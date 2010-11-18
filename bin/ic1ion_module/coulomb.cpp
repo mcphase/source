@@ -695,7 +695,31 @@ sMat<double> racah_emat(int n, double F0, double F2, double F4)
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
+// Calculates the coulomb interaction matrix elements for p-electrons from a formula of van Vleck PR 45, 405 (1936)
+// --------------------------------------------------------------------------------------------------------------- //
+sMat<double> racah_emat(int n, double F0, double F2)
+{
+   int nn = n;
+   sMat<double> e;
+   if (n>3) nn=6-n;  if(nn<1) { std::cerr << "racah_emat: number of p-electrons n > 6 or < 1\n"; return e; }
+
+   int Hsz[]={1,3,3}, L[]={1,1,0,2,0,1,2},                 // p1:2P - p2: 3P,1S,1D - p3: 4S,2P,2D
+                     S2[]={1,2,0,0,3,1,1}, st=0;
+
+   F2/=25; nn--;  // Converts from Slater nomalisation to Condon and Shortley normalisation
+
+   for (int ii=1; ii<nn; ii++) st+=Hsz[ii-1];
+   // Uses formula 38 of van Vleck
+   for (int ii=0; ii<Hsz[nn]; ii++) e(ii,ii) = (n*(n+1.)/2.)*F0 + ((-5*n*n+20*n-3*L[ii+st]*(L[ii+st]+1)-12*(S2[ii+st]/2.)*((S2[ii+st]/2.)+1))/2.)*F2;
+
+   return e;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
 // Calculates the conversions between Coulomb interaction parameters for Slater integrals and Racah's e_k operators
+//    NB These conversion factors are only valid for f-electrons!!! 
+//    For d-electrons to convert from Condon/Shortley F_k to Slater F^k: F^2=F_2*49 and F^4=F_4*441
+//    For d-electrons to convert from Condon/Shortley F_k to Slater F^k: F^2=F_2*25
 // --------------------------------------------------------------------------------------------------------------- //
 std::vector<double> racah_FtoE(std::vector<double> F)      // Converts from F_k to E
 {
@@ -771,6 +795,19 @@ sMat<double> racah_ci(int n, double alpha, double beta)                  // For 
       L = abs(conf.states[i].L);
       ci(i,i) = alpha*L*(L+1.) + beta*racah_g(conf.states[i].U,true);    // Eqn 22 of Rajnak and Wybourne
    }
+
+   return ci;
+}
+
+sMat<double> racah_ci(int n, double alpha)                               // For p-electrons
+{
+   int nn = n;
+   sMat<double> ci;
+   if (n>3) nn=6-n; if(nn<1) { std::cerr << "racah_ci number of p-electrons n > 6 or < 1\n"; return ci; }
+   nn--;
+   int Hsz[]={1,3,3}, L[]={1,1,0,2,0,1,2}, st=0;                         // p1:2P - p2: 3P,1S,1D - p3: 4S,2P,2D
+   for (int i=1; i<nn; i++) st+=Hsz[i-1];
+   for (int i=0; i<Hsz[nn]; i++) ci(i,i)=alpha*L[i+st]*(L[i+st]+1.);     // Eqn 21 of Rajnak and Wybourne
 
    return ci;
 }

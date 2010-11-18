@@ -119,19 +119,19 @@ LDFLAGS += -m32
 endif
 #------------------------------   DISTRO   --------------------------------------#
 ifdef distrib
-CFLAGS += -mtune=pentium3 -march=i686
+#CFLAGS += -mtune=pentium3 -march=i686
 STATIC = -static
 endif
 ##################################################################################
 
 # List of object files to be created and their headers
-OBJECT = maths states        icpars ic_hmltn ic_diag mmio njsyms cfp coulomb so_cf lovesey
-HEADER = maths states ic1ion icpars
+OBJECT = maths states        icpars icmf par_io ic_hmltn ic_diag mmio njsyms cfp coulomb so_cf lovesey
+HEADER = maths states ic1ion icpars icmf
 
 .PHONY: default all clean
 
 default: all
-all: ../ic1ion$(EXE) ic1ion.so
+all: ../ic1ion$(EXE) ic1ion.so ../icf1ion$(EXE) icf1ion.so
 
 # Defines some variables
 OBJ := $(foreach objs,$(OBJECT),$(objs).o)
@@ -177,11 +177,24 @@ else
 endif
 endif
 
+icf1ion_module.o: icf1ion_module.cpp
+	$(CC) $(CFLAGS) -I../include -c $<
+
 ic1ion.so: checkgcc libs/libarpack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
 ifdef WINDOWS
 	$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
 else
 	$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
+endif
+
+ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o  # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
+../icf1ion$(EXE): checkgcc libs/libarpack.a $(ICFOBJ) icf1ion_module.o 
+	$(LINKER) -o ../icf1ion icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+icf1ion.so: checkgcc libs/libarpack.a $(ICOBJ) icf1ion_module.o
+ifdef WINDOWS
+	$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libicf1ion_module.a
+else
+	$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
 # Patern rules

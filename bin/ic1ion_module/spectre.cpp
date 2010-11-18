@@ -174,6 +174,14 @@ std::vector<double> spectre_expJ(icpars &pars, ComplexMatrix &est, int parvalsiz
  /*int Jhi = (J.Hi()>6) ? 6 : J.Hi();*/ memset(Jm,0,icv*icv*sizeof(complexdouble)); std::fstream FILEIN; 
    int k[] = {0,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+   std::vector<double> mgjmbH(Jhi,0.);
+   #ifdef JIJCONV
+   if(pars.B.norm().find("Stevens")!=std::string::npos) {
+      pars.jijconvcalc();
+      for (int iq=Jlo; iq<=Jhi; iq++) mgjmbH[iq] = -gjmbH[iq]*pars.jijconv[iq]; }
+   else
+   #endif
+      for (int iq=Jlo; iq<=Jhi; iq++) mgjmbH[iq] = -gjmbH[iq];
    complexdouble **LS = new complexdouble*[6]; 
    int iq,j; for(iq=0; iq<6; iq++) { LS[iq] = new complexdouble[icv*icv]; memset(LS[iq],0,icv*icv*sizeof(complexdouble)); }
    for(iq=Jlo; iq<=Jhi; iq++)
@@ -181,24 +189,24 @@ std::vector<double> spectre_expJ(icpars &pars, ComplexMatrix &est, int parvalsiz
       if(iq<=6)
       {
          fn[16]=iq+48; FILEIN.open(fn,std::fstream::in); FILEIN.precision(24);  // In ascii, 48=="0"
-         if(iq==3||iq==4) for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> LS[iq-1][i+j*icv].i; Jm[i+j*icv].i += LS[iq-1][i+j*icv].i*(-gjmbH[iq]); }
-         else             for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> LS[iq-1][i+j*icv].r; Jm[i+j*icv].r += LS[iq-1][i+j*icv].r*(-gjmbH[iq]); }
+         if(iq==3||iq==4) for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> LS[iq-1][i+j*icv].i; Jm[i+j*icv].i += LS[iq-1][i+j*icv].i*mgjmbH[iq]; }
+         else             for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> LS[iq-1][i+j*icv].r; Jm[i+j*icv].r += LS[iq-1][i+j*icv].r*mgjmbH[iq]; }
          FILEIN.close();
       }
       else
       {
-         if(fabs(gjmbH[iq])>(DBL_EPSILON*1000))
+         if(fabs(mgjmbH[iq])>(DBL_EPSILON*1000))
          {
             char fh[] = "results/ic1ion.uXmX"; fh[16]=k[iq]+48; 
             if(q[iq]<0) 
             {
                fh[18]=abs(q[iq])+48; FILEIN.open(fh, std::fstream::out); FILEIN.precision(24);
-               for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> elem; Jm[i+j*icv].i += elem*(-gjmbH[iq]); } FILEIN.close();
+               for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> elem; Jm[i+j*icv].i += elem*mgjmbH[iq]; } FILEIN.close();
             }
             else 
             { 
                fh[17]=q[iq]+48; fh[18]=0; FILEIN.open(fh, std::fstream::out); FILEIN.precision(24);
-               for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> elem; Jm[i+j*icv].r += elem*(-gjmbH[iq]); } FILEIN.close();
+               for(i=0; i<icv; i++) for(j=0; j<icv; j++) { FILEIN >> elem; Jm[i+j*icv].r += elem*mgjmbH[iq]; } FILEIN.close();
             }
          }
       }
@@ -243,6 +251,9 @@ std::vector<double> spectre_expJ(icpars &pars, ComplexMatrix &est, int parvalsiz
          J[iq]+=zme.r*eb[i]; if(iq==Jlo) { Z+=eb[i]; U+=(E[i]+VE.E(0))*eb[i]; }
       }
       J[iq]/=Z; if(fabs(J[iq])<DBL_EPSILON) J[iq]=0.;
+      #ifdef JIJCONV
+      if(pars.B.norm().find("Stevens")!=std::string::npos) J[iq]*=pars.jijconv[iq];
+      #endif
    }
    for(i=0; i<6; i++) delete[]LS[i]; delete[]LS;
    delete[]zt; delete[]Jm; 
@@ -345,6 +356,9 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
          MSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
          Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[iJ],-abs(q[iJ]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
          redmat = pow(-1.,(double)abs(pars.l)) * (2*pars.l+1) * threej(2*pars.l,2*k[iJ],2*pars.l,0,0,0);
+         #ifdef JIJCONV
+         if(pars.B.norm().find("Stevens")!=std::string::npos) redmat*=pars.jijconv[iJ+1];
+         #endif
          if(q[iJ]<0) { if((q[iJ]%2)==0) Upq -= Umq; else Upq += Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; }
          Upq *= redmat; if(im[iJ]==0) zJmat=zmat2f(Upq,zeroes); else zJmat = zmat2f(zeroes,Upq);
       }
@@ -377,7 +391,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, d
    // Calculates the mean field Hamiltonian = H_singleion + sum_i(gjmbH[i]*Operator[i])
    for(int iJ=1; iJ<=(gjmbH.Hi()-gjmbH.Lo()+1); iJ++)
    {
-      if (q[iJ]<0) a.r = gjmbH[iJ+gjmbH.Lo()-1]; else a.r = -gjmbH[iJ+gjmbH.Lo()-1];
+      if (q[iJ]<0) a.r = -gjmbH[iJ+gjmbH.Lo()-1]; else a.r = -gjmbH[iJ+gjmbH.Lo()-1];
       if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,(complexdouble*)&est[iJ*cb*cb+100][0],&incx,Hrot,&incx);
    }
 

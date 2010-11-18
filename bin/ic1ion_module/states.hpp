@@ -160,6 +160,11 @@ class fstates_t {
          : S2(S2_), L(L_), v(v_), id(id_), J2(J2_) {};
       fstates_t(int S2_, orbital L_, int v_, std::string id_, int J2_, int mJ2_)                   // For d-electrons
          : S2(S2_), L(L_), v(v_), id(id_), J2(J2_), mJ2(mJ2_) {};
+      fstates_t(int S2_, orbital L_, std::string id_) : S2(S2_), L(L_), id(id_) {};                // For p-electrons
+      fstates_t(int S2_, orbital L_, std::string id_, int J2_) : S2(S2_),L(L_),id(id_),J2(J2_) {}; // For p-electrons
+      fstates_t(int S2_, orbital L_, std::string id_, int J2_, int mJ2_)                           // For p-electrons
+         : S2(S2_), L(L_), id(id_), J2(J2_), mJ2(mJ2_) {};
+
 
     //~fstates_t() {};                                          // Destructor
 };

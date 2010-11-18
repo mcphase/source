@@ -250,7 +250,7 @@ int ic_arpackeig(int n, complexdouble *zm, complexdouble *z, double *eigval, int
    for(i=0; i<nev; i++) { memcpy(&z[i*n],&v[ind[i]*n+1],n*sizeof(complexdouble)); }
    memset(&eigval[nev],0,(n-nev)*sizeof(double)); memset(&z[nev*n],0,(n-nev)*n*sizeof(complexdouble));
 
-   free(ipntr); free(rwork); free(resid); free(v); free(workd); free(workl); free(select); free(d); free(workev);
+   if(info==0) { free(ipntr); free(rwork); free(resid); free(v); free(workd); free(workl); free(select); free(d); free(workev); }
 
    return info;
 }

@@ -11,6 +11,7 @@
 
 #ifndef ICPARS_H
 #define ICPARS_H
+//#define JIJCONV
 
 #define PHYSPROP_MAGBIT 1                  // Defined bit values for the flags.calcphys bit mask
 #define PHYSPROP_SUSBIT 2
@@ -92,11 +93,15 @@ class icpars
       double _econv;                         // Energy conversion factor fgor e_units to cm^{-1}
       // Needs to access _F, _xi, _alpha
       friend sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars);
+      friend sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars);
       friend sMat<double> ic_Hcso(icpars &pars);
       friend void getfromionname(std::string &ionname, icpars &pars);
       friend void conv_e_units(icpars &pars, std::string &newunit);
       friend void ic_parseinput(const char *filename, icpars &pars);
     //friend int ic_peig(icpars &pars, double *Vd, complexdouble *zVd, double *eigval);
+      #ifdef JIJCONV
+      bool _jijconvalreadycalc;              // Flag to show that the conversion factor for Jij already calculated
+      #endif
    public:
       orbital l;                             // Orbital angular momentum of electrons, defaults to f-electrons (l=3)
       int n;                                 // Number of electrons in lowest configuration.
@@ -119,92 +124,22 @@ class icpars
       double truncate_level;                 // Fraction of matrix to keep, for matrix truncation.
       int num_eigv;                          // Number of eigenvectors to print in output
       std::string density;                   // Flag to output expectation values of spin/orbital density operator.
+    //std::string observable;                // Flag to tell mq() and dncalc() which observable matrix to calculate
       std::string basis;                     // Name of basis to output eigenvectors, supported: "JmJ" and "mSmL"
       double Bx,By,Bz;                       // For magnetic field for Zeeman term
       double xT,xHa,xHb,xHc;                 // The vector in (H-T) phase space to calculate the x-axis of phase diag
       double xMin,xStep,xMax;                // Start, step and end of x-axis in the phase diagram
       double yT,yHa,yHb,yHc;                 // The vector in (H-T) phase space to calculate the y-axis of phase diag
       double yMin,yStep,yMax;                // Start, step and end of y-axis in the phase diagram
+      #ifdef JIJCONV
+      std::vector<double> jijconv;           // Conversion factor for Jij coupling parameters from Stevens/Wybourne norm.
+      void jijconvcalc();                    // Calculates the conversion factors above.
+      #endif
 
       bool operator==(icpars c) const;       // Operator to determine if parameters are the same
       bool operator!=(icpars c) const;       // Operator to determine if parameters are not the same
 
       icpars();                              // Blank constructor
-};
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Defines a class to hold the eigenvalues and eigenvectors
-// --------------------------------------------------------------------------------------------------------------- //
-class iceig
-{
-   private:
-      int _Hsz;
-      double *_E;
-      double *_V;
-      complexdouble *_zV;
-
-   public:
-      iceig() { _E=0; _V=0; _zV=0; }               // Blank constructor
-      ~iceig();                                    // Destructor
-      iceig(sMat<double>&H);                       // Constructs the eigenstates of H
-      iceig(sMat<double>&H, sMat<double>&iH);      // Constructs the eigenstates of H+iH
-      iceig(int Hsz, double *E, double *V);        // Constructor for known eigenvalues/vectors
-      iceig(int Hsz, double *E, complexdouble *V); // Constructor for known eigenvalues/complex eigenvectors
-      iceig(int Hsz,double*E,complexdouble*V,int s);// Constructor for known eigenvalues/complex eigenvectors
-      double E(int i) { return _E[i]; }
-      double *V(int i) { return &_V[i*_Hsz]; }
-      double V(int i,int j) {return _V[j*_Hsz+i];}
-      complexdouble *zV(int i) { return &_zV[i*_Hsz]; }
-      complexdouble zV(int i,int j){return _zV[j*_Hsz+i];}
-      void assign(int Hsz,double*E,complexdouble*V,int s);
-      void calc(sMat<double>&H);                   // Calculates the eigenstates of H
-      void calc(sMat<double>&H, sMat<double>&iH);  // Calculates the eigenstates for a matrix H+iH
-      void calc(int Hsz, complexdouble *H);
-      void lcalc(icpars &pars, sMat<double> &H);   // Calculates a partial set of eigenstates of H
-      void lcalc(icpars &pars, sMat<double> &H, sMat<double> &iH); 
-      void lcalc(icpars &pars, complexdouble *H);  // Calculates a partial set from a fortran-style matrix
-      void pcalc(icpars &pars, complexdouble *zV,  // Calculates a partial set of eigenstates using
-                 sMat<double>&J, sMat<double>&iJ); //    perturbation theory
-      void acalc(icpars &pars, complexdouble *H);  // Calculates a partial set using the Arnoldi method (ARPACK)
-      void acalc(icpars &pars, sMat<double> &J);
-      void acalc(icpars &pars, sMat<double> &J, sMat<double> &iJ);
-      bool iscomplex() { return _zV!=0; }          // Determines of eigenvalues are complex
-      int Hsz() { return _Hsz; }
-      std::string strout();                        // Prints the eigenstates out as a matrix
-};
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Defines a class to hold the matrices Lx/Sx etc. and to calculate their expectation values
-// --------------------------------------------------------------------------------------------------------------- //
-class icmfmat
-{
-   private:
-      int _n;
-      orbital _l;
-      int _num_op;
-      std::string _density;                        // Flag to output expectation values of spin/orbital density operator.
-
-   public:
-      std::vector<sMat<double> > J;                // A vector of the matrices [Sx Lx Sy Ly Sz Lz]
-      std::vector<int> iflag;                      // Vector to determine if matrix is imaginery
-
-      icmfmat();                                   // Blank constructor
-      icmfmat(int n, orbital l, int num_op,        // Constructor for l^n configuration
-        bool save_matrices, std::string density="");
-      void Jmat(sMat<double>&J, sMat<double>&iJ,   // Calculates the mean field matrix sum_i (H_i*J_i)
-        std::vector<double>&gjmbH, bool save_matrices);
-      std::vector<double> expJ(iceig&VE, double T, // Calculates the expectation values <V|J|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Jm|n>
-        bool save_matrices);
-      std::vector<double> spindensity_expJ(iceig&VE, int xyz,double T, // Calculates the expectation values <V|spindensitycoeff_of_Zlm|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel,   
-        bool save_matrices);
-      std::vector<double> orbmomdensity_expJ(iceig&VE,int xyz, double T, // Calculates the expectation values <V|orbmomdensitycoeff_of_Zlm|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel,
-        bool save_matrices);
-      void Mab(sMat<double>&M, sMat<double>&iM,    // Calculates the matrix M_ab = <i|Ja|j><j|Jb|i>
-        iceig&V, double T, int i, int j, int p,    // * {exp(-beta_i*T)-exp(-beta_j*T)}
-	float&d, bool save_matrices);
 };
 
 #endif

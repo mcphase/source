@@ -227,7 +227,9 @@ int racah_wtov(int S2, qR7 W)
 // --------------------------------------------------------------------------------------------------------------- //
 fconf::fconf(orbital l)
 {
-   if(l==D) 
+   if(l==P) 
+      states.push_back(fstates_t(1,P,"2P"));
+   else if(l==D) 
       states.push_back(fstates_t(1,D,1,"2D"));
    else if(l==F) 
    {
@@ -243,6 +245,44 @@ fconf::fconf(int n, orbital l)
    qG2 U; 
    
    switch(l) {
+
+   case S:
+   if (n!=1)		// Checks to see if number of s-electrons valid
+   {
+      std::cerr << "fconf::fconf() - Invalid value of n = number of s-electrons (must be 1)\n";
+   }
+   else { states.push_back(fstates_t(1,S,"2S")); }
+   break; // case S:
+
+   case P:
+   if (n<1 || n>5)	// Checks to see if number of p-electrons valid
+   {
+      std::cerr << "fconf::fconf() - Invalid value of n = number of p-electrons (must be 1<= n <=5)\n";
+   }
+   else {
+      if (n>3) n=5-n;	// Checks to see if we are in the second half of the series
+      switch(n)
+      {
+         case 1:
+            states.push_back(fstates_t(1,P,"2P"));                        // p1    2P
+            break;
+         case 2:
+	    states.reserve(3);
+            states.push_back(fstates_t(2,P,"3P"));                        // p2    3P
+            states.push_back(fstates_t(0,S,"1S"));                        // p2    1S
+            states.push_back(fstates_t(0,D,"1D"));                        // p2    1D
+            break;
+         case 3:
+	    states.reserve(3);
+            states.push_back(fstates_t(3,S,"4S"));                        // p2    4S
+            states.push_back(fstates_t(1,P,"2P"));                        // p2    2P
+            states.push_back(fstates_t(1,D,"2D"));                        // p2    2D
+            break;
+      } // switch(n)
+   }    // else (n>0 && n<11)
+
+   break; // case P:
+   
    case D:
 
    if (n<1 || n>9)	// Checks to see if number of d-electrons valid

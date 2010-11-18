@@ -25,10 +25,7 @@
 // --------------------------------------------------------------------------------------------------------------- //
 sMat<double> racah_so(int n, double xi, orbital e_l)  // Defaults to f-electrons (see ic1ion.hpp - e_l=F by default)
 {
-   bool df;
-   if(e_l==D) df = true;
-   else if(e_l==F) df = false;
-   else {  std::cerr << "racah_so(): Only d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
+   if(e_l!=P&&e_l!=D&&e_l!=F) {  std::cerr << "racah_so(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
 
    fconf conf(n,0,e_l);
    int num_states = (int)conf.states.size();
@@ -55,8 +52,10 @@ sMat<double> racah_so(int n, double xi, orbital e_l)  // Defaults to f-electrons
 
    for(i=0; i<num_states; i++)
    {
-      if(df) cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].S2,conf.states[i].L); else 
-      cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].U,conf.states[i].S2,conf.states[i].L);
+      switch(e_l) {
+         case P: cfpsi = racah_parents(n,conf.states[i].S2,conf.states[i].L); break;
+         case D: cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].S2,conf.states[i].L); break;
+	 default:cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].U,conf.states[i].S2,conf.states[i].L);  }
       for(j=i; j<num_states; j++)
       {
          if(abs(conf.states[i].S2-conf.states[j].S2)>2) continue;
@@ -65,8 +64,10 @@ sMat<double> racah_so(int n, double xi, orbital e_l)  // Defaults to f-electrons
          if(abs(conf.states[i].v-conf.states[j].v)>2) continue;  //    see Judd book, sections 8-3, and 8-4.
          if(conf.states[i].J2==conf.states[j].J2)
          {
-            if(df) cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].S2,conf.states[j].L); else
-            cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].U,conf.states[j].S2,conf.states[j].L);
+            switch(e_l) {
+               case P: cfpsj = racah_parents(n,conf.states[j].S2,conf.states[j].L); break;
+               case D: cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].S2,conf.states[j].L); break;
+	       default:cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].U,conf.states[j].S2,conf.states[j].L);  }
             sumcfp = 0.;
             isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
             for(k=0; k<isz; k++)
@@ -93,10 +94,7 @@ sMat<double> racah_Umat(int n, int k, orbital e_l)
 {
    if(n==1) { sMat<double> U(1,1); U(0,0) = 1.; return U; }      // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
    if(n==(4*e_l+1)) { sMat<double> U(1,1); U(0,0) = -1.; return U; }
-   bool df;
-   if(e_l==D) df = true;
-   else if(e_l==F) df = false;
-   else {  std::cerr << "racah_Umat(): Only d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
+   if(e_l!=P&&e_l!=D&&e_l!=F) { std::cerr << "racah_Umat(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
    fconf conf(n,e_l);
    fconf confp(n-1,e_l);
    int num_states = (int)conf.states.size();
@@ -104,18 +102,23 @@ sMat<double> racah_Umat(int n, int k, orbital e_l)
    int i,j,ii,jj,isz,jsz;
    double sumcfp,noncfpprod;
    sMat<double> U(num_states,num_states);
+// if(k>e_l*2) return U;                      // Condition from reduced matrix element
 
    for(i=0; i<num_states; i++)
    {
-      if(df) cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].S2,conf.states[i].L); else 
-      cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].U,conf.states[i].S2,conf.states[i].L);
+      switch(e_l) {
+         case P: cfpsi = racah_parents(n,conf.states[i].S2,conf.states[i].L); break;
+         case D: cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].S2,conf.states[i].L); break;
+	 default:cfpsi = racah_parents(n,conf.states[i].v,conf.states[i].U,conf.states[i].S2,conf.states[i].L);  }
       for(j=i; j<num_states; j++)
       {
          if(abs(abs(conf.states[i].L)-abs(conf.states[j].L))>k) continue;
          if(conf.states[i].S2==conf.states[j].S2)
          {
-            if(df) cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].S2,conf.states[j].L); else
-            cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].U,conf.states[j].S2,conf.states[j].L);
+            switch(e_l) {
+               case P: cfpsj = racah_parents(n,conf.states[j].S2,conf.states[j].L); break;
+               case D: cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].S2,conf.states[j].L); break;
+	       default:cfpsj = racah_parents(n,conf.states[j].v,conf.states[j].U,conf.states[j].S2,conf.states[j].L);  }
             sumcfp = 0.; 
 //          noncfpprod = pow(-1.,-(double)e_l-abs(conf.states[j].L)) * sqrt( (2.*abs(conf.states[i].L)+1.)*(2.*abs(conf.states[j].L)+1.) );
             noncfpprod =                                               sqrt( (2.*abs(conf.states[i].L)+1.)*(2.*abs(conf.states[j].L)+1.) );
@@ -137,6 +140,7 @@ sMat<double> racah_Umat(int n, int k, orbital e_l)
          }
       }
    }
+for(i=0; i<num_states; i++) { for(j=0; j<num_states; j++) std::cout << U(i,j) << " "; std::cout << "\n"; }
  //char rmat[255]; strcpy(rmat,"results/ic1ion.umat"); rmzeros(U); mm_gout(U,rmat);
    return U;
 }

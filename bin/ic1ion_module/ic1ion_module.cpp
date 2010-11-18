@@ -132,7 +132,7 @@ __declspec(dllexport)
    if((est.Cols()!=(Hsz+1) || est.Rows()!=(Hsz+1)) && pars.truncate_level==1) Hicnotcalc = true;
    else if(real(est[0][0])==-0.1 && imag(est[0][0])==-0.1)  // Hic previously calculated
    {
-      for(i=0; i<(int)(parval.size()/2); i++) if(real(est[0][i+1])!=parval[2*i] && imag(est[0][i+1])!=parval[2*i+1]) { Hicnotcalc = true; break; }
+      for(i=0; i<(int)(parval.size()/2); i++) if(real(est[0][i+1])!=parval[2*i] || imag(est[0][i+1])!=parval[2*i+1]) { Hicnotcalc = true; break; }
    }
    else Hicnotcalc = true;
    if(Hicnotcalc)

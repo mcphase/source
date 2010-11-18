@@ -77,7 +77,7 @@ FLAGS   += -fomit-frame-pointer
 endif
 endif
 ifdef distrib
-FLAGS   += -mtune=pentium3 -march=i686
+#FLAGS   += -mtune=pentium3 -march=i686
 endif
 ifdef b32
 FLAGS   += -m32

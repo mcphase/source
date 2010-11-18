@@ -895,7 +895,7 @@ double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp)
    switch (n) // Looks up table of cfp from Neilson and Koster, 1963
    {
       case 2:
-         if(S2p==1 && Lp==D)   // f^1 has only one state: 2D
+         if(S2p==1 && Lp==D)   // d^1 has only one state: 2D
          {
             if(S2==2) { if(L==P || L==F) cfp = 1.; }                // 3P 2D 1  // 3F 2D 1
             else if(S2==0) { if(L==S || L==D || L==G) cfp = 1.; }   // 1S 2D 1  // 1D 2D 1  // 1G 2D 1
@@ -1024,6 +1024,43 @@ double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp)
 
    return cfp;
 }
+// --------------------------------------------------------------------------------------------------------------- //
+// Calculates the coefficient of fractional parentage for a particular p-electron state
+// --------------------------------------------------------------------------------------------------------------- //
+double racah_cfp(int n, int S2, orbital L, int S2p, orbital Lp)
+{
+   double cfp = 0.;
+   int nn=n,it,id=-1;
+   orbital Lt;
+
+   if(n>3) { n=6-n; n++; it=S2;S2=S2p;S2p=it; Lt=L;L=Lp;Lp=Lt; }
+   if(n<0) { std::cerr << "racah_cfpd: n<0 or n>10 not allowed for d-electrons.\n"; return cfp; }
+
+   switch(n) {
+      case 2:
+         if(S2p==1 && Lp==P)   // p^1 has only one state: 2P
+         {
+            if(S2==0) { if(L==S || L==D) cfp = 1.; }
+            else if(S2==2 && L==P) cfp = 1.;
+         }
+         break;
+      case 3:  //        1S    3P    1D    (Table 1, Racah 3)
+         double t[] = {   0.,   1.,   0.,  // 4S
+                          4.,  -9.,  -5.,  // 2P
+                          0.,   1.,  -1.}; // 2D
+         double d[] = {   1.,  18.,   2.}; // Denominators
+         if(S2==3 && L==S) id=0; else if(S2==1) { if(L==P) id=1; else if(L==D) id=2; else return cfp; } else return cfp;
+         if(S2p==0) { if(Lp==S) cfp=t[id*3]/d[id]; else if(Lp==D) cfp=t[id*3+2]/d[id]; else return cfp; } 
+         else if(S2p==2 && Lp==P) cfp=t[id*3+1]/d[id]; else return cfp;
+         cfp = sqrt(fabs(cfp))*sign(cfp);
+         break;
+   }
+
+   if(nn>3)  // Uses Starace's formula (see above) for more than half filled subshell
+      cfp *= ( pow(-1.,(S2+S2p)/2.+abs(L)+abs(Lp)-2.-.5) * sqrt((10.-nn+1.)*(S2+1.)*(2.*abs(L)+1.)/nn/(S2p+1.)/(2.*abs(Lp)+1.)) );
+
+   return cfp;
+}
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the coefficient of fractional parentage for all the parents of a particular state
@@ -1086,6 +1123,30 @@ std::vector<cfpls> racah_parents(int n, int v, int S2, orbital L)       // For d
       S2p = conf_par.states[i].S2; if(abs(S2-S2p)>1) continue;          // s=1/2 for electrons -> Need: S-Sp<=(1/2)
       Lp = conf_par.states[i].L; if(abs(abs(L)-abs(Lp))>2) continue;    // l=2 for d-electrons -> Need: L-Lp<=2
       cfp_temp = racah_cfp(n,v,S2,L,vp,S2p,Lp);
+      if(cfp_temp!=0.)
+      {
+	 entry.cfp = cfp_temp; entry.par = conf_par.states[i]; entry.ind = i;
+	 cfps.push_back(entry);
+      }
+   }
+   return cfps;
+}
+std::vector<cfpls> racah_parents(int n, int S2, orbital L)              // For p-electrons
+{
+   std::vector<cfpls> cfps;
+   cfpls entry;
+   int np=n-1; //if(n>5) np = n+1; else np = n-1;
+   fconf conf_par(np,P);
+   int num_states = (int)conf_par.states.size();
+   int i,S2p;
+   orbital Lp;
+   double cfp_temp;
+
+   for(i=0; i<num_states; i++)
+   {
+      S2p = conf_par.states[i].S2; if(abs(S2-S2p)>1) continue;          // s=1/2 for electrons -> Need: S-Sp<=(1/2)
+      Lp = conf_par.states[i].L; if(abs(abs(L)-abs(Lp))>1) continue;    // l=1 for d-electrons -> Need: L-Lp<=1
+      cfp_temp = racah_cfp(n,S2,L,S2p,Lp);
       if(cfp_temp!=0.)
       {
 	 entry.cfp = cfp_temp; entry.par = conf_par.states[i]; entry.ind = i;

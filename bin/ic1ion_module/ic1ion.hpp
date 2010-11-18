@@ -15,6 +15,7 @@
 #include "states.hpp"
 #include "maths.hpp"
 #include "icpars.hpp"
+#include "icmf.hpp"
 #include <iostream>
 #include <cstring>
 
@@ -26,7 +27,7 @@
 #include <windows.h>
 #endif
 
-#define IC1IONMODULE_VERSION 0.11
+#define IC1IONMODULE_VERSION 0.5
 
 #define PI 3.1415926535897932384626433832795
 
@@ -64,12 +65,14 @@ double racah_g(qR7 W);                                                    // Cal
 sMat<double> racah_e3(int n);                                             // Calculates the matrix elements of e3
 sMat<double> racah_emat(int n, double E0, double E1, double E2, double E3);//Calculates the Coulomb interaction matrix
 sMat<double> racah_emat(int n, double F0, double F2, double F4);          // Calculates the Coulomb matrix for d-electrons
+sMat<double> racah_emat(int n, double F0, double F2);                     // Calculates the Coulomb matrix for p-electrons
 std::vector<double> racah_FtoE(std::vector<double> F);                    // Converts from F_k to E
 std::vector<double> racah_EtoF(std::vector<double> E);                    // Converts from E to F_k
 std::vector<double> racah_FtoF_k(std::vector<double> F);                  // Converts from F^k to F_k
 std::vector<double> racah_F_ktoF(std::vector<double> F_k);                // Converts from F_k to F^k
 sMat<double> racah_ci(int n, double alpha, double beta, double gamma);    // Calcs. conf. interaction matrix for f-elec.
 sMat<double> racah_ci(int n, double alpha, double beta);                  // Calcs. conf. interaction matrix for d-elec.
+sMat<double> racah_ci(int n, double alpha);                               // Calcs. conf. interaction matrix for p-elec.
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Declarations for functions in cfp.cpp
@@ -79,9 +82,11 @@ double racah_wupf(qR7 W, qG2 U, qR7 Wp, qG2 Up);                          // Cal
 double racah_cfp(int n, qG2 U, int v, int S2, orbital L, qG2 Up, int vp, int S2p, orbital Lp);
 double racah_cfp(int n, std::string child, std::string parent);           // Calculates the coeff. fractional parentage.
 double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp); // cfp for d-electrons
+double racah_cfp(int n, int S2, orbital L, int S2p, orbital Lp);          // cfp for p-electrons
 std::vector<cfpls> racah_parents(int n, int v, qG2 U, int S2, orbital L); // Calculates the cfp's of all the parents
 std::vector<cfpls> racah_parents(int n, std::string state);               //    of a particular state.
 std::vector<cfpls> racah_parents(int n, int v, int S2, orbital L);        // Calc. the cfp's of all parents for d-elec.
+std::vector<cfpls> racah_parents(int n, int S2, orbital L);               // Calc. the cfp's of all parents for p-elec.
 //  sMat<double> cfp_orthog_test(int n, const char* LS);                  // These two functions are for testing the
 //  sMat<double> cfp_cowan_test(int n, const char* LSp);                  //    calculations of the cfp's.
 

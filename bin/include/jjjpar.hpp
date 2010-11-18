@@ -74,7 +74,7 @@ private:
   Vector ABC;   // storage for single ion module paramters
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
   void get_parameters_from_sipfile(char * sipffilename); // function to read single ion parameter files
-
+  int  get_exchange_indices(char *instr, Matrix *exchangeindices);
 
 public:
 
