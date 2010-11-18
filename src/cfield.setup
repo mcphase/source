@@ -1,0 +1,71 @@
+ -----------------------
+| VERSION :   5.30      |
+ -----------------------
+
+ -------------------------------------------------------------- 
+|                                                              |
+|                           C F I E L D                        |
+|                                                              |
+|                    A Crystal field program                   |
+|                                                              |
+ -------------------------------------------------------------- 
+                __________________________________              
+               |                                  |             
+               |          Programmautor:          |             
+               |                                  |             
+               |         Peter  Hoffmann          |             
+               |    Forschungszentrum Juelich     |             
+               |Institut fuer Festkoerperforschung|             
+               |Tel.: 02461-616896                |             
+                __________________________________              
+ ______________________________________________________________ 
+|                                                              |
+|                      CFIELD - SETUP - FILE                   |
+|                                                              |
+ ______________________________________________________________ 
+
+================================================================
+|                                                              |
+| Computational accuracy  =  5e-020                             |
+|                                                              |
+================================================================
+
+================================================================
+|                                                              |
+| the inacuracy of the calculation  is  20. decimal places     |
+| This agrees when two numbers                                 |
+| are the same for the computer. Because of rounding erro      |
+| This decimal place should be put too:                        |
+|                                                              |
+|  Recommended          ==================                     |
+|  decimal place:       |       3        |                     |
+|                       ==================                     |
+|                                                              |
+================================================================
+
+================================================================
+| The program outputs record into file which are NOT           |
+| numbered in the files.                                       |
+| If you would like the program to number the record in a file |
+| The put a different number in the box other than zero        |
+|                                                              |
+|                                                              |
+|                       ==================                     |
+|                       |       0        |                     |
+|                       ==================                     |
+|                                                              |
+================================================================
+
+================================================================
+|                                                              |
+| The program writes to output fiels                           |
+| Please give the                                              |
+| number of datapoints that are supposed to be calculated      |
+| in the lower box.                                            |
+|                                                              |
+|                       ==================                     |
+|                       |       20       |                     |
+|                       ==================                     |
+|                                                              |
+================================================================
+

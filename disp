@@ -1,0 +1,166 @@
+#! /usr/bin/perl
+
+# perl packages to use
+use FileHandle;
+use PDL;
+use PGPLOT;
+use PDL::Graphics::PGPLOT;
+
+
+#get filename from command line if given
+if ($ARGV[0]=~m|-h.*|)
+{print "program disp: creates display and postscript plot  of dispersion curves with energy 
+                      taken from column 8 symbol size taken from column 9
+		      
+    use as disp [hkl] [filename] 
+          hkl  ...... 5 6 or 7 for plot with h k or l as x-axis, data taken from col 5 6 or 7, respectively
+	  filename... filename to be read (mcdisp.qom as default)
+	  
+    
+\n";
+
+exit(0);
+}
+
+if(($in)=($ARGV[0]=~m|\A(\d)\Z|)){shift @ARGV;}
+my (@file) = @ARGV;
+
+ unless ($file[0])
+{$file[0] = "./mcdisp.qom";
+ print "using data from file ./mcdisp.qom\n";}
+ 
+    overview_plot("./dd.ps/vcps", @file); #then plot on psfile
+    overview_plot("/xserv", @file); # plot on screen
+    system ("awk '{gsub(\"1 setlinewidth\",\" \"); print \$0}' ./dd.ps > ./disp.ps\n");
+    system ("rm dd.ps");
+    print "Wrote postscript file 'disp.ps'\n";
+
+sub overview_plot {
+    my ($devspec, @file) = @_;
+#open page on pgplot server to be able to display/print
+    my $dev = dev($devspec);
+    die "PGOPEN failed!" unless $dev > 0;
+#plot data
+    pgvstd; # set standard (default) viewport
+    pgpap(6.5,1.0);
+    hold;   # wait with display until release command is given
+
+    my ($data,$Limits) = get_detector_data_2D($file[0]);
+    my ($x0,$x1,$y0,$y1,$xcol,$ycol,$xtext,$ytext) = @{$Limits};
+    pgswin ($x0,$x1,$y0,$y1); #set window
+    pgbox("BCNSTI", 0.0, 0.0, "BCNSTI", 0.0, 0.0); #draw labeled frame arount viewport
+    #label plot
+    pglab($xtext,$ytext, "");
+#    shift @file;
+    $col=0;$files="";
+    foreach(@file)
+    {++$col;pgsci($col);$files=$files." ".$_;
+    my ($data,$Limits) = get_detector_data_2D($_);
+    $lw=($data->slice("$intcol,:"))**0.5;
+    $maxint=max($lw);$minint=min($lw);
+    if ($maxint==$minint) {$lw*=5;}# nop int column
+    else {$lw/=$maxint/30;} # if there was a intcolumn
+    $_=$devspec;
+    if (/.*cps/&&$col>1){$lw/=10;}
+    if (/.*cps/&&$col==3){++$col}
+    #draw datapoints from slice of piddle "$data"
+
+    for ($k=0;$k<(($data->dims)[1]);++$k)
+    {pgslw $lw->at(0,$k)+1.0;
+     points $data->at($xcol,$k),$data->at($ycol,$k),-2+$col;
+
+}
+    }
+    pgslw 1;
+    pgmtxt("T", 2.5, 0.5, 0.5, '\frExcitation Energy '.$files);
+    pgebuf; #end the buffer and
+    release; #display it
+
+#close page on pgplot server
+#	pgclos;
+
+#exit(0);
+	return ();
+}
+
+
+# Get numerical data, reading it from file 
+sub get_detector_data_2D {
+    my ($info) = @_;
+#    stat my $washere;
+#     unless ($info->{'Numeric Data'})
+#    unless ($washere)
+    {#$washere=1;
+    ($info->{'Numeric Data'}) = read_data_file_2D($info);
+     unless($in) {# let user select axes
+                  print "\n 1. Ha\n 2. Hb\n 3. Hc\n 4. T\n 5. h\n 6. k\n 7. l\n";
+                  print "select x axis (1-7) ? ";
+                  $in=<STDIN>;
+                 }
+     $xcol=$in-1;
+     $ycol=7;
+     $intcol=8;
+     if ($in==1) {$xtext='\frHa(T)';}
+     if ($in==2) {$xtext='\frHb(T)';}
+     if ($in==3) {$xtext='\frHc(T)';}
+     if ($in==4) {$xtext='\frT(K)';}
+     if ($in==5) {$xtext='\frh';}
+     if ($in==6) {$xtext='\frk';}
+     if ($in==7) {$xtext='\frl';}
+     $ytext='\frEnergy (meV)';
+     
+     # calculate limits
+     $x0=min(($info->{'Numeric Data'})->slice("$xcol,:"));         
+     $x1=max(($info->{'Numeric Data'})->slice("$xcol,:"));         
+     $y0=min(($info->{'Numeric Data'})->slice("$ycol,:"));         
+     $y1=max(($info->{'Numeric Data'})->slice("$ycol,:"));         
+     ($info->{'Limits'})=[$x0,$x1,$y0,$y1,$xcol,$ycol,$xtext,$ytext];
+    
+     } 
+    return ($info->{'Numeric Data'},$info->{'Limits'});
+}
+
+
+# Read 2D numeric data, skipping comment lines.
+sub read_data_file_2D {
+    my ($file) = @_;
+    my $h = new FileHandle;
+    my $l = new FileHandle;
+    my @v=();
+     my @xlist = ();
+  # input data int piddle
+  if(open($h,$file))
+  {  open($l,">./disp.asc");
+     print $l ("#Ha Hb Hc T  h k l energy[meV] int\n");
+     while(<$h>)
+     {next if /^\s*#/;
+      # detect > to see where int data starts [Ha Hb Hc T h k l en1 en2 en3 ... > int1 int2 int3 ...
+      if (/^.*\Q>\E/)
+       {($a)=(/^(.*)\Q>\E/);($b)=(/^.*\Q>\E(.*)\n/);
+       $x=new PDL(split " ",$a);
+       if (($x->dims)[0]>8){$xx=new PDL(split " ",$b);}
+       else {$xx=new PDL($b,0);}
+       }
+      else
+      {$x=new PDL(split " ");if (($x->dims)[0]>7) {$xx=xvals(($x->dims)[0]-7)+1;}
+      } 
+      # extract en and int
+      for ($k=7;$k<(($x->dims)[0]);++$k)
+      {$y=$x->slice("0:6");
+       #add xyz to piddle
+       $z=$x->slice($k.":".$k);
+       $int=$xx->slice(($k-7).":".($k-7));
+       push(@xlist,$y->append($z)->append($int));
+       $out=$y->append($z)->append($int);$out=~s/\[/ /g;$out=~s/\]/ /g;   
+       print $l ($out."\n");
+       }
+     }
+     
+     close $h; close $l;
+     return (cat @xlist);
+    } else {
+	print STDOUT "Warning: failed to read data file \"$file\"\n";
+	return undef;
+    }
+}
+

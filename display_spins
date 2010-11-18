@@ -1,0 +1,49 @@
+#!/bin/bash
+
+echo "--------------------------------------"
+echo "graphic package to display spins"
+echo "--------------------------------------"
+echo "arguments as for spindensities:"
+if test -f results/spins.jvx
+ then
+  rm results/spinds.jvx
+fi
+if test -f results/spins.1.jvx
+ then
+  rm results/spinds.1.jvx
+fi
+
+echo "# this is initial graphic parameters file" > results/graphic_parameters.set
+while test -f results/graphic_parameters.set
+do
+ spins $*
+if test -f results/spins.jvx
+then
+java javaview results/spins.jvx &
+rem1=$!
+java javaview results/spins_prim.jvx &
+rem2=$!
+if test -f results/spins.1.jvx
+then
+java javaview "model=results/spins_prim.*.jvx" Animation.LastKey=16 &
+rem3=$!
+java javaview "model=results/spins.*.jvx" Animation.LastKey=16 &
+rem4=$!
+fi
+ 
+ java graphic_parameters_configurator
+kill $rem1
+kill $rem2
+
+if test -f results/spins.1.jvx
+then
+kill $rem3
+kill $rem4
+fi
+
+
+else
+  rm results/graphic_parameters.set
+fi
+done
+

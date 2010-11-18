@@ -1,0 +1,27 @@
+#!/bin/bash
+
+echo "--------------------------------------"
+echo "graphic package to display current density"
+echo "--------------------------------------"
+echo "arguments as for currdensities:"
+if test -f results/currdensities.jvx
+ then
+  rm results/currdensities.jvx
+fi
+
+echo "# this is initial graphic parameters file" > results/graphic_parameters.set
+while test -f results/graphic_parameters.set
+do
+ currdensities $*
+if test -f results/currdensities.jvx
+then
+ java javaview results/currdensities.jvx &
+rem1=$!
+
+java graphic_parameters_configurator 
+kill $rem1
+
+else
+  rm results/graphic_parameters.set
+fi
+done

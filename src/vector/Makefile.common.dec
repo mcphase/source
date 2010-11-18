@@ -1,0 +1,119 @@
+###########################################################################
+###									###
+### This Makefile.common is included by all other Makefiles and 	###
+### isolates all machine/compiler specific settings. Adapt it to your	###
+### environment or uncomment one of defines below			###
+###									###
+### Uncomment your C / C++ compiler and the compiler options		###
+###									###
+### CC= ...     must be defined for the C compiler			###
+### CCC= ...    must be defined for the C++ compiler			###
+### COPTS= ...  are the C compiler optimization options (e.g. -O2)	###
+### CCOPTS= ... are the C++ compiler optimization options (e.g. -O2)	###
+###									###
+### YACC= ...   must be your yacc					###
+### LIBL= ...   the lex/flex library (/usr/lib/libl.a or libfl.a)	###
+###									###
+### LINKLIBS=   library neccessary for linking, sometimes a path has	###
+###		has to be give explicetly				###
+###									###
+### ADDAR= ar rc    usually used for archiver (must use replace "r" !)	###
+### RANLIB= ranlib  sometimes neccessary, sometimes not			###
+###									###
+### MV= mv	the move command					###
+###									###
+### TAR= tar	the tar archiver (need GNU tar, sometimes call gtar)	###
+###									###
+### Before including this file MATPACK must be set to the path to	###
+### the Matpack home directory						###
+###									###
+### The following are defined here (and must not be changed!)		###
+### INCLUDE	the directory with all Matpack include files		###
+### MATLIB	the matpack.a archive library				###
+###									###
+###########################################################################
+
+# Hint for compilation with several Linux PC distributions:
+# When linking it is sometimes not sufficient to use the flags -lX11 -lXpm 
+# only. The path -L /usr/X11R6 must be set explicitly.
+
+###########################################################################
+# gcc version egcs-2.95.2 19991024 (release) on a Linux system
+# Intel Pentium PC, use -m486 for 486 CPU or -mpentium for Pentium Systems
+###########################################################################
+
+# C compiler 
+CC= gcc -pipe
+COPTS= -ansi -O3 -fomit-frame-pointer -fforce-addr -m486
+
+# C++ compiler
+#CCC= g++ -pipe
+#CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium
+
+# for dec-unix
+CCC= g++
+CCOPTS= -O3 -fomit-frame-pointer -fforce-addr 
+
+LIBL= /usr/lib/libfl.a
+
+###########################################################################
+# BLAS:
+#
+# Decide if you link a high-performance machine-specific BLAS library
+# or if you use the C++ coded, builtin, matrix and vector operations. 
+# It is highly  recommended to use a vendor supplied BLAS library if
+# available. The performance gain can be as large as a factor of 5 to 10  
+# (for instance for matrix multiplication)!!!
+#
+# If you decide to use BLAS uncomment the _MATPACK_USE_BLAS_ define
+# in the include file "compat.h"
+#
+###########################################################################
+
+###########################################################################
+# DEC Alpha BLAS library "dxml", for example, is linked with "-ldxml"
+###########################################################################
+#BLASLIB= -ldxml
+
+
+###########################################################################
+# Alternatively, the Matpack supplied BLAS reference routines can be
+# compiled. These should be used for testing purposes only, because
+# they are just a slow Fortran reference implementation. Instead you should 
+# use either the C++ coded matrix and vector operations, or, if available,
+# a vendor supplied optimized BLAS library. If you like to test the BLAS
+# reference implementation just uncomment the following two lines,
+# define _MATPACK_USE_BLAS_ (as described above), link libblas.a, and
+# don't forget the -lf2c library if using GNU f77.
+###########################################################################
+#MAKEBLASF= make
+#BLASLIB= ${MATPACK}/source/BlasF/libblas.a -lf2c
+
+
+###########################################################################
+# libaries for linking: first the matpack library ${MATLIB}, then the
+#                       X libraries, standard libs, and the math libraries
+###########################################################################
+
+#LINKLIBS= ${MATLIB} -L/usr/X11/lib -lXpm -lX11 -lstdc++ ${BLASLIB} -lm
+
+###########################################################################
+### include directory: don't change !					  #
+###########################################################################
+
+INCLUDE= ../../include
+
+###########################################################################
+### general rules							  #
+###########################################################################
+
+.SUFFIXES: .cc .o
+
+.c.o: 
+	${CC} -c ${COPTS} -I ${INCLUDE} $<
+
+.cc.o: 
+	${CCC} -c ${CCOPTS} -I ${INCLUDE} $<
+
+###########################################################################
+###########################################################################

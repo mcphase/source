@@ -1,0 +1,20 @@
+#!/bin/sh
+cat << EOF > results/.mag.gnu
+#set terminal postscript 
+#set output "magmes1T.ps" 
+set key left top 
+set border 15 lw 1.5
+set linestyle 1 lt 1 lw 2 pt 1 ps 2.5 
+set linestyle 2 lt 2 lw 2 pt 2 ps 2.5 
+set linestyle 3 lt 3 lw 2 pt 3 ps 2.5 
+set size ratio 1 
+set xlabel "H(Tesla)"  
+set ylabel "Magnetisation [muB/f.u]" 
+plot "results/.mcphas.fum" every 1:1:2 using 2:11 title "M||a" with linesp ls 1, \
+     "results/.mcphas.fum" every 1:1:2 using 2:12 title "M||b" with linesp ls 2, \
+     "results/.mcphas.fum" every 1:1:2 using 2:13 title "M||c" with linesp ls 3, \
+     "results/.mcphas.fum" every 1:1:0:0:1 using 2:11 title "" with points ps 0.1
+pause 2
+reread 
+EOF
+gnuplot results/.mag.gnu 

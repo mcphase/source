@@ -1,0 +1,35 @@
+#!/bin/bash
+
+echo "--------------------------------------"
+echo "graphic package to display charge density"
+echo "--------------------------------------"
+echo "arguments as for chrgplt:"
+if test -f results/chrgplt.jvx
+ then
+  rm results/chrgplt.jvx
+ fi
+
+echo "# this is initial graphic parameters file" > results/graphic_parameters.set
+while test -f results/graphic_parameters.set
+do
+  chrgplt $*
+if test -f results/chrgplt.jvx
+then
+ java javaview results/chrgplt.jvx &
+rem1=$!
+java displaycontour 2 3 4 results/chrgplti.grid &
+rem2=$!
+java displaycontour 1 3 4 results/chrgpltj.grid &
+rem3=$!
+ java displaycontour 1 2 4 results/chrgpltk.grid &
+rem4=$!
+ java graphic_parameters_configurator 
+kill $rem1
+kill $rem2
+kill $rem3
+kill $rem4
+else
+  rm  results/graphic_parameters.set
+fi
+done
+

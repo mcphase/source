@@ -1,0 +1,211 @@
+#*********************************************************************
+#
+# File:          Makefile
+#
+# Project:       McPhase
+#
+# Description:   Makefile for the program package - compiles and links all c++ code
+#
+# Author(s):     M. Rotter
+#
+# Original:	 August 2000
+#
+#**********************************************************************
+
+# make looks in the following directories for files
+#vpath %.c  ./
+#vpath %.cpp ./
+#vpath %.h  ../include
+#vpath %.hpp ../include
+#vpath %.o  ./ ./Vector ../cf1ion_module
+
+#---------------------------------------------------------------------
+#  Operating system
+#  (linux windows)
+ LINUX = linux
+# WINDOWS = windows
+#
+#  Debugging flag
+# 
+#ifdef LINUX
+# DEBUG = debug
+#endif
+# STATIC = static
+#
+#---------------------------------------------------------------------
+#               ... and his Flags
+#
+#                Includes
+#
+
+INCLDIRS =      -I. \
+		-I../include \
+		-I/usr/include/readline \
+		-I/local/lib  \
+		-I/usr/X11R6/include
+
+
+#                       Optimizer or ANSI standard?
+CFLAGS  =       -c -O0 -Wall $(INCLDIRS)
+
+# PGPLLIBS =       -L$(PGPLOT_DIR)  -lcpgplot -lpgplot
+XLIBS=           -L/usr/X11/lib -lX11 -lXext -lc -lXpm 
+
+LFLAGS =           $(XLIBS) -lstdc++ -lm 
+
+
+#---------------------------------------------------------------------
+# RCS options
+#
+#               RCS lock options
+RCSLOCK  =      co -l -r$(VERSION)
+#               RCS check out options
+RCSCO    =      co -r$(VERSION)
+#               RCS check in options
+RCSCI    =      ci -u -f -s"Rel" -r$(VERSION) -m"$(LOCKMSG)"
+
+
+#---------------------------------------------------------------------
+# All files needed for the library
+#
+#	File list for RCS control
+#               all include files
+
+#               source files
+
+
+#--------------------------------------------------------------------
+# What has to be made
+#
+#               Names of the include files in the 
+#		installation directories
+#
+
+INCL = ../include/mcphas.h  ../include/htcalc.h ../include/testspin.hpp ../include/qvectors.hpp \
+	 ../include/spincf.hpp ../include/par.hpp  ../include/jjjpar.hpp ../include/inipar.hpp \
+	 ../include/mfcf.hpp ../include/vector.h ../include/martin.h
+
+OBJS = jjjpar.o par.o physprop.o qvectors.o mcphas.o testspin.o spincf.o inipar.o mfcf.o martin.o ionpars.o
+
+VOBS = ./Vector/ivector.o ./Vector/imatrix.o ./Vector/dvector.o ./Vector/dmatrix.o ./Vector/dmatmul.o \
+	./Vector/cvector.o ./Vector/cmatrix.o ./Vector/cmatmul.o \
+	./Vector/dludcomp.o ./Vector/dsvdcomp.o ./Vector/dortho.o ./Vector/cludcomp.o ./Vector/tred.o \
+	./Vector/imtql.o ./Vector/imtql2.o ./Vector/rseigen.o ./Vector/cheigen.o \
+	./Vector/chgeigen.o ./Vector/matlapl.o ./Vector/moment.o ./Vector/matexph.o \
+	./Vector/matsqth.o ./Vector/magicsquare.o \
+	./Vector/matpack.o ./Vector/sortdbl.o ./Vector/sort2dbl.o ./Vector/sort3dbl.o
+
+CFIELDOBJS=../cf1ion_module/cfieldrout.o ../cf1ion_module/diahermx.o ../cf1ion_module/eingabe.o \
+	../cf1ion_module/intensit.o ../cf1ion_module/kopmlex.o ../cf1ion_module/matrix.o \
+	../cf1ion_module/stevens.o ../cf1ion_module/theta.o
+
+#OBJS := $(patsubst %.c,%.o,$(wildcard ./src/*.c)) \
+#	$(patsubst %.cpp,%.o,$(wildcard ./src/*.cpp)) 
+#---------------------------------------------------------------------
+# Build mcphas
+#
+
+all :  martin.o cond  coq2jjj jjj2j mcdisp mcphasit spins addj singleion
+
+# ****************************************************
+# compile sources 
+
+martin.o:  martin.c ../include/martin.h
+	g++  $(CFLAGS)  martin.c
+	
+paramete.o: paramete.cpp ../include/paramete.hpp ../include/martin.h ../include/vector.h 
+	g++  $(CFLAGS) paramete.cpp
+
+par.o: par.cpp ../include/par.hpp ../include/jjjpar.hpp ../include/martin.h ../include/vector.h
+	g++  $(CFLAGS)  par.cpp
+
+jjjpar.o: jjjpar.cpp ../include/jjjpar.hpp ../include/martin.h ../include/vector.h 
+	g++  $(CFLAGS)  jjjpar.cpp
+
+testspin.o: testspin.cpp ../include/testspin.hpp ../include/spincf.hpp ../include/martin.h
+	g++  $(CFLAGS)  testspin.cpp
+
+spincf.o: spincf.cpp ../include/spincf.hpp ../include/vector.h
+	g++  $(CFLAGS) spincf.cpp
+
+mfcf.o: mfcf.cpp ../include/mfcf.hpp ../include/vector.h
+	g++  $(CFLAGS)  mfcf.cpp
+
+mdcf.o: mdcf.cpp ../include/mdcf.hpp ../include/vector.h
+	g++  $(CFLAGS)  mdcf.cpp
+
+jq.o: jq.cpp ../include/jq.hpp ../include/vector.h
+	g++  $(CFLAGS)  jq.cpp
+
+inipar.o: inipar.cpp ../include/inipar.hpp ../include/martin.h ../include/vector.h 
+	g++  $(CFLAGS)  inipar.cpp
+
+ionpars.o: ionpars.cpp ../include/ionpars.hpp
+	g++ $(CFLAGS) ionpars.cpp
+	
+
+inimcdis.o: inimcdis.cpp ../include/inimcdis.hpp ../include/martin.h ../include/vector.h ../include/mfcf.hpp
+	g++  $(CFLAGS)  inimcdis.cpp 
+
+physprop.o: physprop.cpp ../include/physprop.hpp ../include/spincf.hpp ../include/vector.h ../include/mfcf.hpp ../include/martin.h ../include/par.hpp
+	g++  $(CFLAGS)  physprop.cpp
+
+qvectors.o: qvectors.cpp ../include/qvectors.hpp ../include/spincf.hpp ../include/martin.h ../include/vector.h ../include/inipar.hpp myev.c
+	g++  $(CFLAGS)  qvectors.cpp
+
+mcphas.o: mcphas.c $(INCL) htcalc.c 
+	g++ $(CFLAGS) mcphas.c 
+
+mcdisp.o: mcdisp.c refine.c myev.c intcalc.c ../include/jq.hpp ../include/mdcf.hpp $(INCL) 
+	g++ $(CFLAGS) mcdisp.c refine.c myev.c intcalc.c
+
+cond.o: cond.c ../include/paramete.hpp ../include/martin.h
+	g++ $(CFLAGS) cond.c
+
+coq2jjj.o: coq2jjj.c ../include/paramete.hpp ../include/martin.h
+	g++ $(CFLAGS) coq2jjj.c
+
+jjj2j.o: jjj2j.c ../include/par.hpp ../include/jjj2j.h ../include/jjjpar.hpp ../include/vector.h
+	g++ $(CFLAGS) jjj2j.c
+
+spins.o: spins.c ../include/spincf.hpp  ../include/martin.h ../include/vector.h
+	g++ $(CFLAGS) spins.c
+
+singleion.o: singleion.c ../include/par.hpp  ../include/martin.h ../include/vector.h
+	g++ $(CFLAGS) singleion.c
+
+addj.o: addj.c ../include/par.hpp  ../include/martin.h ../include/vector.h
+	g++ $(CFLAGS) addj.c
+
+
+
+# ************************************************
+# make  binaries (link .o files)
+
+cond: cond.o paramete.o $(VOBS) martin.o
+	g77  -Wall  -o ../cond cond.o paramete.o $(VOBS) martin.o $(LFLAGS)
+
+coq2jjj: coq2jjj.o paramete.o $(VOBS) martin.o
+	g77  -Wall  -o ../coq2jjj coq2jjj.o paramete.o $(VOBS) martin.o $(LFLAGS)
+
+jjj2j: jjj2j.o par.o jjjpar.o $(CFIELDOBJS) martin.o $(VOBS) ionpars.o
+	g77  -Wall  -o ../jjj2j jjj2j.o par.o jjjpar.o $(CFIELDOBJS) martin.o $(VOBS) ionpars.o $(LFLAGS)
+
+mcdisp: mcdisp.o martin.o par.o jjjpar.o inimcdis.o jq.o mdcf.o mfcf.o ionpars.o  $(VOBS)  $(CFIELDOBJS)
+	g77  -Wall  -o ../mcdisp   mcdisp.o martin.o par.o jjjpar.o inimcdis.o jq.o mdcf.o $(VOBS) ionpars.o  $(CFIELDOBJS) mfcf.o  $(LFLAGS)
+
+mcphasit: $(OBJS) $(VOBS)   $(CFIELDOBJS)
+	g77  -Wall  -o ../mcphasit  $(OBJS)  $(VOBS)   $(CFIELDOBJS) $(LFLAGS)
+
+spins: spincf.o spins.o $(VOBS) martin.o
+	g77  -Wall  -o ../spins spincf.o spins.o $(VOBS) martin.o $(LFLAGS)
+
+singleion:  singleion.o martin.o  jjjpar.o  $(VOBS) par.o  $(CFIELDOBJS) ionpars.o
+	g77  -Wall  -o ../singleion singleion.o martin.o  jjjpar.o  $(VOBS) par.o  $(CFIELDOBJS) ionpars.o  $(LFLAGS)
+
+addj: addj.o par.o martin.o  $(VOBS) jjjpar.o $(CFIELDOBJS) ionpars.o
+	g77  -Wall  -o ../addj addj.o par.o martin.o  $(VOBS) jjjpar.o $(CFIELDOBJS) ionpars.o  $(LFLAGS)
+
+
+clean: 
+	rm -f ./*.o

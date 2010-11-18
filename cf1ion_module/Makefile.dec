@@ -1,0 +1,111 @@
+#makefile for program cfield
+#vpath %.h  ../include
+#vpath %.hpp ../include
+#vpath %.o  ../src/Vector
+
+###########################################################################
+# gcc version egcs-2.95.2 19991024 (release) on a Linux system
+# Intel Pentium PC, use -m486 for 486 CPU or -mpentium for Pentium Systems
+###########################################################################
+
+# C compiler for linux windows
+#CC= g++ -pipe
+#COPTS= -ansi -O3 -fomit-frame-pointer -fforce-addr -m486 -x c 
+
+#for dec alpha
+CC= g++ 
+COPTS= -ansi  -fomit-frame-pointer -fforce-addr -fPIC -x c 
+
+#LIBL= /usr/lib/libfl.a
+###########################################################################
+### include directory: don't change !					  #
+###########################################################################
+
+INCLUDE= ../../include
+
+###########################################################################
+### general rules							  #
+###########################################################################
+
+.SUFFIXES: .cc .o
+
+.c.o: 
+	${CC} -c ${COPTS}  -I ${INCLUDE} $<
+
+.cc.o: 
+	${CCC} -c ${CCOPTS}   -I ${INCLUDE} $<
+
+###########################################################################
+###########################################################################
+
+
+
+INCLDIRS =      -I. \
+		-I../include \
+		-I/usr/include/readline \
+		-I/local/lib  \
+		-I/usr/X11R6/include
+
+
+all : cfieldrout.o cfield.so cfield 
+
+VECOBJS= ../src/Vector/matpack.o ../src/Vector/sortdbl.o ../src/Vector/sort2dbl.o \
+	        ../src/Vector/sort3dbl.o ../src/Vector/ivector.o \
+		../src/Vector/imatrix.o ../src/Vector/dvector.o ../src/Vector/dmatrix.o \
+		../src/Vector/dmatmul.o ../src/Vector/cvector.o \
+		../src/Vector/cmatrix.o ../src/Vector/cmatmul.o ../src/Vector/dludcomp.o \
+		../src/Vector/dsvdcomp.o ../src/Vector/dortho.o \
+		../src/Vector/cludcomp.o ../src/Vector/tred.o ../src/Vector/imtql.o \
+		../src/Vector/imtql2.o ../src/Vector/rseigen.o ../src/Vector/cheigen.o \
+		../src/Vector/chgeigen.o ../src/Vector/matlapl.o ../src/Vector/moment.o \
+		../src/Vector/matexph.o ../src/Vector/matsqth.o ../src/Vector/magicsquare.o
+
+CFOBJS= cfield.o diahermx.o eingabe.o intensit.o kopmlex.o matrix.o stevens.o theta.o 
+
+
+${CFOBJS}: 
+
+# used for internal module in mcphas and mcdisp
+cfieldrout.o: cfieldrout.c
+
+#	$(CC) -o cfieldrout.o cfieldrout.c  $(INCLDIRS)
+
+
+cfield.so: module.o cfield.o  $(VECOBJS) $(CFOBJS)
+	 g++  -Wall -o cfield.so module.o cfield.o ../src/Vector/matpack.o \
+	 ../src/Vector/sortdbl.o ../src/Vector/sort2dbl.o ../src/Vector/sort3dbl.o \
+	 ../src/Vector/ivector.o ../src/Vector/imatrix.o ../src/Vector/dvector.o \
+	 ../src/Vector/dmatrix.o ../src/Vector/dmatmul.o ../src/Vector/cvector.o \
+	 ../src/Vector/cmatrix.o ../src/Vector/cmatmul.o ../src/Vector/dludcomp.o \
+	 ../src/Vector/dsvdcomp.o ../src/Vector/dortho.o ../src/Vector/cludcomp.o \
+	 ../src/Vector/tred.o ../src/Vector/imtql.o ../src/Vector/imtql2.o \
+	 ../src/Vector/rseigen.o ../src/Vector/cheigen.o ../src/Vector/chgeigen.o \
+	 ../src/Vector/matlapl.o ../src/Vector/moment.o ../src/Vector/matexph.o \
+	 ../src/Vector/matsqth.o ../src/Vector/magicsquare.o diahermx.o eingabe.o \
+	 intensit.o kopmlex.o matrix.o stevens.o theta.o  
+
+
+#	g++  -Wall -o cfield.so $^  -shared 
+
+cfield: cfield.o  $(VECOBJS) $(CFOBJS)
+	 g++  -Wall -o ../bin/cfield cfield.o ../src/Vector/matpack.o \
+	 ../src/Vector/sortdbl.o ../src/Vector/sort2dbl.o ../src/Vector/sort3dbl.o \
+	 ../src/Vector/ivector.o ../src/Vector/imatrix.o ../src/Vector/dvector.o \
+	 ../src/Vector/dmatrix.o ../src/Vector/dmatmul.o ../src/Vector/cvector.o \
+	 ../src/Vector/cmatrix.o ../src/Vector/cmatmul.o ../src/Vector/dludcomp.o \
+	 ../src/Vector/dsvdcomp.o ../src/Vector/dortho.o ../src/Vector/cludcomp.o \
+	 ../src/Vector/tred.o ../src/Vector/imtql.o ../src/Vector/imtql2.o \
+	 ../src/Vector/rseigen.o ../src/Vector/cheigen.o ../src/Vector/chgeigen.o \
+	 ../src/Vector/matlapl.o ../src/Vector/moment.o ../src/Vector/matexph.o \
+	 ../src/Vector/matsqth.o ../src/Vector/magicsquare.o diahermx.o eingabe.o \
+	 intensit.o kopmlex.o matrix.o stevens.o theta.o  
+
+
+#	g++  -Wall -o ../cfield $^
+
+module.o: module.c 
+	g++  -Wall -fPIC -c  -o module.o module.c  $(INCLDIRS) 
+
+clean:
+	rm -vf ./*.o ./*.info ./*.parameter ./*.output
+
