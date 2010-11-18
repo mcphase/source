@@ -418,7 +418,6 @@ sub printneighbourlist {
      print $l ("#*************************************************************************\n");
      while(<$h>)
      {$text=$_;
-     next if /.*\*\*\*\*\*\*\*\*\*\*\*/;
      if (/^(#!|[^#])*nofneighbours\s*=\s*/){($nn0)=extract("nofneighbours",$text);
                                             $text=~s!nofneighbours\s*=\s*\d+!nofneighbours=$nofn!;}
      if (/^(#!|[^#])*diagonalexchange\s*=\s*/){

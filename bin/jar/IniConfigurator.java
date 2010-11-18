@@ -623,21 +623,29 @@ public class IniConfigurator extends JPanel
 		IniConfigurator panel = new IniConfigurator();
 				
 		JFrame frame = new JFrame("IniConfigurator");
-		frame.addWindowListener(new WindowAdapter() 			{
-				public void windowClosing(WindowEvent e) 				{					System.exit(0);				}
-			});		
+		frame.addWindowListener(new WindowAdapter() 
+			{
+				public void windowClosing(WindowEvent e) 
+				{
+					System.exit(0);
+				}
+			});
+		
 		frame.getContentPane().add("Center", panel);
 		frame.pack();
 		frame.setSize(800,400);
 		// Initialize Form
 		panel.jbInit();
-		// Start Reading of INI		panel.ReadFromIni(panel.strWorkingDir);
-		// Set the form visible		frame.setVisible(true);
+		// Start Reading of INI
+		panel.ReadFromIni(panel.strWorkingDir);
+		// Set the form visible
+		frame.setVisible(true);
 	  }
 	  catch(Exception e)
 	  {
 		System.out.println(e.getMessage());
-	  }  }
+	  }
+  }
 
   void btnRead_actionPerformed(ActionEvent e) 
   {

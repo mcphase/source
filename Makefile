@@ -1,13 +1,13 @@
 # Makefile for all McPhase
 
-include src/Makefile.common
+include bin/src/Makefile.common
 
-cfdir = cf1ion_module
-icdir = ic1ion_module
-mcpdir = src
-vecdir = src/vector
-funcdir = src/functions
-calcdir = src/calc
+cfdir = bin/cf1ion_module
+icdir = bin/ic1ion_module
+mcpdir = bin/src
+vecdir = bin/src/vector
+funcdir = bin/src/functions
+calcdir = bin/src/calc
 
 all: vector functions cfield mcphase
 
@@ -16,6 +16,9 @@ vector:
 
 functions:
 	cd $(funcdir) && $(MAKE)
+
+calc:
+	cd $(calcdir) && $(MAKE)
 
 cfield: vector
 	cd $(cfdir) && $(MAKE)
@@ -40,7 +43,9 @@ clean:
                 bin/ic1ion.exe bin/so1ion.exe \
                 bin/ic1ion_module/ic1ion.dll \
                 bin/fediff.exe bin/mf2fe.exe \
-                bin/spindensplt.exe bin/orbmomdensplt.exe bin/momdensplt.exe
+                bin/spindensplt.exe bin/orbmomdensplt.exe bin/momdensplt.exe \
+                bin/spindensities.exe bin/orbmomdensities.exe bin/momdensities.exe \
+                bin/currdensities.exe bin/currdensplt.exe
 	rm -vf bin/addj bin/charges bin/coq2jjj \
 		bin/mcdispit bin/singleion bin/cfield \
 		bin/cond bin/jjj2j bin/mcphasit bin/spins \
@@ -49,5 +54,6 @@ clean:
                 bin/ic1ion bin/so1ion \
                 bin/ic1ion_module/ic1ion.so \
                 bin/fediff bin/mf2fe \
-                bin/spindensplt bin/orbmomdensplt bin/momdensplt
-
+                bin/spindensplt bin/orbmomdensplt bin/momdensplt \
+                bin/spindensities bin/orbmomdensities bin/momdensities \
+                bin/currdensities bin/currdensplt
