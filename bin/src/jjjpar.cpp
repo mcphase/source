@@ -416,9 +416,11 @@ void jjjpar::save_sipf(const char * path)
 //constructor with file handle of mcphas.j
 jjjpar::jjjpar(FILE * file,int nofcomps) 
 {   
-  char instr[MAXNOFCHARINLINE];
+  char instr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE];
   cffilename= new char [MAXNOFCHARINLINE];
   int i,j,i1,j1,k1;
+  int symmetricexchange=0,indexexchangenum;
+  Matrix exchangeindices;
   double gjcheck;
   float nn[MAXNOFNUMBERSINLINE];
   nn[0]=MAXNOFNUMBERSINLINE;
@@ -439,6 +441,26 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
              i+=extract(instr,"gJ",gjcheck)-1;
              i+=extract(instr,"cffilename",cffilename,(size_t)MAXNOFCHARINLINE)-1;
             }
+
+ // MDL 29.08.10 - Added to check if exchange parameters are indexed.
+ //   - Used: set diagonalexchange=2. The add a line:
+ //        #! symmetricexchange=1 nofcomponents=3 indexexchange= JaJb JbJc
+ //     Or
+ //        #! symmetricexchange=0 nofcomponents=3 indexexchange= 1,2 2,1 2,3 3,2
+ //     Where symmetricexchange is 1 or 0 depending on whether you want the non-diagonal elements of the exchange
+ //     matrix to be symmetric or not. The column index can be either a string or a list of coordinates (indices)
+ //     Note that you if you don't specify symmetricexchange, it is assumed to be 0 (nonsymmetric)
+ //     Note also that the JaJb syntax is case sensitive - J must be upper case so that Jj is allowed. Index must be lower case
+ if(diagonalexchange==2) { 
+    i=1; while(i>0) { 
+      if(instr[strspn(instr," \t")]!='#') { 
+         fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2, but not indexexchange parameters found\n"); exit (EXIT_FAILURE);}
+      fgets_errchk (instr, MAXNOFCHARINLINE, file); 
+      extract(instr,"symmetricexchange",symmetricexchange);
+      if(extract(instr,"indexexchange",exchangeindicesstr,MAXNOFCHARINLINE)==0) { strcpy(exchangeindicesstr,instr); break; }
+    }
+    indexexchangenum=get_exchange_indices(exchangeindicesstr,&exchangeindices);
+ }
 
  // fgets_errchk (instr, MAXNOFCHARINLINE, file); //removed by MR 30.4.2010
 
@@ -464,7 +486,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
                       exit (EXIT_FAILURE);
                     }
     if(i==1){// determine nofcomponents from number of parameters read in first line of mcphas.j
-             if(diagonalexchange==1){nofcomponents=j-3;}else{nofcomponents=(int)sqrt((double)(j-3));}
+             if(diagonalexchange==1){nofcomponents=j-3;}else if(diagonalexchange==0){nofcomponents=(int)sqrt((double)(j-3));}
              if(module_type==1)
 	     {// check dimensions of vector if internal kramers is used
               if(nofcomponents!=3)
@@ -475,7 +497,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
              for(i1=0;i1<=paranz;++i1){jij[i1]=Matrix(1,nofcomponents,1,nofcomponents);}
             }
    //check if correct number of columns has been read	        
-    if((diagonalexchange==1&&nofcomponents!=j-3)||(diagonalexchange==0&&nofcomponents!=(int)sqrt((double)(j-3))))
+    if((diagonalexchange==1&&nofcomponents!=j-3)||(diagonalexchange==0&&nofcomponents!=(int)sqrt((double)(j-3)))||(diagonalexchange==2&&indexexchangenum!=(j-3)))
               {fprintf(stderr,"Error reading mcphas.j line %i: check number of columns\n",i);
                exit(EXIT_FAILURE);}
 
@@ -492,6 +514,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   // 11 22 33 44 55 12 21 13 31 14 41 15 51 23 32 24 42 25 52 34 43 35 53 45 54 (5x5 matrix)
   // etc ...
   //read diagonal components of exchange matrix
+  if (diagonalexchange==1||diagonalexchange==0)
   for(i1=1;i1<=nofcomponents;++i1){jij[i](i1,i1)= nn[i1+3];}
   //read off-diagonal components of exchange matrix (if required)
   if (diagonalexchange==0){k1=3+nofcomponents;
@@ -502,6 +525,16 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
 			       }
 			      }
                           }
+  if (diagonalexchange==2 && indexexchangenum>0)  {
+     double dt=0.; int ii,jj;
+     for(i1=1; i1<=indexexchangenum; i1++) {
+        ii=(int)exchangeindices(i1,1); jj=(int)exchangeindices(i1,2); jij[i](ii,jj) = nn[i1+3]; 
+        if(i==paranz) { if(ii!=jj) diagonalexchange=0; }} if(i==paranz&&diagonalexchange!=0) diagonalexchange=1;
+     if (symmetricexchange==1) {
+        for(i1=1; i1<=nofcomponents; i1++) for(j1=i1+1; j1<=nofcomponents; j1++) if(i1!=j1) {
+           dt=0.; if(jij[i](j1,i1)!=0) dt=jij[i](j1,i1); else if(jij[i](i1,j1)!=0) dt=jij[i](i1,j1);
+           if(dt!=0) { jij[i](j1,i1)=dt; jij[i](i1,j1)=dt; }
+     }}}
   }
 }
 

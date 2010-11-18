@@ -156,7 +156,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
  Vector nettom(1,inputpars.nofcomponents*inputpars.nofatoms),q(1,3);
  Vector mmom(1,inputpars.nofcomponents);
  Vector h1(1,inputpars.nofcomponents),hkl(1,3);
- char text[1000];
+ char text[10000];
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  mfcf * mf;
  FILE * felog; // logfile for q dependence of fe

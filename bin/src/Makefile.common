@@ -99,11 +99,11 @@ COPTS   =  -g  -fomit-frame-pointer -fforce-addr -DDEBUG $(LINOPTS)
 #CFLAGS  =       -c -g  -DDEBUG -Wall $(INCLDIRS)
 else
 ifdef profile 
-CCOPTS  =  -pg -fforce-addr -fpermissive $(LINOPTS)
-COPTS   =  -pg -fforce-addr $(LINOPTS)
+CCOPTS  = -pg -fforce-addr -fpermissive $(LINOPTS)
+COPTS   = -pg -fforce-addr $(LINOPTS)
 else
-CCOPTS  = -g -Wall   $(LINOPTS)
-COPTS   = -g -Wall   $(LINOPTS)
+CCOPTS  = -g -Wall --pedantic  $(LINOPTS)
+COPTS   = -g -Wall --pedantic  $(LINOPTS)
 endif
 endif
 

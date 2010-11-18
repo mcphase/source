@@ -335,6 +335,57 @@ if (gJ==0){printf("# reading gJ=0 in single ion property file %s -> entering int
 }
 
 /****************************************************************************/
+// get list of indices of exchange parameters
+/************************************************************************************/
+int jjjpar::get_exchange_indices(char *instr, Matrix *exchangeindices)
+{
+   bool charflag=false;
+   char *tk,*tkp,*instrptr,sep[]=" \t",allowedch[]="abcdefghijklmnopqrstuvwxyz";
+   int num_indices=0,ii,i,j;
+
+   // Checks if using "JaJb" or "1,2" syntax
+   if(strstr(instr,"J")!=NULL) charflag=true; else if(strstr(instr,",")==NULL) {
+      fprintf(stderr,"Error in indexexchange: Syntax neither of the form JaJb or 1,2\n"); exit(EXIT_FAILURE); }
+
+   // Moves to start of index list in the string
+   instrptr = strstr(instr,"indexexchange")+13; instrptr = strstr(instrptr,"=")+1; instrptr+=strspn(instrptr,sep);
+   // Clears all whitespaces at the end of the list
+   tkp = strrchr(instr,0)-1; while(tkp>instrptr) { if(tkp[0]!=' '&&tkp[0]!='\t'&&tkp[0]!='\n') break; tkp--; } tkp++;
+   // Goes through string finding whitespaces to get number of indices
+   tk = strpbrk(instrptr,sep); if(strncmp(sep,tk,1)==0) tk += strspn(tk,sep);
+   if(tk!=NULL) { num_indices=1; 
+     while(tk!=NULL&&tk<tkp) { tk = strpbrk(tk+1,sep); if(strncmp(sep,tk,1)==0) tk += strspn(tk,sep); num_indices++; } 
+   } else return 0; 
+
+   (*exchangeindices) = Matrix(1,num_indices,1,2);
+
+   if(charflag)
+   {
+      tk = strpbrk(instrptr,"J");
+      for(ii=1; ii<=num_indices; ii++)
+      {
+         tk = strpbrk(tk+1,allowedch); i=(int)tk[0]-96; // 'a'==97 in ASCII
+         tk = strpbrk(tk+1,allowedch); j=(int)tk[0]-96;
+         (*exchangeindices)(ii,1) = i; (*exchangeindices)(ii,2) = j;
+         tk = strpbrk(tk,"J");
+      }
+   }
+   else
+   {
+      tk = instrptr;
+      for(ii=1; ii<=num_indices; ii++)
+      {
+         i = strtol(tk,&tkp,10); tkp++;
+	 j = strtol(tkp,&tk,10); 
+         (*exchangeindices)(ii,1) = i; (*exchangeindices)(ii,2) = j;
+	 tk = strpbrk(tk+1,"123456789");
+      }
+   }
+   return num_indices;
+}
+
+
+/****************************************************************************/
 // function to calculate magnetisation M from effective field H
 // this is the heart of the meanfield algorithm an it is necessary to
 // keep this routine as efficient as possible

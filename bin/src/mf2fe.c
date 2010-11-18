@@ -25,7 +25,7 @@ double fecalc(Vector Hex, double T, par &inputpars, spincf &sps, mfcf &mf, doubl
    Vector diff(1,inputpars.nofcomponents*inputpars.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
    Vector meanfield(1,inputpars.nofcomponents),moment(1,inputpars.nofcomponents),d1(1,inputpars.nofcomponents);
 // spincf sps(mf.na(),mf.nb(),mf.nc(),inputpars.nofatoms,inputpars.nofcomponents); // spinconf variable 
-   char text[60]; // some text variable
+   char text[1000]; // some text variable
    int i,j,k,i1,j1,k1,di,dj,dk,l,r,s,sdim,m,n,m1;
    div_t result; // some modulo variable
    float    sta=1000000; // initial value of standard deviation
