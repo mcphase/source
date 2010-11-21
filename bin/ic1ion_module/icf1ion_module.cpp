@@ -105,6 +105,7 @@ int icf_getdim(icpars &pars)
 sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
 {
    int n = pars.n; double xi = pars._xi; orbital e_l = pars.l;
+   if (e_l>3||e_l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
    fstates_t gs = hunds_gs(n, e_l);
    int J2min, J2max, ns=0;
    int S2 = gs.S2, L2 = abs(gs.L)*2;
@@ -123,38 +124,43 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
 
    // Determines reduced matrix elements (Stevens operator equivalent factor)
    double rmso = 0., rmU[7]={0.,0.,0.,0.,0.,0.,0.};
+   double p = 1./( pow(-1.,(double)abs(e_l))*(2.*e_l+1.) );
    if (n>1)
    {
       fconf confp(n-1,e_l);
       std::vector<cfpls> cfps;
-      if(e_l==D)      cfps = racah_parents(n,gs.v,gs.S2,gs.L);
-      else if(e_l==F) cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);
-      else { std::cerr << "Sorry only d- and f-electrons supported at present\n"; exit(0); }
+      switch(e_l) {
+         case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
+         case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
+         default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
       int sz = (int)cfps.size();
-      double p = 1./( pow(-1.,(double)abs(e_l))*(2.*e_l+1.) );
       for(int k=0; k<sz; k++)
       {
          int pS2 = confp.states[cfps[k].ind].S2, pL2 = abs(confp.states[cfps[k].ind].L)*2;
-         rmso   += racahW(pS2,S2,1,2,1,S2) * racahW(pL2,L2,2*e_l,2,2*e_l,L2) * cfps[k].cfp * cfps[k].cfp;
-         rmU[2] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,4,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.) * threej(2*e_l,4,2*e_l,0,0,0) / p;
-         rmU[4] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,8,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.) * threej(2*e_l,8,2*e_l,0,0,0) / p;
-         rmU[6] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.) * threej(2*e_l,12,2*e_l,0,0,0)/ p;
+         rmso   += racahW(pS2,S2,1,2,1,S2) * racahW(pL2,L2,2*e_l,2,2*e_l,L2) * cfps[k].cfp * cfps[k].cfp; if(n!=(4*e_l+1)) {
+         rmU[2] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,4,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
+         rmU[4] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,8,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
+         rmU[6] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.); }
       }
+      if(n==(4*e_l+1)) { rmU[2]=1./n; rmU[4]=1./n; rmU[6]=1./n; }
+      for(int ik=2; ik<=6; ik+=2) rmU[ik] *= n * threej(2*e_l,2*ik,2*e_l,0,0,0) / p;
    }
    else  // Single electron
    {
    // rmso = sqrt(3/2.)*sqrt(e_l*(e_l+1)*(2*e_l+1));             // s=1/2 substituted into eqn 4-12 of Judd 1963
-      rmU[2] = 1.; rmU[4] = 1.; rmU[6] = 1.;                     // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
       rmso = 1./((L2+1.)*(S2+1.));
+      rmU[2] = threej(2*e_l,4,2*e_l,0,0,0) / p;                  // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
+      rmU[4] = threej(2*e_l,8,2*e_l,0,0,0) / p;
+      rmU[6] = threej(2*e_l,12,2*e_l,0,0,0)/ p;
    }
 
    double elp, elm; int k, q, iq;
-   for (int i=0; i<ns; i++)
+   for (int i=0; i<ns; i++) 
       for (int j=0; j<ns; j++)
       {
          if(i==j)  // Selection rule for Spin-orbit operator J=J', mJ=mJ'
          {
-            Hcf(i,i) = -n*xi * racahW(J2[i],L2,S2,2,S2,L2) * (L2+1)*(S2+1) * sqrt( (9./6)*e_l*(e_l+1)*(2*e_l+1) ) * rmso;
+            Hcf(i,i) += -n*xi * racahW(J2[i],L2,S2,2,S2,L2) * (L2+1)*(S2+1) * sqrt( (9./6)*e_l*(e_l+1)*(2*e_l+1) ) * rmso;
          // Hcf(i,i) = -xi * pow(-1.,(S2+L2+J2[i])/2.) * sixj(S2,S2,2,L2,L2,J2[i]) * rmso;
          }
          for(k=2; k<=6; k+=2) for(iq=0; iq<(2*k+1); iq++)
@@ -164,7 +170,7 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
             {
                elp = pow(-1.,(S2-L2-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2,J2[i],L2,J2[j],S2,2*k) * rmU[k] 
                         * pow(-1.,(J2[i]+mJ2[i])/2.+k) * wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k,0) / sqrt(2.*k+1.); 
-               Hcf(i,j) = elp * pars.B(k,q);
+               Hcf(i,j) += elp * pars.B(k,q);
             }
             else
             {
@@ -186,6 +192,7 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
 // --------------------------------------------------------------------------------------------------------------- //
 sMat<double> icf_ukq(int n, int k, int q, orbital e_l)
 {
+   if (e_l>3||e_l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
    fstates_t gs = hunds_gs(n, e_l);
    int J2min, J2max, ns=0;
    int S2 = gs.S2, L2 = abs(gs.L)*2;
@@ -203,24 +210,25 @@ sMat<double> icf_ukq(int n, int k, int q, orbital e_l)
      }
 
    // Determines reduced matrix elements (Stevens operator equivalent factor)
-   double rmU=0.;
-   if (n>1)
+   double rmU=0., p = 1./( pow(-1.,(double)abs(e_l))*(2.*e_l+1.) );
+   if (n>1 && n<(4*e_l+1))
    {
       fconf confp(n-1,e_l);
       std::vector<cfpls> cfps;
-      if(e_l==D)      cfps = racah_parents(n,gs.v,gs.S2,gs.L);
-      else if(e_l==F) cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);
-      else { std::cerr << "Sorry only d- and f-electrons supported at present\n"; exit(0); }
+      switch(e_l) {
+         case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
+         case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
+         default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
       int sz = (int)cfps.size();
-      double p = 1./( pow(-1.,(double)abs(e_l))*(2.*e_l+1.) );
       for(int k=0; k<sz; k++)
       {
          int pL2 = abs(confp.states[cfps[k].ind].L)*2;
-         rmU += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,2*k,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.) * threej(2*e_l,2*k,2*e_l,0,0,0) / p;
+         rmU += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,2*k,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
       }
+      rmU *= n * threej(2*e_l,2*k,2*e_l,0,0,0) / p;
    }
-   else  // Single electron
-      rmU = 1.;                                                  // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
+   else  // Single electron or single hole
+      rmU = threej(2*e_l,2*k,2*e_l,0,0,0) / p;                   // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
 
    double elp, elm;
    if(q==0)
@@ -600,7 +608,7 @@ __declspec(dllexport)
    else
       for(i=0; i<Hsz; i++){//printf("\n");
          for(j=0; j<Hsz; j++) 
-            {(*est)(i+1,j+1) = complex<double> (rV[i+j*Hsz], 0.);
+            {(*est)(i+1,j+1) = complex<double> (rV[j+i*Hsz], 0.);
 //                         printf("%6.3f %+6.3f i  ",rV[i+j*Hsz],0.0);
 //           if(rV[i+j*Hsz]!=(*est)[i+1][j+1]){fprintf(stderr,"compiler problem: bad memory mapping of vectors\n");exit(EXIT_FAILURE);}
             }}

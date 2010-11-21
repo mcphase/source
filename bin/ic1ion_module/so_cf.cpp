@@ -92,8 +92,8 @@ sMat<double> racah_so(int n, double xi, orbital e_l)  // Defaults to f-electrons
 // --------------------------------------------------------------------------------------------------------------- //
 sMat<double> racah_Umat(int n, int k, orbital e_l)
 {
-   if(n==1) { sMat<double> U(1,1); U(0,0) = 1.; return U; }      // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
-   if(n==(4*e_l+1)) { sMat<double> U(1,1); U(0,0) = -1.; return U; }
+   if(n==1||n==(4*e_l+1)) { sMat<double> U(1,1); U(0,0) = 1.; return U; }      // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
+// if(n==(4*e_l+1)) { sMat<double> U(1,1); U(0,0) = -1.; return U; }  // Error! Removed 21.11.10 After checking with Carnall paper.
    if(e_l!=P&&e_l!=D&&e_l!=F) { std::cerr << "racah_Umat(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
    fconf conf(n,e_l);
    fconf confp(n-1,e_l);
@@ -140,7 +140,6 @@ sMat<double> racah_Umat(int n, int k, orbital e_l)
          }
       }
    }
-for(i=0; i<num_states; i++) { for(j=0; j<num_states; j++) std::cout << U(i,j) << " "; std::cout << "\n"; }
  //char rmat[255]; strcpy(rmat,"results/ic1ion.umat"); rmzeros(U); mm_gout(U,rmat);
    return U;
 }

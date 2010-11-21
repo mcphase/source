@@ -17,10 +17,9 @@ int verbose=0;
 const char * filemode="w";
 
 #include "myev.h"
+#include "mcphas_htcalc.c"
 #include "mcphas_fecalc.c"
 #include "mcphas_physpropcalc.c"
-
-#include "mcphas_htcalc.c"
 
 // main program
 int main (int argc, char **argv)
