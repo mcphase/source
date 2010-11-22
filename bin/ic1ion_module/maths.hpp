@@ -28,6 +28,8 @@
 #include<cfloat>       // For definition of EPSILON etc.
 #include "lapack.h"
 
+#define PI 3.1415926535897932384626433832795
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Template Class to hold a sparse matrix of any type - and also declares standard matrix algebra methods.
 //    The class stores elements by coordinate indices in a subclass, _ind, consisting of two ints, which serves
@@ -1156,5 +1158,6 @@ void rmzeros(sMat<double> & M);                                           // Rem
 std::vector<double> f2vec(double *v, int n);                              // Converts a 1D C-array into a std::vector
 sMat<double> f2mat(double *M, int m, int n);                              // Converts a 2D C-array into an sMat
 complexdouble* zmat2f(sMat<double> &r, sMat<double> &i);                  // Converts two sMat to complex C-array
+complexdouble spherical_harmonics(int k, int q, double th, double phi);   // Calculates the spherical harmonic
 
 #endif

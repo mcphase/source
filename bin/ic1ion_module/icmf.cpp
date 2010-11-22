@@ -428,7 +428,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          if (T<0)
          {  char instr[MAXNOFCHARINLINE];
             printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-            fgets(instr, MAXNOFCHARINLINE, stdin);
+            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
             eb[ind_j]=strtod(instr,NULL);
          }
         else
@@ -455,7 +455,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          if (T<0)
          {  char instr[MAXNOFCHARINLINE];
             printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-            fgets(instr, MAXNOFCHARINLINE, stdin);
+            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
             eb[ind_j]=strtod(instr,NULL);
          }
          else
@@ -767,7 +767,7 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
       if (T<0)
       {  char instr[MAXNOFCHARINLINE];
          printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-         fgets(instr, MAXNOFCHARINLINE, stdin);
+         if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
          eb[ind_j]=strtod(instr,NULL);
       }
        else
@@ -795,7 +795,7 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
          if (T<0)
          {  char instr[MAXNOFCHARINLINE];
             printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-            fgets(instr, MAXNOFCHARINLINE, stdin);
+            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
             eb[ind_j]=strtod(instr,NULL);
          }
          else

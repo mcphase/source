@@ -29,8 +29,6 @@
 
 #define IC1IONMODULE_VERSION 0.5
 
-#define PI 3.1415926535897932384626433832795
-
 // --------------------------------------------------------------------------------------------------------------- //
 // Defines a class to hold the coefficient of fractional parentage, parent id and parent id number
 // --------------------------------------------------------------------------------------------------------------- //
@@ -119,7 +117,6 @@ void chanlam_mumat(int n,int q,sMat<double>&mu, orbital l=F);             // Cal
 // --------------------------------------------------------------------------------------------------------------- //
 bool lovesey_aKK(sMat<double> &aKK, int K, int Kp, int n, orbital l);     // Calculates the matrix a(K,K')
 bool lovesey_cKK(sMat<double> &aKK, int K, int Kp, int n, orbital l);     // Calculates the matrix c(K,K')
-complexdouble spherical_harmonics(int k, int q, double th, double phi);   // Calculates the spherical harmonic
 void lovesey_Qq(std::vector<sMat<double> >&Q, int q, int n, orbital l,    // Calculates the transition matrix Qq
        std::vector<double>&);
 sMat<double> balcar_MSq(int q, int K, int Q, int n, orbital l);           // Calculates the coeff. of the spin density

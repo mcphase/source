@@ -275,47 +275,6 @@ bool lovesey_cKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
-// Calculates the spherical harmonic functions Y_q^k(theta,phi)
-// --------------------------------------------------------------------------------------------------------------- //
-complexdouble spherical_harmonics(int k, int q, double theta, double phi)
-{
-   complexdouble Ykq; Ykq.r=0; Ykq.i=0;
-   double c=0.; double ct = cos(theta), st = sin(theta);
-   if(k<0) k=-k;
-   if(q<-k || q>k) return Ykq;
-   if(k%2!=0) return Ykq;
-   
-#define SQ switch(q)
-#define CQ(M,V) case M: c=V; break
-#define SA switch(abs(q))
-#define TQ(M,T) case M: c*=T; break
-   switch(k)
-   {
-      case 0: Ykq.r = (1/2.)*sqrt(1./PI); break;
-      case 2: SQ { CQ(-2,(1/4.)*sqrt(15/(2*PI))); CQ(-1,(1/2.)*sqrt(15/(2*PI))); CQ(0,(1/4.)*sqrt(5/PI));
-                   CQ(1,(-1/2.)*sqrt(15/(2*PI))); CQ(2,(1/4.)*sqrt(15/(2*PI))); }
-              SA { TQ(2,pow(st,2.)); TQ(1,st*ct); TQ(0,3*pow(ct,2.)-1.); } break;
-      case 4: SQ { CQ(-4,(3/16.)*sqrt(35/(2*PI))); CQ(-3,(3/8.)*sqrt(35/PI)); CQ(-2,(3/8.)*sqrt(5/(2*PI)));
-                   CQ(-1,(3/8.)*sqrt(5/PI)); CQ(0,(3/16.)*sqrt(1/PI)); CQ(1,(-3/8.)*sqrt(5/PI));
-                   CQ(2,(3/8.)*sqrt(5/(2*PI))); CQ(3,(-3/8.)*sqrt(35/PI)); CQ(4,(3/16.)*sqrt(35/(2*PI))); }
-              SA { TQ(4,pow(st,4.)); TQ(3,pow(st,3.)*ct); TQ(2,pow(st,2.)*(7*pow(ct,2.)-1.));
-                   TQ(1,st*(7*pow(ct,3.)-3*ct)); TQ(0,35*pow(ct,4.)-30*pow(ct,2.)+3); } break;
-      case 6: SQ { CQ(-6,(1/64.)*sqrt(3003/PI)); CQ(-5,(3/32.)*sqrt(1001/PI)); CQ(-4,(3/32.)*sqrt(91/(2*PI)));
-                   CQ(-3,(1/32.)*sqrt(1365/PI)); CQ(-2,(1/64.)*sqrt(1365/PI)); CQ(-1,(1/16.)*sqrt(273/(2*PI)));
-                   CQ(0,(1/32.)*sqrt(13/PI)); CQ(1,(-1/16.)*sqrt(273/(2*PI))); CQ(2,(1/64.)*sqrt(1365/PI));
-                   CQ(3,(-1/32.)*sqrt(1365/PI)); CQ(4,(3/32.)*sqrt(91/(2*PI))); CQ(5,(-3/32.)*sqrt(1001/PI));
-                   CQ(6,(1/64.)*sqrt(3003/PI)); }
-              SA { TQ(6,pow(st,6.)); TQ(5,pow(st,5.)*ct); TQ(4,pow(st,4.)*(11*pow(ct,2.)-1.));
-                   TQ(3,pow(st,3.)*(11*pow(ct,3.)-3*ct)); TQ(2,pow(st,2.)*(33*pow(ct,4.)-18*pow(ct,2.)+1));
-                   TQ(1,st*(33*pow(ct,5.)-30*pow(ct,3.)+5*ct)); TQ(0,231*pow(ct,6.)-315*pow(ct,4.)+105*pow(ct,2.)-5); }
-              break;
-   }
-
-   if(k>0) { Ykq.r = c*cos(q*phi); Ykq.i = c*sin(q*phi); }
-   return Ykq;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
 // Calculates the transition operator Q_q
 // --------------------------------------------------------------------------------------------------------------- //
 void lovesey_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vector<double> &Jvec)

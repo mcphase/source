@@ -786,20 +786,19 @@ void save_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vect
 }
 */
 
-bool icf_loveseyAkk(sMat<double> &aKK, int K, int Kp, int n, orbital l)
+// --------------------------------------------------------------------------------------------------------------- //
+// Calculates the a(K,K') matrix - the routine returns a true if the matrix is real, and false if it is imaginary
+//    The matrix is returned in the argument aKK
+// --------------------------------------------------------------------------------------------------------------- //
+bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
 {
    if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
 
-   fstates_t gs = hunds_gs(n, e_l);
-   int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2;
-
-   // Determines number of basis states
-   J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
-   for (int J2=J2min; J2<=J2max; J2+=2) ns+=J2+1; 
+   fstates_t gs = hunds_gs(n, l);
+   int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2; std::vector<int> J2;
 
    // Determines number and angular momentum quantum numbers of basis states
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
-   int ins=0; std::vector<int> J2;
    for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
 
    // Loads a previously save matrix if it exists
@@ -876,9 +875,9 @@ bool icf_loveseyAkk(sMat<double> &aKK, int K, int Kp, int n, orbital l)
    double rmLS=0.,sumcfp=0.;
    if (n>1)
    {
-      fconf confp(n-1,e_l);
+      fconf confp(n-1,l);
       std::vector<cfpls> cfps;
-      switch(e_l) {
+      switch(l) {
          case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
          case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
          default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
@@ -895,7 +894,7 @@ bool icf_loveseyAkk(sMat<double> &aKK, int K, int Kp, int n, orbital l)
       rmLS = -redmat;
    }
 
-   for(i=0; i<ns; i++) for(j=0; j<ns; j++)
+   for(int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       aKK(i,j) = pow(-1.,(J2[j]+S2+L2+L2)/2.+l) * sqrt(J2[j]+1.) * sixj(J2[j],2*Kp,J2[i],L2,S2,L2) * rmLS;
 
    // Calculates the matrix elements at particular |J,M>, |J',M'>
@@ -952,16 +951,18 @@ bool icf_loveseyAkk(sMat<double> &aKK, int K, int Kp, int n, orbital l)
    rmzeros(aKK); return 1;
 }
 
+// --------------------------------------------------------------------------------------------------------------- //
+// Calculates the c(K,K') matrix, returning true if matrix is real, false if imaginary
+// --------------------------------------------------------------------------------------------------------------- //
 bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
 {
    if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
 
-   fstates_t gs = hunds_gs(n, e_l);
-   int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2;
+   fstates_t gs = hunds_gs(n, l);
+   int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2; std::vector<int> J2;
 
    // Determines number and angular momentum quantum numbers of basis states
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
-   int ins=0; std::vector<int> J2;
    for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
 
 /* // Loads a previously save matrix if it exists
@@ -1024,9 +1025,9 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
    double rmLS=0.,sumcfp=0.;
    if (n>1)
    {
-      fconf confp(n-1,e_l);
+      fconf confp(n-1,l);
       std::vector<cfpls> cfps;
-      switch(e_l) {
+      switch(l) {
          case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
          case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
          default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
@@ -1043,9 +1044,9 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
       rmLS = redmat;
    }
 
-   for(i=0; i<ns; i++) for(j=0; j<ns; j++)
+   for(int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       if(abs(J2[i]-J2[j])<=(2*Kp))                          // Triangular condition on 9j symbol in 3.6.11
-         cKK(iJ,jJ) = sqrt(J2[j]+1.) * ninej(2,2*K,2*Kp,S2,L2,J2[j],S2,L2,J2[i]) * rmLS;
+         cKK(i,j) = sqrt(J2[j]+1.) * ninej(2,2*K,2*Kp,S2,L2,J2[j],S2,L2,J2[i]) * rmLS;
 /*
    rmJ.zero(num_states,num_states);
    // Calculates the matrix elements at particular |J,M>, |J',M'>
@@ -1105,6 +1106,300 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
    rmzeros(cKK); return 1;
 }
 
+// --------------------------------------------------------------------------------------------------------------- //
+// Calculates the transition operator Q_q
+// --------------------------------------------------------------------------------------------------------------- //
+void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vector<double> &Jvec)
+{
+   if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+
+   double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5]};
+   std::string errormsg("lovesey_Qq(): Unable to calculate the A(K,K') or B(K,K') matrix\n");
+
+   fstates_t gs = hunds_gs(n, l);
+   int J2min, J2max, ns=0;
+   int K,Kp,Q,Qp,i,j;
+   sMat<double> Akk,Bkk,ckk,Qmat,QLmat,QSmat;
+
+   bool iA,ic;
+   complexdouble Ykq; double Tj,Tj2;
+
+/* int k,minJ2,maxJ2,valJ,valJ_i,valJ_j;
+   int imJ_i,imJ_j,J2,J2p,Jz2,Jz2p;
+   std::vector< std::vector<int> > nz;
+
+   sMat<double> mJmat_i(1,1);
+   std::vector< std::vector< sMat<double> > > mJmat;
+   std::vector< sMat<double> > mJmat_row;
+   std::vector<int> iJst,iJen;
+*/
+   // Determines number of basis states
+   J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2; for (int J2=J2min; J2<=J2max; J2+=2) ns+=J2+1; 
+   int ins=0; std::vector<int> J2(ns), Jz2(ns), irm(ns);
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) for (int imJ2=-iJ2; imJ2<=iJ2; imJ2+=2) {
+        J2[ins]=iJ2; Jz2[ins]=imJ2; irm[ins]=iJ2-J2min; ins++; }
+
+   Qmat.zero(ns,ns); Qq.clear(); for(i=0; i<6; i++) Qq.push_back(Qmat);
+
+/* // Initialises a cell array of matrices of q- and Jz- dependent matrices so that we don't have to calculate
+   //    each (2J+1)x(2J'+1) matrix more than once, for each J and J' values.
+   valJ = (J2max-J2min)/2;
+   for(i=0; i<=valJ; i++) mJmat_row.push_back(mJmat_i);
+   for(i=0; i<=valJ; i++) mJmat.push_back(mJmat_row);
+*/
+   for(Kp=0; Kp<=(2*l+1); Kp++)                                 // K may take even values between [0,2l]; K' odd values [1,(2l+1)]
+   {
+      if(Kp%2==1)                                               // Calculates the matrices for the first term with A+B
+      {
+         iA = icf_loveseyAKK(Akk,Kp-1,Kp,n,l); if(iA) Akk*= (J[Kp-1]+J[Kp+1])*((2*Kp+1)/(Kp+1.)); else { std::cerr << errormsg; return; }
+         ic = icf_loveseyCKK(ckk,Kp-1,Kp,n,l); if(ic) Bkk = ckk*J[Kp-1];                          else { std::cerr << errormsg; return; }
+         ic = icf_loveseyCKK(ckk,Kp+1,Kp,n,l); if(ic) Bkk+= ckk*(J[Kp+1]*sqrt(Kp/(Kp+1.)));       else { std::cerr << errormsg; return; }
+         Bkk *= ((Kp+1.)/(2*Kp+1.)) * ( (2*Kp+1)/(Kp+1.) ); K = Kp-1; ckk = Bkk+Akk;
+      }
+      else                                                      // Calculates the matrices for the second term with just B
+      {
+         ic = icf_loveseyCKK(ckk,Kp,Kp,n,l); if(ic) ckk *= J[Kp]; else { std::cerr << errormsg; return; } K = Kp;
+      }
+
+      for(Q=-K; Q<=K; Q++)
+      {
+         Qp = -(Q-q); if(Qp<-Kp || Qp>Kp) continue;             // 3j symbol requires Q+Q'-q = 0
+ 
+         Ykq = spherical_harmonics(K,Q,theta,phi); 
+         Tj = pow(-1.,K-Kp+q) * sqrt(3) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q);
+         if((fabs(Ykq.r)<DBL_EPSILON && fabs(Ykq.i)<DBL_EPSILON) || fabs(Tj)<DBL_EPSILON) continue;
+
+         Qmat.zero(ns,ns); QLmat.zero(ns,ns); QSmat.zero(ns,ns);
+
+/*       nz = ckk.find();
+         for(i=0; i<(int)nz.size(); i++)                        // The matrices above already contain the dependence on |vULSJ>
+         {                                                      //    we now use the W-E theorem to add the Jz, Q, dependence
+            J2 = conf.states[nz[i][0]].J2;
+            J2p = conf.states[nz[i][1]].J2;
+            valJ_i = (J2-minJ2)/2; valJ_j = (J2p-minJ2)/2;
+            if(mJmat[valJ_i][valJ_j].isempty())
+            {
+               mJmat[valJ_i][valJ_j].zero(J2+1,J2p+1);
+               for(imJ_i=0; imJ_i<=J2; imJ_i++)
+               {
+                  Jz2 = imJ_i*2-J2;
+                  for(imJ_j=0; imJ_j<=J2p; imJ_j++)
+                  {
+                     Jz2p = imJ_j*2-J2p; Tj2 = threej(2*Kp,J2p,J2,2*Qp,Jz2p,-Jz2);
+                     if(fabs(Tj2)>DBL_EPSILON) mJmat[valJ_i][valJ_j](imJ_i,imJ_j) = pow(-1.,Kp+(-J2p+Jz2)/2.) * sqrt(J2+1.) * Tj2;
+                  }
+               }
+            }
+            Qmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*ckk(nz[i][0],nz[i][1]));
+            if(Kp%2==1)
+            {
+               QLmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Akk(nz[i][0],nz[i][1]));
+               QSmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Bkk(nz[i][0],nz[i][1]));
+            }
+         }
+         for(i=0; i<=valJ; i++) for(j=0; j<=valJ; j++) mJmat[i][j].clear();
+*/
+         for(i=0; i<ns; i++) for(j=0; j<ns; j++)
+         {
+            Tj2 = threej(2*Kp,J2[j],J2[i],2*Qp,Jz2[j],-Jz2[i]); if(fabs(Tj2)<DBL_EPSILON) continue;
+            Tj2 *= pow(-1.,Kp+(-J2[j]+Jz2[i])/2.) * sqrt(J2[i]+1.);
+            if(Kp%2==1)
+            {
+               QLmat(i,j) = Tj2 * Akk(irm[i],irm[j]);
+               QSmat(i,j) = Tj2 * Bkk(irm[i],irm[j]);
+            }
+            Qmat(i,j) = Tj2 * ckk(irm[i],irm[j]);
+         }
+
+         Qq[0] += Qmat*(Ykq.r*Tj); Qq[1] += Qmat*(Ykq.i*Tj);
+         if(Kp%2==1) { Qq[2] += QSmat*(Ykq.r*Tj); Qq[3] += QSmat*(Ykq.i*Tj);  Qq[4] += QLmat*(Ykq.r*Tj); Qq[5] += QLmat*(Ykq.i*Tj); }
+         else        { Qq[2] += Qmat*(Ykq.r*Tj); Qq[3] += Qmat*(Ykq.i*Tj); }
+      }
+   }
+
+   for(i=0; i<6; i++) { rmzeros(Qq[i]); Qq[i] *= sqrt(4*PI); }
+
+/* 
+   // Determines number and angular momentum quantum numbers of basis states
+   J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
+
+   sMat<double> aKK(ns,ns), cKK(ns,ns);
+
+   // Selection rules on K for a(K,K')
+   if(K<0  || K>(2*abs(l))   || (K%2)!=0)      return 1;        // Eqn 4.2.2
+   if(Kp<1 || Kp>=(2*abs(l)) || ((Kp+1)%2)!=0) return 1;        // Eqn 4.2.3
+   if(K!=(Kp+1) && K!=(Kp-1))                  return 1;        // Eqn 4.2.4  (first 3j symbol, needs 1+K+K' even)
+   // The triangular conditions require that K<=2l and K=even (from 3j), and that (K-1)<=K'<=(K+1) (from 9j) for c(K,K')
+   if(K%2!=0 || abs(Kp-K)>1) return 1;
+
+   // Calculate the non-state dependent part of the matrix elements
+   double AKKl = pow(-1.,l+1.) * sqrt( (2.*l+3.)*(l+1.)/(2.*l+1.) ) * threej(2*l,2*Kp,2*(l+1),0,0,0) * sixj(2,2*Kp,2*Kp,2*l,2*(l+1),2*l);
+   double Aredmat = sqrt(2) * (2*l+1)*(2*l+1) * (2*Kp+1.) * sqrt(2*K+1.) * threej(2,2*K,2*Kp,0,0,0) * sixj(2,2,2,2*Kp,2*K,2*Kp) * AKKl;
+   double Credmat = sqrt(1./2) * (2*l+1.) * sqrt(2*K+1.) * (2*Kp+1.) * threej(2*l,2*K,2*l,0,0,0); 
+
+   if(fabs(Aredmat)>DBL_EPSILON || fabs(Credmat)>DBL_EPSILON)
+   {
+      // Determines the factor i^(K'-1) - because K' is always odd, matrix is always real
+      if((Kp-1)%4==0) Aredmat = -Aredmat;
+      // Determines the factor i^K - because K is always even, matrix is always real
+      if(K%4==2) Credmat = -Credmat;
+
+      double ArmLS=0., Asumcfp=0., CrmLS=0., Csumcfp=0.;
+      if (n>1)
+      {
+         fconf confp(n-1,l);
+         std::vector<cfpls> cfps;
+         switch(l) {
+            case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
+            case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
+            default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
+         int sz = (int)cfps.size(), pL2, pS2;
+         for(int k=0; k<sz; k++)
+         {
+            pS2 = confp.states[cfps[k].ind].S2; pL2 = abs(confp.states[cfps[k].ind].L)*2;
+            Asumcfp += cfps[k].cfp*cfps[k].cfp * pow(-1.,pL2/2) * sixj(L2,2*Kp,L2,2*l,pL2,2*l);
+            Csumcfp += cfps[k].cfp*cfps[k].cfp * pow(-1.,(1+S2+L2+pL2+pS2)/2.) * sixj(S2,2,S2,1,pS2,1)*sixj(L2,2*K,L2,2*l,pL2,2*l); 
+         }
+         ArmLS = (L2+1.) * n * Asumcfp * Aredmat; CrmLS = (L2+1.)*(S2+1.) * n * sumcfp * redmat;
+      }
+      else  // Single electron
+      {
+         ArmLS = -redmat; CrmLS = redmat;
+      }
+
+      for(int i=0; i<ns; i++) for(int j=0; j<ns; j++)
+      {
+         if(abs(J2[i]-J2[j])<=(2*Kp))                          // Triangular condition on 9j symbol in 3.6.11
+            cKK(i,j) = sqrt(J2[j]+1.) * ninej(2,2*K,2*Kp,S2,L2,J2[j],S2,L2,J2[i]) * CrmLS; 
+         aKK(i,j) = pow(-1.,(J2[j]+S2+L2+L2)/2.+l) * sqrt(J2[j]+1.) * sixj(J2[j],2*Kp,J2[i],L2,S2,L2) * ArmLS;
+      }
+   }
+
+   std::vector<int> mJ2, irm; J2.clear(); mJ2.reserve(100); irm.reserve(100); J2.reserve(100);
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) for (int imJ2=-iJ2; imJ2<=iJ2; imJ2+=2) {
+      J2.push_back(iJ2); mJ2.push_back(imJ2); irm.push_back(iJ2-J2min); }
+*/
+/*
+   int i,j,ns=getdim(n,l);                                      // Number of states = ^{4l+2}C_{n}
+
+   std::string errormsg("lovesey_Qq(): Unable to calculate the A(K,K') or B(K,K') matrix\n");
+   double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5]};
+   int K,Kp,Q,Qp;
+   sMat<double> Akk,Bkk,ckk,Qmat,QLmat,QSmat;
+   Qmat.zero(ns,ns); Qq.clear(); for(i=0; i<6; i++) Qq.push_back(Qmat);
+
+   bool iA,ic;
+   complexdouble Ykq; double Tj,Tj2;
+
+   int k,minJ2,maxJ2,valJ,valJ_i,valJ_j;
+   int imJ_i,imJ_j,J2,J2p,Jz2,Jz2p;
+   std::vector< std::vector<int> > nz;
+
+   sMat<double> mJmat_i(1,1);
+   std::vector< std::vector< sMat<double> > > mJmat;
+   std::vector< sMat<double> > mJmat_row;
+   std::vector<int> iJst,iJen;
+   fconf conf(n,0,l); minJ2=99; maxJ2=0; k=0;
+   for(i=0; i<(int)conf.states.size(); i++) {
+      j = conf.states[i].J2; if(j<minJ2) minJ2 = j; if(j>maxJ2) maxJ2 = j; iJst.push_back(k+1); k+=j+1; iJen.push_back(k); }
+
+   // Initialises a cell array of matrices of q- and Jz- dependent matrices so that we don't have to calculate
+   //    each (2J+1)x(2J'+1) matrix more than once, for each J and J' values.
+   valJ = (maxJ2-minJ2)/2;
+   for(i=0; i<=valJ; i++)
+      mJmat_row.push_back(mJmat_i);
+   for(i=0; i<=valJ; i++)
+      mJmat.push_back(mJmat_row);
+
+   // The scattering operator is given by: (eqn. 3.7.9 and 3.7.11 for the orbital and spin parts respectively)
+   //
+   //              ____ ---  {  K'-1 ^    2K'+1                                                  K'                      }
+   // <i|Q |j> = \/4*pi >    { Y    (k) [ ------ ] [ A(K'-1,K') + B(K'-1,K') ] ( K'-1 K' 1  ) + Y  B(K',K') ( K' K' 1  ) }
+   //     q             ---  {  Q    -     K'+1                                ( Q    Q' -q )    Q          ( Q  Q' -q ) }
+   //                  K'QQ'
+   //                     -J'+q+M  ( K' J'  J )
+   //                 (-1)      *  ( Q' M' -M )                  with |i>==|avUSLJM> and |j>==|a'v'U'S'L'J'M'>
+   //
+   // The matrices A(K,K') and B(K,K') are:                                                              1/2 
+   //                                                                K+2 [                        ( K+1 )            ]
+   //  A(K,K') = ( <j    > + <j    > ) a(K,K')           B(K,K+1) = ---- [ <j > c(K,K+1) + <j   > ( --- ) c(K+2,K+1) ]
+   //                K'-1      K'+1                                 2K+3 [   K               K+2  ( K+2 )            ]
+   //
+   //                                                                                                    1/2
+   //                                                                K-1 [                        (  K  )            ]
+   //  B(K,K) = <j > c(K,K)                              B(K,K-1) = ---- [ <j > c(K,K-1) + <j   > ( --- ) c(K-2,K-1) ]
+   //             K                                                 2K-1 [   K               K-2  ( K-1 )            ]
+   //
+   //
+   //  The 3j symbols with the matrices a(K,K') and c(K,K') restrict K to even integers up to 2l, and K' to odd integers
+   //  less than 2l. I.e. for f-electrons, K=0,2,4,6 and K'=1,3,5. The summation over K' in the first case however is over
+   //  all integers up to 2l, so that in the case of even K', the first term (with the A+B) is zero and in the case of odd
+   //  K', the second term (with just the B term) is zero.
+   //
+   //  The matrices a(K,K') and c(K,K') are solely functions of |i> and |j> and do not depend on the bessel functions
+   //  <j_k>, or spherical harmonics Y^K_Q, and are calculated in the functions lovesey_aKK() and loveset_cKK() above.
+
+   for(Kp=0; Kp<=(2*l+1); Kp++)                                 // K may take even values between [0,2l]; K' odd values [1,(2l+1)]
+   {
+      if(Kp%2==1)                                               // Calculates the matrices for the first term with A+B
+      {
+         iA = lovesey_aKK(Akk,Kp-1,Kp,n,l); if(iA) Akk*= (J[Kp-1]+J[Kp+1])*((2*Kp+1)/(Kp+1.)); else { std::cerr << errormsg; return; }
+         ic = lovesey_cKK(ckk,Kp-1,Kp,n,l); if(ic) Bkk = ckk*J[Kp-1];                          else { std::cerr << errormsg; return; }
+         ic = lovesey_cKK(ckk,Kp+1,Kp,n,l); if(ic) Bkk+= ckk*(J[Kp+1]*sqrt(Kp/(Kp+1.)));       else { std::cerr << errormsg; return; }
+         Bkk *= ((Kp+1.)/(2*Kp+1.)) * ( (2*Kp+1)/(Kp+1.) ); K = Kp-1; ckk = Bkk+Akk;
+      }
+      else                                                      // Calculates the matrices for the second term with just B
+      {
+         ic = lovesey_cKK(ckk,Kp,Kp,n,l); if(ic) ckk *= J[Kp]; else { std::cerr << errormsg; return; } K = Kp;
+      }
+
+      for(Q=-K; Q<=K; Q++)
+      {
+         Qp = -(Q-q); if(Qp<-Kp || Qp>Kp) continue;             // 3j symbol requires Q+Q'-q = 0
+ 
+         Ykq = spherical_harmonics(K,Q,theta,phi); 
+         Tj = pow(-1.,K-Kp+q) * sqrt(3) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q);
+         if((fabs(Ykq.r)<DBL_EPSILON && fabs(Ykq.i)<DBL_EPSILON) || fabs(Tj)<DBL_EPSILON) continue;
+
+         Qmat.zero(ns,ns); QLmat.zero(ns,ns); QSmat.zero(ns,ns);
+
+         nz = ckk.find();
+         for(i=0; i<(int)nz.size(); i++)                        // The matrices above already contain the dependence on |vULSJ>
+         {                                                      //    we now use the W-E theorem to add the Jz, Q, dependence
+            J2 = conf.states[nz[i][0]].J2;
+            J2p = conf.states[nz[i][1]].J2;
+            valJ_i = (J2-minJ2)/2; valJ_j = (J2p-minJ2)/2;
+            if(mJmat[valJ_i][valJ_j].isempty())
+            {
+               mJmat[valJ_i][valJ_j].zero(J2+1,J2p+1);
+               for(imJ_i=0; imJ_i<=J2; imJ_i++)
+               {
+                  Jz2 = imJ_i*2-J2;
+                  for(imJ_j=0; imJ_j<=J2p; imJ_j++)
+                  {
+                     Jz2p = imJ_j*2-J2p; Tj2 = threej(2*Kp,J2p,J2,2*Qp,Jz2p,-Jz2);
+                     if(fabs(Tj2)>DBL_EPSILON) mJmat[valJ_i][valJ_j](imJ_i,imJ_j) = pow(-1.,Kp+(-J2p+Jz2)/2.) * sqrt(J2+1.) * Tj2;
+                  }
+               }
+            }
+            Qmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*ckk(nz[i][0],nz[i][1]));
+            if(Kp%2==1)
+            {
+               QLmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Akk(nz[i][0],nz[i][1]));
+               QSmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Bkk(nz[i][0],nz[i][1]));
+            }
+         }
+         for(i=0; i<=valJ; i++) for(j=0; j<=valJ; j++) mJmat[i][j].clear();
+
+         Qq[0] += Qmat*(Ykq.r*Tj); Qq[1] += Qmat*(Ykq.i*Tj);
+         if(Kp%2==1) { Qq[2] += QSmat*(Ykq.r*Tj); Qq[3] += QSmat*(Ykq.i*Tj);  Qq[4] += QLmat*(Ykq.r*Tj); Qq[5] += QLmat*(Ykq.i*Tj); }
+         else        { Qq[2] += Qmat*(Ykq.r*Tj); Qq[3] += Qmat*(Ykq.i*Tj); }
+      }
+   }
+
+   for(i=0; i<6; i++) { rmzeros(Qq[i]); Qq[i] *= sqrt(4*PI); } */
+}
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the thermal expectation value of the FT of the magnetisation density -2Q in Bohr magnetons
@@ -1120,7 +1415,8 @@ __declspec(dllexport)
                   ComplexMatrix &est)     // Input eigenvalues/vectors of the system Hamiltonian, H_SI+H_mf 
 {
    int i,q,n=1,Hsz=est.Cols()-1; orbital l;
-   n = (int)est[0][0].real(); i = (int)est[0][0].imag(); l = (i==2) ? D : F;
+   n = (int)est[0][0].real(); i = (int)est[0][0].imag(); 
+   switch(i) { case 1: l=P; break; case 2: l=D; break; case 3: l=F; break; default: std::cerr << "Error - only P,D,F-electrons supported.\n"; exit(0); }
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
@@ -1130,7 +1426,14 @@ __declspec(dllexport)
 
    Mq = ComplexVector(1,3);
 
-   icf_loveseyQq(Qmat,n,l.Jvec);
+   icf_loveseyQq(Qm,-1,n,l,Jvec); icf_loveseyQq(Qp,1,n,l,Jvec);
+   for(i=0; i<6; i++)  
+   {
+      Qmat[0].push_back( (Qp[i]-Qm[i]) * (-1/sqrt(2.)) );                    // Qx = -1/sqrt(2) * (Q_{+1} - Q_{-1})
+      if(i%2==0) Qmat[1].push_back( (Qp[i+1]+Qm[i+1]) * (-1/sqrt(2.)) );     // real(Qy) = i^2/sqrt(2) * imag(Q_{+1}+Q_{-1})
+      else       Qmat[1].push_back( (Qp[i-1]+Qm[i-1]) *  (1/sqrt(2.)) );     // imag(Qy) = i/sqrt(2) * real(Q_{+1}+Q_{-1})
+   }
+   icf_loveseyQq(Qmat[2],0,n,l,Jvec);
 
 /* if(!get_Qq(Qmat[0],0,n,l,Jvec) || !get_Qq(Qmat[1],1,n,l,Jvec))            // Qmat[0]==Qx, Qmat[1]==Qy, Qmat[2]==Qz
    {
