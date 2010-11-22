@@ -784,6 +784,327 @@ void save_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vect
    }
    FILEOUT.close();
 }
+*/
+
+bool icf_loveseyAkk(sMat<double> &aKK, int K, int Kp, int n, orbital l)
+{
+   if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+
+   fstates_t gs = hunds_gs(n, e_l);
+   int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2;
+
+   // Determines number of basis states
+   J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
+   for (int J2=J2min; J2<=J2max; J2+=2) ns+=J2+1; 
+
+   // Determines number and angular momentum quantum numbers of basis states
+   J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
+   int ins=0; std::vector<int> J2;
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
+
+   // Loads a previously save matrix if it exists
+/* char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
+   nstr[0] = (l==F?102:100); if(n<10) { nstr[1] = n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = n+38; nstr[3] = 0; }
+   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 65;   // 65 is ASCII for "A", 100=="d" and 102=="f"
+   nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+   aKK = mm_gin(filename); if(!aKK.isempty()) return 1;
+
+   bool df;
+   if(l==D) df = true;
+   else if(l==F) df = false;
+   else {  std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; return false; }
+
+   int np = (n==1)?n:(n-1); 
+   fconf confp(np,l);
+   fconf conf(n,l);
+   int num_states = (int)conf.states.size(), ns=0;
+   int i,j,k,kk,v,vp,isz,jsz,iJ,jJ;
+   int j2min,j2max,j2pmin,j2pmax;
+   int L2,L2p,S2,S2p,J2,J2p,L2b,S2b;
+   std::vector<int> indexJstart,indexJstop;
+   std::vector<cfpls> cfpsi,cfpsj;
+   double rmLS,sumcfp;
+
+   // Determines the L S J values for each matrix elements and the index of each J-J' block
+   for(i=0; i<num_states; i++)
+   {
+      j2min = abs(abs(conf.states[i].L)*2-conf.states[i].S2); j2max = abs(conf.states[i].L)*2+conf.states[i].S2;
+      indexJstart.push_back(ns+1);
+      for(j=j2min; j<=j2max; j+=2) ns++;
+      indexJstop.push_back(ns);
+   }
+*/
+
+   aKK.zero(ns,ns);
+
+   // Selection rules on K.
+   if(K<0  || K>(2*abs(l))   || (K%2)!=0)      return 1;        // Eqn 4.2.2
+   if(Kp<1 || Kp>=(2*abs(l)) || ((Kp+1)%2)!=0) return 1;        // Eqn 4.2.3
+   if(K!=(Kp+1) && K!=(Kp-1))                  return 1;        // Eqn 4.2.4  (first 3j symbol, needs 1+K+K' even)
+
+   // Calculates the matrix elements:
+   // Eqn. 3.6.8 (d==delta)
+   //
+   //                                  K'+1           J'+S+L+L'+l  1/2    2                  1/2
+   // A(K,K') = ( <j    > + <j    > ) i      d    (-1)            2    [l]  [L,L',K',K',K,J']
+   //               K'-1      K'+1            SS'
+   //
+   //              \/   ( 1 K K' )  { 1  1  1  }  { J' K' J  } 
+   //              /\   ( 0 0 0  )  { K' K  K' }  { L  S  L' }  A(K',K',l)
+   //                                            _
+   //                     ---     _   _          L                                _
+   //              \/   n >   (t{|t) (t|}t') (-1)  { L' K' L }                Lb==L
+   //              /\     ---                      { l  Lb l }
+   //                      t
+
+   // Where: (Eqn 3.4.9)
+   //                                    1/2
+   //                 l+1 [ (2l+3)(l+1) ]    ( l K' l+1 )  { 1  K'  K }
+   // A(K,K',l) = (-1)    [ ----------- ]    ( 0 0  0   )  { l l+1  l }
+   //                     [   (2l+1)    ]
+   //
+   
+   // Calculate the coefficient A(K,K',l)
+   double AKKl = pow(-1.,l+1.) * sqrt( (2.*l+3.)*(l+1.)/(2.*l+1.) ) * threej(2*l,2*Kp,2*(l+1),0,0,0) * sixj(2,2*Kp,2*Kp,2*l,2*(l+1),2*l);
+
+   // Calculate the non-state dependent part of the matrix elements
+   double redmat = sqrt(2) * (2*l+1)*(2*l+1) * (2*Kp+1.) * sqrt(2*K+1.) * threej(2,2*K,2*Kp,0,0,0) * sixj(2,2,2,2*Kp,2*K,2*Kp) * AKKl;
+
+   // Determines the factor i^(K'-1) - because K' is always odd, matrix is always real
+   if((Kp-1)%4==0) redmat = -redmat;
+
+   double rmLS=0.,sumcfp=0.;
+   if (n>1)
+   {
+      fconf confp(n-1,e_l);
+      std::vector<cfpls> cfps;
+      switch(e_l) {
+         case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
+         case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
+         default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
+      int sz = (int)cfps.size(), pL2;
+      for(int k=0; k<sz; k++)
+      {
+         pL2 = abs(confp.states[cfps[k].ind].L)*2;
+         sumcfp += cfps[k].cfp*cfps[k].cfp * pow(-1.,pL2/2) * sixj(L2,2*Kp,L2,2*l,pL2,2*l);
+      }
+      rmLS = (L2+1.) * n * sumcfp * redmat;
+   }
+   else  // Single electron
+   {
+      rmLS = -redmat;
+   }
+
+   for(i=0; i<ns; i++) for(j=0; j<ns; j++)
+      aKK(i,j) = pow(-1.,(J2[j]+S2+L2+L2)/2.+l) * sqrt(J2[j]+1.) * sixj(J2[j],2*Kp,J2[i],L2,S2,L2) * rmLS;
+
+   // Calculates the matrix elements at particular |J,M>, |J',M'>
+/* for(i=0; i<num_states; i++)
+   {
+      L2 = abs(conf.states[i].L)*2; S2 = conf.states[i].S2; v = conf.states[i].v;
+      if(n!=1) 
+      {
+         if(df) cfpsi = racah_parents(n,v,S2,conf.states[i].L); 
+         else   cfpsi = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L);
+      }
+
+      for(j=0; j<num_states; j++)
+      {
+         L2p = abs(conf.states[j].L)*2; S2p = conf.states[j].S2; vp = conf.states[j].v;
+
+         if(S2!=S2p) continue;                                  // delta_SS'
+         if(abs(L2-L2p)>(2*Kp)) continue;                       // Triangular condition on 6j symbol in 3.6.9
+
+	 if(n==1) 
+            rmLS = -redmat;
+         else
+         {
+            if(df) cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); 
+            else   cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);
+
+            sumcfp = 0.; isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
+            for(k=0; k<isz; k++)
+               for(kk=0; kk<jsz; kk++)
+                  if(cfpsi[k].ind==cfpsj[kk].ind) {
+                     L2b = 2*abs(confp.states[cfpsi[k].ind].L); S2b = confp.states[cfpsi[k].ind].S2;
+                     sumcfp += cfpsi[k].cfp*cfpsj[kk].cfp * pow(-1.,L2b/2) * sixj(L2p,2*Kp,L2,2*l,L2b,2*l); }
+            rmLS = sqrt( (L2+1.)*(L2p+1.) ) * n * sumcfp * redmat;
+         }
+
+         // Caculate the J-dependent reduced matrix elements 
+         j2min = abs(L2-S2); j2max = L2+S2; j2pmin = abs(L2p-S2p); j2pmax = L2p+S2p;
+         iJ=indexJstart[i]-1; jJ=indexJstart[j]-1;
+         for(J2=j2min; J2<=j2max; J2+=2)
+         {
+            for(J2p=j2pmin; J2p<=j2pmax; J2p+=2)
+            {
+               if(abs(J2-J2p)<=(2*Kp))                          // Triangular condition on 6j symbol in 3.6.9
+                  aKK(iJ,jJ) = pow(-1.,(J2p+S2+L2+L2p)/2.+l) * sqrt(J2p+1.) * sixj(J2p,2*Kp,J2,L2,S2,L2p) * rmLS;
+               jJ++;
+            }
+            iJ++; jJ=indexJstart[j]-1;
+         }
+      }
+   }
+*/
+// std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out); FILEOUT.close();
+// rmzeros(aKK); mm_gout(aKK,filename); return 1;
+   rmzeros(aKK); return 1;
+}
+
+bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
+{
+   if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+
+   fstates_t gs = hunds_gs(n, e_l);
+   int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2;
+
+   // Determines number and angular momentum quantum numbers of basis states
+   J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
+   int ins=0; std::vector<int> J2;
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
+
+/* // Loads a previously save matrix if it exists
+   char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
+   nstr[0] = (l==F?102:100); if(n<10) { nstr[1] = n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = n+38; nstr[3] = 0; }
+   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 67;   // 67 is ASCII for "C", 100=="d" and 102=="f"
+   nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+   cKK = mm_gin(filename); if(!cKK.isempty()) return 1;
+
+   bool df;
+   if(l==D) df = true;
+   else if(l==F) df = false;
+   else { std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; return false; }
+   int np = (n==1)?n:(n-1);
+   fconf confp(np,l);
+   fconf conf(n,l);
+   int num_states = (int)conf.states.size(), ns=0;
+   int i,j,k,kk,j2min,j2max,j2pmin,j2pmax;
+   int L2,L2p,S2,S2p,J2,J2p;
+   std::vector<cfpls> cfpsi,cfpsj;
+   std::vector<int> indexJstart,indexJstop,irm;
+   sMat<double> mJmat_i(1,1);
+   sMat<double> rmJ;
+   std::vector< std::vector< sMat<double> > > mJmat;
+   std::vector< sMat<double> > mJmat_row;
+   double rmLS,sumcfp;
+   int v,vp,isz,jsz,L2b,S2b,iJ,jJ; 
+
+   // Eqn. 3.6.11
+   //
+   //                  K      1/2                            1/2      1/2+S'+L'
+   // C(K,K') = <j >  i  (1/2)     [l,l,S,S',L,L',J',K,K',K']     (-1)
+   //             K                                                       _ _
+   //                              { 1  K  K' }    ---     _   _          S+L
+   //              \/   ( l K l )  { S' L' J' }  n >   (t{|t) (t|}t') (-1)    { S  1  S' }  { L  K  L' }
+   //              /\   ( 0 0 0 )  { S  L  J  }    ---                        { s  Sb s  }  { l  Lb l  }
+   //                                               t
+
+   // Determines the L S J values for each matrix elements and the index of each J-J' block
+   for(i=0; i<num_states; i++)
+   {
+      j2min = abs(abs(conf.states[i].L)*2-conf.states[i].S2); j2max = abs(conf.states[i].L)*2+conf.states[i].S2;
+      indexJstart.push_back(ns+1);
+      for(j=j2min; j<=j2max; j+=2) { ns++; irm.push_back(i); }
+      indexJstop.push_back(ns);
+   }
+*/
+   cKK.zero(ns,ns);
+
+   // The triangular conditions require that K<=2l and K=even (from 3j), and that (K-1)<=K'<=(K+1) (from 9j)
+   if(K%2!=0 || abs(Kp-K)>1) return 1;
+
+   // Calculates part of the prefactor which only depends on K,K',l
+   double redmat = sqrt(1./2) * (2*l+1.) * sqrt(2*K+1.) * (2*Kp+1.) * threej(2*l,2*K,2*l,0,0,0); 
+   if(fabs(redmat)<DBL_EPSILON) return 1;
+
+   // Determines the factor i^K - because K is always even, matrix is always real
+   if(K%4==2) redmat = -redmat;
+
+   double rmLS=0.,sumcfp=0.;
+   if (n>1)
+   {
+      fconf confp(n-1,e_l);
+      std::vector<cfpls> cfps;
+      switch(e_l) {
+         case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
+         case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
+         default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
+      int sz = (int)cfps.size(), pL2, pS2;
+      for(int k=0; k<sz; k++)
+      {
+         pS2 = confp.states[cfps[k].ind].S2; pL2 = abs(confp.states[cfps[k].ind].L)*2;
+         sumcfp += cfps[k].cfp*cfps[k].cfp * pow(-1.,(1+S2+L2+pL2+pS2)/2.) * sixj(S2,2,S2,1,pS2,1)*sixj(L2,2*K,L2,2*l,pL2,2*l); 
+      }
+      rmLS = (L2+1.)*(S2+1.) * n * sumcfp * redmat;
+   }
+   else  // Single electron
+   {
+      rmLS = redmat;
+   }
+
+   for(i=0; i<ns; i++) for(j=0; j<ns; j++)
+      if(abs(J2[i]-J2[j])<=(2*Kp))                          // Triangular condition on 9j symbol in 3.6.11
+         cKK(iJ,jJ) = sqrt(J2[j]+1.) * ninej(2,2*K,2*Kp,S2,L2,J2[j],S2,L2,J2[i]) * rmLS;
+/*
+   rmJ.zero(num_states,num_states);
+   // Calculates the matrix elements at particular |J,M>, |J',M'>
+   for(i=0; i<num_states; i++)
+   {
+      L2 = abs(conf.states[i].L)*2; S2 = conf.states[i].S2; v = conf.states[i].v;
+      if(n!=1) 
+      {
+         if(df) cfpsi = racah_parents(n,v,S2,conf.states[i].L); 
+         else   cfpsi = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L); 
+      }
+
+      for(j=0; j<num_states; j++)
+      {
+         L2p = abs(conf.states[j].L)*2; S2p = conf.states[j].S2; vp = conf.states[j].v;
+
+         if(abs(S2-S2p)>2)     continue;                        // Triangular condition on 6j symbol in 3.6.11
+         if(abs(L2-L2p)>(2*K)) continue;                        // Triangular condition on 6j symbol in 3.6.11
+
+	 if(n==1)
+	    rmLS = redmat;
+	 else
+	 {
+            if(df) cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); 
+            else   cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);
+
+            sumcfp = 0.; isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
+            for(k=0; k<isz; k++)
+               for(kk=0; kk<jsz; kk++)
+                  if(cfpsi[k].ind==cfpsj[kk].ind) {
+                     L2b = 2*abs(confp.states[cfpsi[k].ind].L); S2b = confp.states[cfpsi[k].ind].S2;
+                     sumcfp += cfpsi[k].cfp*cfpsj[kk].cfp * pow(-1.,(1+S2p+L2p+L2b+S2b)/2.) 
+                                  * sixj(S2,2,S2p,1,S2b,1)*sixj(L2,2*K,L2p,2*l,L2b,2*l); }
+
+            rmLS = sqrt( (S2+1.)*(S2p+1.)*(L2+1.)*(L2p+1.) ) * n * sumcfp * redmat;
+         }
+
+         // Caculate the J-dependent reduced matrix elements 
+         j2min = abs(L2-S2); j2max = L2+S2; j2pmin = abs(L2p-S2p); j2pmax = L2p+S2p;
+         iJ=indexJstart[i]-1; jJ=indexJstart[j]-1;
+         for(J2=j2min; J2<=j2max; J2+=2)
+         {
+            for(J2p=j2pmin; J2p<=j2pmax; J2p+=2)
+            {
+               if(abs(J2-J2p)<=(2*Kp))                          // Triangular condition on 9j symbol in 3.6.11
+                  cKK(iJ,jJ) = sqrt(J2p+1.) * ninej(2,2*K,2*Kp,S2p,L2p,J2p,S2,L2,J2) * rmLS;
+               jJ++;
+            }
+            iJ++; jJ=indexJstart[j]-1;
+         }
+      }
+   }
+
+   std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out); FILEOUT.close();
+   rmzeros(cKK); mm_gout(cKK,filename); return 1;
+*/
+   rmzeros(cKK); return 1;
+}
+
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the thermal expectation value of the FT of the magnetisation density -2Q in Bohr magnetons
@@ -809,7 +1130,9 @@ __declspec(dllexport)
 
    Mq = ComplexVector(1,3);
 
-   if(!get_Qq(Qmat[0],0,n,l,Jvec) || !get_Qq(Qmat[1],1,n,l,Jvec))            // Qmat[0]==Qx, Qmat[1]==Qy, Qmat[2]==Qz
+   icf_loveseyQq(Qmat,n,l.Jvec);
+
+/* if(!get_Qq(Qmat[0],0,n,l,Jvec) || !get_Qq(Qmat[1],1,n,l,Jvec))            // Qmat[0]==Qx, Qmat[1]==Qy, Qmat[2]==Qz
    {
       lovesey_Qq(Qm,-1,n,l,Jvec); lovesey_Qq(Qp,1,n,l,Jvec);
       for(i=0; i<6; i++)  
@@ -827,7 +1150,7 @@ __declspec(dllexport)
       save_Qq(Qmat[2],2,n,l,Jvec);
   // myPrintMatrix(stdout,Qmat[2][0],Hsz-1);
    }
-   for(q=0; q<3; q++)
+*/ for(q=0; q<3; q++)
    {
       zQmat = zmat2f(Qmat[q][0],Qmat[q][1]);
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
@@ -835,11 +1158,11 @@ __declspec(dllexport)
       for(i=1; i<=Hsz; i++)
       {
          F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
+         #ifdef _G77
          F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-#else
+         #else
          zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-#endif
+         #endif
 //         printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
          zMqr += (-2.)*zme.r*est[0][i].imag(); zMqi += (-2.)*zme.i*est[0][i].imag(); if(q==0) Z += est[0][i].imag();
       }
@@ -848,6 +1171,7 @@ __declspec(dllexport)
 //   printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
 }
 
+/*
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the transition matrix using the scattering operator of Balcar and Lovesey
 // --------------------------------------------------------------------------------------------------------------- //
