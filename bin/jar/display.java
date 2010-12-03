@@ -117,7 +117,8 @@ public class display extends Panel implements Runnable, MouseListener,KeyListene
     double posy1=ya+5./3.*(ye-ya)*(1-xy[1]/h-0.2);
     double posx2=xa+5./3.*(xe-xa)*(xy[2]/w-0.2);
     double posy2=ya+5./3.*(ye-ya)*(1-xy[3]/h-0.2);
-    if (posx1<posx2){
+    int reload=0;
+if (posx1<posx2){
          //chart.getXAxis().setAutoScale(false);
          chart.getXAxis().setAxisStart(posx1);
          chart.getXAxis().setAxisEnd(posx2);
@@ -125,6 +126,7 @@ public class display extends Panel implements Runnable, MouseListener,KeyListene
     else {//chart.getXAxis().setAutoScale(true);
          chart.getXAxis().setAxisStart(xxa);
          chart.getXAxis().setAxisEnd(xxe);
+         reload=1;
          }
     if (posy1<posy2){
          //chart.getYAxis().setAutoScale(false);
@@ -134,7 +136,9 @@ public class display extends Panel implements Runnable, MouseListener,KeyListene
     else {//chart.getYAxis().setAutoScale(true);
          chart.getYAxis().setAxisStart(yya);
          chart.getYAxis().setAxisEnd(yye);
+         reload=1;
          }
+     if(reload==1){reload_data();}
    }
   }
   else // getbutton =2 or 3 ... scroll  picture
@@ -193,6 +197,7 @@ public class display extends Panel implements Runnable, MouseListener,KeyListene
  static String [] legend; 
  static String xText = "";
  static String yText = "";
+ static File fileIni;
  static FileInputStream ff;
  static int xy[]={0,0,0,0};
  static double xxa,xxe,yya,yye; // axes autolimits
@@ -217,14 +222,20 @@ public class display extends Panel implements Runnable, MouseListener,KeyListene
        }catch(Exception ignored){}
        // here do something
 
- File fileIni;
+
   int filechanged=0;
            for (int i=0;i<noffiles;++i)
                   {fileIni = new File(file[i]);
                    if(fileIni.lastModified()!=lastmod[i]){lastmod[i]=fileIni.lastModified();filechanged=1;}
                   }
        if(filechanged==1)
-      { try{
+      { 
+  reload_data(); repaint();
+}}}
+
+protected void reload_data()
+{
+try{
     xxa=1e100;xxe=-1e100;yya=1e100;yye=-1e100;
  for (int i=0;i<noffiles;++i)
  {String s="";
@@ -319,8 +330,9 @@ public class display extends Panel implements Runnable, MouseListener,KeyListene
     { System.out.println("Dateifehler: " + e.getLocalizedMessage());
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
-        repaint();
- }}}
+       
+ }
+
 
 
  protected void initChart(){ 
