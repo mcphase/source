@@ -1,0 +1,1032 @@
+\section{{\prg so1ion}\index{so1ion} ({\prg cfield}\index{cfield}) - a crystal field module for rare earth %%@
+ions (calculate energy levels, transition matrix elements)}\label{cfield}
+
+\subsection{Using {\prg so1ion} ({\prg Cfield}) separately}
+\label{cfieldsep}
+
+The crystal field is the electrostatic field, which is produced by the
+charges of the crystal environment of a rare earth atom. It acts on the
+4f electrons of the rare earth and causes magnetic anisotropy. Fig.~\ref{chrgpla} and
+\ref{chrgplb} show the effect of this field on the charge distribution.
+Such plots can be made by using the programs {\prg pointc\index{pointc}} to calculate
+the crystal field parameters and
+ {\prg chrgplt\index{chrgplt}} to plot the charge density, see section \ref{addprog}.
+
+\begin{figure}[hb]
+\includegraphics[angle=0,width=0.7\columnwidth]{./figsrc/crystalfieldplot.eps}
+\caption{\label{chrgpla}
+The crystal field model: the figure shows the influence of two positive 
+charges on the charge density of 4f-electrons. The
+charge density is distorted by the electric field from the neighbouring atoms.
+Furthermore, this distortion leads to an anisotropy of the magnetic properties
+of the 4f shell. The resulting 
+easy direction of the magnetic moment is shown by arrows for the different tri positive
+rare earth ions.} 
+\end{figure}
+
+\begin{figure}[ht]
+\includegraphics[angle=0,width=0.7\columnwidth]{./figsrc/chrgpla.eps}
+\caption{\label{chrgplb}
+Calculated charge density of 4f-electrons in an orthorhombic crystal field. In
+this example the charge density of a Nd$^{3+}$ ion at a temperature of 10~K was 
+calculated by taking the crystal
+field parameters determined by neutron spectroscopy and 
+magnetic measurements in NdCu$_2$~\cite{gratz91-9297}.
+[plot created by program {\prg chrgplt\index{chrgplt}+javaview}]}
+\end{figure}
+
+We will describe now, how the crystal field influence can be quantitatively evaluated
+and how {\prg so1ion}\index{so1ion}  can help to do this.
+Within the $|JLSm_J \rangle$ ground state multiplet of the 4f electron wave function 
+the crystal field can be described by the following Hamiltonian:
+
+\begin{equation}
+\label{cfham}
+ {\mathcal H}= \sum_{s,lm} B_{lm} O_{lm}({\mbf J}^s) 
+	     - \sum_{s} g_{Js} \mu_B {\mbf J}^s {\mbf H} 
+\end{equation}
+
+The first term in equ.~\ref{cfham} describes the crystal field, the second the
+effect of a magnetic field (Zeeman term). The strength of the crystal field is given by the
+crystal field parameters $B_l^m$. In the case of isolating materials these
+parameters can be obtained by the point charge model (point charges on the 
+neighbouring atoms, for details on these calculations see~\cite{hutchings64-227},
+in the {\prg McPhase} suite use programs {\prg makenn} and {\prg pointc} to evaluate
+the pointcharge model for a given crystal structure, see section~\ref{addprog}).
+For metals the conduction electrons screen the point charges and the determination
+of the crystal field is usually only possible by fits to experimental data. 
+The program package {\prg McPhase} may be used to solve such crystal field problems.
+
+A simpler way of dealing with crystal field anisotropy is to write
+instead of the first term in equ.~\ref{cfham}
+
+\begin{equation}
+  \sum_s D_x^2 (J_x^s)^2 + D_y^2 (J_y^s)^2 +D_z^2 (J_z^s)^2 
+\end{equation}
+
+In order to implement a full diagonalisation of the single ion crystal field Hamiltonian
+the module {\prg so1ion}\index{so1ion}({\prg cfield\index{cfield}}, written by P. Fabi n\'e Hoffmann) has %%@
+been included into the program package. It  can be used separately to 
+calculate crystal field problems. The program is self explaining, provided 
+the user has a basic knowledge of crystal field 
+theory (see e.g. the famous article by Hutchings~\cite{hutchings64-227}).
+The program is started by typing {\prg so1ion}\index{so1ion} and displays help messages. 
+
+\subsection{Example - how to evaluate the crystal field of NdCu$_2$ using {\prg %%@
+so1ion}\index{so1ion}}\label{cfieldexample}
+
+All the files described in the following procedure are available in the directory
+{\prg examples/ndcu2b\_new/cf}.
+
+A simple input file is made up in the following:
+
+\begin{itemize}
+\item The first line in the input file tells {\prg so1ion}\index{so1ion} that it should use simple input %%@
+format.
+\item Comment lines start with \#. 
+\item The type of ion has to be given plus
+several lines containing the crystal field parameters. 
+\end{itemize}
+
+It follows an example, we take the values
+for NdCu$_2$ from literature~\cite{gratz91-9297}. Note that
+if the crystal field parameters are not known, there are different
+possibilities to obtain values, such as ab initio calculation,
+point charge calculations (use module {\prg pointc\index{pointc}}) and fitting
+to experimental data (see section~\ref{simannfit}).
+
+\begin{verbatim}
+#!MODULE=so1ion
+#<!--mcphas.cf-->
+# comment followed by
+# the ion type and the crystal field parameters [meV]
+ IONTYPE=Nd3+
+# - note you can also do any pure spin problem by entering e.g. IONTYPE=S=2.5 
+ B20=  0.116765                                           
+ B22  =  0.134172                                           
+ B40  =  0.0019225                                          
+ B42  =  0.0008704                                          
+ B44  =  0.0016916                                          
+ B60  =  0.0000476                                          
+ B62  =  0.0000116                                          
+ B64  =  0.0000421                                          
+ B66  =  0.0003662       
+# instead of the Stevens parameters Blm 
+# second order crystal field parameters Dx^2 Dy^2 and Dz^2 can be entered in meV
+Dx2=0.1
+Dy2=0
+Dz2=0.4
+# the temperature in Kelvin
+TEMP= 10
+# if you want you can apply a magnetic field in Tesla
+Bx=0
+By=0
+Bz=0
+\end{verbatim}
+
+Note: you can also create an input file for so1ion with more comments for the crystal field
+parameters, the type of ion etc. This is done by running {\prg so1ion}\index{so1ion} with the
+option {\em -c}, i.e.: {\bf so1ion -c}, a help screen appears ...
+
+\begin{enumerate} 
+\item
+The calculation of the single ion properties is 
+performed using {\prg so1ion}\index{so1ion} with the option {\prg -r}, 
+i.e. type the command {\bf so1ion -r filename -B} where filename
+refers to the name of the single ion property file.
+Files
+{\prg so1ion.out} and {\prg levels.cef} (short summary, usable as input for
+{\prg mcdiff\index{mcdiff}}) are generated, which contain the results of the calculation, i.e.
+the diagonalisation of the Hamilton operator and the neutron scattering cross section.
+The program {\prg so1ion}\index{so1ion} outputs a variety of results, such as eigenvectors and 
+energies of the crystal field states. In addition it provides 
+the total neutron powder cross section for each crystal field
+transitions (in barn/ion) at a given temperature according to the formula
+
+\begin{equation}
+\sigma(i\rightarrow k)=4\pi \left(\frac{\hbar \gamma e^2}{mc^2}\right)^2
+\frac{exp(-E_i/k_BT)}{\sum_j exp(-E_j/k_BT)} \frac{2}{3}\sum_{\alpha=x,y,z}
+|\langle i|J^{\alpha}|k\rangle|^2
+\end{equation}
+
+Note: in this calculation energy and Q dependence
+of the double differential scattering cross section are not considered and
+integration over all energies and scattering angles has been performed.
+In order to get a more realistic scattering intensity, the
+form factor (giving a $Q$ dependence), the
+factor $k'/k$ and the Debye Waller factor $exp(-W(Q))$ should be considered.
+
+Here comes the output file {\prg so1ion.out}:
+{\footnotesize
+\begin{verbatim}
+#{VERSION :   5.40      |
+#-------------------------------------------------------------- 
+#                   C F I E L D / S O 1 I O N                  |
+#                    A crystal field program                   |
+#               __________________________________              
+#              |         Peter  Hoffmann          |             
+#              |    Forschungszentrum Juelich     |             
+#              |Institut fuer Festkoerperforschung|             
+#              |Tel.: 02461-616896                |             
+#               __________________________________              
+#                          O U T P U T                         
+#-------------------------------------------------------------- 
+#!Temperature of the sample       T=   2.00 Kelvin                
+#!Ion                    IONTYPE= Nd3+                          
+#!Lande factor of the ion   gJ= 0.727273                       
+#                                                              
+# Total angular momentum J of the                               
+#!Spin - orbit - level     J=  4.5                            
+#!Electrons in 4f shell   Ne=  3                              
+#  local point symmetry                                        
+#! of the ion              PS= triklin                               
+#! Symmetry_number            = 0                              
+#-------------------------------------------------------------- 
+# Parameter           :  Akq   in  meV   /a0**k                  
+# (compare Hutchings p 255 eq 5.5)                             
+#!A20  =        -16.306372                                     
+#!A22  =        -18.737280                                     
+#                                                              
+#!A40  =         -2.269445                                     
+#!A42  =         -1.027477                                     
+#!A44  =         -1.996875                                     
+#                                                              
+#!A60  =         -0.083369                                     
+#!A62  =         -0.020317                                     
+#!A64  =         -0.073736                                     
+#!A66  =         -0.641377                                     
+#-------------------------------------------------------------- 
+#-------------------------------------------------------------- 
+# Parameter           :  Bkq   in  meV                           
+#                        (Stevens Parameters comp Hutchings)
+#!B20  =          0.116765                                     
+#!B22  =          0.134172                                     
+#                                                              
+#!B40  =          0.001922                                     
+#!B42  =          0.000870                                     
+#!B44  =          0.001692                                     
+#                                                              
+#!B60  =          0.000048                                     
+#!B62  =          0.000012                                     
+#!B64  =          0.000042                                     
+#!B66  =          0.000366                                     
+#-------------------------------------------------------------- 
+#-------------------------------------------------------------- 
+# Parameter           :  Dkq   in  meV                           
+#!D20 =         -36.330596                                     
+#!D22 =         -17.043002                                     
+#                                                              
+#!D40 =         -52.832675                                     
+#!D42 =          -3.782031                                     
+#!D44 =          -5.556290                                     
+#                                                              
+#!D60 =         -20.048458                                     
+#!D62 =          -0.476801                                     
+#!D64 =          -1.579686                                     
+#!D66 =         -10.148138                                     
+#-------------------------------------------------------------- 
+#-------------------------------------------------------------- 
+# Parameter           :  Lkq   in  meV                           
+#                        (Wyborne Parameters comp Kassmann)
+#!L20  =        -36.330596                                     
+#!L22  =        -17.043002                                     
+#                                                              
+#!L40  =        -52.832675                                     
+#!L42  =         -3.782031                                     
+#!L44  =         -5.556290                                     
+#                                                              
+#!L60  =        -20.048458                                     
+#!L62  =         -0.476801                                     
+#!L64  =         -1.579686                                     
+#!L66  =        -10.148138                                     
+#-------------------------------------------------------------- 
+#-------------------------------------------------------------- 
+# Parameter           :  Vkq   in  meV                           
+# (NOT the same Vlm as in Hutchings p255 or Elliot and Stevens)
+#!V20 =           0.116765                                     
+#!V22 =           0.067086                                     
+#                                                              
+#!V40 =           0.001922                                     
+#!V42 =           0.000435                                     
+#!V44 =           0.000846                                     
+#                                                              
+#!V60 =           0.000048                                     
+#!V62 =           0.000002                                     
+#!V64 =           0.000021                                     
+#!V66 =           0.000183                                     
+#-------------------------------------------------------------- 
+#-------------------------------------------------------------- 
+# Parameter           :  Wkq   in  meV   /a0**k                  
+#!W20 =         -16.306372                                     
+#!W22 =          -9.368640                                     
+#                                                              
+#!W40 =          -2.269445                                     
+#!W42 =          -0.513739                                     
+#!W44 =          -0.998438                                     
+#                                                              
+#!W60 =          -0.083369                                     
+#!W62 =          -0.003386                                     
+#!W64 =          -0.036868                                     
+#!W66 =          -0.320689                                     
+#-------------------------------------------------------------- 
+#
+#-------------------------------------------------------------- 
+#                   Magnetic field B in Tesla .                    
+#                                                              
+#                   H = H   +  H       + H                     
+#                        CF     mag_ex    mag_mol              
+#                                                              
+#--------------------------------------------------------------
+#                                                              
+#  H        = - g  my   J  B                                   
+#   mag_ex       J   B  -  - ex                                
+#                                                              
+#--------------------------------------------------------------
+#                                                              
+#  H        = - 2 ( g - 1 ) my   J  B                          
+#   mag_mol          J        B  -  - mol                      
+#                                                              
+#--------------------------------------------------------------
+#                                                              
+#! Bx_ex   =          0.00                                     
+#! By_ex   =          0.00                                     
+#! Bz_ex   =          3.00                                     
+#                                                              
+#! Bx_mol  =          0.00                                     
+#! By_mol  =          0.00                                     
+#! Bz_mol  =          0.00                                     
+#                                                              
+#                                                              
+#-------------------------------------------------------------- 
+#
+#
+#-------------------------------------------------------------- 
+# Energy Eigenvalues are in  meV   .          	            
+#--------------------------------------------------------------
+#!Nr of different energy levels   noflevels=10                 
+#!Energy shift   Eshift=                       -6.1829 
+#                                                              
+# Because of the calibration freedom the smallest energy       
+# eigenvalue is shifted to zero. You can get the energy        
+# eigen-value of the applied eigen-value problem               
+# by shifting the energy by the added energy value above       
+#!*E( 1)=        0.0000        Degeneracy =   1 -fold            
+#!*E( 2)=        0.6253        Degeneracy =   1 -fold            
+#!*E( 3)=        3.2216        Degeneracy =   1 -fold            
+#!*E( 4)=        3.2555        Degeneracy =   1 -fold            
+#!*E( 5)=        5.2391        Degeneracy =   1 -fold            
+#!*E( 6)=        5.3833        Degeneracy =   1 -fold            
+#!*E( 7)=        7.5859        Degeneracy =   1 -fold            
+#!*E( 8)=        7.5951        Degeneracy =   1 -fold            
+#!*E( 9)=       13.9267        Degeneracy =   1 -fold            
+#! E(10)=       14.9961        Degeneracy =   1 -fold            
+# Them with  *  marked Energy eigenvalues have a non-          
+# vanishing Matrix element of the Ground state E( 1).          
+#-------------------------------------------------------------- 
+#
+#-------------------------------------------------------------- 
+# The orthonormal characteristic Eigenvectors  |i,r>  with     
+#                                                              
+#             H |i,r>  = ( E  + E      ) |i,r>  , r=1 ... n    
+#                           i    shift                     i   
+#                                                              
+#                            and                               
+#                                                              
+#                    <i,r|j,s> = D   D                         
+#                                 ij  rs                       
+#                                                              
+#              D  = Kronecker- Delta function                  
+#               ij                                             
+#                                                              
+# the |i,r> are also orthonormal .                             
+# We consider in this program  Crystal Field spliting          
+# at the lowest Spin-orbit-level (Ground state)                
+#                                                              
+# 2S+1                                                         
+#     L  of the calualted Ion. The |i,r> are in                
+#      J                                                       
+#                                                              
+# a more developed  Eigenfunction   			    
+#                                                              
+# system  [ | J  M   > ]               ,where                  
+#                 J     M = -J,...,J                           
+#                        J                                     
+#                               ,                              
+#              <  J  M   |  J  M  >  =  D    ,    .            
+#                     J         J        M  M                  
+#                                         J  J                 
+#--------------------------------------------------------------
+#                                                              
+# I 1, 1> =     0.0424               I 4.5  -4.5>              
+#          -    0.3284               I 4.5  -2.5>              
+#          +    0.0834               I 4.5  -0.5>              
+#          -    0.2234               I 4.5   1.5>              
+#          +    0.9130               I 4.5   3.5>              
+#                                                              
+# I 2, 1> =     0.8586               I 4.5  -3.5>              
+#          -    0.2351               I 4.5  -1.5>              
+#          +    0.1475               I 4.5   0.5>              
+#          -    0.4274               I 4.5   2.5>              
+#          +    0.0560               I 4.5   4.5>              
+#                                                              
+# I 3, 1> =     0.3625               I 4.5  -3.5>              
+#          +    0.2363               I 4.5  -1.5>              
+#          -    0.8490               I 4.5   0.5>              
+#          +    0.3025               I 4.5   2.5>              
+#          -    0.0207               I 4.5   4.5>              
+#                                                              
+# I 4, 1> =     0.0279               I 4.5  -4.5>              
+#          -    0.2959               I 4.5  -2.5>              
+#          +    0.8547               I 4.5  -0.5>              
+#          -    0.3316               I 4.5   1.5>              
+#          -    0.2669               I 4.5   3.5>              
+#                                                              
+# I 5, 1> =     0.1624               I 4.5  -3.5>              
+#          -    0.6457               I 4.5  -1.5>              
+#          +    0.1503               I 4.5   0.5>              
+#          +    0.7305               I 4.5   2.5>              
+#          -    0.0205               I 4.5   4.5>              
+#                                                              
+# I 6, 1> =     0.0010               I 4.5  -4.5>              
+#          +    0.7060               I 4.5  -2.5>              
+#          -    0.0029               I 4.5  -0.5>              
+#          -    0.7034               I 4.5   1.5>              
+#          +    0.0821               I 4.5   3.5>              
+#                                                              
+# I 7, 1> =     0.3206               I 4.5  -3.5>              
+#          +    0.6617               I 4.5  -1.5>              
+#          +    0.4732               I 4.5   0.5>              
+#          +    0.4090               I 4.5   2.5>              
+#          -    0.2610               I 4.5   4.5>              
+#                                                              
+# I 8, 1> =    -0.2262               I 4.5  -4.5>              
+#          +    0.5337               I 4.5  -2.5>              
+#          +    0.5046               I 4.5  -0.5>              
+#          +    0.5676               I 4.5   1.5>              
+#          +    0.2953               I 4.5   3.5>              
+#                                                              
+# I 9, 1> =     0.0482               I 4.5  -3.5>              
+#          +    0.1844               I 4.5  -1.5>              
+#          +    0.1046               I 4.5   0.5>              
+#          +    0.1577               I 4.5   2.5>              
+#          +    0.9633               I 4.5   4.5>              
+#                                                              
+# I10, 1> =     0.9728               I 4.5  -4.5>              
+#          +    0.1462               I 4.5  -2.5>              
+#          +    0.0892               I 4.5  -0.5>              
+#          +    0.1520               I 4.5   1.5>              
+#          +    0.0364               I 4.5   3.5>              
+#                                                              
+#-------------------------------------------------------------- 
+#
+#!magnetic moment(mb/f.u.): mx= 0.000 my= 0.000 mz= 1.880
+#
+#-------------------------------------------------------------- 
+#                                                              
+#                  M A T R I X  E L E M E N T                  
+#                  S I N G L E  C R Y S T A L                    
+#                                                              
+#--------------------------------------------------------------
+#    Only the marix elements that are non-zero are written     
+#                                                              
+#--------------------------------------------------------------
+#                              2 |            2 |            2 
+#    a  <-->  b      |<a|J |b>|  |  |<a|J |b>|  |  |<a|J |b>|  
+#                         x      |       y      |       z      
+#--------------------------------+--------------+--------------
+#    1  <-->  1       0.000000   |   0.000000   |   7.349037   
+#--------------------------------+--------------+--------------
+#    2  <-->  1       0.837715   |   4.124524   |   0.000000   
+#--------------------------------+--------------+--------------
+#    2  <-->  2       0.000000   |   0.000000   |   4.757295   
+#--------------------------------+--------------+--------------
+#    3  <-->  1       0.097402   |   1.800867   |   0.000000   
+#--------------------------------+--------------+--------------
+#    3  <-->  2       0.000000   |   0.000000   |   1.951770   
+#--------------------------------+--------------+--------------
+#    3  <-->  3       0.000000   |   0.000000   |   0.002243   
+#--------------------------------+--------------+--------------
+#    4  <-->  1       0.000000   |   0.000000   |   1.052055   
+#--------------------------------+--------------+--------------
+#    4  <-->  2       0.006254   |   2.906196   |   0.000000   
+#--------------------------------+--------------+--------------
+#    4  <-->  3       1.883036   |   8.933883   |   0.000000   
+#--------------------------------+--------------+--------------
+#    4  <-->  4       0.000000   |   0.000000   |   0.030053   
+#--------------------------------+--------------+--------------
+#    5  <-->  1       1.296760   |   0.787532   |   0.000000   
+#--------------------------------+--------------+--------------
+#    5  <-->  2       0.000000   |   0.000000   |   2.221074   
+#--------------------------------+--------------+--------------
+#    5  <-->  3       0.000000   |   0.000000   |   0.263606   
+#--------------------------------+--------------+--------------
+#    5  <-->  4       3.031073   |   4.748191   |   0.000000   
+#--------------------------------+--------------+--------------
+#    5  <-->  5       0.000000   |   0.000000   |   0.396361   
+#--------------------------------+--------------+--------------
+#    6  <-->  1       0.000000   |   0.000000   |   1.160910   
+#--------------------------------+--------------+--------------
+#    6  <-->  2       1.453148   |   0.329358   |   0.000000   
+#--------------------------------+--------------+--------------
+#    6  <-->  3       3.692640   |   4.510482   |   0.000000   
+#--------------------------------+--------------+--------------
+#    6  <-->  4       0.000000   |   0.000000   |   0.634606   
+#--------------------------------+--------------+--------------
+#    6  <-->  5       4.539708   |   5.382444   |   0.000000   
+#--------------------------------+--------------+--------------
+#    6  <-->  6       0.000000   |   0.000000   |   0.230677   
+#--------------------------------+--------------+--------------
+#    7  <-->  1       0.284349   |   1.844604   |   0.000000   
+#--------------------------------+--------------+--------------
+#    7  <-->  2       0.000000   |   0.000000   |   1.435031   
+#--------------------------------+--------------+--------------
+#    7  <-->  3       0.000000   |   0.000000   |   0.258615   
+#--------------------------------+--------------+--------------
+#    7  <-->  4       0.926445   |   0.049897   |   0.000000   
+#--------------------------------+--------------+--------------
+#    7  <-->  5       0.000000   |   0.000000   |   1.601018   
+#--------------------------------+--------------+--------------
+#    7  <-->  6       0.005768   |   0.457608   |   0.000000   
+#--------------------------------+--------------+--------------
+#    7  <-->  7       0.000000   |   0.000000   |   0.032325   
+#--------------------------------+--------------+--------------
+#    8  <-->  1       0.000000   |   0.000000   |   1.472943   
+#--------------------------------+--------------+--------------
+#    8  <-->  2       0.119332   |   2.256706   |   0.000000   
+#--------------------------------+--------------+--------------
+#    8  <-->  3       0.711683   |   0.039222   |   0.000000   
+#--------------------------------+--------------+--------------
+#    8  <-->  4       0.000000   |   0.000000   |   0.122925   
+#--------------------------------+--------------+--------------
+#    8  <-->  5       0.091000   |   0.073150   |   0.000000   
+#--------------------------------+--------------+--------------
+#    8  <-->  6       0.000000   |   0.000000   |   2.114855   
+#--------------------------------+--------------+--------------
+#    8  <-->  7      14.237466   |   0.119658   |   0.000000   
+#--------------------------------+--------------+--------------
+#    8  <-->  8       0.000000   |   0.000000   |   0.078994   
+#--------------------------------+--------------+--------------
+#    9  <-->  1       1.853194   |   0.788092   |   0.000000   
+#--------------------------------+--------------+--------------
+#    9  <-->  2       0.000000   |   0.000000   |   0.000005   
+#--------------------------------+--------------+--------------
+#    9  <-->  3       0.000000   |   0.000000   |   0.020033   
+#--------------------------------+--------------+--------------
+#    9  <-->  4       0.046976   |   0.352198   |   0.000000   
+#--------------------------------+--------------+--------------
+#    9  <-->  5       0.000000   |   0.000000   |   0.128492   
+#--------------------------------+--------------+--------------
+#    9  <-->  6       0.005534   |   0.062238   |   0.000000   
+#--------------------------------+--------------+--------------
+#    9  <-->  7       0.000000   |   0.000000   |   1.398393   
+#--------------------------------+--------------+--------------
+#    9  <-->  8       2.221975   |   0.206978   |   0.000000   
+#--------------------------------+--------------+--------------
+#    9  <-->  9       0.000000   |   0.000000   |  17.505703   
+#--------------------------------+--------------+--------------
+#   10  <-->  1       0.000000   |   0.000000   |   0.000017   
+#--------------------------------+--------------+--------------
+#   10  <-->  2       1.649987   |   0.701605   |   0.000000   
+#--------------------------------+--------------+--------------
+#   10  <-->  3       0.149440   |   0.435077   |   0.000000   
+#--------------------------------+--------------+--------------
+#   10  <-->  4       0.000000   |   0.000000   |   0.026213   
+#--------------------------------+--------------+--------------
+#   10  <-->  5       0.104403   |   0.085187   |   0.000000   
+#--------------------------------+--------------+--------------
+#   10  <-->  6       0.000000   |   0.000000   |   0.170024   
+#--------------------------------+--------------+--------------
+#   10  <-->  7       1.869528   |   0.229295   |   0.000000   
+#--------------------------------+--------------+--------------
+#   10  <-->  8       0.000000   |   0.000000   |   0.883112   
+#--------------------------------+--------------+--------------
+#   10  <-->  9       0.135184   |   0.025006   |   0.000000   
+#--------------------------------+--------------+--------------
+#   10  <--> 10       0.000000   |   0.000000   |  18.285922   
+#-------------------------------------------------------------- 
+#
+#
+#-------------------------------------------------------------- 
+#                                                              
+#                  M A T R I X  E L E M E N T S                
+#                    P O L Y C R Y S T A L                     
+#                                                              
+#--------------------------------------------------------------
+#                                                              
+#                             ----                2            
+# Matrix element       :      >     |<i,r|J |k,s>|             
+#                             ----         T                   
+#                              r,s                             
+#                                                              
+#                                                              
+# for the transition :      E  ->  E                           
+#                              i      k                        
+#                                                              
+#--------------------------------------------------------------
+#                                                              
+#                         SUm rule :                           
+#                                                              
+#             ----                2       2                    
+#             >     |<i,r|J |k,s>|  = n  --- J(J+1)            
+#             ----         T           i  3                    
+#             k,r,s                                            
+#-------------------------------------------------------------- 
+#------------------------------------------------- 
+# \ E |   |   |   |   |   |   |   |   |   |   |Zei|
+#E \ k|E  |E  |E  |E  |E  |E  |E  |E  |E  |E  |len|
+# i \ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10|sum|
+#----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |  4|  3|  1|   |  1|   |  1|   |  1|   | 16|
+#|  1 |.90|.31|.27|.70|.39|.77|.42|.98|.76|   |.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |  3|  3|  1|  1|  1|  1|   |  1|   |  1| 16|
+#|  2 |.31|.17|.30|.94|.48|.19|.96|.58|   |.57|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |  1|  1|   |  7|   |  5|   |   |   |   | 16|
+#|  3 |.27|.30|   |.21|.18|.47|.17|.50|.01|.39|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |  1|  7|   |  5|   |   |   |   |   | 16|
+#|  4 |.70|.94|.21|.02|.19|.42|.65|.08|.27|.02|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |  1|  1|   |  5|   |  6|  1|   |   |   | 16|
+#|  5 |.39|.48|.18|.19|.26|.61|.07|.11|.09|.13|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |  1|  5|   |  6|   |   |  1|   |   | 16|
+#|  6 |.77|.19|.47|.42|.61|.15|.31|.41|.05|.11|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |  1|   |   |   |  1|   |   |  9|   |  1| 16|
+#|  7 |.42|.96|.17|.65|.07|.31|.02|.57|.93|.40|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |  1|   |   |   |  1|  9|   |  1|   | 16|
+#|  8 |.98|.58|.50|.08|.11|.41|.57|.05|.62|.59|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |  1|   |   |   |   |   |   |  1| 11|   | 16|
+#|  9 |.76|   |.01|.27|.09|.05|.93|.62|.67|.11|.50|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |  1|   |   |   |   |  1|   |   | 12| 16|
+#|  10|   |.57|.39|.02|.13|.11|.40|.59|.11|.19|.50|
+# ------------------------------------------------ 
+#
+#
+#
+#-------------------------------------------------------------- 
+#               Transition intensities in barn.                
+#                                                              
+#                                                              
+#                                                              
+#                                                              
+# =                    - E /T     -----                        
+# |                   e   i       \                   2        
+# |     = const --------------     >    |<i,r|J |k,s>|         
+# |             ----    - E /T    /            T               
+# =             >    n e   i      -----                        
+#  E -> E       ----  i            r,s                         
+#   i    k       i                                             
+#                                                              
+#                            with                              
+#                                                              
+#                                                              
+#                                -----                         
+#                      2     2   \                    2        
+#        |<i,r|J |k,s>|   = ---   >     |<i,r|J |k,s>|         
+#               T            3   /             u               
+#                                -----                         
+#                             u = x,y,z                        
+#                                                              
+#                                                              
+#                             und                              
+#                                                              
+#                                   1          2               
+#                  const  = 4*pi*( --- r   g  )                
+#                                   2   0   J                  
+#                                                              
+#                                      -12                     
+#                  r      = - 0.54 * 10    cm                  
+#                   0                                          
+#                                                              
+#--------------------------------------------------------------
+#                                                              
+#                       1.Sum rule :                           
+#                                                 - E /T       
+#                                            n   e   i         
+#  ----  =            2                       i                
+#  >     |         = --- * const * J(J+1) * ----------------   
+#  ----  =            3                     ----     - E /T    
+#   k     E -> E                            >    n  e   i      
+#          i    k                           ----  i            
+#                                            i                 
+#--------------------------------------------------------------
+#                                                              
+#                       2. sum rule :                          
+#                                                              
+#                                                              
+#            ----  =            2                              
+#            >     |         = --- * const * J(J+1)            
+#            ----  =            3                              
+#             k,i   E -> E                                     
+#                    i    k                                    
+#-------------------------------------------------------------- 
+#-------------------------------------------------------------- 
+#!Temperature of the sample               T=    2.00 Kelvin         
+#-------------------------------------------------------------- 
+#!parition function            Z  =   1.03                 
+#-------------------------------------------------------------- 
+#!Total_magnetic_scattering_intensity =   7.94 barn            
+#-------------------------------------------------------------- 
+#------------------------------------------------- 
+# \ E |   |   |   |   |   |   |   |   |   |   |Zei|
+#E \ k|E  |E  |E  |E  |E  |E  |E  |E  |E  |E  |len|
+# i \ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10|sum|
+#----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |  2|  1|   |   |   |   |   |   |   |   |  7|
+#|  1 |.30|.55|.59|.33|.65|.36|.67|.46|.83|   |.74|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  2 |.04|.04|.02|.02|.02|.01|.01|.02|   |.02|.21|
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  3 |   |   |   |   |   |   |   |   |   |   |   |
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  4 |   |   |   |   |   |   |   |   |   |   |   |
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  5 |   |   |   |   |   |   |   |   |   |   |   |
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  6 |   |   |   |   |   |   |   |   |   |   |   |
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  7 |   |   |   |   |   |   |   |   |   |   |   |
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  8 |   |   |   |   |   |   |   |   |   |   |   |
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  9 |   |   |   |   |   |   |   |   |   |   |   |
+#|----|---|---|---|---|---|---|---|---|---|---|---|
+#| E  |   |   |   |   |   |   |   |   |   |   |   |
+#|  10|   |   |   |   |   |   |   |   |   |   |   |
+# ------------------------------------------------ 
+#
+#-----------------------------------------------------------
+#!Total_quasielastic_intensity =             2.34 barn           
+#-----------------------------------------------------------
+#                  Neutron-Energy-loss                      
+#!middle_position_of_the_energy        =        0.65 meV    
+#!relative_error_in_the_middl_Position  =        6.25 %      
+#!Intensity_of_the_middle_position   =        1.57 barn   
+#                  Neutron-Energy-Gain                 
+#!middle position of the energy        =       -0.63 meV    
+#!relative_error_in_the_middl_Position  =        0.00 %      
+#!Intensity_of_the_middle_position   =        0.04 barn   
+#-----------------------------------------------------------
+
+#-------------------------------------------------------------- 
+# Transition Energy (meV   ) vs Intensity (barn)                  
+#-------------------------------------------------------------- }
+  0.00   2.30
+  0.63   1.55
+  3.22   0.59
+  3.26   0.33
+  5.24   0.65
+  5.38   0.36
+  7.59   0.67
+  7.60   0.46
+ 13.93   0.83
+ 15.00   0.00
+ -0.63   0.04
+  0.00   0.04
+  2.60   0.02
+  2.63   0.02
+  4.61   0.02
+  4.76   0.01
+  6.96   0.01
+  6.97   0.02
+ 13.30   0.00
+ 14.37   0.02
+ -3.22   0.00
+ -2.60   0.00
+  0.00   0.00
+  0.03   0.00
+  2.02   0.00
+  2.16   0.00
+  4.36   0.00
+  4.37   0.00
+ 10.71   0.00
+ 11.77   0.00
+ -3.26   0.00
+ -2.63   0.00
+ -0.03   0.00
+  0.00   0.00
+  1.98   0.00
+  2.13   0.00
+  4.33   0.00
+  4.34   0.00
+ 10.67   0.00
+ 11.74   0.00
+ -5.24   0.00
+ -4.61   0.00
+ -2.02   0.00
+ -1.98   0.00
+  0.00   0.00
+  0.14   0.00
+  2.35   0.00
+  2.36   0.00
+  8.69   0.00
+  9.76   0.00
+ -5.38   0.00
+ -4.76   0.00
+ -2.16   0.00
+ -2.13   0.00
+ -0.14   0.00
+  0.00   0.00
+  2.20   0.00
+  2.21   0.00
+  8.54   0.00
+  9.61   0.00
+ -7.59   0.00
+ -6.96   0.00
+ -4.36   0.00
+ -4.33   0.00
+ -2.35   0.00
+ -2.20   0.00
+  0.00   0.00
+  0.01   0.00
+  6.34   0.00
+  7.41   0.00
+ -7.60   0.00
+ -6.97   0.00
+ -4.37   0.00
+ -4.34   0.00
+ -2.36   0.00
+ -2.21   0.00
+ -0.01   0.00
+  0.00   0.00
+  6.33   0.00
+  7.40   0.00
+-13.93   0.00
+-13.30   0.00
+-10.71   0.00
+-10.67   0.00
+ -8.69   0.00
+ -8.54   0.00
+ -6.34   0.00
+ -6.33   0.00
+  0.00   0.00
+  1.07   0.00
+-15.00   0.00
+-14.37   0.00
+-11.77   0.00
+-11.74   0.00
+ -9.76   0.00
+ -9.61   0.00
+ -7.41   0.00
+ -7.40   0.00
+ -1.07   0.00
+  0.00   0.00
+\end{verbatim}
+}
+\item at the end of the file {\prg so1ion.out} the neutron scattering cross section of the different 
+transitions is given as a list of energy vs intensity. 
+In order to calculate a spectrum these results
+have to be convolute\index{convolute}d with the resolution function of a neutron spectrometer. This can be 
+done by the programs {\prg convolut} (available under windows only)
+ or {\prg convolute\index{convolute}}. For example, the command {\bf
+convolut so1ion.out 12 stp=0.05 mode=gauss fwhm=0.5} convolute\index{convolute}s the calculated neutron %%@
+transitions
+with a Gaussian resolution function of 0.5~meV full width half maximum. The step size of the
+output spectrum is 0.05~meV. The output spectrum is contained in file {\prg so1ion.cvt}.
+\item 
+Use program {\prg cuthead} (available under windows only)
+ to shorten the file header and {\prg display}
+ to view the spectrum: {\bf cuthead 10 so1ion.cvt} and
+{\bf display\index{display} 1 2  so1ion.cvt}. In order to create an image file for printing the viewed %%@
+spectrum
+press the save button, it creates a file {\prg display.jpg} which is shown in figure~\ref{spectrum}.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[angle=0,width=1.0\textwidth]{./figsrc/10KCEFspectrum.eps}
+\caption{\label{spectrum}
+Calculated crystal field neutron spectrum of NdCu$_2$ at a temperature of 10~K.
+Horizontal axis is energy transfer in meV and vertical axis is neutron intensity
+in barns per meV and Nd atom.
+[plot created by program {\prg display}]}
+\end{center}
+\end{figure}
+\item In order to calculate the magnetisation for our problem (in the paramagnetic state), the
+direction of the magnetic field has to be given in {\prg bkq.parmeter} and
+program {\prg so1ion\index{so1ion}} has to be started with the option {\prg -m}, i.e. {\bf so1ion -m -B 0 30 %%@
+10}. The
+numbers denote the field range (0-30 Tesla) and the temperature (10~K). The results are written
+to {\prg moment.rtplot}, fig.~\ref{moment} shows the result.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[angle=0,width=0.7\columnwidth]{./figsrc/moment.eps}
+\caption{\label{moment}
+Calculated magnetic moment for field applied along $x$ direction ($c$ axis, note the
+notation of the crystal field $xyz$ axes with respect to the crystal lattice is
+$xyz||cab$ in our example)
+ of NdCu$_2$ at a temperature of 10~K.
+[plot created by program {\prg gnuplot}]}
+\end{center}
+\end{figure}
+
+\item In a similar way the temperature dependence of the susceptibility can be calculated by 
+{\bf so1ion -s}. 
+\item The crystal field contribution to the specific heat may be calculated 
+from the output file {\prg so1ion.out} using the  program {\prg cpso1ion}, e.g. {\bf cpso1ion 10 100 1 %%@
+[options]}
+calculates the specific heat in the temperature interval 10-100 K with a step width
+of 1 K. Alternatively a comparison to experimental data can be made by {\bf cpso1ion 1 2 cpexp.dat},
+where the temperatures are given in column 1 and the experimental specific heat in column
+2 of file cpexp.dat. The calculated specific heat is compared to the experimental data and
+a standard deviation {\em sta} is calculated and output is written to stdout.
+Other quantities can be calculated using the options: -s  (calculate entropy  (J/molK) instead of cp),
+-f (calculate free energy (J/mol) instead of cp),-u  (calculate magnetic energy (J/mol) instead of cp),
+-z (calculate partition sum instead of cp).
+Fig.~\ref{cpndcu2} shows an example.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[angle=0,width=0.7\columnwidth]{./figsrc/cpall.eps}
+\caption{\label{cpndcu2}
+Calculated specific heat of NdCu$_2$ in zero magnetic field as calculated
+by {\prg cpso1ion} (crystal field contribution) in comparison with experimental
+data~\cite{gratz91-9297}. The dashed line shows the results of a calculation,
+which in addition to the crystal field takes into account the two ion interaction
+and using {\prg so1ion\index{so1ion}} as a module in {\prg mcphas} - see below and chapter~\ref{runmcphas}.
+[plot created by program {\prg gnuplot}]}
+\end{center}
+\end{figure}
+\end{enumerate}
+
+
+
+
+\vspace{1cm}
+{\em Exercises:}
+\begin{itemize}
+\item Use {\prg so1ion\index{so1ion}} to calculate the energies, eigenvectors and
+transition matrix elements (for inelastic
+neutron scattering) for Nd$^{3+}$ in an orthorhombic crystal field.
+Use the parameters given in section~\ref{cf1ion}.
+\end{itemize}
+
+
+
+\subsection{Using {\prg so1ion\index{so1ion}} as a module in {\prg McPhase} and {\prg McDisp}}
+\label{cf1ion}
+
+
+The use 
+ of {\prg so1ion\index{so1ion}} as a module in {\prg mcphas} is necessary in order to 
+ go beyond the capabilities of {\prg so1ion\index{so1ion}} (for instance the calculation
+ of magnetisation or specific heat or if the exchange interaction
+ given in equations~(\ref{hamilton}) and (\ref{multipolehamilton})
+  shall be taken into account).  
+
+\subsubsection{Module Tasks:}
+
+
+As a single ion module, {\prg so1ion\index{so1ion}} provides to {\prg mcphas} the magnetic properties
+of a single rare earth ion subject to the crystal field. Its main duty is
+to calculate the magnetic moment given an effective magnetic field. 
+To be more explicit - given the effective magnetic field $H^s_{eff}$ by {\prg mcphas}
+ the module {\prg so1ion\index{so1ion}}
+ diagonalises the crystal field and Zeeman Hamiltonian (\ref{cfze}) of the
+ ion $s$:
+
+\begin{equation}\label{cfze}
+ {\mathcal H}=  B_l^m O_{lm}({\mbf J}^s) 
+	     -  g_{Ji} \mu_B {\mbf J}^s {\mbf H^s_{eff}} 
+\end{equation}
+
+and calculates the expectation value of the angular momentum $\langle \mbf J^s \rangle$
+according to
+
+\begin{equation}
+\langle \mbf J^s \rangle =
+\sum_{\Gamma} n_{\Gamma} \langle \Gamma | \mbf J^s | \Gamma \rangle
+\end{equation}
+
+with 
+
+\begin{eqnarray}
+n_{\Gamma}&=&\frac{\exp(-E_{\Gamma}/kT)}{z}\\
+z&=&\sum_{\Gamma} \exp(-E_{\Gamma}/kT)
+\end{eqnarray}
+
+Here $z$ is the partition sum, $|\Gamma\rangle$ the eigenstate corresponding to
+the eigenvalue $E_{\Gamma}$ of the Hamiltonian (\ref{cfze}). 
+\footnote{In addition to $\langle \mbf J_i \rangle$ the module also returns
+the partition sum $z$ and the magnetic energy $u=\sum_{\Gamma} n_{\Gamma} E_{\Gamma}$.}
+
+\subsubsection{Module Usage:}
+ 
+
+The program {\prg mcphas} (-calculation of the magnetic phase diagram) 
+requires a single ion
+property input file of the same format as given above in
+section~\ref{cfieldexample} (also for each ion in the
+crystallographic unit cell):
+
+\begin{itemize}
+\item The first line in the single ion property file tells {\prg mcphas} that the module
+{\prg so1ion\index{so1ion}} should be used for this ion. 
+\item Comment lines start with \#. 
+\item The type of ion has to be given plus
+several lines containing the crystal field parameters. 
+\end{itemize}
+
+It follows a simple  example (for more complicated examples see section \ref{sifile} and 
+{\prg mcphas.cf1} in the 
+directory {\prg examples/ndcu2b\_new}):
+
+
+\begin{verbatim}
+#!MODULE=so1ion
+#<!--mcphas.cf-->
+# comment followed by
+# the ion type and the crystal field parameters [meV]
+ IONTYPE=Nd3+
+# - note you can also do any pure spin problem by entering e.g. IONTYPE=S=2.5 
+ B20=  0.116765                                           
+ B22  =  0.134172                                           
+ B40  =  0.0019225                                          
+ B42  =  0.0008704                                          
+ B44  =  0.0016916                                          
+ B60  =  0.0000476                                          
+ B62  =  0.0000116                                          
+ B64  =  0.0000421                                          
+ B66  =  0.0003662                                          
+\end{verbatim}
+
+
+\begin{description}
+\item [Note:] 
+In order to use {\prg so1ion\index{so1ion}} as a module in {\prg McPhase} a convention for
+the orientation of the $xyz$ coordinate system (of the crystal field) relative
+to the crystal axis $abc$ has to be made:
+ The axes convention adopted in module {\prg so1ion} for the crystal field parameters
+is - $\mbf a||x$, $\mbf b||y$ and $\mbf c||z$. Note that if you use the
+module {\prg cfield}, the choice is more unconventional:$\mbf a||y$, $\mbf b||z$ and $\mbf c||x$
+Tools for rotating crystal field parameters are described in appendix~\ref{rotateBlm}.
+
+The reason for
+this unique choice is to make it possible to treat quadrupolar interactions - the 
+generalisation of bilinear interactions to these higher order interactions
+is much easier in this a first glance very unconventional axes convention.
+Furthermore, for the higher order interactions it is also convenient to
+adopt the same orientation of the coordinate system for each atom.
+
+
+{\small
+{\bf Information for experienced users:} the first line in the single ion property file
+can either refer to  one of the standard
+single ion property modules (e.g. Kramers ground state
+doublet \#!MODULE=kramers, full crystal field \#!MODULE=so1ion) or a shared library file, which will be %%@
+loaded
+dynamically into the program at runtime 
+ - for a description
+of this file see section~\ref{sifile}.
+}

@@ -1,0 +1,45 @@
+
+
+- für jeden der folgenden filetypen sollte dasselbe icon angezeigt werden
+
+- popup text sollte dass command sein, damit der benutzer sieht, was er startet durch doppelklicks
+
+- popup der mcphas - eingabedateien sollte sein "input file for module mcphas"
+
+- mcdisp.par, mcdisp.mf sollten noch das icon und popup "input file for module mcdisp" erhalten
+
+
+
+
+filetype     command
+
+*.fst       fp_studio.exe *.fst
+*.gnu       gnuplot *.gnu
+*.xyt       phased  *.xyt
+*.qom       disp 5 *.qom
+            disp 6 *.qom 
+            disp 7 *.qom
+
+
+
+java based
+
+*.jvx     java javaview *.jvx
+*.ps      java PostscriptViewer *.ps
+*.eps     java PostscriptViewer *.eps
+*.jpg     java Viewer *.jpg  
+*.gif     java Viewer *.jpg
+*.cvt     display 1 2 *.cvt
+*.hst     display 1 2 *.hst
+cp.clc    display 1 2 cp.clc
+*.rtplot display 1 2 *.rtplot
+*.fum     java displaymag 1 11 *.fum 1 12 *.fum 1 13 *.fum
+          java displaymag 2 11 *.fum 2 12 *.fum 2 13 *.fum
+*.dsigma.tot  displaycontour 5 6 8 *.dsigma.tot
+              displaycontour 5 7 8 *.dsigma.tot
+              displaycontour 6 7 8 *.dsigma.tot
+*.qei     displaybubbles 5 8 9 *.qei
+          displaybubbles 6 8 9 *.qei
+          displaybubbles 7 8 9 *.qei
+
+

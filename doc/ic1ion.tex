@@ -1,0 +1,609 @@
+\section{{\prg ic1ion\index{ic1ion}} - a module for intermediate coupling}\label{ic1ion}
+
+
+This powerful module, written by Duc Le, is able to do crystal field calculations
+using intermediate coupling schemes. 
+
+\subsection{using {\prg ic1ion\index{ic1ion}} as a stand-alone program to do crystal field calculations}
+
+{\prg ic1ion\index{ic1ion}} can be started by issuing the command {\prg ic1ion\index{ic1ion}} (reading input from single ion %%@
+parameter file {\prg mcphas.ic}) 
+{\prg ic1ion\index{ic1ion} filename}, where {\prg filename} is the name of the single ion
+parameter file to be used. The single ion 
+parameter
+file has to be of the form (note the crystal field parameters in Wybourne notation
+can be calculated by {\prg pointc}\index{pointc}):
+{\footnotesize
+\begin{verbatim}
+#!../../bin/ic1ion_module/ic1ion.so
+#<!--mcphase.sipf-->
+# single ion property file example for module ic1ion
+# OBLIGATORY PARAMETERS
+# 
+------------------------------------------------------------------------------------------
+
+# Configuration
+# (i)either specify single ion type by IONTYPE reading internal values for ion parameters XI 
+F0 F2 F4 F6: 
+#IONTYPE=Co2+
+
+# (ii)or by giving parameters explicitly:
+# from Griffith 1971 p 487  B=1115  C=4366 XI=533
+# p379 CoIII=Co2+ is 3d7 configuration
+ conf=d7
+# from equations p 83 A=F0-49*F4  B=F2-5*F4 C=35*F4
+# we get F4=C/35  F2=B+5*F4
+# however F0 is not determined from this table ...
+ F0=0
+ F2=1738.7
+ F4=124.74
+ xi=533
+#
+# for charges and chrgplt to work you need to specify the number of electrons in the shell
+nof_electrons=7
+-------------------------------------------------------------------------------------------
+ 
+# from here on follow some OPTIONAL PARAMETERS
+
+# some keywords, each in a separate line (each keyword sets a flag to true and holds
+# for the rest of the file to be read)
+
+# --- add a magnetic field (Tesla) ---
+Bx=1
+By=2
+Bz=0.1
+
+# -- choose the basis to be used for output of eigenstates in ic1ion.out ----
+#basis=mSmL
+# 
+basis=JmJ
+
+# to allow output of more than 4 components of the eigenvector in ic1ion.out, you need to put a flag:
+# eigenvectors=X
+
+# --- some faster algorithms for matrix diagonalisation ...
+
+# keyword "save_matrices" - if uncommented then matrices which are often used
+# are not recalculated each time, but saved in directory results/mms
+# save_matrices
+
+
+# if the next line is uncommented then it will use 
+# a routine to calculate only a few of the lowest
+# eigenvalues in mcalc() using an arnoldi iterative method in ARPACK
+# it makes calculation with f-configurations with many
+# electrons (f5-f9) more practicable... It usually gets the correct
+# eigenvalue/vector, however sometime for some reason (defective random
+# number generator?) it gives completely erroneous numbers. This happens
+# perhaps between once in a 100 times, and occurs randomly... I have no
+# idea why it happens, and it doesn't occur systematically enough for me
+# to track down the problem...
+
+# arnoldi
+
+#there is a matrix truncation routine in mcalc() - which is
+#triggered when you put:
+#truncate_matrix=x
+#   ... this routine first calculates and diagonalises the singleion
+# Hamiltonian without the Zeeman or mean-field terms, and then uses
+# the eigenvectors to make a unitary transformation matrix to rotate
+# the multipolar and L and S operators into this new basis. Then it
+# truncates the matrix, leaving only the x-fraction lowest terms
+# (e.g. for f2 if you specify x=0.2, it would keep 20% of the levels,
+# there are 91 levels so it would use 18 levels). This seems to be
+# much faster (for low values of x) even than the arnoldi/lanczos method,
+# but then it is much more approximate...
+# Note The most computationally extensive operations are carried out at the
+#start - the diagonalisation of the single ion Hamiltonian, and
+#matrix-matrix multiplication to rotate the operator matrices. Once
+#done the rotated matrices are stored in memory and then reused when
+# the <J> expectation values have to be evaluated...
+# the routine uses the mcalc_parstorage matrix for storing the rotated
+# matrices.
+# one should experiment with the
+#value of x and compare it with using the full matrix diagonalisation
+#(or the arnoldi/lanczos) one before relying on the results.
+#This approximation method is probably not necessary for d-electron
+#matrices (as those are generally quite small), but for f-electrons it
+#is quite useful!
+
+
+# there is also another method to find only a few of the lowest
+# eigenvalue, which is more reliable, and this uses the relatively
+# robust representation algorithm in Lapack and can be accessibly by including the
+# keyword: "partial" in the parameter file. This takes about 2/3 the
+# time of the full computation, whereas the arnoldi routine takes about
+# 1/5 the time...
+# if the next line is uncommented ic1ion will use the 'partial' RRR algorithm 
+
+# partial
+
+# There is also an experimental feature to use a truncated Hamiltonian matrix in
+# mcalc() to speed up the calculation in mcphasit... You specify in the
+# sipf a variable, "truncate_matrix=XX" where XX is between 0 and 1, and
+# is the fraction of levels to keep... E.g. truncate_matrix=0.2 would
+# keep only the lowest 5th set of energy levels. For f5 this is about
+# 400 levels out of 2000. Unfortunately it's only for Linux at the
+# moment, because I have to make a rotation matrix to change the basis
+# of the Hamiltonian, and I store this matrix as a memory mapped file
+# and the implementation of memory mapping is different from Linux to
+# Windows.
+
+# another experimental (not yet working) feature is for the calculation
+# of spin and orbital magnetisation density in the three spatial directions
+# which can be specified by
+# density=1,2,3,4,5,6
+# ... this triggers mcalc to output instead of the normal operators
+# the expectation value of the coefficient in the expansion of the 
+# (orbital or spin)-density in terms of tesseral harmonic functions
+
+# a list of crystal field parameters (Llm denote Wybourne parameters)
+units=meV
+L22S=-4.8939
+L21S=-3.26255
+L20=2.8304
+L21=-2.44691
+L22=1.42739
+L44S=0.0574029
+L43S=-0.0425222
+L42S=0.00309947
+L41S=0.0862038
+L40=0.0162131
+L41=0.0646528
+L42=-0.000904011
+L43=0.11307
+L44=0.0900338
+L66S=0.00305141
+L65S=0.006398
+L64S=0.00110317
+L63S=0.00151215
+L62S=0.00344795
+L61S=-0.00449046
+L60=-0.00389599
+L61=-0.00336784
+L62=-0.00100565
+L63=-0.00402095
+L64=0.00173027
+L65=0.000486626
+L66=-0.00348322
+
+# magnetisation calculation can be triggered by the following parameters
+calcmag
+# default magnetisation output units is Bohr magneton per ion
+
+# if the following is uncommented, ic1ion will output magnetisation in emu/mol
+#emu
+
+# if the following is uncommented, ic1ion will output magnetisation in Am^2/mol
+#simag
+
+ xT   = 1
+ xHa  = 0
+ xHb  = 0
+ xHc  = 0
+ xmin = 1
+ xstep= 1
+ xmax = 300
+ yT   = 0
+ yHa  = 1
+ yHb  = 0
+ yHc  = 0
+ ymin = 1
+ ystep= 1
+ ymax = 1
+
+#-------------------------------------------------------------------------------------------
+# the following parameters are read, when ic1ion is used as a module for other
+# programs in the mcphase program suite, such as mcphas, mcdiff, mcdisp ...
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.249
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+ 
+ 
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#   r= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Qr)>=   FFj0A*EXP(-FFj0a*r) + FFj0B*EXP(-FFj0b*r) + FFj0C*EXP(-FFj0c*r) + FFj0D
+#   <j2(Qr)>=r*(FFj2A*EXP(-FFj2a*r) + FFj2B*EXP(-FFj2b*r) + FFj2C*EXP(-FFj2c*r) + FFj2D
+#   <j4(Qr)>=r*(FFj4A*EXP(-FFj4a*r) + FFj4B*EXP(-FFj4b*r) + FFj4C*EXP(-FFj4c*r) + FFj4D
+#   <j6(Qr)>=r*(FFj6A*EXP(-FFj6a*r) + FFj6B*EXP(-FFj6b*r) + FFj6C*EXP(-FFj6c*r) + FFj6D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)
+#--------------------------------------------------------------------------------------
+FFj0A=0.4085 FFj0a=23.8526 FFj0B=0.6091 FFj0b=8.2456 FFj0C=-0.1676 FFj0c=0.0415 FFj0D=0.1496     
+FFj2A=3.4386 FFj2a=16.5303 FFj2B=1.9638 FFj2b=6.1415 FFj2C=0.2997 FFj2c=2.2669 FFj2D=0.0009     
+FFj4A=-0.4759 FFj4a=14.0462 FFj4B=0.2747 FFj4b=3.7306 FFj4C=0.2458 FFj4c=1.2504 FFj4D=0.0057 
+
+
+#---------------------------------------------------------
+# radial wave function parameters (for use in programs pointc, chrgplt, charges) 
+# R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)  
+# values tabulated in clementi & roetti Atomic data and nuclear data tables 14 (1974) 177-478
+# Co2+ is isoelectronic to Fe+, looking at page  422 of Clemente & Roetti 
+# the 3D radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
+#---------------------------------------------------------
+N1=3 XI1=4.95296 C1=0.36301 
+N2=3 XI2=12.2963 C2=0.02707 
+N3=3 XI3=7.03565 C3=0.14777
+N4=3 XI4=2.74850 C4=0.49771 
+N5=3 XI5=1.69027 C5=0.11388 
+# for program pointcharge alternatively, the radial matrix elements may be given:
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.24653
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=3.67281
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=21.0652
+
+#---------------------------------------------------------
+#pointcharges charge[|e|]  x[A] y[A] z[A]
+#---------------------------------------------------------
+pointcharge=  0.3            3    4    2
+
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0.4
+\end{verbatim}
+}
+The output files are written to directory {\prg results} and contain energy eigentstates ({\prg mcphas.icp}) and, optional, %%@
+the magnetisation ({\prg mcphas.icq}). Note in these
+output files the parameters alpha/beta/gamma
+in the header are not the Steven's operator equivalent factors, but
+rather the parameters of the configuration interactions.
+
+\subsection{{\prg cpic1ion} - calculation of the specific heat from {\prg ic1ion.out}}
+ The crystal field contribution to the specific heat may be calculated 
+from the output file {\prg ic1ion.out} using the  program {\prg cpic1ion}, e.g. {\bf cpic1ion 10 100 1 [options]}
+calculates the specific heat in the temperature interval 10-100 K with a step width
+of 1 K. Alternatively a comparison to experimental data can be made by {\bf cpic1ion 1 2 cpexp.dat},
+where the temperatures are given in column 1 and the experimental specific heat in column
+2 of file cpexp.dat. The calculated specific heat is compared to the experimental data and
+a standard deviation {\em sta} is calculated and output is written to stdout.
+Other quantities can be calculated using the options: -s  (calculate entropy  (J/molK) instead of cp),
+-f (calculate free energy (J/mol) instead of cp),-u  (calculate magnetic energy (J/mol) instead of cp),
+-z (calculate partition sum instead of cp).
+
+
+\subsection{using {\prg ic1ion\index{ic1ion}} as a module in {\prg mcphas},{\prg mcdiff},{\prg mcdisp},...}
+
+Currently {\prg ic1ion\index{ic1ion}} is loadable by mcphas\index{mcphas} as an external module. The single
+ion parameter file is just the same as given in the above format for running {\prg ic1ion\index{ic1ion}} as 
+a stand alone program. However, some input files have to follow special conventions in order that 
+{\prg mcphas, mcdisp, mcdiff} work correctly: 
+
+{\bf Note:} in case of intermediate coupling
+it is necessary to specify
+L and S seperately (in interactions and Zeeman term and neutron cross sections ...)
+therefore  ''gJ=0'' in {\prg mcphas.j\index{mcphas.j}} has a special meaning:
+\begin{itemize}
+\item  it modifies
+the convention that Ja=Jy=O1-1(J) Jb=Jz=O10(J) Jc=Jx=O11(J) and instead
+puts Ja=Sx Jb=Lx Jc=Sy Jd=Ly Je=Sz Jf=Lz, the Jn for $n>f$ being defined in the single
+ion module. 
+\item for higher order operators, the current McPhase definitions are expanded, so instead of
+Jd==O22S, we made Jg==O22S, Jh==O21S, Ji==O20, Jj==O21, Jk==O22,
+Jl==O33S, etc... these operators are to be understood as in the Stevens notation, equivalent
+operators to tesseral harmonic functions stripped by their prefactors $c_{lm}$ (factors before the
+bracket in table IV of~\cite{hutchings64-227} and in appendix~\ref{tesseral}), 
+i.e. $\langle \nu| O_{lm}| \nu' \rangle=\langle nu |\sum_i Z_l^m(\Omega_i)|nu' \rangle / c_{lm}$.
+\item the programs {\prg mcphas, mcdisp etc} take into account
+ a modified Zeeman term $H_{Ze}=-\mu_B(2\mbf S+\mbf L)\mbf H$.
+ However, in program {\prg singleion\index{singleion}} the meanfields of S and L can be
+ separately given by specifying gjmbH=$g \mu_B H$ with g=2 or 1 depending
+ on whether it is spin or orbital component of the field. 
+\item the magnetic moments are calculated and shown in plots according 
+to $\mbf M=\mu_B(2<\mbf S>+<\mbf L>)$
+\item Also the inelastic neutron scattering cross section in {\prg mcdisp\index{mcdisp}} is evaluated using the first
+6x6 components of the dynamical matrix  in dipole approximation for the magnetic formfactor.
+\end{itemize}
+
+\vspace{1cm}
+\subsection{Formalism}
+
+As noted in equation~\ref{ichamilton}, in the case of intermediate coupling, we calculate
+the single-ion Hamiltonian considering the electron-electron (Coulomb) interaction and the
+spin-orbit (SO), which are respectively the first\footnote{Note that we do not calculate all the
+terms in the braces in the first line of equation~\ref{ichamilton}. In particular using the
+\emph{central field approximation} the first summation produces Hydrogen-like energy levels, called
+\emph{configurations}, which are split into \emph{terms} by the second summation. What we refer to
+as the Coulomb interaction is \emph{only} this second summation, and we shall consider the lowest
+energy configuration only. This configuration corresponds to the outer most electrons in ion, and is
+labelled $nl^N$, for example, $4f^1$ for Ce$^{3+}$.} and second lines of the equation, in addition
+to the crystal field (CF) interaction which \emph{cfield} treats. 
+
+The term \emph{intermediate coupling} is somewhat a misnomer, because it does not refer to a
+specific coupling scheme to determine the total angular momentum $J$, such as
+\emph{Russel-Saunders} coupling ($LS$-coupling), or $jj$-coupling. Rather, it refers the case where all
+three of the above single-ion interactions are treated on an equal footing. This is to distinguish
+between the practice of using only the lowest energy manifold of levels with the same $J$ in either
+of the other two coupling schemes to calculate the low temperature (low energy) physical
+properties\footnote{For the case of $LS$-coupling this corresponds to ignoring the Coulomb and SO
+interactions, which are in this limit both much larger than the CF. For $jj$-coupling, the Coulomb
+interaction is treated as small and neglected, but the spin-orbit interaction is considered.}.
+
+Finaly in some cases, \emph{intermediate coupling}, also refers to the narrower case where although
+the Coulomb and SO terms are included, their strengths are fixed by parameters determined from
+experimental (optical) spectra, or ab-initio (Hartree-Fock) calculations, rather than being freely
+varied.  
+
+In the case where the Coulomb interaction dominates, \emph{and} the
+spin-orbit interaction is sufficiently stronger than the CF, then only the lowest
+energy \emph{multiplet} - that is, the degenerate energy levels produced by the Coulomb and SO
+interactions - need to be taken into account. This multiplet may be determined from \emph{Hund's
+Rules}, and hence we need only calculate the CF interaction (as \emph{cfield} does). This case is
+termed \emph{Russel-Saunders} or $LS$-coupling. 
+Thus  \emph{Russel-Saunders} coupling corresponds to the limit where
+both the Coulomb and spin-orbit interaction are large (but where $\mathcal{H}_{\mathrm{Coulomb}}\gg
+\mathcal{H}_{\mathrm{SO}}\gg
+\mathcal{H}_{\mathrm{CEF}}$), i.e. the crystal field interaction is treated as a perturbation. Only
+the lowest energy spin-orbit multiplet is considered, and its degeneracy is split by the CF. These
+levels are labeled by the total angular momentum quantum numbers $L, S, J and J_z$\footnote{Also
+denoted $m_J$.}. 
+
+The other limit corresponds to $jj$-coupling, where the spin-orbit interaction
+dominates $\mathcal{H}_{\mathrm{SO}}\gg
+\mathcal{H}_{\mathrm{Coulomb}}$, and there is no term or multiplet structure, 
+in this case only the single electron total
+angular momentum quantum number $j$ serves to label the states. 
+
+What is refered to as \emph{intermediate coupling} can mean in general that all the three main
+single ion interactions are considered with variable strengths
+$\mathcal{H}_{\mathrm{Coulomb}}\sim
+\mathcal{H}_{\mathrm{SO}}\sim
+\mathcal{H}_{\mathrm{CEF}}$, but may also specifically refer to
+the situation in which the strengths of the Coulomb and spin-orbit interaction is fixed by
+parameters determined either from experimental (optical) spectra or ab-initio (Hartree-Fock)
+calculations. In these cases there is usually still a multiplet structure but the eigenstates of the
+system is a mixture of the $LS$-basis states, with only $J$ being a good quantum number which can be
+used to distinguish the states. In the case of a large CF interaction, however, \emph{J-mixing} can
+occur, which results in the lost of a distinct multiplet structure.
+
+The operators corresponding to each of the three single-ion interactions are calculated as matrices
+using $LS$-coupling basis states, which are labelled according to a group theoretical
+classification. This is to facilitate the use of \emph{coefficients of fractional parentage} (cfp)
+in the calculation of the matrix elements. These coefficients allow states of given configuration
+$nl^N$ to be determined by the states of a parent configuration $nl^{N-1}$ with one fewer electron.
+That is, we express the $N^{\mathrm{th}}$ electron state $|\Omega\rangle$ as a sum,
+$\sum_{\bar{\Omega},\omega} \langle\bar{\Omega};\omega|\Omega\rangle|\omega\rangle$, over all possible ways of
+adding a single electron $|\omega\rangle$ to a the $(N-1)^{\mathrm{th}}$ state, $|\bar{\Omega}\rangle$,
+where $\langle\bar{\Omega};\omega|\Omega\rangle$ is the cfp. We also use the results that a single-particle
+operator, $\langle\Omega|V|\Omega'\rangle$, acting on $N$ electrons is just $N$ times the same operator 
+acting on one electron, $\langle\omega|v|\omega'\rangle$, to expand the states (and matrix element) in
+terms of the cfp's,
+
+\[ \langle\Omega|V|\Omega'\rangle = N \sum_{\bar{\Omega},\omega,\omega'} \langle\Omega|\bar{\Omega};\omega\rangle
+                                         \langle\omega|v|\omega'\rangle \langle\bar{\Omega};\omega'|\Omega'\rangle \]
+
+\noindent Once the cfp are known, only the single electron matrix element $\langle\omega|v|\omega'\rangle$ 
+is needed to be determined for each particular operator. This is generaly a straigtforward task. The
+cfp are also dependent on the classification of the states for which they are constructed, but the
+advantage of the use of a classification based on group theory is that we can use Racah's
+theorem~\cite{racah49-1352}\footnote{Equation 11}, to factorise the cfp into terms involving only
+pairs of quantum numbers labelling the states, rather than all the quantum numbers together. Because
+of the properties of the groups from which they derive, most of these factors do not have explicit
+algebraic formulae\footnote{Except for the case of the rotation group in 3 dimensions, SO(3) (whose
+representations are labelled by the angular momentum quantum numbers, $L$ and $J$), where they are
+simply the $3j$ symbols}. However they make a chain calculation of the cfp from a single electron
+state practicable. These calculations were carried out in the atomic spectroscopy community in the
+1950's and '60's and tabulated in the works of Racah~\cite{racah49-1352}, Wybourne~\cite{wybourne61}, 
+Allison and McNulty~\cite{allison74}\footnote{http://cpc.cs.qub.ac.uk/cpc/cgi-bin/showversions.pl/?catid=acry},
+and Nielson and Koster~\cite{nielson63-1}.
+
+The LS-coupling basis states are tabulated by Nielsen and Koster~\cite{nielson63-1}, and the
+formulae for the matrix elements are from Racah~\cite{racah42-186,racah42-438,racah43-367}
+ and Judd~\cite{judd88-1}.
+
+We construct the cfp's from several different factors. This comes about
+because you can factorise the cfp into terms involving any two quantum
+numbers of the set you used to label your basis states, if the
+quantum numbers are labels for a representation of a group (hence the
+use of group theory to determine the basis states). In this case the
+factors involving the quantum numbers S,L,J,mJ are just 3j-symbols.
+The factors involving v, U, and n are not, and for these I've used
+tables constructed by Racah, Wybourne and later from a program written
+by Allison (http://cpc.cs.qub.ac.uk/cpc/cgi-bin/showversions.pl/?catid=acry
+).
+
+Some checks of the cfp's were made - by comparing
+them to values tabulated by Cowan, and by using the reciprocity
+relation between the coefficients like $l^{n-1}a"L"S"|\}l^{n}aLS$ and
+$l^{n-1}aLS|\}l^{n}a"L"S"$. These seem to check out... but I was mostly
+concentrating on the configurations with fewer electrons - e.g. f1-f5.
+Finally I don't use these tables for d-electrons at all, because
+there are not so many states involved, and all the cfp's have been
+tabulated by Nielson and Koster~\cite{nielson63-1}, so
+It is just programmed them in as a look up table. 
+
+
+Finally expressions based on the above equation for the matrix elements of the spin-orbit and
+crystal field operators were derived by Elliot, Judd and Runciman~\cite{elliot57-509}\footnote{Eqn
+16 for SO, and 25-27 for CF, and reproduced in more modern notation in appendix C
+of~\cite{ducle09-1}}. For the Coulomb interaction, we have chosen to use the operators defined by
+Racah~\cite{racah49-1352}\footnote{Eqns 66 for the conversion of the Racah parameters to Slater
+integrals, 63 for the $e_0$ operator, 69 for $e_1$, 73-74 for $e_2$, and 78, 28 and 80-87 for
+$e_3$}. In the case of the rank-1 spin and orbital angular momentum operators, an explicit algebraic
+expression exists for the sum over cfp in the above equation~\cite{judd88-1}\footnote{Eqn 7-58},
+resulting in the equations quoted by Chan and Lam~\cite{chan70-219}.
+
+The interested reader will find much more details in the books by Judd~\cite{judd88-1} and
+Wybourne~\cite{wybourne65}, and for the more mathematically inclined, in the lecture notes of
+Racah~\cite{racah51}. In addition, this group theory approach was used to determine the neutron
+cross-sections in a series of papers in the 1970's and 1980's by Balcar and Lovesey, and summarised
+in their books~\cite{lovesey84-1,balcar89-1}.
+
+Finally, the Slater and spin-orbit integrals which parameterise the strength of the Coulomb and SO
+interactions (these are the radial integrals, whereas what we have calculated using the above
+techniques is effectively the angular parts of these operators), are tabulated in various books. In
+particular we have used the experimentally determined values given by Abragam
+Bleaney~\cite{abragam70-1}, Griffith~\cite{griffith71-1} and Chakravarty~\cite{chakravarty80-1} for
+the transition metal ions, and by Carnall et al.~\cite{carnall89,carnall92} for the rare earths.
+Other relevant literature are the famous papers by Racah~\cite{racah42-186,racah42-438,racah43-367}.
+
+The first (electrostatic) term is well known to be exactly solvable only for Hydrogen. Thus we use
+the well known \emph{central field approximation} to separate it into a Hydrogen-like part which
+produces degenerate energy levels called \emph{configurations} labeled by the principal quantum
+number, $n$, and the orbital quantum number $l$ of the electrons; and a remainder term which
+resembles the second summation in the first line of equation~\ref{ichamilton}, and lifts the
+degeneracy of the configurations, producing energy levels called \emph{terms} which are labeled by
+the total spin, $S$, and orbital, $L$, angular momentum of the multi-electron system. 
+
+In order to make the calculations tractable we shall consider only the configuration with the lowest
+energy, which in general belongs to the outer most electron shell of the ion of interest. For
+Lanthanide ions, these electrons have $n=4$ and $l=3$, and are thus labeled $4f$, whilst actinide
+ions are $5f$, and the 1st, 2nd, and 3rd transition metal serires (with $l=3$) are $3d$, $4d$ and
+$5d$ respectively. 
+
+Futhermore the terms are split by the spin-orbit interation into \emph{multiplets} labeled by the
+total orbital angular momentum, $J=L+S$, which is finally split by the crystal field. \emph{cfield}
+considers only the lowest lying multiplet and the crystal field splitting, which is usually adequate
+for rare earth systems because the Coulomb and SO terms are large enough such that the energy gap
+between multiplet is too large to affect the low (or room) temperature physical properties of such
+systems.
+
+In order to calculate the matrix elements of each of these interactions, we refer to the formulae in
+the following:
+\begin{quotation}
+\item[\bf Coulomb electron electron interaction operator:]
+The denominator $|\mathbf{r}_i-\mathbf{r}_j|$ in the Coulomb interaction may be expanded as in a multipole
+series in terms of spherical harmonics, whilst the CF operators are themselves tensor operators which transform
+like the spherical harmonic functions. Thus we can (after some algebra) express the Coulomb interaction as
+$\sum_{ij} e^2 \sum_k (r_<^k/r_>^k) \mathbf{T}^{(k)}_i \cdot \mathbf{T}^{(k)}_j$, where $r_<$ is the lesser of
+$r_i$ or $r_j$ and $r_>$ is the greater; and $\mathbf{T}^{(k)}$ is a vector of operators $T^{(k)}_q$, with
+$q=-k,\ldots,k$.
+
+After some further manipulations the following expression may be derived:
+
+\[ \mathcal{H}_{\mathrm{coulomb}} = \sum_{i>j=1}^N \frac{e^2}{|\mathbf{r}_i-\mathbf{r}_j|} = e_0 E^0 + e_1 E^1
++ e_2 E^2 + e_3 E^3 \]
+
+Eqns 66 (conversion from Racah parameters, $E^k$ to Slater integrals, $F_k$), 63 ($e_0$ operator), 
+69 ($e1$), eqns 73-74 ($e2$), and eqns 78,28,80-87 ($e3$), from the important paper by Giulio
+Racah~\cite{racah49-1352}.
+
+\item[\bf Spin-orbit interaction operator $\xi \sum_i ({\mbf s}_i . {\mbf l}_i)$:]
+
+Eqn 16 from Elliot, Judd and Runciman~\cite{elliot57-509}.
+
+\item[\bf Crystal field interaction:]
+
+The crystal field interaction is given by the electrical potential produced according 
+to Coulombs law by neighbouring charges $q_j$ at positions $\mbf R_j$ acting on
+n electrons.
+
+\begin{equation}\label{crystal field}
+H_{cef}=\frac{1}{4\pi \epsilon_0}\sum_{i=1}^n \sum_j \frac{-|e|q_j}{|\mbf R_j - \mbf r_i|}
+\end{equation}
+
+The crystal field is rewritten in terms of tesseral harmonics $Z_{kq}(\Omega)$ (see appendix \ref{tesseral})
+
+\begin{equation}
+H_{cef}=-|e|\sum_{i=1}^n \sum_j q_j \sum_{k=0}^{\infty}\frac{r_i^k}{\epsilon_0 R_j^{k+1}} \sum_{q=-k}^k \frac{1}{2k+1} %%@
+Z_{kq}(\Omega_i)Z_{kq}(\Omega_j)
+\end{equation}
+
+we define crystal field parameters 
+
+\begin{equation}
+\gamma_{kq}=\sum_j \frac{q_j}{2k+1}\frac{1}{\epsilon_0R_j^{k+1}}Z_{kq}(\Omega_j)
+\end{equation}
+
+and rewrite the crystal field as
+
+\begin{equation}
+H_{cef}=-|e| \sum_{i=1}^n \sum_{k=0}^{\infty} \sum_{q=-k}^k r_i^k \gamma_{kq}Z_{kq}(\Omega_i)
+\end{equation}
+
+Defining rescaled tesseral harmonics $z_{kq}$ as
+
+\begin{eqnarray}
+z_{kq}=\sqrt{\frac{8\pi}{2k+1}}Z_{kq} \dots q\neq 0 \\
+z_{k0}=\sqrt{\frac{4\pi}{2k+1}}Z_{k0} \dots q=0 \\
+\end{eqnarray}
+
+and Wybourne parameters as
+
+\begin{eqnarray}
+L_{kq}=-|e|\langle r^k \rangle \gamma_{kq}\sqrt{\frac{2k+1}{8\pi}} \dots q\neq 0 \\
+L_{k0}=-|e|\langle r^k \rangle \gamma_{kq}\sqrt{\frac{2k+1}{4\pi}} \dots q= 0 \\
+\end{eqnarray}
+
+the crystal field may be rewritten as
+
+\begin{equation}
+H_{cef}=  \sum_{k=0}^{\inf} \sum_{q=-k}^k  L_{kq} \sum_{i=1}^n z_{kq}(\Omega_i)
+\end{equation}
+
+This may be expressed as ....
+
+{\bf some formula for CEF as it is programmed in ???? note that we have changed
+racah\_ukq by a factor $(-1)^q$ and also the operators (Ukqp $\pm Ukqm$) had their sign changed
+for negative q !!! relation to the $T^{(k)}_q$ ???}
+
+The main formulae for $T^{(k)}_q$ is in chapter 7 of the Judd book (eqn. 7-51 and
+7-52)~\cite{judd88-1}. Eqns 25-27 from Elliot, Judd and Runciman~\cite{elliot57-509}, 
+and in slightly more modern notation
+in equation C.14 from the thesis of Duc Le~\cite{ducle09-1}. 
+Note also the equivalence between the 3j symbols and Clebsch-Gordan coefficients
+(eqn 19 here: http://mathworld.wolfram.com/Wigner3j-Symbol.html ), and
+between the 6j symbols and Racah's W coefficient (http://mathworld.wolfram.com/RacahW-Coefficient.html ).
+The basic matrix element is the same for all operators written
+variously as Ukq, Vkq and Tkq except for the single electron reduced
+matrix element $<nl||?||n'l'>$. The unit tensor operator Ukq have
+$<lm||uk||l'm'>=\delta_{nn'}\delta_{ll'}$ whilst the Vkq operators have
+$<lm||vk||l'm'>=\sqrt{2k+1}\delta_{nn'}\delta_{ll'}$
+and the spherical
+harmonics tensor operator Tkq, has
+\begin{equation}
+<lm||vk||l'm'>=(-1)^l*\sqrt{(2l+1)(2l'+1)}*\left (\begin{tabular}{ccc}  l & k & l' \\ 0 & 0 & 0 \\ \end{tabular}\right)
+\end{equation}
+
+\item[The magnetic moment operators, $L_x L_y L_z S_x S_y S_z$:]
+
+Defined in Chan and Lam~\cite{chan70-219} and again in modern notation in equation C.19 of~\cite{ducle09-1}.
+\end{quotation}
+
+\subsection{formalism for going beyond the dipolar approximation}
+
+{\prg ic1ion} is prepared to do calculations of the neutron cross section going beyond the dipole approximation for 
+the scattering cross section. The formulation of the scattering operator
+ implemented in the functions {\prg mq} and {\prg dncalc} have been given by Lovesey and Balcar~\cite{lovesey84-1}, 6.87b:
+ 
+ \begin{eqnarray}
+ \langle  l^n \nu S L J M| \hat \mathcal Q_q | l^n \nu' S' L' J' M' \rangle &=& \sqrt{4\pi}\sum_{K',Q,Q'} \left [ %%@
+Y_{K'-1}^{Q}(\hat \mbf Q) \left (\frac{2K'+1}{K'+1}\right ) \right. \\
+&& \times \{ A(K'-1,K')+B(K'-1,K')(K'-1 Q K' Q'|1q)\}\\
+&& \left . + Y_{K'}^{Q}(\hat \mbf Q) B(K',K') (K' Q K' Q'|1q) \right ] (K' Q' J' M'|JM)
+ \end{eqnarray}
+ 
+... these are the spherical components with $q=-1,0,1$, which are related to the cartesian components by
+
+\begin{eqnarray}
+\hat \mathcal Q_x &=& -\frac{1}{\sqrt{2}}(\hat \mathcal Q_{+1} -\hat \mathcal Q_{-1})\\
+\hat \mathcal Q_y &=& +\frac{i}{\sqrt{2}}(\hat \mathcal Q_{+1} +\hat \mathcal Q_{-1}) \\
+\hat \mathcal Q_z &=& \hat \mathcal Q_0  \\
+\end{eqnarray}
+
+The coefficients $A(K,K')$ and $B(K,K')$ are complex to obtain, formulas will not be given here, we refer the reader %%@
+to~\cite{lovesey84-1} and just mention, that the computation involves
+of 3j, 6j and 9j symbols and some fractional parentage coefficients. 

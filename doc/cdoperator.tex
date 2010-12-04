@@ -1,0 +1,52 @@
+\newpage
+\section{Derivation of the Chargedensity Formula}\label{chargedensityoperator}
+ 
+ The charge density operator for an electron system is given by a sum of delta
+ functions on the location of the individual electrons in a system carrying
+an elementary charge $e$:
+ 
+ \begin{equation}
+ \hat\rho(\mbf r) = \sum_i -|e| \delta(\mbf r_i - \mbf r)
+ \end{equation} 
+ 
+ Using spherical coordinates the delta function in this expression can be rewritten as
+ 
+ \begin{equation}
+ \delta(\mbf r_i - \mbf r) = \frac{1}{r^2}\delta(r-r_i) \delta(\Omega- \Omega_i)
+ \end{equation} 
+ 
+ The delta function of spherical harmonics can be expressed by spherical and tesseral harmonic
+ functions (see appendix~\ref{tesseral}):
+ 
+ \begin{equation}
+  \delta(\Omega- \Omega_i)= \sum_{l,m} Y_l^{m\star}(\Omega_i) Y_l^{m}(\Omega)= \sum_{l,m} Z_l^{m}(\Omega_i) Z_l^{m}(\Omega)
+ \end{equation} 
+ 
+ Using the above equations and assuming the same radial part $R(r)$ of the wave function for all electrons in an unfilled %%@
+shell the radial integrals in the expectation value of the charge density operator can be substituted by the radial %%@
+wavefunction $R(r)$ and we obtain the expression
+ 
+  \begin{equation}\label{chargedensity2}
+	       \langle \hat\rho(\mbf r)\rangle=
+	       -|e|  |R(r)|^2 \sum_{l,m}Z_l^{m}(\Omega) \langle\sum_i Z_l^{m}(\Omega_i)\rangle
+   \end{equation} 
+
+If higher multiplets are neglected, 
+the expectation values of tesseral harmonics at the right side of equation (\ref{chargedensity2}) can
+be rewritten using the operator equivalent method by Stevens\cite{hutchings64-227}:
+
+  \begin{equation}
+	      \langle\sum_i Z_l^{m}(\Omega_i)\rangle = c_{lm} \theta_{l} \langle O_l^m(\mbf J)\rangle_T 
+	      \end{equation} 
+
+Here, $c_{lm}$ are the pre factors of harmonic tesseral
+functions and $\Theta_l$
+correspond to the Stevens factors $\alpha$,$\beta$ and $\gamma$ for $l=$~2,4,6, respectively.
+This results in the following expression for the chargedensity:
+		  
+  \begin{equation}\label{chargedensity_operator2}
+	       \langle \hat\rho(\mbf r)\rangle=|R_{4f}(r)|^2 \sum_{l=0,2,4,6}\sum_{m=-n,...,n}
+	       -|e|  c_{nm} \theta_{l} \langle O_l^m(\mbf J)\rangle_T Z_{lm}(\Omega)
+	      \end{equation} 
+
+  

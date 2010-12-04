@@ -1,0 +1,85 @@
+\newpage
+\section{ErNi$_2$B$_2$C - single ion module}\label{erni2b2c}
+
+The crystal field ground state of the $J=15/2$ Er$^{3+}$ ion in ErNi$_2$B$_2$C 
+can be   described by a quasi-quartett consisting of two doublets separated
+by a energy interval $\Delta$.
+
+In order to calculate efficiently the single ion property (for small effective
+magnetic fields in comparison to the total CF splitting) the 
+Hamiltonian $H=H_{cf}- g_J \mu_b {\mbf H}{\mbf J}$ is projected to the quasi quartett
+and may be written as
+
+\begin{equation}\label{hamer}
+H=\left (
+\begin{array}{cccc}
+-\Delta/2 & 0 & 0 & 0 \\
+0 & -\Delta/2 & 0 & 0 \\
+0 & 0 & \Delta/2  & 0 \\
+0 & 0 & 0 & \Delta/2 
+\end{array}
+\right)
+ -g_J \mu_B (H_a J_a + H_b J_b + H_c J_b)
+\end{equation}
+
+with the angular momentum operators given by the  4x4 matrices
+\begin{equation}
+J_a=
+\left (
+\begin{array}{cccc}
+0 & b & 0 & c \\
+b & 0 &-c & 0 \\
+0 &-c & 0 & e \\
+c & 0 & e & 0 
+\end{array}
+\right )
+\end{equation}
+
+\begin{equation}
+J_b=
+\left (
+\begin{array}{cccc}
+0 & -ib & 0 & ic \\
++ib & 0 & +ic & 0 \\
+0 & -ic & 0 & -ie \\
+-ic & 0 & +ie & 0 
+\end{array}
+\right )
+\end{equation}
+
+
+\begin{equation}
+J_c=
+\left (
+\begin{array}{cccc}
++a& 0 & 0 & 0 \\
+0 &-a & 0 & 0 \\
+0 & 0 &-d & 0 \\
+0 & 0 & 0 &+d 
+\end{array}
+\right )
+\end{equation}
+
+The constants $a$-$e$ can be computed from the crystal field parameters, if
+these are known. On the other hand, they are connected to the saturation
+magnetic moments $\mbf M$ by the following equations ($\max(...)$ denotes the
+maximum of the argument values)
+
+\begin{equation}
+M_{001}=g_J \mu_B \max(|a|,|d|) 
+\end{equation}
+
+\begin{eqnarray}
+M_{100}&=&g_J \mu_B \lambda\\
+2\lambda^2&=&e^2+2c^2+b^2 + \sqrt{(e^2+2c^2+b^2)^2-4(be{\mbf+}c^2)}
+\end{eqnarray}
+
+\begin{eqnarray}
+M_{110}&=&g_J \mu_B  \lambda\\
+2\lambda^2&=&e^2+2c^2+b^2 + \sqrt{(e^2+2c^2+b^2)^2-4(be{\mbf-}c^2)}
+\end{eqnarray}
+
+The module given in {\prg /examples/erni2b2c/1ion\_mod/quartett.c} diagonalises
+the Hamiltonian (\ref{hamer}) and calculates the thermal expectation 
+value $<>_T$ of the vector $\mbf J$, which
+is returned to the {\prg McPhas} program.

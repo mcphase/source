@@ -1,0 +1,945 @@
+\section{Single Ion Modules}\label{simod}
+
+In table~\ref{simodtable} the different single ion modules are listed
+together with the functionality in the context of programs
+{\prg mcphas},{\prg mcdiff} and {\prg mcdisp}.
+
+Usually, internal single ion modules are used as a starting point.
+Alternatively, the single ion properties can be calculated by a program
+module which has to be written in {\prg c}. Details about this can be found 
+in chapter \ref{extsimod}. Several external modules are supplied also
+with the program package.
+
+\begin{table}[htb] 
+\begin{center}  
+\caption {Single ion\index{singleion} modules and functionality in the context of programs
+{\prg mcphas},{\prg mcdiff} and {\prg mcdisp}.}   
+\label{simodtable}   
+\begin{tabular} 
+{l|l|l|l} 
+module / functionality       &{\prg mcphas} & {\prg mcdiff} & {\prg mcdisp} \\
+\hline
+INTERNAL MODULES  & & &\\
+\hline
+{\prg so1ion}                & in test           &  in test           & in test \\
+{\prg cfield}                & ok           &  ok           & ok \\
+$F(Q)$- go beyond dip approx & -            &  ok           & in test\\
+\hline
+{\prg kramer} & ok &  ok   & ok \\
+\hline
+{\prg brillouin} & ok  & ok &  ok\\
+\hline
+\hline
+EXTERNAL MODULES & &  &\\
+\hline
+{\prg examples/cecu2a/1ion\_mod/kramer.so}  & ok & & ok \\
+\hline
+{\prg examples/dyni2b2c/1ion\_mod/quartett.so}  & ok & &\\
+\hline
+{\prg examples/erni2b2c/1ion\_mod/quartett.so}  & ok & &\\
+\hline
+{\prg examples/gdni2b2c/1ion\_mod/brillouin.so}  & ok & & in test \\
+\hline
+{\prg examples/ndcu2b\_1dim/1ion\_mod/kramer.so}  & ok & &\\
+\hline
+{\prg bin/ic1ion\_module/ic1ion.so} & in test  &  in test          & in test \\
+$F(Q)$- go beyond dip approx        & -        &  in test          & in test \\
+\hline
+{\prg bin/cf1ion\_module/cfield.so} & ok &  & ok\\
+ \end{tabular}
+\end{center}   
+\end{table}
+
+The filename given for each atom in {\prg mcphas.j\index{mcphas.j}}
+or {\prg mcdiff.in\index{mcdiff.in}} determines, which single ion module 
+is to be used for a specific ion in the calculation.
+As internal single ion modules there are currently available an isotropic spin (internal module {\prg brillouin}, %%@
+see
+appendix ~\ref{brillouin}), an 
+ anisotropic doublet (internal module {\prg kramers}, see appendix ~\ref{kramers}), 
+and the rare earth crystal field (internal module {\prg so1ion\index{so1ion}} and
+cfield, see section~\ref{cfield}).
+
+\vspace{0.5cm} 
+{\bf Internal Single Ion Property Modules:} 
+\begin{quote}
+\item[{\prg brillouin}]
+If the internal module {\prg brillouin}
+ (Brillouin function used for single ion properties,
+  see appendix ~\ref{brillouin}) is used,
+the single ion property file must start with
+\begin{verbatim}#!brillouin\end{verbatim} and
+the corresponding spin
+ quantum number $J$ has to be given in the first uncommented
+lines.
+Here is an example:
+\begin{verbatim}
+#!MODULE=brillouin
+#<!--mcphas.sipf-->
+# single ion parameter file for Gd
+J = 3.5
+\end{verbatim}
+\item [{\prg kramer}] If the internal module {\prg kramers} (anisotropic doublet ground state, see appendix %%@
+~\ref{kramers}) is used,
+the single ion property file must start with
+\begin{verbatim}#!kramer\end{verbatim} and
+the corresponding saturation magnetisations have to be given in the first uncommented
+line.
+Here is an example:
+\begin{verbatim}
+#!MODULE=kramer
+#<!--mcphas.sipf-->
+# single ion parameter file for CeCu2
+paramnames= |<+|Ja|->| |<-|Jb|->| |<+|Jc|->|
+params= 1.6 0.58333   1.1
+\end{verbatim}
+\item[{\prg so1ion\index{so1ion}}]In order to use the rare earth crystal field module the first line should read
+\begin{verbatim}#!MODULE=so1ion\end{verbatim}
+
+then the ion name should be given followed by a list of nonzero crystal field parameters
+
+\begin{verbatim}
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+ IONTYPE=Ce3+
+ B20=  0.1e-1                                           
+ B22  =  -0.3e-1                                       
+ B40  =  0.0
+ B42  =  0.0
+ B44  =  0.0
+ B60  =  0.0
+ B62  =  0.0
+ B64  =  0.0
+ B66  =  0.0
+\end{verbatim}
+
+ - for a description of this module refer
+to section~\ref{cfield}.
+\end{quote}
+
+In addition to the basic parameters described above the single ion property file 
+may/should contain additional parameters as described below. 
+
+\subsection{Lande Factor}
+
+In order to calculate the magnetisation and Zeeman term, the Land\'e factor
+has to be entered in the single ion property file. For a rare earth ion this
+factor gives the ratio of negative angular momentum / magnetic moment.
+Note, for intermediate coupling schemes this factor has no meaning (should be set to zero).
+
+\begin{verbatim}
+#Lande Factor
+GJ=0.85714
+\end{verbatim}
+
+
+\subsection{Magnetic Formfactor Coefficients}
+
+For the more accurate calculation of neutron intensities it is
+necessary to give the magnetic form factor (see the table in appendix~\ref{ffacts})
+in the single ion property input file. This can
+easily be don by adding some additional lines to a single ion property file:
+
+{\footnotesize
+\begin{verbatim}
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#   r= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Qr)>=   FFj0A*EXP(-FFj0a*r) + FFj0B*EXP(-FFj0b*r) + FFj0C*EXP(-FFj0c*r) + FFj0D
+#   <j2(Qr)>=r*(FFj2A*EXP(-FFj2a*r) + FFj2B*EXP(-FFj2b*r) + FFj2C*EXP(-FFj2c*r) + FFj2D
+#   <j4(Qr)>=r*(FFj4A*EXP(-FFj4a*r) + FFj4B*EXP(-FFj4b*r) + FFj4C*EXP(-FFj4c*r) + FFj4D
+#   <j6(Qr)>=r*(FFj6A*EXP(-FFj6a*r) + FFj6B*EXP(-FFj6b*r) + FFj6C*EXP(-FFj6c*r) + FFj6D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)
+
+#--------------------------------------------------------------------------------------
+FFj0A=0.0540 FFj0a=25.0293 FFj0B=0.3101 FFj0b=12.1020 FFj0C=0.6575 FFj0c=4.7223 FFj0D=-0.0216
+FFj2A=0.6751 FFj2a=18.3421 FFj2B=1.6272 FFj2b=7.2600 FFj2C=0.9644 FFj2c=2.6016 FFj2D=0.0150
+FFj4A=-0.4053 FFj4a=+14.0141 FFj4B=+0.0329 FFj4b=+7.0046 FFj4C=+0.3759 FFj4c=+1.7074 FFj4D=+0.0209
+FFj6A=-0.0416 FFj6a=+8.0136 FFj6B=-0.1261 FFj6b=+4.0399 FFj6C=+0.1400 FFj6c=+1.0873 FFj6D=+0.0102
+\end{verbatim}
+}
+In order to go beyond the dipolar approximation for the magnetic formfactor in case
+of rare earth ions and using module {\prg so1ion} the coefficients $Z(K')$ have to
+be given (see appendix~\ref{zk} for values):
+{\footnotesize
+\begin{verbatim}
+#----------------------------------------------------------------------
+# coefficients of Z(K') according to Lovesey (Neutron Scattering) vol.2
+# chapter 11.6.1 page 233
+#  ... these coefficients are needed to go beyond dipolar approx.
+#      for the neutron magnetic formfactor in rare earth ions
+#----------------------------------------------------------------------
+Z1c0=+1.63636364  Z1c2=+2.95041322
+		  Z3c2=-0.20896503  Z3c4=-0.25329095
+				    Z5c4=+0.03820789  Z5c6=+0.14258681
+						      Z7c6=-0.00614959
+\end{verbatim}
+}
+
+\subsection{Debye Waller Factor}
+
+For the more accurate calculation of neutron intensities it is
+necessary to give the magnetic form factor (see the table in appendix~\ref{ffacts})
+and the Debye Waller Factor in the single ion property input file. This can
+easily be don by adding some additional lines to a single ion property file:
+{\footnotesize
+\begin{verbatim}
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0.4
+\end{verbatim}
+}
+
+\subsection{Nuclear Neutron Scattering Length}
+
+In order to calculate nuclear neutron intensities properly, {\prg mcdiff} has to
+be provided with the neutron scattering length in units of $10^{-14}$~m.
+{\footnotesize
+\begin{verbatim}
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.769
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+\end{verbatim}
+}
+
+\subsection{Radial Wavefunction}
+
+In order to calculate the charge density correctly (programs {\prg charges, chrgplt}) and
+to evaluate the pointcharge model (program {\prg pointc}) the radial wave function has to be entered in the %%@
+parametrization of Clementi and Roetti:
+{\footnotesize
+\begin{verbatim}
+#------------------------------------------------------------------------------------------------------
+# radial wave function parameters R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)  
+# values tabulated in clementi & roetti Atomic data and nuclear data tables 14 (1974) 177-478
+# Co2+ is isoelectronic to Fe+, looking at page  422 of Clemente & Roetti 
+# the 3D radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
+#------------------------------------------------------------------------------------------------------
+N1=3 XI1=4.95296 C1=0.36301 
+N2=3 XI2=12.2963 C2=0.02707 
+N3=3 XI3=7.03565 C3=0.14777
+N4=3 XI4=2.74850 C4=0.49771 
+N5=3 XI5=1.69027 C5=0.11388 
+\end{verbatim}
+}
+\subsection{Radial Matrix Elements}
+
+For the program {\prg pointc} alternatively, the radial matrix elements can be given:
+{\footnotesize
+\begin{verbatim}
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.114
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=2.91
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=15.03
+\end{verbatim}
+}
+
+
+
+\section{All about External Single Ion Modules}\label{extsimod}
+
+Single ion properties can be described in a very flexible way by
+user programmed single ion module functions, which are loaded at runtime.
+
+The first line in such a single ion property file
+must contain the filename of the loadable module, in the following example
+the file {\prg ./1ion\_mod/kramer.so}:
+
+\begin{verbatim}
+#!./1ion_mod/kramer.so
+#<!--mcphas.sipf-->
+# single ion parameter file for CeCu2
+# there follow some module parameters (up to 9) which are 
+# loaded at initialisation of the module
+nof_electrons=1
+MODPAR1=1.6
+MODPAR2=0.58333
+MODPAR3=1.1
+
+...
+\end{verbatim}
+
+
+If the first line refers not to an internal module, but to
+ a loadable module file, the single ion
+properties are calculated using functions in this module file.
+
+In the following sections the different functions are presented
+which need to be present in the loadable module in order to 
+run the programs. All functions have to be present, but only 
+formally. If a function is not implemented please just let
+print out a message and exit. The corresponding programs
+will not work then. Table~\ref{modulefunctions} lists all
+functions foreseen in a loadable module.
+
+\begin{table}[htb] 
+\begin{center}  
+\caption {External Single ion\index{singleion} module functions in the context of the {\prg McPhase}
+programs.}   
+\label{modulefunctions}   
+\begin{tabular} 
+{l|l|l} 
+Module - Function       & obligatory for & optional for \\  
+\hline
+void mcalc              & {\prg mcphas}         & \\
+                        & {\prg mcdiff}         &\\
+						& {\prg singleion}      &\\
+						& {\prg charges}        &\\
+						& {\prg chrgplt}        &\\
+void mcalc\_parameter\_storage\_matrix\_init   && {\prg mcphas}       \\
+                        && {\prg mcdiff}         \\
+						&& {\prg singleion}     \\
+						&& {\prg charges}        \\
+						&& {\prg chrgplt}        \\
+void estates            &&	{\prg mcdiff}         \\
+						&& {\prg singleion}     \\	
+						&& {\prg mcdisp} \\
+int dmcalc				& {\prg mcdisp} &\\
+						& {\prg singleion}     \\	
+void mq					& & {\prg mcdiff} \\
+int dncalc              & & {\prg mcdisp} \\										
+void spindensity\_mcalc  &{\prg spindensplt}&\\
+                        &{\prg spindensities}&\\
+                        &{\prg momdensplt}&\\
+                        &{\prg momdensities}&\\
+void orbmomdensity\_mcalc &{\prg orbmomdensplt} &\\
+                        &{\prg orbmomdensities}&\\
+                        &{\prg momdensplt}&\\
+                        &{\prg momdensities}&\\
+                        &{\prg currdensplt}&\\
+                        &{\prg currdensities}&\\
+double ro\_calc & & {\prg chrgplt}\\
+						&& {\prg charges}        \\
+ \end{tabular}
+\end{center}   
+\end{table}
+
+
+
+{\bf Note for intermediate coupling simulations:} in case of intermediate coupling
+it is necessary to specify
+L and S seperately (in interactions and Zeeman term and neutron cross sections ...)
+therefore  ''gJ=0'' in {\prg mcphas.j\index{mcphas.j}} has a special meaning:
+\begin{itemize}
+\item  it modifies
+the convention that Ja, Jb and Jc are the total momentum components along the
+crystallographic a,b and c directions. Instead
+the spin components Sa,Sb,Sc and the orbital momentum components La,Lb,Lc are
+assigned to the operator series Ja,Jb,Jc,... as  Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc 
+Jf=Lc, the Jn for $n>f$ being defined in the single ion module. 
+\item the programs {\prg mcphas, mcdisp etc} take into account
+ a modified Zeeman term $H_{Ze}=-\mu_B(\mbf L+2\mbf S)\mbf H$.
+\item the magnetic moments are calculated and shown in plots according 
+to $\mbf M=\mu_B(<\mbf L>+2<\mbf S>)$
+\item Also the inelastic neutron scattering cross section in {\prg mcdisp\index{mcdisp}} is evaluated using the %%@
+first
+6x6 components of the dynamical matrix  in dipole approixmation for the magnetic formfactor.
+\end{itemize}
+... all these features should enable to set up an intermediate coupling module.
+
+
+%*************************************************************************************
+\subsection{External module function {\prg mcalc} - used by {\prg mcphas},{\prg singleion\index{singleion}},{\prg %%@
+charges\index{charges}} and {\prg chrgplt\index{chrgplt}},{\prg mcdiff\index{mcdiff}} }
+
+In order to run {\prg mcphas},{\prg singleion\index{singleion}},,{\prg charges\index{charges}} and {\prg %%@
+chrgplt\index{chrgplt}} the following function has to be 
+present in the module file {\prg *.so}:
+
+\begin{verbatim}
+extern "C" void mcalc(Vector & J,double * T, Vector & gjmbH,double * gJ, Vector & MODPAR,
+                      char ** sipffilename, double * lnZ,double * U,ComplexMatrix & mcalc_parstorage);
+\end{verbatim}
+
+Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) void %%@
+mcalc(...)}.
+
+The meaning of the symbols is as follows:
+{\footnotesize
+\begin{verbatim}
+  on input
+    T           temperature[K]
+    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gJ          Lande factor
+    MODPAR      Vector with Parameters  read in single ion property file
+    sipffilename    file name of the single ion parameter file
+    mcalc_parstorage parameter matrix (initialized by mcalc_parameter_storage_matrix_init)
+                   it should/may contain any information, e.g. population numbers of the
+				   states (imaginary part of row 0)
+                   and eigenvalues (real part of row 0) with values set by the most recent call
+                   for this ion (use of this matrix is optional)
+  on output    
+    J           single ion momentum vector <J> (n- dimensional with n>=1,
+                may be an arbitrary set of operators, restriction is that 
+                Ja, Jb, Jc are the total angular motmentum components along the
+                crystallographic a,b,c directions (note if gJ=0 this restriction is that
+                Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc). his is necessary in order that
+                mcphas\index{mcphas} gets right the Zeeman term and correctly outputs
+				magnetisation and neutron scattering. This means J4,...,Jn can be chosen 
+				as the user wants, for example Jd=O20(J) Je=O61(J) Jf=Jy-Jx^2 or similar)
+    lnZ         natural logarithm of single ion partition function
+    U           single ion magnetic energy [meV]
+    mcalc_parstorage     parameter matrix matrix (optional)
+                   it should/may contain any information for the next call of mcalc, e.g.
+                   population numbers of the states (imaginary part of row 0)
+                   and eigenvalues (real part of row 0) ...
+\end{verbatim}
+}
+The module function must perform the following tasks:
+\begin{enumerate}
+\item check if the dimensions of vectors J,gjmbH (taken by {\prg mcphas} from the number of 
+interaction constant columns in {\prg mcphas.j\index{mcphas.j}})
+ and ABC (taken by {\prg mcphas} from the number of params in the single ion property
+file) agree with the module specifications. Note a module may be designed to 
+take different dimensions depending on the input files, however the dimensions
+of vectors J and gjmbH has to agree and must be within the range of dimensions which
+can be treated by the module. If the check fails the module function should exit the
+program with an appropriate error message
+\item the module should calculate from meanfields at a given temperature the 
+thermal expectation values of the operators $<Ja>, <Jb>,<Jc> etc$ and return them as
+a vector J. Input file parameters params are supplied as a vector ABC and
+Lande factor as gJ and  can be used for this purpose. The Hamiltonian
+is assumed to be of the general form $H=H_0-J_a {\rm gjmbH}(1) -J_b {\rm gjmbH}(2) -J_c {\rm gjmbH}(3) -J_d {\rm %%@
+gjmbH}(4) ...$.
+\item the natural logarithm of the partition sum Z should be calculated and returned as lnZ,
+$Z=\sum_i e^{-E_i/kT}$
+\item the magnetic energy U should be calculated and returned as U, $U=\sum_i E_i e^{-E_i/kT}$
+\end{enumerate}
+
+... as an example the anisotropic doublet function is given as a
+loadable module in the file {\prg ./examples/cecu2a/1ion\_mod/kramer.c}, in the same
+directory a Makefile is given in order to show how this loadable
+module is compiled (for details see appendix~\ref{kramers}).
+
+Another more complicated example, the calculation of the magnetisation
+in a tetragonal quasi-quartet system is given in Appendix~\ref{dyni2b2c}.
+
+%*************************************************************************************
+\subsection{External module function {\prg mcalc\_parameter\_storage\_matrix\_init} - used by {\prg %%@
+mcphas\index{mcphas}},{\prg singleion\index{singleion}},{\prg charges\index{charges}} and {\prg %%@
+chrgplt\index{chrgplt}},{\prg mcdiff\index{mcdiff}}  }
+
+This routine is optional, i.e. it may be programmed, but is not absolutely necessary.
+Before any call to mcalc this function will be called. subsequent calls to mcalc will provide this matrix to %%@
+mcalc, mcalc may set values to this matrix to be read in the next call
+of mcalc.
+
+This feature provides the designer of a single ion module  with the possiblity to store information for subsquent %%@
+calls of mcalc,
+ usually the eigenvalues and eigenstates of a problem. This can be very useful to accelerate computations. For %%@
+example, in {\prg mcphas} meanfield iterations require
+to solve a similar eigenvalue problem in each iteration step. Therefore the {\prg mcphas} module provides
+to the single ion module on every call to the function {\prg mcalc} the parmeter matrix {\prg }
+which the module stored in its last call for a specfic ion in the magnetic unit cell.
+
+At the start of the programs {\prg mcphas} {\prg mcdiff} {\prg singleion} the function {\prg %%@
+mcalc\_parameter\_storage\_matrix\_init}
+is called (if present in the module) and it should initialize a Complex Matrix by a command such as
+
+{\prg (*parstorage)=ComplexMatrix(0,nofrows,1,nofcols);}
+
+and fill this matrix with sensible numerical values, in particular for the effective field, temperature given at %%@
+the input of this function.
+Parameters {\prg MODPAR} and Lande Factor {\prg gJ} may be used for this purpose.
+
+The routine should look similar to
+{\footnotesize
+\begin{verbatim}
+#include "vector.h"          // MatPack vector class must be included
+
+#ifdef __linux__
+extern "C" void mcalc_parameter_storage_matrix_init(
+#else
+extern "C" __declspec(dllexport) void mcalc_parameter_storage_matrix_init(
+#endif
+// on output
+                     ComplexMatrix * parstorage,    // storage matrix
+// on input
+                      Vector &gjmbH,      // Input vector of mean fields (meV)
+					                      // (can be n dimensional)
+                      double *g_J,        // Input Lande g-factor
+                      double &T,          // Input temperature (K)
+                      Vector &MODPAR,     // Input vector of parameters 
+					                      //from single ion property file
+                      char **sipffilename)// Single ion properties filename
+{ // ... some code to compute eigenvectors and eigenvalues
+
+// dimension matrix
+(*parstorage)=ComplexMatrix(0,nofrows,1,nofcols);
+
+// fill matrix with values
+int l,m;
+          for(l=1;l<=nofrows;++l)for(m=1;m<=nofcols;++m)
+          {(*parstorage)(l,m)=complex <double> ( 4 , 2);}
+                                           // instead of 4 and 2 put the real 
+										   //and imaginary parts to be stored
+}
+\end{verbatim}
+}
+
+
+%*************************************************************************************
+\subsection{External module function {\prg estates} - used by {\prg mcdisp\index{mcdisp}}, {\prg %%@
+mcdiff\index{mcdiff}} and {\prg singleion\index{singleion}}}
+
+This routine is optional, i.e. may be programemd but is not absolutely necessary. It provides the designer of a %%@
+single ion module
+with the possiblity to store information, usually the eigenvalues and eigenstates of a problem. This can be very %%@
+useful to accelerate computations. 
+For example, the module {\prg mcdisp} provides to the single ion module functions {\prg dmcalc} and {\prg dncalc}
+at every call the matrix {\prg estates} which has been set initially for every atom
+by a call to {\prg estates}.
+
+At the start of the programs {\prg mcdisp} {\prg singleion} the function {\prg estates}
+is called (if present in the module) and it should initialize the Complex Matrix by a command such as
+
+{\prg (*ests)=ComplexMatrix(0,nofrows,1,nofcols);} 
+
+and fill this matrix with sensible numerical values for the effective field, temperature given.
+Parameters {\prg ABC} and Lande Factor {\prg gJ} may be used for this purpose. 
+
+The routine should look similar to
+{\footnotesize
+\begin{verbatim}
+#include "vector.h"          // MatPack vector class must be included
+
+#ifdef __linux__
+extern "C" void estates(
+#else
+extern "C" __declspec(dllexport) void estates(
+#endif
+// on output
+                     ComplexMatrix * ests,    // eigenstate matrix      
+                                              // it should/may also contain population 
+                                              // numbers of the states (imaginary part of row 0)
+                                              // and eigenvalues (real part of row 0)
+// on input
+                      Vector &gjmbH,      // Input vector of mean fields (meV) 
+					                      //(can be n dimensional) 
+                      double *g_J,        // Input Lande g-factor
+                      double &T,          // Input temperature (K)
+                      Vector &MODPAR,     // Input vector of parameters from 
+					                      //single ion property file
+                      char **sipffilename)// Single ion properties filename                      
+{ // ... some code to compute eigenvectors and eigenvalues
+
+// dimension matrix
+(*ests)=ComplexMatrix(0,nofrows,1,nofcols);
+
+// fill matrix with values
+int l,m;
+          for(l=1;l<=nofrows;++l)for(m=1;m<=nofcols;++m)
+          {(*ests)(l,m)=complex <double> ( 4 , 2);}
+                                           // instead of 4 and 2 put the real 
+										   //and imaginary parts to be stored
+}
+\end{verbatim}
+}
+
+
+%*************************************************************************************
+\subsection{External module function {\prg dmcalc} - used by {\prg mcdisp\index{mcdisp}},{\prg %%@
+singleion\index{singleion}}}
+
+The external single ion module has to provide the 3x3 
+matrix $M^s_{\alpha\beta}$ (see equation (\ref{mmatrix})) for every transition
+$|-> \rightarrow |+>$which is to be taken into consideration 
+in the calculation. Note, in general$M^s_{\alpha\beta}$ it is a quadratic matrix with the same
+dimension as the vectors J and gjmbH, however it must be at least 3x3.
+
+
+The format to be used is:
+{\footnotesize
+\begin{verbatim}
+extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & MODPAR,
+char ** sipffilename,ComplexMatrix & mat,float & delta, ComplexMatrix & est)
+\end{verbatim}
+
+The meaning of the symbols is as follows:
+
+\begin{verbatim}
+on input
+   |tn|            transition-number  
+   sign(tn)        >0 standard, <0 routine should do some printout to stdout for user information
+   MODPAR          Vector with Parameters  read in single ion property file
+   sipffilename    file name of the single ion parameter file
+   g_J             Lande factor
+   T               Temperature[K]
+   gjmbH           Vector of effective field [meV] (can be n dimensional)
+   est             eigenstate matrix (initialized by estates)
+                   it should/may also contain population numbers of the states
+				   (imaginary part of row 0)
+                   and eigenvalues (real part of row 0) with values set by the most recent call
+				   for this ion (use of this matrix is optional)
+on output
+   int             total number of transitions
+   delta           transition energy [meV]
+   mat             matrix M(alpha,beta)=<-|Jalpha|+><+|Jbeta|-> (n- - n+)
+                note that as in mcalc the single ion momentum vector <-|J|+> 
+				(n- dimensional with n>=1)
+                may be an arbitrary set of operators, restriction is that 
+                Ja, Jb, Jc are the total angular motmentum components along the
+                crystallographic a,b,c directions (note if gJ=0 this restriction is that
+                Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc). this is necessary in order that
+                mcdisp\index{mcdisp} correctly outputs the neutron scattering cross section.
+				
+\end{verbatim}
+}
+The module function must perform the following tasks:
+\begin{enumerate}
+\item check if the dimensions of vectors J,gjmbH (taken by {\prg mcphas} from the number of 
+interaction constant columns in {\prg mcphas.j\index{mcphas.j}})
+ and ABC (taken by {\prg mcphas} from the number of params in the single ion property
+file) agree with the module specifications. Note a module may be designed to 
+take different dimensions depending on the input files, however the dimensions
+of vectors J and gjmbH has to agree and must be within the range of dimensions which
+can be treated by the module. If the check fails the module function should exit the
+program with an appropriate error message
+\item the module function should do a numbering of all possible single ion transitions and return
+the total number of transitions as an integer. Input file parameters params are supplied as a vector ABC and
+Lande factor as g\_J and  can be used for this purpose.
+\item it should calculate from meanfields at a given temperature the 
+transition energy of transition number {\prg tn}. The result should be returned as {\prg delta}
+\item for the transition number tn the matrix mat is to be filled with the 3x3 
+matrix $M^s_{\alpha\beta}$ (see equation (\ref{mmatrix})).
+If the energy of this transition
+is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
+the expression (\ref{mmatrix}) would be zero because $(n_--n_+)$ vanishes.
+In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--n_+)$.
+\end{enumerate}
+
+%*************************************************************************************
+\subsection{External module function {\prg mq} - used by {\prg mcdiff\index{mcdiff}}  }
+
+ ''going beyond''  dipolar approximation is a desirable feature of an accurate
+ calculation of magnetic neutron scattering intensity and can be performed using
+ mcphase. The internal module {\prg so1ion}\index{so1ion} does this in an excellent
+ way for the ground state multiplet of rare earth atoms (see section \ref{mcdiff_gobeyond})
+ using equations (\ref{scattoperator}) for the scattering operator $\hat \mathcal Q$.
+ A more general formula for this scattering operator operator relates this operator
+ to the Fourier transform of the magnetisation density $\mbf M(\mbf r)$of the unfilled shell of a specific
+ ion~\cite{lovesey84-1}:
+ 
+ \begin{equation}\label{scattop}
+ \hat  \mbf Q \times (\hat \mathcal Q \times \hat \mbf  Q) = \frac{-1}{2\mu_B} 
+ \hat  \mbf Q \times (\mbf M(\mbf Q) \times \hat \mbf  Q) =\frac{-1}{2\mu_B} \int d\mbf r
+    \hat  \mbf Q \times (\mbf M(\mbf r) \times \hat \mbf  Q)
+ \end{equation}
+ 
+ Note that the magnetisation density consists of two contributions $\mbf M(\mbf r)=\mbf M_S(\mbf r)+\mbf M_L(\mbf %%@
+r)$, the
+ spin and orbital contribution. The orbital contribution is not uniquely defined due to a gauge freedom ($\nabla %%@
+\times \mbf M_L (\mbf r)=\mbf j(\mbf r)$, the curl of the magnetisation must give the current density, so any %%@
+gradient of a potential may be added
+to $\mbf M(\mbf r)$ without changing the result). However, this does not matter, because adding a gradient of a %%@
+potential
+to $\mbf M(\mbf r)$ will just give a contribution $\mbf Q \times \mbf Q \times \mbf Q=0$ to the equation %%@
+(\ref{scattop}),
+thus the neutron scattering cross section is not sensitive to the chosen gauge, which is an important feature of %%@
+the theory.
+ 
+ 
+Technically,  ''going beyond''  dipolar approximation in the program {\prg mcdiff\index{mcdiff}}
+can be done with  module functions {\prg mq} and {\prg estates}. 
+The output of {\prg mq} is the scattering operator 
+ $\langle \hat \mathcal Q^{d \dag}_{\alpha} \rangle_{T,H}$ for
+ a given orientation of the scattering vector. {\prg mq} is called many times, for
+ every scattering vector. In order to
+ do an efficient calculation the eigenstates should be calculated only
+ once, this is the task of function {\prg estates}.
+
+
+The format to be used is:
+{\footnotesize
+\begin{verbatim}
+extern "C" void mq(ComplexVector & Mq,double & th,double & ph,double J0,
+double & J2, double & J4, double & J6,ComplexMatrix & est)
+\end{verbatim}
+
+The meaning of the symbols is as follows:
+
+\begin{verbatim}
+on input
+   th     polar angle theta of the scattering vector Q (angle with the axb axis=c axis) in rad
+   ph     polar angle phi of the scattering vector Q (angle with bx(axb)=a in the 
+          projection into the  bx(axb),b plane = angle with a in the projection into the 
+		  ab plane) in rad
+   J0,J2,J4,J6     form factor functions <jn(Q)>   
+   est             eigenstate matrix (as calculated by estates),
+                   it should also contain population numbers of the states
+on output
+   Mq(1..3)        Kartesian components of the scattering operator <M(Q)>=-2<Q>_TH
+                    Note that: 
+                               Mq(1)=<Mbx(axb)(Q)>
+                               Mq(2)=<Mb(Q)>
+                               Mq(3)=<Maxb(Q)>
+                    according to Lovesey Neutron Scattering equation 6.87b the 
+                    scattering operator is given in  spherical coordinates 
+					Q-1,Q0,Q+1 (introduced as described above on input of th and ph)
+					these are related to cartesion coordinates by 11.123
+				    thus at Q=0  <M(Q)>=2<S>+<L>
+
+\end{verbatim}
+}
+
+%*************************************************************************************
+\subsection{External module functions {\prg dncalc} - used by {\prg mcdisp\index{mcdisp}}  }
+
+Similarly  ''going beyond''  dipolar approximation in the program {\prg mcdisp\index{mcdisp}}
+can be done with  module functions {\prg dncalc} and {\prg estates}. 
+The input of {\prg dncalc} 
+has similar arguments as
+{\prg dmcalc}, but as additional argument an orientation
+of the scattering vector,
+output should be a corresponding matrix 
+$N^s_{\alpha\beta}(\mbf Q)=<-|\mathcal Q^{\dag}_{\alpha}|+><+|\mathcal Q_{\beta}|-> (n_--n_+)$.
+where $\mathcal Q_{\alpha}$ are the cartesian components of the scattering operator.
+ {\prg dncalc} is called many times, for
+ every scattering vector. In order to
+ do an efficient calculation the eigenstates should be calculated only
+ once, this is the task of function {\prg estates} (see above).
+
+
+The format to be used is:
+{\footnotesize
+\begin{verbatim}
+extern "C" int dncalc(int & tn,double & th,double & ph,double J0,
+double & J2, double & J4, double & J6,ComplexMatrix & est,double & T,
+ComplexMatrix & mat)
+\end{verbatim}
+
+The meaning of the symbols is as follows:
+
+\begin{verbatim}
+on input
+   |tn|            transition-number  
+   sign(tn)        >0 standard with printouts for user information, 
+                   <0 routine should omit any printout
+   th              polar angle theta of the scattering vector Q 
+                   (angle with the axb axis=c axis) in rad
+   ph              polar angle phi of the scattering vector Q 
+                   (angle with bx(axb)=a in the projection into
+                   the  bx(axb),b plane = angle with a in the projection into 
+				   the ab plane) in rad
+   J0,J2,J4,J6     form factor functions <jn(Q)>   
+   est             eigenstate matrix (as calculated by estates),
+                   it should also contain population numbers of the states (row 0)
+   T               Temperature[K]
+on output
+   int             total number of transitions
+   mat             matrix N(alpha,beta)=<-|Qalpha|+><+|Qbeta|-> (n- - n+)
+                   
+     Note on Qalpha
+       if gJ>0:
+        Cartesian components of the scattering operator Qalpha, alpha=1,2,3=a,b,c
+        according to Lovesey Neutron Scattering equation 6.87b 
+        scattering operator is given in  spherical coordinates Q-1,Q0,Q+1 (introduced
+        as described above on input of th and ph) these are related to euclidean 
+		components by 11.123
+        Q1=Qbx(axb)
+        Q2=Qb                         
+        Q3=Qaxb    
+                   
+       if gJ=0 
+        the orbital and spin contributions have to be given as separate 
+		components of Qalpha=1,2,3,4,5,6 according to Lovesey Neutron Scattering 
+		equations 11.55 and 11.71 (the spin part 11.71 has to be
+        divided by 2), i.e.
+        <-|Q1,3,5|+>=<-|QSa,b,c|+>=
+          =<-|sum_i exp(i k ri) s_(a,b,c)|+> /2                   as defined by 11.71 / 2
+				   
+        <-|Q2,4,6|+>=<-|QLa,b,c|+>=
+          =<-|sum_i exp(i k ri) (-(k x grad_i)_(a,b,c)/|k|)|+>     as defined by 11.54 /(-|k|)
+	     thus for k=0 <Q1,3,5>=<S>/2 and <Q2,4,6>=<L>/2 
+				
+\end{verbatim}
+}
+
+The module function must perform the following tasks:
+\begin{enumerate}
+\item for the transition number tn the matrix mat is to be filled with the nxn 
+matrix $N^s_{\alpha\beta}$ (see comments after equation (\ref{finalslow})),
+n is the number of components of the effective field vector, the 
+matrix should only have nonzero values for the relevant values of
+the scattering operator, i.e. for $\alpha,\beta=1,..3$ in the case of
+gJ$>$0 and for $\alpha,\beta=1,..,6$ in the case gJ=0 (intermediate coupling)
+\item
+If the energy of this transition
+is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
+the $N^s_{\alpha\beta}$ 
+ would be zero because $(n_--n_+)$ vanishes (compare expression (\ref{mmatrix})).
+In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--n_+)$.
+\end{enumerate}
+
+%*************************************************************************************
+\subsection{External module function {\prg spindensity\_mcalc} -
+used by {\prg spindensplt\index{spindensplt}},
+{\prg spindensities\index{spindensities}},
+{\prg momdensplt\index{momdensplt}},
+{\prg momdensities\index{momdensities}}}
+
+In order to calculate spindensities
+the following function has to be
+present in the module file {\prg *.so}:
+
+\begin{verbatim}
+extern "C" void spindensity_mcalc(Vector &aSlm, int & xyz, double *T,Vector &gjmbH,
+     double *gJ,Vector &MODPAR,char **sipffilename,ComplexMatrix & mcalc_parstorage);
+\end{verbatim}
+
+Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) void %%@
+spindensity\_mcalc(...)}.
+
+The meaning of the symbols is as follows:
+{\footnotesize
+\begin{verbatim}
+  on input
+    xyz         direction index 1,2,3 = x,y,z (component for the spindensity vector to be calculated)
+    T           temperature[K]
+    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gJ          Lande factor
+    MODPAR      Vector with Parameters  read in single ion property file
+    sipffilename    file name of the single ion parameter file
+    mcalc_parstorage parameter matrix (initialized by mcalc_parameter_storage_matrix_init)
+                   it should/may contain any information, e.g. population numbers of the
+				   states (imaginary part of row 0)
+                   and eigenvalues (real part of row 0) with values set by the most recent call
+                   for this ion (use of this matrix is optional)
+  on output
+    aSlm         Output single ion moments =expectation values of
+                coefficients of Zlm R^2(r) at a given temperature T and
+                effective field H
+\end{verbatim}
+}
+
+The module function must perform the following tasks:
+\begin{enumerate}
+\item calculate the coefficients of $Z_l^m R^2(r)$ in the expansion of
+      the spin density vector $M^S_{x,y,z}=\sum_{l,m} a^{x,y,z}_{S,lm} Z_l^m R^2(r)$
+      The output Vector alm(1,\dots,49) should contain  $a^{x,y,z}_{S,lm}$
+      in the following order (lm):  00,1-1, 10,11, 2-2, 2-1,20,21,22, 3-3, 3-2, ...,65,66
+\end{enumerate}
+
+%*************************************************************************************
+\subsection{External module function {\prg orbmomdensity\_mcalc} -
+used by {\prg orbmomdensplt\index{spindensplt}},
+{\prg orbmomdensities\index{spindensities}},
+{\prg momdensplt\index{momdensplt}},
+{\prg momdensities\index{momdensities}},
+{\prg currdensplt\index{momdensplt}},
+{\prg currdensities\index{momdensities}}
+}
+
+In order to calculate orbital moment densities
+the following function has to be
+present in the module file {\prg *.so}:
+
+\begin{verbatim}
+extern "C" void orbmomdensity_mcalc(Vector &aLlm, int & xyz, double *T,Vector &gjmbH,
+     double *gJ,Vector &MODPAR,char **sipffilename,ComplexMatrix & mcalc_parstorage);
+\end{verbatim}
+
+Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) void %%@
+orbmomdensity\_mcalc(...)}.
+
+The meaning of the symbols is as follows:
+{\footnotesize
+\begin{verbatim}
+  on input
+    xyz         direction index 1,2,3 = x,y,z (component for the spindensity vector to be calculated)
+    T           temperature[K]
+    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gJ          Lande factor
+    MODPAR      Vector with Parameters  read in single ion property file
+    sipffilename    file name of the single ion parameter file
+    mcalc_parstorage parameter matrix (initialized by mcalc_parameter_storage_matrix_init)
+                   it should/may contain any information, e.g. population numbers of the
+				   states (imaginary part of row 0)
+                   and eigenvalues (real part of row 0) with values set by the most recent call
+                   for this ion (use of this matrix is optional)
+  on output
+    aLlm         Output single ion moments =expectation values of
+                coefficients of Zlm F(r) at a given temperature T and
+                effective field H
+\end{verbatim}
+}
+
+The module function must perform the following tasks:
+\begin{enumerate}
+\item calculate the coefficients of $Z_l^m F(r)$ in the expansion of
+      the orbital moment
+      density vector $M^L_{x,y,z}=\sum_{l,m} a^{x,y,z}_{L,lm} Z_l^m F(r)$
+      The output Vector alm(1,\dots,49) should contain  $a^{x,y,z}_{L,lm}$
+      in the following order (lm):  00,1-1, 10,11, 2-2, 2-1,20,21,22, 3-3, 3-2, ...,65,66
+\end{enumerate}
+
+Note the definition of $F(r)$ in terms of the radial wave function $R(r)$ is
+
+\begin{equation}
+F(r)=\frac{1}{r}\int_r^{\infty} R^2(\xi)d\xi
+\end{equation}
+
+%*************************************************************************************
+\subsection{External module function {\prg ro\_calc} -
+used by {\prg chrgplturrdensplt\index{chrgplt}},
+{\prg charges\index{charges}}
+}
+
+In order to calculate more complex charge densities, the optional function
+{\prg rocalc} may be present in the module file {\prg *.so}. If present,
+it will be used by programs {\prg chrgplturrdensplt\index{chrgplt}},
+{\prg charges\index{charges}}:
+
+\begin{verbatim}
+extern "C" double ro_calc(double & teta,double & fi,double &R,Vector &aLlm, double *T,
+     Vector &gjmbH, double *gJ,Vector &MODPAR,char **sipffilename);
+\end{verbatim}
+
+Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) double %%@
+ro\_calc(...)}.
+
+The meaning of the symbols is as follows:
+{\footnotesize
+\begin{verbatim}
+  on input
+    teta, fi, R(Angsgtroem) .... spatial position in spherical coordinates
+    T           temperature[K]
+    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gJ          Lande factor
+    MODPAR      Vector with Parameters  read in single ion property file
+    sipffilename    file name of the single ion parameter file
+    aLlm         Output single ion moments =expectation values of
+                coefficients of Zlm F(r) at a given temperature T and
+                effective field H
+on output
+  double ro_rocalc ... the charge density
+\end{verbatim}
+}
+
+The module function must perform the following tasks:
+\begin{enumerate}
+\item calculate the charge density for plotting
+\end{enumerate}
+
+

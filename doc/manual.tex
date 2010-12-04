@@ -1,0 +1,532 @@
+\documentclass[twoside]{article}
+\hoffset-2.5cm
+\voffset-2cm
+\textwidth16cm
+\textheight26cm
+\oddsidemargin2.4cm
+\evensidemargin2.4cm
+\usepackage{graphicx}
+ \usepackage{makeidx}
+\makeindex
+\newcommand{\mbf}[1]{\mathbf #1}
+\newcommand{\V}[1]{ \stackrel{=}{\mathbf #1}}
+\newcommand{\prg}{\sl}
+\newcommand{\use}[1]{\vspace{0.5cm} Usage: {\prg{ #1}} \vspace{0.5cm}}
+
+\begin{document}
+
+
+ \title{ {\Huge \bf \em McPhase} \\
+ \vspace{1cm} 
+{\bf   USERS MANUAL}\\
+  \vspace{2cm} 
+\vspace{3cm}}
+
+\date {\input{version.tex}
+ \vspace{2cm}
+ \\ \today}
+
+\author{M. Rotter, Lucian G Pascut, Till Hoffmann \\
+University of Oxford, Physics Department, Clarendon Laboratory, Parks Road, Oxford, UK\\
+E-mail: martin.rotter@physics.ox.ac.uk\\
+\\
+ M. Doerr\\
+Institut f\"ur Festk\"orperhysik, Technische Universit\"at Dresden, D-01062 Dresden, Germany\\
+\\
+P. Fabi n\'e Hoffmann\\
+Forschungszentrum J\"ulich, D-52425 J\"ulich, Germany\\
+\\
+S. Rotter\\
+Wien, Austria \\
+\\
+M. Banks \\
+Max Planck Institute, Stuttgart, Germany\\
+\\
+Duc Manh Le, R. Schedler \\
+Helmholtz-Zentrum Berlin f\"ur Materialien und Energie, Berlin, Germany\\
+\vspace{2cm} 
+}
+
+
+\maketitle
+\clearpage
+
+\section*{Acknowledgements}
+
+We would like to thank colleagues who generously agreed to read sections of the draft version
+of the text; their comments helped to improve the text substantially. We are particularly indebted to
+Ulrike Witte, Jane Brown and Andrew Boothroyd for their help and inspiring comments.
+
+The authors thank the FWF, Royal Society and the EPSRC.
+We thank the authors of Cfield, Powls, FullProf, Spectre and Amos, output 
+of these programs has been used to test McPhase. 
+
+Without the enthusiastic support of the neutron scattering 
+community this program would not have come into existence. 
+
+\section*{What is New ?}
+
+\subsection*{... in version 3.8 ...}
+
+{\prg mcdiff}\index{mcdiff} has been extended to be able to output real and imaginary parts of nuclear and
+magnetic structure factors. This is convenient for the analysis of polarized neutron diffraction experiments.
+
+\subsection*{... in version 3.7 ... }
+
+Calculation of standard deviations and input file format of mcdisp.par changed to include antipeaks and
+also input external experimental data files. {\prg Setup\_mcdisp\_mf} program to easily create input file {\prg %%@
+mcdisp.mf}. Hamiltonian extended to include $S_z^2$ anisotropy terms.
+
+\subsection*{... in version 3.6 ... }
+calculation and display of densities: charge density, spin density, orbital moment density, total moment density, %%@
+current density
+
+\subsection*{... in version 3.5 ... }
+McPhase has become fully capable of dealing with nonorthogonal lattices 
+
+\subsection*{... in version 3.2 ...}
+\begin{enumerate}
+\item {\prg mcdisp} calculation of powder single ion neutron intensities is straightforward - intensities are
+      output in {\prg mcdisp.trs}.
+\item some routines in mcphas and mcdisp are now capable to use multiple threads and thus calculations are possible
+      on multiprocessor computers with higher speed
+\end{enumerate}
+\subsection*{... in  version 3.1 ...}
+
+\begin{enumerate}
+\item in addition to cfield there is now a module so1ion, where the coordinates
+      of the crystal field xyz are oriented to the crystal axes as xyz$||$abc
+\item the package is now capable of doing intermediate coupling calculations
+      and thus applicable to transition metal and actinide ions, for details
+      see chapter~\ref{ic1ion}.
+\item {\prg makenn\index{makenn}} contains new functions for creating two ion interaction:
+      the Bethe Slater Curve, RKKY and dipolar interactions
+\item {\prg rotateBlm} can be used for transformation of Stevens
+      parameters under arbitrary rotation of the coordinate system
+\item {\prg displaytext\index{displaytext}} allows to monitor text files (for instance during a fit)
+\item all input/output files have comments lines starting with ''\#'', however if variables to be read by 
+      programs follow, the line should start with ''\#!''
+
+\end{enumerate}
+
+\newpage
+
+\tableofcontents
+
+\clearpage
+
+\section{How To ... ? }
+\input{../tutorial/howto.txt}
+
+\section{Frequently asked Questions}
+\input{../frequently_asked_questions.txt}
+
+\clearpage
+\section{Introduction}
+
+{\prg McPhase} is a program package designed to calculate 
+properties of a magnetic system with localised magnetic moments
+given the crystal field and/or the
+exchange interaction constants.
+For rare earth ions it is based on the standard model
+of rare earth magnetism~\cite{jensen91-1}~\footnote{\em http://www.nbi.ku.dk/page40667.htm}.
+The Hamiltonian of the standard model of rare earth magnetism 
+is described in section~\ref{hamiltonian}.
+Alternatively, a more complex Hamiltonian can be used which includes
+all terms in intermediate coupling - this is important for transition metal
+and actinide ions.
+
+ 
+
+For each of the many tasks of the program package separate programs have been written.
+Fig.~\ref{modules} gives an overview of the 
+tasks of these different modules of the program package.
+
+
+\begin{figure}[hb]\begin{center}
+\includegraphics[angle=0,width=0.7\columnwidth]{./figsrc/mcphas_modules.eps}
+\caption{\label{modules}
+Structure of the program package showing the tasks of the different modules.}
+\end{center}
+\end{figure}
+
+\begin{description}
+\item[so1ion(cfield):]
+The best way to start with the program package is probably to get
+acquainted with
+the module {\prg so1ion\index{so1ion}}, which is the most important of several 
+modules used for the calculation of single ion properties (see Section~\ref{cfield}).
+\item[ic1ion:]
+An advanced single ion module for intermediate coupling calcuations.
+\item[mcphas:]
+This module has been written to calculate the thermodynamic properties.
+In order to  deal with the pair interactions a
+ combined mean-field/monte-carlo algorithm is used in module {\prg mcphas}.
+For a given temperature $T$ and magnetic field $\mbf H$ (vector)
+ several possible magnetic structures are stabilised
+by a mean field algorithm and the free energy is 
+calculated. The initial values for this mean-field procedure are
+modified by a Monte Carlo process.
+See Section~\ref{runmcphas} on how to perform such a simulation.
+
+
+The temperature and magnetic field is varied during the calculation
+and thereby it is possible to map out the magnetic phase diagram.
+The program produces a plot of the stabilised magnetic
+structures and the magnetisation on screen, the
+output files contain additional information 
+such as calculated magnetoelastic and  neutron-diffraction
+data. As a typical application of {\prg mcphas} the calculated magnetic
+phase diagram of NdCu$_2$ is shown in fig.~\ref{ndphased}.
+The exchange parameters required for the calculation of such a complex
+antiferromagnet have
+been determined from the dispersion of magnetic excitations
+measured by neutron spectroscopy with moments aligned ferromagnetically
+by an external magnetic field. Details are described elsewhere \cite{rotter00-29}.
+
+\item[graphics:]
+Several graphic programs easy the visualisation of the
+calculated data (section~\ref{graphics}).
+
+\item[mcdiff\index{mcdiff}:]
+The module {\prg McDiff} can be used to calculate the magnetic neutrons
+or resonant x-ray diffraction intensities. Note that neutron intensities
+can be calculated going beyond the dipolar approximation for the magnetic
+formfactor.
+
+\item[mcdisp:]
+An additional module {\prg McDisp} can be used to calculate the 
+dispersion and intensity
+ of magnetic excitations and diffuse magnetic scattering cross section.
+  It is based on a mean field- random
+phase approximation treatment of the problem (section~\ref{mcdisp}). 
+\item[simannfit:]
+In oder to enable the determination of the parameters of the
+magnetic Hamiltonian from experimental data, a fitting module
+{\prg Simannfit} can be used to fit experimental  magnetic structure and excitation
+data. This module is based on the simulated annealing 
+algorithm~\cite{kirkpatrick83-671} and described in section~\ref{simannfit}.
+\end{description}
+
+\begin{figure}[ht]\begin{center}
+\includegraphics[angle=90,width=0.7\columnwidth]{./figsrc/ndphased.ps}
+\caption{\label{ndphased}
+Magnetic phase diagram for NdCu$_2$ for magnetic field along
+the orthorhombic $b$-direction. Colours represent the calculated phase
+diagram, lines correspond to experimentally determined phase boundaries.
+[plot created by program {\prg phased}]
+}
+\end{center}
+\end{figure}
+
+
+\section{Getting Started ...}  
+
+First some important notes .... this manual does neither give an introduction into the theory of 
+magnetism nor a description of the experimental techniques. In order
+to use the program successfully, some basic knowledge of crystal field theory and the mean field
+approximation is required, see for instance~\cite{jensen91-1}.
+In order to compare the output of the calculation with experimental
+data, it is recommended to be familiar with  experimental techniques used
+in the investigation of magnetic properties
+such as magnetisation, susceptibility, specific heat, magnetostriction
+measurements and neutron scattering.
+
+Using {\prg McPhase} for the first time, the reader should
+\begin{itemize}
+\item
+rush into the program and test that it functions correctly on his system
+by starting the demos ( type {\prg cd demo} and then run {\prg 01\_demo\_crystal\_fields.bat},{\prg %%@
+02\_demo\_mcphas\_I\_NdCu2.bat}, etc.).  
+\item 
+learn about some special features and basic functions of the program package by
+doing the tutorial in directory {\prg tutorial}
+\item
+look at the example calculations in directory {\prg examples}. These examples cover a large variety
+of problems, which the program package may be applied to (see table~\ref{examples}). In addition, this directory
+contains a large number of single ion property files which will be useful for setting
+up numerical calculations for a specific system.
+\item
+with the help of this manual, which contains also some exercises the user is advised 
+to learn about all details required to do a successful simulation of atomic magnetic properties
+and set up calculations, which hopefully will be useful to interpret a large variety of 
+experimental data. 
+\end{itemize}
+
+\begin{table}[thb] 
+\begin{center}  
+\caption {Description of the calculations, which come along with the program package {\prg McPhase} in directory {\prg %%@
+examples}:}   
+\label{examples}   
+\begin{tabular} 
+{l|l|l|l}
+compound & problem & single ion & references \\ 
+        &          & module  &             \\
+\hline
+CeCu$_2$  & mag phase diagram, fit of dispersive mag. excitations to neutron data & {\prg kramer}\index{kramer} & %%@
+\cite{loewenhaupt06-775,schedler03-1313} \\
+CePd$_2$Si$_2$ & neutron diffraction going beyond dipolar approx for mag. formfactor & {\prg %%@
+so1ion}&\cite{rotter09-140405} \\
+NdBa$_2$Cu$_3$O$_7$ & fit of magnetic neutron diffraction data going beyond dipapprox & {\prg cfield}\index{cfield} & %%@
+\cite{rotter09-140405} \\
+DyCu$_2$ & quadrupolar order and phase diagram & {\prg cfield}\index{cfield}&\cite{yoshida98-1421} \\
+DyNi$_2$B$_2$C & magnetic phase diagram, special single ion module (quasiquartet) & {\prg %%@
+quartett.so}\index{quartett.so}& \\
+ErNi$_2$B$_2$C & magnetostriction and phase diagram & {\prg cfield}&\cite{doerr02-5609}\\
+Gd$_3$GaO$_6$  & pointcharge model calculation of crystal field parameters & & \\ 
+GdNi$_2$B$_2$C & magnetostriction and phase diagram, spin only (L=0) & {\prg brillouin}\index{brillouin}& %%@
+\cite{doerr02-5609}\\
+GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, magnetic structure & {\prg cfield} & \\
+NdCu$_2$  & crystal field, magnetic structure, phase diagrams, excitations & {\prg cfield}& %%@
+\cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29,rotter02-751,rotter02-8885} \\
+PrNi$_2$B$_2$C & crystal field - fit to neutrons,cp, susc & {\prg cfield}&\cite{mazumdar08-144422}\\
+TbCu$_2$ & magnetic phases with field parallel $a$ & {\prg cfield} \\
+testic1ion & Pr$^{3+}$ chargedensity in IC and LS coupling & {\prg ic1ion,cfield} \\
+ \end{tabular}
+\end{center}   
+\end{table}
+
+
+
+Some publications referencing Mcstas: %%@
+\cite{rotter02-751,rotter02-8885,rotter03-144418,rotter03-mass,rotter03-x,rotter04-231,ro%%@
+tter%%@
+04-xxxx}
+
+
+
+\clearpage
+\section{The Hamiltonian}
+\label{hamiltonian}
+
+\subsection{Rare Earth Ions}
+
+The magnetic  Hamiltonian $\mathcal H$, which may be treated with
+the program package is:
+
+\begin{equation}
+\label{hamilton}
+ {\mathcal H}= \sum_{s,lm} B_l^m O_{lm}({\mbf J}^s) 
+             -\frac{1}{2}  \sum_{ss'} {\mathcal J}(ss') {\mbf J}^s{\mbf J}^{s'}
+	     - \sum_{s} g_{Js} \mu_B {\mbf J}^s {\mbf H} 
+\end{equation}
+
+The first term describes the crystal field (Stevens Operators $O_l^m$, see table in appendix~\ref{stevens}), the second %%@
+the magnetic
+exchange interaction, the third the Zeeman energy if an external magnetic field is applied.
+Instead (or rather in addition) to this it is also possible to treat the 
+more general two ion exchange coupling
+
+\begin{equation}
+\label{multipolehamilton}
+ {\mathcal H}_{JJ}=
+             -\frac{1}{2}  \sum_{ss'} \sum_ {ll'} \sum_{mm'}
+	     {\mathcal K}_{ll'}^{mm'}(ss') O_{lm}({\mbf J}^s) O_{l'm'}({\mbf J}^s)
+\end{equation}
+
+For further information on the notation and symmetry restrictions to the
+parameters in the Hamiltonian refer to~\cite{jensen91-1}~\footnote{\em http://www.nbi.ku.dk/page40667.htm}.
+
+In addition to the above terms in the Hamiltonian the coupling of magnetic and lattice properties
+is possible by introducing magnetoelastic interactions:
+In order to calculate magnetoelastic effects the parameters $B_l^m$, ${\mathcal J}(ij)$ (or more general
+the ${\mathcal K}_{ll'}^{mm'}(ij)$) are expanded in a Taylor expansion in the strain tensor
+$\epsilon$ resulting in the magnetoelastic interaction (i.e. keeping only the terms linear
+in $\epsilon$). The equilibrium strain can be 
+calculated by considering in addition the elastic energy and minimising the total free energy.
+The procedure is described in detail in~\cite{rotter02-8885}.
+
+
+ 
+
+
+\vspace{1cm}
+
+{\em Exercises:}
+\begin{itemize}
+\item Write down the list of nonzero crystal field parameters in the crystal field Hamiltonian
+of a Nd$^{3+}$ ion in an orthorhombic crystal field (Section~\ref{cfield} describes how such a parameter set
+enters a {\prg McPhase} calculation).
+\item Taking a primitive orthorhombic lattice of Nd$^{3+}$ ions write down the most general
+anisotropic bilinear interaction  for the nearest neighbour exchange interaction
+(Section~\ref{mcphasj} describes how such a parameters set enters a {\prg McPhase calculation}).
+\end{itemize}
+
+%The $\tilde O_l^m$ in are the Racah  operators, which form a set of irreducible
+%tensor operators.
+
+\subsection{Intermediate Coupling}
+
+For some rare earth ions and for transition metals or actinides it is necessary to
+include more singleion ion states with differen L,S into the calculation. This
+can be done in intermediate coupling using the module {\prg ic1ion}\index{ic1ion}, which
+explicitely includes electrostatic and  spin orbit interactions for each ion:
+
+\begin{eqnarray}
+\label{ichamilton}
+ {\mathcal H}&=& \sum_s \left \{ \sum_{i_s=1}^{N_s} \left [ \frac{p_{i_s}^2}{2m_e}-\frac{Z_s e^2}{|\mbf r_{i_s}-\mbf %%@
+R_s|}\right ]
+              + \sum_{i_s>j_s=1}^{N_s}\frac{e^2}{|\mbf r_{i_s}-\mbf r_{j_s}|} \right \} \nonumber \\
+            &&  + \sum_s \xi_s \mbf L^s \mbf S^s  \nonumber\\
+            && + \sum_{s,lm} L_l^m T_{lm}^s \nonumber\\
+            && -\frac{1}{2}  \sum_{ss'} {\mathcal J_S}(ss') {\mbf S}^s{\mbf S}^{s'}
+               -\frac{1}{2}  \sum_{ss'} {\mathcal J_L}(ss') {\mbf L}^s{\mbf L}^{s'} \nonumber\\
+	    && - \sum_{s}  \mu_B (2\mbf S^s+\mbf L^s) {\mbf H} 
+\end{eqnarray}
+
+Here $N_s$,$Z_s$ and $\mbf R_s$ denote the number of electrons, the charge of the nucleus
+and the position
+ of the ion number $s$,respectively, for each electron being
+$p$ the momentum, $m_e$ the mass, $e$ the charge and $\mbf r$ the location.
+Spin orbit coupling, Zeman interaction and two ion interaction are written in terms of 
+the (inverse) total spin $\mbf S_s$ and (inverse) total orbital momentum $\mbf L_s$
+of ion number $s$. The crystal field in intermediat coupling is written
+in terms of Wybourne parameters $L_l^m$ and Wybourne operators $T_{lm}^s$, operator equivalents
+of spherical harmonic functions $\sqrt{4\pi/(2l+1)}\sum_i Y_{lm}(\Omega_{i_s})$ for the ion $s$.
+
+\clearpage
+
+\input{cfield.tex}
+
+\clearpage
+
+\input{mcphas.tex}
+
+\clearpage
+
+\input{mcdiff.tex}
+
+\clearpage
+
+\input{mcdisp.tex}
+
+\clearpage
+
+\input{q_int.tex}
+
+\input{extsimod.tex}
+
+\input{ic1ion.tex}
+\clearpage
+
+\input{graphic_display.tex}
+
+\clearpage
+
+\input{fitting.tex}
+
+\clearpage
+
+\input{additional_programs.tex}
+
+\clearpage		     
+
+\appendix
+
+
+\input{kramers.tex}
+\input{brillouin.tex}
+\input{dyni2b2c.tex}
+\input{erni2b2c.tex}
+\clearpage
+\input{tesseral.tex}
+\clearpage
+\input{stevens.tex}
+\input{rotateBlm.tex}
+
+\clearpage
+\input{ffacts.tex}
+\input{zk.tex}
+\input{cdoperator.tex}
+\clearpage
+\section{Solution of the exercises}
+
+\begin{description}
+\item[section~\ref{hamiltonian} {\em The Hamiltonian}] \ 
+ \begin{enumerate}
+ \item Fast and simple: take some book on crystal fields~\cite{hutchings64-227} and look up which parameters are nonzero 
+ for the orthorhombic crystal field ($B_2^0$,$B_2^2$,$B_4^0$,$B_4^2$,$B_4^4$,$B_6^0$,$B_6^2$,$B_6^4$,$B_6^6$).
+
+ Detailed Calculation: take the point group $D_2^h$, the Stevens Operators $O_l^m$ taken as a vector form
+ a representation of this point group, which is reducible. Follow the procedure outlined in the book~\cite{elliott79-1}
+ to split this representation into irreducible parts. The basis vectors of the unit representation may then be 
+ linear combined with some arbitrary crystal field parameters to give the most general crystal field.
+ Note that the basis vectors of the unit representation can be obtained efficiently by constructing the
+ projection operator (eq. 4.51 in~\cite{elliott79-1})
+  into the subspace transforming according to the irreducible unit representation. 
+ \item Unfortunately no table is available for all relevant problems. Some cases are given in~\cite{morin90-1}.
+ 2 ways are possible to solve the problem. The accurate group theoretical approach which follows the calculation
+ outlined above for the crystal field  and needs a lot of knowledge in group theory. However a more intuitive %%@
+calculation
+ can be made by writing down the most general two ion interaction and subsequent introduction of symmetry elements which
+ will then give relation between parameters. As an example in the primitive orthorhombic lattice there are 2 nearest %%@
+neighbours, which
+ are equivalent. 
+
+ In general the bilinear two ion interaction  has the form 
+ $-\frac{1}{2}  \sum_{ij}  {\mbf J}_i^{alpha}{\mathcal J}_{\alpha\beta}(ij){\mbf J}_j^{\beta}$.
+ $i$ and $j$ number the different positions of the magnetic ions in the lattice. Without loss of 
+ generality the interaction constants ${\mathcal J}_{\alpha\beta}(ij)$ can be chosen such that
+ ${\mathcal J}_{\alpha\beta}(ij)={\mathcal J}_{\beta\alpha}(ji)$ (because the expression is symmetric in
+ angular momentum components any anisotropic part of the interaction tensor does not contribute to the
+ interaction energy).  
+
+ If $i$ and $j$ are nearest neighbours on a orthorhombic lattice, they are situated on one of the
+ crystallographic axes, for example at [$\pm$100]. The off-diagonal components of the corresponding
+ interaction tensor ${\mathcal J}_{\alpha\beta}(\pm100)$ vanish, because spin-configurations such as
+ a moment (m00) on [000] and (0m0) on [100] must have the same magnetic energy as (m00) on [000] and
+ (0-m0) on [100]. Furthermore the spin-configuration with (m00) on [000] and (m'00) on [100] must
+ have the same magnetic energy as (m00) on [000] and (m'00) on [-100]. This and similar
+ considerations lead to the conclusion that the interaction tensor must be the same for [-100] and
+ [+100]. Therefore the most general form of the interaction ${\mathcal J}_{\alpha\beta}(\pm100)$
+ is 
+ \begin{equation}
+ {\mathcal J}_{\alpha\beta}(\pm100)=\left(
+ \begin{array}{ccc}
+ {\mathcal J}_{aa}(\pm100) & 0 & 0 \\
+ 0 & {\mathcal J}_{bb}(\pm100) &  0 \\
+ 0 & 0 & {\mathcal J}_{cc}(\pm100) \\
+ \end{array}
+ \right)
+ \end{equation}
+ \end{enumerate}
+\item[section~\ref{cfieldsep} {\em Using {\prg Cfield} separately}] \ 
+ \begin{itemize}
+ \item type: cfield -c -B m m Nd3+ 2 10 rk
+ \item edit file bkq.parameter and enter the crystal field parameters given in section~\ref{cf1ion}
+ \item type: cfield -r -B
+ \item edit file cfield.output to see the result of the calculation
+ \end{itemize}
+\item[section~\ref{start} {\em starting a simulation}] \ 
+
+ \begin{enumerate}
+ \item In the crystallographic basis there are two ions.
+ \item ... the simulation should run after typing {\prg mcphas}
+ \end{enumerate}
+\item[section~\ref{outputfiles} {\em output files}] \ 
+ \begin{enumerate}
+ \item at 2.8 Tesla
+ \item (0.6 0 0), (2/3 0 0) and (0.625 0 0)
+ \end{enumerate}
+\item[section~\ref{mcdisp} {\em {\prg McDisp} - the calculation program for magnetic excitations}] \ \\
+ the inspection of the file {\prg mcdisp.mf\index{mcdisp.mf}} shows that the calculation is performed at 3.2 Tesla field
+ parallel to $b$, i.e. in the ferromagnetically aligned state. Due to the two ions in the crystallographic
+ unit cell in general 2 modes are expected for each crystal field transition. After running {\prg mcdisp\index{mcdisp}}
+ the results may be inspected in file {\prg ./results/mcdisp.qom}, graphically using the program {\prg disp}.
+ It turns out the the soft mode (gap at (2/3\,1\,0) shows the largest intensity.
+\end{description}
+
+\clearpage
+\section{Installation of the program package}
+
+\input{../install.txt}
+
+
+\newpage
+
+\bibliographystyle{physrev}   % here you should update any list by
+\bibliography{li100610}   % bibtex - ing the database
+
+\newpage
+\printindex
+\end{document}

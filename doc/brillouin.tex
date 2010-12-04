@@ -1,0 +1,61 @@
+\newpage
+\section{An Isotropic Spin - single ion module}\label{brillouin}
+
+A magnetic ion often can be described by a pure spin moment (transition
+metal ions, $^{3+}$Gd, $^{2+}$Eu). In this description the magnetic moment
+${\mbf M}=g_J \mu_B <{\mbf J}>_T$ is calculated by the Brillouin function. 
+
+\begin{equation}
+<\mbf J>=\frac{\mbf H}{|\mbf H|} B_{J}(x=g_J \mu_B |\mbf H|/kT)
+\end{equation}
+
+with
+
+\begin{equation}
+B_J(x)=\frac{\sum_{m=-J}^{J} m x^m}{\sum_{m=-J}^{J}  x^m}=
+\frac{J(x^{J+2}-x^{-J})+(J+1)x(x^{-J}-x^J)}{(1-x)(x^{-J}-x^{J+1})}
+\end{equation}
+
+Note that the partition sum $Z$ is given by $Z=\sum_{m=-J}^{J}  x^m=\frac{x^{J+1}-x^{-J}}{x-1}$.
+This is all what is needed to calculate the mean field ground state with 
+module {\prg mcphas}.
+
+For the calculation of the dynamical properties using module {\prg mcdisp\index{mcdisp}}
+the single ion susceptibility of for a free magnetic ion is needed. In principle
+there are (J-1) transitions with non vanishing matrix elements of
+the momentum operator $\mbf J$ with all having the same
+ excitation energy $\Delta=g_J \mu_B H$.
+ These different transitions can
+be combined into one effective inelastic excitation. The corresponding
+transition matrix to be used in equation~(\ref{mmatrix}) of the MF-RPA formalism
+is given by 
+
+\begin{equation}
+M_{\alpha\beta}=\frac{-b_{\alpha}b_{\beta}R_J}{Z}
+\end{equation}
+
+with the angular dependence given by the vector $\mbf b$
+
+\begin{eqnarray}
+b_x& = & \frac{-H_y+i H_x \frac{H_z}{|\mbf H|}}{2|\mbf H| sin\Theta} \\
+b_y& = & \frac{H_x+i H_y \frac{H_z}{|\mbf H|}}{2|\mbf H| sin\Theta} \\
+b_z& = & \frac{H_x^2+H_y^2}{2i|\mbf H|^2 sin\Theta}=\frac{-isin\Theta}{2} \\
+&&sin\Theta=\frac{\sqrt{H_x^2+H_y^2}}{|\mbf H|}
+\end{eqnarray}
+
+and with the sum $R_J$ given by
+
+\begin{equation}
+R_J=(x-1)\sum_{m=-J}^{J-1}(J+m+1)(J-m)x^m=\frac{2Jx^{-J}+(2J+2)x(x^{J}-x^{-J})-2Jx^{J+2}}{(1-x)^2}
+\end{equation}
+
+The module given in {\prg /examples/gdni2b2c/1ion\_mod/brillouin.c} 
+can be compiled
+by typing make in the directory {\prg /examples/gdni2b2c/1ion\_mod/} thus using the
+{\prg  /examples/gdni2b2c/1ion\_mod/makefile}. It 
+evaluates the Brillouin function and thus calculates the thermal expectation 
+value $<>_T$ of the vector $\mbf J$. 
+The moment ${\mbf M}=g_J \mu_B <{\mbf J}>_T$
+is returned to the mcphas\index{mcphas} program:
+
+\input{../examples/gdni2b2c/1ion_mod/brillouin.c}

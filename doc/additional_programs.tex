@@ -1,0 +1,460 @@
+\section{Programs for Specific Tasks in the World of McPhase}\label{addprog}
+
+This section  contains some further programs which do some important manipulations
+in magnetism, ...
+
+\begin{description} 
+
+\item [\prg addj\index{addj} file1.j file2.j:] adds exchange parameters of file2.j to the %%@
+parameters in
+file1.j - output is written to stdout
+
+\item [\prg chrgplt\index{chrgplt} threshold T Ha Hb Hc mcphas.cf:]
+                calculates  the 4f-charge density of a single rare earth ion
+                given is temperature T[K] and magnetic effective field H[T]
+ 		and crystal field  parameters Blm should be read from a 
+	        standard mcphas\index{mcphas} single ion property file mcphas.cf 
+                options: if T$<$0, then no thermal Boltzmann distribution
+		 is taken
+		the statistical probability of each CF state has to be 
+		entered by hand ... to view charge plots type: java javaview chrgplt\index{chrgplt}.jvx.
+		You can create also several plots (for instance for different temperatures) and store %%@
+these
+		in a sequence such as chrgplt.1.jvx, chrgplt.2.jvx, ... animate
+		the view of 4 jvx files by typing: java javaview model=chrgplt.*.jvx Animation.LastKey=4 
+
+\item [\prg coq2jjj:]         programs to reformat input file {\prg mcphas.coq}
+                      ({\prg McPhas} version 1.0) to new format
+
+\item [\prg cpso1ion 10 100 1 {[options]}: ] calculates the specific heat in the temperature %%@
+interval 10-100 K with a step width
+of 1 K. Alternatively a comparison to experimental data can be made by {\bf cpso1ion 1 2 %%@
+cpexp.dat},
+where the temperatures are given in column 1 and the experimental specific heat in column
+2 of file cpexp.dat. The calculated specific heat is compared to the experimental data and
+a standard deviation {\em sta} is calculated and output is written to stdout.
+Other quantities can be calculated using the options: -s  (calculate entropy  (J/molK) instead %%@
+of cp),
+-f (calculate free energy (J/mol) instead of cp),-u  (calculate magnetic energy (J/mol) instead %%@
+of cp),
+-z (calculate partition sum instead of cp).
+\item[\prg cpic1ion 10 100 1 [options]:] same as {\prg cpso1ion} but for output of program
+ic1ion.
+					  
+\item [\prg epsdebye\index{epsdebye} Tmax dT Tdebye scale [d1 d2 datafile]:]	        
+		    calculates the phonon induced strain $\epsilon$ using the debye model
+		    according to the following formula:
+		    $   \epsilon=S*T*D(\Theta_{D}/T) $
+				    with    
+		    $D(z)=\frac{3}{z^3}\int_0^z \frac{x^3 dx}{e^x-1}$
+                 Range is from zero to Tmax in stepwidths dT
+		 unless a datafile is given. 
+                 If a  datafile is given, with data column d1 and d2,the strain
+                 is calculated for T-values of data column d1 and epsilon
+		  is compared to data in column d2 - a standard 
+                 deviation sta is calculated as a sum of squared deviations.
+                 As output the datafile is given, an additional is column added 
+		 containing the calculated strain epsilon. The datafile has to
+		 be sorted according to descending T values !!!
+                 output is written to stdout.
+
+\item [\prg extendunitcell\index{extendunitcell} n1 n2 n3]program to extend crystallographic %%@
+unit cell n 
+                times in r1 (or r2,r3) direction, meaning take mcphas.j, mcphas.tst 
+                and mcdiff\index{mcdiff}.in and generate an extended description of the unit %%@
+cell 
+                n1xr1,n2xr2,n3xr3 put result into extend.j, extend.tst and extend.in
+
+\item [\prg jjj2j:] transforms file of {\prg mcphas.jjj} format to {\prg %%@
+mcphas.j\index{mcphas.j}} format
+- output is written to stdout
+
+\item[\prg makenn 23.3:] Program to calculate neighbors of atoms given a crystal structure.
+Note that in order to use {\prg makenn\index{makenn}} you have to set up a 
+working {\prg mcphas.j\index{mcphas.j}} file with the crystal structure. 
+The program {\prg makenn\index{makenn}} takes {\prg mcphas.j\index{mcphas.j}} and
+creates all neighbours within a sphere of distance 23.3\AA, for every neighbour the classical
+dipole interaction is calculated and is stored in file {\prg makenn.j}. If the exchange %%@
+parameters 
+(and neighbour positions) are not known for your system, you can use this module 
+to generate a list of nearest neighbours and exchange parameters. Currently implemented 
+ are not only dipolar interactions, but also exchange interactions via the Bethe-Slater 
+curve or the RKKY model. 
+\begin{description}
+\item[option {\prg -rkky A(meV) kf(1/A)}] calculates the rkky interaction according to $J(R)=A %%@
+cos(2 k_f R)/(2 k_f R)^3$
+\item[option {\prg -rkky3d A(meV) ka(1/A) kb(1/A) kc(1/A)}] calculates the rkky interaction %%@
+according to $J(R)=A cos(2 \kappa)/(2 \kappa)^3$ with $\kappa^2=k_a^2 R_a^2 + k_b^2 R_b^2 + %%@
+k_c^2 R_c^2$
+\item[option {\prg -rkkz A(meV) kf(1/A)}] calculates the rkky interaction according to $J(R)=A %%@
+(sin(2 k_f R)- 2 k_f R cos(2 k_f R))/(2 k_f R)^4$
+\item[option {\prg -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)}] calculates the rkky interaction %%@
+according to $J(R)=A (sin(2 \kappa)- 2 \kappa cos(2 \kappa))/(2 \kappa)^4$ with $\kappa^2=k_a^2 %%@
+R_a^2 + k_b^2 R_b^2 + k_c^2 R_c^2$
+\item[option {\prg -kaneyoshi A(meV) D(A) alpha}] calculates the Kaneyoshi parametrisation for %%@
+the Bethe-Slater
+                               curve: $J(R)= A [-(R/D)^2+(R/D)^4]exp[-\alpha (R/D)^2]$  with $D$ %%@
+corresponding
+                               to the orbital radius
+\item[option {\prg -kaneyoshi3d A(meV) Da(A) Db(A) Dc(A) alpha}] calculates the Kaneyoshi %%@
+parametrisation for the Bethe-Slater
+                               curve: $J(R)= A [-\rho^2+\rho^4]exp[-\alpha \rho^2]$  with %%@
+$\rho^2=R_a^2/D_a^2+R_b^2/D_b^2+R_c^2/D_c^2$
+\item[option {\prg -d}] puts to the last column the distance of the neighbours (A)
+\end{description}
+The neigbours of each atom are also stored in seperate files
+{\prg results\/makenn.a*.pc}, which can be used with the program {\prg pointc} to evaluate
+the pointcharge model and calculate crystal field paramaters.
+
+\item [\prg pointc\index{pointc} Ce3+ 0.2 4 1 5.3]
+              calculates Crystal field Parameters from Point Charges  
+                 ... meaning calculate Stevens Parameters Blms 
+                                  and Wybourne Parameters Llms
+                 for one point charge of +0.2$|e|$ in distance
+                 x=4 \AA y=1 \AA z=5.3 \AA from a Ce$^{3+}$ ion.
+                Alternative Usage: pointc\index{pointc} Ce3+ filename
+                 ... meaning read several charges+coordinates from file,
+                 file format: column 1=charge, column 2-4 = x y z coordinate  (note,
+				 ({\prg makenn} creates useful files for this option from the crystal %%@
+structure).
+                results are written to stdout (including radial matrix elements and Stevens %%@
+factors)
+
+                Note: if an ion is not implemented, it's parameters can be 
+                      entered in a single ion property file and pointc\index{pointc} is
+                      started as 
+                        pointc\index{pointc} file.sipf 0.2 4 1 5.3
+
+                      the single ion property file must then contain the following
+                      information (\# denotes comments):
+\begin{verbatim}
+      #the name of the ion
+      IONTYPE=Ce3+
+      #stevens parameters (optional, necessary for output of Blm)
+      ALPHA=-0.0571429
+      BETA=0.00634921
+      GAMMA=0
+      # the radial matrix elements RN=<r^N> in units of a0^N (a0=0.5292 A)
+      R2=1.309
+      R4=3.964
+      R6=23.31
+      # alternatively the radial wave function can be given:
+      # radial wave function parameters R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / %%@
+sqrt(2Np!)  
+      # values tabulated in clementi & roetti Atomic data and nuclear data tables 14 (1974) %%@
+177-478
+      # Co2+ is isoelectronic to Fe+, looking at page  422 of Clemente & Roetti 
+      # the 3D radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
+      N1=3 XI1=4.95296 C1=0.36301 
+      N2=3 XI2=12.2963 C2=0.02707 
+      N3=3 XI3=7.03565 C3=0.14777
+      N4=3 XI4=2.74850 C4=0.49771 
+      N5=3 XI5=1.69027 C5=0.11388
+      # if the above parameters are given the radial wave function is output to file %%@
+radwavfun.dat                 
+\end{verbatim}                      
+
+\item [\prg powedercell2j\index{powdercell2j} file:]     used to create mcphas.j type file from %%@
+output of powdercell,output is written to mcphas.j.  Example of input file:
+\begin{verbatim}
+  No   name       crystal coordinates          cartesian coordinates
+                 x        y        z           x        y        z
+  ------------------------------------------------------------------
+  1     Sr1    0.3644   0.0000   0.2500     1.0962  -4.1497  -2.7991
+  ...
+  \end{verbatim}
+\item [\prg rotateBlm\index{rotateBlm}]
+  \begin{verbatim}
+    Rotates a set of  crystal field  parameters for  Stevens equivalent
+    operators by an azimuthal angle fi about the original z axis and
+    a polar angle theta about the new y axis. A right hand axis system is assumed
+    and a positive rotation is one which advances a right-hand screw in a
+    positive direction along the axis.
+
+    The calculations are  done by means of matrix  multiplication based on
+    the method of Buckmaster (phys. stat. sol. a, vol 13,  pp 9, 1972) and
+    Rudowicz (J. Phys: Solid State Phys., vol 18, pp 1415, 1985).   
+
+    usage: $0 [-h] [--help] 
+              [-i input_file] [--input input_file]
+	      [-o output_file] [--output output_file]
+              [-v] [--verbose] [-th theta] [-fi fi] [CF parameters]
+
+          
+     -h          : this (help) message
+     -i in_file  : input CF parameters file in cfield or mcphase formats
+     -o out_file : output CF parameters file in mcphase format
+     -v          : verbose mode. Will print out input parameters as read.
+     -th	 : polar angle theta in degrees
+     -fi         : azimuthal angle fi in degrees
+
+    if -i is omitted, the program will  assume the input CF parameters are
+          given on the command line in the format: Bkq=x.xx,Bkq=x.xx, etc.
+          e.g. $0 B20=0.21,B40=0.0005,B60=0.051,B66=0.626
+    negative q parameters such as B_2^{-2},  are specified as:  B22S, with 
+          an 'S' at the end, as per the McPhase convention.
+    you may also  specify the ion type by a dding another  parameter after
+          the CF parameters: e.g. $0 B20=0.21,B40=0.5 Pr3+
+    if -o is omitted, the program prints the parameters to standard output.
+  \end{verbatim}
+\item[\prg   setup\_jqfit\index{setup\_jqfit}[-h] [--help] h k l:] program to setup a fit of exchange parameters in order to reproduce an experimental propagation vector.
+\begin{verbatim}
+     -h          : print help message
+      hkl        : Miller indices of propagation vector
+
+    required input files:
+
+    mcphas.j (+ single ion paramter files)
+                 :  structural information including all magnetic atoms
+
+    output files:
+
+    mcdisp.par   :  contains propagation vector and list of other hkl to
+                    be probed
+    mcdisp.mf    :  required input file for mcdisp
+    calcsta      :  required input file for simannfit and searchspace
+    calcsta.pl.forfit: file with fitparameters for Bethe slater, RKKY fits
+    fit.bat      :  batch to start the fit
+
+   
+\end{verbatim}
+
+ After running this program you can start immediately a fit of exchange
+    parameters. Edit {\prg calcsta.pl.forfit} and {\prg fit.bat} to fine tune the fit 
+    according to your needs.
+    During fitting a value of sta $< 1$~ indicates, that the maximum of $J(Q)$ is
+    at the propagation vector tau. How much it is below one depends on the
+    magnitude of $J(Q)$ for the competing wavevectors in the list in{\prg  mcdisp.par}.
+
+\item [\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}  T Ha Hb Hc:] program
+ to setup {\prg mcdiff.in} with information on spinconfiguration
+                    to be used by program {\prg mcdiff\index{mcdiff}}. Note, you must
+                    have done a {\prg mcphas\index{mcphas}} calculation to stabilise
+                    a magnetic structure at the desired Temperature/Field.
+                  { \prg   setup\_mcdiff\_in} reads the results of this calculation
+                    from {\prg results/mcphas.sps} and generates an input file
+                    {\prg mcdiff.in}
+
+\begin{verbatim}
+     -h          : this (help) message
+      T          : Temperature (K)
+      Ha,Hb,Hc   : Magnetic Field (T)
+
+    required input files:
+
+    results/mcphas.sps
+                 :  result of a mcphas calculation
+
+    output files:
+
+    mcdiff.in    :  required input file for mcdiff
+
+    - after running this program you can start mcdiff to do the calculation
+      magnetic diffraction pattern
+\end{verbatim}
+\item [ \prg   setup\_mcdisp\_mf \index{setup\_mcdisp\_mf} T Ha Hb Hc:] program to setup{\prg mcdisp.mf} with information on meanfields
+                    to be used by program {\prg mcdisp\index{mcdisp}}. Note, you must
+                    have done a {\prg mcphas\index{mcphas}} calculation to stabilise
+                    a magnetic structure at the desired Temperature/Field.
+                    {\prg   setup\_mcdisp\_mf} reads the results of this calculation
+                    from {\prg  results/mcphas.mf} and puts the meanfields into
+                    {\prg mcdisp.mf}.
+
+
+\begin{verbatim}
+     -h          : this (help) message
+      T          : Temperature (K)
+      Ha,Hb,Hc   : Magnetic Field (T)
+
+    required input files:
+
+    results/mcphas.mf
+                 :  result of a mcphas calculation
+
+    output files:
+
+    mcdisp.mf    :  required input file for mcdisp
+
+    - after running this program you can start mcdisp to do the calculation
+      of dispersion of excitations or diffuse scattering
+\end{verbatim}
+\item[\prg   setup\_mcphasjforfit\index{setup\_mcphasjforfit}  [-h]:] program to setup a fit of exchange parameters by   creating mcphas.j.forfit from mcphas.j
+                    
+\begin{verbatim}
+     -h          : print help message
+
+    required input files:
+
+    mcphas.j (+ single ion parameter files)
+                 :  structural information including all magnetic atoms
+
+    output files:
+
+    mcphas.j.forfit  : all interaction parameters are substituted
+                       with parJxxx[0.0,-1e0,1e0,0,1e-6]
+
+    - after running this program you must setup a file calcsta 
+      to calculate the standard deviation and then you can start
+      a fit by simannfit or searchspace
+\end{verbatim}\index{simannfit}\index{searchspace}
+\item [\prg singleion\index{singleion} T Ha Hb Hc:] used to display\index{display} the single %%@
+ion moment at a specified field [T] and temperature [K].
+\end{description} 
+
+\section{Programs for Manipulation of Columns and Lines in Data Files}
+
+Datafiles usually contain columns of numbers, for example:
+
+\begin{verbatim}
+# T(K) mu0H(T)  M(mb/T)  [comment lines start with '#' ]
+1      1      0.9
+2      1      0.6
+3      1      0.4
+4      1      0.3
+5      1      0.25
+\end{verbatim}
+
+The following programs manipulate such data files, for example
+the program {\prg delcol} deletes a column from a data file,
+some general features are:
+\begin{itemize}
+\item data files are overwritten 
+\item multiple files may be handled by one command, e.g. {\prg delcol 4 *.dat} deletes column 4 %%@
+in all 
+files ending with .dat
+\end{itemize}
+
+\begin{description}
+\item [\prg acoscol\index{acoscol} col const file:] calculates arccosine of a column arccos(col) 
+\item [\prg asincol\index{asincol} col const file:] calculates arcsine of a column arcsine(col) 
+\item [\prg atancol\index{atancol} col const file:] calculates arctangens of a column %%@
+arctan(col) 
+\item [\prg addcol\index{addc}  colx coly file:] adds column x and column y of file, result is %%@
+stored in col y
+\item [\prg chi2\index{chi2} col1 col2 col3 *.*] is used to calculate the 
+ chi-squared from 3 columns in a file: if col1, col2 and col3 are calculation, 
+ experiment and experimental error, respectively, then
+  chisquared is defined as $\chi^2=\frac{1}{n}\sum_{i=1}^n \frac{({\rm col2}_i-{\rm %%@
+col1}_i)^2}{{\rm col3_i}^2}$
+\item [\prg comment l1 l2 file:] comments all lines from l1 and l2  (with \#) in a file
+\item [\prg compare file1 file2:] used to compare data file1 and data file2
+                all columns and rows are compared and a standard deviation
+                is calculated according to sum\_i (file1\_i - file2\_i)\^2
+                this standard deviation is output to stdout, e.g. as sta=143.3
+\item [\prg convolute\index{convolute} c1 c2 file cx cy convfuncfile [d1 d2 datafile]:] %%@
+convolute\index{convolute}s data given as column c1 vs column
+                       c2 in file (data pairs $x_i,y_i$) with the convolution function given in %%@
+column cx vs cy
+		        of convfuncfile (function $c(x)$)
+		       Range and step width of output file is determined from range and step 
+		        of convfuncfile  unless a datafile is given. If a datafile is given, 
+		     with data column d1 and d2, the result of the convolution is
+		     calculated for x-values of data column d1 and $f(x)$ is compared to
+		     data in column d2 - a standard deviation sta is calculated as
+		     sum of squared deviations.Values out of range of convfile are assumed to be zero,
+			convfile has to be sorted according to ascending x.
+			Formula: $f(x)=\sum_i y_i c(x-x_i)$ , 
+		       output is written to stdout. 
+\item [\prg coscol\index{coscol} col const file:] calculates cosinus of a column cos(col) 
+\item [\prg delcol\index{delcol} col file:] deletes column col in file
+\item [\prg delcomments *.*] removes every comment line (starting with \#) from a file and %%@
+prints the removed lines to screen
+\item [\prg delline\index{delline} l1 l2 file:] deletes lines l1 to l2  in file
+\item [\prg delnthline n file]  remove every nth line (n$>$2) in file
+\item [\prg dif\index{dif} colx coly n *.*:] used to calculate d(coly)/d(colx) with %%@
+differentiation averaging n points
+\item [\prg display\index{display} 5 6  ./results/mcdisp.qei] displays a graphic on screen as xy %%@
+graph
+with column 5 as x axis and columns 6 as y axis.
+\item [\prg displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei] works similar as %%@
+display, however
+a third column is given and the radius of the symbols varied according to the data in 
+this column.
+\item [\prg displaycontour\index{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot] produces a %%@
+graphical
+display\index{display} of a 3 dimensional dataset as a colour and/or contour plot. Here '5 6 8' 
+denote the x,y and z column in file {\prg ./results/mcdisp.dsigma.tot}, which should
+be plotted. Figure~\ref{diffus} shows an sample output of this program.
+\item [\prg displaytext\index{displaytext} ./results/mcphas.hkl] monitors the file mcphas.hkl in %%@
+a text window
+on screen.
+\item [\prg expcol\index{expcol} col const file:] calculates exponent of a column exp(col) 
+\item [\prg factcol\index{factcol} col const file:] multiplies col with a constant in file
+\item [\prg fform\index{fform} col1 col2 format file:] reformats numbers in col1 to col2 in file %%@
+with
+             a number format given by format. Format is a number format string according
+             to c conventions, for example 8.4f or 4.4g  ...             
+\item [\prg multcol\index{multcol}  colx coly file:] multiplies column x and column y of file, %%@
+result is stored in col y
+\item [\prg newcol\index{newcol} col file:] creates a new column col in file containing the line %%@
+number
+\item [\prg newline\index{newcol} n text file:] creates a new line number n  in file containing %%@
+the text 
+\item [\prg potcol\index{potcol} col const file:]  col=col$^{\rm const}$ in file
+\item [\prg range\index{range} col min max file:] deletes (comments out) all data points outside %%@
+min max in column  col of
+                       file file (remember to store your full data set in some other
+		       file before using this command), \# is used to comment lines
+\item[\prg rotate\index{rotate} xcol ycol angle file:]
+program rotate  used to rotate coordinate axes,
+ xcol,yxol=columns containing x and y , 
+ angle=angle $\alpha$ of rotation around z.
+ 
+ The rotation is done using the following formula:
+\begin{eqnarray}
+ x'&= &\cos(\alpha)*x+\sin(\alpha)*y \nonumber \\
+ y'&=&-\sin(\alpha)*x+\cos(\alpha)*y
+\end{eqnarray}
+\item [\prg rpvalue\index{rpvalue} colx coly  *.*:]  program rpvalue\index{rpvalue}  used to %%@
+calculate 
+                       the $R_p$-value from columns number colx and coly 
+		       in a file *.*. The $R_p$-value is defined as
+		       \begin{equation}
+		       R_p= 100*\frac{\sum_{i=1}^{N} |(x(i)-y(i)|}{\sum_{i=1}^{N}|x(i)|}
+		       \end{equation}
+                       $N$ denotes the number of data points in the file.
+\item [\prg setvalue\index{setvalue} row column text files:] sets the numerical value in a specified position of a data file.
+
+\begin{verbatim}
+     row         : row number
+     column    : column number
+     number   : text to be placed in file at this position
+     files         : one or more filenames
+
+    example: $0 4 5 3.142 data.dat
+             replaces the number in row 4 and column 5 by 3.142 in file data.dat
+\end{verbatim}
+\item [\prg shiftcol\index{shiftcol} col const *.*:] used to add a constant (const) to a column %%@
+(number col) in file(s) *.*
+\item [\prg sincol\index{sincol} col const file:] calculates sinus of a column sin(col) 
+\item [\prg sumcol\index{sumcol} col *.*] prints to stdout number of lines, sum of squares, sum %%@
+of absolute values of column col in file *.*
+\item [\prg swapcol\index{swapcol} colx coly file:] swaps column x and column y of file
+\item [\prg tancol\index{tanncol} col const file:] calculates tangens of a column tan(col) 
+\item [\prg uvw2fwhm\index{uvw2fwhm} u v w col *.*:] used to calculate the full
+                   width half maximum from
+                   2theta in degree according to fullprofs u,v,w parameters ...
+                  The column col in file *.* must contain 2theta scattering angle
+                 values and is overwritten with the fwhm as calculated by
+                  \begin{equation}
+                     {\rm  fwhm }= \sqrt {u \tan^2(\theta) + v \tan(\theta) + w}
+                \end{equation}
+\item [\prg zshift\index{zshift} constx colx coly *.*:] shifts colx by a constant such that it %%@
+is zero at a specified value constx of colx. 
+\end{description}
+
+\section{Programs of General Interest}
+
+\begin{description}
+\item [\prg beep\index{beep}:] just make a beep\index{beep} to signal attention 
+\item [\prg gauss\index{gauss} fwhm stp min max:] calculate a gaussian, output goes to console %%@
+(stdout)
+\item [\prg lorentz\index{lorentz} fwhm stp min max:] calculate a lorentzian, output goes to %%@
+console (stdout)
+\item [\prg plotbook *.ps:] program plotbook to arrange many (single side) ps-images to one %%@
+booklet (needs: latex, pstops,ghostscript, perl)
+\item [\prg substitute\index{substitute} oldtext newtext *.*:] replaces every instance of %%@
+oldtext with newtext in file(s) *.*
+\end{description}
+
+

@@ -1,0 +1,57 @@
+\begin{verbatim}
+
+-) How are comments denoted "#" or "#!" ?
+Lines beginning with # are comment lines
+Lines beginning with #! are also comment lines, but some programs will
+      read information from these lines
+
+PROGRAM SO1ION and CFIELD
+
+-) are programs cfield and so1ion different ?
+
+no, these programs do exactly the same job (as stand alone programs).
+However, if used as a module in mcphas, mcdisp etc the orientation
+of the crystal field coordinate system xyz with respect to the crystal
+axes abc is different:  for MODULE=so1ion it is xyz||abc, whereas for
+MODULE=cfield it is xyz||cab
+
+PROGRAM MCDISP
+
+-) I  get the error message: "Error 1: Chreduce: matrix B is not positiv
+definite" for some Q-vectors, what is going wrong ?
+
+most probably the magnetic structure you are using in mcdisp.mf is not the
+thermodynamically stable one. Try to rerun mcphas with less restrictions on
+the test structures and try to find a structure with a lower free energy.
+Probably the propagation vector of the stable magnetic structure is near
+to the Q-vector, where mcdisp gave the error.
+
+
+
+EXTERNAL MODULE IC1ION
+
+-) I cannot find ic1ion.mag after running ic1ion - what is the reason ?
+
+Please be aware that on some windows systems the file extension ".mag" is associated
+with other programs than mcphase and the explorer does not explicitely show the ".mag",
+the file is there, you can make sure by listing the directory contents with the
+command "dir"
+
+-) The programs mcphas/mcdisp/chrgplt/charges/singleion will not load the ic1ion.so
+   module !?
+
+check if the first line in your single ion input file (.sipf) points to the path
+where the ic1ion.so module can be found: e.g.
+#!MODULE=c:\mcphas3_0\bin\ic1ion_module\ic1ion.so
+
+-) do I have to enter the free ion parameters F2 F4 F6 and XI in the sipf file ?
+
+No, usually it is sufficient to give the IONTYPE, e.g. IONTYPE=Co3+ and then
+the program automatically looks up F2 F4 F6 and XI in an internal table.
+However, if you are not happy with the values from the table, you can explicitely enter
+these constants. 
+
+However for some ions these parameters are not available in standard tables, then
+you have to enter them. Please always check ic1ion.out to see if output is correct.
+
+\end{verbatim}

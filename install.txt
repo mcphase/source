@@ -1,0 +1,182 @@
+{\footnotesize \begin{verbatim}
+
+McPhase  home page:
+    http://www.mcphase.de
+
+---------------------------------------------------------------------
+I WINDOWS
+---------------------------------------------------------------------
+
+the windows version of McPhase provides all calculation programs
+however less graphic tools. 
+
+Preriquisites:
+- for  running McPhase, McDisp
+    Windows 2000, XP, VISTA
+     
+- for compiling the sources (necessary if mcphas does not run on your system after installation steps a)-d)
+    gcc for windows (e.g. MinGW-4.3.5.exe (or newer) and MSYS-1.0.10.exe available at http://www.mingw.org)
+    java (> 1.6.0)  available at java.sun.com, 
+     if you do not know wether java (and which version) is installed
+     on your computer, open a dos shell and type:  
+     java -version 
+     
+-----------------------------------------------------------------------
+Installation Procedure:
+
+
+ just run mcphX_Y.exe and follow the instructions
+
+
+ Mind:
+ In order that McPhas finds its exe files,you have to edit
+ the file dos.bat and modify the following commands:
+ 
+ set the variable MCPHASE_DIR to your mcphase directory, in our example
+ to c:\mcphas
+  
+   set MCPHASE_DIR=c:\mcphas
+  
+ 
+ Now the Installation should be complete and to test this 
+   open the mcphas-shell, change into an example directory:
+
+   cd c:\mcphas\examples\ndcu2b_new
+
+  and type:
+
+   mcphas
+
+-> the program should start running
+
+
+[ for compiling the sources:
+
+    install compiler MinGW-4.3.5.exe (or later) and MSYS-1.0.10.exe
+    install MSYS
+
+    cd  mcphas\
+    type: make clean
+          make
+
+ OPTIMIZATION:
+ if you want to compile with more optimization to make the program faster, try instead of
+ make
+
+ make clean
+ make fast=1
+
+ if you have a multiple core processor, change #define NUM_THREADS
+ in bin/src/mcphas_htcalc_threaded.c to according to your system, i.e. to
+ 2 for a double core or 4 for a quadruple core computer and 
+ recompile mcphas.exe by typing:
+
+ cd bin/src
+ set threads=1
+ make
+
+(or you can modify the Makefile to specify threads=1). make
+]
+-------------------------------------------------------------------
+II  LINUX 
+-------------------------------------------------------------------
+
+
+Prerequisits:
+
+- for compiling and running McPhas, McDisp
+    Suse Linux 6.0/ 6.2/ 7.0/ 7.1 / 7.2 / 8.1 / 9.2
+         with
+    gcc, gfortran or g77
+    
+- for some ascii file manipulation programs (pat)
+   python
+   qt   
+
+- for plotting programs:
+    perl
+    flex
+    yacc
+    PGPLOT 5.2.0 graphics library
+            http://www.astro.caltech.edu/~tjp/pgplot/
+    PDL 2.0      PerlDL
+            http://pdl.perl.org
+    PGPLOT 2.11/2.18  pgplot module for perl
+            ftp://ftp.freenet.de/pub/ftp.cpan.org/pub/CPAN/modules/by-
+            module/PGPLOT/
+            http://www.aao.gov.au/local/www/kgb/pgperl/    
+            NOTE THE INSTALLATION BUG FOR >SUSE 6.2: after typing 'perl 
+            Makefile.PL'
+	    you have to manually edit 'Makefile' and substitute 'f2c' with 'g2c' 
+            before
+	    continuing with 'make' and 'make test' ...
+	    
+-----------------------------------------------------------------------
+Installation Procedure:
+
+a) unpack and untar the zip file into your mcphase directory, in our example /usr/local
+
+    gunzip mcphas-*.*.tar.gz
+
+    tar -xvf mcphas-X.Y.tar
+
+
+b) In order that McPhas finds its  files,you have to edit
+ the file lin.bat and modify the following commands:
+ 
+ set the variable MCPHASE_DIR to your mcphase directory, in our example
+ to /usr/local/mcphas
+  
+   export MCPHASE_DIR=/usr/local/mcphas
+   
+    - in order to use the plotting programs
+      make sure that the other variables are set correctly
+
+   in order to set the above environment at login put the above export
+   commands into /etc/profile.local 
+   e.g. put there:
+
+   . /data/martin/mcphas/lin.bat
+
+
+
+c) Now the installation should be complete. To test the Program: 
+   goto your mcphase directory and set the environment variables correctly by typing:
+   
+   . ./lin.bat
+   
+   
+   goto directory ./demo
+   and run the demos to test many of the programs of the package
+
+[e) if it is necessary to recompile the sources -
+
+    goto $MCPHASE_DIR and type:
+
+    make
+   
+ OPTIMIZATION:
+ if you want to compile with more optimization to make the program faster, try instead of
+ make
+
+ make clean
+ make fast=1
+ 
+ (this might work not on all systems)
+
+ if you have a multiple core processor, change #define NUM_THREADS
+ in bin/src/mcphas_htcalc_threaded.c to according to your system, i.e. to
+ 2 for a double core or 4 for a quadruple core computer and 
+ recompile mcphas.exe by typing:
+
+ cd bin/src
+ threads=1  make
+
+f) type 
+
+   make clean
+   
+   to remove files which are not needed
+]
+	  	  
+\end{verbatim}}

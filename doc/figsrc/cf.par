@@ -1,0 +1,22 @@
+{parameterfile for program chrgplot
+The crystal field parameters can be given as Blm or as Vlm  (Blm=stevens factor x Vlm)
+parameter          name}
+{Ce3+}         {ion}
+ .1601537      {B20[meV]}
+ .1669528      {B22[meV]}
+-2.620866E-04  {B40[meV]}
+-1.929541E-05  {B42[meV]}
+ 1.603113E-03  {B44[meV]}
+ 1.565799E-07  {B60[meV]}
+ 1.530456E-07  {B62[meV]}
+ 2.258362E-07  {B64[meV]}
+-2.174181E-06  {B66[meV]}
+-3.909595E-04  {o20-q-exchange [meV]}
+-1.193248E-03  {o22-q-exchange [meV]}
+ 1.878634E-08  {o40-q-exchange [meV]}
+-4.423294E-08  {o42-q-exchange [meV]}
+-8.45338E-08   {o44-q-exchange [meV]}
+-2.557163E-14  {o60-q-exchange [meV]}
+-1.78518E-12   {o62-q-exchange [meV]}
+-2.064902E-12  {o64-q-exchange [meV]}
+-4.076859E-12  {o66-q-exchange [meV]}

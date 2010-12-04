@@ -1,0 +1,296 @@
+\section{Definition of sipf file format}
+
+\begin{verbatim}
+
+#!MODULE=cfield
+#!<--mcphase.sipf-->
+#
+#----------------------------------------------------------------------------
+# obligatory: 
+# the first line denotes which single ion module is used, it starts always with a modulename, 
+# which is either the name of an internal single ion module or the filename of an external
+# (possibly user written) module, which is loaded at runtime
+#
+# the second line identifies the file as a sipf file  #!<--mcphase.sipf-->
+#
+#
+# in what follows all comment lines start with #
+# variables are declared in uncommented lines only by the = sign
+#----------------------------------------------------------------------------
+#
+#----------------------------------------------------------------------------
+# optional for external modules a list of parameters
+#----------------------------------------------------------------------------
+MODPAR1=13
+MODPAR2=1
+MODPAR3=4.2
+
+#***************************************************************
+# Single Ion Parameter File for internal Module Kramer for  
+# mcphas version 3.0
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.0
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.0
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+# this is a crystal field ground state doublet
+# module, parameters are the following 3 matrix
+# elements
+#
+# A=|<+-|Ja|-+>| B=|<+-|Jb|-+>| C=|<+-|Jc|+->| are obligatory
+# parameters for module kramer, not read by other modules
+ A=  2.000000 
+ B=  2.543750 
+ C=  1.600000
+
+#***************************************************************
+# Single Ion Parameter File for internal Module Brillouin for
+# mcphas version 3.0
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.0
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.0
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#****************************************************************
+#
+#
+# single ion parameterized by Brillouin function
+# BJ(x) with angular momentum number J=S,
+# no crystal field
+#
+#  J   angular momentum quantum number is
+# and obligatory parameter for module Brillouin, not read
+# by other modules
+J=3.5
+
+#***************************************************************
+# Single Ion Parameter File for internal Module Cfield for  
+# mcphas version 3.0
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.0
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.0
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+#
+#
+# crystal field paramerized in Stevens formalism
+#
+#----------------------------------------------------------------------------
+# IONTYPE is an obligatory parameter for internal module cfield -
+#                          optional parameter for external module ic1ion
+#                          not needed for other internal modules 
+IONTYPE=Ce3+
+#---------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+# Crystal Field parameters in Stevens Notation (coordinate system yzx||abc in 
+# in module cfield, xyz||abc in external module ic1ion)
+# used by programs mcphas, mcdisp, mcdiff
+#--------------------------------------------------------------------------
+# corresponding rotated CF suited for mcphas yzx||abc
+# the units statement is recognised only in external module ic1ion and defines the 
+# units used from this point onwards
+units=meV
+# crystal field parameters Blm with l=2,4,6 m=-l,-l+1,...,+l
+# Blm with negative l are denoted e.g. as B21S
+B20=-0.022
+B22=0.066
+B40=0.0655
+B42=0.098
+B44=0.2295
+
+#--------------------------------------------------------------------------
+# external module ic1ion also recognises crystal field parameters in Wybourne notation
+# used by programs mcphas, mcdisp, mcdiff
+#--------------------------------------------------------------------------
+# the units statement is recognised only in external module ic1ion and defines the 
+# units used from this point onwards
+units=meV
+# crystal field parameters Llm with l=2,4,6 m=-l,-l+1,...,+l
+# Llm with negative l are denoted e.g. as L21S
+L20=-0.022
+L22=0.066
+L40=0.0655
+L42=0.098
+L44=0.2295
+
+#-------------------------------------------------
+# Stevens Factors (optional) used in module cfield
+# used by programs mcphas, mcdisp, mcdiff
+#-------------------------------------------------
+ALPHA=-0.0571429
+BETA=0.00634921
+GAMMA=0
+
+#---------------------------------------------------------
+# (for use in programs pointc, chrgplt, charges) 
+# radial wave function parameters, for transition metal ions the the values are tabulated in
+# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave
+# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# Co2+ is isoelectronic to Fe+, looking at page  422 of Clemente & Roetti we see:
+#---------------------------------------------------------
+N1=3 XI1=4.95296 C1=0.36301 
+N2=3 XI2=12.2963 C2=0.02707 
+N3=3 XI3=7.03565 C3=0.14777
+N4=3 XI4=2.74850 C4=0.49771 
+N5=3 XI5=1.69027 C5=0.11388 
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+# for program pointc alternatively to radial wavefunction parameters,
+#  the radial matrix elements may be given:
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.24653
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=3.67281
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=21.0652
+
+#------------------------------------------
+# Lande factor gJ
+# used by programs mcphas, mcdisp, mcdiff
+#------------------------------------------
+GJ=0.857143
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+# used by program mcdiff
+# a table for all elements is available at 
+# http://www.ncnr.nist.gov/resources/n-lengths/list.html
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.484
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+# used by program mcdiff, mcdisp, mcphas
+#-------------------------------------------------------
+DWF=0.00211
+
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#   s2= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Q)>=    FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D
+#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D
+#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D
+#   <j6(Q)>=s2*(FFj6A*EXP(-FFj6a*s2) + FFj6B*EXP(-FFj6b*s2) + FFj6C*EXP(-FFj6c*s2) + FFj6D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)
+# used by programs mcphas, mcdiff, mcdisp
+# a table for all magnetic ions is available in file ffacts.tex
+#--------------------------------------------------------------------------------------
+FFj0A=+0.2953 FFj0a=+17.6846 FFj0B=+0.2923 FFj0b=+6.7329 FFj0C=+0.4313 FFj0c=+5.3827 FFj0D=-0.0194
+FFj2A=+0.9809 FFj2a=+18.0630 FFj2B=+1.8413 FFj2b=+7.7688 FFj2C=+0.9905 FFj2c=+2.8452 FFj2D=+0.0120
+FFj4A=-0.6468 FFj4a=+10.5331 FFj4B=+0.4052 FFj4b=+5.6243 FFj4C=+0.3412 FFj4c=+1.5346 FFj4D=+0.0080
+FFj6A=-0.1212 FFj6a=+7.9940 FFj6B=-0.0639 FFj6b=+4.0244 FFj6C=+0.1519 FFj6c=+1.0957 FFj6D=+0.0078
+
+
+#----------------------------------------------------------------------
+# coefficients of Z(K') according to Lovesey (Neutron Scattering) vol.2
+# chapter 11.6.1 page 233: Z(K)= ZKcK-1 * <jK-1(Q)> + ZKcK+1 * <jK+1(Q)>
+#  ... these coefficients are needed to go beyond dipolar approx.
+#      for the neutron magnetic formfactor in rare earth ions
+#      - a table for all rare earth 3+ ions is available in file zk.tex
+# optional parameters for module cfield, used in programs mcdiff and mcdisp
+#----------------------------------------------------------------------
+Z1c0=+1.07142857  Z1c2=+1.71428571
+		  Z3c2=+0.09583148  Z3c4=+0.31943828
+				    Z5c4=+0.00360750  Z5c6=+0.04329004
+						      Z7c6=+0.00000000
+
+
+#------------------------------------------------------------------------------------------------------
+# configuration and electron electron interaction parameters to be used if not
+# IONTYPE is given in external module ic1ion
+#------------------------------------------------------------------------------------------------------
+ conf=d6
+ F0=0
+ F2=88025
+ F4=64512
+ xi=514.5
+
+#----------------------------------------------------------------------
+# optional parameters for external module ic1ion for calculation of 
+# magnetisation (triggered by the keyword clacmag)
+#----------------------------------------------------------------------
+# magnetisation calculation can be triggered by the following parameters
+calcmag
+# default magnetisation output units is Bohr magneton per ion
+
+# if the following is uncommented, ic1ion will output magnetisation in emu/mol
+#emu
+
+# if the following is uncommented, ic1ion will output magnetisation in Am^2/mol
+#simag
+ xT   = 1
+ xHa  = 0
+ xHb  = 0
+ xHc  = 0
+ xmin = 1
+ xstep= 1
+ xmax = 300
+ yT   = 0
+ yHa  = 0
+ yHb  = 0
+ yHc  = 1
+ ymin = 1
+ ystep= 1
+ ymax = 1
+
+
+# keyword arnoldi: optional parameter for module ic1ion
+# if present ic1ion will use 
+# a routine to calculate only a few of the lowest
+# eigenvalues in mcalc() using an arnoldi iterative method in ARPACK
+# it makes calculation with f-configurations with many
+# electrons (f5-f9) more practicable... It usually gets the correct
+# eigenvalue/vector, however sometime for some reason (defective random
+# number generator?) it gives completely erroneous numbers. This happens
+# perhaps between once in a 100 times, and occurs randomly... I have no
+# idea why it happens, and it doesn't occur systematically enough for me
+# to track down the problem...
+ arnoldi
+
+# keyword partial: optional parameter for module ic1ion
+# there is also another method to find only a few of the lowest
+# eigenvalue, which is more reliable, and this uses the relatively
+# robust representation algorithm in Lapack and can be accessibly by including the
+# keyword: "partial" in the parameter file. This takes about 2/3 the
+# time of the full computation, whereas the arnoldi routine takes about
+# 1/5 the time...
+# if the next line is uncommented ic1ion will use the 'partial' RRR algorithm 
+ partial
+
+
+#---------------------------------------------------------
+#pointcharges charge[|e|]  x[A] y[A] z[A]
+# output of program pointc, used in chrgplt
+#---------------------------------------------------------
+pointcharge=  0.3            3    4    2
+
+
+\end{verbatim}
