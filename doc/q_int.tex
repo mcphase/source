@@ -137,6 +137,33 @@ $O_{22}=\frac{1}{2}[J_+^2+J_-^2]=[J_x^2-J_y^2]$ & $J_h$ \\
 \end{center}   
 \end{table}
 
+The {\prg indexexchange} parameter discussed in section~\ref{mcphasj} may be useful in keeping the input
+of the exchange components short. For example the $\zeta$ and $\eta$ strain modes on the quasi-cubic sites
+of a double hexagonal close packed structure involves the coupling of $P_{zx}$ ($J_g$) and $P_{xy}$ ($J_d$) 
+as well as $P_{yz}$ ($J_e$) and $O_2^2$ $(J_h)$ quadrupoles, so the {\prg diagonalexchange=1} option 
+cannot be used. Thus 64 components need to be specified to describe the $8\times 8$ exchange tensor. 
+However, we can simplify this with the {\prg indexexchange} parameter by setting {\prg diagonalexchange=2}, 
+as follows for UPd$_3$:
+
+{\footnotesize \begin{verbatim}
+# UPd3 
+#<!--mcphase.mcphas.j-->
+#! a=9.92465 b=5.73 c=9.65  alpha=  90 beta=  90 gamma=  90
+#! r1x= 1 r2x=   0 r3x=   0
+#! r1y= 0 r2y=   1 r3y=   0
+#! r1z= 0 r2z=   0 r3z=   1
+#! nofatoms=1 nofcomponents=8
+#*************************************************************************
+#! x=   0 [a] y=   0 [b] z=   0 nofneighbours=6 diagonalexchange=2 gJ=0.8 cffilename=mcphas.cf1
+#! x[a]  y[b]    z[c]   Ja[meV]  Jb[meV]  Jc[meV]  Jd[meV]  Je[meV]  Jf[meV]  Jg[meV]  Jh[meV]
+#! symmetricexchange=1 indexexchange= JaJa JbJb JcJc JdJd JeJe JfJf JgJg JhJh JgJd JhJe
+ 0    0    0.5 -0.022 -0.022 -0.022  0.0035198 -0.18643  -0.00053332 -0.18643   0.00087996  0.013      0.0064378
+ 0    0   -0.5 -0.022 -0.022 -0.022  0.0035198 -0.18643  -0.00053332 -0.18643   0.00087996  0.013      0.0064378
+ 0.5  0.5  0   -0.022 -0.022 -0.022 -0.0034195 -0.019714 -0.00034044 -0.019714 -0.00085486 -0.0065221 -0.0050197
+-0.5 -0.5  0   -0.022 -0.022 -0.022 -0.0034195 -0.019714 -0.00034044 -0.019714 -0.00085486 -0.0065221 -0.0050197
+ 0.5 -0.5  0   -0.022 -0.022 -0.022 -0.0034195 -0.019714 -0.00034044 -0.019714 -0.00085486 -0.0065221 -0.0050197
+-0.5  0.5  0   -0.022 -0.022 -0.022 -0.0034195 -0.019714 -0.00034044 -0.019714 -0.00085486 -0.0065221 -0.0050197
+\end{verbatim} }
 
 \subsection{Running {\prg McPhase} and {\prg McDisp}}
 

@@ -240,8 +240,20 @@ If {\prg diagonalexchange}
 is set to 0 the 9 components of the exchange tensor are given in column 4-12. 
 If {\prg diagonalexchange}
  is 1, only 3 components are given (column 4-6).
+If {\prg diagonalexchange}
+ is 2, specific components of the exchange tensor can be given in columns 4 onwards. The indices of these components
+ must be given in the following line (Line 9a below).
 The Land'e factor of the ion (gJ) and the file name of the corresponding single ion
 parameter file (cffilename).
+\item [Line 9a:]  If {\prg diagonalexchange=2}, then this line gives the indices of the exchange tensor corresponding to 
+ the columns 4 onwards. It must have a variable called {\prg indexexchange} followed by a list of pairs of exchange 
+ constants separated by space. E.g. \verb|  #! indexexchange= JaJb JbJc  | means column 4 gives the the exchange between the
+ first angular momentum component of the current ion with the second angular momentum component of its neighbour, whilst 
+ column 5 has the correlations between the second angular momentum component of this ion with the third component of its
+ neighbour. Alternatively, pairs of numbers may be given, as in \verb|  #! indexexchange= 1,2 2,3  |
+ Additionally another parameter {\prg symmetricexchange} can be set to 1, where the value in each column is also used 
+ for the transposed tensor component. Thus \verb|  #! symmetricexchange=1 indexexchange= JaJb  | is the same as \\
+ \verb|  #! indexexchange= JaJb JbJa  | where the 4th and 5th column are the same.
 \item [Line 10:]  Comment line
 \item [Line 11-(10+nofneighbours):] Interaction table for ion number 1.   
 Note: the neighbour coordinates (column 1-3) are given with respect to the ortho-lattice
