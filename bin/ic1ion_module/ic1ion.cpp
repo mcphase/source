@@ -201,13 +201,13 @@ void ic_showoutput(const char *filename,                        // Output file n
          }
          elc = zV[0];
          FILEOUT << " (" << elc.r; if(elc.i>0) FILEOUT << "+"; else FILEOUT << "-";
-         FILEOUT << "i" << elc.i << ")\t\t" << (elc.r*elc.r+elc.i*elc.i) << "\t";
+         FILEOUT << "i" << fabs(elc.i) << ")\t\t" << (elc.r*elc.r+elc.i*elc.i) << "\t";
          FILEOUT << "|" << conf.states[isV[0]].id << ">";
          for(iV=1; iV<(unsigned int)pars.num_eigv; iV++)
          {
             elc = zV[iV]; FILEOUT << "\n\t\t+";
             FILEOUT << "(" << elc.r; if(elc.i>0) FILEOUT << "+"; else FILEOUT << "-";
-	    FILEOUT << "i" << elc.i << ")\t\t" << (elc.r*elc.r+elc.i*elc.i) << "\t";
+	    FILEOUT << "i" << fabs(elc.i) << ")\t\t" << (elc.r*elc.r+elc.i*elc.i) << "\t";
             FILEOUT << "|" << conf.states[isV[iV]].id << ">";
          }
          FILEOUT << "\n";
