@@ -254,13 +254,14 @@ dummyc=Jbb;Jbb=Jcc;Jcc=Jaa;Jaa=dummyc;
 }
 
 module_ionpars iops("#ATTENTION in module cfield.so the AXES xyz are parallel to cab\n#The higher order interactions are described by the  PKQ Operators defined in cfield:\n#O20(c) .... Jd\n#O22(c) .... Je\n#O40(c) .... Jf\n#O42(c) .... Jg\n#O44(c) .... Jh\n#O60(c) .... Ji\n#O62(c) .... Jj\n#O64(c) .... Jk\n#O66(c) .... Jl\n");  // get 1ion parameters - operator matrices
-#ifdef __linux__
-extern "C" void mcalc(Vector & J,double & T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
-                      double & lnZ,double & U)
-#else
+#ifdef __declspec
 extern "C" __declspec(dllexport) void mcalc(Vector & J,double & T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
                       double & lnZ,double & U)
+#else
+extern "C" void mcalc(Vector & J,double & T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+                      double & lnZ,double & U)
 #endif  
+
 {//ABC not used !!!
     /*on input
     T		temperature[K]
@@ -373,11 +374,11 @@ return;
 
 /**************************************************************************/
 // for mcdisp this routine is needed
-#ifdef __linux__
-extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
+#ifdef __declspec
+extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
                        ComplexMatrix & mat,float & delta)
 #else
-extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
+extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
                        ComplexMatrix & mat,float & delta)
 #endif
 {//ABC not used !!!

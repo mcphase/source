@@ -8,10 +8,10 @@
 
 typedef void fnc_t();
 
-#ifdef __linux__
-#include<dlfcn.h>
-#else
+#ifdef __MINGW32__
 #include <windows.h>
+#else
+#include<dlfcn.h>
 #endif
 
 #include<martin.h>
@@ -207,11 +207,16 @@ Vector currdensity_calc (double & teta,double & fi,double & R, Vector & momentlx
  Matrix gradcurrdensity_calc(double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
 
 private:
-#ifdef __linux__
-  void *handle;
-#else
-//  HANDLE handle;
+//#ifdef __linux__
+//  void *handle;
+//#else
+////  HANDLE handle;
+//  HINSTANCE__* handle;
+//#endif
+#ifdef __MINGW32__
   HINSTANCE__* handle;
+#else
+void *handle;
 #endif
   
   void  (*sd_m)(Vector*,int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*);

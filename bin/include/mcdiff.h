@@ -15,7 +15,7 @@
 #include<spincf.hpp>
 
 // different output data for columns 10 and 11
-const char * colheader [] {"LF          ",
+const char * colheader []= {"LF          ",
                            "|NSF|[b]    ",
                            "Re(NSF)[b]  ",
                            "Im(NSF)[b]  ",

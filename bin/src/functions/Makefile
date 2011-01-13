@@ -80,6 +80,7 @@ FCNOBJ= hypot3d.o  hypot3f.o  \
 
 # implicit rule uses CXXFLAGS for compilation
 CXXFLAGS=$(CCOPTS)
+CXX=${CCC}
 
 ALL: ${FCNOBJ} OBJLIST
 

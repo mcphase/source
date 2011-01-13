@@ -152,7 +152,50 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
 	    }
     fprintf(stderr,"\n");
 module_type=0;
-#ifdef __linux__
+#ifdef __MINGW32__
+  handle=LoadLibrary(modulefilename);
+  if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n");
+	       exit (EXIT_FAILURE);
+	      }
+
+    m=(void(*)(Vector*,double*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mcalc");
+    //*(int **)(&m)=GetProcAddress(handle,"mcalc");
+     if (m==NULL) {fprintf (stderr,"jjjpar::jjjpar error %d  module %s loading function mcalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
+    dm=(int(*)(int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*,float*,ComplexMatrix*))GetProcAddress(handle,"dmcalc");
+    //*(void **)(&dm)=GetProcAddress(handle,"dmcalc");
+     if (dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dmcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mq");
+    //*(void **)(&mq)=GetProcAddress(handle,"mq");
+     if (mq==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mq not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    estates=(void(*)(ComplexMatrix*,Vector*,double*,double*,Vector*,char**))GetProcAddress(handle,"estates");
+    //*(void **)(&estates)=GetProcAddress(handle,"estates");
+     if (estates==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function estates not possible - continuing\n",(int)GetLastError(),modulefilename);
+                                est=ComplexMatrix(0,2,1,2);// not used, just initialize to prevent errors
+                                est=0;
+                               }
+    mcalc_parameter_storage=(void(*)(ComplexMatrix*,Vector*,double*,double*,Vector*,char**))GetProcAddress(handle,"mcalc_parameter_storage_matrix_init");
+    //*(void **)(&mcalc_parameter_storage)=GetProcAddress(handle,"mcalc_parameter_storage_matrix_init");
+    if (mcalc_parameter_storage==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %X  module %s loading function mcalc_parameter_storage_matrix_init not possible - continuing\n",(int)GetLastError(),modulefilename);
+                                  mcalc_parstorage=ComplexMatrix(0,2,1,2);mcalc_parstorage=0;// not used, just initialize to prevent errors
+                                  }
+
+  ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexMatrix*))GetProcAddress(handle,"dncalc");
+    //*(void **)(&dnn)=GetProcAddress(handle,"dncalc");
+     if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dncalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
+    sd_m=(void(*)(Vector*,int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"spindensity_mcalc");
+    //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_mcalc");
+    if (sd_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function spindensity_mcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
+    od_m=(void(*)(Vector*,int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"orbmomdensity_mcalc");
+    //*(void **)(&od_m)=GetProcAddress(handle,"orbmomdensity_mcalc");
+    if (od_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function orbmomdensity_mcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
+    ro_calc=(void(*)(double*,double*,double*,double*,Vector*,double*,Vector*,double*,Vector*,char**))GetProcAddress(handle,"ro_calc");
+    //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_mcalc");
+    if (ro_calc==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function ro_calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
+#else
   char * error;
   handle=dlopen (modulefilename,RTLD_NOW | RTLD_GLOBAL);
   if (!handle){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n");
@@ -197,48 +240,6 @@ module_type=0;
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ro_calc=NULL;}
 
 
-#else
-  handle=LoadLibrary(modulefilename);
-  if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n");
-	       exit (EXIT_FAILURE);
-	      }
-
-    m=(void(*)(Vector*,double*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mcalc");
-    //*(int **)(&m)=GetProcAddress(handle,"mcalc");
-     if (m==NULL) {fprintf (stderr,"jjjpar::jjjpar error %d  module %s loading function mcalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
-    dm=(int(*)(int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*,float*,ComplexMatrix*))GetProcAddress(handle,"dmcalc");
-    //*(void **)(&dm)=GetProcAddress(handle,"dmcalc");
-     if (dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dmcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mq");
-    //*(void **)(&mq)=GetProcAddress(handle,"mq");
-     if (mq==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mq not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    estates=(void(*)(ComplexMatrix*,Vector*,double*,double*,Vector*,char**))GetProcAddress(handle,"estates");
-    //*(void **)(&estates)=GetProcAddress(handle,"estates");
-     if (estates==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function estates not possible - continuing\n",(int)GetLastError(),modulefilename);
-                                est=ComplexMatrix(0,2,1,2);// not used, just initialize to prevent errors
-                                est=0;
-                               }
-    mcalc_parameter_storage=(void(*)(ComplexMatrix*,Vector*,double*,double*,Vector*,char**))GetProcAddress(handle,"mcalc_parameter_storage_matrix_init");
-    //*(void **)(&mcalc_parameter_storage)=GetProcAddress(handle,"mcalc_parameter_storage_matrix_init");
-    if (mcalc_parameter_storage==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %X  module %s loading function mcalc_parameter_storage_matrix_init not possible - continuing\n",(int)GetLastError(),modulefilename);
-                                  mcalc_parstorage=ComplexMatrix(0,2,1,2);mcalc_parstorage=0;// not used, just initialize to prevent errors
-                                  }
-
-  ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexMatrix*))GetProcAddress(handle,"dncalc");
-    //*(void **)(&dnn)=GetProcAddress(handle,"dncalc");
-     if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dncalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-
-    sd_m=(void(*)(Vector*,int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"spindensity_mcalc");
-    //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_mcalc");
-    if (sd_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function spindensity_mcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-
-    od_m=(void(*)(Vector*,int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"orbmomdensity_mcalc");
-    //*(void **)(&od_m)=GetProcAddress(handle,"orbmomdensity_mcalc");
-    if (od_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function orbmomdensity_mcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-
-    ro_calc=(void(*)(double*,double*,double*,double*,Vector*,double*,Vector*,double*,Vector*,char**))GetProcAddress(handle,"ro_calc");
-    //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_mcalc");
-    if (ro_calc==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function ro_calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
 #endif
      }

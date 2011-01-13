@@ -25,11 +25,11 @@ void _fini(void)
 {  fprintf(stdout,"brillouin.so: is removed\n");}
 
 //routine mcalc for brillouin 
-#ifdef __linux__
-extern "C" void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+#ifdef __MINGW32__
+extern "C" __declspec(dllexport) void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #else
-extern "C" __declspec(dllexport) void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #endif
 {   
@@ -103,11 +103,11 @@ return;
 }
 /**************************************************************************/
 // for mcdisp this routine is needed
-#ifdef __linux__
-extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
+#ifdef __MINGW32
+extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
                        ComplexMatrix & mat,float & delta,ComplexMatrix & est)
 #else
-extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
+extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
                        ComplexMatrix & mat,float & delta,ComplexMatrix & est)
 #endif
 { 
