@@ -163,9 +163,17 @@ fprintf(fout,"#            4.....neutron TOF powder cyl. sample - d-pattern log 
 fprintf(fout,"#            5.....neutron TOF powder cyl. sample - d-pattern normal scaled\n");
 fprintf(fout,"#! out10=%i    type of desired output in column 10 and 11 of mcdiff.out\n",colcode[10]);
 fprintf(fout,"#! out11=%i    (optional) default is NSF in column 10 and LF in column 11\n",colcode[11]);
-for(i=0;i<=12;++i){
+for(i=0;i<=20;++i){
 fprintf(fout,"#            %i....%s\n",i,colheader[i]);
                    }
+fprintf(fout,"#\n");
+fprintf(fout,"#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities\n");
+fprintf(fout,"#           in a polarised neutron experiment:\n");
+fprintf(fout,"#            I+-=LF exp(-OTF Q^2/8pi^2) \n");
+fprintf(fout,"#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF/NB|^2-i(MSF x MSF*).P) \n");
+fprintf(fout,"#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]\n");
+fprintf(fout,"#\n");
+fprintf(fout,"#\n");
 fprintf(fout,"#             For some of the above options we need the\n");
 fprintf(fout,"#! Pa=%8.4f   Components of Projection Vector P=(Pa * a + Pb * b + Pc *c)/Norm(Pa * a + Pb * b + Pc *c)\n",P(1));
 fprintf(fout,"#! Pb=%8.4f\n",P(2));

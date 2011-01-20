@@ -902,13 +902,13 @@ F(r)=\frac{1}{r}\int_r^{\infty} R^2(\xi)d\xi
 
 %*************************************************************************************
 \subsection{External module function {\prg ro\_calc} -
-used by {\prg chrgplturrdensplt\index{chrgplt}},
+used by {\prg chrgplt\index{chrgplt}},
 {\prg charges\index{charges}}
 }
 
 In order to calculate more complex charge densities, the optional function
 {\prg rocalc} may be present in the module file {\prg *.so}. If present,
-it will be used by programs {\prg chrgplturrdensplt\index{chrgplt}},
+it will be used by programs {\prg chrgplt\index{chrgplt}},
 {\prg charges\index{charges}}:
 
 \begin{verbatim}
@@ -929,7 +929,7 @@ The meaning of the symbols is as follows:
     gJ          Lande factor
     MODPAR      Vector with Parameters  read in single ion property file
     sipffilename    file name of the single ion parameter file
-    aLlm         Output single ion moments =expectation values of
+    aLlm          single ion moments =expectation values of
                 coefficients of Zlm F(r) at a given temperature T and
                 effective field H
 on output

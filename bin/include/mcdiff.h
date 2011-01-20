@@ -27,10 +27,18 @@ const char * colheader []= {"LF          ",
                            "|MSFdip.P|  ",
                            "Re(MSFdip.P)",
                            "Im(MSFdip.P)",
-                           "angl(Q,P)[°]"
+                           "angl(Q,P)[°]",
+                           "i(MSFxMSF*).P",
+                           "I+          ",
+                           "I-          ",
+                           "I+/I-       ",
+                           "i(MSFxMSF*)dip.P",
+                           "Idip+       ",
+                           "Idip-       ",
+                           "Idip+/Idip- "
                            };
 
-double setcoloutput(int i,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,
+double setcoloutput(int i,float & scale, double & ovallt,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,
                    complex <double> & msfx, complex <double> & msfy, complex <double> & msfz,
                    complex <double> & msfdipx, complex <double> &msfdipy, complex <double> &msfdipz,Vector & Qvec);
 // get intensity of one reflection

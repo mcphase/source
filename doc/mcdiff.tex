@@ -65,7 +65,19 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #            10....Re(MSFdip.P)
 #            11....Im(MSFdip.P)
 #            12....angl(Q,P)[°]
-#             For some of the above options we need the
+#            13....i(MSF x MSF*).P
+#            14.... I+
+#            15.... I-
+#            16....I+/I-
+#
+#           In the above the intensities I+ and I- are the spinflip and nonspineflip intensities
+#           in a polarised neutron experiment:
+#            I+-=LF exp(-OTF Q^2/8pi^2) 
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF/NB|^2-i(MSF x MSF*).P) 
+#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
+#
+#
+#             For some of the above options we need the Projection (=polarization of neutron beam) vector
 #! Pa=  1.0000   Components of Projection Vector P=(Pa * a + Pb * b + Pc *c)/Norm(Pa * a + Pb * b + Pc *c)
 #! Pb=  0.0000
 #! Pc=  0.0000
@@ -499,7 +511,7 @@ u)^2 \rangle = \langle u^2 \rangle Q^2  \\
 {\rm NSF} &=&{\rm ... nuclear structure factor}\\
                  &=&  \sum_{d} \bar b_d e^{i\mbf Q \mbf B_d} e^{-W_d}\\
 \vec{\rm MSF} &=&{\rm ... magnetic structure factor}\\
-                &=& \sum_{d}{\frac{1}{2\mu_B}F(Q)}_d \vec M^{\perp}_{d} e^{i\mbf Q\mbf B_d} e^{-W_d} 
+                &=& \sum_{d}\frac{1}{2\mu_B}F_d(Q) \vec M^{\perp}_{d} e^{i\mbf Q\mbf B_d} e^{-W_d} 
 \end{eqnarray}
 
 Mind: no absorption and extinction corrections are calculated.

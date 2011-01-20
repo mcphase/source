@@ -1,10 +1,10 @@
 // routines for calculation of intensities for program mcdiff
 
 // different output data for columns 10 and 11
-double setcoloutput(int i,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,
+double setcoloutput(int i,float & scale, double & ovallt,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,
                    complex <double> & msfx, complex <double> & msfy, complex <double> & msfz,
                    complex <double> & msfdipx, complex <double> &msfdipy, complex <double> &msfdipz,Vector & Qvec)
-{
+{double cosw,crossx,crossy,crossz,Ip,Im;
          switch (i) {
 case 0:  return lorentzf;break;//   "LF          ",
 case 1:  return abs(nsf);break;//    "|NSF|[b]    ",
@@ -18,7 +18,68 @@ case 8:  return sqrt(msf2dip+1e-100);break;//    "|MSFdip|    ",
 case 9:  return abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "|MSFdip.P|  ",
 case 10: return real(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Re(MSFdip.P)",
 case 11: return imag(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Im(MSFdip.P)"
-case 12: double cosw=Pxyz*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[°]"
+case 12: cosw=Pxyz*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[°]"
+case 13:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
+          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
+          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
+         return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //"i(MSFxMSF*).P",
+case 14:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
+          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
+          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
+          Ip=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
+                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
+         return Ip* lorentzf * scale * ovallt;
+                     //              "I+          ",
+case 15:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
+          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
+          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
+          Im=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
+                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
+         return Im* lorentzf * scale * ovallt;
+                     //              "I-          ",
+case 16:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
+          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
+          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
+          Ip=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
+                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
+          Im=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
+                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
+                return Ip/Im;     //              "I+/I-       "
+case 17:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
+          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
+          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
+         return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //i(MSFdip x MSFdip*).P
+case 18:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
+          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
+          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
+          Ip=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
+                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
+         return Ip* lorentzf * scale * ovallt;
+          //Idip+
+case 19:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
+          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
+          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
+          Im=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
+                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
+         return Im* lorentzf * scale * ovallt;
+         // Idip-
+case 20:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
+          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
+          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
+          Ip=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
+                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
+          Im=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
+                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
+                return Ip/Im;         // Idip+/Idip-
+
                      }
 return 0;
 }
@@ -202,7 +263,22 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
             msf2dip -=  Qvec(1) * Qvec(1) / Q / Q * norm(msfdipx);
             msf2dip -=  Qvec(2) * Qvec(2) / Q / Q * norm(msfdipy);
             msf2dip -=  Qvec(3) * Qvec(3) / Q / Q * norm(msfdipz);
+             // alternative procedure: project msf normal to Q and then take norm:
+             // msfperp= msf - Q (Q.msf)/Q^2
+            complex <double> Qmsf;
+            complex <double> Qmsfdip;
+            Qmsf=Qvec(1)*msfx+Qvec(2)*msfy+Qvec(3)*msfz; Qmsf/=Q;
+            msfx=msfx-Qvec(1)*Qmsf/Q;
+            msfy=msfy-Qvec(2)*Qmsf/Q;
+            msfz=msfz-Qvec(3)*Qmsf/Q;
 
+            Qmsfdip=Qvec(1)*msfdipx+Qvec(2)*msfdipy+Qvec(3)*msfdipz; Qmsfdip/=Q;
+            msfdipx=msfdipx-Qvec(1)*Qmsfdip/Q;
+            msfdipy=msfdipy-Qvec(2)*Qmsfdip/Q;
+            msfdipz=msfdipz-Qvec(3)*Qmsfdip/Q;
+
+            if (fabs(norm(msfx)+norm(msfy)+norm(msfz)-msf2)>0.001){fprintf(stderr,"ERROR mcdiff: internal calculation of MSF wrong, contact Martin Rotter\n");exit(EXIT_FAILURE);}
+            if (fabs(norm(msfdipx)+norm(msfdipy)+norm(msfdipz)-msf2dip)>0.001){fprintf(stderr,"ERROR mcdiff: internal calculation of MSF wrong, contact Martin Rotter\n");exit(EXIT_FAILURE);}
 
             //lorentzfactor*************************************************************
             float lorentzf=1;
@@ -226,9 +302,9 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
             Imagdip = msf2dip * 3.65 / 4 / PI * lorentzf * scale * ovallt;
 
              // output column 10
-            OUT10 = setcoloutput(colcode[10],lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec);
+            OUT10 = setcoloutput(colcode[10],scale,ovallt,lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec);
              // output column 11
-            OUT11 = setcoloutput(colcode[11],lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec);
+            OUT11 = setcoloutput(colcode[11],scale,ovallt,lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec);
 
 
 return true;
