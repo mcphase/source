@@ -50,9 +50,9 @@ sub usage() {
     $0:
     Rotates a set of  crystal field  parameters for  Stevens equivalent
     operators by an azimuthal angle fi about the original z axis and
-    a polar angle theta about the new y axis. A right hand axis system is assumed
-    and a positive rotation is one which advances a right-hand screw in a
-    positive direction along the axis.
+    a polar angle theta about the new y axis. A right hand axis system is 
+    assumed and a positive rotation is one which advances a right-hand 
+    screw in a positive direction along the axis.
     The calculations are  done by means of matrix  multiplication based on
     the method of Buckmaster (phys. stat. sol. a, vol 13,  pp 9, 1972) and
     Rudowicz (J. Phys: Solid State Phys., vol 18, pp 1415, 1985).   
@@ -68,11 +68,14 @@ sub usage() {
      -fi         : azimuthal angle fi in degrees
     if -i is omitted, the program will  assume the input CF parameters are
           given on the command line in the format: Bkq=x.xx,Bkq=x.xx, etc.
-          e.g. $0 B20=0.21,B40=0.0005,B60=0.051,B66=0.626
+          e.g. $0 "B20=0.21,B40=0.0005,B60=0.051,B66=0.626"
           negative q parameters such as B_2^{-2},  
           are specified as:  B22S, with an 'S' at the end, as per the 
           McPhase convention. you may also  specify the ion type by adding 
-          another parameter after the CF parameters: e.g. $0 B20=0.21,B40=0.5 Pr3+
+          another parameter after the CF parameters: e.g. 
+	  $0 "B20=0.21,B40=0.5" Pr3+
+	  Note that the quotation marks are required in Windows, but not
+	  in Linux.
     if -o is omitted, the program prints the parameters to standard output. 
 EOF
   exit;
