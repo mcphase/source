@@ -53,6 +53,13 @@ else
  CFLAGS+=-D_G77
 endif
 
+# Determines if we should use ARPACK or not
+ifdef noarpack
+CFLAGS+=-DNO_ARPACK
+else
+LIBARPACK=-larpack
+endif
+
 # Determines if we have GOTOBLAS
 ifneq ($(strip $(wildcard libs/GotoBLAS/libgoto.a)),)
 ifndef cross64
@@ -91,19 +98,19 @@ ifdef matlab
 ifdef MSYS
 LDFLAGS = -L. -lmwrefblas -lmwlapack -lmwarpack
 else
-LDFLAGS = -L/usr/local/MATLAB/bin/glnxa64 -Wl,-rpath,/usr/local/MATLAB/bin/glnxa64 -lut -lmwbinder -lmwblas -lmwlapack -Llibs -larpack $(LIBFORTRAN)
+LDFLAGS = -L/usr/local/MATLAB/bin/glnxa64 -Wl,-rpath,/usr/local/MATLAB/bin/glnxa64 -lut -lmwbinder -lmwblas -lmwlapack -Llibs $(LIBARPACK) $(LIBFORTRAN)
 endif
 else
 ifdef gotoblas
-LDFLAGS = -Llibs -Llibs/GotoBLAS -larpack -llapack -lgoto $(LIBFORTRAN)
+LDFLAGS = -Llibs -Llibs/GotoBLAS $(LIBAPRACK) -llapack -lgoto $(LIBFORTRAN)
 ifeq (,$(findstring CYGWIN,$(shell uname)))
 LDFLAGS += -lpthread
 endif
 else
-#LDFLAGS = -larpack -llapack -lblas
-LDFLAGS = -Llibs -larpack -llapack -lblas $(LIBFORTRAN)
-#LDFLAGS = -Llibs -larpack -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
-#LDFLAGS = -Llibs -larpack -llapack -L/home/eqr/src/ATLAS-3.8.3/mingw64_penryn/lib -lf77blas -latlas -lgfortran
+#LDFLAGS = $(LIBAPRACK) -llapack -lblas
+LDFLAGS = -Llibs $(LIBARPACK) -llapack -lblas $(LIBFORTRAN)
+#LDFLAGS = -Llibs $(LIBAPRACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
+#LDFLAGS = -Llibs $(LIBAPRACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/mingw64_penryn/lib -lf77blas -latlas -lgfortran
 ifdef MSYS
 ifdef GCC4
 LDFLAGS+= -static
@@ -145,14 +152,14 @@ FORCE:
 checkgcc: FORCE
 	./checkgcc.sh 3.4.5 $(CC) -warn
 
-libs/libarpack.a:
+libs/liblapack.a:
 	cd libs && make
 
 ifdef integral
-../ic1ion$(EXE): checkgcc libs/libarpack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
+../ic1ion$(EXE): checkgcc libs/liblapack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
 	$(LINKER) -o ../ic1ion ic1ion.o spectre.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
 else
-../ic1ion$(EXE): checkgcc libs/libarpack.a $(OBJ) ic1ion.o
+../ic1ion$(EXE): checkgcc libs/liblapack.a $(OBJ) ic1ion.o
 	$(LINKER) -o ../ic1ion ic1ion.o $(OBJ) $(LDFLAGS) $(STATIC)
 endif
 
@@ -180,7 +187,7 @@ endif
 icf1ion_module.o: icf1ion_module.cpp
 	$(CC) $(CFLAGS) -I../include -c $<
 
-ic1ion.so: checkgcc libs/libarpack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
+ic1ion.so: checkgcc libs/liblapack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
 ifdef WINDOWS
 	$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
 else
@@ -188,9 +195,9 @@ else
 endif
 
 ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o  # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
-../icf1ion$(EXE): checkgcc libs/libarpack.a $(ICFOBJ) icf1ion_module.o 
+../icf1ion$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o 
 	$(LINKER) -o ../icf1ion icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
-icf1ion.so: checkgcc libs/libarpack.a $(ICOBJ) icf1ion_module.o
+icf1ion.so: checkgcc libs/liblapack.a $(ICOBJ) icf1ion_module.o
 ifdef WINDOWS
 	$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libicf1ion_module.a
 else

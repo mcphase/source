@@ -156,8 +156,10 @@ int ic_diag(sMat<double>&Hic, double *V, double *E);                      // Dia
 int ic_leig(sMat<double>&H,sMat<double>&i,complexdouble*V,double*E,int n);// Finds only the n lowest eigenval/vec
 int ic_leig(int n, complexdouble *zm, complexdouble *z, double*E, int iu);
 int ic_leig(sMat<double>&Hic, double *V, double *E, int n);               // Finds only the n lowest eigenval/vec
+#ifndef NO_ARPACK
 int ic_arpackeig(int n, complexdouble*m,complexdouble*z, double*E,int iu);// Finds only lowest eigval/vecs, use ARPACK
 int ic_arpackeig(int n, double *m, double *z, double *E, int iu);         // Finds only lowest eigval/vecs, use ARPACK
+#endif
 int ic_peig(int Hsz, complexdouble *zJmat, complexdouble *est,            // Diagonalises a complex matrix
             complexdouble *zVd, double *eigval, int nev=0);               /*   using perturbation theory
 int ic_peig(sMat<double>&Hic, sMat<double>&iH, complexdouble*V, double*E);// Diagonalises complex hermitian Hic+iH

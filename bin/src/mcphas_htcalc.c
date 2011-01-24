@@ -34,7 +34,7 @@ void dataDestructor(void *data) { }
 #define THRLC_GET(v)   TlsGetValue (v)
 #define THRLC_GET_FAIL 0
 #endif
-#define NUM_THREADS 2
+#define NUM_THREADS 3
 
 // ----------------------------------------------------------------------------------- //
 // Declares a struct to store all the information needed for each htcalc iteration

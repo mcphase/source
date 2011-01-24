@@ -137,7 +137,7 @@ extern "C"
                       double *vl, double *vu, int *il, int *iu, double *abstol, int *numfnd, double *eigval, 
                       complexdouble *z, int *ldz, int *isuppz, complexdouble *zwork, 
 		      int *lwork, double *rwork, int *lrwork, int *iwork, int *liwork, int *info);
-
+#ifndef NO_ARPACK
   // Double precision real ARPACK routines.
   void F77NAME(dnaupd)(int *ido, char *bmat, int *Hsz, char *whichp, int *nev, double *tol,
                       double *resid, int *ncv, double *v, int *ldv, int *iparam, int *ipntr,
@@ -163,14 +163,7 @@ extern "C"
                       double *tol, complexdouble *resid, int *ncv, complexdouble *v, int *ldv, int *iparam,
                       int *ipntr, complexdouble *workd, complexdouble *workl, int *lworkl, double *rwork, int *info);
   void F77NAME(zsortc)(char *which, int *apply, int *n, complexdouble *x, complexdouble *y);
-
-#ifdef ARCOMP_H
-
-  // Single precision complex routines.
-
-  // Double precision complex routines.
-
-#endif // ARCOMP_H
+#endif
 
 }
 

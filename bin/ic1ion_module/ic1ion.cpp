@@ -285,7 +285,11 @@ void ic_cmag(const char *filename, icpars &pars)
       for(j=0; j<6; j++) gjmbHmeV[j] = gjmbH[j]*(-MUB*(Hmin+i*Hstep)); 
       mfmat.Jmat(J,iJ,gjmbHmeV,pars.save_matrices);
       if(pars.perturb) VE.pcalc(pars,zV,J,iJ);
-         else { J+=H; iJ+=iH; if(pars.partial) VE.lcalc(pars,J,iJ); else if(pars.arnoldi) VE.acalc(pars,J,iJ); else VE.calc(J,iJ); }
+      else { J+=H; iJ+=iH; if(pars.partial) VE.lcalc(pars,J,iJ); 
+      #ifndef NO_ARPACK
+         else if(pars.arnoldi) VE.acalc(pars,J,iJ); else VE.calc(J,iJ); 
+      #endif
+      }
       ex = mfmat.expJ(VE,Tmax,matel,pars.save_matrices); ex.assign(matel[0].size(),0.); for(j=0; j<6; j+=2) exj.push_back(ex);
       for(j=0; j<nT; j++) 
       {
@@ -359,7 +363,9 @@ int main(int argc, char *argv[])
    // Fully diagonalise IC Hamilton matrix and saves results to <outfile>
    iceig VE; 
    if(pars.partial_standalone)      if(iHic.isempty()) VE.lcalc(pars,Hic); else VE.lcalc(pars,Hic,iHic);
+   #ifndef NO_ARPACK
    else if(pars.arnoldi_standalone) if(iHic.isempty()) VE.acalc(pars,Hic); else VE.acalc(pars,Hic,iHic);
+   #endif
    else                             if(iHic.isempty()) VE.calc(Hic); else VE.calc(Hic,iHic);
    start = clock(); std::cerr << "Time to diagonalise = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 // iceig VE; VE.lcalc(pars,Hic,iHic); int i; for(i=0; i<6; i++) std::cout << (VE.E(i)-VE.E(0))/MEV2CM << " "; std::cout << "\n";

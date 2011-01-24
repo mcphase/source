@@ -151,6 +151,7 @@ void iceig::pcalc(icpars &pars, complexdouble *zV, sMat<double> &J, sMat<double>
    complexdouble *zJmat = zmat2f(J,iJ); int info = ic_peig(_Hsz, zJmat, zV, _zV, _E, nev); free(zJmat);
    if(info!=0) { std::cerr << "iceig::pcalc() - Error\n"; }
 }
+#ifndef NO_ARPACK
 void iceig::acalc(icpars &pars, sMat<double>&H)
 {
    if(_E!=0) { delete[]_E; _E=0; } if(_V!=0) { delete[]_V; _V=0; } if(_zV!=0) { delete[]_zV; _zV=0; }
@@ -220,6 +221,7 @@ void iceig::acalc(icpars &pars, complexdouble *H)
       if(info!=0) { std::cerr << "iceig::acalc() - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; exit(EXIT_FAILURE); }
    }
 }
+#endif
 std::string iceig::strout() 
 {
    int i,j;

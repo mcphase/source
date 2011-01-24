@@ -162,6 +162,7 @@ int ic_leig(sMat<double> &Hic, double *m, double *eigval, int iu)
    return info;
 }
 
+#ifndef NO_ARPACK
 // --------------------------------------------------------------------------------------------------------------- //
 // Function to calculate some of the lowest energy eigenvectors/values of the Hamiltonian using ARPACK
 // --------------------------------------------------------------------------------------------------------------- //
@@ -254,6 +255,7 @@ int ic_arpackeig(int n, complexdouble *zm, complexdouble *z, double *eigval, int
 
    return info;
 }
+#endif
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Function to calculate the magnetisation given the eigenvalues and eigenvectors of Hic, using pertubation theory

@@ -322,12 +322,14 @@ void ic_parseinput(const char *filename, icpars &pars)
          pars.perturb = true;
       else if(varname.find("partial_standalone")!=std::string::npos)
          pars.partial_standalone = true;
-      else if(varname.find("arnoldi_standalone")!=std::string::npos)
-         pars.arnoldi_standalone = true;
       else if(varname.find("partial")!=std::string::npos)
          pars.partial = true;
+      #ifndef NO_ARPACK
+      else if(varname.find("arnoldi_standalone")!=std::string::npos)
+         pars.arnoldi_standalone = true;
       else if(varname.find("arnoldi")!=std::string::npos)
          pars.arnoldi = true;
+      #endif
       else if(varname.find("save_matrices")!=std::string::npos)
          pars.save_matrices = true;
       else if(varname.find("spectrelevels")!=std::string::npos)

@@ -44,9 +44,11 @@ class iceig
       void lcalc(icpars &pars, complexdouble *H);  // Calculates a partial set from a fortran-style matrix
       void pcalc(icpars &pars, complexdouble *zV,  // Calculates a partial set of eigenstates using
                  sMat<double>&J, sMat<double>&iJ); //    perturbation theory
+      #ifndef NO_ARPACK
       void acalc(icpars &pars, complexdouble *H);  // Calculates a partial set using the Arnoldi method (ARPACK)
       void acalc(icpars &pars, sMat<double> &J);
       void acalc(icpars &pars, sMat<double> &J, sMat<double> &iJ);
+      #endif
       bool iscomplex() { return _zV!=0; }          // Determines of eigenvalues are complex
       int Hsz() { return _Hsz; }
       std::string strout();                        // Prints the eigenstates out as a matrix

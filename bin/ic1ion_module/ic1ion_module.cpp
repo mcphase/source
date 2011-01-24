@@ -216,7 +216,11 @@ __declspec(dllexport)
          Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
 
          // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
-         iceig VE; if(pars.partial) VE.lcalc(pars,Jm); else if(pars.arnoldi) VE.acalc(pars,Jm); else VE.calc(Hsz,Jm); free(Jm);
+         iceig VE; if(pars.partial) VE.lcalc(pars,Jm);
+         #ifndef NO_ARPACK
+         else if(pars.arnoldi) VE.acalc(pars,Jm); 
+         #endif
+         else VE.calc(Hsz,Jm); free(Jm);
 
          // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
          std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices);
@@ -811,7 +815,11 @@ void sdod_mcalc(Vector &J,           // Output single ion moments==(expectation 
          Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
 
          // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
-         iceig VE; if(pars.partial) VE.lcalc(pars,Jm); else if(pars.arnoldi) VE.acalc(pars,Jm); else VE.calc(Hsz,Jm); free(Jm);
+         iceig VE; if(pars.partial) VE.lcalc(pars,Jm); 
+         #ifndef NO_ARPACK
+         else if(pars.arnoldi) VE.acalc(pars,Jm); 
+         #endif
+         else VE.calc(Hsz,Jm); free(Jm);
 
          // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
          std::vector< std::vector<double> > matel;
