@@ -237,7 +237,7 @@ fconf::fconf(orbital l)
       states.push_back(fstates_t(1,F,1,U,"2F")); 
    }
    else
-      std::cerr << "fconf::fconf() - error, only the case of l=2 and l=3, d- and f-electrons implemented.\n";
+      std::cerr << "fconf::fconf() - error, only the case of l=1, l=2 and l=3, p-, d- and f-electrons implemented.\n";
 }
 
 fconf::fconf(int n, orbital l)
@@ -260,7 +260,7 @@ fconf::fconf(int n, orbital l)
       std::cerr << "fconf::fconf() - Invalid value of n = number of p-electrons (must be 1<= n <=5)\n";
    }
    else {
-      if (n>3) n=5-n;	// Checks to see if we are in the second half of the series
+      if (n>3) n=6-n;	// Checks to see if we are in the second half of the series
       switch(n)
       {
          case 1:
@@ -274,9 +274,9 @@ fconf::fconf(int n, orbital l)
             break;
          case 3:
 	    states.reserve(3);
-            states.push_back(fstates_t(3,S,"4S"));                        // p2    4S
-            states.push_back(fstates_t(1,P,"2P"));                        // p2    2P
-            states.push_back(fstates_t(1,D,"2D"));                        // p2    2D
+            states.push_back(fstates_t(3,S,"4S"));                        // p3    4S
+            states.push_back(fstates_t(1,P,"2P"));                        // p3    2P
+            states.push_back(fstates_t(1,D,"2D"));                        // p3    2D
             break;
       } // switch(n)
    }    // else (n>0 && n<11)
@@ -777,13 +777,15 @@ fconf::fconf(int n, orbital l)
    }    // else (n>0 && n<15)
    break; // case D:
    default:
-      std::cerr << "fconf::fconf() - error, only the case of l=2 and l=3, d- and f-electrons implemented.\n";
+      std::cerr << "fconf::fconf() - error, only the case of l=1, l=2 and l=3, p-, d- and f-electrons implemented.\n";
    }    // switch(l)
 }
 
 fconf::fconf(int n, bool mJflag, orbital l)
 {
-   if(l!=D && l!=F) { std::cerr << "fconf::fconf() - error, only the case of l=2 and l=3, d- and f-electrons implemented.\n"; return; }
+   if(l!=P && l!=D && l!=F) { 
+      std::cerr << "fconf::fconf() - error, only the case of l=1, l=2 and l=3, p-, d- and f-electrons implemented.\n"; return; }
+     
    fconf confLS(n,l);
    int num_states = (int)confLS.states.size();
    int i,j,J2min,J2max,mj;
