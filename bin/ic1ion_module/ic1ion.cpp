@@ -187,7 +187,7 @@ void ic_showoutput(const char *filename,                        // Output file n
    double *V=0; complexdouble *zV=0; if(VE.iscomplex()) zV = new complexdouble[num_states]; else V = new double[num_states];
    for(iE=0; iE<num_states; iE++)
    {
-      if(VE.E(iE)==0.) if(iE<(num_states-1) && VE.E(iE+1)==0.) break; 
+      //if(VE.E(iE)==0.) if(iE<(num_states-1) && VE.E(iE+1)==0.) break;
       FILEOUT << (VE.E(iE)-VE.E(0))*conv << "\t\t";
       for(ii=0; ii<(int)num_states; ii++) isV[ii]=ii;
       i=1; j=2;

@@ -230,7 +230,7 @@ void jjjpar::save(FILE * file)
 }
 
 void jjjpar::saveatom(FILE * file) 
-{   fprintf(file,"#! da=%4.6g [a] db=%4.6g [b] dc=%4.6g [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g cffilename=%s\n",xyz(1),xyz(2),xyz(3),paranz,diagonalexchange,gJ,cffilename);
+{   fprintf(file,"#! da=%4.6g [a] db=%4.6g [b] dc=%4.6g [c] nofneighbours=%i diagonalexchange=%i gJ=%g cffilename=%s\n",xyz(1),xyz(2),xyz(3),paranz,diagonalexchange,gJ,cffilename);
 }
 
 //save single ion parameter file filename to path*
