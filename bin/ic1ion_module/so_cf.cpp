@@ -339,10 +339,7 @@ sMat<double> racah_mumat(int n, int q, orbital e_l)
 {
    const double g_s = 2.0023193043622;   // electronic g-factor, from NIST - http://physics.nist.gov/cuu/Constants/
 
-   bool df;
-   if(e_l==D) df = true;
-   else if(e_l==F) df = false;
-   else {  std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; sMat<double> so; return so; }
+   if(e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only p-, d- and f- configurations are implemented.\n"; }
    fconf conf(n,e_l);
    int num_states = (int)conf.states.size();
    int i,j,ns,minJ2,maxJ2,valJ,valJ_i,valJ_j;
@@ -383,9 +380,10 @@ sMat<double> racah_mumat(int n, int q, orbital e_l)
     for(j=0; j<num_states; j++)
     {
       L2 = abs(conf.states[i].L)*2; L2p = abs(conf.states[j].L)*2; S2 = conf.states[i].S2; S2p = conf.states[j].S2;
-      v = conf.states[i].v; vp = conf.states[j].v; if(!df) { if(conf.states[i].U != conf.states[j].U) continue; }
 
-      if(S2!=S2p || L2!=L2p || v!=vp) continue;
+      if(S2!=S2p || L2!=L2p) continue;
+      if(e_l>1 && conf.states[i].v!=conf.states[j].v) continue;
+      if(e_l>2 && conf.states[i].U!=conf.states[j].U) continue;
       
       // Caculate the J-dependent reduced matrix elements 
       j2min = abs(L2-S2); j2max = L2+S2; j2pmin = abs(L2p-S2); j2pmax = L2p+S2;
@@ -433,10 +431,7 @@ sMat<double> racah_mumat(int n, int q, orbital e_l)
 // --------------------------------------------------------------------------------------------------------------- //
 void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l)
 {
-   bool df=false;
-   if(e_l==D) df = true;
-   else if(e_l==F) df = false;
-   else { std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; }
+   if(e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only p-, d- and f- configurations are implemented.\n"; }
    fconf conf(n,e_l);
    int num_states = (int)conf.states.size();
    int i,j,ns,minJ2,maxJ2,valJ,valJ_i,valJ_j;
@@ -477,9 +472,10 @@ void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l
     for(j=0; j<num_states; j++)
     {
       L2 = abs(conf.states[i].L)*2; L2p = abs(conf.states[j].L)*2; S2 = conf.states[i].S2; S2p = conf.states[j].S2;
-      v = conf.states[i].v; vp = conf.states[j].v; if(!df) { if(conf.states[i].U != conf.states[j].U) continue; }
 
-      if(S2!=S2p || L2!=L2p || v!=vp) continue;
+      if(S2!=S2p || L2!=L2p) continue;
+      if(e_l>1 && conf.states[i].v!=conf.states[j].v) continue;
+      if(e_l>2 && conf.states[i].U!=conf.states[j].U) continue;
       
       // Caculate the J-dependent reduced matrix elements 
       j2min = abs(L2-S2); j2max = L2+S2; j2pmin = abs(L2p-S2); j2pmax = L2p+S2;
@@ -526,10 +522,7 @@ void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l
 // --------------------------------------------------------------------------------------------------------------- //
 void chanlam_mumat(int n, int q, sMat<double> &mu, orbital e_l)
 {
-   bool df=false;
-   if(e_l==D) df = true;
-   else if(e_l==F) df = false;
-   else { std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; }
+   if(e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only p-, d- and f- configurations are implemented.\n"; }
    fconf conf(n,e_l);
    int num_states = (int)conf.states.size();
    int i,j,ns,k,j2min,j2max,L2,L2p,S2,S2p;
@@ -555,9 +548,10 @@ void chanlam_mumat(int n, int q, sMat<double> &mu, orbital e_l)
       for(j=0; j<ns; j++)
       {
          L2 = abs(conf.states[index[i]].L)*2; L2p = abs(conf.states[index[j]].L)*2; S2 = conf.states[index[i]].S2; S2p = conf.states[index[j]].S2;
-         v = conf.states[index[i]].v; vp = conf.states[index[j]].v; if(!df) { if(conf.states[index[i]].U != conf.states[index[j]].U) continue; }
 
-         if(S2!=S2p || L2!=L2p || v!=vp) continue;
+         if(S2!=S2p || L2!=L2p) continue;
+         if(e_l>1 && conf.states[i].v!=conf.states[j].v) continue;
+         if(e_l>2 && conf.states[i].U!=conf.states[j].U) continue;
       
          J = J2[i]/2.; M=Jz2[i]/2.; denom = (J*J*(2*J+1.)*(2*J-1.));
          if(fabs(denom)<DBL_EPSILON) f=0.; else f = sqrt( ((S2+L2+2*J)/2.+1)*((S2+L2-2*J)/2.+1)*((S2+2*J-L2)/2.)*((L2+2*J-S2)/2.) / denom );

@@ -448,7 +448,8 @@ __declspec(dllexport)
                   ComplexMatrix &est)     // Input eigenvalues/vectors of the system Hamiltonian, H_SI+H_mf 
 {
    int i,q,n=1,Hsz=est.Cols()-1; orbital l;
-   n = (int)est[0][0].real(); i = (int)est[0][0].imag(); l = (i==2) ? D : F;
+   n = (int)est[0][0].real(); i = (int)est[0][0].imag(); l = (orbital)i;
+   if(i>3 || i<1) { std::cerr << "ic1ion mq(): Error only p-, d-, and f-electrons supported.\n"; exit(EXIT_FAILURE); }
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);

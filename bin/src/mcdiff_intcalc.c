@@ -451,7 +451,7 @@ if(code==0){ m = 0;// reset m
             }
           }
    }}// NEXT li NEXT ki
-   printf("%i %s",100* (hi-(int)nmin(1))/((int)nmax(1)-(int)nmin(1)),"%");
+   printf("%i %s",100* (hi-(int)nmin(1))/((int)nmax(1)-(int)nmin(1)),"%"); fflush(stdout);
   }
  printf("\n");
  }

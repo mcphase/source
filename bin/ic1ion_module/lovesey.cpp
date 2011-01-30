@@ -34,10 +34,7 @@ bool lovesey_aKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
    nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
    aKK = mm_gin(filename); if(!aKK.isempty()) return 1;
 
-   bool df;
-   if(l==D) df = true;
-   else if(l==F) df = false;
-   else {  std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; return false; }
+   if(l!=P&&l!=D&&l!=F) {  std::cerr << "lovesey_cKK(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
    int np = (n==1)?n:(n-1); 
    fconf confp(np,l);
    fconf conf(n,l);
@@ -102,8 +99,10 @@ bool lovesey_aKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
       L2 = abs(conf.states[i].L)*2; S2 = conf.states[i].S2; v = conf.states[i].v;
       if(n!=1) 
       {
-         if(df) cfpsi = racah_parents(n,v,S2,conf.states[i].L); 
-         else   cfpsi = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L);
+         switch(l) {
+            case P: cfpsj = racah_parents(n,S2,conf.states[i].L); break;
+            case D: cfpsj = racah_parents(n,v,S2,conf.states[i].L); break;
+            default:cfpsj = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L);  }
       }
 
       for(j=0; j<num_states; j++)
@@ -117,8 +116,10 @@ bool lovesey_aKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
             rmLS = -redmat;
          else
          {
-            if(df) cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); 
-            else   cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);
+            switch(l) {
+               case P: cfpsj = racah_parents(n,S2p,conf.states[j].L); break;
+               case D: cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); break;
+               default:cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);  }
 
             sumcfp = 0.; isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
             for(k=0; k<isz; k++)
@@ -161,10 +162,7 @@ bool lovesey_cKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
    nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
    cKK = mm_gin(filename); if(!cKK.isempty()) return 1;
 
-   bool df;
-   if(l==D) df = true;
-   else if(l==F) df = false;
-   else { std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; return false; }
+   if(l!=P&&l!=D&&l!=F) {  std::cerr << "lovesey_cKK(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
    int np = (n==1)?n:(n-1);
    fconf confp(np,l);
    fconf conf(n,l);
@@ -219,8 +217,10 @@ bool lovesey_cKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
       L2 = abs(conf.states[i].L)*2; S2 = conf.states[i].S2; v = conf.states[i].v;
       if(n!=1) 
       {
-         if(df) cfpsi = racah_parents(n,v,S2,conf.states[i].L); 
-         else   cfpsi = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L); 
+         switch(l) {
+            case P: cfpsj = racah_parents(n,S2,conf.states[i].L); break;
+            case D: cfpsj = racah_parents(n,v,S2,conf.states[i].L); break;
+            default:cfpsj = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L);  }
       }
 
       for(j=0; j<num_states; j++)
@@ -234,8 +234,10 @@ bool lovesey_cKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
 	    rmLS = redmat;
 	 else
 	 {
-            if(df) cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); 
-            else   cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);
+            switch(l) {
+               case P: cfpsj = racah_parents(n,S2p,conf.states[j].L); break;
+               case D: cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); break;
+               default:cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);  }
 
             sumcfp = 0.; isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
             for(k=0; k<isz; k++)

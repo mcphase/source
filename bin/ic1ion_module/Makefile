@@ -107,10 +107,10 @@ ifeq (,$(findstring CYGWIN,$(shell uname)))
 LDFLAGS += -lpthread
 endif
 else
-#LDFLAGS = $(LIBAPRACK) -llapack -lblas
-LDFLAGS = -Llibs $(LIBARPACK) -llapack -lblas $(LIBFORTRAN)
-#LDFLAGS = -Llibs $(LIBAPRACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
-#LDFLAGS = -Llibs $(LIBAPRACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/mingw64_penryn/lib -lf77blas -latlas -lgfortran
+LDFLAGS = $(LIBARPACK) -llapack -lblas
+#LDFLAGS = -Llibs $(LIBARPACK) -llapack -lblas $(LIBFORTRAN)
+#LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
+#LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/mingw64_penryn/lib -lf77blas -latlas -lgfortran
 ifdef MSYS
 ifdef GCC4
 LDFLAGS+= -static
