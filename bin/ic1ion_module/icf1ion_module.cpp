@@ -220,10 +220,10 @@ sMat<double> icf_ukq(int n, int k, int q, orbital e_l)
          case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
          default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
       int sz = (int)cfps.size();
-      for(int k=0; k<sz; k++)
+      for(int kk=0; kk<sz; kk++)
       {
-         int pL2 = abs(confp.states[cfps[k].ind].L)*2;
-         rmU += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,2*k,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
+         int pL2 = abs(confp.states[cfps[kk].ind].L)*2;
+         rmU += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,2*k,L2,2*e_l,pL2,2*e_l) * cfps[kk].cfp * cfps[kk].cfp * (L2+1.);
       }
       rmU *= n * threej(2*e_l,2*k,2*e_l,0,0,0) / p;
    }

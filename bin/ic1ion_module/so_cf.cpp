@@ -351,7 +351,6 @@ sMat<double> racah_mumat(int n, int q, orbital e_l)
    std::vector< std::vector< sMat<double> > > mJmat;
    std::vector< sMat<double> > mJmat_row;
    double Lrm,Srm,rm;
-   int v,vp; 
 
    // Determines the L S J values for each matrix elements and the index of each J-J' block
    ns = 0; minJ2 = 99; maxJ2 = 0;
@@ -443,7 +442,6 @@ void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l
    std::vector< std::vector< sMat<double> > > mJmat;
    std::vector< sMat<double> > mJmat_row;
    double Lrm,Srm;
-   int v,vp; 
 
    // Determines the L S J values for each matrix elements and the index of each J-J' block
    ns = 0; minJ2 = 99; maxJ2 = 0;
@@ -529,7 +527,6 @@ void chanlam_mumat(int n, int q, sMat<double> &mu, orbital e_l)
    std::vector<int> index, J2, Jz2;
    std::vector< std::vector< sMat<double> > > mJmat;
    std::vector< sMat<double> > mJmat_row;
-   int v,vp; 
 
    // Determines the L S J values for each matrix elements and the index of each J-J' block
    ns = 0;
