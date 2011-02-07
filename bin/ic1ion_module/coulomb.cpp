@@ -708,7 +708,7 @@ sMat<double> racah_emat(int n, double F0, double F2)
 
    F2/=25; nn--;  // Converts from Slater nomalisation to Condon and Shortley normalisation
 
-   for (int ii=1; ii<nn; ii++) st+=Hsz[ii-1];
+   for (int ii=0; ii<nn; ii++) st+=Hsz[ii];
    // Uses formula 38 of van Vleck
    for (int ii=0; ii<Hsz[nn]; ii++) e(ii,ii) = (n*(n+1.)/2.)*F0 + ((-5*n*n+20*n-3*L[ii+st]*(L[ii+st]+1)-12*(S2[ii+st]/2.)*((S2[ii+st]/2.)+1))/2.)*F2;
 

@@ -234,7 +234,7 @@ std::vector<double> rk_int(std::string &ionname)
 // --------------------------------------------------------------------------------------------------------------- //
 icpars::icpars()
 {
-   alpha.assign(3,0.); F.assign(4,0.); xi = 0.; _econv = 1.; _alpha.assign(3,0.); _F.assign(4,0.); 
+   alpha.assign(3,0.); F.assign(4,0.); xi = 0.; _econv = 1.; _alpha.assign(3,0.); _F.assign(4,0.); _xi = 0.; 
    #ifdef JIJCONV
    jijconv.assign(52,1.); _jijconvalreadycalc = false;
    #endif
