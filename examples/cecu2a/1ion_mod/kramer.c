@@ -11,7 +11,7 @@
 #define MU_B 0.05788
 #define K_B  0.0862
 #define SMALL 1e-10
-
+#define PI   3.14159265
 
 // this is called directly after loading it into memory from dlopen
 #ifdef __linux__
@@ -31,28 +31,51 @@
 
 //routine mcalc for kramers doublet
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" __declspec(dllexport) void mcalc(Vector & Jr,double * T, Vector & gjmbHin,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #else
-extern "C" void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" void mcalc(Vector & Jr,double * T, Vector & gjmbHin,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #endif
 {   
     /*on input
     T		temperature[K]
-    gJmbH	vector of effective field [meV]
+    gJmbHin	vector of effective field [meV]
     gJ          Lande factor
     ABC         single ion parameter values (A, B, C corresponding to <+|Ja|->,<-|Jb|->,<+|Jc|->/i
+                 MODPAR4= angle of rotation around c axis (deg)
+                 MODPAR5= angle of rotation around new x axis (degree)
+
   on output    
     J		single ion momentum vector <J>
     Z		single ion partition function
     U		single ion magnetic energy
 */
 // check dimensions of vector
-if(J.Hi()!=3||gjmbH.Hi()!=3||ABC.Hi()!=3)
+if(Jr.Hi()!=3||gjmbHin.Hi()!=3||ABC.Hi()!=5)
    {fprintf(stderr,"Error loadable module kramer.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
-    
+
+// rotate effective field
+double sf=sin(ABC(4)*PI/180);
+double cf=cos(ABC(4)*PI/180);
+double st=sin(ABC(5)*PI/180);
+double ct=cos(ABC(5)*PI/180);
+Vector J(1,3);
+Vector gjmbH(1,3);
+Matrix rot(1,3,1,3);
+      rot(1,1)=cf;    rot(1,2)=sf;   rot(1,3)=0;
+      rot(2,1)=-ct*sf;rot(2,2)=ct*cf;rot(2,3)=-st;
+      rot(3,1)=-st*sf;rot(3,2)=st*cf;rot(3,3)=ct;
+Matrix brot(1,3,1,3);
+      brot(1,1)=cf;    brot(1,2)=-sf*ct;   brot(1,3)=-st*sf;
+      brot(2,1)=sf;brot(2,2)=ct*cf;brot(2,3)=st*cf;
+      brot(3,1)=0.0  ;brot(3,2)=-st;brot(3,3)=ct;
+
+//printf("%g %g %g\n",gjmbHin(1),gjmbHin(2),gjmbHin(3));
+gjmbH=rot*gjmbHin;
+//printf("%g %g %g\n",gjmbH(1),gjmbH(2),gjmbH(3));
+
     
   double alpha, betar, betai, lambdap,lambdap_K_BT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, jap, jam, jbp, jbm, jcp, jcm,Z;
@@ -130,17 +153,22 @@ if(J.Hi()!=3||gjmbH.Hi()!=3||ABC.Hi()!=3)
   J[3] = np * jcp + nm * jcm;
 // printf ("np=%g nm=%g jap=%g jbp=%g jcp=%g jam=%g jbm=%g jcm=%g \n",np,nm,jap,jbp,jcp,jam,jbm,jcm);
 //  printf ("gjmbHa=%g gjmbHb=%g gjmbHc=%g Ja=%g Jb=%g Jc=%g \n", gjmbH[1], gjmbH[2], gjmbH[3], J[1], J[2], J[3]);
+//printf("J %g %g %g\n",J(1),J(2),J(3));
+
+Jr=brot*J;
+//printf("J %g %g %g\n",Jr(1),Jr(2),Jr(3));
+
 
 return;
 }
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
-                       ComplexMatrix & mat,float & delta,ComplexMatrix & est)
+extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
+                       ComplexMatrix & matr,float & delta,ComplexMatrix & est)
 #else
-extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
-                       ComplexMatrix & mat,float & delta,ComplexMatrix & est)
+extern "C" int dmcalc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
+                       ComplexMatrix & matr,float & delta,ComplexMatrix & est)
 #endif
 { 
   /*on input
@@ -151,7 +179,7 @@ extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & A
     gjmbH	vector of effective field [meV]
   on output    
     delta	splitting of kramers doublet [meV]
-    mat(i,j)	<-|Ji|+><+|Jj|-> tanh(delta/2kT)
+    matr(i,j)	<-|Ji|+><+|Jj|-> tanh(delta/2kT)
 */
   double alpha, betar, betai, lambdap,lambdap_K_BT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, nenner;
@@ -160,9 +188,30 @@ extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & A
   double Z,lnz,u;
   static int pr;
 
+  static Vector Jin(1,3);
   static Vector J(1,3);
+  static ComplexMatrix mat(1,3,1,3);
   // clalculate thermal expectation values (needed for quasielastic scattering)
-  mcalc(J,&T,gjmbH,g_J,ABC,sipffile,&lnz,&u,est);
+  mcalc(Jin,&T,gjmbHin,g_J,ABC,sipffile,&lnz,&u,est);
+
+// rotate effective field
+double sf=sin(ABC(4)*PI/180);
+double cf=cos(ABC(4)*PI/180);
+double st=sin(ABC(5)*PI/180);
+double ct=cos(ABC(5)*PI/180);
+Vector gjmbH(1,3);
+Matrix rot(1,3,1,3);
+      rot(1,1)=cf;    rot(1,2)=sf;   rot(1,3)=0;
+      rot(2,1)=-ct*sf;rot(2,2)=ct*cf;rot(2,3)=-st;
+      rot(3,1)=-st*sf;rot(3,2)=st*cf;rot(3,3)=ct;
+Matrix brot(1,3,1,3);
+      brot(1,1)=cf;    brot(1,2)=-sf*ct;   brot(1,3)=-st*sf;
+      brot(2,1)=sf;brot(2,2)=ct*cf;brot(2,3)=st*cf;
+      brot(3,1)=0.0  ;brot(3,2)=-st;brot(3,3)=ct;
+
+gjmbH=rot*gjmbHin;
+J=rot*Jin;
+
   pr=1;
   if (tn<0) {pr=0;tn*=-1;}
 
@@ -305,6 +354,13 @@ if (tn==2)
 }
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
  
+// rotate back mat(i,j)
+for(int i=1;i<=3;++i)for(int j=1;j<=3;++j){
+matr(i,j)=0.0;
+for(int i1=1;i1<=3;++i1)for(int j1=1;j1<=3;++j1){
+matr(i,j)+=brot(i,i1)*brot(j,j1)*mat(i1,j1);
+}}
+
 
 return 3;// kramers doublet has always exactly one transition + 2 levels (quasielastic scattering)!
 }

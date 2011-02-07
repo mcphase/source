@@ -652,7 +652,7 @@ sMat<double> racah_emat(int n, double F0, double F2, double F4)
    if (n>5) nn=10-n; if(nn<1) { std::cerr << "racah_emat: number of d-electrons n > 10 or < 1\n"; return e; }
 
    switch(nn) {
-      case 1: e(0,0) = F0+F2+F4; break;
+      case 1: e(0,0) = 0; break; // F0+F2+F4; break;
       case 2:
          e.zero(5,5); 
          e(0,0) = F0+F2/7.-4*F4/21.;          e(1,1) = F0-8*F2/49.-F4/49.;          e(2,2) = F0+2*F2/7.+2*F4/7.;
@@ -719,7 +719,7 @@ sMat<double> racah_emat(int n, double F0, double F2)
 // Calculates the conversions between Coulomb interaction parameters for Slater integrals and Racah's e_k operators
 //    NB These conversion factors are only valid for f-electrons!!! 
 //    For d-electrons to convert from Condon/Shortley F_k to Slater F^k: F^2=F_2*49 and F^4=F_4*441
-//    For d-electrons to convert from Condon/Shortley F_k to Slater F^k: F^2=F_2*25
+//    For p-electrons to convert from Condon/Shortley F_k to Slater F^k: F^2=F_2*25
 // --------------------------------------------------------------------------------------------------------------- //
 std::vector<double> racah_FtoE(std::vector<double> F)      // Converts from F_k to E
 {
