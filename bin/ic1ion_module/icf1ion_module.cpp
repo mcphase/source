@@ -301,7 +301,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
          elm+= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
-         if(fabs(elm)>SMALL) mu(i,j)=-elm/sqrt2;
+         if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm+elp)/sqrt2;
       }
    else if (ind>3 && ind<6)                             // Sz or Lz
@@ -981,6 +981,7 @@ bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
 */
 // std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out); FILEOUT.close();
 // rmzeros(aKK); mm_gout(aKK,filename); return 1;
+
    rmzeros(aKK); return 1;
 }
 
@@ -1170,7 +1171,7 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2; for (int J2=J2min; J2<=J2max; J2+=2) ns+=J2+1; 
    int ins=0; std::vector<int> J2(ns), Jz2(ns), irm(ns);
    for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) for (int imJ2=-iJ2; imJ2<=iJ2; imJ2+=2) {
-        J2[ins]=iJ2; Jz2[ins]=imJ2; irm[ins]=iJ2-J2min; ins++; }
+        J2[ins]=iJ2; Jz2[ins]=imJ2; irm[ins]=(iJ2-J2min)/2; ins++; }
 
    Qmat.zero(ns,ns); Qq.clear(); for(i=0; i<6; i++) Qq.push_back(Qmat);
 
@@ -1453,7 +1454,7 @@ __declspec(dllexport)
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   complexdouble *zQmat, *zt, zme, zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   complexdouble *zQmat, *zt, zme, zalpha, zbeta; zalpha.r=-1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
    double zMqr,zMqi,Z=0.;
    char trans = 'U'; int incx=1;
 
@@ -2135,7 +2136,7 @@ int main(int argc, char *argv[])
                           << Mq[2].real() << "+" << Mq[2].imag() << "i "
                           << Mq[3].real() << "+" << Mq[3].imag() << "i]\n";
 
-/* ComplexMatrix mat;
+/* ComplexMatrix mat(1,6,1,6);
    imq = dncalc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
    start = clock(); std::cerr << "Time to calculate dncalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n"; */
 #endif

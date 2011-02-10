@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
                           << Mq[2].real() << "+" << Mq[2].imag() << "i "
                           << Mq[3].real() << "+" << Mq[3].imag() << "i]\n";
 
-   ComplexMatrix mat;
+   ComplexMatrix mat(1,6,1,6);
    imq = dncalc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
    start = clock(); std::cerr << "Time to calculate dncalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 #endif
