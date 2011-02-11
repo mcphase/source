@@ -184,6 +184,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;fclose(finhkl);++nofhklfiles;
                  }
   }
+  if (extended_eigenvector_dimension<nofcomponents){fprintf(stderr,"ERROR: reading extended_eigenvector_dimension=%i which is less than nofcomponents=%i - increase extended_eigenvector_dimension in mcdisp.par and restart ! \n",extended_eigenvector_dimension,nofcomponents);exit(EXIT_FAILURE);}
   if (ki==0) {if (kf==0) kf=10;
               fprintf(stdout,"#Calculating intensities for  kf=const=%4.4g/A\n",kf);
 	     }

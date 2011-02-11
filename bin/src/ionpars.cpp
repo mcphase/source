@@ -1186,7 +1186,7 @@ for(l=1;l<=gjmbH.Hi();++l)for(m=1;m<=gjmbH.Hi();++m)
   //check if M it is hermitean
 double d;
    d=NormFro(z*z.Conjugate().Transpose());
-printf("d=%g\n",d);
+//printf("d=%g\n",d);
    d=NormFro(mat-mat.Conjugate().Transpose());
    if (d>1e-5)
    {fprintf(stderr,"cfielddm: ERROR- %ix%i matrix not hermitian, abs sum of differences= %g\n",mat.Rhi(),mat.Rhi(),d);

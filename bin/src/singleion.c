@@ -20,7 +20,7 @@ void helpexit()
 int main (int argc, char **argv)
 { int i,j,i0,nt;
   double lnz,u;
-  float d;
+  float d=1e10;
   double T;
 
 printf("#**************************************************************\n");
@@ -66,7 +66,7 @@ for(j=1;j<=inputpars.nofcomponents;++j)printf(" <J%c> ",'a'-1+j);
    nt=(*inputpars.jjj[i]).dmcalc(TT,h,Mijkl,d,(*inputpars.jjj[i]).eigenstates(h,T));
           // get nt = number of transitions
    for(j=1;j<=nt&&j<=nmax;++j)
-   {(*inputpars.jjj[i]).transitionnumber=-j;
+   {(*inputpars.jjj[i]).transitionnumber=-j;d=1e10;
    (*inputpars.jjj[i]).dmcalc(TT,h,Mijkl,d,(*inputpars.jjj[i]).est);
    printf(" %4g ",d);
    }

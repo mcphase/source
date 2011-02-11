@@ -552,10 +552,14 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
         (*inputpars.jjj[l]).transitionnumber=tn; // try calculation for transition  j
       d=1e10;(*inputpars.jjj[l]).dmcalc(ini.T,mf,Mijkl,d,md.est(i,j,k,l));
-       //      myPrintComplexMatrix(stdout,Mijkl);
+           if (do_verbose==1){
+                  fprintf(stdout,"#Matrix M(s=%i %i %i %i)\n",i,j,k,l);
+                   myPrintComplexMatrix(stdout,Mijkl);
+                              }
       
        // here we if required calculate the higher dimension matrix used to do the
        // extension of chi to higher value of (uncoupled) nofcomponents in intcalc_approx ... needed for chargedensityfluctuations, extended eigenvectors ...
+ if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with extended_eigenvector_dimension=%i (read from mcdisp.par)\n",i,j,k,l,ini.extended_eigenvector_dimension);}
              d=1e10;(*inputpars.jjj[l]).dmcalc(ini.T,extmf,extMijkl,d,md.est(i,j,k,l));
      
         (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
@@ -610,14 +614,14 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
         md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Uijkl(m,n);
         md.M(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Mijkl(m,n);
         }}    
-//if (do_verbose==1){
-//                  fprintf(stdout,"#Matrix M(s=%i %i %i)\n",i,j,k);
-//                  myPrintComplexMatrix(stdout,Mijkl); 
-//                  fprintf(stdout,"#Eigenvalues:\n");
-//                  myPrintVector(stdout,gamma); 
-//                  fprintf(stdout,"#Matrix U(s=%i%i%i)\n",i,j,k);
-//                  myPrintComplexMatrix(stdout,Uijkl); 
-//                 }
+if (do_verbose==1){
+                  fprintf(stdout,"#Matrix M(s=%i %i %i)\n",i,j,k);
+                  myPrintComplexMatrix(stdout,Mijkl); 
+                  fprintf(stdout,"#Eigenvalues:\n");
+                  myPrintVector(stdout,gamma); 
+                  fprintf(stdout,"#Matrix U(s=%i%i%i)\n",i,j,k);
+                  myPrintComplexMatrix(stdout,Uijkl); 
+                 }
 
     }}}
     fclose(fin);

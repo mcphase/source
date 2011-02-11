@@ -88,9 +88,10 @@ FILE * fin_coq, * fout;
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
 // 1.b: mcalc has to be used to calculate all the <Olm>.
-hh=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
-{//(*inputpars.jjj[ii]).eigenstates(hh,T);} // initialize eigenstate matrices
- (*inputpars.jjj[ii]).mcalc_parameter_storage_init(hh,T);} // initialize mcalc module parameter storage
+for(ii=1;ii<=inputpars.nofatoms;++ii)
+{ Vector h(1,ext_nof_components[ii]);h=0;
+ //(*inputpars.jjj[ii]).eigenstates(hh,T); // initialize eigenstate matrices
+  (*inputpars.jjj[ii]).mcalc_parameter_storage_init(h,T);} // initialize mcalc module parameter storage
 
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {

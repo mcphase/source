@@ -14,7 +14,7 @@ cat << EOF > results/.mcdisp.dsigma
 0 0 0 0 0 0 0 0 0 0 0 0 0
 1 1 1 1 1 1 1 1 1 1 1 1 1
 EOF
- java displaydsigma 8 9  results/.mcdisp.qom 10 11 results/.mcdisp.qom 8 9 results/.mcdisp.dsigma  &
+ java display 8 9  results/.mcdisp.qom 10 11 results/.mcdisp.qom 8 9 results/.mcdisp.dsigma  &
  spinid=$!
  
  #start calculation program

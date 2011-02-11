@@ -137,12 +137,12 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
       for(int k=0; k<sz; k++)
       {
          int pS2 = confp.states[cfps[k].ind].S2, pL2 = abs(confp.states[cfps[k].ind].L)*2;
-         rmso   += racahW(pS2,S2,1,2,1,S2) * racahW(pL2,L2,2*e_l,2,2*e_l,L2) * cfps[k].cfp * cfps[k].cfp; if(n!=(4*e_l+1)) {
+         rmso   += racahW(pS2,S2,1,2,1,S2) * racahW(pL2,L2,2*e_l,2,2*e_l,L2) * cfps[k].cfp * cfps[k].cfp; //if(n!=(4*e_l+1)) {
          rmU[2] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,4,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
          rmU[4] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,8,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
-         rmU[6] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.); }
+         rmU[6] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.); //}
       }
-      if(n==(4*e_l+1)) { rmU[2]=1./n; rmU[4]=1./n; rmU[6]=1./n; }
+    //if(n==(4*e_l+1)) { rmU[2]=1./n; rmU[4]=1./n; rmU[6]=1./n; }
       for(int ik=2; ik<=6; ik+=2) rmU[ik] *= n * threej(2*e_l,2*ik,2*e_l,0,0,0) / p;
    }
    else  // Single electron
@@ -296,7 +296,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
          if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm-elp)/sqrt2;
       }
-   else if (ind<4)                                      // Sy or Ly
+   else if (ind>1 && ind<4)                             // Sy or Ly
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
@@ -304,12 +304,13 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
          if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm+elp)/sqrt2;
       }
-   else                                                 // Sz or Lz
+   else if (ind>3 && ind<6)                             // Sz or Lz
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++) 
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],0,mJ2[j]); 
          if(fabs(elm)>SMALL) mu(i,j)=elm; 
       }
+   else { std::cerr << "icf_mumat: Error, index > 5 or index < 0.\n"; exit(EXIT_FAILURE); }
 // {
 //    mu(i,j) = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2*q,mJ2[j]);
 // }
@@ -638,12 +639,12 @@ __declspec(dllexport)
 { 
    int i,j,k;
 
-   int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   int Q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-   int im[]= {-1,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+   int K[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+   int Q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+   int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
 
    int sz = gjmbH.Hi();
-   sMat<double> zeroes(est.Rows(),est.Cols()), op, Mab(sz,sz), iMab(sz,sz);
+   sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op, Mab(sz,sz), iMab(sz,sz);
    complexdouble *zJmat=0, *zt=0, zme; zme.r=0; zme.i=0.; 
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
@@ -672,23 +673,55 @@ __declspec(dllexport)
       //    M_ab = <i|Ja|j><j|Jb|i> * (exp(-Ei/kT)) / kTZ              if delta < small (quasielastic scattering)
       for(iJ=0; iJ<sz; iJ++)
       {
-         if(iJ<=6) op = icf_mumat(pars.n, iJ-1, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
+         if(iJ<6) op = icf_mumat(pars.n, iJ, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
          if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes);
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[1][j], &incx, &zbeta, zt, &incx);
+         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[j+1][1], &incx, &zbeta, zt, &incx);
          #ifdef _G77 
-         F77NAME(zdotc)(&zij[iJ], &Hsz, (complexdouble*)&est[1][i], &incx, zt, &incx);
+         F77NAME(zdotc)(&zij[iJ], &Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
          #else
-         zij[iJ] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[1][i], &incx, zt, &incx);
+         zij[iJ] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
          #endif
          free(zJmat); free(zt);
       }
 
       if(i==j) //subtract thermal expectation value from zij=zii
       {
-         Vector vJ(gjmbH.Lo(),gjmbH.Hi()); double lnZ=0., U=0.;
-         icf_expJ(pars,est,(complexdouble*)&est[1][0],en,&T,vJ,&lnZ,&U);
-         for(iJ=0; iJ<sz; iJ++) zij[iJ].r-=vJ[iJ];
+//       Vector vJ(gjmbH.Lo(),gjmbH.Hi());
+//       icf_expJ(pars,est,(complexdouble*)&est[1][0],en,&T,vJ,&lnZ,&U);
+//       for(iJ=0; iJ<sz; iJ++) zij[iJ].r-=vJ[iJ];
+         std::vector<double> eb, E; E.reserve(Hsz);
+         int Esz; for(Esz=0; Esz<Hsz; Esz++) { E.push_back(en[Esz]-en[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || en[Esz+1]==0) break; }
+	 eb.assign(Esz,0.);
+         for(iJ=0; iJ<sz; iJ++)
+         {
+            if(iJ<6) op = icf_mumat(pars.n, iJ, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
+            if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes); double Jj=0.;
+            zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+            for(int ind_j=0; ind_j<Esz; ind_j++)
+            {  // Calculates the matrix elements <Vi|J.H|Vi>
+               F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, &zbeta, zt, &incx);
+               #ifdef _G77 
+               F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
+               #else
+               zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
+               #endif
+               // For first run calculate also the partition function and internal energy
+               if(iJ==0)
+               {
+//MR 10.9.2010
+                  if (T<0) { char instr[MAXNOFCHARINLINE];
+                    printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
+                    if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { fprintf(stderr,"Error reading input\n"); exit(1); }
+                    eb[ind_j]=strtod(instr,NULL); }
+//MRend 10.9.2010
+                  else { eb[ind_j] = exp(-E[ind_j]/(KB*T)); } 
+		  Z+=eb[ind_j];
+	       }
+               Jj+=zme.r*eb[ind_j];
+            }
+            zij[iJ].r -= Jj/Z; free(zJmat); free(zt);
+         }
       }
 
       // Calculates the matrix M_ab and iM_ab
@@ -705,7 +738,7 @@ __declspec(dllexport)
       if(j==i)delta=-SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
    
       // Calculates the partition function
-      for(iJ=0; iJ<Hsz; iJ++) { therm = exp(-(en[iJ]-en[0])/(KB*T)); Z += therm; if(therm<DBL_EPSILON) break; }
+      Z=0.; for(iJ=0; iJ<Hsz; iJ++) { therm = exp(-(en[iJ]-en[0])/(KB*T)); Z += therm; if(therm<DBL_EPSILON) break; }
    
       // do some printout if wishes and set correct occupation factor
       if (delta>SMALL)
@@ -727,7 +760,7 @@ __declspec(dllexport)
             printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
             printf(" |<%i|Ja-<Ja>|%i>|^2=%6.3f\n |<%i|Jb-<Jb>|%i>|^2=%6.3f\n |<%i|Jc-<Jc>|%i>|^2=%6.3f\n",i+1,j+1,Mab(1,1),i+1,j+1,Mab(2,2),i+1,j+1,Mab(3,3));
             printf(" |<%i|Jd-<Jd>|%i>|^2=%6.3f\n |<%i|Je-<Je>|%i>|^2=%6.3f\n |<%i|Jf-<Jf>|%i>|^2=%6.3f\n",i+1,j+1,Mab(4,4),i+1,j+1,Mab(5,5),i+1,j+1,Mab(6,6));
-            printf(" n%i=%6.3f\n",i,therm/Z);
+            printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
          }
       }
    
@@ -948,6 +981,7 @@ bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
 */
 // std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out); FILEOUT.close();
 // rmzeros(aKK); mm_gout(aKK,filename); return 1;
+
    rmzeros(aKK); return 1;
 }
 
@@ -1137,7 +1171,7 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2; for (int J2=J2min; J2<=J2max; J2+=2) ns+=J2+1; 
    int ins=0; std::vector<int> J2(ns), Jz2(ns), irm(ns);
    for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) for (int imJ2=-iJ2; imJ2<=iJ2; imJ2+=2) {
-        J2[ins]=iJ2; Jz2[ins]=imJ2; irm[ins]=iJ2-J2min; ins++; }
+        J2[ins]=iJ2; Jz2[ins]=imJ2; irm[ins]=(iJ2-J2min)/2; ins++; }
 
    Qmat.zero(ns,ns); Qq.clear(); for(i=0; i<6; i++) Qq.push_back(Qmat);
 
@@ -1420,7 +1454,7 @@ __declspec(dllexport)
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   complexdouble *zQmat, *zt, zme, zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   complexdouble *zQmat, *zt, zme, zalpha, zbeta; zalpha.r=-1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
    double zMqr,zMqi,Z=0.;
    char trans = 'U'; int incx=1;
 
@@ -2062,14 +2096,14 @@ int main(int argc, char *argv[])
       }
       FILEOUT.close();
    }
-/*   
+
 #ifdef _INTEGRAL
- //clock_t start,end; end = clock();
+   clock_t start,end; end = clock();
    Vector J(1,6,0.), gmbH(1,6,.0578838263), ABC; gmbH[1]*=2; gmbH[3]*=2; gmbH[5]*=2; 
-   double T=2.0,lnZ=0.,U=0.,gJ=0.;
+   double /*T=2.0,*/lnZ=0.,U=0.,gJ=0.; T=2.0;
    char *filearray[1]; 
    filearray[0] = infile;
-   ComplexMatrix est; mcalc_parameter_storage_matrix_init(&est,gmbH,&gJ,&T,ABC,filearray);
+ /*ComplexMatrix est;*/ mcalc_parameter_storage_matrix_init(&est,gmbH,&gJ,&T,ABC,filearray);
  //ComplexMatrix est; int Hsz=getdim(pars.n,pars.l); est = ComplexMatrix(0,Hsz,0,Hsz);
    end = clock();
 
@@ -2085,8 +2119,8 @@ int main(int argc, char *argv[])
 // std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
 // std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";
 // if(it%100==0) { std::cerr << it << " "; } } std::cerr << "\n";
-   gmbH[1] = 0.; gmbH[2] = 0.; gmbH[3] = 0.; gmbH[4] = 0.; gmbH[5] = 0.; gmbH[6] = 0.; 
-   estates(est,gmbH,&gJ,&T,ABC,filearray);
+ //gmbH[1] = 0.; gmbH[2] = 0.; gmbH[3] = 0.; gmbH[4] = 0.; gmbH[5] = 0.; gmbH[6] = 0.; 
+   est.Remove(); estates(&est,gmbH,gJ,T,ABC,filearray);
    end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
    
    int imq, tn = 2; float delta=0.; ComplexMatrix mat6(1,6,1,6);
@@ -2096,17 +2130,17 @@ int main(int argc, char *argv[])
    ComplexVector Mq;
    double th=PI/4, ph=PI/4, J0=1., J2=1., J4=1., J6=1.;
  //double th=0., ph=0., J0=1., J2=1., J4=0., J6=0.;
-   imq = mq(Mq,th,ph,J0,J2,J4,J6,est);
+   mq(Mq,th,ph,J0,J2,J4,J6,est);
    end = clock(); std::cerr << "Time to calculate mq() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.";
    std::cerr << " Mq = [" << Mq[1].real() << "+" << Mq[1].imag() << "i "
                           << Mq[2].real() << "+" << Mq[2].imag() << "i "
                           << Mq[3].real() << "+" << Mq[3].imag() << "i]\n";
 
-   ComplexMatrix mat;
+/* ComplexMatrix mat(1,6,1,6);
    imq = dncalc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
-   start = clock(); std::cerr << "Time to calculate dncalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
+   start = clock(); std::cerr << "Time to calculate dncalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n"; */
 #endif
-*/
+
 /* int i, Hsz = est.Cols(); //complexdouble *cest = new complexdouble[Hsz*Hsz]; memcpy(cest,&est[0][0],Hsz*Hsz*sizeof(complexdouble));
    std::vector<double> vgjmbH(6,.0578838263); //for(i=0; i<6; i++) vgjmbH[i] = gjmbH[i+1];
    icmfmat mfmat(pars.n,pars.l);
