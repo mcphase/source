@@ -1043,6 +1043,7 @@ double racah_cfp(int n, int S2, orbital L, int S2p, orbital Lp)
             if(S2==0) { if(L==S || L==D) cfp = 1.; }
             else if(S2==2 && L==P) cfp = 1.;
          }
+	 else return cfp;
          break;
       case 3:  //        1S    3P    1D    (Table 1, Racah 3)
          double t[] = {   0.,   1.,   0.,  // 4S
@@ -1057,7 +1058,7 @@ double racah_cfp(int n, int S2, orbital L, int S2p, orbital Lp)
    }
 
    if(nn>3)  // Uses Starace's formula (see above) for more than half filled subshell
-      cfp *= ( pow(-1.,(S2+S2p)/2.+abs(L)+abs(Lp)-2.-.5) * sqrt((10.-nn+1.)*(S2+1.)*(2.*abs(L)+1.)/nn/(S2p+1.)/(2.*abs(Lp)+1.)) );
+      cfp *= ( pow(-1.,(S2+S2p)/2.+abs(L)+abs(Lp)-1.-.5) * sqrt((6.-nn+1.)*(S2+1.)*(2.*abs(L)+1.)/nn/(S2p+1.)/(2.*abs(Lp)+1.)) );
 
    return cfp;
 }

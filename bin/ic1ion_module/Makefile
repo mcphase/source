@@ -185,7 +185,11 @@ endif
 endif
 
 icf1ion_module.o: icf1ion_module.cpp
+ifdef integral
+	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -c $<
+else
 	$(CC) $(CFLAGS) -I../include -c $<
+endif
 
 ic1ion.so: checkgcc libs/liblapack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
 ifdef WINDOWS

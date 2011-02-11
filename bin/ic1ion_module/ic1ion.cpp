@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
 // std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
 // std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";
 // if(it%100==0) { std::cerr << it << " "; } } std::cerr << "\n";
-   gmbH[1] = 0.; gmbH[2] = 0.; gmbH[3] = 0.; gmbH[4] = 0.; gmbH[5] = 0.; gmbH[6] = 0.; 
+ //gmbH[1] = 0.; gmbH[2] = 0.; gmbH[3] = 0.; gmbH[4] = 0.; gmbH[5] = 0.; gmbH[6] = 0.; 
    estates(est,gmbH,&gJ,&T,ABC,filearray);
    end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
    
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
                           << Mq[2].real() << "+" << Mq[2].imag() << "i "
                           << Mq[3].real() << "+" << Mq[3].imag() << "i]\n";
 
-   ComplexMatrix mat;
+   ComplexMatrix mat(1,6,1,6);
    imq = dncalc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
    start = clock(); std::cerr << "Time to calculate dncalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 #endif
