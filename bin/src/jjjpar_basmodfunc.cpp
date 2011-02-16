@@ -561,23 +561,24 @@ int jjjpar::dncalc(Vector & Qvec,double & T, ComplexMatrix & nat,ComplexMatrix &
 /************************************************************************************/
    double jjjpar::F(double Q)
    {if(gJ==0&&Q>0){return j0(Q);} // in case of intermediate coupling return spin form factor
-    if(gJ==0&&Q<0){return j0(Q)+j2(Q);} // in case of intermediate coupling return angular form factor
+    if(gJ==0&&Q<0){return j0(-Q)+j2(-Q);} // in case of intermediate coupling return angular form factor
    return (j0(Q) + j2(Q) * (2 / gJ - 1)); // formfactor F(Q) for rare earth
    }
    double jjjpar::j0(double Q)
-  {double value=0,s;
+  {double value=0,s; if(fabs(Q)<0.1)return 1.0;
    if(Np(1)!=0){value=jl(0,Q);}// here enter calculation from radial wave function parameters
    else
    {s=Q/4/PI;    value=magFFj0(1)*exp(-magFFj0(2)*s*s)+magFFj0(3)*exp(-magFFj0(4)*s*s)+magFFj0(5)*exp(-magFFj0(6)*s*s)+magFFj0(7);
    }return value;
   }
    double jjjpar::j1(double Q)
-  {double value=0,s;    s=Q/4/PI;
+  {double value=0;   if(fabs(Q)<0.1)return 0.0;
    if(Np(1)!=0){value=jl(1,Q);}// here enter calculation from radial wave function parameters
    return value;
   }
    double jjjpar::j2(double Q)
-  {double value=0,s;    s=Q/4/PI;
+  {double value=0,s;  if(fabs(Q)<0.1)return 0.0;
+   s=Q/4/PI;
    if(Np(1)!=0){value=jl(2,Q);}// here enter calculation from radial wave function parameters
     else
    { value=magFFj2(1)*exp(-magFFj2(2)*s*s)+magFFj2(3)*exp(-magFFj2(4)*s*s)+magFFj2(5)*exp(-magFFj2(6)*s*s)+magFFj2(7);
@@ -585,12 +586,13 @@ int jjjpar::dncalc(Vector & Qvec,double & T, ComplexMatrix & nat,ComplexMatrix &
    }return value;
   }
    double jjjpar::j3(double Q)
-  {double value=0,s;    s=Q/4/PI;
+  {double value=0; if(fabs(Q)<0.1)return 0.0;
    if(Np(1)!=0){value=jl(3,Q);}// here enter calculation from radial wave function parameters
    return value;
   }
    double jjjpar::j4(double Q)
-  {double value=0,s;    s=Q/4/PI;
+  {double value=0,s;  if(fabs(Q)<0.1)return 0.0;
+     s=Q/4/PI;
          if(Np(1)!=0){value=jl(4,Q);}// here enter calculation from radial wave function parameters
      else
    {  value=magFFj4(1)*exp(-magFFj4(2)*s*s)+magFFj4(3)*exp(-magFFj4(4)*s*s)+magFFj4(5)*exp(-magFFj4(6)*s*s)+magFFj4(7);
@@ -598,12 +600,13 @@ int jjjpar::dncalc(Vector & Qvec,double & T, ComplexMatrix & nat,ComplexMatrix &
    }return value;
   }
    double jjjpar::j5(double Q)
-  {double value=0,s;    s=Q/4/PI;
+  {double value=0; if(fabs(Q)<0.1)return 0.0;
       if(Np(1)!=0){value=jl(5,Q);}// here enter calculation from radial wave function parameters
       return value;
   }
    double jjjpar::j6(double Q)
-  {double value=0,s;    s=Q/4/PI;
+  {double value=0,s;   if(fabs(Q)<0.1)return 0.0;
+     s=Q/4/PI;
          if(Np(1)!=0){value=jl(6,Q);}// here enter calculation from radial wave function parameters
      else
    {  value=magFFj6(1)*exp(-magFFj6(2)*s*s)+magFFj6(3)*exp(-magFFj6(4)*s*s)+magFFj6(5)*exp(-magFFj6(6)*s*s)+magFFj6(7);
