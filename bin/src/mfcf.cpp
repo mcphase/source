@@ -138,7 +138,7 @@ void mfcf::print(FILE * fout) //print mfconfiguration to stream
  {for (j=1;j<=nofb;++j)
   {for (l=1;l<=nofcomponents*nofatoms;++l)
    {for (i=1;i<=nofa;++i)
-      {fprintf(fout," %4.4f",myround(mfi[in(i,j,k)](l)));
+      {fprintf(fout," %4.4f",myround(1e-5,mfi[in(i,j,k)](l)));
        }
     fprintf(fout,"\n");
     }

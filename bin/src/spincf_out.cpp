@@ -1235,7 +1235,7 @@ void spincf::print(FILE * fout) //print spinconfiguration to stream
  {for (j=1;j<=nofb;++j)
   {for (l=1;l<=nofcomponents*nofatoms;++l)
    {for (i=1;i<=nofa;++i)
-      {fprintf(fout," %4.4f",myround(mom[in(i,j,k)](l)));
+      {fprintf(fout," %4.4f",myround(1e-5,mom[in(i,j,k)](l)));
        }
     fprintf(fout,"\n");
     }
@@ -1269,9 +1269,9 @@ void spincf::printall(FILE * fout,cryststruct & cs) //print spinconfiguration to
               fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
 	              cs.cffilenames[l],ddp(1),ddp(2),ddp(3),dd0(1),dd0(2),dd0(3));
              if(cs.gJ[l]!=0)
-              {fprintf(fout," %4.4f",cs.gJ[l]*mom[in(i,j,k)](1+nofcomponents*(l-1)));
-               if(nofcomponents>=2){fprintf(fout," %4.4f",cs.gJ[l]*mom[in(i,j,k)](2+nofcomponents*(l-1)));}else{fprintf(fout," %4.4f",0.0);}
-               if(nofcomponents>=2){fprintf(fout," %4.4f",cs.gJ[l]*mom[in(i,j,k)](3+nofcomponents*(l-1)));}else{fprintf(fout," %4.4f",0.0);}
+              {fprintf(fout," %4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](1+nofcomponents*(l-1))));
+               if(nofcomponents>=2){fprintf(fout," %4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](2+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
+               if(nofcomponents>=2){fprintf(fout," %4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](3+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
               }
              else   // if gJ=0 it means we have so print out total moment
               { //load magnetic moment into vector mmm
@@ -1281,10 +1281,10 @@ void spincf::printall(FILE * fout,cryststruct & cs) //print spinconfiguration to
                                      else                {mmm((m+1)/2)+=2*mom[in(i,j,k)](nofcomponents*(l-1)+m);}
                                      }
 
-               fprintf(fout," %4.4f %4.4f %4.4f",mmm(1),mmm(2),mmm(3));
+               fprintf(fout," %4.4f %4.4f %4.4f",myround(1e-5,mmm(1)),myround(1e-5,mmm(2)),myround(1e-5,mmm(3)));
               }
              {for (lc=1;lc<=nofcomponents;++lc)
-              {fprintf(fout," %4.4f",mom[in(i,j,k)](lc+nofcomponents*(l-1)));}
+              {fprintf(fout," %4.4f",myround(1e-5,mom[in(i,j,k)](lc+nofcomponents*(l-1))));}
               fprintf(fout,"\n");
 	     }
 

@@ -277,7 +277,7 @@ void writeheader(par & inputpars,FILE * fout)
   struct tm *loctime;
    fprintf(fout, "#{output file of program %s",MCDISPVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
-   fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
+  
    fprintf(fout,"#*********************************************************************\n");
    fprintf(fout,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
    fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
@@ -670,41 +670,35 @@ if (do_verbose==1){
 if (do_jqfile==0)
 { printf("#saving mcdisp.qom and mcdisp.qei and mcdisp.qev\n");
   fout = fopen_errchk ("./results/mcdisp.qom",filemode);
-   fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
-  writeheader(inputpars,fout);
+  writeheader(inputpars,fout); fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
           fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   foutqei = fopen_errchk ("./results/mcdisp.qei",filemode);
-  writeheader(inputpars,foutqei);
-   fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
+  writeheader(inputpars,foutqei); fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
           fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   foutqev = fopen_errchk ("./results/mcdisp.qev",filemode);
-  writeheader(inputpars,foutqev);
-   fprintf(foutqev,"#!<--mcphas.mcdisp.qev-->\n");
+  writeheader(inputpars,foutqev);   fprintf(foutqev,"#!<--mcphas.mcdisp.qev-->\n");
           fprintf (foutqev, "#!spins_wave_amplitude=1.0\n");
           fprintf (foutqev, "#!spins_show_ellipses=1.0\n");
           fprintf (foutqev, "#!spins_show_static_moment_direction=1.0\n");
           fprintf (foutqev, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 
   foutqee = fopen_errchk ("./results/mcdisp.qee",filemode);
-   writeheader(inputpars,foutqee);
-   fprintf(foutqee,"#!<--mcphas.mcdisp.qee-->\n");
+   writeheader(inputpars,foutqee);  fprintf(foutqee,"#!<--mcphas.mcdisp.qee-->\n");
           fprintf (foutqee, "#!spins_wave_amplitude=1.0\n");
           fprintf (foutqee, "#!spins_show_ellipses=1.0\n");
-          fprintf (foutqev, "#!spins_show_static_moment_direction=1.0\n");
+          fprintf (foutqee, "#!spins_show_static_moment_direction=1.0\n");
           fprintf (foutqee, "#!extended_eigenvector_dimension=%i\n",ini.extended_eigenvector_dimension); 
           fprintf (foutqee, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
-  writeheader(inputpars,foutdstot);
-          printf("#saving mcdisp.dsigma.tot\n");
+  writeheader(inputpars,foutdstot); printf("#saving mcdisp.dsigma.tot\n");
    fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
           fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma/dOmeg [barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}",ini.emin,ini.emax);
 
    if (do_Erefine==1){
           errno = 0;
   foutds = fopen_errchk ("./results/mcdisp.dsigma",filemode);
-  writeheader(inputpars,foutds);
-          printf("#saving mcdisp.dsigma\n");
+  writeheader(inputpars,foutds); printf("#saving mcdisp.dsigma\n");
    fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
           fprintf (foutds, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
           fprintf (foutdstot, "for fast algorithm  vs summing dsigma for diff energies");
@@ -716,8 +710,7 @@ if (do_jqfile==0)
 if (do_jqfile==1)
 {  printf("#saving mcdisp.jq\n");
  jqfile = fopen_errchk ("./results/mcdisp.jq",filemode);
- writeheader(inputpars,jqfile);
-         printf("#saving mcdisp.jq\n");
+ writeheader(inputpars,jqfile); printf("#saving mcdisp.jq\n");
    fprintf(jqfile,"#!<--mcphas.mcdisp.dsigma.jq-->\n");
    fprintf (jqfile, "#Fourier Transform of 2 Ion Interaction - sta is calculated by comparing the larges eigenvalue\n# to that of the first q vector of the calculation");
    fputs (asctime(loctime),jqfile);
@@ -986,7 +979,7 @@ if (do_jqfile==1){
    fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
 
    for (i=1;i<=dimA;++i){
-	       fprintf (fout, " %4.4g ",En(i));
+	       fprintf (fout, " %4.4g ",myround(En(i)));
                if(do_verbose==1){fprintf(stdout, " %4.4g",En(i));}
                          }
 
@@ -1127,16 +1120,16 @@ diffint=0;diffintbey=0;
                      if(intsbey(i)<0)intsbey(i)=-1;
                      //printout rectangular function to .mdcisp.qom
 	             fprintf (fout, " %4.4g %4.4g",ints(i),intsbey(i));
-                     fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),ints(i),intsbey(i));
+                     fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
 
-                     fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),ints(i),intsbey(i));
+                     fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqev, "#eigenvector real part\n");
                      ev_real.print(foutqev); // here we printout the eigenvector of the excitation
                      fprintf (foutqev, "#eigenvector imaginary part\n");
                      ev_imag.print(foutqev); // 
                      fprintf (foutqev, "#\n");
 
-                     fprintf (foutqee, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),ints(i),intsbey(i));
+                     fprintf (foutqee, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqee, "#eigenvector real part\n");
                      eev_real.print(foutqee); // here we printout the eigenvector of the excitation
                      fprintf (foutqee, "#eigenvector imaginary part\n");
@@ -1191,26 +1184,26 @@ diffint=0;diffintbey=0;
 		     if (ints(i)>SMALLINT)  // draw triangles to show calculated intensity
 		      {for (E=0;E<=ints(i)/epsilon;E+=ints(i)/2/epsilon/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",En(i)-epsilon+E*epsilon*epsilon/ints(i),E,En(i));
+	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)-epsilon+E*epsilon*epsilon/ints(i)),E,myround(En(i)));
 		       }
 		       for (E=ints(i)/epsilon;E>=0;E-=ints(i)/2/epsilon/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",En(i)+epsilon-E*epsilon*epsilon/ints(i),E,En(i));
+	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)+epsilon-E*epsilon*epsilon/ints(i)),E,myround(En(i)));
 		       }
                        fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	               fprintf (fout1, " %4.4g 0 %4.4g 0\n",En(i)+epsilon,En(i));
+	               fprintf (fout1, " %4.4g 0 %4.4g 0\n",myround(En(i)+epsilon),myround(En(i)));
 		      }
 		     if (intsbey(i)>SMALLINT)  // draw triangles to show calculated intensity
 		      {for (E=0;E<=intsbey(i)/epsilon;E+=intsbey(i)/2/epsilon/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g \n",En(i),En(i)-epsilon+E*epsilon*epsilon/intsbey(i),E);
+	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g \n",myround(En(i)),myround(En(i)-epsilon+E*epsilon*epsilon/intsbey(i)),E);
 		       }
 		       for (E=intsbey(i)/epsilon;E>=0;E-=intsbey(i)/2/epsilon/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g\n",En(i),En(i)+epsilon-E*epsilon*epsilon/intsbey(i),E);
+	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g\n",myround(En(i)),myround(En(i)+epsilon-E*epsilon*epsilon/intsbey(i)),E);
 		       }
                        fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	               fprintf (fout1, " %4.4g 0 %4.4g 0 \n",En(i),En(i)+epsilon);
+	               fprintf (fout1, " %4.4g 0 %4.4g 0 \n",myround(En(i)),myround(En(i)+epsilon));
 		      }
 		    }
 	  fclose(fout1);   

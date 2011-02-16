@@ -118,17 +118,17 @@ for(ii=1;ii<=inputpars.nofatoms;++ii)
 	              cs.cffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
               printf("{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f \n",
 	              cs.cffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
-                     for(nt=1;nt<=3;++nt){if(cs.gJ[ii]!=0){fprintf(fout," %4.4f",cs.gJ[ii]*moments(nt));}
-                                          else         {fprintf(fout," %4.4f",2*moments(2*nt-1)+moments(2*nt));}
+                     for(nt=1;nt<=3;++nt){if(cs.gJ[ii]!=0){fprintf(fout," %4.4f",myround(1e-5,cs.gJ[ii]*moments(nt)));}
+                                          else         {fprintf(fout," %4.4f",myround(1e-5,2*moments(2*nt-1)+moments(2*nt)));}
                                          }
                      for(nt=1;nt<=ext_nof_components[ii];++nt)                                                               // this else is when gJ=0: means intermediate coupling
 		        {extendedspincf.m(i,j,k)(nt+max_ext_nof_components*(ii-1))=moments(nt);
-                         fprintf(fout," %4.4f",extendedspincf.m(i,j,k)(nt+max_ext_nof_components*(ii-1)));
+                         fprintf(fout," %4.4f",myround(1e-5,extendedspincf.m(i,j,k)(nt+max_ext_nof_components*(ii-1))));
                         }
                          fprintf(fout,"\n");
                       fprintf(fout,"                  corresponding effective fields heff [meV]-->          ");
                       for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout meanfields
-                        {fprintf(fout," %4.4f",h(nt));}
+                        {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
                          fprintf(fout,"\n");
 
   }}}}
