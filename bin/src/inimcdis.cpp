@@ -303,6 +303,9 @@ inimcdis::inimcdis (const inimcdis & p)
                for(i=0;i<=p.hkls[j][0];++i)
          	    {hkls[j][i]=p.hkls[j][i];}
 	      }
+       int nofhklfiles=p.hklfile_start_index[0];
+       hklfile_start_index= new int [nofhklfiles+1];hklfile_start_index[0]=nofhklfiles;
+      for (j=1;j<=nofhklfiles;++j) hklfile_start_index[j]=p.hklfile_start_index[j]; 
    }
 }
 
