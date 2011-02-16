@@ -469,16 +469,13 @@ Matrix jjjpar::opmat(int n,Vector & gjmbH)
 /****************************************************************************/
 ComplexVector & jjjpar::MQ(Vector & Qvec)
 {double J0,J2,J4,J6;
- double Q,d,s,th,ph;
+ double Q,th,ph;
             Q = Norm(Qvec); //dspacing
-            d = 2.0 * PI / Q; s=0.5 / d;
-      J0=magFFj0(1)*exp(-magFFj0(2)*s*s)+magFFj0(3)*exp(-magFFj0(4)*s*s)+magFFj0(5)*exp(-magFFj0(6)*s*s)+magFFj0(7);
-      J2=magFFj2(1)*exp(-magFFj2(2)*s*s)+magFFj2(3)*exp(-magFFj2(4)*s*s)+magFFj2(5)*exp(-magFFj2(6)*s*s)+magFFj2(7);
-      J2*=s*s;
-      J4=magFFj4(1)*exp(-magFFj4(2)*s*s)+magFFj4(3)*exp(-magFFj4(4)*s*s)+magFFj4(5)*exp(-magFFj4(6)*s*s)+magFFj4(7);
-      J4*=s*s;
-      J6=magFFj6(1)*exp(-magFFj6(2)*s*s)+magFFj6(3)*exp(-magFFj6(4)*s*s)+magFFj6(5)*exp(-magFFj6(6)*s*s)+magFFj6(7);
-      J6*=s*s;
+//            d = 2.0 * PI / Q; s=0.5 / d;
+      J0=j0(Q);
+      J2=j2(Q);
+      J4=j4(Q);
+      J6=j6(Q);
             complex<double>dummy;
 switch (module_type)
   {case 0:  getpolar(Qvec(2),Qvec(3),Qvec(1),Q,th,ph); // for external module we must provide th and ph with respect
@@ -522,17 +519,14 @@ switch (module_type)
 int jjjpar::dncalc(Vector & Qvec,double & T, ComplexMatrix & nat,ComplexMatrix & ests)
 
 {double J0,J2,J4,J6;
- double Q,d,s,th,ph;
+ double Q,th,ph;
  int i;     complex<double>dummy; // introduced 3.4.10 MR
             Q = Norm(Qvec); //dspacing
-            d = 2.0 * PI / Q; s=0.5 / d;
-      J0=magFFj0(1)*exp(-magFFj0(2)*s*s)+magFFj0(3)*exp(-magFFj0(4)*s*s)+magFFj0(5)*exp(-magFFj0(6)*s*s)+magFFj0(7);
-      J2=magFFj2(1)*exp(-magFFj2(2)*s*s)+magFFj2(3)*exp(-magFFj2(4)*s*s)+magFFj2(5)*exp(-magFFj2(6)*s*s)+magFFj2(7);
-      J2*=s*s;
-      J4=magFFj4(1)*exp(-magFFj4(2)*s*s)+magFFj4(3)*exp(-magFFj4(4)*s*s)+magFFj4(5)*exp(-magFFj4(6)*s*s)+magFFj4(7);
-      J4*=s*s;
-      J6=magFFj6(1)*exp(-magFFj6(2)*s*s)+magFFj6(3)*exp(-magFFj6(4)*s*s)+magFFj6(5)*exp(-magFFj6(6)*s*s)+magFFj6(7);
-      J6*=s*s;
+      //      d = 2.0 * PI / Q; s=0.5 / d;
+      J0=j0(Q);
+      J2=j2(Q);
+      J4=j4(Q);
+      J6=j6(Q);
 	 // calculate th and ph (polar angles of Q with respect to xyz of CEF)
  switch (module_type)
   {static int washere=0;
@@ -566,15 +560,102 @@ int jjjpar::dncalc(Vector & Qvec,double & T, ComplexMatrix & nat,ComplexMatrix &
 //  s = 1 / 2 / D: sintheta = lambda * s
 /************************************************************************************/
    double jjjpar::F(double Q)
-   {double s,j0,j2;
-    s=Q/4/PI;
-    j0=magFFj0(1)*exp(-magFFj0(2)*s*s)+magFFj0(3)*exp(-magFFj0(4)*s*s)+magFFj0(5)*exp(-magFFj0(6)*s*s)+magFFj0(7);
-    if(gJ==0&&Q>0){return j0;} // in case of intermediate coupling return spin form factor
-    j2=magFFj2(1)*exp(-magFFj2(2)*s*s)+magFFj2(3)*exp(-magFFj2(4)*s*s)+magFFj2(5)*exp(-magFFj2(6)*s*s)+magFFj2(7);
-    j2*=s*s;
-    if(gJ==0&&Q<0){return j0+j2;} // in case of intermediate coupling return angular form factor
-   return (j0 + j2 * (2 / gJ - 1)); // formfactor F(Q) for rare earth
+   {if(gJ==0&&Q>0){return j0(Q);} // in case of intermediate coupling return spin form factor
+    if(gJ==0&&Q<0){return j0(Q)+j2(Q);} // in case of intermediate coupling return angular form factor
+   return (j0(Q) + j2(Q) * (2 / gJ - 1)); // formfactor F(Q) for rare earth
+   }
+   double jjjpar::j0(double Q)
+  {double value=0,s;
+   if(Np(1)!=0){value=jl(0,Q);}// here enter calculation from radial wave function parameters
+   else
+   {s=Q/4/PI;    value=magFFj0(1)*exp(-magFFj0(2)*s*s)+magFFj0(3)*exp(-magFFj0(4)*s*s)+magFFj0(5)*exp(-magFFj0(6)*s*s)+magFFj0(7);
+   }return value;
+  }
+   double jjjpar::j1(double Q)
+  {double value=0,s;    s=Q/4/PI;
+   if(Np(1)!=0){value=jl(1,Q);}// here enter calculation from radial wave function parameters
+   return value;
+  }
+   double jjjpar::j2(double Q)
+  {double value=0,s;    s=Q/4/PI;
+   if(Np(1)!=0){value=jl(2,Q);}// here enter calculation from radial wave function parameters
+    else
+   { value=magFFj2(1)*exp(-magFFj2(2)*s*s)+magFFj2(3)*exp(-magFFj2(4)*s*s)+magFFj2(5)*exp(-magFFj2(6)*s*s)+magFFj2(7);
+    value*=s*s;
+   }return value;
+  }
+   double jjjpar::j3(double Q)
+  {double value=0,s;    s=Q/4/PI;
+   if(Np(1)!=0){value=jl(3,Q);}// here enter calculation from radial wave function parameters
+   return value;
+  }
+   double jjjpar::j4(double Q)
+  {double value=0,s;    s=Q/4/PI;
+         if(Np(1)!=0){value=jl(4,Q);}// here enter calculation from radial wave function parameters
+     else
+   {  value=magFFj4(1)*exp(-magFFj4(2)*s*s)+magFFj4(3)*exp(-magFFj4(4)*s*s)+magFFj4(5)*exp(-magFFj4(6)*s*s)+magFFj4(7);
+      value*=s*s;
+   }return value;
+  }
+   double jjjpar::j5(double Q)
+  {double value=0,s;    s=Q/4/PI;
+      if(Np(1)!=0){value=jl(5,Q);}// here enter calculation from radial wave function parameters
+      return value;
+  }
+   double jjjpar::j6(double Q)
+  {double value=0,s;    s=Q/4/PI;
+         if(Np(1)!=0){value=jl(6,Q);}// here enter calculation from radial wave function parameters
+     else
+   {  value=magFFj6(1)*exp(-magFFj6(2)*s*s)+magFFj6(3)*exp(-magFFj6(4)*s*s)+magFFj6(5)*exp(-magFFj6(6)*s*s)+magFFj6(7);
+      value*=s*s;
+    } return value;
+  }
 
+   double jjjpar::jl(int l,double QA){
+    int p,q, pmax=0;
+    double Q=QA*0.5292;// convert Q from 1/A into 1/a0
+    Vector coeff(1,9);
+    for(p=1;p<=9;++p){if(Np(p)!=0){pmax=p;
+                                   coeff(p)=Cp(p)*pow(2.0*Xip(p)/Q,Np(p)+0.5)/sqrt((double)factorial(2*(int)Np(p)));
+                                   if(Xip(p)<=0){fprintf (stderr,"Warning: calculation of <j%i(Q)> failed due to Xi%i<=0 - continuing with <j%i(Q)>=0\n",l,p,l);return 0;}
+                     }            }
+    if(pmax==0){fprintf (stderr,"Warning: calculation of <j%i(Q)> failed - continuing with <j%i(Q)>=0\n",l,l);return 0;}
+
+    double value=0;
+    for(p=1;p<=pmax;++p){
+    for(q=1;q<=pmax;++q){
+    value+=coeff(p)*coeff(q)*tl(l,(int)Np(p)+(int)Np(q),(Xip(p)+Xip(q))/Q);
+                        }}
+     return value;
+   }
+
+
+
+   double jjjpar::tl(int l,int N,double x)
+     {double value=0;
+      switch (l)
+       { case 0: value=sn(1,N,x);break;
+         case 1: value=sn(2,N,x)-cn(1,N,x);break;
+         case 2: value=3*sn(3,N,x)-3*cn(2,N,x)-sn(1,N,x);break;
+         case 3: value=cn(1,N,x)-15*cn(3,N,x)-6*sn(2,N,x)+15*sn(4,N,x);break;
+         case 4: value=10*cn(2,N,x)-105*cn(4,N,x)+sn(1,N,x)-45*sn(3,N,x)+105*sn(5,N,x);break;
+         case 5: value=-cn(1,N,x)+105*cn(3,N,x)-945*cn(5,N,x)+15*sn(2,N,x)-420*sn(4,N,x)+945*sn(6,N,x);break;
+         case 6: value=-21*cn(2,N,x)+1260*cn(4,N,x)-10395*cn(6,N,x)-sn(1,N,x)+210*sn(3,N,x)-4725*sn(5,N,x)+10395*sn(7,N,x);break;
+        default: fprintf(stderr,"Error function jjjpar:tl - value l=%i not implemented\n",l);exit(1);
+       }
+     return value;
+     }
+   double jjjpar::sn(int n,int N,double x)
+   {complex <double> c(x,-1.0);
+    double value;
+    value=(double)factorial(N-n)*imag(pow(c,-N+n-1));
+    return value;
+   }
+   double jjjpar::cn(int n,int N,double x)
+   {complex <double> c(x,-1.0);
+    double value;
+    value=(double)factorial(N-n)*real(pow(c,-N+n-1));
+    return value;
    }
 
 /************************************************************************************/

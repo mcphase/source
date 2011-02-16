@@ -113,13 +113,10 @@ float invalues[100];invalues[0]=99;
         extract(instr,"R6",  (*jjjps).r6);
 //        }
   }
-      if((*jjjps).r2==0){(*jjjps).r2_from_radial_wavefunction();printf("#<r^2> in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);}
-      if((*jjjps).r4==0){(*jjjps).r4_from_radial_wavefunction();printf("#<r^4> in units of a0^4 a0=0.5292 Angstroem\nR4=%g\n",(*jjjps).r4);}
-      if((*jjjps).r6==0){(*jjjps).r6_from_radial_wavefunction();printf("#<r^6> in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);}
-      if((*jjjps).Np(1)!=0)
-      {// save radial wavefunction
-      (*jjjps).save_radial_wavefunction("results/radwavfun.dat");
-      }
+      if((*jjjps).r2==0){(*jjjps).r2_from_radial_wavefunction();printf("#<r^2>  from radial wavefunction in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);}
+      if((*jjjps).r4==0){(*jjjps).r4_from_radial_wavefunction();printf("#<r^4>  from radial wavefunction in units of a0^4 a0=0.5292 Angstroem\nR4=%g\n",(*jjjps).r4);}
+      if((*jjjps).r6==0){(*jjjps).r6_from_radial_wavefunction();printf("#<r^6>  from radial wavefunction in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);}
+     
       (*iops).r2=(*jjjps).r2;
       (*iops).r4=(*jjjps).r4;
       (*iops).r6=(*jjjps).r6;

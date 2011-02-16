@@ -235,6 +235,12 @@ float integer (float s){  double result;modf(s,&result);  return result;}
 //return rounded integer of floating number
 int cint (float s){  double result;if(modf(s,&result)<0.5){return (int)result;}{return (int)result+1;}}
 
+// round to 1e-11 precision
+double myround(double s){
+double result;result=1e-11*rint(1e11*s);
+if (result==0){result*=result;}
+return result;
+}
 
 // factorial of an integer number
 int factorial(int number) {

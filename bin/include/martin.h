@@ -64,6 +64,9 @@ extern  float integer (float s);
 //return rounded integer of floating number
 extern int cint (float s);
 
+// round to 1e-11 precision
+extern double myround(double s);
+
 // return threej symbol 
 extern float threej (float AJ1,float AJ2,float AJ3,float AM1,float AM2,float AM3);
 

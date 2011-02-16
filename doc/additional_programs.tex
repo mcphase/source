@@ -65,6 +65,10 @@ unit cell n
 cell 
                 n1xr1,n2xr2,n3xr3 put result into extend.j, extend.tst and extend.in
 
+\item[\prg formfactor\index{formfactor} *.sipf] program to calculate the neutron magnetic formfactor
+from the formfactor coefficients in the single ion parameter file *.sipf. If a radial wave function is given in *.sipf
+then the formfactorand the expectation values of the spherical Bessel functions  are evaluated by integration
+with this radial wave function (see appendix \ref{ffacts}).
 \item [\prg jjj2j:] transforms file of {\prg mcphas.jjj} format to {\prg %%@
 mcphas.j\index{mcphas.j}} format
 - output is written to stdout
@@ -153,8 +157,9 @@ sqrt(2Np!)
       # if the above parameters are given the radial wave function is output to file %%@
 radwavfun.dat                 
 \end{verbatim}                      
-
-\item [\prg powedercell2j\index{powdercell2j} file:]     used to create mcphas.j type file from %%@
+\item[\prg radwavfunc\index{radwavfunc} file.sipf:] program to evaluate the radial wave function
+given by th parametrisation in file.sipf.
+\item [\prg powdercell2j\index{powdercell2j} file:]     used to create mcphas.j type file from %%@
 output of powdercell,output is written to mcphas.j.  Example of input file:
 \begin{verbatim}
   No   name       crystal coordinates          cartesian coordinates

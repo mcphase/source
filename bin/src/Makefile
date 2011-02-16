@@ -135,7 +135,7 @@ all :  martin.o ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE) \
 	../spinsfromq$(EXE) ../addj$(EXE) ../singleion$(EXE) ../charges$(EXE)  \
 	../chrgplt$(EXE) ../spindensplt$(EXE) ../pointc$(EXE) ../mcdiff$(EXE) \
         ../orbmomdensplt$(EXE) ../momdensplt$(EXE) ../currdensplt$(EXE) \
-        ../spindensities$(EXE) \
+        ../formfactor$(EXE) ../radwavfunc$(EXE) ../spindensities$(EXE) \
         ../orbmomdensities$(EXE) ../momdensities$(EXE) ../currdensities$(EXE)
 
 
@@ -252,6 +252,12 @@ currdensplt.o:  currdensplt.c plt_func.c density.hpp martin.h vector.h jjjpar.hp
 pointc.o:  pointc.c  martin.h vector.h ionpars.hpp jjjpar.hpp
 	$(CCC) $(CFLAGS) $<
 
+formfactor.o:  formfactor.c  martin.h vector.h ionpars.hpp jjjpar.hpp
+	$(CCC) $(CFLAGS) $<
+
+radwavfunc.o:  radwavfunc.c  martin.h vector.h ionpars.hpp jjjpar.hpp
+	$(CCC) $(CFLAGS) $<
+
 addj.o: addj.c par.hpp  martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 
@@ -365,6 +371,14 @@ ip.o: ionpars.cpp
 ../pointc$(EXE): pointc.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o  $(FUNCTIONOBJS) jjjpar.o  par.o
 	@echo Linking ../pointc
 	@$(LINKER)  -Wall  -o ../pointc $^  $(LFLAGS)
+
+../formfactor$(EXE): formfactor.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o  $(FUNCTIONOBJS) jjjpar.o  par.o
+	@echo Linking ../formfactor
+	@$(LINKER)  -Wall  -o ../formfactor $^  $(LFLAGS)
+
+../radwavfunc$(EXE): radwavfunc.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o  $(FUNCTIONOBJS) jjjpar.o  par.o
+	@echo Linking ../radwavfunc
+	@$(LINKER)  -Wall  -o ../radwavfunc $^  $(LFLAGS)
 
 ../addj$(EXE): addj.o par.o martin.o myev.o jjjpar.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
 	@echo Linking ../addj

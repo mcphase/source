@@ -142,7 +142,21 @@ public:
 //    however if gJ=0 and Q>0 return spin form factor FS(Q)=<j0(Q)>
 //            if gJ=0 and Q<0 return angular  form factor FL(Q)=<j0(Q)>+<j2(Q)>
    double F(double Q);
+   double j0(double Q);
+   double j1(double Q);
+   double j2(double Q);
+   double j3(double Q);
+   double j4(double Q);
+   double j5(double Q);
+   double j6(double Q);
 
+private:
+   double jl(int l,double Q);
+   double tl(int l,int N,double x);
+   double sn(int n,int N,double x);
+   double cn(int n,int N,double x);
+
+public:
 //   debyewallerfactor = EXP(-2 * DWF *s*s)
    double debyewallerfactor(double & Q);
 

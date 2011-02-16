@@ -127,9 +127,14 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
   if(J[i]==0||J[i]==-3){fprintf(fout,"F(Q) beyond dip.approx.");}
   if(J[i]==-1){fprintf(fout,"F(Q)=j0-(1-2/gJ)j2 formfactor for rare earth/transition metals with gJ=2");}
   if(J[i]==-2){fprintf(fout,"FL(Q)=(j0+j2)/2 and FS(Q)=j0 formfactors separate for spin and orb. moments");}
-
+  if((*jjjpars[i]).Np(1)!=0){
+  fprintf(fout," - formfactor calculated directly from radial wave function parameters in %s",(*jjjpars[i]).cffilename);
+  }
+  else
+  {
   for (j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*jjjpars[i]).magFFj0(j));}
   for (j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*jjjpars[i]).magFFj2(j));}
+  }
   fprintf(fout, "\n");
  }
  fprintf(fout, "#}\n");
@@ -234,7 +239,8 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
       f2pp=abs(-ct*ct*(z12*st*st/ct/ct+z32)); if(f2pp*f2pp>IppF2){IppF2=f2pp*f2pp;IppF2a=azimuth*180/PI;}
       if(code==1&&ortho==1)
        {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
-       hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],ikern[i], intmag[i], ikern[i]+intmag[i],out10[i],out11[i],intmagdip[i],
+       hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],myround(ikern[i]), myround(intmag[i]),myround( (ikern[i]+intmag[i])),myround(out10[i]),
+       myround(out11[i]),myround(intmagdip[i]),
        f1ps*f1ps,azimuth*180/PI,
        f1sp*f1sp,azimuth*180/PI,
        f1pp*f1pp,azimuth*180/PI,
@@ -247,12 +253,16 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
     if(IspF1+IpsF1+IppF1+IspF2+IpsF2+IppF2+ikern[i]+intmag[i]>0.0001)
       {if(ortho==1)
        {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
-        hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],ikern[i], intmag[i], ikern[i]+intmag[i],out10[i],out11[i],intmagdip[i],
+        hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],
+        myround(ikern[i]), myround(intmag[i]), myround((ikern[i]+intmag[i])),myround(out10[i]),myround(out11[i]),
+        myround(intmagdip[i]),
         IspF1,IspF1a,IpsF1,IpsF1a,IppF1,IppF1a,IspF2,IspF2a,IpsF2,IpsF2a,IppF2,IppF2a,
         abs(mx[i]),abs(my[i]),abs(mz[i]),abs(mx2[i]),abs(my2[i]),abs(mz2[i]),abs(mxmy[i]),abs(mxmz[i]),abs(mymz[i]));}
        else
        {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E\n",
-        hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],ikern[i], intmag[i], ikern[i]+intmag[i],out10[i],out11[i],intmagdip[i]);}
+        hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],
+        myround(ikern[i]), myround(intmag[i]), myround((ikern[i]+intmag[i])),
+        myround(out10[i]),myround(out11[i]),myround(intmagdip[i]));}
       }
     if(code==1&&ortho==1){fprintf(fout,"#\n");}
    }
@@ -260,7 +270,9 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
    {if((double)(i-imin)/50==(double)((i-imin)/50))
     {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) Iobs\n",colheader[colcode[10]],colheader[colcode[11]]);}
       fprintf(fout,   "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E %8.4f\n",
-      hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],ikern[i], intmag[i], ikern[i]+intmag[i],out10[i],out11[i],intmagdip[i],real(mx[i]));
+      hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],
+      myround(ikern[i]), myround(intmag[i]),myround((ikern[i]+intmag[i])),
+      myround(out10[i]),myround(out11[i]),myround(intmagdip[i]),real(mx[i]));
      if(real(mx[i])>=0){total+=abs(mx[i]);
                         rpvalue[9]+=abs(isave[9]+ikern[i]+intmag[i]-abs(mx[i])); isave[9]=0;
                         rpvalue[10]+=abs(isave[10]+out10[i]-abs(mx[i])); isave[10]=0;
@@ -274,7 +286,10 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
    {if((double)(i-imin)/50==(double)((i-imin)/50))
     {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) Iobs        error\n",colheader[colcode[10]],colheader[colcode[11]]);}
       fprintf(fout,    "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E %5.4E %5.4E\n",
-      hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],ikern[i], intmag[i], ikern[i]+intmag[i],out10[i],out11[i],intmagdip[i],real(mx[i]),abs(my[i]));
+      hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],
+      myround(ikern[i]), myround(intmag[i]), myround((ikern[i]+intmag[i])),
+      myround(out10[i]),myround(out11[i]),myround(intmagdip[i]),
+      real(mx[i]),abs(my[i]));
      if(real(mx[i])>=0){total+=abs(mx[i]);
       chisquared[9]+=(isave[9]+ikern[i]+intmag[i]-abs(mx[i]))*(isave[9]+ikern[i]+intmag[i]-abs(mx[i]))/abs(my[i])/abs(my[i]);
       chisquared[10]+=(isave[10]+out10[i]-abs(mx[i]))*(isave[10]+out10[i]-abs(mx[i]))/abs(my[i])/abs(my[i]);

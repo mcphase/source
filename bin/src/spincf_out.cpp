@@ -1235,7 +1235,7 @@ void spincf::print(FILE * fout) //print spinconfiguration to stream
  {for (j=1;j<=nofb;++j)
   {for (l=1;l<=nofcomponents*nofatoms;++l)
    {for (i=1;i<=nofa;++i)
-      {fprintf(fout," %4.4f",mom[in(i,j,k)](l));
+      {fprintf(fout," %4.4f",myround(mom[in(i,j,k)](l)));
        }
     fprintf(fout,"\n");
     }

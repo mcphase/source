@@ -271,6 +271,43 @@ void staout(FILE*fout,double & sta,double & sta_int,double & sta_without_antipea
     fprintf(fout,"#!sta_int_without_antipeaks_weights= %8.6g \n",sta_int_without_antipeaks_weights);
     }
 
+// some function to write fileheader efficiently
+void writeheader(par & inputpars,FILE * fout)
+{  time_t curtime;
+  struct tm *loctime;
+   fprintf(fout, "#{output file of program %s",MCDISPVERSION);
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
+   fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
+   fprintf(fout,"#*********************************************************************\n");
+   fprintf(fout,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
+   fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
+   fprintf(fout,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
+   fprintf(fout,"#*********************************************************************\n");
+  fprintf(fout, "# List of atomic positions dr1 dr2 dr3, moments m \n");
+  fprintf(fout, "# Debye Waller factor (sqr(Intensity)~|sf| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),\n# units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)\n");
+  fprintf(fout, "#  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor\n# coefficients\n");
+  fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3]mi[MuB]mj[MuB]mk[MuB] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
+  fprintf(fout, "#                         ...with j||b, k||(a x b) and i normal to k and j\n");
+ 
+ for (int i = 1;i<=inputpars.nofatoms;++i)
+ {if((double)(i)/50==(double)(i/50))
+  {
+  fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
+  
+  }
+  fprintf(fout, "# %6.3f %6.3f %6.3f %6.3f %6.3f ",(*inputpars.jjj[i]).xyz(1),(*inputpars.jjj[i]).xyz(2),(*inputpars.jjj[i]).xyz(3),(*inputpars.jjj[i]).DWF,(*inputpars.jjj[i]).gJ);
+  if((*inputpars.jjj[i]).Np(1)!=0){
+  fprintf(fout," - formfactor calculated directly from radial wave function parameters in %s",(*inputpars.jjj[i]).cffilename);
+  }
+  else
+  {
+  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*inputpars.jjj[i]).magFFj0(j));}
+  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*inputpars.jjj[i]).magFFj2(j));}
+  }
+  fprintf(fout, "\n");
+ }
+}
+
 // procedure to calculate the dispersion
 void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
@@ -633,48 +670,24 @@ if (do_verbose==1){
 if (do_jqfile==0)
 { printf("#saving mcdisp.qom and mcdisp.qei and mcdisp.qev\n");
   fout = fopen_errchk ("./results/mcdisp.qom",filemode);
-   fprintf(fout, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
-   fprintf(fout,"#*********************************************************************\n");
-   fprintf(fout,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(fout,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(fout,"#*********************************************************************\n");
+  writeheader(inputpars,fout);
           fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   foutqei = fopen_errchk ("./results/mcdisp.qei",filemode);
-   fprintf(foutqei, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutqei);
+  writeheader(inputpars,foutqei);
    fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
-   fprintf(foutqei,"#*********************************************************************\n");
-   fprintf(foutqei,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(foutqei,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(foutqei,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(foutqei,"#*********************************************************************\n");
           fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   foutqev = fopen_errchk ("./results/mcdisp.qev",filemode);
-   fprintf(foutqev, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutqev);
+  writeheader(inputpars,foutqev);
    fprintf(foutqev,"#!<--mcphas.mcdisp.qev-->\n");
-   fprintf(foutqev,"#*********************************************************************\n");
-   fprintf(foutqev,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(foutqev,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(foutqev,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(foutqev,"#*********************************************************************\n");
           fprintf (foutqev, "#!spins_wave_amplitude=1.0\n");
           fprintf (foutqev, "#!spins_show_ellipses=1.0\n");
           fprintf (foutqev, "#!spins_show_static_moment_direction=1.0\n");
           fprintf (foutqev, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 
   foutqee = fopen_errchk ("./results/mcdisp.qee",filemode);
-   fprintf(foutqee, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutqee);
+   writeheader(inputpars,foutqee);
    fprintf(foutqee,"#!<--mcphas.mcdisp.qee-->\n");
-   fprintf(foutqee,"#*********************************************************************\n");
-   fprintf(foutqee,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(foutqee,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(foutqee,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(foutqee,"#*********************************************************************\n");
           fprintf (foutqee, "#!spins_wave_amplitude=1.0\n");
           fprintf (foutqee, "#!spins_show_ellipses=1.0\n");
           fprintf (foutqev, "#!spins_show_static_moment_direction=1.0\n");
@@ -682,29 +695,17 @@ if (do_jqfile==0)
           fprintf (foutqee, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
+  writeheader(inputpars,foutdstot);
           printf("#saving mcdisp.dsigma.tot\n");
-   fprintf(foutdstot, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutdstot);
    fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
-   fprintf(foutdstot,"#*********************************************************************\n");
-   fprintf(foutdstot,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(foutdstot,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(foutdstot,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(foutdstot,"#*********************************************************************\n");
           fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma/dOmeg [barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}",ini.emin,ini.emax);
 
    if (do_Erefine==1){
           errno = 0;
   foutds = fopen_errchk ("./results/mcdisp.dsigma",filemode);
+  writeheader(inputpars,foutds);
           printf("#saving mcdisp.dsigma\n");
-   fprintf(foutds, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds);
    fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
-   fprintf(foutds,"#*********************************************************************\n");
-   fprintf(foutds,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(foutds,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(foutds,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(foutds,"#*********************************************************************\n");
           fprintf (foutds, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
           fprintf (foutdstot, "for fast algorithm  vs summing dsigma for diff energies");
                      }  
@@ -715,16 +716,10 @@ if (do_jqfile==0)
 if (do_jqfile==1)
 {  printf("#saving mcdisp.jq\n");
  jqfile = fopen_errchk ("./results/mcdisp.jq",filemode);
-          printf("#saving mcdisp.jq\n");
-   fprintf(jqfile, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),jqfile);
+ writeheader(inputpars,jqfile);
+         printf("#saving mcdisp.jq\n");
    fprintf(jqfile,"#!<--mcphas.mcdisp.dsigma.jq-->\n");
-   fprintf(jqfile,"#*********************************************************************\n");
-   fprintf(jqfile,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(jqfile,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(jqfile,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(jqfile,"#*********************************************************************\n");
-  fprintf (jqfile, "#Fourier Transform of 2 Ion Interaction - sta is calculated by comparing the larges eigenvalue\n# to that of the first q vector of the calculation");
+   fprintf (jqfile, "#Fourier Transform of 2 Ion Interaction - sta is calculated by comparing the larges eigenvalue\n# to that of the first q vector of the calculation");
    fputs (asctime(loctime),jqfile);
   if (do_verbose==1){   fprintf (jqfile, "#q=(hkl)\n #spin s() - spin s'()\n #3x3 matrix jss'(q) real im .... [meV]\n");}
   else {fprintf(jqfile,"#h  vs  k  vs  l  vs largest eigenvalue of J(hkl) matrix vs components of corresponding eigenvector re im re im re im re im\n");}

@@ -137,13 +137,14 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
    if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;}
    fout = fopen_errchk ("./results/mcphas.fum","a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
-            x,y,T,Norm(Hijk),H[1],H[2],H[3],fe,u,Norm(m),mabc[1],mabc[2],mabc[3],m*Hijk/Norm(Hijk));
-   if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",m(1),m(2),m(3),Hijk(1),Hijk(2),Hijk(3));}
+            x,y,T,Norm(Hijk),H[1],H[2],H[3],myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
+   if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
    fprintf(fout,"\n");
    fclose(fout);
    fout = fopen_errchk ("./results/.mcphas.fum","a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g %4.4g\n",
-            x,y,T,Norm(Hijk),H[1],H[2],H[3],fe,u,Norm(m),mabc[1],mabc[2],mabc[3],m*Hijk/Norm(Hijk));
+            x,y,T,Norm(Hijk),H[1],H[2],H[3],myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),
+            myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
    fclose(fout);
    if((fout=fopen("./fit/mcphas.fum","rb"))!=NULL)
     {// some measured data should be fitted
@@ -237,7 +238,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
   if (htfailed!=0){jj[i](1)=0;jj[i](2)=0;jj[i](3)=0;}
    fprintf (fout, "%4.4g %4.4g   %4.4g %4.4g   %4.4g %4.4g %4.4g     ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
         for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
-            {fprintf (fout, "%4.4g ",jj[i](j2+nofcomponents*nofcomponents*(l-1)));
+            {fprintf (fout, "%4.4g ",myround(jj[i](j2+nofcomponents*nofcomponents*(l-1))));
 	    }
    fprintf (fout,"\n");
    fclose(fout);
@@ -332,7 +333,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
   fout = fopen_errchk ("./results/mcphas.hkl","a");fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
    for (i=nofhkls;i>=1;--i)
     {if (htfailed!=0){hkli[inew[i]](1)=0;hkli[inew[i]](2)=0;hkli[inew[i]](3)=0;hkli[inew[i]](4)=0;}
-    fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),hkli[inew[i]](4));
+    fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](4)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray a component
@@ -340,7 +341,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    }else{
   fout = fopen_errchk ("./results/mcphasa.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),hkli[inew[i]](5));
+    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](5)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray b component
@@ -348,7 +349,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    }else{
   fout = fopen_errchk ("./results/mcphasb.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),hkli[inew[i]](6));
+    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](6)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray c component
@@ -356,7 +357,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    }else{
   fout = fopen_errchk ("./results/mcphasc.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),hkli[inew[i]](7));
+    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](7)));
     } fprintf(fout,"\n");
    fclose(fout);
 

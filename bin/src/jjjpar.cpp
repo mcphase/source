@@ -397,7 +397,7 @@ void jjjpar::save_sipf(const char * path)
   if(abs(Np)>1e-10){fprintf(fout,"#---------------------------------------------------------------------------------------------------\n");
                     fprintf(fout,"# radial wave function parameters, for transition metal ions the the values are tabulated in\n");
                     fprintf(fout,"# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave\n");
-                    fprintf(fout,"# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)\n");
+                    fprintf(fout,"# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt((2Np)!)\n");
                     fprintf(fout,"# for rare earth ions see Freeman & Watson PR 127(1962)2058, Sovers J. Phys. Chem. Sol. 28(1966)1073\n");
                     fprintf(fout,"#---------------------------------------------------------------------------------------------------\n");
                     for(i=Np.Lo();i<=Np.Hi();++i){if(Np(i)!=0){fprintf(fout,"N%i=%i XI%i=%g C%i=%g\n",i,(int)Np(i),i,Xip(i),i,Cp(i));}
