@@ -38,6 +38,8 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
     //   strcat(modulefilename,"\\bin\\ic1ion_module\\ic1ion.so");
        strcat(modulefilename,"/bin/ic1ion_module/ic1ion.so");
 }
+      if (strncmp(modulefilename,"icf1ion",6)==0)
+      {strcpy(modulefilename,getenv("MCPHASE_DIR")); strcat(modulefilename,"/bin/ic1ion_module/icf1ion.so"); }
 
   fprintf (stderr,"#parsing single ion property file: %s - loading module %s\n",sipffilename,modulefilename);
 

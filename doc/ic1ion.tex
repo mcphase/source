@@ -318,7 +318,20 @@ to $\mbf M=\mu_B(2<\mbf S>+<\mbf L>)$
 6x6 components of the dynamical matrix  in dipole approximation for the magnetic formfactor.
 \end{itemize}
 
-\vspace{1cm}
+\subsection{{\prg icf1ion} - Intermediate Crystal Field module}
+
+In addition to the full {\prg ic1ion} module, there is a derived module, {\prg icf1ion}, in which only the lowest
+energy term of constant $L$ and $S$ is considered. Thus, the Coulomb interaction (see next section) is supposed
+to have such high energy that the low temperature physical properties may be accounted for just by the spin-orbit,
+crystal field, and exchange interactions. As a smaller energy matrix is required in this module, calculations will
+be faster. In the cases of a single outer shell electron or hole (e.g. Ce$^{3+}$ or Yb$^{3+}$), the two modules are 
+identical. {\prg icf1ion} accepts the same inputs as {\prg ic1ion}, except that the Slater integrals $F^k$ are 
+ignored. 
+
+Currently (version 4.0), the beyond dipole part of {\prg mcdisp} is not yet implemented, as are the calculations
+of the spin and orbital moment densities. All other packages may use {\prg icf1ion}.
+
+%\vspace{1cm}
 \subsection{Formalism}
 
 As noted in equation~\ref{ichamilton}, in the case of intermediate coupling, we calculate
@@ -330,7 +343,7 @@ terms in the braces in the first line of equation~\ref{ichamilton}. In particula
 as the Coulomb interaction is \emph{only} this second summation, and we shall consider the lowest
 energy configuration only. This configuration corresponds to the outer most electrons in ion, and is
 labelled $nl^N$, for example, $4f^1$ for Ce$^{3+}$.} and second lines of the equation, in addition
-to the crystal field (CF) interaction which \emph{cfield} treats. 
+to the crystal field (CF) interaction which {\prg cfield} treats. 
 
 The term \emph{intermediate coupling} is somewhat a misnomer, because it does not refer to a
 specific coupling scheme to determine the total angular momentum $J$, such as
@@ -358,26 +371,50 @@ both the Coulomb and spin-orbit interaction are large (but where $\mathcal{H}_{\
 \mathcal{H}_{\mathrm{SO}}\gg
 \mathcal{H}_{\mathrm{CEF}}$), i.e. the crystal field interaction is treated as a perturbation. Only
 the lowest energy spin-orbit multiplet is considered, and its degeneracy is split by the CF. These
-levels are labeled by the total angular momentum quantum numbers $L, S, J and J_z$\footnote{Also
-denoted $m_J$.}. 
+levels are labeled by the total angular momentum quantum numbers $L, S, J$ and $J_z$\footnote{Also
+denoted $m_J$.}. This is the case treated in the modules {\prg so1ion}/{\prg cfield}, and is 
+sometimes called the \emph{weak field} case.
 
 The other limit corresponds to $jj$-coupling, where the spin-orbit interaction
 dominates $\mathcal{H}_{\mathrm{SO}}\gg
 \mathcal{H}_{\mathrm{Coulomb}}$, and there is no term or multiplet structure, 
 in this case only the single electron total
 angular momentum quantum number $j$ serves to label the states. 
+In between these two limits is thus, \emph{intermediate coupling}. 
 
-What is refered to as \emph{intermediate coupling} can mean in general that all the three main
+In addition to the limits represented by these coupling schemes, the crystal field literature
+also introduces several other limiting cases, depending on the strength of the crystal
+field. The \emph{weak field} limit corresponds to $LS$-coupling. The \emph{intermediate field} is
+the case where $\mathcal{H}_{\mathrm{Coulomb}}\gg\mathcal{H}_{\mathrm{CEF}}\gg
+\mathcal{H}_{\mathrm{SO}}$ and this case may be calculated using the {\prg icf1ion} module,
+which ignores $\mathcal{H}_{\mathrm{Coulomb}}$, and treats only $\mathcal{H}_{\mathrm{CEF}}$ and
+$\mathcal{H}_{\mathrm{SO}}$ within the lowest term $^{2S+1} L$ determined by Hund's rules.
+
+The \emph{strong field} limit is where $\mathcal{H}_{\mathrm{CF}}$ dominates even over the Coulomb
+interaction. In this case, the crystal field is considered to act first on single-electron states,
+splitting the degenerate orbital levels $m_l=-l,...,l$, as dictated by the point symmetry of the
+ion (e.g. for a transition metal ion in cubic symmetry this is usually into a doublet
+$|m_l=0,2\rangle$, labelled by the group theoretical irreducible representation of the cubic group,
+$E_g$; and a triplet $|m_l=-2,-1,1\rangle$ labelled $T_{2g}$). Electrons may then fill these single
+electron crystal field states, and their degeneracy may be lifted by the Coulomb and spin-orbit
+interactions. This case is not explicitly considered in the module, but one may calculate the
+resulting energy levels by increasing the crystal field above the Coulomb interaction. {\prg
+ic1ion} however, uses the total orbital and spin angular momenta as labels for the states, rather
+than single-electron angular momenta or irreducible representations, so it is difficult to intepret
+{\prg ic1ion} output in terms of this limit.
+
+Finally, {\prg ic1ion} may be used in the general case, where all the three main
 single ion interactions are considered with variable strengths
 $\mathcal{H}_{\mathrm{Coulomb}}\sim
 \mathcal{H}_{\mathrm{SO}}\sim
 \mathcal{H}_{\mathrm{CEF}}$, but may also specifically refer to
 the situation in which the strengths of the Coulomb and spin-orbit interaction is fixed by
 parameters determined either from experimental (optical) spectra or ab-initio (Hartree-Fock)
-calculations. In these cases there is usually still a multiplet structure but the eigenstates of the
-system is a mixture of the $LS$-basis states, with only $J$ being a good quantum number which can be
-used to distinguish the states. In the case of a large CF interaction, however, \emph{J-mixing} can
-occur, which results in the lost of a distinct multiplet structure.
+calculations. If the CF interaction is relatively weak, there will still be a multiplet structure
+but the eigenstates of the system is a mixture of the $LS$-basis states (due to the SO interaction),
+with only $J$ being a good quantum number which can be used to distinguish the states. In the case
+of a large CF interaction, however, \emph{J-mixing} can occur, which results in the lost of a
+distinct multiplet structure.
 
 The operators corresponding to each of the three single-ion interactions are calculated as matrices
 using $LS$-coupling basis states, which are labelled according to a group theoretical
@@ -414,27 +451,25 @@ The LS-coupling basis states are tabulated by Nielsen and Koster~\cite{nielson63
 formulae for the matrix elements are from Racah~\cite{racah42-186,racah42-438,racah43-367}
  and Judd~\cite{judd88-1}.
 
-We construct the cfp's from several different factors. This comes about
-because you can factorise the cfp into terms involving any two quantum
-numbers of the set you used to label your basis states, if the
-quantum numbers are labels for a representation of a group (hence the
-use of group theory to determine the basis states). In this case the
-factors involving the quantum numbers S,L,J,mJ are just 3j-symbols.
-The factors involving v, U, and n are not, and for these I've used
-tables constructed by Racah, Wybourne and later from a program written
-by Allison (http://cpc.cs.qub.ac.uk/cpc/cgi-bin/showversions.pl/?catid=acry
-).
+%We construct the cfp's from several different factors. This comes about
+%because you can factorise the cfp into terms involving any two quantum
+%numbers of the set you used to label your basis states, if the
+%quantum numbers are labels for a representation of a group (hence the
+%use of group theory to determine the basis states). In this case the
+%factors involving the quantum numbers S,L,J,mJ are just 3j-symbols.
+%The factors involving v, U, and n are not, and for these I've used
+%tables constructed by Racah, Wybourne and later from a program written
+%by Allison~\cite{allison74}.
 
-Some checks of the cfp's were made - by comparing
-them to values tabulated by Cowan, and by using the reciprocity
-relation between the coefficients like $l^{n-1}a"L"S"|\}l^{n}aLS$ and
-$l^{n-1}aLS|\}l^{n}a"L"S"$. These seem to check out... but I was mostly
-concentrating on the configurations with fewer electrons - e.g. f1-f5.
-Finally I don't use these tables for d-electrons at all, because
-there are not so many states involved, and all the cfp's have been
-tabulated by Nielson and Koster~\cite{nielson63-1}, so
-It is just programmed them in as a look up table. 
-
+%Some checks of the cfp's were made - by comparing
+%them to values tabulated by Cowan, and by using the reciprocity
+%relation between the coefficients like $l^{n-1}a"L"S"|\}l^{n}aLS$ and
+%$l^{n-1}aLS|\}l^{n}a"L"S"$. These seem to check out... but I was mostly
+%concentrating on the configurations with fewer electrons - e.g. f1-f5.
+%Finally I don't use these tables for d-electrons at all, because
+%there are not so many states involved, and all the cfp's have been
+%tabulated by Nielson and Koster~\cite{nielson63-1}, so
+%It is just programmed them in as a look up table. 
 
 Finally expressions based on the above equation for the matrix elements of the spin-orbit and
 crystal field operators were derived by Elliot, Judd and Runciman~\cite{elliot57-509}\footnote{Eqn
@@ -460,51 +495,67 @@ Bleaney~\cite{abragam70-1}, Griffith~\cite{griffith71-1} and Chakravarty~\cite{c
 the transition metal ions, and by Carnall et al.~\cite{carnall89,carnall92} for the rare earths.
 Other relevant literature are the famous papers by Racah~\cite{racah42-186,racah42-438,racah43-367}.
 
-The first (electrostatic) term is well known to be exactly solvable only for Hydrogen. Thus we use
-the well known \emph{central field approximation} to separate it into a Hydrogen-like part which
-produces degenerate energy levels called \emph{configurations} labeled by the principal quantum
-number, $n$, and the orbital quantum number $l$ of the electrons; and a remainder term which
-resembles the second summation in the first line of equation~\ref{ichamilton}, and lifts the
-degeneracy of the configurations, producing energy levels called \emph{terms} which are labeled by
-the total spin, $S$, and orbital, $L$, angular momentum of the multi-electron system. 
+%The first (electrostatic) term is well known to be exactly solvable only for Hydrogen. Thus we use
+%the well known \emph{central field approximation} to separate it into a Hydrogen-like part which
+%produces degenerate energy levels called \emph{configurations} labeled by the principal quantum
+%number, $n$, and the orbital quantum number $l$ of the electrons; and a remainder term which
+%resembles the second summation in the first line of equation~\ref{ichamilton}, and lifts the
+%degeneracy of the configurations, producing energy levels called \emph{terms} which are labeled by
+%the total spin, $S$, and orbital, $L$, angular momentum of the multi-electron system. 
+%
+%In order to make the calculations tractable we shall consider only the configuration with the lowest
+%energy, which in general belongs to the outer most electron shell of the ion of interest. For
+%Lanthanide ions, these electrons have $n=4$ and $l=3$, and are thus labeled $4f$, whilst actinide
+%ions are $5f$, and the 1st, 2nd, and 3rd transition metal serires (with $l=3$) are $3d$, $4d$ and
+%$5d$ respectively. 
+%
+%Futhermore the terms are split by the spin-orbit interation into \emph{multiplets} labeled by the
+%total orbital angular momentum, $J=L+S$, which is finally split by the crystal field. \emph{cfield}
+%considers only the lowest lying multiplet and the crystal field splitting, which is usually adequate
+%for rare earth systems because the Coulomb and SO terms are large enough such that the energy gap
+%between multiplet is too large to affect the low (or room) temperature physical properties of such
+%systems.
 
-In order to make the calculations tractable we shall consider only the configuration with the lowest
-energy, which in general belongs to the outer most electron shell of the ion of interest. For
-Lanthanide ions, these electrons have $n=4$ and $l=3$, and are thus labeled $4f$, whilst actinide
-ions are $5f$, and the 1st, 2nd, and 3rd transition metal serires (with $l=3$) are $3d$, $4d$ and
-$5d$ respectively. 
+%In order to calculate the matrix elements of each of these interactions, we refer to the formulae in
+%the following:
 
-Futhermore the terms are split by the spin-orbit interation into \emph{multiplets} labeled by the
-total orbital angular momentum, $J=L+S$, which is finally split by the crystal field. \emph{cfield}
-considers only the lowest lying multiplet and the crystal field splitting, which is usually adequate
-for rare earth systems because the Coulomb and SO terms are large enough such that the energy gap
-between multiplet is too large to affect the low (or room) temperature physical properties of such
-systems.
+We now list formulae for the matrix elements of the principal operators used in {\prg ic1ion} as
+they are programmed in:
 
-In order to calculate the matrix elements of each of these interactions, we refer to the formulae in
-the following:
 \begin{quotation}
 \item[\bf Coulomb electron electron interaction operator:]
-The denominator $|\mathbf{r}_i-\mathbf{r}_j|$ in the Coulomb interaction may be expanded as in a multipole
-series in terms of spherical harmonics, whilst the CF operators are themselves tensor operators which transform
-like the spherical harmonic functions. Thus we can (after some algebra) express the Coulomb interaction as
-$\sum_{ij} e^2 \sum_k (r_<^k/r_>^k) \mathbf{T}^{(k)}_i \cdot \mathbf{T}^{(k)}_j$, where $r_<$ is the lesser of
-$r_i$ or $r_j$ and $r_>$ is the greater; and $\mathbf{T}^{(k)}$ is a vector of operators $T^{(k)}_q$, with
-$q=-k,\ldots,k$.
+\[ \mathcal{H}_{\mathrm{coulomb}} = \sum_{i>j=1}^N \frac{e^2}{|\mathbf{r}_i-\mathbf{r}_j|} = 
+    \sum_{k} F^k \sum_{ij} {\mathbf T}_i^{(k)} \cdot {\mathbf T}_j^{(k)} = \sum_k F^k f_k \]
 
-After some further manipulations the following expression may be derived:
-
-\[ \mathcal{H}_{\mathrm{coulomb}} = \sum_{i>j=1}^N \frac{e^2}{|\mathbf{r}_i-\mathbf{r}_j|} = e_0 E^0 + e_1 E^1
-+ e_2 E^2 + e_3 E^3 \]
-
-Eqns 66 (conversion from Racah parameters, $E^k$ to Slater integrals, $F_k$), 63 ($e_0$ operator), 
-69 ($e1$), eqns 73-74 ($e2$), and eqns 78,28,80-87 ($e3$), from the important paper by Giulio
-Racah~\cite{racah49-1352}.
-
+\noindent The denominator $|\mathbf{r}_i-\mathbf{r}_j|$ was expanded as a multipole series in terms 
+of spherical harmonic functions $Y_{kq}$, which are in turn related to the tensor operators ${\mathbf
+T}_i^{(k)}$ of the $i^{\mathrm th}$ electron. The radial dependence of the electron wavefunction is
+then embodied in the \emph{Slater integrals}, $F^k$, whilst the angular part is given by the Slater
+operators $f_k$, and $k$ runs through even integers from 0 to $2l$. In the case of $f$-electrons 
+we use Racah's operators, $e_k$ which are linear combinations of $f_k$ which transform according to
+specific irreducible representations of the group SO(7)$\times G_2$. This means that their matrix
+elements are more straightforward to calculate. The relation between these operators and $f_k$, and
+their matrix elements are given by Racah~\cite{racah49-1352}. For $d$- and $p$-electrons the $f_k$
+operators are used directly, from tabulated matrix elements given by~\cite{nielson63-1}. 
+%e_0 E^0 + e_1 E^1 + e_2 E^2 + e_3 E^3 \]
+%The denominator $|\mathbf{r}_i-\mathbf{r}_j|$ in the Coulomb interaction may be expanded as in a multipole
+%series in terms of spherical harmonics, whilst the CF operators are themselves tensor operators which transform
+%like the spherical harmonic functions. Thus we can (after some algebra) express the Coulomb interaction as
+%$\sum_{ij} e^2 \sum_k (r_<^k/r_>^k) \mathbf{T}^{(k)}_i \cdot \mathbf{T}^{(k)}_j$, where $r_<$ is the lesser of
+%$r_i$ or $r_j$ and $r_>$ is the greater; and $\mathbf{T}^{(k)}$ is a vector of operators $T^{(k)}_q$, with
+%$q=-k,\ldots,k$.
+%
+%After some further manipulations the following expression may be derived:
+%
+%
+%Eqns 66 (conversion from Racah parameters, $E^k$ to Slater integrals, $F_k$), 63 ($e_0$ operator), 
+%69 ($e1$), eqns 73-74 ($e2$), and eqns 78,28,80-87 ($e3$), from the important paper by Giulio
+%Racah~\cite{racah49-1352}.
+\\
 \item[\bf Spin-orbit interaction operator $\xi \sum_i ({\mbf s}_i . {\mbf l}_i)$:]
-
 Eqn 16 from Elliot, Judd and Runciman~\cite{elliot57-509}.
-
+\\
+%
 \item[\bf Crystal field interaction:]
 
 The crystal field interaction is given by the electrical potential produced according 
@@ -554,33 +605,86 @@ the crystal field may be rewritten as
 H_{cef}=  \sum_{k=0}^{\inf} \sum_{q=-k}^k  L_{kq} \sum_{i=1}^n z_{kq}(\Omega_i)
 \end{equation}
 
-This may be expressed as ....
+In order to calculate the crystal field Hamiltonian matrix, we replace the tesseral harmonic
+functions $\sum_i z_{kq}(\Omega_i)$ by the tensor operators $\hat{T}_{kq}$ which transform in the
+same way as the tesseral harmonics under the action of the rotation group SO(3). That is, the action
+of the operator $\hat{T}_{kq}$ on a wavefunction $|J,m_J\rangle$ is the same as that of the
+functions $z_{kq}$ on the coordinates $\Omega \equiv (\theta,\phi)$. The $\hat{T}_{kq}$ are
+expressed in terms of similar operators $\hat{C}_{kq}$ (which transform in the same way as spherical
+harmonics) as:
 
-{\bf some formula for CEF as it is programmed in ???? note that we have changed
-racah\_ukq by a factor $(-1)^q$ and also the operators (Ukqp $\pm Ukqm$) had their sign changed
-for negative q !!! relation to the $T^{(k)}_q$ ???}
-
-The main formulae for $T^{(k)}_q$ is in chapter 7 of the Judd book (eqn. 7-51 and
-7-52)~\cite{judd88-1}. Eqns 25-27 from Elliot, Judd and Runciman~\cite{elliot57-509}, 
-and in slightly more modern notation
-in equation C.14 from the thesis of Duc Le~\cite{ducle09-1}. 
-Note also the equivalence between the 3j symbols and Clebsch-Gordan coefficients
-(eqn 19 here: http://mathworld.wolfram.com/Wigner3j-Symbol.html ), and
-between the 6j symbols and Racah's W coefficient (http://mathworld.wolfram.com/RacahW-Coefficient.html ).
-The basic matrix element is the same for all operators written
-variously as Ukq, Vkq and Tkq except for the single electron reduced
-matrix element $<nl||?||n'l'>$. The unit tensor operator Ukq have
-$<lm||uk||l'm'>=\delta_{nn'}\delta_{ll'}$ whilst the Vkq operators have
-$<lm||vk||l'm'>=\sqrt{2k+1}\delta_{nn'}\delta_{ll'}$
-and the spherical
-harmonics tensor operator Tkq, has
-\begin{equation}
-<lm||vk||l'm'>=(-1)^l*\sqrt{(2l+1)(2l'+1)}*\left (\begin{tabular}{ccc}  l & k & l' \\ 0 & 0 & 0 \\ \end{tabular}\right)
+\begin{equation} \label{tkqhermitian}
+  \hat{T}_{k0} = \hat{C}_{k0}, \qquad \hat{T}_{k,\pm|q|} = \frac{\pm 1}{\sqrt{\pm 2}} \left[
+  \hat{C}_{k,-|q|} \pm (-1)^{|q|} \hat{C}_{k,|q|} \right]
 \end{equation}
 
-\item[The magnetic moment operators, $L_x L_y L_z S_x S_y S_z$:]
+\noindent and the matrix elements of these operators are given by
 
-Defined in Chan and Lam~\cite{chan70-219} and again in modern notation in equation C.19 of~\cite{ducle09-1}.
+\begin{equation} \label{iccfmatel}
+\begin{array}{l}
+\langle \theta J m_J | \hat{C}_{kq} | \theta' J' m_J' \rangle = (-1)^{J-m_J}
+       \left( \begin{array}{ccc} J' & k & J \\ -m_J & q & m'_J \end{array} \right)
+       \quad \langle l | \hat{c}_k | l \rangle  \\
+ \quad \times n \sum_{\bar{\theta}} (\theta\{|\bar{\theta}) (\theta'\{|\bar{\theta})
+       \ \  (-1)^{\bar{L}+L+k+l} ([L][L'])^{\frac{1}{2}}
+       \left\{ \begin{array}{ccc} L' & k & L \\ l & \bar{L} & l \end{array} \right\}  \\
+ \quad \times \qquad\qquad\qquad\qquad\  (-1)^{S+L+k+J} ([J][J'])^{\frac{1}{2}}
+       \left\{ \begin{array}{ccc} J' & k & J \\ L & S & L' \end{array} \right\}
+\end{array}
+\end{equation}
+
+\noindent with the single electron matrix element
+
+\begin{equation} \label{iccf1ematel}
+\langle l | \hat{c}_k | l \rangle = (-1)^l (2l+1) \left( \begin{array}{ccc} l & k & l \\ 0 & 0 & 0
+\end{array} \right)
+\end{equation}
+
+%This may be expressed as ....
+%
+%{\bf some formula for CEF as it is programmed in ???? note that we have changed
+%racah\_ukq by a factor $(-1)^q$ and also the operators (Ukqp $\pm Ukqm$) had their sign changed
+%for negative q !!! relation to the $T^{(k)}_q$ ???}
+%
+%The main formulae for $T^{(k)}_q$ is in chapter 7 of the Judd book (eqn. 7-51 and
+%7-52)~\cite{judd88-1}. Eqns 25-27 from Elliot, Judd and Runciman~\cite{elliot57-509}, 
+%and in slightly more modern notation
+%in equation C.14 from the thesis of Duc Le~\cite{ducle09-1}. 
+%Note also the equivalence between the 3j symbols and Clebsch-Gordan coefficients
+%(eqn 19 here: http://mathworld.wolfram.com/Wigner3j-Symbol.html ), and
+%between the 6j symbols and Racah's W coefficient (http://mathworld.wolfram.com/RacahW-Coefficient.html ).
+%The basic matrix element is the same for all operators written
+%variously as Ukq, Vkq and Tkq except for the single electron reduced
+%matrix element $<nl||?||n'l'>$. The unit tensor operator Ukq have
+%$<lm||uk||l'm'>=\delta_{nn'}\delta_{ll'}$ whilst the Vkq operators have
+%$<lm||vk||l'm'>=\sqrt{2k+1}\delta_{nn'}\delta_{ll'}$
+%and the spherical
+%harmonics tensor operator Tkq, has
+%\begin{equation}
+%<lm||vk||l'm'>=(-1)^l*\sqrt{(2l+1)(2l'+1)}*\left (\begin{tabular}{ccc}  l & k & l' \\ 0 & 0 & 0 \\ \end{tabular}\right)
+%\end{equation}
+%
+\item[\bf The magnetic moment operators, $L_x L_y L_z S_x S_y S_z$:]
+
+The orbital and spin operators have the same dependence on $m_J$, due to the Wigner-Eckart theorem:
+
+\begin{eqnarray}
+\bra{\theta Jm_J}(L,S)_{x,y}\ket{\theta'J'm_J'} &=& \frac{(-1)^{J-m_J}}{\sqrt{\pm 2}}
+ \left[ \threej{J'&1&J}{-m_J&-1&m'_J} \mp \threej{J'&1&J}{-m_J&1&m'_J} \right] \\ \nonumber  
+ && \qquad \times \bra{\theta J}|(L,S)||\ket{\theta'J'} \\
+    \bra{\theta Jm_J}(L,S)_z\ket{\theta'J'm_J'} &=& (-1)^{J-m_J}
+    \threej{J'&1&J}{-m_J&0&m'_J} \bra{\theta J}|(L,S)|\ket{\theta'J'}
+\end{eqnarray}
+
+\noindent where the reduced matrix elements are:
+
+\begin{eqnarray} \label{eq:muredmat} \nonumber
+&&\bra{\theta J}|(L,S)|\ket{\theta'J'} = \delta_{\theta,\theta'} (-1)^{k+S+L+J} \sqrt{(2J+1)(2J'+1)} \\
+&&\;\;\times \sqrt{(L,S)((L,S)+1)(2(L,S)+1)} \sixj{J'&1&J}{ (L,S) &
+(S,L) & (L,S)'} 
+\end{eqnarray}
+
+%Defined in Chan and Lam~\cite{chan70-219} and again in modern notation in equation C.19 of~\cite{ducle09-1}.
 \end{quotation}
 
 \subsection{formalism for going beyond the dipolar approximation}
