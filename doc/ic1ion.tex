@@ -18,32 +18,38 @@ can be calculated by {\prg pointc}\index{pointc}):
 #!../../bin/ic1ion_module/ic1ion.so
 #<!--mcphase.sipf-->
 # single ion property file example for module ic1ion
+
+-------------------------------------------------------------------------------------------
 # OBLIGATORY PARAMETERS
-# 
 ------------------------------------------------------------------------------------------
 
 # Configuration
-# (i)either specify single ion type by IONTYPE reading internal values for ion parameters XI 
-F0 F2 F4 F6: 
-#IONTYPE=Co2+
+# (i) either specify single ion type by IONTYPE 
 
-# (ii)or by giving parameters explicitly:
+# IONTYPE=Co2+
+
+# (ii) or by giving parameters explicitly:
 # from Griffith 1971 p 487  B=1115  C=4366 XI=533
 # p379 CoIII=Co2+ is 3d7 configuration
- conf=d7
+
+conf = d7
+
 # from equations p 83 A=F0-49*F4  B=F2-5*F4 C=35*F4
 # we get F4=C/35  F2=B+5*F4
 # however F0 is not determined from this table ...
- F0=0
- F2=1738.7
- F4=124.74
- xi=533
-#
+
+F0=0
+F2=1738.7
+F4=124.74
+xi=533
+
 # for charges and chrgplt to work you need to specify the number of electrons in the shell
+
 nof_electrons=7
+
 -------------------------------------------------------------------------------------------
- 
-# from here on follow some OPTIONAL PARAMETERS
+# OPTIONAL PARAMETERS
+-------------------------------------------------------------------------------------------
 
 # some keywords, each in a separate line (each keyword sets a flag to true and holds
 # for the rest of the file to be read)
@@ -54,84 +60,70 @@ By=2
 Bz=0.1
 
 # -- choose the basis to be used for output of eigenstates in ic1ion.out ----
-#basis=mSmL
-# 
-basis=JmJ
+# Either:
+#
+# basis=mSmL
+#
+# For |L,S,mS,mL> basis. Or
+ 
+ basis=JmJ
 
-# to allow output of more than 4 components of the eigenvector in ic1ion.out, you need to put a flag:
+# For |L,S,J,mJ> basis (default if none specified).
+
+# to allow output of more than 4 components of the eigenvector in ic1ion.out, 
+# you need to specify the number X of eigenvectors here:
+
 # eigenvectors=X
 
 # --- some faster algorithms for matrix diagonalisation ...
 
-# keyword "save_matrices" - if uncommented then matrices which are often used
-# are not recalculated each time, but saved in directory results/mms
+# uncomment the next line to save matrices which are often used the first time they are
+# calcultated in the directory results/mms, and then reread for subsequent instances.
+
 # save_matrices
 
-
-# if the next line is uncommented then it will use 
-# a routine to calculate only a few of the lowest
-# eigenvalues in mcalc() using an arnoldi iterative method in ARPACK
-# it makes calculation with f-configurations with many
-# electrons (f5-f9) more practicable... It usually gets the correct
-# eigenvalue/vector, however sometime for some reason (defective random
-# number generator?) it gives completely erroneous numbers. This happens
-# perhaps between once in a 100 times, and occurs randomly... I have no
-# idea why it happens, and it doesn't occur systematically enough for me
-# to track down the problem...
+# if the next line is uncommented then it will use the Arnoldi method to calculate only 
+# a few of the lowest eigenvalues in mcalc(). Note. this method may sometimes give 
+# erroneous eigenvectors due to numerical instabilities. In addition, it may be 
+# disabled in Mac OS X versions.
 
 # arnoldi
 
-#there is a matrix truncation routine in mcalc() - which is
-#triggered when you put:
-#truncate_matrix=x
-#   ... this routine first calculates and diagonalises the singleion
-# Hamiltonian without the Zeeman or mean-field terms, and then uses
-# the eigenvectors to make a unitary transformation matrix to rotate
-# the multipolar and L and S operators into this new basis. Then it
-# truncates the matrix, leaving only the x-fraction lowest terms
-# (e.g. for f2 if you specify x=0.2, it would keep 20% of the levels,
-# there are 91 levels so it would use 18 levels). This seems to be
-# much faster (for low values of x) even than the arnoldi/lanczos method,
-# but then it is much more approximate...
-# Note The most computationally extensive operations are carried out at the
-#start - the diagonalisation of the single ion Hamiltonian, and
-#matrix-matrix multiplication to rotate the operator matrices. Once
-#done the rotated matrices are stored in memory and then reused when
-# the <J> expectation values have to be evaluated...
-# the routine uses the mcalc_parstorage matrix for storing the rotated
-# matrices.
-# one should experiment with the
-#value of x and compare it with using the full matrix diagonalisation
-#(or the arnoldi/lanczos) one before relying on the results.
-#This approximation method is probably not necessary for d-electron
-#matrices (as those are generally quite small), but for f-electrons it
-#is quite useful!
-
-
-# there is also another method to find only a few of the lowest
-# eigenvalue, which is more reliable, and this uses the relatively
-# robust representation algorithm in Lapack and can be accessibly by including the
-# keyword: "partial" in the parameter file. This takes about 2/3 the
-# time of the full computation, whereas the arnoldi routine takes about
-# 1/5 the time...
-# if the next line is uncommented ic1ion will use the 'partial' RRR algorithm 
+# Another more reliable method to find only a few of the lowest eigenvalue uses the 
+# relatively robust representation algorithm in Lapack and can be accessibly by 
+# uncommenting the keyword: "partial" below. This method takes about 2/3 the
+# time of the full computation of mcalc(), whereas the arnoldi routine takes about
+# 1/5 the time.
 
 # partial
 
-# There is also an experimental feature to use a truncated Hamiltonian matrix in
-# mcalc() to speed up the calculation in mcphasit... You specify in the
-# sipf a variable, "truncate_matrix=XX" where XX is between 0 and 1, and
-# is the fraction of levels to keep... E.g. truncate_matrix=0.2 would
-# keep only the lowest 5th set of energy levels. For f5 this is about
-# 400 levels out of 2000. Unfortunately it's only for Linux at the
-# moment, because I have to make a rotation matrix to change the basis
-# of the Hamiltonian, and I store this matrix as a memory mapped file
-# and the implementation of memory mapping is different from Linux to
-# Windows.
+# Finally the full Hamiltonian matrix may be truncated at some levels, leaving only
+# the lowest lying energy levels to be used in the calculation of the moments.
+# This option is activated by uncommenting the line below, specifying a ratio X of
+# levels to keep. For example, if X=0.2, for f2, 20% of the full 91 levels == 18
+# levels will be used for the mcalc() calculation.
+# This routine first calculates and diagonalises the singleion Hamiltonian without 
+# the Zeeman or mean-field terms, and then uses these eigenvectors to make a unitary 
+# transformation matrix to rotate the multipolar and L and S operators into this i
+# new basis. Then it truncates the matrix, leaving only the X fraction lowest 
+# levels.
+# This method is much faster (for low values of X) even than the arnoldi method, but
+# is much more approximate. Note The most computationally extensive operations are 
+# carried out at the start - the diagonalisation of the single ion Hamiltonian, and
+# matrix-matrix multiplication to rotate the operator matrices. Once done the rotated 
+# matrices are stored in memory and then reused when the <J> expectation values have 
+# to be evaluated. the routine uses the mcalc_parstorage matrix for storing the 
+# rotated matrices.
+# One should experiment with the value of X and compare it with using the full matrix 
+# diagonalisation before relying on the results. 
+# This approximation method is probably not necessary for d-electron matrices (as 
+# those are usually quite small), but for f-electrons it is quite useful!
+# Uncomment the next line to use the truncate method with 1/5th of all levels
 
-# another experimental (not yet working) feature is for the calculation
-# of spin and orbital magnetisation density in the three spatial directions
-# which can be specified by
+# truncate_matrix=0.2
+
+# another experimental feature is for the calculation of spin and orbital 
+# magnetisation density in the three spatial directions which is specified by
 # density=1,2,3,4,5,6
 # ... this triggers mcalc to output instead of the normal operators
 # the expectation value of the coefficient in the expansion of the 
