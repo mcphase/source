@@ -25,7 +25,7 @@
 // --------------------------------------------------------------------------------------------------------------- //
 sMat<double> racah_so(int n, double xi, orbital e_l)  // Defaults to f-electrons (see ic1ion.hpp - e_l=F by default)
 {
-   if(e_l!=P&&e_l!=D&&e_l!=F) {  std::cerr << "racah_so(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
+   if(e_l!=S&&e_l!=P&&e_l!=D&&e_l!=F) {  std::cerr << "racah_so(): Only s-, p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
 
    fconf conf(n,0,e_l);
    int num_states = (int)conf.states.size();
@@ -339,7 +339,7 @@ sMat<double> racah_mumat(int n, int q, orbital e_l)
 {
    const double g_s = 2.0023193043622;   // electronic g-factor, from NIST - http://physics.nist.gov/cuu/Constants/
 
-   if(e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only p-, d- and f- configurations are implemented.\n"; }
+   if(e_l!=S && e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only s-, p-, d- and f- configurations are implemented.\n"; }
    fconf conf(n,e_l);
    int num_states = (int)conf.states.size();
    int i,j,ns,minJ2,maxJ2,valJ,valJ_i,valJ_j;
@@ -430,7 +430,7 @@ sMat<double> racah_mumat(int n, int q, orbital e_l)
 // --------------------------------------------------------------------------------------------------------------- //
 void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l)
 {
-   if(e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only p-, d- and f- configurations are implemented.\n"; }
+   if(e_l!=S && e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only s-, p-, d- and f- configurations are implemented.\n"; }
    fconf conf(n,e_l);
    int num_states = (int)conf.states.size();
    int i,j,ns,minJ2,maxJ2,valJ,valJ_i,valJ_j;
@@ -520,7 +520,7 @@ void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l
 // --------------------------------------------------------------------------------------------------------------- //
 void chanlam_mumat(int n, int q, sMat<double> &mu, orbital e_l)
 {
-   if(e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only p-, d- and f- configurations are implemented.\n"; }
+   if(e_l!=S && e_l!=P && e_l!=D && e_l!=F) { std::cerr << "racah_mumat(): Only s-, p-, d- and f- configurations are implemented.\n"; }
    fconf conf(n,e_l);
    int num_states = (int)conf.states.size();
    int i,j,ns,k,j2min,j2max,L2,L2p,S2,S2p;

@@ -53,6 +53,12 @@ fstates_t hunds_gs(int n, orbital l=F)  // Defaults to f-electrons
 
    switch(l)
    {
+      case S:
+         switch(n)
+         {
+            case 1: return fstates_t(1,S,"2S");                           // s1    2S
+            default: std::cerr << "Invalid number of electrons\n"; exit(1); 
+         }
       case P:
          switch(n)
          {
@@ -105,7 +111,7 @@ int icf_getdim(icpars &pars)
 sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
 {
    int n = pars.n; double xi = pars._xi; orbital e_l = pars.l;
-   if (e_l>3||e_l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+   if (e_l>3||e_l<0) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
    fstates_t gs = hunds_gs(n, e_l);
    int J2min, J2max, ns=0;
    int S2 = gs.S2, L2 = abs(gs.L)*2;
@@ -192,7 +198,7 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
 // --------------------------------------------------------------------------------------------------------------- //
 sMat<double> icf_ukq(int n, int k, int q, orbital e_l)
 {
-   if (e_l>3||e_l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+   if (e_l>3||e_l<0) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
    fstates_t gs = hunds_gs(n, e_l);
    int J2min, J2max, ns=0;
    int S2 = gs.S2, L2 = abs(gs.L)*2;
@@ -386,7 +392,7 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
    {
       me.assign(Esz,0.); J[iJ]=0.;
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      if((iJ>6 && K[iJ]%2==1) || (K[iJ]>4 && pars.l==D)) { /*matel.push_back(me);*/ continue; }
+      if(iJ>6 && (K[iJ]%2==1 || K[iJ]>2*pars.l)) { /*matel.push_back(me);*/ continue; }
       {
          iy = (iJ-J.Lo()+1)/nfact; ix = (iJ-J.Lo()+1)-iy*nfact;
          for(i=1; i<=Hsz; i++) memcpy(&zJmat[(i-1)*Hsz],&est[i+ix*Hsz][1+iy*Hsz],Hsz*sizeof(complexdouble));
@@ -487,7 +493,7 @@ __declspec(dllexport)
    }
    else Hicnotcalc = true;
 
-   if(Hicnotcalc)
+   if(Hicnotcalc || pars.l==S)
    {
       sMat<double> Hcfi, Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM; H = zmat2f(Hcf,Hcfi);
       if(est.Rhi()!=esz||est.Chi()!=esz) {
@@ -825,7 +831,7 @@ void save_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vect
 // --------------------------------------------------------------------------------------------------------------- //
 bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
 {
-   if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+   if (l>3||l<0) { std::cerr << "Sorry only s-, p-, d- and f-electrons supported at present\n"; exit(0); }
 
    fstates_t gs = hunds_gs(n, l);
    int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2; std::vector<int> J2;
@@ -990,7 +996,7 @@ bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
 // --------------------------------------------------------------------------------------------------------------- //
 bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
 {
-   if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+   if (l>3||l<0) { std::cerr << "Sorry only s-, p-, d- and f-electrons supported at present\n"; exit(0); }
 
    fstates_t gs = hunds_gs(n, l);
    int J2min, J2max, ns=0, S2 = gs.S2, L2 = abs(gs.L)*2; std::vector<int> J2;
@@ -1145,7 +1151,7 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
 // --------------------------------------------------------------------------------------------------------------- //
 void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vector<double> &Jvec)
 {
-   if (l>3||l<1) { std::cerr << "Sorry only p-, d- and f-electrons supported at present\n"; exit(0); }
+   if (l>3||l<0) { std::cerr << "Sorry only s-, p-, d- and f-electrons supported at present\n"; exit(0); }
 
    double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5]};
    std::string errormsg("lovesey_Qq(): Unable to calculate the A(K,K') or B(K,K') matrix\n");
@@ -1450,7 +1456,9 @@ __declspec(dllexport)
 {
    int i,q,n=1,Hsz=est.Cols()-1; orbital l;
    n = (int)est[0][0].real(); i = (int)est[0][0].imag(); 
-   switch(i) { case 1: l=P; break; case 2: l=D; break; case 3: l=F; break; default: std::cerr << "Error - only P,D,F-electrons supported.\n"; exit(0); }
+   switch(i) { 
+      case 0: l=S; case 1: l=P; break; case 2: l=D; break; case 3: l=F; break; 
+      default: std::cerr << "Error - only S,P,D,F-electrons supported.\n"; exit(0); }
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
@@ -1939,7 +1947,7 @@ void icf_showoutput(const char *filename,                       // Output file n
 
    int iE,iV,i=1,j=2;
    std::vector<int> isE,isV(ns,0); isE.reserve(ns);
-   int ii; 
+   int ii,nV=pars.num_eigv>ns?ns:pars.num_eigv; 
    double elem,conv=1.; complexdouble elc;
 
    if(pars.e_units.find("cm")!=std::string::npos) conv = MEV2CM; 
@@ -1959,7 +1967,7 @@ void icf_showoutput(const char *filename,                       // Output file n
    double *V=0; complexdouble *zV=0; if(iscomplex) zV = new complexdouble[ns]; else V = new double[ns];
    for(iE=0; iE<ns; iE++)
    {
-      if(real(est(0,iE+1))==0.) if(iE<(ns-1) && real(est(0,iE+2))==0.) break; 
+    //if(real(est(0,iE+1))==0.) if(iE<(ns-1) && real(est(0,iE+2))==0.) break; 
       FILEOUT << (real(est(0,iE+1))-real(est(0,1)))*conv << "\t\t";
       for(ii=0; ii<(int)ns; ii++) isV[ii]=ii;
       i=1; j=2;
@@ -1975,7 +1983,7 @@ void icf_showoutput(const char *filename,                       // Output file n
          FILEOUT << " (" << elc.r; if(elc.i>0) FILEOUT << "+"; else FILEOUT << "-";
          FILEOUT << "i" << elc.i << ")\t\t" << (elc.r*elc.r+elc.i*elc.i) << "\t";
          FILEOUT << "|" << statesID[isV[0]] << ">";
-         for(iV=1; iV<pars.num_eigv; iV++)
+         for(iV=1; iV<nV; iV++)
          {
             elc = zV[iV]; FILEOUT << "\n\t\t+";
             FILEOUT << "(" << elc.r; if(elc.i>0) FILEOUT << "+"; else FILEOUT << "-";
@@ -1993,7 +2001,7 @@ void icf_showoutput(const char *filename,                       // Output file n
             else { elem = V[i-1]; V[i-1] = V[i]; V[i] = elem; ii=isV[i-1]; isV[i-1]=isV[i]; isV[i]=ii; i--; if(i==0) i=1; }
          }
          FILEOUT << V[0] << "|" << statesID[isV[0]] << ">\t";
-         for(iV=1; iV<pars.num_eigv; iV++)
+         for(iV=1; iV<nV; iV++)
          {
             if(iV%4==0) FILEOUT << "\n\t\t";
             if(V[iV]>0) FILEOUT << "+";
@@ -2103,7 +2111,7 @@ int main(int argc, char *argv[])
    double /*T=2.0,*/lnZ=0.,U=0.,gJ=0.; T=2.0;
    char *filearray[1]; 
    filearray[0] = infile;
- /*ComplexMatrix est;*/ mcalc_parameter_storage_matrix_init(&est,gmbH,&gJ,&T,ABC,filearray);
+ /*ComplexMatrix est;*/ est.Remove(); mcalc_parameter_storage_matrix_init(&est,gmbH,&gJ,&T,ABC,filearray);
  //ComplexMatrix est; int Hsz=getdim(pars.n,pars.l); est = ComplexMatrix(0,Hsz,0,Hsz);
    end = clock();
 

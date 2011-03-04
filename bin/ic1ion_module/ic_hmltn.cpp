@@ -197,8 +197,11 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
       case P: 
          emat = racah_emat(nn,pars._F[0],pars._F[1]) + racah_ci(nn,pars._alpha[0]); H_so = racah_so(n,pars._xi,P);
          break;
+      case S:
+         emat.zero(1,1); H_so = racah_so(n,pars._xi,S);
+         break;
       default:
-         std::cerr << "ic_hmltn(): l!=2 or l!=3, only d- and f- electrons have been implemented so far.\n";
+         std::cerr << "ic_hmltn(): l!=0,1,2 or 3, only s-, p-, d- and f- electrons are implemented.\n";
    }
  
    int k,iq,q;

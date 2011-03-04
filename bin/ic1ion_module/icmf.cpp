@@ -502,7 +502,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
    {
       me.assign(Esz,0.);
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      if((iJ>6 && k[iJ]%2==1) || (k[iJ]>4 && _l==D)) { matel.push_back(me); continue; }
+      if(iJ>6 && (k[iJ]%2==1 || k[iJ]>_l*2)) { matel.push_back(me); continue; }
       if(!VE.iscomplex() && _density.empty())
       {
          if(iflag[iJ]==0) {
