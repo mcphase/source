@@ -343,7 +343,7 @@ if (gJ==0){printf("# reading gJ=0 in single ion property file %s -> entering int
 int jjjpar::get_exchange_indices(char *instr, Matrix *exchangeindices)
 {
    bool charflag=false;
-   char *tk,*tkp,*instrptr,sep[]=" \t",allowedch[]="abcdefghijklmnopqrstuvwxyz";
+   char *tk,*tkp,*instrptr,sep[]=" \t\n",allowedch[]="abcdefghijklmnopqrstuvwxyz";
    int num_indices=0,ii,i,j;
 
    // Checks if using "JaJb" or "1,2" syntax
