@@ -168,7 +168,7 @@ void ic_showoutput(const char *filename,                        // Output file n
 {
    fconf conf(pars.n,iconf,pars.l);
 
-   unsigned int iE,iV,i=1,j=2,num_states=conf.states.size();
+   unsigned int iE,iV,i=1,j=2,num_states=conf.states.size(),ns;
    std::vector<int> isE,isV(num_states,0); isE.reserve(num_states);
    int ii; 
    double elem,conv=1.; complexdouble elc;
@@ -185,6 +185,7 @@ void ic_showoutput(const char *filename,                        // Output file n
    FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L_J,mJ) }\n";
 
    double *V=0; complexdouble *zV=0; if(VE.iscomplex()) zV = new complexdouble[num_states]; else V = new double[num_states];
+   if((unsigned int)pars.num_eigv > num_states) { ns = num_states; } else { ns = (unsigned int)pars.num_eigv; }
    for(iE=0; iE<num_states; iE++)
    {
       //if(VE.E(iE)==0.) if(iE<(num_states-1) && VE.E(iE+1)==0.) break;
@@ -203,7 +204,7 @@ void ic_showoutput(const char *filename,                        // Output file n
          FILEOUT << " (" << elc.r; if(elc.i>0) FILEOUT << "+"; else FILEOUT << "-";
          FILEOUT << "i" << fabs(elc.i) << ")\t\t" << (elc.r*elc.r+elc.i*elc.i) << "\t";
          FILEOUT << "|" << conf.states[isV[0]].id << ">";
-         for(iV=1; iV<(unsigned int)pars.num_eigv; iV++)
+         for(iV=1; iV<ns; iV++)
          {
             elc = zV[iV]; FILEOUT << "\n\t\t+";
             FILEOUT << "(" << elc.r; if(elc.i>0) FILEOUT << "+"; else FILEOUT << "-";
@@ -221,7 +222,7 @@ void ic_showoutput(const char *filename,                        // Output file n
             else { elem = V[i-1]; V[i-1] = V[i]; V[i] = elem; ii=isV[i-1]; isV[i-1]=isV[i]; isV[i]=ii; i--; if(i==0) i=1; }
          }
          FILEOUT << V[0] << "|" << conf.states[isV[0]].id << ">\t";
-         for(iV=1; iV<(unsigned int)pars.num_eigv; iV++)
+         for(iV=1; iV<ns; iV++)
          {
             if(iV%4==0) FILEOUT << "\n\t\t";
             if(V[iV]>0) FILEOUT << "+";

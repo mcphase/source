@@ -777,14 +777,14 @@ fconf::fconf(int n, orbital l)
    }    // else (n>0 && n<15)
    break; // case D:
    default:
-      std::cerr << "fconf::fconf() - error, only the case of l=1, l=2 and l=3, p-, d- and f-electrons implemented.\n";
+      std::cerr << "fconf::fconf() - error, only the case of l=0,1,2, and 3, s-, p-, d- and f-electrons implemented.\n";
    }    // switch(l)
 }
 
 fconf::fconf(int n, bool mJflag, orbital l)
 {
-   if(l!=P && l!=D && l!=F) { 
-      std::cerr << "fconf::fconf() - error, only the case of l=1, l=2 and l=3, p-, d- and f-electrons implemented.\n"; return; }
+   if(l!=S && l!=P && l!=D && l!=F) { 
+      std::cerr << "fconf::fconf() - error, only the case of l=0,1,2, and 3, s-, p-, d- and f-electrons implemented.\n"; return; }
      
    fconf confLS(n,l);
    int num_states = (int)confLS.states.size();

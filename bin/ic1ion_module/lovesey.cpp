@@ -30,13 +30,13 @@ bool lovesey_aKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
    // Loads a previously save matrix if it exists
    char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
  //nstr[0] = (l==F?102:100); 
-   switch(l) { case P: nstr[0]=112; break; case D: nstr[0]=100; break; default: nstr[0]=102; }
+   switch(l) { case S: nstr[0]=115; break; case P: nstr[0]=112; break; case D: nstr[0]=100; break; default: nstr[0]=102; }
    if(n<10) { nstr[1] = n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = n+38; nstr[3] = 0; }
    strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 65;   // 65 is ASCII for "A", 100=="d" and 102=="f"
    nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
    aKK = mm_gin(filename); if(!aKK.isempty()) return 1;
 
-   if(l!=P&&l!=D&&l!=F) {  std::cerr << "lovesey_cKK(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
+   if(l!=S&&l!=P&&l!=D&&l!=F) {  std::cerr << "lovesey_cKK(): Only s-, p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
    int np = (n==1)?n:(n-1); 
    fconf confp(np,l);
    fconf conf(n,l);
@@ -160,13 +160,13 @@ bool lovesey_cKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
    // Loads a previously save matrix if it exists
    char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
  //nstr[0] = (l==F?102:100); 
-   switch(l) { case P: nstr[0]=112; break; case D: nstr[0]=100; break; default: nstr[0]=102; }
+   switch(l) { case S: nstr[0]=115; break; case P: nstr[0]=112; break; case D: nstr[0]=100; break; default: nstr[0]=102; }
    if(n<10) { nstr[1] = n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = n+38; nstr[3] = 0; }
    strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 67;   // 67 is ASCII for "C", 100=="d" and 102=="f"
    nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
    cKK = mm_gin(filename); if(!cKK.isempty()) return 1;
 
-   if(l!=P&&l!=D&&l!=F) {  std::cerr << "lovesey_cKK(): Only p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
+   if(l!=S&&l!=P&&l!=D&&l!=F) {  std::cerr << "lovesey_cKK(): Only s-, p-, d- and f- configurations are implemented.\n"; exit(EXIT_FAILURE); }
    int np = (n==1)?n:(n-1);
    fconf confp(np,l);
    fconf conf(n,l);
