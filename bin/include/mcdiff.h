@@ -13,6 +13,7 @@
 #include <complex>
 #include<cstddef>
 #include<spincf.hpp>
+#include<mfcf.hpp>
 
 // different output data for columns 10 and 11
 const char * colheader []= {"LF          ",
@@ -64,3 +65,6 @@ complex <double>*mx2,complex <double>*my2,complex <double>*mz2,float a,float b,f
 
 // output to mcdiff.sps
 void print_sps(const char * filename,int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H);
+
+// output to mcdiff.mf
+void print_mf(const char * filename,mfcf & mfields, int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H);

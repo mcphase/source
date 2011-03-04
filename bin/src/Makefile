@@ -261,7 +261,7 @@ radwavfunc.o:  radwavfunc.c  martin.h vector.h ionpars.hpp jjjpar.hpp
 addj.o: addj.c par.hpp  martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 
-mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c spincf.hpp
+mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c spincf.hpp mfcf.hpp
 	$(CCC) $(CFLAGS) $<
 
 myev.o: myev.c
@@ -384,7 +384,7 @@ ip.o: ionpars.cpp
 	@echo Linking ../addj
 	@$(LINKER)  -Wall  -o ../addj $^  $(LFLAGS)
 
-../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o  par.o
+../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o
 	@echo Linking ../mcdiff
 	@$(LINKER)  -Wall  -o ../mcdiff $^  $(LFLAGS)
 

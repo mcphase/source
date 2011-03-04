@@ -55,6 +55,51 @@ time_t curtime;
   spins.print(fout);
  fclose(fout);
 }
+
+void print_mf(const char * filename,mfcf & mfields,int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H)
+{
+FILE * fout;int i;
+time_t curtime;
+ struct tm * loctime;
+   fout = fopen_errchk ("./results/mcdiff.mf", "w");
+  fprintf(fout, "#{output file of program %s ",MCDIFFVERSION);
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
+   fprintf(fout,"#!<--mcphas.mcphas.mf-->\n");
+   fprintf(fout,"#*********************************************************\n");
+   fprintf(fout,"# mcdiff - program to calculate neutron and magnetic Xray diffraction\n");
+   fprintf(fout,"# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n");
+   fprintf(fout,"#**********************************************************\n");
+   // printout the lattice and atomic positions
+  fprintf(fout,"#\n# Lattice Constants (A)\n");
+  fprintf(fout,"#! a=%8.5f b=%8.5f c=%8.5f alpha=%8.5f beta=%8.5f gamma=%8.5f\n",a,b,c,alpha,beta,gamma);
+  fprintf(fout,"#! r1a=%8.5f r2a=%8.5f r3a=%8.5f\n",nr1*r1s[1],nr2*r2s[1],nr3*r3s[1]);
+  fprintf(fout,"#! r1b=%8.5f r2b=%8.5f r3b=%8.5f   primitive lattice vectors [a][b][c]\n",nr1*r1s[2],nr2*r2s[2],nr3*r3s[2]);
+  fprintf(fout,"#! r1c=%8.5f r2c=%8.5f r3c=%8.5f\n",nr1*r1s[3],nr2*r2s[3],nr3*r3s[3]);
+  fprintf(fout,"#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",natmagnetic,mfields.nofcomponents);
+  fprintf(fout,"#*********************************************************************\n");
+
+ for (i=1;i<=natmagnetic;++i)
+ { Vector abc(1,3);
+   abc=(*jjjpars[i]).xyz(1)*nr1*r1s+(*jjjpars[i]).xyz(2)*nr2*r2s+(*jjjpars[i]).xyz(3)*nr3*r3s;
+   fprintf(fout,"#! da=%8.5f [a] db=%8.5f [b] dc=%8.5f [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g cffilename=%s\n",
+   abc(1),abc(2),abc(3), (*jjjpars[i]).paranz, (*jjjpars[i]).diagonalexchange, (*jjjpars[i]).gJ, (*jjjpars[i]).cffilename);
+ }
+   fprintf (fout, "#!show_abc_unitcell=1.0\n");
+   fprintf (fout, "#!show_primitive_crystal_unitcell=1.0\n");
+   fprintf (fout, "#!show_magnetic_unitcell=1.0\n");
+   fprintf (fout, "#!show_atoms=1.0\n");
+   fprintf (fout, "#!spins_scale_moment=1.0\n");
+   fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
+   fprintf (fout, "#0 0 T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms nofmoment-components\n");
+   fprintf (fout, "    #<Ma(1)> <Ma(2)> .... Momentconfiguration  \n");
+   fprintf (fout, "    #<Mb(1)> <Mb(2)> .... UNITS:   [muB]\n");
+   fprintf (fout, "    #<Mc(1)> <Mc(2)> ....}\n");
+   fprintf (fout, " 0 0 %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i \n",
+            T,Norm(H),H[1],H[2],H[3],mfields.n()*mfields.nofatoms,mfields.nofatoms,mfields.nofcomponents);
+  mfields.print(fout);
+ fclose(fout);
+}
+
 //*******************************************************************************************************
 //*******************************************************************************************************
 //*******************************************************************************************************

@@ -435,8 +435,10 @@ fprintf(fout,"#\n");
 fprintf(fout,"#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] <Ja>     <Jb>     <Jc> ...\n");
 fprintf(fout,"#{corresponding effective fields gjmbHeff [meV]- if passed to mcdiff only these are used for caculation (not the magnetic moments)}\n");
 
+mfcf mfields(1,1,1,natmagnetic,51); // 51 is maximum of nofmfcomponents - we take it here !
+mfields.clear();
 
-for(i=1;i<=natmagnetic;++i){ 
+for(i=1;i<=natmagnetic;++i){
                             instr[0]='#';J[i]=-1;
                             while(instr[strspn(instr," \t")]=='#'){pos=ftell(fin_coq);
                                                                    if(feof(fin_coq)==1){fprintf(stderr,"mcdiff Error: end of file before all magnetic atoms could be read\n");exit(EXIT_FAILURE);}
@@ -490,7 +492,7 @@ fprintf(fout,"\n");
                              {J[i]=0; // J=0 tells that full calculation should be done for this ion
                               fseek(fin_coq,pos+strchr(instr,'>')-instr+1,SEEK_SET); 
                               j=inputline(fin_coq,numbers);printf("dimension of mf = %i\n",j);
-                              Vector heff(1,j);for(k=1;k<=j;++k){heff(k)=numbers[k];}
+                              Vector heff(1,j);for(k=1;k<=j;++k){heff(k)=numbers[k];mfields.mf(1,1,1)(51*(i-1)+k)=heff(k);}
                               if ((*jjjpars[i]).gJ==0)
  			      {J[i]=-3;fprintf(stderr,"mcdiff: gJ=0 - going beyond dipolar approximation for intermediate coupling");
    			             (*jjjpars[i]).eigenstates(heff,T); // calculate eigenstates
@@ -543,6 +545,7 @@ fprintf(fout,"\n");
 
 // print spinconfiguration to mcdiff.sps  (useful for viewing)
 print_sps("./results/mcdiff.sps",natmagnetic,a,b,c,alpha,beta,gamma,nr1,nr2,nr3,r1s,r2s,r3s,jjjpars,T,H);
+print_mf("./results/mcdiff.sps",mfields,natmagnetic,a,b,c,alpha,beta,gamma,nr1,nr2,nr3,r1s,r2s,r3s,jjjpars,T,H);
 
 printf ("calculating ...\n");  
 
