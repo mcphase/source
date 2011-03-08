@@ -91,9 +91,9 @@ time_t curtime;
    fprintf (fout, "#!spins_scale_moment=1.0\n");
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
    fprintf (fout, "#0 0 T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms nofmoment-components\n");
-   fprintf (fout, "    #<Ma(1)> <Ma(2)> .... Momentconfiguration  \n");
-   fprintf (fout, "    #<Mb(1)> <Mb(2)> .... UNITS:   [muB]\n");
-   fprintf (fout, "    #<Mc(1)> <Mc(2)> ....}\n");
+   fprintf (fout, "    #mfa(1) mfa(2) .... selfconsistent Mean field configuration \n");
+   fprintf (fout, "    #mfb(1) mfb(2) .... UNITS: mf(i)=gJ*mu_B*heff(i)[meV] \n");
+   fprintf (fout, "    #mfc(1) mfc(2) ....         (i.e. divide by gJ and mu_B=0.05788meV/T to get effective field[T]}\n");
    fprintf (fout, " 0 0 %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i \n",
             T,Norm(H),H[1],H[2],H[3],mfields.n()*mfields.nofatoms,mfields.nofatoms,mfields.nofcomponents);
   mfields.print(fout);
