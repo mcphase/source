@@ -190,11 +190,19 @@ void myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector &
 EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
   T=ComplexMatrix(zi,zr);
 // normalize eigenvectors ( this is not automatically done);
-  for(i1=T.Clo();i1<=T.Chi();++i1)
-   {x=T.Column(i1);
-    x=x/Norm(x);
-    for(j1=T.Rlo();j1<=T.Rhi();++j1) {T(j1,i1)=x(j1);}
-   }
+//                        deleted by MR 9.3.2011 because of
+//                        new derivation of DMD: the eigenvectors
+//                        need to be normalised such that T* A T =1 ...
+//                        mind the case that A is very small (quasielastic), then
+//                        T gets very large. In the program we have
+//                        put Delta_s artifically to SMALL  (A is proportional to Delta_s)
+//                        for such quasielastic scattering
+//                        so that T stays finite.
+//  for(i1=T.Clo();i1<=T.Chi();++i1)
+//   {x=T.Column(i1);
+//    x=x/Norm(x);
+//    for(j1=T.Rlo();j1<=T.Rhi();++j1) {T(j1,i1)=x(j1);}
+//   }
 
    return;
 

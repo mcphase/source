@@ -286,7 +286,7 @@ void writeheader(par & inputpars,FILE * fout)
   fprintf(fout, "# List of atomic positions dr1 dr2 dr3, moments m \n");
   fprintf(fout, "# Debye Waller factor (sqr(Intensity)~|sf| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),\n# units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)\n");
   fprintf(fout, "#  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor\n# coefficients\n");
-  fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3]mi[MuB]mj[MuB]mk[MuB] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
+  fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
   fprintf(fout, "#                         ...with j||b, k||(a x b) and i normal to k and j\n");
  
  for (int i = 1;i<=inputpars.nofatoms;++i)
@@ -961,14 +961,21 @@ if (do_jqfile==1){
   
 //   myEigenSystemHermitean (Ac,En,Tau,sort,maxiter);
 //    myPrintVector(stdout,En);
-   myEigenSystemHermiteanGeneral (Lambda,Ac,En,Tau,sort,maxiter);
+   myEigenSystemHermiteanGeneral (Lambda,Ac,En,Tau,sort=0,maxiter);
    En=1.0/En;
    sortE(En,Tau);
            Tau=Tau.Conjugate();
   	// conjugate inserted 31.10.05, because when calculating simple AF - I noticed
 	// that the eigensystemhgermitean returns eigenvectors as column vectors, but
 	// the components need to be complex conjugated 
-
+ // check normalisation of eigenvectors --------------------
+   ComplexMatrix test(1,dimA,1,dimA);
+   test=Tau.Conjugate().Transpose()*Ac*Tau;
+   ComplexMatrix unit(1,dimA,1,dimA);unit=1;
+   if( NormFro(unit-test)>SMALL){
+ if(do_verbose==1){myPrintComplexMatrix(stdout,test); }
+ fprintf(stderr,"Error: eigenvectors t not correctly normalised\n");exit(1);}
+//-------------------------------------------------------
  if(do_verbose==1){// fprintf(stdout,"#eigenvectors (matrix Tau):\n");
                    // myPrintComplexMatrix(stdout,Tau); 
                     fprintf(stdout,"#saving the following eigenvalues (meV) to mcdisp.qom:\n");}

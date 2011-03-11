@@ -208,7 +208,8 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
 if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
 
      chi((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
-     PI*chileft*conj(Tau(ss,level))*conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
+     PI*chileft*en*conj(Tau(ss,level))*conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
+  // en inserted  MR 9.3.11
 
      // here we fill the eigenvector mf with the information from chi
      if((ss-1)*md.nofcomponents+j==1){ev_real.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=real(chileft);// add this transition
@@ -216,7 +217,8 @@ if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.
                                       }
 
 if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
-     PI*chileftbey*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
+     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
+  // en inserted  MR 9.3.11
     }}
    }}}}
   }}}
@@ -338,7 +340,7 @@ if(intensitybey>0){       chibey(s+i,ss+j)*=pol(i,j);
 
    double bose;
    if (fabs(en/KB/ini.T)>SMALL*0.1)
-   {bose=1.0/(1.0-exp(-en*(1.0/KB/ini.T)));
+   {bose=1.0/(1.0-exp(-en*(1.0/KB/ini.T)));  
    }else{//quasielastic needs special treatment
          //if(fabs(en/KB/ini.T)>1e-30){bose=ini.T*KB/en;}
          //else{bose=1e30;} .... this is no good
@@ -347,10 +349,15 @@ if(intensitybey>0){       chibey(s+i,ss+j)*=pol(i,j);
 	 // in population matrix Mijkl(i.e. gamma) ... therefore we skip it:
 	 // (for small energies delta_s the md.sqrt_gamma has been set = sqr(SMALL*gamma) and this is
 	 // inserted into the calculation of chi above)
-         bose=ini.T*KB/(SMALL*0.1);
+//         bose=ini.T*KB/(SMALL*0.1); // changed by MR 9.3.11 because factor omegar introduced in DMD formulas
 //   bose=ini.T*KB;
+     bose=ini.T*KB/en;  // replaced by the following line MR 9.3.11
    }
-  bose=fabs(bose);// this is to correctly consider omegar/|omegar| in the formula for chi'' ... introduced 2.4.10 MR
+//  bose=fabs(bose);// this is to correctly consider omegar/|omegar| in the formula for chi'' ... introduced 2.4.10 MR
+                    // deleted by MR 9.3.11 because new derivation of DMD gives factor omegar
+                    //                      only (introduced above in bose) and
+                    //                      we remove normalisation of tau in eigenvalueGeneral
+                    //                      so that Tau is in units of sqrt of meV^-1
 
 sumS=Sum(chi)/PI/2.0*3.65/4.0/PI/(double)ini.mf.n();sumS*=2.0*bose;
 intensity=fabs(real(sumS));
