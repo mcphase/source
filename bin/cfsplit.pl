@@ -125,44 +125,44 @@ for $i_op (0..$#Tgops) { for $ix (0..(2*$J)) { for $iy (0..(2*$J)) { $elem = $Tg
    $Tgops[$i_op]->[$ix][$iy] = $elem; 
 } } }
 
-if ($debug) { print "\n"; for $i_op (0..$#Tgops) { print "Matrix representation of operator $rops{$ptgpsym}->[$i_op][0]:\n";
-   for $ii (0..($#{$Tgops[$i_op]})) { print "["; for $jj (0..($#{$Tgops[$i_op]})) { 
-      $elem = $Tgops[$i_op]->[$ii][$jj]; $elem->display_format('format' => '%5.2f'); print $elem,"\t"; } print "]\n"; }
-   $tracem=0; for $ii (0..(2*$J)) { $tracem+=$Tgops[$i_op]->[$ii][$ii]; }; print "Trace=$tracem\n\n";
-} }
-
-@irops = @{$IRops{$ptgpsym}};
-for $i_irrep (0..$#irreps) {
-   my $prop=zeros($j2p,$j2p);
-   if ($cmpfl[$i_irrep]==1) {
-      for $idr (1..2) { for $i_ops (0..$#Tgops) {
-        #$mychar = $mychartab{$irreps[$i_irrep]}[$irops[$i_ops]]; if($idr==2) { $mychar=~($mychar); }
-         $mychar = $mychartab{$irreps[$i_irrep]}[$irops[$i_ops]]; if($idr==2) { $mychar=cplx(Re($mychar),-Im($mychar)); }
-         for (0..($j2p-1)) { for $jj(0..($j2p-1)) { $prop->[$_][$jj] += $Tgops[$i_ops]->[$_][$jj]*($mychar); } }
-      } }
-   }
-   else {
-      for $i_ops (0..$#Tgops) { 
-         $mychar = $mychartab{$irreps[$i_irrep]}[$irops[$i_ops]]; #if(Im($mychar)>$SMALL) { $mychar=~$mychar; }
-         for (0..($j2p-1)) { for $jj(0..($j2p-1)) { $prop->[$_][$jj] += $Tgops[$i_ops]->[$_][$jj]*$mychar; } }
-      }
-   }
-   for $ii(0..($j2p-1)) { for $jj(0..($j2p-1)) { $prop->[$ii][$jj]*=($mychartab{$irreps[$i_irrep]}[0]/$order); } }
-   push(@proj,$prop);
-}
-
-if ($debug) { for(0..$#irreps) { print "Projection operator for IRREP $irreps[$_]:\n"; 
-   for $ii(0..($j2p-1)) { print "["; for $jj(0..($j2p-1)) { $elem = $proj[$_]->[$ii][$jj];
-      if(abs(Re($elem))<$SMALL) { $elem=cplx(0,Im($elem)); } if(abs(Im($elem))<$SMALL) { $elem=cplx(Re($elem),0); }
-      $elem->display_format('format' => '%5.2f'); print $elem,"\t"; } print "]\n"; 
-   }
-   # Checks that projection operator is correct
-   $conjsum=0; 
-   for $ii (0..(2*$J)) { for $jj(0..(2*$J)) { $conjsum+=abs($proj[$_]->[$ii][$jj]-cplx(Re($proj[$_]->[$jj][$ii]),-Im($proj[$_]->[$jj][$ii]))); } }
-   if (abs($conjsum)<$SMALL) { print "Projection matrix is hermitian. "; } else { print "Error: projection matrix not hermitian. "; }
-   $proj2 = mmult($proj[$_],$proj[$_]); $p2sum=0; for $ii(0..(2*$J)) { for $jj(0..(2*$J)) { $p2sum+=($proj2->[$ii][$jj]-$proj[$_]->[$ii][$jj]); } }
-   if (abs($p2sum)<$SMALL) { print "Projection matrix is idempotent.\n"; } else { print "Error: projection matrix pA1^2!=pA1.\n"; }
-   $tracem=0; for $ii (0..(2*$J)) { $tracem+=$proj[$_]->[$ii][$ii]; }; 
-   if (Im($tracem)<$SMALL) { $tracem=Re($tracem); } if (abs($tracem)<$SMALL) { $tracem=0; } print "Trace=$tracem\n\n";
-} }
+#if ($debug) { print "\n"; for $i_op (0..$#Tgops) { print "Matrix representation of operator $rops{$ptgpsym}->[$i_op][0]:\n";
+#   for $ii (0..($#{$Tgops[$i_op]})) { print "["; for $jj (0..($#{$Tgops[$i_op]})) { 
+#      $elem = $Tgops[$i_op]->[$ii][$jj]; $elem->display_format('format' => '%5.2f'); print $elem,"\t"; } print "]\n"; }
+#   $tracem=0; for $ii (0..(2*$J)) { $tracem+=$Tgops[$i_op]->[$ii][$ii]; }; print "Trace=$tracem\n\n";
+#} }
+#
+#@irops = @{$IRops{$ptgpsym}};
+#for $i_irrep (0..$#irreps) {
+#   my $prop=zeros($j2p,$j2p);
+#   if ($cmpfl[$i_irrep]==1) {
+#      for $idr (1..2) { for $i_ops (0..$#Tgops) {
+#        #$mychar = $mychartab{$irreps[$i_irrep]}[$irops[$i_ops]]; if($idr==2) { $mychar=~($mychar); }
+#         $mychar = $mychartab{$irreps[$i_irrep]}[$irops[$i_ops]]; if($idr==2) { $mychar=cplx(Re($mychar),-Im($mychar)); }
+#         for (0..($j2p-1)) { for $jj(0..($j2p-1)) { $prop->[$_][$jj] += $Tgops[$i_ops]->[$_][$jj]*($mychar); } }
+#      } }
+#   }
+#   else {
+#      for $i_ops (0..$#Tgops) { 
+#         $mychar = $mychartab{$irreps[$i_irrep]}[$irops[$i_ops]]; #if(Im($mychar)>$SMALL) { $mychar=~$mychar; }
+#         for (0..($j2p-1)) { for $jj(0..($j2p-1)) { $prop->[$_][$jj] += $Tgops[$i_ops]->[$_][$jj]*$mychar; } }
+#      }
+#   }
+#   for $ii(0..($j2p-1)) { for $jj(0..($j2p-1)) { $prop->[$ii][$jj]*=($mychartab{$irreps[$i_irrep]}[0]/$order); } }
+#   push(@proj,$prop);
+#}
+#
+#if ($debug) { for(0..$#irreps) { print "Projection operator for IRREP $irreps[$_]:\n"; 
+#   for $ii(0..($j2p-1)) { print "["; for $jj(0..($j2p-1)) { $elem = $proj[$_]->[$ii][$jj];
+#      if(abs(Re($elem))<$SMALL) { $elem=cplx(0,Im($elem)); } if(abs(Im($elem))<$SMALL) { $elem=cplx(Re($elem),0); }
+#      $elem->display_format('format' => '%5.2f'); print $elem,"\t"; } print "]\n"; 
+#   }
+#   # Checks that projection operator is correct
+#   $conjsum=0; 
+#   for $ii (0..(2*$J)) { for $jj(0..(2*$J)) { $conjsum+=abs($proj[$_]->[$ii][$jj]-cplx(Re($proj[$_]->[$jj][$ii]),-Im($proj[$_]->[$jj][$ii]))); } }
+#   if (abs($conjsum)<$SMALL) { print "Projection matrix is hermitian. "; } else { print "Error: projection matrix not hermitian. "; }
+#   $proj2 = mmult($proj[$_],$proj[$_]); $p2sum=0; for $ii(0..(2*$J)) { for $jj(0..(2*$J)) { $p2sum+=($proj2->[$ii][$jj]-$proj[$_]->[$ii][$jj]); } }
+#   if (abs($p2sum)<$SMALL) { print "Projection matrix is idempotent.\n"; } else { print "Error: projection matrix pA1^2!=pA1.\n"; }
+#   $tracem=0; for $ii (0..(2*$J)) { $tracem+=$proj[$_]->[$ii][$ii]; }; 
+#   if (Im($tracem)<$SMALL) { $tracem=Re($tracem); } if (abs($tracem)<$SMALL) { $tracem=0; } print "Trace=$tracem\n\n";
+#} }
 
