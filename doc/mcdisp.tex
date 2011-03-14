@@ -656,21 +656,23 @@ by the definition (\ref{jqtransform}) of the matrix $\mathcal L_{11}^{ss''}$ hav
 transformation
 matrices $\mathcal U$, see equation (\ref{ufirstrow})).
  
-The eigenvector matrix $\mathcal T$ provides a unitary transformation ($\mathcal T \mathcal T^\dag\Lambda=\mathcal %%@
-T^\dag\Lambda\mathcal T=1$
-and $\Lambda \mathcal T \Omega \mathcal T^\dag\Lambda=A$) of equation (\ref{psi0rpa}):
+
+The eigenvector matrix $\mathcal T=\mathcal Z^{-1}$ provides a unitary transformation 
+ of equation (\ref{psi0rpa}) by virtue of the normalisation condition
+ $\mathcal T^\dag A\mathcal T=1$
+and the spectral decomposition $\mathcal T^\dag \Lambda \mathcal T=\Omega^{-1}$.
 
 \begin{equation}
-\delta_{ss'}=\sum_{s''rr's'''s''''}\Lambda_{ss''} \mathcal T_{s''r} (\hbar\omega_r-\hbar\omega)\delta_{rr'}\mathcal %%@
-T^\dag_{r's'''}\Lambda_{s'''s''''}\Psi^{s''''s'}({\mbf Q},\omega)
+\delta_{ss'}=\sum_{s''rr's'''} \mathcal Z_{s''r} (1-\frac{\hbar\omega}{\hbar\omega_r})\delta_{rr'}\mathcal Z^\dag_{r's'''}
+\Psi^{s'''s'}({\mbf Q},\omega)
 \end{equation}
 
-This equation may be easily inverted to provide the following expression of $\Psi^{ss'}({\mbf Q},\omega)$:
+This equation may be easily inverted to provide the following expression for $\Psi^{ss'}({\mbf Q},\omega)$:
 
 \begin{equation}\label{psiresult}
 \Psi^{ss'}({\mbf Q},\omega)
 =
-\sum_{rr'} \mathcal T_{sr} (\hbar\omega_r-\hbar\omega)^{-1}\delta_{rr'}\mathcal T^\dag_{r's}
+\sum_{rr'} \mathcal T_{sr} \frac{\hbar \omega_r}{\hbar\omega_r-\hbar\omega}\delta_{rr'}\mathcal T^\dag_{r's}
 \end{equation}
 
 The normal procedure to avoid divergencies is to substitute $\hbar \omega$ with $\hbar \omega + i \epsilon$ and
@@ -698,7 +700,7 @@ yields the final result for the dynamical susceptibility:
 
 \begin{equation}\label{dmdfinal}
 \chi^{,,ss'}_{\alpha\beta}(\mbf Q,\omega)=\sqrt{\gamma^s}^\star\pi \sum_r 
-\mathcal U^s_{\alpha1} \mathcal T_{sr}(\mbf Q) \frac{\omega_r(\mbf Q)}{|\omega_r(\mbf Q)|}\delta(\hbar \omega_r(\mbf Q) %%@
+\mathcal U^s_{\alpha1} \mathcal T_{sr}(\mbf Q) \omega_r(\mbf Q)\delta(\hbar \omega_r(\mbf Q) %%@
 - \hbar \omega) \mathcal T^{\dag}_{rs'}(\mbf Q) \mathcal U^{s'\dag}_{1\beta}\sqrt{\gamma^{s'}} 
 \end{equation}
 
@@ -780,19 +782,19 @@ considering the susceptibility obtained from equation (\ref{psiresult}) etc. we 
 \begin{equation}\label{oscill}
 \Delta \langle J^s_{\alpha}\rangle(\mbf R=\mbf R_{ijk}+\mbf r_s)=
 a_0 \exp(i\mbf Q \mbf R-i\omega_r t) 
-\sqrt{\gamma^s}^\star \mathcal U^s_{\alpha1} \mathcal T_{sr}(\mbf Q)  \mathcal T^{\dag}_{r1}(\mbf Q) \mathcal %%@
+\sqrt{\gamma^s}^\star \mathcal U^s_{\alpha1} \mathcal T_{sr}(\mbf Q) \omega_r \mathcal T^{\dag}_{r1}(\mbf Q) \mathcal %%@
 U^{1\dag}_{11}\sqrt{\gamma^{1}}
 \end{equation} 
 
 This procedure is fine unless $\mathcal T^{\dag}_{r1}(\mbf Q)$ or $U^{1\dag}_{11}$ is zero. Therefore
 it is convenient to redefine the amplitude $a=a_0 \mathcal T^{\dag}_{r1}(\mbf Q) \mathcal %%@
-U^{1\dag}_{11}\sqrt{\gamma^{1}}$.
+U^{1\dag}_{11}\sqrt{\omega_r\gamma^{1}}$.
 We get
 
 \begin{equation}\label{oscillation}
 \Delta \langle J^s_{\alpha}\rangle(\mbf R=\mbf R_{ijk}+\mbf r_s)=
 a \exp(i\mbf Q \mbf R-i\omega_r t) 
-\sqrt{\gamma^s}^\star \mathcal U^s_{\alpha1} \mathcal T_{sr}(\mbf Q)=
+\sqrt{\omega_r\gamma^s}^\star \mathcal U^s_{\alpha1} \mathcal T_{sr}(\mbf Q)=
 a \exp(i\mbf Q \mbf R-i\omega_r t) e^s_{r\alpha} 
 \end{equation} 
 
@@ -1073,7 +1075,7 @@ For the DMD algorithm we insert  (\ref{dmdfinal}) into (\ref{finalslow}) and obt
 \begin{equation}\label{Xcalc}
 X^{,,ss'}_{\alpha\beta}(\mbf Q,\omega)=\sqrt{\Gamma^s}^\star\sqrt{\Gamma^{s'}} 
 \pi \sum_r 
-\mathcal V^s_{\alpha1} \mathcal T_{sr}(\mbf Q)\frac{\omega_r(\mbf Q)}{|\omega_r(\mbf Q)|} \delta(\hbar \omega_r(\mbf Q) %%@
+\mathcal V^s_{\alpha1} \mathcal T_{sr}(\mbf Q)\omega_r(\mbf Q) \delta(\hbar \omega_r(\mbf Q) %%@
 - \hbar \omega) \mathcal T^{\dag}_{rs'}(\mbf Q) \mathcal V^{s'\dag}_{1\beta}
 \end{equation}
 

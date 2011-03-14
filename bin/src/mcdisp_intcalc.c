@@ -199,8 +199,8 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
     
     for(j=1;j<=md.nofcomponents;++j){
      if((ss-1)*md.nofcomponents+j==1){for(i=1;i<=ini.extended_eigenvector_dimension;++i)
-                                        {eev_real.mf(i1,j1,k1)(ini.extended_eigenvector_dimension*(l1-1)+i)+=real(Ec(s,i)*Tau(s,level));// add this transition
-                                         eev_imag.mf(i1,j1,k1)(ini.extended_eigenvector_dimension*(l1-1)+i)+=imag(Ec(s,i)*Tau(s,level));
+                                        {eev_real.mf(i1,j1,k1)(ini.extended_eigenvector_dimension*(l1-1)+i)+=real(Ec(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         eev_imag.mf(i1,j1,k1)(ini.extended_eigenvector_dimension*(l1-1)+i)+=imag(Ec(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                         }
                                      }
     for(i=1;i<=md.nofcomponents;++i){
@@ -212,8 +212,8 @@ if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.
   // en inserted  MR 9.3.11
 
      // here we fill the eigenvector mf with the information from chi
-     if((ss-1)*md.nofcomponents+j==1){ev_real.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=real(chileft);// add this transition
-                                      ev_imag.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=imag(chileft);
+     if((ss-1)*md.nofcomponents+j==1){ev_real.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=real(chileft)*sqrt(fabs(en));// add this transition
+                                      ev_imag.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=imag(chileft)*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                       }
 
 if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=

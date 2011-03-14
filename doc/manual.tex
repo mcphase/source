@@ -70,6 +70,9 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{... in version 4.1 ...}
+- a bug in the normalisation of the eigenvectors/intensities calculated for dispersive modes in mcdisp.c has been removed
+
 \subsection*{... in version 4.0 ...}
 
 - neutron magnetic formfactors (j0,j2,j4,j6)  are now calculated directly from the radial wavefunction instead of the 
@@ -101,23 +104,6 @@ McPhase has become fully capable of dealing with nonorthogonal lattices
       output in {\prg mcdisp.trs}.
 \item some routines in mcphas and mcdisp are now capable to use multiple threads and thus calculations are possible
       on multiprocessor computers with higher speed
-\end{enumerate}
-\subsection*{... in  version 3.1 ...}
-
-\begin{enumerate}
-\item in addition to cfield there is now a module so1ion, where the coordinates
-      of the crystal field xyz are oriented to the crystal axes as xyz$||$abc
-\item the package is now capable of doing intermediate coupling calculations
-      and thus applicable to transition metal and actinide ions, for details
-      see chapter~\ref{ic1ion}.
-\item {\prg makenn\index{makenn}} contains new functions for creating two ion interaction:
-      the Bethe Slater Curve, RKKY and dipolar interactions
-\item {\prg rotateBlm} can be used for transformation of Stevens
-      parameters under arbitrary rotation of the coordinate system
-\item {\prg displaytext\index{displaytext}} allows to monitor text files (for instance during a fit)
-\item all input/output files have comments lines starting with ''\#'', however if variables to be read by 
-      programs follow, the line should start with ''\#!''
-
 \end{enumerate}
 
 \newpage
