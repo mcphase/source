@@ -382,8 +382,8 @@ sub hm2schoenflies {
     case /m.*3/     { return "Th";  }  # m-3
     case /23/       { return "T";   }  # 23
     case /6.*mmm/   { return "D6h"; }  # 6/mmm
-    case /6.*[m2]+/ { return "D3h"; }  # -62m or -6m2
     case /6mm/      { return "C6v"; }  # 6mm
+    case /6.*[m2]+/ { return "D3h"; }  # -62m or -6m2
     case /622/      { return "D6";  }  # 622
     case /6.*m/     { return "C6h"; }  # 6/m
     case /-6/       { return "C3h"; }  # -6
