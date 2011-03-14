@@ -174,9 +174,7 @@ if ($debug) { print "\n";
 
 # Constructs the projection operator from the operators T(G)
 $j2s = $j2p**2; $pA1s = zeros($j2s,$j2s); $Aj = zeros($j2s,$j2s); $invAj = zeros($j2s,$j2s);
-for $i_ops (0..$#Tgops) {  # Pairs: 4,9 6,11 8,5 10,7
-#for $j_ops (0..$#Tgops) {
-#for $i_ops (8,5,10,7) { 
+for $i_ops (0..$#Tgops) {
    for $ii(0..($j2s-1)) { for $jj(0..($j2s-1)) {
       $m1i = $ii % $j2p; $m1j = $jj % $j2p; $m2i = int($ii/$j2p); $m2j = int($jj/$j2p);
       $pA1s->[$ii][$jj] += $Tgops[$i_ops]->[$m1i][$m1j] * $Tgops[$i_ops]->[$m2i][$m2j];
@@ -186,7 +184,6 @@ for $i_ops (0..$#Tgops) {  # Pairs: 4,9 6,11 8,5 10,7
       my $namestring = sprintf("O%i%i.O%i%i",$J,$v1,$J,$v2); $namestring =~ s/-([0-7])/\1S/g;
       push(@opname,$namestring);
    } } 
-#}
 }
 
 # Sets near-zero elements to zero. Criteria is the $SMALL variable declared at the top.
@@ -220,10 +217,7 @@ if ($debug) {
    }
 }
 
-#while ( my ($key, $value) = each(%seen) ) { print "$key => $value\n"; }
-
 # Checks that projection operator is correct
-#$conjsum=0; for $ii(0..($j2s-1)) { for $jj(0..($j2s-1)) { $conjsum+=($pA1s->[$ii][$jj]-~($pA1s->[$jj][$ii])); }}
 $conjsum=0; for $ii(0..($j2s-1)) { for $jj(0..($j2s-1)) { 
   my $ipr=Im($proj[$_]->[$jj][$ii]); my $vconj=Re($proj[$_]->[$jj][$ii]); 
   if(abs($ipr)>$SMALL) { $vconj=cplx(Re($proj[$_]->[$jj][$ii]),-Im($proj[$_]->[$jj][$ii])); } 
@@ -239,8 +233,6 @@ $pA1n=zeros($j2s,$j2s); for(0..($j2s-1)) { if($mxcv[$_]>$SMALL) { for $jj(0..($j
 
 # Checks whether we have the right number of operators - if not check for duplicates
 if (abs($#nonzero+1-$m_irrep[$iunit])>$SMALL) { 
-#  @duplicate = @nonzero;
-#  print join(",",@duplicate),"\n";
    my %idu; if($J>1) { for(0..$#uniqi) { $idu{$uniqi[$_]}=$_; } }
    @duplicate = ();
    foreach $ic(@nonzero) { 
@@ -254,33 +246,14 @@ if (abs($#nonzero+1-$m_irrep[$iunit])>$SMALL) {
 	 else     { if($#ident>-1) { print "Columns ",join(",",@ident)," is same as column $ic.\n"; } }
       }
       foreach (@ident) { push(@duplicate,$_); }
-#     foreach $id(@ident) { for $idp (0..$#duplicate) { if($duplicate[$idp]==$id) { delete $duplicate[$idp]; } } push(@idents,\@ident); }
    }
-#  print join(",",@duplicate),"\n";
-#  print @idents,"\n";
-#  print "$#idents\n";
    for $ic(0..$#nonzero) { foreach (@duplicate) { if($_==$nonzero[$ic]) { delete($nonzero[$ic]); } } }
    foreach (@nonzero) { if(defined($_)) { push(@newnz,$_); } }
    my @newnzP; if($J>1) { foreach(@newnz) { push(@newnzP,$idu{$_}); } } else { @newnzP=@newnz; }
    if ($debug) { print "Nonzero, non-duplicate columns are: ",join(",",@newnzP),"\n"; }
    if (abs($#newnz+1-$m_irrep[$iunit])>$SMALL) { 
-#     # Try to normalise the projection operator matrix to find duplicate columns
-#     my $pA1n = zeros($j2s,$j2s); 
-#     for (0..($j2s-1)) { 
-#        $normv=0; $maxv=0; 
-#        for $jj (0..($j2s-1)) {
-#           if($pA1s->[$jj][$_]>$maxv) { $maxv=$pA1s->[$jj][$_]; } 
-#           $normv += $pA1s->[$jj][$_]*$pA1s->[$jj][$_]; 
-#        }
-#        if(abs(Re($normv))<$SMALL){ $normv= cplx(0,Im($normv));} if(abs(Im($normv))<$SMALL){ $normv= cplx(Re($normv),0); }
-#        if(abs(Re($maxv))<$SMALL) { $maxv = cplx(0,Im($maxv)); } if(abs(Im($maxv))<$SMALL) { $maxv = cplx(Re($maxv),0); }
-#        push(@normcolv,$normv); if(abs($normv)<$SMALL) { $normv=1; } push(@maxnormcolv,$maxv/$normv);
-#     } 
-##    for (0..($j2s-1)) { print $normcolv[$_]," "; } print "\n"; for (0..($j2s-1)) { print $maxnormcolv[$_]," "; } print "\n";
-#     if (abs($#newnz+1-$m_irrep[$iunit])>$SMALL) { 
          print "$ptgpsym Error: number of allowed terms from projection operator does not match character analysis. ";
          print "Expected $m_irrep[$iunit], found ", $#newnz+1,".\n"; 
-#     }
    }
 }
 else { @newnz = @nonzero; }
@@ -288,23 +261,17 @@ else { @newnz = @nonzero; }
 # Construct the expression of the symmetry allowed Hamiltonian.
 $inz=0;
 foreach (@newnz) {
-#  $normcol=0; for $jj(0..($j2s-1)) { $normcol+=$pA1s->[$jj][$_]*$pA1s->[$jj][$_]; }
-#  $maxcol=0; for $jj(0..($j2s-1)) { if($pA1s->[$jj][$_]>$maxcol) { $maxcol=$pA1s->[$jj][$_]; } }
    push(@outhmltn,sprintf("K%s|",chr(97+$inz))); $inz++;
-#  for $jj(0..($j2s-1)) { if(abs($pA1s->[$jj][$_])>$SMALL) { push(@outhmltn,$pA1s->[$jj][$_]/abs($maxcol)); push(@outhmltn,$opname[$jj]); } }
    for $jj(0..($j2s-1)) { 
       if(abs($pA1s->[$jj][$_])>$SMALL) { my $val=$pA1s->[$jj][$_]/$mxcv[$_]; $val=round($val*1e4)/1e4; push(@outhmltn,$val); push(@outhmltn,$opname[$jj]); } }
    push(@outhmltn,"\n");
 }
 $outstr = join(":",@outhmltn); $outstr =~ s/\|:/\(/g; $outstr =~ s/-1/-/g; $outstr =~ s/\:([02-9])/ +\1/g; $outstr =~ s/\:1/+/g; 
-#$outstr =~ s/:O/\ O/g;
 $outstr =~ s/\(1\:/\(/g; $outstr =~ s/://g; $outstr =~ s/\n/)\ +\ /g; $outstr =~ s/\+\ $//; $outstr =~ s/\+\ \-/-/g; $outstr =~ s/\s+$//;
-#$outstr =~ s/(K[a-z])\(([0-9]*)/\2\1\(/g;
 print "\nThe symmetry allowed Hamiltonian for $ptgpsym is $outstr\n";
 
 # For dipolar interactions, also print out it in terms of the operators Jx,Jy,Jz
 if ($J==1 && !$usebuckop) {
-  #$outstr =~ s/O11S\.O11S/-Jy.Jy/g; 
    $outstr =~ s/O11S/Jy/g; $outstr =~ s/O11/Jx/g; $outstr =~ s/O10/Jz/g;
    print "\nThe symmetry allowed Hamiltonian for $ptgpsym is $outstr\n";
 }

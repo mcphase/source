@@ -42,8 +42,6 @@ $ptgpsym =~ s/H/h/; $ptgpsym =~ s/V/v/; $ptgpsym =~ s/D$/d/; $ptgpsym =~ s/I/i/;
 if ($debug) { print $ptgpsym,"\n"; }
 
 # Gets the rotation angles, operators and character table for this group
-#@angs = @{ $rang{$ptgpsym} };
-#@ptops = @{ $ptgp{$ptgpsym} }; $order = shift(@ptops); 
 for $iop (0..($ptgp{$ptgpsym}[0]-1)) { push(@ptops,$ptgp{$ptgpsym}[$iop+2]); push(@angs,$rang{$ptgpsym}[$iop]); }
 $order = $ptgp{$ptgpsym}[1]; %mychartab = %{ $chartab{$ptgpsym} };
 @irreps = keys %mychartab;
@@ -83,7 +81,6 @@ for $i_irrep (0..$#irreps) {
   $mval=0; push(@dims,$mychartab{$irreps[$i_irrep]}[0]);
   if ($cmpfl[$i_irrep]==1) {
     for $idr (1..2) { for $i_ops (0..$#ptops) {
-     #$mychar = $mychartab{$irreps[$i_irrep]}[$i_ops]; if($idr==2) { $mychar=~$mychar; }
       $mychar = $mychartab{$irreps[$i_irrep]}[$i_ops]; if($idr==2) { $mychar=cplx(Re($mychar),-Im($mychar)); }
       $mval = $mval + $classmult[$i_ops]*$mychar*$charR[$i_ops];
     } }
@@ -95,7 +92,6 @@ for $i_irrep (0..$#irreps) {
     }
   }
   if(abs(Im($mval))<1e-3) { $mval = Re($mval); }
-# if ($complexflag) { $mval = $mval/2; }
   push(@m_irrep,$mval/$order);
 }
 
@@ -103,10 +99,8 @@ if ($debug) { print join("\t",@m_irrep),"\n"; }
 
 print "\nAllowed CF levels are: (number paretheses is multiplicity)\n";
 foreach (0..$#m_irrep) { 
- #if(abs($m_irrep[$_])>1e-3) { push(@outstr,$m_irrep[$_],"*",$irreps[$_],"(",$mychartab{$irreps[$_]}[0],") + "); } }
   if(abs($m_irrep[$_])>1e-3) { push(@outstr,$m_irrep[$_],"*",$irreps[$_],"(",$dims[$_],") + "); } }
   $outstr = join("",@outstr); $outstr =~ s/\+\ $//; print $outstr,"\n";
-#  if($m_irrep[-1]!~/0/) { print $m_irrep[-1],"*",$irreps[-1],"(",$mychartab{$irreps[-1]}[0],")\n"; } else { print "\n"; }
 
 if((2*$J)%2==1) { exit(0); }
 
@@ -154,7 +148,6 @@ for $i_irrep (0..$#irreps) {
       }
    }
    for $ii(0..($j2p-1)) { for $jj(0..($j2p-1)) { $prop->[$ii][$jj]*=($mychartab{$irreps[$i_irrep]}[0]/$order); } }
-#     if(abs($prop->[$ii][$jj])<$SMALL) { $prop->[$ii][$jj]=0; } else { $prop->[$ii][$jj]/=$order; } } }
    push(@proj,$prop);
 }
 
@@ -165,7 +158,6 @@ if ($debug) { for(0..$#irreps) { print "Projection operator for IRREP $irreps[$_
    }
    # Checks that projection operator is correct
    $conjsum=0; 
-  #for $ii (0..(2*$J)) { for $jj(0..(2*$J)) { $conjsum+=($proj[$_]->[$ii][$jj]-~($proj[$_]->[$jj][$ii])); } }
    for $ii (0..(2*$J)) { for $jj(0..(2*$J)) { $conjsum+=abs($proj[$_]->[$ii][$jj]-cplx(Re($proj[$_]->[$jj][$ii]),-Im($proj[$_]->[$jj][$ii]))); } }
    if (abs($conjsum)<$SMALL) { print "Projection matrix is hermitian. "; } else { print "Error: projection matrix not hermitian. "; }
    $proj2 = mmult($proj[$_],$proj[$_]); $p2sum=0; for $ii(0..(2*$J)) { for $jj(0..(2*$J)) { $p2sum+=($proj2->[$ii][$jj]-$proj[$_]->[$ii][$jj]); } }
@@ -174,40 +166,3 @@ if ($debug) { for(0..$#irreps) { print "Projection operator for IRREP $irreps[$_
    if (Im($tracem)<$SMALL) { $tracem=Re($tracem); } if (abs($tracem)<$SMALL) { $tracem=0; } print "Trace=$tracem\n\n";
 } }
 
-## Constructs the projection operator from the operators T(G)
-#$j2s = $j2p**2; $pA1s = zeros($j2s,$j2s); $Aj = zeros($j2s,$j2s); $invAj = zeros($j2s,$j2s);
-#for $i_ops (0..$#Tgops) {  # Pairs: 4,9 6,11 8,5 10,7
-##for $i_ops (8,5,10,7) { 
-#   for $ii(0..($j2s-1)) { for $jj(0..($j2s-1)) {
-#      $m1i = $ii % $j2p; $m1j = $jj % $j2p; $m2i = int($ii/$j2p); $m2j = int($jj/$j2p);
-#      $pA1s->[$ii][$jj] += $Tgops[$i_ops]->[$m1i][$m1j] * $Tgops[$i_ops]->[$m2i][$m2j];
-#   } 
-#   if ($i_ops==0) { 
-#      $v1=$m1i-$J; $v2=$m2i-$J; push(@wvec,sprintf("|%2i,%2i> ",$v1,$v2)); 
-#      my $namestring = sprintf("O%i%i.O%i%i",$J,$v1,$J,$v2); $namestring =~ s/-([0-7])/\1S/g;
-#      push(@opname,$namestring);
-#   } } 
-#}
-
-
-
-#$schsym=hm2schoenflies($ARGV[0]);
-#print "$schsym\n";
-#for (keys %ptgp) { print $_," "; } print "\n";
-#print join(" - ",@{ $ptgp{$schsym} }),"\n";
-#print "@{ $ptgp{$schsym} }\n";
-#foreach (@{ $ptgp{$schsym} }) { print $_," - "; } print "\n";
-#print $chartab{O}{E}[0],"\n";
-#print each %chartab{$schsym},"\n";
-#%thischartab = %chartab{O};
-#for (keys %thischartab) {
-#  print $_," ";
-#} print "\n";
-
-#for (keys %{ $chartab{$schsym} }) { print $_," "; } print "\n";
-#@ops = @{ $ptgp{$schsym} }; $order=shift(@ops); print "Group: $schsym, Order=$order\n";
-#%thischartab=%{$chartab{$schsym}};
-#print "\t",join("\t",@ops),"\n";
-#for (keys %{ $chartab{$schsym} }) {
-#  print $_,"\t",join("\t",@{ $chartab{$schsym}{$_} }),"\n";
-#}
