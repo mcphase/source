@@ -273,7 +273,7 @@ public class displaycontour extends JApplet {
       a1[ii]= pp.parseDouble(sx);
       a2[ii]= pp.parseDouble(sy);
       vv[ii]= pp.parseDouble(sz);
-   //   System.out.println(sx+" x "+sy+" x "+sz);
+     //System.out.println(sx+" x "+sy+" x "+sz);
     
       if(ii>0){if(a2[ii]<a2[ii-1]&&jj==0){jj=ii;}}
       
@@ -326,6 +326,7 @@ public class displaycontour extends JApplet {
     /*
      * Create a new JFrame to contain the demo.
      */
+
     JFrame frame = new JFrame("displaycontour");
     JPanel main = new JPanel();
     main.setLayout(new BorderLayout());

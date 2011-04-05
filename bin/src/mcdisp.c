@@ -693,7 +693,7 @@ if (do_jqfile==0)
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
   writeheader(inputpars,foutdstot); printf("#saving mcdisp.dsigma.tot\n");
    fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
-          fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma/dOmeg [barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}",ini.emin,ini.emax);
+          fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma/dOmeg dsigma_beydip/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}",ini.emin,ini.emax);
 
    if (do_Erefine==1){
           errno = 0;
@@ -701,7 +701,7 @@ if (do_jqfile==0)
   writeheader(inputpars,foutds); printf("#saving mcdisp.dsigma\n");
    fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
           fprintf (foutds, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
-          fprintf (foutdstot, "for fast algorithm  vs summing dsigma for diff energies");
+          fprintf (foutdstot, "for DMD algorithm  vs summing dsigma for diff energies");
                      }  
           fprintf (foutdstot, "\n");
 }
@@ -981,7 +981,14 @@ if (do_jqfile==1){
                     fprintf(stdout,"#saving the following eigenvalues (meV) to mcdisp.qom:\n");}
    int dim=3;
    if (ini.hkllist==1){dim=(int)((ini.hkls[counter][0]-3)/4);
-                       if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)fprintf(foutqei,"#!hklfile_number=%i\n",is);
+                       if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
+                       {fprintf(foutqei,"#!hklfile_number=%i\n",is);
+                        fprintf(fout,"#!hklfile_number=%i\n",is);
+                        fprintf(foutqev,"#!hklfile_number=%i\n",is);
+                        fprintf(foutqee,"#!hklfile_number=%i\n",is);
+                        fprintf(foutdstot,"#!hklfile_number=%i\n",is);
+                        if (do_Erefine==1){fprintf(foutds,"#!hklfile_number=%i\n",is);}
+                       }
                       }
    fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
 
