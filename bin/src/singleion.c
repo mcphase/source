@@ -61,7 +61,7 @@ for(j=1;j<=inputpars.nofcomponents;++j)printf(" <J%c> ",'a'-1+j);
   for(j=1;j<=inputpars.nofcomponents;++j)printf(" %10g ",h(j)); // printout meanfield as requested
   for(j=1;j<=inputpars.nofcomponents;++j)printf(" %4g ",m(j));  // printout corresponding moments 
  double TT=fabs(T);
- if(nt>0)
+ if(nmax>0)
   {(*inputpars.jjj[i]).transitionnumber=-1;
    nt=(*inputpars.jjj[i]).dmcalc(TT,h,Mijkl,d,(*inputpars.jjj[i]).eigenstates(h,T));
           // get nt = number of transitions
