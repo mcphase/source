@@ -489,10 +489,15 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
 
 // 3. set mat
 for(l=1;l<=gjmbH.Hi();++l)for(m=1;m<=gjmbH.Hi();++m)
+//{if(i==j){//take into account thermal expectation values <Jl>
+//          mat(l,m)=((z.Column(i)*(*zp[l]).Column(j))-J(l))*((z.Column(j)*(*zp[m]).Column(i))-J(m));}
+// else    {mat(l,m)=(z.Column(i)*(*zp[l]).Column(j))*(z.Column(j)*(*zp[m]).Column(i));}
+//}
 {if(i==j){//take into account thermal expectation values <Jl>
-          mat(l,m)=((z.Column(i)*(*zp[l]).Column(j))-J(l))*((z.Column(j)*(*zp[m]).Column(i))-J(m));}
- else    {mat(l,m)=(z.Column(i)*(*zp[l]).Column(j))*(z.Column(j)*(*zp[m]).Column(i));}
-}
+          mat(l,m)=(((*zp[l]).Column(j)*z.Column(i))-J(l))*(((*zp[m]).Column(i)*z.Column(j))-J(m));}
+ else    {mat(l,m)=((*zp[l]).Column(j)*z.Column(i))*((*zp[m]).Column(i)*z.Column(j));}}
+           // changed by MR 11.4.2011 because bug in cecu2ge2:
+           // ... in complex vector scalar product a*b is defined as: a.conj(b) !!! (see cvector.cc)
 
 
 if (delta/K_B/T>0.000001)

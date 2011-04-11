@@ -87,6 +87,11 @@ void myPrintComplexVector(FILE * file,ComplexVector & M)
     fprintf (file,"\n");    
 }    
 
+void myPrintComplexNumber(FILE * file,complex<double> & M)
+{fprintf (file,"%6.3g %+6.3g i ",real(M),imag(M));
+
+}
+
 
 void myEigenValuesHermitean (ComplexMatrix & M,Vector & lambda,int & sort,int & maxiter)
 { // this sub diagonalizes M and puts eigenvalues to lambda
@@ -135,7 +140,8 @@ void myEigenSystemHermitean (ComplexMatrix & M,Vector & lambda,ComplexMatrix & l
  // 			   int sort, int maxiter)
    EigenSystemHermitean (mat1,lambda,lr,li,sort,maxiter);
   // l=li;l*=ii;l+=lr;
-  l=ComplexMatrix(li,lr);
+//  l=ComplexMatrix(li,lr); ...  ... changed 11.4.2011 because this is a bug and gives complex conjugate eigenvectors, other programs changed accordingly
+  l=ComplexMatrix(lr,li);
    return;
 }
 
@@ -188,7 +194,8 @@ void myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector &
 //  B.T.Smith et al: Matrix Eigensystem Routines
 //  EISPACK Guide,Springer,Heidelberg,New York 1976.
 EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
-  T=ComplexMatrix(zi,zr);
+//  T=ComplexMatrix(zi,zr); ... changed 11.4.2011 because this is a bug and gives complex conjugate eigenvectors, other programs changed accordingly
+  T=ComplexMatrix(zr,zi);
 // normalize eigenvectors ( this is not automatically done);
 //                        deleted by MR 9.3.2011 because of
 //                        new derivation of DMD: the eigenvectors

@@ -613,7 +613,7 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
 	// the components need to be complex conjugated 
 
          // treat correctly case for neutron energy loss
-	 if (nn[6]>=0) // if transition energy is greater than zero do a conjugation of the matrix
+	 if (nn[6]<0) // if transition energy is greater than zero do a conjugation of the matrix
 	 {//Uijkl=Uijkl.Conjugate();extUijkl=extUijkl.Conjugate();
 	    for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++)       for(int jj=Uijkl.Clo(); jj<=Uijkl.Chi(); jj++)       Uijkl[ii][jj]=conj(Uijkl[ii][jj]);
 	    for(int ii=extUijkl.Rlo(); ii<=extUijkl.Rhi(); ii++) for(int jj=extUijkl.Clo(); jj<=extUijkl.Chi(); jj++) extUijkl[ii][jj]=conj(extUijkl[ii][jj]);
@@ -964,10 +964,11 @@ if (do_jqfile==1){
    myEigenSystemHermiteanGeneral (Lambda,Ac,En,Tau,sort=0,maxiter);
    En=1.0/En;
    sortE(En,Tau);
-           Tau=Tau.Conjugate();
+        //   Tau=Tau.Conjugate();
   	// conjugate inserted 31.10.05, because when calculating simple AF - I noticed
 	// that the eigensystemhgermitean returns eigenvectors as column vectors, but
-	// the components need to be complex conjugated 
+	// the components need to be complex conjugated
+         // conjugate removed again MR 11.4.2011 because now done correctly in myev.c
  // check normalisation of eigenvectors --------------------
    ComplexMatrix test(1,dimA,1,dimA);
    test=Tau.Conjugate().Transpose()*Ac*Tau;

@@ -48,10 +48,7 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
     // calculate delta(single ion excitation energy), 
     // Malphabeta(transition matrix elements)
 
-      // do calculation for atom s=(ijkl)
-//      for(ll=1;ll<=ini.nofcomponents;++ll)
-//       {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s
-
+ 
 //      fprintf(stdout,"#transition %i of ion %i of cryst. unit cell at pos  %i %i %i in mag unit cell:\n",tn,l,i,j,k);
 //      if(nn[6]<SMALL){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
       
@@ -59,8 +56,16 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  j
         if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=tn;
       int nnt;
+ 
+// printf("****for checking if dmcalc and dncalc gives same result for small Q ************\n");
+      // do calculation for atom s=(ijkl)
+//      for(int ll=1;ll<=ini.nofcomponents;++ll)
+//       {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s
+//     float d=1e10;nnt=(*inputpars.jjj[l]).dmcalc(ini.T,mf,Nijkl,d,md.est(i,j,k,l));
+//       Nijkl/=2.33333*2.33333;myPrintComplexMatrix(stdout,Nijkl);
+
       nnt=(*inputpars.jjj[l]).dncalc(qijk,ini.T,Nijkl,md.est(i,j,k,l));
-//       myPrintComplexMatrix(stdout,Nijkl); 
+//       myPrintComplexMatrix(stdout,Nijkl);
 
       (*inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
       if(nnt==0)
@@ -80,7 +85,7 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
 	// the components need to be complex conjugated 
 
          // treat correctly case for neutron energy loss
-	 if (nn[6]>=0){Vijkl=Vijkl.Conjugate();}
+	 if (nn[6]<0){Vijkl=Vijkl.Conjugate();}
 
      if (Gamma(ini.nofcomponents)>=0&&fabs(Gamma(ini.nofcomponents-1))<SMALL) 
                            // mind in manual the 1st dimension alpha=1 corresponds
@@ -106,10 +111,12 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
 			   }else 
                            {fprintf(stderr,"ERROR eigenvalue of single ion matrix <0: ev1=%g ev2=%g ev3=%g ... evn=%g\n",Gamma(1),Gamma(2),Gamma(3),Gamma(ini.nofcomponents));
                             exit(EXIT_FAILURE);}
+
         for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){
         md.V(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Vijkl(m,n);
         md.N(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Nijkl(m,n);
         }}    
+
        }
     }}}
     fclose(fin);
@@ -204,7 +211,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
                                         }
                                      }
     for(i=1;i<=md.nofcomponents;++i){
-     chileft=conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
+                     chileft=conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
 if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
 
      chi((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
