@@ -196,7 +196,7 @@ public class displaycontour extends JApplet {
     int ii=0;int jj=0;
     
  try{int i=0;
- String s="";
+ String s="";comment=" ";comment1=" ";
  fileIni = new File(file[i]);
 
     //ffnen der Datei
