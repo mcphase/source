@@ -375,11 +375,11 @@ return;
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __declspec
-extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
-                       ComplexMatrix & mat,float & delta)
+extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
+                       ComplexVector & u1,float & delta)
 #else
-extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
-                       ComplexMatrix & mat,float & delta)
+extern "C" int du1calc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
+                       ComplexVector & u1,float & delta)
 #endif
 {//ABC not used !!!
     /*on input
@@ -411,7 +411,8 @@ if(gjmbH.Hi()>12)
 // 			   int sort, int maxiter)
    static Vector J(1,gjmbH.Hi());
    double lnz,u;
-   mcalc(J,T,gjmbH,gJ,ABC,sipffile,lnz,u);
+   J=0;
+   if (T>0){ mcalc(J,T,gjmbH,gJ,ABC,sipffile,lnz,u);} else {T=-T;}
    // setup hamiltonian
    int dj;
    dj=iops.Hcf.Rhi();
@@ -444,7 +445,7 @@ if(tn<0) {tn=-tn;pr=0;}
    EigenSystemHermitean (Ham,En,zr,zi,sort,maxiter);
    // calculate Z and wn (occupation probability)
      Vector wn(1,dj);double Z;
-     double x,y;int i,j=0,k,l,m;
+     double x,y;int i,j=0,k,l;
      x=Min(En);
      for (i=1;i<=dj;++i)
      {if ((y=(En(i)-x)/K_B/T)<700) wn[i]=exp(-y); 
@@ -473,7 +474,7 @@ if(tn<0) {tn=-tn;pr=0;}
      if(gjmbH.Hi()>=11){(*zp[11])=iops.OO64*z;}
      if(gjmbH.Hi()>=12){(*zp[12])=iops.OO66*z;}
 
-// calculate mat and delta for transition number tn
+// calculate u1 and delta for transition number tn
 // 1. get i and j from tn
 k=0;
 for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
@@ -488,33 +489,28 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
 
 
 // 3. set mat
-for(l=1;l<=gjmbH.Hi();++l)for(m=1;m<=gjmbH.Hi();++m)
-//{if(i==j){//take into account thermal expectation values <Jl>
-//          mat(l,m)=((z.Column(i)*(*zp[l]).Column(j))-J(l))*((z.Column(j)*(*zp[m]).Column(i))-J(m));}
-// else    {mat(l,m)=(z.Column(i)*(*zp[l]).Column(j))*(z.Column(j)*(*zp[m]).Column(i));}
-//}
+for(l=1;l<=gjmbH.Hi();++l)
 {if(i==j){//take into account thermal expectation values <Jl>
-          mat(l,m)=(((*zp[l]).Column(j)*z.Column(i))-J(l))*(((*zp[m]).Column(i)*z.Column(j))-J(m));}
- else    {mat(l,m)=((*zp[l]).Column(j)*z.Column(i))*((*zp[m]).Column(i)*z.Column(j));}}
-           // changed by MR 11.4.2011 because bug in cecu2ge2:
+          u1(l)=((*zp[l]).Column(j)*z.Column(i))-J(l);}
+ else    {u1(l)=(*zp[l]).Column(j)*z.Column(i);}}
            // ... in complex vector scalar product a*b is defined as: a.conj(b) !!! (see cvector.cc)
 
 
 if (delta/K_B/T>0.000001)
-   {mat*=(wn(i)-wn(j)); // occupation factor    
+   {u1*=sqrt(wn(i)-wn(j)); // occupation factor
     if(pr==1)
       {printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-       printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",i,j,real(mat(1,1)),i,j,real(mat(2,2)),i,j,real(mat(3,3)));
+       printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",i,j,abs(u1(1))*abs(u1(1)),i,j,abs(u1(2))*abs(u1(2)),i,j,abs(u1(3))*abs(u1(3)));
        printf(" n%i-n%i=%4.4g\n",i,j,wn(i)-wn(j));
       }
    }else
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
       if (pr==1)
       {printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-       printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",i,j,real(mat(1,1)),i,j,real(mat(2,2)),i,j,real(mat(3,3)));
+       printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",i,j,abs(u1(1))*abs(u1(1)),i,j,abs(u1(2))*abs(u1(2)),i,j,abs(u1(3))*abs(u1(3)));
        printf(" n%i=%4.4g\n",i,wn(i));
       }
-    mat*=(wn(i)/K_B/T);
+    u1*=sqrt(wn(i)/K_B/T);
    }
 
 //clean up memory

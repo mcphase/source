@@ -5,8 +5,8 @@
  *   bool checkmat(ComplexMatrix &cmat, complexdouble *fmat,int r, int c)          // Compares Matpack and fortran matrices
  *   void mcalc(Vector &J, double *T, Vector &gjmbH, double *gJ, Vector &ABC,      // Calculates the meanfield moment
  *                 char **sipffile, double *lnZ, double *U, ComplexMatrix &est)    //
- *   int dmcalc(int &tn, double &T, Vector &gjmbH, double &g_J, Vector &ABC,       // Calculates the transition
- *                 char **sipffilename, ComplexMatrix &mat, float &delta,          //   matrix elements
+ *   int du1calc(int &tn, double &T, Vector &gjmbH, double &g_J, Vector &ABC,       // Calculates the transition
+ *                 char **sipffilename, ComplexVector &u1, float &delta,          //   matrix elements
  *                 ComplexMatrix &est)                                             //
  *   void mcalc_parameter_storage_matrix_init(ComplexMatrix *est,Vector &gjmbheff  // initialises parameter storage matrix 
  *                 double *g_J,double &T,Vector &ABC,char **sipffilename)          // for mcalc
@@ -18,9 +18,9 @@
  *                 std::vector<double> &Jvec)                                      //
  *   void mq(ComplexVector &Mq, double &th, double &ph, double &J0, double &J2,    // Calculates the thermal expectation
  *                 double &J4, double &J6, ComplexMatrix &est)                     //   of the magnetisation density
- *   int dncalc(int &tn, double &th, double &ph, double &J0, double &J2,           // Calculates the transition matrix
+ *   int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2,           // Calculates the transition matrix
  *                 double &J4, double &J6, ComplexMatrix &est, double &T,          //   elements beyond the dipole
- *                 ComplexMatrix &mat)                                             //   approximation.
+ *                 ComplexVecto & v1)                                             //   approximation.
  *   void spindensity_mcalc(Vector & mom, int & xyz,double *T, Vector &gjmbH,      // Calc. coeffs. of expansion of spindensity 
  *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm R^2(r) at given T / H_eff
  *   void orbmomdensity_mcalc(Vector & mom,int & xyz, double *T, Vector &gjmbH,    // Calc. coeffs. of expansion of orbital moment density
@@ -632,13 +632,13 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dmcalc(int &tn,            // Input transition number; if tn>0, print debug info
+           int du1calc(int &tn,            // Input transition number; if tn>0, print debug info
                       double &T,          // Input temperature
                       Vector &gjmbH,      // Input vector of mean fields (meV) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
-                      ComplexMatrix &mat, // Output M or Q matrix
+                      ComplexVector &u1,  // Output eigenvector u1
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
@@ -650,9 +650,10 @@ __declspec(dllexport)
    int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
 
    int sz = gjmbH.Hi();
-   sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op, Mab(sz,sz), iMab(sz,sz);
+   sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op;
    complexdouble *zJmat=0, *zt=0, zme; zme.r=0; zme.i=0.; 
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
+   std::vector<double> u(sz+1),iu(sz+1);
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    char uplo = 'U';
    double Z=0., therm;
@@ -661,7 +662,7 @@ __declspec(dllexport)
    int pr=1; if (tn<0) { pr=0; tn*=-1; }
 
    // Copies the already calculated energy levels / wavefunctions from *est
-   if(est.Rows()!=est.Cols()) { std::cerr << "dmcalc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
+   if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
    int Hsz = est.Rows()-1, iJ, jJ, incx = 1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    if(est[0][j+1].real()-est[0][i+1].real()<delta)
@@ -674,10 +675,10 @@ __declspec(dllexport)
       icpars pars; const char *filename = sipffilename[0];
       ic_parseinput(filename,pars);
 
-      // Calculates the transition matrix elements:
-      //    M_ab = <i|Ja|j><j|Jb|i> * (exp(-Ei/kT)-exp(-Ej/kT)) / Z    if delta > small
-      //    M_ab = <i|Ja|j><j|Jb|i> * (exp(-Ei/kT)) / kTZ              if delta < small (quasielastic scattering)
-      for(iJ=0; iJ<sz; iJ++)
+       // Calculates the transition matrix elements:
+      //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
+      //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
+     for(iJ=0; iJ<sz; iJ++)
       {
          if(iJ<6) op = icf_mumat(pars.n, iJ, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
          if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes);
@@ -691,7 +692,7 @@ __declspec(dllexport)
          free(zJmat); free(zt);
       }
 
-      if(i==j) //subtract thermal expectation value from zij=zii
+      if(i==j&&T>0) //subtract thermal expectation value from zij=zii
       {
 //       Vector vJ(gjmbH.Lo(),gjmbH.Hi());
 //       icf_expJ(pars,est,(complexdouble*)&est[1][0],en,&T,vJ,&lnZ,&U);
@@ -729,18 +730,18 @@ __declspec(dllexport)
             zij[iJ].r -= Jj/Z; free(zJmat); free(zt);
          }
       }
+if (T<0){T=-T;}
 
-      // Calculates the matrix M_ab and iM_ab
+      // Calculates the vector u , iu
       for(iJ=0; iJ<sz; iJ++)
-         for(jJ=0; jJ<sz; jJ++)
          {  
-            Mab(iJ+1,jJ+1) = (zij[iJ].r*zij[jJ].r + zij[iJ].i*zij[jJ].i);
-            iMab(iJ+1,jJ+1) = (-zij[iJ].r*zij[jJ].i + zij[iJ].i*zij[jJ].r);
+            u[iJ+1] = zij[iJ].r;
+            iu[iJ+1] =zij[iJ].i;
          }
 
       delta = en[j]-en[i];
       if(delta<-0.000001) {
-         std::cerr << "ERROR module ic1ion - dmcalc: energy gain delta gets negative\n"; exit(EXIT_FAILURE); }
+         std::cerr << "ERROR module ic1ion - du1calc: energy gain delta gets negative\n"; exit(EXIT_FAILURE); }
       if(j==i)delta=-SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
    
       // Calculates the partition function
@@ -753,8 +754,8 @@ __declspec(dllexport)
          if(pr==1)
          {
             printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-            printf(" |<%i|Ja|%i>|^2=%6.3f\n |<%i|Jb|%i>|^2=%6.3f\n |<%i|Jc|%i>|^2=%6.3f\n",i+1,j+1,Mab(1,1),i+1,j+1,Mab(2,2),i+1,j+1,Mab(3,3));
-            printf(" |<%i|Jd|%i>|^2=%6.3f\n |<%i|Je|%i>|^2=%6.3f\n |<%i|Jf|%i>|^2=%6.3f\n",i+1,j+1,Mab(4,4),i+1,j+1,Mab(5,5),i+1,j+1,Mab(6,6));
+            printf(" |<%i|Ja|%i>|^2=%6.3f\n |<%i|Jb|%i>|^2=%6.3f\n |<%i|Jc|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+            printf(" |<%i|Jd|%i>|^2=%6.3f\n |<%i|Je|%i>|^2=%6.3f\n |<%i|Jf|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
             printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
          }
       }
@@ -764,22 +765,21 @@ __declspec(dllexport)
          if(pr==1)
          {
             printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-            printf(" |<%i|Ja-<Ja>|%i>|^2=%6.3f\n |<%i|Jb-<Jb>|%i>|^2=%6.3f\n |<%i|Jc-<Jc>|%i>|^2=%6.3f\n",i+1,j+1,Mab(1,1),i+1,j+1,Mab(2,2),i+1,j+1,Mab(3,3));
-            printf(" |<%i|Jd-<Jd>|%i>|^2=%6.3f\n |<%i|Je-<Je>|%i>|^2=%6.3f\n |<%i|Jf-<Jf>|%i>|^2=%6.3f\n",i+1,j+1,Mab(4,4),i+1,j+1,Mab(5,5),i+1,j+1,Mab(6,6));
+            printf(" |<%i|Ja-<Ja>|%i>|^2=%6.3f\n |<%i|Jb-<Jb>|%i>|^2=%6.3f\n |<%i|Jc-<Jc>|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+            printf(" |<%i|Jd-<Jd>|%i>|^2=%6.3f\n |<%i|Je-<Je>|%i>|^2=%6.3f\n |<%i|Jf-<Jf>|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
             printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
          }
       }
    
       // multiply matrix Mab by occupation factor
       for(iJ=1; iJ<=sz; iJ++)
-         for(jJ=1; jJ<=sz; jJ++)
-	    mat(iJ,jJ) = complex<double> ( Mab(iJ,jJ)*therm/Z, iMab(iJ,jJ)*therm/Z );
+	    u1(iJ) = complex<double> ( u[iJ]*sqrt(therm/Z), iu[iJ]*sqrt(therm/Z) );
 
       delete[]en;
    }
 
    // determine number of thermally reachable states
-   int noft=0;for(i=0;(i<Hsz)&(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T))>SMALL);++i)noft+=Hsz-i-1;
+   int noft=0;for(i=0;(i<Hsz)&(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))>SMALL);++i)noft+=Hsz-i-1;
    return noft;
    //return Hsz*(Hsz-1)/2;
 }
@@ -1525,14 +1525,14 @@ extern "C"
 __declspec(dllexport)
 #endif
            int                            // Returns total number of transitions
-               dncalc(int &tn,            // Input transition number |tn|. If tn<0 omit printout. If tn>0 print info.
+               dv1calc(int &tn,            // Input transition number |tn|. If tn<0 omit printout. If tn>0 print info.
                   double &th,             // Input zenith angle (with the z==b axis) in radians.
                   double &ph,             // Input azimuth angle (with the x==a axis, to projection in x-y plane).
                   double &J0, double &J2, // Input radial parameters <j_0>, <j_2>
                   double &J4, double &J6, // Input radial parameters <j_4>, <j_6>
                   ComplexMatrix &est,     // Input eigenvalues/vectors of the system Hamiltonian, H_SI+H_mf 
                   double &T,              // Input temperature (K)
-                  ComplexMatrix &mat)     // Output transition matrix, N(alpha,beta) = <-|Qa|+><+|Qb|-> (n- - n+)
+                  ComplexVector & v1)     // Output transitionvector , v1(alpha) = <-|Qalpha|+> sqrt(n- - n+)
 / * 
      Note on Qalpha (Qa or Qb)
        if gJ>0:
@@ -1613,22 +1613,23 @@ __declspec(dllexport)
       zji[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
 #endif
 
-      if(i==j)                               //subtract thermal expectation value from zij=zii
-      {
-         complexdouble expQ; double thexp=0;
-         for(iJ=1;iJ<=Hsz;++iJ)    
-         {
-            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break; 
-            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
+//      if(i==j)                               //subtract thermal expectation value from zij=zii
+//      {
+//         complexdouble expQ; double thexp=0;
+//         for(iJ=1;iJ<=Hsz;++iJ)
+//         {
+//            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
+//            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
 #ifdef _G77
-            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+//            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
 #else
-            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+//            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
 #endif
-            thexp += expQ.r * therm / Z;
-         }
-         zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
-      }
+//            thexp += expQ.r * therm / Z;
+//         }
+//         zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
+//
+//      }
       free(zQmat); free(zt);
 
       zQmat = zmat2f(Qq[q][4],Qq[q][5]);     // orbital part
@@ -1643,28 +1644,28 @@ __declspec(dllexport)
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
 #endif
-      if(i==j)                               //subtract thermal expectation value from zij=zii
-      {
-         complexdouble expQ;double thexp=0;
-         for(iJ=1;iJ<=Hsz;++iJ)    
-         {
-            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break; 
-            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
+ //     if(i==j)                               //subtract thermal expectation value from zij=zii
+ //     {
+ //        complexdouble expQ;double thexp=0;
+ //        for(iJ=1;iJ<=Hsz;++iJ)
+ //        {
+ //           therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
+ //           F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
 #ifdef _G77
-            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+ //           F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
 #else
-            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+ //           expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
 #endif
-            thexp += expQ.r * therm / Z;
-         }
-         zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
-      }
+ //           thexp += expQ.r * therm / Z;
+ //        }
+ //        zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
+ //     }
       free(zQmat); free(zt);
    }
 
    // check if zij are complex conjugate
    for(iJ=1;iJ<=6;++iJ)
-      if(fabs(zij[iJ].i+zji[iJ].i)>SMALL) { std::cerr << "ERROR module ic1ion - dncalc: <i|Qalpha|j>not hermitian\n"; exit(EXIT_FAILURE); }
+      if(fabs(zij[iJ].i+zji[iJ].i)>SMALL) { std::cerr << "ERROR module ic1ion - dv1calc: <i|Qalpha|j>not hermitian\n"; exit(EXIT_FAILURE); }
 
                 
    complex<double> im(0,1);
@@ -1672,14 +1673,13 @@ __declspec(dllexport)
    
    for(a=1; a<=6; a++){iQalphaj(a) = complex<double> (zij[a].r,zij[a].i);if(a%2==1){iQalphaj(a)*=0.5;}} 
                                                                          // divide spin part by 2
-   mat = 0;
+   v1 = 0;
    for(a=1; a<=6; a++)
-      for(b=1; b<=6; b++)
-         mat(a,b) = iQalphaj(a)*conj(iQalphaj(b));
+         v1(a,b) = iQalphaj(a);
 
    double delta;
    delta = est[0][j].real()-est[0][i].real();
-   if(delta<-0.000001) { std::cerr << "ERROR module ic1ion - dncalc: energy gain delta gets negative\n"; exit(EXIT_FAILURE); }
+   if(delta<-0.000001) { std::cerr << "ERROR module ic1ion - dv1calc: energy gain delta gets negative\n"; exit(EXIT_FAILURE); }
 
    if(j==i) delta = -SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
@@ -1690,8 +1690,8 @@ __declspec(dllexport)
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV",i,j,delta);
-         printf(" |<%i|Qa|%i>|^2=%6.3f |<%i|Qb|%i>|^2=%6.3f |<%i|Qc|%i>|^2=%6.3f",i,j,real(mat(1,1)),i,j,real(mat(2,2)),i,j,real(mat(3,3)));
-         printf(" |<%i|Qd|%i>|^2=%6.3f |<%i|Qe|%i>|^2=%6.3f |<%i|Qf|%i>|^2=%6.3f",i,j,real(mat(4,4)),i,j,real(mat(5,5)),i,j,real(mat(6,6)));
+         printf(" |<%i|Qa|%i>|^2=%6.3f |<%i|Qb|%i>|^2=%6.3f |<%i|Qc|%i>|^2=%6.3f",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+         printf(" |<%i|Qd|%i>|^2=%6.3f |<%i|Qe|%i>|^2=%6.3f |<%i|Qf|%i>|^2=%6.3f",i,j,abs(v1(4))*abs(v1(4)),i,j,abs(v1(5))*abs(v1(5)),i,j,abs(v1(6))*abs(v1(6)));
          printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
       }
    }
@@ -1702,12 +1702,12 @@ __declspec(dllexport)
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV",i,j,delta);
-         printf(" |<%i|Qa-<Qa>|%i>|^2=%6.3f |<%i|Qb-<Qb>|%i>|^2=%6.3f |<%i|Qc-<Qc>|%i>|^2=%6.3f",i,j,real(mat(1,1)),i,j,real(mat(2,2)),i,j,real(mat(3,3)));
-         printf(" |<%i|Qd-<Qd>|%i>|^2=%6.3f |<%i|Qe-<Qe>|%i>|^2=%6.3f |<%i|Qf-<Qf>|%i>|^2=%6.3f",i,j,real(mat(4,4)),i,j,real(mat(5,5)),i,j,real(mat(6,6)));
+         printf(" |<%i|Qa-<Qa>|%i>|^2=%6.3f |<%i|Qb-<Qb>|%i>|^2=%6.3f |<%i|Qc-<Qc>|%i>|^2=%6.3f",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+         printf(" |<%i|Qd-<Qd>|%i>|^2=%6.3f |<%i|Qe-<Qe>|%i>|^2=%6.3f |<%i|Qf-<Qf>|%i>|^2=%6.3f",i,j,abs(v1(4))*abs(v1(4)),i,j,abs(v1(5))*abs(v1(5)),i,j,abs(v1(6))*abs(v1(6)));
          printf(" n%i=%6.3f\n",i,therm/Z);
       }
    }
-         mat *= therm / Z;
+         v1 *= sqrt(therm / Z);
 
    // determine number of thermally reachable states
    int noft=0;for(i=0;(i<Hsz)&((exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)))>SMALL);++i)noft+=Hsz-i-1;
@@ -2132,8 +2132,8 @@ int main(int argc, char *argv[])
    end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
    
    int imq, tn = 2; float delta=0.; ComplexMatrix mat6(1,6,1,6);
-   imq = dmcalc(tn,T,gmbH,gJ,ABC,filearray,mat6,delta,est);
-   start = clock(); std::cerr << "Time to calculate dmcalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
+   imq = du1calc(tn,T,gmbH,gJ,ABC,filearray,mat6,delta,est);
+   start = clock(); std::cerr << "Time to calculate du1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 
    ComplexVector Mq;
    double th=PI/4, ph=PI/4, J0=1., J2=1., J4=1., J6=1.;
@@ -2145,8 +2145,8 @@ int main(int argc, char *argv[])
                           << Mq[3].real() << "+" << Mq[3].imag() << "i]\n";
 
 /* ComplexMatrix mat(1,6,1,6);
-   imq = dncalc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
-   start = clock(); std::cerr << "Time to calculate dncalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n"; */
+   imq = dv1calc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
+   start = clock(); std::cerr << "Time to calculate dv1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n"; */
 #endif
 
 /* int i, Hsz = est.Cols(); //complexdouble *cest = new complexdouble[Hsz*Hsz]; memcpy(cest,&est[0][0],Hsz*Hsz*sizeof(complexdouble));

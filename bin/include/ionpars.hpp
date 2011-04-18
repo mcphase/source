@@ -48,8 +48,8 @@ class ionpars
    void cfieldJJ(Vector & JJ,double & T, Vector & gjmbH, double & lnZs, double & U, ComplexMatrix & ests);
    void cfeigenstates (ComplexMatrix *est, Vector & H, double & T);
    // and transition matrix elements
-   int  cfielddm (int & tn,double & T,Vector &  heff, ComplexMatrix & mat,float & delta,ComplexMatrix & ests);
-   int cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexMatrix & nat);
+   int  cfielddm (int & tn,double & T,Vector &  heff, ComplexVector & u1,float & delta,ComplexMatrix & ests);
+   int cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & v1);
    // calculate scattering operator <M(Q)>=-2x<Q>_TH in units of mb
    // according to stored eigenstate matrix est
    // calculates the scattering operator given the polar angles th, ph (with respect to the CEF coordinate 

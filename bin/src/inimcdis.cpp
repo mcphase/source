@@ -28,6 +28,7 @@ void inimcdis::errexit() // type info and error exit
     printf ("	       -maxE E                  single ion transitions within this energy range will \n");
     printf ("		                        be considered\n");
     printf ("	       -r                   ... refine energies\n");
+    printf ("	       -d                   ... calculate intensities in dipole approximation only\n");
     printf ("	       -v                   ... verbose\n");
     printf ("	       -a                   ... do not overwrite output files in results - append new results\n");
     printf ("	       -c                   ... only create single ion transition file ./results/mcdisp.trs and exit\n");
@@ -52,6 +53,7 @@ void inimcdis::save()
   fprintf(fout,"# depending on what is kept constant it follows either kf or ki (1/A)\n");
   if(kf!=0){fprintf(fout,"#!kf=%g\n",kf);}else{fprintf(fout,"#!ki=%g\n",ki);}
   fprintf(fout,"# \n");
+  fprintf(fout,"# emin and emax define the energy range in which neutron intensities are calculated\n");
   fprintf(fout,"# for full calculation of the dynamical susceptibility (option \"-r\", inversion of the MF-RPA equation \n");
   fprintf(fout,"# for each point in Q-omega space) the minimum and maximum energy has to be given (energy stepwidth is \n");
   fprintf(fout,"# equal to the parameter epsilon given in the command line after \"-r\")\n");

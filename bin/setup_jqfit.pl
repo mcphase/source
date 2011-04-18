@@ -33,6 +33,7 @@ print Fout << "EOF";
 # depending on what is kept constant it follows either kf or ki (1/A)
 #!kf=10
 #
+# emin and emax define the energy range in which neutron intensities are calculated
 # for full calculation of the dynamical susceptibility (option "-r", inversion of the MF-RPA equation
 # for each point in Q-omega space) the minimum and maximum energy has to be given (energy stepwidth is
 # equal to the parameter epsilon given in the command line after "-r")

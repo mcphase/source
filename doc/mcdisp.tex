@@ -25,7 +25,7 @@ the {\prg mcphas.j\index{mcphas.j}} and single ion input files. In addition, the
 				also an energy interval may be given (minE,maxE):
 				Single ion transitions with energies outside this
 				energy interval are not considered.
-				
+                                               \item option {\prg -d} forces mcdisp to do calculation of intensities in dipole approximation only				
 				\item Option {\prg -r} is used to calculate the energy dependence
 				of the cross section via the dynamical susceptibility (see below).
 				\item To create an output
@@ -95,6 +95,7 @@ described in section~\ref{spins}.
 # depending on what is kept constant it follows either kf or ki (1/A)
 #!kf=3.474
 # 
+# emin and emax define the energy range in which neutron intensities are calculated
 # for full calculation of the dynamical susceptibility (option "-r", inversion of the MF-RPA equation 
 # for each point in Q-omega space) the minimum and maximum energy has to be given (energy stepwidth is 
 # equal to the parameter epsilon given in the command line after "-r")
@@ -196,13 +197,14 @@ The output files of program {\prg McDisp} are
 and neutron intensities.
 \item [{\prg mcdisp.qom}:] Contains the energies of the modes and scattering cross sections  for each mode 
 calculated using the DMD algorithm described in section~\ref{intapprox}
-\item[{\prg mcdisp.qei}] energies and neutron scattering intensities calculated by the DMD algorithm
+\item[{\prg mcdisp.qei}] energies and neutron scattering intensities calculated by the DMD algorithm, if 
+        the energy of a mode is outside interval  [emin,emax] the value -1 is output for the intensity.
 \item[{\prg mcdisp.qev}] eigenvectors (relative phase and amplitudes) for the modes
 \item [{\prg mcdisp.dsigma}(only created with option {\prg -r}):] Contains the energy dependence of the scattering cross %%@
 section
 calculated according to section~\ref{formalism} within the energy range specified by [emin,emax] given in {\prg %%@
 mcdisp.par}. 
-\item [{\prg mcdisp.dsigma.tot}(only created with option {\prg -r}):] Sum of intensities calculated in {\prg %%@
+\item [{\prg mcdisp.dsigma.tot}:] sum of intensities in interval  [emin,emax].  For option {\prg -r} : Sum of intensities calculated in {\prg %%@
 mcdisp.dsigma}.
 \end{quote}
 
@@ -513,9 +515,11 @@ In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--
  The 3x3 matrices $M^s_{\alpha\beta}$
 always have one double degenerate eigenvalue $=$ zero (2,3) and one 
 positive eigenvalue (1)
-$\gamma^s=(<-|J_a|+><+|J_a|->
-+<-|J_b|+><+|J_b|->
-+<-|J_c|+><+|J_c|->)(n_--n_+)$. 
+
+\begin{equation}
+\gamma^s=(n_--n_+)\sum_{\alpha}<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+><+|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|->
+\end{equation}
+
 The  problem  may be simplified by using
 the unitary transformation ${\mathcal U^s_{\alpha\beta}}$ (${\mathcal U^{s\dag}\mathcal U^s}=1$), which diagonalises the %%@
 $M^s_{\alpha\beta}$. Note that the first column of this matrix ${\mathcal U^s_{\alpha\beta}}$ (the eigenvector with the %%@
@@ -990,24 +994,31 @@ outlined in equations (\ref{mmatrix}) ff:
 
 similar to $M_{\alpha\beta}^s$ the matrices  $\mu_{\alpha\beta}^s$ and $\nu_{\alpha\beta}^s$ 
 can be diagonalised using the
-unitary transformations $\mathcal U_{\alpha\beta}^s$ (${\mathcal U^{s\dag}\mathcal U^s}=1$) and
-$\mathcal V_{\alpha\beta}^s$ (${\mathcal V^{s\dag}\mathcal V^s}=1$), respectively.
+unitary transformations $\overline \mathcal  U_{\alpha\beta}^s$ (${\overline \mathcal U^{s\dag}\overline \mathcal U^s}=1$) and
+$\mathcal V_{\alpha\beta}^s$ (${\mathcal V^{s\dag}\mathcal V^s}=1$), respectively. Note that in the case $<+| \neq <-|$
+the unitary transformations $\overline \mathcal U =\mathcal U$ and $\overline \gamma = \gamma$.
+
+\begin{equation}
+\overline \gamma^s=(n_--n_+)\sum_{\alpha}<-|J^s_{\alpha}|+><+|J^s_{\alpha}|->
+\end{equation}
+
+
 Thus we have for orthogonal states 
 
 \begin{eqnarray}
-<-|         J^{s     }_{\alpha}|+><+|         J^s_{\beta}|->&=&\mathcal U_{\alpha 1}^s\phi^s U_{1\beta}^{s\dag} \dots %%@
-{\rm with }\, \phi^s=\gamma^s/(n_--n_+)\\
+<-|         J^{s     }_{\alpha}|+><+|         J^s_{\beta}|->&=&\overline \mathcal U_{\alpha 1}^s\phi^s\overline \mathcal U_{1\beta}^{s\dag} \dots %%@
+{\rm with }\, \phi^s=\overline \gamma^s/(n_--n_+)\\
 <-|\mathcal Q^{s \dag}_{\alpha}|+><+|\mathcal Q^s_{\beta}|->&=&\mathcal V_{\alpha 1}^s\xi^s\mathcal V_{1\beta}^{s\dag}  
 \end{eqnarray}
 
 Multiplying this from the right(left) side with 
-$\mathcal U_{\beta\beta'}^{s}/\sqrt(\phi^s)$
-($\mathcal U_{\alpha'\alpha}^{s\dag}/\sqrt(\phi^s)^{\star}$)
+$\overline \mathcal U_{\beta\beta'}^{s}/\sqrt(\phi^s)$
+($\overline \mathcal U_{\alpha'\alpha}^{s\dag}/\sqrt(\phi^s)^{\star}$)
 and summing over $\beta$ ($\alpha$) we get
 
 \begin{equation}
-\frac{1}{\phi^s}\left ( \sum_{\alpha}\mathcal U_{\alpha'\alpha}^{s\dag} <-|         J^{s     }_{\alpha}|+> \right )
-\left ( \sum_{\beta} <+|         J^s_{\beta}|->\mathcal U_{\beta\beta'}^{s} \right )
+\frac{1}{\phi^s}\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} <-|         J^{s     }_{\alpha}|+> \right )
+\left ( \sum_{\beta} <+|         J^s_{\beta}|->\overline \mathcal U_{\beta\beta'}^{s} \right )
 = \delta_{1\alpha'} \delta_{1\beta'}
 \end{equation}
 
@@ -1015,7 +1026,7 @@ It follows
 
 \begin{equation}
 \frac{1}{\sqrt{\phi^s}}
-\left ( \sum_{\alpha}\mathcal U_{\alpha'\alpha}^{s\dag} <-|         J^{s     }_{\alpha}|+> \right )
+\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} <-|         J^{s     }_{\alpha}|+> \right )
 = \delta_{1\alpha'}
 \end{equation}
 
@@ -1024,8 +1035,8 @@ $\langle -|J_{\alpha}^s|+\rangle \langle +'|J_{\beta}^{s'}|-'\rangle$
 in the numerator of (\ref{gensus}) to $\delta_{1\alpha'} \delta_{1\beta'}$:
 
 \begin{equation}\label{trafo1}
-\left ( \sum_{\alpha}\frac{1}{\sqrt{\phi^s}^{\star}}\mathcal U_{\alpha'\alpha}^{s\dag} <-|J^{s}_{\alpha}|+> \right )
-\left ( \sum_{\beta} <+'|J^{s'}_{\beta}|-'> \frac{1}{\sqrt{\phi^{s'}}}U_{\beta\beta'}^{s'} \right )
+\left ( \sum_{\alpha}\frac{1}{\sqrt{\phi^s}^{\star}}\overline \mathcal U_{\alpha'\alpha}^{s\dag} <-|J^{s}_{\alpha}|+> \right )
+\left ( \sum_{\beta} <+'|J^{s'}_{\beta}|-'> \frac{1}{\sqrt{\phi^{s'}}}\overline \mathcal U_{\beta\beta'}^{s'} \right )
 = \delta_{1\alpha'} \delta_{1\beta'}
 \end{equation}
 
@@ -1049,9 +1060,9 @@ obtain $X_{\alpha''\beta''}^{ss'}({\mbf Q},\omega)$:
 X_{\alpha''\beta''}^{,,ss'}({\mbf Q},\omega)=\sum_{\alpha\alpha'\beta\beta'}
 \sqrt{\frac{\Gamma^s}{\gamma^s}}^{\star}
  \mathcal V_{\alpha''\alpha'}^{s}
-  \mathcal U_{\alpha'\alpha}^{s\dag} 
+ \overline  \mathcal U_{\alpha'\alpha}^{s\dag} 
     \chi_{\alpha\beta}^{,,ss'}({\mbf Q},\omega)
-  \mathcal U_{\beta\beta'}^{s'} 
+ \overline  \mathcal U_{\beta\beta'}^{s'} 
  \mathcal V_{\beta'\beta''}^{s' \dag}
 \sqrt{\frac{\Gamma^{s'}}{\gamma^{s'}}}
 \end{equation}
@@ -1061,12 +1072,12 @@ Having obtained the dynamical susceptibility $    \chi_{\alpha\beta}^{,,ss'}({\m
 by the method outlined in section \ref{formalism}, 
 the expression (\ref{finalslow})
  can be inserted in (\ref{intbeyond}) and (\ref{fluctdissbeyond})  to evaluate 
-the neutron scattering cross section numerically (slow algorithm, {\prg Mcdisp} option {\prg -r}).
+the neutron scattering cross section numerically.
 {\small Technically, the single ion module has to provide in addition to the
 matrices $M^s_{\alpha\beta}$ (equation (\ref{mmatrix})) for every $\mbf Q$-vector
-a set of matrices $N^s_{\alpha\beta}(\mbf Q)=<-|\mathcal Q^{s \dag}_{\alpha}|+><+|\mathcal Q^s_{\beta}|-> (n_--n_+)$
-from which {\prg Mcdisp} can calculate the transformation matrices 
-$V_{\alpha''\alpha'}^{s}$ and $\Gamma^s$, which both will depend on the 
+the vector 
+$\sqrt{\Gamma^s}^\star \mathcal V^s_{\alpha1}\equiv
+ {\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(n_--n_+)}<-|\mathcal Q^{\dag}_{\alpha}|+>$, which will depend on the 
 scattering vector $\mbf Q$.}
 
 For the DMD algorithm we insert  (\ref{dmdfinal}) into (\ref{finalslow}) and obtain
@@ -1075,9 +1086,18 @@ For the DMD algorithm we insert  (\ref{dmdfinal}) into (\ref{finalslow}) and obt
 \begin{equation}\label{Xcalc}
 X^{,,ss'}_{\alpha\beta}(\mbf Q,\omega)=\sqrt{\Gamma^s}^\star\sqrt{\Gamma^{s'}} 
 \pi \sum_r 
-\mathcal V^s_{\alpha1} \mathcal T_{sr}(\mbf Q)\omega_r(\mbf Q) \delta(\hbar \omega_r(\mbf Q) %%@
-- \hbar \omega) \mathcal T^{\dag}_{rs'}(\mbf Q) \mathcal V^{s'\dag}_{1\beta}
+\overline \mathcal V^s_{\alpha1} \mathcal T_{sr}(\mbf Q)\omega_r(\mbf Q) \delta(\hbar \omega_r(\mbf Q) %%@
+- \hbar \omega) \mathcal T^{\dag}_{rs'}(\mbf Q)\overline  \mathcal V^{s'\dag}_{1\beta}
 \end{equation}
+
+with 
+
+\begin{equation}
+\overline \mathcal V^s_{\alpha1} =\sqrt{\frac{\gamma^s}{\overline \gamma^s}}^{\star}\sum_{\alpha'\alpha''} \mathcal V_{\alpha\alpha'}^s \overline \mathcal U^{s\dag}_{\alpha'\alpha''}
+\mathcal U^s_{\alpha''1}
+\end{equation}
+
+If $<+|\neq<-|$ then $\overline \mathcal V=\mathcal V$.
 
 {\prg mcdisp\index{mcdisp}} automatically calculates the intensity in
 dipole approximation and also going beyond, if possible, the result

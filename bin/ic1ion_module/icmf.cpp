@@ -581,15 +581,14 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the matrix M_ab=<i|Ja|j><j|Jb|i>{exp(-beta_i*T)-exp(-beta_j*T)} for some state i,j
 // --------------------------------------------------------------------------------------------------------------- //
-void icmfmat::Mab(sMat<double>&Mab, sMat<double>&iMab, iceig&VE, double T, int i, int j,int pr,float & delta, bool save_matrices)
-{
-   double *vt=0, Z=0., therm; complexdouble *zt=0, zme; zme.r=0; zme.i=0.;
+void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta, bool save_matrices)
+{  double *vt=0, Z=0., therm; complexdouble *zt=0, zme; zme.r=0; zme.i=0.;
    int sz = (_num_op>6?_num_op:6);
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
-   Mab.zero(sz,sz); iMab.zero(sz,sz);
+//   u.zero(sz); iu.zero(sz);
    int iJ, jJ, Hsz=VE.Hsz(), incx=1; 
-   if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::Mab() - Hamiltonian matrix size not same as mean field operator!\n"; return; }
+   if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::u1() - Hamiltonian matrix size not same as mean field operator!\n"; return; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
    double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    complexdouble *zJmat=0;
@@ -599,10 +598,10 @@ void icmfmat::Mab(sMat<double>&Mab, sMat<double>&iMab, iceig&VE, double T, int i
    if(save_matrices) {
    #ifndef _WINDOWS
    struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
-      if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::Mab(): Can't create mms dir, " << strerror(errno) << "\n";
+      if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::u1(): Can't create mms dir, " << strerror(errno) << "\n";
    #else
    DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY)) 
-      if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::Mab(): Cannot create mms directory\n";
+      if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::u1(): Cannot create mms directory\n";
    #endif
    nstr[0] = (_l==F?102:100); if(_n<10) { nstr[1] = _n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = _n+38; nstr[3] = 0; }
    strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;   // 85 is ASCII for "U", 100=="d" and 102=="f"
@@ -661,30 +660,24 @@ void icmfmat::Mab(sMat<double>&Mab, sMat<double>&iMab, iceig&VE, double T, int i
       }
    }
 
-   // // Calculates the matrix M_ab
-   // for(iJ=0; iJ<6; iJ++)
-   //    for(jJ=0; jJ<6; jJ++)
-   //       Mab(i+1,j+1) = (mij[iJ]*mji[jJ]) * ( exp(-(VE.E(i)-VE.E(0))/(KB*T)) - exp(-(VE.E(j)-VE.E(0))/(KB*T)) );
-
-
-   if(i==j) {//subtract thermal expectation value from zij=zii
+   if(i==j&&T>0) {//subtract thermal expectation value from zij=zii
             std::vector< std::vector<double> > matel;
             std::vector<double> vJ = expJ(VE,T,matel,save_matrices);
             for(iJ=0; iJ<sz; iJ++)zij[iJ].r-=vJ[iJ];
             }
+   if (T<0){T=-T;}
 
    // Calculates the matrix M_ab and iM_ab
    for(iJ=0; iJ<sz; iJ++)
-      for(jJ=0; jJ<sz; jJ++)
       {  
-         Mab(iJ+1,jJ+1) = (zij[iJ].r*zij[jJ].r + zij[iJ].i*zij[jJ].i);
-         iMab(iJ+1,jJ+1) = (-zij[iJ].r*zij[jJ].i + zij[iJ].i*zij[jJ].r);
+         u[iJ+1] = zij[iJ].r;
+         iu[iJ+1]= zij[iJ].i;
       }
 
    delta = VE.E(j)-VE.E(i);
    if(delta<-0.000001)
    {
-      std::cerr << "ERROR module ic1ion - dmcalc: energy gain delta gets negative\n"; 
+      std::cerr << "ERROR module ic1ion - du1calc: energy gain delta gets negative\n"; 
       exit(EXIT_FAILURE);
    }
    if(j==i)delta=-SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
@@ -699,8 +692,8 @@ void icmfmat::Mab(sMat<double>&Mab, sMat<double>&iMab, iceig&VE, double T, int i
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ja|%i>|^2=%6.3f\n |<%i|Jb|%i>|^2=%6.3f\n |<%i|Jc|%i>|^2=%6.3f\n",i+1,j+1,Mab(1,1),i+1,j+1,Mab(2,2),i+1,j+1,Mab(3,3));
-         printf(" |<%i|Jd|%i>|^2=%6.3f\n |<%i|Je|%i>|^2=%6.3f\n |<%i|Jf|%i>|^2=%6.3f\n",i+1,j+1,Mab(4,4),i+1,j+1,Mab(5,5),i+1,j+1,Mab(6,6));
+         printf(" |<%i|Ja|%i>|^2=%6.3f\n |<%i|Jb|%i>|^2=%6.3f\n |<%i|Jc|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+         printf(" |<%i|Jd|%i>|^2=%6.3f\n |<%i|Je|%i>|^2=%6.3f\n |<%i|Jf|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
          printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
       }
    }
@@ -710,15 +703,15 @@ void icmfmat::Mab(sMat<double>&Mab, sMat<double>&iMab, iceig&VE, double T, int i
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ja-<Ja>|%i>|^2=%6.3f\n |<%i|Jb-<Jb>|%i>|^2=%6.3f\n |<%i|Jc-<Jc>|%i>|^2=%6.3f\n",i+1,j+1,Mab(1,1),i+1,j+1,Mab(2,2),i+1,j+1,Mab(3,3));
-         printf(" |<%i|Jd-<Jd>|%i>|^2=%6.3f\n |<%i|Je-<Je>|%i>|^2=%6.3f\n |<%i|Jf-<Jf>|%i>|^2=%6.3f\n",i+1,j+1,Mab(4,4),i+1,j+1,Mab(5,5),i+1,j+1,Mab(6,6));
+         printf(" |<%i|Ja-<Ja>|%i>|^2=%6.3f\n |<%i|Jb-<Jb>|%i>|^2=%6.3f\n |<%i|Jc-<Jc>|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+         printf(" |<%i|Jd-<Jd>|%i>|^2=%6.3f\n |<%i|Je-<Je>|%i>|^2=%6.3f\n |<%i|Jf-<Jf>|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
          printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
       }
    }
 
    // multiply matrix Mab by occupation factor
    for(iJ=0; iJ<sz; iJ++)
-      for(jJ=0; jJ<sz; jJ++) { Mab(iJ+1,jJ+1) *= therm/Z; iMab(iJ+1,jJ+1) *= therm/Z; }
+      { u[iJ+1] *= sqrt(therm/Z); iu[iJ+1] *= sqrt(therm/Z); }
 
 }
 

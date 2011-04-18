@@ -37,7 +37,7 @@ printf("# **************************************************************\n");
   Vector h(1,inputpars.nofcomponents);
   Vector m(1,inputpars.nofcomponents);
   // transition matrix Mij
-  ComplexMatrix Mijkl(1,inputpars.nofcomponents,1,inputpars.nofcomponents);
+  ComplexVector u1(1,inputpars.nofcomponents);
 
 int nmax=5;// max number of transtions to  be output
                              i=1;if(!strcmp(argv[i],"-nt")){nmax=(int)strtod(argv[i+1],NULL);i+=2;}
@@ -63,11 +63,12 @@ for(j=1;j<=inputpars.nofcomponents;++j)printf(" <J%c> ",'a'-1+j);
  double TT=fabs(T);
  if(nmax>0)
   {(*inputpars.jjj[i]).transitionnumber=-1;
-   nt=(*inputpars.jjj[i]).dmcalc(TT,h,Mijkl,d,(*inputpars.jjj[i]).eigenstates(h,T));
+   nt=(*inputpars.jjj[i]).du1calc(TT,h,u1,d,(*inputpars.jjj[i]).eigenstates(h,T));
+
           // get nt = number of transitions
    for(j=1;j<=nt&&j<=nmax;++j)
    {(*inputpars.jjj[i]).transitionnumber=-j;d=1e10;
-   (*inputpars.jjj[i]).dmcalc(TT,h,Mijkl,d,(*inputpars.jjj[i]).est);
+   (*inputpars.jjj[i]).du1calc(TT,h,u1,d,(*inputpars.jjj[i]).est);
    printf(" %4g ",d);
    }
    if(nmax<nt){printf("...");}

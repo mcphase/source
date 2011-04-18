@@ -164,11 +164,11 @@ return;
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) int dmcalc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
-                       ComplexMatrix & matr,float & delta,ComplexMatrix & est)
+extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
+                       ComplexVector & u1r,float & delta,ComplexMatrix & est)
 #else
-extern "C" int dmcalc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
-                       ComplexMatrix & matr,float & delta,ComplexMatrix & est)
+extern "C" int du1calc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
+                       ComplexVector & u1r,float & delta,ComplexMatrix & est)
 #endif
 { 
   /*on input
@@ -179,7 +179,7 @@ extern "C" int dmcalc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector &
     gjmbH	vector of effective field [meV]
   on output    
     delta	splitting of kramers doublet [meV]
-    matr(i,j)	<-|Ji|+><+|Jj|-> tanh(delta/2kT)
+    u1r(i)	<-|Ji-<Ji>|+> sqrt(tanh(delta/2kT))
 */
   double alpha, betar, betai, lambdap,lambdap_K_BT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, nenner;
@@ -190,9 +190,10 @@ extern "C" int dmcalc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector &
 
   static Vector Jin(1,3);
   static Vector J(1,3);
-  static ComplexMatrix mat(1,3,1,3);
+  static ComplexVector u1(1,3);
   // clalculate thermal expectation values (needed for quasielastic scattering)
-  mcalc(Jin,&T,gjmbHin,g_J,ABC,sipffile,&lnz,&u,est);
+  Jin=0;if(T>0){ mcalc(Jin,&T,gjmbHin,g_J,ABC,sipffile,&lnz,&u,est);}
+                else {T=-T;}
 
 // rotate effective field
 double sf=sin(ABC(4)*PI/180);
@@ -263,26 +264,14 @@ if (tn==2)
     }
  if (delta>SMALL)
   {// now lets calculate mat
-  mat(1,1)=ja*conj(ja)*(nm-np);
-  mat(1,2)=ja*conj(jb)*(nm-np);
-  mat(1,3)=ja*conj(jc)*(nm-np);
-  mat(2,1)=jb*conj(ja)*(nm-np);
-  mat(2,2)=jb*conj(jb)*(nm-np);
-  mat(2,3)=jb*conj(jc)*(nm-np);
-  mat(3,1)=jc*conj(ja)*(nm-np);
-  mat(3,2)=jc*conj(jb)*(nm-np);
-  mat(3,3)=jc*conj(jc)*(nm-np);
+  u1(1)=ja*sqrt(nm-np);
+  u1(2)=jb*sqrt(nm-np);
+  u1(3)=jc*sqrt(nm-np);
   } else
   {// quasielastic scattering needs epsilon * nm / KT ....
-  mat(1,1)=ja*conj(ja)*nm/K_B/T;
-  mat(1,2)=ja*conj(jb)*nm/K_B/T;
-  mat(1,3)=ja*conj(jc)*nm/K_B/T;
-  mat(2,1)=jb*conj(ja)*nm/K_B/T;
-  mat(2,2)=jb*conj(jb)*nm/K_B/T;
-  mat(2,3)=jb*conj(jc)*nm/K_B/T;
-  mat(3,1)=jc*conj(ja)*nm/K_B/T;
-  mat(3,2)=jc*conj(jb)*nm/K_B/T;
-  mat(3,3)=jc*conj(jc)*nm/K_B/T;  
+  u1(1,1)=ja*sqrt(nm/K_B/T);
+  u1(2,1)=jb*sqrt(nm/K_B/T);
+  u1(3,1)=jc*sqrt(nm/K_B/T);
   }
  }
  else
@@ -330,35 +319,23 @@ if (tn==2)
     }
  if (tn==1)
  {// now lets calculate mat
- mat(1,1)=(jam-J(1))*(jam-J(1))*nm/K_B/T;
- mat(1,2)=(jam-J(1))*(jbm-J(2))*nm/K_B/T;
- mat(1,3)=(jam-J(1))*(jcm-J(3))*nm/K_B/T;
- mat(2,1)=(jbm-J(2))*(jam-J(1))*nm/K_B/T;
- mat(2,2)=(jbm-J(2))*(jbm-J(2))*nm/K_B/T;
- mat(2,3)=(jbm-J(2))*(jcm-J(3))*nm/K_B/T;
- mat(3,1)=(jcm-J(3))*(jam-J(1))*nm/K_B/T;
- mat(3,2)=(jcm-J(3))*(jbm-J(2))*nm/K_B/T;
- mat(3,3)=(jcm-J(3))*(jcm-J(3))*nm/K_B/T;
+ u1(1)=(jam-J(1))*sqrt(nm/K_B/T);
+ u1(2)=(jbm-J(2))*sqrt(nm/K_B/T);
+ u1(3)=(jcm-J(3))*sqrt(nm/K_B/T);
  }else{ // tn = 3 in this case
  // now lets calculate mat
- mat(1,1)=(jap-J(1))*(jap-J(1))*np/K_B/T;
- mat(1,2)=(jap-J(1))*(jbp-J(2))*np/K_B/T;
- mat(1,3)=(jap-J(1))*(jcp-J(3))*np/K_B/T;
- mat(2,1)=(jbp-J(2))*(jap-J(1))*np/K_B/T;
- mat(2,2)=(jbp-J(2))*(jbp-J(2))*np/K_B/T;
- mat(2,3)=(jbp-J(2))*(jcp-J(3))*np/K_B/T;
- mat(3,1)=(jcp-J(3))*(jap-J(1))*np/K_B/T;
- mat(3,2)=(jcp-J(3))*(jbp-J(2))*np/K_B/T;
- mat(3,3)=(jcp-J(3))*(jcp-J(3))*np/K_B/T;
+ u1(1)=(jap-J(1))*sqrt(np/K_B/T);
+ u1(2)=(jbp-J(2))*sqrt(np/K_B/T);
+ u1(3)=(jcp-J(3))*sqrt(np/K_B/T);
  }
 }
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
  
 // rotate back mat(i,j)
 for(int i=1;i<=3;++i)for(int j=1;j<=3;++j){
-matr(i,j)=0.0;
-for(int i1=1;i1<=3;++i1)for(int j1=1;j1<=3;++j1){
-matr(i,j)+=brot(i,i1)*brot(j,j1)*mat(i1,j1);
+u1r(i)=0.0;
+for(int i1=1;i1<=3;++i1){
+u1r(i)+=brot(i,i1)*u1(i1);
 }}
 
 

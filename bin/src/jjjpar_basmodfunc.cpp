@@ -163,9 +163,9 @@ module_type=0;
     m=(void(*)(Vector*,double*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mcalc");
     //*(int **)(&m)=GetProcAddress(handle,"mcalc");
      if (m==NULL) {fprintf (stderr,"jjjpar::jjjpar error %d  module %s loading function mcalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
-    dm=(int(*)(int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*,float*,ComplexMatrix*))GetProcAddress(handle,"dmcalc");
-    //*(void **)(&dm)=GetProcAddress(handle,"dmcalc");
-     if (dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dmcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dm=(int(*)(int*,double*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"du1calc");
+    //*(void **)(&dm)=GetProcAddress(handle,"du1calc");
+     if (dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function du1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
     mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mq");
     //*(void **)(&mq)=GetProcAddress(handle,"mq");
      if (mq==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mq not possible - continuing\n",(int)GetLastError(),modulefilename);}
@@ -181,9 +181,9 @@ module_type=0;
                                   mcalc_parstorage=ComplexMatrix(0,2,1,2);mcalc_parstorage=0;// not used, just initialize to prevent errors
                                   }
 
-  ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexMatrix*))GetProcAddress(handle,"dncalc");
-    //*(void **)(&dnn)=GetProcAddress(handle,"dncalc");
-     if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dncalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+  ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*))GetProcAddress(handle,"dv1calc");
+    //*(void **)(&dnn)=GetProcAddress(handle,"dv1calc");
+     if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dv1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     sd_m=(void(*)(Vector*,int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"spindensity_mcalc");
     //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_mcalc");
@@ -208,8 +208,8 @@ module_type=0;
   //m=(void(*)(Vector*,double*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))dlsym(handle,"mcalc");
   *(void **)(&m)=dlsym(handle,"mcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s\n",error);exit (EXIT_FAILURE);}
-  //dm=(int(*)(int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*,float*,ComplexMatrix*))dlsym(handle,"dmcalc");
-  *(void **)(&dm)=dlsym(handle,"dmcalc");
+  //dm=(int(*)(int*,double*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))dlsym(handle,"du1calc");
+  *(void **)(&dm)=dlsym(handle,"du1calc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dm=NULL;}
   //mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))dlsym(handle,"mq");
   *(void **)(&mq)=dlsym(handle,"mq");
@@ -226,8 +226,8 @@ module_type=0;
                                 mcalc_parstorage=ComplexMatrix(0,2,1,2);mcalc_parstorage=0;// not used, just initialize to prevent errors
                                }
 
-  //ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexMatrix*))dlsym(handle,"dncalc");
-  *(void **)(&ddnn)=dlsym(handle,"dncalc");
+  //ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*))dlsym(handle,"dv1calc");
+  *(void **)(&ddnn)=dlsym(handle,"dv1calc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ddnn=NULL;}
 
   //sd_m=(void(*)(Vector*,int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*))dlsym(handle,"spindensity_mcalc");
@@ -406,19 +406,19 @@ void jjjpar::mcalc (Vector &mom, double & T, Vector &  gjmbH, double & lnZ,doubl
 
 /****************************************************************************/
 // this function returns n (the number of transitions in the single ion susceptibility)
-// the transition matrix mat corresponding to jjjpar.transitionnumber and delta
+// the transition matrix mat first eigenvector u1 corresponding to jjjpar.transitionnumber and delta
 // for effective field heff and temperature given on input
 /****************************************************************************/
-int jjjpar::dmcalc(double & T,Vector & gjmbheff,ComplexMatrix & mat,float & delta,ComplexMatrix & ests)
+int jjjpar::du1calc(double & T,Vector & gjmbheff,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 { switch (module_type)
-  {case 0: if (dm!=NULL){return (*dm)(&transitionnumber,&T,&gjmbheff,&gJ,&ABC,&cffilename,&mat,&delta,&ests);}
+  {case 0: if (dm!=NULL){return (*dm)(&transitionnumber,&T,&gjmbheff,&gJ,&ABC,&cffilename,&u1,&delta,&ests);}
            else return 0;
            break;
-   case 1: return kramerdm(transitionnumber,T,gjmbheff,mat,delta);break;
+   case 1: return kramerdm(transitionnumber,T,gjmbheff,u1,delta);break;
    case 2:
-   case 4: return (*iops).cfielddm(transitionnumber,T,gjmbheff,mat,delta,ests);break;
-   case 3: return brillouindm(transitionnumber,T,gjmbheff,mat,delta);break;
-   case 5: return cluster_dm(transitionnumber,T,gjmbheff,mat,delta);break;
+   case 4: return (*iops).cfielddm(transitionnumber,T,gjmbheff,u1,delta,ests);break;
+   case 3: return brillouindm(transitionnumber,T,gjmbheff,u1,delta);break;
+   case 5: return cluster_dm(transitionnumber,T,gjmbheff,u1,delta);break;
    default: return 0;
   }
 }
@@ -500,7 +500,7 @@ switch (module_type)
 }
 
 /****************************************************************************/
-// returns transition element matrix N(Q) in order to be able to go beyond
+// returns transition element matrix N(Q) first eigenvector v1 in order to be able to go beyond
 //
 // dipolar approximation in mcdisp - it requires a call to eigenstates first
 //
@@ -518,7 +518,7 @@ switch (module_type)
 //    .... occupation number of states (- to + transition chosen according to transitionnumber)
 //
 /****************************************************************************/
-int jjjpar::dncalc(Vector & Qvec,double & T, ComplexMatrix & nat,ComplexMatrix & ests)
+int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix & ests)
 
 {double J0,J2,J4,J6;
  double Q,th,ph;
@@ -534,18 +534,16 @@ int jjjpar::dncalc(Vector & Qvec,double & T, ComplexMatrix & nat,ComplexMatrix &
   {static int washere=0;
 
    case 0:if (ddnn!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
-                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&nat);break;}
+                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&v1);break;}
           else {return 0;}
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give cfielddn polar angles with respect to xyz
-            i=(*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,nat);
+            i=(*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,v1);
             // and we have to switch indices in matrix nat(1..3,1..3) to conform with xyz||cba changed MR 3.4.10
-            dummy=nat(1,1);nat(1,1)=nat(2,2);nat(2,2)=nat(3,3);nat(3,3)=dummy; // changed MR 3.4.10
-            dummy=nat(1,2);nat(1,2)=nat(2,3);nat(2,3)=nat(3,1);nat(3,1)=dummy; // changed MR 3.4.10
-            dummy=nat(1,3);nat(1,3)=nat(2,1);nat(2,1)=nat(3,2);nat(3,2)=dummy; // changed MR 3.4.10
+            dummy=v1(1);v1(1)=v1(2);v1(2)=v1(3);v1(3)=dummy; // changed MR 3.4.10
             return i;break;
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give cfielddn polar angles with respect to xyz
-            return (*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,nat);break;
-   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dncalc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",cffilename);
+            return (*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,v1);break;
+   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dv1calc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",cffilename);
                            washere=1;}
             return 0;
   }

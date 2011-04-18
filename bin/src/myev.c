@@ -27,12 +27,12 @@ void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
  fprintf (file,"#Real Part\n");
    
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%6.3g ",real(M(i1,j1)));
+    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%6.3g ",myround(real(M(i1,j1))));
     fprintf (file,"\n");
     }
     fprintf (file,"#Imaginary Part\n");
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-   for (j1=M.Clo();j1<=M.Chi();++j1)fprintf (file,"%6.3g ",imag(M(i1,j1)));
+   for (j1=M.Clo();j1<=M.Chi();++j1)fprintf (file,"%6.3g ",myround(imag(M(i1,j1))));
     fprintf (file,"\n");
     }
 }    
@@ -66,7 +66,7 @@ return true;
 void myPrintMatrix(FILE * file,Matrix & M)
 {int i1,j1;
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%6.3g ",M(i1,j1));
+    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%6.3g ",myround(M(i1,j1)));
     fprintf (file,"\n");
     }
 }    
@@ -75,7 +75,7 @@ void myPrintVector(FILE * file,Vector & M)
 {int j1;
  fprintf (file,"#Components:\n");
    
-    for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g ",M(j1));
+    for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g ",myround(M(j1)));
     fprintf (file,"\n");    
 }    
 
@@ -83,7 +83,7 @@ void myPrintComplexVector(FILE * file,ComplexVector & M)
 {int j1;
  fprintf (file,"#Components:\n");
    
-    for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g %+6.3g i ",real(M(j1)),imag(M(j1)));
+    for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g %+6.3g i ",myround(real(M(j1))),myround(imag(M(j1))));
     fprintf (file,"\n");    
 }    
 

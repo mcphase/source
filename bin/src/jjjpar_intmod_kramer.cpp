@@ -89,7 +89,7 @@ void jjjpar::kramer (Vector & Jret,double & T, Vector & gjmbH, double & lnZ, dou
 //     gjmbH[1]/MU_B/gjJ, gjmbH[2]/MU_B/gjJ, gjmbH[3]/MU_B/gjJ, J[1], J[2], J[3]);
 }
 
-int jjjpar::kramerdm(int & transitionnumber,double & T,Vector & gjmbH,ComplexMatrix & mat,float & delta)
+int jjjpar::kramerdm(int & transitionnumber,double & T,Vector & gjmbH,ComplexVector & u1,float & delta)
 { 
   /*on input
     transitionnumber ... number of transition to be computed - meaningless for kramers doublet, because there is only 1 transition
@@ -99,7 +99,7 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector & gjmbH,ComplexMat
     gjmbH	vector of effective field [meV]
   on output    
     delta	splitting of kramers doublet [meV]
-    mat(i,j)	<-|(Ji-<Ji>)|+><+|(Jj-<Jj>|-> tanh(delta/2kT)
+    u1(i)	<-|(Ji-<Ji>)|+> sqrt(tanh(delta/2kT))
 */
   double alpha, betar, betai, lambdap,lambdap_KBT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, nenner;
@@ -109,8 +109,9 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector & gjmbH,ComplexMat
   double lnz,u;
   
   static Vector Jret(1,3);
+  Jret=0;
   // clalculate thermal expectation values (needed for quasielastic scattering)
-  kramer(Jret,T,gjmbH,lnz,u);
+  if(T>0){kramer(Jret,T,gjmbH,lnz,u);}else{T=-T;}
   int pr;
   pr=1;
   if (transitionnumber<0) {pr=0;transitionnumber*=-1;}
@@ -166,26 +167,14 @@ if (transitionnumber==2)
     }
  if (delta>SMALL)
  {// now lets calculate mat
- mat(1,1)=ja*conj(ja)*(nm-np);
- mat(1,2)=ja*conj(jb)*(nm-np);
- mat(1,3)=ja*conj(jc)*(nm-np);
- mat(2,1)=jb*conj(ja)*(nm-np);
- mat(2,2)=jb*conj(jb)*(nm-np);
- mat(2,3)=jb*conj(jc)*(nm-np);
- mat(3,1)=jc*conj(ja)*(nm-np);
- mat(3,2)=jc*conj(jb)*(nm-np);
- mat(3,3)=jc*conj(jc)*(nm-np); 
+ u1(1)=ja*sqrt(nm-np);
+ u1(2)=jb*sqrt(nm-np);
+ u1(3)=jc*sqrt(nm-np);
  }else
  {// quasielastic scattering needs epsilon * nm / KT ....
- mat(1,1)=ja*conj(ja)*nm/KB/T;
- mat(1,2)=ja*conj(jb)*nm/KB/T;
- mat(1,3)=ja*conj(jc)*nm/KB/T;
- mat(2,1)=jb*conj(ja)*nm/KB/T;
- mat(2,2)=jb*conj(jb)*nm/KB/T;
- mat(2,3)=jb*conj(jc)*nm/KB/T;
- mat(3,1)=jc*conj(ja)*nm/KB/T;
- mat(3,2)=jc*conj(jb)*nm/KB/T;
- mat(3,3)=jc*conj(jc)*nm/KB/T;
+ u1(1)=ja*sqrt(nm/KB/T);
+ u1(2)=jb*sqrt(nm/KB/T);
+ u1(3)=jc*sqrt(nm/KB/T);
  }
 }
 else
@@ -233,26 +222,14 @@ else
     }
  if (transitionnumber==1)
  {// now lets calculate mat
- mat(1,1)=(jam-Jret(1))*(jam-Jret(1))*nm/KB/T;
- mat(1,2)=(jam-Jret(1))*(jbm-Jret(2))*nm/KB/T;
- mat(1,3)=(jam-Jret(1))*(jcm-Jret(3))*nm/KB/T;
- mat(2,1)=(jbm-Jret(2))*(jam-Jret(1))*nm/KB/T;
- mat(2,2)=(jbm-Jret(2))*(jbm-Jret(2))*nm/KB/T;
- mat(2,3)=(jbm-Jret(2))*(jcm-Jret(3))*nm/KB/T;
- mat(3,1)=(jcm-Jret(3))*(jam-Jret(1))*nm/KB/T;
- mat(3,2)=(jcm-Jret(3))*(jbm-Jret(2))*nm/KB/T;
- mat(3,3)=(jcm-Jret(3))*(jcm-Jret(3))*nm/KB/T;
+ u1(1)=(jam-Jret(1))*sqrt(nm/KB/T);
+ u1(2)=(jbm-Jret(2))*sqrt(nm/KB/T);
+ u1(3)=(jcm-Jret(3))*sqrt(nm/KB/T);
  }else{
  // now lets calculate mat
- mat(1,1)=(jap-Jret(1))*(jap-Jret(1))*np/KB/T;
- mat(1,2)=(jap-Jret(1))*(jbp-Jret(2))*np/KB/T;
- mat(1,3)=(jap-Jret(1))*(jcp-Jret(3))*np/KB/T;
- mat(2,1)=(jbp-Jret(2))*(jap-Jret(1))*np/KB/T;
- mat(2,2)=(jbp-Jret(2))*(jbp-Jret(2))*np/KB/T;
- mat(2,3)=(jbp-Jret(2))*(jcp-Jret(3))*np/KB/T;
- mat(3,1)=(jcp-Jret(3))*(jap-Jret(1))*np/KB/T;
- mat(3,2)=(jcp-Jret(3))*(jbp-Jret(2))*np/KB/T;
- mat(3,3)=(jcp-Jret(3))*(jcp-Jret(3))*np/KB/T;
+ u1(1)=(jap-Jret(1))*sqrt(np/KB/T);
+ u1(2)=(jbp-Jret(2))*sqrt(np/KB/T);
+ u1(3)=(jcp-Jret(3))*sqrt(np/KB/T);
  }
 }
 if (pr==1) printf ("delta=%4.6g meV\n",delta);

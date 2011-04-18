@@ -124,7 +124,7 @@ class icpars
       double truncate_level;                 // Fraction of matrix to keep, for matrix truncation.
       int num_eigv;                          // Number of eigenvectors to print in output
       std::string density;                   // Flag to output expectation values of spin/orbital density operator.
-    //std::string observable;                // Flag to tell mq() and dncalc() which observable matrix to calculate
+    //std::string observable;                // Flag to tell mq() and dv1calc() which observable matrix to calculate
       std::string basis;                     // Name of basis to output eigenvectors, supported: "JmJ" and "mSmL"
       double Bx,By,Bz;                       // For magnetic field for Zeeman term
       double xT,xHa,xHb,xHc;                 // The vector in (H-T) phase space to calculate the x-axis of phase diag

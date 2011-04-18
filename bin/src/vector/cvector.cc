@@ -788,7 +788,7 @@ complex<double> Sum (const ComplexVector& c)
 
 //----------------------------------------------------------------------------//
 // double Norm (const ComplexVector& A)
-// Returns the Euclidean norm (2-norm) of the vector, that is the sum of 
+// Returns the Euclidean norm (2-norm) of the vector, that is the sqrt of the sum of
 // modulus squared of all vector elements.
 //----------------------------------------------------------------------------//
 
@@ -810,7 +810,7 @@ double Norm2 (const ComplexVector& A)
 {
   int n = A.ncol;
   if (n <= 0) Matpack.Error("double Norm2 (const ComplexVector& A) -- empty vector");  
-  double sum = sqrt(norm2(A.Store(),n));
+  double sum = norm2(A.Store(),n);
   return sum;
 }
 

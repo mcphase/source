@@ -204,7 +204,7 @@ for(int a=1;a<=gjmbH.Hi();++a)
 delete []d0;delete []dn;
 }
 
-int jjjpar::cluster_dm(int & tn,double & T,Vector & gjmbH,ComplexMatrix & mat,float & delta)
+int jjjpar::cluster_dm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,float & delta)
 { 
   /*on input
     transitionnumber ... number of transition to be computed - meaningless for kramers doublet, because there is only 1 transition
@@ -214,9 +214,9 @@ int jjjpar::cluster_dm(int & tn,double & T,Vector & gjmbH,ComplexMatrix & mat,fl
     gjmbH	vector of effective field [meV]
   on output    
     delta	splitting of kramers doublet [meV]
-    mat(i,j)	<-|(Ji-<Ji>)|+><+|(Jj-<Jj>|-> tanh(delta/2kT)
+    u1(i)	<-|(Ji-<Ji>)|+> sqrt(tanh(delta/2kT))
 */
-  int pr=1;
+  int pr=1,subtractexpvalue=1;if(T<0){subtractexpvalue=0;T=-T;}
   if (tn<0) {pr=0;tn*=-1;}
 int dim=1; int *d0= new int [(*clusterpars).nofatoms+1];
            int *dn= new int [(*clusterpars).nofatoms+1];
@@ -226,7 +226,7 @@ for (int n=1;n<=(*clusterpars).nofatoms;++n)
  dn[n]=(*(*clusterpars).jjj[n]).opmat(0,gjmbH).Rhi();
  dim*=dn[n];
  if(gjmbH.Hi()!=(*(*clusterpars).jjj[n]).nofcomponents)
- {fprintf(stderr,"Error module cluster - dmcalc: in current version dimensions of meanfield must match number of components of each atom in cluster, individual coupling between atoms in different clusters are not implemented yet\n");exit(EXIT_FAILURE);}
+ {fprintf(stderr,"Error module cluster - du1calc: in current version dimensions of meanfield must match number of components of each atom in cluster, individual coupling between atoms in different clusters are not implemented yet\n");exit(EXIT_FAILURE);}
 }
 
  Matrix H(1,dim,1,dim);
@@ -332,7 +332,7 @@ for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj)
 // 2. set delta
 delta=En(jj)-En(ii);
 
-if (delta<-0.000001){fprintf(stderr,"ERROR module cluster - dmcalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if (delta<-0.000001){fprintf(stderr,"ERROR module cluster - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(jj==ii)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
 // calculate Z and wn (occupation probability)
@@ -346,7 +346,7 @@ if(jj==ii)delta=-SMALL; //if transition within the same level: take negative del
       }
      Zs=Sum(wn);wn/=Zs;
 
-Vector Jret(1,gjmbH.Hi());
+Vector Jret(1,gjmbH.Hi());Jret=0;
 ComplexVector iJj(1,gjmbH.Hi());
 
 Matrix Ja(1,dim,1,dim);
@@ -382,46 +382,36 @@ for(int a=1;a<=gjmbH.Hi();++a)
 
  // determine expectation value
  Jret(a)=0;
- for(int i=1;i<=dim&&wn[i]>0.00001;++i)
+if (subtractexpvalue==1)
+{ for(int i=1;i<=dim&&wn[i]>0.00001;++i)
  {Jret(a)+=wn[i]*aMb_real(Ja,zr,zc,i,i);
  }
+}
 }
 
 delete []d0;delete []dn;
 
 
-// 3. set mat
-for(int l=1;l<=gjmbH.Hi();++l)for(int m=1;m<=gjmbH.Hi();++m)
+// 3. set u1
+for(int l=1;l<=gjmbH.Hi();++l)
 {if(ii==jj){//take into account thermal expectation values <Jret>
-          mat(l,m)=(iJj(l)-Jret(l))*(conj(iJj(m))-Jret(m));}
- else    {mat(l,m)=iJj(l)*conj(iJj(m));}
+          u1(l)=(iJj(l)-Jret(l));}
+ else    {u1(l)=iJj(l);}
 }
-
-  //check if M it is hermitean
-double d;
-   d=NormFro(mat-mat.Conjugate().Transpose());
-   if (d>1e-5)
-   {fprintf(stderr,"cfielddm: ERROR- %ix%i matrix not hermitian, abs sum of differences= %g\n",mat.Rhi(),mat.Rhi(),d);
-//for(l=1;l<=gjmbH.Hi();++l)for(m=1;m<=l;++m)if((fabs(imag(mat(l,m))+imag(mat(m,l)))+fabs(real(mat(l,m))-real(mat(m,l))))>0.1)printf("m(%i,%i)=%g,%g m(%i,%i)=%g,%g\n",l,m,real(mat(l,m)),imag(mat(l,m)),m,l,real(mat(m,l)),imag(mat(m,l)));
-    //printout matrix
-   // myPrintComplexMatrix(stderr,z);
-    getchar();
-   }
-
 
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",ii,jj,delta);
-      printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",ii,jj,real(mat(1,1)),ii,jj,real(mat(2,2)),ii,jj,real(mat(3,3)));
+      printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",ii,jj,abs(u1(1))*abs(u1(1)),ii,jj,abs(u1(2))*abs(u1(2)),ii,jj,abs(u1(3))*abs(u1(3)));
       printf(" n%i-n%i=%4.4g\n",ii,jj,wn(ii)-wn(jj));}
-    mat*=(wn(ii)-wn(jj)); // occupation factor
+    u1*=sqrt(wn(ii)-wn(jj)); // occupation factor
      }else
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",ii,jj,delta);
-      printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",ii,jj,real(mat(1,1)),ii,jj,real(mat(2,2)),ii,jj,real(mat(3,3)));
+      printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",ii,jj,abs(u1(1))*abs(u1(1)),ii,jj,abs(u1(2))*abs(u1(2)),ii,jj,abs(u1(3))*abs(u1(3)));
       printf(" n%i=%4.4g\n",ii,wn(ii));}
-    mat*=(wn(ii)/KB/T);
+    u1*=sqrt(wn(ii)/KB/T);
    }
 
 

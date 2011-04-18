@@ -1057,7 +1057,7 @@ if(gjmbH.Hi()>48)
 
 /**************************************************************************/
 // for mcdisp this routine is needed
-int ionpars::cfielddm(int & tn,double & T,Vector & gjmbH,ComplexMatrix & mat,float & delta,ComplexMatrix & ests)
+int ionpars::cfielddm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 {  /*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -1065,7 +1065,7 @@ int ionpars::cfielddm(int & tn,double & T,Vector & gjmbH,ComplexMatrix & mat,flo
     gjmbH	vector of effective field [meV]
   on output    
     delta-+	energy of transition [meV]
-    mat(i,j)	<-|Ji|+><+|Jj|-> (n+-n-),  n+,n-
+    u1(i)	<-|Ji|+> sqrt(n+-n-),  n+,n-
     .... occupation number of states (- to + transition chosen according to transitionnumber)
 */
 
@@ -1090,8 +1090,11 @@ if(gjmbH.Hi()>48)
 // 			   int sort, int maxiter)
 
  Vector JJ(1,gjmbH.Hi());
-double lnz,u;
-cfieldJJ(JJ,T,gjmbH,lnz,u,ests);  //expectation values <J>
+double lnz,u;JJ=0;
+if (T>0){cfieldJJ(JJ,T,gjmbH,lnz,u,ests);  //expectation values <J>
+        }
+        else
+        {T=-T;}
   int pr;
   pr=1;
   if (tn<0) {pr=0;tn*=-1;}
@@ -1136,7 +1139,7 @@ exit(0);
    
    // calculate Z and wn (occupation probability)
      Vector wn(1,dj);double Zs;
-     double x,y;int i,k,l,m;
+     double x,y;int i,k,l;
      x=Min(En);
      for (i=1;i<=dj;++i)
      {if ((y=(En(i)-x)/KB/T)<700) wn[i]=exp(-y); 
@@ -1174,47 +1177,29 @@ for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 // 2. set delta
 delta=En(j)-En(i);
 
-if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion or cfield.so - dmcalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion or cfield.so - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
 // 3. set mat
-for(l=1;l<=gjmbH.Hi();++l)for(m=1;m<=gjmbH.Hi();++m)
-//{if(i==j){//take into account thermal expectation values <Jl>
-//          mat(l,m)=((z.Column(i)*(*zp[l]).Column(j))-JJ(l))*((z.Column(j)*(*zp[m]).Column(i))-JJ(m));}
-// else    {mat(l,m)=(z.Column(i)*(*zp[l]).Column(j))*(z.Column(j)*(*zp[m]).Column(i));}}
+for(l=1;l<=gjmbH.Hi();++l)
 {if(i==j){//take into account thermal expectation values <Jl>
-          mat(l,m)=(((*zp[l]).Column(j)*z.Column(i))-JJ(l))*(((*zp[m]).Column(i)*z.Column(j))-JJ(m));}
- else    {mat(l,m)=((*zp[l]).Column(j)*z.Column(i))*((*zp[m]).Column(i)*z.Column(j));}}
-           // changed by MR 11.4.2011 because bug in cecu2ge2:
+          u1(l)=(((*zp[l]).Column(j)*z.Column(i))-JJ(l));}
+ else    {u1(l)=((*zp[l]).Column(j)*z.Column(i));}}
            // ... in complex vector scalar product a*b is defined as: a.conj(b) !!! (see cvector.cc)
-
-  //check if M it is hermitean
-double d;
-   d=NormFro(z*z.Conjugate().Transpose());
-//printf("d=%g\n",d);
-   d=NormFro(mat-mat.Conjugate().Transpose());
-   if (d>1e-5)
-   {fprintf(stderr,"cfielddm: ERROR- %ix%i matrix not hermitian, abs sum of differences= %g\n",mat.Rhi(),mat.Rhi(),d);
-//for(l=1;l<=gjmbH.Hi();++l)for(m=1;m<=l;++m)if((fabs(imag(mat(l,m))+imag(mat(m,l)))+fabs(real(mat(l,m))-real(mat(m,l))))>0.1)printf("m(%i,%i)=%g,%g m(%i,%i)=%g,%g\n",l,m,real(mat(l,m)),imag(mat(l,m)),m,l,real(mat(m,l)),imag(mat(m,l)));
-    //printout matrix
-   // myPrintComplexMatrix(stderr,z);
-    getchar();
-   }
-
 
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",i,j,real(mat(1,1)),i,j,real(mat(2,2)),i,j,real(mat(3,3)));
+      printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",i,j,abs(u1(1))*abs(u1(1)),i,j,abs(u1(2))*abs(u1(2)),i,j,abs(u1(3))*abs(u1(3)));
       printf(" n%i-n%i=%4.4g\n",i,j,wn(i)-wn(j));}
-    mat*=(wn(i)-wn(j)); // occupation factor    
+    u1*=sqrt(wn(i)-wn(j)); // occupation factor
      }else
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",i,j,real(mat(1,1)),i,j,real(mat(2,2)),i,j,real(mat(3,3)));
+      printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",i,j,abs(u1(1))*abs(u1(1)),i,j,abs(u1(2))*abs(u1(2)),i,j,abs(u1(3))*abs(u1(3)));
       printf(" n%i=%4.4g\n",i,wn(i));}
-    mat*=(wn(i)/KB/T);
+    u1*=sqrt(wn(i)/KB/T);
    }
 
 //clean up memory
@@ -1226,7 +1211,7 @@ if (delta>SMALL)
  return (int)((J+1)*(2*J+1)); 
 }
 
-int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexMatrix & nat)
+int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & v1)
 {/*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -1234,16 +1219,16 @@ int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,d
     th ph  .... polar angles of the scattering vector with respect to xyz=cab coordinate system (cfield) or xyz=abc (so1ion)
 on output    
     int   	total number of transitions
-    N(i,j)	<-|Q|+><+|Q|-> (n+-n-),  n+,n-
+    v1(i)	<-|Q|+> sqrt(n+-n-),  n+,n-
      // note that  <M(Q)>=-2x<Q>_TH in units of mb
     .... occupation number of states (- to + transition chosen according to transitionnumber)
 */
   int pr;pr=1;if (tn<0) {pr=0;tn*=-1;}
-  int i,j,k,l,m;
+  int i,j,k,l;
   int dj=(int)(2*J+1);
   double delta;
 // calculate nat for transition number tn
-// 1. get i and j from tn (as in dmcalc
+// 1. get i and j from tn (as in du1calc
 k=0;
 for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 {++k;if(k==tn)break;
@@ -1252,7 +1237,7 @@ for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 // 2. set delta
 delta=real(est(0,j))-real(est(0,i));
 
-if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - dncalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - dv1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
 	 ComplexMatrix * MQMi[4];
@@ -1261,9 +1246,9 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
          MQMi[3]=new ComplexMatrix(1,dj,1,dj);
         MQM((*MQMi[1]),(*MQMi[2]),(*MQMi[3]),th,ph,J0,J2,J4,J6,Zc);
         //      x           y         z   // this has been fixed for module so1ion now 3.4.10 MR
-        //      a           b         c   // ... for module cfield a backtransformation in dncalc has been introduced in jjjpar.cpp
+        //      a           b         c   // ... for module cfield a backtransformation in dv1calc has been introduced in jjjpar.cpp
       
-// 3. set nat
+// 3. set v1
          int K,M,Md;
          ComplexVector Malpha(1,3);Malpha=0;
           for(K=1;K<=3;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
@@ -1282,26 +1267,26 @@ if(i==j){//take into account thermal expectation values <Jl>
          delete MQMi[1];delete MQMi[2]; delete MQMi[3];
 
 
-       // set matrix <i|Ml|j><j|Mm|i>
-       nat=0;
-          for(l=1;l<=3;++l)for(m=1;m<=3;++m)
-          {nat(l,m)=Malpha(l)*conj(Malpha(m));}
+       // set vector v1= <i|Ml|j>
+       v1=0;
+          for(l=1;l<=3;++l)
+          {v1(l)=Malpha(l);}
 
 // multiply by occupation number difference ...
 
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Qa|%i>|^2=%4.4g |<%i|Qb|%i>|^2=%4.4g |<%i|Qc|%i>|^2=%4.4g",i,j,real(nat(1,1)),i,j,real(nat(2,2)),i,j,real(nat(3,3)));
+      printf(" |<%i|Qa|%i>|^2=%4.4g |<%i|Qb|%i>|^2=%4.4g |<%i|Qc|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
       printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
-    nat*=(imag(est(0,i))-imag(est(0,j))); // occupation factor    
+    v1*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
      }else
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Qa-<Qa>|%i>|^2=%4.4g |<%i|Qb-<Qb>|%i>|^2=%4.4g |<%i|Qc-<Qc>|%i>|^2=%4.4g",i,j,real(nat(1,1)),i,j,real(nat(2,2)),i,j,real(nat(3,3)));
+      printf(" |<%i|Qa-<Qa>|%i>|^2=%4.4g |<%i|Qb-<Qb>|%i>|^2=%4.4g |<%i|Qc-<Qc>|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
       printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
-    nat*=(imag(est(0,i))/KB/T);
+    v1*=sqrt(imag(est(0,i))/KB/T);
    }
 
 

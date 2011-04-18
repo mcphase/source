@@ -83,7 +83,7 @@ public:
    void  mcalc (Vector &mom, double & T, Vector &  gjmbH, double & lnZ,double & U,ComplexMatrix & ests);
 
    // returns transition element matrix M  and transition energy delta (to calculate chi0 in mcdisp,see manual)
-   int  dmcalc (double & T,Vector &  gjmbheff, ComplexMatrix & mat,float & delta,ComplexMatrix & ests);
+   int  du1calc (double & T,Vector &  gjmbheff, ComplexVector & u1,float & delta,ComplexMatrix & ests);
    int transitionnumber; // the transition associated with the ion (important if there are more in the single ion spectrum)
 
    ComplexMatrix est; // eigenstates
@@ -99,7 +99,7 @@ private:
   // external module functions, intern_mcalc=0
  
   void (*m)(Vector*,double*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*);
-  int  (*dm)(int*,double*,Vector*,double*,Vector*,char**,ComplexMatrix*,float*,ComplexMatrix*);
+  int  (*dm)(int*,double*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
   void (*estates)(ComplexMatrix*,Vector*,double*,double*,Vector*,char**);
   void (*mcalc_parameter_storage)(ComplexMatrix*,Vector*,double*,double*,Vector*,char**);
@@ -115,11 +115,11 @@ public:
 
   // returns transition element matrix N(Q) in order to be able to go beyond
    // dipolar approximation in mcdisp - it requires a call to eigenstates first
-   int dncalc(Vector & Qvec, double & T, ComplexMatrix & nat, ComplexMatrix & ests);
+   int dv1calc(Vector & Qvec, double & T, ComplexVector & v1, ComplexMatrix & ests);
 
 private :
   void (*mq)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*);
-  int  (*ddnn)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexMatrix*);
+  int  (*ddnn)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*);
 
 
 public:
@@ -244,7 +244,7 @@ void *handle;
 
   // kramers internal module functions, module_type=1
   void kramer (Vector &mom,double & T,Vector & H, double & Z,double & U);
-  int  kramerdm (int & tn,double & T,Vector &  heff, ComplexMatrix & mat,float & delta);
+  int  kramerdm (int & tn,double & T,Vector &  heff, ComplexVector & u1,float & delta);
   Matrix krameropmat (int & n ,Vector & H);
 
   // realisation of class iops - cfield internal module functions, intern_mcalc=2
@@ -254,11 +254,11 @@ void *handle;
 
   // brillouin internal module functions,module_type=3
   void brillouin (Vector &mom, double & T,Vector & H, double & Z,double & U);
-  int  brillouindm (int & tn,double & T,Vector &  heff, ComplexMatrix & mat,float & delta);
+  int  brillouindm (int & tn,double & T,Vector &  heff, ComplexVector & u1,float & delta);
 
   // cluster internal module functions, module_type=5
   void cluster_mcalc (Vector &mom,double & T,Vector & H, double & Z,double & U);
-  int  cluster_dm (int & tn,double & T,Vector &  heff, ComplexMatrix & mat,float & delta);
+  int  cluster_dm (int & tn,double & T,Vector &  heff, ComplexVector & u1,float & delta);
   par * clusterpars;
 
 

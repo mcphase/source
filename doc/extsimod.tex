@@ -318,10 +318,10 @@ void mcalc\_parameter\_storage\_matrix\_init   && {\prg mcphas}       \\
 void estates            &&	{\prg mcdiff}         \\
 						&& {\prg singleion}     \\	
 						&& {\prg mcdisp} \\
-int dmcalc				& {\prg mcdisp} &\\
+int du1calc				& {\prg mcdisp} &\\
 						& {\prg singleion}     \\	
 void mq					& & {\prg mcdiff} \\
-int dncalc              & & {\prg mcdisp} \\										
+int dv1calc              & & {\prg mcdisp} \\										
 void spindensity\_mcalc  &{\prg spindensplt}&\\
                         &{\prg spindensities}&\\
                         &{\prg momdensplt}&\\
@@ -510,7 +510,7 @@ This routine is optional, i.e. may be programemd but is not absolutely necessary
 single ion module
 with the possiblity to store information, usually the eigenvalues and eigenstates of a problem. This can be very %%@
 useful to accelerate computations. 
-For example, the module {\prg mcdisp} provides to the single ion module functions {\prg dmcalc} and {\prg dncalc}
+For example, the module {\prg mcdisp} provides to the single ion module functions {\prg du1calc} and {\prg dv1calc}
 at every call the matrix {\prg estates} which has been set initially for every atom
 by a call to {\prg estates}.
 
@@ -562,21 +562,24 @@ int l,m;
 
 
 %*************************************************************************************
-\subsection{External module function {\prg dmcalc} - used by {\prg mcdisp\index{mcdisp}},{\prg %%@
+\subsection{External module function {\prg du1calc} - used by {\prg mcdisp\index{mcdisp}},{\prg %%@
 singleion\index{singleion}}}
 
-The external single ion module has to provide the 3x3 
+The external single ion module has to provide the components 3x3 
 matrix $M^s_{\alpha\beta}$ (see equation (\ref{mmatrix})) for every transition
 $|-> \rightarrow |+>$which is to be taken into consideration 
 in the calculation. Note, in general$M^s_{\alpha\beta}$ it is a quadratic matrix with the same
-dimension as the vectors J and gjmbH, however it must be at least 3x3.
-
+dimension as the vectors J and gjmbH, however it must be at least 3x3. 
+In order to make calculations easier and provide a unique phase of the eigenvectors, the 
+external single ion module must return not the Matrix $M$ but the unnormalized
+eigenvector $u1$, which is given by equation (\ref{ufirstrow}): ${\mbf u^s_{\alpha1}}=\sqrt{(n_--n_+)}<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+>$. Note that in contrast to ${\mathcal U^s_{\alpha1}}$ the eigenvector
+${\mbf u^s_{\alpha1}}$ is not normalised and thus the matrix  $M^s_{\alpha\beta}$ may be recovered from it.
 
 The format to be used is:
 {\footnotesize
 \begin{verbatim}
-extern "C" int dmcalc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & MODPAR,
-char ** sipffilename,ComplexMatrix & mat,float & delta, ComplexMatrix & est)
+extern "C" int du1calc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & MODPAR,
+char ** sipffilename,ComplexVector & u1,float & delta,ComplexVector & u1, ComplexMatrix & est)
 \end{verbatim}
 
 The meaning of the symbols is as follows:
@@ -598,14 +601,15 @@ on input
 on output
    int             total number of transitions
    delta           transition energy [meV]
-   mat             matrix M(alpha,beta)=<-|Jalpha|+><+|Jbeta|-> (n- - n+)
+   u1             vector u1=<-|Jalpha-<Jalpha>|+>sqrt((n- - n+)) (if T>0)
+                          vector u1=<-|Jalpha|+>sqrt((n- - n+)) (if T<0)
                 note that as in mcalc the single ion momentum vector <-|J|+> 
 				(n- dimensional with n>=1)
                 may be an arbitrary set of operators, restriction is that 
                 Ja, Jb, Jc are the total angular motmentum components along the
                 crystallographic a,b,c directions (note if gJ=0 this restriction is that
                 Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc). this is necessary in order that
-                mcdisp\index{mcdisp} correctly outputs the neutron scattering cross section.
+                mcdisp correctly outputs the neutron scattering cross section.
 				
 \end{verbatim}
 }
@@ -613,23 +617,27 @@ The module function must perform the following tasks:
 \begin{enumerate}
 \item check if the dimensions of vectors J,gjmbH (taken by {\prg mcphas} from the number of 
 interaction constant columns in {\prg mcphas.j\index{mcphas.j}})
- and ABC (taken by {\prg mcphas} from the number of params in the single ion property
+ and MODPAR (taken by {\prg mcphas} from the number of params in the single ion property
 file) agree with the module specifications. Note a module may be designed to 
 take different dimensions depending on the input files, however the dimensions
 of vectors J and gjmbH has to agree and must be within the range of dimensions which
 can be treated by the module. If the check fails the module function should exit the
 program with an appropriate error message
 \item the module function should do a numbering of all possible single ion transitions and return
-the total number of transitions as an integer. Input file parameters params are supplied as a vector ABC and
+the total number of transitions as an integer. Input file parameters params are supplied as a vector MODPAR and
 Lande factor as g\_J and  can be used for this purpose.
 \item it should calculate from meanfields at a given temperature the 
 transition energy of transition number {\prg tn}. The result should be returned as {\prg delta}
-\item for the transition number tn the matrix mat is to be filled with the 3x3 
-matrix $M^s_{\alpha\beta}$ (see equation (\ref{mmatrix})).
+\item for the transition number tn the vector u1 is to be filled with ${\mbf u^s_{\alpha1}}=\sqrt{(n_--n_+)}<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+>$.
+\item if the a negative value for T is entered, the vector u1 is to be filled with
+        ${\mbf u^s_{\alpha1}}=\sqrt{(n_--n_+)}<-|J^s_{\alpha}|+>$ and the 
+       temperature T has to be multiplied by -1.
+\item
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
 the expression (\ref{mmatrix}) would be zero because $(n_--n_+)$ vanishes.
 In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--n_+)$.
+\item if transition is from a level to itself, then a negative value of $\Delta=-10^{-10}$ should be returned.
 \end{enumerate}
 
 %*************************************************************************************
@@ -707,18 +715,18 @@ on output
 }
 
 %*************************************************************************************
-\subsection{External module functions {\prg dncalc} - used by {\prg mcdisp\index{mcdisp}}  }
+\subsection{External module functions {\prg dv1calc} - used by {\prg mcdisp\index{mcdisp}}  }
 
 Similarly  ''going beyond''  dipolar approximation in the program {\prg mcdisp\index{mcdisp}}
-can be done with  module functions {\prg dncalc} and {\prg estates}. 
-The input of {\prg dncalc} 
+can be done with  module functions {\prg dv1calc} and {\prg estates}. 
+The input of {\prg dv1calc} 
 has similar arguments as
-{\prg dmcalc}, but as additional argument an orientation
+{\prg du1calc}, but as additional argument an orientation
 of the scattering vector,
-output should be a corresponding matrix 
-$N^s_{\alpha\beta}(\mbf Q)=<-|\mathcal Q^{\dag}_{\alpha}|+><+|\mathcal Q_{\beta}|-> (n_--n_+)$.
+output should be a corresponding vector
+ ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(n_--n_+)}<-|\mathcal Q^{\dag}_{\alpha}|+>$.
 where $\mathcal Q_{\alpha}$ are the cartesian components of the scattering operator.
- {\prg dncalc} is called many times, for
+ {\prg dv1calc} is called many times, for
  every scattering vector. In order to
  do an efficient calculation the eigenstates should be calculated only
  once, this is the task of function {\prg estates} (see above).
@@ -727,9 +735,9 @@ where $\mathcal Q_{\alpha}$ are the cartesian components of the scattering opera
 The format to be used is:
 {\footnotesize
 \begin{verbatim}
-extern "C" int dncalc(int & tn,double & th,double & ph,double J0,
+extern "C" int dv1calc(int & tn,double & th,double & ph,double J0,
 double & J2, double & J4, double & J6,ComplexMatrix & est,double & T,
-ComplexMatrix & mat)
+ComplexVector & v1)
 \end{verbatim}
 
 The meaning of the symbols is as follows:
@@ -751,7 +759,7 @@ on input
    T               Temperature[K]
 on output
    int             total number of transitions
-   mat             matrix N(alpha,beta)=<-|Qalpha|+><+|Qbeta|-> (n- - n+)
+   v1             vector v(alpha)=<-|Qalpha|+>sqrt(n- - n+)
                    
      Note on Qalpha
        if gJ>0:
@@ -781,16 +789,16 @@ on output
 
 The module function must perform the following tasks:
 \begin{enumerate}
-\item for the transition number tn the matrix mat is to be filled with the nxn 
-matrix $N^s_{\alpha\beta}$ (see comments after equation (\ref{finalslow})),
-n is the number of components of the effective field vector, the 
-matrix should only have nonzero values for the relevant values of
-the scattering operator, i.e. for $\alpha,\beta=1,..3$ in the case of
-gJ$>$0 and for $\alpha,\beta=1,..,6$ in the case gJ=0 (intermediate coupling)
+\item for the transition number tn the vector v1  is to be filled with the n-component 
+ ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(n_--n_+)}<-|\mathcal Q^{\dag}_{\alpha}|+>$.
+n is the number of components of the effective field vector, the vector
+should only have nonzero values for the relevant values of
+the scattering operator, i.e. for $\alpha=1,..3$ in the case of
+gJ$>$0 and for $\alpha=1,..,6$ in the case gJ=0 (intermediate coupling)
 \item
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
-the $N^s_{\alpha\beta}$ 
+the ${\mbf v^s_{\alpha1}}(\mbf Q)$ 
  would be zero because $(n_--n_+)$ vanishes (compare expression (\ref{mmatrix})).
 In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--n_+)$.
 \end{enumerate}

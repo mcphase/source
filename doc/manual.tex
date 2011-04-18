@@ -72,9 +72,12 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
-\subsection*{... in version 4.1/4.2 ...}
+\subsection*{... in version 4.1/4.2/4.3 ...}
 - a bug in the normalisation of the eigenvectors/intensities calculated for dispersive modes in mcdisp.c has been removed
 - a bug in the beyond dip approximation calculation for inelastic intensities with module so1ion has been removed
+- the phase problem in eigenvector of matrix M has been solved by introducing a function du1calc and dv1calc, which
+replaces dmcalc and dncalc in previous versions (different phases of eigenvector U1 and V1 led to wrong neutron intensities
+for the beyond dipole calculation in older versions of mcdisp)
 
 \subsection*{... in version 4.0 ...}
 

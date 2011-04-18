@@ -16,7 +16,7 @@ unless ($#ARGV>=2)
 
 {print " program to create mcdisp.ini from mcphas.j for the calculation of neutron powder spectra\n\n";
 
-print " usage: powdermagnon 0.3 2 0.1 10\n\n";
+print " usage: powdermagnon 0.3 2 0.1 10 0.5 30\n\n";
 
 print " meaning take mcphas.j, generate a reflection list and put it to mcdisp.par \n";
 
@@ -27,6 +27,10 @@ print " 2   ....qmax   [1/A] maximal q vector\n";
 print " 0.1 ....deltaq [1/A] stepwidth in q\n";
 
 print " 10  ....number of steps in polar coordinate theta\n";
+
+print " 0.5 ....Emin   [meV] minimal energy\n";
+
+print " 30  ....Emax   [meV] maximal energy\n";
 
 print "        (steps in fi fixed by dfi=dtheta*pi/(4*sin(theta))\n";
 
@@ -42,7 +46,7 @@ print ".... then restart powdermagnon by: powdermagnon -r results/mcdisp.qei 0.5
 
 print " 0.5 ....Emin   [meV] minimal energy\n";
 
-print " 0.5 ....Emax   [meV] maximal energy\n";
+print " 30  ....Emax   [meV] maximal energy\n";
 
 print " 0.5 ....deltaE [meV] energy stepwidth\n";
 
@@ -81,6 +85,7 @@ my ($deltaE) = $ARGV[4];
 $n=int(($Emax-$Emin)/$deltaE);
 
 my (@ints)=();$#ints=$n;
+my (@intsbey)=();$#intsbey=$n;
 
 
 
@@ -102,20 +107,21 @@ while(<$h>)
 
      for($i=0;$i<=$n;++$i){
 
-     $E=$Emin+($i-0.5)*$deltaE;$ints[$i]/=$counter;
+     $E=$Emin+($i-0.5)*$deltaE;$ints[$i]/=$counter;$intsbey[$i]/=$counter;
 
-     print $numbers[0]." ".$numbers[1]." ".$numbers[2]." ".$numbers[3]." ";
+     print $numbers1[0]." ".$numbers1[1]." ".$numbers1[2]." ".$numbers1[3]." ";
 
-     print $qold." ".$E." ".$ints[$i]."\n";}
+     print $qold." ".$E." ".$ints[$i]." ".$intsbey[$i]."\n";}
 
-     $counter=0;@ints=0;
+     $counter=0;@ints=0;@intsbey=0;
 
                }
 
-  $i=int(($numbers[8]-$Emin)/$deltaE);
-
-  $ints[$i]+=$numbers[9];
-
+  if($numbers[8]<=$Emax&&$numbers[8]>=$Emin)
+  {  $i=int(($numbers[8]-$Emin)/$deltaE);
+     $ints[$i]+=$numbers[9];
+     $intsbey[$i]+=$numbers[10];
+  }
   $qold=$q;
 
   $qh=$numbers[4];
@@ -131,7 +137,7 @@ while(<$h>)
   $qkold=$qk;
 
   $qlold=$ql;
-
+  @numbers1=@numbers;
  }
 
 close $h;
@@ -145,6 +151,11 @@ exit;
 my ($deltaq) = $ARGV[2];
 
 my ($nn)=$ARGV[3];
+
+my ($Emin) = $ARGV[4];
+
+my ($Emax) = $ARGV[5];
+
 
 $dtheta=$pi/$nn+0.000001;
 
@@ -177,12 +188,13 @@ print $h "#\n";
 print $h "# depending on what is kept constant it follows either kf or ki (1/A)\n";
 print $h "#!kf=2\n";
 print $h "# \n";
+print $h "# emin and emax define the energy range in which neutron intensities are calculated\n";
 print $h "# for full calculation of the dynamical susceptibility (option -r, inversion of the MF-RPA equation \n";
 print $h "# for each point in Q-omega space) the minimum and maximum energy has to be given (energy stepwidth is \n";
 print $h "# equal to the parameter epsilon given in the command line after -r)\n";
 print $h "#\n";
-print $h "#!emin=-0.02\n";
-print $h "#!emax=+0.02\n";
+print $h "#!emin=$Emin\n";
+print $h "#!emax=$Emax\n";
 print $h "#\n";
 print $h "# optional parameter is extended_eigenvector_dimension\n";
 print $h "# which is used to define, how many components of the\n";

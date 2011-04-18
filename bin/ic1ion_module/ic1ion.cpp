@@ -26,9 +26,9 @@
 #include "../include/vector.h"
 extern "C" void mcalc(Vector &J, double *T, Vector &gjmbH, double *gJ, Vector &ABC, char **sipffilename, double *lnZ, double *U, ComplexMatrix &est);
 extern "C" int estates(ComplexMatrix &est, Vector &gjmbheff, double *gJ, double *T, Vector &ABC, char **sipffilename);
-extern "C" int dmcalc(int &tn, double &T, Vector &gjmbH, double &g_J, Vector &ABC, char **sipffilename, ComplexMatrix &mat, float &delta, ComplexMatrix &est);
+extern "C" int du1calc(int &tn, double &T, Vector &gjmbH, double &g_J, Vector &ABC, char **sipffilename, ComplexMatrix &mat, float &delta, ComplexMatrix &est);
 extern "C" int mq(ComplexVector &Mq, double &th, double &ph, double &J0, double &J2, double &J4, double &J6, ComplexMatrix &est);
-extern "C" int dncalc(int &tn, double &th, double &ph, double &J0, double &J2, double &J4, double &J6, ComplexMatrix &est, double &T, ComplexMatrix &mat);
+extern "C" int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2, double &J4, double &J6, ComplexMatrix &est, double &T, ComplexMatrix &mat);
 extern "C" void mcalc_parameter_storage_matrix_init(ComplexMatrix *est, Vector &gjmbheff, double *g_J, double *T, Vector &ABC, char **sipffilename);
 #endif
 
@@ -419,8 +419,8 @@ int main(int argc, char *argv[])
    end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
    
    int imq, tn = 2; float delta=0.; ComplexMatrix mat6(1,6,1,6);
-   imq = dmcalc(tn,T,gmbH,gJ,ABC,filearray,mat6,delta,est);
-   start = clock(); std::cerr << "Time to calculate dmcalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
+   imq = du1calc(tn,T,gmbH,gJ,ABC,filearray,mat6,delta,est);
+   start = clock(); std::cerr << "Time to calculate du1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 
    ComplexVector Mq;
    double th=PI/4, ph=PI/4, J0=1., J2=1., J4=1., J6=1.;
@@ -432,8 +432,8 @@ int main(int argc, char *argv[])
                           << Mq[3].real() << "+" << Mq[3].imag() << "i]\n";
 
    ComplexMatrix mat(1,6,1,6);
-   imq = dncalc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
-   start = clock(); std::cerr << "Time to calculate dncalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
+   imq = dv1calc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
+   start = clock(); std::cerr << "Time to calculate dv1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 #endif
 
 /* int i, Hsz = est.Cols(); //complexdouble *cest = new complexdouble[Hsz*Hsz]; memcpy(cest,&est[0][0],Hsz*Hsz*sizeof(complexdouble));

@@ -75,7 +75,7 @@ if (gmh>0)
 // for mcdisp this routine is needed
 /**************************************************************************/
 
-int jjjpar::brillouindm(int & tn,double & T,Vector & gjmbH,ComplexMatrix & mat,float & delta)
+int jjjpar::brillouindm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,float & delta)
 { 
   /*on input
     tn          transition-number
@@ -85,7 +85,7 @@ int jjjpar::brillouindm(int & tn,double & T,Vector & gjmbH,ComplexMatrix & mat,f
     gjmbH	vector of effective field [meV]
   on output    
     delta	splittings [meV] 
-    mat(i,j)	transition matrix elements ...
+    u1(i)	transition matrix first eigenvector elements ...
 */
 
 static Vector Jret(1,3);
@@ -93,7 +93,7 @@ int pr;
 
   pr=1;
   if (tn<0) {pr=0;tn*=-1;}
-
+  if (T<0) {T=-T;}
   double JJ,KBT,XJ,gmhkt,gmh,Z,R,X,sinth,hxxyy,jjkt;
   complex <double> i(0,1),bx,by,bz;
 
@@ -114,7 +114,7 @@ else
   R/=0.5*(X-1)*(X-1);
  }
 }
-//printf("module brillouin -dmcalc: Z=%g R=%g X=%g XJ=%g |gjmbH|=%g\n",Z,R,X,XJ,gmh);
+//printf("module brillouin -du1calc: Z=%g R=%g X=%g XJ=%g |gjmbH|=%g\n",Z,R,X,XJ,gmh);
 
 // calculate coefficients bx,by,bz
  hxxyy=gjmbH(1)*gjmbH(1)+gjmbH(2)*gjmbH(2);
@@ -134,33 +134,21 @@ else
  }
   bz=-i*sinth*0.5;
 // -----------------------------------------
-//printf("module brillouin -dmcalc: bx=%g by=%g bz=%g\n",bx,by,bz);
+//printf("module brillouin -du1calc: bx=%g by=%g bz=%g\n",bx,by,bz);
 if (tn==2) // transition to finite energy
  {delta=gmh; //set delta !!!
 
  if (delta>SMALL)
   {// now lets calculate mat
-  mat(1,1)=bx*conj(bx)*(-R/Z);
-  mat(1,2)=bx*conj(by)*(-R/Z);
-  mat(1,3)=bx*conj(bz)*(-R/Z);
-  mat(2,1)=by*conj(bx)*(-R/Z);
-  mat(2,2)=by*conj(by)*(-R/Z);
-  mat(2,3)=by*conj(bz)*(-R/Z);
-  mat(3,1)=bz*conj(bx)*(-R/Z);
-  mat(3,2)=bz*conj(by)*(-R/Z);
-  mat(3,3)=bz*conj(bz)*(-R/Z);
+  u1(1)=bx*sqrt(-R/Z);
+  u1(2)=by*sqrt(-R/Z);
+  u1(3)=bz*sqrt(-R/Z);
   } else
   {// quasielastic scattering needs epsilon * nm / KT ....
   jjkt=0.6666667*JJ*(JJ+1)/KBT;
-  mat(1,1)=bx*conj(bx)*jjkt;
-  mat(1,2)=bx*conj(by)*jjkt;
-  mat(1,3)=bx*conj(bz)*jjkt;
-  mat(2,1)=by*conj(bx)*jjkt;
-  mat(2,2)=by*conj(by)*jjkt;
-  mat(2,3)=by*conj(bz)*jjkt;
-  mat(3,1)=bz*conj(bx)*jjkt;
-  mat(3,2)=bz*conj(by)*jjkt;
-  mat(3,3)=bz*conj(bz)*jjkt;
+  u1(1)=bx*sqrt(jjkt);
+  u1(2)=by*sqrt(jjkt);
+  u1(3)=bz*sqrt(jjkt);
   }
  }
  else
@@ -179,16 +167,10 @@ if (tn==2) // transition to finite energy
 	 jjkt/=(1/XJ-X*XJ)*KBT;
          }
         }
- // now lets calculate mat
- mat(1,1)=gjmbH(1)*gjmbH(1)*jjkt;
- mat(1,2)=gjmbH(1)*gjmbH(2)*jjkt;
- mat(1,3)=gjmbH(1)*gjmbH(3)*jjkt;
- mat(2,1)=gjmbH(2)*gjmbH(1)*jjkt;
- mat(2,2)=gjmbH(2)*gjmbH(2)*jjkt;
- mat(2,3)=gjmbH(2)*gjmbH(3)*jjkt;
- mat(3,1)=gjmbH(3)*gjmbH(1)*jjkt;
- mat(3,2)=gjmbH(3)*gjmbH(2)*jjkt;
- mat(3,3)=gjmbH(3)*gjmbH(3)*jjkt;
+ // now lets calculate u1
+ u1(1)=gjmbH(1)*sqrt(jjkt);
+ u1(2)=gjmbH(2)*sqrt(jjkt);
+ u1(3)=gjmbH(3)*sqrt(jjkt);
  }
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
 

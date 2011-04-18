@@ -308,8 +308,9 @@ void writeheader(par & inputpars,FILE * fout)
  }
 }
 
+
 // procedure to calculate the dispersion
-void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double epsilon, const char * filemode)
+void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
   FILE * fin;
   FILE * fout;
@@ -322,7 +323,6 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do
   FILE * foutds1;
   FILE * jqfile;
   float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
-  int do_gobeyond=1;
   double E;
   double sta=0,sta_int=0,sta_without_antipeaks=0,sta_int_without_antipeaks=0;
   double sta_without_weights=0,sta_int_without_weights=0,sta_without_antipeaks_weights=0,sta_int_without_antipeaks_weights=0;
@@ -339,9 +339,11 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do
   time_t curtime;
   struct tm *loctime;
   float d;
-  
+  double gamman,extgamman;
   Vector gamma(1,ini.nofcomponents);Vector extgamma(1,ini.extended_eigenvector_dimension);
   complex<double> imaginary(0,1);
+  ComplexVector u1(1,ini.nofcomponents);
+  ComplexVector extu1(1,ini.extended_eigenvector_dimension);
   // transition matrix Mij
   ComplexMatrix Mijkl(1,ini.nofcomponents,1,ini.nofcomponents);
  // extended transition matrix Mij
@@ -435,7 +437,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do
  
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
-   fprintf(stdout,"trying dmcalc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
+   fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
       for(ll=1;ll<=ini.nofcomponents;++ll)
        {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s in first 
                                                               //crystallographic unit of magnetic unit cell
@@ -443,8 +445,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do
    md.est_ini(i,j,k,l,(*inputpars.jjj[l]).eigenstates(mf,ini.T)); 
    (*inputpars.jjj[l]).transitionnumber=1;
    fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-   d=1e10;i1=(*inputpars.jjj[l]).dmcalc(ini.T,mf,Mijkl,d,md.est(i,j,k,l));
-
+   d=1e10;i1=(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+   Mijkl = u1^u1;
       // here Mijkl is a nxn matrix n ... numberofcomponents
    noftransitions(l)=0;
     while (minE>d||d>maxE) //only consider transition if it is in interval minE/maxE
@@ -452,7 +454,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do
      fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      ++(*inputpars.jjj[l]).transitionnumber;
      fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-     d=1e10;(*inputpars.jjj[l]).dmcalc(ini.T,mf,Mijkl,d,md.est(i,j,k,l));
+     d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+     Mijkl=u1^u1;
      if((*inputpars.jjj[l]).transitionnumber>i1){fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n (within first crystallographic unit of magnetic unit cell)\n please increase energy range in option -maxE and -minE\n",minE,maxE);
                             exit(EXIT_FAILURE);}
      }
@@ -491,7 +494,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_Erefine,int do_jqfile,int do
       
         (*inputpars.jjj[l]).transitionnumber=j1; // try calculation for transition  j
       fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-      d=maxE;(*inputpars.jjj[l]).dmcalc(ini.T,mf,Mijkl,d,md.est(i,j,k,l));
+      d=maxE;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+      Mijkl = u1^u1;
         (*inputpars.jjj[l]).transitionnumber=jmin; // put back transition number for 1st transition
    //printf("noftransitions read by mcdisp: %i",i1);
       
@@ -588,7 +592,8 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
       
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
         (*inputpars.jjj[l]).transitionnumber=tn; // try calculation for transition  j
-      d=1e10;(*inputpars.jjj[l]).dmcalc(ini.T,mf,Mijkl,d,md.est(i,j,k,l));
+      d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+        Mijkl = u1^u1;gamman=Norm2(u1);u1/=sqrt(gamman);
            if (do_verbose==1){
                   fprintf(stdout,"#Matrix M(s=%i %i %i %i)\n",i,j,k,l);
                    myPrintComplexMatrix(stdout,Mijkl);
@@ -597,8 +602,9 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
        // here we if required calculate the higher dimension matrix used to do the
        // extension of chi to higher value of (uncoupled) nofcomponents in intcalc_approx ... needed for chargedensityfluctuations, extended eigenvectors ...
  if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with extended_eigenvector_dimension=%i (read from mcdisp.par)\n",i,j,k,l,ini.extended_eigenvector_dimension);}
-             d=1e10;(*inputpars.jjj[l]).dmcalc(ini.T,extmf,extMijkl,d,md.est(i,j,k,l));
-     
+             d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,extmf,extu1,d,md.est(i,j,k,l));
+        extMijkl = extu1^extu1;extgamman=Norm2(extu1);extu1/=sqrt(extgamman);
+
         (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
 
        j1=md.baseindex(i,j,k,l,jmin); 
@@ -609,8 +615,21 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
        md.delta(i,j,k)(j1)=nn[6]; // set delta
      // diagonalizeMs to get unitary transformation matrix Us
       myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);myEigenSystemHermitean (extMijkl,extgamma,extUijkl,sort=1,maxiter);
-      // conjugate:note the eigensystemhgermitean returns eigenvectors as column vectors, but
-	// the components need to be complex conjugated 
+
+       if (fabs(gamman-gamma(ini.nofcomponents))>SMALL){fprintf(stderr,"ERROR eigenvalue of single ion matrix M inconsistent: analytic value gamma= %g numerical diagonalisation of M gives gamma= %g\n",gamman,gamma(ini.nofcomponents));
+                           exit(EXIT_FAILURE);}
+       if (fabs(extgamman-extgamma(ini.extended_eigenvector_dimension))>SMALL){fprintf(stderr,"ERROR eigenvalue of extended single ion matrix extM inconsistent: analytic value gamma= %g numerical diagonalisation of extM gives gamma= %g\n",extgamman,extgamma(ini.nofcomponents));
+                           exit(EXIT_FAILURE);}
+
+// take highest eigenvector to be the same phase as u1
+for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii,ini.nofcomponents)))>SMALL)
+                                                {fprintf(stderr,"ERROR eigenvector of single ion matrix M inconsistent\n");
+                                                 myPrintComplexVector(stderr,u1);u1=Uijkl.Column(ini.nofcomponents);myPrintComplexVector(stderr,u1);exit(EXIT_FAILURE);}
+                                               Uijkl(ii,ini.nofcomponents)=u1(ii);}
+for(int ii=extUijkl.Rlo(); ii<=extUijkl.Rhi(); ii++){if (fabs(abs(extu1(ii))-abs(extUijkl(ii,ini.extended_eigenvector_dimension)))>SMALL)
+                                                {fprintf(stderr,"ERROR eigenvector of extended single ion matrix M inconsistent\n");
+                                                 myPrintComplexVector(stderr,extu1);extu1=extUijkl.Column(ini.extended_eigenvector_dimension);myPrintComplexVector(stderr,extu1);exit(EXIT_FAILURE);}
+                                                 extUijkl(ii,ini.extended_eigenvector_dimension)=extu1(ii);}
 
          // treat correctly case for neutron energy loss
 	 if (nn[6]<0) // if transition energy is greater than zero do a conjugation of the matrix
@@ -1092,8 +1111,13 @@ diffint=0;diffintbey=0;
                         i = tin[ithread]->level;
 #else
                      if(do_gobeyond==0){intsbey(i)=-1.1;}else{intsbey(i)=+1.1;}
+                     if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
+                     {
                      ints(i)=intcalc_approx(chi,chibey,pol,polICIC,polICn,polnIC,
                                             intsbey(i),ev_real,ev_imag,eev_real,eev_imag,Ec,dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,QQ);
+                     }
+                     else
+                     {ints(i)=-1;intsbey(i)=-1;}
 #endif
                      if (ini.hkllist==1)
 	             {double test; // add to sta distance to nearest measured peak squared
@@ -1380,7 +1404,7 @@ diffint=0;diffintbey=0;
 //*************************************************************************************************
 // main program
 int main (int argc, char **argv)
-{int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0,do_readtrs=0;
+{int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0,do_readtrs=0,calc_beyond=1;
  const char * spinfile="mcdisp.mf"; //default spin-configuration-input file
  const char * filemode="w";
  double epsilon; //imaginary part of omega to avoid divergence
@@ -1400,7 +1424,8 @@ for (i=1;i<=argc-1;++i){
 		                                                epsilon=strtod(argv[i+1],NULL);++i;
 							        fprintf(stdout,"#epsilon= %g\n",epsilon);
 				     }		
-         else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL;maxlevels=1;}       
+        else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
+         else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL;maxlevels=1;}
           else {if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
            else {if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
             else {if(strcmp(argv[i],"-a")==0) filemode="a";       
@@ -1426,6 +1451,7 @@ for (i=1;i<=argc-1;++i){
 	     }
 	    }
            }	
+          }
     }
 inimcdis ini("mcdisp.par",spinfile);
 
@@ -1440,7 +1466,7 @@ if (argc > 10) {ini.errexit();}
 
 
 //calculate dispersion and save to files
-dispcalc(ini,inputpars,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,epsilon,filemode);
+dispcalc(ini,inputpars,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,epsilon,filemode);
   
  printf("RESULTS saved in directory ./results/  - files:\n");
    printf("  mcdisp.qei  - T,H,qvector vs energies and neutron intensities\n");
