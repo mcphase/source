@@ -1084,6 +1084,8 @@ diffint=0;diffintbey=0;
                      {
                         i=oldi+ithread; if(i>dimA) break;
                         if(do_gobeyond==0) intsbey(i)=-1.1; else intsbey(i)=+1.1;
+                      if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
+                      {
                         tin[ithread]->En=En(i); tin[ithread]->intensitybey=intsbey(i); tin[ithread]->level = i;
                         #ifdef __linux__
                         rc = pthread_create(&threads[ithread], &attr, intcalc_approx, (void *) tin[ithread]);
@@ -1093,6 +1095,8 @@ diffint=0;diffintbey=0;
                         if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                         #endif
                         num_threads_started = ithread+1;
+                      }
+                      else {ints(i)=-1;intsbey(i)=-1;}
                      }
                      #ifdef __linux__
                      for(int th=0; th<num_threads_started; th++)
@@ -1160,7 +1164,6 @@ diffint=0;diffintbey=0;
                      //printout rectangular function to .mdcisp.qom
 	             fprintf (fout, " %4.4g %4.4g",ints(i),intsbey(i));
                      fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
-
                      fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqev, "#eigenvector real part\n");
                      ev_real.print(foutqev); // here we printout the eigenvector of the excitation
