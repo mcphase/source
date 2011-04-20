@@ -160,7 +160,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
   FILE *fin_coq;
   errno = 0;
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
-  emin=0;emax=10;extended_eigenvector_dimension=nofcomponents;
+  emin=-DBL_MAX;emax=DBL_MAX;extended_eigenvector_dimension=nofcomponents;
   printf("reading file %s\n",file);
   fin_coq = fopen(file, "rb"); if (fin_coq==NULL) {fprintf(stderr,"ERROR - file %s not found \n",file);errexit();}   
   // save the parameters read from mcdisp.par into results/mcdisp.par)

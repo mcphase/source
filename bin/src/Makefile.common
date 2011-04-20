@@ -102,8 +102,8 @@ ifdef profile
 CCOPTS  = -pg -fforce-addr -fpermissive $(LINOPTS)
 COPTS   = -pg -fforce-addr $(LINOPTS)
 else
-CCOPTS  = -g -Wall --pedantic  $(LINOPTS)
-COPTS   = -g -Wall --pedantic  $(LINOPTS)
+CCOPTS  = -g -Wall  $(LINOPTS)
+COPTS   = -g -Wall  $(LINOPTS)
 endif
 endif
 
