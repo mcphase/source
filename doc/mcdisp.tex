@@ -995,7 +995,7 @@ outlined in equations (\ref{mmatrix}) ff:
 similar to $M_{\alpha\beta}^s$ the matrices  $\mu_{\alpha\beta}^s$ and $\nu_{\alpha\beta}^s$ 
 can be diagonalised using the
 unitary transformations $\overline \mathcal  U_{\alpha\beta}^s$ (${\overline \mathcal U^{s\dag}\overline \mathcal U^s}=1$) and
-$\mathcal V_{\alpha\beta}^s$ (${\mathcal V^{s\dag}\mathcal V^s}=1$), respectively. Note that in the case $<+| \neq <-|$
+$\overline \mathcal V_{\alpha\beta}^s$ (${\overline \mathcal V^{s\dag}\overline \mathcal V^s}=1$), respectively. Note that in the case $<+| \neq <-|$
 the unitary transformations $\overline \mathcal U =\mathcal U$ and $\overline \gamma = \gamma$.
 
 \begin{equation}
@@ -1008,7 +1008,7 @@ Thus we have for orthogonal states
 \begin{eqnarray}
 <-|         J^{s     }_{\alpha}|+><+|         J^s_{\beta}|->&=&\overline \mathcal U_{\alpha 1}^s\phi^s\overline \mathcal U_{1\beta}^{s\dag} \dots %%@
 {\rm with }\, \phi^s=\overline \gamma^s/(n_--n_+)\\
-<-|\mathcal Q^{s \dag}_{\alpha}|+><+|\mathcal Q^s_{\beta}|->&=&\mathcal V_{\alpha 1}^s\xi^s\mathcal V_{1\beta}^{s\dag}  
+<-|\mathcal Q^{s \dag}_{\alpha}|+><+|\mathcal Q^s_{\beta}|->&=&\overline \mathcal V_{\alpha 1}^s\xi^s\overline \mathcal V_{1\beta}^{s\dag}  
 \end{eqnarray}
 
 Multiplying this from the right(left) side with 
@@ -1041,14 +1041,14 @@ in the numerator of (\ref{gensus}) to $\delta_{1\alpha'} \delta_{1\beta'}$:
 \end{equation}
 
 Further transformation with 
-$\sum_{\alpha'}\mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}$ and
-$\sum_{\beta'} \sqrt{\xi^{s'}}\mathcal V_{\beta'\beta''}^{s' \dag} $ transforms the term to
+$\sum_{\alpha'}\overline \mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}$ and
+$\sum_{\beta'} \sqrt{\xi^{s'}}\overline \mathcal V_{\beta'\beta''}^{s' \dag} $ transforms the term to
 $\langle -|\hat \mathcal Q_{\alpha''}^s|+\rangle \langle +'|\hat \mathcal Q_{\beta''}^{s'}|-'\rangle$,
 i.e.
 
 \begin{equation}\label{trafo2}
-\sum_{\alpha'\beta'}\mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}\delta_{1\alpha'} \delta_{1\beta'}
- \sqrt{\xi^{s'}}\mathcal V_{\beta'\beta''}^{s' \dag}=
+\sum_{\alpha'\beta'}\overline \mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}\delta_{1\alpha'} \delta_{1\beta'}
+ \sqrt{\xi^{s'}}\overline \mathcal V_{\beta'\beta''}^{s' \dag}=
 \langle -|\hat \mathcal Q_{\alpha''}^s|+\rangle \langle +'|\hat \mathcal Q_{\beta''}^{s'}|-'\rangle
 \end{equation}
 
@@ -1058,13 +1058,13 @@ obtain $X_{\alpha''\beta''}^{ss'}({\mbf Q},\omega)$:
 
 \begin{equation}\label{finalslow}
 X_{\alpha''\beta''}^{,,ss'}({\mbf Q},\omega)=\sum_{\alpha\alpha'\beta\beta'}
-\sqrt{\frac{\Gamma^s}{\gamma^s}}^{\star}
- \mathcal V_{\alpha''\alpha'}^{s}
+\sqrt{\frac{\Gamma^s}{\overline \gamma^s}}^{\star}
+\overline \mathcal V_{\alpha''\alpha'}^{s}
  \overline  \mathcal U_{\alpha'\alpha}^{s\dag} 
     \chi_{\alpha\beta}^{,,ss'}({\mbf Q},\omega)
  \overline  \mathcal U_{\beta\beta'}^{s'} 
- \mathcal V_{\beta'\beta''}^{s' \dag}
-\sqrt{\frac{\Gamma^{s'}}{\gamma^{s'}}}
+ \overline \mathcal V_{\beta'\beta''}^{s' \dag}
+\sqrt{\frac{\Gamma^{s'}}{\overline \gamma^{s'}}}
 \end{equation}
 
 (Note here we have defined $\Gamma^s \equiv \xi^s(n_--n+)$).
@@ -1076,7 +1076,7 @@ the neutron scattering cross section numerically.
 {\small Technically, the single ion module has to provide in addition to the
 matrices $M^s_{\alpha\beta}$ (equation (\ref{mmatrix})) for every $\mbf Q$-vector
 the vector 
-$\sqrt{\Gamma^s}^\star \mathcal V^s_{\alpha1}\equiv
+$\sqrt{\Gamma^s}^\star \overline \mathcal V^s_{\alpha1}\equiv
  {\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(n_--n_+)}<-|\mathcal Q^{\dag}_{\alpha}|+>$, which will depend on the 
 scattering vector $\mbf Q$.}
 
@@ -1086,14 +1086,14 @@ For the DMD algorithm we insert  (\ref{dmdfinal}) into (\ref{finalslow}) and obt
 \begin{equation}\label{Xcalc}
 X^{,,ss'}_{\alpha\beta}(\mbf Q,\omega)=\sqrt{\Gamma^s}^\star\sqrt{\Gamma^{s'}} 
 \pi \sum_r 
-\overline \mathcal V^s_{\alpha1} \mathcal T_{sr}(\mbf Q)\omega_r(\mbf Q) \delta(\hbar \omega_r(\mbf Q) %%@
-- \hbar \omega) \mathcal T^{\dag}_{rs'}(\mbf Q)\overline  \mathcal V^{s'\dag}_{1\beta}
+ \mathcal V^s_{\alpha1} \mathcal T_{sr}(\mbf Q)\omega_r(\mbf Q) \delta(\hbar \omega_r(\mbf Q) %%@
+- \hbar \omega) \mathcal T^{\dag}_{rs'}(\mbf Q)  \mathcal V^{s'\dag}_{1\beta}
 \end{equation}
 
 with 
 
 \begin{equation}
-\overline \mathcal V^s_{\alpha1} =\sqrt{\frac{\gamma^s}{\overline \gamma^s}}^{\star}\sum_{\alpha'\alpha''} \mathcal V_{\alpha\alpha'}^s \overline \mathcal U^{s\dag}_{\alpha'\alpha''}
+ \mathcal V^s_{\alpha1} =\sqrt{\frac{\gamma^s}{\overline \gamma^s}}^{\star}\sum_{\alpha'\alpha''} \overline \mathcal V_{\alpha\alpha'}^s \overline \mathcal U^{s\dag}_{\alpha'\alpha''}
 \mathcal U^s_{\alpha''1}
 \end{equation}
 
