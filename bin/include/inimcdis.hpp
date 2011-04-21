@@ -4,6 +4,7 @@
 #define INIMCDIS
 
 
+#include<float.h>
 #include<cstdio>
 #include<cstring>
 #include<cstdlib>
