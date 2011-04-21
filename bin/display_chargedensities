@@ -8,6 +8,11 @@ if test -f results/charges.jvx
  then
   rm results/charges.jvx
 fi
+if test -f results/charges.1.jvx
+ then
+  rm results/charges.1.jvx
+fi
+
 
 echo "# this is initial graphic parameters file" > results/graphic_parameters.set
 while test -f results/graphic_parameters.set
@@ -17,8 +22,14 @@ if test -f results/charges.jvx
 then
 java javaview results/charges.jvx &
 rem1=$!
+if test -f results/charges.1.jvx
+then
+java javaview "model=results/charges.*.jvx" Animation.LastKey=16 &
+rem4=$!
+fi
  java graphic_parameters_configurator 
 kill $rem1
+kill $rem4
 else
   rm results/graphic_parameters.set
 fi
