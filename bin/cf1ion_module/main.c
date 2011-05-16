@@ -618,7 +618,15 @@ int main(argc,argv)
     INT          lesetheta;
     FILE         *fptheta;
     CHAR         *nametheta;
- 
+    CHAR *t01,*t02,*t03;
+
+t01=" ------------------------------------------------------------------ \n";
+t02="|Progam %6s - calculation of single ion problems in LS coupling |\n|Hee >> Hso >> Hcef ~ Hze (Hutchings Sol.Stat.Phys. 16 (1964) 227) |\n";
+t03=" ------------------------------------------------------------------ \n";
+
+    printf("%s",t01);printf(t02,PROGRAMMNAME);printf("%s",t03);
+    printf("\n");
+
     init_einheit();
  
     setup =  cfield_setup(); /* setup's aus SETUP-file holen (in diahermx.c) */
@@ -3692,16 +3700,9 @@ void info_info()      /* Informationen ueber moegliche Infos ausgeben */
 void info_befehle()     /* informationen ueber moegliche Befehle  ausgeben */
 {
  INT i;
- CHAR *t01,*t02,*t03;
  
     clearscreen;
  
-t01=" ------------------------------------------------------------------ \n";
-t02="|   %8s is a Crystal Field program.                         |\n";
-t03=" ------------------------------------------------------------------ \n";
- 
-    printf("%s",t01);printf(t02,PROGRAMMNAME);printf("%s",t03);
-    printf("\n");
  
  
     printf("\nImplemented commands are :\n\n");

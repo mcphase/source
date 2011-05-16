@@ -10,6 +10,7 @@ unless ($#ARGV >1)
 {print " program chi2  used to calculate the chi-squared from 3 columns in a file\n";
  print " if col1, col2 and col3 are calculation, experiment and experimental error, respectively, then\n";
  print " chisquared is defined as\n 1/nofpoints *sum_i{allpoints} (col2 - col1)^2/col3^2\n";
+ print " for each data point a line sta= (col2 - col1)^2  col3^2 is output to stdout\n";
  print " usage: chi2 col1 col2 col3  *.*   \n col=columns \n *.* .. filenname\n";
  exit 0;}
 
@@ -27,7 +28,7 @@ $col3=$ARGV[0];shift @ARGV;
    $file=$_;
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "<".$file;
+   print "<".$file.">\n";
 
    while($line=<Fin>)
 
@@ -36,9 +37,11 @@ $col3=$ARGV[0];shift @ARGV;
        if ($line=~/^\s*#/) {print Fout $line;}
 
        else{$line=~s/D/E/g;@numbers=split(" ",$line);
-
-            $chi2+=($numbers[$col1-1]-$numbers[$col2-1])*($numbers[$col1-1]-$numbers[$col2-1])/$numbers[$col3-1]/$numbers[$col3-1];
-
+            $s=($numbers[$col1-1]-$numbers[$col2-1]);
+            $e=$numbers[$col3-1];
+            $s2=$s*$s;$e2=$e*$e;
+            $chi2+=$s2/$e2;
+            print "sta= $s2 $e2\n";
             $nofpoints+=1;
 
            }
@@ -47,11 +50,10 @@ $col3=$ARGV[0];shift @ARGV;
 
       $chi2/=$nofpoints;
 
-      print " chi2=".$chi2." ";
+      print " chi2=".$chi2."\n";
 
       close Fin;
 
-   print ">\n";
 
    }
 

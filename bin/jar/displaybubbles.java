@@ -50,7 +50,7 @@ static myStringfunc SF=new myStringfunc();
       {System.out.println("- too few arguments...\n");
        System.out.println("  program displaybubbles - show and watch data file by viewing a xy graphic on screen\n\n");
        System.out.println("use as:  displaybubbles xcol ycol intcol filename [xcol1 ycol1 intcol filename1 ...]\n\n");
-       System.out.println("         xcol,ycol ... column to be taken as x-, y- and intensity-axis\n");
+       System.out.println("         xcol,ycol,intcol ... column to be taken as x-, y- and bubble-area axis\n");
        System.out.println("	 filename ..... filename of datafile\n\n");
        System.exit(0);
       }
@@ -302,18 +302,28 @@ static myStringfunc SF=new myStringfunc();
         continue;
        }
              // select colx and coly
+     // replace tabs by spaces
+      strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
                  sx=SF.NthWord(strLine,clx);
                  sy=SF.NthWord(strLine,cly);
                  sint=SF.NthWord(strLine,clint);
               //System.out.println(sx+" "+sy+" "+sint);
 
                Double p = new Double(0.0);
-               try{data[1][j]=p.parseDouble(sx);
+   if(sx.length()!=0&&sy.length()!=0&&sint.length()!=0){
+               try{
+                    sx=sx.replace('D','E');
+                    sy=sy.replace('D','E');
+                    sint=sint.replace('D','E');
+                   data[1][j]=p.parseDouble(sx);
                    data[0][j]=p.parseDouble(sy);
                    data[2][j]=p.parseDouble(sint);
+                   if (data[2][j]<0){data[2][j]=0;}
+                   data[2][j]=Math.sqrt(data[2][j]);
                     ++j;
                    }
                    catch(NumberFormatException e){System.exit(1);}
+                                                          }
                }   
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                else

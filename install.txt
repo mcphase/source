@@ -12,7 +12,7 @@ however less graphic tools.
 
 Preriquisites:
 - for  running McPhase, McDisp
-    Windows 2000, XP, VISTA
+    Windows 2000, XP, VISTA, 7
      
 - for compiling the sources (necessary if mcphas does not run on your system after installation steps a)-d)
     gcc for windows (e.g. MinGW-4.3.5.exe (or newer) and MSYS-1.0.10.exe available at http://www.mingw.org)
@@ -28,7 +28,7 @@ Installation Procedure:
  just run mcphX_Y.exe and follow the instructions
 
 
- Mind:
+ Mind in case of problems:
  In order that McPhas finds its exe files,you have to edit
  the file dos.bat and modify the following commands:
  

@@ -138,10 +138,10 @@ float invalues[100];invalues[0]=99;
   printf("#Stevens factors\nALPHA=%4g\nBETA=%4g\nGAMMA=%4g\n",(*iops).alpha,(*iops).beta,(*iops).gamma);
   printf("#Expectation values of radial wave function <r^k> in units of a0^k a0=0.5292 Angstroem\n");
   printf("R2=%4g\nR4=%4g\nR6=%4g\n\n",(*iops).r2,(*iops).r4,(*iops).r6);
-  printf("# calculation of magnetisation density instead of chargedensity\n");
-  printf("# switch calcmagdensity triggers: 0 ... normal mode, 1,2,3 calc <J'i>=gJ/2 (<J1,2,3 * Ji>+<Ji*J1,2,3>)\n");
-  printf("#                                                    ... gives magnetisationdensity in a b c dir instead, useful only in chrgplt,charges !\n");
-  printf("calcmagdensity=0\n\n");
+//  printf("# calculation of magnetisation density instead of chargedensity\n");
+//  printf("# switch calcmagdensity triggers: 0 ... normal mode, 1,2,3 calc <J'i>=gJ/2 (<J1,2,3 * Ji>+<Ji*J1,2,3>)\n");
+//  printf("#                                                    ... gives magnetisationdensity in a b c dir instead, useful only in chrgplt,charges !\n");
+//  printf("calcmagdensity=0\n\n");
  }
 
 // zero parameters in case initialisation put some values to the parameters ...

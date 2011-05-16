@@ -747,6 +747,9 @@ void ionpars::savBlm(FILE * outfile)
    if(Blm(43)!=0){fprintf(outfile,"B64=%g\n",Blm(43));}
    if(Blm(44)!=0){fprintf(outfile,"B65=%g\n",Blm(44));}
    if(Blm(45)!=0){fprintf(outfile,"B66=%g\n",Blm(45));}
+   if(Blm(46)!=0){fprintf(outfile,"Dx2=%g\n",Blm(46));}
+   if(Blm(47)!=0){fprintf(outfile,"Dy2=%g\n",Blm(47));}
+   if(Blm(48)!=0){fprintf(outfile,"Dz2=%g\n",Blm(48));}
 
 }
 

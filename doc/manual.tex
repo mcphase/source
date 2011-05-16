@@ -27,31 +27,21 @@
   \vspace{2cm} 
 \vspace{3cm}}
 
-\date {\input{version.tex}
+\date {\vspace{2cm} \input{version.tex}
  \vspace{2cm}
  \\ \today}
 
-\author{M. Rotter, Lucian G Pascut, Till Hoffmann \\
-University of Oxford, Physics Department, Clarendon Laboratory, Parks Road, Oxford, UK\\
-Max Planck Institute for Chemical Physics of Solids,N\"othnitzer Str. 40, 01187 Dresden, 
-Germany \\
-E-mail: martin.rotter@cpfs.mpg.de\\
-\\
- M. Doerr\\
-Institut f\"ur Festk\"orperhysik, Technische Universit\"at Dresden, D-01062 Dresden, Germany\\
-\\
-P. Fabi n\'e Hoffmann\\
-Forschungszentrum J\"ulich, D-52425 J\"ulich, Germany\\
-\\
-S. Rotter\\
-Wien, Austria \\
-\\
-M. Banks \\
-Max Planck Institute, Stuttgart, Germany\\
-\\
-Duc Manh Le, R. Schedler \\
-Helmholtz-Zentrum Berlin f\"ur Materialien und Energie, Berlin, Germany\\
-\vspace{2cm} 
+\author{M. Rotter\thanks{Max Planck Institute for Chemical Physics of Solids,N\"othnitzer Str. 40, 01187 Dresden, 
+Germany, email: martin.rotter@cpfs.mpg.de}, \and
+Duc Manh Le \thanks{Helmholtz-Zentrum Berlin f\"ur Materialien und Energie, Berlin, Germany}
+\and Lucian G Pascut,~Till Hoffmann 
+\thanks{University of Oxford, Physics Department, Clarendon Laboratory, Parks Road, Oxford, UK},
+\and
+ M. Doerr,~R. Schedler\thanks{Institut f\"ur Festk\"orperhysik, Technische Universit\"at Dresden, D-01062 Dresden, Germany},
+\and
+P. Fabi n\'e Hoffmann\thanks{Forschungszentrum J\"ulich, D-52425 J\"ulich, Germany},
+\and S. Rotter \thanks{Wien, Austria},
+\and M. Banks \thanks{Max Planck Institute, Stuttgart, Germany}
 }
 
 
@@ -72,6 +62,21 @@ Without the enthusiastic support of the neutron scattering
 community this program would not have come into existence. 
 
 \section*{What is New ?}
+
+\subsection*{... in version 4.4...}
+          -{\prg gauss, lorentz, convolute}  changed to avoid uncommented text line when piping to file
+           -{\prg ic1ion} standalone started by batch to be able to create ic1ion.trs containing neutron 
+           powder single ion intensities.
+           -{\prg displaybubbles} changed to ignore negative bubblesize values and display data given in intcolumn as area of bubble
+           -{\prg setup\_mcdiff\_in} changed to try to setup for going beyond dipole approximation if possible (using program charges)
+           - {\prg simannfit and searchspace} changed to input all occurencies of sta= in output of
+             calcsta. the first number following sta= is taken a the squared deviation of
+             fitcurve-experimental value. If there follows a second number after sta=, then this
+             is taken as the square of the experimental error and chisquared is computed and
+             minimized.
+           - {\prg convolute} changed to output in addition one column with the original data
+           - {\prg chi2} changed to output sta= deviation$^2$ experr$^2$ for each contribution to chisquared
+           - added example Lu2MnO4
 
 \subsection*{... in version 4.1/4.2/4.3 ...}
 - a bug in the normalisation of the eigenvectors/intensities calculated for dispersive modes in mcdisp.c has been removed
@@ -105,13 +110,6 @@ current density
 \subsection*{... in version 3.5 ... }
 McPhase has become fully capable of dealing with nonorthogonal lattices 
 
-\subsection*{... in version 3.2 ...}
-\begin{enumerate}
-\item {\prg mcdisp} calculation of powder single ion neutron intensities is straightforward - intensities are
-      output in {\prg mcdisp.trs}.
-\item some routines in mcphas and mcdisp are now capable to use multiple threads and thus calculations are possible
-      on multiprocessor computers with higher speed
-\end{enumerate}
 
 \newpage
 
@@ -281,6 +279,7 @@ Gd$_3$GaO$_6$  & pointcharge model calculation of crystal field parameters & & \
 GdNi$_2$B$_2$C & magnetostriction and phase diagram, spin only (L=0) & {\prg brillouin}\index{brillouin}& %%@
 \cite{doerr02-5609}\\
 GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, magnetic structure & {\prg cfield} & \\
+Lu$_2$MnO$_4$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
 NdCu$_2$  & crystal field, magnetic structure, phase diagrams, excitations & {\prg cfield}& %%@
 \cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29,rotter02-751,rotter02-8885} \\
 PrNi$_2$B$_2$C & crystal field - fit to neutrons,cp, susc & {\prg cfield}&\cite{mazumdar08-144422}\\
@@ -530,7 +529,7 @@ neighbours, which
 \newpage
 
 \bibliographystyle{physrev}   % here you should update any list by
-\bibliography{li100610}   % bibtex - ing the database
+\bibliography{li110516}   % bibtex - ing the database
 
 \newpage
 \printindex

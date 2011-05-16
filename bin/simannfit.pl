@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+use PDL;
+
+use PDL::Slatec;
+
 unless ($#ARGV >0) 
 {print " program simannfit used to perform simulating annealing\n";
  print " usage: simannfit 10 [options] * \n  10 .. initial temperature \n * .. filename(s) of paramter file(s)\n";
@@ -80,6 +84,10 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
  }  
     if ($#par<0) {print "Error simannfit: no parameters found in input files @ARGV\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
     print ($#par+1);print " parameters found - starting fit ...\n";close Fout;
+# initialize parameter storage
+$parstore = zeroes $#par+3,$#par+1;
+$deltastore =  PDL->nullcreate(0);
+$nof_calcsta_calls=0;
 #*******************************************************************************
 # fitting loop
 $rnd=1;$stasave=1e20;
@@ -155,9 +163,51 @@ if($sta>0)
    $i=0;foreach(@par){write STDOUT;++$i;}
    ($sta)=sta(); # CALCULATE sta !!!!
 }
+# calculate covariance matrix
+# for($i6=0;$i6<=$#par;++$i6){set $parstore,0,$i6,$par[$i6];}
+#$parstore
+#$deltastore
+
+print $parstore;
+print $store_counter."\n";
+# rotate back the storage to make last set in column 0 ...
+for($i6=1;$i6<=$store_counter;++$i6){
+$deltastore=rotate $deltastore,-1;
+$parstore= rotate $parstore,-1;
+}
+
+print $parstore;
+$b=$parstore->slice(0)->copy;
+$parstore.=$parstore-$b;
+print $parstore;
+$V=$parstore->slice('1:-1');
+$c=$deltastore->slice(0)->copy;
+$deltastore.=$deltastore-$c;
+$delta=$deltastore->slice('1:-1');
+#print $V; # here we have calculated V
+#print $delta;
+# now we need to cut out the zero vector (if present) !!!
+$i6=$#par+3;
+while(sum($V->slice(0)*$V->slice(0))>1e-10&&$i6>0){
+$V=rotate $V,1;$delta=rotate $delta,1;--$i6;
+}
+$delta=$delta->slice('1:-1');
+$V=$V->slice('1:-1');
+print $V;
+print $delta;
+
+#{$cov="calculation of covariance matrix not successfull because last n steps of simulated annealing were not orthogonal in parameter space - restart simannfit and try again ...\n";}
+#print $cov;
+#print $Fij;
+
    print "best fit:\n";
    $i=0;foreach(@par){write STDOUT;++$i;}
-   print "      sta=$sta\n";
+  if($chisquared){print "      sta=chi2=$sta (=sum deviations^2/experrors^2)\n    variance s2=$s2 (=sum deviations^2)\n";
+     print  "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens restart and try again):\n";
+     }
+          else {  print "      sta=variance=s2=$s2 (=sum deviations^2)\n";}
+
+
 # move files
 # foreach (@ARGV)
 # {$file=$_; #if(mydel("$file.fit")){die "\n error deleting $file.fit \n";}
@@ -166,8 +216,10 @@ if($sta>0)
 #            #if(mycopy ($file.".par ",$file)){die "\n error copying $file.par \n";}
 # }
      open(Fout,">results/simannfit.status");print Fout " ... simannfit stopped\n";
+     print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
      print Fout "best fit:\n";
-     print Fout "      sta=$sta\n";
+  if($chisquared){print Fout "      sta=chi2=$sta (=1/".($#ssta+1)."sum deviations^2/experrors^2)\n    variance s2=$s2 (=1/".($#ssta+1)."sum deviations^2)\n";}
+          else {  print Fout "      sta=variance=s2=$s2 (=1/".($#ssta+1)."sum deviations^2)\n";}
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";
@@ -176,7 +228,15 @@ if($sta>0)
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
      $i=0;foreach(@par){write Fout;++$i;}
-      close Fout;
+  if($chisquared){
+     print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens restart and try again):\n";
+$Fij=$delta x matinv($V) ;
+ $cov=$Fij->xchg(0,1) x $Fij;
+ $cov*=$s2;
+     print $cov;
+     print Fout $cov;
+                 }
+     close Fout;
 print " <Press enter to close>";$in=<STDIN>;exit 0;
 # END OF MAIN PROGRAM
 #****************************************************************************** 
@@ -255,12 +315,48 @@ $staboundary=$stasave-log($rnd)*$stattemp;
                   {
                    if(system ("./calcsta $staboundary > ./results/simannfit.sta")){die "\n error executing calcsta\n";}
                   }	
- open (Fin,"./results/simannfit.sta"); 
+ open (Fin,"./results/simannfit.sta");  $i6=0;$errc=1;
  while($line=<Fin>){
-           if($line=~/^(#!|[^#])*?\bsta\s*=/) {($sta)=($line=~m/(?:#!|[^#])*?\bsta\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);} 
+           if($line=~/^(#!|[^#])*?\bsta\s*=/) {($staline)=($line=~m/(?:#!|[^#])*?\bsta\s*=\s*([\d.eEdD\Q-\E\Q+\E\s]+)/);
+                                               $staline=~s/D/E/g;my @ssn=split(" ",$staline);
+                                               $ssta[$i6]=$ssn[0];
+                                               if($errc==1){if ($#ssn>0){$eerr[$i6]=$ssn[1];}else{$errc=0;}}
+                                               ++$i6;
+                                              }
                    }
  close Fin;
  mydel ("./results/simannfit.sta");
+# print @ssta;
+ $delta= sqrt PDL->new(@ssta);
+ $c=PDL->new(@par);
+# print $delta;
+ $s2=inner($delta,$delta)/($#ssta+1); # this is s^2
+ $sta=$s2;
+ if($errc>0) #if errors are given we can minimize chisquared and calculate covariance matrix
+ {my  $err=   sqrt PDL->new(@eerr);
+  $delta=$delta/$err;
+  $chisquared=inner($delta,$delta)/($#ssta+1); # this is chisquared
+  # if we have errors present we rather minimize chi2
+  $sta=$chisquared;
+ }
+
+# $sta= ... sum of @ssta
+# $deltastore= ... @ssta
+# $parstore= ....@par
+if($nof_calcsta_calls<$#par+3)
+{# extend storage of delta
+ $deltastore=$deltastore->append($delta->dummy(0));
+ $store_counter=$nof_calcsta_calls;
+}
+else
+{#rotate
+# $deltastore=rotate $deltastore,1; this would be good but does not work pdl bug
+ if ($store_counter>$#par+2){$store_counter=0;}
+ for($i6=0;$i6<=$#ssta;++$i6){set $deltastore,$store_counter,$i6,$delta->at($i6);}
+}
+# $parstore= rotate $parstore,1;  this would be good but does not work pdl bug
+ for($i6=0;$i6<=$#par;++$i6){set $parstore,$store_counter,$i6,$par[$i6];}
+ ++$nof_calcsta_calls;++$store_counter; print $store_counter." ".$#par."\n";
  return $sta;
 }  
 
@@ -289,7 +385,9 @@ sub mydel  { my ($file1)=@_;
     
 sub read_write_statusfile {
      open(Fout,">./results/simannfit.status");$i=0;
-     print Fout "Current sta=$sta    sta of stored parameters=$stasave\n";
+     print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+     if($chisquared){print Fout "Current sta=chi2=$sta (=1/".($#ssta+1)."sum deviations^2/experrors^2) sta of stored parameters=$stasave\n";}
+              else {print Fout " Current     sta=variance=s2=$s2 (=1/".($#ssta+1)."sum deviations^2)   sta of stored parameters=$stasave\n";}
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";

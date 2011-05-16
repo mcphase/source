@@ -252,7 +252,7 @@ void sortE(Vector & d,ComplexMatrix & z)
 // some function to efficiently output standard deviations
 void staout(FILE*fout,double & sta,double & sta_int,double & sta_without_antipeaks,double & sta_int_without_antipeaks,double & sta_without_weights,double & sta_int_without_weights,double & sta_without_antipeaks_weights,double & sta_int_without_antipeaks_weights)
     {
-    fprintf(fout,"#definitions:\n\n");
+    fprintf(fout,"#definitions:\n#\n");
     fprintf(fout,"#sta                               = sum_i |weight(i)|*[Eexp(i) - nearestEcalc]^[2*sign(weight(i))]\n");
     fprintf(fout,"#sta_int                           = sum_i |weight(i)|*[Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^[2*sign(weight(i))]\n",SMALLINT);
     fprintf(fout,"#sta_without_antipeaks             = sum_i_with_weight(i)>0  weight(i)*[Eexp(i) - nearestEcalc]^2\n");
@@ -260,7 +260,7 @@ void staout(FILE*fout,double & sta,double & sta_int,double & sta_without_antipea
     fprintf(fout,"#sta_without_weights               = sum_i [Eexp(i) - nearestEcalc]^[2*sign(weight(i))]\n");
     fprintf(fout,"#sta_int_without_weights           = sum_i [Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^[2*sign(weight(i))]\n",SMALLINT);
     fprintf(fout,"#sta_without_antipeaks_weights     = sum_i_with_weight(i)>0 [Eexp(i) - nearestEcalc]^2\n");
-    fprintf(fout,"#sta_int_without_antipeaks_weights = sum_i_with_weight(i)>0 [Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^2\n\n",SMALLINT);
+    fprintf(fout,"#sta_int_without_antipeaks_weights = sum_i_with_weight(i)>0 [Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^2\n#\n",SMALLINT);
     fprintf(fout,"#!sta= %8.6g \n",sta);
     fprintf(fout,"#!sta_int= %8.6g \n",sta_int);
     fprintf(fout,"#!sta_without_antipeaks= %8.6g \n",sta_without_antipeaks);
@@ -431,7 +431,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
    fprintf(fout,"#             k,i   E -> E                                     |\n");
    fprintf(fout,"#                    i    k                                    |\n");
    fprintf(fout,"#-------------------------------------------------------------- \n");
-   fprintf(fout,"# T= %g K\n",ini.T);
+   fprintf(fout,"# T= %g K Ha=%g Hb=%g Hc=%g T\n",ini.T,ini.Ha,ini.Hb,ini.Hc);
    fprintf(fout,"#*********************************************************************\n");
           fprintf (fout, "#i j k ionnr transnr energy |gamma_s|  sigma [barn/sr](*)\n");
  

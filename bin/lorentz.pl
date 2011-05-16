@@ -13,7 +13,7 @@ unless ($#ARGV >2)
 
  exit 0;}
 
- 
+print "# $0 @ARGV\n";
 
 $fwhm=$ARGV[0];shift @ARGV;
 

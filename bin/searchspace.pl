@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 BEGIN{@ARGV=map{glob($_)}@ARGV}
+use PDL;
+use PDL::Slatec;
 use File::Copy;
 
 # copy parameter files to specific locations
@@ -137,7 +139,7 @@ $starttime=time;$stamin=1e10;
 # open and initialize output file
 print "storing points in file searchspace.$searchlevel\n";
 open (Foutlevel,">results/searchspace.$searchlevel");
-print Foutlevel "#";foreach(@parnam){print Foutlevel $_." ";}print Foutlevel "sta\n";
+print Foutlevel "#";foreach(@parnam){print Foutlevel $_." ";}print Foutlevel "sta variance chisquared\n";
 open(Foutlocalmin,">results/searchspace.$searchlevel.localminima");
 print Foutlocalmin "#";foreach(@parnam){print Foutlocalmin $_." ";}print Foutlocalmin "sta\n";
 
@@ -161,7 +163,7 @@ if ($searchlevel==0)
 			}
 
           if ($sta<=$staorigin){$minimum=0;}
-          $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta."\n";
+          $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta." ".$s2." ".$chisquared."\n";
 	    ++$pointcounter; 
           $par[$i]-=2*$dpar;
           ($sta)=sta();
@@ -262,6 +264,9 @@ $hours=(time-$starttime)/3600;
 $estimate=sprintf("%6.2f",$hours*2*($#par+1));
 print "nofpts=$pointcounter points calculated in  $hours h.\n Time estimate for next level ".($searchlevel+1).": $estimate h\n";
 print Foutlevel "#$pointcounter points calculated in  $hours h.\n# Time estimate for next level ".($searchlevel+1).": $estimate h\n";
+print Foutlevel ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+   if($chisquared){print Foutlevel "sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
+               else{print Foutlevel "sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
 print Foutlevel "#Mininimal found sta minsta=$stamin\n";
 print Foutlevel "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
 print Foutlocalmin "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
@@ -272,6 +277,9 @@ print Fout ".......... searchspace stopped...............\n";
 print Fout ".............................................\n";
 print Fout "nofpts=$pointcounter points calculated in  $hours h.\n";
 print Fout ".............................................\n";
+print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+if($chisquared){print Fout "sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
+               else{print Fout "sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
 print Fout "Mininimal found sta=$stamin\n";
 print Fout "noflocalminima=".($minnumber-1)." local minima found (see results/searchspace.$searchlevel.localminima)\n";
 print Fout ".............................................\n";
@@ -295,12 +303,30 @@ sub sta {local $SIG{INT}='IGNORE';
                    if(system ("./calcsta 1e10 > results/searchspace.sta")){print "\n error executing calcsta.bat\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
                   }
 
- open (Fin,"./results/searchspace.sta"); 
+ open (Fin,"./results/searchspace.sta"); $i6=0;$errc=1;
  while($line=<Fin>){
-           if($line=~/^(#!|[^#])*?\bsta\s*=/) {($sta)=($line=~m/(?:#!|[^#])*?\bsta\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);} 
+           if($line=~/^(#!|[^#])*?\bsta\s*=/) {($staline)=($line=~m/(?:#!|[^#])*?\bsta\s*=\s*([\d.eEdD\Q-\E\Q+\E\s]+)/);
+                                               $staline=~s/D/E/g;my @ss=split(" ",$staline);
+                                               $ssta[$i6]=$ss[0];
+                                               if($errc==1){if ($#ss>0){$eerr[$i6]=$ss[1];}else{$errc=0;}}
+                                               ++$i6;
+                                              }
                    }
  close Fin;
+
  mydel("./results/searchspace.sta");
+ $delta= sqrt PDL->new(@ssta);
+ $c=PDL->new(@par);
+# print $delta;
+ $s2=inner($delta,$delta)/($#ssta+1); # this is s^2
+ $sta=$s2;
+ if($errc>0) #if errors are given we can minimize chisquared and calculate covariance matrix
+ {my  $err=   sqrt PDL->new(@eerr);
+  $delta=$delta/$err;
+  $chisquared=inner($delta,$delta)/($#ssta+1); # this is chisquared
+  # if we have errors present we rather minimize chi2
+  $sta=$chisquared;
+ }
  return $sta;
 }
   
@@ -387,7 +413,10 @@ sub read_write_statusfile {
      {open(Fout,">./results/searchspace.status");$ii=0;
      $est=sprintf("%6.2f",($pointstocalculate-$pointcounter)*(time-$starttime)/3600/($pointcounter+1));
      $passed=sprintf("%6.2f",(time-$starttime)/3600);
+     print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
      print Fout "Searchlevel $searchlevel   Current sta=$sta Minimum sta=$stamin\n";
+    if($chisquared){print Fout "sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
+               else{print Fout "sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
      print Fout "--------------------------------------------------------------------\n";
      print Fout "Time since Start: $passed h Estimated time to complete: $est h\n";
      print Fout "--------------------------------------------------------------------\n";

@@ -101,6 +101,9 @@ int inipar::load ()
   if(qmin(2)>qmax(2)){fprintf(stderr,"ERROR reading kmin kmax\n");return 1;}
   if(qmin(3)>qmax(3)){fprintf(stderr,"ERROR reading lmin lmax\n");return 1;}
   if(Norm(deltaq)==0){fprintf(stderr,"Warning reading deltah k l: deltah=deltak=deltal=0\n");}
+  if(deltaq[1]==0){fprintf(stderr,"ERROR reading deltah=0: deltah must be >0\n");return 1;}
+  if(deltaq[2]==0){fprintf(stderr,"ERROR reading deltak=0: deltak must be >0\n");return 1;}
+  if(deltaq[3]==0){fprintf(stderr,"ERROR reading deltal=0: deltal must be >0\n");return 1;}
   if(maxqperiod==0){fprintf(stderr,"Warning reading maxqperiod=0\n");}
   if(nofrndtries==0){fprintf(stderr,"Warning reading nofrndtries=0\n");}
   if (maxnofspins==0){maxnofspins=maxqperiod*maxqperiod*maxqperiod;

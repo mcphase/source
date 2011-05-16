@@ -128,10 +128,14 @@ INT output( setup,ewproblem,kristallfeld,modus )
 	
         write_titlecom(fp);
 t01="#-------------------------------------------------------------- \n";
-t02="#                          O U T P U T                         \n";
+t02="#    O U T P U T         ";
+
 t03="#-------------------------------------------------------------- \n";
 t04="#\n#\n";
 /*        fprintf(fp,"%s",t01);*/fprintf(fp,"%s",t02);/*fprintf(fp,"%s",t03);fprintf(fp,"%s",t04);*/
+  time_t curtime;
+  struct tm *loctime;
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fp);
  
     }
     else      fp=fopen_errchk(FILENAME(kristallfeld),"a");
@@ -216,10 +220,9 @@ t21="#\n";
   /*  fprintf(fp,"%s",t09);*/fprintf(fp,t10,elektronen4f);
   /*  fprintf(fp,"%s",t11);fprintf(fp,"%s",t12);
     fprintf(fp,"%s",t13);fprintf(fp,"%s",t14);*/
-    fprintf(fp,"%s",t15);fprintf(fp,t16,symname);
-  /*  fprintf(fp,"%s",t17);*/fprintf(fp,t18,symmetrienr);
-  /*  fprintf(fp,"%s",t19);fprintf(fp,"%s",t20);
-    fprintf(fp,"%s",t21);*/
+  /*  fprintf(fp,"%s",t15);fprintf(fp,t16,symname);*/
+  /*  fprintf(fp,"%s",t17);fprintf(fp,t18,symmetrienr);*/
+  /*  fprintf(fp,"%s",t19);fprintf(fp,"%s",t20); fprintf(fp,"%s",t21);*/
  }
  
  
@@ -294,9 +297,9 @@ t17="#                                                              \n";
 t18="#--------------------------------------------------------------\n";
  
 t19="#                                                              \n";
-t20="#! Bx_ex   =   %11.2f                                     \n";
-t21="#! By_ex   =   %11.2f                                     \n";
-t22="#! Bz_ex   =   %11.2f                                     \n";
+t20="#! Bx = Bx_ex   =   %11.2f                                \n";
+t21="#! By = By_ex   =   %11.2f                                \n";
+t22="#! By = Bz_ex   =   %11.2f                                \n";
  
 t23="#                                                              \n";
 t24="#! Bx_mol  =   %11.2f                                     \n";
@@ -421,7 +424,7 @@ t16="# We consider in this program  Crystal Field spliting          \n";
 t17="# at the lowest Spin-orbit-level (Ground state)                \n";
 t18="#                                                              \n";
 t19="# 2S+1                                                         \n";
-t20="#     L  of the calualted Ion. The |i,r> are in                \n";
+t20="#     L  of the calculated Ion. The |i,r> are in               \n";
 t21="#      J                                                       \n";
 t22="#                                                              \n";
 t23="# a more developed  Eigenfunction   			    \n";
@@ -519,21 +522,26 @@ if( *(FILENAME(kristallfeld)+16) != *(ORTHO+16) ){
        }
 
     ewev=fopen_errchk("results/levels.cef","w"); /* output also  in uncommented format with states to be used in mcdiff.in */
-    fprintf(ewev,"#J=value {atom-file}  <Ja>(=<Jy>) <Jb>(=<Jz>) <Jc>(=<Jx>)\n");
-    fprintf(ewev,"# Eigenvalues [%s] and eigenvectors [as columns]\n",EINHEITIMP[einheitnr_out].einheit); 
-    fprintf(ewev,"J= %4.1f {%s} %6.3f %6.3f %6.3f\n",j,INFILE(kristallfeld),
+  time_t curtime;
+  struct tm *loctime;
+   fprintf(ewev, "# output file of program so1ion/cfield ");
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),ewev);
+    fprintf(ewev,"#J=value {atom-file}  <Jx> <Jy>) <Jz>   \n");
+    fprintf(ewev,"#!J= %4.1f sipffile=%s Jx=%6.3f Jy=%6.3f Jz=%6.3f\n",j,INFILE(kristallfeld),
   magnetm(mat_Jy,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj,
   magnetm(mat_Jz,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj,
   magnetm(mat_Jx,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj);
+    fprintf(ewev,"#! Eigenvalues= ");
 
-    fprintf(ewev,"#Real Part\n");
     for( zeile=1 ; zeile<=anz_niveaus ; ++zeile )
        for( spalte=1 ; spalte<= VALUE(gi,zeile) ; ++spalte ){
        fprintf(ewev,"%g ",
        RV(ew,(INT)R(entartung,zeile,1))
        *EINHEITIMP[einheitnr_in].fek*EINHEITIMP[einheitnr_out].fke);
        }
-    fprintf(ewev,"\n");
+    fprintf(ewev," %s\n",EINHEITIMP[einheitnr_out].einheit);
+    fprintf(ewev,"# Eigenvectors [as columns]\n",EINHEITIMP[einheitnr_out].einheit);
+    fprintf(ewev,"#Real Part\n");
     for( i=1 ; i<=VRDIM(v) ; ++i ){
      for( zeile=1 ; zeile<=anz_niveaus ; ++zeile )
        for( spalte=1 ; spalte<= VALUE(gi,zeile) ; ++spalte ){
@@ -548,9 +556,9 @@ if( *(FILENAME(kristallfeld)+16) != *(ORTHO+16) ){
     fprintf(ewev,"#Imaginary Part\n");
     for( zeile=1 ; zeile<=anz_niveaus ; ++zeile )
        for( spalte=1 ; spalte<= VALUE(gi,zeile) ; ++spalte ){
-       fprintf(ewev,"0.00000 ");
+//       fprintf(ewev,"0.000 ");
        }
-    fprintf(ewev,"\n");
+//    fprintf(ewev,"\n");
     for( i=1 ; i<=VRDIM(v) ; ++i ){
      for( zeile=1 ; zeile<=anz_niveaus ; ++zeile )
        for( spalte=1 ; spalte<= VALUE(gi,zeile) ; ++spalte ){
@@ -1866,10 +1874,10 @@ if( modus == XW      &&  *(FILENAME(kristallfeld)+16) == *(ORTHO+16) ){
 t01="#-------------------------------------------------------------- \n";
 t02="# Parameter           :  %ckq   in  %6s                        \n";
 t02a="# (NOT the same Vlm as in Hutchings p255 or Elliot and Stevens)\n";
-t02b="#                        (Stevens Parameters comp Hutchings)\n";
-t02l="#                        (Wybourne Parameters comp Kassmann)\n";
+t02b="#                        Bkq are the Stevens Parameters  - see Hutchings Solid State Physics 16 (1964) 227\n";
+t02l="#                        Lkq are the Wybourne Parameters - see A. Kassmann J. Chem. Phys. 53 (1970) 4118\n";
 t12="# Parameter           :  %ckq   in  %6s/a0**k                  \n";
-t12a="# (compare Hutchings p 255 eq 5.5)                             \n";
+t12a="# (compare Hutchings Solid State Physics 16 (1964) 227, p 255 eq 5.5)                             \n";
 t22="# Parameter           :  x,W    in  %6s                        \n";
 t03="#--------------------------------------------------------------\n";
 t04="#                                                              \n";

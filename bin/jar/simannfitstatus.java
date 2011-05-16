@@ -97,7 +97,7 @@ public class simannfitstatus extends JPanel implements ActionListener {
         Runtime.getRuntime().addShutdownHook(new Thread() {
                                                            public void run() {
                                                                               File f = new File(filename);
-                                                                              if (!f.delete())throw new IllegalArgumentException("Delete: deletion failed");
+                                                                            //  if (!f.delete())throw new IllegalArgumentException("Delete: deletion failed");
                                                                              }
                                                           }
                                              ); 

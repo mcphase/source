@@ -24,8 +24,8 @@ unless ($#ARGV >4)
                  d1 and f(x) is compared to data in column d2 - a standard 
                  deviation sta is calculated as a sum of squared deviations.
                  As output the datafile is given, however with a scaled column
-                 d2 and an additional is column added containing the calculated
-                 results of the convolution.
+                 d2 and 2 additional columns are added containing the calculated
+                 results of the convolution and the original unscaled data.
 		     
 		     Formula: f(x)=sum_i yi c(x-xi) , 
 		     
@@ -35,7 +35,9 @@ unless ($#ARGV >4)
                          a stretching factor for the convolution function in 
                          order to allow for x dependent resolution \n";
  exit 0;}
- 
+
+
+print "# $0 @ARGV\n";
 $c1=$ARGV[0];shift @ARGV;
 $c2=$ARGV[0];shift @ARGV;
 $file1=$ARGV[0];shift @ARGV;
@@ -212,11 +214,12 @@ else
 #             $if($d3){$stretch=$numbers3[$d3-1];}else{$stretch=1;}
    ++$ii;
   $stanorm+=($ydata[$ii]*$scale-$ycalc[$ii])*($ydata[$ii]*$scale-$ycalc[$ii]); 
+  $yorig=$numbers3[$d2-1];
    $numbers3[$d2-1]*=$scale;
-           	  $i=0;
+            	  $i=0;
 		  foreach (@numbers3)
 		  {++$i;print $numbers3[$i-1]." ";}     
-    print  "  ".$ycalc[$ii]."\n";
+    print  "  ".$ycalc[$ii]." $yorig\n";
   }
  } 
 print STDOUT << "EOF";

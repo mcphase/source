@@ -419,7 +419,7 @@ t16="                __________________________________              \n";
  
 fprintf(fp,"%s",t01);/*fprintf(fp,"%s",t02);*/fprintf(fp,"%s",t03);fprintf(fp,"%s",t04);fprintf(fp,"%s",t05);
 /*fprintf(fp,"%s",t06);fprintf(fp,"%s",t07);*/fprintf(fp,"%s",t08);/*fprintf(fp,"%s",t09);fprintf(fp,"%s",t10);*/
-/*fprintf(fp,"%s",t11);*/fprintf(fp,"%s",t12);fprintf(fp,"%s",t13);fprintf(fp,"%s",t14);fprintf(fp,"%s",t15);
+/*fprintf(fp,"%s",t11);*/fprintf(fp,"%s",t12);fprintf(fp,"%s",t13);fprintf(fp,"%s",t14);/*fprintf(fp,"%s",t15);*/
 fprintf(fp,"%s",t16);
  
  
@@ -438,11 +438,11 @@ t02="#{VERSION : %6.2f      |\n";
 t03="#-----------------------\n";
 t04="#\n";
 /*fprintf(fp,"%s",t01);*/
-fprintf(fp,t02,VERSION);/*fprintf(fp,"%s",t03);fprintf(fp,"%s",t04);*/
+/*fprintf(fp,t02,VERSION);fprintf(fp,"%s",t03);fprintf(fp,"%s",t04);*/
  
-t01="#-------------------------------------------------------------- \n";
+t01="#{------------------------------------------------------------- \n";
 t02="#                                                              |\n";
-t03="#                  C F I E L D / S O 1 I O N                   |\n";
+t03="#                  C F I E L D / S O 1 I O N  %6.2f           |\n";
 t04="#                                                              |\n";
 t05="#                    A crystal field program                   |\n";
 t06="#                                                              |\n";
@@ -458,9 +458,9 @@ t15="#              |Tel.: 02461-616896                |             \n";
 t16="#               __________________________________              \n";
  
  
-fprintf(fp,"%s",t01);/*fprintf(fp,"%s",t02);*/fprintf(fp,"%s",t03);/*fprintf(fp,"%s",t04);*/fprintf(fp,"%s",t05);
+fprintf(fp,"%s",t01);/*fprintf(fp,"%s",t02);*/fprintf(fp,t03,VERSION);/*fprintf(fp,"%s",t04);*/fprintf(fp,"%s",t05);
 /*fprintf(fp,"%s",t06);fprintf(fp,"%s",t07);*/fprintf(fp,"%s",t08);/*fprintf(fp,"%s",t09);fprintf(fp,"%s",t10);*/
-/*fprintf(fp,"%s",t11);*/fprintf(fp,"%s",t12);fprintf(fp,"%s",t13);fprintf(fp,"%s",t14);fprintf(fp,"%s",t15);
+/*fprintf(fp,"%s",t11);*/fprintf(fp,"%s",t12);fprintf(fp,"%s",t13);fprintf(fp,"%s",t14);/*fprintf(fp,"%s",t15);*/
 fprintf(fp,"%s",t16);
  
  

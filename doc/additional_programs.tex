@@ -340,7 +340,9 @@ stored in col y
  chi-squared from 3 columns in a file: if col1, col2 and col3 are calculation, 
  experiment and experimental error, respectively, then
   chisquared is defined as $\chi^2=\frac{1}{n}\sum_{i=1}^n \frac{({\rm col2}_i-{\rm %%@
-col1}_i)^2}{{\rm col3_i}^2}$
+col1}_i)^2}{{\rm col3_i}^2}$. For each datapoint the program outputs a line
+{\em sta=} deviation$^2$  (experimental error)$^2$ to stdout. This may be 
+used directly for generating useful input for fitting in {\prg simannfit}\index{simannfit}.
 \item [\prg comment l1 l2 file:] comments all lines from l1 and l2  (with \#) in a file
 \item [\prg compare file1 file2:] used to compare data file1 and data file2
                 all columns and rows are compared and a standard deviation

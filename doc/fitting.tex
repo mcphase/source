@@ -130,18 +130,40 @@ system ("mcphas");
 
 ... in general the output of this batch (to stdout) must contain a line
 such as {\em sta = 4122.32}, which contains the calculated standard
-deviation. Note that the programs {\prg McPhas} and {\prg McDisp} always try to
-calculate a standard deviation and write such {\em sta = ...} statement
-to stdout.
- So it is possible to use these programs. Alternatively (or in addition)
-any other program can be called in {\prg calcsta} and calculate the 
-standard deviation {\prg sta}.
+deviation which will be minimized by the fitting procedure.
 
+Important notes:
+\begin{enumerate}
+\item
 Before starting a fit it is necessary to test the program {\prg calcsta} by typing
 {\prg ./calcsta}. The calculation should run and there must appear an output
 the line {\prg sta= ...} on the screen. If this works, a fit may be started.
-
-{\bf Options:} note, that the program {\prg simannfit\index{simannfit}} calls the user written program
+\item the programs {\prg McPhas} and {\prg McDisp} always try to
+calculate a standard deviation and write such {\em sta = ...} statement
+to stdout.  So it is possible to use these programs to create the desired output.
+\item
+ Alternatively (or in addition)
+any other program can be called in {\prg calcsta} and calculate the 
+standard deviation {\prg sta}. Useful  programs are {\prg chi2}\index{chi2},
+{\prg rpvalue}\index{rpvalue}.
+\item Several ($N$) occurrencies of {\em sta = } $\delta_i^2$  contribute additively to
+the variance $s^2=1/N\sum_i \delta_i^2$, which is minimized in the process.
+\item
+if {\em sta=} is followed by two numbers $\delta_i^2$ and ${\rm err}^2$, the first is interpreted as the 
+ $\delta_i^2=$ deviation$^2$ from an experimental data point (which is to be fitted).
+The second number ${\rm err}^2$  is interpreted as the squared errorbar of this 
+datapoint. If ${\rm err}^2$ is not given, the program minimizes the variance
+{\em sta}$=s^2=1/N\sum_i \delta_i^2$.
+If ${\rm err}^2$ is given, the program minimizes $\chi^2=1/N\sum_i \delta_i^2/{\rm err}^2$.
+The error is used at the end of the fitting to calculate
+a covariance matrix, which can be used to estimate correlations
+and errors of the fitting parameters: $F_{ij}=\partial \delta_i / {\rm err}_i\partial {\rm par}_j$,
+the covariance matrix is then ${\rm cov}=s^2(F^TF)^{-1}$, it's diagonal elements correspond
+to the squared error of the fitting parameters par$_j$ and the off diagonal elements to
+the correlation among these fitting parameters.  Useful to generate
+the required {\em sta= ...} statements is the program {\prg chi2}\index{chi2}.
+\item
+ note, that the program {\prg simannfit\index{simannfit}} calls the user written program
 {\prg calcsta} with a number as argument, e.g. as {\prg calcsta 21.3}. This number
 (i.e. 21.3 in our example) denotes a maximum value of the standard deviation. The
 user written program may use this number and stop, when in the summation process
@@ -150,6 +172,7 @@ number. Using this option is advisable in complex fitting problems in order to
 optimise the time of the fitting procedure. Note, that the module {\prg mcphas}
 can be used with the option {\prg -stamax 21.3}, which leads to a stop when the value of 
 the standard deviation 21.3 is reached. 
+\end{enumerate}
 
 \subsection{Starting a parameter space search}
 

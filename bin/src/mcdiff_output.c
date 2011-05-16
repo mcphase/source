@@ -170,8 +170,8 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
   }
   fprintf(fout, "# %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f%+6.3fi %6.3f %6.3f ",(*jjjpars[i]).xyz(1),(*jjjpars[i]).xyz(2),(*jjjpars[i]).xyz(3),(*jjjpars[i]).mom(1),(*jjjpars[i]).mom(2),(*jjjpars[i]).mom(3),(*jjjpars[i]).SLR,(*jjjpars[i]).SLI,(*jjjpars[i]).DWF,(*jjjpars[i]).gJ);
   if(J[i]==0||J[i]==-3){fprintf(fout,"F(Q) beyond dip.approx.");}
-  if(J[i]==-1){fprintf(fout,"F(Q)=j0-(1-2/gJ)j2 formfactor for rare earth/transition metals with gJ=2");}
-  if(J[i]==-2){fprintf(fout,"FL(Q)=(j0+j2)/2 and FS(Q)=j0 formfactors separate for spin and orb. moments");}
+  if(J[i]==-1){fprintf(fout,"formfactor F(Q)=j0-(1-2/gJ)j2 (note that in case of transition metals mcdiff sets gJ=2) FF coefficients:");}
+  if(J[i]==-2){fprintf(fout,"FL(Q)=(j0+j2)/2 and FS(Q)=j0 formfactors separate for spin and orb. moments, FF coefficients:");}
   if((*jjjpars[i]).Np(1)!=0){
   fprintf(fout," - formfactor calculated directly from radial wave function parameters in %s",(*jjjpars[i]).cffilename);
   }

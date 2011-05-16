@@ -8,6 +8,15 @@ print STDOUT << "EOF";
 setting up mcdisp.mf to be used by mcdisp
 T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T
 *******************************************************
+reading results/mcphas.mf
+.... trying to calculate results/charges.*
+EOF
+
+$takecharges=0;
+unless(system ("charges -0.05 $ARGV[0] $ARGV[1] $ARGV[2]) $ARGV[3] results/mcphas.mf > range.out"))
+{$takecharges=1;}
+
+print STDOUT << "EOF";
 reading results/mcphas.sps
 ....writing results/spins.*
 EOF
@@ -88,9 +97,18 @@ print Fout << "EOF";
 # -----------------------------------------------------------------------------
 EOF
 
+if($takecharges)
+{print "taking output of meanfields created by program charges - ready to go beyond dipole approximation in mcdiff\n";
+open (Fin,"results/charges.out");
+while(<Fin>) {print Fout $_;}
+close Fout,Fin;
+}
+else
+{print "\n\n!!!Setting up mcdiff.in for DIPOLE APPROXIMATION ONLY!!!\n";
 open (Fin,"results/spins.out");
 while(<Fin>) {print Fout $_;}
 close Fout,Fin;
+}
 
 print STDOUT << "EOF";
 
@@ -114,8 +132,8 @@ sub usage() {
                     have done a mcphas calculation to stabilise
                     a magnetic structure at the desired Temperature/Field.
                     setup_mcdiff_in reads the results of this calculation
-                    from results/mcphas.sps and generates an input file
-                    mcdiff.in
+                    from results/mcphas.sps and results/mcphas.mf generates an
+                    input file mcdiff.in
 
     usage: setup_mcdiff_in T Ha Hb Hc
 
