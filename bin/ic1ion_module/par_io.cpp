@@ -182,7 +182,7 @@ void getfromionname(std::string &ionname, icpars &pars)
    else if(pars.e_units.find("K")!=std::string::npos)   { for(i=0;i<4;i++) F[i]*=CM2K;   xi*=CM2K;   for(i=0;i<3;i++) a[i]*=CM2K; }   
    else std::cerr << "getfromionname(): Energy units " << pars.e_units << " not recognised. Accepted units are cm^{-1}, meV, K.\n";
 
-   pars.F = F; pars.xi = xi; pars.alpha = a; pars.B.find_rk(ionname); pars.B.calc_stevfact(n,l);
+   pars.F = F; pars.xi = xi; pars.alpha = a; pars.B.find_rk(ionname); pars.B.calc_stevfact(n,l); pars.B.convback();
 }
 
 void ic_parsecfpars(std::string &varname, std::string &varval, icpars &pars, int length)

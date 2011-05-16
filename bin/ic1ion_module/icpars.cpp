@@ -496,6 +496,29 @@ void cfpars::conv(std::string &newcfname)                     // Converts parame
 // --------------------------------------------------------------------------------------------------------------- //
 
 // --------------------------------------------------------------------------------------------------------------- //
+void cfpars::convback()                                       // Converts internal parameters from external parameter type
+{
+   int k,q,i;
+   double l[] = {sqrt(6.)/2., -sqrt(6.), 1./2., -sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., -sqrt(35.)/2., 
+                 sqrt(10.)/4., -sqrt(5.)/2., 1./8., -sqrt(5.)/2., sqrt(10.)/4., -sqrt(35.)/2., sqrt(70.)/8.,
+         /*k=6*/ sqrt(231.)/16., -3*sqrt(77.)/8., 3*sqrt(14.)/16., -sqrt(105.)/8., sqrt(105.)/16., -sqrt(42.)/8., 
+                 1./16., -sqrt(42.)/8., sqrt(105.)/16., -sqrt(105.)/8., 3*sqrt(14.)/16., -3*sqrt(77.)/8., sqrt(231.)/16.};
+   double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
+   double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
+        if(_cfname.compare("A")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]*_rk[k]*imin[i]; ) }
+   else if(_cfname.compare("W")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]*_rk[k]/half[i]; ) }
+   else if(_cfname.compare("B")==0) { CFLOOP( if(_stevfact[k]==0) _Bi[i]=0; else _Bi[i]= _Bo[i]/l[i]/_stevfact[k]*imin[i]; ) }
+   else if(_cfname.compare("V")==0) { CFLOOP( if(_stevfact[k]==0) _Bi[i]=0; else _Bi[i]= _Bo[i]/l[i]/_stevfact[k]/half[i]; ) }
+   else if(_cfname.compare("L")==0 || _cfname.compare("D")==0) { for(i=0;i<27;i++) _Bi[i] = _Bo[i]; }
+   else if(_cfname.compare("AR")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]; ) }
+   else std::cerr << "cfpars::conv(): CF parameter type " << _cfname << "kq not recognised. Accepted: A,W,B,V,L,D,AR\n";
+
+   if(_units.find("K")!=std::string::npos)   for(i=0; i<27; i++) _Bi[i]/=CM2K;
+   if(_units.find("meV")!=std::string::npos) for(i=0; i<27; i++) _Bi[i]*=MEV2CM;
+}
+// --------------------------------------------------------------------------------------------------------------- //
+
+// --------------------------------------------------------------------------------------------------------------- //
 // Overloaded operators for class cfpars
 // --------------------------------------------------------------------------------------------------------------- //
 double cfpars::operator ()(int k, int q) const                // Operator to access internal parameters Bi

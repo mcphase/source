@@ -587,7 +587,7 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
 //   u.zero(sz); iu.zero(sz);
-   int iJ, jJ, Hsz=VE.Hsz(), incx=1; 
+   int iJ, Hsz=VE.Hsz(), incx=1; 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::u1() - Hamiltonian matrix size not same as mean field operator!\n"; return; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
    double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
