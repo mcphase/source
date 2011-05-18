@@ -175,6 +175,8 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
  //char rmat[255],imat[255]; strcpy(rmat,"results/mcphas.icmatr"); strcpy(imat,"results/mcphas.icmati");
    sMat<double> H_cf;
  //if(ic_parseheader(rmat,pars) && ic_parseheader(imat,pars)) { H_cf = mm_gin(rmat); H_cfi = mm_gin(imat); return H_cf; }
+ 
+   if(pars.B.check()==false) { std::cerr << "ic_hmltn(): Internal Wybourne and external CF parameters do not agree. Check sipf.\n"; exit(0); }
 
    sMat<double> Upq,Umq,emat,H_so;
    std::vector<double> E;

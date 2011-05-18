@@ -519,6 +519,32 @@ void cfpars::convback()                                       // Converts intern
 // --------------------------------------------------------------------------------------------------------------- //
 
 // --------------------------------------------------------------------------------------------------------------- //
+bool cfpars::check()                                          // Checks internal and external pars agree
+{
+   int k,q,i;
+   double l[] = {sqrt(6.)/2., -sqrt(6.), 1./2., -sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., -sqrt(35.)/2., 
+                 sqrt(10.)/4., -sqrt(5.)/2., 1./8., -sqrt(5.)/2., sqrt(10.)/4., -sqrt(35.)/2., sqrt(70.)/8.,
+         /*k=6*/ sqrt(231.)/16., -3*sqrt(77.)/8., 3*sqrt(14.)/16., -sqrt(105.)/8., sqrt(105.)/16., -sqrt(42.)/8., 
+                 1./16., -sqrt(42.)/8., sqrt(105.)/16., -sqrt(105.)/8., 3*sqrt(14.)/16., -3*sqrt(77.)/8., sqrt(231.)/16.};
+   double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
+   double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
+   double cB[27];
+        if(_units.find("K")!=std::string::npos)   for(i=0; i<27; i++) cB[i]=_Bi[i]*CM2K;
+   else if(_units.find("meV")!=std::string::npos) for(i=0; i<27; i++) cB[i]=_Bi[i]/MEV2CM; else for(i=0; i<27; i++) cB[i]=_Bi[i];
+
+        if(_cfname.compare("A")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]*imin[i]))>SMALL) return false; ) }
+   else if(_cfname.compare("W")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]/half[i]))>SMALL) return false; ) }
+   else if(_cfname.compare("B")==0) { CFLOOP( if(_stevfact[k]!=0 && abs(cB[i]-(_Bo[i]/l[i]/_stevfact[k]*imin[i]))>SMALL) return false; ) }
+   else if(_cfname.compare("V")==0) { CFLOOP( if(_stevfact[k]!=0 && abs(cB[i]-(_Bo[i]/l[i]/_stevfact[k]/half[i]))>SMALL) return false; ) }
+   else if(_cfname.compare("L")==0 || _cfname.compare("D")==0) { for(i=0;i<27;i++) if(abs(cB[i]-_Bo[i])>SMALL) return false; }
+   else if(_cfname.compare("AR")==0) { for(i=0;i<27;i++) if(abs(cB[i]-_Bo[i]/l[i])>SMALL) return false; }
+
+   return true;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+
+// --------------------------------------------------------------------------------------------------------------- //
 // Overloaded operators for class cfpars
 // --------------------------------------------------------------------------------------------------------------- //
 double cfpars::operator ()(int k, int q) const                // Operator to access internal parameters Bi

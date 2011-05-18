@@ -72,6 +72,7 @@ class cfpars
       void conv_e_units(std::string &units); // Converts parameters to different units
       void conv(std::string &newcfname);     // Converts parameters to a new type (A,V,B,W,L,D,AR)
       void convback();                       // Converts internal parameters back from external.
+      bool check();                          // Checks that internal and external parameters agree.
 
       // Overloaded operators
       double operator()(int k, int q) const; // Operator to access internal parameters Bi
