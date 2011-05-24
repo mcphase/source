@@ -123,7 +123,21 @@ EOF
   exit;
 
 }
+
+sub printheader {
+  my $filehandle;
+  if($#_==-1) { $filehandle=STDOUT; } else { $filehandle=$_[0]; }
+  print { $filehandle } "#! J=",$J," Eigenvalues: ",join("\t",@E),"\n";
+  print { $filehandle } "#! Eigenvectors: "; 
+  for($ii=0; $ii<=$J2; $ii++) { for($jj=0; $jj<=$J2; $jj++) {
+    print { $filehandle } $V->[$ii][$jj]*1,"\t"; } print { $filehandle } "\n#!\t\t",; } 
+  print { $filehandle } "\n";
+}
+
+
 # see http://aplawrence.com/Unix/perlgetops.html for details of GetOptions
+
+usage() if $#ARGV<0;
 
 # -------------------------------------------------------------------------------------- #
 # Options and declarations
@@ -208,16 +222,6 @@ close(CEFLEV);
 if ($einit==0 && $JreadR!=$JreadI) { 
   die "$0: Real and Imaginary eigenvector matrix do not have the same dimensions."; }
 $J=$JreadR; $J2 = 2*$J; $Jsq=$J*($J+1);
-
-#if ($debug) {
-#  print "J = $J\n";
-#  print "Eigenvalues:\n",join("\t",@ereal),"\n";
-#  print "Eigenvectors:\n"; 
-#  for($ii=0; $ii<=$J2; $ii++) { for($jj=0; $jj<=$J2; $jj++) {
-#    print $vreal[$ii+$jj*($J2+1)]*1; 
-#    if(abs($vimag[$ii+$jj*($J2+1)])>$SMALL) { print "+i",$vimag[$ii+$jj*($J2+1)]*1; }
-#    print "\t"; } print "\n"; }
-#}
 
 # -------------------------------------------------------------------------------------- #
 # Calculates the angular momentum operator matrices.
@@ -342,27 +346,29 @@ foreach $T (@Temp) {
 
 # User specified a temperature datafile and two columns. Replace column2 with calculation.
 if ($tfile && $fflag && $col2) {
-  open(OUTFILE,">rhoso1ion.out"); $ix=0;
+  open($OUTFILE,">rhoso1ion.out"); $ix=0;
+  printheader($OUTFILE);
   foreach(@INLines) {
-    if ($_=~/^\s*#/) { print OUTFILE $_; }
+    if ($_=~/^\s*#/) { print $OUTFILE $_; }
     else {
       split; if($#_<($col2-1)) { for $ic ($#_..($col2-2)) { push(@_,0); } }
       $_[$col2-1] = $reslist[$ix++];
-      print OUTFILE join("\t",@_),"\n";
+      print $OUTFILE join("\t",@_),"\n";
     }
   }
-  close(OUTFILE); 
+  close($OUTFILE); 
   unless(rename("rhoso1ion.out",$tfile)) {
-    open (OUTFILE, ">$tfile") or die "$0: cannot to write to $tfile. Output left in rhoso1ion.out";
-    open(INFILE,"rhoso1ion.out");
-    while(<INFILE>) { print OUTFILE $_; }
-    close(INFILE); close(OUTFILE); unlink("rhoso1ion.out");
+    open ($OUTFILE, ">$tfile") or die "$0: cannot to write to $tfile. Output left in rhoso1ion.out";
+    open($INFILE,"rhoso1ion.out");
+    while(<$INFILE>) { print $OUTFILE $_; }
+    close($INFILE); close($OUTFILE); unlink("rhoso1ion.out");
   }
   exit(0);
 }
 
 # User specified a datafile with resistivity data, and wants sta outputted.
 if ($fflag && $dflag) {
+  printheader();
   $sta=0; print "# T(K)  Res_Calc  Res_exp\n";
   for (0..$#reslist) {
     $sta+=($reslist[$_]-$resexp[$_])**2;
@@ -373,6 +379,7 @@ if ($fflag && $dflag) {
   exit(0);
 }
 
+printheader();
 print "# T(K)  Res_Calc\n";
 for (0..$#reslist) { print $Temp[$_]," ",$reslist[$_],"\n"; }
 
