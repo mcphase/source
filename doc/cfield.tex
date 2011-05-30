@@ -872,10 +872,29 @@ and using {\prg so1ion\index{so1ion}} as a module in {\prg mcphas} - see below a
 [plot created by program {\prg gnuplot}]}
 \end{center}
 \end{figure}
+
+\item The spin-disorder resistivity due to scattering of conduction $s$-electrons with the localised
+$f$-electrons via the exchange interaction can be calculated in the first Born approximation as~\cite{raowallace},
+
+\begin{equation} \label{eq:cfres}
+\rho_{s-f}(T) = \frac{3\pi N m}{\hbar e^2 E_F} G^2(g-1)^2 \sum_{m_s,m_s',i,i'} 
+      \langle m_s',i' | {\mathbf s \cdot J} | m_s, i \rangle^2 p_i f_{ii'}
+\end{equation}
+
+\noindent where $G$ is the exchange constant, $p_i$ is the Bose factor $e^{-\beta E_i}/Z$ and $f_{ii'}$ is the
+Fermi function $2/(1+e^{-\beta(E_i-E_{i'})})$. The program {\prg rhoso1ion} can be used to calculate this
+resistivity for magnetic ions in a crystal field. The wavefunctions $|i\rangle$ are taken from the file {\prg
+levels.cef} output by {\prg so1ion}. The matrix elements of ${\mathbf s \cdot J}$ are calculated according to
+the formulae of Dekker~\cite{dekker}. {\prg rhoso1ion} calculates only the sum in the above equation, however.
+The constant coefficient $\rho_0=(3\pi N m/\hbar e^2 E_F) G^2(g-1)^2$ is set to unity, or may be specified using
+the option {\prg --rho0} or {\prg -r}. The syntax is otherwise the same as {\prg cpso1ion}. For example, to
+calculate the resistivity from 10 to 100 K in 1 K steps with $\rho_0 = 0.2$~$\Omega$.cm, the command {\bf
+rhoso1ion 10 100 1 -r 0.2} can be used. Alternatively, for comparison with data, {\bf rhoso1ion 1 2 rhoexp.dat
+-r 0.2} can be used. Note that as the temperature dependence of the resistivity in this case is mainly a
+function of the Bose and Fermi functions, at high temperatures where all $2J+1$ crystal field levels are
+thermally occupied, the resistivity will saturate to a value $\rho_0 J(J+1)$.
+
 \end{enumerate}
-
-
-
 
 \vspace{1cm}
 {\em Exercises:}
