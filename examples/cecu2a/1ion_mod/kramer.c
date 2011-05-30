@@ -59,8 +59,8 @@ if(Jr.Hi()!=3||gjmbHin.Hi()!=3||ABC.Hi()!=5)
 // rotate effective field
 double sf=sin(ABC(4)*PI/180);
 double cf=cos(ABC(4)*PI/180);
-double st=sin(ABC(5)*PI/180);
-double ct=cos(ABC(5)*PI/180);
+double st=sin(-ABC(5)*PI/180);
+double ct=cos(-ABC(5)*PI/180);
 Vector J(1,3);
 Vector gjmbH(1,3);
 Matrix rot(1,3,1,3);
@@ -198,8 +198,8 @@ extern "C" int du1calc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector 
 // rotate effective field
 double sf=sin(ABC(4)*PI/180);
 double cf=cos(ABC(4)*PI/180);
-double st=sin(ABC(5)*PI/180);
-double ct=cos(ABC(5)*PI/180);
+double st=sin(-ABC(5)*PI/180);
+double ct=cos(-ABC(5)*PI/180);
 Vector gjmbH(1,3);
 Matrix rot(1,3,1,3);
       rot(1,1)=cf;    rot(1,2)=sf;   rot(1,3)=0;

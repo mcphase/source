@@ -233,9 +233,11 @@ print $delta;
 $Fij=$delta x matinv($V) ;
  $cov=$Fij->xchg(0,1) x $Fij;
  $cov*=$s2;
-     print $cov;
-     print Fout $cov;
-                 }
+     print $cov; print Fout $cov;
+                $i=0;foreach(@par){print $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
+                                   print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
+                                   ++$i;}
+     }
      close Fout;
 print " <Press enter to close>";$in=<STDIN>;exit 0;
 # END OF MAIN PROGRAM

@@ -235,6 +235,12 @@ print STDOUT << "EOF";
 #using stretching factor for resolution function in column $d3 in $file3
 EOF
 }
+print STDOUT << "EOF";
+#                 the above output contains data from $file3 as given, however
+#                 with a scaled column $d2. Two additional columns are added 
+#                 containing the calculated results of the convolution and the 
+#                 original unscaled data.
+EOF
  print "#\n#!sta=$sta\n";
  print "#!areadata=$areadata\n";
  print "#!areacalc=$areacalc\n";

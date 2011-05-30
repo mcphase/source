@@ -15,7 +15,7 @@ unless ($#ARGV >2)
 
 print "# $0 @ARGV\n";
 
-$fwhm=$ARGV[0];shift @ARGV;
+$fwhm=$ARGV[0]/2;shift @ARGV;
 
 $stp=$ARGV[0];shift @ARGV;
 
