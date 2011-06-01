@@ -536,6 +536,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
            if(dt!=0) { jij[i](j1,i1)=dt; jij[i](i1,j1)=dt; }
      }}}
   }
+  Qsaved=-1e16;
 }
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot
@@ -548,6 +549,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile)
   strcpy(cffilename,sipffile);
   get_parameters_from_sipfile(cffilename);
   set_zlm_constants();
+  Qsaved=-1e16;
 
 }
 
@@ -570,6 +572,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   paranz=0;
   cffilename= new char [MAXNOFCHARINLINE];
   module_type=1;
+  Qsaved=-1e16;
 }
 
 //constructor without file
@@ -601,6 +604,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
   DWF=0;gJ=0;
+  Qsaved=-1e16;
 
 }
 
@@ -674,6 +678,7 @@ int i1;
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   for (i=1;i<=paranz;++i)
   {jij[i]=p.jij[i];dn[i]=p.dn[i];sublattice[i]=p.sublattice[i];}
+  Qsaved=-1e16;
 }
 
 

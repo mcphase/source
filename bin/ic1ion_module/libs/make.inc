@@ -70,11 +70,11 @@ FLAGS   += -O2
 else
 FLAGS   += -O2 -march=native
 endif
+endif
 ifdef profile
 FLAGS   += -pg
 else
 FLAGS   += -fomit-frame-pointer
-endif
 endif
 ifdef distrib
 #FLAGS   += -mtune=pentium3 -march=i686

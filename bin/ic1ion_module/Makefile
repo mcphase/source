@@ -88,11 +88,6 @@ ifndef profile
 CFLAGS+= -fomit-frame-pointer
 endif
 endif
-#----------------------------  GNU Profiler  ------------------------------------#
-ifdef profile
-CFLAGS+= -pg
-LDFLAGS+= -pg
-endif
 #------------------------------   LINKER   --------------------------------------#
 ifdef matlab
 ifdef MSYS
@@ -123,6 +118,11 @@ ifdef b32
 LINKER += -m32
 CFLAGS += -m32
 LDFLAGS += -m32
+endif
+#----------------------------  GNU Profiler  ------------------------------------#
+ifdef profile
+CFLAGS+= -pg
+LDFLAGS+= -pg
 endif
 #------------------------------   DISTRO   --------------------------------------#
 ifdef distrib
