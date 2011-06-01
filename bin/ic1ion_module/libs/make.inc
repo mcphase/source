@@ -79,10 +79,6 @@ endif
 ifdef distrib
 #FLAGS   += -mtune=pentium3 -march=i686
 endif
-ifdef b32
-FLAGS   += -m32
-NOOPT   += -m32
-endif
 OPTS     = $(FLAGS)
 DRVOPTS  = $(OPTS)
 NOOPT    = -fPIC -O0
@@ -90,6 +86,10 @@ LOADER   = $(FORTRAN)
 LOADOPTS =
 CC       = gcc
 CFLAGS   = $(FLAGS)
+ifdef b32
+FLAGS   += -m32
+NOOPT   += -m32
+endif
 #
 # Timer for the SECOND and DSECND routines
 #
