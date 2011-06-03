@@ -13,7 +13,7 @@ reading results/mcphas.mf
 EOF
 
 $takecharges=0;
-unless(system ("charges -0.05 $ARGV[0] $ARGV[1] $ARGV[2]) $ARGV[3] results/mcphas.mf > range.out"))
+unless(system ("charges -0.05 $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3] results/mcphas.mf > range.out"))
 {$takecharges=1;}
 
 print STDOUT << "EOF";
@@ -21,7 +21,7 @@ reading results/mcphas.sps
 ....writing results/spins.*
 EOF
 
-system ("spins $ARGV[0] $ARGV[1] $ARGV[2]) $ARGV[3] results/mcphas.sps");
+system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3] results/mcphas.sps");
 
 print STDOUT << "EOF";
 generating mcdiff.in ...

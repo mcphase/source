@@ -560,9 +560,18 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
 //  s = 1 / 2 / D: sintheta = lambda * s
 /************************************************************************************/
    double jjjpar::F(double Q)
-   {if(gJ==0&&Q>0){return j0(Q);} // in case of intermediate coupling return spin form factor
-    if(gJ==0&&Q<0){return j0(-Q)+j2(-Q);} // in case of intermediate coupling return angular form factor
-   return (j0(Q) + j2(Q) * (2 / gJ - 1)); // formfactor F(Q) for rare earth
+// {if(gJ==0&&Q>0){return j0(Q);} // in case of intermediate coupling return spin form factor
+//  if(gJ==0&&Q<0){return j0(-Q)+j2(-Q);} // in case of intermediate coupling return angular form factor
+// return (j0(Q) + j2(Q) * (2 / gJ - 1)); // formfactor F(Q) for rare earth
+   // Rewrote to use saved value if Q same as previous call.
+   {
+     if(abs(Q-Qsaved)<1e-6) return Fsaved;
+     double Fval;
+     if(gJ==0&&Q>0) Fval = j0(Q);
+     else if(gJ==0&&Q<0) Fval = j0(-Q)+j2(-Q);
+     else Fval = (j0(Q) + j2(Q) * (2 / gJ - 1));
+     Qsaved = Q; Fsaved = Fval;
+     return Fval;
    }
    double jjjpar::j0(double Q)
   {double value=0,s; if(fabs(Q)<0.1)return 1.0;
@@ -648,6 +657,7 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
        }
      return value;
      }
+/*
    double jjjpar::sn(int n,int N,double x)
    {complex <double> c(x,-1.0);
     double value;
@@ -660,6 +670,65 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
     value=(double)factorial(N-n)*real(pow(c,-N+n-1));
     return value;
    }
+*/
+// ------------------------------------------------------------------------- //
+// Rewrite ::sn() and ::cn() to avoid using complex numbers, to run faster
+// ------------------------------------------------------------------------- //
+/* Complex powers, from Mathematica: z=x+I y; Do[Print[ComplexExpand[z^ex]], {ex, 1, 6}] (type I as <ESC>ii<Esc>)
+ * x+I y
+ * x^2+2 I x y-y^2
+ * x^3-3 x y^2+I (3 x^2 y-y^3)
+ * x^4-6 x^2 y^2+y^4+I (4 x^3 y-4 x y^3)
+ * x^5-10 x^3 y^2+5 x y^4+I (5 x^4 y-10 x^2 y^3+y^5)
+ * x^6-15 x^4 y^2+15 x^2 y^4-y^6+I (6 x^5 y-20 x^3 y^3+6 x y^5)
+ * when y=-1:                          For powers z^{-p}, take -ve of Im part and div by (1-x^2)^p.
+ * x                     +I( -1 )
+ * -1+x^2                +I( -2 x )
+ *  -3 x+x^3             +I(  1-3 x^2 )
+ *  1-6 x^2+x^4          +I(  4 x-4 x^3 )
+ *  5 x-10 x^3+x^5       +I( -1+10 x^2-5 x^4 )
+ *  -1+15 x^2-15 x^4+x^6 +I( -6 x+20 x^3-6 x^5 )
+ */
+ double jjjpar::sn(int n,int N,double x)    // Need imaginary part
+ {
+    double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
+    switch(-N+n-1) {
+      case  0: return 0.; break;
+      case  1: return (double)factorial(N-n) *  -1.; break;
+      case -1: return (double)factorial(N-n) * (1. / denom); break;
+      case  2: return (double)factorial(N-n) *  -2*x; break;
+      case -2: return (double)factorial(N-n) * ( 2*x / denom); break;
+      case  3: return (double)factorial(N-n) *   (1-3*x*x); break;
+      case -3: return (double)factorial(N-n) * (-(1-3*x*x) / denom); break;
+      case  4: return (double)factorial(N-n) *   4*x * (1-x*x); break;
+      case -4: return (double)factorial(N-n) * (-4*x * (1-x*x) / denom); break;
+      case  5: return (double)factorial(N-n) *   (-1 + x*x * (10 - 5*x*x)); break;
+      case -5: return (double)factorial(N-n) * (-(-1 + x*x * (10 - 5*x*x)) / denom); break;
+      case  6: return (double)factorial(N-n) *   x * (-6 + x*x * (20 - 6*x*x)); break;
+      case -6: return (double)factorial(N-n) * (-x * (-6 + x*x * (20 - 6*x*x)) / denom);  break;
+      default: fprintf(stderr,"jjjpar::sn() Bad power %i\n",-N+n-1); exit(-1);
+    }
+ }
+ double jjjpar::cn(int n,int N,double x)    // Need real part
+ {
+    double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
+    switch(-N+n-1) {
+      case  0: return 1.; break;
+      case  1: return (double)factorial(N-n) *  x; break;
+      case -1: return (double)factorial(N-n) * (x / denom); break;
+      case  2: return (double)factorial(N-n) *  (-1+x*x); break;
+      case -2: return (double)factorial(N-n) * ((-1+x*x) / denom); break;
+      case  3: return (double)factorial(N-n) *  x * (-3+x*x); break;
+      case -3: return (double)factorial(N-n) * (x * (-3+x*x) / denom); break;
+      case  4: return (double)factorial(N-n) *  (1 + x*x * (-6+x*x)); break;
+      case -4: return (double)factorial(N-n) * ((1 + x*x * (-6+x*x)) / denom); break;
+      case  5: return (double)factorial(N-n) *  x * (5 + x*x *(-10+x*x)); break;
+      case -5: return (double)factorial(N-n) * (x * (5 + x*x *(-10+x*x)) / denom); break;
+      case  6: return (double)factorial(N-n) *  (-1 + x*x * (15 + x*x * (-15+x*x))); break;
+      case -6: return (double)factorial(N-n) * ((-1 + x*x * (15 + x*x * (-15+x*x))) / denom); break;
+      default: fprintf(stderr,"jjjpar::cn() Bad power %i\n",-N+n-1); exit(-1);
+    }
+ }
 
 /************************************************************************************/
 //   debyewallerfactor = exp(-2 * DWF *s*s)      (sf ~ exp(-2 DWF sin^2(theta) / lambda^2)=EXP (-W),  (2*DWF=B=8 pi^2 <u^2>)

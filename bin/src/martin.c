@@ -244,14 +244,16 @@ return result;
 }
 
 // factorial of an integer number
-int factorial(int number) {
+/*int factorial(int number) {
 	int temp;
 
 	if(number <= 1) return 1;
 
 	temp = number * factorial(number - 1);
 	return temp;
-}
+}*/
+// Above recursive function too slow. Also 64-bit int can only hold up to fact(20) anyway: use a lookup table
+// Moved code to header file <martin.h>, so can be inlined
 
 // return threej symbol 
 float threej (float AJ1,float  AJ2,float  AJ3,float AM1,float AM2,float AM3)

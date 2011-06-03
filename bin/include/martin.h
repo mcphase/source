@@ -72,7 +72,16 @@ extern double myround(double prec,double s);
 // return threej symbol 
 extern float threej (float AJ1,float AJ2,float AJ3,float AM1,float AM2,float AM3);
 
-extern int factorial(int number);
+//extern int factorial(int number);  // Too slow. Use lookup table, and inline
+const int facts[13] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800}; 
+// For long int (64-bit numbers), use this: 
+// const long int facts[21] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800,
+// 39916800, 479001600, 6227020800, 87178291200, 1307674368000, 20922789888000,
+// 355687428096001,  6402373705727994, 121645100408832080, 2432902008176640000};
+inline
+int factorial(int number) {
+   return (number>13)?0:facts[number];  // Fast but if number>13 gives wrong results!
+}
 
 #ifndef __linux__
 // return rounded integer (not needed any more in MINGW 3.1.3)
