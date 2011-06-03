@@ -82,6 +82,7 @@ inline
 int factorial(int number) {
    return (number>13)?0:facts[number];  // Fast but if number>13 gives wrong results!
 }
+extern double factorial(double number);
 
 #ifndef __linux__
 // return rounded integer (not needed any more in MINGW 3.1.3)
