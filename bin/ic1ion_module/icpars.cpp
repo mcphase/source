@@ -28,6 +28,7 @@
 #define SMALL 1e-6   // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
 		     // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 #define MAXNOFCHARINLINE 144
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the number of allowed states from the number of electrons and l
 // --------------------------------------------------------------------------------------------------------------- //
@@ -303,6 +304,7 @@ cfpars::cfpars()                                              // Blank construct
    _normalisation.assign("Wybourne"); _cfname.assign("L"); 
    _stevfact.assign(3,1.); _istevfact.assign(3,1.); _rk.assign(3,1.);
    _units.assign("cm^{-1}");
+   op_equiv = undef;
 }
 cfpars::cfpars(std::string &ionname, int n, orbital l)        // Constructor function with stevens factor and <r^k>
 {
@@ -313,6 +315,7 @@ cfpars::cfpars(std::string &ionname, int n, orbital l)        // Constructor fun
    _minustype = false; if(_rk[0]!=1.) _withiontype = true;
    _normalisation.assign("Stevens"); _cfname.assign("B");
    _units.assign("cm^{-1}");
+   op_equiv = (l==D)?Lt:Jt;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -364,7 +367,20 @@ void cfpars::assign(std::string &S, int &k, int &q, double v) // Assign a partic
 // --------------------------------------------------------------------------------------------------------------- //
 void cfpars::calc_stevfact(int n, orbital l)
 {
-   _stevfact = stev_thetak(n,l);
+   if(op_equiv==undef) { op_equiv = (l==D)?Lt:Jt; }
+   if(op_equiv==Lt)  // <L||theta||L> from Abragam and Bleaney, EPR, Appendix B, Table 19, page 873
+   {
+      for(int i=0; i<3; i++) { _stevfact[i]=0; _istevfact[i]=0; }
+      if(n==5) return;
+      int S2 = (n<=5) ? n : (10-n);                // Maximise S.  (Hund's Rules with l=2 substituted in)
+      int L = 0, ln = (n<=5) ? (2-n) : (7-n); 
+      for(int ml=2; ml>ln; ml--) L+=ml;            // Maximise L.
+      _stevfact[0] = 2*(5-2*S2)/21./(2.*L-1);      // <L||alpha||L> = -/+ 2(2l+1-4S)/(2l-1)/(2l+3)/(2L-1)
+      if(n<5) _stevfact[0] = -_stevfact[0];
+      // <L||beta||L> = <L||alpha||L> * ( 3*(3(l-1)(l+2)-7(l-2S)(l+1-2S)) / 2(2l-3)(2l+5)(L-1)(2L-3) )
+      _stevfact[1] = _stevfact[0]*3*(12-7*(2-S2)*(3-S2))/18./(L-1.)/(2*L-3.);
+   }
+   else _stevfact = stev_thetak(n,l);
    int i; for(i=0; i<3; i++) if(_stevfact[i]!=0) _istevfact[i] = 1/_stevfact[i]; else _istevfact[i] = 0.;
 }
 // --------------------------------------------------------------------------------------------------------------- //

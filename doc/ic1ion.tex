@@ -159,6 +159,24 @@ L64=0.00173027
 L65=0.000486626
 L66=-0.00348322
 
+# Blm denote Stevens normalised parameters. They are related to Wyborne
+# parameters by: Blm = l(lm) t(lm) Llm  where l(lm) is a l- and m-dependent
+# factor and t(lm) is the Stevens operator equivalent factor, usually 
+# denoted alpha, beta, gamma for l=2,4,6 respectively. Please note that
+# by default the factor <J||alpha||J> etc. for a J-multiplet is used for
+# f-electron ions whilst <L||alpha||L> etc. ignoring spin is used for 
+# d-electron ions as per convention in the literature. You can force the
+# use of one or the other type of factors by uncommenting the following:
+
+#use_L_operator_equivalent
+#use_J_operator_equivalent
+
+B20=-0.001
+
+# Note that the parameters output in the header of the ic1ion.out file
+# is given in the type of the last input parameter read (e.g. Stevens
+# normalisation in this case).
+
 # magnetisation calculation can be triggered by the following parameters
 calcmag
 # default magnetisation output units is Bohr magneton per ion
@@ -258,12 +276,83 @@ pointcharge=  0.3            3    4    2
 DWF=0.4
 \end{verbatim}
 }
-The output files are written to directory {\prg results} and contain energy eigentstates ({\prg mcphas.icp}) ,
+The output files are written to directory {\prg results} and contain energy eigentstates ({\prg ic1ion.out}) ,
 polycrystal neutron transitions and intensities ({\prg ic1ion.trs}) and, optional, %%@
-the magnetisation ({\prg mcphas.icq}). Note in these
+the magnetisation ({\prg ic1ion.mag}). Note in these
 output files the parameters alpha/beta/gamma
 in the header are not the Steven's operator equivalent factors, but
-rather the parameters of the configuration interactions.
+rather the parameters of the configuration interactions. The operator equivalent factors are listed as 
+{\tt <L||alpha||L>} etc. or {\tt <J||alpha||J>} etc. depending on whether $J$- or $L$-operator equivalents
+are used. $L$- ($J$-)operators are default for $d$- ($f$-)electron ions. In practice, as the $J$- or $L$- 
+operators are valid only within an $L$- or $J$-manifold, whilst {\prg ic1ion} calculates the splitting of the
+full $l^n$ configuration with many manifolds, the operator equivalent factors only serve to convert the input
+Stevens parameters into Wybourne normalisation, which is used internally by the program to calculate the
+Hamiltonian.
+
+If the user wishes to compare the output of {\prg ic1ion} with published energies/wavefunctions using Stevens
+parameters for rare earths, they should set the Slater {\prg F2, F4, F6} and spin-orbit {\prg xi} integrals to
+very high values - such as 10$^7$ meV, in order to obtain the $LS$-coupling limit. For comparison with Stevens
+parameters within an $L$-manifold for $d$-electron ions, the user should set the Slater integrals to high
+values but the spin-orbit integral to zero. In this case the {\prg ic1ion} output will have twice the
+degeneracy of a pure $L$-manifold calculation because the spin is taken into account in {\prg ic1ion} and
+generates an additional two-fold degeneracy. If a non-zero (e.g. literature specified) spin-orbit integral
+{\prg xi} is specified, then this degeneracy will be lifted.
+
+In addition to the usual Stevens, $B_l^m$, and Wyborne $L_l^m$ parameters noted above, {\prg ic1ion} also
+understands certain variants to these parameters using the same notation as {\prg cfield}/{\prg so1ion}:
+
+\begin{center} \begin{tabular}{@{\extracolsep{\fill}}r|l|l} \hline
+     Parameter  & Relation to Llm                                                & Normalisation \\ \hline
+     Alm        & = sign($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$         & Stevens \\
+     Blm        & = sign($m$) $ \lambda_{lm} \langle J || \theta_l || J \rangle$ & Stevens \\
+     ARlm       & =           $ \lambda_{lm} L_l^m $                             & Stevens \\
+     Wlm        & = half($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$         & Stevens \\
+     Vlm        & = half($m$) $ \lambda_{lm} \langle J || \theta_l || J \rangle$ & Stevens \\
+     Llm        & =           $              L_l^m $                             & Wybourne \\
+     Dlm        & =           $              L_l^m $                             & Wybourne \\ \hline
+\end{tabular} \end{center}
+
+\noindent where half($m$) = $\frac{1}{2}$ when $m\neq 0$ and half($m$)=1 when $m=0$.
+Note that {\prg lm} should be replaced by numbers - e.g. an example of ARlm is {\prg AR20}, and that
+the operator equivalent factor $\langle J || \theta_l || J \rangle$ should be $\langle L || \theta_l || L
+\rangle$ for an $L$-manifold which is the default for $d$-electron ions. The constants $\lambda_{lm}$
+are given in table~\ref{tab:wytostev}.
+
+\begin{table}[h] \renewcommand{\arraystretch}{1.3}
+  \begin{center}
+   %\begin{tabular*}{10cm}{@{\extracolset{\fill}}|c|c|c|}
+   %  \multicolumn{3}{|c|}{$k$~~~$q$~~~$\lambda_{kq}$} \\ \hline
+   %  $k$  &  $q$  &  $\lambda_{kq}$ \\ \hline \hline
+   %  $2$  &  $0$  &  $\frac{1}{2}$  \\
+   %  $2$  &  $1$  &  $-\sqrt{6}$  \\
+   %  $2$  &  $2$  &  $\frac{1}{2}\sqrt{6}$  \\
+   %  $4$  &  $0$  &  $\frac{1}{8}$  \\
+   %  $4$  &  $1$  &  $-\frac{1}{2}\sqrt{5}$  \\
+   %  $4$  &  $2$  &  $\frac{1}{4}\sqrt{10}$  \\
+   %  $4$  &  $3$  &  $-\frac{1}{2}\sqrt{35}$  \\
+   %  $4$  &  $4$  &  $\frac{1}{8}\sqrt{70}$  \\
+   %  $6$  &  $0$  &  $\frac{1}{16}$  \\
+   %  $6$  &  $1$  &  $-\frac{1}{8}\sqrt{42}$  \\
+   %  $6$  &  $2$  &  $\frac{1}{16}\sqrt{105}$  \\
+   %  $6$  &  $3$  &  $\frac{1}{8}\sqrt{105}$  \\
+   %  $6$  &  $4$  &  $-\frac{3}{16}\sqrt{14}$  \\
+   %  $6$  &  $5$  &  $-\frac{3}{8}\sqrt{77}$  \\
+   %  $6$  &  $6$  &  $\frac{1}{16}\sqrt{231}$  \\ \hline
+    \begin{tabular}{c|ccccccc}
+     %\hline
+     %\backslashbox{$k$}{$|q|$} & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ \\
+          & \multicolumn{7}{|c}{$|m|$} \\  \cline{2-8}
+      $l$ & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ \\
+      \hline \hline
+      $2$ & $\frac{1}{2}$  & $-\sqrt{6}$             & $\frac{1}{2}\sqrt{6}$  & & & & \\
+      $4$ & $\frac{1}{8}$  & $-\frac{1}{2}\sqrt{5}$  & $\frac{1}{4}\sqrt{10}$   & $-\frac{1}{2}\sqrt{35}$ & $\frac{1}{8}\sqrt{70}$   & & \\
+      $6$ & $\frac{1}{16}$ & $-\frac{1}{8}\sqrt{42}$ & $\frac{1}{16}\sqrt{105}$ & $\frac{1}{8}\sqrt{105}$ & $-\frac{3}{16}\sqrt{14}$ &
+            $-\frac{3}{8}\sqrt{77}$ & $\frac{1}{16}\sqrt{231}$ \\
+      \hline
+    \end{tabular}
+    \caption{\emph{Ratios of the Stevens to the Wybourne parameters}. $\lambda_{lm} = A_{lm}\langle r^l \rangle / L_l^m$.} \label{tab:wytostev}
+  \end{center}
+\end{table}
 
 \subsection{{\prg cpic1ion} - calculation of the specific heat from {\prg ic1ion.out}}
  The crystal field contribution to the specific heat may be calculated 

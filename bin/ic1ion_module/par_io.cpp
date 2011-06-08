@@ -338,6 +338,10 @@ void ic_parseinput(const char *filename, icpars &pars)
       {  
          iss >> pars.truncate_level; if(pars.truncate_level<=0 || pars.truncate_level>=1) pars.truncate_level=0.5;
       }  
+      else if(varname.find("use_J_operator_equivalent")!=std::string::npos)
+      {  pars.B.op_equiv = Jt; pars.B.calc_stevfact(pars.n,pars.l); pars.B.convback(); }
+      else if(varname.find("use_L_operator_equivalent")!=std::string::npos)
+      {  pars.B.op_equiv = Lt; pars.B.calc_stevfact(pars.n,pars.l); pars.B.convback(); }
       else if(varname.find("emu")!=std::string::npos)
          pars.mag_units = 1;
       else if(varname.find("simag")!=std::string::npos)

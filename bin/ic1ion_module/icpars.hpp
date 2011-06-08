@@ -35,6 +35,9 @@
 
 #define GS      2.0023193043622            // The electron gyromagnetic ratio
 
+// Defines a enumeration for the operator equivalent type: <J||theta||J> or <L||theta||L>
+enum t_opequiv { undef, Jt, Lt };
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Defines a class to hold the values of the crystal field parameters and methods to convert and print them.
 //   Note that the parameters are stored internally in both Wybourne normalisation (type Lkq) and in whichevery
@@ -59,6 +62,7 @@ class cfpars
       std::string cfname() { return _cfname; }
       std::string norm() { return _normalisation; }
       std::string units() { return _units; }
+      t_opequiv op_equiv;                    // Operator equivalent type: Default <J||t||J> for f-, <L||t||L> for d-elec.
       void calc_stevfact(int n, orbital l);  // (Re)calculates the stevens factor for l^n
       void find_rk(std::string &ionname);    // (Re)lookup the radial integral <r^k> for a particular ion
       double get(int k, int q);              // Returns the value of the external parameter k,q
