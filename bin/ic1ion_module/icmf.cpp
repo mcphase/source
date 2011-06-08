@@ -609,6 +609,7 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
    // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
    int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+   int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
                  
    sMat<double> Upq,Umq; double redmat; int n = _n; if(n>(2*_l+1)) n = 4*_l+2-n; 
 
@@ -631,7 +632,7 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
          Upq *= redmat;
       }
 
-      if(!VE.iscomplex() && iflag[iJ]==0)
+      if(!VE.iscomplex() && im[iJ]==0)
       {
          vt = (double*)malloc(Hsz*sizeof(double)); 
          double *fJmat; if(iJ>=6) fJmat=Upq.f_array(); else fJmat=J[iJ].f_array();
@@ -646,8 +647,8 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
       else
       {
          zeroes.zero(J[0].nr(),J[0].nc());
-         if(iJ>=6) { if(iflag[iJ]==0) zJmat=zmat2f(Upq,zeroes);   else zJmat = zmat2f(zeroes,Upq); }
-         else      { if(iflag[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]); }
+         if(iJ>=6) { if(im[iJ]==0) zJmat=zmat2f(Upq,zeroes);   else zJmat = zmat2f(zeroes,Upq); }
+         else      { if(im[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]); }
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(j), &incx, &zbeta, zt, &incx);
          #ifdef _G77 

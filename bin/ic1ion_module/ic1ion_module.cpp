@@ -356,14 +356,13 @@ __declspec(dllexport)
    // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
    int num_op = gjmbheff.Hi()-gjmbheff.Lo()+1; icmfmat mfmat(pars.n,pars.l,(num_op>6?num_op:6),pars.save_matrices);
    int i,j,gLo=gjmbheff.Lo(),gHi=gjmbheff.Hi(); std::vector<double> vgjmbH(gHi,0.);
+   for(i=gLo; i<=gHi; i++) vgjmbH[i-1] = -gjmbheff[i];
    // Converts the Jij parameters if necessary
    #ifdef JIJCONV
    if(pars.B.norm().find("Stevens")!=std::string::npos) {
       pars.jijconvcalc(); mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
-      for(i=gLo; i<=gHi; i++) vgjmbH[i-1] = -gjmbheff[i]*pars.jijconv[i]; }
-   else
+      for(i=gLo; i<=gHi; i++) vgjmbH[i-1] *= pars.jijconv[i]; }
    #endif
-      for(i=gLo; i<=gHi; i++) vgjmbH[i-1] = -gjmbheff[i];
    sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices); 
 
    // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
@@ -379,8 +378,8 @@ __declspec(dllexport)
    // Puts eigenvectors/values into the est matrix
    for(i=0; i<Hsz; i++) (*est)(0,i+1) = complex<double> (VE.E(i), exp(-(VE.E(i)-VE.E(0))/(KB*T)));   // Row 0
 
-   if(VE.iscomplex()) // {
-      for(i=1; i<=Hsz; i++) memcpy(&(*est)[i][1],VE.zV(i-1),Hsz*sizeof(complexdouble)); 
+   if(VE.iscomplex()) {
+      for(i=1; i<=Hsz; i++) memcpy(&(*est)[i][1],VE.zV(i-1),Hsz*sizeof(complexdouble));  }
 //    std::cout << "\n\nest==VE.zV = " << checkmat((*est),VE.zV(0),1,1) << endl << endl; }
    else
       for(i=0; i<Hsz; i++){//printf("\n");
@@ -574,7 +573,7 @@ __declspec(dllexport)
    for(i=0; i<Hsz; i++) { 
       therm = exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)); Z += therm; if(therm<DBL_EPSILON) break; }
 
-   int a,b,j=0,k=0; for(i=0; i<Hsz; ++i) {for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
+   int a,j=0,k=0; for(i=0; i<Hsz; ++i) {for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    ++i;++j; // because in est i and j start from 1...Hsz
  
    for(q=0; q<3; q++)

@@ -174,7 +174,7 @@ std::vector<double> stev_thetak(int n, orbital l)
    L = (orbital)Li;
 
    // Finds the seniority and other quantum numbers from the list of states
-   for(is=0; is<(int)conf.states.size(); is++) if(conf.states[is].S2==S2 && conf.states[is].L==L) break;
+   for(is=0; is<(int)conf.states.size(); is++) { if(conf.states[is].S2==S2 && conf.states[is].L==L) break; }
 
    noncfpprod = pow(-1.,-(double)l-Li) * (2.*Li+1.);
    if(df) cfps = racah_parents(n,conf.states[is].v,S2,L); else cfps = racah_parents(n,conf.states[is].v,conf.states[is].U,S2,L);
@@ -255,7 +255,7 @@ void icpars::jijconvcalc()
    if(_jijconvalreadycalc) return;
    int k[] = {0,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-   double pna[]={0,0,0,0,0,0,0,sqrt(15/PI)/4,sqrt(15/PI)/2,sqrt(5/PI)/4,sqrt(15/PI)/2,sqrt(15/PI)/4,
+   double pna[]={0,1,1,1,1,1,1,sqrt(15/PI)/4,sqrt(15/PI)/2,sqrt(5/PI)/4,sqrt(15/PI)/2,sqrt(15/PI)/4,
       sqrt(35./32/PI),sqrt(105./16/PI),sqrt(21./32/PI),sqrt(7./16/PI),sqrt(21./32/PI),sqrt(105./16/PI),sqrt(35./32/PI),
       3*sqrt(35/PI)/16,3*sqrt(70/PI)/8,3*sqrt(5/PI)/8,3*sqrt(5./2/PI)/4,3./16/sqrt(PI),3*sqrt(5./2/PI)/4,3*sqrt(5/PI)/8,3*sqrt(70/PI)/8,3*sqrt(35/PI)/16,
       sqrt(693./512/PI),sqrt(3465./256/PI),sqrt(385./512/PI),sqrt(1155./64/PI),sqrt(165./256/PI),sqrt(11./256/PI),sqrt(165./256/PI),sqrt(1155./64/PI),

@@ -37,11 +37,11 @@ LINKER+=-mno-cygwin
 endif
 # Checks to see if we want to use the 64bit crosscompiler in Cygwin
 ifdef cross64
-CC=x86_64-w64-mingw32-g++ -m64 -pipe $(ARCHFLAG)
+CC=x86_64-w64-mingw32-g++ -m64 $(ARCHFLAG)
 LINKER=x86_64-w64-mingw32-g++ -m64
 endif
 ifdef cross32
-CC=i686-w64-mingw32-g++ -m32 -pipe $(ARCHFLAG)
+CC=i686-w64-mingw32-g++ -m32 $(ARCHFLAG)
 LINKER=i686-w64-mingw32-g++ -m32
 endif
 endif
@@ -79,10 +79,10 @@ endif
 #------------------------------    FAST    --------------------------------------#
 ifdef fast
 ifdef GCC42
-CFLAGS+= -O2 -march=native -pipe
+CFLAGS+= -pipe -O2 -march=native
 #CFLAGS+= -O2 -pipe -fomit-frame-pointer -march=core2 -msse4 -msse4.1 -msse4.2 -mcx16 -msahf
 else
-CFLAGS+= -O2 -pipe
+CFLAGS+= -pipe -O2
 endif
 ifndef profile
 CFLAGS+= -fomit-frame-pointer
@@ -132,7 +132,7 @@ endif
 ##################################################################################
 
 # List of object files to be created and their headers
-OBJECT = maths states        icpars icmf par_io ic_hmltn ic_diag mmio njsyms cfp coulomb so_cf lovesey
+OBJECT = maths               icpars icmf par_io ic_hmltn ic_diag mmio njsyms cfp coulomb so_cf lovesey
 HEADER = maths states ic1ion icpars icmf
 
 .PHONY: default all clean
@@ -156,11 +156,13 @@ libs/liblapack.a:
 	cd libs && make
 
 ifdef integral
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
-	$(LINKER) -o ../ic1ionit ic1ion.o spectre.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
+../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o spectre.o ic1ion_module.o
+	@echo Linking $@
+	@$(LINKER) -o ../ic1ionit ic1ion.o spectre.o states.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
 else
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) ic1ion.o
-	$(LINKER) -o ../ic1ionit ic1ion.o $(OBJ) $(LDFLAGS) $(STATIC)
+../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
+	@echo Linking $@
+	@$(LINKER) -o ../ic1ionit ic1ion.o states.o $(OBJ) $(LDFLAGS) $(STATIC)
 endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp
@@ -169,6 +171,9 @@ ifdef integral
 else
 	$(CC) $(CFLAGS) -c $<
 endif
+
+states.o: states.cpp states.hpp
+	$(CC) $(patsubst -O2,   ,${CFLAGS}) -c $<
 
 spectre.o: spectre.cpp
 	$(CC) $(CFLAGS) -I../include -c $<
@@ -191,21 +196,24 @@ else
 	$(CC) $(CFLAGS) -I../include -c $<
 endif
 
-ic1ion.so: checkgcc libs/liblapack.a $(OBJ) ic1ion.o spectre.o ic1ion_module.o
+ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o spectre.o ic1ion_module.o
+	@echo Linking $@
 ifdef WINDOWS
-	$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
 else
-	$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
 ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o  # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
 ../icf1ionit$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o
-	$(LINKER) -o ../icf1ionit icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+	@echo Linking $@
+	@$(LINKER) -o ../icf1ionit icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 icf1ion.so: checkgcc libs/liblapack.a $(ICOBJ) icf1ion_module.o
+	@echo Linking $@
 ifdef WINDOWS
-	$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libicf1ion_module.a
+	@$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libicf1ion_module.a
 else
-	$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS)
+	@$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
 # Patern rules

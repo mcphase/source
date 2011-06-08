@@ -663,7 +663,7 @@ __declspec(dllexport)
 
    // Copies the already calculated energy levels / wavefunctions from *est
    if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
-   int Hsz = est.Rows()-1, iJ, jJ, incx = 1;
+   int Hsz = est.Rows()-1, iJ, incx = 1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    if(est[0][j+1].real()-est[0][i+1].real()<delta)
    {
@@ -1907,8 +1907,10 @@ void icf_printheader(const char *outfile, icpars &pars)
    FILEOUT << "# Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
    std::string norm=pars.B.norm(); strtolower(norm); if(norm.find("stev")!=std::string::npos)
    {
-      FILEOUT << "# Stevens Factors: alpha=" << pars.B.alpha() << ", beta=" << pars.B.beta();
-      if(pars.l==F) FILEOUT << ", gamma=" << pars.B.gamma(); FILEOUT << "\n";
+      std::string op; if(pars.B.op_equiv==Lt) op.assign("L"); else op.assign("J");
+      FILEOUT << "# Stevens Factors: <" << op << "||alpha||" << op << ">=" << pars.B.alpha();
+      FILEOUT <<                  ", <" << op << "||beta||" << op << ">=" << pars.B.beta();
+      if(pars.l==F) FILEOUT << ", <" << op << "||gamma||" << op << ">=" << pars.B.gamma(); FILEOUT << "\n";
    }
    FILEOUT << "# Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
    if(fabs(pars.Bx)>DBL_EPSILON || fabs(pars.By)>DBL_EPSILON || fabs(pars.Bz)>DBL_EPSILON)
