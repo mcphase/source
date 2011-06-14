@@ -7,25 +7,28 @@ use File::Copy;
 # copy("alter_name","neuer_name");
 # rename("alter_name","neuer_name");
 # chdir('../.');
-
 print STDOUT << "EOF";
 
-Progam icf1ion - calculation of single ion problems in intermediate coupling
-schemes (Hee >> Hcef ~ Hso ~ Hze) considering only lowest term (L&S according
-to 1st and 2nd Hunds rule) and levels
+Progam so1ion - calculation of single ion problems in intermediate coupling
+schemes (Hee ~ Hcef ~ Hso ~ Hze) considering all terms and levels
 
 EOF
-system "icf1ionit @ARGV";
-# check if file exists and if it starts with #!MODULE=icf1ion
-unless (open(Fin,$ARGV[0])){print "error: file $ARGV[0] does not exist\n";exit(0);}
-$line=<Fin>;close Fin;
-unless($line=~/\Q#!MODULE=icf1ion\E/){print "error: file $ARGV[0] does not start with #!MODULE=icf1ion\n";exit(0);}
-# if yes then do also a mcdisp calculation to create icf1ion.trs ...
 
-($T)=extract("T","$ARGV[0]");
-($Bx)=extract("Bx","$ARGV[0]");
-($By)=extract("By","$ARGV[0]");
-($Bz)=extract("Bz","$ARGV[0]");
+system "so1ionit @ARGV";
+
+# check if command line is reading file for neutron intensity calculation (option -r)
+unless ($ARGV[0]=~/-r/&&$ARGV[2]=~/-[B,L]/) {exit(0);}
+# if yes, check if file exists and if it starts with #!MODULE=so1ion
+unless (open(Fin,$ARGV[1])){print "error: file $ARGV[1] does not exist\n";exit(0);}
+$line=<Fin>;close Fin;
+unless($line=~/\Q#!MODULE=so1ion\E/){print "error: file $ARGV[1] does not start with #!MODULE=so1ion\n";exit(0);}
+# if yes then do also a mcdisp calculation to create so1ion.trs ...
+
+($T)=extract("T","$ARGV[1]");
+($gJ)=extract("GJ","$ARGV[1]");
+($Bx)=extract("Bx","$ARGV[1]");
+($By)=extract("By","$ARGV[1]");
+($Bz)=extract("Bz","$ARGV[1]");
 
 
 
@@ -65,7 +68,7 @@ close Fout;
 if (open(Fin,"mcphas.j")) {@mcphasj=<Fin>;close Fin;}
 open (Fout, ">mcphas.j");
 print Fout << "EOF";
-# autocreated file for icf1ion
+# autocreated file for so1ion
 #<!--mcphase.mcphas.j-->
 #***************************************************************
 # Lattice Constants (A)
@@ -76,16 +79,17 @@ print Fout << "EOF";
 #! nofatoms=1  nofcomponents=6  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
 # ****************************************************************************
-#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=0 cffilename=$ARGV[0]
+#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=$gJ cffilename=$ARGV[1]
 # da[a]      db[b]      dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
 EOF
+
 if (open(Fin,"results/mcdisp.trs")) {@mcdisptrs=<Fin>;close Fin;}
 
 #
 # start mcdispit -c
 if(system "mcdispit -c > range.out ") {print "problem starting mcdispit";}
 else
-{print "Transitions and single ion neutron intensities stored in results/icf1ion.trs";}
+{print "Transitions and single ion neutron intensities stored in results/so1ion.trs";}
 mydel("range.out");
 # remove files
 if (@mcdispmf){open (Fout, ">mcdisp.mf"); print Fout @mcdispmf;close Fout;}
@@ -96,9 +100,9 @@ if (@mcphasj){open (Fout, ">mcphas.j"); print Fout @mcphasj;close Fout;}
 else {mydel("mcphas.j");}
 
 
-# rename mcdisp.trs into icf1ion.trs
+# rename mcdisp.trs into so1ion.trs
  chdir('./results');
- rename("mcdisp.trs","icf1ion.trs");
+ rename("mcdisp.trs","so1ion.trs");
  chdir('./..');
 
 if (@mcdisptrs){open (Fout, ">results/mcdisp.trs"); print Fout @mcdisptrs;close Fout;}

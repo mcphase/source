@@ -29,6 +29,8 @@ if ($module=~/.*ic1ion/){$module="ic1ion";}
 # print $module;exit;
 # initialise CEF parameters
 $L20=0.0;
+$L21s=0.0;
+$L22s=0.0;
 $L21=0.0;
 $L22=0.0;
 $L40=0.0;
@@ -58,8 +60,11 @@ switch ($module)
   else {die "ERROR program sipf2xcard: module $module not implemented\n";}
 }
 
-# transform CEF parameters to meV
-$L20*=0.001;
+# transform CEF parameters to eV
+if(1==0)
+{$L20*=0.001;
+$L21s*=0.001;
+$L22s*=0.001;
 $L21*=0.001;
 $L22*=0.001;
 $L40*=0.001;
@@ -88,7 +93,7 @@ $L66s*=0.001;
 $F2*=0.001;
 $F4*=0.001;
 $xi*=0.001;
-
+}
 print STDOUT << "EOF";
  XCRD:
  //XCARD for $file
@@ -133,7 +138,7 @@ EOF
 
                                        print STDOUT "    CAk(#i1 $conf)={2,0,$L20,0\n";
 if (abs($L21*$L21+$L21s*$L21s)>1e-10) {print STDOUT "              ,2,1,".(-$L21).",".( $L21s).",2,-1,$L21,$L21s\n";}
-if (abs($L22*$L22+$L22s*$L22s)>1e-10) {print STDOUT "              ,2,1,".( $L22).",".(-$L22s).",2,-1,$L22,$L22s\n";}
+if (abs($L22*$L22+$L22s*$L22s)>1e-10) {print STDOUT "              ,2,2,".( $L22).",".(-$L22s).",2,-2,$L22,$L22s\n";}
 if (abs($L40)>1e-10)                  {print STDOUT "              ,4,0,$L40,0\n";}
 if (abs($L41*$L41+$L41s*$L41s)>1e-10) {print STDOUT "              ,4,1,".(-$L41).",".( $L41s).",4,-1,$L41,$L41s\n";}
 if (abs($L42*$L42+$L42s*$L42s)>1e-10) {print STDOUT "              ,4,2,".( $L42).",".(-$L42s).",4,-2,$L42,$L42s\n";}

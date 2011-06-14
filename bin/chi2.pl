@@ -11,6 +11,8 @@ unless ($#ARGV >1)
  print " if col1, col2 and col3 are calculation, experiment and experimental error, respectively, then\n";
  print " chisquared is defined as\n 1/nofpoints *sum_i{allpoints} (col2 - col1)^2/col3^2\n";
  print " for each data point a line sta= (col2 - col1)^2  col3^2 is output to stdout\n";
+ print " a column containing the value of chisquared during each step of the\n";
+ print " summation is added to the file\n";
  print " usage: chi2 col1 col2 col3  *.*   \n col=columns \n *.* .. filenname\n";
  exit 0;}
 
@@ -29,7 +31,7 @@ $col3=$ARGV[0];shift @ARGV;
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file.">\n";
-
+   open (Fout, ">range.out");
    while($line=<Fin>)
 
      {
@@ -43,7 +45,11 @@ $col3=$ARGV[0];shift @ARGV;
             $chi2+=$s2/$e2;
             print "sta= $s2 $e2\n";
             $nofpoints+=1;
-
+            $i=0;
+             foreach (@numbers)
+             {++$i;
+  		   print Fout $numbers[$i-1]." ";}     
+              print Fout ($chi2/$nofpoints)."\n";
            }
 
      } 
@@ -53,6 +59,17 @@ $col3=$ARGV[0];shift @ARGV;
       print " chi2=".$chi2."\n";
 
       close Fin;
+      close Fout;
+       unless (rename "range.out",$file)
+          {unless(open (Fout, ">$file"))     
+      {die "\n error:unable to write to $file\n";}
+      open (Fin, "range.out");
+      while($line=<Fin>){ print Fout $line;}
+      close Fin;
+      close Fout;
+      system "del range.out"; 
+     }
+
 
 
    }

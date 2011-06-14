@@ -1,4 +1,4 @@
-#makefile for program cfield
+#makefile for program so1ion
 
 vpath %.h  ../include
 vpath %.hpp ../include
@@ -56,7 +56,7 @@ ifdef WINDOWS
 EXE=.exe
 endif
 
-all : cfieldrout.o cfield.so ../cfield$(EXE) ../so1ion$(EXE) module.o
+all : cfieldrout.o cfield.so ../cfield$(EXE) ../so1ionit$(EXE) module.o
 
 VECOBJS= matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
 		imatrix.o dvector.o dmatrix.o dmatmul.o cvector.o \
@@ -81,8 +81,8 @@ cfield.so: module.o cfield.o  $(VECOBJS) $(CFOBJS)
 ../cfield$(EXE): cfield.o  $(VECOBJS) $(CFOBJS)
 	$(CCC) $(CCOPTS) -Wall -o ../cfield $^ $(LFLAGS)
 
-../so1ion$(EXE): so1ion.o  $(VECOBJS) $(CFOBJS)
-	$(CCC) $(CCOPTS) -Wall -o ../so1ion $^ $(LFLAGS)
+../so1ionit$(EXE): so1ion.o  $(VECOBJS) $(CFOBJS)
+	$(CCC) $(CCOPTS) -Wall -o ../so1ionit $^ $(LFLAGS)
 
 module.o: module.c 
 	$(CCC) $(CCOPTS) -Wall -fPIC -c  -o module.o module.c  $(INCLDIRS) $(LFLAGS)

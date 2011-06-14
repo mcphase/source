@@ -16,6 +16,12 @@ EOF
 
 system "ic1ionit @ARGV";
 
+# check if file exists and if it starts with #!MODULE=ic1ion
+unless (open(Fin,$ARGV[0])){print "error: file $ARGV[0] does not exist\n";exit(0);}
+$line=<Fin>;close Fin;
+unless($line=~/\Q#!MODULE=ic1ion\E/){print "error: file $ARGV[0] does not start with #!MODULE=ic1ion\n";exit(0);}
+# if yes then do also a mcdisp calculation to create ic1ion.trs ...
+
 ($T)=extract("T","$ARGV[0]");
 ($Bx)=extract("Bx","$ARGV[0]");
 ($By)=extract("By","$ARGV[0]");
@@ -70,9 +76,10 @@ print Fout << "EOF";
 #! nofatoms=1  nofcomponents=6  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
 # ****************************************************************************
-#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=0 cffilename=@ARGV[0]
+#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=0 cffilename=$ARGV[0]
 # da[a]      db[b]      dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
 EOF
+if (open(Fin,"results/mcdisp.trs")) {@mcdisptrs=<Fin>;close Fin;}
 
 #
 # start mcdispit -c
@@ -94,6 +101,7 @@ else {mydel("mcphas.j");}
  rename("mcdisp.trs","ic1ion.trs");
  chdir('./..');
 
+if (@mcdisptrs){open (Fout, ">results/mcdisp.trs"); print Fout @mcdisptrs;close Fout;}
 
 
 
