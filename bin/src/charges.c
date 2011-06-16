@@ -221,7 +221,8 @@ if (argc>=10){// try a spinwave picture
               savev_real.print(stdout);
               fprintf(stdout,"#imag\n");
               savev_imag.print(stdout);
-
+              gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.set
+                        // in case he wants to overwrite some default settings
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
               double phase;

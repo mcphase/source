@@ -106,7 +106,13 @@ described in section~\ref{spins}.
 # optional parameter is extended_eigenvector_dimension
 # which is used to define, how many components of the
 # eigenvector should be in the ouput to file mcdisp.qee
-# (important for charge density movies)
+# important for charge density movies, e.g.(i) for module so1ion
+#  - f electrons - chargedensity fluctuation needs coefficients
+#  l=3, i.e. eigenvector should be extended to 3+5+7+9+11+13=48,
+#  (ii) for module ic1ion with f-electrons eigenvector has to be
+#  extended to 6+5+7+9+11+13=51 (here there are 6 components for 
+#  all spin and orbital moments), (iii) for module ic1ion and d-
+#  electrons l=2 it suffices 6+5+7+9=27 
 #!extended_eigenvector_dimension=3
 #
 # It follows either 

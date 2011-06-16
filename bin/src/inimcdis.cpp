@@ -67,7 +67,13 @@ void inimcdis::save()
   fprintf(fout,"# optional parameter is extended_eigenvector_dimension\n");
   fprintf(fout,"# which is used to define, how many components of the\n");
   fprintf(fout,"# eigenvector should be in the ouput to file mcdisp.qee\n");
-  fprintf(fout,"# (important for charge density movies)\n");
+  fprintf(fout,"# important for charge density movies, e.g.(i) for module so1ion\n");
+  fprintf(fout,"#  - f electrons - chargedensity fluctuation needs coefficients\n");
+  fprintf(fout,"#  l=3, i.e. eigenvector should be extended to 3+5+7+9+11+13=48,\n");
+  fprintf(fout,"#  (ii) for module ic1ion with f-electrons eigenvector has to be\n");
+  fprintf(fout,"#  extended to 6+5+7+9+11+13=51 (here there are 6 components for \n");
+  fprintf(fout,"#  all spin and orbital moments), (iii) for module ic1ion and d-\n");
+  fprintf(fout,"#  electrons l=2 it suffices 6+5+7+9=27 \n");
   fprintf(fout,"#!extended_eigenvector_dimension=%i\n",extended_eigenvector_dimension);
 
   fprintf(fout,"#\n");
