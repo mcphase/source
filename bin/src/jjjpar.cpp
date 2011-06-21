@@ -419,7 +419,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   char instr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE];
   cffilename= new char [MAXNOFCHARINLINE];
   int i,j,i1,j1,k1;
-  int symmetricexchange=0,indexexchangenum;
+  int symmetricexchange=0,indexexchangenum=0;
   Matrix exchangeindices;
   double gjcheck;
   float nn[MAXNOFNUMBERSINLINE];

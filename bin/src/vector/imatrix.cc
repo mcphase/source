@@ -600,8 +600,17 @@ int Min (const IntMatrix &d, int& i, int& j)
 // Returns the smallest element of this matrix and its indices i,j
 //
 {
-    Matpack.Error("int Min (const IntMatrix &d, int& i, int& j) NOT YET IMPLEMENTED");
-    return 0;
+//  Matpack.Error("int Min (const IntMatrix &d, int& i, int& j) NOT YET IMPLEMENTED");
+//  return 0;
+    register int n = d.ncol*d.nrow-1, im=0;
+    register int* src = d.M[d.rl]+d.cl;
+    register int* minp = src++;
+    while (n--) {
+	if (*src < *minp) { minp = src; im = n; }
+	src++; 
+    }
+    j = im % d.nrow; i = (im-j)/d.nrow;  //  im = i*d.nrow+j;
+    return *minp;
 }
 
 //----------------------------------------------------------------------------//
@@ -628,8 +637,17 @@ int Max (const IntMatrix &d, int& i, int& j)
 // Returns the largest element of this matrix and its indices i,j
 //
 {
-    Matpack.Error("int Max (const IntMatrix &d, int& i, int& j) NOT YET IMPLEMENTED");
-    return 0;
+//  Matpack.Error("int Max (const IntMatrix &d, int& i, int& j) NOT YET IMPLEMENTED");
+//  return 0;
+    register int n = d.ncol*d.nrow-1, im=0;
+    register int* src = d.M[d.rl]+d.cl;
+    register int* maxp = src++;
+    while (n--) {
+	if (*src > *maxp) { maxp = src; im = n; }
+	src++; 
+    }
+    j = im % d.nrow; i = (im-j)/d.nrow;  //  im = i*d.nrow+j;
+    return *maxp;
 }
 
 //----------------------------------------------------------------------------//

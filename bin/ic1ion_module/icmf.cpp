@@ -26,6 +26,12 @@
 #define SMALL 1e-6   // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
 		     // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 #define MAXNOFCHARINLINE 144
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Member function for complexdouble struct
+// --------------------------------------------------------------------------------------------------------------- //
+complexdouble complexdouble::operator=(const double v) { complexdouble t; t.r=v; t.i=0.; return t; }
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Constructors for class iceig::
 // --------------------------------------------------------------------------------------------------------------- //
@@ -249,7 +255,6 @@ icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string d
    sMat<double> t; J.assign(6,t); 
    iflag.assign(num_op>6?num_op:6,0); iflag[2]=1; iflag[3]=1;
    // Determines the filename strings for where the moment operator matrices are stored if previously calculated
-   int nn = n; if(n>(2*l+1)) nn = (4*l+2)-n;
    char nstr[6]; char basename[255]; char Lfilestr[255], Sfilestr[255]; strcpy(basename,"results/mms/");
    if(save_matrices) {
    #ifndef _WINDOWS
@@ -409,7 +414,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) 
       if(fabs(VE.zV(ii,jj).r*VE.zV(ii,jj).r+VE.zV(ii,jj).i*VE.zV(ii,jj).i)<DBL_EPSILON*100000) 
       {
-         VE.zV(ii,jj).r=0.; VE.zV(ii,jj).i=0.;  
+         VE.zV(ii,jj) = 0;
       }  
    // For first run calculate also the partition function and internal energy
    me.assign(Esz,0.); eb.assign(Esz,0.); Z=0.;
@@ -741,7 +746,7 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++)
       if(fabs(VE.zV(ii,jj).r*VE.zV(ii,jj).r+VE.zV(ii,jj).i*VE.zV(ii,jj).i)<DBL_EPSILON*100000)
       {
-         VE.zV(ii,jj).r=0.; VE.zV(ii,jj).i=0.;
+         VE.zV(ii,jj) = 0.;
       }
 
    // For first run calculate also the partition function and internal energy

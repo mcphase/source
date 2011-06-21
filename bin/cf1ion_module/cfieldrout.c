@@ -199,7 +199,7 @@ void init_einheit()
 {
     INT i;
  
-    for(i=0 ; i<ANZ_EINHEIT ; ++i )
+    for(i=0 ; i<(int)ANZ_EINHEIT ; ++i )
           switch(i){
              case 0:
              case 1: EINHEITIMP[i].myB = myBKelvin;
@@ -253,7 +253,7 @@ INT is_einheit_imp( c ) /* Bestimme Einheit anhand des Erkennugszeichens c */
 {
    INT i;
  
-   for(i=0; i<ANZ_EINHEIT; ++i)
+   for(i=0; i<(int)ANZ_EINHEIT; ++i)
        if( c==EINHEITIMP[i].c )
              return( i );
  
@@ -307,6 +307,7 @@ DOUBLE  epn6n(n) INT n; {return( dummy(ABS(n)+6,n)*gn6n(ABS(n)) );}
 DOUBLE omegan0n(n)
   INT n;
 {
+   UNUSED_PARAMETER(n);
    return( 1.0 );
 }
  
@@ -315,6 +316,7 @@ DOUBLE omegan1n(n)
  
   INT n;
 {
+   UNUSED_PARAMETER(n);
    return( 1.0 );
 }
  
@@ -323,6 +325,7 @@ DOUBLE omegan1n(n)
 DOUBLE omegan2n(n)
   INT n;
 {
+   UNUSED_PARAMETER(n);
    return( 1.0 );
 }
  
@@ -373,7 +376,7 @@ DOUBLE omegan5n(n)
   INT z1;
   INT z2;
   INT z3;
-  DOUBLE e1,e2;
+  DOUBLE e1/*,e2*/;
  
    if(n==0) return( 1.0 );
  
@@ -385,7 +388,7 @@ DOUBLE omegan5n(n)
    }while( z1<n );
  
    k=0;
-   e2 = 1.0;
+/* e2 = 1.0; */
    do{
    z2 = 3 + 5*k;
    z3 = 4 + 5*k;
@@ -428,10 +431,10 @@ void getpar(char * iontype, int * dj, double * alpha, double * beta, double * ga
        double * rh2, double * rh4,double * rh6, int * nof_electrons )
 {
     KRISTALLFELD *kristallfeld,*init_iterationnew();
-    SETUP        *setup;
+/*  SETUP        *setup; */
     ITERATION    *iteration;
     init_einheit();
-    setup =  cfield_setup(); /* setup's aus SETUP-file holen */
+/*  setup =  cfield_setup();*/ /* setup's aus SETUP-file holen */
     kristallfeld=init_iterationnew(iontype);/*sets up HMAG */
     iteration= ITERATION (kristallfeld);
 
@@ -511,7 +514,7 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
                               double * rh2,double * rh4,double * rh6, int * nof_electrons)
 {
     KRISTALLFELD *kristallfeld,*init_iterationnew();
-    EWPROBLEM    *ewproblem,   *setuphcf();
+    EWPROBLEM /* *ewproblem,*/ *setuphcf();
     SETUP        *setup;
     INT          m,n;
     INT          i,j;
@@ -522,7 +525,7 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
 
     init_einheit();
 
-    setup =  cfield_setup(); /* setup's aus SETUP-file holen */
+    setup = cfield_setup(); /* setup's aus SETUP-file holen */
     
 /* determine crystal field stevens operator matrices */
 
@@ -565,7 +568,7 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
 
     Bx=0.0;By=0.0; Bz=0.0;
     HMAG(iteration)=calc_Bmag( DIMJ(iteration),GJ(iteration),myB,Bx,By,Bz);
-    ewproblem=setuphcf(setup,(EWPROBLEM*)0,NEIN,kristallfeld,BKQ);
+/*  ewproblem=*/setuphcf(setup,(EWPROBLEM*)0,NEIN,kristallfeld,BKQ);
 
     /* h += singleion anisotropy */
     for( n= DIMJ(iteration); n>=1 ; --n) for( m=DIMJ(iteration) ; m>=1 ; --m) {
@@ -658,7 +661,7 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
 
              mo55sr[30*(n-1)+m-1]= ( I(P5P5(PKQ(iteration)),n,m )-I(P5M5(PKQ(iteration)),n,m))/2/omegan0n(5);
 	     mo55si[30*(n-1)+m-1]=-( R(P5P5(PKQ(iteration)),n,m )-R(P5M5(PKQ(iteration)),n,m))/2/omegan0n(5);
-             mo44sr[30*(n-1)+m-1]= ( I(P5P4(PKQ(iteration)),n,m )-I(P5M4(PKQ(iteration)),n,m))/2/omegan1n(4);
+             mo54sr[30*(n-1)+m-1]= ( I(P5P4(PKQ(iteration)),n,m )-I(P5M4(PKQ(iteration)),n,m))/2/omegan1n(4);
 	     mo54si[30*(n-1)+m-1]=-( R(P5P4(PKQ(iteration)),n,m )-R(P5M4(PKQ(iteration)),n,m))/2/omegan1n(4);
              mo53sr[30*(n-1)+m-1]= ( I(P5P3(PKQ(iteration)),n,m )-I(P5M3(PKQ(iteration)),n,m))/2/omegan2n(3);
 	     mo53si[30*(n-1)+m-1]=-( R(P5P3(PKQ(iteration)),n,m )-R(P5M3(PKQ(iteration)),n,m))/2/omegan2n(3);
@@ -962,6 +965,9 @@ EWPROBLEM *setuphcf(setup,ewproblem,overwrite,kristallfeld,modus)
     KRISTALLFELD *kristallfeld;
     CHAR modus;
 {
+    UNUSED_PARAMETER(setup);
+    UNUSED_PARAMETER(overwrite);
+
     EWPROBLEM *diagonalisiere();
  
     ITERATION *iteration;
@@ -2324,7 +2330,6 @@ KRISTALLFELD *init_iteration(filename,symmetrienr,modus) /* [1] */
     ITERATION    *read_Wkq(),  *read_xW();
     ITERATION    *read_Dkq(),  *read_Lkq();
     KRISTALLFELD *kristallfeld;
-    INFILE(kristallfeld)=filename;
  
  
     switch(modus){
@@ -2354,9 +2359,12 @@ KRISTALLFELD *init_iteration(filename,symmetrienr,modus) /* [1] */
  
           case WKQ:   iteration  = read_Wkq( filename ,symmetrienr);
                       break;
+
+          default:    fprintf(stderr,"init_iteration: Invalid parameter type %c\n",modus); exit(-1);
    }
  
    kristallfeld              = KRISTALLFELD(1);
+   INFILE(kristallfeld)      = filename;
    ITERATION(kristallfeld)   = iteration;
    SYMMETRIENR(kristallfeld) = SYMMETRIENR( iteration );
    IONENNUMMER(kristallfeld) = IONENNUMMER( iteration );
@@ -2925,6 +2933,8 @@ UMGEBUNG*trans_B_kartesisch(name,umgebung)/*Magnetfeld ins kartesische       */
     CHAR     *name;                      /* Koordinatensystem transformieren */
     UMGEBUNG *umgebung;
 {
+    UNUSED_PARAMETER(name);
+
     DOUBLE  h,theta,phi;
     DOUBLE  sin(),cos();
  
@@ -2994,7 +3004,7 @@ void info_info()      /* Informationen ueber moegliche Infos ausgeben */
  
     clearscreen;
     printf("\nImplementierte Infos are :\n\n");
-    for( i=0 ; i<  ANZ_INFOS ; ++i )
+    for( i=0 ; i<  (int)ANZ_INFOS ; ++i )
          printf("%s -i[nfo] %s \n",PROGRAMMNAME,INFO(i) );
     printf("\n");
  
@@ -3018,7 +3028,7 @@ t03=" ------------------------------------------------------------------ \n";
  
  
     printf("\nImplemented commands are :\n\n");
-    for( i=0 ; i<  ANZ_BEFEHLE ; ++i )
+    for( i=0 ; i<  (int)ANZ_BEFEHLE ; ++i )
          printf("%s : %s %s \n",BEFEHLKOM(i),PROGRAMMNAME,BEFEHL(i) );
     printf("\n");
  
@@ -3212,7 +3222,7 @@ void info_Vlm(filename,symmetrienr,einheit)
     FILE *fp,*fopen();
     KOMPLEX      *z;
     KRISTALLFELD *kf,*init_iteration();
-    ITERATION    *iteration;
+/*  ITERATION    *iteration; */
     DOUBLE       renorm = E0_EINHEIT;
     INT          s;
     CHAR         *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
@@ -3228,23 +3238,23 @@ void info_Vlm(filename,symmetrienr,einheit)
     kf = init_iteration( filename,symmetrienr );
  
     switch( symmetrienr ){
-         case 0 : iteration = Vkq0( ITERATION(kf)  );
+         case 0 : /* iteration = */ Vkq0( ITERATION(kf)  );
                   break;
-         case 1 : iteration = Vkq1( ITERATION(kf)  );
+         case 1 : /* iteration = */ Vkq1( ITERATION(kf)  );
                   break;
-         case 2 : iteration = Vkq2( ITERATION(kf)  );
+         case 2 : /* iteration = */ Vkq2( ITERATION(kf)  );
                   break;
-         case 3 : iteration = Vkq3( ITERATION(kf)  );
+         case 3 : /* iteration = */ Vkq3( ITERATION(kf)  );
                   break;
-         case 4 : iteration = Vkq4( ITERATION(kf)  );
+         case 4 : /* iteration = */ Vkq4( ITERATION(kf)  );
                   break;
-         case 5 : iteration = Vkq5( ITERATION(kf)  );
+         case 5 : /* iteration = */ Vkq5( ITERATION(kf)  );
                   break;
-         case 6 : iteration = Vkq6( ITERATION(kf)  );
+         case 6 : /* iteration = */ Vkq6( ITERATION(kf)  );
                   break;
-         case 7 : iteration = Vkq7( ITERATION(kf)  );
+         case 7 : /* iteration = */ Vkq7( ITERATION(kf)  );
                   break;
-         case 8 : iteration = Vkq8( ITERATION(kf)  );
+         case 8 : /* iteration = */ Vkq8( ITERATION(kf)  );
                   break;
     }
  
@@ -3681,6 +3691,7 @@ INT k,q;
        case 4 : z=omegan4n(ABS(q));break;
        case 5 : z=omegan5n(ABS(q));break;
        case 6 : z=omegan6n(ABS(q));break;
+       default: fprintf(stderr,"info_omegakq: Invalid k=%i\n",k); z=0.0; break;
    }
  
    printf("\n");
@@ -4029,7 +4040,7 @@ void c_kq_error(c)   /* Eingabefehler beim Versuch von  -c -'c' */
     printf("e_e := Unit in which the energy eigenvalues ");
     printf("are calculated.\n\n");
     printf("ion symmetry number: ");
-    for(i=0;i<ANZ_INFO_EINHEIT-1;++i)
+    for(i=0;i<(int)ANZ_INFO_EINHEIT-1;++i)
        printf("%s,",INFO_EINHEIT[ i ].info);
     printf("%s\n\n",INFO_EINHEIT[ ANZ_INFO_EINHEIT-1 ].info);
  
@@ -4599,6 +4610,7 @@ INT coor_error(fp,filename,nrion,errornr)
     CHAR *filename;
     INT  nrion,errornr;
 {
+    UNUSED_PARAMETER(fp);
  
     printf("\n");
     printf("mistake in File %s !\n",filename);

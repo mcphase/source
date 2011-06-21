@@ -31,7 +31,11 @@
  * @brief Platform-dependent macro definitions
  */
 
-typedef struct { double r,i; } complexdouble;
+//typedef struct { double r,i; } complexdouble;
+struct complexdouble {
+   double r, i;
+   complexdouble operator=(const double v);
+};
 
 #if  defined(RIOS) && !defined(CLAPACK)
 # define F77NAME(x) x

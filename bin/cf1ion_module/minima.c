@@ -55,6 +55,8 @@ void CALFUN(m,n,f,x)   /* wird spaeter von der C-routine VA05A()  */
  INT     m, n;         /* aufgerufen                              */
  DOUBLE *f, *x;
 {
+   UNUSED_PARAMETER(m);
+
    DOUBLE   (*funk)();
    SETUP     *setup;
    EWPROBLEM *ewproblem;
@@ -88,7 +90,7 @@ MINIMUM *va05a_(_fitnr,setup,ewproblem,iteration,p0,funk)
       VEKTOR *p0;
       DOUBLE (*funk)();
 {
-      DOUBLE macheps;
+/*    DOUBLE macheps; */
       VEKTOR *xi,*pp,*vr_alloc();
  
       /* variablendefinition fuer VA05A() */
@@ -104,7 +106,7 @@ MINIMUM *va05a_(_fitnr,setup,ewproblem,iteration,p0,funk)
       CF.start     = vr_alloc( VRDIM(p0) );
  
       maxfun  = FITMAX(iteration);
-      macheps = sqrt(ewproblem->eps_machine);
+/*    macheps = sqrt(ewproblem->eps_machine); */
  
  
       n = VRDIM(p0);
@@ -162,12 +164,12 @@ MINIMUM *fitnr5(_fitnr ,setup,ewproblem,iteration,p0,funk)
       VEKTOR *p0;
       DOUBLE (*funk)();
 {
-      DOUBLE chi2,macheps;
-      INT    itmax,iter;
+      DOUBLE chi2/*,macheps*/;
+      INT /* itmax,*/iter;
  
       iter    = 0;
-      itmax   = FITMAX(iteration);
-      macheps = sqrt(ewproblem->eps_machine);
+/*    itmax   = FITMAX(iteration); */
+/*    macheps = sqrt(ewproblem->eps_machine); */
  
       TEXT1(_fitnr)  = SUCCESSFUL;
       TEXT2(_fitnr)  = UNSTABLE;
@@ -517,7 +519,7 @@ MINIMUM *frprmn(_frprmn,setup,ewproblem,iteration,pv,func)
 {
  
       VEKTOR *vr_alloc(),  *xi, *g, *h, *p, *gradient();
-      INT    n,iter,i,j,ze,sp,mw;
+      INT    n,iter/*,i*/,j/*,ze*/,sp,mw;
       DOUBLE macheps,ftol,fret,eps,gg,dgg,gam,fp;
       LINMIN *linmin(),*_linmin;
       MINIMUM *dbrent();
@@ -530,6 +532,8 @@ MINIMUM *frprmn(_frprmn,setup,ewproblem,iteration,pv,func)
  
       ftol    = sqrt(macheps);
       eps     = sqrt(macheps);
+      fret    = 0.0;
+      iter    = 1;
  
       n       = VRDIM(pv);
       p       = vr_alloc( n );
@@ -617,7 +621,7 @@ LINMIN *linmin(_linmin,brent,setup,ewproblem,iteration,p,xi,func)
       DOUBLE    (*func)();
 {
       INT j;
-      DOUBLE  ax,xx,bx,fa,fx,fb,fret,xmin;
+      DOUBLE  ax,xx,bx/*,fa,fx,fb*/,fret,xmin;
       MNBRAK  *_mnbrak,*mnbrak();
       MINIMUM *_brent;
  
@@ -855,7 +859,7 @@ MINIMUM *brent(_brent,setup,ewproblem,iteration,ax,bx,cx,func,pv,xi)
       v = bx;
       w = v;
       x = v;
-      e = 0.0;
+      e = 0.0; d = 0.0;
  
       fx = f1dim(setup,ewproblem,iteration,func,pv,xi,x);
       fv = fx;
@@ -952,7 +956,7 @@ MINIMUM *dbrent(_brent,setup,ewproblem,iteration,ax,bx,cx,func,pv,xi)
  
  
       DOUBLE v,w,x,e,xm,a,b,tol,tol1,tol2,fx,fv,fw,fu,dx,dv,dw,du;
-      DOUBLE etemp,u,d1,d2,u1,u2,d,olde;
+      DOUBLE /*etemp,*/u,d1,d2,u1,u2,d,olde;
  
       macheps         = ewproblem -> eps_machine;
       TEXT1(_brent )  = SUCCESSFUL;
@@ -967,7 +971,7 @@ MINIMUM *dbrent(_brent,setup,ewproblem,iteration,ax,bx,cx,func,pv,xi)
       v = bx;
       w = v;
       x = v;
-      e = 0.0;
+      e = 0.0; d = 0.0;
  
       fx = f1dim(setup,ewproblem,iteration,func,pv,xi,x);
       fv = fx;

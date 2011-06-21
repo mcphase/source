@@ -317,6 +317,7 @@ void ComplexMatrix::Remove (void)
 
 void ComplexMatrix::Resize (int rlo, int rhi, int clo, int chi)
 {
+    (void)rlo; (void)rhi; (void)clo; (void)chi;  // Cast to void to skip -Wunused-parameter
     Matpack.Error("ComplexMatrix::Resize: NOT YET IMPLEMENTED");
 }
 
@@ -967,8 +968,9 @@ double Norm (const ComplexMatrix& A)
 // largest singular value of A.
 //
 {
+    (void)A;  // Cast to void so gcc doesn't throw -Wunused-parameter
     double sum = 0;
-    Matpack.Error("double Norm (const ComplexMatrix& A) NOT YET");
+    Matpack.Error("double Norm (const ComplexMatrix& A) NOT YET IMPLEMENTED");
     return sum;
 }
 
@@ -981,8 +983,9 @@ double Norm2 (const ComplexMatrix& A)
 // largest singular value of A.
 //
 {
+    (void)A;  // Cast to void so gcc doesn't throw -Wunused-parameter
     double sum = 0;
-    Matpack.Error("double Norm (const ComplexMatrix& A) NOT YET");
+    Matpack.Error("double Norm2 (const ComplexMatrix& A) NOT YET IMPLEMENTED");
     return sum;
 }
 

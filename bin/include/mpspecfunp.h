@@ -90,7 +90,7 @@ inline double dcsevl (double x, const double* cs, int n)
 	Matpack.Warning("%s: %s", "dcsevl",
 			"x outside the interval (-1,+1)");
 #endif
-    double b0 = 0.0, b1 = 0.0, b2, twox = x * 2;
+    double b0 = 0.0, b1 = 0.0, b2 = 0.0, twox = x * 2;
     for (int i = 1; i <= n; i++) {
 	b2 = b1;
 	b1 = b0;

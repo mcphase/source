@@ -835,7 +835,7 @@ return JJ;
 }
 
 
-void ionpars::cfieldJJ(Vector & JJ,double & T, Vector & gjmbH, double & lnZs, double & U, ComplexMatrix & ests)
+void ionpars::cfieldJJ(Vector & JJ,double & T, Vector & gjmbH, double & lnZs, double & U, ComplexMatrix & /*ests*/)
 {//ABC not used !!!
     /*on input
     T		temperature[K]
@@ -1227,7 +1227,7 @@ on output
     .... occupation number of states (- to + transition chosen according to transitionnumber)
 */
   int pr;pr=1;if (tn<0) {pr=0;tn*=-1;}
-  int i,j,k,l;
+  int i,j=1,k,l;
   int dj=(int)(2*J+1);
   double delta;
 // calculate nat for transition number tn

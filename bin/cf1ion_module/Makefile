@@ -23,8 +23,9 @@ INCLUDE= ../../include
 
 .SUFFIXES: .cc .o
 
+#	${CC} -c $(patsubst -Wall,,${COPTS}) -I ${INCLUDE} $<
 .c.o: 
-	${CC} -c $(patsubst -Wall,,${COPTS})  -I ${INCLUDE} $<
+	${CC} -c ${COPTS} -I ${INCLUDE} $<
 
 .cc.o: 
 	${CCC} -c ${CCOPTS}   -I ${INCLUDE} $<
@@ -73,18 +74,18 @@ cfield.o: types.c main.c
 so1ion.o: types.c main.c
 
 # used for internal module in mcphas and mcdisp
-cfieldrout.o: cfieldrout.c $(VECOBJS) $(CFOBJS) 
+cfieldrout.o: cfieldrout.c $(CFOBJS) 
 
 cfield.so: module.o cfield.o  $(VECOBJS) $(CFOBJS) 
 	$(CCC) $(CCOPTS) -Wall -o cfield.so $^ -shared $(LFLAGS)
 
-../cfield$(EXE): cfield.o  $(VECOBJS) $(CFOBJS)
+../cfield$(EXE): cfield.o $(CFOBJS)
 	$(CCC) $(CCOPTS) -Wall -o ../cfield $^ $(LFLAGS)
 
-../so1ionit$(EXE): so1ion.o  $(VECOBJS) $(CFOBJS)
+../so1ionit$(EXE): so1ion.o $(CFOBJS)
 	$(CCC) $(CCOPTS) -Wall -o ../so1ionit $^ $(LFLAGS)
 
-module.o: module.c 
+module.o: module.c
 	$(CCC) $(CCOPTS) -Wall -fPIC -c  -o module.o module.c  $(INCLDIRS) $(LFLAGS)
 
 clean:

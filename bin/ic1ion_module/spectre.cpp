@@ -296,12 +296,13 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
 {
    std::cout << "mcalc(): Calculating rotated matrix for truncation." << std::flush;
    clock_t start,end; start = clock();
-   int i,Hsz=getdim(pars.n,pars.l);
+   int info,Hsz=getdim(pars.n,pars.l);
    complexdouble *Vf; Vf = new complexdouble[Hsz*Hsz]; double *Ef; Ef = new double[Hsz]; 
 
    // Calculates the eigenvectors and puts it into *est matrix for use by truncate_expJ()
    std::cout << " Starting single ion matrix diagonalisation... " << std::flush;
-   i = ic_diag(Hic,iHic,Vf,Ef); delete[]Ef; 
+   info = ic_diag(Hic,iHic,Vf,Ef); if(info!=0) { std::cerr << "truncate_hmltn: Error diagonalising, info==" << info << "\n"; }
+   delete[]Ef; 
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) { 
       if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) Vf[ii*Hsz+jj].r=0.; if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) Vf[ii*Hsz+jj].i=0.; } 
    std::cout << "Finished.";
@@ -378,7 +379,8 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
 void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, double *lnZ, double *U, complexdouble *Jm)
 {
    int Hsz=getdim(pars.n,pars.l);
-   size_t filesize = Hsz*Hsz*sizeof(complexdouble); char uplo='U'; complexdouble zme;
+ //size_t filesize = Hsz*Hsz*sizeof(complexdouble); 
+   char uplo='U'; complexdouble zme;
    int Esz, incx=1; std::vector<double> E, me, eb;
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
 
@@ -400,7 +402,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, d
       if(fabs(Hrot[ii+jj*cb].r)<DBL_EPSILON) Hrot[ii+jj*cb].r=0.; if(fabs(Hrot[ii+jj*cb].i)<DBL_EPSILON) Hrot[ii+jj*cb].i=0.; } 
    iceig VE; VE.calc(cb,Hrot); delete[]Hrot;
    for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-      if(fabs(VE.zV(ii,jj).r)<DBL_EPSILON) VE.zV(ii,jj).r=0.; if(fabs(VE.zV(ii,jj).i)<DBL_EPSILON) VE.zV(ii,jj).i=0.; } 
+      if(fabs(VE.zV(ii,jj).r)<DBL_EPSILON && fabs(VE.zV(ii,jj).i)<DBL_EPSILON) VE.zV(ii,jj) = 0.; } 
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<cb; Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
@@ -408,7 +410,8 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, d
    // Calculates the rotated operators for the mean field terms
    char nstr[6]; char mapname[255]; char mapbasename[255];
    nstr[0] = (pars.l==F?102:100); if(pars.n<10) { nstr[1] = pars.n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = pars.n+38; nstr[3] = 0; }
-   filesize = cb*cb*sizeof(complexdouble); complexdouble *zt; double Z=0.; eb.assign(Esz,0.); *U=0.;
+ //filesize = cb*cb*sizeof(complexdouble); 
+   complexdouble *zt; double Z=0.; eb.assign(Esz,0.); *U=0.;
    int memloc=cb*cb;
    for(int iJ=(J.Lo()-1); iJ<J.Hi(); iJ++)
    {

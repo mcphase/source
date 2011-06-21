@@ -13,6 +13,7 @@
 #define K_B  0.0862
 #define SMALL 1e-10
 
+#define UNUSED_PARAMETER(a) (void)a
 
 // use cfield as a module loaded at runtime
 
@@ -273,6 +274,9 @@ extern "C" void mcalc(Vector & J,double & T, Vector & gjmbH,double * g_J, Vector
     Z		single ion partition function
     U		single ion magnetic energy
 */
+    UNUSED_PARAMETER(g_J);
+    UNUSED_PARAMETER(ABC);
+    UNUSED_PARAMETER(sipffile);
 
 // check dimensions of vector
 if(J.Hi()>12||gjmbH.Hi()>12)

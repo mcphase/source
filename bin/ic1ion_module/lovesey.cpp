@@ -43,7 +43,7 @@ bool lovesey_aKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
    int num_states = (int)conf.states.size(), ns=0;
    int i,j,k,kk,v,vp,isz,jsz,iJ,jJ;
    int j2min,j2max,j2pmin,j2pmax;
-   int L2,L2p,S2,S2p,J2,J2p,L2b,S2b;
+   int L2,L2p,S2,S2p,J2,J2p,L2b;//,S2b;
    std::vector<int> indexJstart,indexJstop;
    std::vector<cfpls> cfpsi,cfpsj;
    double rmLS,sumcfp;
@@ -127,7 +127,7 @@ bool lovesey_aKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
             for(k=0; k<isz; k++)
                for(kk=0; kk<jsz; kk++)
                   if(cfpsi[k].ind==cfpsj[kk].ind) {
-                     L2b = 2*abs(confp.states[cfpsi[k].ind].L); S2b = confp.states[cfpsi[k].ind].S2;
+                     L2b = 2*abs(confp.states[cfpsi[k].ind].L); //S2b = confp.states[cfpsi[k].ind].S2;
                      sumcfp += cfpsi[k].cfp*cfpsj[kk].cfp * pow(-1.,L2b/2) * sixj(L2p,2*Kp,L2,2*l,L2b,2*l); }
             rmLS = sqrt( (L2+1.)*(L2p+1.) ) * n * sumcfp * redmat;
          }

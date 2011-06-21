@@ -333,9 +333,9 @@ __declspec(dllexport)
           void mcalc_parameter_storage_matrix_init(
                       ComplexMatrix *est, // Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
                       Vector &gjmbheff,   // Input  Effective mean fields (meV)
- /* Not Used */       double *g_J,        // Input  Lande g-factor
-                      double *T,          // Input  temperature
- /* Not Used */       Vector &ABC,        // Input  Vector of parameters from single ion property file
+ /* Not Used */       double * /*g_J*/,   // Input  Lande g-factor
+                      double * /*T*/,     // Input  temperature
+ /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 {
    // Parses the input file for parameters
@@ -443,8 +443,8 @@ __declspec(dllexport)
            void mcalc(Vector &J,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
                       double *T,          // Input scalar temperature
                       Vector &gjmbH,      // Input vector of mean fields (meV) 
- /* Not Used */       double *gJ,         // Input Lande g-factor
- /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
+ /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       double *lnZ,        // Output scalar logarithm of partition function
                       double *U,          // Output scalar internal energy 
@@ -552,9 +552,9 @@ __declspec(dllexport)
 #endif
           void estates(ComplexMatrix *est,// Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
                       Vector &gjmbheff,   // Input  Effective mean fields (meV)
- /* Not Used */       double &g_J,        // Input  Lande g-factor
+ /* Not Used */       double & /*g_J*/,   // Input  Lande g-factor
                       double &T,          // Input  temperature
- /* Not Used */       Vector &ABC,        // Input  Vector of parameters from single ion property file
+ /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 {
    clock_t start,end; start = clock();
@@ -635,8 +635,8 @@ __declspec(dllexport)
            int du1calc(int &tn,            // Input transition number; if tn>0, print debug info
                       double &T,          // Input temperature
                       Vector &gjmbH,      // Input vector of mean fields (meV) 
- /* Not Used */       double &g_J,        // Input Lande g-factor
- /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
+ /* Not Used */       double & /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexVector &u1,  // Output eigenvector u1
                       float &delta,       // Output transition energy

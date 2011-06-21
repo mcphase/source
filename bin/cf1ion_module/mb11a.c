@@ -29,7 +29,7 @@ Includedateien holen
 #define FOR for
 #define ELSE else
 #define GOTO goto
-#define RETURN return
+#define RETURN return 0
 #define CONTINUE ;}
 #define STOP exit(1);
 #define END
@@ -43,6 +43,11 @@ Includedateien holen
 #define GOTO3(A,B,M)     {IF((M)==1)GOTO A;IF((M)==2)GOTO B;}
 #define SIGN(a1,a2) ( (a2)>=0. ? ABSD(a1) : (-ABSD(a1)) )
  
+
+INT MB11D(DOUBLE *A, INT ZA, INT SA, INT ZB, INT SB, INT ZC, INT SC, INT IA, DOUBLE WKK, INT MKK, INT NKK);
+INT MB11E(DOUBLE *A, INT ZA, INT SA, INT ZB, INT SB, INT IA, DOUBLE *W, DOUBLE WKK, INT MKK, INT NKK);
+INT MB11F(DOUBLE *A, INT ZA, INT SA, INT ZB, INT SB, INT ZC, INT SC, INT IA, DOUBLE WKK, DOUBLE AKK, INT MKK, INT NKK);
+
 /*----------------------------------------------------------------------------
                                MB11A()
 -----------------------------------------------------------------------------*/
@@ -57,9 +62,9 @@ Includedateien holen
       DOUBLE           BSQ,RMAX,SIGMA,SUM;
       DOUBLE           WKK,AKK;
       CHAR *TEXT1,*TEXT2;
-      INT    NRW,NCW,N1,N2,N3,N4,N5,N6,I,J,K,IR,KK,MMK,KP;
+      INT    NRW,NCW,N1,N2,N3,N4,N5,N6,I,J/*,K*/,IR,KK,MMK,KP;
 printf("am in mb11a()\n");
- 
+      IR=0;
 /*    COMMON/MB11B /LP
       DIMENSION A(IA,1),W(1)
       EXTERNAL MB11C
@@ -75,11 +80,11 @@ C     SET THE INITIAL RECORDS OF ROW AND COLUMN INTERCHANGES */
       DO(1,I,1,M)
       N1=NRW+I;
       W(N1)=(DOUBLE)0.5+(DOUBLE)I;
-   C1:CONTINUE
+/* 1*/CONTINUE
       DO(2,I,1,N)
       N1=NCW+I;
       W(N1)=(DOUBLE)0.5+(DOUBLE)I;
-   C2:CONTINUE
+/* 2*/CONTINUE
 /*    'KK' COUNTS THE SEPARATE ELEMENTARY TRANSFORMATIONS  */
       KK=1;
 /*    FIND LARGEST ROW AND MAKE ROW INTERCHANGES */
@@ -88,7 +93,7 @@ C     SET THE INITIAL RECORDS OF ROW AND COLUMN INTERCHANGES */
       SUM=ZERO;
       DO(5,J,KK,N)
       SUM=SUM+A(I,J)*A(I,J);
-   C5:CONTINUE
+/* 5*/CONTINUE
       IFD(RMAX-SUM,C6,C4,C4);
    C6:RMAX=SUM;
       IR=I;
@@ -104,7 +109,7 @@ C     SET THE INITIAL RECORDS OF ROW AND COLUMN INTERCHANGES */
       SUM=A(KK,J);
       A(KK,J)=A(IR,J);
       A(IR,J)=SUM;
-   C9:CONTINUE
+/* 9*/CONTINUE
 /*    FIND LARGEST ELEMENT OF PIVOTAL ROW, AND MAKE COLUMN INTERCHANGES*/
    C7:RMAX=ZERO;
       SUM=ZERO;
@@ -124,7 +129,7 @@ C     SET THE INITIAL RECORDS OF ROW AND COLUMN INTERCHANGES */
       RMAX=A(I,KK);
       A(I,KK)=A(I,IR);
       A(I,IR)=RMAX;
-  C14:CONTINUE
+/*14*/CONTINUE
 /*    REPLACE THE PIVOTAL ROW BY THE VECTOR OF THE TRANSFORMATION*/
   C12:SIGMA= SQRT(SUM);
       BSQ= SQRT(SUM+SIGMA* ABSD(A(KK,KK)));
@@ -134,7 +139,7 @@ C     SET THE INITIAL RECORDS OF ROW AND COLUMN INTERCHANGES */
       IFI(KP-N,C15,C15,C16);
   C15:DO(17,J,KP,N)
       A(KK,J)=A(KK,J)/BSQ;
-  C17:CONTINUE
+/*17*/CONTINUE
 /*    APPLY THE TRANSFORMATION TO THE REMAINING ROWS OF A */
       IFI(KP-M,C18,C18,C16)
   C18:WKK=W(KK);
@@ -151,7 +156,7 @@ C     APPLY THE FIRST ELEMENTARY TRANSFORMATION  */
       IFI(N-M,C33,C33,C34);
   C34:DO(35,J,KP,N)
       A(M,J)=SUM*A(M,J);
-  C35:CONTINUE
+/*35*/CONTINUE
   C33:A(M,M)=ONE/A(M,M)+SUM*W(M);
 /*    NOW APPLY THE OTHER (M-1) TRANSFORMATIONS */
   C36:KP=KK;
@@ -170,7 +175,7 @@ C     APPLY THE FIRST ELEMENTARY TRANSFORMATION  */
       DO(44,I,KP,M)
       SUM=SUM-A(I,KK)*W(I);
       A(I,KK)=W(I);
-  C44:CONTINUE
+/*44*/CONTINUE
       A(KK,KK)=SUM/A(KK,KK);
       GOTO C36;
 /*    RESTORE THE ROW INTERCHANGES  */
@@ -186,7 +191,7 @@ C     APPLY THE FIRST ELEMENTARY TRANSFORMATION  */
       SUM=A(I,J);
       A(I,J)=A(IR,J);
       A(IR,J)=SUM;
-  C48:CONTINUE
+/*48*/CONTINUE
       GOTO C46;
   C45:CONTINUE
 /*    RESTORE THE COLUMN INTERCHANGES */
@@ -202,10 +207,10 @@ C     APPLY THE FIRST ELEMENTARY TRANSFORMATION  */
       SUM=A(I,J);
       A(I,J)=A(I,IR);
       A(I,IR)=SUM;
-  C52:CONTINUE
+/*52*/CONTINUE
       GOTO C50;
   C49:CONTINUE
-  C80:RETURN;
+/*80*/RETURN;
   C81:MMK=M-KK;
  /*   WRITE(LP,82) MMK
    82 FORMAT(1H0,22H *** MB11A  ERROR *** ,I3,8H REDUCED,
@@ -245,14 +250,14 @@ printf("am in mb11d()\n");
 /*    CIBMD PREFER SCALAR */
       DO(20,J,1,NKK)
       SUM=SUM+CC(1,J)*AA(I,J);
-  C20:CONTINUE
+/*20*/CONTINUE
       SUM=-SUM;
       BB(I)=BB(I)+SUM*WKK;
 /*    CIBMD PREFER SCALAR  */
       DO(21,J,1,NKK)
       AA(I,J)=AA(I,J)+SUM*CC(1,J);
-  C21:CONTINUE
-  C19:CONTINUE
+/*21*/CONTINUE
+/*19*/CONTINUE
       RETURN;
       END
 }
@@ -279,14 +284,14 @@ printf("am in mb11e()\n");
 /*    CIBMD PREFER SCALAR   */
       DO(40,J,1,NKK)
       SUM=SUM+BBB(1,J)*AAA(I,J);
-  C40:CONTINUE
+/*40*/CONTINUE
       SUM=-SUM;
 /*    CIBMD PREFER SCALAR  */
       DO(41,J,1,NKK)
       AAA(I,J)=AAA(I,J)+SUM*BBB(1,J);
-  C41:CONTINUE
+/*41*/CONTINUE
       WWW(I)=SUM*WKK;
-  C39:CONTINUE
+/*38*/CONTINUE
       RETURN;
       END
 }
@@ -297,6 +302,7 @@ printf("am in mb11e()\n");
 /*    SUBROUTINE MB11F ( A, B, C,IA,WKK,AKK,MKK,NKK)  */
       INT        MB11F (A ,ZA,SA,ZB,SB,ZC,SC,IA,WKK,AKK,MKK,NKK)
       DOUBLE *A ,WKK,AKK;
+      INT    ZA,ZB,ZC,SA,SB,SC;
       INT    IA,MKK,NKK;
 {
       #define AAA(I,J) (*(A +(ZA-1+I-1)+(SA-1+J-1)*IA))
@@ -310,10 +316,10 @@ printf("am in mb11f()\n");
       SUM=WKK*BBB(1,J);
       DO(43,I,1,MKK)
       SUM=SUM+CCC(I)*AAA(I,J);
-  C43:CONTINUE
+/*43*/CONTINUE
       SUM=-SUM;
       BBB(1,J)=SUM*AKK;
-  C42:CONTINUE
+/*42*/CONTINUE
       RETURN;
       END
 }

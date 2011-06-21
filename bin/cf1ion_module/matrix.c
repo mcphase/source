@@ -40,6 +40,7 @@ Includedateien holen
 #include <stdio.h>          /* damit FILE definiert wird               */
 #include <stdlib.h>
 #include <math.h>           /* damit sqrt in define_j.c definiert wird */
+#include <limits.h>
 #define pi (4.0*atan(1.0))  /* atan() braucht <math.h>                 */
 #include "types.c"          /* benutze Datentypen laden                */
  
@@ -67,7 +68,7 @@ CHAR* c_alloc( anzahl,laenge )
 /*----------------------------------------------------------------------------
                                    warning()
 ------------------------------------------------------------------------------*/
-INT warning(s)  /* Warnung ausgeben */
+void warning(s)  /* Warnung ausgeben */
     CHAR *s;
 {
     printf("\nWarning : ");
@@ -265,7 +266,7 @@ MATRIX *mx_alloc(anz_ze,anz_sp)   /* Holt Speicherplatz fuer eine komplexe */
 {
     MATRIX *m;          /* neue Matrix m */
     INT    ze,sp;
-    INT    warning();
+/*  INT    warning(); */
  
     if( anz_ze==0 || anz_sp==0 ){
          warning("Es wurde eine Matrix mit Dimension 0 definiert");
@@ -293,7 +294,7 @@ MATRIX *mx_alloc(anz_ze,anz_sp)   /* Holt Speicherplatz fuer eine komplexe */
 /*----------------------------------------------------------------------------
                                   free_mx()
 ------------------------------------------------------------------------------*/
-INT  free_mx(mx)  /* Speicherplatz der Matrix mx freigeben */
+void free_mx(mx)  /* Speicherplatz der Matrix mx freigeben */
   MATRIX *mx;
 {
     INT    sp;
@@ -331,7 +332,7 @@ VEKTOR *_vr_copy(a,b)  /*  b nach a kopieren    */
        VEKTOR *a;
        VEKTOR *b;
 {
-   INT    zeile,i;
+   INT    zeile/*,i*/;
  
  
     for( zeile=0 ; zeile<=VRDIM(a) ; ++zeile){
@@ -380,7 +381,7 @@ VEKTOR *vr_sub(a,b)  /*  c = a-b */
 /*----------------------------------------------------------------------------
                                   free_vr()
 ------------------------------------------------------------------------------*/
-free_vr(v)        /* Speicherplatz von v freigeben */
+void free_vr(v)        /* Speicherplatz von v freigeben */
  VEKTOR *v;
 {
    free_(v->_zeile );
@@ -397,12 +398,12 @@ LUDCMP *ludcmp(mx)
  
    MATRIX *a, *mx_copy();
    VEKTOR *vr_alloc(), *vr_copy(), *index, *vv;
-   INT    n,i,j,k,invers,imax;
+   INT    n,i,j,k,invers,imax=-INT_MAX;
    DOUBLE accuracy(), tiny;
    DOUBLE aamax;
    DOUBLE d,sum,dum,is_equal();
  
-   INT    nmax = 100;  /* maximale  Iterationsschritte */
+/* INT    nmax = 100; / * maximale  Iterationsschritte */
  
  
    invers = JA;  /* inverse Matrix exestiert */
@@ -482,12 +483,12 @@ VEKTOR *lubksb(ludcmp,v)
    VEKTOR *b, *vr_alloc(), *index;
    MATRIX *a;
    INT    n,i,j,ii,ll;
-   DOUBLE d,sum,macheps,accuracy(),is_equal();
+   DOUBLE /*d,*/sum,macheps,accuracy(),is_equal();
  
  
    a      = ludcmp->matrix;
    index  = ludcmp->index;
-   d      = ludcmp->d;
+/* d      = ludcmp->d; */
    macheps= (MACHEPSFACT*accuracy());
  
    n = MXDIM(a);

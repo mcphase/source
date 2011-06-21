@@ -255,7 +255,7 @@ VEKTOR *vr_normalisieren(v)
     VEKTOR  *cv_mult();
     VEKTOR  *_vr_copy();
     VEKTOR  *w;
-    INT     i;
+/*  INT     i; */
  
     c     = KX_ALLOC(1);
     norm  = cnorm(v);

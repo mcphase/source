@@ -41,6 +41,8 @@ Includedateien holen
  
 extern INT      *sort();         /* definiert in DIAHERMX.C */
  
+void TB04A(INT N, DOUBLE *XX, DOUBLE *FF, DOUBLE *DD, DOUBLE *AA);
+
 /*----------------------------------------------------------------------------
                                spline()
 -----------------------------------------------------------------------------*/
@@ -112,7 +114,7 @@ DOUBLE *xx,*ff,x,macheps;
 /*C THE SPLINE DERIVATIVES D(I) ARE FOUND.  THE DIMENSION OF A MUST */
 /*C NOT BE LESS THAN 3*N. PERIPHERAL NP MUST BE AN OUTPUT MEDIUM.   */
  
-INT TB04A(N,XX,FF,DD,AA)
+void TB04A(N,XX,FF,DD,AA)
 INT N;
 DOUBLE *XX,*FF,*DD,*AA;
 {
@@ -172,7 +174,7 @@ C50:  CONTINUE
       DO(60,I,3,N)
       J=N+2-I;
       D(J)=(D(J)-A(3*J)*D(J+1))/A(3*J-1);
-C60:  CONTINUE
+/*C60:*/  CONTINUE
       D(1)=(D(1)-D(2)*A(2)-D(3)*A(3))/A(1);
       A(1)=0.;
       RETURN;
@@ -193,7 +195,7 @@ DOUBLE *UU,*SSS,*DD,X,EPS;
       #define S(I) (*(SSS+I))
       #define D(I) (*(DD+I))
  
-      INT    I ,IFLG=0,J;
+      INT /* I,*/IFLG=0,J;
       DOUBLE H,Q1,Q2,SS,B,A,Z;
 /*
  C

@@ -875,7 +875,7 @@ double racah_cfp(int n, std::string child, std::string parent)
       if(child.compare(conf_chl.states[i].id)==0) break;
    U = conf_chl.states[i].U; v = conf_chl.states[i].v; S2 = conf_chl.states[i].S2; L = conf_chl.states[i].L;
    for(i=0; i<num_states_par; i++)
-      if(child.compare(conf_par.states[i].id)==0) break;
+      if(parent.compare(conf_par.states[i].id)==0) break;
    Up = conf_par.states[i].U; vp = conf_par.states[i].v; S2p = conf_par.states[i].S2; Lp = conf_par.states[i].L;
 
    return racah_cfp(n,U,v,S2,L,Up,vp,S2p,Lp);

@@ -165,7 +165,6 @@ std::vector<double> stev_thetak(int n, orbital l)
    std::vector<cfpls> cfps;
    double sumcfp,noncfpprod;
    int k,is,ic;
-   bool df = false; if(l==D) df = true;
 
    // Calculates L,S,J from Hund's rules
    S2 = (n<=(2*l+1)) ? n : ((4*l+2)-n);                       // Maximise S.
@@ -177,7 +176,7 @@ std::vector<double> stev_thetak(int n, orbital l)
    for(is=0; is<(int)conf.states.size(); is++) { if(conf.states[is].S2==S2 && conf.states[is].L==L) break; }
 
    noncfpprod = pow(-1.,-(double)l-Li) * (2.*Li+1.);
-   if(df) cfps = racah_parents(n,conf.states[is].v,S2,L); else cfps = racah_parents(n,conf.states[is].v,conf.states[is].U,S2,L);
+   if(l==D) cfps = racah_parents(n,conf.states[is].v,S2,L); else cfps = racah_parents(n,conf.states[is].v,conf.states[is].U,S2,L);
 
    // We use the formulae of Elliot, Judd and Runciman, Proc. R. Soc. Lon. A, v240, pp509, 1957 to calculate theta_k
    for(k=0; k<3; k++)

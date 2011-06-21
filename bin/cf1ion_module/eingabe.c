@@ -1436,13 +1436,13 @@ ITERATION *read_Vkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
                           /* dann vsymmetrienr_vor <  0          */
 {
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    myB;
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),v40,v44,v60,v64,sqrt(),temperatur;
-    CHAR      *einheit_in,*einheit_out,modus;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
@@ -1467,7 +1467,7 @@ ITERATION *read_Vkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
  
@@ -1477,7 +1477,7 @@ ITERATION *read_Vkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     line=fgets( string , buffer_size , fp ); /* : Temperatur der Probe :.*/
     temperatur = a_tof(line,31,61);
@@ -1497,7 +1497,7 @@ ITERATION *read_Vkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
       IONENIMP[ ionennr ].dimj=dimj;
      }    
 
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
     iteration = iter_alloc(dimj,anz_nn);
  
  
@@ -1779,7 +1779,7 @@ ITERATION *read_Dkq(name,vsymmetrienr_vor)  /* Dkq aus file name lesen */
                           /* dann vsymmetrienr_vor <  0          */
 {
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr,e_4f;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    myB;
@@ -1787,7 +1787,7 @@ ITERATION *read_Dkq(name,vsymmetrienr_vor)  /* Dkq aus file name lesen */
  
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),v40,v44,v60,v64,sqrt(),temperatur;
-    CHAR      *einheit_in,*einheit_out,modus;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
@@ -1812,7 +1812,7 @@ ITERATION *read_Dkq(name,vsymmetrienr_vor)  /* Dkq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
  
@@ -1822,7 +1822,7 @@ ITERATION *read_Dkq(name,vsymmetrienr_vor)  /* Dkq aus file name lesen */
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     line=fgets( string , buffer_size , fp ); /* : Temperatur der Probe :.*/
     temperatur = a_tof(line,31,61);
@@ -1842,7 +1842,7 @@ ITERATION *read_Dkq(name,vsymmetrienr_vor)  /* Dkq aus file name lesen */
       IONENIMP[ ionennr ].dimj=dimj;
      }    
 
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
     iteration = iter_alloc(dimj,anz_nn);
  
  
@@ -2016,14 +2016,14 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
                           /* dann vsymmetrienr_vor <  0          */
 {
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr,e_4f;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    x1=-1.,x2=-1.,x3=-1.,myB;
 
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),v40=0,v44=0,v60=0,v64=0,sqrt(),temperatur;
-    CHAR      *einheit_in,*einheit_out,modus;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0,*token;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
@@ -2050,13 +2050,13 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
     c = 'm';
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
 
      temperatur=10.0; /* can be modified by reading in a temperature below*/
 
@@ -2110,7 +2110,7 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
      {dimj =(int)( 2 * strtod (ion+2, NULL)+1);
       IONENIMP[ ionennr ].dimj=dimj;
      }    
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
  
     iteration = iter_alloc(dimj,anz_nn);
  
@@ -2687,7 +2687,7 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
  
@@ -2697,7 +2697,7 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     line=fgets( string , buffer_size , fp ); /* : Temperatur der Probe :.*/
     temperatur = a_tof(line,31,61);
@@ -2717,7 +2717,7 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
       IONENIMP[ ionennr ].dimj=dimj;
      }    
 
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
     iteration = iter_alloc(dimj,anz_nn);
  
  
@@ -2920,14 +2920,14 @@ ITERATION *read_Wkq(name,vsymmetrienr_vor)  /* Wkq aus file name lesen */
                           /* dann vsymmetrienr_vor <  0          */
 {
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr,e_4f;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    myB,f2,f4,f6;
     
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),w40,w44,w60,w64,sqrt(),temperatur;
-    CHAR      *einheit_in,*einheit_out,modus;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
@@ -2952,7 +2952,7 @@ ITERATION *read_Wkq(name,vsymmetrienr_vor)  /* Wkq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
  
@@ -2962,7 +2962,7 @@ ITERATION *read_Wkq(name,vsymmetrienr_vor)  /* Wkq aus file name lesen */
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     line=fgets( string , buffer_size , fp ); /* : Temperatur der Probe :.*/
     temperatur = a_tof(line,31,61);
@@ -2982,7 +2982,7 @@ ITERATION *read_Wkq(name,vsymmetrienr_vor)  /* Wkq aus file name lesen */
       IONENIMP[ ionennr ].dimj=dimj;
      }    
 
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
     iteration = iter_alloc(dimj,anz_nn);
  
  
@@ -3161,17 +3161,17 @@ ITERATION *read_Akq(name,vsymmetrienr_vor)  /* Akq aus file name lesen */
                           /* dann vsymmetrienr_vor <  0          */
 {
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr,e_4f;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
-    DOUBLE    myB,f2,f4,f6;
+    DOUBLE    myB/*,f2,f4,f6*/; 
     
     DOUBLE    sin(),cos();
     DOUBLE    omegan0n(),omegan1n(),omegan2n();
     DOUBLE    omegan3n(),omegan4n(),omegan5n();
     DOUBLE    omegan6n();
     DOUBLE    a_tof(),a40,a44,a60,a64,sqrt(),temperatur;
-    CHAR      *einheit_in,*einheit_out,modus;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
@@ -3196,7 +3196,7 @@ ITERATION *read_Akq(name,vsymmetrienr_vor)  /* Akq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
  
@@ -3206,7 +3206,7 @@ ITERATION *read_Akq(name,vsymmetrienr_vor)  /* Akq aus file name lesen */
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     line=fgets( string , buffer_size , fp ); /* : Temperatur der Probe :.*/
     temperatur = a_tof(line,31,61);
@@ -3229,7 +3229,7 @@ ITERATION *read_Akq(name,vsymmetrienr_vor)  /* Akq aus file name lesen */
       IONENIMP[ ionennr ].dimj=dimj;
      }    
 
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
     iteration = iter_alloc(dimj,anz_nn);
  
     ANZ_NN(   iteration)     =  anz_nn;
@@ -3357,19 +3357,19 @@ ITERATION *read_Akq(name,vsymmetrienr_vor)  /* Akq aus file name lesen */
  
      e_4f = E4f( ionennr );
  
-     f2= A0_BOHR*A0_BOHR;
+/*   f2= A0_BOHR*A0_BOHR; */
      RT( V20(iteration) ) *=  alpha_J[ e_4f ] * r2(ionennr);
      RT( V21(iteration) ) *=  alpha_J[ e_4f ] * r2(ionennr);
      RT( V22(iteration) ) *=  alpha_J[ e_4f ] * r2(ionennr);
  
-     f4= f2 * f2;
+/*   f4= f2 * f2; */
      RT( V40(iteration) ) *=   beta_J[ e_4f ] * r4(ionennr);
      RT( V41(iteration) ) *=   beta_J[ e_4f ] * r4(ionennr);
      RT( V42(iteration) ) *=   beta_J[ e_4f ] * r4(ionennr);
      RT( V43(iteration) ) *=   beta_J[ e_4f ] * r4(ionennr);
      RT( V44(iteration) ) *=   beta_J[ e_4f ] * r4(ionennr);
  
-     f6= f4 * f2;
+/*   f6= f4 * f2; */
      RT( V60(iteration) ) *=  gamma_J[ e_4f ] * r6(ionennr);
      RT( V61(iteration) ) *=  gamma_J[ e_4f ] * r6(ionennr);
      RT( V62(iteration) ) *=  gamma_J[ e_4f ] * r6(ionennr);
@@ -3426,8 +3426,8 @@ ITERATION *read_Bkqnew(ion)  /* Vkq aus file name lesen */
     CHAR *ion;
 {
     FILE      *fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr;
-    INT       buffer_size=381,einheitnr_in,einheitnr_out;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
+    INT    /* buffer_size=381,*/einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    myB;
    
@@ -3436,23 +3436,23 @@ ITERATION *read_Bkqnew(ion)  /* Vkq aus file name lesen */
     DOUBLE    omegan3n(),omegan4n(),omegan5n();
     DOUBLE    omegan6n();
     DOUBLE    a_tof(),b40,b44,b60,b64,sqrt();
-    CHAR      *einheit_in,*einheit_out;
-    CHAR      c,*string,*fgets(),*a_tos();
+/*  CHAR      *einheit_in,*einheit_out; */
+    CHAR      c/*,*string*/,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
     ITERATION *auswahlregel();
     STEVENS   *calc_Pkq();
     MATRIX    *readBmag();
  
-    string   = STRING_ALLOC(buffer_size);
+/*  string   = STRING_ALLOC(buffer_size); */
     versionsnummer =VERSION;
     c = 'm';
  /* units are in meV */
     einheitnr_in = is_einheit_imp(c);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
     einheitnr_out= einheitnr_in;
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     symmetrienr =0;
  /*triclinic */
@@ -3465,7 +3465,7 @@ ITERATION *read_Bkqnew(ion)  /* Vkq aus file name lesen */
       IONENIMP[ ionennr ].dimj=dimj;
      }    
 
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
  
     iteration = iter_alloc(dimj,anz_nn);
  
@@ -3570,7 +3570,7 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
                           /* dann vsymmetrienr_vor <  0          */
 {
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    x1=-1.,x2=-1.,x3=-1.,myB;
@@ -3579,7 +3579,7 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     DOUBLE    omegan3n(),omegan4n(),omegan5n();
     DOUBLE    omegan6n();
     DOUBLE    a_tof(),b40,b44,b60,b64,sqrt(),temperatur;
-    CHAR      *einheit_in,*einheit_out,modus;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0,*token;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
@@ -3605,13 +3605,13 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
     c = 'm';
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
 
      temperatur=10.0; /* can be modified by reading in a temperature below*/
 
@@ -3665,7 +3665,7 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
      {dimj =(int)( 2 * strtod (ion+2, NULL)+1);
       IONENIMP[ ionennr ].dimj=dimj;
               }    
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
  
     iteration = iter_alloc(dimj,anz_nn);
  
@@ -4201,7 +4201,7 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
  
@@ -4212,7 +4212,7 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     line=fgets( string , buffer_size , fp ); /* : Temperatur der Probe :.*/
     temperatur = a_tof(line,31,61);
@@ -4234,7 +4234,7 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
      {dimj =(int)( 2 * strtod (ion+2, NULL)+1);
       IONENIMP[ ionennr ].dimj=dimj;
      }    
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
  
     iteration = iter_alloc(dimj,anz_nn);
  
@@ -4417,8 +4417,10 @@ ITERATION *read_xW(name,vsymmetrienr_vor)  /* x,W aus file name lesen */
     INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
+    UNUSED_PARAMETER(vsymmetrienr_vor);
+
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr;
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    myB;
@@ -4429,7 +4431,7 @@ ITERATION *read_xW(name,vsymmetrienr_vor)  /* x,W aus file name lesen */
     DOUBLE    omegan3n(),omegan4n(),omegan5n();
     DOUBLE    omegan6n();
     DOUBLE    a_tof(),sqrt(),temperatur;
-    CHAR      *einheit_in,*einheit_out,modus;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
@@ -4454,7 +4456,7 @@ ITERATION *read_xW(name,vsymmetrienr_vor)  /* x,W aus file name lesen */
     einheitnr_in = is_einheit_imp(c);
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
-    einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
+/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
     myB        = EINHEITIMP[ einheitnr_in ].myB;
  
  
@@ -4465,7 +4467,7 @@ ITERATION *read_xW(name,vsymmetrienr_vor)  /* x,W aus file name lesen */
     einheitnr_out= is_einheit_imp(c);
     if( einheitnr_out== NICHTIMP )
          read_error(21,fp,name);
-    einheit_out= EINHEITIMP[ einheitnr_out].einheit;
+/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
  
     line=fgets( string , buffer_size , fp ); /* : Temperatur der Probe :.*/
     temperatur = a_tof(line,31,61);
@@ -4485,7 +4487,7 @@ ITERATION *read_xW(name,vsymmetrienr_vor)  /* x,W aus file name lesen */
       IONENIMP[ ionennr ].dimj=dimj;
      }    
 
-    zwei_j    = dimj - 1 ;
+/*  zwei_j    = dimj - 1 ; */
     iteration = iter_alloc(dimj,anz_nn);
  
  
@@ -5654,7 +5656,8 @@ tl  ="|                   |                                     |\n";
                    else              td = t[i];
                    break;
           case 5:
-          case 6:  if( zwei_j < 2.0) td = tl;
+          case 6:
+          default: if( zwei_j < 2.0) td = tl;
                    else              td = t[i];
                    break;
        }
@@ -5712,10 +5715,10 @@ READ *read_einheit(name,art)
 {
     READ      *read;
     FILE      *fp,*fopen();
-    INT       anz_nn,dimj,zwei_j,ionennr,symmetrienr;
+    INT   /*  anz_nn,*/dimj,zwei_j,ionennr/*,symmetrienr*/;
     INT       buffer_size=381,i,einheitnr_in,einheitnr_out;
-    DOUBLE    versionsnummer;
-    DOUBLE    x1,x2,x3,myB;
+/*  DOUBLE    versionsnummer; */
+    DOUBLE    x1,x2,x3/*,myB*/;
     DOUBLE    h,theta,phi;
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),sqrt(),temperatur;
@@ -5729,7 +5732,7 @@ READ *read_einheit(name,art)
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
  
     while(  *(line=fgets( string , buffer_size , fp )) != '|'  );/* 1.==== */
-    versionsnummer =a_tof( line , 11,23);
+/*  versionsnummer =a_tof( line , 11,23); */
     fclose(fp);
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
  
@@ -5741,7 +5744,7 @@ READ *read_einheit(name,art)
     if( einheitnr_in == NICHTIMP )
          read_error(21,fp,name);
     einheit_in = EINHEITIMP[ einheitnr_in ].einheit;
-    myB        = EINHEITIMP[ einheitnr_in ].myB;
+/*  myB        = EINHEITIMP[ einheitnr_in ].myB; */
  
  
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 2.==== */
@@ -5759,10 +5762,10 @@ READ *read_einheit(name,art)
     ion =a_tos( line , 31,56);
  
     line=fgets( string , buffer_size , fp ); /* : Symmetrie ... Symmnr...*/
-    symmetrienr =a_toi( line , 53,61);
+/*  symmetrienr =a_toi( line , 53,61); */
  
  
-    anz_nn    = 0;
+/*  anz_nn    = 0; */
     ionennr   = isimplementiert(ion);
     dimj      = IONENIMP[ ionennr ].dimj;
     if(strncmp(ion,"S=",2)==0)  /* S=... ion !! extract dimj from string ion */

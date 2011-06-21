@@ -465,8 +465,16 @@ int Min (const IntVector& d, int& i)
 // Returns the smallest element and its index i
 //
 {
-    Matpack.Error("int Min (const IntVector& d, int& i) NOT YET IMPLEMENTED");
-    return 0;
+//  Matpack.Error("int Min (const IntVector& d, int& i) NOT YET IMPLEMENTED");
+//  return 0;
+    register int n = d.ch-d.cl;
+    register int* src = d.V+d.cl;
+    int m = *src++;
+    while (n--) {
+	if (*src < m) { m = *src; i = n; }
+	src++; 
+    }
+    return m;
 }
 
 //----------------------------------------------------------------------------//
@@ -493,8 +501,16 @@ int Max (const IntVector& d, int& i)
 // Returns the largest element and its index i
 //
 {
-    Matpack.Error("int Max (const IntVector& d, int& i) NOT YET IMPLEMENTED");
-    return 0;
+//  Matpack.Error("int Max (const IntVector& d, int& i) NOT YET IMPLEMENTED");
+//  return 0;
+    register int n = d.ch-d.cl;
+    register int* src = d.V+d.cl;
+    int m = *src++;
+    while (n--) {
+	if (*src > m) { m = *src; i = n; }
+	src++; 
+    }
+    return m;
 }
 
 //----------------------------------------------------------------------------//

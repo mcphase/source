@@ -389,8 +389,8 @@ return(setup);
 void write_title(fp)  /* setupfile erzeugen */
    FILE *fp;
 {
-   CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
-   CHAR *t11,*t12,*t13,*t14,*t15,*t16;/*,*t17,*t18,*t19,*t20;*/
+   CHAR *t01,*t02,*t03,*t04,*t05/*,*t06,*t07*/,*t08/*,*t09,*t10*/;
+   CHAR/* *t11,*/*t12,*t13,*t14/*,*t15*/,*t16;/*,*t17,*t18,*t19,*t20;*/
  
 t01=" -----------------------\n";
 t02="| VERSION : %6.2f      |\n";
@@ -403,17 +403,17 @@ t01=" -------------------------------------------------------------- \n";
 t02="|                                                              |\n";
 t03="|                  C F I E L D / S O 1 I O N                   |\n";
 t04="|                                                              |\n";
-t05="|                    A Crystal field program                   |\n";
+t05="|                    A Crystal field program                   |\n"; /*
 t06="|                                                              |\n";
-t07=" -------------------------------------------------------------- \n";
-t08="                __________________________________              \n";
+t07=" -------------------------------------------------------------- \n"; */
+t08="                __________________________________              \n"; /*
 t09="               |                                  |             \n";
 t10="               |          Programmautor:          |             \n";
-t11="               |                                  |             \n";
+t11="               |                                  |             \n"; */
 t12="               |         Peter  Hoffmann          |             \n";
 t13="               |    Forschungszentrum Juelich     |             \n";
-t14="               |Institut fuer Festkoerperforschung|             \n";
-t15="               |Tel.: 02461-616896                |             \n";
+t14="               |Institut fuer Festkoerperforschung|             \n"; /*
+t15="               |Tel.: 02461-616896                |             \n"; */
 t16="                __________________________________              \n";
  
  
@@ -430,31 +430,31 @@ fprintf(fp,"%s",t16);
 void write_titlecom(fp)  /* setupfile erzeugen */
    FILE *fp;
 {
-   CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
-   CHAR *t11,*t12,*t13,*t14,*t15,*t16;/*,*t17,*t18,*t19,*t20;*/
- 
+   CHAR *t01/*,*t02*/,*t03/*,*t04*/,*t05/*,*t06,*t07*/,*t08/*,*t09,*t10*/;
+   CHAR/* *t11,*/*t12,*t13,*t14/*,*t15*/,*t16;/*,*t17,*t18,*t19,*t20;
+
 t01="#{-----------------------\n";
 t02="#{VERSION : %6.2f      |\n";
 t03="#-----------------------\n";
-t04="#\n";
+t04="#\n"; */
 /*fprintf(fp,"%s",t01);*/
 /*fprintf(fp,t02,VERSION);fprintf(fp,"%s",t03);fprintf(fp,"%s",t04);*/
  
-t01="#{------------------------------------------------------------- \n";
-t02="#                                                              |\n";
-t03="#                  C F I E L D / S O 1 I O N  %6.2f           |\n";
-t04="#                                                              |\n";
-t05="#                    A crystal field program                   |\n";
+t01="#{------------------------------------------------------------- \n"; /*
+t02="#                                                              |\n"; */
+t03="#                  C F I E L D / S O 1 I O N  %6.2f           |\n";  /*
+t04="#                                                              |\n"; */
+t05="#                    A crystal field program                   |\n"; /*
 t06="#                                                              |\n";
-t07="#-------------------------------------------------------------- \n";
-t08="#               __________________________________              \n";
+t07="#-------------------------------------------------------------- \n"; */
+t08="#               __________________________________              \n"; /*
 t09="#              |                                  |             \n";
 t10="#              |          Programmautor:          |             \n";
-t11="#              |                                  |             \n";
+t11="#              |                                  |             \n"; */
 t12="#              |         Peter  Hoffmann          |             \n";
 t13="#              |    Forschungszentrum Juelich     |             \n";
-t14="#              |Institut fuer Festkoerperforschung|             \n";
-t15="#              |Tel.: 02461-616896                |             \n";
+t14="#              |Institut fuer Festkoerperforschung|             \n"; /*
+t15="#              |Tel.: 02461-616896                |             \n"; */
 t16="#               __________________________________              \n";
  
  
@@ -799,11 +799,11 @@ EWPROBLEM *orthonormalisieren( ewproblem )/* Eigenvektoren */
     EWPROBLEM *ewproblem;                 /* orthonormalisieren */
 {                                         /* nach Kram-Schmidt */
     MATRIX *ev;
-    MATRIX *entartung;
+/*  MATRIX *entartung; */
     VEKTOR *v,*w,*c,*d,*ortho;
     VEKTOR *vr_normalisieren();
     KOMPLEX *vw;
-    INT    spalte,k,*gi;
+    INT    spalte,k/*,*gi*/;
     COMHES *comhes;
  
     comhes = ewproblem -> comhes;
@@ -811,8 +811,8 @@ EWPROBLEM *orthonormalisieren( ewproblem )/* Eigenvektoren */
     if(test_nullmatrix(comhes->matrix)==JA) return( ewproblem );
  
     ev        = ewproblem -> eigenvektoren;
-    entartung = ewproblem -> entartung;
-    gi        = ewproblem -> gi;
+/*  entartung = ewproblem -> entartung; */
+/*  gi        = ewproblem -> gi; */
  
     for( spalte=1; spalte<=ANZ_SP( ev ) ; ++spalte){
  

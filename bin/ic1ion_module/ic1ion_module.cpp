@@ -84,8 +84,8 @@ __declspec(dllexport)
            void mcalc(Vector &J,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
                       double *T,          // Input scalar temperature
                       Vector &gjmbH,      // Input vector of mean fields (meV) 
- /* Not Used */       double *gJ,         // Input Lande g-factor
- /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
+ /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       double *lnZ,        // Output scalar logarithm of partition function
                       double *U,          // Output scalar internal energy 
@@ -173,8 +173,8 @@ __declspec(dllexport)
             #endif
 	    sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices); 
             int cbbest=1,ibest=1; Jmat+=Hic; iJmat+=iHic; Jm = zmat2f(Jmat,iJmat); iceig VE; VE.calc(Hsz,Jm); 
-            double Uref,dbest=DBL_MAX,dnew=DBL_MAX; std::vector<double> vBest,vNew; // double Unew,Ubest;
-            std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices); Uref=vJ[J.Hi()-J.Lo()+2];
+            double /*Uref,*/dbest=DBL_MAX,dnew=DBL_MAX; std::vector<double> vBest,vNew; // double Unew,Ubest;
+            std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices); //Uref=vJ[J.Hi()-J.Lo()+2];
             FH << "\nRef:\t["; for(i=0; i<(int)vJ.size(); i++) FH << vJ[i] << "\t"; FH << "]\n";
             for(int cb=1; cb<=Hic.nr(); cb++)
             {
@@ -246,8 +246,8 @@ __declspec(dllexport)
            int du1calc(int &tn,            // Input transition number; if tn>0, print debug info
                       double &T,          // Input temperature
                       Vector &gjmbH,      // Input vector of mean fields (meV) 
- /* Not Used */       double &g_J,        // Input Lande g-factor
- /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexVector & u1, // Output u1 vector
                       float &delta,       // Output transition energy
@@ -303,9 +303,9 @@ __declspec(dllexport)
           void mcalc_parameter_storage_matrix_init(
                       ComplexMatrix *est, // Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
                       Vector &gjmbheff,   // Input  Effective mean fields (meV)
- /* Not Used */       double *g_J,        // Input  Lande g-factor
-                      double *T,          // Input  temperature
- /* Not Used */       Vector &ABC,        // Input  Vector of parameters from single ion property file
+ /* Not Used */       double * /*g_J*/,   // Input  Lande g-factor
+                      double * /*T*/,     // Input  temperature
+ /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 {
    // Parses the input file for parameters
@@ -338,9 +338,9 @@ __declspec(dllexport)
 #endif
           void estates(ComplexMatrix *est,// Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
                       Vector &gjmbheff,   // Input  Effective mean fields (meV)
- /* Not Used */       double *g_J,        // Input  Lande g-factor
+ /* Not Used */       double * /*g_J*/,   // Input  Lande g-factor
                       double &T,          // Input  temperature
- /* Not Used */       Vector &ABC,        // Input  Vector of parameters from single ion property file
+ /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 {
    clock_t start,end; start = clock();
@@ -771,8 +771,8 @@ void sdod_mcalc(Vector &J,           // Output single ion moments==(expectation 
             std::vector<double> vgjmbH((51),0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
             icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices); sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
             int cbbest=1,ibest=1; Jmat+=Hic; iJmat+=iHic; Jm = zmat2f(Jmat,iJmat); iceig VE; VE.calc(Hsz,Jm);
-            double Uref,dbest=DBL_MAX,dnew=DBL_MAX; std::vector<double> vBest,vNew; // double Unew,Ubest;
-            std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices); Uref=vJ[J.Hi()-J.Lo()+2];
+            double /*Uref,*/dbest=DBL_MAX,dnew=DBL_MAX; std::vector<double> vBest,vNew; // double Unew,Ubest;
+            std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices); //Uref=vJ[J.Hi()-J.Lo()+2];
             FH << "\nRef:\t["; for(i=0; i<(int)vJ.size(); i++) FH << vJ[i] << "\t"; FH << "]\n";
             for(int cb=1; cb<=Hic.nr(); cb++)
             {
@@ -846,8 +846,8 @@ void spindensity_mcalc(Vector &J,          // Output single ion moments =expecta
                       int & xyz,           // direction 1,2,3 = x,y,z
                       double *T,           // Input scalar temperature
                       Vector &gjmbH,       // Input vector of mean fields (meV)
- /* Not Used */       double *gJ,          // Input Lande g-factor
- /* Not Used */       Vector &ABC,         // Input vector of parameters from single ion property file
+ /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename, // Single ion properties filename
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {
@@ -867,8 +867,8 @@ void orbmomdensity_mcalc(Vector &J,        // Output single ion moments =expecta
                       int & xyz,           // direction 1,2,3 = x,y,z
                       double *T,           // Input scalar temperature
                       Vector &gjmbH,       // Input vector of mean fields (meV)
- /* Not Used */       double *gJ,          // Input Lande g-factor
- /* Not Used */       Vector &ABC,         // Input vector of parameters from single ion property file
+ /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename, // Single ion properties filename
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {

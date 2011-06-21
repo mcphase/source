@@ -60,6 +60,13 @@ extern DOUBLE omegan6n();
 extern IONEN  IONENIMP[];
  
 extern FILE *fopen_errchk();         /* definiert in EINGABE.C*/ 
+
+/*----------------------------------------------------------------------------
+   Internal function declarations
+-----------------------------------------------------------------------------*/
+void showPkq(FILE *fp, MATRIX *mx, INT k, INT q, INT dimj, CHAR modus);
+void showSTEVkq(FILE *fp, MATRIX *mx, INT k, INT q, INT dimj, CHAR modus);
+
 /*----------------------------------------------------------------------------
                                norm_Pkq()
 ------------------------------------------------------------------------------*/
@@ -226,7 +233,7 @@ DOUBLE norm_operator(mx,macheps)
    DOUBLE macheps;
 {
    DOUBLE sum=0.0,sqrt();
-   DOUBLE exp,test_exp,j,pow_();
+   DOUBLE exp,test_exp/*,j*/,pow_();
    DOUBLE expr,expi;
    INT n,m,dimj,is_equal();
    DOUBLE dummy;
@@ -238,17 +245,17 @@ DOUBLE norm_operator(mx,macheps)
    for( n=dimj ; n>=1 ; --n )
       for( m=dimj ; m>=1 ; --m ){
            dummy = ABSDR( mx  ,n,m );
-           if( dummy > 1.0 )
+           if( dummy > 1.0 ) {
                test_exp = log( dummy )/log(10.0);
-           if( test_exp > expr )  expr = test_exp;
+           if( test_exp > expr )  expr = test_exp; }
       }
    expi= 0.0;
    for( n=dimj ; n>=1 ; --n )
       for( m=dimj ; m>=1 ; --m ){
            dummy = ABSDI( mx  ,n,m );
-           if( dummy > 1.0 )
+           if( dummy > 1.0 ) {
                test_exp = log( dummy )/log(10.0);
-           if( test_exp > expi )  expi = test_exp;
+           if( test_exp > expi )  expi = test_exp; }
       }
  
    exp = expr;
@@ -292,7 +299,7 @@ DOUBLE norm_operator(mx,macheps)
 /*----------------------------------------------------------------------------
                                fkq_tabelle()
 ------------------------------------------------------------------------------*/
-fkq_tabelle(anz_ionen)/* Fkq Faktoren fuer die implementierten Ionen ausgeben */
+void fkq_tabelle(anz_ionen)/* Fkq Faktoren fuer die implementierten Ionen ausgeben */
   INT anz_ionen;
 {
  INT  ionennr;
@@ -406,7 +413,7 @@ fprintf(out,"%s",t01);fprintf(out,"%s",t02);fprintf(out,"%s",t03);
 /*----------------------------------------------------------------------------
                                gkq_tabelle()
 ------------------------------------------------------------------------------*/
-gkq_tabelle(anz_ionen)/* Gkq Faktoren fuer die implementierten Ionen ausgeben */
+void gkq_tabelle(anz_ionen)/* Gkq Faktoren fuer die implementierten Ionen ausgeben */
   INT anz_ionen;
 {
  INT  ionennr;
@@ -576,6 +583,7 @@ MATRIX *Pkq(k,q,dimj)  /* Matrix <JM'|Pkq(J)|MJ> zurueckgeben */
                    break;
           case 6 : a=pn6n( q,dimj );
                    break;
+          default: fprintf(stderr,"stevkq(): Invalid value of k=%i.\n",k); exit(-1);
    }
    return( a );
 }
@@ -650,7 +658,7 @@ STEVENS *calc_Pkq(dimj)        /* Stevensoperatoren initialisieren */
 /*----------------------------------------------------------------------------
                                free_Pkq()
 ------------------------------------------------------------------------------*/
- free_Pkq( stevens )
+void free_Pkq( stevens )
     STEVENS *stevens;
 {
  
@@ -693,7 +701,7 @@ STEVENS *calc_Pkq(dimj)        /* Stevensoperatoren initialisieren */
 /*----------------------------------------------------------------------------
                                free_Okq()
 ------------------------------------------------------------------------------*/
- free_Okq( stevens )
+void free_Okq( stevens )
     STEVENS *stevens;
 {
  
@@ -712,7 +720,7 @@ STEVENS *calc_Pkq(dimj)        /* Stevensoperatoren initialisieren */
 /*----------------------------------------------------------------------------
                                STEVkq_tabelle()
 ------------------------------------------------------------------------------*/
-STEVkq_tabelle()
+/* STEVkq_tabelle()
 {
     DOUBLE  j;
     FILE    *fopen(),*out;
@@ -742,12 +750,12 @@ STEVkq_tabelle()
  
   }
     fclose(out);
-}
+}*/
 /*----------------------------------------------------------------------------
                                info_Pkq()
 ------------------------------------------------------------------------------*/
 /*Matrixelemente (JM'|Pkq(J)|JM) auf file name ausgeben */
-info_Pkq(k,q,dimj,modus)
+void info_Pkq(k,q,dimj,modus)
 INT k,q,dimj;
 CHAR modus;
 {
@@ -829,7 +837,7 @@ fprintf(out,"|Matrix element   (JM'|Pkq(J)|MJ) for k=%2d q=%2d J=%5.1f|\n",k
 /*----------------------------------------------------------------------------
                                   showPkq()
 ------------------------------------------------------------------------------*/
-showPkq(fp,mx,k,q,dimj,modus) /* Matrix  (JM'|Pkq(J)|JM)  zeigen     */
+void showPkq(fp,mx,k,q,dimj,modus) /* Matrix  (JM'|Pkq(J)|JM)  zeigen     */
     FILE   *fp;               /* in Einheiten des GGT's oder der Norm*/
     MATRIX *mx;
     INT    k,q;
@@ -867,6 +875,7 @@ CHAR *tnorm="Die Norm || P%1d%1d(%3.1f) || ist null.\n";
     LONG  haupt_n;
     CHAR  c;
  
+    j = ((DOUBLE)dimj-1)/2; nr = 1; zr = 1; norm = 0.0;
  
     switch(modus){
  
@@ -892,8 +901,6 @@ CHAR *tnorm="Die Norm || P%1d%1d(%3.1f) || ist null.\n";
                    }
                    break;
     }
- 
-    j = ((DOUBLE)dimj-1)/2;
  
     flag=0;
     for( n=dimj ; n>=1 ; --n )
@@ -999,7 +1006,7 @@ CHAR *tnorm="Die Norm || P%1d%1d(%3.1f) || ist null.\n";
                                info_STEVkq()
 ------------------------------------------------------------------------------*/
 /*Matrixelemente (JM'|STEVkq(J)|JM) auf file name ausgeben */
-info_STEVkq(k,q,dimj,modus)
+void info_STEVkq(k,q,dimj,modus)
 INT k,q,dimj;
 CHAR modus;
 {
@@ -1139,6 +1146,7 @@ MATRIX *stevkq(k,q,dimj)  /* Matrix <JM'|STEVkq(J)|MJ> zurueckgeben */
                    if( q >=0 ) c=mx_add(z,a,b);
                    else        c=mx_sub(z,a,b);
                    break;
+          default: fprintf(stderr,"stevkq(): Invalid value of k=%i.\n",k); exit(-1);
    }
  
    free_mx(a);
@@ -1176,7 +1184,7 @@ MATRIX *stevks(k,s,dimj,iter)
                    free_mx( o60);
                    free_mx( o64);
                    break;
- 
+          default: fprintf(stderr,"stevkq(): Invalid value of k=%i.\n",k); exit(-1);
    }
  
    return( o );
@@ -1184,7 +1192,7 @@ MATRIX *stevks(k,s,dimj,iter)
 /*----------------------------------------------------------------------------
                                   showSTEVkq()
 ------------------------------------------------------------------------------*/
-showSTEVkq(fp,mx,k,q,dimj,modus) /* Matrix  (JM'|STEVkq(J)|JM)  zeigen   */
+void showSTEVkq(fp,mx,k,q,dimj,modus) /* Matrix  (JM'|STEVkq(J)|JM)  zeigen   */
     FILE   *fp;                  /* in Einheiten des GGT's oder der Norm */
     MATRIX *mx;
     INT    k,q;
@@ -1221,6 +1229,7 @@ CHAR *tnorm="Die Norm || STEV%1d%1d(%3.1f) || ist null.\n";
     LONG  haupt_n;
     CHAR  c;
  
+    j = ((DOUBLE)dimj-1)/2; nr=1; zr=1; norm=0.0;
  
     switch(modus){
  
@@ -1244,7 +1253,6 @@ CHAR *tnorm="Die Norm || STEV%1d%1d(%3.1f) || ist null.\n";
                       break;
                    }
     }
-    j = ((DOUBLE)dimj-1)/2;
  
     flag=0;
     for( n=dimj ; n>=1 ; --n )
@@ -1364,14 +1372,14 @@ CHAR *tnorm="Die Norm || STEV%1d%1d(%3.1f) || ist null.\n";
  
  
 */
-info_Fkq(k,q,dimj)
+void info_Fkq(k,q,dimj)
 INT k,q,dimj;
 {
     CHAR    *name  = "results/Fkq.info";
     LONG    fkq(),_fkq;
-    DOUBLE  z;
+/*  DOUBLE  z; */
     DOUBLE  j;
-    INT     n,m;
+/*  INT     n,m; */
     FILE    *fopen(),*out;
  
     out = fopen_errchk(name,"w");
@@ -1423,14 +1431,14 @@ fclose(out);
  
  
 */
-info_Gkq(k,q,dimj)
+void info_Gkq(k,q,dimj)
 INT k,q,dimj;
 {
     CHAR    *name  = "results/Gkq.info";
     LONG    gkq(),_gkq;
-    DOUBLE  z;
+/*  DOUBLE  z; */
     DOUBLE  j;
-    INT     n,m;
+/*  INT     n,m; */
     FILE    *fopen(),*out;
  
     out = fopen_errchk(name,"w");
@@ -1608,7 +1616,7 @@ MATRIX *pn2n(k,dimj)       /* MATRIX  (JN|Pk+2,k(J)|JM) */
 {
     INT    m,n;
     INT    s;
-    DOUBLE jzn,jzm,jpn,jpm;
+    DOUBLE jzn,jzm/*,jpn*/,jpm;
     DOUBLE fac();
     MATRIX *okq,*mx_alloc();
  
@@ -1637,7 +1645,7 @@ MATRIX *pn3n(k,dimj)       /* MATRIX  (JN|Pk+3,k(J)|JM) */
 {
     INT    m,n;
     INT    s;
-    DOUBLE jzn,jzm,jpn,jpm;
+    DOUBLE jzn,jzm/*,jpn*/,jpm;
     DOUBLE fac();
     MATRIX *okq,*mx_alloc();
  
@@ -1674,7 +1682,7 @@ MATRIX *pn4n(k,dimj)       /* MATRIX  (JN|Pk+4,k(J)|JM) */
 {
     INT    m,n;
     INT    s;
-    DOUBLE jzn,jzm,jpn,jpm;
+    DOUBLE jzn,jzm/*,jpn*/,jpm;
     DOUBLE fac();
     MATRIX *okq,*mx_alloc();
  
@@ -1719,7 +1727,7 @@ MATRIX *pn5n(k,dimj)       /* MATRIX  (JN|Pk+5,k(J)|JM) */
 {
     INT    m,n;
     INT    s;
-    DOUBLE jzn,jzm,jpn,jpm;
+    DOUBLE jzn,jzm/*,jpn*/,jpm;
     DOUBLE fac();
     MATRIX *okq,*mx_alloc();
  
@@ -1765,15 +1773,15 @@ MATRIX *pn6n(k,dimj)       /* MATRIX  (JN|Pk+6,k(J)|JM) */
     INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
-    INT    s;
-    DOUBLE jzn,jzm,jpn,jpm;
+/*  INT    s; */
+    DOUBLE jzn,jzm/*,jpn*/,jpm;
     DOUBLE fac();
     MATRIX *okq,*mx_alloc();
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix(JN|Pk+6,k(J)|JM)*/
  
-    s = ABS(k);
+/*  s = ABS(k); */
     for( n=dimj ; n>=1 ; --n )
          for( m=dimj ; m>=1 ; --m ){
  
@@ -1861,7 +1869,7 @@ DOUBLE fac(n)    /* Fakultaet von n berechnen */
 /*----------------------------------------------------------------------------
                           info_tensor_Clm()
 ------------------------------------------------------------------------------*/
-info_tensor_Clm(l,m,theta,phi) /* Tensor Clm  auf file name ausgeben */
+void info_tensor_Clm(l,m,theta,phi) /* Tensor Clm  auf file name ausgeben */
     INT l,m;
     DOUBLE theta,phi;
 {
@@ -1925,7 +1933,7 @@ BRUCH   *ggt_r(a,z,n)  /* groessten gemeinsamen Teiler von a und b bestimmen */
   DOUBLE a;            /* a,b=z/n  rational */
   LONG   z,n;
 {
-   BRUCH   *ar,*br,*is_rational(),*bruch;
+   BRUCH   *ar/*,*br*/,*is_rational(),*bruch;
    LONG    a_nenner,a_zaehler;
    LONG    b_nenner,b_zaehler;
    LONG      nenner,  zaehler;
@@ -1954,8 +1962,8 @@ BRUCH   *suche_quadratzahl(bruch)
     BRUCH   *bruch;
 {
    LONG zaehler,nenner,sucheq();
-   LONG z =1;
-   LONG n =1;
+/* LONG z =1;
+   LONG n =1; */
  
     zaehler = ZAEHLER(bruch);
     nenner  = NENNER(bruch);
@@ -1987,7 +1995,7 @@ LONG is_quadrat(zahl)    /* ist zahl = q * q ? */
 LONG sucheq(zahl)    /* suche maximales q mit :   q*q teilt zahl */
   LONG zahl;
 {
-    LONG i,q,s;
+    LONG i,q/*,s*/;
  
     if( (q=is_quadrat(zahl)) >= 0)
          return( q );
@@ -2039,7 +2047,7 @@ LONG ggt_l(a,b) /* groessten gemeinsamen Teiler von a und b bestimmen */
     LONG a,b;
 {
    LONG   c,rest;
-   LONG   zaehler,nenner;
+/* LONG   zaehler,nenner; */
  
    if( a==0 && b==0 )   return( 1 );
    if( a==0 )           return( b );

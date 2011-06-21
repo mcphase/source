@@ -42,7 +42,7 @@ typedef float  REAL;
    typedef size_t TYPUS;
    typedef void   FREE;
 #else
-    #define clearscreen  if(1)    /* clearscreen durch dummy */
+    #define clearscreen  if(1){}  /* clearscreen durch dummy */
    typedef void   SPEICHER;
    typedef INT    TYPUS;
    typedef void   FREE;
@@ -1450,6 +1450,9 @@ benutzte Defines definieren
 #define ISIGN(n) ( ((n)>=(0  ))?  1   : -1  )
 #define MAX(a,b) ( ((a)>=(b  ))?  (a) : (b) )
 #define MIN(a,b) ( ((a)<=(b  ))?  (a) : (b) )
+
+/* For unused parameters, cast to void - to suppress warnings in GCC>4.5 */ 
+#define UNUSED_PARAMETER(a) (void)a
  
 /*------------------------------------------------------------------------------
 ENDEMODUL    T Y P E S   C

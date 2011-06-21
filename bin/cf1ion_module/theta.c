@@ -174,7 +174,7 @@ DOUBLE gamma_J[NR_RE]={
 /*----------------------------------------------------------------------------
                                info_thetakq()
 -----------------------------------------------------------------------------*/
-info_thetakq()     /* Liste der Stevensfaktoren alpha_J,beta_J,gamma_J zeigen*/
+void info_thetakq()/* Liste der Stevensfaktoren alpha_J,beta_J,gamma_J zeigen*/
 {
     CHAR *name = "results/thetakq.info";
  
@@ -213,7 +213,7 @@ info_thetakq()     /* Liste der Stevensfaktoren alpha_J,beta_J,gamma_J zeigen*/
     fprintf(fp,"|    f-electrons                                           |\n");
     fprintf(fp,"============================================================\n");
 
-    for (i=0;i<ANZ_IONEN;++i){
+    for (i=0;i<(int)ANZ_IONEN;++i){
                               s=IONENIMP[i].ionname;a=x*alpha_J[E4f(i)];b=y*beta_J[E4f(i)];c=z*gamma_J[E4f(i)];fprintf(fp,text,s,E4f(i),a,b,c);
                              }
     fclose(fp);
@@ -222,7 +222,7 @@ info_thetakq()     /* Liste der Stevensfaktoren alpha_J,beta_J,gamma_J zeigen*/
                                   info_rn()
 -----------------------------------------------------------------------------*/
                    /*             n                   */
-info_rn()          /* Liste der <r > n=2,4,6 ausgeben */
+void info_rn()     /* Liste der <r > n=2,4,6 ausgeben */
 {
     CHAR *name = "results/rn.info";
  
@@ -254,7 +254,7 @@ info_rn()          /* Liste der <r > n=2,4,6 ausgeben */
     fprintf(fp,"|ion         <r >/a0       <r >/a0       <r >/a0          |\n");
     fprintf(fp,"-----------------------------------------------------------\n");
 
-    for (i=0;i<ANZ_IONEN;++i){
+    for (i=0;i<(int)ANZ_IONEN;++i){
                               if(i==1||i==3){s=IONENIMP[i].ionname;a=r2(i);b=r4(i);c=r6(i);fprintf(fp,texti,s,a,b,c);}
                               else    {s=IONENIMP[i].ionname;a=r2(i);b=r4(i);c=r6(i);fprintf(fp,textfw,s,a,b,c);}
                              }
@@ -268,7 +268,7 @@ info_rn()          /* Liste der <r > n=2,4,6 ausgeben */
     a4 = a2*a2;
     a6 = a2*a4;
 
-    for (i=0;i<ANZ_IONEN;++i){
+    for (i=0;i<(int)ANZ_IONEN;++i){
                               if(i==1||i==3){s=IONENIMP[i].ionname;a=r2(i)*a2;b=r4(i)*a4;c=r6(i)*a6;fprintf(fp,sexti,s,a,b,c);}
                               else    {s=IONENIMP[i].ionname;a=r2(i)*a2;b=r4(i)*a4;c=r6(i)*a6;fprintf(fp,sextfw,s,a,b,c);}
                              }
@@ -285,7 +285,7 @@ info_rn()          /* Liste der <r > n=2,4,6 ausgeben */
     a2 = A0_BOHR*A0_BOHR*100;
     a4 = a2*a2;
     a6 = a2*a4;
-    for (i=0;i<ANZ_IONEN;++i){
+    for (i=0;i<(int)ANZ_IONEN;++i){
                               if(i==1||i==3){s=IONENIMP[i].ionname;a=r2(i)*a2*alpha_J[E4f(i)];b=r4(i)*a4*beta_J[E4f(i)];c=r6(i)*a6*gamma_J[E4f(i)];fprintf(fp,sexti,s,a,b,c);}
                               else          {s=IONENIMP[i].ionname;a=r2(i)*a2*alpha_J[E4f(i)];b=r4(i)*a4*beta_J[E4f(i)];c=r6(i)*a6*gamma_J[E4f(i)];fprintf(fp,sextfw,s,a,b,c);}
                              }

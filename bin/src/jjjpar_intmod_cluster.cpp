@@ -324,7 +324,7 @@ EigenSystemHermitean (H,En,zr,zc,sort,maxiter);
 
 // calculate mat and delta for transition number tn
 // 1. get i and j from tn
-int k=0,ii,jj;
+int k=0,ii=1,jj=1;
 for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj)
 {++k;if(k==tn)break;
 }if(k==tn)break;}
