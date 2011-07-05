@@ -342,6 +342,9 @@ void ic_parseinput(const char *filename, icpars &pars)
       {  pars.B.op_equiv = Jt; pars.B.calc_stevfact(pars.n,pars.l); pars.B.convback(); }
       else if(varname.find("use_L_operator_equivalent")!=std::string::npos)
       {  pars.B.op_equiv = Lt; pars.B.calc_stevfact(pars.n,pars.l); pars.B.convback(); }
+      else if(varname.find("dx2")!=std::string::npos) iss >> pars.Dx2;
+      else if(varname.find("dy2")!=std::string::npos) iss >> pars.Dy2;
+      else if(varname.find("dz2")!=std::string::npos) iss >> pars.Dz2;
       else if(varname.find("emu")!=std::string::npos)
          pars.mag_units = 1;
       else if(varname.find("simag")!=std::string::npos)

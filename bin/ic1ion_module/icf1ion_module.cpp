@@ -106,6 +106,59 @@ int icf_getdim(icpars &pars)
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
+// Calculates the spin anisotropy interactions D Sa^2 where a=x,y,z
+// --------------------------------------------------------------------------------------------------------------- //
+void icf_DS2(sMat<double> &Hcf, icpars &pars)
+{
+   int n = pars.n; orbital e_l = pars.l;
+   fstates_t gs = hunds_gs(n, e_l);
+   int J2min, J2max, ns=0, L2=2*abs(gs.L), S2=gs.S2;
+   J2min = abs(L2-S2); J2max = L2+S2;
+   sMat<double> rm(J2min-J2max+1,J2min-J2max+1);
+
+   // Calculates the reduced matrix element
+   for (int J2=J2min; J2<=J2max; J2+=2) 
+   {
+      ns+=J2+1; 
+      for (int J2p=J2min; J2p<=J2max; J2p+=2) 
+         rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(S2,J2,L2,J2p,S2,2);
+   }
+
+   // Determines the states indices.
+   int ins=0; std::vector<int> J2(ns), mJ2(ns), irm(ns);
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2)
+     for (int imJ2=-iJ2; imJ2<=iJ2; imJ2+=2)
+     {
+        J2[ins]=iJ2; mJ2[ins]=imJ2; irm[ins]=iJ2-J2min; ins++;
+     }
+
+   // Loops through the Cartesian directions, expanding reduced matrix by Wigner-Eckart theorem
+   double elp, elm, el0, sqrt2=sqrt(2);
+   sMat<double> Sx(ns,ns), Sy(ns,ns), Sz(ns,ns);
+   if((fabs(pars.Dx2)+fabs(pars.Dy2))>SMALL)                  // Sx or Sy
+   {
+      for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
+      {
+         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
+         elp = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
+         if(fabs(pars.Dx2)>SMALL) { el0=elm-elp; if(fabs(el0)>SMALL) Sx(i,j) = el0/sqrt2; }
+         if(fabs(pars.Dy2)>SMALL) { el0=elm+elp; if(fabs(el0)>SMALL) Sy(i,j) = el0/sqrt2; }
+      }
+      if(fabs(pars.Dx2)>SMALL) { Sx*=Sx; rmzeros(Sx); Hcf += Sx * (pars.Dx2*pars._econv); }
+      if(fabs(pars.Dy2)>SMALL) { Sy*=Sy; rmzeros(Sy); Hcf -= Sy * (pars.Dy2*pars._econv); }
+   }
+   if((fabs(pars.Dz2)>SMALL))                                 // Sz
+   {
+      for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
+      {
+         el0 = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],0,mJ2[j]); 
+         if(fabs(el0)>SMALL) Sz(i,j) = el0;
+      }
+      Sz*=Sz; rmzeros(Sz); Hcf += Sz * (pars.Dz2*pars._econv); 
+   }
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
 // Calculates the Hamilton matrix for the lowest Coulombic term (manifold of constant L and S)
 // --------------------------------------------------------------------------------------------------------------- //
 sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
@@ -190,6 +243,8 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
             }
          }
       }
+   // Calculates the spin-anisotropy terms D[xzy]2(S[xyz].S[xyz]) if needed.
+   if((fabs(pars.Dx2)+fabs(pars.Dy2)+fabs(pars.Dz2))>SMALL) icf_DS2(Hcf,pars);
    return Hcf;
 }
 
@@ -1917,6 +1972,8 @@ void icf_printheader(const char *outfile, icpars &pars)
    {
       FILEOUT << "# With magnetic field: Bx=" << pars.Bx << ", By=" << pars.By << ", Bz=" << pars.Bz << " Tesla.\n";
    }
+   if(fabs(pars.Dx2)>DBL_EPSILON || fabs(pars.Dy2)>DBL_EPSILON || fabs(pars.Dz2)>DBL_EPSILON)
+      FILEOUT << "# With spin anisotropy: Dx2=" << pars.Dx2 << ", Dy2=" << pars.Dy2 << ", Dz2=" << pars.Dz2 << " " << pars.e_units << ".\n";
    FILEOUT.close();
 }
  

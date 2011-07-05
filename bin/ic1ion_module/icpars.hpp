@@ -104,6 +104,7 @@ class icpars
       friend void getfromionname(std::string &ionname, icpars &pars);
       friend void conv_e_units(icpars &pars, std::string &newunit);
       friend void ic_parseinput(const char *filename, icpars &pars);
+      friend void icf_DS2(sMat<double> &Hcf, icpars &pars);
     //friend int ic_peig(icpars &pars, double *Vd, complexdouble *zVd, double *eigval);
       #ifdef JIJCONV
       bool _jijconvalreadycalc;              // Flag to show that the conversion factor for Jij already calculated
@@ -133,6 +134,7 @@ class icpars
     //std::string observable;                // Flag to tell mq() and dv1calc() which observable matrix to calculate
       std::string basis;                     // Name of basis to output eigenvectors, supported: "JmJ" and "mSmL"
       double Bx,By,Bz;                       // For magnetic field for Zeeman term
+      double Dx2,Dy2,Dz2;                    // For spin anisotropy parameters in spin-only (half-filled) icf1ion ions.
       double xT,xHa,xHb,xHc;                 // The vector in (H-T) phase space to calculate the x-axis of phase diag
       double xMin,xStep,xMax;                // Start, step and end of x-axis in the phase diagram
       double yT,yHa,yHb,yHc;                 // The vector in (H-T) phase space to calculate the y-axis of phase diag
