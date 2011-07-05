@@ -980,7 +980,16 @@ if (do_jqfile==1){
   
 //   myEigenSystemHermitean (Ac,En,Tau,sort,maxiter);
 //    myPrintVector(stdout,En);
-   myEigenSystemHermiteanGeneral (Lambda,Ac,En,Tau,sort=0,maxiter);
+   int eigrval = myEigenSystemHermiteanGeneral (Lambda,Ac,En,Tau,sort=0,maxiter);
+   if(eigrval>0) {  // 0==sucess. +1==Lambda not hermitian. +2==Ac not hermitian, +3==Lambda AND Ac not hermitian
+      if(eigrval>1) {
+         fprintf(stderr,"# Dynamical Matrix Ac not hermitian. Check exchange parameter file mcphas.j is consistent\n");
+         fprintf(stderr,"#   Note that each interaction between pairs of ions must match - e.g. Interaction between\n");
+         fprintf(stderr,"#   Atom 1 with Neighbour 2 (which is atom 2) must equal interaction between Atom 2 with Neighbour 1\n");
+         fprintf(stderr,"#   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); 
+      }
+      if(eigrval%2==1) fprintf(stderr,"# Warning: Trace matrix Lambda is not diagonal\n");
+   }
    En=1.0/En;
    sortE(En,Tau);
         //   Tau=Tau.Conjugate();
@@ -994,7 +1003,8 @@ if (do_jqfile==1){
    ComplexMatrix unit(1,dimA,1,dimA);unit=1;
    if( NormFro(unit-test)>SMALL){
  if(do_verbose==1){myPrintComplexMatrix(stdout,test); }
- fprintf(stderr,"Error: eigenvectors t not correctly normalised\n");exit(1);}
+ fprintf(stderr,"Error: eigenvectors t not correctly normalised\n"); 
+ fprintf(stderr,"   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); }
 //-------------------------------------------------------
  if(do_verbose==1){// fprintf(stdout,"#eigenvectors (matrix Tau):\n");
                    // myPrintComplexMatrix(stdout,Tau); 

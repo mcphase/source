@@ -5,19 +5,19 @@
 #define MAXNOFCHARINLINE 1000
 #endif
 
-void checkHerm(ComplexMatrix & M)
+bool checkHerm(ComplexMatrix & M, bool warn=true)
 {double d,max=0;
  int i1,j1,n=0;
  for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=M.Chi();++j1){
    d=abs(M(i1,j1)-conj(M(j1,i1)));
    if (d>VERYSMALL){n++;if(d>max)max=d;}
    }}
-  if(n>0)
+  if(n>0 && warn)
    {fprintf(stderr,"myEigenSystemHermitean: ERROR- %ix%i matrix not hermitian\n %i offdiagonal elements deviate by more than %g\n - largest deviation of offdiagonal elements: %g\n\n Press enter to ignore and continue, press p to print matrix\n?\n",M.Rhi(),M.Rhi(),n,VERYSMALL,max);
     //printout matrix
     if(getchar()=='p'){getchar();myPrintComplexMatrix(stderr,M);fprintf(stderr,"press enter to continue\n");getchar();}
    }
-
+  return (n>0)?false:true;
 }
 
 // subs to be able to check and directly diagonalize hermitean
@@ -25,14 +25,14 @@ void checkHerm(ComplexMatrix & M)
 void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
 {int i1,j1;
  fprintf (file,"#Real Part\n");
-   
+   double va;
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%6.3g ",myround(real(M(i1,j1))));
+    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(real(M(i1,j1))); if(abs(va>1e-5)) fprintf (file,"%6.3f\t",va); else fprintf(file,"0\t"); }
     fprintf (file,"\n");
     }
     fprintf (file,"#Imaginary Part\n");
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-   for (j1=M.Clo();j1<=M.Chi();++j1)fprintf (file,"%6.3g ",myround(imag(M(i1,j1))));
+    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(imag(M(i1,j1))); if(abs(va>1e-5)) fprintf (file,"%6.3f\t",va); else fprintf(file,"0\t"); }
     fprintf (file,"\n");
     }
 }    
@@ -146,7 +146,7 @@ void myEigenSystemHermitean (ComplexMatrix & M,Vector & lambda,ComplexMatrix & l
 }
 
 
-void myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector & e, ComplexMatrix & T, int & sort, int & maxiter)
+int myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector & e, ComplexMatrix & T, int & sort, int & maxiter)
 { // this sub diagonalizes M and puts eigenvalues to lambda, the eigenvectors to l
   Matrix mata(a.Rlo(),a.Rhi(),a.Clo(),a.Chi());
   Matrix matb(b.Rlo(),b.Rhi(),b.Clo(),b.Chi());
@@ -154,12 +154,12 @@ void myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector &
   Matrix zi(T.Rlo(),T.Rhi(),T.Clo(),T.Chi());
   ComplexVector x(T.Rlo(),T.Rhi());
   complex<double> ii(0,1);  
-  int i1,j1;
+  int i1,j1,retval=0;
 
   //check if a,b it is hermitean
-  checkHerm(a);
-  checkHerm(b);
-
+  bool isherm;
+  isherm = checkHerm(a,false); if(!isherm) { fprintf(stderr,"myEigenSystemHermiteanGeneral: Matrix a is not Hermitian\n"); retval += 1; }
+  isherm = checkHerm(b,false); if(!isherm) { fprintf(stderr,"myEigenSystemHermiteanGeneral: Matrix b is not Hermitian\n"); retval += 2; }
 
   // put matrix to format needed for library diagonalize function
    for(i1=a.Rlo();i1<=a.Rhi();++i1){for(j1=a.Clo();j1<=a.Chi();++j1){
@@ -211,6 +211,6 @@ EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
 //    for(j1=T.Rlo();j1<=T.Rhi();++j1) {T(j1,i1)=x(j1);}
 //   }
 
-   return;
+   return retval;
 
 }

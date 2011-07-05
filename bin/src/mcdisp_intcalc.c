@@ -276,10 +276,11 @@ if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
  // polarization factor
 // neutrons only sense first 3x3 part of S !! - this is taken into account by setting 0 all
 // higher components in the polarization factor !!!
-    pol=0;
+    pol=0; double qsqr=qijk*qijk;
     for(i=1;i<=3;++i){pol(i,i)=1.0;
-    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/(qijk*qijk);
+    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
     }}
+    fprintf(stdout,"pol="); myPrintMatrix(stdout,pol);
 // yes and for intermediate coupling we need another polarization factor
 // because neutrons sense the first 6x6 part of S
  polICIC=0;polICn=0;polnIC=0;
@@ -592,12 +593,12 @@ double intcalc(int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector 
  hkl2ijk(qijk,hkl, abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
- pol=0;
+ pol=0; double qsqr=qijk*qijk;
 //    qijk(1)=hkl(1)/inputpars.a; // only correct for ortholattices !!!!
 //    qijk(2)=hkl(2)/inputpars.b;
 //    qijk(3)=hkl(3)/inputpars.c;
     for(i=1;i<=3;++i){pol(i,i)=1.0;
-    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/(qijk*qijk);
+    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
     }}
     QQ=Norm(qijk);
 // yes and for intermediate coupling we need another polarization factor
