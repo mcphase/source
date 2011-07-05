@@ -565,12 +565,13 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
 // return (j0(Q) + j2(Q) * (2 / gJ - 1)); // formfactor F(Q) for rare earth
    // Rewrote to use saved value if Q same as previous call.
    {
-     if(abs(Q-Qsaved)<1e-6) return Fsaved;
+     for(int iq=1; iq<(Qsaved(MAXSAVEQ)==-1e16?nsaved:6); iq++) if(fabs(Q-Qsaved(iq))<1e-6) return Fsaved(iq);
      double Fval;
      if(gJ==0&&Q>0) Fval = j0(Q);
      else if(gJ==0&&Q<0) Fval = j0(-Q)+j2(-Q);
      else Fval = (j0(Q) + j2(Q) * (2 / gJ - 1));
-     Qsaved = Q; Fsaved = Fval;
+     nsaved++; if(nsaved>MAXSAVEQ) nsaved=1;
+     Qsaved(nsaved) = Q; Fsaved(nsaved) = Fval;
      return Fval;
    }
    double jjjpar::j0(double Q)

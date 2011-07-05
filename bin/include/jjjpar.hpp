@@ -155,7 +155,7 @@ private:
    double tl(int l,int N,double x);
    double sn(int n,int N,double x);
    double cn(int n,int N,double x);
-   double Fsaved,Qsaved;
+   Vector Fsaved,Qsaved; int nsaved;
 
 public:
 //   debyewallerfactor = EXP(-2 * DWF *s*s)
