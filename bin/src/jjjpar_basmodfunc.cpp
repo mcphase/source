@@ -565,13 +565,20 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
 // return (j0(Q) + j2(Q) * (2 / gJ - 1)); // formfactor F(Q) for rare earth
    // Rewrote to use saved value if Q same as previous call.
    {
-     for(int iq=1; iq<(Qsaved(MAXSAVEQ)==-1e16?nsaved:6); iq++) if(fabs(Q-Qsaved(iq))<1e-6) return Fsaved(iq);
+     unsigned int iq=nsaved; //iqmax = (unsigned int)(Qsaved[MAXSAVEQ]==-1e16?nsaved:6), iq=nsaved;
+     for(unsigned int ic=MAXSAVEQ; ic--;) {
+//      if(fabs(Q-Qsaved[iq])<1e-6) return Fsaved[iq];
+        if(Q==Qsaved[iq]) return Fsaved[iq];  // Starts search at last saved value, indexed by nsaved.
+        if(!(iq--)) iq=MAXSAVEQ-1;
+     }
      double Fval;
-     if(gJ==0&&Q>0) Fval = j0(Q);
-     else if(gJ==0&&Q<0) Fval = j0(-Q)+j2(-Q);
-     else Fval = (j0(Q) + j2(Q) * (2 / gJ - 1));
-     nsaved++; if(nsaved>MAXSAVEQ) nsaved=1;
-     Qsaved(nsaved) = Q; Fsaved(nsaved) = Fval;
+     if(gJ) {                                       // gJ!=0
+        Fval = (j0(Q) + j2(Q) * (2 / gJ - 1)); }
+     else {
+        if(Q>0) Fval = j0(Q);
+        else Fval = j0(-Q)+j2(-Q); }
+     Qsaved[nsaved] = Q; Fsaved[nsaved--] = Fval;   // nsaved starts at MAXSAVEQ
+     if(!nsaved) nsaved=MAXSAVEQ-1;
      return Fval;
    }
    double jjjpar::j0(double Q)
@@ -745,13 +752,24 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
     }
  }
 
+#define DIV4PI 0.07957747154594766788444  // Value of 1/4/PI to save some computation time avoiding division
+
 /************************************************************************************/
 //   debyewallerfactor = exp(-2 * DWF *s*s)      (sf ~ exp(-2 DWF sin^2(theta) / lambda^2)=EXP (-W),  (2*DWF=B=8 pi^2 <u^2>)
 /************************************************************************************/
    double jjjpar::debyewallerfactor(double & Q)
-   {double s;
-    s=Q/4/PI;
-    return exp(-2*DWF*s*s);
+   {
+     if(DWF==0) return 1.;  // Quick exit
+     double s; unsigned int iq=DBWnsaved;        // Starts search at last saved value, indexed by DBWnsaved.
+     for(unsigned int ic=MAXSAVEQ; ic--;) {
+        if(Q==DBWQsaved[iq]) return DBWsaved[iq]; if(!(iq--)) iq=MAXSAVEQ-1; }
+//  s=Q/4/PI;
+    s=Q*DIV4PI;
+    double DBW=exp(-2*DWF*s*s);
+     DBWQsaved[DBWnsaved] = Q; DBWsaved[DBWnsaved--] = DBW;   // nsaved starts at MAXSAVEQ
+     if(!DBWnsaved) DBWnsaved=MAXSAVEQ;
+     return DBW;
+//  return exp(-2*DWF*s*s);
    }
 
 // 2. charge density ----------------------------------------------------------

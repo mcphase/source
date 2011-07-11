@@ -128,7 +128,7 @@ mdcf::mdcf (int n1,int n2,int n3,int n,int nc)
   eigenstates= new ComplexMatrix * [mxa*mxb*mxc*(nofatoms+1)+1];   
   if (eigenstates == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
   
-
+  Ug=0; gU=0; bUg=0; bgU=0;
 }
 
 ComplexMatrix & mdcf::est(int i, int j, int k, int l)
@@ -203,6 +203,11 @@ mdcf::~mdcf ()
  }}}
  delete []s;delete []m;delete []d;delete []l;delete []nt;
  delete []sb;delete []mb;delete []lb;
+ // For caching values in calculation of transform of chi''
+ for(i=1;i<=ncel;i++) { if(Ug[i]!=0) { delete Ug[i]; Ug[i]=0; } if(bUg[i]!=0) { delete bUg[i]; bUg[i]=0; } 
+                        if(gU[i]!=0) { delete gU[i]; gU[i]=0; } if(bgU[i]!=0) { delete bgU[i]; bgU[i]=0; } }
+ if(Ug!=0) { delete Ug; Ug=0; } if(bUg!=0) { delete bUg; bUg=0; }
+ if(gU!=0) { delete gU; gU=0; } if(bgU!=0) { delete bgU; bgU=0; }
 }
 
 
@@ -261,6 +266,7 @@ mdcf::mdcf (const mdcf & p)
     }
   }           
 
+  Ug=0; gU=0; bUg=0; bgU=0;
 }
 //*/
 /*

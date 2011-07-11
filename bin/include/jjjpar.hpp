@@ -19,6 +19,8 @@ typedef void fnc_t();
 #include<myev.h>
 #include<stdlib.h>
 
+#define MAXSAVEQ 5   // Number of Q vector values to save in calculation of F(Q)
+                     //  so as to not repeat calculations.
 
 class par;
 class jjjpar
@@ -155,7 +157,8 @@ private:
    double tl(int l,int N,double x);
    double sn(int n,int N,double x);
    double cn(int n,int N,double x);
-   Vector Fsaved,Qsaved; int nsaved;
+   double Fsaved[MAXSAVEQ+1],Qsaved[MAXSAVEQ+1]; int nsaved;
+   double DBWsaved[MAXSAVEQ+1],DBWQsaved[MAXSAVEQ+1]; int DBWnsaved;
 
 public:
 //   debyewallerfactor = EXP(-2 * DWF *s*s)

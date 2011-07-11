@@ -159,6 +159,8 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
   return 1;
 }
 
+#include <time.h>
+
 //**************************************************************************/
 #ifdef _THREADS
 #ifdef __linux__
@@ -167,9 +169,10 @@ void *intcalc_approx(void *input)
 DWORD WINAPI intcalc_approx(void *input)
 #endif
 #else
-double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Matrix & polICIC,Matrix & polICn,Matrix & polnIC, double & intensitybey,mfcf & ev_real,mfcf & ev_imag,mfcf & eev_real,mfcf & eev_imag,ComplexMatrix & Ec,int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl,const mdcf & md,int do_verbose,double & QQ)
+double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Matrix & polICIC,Matrix & polICn,Matrix & polnIC, double & intensitybey,mfcf & ev_real,mfcf & ev_imag,mfcf & eev_real,mfcf & eev_imag,ComplexMatrix & Ec,int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl,/*const*/ mdcf & md,int do_verbose,double & QQ)
 #endif
 {//calculates approximate intensity for energylevel i - according to chapter 8.2 mcphas manual
+
 
 #ifdef _THREADS
    intcalcapr_input *myinput; myinput = (intcalcapr_input *)input;
@@ -180,7 +183,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
    #define pol (*thrdat.pol[thread_id])
    #define polICIC (*thrdat.polICIC[thread_id])
    #define polICn (*thrdat.polICn[thread_id])
-   #define polnIC (*thrdat.polnIC[thread_id])
+     efine polnIC (*thrdat.polnIC[thread_id])
    #define ev_real (*thrdat.ev_real[thread_id])
    #define ev_imag (*thrdat.ev_imag[thread_id])
    #define eev_real (*thrdat.eev_real[thread_id])
@@ -217,10 +220,24 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
   ev_real.clear();ev_imag.clear();
   eev_real.clear();eev_imag.clear();
 
+ // Added code to re-use previously calculated values of sqrt(gamma)*U and conj(U)*conj(sqrt(gamma)). mdl 110705
+ int maxb=-1,bval,/*ncel=-1,*/nval; complex<double> defval(-0.1,0.), tval; md.ncel=-1;
+ for(i2=1;i2<=ini.mf.na();++i2) for(j2=1;j2<=ini.mf.nb();++j2) for(k2=1;k2<=ini.mf.nc();++k2) { 
+   bval=md.baseindex_max(i2,j2,k2); if(bval>maxb) maxb=bval; 
+   nval=md.in(i2,j2,k2); if(nval>md.ncel) md.ncel=nval; } md.ncel++;
+   if(maxb==md.nofcomponents) maxb++; // To ensure matrix is not square so overloaded operator ComplexMatrix=(complex<double>) sets all elements to 1e-16 not just diagonal.
+// ComplexMatrix *Ug[ncel], *bUg[ncel], *gU[ncel],* bgU[ncel]; // Cache for U*sqrt(gamma) and sqrt(gamma)*U values, and beyond equiv.
+// ComplexMatrix **Ug, **bUg, **gU, **bgU;
+   if(md.Ug==0) { md.Ug = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.Ug[i]=0; }
+   if(md.gU==0) { md.gU = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.gU[i]=0; }
+   if(md.bUg==0) { md.bUg = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.bUg[i]=0; }
+   if(md.bgU==0) { md.bgU = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.bgU[i]=0; }
+
+// clock_t start,mid,end; start = clock();
+
 // determine chi
   //  chi=0;chibey=0;
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
-
 
 //     stau=(ini.mf.nb()*ini.mf.nc()*(i1-1)+ini.mf.nc()*(j1-1)+k1-1)*md.nofatoms;
 //     s=stau*md.nofcomponents;
@@ -237,7 +254,14 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
       b=md.baseindex(i1,j1,k1,l1,t1);
       bb=md.baseindex(i2,j2,k2,l2,t2);
         
-    
+      int in1=md.in(i1,j1,k1), in2=md.in(i2,j2,k2); //fprintf(stderr,"in1=%i, b=%i\tin2=%i, bb=%i\n",in1,b,in2,bb);
+      if(md.gU[in1]==0) { md.gU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.gU[in1]=defval; }
+      if(md.Ug[in2]==0) { md.Ug[in2] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.Ug[in2]=defval; }
+      if(intensitybey>0) {
+        if(md.bgU[in1]==0) { md.bgU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.bgU[in1]=defval; }
+        if(md.bUg[in2]==0) { md.bUg[in2] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.bUg[in2]=defval; }
+      }
+
     for(j=1;j<=md.nofcomponents;++j){
      if((ss-1)*md.nofcomponents+j==1){for(i=1;i<=ini.extended_eigenvector_dimension;++i)
                                         {eev_real.mf(i1,j1,k1)(ini.extended_eigenvector_dimension*(l1-1)+i)+=real(Ec(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
@@ -245,11 +269,29 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
                                         }
                                      }
     for(i=1;i<=md.nofcomponents;++i){
-                     chileft=conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
-if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
+
+      if((*md.gU[in1])(i,b)==defval) (*md.gU[in1])(i,b)  = conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))
+                                                            * md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
+      if((*md.Ug[in2])(j,bb)==defval) (*md.Ug[in2])(j,bb) = conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))
+                                                            * md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
+      if(intensitybey>0)
+      {
+        if((*md.bgU[in1])(i,b)==defval)  (*md.bgU[in1])(i,b)  = conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))
+                                                                 * md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
+        if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))
+                                                                 * md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
+      }
+ //   tval = conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b)) * md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
+ //   fprintf(stderr,"xcheck: gU[%i](%i,%i)=%f+i%f\tshould be %f+i%f\n",in1,i,b,real((*gU[in1])(i,b)),imag((*gU[in1])(i,b)),real(tval),imag(tval));
+ //   tval = conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents)) * md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
+ //   fprintf(stderr,"xcheck: Ug[%i](%i,%i)=%f+i%f\tshould be %f+i%f\n",in2,j,bb,real((*Ug[in2])(j,bb)),imag((*Ug[in2])(j,bb)),real(tval),imag(tval));
+    
+//                   chileft=conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
+//if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
 
      chi((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
-     PI*chileft*en*conj(Tau(ss,level))*conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
+//   PI*chileft*en*conj(Tau(ss,level))*conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
+     PI * (*md.gU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.Ug[in2])(j,bb); 
   // en inserted  MR 9.3.11
 
      // here we fill the eigenvector mf with the information from chi
@@ -257,13 +299,16 @@ if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.
                                       ev_imag.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=imag(chileft)*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                       }
 
-if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
-     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
+//if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
+//     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
+     if(intensitybey>0) chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j) = PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);
   // en inserted  MR 9.3.11
     }}
    }}}}
   }}}
  }}}
+
+// end = clock(); fprintf(stderr,"Time to determine chi = %f s.\n",(double)(end-start)/CLOCKS_PER_SEC);
 
   complex<double> im(0,1.0);
  //  chi'' to  S (bose factor) ... fluctuation dissipation theorem
@@ -280,7 +325,6 @@ if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
     for(i=1;i<=3;++i){pol(i,i)=1.0;
     for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
     }}
-    fprintf(stdout,"pol="); myPrintMatrix(stdout,pol);
 // yes and for intermediate coupling we need another polarization factor
 // because neutrons sense the first 6x6 part of S
  polICIC=0;polICn=0;polnIC=0;
@@ -298,7 +342,17 @@ if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
                       if(i==1||i==3||i==5){polICn(i,j)*=2.0;} // this accounts for the 
     }}
 
-
+  double Fq1, Fq2;
+  
+  // Precalculate values of Debye-Waller and Form Factors for this Q-vector to save calls to (*inputpars.jjj[ion]).* functions
+  double DBWF[md.nofatoms+1], Fqm[md.nofatoms+1], Fqp[md.nofatoms+1];
+  for(l1=1;l1<=md.nofatoms;++l1) {
+     DBWF[l1] = (*inputpars.jjj[l1]).debyewallerfactor(QQ);
+     if((*inputpars.jjj[l1]).gJ==0) {
+        Fqp[l1] = (*inputpars.jjj[l1]).F(QQ)*0.5; Fqm[l1] = (*inputpars.jjj[l1]).F(-QQ)*0.5; }
+     else 
+        Fqp[l1] = (*inputpars.jjj[l1]).gJ * (*inputpars.jjj[l1]).F(QQ) * 0.5;
+  }
 
  //multiply polarization factor, formfactor and debyewallerfactor
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
@@ -315,7 +369,7 @@ if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
 
     for(i=1;i<=md.nofcomponents;++i){for(j=1;j<=md.nofcomponents;++j){
 
-      //--------------------------------------------------------------------------------------------------
+/*    //--------------------------------------------------------------------------------------------------
       if((*inputpars.jjj[l1]).gJ==0&&(*inputpars.jjj[l2]).gJ==0)
       {chi(s+i,ss+j)*=polICIC(i,j);
        chi(s+i,ss+j)*=0.5*(*inputpars.jjj[l1]).debyewallerfactor(QQ); // multiply (2S+L) with factor 1/2 to be conformant
@@ -368,12 +422,63 @@ if(intensitybey>0){       chibey(s+i,ss+j)*=pol(i,j);
        chibey(s+i,ss+j)*=(*inputpars.jjj[l2]).debyewallerfactor(QQ); }// and  + debey waller factor
       }
       //--------------------------------------------------------------------------------------------------
+*/   
+      if((*inputpars.jjj[l1]).gJ==0)
+      {
+        if((*inputpars.jjj[l2]).gJ==0)  // Both neighbours IC
+        {                               // formfactor +QQ..spin formfactor (j0), -QQ .. orbital formfactor (j0+j2)
+//        if(i==2||i==4||i==6) { Fq1 = (*inputpars.jjj[l1]).F(-QQ); } else { Fq1 = (*inputpars.jjj[l1]).F(QQ); }
+//        if(j==2||j==4||j==6) { Fq2 = (*inputpars.jjj[l2]).F(-QQ); } else { Fq2 = (*inputpars.jjj[l2]).F(QQ); }
+          // multiply (2S+L) with factor 1/2 * 1/2 to be conformant to gj/2F(Q)<J>=M/2F(Q) in case of gj>0 (see below)
+//        chi(s+i,ss+j) *= ( polICIC(i,j) * 0.25*(*inputpars.jjj[l1]).debyewallerfactor(QQ)*(*inputpars.jjj[l2]).debyewallerfactor(QQ) * Fq1*Fq2 );
+//        if(intensitybey>0) {    
+//          chibey(s+i,ss+j) *= ( polICIC(i,j) * (*inputpars.jjj[l1]).debyewallerfactor(QQ) * (*inputpars.jjj[l2]).debyewallerfactor(QQ) ); }
+          if(i==2||i==4||i==6) { Fq1 = Fqm[l1]; } else { Fq1 = Fqp[l1]; } if(j==2||j==4||j==6) { Fq2 = Fqm[l2]; } else { Fq2 = Fqp[l2]; }
+          chi(s+i,ss+j) *= ( polICIC(i,j) * DBWF[l1] * DBWF[l2] * Fq1 * Fq2 );  // Fqp=F(+Q)/2, Fqm=F(-Q)/2 - see line 351
+          if(intensitybey>0) { chibey(s+i,ss+j) *= ( polICIC(i,j) * DBWF[l1]*DBWF[l2] ); }
+        }
+        else                            // Ion 1 IC, Ion 2 not
+        {                               // formfactor +QQ..spin formfactor (j0), -QQ .. orbital formfactor (j0+j2)
+//        if(i==2||i==4||i==6) { Fq1 = (*inputpars.jjj[l1]).F(-QQ); } else { Fq1 = (*inputpars.jjj[l1]).F(QQ); }
+//        chi(s+i,ss+j) *= ( polICn(i,j) * /* 0.5 */ 0.25*(*inputpars.jjj[l1]).debyewallerfactor(QQ) * Fq1   // Moved factor *0.5 and /2.0 to *0.25 - mdl 110709
+//                             * (*inputpars.jjj[l2]).gJ /* /2.0 */ *(*inputpars.jjj[l2]).debyewallerfactor(QQ)*(*inputpars.jjj[l2]).F(QQ) );
+//        if(intensitybey>0) {    
+//          chibey(s+i,ss+j) *= ( polICn(i,j) * (*inputpars.jjj[l1]).debyewallerfactor(QQ) * (*inputpars.jjj[l2]).debyewallerfactor(QQ) ); }
+          if(i==2||i==4||i==6) { Fq1 = Fqm[l1]; } else { Fq1 = Fqp[l1]; }   // Moved factor *0.5 and /2.0 to *0.25 - mdl 110709
+          chi(s+i,ss+j) *= ( polICn(i,j) * DBWF[l1] * /* 0.5 */ Fq1 * DBWF[l2] * /* gJ/2.0 */ Fqp[l2] );  // Fqp = gJ*F(Q)/2 - see line 353
+          if(intensitybey>0) { chibey(s+i,ss+j) *= ( polICn(i,j) * DBWF[l1] * DBWF[l2] ); }   
+        }
+      }
+      else
+      {
+        if((*inputpars.jjj[l2]).gJ==0)  // Ion 1 not, Ion 2 IC
+        {                               // formfactor +QQ..spin formfactor (j0), -QQ .. orbital formfactor (j0+j2)
+//        if(j==2||j==4||j==6) { Fq2 = (*inputpars.jjj[l2]).F(-QQ); } else { Fq2 = (*inputpars.jjj[l2]).F(QQ); }
+//        chi(s+i,ss+j) *= ( polnIC(i,j) * (*inputpars.jjj[l1]).gJ /* /2.0 */ *(*inputpars.jjj[l1]).debyewallerfactor(QQ)*(*inputpars.jjj[l1]).F(QQ) 
+//                            /* 0.5 */ * 0.25*(*inputpars.jjj[l2]).debyewallerfactor(QQ) * Fq2 );  // Moved factor *0.5 and /2.0 to *0.25 - mdl 110709
+//        if(intensitybey>0) {    
+//          chibey(s+i,ss+j) *= ( polnIC(i,j) * (*inputpars.jjj[l1]).debyewallerfactor(QQ) * (*inputpars.jjj[l2]).debyewallerfactor(QQ) ); }
+          if(j==2||j==4||j==6) { Fq2 = Fqm[l2]; } else { Fq2 = Fqp[l2]; }   // Moved factor *0.5 and /2.0 to *0.25 - mdl 110709
+          chi(s+i,ss+j) *= ( polnIC(i,j) * DBWF[l1] * /* gJ/2.0 */ Fqp[l1] * DBWF[l2] * /* 0.5 */ Fq2 );  // Fqp = gJ*F(Q)/2 - see line 353
+          if(intensitybey>0) { chibey(s+i,ss+j) *= ( polnIC(i,j) * DBWF[l1] * DBWF[l2] ); }   
+        }
+        else                            // Both neighbours not IC
+        {   // Put access to chi matrix element in a single call, and replaced two factors of /2.0 with 0.25 to speed up computation - mdl 110709
+//        chi(s+i,ss+j) *= ( pol(i,j) * (*inputpars.jjj[l1]).gJ /* /2.0 */ *(*inputpars.jjj[l1]).debyewallerfactor(QQ)*(*inputpars.jjj[l1]).F(QQ) * 0.25
+//                                    * (*inputpars.jjj[l2]).gJ /* /2.0 */ *(*inputpars.jjj[l2]).debyewallerfactor(QQ)*(*inputpars.jjj[l2]).F(QQ) );
+//        if(intensitybey>0) {
+//           chibey(s+i,ss+j) *= ( pol(i,j) * (*inputpars.jjj[l1]).debyewallerfactor(QQ) * (*inputpars.jjj[l2]).debyewallerfactor(QQ) ); }
+          chi(s+i,ss+j) *= ( pol(i,j) * DBWF[l1] * /* gJ/2.0 */ Fqp[l1] * DBWF[l2] * /* gJ/2.0 */ Fqp[l2] ); // Fqp = gJ*F(Q)/2 - see line 353
+          if(intensitybey>0) { chibey(s+i,ss+j) *= ( pol(i,j) * DBWF[l1] * DBWF[l2] ); }   
+        }
+      }
     }}   
   }}
   }}}
  }}
  }}}
 
+// start = clock(); fprintf(stderr,"Time to calculate polarisation, Debye-Waller and form factors is = %f s.\n",(double)(start-end)/CLOCKS_PER_SEC);
 
 
  // determine dsigma in barns per cryst unit cell !
@@ -438,6 +543,8 @@ else
   intensitybey*=kf/ini.ki;
  }
 }
+
+// end = clock(); fprintf(stderr,"Time to calculate Bose and k/k' factors = %f s.\n",(double)(end-start)/CLOCKS_PER_SEC);
 
 #ifdef _THREADS
 myinput->intensity=intensity;

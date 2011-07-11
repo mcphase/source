@@ -13,9 +13,6 @@
 #define MAXNOFNUMBERSINLINE 2500
 #define MAXNOFCHARINLINE 7024
 
-#define MAXSAVEQ 5   // Number of Q vector values to save in calculation of F(Q)
-                     //  so as to not repeat calculations.
-
 #define SMALL 1e-6   //!!! must match SMALL in mcdisp.c and ionpars.cpp !!!
                      // because it is used to decide whether for small transition
 		     // energy the matrix Mijkl contains wn-wn' or wn/kT
@@ -536,7 +533,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
            if(dt!=0) { jij[i](j1,i1)=dt; jij[i](i1,j1)=dt; }
      }}}
   }
-  Qsaved=Vector(1,MAXSAVEQ); Fsaved=Vector(1,MAXSAVEQ); Qsaved=-1e16; Fsaved=0; nsaved=0;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 }
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot
@@ -549,7 +546,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile)
   strcpy(cffilename,sipffile);
   get_parameters_from_sipfile(cffilename);
   set_zlm_constants();
-  Qsaved=Vector(1,MAXSAVEQ); Fsaved=Vector(1,MAXSAVEQ); Qsaved=-1e16; Fsaved=0; nsaved=0;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 
 }
 
@@ -572,7 +569,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   paranz=0;
   cffilename= new char [MAXNOFCHARINLINE];
   module_type=1;
-  Qsaved=Vector(1,MAXSAVEQ); Fsaved=Vector(1,MAXSAVEQ); Qsaved=-1e16; Fsaved=0; nsaved=0;
+  for(unsigned int ui=MAXSAVEQ; ui--;) { Qsaved[ui]=-1e16; Fsaved[ui]=0; } nsaved=MAXSAVEQ-1;
 }
 
 //constructor without file
@@ -604,7 +601,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
   DWF=0;gJ=0;
-  Qsaved=Vector(1,MAXSAVEQ); Fsaved=Vector(1,MAXSAVEQ); Qsaved=-1e16; Fsaved=0; nsaved=0;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 
 }
 
@@ -678,7 +675,10 @@ int i1;
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   for (i=1;i<=paranz;++i)
   {jij[i]=p.jij[i];dn[i]=p.dn[i];sublattice[i]=p.sublattice[i];}
-  Qsaved=p.Qsaved; nsaved=p.nsaved;
+//Qsaved=p.Qsaved; Fsaved=p.Fsaved; nsaved=p.nsaved;
+//Qsaved=Vector(1,MAXSAVEQ); Fsaved=Vector(1,MAXSAVEQ); Qsaved=-1e16; Fsaved=0; nsaved=MAXSAVEQ;
+//for(unsigned int ui=MAXSAVEQ; ui--;) { Qsaved[ui]=-1e16; Fsaved[ui]=0; } nsaved=MAXSAVEQ-1;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 }
 
 

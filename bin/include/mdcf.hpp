@@ -31,6 +31,9 @@ class mdcf
     int in(int i,int j, int k) const; // indexing functions
     int ind(int i,int j, int k,int l); 
    
+    int ncel;
+    ComplexMatrix **Ug, **bUg, **gU, **bgU; // Cache for U*sqrt(gamma) and sqrt(gamma)*U values, and beyond equiv.
+    
     ComplexMatrix & M(int i,int j,int k); // returns pointer to  matrix M(ijk) 
     ComplexMatrix & Mi(int in); // returns pointer to matrix M(i)
     ComplexMatrix & U(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
