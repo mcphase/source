@@ -687,7 +687,6 @@ class ComplexMatrix : public MatrixBase {
   friend class ComplexVector;
   
   private:
-    complex<double>** M;
 
     void checkdim (const ComplexMatrix&);
     friend void checkdim (const ComplexMatrix&, const ComplexMatrix&);
@@ -695,6 +694,7 @@ class ComplexMatrix : public MatrixBase {
     
   public:
 
+    complex<double>** M;
     friend int unbound (const ComplexMatrix& A) { return (A.temporary == 1); }
 
     // constructors

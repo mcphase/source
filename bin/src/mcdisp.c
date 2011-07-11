@@ -107,9 +107,10 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
     int nofneighbours=myinput->dimA, ll=myinput->level;
     int thread_id = myinput->thread_id;
 #endif
-    complex<double> ipi(0,2*3.1415926535);
+    complex<double> ipi(0,2*3.1415926535), expqd;
     int i,j,k,i1,j1,k1,s,ss,sl,tl,tll,m,n;
     int l;
+    double REexpqd, IMexpqd, jjval; int jsi,jsj;
     for(l=1;l<=(*inputpars.jjj[ll]).paranz;++l) 
     {
          int sd=(*inputpars.jjj[ll]).sublattice[l];
@@ -121,6 +122,8 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 
          xyz=(*inputpars.jjj[ll]).dn[l];
          d=inputpars.rez*(const Vector&)xyz;// set d to distance for later use to determie phase factor in J(Q) ...
+
+         expqd = exp(ipi*(q*d)); REexpqd = real(expqd); IMexpqd = imag(expqd);
 
 //	  if (do_verbose==1) {printf("#adding neighbor %i (%6.3f %6.3f %6.3f) of atom %i (%6.3f %6.3f %6.3f)- it contributes to J(s,s'):\n",l,xyz(1),xyz(2),xyz(3),ll,(*inputpars.jjj[ll]).xyz[1],(*inputpars.jjj[ll]).xyz[2],(*inputpars.jjj[ll]).xyz[3]);
 //                              } 
@@ -149,25 +152,31 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 	 ss=J.in(i,j,k);
 //          if (do_verbose==1) {printf("#s=%i %i %i  s'=%i %i %i\n",i,j,k,i1,j1,k1);}
           // sum up 
-           ComplexMatrix jsss(1,ini.nofcomponents*md.baseindex_max(i1,j1,k1),1,ini.nofcomponents*md.baseindex_max(i,j,k));
-           jsss=0;
+
+//         mdl - Changed 110710 - To speed up computation by calculating exp(-2i.Pi.Q.d) real and imag parts separately, 
+//                                and put into J.mati(s,ss) directly without using intermediate jsss matrix.
+           complex<double> **jsss = J.mati(s,ss).M;
+
+//         ComplexMatrix jsss(1,ini.nofcomponents*md.baseindex_max(i1,j1,k1),1,ini.nofcomponents*md.baseindex_max(i,j,k));
+//         jsss=0;
         
 	  sl=(*inputpars.jjj[ll]).sublattice[l]; // the whole loop has also to be done 
                                                  // for all the other transitions of sublattice sl
 
             
           // therefore calculate offset of the set of transitions
-          for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){
-	  for(tll=1;tll<=md.noft(i,j,k,sl);++tll){
+          for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
+	  for(tll=1;tll<=md.noft(i,j,k,sl);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,sl,tll)-1);
 	  
        
 	     for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){ //this should also be ok for nofcomponents > 3 !!! (components 1-3 denote the magnetic moment)
-             jsss(ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1)+m,ini.nofcomponents*(md.baseindex(i,j,k,sl,tll)-1)+n)=(*inputpars.jjj[ll]).jij[l](m,n);
+//           jsss(ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1)+m,ini.nofcomponents*(md.baseindex(i,j,k,sl,tll)-1)+n)=(*inputpars.jjj[ll]).jij[l](m,n);
+         jjval = (*inputpars.jjj[ll]).jij[l](m,n); jsss[jsi+m][jsj+n] += complex<double>(jjval*REexpqd, jjval*IMexpqd);
                                               }                                 } // but orbitons should be treated correctly by extending 3 to n !!
 	                                         }} 
 // increase Js,ss(q) taking into account the phase factors for the distance l-ll
           // J.mati(s,ss)+=jsss*exp(ipi*(q*d)); // changed
-          jsss*=exp(ipi*(q*d)); J.mati(s,ss)+=jsss;
+//        jsss*=exp(ipi*(q*d)); J.mati(s,ss)+=jsss;
           ++nofneighbours; // count neighbours summed up
 	 }}}
    }
