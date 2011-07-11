@@ -675,9 +675,6 @@ int i1;
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   for (i=1;i<=paranz;++i)
   {jij[i]=p.jij[i];dn[i]=p.dn[i];sublattice[i]=p.sublattice[i];}
-//Qsaved=p.Qsaved; Fsaved=p.Fsaved; nsaved=p.nsaved;
-//Qsaved=Vector(1,MAXSAVEQ); Fsaved=Vector(1,MAXSAVEQ); Qsaved=-1e16; Fsaved=0; nsaved=MAXSAVEQ;
-//for(unsigned int ui=MAXSAVEQ; ui--;) { Qsaved[ui]=-1e16; Fsaved[ui]=0; } nsaved=MAXSAVEQ-1;
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 }
 

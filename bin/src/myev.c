@@ -15,7 +15,7 @@ bool checkHerm(ComplexMatrix & M, bool warn=true)
   if(n>0 && warn)
    {fprintf(stderr,"myEigenSystemHermitean: ERROR- %ix%i matrix not hermitian\n %i offdiagonal elements deviate by more than %g\n - largest deviation of offdiagonal elements: %g\n\n Press enter to ignore and continue, press p to print matrix\n?\n",M.Rhi(),M.Rhi(),n,VERYSMALL,max);
     //printout matrix
-    if(getchar()=='p'){getchar();myPrintComplexMatrix(stderr,M);fprintf(stderr,"press enter to continue\n");getchar();}
+//  if(getchar()=='p'){getchar();myPrintComplexMatrix(stderr,M);fprintf(stderr,"press enter to continue\n");getchar();}
    }
   return (n>0)?false:true;
 }
@@ -27,12 +27,12 @@ void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
  fprintf (file,"#Real Part\n");
    double va;
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(real(M(i1,j1))); if(abs(va>1e-5)) fprintf (file,"%6.3f\t",va); else fprintf(file,"0\t"); }
+    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(real(M(i1,j1))); if(fabs(va)>1e-5) fprintf (file,"%6.3f\t",va); else fprintf(file,"0\t"); }
     fprintf (file,"\n");
     }
     fprintf (file,"#Imaginary Part\n");
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(imag(M(i1,j1))); if(abs(va>1e-5)) fprintf (file,"%6.3f\t",va); else fprintf(file,"0\t"); }
+    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(imag(M(i1,j1))); if(fabs(va)>1e-5) fprintf (file,"%6.3f\t",va); else fprintf(file,"0\t"); }
     fprintf (file,"\n");
     }
 }    
