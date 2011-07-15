@@ -26,7 +26,7 @@
 ###########################################################################
 
 # Checks to see if the gcc compiler is newer than 4.2
-ifneq ($(shell gcc --version|grep " 4.[2345]"),)
+ifneq ($(shell gcc --version|grep " 4.[2-9]"),)
 GCC42=1
 LFLAGS=-static-libgcc
 endif
