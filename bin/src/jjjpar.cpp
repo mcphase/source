@@ -569,7 +569,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   paranz=0;
   cffilename= new char [MAXNOFCHARINLINE];
   module_type=1;
-  for(unsigned int ui=MAXSAVEQ; ui--;) { Qsaved[ui]=-1e16; Fsaved[ui]=0; } nsaved=MAXSAVEQ-1;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 }
 
 //constructor without file
