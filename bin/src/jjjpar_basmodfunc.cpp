@@ -691,7 +691,7 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
  * x^6-15 x^4 y^2+15 x^2 y^4-y^6+I (6 x^5 y-20 x^3 y^3+6 x y^5)
  * x^7-21 x^5 y^2+35 x^3 y^4-7 x y^6+I (-7 x^6 y+35 x^4 y^3-21 x^2 y^5+y^7)
  * x^8-28 x^6 y^2+70 x^4 y^4-28 x^2 y^6+y^8+I (-8 x^7 y+56 x^5 y^3-56 x^3 y^5+8 x y^7)
- * when y=-1:                          For powers z^{-p}, take -ve of Im part and div by (1-x^2)^p.
+ * when y=-1:                          For powers z^{-p}, take -ve of Im part and div by (1+x^2)^p.
  * x                           +I( -1 )
  * -1+x^2                      +I( -2 x )
  *  -3 x+x^3                   +I(  1-3 x^2 )
@@ -700,7 +700,7 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
  *  -1+15 x^2-15 x^4+x^6       +I( -6 x+20 x^3-6 x^5 )
  * -7 x+35 x^3-21 x^5+x^7      +I( 1-21 x^2+35 x^4-7 x^6)
  * 1-28 x^2+70 x^4-28 x^6+x^8  +I( 8 x-56 x^3+56 x^5-8 x^7)
- */
+ */ 
  double jjjpar::sn(int n,int N,double x)    // Need imaginary part
  {
     double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
@@ -718,8 +718,8 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
       case -5: return (double)factorial(N-n) * (-(-1 + x*x * (10 - 5*x*x)) / denom); break;
       case  6: return (double)factorial(N-n) *   x * (-6 + x*x * (20 - 6*x*x)); break;
       case -6: return (double)factorial(N-n) * (-x * (-6 + x*x * (20 - 6*x*x)) / denom);  break;
-      case  7: return (double)factorial(N-n) *   ( 1 + x*x * (-21 + x*x * (35 - 6*x*x))); break;
-      case -7: return (double)factorial(N-n) * (-( 1 + x*x * (-21 + x*x * (35 - 6*x*x))) / denom); break;
+      case  7: return (double)factorial(N-n) *   ( 1 + x*x * (-21 + x*x * (35 - 7*x*x))); break;
+      case -7: return (double)factorial(N-n) * (-( 1 + x*x * (-21 + x*x * (35 - 7*x*x))) / denom); break;
       case  8: return (double)factorial(N-n) *   x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))); break;
       case -8: return (double)factorial(N-n) * (-x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))) / denom); break;
       default: //fprintf(stderr,"jjjpar::sn() Bad power %i\n",-N+n-1); exit(-1);

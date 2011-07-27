@@ -226,11 +226,16 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
    bval=md.baseindex_max(i2,j2,k2); if(bval>maxb) maxb=bval; 
    nval=md.in(i2,j2,k2); if(nval>md.ncel) md.ncel=nval; } md.ncel++;
    if(maxb==md.nofcomponents) maxb++; // To ensure matrix is not square so overloaded operator ComplexMatrix=(complex<double>) sets all elements to 1e-16 not just diagonal.
-   if(md.Ug==0) { md.Ug = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.Ug[i]=0; }
-   if(md.gU==0) { md.gU = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.gU[i]=0; }
-   if(md.bUg==0) { md.bUg = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.bUg[i]=0; }
-   if(md.bgU==0) { md.bgU = new ComplexMatrix *[md.ncel]; for(i=1;i<=md.ncel;i++) md.bgU[i]=0; }
-
+   if(md.Ug==0) { md.Ug = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.Ug[i]=0; }
+   if(md.gU==0) { md.gU = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.gU[i]=0; }
+   if(md.bUg==0) { md.bUg = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.bUg[i]=0; }
+   if(md.bgU==0) { md.bgU = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.bgU[i]=0; }
+ for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){ int in1=md.in(i1,j1,k1);
+   md.gU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.gU[in1]=defval; 
+   md.Ug[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.Ug[in1]=defval;
+   md.bgU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb);*md.bgU[in1]=defval; 
+   md.bUg[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb);*md.bUg[in1]=defval; }}}
+  
 // determine chi
   //  chi=0;chibey=0;
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
@@ -249,15 +254,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
       ss=index_s(i2,j2,k2,l2,t2,md,ini);
       b=md.baseindex(i1,j1,k1,l1,t1);
       bb=md.baseindex(i2,j2,k2,l2,t2);
-
-      // Initiate cache for values of sqrt(gamma)'*U and U'*sqrt(gamma)
       int in1=md.in(i1,j1,k1), in2=md.in(i2,j2,k2);
-      if(md.gU[in1]==0) { md.gU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.gU[in1]=defval; }
-      if(md.Ug[in2]==0) { md.Ug[in2] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.Ug[in2]=defval; }
-/*    if(intensitybey>0) {
-        if(md.bgU[in1]==0) { md.bgU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.bgU[in1]=defval; }
-        if(md.bUg[in2]==0) { md.bUg[in2] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.bUg[in2]=defval; }
-      } */
 
     for(j=1;j<=md.nofcomponents;++j){
      if((ss-1)*md.nofcomponents+j==1){for(i=1;i<=ini.extended_eigenvector_dimension;++i)
@@ -272,20 +269,20 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
                                                             * md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
       if((*md.Ug[in2])(j,bb)==defval) (*md.Ug[in2])(j,bb) = conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))
                                                             * md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
-/*    if(intensitybey>0)
+      if(intensitybey>0)
       {
         if((*md.bgU[in1])(i,b)==defval)  (*md.bgU[in1])(i,b)  = conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))
                                                                  * md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
         if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))
                                                                  * md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
-      } */
+      }
  //   tval = conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b)) * md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
  //   fprintf(stderr,"xcheck: gU[%i](%i,%i)=%f+i%f\tshould be %f+i%f\n",in1,i,b,real((*gU[in1])(i,b)),imag((*gU[in1])(i,b)),real(tval),imag(tval));
  //   tval = conj(md.U(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents)) * md.sqrt_gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
  //   fprintf(stderr,"xcheck: Ug[%i](%i,%i)=%f+i%f\tshould be %f+i%f\n",in2,j,bb,real((*Ug[in2])(j,bb)),imag((*Ug[in2])(j,bb)),real(tval),imag(tval));
     
 //                   chileft=conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
-  if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
+//if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
 
      chileft = (*md.gU[in1])(i,b) * Tau(s,level);
      chi((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
@@ -299,9 +296,9 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
                                       ev_imag.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=imag(chileft)*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                       }
 
-  if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
-       PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
-//   if(intensitybey>0) chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j) = PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);
+//if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
+//     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
+   if(intensitybey>0) chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j) = PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);
   // en inserted  MR 9.3.11
     }}
    }}}}
