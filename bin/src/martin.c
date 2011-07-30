@@ -236,7 +236,7 @@ float integer (float s){  double result;modf(s,&result);  return result;}
 int cint (float s){  double result;if(modf(s,&result)<0.5){return (int)result;}{return (int)result+1;}}
 
 // round to 1e-11 precision
-double myround(double s){return myround(1e-11,s);}
+double myround(double s){return myround(1e-10,s);}
 double myround(double prec,double s){
 double result;result=prec*rint(s/prec);
 if (result==0){result*=result;}

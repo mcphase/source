@@ -78,7 +78,7 @@ gp.show_density=0;
 
   fclose (fin_coq);
 
-  printf("%s - momentum configuration <J(i)>\n",outstr);
+  printf("#! %s - momentum configuration <J(i)>\n",outstr);
   fprintf(fout,"#! %s - momentum configuration <J(i)>\n",outstr);
   savspins.printall(fout,cs);
   savspins.print(stdout);

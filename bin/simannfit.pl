@@ -223,8 +223,8 @@ print $delta;
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";
-     $est=sprintf("%6.2f",(time-$starttime)/3600);
-     print Fout "Time since start of simannfit: $est hours    ($stepnumber steps)\n";
+     $est=sprintf("%6.2f",(time-$starttime)/3600);$maxtimest=sprintf("%6.2f",($maxtim)/3600);
+     print Fout "Time since start of simannfit: $est hours (limit:$maxtimest), $stepnumber steps (limit:$maxstep)\n";
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
      $i=0;foreach(@par){write Fout;++$i;}
@@ -393,8 +393,8 @@ sub read_write_statusfile {
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";
-     $est=sprintf("%6.2f",(time-$starttime)/3600);
-     print Fout "Time since start of simannfit: $est hours    ($stepnumber steps)\n";
+     $est=sprintf("%6.2f",(time-$starttime)/3600);$maxtimest=sprintf("%6.2f",($maxtim)/3600);
+     print Fout "Time since start of simannfit: $est hours (limit:$maxtimest), $stepnumber steps (limit:$maxstep)\n";
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
      foreach(@par){write Fout;++$i;}

@@ -699,7 +699,7 @@ if (do_jqfile==0)
 { printf("#saving mcdisp.qom and mcdisp.qei and mcdisp.qev\n");
   fout = fopen_errchk ("./results/mcdisp.qom",filemode);
   writeheader(inputpars,fout); fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
-          fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+          fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities (dipapprox vs full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   foutqei = fopen_errchk ("./results/mcdisp.qei",filemode);
   writeheader(inputpars,foutqei); fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
           fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
@@ -1089,6 +1089,11 @@ diffint=0;diffintbey=0;
                   }
                   ithread=0; num_threads_started=-1; int oldi=-1; double QQ; Vector vQQ(1,dimA);
 #endif
+                      Vector qijk(1,3); // determine QQ for printout
+                      Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
+                                       abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+                      hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);
+
 #ifdef _THREADS  
                   for (i=1;i<=dimA;i+=NUM_THREADS)
 #else
@@ -1140,7 +1145,8 @@ diffint=0;diffintbey=0;
                                             intsbey(i),ev_real,ev_imag,eev_real,eev_imag,Ec,dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,QQ);
                      }
                      else
-                     {ints(i)=-1;intsbey(i)=-1;}
+                     {ints(i)=-1;intsbey(i)=-1;
+                     }
 #endif
                      if (ini.hkllist==1)
 	             {double test; // add to sta distance to nearest measured peak squared
@@ -1181,7 +1187,7 @@ diffint=0;diffintbey=0;
 
                      if(intsbey(i)<0)intsbey(i)=-1;
                      //printout rectangular function to .mdcisp.qom
-	             fprintf (fout, " %4.4g %4.4g",ints(i),intsbey(i));
+	             fprintf (fout, " %4.4g %4.4g",myround(ints(i)),myround(intsbey(i)));
                      fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqev, "#eigenvector real part\n");

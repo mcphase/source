@@ -52,8 +52,8 @@ double fecalc(Vector  Hex,double T,par & inputpars,
 // coupling coefficients jj[](a-c) berechnen
 // for (r=0;r<=sdim;++r)
 
- Matrix * jj; //if (inputpars.diagonalexchange()==0){i=9;}else{i=3;}
-  jj= new Matrix [(sdim+1)+1];for(i=0;i<=sdim+1;++i){jj[i]=Matrix(1,inputpars.nofcomponents*inputpars.nofatoms,1,inputpars.nofcomponents*inputpars.nofatoms);} // coupling coeff.variable
+ Matrix * jj; jj= new Matrix [(sdim+1)+1];
+ for(i=0;i<=sdim+1;++i){jj[i]=Matrix(1,inputpars.nofcomponents*inputpars.nofatoms,1,inputpars.nofcomponents*inputpars.nofatoms);} // coupling coeff.variable
    if (jj == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
    // initialize mfold with zeros
@@ -68,11 +68,14 @@ double fecalc(Vector  Hex,double T,par & inputpars,
 	n=(*inputpars.jjj[m]).sublattice[l]; // n set to sublattice of neighbor l
 
     // determine s (index of difference between crystal unit cells in the magnetic supercell)
-    // start with calculating the difference vector of origins of crystal unit cells
+    // start with calculating the difference vector xyz of origins of crystal unit cells
                    // bugfix GdVO3: sign of 2nd term changed and last term added 12.12.07
      xyz=(*inputpars.jjj[m]).dn[l]+(*inputpars.jjj[m]).xyz-(*inputpars.jjj[n]).xyz;
+         // distance of neighbour l
+                                    // xyz of sublattice m
+                                                            // xyz of sublattice n
 
-    // transform distance vector to primitive lattice
+    // transform distance vector xyz to primitive lattice
      d=inputpars.rez*(const Vector&)xyz;
 
      for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); //round relative position to integer numbers (to do
@@ -99,7 +102,7 @@ double fecalc(Vector  Hex,double T,par & inputpars,
         // used in the meanfield calculation below
 	for(i=1;i<=inputpars.nofcomponents;++i){for(j=1;j<=inputpars.nofcomponents;++j){
 	  jj[s](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=(*inputpars.jjj[m]).jij[l](i,j);
-
+          
 	//remark: function par:jij(l) returns exchange constants (*inputpars.jjj[1]).jij[l](1-9)
         }}
 
@@ -157,12 +160,20 @@ for (r=1;sta>ini.maxstamf;++r)
   				                       }
 					}
 				     }
-  for (i1=1;i1<=sps.na();++i1){if (i<i1){di=i-i1+sps.na();}else{di=i-i1;}
-                               for (j1=1;j1<=sps.nb();++j1){if (j<j1){dj=j-j1+sps.nb();}else{dj=j-j1;}
-			                                    for (k1=1;k1<=sps.nc();++k1){if (k<k1){dk=k-k1+sps.nc();}else{dk=k-k1;}
+//  for (i1=1;i1<=sps.na();++i1){if (i<i1){di=i-i1+sps.na();}else{di=i-i1;}
+//                               for (j1=1;j1<=sps.nb();++j1){if (j<j1){dj=j-j1+sps.nb();}else{dj=j-j1;}
+//			                                    for (k1=1;k1<=sps.nc();++k1){if (k<k1){dk=k-k1+sps.nc();}else{dk=k-k1;}
+//  MR 27.7.2011: the above 3 lines seem wrong to me after checking: we want to calculate the influence of sublattices i1,j1,k1 onto
+// sublattice i j k, thus if i1>=i then di=i1-i otherwise di=sps.na()-|i1-i|=sps.na()-(i-i1)
+  for (i1=1;i1<=sps.na();++i1){if (i1>=i){di=i1-i;}else{di=sps.na()-i+i1;}
+                               for (j1=1;j1<=sps.nb();++j1){if (j1>=j){dj=j1-j;}else{dj=sps.nb()-j+j1;}
+			                                    for (k1=1;k1<=sps.nc();++k1){if (k1>=k){dk=k1-k;}else{dk=sps.nc()-k+k1;}
+
     l=sps.in(di,dj,dk);//di dj dk range from 0 to to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
                        // and index a difference between crystal unit cell positions in the
                        // magnetic supercell
+
+//      if(r==1){fprintf(stdout,"l=%i di=%i dj=%i dk=%i\n",l,di,dj,dk);    myPrintMatrix(stdout,jj[l]);getchar();}
 
      // here the contribution of the crystal unit cell i1 j1 k1 (i1,j1,k1 indicate the
      // position of the crystal unit cell in the magnetic supercell) to the mean field

@@ -63,6 +63,13 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{... in version 4.5...}
+ - a bug in mcphasit removed (which produced wrong output if magnetic structures are stabilized in a calculation involving a
+   crystallographic primitive basis with more than one magnetic atom and a magnetic structure with a supercell which is 
+  larger than the primitive crystal unitcell and the magnetic atoms in the crystal unit cell not ferromagnetically aligned.)
+- more examples introduced
+- calculation of intensities in mcdisp significantly speeded up
+
 \subsection*{... in version 4.4...}
           -{\prg gauss, lorentz, convolute}  changed to avoid uncommented text line when piping to file
            -{\prg ic1ion} standalone started by batch to be able to create ic1ion.trs containing neutron 
@@ -102,14 +109,6 @@ magnetic structure factors and flipping ratios. This is convenient for the analy
 Calculation of standard deviations and input file format of mcdisp.par changed to include antipeaks and
 also input external experimental data files. {\prg Setup\_mcdisp\_mf} program to easily create input file {\prg %%@
 mcdisp.mf}. Hamiltonian extended to include $S_z^2$ anisotropy terms.
-
-\subsection*{... in version 3.6 ... }
-calculation and display of densities: charge density, spin density, orbital moment density, total moment density, %%@
-current density
-
-\subsection*{... in version 3.5 ... }
-McPhase has become fully capable of dealing with nonorthogonal lattices 
-
 
 \newpage
 

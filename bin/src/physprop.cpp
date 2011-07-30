@@ -185,7 +185,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
    fprintf (fout, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip      ",
             x,y,T,Norm(Hijk),H[1],H[2],H[3],j,sps.wasstable);
            for(i1=1;i1<=nofcomponents;++i1)
-	      {fprintf(fout,"%4.4g ",totalJ(i1));}
+	      {fprintf(fout,"%4.4g ",myround(totalJ(i1)));}
 	      fprintf(fout,"\n");
    fclose(fout);
     if((fout=fopen("./fit/mcphas.xyt","rb"))!=NULL)

@@ -128,7 +128,7 @@ void inimcdis::save()
   fprintf(fout,"#'n'             number of atoms in magnetic unit cell\n");
   fprintf(fout,"#'nofatoms'      number of atoms in primitive crystal unit cell\n");
   fprintf(fout,"#'nofcomponents' dimension of moment vector of a magnetic atoms\n");
-  fprintf(fout,"T=%g Ha=%g Hb=%g Hc=%g n=%i nofatoms=%i nofcomponents=%i\n",T,Ha,Hb,Hc,mf.n(),nofatoms,nofcomponents);
+  fprintf(fout,"#! T=%g Ha=%g Hb=%g Hc=%g n=%i nofatoms=%i nofcomponents=%i\n",T,Ha,Hb,Hc,mf.n(),nofatoms,nofcomponents);
   mf.print(fout);
   fclose (fout);
 
@@ -143,7 +143,8 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
   FILE *fin,*finhkl;
   fin=fopen(spinfile,"rb");if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);errexit();}
   instr[0]='#';  
-  while(instr[strspn(instr," \t")]=='#'){fgets(instr,MAXNOFCHARINLINE,fin);}
+  // while(instr[strspn(instr," \t")]=='#')//substituted MR 29.7.11 in order to be able to place parameters in comment lines
+  while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
   info= new char [strlen(instr)+1];
   extract(instr,"T",T); 
   extract(instr,"Ha",Ha);
