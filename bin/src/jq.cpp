@@ -68,15 +68,15 @@ jq::jq (int n1,int n2,int n3,mdcf & m)
   jj = new  ComplexMatrix * [mx*mx+1];
 //  (1,nofcomponents*nofatoms,1,nofcomponents*nofatoms);
   if (jj == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-
+  int mbm1,mbm2;
  int i1,j1,k1,i2,j2,k2;
  for (i1=1;i1<=nofa;++i1){
  for (j1=1;j1<=nofb;++j1){
- for (k1=1;k1<=nofc;++k1){
+ for (k1=1;k1<=nofc;++k1){mbm1=m.baseindex_max(i1,j1,k1);if (mbm1<1){mbm1=1;}
  for (i2=1;i2<=nofa;++i2){
  for (j2=1;j2<=nofb;++j2){
- for (k2=1;k2<=nofc;++k2){
- jj[iin(in(i1,j1,k1),in(i2,j2,k2))]= new ComplexMatrix(1,nofcomponents*m.baseindex_max(i1,j1,k1),1,nofcomponents*m.baseindex_max(i2,j2,k2));
+ for (k2=1;k2<=nofc;++k2){mbm2=m.baseindex_max(i2,j2,k2);if(mbm2<1){mbm2=1;} // MR 2011.08.08 for zero transitions in subsystem
+ jj[iin(in(i1,j1,k1),in(i2,j2,k2))]= new ComplexMatrix(1,nofcomponents*mbm1,1,nofcomponents*mbm2);
  }}}}}} 
 }
 

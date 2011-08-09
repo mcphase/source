@@ -223,7 +223,7 @@ else
 
  close Fin1;
 
- print "#sta=$sta\n"; 
+ print "#! sta=$sta\n";
 
 }
 

@@ -142,15 +142,16 @@ void mdcf::est_ini(int i, int j, int k, int l,ComplexMatrix & M) // initialize e
 
 // has to be called before mdcf object can be used for calculation
 void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr)
-{      
-      (*nt[in(i,j,k)])=notr;
-     s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-     m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-     l[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-     sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-     mb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-     lb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-     d[in(i,j,k)]= new Vector(1,sum((*nt[in(i,j,k)])));
+{      (*nt[in(i,j,k)])=notr;
+       int sumnt=sum((*nt[in(i,j,k)]));
+      if (sumnt<1){sumnt=1;} // MR 2011.08.09. in case there is no transition for this subsystem then initialize all matrices/Vector to 1...
+     s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     l[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     mb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     lb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     d[in(i,j,k)]= new Vector(1,sumnt);
       
 }
 

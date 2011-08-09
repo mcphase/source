@@ -7,9 +7,9 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >0) 
 
-{print " program sum  used to sum columnx, the result goes to stdout\n";
+{print " program sumcol  used to sum columnx, the result goes to stdout\n";
 
- print " usage: sum colx *.*   \n colx=columnx \n *.* .. filenname\n";
+ print " usage: sumcol colx *.*   \n colx=columnx \n *.* .. filenname\n";
 
  exit 0;}
 
