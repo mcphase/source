@@ -9,19 +9,19 @@ use File::Copy;
 # chdir('../.');
 print STDOUT << "EOF";
 
-Progam so1ion - calculation of single ion problems in intermediate coupling
-schemes (Hee ~ Hcef ~ Hso ~ Hze) considering all terms and levels
+Progam so1ion - calculation of single ion problems in LS coupling
+schemes (Hee >> Hso >>  Hcef ~ Hze)
 
 EOF
 
 system "so1ionit @ARGV";
 
 # check if command line is reading file for neutron intensity calculation (option -r)
-unless ($ARGV[0]=~/-r/&&$ARGV[2]=~/-[B,L]/) {exit(0);}
+unless ($ARGV[0]=~m/-r/&&$ARGV[2]=~m/-[B,L,b,l]/) {exit(0);}
 # if yes, check if file exists and if it starts with #!MODULE=so1ion
 unless (open(Fin,$ARGV[1])){print "error: file $ARGV[1] does not exist\n";exit(0);}
 $line=<Fin>;close Fin;
-unless($line=~/\Q#!MODULE=so1ion\E/){print "error: file $ARGV[1] does not start with #!MODULE=so1ion\n";exit(0);}
+unless($line=~m/\Q#!MODULE=so1ion\E/){print "error: file $ARGV[1] does not start with #!MODULE=so1ion\n";exit(0);}
 # if yes then do also a mcdisp calculation to create so1ion.trs ...
 
 ($T)=extract("T","$ARGV[1]");
@@ -82,7 +82,7 @@ print Fout << "EOF";
 #! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=$gJ cffilename=$ARGV[1]
 # da[a]      db[b]      dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
 EOF
-
+close Fout;
 if (open(Fin,"results/mcdisp.trs")) {@mcdisptrs=<Fin>;close Fin;}
 
 #
