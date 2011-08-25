@@ -331,10 +331,10 @@ void cfpars::assign(std::string &S, int &k, int &q, double v) // Assign a partic
 {
    int i;
    double val = v;
-   double l[] = {sqrt(6.)/2., -sqrt(6.), 1./2., -sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., -sqrt(35.)/2., 
-                 sqrt(10.)/4., -sqrt(5.)/2., 1./8., -sqrt(5.)/2., sqrt(10.)/4., -sqrt(35.)/2., sqrt(70.)/8.,
-         /*k=6*/ sqrt(231.)/16., -3*sqrt(77.)/8., 3*sqrt(14.)/16., -sqrt(105.)/8., sqrt(105.)/16., -sqrt(42.)/8., 
-                 1./16., -sqrt(42.)/8., sqrt(105.)/16., -sqrt(105.)/8., 3*sqrt(14.)/16., -3*sqrt(77.)/8., sqrt(231.)/16.};
+   double l[] = {sqrt(6.)/2., sqrt(6.), 1./2., sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., sqrt(35.)/2., 
+                 sqrt(10.)/4., sqrt(5.)/2., 1./8., sqrt(5.)/2., sqrt(10.)/4., sqrt(35.)/2., sqrt(70.)/8.,
+         /*k=6*/ sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
+                 1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    str2upper(S);
 
    if(k==2) i = 2+q; else if(k==4) i = 5+(4+q); else if(k==6) i = 14+(6+q); 
@@ -430,11 +430,11 @@ std::string cfpars::cfparsout(const char *delimiter)          // Prints the cf p
 void cfpars::conv_B_norm(std::string &newnorm_)               // Converts cf parameters between Stevens and Wybourne
 {
    int q;
-   double lambda_2q[] = {sqrt(6.)/2., -sqrt(6.), 1./2., -sqrt(6.), sqrt(6.)/2.};
-   double lambda_4q[] = {sqrt(70.)/8., -sqrt(35.)/2., sqrt(10.)/4., -sqrt(5.)/2., 1./8., -sqrt(5.)/2., sqrt(10.)/4., 
-                         -sqrt(35.)/2., sqrt(70.)/8.};
-   double lambda_6q[] = {sqrt(231.)/16., -3*sqrt(77.)/8., 3*sqrt(14.)/16., -sqrt(105.)/8., sqrt(105.)/16., -sqrt(42.)/8., 
-                         1./16., -sqrt(42.)/8., sqrt(105.)/16., -sqrt(105.)/8., 3*sqrt(14.)/16., -3*sqrt(77.)/8., sqrt(231.)/16.};
+   double lambda_2q[] = {sqrt(6.)/2., sqrt(6.), 1./2., sqrt(6.), sqrt(6.)/2.};
+   double lambda_4q[] = {sqrt(70.)/8., sqrt(35.)/2., sqrt(10.)/4., sqrt(5.)/2., 1./8., sqrt(5.)/2., sqrt(10.)/4., 
+                         sqrt(35.)/2., sqrt(70.)/8.};
+   double lambda_6q[] = {sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
+                         1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    std::string oldnorm; oldnorm.assign(_normalisation); strtolower(oldnorm);
    std::string newnorm; newnorm.assign(newnorm_); strtolower(newnorm);
    if(oldnorm.find("stev")!=std::string::npos && newnorm.find("wy")!=std::string::npos)
@@ -493,10 +493,10 @@ void cfpars::conv_e_units(std::string &units)                 // Converts parame
 void cfpars::conv(std::string &newcfname)                     // Converts parameters to a new type (A,W,B,V,L,D,AR)
 {
    int k,q,i;
-   double l[] = {sqrt(6.)/2., -sqrt(6.), 1./2., -sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., -sqrt(35.)/2., 
-                 sqrt(10.)/4., -sqrt(5.)/2., 1./8., -sqrt(5.)/2., sqrt(10.)/4., -sqrt(35.)/2., sqrt(70.)/8.,
-         /*k=6*/ sqrt(231.)/16., -3*sqrt(77.)/8., 3*sqrt(14.)/16., -sqrt(105.)/8., sqrt(105.)/16., -sqrt(42.)/8., 
-                 1./16., -sqrt(42.)/8., sqrt(105.)/16., -sqrt(105.)/8., 3*sqrt(14.)/16., -3*sqrt(77.)/8., sqrt(231.)/16.};
+   double l[] = {sqrt(6.)/2., sqrt(6.), 1./2., sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., sqrt(35.)/2., 
+                 sqrt(10.)/4., sqrt(5.)/2., 1./8., sqrt(5.)/2., sqrt(10.)/4., sqrt(35.)/2., sqrt(70.)/8.,
+         /*k=6*/ sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
+                 1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
    double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
    strtoupper(newcfname);
@@ -521,10 +521,10 @@ void cfpars::conv(std::string &newcfname)                     // Converts parame
 void cfpars::convback()                                       // Converts internal parameters from external parameter type
 {
    int k,q,i;
-   double l[] = {sqrt(6.)/2., -sqrt(6.), 1./2., -sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., -sqrt(35.)/2., 
-                 sqrt(10.)/4., -sqrt(5.)/2., 1./8., -sqrt(5.)/2., sqrt(10.)/4., -sqrt(35.)/2., sqrt(70.)/8.,
-         /*k=6*/ sqrt(231.)/16., -3*sqrt(77.)/8., 3*sqrt(14.)/16., -sqrt(105.)/8., sqrt(105.)/16., -sqrt(42.)/8., 
-                 1./16., -sqrt(42.)/8., sqrt(105.)/16., -sqrt(105.)/8., 3*sqrt(14.)/16., -3*sqrt(77.)/8., sqrt(231.)/16.};
+   double l[] = {sqrt(6.)/2., sqrt(6.), 1./2., sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., sqrt(35.)/2., 
+                 sqrt(10.)/4., sqrt(5.)/2., 1./8., sqrt(5.)/2., sqrt(10.)/4., sqrt(35.)/2., sqrt(70.)/8.,
+         /*k=6*/ sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
+                 1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
    double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
         if(_cfname.compare("A")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]*_rk[k]*imin[i]; ) }
@@ -544,10 +544,10 @@ void cfpars::convback()                                       // Converts intern
 bool cfpars::check()                                          // Checks internal and external pars agree
 {
    int k,q,i;
-   double l[] = {sqrt(6.)/2., -sqrt(6.), 1./2., -sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., -sqrt(35.)/2., 
-                 sqrt(10.)/4., -sqrt(5.)/2., 1./8., -sqrt(5.)/2., sqrt(10.)/4., -sqrt(35.)/2., sqrt(70.)/8.,
-         /*k=6*/ sqrt(231.)/16., -3*sqrt(77.)/8., 3*sqrt(14.)/16., -sqrt(105.)/8., sqrt(105.)/16., -sqrt(42.)/8., 
-                 1./16., -sqrt(42.)/8., sqrt(105.)/16., -sqrt(105.)/8., 3*sqrt(14.)/16., -3*sqrt(77.)/8., sqrt(231.)/16.};
+   double l[] = {sqrt(6.)/2., sqrt(6.), 1./2., sqrt(6.), sqrt(6.)/2., /*k=4*/ sqrt(70.)/8., sqrt(35.)/2., 
+                 sqrt(10.)/4., sqrt(5.)/2., 1./8., sqrt(5.)/2., sqrt(10.)/4., sqrt(35.)/2., sqrt(70.)/8.,
+         /*k=6*/ sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
+                 1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
    double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
    double cB[27];

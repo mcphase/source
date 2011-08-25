@@ -289,27 +289,66 @@ full $l^n$ configuration with many manifolds, the operator equivalent factors on
 Stevens parameters into Wybourne normalisation, which is used internally by the program to calculate the
 Hamiltonian.
 
-If the user wishes to compare the output of {\prg ic1ion} with published energies/wavefunctions using Stevens
-parameters for rare earths, they should set the Slater {\prg F2, F4, F6} and spin-orbit {\prg xi} integrals to
-very high values - such as 10$^7$ meV, in order to obtain the $LS$-coupling limit. For comparison with Stevens
-parameters within an $L$-manifold for $d$-electron ions, the user should set the Slater integrals to high
-values but the spin-orbit integral to zero. In this case the {\prg ic1ion} output will have twice the
-degeneracy of a pure $L$-manifold calculation because the spin is taken into account in {\prg ic1ion} and
-generates an additional two-fold degeneracy. If a non-zero (e.g. literature specified) spin-orbit integral
-{\prg xi} is specified, then this degeneracy will be lifted.
+For historical reasons, crystal field parameters (effectively the radial matrix elements of the crystal field
+interactions) may be expressed in two different "normalisation", which we shall call \emph{Stevens} and 
+\emph{Wybourne}. Stevens~\cite{stevens52-209} initially expressed the radial parts of the crystal field interaction
+in terms of angular momentum operators $J_x$, $J_y$, $J_z$. He did this by taking the Cartesian expressions for 
+the tesseral harmonic functions (see Appendix~\ref{tesseral}), and replacing all instances of the coordinates
+$x$, $y$, and $z$ with $J_x$, $J_y$ and $J_z$ and allowing for the commutation relations of the angular
+momentum operators, but without considering the normalisation condition of these functions and hence are missing
+the prefactors before the square brackets in the expressions in Appendix~\ref{tesseral}. We denote these
+prefactors $p_{kq}$. The Stevens crystal field Hamiltonian is thus
 
-In addition to the usual Stevens, $B_l^m$, and Wyborne $L_l^m$ parameters noted above, {\prg ic1ion} also
-understands certain variants to these parameters using the same notation as {\prg cfield}/{\prg so1ion}:
+\[
+\mathcal{H}_{\mathrm{cf}} = \sum_{l,m} A_{lm} \langle r^l \rangle \langle J || \theta_l || J \rangle \hat{O}_l^m (J)
+\]
+
+\noindent where the product $A_{lm} \langle r^l \rangle$ is commonly taken in the literature as the crystal
+field parameter, because the factorisation into an intrinsic parameter $A_{lm}$ and the expectation value of
+the radial wavefunction $\langle r^l \rangle$ is derived from the point charge model and is not generally
+valid. Alternatively, the product $B_l^m = A_{lm} \langle r^l \rangle \langle J || \theta_l || J \rangle$ is
+also commonly used, particularly in the neutron scattering literature.
+
+Wybourne~\cite{wybourne65} and subsequent co-authors on the other hand chose to use the tensor operators 
+$\hat{C}_{lm}$ which transform in the same way as the functions $C_{lm}(\theta,\phi) = \sqrt{4\pi / (2k+1)}
+Y_{lm}(\theta,\phi)$, where $Y_{lm}(\theta,\phi)$ are the spherical harmonic functions, to describe the crystal
+field. Thus the angular-dependent part of the crystal field matrix elements used by Wybourne differed from
+that of Stevens by the factor $\lambda_{k0} = p_{k0} \sqrt{8\pi / (2k+1)}$ and
+ $\lambda_{kq} = p_{kq} \sqrt{8\pi / (2k+1)}$ for $q\neq 0$. The crystal field Hamiltonian used by Wybourne is
+thus (in our notation)
+
+\[
+\mathcal{H}_{\mathrm{cf}} = \sum_{l,m} D_l^m \hat{C}_{lm}
+\]
+
+The disadvantage of the Wybourne approach is that one requires imaginary crystal field parameters, because the
+tensor operators $\hat{C}_{kq}$ are not Hermitian. In {\prg McPhase}, we have instead chosen to use slightly
+different tensor operators $\hat{T}_{kq}$, which are the Hermitian combinations of the $\hat{C}_{kq}$,
+
+\[
+  \hat{T}_{k0} = \hat{C}_{k0}, \qquad \hat{T}_{k,\pm|q|} = \sqrt{\pm 1} \left[ \hat{C}_{k,-|q|} \pm (-1)^{|q|} \hat{C}_{k,|q|} \right]
+\]
+
+\noindent giving the Hamiltonian
+
+\[
+\mathcal{H}_{\mathrm{cf}} = \sum_{l,m} L_l^m \hat{T}_{lm}
+\]
+
+Our $L_l^m$ parameters therefore have the same normalisation as the Wybourne parameters but will be real, with
+the imaginary parts expressed by the $q<0$ components of the $\hat{T}_{kq}$ operator.
+
+In summary, the various types of crystal field parameters understood by {\prg McPhase} are:
 
 \begin{center} \begin{tabular}{@{\extracolsep{\fill}}r|l|l} \hline
-     Parameter  & Relation to Llm                                                & Normalisation \\ \hline
-     Alm        & = sign($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$         & Stevens \\
-     Blm        & = sign($m$) $ \lambda_{lm} \langle J || \theta_l || J \rangle$ & Stevens \\
-     ARlm       & =           $ \lambda_{lm} L_l^m $                             & Stevens \\
-     Wlm        & = half($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$         & Stevens \\
-     Vlm        & = half($m$) $ \lambda_{lm} \langle J || \theta_l || J \rangle$ & Stevens \\
-     Llm        & =           $              L_l^m $                             & Wybourne \\
-     Dlm        & =           $              L_l^m $                             & Wybourne \\ \hline
+     Parameter  & Relation to Llm                                                      & Normalisation \\ \hline
+     Alm        & = sign($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$               & Stevens \\
+     Blm        & = sign($m$) $ \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle$ & Stevens \\
+     ARlm       & =           $ \lambda_{lm} L_l^m $                                   & Stevens \\
+     Wlm        & = half($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$               & Stevens \\
+     Vlm        & = half($m$) $ \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle$ & Stevens \\
+     Llm        & =           $              L_l^m $                                   & Wybourne \\
+     Dlm        & =           $              L_l^m $                                   & Wybourne (imaginary) \\ \hline
 \end{tabular} \end{center}
 
 \noindent where half($m$) = $\frac{1}{2}$ when $m\neq 0$ and half($m$)=1 when $m=0$.
@@ -334,8 +373,8 @@ are given in table~\ref{tab:wytostev}.
    %  $6$  &  $0$  &  $\frac{1}{16}$  \\
    %  $6$  &  $1$  &  $-\frac{1}{8}\sqrt{42}$  \\
    %  $6$  &  $2$  &  $\frac{1}{16}\sqrt{105}$  \\
-   %  $6$  &  $3$  &  $\frac{1}{8}\sqrt{105}$  \\
-   %  $6$  &  $4$  &  $-\frac{3}{16}\sqrt{14}$  \\
+   %  $6$  &  $3$  &  $-\frac{1}{8}\sqrt{105}$  \\
+   %  $6$  &  $4$  &  $\frac{3}{16}\sqrt{14}$  \\
    %  $6$  &  $5$  &  $-\frac{3}{8}\sqrt{77}$  \\
    %  $6$  &  $6$  &  $\frac{1}{16}\sqrt{231}$  \\ \hline
     \begin{tabular}{c|ccccccc}
@@ -344,15 +383,24 @@ are given in table~\ref{tab:wytostev}.
           & \multicolumn{7}{|c}{$|m|$} \\  \cline{2-8}
       $l$ & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ \\
       \hline \hline
-      $2$ & $\frac{1}{2}$  & $-\sqrt{6}$             & $\frac{1}{2}\sqrt{6}$  & & & & \\
-      $4$ & $\frac{1}{8}$  & $-\frac{1}{2}\sqrt{5}$  & $\frac{1}{4}\sqrt{10}$   & $-\frac{1}{2}\sqrt{35}$ & $\frac{1}{8}\sqrt{70}$   & & \\
-      $6$ & $\frac{1}{16}$ & $-\frac{1}{8}\sqrt{42}$ & $\frac{1}{16}\sqrt{105}$ & $\frac{1}{8}\sqrt{105}$ & $-\frac{3}{16}\sqrt{14}$ &
-            $-\frac{3}{8}\sqrt{77}$ & $\frac{1}{16}\sqrt{231}$ \\
+      $2$ & $\frac{1}{2}$  & $\sqrt{6}$             & $\frac{1}{2}\sqrt{6}$  & & & & \\
+      $4$ & $\frac{1}{8}$  & $\frac{1}{2}\sqrt{5}$  & $\frac{1}{4}\sqrt{10}$   & $\frac{1}{2}\sqrt{35}$ & $\frac{1}{8}\sqrt{70}$   & & \\
+      $6$ & $\frac{1}{16}$ & $\frac{1}{8}\sqrt{42}$ & $\frac{1}{16}\sqrt{105}$ & $\frac{1}{8}\sqrt{105}$ & $\frac{3}{16}\sqrt{14}$ &
+            $\frac{3}{8}\sqrt{77}$ & $\frac{1}{16}\sqrt{231}$ \\
       \hline
     \end{tabular}
     \caption{\emph{Ratios of the Stevens to the Wybourne parameters}. $\lambda_{lm} = A_{lm}\langle r^l \rangle / L_l^m$.} \label{tab:wytostev}
   \end{center}
 \end{table}
+
+Note that if you wish to compare the output of {\prg ic1ion} with published energies/wavefunctions using Stevens
+parameters for rare earths, you should set the Slater {\prg F2, F4, F6} and spin-orbit {\prg xi} integrals to
+very high values - such as 10$^7$ meV, in order to obtain the $LS$-coupling limit. For comparison with Stevens
+parameters within an $L$-manifold for $d$-electron ions, the Slater integrals should be set to high
+values but the spin-orbit integral to zero. In this case the {\prg ic1ion} output will have twice the
+degeneracy of a pure $L$-manifold calculation because the spin is taken into account in {\prg ic1ion} and
+generates an additional two-fold degeneracy. If a non-zero (e.g. literature specified) spin-orbit integral
+{\prg xi} is specified, then this degeneracy will be lifted.
 
 \subsection{{\prg cpic1ion} - calculation of the specific heat from {\prg ic1ion.out}}
  The crystal field contribution to the specific heat may be calculated 
