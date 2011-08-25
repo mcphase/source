@@ -930,11 +930,16 @@ a(6, 6)=moments(offset+48);
 rr=radial_wavefunction(R);
 rr=rr*rr;// then the chargedensity will be in units of 1/A^3
 for(l=1;l<=5;l+=2){for(m=-l;m<=l;++m){a(l,m)=0;}}
+
+
+// the following should correspond exactly to lines 111 ff in program chrgplt.c
 if(module_type==2||module_type==4){for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){a(l,m)*=tetan(l)*cnst(l,m);}}
          } // these are prefactors in case of module cfield and so1ion(stevens parameters tetan and zlm prefactors)
 else     {for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){if(m!=0){a(l,m)*=sqrt((2.0*l+1)/8/PI);}else{a(l,m)*=sqrt((2.0*l+1)/4/PI);}}}
          } // in case
            // of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
+           // MR 23.8.2011: if Tkq are define as in our review then the above should be right
+
 
  ro=-rr*zlmsum(a,teta,fi); // minus, because electrons are negative
  }

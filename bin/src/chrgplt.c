@@ -108,6 +108,7 @@ fprintf(fout,"#chargedensity is expanded in tesseral harmonics as\n#   ro(r)= -|
                        if (dim==48) strncpy(lm4,lm+(i-1)*4,4);
                        if (dim==51) strncpy(lm4,lme+(i-1)*4,4);
                        factor=0;
+                  // the following prefactors should correspond exactly to jjjpar_basmodfunc.cpp lines 933 ff !!!
                        if(jjjps.module_type==2||jjjps.module_type==4){if(i>3){l=lm4[1]-48;m=lm4[2]-48;
                                                         factor=jjjps.tetan()(l)*jjjps.cnst(l,m);
                                                         }
