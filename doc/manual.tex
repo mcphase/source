@@ -386,7 +386,11 @@ Spin orbit coupling, Zeman interaction and two ion interaction are written in te
 the (inverse) total spin $\mbf S_s$ and (inverse) total orbital momentum $\mbf L_s$
 of ion number $s$. The crystal field in intermediat coupling is written
 in terms of Wybourne parameters $L_l^m$ and Wybourne operators $T_{lm}^s$, operator equivalents
-of spherical harmonic functions $\sqrt{4\pi/(2l+1)}\sum_i Y_{lm}(\Omega_{i_s})$ for the ion $s$.
+of real valued 
+spherical harmonic functions 
+$T_{l0}=\sqrt{4\pi/(2l+1)}\sum_iY_{l0}(\Omega_{i_s})$, 
+$T_{l,\pm|m|}=\sqrt{4\pi/(2l+1)}\sum_i \sqrt{\pm1}[Y_{l,-|m|}(\Omega_{i_s})\pm (-1)^m Y_{l,|m|}(\Omega_{i_s})]$ for the ion $s$,
+for details on crystal field parameter conventions see~\ref{cfparconventions}.
 
 \clearpage
 
@@ -433,6 +437,7 @@ of spherical harmonic functions $\sqrt{4\pi/(2l+1)}\sum_i Y_{lm}(\Omega_{i_s})$ 
 \input{dyni2b2c.tex}
 \input{erni2b2c.tex}
 \clearpage
+\input{cfparconventions.tex}
 \input{tesseral.tex}
 \clearpage
 \input{stevens.tex}
