@@ -2086,20 +2086,20 @@ t26="#!   W     =   %16.6f                                \n";
                      v65r *=  2 * omegan1n(5);
                      v66r *=  2 * omegan0n(6);
 
-                     v21i *=  -2 * omegan1n(1);
-                     v22i *=  -2 * omegan0n(2);
+                     v21i *=  /*-*/2 * omegan1n(1);
+                     v22i *=  /*-*/2 * omegan0n(2);
  
-                     v41i *=  -2 * omegan3n(1);
-                     v42i *=  -2 * omegan2n(2);
-                     v43i *=  -2 * omegan1n(3);
-                     v44i *=  -2 * omegan0n(4);
+                     v41i *=  /*-*/2 * omegan3n(1);
+                     v42i *=  /*-*/2 * omegan2n(2);
+                     v43i *=  /*-*/2 * omegan1n(3);
+                     v44i *=  /*-*/2 * omegan0n(4);
  
-                     v61i *=  -2 * omegan5n(1);
-                     v62i *=  -2 * omegan4n(2);
-                     v63i *=  -2 * omegan3n(3);
-                     v64i *=  -2 * omegan2n(4);
-                     v65i *=  -2 * omegan1n(5);
-                     v66i *=  -2 * omegan0n(6);
+                     v61i *=  /*-*/2 * omegan5n(1);
+                     v62i *=  /*-*/2 * omegan4n(2);
+                     v63i *=  /*-*/2 * omegan3n(3);
+                     v64i *=  /*-*/2 * omegan2n(4);
+                     v65i *=  /*-*/2 * omegan1n(5);
+                     v66i *=  /*-*/2 * omegan0n(6);
                   }
  
  

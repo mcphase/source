@@ -346,7 +346,7 @@ void cfpars::assign(std::string &S, int &k, int &q, double v) // Assign a partic
 
    if(S.compare("A")==0)
    {
-      if(_cfname.compare("A")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_rk[k/2-1]/l[i]; if(q<0) _Bi[i] = -_Bi[i]; MTP 0;
+      if(_cfname.compare("A")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_rk[k/2-1]/l[i]; /*if(q<0) _Bi[i] = -_Bi[i];*/ MTP 0;
    } 
    else if(S.compare("W")==0)
    {
@@ -354,7 +354,7 @@ void cfpars::assign(std::string &S, int &k, int &q, double v) // Assign a partic
    }
    else if(S.compare("B")==0)
    {
-      if(_cfname.compare("B")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_istevfact[k/2-1]/l[i]; if(q<0) _Bi[i] = -_Bi[i]; MTP 0;
+      if(_cfname.compare("B")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_istevfact[k/2-1]/l[i]; /*if(q<0) _Bi[i] = -_Bi[i];*/ MTP 0;
    }
    else if(S.compare("V")==0)
    {
@@ -498,15 +498,15 @@ void cfpars::conv(std::string &newcfname)                     // Converts parame
          /*k=6*/ sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
                  1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
-   double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
+// double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
    strtoupper(newcfname);
 #define CFCMP newcfname.compare
 #define CFLOOP(ARG) i=0; for(k=0;k<3;k++) for(q=0; q<(4*(k+1)+1); q++) { ARG i++; } 
 #define normstev _normalisation.assign("Stevens")
 #define normwy _normalisation.assign("Wybourne")
-        if(CFCMP("A")==0) { CFLOOP( _Bo[i]= _Bi[i]*l[i]/_rk[k]*imin[i]; _cfname.assign("A"); normstev; ) }
+        if(CFCMP("A")==0) { CFLOOP( _Bo[i]= _Bi[i]*l[i]/_rk[k]/*imin[i]*/; _cfname.assign("A"); normstev; ) }
    else if(CFCMP("W")==0) { CFLOOP( _Bo[i]= _Bi[i]*l[i]/_rk[k]*half[i]; _cfname.assign("W"); normstev; ) }
-   else if(CFCMP("B")==0) { CFLOOP( _Bo[i]= _Bi[i]*l[i]*_stevfact[k]*imin[i]; _cfname.assign("B"); normstev; ) }
+   else if(CFCMP("B")==0) { CFLOOP( _Bo[i]= _Bi[i]*l[i]*_stevfact[k]/*imin[i]*/; _cfname.assign("B"); normstev; ) }
    else if(CFCMP("V")==0) { CFLOOP( _Bo[i]= _Bi[i]*l[i]*_stevfact[k]*half[i]; _cfname.assign("V"); normstev; ) }
    else if(CFCMP("L")==0 || CFCMP("D")==0) { for(i=0;i<27;i++) _Bo[i] = _Bi[i]; _cfname.assign(newcfname); normwy; }
    else if(CFCMP("AR")==0) { CFLOOP( _Bo[i]= _Bi[i]*l[i]; _cfname.assign("AR"); normstev; ) }
@@ -526,10 +526,10 @@ void cfpars::convback()                                       // Converts intern
          /*k=6*/ sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
                  1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
-   double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
-        if(_cfname.compare("A")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]*_rk[k]*imin[i]; ) }
+// double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
+        if(_cfname.compare("A")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]*_rk[k]/*imin[i]*/; ) }
    else if(_cfname.compare("W")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]*_rk[k]/half[i]; ) }
-   else if(_cfname.compare("B")==0) { CFLOOP( if(_stevfact[k]==0) _Bi[i]=0; else _Bi[i]= _Bo[i]/l[i]/_stevfact[k]*imin[i]; ) }
+   else if(_cfname.compare("B")==0) { CFLOOP( if(_stevfact[k]==0) _Bi[i]=0; else _Bi[i]= _Bo[i]/l[i]/_stevfact[k]/*imin[i]*/; ) }
    else if(_cfname.compare("V")==0) { CFLOOP( if(_stevfact[k]==0) _Bi[i]=0; else _Bi[i]= _Bo[i]/l[i]/_stevfact[k]/half[i]; ) }
    else if(_cfname.compare("L")==0 || _cfname.compare("D")==0) { for(i=0;i<27;i++) _Bi[i] = _Bo[i]; }
    else if(_cfname.compare("AR")==0) { CFLOOP( _Bi[i]= _Bo[i]/l[i]; ) }
@@ -549,14 +549,14 @@ bool cfpars::check()                                          // Checks internal
          /*k=6*/ sqrt(231.)/16., 3*sqrt(77.)/8., 3*sqrt(14.)/16., sqrt(105.)/8., sqrt(105.)/16., sqrt(42.)/8., 
                  1./16., sqrt(42.)/8., sqrt(105.)/16., sqrt(105.)/8., 3*sqrt(14.)/16., 3*sqrt(77.)/8., sqrt(231.)/16.};
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
-   double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
+// double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
    double cB[27];
         if(_units.find("K")!=std::string::npos)   for(i=0; i<27; i++) cB[i]=_Bi[i]*CM2K;
    else if(_units.find("meV")!=std::string::npos) for(i=0; i<27; i++) cB[i]=_Bi[i]/MEV2CM; else for(i=0; i<27; i++) cB[i]=_Bi[i];
 
-        if(_cfname.compare("A")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]*imin[i]))>SMALL) return false; ) }
+        if(_cfname.compare("A")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]/*imin[i]*/))>SMALL) return false; ) }
    else if(_cfname.compare("W")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]/half[i]))>SMALL) return false; ) }
-   else if(_cfname.compare("B")==0) { CFLOOP( if(_stevfact[k]!=0 && abs(cB[i]-(_Bo[i]/l[i]/_stevfact[k]*imin[i]))>SMALL) return false; ) }
+   else if(_cfname.compare("B")==0) { CFLOOP( if(_stevfact[k]!=0 && abs(cB[i]-(_Bo[i]/l[i]/_stevfact[k]/*imin[i]*/))>SMALL) return false; ) }
    else if(_cfname.compare("V")==0) { CFLOOP( if(_stevfact[k]!=0 && abs(cB[i]-(_Bo[i]/l[i]/_stevfact[k]/half[i]))>SMALL) return false; ) }
    else if(_cfname.compare("L")==0 || _cfname.compare("D")==0) { for(i=0;i<27;i++) if(abs(cB[i]-_Bo[i])>SMALL) return false; }
    else if(_cfname.compare("AR")==0) { for(i=0;i<27;i++) if(abs(cB[i]-_Bo[i]/l[i])>SMALL) return false; }
