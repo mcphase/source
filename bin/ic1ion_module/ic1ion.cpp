@@ -142,7 +142,7 @@ void ic_printheader(const char *outfile, icpars &pars)
    if(!pars.ionname.empty()) FILEOUT << "# Ion name: " << pars.ionname << "\n";
    FILEOUT << "# Free ion configuration: " << Lstr << "^" << pars.n << "\n";
    FILEOUT << "# Free ion parameters (" << pars.e_units << "): F^2=" << pars.F[1] << " F^4=" << pars.F[2];
-   if(pars.l==F) FILEOUT << " F^6=" << pars.F[3]; FILEOUT << " xi=" << pars.xi << " alpha=" << pars.alpha[0] << " beta=" << pars.alpha[1]; 
+   if(pars.l==F) FILEOUT << " F^6=" << pars.F[3]; FILEOUT << " zeta=" << pars.xi << " alpha=" << pars.alpha[0] << " beta=" << pars.alpha[1]; 
    if(pars.l==D) FILEOUT << "\n"; else FILEOUT << " gamma=" << pars.alpha[2] << "\n";
    FILEOUT << "# Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
    std::string norm=pars.B.norm(); strtolower(norm); if(norm.find("stev")!=std::string::npos)
