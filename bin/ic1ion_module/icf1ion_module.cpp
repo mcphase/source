@@ -1958,7 +1958,7 @@ void icf_printheader(const char *outfile, icpars &pars)
    FILEOUT << "#{ icf1ionmodule version " << IC1IONMODULE_VERSION << " " << ctime(&curtime);
    if(!pars.ionname.empty()) FILEOUT << "# Ion name: " << pars.ionname << "\n";
    FILEOUT << "# Free ion configuration: " << Lstr << "^" << pars.n << "\n";
-   FILEOUT << "# Spin orbit parameter (" << pars.e_units << "): xi=" << pars.xi << "\n";
+   FILEOUT << "# Spin orbit parameter (" << pars.e_units << "): zeta=" << pars.xi << "\n";
    FILEOUT << "# Crystal Field parameters normalisation: " << pars.B.norm() << "\n";
    std::string norm=pars.B.norm(); strtolower(norm); if(norm.find("stev")!=std::string::npos)
    {
