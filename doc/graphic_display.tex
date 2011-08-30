@@ -124,10 +124,10 @@ power point
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode
-\includegraphics[angle=0, width=0.5\textwidth]{figsrc/ndcu2b/resultss/spinsab.eps}
+\includegraphics[angle=0, width=1.0\textwidth]{figsrc/ndcu2b/resultss/spinsab.eps}
 \end{center}
-\caption{Calculated Spin-Structure of NdCu$_2$ at $T=$~2~K and $H=0$.
-[plot created by program {\prg spinsab.eps}]}
+\caption{Calculated Spin-Structure of NdCu$_2$ at $T=$~1.5~K and $H=0$.
+[plot created by program {\prg display\_spins}\index{display\_spins}]}
 \label{spingraphic}
 \end{figure}
 
@@ -167,16 +167,16 @@ appendix~\ref{chargedensityoperator} for a derivation),
 (ii) for module {\prg so1ion} ({\prg cfield})
    
    \begin{equation}\label{chargedensity_operator}
-	       \langle \hat\rho(\mbf r)\rangle=|R_{4f}(r)|^2 \sum_{l=0,2,4,6}\sum_{m=-n,...,n}
-	       e  c_{nm} \theta_{l} \langle O_l^m(\mbf J)\rangle_T Z_{lm}(\Omega)
+	       \langle \hat\rho(\mbf r)\rangle=-|e||R_{4f}(r)|^2 \sum_{l=0,2,4,6}\sum_{m=-n,...,n}
+	        |p_{nm}| \theta_{l} \langle O_l^m(\mbf J)\rangle_T Z_{lm}(\Omega)
 	      \end{equation}
 		  
 For the notation see \cite{hutchings64-227}: the $R_{4f}$ is the radial part of the
 4f wave function (in program {\prg charges\index{charges}} this is taken the same for all
-rare earth), $e$ the elementary charge, $c_{nm}$ the pre factors of harmonic tesseral
+rare earth), $e$ the elementary charge, $p_{nm}$ the pre factors of harmonic tesseral
 functions $Z_{lm}(\Omega)$ as given in table IV in \cite{hutchings64-227} and in appendix~\ref{tesseral}, %%@
 $\Theta_l$
-correspond to the number of electrons for $l=0$
+correspond to the number of electrons ($\nu$) for $l=0$
  and the Stevens factors $\alpha$,$\beta$ and $\gamma$ for $l=$~2,4,6, respectively.
 
 The program {\prg chrgplt\index{chrgplt}} just calculates the single ion
@@ -221,8 +221,8 @@ program
 \begin{center}\leavevmode
 \includegraphics[angle=0, width=0.7\textwidth]{figsrc/ndcu2b/resultss/chargesab.eps}
 \end{center}
-\caption{Calculated 4f Charge-Structure of NdCu$_2$ at $T=$~2~K and $H=0$.
-[plot created by program {\prg charges+javaview}]}
+\caption{Calculated 4f Charge-Structure of NdCu$_2$ at $T=$~1.5~K and $H=0$.
+[plot created by program {\prg display\_chargedensities}\index{display\_chargedensities}]}
 \label{chargegraphic}
 \end{figure}
 

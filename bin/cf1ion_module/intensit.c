@@ -808,7 +808,7 @@ fprintf(fp,"%s",t01);fprintf(fp,t02,einheit_out);fprintf(fp,"%s",t03);
         {
       energie = (RV( ew , (INT)R(entartung,sp,1) )-RV( ew , (INT)R(entartung,ze,1) ))
                  *EINHEITIMP[einheitnr_in].fek*EINHEITIMP[einheitnr_out].fke;
-         fprintf(fp,"%6.2f %6.2f\n",energie,R(aJtb2,ze,sp));
+         fprintf(fp,"%7.3f %9.6f\n",energie,R(aJtb2,ze,sp));
         }
     }
 

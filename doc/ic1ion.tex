@@ -29,7 +29,7 @@ can be calculated by {\prg pointc}\index{pointc}):
 # IONTYPE=Co2+
 
 # (ii) or by giving parameters explicitly:
-# from Griffith 1971 p 487  B=1115  C=4366 XI=533
+# from Griffith 1971 p 487  B=1115  C=4366 ZETA=533
 # p379 CoIII=Co2+ is 3d7 configuration
 
 conf = d7
@@ -41,7 +41,7 @@ conf = d7
 F0=0
 F2=1738.7
 F4=124.74
-xi=533
+zeta=533
 
 # for charges and chrgplt to work you need to specify the number of electrons in the shell
 
@@ -285,19 +285,19 @@ rather the parameters of the configuration interactions. The operator equivalent
 {\tt <L||alpha||L>} etc. or {\tt <J||alpha||J>} etc. depending on whether $J$- or $L$-operator equivalents
 are used. $L$- ($J$-)operators are default for $d$- ($f$-)electron ions. In practice, as the $J$- or $L$- 
 operators are valid only within an $L$- or $J$-manifold, whilst {\prg ic1ion} calculates the splitting of the
-full $l^n$ configuration with many manifolds, the operator equivalent factors only serve to convert the input
+full $l^\nu$ configuration with many manifolds, the operator equivalent factors only serve to convert the input
 Stevens parameters into Wybourne normalisation, which is used internally by the program to calculate the
-Hamiltonian, for details on crystal field parameter conventions see~\ref{cfparconventions}.
+Hamiltonian, for details on crystal field parameter conventions see appendix~\ref{cfparconventions}.
 
 
 Note that if you wish to compare the output of {\prg ic1ion} with published energies/wavefunctions using Stevens
-parameters for rare earths, you should set the Slater {\prg F2, F4, F6} and spin-orbit {\prg xi} integrals to
+parameters for rare earths, you should set the Slater {\prg F2, F4, F6} and spin-orbit {\prg zeta} integrals to
 very high values - such as 10$^7$ meV, in order to obtain the $LS$-coupling limit. For comparison with Stevens
 parameters within an $L$-manifold for $d$-electron ions, the Slater integrals should be set to high
 values but the spin-orbit integral to zero. In this case the {\prg ic1ion} output will have twice the
 degeneracy of a pure $L$-manifold calculation because the spin is taken into account in {\prg ic1ion} and
 generates an additional two-fold degeneracy. If a non-zero (e.g. literature specified) spin-orbit integral
-{\prg xi} is specified, then this degeneracy will be lifted.
+{\prg zeta} is specified, then this degeneracy will be lifted.
 
 \subsection{{\prg cpic1ion} - calculation of the specific heat from {\prg ic1ion.out}}
  The crystal field contribution to the specific heat may be calculated 
@@ -333,7 +333,7 @@ Jd==O22S, we made Jg==O22S, Jh==O21S, Ji==O20, Jj==O21, Jk==O22,
 Jl==O33S, etc... these operators are to be understood as in the Stevens notation, equivalent
 operators to tesseral harmonic functions stripped by their prefactors $c_{lm}$ (factors before the
 bracket in table IV of~\cite{hutchings64-227} and in appendix~\ref{tesseral}), 
-i.e. $\langle \nu| O_{lm}| \nu' \rangle=\langle nu |\sum_i Z_l^m(\Omega_i)|nu' \rangle / c_{lm}$.
+i.e. $\langle v| O_{lm}| v' \rangle=\langle nu |\sum_i Z_l^m(\Omega_i)|nu' \rangle / c_{lm}$.
 \item the programs {\prg mcphas, mcdisp etc} take into account
  a modified Zeeman term $H_{Ze}=-\mu_B(2\mbf S+\mbf L)\mbf H$.
  However, in program {\prg singleion\index{singleion}} the meanfields of S and L can be
@@ -369,7 +369,7 @@ terms in the braces in the first line of equation~\ref{ichamilton}. In particula
 \emph{configurations}, which are split into \emph{terms} by the second summation. What we refer to
 as the Coulomb interaction is \emph{only} this second summation, and we shall consider the lowest
 energy configuration only. This configuration corresponds to the outer most electrons in ion, and is
-labelled $nl^N$, for example, $4f^1$ for Ce$^{3+}$.} and second lines of the equation, in addition
+labelled $nl^\nu$, for example, $4f^1$ for Ce$^{3+}$.} and second lines of the equation, in addition
 to the crystal field (CF) interaction which {\prg cfield} treats. 
 
 The term \emph{intermediate coupling} is somewhat a misnomer, because it does not refer to a
@@ -447,16 +447,16 @@ The operators corresponding to each of the three single-ion interactions are cal
 using $LS$-coupling basis states, which are labelled according to a group theoretical
 classification. This is to facilitate the use of \emph{coefficients of fractional parentage} (cfp)
 in the calculation of the matrix elements. These coefficients allow states of given configuration
-$nl^N$ to be determined by the states of a parent configuration $nl^{N-1}$ with one fewer electron.
-That is, we express the $N^{\mathrm{th}}$ electron state $|\Omega\rangle$ as a sum,
+$nl^\nu$ to be determined by the states of a parent configuration $nl^{\nu-1}$ with one fewer electron.
+That is, we express the $\nu^{\mathrm{th}}$ electron state $|\Omega\rangle$ as a sum,
 $\sum_{\bar{\Omega},\omega} \langle\bar{\Omega};\omega|\Omega\rangle|\omega\rangle$, over all possible ways of
-adding a single electron $|\omega\rangle$ to a the $(N-1)^{\mathrm{th}}$ state, $|\bar{\Omega}\rangle$,
+adding a single electron $|\omega\rangle$ to a the $(\nu-1)^{\mathrm{th}}$ state, $|\bar{\Omega}\rangle$,
 where $\langle\bar{\Omega};\omega|\Omega\rangle$ is the cfp. We also use the results that a single-particle
-operator, $\langle\Omega|V|\Omega'\rangle$, acting on $N$ electrons is just $N$ times the same operator 
+operator, $\langle\Omega|V|\Omega'\rangle$, acting on $\nu$ electrons is just $\nu$ times the same operator 
 acting on one electron, $\langle\omega|v|\omega'\rangle$, to expand the states (and matrix element) in
 terms of the cfp's,
 
-\[ \langle\Omega|V|\Omega'\rangle = N \sum_{\bar{\Omega},\omega,\omega'} \langle\Omega|\bar{\Omega};\omega\rangle
+\[ \langle\Omega|V|\Omega'\rangle = \nu \sum_{\bar{\Omega},\omega,\omega'} \langle\Omega|\bar{\Omega};\omega\rangle
                                          \langle\omega|v|\omega'\rangle \langle\bar{\Omega};\omega'|\Omega'\rangle \]
 
 \noindent Once the cfp are known, only the single electron matrix element $\langle\omega|v|\omega'\rangle$ 
@@ -503,8 +503,8 @@ crystal field operators were derived by Elliot, Judd and Runciman~\cite{elliot57
 16 for SO, and 25-27 for CF, and reproduced in more modern notation in appendix C
 of~\cite{ducle09-1}}. For the Coulomb interaction, we have chosen to use the operators defined by
 Racah~\cite{racah49-1352}\footnote{Eqns 66 for the conversion of the Racah parameters to Slater
-integrals, 63 for the $e_0$ operator, 69 for $e_1$, 73-74 for $e_2$, and 78, 28 and 80-87 for
-$e_3$}. In the case of the rank-1 spin and orbital angular momentum operators, an explicit algebraic
+integrals, 63 for the $\hat e_0$ operator, 69 for $\hat e_1$, 73-74 for $\hat e_2$, and 78, 28 and 80-87 for
+$\hat e_3$}. In the case of the rank-1 spin and orbital angular momentum operators, an explicit algebraic
 expression exists for the sum over cfp in the above equation~\cite{judd88-1}\footnote{Eqn 7-58},
 resulting in the equations quoted by Chan and Lam~\cite{chan70-219}.
 
@@ -548,21 +548,24 @@ Other relevant literature are the famous papers by Racah~\cite{racah42-186,racah
 
 We now list formulae for the matrix elements of the principal operators used in {\prg ic1ion} as
 they are programmed in:
+\begin{equation}
+ \mathcal H = \mathcal H_{\mathrm{coulomb}} + \mathcal H_{\mathrm {spinorbit}} + \mathcal H_{\mathrm{crystalfield}} + \mathcal H_{\mathrm{zeman}}
+\end{equation}
 
 \begin{quotation}
 \item[\bf Coulomb electron electron interaction operator:]
-\[ \mathcal{H}_{\mathrm{coulomb}} = \sum_{i>j=1}^N \frac{e^2}{|\mathbf{r}_i-\mathbf{r}_j|} = 
-    \sum_{k} F^k \sum_{ij} {\mathbf T}_i^{(k)} \cdot {\mathbf T}_j^{(k)} = \sum_k F^k f_k \]
+\[ \mathcal{H}_{\mathrm{coulomb}} = \sum_{i>j=1}^\nu \frac{e^2}{4\pi\epsilon_0|\mathbf{r}_i-\mathbf{r}_j|} = 
+    \sum_{k} F^k \sum_{ij} {\mathbf T}_i^{(k)} \cdot {\mathbf T}_j^{(k)} = \sum_k F^k \hat f_k \]
 
 \noindent The denominator $|\mathbf{r}_i-\mathbf{r}_j|$ was expanded as a multipole series in terms 
 of spherical harmonic functions $Y_{kq}$, which are in turn related to the tensor operators ${\mathbf
 T}_i^{(k)}$ of the $i^{\mathrm th}$ electron. The radial dependence of the electron wavefunction is
 then embodied in the \emph{Slater integrals}, $F^k$, whilst the angular part is given by the Slater
-operators $f_k$, and $k$ runs through even integers from 0 to $2l$. In the case of $f$-electrons 
-we use Racah's operators, $e_k$ which are linear combinations of $f_k$ which transform according to
+operators $\hat f_k$, and $k$ runs through even integers from 0 to $2l$. In the case of $f$-electrons 
+we use Racah's operators, $\hat e_k$ which are linear combinations of $\hat f_k$ which transform according to
 specific irreducible representations of the group SO(7)$\times G_2$. This means that their matrix
-elements are more straightforward to calculate. The relation between these operators and $f_k$, and
-their matrix elements are given by Racah~\cite{racah49-1352}. For $d$- and $p$-electrons the $f_k$
+elements are more straightforward to calculate. The relation between these operators and $\hat f_k$, and
+their matrix elements are given by Racah~\cite{racah49-1352}. For $d$- and $p$-electrons the $\hat f_k$
 operators are used directly, from tabulated matrix elements given by~\cite{nielson63-1}. 
 %e_0 E^0 + e_1 E^1 + e_2 E^2 + e_3 E^3 \]
 %The denominator $|\mathbf{r}_i-\mathbf{r}_j|$ in the Coulomb interaction may be expanded as in a multipole
@@ -575,28 +578,29 @@ operators are used directly, from tabulated matrix elements given by~\cite{niels
 %After some further manipulations the following expression may be derived:
 %
 %
-%Eqns 66 (conversion from Racah parameters, $E^k$ to Slater integrals, $F_k$), 63 ($e_0$ operator), 
+%Eqns 66 (conversion from Racah parameters, $E^k$ to Slater integrals, $F_k$), 63 ($\hat e_0$ operator), 
 %69 ($e1$), eqns 73-74 ($e2$), and eqns 78,28,80-87 ($e3$), from the important paper by Giulio
 %Racah~\cite{racah49-1352}.
 \\
-\item[\bf Spin-orbit interaction operator $\xi \sum_i ({\mbf s}_i . {\mbf l}_i)$:]
+\item[\bf Spin-orbit interaction operator $\mathcal H_{\mathrm {spinorbit}}=\zeta \sum_i ({\mbf s}_i . {\mbf l}_i)$:]
 Eqn 16 from Elliot, Judd and Runciman~\cite{elliot57-509}.
 \\
-%
+
+
 \item[\bf Crystal field interaction:]
 
 The crystal field interaction is given by the electrical potential produced according 
 to Coulombs law by neighbouring charges $q_j$ at positions $\mbf R_j$ acting on
 n electrons.
-
+ 
 \begin{equation}\label{crystal field}
-H_{cef}=\frac{1}{4\pi \epsilon_0}\sum_{i=1}^n \sum_j \frac{-|e|q_j}{|\mbf R_j - \mbf r_i|}
+\mathcal H_{\mathrm{crystalfield}}=\frac{1}{4\pi \epsilon_0}\sum_{i=1}^\nu \sum_j \frac{-|e|q_j}{|\mbf R_j - \mbf r_i|}
 \end{equation}
 
 The crystal field is rewritten in terms of tesseral harmonics $Z_{kq}(\Omega)$ (see appendix \ref{tesseral})
 
 \begin{equation}
-H_{cef}=-|e|\sum_{i=1}^n \sum_j q_j \sum_{k=0}^{\infty}\frac{r_i^k}{\epsilon_0 R_j^{k+1}} \sum_{q=-k}^k \frac{1}{2k+1} %%@
+\mathcal H_{\mathrm{crystalfield}}=-|e|\sum_{i=1}^\nu \sum_j q_j \sum_{k=0}^{\infty}\frac{r_i^k}{\epsilon_0 R_j^{k+1}} \sum_{q=-k}^k \frac{1}{2k+1} %%@
 Z_{kq}(\Omega_i)Z_{kq}(\Omega_j)
 \end{equation}
 
@@ -609,7 +613,7 @@ we define crystal field parameters
 and rewrite the crystal field as
 
 \begin{equation}
-H_{cef}=-|e| \sum_{i=1}^n \sum_{k=0}^{\infty} \sum_{q=-k}^k r_i^k \gamma_{kq}Z_{kq}(\Omega_i)
+\mathcal H_{\mathrm{crystalfield}}=-|e| \sum_{i=1}^\nu \sum_{k=0}^{\infty} \sum_{q=-k}^k r_i^k \gamma_{kq}Z_{kq}(\Omega_i)
 \end{equation}
 
 Defining rescaled tesseral harmonics $z_{kq}$ as
@@ -629,7 +633,7 @@ L_{k0}=-|e|\langle r^k \rangle \gamma_{kq}\sqrt{\frac{2k+1}{4\pi}} \dots q= 0 \\
 the crystal field may be rewritten as
 
 \begin{equation}
-H_{cef}=  \sum_{k=0}^{\inf} \sum_{q=-k}^k  L_{kq} \sum_{i=1}^n z_{kq}(\Omega_i)
+\mathcal H_{\mathrm{crystalfield}}=  \sum_{k=0}^{\inf} \sum_{q=-k}^k  L_{kq} \sum_{i=1}^\nu z_{kq}(\Omega_i)
 \end{equation}
 
 In order to calculate the crystal field Hamiltonian matrix, we replace the tesseral harmonic
@@ -641,11 +645,14 @@ expressed in terms of similar operators $\hat{C}_{kq}$ (which transform in the s
 harmonics) as:
 
 \begin{equation} \label{tkqhermitian}
-  \hat{T}_{k0} = \hat{C}_{k0}, \qquad \hat{T}_{k,\pm|q|} = \frac{\pm 1}{\sqrt{\pm 2}} \left[
+  \hat{T}_{k0} = \hat{C}_{k0}, \qquad \hat{T}_{k,\pm|q|} = \sqrt{\pm 1} \left[
   \hat{C}_{k,-|q|} \pm (-1)^{|q|} \hat{C}_{k,|q|} \right]
 \end{equation}
 
-\noindent and the matrix elements of these operators are given by
+\noindent and the matrix elements of these operators are given by {\bf 
+in the following equation there might be wrong; $L$ should be $L'$ 
+for some exponent of $(-1)$ and $J$ and $J'$ might have
+to be exchanged in the 3j symbol ???}
 
 \begin{equation} \label{iccfmatel}
 \begin{array}{l}
@@ -691,7 +698,7 @@ harmonics) as:
 %<lm||vk||l'm'>=(-1)^l*\sqrt{(2l+1)(2l'+1)}*\left (\begin{tabular}{ccc}  l & k & l' \\ 0 & 0 & 0 \\ \end{tabular}\right)
 %\end{equation}
 %
-\item[\bf The magnetic moment operators, $L_x L_y L_z S_x S_y S_z$:]
+\item[\bf The magnetic moment operators, $L_x L_y L_z S_x S_y S_z$ and $\mathcal H_{\mathrm{zeman}}$ :]
 
 The orbital and spin operators have the same dependence on $m_J$, due to the Wigner-Eckart theorem:
 
@@ -711,6 +718,12 @@ The orbital and spin operators have the same dependence on $m_J$, due to the Wig
 (S,L) & (L,S)'} 
 \end{eqnarray}
 
+Using this the Zeman interaction can be written as
+\begin{equation}
+ \mathcal H_{\mathrm{zeman}}= -\mu_B (2\mbf S^n+\mbf L^n) {\mbf H}
+\end{equation}
+
+
 %Defined in Chan and Lam~\cite{chan70-219} and again in modern notation in equation C.19 of~\cite{ducle09-1}.
 \end{quotation}
 
@@ -721,7 +734,7 @@ the scattering cross section. The formulation of the scattering operator
  implemented in the functions {\prg mq} and {\prg dncalc} have been given by Lovesey and Balcar~\cite{lovesey84-1}, 6.87b:
  
  \begin{eqnarray}
- \langle  l^n \nu S L J M| \hat \mathcal Q_q | l^n \nu' S' L' J' M' \rangle &=& \sqrt{4\pi}\sum_{K',Q,Q'} \left [ %%@
+ \langle  l^\nu v S L J M| \hat \mathcal Q_q | l^\nu v' S' L' J' M' \rangle &=& \sqrt{4\pi}\sum_{K',Q,Q'} \left [ %%@
 Y_{K'-1}^{Q}(\hat \mbf Q) \left (\frac{2K'+1}{K'+1}\right ) \right. \\
 && \times \{ A(K'-1,K')+B(K'-1,K')(K'-1 Q K' Q'|1q)\}\\
 && \left . + Y_{K'}^{Q}(\hat \mbf Q) B(K',K') (K' Q K' Q'|1q) \right ] (K' Q' J' M'|JM)

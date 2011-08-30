@@ -95,7 +95,10 @@ int * spincf::ijk(int in)
 
 // the inverse: get number of spin from indizes i,j,k
 int spincf::in(int i, int j, int k)
-{return ((i*mxb+j)*mxc+k);
+{while (i>nofa)i-=nofa;
+ while (j>nofb)j-=nofb;
+ while (k>nofc)k-=nofc;
+ return ((i*mxb+j)*mxc+k);
 }
 
 // this subtracts n2 if n1>n2

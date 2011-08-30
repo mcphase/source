@@ -21,7 +21,7 @@ module / functionality       &{\prg mcphas} & {\prg mcdiff} & {\prg mcdisp} \\
 \hline
 INTERNAL MODULES  & & &\\
 \hline
-{\prg so1ion}                & in test           &  in test           & in test \\
+{\prg so1ion}                & ok           &  ok           & ok \\
 {\prg cfield}                & ok           &  ok           & ok \\
 $F(Q)$- go beyond dip approx & -            &  ok           & in test\\
 \hline
@@ -42,7 +42,8 @@ EXTERNAL MODULES & &  &\\
 \hline
 {\prg examples/ndcu2b\_1dim/1ion\_mod/kramer.so}  & ok & &\\
 \hline
-{\prg bin/ic1ion\_module/ic1ion.so} & in test  &  in test          & in test \\
+{\prg ic1ion} & in test  &  in test          & in test \\
+{\prg icf1ion} & in test  &  in test          & in test \\
 $F(Q)$- go beyond dip approx        & -        &  in test          & in test \\
 \hline
 {\prg bin/cf1ion\_module/cfield.so} & ok &  & ok\\
@@ -120,7 +121,7 @@ to section~\ref{cfield}.
 In addition to the basic parameters described above the single ion property file 
 may/should contain additional parameters as described below. 
 
-\subsection{Lande Factor}
+\subsection{Land\'e Factor}
 
 In order to calculate the magnetisation and Zeeman term, the Land\'e factor
 has to be entered in the single ion property file. For a rare earth ion this
@@ -354,7 +355,7 @@ Jf=Lc, the Jn for $n>f$ being defined in the single ion module.
 \item the programs {\prg mcphas, mcdisp etc} take into account
  a modified Zeeman term $H_{Ze}=-\mu_B(\mbf L+2\mbf S)\mbf H$.
 \item the magnetic moments are calculated and shown in plots according 
-to $\mbf M=\mu_B(<\mbf L>+2<\mbf S>)$
+to $\mbf M=\mu_B(\langle \mbf L\rangle+2\langle \mbf S\rangle)$
 \item Also the inelastic neutron scattering cross section in {\prg mcdisp\index{mcdisp}} is evaluated using the %%@
 first
 6x6 components of the dynamical matrix  in dipole approixmation for the magnetic formfactor.
@@ -420,14 +421,14 @@ of vectors J and gjmbH has to agree and must be within the range of dimensions w
 can be treated by the module. If the check fails the module function should exit the
 program with an appropriate error message
 \item the module should calculate from meanfields at a given temperature the 
-thermal expectation values of the operators $<Ja>, <Jb>,<Jc> etc$ and return them as
+thermal expectation values of the operators $\langle Ja\rangle, \langle Jb\rangle,\langle Jc\rangle etc$ and return them as
 a vector J. Input file parameters params are supplied as a vector ABC and
 Lande factor as gJ and  can be used for this purpose. The Hamiltonian
 is assumed to be of the general form $H=H_0-J_a {\rm gjmbH}(1) -J_b {\rm gjmbH}(2) -J_c {\rm gjmbH}(3) -J_d {\rm %%@
 gjmbH}(4) ...$.
 \item the natural logarithm of the partition sum Z should be calculated and returned as lnZ,
 $Z=\sum_i e^{-E_i/kT}$
-\item the magnetic energy U should be calculated and returned as U, $U=\sum_i E_i e^{-E_i/kT}$
+\item the magnetic energy U should be calculated and returned as U, $U=\sum_i E_i e^{-E_i/kT}/Z$
 \end{enumerate}
 
 ... as an example the anisotropic doublet function is given as a
@@ -567,12 +568,12 @@ singleion\index{singleion}}}
 
 The external single ion module has to provide the components 3x3 
 matrix $M^s_{\alpha\beta}$ (see equation (\ref{mmatrix})) for every transition
-$|-> \rightarrow |+>$which is to be taken into consideration 
+$|-\rangle \rightarrow |+\rangle$which is to be taken into consideration 
 in the calculation. Note, in general$M^s_{\alpha\beta}$ it is a quadratic matrix with the same
 dimension as the vectors J and gjmbH, however it must be at least 3x3. 
 In order to make calculations easier and provide a unique phase of the eigenvectors, the 
 external single ion module must return not the Matrix $M$ but the unnormalized
-eigenvector $u1$, which is given by equation (\ref{ufirstrow}): ${\mbf u^s_{\alpha1}}=\sqrt{(n_--n_+)}<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+>$. Note that in contrast to ${\mathcal U^s_{\alpha1}}$ the eigenvector
+eigenvector $u1$, which is given by equation (\ref{ufirstrow}): ${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. Note that in contrast to ${\mathcal U^s_{\alpha1}}$ the eigenvector
 ${\mbf u^s_{\alpha1}}$ is not normalised and thus the matrix  $M^s_{\alpha\beta}$ may be recovered from it.
 
 The format to be used is:
@@ -628,15 +629,15 @@ the total number of transitions as an integer. Input file parameters params are 
 Lande factor as g\_J and  can be used for this purpose.
 \item it should calculate from meanfields at a given temperature the 
 transition energy of transition number {\prg tn}. The result should be returned as {\prg delta}
-\item for the transition number tn the vector u1 is to be filled with ${\mbf u^s_{\alpha1}}=\sqrt{(n_--n_+)}<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+>$.
+\item for the transition number tn the vector u1 is to be filled with ${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
 \item if the a negative value for T is entered, the vector u1 is to be filled with
-        ${\mbf u^s_{\alpha1}}=\sqrt{(n_--n_+)}<-|J^s_{\alpha}|+>$ and the 
+        ${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|J^s_{\alpha}|+\rangle$ and the 
        temperature T has to be multiplied by -1.
 \item
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
-the expression (\ref{mmatrix}) would be zero because $(n_--n_+)$ vanishes.
-In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--n_+)$.
+the expression (\ref{mmatrix}) would be zero because $(p_--p_+)$ vanishes.
+In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--p_+)$.
 \item if transition is from a level to itself, then a negative value of $\Delta=-10^{-10}$ should be returned.
 \end{enumerate}
 
@@ -724,7 +725,7 @@ has similar arguments as
 {\prg du1calc}, but as additional argument an orientation
 of the scattering vector,
 output should be a corresponding vector
- ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(n_--n_+)}<-|\mathcal Q^{\dag}_{\alpha}|+>$.
+ ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}\langle -|\mathcal Q^{\dag}_{\alpha}|+\rangle$.
 where $\mathcal Q_{\alpha}$ are the cartesian components of the scattering operator.
  {\prg dv1calc} is called many times, for
  every scattering vector. In order to
@@ -790,7 +791,7 @@ on output
 The module function must perform the following tasks:
 \begin{enumerate}
 \item for the transition number tn the vector v1  is to be filled with the n-component 
- ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(n_--n_+)}<-|\mathcal Q^{\dag}_{\alpha}|+>$.
+ ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}\langle -|\mathcal Q^{\dag}_{\alpha}|+\rangle$.
 n is the number of components of the effective field vector, the vector
 should only have nonzero values for the relevant values of
 the scattering operator, i.e. for $\alpha=1,..3$ in the case of
@@ -799,8 +800,8 @@ gJ$>$0 and for $\alpha=1,..,6$ in the case gJ=0 (intermediate coupling)
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
 the ${\mbf v^s_{\alpha1}}(\mbf Q)$ 
- would be zero because $(n_--n_+)$ vanishes (compare expression (\ref{mmatrix})).
-In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--n_+)$.
+ would be zero because $(p_--p_+)$ vanishes (compare expression (\ref{mmatrix})).
+In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--p_+)$.
 \end{enumerate}
 
 %*************************************************************************************

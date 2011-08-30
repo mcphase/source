@@ -63,6 +63,16 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{... in version 4.6...}
+
+- crystal field parameter notation for the low symmetry parameters
+  (m<0) BlmS and LlmS in so1ion/cfield/ic1ion/icf1ion
+  has been adapted to literature usage. In previous McPhase versions
+  parameters with m<0 had a negative sign with respect to the
+  standard definition,  now they have a positive sign as described 
+  in chapter~\ref{cfparconventions}, where an overview on different
+  crystal field parameter conventions used in literature is given.
+
 \subsection*{... in version 4.5...}
  - a bug in mcphasit removed (which produced wrong output if magnetic structures are stabilized in a calculation involving a
    crystallographic primitive basis with more than one magnetic atom and a magnetic structure with a supercell which is 
@@ -102,13 +112,6 @@ some bugs for ic1ion d9 configuration removed
 
 {\prg mcdiff}\index{mcdiff} has been extended to be able to output real and imaginary parts of nuclear and
 magnetic structure factors and flipping ratios. This is convenient for the analysis of polarized neutron diffraction experiments.
-
-
-\subsection*{... in version 3.7 ... }
-
-Calculation of standard deviations and input file format of mcdisp.par changed to include antipeaks and
-also input external experimental data files. {\prg Setup\_mcdisp\_mf} program to easily create input file {\prg %%@
-mcdisp.mf}. Hamiltonian extended to include $S_z^2$ anisotropy terms.
 
 \newpage
 
@@ -310,9 +313,9 @@ the program package is:
 
 \begin{equation}
 \label{hamilton}
- {\mathcal H}= \sum_{s,lm} B_l^m O_{lm}({\mbf J}^s) 
-             -\frac{1}{2}  \sum_{ss'} {\mathcal J}(ss') {\mbf J}^s{\mbf J}^{s'}
-	     - \sum_{s} g_{Js} \mu_B {\mbf J}^s {\mbf H} 
+ {\mathcal H}= \sum_{n,lm} B_l^m O_{lm}({\mbf J}^n) 
+             -\frac{1}{2}  \sum_{nn'} {\mathcal J}(nn') {\mbf J}^n{\mbf J}^{n'}
+	     - \sum_{n} g_{Jn} \mu_B {\mbf J}^n {\mbf H} 
 \end{equation}
 
 The first term describes the crystal field (Stevens Operators $O_l^m$, see table in appendix~\ref{stevens}), the second %%@
@@ -324,8 +327,8 @@ more general two ion exchange coupling
 \begin{equation}
 \label{multipolehamilton}
  {\mathcal H}_{JJ}=
-             -\frac{1}{2}  \sum_{ss'} \sum_ {ll'} \sum_{mm'}
-	     {\mathcal K}_{ll'}^{mm'}(ss') O_{lm}({\mbf J}^s) O_{l'm'}({\mbf J}^s)
+             -\frac{1}{2}  \sum_{nn'} \sum_ {ll'} \sum_{mm'}
+	     {\mathcal K}_{ll'}^{mm'}(nn') O_{lm}({\mbf J}^n) O_{l'm'}({\mbf J}^{n'})
 \end{equation}
 
 For further information on the notation and symmetry restrictions to the
@@ -368,29 +371,34 @@ explicitely includes electrostatic and  spin orbit interactions for each ion:
 
 \begin{eqnarray}
 \label{ichamilton}
- {\mathcal H}&=& \sum_s \left \{ \sum_{i_s=1}^{N_s} \left [ \frac{p_{i_s}^2}{2m_e}-\frac{Z_s e^2}{|\mbf r_{i_s}-\mbf %%@
-R_s|}\right ]
-              + \sum_{i_s>j_s=1}^{N_s}\frac{e^2}{|\mbf r_{i_s}-\mbf r_{j_s}|} \right \} \nonumber \\
-            &&  + \sum_s \xi_s \mbf L^s \mbf S^s  \nonumber\\
-            && + \sum_{s,lm} L_l^m T_{lm}^s \nonumber\\
-            && -\frac{1}{2}  \sum_{ss'} {\mathcal J_S}(ss') {\mbf S}^s{\mbf S}^{s'}
-               -\frac{1}{2}  \sum_{ss'} {\mathcal J_L}(ss') {\mbf L}^s{\mbf L}^{s'} \nonumber\\
-	    && - \sum_{s}  \mu_B (2\mbf S^s+\mbf L^s) {\mbf H} 
+ {\mathcal H}&=& \sum_n \left \{ \sum_{i_n=1}^{\nu_n}
+ \left [ \frac{p_{i_n}^2}{2m_e}
+        -\frac{Z_n e^2}{4\pi\epsilon_0|\mbf r_{i_n}-\mbf R_n|}
+        +\zeta_n  \mbf l^{i_n} \cdot \mbf s^{i_n}
+        + \sum_{lm} L_l^m(n) T_{lm}^n
+\right ]
+              + \sum_{i_n>j_n=1}^{\nu_n}\frac{e^2}{4\pi\epsilon_0|\mbf r_{i_n}-\mbf r_{j_n}|} \right \} \nonumber \\
+            && -\frac{1}{2}  \sum_{nn'} {\mathcal J_S}(nn') {\mbf S}^n{\mbf S}^{n'}
+               -\frac{1}{2}  \sum_{nn'} {\mathcal J_L}(nn') {\mbf L}^n{\mbf L}^{n'} \nonumber\\
+	    && - \sum_{n}  \mu_B (2\mbf S^n+\mbf L^n) {\mbf H} 
 \end{eqnarray}
 
-Here $N_s$,$Z_s$ and $\mbf R_s$ denote the number of electrons, the charge of the nucleus
+Here $\nu_n$,$Z_n$ and $\mbf R_n$ denote the number of electrons, the charge of the nucleus
 and the position
- of the ion number $s$,respectively, for each electron being
+ of the ion number $n$,respectively, for each electron being
 $p$ the momentum, $m_e$ the mass, $e$ the charge and $\mbf r$ the location.
-Spin orbit coupling, Zeman interaction and two ion interaction are written in terms of 
-the (inverse) total spin $\mbf S_s$ and (inverse) total orbital momentum $\mbf L_s$
-of ion number $s$. The crystal field in intermediat coupling is written
-in terms of Wybourne parameters $L_l^m$ and Wybourne operators $T_{lm}^s$, operator equivalents
+Spin orbit coupling is written in terms of the orbital momentum $\mbf l$ and
+spin $\mbf s$ of the individual electrons. The
+ Zeman interaction and two ion interaction are written in terms of 
+the (inverse) total spin $\mbf S_n$ and (inverse) total orbital momentum $\mbf L_n$
+of ion number $n$. The crystal field in intermediate coupling is written
+in terms of Wybourne parameters $L_l^m$ and Wybourne operators $T_{lm}^n$, operator equivalents
 of real valued 
 spherical harmonic functions 
-$T_{l0}=\sqrt{4\pi/(2l+1)}\sum_iY_{l0}(\Omega_{i_s})$, 
-$T_{l,\pm|m|}=\sqrt{4\pi/(2l+1)}\sum_i \sqrt{\pm1}[Y_{l,-|m|}(\Omega_{i_s})\pm (-1)^m Y_{l,|m|}(\Omega_{i_s})]$ for the ion $s$,
-for details on crystal field parameter conventions see~\ref{cfparconventions}.
+$T_{l0}=\sqrt{4\pi/(2l+1)}\sum_iY_{l0}(\Omega_{i_n})$, 
+$T_{l,\pm|m|}=\sqrt{4\pi/(2l+1)}\sum_i \sqrt{\pm1}[Y_{l,-|m|}(\Omega_{i_n})\pm (-1)^m Y_{l,|m|}(\Omega_{i_n})]$ for the ion $n$,
+for details on crystal field parameter 
+conventions see appendix~\ref{cfparconventions}.
 
 \clearpage
 
@@ -535,7 +543,7 @@ neighbours, which
 \newpage
 
 \bibliographystyle{physrev}   % here you should update any list by
-\bibliography{li110516}   % bibtex - ing the database
+\bibliography{li110830}   % bibtex - ing the database
 
 \newpage
 \printindex

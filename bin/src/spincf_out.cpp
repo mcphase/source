@@ -553,7 +553,8 @@ fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
-  // plot atoms in region xmin to xmax (quader)
+if(1==0) // plot atoms removed by MR 30.8.2011 - probably not needed
+ { // plot atoms in region xmin to xmax (quader)
 fprintf(fout,"    <geometry name=\"ions\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
@@ -591,7 +592,7 @@ fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atom
 fprintf(fout,"        </colors>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"    </geometry>\n");
-
+}
 
 
 

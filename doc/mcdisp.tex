@@ -318,9 +318,9 @@ The single ion susceptibility in this  equation is given by
 \begin{equation}
 \label{singleionchi}
 \chi^{{\rm single ion-} s}_{\alpha\beta}(\omega)=
-\sum_{ij} \frac{<i|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|j><j|J^s_{\beta}-<J^s_{\beta}>_{\mbf %%@
-H,T}|i>}{E^s_j-E^s_i-\hbar \omega}
-(n_i-n_j)
+\sum_{ij} \frac{\langle i|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|j\rangle\langle j|J^s_{\beta}-\langle J^s_{\beta}\rangle_{\mbf %%@
+H,T}|i\rangle}{E^s_j-E^s_i-\hbar \omega}
+(p_i-p_j)
 \end{equation}
 
 and the Fourier transform of the two-ion interaction is defined as
@@ -332,9 +332,9 @@ r_{s'})) e^{-i\mbf Q(\mbf G+\mbf r_s-(\mbf G'+\mbf r_{s'}))}
 
 Here the $\mbf G,\mbf G'$ are the lattice vectors of the Bravais Lattice and 
 $\mbf r_s$ the position of the atom $s$ in the magnetic unit cell,
- $|i>$ and $|j>$ denote energy levels of the ion
+ $|i\rangle$ and $|j\rangle$ denote energy levels of the ion
 $s$, $\mbf J$ is the angular momentum operator,
-$n_i$ and $n_j$ denote the Boltzmann occupation number of the
+$p_i$ and $p_j$ denote the Boltzmann occupation number of the
 energy level $E^s_i$ and $E^s_j$, respectively.
 
 
@@ -433,7 +433,7 @@ eq.(\ref{fluctdissbeyond}) \end{tabular} }}
              } }% close PUTLEFT
 %            1 2 3 4 			  
 \put(+7,-8.0){ %PUTRIGHT 1
-               \put(-6,-4){\framebox(12,4){\begin{tabular}{c} calc. $\Delta<\mathcal{O}_\alpha^n >$\\ 
+               \put(-6,-4){\framebox(12,4){\begin{tabular}{c} calc. $\Delta\langle \mathcal{O}_\alpha^n \rangle$\\ 
                                            eq.(\ref{oscillation})(prog. {\prg charges}) \end{tabular}}}
                \put(0,-4){\vector(0,-1){2}}
 \put(+0,-6.0){ %PUTRIGHT
@@ -487,7 +487,7 @@ and the formalism is outlined hereafter:
 $\Delta^s$ is considered for each ion. For instance, in case of a Kramers ground state
 doublet, which is split in the magnetically ordered state by the molecular
 field, this single ion excitation energy is the distance between the upper
-and lower state of the doublet $|\pm>$.
+and lower state of the doublet $|\pm\rangle$.
  This approach turns out to 
 give a reasonable accurate description of the magnetic excitations provided
 that the energy is far from zero and that there is no crossing of modes
@@ -506,16 +506,16 @@ reads
 
 with the transition elements
 \begin{equation}\label{mmatrix}
-M^s_{\alpha\beta}=<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+><+|J^s_{\beta}-<J^s_{\beta}>_{\mbf H,T}|->
-(n_--n_+)
+M^s_{\alpha\beta}=\langle -|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|+\rangle\langle +|J^s_{\beta}-\langle J^s_{\beta}\rangle_{\mbf H,T}|-\rangle
+(p_--p_+)
 \end{equation}
 
 {\tiny Note for experts on programming single ion modules: that any external single ion module has to provide the 3x3 %%@
 matrix $M^s_{\alpha\beta}$ for every transition
-$|-> \rightarrow |+>$which is to be taken into consideration in the calculation. If the energy of this transition
-is zero, i.e. $\Delta^s=0$ (diffuse scattering), the expression (\ref{mmatrix}) would be zero because $(n_--n_+)$ %%@
+$|-\rangle \rightarrow |+\rangle$which is to be taken into consideration in the calculation. If the energy of this transition
+is zero, i.e. $\Delta^s=0$ (diffuse scattering), the expression (\ref{mmatrix}) would be zero because $(p_--p_+)$ %%@
 vanishes.
-In this case the single ion module should calculate $(n_+/kT)$ instead of $(n_--n_+)$.
+In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--p_+)$.
 }
    
  The 3x3 matrices $M^s_{\alpha\beta}$
@@ -523,7 +523,7 @@ always have one double degenerate eigenvalue $=$ zero (2,3) and one
 positive eigenvalue (1)
 
 \begin{equation}
-\gamma^s=(n_--n_+)\sum_{\alpha}<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+><+|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|->
+\gamma^s=(p_--p_+)\sum_{\alpha}\langle -|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|+\rangle\langle +|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|-\rangle
 \end{equation}
 
 The  problem  may be simplified by using
@@ -532,7 +532,7 @@ $M^s_{\alpha\beta}$. Note that the first column of this matrix ${\mathcal U^s_{\
 eigenvalue $\gamma^s$) is simply 
 
 \begin{equation}\label{ufirstrow}
-{\mathcal U^s_{\alpha1}}=\sqrt{(n_--n_+)/\gamma^s}<-|J^s_{\alpha}-<J^s_{\alpha}>_{\mbf H,T}|+>
+{\mathcal U^s_{\alpha1}}=\sqrt{(p_--p_+)/\gamma^s}\langle -|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|+\rangle
 \end{equation}
 
  This property is useful as most of the equations below only require the knowledge of this first column.
@@ -748,10 +748,11 @@ the excitation energies and eigenvector matrices $\mathcal T$ remain the same.
 \begin{center}\leavevmode
 \includegraphics[angle=-0, width=0.6\textwidth]{figsrc/animationAF1.eps}
 \end{center}
-\caption{\label{animationAF1}
-NdCu$_2$ - snapshot of animation of the mode at Q=(0.65 1 0) at energy 1.056~meV in phase AF1 at 
-H=0 and T=1.5~K [plot created by program {\prg java javaview \index{javaview}}]
-}
+\caption{NdCu$_2$ - snapshot of animation of the mode 
+at Q=(0.67 1 0) at energy 0.7~meV in phase AF1 at 
+H=0 and T=1.5~K [plot created by program 
+{\prg display\_chargedensities}\index{display\_chargedensities}]
+}\label{animationAF1}
 \end{figure}
 
 \subsubsection{Graphical Visualization of Spin and Charge Oscillations of a Magnetic Excitation}
@@ -962,7 +963,7 @@ to get a relation between
 $X_{\alpha\beta}^{ss'}({\mbf Q},\omega)$ and 
 $\chi_{\alpha\beta}^{ss'}({\mbf Q},\omega)$, which may be used.  In general a dynamical susceptibility %%@
 $\chi_{BA}(\omega)$ describes the response of
- a physical observable $<\hat B(t)>$ to a perturbation of the system described by 
+ a physical observable $\langle \hat B(t)\rangle$ to a perturbation of the system described by 
 an operator $\hat A$.
 In the case of $\chi_{\alpha\beta}^{ss'}({\mbf Q},\omega)$ we have 
 $\hat A=\frac{1}{\sqrt{N_g}}e^{i\mbf B_{s'}}\sum_{l'}e^{i\mbf Q\mbf G_{l'}}J^{s'l'}_{\beta}$,
@@ -976,7 +977,7 @@ at the excitation energies of the system:
 
 \begin{equation}\label{gensus}
 \chi_{BA}= \lim_{\epsilon \rightarrow 0^+}\sum_{\alpha\alpha'}\frac{\langle \alpha |\hat B|\alpha' \rangle 
-\langle\alpha' |\hat A|\alpha \rangle }{E_{\alpha'}-E_{\alpha}-\hbar \omega - i \hbar \epsilon}(n_{\alpha}-n_{\alpha'})
+\langle \alpha' |\hat A|\alpha \rangle }{E_{\alpha'}-E_{\alpha}-\hbar \omega - i \hbar \epsilon}(p_{\alpha}-p_{\alpha'})
 \end{equation}
  
 The denominator, the eigenstates and the difference in thermal population are the same for any susceptibility.
@@ -994,27 +995,27 @@ These terms can be related by a similar procedure as
 outlined in equations (\ref{mmatrix}) ff:
 
 \begin{eqnarray}\label{mumatrix}
-\mu^s_{\alpha\beta}=<-|J^{s}_{\alpha}|+><+|J^s_{\beta}|-> \\
-\nu^s_{\alpha\beta}=<-|\mathcal Q^{s \dag}_{\alpha}|+><+|\mathcal Q^s_{\beta}|->
+\mu^s_{\alpha\beta}=\langle -|J^{s}_{\alpha}|+\rangle\langle +|J^s_{\beta}|-\rangle \\
+\nu^s_{\alpha\beta}=\langle -|\mathcal Q^{s \dag}_{\alpha}|+\rangle\langle +|\mathcal Q^s_{\beta}|-\rangle
 \end{eqnarray}
 
 similar to $M_{\alpha\beta}^s$ the matrices  $\mu_{\alpha\beta}^s$ and $\nu_{\alpha\beta}^s$ 
 can be diagonalised using the
 unitary transformations $\overline \mathcal  U_{\alpha\beta}^s$ (${\overline \mathcal U^{s\dag}\overline \mathcal U^s}=1$) and
-$\overline \mathcal V_{\alpha\beta}^s$ (${\overline \mathcal V^{s\dag}\overline \mathcal V^s}=1$), respectively. Note that in the case $<+| \neq <-|$
+$\overline \mathcal V_{\alpha\beta}^s$ (${\overline \mathcal V^{s\dag}\overline \mathcal V^s}=1$), respectively. Note that in the case $\langle +| \neq \langle -|$
 the unitary transformations $\overline \mathcal U =\mathcal U$ and $\overline \gamma = \gamma$.
 
 \begin{equation}
-\overline \gamma^s=(n_--n_+)\sum_{\alpha}<-|J^s_{\alpha}|+><+|J^s_{\alpha}|->
+\overline \gamma^s=(p_--p_+)\sum_{\alpha}\langle -|J^s_{\alpha}|+\rangle\langle +|J^s_{\alpha}|-\rangle
 \end{equation}
 
 
 Thus we have for orthogonal states 
 
 \begin{eqnarray}
-<-|         J^{s     }_{\alpha}|+><+|         J^s_{\beta}|->&=&\overline \mathcal U_{\alpha 1}^s\phi^s\overline \mathcal U_{1\beta}^{s\dag} \dots %%@
-{\rm with }\, \phi^s=\overline \gamma^s/(n_--n_+)\\
-<-|\mathcal Q^{s \dag}_{\alpha}|+><+|\mathcal Q^s_{\beta}|->&=&\overline \mathcal V_{\alpha 1}^s\xi^s\overline \mathcal V_{1\beta}^{s\dag}  
+\langle -|         J^{s     }_{\alpha}|+\rangle\langle +|         J^s_{\beta}|-\rangle&=&\overline \mathcal U_{\alpha 1}^s\phi^s\overline \mathcal U_{1\beta}^{s\dag} \dots %%@
+{\rm with }\, \phi^s=\overline \gamma^s/(p_--p_+)\\
+\langle -|\mathcal Q^{s \dag}_{\alpha}|+\rangle\langle +|\mathcal Q^s_{\beta}|-\rangle&=&\overline \mathcal V_{\alpha 1}^s\xi^s\overline \mathcal V_{1\beta}^{s\dag}  
 \end{eqnarray}
 
 Multiplying this from the right(left) side with 
@@ -1023,8 +1024,8 @@ $\overline \mathcal U_{\beta\beta'}^{s}/\sqrt(\phi^s)$
 and summing over $\beta$ ($\alpha$) we get
 
 \begin{equation}
-\frac{1}{\phi^s}\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} <-|         J^{s     }_{\alpha}|+> \right )
-\left ( \sum_{\beta} <+|         J^s_{\beta}|->\overline \mathcal U_{\beta\beta'}^{s} \right )
+\frac{1}{\phi^s}\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} \langle -|         J^{s     }_{\alpha}|+\rangle \right )
+\left ( \sum_{\beta} \langle +|         J^s_{\beta}|-\rangle\overline \mathcal U_{\beta\beta'}^{s} \right )
 = \delta_{1\alpha'} \delta_{1\beta'}
 \end{equation}
 
@@ -1032,7 +1033,7 @@ It follows
 
 \begin{equation}
 \frac{1}{\sqrt{\phi^s}}
-\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} <-|         J^{s     }_{\alpha}|+> \right )
+\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} \langle -|         J^{s     }_{\alpha}|+\rangle \right )
 = \delta_{1\alpha'}
 \end{equation}
 
@@ -1041,8 +1042,8 @@ $\langle -|J_{\alpha}^s|+\rangle \langle +'|J_{\beta}^{s'}|-'\rangle$
 in the numerator of (\ref{gensus}) to $\delta_{1\alpha'} \delta_{1\beta'}$:
 
 \begin{equation}\label{trafo1}
-\left ( \sum_{\alpha}\frac{1}{\sqrt{\phi^s}^{\star}}\overline \mathcal U_{\alpha'\alpha}^{s\dag} <-|J^{s}_{\alpha}|+> \right )
-\left ( \sum_{\beta} <+'|J^{s'}_{\beta}|-'> \frac{1}{\sqrt{\phi^{s'}}}\overline \mathcal U_{\beta\beta'}^{s'} \right )
+\left ( \sum_{\alpha}\frac{1}{\sqrt{\phi^s}^{\star}}\overline \mathcal U_{\alpha'\alpha}^{s\dag} \langle -|J^{s}_{\alpha}|+\rangle \right )
+\left ( \sum_{\beta} \langle +'|J^{s'}_{\beta}|-'\rangle \frac{1}{\sqrt{\phi^{s'}}}\overline \mathcal U_{\beta\beta'}^{s'} \right )
 = \delta_{1\alpha'} \delta_{1\beta'}
 \end{equation}
 
@@ -1073,7 +1074,7 @@ X_{\alpha''\beta''}^{,,ss'}({\mbf Q},\omega)=\sum_{\alpha\alpha'\beta\beta'}
 \sqrt{\frac{\Gamma^{s'}}{\overline \gamma^{s'}}}
 \end{equation}
 
-(Note here we have defined $\Gamma^s \equiv \xi^s(n_--n+)$).
+(Note here we have defined $\Gamma^s \equiv \xi^s(p_--n+)$).
 Having obtained the dynamical susceptibility $    \chi_{\alpha\beta}^{,,ss'}({\mbf Q},\omega)$
 by the method outlined in section \ref{formalism}, 
 the expression (\ref{finalslow})
@@ -1083,7 +1084,7 @@ the neutron scattering cross section numerically.
 matrices $M^s_{\alpha\beta}$ (equation (\ref{mmatrix})) for every $\mbf Q$-vector
 the vector 
 $\sqrt{\Gamma^s}^\star \overline \mathcal V^s_{\alpha1}\equiv
- {\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(n_--n_+)}<-|\mathcal Q^{\dag}_{\alpha}|+>$, which will depend on the 
+ {\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}\langle -|\mathcal Q^{\dag}_{\alpha}|+\rangle$, which will depend on the 
 scattering vector $\mbf Q$.}
 
 For the DMD algorithm we insert  (\ref{dmdfinal}) into (\ref{finalslow}) and obtain
@@ -1103,7 +1104,7 @@ with
 \mathcal U^s_{\alpha''1}
 \end{equation}
 
-If $<+|\neq<-|$ then $\overline \mathcal V=\mathcal V$.
+If $\langle +|\neq\langle -|$ then $\overline \mathcal V=\mathcal V$.
 
 {\prg mcdisp\index{mcdisp}} automatically calculates the intensity in
 dipole approximation and also going beyond, if possible, the result

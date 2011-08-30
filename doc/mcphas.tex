@@ -137,38 +137,43 @@ In the mean field approximation the Hamiltonian~(\ref{hamilton}) is approximated
 by
 
 \begin{equation}
- {\mathcal H}=\sum_s H_{SI}^s + E_{corr}
+ {\mathcal H}=\sum_n H_{SI}^n + E_{corr}
 \end{equation}
 
 with the single ion Hamiltonian (in case of module {\prg cfield\index{cfield}})
 
 \begin{equation}
-H_{SI}^s=  B_l^m O_{lm}({\mbf J}^s) 
-	     - g_{Js} \mu_B {\mbf J}^s {\mbf H^s_{eff}} 
+H_{SI}^n=  B_l^m O_{lm}({\mbf J}^n) 
+	     - g_{Jn} \mu_B {\mbf J}^n {\mbf H^n_{eff}} 
 \end{equation}
 
 and the correction term
 
 \begin{equation}
-E_{corr}=\frac{1}{2}\sum_{s} g_{Js} \mu_B \langle {\mbf J}^s \rangle (\mbf H^s_{eff}-\mbf H) 
+E_{corr}=\frac{1}{2}\sum_{n} g_{Jn} \mu_B \langle {\mbf J}^n
+ \rangle (\mbf H^n_{eff}-\mbf H) 
 \end{equation}
 
-and with the mean fields $ \mbf H^s_{eff}$ given by
+and with the mean fields $ \mbf H^n_{eff}$ given by
 
 \begin{equation}\label{meanfield}
-\mbf H^s_{eff}=\mbf H+\sum_{{\mbf G'}s'} \frac{{\mathcal J}(\mbf r_s-(\mbf G'+\mbf r_{s'}))}{g_{Js}\mu_B } \langle{\mbf %%@
-J}^{s'}\rangle
+\mbf H^n_{eff}=\mbf H+\sum_{{\mbf G'}n'} \frac{{\mathcal J}
+(\mbf r_n-(\mbf G'+\mbf r_{n'}))}{g_{Jn}\mu_B } \langle{\mbf
+J}^{n'}\rangle
 \end{equation}
 
-These mean fields and the moments $\langle \mbf J^s \rangle$ are determined in a self consistent
+These mean fields and the moments $\langle \mbf J^n \rangle$ 
+are determined in a self consistent
 way. For a given magnetic unit cell and initial configuration 
 of magnetic moments
-the mean fields are calculated according to equation~(\ref{meanfield}). Then, for each
+the mean fields are calculated according to equation~(\ref{meanfield}). 
+Then, for each
 magnetic ion the single ion property module is taken 
-and the magnetic moment $\langle \mbf J^s \rangle$ is 
+and the magnetic moment $\langle \mbf J^n \rangle$ is 
 calculated from it's mean field. The mean fields are used again in equation~(\ref{meanfield})
 and so on .... until convergence is reached. 
-Then, the free energy ($f=-kT\sum_s \ln(z_s) + E_{corr}$ ) of the stabilised
+Then, the free energy ($f=-kT\sum_n \ln(z_n) + E_{corr}$ ) 
+of the stabilised
 configuration is calculated (this is why this sub is called {\prg fecalc}). 
 The free energies of a lot of different stabilised configurations have to
 be compared in order to find out which configuration has lowest free energy, i.e.

@@ -29,7 +29,7 @@ that of Stevens by the factor $\lambda_{k0} = p_{k0} \sqrt{4\pi / (2l+1)}$ and
 thus (in our notation)
 
 \[
-\mathcal{H}_{\mathrm{cf}} = \sum_{l,m\geq 0} D_l^{m} \hat{C}_{lm}
+\mathcal{H}_{\mathrm{cf}} = \sum_{l,m} D_l^{m} \hat{C}_{lm}
 \]
 
 The disadvantage of the Wybourne approach is that one requires imaginary crystal field parameters, because the
@@ -46,27 +46,57 @@ different tensor operators $\hat{T}_{lm}$, which are the Hermitian combinations 
 \mathcal{H}_{\mathrm{cf}} = \sum_{l,m} L_l^m \hat{T}_{lm}
 \]
 
-Our $L_l^m$ parameters therefore have the same normalisation as the Wybourne parameters but will be real, with
-the imaginary parts expressed by the $q<0$ components of the $\hat{T}_{lm}$ operator.
+Our $L_l^m$ parameters therefore have the same normalisation as the Wybourne parameters but will be real.
+%, with the imaginary parts expressed by the $q<0$ components of the $\hat{T}_{lm}$ operator.
 
-In summary, the various types of crystal field parameters are:
+In summary, the various types of crystal field parameters are given in 
+table~\ref{cfpartypes}.
+\begin{table}
+\begin{center} \begin{tabular}{@{\extracolsep{\fill}}l|r|l|l} \hline
+Literature	&  Parameter  & Relation to $L_l^m$                                                   & Normalisation \\ 
+		&  name in    &                                                                       &\\
+		&{\prg McPhase}&                                                                       &\\ \hline
+$A_l^m$ in Hutchings 1964~\cite{hutchings64-227}
+		&  Alm        & =           $ \lambda_{lm} L_l^m /\langle r^l \rangle$               & Stevens \\
+$A_l^m$ in Kassman 1970~\cite{kassman70-4118}  & & & \\
+$A_l^m$ in Abragam 1970~\cite{abragam70-1}  & & & \\
+\hline
+$B_l^m$ in Hutchings 1964~\cite{hutchings64-227}
+		&  Blm        & =           $ \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle$ & Stevens \\
+$B_l^m$ in Jensen 1991~\cite{jensen91-1}  & & & \\
+$B^l_m$ in Mulak 2000~\cite{mulak00-1}  & & & \\
 
-\begin{center} \begin{tabular}{@{\extracolsep{\fill}}r|l|l} \hline
-     Parameter  & Relation to Llm                                                      & Normalisation \\ \hline
-     Alm        & =           $ \lambda_{lm} L_l^m /\langle r^l \rangle$               & Stevens \\
-     Blm        & =           $ \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle$ & Stevens \\
-     ARlm       & =           $ \lambda_{lm} L_l^m $                                   & Stevens \\
-     Wlm        & = half($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$               & Stevens \\
-     Vlm        & = half($m$) $ \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle$ & Stevens \\
-     Llm        & =           $              L_l^m $                                   & Wybourne \\
-     Dlm        & =           $              L_l^m $                                   & Wybourne (imaginary) \\ \hline
-\end{tabular} \end{center}
-
-\noindent where half($m$) = $\frac{1}{2}$ when $m\neq 0$ and half($m$)=1 when $m=0$.
+\hline
+$V_l^m$ in Elliott 1953~\cite{elliott53-387}
+		&             & =           $ \lambda_{lm} L_l^m $                                   & Stevens \\
+\hline
+		&  Wlm        & = half($m$) $ \lambda_{lm} L_l^m /\langle r^l \rangle$               & Stevens \\
+\hline
+		&  Vlm        & = half($m$) $ \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle$ & Stevens \\
+\hline
+		&  Llm        & =           $              L_l^m $                                   & Wybourne \\
+\hline
+$B_m^l$ in Wybourne 1965~\cite{wybourne65}\footnote{Note that table 6-1 and equ 6-7 are not correct in this reference.}
+		&  Dlm        & =          $ \left \{ \begin{array}{lr} L_l^0 & m=0 \\
+                                                                (-1)^m(L_l^m-iL_l^{-m}) & m >0 \\ 
+                                                                L_l^{-m}+iL_l^{m}      &m<0    \\                    
+		                               
+		                              \end{array}  \right . $                                & Wybourne  \\ 
+$B_m^l$ in Kassman 1970~\cite{kassman70-4118}  & & & \\
+$B_{lm}$ in Mulak 2000~\cite{mulak00-1}  & & & \\
+\hline
+$B_m^l$ in Newman 2000~\cite{newman00-1}
+                &             & =           $(-1)^m L_l^m$                                            & Wybourne \\
+\hline
+\end{tabular} 
+\caption{Different Crystal Field Parameter Notation Schemes in Literature.
+Here half($m$) = $\frac{1}{2}$ when $m\neq 0$ and half($m$)=1 when $m=0$.
 Note that {\prg lm} should be replaced by numbers - e.g. an example of ARlm is {\prg AR20}, and that
 the operator equivalent factor $\langle J || \theta_l || J \rangle$ should be $\langle L || \theta_l || L
 \rangle$ for an $L$-manifold which is the default for $d$-electron ions. The constants $\lambda_{lm}$
-are given in table~\ref{tab:wytostev}.
+are given in table~\ref{tab:wytostev}.}\label{cfpartypes}
+\end{center}
+\end{table}
 
 \begin{table}[h] \renewcommand{\arraystretch}{1.3}
   \begin{center}
@@ -111,3 +141,4 @@ his real valued Wybourne
 parameters $B_m^l({\rm Newman})\equiv (-1)^m L_l^m$]{newman00-1}.} \label{tab:wytostev}
   \end{center}
 \end{table}
+\clearpage
