@@ -77,6 +77,9 @@ T=2 Ha=0 Hb=0 Hc=0 n=10 nofatoms=2 nofcomponents=3
 The file {\prg mcdisp.mf\index{mcdisp.mf}} can be easily set up by using the program {\prg %%@
 setup\_mcdisp\_mf\index{setup\_mcdisp\_mf}} or alternatively by the program {\prg spins\index{spins}} 
 described in section~\ref{spins}.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            the mean field components
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 
 \subparagraph{example of input file {\prg mcdisp.par\index{mcdisp.par}}}
 
@@ -151,7 +154,14 @@ lmin=0 lmax=0 deltal=0.02
 \end{verbatim}
 
 alternatively these lines can be commented and a
-list of reflections can be given in {\prg mcdisp.par\index{mcdisp.par}}, the
+list of reflections can be given in {\prg mcdisp.par\index{mcdisp.par}}.
+Miller indices always refer to the lattice $\vec a^*, \vec b^*, \vec c^*$, which
+is the reciprocal lattice of $\vec a, \vec b, \vec c$ as defined by lattice
+parameters $a,b,c$ and angles $\alpha,\beta,\gamma$ as given in
+input file {\prg mcphas.j}.
+
+
+The
 program {\prg mcdisp\index{mcdisp}} then calculates only 
 the excitation energies at these reflections and (if measured
 energies are given) computes a standard deviation

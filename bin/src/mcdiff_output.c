@@ -197,7 +197,7 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
     if((double)(i-imin)/50==(double)((i-imin)/50))
     {if (ortho==1)
      {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) F1:max-Isigpi azim Ipisig azim Ipipig azim F2:max-Isigpi azim Ipisig azim Ipipig azim  |^ma_q| |^mb_q| |^mc_q| |^ma^2_q||^mb^2_q||^mc^2_q||(^ma*^mb)_q||(^ma*^mc)_q||(^mb*^mc)_q|}\n",colheader[colcode[10]],colheader[colcode[11]]);}
-     else
+     else   // magnetic xrayscattering for nonortholattices currently not implemented
      {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) \n",colheader[colcode[10]],colheader[colcode[11]]);}
     }
     // calculate alpha_i delta_i for reflection hkl[i](1..3)  [currently ok only for ortholattices !!!]

@@ -92,6 +92,11 @@ this offset is zero (T0=0, Ha0=0, Hb0=0, Hc0=0).
  It is just necessary to set xT=1 and give the temperature range by
 xmin/xmax/xstep. For field in b direction then just set yHb=1 and 
 define the range in ymin/ymax/ystep.
+In case of non-orthogonal axes the applied magnetic field
+components $Ha, Hb, Hc$ refer to the orthogonal coordinate system
+defined with respect to the nonorthogonal lattice $\mbf a,\mbf b,\mbf c$ as
+$Hb||\mbf b$, $Hc||(\mbf a \times \mbf b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+
 \item [GENERATION OF SPINCONFIGURATIONS:] at the beginning of the program
 some initial values of spin configurations are generated from a set of 
 propagation vectors. This section defines the range of propagation vectors
@@ -140,7 +145,7 @@ by
  {\mathcal H}=\sum_n H_{SI}^n + E_{corr}
 \end{equation}
 
-with the single ion Hamiltonian (in case of module {\prg cfield\index{cfield}})
+with the single ion Hamiltonian (in case of module {\prg so1ion\index{so1ion}})
 
 \begin{equation}
 H_{SI}^n=  B_l^m O_{lm}({\mbf J}^n) 
@@ -234,12 +239,11 @@ such {\prg .j} files (see section~\ref{addprog}).
 \begin{description}
 \item [Line 1,2:] Comment Lines
 \item [Line 3:] lattice constants a,b,c and crystal angles alpha, beta, gamma 
-                (must be 90$^o$ in current version)
 \item [Line 4-6:] primitive lattice vectors
 \item [Line 7:] Number of atoms in the primitive crystallographic unit cell ({\prg nofatoms})
 \item [Line 8:] a comment line with stars
 \item [Line 9:] coordinates  ($d_a$,$d_b$,$d_c$) of 1$^{st}$ magnetic ion in the crystallographic unit cell  with
-respect to the ortho-lattice $\vec a$,$\vec b$,$\vec c$. The number of neighbours of this 
+respect to the lattice vectors $\vec a$,$\vec b$,$\vec c$. The number of neighbours of this 
 ion, for which interaction constants are given in the interaction table (nofneighbours). 
 If {\prg diagonalexchange}
 is set to 0 the 9 components of the exchange tensor are given in column 4-12. 
@@ -261,13 +265,16 @@ parameter file (cffilename).
  \verb|  #! indexexchange= JaJb JbJa  | where the 4th and 5th column are the same.
 \item [Line 10:]  Comment line
 \item [Line 11-(10+nofneighbours):] Interaction table for ion number 1.   
-Note: the neighbour coordinates (column 1-3) are given with respect to the ortho-lattice
+Note: the neighbour coordinates (column 1-3) are given with respect to the lattice vectors
 $\vec a$,$\vec b$,$\vec c$. The program then calculates from these values the coordinates
-with respect to the primitive (non-ortho) lattice $\vec r_1$,~$\vec r_2$,~$\vec r_3$. 
-
-Interactions ( given by absolute neighbour position 
-$ d_a \vec a + d_b \vec b + d_c \vec c = d_1 \vec r_1 + d_2 \vec r_2 + d_3 \vec r_3$)
-and components of the interaction tensor $\stackrel{=}{\mathcal J}$. 
+with respect to the primitive lattice $\vec r_1$,~$\vec r_2$,~$\vec r_3$.
+($ d_a \vec a + d_b \vec b + d_c \vec c = d_1 \vec r_1 + d_2 \vec r_2 + d_3 \vec r_3$).
+Column 4,5,6 \dots contain the components of the interaction tensor $\stackrel{=}{\mathcal J}$. 
+Note that in case of non-orthogonal axes the 
+components of the moments and the interaction tensor $Ja, Jb, Jc, Jaa, Jbb, Jcc, Jab ...$ 
+refer to the orthogonal coordinate system
+defined with respect to the nonorthogonal lattice $\vec a,\vec b,\vec c$ as
+$Jb||\vec b$, $Jc||(\vec a \times \vec b)$ and $Ja$ perpendicular to $Jb$ and $Jc$.
 \item [Line (11+nofneighbours) - end:] for each ion in the unit cell line 8 - (10+nofneighbours)
 are repeated.
 \end{description}
@@ -332,8 +339,10 @@ given in directory {\prg examples}.
 \subsubsection{Example single ion property file  for a simple antiferromagnet}
 
 Here is an example file {\prg mcphas.cf1} describing the anisotropy of a 
-simple antiferromagnet with Ce atoms having basal plane anisotropy (note the
-axis convention xyz$||$abc):
+simple antiferromagnet with Ce atoms having basal plane anisotropy. Note the
+axis convention xyz$||$abc, in case of non-orthogonal axes the convention 
+is $y||\vec b$, $z||(\vec a \times \vec b)$ and $x$ perpendicular to $y$ and $z$.
+
 
 \input{mcphas.cf1}
 
@@ -363,6 +372,8 @@ describing some spin configurations
 to be used as starting values for the mean field process:
 
 \input{mcphas.tst}
+Note, in case of non-orthogonal axes the convention 
+is $mb||\vec b$, $mc||(\vec a \times \vec b)$ and $ma$ perpendicular to $mb$ and $mc$.
 
 \subsubsection{subdirectory {\prg ./results} - directory where calculated data is stored}
 
@@ -480,8 +491,11 @@ curve(s).
 \end{figure}
 
 \begin{description}
-\item [\prg mcphas.qvc]    the set of test q-vectors used for calculation of free energy
+\item [\prg mcphas.qvc]    the set of test q-vectors used for calculation of free energy.
+                           Components of these q vectors refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
 \item [\prg mcphas.phs]    spin-configuration table of different types of spin-configurations. 
+                            Note, in case of non-orthogonal axes the convention in these tables 
+                            is $mb||\vec b$, $mc||(\vec a \times \vec b)$ and $ma$ perpendicular to $mb$ and $mc$.
 
                            {\em Note}: 
                            there is no natural criteria for deciding, if one spin-configuration is
@@ -499,14 +513,25 @@ curve(s).
 \item [\prg mcphas.sps]    $T-H$ dependence of spin-configuration. The spin configurations stored in this
                            file may be displayed using the program {\prg spins\index{spins}}, an example is given
 			   in figure~\ref{spingraphic}.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            also for the moment components $ma, mb, mc$ in these tables 
+                            is $mb||\vec b$, $mc||(\vec a \times \vec b)$ and $ma$ perpendicular to $mb$ and $mc$.
+
 \item [\prg mcphas.mf]     $T-H$ dependence of mean field configuration, stored as $g_J \mu_B H_{eff}(i)$(unit is in meV)
                             for i=1,2,...,number of spins in magnetic unit cell.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            also for the mean field components in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \item [\prg mcphas.fum]    free energy, magnetic energy (the derivative with respect to temperature gives the specific %%@
 heat),
                            magnetisation data and (if cfield is used with higher order interactions)
                            expectation values of the Stevens Operators $<O_l^m>$ . As an example for the information
 			   contained in this file the calculated magnetisation and magnetostriction of NdCu$_2$ is shown in
 			   figures~\ref{magnetization} and ~\ref{magnetizationgraphic}.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            also for the magnetisation components $ma,mb,mc$ in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+
 \item [\prg mcphas1.j1 .j1 .j2 ...] 
                spin-spin correlation functions for sub-lattice 1 neighbour 1 2 ...
 	       (linear combination is proportional to magnetostriction)
@@ -521,18 +546,41 @@ heat),
 	       spin-spin correlation functions. As an example the magnetostriction analysis of
 	       NdCu$_2$ is shown in figure~\ref{magnetostrictiongraphic}. For details 
              please refer to~\cite{rotter02-8885}.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            also for the moment components in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \item [\prg mcphas.xyt]    phase diagram as x,y,T, H, phase-number j according to spin-configuration table
                given in mcphas.phs, a periodicity key, nettomoments <J>.
  Figure~\ref{phasediagramgraphic}
 	       shows the phase diagram of NdCu$_2$ for magnetic fields parallel to the orthorhombic $b$-direction.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ 
+                             in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \item [\prg mcphas.hkl]    calculated (unpolarised) neutron diffraction data (the calculated magnetic intensities
     correspond to the magnetic structure + Polarisation factor. The
     Lorentz-factor , magnetic form factor and  instrumental corrections are not calculated.)
  As an example figure~\ref{neutintgraphic}
     shows the calculated temperature dependence of magnetic amplitudes for NdCu$_2$.
+                           $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ 
+                             in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+    
 \item [\prg mcphasa.hkl]    Fourier Transform of the $a$-component of the magnetic Moments.
+                           $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            the magnetic moment component in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \item [\prg mcphasb.hkl]    Fourier Transform of the $b$-component of the magnetic Moments.
+                           $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            the magnetic moment component in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \item [\prg mcphasc.hkl]    Fourier Transform of the $c$-component of the magnetic Moments.
+                           $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            the magnetic moment component in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \end{description} 
 
 \vspace{1cm}

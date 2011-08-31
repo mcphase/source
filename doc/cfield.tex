@@ -813,16 +813,18 @@ In order to use {\prg so1ion\index{so1ion}} as a module in {\prg McPhase} a conv
 the orientation of the $xyz$ coordinate system (of the crystal field) relative
 to the crystal axis $abc$ has to be made:
  The axes convention adopted in module {\prg so1ion} for the crystal field parameters
-is - $\mbf a||x$, $\mbf b||y$ and $\mbf c||z$. Note that if you use the
-module {\prg cfield}, the choice is more unconventional:$\mbf a||y$, $\mbf b||z$ and $\mbf c||x$
-Tools for rotating crystal field parameters are described in appendix~\ref{rotateBlm}.
+is - $\vec a||x$, $\vec b||y$ and $\vec c||z$. \footnote{Note that if you use the
+module {\prg cfield}, the choice is more unconventional:$\vec a||y$, $\vec b||z$ and $\vec c||x$
+Tools for rotating crystal field parameters are described in appendix~\ref{rotateBlm}.}
+In case of non-orthogonal axes the convention 
+is $y||\vec b$, $z||(\vec a \times \vec b)$ and $x$ perpendicular to $y$ and $z$.
+
 
 The reason for
 this unique choice is to make it possible to treat quadrupolar interactions - the 
 generalisation of bilinear interactions to these higher order interactions
-is much easier in this a first glance very unconventional axes convention.
-Furthermore, for the higher order interactions it is also convenient to
-adopt the same orientation of the coordinate system for each atom.
+is much easier in a unique axes convention.
+
 
 
 {\small

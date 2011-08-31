@@ -49,8 +49,19 @@ different tensor operators $\hat{T}_{lm}$, which are the Hermitian combinations 
 Our $L_l^m$ parameters therefore have the same normalisation as the Wybourne parameters but will be real.
 %, with the imaginary parts expressed by the $q<0$ components of the $\hat{T}_{lm}$ operator.
 
-In summary, the various types of crystal field parameters are given in 
+In summary:
+\begin{enumerate}
+ \item  the various types of crystal field parameters are given in 
 table~\ref{cfpartypes}.
+\item crystal field parameters may have different units, in {\prg
+McPhase} we use meV.
+\item crystal field coordinate systems used in literature may be 
+different from the convention used by single ion modules {\prg so1ion,ic1ion,icf1ion},
+which is the crystal field axes $xyz$ are such that $x||a,y||b,z||c$ in case
+of orthogonal lattices and in case of non-orthogonal axes 
+the convention is $y||\vec b$, $z||(\vec a \times \vec b)$ and $x$ perpendicular to $y$ and $z$.
+\end{enumerate}
+
 \begin{table}
 \begin{center} \begin{tabular}{@{\extracolsep{\fill}}l|r|l|l} \hline
 Literature	&  Parameter  & Relation to $L_l^m$                                                   & Normalisation \\ 
@@ -62,10 +73,14 @@ $A_l^m$ in Kassman 1970~\cite{kassman70-4118}  & & & \\
 $A_l^m$ in Abragam 1970~\cite{abragam70-1}  & & & \\
 \hline
 $B_l^m$ in Hutchings 1964~\cite{hutchings64-227}
-		&  Blm        & =           $ \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle$ & Stevens \\
+		&  Blm        & =           $ \left \{ \begin{array}{lr}  \lambda_{lm} L_l^m \langle J || \theta_l || J \rangle & {\rm  for rare earth} \\
+                                                                          \lambda_{lm} L_l^m \langle L || \theta_l || L \rangle & {\rm  for trans metals}
+		                                       \end{array} \right .$                                  & Stevens \\                               
+
 $B_l^m$ in Jensen 1991~\cite{jensen91-1}  & & & \\
 $B^l_m$ in Mulak 2000~\cite{mulak00-1}  & & & \\
-
+$B^l_m$ in FOCUS  & & & \\
+$B^l_m$ in AMOS   & & & \\
 \hline
 $V_l^m$ in Elliott 1953~\cite{elliott53-387}
 		&             & =           $ \lambda_{lm} L_l^m $                                   & Stevens \\
@@ -84,6 +99,7 @@ $B_m^l$ in Wybourne 1965~\cite{wybourne65}\footnote{Note that table 6-1 and equ 
 		                              \end{array}  \right . $                                & Wybourne  \\ 
 $B_m^l$ in Kassman 1970~\cite{kassman70-4118}  & & & \\
 $B_{lm}$ in Mulak 2000~\cite{mulak00-1}  & & & \\
+$Ak(),CAk()$ in XTLS  & & & \\
 \hline
 $B_m^l$ in Newman 2000~\cite{newman00-1}
                 &             & =           $(-1)^m L_l^m$                                            & Wybourne \\
@@ -91,9 +107,9 @@ $B_m^l$ in Newman 2000~\cite{newman00-1}
 \end{tabular} 
 \caption{Different Crystal Field Parameter Notation Schemes in Literature.
 Here half($m$) = $\frac{1}{2}$ when $m\neq 0$ and half($m$)=1 when $m=0$.
-Note that {\prg lm} should be replaced by numbers - e.g. an example of ARlm is {\prg AR20}, and that
-the operator equivalent factor $\langle J || \theta_l || J \rangle$ should be $\langle L || \theta_l || L
-\rangle$ for an $L$-manifold which is the default for $d$-electron ions. The constants $\lambda_{lm}$
+Note that {\prg lm} should be replaced by numbers - e.g. an example of Alm is {\prg A20}, and that
+the operator equivalent factor $\langle J || \theta_l || J \rangle$~\cite{hutchings64-227} should be $\langle L || \theta_l || L
+\rangle$ for an $L$-manifold which is the default for $d$-electron ions~\cite{abragam70-1}. The constants $\lambda_{lm}$
 are given in table~\ref{tab:wytostev}.}\label{cfpartypes}
 \end{center}
 \end{table}

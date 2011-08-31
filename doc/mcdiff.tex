@@ -9,6 +9,9 @@ the output file {\prg mcphas.sps} by the program {\prg setup\_mcdiff\_in\index{s
                         and maximal angle have to be edited).
 \footnote{Alternatively, one may make use of the program {\prg spins\index{spins}}.} 
 {\prg mcdiff\index{mcdiff}} then calculates neutron reflection and intensity list.
+Miller indices always refer to the lattice $\vec a^*, \vec b^*, \vec c^*$, which
+is the reciprocal lattice of $\vec a, \vec b, \vec c$ as defined by lattice
+parameters $a,b,c$ and angles $\alpha,\beta,\gamma$.
 
 Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff}.in):
 
@@ -386,7 +389,9 @@ separately and no interference is considered.
 
 To determine the azimuthal dependence the $z_i$ are expanded in terms of the components
 $\mu_a,\mu_b$ and $\mu_c$ of the magnetic moment along the orthogonal crystallographic
-unit cell vectors $\mbf a$,$\mbf b$ and $\mbf c$:
+unit cell vectors $\mbf a$,$\mbf b$ and $\mbf c$ (for non orthogonal
+crystal lattices currently magnetic xray scattering intensities cannot
+be calculated):
 
 \begin{eqnarray}
 z_1&=&\mu_a \sin \alpha_1 \cos(\Psi+\delta_1)+\mu_b \sin \alpha_2 \cos(\Psi +\delta_2) \nonumber \\
@@ -558,6 +563,9 @@ in the following format:
 # 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1), 
 # 'dr1','dr2' and 'dr3' refer to the primitive lattice given below
 # 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons
+#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mi Mj Mk
+#                have to be given, which refer to an right handed orthogonal coordinate system 
+#                defined by j||b, k||(a x b) and i normal to k and j
 # '<Ja>' '<Jb>' '<Jc>' (optional) denote the momentum components 
 # 'gjmbHeffa' 'gjmbHeffb' 'gjmbHeffc' (optional line, used to go beyond dipole approx for formfactor)
 #                                     denote the corresponding meanfields multiplied by 
@@ -653,7 +661,6 @@ Z7c6=-0.00614959
 \end{verbatim}
 
 The $Y_{lm}(\hat \mbf Q)$ are the spherical harmonics evaluated for the direction of the
-scattering vector with respect to the crystal field coordinate system $xyz$ (which in {\prg McPhase}
-is oriented relatively to the crystal axes coordinates as $y||a$, $z||b$, $x||c$ - see chapter \ref{cfield}).
+scattering vector with respect to the crystal field coordinate system $xyz$.
 The factor $P(K',Q')$ is defined in terms of $3j$-symbols.
 
