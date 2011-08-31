@@ -185,7 +185,7 @@ while(n>0)
  cfi =  x/sqrt(x*x+y*y);} 
 
   int l,m;   
- // cnst is the Zlm constants - put them into the matrix (same constants are used in jjjpar.cpp and ionpars.cpp)
+ // cnst is the Zlm prefactors (plm) - put them into the matrix (same constants are used in jjjpar.cpp and ionpars.cpp)
  Matrix cnst(0,6,-6,6); 
 
  cnst(2,0) = 0.3153962;
@@ -203,9 +203,9 @@ while(n>0)
  cnst(6,4)=  0.5045723;
  cnst(6,5)=  2.366619;
  cnst(6,6)=  0.6831942;
- for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
+ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);} // for negative m the prefactors plm are the same as for positive
 
- // evaluate the Zlm in order to get gamma_lm
+ // evaluate the Zlm in order to get gamma_lm ... in the following lines Zlm(Omega_i) is evaluated
  gamma(1)= cnst(2, -2)  * 2 * st2 * sfi * cfi;
  gamma(2)= cnst(2, -1)  * st * sfi * ct;
  gamma(3)= cnst(2, 0)  * (3 * ct2 - 1);
@@ -235,6 +235,7 @@ while(n>0)
  gamma(43)= cnst(6, 4)  * (11 * ct2 - 1) * st2 * st2 * (cfi * cfi * cfi * cfi - 6 * cfi * cfi * sfi * sfi + sfi * sfi * sfi * sfi);
  gamma(44)= cnst(6, 5)  * ct * st * st2 * st2 * (cfi * cfi * cfi * cfi * cfi - 10 * cfi * cfi * cfi * sfi * sfi + 5 * cfi * sfi * sfi * sfi * sfi);
  gamma(45)= cnst(6, 6) * st2 * st2 * st2 * (cfi * cfi * cfi * cfi * cfi * cfi - 15 * cfi * cfi * cfi * cfi * sfi * sfi + 15 * cfi * cfi * sfi * sfi * sfi * sfi - sfi * sfi * sfi * sfi * sfi * sfi);
+  //... now gamma_lm=Zlm(Omega_i)
 
 
  // this is squaring of the coefficients of Zlm, a technical trick in
@@ -273,6 +274,7 @@ while(n>0)
  B(43)= cnst(6, 4)  * (11 * ct2 - 1) * st2 * st2 * (cfi * cfi * cfi * cfi - 6 * cfi * cfi * sfi * sfi + sfi * sfi * sfi * sfi);
  B(44)= cnst(6, 5)  * ct * st * st2 * st2 * (cfi * cfi * cfi * cfi * cfi - 10 * cfi * cfi * cfi * sfi * sfi + 5 * cfi * sfi * sfi * sfi * sfi);
  B(45)= cnst(6, 6) * st2 * st2 * st2 * (cfi * cfi * cfi * cfi * cfi * cfi - 15 * cfi * cfi * cfi * cfi * sfi * sfi + 15 * cfi * cfi * sfi * sfi * sfi * sfi - sfi * sfi * sfi * sfi * sfi * sfi);
+// ... now B()=plm*Zlm(Omegai)
 
 
  // now calculation of the coefficients gammaLM  in cgs
@@ -286,7 +288,8 @@ while(n>0)
  //gamma6M
  for (i=33;i<=45;++i){B(i)*=q/r/r/r/r/r/r/r*4*PI/13; gamma(i)*=q*echarge*1e70/r/r/r/r/r/r/r/13/eps0; }
 
- // ... gammas are calculated in SI units [N m^(2-2L-1) /C]
+ // ... gammas are calculated gamma()=q*Zlm(Omegai)/[r^(l+1)eps0(2l+1)] in SI units [N m^(2-L-1) /C]
+ // ... Blm    are calculated B()=4pi*q*plm*Zlm(Omegai)/[r^(l+1)(2l+1)] in |e|A^(-L-1)
 
  double e,a0,umr,ehv2,ehv4,ehv6;
      e = 4.80325E-10; // elementarladung
@@ -316,6 +319,10 @@ while(n>0)
                    if(i!=39){(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/8.0/PI);}  //m<>0
                    else     {(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/4.0/PI);}  //m=0
                     }
+// now Llm=-|e|q*<r^l> sqrt((2l+1)/4pi) Zlm(Omegai)/[r^(l+1)eps0(2l+1)] in SI units [N m=J] transformed to meV by J2mEV
+//     Ll0=-|e|q*<r^l> sqrt((2l+1)/8pi) ...  for m=0
+
+// now Blm=-e^2 <r^l> theta_l 4pi*q*|plm|*Zlm(Omegai)/[r^(l+1)(2l+1)]
  n=0;
  if (argc<5)
  { while((n==0)&(feof(table_file)==false))n=inputline(table_file, invalues);

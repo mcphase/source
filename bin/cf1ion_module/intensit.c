@@ -1863,7 +1863,7 @@ void parametersatz(fp,modus,kristallfeld,ionennr,einheit,eingabeart)
     CHAR *einheit;
     CHAR eingabeart;
 {
-    CHAR    *t01,*t02,*t02a,*t02b,*t02l,*t03,*t04,*t05,*t06,*t07/*,*t08,*t09,*t10*/,*t12,*t12a;
+    CHAR    *t01,*t02,*t02a,*t02b,*t03,*t04,*t05,*t06,*t07/*,*t08,*t09,*t10*/,*t12,*t12a;
     CHAR    *t16,*t22,*t26/*,*t33,*t34*/,*t36/*,*t45*/,*t46,*t47;
     DOUBLE  v20r,v21r,v22r,v40r,v41r,v42r,v43r,v44r;
     DOUBLE  v20i,v21i,v22i,v40i,v41i,v42i,v43i,v44i;
@@ -1895,7 +1895,6 @@ t01="#-------------------------------------------------------------- \n";
 t02="# Parameter           :  %ckq   in  %6s                        \n";
 t02a="# (NOT the same Vlm as in Hutchings p255 or Elliot and Stevens)\n";
 t02b="#                        Bkq are the Stevens Parameters  - see Hutchings Solid State Physics 16 (1964) 227\n";
-t02l="#                        Lkq are the Wybourne Parameters - see A. Kassmann J. Chem. Phys. 53 (1970) 4118\n";
 t12="# Parameter           :  %ckq   in  %6s/a0**k                  \n";
 t12a="# (compare Hutchings Solid State Physics 16 (1964) 227, p 255 eq 5.5)                             \n";
 t22="# Parameter           :  x,W    in  %6s                        \n";
@@ -1988,7 +1987,6 @@ t26="#!   W     =   %16.6f                                \n";
 
     if( modus==up(VKQ)) fprintf(fp,"%s",t02a);
     if( modus==up(BKQ)) fprintf(fp,"%s",t02b);
-    if( modus==up(LKQ)) fprintf(fp,"%s",t02l);
     if( modus==up(AKQ)) fprintf(fp,"%s",t12a);
 /*    fprintf(fp,"%s",t03);fprintf(fp,"%s",t04);*/
     e_4f = E4f( ionennr );
