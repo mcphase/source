@@ -234,10 +234,10 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
             else
             {
                elp = pow(-1.,(S2-L2-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2,J2[i],L2,J2[j],S2,2*k) * rmU[k] * pow(-1.,(J2[i]+mJ2[i])/2.+k);
-               elm = elp * wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k,-2*abs(q)) / sqrt(2.*k+1.); 
-               elp *=      wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k, 2*abs(q)) / sqrt(2.*k+1.); 
+               elm = elp * wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k, 2*abs(q)) / sqrt(2.*k+1.);  // Note in Elliot et al., eqn 25, it is -q in the Wigner 
+               elp *=      wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k,-2*abs(q)) / sqrt(2.*k+1.);  //    symbol.
                if(q<0)
-                 Hcfi(i,j)+= (elp-elm*pow(-1.,q)) * pars.B(k,q); 
+                 Hcfi(i,j)-= (elp-elm*pow(-1.,q)) * pars.B(k,q); 
                else
                  Hcf(i,j) += (elp+elm*pow(-1.,q)) * pars.B(k,q); 
             }
@@ -328,10 +328,12 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
       ns+=J2+1; 
       if (ind%2==0)                                     // Sx, Sy or Sz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
-            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(S2,J2,L2,J2p,S2,2);
+//          rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(S2,J2,L2,J2p,S2,2);
+            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(J2p,2,J2,S2,L2,S2);
       else                                              // Lx, Ly or Lz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
-            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(L2,J2,S2,J2p,L2,2);
+//          rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(L2,J2,S2,J2p,L2,2);
+            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(J2p,2,J2,L2,S2,L2);
 //    for (int J2p=J2min; J2p<=J2max; J2p+=2) 
 //    {
 //       Lrm = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(L2,J2,S2,J2p,L2,2);
@@ -641,9 +643,9 @@ __declspec(dllexport)
       if(fabs(vgjmbH[ind])<SMALL) continue; 
       if(ind<=6) mat = icf_mumat(pars.n, ind-1, pars.l); else mat = icf_ukq(pars.n,K[ind],Q[ind],pars.l); 
       mat *= vgjmbH[ind];
-      if(im[ind]==1) Hcfi += mat; else Hcf += mat;
+      if(im[ind]==1) Hcfi -= mat; else Hcf += mat;
    }
-
+   
    // Initialises the output matrix
    int Hsz = Hcf.nr();
    (*est) = ComplexMatrix(0,Hsz,0,Hsz);
@@ -2098,9 +2100,9 @@ int main(int argc, char *argv[])
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(pars.Bx)>DBL_EPSILON || fabs(pars.By)>DBL_EPSILON || fabs(pars.Bz)>DBL_EPSILON)
    {
-      if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH(2)=MUB*pars.Bx; gjmbH(1)=GS*gjmbH(2); }
-      if(fabs(pars.By)>DBL_EPSILON) { gjmbH(4)=MUB*pars.By; gjmbH(3)=GS*gjmbH(4); }
-      if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH(6)=MUB*pars.Bz; gjmbH(5)=GS*gjmbH(6); }
+      if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH(2)=-MUB*pars.Bx; gjmbH(1)=GS*gjmbH(2); }
+      if(fabs(pars.By)>DBL_EPSILON) { gjmbH(4)=-MUB*pars.By; gjmbH(3)=GS*gjmbH(4); }
+      if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH(6)=-MUB*pars.Bz; gjmbH(5)=GS*gjmbH(6); }
    }
    estates(&est,gjmbH,T,T,gjmbH,&infile);
    icf_showoutput(outfile,pars,est);
