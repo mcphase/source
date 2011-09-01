@@ -1,8 +1,10 @@
 #!/usr/bin/perl
+BEGIN{@ARGV=map{glob($_)}@ARGV}
+
 use Getopt::Long;
-#use Math::Trig;
-use PDL;
-use PDL::Slatec;
+use Math::Trig;
+#use PDL;
+#use PDL::Slatec;
 use Switch;
 use File::Copy;
 
@@ -61,7 +63,7 @@ switch ($module)
 }
 
 # transform CEF parameters to eV
-if(1==0)
+if(0==0)
 {$L20*=0.001;
 $L21s*=0.001;
 $L22s*=0.001;
@@ -92,9 +94,20 @@ $L66s*=0.001;
 
 $F2*=0.001;
 $F4*=0.001;
+$F6*=0.001;
 $xi*=0.001;
 }
-print STDOUT << "EOF";
+$mb=0.05788e-3; # bohr magneton in eV/T
+$Bx*=$mb;$By*=$mb;$Bz*=$mb;$Bdirx=1;$Bdiry=0;$Bdirz=0;
+$Babs=$Bx*$Bx+$By*$By+$Bz*$Bz; # set absolute value of applied magnetic field in eV
+if ($Babs>0){$Babs=sqrt($Babs);
+             $Bdirx=$Bx/$Babs;
+             $Bdiry=$By/$Babs;
+             $Bdirz=$Bz/$Babs;
+            }
+
+open (FOUT,">$file.xcard");
+print FOUT << "EOF";
  XCRD:
  //XCARD for $file
  (
@@ -114,7 +127,7 @@ print STDOUT << "EOF";
 
    Mode =nop;
    //Mag={$conf};
-   Ninit=20;
+   Ninit=16;
    // this is to define that we want to calculate expectation value of Y40 and Y44
    //Goprt="A40;A44;A4m4";
 
@@ -136,28 +149,29 @@ print STDOUT << "EOF";
 EOF
 
 
-                                       print STDOUT "    CAk(#i1 $conf)={2,0,$L20,0\n";
-if (abs($L21*$L21+$L21s*$L21s)>1e-10) {print STDOUT "              ,2,1,".(-$L21).",".( $L21s).",2,-1,$L21,$L21s\n";}
-if (abs($L22*$L22+$L22s*$L22s)>1e-10) {print STDOUT "              ,2,2,".( $L22).",".(-$L22s).",2,-2,$L22,$L22s\n";}
-if (abs($L40)>1e-10)                  {print STDOUT "              ,4,0,$L40,0\n";}
-if (abs($L41*$L41+$L41s*$L41s)>1e-10) {print STDOUT "              ,4,1,".(-$L41).",".( $L41s).",4,-1,$L41,$L41s\n";}
-if (abs($L42*$L42+$L42s*$L42s)>1e-10) {print STDOUT "              ,4,2,".( $L42).",".(-$L42s).",4,-2,$L42,$L42s\n";}
-if (abs($L43*$L43+$L43s*$L43s)>1e-10) {print STDOUT "              ,4,3,".(-$L43).",".( $L43s).",4,-3,$L43,$L43s\n";}
-if (abs($L44*$L44+$L44s*$L44s)>1e-10) {print STDOUT "              ,4,4,".( $L44).",".(-$L44s).",4,-4,$L44,$L44s\n";}
-if (abs($L60)>1e-10)                  {print STDOUT "              ,4,0,$L40,0\n";}
-if (abs($L61*$L61+$L61s*$L61s)>1e-10) {print STDOUT "              ,6,1,".(-$L61).",".( $L61s).",6,-1,$L61,$L61s\n";}
-if (abs($L62*$L62+$L62s*$L62s)>1e-10) {print STDOUT "              ,6,2,".( $L62).",".(-$L62s).",6,-2,$L62,$L62s\n";}
-if (abs($L63*$L63+$L63s*$L63s)>1e-10) {print STDOUT "              ,6,3,".(-$L63).",".( $L63s).",6,-3,$L63,$L63s\n";}
-if (abs($L64*$L64+$L64s*$L64s)>1e-10) {print STDOUT "              ,6,4,".( $L64).",".(-$L64s).",6,-4,$L64,$L64s\n";}
-if (abs($L65*$L65+$L65s*$L65s)>1e-10) {print STDOUT "              ,6,5,".(-$L65).",".( $L65s).",6,-5,$L65,$L65s\n";}
-if (abs($L66*$L66+$L66s*$L66s)>1e-10) {print STDOUT "              ,6,6,".( $L66).",".(-$L66s).",6,-6,$L66,$L66s\n";}
-print STDOUT "          };\n";
-print STDOUT << "EOF";
-    Rk(#i1 $conf $conf)={$F2,$F4};
+                                       print FOUT "    CAk(#i1 $conf)={2,0,$L20,0\n";
+if (abs($L21*$L21+$L21s*$L21s)>1e-10) {print FOUT "              ,2,1,".(-$L21).",".( $L21s).",2,-1,$L21,$L21s\n";}
+if (abs($L22*$L22+$L22s*$L22s)>1e-10) {print FOUT "              ,2,2,".( $L22).",".(-$L22s).",2,-2,$L22,$L22s\n";}
+if (abs($L40)>1e-10)                  {print FOUT "              ,4,0,$L40,0\n";}
+if (abs($L41*$L41+$L41s*$L41s)>1e-10) {print FOUT "              ,4,1,".(-$L41).",".( $L41s).",4,-1,$L41,$L41s\n";}
+if (abs($L42*$L42+$L42s*$L42s)>1e-10) {print FOUT "              ,4,2,".( $L42).",".(-$L42s).",4,-2,$L42,$L42s\n";}
+if (abs($L43*$L43+$L43s*$L43s)>1e-10) {print FOUT "              ,4,3,".(-$L43).",".( $L43s).",4,-3,$L43,$L43s\n";}
+if (abs($L44*$L44+$L44s*$L44s)>1e-10) {print FOUT "              ,4,4,".( $L44).",".(-$L44s).",4,-4,$L44,$L44s\n";}
+if (abs($L60)>1e-10)                  {print FOUT "              ,4,0,$L40,0\n";}
+if (abs($L61*$L61+$L61s*$L61s)>1e-10) {print FOUT "              ,6,1,".(-$L61).",".( $L61s).",6,-1,$L61,$L61s\n";}
+if (abs($L62*$L62+$L62s*$L62s)>1e-10) {print FOUT "              ,6,2,".( $L62).",".(-$L62s).",6,-2,$L62,$L62s\n";}
+if (abs($L63*$L63+$L63s*$L63s)>1e-10) {print FOUT "              ,6,3,".(-$L63).",".( $L63s).",6,-3,$L63,$L63s\n";}
+if (abs($L64*$L64+$L64s*$L64s)>1e-10) {print FOUT "              ,6,4,".( $L64).",".(-$L64s).",6,-4,$L64,$L64s\n";}
+if (abs($L65*$L65+$L65s*$L65s)>1e-10) {print FOUT "              ,6,5,".(-$L65).",".( $L65s).",6,-5,$L65,$L65s\n";}
+if (abs($L66*$L66+$L66s*$L66s)>1e-10) {print FOUT "              ,6,6,".( $L66).",".(-$L66s).",6,-6,$L66,$L66s\n";}
+print FOUT "          };\n";
+if($spdf=~/f/){print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4,$F6};\n";}
+else {print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4};\n";}
+print FOUT << "EOF";
     Zta(#i1 $conf)=$xi;
 
     // magnetic field in eV as muB*H
-   // Ba(#i1 $conf)={0.05788e-3,1,0,0};
+    Ba(#i1 $conf)={$Babs,$Bdirx,$Bdiry,$Bdirz};
 
     // here we say we want output of Y40 and Y44
  OPRT:
@@ -168,15 +182,15 @@ print STDOUT << "EOF";
 
  XEND:
  STOP:
+EOF
+close FOUT;
+print STDOUT << "EOF";
 //*******************************************************
-//
+// xcard $file.xcard created ...
 // you may now start an xtls calculation by
-// piping this output into a file "sample" in directory xcards
-//        sipf2xcard file.sipf > file
-// and starting
-//        x900 file
+//        x900 $file.xcard
 // or
-//        x900G file
+//        x900G $file.xcard
 //
 // .... output is in xobj
 //
@@ -201,7 +215,7 @@ sub usage() {
 
     output:
 
-    to stdout            contains anisotropy information
+    sipffilename.xcard    xcard for XTLS
 
 EOF
 
@@ -217,11 +231,18 @@ sub ic1ion()
  while($line=<Fin>){
                 if($line=~/^# Free ion configuration:/) {($spdf)=($line=~m|# Free ion configuration:\s*([spdf])|);
                            ($nof_electrons)=($line=~m|# Free ion configuration:\s*[spdf]\^(\d)|);
-                   print STDERR "Give the main quantum number n of the $spdf^$nof_electrons configuration\n";
+                   print STDERR "Give the main quantum number n of the n$spdf^$nof_electrons configuration\n";
                    $n= <STDIN>;$n=~s/\n//;$conf=$n.$spdf;}
+                if($line=~/^.*Bx\s*=/) {($Bx)=($line=~m|Bx\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*By\s*=/) {($By)=($line=~m|By\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*Bz\s*=/) {($Bz)=($line=~m|Bz\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*T\s*=/) {($T)=($line=~m|T\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*F\^2\s*=/) {($F2)=($line=~m|F\^2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*F\^4\s*=/) {($F4)=($line=~m|F\^4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*xi\s*=/)  {($xi)=($line=~m|xi\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*XI\s*=/)  {($xi)=($line=~m|XI\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*zeta\s*=/)  {($xi)=($line=~m|zeta\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*ZETA\s*=/)  {($xi)=($line=~m|ZETA\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L20\s*=/) {($L20)=($line=~m|L20\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L21\s*=/) {($L21)=($line=~m|L21\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L22\s*=/) {($L22)=($line=~m|L22\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
@@ -237,6 +258,7 @@ sub ic1ion()
                 if($line=~/^.*L4-3\s*=/) {($L43s)=($line=~m|L4-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L4-4\s*=/) {($L44s)=($line=~m|L4-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
 if($spdf=~/f/){
+                if($line=~/^.*F\^6\s*=/) {($F6)=($line=~m|F\^6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L60\s*=/) {($L60)=($line=~m|L60\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L61\s*=/) {($L61)=($line=~m|L61\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L62\s*=/) {($L62)=($line=~m|L62\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
@@ -253,7 +275,8 @@ if($spdf=~/f/){
               }
                     }
  print STDERR "configuration is $conf\n";
- print STDERR "F^2=$F2 meV F^4=$F4 meV xi=$xi meV\n";
+ print STDERR "F^2=$F2 meV F^4=$F4 meV F^6=$F6 meV ZETA=$xi meV\n";
+ print STDERR "Bx=$Bx T By=$By T Bz=$Bz T    T=$T K\n";
 
               close Fin;
  chdir "..";
