@@ -324,7 +324,7 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
    int i; Jmat.zero(J[0].nr(),J[0].nc()); iJmat.zero(J[0].nr(),J[0].nc()); 
    if(_num_op<(int)gjmbH.size()) { iflag.resize(_num_op,0); _num_op = (int)gjmbH.size(); }
    for(i=0; i<(_num_op>6?6:_num_op); i++)
-      if(fabs(gjmbH[i])>DBL_EPSILON*100) { if(iflag[i]==1) iJmat -= J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i]; }
+      if(fabs(gjmbH[i])>DBL_EPSILON*100) { if(iflag[i]==1) iJmat += J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i]; }
    // Higher order than dipole operators needed
    if(_num_op>6)
    {

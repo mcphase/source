@@ -271,7 +271,7 @@ void ic_cmag(const char *filename, icpars &pars)
    double ynorm = sqrt(pars.yHa*pars.yHa+pars.yHb*pars.yHb+pars.yHc*pars.yHc); if(ynorm==0) ynorm=1.;
    std::vector<double> gjmbH(6,0.), gjmbHmeV(6,0.); 
    if(pars.xT==0.) gjmbH[1]=pars.xHa/xnorm; else gjmbH[1]=pars.yHa/ynorm; gjmbH[0]=GS*gjmbH[1];
-   if(pars.xT==0.) gjmbH[3]=-pars.xHb/xnorm;else gjmbH[3]=-pars.yHb/ynorm;gjmbH[2]=GS*gjmbH[3];
+   if(pars.xT==0.) gjmbH[3]=pars.xHb/xnorm; else gjmbH[3]=pars.yHb/ynorm; gjmbH[2]=GS*gjmbH[3];
    if(pars.xT==0.) gjmbH[5]=pars.xHc/xnorm; else gjmbH[5]=pars.yHc/ynorm; gjmbH[4]=GS*gjmbH[5];
 
    iceig VE;
@@ -353,12 +353,10 @@ int main(int argc, char *argv[])
    {
       std::vector<double> gjmbH(6,0.);
       if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH[1]=-MUBc*pars.Bx; gjmbH[0]=GS*gjmbH[1]; }
-      if(fabs(pars.By)>DBL_EPSILON) { gjmbH[3]=-MUBc*pars.By; gjmbH[2]=GS*gjmbH[3]; }
+      if(fabs(pars.By)>DBL_EPSILON) { gjmbH[3]= MUBc*pars.By; gjmbH[2]=GS*gjmbH[3]; }
       if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH[5]=-MUBc*pars.Bz; gjmbH[4]=GS*gjmbH[5]; }
       sMat<double> J,iJ; icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices); mfmat.Jmat(J,iJ,gjmbH,pars.save_matrices); Hic+=J; iHic+=iJ;
    }
-
-   int icv=Hic.nr();
 
 // std::cout << std::setprecision(16) << "Hic=" << Hic.display_full() << "; Hic=Hic./" << MEV2CM << ";\n";
 // std::cout << std::setprecision(16) << "iHic=" << iHic.display_full() << "; iHic=iHic./" << MEV2CM << ";\n";
