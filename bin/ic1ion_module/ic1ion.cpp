@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
    {
       std::vector<double> gjmbH(6,0.);
       if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH[1]=-MUBc*pars.Bx; gjmbH[0]=GS*gjmbH[1]; }
-      if(fabs(pars.By)>DBL_EPSILON) { gjmbH[3]= MUBc*pars.By; gjmbH[2]=GS*gjmbH[3]; }
+      if(fabs(pars.By)>DBL_EPSILON) { gjmbH[3]=-MUBc*pars.By; gjmbH[2]=GS*gjmbH[3]; }
       if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH[5]=-MUBc*pars.Bz; gjmbH[4]=GS*gjmbH[5]; }
       sMat<double> J,iJ; icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices); mfmat.Jmat(J,iJ,gjmbH,pars.save_matrices); Hic+=J; iHic+=iJ;
    }

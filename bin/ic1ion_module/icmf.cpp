@@ -281,8 +281,8 @@ icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string d
    { 
       racah_mumat(n,1,Lp1,Sp1,l); rmzeros(Sp1); rmzeros(Lp1);
       racah_mumat(n,-1,Lm1,Sm1,l); rmzeros(Sm1); rmzeros(Lm1);
-      J[0] = (Sm1-Sp1)/sqrt(2); J[2] = (Sm1+Sp1)/sqrt(2); Sm1.clear(); Sp1.clear();   // Sx and Sy
-      J[1] = (Lm1-Lp1)/sqrt(2); J[3] = (Lm1+Lp1)/sqrt(2); Lm1.clear(); Lp1.clear();   // Lx ans Ly
+      J[0] = (Sp1+Sm1)/sqrt(2); J[2] = (Sp1-Sm1)/(-sqrt(2)); Sm1.clear(); Sp1.clear();   // Sx and Sy
+      J[1] = (Lp1+Lm1)/sqrt(2); J[3] = (Lp1-Lm1)/(-sqrt(2)); Lm1.clear(); Lp1.clear();   // Lx ans Ly
       mm_gout(J[2],Sfilestr); mm_gout(J[3],Lfilestr);
       nstr[2]=120; nstr[3]=0; strcpy(Lfilestr,basename); strcat(Lfilestr,nstr); strcat(Lfilestr,".mm");   
       nstr[0]=83;             strcpy(Sfilestr,basename); strcat(Sfilestr,nstr); strcat(Sfilestr,".mm");
@@ -363,9 +363,9 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
             Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(n,k[i],-abs(q[i]),_l); rmzeros(Umq); mm_gout(Umq,filename); }
             if(q[i]<0) { 
             // if((q[i]%2)==0) iJmat += (Upq - Umq) * (gjmbH[i]*redmat); else iJmat += (Upq + Umq) * (gjmbH[i]*redmat); } changed MR 15.12.09
-               if((q[i]%2)==0) iJmat -= (Upq - Umq) * (gjmbH[i]*redmat); else iJmat -= (Upq + Umq) * (gjmbH[i]*redmat); }
+               if((q[i]%2)==0) iJmat += (Umq - Upq) * (gjmbH[i]*redmat); else iJmat += (Umq + Upq) * (gjmbH[i]*redmat); }
             else {
-               if((q[i]%2)==0)  Jmat += (Upq + Umq) * (gjmbH[i]*redmat); else  Jmat += (Upq - Umq) * (gjmbH[i]*redmat); } 
+               if((q[i]%2)==0)  Jmat += (Umq + Upq) * (gjmbH[i]*redmat); else  Jmat += (Umq - Upq) * (gjmbH[i]*redmat); } 
          } 
       }
    }
@@ -522,11 +522,11 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
                Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(n,k[iJ],-abs(q[iJ]),_l); rmzeros(Umq); mm_gout(Umq,filename); }
                redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[iJ],2*_l,0,0,0);// * wy2stev(iJ);
 //             if(q[iJ]<0) { if((q[iJ]%2)==0) Upq -= Umq; else Upq += Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } changed MR 15.12.09
-               if(q[iJ]<0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; }
+               if(q[iJ]<0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
                #ifdef JIJCONV
                if(jijconv.size()>1) redmat*=jijconv[iJ+1];
                #endif
-               Upq *= redmat; fJmat = Upq.f_array();
+               Umq *= redmat; fJmat = Umq.f_array();
             }
             for(ind_j=0; ind_j<Esz; ind_j++)
             {  // Calculates the matrix elements <Vi|J.H|Vi>
@@ -558,11 +558,11 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
             Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(n,k[iJ],-abs(q[iJ]),_l); rmzeros(Umq); mm_gout(Umq,filename); }
             redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[iJ],2*_l,0,0,0);// * wy2stev(iJ);
 //          if(q[iJ]<0) { if((q[iJ]%2)==0) Upq -= Umq; else Upq += Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } changed MR 15.12.09
-            if(q[iJ]<0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; }
+            if(q[iJ]<0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
             #ifdef JIJCONV
             if(jijconv.size()>1) redmat*=jijconv[iJ+1];
             #endif
-            Upq *= redmat; if(iflag[iJ]==0) zJmat=zmat2f(Upq,zeroes); else zJmat = zmat2f(zeroes,Upq); //}
+            Umq *= redmat; if(iflag[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq); //}
          }
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          for(ind_j=0; ind_j<Esz; ind_j++)
@@ -633,8 +633,8 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
          #endif
          redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[iJ],2*_l,0,0,0);
 //       if(q[iJ]<0) { if((q[iJ]%2)==0) Upq -= Umq; else Upq += Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } changed MR 15.12.09
-         if(q[iJ]<0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; }
-         Upq *= redmat;
+         if(q[iJ]<0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
+         Umq *= redmat;
       }
 
       if(!VE.iscomplex() && im[iJ]==0)
@@ -652,7 +652,7 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
       else
       {
          zeroes.zero(J[0].nr(),J[0].nc());
-         if(iJ>=6) { if(im[iJ]==0) zJmat=zmat2f(Upq,zeroes);   else zJmat = zmat2f(zeroes,Upq); }
+         if(iJ>=6) { if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes);   else zJmat = zmat2f(zeroes,Umq); }
          else      { if(im[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]); }
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(j), &incx, &zbeta, zt, &incx);

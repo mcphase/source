@@ -162,6 +162,7 @@ __declspec(dllexport)
       }
       else  // Calculates using the Spectre method...                                       // lvl = 10;     % Number of |LSJ> levels to keep
       {
+         std::cerr << "ic1ion Warning: Using spectre method of dividing into J-submatrices - this method is known to be buggy!\n";
          if(pars.spectrelevels==-2)
          {
             std::cerr << "Trying to determine optimal number of levels for spectre... ";

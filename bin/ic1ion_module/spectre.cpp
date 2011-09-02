@@ -360,8 +360,8 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
          #ifdef JIJCONV
          if(pars.B.norm().find("Stevens")!=std::string::npos) redmat*=pars.jijconv[iJ+1];
          #endif
-         if(q[iJ]<0) { if((q[iJ]%2)==0) Upq -= Umq; else Upq += Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; }
-         Upq *= redmat; if(im[iJ]==0) zJmat=zmat2f(Upq,zeroes); else zJmat = zmat2f(zeroes,Upq);
+         if(q[iJ]<0) { if((q[iJ]%2)==0) Umq -= Upq; else Umq += Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
+         Umq *= redmat; if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq);
       }
       F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,Vf,&Hsz,&zbeta,zmt,&Hsz);
       F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&cb); free(zJmat);

@@ -180,8 +180,8 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
 
    sMat<double> Upq,Umq,emat,H_so;
    std::vector<double> E;
-   double p = 1./( pow(-1.,(double)abs(pars.l))*(2.*pars.l+1.) );
-   double icfact[] = {0,0,p/threej(2*pars.l,4,2*pars.l,0,0,0),0,p/threej(2*pars.l,8,2*pars.l,0,0,0),0,p/threej(2*pars.l,12,2*pars.l,0,0,0)};
+   double p = pow(-1.,(double)abs(pars.l))*(2.*pars.l+1.);
+   double icfact[] = {0,0,p*threej(2*pars.l,4,2*pars.l,0,0,0),0,p*threej(2*pars.l,8,2*pars.l,0,0,0),0,p*threej(2*pars.l,12,2*pars.l,0,0,0)};
    int n = pars.n; orbital e_l = pars.l;
    int nn = n; //if(n>(2*e_l+1)) n = 4*e_l+2-n; 
 
@@ -276,7 +276,7 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
                 //   Upq = fast_ukq(n,k,0);
                   rmzeros(Upq); mm_gout(Upq,filename);
                }
-             /*if(nn>(2*e_l+1)) H_cf -= Upq * (pars.B(k,q)/icfact[k]); else*/ H_cf += Upq * (pars.B(k,q)/icfact[k]);
+             /*if(nn>(2*e_l+1)) H_cf -= Upq * (pars.B(k,q)/icfact[k]); else*/ H_cf += Upq * (pars.B(k,q)*icfact[k]);
             }
             else
             {
@@ -301,10 +301,10 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
                if(q<0)
                 /*if(nn>(2*e_l+1)) H_cfi-= (Upq - Umq*pow(-1.,q)) * (pars.B(k,q)/icfact[k]); 
                   else   H_cfi+= (Upq - Umq*pow(-1.,q)) * (pars.B(k,q)/icfact[k]); changed MR 15.12.09 */
-                         H_cfi-= (Upq - Umq*pow(-1.,q)) * (pars.B(k,q)/icfact[k]);
+                         H_cfi+= (Umq - Upq*pow(-1.,q)) * (pars.B(k,q)*icfact[k]);
                else
                 /*if(nn>(2*e_l+1)) H_cf -= (Upq + Umq*pow(-1.,q)) * (pars.B(k,q)/icfact[k]); 
-                  else*/ H_cf += (Upq + Umq*pow(-1.,q)) * (pars.B(k,q)/icfact[k]); 
+                  else*/ H_cf += (Umq + Upq*pow(-1.,q)) * (pars.B(k,q)*icfact[k]); 
             }
          }
       }

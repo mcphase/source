@@ -183,7 +183,7 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
 
    // Determines reduced matrix elements (Stevens operator equivalent factor)
    double rmso = 0., rmU[7]={0.,0.,0.,0.,0.,0.,0.};
-   double p = 1./( pow(-1.,(double)abs(e_l))*(2.*e_l+1.) );
+   double p = ( pow(-1.,(double)abs(e_l))*(2.*e_l+1.) );
    if (n>1)
    {
       fconf confp(n-1,e_l);
@@ -196,21 +196,22 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
       for(int k=0; k<sz; k++)
       {
          int pS2 = confp.states[cfps[k].ind].S2, pL2 = abs(confp.states[cfps[k].ind].L)*2;
-         rmso   += racahW(pS2,S2,1,2,1,S2) * racahW(pL2,L2,2*e_l,2,2*e_l,L2) * cfps[k].cfp * cfps[k].cfp; //if(n!=(4*e_l+1)) {
-         rmU[2] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,4,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
-         rmU[4] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,8,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
-         rmU[6] += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.); //}
+         rmso   += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,2,L2,2*e_l,pL2,2*e_l) * 
+		   pow(-1.,(double)(pS2+S2+1)/2.)   * sixj(S2,2,S2,1,pS2,1) * cfps[k].cfp * cfps[k].cfp;
+         rmU[2] += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,4,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
+         rmU[4] += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,8,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
+         rmU[6] += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.); //}
       }
     //if(n==(4*e_l+1)) { rmU[2]=1./n; rmU[4]=1./n; rmU[6]=1./n; }
-      for(int ik=2; ik<=6; ik+=2) rmU[ik] *= n * threej(2*e_l,2*ik,2*e_l,0,0,0) / p;
+      for(int ik=2; ik<=6; ik+=2) rmU[ik] *= n * threej(2*e_l,2*ik,2*e_l,0,0,0) * p;
    }
    else  // Single electron
    {
    // rmso = sqrt(3/2.)*sqrt(e_l*(e_l+1)*(2*e_l+1));             // s=1/2 substituted into eqn 4-12 of Judd 1963
       rmso = 1./((L2+1.)*(S2+1.));
-      rmU[2] = threej(2*e_l,4,2*e_l,0,0,0) / p;                  // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
-      rmU[4] = threej(2*e_l,8,2*e_l,0,0,0) / p;
-      rmU[6] = threej(2*e_l,12,2*e_l,0,0,0)/ p;
+      rmU[2] = threej(2*e_l,4,2*e_l,0,0,0) * p;                  // See Judd 1963, Eqn 5-13. with U^k=V^k/sqrt(2k+1)
+      rmU[4] = threej(2*e_l,8,2*e_l,0,0,0) * p;
+      rmU[6] = threej(2*e_l,12,2*e_l,0,0,0)* p;
    }
 
    double elp, elm; int k, q, iq;
@@ -219,27 +220,26 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
       {
          if(i==j)  // Selection rule for Spin-orbit operator J=J', mJ=mJ'
          {
-            Hcf(i,i) += -n*xi * racahW(J2[i],L2,S2,2,S2,L2) * (L2+1)*(S2+1) * sqrt( (9./6)*e_l*(e_l+1)*(2*e_l+1) ) * rmso;
-         // Hcf(i,i) = -xi * pow(-1.,(S2+L2+J2[i])/2.) * sixj(S2,S2,2,L2,L2,J2[i]) * rmso;
+            Hcf(i,i) += n*xi * pow(-1.,(S2+L2+J2[i])/2.) * sixj(S2,2,S2,L2,J2[i],L2) * (L2+1)*(S2+1) * sqrt( (9./6)*e_l*(e_l+1)*(2*e_l+1) ) * rmso;
          }
          for(k=2; k<=6; k+=2) for(iq=0; iq<(2*k+1); iq++)
          {
             q = iq-k; if(fabs(pars.B(k,q))<1e-10) continue;
             if(q==0)
             {
-               elp = pow(-1.,(S2-L2-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2,J2[i],L2,J2[j],S2,2*k) * rmU[k] 
-                        * pow(-1.,(J2[i]+mJ2[i])/2.+k) * wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k,0) / sqrt(2.*k+1.); 
+               elp = pow(-1.,(S2+L2+J2[i])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * sixj(J2[j],2*k,J2[i],L2,S2,L2) * rmU[k] 
+                        * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2*k,J2[j],0-mJ2[i],0,mJ2[j]);
                Hcf(i,j) += elp * pars.B(k,q);
             }
             else
             {
-               elp = pow(-1.,(S2-L2-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2,J2[i],L2,J2[j],S2,2*k) * rmU[k] * pow(-1.,(J2[i]+mJ2[i])/2.+k);
-               elm = elp * wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k, 2*abs(q)) / sqrt(2.*k+1.);  // Note in Elliot et al., eqn 25, it is -q in the Wigner 
-               elp *=      wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k,-2*abs(q)) / sqrt(2.*k+1.);  //    symbol.
+               elp = pow(-1.,(S2+L2+J2[i])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * sixj(J2[j],2*k,J2[i],L2,S2,L2) * rmU[k];
+               elm = elp * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2*k,J2[j],0-mJ2[i],-2*abs(q),mJ2[j]);
+               elp *=      pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2*k,J2[j],0-mJ2[i], 2*abs(q),mJ2[j]);
                if(q<0)
-                 Hcfi(i,j)-= (elp-elm*pow(-1.,q)) * pars.B(k,q); 
+                 Hcfi(i,j)+= (elm-elp*pow(-1.,q)) * pars.B(k,q); 
                else
-                 Hcf(i,j) += (elp+elm*pow(-1.,q)) * pars.B(k,q); 
+                 Hcf(i,j) += (elm+elp*pow(-1.,q)) * pars.B(k,q); 
             }
          }
       }
@@ -284,7 +284,7 @@ sMat<double> icf_ukq(int n, int k, int q, orbital e_l)
       for(int kk=0; kk<sz; kk++)
       {
          int pL2 = abs(confp.states[cfps[kk].ind].L)*2;
-         rmU += pow(-1.,(double)abs(pL2+L2)/2.+e_l) * sixj(L2,2*k,L2,2*e_l,pL2,2*e_l) * cfps[kk].cfp * cfps[kk].cfp * (L2+1.);
+         rmU += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,2*k,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
       }
       rmU *= n * threej(2*e_l,2*k,2*e_l,0,0,0) / p;
    }
@@ -296,20 +296,20 @@ sMat<double> icf_ukq(int n, int k, int q, orbital e_l)
       for (int i=0; i<ns; i++)
          for (int j=0; j<ns; j++)
          {
-            Hcf(i,j) = pow(-1.,(S2-L2-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2,J2[i],L2,J2[j],S2,2*k) * rmU 
-                       * pow(-1.,(J2[i]+mJ2[i])/2.+k) * wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k,0) / sqrt(2.*k+1.); 
+            Hcf(i,j) = pow(-1.,(S2+L2+J2[i])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * sixj(J2[j],2*k,J2[i],L2,S2,L2) * rmU
+                       * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2*k,J2[j],0-mJ2[i],0,mJ2[j]);
          }
    else
       for (int i=0; i<ns; i++)
          for (int j=0; j<ns; j++)
          {
-            elp = pow(-1.,(S2-L2-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2,J2[i],L2,J2[j],S2,2*k) * rmU * pow(-1.,(J2[i]+mJ2[i])/2.+k);
-            elm = elp * wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k,-2*abs(q)) / sqrt(2.*k+1.); 
-            elp *=      wigner(J2[i],J2[j],0-mJ2[i],mJ2[j],2*k, 2*abs(q)) / sqrt(2.*k+1.); 
+            elp = pow(-1.,(S2+L2+J2[i])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * sixj(J2[j],2*k,J2[i],L2,S2,L2) * rmU;
+            elm = elp * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2*k,J2[j],0-mJ2[i],-2*abs(q),mJ2[j]);
+            elp *=      pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2*k,J2[j],0-mJ2[i], 2*abs(q),mJ2[j]);
             if(q<0)
-              Hcf(i,j) += (elp-elm*pow(-1.,q));
+              Hcf(i,j) += (elm-elp*pow(-1.,q));
             else
-              Hcf(i,j) += (elp+elm*pow(-1.,q));
+              Hcf(i,j) += (elm+elp*pow(-1.,q));
          }
    return Hcf;
 }
@@ -328,11 +328,9 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
       ns+=J2+1; 
       if (ind%2==0)                                     // Sx, Sy or Sz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
-//          rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(S2,J2,L2,J2p,S2,2);
             rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(J2p,2,J2,S2,L2,S2);
       else                                              // Lx, Ly or Lz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
-//          rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(L2,J2,S2,J2p,L2,2);
             rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(J2p,2,J2,L2,S2,L2);
 //    for (int J2p=J2min; J2p<=J2max; J2p+=2) 
 //    {
@@ -354,17 +352,17 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
    if (ind<2)                                           // Sx or Lx
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
-         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
-         elm-= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
+         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
+         elm+= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
          if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm-elp)/sqrt2;
       }
    else if (ind>1 && ind<4)                             // Sy or Ly
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
-         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
-         elm+= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
-         if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
+         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
+         elm-= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
+         if(fabs(elm)>SMALL) mu(i,j)=-elm/sqrt2;
        //mu(i,j) = (elm+elp)/sqrt2;
       }
    else if (ind>3 && ind<6)                             // Sz or Lz
@@ -643,7 +641,7 @@ __declspec(dllexport)
       if(fabs(vgjmbH[ind])<SMALL) continue; 
       if(ind<=6) mat = icf_mumat(pars.n, ind-1, pars.l); else mat = icf_ukq(pars.n,K[ind],Q[ind],pars.l); 
       mat *= vgjmbH[ind];
-      if(im[ind]==1) Hcfi -= mat; else Hcf += mat;
+      if(im[ind]==1) Hcfi += mat; else Hcf += mat;
    }
    
    // Initialises the output matrix
@@ -2100,9 +2098,9 @@ int main(int argc, char *argv[])
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(pars.Bx)>DBL_EPSILON || fabs(pars.By)>DBL_EPSILON || fabs(pars.Bz)>DBL_EPSILON)
    {
-      if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH(2)=-MUB*pars.Bx; gjmbH(1)=GS*gjmbH(2); }
-      if(fabs(pars.By)>DBL_EPSILON) { gjmbH(4)=-MUB*pars.By; gjmbH(3)=GS*gjmbH(4); }
-      if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH(6)=-MUB*pars.Bz; gjmbH(5)=GS*gjmbH(6); }
+      if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH(2)=MUB*pars.Bx; gjmbH(1)=GS*gjmbH(2); }
+      if(fabs(pars.By)>DBL_EPSILON) { gjmbH(4)=MUB*pars.By; gjmbH(3)=GS*gjmbH(4); }
+      if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH(6)=MUB*pars.Bz; gjmbH(5)=GS*gjmbH(6); }
    }
    estates(&est,gjmbH,T,T,gjmbH,&infile);
    icf_showoutput(outfile,pars,est);
