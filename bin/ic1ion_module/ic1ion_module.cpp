@@ -259,7 +259,8 @@ __declspec(dllexport)
  
    // check if printout should be done and make tn positive
    int pr=1; if (tn<0) { pr=0; tn*=-1; }
-
+   double ninit=u1[1].real();
+   double pinit=u1[1].imag();
    // Copies the already calculated energy levels / wavefunctions from *est
    if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
    int Hsz = est.Rows()-1;
@@ -289,7 +290,11 @@ __declspec(dllexport)
             u1(i) = complex<double> (u[i], iu[i]);
    }
    // determine number of thermally reachable states
-   int noft=0;for(i=0;(i<Hsz)&(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))>SMALL);++i)noft+=Hsz-i-1;
+   if (ninit>Hsz)ninit=Hsz;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zi;
+   int noft=0;for(i=0;(i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum));++i){noft+=Hsz-i-1;zsum+=zi;}
+//   int noft=0;for(i=0;(i<Hsz)     &((exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)))>SMALL);++i)noft+=Hsz-i-1; // removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit   return noft;
    return noft;
    //return Hsz*(Hsz-1)/2;
 }
@@ -538,6 +543,8 @@ __declspec(dllexport)
 {
    // check if printout should be done and make tn positive
    int pr=1; if (tn<0) { pr=0; tn*=-1; }
+   double ninit=v1[1].real();
+   double pinit=v1[1].imag();
 
    int i,iJ,q,n=1,Hsz=est.Cols()-1; orbital l;//=D; find_nl_from_dim(Hsz,*&n,*&l,(complexdouble*)&est[1][1]);
    n = (int)est[0][0].real(); i = (int)est[0][0].imag(); l = (i==2) ? D : F;
@@ -689,8 +696,12 @@ __declspec(dllexport)
    }
          v1 *= sqrt(therm / Z);
 
+ if (ninit>Hsz)ninit=Hsz;
+ if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zi;
    // determine number of thermally reachable states
-   int noft=0;for(i=0;(i<Hsz)&((exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)))>SMALL);++i)noft+=Hsz-i-1;
+ int noft=0;for(i=0;(i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum));++i){noft+=Hsz-i-1;zsum+=zi;}
+//   int noft=0;for(i=0;(i<Hsz)     &((exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)))>SMALL);++i)noft+=Hsz-i-1; // removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit
    return noft;
 //   return Hsz*(Hsz-1)/2;
 }

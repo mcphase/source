@@ -8,7 +8,7 @@
 //***********************************************************************
 // returns 1 on success and zero on failure
 //***********************************************************************
-int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,Vector & hkl)
+int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,Vector & hkl, double ninit,double pinit)
 {int i,j,k,l,m,n,jmin,i1,j1,tn; Vector qijk(1,3);
  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
@@ -76,7 +76,7 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
 //       myPrintComplexVector(stdout,u1b);
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  j
         if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=tn;
-      nnt=(*inputpars.jjj[l]).dv1calc(qijk,ini.T,v1,md.est(i,j,k,l));
+      v1(1)=complex <double> (ninit,pinit);nnt=(*inputpars.jjj[l]).dv1calc(qijk,ini.T,v1,md.est(i,j,k,l));
 //       myPrintComplexVector(stdout,v1);
 
       gammab=Norm2(u1b);Mbijkl=u1b^u1b;u1b/=sqrt(gammab);

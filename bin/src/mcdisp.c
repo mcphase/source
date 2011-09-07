@@ -319,7 +319,7 @@ void writeheader(par & inputpars,FILE * fout)
 
 
 // procedure to calculate the dispersion
-void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double epsilon, const char * filemode)
+void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
   FILE * fin;
   FILE * fout;
@@ -440,7 +440,9 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
    fprintf(fout,"#             k,i   E -> E                                     |\n");
    fprintf(fout,"#                    i    k                                    |\n");
    fprintf(fout,"#-------------------------------------------------------------- \n");
-   fprintf(fout,"# T= %g K Ha=%g Hb=%g Hc=%g T\n",ini.T,ini.Ha,ini.Hb,ini.Hc);
+   fprintf(fout,"#! ninit= %g (max number of initial states)\n",ninit);
+   fprintf(fout,"#! pinit= %g (minimum population number of initial states)\n",pinit);
+   fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",ini.T,ini.Ha,ini.Hb,ini.Hc);
    fprintf(fout,"#*********************************************************************\n");
           fprintf (fout, "#i j k ionnr transnr energy |gamma_s|  sigma [barn/sr](*)\n");
  
@@ -454,7 +456,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
    md.est_ini(i,j,k,l,(*inputpars.jjj[l]).eigenstates(mf,ini.T)); 
    (*inputpars.jjj[l]).transitionnumber=1;
    fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-   d=1e10;i1=(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+   d=1e10;u1(1)=complex <double> (ninit,pinit);i1=(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
    Mijkl = u1^u1;
       // here Mijkl is a nxn matrix n ... numberofcomponents
    noftransitions(l)=0;
@@ -463,7 +465,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
      fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      ++(*inputpars.jjj[l]).transitionnumber;
      fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-     d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+     d=1e10;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
      Mijkl=u1^u1;
      if((*inputpars.jjj[l]).transitionnumber>i1){fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n (within first crystallographic unit of magnetic unit cell)\n please increase energy range in option -maxE and -minE\n",minE,maxE);
                             exit(EXIT_FAILURE);}
@@ -503,7 +505,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
       
         (*inputpars.jjj[l]).transitionnumber=j1; // try calculation for transition  j
       fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-      d=maxE;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+      d=maxE;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
       Mijkl = u1^u1;
         (*inputpars.jjj[l]).transitionnumber=jmin; // put back transition number for 1st transition
    //printf("noftransitions read by mcdisp: %i",i1);
@@ -550,6 +552,18 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   fin = fopen_errchk ("./results/mcdisp.trs","rb");
   noftransitions=0;
+ int nparread=0;double Tr,Har,Hbr,Hcr;
+ char instr[MAXNOFCHARINLINE];
+ while(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL&&nparread<6)
+ {nparread+=1-extract(instr,"ninit",pinit);
+  nparread+=1-extract(instr,"pinit",ninit);
+  nparread+=1-extract(instr,"T",Tr);
+  nparread+=1-extract(instr,"Ha",Har);
+  nparread+=1-extract(instr,"Hb",Hbr);
+  nparread+=1-extract(instr,"Hc",Hcr);
+ }
+
+ if (Tr!=ini.T||Har!=ini.Ha||Hbr!=ini.Hb||Hcr!=ini.Hc||nparread!=6){fprintf(stderr,"ERROR: reading mcdisp.trs one of the parameters not set or not in line with mcdisp.ini: ninit pinit T Ha Hb Hc ! \n");exit(EXIT_FAILURE);}
   while (feof(fin)==0)
   {if ((i1=inputline(fin,nn))>=5)
    {if(i==(int)nn[1]&&j==(int)nn[2]&&k==(int)nn[3])
@@ -601,7 +615,7 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
       
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
         (*inputpars.jjj[l]).transitionnumber=tn; // try calculation for transition  j
-      d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+      d=1e10;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
         Mijkl = u1^u1;gamman=Norm2(u1);u1/=sqrt(gamman);
            if (do_verbose==1){
                   fprintf(stdout,"#Matrix M(s=%i %i %i %i)\n",i,j,k,l);
@@ -611,7 +625,7 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
        // here we if required calculate the higher dimension matrix used to do the
        // extension of chi to higher value of (uncoupled) nofcomponents in intcalc_approx ... needed for chargedensityfluctuations, extended eigenvectors ...
  if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with extended_eigenvector_dimension=%i (read from mcdisp.par)\n",i,j,k,l,ini.extended_eigenvector_dimension);}
-             d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,extmf,extu1,d,md.est(i,j,k,l));
+             d=1e10;extu1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,extmf,extu1,d,md.est(i,j,k,l));
         extMijkl = extu1^extu1;extgamman=Norm2(extu1);extu1/=sqrt(extgamman);
 
         (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
@@ -1049,7 +1063,7 @@ if (do_jqfile==1){
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
                   fprintf (fout, " > ");
 diffint=0;diffintbey=0;
-                  if(do_gobeyond)do_gobeyond=intcalc_beyond_ini(ini,inputpars,md,do_verbose,hkl);
+                  if(do_gobeyond)do_gobeyond=intcalc_beyond_ini(ini,inputpars,md,do_verbose,hkl,ninit,pinit);
                   Vector dd(1,dim),dd_int(1,dim);  dd+=100000.0;dd_int+=100000.0;
                   Vector dd1(1,dim),dd1_int(1,dim);  dd1+=100000.0;dd1_int+=100000.0;
                   Vector dd_without_antipeaks(1,dim),dd_int_without_antipeaks(1,dim);  dd_without_antipeaks+=100000.0;dd_int_without_antipeaks+=100000.0;
@@ -1436,7 +1450,7 @@ int main (int argc, char **argv)
  const char * spinfile="mcdisp.mf"; //default spin-configuration-input file
  const char * filemode="w";
  double epsilon; //imaginary part of omega to avoid divergence
- double minE=-100000.0,maxE=+100000.0;
+ double minE=-100000.0,maxE=+100000.0,pinit=0,ninit=1e10;
  fprintf(stderr,"***********************************************************************\n");
  fprintf(stderr,"*\n");
  fprintf(stderr,"* mcdisp - program to calculate the dispersion of magnetic excitations\n");
@@ -1469,8 +1483,18 @@ for (i=1;i<=argc-1;++i){
                 else {if(strcmp(argv[i],"-minE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -minE needs argument(s)\n");exit(EXIT_FAILURE);}
  		                                  minE=strtod(argv[i+1],NULL);++i;
 						  fprintf(stdout,"#minimum Energy of single ion excitations taken into account: %g\n",minE);
-					         }       
-           	 else{spinfile=argv[i];}
+					         }
+                 else {if(strcmp(argv[i],"-ninit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -ninit needs argument(s)\n");exit(EXIT_FAILURE);}
+ 		                                  ninit=strtod(argv[i+1],NULL);++i;
+						  fprintf(stdout,"#maximum number of lowest lying initial states to be taken into account in single ion excitations: %g\n",ninit);
+					         }
+                  else {if(strcmp(argv[i],"-pinit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -pinit needs argument(s)\n");exit(EXIT_FAILURE);}
+ 		                                  pinit=strtod(argv[i+1],NULL);++i;
+						  fprintf(stdout,"#minimum population of initial state for single ion excitations to be taken into account: %g\n",pinit);
+					         }
+           	   else{spinfile=argv[i];}
+		     }
+		    }
 		   }
 		  }          
 		 }
@@ -1494,7 +1518,7 @@ if (argc > 10) {ini.errexit();}
 
 
 //calculate dispersion and save to files
-dispcalc(ini,inputpars,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,epsilon,filemode);
+dispcalc(ini,inputpars,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
   
  printf("RESULTS saved in directory ./results/  - files:\n");
    printf("  mcdisp.qei  - T,H,qvector vs energies and neutron intensities\n");

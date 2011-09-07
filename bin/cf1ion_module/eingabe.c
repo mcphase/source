@@ -2169,8 +2169,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V21(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L21S=%g meV ",/*-*/IT( V21(iteration) ));
+                              IT( V21(iteration) )  = -strtod (token, NULL);
+            printf("L21S=%g meV ",-IT( V21(iteration) ));
               }
            }
         } 
@@ -2195,8 +2195,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V22(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L22S=%g meV ",/*-*/IT( V22(iteration) ));
+                              IT( V22(iteration) )  = -strtod (token, NULL);
+            printf("L22S=%g meV ",-IT( V22(iteration) ));
               }
            }
         } 
@@ -2233,8 +2233,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V41(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L41S=%g meV ",/*-*/IT( V41(iteration) ));
+                              IT( V41(iteration) )  = -strtod (token, NULL);
+            printf("L41S=%g meV ",-IT( V41(iteration) ));
               }
            }
         } 
@@ -2260,8 +2260,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V42(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L42S=%g meV ",/*-*/IT( V42(iteration) ));
+                              IT( V42(iteration) )  = -strtod (token, NULL);
+            printf("L42S=%g meV ",-IT( V42(iteration) ));
               }
            }
         } 
@@ -2286,8 +2286,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V43(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L43S=%g meV ",/*-*/IT( V43(iteration) ));
+                              IT( V43(iteration) )  = -strtod (token, NULL);
+            printf("L43S=%g meV ",-IT( V43(iteration) ));
               }
            }
         } 
@@ -2311,8 +2311,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V44(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L44S=%g meV ",/*-*/IT( V44(iteration) ));
+                              IT( V44(iteration) )  = -strtod (token, NULL);
+            printf("L44S=%g meV ",-IT( V44(iteration) ));
               }
            }
         } 
@@ -2350,8 +2350,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V61(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L61S=%g meV ",/*-*/IT( V61(iteration) ));
+                              IT( V61(iteration) )  = -strtod (token, NULL);
+            printf("L61S=%g meV ",-IT( V61(iteration) ));
               }
            }
         } 
@@ -2377,8 +2377,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V62(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L62S=%g meV ",/*-*/IT( V62(iteration) ));
+                              IT( V62(iteration) )  = -strtod (token, NULL);
+            printf("L62S=%g meV ",-IT( V62(iteration) ));
               }
            }
         } 
@@ -2403,8 +2403,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V63(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L63S=%g meV ",/*-*/IT( V63(iteration) ));
+                              IT( V63(iteration) )  = -strtod (token, NULL);
+            printf("L63S=%g meV ",-IT( V63(iteration) ));
               }
            }
         } 
@@ -2428,8 +2428,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V64(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L64S=%g meV ",/*-*/IT( V64(iteration) ));
+                              IT( V64(iteration) )  = -strtod (token, NULL);
+            printf("L64S=%g meV ",-IT( V64(iteration) ));
               }
            }
         } 
@@ -2454,8 +2454,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V65(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L65S=%g meV ",/*-*/IT( V65(iteration) ));
+                              IT( V65(iteration) )  = -strtod (token, NULL);
+            printf("L65S=%g meV ",-IT( V65(iteration) ));
               }
            }
         } 
@@ -2480,8 +2480,8 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V66(iteration) )  = /*-*/strtod (token, NULL);
-            printf("L66S=%g meV ",/*-*/IT( V66(iteration) ));
+                              IT( V66(iteration) )  = -strtod (token, NULL);
+            printf("L66S=%g meV ",-IT( V66(iteration) ));
               }
            }
         } 
@@ -2751,12 +2751,12 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
  
     line=fgets( string , buffer_size , fp ); /*| L 2,1 .. | L 2,-1.. */
     RT( V21(iteration) ) = a_tof(line, 9,30);
-    IT( V21(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V21(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*| L 2,2 .. | L 2,-2.. */
     RT( V22(iteration) ) = a_tof(line, 9,30);
-    IT( V22(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V22(iteration) ) = -a_tof(line,40,61);
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 5.==== */
  
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 6.==== */
@@ -2766,22 +2766,22 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
  
     line=fgets( string , buffer_size , fp ); /*|L 4,1  .. |L 4,-1 .. */
     RT( V41(iteration) ) = a_tof(line, 9,30);
-    IT( V41(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V41(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 4,2  .. |L 4,-2 .. */
     RT( V42(iteration) ) = a_tof(line, 9,30);
-    IT( V42(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V42(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 4,3  .. |L 4,-3 .. */
     RT( V43(iteration) ) = a_tof(line, 9,30);
-    IT( V43(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V43(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 4,4  .. |L 4,-4 .. */
     RT( V44(iteration) ) = v44 = a_tof(line, 9,30);
-    IT( V44(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V44(iteration) ) = -a_tof(line,40,61);
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 7.==== */
  
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 8.==== */
@@ -2791,32 +2791,32 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
  
     line=fgets( string , buffer_size , fp ); /*|L 6,1  .. |L 6,-1 .. */
     RT( V61(iteration) ) = a_tof(line, 9,30);
-    IT( V61(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V61(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 6,2  .. |L 6,-2 .. */
     RT( V62(iteration) ) = a_tof(line, 9,30);
-    IT( V62(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V62(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 6,3  .. |L 6,-3 .. */
     RT( V63(iteration) ) = a_tof(line, 9,30);
-    IT( V63(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V63(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 6,4  .. |L 6,-4 .. */
     RT( V64(iteration) ) = v64 = a_tof(line, 9,30);
-    IT( V64(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V64(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 6,5  .. |L 6,-5 .. */
     RT( V65(iteration) ) = a_tof(line, 9,30);
-    IT( V65(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V65(iteration) ) = -a_tof(line,40,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|L 6,6  .. |L 6,-6 .. */
     RT( V66(iteration) ) = a_tof(line, 9,30);
-    IT( V66(iteration) ) = /*-*/a_tof(line,40,61);
+    IT( V66(iteration) ) = -a_tof(line,40,61);
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/*9.==== */
  
     /* Auswahlregeln fuer Dkq beachten */
@@ -3724,8 +3724,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V21(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B21S=%g meV ",/*-*/IT( V21(iteration) ));
+                              IT( V21(iteration) )  = -strtod (token, NULL);
+            printf("B21S=%g meV ",-IT( V21(iteration) ));
               }
            }
         } 
@@ -3750,8 +3750,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V22(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B22S=%g meV ",/*-*/IT( V22(iteration) ));
+                              IT( V22(iteration) )  = -strtod (token, NULL);
+            printf("B22S=%g meV ",-IT( V22(iteration) ));
               }
            }
         } 
@@ -3788,8 +3788,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V41(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B41S=%g meV ",/*-*/IT( V41(iteration) ));
+                              IT( V41(iteration) )  = -strtod (token, NULL);
+            printf("B41S=%g meV ",-IT( V41(iteration) ));
               }
            }
         } 
@@ -3815,8 +3815,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V42(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B42S=%g meV ",/*-*/IT( V42(iteration) ));
+                              IT( V42(iteration) )  = -strtod (token, NULL);
+            printf("B42S=%g meV ",-IT( V42(iteration) ));
               }
            }
         } 
@@ -3841,8 +3841,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V43(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B43S=%g meV ",/*-*/IT( V43(iteration) ));
+                              IT( V43(iteration) )  = -strtod (token, NULL);
+            printf("B43S=%g meV ",-IT( V43(iteration) ));
               }
            }
         } 
@@ -3866,8 +3866,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V44(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B44S=%g meV ",/*-*/IT( V44(iteration) ));
+                              IT( V44(iteration) )  = -strtod (token, NULL);
+            printf("B44S=%g meV ",-IT( V44(iteration) ));
               }
            }
         } 
@@ -3905,8 +3905,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V61(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B61S=%g meV ",/*-*/IT( V61(iteration) ));
+                              IT( V61(iteration) )  = -strtod (token, NULL);
+            printf("B61S=%g meV ",-IT( V61(iteration) ));
               }
            }
         } 
@@ -3932,8 +3932,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V62(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B62S=%g meV ",/*-*/IT( V62(iteration) ));
+                              IT( V62(iteration) )  = -strtod (token, NULL);
+            printf("B62S=%g meV ",-IT( V62(iteration) ));
               }
            }
         } 
@@ -3958,8 +3958,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V63(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B63S=%g meV ",/*-*/IT( V63(iteration) ));
+                              IT( V63(iteration) )  = -strtod (token, NULL);
+            printf("B63S=%g meV ",-IT( V63(iteration) ));
               }
            }
         } 
@@ -3983,8 +3983,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V64(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B64S=%g meV ",/*-*/IT( V64(iteration) ));
+                              IT( V64(iteration) )  = -strtod (token, NULL);
+            printf("B64S=%g meV ",-IT( V64(iteration) ));
               }
            }
         } 
@@ -4009,8 +4009,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V65(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B65S=%g meV ",/*-*/IT( V65(iteration) ));
+                              IT( V65(iteration) )  = -strtod (token, NULL);
+            printf("B65S=%g meV ",-IT( V65(iteration) ));
               }
            }
         } 
@@ -4035,8 +4035,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
            {while(strstr(token," ")==token)++token;
             if(token ==strstr (token, "="))
               {++token;while(strstr(token," ")==token)++token;
-                              IT( V66(iteration) )  = /*-*/strtod (token, NULL);
-            printf("B66S=%g meV ",/*-*/IT( V66(iteration) ));
+                              IT( V66(iteration) )  = -strtod (token, NULL);
+            printf("B66S=%g meV ",-IT( V66(iteration) ));
               }
            }
         } 
@@ -4271,13 +4271,13 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     line=fgets( string , buffer_size , fp ); /*|RE B21 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR21(iteration) = -1.0;
     RT( V21(iteration) ) = a_tof(line, 9,30);
-    IT( V21(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V21(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B22 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR22(iteration) = -1.0;
     RT( V22(iteration) ) = a_tof(line, 9,30);
-    IT( V22(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V22(iteration) ) = -a_tof(line, 39,61);
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 5.==== */
 
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 6.==== */
@@ -4288,25 +4288,25 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     line=fgets( string , buffer_size , fp ); /*|RE B41 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR41(iteration) = -1.0;
     RT( V41(iteration) ) = a_tof(line, 9,30);
-    IT( V41(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V41(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B42 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR42(iteration) = -1.0;
     RT( V42(iteration) ) = a_tof(line, 9,30);
-    IT( V42(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V42(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B43 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR43(iteration) = -1.0;
     RT( V43(iteration) ) = a_tof(line, 9,30);
-    IT( V43(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V43(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B44 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR44(iteration) = -1.0;
     RT( V44(iteration) ) = b44 = a_tof(line, 9,30);
-    IT( V44(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V44(iteration) ) = -a_tof(line, 39,61);
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 7.==== */
  
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 8.==== */
@@ -4317,37 +4317,37 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     line=fgets( string , buffer_size , fp ); /*|RE B61 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR61(iteration) = -1.0;
     RT( V61(iteration) ) = a_tof(line, 9,30);
-    IT( V61(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V61(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B62 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR62(iteration) = -1.0;
     RT( V62(iteration) ) = a_tof(line, 9,30);
-    IT( V62(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V62(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B63 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR63(iteration) = -1.0;
     RT( V63(iteration) ) = a_tof(line, 9,30);
-    IT( V63(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V63(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B64 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR64(iteration) = -1.0;
     RT( V64(iteration) ) = b64 = a_tof(line, 9,30);
-    IT( V64(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V64(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B65 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR65(iteration) = -1.0;
     RT( V65(iteration) ) = a_tof(line, 9,30);
-    IT( V65(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V65(iteration) ) = -a_tof(line, 39,61);
     line=fgets( string , buffer_size , fp ); /*--------------------- */
  
     line=fgets( string , buffer_size , fp ); /*|RE B66 ............. */
     c = VALUE(line,7); if( c=='i'||c=='I' ) VOR66(iteration) = -1.0;
     RT( V66(iteration) ) = a_tof(line, 9,30);
-    IT( V66(iteration) ) = /*-*/a_tof(line, 39,61);
+    IT( V66(iteration) ) = -a_tof(line, 39,61);
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/*9.==== */
 
     /* Auswahlregeln fuer Bkq beachten */

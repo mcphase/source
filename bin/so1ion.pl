@@ -40,15 +40,12 @@ print Fout << "EOF";
 # spins - display spinconfiguration at given htpoint
 # Author: Martin Rotter mcphas version 4.0
 #****************************************************
-T=$T Ha=$Bx Hb=$By Hc=$Bz n=1 spins nofatoms=1 in primitive basis nofcomponents=6 - momentum configuration <J(i)>
+T=$T Ha=$Bx Hb=$By Hc=$Bz n=1 spins nofatoms=1 in primitive basis nofcomponents=3 - momentum configuration <J(i)>
 EOF
 $MB=5.788378E-02;
-print Fout (2*$Bx*$MB)."\n";
-print Fout ($Bx*$MB)."\n";
-print Fout (2*$By*$MB)."\n";
-print Fout ($By*$MB)."\n";
-print Fout (2*$Bz*$MB)."\n";
-print Fout ($Bz*$MB)."\n";
+print Fout ($gJ*$Bx*$MB)."\n";
+print Fout ($gJ*$By*$MB)."\n";
+print Fout ($gJ*$Bz*$MB)."\n";
 close Fout;
 
 # set up mcdisp.par
@@ -58,9 +55,9 @@ print Fout << "EOF";
 # autocreated Parameter file  mcdisp.par
 #<!--mcdisp.mcdisp.par>
 #!extended_eigenvector_dimension=48
-#!hmin=1 hmax=1 deltah=0.05
-#!kmin=1 kmax=1 deltak=0.05
-#!lmin=1.0 lmax=2 deltal=0.5
+0.1 0 0
+0 0.1 0
+0 0 0.1
 EOF
 close Fout;
 
@@ -76,7 +73,7 @@ print Fout << "EOF";
 #! r1a= 1 r2a=   0 r3a=   0
 #! r1b= 0 r2b=   1 r3b=   0   primitive lattice vectors [a][b][c]
 #! r1c= 0 r2c=   0 r3c=   1
-#! nofatoms=1  nofcomponents=6  number of atoms in primitive unit cell/number of components of each spin
+#! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
 # ****************************************************************************
 #! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=$gJ cffilename=$ARGV[1]
@@ -90,6 +87,7 @@ if (open(Fin,"results/mcdisp.trs")) {@mcdisptrs=<Fin>;close Fin;}
 if(system "mcdispit -c > range.out ") {print "problem starting mcdispit";}
 else
 {print "Transitions and single ion neutron intensities stored in results/so1ion.trs";}
+
 mydel("range.out");
 # remove files
 if (@mcdispmf){open (Fout, ">mcdisp.mf"); print Fout @mcdispmf;close Fout;}

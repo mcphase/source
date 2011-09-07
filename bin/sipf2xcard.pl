@@ -28,6 +28,8 @@ $line=<Fin>;
 ($module)=($line=~m|\#\!(.*)|);
 if ($module=~/MODULE\=/){($module)=($line=~m|\#\!MODULE\=(.*)|);}
 if ($module=~/.*ic1ion/){$module="ic1ion";}
+if ($module=~/.*icf1ion/){$module="icf1ion";}
+if ($module=~/.*so1ion/){$module="so1ion";}
 # print $module;exit;
 # initialise CEF parameters
 $L20=0.0;
@@ -59,12 +61,13 @@ $L65s=0.0;
 $L66s=0.0;
 switch ($module)
 {  case "ic1ion"  {ic1ion()}
+   case "icf1ion" {icf1ion()}
+   case "so1ion"  {so1ion()}
   else {die "ERROR program sipf2xcard: module $module not implemented\n";}
 }
 
 # transform CEF parameters to eV
-if(0==0)
-{$L20*=0.001;
+$L20*=0.001;
 $L21s*=0.001;
 $L22s*=0.001;
 $L21*=0.001;
@@ -96,7 +99,7 @@ $F2*=0.001;
 $F4*=0.001;
 $F6*=0.001;
 $xi*=0.001;
-}
+
 $mb=0.05788e-3; # bohr magneton in eV/T
 $Bx*=$mb;$By*=$mb;$Bz*=$mb;$Bdirx=1;$Bdiry=0;$Bdirz=0;
 $Babs=$Bx*$Bx+$By*$By+$Bz*$Bz; # set absolute value of applied magnetic field in eV
@@ -105,33 +108,17 @@ if ($Babs>0){$Babs=sqrt($Babs);
              $Bdiry=$By/$Babs;
              $Bdirz=$Bz/$Babs;
             }
-
+open (FOUT,">T.in");
+print FOUT "$T\n";
+close FOUT;
+print "file T.in created\n";
 open (FOUT,">$file.xcard");
 print FOUT << "EOF";
  XCRD:
  //XCARD for $file
  (
 
- )
- CNFG:
-         $conf
-   #i1   $nof_electrons
 
-
- PARA:
-    // if RED is not given, RED is equal to 0.8 and Rk parameters are scaled according to
-    // RED !!!
-    RED=1.0;
-
- EXEC:
-
-   Mode =nop;
-   //Mag={$conf};
-   Ninit=16;
-   // this is to define that we want to calculate expectation value of Y40 and Y44
-   //Goprt="A40;A44;A4m4";
-
- OPRT:
    // all parameters in eV
 
     // CRYSTAL FIELD
@@ -149,7 +136,7 @@ print FOUT << "EOF";
 EOF
 
 
-                                       print FOUT "    CAk(#i1 $conf)={2,0,$L20,0\n";
+                                       print FOUT "    Hcf={2,0,$L20,0\n";
 if (abs($L21*$L21+$L21s*$L21s)>1e-10) {print FOUT "              ,2,1,".(-$L21).",".( $L21s).",2,-1,$L21,$L21s\n";}
 if (abs($L22*$L22+$L22s*$L22s)>1e-10) {print FOUT "              ,2,2,".( $L22).",".(-$L22s).",2,-2,$L22,$L22s\n";}
 if (abs($L40)>1e-10)                  {print FOUT "              ,4,0,$L40,0\n";}
@@ -157,7 +144,7 @@ if (abs($L41*$L41+$L41s*$L41s)>1e-10) {print FOUT "              ,4,1,".(-$L41).
 if (abs($L42*$L42+$L42s*$L42s)>1e-10) {print FOUT "              ,4,2,".( $L42).",".(-$L42s).",4,-2,$L42,$L42s\n";}
 if (abs($L43*$L43+$L43s*$L43s)>1e-10) {print FOUT "              ,4,3,".(-$L43).",".( $L43s).",4,-3,$L43,$L43s\n";}
 if (abs($L44*$L44+$L44s*$L44s)>1e-10) {print FOUT "              ,4,4,".( $L44).",".(-$L44s).",4,-4,$L44,$L44s\n";}
-if (abs($L60)>1e-10)                  {print FOUT "              ,4,0,$L40,0\n";}
+if (abs($L60)>1e-10)                  {print FOUT "              ,6,0,$L60,0\n";}
 if (abs($L61*$L61+$L61s*$L61s)>1e-10) {print FOUT "              ,6,1,".(-$L61).",".( $L61s).",6,-1,$L61,$L61s\n";}
 if (abs($L62*$L62+$L62s*$L62s)>1e-10) {print FOUT "              ,6,2,".( $L62).",".(-$L62s).",6,-2,$L62,$L62s\n";}
 if (abs($L63*$L63+$L63s*$L63s)>1e-10) {print FOUT "              ,6,3,".(-$L63).",".( $L63s).",6,-3,$L63,$L63s\n";}
@@ -165,19 +152,57 @@ if (abs($L64*$L64+$L64s*$L64s)>1e-10) {print FOUT "              ,6,4,".( $L64).
 if (abs($L65*$L65+$L65s*$L65s)>1e-10) {print FOUT "              ,6,5,".(-$L65).",".( $L65s).",6,-5,$L65,$L65s\n";}
 if (abs($L66*$L66+$L66s*$L66s)>1e-10) {print FOUT "              ,6,6,".( $L66).",".(-$L66s).",6,-6,$L66,$L66s\n";}
 print FOUT "          };\n";
+
+print FOUT << "EOF";
+ )
+ CNFG:
+         $conf
+   #i1   $nof_electrons
+   #f1   $nof_electrons
+
+
+ PARA:
+    // if RED is not given, RED is equal to 0.8 and Rk parameters are scaled according to
+    // RED !!!
+    RED=1.0;
+
+ EXEC:
+
+   Mode =xas;
+   //Mag={$conf};
+   Ninit=14;
+   Range={1000,0,0.2,0.001};
+   // this is to define that we want to calculate expectation value of Y40 and Y44
+   //Goprt="A40;A44;A4m4";
+
+ OPRT:
+EOF
 if($spdf=~/f/){print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4,$F6};\n";}
 else {print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4};\n";}
 print FOUT << "EOF";
+   CAk(#i1 $conf)=Hcf;
     Zta(#i1 $conf)=$xi;
 
     // magnetic field in eV as muB*H
     Ba(#i1 $conf)={$Babs,$Bdirx,$Bdiry,$Bdirz};
 
-    // here we say we want output of Y40 and Y44
  OPRT:
-   // Ak^A40(#i1 $conf)={4,0,1d0};
-  //  Ak^A44(#i1 $conf)={4,4,1d0};
-  //  Ak^A4m4(#i1 $conf)={4,-4,1d0};
+EOF
+if($spdf=~/f/){print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4,$F6};\n";}
+else {print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4};\n";}
+print FOUT << "EOF";
+   CAk(#i1 $conf)=Hcf;
+    Zta(#i1 $conf)=$xi;
+
+    // magnetic field in eV as muB*H
+    Ba(#i1 $conf)={$Babs,$Bdirx,$Bdiry,$Bdirz};
+
+ OPRT:
+    // here we say we want output of neutron spectra in dipole approximation for powder
+    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,1,0,0};
+    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,1,0};
+    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,0,1};
+
 
 
  XEND:
@@ -225,7 +250,13 @@ EOF
 # **********************************************************************************************
 sub ic1ion()
 {close Fin;
- system("ic1ion $file > ic1ion.log");
+ unless (open(Fin,$file)){die "cannot open $file\n";}
+ while($line=<Fin>){
+                if($line=~/^.*T\s*=/) {($T)=($line=~m|T\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                   }
+ close Fin;
+
+ system("ic1ionit $file > ic1ion.log");
  chdir "results";
  unless (open(Fin,"ic1ion.out")){die "cannot open file ic1ion.out\n";}
  while($line=<Fin>){
@@ -236,7 +267,6 @@ sub ic1ion()
                 if($line=~/^.*Bx\s*=/) {($Bx)=($line=~m|Bx\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*By\s*=/) {($By)=($line=~m|By\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*Bz\s*=/) {($Bz)=($line=~m|Bz\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*T\s*=/) {($T)=($line=~m|T\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*F\^2\s*=/) {($F2)=($line=~m|F\^2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*F\^4\s*=/) {($F4)=($line=~m|F\^4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*xi\s*=/)  {($xi)=($line=~m|xi\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
@@ -274,13 +304,133 @@ if($spdf=~/f/){
                 if($line=~/^.*L6-6\s*=/) {($L66s)=($line=~m|L6-6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
               }
                     }
+              close Fin;
+
+ chdir "..";
  print STDERR "configuration is $conf\n";
  print STDERR "F^2=$F2 meV F^4=$F4 meV F^6=$F6 meV ZETA=$xi meV\n";
  print STDERR "Bx=$Bx T By=$By T Bz=$Bz T    T=$T K\n";
 
+}
+# **********************************************************************************************
+sub icf1ion()
+{close Fin;
+ unless (open(Fin,$file)){die "cannot open $file\n";}
+ while($line=<Fin>){
+                if($line=~/^.*T\s*=/) {($T)=($line=~m|T\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                   }
+ close Fin;
+
+ system("icf1ionit $file > icf1ion.log");
+ chdir "results";
+ unless (open(Fin,"icf1ion.out")){die "cannot open file icf1ion.out\n";}
+ while($line=<Fin>){
+                if($line=~/^# Free ion configuration:/) {($spdf)=($line=~m|# Free ion configuration:\s*([spdf])|);
+                           ($nof_electrons)=($line=~m|# Free ion configuration:\s*[spdf]\^(\d)|);
+                   print STDERR "Give the main quantum number n of the n$spdf^$nof_electrons configuration\n";
+                   $n= <STDIN>;$n=~s/\n//;$conf=$n.$spdf;}
+                if($line=~/^.*Bx\s*=/) {($Bx)=($line=~m|Bx\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*By\s*=/) {($By)=($line=~m|By\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*Bz\s*=/) {($Bz)=($line=~m|Bz\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*xi\s*=/)  {($xi)=($line=~m|xi\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*XI\s*=/)  {($xi)=($line=~m|XI\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*zeta\s*=/)  {($xi)=($line=~m|zeta\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*ZETA\s*=/)  {($xi)=($line=~m|ZETA\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L20\s*=/) {($L20)=($line=~m|L20\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L21\s*=/) {($L21)=($line=~m|L21\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L22\s*=/) {($L22)=($line=~m|L22\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L21s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-2\s*=/) {($L22s)=($line=~m|L2-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L40\s*=/) {($L40)=($line=~m|L40\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L41\s*=/) {($L41)=($line=~m|L41\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L42\s*=/) {($L42)=($line=~m|L42\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L43\s*=/) {($L43)=($line=~m|L43\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L44\s*=/) {($L44)=($line=~m|L44\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-1\s*=/) {($L41s)=($line=~m|L4-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-2\s*=/) {($L42s)=($line=~m|L4-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-3\s*=/) {($L43s)=($line=~m|L4-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-4\s*=/) {($L44s)=($line=~m|L4-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+if($spdf=~/f/){
+                if($line=~/^.*L60\s*=/) {($L60)=($line=~m|L60\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L61\s*=/) {($L61)=($line=~m|L61\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L62\s*=/) {($L62)=($line=~m|L62\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L63\s*=/) {($L63)=($line=~m|L63\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L64\s*=/) {($L64)=($line=~m|L64\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L65\s*=/) {($L65)=($line=~m|L65\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L66\s*=/) {($L66)=($line=~m|L66\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-1\s*=/) {($L61s)=($line=~m|L6-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-2\s*=/) {($L62s)=($line=~m|L6-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-3\s*=/) {($L63s)=($line=~m|L6-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-4\s*=/) {($L64s)=($line=~m|L6-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-5\s*=/) {($L65s)=($line=~m|L6-5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-6\s*=/) {($L66s)=($line=~m|L6-6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+              }
+                    }
               close Fin;
+
  chdir "..";
- 
+ print STDERR "configuration is $conf\n";
+$F2=1e10;# 1st and 2nd hunds rule -> strong Hee in comparison to Hso
+$F4=1e10;
+$F6=1e10;
+ print STDERR "F^2=$F2 meV F^4=$F4 meV F^6=$F6 meV ZETA=$xi meV\n";
+ print STDERR "Bx=$Bx T By=$By T Bz=$Bz T    T=$T K\n";
+
+}
+# **********************************************************************************************
+sub so1ion()
+{close Fin;
+$spdf="f";$n=4;$conf=$n.$spdf;
+ system("ic1ion $file > ic1ion.log");
+ chdir "results";
+ unless (open(Fin,"ic1ion.out")){die "cannot open file ic1ion.out\n";}
+ while($line=<Fin>){
+                if($line=~/^.*Ne\s*=/) {($nof_electrons)=($line=~m|Ne\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*Bx\s*=/) {($Bx)=($line=~m|Bx\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*By\s*=/) {($By)=($line=~m|By\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*Bz\s*=/) {($Bz)=($line=~m|Bz\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*T\s*=/) {($T)=($line=~m|T\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L20\s*=/) {($L20)=($line=~m|L20\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L21\s*=/) {($L21)=($line=~m|L21\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L22\s*=/) {($L22)=($line=~m|L22\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L21s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-2\s*=/) {($L22s)=($line=~m|L2-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L40\s*=/) {($L40)=($line=~m|L40\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L41\s*=/) {($L41)=($line=~m|L41\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L42\s*=/) {($L42)=($line=~m|L42\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L43\s*=/) {($L43)=($line=~m|L43\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L44\s*=/) {($L44)=($line=~m|L44\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-1\s*=/) {($L41s)=($line=~m|L4-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-2\s*=/) {($L42s)=($line=~m|L4-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-3\s*=/) {($L43s)=($line=~m|L4-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-4\s*=/) {($L44s)=($line=~m|L4-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+if($spdf=~/f/){
+                if($line=~/^.*L60\s*=/) {($L60)=($line=~m|L60\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L61\s*=/) {($L61)=($line=~m|L61\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L62\s*=/) {($L62)=($line=~m|L62\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L63\s*=/) {($L63)=($line=~m|L63\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L64\s*=/) {($L64)=($line=~m|L64\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L65\s*=/) {($L65)=($line=~m|L65\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L66\s*=/) {($L66)=($line=~m|L66\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-1\s*=/) {($L61s)=($line=~m|L6-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-2\s*=/) {($L62s)=($line=~m|L6-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-3\s*=/) {($L63s)=($line=~m|L6-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-4\s*=/) {($L64s)=($line=~m|L6-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-5\s*=/) {($L65s)=($line=~m|L6-5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-6\s*=/) {($L66s)=($line=~m|L6-6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+              }
+                    }
+              close Fin;
+
+ chdir "..";
+ print STDERR "configuration is $conf\n";
+$F2=1e10;# 1st and 2nd hunds rule -> strong Hee in comparison to Hso
+$F4=1e10;
+$F6=1e10;
+$xi=1e7; # Hso
+ print STDERR "F^2=$F2 meV F^4=$F4 meV F^6=$F6 meV ZETA=$xi meV\n";
+ print STDERR "Bx=$Bx T By=$By T Bz=$Bz T    T=$T K\n";
+
 }
 
 

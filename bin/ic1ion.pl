@@ -54,10 +54,10 @@ open (Fout, ">mcdisp.par");
 print Fout << "EOF";
 # autocreated Parameter file  mcdisp.par
 #<!--mcdisp.mcdisp.par>
-#!extended_eigenvector_dimension=48
-#!hmin=1 hmax=1 deltah=0.05
-#!kmin=1 kmax=1 deltak=0.05
-#!lmin=1.0 lmax=2 deltal=0.5
+#!extended_eigenvector_dimension=51
+0.1 0 0
+0 0.1 0
+0 0 0.1
 EOF
 close Fout;
 
@@ -83,7 +83,7 @@ if (open(Fin,"results/mcdisp.trs")) {@mcdisptrs=<Fin>;close Fin;}
 
 #
 # start mcdispit -c
-if(system "mcdispit -c > range.out ") {print "problem starting mcdispit";}
+if(system "mcdispit -c -d -pinit 0.001 > range.out ") {print "problem starting mcdispit";}
 else
 {print "Transitions and single ion neutron intensities stored in results/ic1ion.trs";}
 mydel("range.out");

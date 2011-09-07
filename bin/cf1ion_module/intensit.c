@@ -808,7 +808,7 @@ fprintf(fp,"%s",t01);fprintf(fp,t02,einheit_out);fprintf(fp,"%s",t03);
         {
       energie = (RV( ew , (INT)R(entartung,sp,1) )-RV( ew , (INT)R(entartung,ze,1) ))
                  *EINHEITIMP[einheitnr_in].fek*EINHEITIMP[einheitnr_out].fke;
-         fprintf(fp,"%7.3f %9.6f\n",energie,R(aJtb2,ze,sp));
+         fprintf(fp,"%6.2f %6.2f\n",energie,R(aJtb2,ze,sp));
         }
     }
 
@@ -1863,7 +1863,7 @@ void parametersatz(fp,modus,kristallfeld,ionennr,einheit,eingabeart)
     CHAR *einheit;
     CHAR eingabeart;
 {
-    CHAR    *t01,*t02,*t02a,*t02b,*t03,*t04,*t05,*t06,*t07/*,*t08,*t09,*t10*/,*t12,*t12a;
+    CHAR    *t01,*t02,*t02a,*t02b,*t02l,*t03,*t04,*t05,*t06,*t07/*,*t08,*t09,*t10*/,*t12,*t12a;
     CHAR    *t16,*t22,*t26/*,*t33,*t34*/,*t36/*,*t45*/,*t46,*t47;
     DOUBLE  v20r,v21r,v22r,v40r,v41r,v42r,v43r,v44r;
     DOUBLE  v20i,v21i,v22i,v40i,v41i,v42i,v43i,v44i;
@@ -1895,6 +1895,7 @@ t01="#-------------------------------------------------------------- \n";
 t02="# Parameter           :  %ckq   in  %6s                        \n";
 t02a="# (NOT the same Vlm as in Hutchings p255 or Elliot and Stevens)\n";
 t02b="#                        Bkq are the Stevens Parameters  - see Hutchings Solid State Physics 16 (1964) 227\n";
+t02l="#                        Lkq are  Wybourne normalised Parameters (see McPhase Manual)\n";
 t12="# Parameter           :  %ckq   in  %6s/a0**k                  \n";
 t12a="# (compare Hutchings Solid State Physics 16 (1964) 227, p 255 eq 5.5)                             \n";
 t22="# Parameter           :  x,W    in  %6s                        \n";
@@ -1987,6 +1988,7 @@ t26="#!   W     =   %16.6f                                \n";
 
     if( modus==up(VKQ)) fprintf(fp,"%s",t02a);
     if( modus==up(BKQ)) fprintf(fp,"%s",t02b);
+    if( modus==up(LKQ)) fprintf(fp,"%s",t02l);
     if( modus==up(AKQ)) fprintf(fp,"%s",t12a);
 /*    fprintf(fp,"%s",t03);fprintf(fp,"%s",t04);*/
     e_4f = E4f( ionennr );
@@ -2084,20 +2086,20 @@ t26="#!   W     =   %16.6f                                \n";
                      v65r *=  2 * omegan1n(5);
                      v66r *=  2 * omegan0n(6);
 
-                     v21i *=  /*-*/2 * omegan1n(1);
-                     v22i *=  /*-*/2 * omegan0n(2);
+                     v21i *=  -2 * omegan1n(1);
+                     v22i *=  -2 * omegan0n(2);
  
-                     v41i *=  /*-*/2 * omegan3n(1);
-                     v42i *=  /*-*/2 * omegan2n(2);
-                     v43i *=  /*-*/2 * omegan1n(3);
-                     v44i *=  /*-*/2 * omegan0n(4);
+                     v41i *=  -2 * omegan3n(1);
+                     v42i *=  -2 * omegan2n(2);
+                     v43i *=  -2 * omegan1n(3);
+                     v44i *=  -2 * omegan0n(4);
  
-                     v61i *=  /*-*/2 * omegan5n(1);
-                     v62i *=  /*-*/2 * omegan4n(2);
-                     v63i *=  /*-*/2 * omegan3n(3);
-                     v64i *=  /*-*/2 * omegan2n(4);
-                     v65i *=  /*-*/2 * omegan1n(5);
-                     v66i *=  /*-*/2 * omegan0n(6);
+                     v61i *=  -2 * omegan5n(1);
+                     v62i *=  -2 * omegan4n(2);
+                     v63i *=  -2 * omegan3n(3);
+                     v64i *=  -2 * omegan2n(4);
+                     v65i *=  -2 * omegan1n(5);
+                     v66i *=  -2 * omegan0n(6);
                   }
  
  
