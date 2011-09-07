@@ -54,6 +54,7 @@ open (Fout, ">mcdisp.par");
 print Fout << "EOF";
 # autocreated Parameter file  mcdisp.par
 #<!--mcdisp.mcdisp.par>
+#!kf=100000
 #!extended_eigenvector_dimension=6
 0.1 0 0
 0 0.1 0

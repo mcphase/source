@@ -171,7 +171,7 @@ print FOUT << "EOF";
    Mode =xas;
    //Mag={$conf};
    Ninit=14;
-   Range={1000,0,0.2,0.001};
+   Range={2000,0,0.4,0.001};
    // this is to define that we want to calculate expectation value of Y40 and Y44
    //Goprt="A40;A44;A4m4";
 
