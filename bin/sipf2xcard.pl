@@ -112,7 +112,7 @@ open (FOUT,">T.in");
 print FOUT "$T\n";
 close FOUT;
 print "file T.in created\n";
-open (FOUT,">$file.xcard");
+open (FOUT,">$file.xcardx");
 print FOUT << "EOF";
  XCRD:
  //XCARD for $file
@@ -169,7 +169,7 @@ print FOUT << "EOF";
  EXEC:
 
    Mode =xas;
-   //Mag={$conf};
+   Mag={$conf};
    Ninit=14;
    Range={2000,0,0.4,0.001};
    // this is to define that we want to calculate expectation value of Y40 and Y44
@@ -197,18 +197,35 @@ print FOUT << "EOF";
     // magnetic field in eV as muB*H
     Ba(#i1 $conf)={$Babs,$Bdirx,$Bdiry,$Bdirz};
 
- OPRT:
     // here we say we want output of neutron spectra in dipole approximation for powder
+    // thus we have to do 3 calculations: for 1) <i|Mx|f><f|Mx|i>, for 2) <i|My|f><f|My|i>
+    // and for 3) <i|Mz|f><f|Mz|i>   and subsequently take  (sum of  the spectra) * 0.6667!!
+ OPRT:
+
+EOF
+close FOUT;
+copy("$file.xcardx","$file.xcardy");
+copy("$file.xcardx","$file.xcardz");
+open (FOUT,">>$file.xcardx");
+print FOUT << "EOF";
     Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,1,0,0};
-    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,1,0};
-    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,0,1};
-
-
-
  XEND:
  STOP:
 EOF
-close FOUT;
+open (FOUT,">>$file.xcardy");
+print FOUT << "EOF";
+    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,1,0};
+ XEND:
+ STOP:
+EOF
+open (FOUT,">>$file.xcardz");
+print FOUT << "EOF";
+    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,0,1};
+ XEND:
+ STOP:
+EOF
+
+
 print STDOUT << "EOF";
 //*******************************************************
 // xcard $file.xcard created ...
