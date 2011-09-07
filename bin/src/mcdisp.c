@@ -397,9 +397,9 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
    fprintf(fout,"#                                                              |\n");
    fprintf(fout,"#                                                              |\n");
    fprintf(fout,"#                                -----                         |\n");
-   fprintf(fout,"#                      2     2   \\                    2        |\n");
-   fprintf(fout,"#        |<i,r|M |k,s>|   = ---   >     |<i,r|M |k,s>|         |\n");
-   fprintf(fout,"#               T            3   /             u               |\n");
+   fprintf(fout,"#                      2     2   \\                        2    |\n");
+   fprintf(fout,"#        |<i,r|M |k,s>|   = ---   >     |<i,r|M -<M >|k,s>|    |\n");
+   fprintf(fout,"#               T            3   /             u   u           |\n");
    fprintf(fout,"#                                -----                         |\n");
    fprintf(fout,"#                             u = x,y,z                        |\n");
    fprintf(fout,"#                                                              |\n");
