@@ -1257,16 +1257,16 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
           for(K=1;K<=3;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
              Malpha(K)+=conj(est(M,i))*(*MQMi[K])(M,Md)*est(Md,j); 
             }}} 
-if(i==j){//take into account thermal expectation values <Jl>
-         ComplexVector mm(1,3); mm=0;
-         for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){          
-           mm(1)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[1])(M,Md)*est(Md,K); 
-           mm(2)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[2])(M,Md)*est(Md,K); 
-           mm(3)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[3])(M,Md)*est(Md,K); 
-         }}} // --> mm(1,..3)  thermal expextation values of M
-          Malpha-=mm;// subtract thermal expectation values
-         
-         }
+//if(i==j){//take into account thermal expectation values <Jl>
+//         ComplexVector mm(1,3); mm=0;
+//         for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
+//           mm(1)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[1])(M,Md)*est(Md,K);
+//           mm(2)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[2])(M,Md)*est(Md,K);
+//           mm(3)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[3])(M,Md)*est(Md,K);
+//         }}} // --> mm(1,..3)  thermal expextation values of M
+//          Malpha-=mm;// subtract thermal expectation values
+//
+//         }
          delete MQMi[1];delete MQMi[2]; delete MQMi[3];
 
 
@@ -1287,7 +1287,7 @@ if (delta>SMALL)
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Qa-<Qa>|%i>|^2=%4.4g |<%i|Qb-<Qb>|%i>|^2=%4.4g |<%i|Qc-<Qc>|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+      printf(" |<%i|Qa|%i>|^2=%4.4g |<%i|Qb|%i>|^2=%4.4g |<%i|Qc|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
       printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
     v1*=sqrt(imag(est(0,i))/KB/T);
    }

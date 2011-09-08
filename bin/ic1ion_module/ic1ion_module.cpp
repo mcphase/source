@@ -689,8 +689,8 @@ __declspec(dllexport)
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV",i,j,delta);
-         printf(" |<%i|Qa-<Qa>|%i>|^2=%6.3f |<%i|Qb-<Qb>|%i>|^2=%6.3f |<%i|Qc-<Qc>|%i>|^2=%6.3f",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
-         printf(" |<%i|Qd-<Qd>|%i>|^2=%6.3f |<%i|Qe-<Qe>|%i>|^2=%6.3f |<%i|Qf-<Qf>|%i>|^2=%6.3f",i,j,abs(v1(4))*abs(v1(4)),i,j,abs(v1(5))*abs(v1(5)),i,j,abs(v1(6))*abs(v1(6)));
+         printf(" |<%i|Qa|%i>|^2=%6.3f |<%i|Qb|%i>|^2=%6.3f |<%i|Qc|%i>|^2=%6.3f",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+         printf(" |<%i|Qd|%i>|^2=%6.3f |<%i|Qe|%i>|^2=%6.3f |<%i|Qf|%i>|^2=%6.3f",i,j,abs(v1(4))*abs(v1(4)),i,j,abs(v1(5))*abs(v1(5)),i,j,abs(v1(6))*abs(v1(6)));
          printf(" n%i=%6.3f\n",i,therm/Z);
       }
    }
