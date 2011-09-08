@@ -120,6 +120,7 @@ print FOUT << "EOF";
 
 
    // all parameters in eV
+   Bapplied={$Babs,$Bdirx,$Bdiry,$Bdirz};
 
     // CRYSTAL FIELD
     //10Dq(#i1 $conf )=1.0;
@@ -184,7 +185,7 @@ print FOUT << "EOF";
     Zta(#i1 $conf)=$xi;
 
     // magnetic field in eV as muB*H
-    Ba(#i1 $conf)={$Babs,$Bdirx,$Bdiry,$Bdirz};
+    Ba(#i1 $conf)=Bapplied;
 
  OPRT:
 EOF
@@ -195,7 +196,7 @@ print FOUT << "EOF";
     Zta(#i1 $conf)=$xi;
 
     // magnetic field in eV as muB*H
-    Ba(#i1 $conf)={$Babs,$Bdirx,$Bdiry,$Bdirz};
+    Ba(#i1 $conf)=Bapplied;
 
     // here we say we want output of neutron spectra in dipole approximation for powder
     // thus we have to do 3 calculations: for 1) <i|Mx|f><f|Mx|i>, for 2) <i|My|f><f|My|i>
