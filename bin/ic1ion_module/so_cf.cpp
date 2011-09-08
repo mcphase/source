@@ -494,7 +494,7 @@ void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l
          for(J2p=j2pmin; J2p<=j2pmax; J2p+=2)
          {
             Lrm = -( pow(-1.,(S2p+L2p+J2)/2.)  * sqrt((L2p+1.)*(J2+1.)*(J2p+1.)*(L2p/2.)*(L2p/2.+1.)) * sixj(J2p,2,J2,L2,S2,L2p) );
-            Srm = -( pow(-1.,(S2p+L2p+J2)/2.) * sqrt((S2p+1.)*(J2+1.)*(J2p+1.)*(S2p/2.)*(S2p/2.+1.)) * sixj(J2p,2,J2,S2,L2,S2p) );
+            Srm = -( pow(-1.,(S2p+L2p+J2p)/2.) * sqrt((S2p+1.)*(J2+1.)*(J2p+1.)*(S2p/2.)*(S2p/2.+1.)) * sixj(J2p,2,J2,S2,L2,S2p) );
 //          Lrm /= pow(-1.,L2p/2.)*(L2p+1.); Srm /= pow(-1.,S2p/2.)*(S2p+1.);
 //          Lrm /= pow(-1.,L2p/2.); Srm /= pow(-1.,S2p/2.);
 //          Lrm /= (L2p+1.); Srm /= (S2p+1.);
