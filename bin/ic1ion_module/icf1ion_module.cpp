@@ -353,7 +353,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
-         elm+= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
+         elm-= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
          if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm-elp)/sqrt2;
       }
@@ -361,7 +361,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
-         elm-= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
+         elm+= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
          if(fabs(elm)>SMALL) mu(i,j)=-elm/sqrt2;
        //mu(i,j) = (elm+elp)/sqrt2;
       }
