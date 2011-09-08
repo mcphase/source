@@ -93,9 +93,10 @@ sub emptyblock()
                                                   $i=$ii;
                                                   while($i>1){$max=-1e10;$min=1e10;
                                                           for($kk=0;$kk<=$ii;++$kk)
-                                                                {if($field[$kk][$k]<$min&&$field[$kk][$k]>-1e10){$min=$field[$kk][$k];$field[$kk][$k]=-1e10;}
-                                                                 if($field[$kk][$k]>$max&&$field[$kk][$k]<+1e10){$max=$field[$kk][$k];$field[$kk][$k]=+1e10;}
+                                                                {if($field[$kk][$k]<$min&&$field[$kk][$k]>-1e10){$min=$field[$kk][$k];$kkmin=$kk;}
+                                                                 if($field[$kk][$k]>$max&&$field[$kk][$k]<+1e10){$max=$field[$kk][$k];$kkmax=$kk;}
                                                                 }
+                                                              $field[$kkmin][$k]=-1e10;$field[$kkmax][$k]=+1e10;
                                                               $i-=2;
                                                              }
                                                    for($kk=0;$kk<=$ii;++$kk)
