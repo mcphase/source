@@ -128,7 +128,7 @@ void getfromionname(std::string &ionname, icpars &pars)
 // else if(IONCMP("cu+")==0)  { B = 1216.; C = 4745.;  xi = 0;    /*xi=   ;*/ n =10; l=D; flg3d=1; flgBC=1; } //
    else if(IONCMP("cu2+")==0) { B = 1238.; C = 4659.;  xi = 830.; /*xi=830;*/ n = 9; l=D; flg3d=1; flgBC=1; }
    else if(IONCMP("cu3+")==0) { F[1]=111996;F[2]=69924;xi = 903.; /*xi= - ;*/ n = 8; l=D; flg3d=1;          } // Thesis Havercort Koeln Cu 2p6 3d8
-   else if(IONCMP("zn3+")==0) { F[1]=116868;F[2]=72923; xi =1097.; /*xi=  ;*/ n = 5; l=D; flg3d=1;          } // Havercort Thesis 2p6 3d9
+   else if(IONCMP("zn3+")==0) { F[1]=116868;F[2]=72923;xi = 1097.;/*xi=   ;*/ n = 9; l=D; flg3d=1;          } // Havercort Thesis 2p6 3d9
     
    // 4d ions parameters from Richardson, Blackman and Ranschak, J. Chem. Phys. v58, 3010 (1973).
    //   xi from calculations of Blume, Freeman, Watson, Phys. Rev. v134, A320 (1964), or where not calculated from TM Dunn, Trans. Faraday Soc. v57, 1441 (1961)
@@ -245,8 +245,8 @@ void ic_parseinput(const char *filename, icpars &pars)
          if(subfirst!=std::string::npos)
          {
             varval = varval.substr(subfirst,sublast);
-            first_num_pos = varval.find_first_of("-0123456789.");
-            last_num_pos = varval.find_first_not_of("-0123456789.",first_num_pos);
+            first_num_pos = varval.find_first_of("-0123456789.EDed");
+            last_num_pos = varval.find_first_not_of("-0123456789.EDed",first_num_pos);
             if(first_num_pos!=std::string::npos)
                iss.str(varval.substr(first_num_pos,last_num_pos));
             else
@@ -270,8 +270,8 @@ void ic_parseinput(const char *filename, icpars &pars)
          for(k=0; k<4; k++)
          {
             iss >> pars.F[k];
-            first_num_pos = varval.find_first_of("0123456789.",last_num_pos);
-            last_num_pos = varval.find_first_not_of("0123456789.",first_num_pos);
+            first_num_pos = varval.find_first_of("0123456789.-EeDd",last_num_pos);
+            last_num_pos = varval.find_first_not_of("0123456789.-EeDd",first_num_pos);
             iss.str(varval.substr(first_num_pos,last_num_pos));
          }
       else if(varname.compare("f0")==0) { iss >> pars.F[0]; pars._F[0]=pars.F[0]*pars._econv; }
@@ -295,9 +295,9 @@ void ic_parseinput(const char *filename, icpars &pars)
       else if(varname.compare("beta")==0)  { iss >> pars.alpha[1]; pars._alpha[1]=pars.alpha[1]*pars._econv; }
       else if(varname.compare("gamma")==0) { iss >> pars.alpha[2]; pars._alpha[2]=pars.alpha[2]*pars._econv; }
 
-      else if(varname.find_first_of("awbvld")==0 && varname.find_first_of("0123456789.")==1) 
+      else if(varname.find_first_of("awbvld")==0 && varname.find_first_of("0123456789")==1) 
          ic_parsecfpars(varname, varval, pars);
-      else if(varname.compare(0,2,"ar")==0 && varname.find_first_of("0123456789.")==2)
+      else if(varname.compare(0,2,"ar")==0 && varname.find_first_of("0123456789")==2)
          ic_parsecfpars(varname, varval, pars, 2);
       else if(varname.find("density")!=std::string::npos)
          pars.density = varval;
