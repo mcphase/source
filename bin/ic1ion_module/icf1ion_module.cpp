@@ -328,10 +328,10 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
       ns+=J2+1; 
       if (ind%2==0)                                     // Sx, Sy or Sz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
-            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(J2p,2,J2,S2,L2,S2);
+            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(J2p,2,J2,S2,L2,S2);
       else                                              // Lx, Ly or Lz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
-            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(J2p,2,J2,L2,S2,L2);
+            rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(J2p,2,J2,L2,S2,L2);
 //    for (int J2p=J2min; J2p<=J2max; J2p+=2) 
 //    {
 //       Lrm = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(L2,J2,S2,J2p,L2,2);
@@ -352,17 +352,17 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
    if (ind<2)                                           // Sx or Lx
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
-         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
-         elm-= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
+         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
+         elm-= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
          if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm-elp)/sqrt2;
       }
    else if (ind>1 && ind<4)                             // Sy or Ly
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
-         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
-         elm+= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
-         if(fabs(elm)>SMALL) mu(i,j)=-elm/sqrt2;
+         elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
+         elm+= rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2,mJ2[j]);
+         if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm+elp)/sqrt2;
       }
    else if (ind>3 && ind<6)                             // Sz or Lz

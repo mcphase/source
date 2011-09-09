@@ -281,8 +281,8 @@ icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string d
    { 
       racah_mumat(n,1,Lp1,Sp1,l); rmzeros(Sp1); rmzeros(Lp1);
       racah_mumat(n,-1,Lm1,Sm1,l); rmzeros(Sm1); rmzeros(Lm1);
-      J[0] = (Sp1-Sm1)/sqrt(2); J[2] = (Sp1+Sm1)/(-sqrt(2)); Sm1.clear(); Sp1.clear();   // Sx and Sy
-      J[1] = (Lp1-Lm1)/sqrt(2); J[3] = (Lp1+Lm1)/(-sqrt(2)); Lm1.clear(); Lp1.clear();   // Lx ans Ly
+      J[0] = (Sm1-Sp1)/sqrt(2); J[2] = (Sm1+Sp1)/sqrt(2); Sm1.clear(); Sp1.clear();   // Sx and Sy
+      J[1] = (Lm1-Lp1)/sqrt(2); J[3] = (Lm1+Lp1)/sqrt(2); Lm1.clear(); Lp1.clear();   // Lx ans Ly
       mm_gout(J[2],Sfilestr); mm_gout(J[3],Lfilestr);
       nstr[2]=120; nstr[3]=0; strcpy(Lfilestr,basename); strcat(Lfilestr,nstr); strcat(Lfilestr,".mm");   
       nstr[0]=83;             strcpy(Sfilestr,basename); strcat(Sfilestr,nstr); strcat(Sfilestr,".mm");
