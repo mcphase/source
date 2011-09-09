@@ -279,7 +279,7 @@ sub ic1ion()
  unless (open(Fin,"ic1ion.out")){die "cannot open file ic1ion.out\n";}
  while($line=<Fin>){
                 if($line=~/^# Free ion configuration:/) {($spdf)=($line=~m|# Free ion configuration:\s*([spdf])|);
-                           ($nof_electrons)=($line=~m|# Free ion configuration:\s*[spdf]\^(\d)|);
+                           ($nof_electrons)=($line=~m|# Free ion configuration:\s*[spdf]\^(\d*)|);
                    print STDERR "Give the main quantum number n of the n$spdf^$nof_electrons configuration\n";
                    $n= <STDIN>;$n=~s/\n//;$conf=$n.$spdf;}
                 if($line=~/^.*Bx\s*=/) {($Bx)=($line=~m|Bx\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
