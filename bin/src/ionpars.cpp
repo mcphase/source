@@ -1234,8 +1234,14 @@ on output
   int i,j=1,k,l;
   int dj=(int)(2*J+1);
   double delta;
-   double ninit=v1[1].real();
-   double pinit=v1[1].imag();
+   double ninit=v1(1).real();
+   double pinit=v1(1).imag();
+   if (ninit>dj)ninit=dj;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zii;
+   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(real(est(0,i))-real(est(0,1)))/KB/T))>(pinit*zsum));++i){noft+=dj-i;zsum+=zii;}
+//printf("!!! dv1 noft = %i ninit= %g pinit= %g zii=%g zsum=%g T=%g!!!!\n",noft,ninit,pinit,zii,zsum,T);
+//noft=(int)((J+1)*(2*J+1));
 
 // calculate nat for transition number tn
 // 1. get i and j from tn (as in du1calc
@@ -1247,12 +1253,7 @@ for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 // 2. set delta
 delta=real(est(0,j))-real(est(0,i));
 
-   if (ninit>dj)ninit=dj;
-   if (pinit<SMALL)pinit=SMALL;
-   double zsum=0,zii;
-   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(real(est(0,j))-real(est(0,1)))/KB/T))>(pinit*zsum));++i){noft+=dj-i;zsum+=zii;}
-
-
+ 
 if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - dv1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
@@ -1307,7 +1308,7 @@ if (delta>SMALL)
 
 
 // return number of all transitions     
-// return (int)((J+1)*(2*J+1));
+
 return noft;
 }
 

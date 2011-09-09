@@ -555,8 +555,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
  int nparread=0;double Tr,Har,Hbr,Hcr;
  char instr[MAXNOFCHARINLINE];
  while(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL&&nparread<6)
- {nparread+=1-extract(instr,"ninit",pinit);
-  nparread+=1-extract(instr,"pinit",ninit);
+ {nparread+=1-extract(instr,"ninit",ninit);
+  nparread+=1-extract(instr,"pinit",pinit);
   nparread+=1-extract(instr,"T",Tr);
   nparread+=1-extract(instr,"Ha",Har);
   nparread+=1-extract(instr,"Hb",Hbr);

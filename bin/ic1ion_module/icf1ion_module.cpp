@@ -1778,6 +1778,7 @@ __declspec(dllexport)
  // determine number of thermally reachable states
    int noft=0;for(i=0;(i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum));++i){noft+=Hsz-i-1;zsum+=zi;}
 //   int noft=0;for(i=0;(i<Hsz)&(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))>SMALL);++i)noft+=Hsz-i-1; // removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit   return noft;
+printf("!!! icf1ion dv1 noft=%i\n",noft);
    return noft;
 //   return Hsz*(Hsz-1)/2;
 }
