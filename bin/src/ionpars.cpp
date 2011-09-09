@@ -1098,10 +1098,11 @@ if (T>0){cfieldJJ(JJ,T,gjmbH,lnz,u,ests);  //expectation values <J>
         }
         else
         {T=-T;}
+   double ninit=u1[1].real();
+   double pinit=u1[1].imag();
   int pr;
   pr=1;
   if (tn<0) {pr=0;tn*=-1;}
-
    // setup hamiltonian
    int dj,j;
    dj=Hcf.Rhi();
@@ -1136,10 +1137,7 @@ exit(0);
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
    int sort=1;int maxiter=1000000;
    EigenSystemHermitean (Ham,En,zr,zi,sort,maxiter);
-   
-   
-   
-   
+    
    // calculate Z and wn (occupation probability)
      Vector wn(1,dj);double Zs;
      double x,y;int i,k,l;
@@ -1151,6 +1149,10 @@ exit(0);
       }
      Zs=Sum(wn);wn/=Zs;  
      Zs*=exp(-x/KB/T);
+   if (ninit>dj)ninit=dj;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zii;
+   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(En(i)-x)/KB/T))>(pinit*zsum));++i){noft+=dj-i;zsum+=zii;}
 
 
    // calculate Ja,Jb,Jc
@@ -1211,7 +1213,9 @@ if (delta>SMALL)
      delete []zp;
 
 // return number of all transitions     
- return (int)((J+1)*(2*J+1)); 
+// return (int)((J+1)*(2*J+1));
+return noft;
+
 }
 
 int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & v1)
@@ -1230,6 +1234,9 @@ on output
   int i,j=1,k,l;
   int dj=(int)(2*J+1);
   double delta;
+   double ninit=v1[1].real();
+   double pinit=v1[1].imag();
+
 // calculate nat for transition number tn
 // 1. get i and j from tn (as in du1calc
 k=0;
@@ -1239,6 +1246,12 @@ for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 
 // 2. set delta
 delta=real(est(0,j))-real(est(0,i));
+
+   if (ninit>dj)ninit=dj;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zii;
+   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(real(est(0,j))-real(est(0,1)))/KB/T))>(pinit*zsum));++i){noft+=dj-i;zsum+=zii;}
+
 
 if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - dv1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
@@ -1294,8 +1307,8 @@ if (delta>SMALL)
 
 
 // return number of all transitions     
- return (int)((J+1)*(2*J+1)); 
-
+// return (int)((J+1)*(2*J+1));
+return noft;
 }
 
 //**********************************************************************/
