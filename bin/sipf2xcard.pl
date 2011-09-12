@@ -270,7 +270,7 @@ sub ic1ion()
 {close Fin;
  unless (open(Fin,$file)){die "cannot open $file\n";}
  while($line=<Fin>){
-                if($line=~/^.*T\s*=/) {($T)=($line=~m|T\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^\s*T\s*=/) {($T)=($line=~m|T\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                    }
  close Fin;
 
