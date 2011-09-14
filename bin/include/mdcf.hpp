@@ -17,7 +17,7 @@ class mdcf
    ComplexMatrix ** m; //matrix to store M
    ComplexMatrix ** s; //matrix to store U
    ComplexMatrix ** l; //matrix to store eigenvalues sqrt_gamma
-   ComplexMatrix ** mb; //matrix to store N
+ //  ComplexMatrix ** mb; //matrix to store N //not needed MR 14.9.2011
    ComplexMatrix ** sb; //matrix to store V
    ComplexMatrix ** lb; //matrix to store eigenvalues sqrt_gamma
    Vector ** d;
@@ -40,8 +40,8 @@ class mdcf
     ComplexMatrix & Ui(int in); // returns pointer to eigenvector matrix i
     ComplexMatrix & sqrt_gamma(int i,int j,int k) const; // returns pointer to eigenvaluematrix (ijk) 
     ComplexMatrix & sqrt_gammai(int in); // returns pointer to eigenvalue matrix i
-    ComplexMatrix & N(int i,int j,int k); // returns pointer to  matrix M(ijk) 
-    ComplexMatrix & Ni(int in); // returns pointer to matrix M(i)
+  //  ComplexMatrix & N(int i,int j,int k); // returns pointer to  matrix M(ijk)  //not needed MR 14.9.2011
+  //  ComplexMatrix & Ni(int in); // returns pointer to matrix M(i) //not needed MR 14.9.2011
     ComplexMatrix & V(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
     ComplexMatrix & Vi(int in); // returns pointer to eigenvector matrix i
     ComplexMatrix & sqrt_Gamma(int i,int j,int k) const; // returns pointer to eigenvaluematrix (ijk) 

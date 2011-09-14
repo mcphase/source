@@ -9,7 +9,7 @@
 // returns 1 on success and zero on failure
 //***********************************************************************
 int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,Vector & hkl, double ninit,double pinit)
-{int i,j,k,l,m,n,jmin,i1,j1,tn; Vector qijk(1,3);
+{int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);
  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
  hkl2ijk(qijk,hkl, abc);
@@ -23,23 +23,23 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
  float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
  if(do_verbose==1) printf("#calculating intensity beyond dipole approximation\n");
 // determine unitary transformation Matrix V (q)  Gamma and N for going beyond dip interaction
-  Vector Gamma(1,ini.nofcomponents);
+ // Vector Gamma(1,ini.nofcomponents);
   double Gamman; ComplexVector v1(1,ini.nofcomponents);
   double gamma;  ComplexVector u1(1,ini.nofcomponents);
   double gammab; ComplexVector u1b(1,ini.nofcomponents);
   complex<double> imaginary(0,1);
   // transition matrix Nij
-  ComplexMatrix Nijkl(1,ini.nofcomponents,1,ini.nofcomponents);
-  ComplexMatrix Mijkl(1,ini.nofcomponents,1,ini.nofcomponents);
-  ComplexMatrix Mbijkl(1,ini.nofcomponents,1,ini.nofcomponents);
+  //ComplexMatrix Nijkl(1,ini.nofcomponents,1,ini.nofcomponents);
+  //ComplexMatrix Mijkl(1,ini.nofcomponents,1,ini.nofcomponents);
+  //ComplexMatrix Mbijkl(1,ini.nofcomponents,1,ini.nofcomponents);
   // transformation matrix Vij
-  ComplexMatrix Vijkl(1,ini.nofcomponents,1,ini.nofcomponents);
-  ComplexMatrix Uijkl(1,ini.nofcomponents,1,ini.nofcomponents);
-  ComplexMatrix Ubijkl(1,ini.nofcomponents,1,ini.nofcomponents);
+  //ComplexMatrix Vijkl(1,ini.nofcomponents,1,ini.nofcomponents);
+  //ComplexMatrix Uijkl(1,ini.nofcomponents,1,ini.nofcomponents);
+  //ComplexMatrix Ubijkl(1,ini.nofcomponents,1,ini.nofcomponents);
   FILE * fin; //
   Vector mf(1,ini.nofcomponents);
    
-  int sort=0;int maxiter=1000000;
+ // int sort=0;int maxiter=1000000;
 
 
 
@@ -72,16 +72,22 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
 //       myPrintComplexVector(stdout,u1);
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  j
         if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=tn;
+ // now call du1calc with negative temperature: this will trigger
+ // the function not to include thermal expectation values -> thus u1 with a bar on top
+ // is calculated (u1b ... u1bar)
      double TT=-ini.T; d=1e10;(*inputpars.jjj[l]).du1calc(TT,mf,u1b,d,md.est(i,j,k,l));
 //       myPrintComplexVector(stdout,u1b);
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  j
         if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=tn;
       v1(1)=complex <double> (ninit,pinit);nnt=(*inputpars.jjj[l]).dv1calc(qijk,ini.T,v1,md.est(i,j,k,l));
 //       myPrintComplexVector(stdout,v1);
-
-      gammab=Norm2(u1b);Mbijkl=u1b^u1b;u1b/=sqrt(gammab);
-      gamma=Norm2(u1);Mijkl=u1^u1;u1/=sqrt(gamma);
-      Gamman=Norm2(v1);Nijkl=v1^v1;v1/=sqrt(Gamman);
+//u1b corresponds to u1 with a bar in the manual (computed without thermal expectation values)
+      gammab=Norm2(u1b);//Mbijkl=u1b^u1b;
+u1b/=sqrt(gammab);
+      gamma=Norm2(u1);//Mijkl=u1^u1;
+u1/=sqrt(gamma);
+      Gamman=Norm2(v1);//Nijkl=v1^v1;
+v1/=sqrt(Gamman);
 
      //  myPrintComplexMatrix(stdout,Nijkl);
       (*inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
@@ -92,32 +98,32 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
       {
        j1=md.baseindex(i,j,k,l,jmin); 
       
-//       if(fabs(fabs(d)-fabs(nn[6]))>SMALLEDIF)
-//        {fprintf(stderr,"ERROR mcdisp: reading mcdisp.trs with transition energy delta %g meV differnt from internal calculation %g meV %g\n",nn[6],d);	 
-//         exit(EXIT_FAILURE);}
-//       md.delta(i,j,k)(j1)=nn[6]; // set delta ... not needed here
      // diagonalizeMs to get unitary transformation matrix Us
 //myPrintComplexMatrix(stdout,Mijkl);
-     myEigenSystemHermitean (Mijkl,Gamma,Uijkl,sort=1,maxiter);
+    // myEigenSystemHermitean (Mijkl,Gamma,Uijkl,sort=1,maxiter);
 //myPrintComplexMatrix(stdout,Mbijkl);
-     myEigenSystemHermitean (Mbijkl,Gamma,Ubijkl,sort=1,maxiter);
+    // myEigenSystemHermitean (Mbijkl,Gamma,Ubijkl,sort=1,maxiter);
 //myPrintComplexMatrix(stdout,Nijkl);
-     myEigenSystemHermitean (Nijkl,Gamma,Vijkl,sort=1,maxiter);
+    // myEigenSystemHermitean (Nijkl,Gamma,Vijkl,sort=1,maxiter);
 	// conjugate:note the eigensystemhermitean returns eigenvectors as column vectors, but
 	// the components need to be complex conjugated 
 
          // treat correctly case for neutron energy loss
-	 if (nn[6]<0){Vijkl=Vijkl.Conjugate();v1=v1.Conjugate();
-                      Uijkl=Uijkl.Conjugate();u1=u1.Conjugate();
-                      Ubijkl=Ubijkl.Conjugate();u1b=u1b.Conjugate();
+	 if (nn[6]<0){//Vijkl=Vijkl.Conjugate();
+v1=v1.Conjugate();
+                     // Uijkl=Uijkl.Conjugate();
+u1=u1.Conjugate();
+                     // Ubijkl=Ubijkl.Conjugate();
+u1b=u1b.Conjugate();
                      }
-       if (fabs(Gamman-Gamma(ini.nofcomponents))>SMALL){fprintf(stderr,"ERROR eigenvalue of single ion matrix N inconsistent: analytic value Gamma= %g numerical diagonalisation of N gives Gamma= %g\n",Gamman,Gamma(ini.nofcomponents));
-                           exit(EXIT_FAILURE);}
-       if (Gamma(ini.nofcomponents)>=0&&fabs(Gamma(ini.nofcomponents-1))<SMALL)
+      // if (fabs(Gamman-Gamma(ini.nofcomponents))>SMALL){fprintf(stderr,"ERROR eigenvalue of single ion matrix N inconsistent: analytic value Gamma= %g numerical diagonalisation of N gives Gamma= %g\n",Gamman,Gamma(ini.nofcomponents));
+      //                     exit(EXIT_FAILURE);}
+     //  if (Gamma(ini.nofcomponents)>=0&&fabs(Gamma(ini.nofcomponents-1))<SMALL)
                            // mind in manual the 1st dimension alpha=1 corresponds
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
-                           {Gamman*=gamma/gammab;
+                           //{
+                           Gamman*=gamma/gammab;
                            if (nn[6]>SMALL)
 			    {md.sqrt_Gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(Gamman);// gamma(ini.nofcomponents)=sqr(gamma^s)
                             }
@@ -135,21 +141,30 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
                              md.sqrt_Gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(SMALL*Gamman);
 			                      }
 			    }
-			   }else
-                          {fprintf(stderr,"ERROR eigenvalue of single ion matrix <0: ev1=%g ev2=%g ev3=%g ... evn=%g\n",Gamma(1),Gamma(2),Gamma(3),Gamma(ini.nofcomponents));
-                           exit(EXIT_FAILURE);}
+			//   }else
+                        //  {fprintf(stderr,"ERROR eigenvalue of single ion matrix <0: ev1=%g ev2=%g ev3=%g ... evn=%g\n",Gamma(1),Gamma(2),Gamma(3),Gamma(ini.nofcomponents));
+                        //   exit(EXIT_FAILURE);}
 
-        for(m=1;m<=ini.nofcomponents;++m){
-        Vijkl(m,ini.nofcomponents)=v1(m);
-        Uijkl(m,ini.nofcomponents)=u1(m);
-        Ubijkl(m,ini.nofcomponents)=u1b(m);
-        }
+    //    for(m=1;m<=ini.nofcomponents;++m){
+    //    Vijkl(m,ini.nofcomponents)=v1(m);
+    //    Uijkl(m,ini.nofcomponents)=u1(m);
+    //    Ubijkl(m,ini.nofcomponents)=u1b(m);
+    //    }
 //Nijkl=Ubijkl.Transpose().Conjugate()*Ubijkl;myPrintComplexMatrix(stdout,Nijkl);
-        Vijkl=Vijkl*Ubijkl.Transpose().Conjugate()*Uijkl;
-        for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){
-        md.V(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Vijkl(m,n);
-        md.N(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Nijkl(m,n);
-        }}
+     //   Vijkl=Vijkl*Ubijkl.Transpose().Conjugate()*Uijkl; // equation (33) in review
+        v1=v1*(u1*u1b); // vector product a*b is (according to cvector.cc): sum_m a(m) b(m).conj
+                        // MR 14.9.2011
+        for(m=1;m<=ini.nofcomponents;++m){
+        //for(n=1;n<=ini.nofcomponents;++n){ // not needed MR 14.9.2011
+//        md.V(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Vijkl(m,n); // n=nofcomponents only MR 14.9.2011
+        md.V(i,j,k)(ini.nofcomponents*(j1-1)+m,j1)=v1(m);
+// alternatively we should use rather:   v1(m)*sum_m' [u1b(m').conj *u1(m')]
+// lets try and compare:
+     //    if (abs(Vijkl(m,ini.nofcomponents)-v1(m))>SMALL) {fprintf(stderr,"ERROR - going beyond inconsistent matrix nu: |Vijkl(m)-v1(m)|=%g\n",abs(Vijkl(m,ini.nofcomponents)-v1(m)));exit(EXIT_FAILURE);}
+
+//        md.N(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Nijkl(m,n); // not needed MR 14.9.2011
+        //}
+        }
 
        }
     }}}
@@ -272,8 +287,8 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
       if(intensitybey>0)
       {
         if((*md.bgU[in1])(i,b)==defval)  (*md.bgU[in1])(i,b)  = conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))
-                                                                 * md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
-        if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))
+                                                                 * md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,b);
+        if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,bb))
                                                                  * md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);
       }
  //   tval = conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b)) * md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1) * md.nofcomponents+md.nofcomponents);
@@ -282,7 +297,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
  //   fprintf(stderr,"xcheck: Ug[%i](%i,%i)=%f+i%f\tshould be %f+i%f\n",in2,j,bb,real((*Ug[in2])(j,bb)),imag((*Ug[in2])(j,bb)),real(tval),imag(tval));
     
 //                   chileft=conj(md.sqrt_gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.U(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
-//if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,(b-1)*md.nofcomponents+md.nofcomponents)*Tau(s,level);
+//if(intensitybey>0)chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(md.nofcomponents*b,md.nofcomponents*b))*md.V(i1,j1,k1)((b-1)*md.nofcomponents+i,b)*Tau(s,level);
 
      chileft = (*md.gU[in1])(i,b) * Tau(s,level);
      chi((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
@@ -297,7 +312,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
                                       }
 
 //if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
-//     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,(bb-1)*md.nofcomponents+md.nofcomponents))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
+//     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,bb))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}
    if(intensitybey>0) chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j) = PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);
   // en inserted  MR 9.3.11
     }}
