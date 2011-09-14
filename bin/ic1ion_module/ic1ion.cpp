@@ -336,12 +336,18 @@ int main(int argc, char *argv[])
    icpars pars;
    std::string norm,units;
 
-   if(argc>1) strcpy(infile,  argv[1]); else strcpy(infile,"mcphas.ic");
-   if(argc>2) strcpy(outfile, argv[2]); else strcpy(outfile,"results/ic1ion.out");
-   if(argc>3) strcpy(physfile,argv[3]); else strcpy(physfile,"results/ic1ion.mag");
+   bool headonly=false; int ai[255],ib=1;
+   for(int ia=1; ia<(argc>255?255:argc); ia++) 
+      if(strncmp(argv[ia],"-h",2)==0) headonly=true; else ai[ib++]=ia;
+
+   if(ai[1]!=0) strcpy(infile,  argv[ai[1]]); else strcpy(infile,"mcphas.ic");
+   if(ai[2]!=0) strcpy(outfile, argv[ai[2]]); else strcpy(outfile,"results/ic1ion.out");
+   if(ai[3]!=0) strcpy(physfile,argv[ai[3]]); else strcpy(physfile,"results/ic1ion.mag");
 
    // Gets input parameters and what to calculate from input single-ion parameters file
    ic_parseinput(infile,pars);
+
+   if(headonly) { std::cout << "ic1ion: Outputing only header\n"; ic_printheader(outfile,pars); return(0); }
 
    // For quick and dirty timing routines...
    clock_t start,end; start = clock();
