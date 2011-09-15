@@ -336,8 +336,8 @@ int main(int argc, char *argv[])
    icpars pars;
    std::string norm,units;
 
-   bool headonly=false; int ai[255],ib=1;
-   for(int ia=1; ia<(argc>255?255:argc); ia++) 
+   bool headonly=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc);
+   for(int ia=1; ia<narg; ia++)
       if(strncmp(argv[ia],"-h",2)==0) headonly=true; else ai[ib++]=ia;
 
    if(ai[1]!=0) strcpy(infile,  argv[ai[1]]); else strcpy(infile,"mcphas.ic");
