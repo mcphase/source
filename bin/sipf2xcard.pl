@@ -274,7 +274,7 @@ sub ic1ion()
                    }
  close Fin;
 
- system("ic1ionit $file > ic1ion.log");
+ system("ic1ionit -h $file > ic1ion.log");
  chdir "results";
  unless (open(Fin,"ic1ion.out")){die "cannot open file ic1ion.out\n";}
  while($line=<Fin>){
