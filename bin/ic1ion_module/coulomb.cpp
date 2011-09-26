@@ -586,16 +586,16 @@ sMat<double> racah_e3(int n)
 	 // e3(i,i) = e; }
 	 else if(abs(L)==abs(conf.states[i].L) && S2==conf.states[i].S2)
 	 {
-	    e = 0;
 	    if(v==conf.states[i].v)
 	    {
-	       if((n==6 && v==6) || (n==7 && v==7)) { }
-	       else if(n==(v+2))
-	          e = ((1.-v)/(7.-v)) * ( racah_yfn(v,v,S2,conf.states[i].U,v,U)         // Eqn 82 and 84a.
-		               * racah_phi(conf.states[i].U,U,conf.states[i].L,L) );
-	       else if(n==(v+4))
-	          e = (-4./(7.-v))    * ( racah_yfn(v,v,S2,conf.states[i].U,v,U)         // Eqn 82 and 84b.
-		               * racah_phi(conf.states[i].U,U,conf.states[i].L,L) );
+	       if((n==6 && v==6) || (n==7 && v==7)) { e = 0.; }
+	       else if(n==(v+2) || n==(v+4))
+	       {
+	          if(v==S2) e = -2. * (abs(L)*(abs(L)+1.)/2 - 12.*racah_g(U));           // Eqn 81
+	          else      e = racah_yfn(v,v,S2,conf.states[i].U,v,U)
+		               * racah_phi(conf.states[i].U,U,conf.states[i].L,L);
+                  e *= ( n==(v+2) ? ((1.-v)/(7.-v)) : (-4./(7.-v)) );                    // Eqn 82 and 84.
+	       }
 	       else                                                                      // Eqn 87 ---\/
 	          e = racah_yfn(n,v,S2,conf.states[i].U,v,U) * racah_phi(conf.states[i].U,U,conf.states[i].L,L);
             }
@@ -610,7 +610,7 @@ sMat<double> racah_e3(int n)
 	    else                                                                         // Eqn 87 
 	       e = racah_yfn(n,conf.states[i].v,S2,conf.states[i].U,v,U) * racah_phi(conf.states[i].U,U,conf.states[i].L,L);
 	    if(i!=j && e!=0) { e3(i,j) = e; e3(j,i) = e; }
-	    if(i==j && e!=0) { e3(i,i) = e - (abs(L)*(abs(L)+1.)/2 - 12.*racah_g(U)); }  // Eqn 87 and 78
+	    if(i==j)         { e3(i,i) = e - (abs(L)*(abs(L)+1.)/2 - 12.*racah_g(U)); }  // Eqn 87 and 78
 	 }
       }
    }
