@@ -176,8 +176,8 @@ fprintf(fout,"#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + N
 fprintf(fout,"#\n");
 fprintf(fout,"#\n");
 fprintf(fout,"#             For some of the above options we need the\n");
-fprintf(fout,"#! Pa=%8.4f   Components of Projection Vector P=(Pa * a + Pb * b + Pc *c)/Norm(Pa * a + Pb * b + Pc *c)\n",P(1));
-fprintf(fout,"#! Pb=%8.4f\n",P(2));
+fprintf(fout,"#! Pa=%8.4f   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)\n",P(1));
+fprintf(fout,"#! Pb=%8.4f   Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)\n",P(2));
 fprintf(fout,"#! Pc=%8.4f\n",P(3));
 fprintf(fout,"#\n");
 fprintf(fout,"#\n");
@@ -369,7 +369,10 @@ r3=(rtoxyz*r3)*(double)nr3;
 // transform also Projection vector
 Vector Pxyz (1,3);
 Pxyz=(rtoxyz*P);
-P/=Norm(Pxyz);Pxyz/=Norm(Pxyz); // normalise to length 1
+// P/=Norm(Pxyz);Pxyz/=Norm(Pxyz); // normalise to length 1 : removed 14.10.2011 to be able to calculate different degrees of beam polarisation
+if(Norm(Pxyz)>1){fprintf(stderr,"Warning mcdiff: length of polarization vector |P|>1 ... taking full polarised beam, i.e. normalising length of P to |P|=1\n");
+                 P/=Norm(Pxyz);Pxyz/=Norm(Pxyz); }  // normalize only if |P|>1
+printf("#Length of Polarization Vector P (beam polarisation for calculation of I+,I-,MSF.P): |P|=%g \n",Norm(Pxyz));
 
 //r1(1) = a * r1(1) * nr1;
 //r2(1) = a * r2(1) * nr2;
@@ -638,7 +641,7 @@ for(i=1;i<=m;++i){hhkkll=hkl[i];
 
 printeln(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
           r2, r3, n,  J, m, hkl, ikern, intmag,intmagdip, D, theta, out10, out11,mx,my,mz,mxmy,mxmz,mymz,
-          mx2,my2,mz2,a,b,c,colcode,P);
+          mx2,my2,mz2,a,b,c,colcode,P,Pxyz);
 
 fprintf (stderr,"...results written to ./results/mcdiff.out\n");
 fprintf (stderr,"***********************************************************\n");

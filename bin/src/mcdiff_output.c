@@ -108,7 +108,7 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
               Vector * hkl,float * ikern,float * intmag,float * intmagdip,float * D,float * theta,float * out10,
               float * out11,complex <double>*mx,complex <double>*my,complex <double>*mz,complex <double>*mxmy,
               complex <double>*mxmz,complex <double>*mymz,complex <double>*mx2,complex <double>*my2,complex <double>*mz2,
-              float a,float b,float c,int * colcode,Vector & P)
+              float a,float b,float c,int * colcode,Vector & P, Vector & Pxyz)
 {// ausgabe auf file filename
  FILE * fout;char l[MAXNOFCHARINLINE];
  int i,j,chinr=0,ortho=1;
@@ -132,7 +132,7 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
 
  fprintf(fout,"# unit cell:%s",unitcell);
  fprintf(fout,"#                   / %6.3f A \\     / %6.3f A \\     / %6.3f A \\ \n", r1(1), r2(1), r3(1));
- fprintf(fout,"#                r1=| %6.3f A |  r2=| %6.3f A |  r3=| %6.3f A |\n", r1(2), r2(2), r3(2));
+ fprintf(fout,"#                b1=| %6.3f A |  b2=| %6.3f A |  b3=| %6.3f A |\n", r1(2), r2(2), r3(2));
  fprintf(fout,"#                   \\ %6.3f A /     \\ %6.3f A /     \\ %6.3f A /\n", r1(3), r2(3), r3(3));
  fprintf(fout, "#! Wavelength=%g A   number of atoms: %i\n",lambda, n);
  fprintf(fout, "#! T= %g K Ha= %g T Hb= %g T Hc= %g T\n",T,H(1),H(2),H(3));
@@ -149,22 +149,22 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
  {fprintf(fout, "# Lorentz Factor not considered for resonant magnetic xray scattering - F1 and F2 transition intensities calculated\n");
   fprintf(fout, "# according to fRMXS as given in equation (2) of Longfield et al. PRB 66 054417 (2002) and maximized with respect to azimuth.\n#\n");
  }
- fprintf(fout, "# List of atomic positions dr1 dr2 dr3, moments m scattering lengths sl,\n");
+ fprintf(fout, "# List of atomic positions db1 db2 db3, moments m scattering lengths sl,\n");
  fprintf(fout, "# Debye Waller factor (sqr(Intensity)~|sf| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),\n# units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)\n");
  fprintf(fout, "#  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor\n# coefficients\n");
  if (ortho==1)
- {fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3]ma[MuB]mb[MuB]mc[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
+ {fprintf(fout, "#  db1[b1]db2[b2]db3[b3]ma[MuB]mb[MuB]mc[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
  } else
- {fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3]mi[MuB]mj[MuB]mk[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
+ {fprintf(fout, "#  db1[b1]db2[b2]db3[b3]mi[MuB]mj[MuB]mk[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
   fprintf(fout, "#                         ...with j||b, k||(a x b) and i normal to k and j\n");
  }
  for (i = 1;i<=n;++i)
  {if((double)(i)/50==(double)(i/50))
   {
    if (ortho==1)
-   {fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3]ma[MuB]mb[MuB]mc[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
+   {fprintf(fout, "#  db1[b1]db2[b2]db3[b3]ma[MuB]mb[MuB]mc[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
    } else
-   {fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3]mi[MuB]mj[MuB]mk[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
+   {fprintf(fout, "#  db1[b1]db2[b2]db3[b3]mi[MuB]mj[MuB]mk[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
     fprintf(fout, "#                         ...with j||b, k||(a x b) and i normal to k and j\n");
    }
   }
@@ -184,7 +184,7 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
  }
  fprintf(fout, "#}\n");
  fprintf(fout, "#    REFLECTION LIST\n");
- if(colcode[10]>4||colcode[11]>4){fprintf(fout, "#    Projection Vector P= %g a + %g b + %g c \n",P(1),P(2),P(3));}
+ if(colcode[10]>4||colcode[11]>4){fprintf(fout, "#    Polarization Vector P= %g a + %g b + %g c (|P|=%g)\n",P(1),P(2),P(3),Norm(Pxyz));}
  hkl[0] = 0; D[0] = 100; theta[0] = 0; ikern[0] = 0; intmag[0] = 0;intmagdip[0] = 0; out10[0] = 0; out11[0] = 0;mx[0]=0;my[0]=0;mz[0]=0;mx2[0]=0;my2[0]=0;mz2[0]=0;mxmy[0]=0;mxmz[0]=0;mymz[0]=0;
  double rpvalue[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
  double chisquared[]={0,0,0,0,0,0,0,0,0,0,0,0,0};

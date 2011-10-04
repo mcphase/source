@@ -97,8 +97,8 @@ print Fout << "EOF";
 #
 #
 #             For some of the above options we need the
-#! Pa=  0.0000   Components of Projection Vector P=(Pa * a + Pb * b + Pc *c)/Norm(Pa * a + Pb * b + Pc *c)
-#! Pb=  0.0000
+#! Pa=  0.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
+#! Pb=  0.0000   Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)
 #! Pc=  1.0000
 #
 #
