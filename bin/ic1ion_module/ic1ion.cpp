@@ -336,9 +336,10 @@ int main(int argc, char *argv[])
    icpars pars;
    std::string norm,units;
 
-   bool headonly=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc);
-   for(int ia=1; ia<narg; ia++)
-      if(strncmp(argv[ia],"-h",2)==0) headonly=true; else ai[ib++]=ia;
+   bool headonly=false, hcsoonly=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc);
+   for(int ia=1; ia<narg; ia++) {
+      if(strncmp(argv[ia],"-h",2)==0) headonly=true; else
+      if(strncmp(argv[ia],"-s",2)==0) hcsoonly=true; else ai[ib++]=ia; }
 
    if(ai[1]!=0) strcpy(infile,  argv[ai[1]]); else strcpy(infile,"mcphas.ic");
    if(ai[2]!=0) strcpy(outfile, argv[ai[2]]); else strcpy(outfile,"results/ic1ion.out");
@@ -348,6 +349,7 @@ int main(int argc, char *argv[])
    ic_parseinput(infile,pars);
 
    if(headonly) { std::cout << "ic1ion: Outputing only header\n"; ic_printheader(outfile,pars); return(0); }
+   if(hcsoonly) { iceig VE; sMat<double> Hcso = ic_Hcso(pars); VE.calc(Hcso); strcpy(outfile,"results/mcphas.icpJ"); ic_showoutput(outfile,pars,VE,0); return(0); }
 
    // For quick and dirty timing routines...
    clock_t start,end; start = clock();
