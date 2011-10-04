@@ -39,7 +39,7 @@
 template <class T> class sMat;                                          // google  "Explicit Template Specification"
 template <class T> std::ostream & operator << (std::ostream & o, const sMat<T> & m);
 template <class T> std::istream & operator >> (std::istream & i, sMat<T> & m);
-template <class T> T atoT(std::string &s);
+template <class T> T atoT(const std::string &s);
 // --------------------------------------------------------------------------------------------------------------- //
 template <class T> class sMat {
    private:
@@ -85,6 +85,7 @@ template <class T> class sMat {
    //std::map<_ind,T> ls() { return _ls; }
      void mcol(int c, T val);                                           // Multiplies a given column by a constant
      void mrow(int r, T val);                                           // Multiplies a given row by a constant
+     sMat<T> reorder(std::vector<int> id);                              // Changes to a new basis given by id
 
      // Overloaded operators
      sMat<T> operator =  (const sMat & m);                              // Copy assignment - overwrites previous matrix
@@ -494,6 +495,23 @@ template <class T> void sMat<T>::mrow(int r, T val)             // Multiplies a 
    if (lb->first < ub->first)
       for(it=lb; it->first<ub->first; it++)
          it->second *= val;
+}
+template <class T> sMat<T> sMat<T>::reorder(std::vector<int> id) // Changes to a new basis given by id
+{
+   if(_ls.empty()) return *this;
+
+   int i,j;
+   typename std::map<_ind,T>::iterator it;
+   std::map<_ind,T> tmp_ls;
+
+   for (it=_ls.begin(); it!=_ls.end(); it++)
+   {
+      i = (*it).first.r; j = (*it).first.c;
+      tmp_ls[_ind(id[i],id[j])] = (*it).second;
+   }
+   _ls = tmp_ls;
+
+   return *this;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //

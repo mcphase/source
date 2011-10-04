@@ -25,8 +25,6 @@
 #include <cctype>                  // For std::tolower
 #include <fstream>
 
-#define SMALL 1e-6   // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-		     // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 #define MAXNOFCHARINLINE 144
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -249,7 +247,7 @@ icpars::icpars()
    yT=0.; yHa=0.; yHb=0.; yHc=0.; yMin=0.; yStep=0.; yMax=0.;
    Bx=0.; By=0.;  Bz=0.; basis.assign("JmJ"); save_matrices = false;
    Dx2=0.; Dy2=0.; Dz2=0.;  // For spin wave anisotropy parameters in icf1ion for half filled shells.
-   perturb = false; partial = false; arnoldi = false; spectrelevels = -1; truncate_level = 1; num_eigv = 4;
+   partial = false; arnoldi = false; truncate_level = 1; num_eigv = 4;
    partial_standalone = false; arnoldi_standalone = false;
 }
 // --------------------------------------------------------------------------------------------------------------- //
