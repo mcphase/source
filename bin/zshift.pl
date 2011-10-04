@@ -23,14 +23,13 @@ $column=$ARGV[0];shift @ARGV;
 
 
 
-$delta=1e22;
 
   foreach (@ARGV)
 
   {
 
    $file=$_;
-
+$delta=1e22;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file;
 

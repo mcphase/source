@@ -13,7 +13,7 @@ use as:
          [-av]           points are averaged
          [-sum]           points are added
 	 [-median]       median of points is calculated and kept
-         [--dmin=0.4]    takes instead of 15 lines a variable number
+         [-dmin=0.4]    takes instead of 15 lines a variable number
                          of lines determined by the condition that
                          data in column 15 is closer than dmin 
          15 filenames    takes sets of 15 lines in data file and averages data
@@ -31,7 +31,7 @@ if (join('',@pars) =~/\-/) {
   usage() if $helpflag;
 }
 @ARGV=@p;while (join('',@pars) =~ /\-/){shift @ARGV;@pars = @ARGV;}
-if ($dmin) {shift @ARGV;}
+# if ($dmin) {shift @ARGV;} # removed because it squeezes out the column MR 1.10.2011
 $n=$ARGV[0];shift @ARGV;
 
 if ($avflag) {print "averaging ...\n";}

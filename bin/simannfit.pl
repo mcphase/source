@@ -83,17 +83,19 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
      } close Fin;
  }  
     if ($#par<0) {print "Error simannfit: no parameters found in input files @ARGV\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
-    print ($#par+1);print " parameters found - starting fit ...\n";close Fout;
-# initialize parameter storage
+   close Fout;
+print "initialize parameter storage\n";
 $parstore = zeroes $#par+3,$#par+1;
 $deltastore =  PDL->nullcreate(0);
 $nof_calcsta_calls=0;
 #*******************************************************************************
 # fitting loop
+ print ($#par+1);print " parameters found - testing calculation of sta\n";
 $rnd=1;$stasave=1e20;
  ($sta)=sta();$stps=1;$noofupdates=0;$stepnumber=0;
+
 if($sta>0)
-{
+{print "starting fit\n";
  $SIG{INT} = \&catch_zap;
  while($sta>0)
  {  $stasave=$sta;
@@ -163,6 +165,8 @@ if($sta>0)
    $i=0;foreach(@par){write STDOUT;++$i;}
    ($sta)=sta(); # CALCULATE sta !!!!
 }
+else
+{print "sta=0 already - not fit required !?\n";exit;}
 # calculate covariance matrix
 # for($i6=0;$i6<=$#par;++$i6){set $parstore,0,$i6,$par[$i6];}
 #$parstore
@@ -327,7 +331,7 @@ $staboundary=$stasave-log($rnd)*$stattemp;
                                               }
                    }
  close Fin;
- mydel ("./results/simannfit.sta");
+ mydel ("./results/simannfit.sta"); 
 # print @ssta;
  $delta= sqrt PDL->new(@ssta);
  $c=PDL->new(@par);
