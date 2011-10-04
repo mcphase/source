@@ -76,7 +76,7 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #           In the above the intensities I+ and I- are the spinflip and nonspineflip intensities
 #           in a polarised neutron experiment:
 #            I+-=LF exp(-OTF Q^2/8pi^2) 
-#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF/NB|^2-i(MSF x MSF*).P) 
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2
 #                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
 #
 #
@@ -89,9 +89,9 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 # %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
 #
 #
-#! nat=1      number of nonmagnetic atoms in primitive crystalographic unit cell
+#! natcryst=1      number of nonmagnetic atoms in primitive crystalographic unit cell
 #
-# it follows a list of nat lines with nonmagnetic atoms
+# it follows a list of natcryst lines with nonmagnetic atoms
 # ... notes: - if an occupancy other than 1.0 is needed, just reduce 
 #              the scattering length linear accordingly
 #            - da db and dc are not used by the program (unless you enter a line #! use_dadbdc=1), 

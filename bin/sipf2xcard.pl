@@ -209,19 +209,19 @@ copy("$file.xcardx","$file.xcardy");
 copy("$file.xcardx","$file.xcardz");
 open (FOUT,">>$file.xcardx");
 print FOUT << "EOF";
-    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,1,0,0};
+    Ba(#i1 #f1 $conf $conf)={1,1,0,0};
  XEND:
  STOP:
 EOF
 open (FOUT,">>$file.xcardy");
 print FOUT << "EOF";
-    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,1,0};
+    Ba(#i1 #f1 $conf $conf)={1,0,1,0};
  XEND:
  STOP:
 EOF
 open (FOUT,">>$file.xcardz");
 print FOUT << "EOF";
-    Ba(#i1 #f1 $conf $conf)={0.6666667/0.00005788,0,0,1};
+    Ba(#i1 #f1 $conf $conf)={1,0,0,1};
  XEND:
  STOP:
 EOF

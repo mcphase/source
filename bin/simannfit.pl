@@ -313,7 +313,7 @@ sub sta {#local $SIG{INT}='IGNORE';
  }
 
 # print "#call routine calcsta.bat to calculate standard deviation\n";
-$staboundary=$stasave-log($rnd)*$stattemp;
+$staboundary=$stasave-log($rnd+1e-10)*$stattemp;
  if ($^O=~/MSWin/){
                    if(system ("calcsta.bat $staboundary > results\\simannfit.sta")){die "\n error executing calcsta.bat\n";}
                   }

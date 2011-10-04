@@ -16,7 +16,7 @@ if ($step=~/-n/){$nofsteps=$ARGV[0];shift @ARGV; }
 $min=1e100;$max=-1e100;
   foreach (@ARGV)
   {$file=$_;
-   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
+   unless (open (Fin, $file)){die "\n error histcol:unable to open $file\n";}
    print "<".$file;
    while($line=<Fin>)
      {if ($line=~/^\s*#/) {}
@@ -29,8 +29,8 @@ $min=1e100;$max=-1e100;
    }
 print ">\n";
 if ($step=~/-n/){$step=($max-$min)/$nofsteps;}
-if($max==$min){die "Error histcol: maximum equal to minimum\n";}
-if ($step/($max-$min)<1e-3) {die "Error histcol: not more than 1000 steps allowed \n";}
+if($max==$min){die "Error histcol $file: maximum equal to minimum\n";}
+if ($step/($max-$min)<1e-3) {die "Error histcol $file: not more than 1000 steps allowed \n";}
 # determine histogram
 @histo=();
  # histogramm steps (not more than 1000)
@@ -38,7 +38,7 @@ for($hx=0;$hx<=int(($max-$min)/$step)+1;++$hx){$histo[$hx]=0;}
 
   foreach (@ARGV)
   {$file=$_;
-   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
+   unless (open (Fin, $file)){die "\n error histcol:unable to open $file\n";}
    while($line=<Fin>)
      {if ($line=~/^\s*#/) {}
        else{$line=~s/D/E/g;@numbers=split(" ",$line);
