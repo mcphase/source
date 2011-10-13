@@ -161,9 +161,9 @@ ifdef integral
 	@echo Linking $@
 	@$(LINKER) -o ../ic1ionit ic1ion.o spectre.o states.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
 else
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
+../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) spectre.o states.o ic1ion.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ionit ic1ion.o states.o $(OBJ) $(LDFLAGS) $(STATIC)
+	@$(LINKER) -o ../ic1ionit ic1ion.o states.o $(OBJ) spectre.o $(LDFLAGS) $(VECOBJ) $(STATIC)
 endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp

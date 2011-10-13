@@ -98,6 +98,24 @@ int ic_diag(sMat<double> &Hic, double *m, double *eigval)
    }
    return info;
 }
+int ic_diag(double *mz, int lda, int n, double *m, double *eigval)
+{
+   // Paramaters for DSYEV
+   int info = 0, lwork = 4*n;
+   char jobz = 'V', uplo = 'U';
+   double *work=0;
+   {
+      char range = 'A'; double vl,vu; int il=1,iu=n/10,numfnd,ldz=n;
+      double abstol = 0.00001; int *isuppz = new int[2*n];
+      lwork = 26*n; int liwork=10*n;
+      work = new double[lwork];
+      int *iwork = new int[liwork];
+      F77NAME(dsyevr)(&jobz, &range, &uplo, &n, mz, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, eigval, m, 
+                      &ldz, isuppz, work, &lwork, iwork, &liwork, &info);
+      delete []isuppz; delete[]iwork; delete []work;
+   }
+   return info;
+}
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Diagonalises the IC Hamiltonian matrix and returns an array of eigenvectors and eigenvalues up to specified index
@@ -370,3 +388,4 @@ int ic_peig(int Hsz, complexdouble *zJmat, complexdouble *est, complexdouble *zV
 
    return 0;
 }
+

@@ -166,12 +166,13 @@ void ic_printheader(const char *outfile, icpars &pars)
 void ic_showoutput(const char *filename,                        // Output file name - default "results/mcphas.icr"
                    icpars &pars,                                // Input parameters
                    iceig &VE,                                   // Eigenstates class
-                   int iconf)
+                   int iconf,
+                   std::vector<int> ikeepJ)
 {
    fconf conf(pars.n,iconf,pars.l);
 
    unsigned int iE,iV,i=1,j=2,num_states=conf.states.size(),ns;
-   std::vector<int> isE,isV(num_states,0); isE.reserve(num_states);
+   std::vector<int> isE; isE.reserve(num_states);
    int ii; 
    double elem,conv=1.; complexdouble elc;
 
@@ -186,14 +187,17 @@ void ic_showoutput(const char *filename,                        // Output file n
    if(!VE.iscomplex()) FILEOUT << "# Energy(" << pars.e_units << ")\tWavefunctions(^{2S+1}L_J,mJ) }\n"; else
    FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L_J,mJ) }\n";
 
+   bool istrunc = !ikeepJ.empty(); if(istrunc) num_states=ikeepJ.size();
+   std::vector<int> isV(num_states,0), _isV; _isV.reserve(num_states);
+   if(istrunc) _isV = ikeepJ; else for(ii=0; ii<(int)num_states; ii++) _isV.push_back(ii);
+
    double *V=0; complexdouble *zV=0; if(VE.iscomplex()) zV = new complexdouble[num_states]; else V = new double[num_states];
    if((unsigned int)pars.num_eigv > num_states) { ns = num_states; } else { ns = (unsigned int)pars.num_eigv; }
    for(iE=0; iE<num_states; iE++)
    {
-      //if(VE.E(iE)==0.) if(iE<(num_states-1) && VE.E(iE+1)==0.) break;
+      if(VE.E(iE)==-DBL_MAX) { FILEOUT << "# Higher levels truncated\n"; break; }      // For case of truncated matrices.
       FILEOUT << (VE.E(iE)-VE.E(0))*conv << "\t\t";
-      for(ii=0; ii<(int)num_states; ii++) isV[ii]=ii;
-      i=1; j=2;
+      isV = _isV; i=1; j=2;
       if(VE.iscomplex())
       {
          memcpy(zV,VE.zV(iE),num_states*sizeof(complexdouble));
@@ -278,6 +282,7 @@ void ic_cmag(const char *filename, icpars &pars)
    std::vector<double> ex; std::vector< std::vector<double> > matel, exj;
    sMat<double> J,iJ,H,iH; H = ic_hmltn(iH,pars); H/=MEV2CM; iH/=MEV2CM;
    complexdouble *zV=0;
+
    if(pars.perturb) { VE.calc(H,iH); zV = new complexdouble[(H.nr()+1)*(H.nc()+1)];
       for(i=0; i<H.nr(); i++) zV[i].r = VE.E(i); memcpy(&zV[H.nr()+1],VE.zV(0),H.nr()*H.nc()*sizeof(complexdouble)); }
 
@@ -336,9 +341,10 @@ int main(int argc, char *argv[])
    icpars pars;
    std::string norm,units;
 
-   bool headonly=false, hcsoonly=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc);
+   bool headonly=false, hcsoonly=false, truncate=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc); double elim;
    for(int ia=1; ia<narg; ia++) {
       if(strncmp(argv[ia],"-h",2)==0) headonly=true; else
+      if(strncmp(argv[ia],"-t",2)==0) { truncate=true; elim = atoi(argv[++ia]); } else
       if(strncmp(argv[ia],"-s",2)==0) hcsoonly=true; else ai[ib++]=ia; }
 
    if(ai[1]!=0) strcpy(infile,  argv[ai[1]]); else strcpy(infile,"mcphas.ic");
@@ -350,6 +356,7 @@ int main(int argc, char *argv[])
 
    if(headonly) { std::cout << "ic1ion: Outputing only header\n"; ic_printheader(outfile,pars); return(0); }
    if(hcsoonly) { iceig VE; sMat<double> Hcso = ic_Hcso(pars); VE.calc(Hcso); strcpy(outfile,"results/mcphas.icpJ"); ic_showoutput(outfile,pars,VE,0); return(0); }
+   if(truncate) { iceig VE = spectre_eig(pars, elim); ic_showoutput(outfile,pars,VE,1); return(0); }
 
    // For quick and dirty timing routines...
    clock_t start,end; start = clock();

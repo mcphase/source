@@ -23,8 +23,6 @@
 #include <cctype>                  // For std::tolower
 #include <fstream>
 
-#define SMALL 1e-6   // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-		     // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 #define MAXNOFCHARINLINE 144
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -35,6 +33,11 @@ complexdouble complexdouble::operator=(const double v) { complexdouble t; t.r=v;
 // --------------------------------------------------------------------------------------------------------------- //
 // Constructors for class iceig::
 // --------------------------------------------------------------------------------------------------------------- //
+iceig::iceig(int Hsz, bool isreal)
+{
+   _Hsz = Hsz; _E = new double[_Hsz]; 
+   if(isreal) { _V = new double[_Hsz*_Hsz]; _zV = 0; } else { _zV = new complexdouble[_Hsz*_Hsz]; _V = 0; }
+}
 iceig::iceig(sMat<double>&H)
 {
    _Hsz = H.nc(); _E = new double[_Hsz]; _V = new double[_Hsz*_Hsz]; _zV = 0;
@@ -93,6 +96,13 @@ void iceig::calc(int Hsz, complexdouble *H)
    _Hsz = Hsz; _E = new double[_Hsz]; _zV = new complexdouble[_Hsz*_Hsz];
    int info = ic_diag(Hsz,H,_zV,_E); 
    if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; }
+}
+void iceig::calc(int Hsz, double *H)
+{
+   if(_E!=0) { delete[]_E; _E=0; } if(_V!=0) { delete[]_V; _V=0; } if(_zV!=0) { delete[]_zV; _zV=0; }
+   _Hsz = Hsz; _E = new double[_Hsz]; _V = new double[_Hsz*_Hsz];
+   int info = ic_diag(H,Hsz,Hsz,_V,_E); 
+   if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_V; _V=0; }
 }
 void iceig::lcalc(icpars &pars, sMat<double>&H)
 {
@@ -852,3 +862,4 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
    //ex[iJ] = log(Z)-VE.E(0)/(KB*T); ex[iJ+1] = U;
    return ex;
 }
+
