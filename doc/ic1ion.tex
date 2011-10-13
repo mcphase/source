@@ -6,12 +6,21 @@ using intermediate coupling schemes.
 
 \subsection{using {\prg ic1ion\index{ic1ion}} as a stand-alone program to do crystal field calculations}
 
-{\prg ic1ion\index{ic1ion}} can be started by issuing the command {\prg ic1ion\index{ic1ion}} (reading input from single ion %%@
-parameter file {\prg mcphas.ic}) 
-{\prg ic1ion\index{ic1ion} filename}, where {\prg filename} is the name of the single ion
-parameter file to be used. The single ion 
-parameter
-file has to be of the form (note the crystal field parameters in Wybourne notation
+{\prg ic1ion} can be started by issuing the command {\prg ic1ion} (reading input from single ion %%@
+parameter file {\prg mcphas.ic}). Alternatively, the single ion parameter file can be specified on the commandline as
+
+{\prg ic1ion filename}
+
+{\prg ic1ion} also accepts two options: 
+\begin{description}
+\item[{\prg -h}] which outputs in the file {\prg results/ic1ion.out} only
+the header containing the free ion (Coulomb and spin-orbit) and single ion (crystal field and magnetic fields)
+parameters. 
+\item[{\prg -t energylimit}] which calculates the output energy levels only up to the value of energy limit
+by truncating the free ion Hamiltonian at this limit, and calculating the crystal field and Zeeman terms only
+for free ion states below this limit.
+\end{description}
+The single ion parameter file has to be of the form (note the crystal field parameters in Wybourne notation
 can be calculated by {\prg pointc}\index{pointc}):
 {\footnotesize
 \begin{verbatim}
@@ -83,9 +92,9 @@ Bz=0.1
 # save_matrices
 
 # if the next line is uncommented then it will use the Arnoldi method to calculate only 
-# a few of the lowest eigenvalues in mcalc(). Note. this method may sometimes give 
-# erroneous eigenvectors due to numerical instabilities. In addition, it may be 
-# disabled in Mac OS X versions.
+# a few of the lowest eigenvalues in mcalc() [those for which the thermal occupation
+# factor at 300K is nonzero]. Note: this method may sometimes give erroneous eigenvectors
+# due to numerical instabilities. In addition, it may be disabled in Mac OS X versions.
 
 # arnoldi
 
@@ -104,7 +113,7 @@ Bz=0.1
 # levels will be used for the mcalc() calculation.
 # This routine first calculates and diagonalises the singleion Hamiltonian without 
 # the Zeeman or mean-field terms, and then uses these eigenvectors to make a unitary 
-# transformation matrix to rotate the multipolar and L and S operators into this i
+# transformation matrix to rotate the multipolar and L and S operators into this
 # new basis. Then it truncates the matrix, leaving only the X fraction lowest 
 # levels.
 # This method is much faster (for low values of X) even than the arnoldi method, but
@@ -124,7 +133,9 @@ Bz=0.1
 
 # another experimental feature is for the calculation of spin and orbital 
 # magnetisation density in the three spatial directions which is specified by
+
 # density=1,2,3,4,5,6
+
 # ... this triggers mcalc to output instead of the normal operators
 # the expectation value of the coefficient in the expansion of the 
 # (orbital or spin)-density in terms of tesseral harmonic functions

@@ -45,8 +45,6 @@ class iceig
       void lcalc(icpars &pars, sMat<double> &H);   // Calculates a partial set of eigenstates of H
       void lcalc(icpars &pars, sMat<double> &H, sMat<double> &iH); 
       void lcalc(icpars &pars, complexdouble *H);  // Calculates a partial set from a fortran-style matrix
-      void pcalc(icpars &pars, complexdouble *zV,  // Calculates a partial set of eigenstates using
-                 sMat<double>&J, sMat<double>&iJ); //    perturbation theory
       #ifndef NO_ARPACK
       void acalc(icpars &pars, complexdouble *H);  // Calculates a partial set using the Arnoldi method (ARPACK)
       void acalc(icpars &pars, sMat<double> &J);

@@ -281,23 +281,17 @@ void ic_cmag(const char *filename, icpars &pars)
    iceig VE;
    std::vector<double> ex; std::vector< std::vector<double> > matel, exj;
    sMat<double> J,iJ,H,iH; H = ic_hmltn(iH,pars); H/=MEV2CM; iH/=MEV2CM;
-   complexdouble *zV=0;
-
-   if(pars.perturb) { VE.calc(H,iH); zV = new complexdouble[(H.nr()+1)*(H.nc()+1)];
-      for(i=0; i<H.nr(); i++) zV[i].r = VE.E(i); memcpy(&zV[H.nr()+1],VE.zV(0),H.nr()*H.nc()*sizeof(complexdouble)); }
 
    double convfact=1; if(pars.mag_units==1) convfact = NAMUB*1e3; else if(pars.mag_units==2) convfact = NAMUB;  // 1==cgs, 2==SI
 
    for(i=0; i<nH; i++)
    {
       for(j=0; j<6; j++) gjmbHmeV[j] = gjmbH[j]*(-MUB*(Hmin+i*Hstep)); 
-      mfmat.Jmat(J,iJ,gjmbHmeV,pars.save_matrices);
-      if(pars.perturb) VE.pcalc(pars,zV,J,iJ);
-      else { J+=H; iJ+=iH; if(pars.partial) VE.lcalc(pars,J,iJ); 
+      mfmat.Jmat(J,iJ,gjmbHmeV,pars.save_matrices); J+=H; iJ+=iH; 
+      if(pars.partial) VE.lcalc(pars,J,iJ); 
       #ifndef NO_ARPACK
          else if(pars.arnoldi) VE.acalc(pars,J,iJ); else VE.calc(J,iJ); 
       #endif
-      }
       ex = mfmat.expJ(VE,Tmax,matel,pars.save_matrices); ex.assign(matel[0].size(),0.); for(j=0; j<6; j+=2) exj.push_back(ex);
       for(j=0; j<nT; j++) 
       {
@@ -327,7 +321,6 @@ void ic_cmag(const char *filename, icpars &pars)
                     << (ma[j]*gjmbH[1] + mb[j]*gjmbH[3] + mc[j]*gjmbH[5])*convfact << "\n";
       }
    }
-   if(pars.perturb) delete[]zV;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -341,7 +334,7 @@ int main(int argc, char *argv[])
    icpars pars;
    std::string norm,units;
 
-   bool headonly=false, hcsoonly=false, truncate=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc); double elim;
+   bool headonly=false, hcsoonly=false, truncate=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc); double elim=2e3;
    for(int ia=1; ia<narg; ia++) {
       if(strncmp(argv[ia],"-h",2)==0) headonly=true; else
       if(strncmp(argv[ia],"-t",2)==0) { truncate=true; elim = atoi(argv[++ia]); } else
@@ -452,23 +445,6 @@ int main(int argc, char *argv[])
    imq = dv1calc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
    start = clock(); std::cerr << "Time to calculate dv1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 #endif
-
-/* int i, Hsz = est.Cols(); //complexdouble *cest = new complexdouble[Hsz*Hsz]; memcpy(cest,&est[0][0],Hsz*Hsz*sizeof(complexdouble));
-   std::vector<double> vgjmbH(6,.0578838263); //for(i=0; i<6; i++) vgjmbH[i] = gjmbH[i+1];
-   icmfmat mfmat(pars.n,pars.l);
-   sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH); complexdouble *zJmat=0; zJmat = zmat2f(Jmat,iJmat);
-   complexdouble *zVd = new complexdouble[(Hsz-1)*(Hsz-1)]; double *eigval = new double[Hsz-1];
-   start = clock();
-   int info = ic_peig(Hsz-1, zJmat, (complexdouble*)&est[0][0], zVd, eigval);
-   end = clock(); std::cerr << "Time to do peig() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
-   iceig VE(Hsz-1,eigval,zVd); strcpy(outfile,"results/mcphas.ic1"); ic_showoutput(outfile,pars,VE);
-   free(zJmat); delete[]zVd; delete[]eigval; //delete []cest;
-   start = clock();
-   Hic/=MEV2CM; iHic/=MEV2CM; 
-   VE.calc(Hic,iHic); strcpy(outfile,"results/mcphas.icp"); ic_showoutput(outfile,pars,VE);
-   end = clock(); std::cerr << "Time to do VE.calc() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
-   Hic+=Jmat; iHic+=Jmat;
-   VE.calc(Hic,iHic); strcpy(outfile,"results/mcphas.ic2"); ic_showoutput(outfile,pars,VE); */
 
    return 0;
 }

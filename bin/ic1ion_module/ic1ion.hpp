@@ -161,11 +161,10 @@ int ic_leig(sMat<double>&Hic, double *V, double *E, int n);               // Fin
 int ic_arpackeig(int n, complexdouble*m,complexdouble*z, double*E,int iu);// Finds only lowest eigval/vecs, use ARPACK
 int ic_arpackeig(int n, double *m, double *z, double *E, int iu);         // Finds only lowest eigval/vecs, use ARPACK
 #endif
-int ic_peig(int Hsz, complexdouble *zJmat, complexdouble *est,            // Diagonalises a complex matrix
-            complexdouble *zVd, double *eigval, int nev=0);               /*   using perturbation theory
-int ic_peig(sMat<double>&Hic, sMat<double>&iH, complexdouble*V, double*E);// Diagonalises complex hermitian Hic+iH
-int ic_peig(sMat<double>&Hic, double *V, double *E);                      // Diagonalises real symmetric Hic  */
 
+// --------------------------------------------------------------------------------------------------------------- //
+// Declarations for functions in spectre.cpp
+// --------------------------------------------------------------------------------------------------------------- //
 iceig spectre_eig(icpars &pars, double elim=2e3);                         // Diagonalises a truncated Hic like XTAL84
 
 // --------------------------------------------------------------------------------------------------------------- //
