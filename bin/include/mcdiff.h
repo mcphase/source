@@ -5,6 +5,8 @@
 
 #define MAXNOFREFLECTIONS 6000
 #define SMALL 1e-8
+#define SMALLINT 1e-4
+#define COLHEADERDIM 22
 #include "../../version"
 #include <mpspecfunp.h>
 #include <martin.h>
@@ -36,7 +38,9 @@ const char * colheader []= {"LF          ",
                            "i(MSFxMSF*)dip.P",
                            "Idip+       ",
                            "Idip-       ",
-                           "Idip+/Idip- "
+                           "Idip+/Idip- ",
+                           "2*|MSF.P|/sin^2(angl(Q,P)",
+                           "2*|MSFdip.P|/sin^2(angl(Q,P)"
                            };
 
 double setcoloutput(int i,float & scale, double & ovallt,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,

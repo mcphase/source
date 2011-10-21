@@ -164,7 +164,7 @@ fprintf(fout,"#            4.....neutron TOF powder cyl. sample - d-pattern log 
 fprintf(fout,"#            5.....neutron TOF powder cyl. sample - d-pattern normal scaled\n");
 fprintf(fout,"#! out10=%i    type of desired output in column 10 and 11 of mcdiff.out\n",colcode[10]);
 fprintf(fout,"#! out11=%i    (optional) default is NSF in column 10 and LF in column 11\n",colcode[11]);
-for(i=0;i<=20;++i){
+for(i=0;i<=COLHEADERDIM;++i){
 fprintf(fout,"#            %i....%s\n",i,colheader[i]);
                    }
 fprintf(fout,"#\n");

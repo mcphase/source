@@ -481,7 +481,7 @@ print $l1 "#--------------------------------------------------------------------
 
  for ($n1=1;$n1<(($rn->dims)[0]);++$n1)
 # the position xyz is relative position (not absolute coordinate of neighbour)
- {print $l sprintf("%4.4g %4.4g %4.4g ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
+ {print $l sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
  $ddd=$an->index($n)->at($n1);
   print $l1 sprintf("%8s   %+10.6f %+10.6f %+10.6f     ",$charge[$ddd],$in->index($n)->at($n1),$jn->index($n)->at($n1),$kn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
@@ -493,54 +493,54 @@ print $l1 "#--------------------------------------------------------------------
   if ($rkky==0) # here anisotropic interaction comes in
 
    {   if($gJ!=0&&$gJ[$ddd]!=0)
-         {print $l ($Jaa->index($n)->at($n1)." ".$Jbb->index($n)->at($n1)." ".$Jcc->index($n)->at($n1))." ";
+         {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
-          print $l $Jab->index($n)->at($n1)." ".$Jba->index($n)->at($n1)." ";
-          print $l $Jac->index($n)->at($n1)." ".$Jca->index($n)->at($n1)." ";
+          print $l sprintf("%+10.9e %+10.9e ",$Jab->index($n)->at($n1),$Jba->index($n)->at($n1));
+          print $l sprintf("%+10.9e %+10.9e ",$Jac->index($n)->at($n1),$Jca->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l $Jbc->index($n)->at($n1)." ".$Jcb->index($n)->at($n1)." ";
+          print $l sprintf("%+10.9e %+10.9e ",$Jbc->index($n)->at($n1),$Jcb->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){print $l "0 0 ";}} # add other components
          }
 
        if ($gJ==0&&$gJ[$ddd]==0)
-         {print $l (4*$Jaa->index($n)->at($n1))." ".$Jaa->index($n)->at($n1)." ".(4*$Jbb->index($n)->at($n1))." ".$Jbb->index($n)->at($n1)." ".(4*$Jcc->index($n)->at($n1))." ".$Jcc->index($n)->at($n1)." ";
+         {print $l sprintf("%+10.9e %+10.9e %+10.9e %+10.9e %+10.9e %+10.9e ",4*$Jaa->index($n)->at($n1),$Jaa->index($n)->at($n1),4*$Jbb->index($n)->at($n1),$Jbb->index($n)->at($n1),4*$Jcc->index($n)->at($n1),$Jcc->index($n)->at($n1));
           for($i=7;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
-          print $l (2*$Jaa->index($n)->at($n1))." ".(2*$Jaa->index($n)->at($n1))." "; #SaLa LaSa
-          print $l (4*$Jab->index($n)->at($n1))." ".(4*$Jba->index($n)->at($n1))." "; #SaSb SbSa
-          print $l (2*$Jab->index($n)->at($n1))." ".(2*$Jba->index($n)->at($n1))." "; #SaLb LbSa
-          print $l (4*$Jac->index($n)->at($n1))." ".(4*$Jca->index($n)->at($n1))." "; #SaSc ScSa
-          print $l (2*$Jac->index($n)->at($n1))." ".(2*$Jca->index($n)->at($n1))." "; #SaLc LcSa
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jaa->index($n)->at($n1)),(2*$Jaa->index($n)->at($n1))); #SaLa LaSa
+          print $l sprintf("%+10.9e %+10.9e ",(4*$Jab->index($n)->at($n1)),(4*$Jba->index($n)->at($n1))); #SaSb SbSa
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jab->index($n)->at($n1)),(2*$Jba->index($n)->at($n1))); #SaLb LbSa
+          print $l sprintf("%+10.9e %+10.9e ",(4*$Jac->index($n)->at($n1)),(4*$Jca->index($n)->at($n1))); #SaSc ScSa
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jac->index($n)->at($n1)),(2*$Jca->index($n)->at($n1))); #SaLc LcSa
           for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l (2*$Jab->index($n)->at($n1))." ".(2*$Jba->index($n)->at($n1))." "; #LaSb SbLa
-          print $l $Jab->index($n)->at($n1)." ".$Jba->index($n)->at($n1)." ";         #LaLb LbLa
-          print $l (2*$Jac->index($n)->at($n1))." ".(2*$Jca->index($n)->at($n1))." "; #LaSc ScLa
-          print $l $Jac->index($n)->at($n1)." ".$Jca->index($n)->at($n1)." ";         #LaLc LcLa
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jab->index($n)->at($n1)),(2*$Jba->index($n)->at($n1))); #LaSb SbLa
+          print $l sprintf("%+10.9e %+10.9e ",$Jab->index($n)->at($n1),$Jba->index($n)->at($n1));         #LaLb LbLa
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jac->index($n)->at($n1)),(2*$Jca->index($n)->at($n1))); #LaSc ScLa
+          print $l sprintf("%+10.9e %+10.9e ",$Jac->index($n)->at($n1),$Jca->index($n)->at($n1));         #LaLc LcLa
           for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l (2*$Jbb->index($n)->at($n1))." ".(2*$Jbb->index($n)->at($n1))." "; #SbLb LbSb
-          print $l (4*$Jbc->index($n)->at($n1))." ".(4*$Jbc->index($n)->at($n1))." "; #SbSc ScSb
-          print $l (2*$Jbc->index($n)->at($n1))." ".(2*$Jcb->index($n)->at($n1))." "; #SbLc LcSb
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jbb->index($n)->at($n1)),(2*$Jbb->index($n)->at($n1))); #SbLb LbSb
+          print $l sprintf("%+10.9e %+10.9e ",(4*$Jbc->index($n)->at($n1)),(4*$Jbc->index($n)->at($n1))); #SbSc ScSb
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jbc->index($n)->at($n1)),(2*$Jcb->index($n)->at($n1))); #SbLc LcSb
           for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l (2*$Jbc->index($n)->at($n1))." ".(2*$Jcb->index($n)->at($n1))." "; #LbSc ScLb
-          print $l $Jbc->index($n)->at($n1)." ".$Jcb->index($n)->at($n1)." ";         #LbLc LcLb
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jbc->index($n)->at($n1)),(2*$Jcb->index($n)->at($n1))); #LbSc ScLb
+          print $l sprintf("%+10.9e %+10.9e ",$Jbc->index($n)->at($n1),$Jcb->index($n)->at($n1));         #LbLc LcLb
           for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l (2*$Jcc->index($n)->at($n1))." ".(2*$Jcc->index($n)->at($n1))." "; #ScLc LcSc
+          print $l sprintf("%+10.9e %+10.9e ",(2*$Jcc->index($n)->at($n1)),(2*$Jcc->index($n)->at($n1))); #ScLc LcSc
           for($i=7;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){print $l "0 0 ";}} # add other components
          }
    }
    else  #here the isotropic interaction is written
    {
     if($gJ!=0&&$gJ[$ddd]!=0) 
-    {print $l ($Jaa->index($n)->at($n1)." ".$Jbb->index($n)->at($n1)." ".$Jcc->index($n)->at($n1))." ";
+    {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
      for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
     }
   
     if ($gJ==0&&$gJ[$ddd]==0) # spin - spin interactions only
-    {print $l ($Jaa->index($n)->at($n1)." 0.0 ".$Jbb->index($n)->at($n1)." 0.0 ".$Jcc->index($n)->at($n1))."  0.0 ";
+    {print $l sprintf("%+10.9e 0.0 %+10.9e 0.0 %+10.9e 0.0 ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
      for($i=7;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
     }
    }
 
- if ($calcdist==1) {print $l ($rn->index($n)->at($n1)." a".$ddd);}
+ if ($calcdist==1) {print $l sprintf("%+10.9e a%s",$rn->index($n)->at($n1),$ddd);}
 
   print $l "\n";
 
@@ -610,13 +610,12 @@ sub extractstring {
 # 
 # ... it stores 0.24 in the variable $standarddeviation
 #
-sub extractfromfile { 
+sub extractfromfile {
              my ($variable,$filename)=@_;
-             $var="\Q$variable\E";
-             $value="";
+             $var="\Q$variable\E";$value="";
              if(open (Fin,$filename))
              {while($line=<Fin>){
-                if($line=~/^.*$var\s*=/) {($value)=($line=~m|$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}                                        }
+                if($line=~/^(#!|[^#])*\b$var\s*=\s*/) {($value)=($line=~m/^(?:#!|[^#])*\b$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);}}
               close Fin;
        	     }
              else

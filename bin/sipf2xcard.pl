@@ -464,10 +464,10 @@ $xi=1e7; # Hso
 #
 sub fileextract {
              my ($variable,$filename)=@_;
-             my $var="\Q$variable\E";
+             $var="\Q$variable\E";$value="";
              if(open (Fin,$filename))
              {while($line=<Fin>){
-                if($line=~/^.*$var\s*=/) {($value)=($line=~m|$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}                                        }
+                if($line=~/^(#!|[^#])*\b$var\s*=\s*/) {($value)=($line=~m/^(?:#!|[^#])*\b$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);}}
               close Fin;
        	     }
              else

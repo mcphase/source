@@ -134,7 +134,7 @@ for($x=$min;$x<$max;$x+=$delta)
      }
 #     close Fin1;
         	     
-    print  $x." ".$y."\n";
+    print  sprintf("%+10.9e %10.9e\n",$x,$y);
    }
 }
 else
@@ -219,7 +219,7 @@ else
             	  $i=0;
 		  foreach (@numbers3)
 		  {++$i;print $numbers3[$i-1]." ";}     
-    print  "  ".$ycalc[$ii]." $yorig\n";
+    print sprintf(" %+10.9e %10.9e\n",$ycalc[$ii],$yorig);
   }
  } 
 print STDOUT << "EOF";
@@ -241,11 +241,11 @@ print STDOUT << "EOF";
 #                 containing the calculated results of the convolution and the 
 #                 original unscaled data.
 EOF
- print "#\n#!sta=$sta\n";
- print "#!areadata=$areadata\n";
- print "#!areacalc=$areacalc\n";
- print "#!column $d2 scaled by\n#!scale_factor=$scale\n";
- print "#!sta_of_normalized_curves=$stanorm\n";
+ print sprintf("#\n#!sta=%+10.9e\n",$sta);
+ print  sprintf("#!areadata=%+10.9e\n",$areadata);
+ print sprintf( "#!areacalc=%+10.9e\n",$areacalc);
+ print  sprintf("#!column %i scaled by\n#!scale_factor=%+10.9e\n",$d2,$scale);
+ print  sprintf("#!sta_of_normalized_curves=%+10.9e\n",$stanorm);
 }
 print STDOUT << "EOF";
 #

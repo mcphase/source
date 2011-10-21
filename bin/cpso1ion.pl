@@ -286,11 +286,10 @@ sub extractstring {
 #
 sub extractfromfile {
              my ($variable,$filename)=@_;
-             $var="\Q$variable\E";
-             $value="";
+             $var="\Q$variable\E";$value="";
              if(open (Fin,$filename))
              {while($line=<Fin>){
-                if($line=~/^.*$var\s*=/) {($value)=($line=~m|$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}                                        }
+                if($line=~/^(#!|[^#])*\b$var\s*=\s*/) {($value)=($line=~m/^(?:#!|[^#])*\b$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);}}
               close Fin;
        	     }
              else

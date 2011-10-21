@@ -137,13 +137,13 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
    if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;}
    fout = fopen_errchk ("./results/mcphas.fum","a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
-            x,y,T,Norm(Hijk),H[1],H[2],H[3],myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
+            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
    if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
    fprintf(fout,"\n");
    fclose(fout);
    fout = fopen_errchk ("./results/.mcphas.fum","a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g %4.4g\n",
-            x,y,T,Norm(Hijk),H[1],H[2],H[3],myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),
+            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),
             myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
    fclose(fout);
    if((fout=fopen("./fit/mcphas.fum","rb"))!=NULL)
@@ -183,7 +183,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
   if (htfailed!=0){j=0;}else{totalJ=sps.totalJ();}
    if(j<0){sps.wasstable=j;}
    fprintf (fout, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip      ",
-            x,y,T,Norm(Hijk),H[1],H[2],H[3],j,sps.wasstable);
+            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),j,sps.wasstable);
            for(i1=1;i1<=nofcomponents;++i1)
 	      {fprintf(fout,"%4.4g ",myround(totalJ(i1)));}
 	      fprintf(fout,"\n");
@@ -221,7 +221,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "# sublattice %i (da=%g a db=%g b dc=%g c)\n",l,(*inputpars.jjj[l]).xyz(1),(*inputpars.jjj[l]).xyz(2),(*inputpars.jjj[l]).xyz(3));
-   fprintf (fout, "# correlation fuction <JJ(%g %g %g)>\n",(*inputpars.jjj[l]).dn[i](1),(*inputpars.jjj[l]).dn[i](2),(*inputpars.jjj[l]).dn[i](3));
+   fprintf (fout, "# correlation fuction <JJ(%g %g %g)>\n",myround((*inputpars.jjj[l]).dn[i](1)),myround((*inputpars.jjj[l]).dn[i](2)),myround((*inputpars.jjj[l]).dn[i](3)));
    fprintf (fout, "#x     y     T[K]  H[T]   Ha[T] Hb[T] Hc[T]  ");
            for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents;++i1)
 	      {fprintf(fout,"<J%cJ%c> ",'a'-1+i1,'a'-1+i1);}
@@ -236,7 +236,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       }
   fout = fopen_errchk (filename,"a");
   if (htfailed!=0){jj[i](1)=0;jj[i](2)=0;jj[i](3)=0;}
-   fprintf (fout, "%4.4g %4.4g   %4.4g %4.4g   %4.4g %4.4g %4.4g     ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
+   fprintf (fout, "%4.4g %4.4g   %4.4g %4.4g   %4.4g %4.4g %4.4g     ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
         for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
             {fprintf (fout, "%4.4g ",myround(jj[i](j2+nofcomponents*nofcomponents*(l-1))));
 	    }
@@ -330,34 +330,34 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    sort(intensity,1,nofhkls,inew); // sort according to ascending intensity
 
   //neutrons
-  fout = fopen_errchk ("./results/mcphas.hkl","a");fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
+  fout = fopen_errchk ("./results/mcphas.hkl","a");fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
     {if (htfailed!=0){hkli[inew[i]](1)=0;hkli[inew[i]](2)=0;hkli[inew[i]](3)=0;hkli[inew[i]](4)=0;}
-    fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](4)));
+    fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](4)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray a component
       if(ortho==0){fout = fopen_errchk ("./results/mcphasi.hkl","a");
    }else{
-  fout = fopen_errchk ("./results/mcphasa.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
+  fout = fopen_errchk ("./results/mcphasa.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](5)));
+    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray b component
       if(ortho==0){fout = fopen_errchk ("./results/mcphasj.hkl","a");
    }else{
-  fout = fopen_errchk ("./results/mcphasb.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
+  fout = fopen_errchk ("./results/mcphasb.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](6)));
+    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](6)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray c component
       if(ortho==0){fout = fopen_errchk ("./results/mcphask.hkl","a");
    }else{
-  fout = fopen_errchk ("./results/mcphasc.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",x,y,T,Norm(Hijk),H[1],H[2],H[3]);
+  fout = fopen_errchk ("./results/mcphasc.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",hkli[inew[i]](1),hkli[inew[i]](2),hkli[inew[i]](3),myround(hkli[inew[i]](7)));
+    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)));
     } fprintf(fout,"\n");
    fclose(fout);
 
@@ -397,7 +397,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    }  
   fout = fopen_errchk ("./results/mcphas.sps","a");
    fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i \n",
-            x,y,T,Norm(Hijk),H[1],H[2],H[3],sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
+            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
    if (htfailed!=0){sps.spinfromq(1,1,1,null1,null,null,null);}
     sps.print(fout);fprintf(fout,"\n");
    fclose(fout);
@@ -437,7 +437,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    }  
      fout = fopen_errchk ("./results/mcphas.mf","a");
 fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i\n",
-            x,y,T,Norm(Hijk),H[1],H[2],H[3],mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
    if (htfailed!=0){sps.print(fout);fprintf(fout,"\n");}else
     {mf.print(fout);fprintf(fout,"\n");}
    fclose(fout);

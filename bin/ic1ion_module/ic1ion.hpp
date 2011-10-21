@@ -27,9 +27,6 @@
 #include <windows.h>
 #endif
 
-#define SMALL 1e-6           // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-                             // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
-
 #define IC1IONMODULE_VERSION 0.5
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -153,7 +150,6 @@ std::vector<double> rk_int(std::string &ionname);                         // Loo
 int ic_diag(sMat<double>&Hic, sMat<double>&iH, complexdouble*V, double*E);// Diagonalises complex hermitian Hic+iH
 int ic_diag(int n, complexdouble *zm, complexdouble *z, double *eigval);
 int ic_diag(sMat<double>&Hic, double *V, double *E);                      // Diagonalises real symmetric Hic 
-int ic_diag(double *mz, int lda, int n, double *m, double *eigval);
 int ic_leig(sMat<double>&H,sMat<double>&i,complexdouble*V,double*E,int n);// Finds only the n lowest eigenval/vec
 int ic_leig(int n, complexdouble *zm, complexdouble *z, double*E, int iu);
 int ic_leig(sMat<double>&Hic, double *V, double *E, int n);               // Finds only the n lowest eigenval/vec
@@ -161,11 +157,10 @@ int ic_leig(sMat<double>&Hic, double *V, double *E, int n);               // Fin
 int ic_arpackeig(int n, complexdouble*m,complexdouble*z, double*E,int iu);// Finds only lowest eigval/vecs, use ARPACK
 int ic_arpackeig(int n, double *m, double *z, double *E, int iu);         // Finds only lowest eigval/vecs, use ARPACK
 #endif
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Declarations for functions in spectre.cpp
-// --------------------------------------------------------------------------------------------------------------- //
-iceig spectre_eig(icpars &pars, double elim=2e3);                         // Diagonalises a truncated Hic like XTAL84
+int ic_peig(int Hsz, complexdouble *zJmat, complexdouble *est,            // Diagonalises a complex matrix
+            complexdouble *zVd, double *eigval, int nev=0);               /*   using perturbation theory
+int ic_peig(sMat<double>&Hic, sMat<double>&iH, complexdouble*V, double*E);// Diagonalises complex hermitian Hic+iH
+int ic_peig(sMat<double>&Hic, double *V, double *E);                      // Diagonalises real symmetric Hic  */
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Declarations for functions in ic1ion.cpp
@@ -175,8 +170,7 @@ void ic_parsecfpars(std::string &n, std::string &v, icpars &p, int l=1);  // Par
 void ic_parseinput(const char *file, icpars &flags);                      // Parses file for 1-ion pars & phys prop.
 void ic_conv_basis(icpars &pars, iceig &VE, fconf &conf);                 // Converts eigenvectors to different basis
 void ic_printheader(const char *filename, icpars &pars);                  // Prints header to file
-void ic_showoutput(const char *file, icpars&pars, iceig&VE, int iconf=1,  // Prints calculated spectra to file
-                   std::vector<int> ikeepJ = std::vector<int>());
+void ic_showoutput(const char *file, icpars&pars, iceig&VE, int iconf=1); // Prints calculated spectra to file
 void ic_cmag(const char *filename, icpars &pars);                         // Calcs. magnetisation using icmfmat::
 
 #endif

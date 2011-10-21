@@ -319,6 +319,8 @@ void ic_parseinput(const char *filename, icpars &pars)
             else 
                pars.calcphys += PHYSPROP_SUSBIT; }
       }
+      else if(varname.find("perturb")!=std::string::npos)
+         pars.perturb = true;
       else if(varname.find("partial_standalone")!=std::string::npos)
          pars.partial_standalone = true;
       else if(varname.find("partial")!=std::string::npos)
@@ -331,6 +333,8 @@ void ic_parseinput(const char *filename, icpars &pars)
       #endif
       else if(varname.find("save_matrices")!=std::string::npos)
          pars.save_matrices = true;
+      else if(varname.find("spectrelevels")!=std::string::npos)
+         iss >> pars.spectrelevels;
       else if(varname.find("truncate_matrix")!=std::string::npos)
       {  
          iss >> pars.truncate_level; if(pars.truncate_level<=0 || pars.truncate_level>=1) pars.truncate_level=0.5;

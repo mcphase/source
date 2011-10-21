@@ -698,112 +698,112 @@ void ionpars::save(FILE * file) // save ion parameters to file
 
 void ionpars::savBlm(FILE * outfile)
 {fprintf(outfile,"units=meV\n");
-   if(Blm(1)!=0){fprintf(outfile,"B22S=%g\n",Blm(1));}
-   if(Blm(2)!=0){fprintf(outfile,"B21S=%g\n",Blm(2));}
-   if(Blm(3)!=0){fprintf(outfile,"B20=%g\n",Blm(3));}
-   if(Blm(4)!=0){fprintf(outfile,"B21=%g\n",Blm(4));}
-   if(Blm(5)!=0){fprintf(outfile,"B22=%g\n",Blm(5));}
+   if(Blm(1)!=0){fprintf(outfile,"B22S=%g\n",myround(Blm(1)));}
+   if(Blm(2)!=0){fprintf(outfile,"B21S=%g\n",myround(Blm(2)));}
+   if(Blm(3)!=0){fprintf(outfile,"B20=%g\n",myround(Blm(3)));}
+   if(Blm(4)!=0){fprintf(outfile,"B21=%g\n",myround(Blm(4)));}
+   if(Blm(5)!=0){fprintf(outfile,"B22=%g\n",myround(Blm(5)));}
    
-   if(Blm(6)!=0){fprintf(outfile,"B33S=%g\n",Blm(6));}
-   if(Blm(7)!=0){fprintf(outfile,"B32S=%g\n",Blm(7));}
-   if(Blm(8)!=0){fprintf(outfile,"B31S=%g\n",Blm(8));}
-   if(Blm(9)!=0){fprintf(outfile,"B30=%g\n",Blm(9));}
-   if(Blm(10)!=0){fprintf(outfile,"B31=%g\n",Blm(10));}
-   if(Blm(11)!=0){fprintf(outfile,"B32=%g\n",Blm(11));}
-   if(Blm(12)!=0){fprintf(outfile,"B32=%g\n",Blm(12));}
+   if(Blm(6)!=0){fprintf(outfile,"B33S=%g\n",myround(Blm(6)));}
+   if(Blm(7)!=0){fprintf(outfile,"B32S=%g\n",myround(Blm(7)));}
+   if(Blm(8)!=0){fprintf(outfile,"B31S=%g\n",myround(Blm(8)));}
+   if(Blm(9)!=0){fprintf(outfile,"B30=%g\n",myround(Blm(9)));}
+   if(Blm(10)!=0){fprintf(outfile,"B31=%g\n",myround(Blm(10)));}
+   if(Blm(11)!=0){fprintf(outfile,"B32=%g\n",myround(Blm(11)));}
+   if(Blm(12)!=0){fprintf(outfile,"B32=%g\n",myround(Blm(12)));}
 
-   if(Blm(13)!=0){fprintf(outfile,"B44S=%g\n",Blm(13));}
-   if(Blm(14)!=0){fprintf(outfile,"B43S=%g\n",Blm(14));}
-   if(Blm(15)!=0){fprintf(outfile,"B42S=%g\n",Blm(15));}
-   if(Blm(16)!=0){fprintf(outfile,"B41S=%g\n",Blm(16));}
-   if(Blm(17)!=0){fprintf(outfile,"B40=%g\n",Blm(17));}
-   if(Blm(18)!=0){fprintf(outfile,"B41=%g\n",Blm(18));}
-   if(Blm(19)!=0){fprintf(outfile,"B42=%g\n",Blm(19));}
-   if(Blm(20)!=0){fprintf(outfile,"B43=%g\n",Blm(20));}
-   if(Blm(21)!=0){fprintf(outfile,"B44=%g\n",Blm(21));}
+   if(Blm(13)!=0){fprintf(outfile,"B44S=%g\n",myround(Blm(13)));}
+   if(Blm(14)!=0){fprintf(outfile,"B43S=%g\n",myround(Blm(14)));}
+   if(Blm(15)!=0){fprintf(outfile,"B42S=%g\n",myround(Blm(15)));}
+   if(Blm(16)!=0){fprintf(outfile,"B41S=%g\n",myround(Blm(16)));}
+   if(Blm(17)!=0){fprintf(outfile,"B40=%g\n",myround(Blm(17)));}
+   if(Blm(18)!=0){fprintf(outfile,"B41=%g\n",myround(Blm(18)));}
+   if(Blm(19)!=0){fprintf(outfile,"B42=%g\n",myround(Blm(19)));}
+   if(Blm(20)!=0){fprintf(outfile,"B43=%g\n",myround(Blm(20)));}
+   if(Blm(21)!=0){fprintf(outfile,"B44=%g\n",myround(Blm(21)));}
   
-   if(Blm(22)!=0){fprintf(outfile,"B55S=%g\n",Blm(22));}
-   if(Blm(23)!=0){fprintf(outfile,"B54S=%g\n",Blm(23));}
-   if(Blm(24)!=0){fprintf(outfile,"B53S=%g\n",Blm(24));}
-   if(Blm(25)!=0){fprintf(outfile,"B52S=%g\n",Blm(25));}
-   if(Blm(26)!=0){fprintf(outfile,"B51S=%g\n",Blm(26));}
-   if(Blm(27)!=0){fprintf(outfile,"B50=%g\n",Blm(27));}
-   if(Blm(28)!=0){fprintf(outfile,"B51=%g\n",Blm(28));}
-   if(Blm(29)!=0){fprintf(outfile,"B52=%g\n",Blm(29));}
-   if(Blm(30)!=0){fprintf(outfile,"B53=%g\n",Blm(30));}
-   if(Blm(31)!=0){fprintf(outfile,"B54=%g\n",Blm(31));}
-   if(Blm(32)!=0){fprintf(outfile,"B55=%g\n",Blm(32));}
+   if(Blm(22)!=0){fprintf(outfile,"B55S=%g\n",myround(Blm(22)));}
+   if(Blm(23)!=0){fprintf(outfile,"B54S=%g\n",myround(Blm(23)));}
+   if(Blm(24)!=0){fprintf(outfile,"B53S=%g\n",myround(Blm(24)));}
+   if(Blm(25)!=0){fprintf(outfile,"B52S=%g\n",myround(Blm(25)));}
+   if(Blm(26)!=0){fprintf(outfile,"B51S=%g\n",myround(Blm(26)));}
+   if(Blm(27)!=0){fprintf(outfile,"B50=%g\n",myround(Blm(27)));}
+   if(Blm(28)!=0){fprintf(outfile,"B51=%g\n",myround(Blm(28)));}
+   if(Blm(29)!=0){fprintf(outfile,"B52=%g\n",myround(Blm(29)));}
+   if(Blm(30)!=0){fprintf(outfile,"B53=%g\n",myround(Blm(30)));}
+   if(Blm(31)!=0){fprintf(outfile,"B54=%g\n",myround(Blm(31)));}
+   if(Blm(32)!=0){fprintf(outfile,"B55=%g\n",myround(Blm(32)));}
 
-   if(Blm(33)!=0){fprintf(outfile,"B66S=%g\n",Blm(33));}
-   if(Blm(34)!=0){fprintf(outfile,"B65S=%g\n",Blm(34));}
-   if(Blm(35)!=0){fprintf(outfile,"B64S=%g\n",Blm(35));}
-   if(Blm(36)!=0){fprintf(outfile,"B63S=%g\n",Blm(36));}
-   if(Blm(37)!=0){fprintf(outfile,"B62S=%g\n",Blm(37));}
-   if(Blm(38)!=0){fprintf(outfile,"B61S=%g\n",Blm(38));}
-   if(Blm(39)!=0){fprintf(outfile,"B60=%g\n",Blm(39));}
-   if(Blm(40)!=0){fprintf(outfile,"B61=%g\n",Blm(40));}
-   if(Blm(41)!=0){fprintf(outfile,"B62=%g\n",Blm(41));}
-   if(Blm(42)!=0){fprintf(outfile,"B63=%g\n",Blm(42));}
-   if(Blm(43)!=0){fprintf(outfile,"B64=%g\n",Blm(43));}
-   if(Blm(44)!=0){fprintf(outfile,"B65=%g\n",Blm(44));}
-   if(Blm(45)!=0){fprintf(outfile,"B66=%g\n",Blm(45));}
-   if(Blm(46)!=0){fprintf(outfile,"Dx2=%g\n",Blm(46));}
-   if(Blm(47)!=0){fprintf(outfile,"Dy2=%g\n",Blm(47));}
-   if(Blm(48)!=0){fprintf(outfile,"Dz2=%g\n",Blm(48));}
+   if(Blm(33)!=0){fprintf(outfile,"B66S=%g\n",myround(Blm(33)));}
+   if(Blm(34)!=0){fprintf(outfile,"B65S=%g\n",myround(Blm(34)));}
+   if(Blm(35)!=0){fprintf(outfile,"B64S=%g\n",myround(Blm(35)));}
+   if(Blm(36)!=0){fprintf(outfile,"B63S=%g\n",myround(Blm(36)));}
+   if(Blm(37)!=0){fprintf(outfile,"B62S=%g\n",myround(Blm(37)));}
+   if(Blm(38)!=0){fprintf(outfile,"B61S=%g\n",myround(Blm(38)));}
+   if(Blm(39)!=0){fprintf(outfile,"B60=%g\n",myround(Blm(39)));}
+   if(Blm(40)!=0){fprintf(outfile,"B61=%g\n",myround(Blm(40)));}
+   if(Blm(41)!=0){fprintf(outfile,"B62=%g\n",myround(Blm(41)));}
+   if(Blm(42)!=0){fprintf(outfile,"B63=%g\n",myround(Blm(42)));}
+   if(Blm(43)!=0){fprintf(outfile,"B64=%g\n",myround(Blm(43)));}
+   if(Blm(44)!=0){fprintf(outfile,"B65=%g\n",myround(Blm(44)));}
+   if(Blm(45)!=0){fprintf(outfile,"B66=%g\n",myround(Blm(45)));}
+   if(Blm(46)!=0){fprintf(outfile,"Dx2=%g\n",myround(Blm(46)));}
+   if(Blm(47)!=0){fprintf(outfile,"Dy2=%g\n",myround(Blm(47)));}
+   if(Blm(48)!=0){fprintf(outfile,"Dz2=%g\n",myround(Blm(48)));}
 
 }
 
 void ionpars::savLlm(FILE * outfile)
 {fprintf(outfile,"units=meV\n");
-   if(Llm(1)!=0){fprintf(outfile,"L22S=%g\n",Llm(1));}
-   if(Llm(2)!=0){fprintf(outfile,"L21S=%g\n",Llm(2));}
-   if(Llm(3)!=0){fprintf(outfile,"L20=%g\n",Llm(3));}
-   if(Llm(4)!=0){fprintf(outfile,"L21=%g\n",Llm(4));}
-   if(Llm(5)!=0){fprintf(outfile,"L22=%g\n",Llm(5));}
+   if(Llm(1)!=0){fprintf(outfile,"L22S=%g\n",myround(Llm(1)));}
+   if(Llm(2)!=0){fprintf(outfile,"L21S=%g\n",myround(Llm(2)));}
+   if(Llm(3)!=0){fprintf(outfile,"L20=%g\n",myround(Llm(3)));}
+   if(Llm(4)!=0){fprintf(outfile,"L21=%g\n",myround(Llm(4)));}
+   if(Llm(5)!=0){fprintf(outfile,"L22=%g\n",myround(Llm(5)));}
   
-   if(Llm(6)!=0){fprintf(outfile,"L33S=%g\n",Llm(6));}
-   if(Llm(7)!=0){fprintf(outfile,"L32S=%g\n",Llm(7));}
-   if(Llm(8)!=0){fprintf(outfile,"L31S=%g\n",Llm(8));}
-   if(Llm(9)!=0){fprintf(outfile,"L30=%g\n",Llm(9));}
-   if(Llm(10)!=0){fprintf(outfile,"L31=%g\n",Llm(10));}
-   if(Llm(11)!=0){fprintf(outfile,"L32=%g\n",Llm(11));}
-   if(Llm(12)!=0){fprintf(outfile,"L32=%g\n",Llm(12));}
+   if(Llm(6)!=0){fprintf(outfile,"L33S=%g\n",myround(Llm(6)));}
+   if(Llm(7)!=0){fprintf(outfile,"L32S=%g\n",myround(Llm(7)));}
+   if(Llm(8)!=0){fprintf(outfile,"L31S=%g\n",myround(Llm(8)));}
+   if(Llm(9)!=0){fprintf(outfile,"L30=%g\n",myround(Llm(9)));}
+   if(Llm(10)!=0){fprintf(outfile,"L31=%g\n",myround(Llm(10)));}
+   if(Llm(11)!=0){fprintf(outfile,"L32=%g\n",myround(Llm(11)));}
+   if(Llm(12)!=0){fprintf(outfile,"L32=%g\n",myround(Llm(12)));}
 
-   if(Llm(13)!=0){fprintf(outfile,"L44S=%g\n",Llm(13));}
-   if(Llm(14)!=0){fprintf(outfile,"L43S=%g\n",Llm(14));}
-   if(Llm(15)!=0){fprintf(outfile,"L42S=%g\n",Llm(15));}
-   if(Llm(16)!=0){fprintf(outfile,"L41S=%g\n",Llm(16));}
-   if(Llm(17)!=0){fprintf(outfile,"L40=%g\n",Llm(17));}
-   if(Llm(18)!=0){fprintf(outfile,"L41=%g\n",Llm(18));}
-   if(Llm(19)!=0){fprintf(outfile,"L42=%g\n",Llm(19));}
-   if(Llm(20)!=0){fprintf(outfile,"L43=%g\n",Llm(20));}
-   if(Llm(21)!=0){fprintf(outfile,"L44=%g\n",Llm(21));}
+   if(Llm(13)!=0){fprintf(outfile,"L44S=%g\n",myround(Llm(13)));}
+   if(Llm(14)!=0){fprintf(outfile,"L43S=%g\n",myround(Llm(14)));}
+   if(Llm(15)!=0){fprintf(outfile,"L42S=%g\n",myround(Llm(15)));}
+   if(Llm(16)!=0){fprintf(outfile,"L41S=%g\n",myround(Llm(16)));}
+   if(Llm(17)!=0){fprintf(outfile,"L40=%g\n",myround(Llm(17)));}
+   if(Llm(18)!=0){fprintf(outfile,"L41=%g\n",myround(Llm(18)));}
+   if(Llm(19)!=0){fprintf(outfile,"L42=%g\n",myround(Llm(19)));}
+   if(Llm(20)!=0){fprintf(outfile,"L43=%g\n",myround(Llm(20)));}
+   if(Llm(21)!=0){fprintf(outfile,"L44=%g\n",myround(Llm(21)));}
  
-   if(Llm(22)!=0){fprintf(outfile,"L55S=%g\n",Llm(22));}
-   if(Llm(23)!=0){fprintf(outfile,"L54S=%g\n",Llm(23));}
-   if(Llm(24)!=0){fprintf(outfile,"L53S=%g\n",Llm(24));}
-   if(Llm(25)!=0){fprintf(outfile,"L52S=%g\n",Llm(25));}
-   if(Llm(26)!=0){fprintf(outfile,"L51S=%g\n",Llm(26));}
-   if(Llm(27)!=0){fprintf(outfile,"L50=%g\n",Llm(27));}
-   if(Llm(28)!=0){fprintf(outfile,"L51=%g\n",Llm(28));}
-   if(Llm(29)!=0){fprintf(outfile,"L52=%g\n",Llm(29));}
-   if(Llm(30)!=0){fprintf(outfile,"L53=%g\n",Llm(30));}
-   if(Llm(31)!=0){fprintf(outfile,"L54=%g\n",Llm(31));}
-   if(Llm(32)!=0){fprintf(outfile,"L55=%g\n",Llm(32));}
+   if(Llm(22)!=0){fprintf(outfile,"L55S=%g\n",myround(Llm(22)));}
+   if(Llm(23)!=0){fprintf(outfile,"L54S=%g\n",myround(Llm(23)));}
+   if(Llm(24)!=0){fprintf(outfile,"L53S=%g\n",myround(Llm(24)));}
+   if(Llm(25)!=0){fprintf(outfile,"L52S=%g\n",myround(Llm(25)));}
+   if(Llm(26)!=0){fprintf(outfile,"L51S=%g\n",myround(Llm(26)));}
+   if(Llm(27)!=0){fprintf(outfile,"L50=%g\n",myround(Llm(27)));}
+   if(Llm(28)!=0){fprintf(outfile,"L51=%g\n",myround(Llm(28)));}
+   if(Llm(29)!=0){fprintf(outfile,"L52=%g\n",myround(Llm(29)));}
+   if(Llm(30)!=0){fprintf(outfile,"L53=%g\n",myround(Llm(30)));}
+   if(Llm(31)!=0){fprintf(outfile,"L54=%g\n",myround(Llm(31)));}
+   if(Llm(32)!=0){fprintf(outfile,"L55=%g\n",myround(Llm(32)));}
  
-   if(Llm(33)!=0){fprintf(outfile,"L66S=%g\n",Llm(33));}
-   if(Llm(34)!=0){fprintf(outfile,"L65S=%g\n",Llm(34));}
-   if(Llm(35)!=0){fprintf(outfile,"L64S=%g\n",Llm(35));}
-   if(Llm(36)!=0){fprintf(outfile,"L63S=%g\n",Llm(36));}
-   if(Llm(37)!=0){fprintf(outfile,"L62S=%g\n",Llm(37));}
-   if(Llm(38)!=0){fprintf(outfile,"L61S=%g\n",Llm(38));}
-   if(Llm(39)!=0){fprintf(outfile,"L60=%g\n",Llm(39));}
-   if(Llm(40)!=0){fprintf(outfile,"L61=%g\n",Llm(40));}
-   if(Llm(41)!=0){fprintf(outfile,"L62=%g\n",Llm(41));}
-   if(Llm(42)!=0){fprintf(outfile,"L63=%g\n",Llm(42));}
-   if(Llm(43)!=0){fprintf(outfile,"L64=%g\n",Llm(43));}
-   if(Llm(44)!=0){fprintf(outfile,"L65=%g\n",Llm(44));}
-   if(Llm(45)!=0){fprintf(outfile,"L66=%g\n",Llm(45));}
+   if(Llm(33)!=0){fprintf(outfile,"L66S=%g\n",myround(Llm(33)));}
+   if(Llm(34)!=0){fprintf(outfile,"L65S=%g\n",myround(Llm(34)));}
+   if(Llm(35)!=0){fprintf(outfile,"L64S=%g\n",myround(Llm(35)));}
+   if(Llm(36)!=0){fprintf(outfile,"L63S=%g\n",myround(Llm(36)));}
+   if(Llm(37)!=0){fprintf(outfile,"L62S=%g\n",myround(Llm(37)));}
+   if(Llm(38)!=0){fprintf(outfile,"L61S=%g\n",myround(Llm(38)));}
+   if(Llm(39)!=0){fprintf(outfile,"L60=%g\n",myround(Llm(39)));}
+   if(Llm(40)!=0){fprintf(outfile,"L61=%g\n",myround(Llm(40)));}
+   if(Llm(41)!=0){fprintf(outfile,"L62=%g\n",myround(Llm(41)));}
+   if(Llm(42)!=0){fprintf(outfile,"L63=%g\n",myround(Llm(42)));}
+   if(Llm(43)!=0){fprintf(outfile,"L64=%g\n",myround(Llm(43)));}
+   if(Llm(44)!=0){fprintf(outfile,"L65=%g\n",myround(Llm(44)));}
+   if(Llm(45)!=0){fprintf(outfile,"L66=%g\n",myround(Llm(45)));}
 
 }
 

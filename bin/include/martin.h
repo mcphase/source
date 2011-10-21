@@ -80,7 +80,7 @@ const int facts[13] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 3
 // 355687428096001,  6402373705727994, 121645100408832080, 2432902008176640000};
 inline
 int factorial(int number) {
-   if(number<0||number>13) { fprintf(stderr,"factorial not handled\n"); return 0; }
+   if(number<0||number>13) { fprintf(stderr,"factorial(%i) not handled\n",number); exit(1); }
    return facts[number];
 // return (number>13)?0:facts[number];  // Fast but if number>13 gives wrong results!
 }

@@ -105,6 +105,7 @@ class icpars
       friend void conv_e_units(icpars &pars, std::string &newunit);
       friend void ic_parseinput(const char *filename, icpars &pars);
       friend void icf_DS2(sMat<double> &Hcf, icpars &pars);
+    //friend int ic_peig(icpars &pars, double *Vd, complexdouble *zVd, double *eigval);
       #ifdef JIJCONV
       bool _jijconvalreadycalc;              // Flag to show that the conversion factor for Jij already calculated
       #endif
@@ -119,12 +120,14 @@ class icpars
       double xi;                             // The spin-orbit radial integral parameter
       std::vector<double> alpha;             // The linear configuration interaction parameters
       cfpars B;                              // The crystal field parameters
+      bool perturb;                          // Flag to indicate if perturbation routine should be used to calculate M
       bool partial;                          // Flag to indicate if partial diagonalisation should be used
       bool arnoldi;                          // Flag to indicate if the Arnoldi method should be use to diagonalise H
       bool partial_standalone;               // Flag to indicate if partial diag. should be used for ic1ion.out
       bool arnoldi_standalone;               // Flag to indicate if the Arnoldi method should be use for ic1ion.out
       bool save_matrices;                    // Flag to indicate if matrices for CF, etc. should be saved and reloaded
     //bool bflag;                            // Flag to show if a field norm= or nostevfact is given
+      int spectrelevels;                     // If using the spectre method, number of LS levels to keep. -1 means all
       double truncate_level;                 // Fraction of matrix to keep, for matrix truncation.
       int num_eigv;                          // Number of eigenvectors to print in output
       std::string density;                   // Flag to output expectation values of spin/orbital density operator.

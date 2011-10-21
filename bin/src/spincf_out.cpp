@@ -482,14 +482,14 @@ if(gp.show_primitive_crystal_unitcell>0)
 fprintf(fout,"    <geometry name=\"primitive crystallographic unit cell\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
-dd=0;           fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\"r1\">  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(2)/(double)nofb;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd-=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\"r2\">  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd =p.Column(3)/(double)nofc;fprintf(fout,"          <p name=\"r3\">  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(2)/(double)nofb;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd-=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
+dd=0;           fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\"r1\">  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(2)/(double)nofb;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd-=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\"r2\">  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd =p.Column(3)/(double)nofc;fprintf(fout,"          <p name=\"r3\">  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(2)/(double)nofb;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd-=p.Column(1)/(double)nofa;fprintf(fout,"          <p name=\" \">  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"			<labelAtt horAlign=\"head\" visible=\"show\" font=\"fixed\" verAlign=\"bottom\">\n");
 fprintf(fout,"				<xOffset>0</xOffset>\n");
 fprintf(fout,"				<yOffset>0</yOffset>\n");
@@ -524,14 +524,14 @@ if(gp.show_magnetic_unitcell>0)
 fprintf(fout,"    <geometry name=\"magnetic unit cell\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"hide\" color=\"hide\">\n");
 fprintf(fout,"        <points>\n");
-dd=0;           fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(2);fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd-=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd =p.Column(3);fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd+=p.Column(2);fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-dd-=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
+dd=0;           fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(2);fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd-=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd =p.Column(3);fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd+=p.Column(2);fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+dd-=p.Column(1);fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"        </points>\n");
 fprintf(fout,"      </pointSet>\n");
 fprintf(fout,"      <lineSet  arrow=\"hide\" line=\"show\" color=\"show\">\n");
@@ -567,7 +567,7 @@ fprintf(fout,"        <points>\n");
             if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
             (gp.showprim==1&&gp.scale_view_1>(double)(i1*nofa+i)/nofa&&gp.scale_view_2>(double)(j1*nofb+j)/nofb&&gp.scale_view_3>(double)(k1*nofc+k)/nofc))
             {
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
      ++ctr;
 	     }
 	  }
@@ -618,9 +618,9 @@ fprintf(fout,"        <points>\n");
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
               //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
-//fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1)-xyz(1)*gp.spins_scale_moment,dd(2)-xyz(2)*gp.spins_scale_moment,dd(3)-xyz(3)*gp.spins_scale_moment);
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1)+xyz(1)*gp.spins_scale_moment,dd(2)+xyz(2)*gp.spins_scale_moment,dd(3)+xyz(3)*gp.spins_scale_moment);
+//fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)-xyz(1)*gp.spins_scale_moment),myround(dd(2)-xyz(2)*gp.spins_scale_moment),myround(dd(3)-xyz(3)*gp.spins_scale_moment));
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
 	     ++ctr;
 
 	     }
@@ -660,8 +660,8 @@ fprintf(fout,"        <points>\n");
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
                           xyz=magmom(i,j,k,l,cs.gJ[l]);
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1),dd(2),dd(3));
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1)+xyz(1)*gp.spins_scale_moment,dd(2)+xyz(2)*gp.spins_scale_moment,dd(3)+xyz(3)*gp.spins_scale_moment);
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
 	     ++ctr;
 
 	     }
@@ -705,7 +705,7 @@ fprintf(fout,"        <points>\n");
               // <Jalpha>(i)=<Jalpha>0(i)+gp.spins_wave_amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
               //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*gp.spins_wave_amplitude; // Q ri not considered for test !!!
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dd(1)+xyz(1)*gp.spins_scale_moment,dd(2)+xyz(2)*gp.spins_scale_moment,dd(3)+xyz(3)*gp.spins_scale_moment);
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
 	     }++ctr;
 
 	     }
@@ -763,8 +763,8 @@ for(l=1;l<=nofatoms;++l)
      dx=R*sin(theta)*cos(fi)+dd(1);dy=R*sin(theta)*sin(fi)+dd(2);dz=R*cos(theta)+dd(3);
                               }
      
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dx,dy,dz);
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",dx+cd.rtf(ii)(4)*gp.scale_density_vectors,dy+cd.rtf(ii)(5)*gp.scale_density_vectors,dz+cd.rtf(ii)(6)*gp.scale_density_vectors);
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dx),myround(dy),myround(dz));
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dx+cd.rtf(ii)(4)*gp.scale_density_vectors),myround(dy+cd.rtf(ii)(5)*gp.scale_density_vectors),myround(dz+cd.rtf(ii)(6)*gp.scale_density_vectors));
     ++ctr; }
    }}}
   }
@@ -807,7 +807,7 @@ for(l=1;l<=nofatoms;++l)
         for(tt=0;tt<=3.1415/dtheta;++tt){for(ff=0;ff<=2*3.1415/dfi;++ff){
              theta=(double)tt*dtheta;fi=(double)ff*dfi;
              dx=rp*sin(theta)*cos(fi)+dd(1);dy=rp*sin(theta)*sin(fi)+dd(2);dz=rp*cos(theta)+dd(3);
-             fprintf(fout,"<p>%4g %4g %4g</p>\n",dx,dy,dz);
+             fprintf(fout,"<p>%4g %4g %4g</p>\n",myround(dx),myround(dy),myround(dz));
              if(tt==0){ff=(int)(2*3.1415/dfi+1);}
              }}
         }}}
@@ -837,7 +837,7 @@ for(l=1;l<=nofatoms;++l)
                               {// mind abc||xyz in other cases ...
      dx=R*sin(theta)*cos(fi)+dd(1);dy=R*sin(theta)*sin(fi)+dd(2);dz=R*cos(theta)+dd(3);
                               }
-     fprintf(fout,"<p>%4g %4g %4g</p>\n",dx,dy,dz);
+     fprintf(fout,"<p>%4g %4g %4g</p>\n",myround(dx),myround(dy),myround(dz));
      }
    }}}
   }
@@ -1101,7 +1101,7 @@ void spincf::fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float
 fprintf(fout,"!   FILE for FullProf Studio: generated automatically by McPhase\n");
 fprintf(fout,"!Title: %s \n",text);
 fprintf(fout,"SPACEG P 1           \n");
-fprintf(fout,"CELL     %g    %g    %g  %g %g %g   DISPLAY MULTIPLE\n",max_min(1),max_min(2),max_min(3),abc(4),abc(5),abc(6));
+fprintf(fout,"CELL     %g    %g    %g  %g %g %g   DISPLAY MULTIPLE\n",myround(max_min(1)),myround(max_min(2)),myround(max_min(3)),myround(abc(4)),myround(abc(5)),myround(abc(6)));
 fprintf(fout,"BOX   -0.15  1.15   -0.15  1.15    -0.15  1.15 \n");
 
   // plot atoms in region xmin to xmax (quader)
@@ -1121,7 +1121,7 @@ for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
             dd(3)<=maxv(3)+0.0001&&dd(3)>=minv(3)-0.0001)
             {dd(1)/=max_min(1);dd(2)/=max_min(2);dd(3)/=max_min(3);
 
-fprintf(fout,"ATOM DY%i    RE       %g       %g       %g        \n",ctr,dd(1),dd(2),dd(3));
+fprintf(fout,"ATOM DY%i    RE       %g       %g       %g        \n",ctr,myround(dd(1)),myround(dd(2)),myround(dd(3)));
 
 	     ++ctr;
 
@@ -1156,8 +1156,8 @@ for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
 
 //	    a=xy(dd,orientation, minv, maxv,bbwidth,bbheight);
             xyz=magmom(i,j,k,l,gJ(l));
-fprintf(fout,"MATOM DY%i    DY      %g       %g       %g   GROUP\n",ctr,dd(1),dd(2),dd(3));
-fprintf(fout,"SKP           1  1  %g       %g       %g       0.00000  0.00000  0.00000    0.00000\n",xyz(1),xyz(2),xyz(3));
+fprintf(fout,"MATOM DY%i    DY      %g       %g       %g   GROUP\n",ctr,myround(dd(1)),myround(dd(2)),myround(dd(3)));
+fprintf(fout,"SKP           1  1  %g       %g       %g       0.00000  0.00000  0.00000    0.00000\n",myround(xyz(1)),myround(xyz(2)),myround(xyz(3)));
 	     ++ctr;
 
 	     }
@@ -1195,7 +1195,7 @@ fprintf(fout,"BOX   -0.15  1.15   -0.15  1.15    -0.15  1.15 \n");
          for(l=1;l<=nofatoms;++l)
 	 {dd=pos(i,j,k,l, abc, r,x,y,z);
          dd0=p.Inverse()*dd;
-fprintf(fout,"ATOM DY%i    RE       %g       %g       %g        \n",ctr,dd0(1),dd0(2),dd0(3));
+fprintf(fout,"ATOM DY%i    RE       %g       %g       %g        \n",ctr,myround(dd0(1)),myround(dd0(2)),myround(dd0(3)));
 	     ++ctr;
 
 	     }
@@ -1217,8 +1217,8 @@ fprintf(fout,"MSYM  u,v,w,0.0\n");
           xyz=magmom(i,j,k,l,gJ(l));
           xyz0=p.Inverse()*xyz; xyz0(1)*=Norm(p.Column(1));xyz0(2)*=Norm(p.Column(2));xyz0(3)*=Norm(p.Column(3));
 
-fprintf(fout,"MATOM DY%i    DY      %g       %g       %g   GROUP\n",ctr,dd0(1),dd0(2),dd0(3));
-fprintf(fout,"SKP           1  1  %g       %g       %g       0.00000  0.00000  0.00000    0.00000\n",xyz0(1),xyz0(2),xyz0(3));
+fprintf(fout,"MATOM DY%i    DY      %g       %g       %g   GROUP\n",ctr,myround(dd0(1)),myround(dd0(2)),myround(dd0(3)));
+fprintf(fout,"SKP           1  1  %g       %g       %g       0.00000  0.00000  0.00000    0.00000\n",myround(xyz0(1)),myround(xyz0(2)),myround(xyz0(3)));
 	     ++ctr;
 
 	     }
@@ -1267,12 +1267,12 @@ void spincf::printall(FILE * fout,cryststruct & cs) //print spinconfiguration to
 	 {dd=pos(i,j,k,l, cs);
          dd0=p.Inverse()*dd;dd0(1)*=nofa;dd0(2)*=nofb;dd0(3)*=nofc;
          ddp=abc_in_ijk_Inverse*dd;
-              fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
-	              cs.cffilenames[l],ddp(1),ddp(2),ddp(3),dd0(1),dd0(2),dd0(3));
+              fprintf(fout,"{%s} %+4.4f %+4.4f %+4.4f %+4.4f %+4.4f %+4.4f ",
+	              cs.cffilenames[l],myround(ddp(1)),myround(ddp(2)),myround(ddp(3)),myround(dd0(1)),myround(dd0(2)),myround(dd0(3)));
              if(cs.gJ[l]!=0)
-              {fprintf(fout," %4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](1+nofcomponents*(l-1))));
-               if(nofcomponents>=2){fprintf(fout," %4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](2+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
-               if(nofcomponents>=2){fprintf(fout," %4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](3+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
+              {fprintf(fout," %+4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](1+nofcomponents*(l-1))));
+               if(nofcomponents>=2){fprintf(fout," %+4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](2+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
+               if(nofcomponents>=2){fprintf(fout," %+4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](3+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
               }
              else   // if gJ=0 it means we have so print out total moment
               { //load magnetic moment into vector mmm
@@ -1282,10 +1282,10 @@ void spincf::printall(FILE * fout,cryststruct & cs) //print spinconfiguration to
                                      else                {mmm((m+1)/2)+=2*mom[in(i,j,k)](nofcomponents*(l-1)+m);}
                                      }
 
-               fprintf(fout," %4.4f %4.4f %4.4f",myround(1e-5,mmm(1)),myround(1e-5,mmm(2)),myround(1e-5,mmm(3)));
+               fprintf(fout," %+4.4f %+4.4f %+4.4f",myround(1e-5,mmm(1)),myround(1e-5,mmm(2)),myround(1e-5,mmm(3)));
               }
              {for (lc=1;lc<=nofcomponents;++lc)
-              {fprintf(fout," %4.4f",myround(1e-5,mom[in(i,j,k)](lc+nofcomponents*(l-1))));}
+              {fprintf(fout," %+4.4f",myround(1e-5,mom[in(i,j,k)](lc+nofcomponents*(l-1))));}
               fprintf(fout,"\n");
 	     }
 

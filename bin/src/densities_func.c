@@ -24,7 +24,7 @@ int n;
       dd=sqrt(ddT+ddHa+ddHb+ddHc+0.000001);
       if (dd<delta)
        {delta=dd;
-        sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",numbers[3],numbers[5],numbers[6],numbers[7],numbers[8],(int)numbers[9],(int)numbers[10]);
+        sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
         savmf=spins;T=numbers[3];ha=numbers[5];hb=numbers[6];hc=numbers[7];
        }
     }

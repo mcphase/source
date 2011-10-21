@@ -191,7 +191,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-    sprintf(text,"physpropclc:T=%gK, |H|=%gT, Ha=%gT, Hb=%gT, Hc=%gT  %i spins",T,Norm(H),physprops.H(1),physprops.H(2),physprops.H(3),sps.n());
+    sprintf(text,"physpropclc:T=%gK, |H|=%gT, Ha=%gT, Hb=%gT, Hc=%gT  %i spins",myround(T),myround(Norm(H)),myround(physprops.H(1)),myround(physprops.H(2)),myround(physprops.H(3)),sps.n());
                     fin_coq = fopen_errchk ("./results/.spins3dab.eps", "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ);
                     fclose (fin_coq);

@@ -2221,5 +2221,22 @@ int main(int argc, char *argv[])
    start = clock(); std::cerr << "Time to calculate dv1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n"; */
 #endif
 
+/* int i, Hsz = est.Cols(); //complexdouble *cest = new complexdouble[Hsz*Hsz]; memcpy(cest,&est[0][0],Hsz*Hsz*sizeof(complexdouble));
+   std::vector<double> vgjmbH(6,.0578838263); //for(i=0; i<6; i++) vgjmbH[i] = gjmbH[i+1];
+   icmfmat mfmat(pars.n,pars.l);
+   sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH); complexdouble *zJmat=0; zJmat = zmat2f(Jmat,iJmat);
+   complexdouble *zVd = new complexdouble[(Hsz-1)*(Hsz-1)]; double *eigval = new double[Hsz-1];
+   start = clock();
+   int info = ic_peig(Hsz-1, zJmat, (complexdouble*)&est[0][0], zVd, eigval);
+   end = clock(); std::cerr << "Time to do peig() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
+   iceig VE(Hsz-1,eigval,zVd); strcpy(outfile,"results/mcphas.ic1"); ic_showoutput(outfile,pars,VE);
+   free(zJmat); delete[]zVd; delete[]eigval; //delete []cest;
+   start = clock();
+   Hic/=MEV2CM; iHic/=MEV2CM; 
+   VE.calc(Hic,iHic); strcpy(outfile,"results/mcphas.icp"); ic_showoutput(outfile,pars,VE);
+   end = clock(); std::cerr << "Time to do VE.calc() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
+   Hic+=Jmat; iHic+=Jmat;
+   VE.calc(Hic,iHic); strcpy(outfile,"results/mcphas.ic2"); ic_showoutput(outfile,pars,VE); */
+
    return 0;
 }

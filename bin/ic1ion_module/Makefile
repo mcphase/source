@@ -133,7 +133,7 @@ endif
 ##################################################################################
 
 # List of object files to be created and their headers
-OBJECT = maths               icpars icmf par_io ic_hmltn ic_diag mmio njsyms cfp coulomb so_cf lovesey spectre
+OBJECT = maths               icpars icmf par_io ic_hmltn ic_diag mmio njsyms cfp coulomb so_cf lovesey
 HEADER = maths states ic1ion icpars icmf
 
 .PHONY: default all clean
@@ -157,13 +157,13 @@ libs/liblapack.a:
 	cd libs && make
 
 ifdef integral
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
+../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o spectre.o ic1ion_module.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ionit ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
+	@$(LINKER) -o ../ic1ionit ic1ion.o spectre.o states.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
 else
 ../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ionit ic1ion.o states.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
+	@$(LINKER) -o ../ic1ionit ic1ion.o states.o $(OBJ) $(LDFLAGS) $(STATIC)
 endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp
@@ -176,7 +176,7 @@ endif
 states.o: states.cpp states.hpp
 	$(CC) $(patsubst -O2,   ,${CFLAGS}) -c $<
 
-truncate.o: truncate.cpp
+spectre.o: spectre.cpp
 	$(CC) $(CFLAGS) -I../include -c $<
 
 ic1ion_module.o: ic1ion_module.cpp
@@ -197,12 +197,12 @@ else
 	$(CC) $(CFLAGS) -I../include -c $<
 endif
 
-ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
+ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o spectre.o ic1ion_module.o
 	@echo Linking $@
 ifdef WINDOWS
-	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
 else
-	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o spectre.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
 ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o  # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o

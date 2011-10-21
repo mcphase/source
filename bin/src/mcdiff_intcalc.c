@@ -4,7 +4,7 @@
 double setcoloutput(int i,float & scale, double & ovallt,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,
                    complex <double> & msfx, complex <double> & msfy, complex <double> & msfz,
                    complex <double> & msfdipx, complex <double> &msfdipy, complex <double> &msfdipz,Vector & Qvec)
-{double cosw,crossx,crossy,crossz,Ip,Im;
+{double cosw,crossx,crossy,crossz,Ip,Im,sinw2;
          switch (i) {
 case 0:  return lorentzf;break;//   "LF          ",
 case 1:  return abs(nsf);break;//    "|NSF|[b]    ",
@@ -18,7 +18,7 @@ case 8:  return sqrt(msf2dip+1e-100);break;//    "|MSFdip|    ",
 case 9:  return abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "|MSFdip.P|  ",
 case 10: return real(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Re(MSFdip.P)",
 case 11: return imag(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Im(MSFdip.P)"
-case 12: cosw=Pxyz*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[°]"
+case 12: cosw=(Pxyz/Norm(Pxyz))*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[°]"
 case 13:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
           crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
           crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
@@ -79,7 +79,10 @@ case 20:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
                 Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
                 Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
                 return Ip/Im;         // Idip+/Idip-
-
+case 21: cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
+         return 2.0*abs(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))/sinw2;break;//|MSF.P|/sin^2(angl(Q,P)
+case 22: cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
+         return 2.0*abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))/sinw2;break;//|MSFdip.P|/sin^2(angl(Q,P)
                      }
 return 0;
 }
@@ -406,10 +409,10 @@ if(code==0){ m = 0;// reset m
           {// reflection was found below thetamax....
 
             //sort according to descending d spacing
-             if((Imag + inuc) > .0001||Imagdip > .0001||abs(mqx)*sqrt(scale)>0.0001
-              ||abs(mqy)*sqrt(scale)>0.0001||abs(mqz)*sqrt(scale)>0.0001
-              ||abs(mqx2)*sqrt(scale)>0.0001||abs(mqy2)*sqrt(scale)>0.0001||abs(mqz2)*sqrt(scale)>0.0001
-              ||abs(mqxy)*sqrt(scale)>0.0001||abs(mqxz)*sqrt(scale)>0.0001||abs(mqyz)*sqrt(scale)>0.0001){
+             if((Imag + inuc) > SMALLINT||Imagdip > SMALLINT||abs(mqx)*sqrt(scale)>SMALLINT
+              ||abs(mqy)*sqrt(scale)>SMALLINT||abs(mqz)*sqrt(scale)>SMALLINT
+              ||abs(mqx2)*sqrt(scale)>SMALLINT||abs(mqy2)*sqrt(scale)>SMALLINT||abs(mqz2)*sqrt(scale)>SMALLINT
+              ||abs(mqxy)*sqrt(scale)>SMALLINT||abs(mqxz)*sqrt(scale)>SMALLINT||abs(mqyz)*sqrt(scale)>SMALLINT){
 
                ++m; if(m > MAXNOFREFLECTIONS){fprintf(stderr,"ERROR mcdiff: out of memory - too many reflections - chose smaller thetamax or recompile program with larger MAXNOFREFLECTIONS\n");exit(EXIT_FAILURE);}
                msort = m;

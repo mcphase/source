@@ -207,7 +207,7 @@ void jjjpar::save(FILE * file)
   fprintf(file,"#da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
 // save the exchange parameters to file (exactly paranz parameters!)
   for  (i=1;i<=paranz;++i)
-  {fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",dn[i](1),dn[i](2),dn[i](3));
+  {fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",myround(dn[i](1)),myround(dn[i](2)),myround(dn[i](3)));
     // format of matrix 
   // 11 22 33 12 21 13 31 23 32 (3x3 matrix)
   // 11 22 33 44 12 21 13 31 14 41 23 32 24 42 34 43 (4x4 matrix)

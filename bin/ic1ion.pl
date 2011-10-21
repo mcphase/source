@@ -27,8 +27,6 @@ unless($line=~/\Q#!MODULE=ic1ion\E/){print "error: file $ARGV[0] does not start 
 ($By)=extract("By","$ARGV[0]");
 ($Bz)=extract("Bz","$ARGV[0]");
 
-
-
 # set up mcdisp.mf
 if (open(Fin,"mcdisp.mf")) {@mcdispmf=<Fin>;close Fin;}
 open (Fout, ">mcdisp.mf");
@@ -37,7 +35,7 @@ print Fout << "EOF";
 # spins - display spinconfiguration at given htpoint
 # Author: Martin Rotter mcphas version 4.0
 #****************************************************
-T=$T Ha=$Bx Hb=$By Hc=$Bz n=1 spins nofatoms=1 in primitive basis nofcomponents=6 - momentum configuration <J(i)>
+#! T=$T Ha=$Bx Hb=$By Hc=$Bz n=1 spins nofatoms=1 in primitive basis nofcomponents=6 - momentum configuration <J(i)>
 EOF
 $MB=5.788378E-02;
 print Fout (2*$Bx*$MB)."\n";
@@ -129,16 +127,16 @@ sub mydel  { my ($file1)=@_;
 #
 sub extract {
              my ($variable,$filename)=@_;
-             $var="\Q$variable\E";
+             $var="\Q$variable\E";$value="";
              if(open (Fin,$filename))
              {while($line=<Fin>){
-                if($line=~/^.*$var\s*=/) {($value)=($line=~m|$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}                                        }
+                if($line=~/^(#!|[^#])*\b$var\s*=\s*/) {($value)=($line=~m/^(?:#!|[^#])*\b$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);}}
               close Fin;
        	     }
              else
              {
              print STDERR "Warning: failed to read data file \"$filename\"\n";
-             }
+             }             
              return $value;
             }
 # **********************************************************************************************

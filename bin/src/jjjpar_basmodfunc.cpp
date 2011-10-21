@@ -644,6 +644,9 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
     double value=0;
     for(p=1;p<=pmax;++p){
     for(q=1;q<=pmax;++q){
+   if((int)Np(p)+(int)Np(q)<l+2){fprintf(stderr,"Warning for atom %s wavefunction calculation of <j%i(Q)> not possible setting <j%i(Q)>=0\n",cffilename,l,l);return 0.0;}
+  // condition: Np(p)+Np(q)>l+1- otherwise jl(Q) not possible to calculate
+  // with this wave function
     value+=coeff(p)*coeff(q)*tl(l,(int)Np(p)+(int)Np(q),(Xip(p)+Xip(q))/Q);
                         }}
      return value;
@@ -652,7 +655,7 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
 
 
    double jjjpar::tl(int l,int N,double x)
-     {double value=0;
+     {double value=0.0;
       switch (l)
        { case 0: value=sn(1,N,x);break;
          case 1: value=sn(2,N,x)-cn(1,N,x);break;

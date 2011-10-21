@@ -489,10 +489,10 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
      //myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);
      gamma=0;gamma(ini.nofcomponents)=real(Trace(Mijkl));
      if(minE<d&&d<maxE)
-    { fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,jmin,d,gamma(ini.nofcomponents),intensityp);
+    { fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,jmin,myround(d),myround(gamma(ini.nofcomponents)),myround(intensityp));
      ++noftransitions(l);}
     if(d>=0&&minE<-d&&-d<maxE) // do not print negative energy transition if d<0 (d<0 means transiton to the same level)
-    { fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,jmin,-d,gamma(ini.nofcomponents),intensitym);
+    { fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,jmin,myround(-d),myround(gamma(ini.nofcomponents)),myround(intensitym));
     ++noftransitions(l);}
 
    for(j1=jmin+1;j1<=i1;++j1) 
@@ -531,10 +531,10 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
      //             else {gamma=0;gamma(ini.nofcomponents)=Trace(Mijkl);}
       gamma=0;gamma(ini.nofcomponents)=real(Trace(Mijkl));
      if(minE<d&&d<maxE)
-     {fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,j1,d,gamma(ini.nofcomponents),intensityp);
+     {fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,j1,myround(d),myround(gamma(ini.nofcomponents)),myround(intensityp));
       ++noftransitions(l);}
      if(d>=0&&minE<-d&&-d<maxE)// do not print negative energy transition if d<0 (d<0 means transiton to the same level)
-     {fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,j1,-d,gamma(ini.nofcomponents),intensitym);
+     {fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,j1,myround(-d),myround(gamma(ini.nofcomponents)),myround(intensitym));
       ++noftransitions(l);}
      }else
      {fprintf(stdout," .... transition not stored because  out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
@@ -1043,7 +1043,7 @@ if (do_jqfile==1){
                         if (do_Erefine==1){fprintf(foutds,"#!hklfile_number=%i\n",is);}
                        }
                       }
-   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
+   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 
    for (i=1;i<=dimA;++i){
 	       fprintf (fout, " %4.4g ",myround(En(i)));
@@ -1202,15 +1202,18 @@ diffint=0;diffintbey=0;
                      if(intsbey(i)<0)intsbey(i)=-1;
                      //printout rectangular function to .mdcisp.qom
 	             fprintf (fout, " %4.4g %4.4g",myround(ints(i)),myround(intsbey(i)));
-                     fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
-                     fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
+                     fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
+                     fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqev, "#eigenvector real part\n");
                      ev_real.print(foutqev); // here we printout the eigenvector of the excitation
                      fprintf (foutqev, "#eigenvector imaginary part\n");
                      ev_imag.print(foutqev); // 
                      fprintf (foutqev, "#\n");
 
-                     fprintf (foutqee, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),QQ,En(i),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
+                     fprintf (foutqee, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                              myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqee, "#eigenvector real part\n");
                      eev_real.print(foutqee); // here we printout the eigenvector of the excitation
                      fprintf (foutqee, "#eigenvector imaginary part\n");
@@ -1264,26 +1267,26 @@ diffint=0;diffintbey=0;
 		    { 
 		     if (ints(i)>SMALLINT)  // draw triangles to show calculated intensity
 		      {for (E=0;E<=ints(i)/epsilon;E+=ints(i)/2/epsilon/10)
-                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)-epsilon+E*epsilon*epsilon/ints(i)),E,myround(En(i)));
+                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)-epsilon+E*epsilon*epsilon/ints(i)),myround(E),myround(En(i)));
 		       }
 		       for (E=ints(i)/epsilon;E>=0;E-=ints(i)/2/epsilon/10)
-                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)+epsilon-E*epsilon*epsilon/ints(i)),E,myround(En(i)));
+                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)+epsilon-E*epsilon*epsilon/ints(i)),myround(E),myround(En(i)));
 		       }
-                       fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
+                       fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	               fprintf (fout1, " %4.4g 0 %4.4g 0\n",myround(En(i)+epsilon),myround(En(i)));
 		      }
 		     if (intsbey(i)>SMALLINT)  // draw triangles to show calculated intensity
 		      {for (E=0;E<=intsbey(i)/epsilon;E+=intsbey(i)/2/epsilon/10)
-                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
+                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g \n",myround(En(i)),myround(En(i)-epsilon+E*epsilon*epsilon/intsbey(i)),E);
 		       }
 		       for (E=intsbey(i)/epsilon;E>=0;E-=intsbey(i)/2/epsilon/10)
-                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
+                       {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g\n",myround(En(i)),myround(En(i)+epsilon-E*epsilon*epsilon/intsbey(i)),E);
 		       }
-                       fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
+                       fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	               fprintf (fout1, " %4.4g 0 %4.4g 0 \n",myround(En(i)),myround(En(i)+epsilon));
 		      }
 		    }
@@ -1324,8 +1327,8 @@ diffint=0;diffintbey=0;
 #else
 		     intensity=intcalc(dimA,ini.emin,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
 #endif
-                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emin,intensity);
+                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emin,myround(intensity));
 #ifdef _THREADS
                      tin[ithread]->En=ini.emax; tin[ithread]->iE=iE;
                      #ifdef __linux__
@@ -1340,8 +1343,8 @@ diffint=0;diffintbey=0;
 #else
 		     intensity=intcalc(dimA,ini.emax,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
 #endif
-                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emax,intensity);
+                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emax,myround(intensity));
 	  fclose(foutds1);
 #ifdef _THREADS
 	  for(E=ini.emin;E<=ini.emax;E+=(epsilon/2)*NUM_THREADS)
@@ -1382,11 +1385,11 @@ diffint=0;diffintbey=0;
 #endif
 
           foutds1 = fopen_errchk ("./results/.mcdisp.dsigma","a");
-                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	             fprintf (foutds1, " %4.4g %4.4g \n",E,intensity);
+                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	             fprintf (foutds1, " %4.4g %4.4g \n",myround(E),myround(intensity));
           fclose(foutds1);	   
-                     fprintf (foutds, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3));
-	             fprintf (foutds, " %4.4g %4.4g \n",E,intensity);
+                     fprintf (foutds, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	             fprintf (foutds, " %4.4g %4.4g \n",myround(E),myround(intensity));
 	   }
 
 #ifdef _THREADS

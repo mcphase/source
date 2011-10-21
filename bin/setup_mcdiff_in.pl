@@ -88,6 +88,8 @@ print Fout << "EOF";
 #            18....Idip+
 #            19....Idip-
 #            20....Idip+/Idip-
+#            21....2*|MSF.P|/sin^2(angl(Q,P)
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P)
 #
 #           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
 #           in a polarised neutron experiment:
@@ -205,10 +207,10 @@ EOF
 #
 sub extract {
              my ($variable,$filename)=@_;
-             $var="\Q$variable\E";
+             $var="\Q$variable\E";$value="";
              if(open (Fin,$filename))
              {while($line=<Fin>){
-                if($line=~/^.*$var\s*=/) {($value)=($line=~m|$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}                                        }
+                if($line=~/^(#!|[^#])*\b$var\s*=\s*/) {($value)=($line=~m/^(?:#!|[^#])*\b$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);}}
               close Fin;
        	     }
              else
