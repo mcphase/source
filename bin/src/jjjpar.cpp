@@ -412,7 +412,7 @@ void jjjpar::save_sipf(const char * path)
 /*****************************************************************************************/
 //constructor with file handle of mcphas.j
 jjjpar::jjjpar(FILE * file,int nofcomps) 
-{   
+{ jl_lmax=6;
   char instr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE];
   cffilename= new char [MAXNOFCHARINLINE];
   int i,j,i1,j1,k1;
@@ -538,7 +538,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot
 jjjpar::jjjpar(double x,double y,double z, char * sipffile)
-{xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;
+{xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
   jij=0; dn=0; sublattice=0;paranz=0;diagonalexchange=1;
   mom=Vector(1,9); mom=0; 
   Mq=ComplexVector(1,3);
@@ -552,7 +552,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile)
 
 // constructor with positions scattering length dwf
 jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
-{xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;
+{xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
  mom=Vector(1,9); mom=0; 
  DWF=dwf;SLR=slr;SLI=sli;
   magFFj0=Vector(1,7);magFFj0=0;  magFFj0[1]=1;
@@ -574,7 +574,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 
 //constructor without file
 jjjpar::jjjpar(int n,int diag,int nofmom) 
-{ cffilename= new char [MAXNOFCHARINLINE];
+{ cffilename= new char [MAXNOFCHARINLINE];jl_lmax=6;
   diagonalexchange=diag;
   paranz=n;xyz=Vector(1,3);xyz=0;
   set_zlm_constants();
@@ -607,7 +607,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
 
 //copy constructor
 jjjpar::jjjpar (const jjjpar & p)
-{ int i;
+{ int i;jl_lmax=p.jl_lmax;
   xyz=Vector(1,3);
   nofcomponents=p.nofcomponents;
   mom=Vector(1,nofcomponents); 

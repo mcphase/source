@@ -171,7 +171,7 @@ fprintf(fout,"#\n");
 fprintf(fout,"#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities\n");
 fprintf(fout,"#           in a polarised neutron experiment:\n");
 fprintf(fout,"#            I+-=LF exp(-OTF Q^2/8pi^2) \n");
-fprintf(fout,"#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2 \n");
+fprintf(fout,"#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 \n");
 fprintf(fout,"#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]\n");
 fprintf(fout,"#\n");
 fprintf(fout,"#\n");
@@ -345,30 +345,78 @@ fprintf(fout,"#\n");
 
 Vector r1s(1,3),r2s(1,3),r3s(1,3);
 r1s=r1;r2s=r2;r3s=r3;
-Matrix rtoxyz(1,3,1,3); // define transformation matrix to calculate components of
-                           // r1 r2 and r3 with respect to the xyz coordinate system
-rtoxyz(1,1)=0;
-rtoxyz(2,1)=a*sin(gamma*PI/180);
-rtoxyz(3,1)=a*cos(gamma*PI/180);
+Matrix rtoijk(1,3,1,3); // define transformation matrix to calculate components of
+                           // r1 r2 and r3 with respect to the ijk coordinate system
 
-rtoxyz(1,2)=0;
-rtoxyz(2,2)=0;
-rtoxyz(3,2)=b;
+// formulas
+//  j||b, k||(a x b) and i normal to j and k
+// (ijk form an euclidian righthanded coordinate system)
+//  ri=ris(1)*a+ris(2)*b+ris(3)*c = ri(1)*i+ri(2)*j+ri(3)*k    (1)
+//  (and then finally consider magnetic supercell and transform ri=ri*nri)
+// so how to get ri(1,..,3): calculate the matrix rtoijk, which should obey
+// ri()=rtoijk*ris() for i=1,2,3
+// to get the components of this matrix we multiply (1) by i,j,k and get:
+// ri(1)=ris(1)*(a.i)+ris(2) (b.i)+ ris(3)*(c.i)
+// ri(2)=ris(1)*(a.j)+ris(2) (b.j)+ ris(3)*(c.j)
+// ri(3)=ris(1)*(a.k)+ris(2) (b.k)+ ris(3)*(c.k)
+// using j||b, k||(a x b) and i normal to j and k  we get
+//i=(bx(axb))/(|a||b|^2sin(gamma)sin(angl(b,axb))
+// ri(1)=ris(1)*(a.i)                 + ris(3)*(c.i)
+// ri(2)=ris(1)*(a.b)/|b|+ris(2) |b|  + ris(3)*(c.b)/|b|
+// ri(3)=                             + ris(3)*(c.(axb))/(|a||b|sin(gamma))
+// note (a.i)=(a.(bx(axb))/|bx(axb)|=|a|sin(gamma)
+// i.e.
+//         / |a|sin(gamma) 0         (c.i)                         \
+// rtoijk= | |a|cos(gamma) |b|       |c|cos(alpha)                 |
+//         \ 0             0         (c.(axb))/(|a||b|sin(gamma))  /
+//
+// to get (c.i) we write in components
+// a=|a|(sin(gamma),cos(gamma),0)
+// c=|c|(eps,cos(alpha),delt)
+// (a.c)=|a||c|cos(beta)=|a||c|(eps*sin(gamma)+cos(gamma)*cos(alpha)
+// --> eps=(cos(beta)-cos(gamma)cos(alpha))/sin(gamma)
+//  (c.i)=|c|*eps
+//  delta and (c.k) we get from the condition that length of c is |c|.
 
-rtoxyz(3,3)=c*cos(alpha*PI/180);
-rtoxyz(2,3)=(a*c*cos(beta*PI/180)-rtoxyz(3,3)*rtoxyz(3,1))/rtoxyz(2,1);
-if (fabs(rtoxyz(2,3))>c){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
-rtoxyz(1,3)=c*c-rtoxyz(2,3)*rtoxyz(2,3)-rtoxyz(3,3)*rtoxyz(3,3);
-if (rtoxyz(1,3)<=0){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
-rtoxyz(1,3)=sqrt(rtoxyz(1,3));
+if (gamma>180||gamma<=0){fprintf(stderr,"ERROR mcdiff: gamma must be between 0 and 180 degrees\n");exit(EXIT_FAILURE);}
+rtoijk(1,1)=a*sin(gamma*PI/180);
+rtoijk(2,1)=a*cos(gamma*PI/180);
+rtoijk(3,1)=0;
 
-r1=(rtoxyz*r1)*(double)nr1;
-r2=(rtoxyz*r2)*(double)nr2;
-r3=(rtoxyz*r3)*(double)nr3;
+rtoijk(1,2)=0;
+rtoijk(2,2)=b;
+rtoijk(3,2)=0;
+
+rtoijk(1,3)=c*(cos(beta*PI/180)-cos(gamma*PI/180)*cos(alpha*PI/180))/sin(gamma*PI/180);
+if (fabs(rtoijk(1,3))>c){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
+rtoijk(2,3)=c*cos(alpha*PI/180);
+rtoijk(3,3)=c*c-rtoijk(1,3)*rtoijk(1,3)-rtoijk(2,3)*rtoijk(2,3);
+if (rtoijk(3,3)<=0){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
+rtoijk(3,3)=sqrt(rtoijk(3,3));
+
+// --------------------- old internal coordinates - removed and changed to the above 30.10.2011 MR
+/* rtoijk(1,1)=0;
+rtoijk(2,1)=a*sin(gamma*PI/180);
+rtoijk(3,1)=a*cos(gamma*PI/180);
+
+rtoijk(1,2)=0;
+rtoijk(2,2)=0;
+rtoijk(3,2)=b;
+
+rtoijk(3,3)=c*cos(alpha*PI/180);
+rtoijk(2,3)=c*(cos(beta*PI/180)-cos(alpha*PI/180)*cos(gamma*PI/180))/sin(gamma*PI/180);
+if (fabs(rtoijk(2,3))>c){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
+rtoijk(1,3)=c*c-rtoijk(2,3)*rtoijk(2,3)-rtoijk(3,3)*rtoijk(3,3);
+if (rtoijk(1,3)<=0){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
+rtoijk(1,3)=sqrt(rtoijk(1,3));
+*/
+r1=(rtoijk*r1)*(double)nr1;
+r2=(rtoijk*r2)*(double)nr2;
+r3=(rtoijk*r3)*(double)nr3;
 
 // transform also Projection vector
 Vector Pxyz (1,3);
-Pxyz=(rtoxyz*P);
+Pxyz=(rtoijk*P);
 // P/=Norm(Pxyz);Pxyz/=Norm(Pxyz); // normalise to length 1 : removed 14.10.2011 to be able to calculate different degrees of beam polarisation
 if(Norm(Pxyz)>1){fprintf(stderr,"Warning mcdiff: length of polarization vector |P|>1 ... taking full polarised beam, i.e. normalising length of P to |P|=1\n");
                  P/=Norm(Pxyz);Pxyz/=Norm(Pxyz); }  // normalize only if |P|>1
@@ -606,9 +654,9 @@ if (argc>1){int nr;
                                {hhkkll(1)=nn[1];hhkkll(2)=nn[2];hhkkll(3)=nn[3];++m;
                                 code=1;                                
                                // transformieren der millerindizes auf magnetische einheitszelle
-                                  hkl[m](1)=hhkkll*(rtoxyz.Inverse()*r1);
-                                  hkl[m](2)=hhkkll*(rtoxyz.Inverse()*r2);
-                                  hkl[m](3)=hhkkll*(rtoxyz.Inverse()*r3);
+                                  hkl[m](1)=hhkkll*(rtoijk.Inverse()*r1);
+                                  hkl[m](2)=hhkkll*(rtoijk.Inverse()*r2);
+                                  hkl[m](3)=hhkkll*(rtoijk.Inverse()*r3);
                               // check if magnetic reflection is indeed on magnetic reciprocal lattice
                               if(fabs(rint(hkl[m](1))-hkl[m](1))>SMALL||fabs(rint(hkl[m](2))-hkl[m](2))>SMALL||fabs(rint(hkl[m](3))-hkl[m](3))>SMALL)
                                 {fprintf(stderr,"Warning - reading (%g %g %g): calculation impossible, because this corresponds to ", hhkkll(1),hhkkll(2),hhkkll(3));
@@ -633,9 +681,9 @@ for(i=1;i<=m;++i){hhkkll=hkl[i];
                   hkl[i]=hhkkll(1)*rez1+hhkkll(2)*rez2+hhkkll(3)*rez3;
                   hkl[i]/=2.0*PI;
                   hhkkll=hkl[i];
-                  hkl[i](1)=hhkkll*rtoxyz.Column(1);
-                  hkl[i](2)=hhkkll*rtoxyz.Column(2);
-                  hkl[i](3)=hhkkll*rtoxyz.Column(3);
+                  hkl[i](1)=hhkkll*rtoijk.Column(1);
+                  hkl[i](2)=hhkkll*rtoijk.Column(2);
+                  hkl[i](3)=hhkkll*rtoijk.Column(3);
                  }
 
 

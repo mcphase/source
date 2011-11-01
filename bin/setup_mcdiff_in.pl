@@ -90,6 +90,11 @@ print Fout << "EOF";
 #            20....Idip+/Idip-
 #            21....2*|MSF.P|/sin^2(angl(Q,P)
 #            22....2*|MSFdip.P|/sin^2(angl(Q,P)
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#
 #
 #           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
 #           in a polarised neutron experiment:

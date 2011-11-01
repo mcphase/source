@@ -6,7 +6,7 @@
 #define MAXNOFREFLECTIONS 6000
 #define SMALL 1e-8
 #define SMALLINT 1e-4
-#define COLHEADERDIM 22
+#define COLHEADERDIM 26
 #include "../../version"
 #include <mpspecfunp.h>
 #include <martin.h>
@@ -40,7 +40,11 @@ const char * colheader []= {"LF          ",
                            "Idip-       ",
                            "Idip+/Idip- ",
                            "2*|MSF.P|/sin^2(angl(Q,P)",
-                           "2*|MSFdip.P|/sin^2(angl(Q,P)"
+                           "2*|MSFdip.P|/sin^2(angl(Q,P)",
+                           "2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)",
+                           "2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)",
+                           "2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)",
+                           "2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)"
                            };
 
 double setcoloutput(int i,float & scale, double & ovallt,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,

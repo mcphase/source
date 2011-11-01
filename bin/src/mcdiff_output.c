@@ -173,7 +173,7 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
   if(J[i]==-1){fprintf(fout,"formfactor F(Q)=j0-(1-2/gJ)j2 (note that in case of transition metals mcdiff sets gJ=2) FF coefficients:");}
   if(J[i]==-2){fprintf(fout,"FL(Q)=(j0+j2)/2 and FS(Q)=j0 formfactors separate for spin and orb. moments, FF coefficients:");}
   if((*jjjpars[i]).Np(1)!=0){
-  fprintf(fout," - formfactor calculated directly from radial wave function parameters in %s",(*jjjpars[i]).cffilename);
+  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",(*jjjpars[i]).cffilename,(*jjjpars[i]).jl_lmax);
   }
   else
   {

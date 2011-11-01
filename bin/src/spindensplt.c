@@ -134,13 +134,13 @@ fprintf(fout,"#spindensity is expanded in tesseral harmonics Zlm\n\
 #   Ms(r).(%g,%g,%g)= sum_lm aS(l,m) R^2(r) Zlm(Omega)\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
    for(i=1;i<=49;++i){
-  if(doijk==3){             printf(" aS(%i,%i) =%12.6f\n",k[i],q[i],moments(i));}
-  else{printf(" aSx(%i,%i) =%12.6f",k[i],q[i],momentsx(i));
-       printf(" aSy(%i,%i) =%12.6f",k[i],q[i],momentsy(i));
-       printf(" aSz(%i,%i) =%12.6f\n",k[i],q[i],momentsz(i));
-       fprintf(fout," aSx(%i,%i) =%12.6f",k[i],q[i],momentsx(i));
-       fprintf(fout," aSy(%i,%i) =%12.6f",k[i],q[i],momentsy(i));
-       fprintf(fout," aSz(%i,%i) =%12.6f\n",k[i],q[i],momentsz(i));
+  if(doijk==3){             printf(" aS(%i,%i) =%12.6f\n",k[i],q[i],myround(moments(i)));}
+  else{printf(" aSx(%i,%i) =%12.6f",k[i],q[i],myround(momentsx(i)));
+       printf(" aSy(%i,%i) =%12.6f",k[i],q[i],myround(momentsy(i)));
+       printf(" aSz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentsz(i)));
+       fprintf(fout," aSx(%i,%i) =%12.6f",k[i],q[i],myround(momentsx(i)));
+       fprintf(fout," aSy(%i,%i) =%12.6f",k[i],q[i],myround(momentsy(i)));
+       fprintf(fout," aSz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentsz(i)));
        moments(i)=momentsx(i);moments(i+49)=momentsy(i);moments(i+2*49)=momentsz(i);
       }
 

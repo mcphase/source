@@ -123,7 +123,6 @@ private :
   void (*mq)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*);
   int  (*ddnn)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*);
 
-
 public:
   double SLR,SLI; // scattering length
   double DWF; // DebeyWallerFactor [A^2]
@@ -151,12 +150,14 @@ public:
    double j4(double Q);
    double j5(double Q);
    double j6(double Q);
+  int jl_lmax; // initialized to 6,will be lowered if Np+Np<l+2 at 
+               //calculation of jjjpar::F(Q) from radial wave function, used for printout mcdiff.out mdisp*.*
 
 private:
    double jl(int l,double Q);
-   double tl(int l,int N,double x);
-   double sn(int n,int N,double x);
-   double cn(int n,int N,double x);
+   long double tl(int l,int N,long double x);
+   long double sn(int n,int N,long double x);
+   long double cn(int n,int N,long double x);
    double Fsaved[MAXSAVEQ+1],Qsaved[MAXSAVEQ+1]; int nsaved;
    double DBWsaved[MAXSAVEQ+1],DBWQsaved[MAXSAVEQ+1]; int DBWnsaved;
 

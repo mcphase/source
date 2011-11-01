@@ -121,13 +121,13 @@ fprintf(fout,"#orbital moment density is expanded in tesseral harmonics Zlm\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
    for(i=1;i<=49;++i){
-   if(doijk==3){ printf(" aL(%i,%i) =%12.6f\n",k[i],q[i],moments(i));}
-   else { printf(" aLx(%i,%i) =%12.6f ",k[i],q[i],momentsx(i));
-          printf(" aLy(%i,%i) =%12.6f ",k[i],q[i],momentsy(i));
-          printf(" aLz(%i,%i) =%12.6f\n",k[i],q[i],momentsz(i));
-          fprintf(fout," aLx(%i,%i) =%12.6f ",k[i],q[i],momentsx(i));
-          fprintf(fout," aLy(%i,%i) =%12.6f ",k[i],q[i],momentsy(i));
-          fprintf(fout," aLz(%i,%i) =%12.6f\n",k[i],q[i],momentsz(i));
+   if(doijk==3){ printf(" aL(%i,%i) =%12.6f\n",k[i],q[i],myround(moments(i)));}
+   else { printf(" aLx(%i,%i) =%12.6f ",k[i],q[i],myround(momentsx(i)));
+          printf(" aLy(%i,%i) =%12.6f ",k[i],q[i],myround(momentsy(i)));
+          printf(" aLz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentsz(i)));
+          fprintf(fout," aLx(%i,%i) =%12.6f ",k[i],q[i],myround(momentsx(i)));
+          fprintf(fout," aLy(%i,%i) =%12.6f ",k[i],q[i],myround(momentsy(i)));
+          fprintf(fout," aLz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentsz(i)));
           moments(i)=momentsx(i);moments(i+49)=momentsy(i);moments(i+2*49)=momentsz(i);
          }
                       }

@@ -125,12 +125,12 @@ fprintf(fout,"#currdensity is expanded in tesseral harmonics Zlm\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
    for(i=1;i<=49;++i){
-                       printf(" aLx(%i,%i) =%12.6f  ",k[i],q[i],momentlx(i));
-                       printf(" aLy(%i,%i) =%12.6f  ",k[i],q[i],momently(i));
-                       printf(" aLz(%i,%i) =%12.6f\n",k[i],q[i],momentlz(i));
-                       fprintf(fout," aLx(%i,%i) =%12.6f  ",k[i],q[i],momentlx(i));
-                       fprintf(fout," aLy(%i,%i) =%12.6f  ",k[i],q[i],momently(i));
-                       fprintf(fout," aLz(%i,%i) =%12.6f\n",k[i],q[i],momentlz(i));
+                       printf(" aLx(%i,%i) =%12.6f  ",k[i],q[i],myround(momentlx(i)));
+                       printf(" aLy(%i,%i) =%12.6f  ",k[i],q[i],myround(momently(i)));
+                       printf(" aLz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentlz(i)));
+                       fprintf(fout," aLx(%i,%i) =%12.6f  ",k[i],q[i],myround(momentlx(i)));
+                       fprintf(fout," aLy(%i,%i) =%12.6f  ",k[i],q[i],myround(momently(i)));
+                       fprintf(fout," aLz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentlz(i)));
              moments(i)=momentlx(i);moments(i+49)=momently(i);moments(i+2*49)=momentlz(i);
              }
 printf("\n");

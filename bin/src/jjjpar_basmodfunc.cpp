@@ -480,21 +480,19 @@ ComplexVector & jjjpar::MQ(Vector & Qvec)
       J6=j6(Q);
             complex<double>dummy;
 switch (module_type)
-  {case 0:  getpolar(Qvec(2),Qvec(3),Qvec(1),Q,th,ph); // for external module we must provide th and ph with respect
+  {case 0:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for external module we must provide th and ph with respect
                                                        // to abc coordinate system
             (*mq)(&Mq,&th,&ph,&J0,&J2,&J4,&J6,&est);
-             // external module provide Mq(123)=Mq(abc)
-             // we must transform this to mcdiff internal xyz||cab coordinate system
-            dummy=Mq(3);Mq(3)=Mq(2);Mq(2)=Mq(1);Mq(1)=dummy;
             return Mq;break;
-   case 2:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // internal module cfield does not need transformation
-            return (*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);break;
-   case 4:  getpolar(Qvec(2),Qvec(3),Qvec(1),Q,th,ph); // for so1ion we muyst th and ph with respect to abc coordinate system
+   case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // internal module cfield needs transformation because
+                                                       // of its convention ijk||yzx where  j||b k||axb and i||jxk
             Mq=(*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);
-             // so1ion module provide Mq(123)=Mq(abc)
-             // we must transform this to mcdiff internal xyz||cab coordinate system
-            dummy=Mq(3);Mq(3)=Mq(2);Mq(2)=Mq(1);Mq(1)=dummy;
+             // cfield module provides Mq(123)=Mq(xyz)
+             // we must transform this to mcdiff internal ijk||yzx coordinate system
+            dummy=Mq(3);Mq(3)=Mq(1);Mq(1)=Mq(2);Mq(2)=dummy;
             return Mq;break;
+   case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for so1ion we must th and ph with respect to abc coordinate system
+            return (*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);break;
    default: fprintf(stderr,"ERROR in scattering operator function M(Q) for ion %s \nM(Q) is currently only implemented for internal module cfield and so1ion:\n",cffilename);exit(EXIT_FAILURE);
   }
 }
@@ -641,20 +639,20 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
                      }            }
     if(pmax==0){fprintf (stderr,"Warning: calculation of <j%i(Q)> failed - continuing with <j%i(Q)>=0\n",l,l);return 0;}
 
-    double value=0;
+    long double value=0;
     for(p=1;p<=pmax;++p){
     for(q=1;q<=pmax;++q){
-   if((int)Np(p)+(int)Np(q)<l+2){fprintf(stderr,"Warning for atom %s wavefunction calculation of <j%i(Q)> not possible setting <j%i(Q)>=0\n",cffilename,l,l);return 0.0;}
+   if((int)Np(p)+(int)Np(q)<l+2){jl_lmax=l-1;return 0.0;}
   // condition: Np(p)+Np(q)>l+1- otherwise jl(Q) not possible to calculate
   // with this wave function
     value+=coeff(p)*coeff(q)*tl(l,(int)Np(p)+(int)Np(q),(Xip(p)+Xip(q))/Q);
-                        }}
-     return value;
+                          }}
+     return (double)value;
    }
 
 
 
-   double jjjpar::tl(int l,int N,double x)
+long double jjjpar::tl(int l,int N,long double x)
      {double value=0.0;
       switch (l)
        { case 0: value=sn(1,N,x);break;
@@ -669,15 +667,15 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
      return value;
      }
 /*
-   double jjjpar::sn(int n,int N,double x)
+long double jjjpar::sn(int n,int N,long double x)
    {complex <double> c(x,-1.0);
-    double value;
+    long double value;
     value=(double)factorial(N-n)*imag(pow(c,-N+n-1));
     return value;
    }
-   double jjjpar::cn(int n,int N,double x)
+long double jjjpar::cn(int n,int N,long double x)
    {complex <double> c(x,-1.0);
-    double value;
+    long double value;
     value=(double)factorial(N-n)*real(pow(c,-N+n-1));
     return value;
    }
@@ -703,55 +701,56 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
  *  -1+15 x^2-15 x^4+x^6       +I( -6 x+20 x^3-6 x^5 )
  * -7 x+35 x^3-21 x^5+x^7      +I( 1-21 x^2+35 x^4-7 x^6)
  * 1-28 x^2+70 x^4-28 x^6+x^8  +I( 8 x-56 x^3+56 x^5-8 x^7)
- */ 
- double jjjpar::sn(int n,int N,double x)    // Need imaginary part
+ */
+
+long double jjjpar::sn(int n,int N,long double x)    // Need imaginary part
  {
-    double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
+    long double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
     switch(-N+n-1) {
       case  0: return 0.; break;
-      case  1: return (double)factorial(N-n) *  -1.; break;
-      case -1: return (double)factorial(N-n) * (1. / denom); break;
-      case  2: return (double)factorial(N-n) *  -2*x; break;
-      case -2: return (double)factorial(N-n) * ( 2*x / denom); break;
-      case  3: return (double)factorial(N-n) *   (1-3*x*x); break;
-      case -3: return (double)factorial(N-n) * (-(1-3*x*x) / denom); break;
-      case  4: return (double)factorial(N-n) *   4*x * (1-x*x); break;
-      case -4: return (double)factorial(N-n) * (-4*x * (1-x*x) / denom); break;
-      case  5: return (double)factorial(N-n) *   (-1 + x*x * (10 - 5*x*x)); break;
-      case -5: return (double)factorial(N-n) * (-(-1 + x*x * (10 - 5*x*x)) / denom); break;
-      case  6: return (double)factorial(N-n) *   x * (-6 + x*x * (20 - 6*x*x)); break;
-      case -6: return (double)factorial(N-n) * (-x * (-6 + x*x * (20 - 6*x*x)) / denom);  break;
-      case  7: return (double)factorial(N-n) *   ( 1 + x*x * (-21 + x*x * (35 - 7*x*x))); break;
-      case -7: return (double)factorial(N-n) * (-( 1 + x*x * (-21 + x*x * (35 - 7*x*x))) / denom); break;
-      case  8: return (double)factorial(N-n) *   x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))); break;
-      case -8: return (double)factorial(N-n) * (-x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))) / denom); break;
+      case  1: return (long double)factorial(N-n) *  -1.; break;
+      case -1: return (long double)factorial(N-n) * (1. / denom); break;
+      case  2: return (long double)factorial(N-n) *  -2*x; break;
+      case -2: return (long double)factorial(N-n) * ( 2*x / denom); break;
+      case  3: return (long double)factorial(N-n) *   (1-3*x*x); break;
+      case -3: return (long double)factorial(N-n) * (-(1-3*x*x) / denom); break;
+      case  4: return (long double)factorial(N-n) *   4*x * (1-x*x); break;
+      case -4: return (long double)factorial(N-n) * (-4*x * (1-x*x) / denom); break;
+      case  5: return (long double)factorial(N-n) *   (-1 + x*x * (10 - 5*x*x)); break;
+      case -5: return (long double)factorial(N-n) * (-(-1 + x*x * (10 - 5*x*x)) / denom); break;
+      case  6: return (long double)factorial(N-n) *   x * (-6 + x*x * (20 - 6*x*x)); break;
+      case -6: return (long double)factorial(N-n) * (-x * (-6 + x*x * (20 - 6*x*x)) / denom);  break;
+      case  7: return (long double)factorial(N-n) *   ( 1 + x*x * (-21 + x*x * (35 - 7*x*x))); break;
+      case -7: return (long double)factorial(N-n) * (-( 1 + x*x * (-21 + x*x * (35 - 7*x*x))) / denom); break;
+      case  8: return (long double)factorial(N-n) *   x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))); break;
+      case -8: return (long double)factorial(N-n) * (-x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))) / denom); break;
       default: //fprintf(stderr,"jjjpar::sn() Bad power %i\n",-N+n-1); exit(-1);
-         complex <double> c(x,-1.0); return factorial((double)(N-n))*imag(pow(c,-N+n-1.));
+         complex <double> c(x,-1.0); return (long double)(factorial((double)(N-n))*imag(pow(c,-N+n-1.)));
     }
  }
- double jjjpar::cn(int n,int N,double x)    // Need real part
+long double jjjpar::cn(int n,int N,long double x)    // Need real part
  {
-    double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
+    long double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
     switch(-N+n-1) {
       case  0: return 1.; break;
-      case  1: return (double)factorial(N-n) *  x; break;
-      case -1: return (double)factorial(N-n) * (x / denom); break;
-      case  2: return (double)factorial(N-n) *  (-1+x*x); break;
-      case -2: return (double)factorial(N-n) * ((-1+x*x) / denom); break;
-      case  3: return (double)factorial(N-n) *  x * (-3+x*x); break;
-      case -3: return (double)factorial(N-n) * (x * (-3+x*x) / denom); break;
-      case  4: return (double)factorial(N-n) *  (1 + x*x * (-6+x*x)); break;
-      case -4: return (double)factorial(N-n) * ((1 + x*x * (-6+x*x)) / denom); break;
-      case  5: return (double)factorial(N-n) *  x * (5 + x*x *(-10+x*x)); break;
-      case -5: return (double)factorial(N-n) * (x * (5 + x*x *(-10+x*x)) / denom); break;
-      case  6: return (double)factorial(N-n) *  (-1 + x*x * (15 + x*x * (-15+x*x))); break;
-      case -6: return (double)factorial(N-n) * ((-1 + x*x * (15 + x*x * (-15+x*x))) / denom); break;
-      case  7: return (double)factorial(N-n) *  x * (-7 + x*x *(35 + x*x * (-21 + x*x))); break;
-      case -7: return (double)factorial(N-n) * (x * (-7 + x*x *(35 + x*x * (-21 + x*x))) / denom); break;
-      case  8: return (double)factorial(N-n) *  ( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))); break;
-      case -8: return (double)factorial(N-n) * (( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))) / denom); break;
+      case  1: return (long double)factorial(N-n) *  x; break;
+      case -1: return (long double)factorial(N-n) * (x / denom); break;
+      case  2: return (long double)factorial(N-n) *  (-1+x*x); break;
+      case -2: return (long double)factorial(N-n) * ((-1+x*x) / denom); break;
+      case  3: return (long double)factorial(N-n) *  x * (-3+x*x); break;
+      case -3: return (long double)factorial(N-n) * (x * (-3+x*x) / denom); break;
+      case  4: return (long double)factorial(N-n) *  (1 + x*x * (-6+x*x)); break;
+      case -4: return (long double)factorial(N-n) * ((1 + x*x * (-6+x*x)) / denom); break;
+      case  5: return (long double)factorial(N-n) *  x * (5 + x*x *(-10+x*x)); break;
+      case -5: return (long double)factorial(N-n) * (x * (5 + x*x *(-10+x*x)) / denom); break;
+      case  6: return (long double)factorial(N-n) *  (-1 + x*x * (15 + x*x * (-15+x*x))); break;
+      case -6: return (long double)factorial(N-n) * ((-1 + x*x * (15 + x*x * (-15+x*x))) / denom); break;
+      case  7: return (long double)factorial(N-n) *  x * (-7 + x*x *(35 + x*x * (-21 + x*x))); break;
+      case -7: return (long double)factorial(N-n) * (x * (-7 + x*x *(35 + x*x * (-21 + x*x))) / denom); break;
+      case  8: return (long double)factorial(N-n) *  ( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))); break;
+      case -8: return (long double)factorial(N-n) * (( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))) / denom); break;
       default: //fprintf(stderr,"jjjpar::cn() Bad power %i\n",-N+n-1); exit(-1);
-         complex <double> c(x,-1.0); return factorial((double)(N-n))*imag(pow(c,-N+n-1.));
+         complex <double> c(x,-1.0); return (long double)(factorial((double)(N-n))*imag(pow(c,-N+n-1.)));
     }
  }
 

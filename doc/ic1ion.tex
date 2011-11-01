@@ -11,14 +11,14 @@ parameter file {\prg mcphas.ic}). Alternatively, the single ion parameter file c
 
 {\prg ic1ion filename}
 
-{\prg ic1ion} also accepts two options: 
+{\prg ic1ion} also accepts these options: 
 \begin{description}
 \item[{\prg -h}] which outputs in the file {\prg results/ic1ion.out} only
 the header containing the free ion (Coulomb and spin-orbit) and single ion (crystal field and magnetic fields)
 parameters. 
-\item[{\prg -t energylimit}] which calculates the output energy levels only up to the value of energy limit
-by truncating the free ion Hamiltonian at this limit, and calculating the crystal field and Zeeman terms only
-for free ion states below this limit.
+%\item[{\prg -t energylimit}] which calculates the output energy levels only up to the value of energy limit
+%by truncating the free ion Hamiltonian at this limit, and calculating the crystal field and Zeeman terms only
+%for free ion states below this limit.
 \end{description}
 The single ion parameter file has to be of the form (note the crystal field parameters in Wybourne notation
 can be calculated by {\prg pointc}\index{pointc}):

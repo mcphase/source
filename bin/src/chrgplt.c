@@ -119,7 +119,7 @@ fprintf(fout,"#chargedensity is expanded in tesseral harmonics as\n#   ro(r)= -|
                                                        }
                                                } 
                        printf(" <J%c> = <%s> =%12.6f   clm=%12.6f\n",'a'-1+i,lm4,moments(i),moments(i)*factor);
-                       fprintf(fout," <J%c> = <%s> =%12.6f   clm=%12.6f\n",'a'-1+i,lm4,moments(i),moments(i)*factor);}
+                       fprintf(fout," <J%c> = <%s> =%12.6f   clm=%12.6f\n",'a'-1+i,lm4,myround(moments(i)),myround(moments(i)*factor));}
 printf("\n");
   fclose (fout);
 

@@ -306,7 +306,7 @@ void writeheader(par & inputpars,FILE * fout)
   }
   fprintf(fout, "# %6.3f %6.3f %6.3f %6.3f %6.3f ",(*inputpars.jjj[i]).xyz(1),(*inputpars.jjj[i]).xyz(2),(*inputpars.jjj[i]).xyz(3),(*inputpars.jjj[i]).DWF,(*inputpars.jjj[i]).gJ);
   if((*inputpars.jjj[i]).Np(1)!=0){
-  fprintf(fout," - formfactor calculated directly from radial wave function parameters in %s",(*inputpars.jjj[i]).cffilename);
+  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",(*inputpars.jjj[i]).cffilename,(*inputpars.jjj[i]).jl_lmax);
   }
   else
   {

@@ -133,23 +133,23 @@ fprintf(fout,"#momdensity is expanded in tesseral harmonics Zlm\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
    for(i=1;i<=49;++i){
 if(doijk==3){moments(i)=momS(i);moments(i+49)=momL(i);
-                       printf(" aS(%i,%i) =%12.6f  ",k[i],q[i],moments(i));
-                       printf(" aL(%i,%i) =%12.6f\n",k[i],q[i],moments(i+49));
+                       printf(" aS(%i,%i) =%12.6f  ",k[i],q[i],myround(moments(i)));
+                       printf(" aL(%i,%i) =%12.6f\n",k[i],q[i],myround(moments(i+49)));
            }
 else
            {
-                       printf(" aSx(%i,%i) =%12.6f  ",k[i],q[i],momentsx(i));
-                       printf(" aSy(%i,%i) =%12.6f  ",k[i],q[i],momentsy(i));
-                       printf(" aSz(%i,%i) =%12.6f  ",k[i],q[i],momentsz(i));
-                       printf(" aLx(%i,%i) =%12.6f  ",k[i],q[i],momentlx(i));
-                       printf(" aLy(%i,%i) =%12.6f  ",k[i],q[i],momently(i));
-                       printf(" aLz(%i,%i) =%12.6f\n",k[i],q[i],momentlz(i));
-                       fprintf(fout," aSx(%i,%i) =%12.6f  ",k[i],q[i],momentsx(i));
-                       fprintf(fout," aSy(%i,%i) =%12.6f  ",k[i],q[i],momentsy(i));
-                       fprintf(fout," aSz(%i,%i) =%12.6f  ",k[i],q[i],momentsz(i));
-                       fprintf(fout," aLx(%i,%i) =%12.6f  ",k[i],q[i],momentlx(i));
-                       fprintf(fout," aLy(%i,%i) =%12.6f  ",k[i],q[i],momently(i));
-                       fprintf(fout," aLz(%i,%i) =%12.6f\n",k[i],q[i],momentlz(i));
+                       printf(" aSx(%i,%i) =%12.6f  ",k[i],q[i],myround(momentsx(i)));
+                       printf(" aSy(%i,%i) =%12.6f  ",k[i],q[i],myround(momentsy(i)));
+                       printf(" aSz(%i,%i) =%12.6f  ",k[i],q[i],myround(momentsz(i)));
+                       printf(" aLx(%i,%i) =%12.6f  ",k[i],q[i],myround(momentlx(i)));
+                       printf(" aLy(%i,%i) =%12.6f  ",k[i],q[i],myround(momently(i)));
+                       printf(" aLz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentlz(i)));
+                       fprintf(fout," aSx(%i,%i) =%12.6f  ",k[i],q[i],myround(momentsx(i)));
+                       fprintf(fout," aSy(%i,%i) =%12.6f  ",k[i],q[i],myround(momentsy(i)));
+                       fprintf(fout," aSz(%i,%i) =%12.6f  ",k[i],q[i],myround(momentsz(i)));
+                       fprintf(fout," aLx(%i,%i) =%12.6f  ",k[i],q[i],myround(momentlx(i)));
+                       fprintf(fout," aLy(%i,%i) =%12.6f  ",k[i],q[i],myround(momently(i)));
+                       fprintf(fout," aLz(%i,%i) =%12.6f\n",k[i],q[i],myround(momentlz(i)));
              moments(i)=momentsx(i);moments(i+49)=momentsy(i);moments(i+2*49)=momentsz(i);
              moments(i+3*49)=momentlx(i);moments(i+4*49)=momently(i);moments(i+5*49)=momentlz(i);
 

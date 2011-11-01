@@ -4,7 +4,41 @@
 double setcoloutput(int i,float & scale, double & ovallt,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,
                    complex <double> & msfx, complex <double> & msfy, complex <double> & msfz,
                    complex <double> & msfdipx, complex <double> &msfdipy, complex <double> &msfdipz,Vector & Qvec)
-{double cosw,crossx,crossy,crossz,Ip,Im,sinw2;
+{double cosw,crossx,crossy,crossz,Ip,Im,sinw2,R;
+         // here do some precalculations with formulas common to several options
+         switch (i) {case 13: // beyond cases
+                     case 14:
+                     case 15:
+                     case 16:
+                     case 23:
+                     case 24:crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
+                             crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
+                             crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
+                            Ip=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
+                            Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                            Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
+                            Im=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
+                            Im+=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                            Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
+                             break;
+                     case 17:  // dipolar cases
+                     case 18:
+                     case 19:
+                     case 20:
+                     case 25:
+                     case 26: crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
+                              crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
+                              crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
+                             Ip=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
+                             Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                             Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
+                             Im=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
+                             Im+=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
+                             Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
+                              break;
+default: break;
+                    }
+
          switch (i) {
 case 0:  return lorentzf;break;//   "LF          ",
 case 1:  return abs(nsf);break;//    "|NSF|[b]    ",
@@ -19,71 +53,40 @@ case 9:  return abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//   
 case 10: return real(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Re(MSFdip.P)",
 case 11: return imag(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Im(MSFdip.P)"
 case 12: cosw=(Pxyz/Norm(Pxyz))*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[°]"
-case 13:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
-          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
-          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
-         return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //"i(MSFxMSF*).P",
-case 14:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
-          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
-          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
-          Ip=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
-                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
-         return Ip* lorentzf * scale * ovallt;
+case 13: return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //"i(MSFxMSF*).P",
+case 14: return Ip* lorentzf * scale * ovallt;
                      //              "I+          ",
-case 15:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
-          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
-          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
-          Im=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
-                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
-         return Im* lorentzf * scale * ovallt;
+case 15: return Im* lorentzf * scale * ovallt;
                      //              "I-          ",
-case 16:  crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
-          crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
-          crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
-          Ip=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
-                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
-          Im=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
-                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
-                return Ip/Im;     //              "I+/I-       "
-case 17:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
-          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
-          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
-         return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //i(MSFdip x MSFdip*).P
-case 18:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
-          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
-          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
-          Ip=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
-                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
-         return Ip* lorentzf * scale * ovallt;
+case 16: return Ip/Im;     //              "I+/I-       "
+case 17: return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //i(MSFdip x MSFdip*).P
+case 18: return Ip* lorentzf * scale * ovallt;
           //Idip+
-case 19:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
-          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
-          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
-          Im=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
-                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
-         return Im* lorentzf * scale * ovallt;
+case 19: return Im* lorentzf * scale * ovallt;
          // Idip-
-case 20:  crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
-          crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
-          crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
-          Ip=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
-                Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
-          Im=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
-                Im-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
-                return Ip/Im;         // Idip+/Idip-
+case 20: return Ip/Im;         // Idip+/Idip-
 case 21: cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
          return 2.0*abs(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))/sinw2;break;//|MSF.P|/sin^2(angl(Q,P)
 case 22: cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
          return 2.0*abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))/sinw2;break;//|MSFdip.P|/sin^2(angl(Q,P)
-                     }
+case 23: R= Ip/Im;     //   I+/I-
+         cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
+         return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))-sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
+         //2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+case 24: R= Ip/Im;     //   I+/I-
+         cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
+         return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))+sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
+         //2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+case 25:  R= Ip/Im;         // Idip+/Idip-
+          cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
+          return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))-sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
+         //2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+case 26:  R= Ip/Im;         // Idip+/Idip-
+          cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
+          return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))+sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
+         //2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+         }
+
 return 0;
 }
 
@@ -174,50 +177,50 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					               msfx+=0.5*MQ(1)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);//MQ(123)=MQ(xyz)
 					               msfy+=0.5*MQ(2)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               msfz+=0.5*MQ(3)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-                                                       msfdipx+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);// mom(123)=mom(abc)=mom(yzx)
-					               msfdipy+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					               msfdipz+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                  }
+                                                       msfdipx+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);// mom(123)=mom(abc)=mom(yzx)
+					               msfdipy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					               msfdipz+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                }
  					      if(J[i]==-1){// dipole approximation - use magnetic moments and rare earth formfactor
                                                            //                        for transition metals always set gJ=2 (spin only moment)
-                                                        msfx+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfy+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfz+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-                                                        msfdipx+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipy+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipz+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+                                                        msfx+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfz+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+                                                        msfdipx+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipz+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               }
 					      if(J[i]==-2){// dipole approximation - use S and L moments (only if gJ=0)
                                                         FQL = (*jjjpars[i]).F(-Q); // orbital formfactor
-                                                        msfx+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
-					                msfy+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfz+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfx+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
-					                msfy+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfz+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-                                                        msfdipx+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
-					                msfdipy+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipz+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipx+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
-					                msfdipy+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipz+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+                                                        msfx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
+					                msfy+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfz+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfx+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
+					                msfy+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+                                                        msfdipx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
+					                msfdipy+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipz+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipx+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
+					                msfdipy+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               }
                                      if(J[i]==-3){ // go beyond dipole approximation for gJ=0 (intermediate coupling)
                                                        ComplexVector MQ(1,3);MQ=(*jjjpars[i]).MQ(Qvec);
                                              FQL = (*jjjpars[i]).F(-Q); // orbital formfactor
-                                                        msfdipx+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
-					                msfdipy+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipz+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipx+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
-					                msfdipy+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                msfdipz+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+                                                        msfdipx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
+					                msfdipy+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipz+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipx+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
+					                msfdipy+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                msfdipz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
                                                        if (Q<SMALL){// for Q=0 put dipole results, because M(Q) givs NaN
-                                                                 msfx+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
-					                         msfy+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                         msfz+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                         msfx+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
-					                         msfy+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-					                         msfz+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+                                                                 msfx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
+					                         msfy+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                         msfz+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                         msfx+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
+					                         msfy+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+					                         msfz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
                                                            }
 					               else{
                                                             msfx+=0.5*MQ(1)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);//MQ(123)=MQ(xyz)
@@ -228,12 +231,9 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 //printf("added ion %i MOUT10=(%8.6f %+8.6f i,%8.6f %+8.6f i,%8.6f %+8.6f i)\n         MSFdip=(%8.6f %+8.6f i,%8.6f %+8.6f i,%8.6f %+8.6f i)\n",i,real(msfx),imag(msfx),real(msfy),imag(msfy),real(msfz),imag(msfz),real(msfdipx),imag(msfdipx),real(msfdipy),imag(msfdipy),real(msfdipz),imag(msfdipz));
 // myPrintVector(stdout,(*jjjpars[i]).mom);//equivalent to moment ...
 
-                                                         //mux=(*jjjpars[i]).mom(3); // this should be done in future to implement
-                                                         //muy=(*jjjpars[i]).mom(1); // also nonortholattices in corr functions and res mag scatt
-                                                         //muz=(*jjjpars[i]).mom(2);
                                                          mux=(*jjjpars[i]).mom(1); // this is still here because correlation functions are calculated
                                                          muy=(*jjjpars[i]).mom(2); // only for orhtogonal lattices (see printeln sub) and so we take
-                                                         muz=(*jjjpars[i]).mom(3); // the old convention of the mcdiff program (a||x,b||y,c||z)
+                                                         muz=(*jjjpars[i]).mom(3); // the convention of the mcdiff program (a||x,b||y,c||z)
                                                          mqx+=mux*exp(-2*PI*qr*im);
                                                          mqy+=muy*exp(-2*PI*qr*im);
                                                          mqz+=muz*exp(-2*PI*qr*im);

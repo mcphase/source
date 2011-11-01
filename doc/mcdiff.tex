@@ -78,11 +78,15 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #            20....Idip+/Idip-
 #            21....2*|MSF.P|/sin^2(angl(Q,P)
 #            22....2*|MSFdip.P|/sin^2(angl(Q,P)
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
 #
 #           In the above the intensities I+ and I- are the spinflip and nonspineflip intensities
 #           in a polarised neutron experiment:
 #            I+-=LF exp(-OTF Q^2/8pi^2) 
-#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2
 #                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
 #
 #
@@ -186,9 +190,9 @@ the program calculates the following output file {\prg results/mcdiff\index{mcdi
 #* reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
 #***********************************************************************
 #! unit cell: a= 4.3843 A  b= 4.3843 A c= 2.4194 A  alpha=90  beta=90 gamma=90
-#                   /  0.000 A \     /  0.000 A \     /  4.839 A \ 
-#                r1=|  4.384 A |  r2=|  0.000 A |  r3=| -0.000 A |
-#                   \ -0.000 A /     \  4.384 A /     \ -0.000 A /
+#                   /  4.384 A \     /  0.000 A \     /  0.000 A \ 
+#                b1=|  0.000 A |  b2=|  4.384 A |  b3=| -0.000 A |
+#                   \ -0.000 A /     \  0.000 A /     \  4.839 A /
 #! Wavelength=0.9 A   number of atoms: 4
 #! T= 2 K Ha= 0 T Hb= 0 T Hc= 0 T
 #! Overall temperature factor B=0.3 A^2: Intensity is proportional to exp(-2*B*(sin(theta)/lambda)^2)

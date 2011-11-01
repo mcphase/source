@@ -52,7 +52,10 @@ P. Fabi n\'e Hoffmann\thanks{Forschungszentrum J\"ulich, D-52425 J\"ulich, Germa
 
 We would like to thank colleagues who generously agreed to read sections of the draft version
 of the text; their comments helped to improve the text substantially. We are particularly indebted to
-Ulrike Witte, Jane Brown and Andrew Boothroyd for their help and inspiring comments.
+Ulrike Witte, Jane Brown, M. Loewenhaupt, A. Kreyssig, E. Faulhaber,
+J. Blanco, M. Haverkort, A. Severing,
+A. Doenni, H. Kitazawa, R. Kremer 
+ and Andrew Boothroyd for their help and inspiring comments.
 
 The authors thank the FWF, Royal Society and the EPSRC.
 We thank the authors of Cfield, Powls, FullProf, Spectre and Amos, output 
@@ -134,7 +137,7 @@ properties of a magnetic system with localised magnetic moments
 given the crystal field and/or the
 exchange interaction constants.
 For rare earth ions it is based on the standard model
-of rare earth magnetism~\cite{jensen91-1}~\footnote{\em http://www.nbi.ku.dk/page40667.htm}.
+of rare earth magnetism~\cite{jensen91-1}.
 The Hamiltonian of the standard model of rare earth magnetism 
 is described in section~\ref{hamiltonian}.
 Alternatively, a more complex Hamiltonian can be used which includes
@@ -284,7 +287,7 @@ GdNi$_2$B$_2$C & magnetostriction and phase diagram, spin only (L=0) & {\prg bri
 \cite{doerr02-5609}\\
 GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, magnetic structure & {\prg cfield} & \\
 La$_2$CoO$_4$ & dispersive magnetic excitations / spinwaves &{\prg  ic1ion} & \cite{lewtas10-184420}\\
-Lu$_2$MnO$_4$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
+LuMnO$_3$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
 NdCu$_2$  & crystal field, magnetic structure, phase diagrams, excitations & {\prg cfield}& %%@
 \cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29,rotter02-751,rotter02-8885} \\
 PrNi$_2$B$_2$C & crystal field - fit to neutrons,cp, susc & {\prg cfield}&\cite{mazumdar08-144422}\\
@@ -297,9 +300,7 @@ testic1ion & Pr$^{3+}$ chargedensity in IC and LS coupling & {\prg ic1ion,cfield
 
 
 Some publications referencing Mcstas: %%@
-\cite{rotter02-751,rotter02-8885,rotter03-144418,rotter03-mass,rotter03-x,rotter04-231,ro%%@
-tter%%@
-04-xxxx}
+\cite{rotter02-751,rotter02-8885,rotter03-144418,rotter03-mass,rotter03-x,rotter04-231,rotter04-xxxx}
 
 
 
@@ -307,13 +308,58 @@ tter%%@
 \section{The Hamiltonian}
 \label{hamiltonian}
 
+We assume a quantum mechanical system that can be described by the Hamiltonian
+ \begin{equation}\label{hamilton}
+ \hat \mathcal H=\sum_{n=1}^N \hat \mathcal H(n) -\frac{1}{2} \sum_{n,n',\alpha,\beta}
+ {\mathcal J}_{\alpha\beta}(\mbf R_{n'} - \mbf R_n) \hat \mathcal I_{\alpha}^n \hat \mathcal I_{\beta}^{n'}.
+ \end{equation}
+The first term $\hat \mathcal H(n)$ denotes the Hamiltonian of
+ a subsystem $n$
+(e.g.~an ion, or cluster of ions). The second term describes a bilinear interaction 
+between different subsystems
+through the operators $\hat \mathcal I_{\alpha}^n$, with $\alpha = 1,2,...,m$. The operators $\hat \mathcal H(n)$ and $\hat \mathcal I_{\alpha}^n$  act in the subspace $n$ of the Hilbert space, i.e. $[\hat \mathcal I_{\alpha}^n,\hat \mathcal I_{\alpha}^{n'}]=0$,
+$[\hat \mathcal H(n),\hat \mathcal I_{\alpha}^{n'}]=0$ and $[\hat \mathcal H(n),\hat \mathcal H(n')]=0$
+for $n \neq n'$\footnote{Note that these conditions are essential and put a  limit to the
+applicability of the theory, for example in the case of charge transfer excitations from
+one subsystem to the next.}.
+For example, in the case of a Heisenberg
+ exchange between magnetic ions we would identify the set of operators with
+ $\alpha=1,2,3$ with the three components of the  spin: $\hat \mathcal I_1 \leftrightarrow \hat S_x, \hat \mathcal I_2 %%@
+\leftrightarrow \hat S_y, \hat \mathcal I_3 \leftrightarrow \hat S_z$.
+The beauty of the analysis which follows is that it can be applied to
+almost any Hamiltonian of the form (\ref{hamilton}). The analysis
+of complex magnetic systems can thus be attempted by starting from a simple
+form such as the Heisenberg model and by introducing, step-by-step, more
+complexity into the model. For example, anisotropy and interactions with extended range can be introduced by modifying ${\mathcal J}_{\alpha\beta}(\mbf R_n - \mbf R_{n'})$, higher order operators can be 
+introduced  by extending the index range for $\alpha$, and a complex single-ion term $\hat \mathcal H(n)$ may be added. 
+Another example for a Hamiltonian (\ref{hamilton})  is the problem of lattice dynamics, which can
+ be treated in the framework of this
+formalism by identifying the operators $\hat \mathcal I^n_{\alpha}$
+ with the atomic displacements $u^{n}$. Here the index $\alpha$ is not necessary and
+$n$ refers to both, the atomic position index and the spatial coordinate of the displacement,
+  $n=(1,x),(1,y),(1,z),(2,x),(2,y),(2,z), ...$. Note that this can be done, because the three spatial components of the 
+displacement operators commute with each other (in contrast to the components of the spin) and each displacement
+component acts in its own subspace of the Hilbert space. The kinetic energy
+will be part of the single ion term $ \hat \mathcal H(n)$. Allowing more complexity to the system,
+both the spin and lattice degrees of freedom can be introduced and spin-phonon interactions can be
+handled by the theory.
+
+The main limitation of the approach is that it neglects fluctuations associated with phase 
+transitions and quantum disorder. We are primarily concerned, therefore, with excitations 
+associated with a  well-ordered ground state.
+
+Two special forms of the Hamiltonian (\ref{hamilton}), which have been implemented
+are given in the following. Some other forms are also available, by programming
+a single ion module the user may treat any type single ion Hamiltonian $\hat \mathcal H(n)$.
+
+
 \subsection{Rare Earth Ions}
 
-The magnetic  Hamiltonian $\mathcal H$, which may be treated with
-the program package is:
+A more specific example of is the following magnetic  Hamiltonian $\mathcal H$ for rare earth ions,
+ which may be treated with the program package:
 
 \begin{equation}
-\label{hamilton}
+\label{hamiltonre}
  {\mathcal H}= \sum_{n,lm} B_l^m O_{lm}({\mbf J}^n) 
              -\frac{1}{2}  \sum_{nn'} {\mathcal J}(nn') {\mbf J}^n{\mbf J}^{n'}
 	     - \sum_{n} g_{Jn} \mu_B {\mbf J}^n {\mbf H} 
@@ -333,7 +379,7 @@ more general two ion exchange coupling
 \end{equation}
 
 For further information on the notation and symmetry restrictions to the
-parameters in the Hamiltonian refer to~\cite{jensen91-1}~\footnote{\em http://www.nbi.ku.dk/page40667.htm}.
+parameters in the Hamiltonian refer to~\cite{jensen91-1}.
 
 In addition to the above terms in the Hamiltonian the coupling of magnetic and lattice properties
 is possible by introducing magnetoelastic interactions:
@@ -379,9 +425,14 @@ explicitely includes electrostatic and  spin orbit interactions for each ion:
         + \sum_{lm} L_l^m(n) T_{lm}^n
 \right ]
               + \sum_{i_n>j_n=1}^{\nu_n}\frac{e^2}{4\pi\epsilon_0|\mbf r_{i_n}-\mbf r_{j_n}|} \right \} \nonumber \\
-            && -\frac{1}{2}  \sum_{nn'} {\mathcal J_S}(nn') {\mbf S}^n{\mbf S}^{n'}
-               -\frac{1}{2}  \sum_{nn'} {\mathcal J_L}(nn') {\mbf L}^n{\mbf L}^{n'} \nonumber\\
-	    && - \sum_{n}  \mu_B (2\mbf S^n+\mbf L^n) {\mbf H} 
+	    && - \sum_{n}  \mu_B (2\mbf S^n+\mbf L^n) {\mbf H}  \nonumber\\
+            && -\frac{1}{2} \sum_{nn'} \left[ 
+({\hat \mbf L}^n,{\hat \mbf S}^n )
+\stackrel{=}{\mathcal J}(nn') 
+\left ( \begin{array}{c} {\hat \mbf L}^{n'} \\
+        {\hat \mbf S}^{n'} \end{array}
+\right )
+     + \sum_{kk'} \sum_{qq'}  \mathcal{K}_{kk'}^{qq'}(nn') \hat{T}_{kq}^n T_{k'q'}^{n'} \right]
 \end{eqnarray}
 
 Here $\nu_n$,$Z_n$ and $\mbf R_n$ denote the number of electrons, the charge of the nucleus
