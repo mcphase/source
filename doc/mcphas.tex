@@ -252,11 +252,13 @@ If {\prg diagonalexchange}
 If {\prg diagonalexchange}
  is 2, specific components of the exchange tensor can be given in columns 4 onwards. The indices of these components
  must be given in the following line (Line 9a below).
-The Land'e factor of the ion (gJ) and the file name of the corresponding single ion
+The Land\'e factor of the ion (gJ) and the file name of the corresponding single ion
 parameter file (cffilename).
 \item [Line 9a:]  If {\prg diagonalexchange=2}, then this line gives the indices of the exchange tensor corresponding to 
  the columns 4 onwards. It must have a variable called {\prg indexexchange} followed by a list of names of components of the interaction
- tensor separated by space. E.g. \verb|  #! indexexchange= JaJb JbJc  | means column 4 gives the the interaction constant between the
+ tensor separated by space. E.g.
+ \verb|  #! indexexchange= JaJb JbJc  | 
+means column 4 gives the the interaction constant between the
  first angular momentum component of the current ion with the second angular momentum component of its neighbour, whilst 
  column 5 has the interaction constant between the second angular momentum component of this ion with the third component of its
  neighbour. Alternatively, pairs of numbers may be given, as in \verb|  #! indexexchange= 1,2 2,3  |

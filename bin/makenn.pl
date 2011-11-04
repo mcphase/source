@@ -355,7 +355,7 @@ sub getlattice {
 
                                    ($nofneighbours[$n])=extract("nofneighbours",$_);
                                    ($diagonalexchange)=extract("diagonalexchange",$_);
-                                   if($diagonalexchange>1){die "Error program makenn: diagonalexchange=$diagonalexchange not implemented\n";}
+                                   if($diagonalexchange>1){print "Warning program makenn: diagonalexchange=$diagonalexchange not implemented setting diagonalexchange=0\n";$diagonalexchange=0;}
                                    ($x[$n])=extract("da",$_);
                                    ($y[$n])=extract("db",$_);
                                    ($z[$n])=extract("dc",$_);
