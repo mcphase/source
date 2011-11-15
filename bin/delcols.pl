@@ -5,52 +5,30 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 
 
-unless ($#ARGV >0) 
+unless ($#ARGV >1)
 
-{print " program newcol  used to create a new column (containing line numbers)\n";
-
- print " usage: newcol col  *.*   \n col=column \n *.* .. filenname\n";
-
+{print " program delcols  used to delete n columns in a data file\n";
+ print " usage: delcols col n  *.*   \n col=first column to be deleted\n n=number of columns to be deleted\n *.* .. filenname\n";
  exit 0;}
 
- 
-
 $column=$ARGV[0];shift @ARGV;
-
-
-
+$n=$ARGV[0];shift @ARGV;
   foreach (@ARGV)
-
-  {
-
-   $file=$_;
-
+  {   $file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file;
-
-   open (Fout, ">range.out");
-
+  open (Fout, ">range.out");
    $j=0;
-
    while($line=<Fin>)
-
      {
-
        if ($line=~/^\s*#/) {print Fout $line;}
-
        else{$line=~s/D/E/g;@numbers=split(" ",$line);
-
            	  $i=0;++$j;
-
 		  foreach (@numbers)
-
 		  {++$i;
+		  if ($i<$column||$i>$column+$n-1){print Fout $numbers[$i-1]." ";}
 
-		  if ($i==$column) {print Fout $j." ";}
-
-		  print Fout $numbers[$i-1]." ";}
-
-		  if ($column==$#numbers+2){print Fout $j;}    
+		  }     
 
             print Fout "\n";
 
@@ -64,7 +42,7 @@ $column=$ARGV[0];shift @ARGV;
 
        unless (rename "range.out",$file)
 
-          {unless(open (Fout, ">$file"))     
+      {unless(open (Fout, ">$file"))     
 
       {die "\n error:unable to write to $file\n";}
 
@@ -89,4 +67,3 @@ $column=$ARGV[0];shift @ARGV;
 
 
 #\end{verbatim} 
-

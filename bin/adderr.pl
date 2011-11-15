@@ -8,10 +8,10 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >6)
 {print STDOUT <<"EOF";
 
-  add: program to adderr functions y1(x1) with y1err and y2(x2) with y2err
+  adderr: program to adderr functions y1(x1) with y1err and y2(x2) with y2err
        taken from data file1 and data file2
 
-  usage: add colx1 coly1 coly1err file1 colx2 coly2 coly2err file2
+  usage: adderr colx1 coly1 coly1err file1 colx2 coly2 coly2err file2
 
   input:
   file1, file2         filennames
@@ -65,10 +65,11 @@ open (Fout, ">range.out");
 # find $n
 while($x1<=$order*$x[$n]&$n>0){--$n;}
 while($x1>=$order*$x[$n+1]&$n<$nn-1){++$n;}
-# treat equal values correctly
-while($x[$n]==$x[$n+1]&$n<$nn-1){++$n;}
-while($x[$n]==$x[$n+1]&$n>0){--$n;}
-#print $n;
+unless($n==0||$n==$nn-1) # do not extrapolate
+           { # treat equal values correctly
+              while($x[$n]==$x[$n+1]&$n<$nn-1){++$n;}
+              while($x[$n]==$x[$n+1]&$n>0){--$n;}
+             #print $n;
               # do addition using linear interpolation
               $numout[$coly1-1]=$y1+$y[$n]+($x1-$x[$n])*($y[$n+1]-$y[$n])/($x[$n+1]-$x[$n]);
                   $y2err=$yerr[$n]+($x1-$x[$n])*($yerr[$n+1]-$yerr[$n])/($x[$n+1]-$x[$n]);
@@ -80,6 +81,7 @@ while($x[$n]==$x[$n+1]&$n>0){--$n;}
                     print Fout "\n";
                  
            }
+          }
       }
       close Fin1;
   

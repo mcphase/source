@@ -45,6 +45,12 @@ the {\prg mcphas.j\index{mcphas.j}} and single ion input files. In addition, the
 				\item  option {\prg -t} to
 				read the single ion transition file {\prg ./results/mcdisp.trs} and
 				calculate energies and neutron intensities.
+				\item Option {\prg -ninit n} to set the maximum number of low lying
+                                 initial states, which will be considered in calculating a single ion susceptibility (not functional
+                                 in all single ion modules).
+                                 \item Option {\prg -pinit p} to set the minimum thermal population of a 
+                                 initial state in order to be considered in the singleion ion susceptibility (not functional in
+                                 all singleion ion modules).
 				\end{itemize}
 \item [\prg mcdispit [options]][file.mf]]  same as {\prg mcdisp}, but no graphic window
 \end{description} 

@@ -9,7 +9,11 @@ unless ($#ARGV >2)
 
 {print " program used to calculate a lorentzian \n";
 
- print " usage: lorentz fwhm stp min max\n";
+ print " usage: lorentz fwhm stp min max
+
+the formula for a lorentz curve is:
+lorentz(x)=1.0/3.1415/fwhm/(1.0+x^2/fwhm^2)
+\n";
 
  exit 0;}
 

@@ -12,22 +12,22 @@
  // class of initial parameters for program mcphas
 
 void inipar::errexit() // type info and error exit 
-{     printf (" \n			%s \n",MCPHASVERSION);
-printf (" 		use as: mcphas \n or as: mcphas [file]\n");
-printf ("                [file] ... input file  with sets of x y T H Ha Hb Hc points \n");
-printf (" 	       (format as output file mcphas.xyt)\n\n");
-printf (" 	       Options: -h     print this help screen\n");
-printf (" 	                -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
-printf (" 	                -v     verbose mode: \n");
-printf (" 			          * more information is printed to stdout, \n");
-printf (" 			          * the qvectors file mcphas.qom will contain \n");
-printf (" 				    the explicit spinconfigurations\n");
-printf (" 			          * ./results/.sps.eps will be updated not only \n");
-printf (" 				    when a H-T point has been finished but always \n");
-printf (" 				    when a structure with smaller free energy \n");
-printf (" 				    has been stabilized\n\n");
-printf (" 	       Note: files which must be in current directory -\n");
-printf (" 	       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
+{     printf (" \n%s \n",MCPHASVERSION);
+printf (" use as: mcphas \n or as: mcphas [file]\n");
+printf (" [file] ... input file  with sets of x y T H Ha Hb Hc points \n");
+printf (" (format as output file mcphas.xyt)\n\n");
+printf (" Options: -h     print this help screen\n");
+printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
+printf ("          -v     verbose mode: \n");
+printf ("                 * more information is printed to stdout, \n");
+printf (" 		  * the qvectors file mcphas.qom will contain \n");
+printf (" 		    the explicit spinconfigurations\n");
+printf (" 		  * ./results/.sps.eps will be updated not only \n");
+printf (" 		    when a H-T point has been finished but always \n");
+printf (" 		    when a structure with smaller free energy \n");
+printf (" 		    has been stabilized\n\n");
+printf (" Note: files which must be in current directory -\n");
+printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
       exit (EXIT_FAILURE);
 } 
 

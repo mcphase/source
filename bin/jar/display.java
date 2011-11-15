@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
+// from kcservlet.jar ... kavachart:  ... note: error bars tried, but not possible with this kavachart !
 import javachart.chart.*;
 import java.io.*;
 import java.lang.*;
@@ -64,7 +65,7 @@ public class display extends Panel implements Runnable, MouseListener,KeyListene
        myFrame.addWindowListener(new WindowAdapter() {
 	    public void windowClosing(WindowEvent e) {System.exit(0);}
 	});
-       myFrame.add(myPanel.bRot);                                          //fügt dem JFrame den Button hinzu
+       myFrame.add(myPanel.bRot);//fügt dem JFrame den Button hinzu
        myFrame.pack();
        myFrame.add(myPanel);
        myFrame.setSize(300,300);
@@ -185,6 +186,7 @@ if (posx1<posx2){
 
 
  public LineChart chart;
+ 
  static myStringfunc SF=new myStringfunc();
  Button bRot;
  Thread myThread = null;
@@ -363,6 +365,7 @@ chart.getYAxis().setNumMinTicks(5);
          encoder.encode(image);
          fos.close();
     }    catch (FileNotFoundException e)
+
     {
          System.out.println("File not found: " + e.getLocalizedMessage());
          //EntSession.CWatch("Konfigurationsdatei cti_listener.ini nicht gefunden!");
@@ -376,6 +379,7 @@ chart.getYAxis().setNumMinTicks(5);
 
       }
                                                  });
+
  }
 
 

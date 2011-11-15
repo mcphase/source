@@ -5,17 +5,20 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 
 
-unless ($#ARGV >0) 
+unless ($#ARGV >1) 
 
-{print " program newcol  used to create a new column (containing line numbers)\n";
+{print " program factcolerr  used to multiply a  column and errcol with a constant\n";
 
- print " usage: newcol col  *.*   \n col=column \n *.* .. filenname\n";
+ print " usage: factcolerr col errcol const  *.*   \n col=column,colerr=column with errorbars const=constant \n *.* .. filenname\n";
 
  exit 0;}
 
  
 
 $column=$ARGV[0];shift @ARGV;
+$columnerr=$ARGV[0];shift @ARGV;
+if ($column==$columnerr){die "Error factcolerr: error column $columnerr = datacolumn $column\n";}
+$const=$ARGV[0];shift @ARGV;
 
 
 
@@ -25,16 +28,15 @@ $column=$ARGV[0];shift @ARGV;
 
    $file=$_;
 
-   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
+   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
+
    print "<".$file;
 
    open (Fout, ">range.out");
 
-   $j=0;
-
    while($line=<Fin>)
 
-     {
+     { 
 
        if ($line=~/^\s*#/) {print Fout $line;}
 
@@ -46,11 +48,10 @@ $column=$ARGV[0];shift @ARGV;
 
 		  {++$i;
 
-		  if ($i==$column) {print Fout $j." ";}
+		  if ($i==$column) {$numbers[$i-1]*=$const;}
+		  if ($i==$columnerr) {$numbers[$i-1]*=abs($const);}
 
-		  print Fout $numbers[$i-1]." ";}
-
-		  if ($column==$#numbers+2){print Fout $j;}    
+		  print Fout $numbers[$i-1]." ";}     
 
             print Fout "\n";
 
@@ -89,4 +90,3 @@ $column=$ARGV[0];shift @ARGV;
 
 
 #\end{verbatim} 
-

@@ -13,26 +13,30 @@
  // class of initial parameters for program mcphas
 
 void inimcdis::errexit() // type info and error exit 
-{     printf (" \n			%s \n",MCDISPVERSION);
-    printf ("    		    use as: mcdisp\n"); 
-    printf ("		 or as: mcdisp [file]\n");
-    printf ("                               [file] ... input file with mean field set (default mcdisp.mf)\n");
-    printf ("			       \n");
-    printf ("	       Note: files which must be in current directory -\n");
-    printf ("	             ./mcdisp.par, ./mcphas.j, directory ./results\n");
+{     printf (" \n %s \n",MCDISPVERSION);
+    printf ("use as: mcdisp\n"); 
+    printf (" or as: mcdisp [options] [file]\n");
+    printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
+    printf ("Options:\n");
+    printf (" -jq                  ... calculate J(Q) (Fourier transform of exchange)\n");
+    printf (" -max n               ... restrict single ion susceptibility to n lowest\n");
+    printf ("                          lying transitions starting from the ground state\n");
+    printf (" -minE E              ... an energy range may be given by minE and maxE: only\n");
+    printf (" -maxE E                  single ion transitions within this energy range will \n");
+    printf ("                          be considered\n");
+    printf (" -r                   ... refine energies\n");
+    printf (" -d                   ... calculate intensities in dipole approximation only\n");
+    printf (" -v                   ... verbose\n");
+    printf (" -a                   ... do not overwrite output files in results - append new results\n");
+    printf (" -c                   ... only create single ion transition file ./results/mcdisp.trs and exit\n");
+    printf (" -t                   ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
+    printf (" -ninit n             ... maximum number n of (low energy) initial states (single ion transitions)\n");
+    printf ("                          (not functional with all single ion modules)\n");
+    printf (" -pinit p             ... minimum populationnumber p of initial state (single ion transitions)\n");
+    printf ("                          in order to be considered (not functional with all single ion modules)\n");
     printf ("\n");
-    printf (" Options: -jq                  ... calculate J(Q) (Fourier transform of exchange)\n");
-    printf ("          -max n               ... restrict single ion susceptibility to n lowest\n");
-    printf ("		                        lying transitions starting from the ground state\n");
-    printf ("	       -minE E              ... an energy range may be given by minE and maxE: only\n");
-    printf ("	       -maxE E                  single ion transitions within this energy range will \n");
-    printf ("		                        be considered\n");
-    printf ("	       -r                   ... refine energies\n");
-    printf ("	       -d                   ... calculate intensities in dipole approximation only\n");
-    printf ("	       -v                   ... verbose\n");
-    printf ("	       -a                   ... do not overwrite output files in results - append new results\n");
-    printf ("	       -c                   ... only create single ion transition file ./results/mcdisp.trs and exit\n");
-    printf ("	       -t                   ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
+    printf ("Note: files which must be in current directory -\n");
+    printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
       exit (EXIT_FAILURE);
 } 
  // *************************************************************************

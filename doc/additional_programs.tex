@@ -330,12 +330,53 @@ files ending with .dat
 \end{itemize}
 
 \begin{description}
-\item [\prg acoscol\index{acoscol} col const file:] calculates arccosine of a column arccos(col) 
+\item [\prg acoscol\index{acoscol} col file:] calculates arccosine of a column arccos(col) 
+\item [\prg acoscolerr\index{acoscoler} col colerr file:] calculates arccosine of a column arccos(col)  and an errorcolumn colerr 
+\item [\prg add\index{add} colx1 coly1 file1 colx2 coly2 file2:] program to add functions y1(x1) and y2(x2)
+       taken from data file1 and data file2.
+\begin{description}
+ \item [ input:]
+\item[  file1, file2 ]    filennames 
+\item[colx, coly ]   columns containing x and y=f(x) values
+\item[  output:]
+\item[ file1]    contains in coly1=coly1+f2(colx1)
+                  f2(colx1) is calculated by linear
+                  interpolation
+                   f2(colx1)=
+                   (colx1-colx2(n)*(coly2(n+1)-coly2(n))/(colx2(n+1)-colx2(n))
+\end{description}
+
+
+
+  note:            colx2 has to be sorted in file2
+\item [\prg adderr\index{adderr} colx1 coly1 coly1err file1 colx2 coly2 coly2err file2:]
+   program to adderr functions y1(x1) with y1err and y2(x2) with y2err
+       taken from data file1 and data file2
+
+\begin{description}
+ \item [input:]
+ \item[ file1, file2]         filennames
+ \item [colx, coly, colyerr]  columns containing x and y=f(x) and yerror values
+\item[  output:]
+\item[  file1]            contains in coly1=coly1+f2(colx1)
+                   and in   coly1err=sqrt[coly1err$^2$+f2err(colx1)$^2$]
+                   f2(colx1) is calculated by linear
+                   interpolation
+                   f2(colx1)=
+                   (colx1-colx2(n)*(coly2(n+1)-coly2(n))/(colx2(n+1)-colx2(n))
+                   f2err(colx1)=
+                   (colx1-colx2(n)*(coly2err(n+1)-coly2err(n))/(colx2(n+1)-colx2(n))
+\end{description}
+  note:            colx2 has to be sorted in file2
+\item [\prg addcol\index{addcol}  colx coly file:] adds column x and column y of file, result is %%@
+stored in col y
+\item [\prg addcolerr\index{addcolerr}  colx colxerr coly colyerr file:]
+ adds column x and column y of file, result is 
+stored in col y. Error is added using the error columns colxerr and colyerr
+by colyerr=sqrt(colxerr*colxerr+colyerr*colyerr)
 \item [\prg asincol\index{asincol} col const file:] calculates arcsine of a column arcsine(col) 
 \item [\prg atancol\index{atancol} col const file:] calculates arctangens of a column %%@
 arctan(col) 
-\item [\prg addcol\index{addc}  colx coly file:] adds column x and column y of file, result is %%@
-stored in col y
 \item [\prg chi2\index{chi2} col1 col2 col3 *.*] is used to calculate the 
  chi-squared from 3 columns in a file: if col1, col2 and col3 are calculation, 
  experiment and experimental error, respectively, then
@@ -364,6 +405,7 @@ column cx vs cy
 		       output is written to stdout. 
 \item [\prg coscol\index{coscol} col const file:] calculates cosinus of a column cos(col) 
 \item [\prg delcol\index{delcol} col file:] deletes column col in file
+\item [\prg delcols\index{delcols} col n file:] deletes column col several (n) times in file
 \item [\prg delcomments *.*] removes every comment line (starting with \#) from a file and %%@
 prints the removed lines to screen
 \item [\prg delline\index{delline} l1 l2 file:] deletes lines l1 to l2  in file
@@ -387,15 +429,45 @@ a text window
 on screen.
 \item [\prg expcol\index{expcol} col const file:] calculates exponent of a column exp(col) 
 \item [\prg factcol\index{factcol} col const file:] multiplies col with a constant in file
+\item [\prg factcolerr\index{factcolerr} col colerr const file:] multiplies col and colerr
+ with a constant in file
 \item [\prg fform\index{fform} col1 col2 format file:] reformats numbers in col1 to col2 in file %%@
 with
              a number format given by format. Format is a number format string according
              to c conventions, for example 8.4f or 4.4g  ...             
+\item[\prg gausscol\index{gausscol} col position fwhm area *.*:] calculate a
+gaussian from the x values given in column col.
+
+The formula for a gaussian is:
+$\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
+${\rm gauss}(x)=\frac{{\rm area} exp(-(x-{\rm position})^2/2 \sigma^2)}{\sqrt{2*\pi}\sigma}$
+\item [\prg linreg\index{linreg} col n file:] calculates linear regression of n columns in file
+\begin{verbatim}
+          col     ...... column containing y_k values followed by
+          n       ...... n columns containing x_ik (i=1 to n)
+	  filename... filename
+
+    the program calculates the linear regression, i.e. the best values
+    of coefficients ai such that y_k~sum_i a_i*x_ik for every data line k
+    in the file. The n linear regression equations solved to determin a_i
+    are (i,j=1 ...n):
+
+     sum_k x_jk y_k = sum_i a_i (sum_k x_ik * x_jk)
+
+   Output: - sdtoud: best coefficients a_i  and standard deviation
+             sta=sum_k (y_k-sum_i a_i*x_ik)^2
+           - file: new column col+n+1 contining sum_i a_i*x_ik
+\end{verbatim}
+\item [\prg lorentzcol\index{lorentzcol} col position fwhm area:] calculate a lorentzian from
+a column with x values, the formula for a Lorentz curve is: 
+${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+(x-{\rm position})^2/fwhm^2)}$
 \item [\prg multcol\index{multcol}  colx coly file:] multiplies column x and column y of file, %%@
 result is stored in col y
 \item [\prg newcol\index{newcol} col file:] creates a new column col in file containing the line %%@
 number
-\item [\prg newline\index{newcol} n text file:] creates a new line number n  in file containing %%@
+\item [\prg newcols\index{newcols} col n file:] creates n new columns from column col
+ in file. New columns are inserted after column col and contain the same data as column col.
+\item [\prg newline\index{newline} n text file:] creates a new line number n  in file containing %%@
 the text 
 \item [\prg potcol\index{potcol} col const file:]  col=col$^{\rm const}$ in file
 \item [\prg range\index{range} col min max file:] deletes (comments out) all data points outside %%@
@@ -455,9 +527,12 @@ is zero at a specified value constx of colx.
 \begin{description}
 \item [\prg beep\index{beep}:] just make a beep\index{beep} to signal attention 
 \item [\prg gauss\index{gauss} fwhm stp min max:] calculate a gaussian, output goes to console %%@
-(stdout)
+(stdout), the formula for a gaussian is:
+$\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
+${\rm gauss}(x)=\frac{exp(-x^2/2 \sigma^2)}{\sqrt{2*\pi}\sigma}$
 \item [\prg lorentz\index{lorentz} fwhm stp min max:] calculate a lorentzian, output goes to %%@
-console (stdout)
+console (stdout)the formula for a Lorentz curve is: 
+${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+x^2/fwhm^2)}$
 \item [\prg plotbook *.ps:] program plotbook to arrange many (single side) ps-images to one %%@
 booklet (needs: latex, pstops,ghostscript, perl)
 \item [\prg substitute\index{substitute} oldtext newtext *.*:] replaces every instance of %%@

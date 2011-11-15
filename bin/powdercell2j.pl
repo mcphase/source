@@ -242,12 +242,56 @@ print Fout2 << "EOF";
 #            4.....neutron TOF powder cyl. sample - d-pattern log scaled
 #            5.....neutron TOF powder cyl. sample - d-pattern normal scaled
 #
+#! out10=1    type of desired output in column 10 and 11 of mcdiff.out
+#! out11=0    (optional) default is NSF in column 10 and LF in column 11
+#            0....LF
+#            1....|NSF|[b]
+#            2....Re(NSF)[b]
+#            3....Im(NSF)[b]
+#            4....|MSF|
+#            5....|MSF.P|
+#            6....Re(MSF.P)
+#            7....Im(MSF.P)
+#            8....|MSFdip|
+#            9....|MSFdip.P|
+#            10....Re(MSFdip.P)
+#            11....Im(MSFdip.P)
+#            12....angl(Q,P)[°]
+#            13....i(MSFxMSF*).P
+#            14....I+
+#            15....I-
+#            16....I+/I-
+#            17....i(MSFxMSF*)dip.P
+#            18....Idip+
+#            19....Idip-
+#            20....Idip+/Idip-
+#            21....2*|MSF.P|/sin^2(angl(Q,P)
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P)
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#
+#
+#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
+#           in a polarised neutron experiment:
+#            I+-=LF exp(-OTF Q^2/8pi^2)
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2
+#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P))]
+#
+#
+#             For some of the above options we need the
+#! Pa=  0.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
+#! Pb=  0.0000   Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)
+#! Pc=  1.0000
+#
+#
 #
 #
 # %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
 #
 #
-#! nat=$totalnonmag      number of nonmagnetic atoms in primitive crystalographic unit cell
+#! natcryst=$totalnonmag      number of nonmagnetic atoms in primitive crystalographic unit cell
 #
 # it follows a list of nat lines with nonmagnetic atoms
 # ... notes: - if an occupancy other than 1.0 is needed, just reduce

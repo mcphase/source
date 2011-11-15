@@ -603,6 +603,7 @@ on input
 				   (imaginary part of row 0)
                    and eigenvalues (real part of row 0) with values set by the most recent call
 				   for this ion (use of this matrix is optional)
+   u1(1)           ninit + i pinit (from mcdisp options  -ninit and -pinit)
 on output
    int             total number of transitions
    delta           transition energy [meV]
@@ -762,6 +763,8 @@ on input
    est             eigenstate matrix (as calculated by estates),
                    it should also contain population numbers of the states (row 0)
    T               Temperature[K]
+   v1(1)           ninit + i pinit (from mcdisp options  -ninit and -pinit)
+
 on output
    int             total number of transitions
    v1             vector v(alpha)=<-|Qalpha|+>sqrt(n- - n+)

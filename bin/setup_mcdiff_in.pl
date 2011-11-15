@@ -100,7 +100,7 @@ print Fout << "EOF";
 #           in a polarised neutron experiment:
 #            I+-=LF exp(-OTF Q^2/8pi^2)
 #                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2
-#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
+#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P))]
 #
 #
 #             For some of the above options we need the

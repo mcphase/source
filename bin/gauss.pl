@@ -9,7 +9,13 @@ unless ($#ARGV >2)
 
 {print " program used to calculate a gaussian \n";
 
- print " usage: gauss fwhm stp min max\n";
+ print " usage: gauss fwhm stp min max
+
+ the formula for a gaussian is:
+sigma=fwhm/2/sqrt(2*log(2))
+gauss(x)=1.0/sqrt(2*3.1415)/sigma* exp(-x^2/2sigma^2)\n";
+
+
 
  exit 0;}
 

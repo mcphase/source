@@ -60,10 +60,11 @@ open (Fout, ">range.out");
 # find $n
 while($x1<=$order*$x[$n]&$n>0){--$n;}
 while($x1>=$order*$x[$n+1]&$n<$nn-1){++$n;}
-# treat equal values correctly
-while($x[$n]==$x[$n+1]&$n<$nn-1){++$n;}
-while($x[$n]==$x[$n+1]&$n>0){--$n;}
-#print $n;
+unless($n==0||$n==$nn-1) # do not extrapolate
+        {# treat equal values correctly
+         while($x[$n]==$x[$n+1]&$n<$nn-1){++$n;}
+         while($x[$n]==$x[$n+1]&$n>0){--$n;}
+         #print $n;
               # do addition using linear interpolation
               $numout[$coly1-1]=$y1+$y[$n]+($x1-$x[$n])*($y[$n+1]-$y[$n])/($x[$n+1]-$x[$n]);
 
@@ -74,6 +75,7 @@ while($x[$n]==$x[$n+1]&$n>0){--$n;}
                  
            }
       }
+}
       close Fin1;
   
        unless (rename "range.out",$file1)
