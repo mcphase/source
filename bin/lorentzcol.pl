@@ -39,7 +39,7 @@ $area=$ARGV[0];shift @ARGV;
 		  foreach (@numbers)
 		  {++$i;
 		  if ($i==$column) {$x=$numbers[$i-1]-$pos;
-                                    $x1=-$x*$x/$fwhm/$fwhm;
+                                    $x1=$x*$x/$fwhm/$fwhm;
                                     if(abs($x1)<100){$numbers[$i-1]=$area/3.1415/$fwhm/(1.0+$x1);}
                                              else {$numbers[$i-1]=0;}
                                    }

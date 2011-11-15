@@ -435,6 +435,60 @@ on screen.
 with
              a number format given by format. Format is a number format string according
              to c conventions, for example 8.4f or 4.4g  ...             
+\item [\prg fitcol coldata prog col parprog1 parprog2 ... {[]} in filename:]
+simple fitting program for data in coldata.
+\begin{verbatim}
+               []=[and prog col parprog1 parprog2 ... [and ...]]
+
+          coldata ...... column number of data column to be fitted
+          prog    ...... program name, e.g. shiftcol
+          col     ...... column to which prog should be applied
+          parprog1 ..... parameter of the program prog, which should be fitted
+          filename... filename
+
+    in order to fit data in column coldata, prog is run many times on
+    the column col with varying parameter set parprog1 ..., the result
+    is scaled to fit best the experimental data. If several programs
+    are combined with option 'and' then the best linear combination of the
+    results is calculated by linear regression to fit coldata.
+
+    Starting values for the parameters parprog are taken from the
+    commandline. initial Stepwidths are chosen 10percent of parameter value, or may
+    be given by adding them to the parameter with an 's', e.g. 100.3s0.1
+    If a parameter should not be fitted and kept fix, add an 'f', e.g. 100.3f
+
+    output: - files can be found in directory results
+            - filename.fit is created with fitted function and parameter values
+
+    examples:
+    1) to fit a gaussian to column 2 in datafile expdat (with xvalues in column 1)
+    with starting values 132.3, 0.5 and 10 for position, fwhm and area, respectively:
+
+    fitcol 2 gausscol 1 132.3 0.5 10 in exp.dat
+
+
+    2) to do the same fit but with a background create a column 3, fill it
+       with constant values and use echo as a fake column manipulation program
+      doing nothing.
+
+   newcol 3 exp.dat
+   factcol 3 0 exp.dat
+   shiftcol 3 1 exp.dat
+   fitcol 2 gausscol 1 132.3 0.5 10 and rem 3 in exp.dat
+
+   3) to do the same with a linear background, put into a column 4 the x values
+
+   newcol 4 exp.dat
+   factcol 4 0 exp.dat
+   addcol 1 4 exp.dat
+   fitcol 2 gausscol 1 132.3 0.5 10 and rem 3 and rem 4 in exp.dat
+
+   4) to fit two gaussians with fixed fwhm and stepping in position initially
+    only with 0.1
+
+   fitcol 2 gausscol 1 132.3s0.1 0.5f 10 and  gausscol 1 100.3s0.1 0.5f 10 and rem 3 and rem 4 in exp.dat
+\end{verbatim}
+
 \item[\prg gausscol\index{gausscol} col position fwhm area *.*:] calculate a
 gaussian from the x values given in column col.
 
