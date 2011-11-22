@@ -8,7 +8,7 @@
 #
 # Author(s):     M. Rotter
 #
-# Original:	 August 2001
+# Original:	 November 2011
 #
 #**********************************************************************
 
@@ -17,7 +17,7 @@ all : pack
 OBJS = IniConfigurator.java IniFile.java IniItem.java IniKey.java display.java \
        displaybubbles.java displaycontour.java displaydsigma.java displaymag.java \
        displaytext.java FileListener.java FileMonitor.java searchspacestatus.java \
-       simannfitstatus.java Viewer.java
+       simannfitstatus.java Viewer.java displayerr.java
 
 compile : $(OBJS)
 	javac ./*.java

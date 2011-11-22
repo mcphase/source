@@ -25,11 +25,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.DefaultXYZDataset;
+import org.jfree.data.xy.DefaultIntervalXYDataset;
 import org.jfree.data.xy.XYZDataset;
+import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
@@ -39,7 +42,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 /**
  * A bubble chart demo.
  */
-public class displaybubbles extends ApplicationFrame {
+public class displayerr extends ApplicationFrame {
 
 static final int MAX_NOF_FILES = 10;
 static myStringfunc SF=new myStringfunc();
@@ -48,9 +51,10 @@ static myStringfunc SF=new myStringfunc();
           String ss; String s;
       if (args.length<1)
       {System.out.println("- too few arguments...\n");
-       System.out.println("  program displaybubbles - show and watch data file by viewing a xy graphic on screen\n\n");
-       System.out.println("use as:  displaybubbles xcol ycol intcol filename [xcol1 ycol1 intcol filename1 ...]\n\n");
-       System.out.println("         xcol,ycol,intcol ... column to be taken as x-, y- and bubble-area axis\n");
+       System.out.println("  program displayerr - show and watch data file by viewing a xy graphic on screen\n\n");
+       System.out.println("use as:  displayerr xcol ycol errorcol filename [xcol1 ycol1 errorcol filename1 ...]\n\n");
+       System.out.println("         xcol,ycol,intcol ... column to be taken as x-, y- and yerrorbar axis\n");
+       System.out.println("        if intcol=- then lines are shown (no symbols and no errorbars)\n");
        System.out.println("	 filename ..... filename of datafile\n\n");
        System.exit(0);
       }
@@ -58,13 +62,13 @@ static myStringfunc SF=new myStringfunc();
        lastmod = new long[MAX_NOF_FILES];
        colx = new int[MAX_NOF_FILES];
        coly = new int[MAX_NOF_FILES];
-       colint = new int[MAX_NOF_FILES];
+       colerr = new int[MAX_NOF_FILES];
        Double p = new Double(0.0);
        //      System.out.println(sx+" "+sy);
        //      p.valueOf(strLine);
        //    double[] myDatax = {};
        int j=0;
-       String title="displaybubbles";
+       String title="displayerr";
        s=args[0];s=SF.TrimString(s); // command line arguments are treated here
        for(int i=0;s.length()>0;	i+=0)
        {Integer pp;
@@ -74,14 +78,14 @@ static myStringfunc SF=new myStringfunc();
        ss=SF.FirstWord(s);
        coly[j]=p.valueOf(ss).intValue();       title=title+" "+ss;
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
-       ss=SF.FirstWord(s);
-       colint[j]=p.valueOf(ss).intValue();       title=title+" "+ss;
+       ss=SF.FirstWord(s);if(ss.substring(0,1).equalsIgnoreCase("-")){ss="0";}
+       colerr[j]=p.valueOf(ss).intValue();       title=title+" "+ss;
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
        file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>=MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
        s=SF.DropWord(s); if (s.length()==0&&i<args.length-1){++i;s=args[i];s=SF.TrimString(s);}
        }noffiles=j;
-        displaybubbles demo = new displaybubbles(title);
+        displayerr demo = new displayerr(title);
         demo.pack();
         RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);
@@ -98,13 +102,14 @@ static myStringfunc SF=new myStringfunc();
  static long[] lastmod;
  static int[] colx;
  static int[] coly;
- static int[] colint;
+ static int[] colerr;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
  static String Title = "";
  static LegendTitle Legendt;
- static DefaultXYZDataset dataset;
+// static DefaultXYZDataset dataset;
+ static DefaultIntervalXYDataset dataset;
  static JFreeChart chart;
  static JPanel chartPanel;
 // static JFrame displayFrame;
@@ -113,7 +118,7 @@ static myStringfunc SF=new myStringfunc();
      *
      * @param title  the frame title.
      */
- public displaybubbles(String title) {
+ public displayerr(String title) {
         super(title);
         //displayFrame= new JFrame();
         chartPanel = createDemoPanel();
@@ -167,17 +172,20 @@ static myStringfunc SF=new myStringfunc();
      *
      * @return The chart.
      */
-    private static JFreeChart createChart(XYZDataset dataset) {
-        chart = ChartFactory.createBubbleChart(
+    private static JFreeChart createChart(IntervalXYDataset dataset) {
+        chart = ChartFactory.createScatterPlot(
                 Title, xText, yText, dataset,
                 PlotOrientation.HORIZONTAL, true, true, false);
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
 
-        XYBubbleRenderer renderer = ( XYBubbleRenderer)plot.getRenderer();
-//    XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 
+//        XYBubbleRenderer renderer = ( XYBubbleRenderer)plot.getRenderer();
+//    XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+    XYErrorRenderer renderer = new XYErrorRenderer();
+     plot.setRenderer(renderer);
+     renderer.setCapLength(0.0);
         renderer.setSeriesPaint(0, Color.blue);
         renderer.setSeriesPaint(1, Color.red);
         renderer.setSeriesPaint(2, Color.green);
@@ -211,9 +219,9 @@ static myStringfunc SF=new myStringfunc();
      *
      * @return A sample dataset.
      */
-    public static XYZDataset createDataset() {
+    public static IntervalXYDataset createDataset() {
         
-         dataset = new DefaultXYZDataset();
+         dataset = new DefaultIntervalXYDataset();
         //double[] x = {2.1, 2.3, 2.3, 2.2, 2.2, 1.8, 1.8, 1.9, 2.3, 3.8};
         //double[] y = {14.1, 11.1, 10.0, 8.8, 8.7, 8.4, 5.4, 4.1, 4.1, 25};
         //double[] z = {2.4, 2.7, 2.7, 2.2, 2.2, 2.2, 2.1, 2.2, 1.6, 4};
@@ -268,7 +276,7 @@ static myStringfunc SF=new myStringfunc();
             //ds.getData().removeAllElements();
             int maxnofpoints=1000;int j=maxnofpoints;
            while(j==maxnofpoints)           
-           {double [][] data=new double [3][maxnofpoints];//={{0,1},{0,1},{0,1}};             
+           {double [][] data=new double [6][maxnofpoints];//={{0,1},{0,1},{0,1}};
 
             fileIni = new File(file[i]);
             //?ffnen der Datei
@@ -276,10 +284,10 @@ static myStringfunc SF=new myStringfunc();
              String strLine;
              String sx;
              String sy;
-             String sint;
+             String serr;
              int clx = colx[i];
              int cly = coly[i];   
-             int clint = colint[i];
+             int clerr = colerr[i];
 
              j=0;
              //Auslesen der Datei
@@ -306,20 +314,24 @@ static myStringfunc SF=new myStringfunc();
       strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
                  sx=SF.NthWord(strLine,clx);
                  sy=SF.NthWord(strLine,cly);
-                 sint=SF.NthWord(strLine,clint);
-              //System.out.println(sx+" "+sy+" "+sint);
+                 serr=SF.NthWord(strLine,clerr);
+              //System.out.println(sx+" "+sy+" "+serr);
 
                Double p = new Double(0.0);
-   if(sx.length()!=0&&sy.length()!=0&&sint.length()!=0){
+   if(sx.length()!=0&&sy.length()!=0&&serr.length()!=0){
                try{
                     sx=sx.replace('D','E');
                     sy=sy.replace('D','E');
-                    sint=sint.replace('D','E');
-                   data[1][j]=p.parseDouble(sx);
+                    serr=serr.replace('D','E');
+                   if(clerr==0){serr="0";}
                    data[0][j]=p.parseDouble(sy);
-                   data[2][j]=p.parseDouble(sint);
-                   if (data[2][j]<0){data[2][j]=0;}
-                   data[2][j]=Math.sqrt(data[2][j]);
+                   data[1][j]=p.parseDouble(sy)+p.parseDouble(serr);
+                   data[2][j]=p.parseDouble(sy)-p.parseDouble(serr);
+                   data[3][j]=p.parseDouble(sx);
+                   data[4][j]=p.parseDouble(sx);
+                   data[5][j]=p.parseDouble(sx);
+                 //  if (data[2][j]<0){data[2][j]=0;}
+                 //  data[2][j]=Math.sqrt(data[2][j]);
                     ++j;
                    }
                    catch(NumberFormatException e){System.exit(1);}
@@ -327,8 +339,12 @@ static myStringfunc SF=new myStringfunc();
                }   
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                else
-              {dataset.removeSeries(file[i]+s.valueOf(i));
+              {//dataset.removeSeries(file[i]+s.valueOf(i));
               dataset.addSeries(file[i]+s.valueOf(i),data);}
+         XYPlot plot = (XYPlot) chart.getPlot();
+         XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer();
+         if(clerr==0){ renderer.setSeriesLinesVisible(i,true);
+                       renderer.setSeriesShapesVisible(i, false);}
              }
     //double[] myDatay = {stringToDouble(strLine,0),stringToDouble(strLine,0)};
              }
@@ -348,4 +364,4 @@ static myStringfunc SF=new myStringfunc();
   }
  }}}
 
-} // displaybubbles
+} // displayerr
