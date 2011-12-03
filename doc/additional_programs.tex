@@ -22,7 +22,29 @@ file1.j - output is written to stdout
 these
 		in a sequence such as chrgplt.1.jvx, chrgplt.2.jvx, ... animate
 		the view of 4 jvx files by typing: java javaview model=chrgplt.*.jvx Animation.LastKey=4 
+\item [\prg anisotropy:] program to calculate the magnetic anistropy
+\begin{verbatim}
+    usage: anisotropy -h 
+           anisotropy T H xn yn zn nofsteps so1ion -r sipffilename -B
+           anisotropy T H xn yn zn nofsteps ic1ion sipffilename
+           anisotropy T H xn yn zn nofsteps icf1ion sipffilename
 
+     -h           : this (help) message
+      T           : temperature in Kelvin
+      H           : absolute value of the magnetic field
+      xn,yn,zn    : direction normal to plane, in which the anisotropy
+                    should be calculated ... e.g. if you want to
+                    calculate the anisotropy in the xy plane, then
+                    enter xn yn zn = 0 0 1
+      nofsteps    : number of steps to be calculated 
+      so1ion      : use so1ion module
+      ic1ion      : use ic1ion module
+      sipffilename: filename of single ion parameter file
+
+    output files:
+
+    ./results/anisotropy.out  contains anisotropy information 
+\end{verbatim}
 \item [\prg coq2jjj:]         programs to reformat input file {\prg mcphas.coq}
                       ({\prg McPhas} version 1.0) to new format
 
@@ -330,27 +352,9 @@ files ending with .dat
 \end{itemize}
 
 \begin{description}
-\item [\prg acoscol\index{acoscol} col file:] calculates arccosine of a column arccos(col) 
-\item [\prg acoscolerr\index{acoscoler} col colerr file:] calculates arccosine of a column arccos(col)  and an errorcolumn colerr 
-\item [\prg add\index{add} colx1 coly1 file1 colx2 coly2 file2:] program to add functions y1(x1) and y2(x2)
-       taken from data file1 and data file2.
-\begin{description}
- \item [ input:]
-\item[  file1, file2 ]    filennames 
-\item[colx, coly ]   columns containing x and y=f(x) values
-\item[  output:]
-\item[ file1]    contains in coly1=coly1+f2(colx1)
-                  f2(colx1) is calculated by linear
-                  interpolation
-                   f2(colx1)=
-                   (colx1-colx2(n)*(coly2(n+1)-coly2(n))/(colx2(n+1)-colx2(n))
-\end{description}
-
-
-
-  note:            colx2 has to be sorted in file2
-\item [\prg adderr\index{adderr} colx1 coly1 coly1err file1 colx2 coly2 coly2err file2:]
-   program to adderr functions y1(x1) with y1err and y2(x2) with y2err
+\item [\prg acoscol\index{acoscol} col{[ecolerr]} file:] calculates arccosine of a column arccos(col) 
+\item [\prg add\index{add} colx1 coly1{[ecoly1err]} file1 colx2 coly2{[ecoly1err]} file2:] 
+   program to add functions y1(x1) with (optional) y1err and y2(x2) with (optional y2err)
        taken from data file1 and data file2
 
 \begin{description}
@@ -368,11 +372,9 @@ files ending with .dat
                    (colx1-colx2(n)*(coly2err(n+1)-coly2err(n))/(colx2(n+1)-colx2(n))
 \end{description}
   note:            colx2 has to be sorted in file2
-\item [\prg addcol\index{addcol}  colx coly file:] adds column x and column y of file, result is %%@
+\item [\prg addcol\index{addcol}  colx{[ecolxerr]} coly{[ecolyerr]} file:] adds column x and column y of file, result is %%@
 stored in col y
-\item [\prg addcolerr\index{addcolerr}  colx colxerr coly colyerr file:]
- adds column x and column y of file, result is 
-stored in col y. Error is added using the error columns colxerr and colyerr
+Optional - error is added using the error columns colxerr and colyerr
 by colyerr=sqrt(colxerr*colxerr+colyerr*colyerr)
 \item [\prg asincol\index{asincol} col const file:] calculates arcsine of a column arcsine(col) 
 \item [\prg atancol\index{atancol} col const file:] calculates arctangens of a column %%@
@@ -412,9 +414,13 @@ prints the removed lines to screen
 \item [\prg delnthline n file]  remove every nth line (n$>$2) in file
 \item [\prg dif\index{dif} colx coly n *.*:] used to calculate d(coly)/d(colx) with %%@
 differentiation averaging n points
-\item [\prg display\index{display} 5 6  ./results/mcdisp.qei] displays a graphic on screen as xy %%@
+\item [\prg display\index{display} 5[e7] 6[e8]  ./results/mcdisp.qei {[colx coly file2]}] displays a graphic on screen as xy %%@
 graph
-with column 5 as x axis and columns 6 as y axis.
+with column 5 as x axis and columns 6 as y axis. By default graphic is a line graph.
+However, if error columns (in the example x error column is 7 and y error column is 8)
+are given, then symbols with x and y error bars are shown. Several files
+can be plotted in the same graph by extending the commandline. If the contents of a file
+changes, the plot is automatically updated.
 \item [\prg displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei] works similar as %%@
 display, however
 a third column is given and the radius of the symbols varied according to the data in 
@@ -424,17 +430,12 @@ graphical
 display\index{display} of a 3 dimensional dataset as a colour and/or contour plot. Here '5 6 8' 
 denote the x,y and z column in file {\prg ./results/mcdisp.dsigma.tot}, which should
 be plotted. Figure~\ref{diffus} shows an sample output of this program.
-\item [\prg displayerr\index{displayerr} colx coly colerr filename:]  program displayerr - show and watch data file by viewing a xy graphic on screen.     
-        xcol,ycol,intcol ... column to be taken as x-, y- and yerrorbar axis.
-            if intcol=- then lines are shown (no symbols and no errorbars)
-        filename ..... filename of datafile.
 \item [\prg displaytext\index{displaytext} ./results/mcphas.hkl] monitors the file mcphas.hkl in %%@
 a text window
 on screen.
 \item [\prg expcol\index{expcol} col const file:] calculates exponent of a column exp(col) 
-\item [\prg factcol\index{factcol} col const file:] multiplies col with a constant in file
-\item [\prg factcolerr\index{factcolerr} col colerr const file:] multiplies col and colerr
- with a constant in file
+\item [\prg factcol\index{factcol} col{[ecolerr]} const file:] multiplies col with a constant in file,
+a error colmn may be given and is also multiplied by the absvalue of the constant.
 \item [\prg fform\index{fform} col1 col2 format file:] reformats numbers in col1 to col2 in file %%@
 with
              a number format given by format. Format is a number format string according

@@ -37,6 +37,33 @@ public String FirstWord(String strSource)
  return(fw);
  }
 
+public String DataCol(String strSource)
+ { String fw;
+  fw=TrimString(strSource);
+       int iPos = fw.indexOf("e");
+       if (iPos >= 0)
+       {
+       fw=strSource.substring(0,iPos);
+       fw=TrimString(fw);
+       }
+ return(fw);
+ }
+
+public String ErrorCol(String strSource)
+ { String fw;
+  fw=TrimString(strSource);
+       int iPos = fw.indexOf("e");
+       if (iPos >= 0)
+       {
+       fw=strSource.substring(iPos+1);
+       fw=TrimString(fw);
+       }
+       else
+       {fw="0";}
+ return(fw);
+ }
+
+
 public String DropWord(String strSource)
  {String fw;
   fw=TrimString(strSource);
