@@ -22,6 +22,8 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.LegendItemCollection;
+import org.jfree.chart.LegendItemSource;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
@@ -51,12 +53,16 @@ static myStringfunc SF=new myStringfunc();
   public void keyReleased(KeyEvent e) {}
  public void keyTyped(KeyEvent e) {
                                     if (e.getKeyChar()=='-'||e.getKeyChar()=='-'){
-//chart.setLineVisible(!chart.getLineVisible());
                                                XYPlot plot = (XYPlot) chart.getPlot();
-                                               XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer();
                                               for (int i=0;i<noffiles;++i)
-                                             {  renderer.setSeriesLinesVisible(i,!renderer.getSeriesLinesVisible(i));renderer.setSeriesShapesVisible(i,!renderer.getSeriesShapesVisible(i));
+                                             { if(colyerr[i]==0&&colxerr[i]==0)
+                                               { XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer(i);
+                                                renderer.setSeriesLinesVisible(i,!renderer.getSeriesLinesVisible(i));renderer.setSeriesShapesVisible(i,!renderer.getSeriesShapesVisible(i));
+                                               }
                                             }}
+
+                                   if (e.getKeyChar()=='S'||e.getKeyChar()=='s'){scale=0.5*scale;reload_data();}
+                                   if (e.getKeyChar()=='B'||e.getKeyChar()=='b'){scale=2*scale;reload_data();}
 
 //                                    if (e.getKeyChar()=='_'||e.getKeyChar()=='_'){chart.setXAxisVisible(!chart.isXAxisVisible());}
 //                                    if (e.getKeyChar()=='|'||e.getKeyChar()=='|'){chart.setYAxisVisible(!chart.isYAxisVisible());}
@@ -84,9 +90,11 @@ static myStringfunc SF=new myStringfunc();
       if (args.length<1)
       {System.out.println("- too few arguments...\n");
        System.out.println("  program display - show and watch data file by viewing a xy graphic on screen\n\n");
-       System.out.println("use as:  display xcol[excolerr] ycol[eycolerr] filename [xcol1[] ycol1[] filename1 ...]\n\n");
+       System.out.println("use as:  display xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]\n\n");
        System.out.println("         xcol,ycol ... column to be taken as x-, y- axis\n in a lineplot");
        System.out.println("        if optional errorcolumns are added then instead of lines symbols and errorbars are shown\n");
+       System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to\n");
+       System.out.println("	  bubblecolumn are shown (toggle bubblesize with 's' and 'b')\n");
        System.out.println("	  (toggle lines also with '-' key))\n");
        System.out.println("	 filename ..... filename of datafile\n\n");
     System.out.println("	 Data files may contain lines to tune the display output, such as\n");
@@ -95,7 +103,7 @@ static myStringfunc SF=new myStringfunc();
     System.out.println("	 # displayxtext=meV \n");
 //    System.out.println("	 # displaylegend=false (toggle also with 'L' key)\n\n");
        System.exit(0);
-      }
+      } scale=1;
        file = new String[MAX_NOF_FILES];
        lastmod = new long[MAX_NOF_FILES];
        colx = new int[MAX_NOF_FILES];
@@ -117,9 +125,8 @@ static myStringfunc SF=new myStringfunc();
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
        coly[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
-//       s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
-//       ss=SF.FirstWord(s);if(ss.substring(0,1).equalsIgnoreCase("-")){ss="0";}
        colyerr[j]=p.valueOf(SF.ErrorCol(ss)).intValue();
+       if (colyerr[j]==0) {colyerr[j]=-p.valueOf(SF.BubbleCol(ss)).intValue();}
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
        file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>=MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
@@ -144,12 +151,13 @@ static myStringfunc SF=new myStringfunc();
  static int[] coly;
  static int[] colxerr;
  static int[] colyerr;
+ static double scale;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
  static String Title = "";
  static LegendTitle Legendt;
-// static DefaultXYZDataset dataset;
+ static DefaultXYZDataset bdataset;
  static DefaultIntervalXYDataset dataset;
  static JFreeChart chart;
  static JPanel chartPanel;
@@ -221,21 +229,30 @@ static myStringfunc SF=new myStringfunc();
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
+        bdataset = new DefaultXYZDataset();
 
 
 //        XYBubbleRenderer renderer = ( XYBubbleRenderer)plot.getRenderer();
 //    XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-    XYErrorRenderer renderer = new XYErrorRenderer();
-     plot.setRenderer(renderer);
-     renderer.setCapLength(0.0);
+     XYErrorRenderer renderer = new XYErrorRenderer();
+     XYBubbleRenderer brenderer = new XYBubbleRenderer(2);
+        renderer.setCapLength(0.0);
         renderer.setSeriesPaint(0, Color.blue);
         renderer.setSeriesPaint(1, Color.red);
         renderer.setSeriesPaint(2, Color.green);
         renderer.setSeriesPaint(3, Color.black);
         renderer.setSeriesPaint(4, Color.orange);
         renderer.setSeriesPaint(5, Color.pink);
+
+        brenderer.setSeriesPaint(1, Color.blue);
+        brenderer.setSeriesPaint(0, Color.red);
+        brenderer.setSeriesPaint(3, Color.green);
+        brenderer.setSeriesPaint(2, Color.black);
+        brenderer.setSeriesPaint(5, Color.orange);
+        brenderer.setSeriesPaint(4, Color.pink);
        
    for(int i=6;i<=MAX_NOF_FILES;++i){ renderer.setSeriesPaint(i, new Color(70*i%256,140*i % 256,210*i % 256));}
+   for(int i=6;i<=MAX_NOF_FILES;++i){ brenderer.setSeriesPaint(i, new Color(70*i%256,140*i % 256,210*i % 256));}
            //renderer.setPlotShapes(true);
            //renderer.setShapesFilled(true);
           //renderer.setSeriesShapesVisible(0, true);
@@ -243,6 +260,8 @@ static myStringfunc SF=new myStringfunc();
           //renderer.setSeriesShapesVisible(2, true);
             renderer.setSeriesShape(0, new Ellipse2D.Double(-3.0, -3.0, 6.0, 6.0));
             renderer.setSeriesShape(1, new Rectangle2D.Double(-3.0, -3.0, 6.0, 6.0));
+           brenderer.setSeriesShape(0, new Ellipse2D.Double(-3.0, -3.0, 6.0, 6.0));
+           brenderer.setSeriesShape(1, new Rectangle2D.Double(-3.0, -3.0, 6.0, 6.0));
            // renderer.setSeriesShape(1, ShapeUtilities.createDiamond(4.0f));
 
         // increase the margins to account for the fact that the auto-range
@@ -253,6 +272,15 @@ static myStringfunc SF=new myStringfunc();
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setLowerMargin(0.15);
         rangeAxis.setUpperMargin(0.15);
+//       final LegendItemCollection legendItemsNew= new LegendItemCollection();
+    for(int i=0;i<=noffiles;++i){
+         if(colyerr[i]>=0){plot.setRenderer(i,renderer);
+                           plot.setDataset(i,dataset);}
+            else {    plot.setRenderer(i,brenderer);
+                      plot.setDataset(i,bdataset);
+          //            legendItemsNew.add(brenderer.getLegendItem(i,i));
+                      }
+          }
         return chart;
     }
 
@@ -310,16 +338,20 @@ static myStringfunc SF=new myStringfunc();
             if(fileIni.lastModified()!=lastmod[i]){lastmod[i]=fileIni.lastModified();filechanged=1;}
            }
        if(filechanged==1)
-      { try{
+      { reload_data();
+      }
+ }}}
+
+private void reload_data(){    try{
            for (int i=0;i<noffiles;++i)
-           {           
+           { File fileIni;
             String s="";
             //XYDataset ds = chart.getXYPlot().getDataset(i);
             //ds.getData().removeAllElements();
             int maxnofpoints=1000;int j=maxnofpoints;
-           while(j==maxnofpoints)           
+           while(j==maxnofpoints)
            {double [][] data=new double [6][maxnofpoints];//={{0,1},{0,1},{0,1}};
-
+            double [][] bdata=new double [3][maxnofpoints];
             fileIni = new File(file[i]);
             //?ffnen der Datei
              DataInputStream inStream = new DataInputStream(new FileInputStream(fileIni));
@@ -329,7 +361,7 @@ static myStringfunc SF=new myStringfunc();
              String sxerr;
              String syerr;
              int clx = colx[i];
-             int cly = coly[i];   
+             int cly = coly[i];
              int clxerr = colxerr[i];
              int clyerr = colyerr[i];
 
@@ -359,7 +391,7 @@ static myStringfunc SF=new myStringfunc();
                  sx=SF.NthWord(strLine,clx);
                  sy=SF.NthWord(strLine,cly);
                  sxerr=SF.NthWord(strLine,clxerr);
-                 syerr=SF.NthWord(strLine,clyerr);
+                 syerr=SF.NthWord(strLine,Math.abs(clyerr));
               //System.out.println(sx+" "+sy+" "+serr);
 
                Double p = new Double(0.0);
@@ -369,29 +401,41 @@ static myStringfunc SF=new myStringfunc();
                     sy=sy.replace('D','E');
                     sxerr=sxerr.replace('D','E');
                     syerr=syerr.replace('D','E');
-                   if(clxerr==0){sxerr="0";}
-                   if(clyerr==0){syerr="0";}
-                   data[0][j]=p.parseDouble(sy);
-                   data[1][j]=p.parseDouble(sy)+p.parseDouble(syerr);
-                   data[2][j]=p.parseDouble(sy)-p.parseDouble(syerr);
-                   data[3][j]=p.parseDouble(sx);
-                   data[4][j]=p.parseDouble(sx)+p.parseDouble(sxerr);;
-                   data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
-                 //  if (data[2][j]<0){data[2][j]=0;}
-                 //  data[2][j]=Math.sqrt(data[2][j]);
+                   if(clyerr>=0)
+                   { if(clxerr==0){sxerr="0";}
+                     if(clyerr==0){syerr="0";}
+                     data[0][j]=p.parseDouble(sy);
+                     data[1][j]=p.parseDouble(sy)+p.parseDouble(syerr);
+                     data[2][j]=p.parseDouble(sy)-p.parseDouble(syerr);
+                     data[3][j]=p.parseDouble(sx);
+                     data[4][j]=p.parseDouble(sx)+p.parseDouble(sxerr);;
+                     data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
+                   }
+                   else
+                   {bdata[1][j]=p.parseDouble(sx);
+                    bdata[0][j]=p.parseDouble(sy);
+                    bdata[2][j]=p.parseDouble(syerr);
+                    if (bdata[2][j]<0){bdata[2][j]=0;}
+                    bdata[2][j]=scale*Math.sqrt(bdata[2][j]);
+                  }
                     ++j;
                    }
                    catch(NumberFormatException e){System.exit(1);}
                                                           }
-               }   
+               }
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                else
-              {//dataset.removeSeries(file[i]+s.valueOf(i));
-              dataset.addSeries(file[i]+s.valueOf(i),data);}
-         XYPlot plot = (XYPlot) chart.getPlot();
-         XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer();
-         if(clxerr==0&&clyerr==0){ renderer.setSeriesLinesVisible(i,true);
-                        renderer.setSeriesShapesVisible(i, false);}
+              {if(clyerr>=0)
+                   {//dataset.removeSeries(file[i]+s.valueOf(i));
+                    dataset.addSeries(file[i]+s.valueOf(i),data);}
+                else
+                   {//bdataset.removeSeries(file[i]+s.valueOf(i));
+                    bdataset.addSeries(file[i]+s.valueOf(i),bdata);}
+              }
+         if(clxerr==0&&clyerr==0){XYPlot plot = (XYPlot) chart.getPlot();
+                                  XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer(i);
+                                   renderer.setSeriesLinesVisible(i,true);
+                                   renderer.setSeriesShapesVisible(i, false);}
              }
     //double[] myDatay = {stringToDouble(strLine,0),stringToDouble(strLine,0)};
              }
@@ -407,8 +451,30 @@ static myStringfunc SF=new myStringfunc();
     {System.out.println("Dateifehler: " + e.getLocalizedMessage());
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
-    repaint();
-  }
- }}}
 
+XYPlot plot = (XYPlot) chart.getPlot();
+LegendItemCollection legendItemsOld = plot.getLegendItems();
+final LegendItemCollection legendItemsNew = new LegendItemCollection();
+
+for(int i = 0; i<noffiles&&i<=legendItemsOld.getItemCount(); i++){
+    legendItemsNew.add(legendItemsOld.get(i));
+}
+LegendItemSource source = new LegendItemSource() {
+    LegendItemCollection lic = new LegendItemCollection();
+    {lic.addAll(legendItemsNew);}
+    public LegendItemCollection getLegendItems() {
+        return lic;
+    }
+};
+//chart.addLegend(new LegendTitle(source));
+LegendItemSource [] s={source};
+//ChartUtilities.applyCurrentTheme(localJFreeChart);
+//chart.getLegend().setVisible(true);
+        //LegendTitle legend= chart.getLegend();
+        //legend.setSources();
+chart.getLegend().setSources(s);
+
+    repaint();
+
+  }
 } // display

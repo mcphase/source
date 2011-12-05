@@ -46,6 +46,12 @@ public String DataCol(String strSource)
        fw=strSource.substring(0,iPos);
        fw=TrimString(fw);
        }
+       iPos = fw.indexOf("b");
+       if (iPos >= 0)
+       {
+       fw=strSource.substring(0,iPos);
+       fw=TrimString(fw);
+       }
  return(fw);
  }
 
@@ -53,6 +59,20 @@ public String ErrorCol(String strSource)
  { String fw;
   fw=TrimString(strSource);
        int iPos = fw.indexOf("e");
+       if (iPos >= 0)
+       {
+       fw=strSource.substring(iPos+1);
+       fw=TrimString(fw);
+       }
+       else
+       {fw="0";}
+ return(fw);
+ }
+
+public String BubbleCol(String strSource)
+ { String fw;
+  fw=TrimString(strSource);
+       int iPos = fw.indexOf("b");
        if (iPos >= 0)
        {
        fw=strSource.substring(iPos+1);
