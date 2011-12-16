@@ -1152,7 +1152,7 @@ exit(0);
    if (ninit>dj)ninit=dj;
    if (pinit<SMALL)pinit=SMALL;
    double zsum=0,zii;
-   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(En(i)-x)/KB/T))>(pinit*zsum));++i){noft+=dj-i;zsum+=zii;}
+   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(En(i)-x)/KB/T))>(pinit*zsum));++i){noft+=dj-i+1;zsum+=zii;}
 
 
    // calculate Ja,Jb,Jc
@@ -1214,6 +1214,7 @@ if (delta>SMALL)
 
 // return number of all transitions     
 // return (int)((J+1)*(2*J+1));
+printf("noft=%i dj=%i\n",noft,dj);
 return noft;
 
 }

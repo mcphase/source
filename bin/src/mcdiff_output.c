@@ -348,7 +348,7 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
       rpvalue[11]+=abs(isave[11]+out11[i]-abs(mx[i])); isave[11]=0;
       rpvalue[12]+=abs(isave[12]+ikern[i]+intmagdip[i]-abs(mx[i])); isave[12]=0;
                       }
-     else {isave[9]+=ikern[i]+intmag[i];isave[10]+=out11[i];isave[11]+=out11[i];isave[12]+=ikern[i]+intmagdip[i];
+     else {isave[9]+=ikern[i]+intmag[i];isave[10]+=out10[i];isave[11]+=out11[i];isave[12]+=ikern[i]+intmagdip[i];
           }
    }
 

@@ -57,12 +57,14 @@ static myStringfunc SF=new myStringfunc();
                                               for (int i=0;i<noffiles;++i)
                                              { if(colyerr[i]==0&&colxerr[i]==0)
                                                { XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer(i);
-                                                renderer.setSeriesLinesVisible(i,!renderer.getSeriesLinesVisible(i));renderer.setSeriesShapesVisible(i,!renderer.getSeriesShapesVisible(i));
+                                                renderer.setSeriesLinesVisible(i,!renderer.getSeriesLinesVisible(i));
+                                                renderer.setSeriesShapesVisible(i,!renderer.getSeriesShapesVisible(i));
+                                                update_legend();
                                                }
                                             }}
 
-                                   if (e.getKeyChar()=='S'||e.getKeyChar()=='s'){scale=0.5*scale;reload_data();}
-                                   if (e.getKeyChar()=='B'||e.getKeyChar()=='b'){scale=2*scale;reload_data();}
+                                   if (e.getKeyChar()=='S'||e.getKeyChar()=='s'){scale=0.5*scale;for (int i=0;i<noffiles;++i){reload_data(i);};update_legend();}
+                                   if (e.getKeyChar()=='B'||e.getKeyChar()=='b'){scale=2*scale;for (int i=0;i<noffiles;++i){reload_data(i);};update_legend();}
 
 //                                    if (e.getKeyChar()=='_'||e.getKeyChar()=='_'){chart.setXAxisVisible(!chart.isXAxisVisible());}
 //                                    if (e.getKeyChar()=='|'||e.getKeyChar()=='|'){chart.setYAxisVisible(!chart.isYAxisVisible());}
@@ -82,7 +84,7 @@ static myStringfunc SF=new myStringfunc();
 //                                    //if (e.getKeyChar()=='q'){ chart.getYAxis().setLogScaling(!chart.getYAxis().getLogScaling());}
 
 
-                                   repaint();
+                                  // repaint();
 //System.out.println("Key pressed ");
                                    }
   public static void main(String[] args) {
@@ -272,15 +274,20 @@ static myStringfunc SF=new myStringfunc();
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setLowerMargin(0.15);
         rangeAxis.setUpperMargin(0.15);
-//       final LegendItemCollection legendItemsNew= new LegendItemCollection();
-    for(int i=0;i<=noffiles;++i){
+    for(int i=0;i<noffiles;++i){
          if(colyerr[i]>=0){plot.setRenderer(i,renderer);
-                           plot.setDataset(i,dataset);}
+                           plot.setDataset(i,dataset);
+                           renderer.setSeriesLinesVisible(i,false);
+                           renderer.setSeriesShapesVisible(i, true);
+                           }
             else {    plot.setRenderer(i,brenderer);
                       plot.setDataset(i,bdataset);
-          //            legendItemsNew.add(brenderer.getLegendItem(i,i));
+                           //            legendItemsNew.add(brenderer.getLegendItem(i,i));
                       }
-          }
+
+        reload_data(i);
+                               }
+     update_legend();
         return chart;
     }
 
@@ -332,19 +339,16 @@ static myStringfunc SF=new myStringfunc();
                 }
 
       File fileIni;
-      int filechanged=0;
       for (int i=0;i<noffiles;++i)
            {fileIni = new File(file[i]);
-            if(fileIni.lastModified()!=lastmod[i]){lastmod[i]=fileIni.lastModified();filechanged=1;}
+            if(fileIni.lastModified()!=lastmod[i]){lastmod[i]=fileIni.lastModified(); reload_data(i);
+            }
            }
-       if(filechanged==1)
-      { reload_data();
-      }
+      
  }}}
 
-private void reload_data(){    try{
-           for (int i=0;i<noffiles;++i)
-           { File fileIni;
+protected static void reload_data(int i){    try{
+            File fileIni;
             String s="";
             //XYDataset ds = chart.getXYPlot().getDataset(i);
             //ds.getData().removeAllElements();
@@ -370,6 +374,7 @@ private void reload_data(){    try{
             while (inStream.available() > 0&&j<maxnofpoints)
             {
              strLine = inStream.readLine();
+             if (strLine==null) break;
              if ((strLine.length() == 0)
              ||(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#")))
              {
@@ -425,20 +430,20 @@ private void reload_data(){    try{
                }
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                else
-              {if(clyerr>=0)
+              {if (j>0)
+               {if(clyerr>=0)
                    {//dataset.removeSeries(file[i]+s.valueOf(i));
-                    dataset.addSeries(file[i]+s.valueOf(i),data);}
+                    dataset.addSeries(file[i]+s.valueOf(i),data);
+                   }
                 else
                    {//bdataset.removeSeries(file[i]+s.valueOf(i));
-                    bdataset.addSeries(file[i]+s.valueOf(i),bdata);}
+                    bdataset.addSeries(file[i]+s.valueOf(i),bdata);
+                    }
+               }
               }
-         if(clxerr==0&&clyerr==0){XYPlot plot = (XYPlot) chart.getPlot();
-                                  XYErrorRenderer renderer = (XYErrorRenderer) plot.getRenderer(i);
-                                   renderer.setSeriesLinesVisible(i,true);
-                                   renderer.setSeriesShapesVisible(i, false);}
              }
     //double[] myDatay = {stringToDouble(strLine,0),stringToDouble(strLine,0)};
-             }
+             
     }
     catch(EOFException e)
     {System.out.println("EOF: " + e.getLocalizedMessage());
@@ -451,7 +456,10 @@ private void reload_data(){    try{
     {System.out.println("Dateifehler: " + e.getLocalizedMessage());
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
+}
 
+
+private static void update_legend () {
 XYPlot plot = (XYPlot) chart.getPlot();
 LegendItemCollection legendItemsOld = plot.getLegendItems();
 final LegendItemCollection legendItemsNew = new LegendItemCollection();
@@ -466,15 +474,10 @@ LegendItemSource source = new LegendItemSource() {
         return lic;
     }
 };
-//chart.addLegend(new LegendTitle(source));
 LegendItemSource [] s={source};
-//ChartUtilities.applyCurrentTheme(localJFreeChart);
-//chart.getLegend().setVisible(true);
-        //LegendTitle legend= chart.getLegend();
-        //legend.setSources();
 chart.getLegend().setSources(s);
 
-    repaint();
+//    repaint();
 
   }
 } // display
