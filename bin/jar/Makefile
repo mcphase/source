@@ -15,9 +15,9 @@
 all : pack 
 
 OBJS = IniConfigurator.java IniFile.java IniItem.java IniKey.java display.java \
-       displaybubbles.java displaycontour.java displaydsigma.java displaymag.java \
+       displaycontour.java displaydsigma.java displaymag.java \
        displaytext.java FileListener.java FileMonitor.java searchspacestatus.java \
-       simannfitstatus.java Viewer.java displayerr.java
+       simannfitstatus.java Viewer.java 
 
 compile : $(OBJS)
 	javac ./*.java

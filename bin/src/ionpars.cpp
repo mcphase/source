@@ -1227,7 +1227,7 @@ int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,d
     th ph  .... polar angles of the scattering vector with respect to xyz=cab coordinate system (cfield) or xyz=abc (so1ion)
 on output    
     int   	total number of transitions
-    v1(i)	<-|Q|+> sqrt(n+-n-),  n+,n-
+    v1(i)	<-|Q-<Q>|+> sqrt(n+-n-),  n+,n-
      // note that  <M(Q)>=-2x<Q>_TH in units of mb
     .... occupation number of states (- to + transition chosen according to transitionnumber)
 */
@@ -1272,16 +1272,15 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
           for(K=1;K<=3;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
              Malpha(K)+=conj(est(M,i))*(*MQMi[K])(M,Md)*est(Md,j); 
             }}} 
-//if(i==j){//take into account thermal expectation values <Jl>
-//         ComplexVector mm(1,3); mm=0;
-//         for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
-//           mm(1)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[1])(M,Md)*est(Md,K);
-//           mm(2)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[2])(M,Md)*est(Md,K);
-//           mm(3)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[3])(M,Md)*est(Md,K);
-//         }}} // --> mm(1,..3)  thermal expextation values of M
-//          Malpha-=mm;// subtract thermal expectation values
-//
-//         }
+if(i==j){//take into account thermal expectation values <Jl> //MR120120
+         ComplexVector mm(1,3); mm=0;                        //MR120120
+         for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){  //MR120120
+           mm(1)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[1])(M,Md)*est(Md,K); //MR120120
+           mm(2)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[2])(M,Md)*est(Md,K); //MR120120
+           mm(3)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[3])(M,Md)*est(Md,K); //MR120120
+         }}} // --> mm(1,..3)  thermal expextation values of M              //MR120120
+          Malpha-=mm;// subtract thermal expectation values                 //MR120120
+         }  //MR120120
          delete MQMi[1];delete MQMi[2]; delete MQMi[3];
 
 
@@ -1295,14 +1294,14 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Qa|%i>|^2=%4.4g |<%i|Qb|%i>|^2=%4.4g |<%i|Qc|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+      printf(" |<%i|Qa-<Qa>|%i>|^2=%4.4g |<%i|Qb-<Qb>|%i>|^2=%4.4g |<%i|Qc-<Qc>|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
       printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
     v1*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
      }else
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Qa|%i>|^2=%4.4g |<%i|Qb|%i>|^2=%4.4g |<%i|Qc|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+      printf(" |<%i|Qa-<Qa>|%i>|^2=%4.4g |<%i|Qb-<Qb>|%i>|^2=%4.4g |<%i|Qc-<Qc>|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
       printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
     v1*=sqrt(imag(est(0,i))/KB/T);
    }

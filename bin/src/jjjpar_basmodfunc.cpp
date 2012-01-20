@@ -793,6 +793,7 @@ double jjjpar::radial_wavefunction(double rr) // rr given in Angstroems, returns
     R/=sqrt(a0*a0*a0);
     // now we have R in units of 1/A^1.5
 //printf("%g ",R);
+    if(R==0){R=1e-30;}
     if (ok==1) return R;
 
 
@@ -807,6 +808,7 @@ double rs;
 rs = rr * exp(-rr);
 R = 280.4 * rs * rs * rs * rs  * exp(-1.5 * rr);
 //printf("R4f(%g)=%g\n ",rr,R);
+    if(R==0){R=1e-30;}
 return R;
    }
 /************************************************************************************/

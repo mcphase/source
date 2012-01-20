@@ -11,6 +11,7 @@
 \makeindex
 \newcommand{\mbf}[1]{\mathbf #1}
 \newcommand{\V}[1]{ \stackrel{=}{\mathbf #1}}
+\newcommand{\B}[1]{#1}
 \newcommand{\prg}{\sl}
 \newcommand{\use}[1]{\vspace{0.5cm} Usage: {\prg{ #1}} \vspace{0.5cm}}
 \newcommand{\bra}[1]{\langle #1|}
@@ -66,6 +67,20 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{... in version 4.7...}
+
+- some bugs corrected in quasielastic scattering beyond dipole approx 
+  (not very likely to be of any relevance for practical applications)
+
+- program display redesigned to be able to handle error bars and 
+  different symbol size
+
+- program anisotropy added to be able to calculate anisotropy loops
+  for single ion property files
+
+- many column manipulation programs extended to be able to manipulate
+  error columns containing errorbars for experimental data
+
 \subsection*{... in version 4.6...}
 
 - mcdiff changed: polarisation vector P may be of length less than 1 enabling calculations for
@@ -80,7 +95,7 @@ community this program would not have come into existence.
   in chapter~\ref{cfparconventions}, where an overview on different
   crystal field parameter conventions used in literature is given.
 - going beyond dipole approximation in neutron spectroscopy option
-  has been changed correcting an error in equations (\ref{Xcalc}), (\ref{nunewcalc})
+  has been changed correcting an error in equations (\ref{Xcalc}) %, (\ref{nunewcalc})
 
 \subsection*{... in version 4.5...}
  - a bug in mcphasit removed (which produced wrong output if magnetic structures are stabilized in a calculation involving a
@@ -104,18 +119,6 @@ community this program would not have come into existence.
            - {\prg chi2} changed to output sta= deviation$^2$ experr$^2$ for each contribution to chisquared
            - added example Lu2MnO4
 
-\subsection*{... in version 4.1/4.2/4.3 ...}
-- a bug in the normalisation of the eigenvectors/intensities calculated for dispersive modes in mcdisp.c has been removed
-- a bug in the beyond dip approximation calculation for inelastic intensities with module so1ion has been removed
-- the phase problem in eigenvector of matrix M has been solved by introducing a function du1calc and dv1calc, which
-replaces dmcalc and dncalc in previous versions (different phases of eigenvector U1 and V1 led to wrong neutron intensities
-for the beyond dipole calculation in older versions of mcdisp)
-
-\subsection*{... in version 4.0 ...}
-
-- neutron magnetic formfactors (j0,j2,j4,j6)  are now calculated directly from the radial wavefunction instead of the 
-formfactor parameters. New programs formfactor and radwavfunc to evaluate formfactors and radial wave functions.
-some bugs for ic1ion d9 configuration removed
 
 \newpage
 

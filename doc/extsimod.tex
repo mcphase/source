@@ -635,9 +635,9 @@ Lande factor as g\_J and  can be used for this purpose.
 \item it should calculate from meanfields at a given temperature the 
 transition energy of transition number {\prg tn}. The result should be returned as {\prg delta}
 \item for the transition number tn the vector u1 is to be filled with ${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|J^s_{\alpha}-\langle J^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
-\item if the a negative value for T is entered, the vector u1 is to be filled with
-        ${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|J^s_{\alpha}|+\rangle$ and the 
-       temperature T has to be multiplied by -1.
+%\item if a negative value for T is entered, the vector u1 is to be filled with
+%        ${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|J^s_{\alpha}|+\rangle$ and the 
+%       temperature T has to be multiplied by -1.
 \item
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
@@ -730,7 +730,8 @@ has similar arguments as
 {\prg du1calc}, but as additional argument an orientation
 of the scattering vector,
 output should be a corresponding vector
- ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}\langle -|\mathcal Q^{\dag}_{\alpha}|+\rangle$.
+ ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}
+\langle -|\mathcal Q^{\dag}_{\alpha}-\langle \mathcal Q^{\dag}_{\alpha}\rangle|+\rangle$.
 where $\mathcal Q_{\alpha}$ are the cartesian components of the scattering operator.
  {\prg dv1calc} is called many times, for
  every scattering vector. In order to
@@ -798,7 +799,9 @@ on output
 The module function must perform the following tasks:
 \begin{enumerate}
 \item for the transition number tn the vector v1  is to be filled with the n-component 
- ${\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}\langle -|\mathcal Q^{\dag}_{\alpha}|+\rangle$.
+ ${\mbf v^s_{\alpha1}}(\mbf Q)=
+\sqrt{(p_--p_+)}
+\langle -|\mathcal Q^{\dag}_{\alpha}-\langle \mathcal Q^{\dag}_{\alpha}\rangle|+\rangle$.
 n is the number of components of the effective field vector, the vector
 should only have nonzero values for the relevant values of
 the scattering operator, i.e. for $\alpha=1,..3$ in the case of

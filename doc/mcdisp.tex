@@ -992,8 +992,9 @@ From linear response theory it can be shown~\cite[page 143]{jensen91-1}, that th
 at the excitation energies of the system:
 
 \begin{equation}\label{gensus}
-\chi_{BA}= \lim_{\epsilon \rightarrow 0^+}\sum_{\alpha\alpha'}\frac{\langle \alpha |\hat B|\alpha' \rangle 
-\langle \alpha' |\hat A|\alpha \rangle }{E_{\alpha'}-E_{\alpha}-\hbar \omega - i \hbar \epsilon}(p_{\alpha}-p_{\alpha'})
+\chi_{BA}= \lim_{\epsilon \rightarrow 0^+}
+\sum_{\alpha\alpha'}\frac{\langle \alpha |\hat B -\langle \hat B \rangle_{\mbf H,T}|\alpha' \rangle 
+\langle \alpha' |\hat A-\langle \hat A \rangle_{\mbf H,T}|\alpha \rangle }{E_{\alpha'}-E_{\alpha}-\hbar \omega - i \hbar \epsilon}(p_{\alpha}-p_{\alpha'})
 \end{equation}
  
 The denominator, the eigenstates and the difference in thermal population are the same for any susceptibility.
@@ -1001,9 +1002,10 @@ The energy eigenstates $|\alpha \rangle$ of the system will be a linear combinat
 single ion states. 
 Therefore, the numerator in equation (\ref{gensus}) will 
 be a (usually not known) linear combination of products of the form 
-$\langle -|J_{\alpha}^s|+\rangle \langle +'|J_{\beta}^{s'}|-'\rangle$ 
+$\langle -|\hat J_{\alpha}^s-\langle \hat  J_{\alpha}^s \rangle_{\mbf H,T} |+\rangle \langle +'|\hat J_{\beta}^{s'}-\langle \hat J_{\beta}^{s'}\rangle_{\mbf H,T} |-'\rangle$ 
 and 
-$\langle -|\hat \mathcal Q_{\alpha}^s|+\rangle \langle +'|\hat \mathcal Q_{\beta}^{s'}|-'\rangle$ for
+$\langle -|\hat \mathcal Q_{\alpha}^s-\langle  \hat \mathcal Q_{\alpha}^s\rangle_{\mbf H,T} |+\rangle 
+\langle +'|\hat \mathcal Q_{\beta}^{s'}-\langle  \hat \mathcal Q_{\beta}^{s'}\rangle_{\mbf H,T} |-'\rangle$ for
  $\chi_{\alpha\beta}^{ss'}({\mbf Q},\omega)$ and 
    $X_{\alpha\beta}^{ss'}({\mbf Q},\omega)$, respectively.
 
@@ -1011,37 +1013,40 @@ These terms can be related by a similar procedure as
 outlined in equations (\ref{mmatrix}) ff:
 
 \begin{eqnarray}\label{mumatrix}
-\mu^s_{\alpha\beta}=\langle -|J^{s}_{\alpha}|+\rangle\langle +|J^s_{\beta}|-\rangle \\
-\nu^s_{\alpha\beta}=\langle -|\mathcal Q^{s \dag}_{\alpha}|+\rangle\langle +|\mathcal Q^s_{\beta}|-\rangle
+\mu^s_{\alpha\beta}=\langle -|\hat J^{s}_{\alpha}-\langle \hat  J^{s}_{\alpha}\rangle_{\mbf H,T} |+\rangle
+\langle +|\hat J^s_{\beta}-\langle \hat J^s_{\beta}\rangle_{\mbf H,T} |-\rangle \\
+\nu^s_{\alpha\beta}=\langle -|\hat \mathcal Q^{s \dag}_{\alpha}-\langle  \mathcal Q^{s \dag}_{\alpha}\rangle_{\mbf H,T} |+\rangle
+\langle +|\hat \mathcal Q^s_{\beta}-\langle  \hat \mathcal \mathcal Q^s_{\beta}\rangle_{\mbf H,T} |-\rangle
 \end{eqnarray}
 
 similar to $M_{\alpha\beta}^s$ the matrices  $\mu_{\alpha\beta}^s$ and $\nu_{\alpha\beta}^s$ 
 can be diagonalised using the
-unitary transformations $\overline \mathcal  U_{\alpha\beta}^s$ (${\overline \mathcal U^{s\dag}\overline \mathcal U^s}=1$) and
-$\overline \mathcal V_{\alpha\beta}^s$ (${\overline \mathcal V^{s\dag}\overline \mathcal V^s}=1$), respectively. Note that in the case $\langle +| \neq \langle -|$
-the unitary transformations $\overline \mathcal U =\mathcal U$ and $\overline \gamma = \gamma$.
+unitary transformations $\B  \mathcal  U_{\alpha\beta}^s$ (${\B  \mathcal U^{s\dag}\B  \mathcal U^s}=1$) and
+$\B  \mathcal V_{\alpha\beta}^s$ (${\B  \mathcal V^{s\dag}\B  \mathcal V^s}=1$), respectively.
+% Note that in the case $\langle +| \neq \langle -|$
+% the unitary transformations $\B  \mathcal U =\mathcal U$ and $\B  \gamma = \gamma$.
 
 \begin{equation}
-\overline \gamma^s=(p_--p_+)\sum_{\alpha}\langle -|J^s_{\alpha}|+\rangle\langle +|J^s_{\alpha}|-\rangle
+ \gamma^s=(p_--p_+)\sum_{\alpha} \mu^s_{\alpha\alpha}
 \end{equation}
 
 
 Thus we have for orthogonal states 
 
 \begin{eqnarray}
-\langle -|         J^{s     }_{\alpha}|+\rangle\langle +|         J^s_{\beta}|-\rangle&=&\overline \mathcal U_{\alpha 1}^s\phi^s\overline \mathcal U_{1\beta}^{s\dag} \dots %%@
-{\rm with }\, \phi^s=\overline \gamma^s/(p_--p_+)\\
-\langle -|\mathcal Q^{s \dag}_{\alpha}|+\rangle\langle +|\mathcal Q^s_{\beta}|-\rangle&=&\overline \mathcal V_{\alpha 1}^s\xi^s\overline \mathcal V_{1\beta}^{s\dag}  
+\mu^s_{\alpha\beta}&=&\B  \mathcal U_{\alpha 1}^s\phi^s\B  \mathcal U_{1\beta}^{s\dag} \dots %%@
+{\rm with }\, \phi^s=\B  \gamma^s/(p_--p_+)\\
+\nu^s_{\alpha\beta}&=&\B  \mathcal V_{\alpha 1}^s\xi^s\B  \mathcal V_{1\beta}^{s\dag}  
 \end{eqnarray}
 
 Multiplying this from the right(left) side with 
-$\overline \mathcal U_{\beta\beta'}^{s}/\sqrt(\phi^s)$
-($\overline \mathcal U_{\alpha'\alpha}^{s\dag}/\sqrt(\phi^s)^{\star}$)
+$\B  \mathcal U_{\beta\beta'}^{s}/\sqrt(\phi^s)$
+($\B  \mathcal U_{\alpha'\alpha}^{s\dag}/\sqrt(\phi^s)^{\star}$)
 and summing over $\beta$ ($\alpha$) we get
 
 \begin{equation}
-\frac{1}{\phi^s}\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} \langle -|         J^{s     }_{\alpha}|+\rangle \right )
-\left ( \sum_{\beta} \langle +|         J^s_{\beta}|-\rangle\overline \mathcal U_{\beta\beta'}^{s} \right )
+\frac{1}{\phi^s}\left ( \sum_{\alpha}\B  \mathcal U_{\alpha'\alpha}^{s\dag} \langle -| J^{s }_{\alpha}-\langle J^{s }_{\alpha}\rangle_{\mbf H,T} |+\rangle \right )
+\left ( \sum_{\beta} \langle +|J^s_{\beta}-\langle J^s_{\beta}\rangle_{\mbf H,T} |-\rangle\B  \mathcal U_{\beta\beta'}^{s} \right )
 = \delta_{1\alpha'} \delta_{1\beta'}
 \end{equation}
 
@@ -1049,30 +1054,32 @@ It follows
 
 \begin{equation}
 \frac{1}{\sqrt{\phi^s}}
-\left ( \sum_{\alpha}\overline \mathcal U_{\alpha'\alpha}^{s\dag} \langle -|         J^{s     }_{\alpha}|+\rangle \right )
+\left ( \sum_{\alpha}\B  \mathcal U_{\alpha'\alpha}^{s\dag} \langle -| J^{s}_{\alpha}-\langle J^{s}_{\alpha}\rangle_{\mbf H,T} |+\rangle \right )
 = \delta_{1\alpha'}
 \end{equation}
 
 Using these properties of the unitary transformation we can transform any product
-$\langle -|J_{\alpha}^s|+\rangle \langle +'|J_{\beta}^{s'}|-'\rangle$ 
+$\langle -|J_{\alpha}^s-\langle J_{\alpha}^s\rangle_{\mbf H,T}|+\rangle \langle +'|J_{\beta}^{s'}\langle J_{\beta}^{s'}\rangle_{\mbf H,T} |-'\rangle$ 
 in the numerator of (\ref{gensus}) to $\delta_{1\alpha'} \delta_{1\beta'}$:
 
 \begin{equation}\label{trafo1}
-\left ( \sum_{\alpha}\frac{1}{\sqrt{\phi^s}^{\star}}\overline \mathcal U_{\alpha'\alpha}^{s\dag} \langle -|J^{s}_{\alpha}|+\rangle \right )
-\left ( \sum_{\beta} \langle +'|J^{s'}_{\beta}|-'\rangle \frac{1}{\sqrt{\phi^{s'}}}\overline \mathcal U_{\beta\beta'}^{s'} \right )
+\left ( \sum_{\alpha}\frac{1}{\sqrt{\phi^s}^{\star}}\B  \mathcal U_{\alpha'\alpha}^{s\dag} \langle -|J^{s}_{\alpha}-\langle J^{s}_{\alpha}\rangle_{\mbf H,T}|+\rangle \right )
+\left ( \sum_{\beta} \langle +'|J^{s'}_{\beta}\langle J^{s'}_{\beta}\rangle_{\mbf H,T} |-'\rangle \frac{1}{\sqrt{\phi^{s'}}}\B  \mathcal U_{\beta\beta'}^{s'} \right )
 = \delta_{1\alpha'} \delta_{1\beta'}
 \end{equation}
 
 Further transformation with 
-$\sum_{\alpha'}\overline \mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}$ and
-$\sum_{\beta'} \sqrt{\xi^{s'}}\overline \mathcal V_{\beta'\beta''}^{s' \dag} $ transforms the term to
-$\langle -|\hat \mathcal Q_{\alpha''}^s|+\rangle \langle +'|\hat \mathcal Q_{\beta''}^{s'}|-'\rangle$,
+$\sum_{\alpha'}\B  \mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}$ and
+$\sum_{\beta'} \sqrt{\xi^{s'}}\B  \mathcal V_{\beta'\beta''}^{s' \dag} $ 
+transforms the term to
+$\langle -|\hat \mathcal Q_{\alpha''}^s-\langle \hat \mathcal Q_{\alpha''}^s \rangle_{\mbf H,T}|+\rangle 
+\langle +'|\hat \mathcal Q_{\beta''}^{s'}-\langle \hat \mathcal Q_{\beta''}^{s'}\rangle_{\mbf H,T} |-'\rangle$,
 i.e.
 
 \begin{equation}\label{trafo2}
-\sum_{\alpha'\beta'}\overline \mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}\delta_{1\alpha'} \delta_{1\beta'}
- \sqrt{\xi^{s'}}\overline \mathcal V_{\beta'\beta''}^{s' \dag}=
-\langle -|\hat \mathcal Q_{\alpha''}^s|+\rangle \langle +'|\hat \mathcal Q_{\beta''}^{s'}|-'\rangle
+\sum_{\alpha'\beta'}\B  \mathcal V_{\alpha''\alpha'}^{s} \sqrt{\xi^s}^{\star}\delta_{1\alpha'} \delta_{1\beta'}
+ \sqrt{\xi^{s'}}\B  \mathcal V_{\beta'\beta''}^{s' \dag}=
+\langle -|\hat \mathcal Q_{\alpha''}^s-\langle \hat \mathcal Q_{\alpha''}^s \rangle_{\mbf H,T}|+\rangle \langle +'|\hat \mathcal Q_{\beta''}^{s'}-\langle Q_{\beta''}^{s'}\rangle_{\mbf H,T} |-'\rangle
 \end{equation}
 
 Applying the two set of transformations (\ref{trafo1}) and (\ref{trafo2}) to
@@ -1081,13 +1088,13 @@ obtain $X_{\alpha''\beta''}^{ss'}({\mbf Q},\omega)$:
 
 \begin{equation}\label{finalslow}
 X_{\alpha''\beta''}^{,,ss'}({\mbf Q},\omega)=\sum_{\alpha\beta}
-\sqrt{\frac{\Gamma^s}{\overline \gamma^s}}^{\star}
-\overline \mathcal V_{\alpha''1}^{s}
- \overline  \mathcal U_{1\alpha}^{s\dag} 
+\sqrt{\frac{\Gamma^s}{\B  \gamma^s}}^{\star}
+\B  \mathcal V_{\alpha''1}^{s}
+ \B   \mathcal U_{1\alpha}^{s\dag} 
     \chi_{\alpha\beta}^{,,ss'}({\mbf Q},\omega)
- \overline  \mathcal U_{\beta1}^{s'} 
- \overline \mathcal V_{1\beta''}^{s' \dag}
-\sqrt{\frac{\Gamma^{s'}}{\overline \gamma^{s'}}}
+ \B   \mathcal U_{\beta1}^{s'} 
+ \B  \mathcal V_{1\beta''}^{s' \dag}
+\sqrt{\frac{\Gamma^{s'}}{\B  \gamma^{s'}}}
 \end{equation}
 
 (Note here we have defined $\Gamma^s \equiv \xi^s(p_--n+)$).
@@ -1099,8 +1106,8 @@ the neutron scattering cross section numerically.
 {\small Technically, the single ion module has to provide in addition to the
 matrices $M^s_{\alpha\beta}$ (equation (\ref{mmatrix})) for every $\mbf Q$-vector
 the vector 
-$\sqrt{\Gamma^s}^\star \overline \mathcal V^s_{\alpha1}\equiv
- {\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}\langle -|\mathcal Q^{\dag}_{\alpha}|+\rangle$, which will depend on the 
+$\sqrt{\Gamma^s}^\star \B  \mathcal V^s_{\alpha1}\equiv
+ {\mbf v^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}-\langle -|\mathcal Q^{\dag}_{\alpha}-\langle \mathcal Q^{\dag}_{\alpha}\rangle_{\mbf H,T}|+\rangle$, which will depend on the 
 scattering vector $\mbf Q$.}
 
 For the DMD algorithm we insert  (\ref{dmdfinal}) into (\ref{finalslow}) and obtain
@@ -1113,14 +1120,14 @@ X^{,,ss'}_{\alpha\beta}(\mbf Q,\omega)=\sqrt{\Gamma^s}^\star\sqrt{\Gamma^{s'}}
 - \hbar \omega) \mathcal T^{\dag}_{rs'}(\mbf Q)  \mathcal V^{s'\dag}_{1\beta}
 \end{equation}
 
-with 
+%with 
 
-\begin{equation}\label{nunewcalc}
- \mathcal V^s_{\alpha1} =\sqrt{\frac{\gamma^s}{\overline \gamma^s}}^{\star}\sum_{\alpha''} \overline \mathcal V_{\alpha1}^s \overline \mathcal U^{s\dag}_{1\alpha''}
-\mathcal U^s_{\alpha''1}
-\end{equation}
+%\begin{equation}\label{nunewcalc}
+% \mathcal V^s_{\alpha1} =\sqrt{\frac{\gamma^s}{\B  \gamma^s}}^{\star}\sum_{\alpha''} \B  \mathcal V_{\alpha1}^s \B  \mathcal U^{s\dag}_{1\alpha''}
+%\mathcal U^s_{\alpha''1}
+%\end{equation}
 
-If $\langle +|\neq\langle -|$ then $\overline \mathcal V=\mathcal V$.
+%If $\langle +|\neq\langle -|$ then $\B  \mathcal V=\mathcal V$.
 
 {\prg mcdisp\index{mcdisp}} automatically calculates the intensity in
 dipole approximation and also going beyond, if possible, the result

@@ -25,8 +25,8 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
 // determine unitary transformation Matrix V (q)  Gamma and N for going beyond dip interaction
  // Vector Gamma(1,ini.nofcomponents);
   double Gamman; ComplexVector v1(1,ini.nofcomponents);
-  double gamma;  ComplexVector u1(1,ini.nofcomponents);
-  double gammab; ComplexVector u1b(1,ini.nofcomponents);
+//MR120120  double gamma;  ComplexVector u1(1,ini.nofcomponents);
+//MR120120  double gammab; ComplexVector u1b(1,ini.nofcomponents);
   complex<double> imaginary(0,1);
   // transition matrix Nij
   //ComplexMatrix Nijkl(1,ini.nofcomponents,1,ini.nofcomponents);
@@ -68,24 +68,24 @@ int intcalc_beyond_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,V
        {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  j
         if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=tn;
-     float d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
+//MR120120     float d=1e10;(*inputpars.jjj[l]).du1calc(ini.T,mf,u1,d,md.est(i,j,k,l));
 //       myPrintComplexVector(stdout,u1);
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  j
         if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=tn;
  // now call du1calc with negative temperature: this will trigger
  // the function not to include thermal expectation values -> thus u1 with a bar on top
  // is calculated (u1b ... u1bar)
-     double TT=-ini.T; d=1e10;(*inputpars.jjj[l]).du1calc(TT,mf,u1b,d,md.est(i,j,k,l));
+//MR120120     double TT=-ini.T; d=1e10;(*inputpars.jjj[l]).du1calc(TT,mf,u1b,d,md.est(i,j,k,l));
 //       myPrintComplexVector(stdout,u1b);
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  j
         if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=tn;
       v1(1)=complex <double> (ninit,pinit);nnt=(*inputpars.jjj[l]).dv1calc(qijk,ini.T,v1,md.est(i,j,k,l));
 //       myPrintComplexVector(stdout,v1);
 //u1b corresponds to u1 with a bar in the manual (computed without thermal expectation values)
-      gammab=Norm2(u1b);//Mbijkl=u1b^u1b;
-u1b/=sqrt(gammab);
-      gamma=Norm2(u1);//Mijkl=u1^u1;
-u1/=sqrt(gamma);
+//MR120120      gammab=Norm2(u1b);//Mbijkl=u1b^u1b;
+//MR120120 u1b/=sqrt(gammab);
+//MR120120      gamma=Norm2(u1);//Mijkl=u1^u1;
+//MR120120 u1/=sqrt(gamma);
       Gamman=Norm2(v1);//Nijkl=v1^v1;
 v1/=sqrt(Gamman);
 
@@ -112,9 +112,9 @@ v1/=sqrt(Gamman);
 	 if (nn[6]<0){//Vijkl=Vijkl.Conjugate();
 v1=v1.Conjugate();
                      // Uijkl=Uijkl.Conjugate();
-u1=u1.Conjugate();
+//MR120120 u1=u1.Conjugate();
                      // Ubijkl=Ubijkl.Conjugate();
-u1b=u1b.Conjugate();
+//MR120120 u1b=u1b.Conjugate();
                      }
       // if (fabs(Gamman-Gamma(ini.nofcomponents))>SMALL){fprintf(stderr,"ERROR eigenvalue of single ion matrix N inconsistent: analytic value Gamma= %g numerical diagonalisation of N gives Gamma= %g\n",Gamman,Gamma(ini.nofcomponents));
       //                     exit(EXIT_FAILURE);}
@@ -123,7 +123,7 @@ u1b=u1b.Conjugate();
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
                            //{
-                           Gamman*=gamma/gammab;
+           //MR120120                Gamman*=gamma/gammab;
                            if (nn[6]>SMALL)
 			    {md.sqrt_Gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(Gamman);// gamma(ini.nofcomponents)=sqr(gamma^s)
                             }
@@ -152,7 +152,7 @@ u1b=u1b.Conjugate();
     //    }
 //Nijkl=Ubijkl.Transpose().Conjugate()*Ubijkl;myPrintComplexMatrix(stdout,Nijkl);
      //   Vijkl=Vijkl*Ubijkl.Transpose().Conjugate()*Uijkl; // equation (33) in review
-        v1=v1*(u1*u1b); // vector product a*b is (according to cvector.cc): sum_m a(m) b(m).conj
+//MR120120        v1=v1*(u1*u1b); // vector product a*b is (according to cvector.cc): sum_m a(m) b(m).conj
                         // MR 14.9.2011
         for(m=1;m<=ini.nofcomponents;++m){
         //for(n=1;n<=ini.nofcomponents;++n){ // not needed MR 14.9.2011

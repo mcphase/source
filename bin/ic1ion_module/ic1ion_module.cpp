@@ -518,7 +518,7 @@ __declspec(dllexport)
                   double &J4, double &J6, // Input radial parameters <j_4>, <j_6>
                   ComplexMatrix &est,     // Input eigenvalues/vectors of the system Hamiltonian, H_SI+H_mf 
                   double &T,              // Input temperature (K)
-                  ComplexVector & v1)     // Output transition vector, v1(alpha) = <-|Qalpha|+> sqrt(n- - n+)
+                  ComplexVector & v1)     // Output transition vector, v1(alpha) = <-|Qalpha-<Qalpha>|+> sqrt(n- - n+)
 /* 
      Note on Qalpha (Qa or Qb)
        if gJ>0:
@@ -631,22 +631,22 @@ __declspec(dllexport)
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
 #endif
-//      if(i==j)                               //subtract thermal expectation value from zij=zii
-//      {
-//         complexdouble expQ;double thexp=0;
-//         for(iJ=1;iJ<=Hsz;++iJ)
-//         {
-//            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
-//            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
+      if(i==j)                             //subtract thermal expectation value from zij=zii
+      {                                    //MR120120 ... reintroduced
+         complexdouble expQ;double thexp=0;
+         for(iJ=1;iJ<=Hsz;++iJ)
+         {
+            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
+            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
 #ifdef _G77
-//            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
 #else
-//            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
 #endif
-//            thexp += expQ.r * therm / Z;
-//         }
-//         zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
-//      }
+            thexp += expQ.r * therm / Z;
+         }
+         zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
+      }
       free(zQmat); free(zt);
    }
 

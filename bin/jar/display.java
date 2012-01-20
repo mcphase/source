@@ -136,10 +136,10 @@ static myStringfunc SF=new myStringfunc();
        }noffiles=j;
         display demo = new display(title);
         demo.pack();
-        RefineryUtilities.centerFrameOnScreen(demo);
+       // RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);
         final Thread updater = demo.new UpdaterThread();
-        updater.setDaemon(true);
+        //updater.setDaemon(true);
         updater.start();
     } //main
 
@@ -164,7 +164,8 @@ static myStringfunc SF=new myStringfunc();
  static JFreeChart chart;
  static JPanel chartPanel;
 // static JFrame displayFrame;
-    /**
+
+   /**
      * A demonstration application showing a bubble chart.
      *
      * @param title  the frame title.
@@ -173,7 +174,12 @@ static myStringfunc SF=new myStringfunc();
         super(title);
         addKeyListener(this);
         //displayFrame= new JFrame();
-        chartPanel = createDemoPanel();
+        dataset = new DefaultIntervalXYDataset();
+        JFreeChart chart = createChart(dataset);
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        chartPanel.setDomainZoomable(true);
+        chartPanel.setRangeZoomable(true);
         //bRot.setHorizontalAlignment(SwingConstants.LEFT);
         //chartPanel.add(bRot);
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
@@ -291,37 +297,7 @@ static myStringfunc SF=new myStringfunc();
         return chart;
     }
 
-    /**
-     * Creates a sample dataset.
-     *
-     * @return A sample dataset.
-     */
-    public static IntervalXYDataset createDataset() {
-        
-         dataset = new DefaultIntervalXYDataset();
-        //double[] x = {2.1, 2.3, 2.3, 2.2, 2.2, 1.8, 1.8, 1.9, 2.3, 3.8};
-        //double[] y = {14.1, 11.1, 10.0, 8.8, 8.7, 8.4, 5.4, 4.1, 4.1, 25};
-        //double[] z = {2.4, 2.7, 2.7, 2.2, 2.2, 2.2, 2.1, 2.2, 1.6, 4};
-        //double[][] series = new double[][] { x, y, z };
-        //dataset.addSeries("Series 1", series);
-        return dataset;
-    }
-
-    /**
-     * Creates a panel for the demo (used by SuperDemo.java).
-     *
-     * @return A panel.
-     */
-    public static JPanel createDemoPanel() {
-        JFreeChart chart = createChart(createDataset());
-        ChartPanel chartPanel = new ChartPanel(chart);
-       	
-        chartPanel.setDomainZoomable(true);
-        chartPanel.setRangeZoomable(true);
-        return chartPanel;
-    }
-
-     /**
+      /**
      * A thread for updating the dataset.
      */
     private class UpdaterThread extends Thread {
@@ -332,19 +308,19 @@ static myStringfunc SF=new myStringfunc();
             setPriority(MIN_PRIORITY); // be nice
           while(true){
                 try {
-                    sleep(500);
-                }
-                catch (InterruptedException e) {
-                    // suppress
-                }
-
+                    sleep(500);                
       File fileIni;
       for (int i=0;i<noffiles;++i)
            {fileIni = new File(file[i]);
             if(fileIni.lastModified()!=lastmod[i]){lastmod[i]=fileIni.lastModified(); reload_data(i);
             }
-           }
-      
+           }}
+                catch (IndexOutOfBoundsException e) {
+                    // suppress
+                }
+                catch (InterruptedException e) {
+                    // suppress
+                }
  }}}
 
 protected static void reload_data(int i){    try{
@@ -375,8 +351,8 @@ protected static void reload_data(int i){    try{
             {
              strLine = inStream.readLine();
              if (strLine==null) break;
-             if ((strLine.length() == 0)
-             ||(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#")))
+             if (strLine.length() == 0) continue;
+             if(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))
              {
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
@@ -387,9 +363,8 @@ protected static void reload_data(int i){    try{
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
         }
-
         continue;
-       }
+             }
              // select colx and coly
      // replace tabs by spaces
       strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
@@ -397,7 +372,7 @@ protected static void reload_data(int i){    try{
                  sy=SF.NthWord(strLine,cly);
                  sxerr=SF.NthWord(strLine,clxerr);
                  syerr=SF.NthWord(strLine,Math.abs(clyerr));
-              //System.out.println(sx+" "+sy+" "+serr);
+             // System.out.println(sx+" "+sy+" "+sxerr+" "+syerr);
 
                Double p = new Double(0.0);
    if(sx.length()!=0&&sy.length()!=0&&sxerr.length()!=0&&syerr.length()!=0){
@@ -425,7 +400,8 @@ protected static void reload_data(int i){    try{
                   }
                     ++j;
                    }
-                   catch(NumberFormatException e){System.exit(1);}
+                   catch(NumberFormatException e){--j;//System.exit(1);
+                                                  }
                                                           }
                }
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
@@ -434,10 +410,11 @@ protected static void reload_data(int i){    try{
                {if(clyerr>=0)
                    {//dataset.removeSeries(file[i]+s.valueOf(i));
                     dataset.addSeries(file[i]+s.valueOf(i),data);
+                    
                    }
                 else
                    {//bdataset.removeSeries(file[i]+s.valueOf(i));
-                    bdataset.addSeries(file[i]+s.valueOf(i),bdata);
+                      bdataset.addSeries(file[i]+s.valueOf(i),bdata);
                     }
                }
               }
