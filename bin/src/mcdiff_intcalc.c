@@ -280,8 +280,10 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
             msfdipy=msfdipy-Qvec(2)*Qmsfdip/Q;
             msfdipz=msfdipz-Qvec(3)*Qmsfdip/Q;
 
-            if (fabs(norm(msfx)+norm(msfy)+norm(msfz)-msf2)>0.001){fprintf(stderr,"ERROR mcdiff: internal calculation of MSF wrong, contact Martin Rotter\n");exit(EXIT_FAILURE);}
-            if (fabs(norm(msfdipx)+norm(msfdipy)+norm(msfdipz)-msf2dip)>0.001){fprintf(stderr,"ERROR mcdiff: internal calculation of MSF wrong, contact Martin Rotter\n");exit(EXIT_FAILURE);}
+            if (fabs((norm(msfx)+norm(msfy)+norm(msfz)-msf2)/(msf2+0.00001))>0.01){fprintf(stderr,"Q=(%g %g %g) msf^2=%g |msfperp|^2=%g\n",Qvec(1),Qvec(2),Qvec(3),msf2,norm(msfx)+norm(msfy)+norm(msfz));
+                                                                   fprintf(stderr,"ERROR mcdiff (%i %i %i): internal calculation of MSF wrong, contact Martin Rotter\n",hi,ki,li);exit(EXIT_FAILURE);}
+            if (fabs((norm(msfdipx)+norm(msfdipy)+norm(msfdipz)-msf2dip)/(msf2+0.00001))>0.01){fprintf(stderr,"Q=(%g %g %g) msfdip^2=%g |msfdipperp|^2=%g\n",Qvec(1),Qvec(2),Qvec(3),msf2dip,norm(msfdipx)+norm(msfdipy)+norm(msfdipz));
+                                                                   fprintf(stderr,"ERROR mcdiff (%i %i %i)dipint: internal calculation of MSF wrong, contact Martin Rotter\n",hi,ki,li);exit(EXIT_FAILURE);}
 
             //lorentzfactor*************************************************************
             float lorentzf=1;

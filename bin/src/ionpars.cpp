@@ -155,6 +155,7 @@ ionpars::ionpars(FILE * cf_file)
   {fgets(instr, MAXNOFCHARINLINE, cf_file);
    if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
         extract(instr,"IONTYPE",iontype,(size_t)MAXNOFCHARINLINE);
+        extract(instr,"nof_electrons",nof_electrons); //MR 120127
 
         extract(instr,"ALPHA",alphar);
         extract(instr,"BETA",betar);

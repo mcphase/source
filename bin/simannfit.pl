@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 use PDL;
 
@@ -222,8 +223,8 @@ print $delta;
      open(Fout,">results/simannfit.status");print Fout " ... simannfit stopped\n";
      print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
      print Fout "best fit:\n";
-  if($chisquared){print Fout "      sta=chi2=$sta (=1/".($#ssta+1)."sum deviations^2/experrors^2)\n    variance s2=$s2 (=1/".($#ssta+1)."sum deviations^2)\n";}
-          else {  print Fout "      sta=variance=s2=$s2 (=1/".($#ssta+1)."sum deviations^2)\n";}
+  if($chisquared){print Fout "      sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n    variance s2=$s2 (=sum deviations^2/".($#ssta+1).")\n";}
+          else {  print Fout "      sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")\n";}
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";
@@ -392,8 +393,8 @@ sub mydel  { my ($file1)=@_;
 sub read_write_statusfile {
      open(Fout,">./results/simannfit.status");$i=0;
      print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
-     if($chisquared){print Fout "Current sta=chi2=$sta (=1/".($#ssta+1)."sum deviations^2/experrors^2) sta of stored parameters=$stasave\n";}
-              else {print Fout " Current     sta=variance=s2=$s2 (=1/".($#ssta+1)."sum deviations^2)   sta of stored parameters=$stasave\n";}
+     if($chisquared){print Fout "Current sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2)) sta of stored parameters=$stasave\n";}
+              else {print Fout " Current     sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")   sta of stored parameters=$stasave\n";}
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";
