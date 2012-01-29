@@ -6,6 +6,7 @@
  */
 
 //package demo; 
+import java.awt.geom.Point2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -15,9 +16,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import javax.swing.*;
+
 //import javax.swing.JButton;
 //import javax.swing.SwingConstants;
 import java.io.*;
+import java.util.EventListener;
+import org.jfree.chart.ChartMouseListener;
+import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ChartPanel;
@@ -44,10 +49,39 @@ import org.jfree.ui.RefineryUtilities;
 /**
  * A bubble chart demo.
  */
-public class display extends ApplicationFrame implements KeyListener {
+public class display extends ApplicationFrame implements KeyListener,ChartMouseListener {
 
 static final int MAX_NOF_FILES = 10;
 static myStringfunc SF=new myStringfunc();
+static int xy[]={0,0,0,0};
+
+ public void chartMouseClicked(ChartMouseEvent e) {
+     xy[0]=e.getTrigger().getX();
+     xy[1]=e.getTrigger().getY();
+      XYPlot plot = (XYPlot) chart.getPlot();
+     double xa= plot.getDomainAxis().getLowerBound() ;
+        double ya= plot.getRangeAxis().getLowerBound();
+        double xe= plot.getDomainAxis().getUpperBound() ;
+        double ye= plot.getRangeAxis().getUpperBound();
+        double w= 500;
+        double h= 270;
+    double posx=xa+(xe-xa)*(xy[0]/w);
+    double posy=ya+(ye-ya)*(1-xy[1]/h);
+  //  System.out.println("attention - only correct when not resized window: x="+posx+" y="+posy);
+
+//Point2D p = chartPanel.translateScreenToJava2D(e.getTrigger().getPoint());
+Rectangle2D plotArea = chartPanel.getScreenDataArea();
+//Rectangle2D plotArea = chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
+//double chartX = plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
+//double chartY = plot.getRangeAxis().java2DToValue(p.getY(), plotArea, plot.getRangeAxisEdge());
+double chartX = plot.getDomainAxis().java2DToValue(xy[0], plotArea, plot.getDomainAxisEdge());
+double chartY = plot.getRangeAxis().java2DToValue(xy[1], plotArea, plot.getRangeAxisEdge());
+    System.out.println("x="+chartX+" y="+chartY);
+    }
+ public void chartMouseMoved(ChartMouseEvent e) {
+     //System.out.println("mouse moved");
+    }
+
 
   public void keyPressed(KeyEvent e) {}
   public void keyReleased(KeyEvent e) {}
@@ -162,7 +196,7 @@ static myStringfunc SF=new myStringfunc();
  static DefaultXYZDataset bdataset;
  static DefaultIntervalXYDataset dataset;
  static JFreeChart chart;
- static JPanel chartPanel;
+ public ChartPanel chartPanel;
 // static JFrame displayFrame;
 
    /**
@@ -177,6 +211,7 @@ static myStringfunc SF=new myStringfunc();
         dataset = new DefaultIntervalXYDataset();
         JFreeChart chart = createChart(dataset);
         ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.addChartMouseListener(this);
 
         chartPanel.setDomainZoomable(true);
         chartPanel.setRangeZoomable(true);
@@ -200,6 +235,7 @@ static myStringfunc SF=new myStringfunc();
          //bRot.list();
         //add(bRot1);
         //add(bRot);
+
 
 //   bRot.addActionListener(new ActionListener(){
 //    public void actionPerformed(ActionEvent ed){
@@ -237,6 +273,7 @@ static myStringfunc SF=new myStringfunc();
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
+      //  plot.setDomainGridlinesVisible(true);
         bdataset = new DefaultXYZDataset();
 
 

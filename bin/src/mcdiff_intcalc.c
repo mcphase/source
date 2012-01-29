@@ -280,11 +280,13 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
             msfdipy=msfdipy-Qvec(2)*Qmsfdip/Q;
             msfdipz=msfdipz-Qvec(3)*Qmsfdip/Q;
 
-            if (fabs((norm(msfx)+norm(msfy)+norm(msfz)-msf2)/(msf2+0.00001))>0.01){fprintf(stderr,"Q=(%g %g %g) msf^2=%g |msfperp|^2=%g\n",Qvec(1),Qvec(2),Qvec(3),msf2,norm(msfx)+norm(msfy)+norm(msfz));
-                                                                   fprintf(stderr,"ERROR mcdiff (%i %i %i): internal calculation of MSF wrong, contact Martin Rotter\n",hi,ki,li);exit(EXIT_FAILURE);}
-            if (fabs((norm(msfdipx)+norm(msfdipy)+norm(msfdipz)-msf2dip)/(msf2+0.00001))>0.01){fprintf(stderr,"Q=(%g %g %g) msfdip^2=%g |msfdipperp|^2=%g\n",Qvec(1),Qvec(2),Qvec(3),msf2dip,norm(msfdipx)+norm(msfdipy)+norm(msfdipz));
+            if (fabs((norm(msfx)+norm(msfy)+norm(msfz)-fabs(msf2))/(fabs(msf2)+0.0001))>0.01){fprintf(stderr,"Q=(%g %g %g) msf^2=%g |msfperp|^2=%g\n",Qvec(1),Qvec(2),Qvec(3),msf2,norm(msfx)+norm(msfy)+norm(msfz));
+                                                                   fprintf(stderr,"ERROR mcdiff 1(%i %i %i): internal calculation of MSF wrong, contact Martin Rotter\n",hi,ki,li);exit(EXIT_FAILURE);}
+            msf2=fabs(norm(msfx)+norm(msfy)+norm(msfz));
+            if (fabs((norm(msfdipx)+norm(msfdipy)+norm(msfdipz)-fabs(msf2dip))/(fabs(msf2dip)+0.0001))>0.01){fprintf(stderr,"Q=(%g %g %g) msfdip^2=%g |msfdipperp|^2=%g\n",Qvec(1),Qvec(2),Qvec(3),msf2dip,norm(msfdipx)+norm(msfdipy)+norm(msfdipz));
                                                                    fprintf(stderr,"ERROR mcdiff (%i %i %i)dipint: internal calculation of MSF wrong, contact Martin Rotter\n",hi,ki,li);exit(EXIT_FAILURE);}
-
+            msf2dip=fabs(norm(msfdipx)+norm(msfdipy)+norm(msfdipz));
+            
             //lorentzfactor*************************************************************
             float lorentzf=1;
             sin2theta = 2.0 * sintheta * sqrt(1.0 - sintheta * sintheta);

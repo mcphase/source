@@ -264,9 +264,9 @@ $hours=(time-$starttime)/3600;
 $estimate=sprintf("%6.2f",$hours*2*($#par+1));
 print "nofpts=$pointcounter points calculated in  $hours h.\n Time estimate for next level ".($searchlevel+1).": $estimate h\n";
 print Foutlevel "#$pointcounter points calculated in  $hours h.\n# Time estimate for next level ".($searchlevel+1).": $estimate h\n";
-print Foutlevel ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
-   if($chisquared){print Foutlevel "sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
-               else{print Foutlevel "sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
+print Foutlevel "#".($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+   if($chisquared){print Foutlevel "#sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
+               else{print Foutlevel "#sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
 print Foutlevel "#Mininimal found sta minsta=$stamin\n";
 print Foutlevel "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
 print Foutlocalmin "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
