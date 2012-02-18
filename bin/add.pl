@@ -53,7 +53,7 @@ $nn=-1;
    close Fin2;
 if ($nn<1) {die "ERROR add: too few points in file $file2\n";}
 $order=+1;if($x[1]-$x[0]<0){$order=-1;}
-
+#print $order."\n";
 #do addition
    unless (open (Fin1, $file1)){die "\n error:unable to open $file1\n";}
 $n=0;
@@ -63,8 +63,8 @@ open (Fout, ">range.out");
      {if ($line1=~/^\s*#/) {print Fout $line1;}
       else{ ($x1,$y1,$y1err,@numout)=getxy($line1,$colx1,$coly1,$coly1err);
 # find $n
-while($x1<$order*$x[$n]&$n>=0){--$n;}
-while($x1>$order*$x[$n+1]&$n<=$nn-1){++$n;}
+while($order*$x1<$order*$x[$n]&$n>=0){--$n;}
+while($order*$x1>$order*$x[$n+1]&$n<=$nn-1){++$n;}
 unless($n<0||$n>$nn-1) # do not extrapolate
            { # treat equal values correctly
               while($x[$n]==$x[$n+1]&$n<=$nn-1){++$n;}

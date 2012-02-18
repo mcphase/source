@@ -8,7 +8,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >1) 
 
 {print " program comment  used to comment lines from row1 to row2 with # \n";
- print " usage: comment col1 col2  *.*   \n  *.* .. filenname\n";
+ print " usage: comment row1 row2  *.*   \n  *.* .. filenname\n";
  print " alternatively: comment -t string *.*\n";
  print " comment all lines containing the text string\n";
  print " or alternatively: comment -n string *.*\n";
