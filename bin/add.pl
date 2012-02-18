@@ -63,13 +63,14 @@ open (Fout, ">range.out");
      {if ($line1=~/^\s*#/) {print Fout $line1;}
       else{ ($x1,$y1,$y1err,@numout)=getxy($line1,$colx1,$coly1,$coly1err);
 # find $n
-while($x1<=$order*$x[$n]&$n>0){--$n;}
-while($x1>=$order*$x[$n+1]&$n<$nn-1){++$n;}
-unless($n==0||$n==$nn-1) # do not extrapolate
+while($x1<$order*$x[$n]&$n>=0){--$n;}
+while($x1>$order*$x[$n+1]&$n<=$nn-1){++$n;}
+unless($n<0||$n>$nn-1) # do not extrapolate
            { # treat equal values correctly
-              while($x[$n]==$x[$n+1]&$n<$nn-1){++$n;}
-              while($x[$n]==$x[$n+1]&$n>0){--$n;}
-             #print $n;
+              while($x[$n]==$x[$n+1]&$n<=$nn-1){++$n;}
+              while($x[$n]==$x[$n+1]&$n>=0){--$n;}
+           unless($n<0||$n>$nn-1) # do not extrapolate
+             { #print $n;
               # do addition using linear interpolation
               $numout[$coly1-1]=$y1+$y[$n]+($x1-$x[$n])*($y[$n+1]-$y[$n])/($x[$n+1]-$x[$n]);
               if($coly1err>0&&$coly2err>0)
@@ -81,7 +82,12 @@ unless($n==0||$n==$nn-1) # do not extrapolate
 		   {print Fout $numout[$i]." ";++$i;}
                     print Fout "\n";
 
+              }
+             else
+             {$n=0;}
            }
+      else
+         {$n=0;}
           }
       }
       close Fin1;
