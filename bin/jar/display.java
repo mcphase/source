@@ -24,6 +24,7 @@ import java.util.EventListener;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -32,6 +33,8 @@ import org.jfree.chart.LegendItemSource;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.axis.Axis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -42,6 +45,11 @@ import org.jfree.data.xy.XYZDataset;
 import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
+import org.jfree.ui.RectangleEdge;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+
 
 //import com.sun.image.codec.jpeg.JPEGCodec;
 //import com.sun.image.codec.jpeg.JPEGImageEncoder;
@@ -49,38 +57,62 @@ import org.jfree.ui.RefineryUtilities;
 /**
  * A bubble chart demo.
  */
-public class display extends ApplicationFrame implements KeyListener,ChartMouseListener {
+public class display extends ApplicationFrame implements KeyListener {
 
 static final int MAX_NOF_FILES = 10;
 static myStringfunc SF=new myStringfunc();
 static int xy[]={0,0,0,0};
 
- public void chartMouseClicked(ChartMouseEvent e) {
+  static class MyChartMouseListener implements ChartMouseListener {
+ ChartPanel panel;
+
+        /**
+         * Creates a new mouse listener.
+         *
+         * @param panel  the panel.
+         */
+        public MyChartMouseListener(ChartPanel panel) {
+            this.panel = panel;
+        }
+        /**
+         * Callback method for receiving notification of a mouse click on a
+         * chart.
+         *
+         * @param event  information about the event.
+         */
+        public void chartMouseClicked(ChartMouseEvent e) {
      xy[0]=e.getTrigger().getX();
      xy[1]=e.getTrigger().getY();
       XYPlot plot = (XYPlot) chart.getPlot();
-     double xa= plot.getDomainAxis().getLowerBound() ;
-        double ya= plot.getRangeAxis().getLowerBound();
-        double xe= plot.getDomainAxis().getUpperBound() ;
-        double ye= plot.getRangeAxis().getUpperBound();
-        double w= 500;
-        double h= 270;
-    double posx=xa+(xe-xa)*(xy[0]/w);
-    double posy=ya+(ye-ya)*(1-xy[1]/h);
-  //  System.out.println("attention - only correct when not resized window: x="+posx+" y="+posy);
+        double ya= plot.getDomainAxis().getLowerBound() ;
+        double xa= plot.getRangeAxis().getLowerBound();
+        double ye= plot.getDomainAxis().getUpperBound() ;
+        double xe= plot.getRangeAxis().getUpperBound();
 
-//Point2D p = chartPanel.translateScreenToJava2D(e.getTrigger().getPoint());
-Rectangle2D plotArea = chartPanel.getScreenDataArea();
-//Rectangle2D plotArea = chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
-//double chartX = plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
-//double chartY = plot.getRangeAxis().java2DToValue(p.getY(), plotArea, plot.getRangeAxisEdge());
-double chartX = plot.getDomainAxis().java2DToValue(xy[0], plotArea, plot.getDomainAxisEdge());
-double chartY = plot.getRangeAxis().java2DToValue(xy[1], plotArea, plot.getRangeAxisEdge());
-    System.out.println("x="+chartX+" y="+chartY);
+Rectangle2D plotArea = panel.getScreenDataArea();
+//    System.out.println("x="+ plotArea.getMaxX()+" y="+ plotArea.getMaxY());
+//    System.out.println("x="+ plotArea.getMinX()+" y="+ plotArea.getMinY());
+//    System.out.println("x="+ xa +" y="+ ya);
+//    System.out.println("x="+ xe +" y="+ ye);
+//    System.out.println("x="+ xy[0] +" y="+ xy[1]);
+double chartX=(xy[0]-plotArea.getMinX())/(plotArea.getMaxX()-plotArea.getMinX())*(xe-xa)+xa;
+double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY())*(ye-ya)+ye;
+    System.out.println("x="+ chartX +" y="+ chartY);
     }
- public void chartMouseMoved(ChartMouseEvent e) {
-     //System.out.println("mouse moved");
+
+        /**
+         * Callback method for receiving notification of a mouse movement on a
+         * chart.
+         *
+         * @param event  information about the event.
+         */
+        public void chartMouseMoved(ChartMouseEvent event) {
+            // ignore
+        }
+
     }
+
+
 
 
   public void keyPressed(KeyEvent e) {}
@@ -211,7 +243,8 @@ double chartY = plot.getRangeAxis().java2DToValue(xy[1], plotArea, plot.getRange
         dataset = new DefaultIntervalXYDataset();
         JFreeChart chart = createChart(dataset);
         ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.addChartMouseListener(this);
+       // chartPanel.addChartMouseListener(this);
+        chartPanel.addChartMouseListener(new MyChartMouseListener(chartPanel));
 
         chartPanel.setDomainZoomable(true);
         chartPanel.setRangeZoomable(true);
@@ -427,6 +460,7 @@ protected static void reload_data(int i){    try{
                      data[3][j]=p.parseDouble(sx);
                      data[4][j]=p.parseDouble(sx)+p.parseDouble(sxerr);;
                      data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
+                   //System.out.println(data[0][j]+" "+data[3][j]+" "+j);
                    }
                    else
                    {bdata[1][j]=p.parseDouble(sx);
