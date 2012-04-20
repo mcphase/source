@@ -12,6 +12,7 @@ use as:
          [-middle]       middle point is taken (default)
          [-av]           points are averaged
          [-sum]           points are added
+         [-sumcol=12,13,14] but points in column 12,13,14 are added
 	 [-median]       median of points is calculated and kept
          [-dmin=0.4]    takes instead of 15 lines a variable number
                          of lines determined by the condition that
@@ -27,7 +28,12 @@ EOF
 @pars = @ARGV;
 if (join('',@pars) =~/\-/) {
   # see http://aplawrence.com/Unix/perlgetops.html for details of GetOptions
-  GetOptions("help"=>\$helpflag,"av"=>\$avflag,"median"=>\$medianflag,"sum"=>\$sumflag,"dmin=f"=>\$dmin);
+  GetOptions("help"=>\$helpflag,
+             "av"=>\$avflag,
+             "median"=>\$medianflag,
+             "sum"=>\$sumflag,
+             "sumcol=s"=>\$sumcol,
+             "dmin=f"=>\$dmin);
   usage() if $helpflag;
 }
 @ARGV=@p;while (join('',@pars) =~ /\-/){shift @ARGV;@pars = @ARGV;}
@@ -38,8 +44,10 @@ if ($avflag) {print "averaging ...\n";}
 elsif ($sumflag) {print "summing  ...\n";}
 elsif ($medianflag) {print "taking median ...\n";}
 else {print "taking middle point ...\n";}
+if ($sumcol){print "...but summing column $sumcol ...\n";@scol=split(",",$sumcol);}
 if ($dmin) {print "taking blocks of lines with data in column $n closer than $dmin\n";}
 else {print "taking $n lines\n";}
+
 --$n; # necessary because arrays indices start at 0 and not at 1
   foreach (@ARGV)
   {$file=$_;$ii=-1;
@@ -83,13 +91,14 @@ else {print "taking $n lines\n";}
    }
 
 sub emptyblock()
-{                  if ($avflag||$sumflag) {# here  average
-                                                  @numout=();
-                                                  for($i=0;$i<=$ii;++$i){for($k=0;$k<=$#numbers;++$k) {$numout[$k]+=$field[$i][$k];}}
-                                                  if($avflag){for($k=0;$k<=$#numbers;++$k) {$numout[$k]/=($ii+1);}}
-                                                 }
-                                    elsif ($medianflag) {@numout=();
-                                                  for($k=0;$k<=$#numbers;++$k) {
+{@numout=();
+ for($k=0;$k<=$#numbers;++$k) {$avfl=$avflag;$sumfl=$sumflag;$medianfl=$medianflag;
+                  if ($sumcol){foreach(@scol){if($_==$k+1){$sumfl=1;}}}
+                  if ($avfl||$sumfl) {# here  average
+                                                  for($i=0;$i<=$ii;++$i){$numout[$k]+=$field[$i][$k];}
+                                                  if($avflag){$numout[$k]/=($ii+1);}
+                                          }
+                                    elsif ($medianfl) {
                                                   $i=$ii;
                                                   while($i>1){$max=-1e10;$min=1e10;
                                                           for($kk=0;$kk<=$ii;++$kk)
@@ -102,13 +111,12 @@ sub emptyblock()
                                                    for($kk=0;$kk<=$ii;++$kk)
                                                           {if($field[$kk][$k]>-1e10&&$field[$kk][$k]<+1e10){$numout[$k]=$field[$kk][$k];}
                                                           }
-                                                                                           }
                                                  }
                                     else         {# here take middle point
                                                   $i=$ii/2;
-                                                  for($k=0;$k<=$#numbers;++$k) {$numout[$k]=$field[$i][$k];}
+                                                 $numout[$k]=$field[$i][$k];
                                                  }
-
+                                 }
                   $ii=0;$i=0;for($k=0;$k<=$#numbers;++$k){$field[$ii][$k]=$numbers[$k];} # put new line to field
 		   foreach (@numout)
 		   {print Fout $numout[$i]." ";++$i;}

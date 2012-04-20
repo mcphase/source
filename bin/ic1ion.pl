@@ -26,7 +26,7 @@ unless($line=~/\Q#!MODULE=ic1ion\E/){print "error: file $ARGV[0] does not start 
 ($Bx)=extract("Bx","$ARGV[0]");
 ($By)=extract("By","$ARGV[0]");
 ($Bz)=extract("Bz","$ARGV[0]");
-
+if($T==0){$T=1;}
 # set up mcdisp.mf
 if (open(Fin,"mcdisp.mf")) {@mcdispmf=<Fin>;close Fin;}
 open (Fout, ">mcdisp.mf");

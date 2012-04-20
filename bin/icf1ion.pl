@@ -21,7 +21,7 @@ unless (open(Fin,$ARGV[0])){print "error: file $ARGV[0] does not exist\n";exit(0
 $line=<Fin>;close Fin;
 unless($line=~/\Q#!MODULE=icf1ion\E/){print "error: file $ARGV[0] does not start with #!MODULE=icf1ion\n";exit(0);}
 # if yes then do also a mcdisp calculation to create icf1ion.trs ...
-
+if($T==0){$T=1;}
 ($T)=extract("T","$ARGV[0]");
 ($Bx)=extract("Bx","$ARGV[0]");
 ($By)=extract("By","$ARGV[0]");

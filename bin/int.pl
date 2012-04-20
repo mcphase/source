@@ -7,16 +7,32 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >1) 
 
-{print " program int  used to integrate columnx vs columny=f(x) in data file\n";
+{print STDOUT <<"EOF";
 
- print " integration is done point by point, the result goes to the data file,\n";
- print " the total integral INT=integral f(x)dx is printed to stdout and set to the \n";
- print " environment variable MCPHASE_INT\n";
- print " usage: int [-m] colx coly  *.*   \n colx=columnx, coly=columny \n *.* .. filenname\n";
- print "  option -m: n-th moments are calculated according to mu_1=integral x f(x)dx/INT\n";
- print "             mu_n=integral (x-mu_1)^n f(x)dx/INT\n";
- print "             the results go to stdout and environment variables MCPHASE_INT_MU_1,\n";
- print "             MCPHASE_INT_MU_2,MCPHASE_INT_MU_3 ... are set\n";
+
+program int  used to integrate columnx vs columny=f(x) in data file
+
+integration is done point by point, the result goes to the data file,
+the total integral INT=integral f(x)dx is printed to stdout and set to the 
+environment variable MCPHASE_INT.
+if an error column is given, errors dy_i are summed as
+ err=sqrt(sum_i dy_i^2 (x_i-x_i-1)^2)
+and MCPHASE_INT_ERR=err is set.
+
+usage: int [-m] colx coly[ecolyerr]  *.*
+
+input:
+  colx, coly, colyerr  columns containing x and y=f(x) and yerror values
+  *.*                  filennames
+
+option -m: n-th moments are calculated according to mu_1=integral x f(x)dx/INT
+           mu_n=integral (x-mu_1)^n f(x)dx/INT
+
+output:
+the results go to stdout and environment variables MCPHASE_INT_MU_1,
+MCPHASE_INT_MU_2,MCPHASE_INT_MU_3 ... are set
+
+EOF
  exit 0;}
 
  
@@ -24,13 +40,16 @@ unless ($#ARGV >1)
 $colx=$ARGV[0];shift @ARGV;
 $calcm=0;if($colx=~/-m/){$colx=$ARGV[0];shift @ARGV;$calcm=1;}
 $coly=$ARGV[0];shift @ARGV;
+if ($coly=~/e/){$_=$coly;($colyerr)=/e(\d*)/;($coly)=/(\d*)e/;}else{$colyerr=0;}
+
+
 
   foreach (@ARGV)
   {$file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file;
 
-  $integral=0;$j=0;$mu[1]=0;
+  $integral=0;$j=0;$mu[1]=0;$muerr2[1]=0;$err2=0;
     open (Fout, ">range.out");
    while($line=<Fin>)
      {if ($line=~/^\s*#/) {print Fout $line;}
@@ -39,14 +58,19 @@ $coly=$ARGV[0];shift @ARGV;
             ++$j;
                  unless(0==($numbers[$colx-1]-$numbers1[$colx-1]))
 		  {@numout=@numbers;
-                   $d=0.5*($numbers[$coly-1]+$numbers1[$coly-1])*($numbers[$colx-1]-$numbers1[$colx-1]);
-                   $integral+=$d;
-                   $mu[1]+=$d*0.5*($numbers[$colx-1]+$numbers1[$colx-1]);
+                   $dx=($numbers[$colx-1]-$numbers1[$colx-1]);
+                   $y=0.5*($numbers[$coly-1]+$numbers1[$coly-1]);
+                   $integral+=$y*$dx;
+                   $mu[1]+=$y*$dx*0.5*($numbers[$colx-1]+$numbers1[$colx-1]);
+                   if($colyerr>0)
+                   {$dy2=$numbers[$colyerr-1]*$numbers[$colyerr-1]/4+$numbers1[$colyerr-1]*$numbers1[$colyerr-1]/4;
+                   $err2+=$dy2*$dx*$dx;
+                   }
 		  } 
-	    @numbers1=@numbers;$i=0;
-            foreach (@numbers)
-		  {++$i;if ($i!=$coly){print Fout $numbers[$i-1]." ";}else{print Fout $integral." ";}
-		  }     
+	    @numbers1=@numbers;
+            $numbers[$coly-1]=$integral;
+            if($colyerr>0){$numbers[$colyerr-1]=sqrt($err2);}
+            $i=0;foreach (@numbers){++$i;print Fout $numbers[$i-1]." ";}     
             print Fout "\n";
            }
       }
@@ -75,6 +99,7 @@ $coly=$ARGV[0];shift @ARGV;
                 }
    $i=0; foreach(@mu){$mu[$i]/=$integral;++$i}
    print " x=col".$colx." y=f(x)=col".$coly." INT=".$integral;
+  if($colyerr>0){$err=sqrt($err2);print " INT_ERROR=".$err;}
    for($i=1;$i<=$nmax;++$i){print " mu_$i=".$mu[$i];}
    print ">\n";
        unless (rename "range.out",$file)
@@ -92,11 +117,13 @@ $coly=$ARGV[0];shift @ARGV;
 # for setting environment variables
 open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
 print Fout "set MCPHASE_INT=$integral\n";
+if($colyerr>0){print Fout "set MCPHASE_INT_ERR=".$err."\n";}
 for($i=1;$i<=$nmax;++$i){print Fout "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
 close Fout;
 
 open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
 print Fout "export MCPHASE_INT=$integral\n";
+if($colyerr>0){print Fout "export MCPHASE_INT_ERR=".$err."\n";}
 for($i=1;$i<=$nmax;++$i){print Fout "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
 close Fout;
 

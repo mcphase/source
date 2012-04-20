@@ -31,9 +31,9 @@ print STDOUT << "EOF";
 <html>
 <head>
  <title>$date</title>
-<style type="text/css">
-.r { font-family:'Times';font-style=italic; }
-body { font-family:'Courier',monospace; }
+<style type="text/css" >
+.r { font-family:'Courier',monospace;white-space:pre; }
+body { font-family:'Times',monospace;font-style=italic;white-space:pre; }
 </style>
 
 
@@ -70,11 +70,23 @@ while (@ARGV)
         close Fin1;unlink($arg[$#arg].".htm");
        }
         else
-       {$line='<span class="r">'.$line.'</span><br>'; #print comments in style "r"
+       {# replace html command <...> by &aaa& ... &bbb&
+        $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
+                         dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
+                         h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
+                         map|meta|noframes|noscript|object|ol|optgroup|option|
+                         p|table|tbody|textarea|tfoot|th|title|tr|tt|ul|var
+                  )(.*?)\>/&aaa&\1\2\3&bbb&/g;
+        $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
+       # $line=~s/\<(img.*)\>/&aaa&\1&bbb&/g;           #          <img ...>
+       
+        $line=~s/>/&gt /g;$line=~s/</&lt /g; # remove < and > signs
+        $line=~s/&aaa&/\</g;$line=~s/&bbb&/\>/g;# replace back &aaa& ... &bbb& to < ... >
+       $line=~s/\n/<br>\n/g;  # print comments in style "c" (default)
        print  $line;
        }
     }else{
-   $line=~s/\n/<br>\n/g;  # print commands in style "c" (default)
+   $line='<span class="r">'.$line.'</span><br>'; #print commands in style "r"
    print  $line;
    }
   
