@@ -606,6 +606,19 @@ console (stdout)the formula for a Lorentz curve is:
 ${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+x^2/fwhm^2)}$
 \item [\prg plotbook *.ps:] program plotbook to arrange many (single side) ps-images to one %%@
 booklet (needs: latex, pstops,ghostscript, perl)
+\item [\prg script2html\index{script2html} calc1.bat calc2.bat ...] This program creates a html file from scripts containing just the text
+ in the scripts.
+\begin{verbatim}
+ input: calc1.bat, calc2.bat ...    scripts (bat files)
+                                   (must be located in the current directory)
+ output: stdout      ...........   html file created from the scripts
+                                   (use ">" to pipe into file)
+ example:
+
+ script2html calc.bat notes.txt > report.html
+
+ [creates the html file report.html from files calc.bat and notes.txt]
+\end{verbatim}
 \item [\prg substitute\index{substitute} oldtext newtext *.*:] replaces every instance of %%@
 oldtext with newtext in file(s) *.*
 \end{description}
