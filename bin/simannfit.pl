@@ -232,7 +232,12 @@ print $delta;
      print Fout "Time since start of simannfit: $est hours (limit:$maxtimest), $stepnumber steps (limit:$maxstep)\n";
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
-     $i=0;foreach(@par){write Fout;++$i;}
+     $i=0;     foreach(@par){$parcent=int(10*($par[$i]-$parmin[$i])/(1e-10+$parmax[$i]-$parmin[$i]));
+                        print Fout "|";for($jsw=0;$jsw<=9;++$jsw){
+                                       if ($jsw==$parcent){print Fout "*";}else{print Fout "-";}
+                                                                 }
+                        print Fout "|";print Fout sprintf ("%s [%+e,%+e,%+e,%+e,%+e]\n",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i]);
+                   ++$i;}
   if($chisquared){
      print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens restart and try again):\n";
 $Fij=$delta x matinv($V) ;
@@ -402,7 +407,12 @@ sub read_write_statusfile {
      print Fout "Time since start of simannfit: $est hours (limit:$maxtimest), $stepnumber steps (limit:$maxstep)\n";
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
-     foreach(@par){write Fout;++$i;}
+     foreach(@par){$parcent=int(10*($par[$i]-$parmin[$i])/(1e-10+$parmax[$i]-$parmin[$i]));
+                        print Fout "|";for($jsw=0;$jsw<=9;++$jsw){
+                                       if ($jsw==$parcent){print Fout "*";}else{print Fout "-";}
+                                                                 }
+                        print Fout "|";print Fout sprintf ("%s [%+e,%+e,%+e,%+e,%+e]\n",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i]);
+                   ++$i;}
      close Fout;
 
                           }

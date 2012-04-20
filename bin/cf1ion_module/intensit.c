@@ -546,9 +546,9 @@ if( *(FILENAME(kristallfeld)+16) != *(ORTHO+16) ){
    curtime=time(NULL); loctime=localtime(&curtime); fprintf(ewev,"%s",asctime(loctime));
     fprintf(ewev,"#J=value {atom-file}  <Jx> <Jy>) <Jz>   \n");
     fprintf(ewev,"#!J= %4.1f sipffile=%s Jx=%6.3f Jy=%6.3f Jz=%6.3f\n",j,INFILE(kristallfeld),
+  magnetm(mat_Jx,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj,
   magnetm(mat_Jy,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj,
-  magnetm(mat_Jz,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj,
-  magnetm(mat_Jx,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj);
+  magnetm(mat_Jz,setup,ewproblem,kristallfeld,B1(iteration),B2(iteration),B3(iteration),temperatur)/gj);
     fprintf(ewev,"#! Eigenvalues= ");
 
     for( zeile=1 ; zeile<=anz_niveaus ; ++zeile )
