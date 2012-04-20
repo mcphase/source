@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import javax.swing.*;
+import javax.imageio.ImageIO;
 
 //import javax.swing.JButton;
 //import javax.swing.SwingConstants;
@@ -57,7 +58,7 @@ import java.text.NumberFormat;
 /**
  * A bubble chart demo.
  */
-public class display extends ApplicationFrame implements KeyListener {
+public class display extends ApplicationFrame implements KeyListener,WindowListener  {
 
 static final int MAX_NOF_FILES = 10;
 static myStringfunc SF=new myStringfunc();
@@ -99,7 +100,6 @@ double chartX=(xy[0]-plotArea.getMinX())/(plotArea.getMaxX()-plotArea.getMinX())
 double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY())*(ye-ya)+ye;
     System.out.println("x="+ chartX +" y="+ chartY);
     }
-
         /**
          * Callback method for receiving notification of a mouse movement on a
          * chart.
@@ -111,6 +111,31 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
         }
 
     }
+
+
+
+public void windowClosing(WindowEvent e) {
+         windowclose();
+        }
+static public void windowclose(){
+        if(jpgfilename.length()!=0)
+         {  BufferedImage image= chart.createBufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB,null);
+           try {
+                // write the image as a jpg
+                ImageIO.write(image,"jpg",new File(jpgfilename));
+              } catch(Exception f) {
+                f.printStackTrace();
+              }
+          }
+                //dispose();
+                System.exit(0);
+}
+        public void windowOpened(WindowEvent e) {}
+        public void windowActivated(WindowEvent e) {}
+        public void windowIconified(WindowEvent e) {}
+        public void windowDeiconified(WindowEvent e) {}
+        public void windowDeactivated(WindowEvent e) {}
+        public void windowClosed(WindowEvent e) {}
 
 
 
@@ -153,13 +178,23 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
                                   // repaint();
 //System.out.println("Key pressed ");
                                    }
+
+      
+                                   
+
   public static void main(String[] args) {
-          String ss; String s;
+      xmin=1e30;xmax=-1e30;detymin=true;detymax=true;doexit=false;
+      ymin=1e30;ymax=-1e30;detxmin=true;detxmax=true;
+           String ss; String s;
       if (args.length<1)
       {System.out.println("- too few arguments...\n");
        System.out.println("  program display - show and watch data file by viewing a xy graphic on screen\n\n");
-       System.out.println("use as:  display xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]\n\n");
+       System.out.println("use as:  display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]\n\n");
        System.out.println("         xcol,ycol ... column to be taken as x-, y- axis\n in a lineplot");
+       System.out.println("        when using option -o file.jpg the application creates a jpg file on exiting\n");
+       System.out.println("        when using option -xmin 23.3 the application sets the minimum of the display xaxis to 23.3\n");
+       System.out.println("        similar are options -xmax -ymin -ymax ....\n");
+       System.out.println("        when using option -c file.jpg the application only creates a jpg file and exits immediatly\n");
        System.out.println("        if optional errorcolumns are added then instead of lines symbols and errorbars are shown\n");
        System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to\n");
        System.out.println("	  bubblecolumn are shown (toggle bubblesize with 's' and 'b')\n");
@@ -182,10 +217,44 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
        //      System.out.println(sx+" "+sy);
        //      p.valueOf(strLine);
        //    double[] myDatax = {};
-       int j=0;
+       int j=0;int k=0; jpgfilename="";
        String title="display";
        s=args[0];s=SF.TrimString(s); // command line arguments are treated here
-       for(int i=0;s.length()>0;	i+=0)
+       //look if options are present
+       while(SF.TrimString(s).substring(0, 1).equalsIgnoreCase("-"))
+          {// yes there are options
+           if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-o")) // option "-o file.jpg"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             jpgfilename=SF.FirstWord(s);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+           else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-c")) // option "-c file.jpg"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             jpgfilename=SF.FirstWord(s);doexit=true;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-xmin")) // option "-xmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detxmin=false;ss=SF.FirstWord(s);xmin=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-xmax")) // option "-xmax 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detxmax=false;ss=SF.FirstWord(s);xmax=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-ymin")) // option "-ymin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detymin=false;ss=SF.FirstWord(s);ymin=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-ymax")) // option "-ymax 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detymax=false;ss=SF.FirstWord(s);ymax=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+          }
+       for(int i=k;s.length()>0;	i+=0)
        {Integer pp;
        ss=SF.FirstWord(s);
        colx[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
@@ -201,25 +270,38 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
        s=SF.DropWord(s); if (s.length()==0&&i<args.length-1){++i;s=args[i];s=SF.TrimString(s);}
        }noffiles=j;
         display demo = new display(title);
+       
+        
         demo.pack();
        // RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);
         final Thread updater = demo.new UpdaterThread();
         //updater.setDaemon(true);
         updater.start();
-    } //main
-
+        Runtime.getRuntime().addShutdownHook(new Thread()
+                    {    @Override
+                         public void run() { 
+                       //  System.out.println("Exiting");
+                                           }
+                    });
+        
+      if(doexit==true){windowclose();
+                       }
+     } //main
 // JButton bRot=new JButton("save display.jpg");                       //erstellt einen Button
 // Box.Filler bRot1=new Box.Filler (new Dimension(350,10),new Dimension(350,10),new Dimension(370,10));                       //erstellt einen Button
 // AbstractButton bRot= new AbstractButton();
  static int noffiles;
  static String[] file;
+ static String jpgfilename;
  static long[] lastmod;
  static int[] colx;
  static int[] coly;
  static int[] colxerr;
  static int[] colyerr;
  static double scale;
+ static double xmin,xmax,ymin,ymax;
+ static boolean detxmin,detymin,detxmax,detymax,doexit;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
@@ -229,23 +311,28 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
  static DefaultIntervalXYDataset dataset;
  static JFreeChart chart;
  public ChartPanel chartPanel;
+ static ChartPanel panel;
 // static JFrame displayFrame;
-
+  
    /**
      * A demonstration application showing a bubble chart.
      *
      * @param title  the frame title.
      */
+          
  public display(String title) {
         super(title);
         addKeyListener(this);
+        //addWindowListener(new MyWindowListener(this,chartPanel));
+        //addWindowListener(this);
         //displayFrame= new JFrame();
         dataset = new DefaultIntervalXYDataset();
         JFreeChart chart = createChart(dataset);
         ChartPanel chartPanel = new ChartPanel(chart);
+        panel= chartPanel;
        // chartPanel.addChartMouseListener(this);
         chartPanel.addChartMouseListener(new MyChartMouseListener(chartPanel));
-
+                         
         chartPanel.setDomainZoomable(true);
         chartPanel.setRangeZoomable(true);
         //bRot.setHorizontalAlignment(SwingConstants.LEFT);
@@ -268,8 +355,6 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
          //bRot.list();
         //add(bRot1);
         //add(bRot);
-
-
 //   bRot.addActionListener(new ActionListener(){
 //    public void actionPerformed(ActionEvent ed){
 //    try{
@@ -289,7 +374,10 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
 //    }
 
 //      } });
-                                               
+
+        
+
+                                 
  }// constructor
 
     /**
@@ -363,9 +451,13 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
 
         reload_data(i);
                                }
+     rangeAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
+     domainAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
+
      update_legend();
-        return chart;
+     return chart;
     }
+
 
       /**
      * A thread for updating the dataset.
@@ -455,16 +547,24 @@ protected static void reload_data(int i){    try{
                    { if(clxerr==0){sxerr="0";}
                      if(clyerr==0){syerr="0";}
                      data[0][j]=p.parseDouble(sy);
+                     if (detymin&data[0][j]<ymin){ymin=data[0][j];}
+                     if (detymax&data[0][j]>ymax){ymax=data[0][j];}
                      data[1][j]=p.parseDouble(sy)+p.parseDouble(syerr);
                      data[2][j]=p.parseDouble(sy)-p.parseDouble(syerr);
                      data[3][j]=p.parseDouble(sx);
+                     if (detxmin&data[3][j]<xmin){xmin=data[3][j];}
+                     if (detxmax&data[3][j]>xmax){xmax=data[3][j];}
                      data[4][j]=p.parseDouble(sx)+p.parseDouble(sxerr);;
                      data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
                    //System.out.println(data[0][j]+" "+data[3][j]+" "+j);
                    }
                    else
                    {bdata[1][j]=p.parseDouble(sx);
+                     if (detxmin&bdata[1][j]<xmin){xmin=bdata[1][j];}
+                     if (detxmax&bdata[1][j]>xmax){xmax=bdata[1][j];}
                     bdata[0][j]=p.parseDouble(sy);
+                     if (detymin&bdata[0][j]<ymin){ymin=bdata[0][j];}
+                     if (detymax&bdata[0][j]>ymax){ymax=bdata[0][j];}
                     bdata[2][j]=p.parseDouble(syerr);
                     if (bdata[2][j]<0){bdata[2][j]=0;}
                     bdata[2][j]=scale*Math.sqrt(bdata[2][j]);

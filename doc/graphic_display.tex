@@ -34,15 +34,25 @@ every 500 milliseconds. In this way it is possible to watch online, how programs
 calculate data. The output of display\index{display} may contain lines to tune the display\index{display} output, %%@
 such as
 \begin{verbatim}
-	 #! displayytext=intensity
+	most general usage: 
 
-	 #! displayxtext=meV 
+ display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] file [xcol1[] ycol1[] file1 ...]
 
-	 #! displaylines=true 
 
-	 #! displaytitle=My new Graph
-
-	 #! displaylegend=false 
+xcol,ycol ... column to be taken as x-, y- axis  in a lineplot
+when using option -o file.jpg the application creates a jpg file on exiting
+when using option -xmin 23.3 the application sets the minimum of the display xaxis to 23.3
+similar are options -xmax -ymin -ymax ....
+when using option -c file.jpg the application only creates a jpg file and exits immediatly
+if optional errorcolumns are added then instead of lines symbols and errorbars are shown
+if optional bubblecolumns are added then instead of lines bubbles with area corresponding to
+bubblecolumn are shown (toggle bubblesize with 's' and 'b')
+(toggle lines also with '-' key))
+filename ..... filename of datafile
+Data files may contain lines to tune the display output, such as
+#! displaytitle=My new Graph
+#! displayytext=intensity
+#! displayxtext=meV 
 \end{verbatim} 
 
 \item [displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei] works similar as display, however
