@@ -7,9 +7,9 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >0) 
 
-{print " program ln used to calculate natural logarithm ln(col) from  a  column \n";
+{print " program lncol used to calculate natural logarithm ln(col) from  a  column \n";
 
- print " usage: ln col   *.*   \n col=column \n *.* .. filenname\n";
+ print " usage: lncol col   *.*   \n col=column \n *.* .. filenname\n";
 
  exit 0;}
 

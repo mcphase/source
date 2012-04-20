@@ -32,6 +32,7 @@ if ($#ARGV<1)
 
    Output: - sdtoud: best coefficients a_i  and standard deviation
              sta=sum_k (y_k-sum_i a_i*x_ik)^2
+           - environment variable MCPHASE_STA: standard deviation sta
            - file: new column col+n+1 contining sum_i a_i*x_ik
 \n";
 
@@ -97,6 +98,15 @@ $n=$ARGV[0]; shift @ARGV;
      }
       print ">\n";
   }
+
+# for setting environment variables
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+print Fout "set MCPHASE_STA=$sta\n";
+close Fout;
+
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+print Fout "export MCPHASE_STA=$sta\n";
+close Fout;
 
 # Read 2D numeric data, skipping comment lines.
 #     sum_k x_jk y_k = sum_i a_i (sum_k x_ik * x_jk)

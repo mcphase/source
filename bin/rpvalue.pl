@@ -8,10 +8,9 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >1) 
 
 {print " program rpvalue  used to calculate the rpvalue from 2 columns in a file\n";
-
- print " the rpvalue is defined as\n 100*[sum_{allpoints} abs(col2-col1)]/[sum_{allpoints}abs(col1)]\n";
-
  print " usage: rpvalue col1 col2  *.*   \n col=columns \n *.* .. filenname\n";
+ print " the rpvalue is defined as\n 100*[sum_{allpoints} abs(col2-col1)]/[sum_{allpoints}abs(col1)]\n";
+ print " the result ist printed to stdout and stored in environment variabele MCPHASE_RP\n";
 
  exit 0;}
 
@@ -57,7 +56,14 @@ $col2=$ARGV[0];shift @ARGV;
    print ">\n";
 
    }
+# for setting environment variables
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+print Fout "set MCPHASE_RP=$rpvalue\n";
+close Fout;
 
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+print Fout "export MCPHASE_RP=$rpvalue\n";
+close Fout;
 
 
 #\end{verbatim} 

@@ -9,7 +9,7 @@ use Math::Trig;
 
 unless ($#ARGV >0) 
 
-{print " program lorentzcol  used to calculate a gaussian from a column\n";
+{print " program lorentzcol  used to calculate a lorentzian from a column\n";
  print " usage: lorentzcol col position fwhm area *.*   \n col=column\n *.* .. filenname\n
 
 the formula for a lorentz curve is:

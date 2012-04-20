@@ -26,6 +26,8 @@ unless ($#ARGV >4)
                  As output the datafile is given, however with a scaled column
                  d2 and 2 additional columns are added containing the calculated
                  results of the convolution and the original unscaled data.
+                 standard deviation, area of curves etc are output to
+                 stdout and to environment variables MCPHASE_STA etc.
 		     
 		     Formula: f(x)=sum_i yi c(x-xi) , 
 		     
@@ -247,6 +249,24 @@ EOF
  print  sprintf("#!column %i scaled by\n#!scale_factor=%+10.9e\n",$d2,$scale);
  print  sprintf("#!sta_of_normalized_curves=%+10.9e\n",$stanorm);
 }
+
+# for setting environment variables
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+print Fout "set MCPHASE_STA=$sta\n";
+print Fout "set MCPHASE_AREADATA=$areadata\n";
+print Fout "set MCPHASE_AREACALC=$areacalc\n";
+print Fout "set MCPHASE_SCALEFACTOR=$scale\n";
+print Fout "set MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
+close Fout;
+
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+print Fout "export MCPHASE_STA=$sta\n";
+print Fout "export MCPHASE_AREADATA=$areadata\n";
+print Fout "export MCPHASE_AREACALC=$areacalc\n";
+print Fout "export MCPHASE_SCALEFACTOR=$scale\n";
+print Fout "export MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
+close Fout;
+
 print STDOUT << "EOF";
 #
 #                     McPhase Software

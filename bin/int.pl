@@ -9,8 +9,8 @@ unless ($#ARGV >1)
 
 {print " program int  used to integrate columnx vs columny in data file\n";
 
- print " integration is done point by point\n";
-
+ print " integration is done point by point, result goes to stdout and \n";
+ print " environment variable MCPHASE_INT\n";
  print " usage: int colx coly  *.*   \n colx=columnx, coly=columny \n *.* .. filenname\n";
 
  exit 0;}
@@ -88,6 +88,13 @@ $coly=$ARGV[0];shift @ARGV;
 
    }
 
+# for setting environment variables
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+print Fout "set MCPHASE_INT=$integral\n";
+close Fout;
 
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+print Fout "export MCPHASE_INT=$integral\n";
+close Fout;
 
 #\end{verbatim} 
