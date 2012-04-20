@@ -37,8 +37,6 @@ body { font-family:'Courier',monospace; }
 </style>
 
 
-</style>
-
 </head><body>
  ... this document was created $date <br>
 ...  in directory $dir<br>
@@ -80,7 +78,7 @@ while (@ARGV)
    print  $line;
    }
   
-   }} print "</p>\n";
+   }} # print "</p>\n";
 close Fin; 
 } 
 close Fout;
