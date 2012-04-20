@@ -6,7 +6,7 @@ unless ($#ARGV >=0)
 {print STDOUT << "EOF";
  program script2html used to create html documentation from McPhase scripts
 
- usage: script2html calc1.bat calc2.bat ...
+ usage: script2html [options] calc1.bat [options] calc2.bat ...
 
  This program creates a html file from scripts containing just the text
  in the scripts.
@@ -15,6 +15,9 @@ unless ($#ARGV >=0)
                                    (must be located in the current directory)
  output: stdout      ...........   html file created from the scripts
                                    (use ">" to pipe into file)
+
+ options: -fromline 3 ..........  only part of the file is html coded starting at line 3
+          -toline   10 .........  only part of the file is html coded (until line 10)
  example:
 
  script2html calc.bat notes.txt > report.html
@@ -30,7 +33,10 @@ print STDOUT << "EOF";
  <title>$date</title>
 <style type="text/css">
 .r { font-family:'Times';font-style=italic; }
-.c { font-family:'Courier',monospace; }
+body { font-family:'Courier',monospace; }
+</style>
+
+
 </style>
 
 </head><body>
@@ -39,22 +45,46 @@ print STDOUT << "EOF";
 ...  by the command: script2html @ARGV <br><br>
 EOF
 @ARGV=map{glob($_)}@ARGV;$i=0;
-foreach (@ARGV) 
-{$file=$_; ++$i;
+while (@ARGV)
+{$linetext="";
+ $fromline=1;if($ARGV[0]=~/-fromline/){shift @ARGV; $fromline=$ARGV[0];shift @ARGV;$linetext=" from line $fromline";}
+ $toline=1e10;if($ARGV[0]=~/-toline/){shift @ARGV; $toline=$ARGV[0];shift @ARGV;$linetext=$linetext." up to line $toline";}
+ $file=$ARGV[0];shift @ARGV; ++$i;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "<hr>Source File $i:<h1>".$file."</h1>\n";
-   print '<p class="c">';
-   while($line=<Fin>)
-   {if ($line=~/^\s*#/||$line=~/^\s*rem/){
-    $line='<span class="r">'.$line.'</span><br>'
+   print "\n<hr>Source File $i$linetext:<h1>".$file."</h1>\n";
+   #print '<p class="c">';
+   $lnr=0;
+   while(($line=<Fin>)&&$lnr<$toline)
+   {++$lnr;if($lnr>=$fromline){
+    if ($line=~/^\s*#/||$line=~/^\s*rem/)
+     { # if the line starts with a comment
+      if($line=~/.*\<\s*script2html.*\>/)
+       { # look if another file should be included
+         # if yes run script2htlm on this file
+         ($arguments)=($line=~m/.*\<\s*script2html(.*)\>/);
+          @arg=split(" ",$arguments);
+         system("script2html $arguments >".$arg[$#arg].".htm");
+         open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
+            until($line1=~/.*by the command: script2html/){$line1=<Fin1>;}
+            while($line1=<Fin1>){unless($line1=~/.*\<\/body\>\<\/html\>/){
+                                 $line1=~s/\<hr\>Source File\s*/\<hr\>Source File $i\./;
+                                 print $line1;}}
+        close Fin1;unlink($arg[$#arg].".htm");
+       }
+        else
+       {$line='<span class="r">'.$line.'</span><br>'; #print comments in style "r"
+       print  $line;
+       }
     }else{
-   $line=~s/\n/<br>\n/g;
+   $line=~s/\n/<br>\n/g;  # print commands in style "c" (default)
+   print  $line;
    }
-   print stdout $line;
-   } print "</p>";
+  
+   }} print "</p>\n";
 close Fin; 
 } 
 close Fout;
+print "<hr>\n";
 print "</body></html>\n";
  
 
