@@ -13,31 +13,20 @@ however less graphic tools.
 Preriquisites:
 - for  running McPhase, McDisp
     Windows 2000, XP, VISTA, 7
-     
-- for compiling the sources (necessary if mcphas does not run on your system after installation steps a)-d)
-    gcc for windows (e.g. MinGW-4.3.5.exe (or newer) and MSYS-1.0.10.exe available at http://www.mingw.org)
-    java (> 1.6.0)  available at java.sun.com, 
-     if you do not know wether java (and which version) is installed
-     on your computer, open a dos shell and type:  
-     java -version 
-     
 -----------------------------------------------------------------------
 Installation Procedure:
 
-
  just run mcphX_Y.exe and follow the instructions
 
-
- Mind in case of problems:
+ In case of problems:
  In order that McPhas finds its exe files,you have to edit
  the file dos.bat and modify the following commands:
  
- set the variable MCPHASE_DIR to your mcphase directory, in our example
- to c:\mcphas
+ set the variable MCPHASE_DIR to your mcphase directory (no spaces in pathname
+ allowed), in our example  to c:\mcphas
   
    set MCPHASE_DIR=c:\mcphas
   
- 
  Now the Installation should be complete and to test this 
    open the mcphas-shell, change into an example directory:
 
@@ -51,6 +40,13 @@ Installation Procedure:
 
 
 [ for compiling the sources:
+  (necessary if mcphas does not run on your system after installation
+    * gcc for windows (e.g. MinGW-4.3.5.exe (or newer) and MSYS-1.0.10.exe
+    available at http://www.mingw.org)
+    * java (> 1.6.0)  available at java.sun.com,
+     if you do not know wether java (and which version) is installed
+     on your computer, open a dos shell and type:
+     java -version
 
     install compiler MinGW-4.3.5.exe (or later) and MSYS-1.0.10.exe
     install MSYS
@@ -77,30 +73,25 @@ Installation Procedure:
 
 (or you can modify the Makefile to specify threads=1). make
 ]
+
 -------------------------------------------------------------------
 II  LINUX 
 -------------------------------------------------------------------
-
-
 Prerequisits:
-
 - for compiling and running McPhas, McDisp
     Suse Linux 6.0/ 6.2/ 7.0/ 7.1 / 7.2 / 8.1 / 9.2
          with
     gcc, gfortran or g77
-    
-- for some ascii file manipulation programs (pat)
-   python
-   qt   
-
-- for plotting programs:
     perl
+    java
+    PDL 2.0      PerlDL
+            http://pdl.perl.org
+    
+- option (needed only for some old plotting programs):
     flex
     yacc
     PGPLOT 5.2.0 graphics library
             http://www.astro.caltech.edu/~tjp/pgplot/
-    PDL 2.0      PerlDL
-            http://pdl.perl.org
     PGPLOT 2.11/2.18  pgplot module for perl
             ftp://ftp.freenet.de/pub/ftp.cpan.org/pub/CPAN/modules/by-
             module/PGPLOT/
@@ -109,8 +100,7 @@ Prerequisits:
             Makefile.PL'
 	    you have to manually edit 'Makefile' and substitute 'f2c' with 'g2c' 
             before
-	    continuing with 'make' and 'make test' ...
-	    
+	    continuing with 'make' and 'make test' ...   
 -----------------------------------------------------------------------
 Installation Procedure:
 

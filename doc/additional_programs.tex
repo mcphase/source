@@ -510,7 +510,11 @@ program to get the y-value of a function by averaging
          1/y-value is written to stdout MCPHASE_YVALUE_INVERSE
          standarddeviation to stdaout and MCPHASE_STA
 \end{verbatim}
-\item[\prg int\index{int} {[-m] }colx coly file(s):]
+\item[\prg histcol\index{histcol} col {[stepwidth|-n steps]} *.*:] generates a histogram of
+a column in a data file and stores it in histcol.out. stepwidth is the 
+stepwidth of the histogram points. Alternatively the number of
+steps in the histogram may be given by e.g. {\prg -n 100}.
+\item[\prg int\index{int} {[-m] }colx coly *.*:]
  program  to integrate columnx vs columny=f(x), integration is done 
 point by point, the result goes to the data file, the total integral 
 INT=$\int f(x)dx$ is printed to stdout and set to the 
@@ -518,6 +522,7 @@ INT=$\int f(x)dx$ is printed to stdout and set to the
  option -m: n-th moments\index{moments of a distribution} are calculated according to $\mu_1=\int x f(x)dx$/INT, $\mu_n=\int (x-\mu_1)^n f(x)dx$/INT.
 The results go to stdout and environment variables MCPHASE\_INT\_MU\_1,
   MCPHASE\_INT\_MU\_2,MCPHASE\_INT\_MU\_3 ... are set.
+
 \item [\prg linreg\index{linreg} col n file:] calculates linear regression of n columns in file
 \begin{verbatim}
           col     ...... column containing y_k values followed by
@@ -587,7 +592,8 @@ calculate
 \item [\prg sumcol\index{sumcol} col *.*] prints to stdout number of lines, sum of squares, sum %%@
 of absolute values of column col in file *.*
 \item [\prg swapcol\index{swapcol} colx coly file:] swaps column x and column y of file
-\item [\prg tancol\index{tanncol} col const file:] calculates tangens of a column tan(col) 
+\item [\prg tancol\index{tancol} col file:] calculates tangens of a column tan(col)
+\item [\prg tanhcol\index{tanhcol} col file:] calculates tangens-hyperbolicus of a column tanh(col)
 \item [\prg uvw2fwhm\index{uvw2fwhm} u v w col *.*:] used to calculate the full
                    width half maximum from
                    2theta in degree according to fullprofs u,v,w parameters ...
@@ -626,6 +632,9 @@ booklet (needs: latex, pstops,ghostscript, perl)
 
  [creates the html file report.html from files calc.bat and notes.txt]
 \end{verbatim}
+\item [\prg setvariable\index{setvariable} varname value *.*:]
+sets a variable in a file, e.g. {\prg setvariable T 20 Co.sipf} replaces
+T=15 by T=20 in file {\prg Co.sipf}.
 \item [\prg substitute\index{substitute} oldtext newtext *.*:] replaces every instance of %%@
 oldtext with newtext in file(s) *.*
 \end{description}

@@ -32,8 +32,8 @@ print STDOUT << "EOF";
 <head>
  <title>$date</title>
 <style type="text/css" >
-.r { font-family:'Courier',monospace;white-space:pre; }
-body { font-family:'Times',monospace;font-style=italic;white-space:pre; }
+.r { font-family:'Courier',monospace; }
+body { font-family:'Times',monospace;font-style=italic; }
 </style>
 
 
