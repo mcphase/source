@@ -1,9 +1,11 @@
-
 /* ---------------------
- * BubbleChartDemo1.java
+ * modified BubbleChartDemo1.java
+ * to implement display program
+ * M . Rotter 2010
  * ---------------------
  * (C) Copyright 2003-2008, by Object Refinery Limited.
  */
+
 
 //package demo; 
 import java.awt.geom.Point2D;
@@ -47,6 +49,9 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -63,6 +68,9 @@ public class display extends ApplicationFrame implements KeyListener,WindowListe
 static final int MAX_NOF_FILES = 10;
 static myStringfunc SF=new myStringfunc();
 static int xy[]={0,0,0,0};
+static Frame frame;
+static Frame popup;
+//static ToolTipManager ToolTipManager;
 
   static class MyChartMouseListener implements ChartMouseListener {
  ChartPanel panel;
@@ -109,10 +117,29 @@ double chartY=-(xy[1]-plotArea.getMinY())/(plotArea.getMaxY()-plotArea.getMinY()
         public void chartMouseMoved(ChartMouseEvent event) {
             // ignore
         }
+        
 
     }
 
+/* static class MyMouseListener implements MouseListener {
+ Frame frame;
+ public MyMouseListener(Frame frame) {
+            this.frame = frame;
+        }
+public void mouseEntered(MouseEvent e){
+if (popup == null) {popup = new Frame();TextArea textArea = new TextArea("Some text to display like a tooltip.");
+    frame.add(popup);frame.pack();}else{popup.show();}//System.out.println("Key pressed ");
+}
+public void mouseReleased(MouseEvent e){}
+public void mousePressed(MouseEvent e){}
+public void mouseClicked(MouseEvent e){}
 
+public void mouseExited(MouseEvent e){
+      if (popup != null) popup.hide();
+      }
+
+}
+*/
 
 public void windowClosing(WindowEvent e) {
          windowclose();
@@ -322,17 +349,22 @@ static public void windowclose(){
           
  public display(String title) {
         super(title);
-        addKeyListener(this);
+        addKeyListener(this); 
+        
         //addWindowListener(new MyWindowListener(this,chartPanel));
         //addWindowListener(this);
         //displayFrame= new JFrame();
         dataset = new DefaultIntervalXYDataset();
         JFreeChart chart = createChart(dataset);
-        ChartPanel chartPanel = new ChartPanel(chart);
+        
+        ChartPanel chartPanel = new ChartPanel(chart,true,true,true,true,true);
         panel= chartPanel;
        // chartPanel.addChartMouseListener(this);
         chartPanel.addChartMouseListener(new MyChartMouseListener(chartPanel));
-                         
+       // chartPanel.addMouseListener(new MyMouseListener(this));        
+       ToolTipManager.setToolTipText(chartPanel,"Press b/s for bigger/smaller bubbles, - toggles lines/points, use mouse to zoom");
+       // chartPanel.addMouseListener(ToolTipManager);
+ 
         chartPanel.setDomainZoomable(true);
         chartPanel.setRangeZoomable(true);
         //bRot.setHorizontalAlignment(SwingConstants.LEFT);
@@ -395,8 +427,12 @@ static public void windowclose(){
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
       //  plot.setDomainGridlinesVisible(true);
-        bdataset = new DefaultXYZDataset();
+       //default to not include zero
+        
 
+
+        bdataset = new DefaultXYZDataset();
+       
 
 //        XYBubbleRenderer renderer = ( XYBubbleRenderer)plot.getRenderer();
 //    XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
@@ -416,7 +452,10 @@ static public void windowclose(){
         brenderer.setSeriesPaint(2, Color.black);
         brenderer.setSeriesPaint(5, Color.orange);
         brenderer.setSeriesPaint(4, Color.pink);
-       
+       renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
+       brenderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
+    
+
    for(int i=6;i<=MAX_NOF_FILES;++i){ renderer.setSeriesPaint(i, new Color(70*i%256,140*i % 256,210*i % 256));}
    for(int i=6;i<=MAX_NOF_FILES;++i){ brenderer.setSeriesPaint(i, new Color(70*i%256,140*i % 256,210*i % 256));}
            //renderer.setPlotShapes(true);
@@ -438,6 +477,9 @@ static public void windowclose(){
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setLowerMargin(0.15);
         rangeAxis.setUpperMargin(0.15);
+        rangeAxis.setAutoRangeIncludesZero(false);
+        domainAxis.setAutoRangeIncludesZero(false);
+        
     for(int i=0;i<noffiles;++i){
          if(colyerr[i]>=0){plot.setRenderer(i,renderer);
                            plot.setDataset(i,dataset);
@@ -490,7 +532,7 @@ protected static void reload_data(int i){    try{
             String s="";
             //XYDataset ds = chart.getXYPlot().getDataset(i);
             //ds.getData().removeAllElements();
-            int maxnofpoints=1000;int j=maxnofpoints;
+            int maxnofpoints=10;int j=maxnofpoints;
            while(j==maxnofpoints)
            {double [][] data=new double [6][maxnofpoints];//={{0,1},{0,1},{0,1}};
             double [][] bdata=new double [3][maxnofpoints];
@@ -576,9 +618,17 @@ protected static void reload_data(int i){    try{
                                                           }
                }
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
-               else
-              {if (j>0)
-               {if(clyerr>=0)
+                 else {
+               if (j>0)
+               {// here fill the rest of the array with the same values
+                for(int jj=j;jj<maxnofpoints;++jj)
+                  {data[0][jj]=data[0][j-1];data[1][jj]=data[1][j-1];data[2][jj]=data[2][j-1];
+                    if(clyerr>=0){data[3][jj]=data[3][j-1];data[4][jj]=data[4][j-1];data[5][jj]=data[5][j-1];
+                                }
+                   
+                  }
+
+               if(clyerr>=0)
                    {//dataset.removeSeries(file[i]+s.valueOf(i));
                     dataset.addSeries(file[i]+s.valueOf(i),data);
                     
@@ -628,4 +678,10 @@ chart.getLegend().setSources(s);
 //    repaint();
 
   }
+
+
+
+
 } // display
+
+
