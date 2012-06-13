@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-#BEGIN{@ARGV=map{glob($_)}@ARGV}
+BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 #\begin{verbatim}
 
@@ -9,17 +9,24 @@ unless ($#ARGV >0)
 
 {print " program newline used to create a new line  number n containing text in a data file\n";
 
- print " usage: newline n text  *.*   \n n=linennumber \n text= text in new line \n *.* .. filenname(s)\n";
+ print " usage: newline n text -f *.*   \n n=linennumber \n text= text in new line \n *.* .. filenname(s)\n";
 
  exit 0;}
 
- 
-
 $n=$ARGV[0];shift @ARGV;
-$text=$ARGV[0];shift @ARGV;
+$commandstring=join(" ",@ARGV);
+if($commandstring=~/-f/)
+{@aa=split('-f',$commandstring);
+$text=$aa[0];shift @aa;$files=$aa[0];@bb=split(" ",$files);
+}
+else
+{@bb=split(' ',$commandstring);$text=$bb[0];shift @bb;
+}
 
 
-  foreach (@ARGV)
+
+
+  foreach (@bb)
 
   {
 

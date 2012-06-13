@@ -44,6 +44,8 @@ public class displaytext extends JPanel implements FileListener {
     protected JScrollPane scrollPane;
     private final static String newline = "\n";
     private static String filename;
+    static myStringfunc SF=new myStringfunc();
+    static int w,h;
 
     public displaytext(String filen) {
         super(new GridBagLayout());
@@ -57,7 +59,7 @@ public class displaytext extends JPanel implements FileListener {
       // Add a listener
       monitor.addListener (this);
 
-        textArea = new JTextArea(5, 20);
+        textArea = new JTextArea(h, w);
         textArea.setEditable(false);
         textArea.setFont(new Font("Courier New",0,12));
         scrollPane = new JScrollPane(textArea);
@@ -150,7 +152,7 @@ public class displaytext extends JPanel implements FileListener {
          in.close();fstream.close();
          scrollPane.setViewport(viewport); 
          }
-         catch (Exception e) { System.err.println("File input error"); }
+         catch (Exception e) { System.err.println("File input error"); System.exit(1);}
     }
 
     /**
@@ -165,8 +167,13 @@ public class displaytext extends JPanel implements FileListener {
 
         //Add contents to the window.
         frame.getContentPane().add(new displaytext(filename));
-
-        //Display the window.
+        
+	//frame.setSize(new Dimension(w, h));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//        frame.setLocation(screenSize.width-w*10, screenSize.height-h*10);
+        frame.setLocation(screenSize.width-w*8, 0);
+    
+      //Display the window.
         frame.pack();
         frame.setVisible(true);
     }
@@ -174,16 +181,38 @@ public class displaytext extends JPanel implements FileListener {
 
 
     public static void main(String args[]) {
+      String s;String ss;
       if (args.length<1)
        {System.out.println("- too few arguments...\n");
         System.out.println("  program displaytext - show and watch text file by viewing a text box on screen\n\n");
-        System.out.println("use as:  display filename\n\n");
-        System.out.println("	 filename ..... filename of textfile\n\n");
+        System.out.println("use as:  display [options] filename\n\n");
+        System.out.println("	 filename ..... filename of textfile\n");
+        System.out.println("	 option -w 100 ..... width of display\n");
+        System.out.println("	 option -h 10  ..... height of display\n\n");
         System.exit(0);
        }
-
-
-        filename=args[0];
+      int j=0;int k=0;
+     w = 20; h =5; // default width and hight
+     Double p = new Double(0.0);
+      s=args[0];s=SF.TrimString(s); // command line arguments are treated here
+       //look if options are present
+       while(SF.TrimString(s).substring(0, 1).equalsIgnoreCase("-"))
+          {// yes there are options
+           if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-w")) // option "-w width"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+              ss=SF.FirstWord(s);
+              w=p.valueOf(SF.DataCol(ss)).intValue();
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+           else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-h")) // option "-h height"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+              ss=SF.FirstWord(s);
+              h=p.valueOf(SF.DataCol(ss)).intValue();
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+          }
+       
+        filename=s;
         //Schedule a job for the event dispatch thread:
         //creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
