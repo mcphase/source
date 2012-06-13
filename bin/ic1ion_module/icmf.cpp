@@ -23,8 +23,6 @@
 #include <cctype>                  // For std::tolower
 #include <fstream>
 
-#define SMALL 1e-6   // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-		     // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 #define MAXNOFCHARINLINE 144
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -35,6 +33,11 @@ complexdouble complexdouble::operator=(const double v) { complexdouble t; t.r=v;
 // --------------------------------------------------------------------------------------------------------------- //
 // Constructors for class iceig::
 // --------------------------------------------------------------------------------------------------------------- //
+iceig::iceig(int Hsz, bool isreal)
+{
+   _Hsz = Hsz; _E = new double[_Hsz]; 
+   if(isreal) { _V = new double[_Hsz*_Hsz]; _zV = 0; } else { _zV = new complexdouble[_Hsz*_Hsz]; _V = 0; }
+}
 iceig::iceig(sMat<double>&H)
 {
    _Hsz = H.nc(); _E = new double[_Hsz]; _V = new double[_Hsz*_Hsz]; _zV = 0;
@@ -62,6 +65,28 @@ iceig::iceig(int Hsz, double *E, complexdouble *zV, int step)
    _Hsz = Hsz; _E = new double[_Hsz]; _zV = new complexdouble[_Hsz*_Hsz]; _V = 0;
    memcpy(_E,E,Hsz*sizeof(double)); 
    int i; for(i=0; i<Hsz; i++) memcpy(&_zV[i*Hsz],&zV[i*Hsz+i+step],Hsz*sizeof(complexdouble));
+}
+// --------------------------------------------------------------------------------------------------------------- //
+// Copy constructors
+// --------------------------------------------------------------------------------------------------------------- //
+iceig::iceig(const iceig &p) { *this = p; }
+iceig &iceig::operator = (const iceig &p) 
+{ 
+   if(_Hsz==p._Hsz)
+   {
+      if(_E==0) _E = new double[_Hsz]; memcpy(_E,p._E,_Hsz*sizeof(double));
+      if(p._V!=0) { if(_V==0) _V = new double[_Hsz*_Hsz]; memcpy(_V,p._V,_Hsz*_Hsz*sizeof(double)); }
+      if(p._zV!=0) { if(_zV==0) _zV = new complexdouble[_Hsz*_Hsz]; memcpy(_zV,p._zV,_Hsz*_Hsz*sizeof(complexdouble)); }
+      if(p._V==0 && _V!=0) { delete[]_V; _V=0; } if(p._zV==0 && _zV!=0) { delete[]_zV; _zV=0; } 
+   }
+   else
+   {
+      if(_E!=0) { delete[]_E; _E=0; } if(_V!=0) { delete[]_V; _V=0; } if(_zV!=0) { delete[]_zV; _zV=0; }
+      _Hsz = p._Hsz; _E = new double[_Hsz]; memcpy(_E,p._E,_Hsz*sizeof(double));
+      if(p._V!=0) { _V = new double[_Hsz*_Hsz]; memcpy(_V,p._V,_Hsz*_Hsz*sizeof(double)); }
+      if(p._zV!=0) { _zV = new complexdouble[_Hsz*_Hsz]; memcpy(_zV,p._zV,_Hsz*_Hsz*sizeof(complexdouble)); }
+   }
+   return *this; 
 }
 // --------------------------------------------------------------------------------------------------------------- //
 // Destructor
@@ -93,6 +118,13 @@ void iceig::calc(int Hsz, complexdouble *H)
    _Hsz = Hsz; _E = new double[_Hsz]; _zV = new complexdouble[_Hsz*_Hsz];
    int info = ic_diag(Hsz,H,_zV,_E); 
    if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; }
+}
+void iceig::calc(int Hsz, double *H)
+{
+   if(_E!=0) { delete[]_E; _E=0; } if(_V!=0) { delete[]_V; _V=0; } if(_zV!=0) { delete[]_zV; _zV=0; }
+   _Hsz = Hsz; _E = new double[_Hsz]; _V = new double[_Hsz*_Hsz];
+   int info = ic_diag(H,Hsz,Hsz,_V,_E); 
+   if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_V; _V=0; }
 }
 void iceig::lcalc(icpars &pars, sMat<double>&H)
 {
@@ -141,21 +173,6 @@ void iceig::lcalc(icpars &pars, complexdouble *H)
    if(nev>_Hsz) nev=_Hsz;
    int info = ic_leig(_Hsz,H,_zV,_E,nev); 
    if(info!=0) { std::cerr << "iceig(H,iH) - Error diagonalising, info==" << info << "\n"; delete[]_E; _E=0; delete[]_zV; _zV=0; }
-}
-void iceig::pcalc(icpars &pars, complexdouble *zV, sMat<double> &J, sMat<double> &iJ)
-{
-   if(_E!=0) { delete[]_E; _E=0; } if(_V!=0) { delete[]_V; _V=0; } if(_zV!=0) { delete[]_zV; _zV=0; }
-   _Hsz = getdim(pars.n,pars.l); _E = new double[_Hsz]; _zV = new complexdouble[_Hsz*_Hsz];
-   memset(_E,0,_Hsz*sizeof(double)); memset(_zV,0,_Hsz*_Hsz*sizeof(complexdouble));
-   sMat<double> Hcso = ic_Hcso(pars); rmzeros(Hcso); eigVE<double> VEcso = eig(Hcso); 
-   fconf conf(pars.n,0,pars.l); int i,j,imax=0,nev=0; double vel,vmax;
-   for(i=0; i<Hcso.nr(); i++) 
-   { 
-      vmax = 0; for(j=0; j<Hcso.nr(); j++) { vel = fabs(VEcso.V(j,i)); if(vel>vmax) { vmax=vel; imax=j; } }
-      nev += conf.states[imax].J2+1; if(exp(-(VEcso.E[i]-VEcso.E[0])/(208.510704))<DBL_EPSILON) break;   // 208.5==300K in 1/cm 
-   }
-   complexdouble *zJmat = zmat2f(J,iJ); int info = ic_peig(_Hsz, zJmat, zV, _zV, _E, nev); free(zJmat);
-   if(info!=0) { std::cerr << "iceig::pcalc() - Error\n"; }
 }
 #ifndef NO_ARPACK
 void iceig::acalc(icpars &pars, sMat<double>&H)
@@ -404,7 +421,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
    }*/
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
+   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0 || VE.E(Esz+1)==-DBL_MAX) break; }
 
    if (T<0){Esz=(int)(-T);printf ("Temperature T<0: please choose probability distribution of states by hand\n");
                          printf ("Number   Excitation Energy\n");
@@ -852,3 +869,4 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
    //ex[iJ] = log(Z)-VE.E(0)/(KB*T); ex[iJ+1] = U;
    return ex;
 }
+

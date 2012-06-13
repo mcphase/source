@@ -25,8 +25,6 @@
 #include <cctype>                  // For std::tolower
 #include <fstream>
 
-#define SMALL 1e-6   // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-		     // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 #define MAXNOFCHARINLINE 144
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -249,7 +247,7 @@ icpars::icpars()
    yT=0.; yHa=0.; yHb=0.; yHc=0.; yMin=0.; yStep=0.; yMax=0.;
    Bx=0.; By=0.;  Bz=0.; basis.assign("JmJ"); save_matrices = false;
    Dx2=0.; Dy2=0.; Dz2=0.;  // For spin wave anisotropy parameters in icf1ion for half filled shells.
-   perturb = false; partial = false; arnoldi = false; spectrelevels = -1; truncate_level = 1; num_eigv = 4;
+   partial = false; arnoldi = false; truncate_level = 1; num_eigv = 4;
    partial_standalone = false; arnoldi_standalone = false;
 }
 // --------------------------------------------------------------------------------------------------------------- //
@@ -276,6 +274,11 @@ void icpars::jijconvcalc()
    _jijconvalreadycalc = true;
 }
 #endif
+bool icpars::isreal()
+{
+   if(!B.isreal() || (fabs(By)>SMALL)) return false; else return true;
+}
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Overloaded operators for icpars:: class
 // --------------------------------------------------------------------------------------------------------------- //
@@ -561,6 +564,12 @@ bool cfpars::check()                                          // Checks internal
    else if(_cfname.compare("L")==0 || _cfname.compare("D")==0) { for(i=0;i<27;i++) if(abs(cB[i]-_Bo[i])>SMALL) return false; }
    else if(_cfname.compare("AR")==0) { for(i=0;i<27;i++) if(abs(cB[i]-_Bo[i]/l[i])>SMALL) return false; }
 
+   return true;
+}
+bool cfpars::isreal()
+{
+   int n[] = {0,1,5,6,7,8,14,15,16,17,18,19};
+   for(int i=0; i<12; i++) if(fabs(_Bi[n[i]])>SMALL) return false;
    return true;
 }
 

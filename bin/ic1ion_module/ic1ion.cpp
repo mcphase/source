@@ -166,12 +166,13 @@ void ic_printheader(const char *outfile, icpars &pars)
 void ic_showoutput(const char *filename,                        // Output file name - default "results/mcphas.icr"
                    icpars &pars,                                // Input parameters
                    iceig &VE,                                   // Eigenstates class
-                   int iconf)
+                   int iconf,
+                   std::vector<int> ikeepJ)
 {
    fconf conf(pars.n,iconf,pars.l);
 
    unsigned int iE,iV,i=1,j=2,num_states=conf.states.size(),ns;
-   std::vector<int> isE,isV(num_states,0); isE.reserve(num_states);
+// std::vector<int> isE; isE.reserve(num_states);
    int ii; 
    double elem,conv=1.; complexdouble elc;
 
@@ -186,14 +187,17 @@ void ic_showoutput(const char *filename,                        // Output file n
    if(!VE.iscomplex()) FILEOUT << "# Energy(" << pars.e_units << ")\tWavefunctions(^{2S+1}L_J,mJ) }\n"; else
    FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L_J,mJ) }\n";
 
+   bool istrunc = !ikeepJ.empty(); if(istrunc) num_states=ikeepJ.size();
+   std::vector<int> isV(num_states,0), _isV; _isV.reserve(num_states);
+   if(istrunc) _isV = ikeepJ; else for(ii=0; ii<(int)num_states; ii++) _isV.push_back(ii);
+
    double *V=0; complexdouble *zV=0; if(VE.iscomplex()) zV = new complexdouble[num_states]; else V = new double[num_states];
    if((unsigned int)pars.num_eigv > num_states) { ns = num_states; } else { ns = (unsigned int)pars.num_eigv; }
    for(iE=0; iE<num_states; iE++)
    {
-      //if(VE.E(iE)==0.) if(iE<(num_states-1) && VE.E(iE+1)==0.) break;
+      if(VE.E(iE)==-DBL_MAX) { FILEOUT << "# Higher levels truncated\n"; break; }      // For case of truncated matrices.
       FILEOUT << (VE.E(iE)-VE.E(0))*conv << "\t\t";
-      for(ii=0; ii<(int)num_states; ii++) isV[ii]=ii;
-      i=1; j=2;
+      isV = _isV; i=1; j=2;
       if(VE.iscomplex())
       {
          memcpy(zV,VE.zV(iE),num_states*sizeof(complexdouble));
@@ -240,7 +244,7 @@ void ic_showoutput(const char *filename,                        // Output file n
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the magnetisation
 // --------------------------------------------------------------------------------------------------------------- //
-void ic_cmag(const char *filename, icpars &pars)
+void ic_cmag(const char *filename, icpars &pars, double elim)
 {
    if(!(pars.calcphys & PHYSPROP_MAGBIT)) return;
    icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices);
@@ -259,7 +263,7 @@ void ic_cmag(const char *filename, icpars &pars)
    else if(pars.mag_units==1) FILEOUT << "Magnetisation(emu/mol)\tMa\tMb\tMc\tM_parallel\n";
    else if(pars.mag_units==2) FILEOUT << "Magnetisation(Am^2/mol)\tMa\tMb\tMc\tM_parallel\n";
    int i,j,k; double Hm=0.,dt,Z;
-   int nT = (int)ceil((Tmax-Tmin)/Tstep), nH = (int)ceil((Hmax-Hmin)/Hstep) + 1;
+   int nT = (int)ceil((Tmax-Tmin)/Tstep)+1, nH = (int)ceil((Hmax-Hmin)/Hstep) + 1;
    std::vector<double> T(nT,0.); for(i=0; i<nT; i++) T[i] = Tmin+i*Tstep;
    std::vector<double> mag(nT,0.),ma(nT,0.),mb(nT,0.),mc(nT,0.);
 
@@ -277,22 +281,25 @@ void ic_cmag(const char *filename, icpars &pars)
    iceig VE;
    std::vector<double> ex; std::vector< std::vector<double> > matel, exj;
    sMat<double> J,iJ,H,iH; H = ic_hmltn(iH,pars); H/=MEV2CM; iH/=MEV2CM;
-   complexdouble *zV=0;
-   if(pars.perturb) { VE.calc(H,iH); zV = new complexdouble[(H.nr()+1)*(H.nc()+1)];
-      for(i=0; i<H.nr(); i++) zV[i].r = VE.E(i); memcpy(&zV[H.nr()+1],VE.zV(0),H.nr()*H.nc()*sizeof(complexdouble)); }
+
+   unsigned int cb=getdim(pars.n,pars.l); complexdouble *zVrot=0; double fcb;
+   if(elim!=-DBL_MAX) 
+   {
+      fcb = elim*MEV2CM; zVrot = new complexdouble[cb*cb]; memset(zVrot,0,cb*cb*sizeof(complexdouble));
+      spectre_vrot(pars,zVrot,fcb); if(elim<0) cb = (unsigned int)elim; else cb = (unsigned int)fcb;
+   }
 
    double convfact=1; if(pars.mag_units==1) convfact = NAMUB*1e3; else if(pars.mag_units==2) convfact = NAMUB;  // 1==cgs, 2==SI
 
    for(i=0; i<nH; i++)
    {
       for(j=0; j<6; j++) gjmbHmeV[j] = gjmbH[j]*(-MUB*(Hmin+i*Hstep)); 
-      mfmat.Jmat(J,iJ,gjmbHmeV,pars.save_matrices);
-      if(pars.perturb) VE.pcalc(pars,zV,J,iJ);
-      else { J+=H; iJ+=iH; if(pars.partial) VE.lcalc(pars,J,iJ); 
+      mfmat.Jmat(J,iJ,gjmbHmeV,pars.save_matrices); J+=H; iJ+=iH; 
+      if(elim!=-DBL_MAX) VE = spectre_eig(J,iJ,zVrot,cb); else
       #ifndef NO_ARPACK
-         else if(pars.arnoldi) VE.acalc(pars,J,iJ); else VE.calc(J,iJ); 
+      if(pars.arnoldi) VE.acalc(pars,J,iJ); else
       #endif
-      }
+      if(pars.partial) VE.lcalc(pars,J,iJ); else VE.calc(J,iJ); 
       ex = mfmat.expJ(VE,Tmax,matel,pars.save_matrices); ex.assign(matel[0].size(),0.); for(j=0; j<6; j+=2) exj.push_back(ex);
       for(j=0; j<nT; j++) 
       {
@@ -322,7 +329,6 @@ void ic_cmag(const char *filename, icpars &pars)
                     << (ma[j]*gjmbH[1] + mb[j]*gjmbH[3] + mc[j]*gjmbH[5])*convfact << "\n";
       }
    }
-   if(pars.perturb) delete[]zV;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -336,9 +342,10 @@ int main(int argc, char *argv[])
    icpars pars;
    std::string norm,units;
 
-   bool headonly=false, hcsoonly=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc);
+   bool headonly=false, hcsoonly=false, truncate=false; int ai[]={0,0,0,0}, ib=1, narg=(argc>4?4:argc); double elim=2e3;
    for(int ia=1; ia<narg; ia++) {
       if(strncmp(argv[ia],"-h",2)==0) headonly=true; else
+      if(strncmp(argv[ia],"-t",2)==0) { truncate=true; elim = atoi(argv[++ia]); } else
       if(strncmp(argv[ia],"-s",2)==0) hcsoonly=true; else ai[ib++]=ia; }
 
    if(ai[1]!=0) strcpy(infile,  argv[ai[1]]); else strcpy(infile,"mcphas.ic");
@@ -353,6 +360,17 @@ int main(int argc, char *argv[])
 
    // For quick and dirty timing routines...
    clock_t start,end; start = clock();
+
+   unsigned int ns=getdim(pars.n,pars.l), cb=ns; complexdouble *zVrot=0; double fcb, *dVrot=0;
+   if(truncate) 
+   {
+      std::cout << "Using matrix truncation... ";
+      fcb = elim; 
+      if(pars.isreal()) { dVrot = new double[ns*ns];        memset(dVrot,0,ns*ns*sizeof(double));        spectre_vrot(pars,dVrot,fcb); }
+      else              { zVrot = new complexdouble[ns*ns]; memset(zVrot,0,ns*ns*sizeof(complexdouble)); spectre_vrot(pars,zVrot,fcb); }
+      if(elim<0) cb = (unsigned int)elim; else cb = (unsigned int)fcb;
+      end = clock(); std::cerr << "took " << (double)(end-start)/CLOCKS_PER_SEC << "s to calculate rotation matrix.\n"; start = clock();
+   }
 
    // Calculates the intermediate coupling Hamilton matrix
    sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars);
@@ -372,8 +390,9 @@ int main(int argc, char *argv[])
    end = clock(); std::cerr << "Time to calculate Hic = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
 
    // Fully diagonalise IC Hamilton matrix and saves results to <outfile>
-   iceig VE; 
-   if(pars.partial_standalone)      if(iHic.isempty()) VE.lcalc(pars,Hic); else VE.lcalc(pars,Hic,iHic);
+   iceig VE;
+   if(truncate)                     if(iHic.isempty()) VE = spectre_eig(Hic,dVrot,cb); else VE = spectre_eig(Hic,iHic,zVrot,cb); 
+   else if(pars.partial_standalone) if(iHic.isempty()) VE.lcalc(pars,Hic); else VE.lcalc(pars,Hic,iHic);
    #ifndef NO_ARPACK
    else if(pars.arnoldi_standalone) if(iHic.isempty()) VE.acalc(pars,Hic); else VE.acalc(pars,Hic,iHic);
    #endif
@@ -382,10 +401,11 @@ int main(int argc, char *argv[])
 // iceig VE; VE.lcalc(pars,Hic,iHic); int i; for(i=0; i<6; i++) std::cout << (VE.E(i)-VE.E(0))/MEV2CM << " "; std::cout << "\n";
    ic_showoutput(outfile,pars,VE);
 // sMat<double> Hcso = ic_Hcso(pars); VE.calc(Hcso); strcpy(outfile,"results/mcphas.icpJ"); ic_showoutput(outfile,pars,VE,0);
+   if(truncate) { if(iHic.isempty()) delete[]dVrot; else delete[]zVrot; }
    end = clock(); std::cerr << "Time to save file = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
 
    // If required calculates some single-ion physical properties and saves to <physfile>
-   ic_cmag(physfile,pars);
+   if(truncate) ic_cmag(physfile,pars,elim); else ic_cmag(physfile,pars);
    start = clock(); std::cerr << "Time to calculate and save magnetisation is = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 
 // iceig VE(Hic,iHic);
@@ -445,23 +465,6 @@ int main(int argc, char *argv[])
    imq = dv1calc(tn,th,ph,J0,J2,J4,J6,est,T,mat);
    start = clock(); std::cerr << "Time to calculate dv1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 #endif
-
-/* int i, Hsz = est.Cols(); //complexdouble *cest = new complexdouble[Hsz*Hsz]; memcpy(cest,&est[0][0],Hsz*Hsz*sizeof(complexdouble));
-   std::vector<double> vgjmbH(6,.0578838263); //for(i=0; i<6; i++) vgjmbH[i] = gjmbH[i+1];
-   icmfmat mfmat(pars.n,pars.l);
-   sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH); complexdouble *zJmat=0; zJmat = zmat2f(Jmat,iJmat);
-   complexdouble *zVd = new complexdouble[(Hsz-1)*(Hsz-1)]; double *eigval = new double[Hsz-1];
-   start = clock();
-   int info = ic_peig(Hsz-1, zJmat, (complexdouble*)&est[0][0], zVd, eigval);
-   end = clock(); std::cerr << "Time to do peig() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
-   iceig VE(Hsz-1,eigval,zVd); strcpy(outfile,"results/mcphas.ic1"); ic_showoutput(outfile,pars,VE);
-   free(zJmat); delete[]zVd; delete[]eigval; //delete []cest;
-   start = clock();
-   Hic/=MEV2CM; iHic/=MEV2CM; 
-   VE.calc(Hic,iHic); strcpy(outfile,"results/mcphas.icp"); ic_showoutput(outfile,pars,VE);
-   end = clock(); std::cerr << "Time to do VE.calc() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
-   Hic+=Jmat; iHic+=Jmat;
-   VE.calc(Hic,iHic); strcpy(outfile,"results/mcphas.ic2"); ic_showoutput(outfile,pars,VE); */
 
    return 0;
 }

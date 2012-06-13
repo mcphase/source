@@ -37,13 +37,10 @@
 #include "vector.h"          // MatPack vector class
 #include <fstream>
 #include <ctime>
-#define SMALL 1e-6           // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-                             // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
+
 // --------------------------------------------------------------------------------------------------------------- //
-// Declarations for functions in spectre.cpp
+// Declarations for functions in truncate.cpp
 // --------------------------------------------------------------------------------------------------------------- //
-void spectre_hmltn(icpars &pars, ComplexMatrix &est, int parvalsize);
-std::vector<double> spectre_expJ(icpars &pars, ComplexMatrix &est, int parvalsize, Vector &gjmbH, int Jhi, int Jlo, double T);
 void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<double> &iHic, int JHi, int JLo);
 void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, double *lnZ, double *U, complexdouble *Jm);
 
@@ -137,103 +134,47 @@ __declspec(dllexport)
    else Hicnotcalc = true;
    if(Hicnotcalc)
    {
-      if(pars.spectrelevels==-1)
+      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM; H = zmat2f(Hic,iHic);
+//    est = ComplexMatrix(0,Hsz,0,Hsz); I comment this out - you should not reinitialize est !!!
+      if( (est.Rhi()!=Hsz||est.Chi()!=Hsz) && pars.truncate_level==1)
       {
-         sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM; H = zmat2f(Hic,iHic);
-//       est = ComplexMatrix(0,Hsz,0,Hsz); I comment this out - you should not reinitialize est !!!
-         if( (est.Rhi()!=Hsz||est.Chi()!=Hsz) && pars.truncate_level==1)
-         {
-            std::cerr << "ERROR module ic1ion - mcalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
-         }
-         if ((int)(parval.size()/2)>Hsz && pars.truncate_level==1)
-         {
-//          std::cerr << "ERROR module ic1ion - mcalc: storing Hamiltonian in est matrix not possible - parval size too big\n"; exit(EXIT_FAILURE);
-         } 
-         else
-         {
-            est[0][0] = complex<double> (-0.1,-0.1);
-            for(i=0; i<(int)(parval.size()/2); i++) est[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
-         }
-         if(pars.truncate_level!=1)  // Truncates the matrix, and stores the single ion part in a memorymapped array (Linux only)
-            truncate_hmltn(pars, est, Hic, iHic, J.Hi(), J.Lo());
-         else
-            for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
-         free(H);
+         std::cerr << "ERROR module ic1ion - mcalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
       }
-      else  // Calculates using the Spectre method...                                       // lvl = 10;     % Number of |LSJ> levels to keep
+      if (!((int)(parval.size()/2)>Hsz && pars.truncate_level==1))
       {
-         std::cerr << "ic1ion Warning: Using spectre method of dividing into J-submatrices - this method is known to be buggy!\n";
-         if(pars.spectrelevels==-2)
-         {
-            std::cerr << "Trying to determine optimal number of levels for spectre... ";
-            std::fstream FH; FH.open("results/ic1ion.spectre", std::fstream::out);
-            sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM;
-            icmfmat mfmat(pars.n,pars.l,J.Hi()-J.Lo()+1,pars.save_matrices); 
-            #ifdef JIJCONV
-            if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
-            #endif
-	    sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices); 
-            int cbbest=1,ibest=1; Jmat+=Hic; iJmat+=iHic; Jm = zmat2f(Jmat,iJmat); iceig VE; VE.calc(Hsz,Jm); 
-            double /*Uref,*/dbest=DBL_MAX,dnew=DBL_MAX; std::vector<double> vBest,vNew; // double Unew,Ubest;
-            std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices); //Uref=vJ[J.Hi()-J.Lo()+2];
-            FH << "\nRef:\t["; for(i=0; i<(int)vJ.size(); i++) FH << vJ[i] << "\t"; FH << "]\n";
-            for(int cb=1; cb<=Hic.nr(); cb++)
-            {
-               pars.spectrelevels=cb; spectre_hmltn(pars,est,parval.size());
-               std::vector<double> vJt = spectre_expJ(pars,est,parval.size(),gjmbH,J.Lo(),J.Hi(),*T);
-               FH << "cb=" << cb << "\t["; for(i=J.Lo(); i<(int)vJt.size(); i++) FH << vJt[i] << "\t"; FH << "]\n";
-               if(cb==1) 
-               { 
-                  dbest=0.; for(i=J.Lo(); i<=J.Hi(); i++) dbest+=fabs(vJ[i-J.Lo()]-vJt[i]); vBest=vJt;
-               } 
-               else
-               { 
-                  vNew = vJt; double dt=0.; for(i=J.Lo(); i<=J.Hi(); i++) dt+=fabs(vJ[i-J.Lo()]-vJt[i]); 
-                  dnew = dt; if(dnew<dbest) { vBest=vNew; dbest=dnew; cbbest=cb; } 
-                  if(dnew>dbest) ibest++; if(ibest==5) break;  
-               } 
-            }
-            FH.close();
-            pars.spectrelevels=cbbest; std::cerr << cbbest << " levels seems optimal\n";
-         }
-         spectre_hmltn(pars,est,parval.size());
+         est[0][0] = complex<double> (-0.1,-0.1);
          for(i=0; i<(int)(parval.size()/2); i++) est[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
       }
-   }
-   if(pars.spectrelevels==-1)
-   {
-      if(pars.truncate_level!=1)  // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-         truncate_expJ(pars,est,gjmbH,J,*T,lnZ,U,Jm);
+      if(pars.truncate_level!=1)  // Truncates the matrix, and stores the single ion part in a memorymapped array (Linux only)
+         truncate_hmltn(pars, est, Hic, iHic, J.Hi(), J.Lo());
       else
-      {
-         // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-         icmfmat mfmat(pars.n,pars.l,J.Hi()-J.Lo()+1,pars.save_matrices,pars.density);
-         #ifdef JIJCONV
-         if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
-         #endif
-       //std::vector<double> vgjmbH((J.Hi()-J.Lo()+1),0.); for(i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i];
-         sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices); 
-         complex<double> a(1.,0.); int incx = 1;
-         Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
-
-         // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
-         iceig VE; if(pars.partial) VE.lcalc(pars,Jm);
-         #ifndef NO_ARPACK
-         else if(pars.arnoldi) VE.acalc(pars,Jm); 
-         #endif
-         else VE.calc(Hsz,Jm); free(Jm);
-
-         // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
-         std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices);
-         for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()]; 
-         *lnZ = vJ[J.Hi()-J.Lo()+1]; *U = vJ[J.Hi()-J.Lo()+2];
-      }
+         for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
+      free(H);
    }
+   if(pars.truncate_level!=1)  // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
+      truncate_expJ(pars,est,gjmbH,J,*T,lnZ,U,Jm);
    else
    {
-      std::vector<double> vJ = spectre_expJ(pars,est,parval.size(),gjmbH,J.Lo(),J.Hi(),*T);
-      for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i]; 
-      *lnZ = vJ[i]; *U = vJ[i+1];
+      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
+      icmfmat mfmat(pars.n,pars.l,J.Hi()-J.Lo()+1,pars.save_matrices,pars.density);
+      #ifdef JIJCONV
+      if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
+      #endif
+      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices); 
+      complex<double> a(1.,0.); int incx = 1;
+      Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
+
+      // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
+      iceig VE; if(pars.partial) VE.lcalc(pars,Jm);
+      #ifndef NO_ARPACK
+      else if(pars.arnoldi) VE.acalc(pars,Jm); 
+      #endif
+      else VE.calc(Hsz,Jm); free(Jm);
+
+      // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
+      std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices);
+      for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()]; 
+      *lnZ = vJ[J.Hi()-J.Lo()+1]; *U = vJ[J.Hi()-J.Lo()+2];
    }
 }
 
@@ -748,100 +689,48 @@ void sdod_mcalc(Vector &J,           // Output single ion moments==(expectation 
    else Hicnotcalc = true;
    if(Hicnotcalc)
    {
-      if(pars.spectrelevels==-1)
-      {
-         sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM; H = zmat2f(Hic,iHic);
+      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM; H = zmat2f(Hic,iHic);
 //       est = ComplexMatrix(0,Hsz,0,Hsz); I comment this out - you should not reinitialize est !!!
-         if( (est.Rhi()!=Hsz||est.Chi()!=Hsz) && pars.truncate_level==1)
-         {
-            std::cerr << "ERROR module ic1ion - mcalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
-         }
-         if ((int)(parval.size()/2)>Hsz && pars.truncate_level==1)
-         {
-//          std::cerr << "ERROR module ic1ion - mcalc: storing Hamiltonian in est matrix not possible - parval size too big\n"; exit(EXIT_FAILURE);
-         }
-         else
-         {
-            est[0][0] = complex<double> (-0.1,-0.1);
-            for(i=0; i<(int)(parval.size()/2); i++) est[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
-         }
-         if(pars.truncate_level!=1)  // Truncates the matrix, and stores the single ion part in a memorymapped array (Linux only)
-            truncate_hmltn(pars, est, Hic, iHic, J.Hi(), J.Lo());
-         else
-            for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
-         free(H);
-      }
-      else  // Calculates using the Spectre method...                                       // lvl = 10;     % Number of |LSJ> levels to keep
+      if( (est.Rhi()!=Hsz||est.Chi()!=Hsz) && pars.truncate_level==1)
       {
-         if(pars.spectrelevels==-2)
-         {
-            std::cerr << "Trying to determine optimal number of levels for spectre... ";
-            std::fstream FH; FH.open("results/ic1ion.spectre", std::fstream::out);
-            sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM;
-//            std::vector<double> vgjmbH((J.Hi()-J.Lo()+1),0.); for(i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i];
-//            icmfmat mfmat(pars.n,pars.l,J.Hi()-J.Lo()+1,pars.save_matrices); sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
-            std::vector<double> vgjmbH((51),0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
-            icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices); sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
-            int cbbest=1,ibest=1; Jmat+=Hic; iJmat+=iHic; Jm = zmat2f(Jmat,iJmat); iceig VE; VE.calc(Hsz,Jm);
-            double /*Uref,*/dbest=DBL_MAX,dnew=DBL_MAX; std::vector<double> vBest,vNew; // double Unew,Ubest;
-            std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,*T,matel,pars.save_matrices); //Uref=vJ[J.Hi()-J.Lo()+2];
-            FH << "\nRef:\t["; for(i=0; i<(int)vJ.size(); i++) FH << vJ[i] << "\t"; FH << "]\n";
-            for(int cb=1; cb<=Hic.nr(); cb++)
-            {
-               pars.spectrelevels=cb; spectre_hmltn(pars,est,parval.size());
-               std::vector<double> vJt = spectre_expJ(pars,est,parval.size(),gjmbH,J.Lo(),J.Hi(),*T);
-               FH << "cb=" << cb << "\t["; for(i=J.Lo(); i<(int)vJt.size(); i++) FH << vJt[i] << "\t"; FH << "]\n";
-               if(cb==1)
-               {
-                  dbest=0.; for(i=J.Lo(); i<=J.Hi(); i++) dbest+=fabs(vJ[i-J.Lo()]-vJt[i]); vBest=vJt;
-               }
-               else
-               {
-                  vNew = vJt; double dt=0.; for(i=J.Lo(); i<=J.Hi(); i++) dt+=fabs(vJ[i-J.Lo()]-vJt[i]);
-                  dnew = dt; if(dnew<dbest) { vBest=vNew; dbest=dnew; cbbest=cb; }
-                  if(dnew>dbest) ibest++; if(ibest==5) break;
-               }
-            }
-            FH.close();
-            pars.spectrelevels=cbbest; std::cerr << cbbest << " levels seems optimal\n";
-         }
-         spectre_hmltn(pars,est,parval.size());
+         std::cerr << "ERROR module ic1ion - mcalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
+      }
+      if (!((int)(parval.size()/2)>Hsz && pars.truncate_level==1))
+      {
+         est[0][0] = complex<double> (-0.1,-0.1);
          for(i=0; i<(int)(parval.size()/2); i++) est[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
       }
-   }
-   if(pars.spectrelevels==-1)
-   {
-      if(pars.truncate_level!=1)  // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-         { std::cerr << "spin/orbmomdensity using truncate otion not yet implemented... exiting ";exit(EXIT_FAILURE);}
-//          truncate_expJ(pars,est,gjmbH,J,*T,lnZ,U,Jm);
+      if(pars.truncate_level!=1)  // Truncates the matrix, and stores the single ion part in a memorymapped array (Linux only)
+         truncate_hmltn(pars, est, Hic, iHic, J.Hi(), J.Lo());
       else
-      {
-         // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
+         for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
+      free(H);
+   }
+   if(pars.truncate_level!=1)  // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
+      { std::cerr << "spin/orbmomdensity using truncate otion not yet implemented... exiting ";exit(EXIT_FAILURE);}
+//          truncate_expJ(pars,est,gjmbH,J,*T,lnZ,U,Jm);
+   else
+   {
+      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
 //         icmfmat mfmat(pars.n,pars.l,J.Hi()-J.Lo()+1,pars.save_matrices,pars.density);
 //         std::vector<double> vgjmbH((J.Hi()-J.Lo()+1),0.); for(i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i];
-         icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices,pars.density);
-         std::vector<double> vgjmbH(51,0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
-         sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
-         complex<double> a(1.,0.); int incx = 1;
-         Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
+      icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices,pars.density);
+      std::vector<double> vgjmbH(51,0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
+      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
+      complex<double> a(1.,0.); int incx = 1;
+      Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
 
-         // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
-         iceig VE; if(pars.partial) VE.lcalc(pars,Jm); 
-         #ifndef NO_ARPACK
-         else if(pars.arnoldi) VE.acalc(pars,Jm); 
-         #endif
-         else VE.calc(Hsz,Jm); free(Jm);
+      // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
+      iceig VE; if(pars.partial) VE.lcalc(pars,Jm); 
+      #ifndef NO_ARPACK
+      else if(pars.arnoldi) VE.acalc(pars,Jm); 
+      #endif
+      else VE.calc(Hsz,Jm); free(Jm);
 
-         // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
-         std::vector< std::vector<double> > matel;
-         std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,*T,matel,pars.save_matrices);
-         for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()];//printf("ss=%g\n",J(1));
-      }
-   }
-   else
-   {   std::cerr << "spin/orbmomdensity using spectre otion not yet implemented... exiting ";exit(EXIT_FAILURE);
-      //std::vector<double> vJ = spectre_expJ(pars,est,parval.size(),gjmbH,J.Lo(),J.Hi(),*T);
-      //for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i];
+      // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
+      std::vector< std::vector<double> > matel;
+      std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,*T,matel,pars.save_matrices);
+      for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()];//printf("ss=%g\n",J(1));
    }
 }
 

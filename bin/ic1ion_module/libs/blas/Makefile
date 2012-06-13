@@ -101,7 +101,7 @@ ZOBJ  = izamax.o zaxpy.o zcopy.o zdotc.o zdotu.o zgbmv.o  zgemv.o zgerc.o\
 # They are called by the driver programs in the EXAMPLES directory.
 #
 SDRVOBJ = sgemm.o strsm.o stbsv.o 
-DDRVOBJ = dgemm.o dtrsm.o dtbsv.o
+DDRVOBJ = dsymm.o dgemm.o dtrsm.o dtbsv.o
 CDRVOBJ = ccopy.o cgemv.o cgeru.o cgemm.o cscal.o cswap.o ctrsm.o ctbsv.o\
           icamax.o 
 ZDRVOBJ = zcopy.o zgemv.o zgeru.o zgemm.o zscal.o zswap.o ztrsm.o ztbsv.o\
