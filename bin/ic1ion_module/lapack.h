@@ -84,6 +84,8 @@ extern "C"
                       int *nev, double *bm, double *vt, int *incy);
   void F77NAME(dsymv)(char *uplo, int *n, double *alpha, double *a, int *lda, double *x, int *incx, 
                       double *beta, double *y, int *incy);
+  void F77NAME(dsymm)(char *side, char *uplo, int *m, int *n, double *alpha, double *A, int *lda,
+                      double *B, int *ldb, double *beta, double *C, int *ldc);
   void F77NAME(dgemm)(char *transa, char *transb, int *m, int *n, int *k, double *alpha, double *A,
                       int *lda, double *B, int *ldb, double *beta, double *c, int *ldc);
   void F77NAME(zhemm)(char *side, char *uplo, int *m, int *n, complexdouble *alpha, complexdouble *A, int *lda,

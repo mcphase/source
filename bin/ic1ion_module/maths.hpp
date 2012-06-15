@@ -39,7 +39,7 @@
 template <class T> class sMat;                                          // google  "Explicit Template Specification"
 template <class T> std::ostream & operator << (std::ostream & o, const sMat<T> & m);
 template <class T> std::istream & operator >> (std::istream & i, sMat<T> & m);
-template <class T> T atoT(std::string &s);
+template <class T> T atoT(const std::string &s);
 // --------------------------------------------------------------------------------------------------------------- //
 template <class T> class sMat {
    private:

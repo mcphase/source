@@ -23,14 +23,18 @@ class iceig
       complexdouble *_zV;
 
    public:
-      iceig() { _E=0; _V=0; _zV=0; }               // Blank constructor
+      iceig() { _Hsz=0; _E=0; _V=0; _zV=0; }       // Blank constructor
       ~iceig();                                    // Destructor
+      iceig(int Hsz, bool isreal=true);            // Constructs a zero eigenstates object, allocating memory
       iceig(sMat<double>&H);                       // Constructs the eigenstates of H
       iceig(sMat<double>&H, sMat<double>&iH);      // Constructs the eigenstates of H+iH
       iceig(int Hsz, double *E, double *V);        // Constructor for known eigenvalues/vectors
       iceig(int Hsz, double *E, complexdouble *V); // Constructor for known eigenvalues/complex eigenvectors
       iceig(int Hsz,double*E,complexdouble*V,int s);// Constructor for known eigenvalues/complex eigenvectors
+      iceig(const iceig &p);                       // Copy constructor
+      iceig &operator = (const iceig &p);          // Copy assignment - overwrites previous eigenvalues/vectors
       double E(int i) { return _E[i]; }
+      double *E() { return &_E[0]; }
       double *V(int i) { return &_V[i*_Hsz]; }
       double V(int i,int j) {return _V[j*_Hsz+i];}
       complexdouble *zV(int i) { return &_zV[i*_Hsz]; }
@@ -39,11 +43,10 @@ class iceig
       void calc(sMat<double>&H);                   // Calculates the eigenstates of H
       void calc(sMat<double>&H, sMat<double>&iH);  // Calculates the eigenstates for a matrix H+iH
       void calc(int Hsz, complexdouble *H);
+      void calc(int Hsz, double *H);
       void lcalc(icpars &pars, sMat<double> &H);   // Calculates a partial set of eigenstates of H
       void lcalc(icpars &pars, sMat<double> &H, sMat<double> &iH); 
       void lcalc(icpars &pars, complexdouble *H);  // Calculates a partial set from a fortran-style matrix
-      void pcalc(icpars &pars, complexdouble *zV,  // Calculates a partial set of eigenstates using
-                 sMat<double>&J, sMat<double>&iJ); //    perturbation theory
       #ifndef NO_ARPACK
       void acalc(icpars &pars, complexdouble *H);  // Calculates a partial set using the Arnoldi method (ARPACK)
       void acalc(icpars &pars, sMat<double> &J);
