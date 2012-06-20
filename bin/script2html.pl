@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use Cwd;
+use File::Basename;
 
 unless ($#ARGV >=0)
 {print STDOUT << "EOF";
@@ -49,6 +50,8 @@ while (@ARGV)
  $toline=1e10;if($ARGV[0]=~/-toline/){shift @ARGV; $toline=$ARGV[0];shift @ARGV;$linetext=$linetext." up to line $toline";}
  $file=$ARGV[0];shift @ARGV; ++$i;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
+   # get path from filename
+   $dir=dirname($file);
    print "\n<hr>Source File $i$linetext:<h1>".$file."</h1>\n";
    #print '<p class="c">';
    $lnr=0;
@@ -61,7 +64,18 @@ while (@ARGV)
          # if yes run script2htlm on this file
          ($arguments)=($line=~m/.*\<\s*script2html(.*)\>/);
           @arg=split(" ",$arguments);
-         system("script2html $arguments >".$arg[$#arg].".htm");
+          foreach(@arg){$a=$_;
+                        next if($a=~/-fromline/);
+                        next if($a=~/-toline/);
+                        next if($aa=~/-fromline/);
+                        next if($aa=~/-toline/);
+                        # put directory name in front of filenames
+                        $_=$dir."/".$_;
+                       } continue {
+                        $aa=$a;
+                       }
+        # print "script2html $arguments > ".$arg[$#arg].".htm\n";
+         system("script2html $arguments > ".$arg[$#arg].".htm");
          open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
             until($line1=~/.*by the command: script2html/){$line1=<Fin1>;}
             while($line1=<Fin1>){unless($line1=~/.*\<\/body\>\<\/html\>/){
@@ -70,7 +84,9 @@ while (@ARGV)
         close Fin1;unlink($arg[$#arg].".htm");
        }
         else
-       {# replace html command <...> by &aaa& ... &bbb&
+       {# take care about <img src=""> commands and insert path
+        $line=~s!\<img(.*)src\s*="!\<img\1src="$dir/!;
+        # replace html commands <...> by &aaa& ... &bbb& 
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
                          dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
                          h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
@@ -78,14 +94,15 @@ while (@ARGV)
                          p|table|tbody|textarea|tfoot|th|title|tr|tt|ul|var
                   )(.*?)\>/&aaa&\1\2\3&bbb&/g;
         $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
-       # $line=~s/\<(img.*)\>/&aaa&\1&bbb&/g;           #          <img ...>
-       
-        $line=~s/>/&gt /g;$line=~s/</&lt /g; # remove < and > signs
-        $line=~s/&aaa&/\</g;$line=~s/&bbb&/\>/g;# replace back &aaa& ... &bbb& to < ... >
+
+       # substitute all remaining < and > signs by the html code &gt and &lt
+        $line=~s/>/&gt /g;$line=~s/</&lt /g; 
+       # replace back &aaa& ... &bbb& to < ... > so that html commands are interpreted properly
+        $line=~s/&aaa&/\</g;$line=~s/&bbb&/\>/g;
        $line=~s/\n/<br>\n/g;  # print comments in style "c" (default)
        print  $line;
        }
-    }else{
+    }else{ # line did not start with a comment - thus it is a command and should be printed as it is
    $line='<span class="r">'.$line.'</span><br>'; #print commands in style "r"
    print  $line;
    }
