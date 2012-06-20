@@ -103,16 +103,12 @@ time_t curtime;
 //*******************************************************************************************************
 //*******************************************************************************************************
 //*******************************************************************************************************
-void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
+void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
               Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int * J,int m,
-              Vector * hkl,float * ikern,float * intmag,float * intmagdip,float * D,float * theta,float * out10,
-              float * out11,complex <double>*mx,complex <double>*my,complex <double>*mz,complex <double>*mxmy,
-              complex <double>*mxmz,complex <double>*mymz,complex <double>*mx2,complex <double>*my2,complex <double>*mz2,
               float a,float b,float c,int * colcode,Vector & P, Vector & Pxyz)
-{// ausgabe auf file filename
+{// output of the header to filename
  FILE * fout;char l[MAXNOFCHARINLINE];
- int i,j,chinr=0,ortho=1;
- double isave[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
+ int i,j,ortho=1;
  double alpha,beta,gamma;
    extract(unitcell, "alpha", alpha); extract(unitcell, "beta", beta); extract(unitcell, "gamma", gamma);
    if(alpha!=90||beta!=90||gamma!=90){ortho=0;}
@@ -183,7 +179,24 @@ void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infil
   fprintf(fout, "\n");
  }
  fprintf(fout, "#}\n");
- fprintf(fout, "#    REFLECTION LIST\n");
+ fclose(fout);
+}
+
+void printreflist(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
+              Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int * J,int m,
+              Vector * hkl,float * ikern,float * intmag,float * intmagdip,float * D,float * theta,float * out10,
+              float * out11,complex <double>*mx,complex <double>*my,complex <double>*mz,complex <double>*mxmy,
+              complex <double>*mxmz,complex <double>*mymz,complex <double>*mx2,complex <double>*my2,complex <double>*mz2,
+              float a,float b,float c,int * colcode,Vector & P, Vector & Pxyz)
+{FILE * fout;
+ int i,chinr=0,ortho=1;
+ double isave[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
+ double alpha,beta,gamma;
+   extract(unitcell, "alpha", alpha); extract(unitcell, "beta", beta); extract(unitcell, "gamma", gamma);
+   if(alpha!=90||beta!=90||gamma!=90){ortho=0;}
+  fout = fopen_errchk (filename, "a");
+
+fprintf(fout, "#    REFLECTION LIST\n");
  if(colcode[10]>4||colcode[11]>4){fprintf(fout, "#    Polarization Vector P= %g a + %g b + %g c (|P|=%g)\n",P(1),P(2),P(3),Norm(Pxyz));}
  hkl[0] = 0; D[0] = 100; theta[0] = 0; ikern[0] = 0; intmag[0] = 0;intmagdip[0] = 0; out10[0] = 0; out11[0] = 0;mx[0]=0;my[0]=0;mz[0]=0;mx2[0]=0;my2[0]=0;mz2[0]=0;mxmy[0]=0;mxmz[0]=0;mymz[0]=0;
  double rpvalue[]={0,0,0,0,0,0,0,0,0,0,0,0,0};

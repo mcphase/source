@@ -539,7 +539,7 @@ for(k=10;k<=j;++k){fprintf(fout," %+8.5f",numbers[k]);}
 fprintf(fout,"\n");
                             instr[0]='#';
                             while(instr[strspn(instr," \t")]=='#'&&feof(fin_coq)==0){pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
-                            if (strchr(instr,'>')==NULL)
+                            if (strchr(instr,'>')==NULL||instr[strspn(instr," \t")]=='#')
                              {fseek(fin_coq,pos,SEEK_SET);} // no ">" found --> do dipole approx
                              else          
                              {J[i]=0; // J=0 tells that full calculation should be done for this ion
@@ -669,6 +669,8 @@ if (argc>1){int nr;
            }
 
 // transformieren der millerindizes auf kristallographische einheitszelle
+printheader(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
+          r2, r3, n,  J, m,a,b,c,colcode,P,Pxyz);
 
 
 neutint(jjjpars,code,T,lambda, thetamax, ovalltemp, lorenz, r1, r2, r3, n,  J, m, hkl, D, theta, intmag,intmagdip, ikern, out10, out11,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2,colcode,Pxyz);
@@ -687,7 +689,7 @@ for(i=1;i<=m;++i){hhkkll=hkl[i];
                  }
 
 
-printeln(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
+printreflist(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
           r2, r3, n,  J, m, hkl, ikern, intmag,intmagdip, D, theta, out10, out11,mx,my,mz,mxmy,mxmz,mymz,
           mx2,my2,mz2,a,b,c,colcode,P,Pxyz);
 

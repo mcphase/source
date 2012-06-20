@@ -501,14 +501,24 @@ The formula for a gaussian is:
 $\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
 ${\rm gauss}(x)=\frac{{\rm area} exp(-(x-{\rm position})^2/2 \sigma^2)}{\sqrt{2*\pi}\sigma}$
 
-\item[\prg getvalue\index{getvalue} colx coly xvalue dE filename]
+\item[\prg getvalue\index{getvalue} colx coly xvalue dx filename]
 program to get the y-value of a function by averaging
- over an interval xvalue+-dE,
+ over an interval xvalue+-dx,
  note: colx has to be sorted
 \begin{verbatim}
  output: the y-value is written to stdout and environment variable MCPHASE_YVALUE
          1/y-value is written to stdout MCPHASE_YVALUE_INVERSE
          standarddeviation to stdaout and MCPHASE_STA
+\end{verbatim}
+\item[\prg getvariable\index{getvariable} variablename filename]
+ program to get the value of a variable from a file 
+  (e.g. somewhere in a file there is 
+   a statement T=4.3 and you want to get out this 4.3)
+\begin{verbatim}
+ output: the variable value is written to stdout and environment variable 
+         MCPHASE_GETVARIABLE_VALUE, the name is stored in 
+         MCPHASE_GETVARIABLE_NAME
+        mind lines starting with # are ignored (unless these start with #!)
 \end{verbatim}
 \item[\prg histcol\index{histcol} col {[stepwidth|-n steps]} *.*:] generates a histogram of
 a column in a data file and stores it in histcol.out. stepwidth is the 

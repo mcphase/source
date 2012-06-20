@@ -7,15 +7,18 @@ unless ($#ARGV >0)
 print STDOUT << "EOF";
 
  program to get the y-value of a function by averaging
- over an interval xvalue+-dE,
+ over an interval xvalue+-dx,
  note: colx has to be sorted
 
- usage: perl getvalue.pl colx coly xvalue dE filename
+ usage: perl getvalue.pl colx coly xvalue dx filename
 
  output: the y-value is written to stdout and environment variable MCPHASE_YVALUE
          1/y-value is written to stdout MCPHASE_YVALUE_INVERSE
          standarddeviation to stdaout and MCPHASE_STA
 EOF
+# clean bat files
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
+open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
 }
 

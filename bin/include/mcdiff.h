@@ -65,11 +65,16 @@ complex <double>*mxmz,complex <double>*mymz,complex <double>*mx2,complex <double
 int * colcode,Vector & Pxyz);
 
 // mcdiff - output of results
-void printeln(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
+void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
+Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int * J,int m,
+float a,float b,float c,int * colcode,Vector & P);
+
+void printreflist(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
 Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int * J,int m,Vector * hkl,
 float * ikern,float * intmag,float * intmagdip,float * D,float * theta,float * sf,float * lpg,complex <double>*mx,
 complex <double>*my,complex <double>*mz,complex <double>*mxmy,complex <double>*mxmz,complex <double>*mymz,
 complex <double>*mx2,complex <double>*my2,complex <double>*mz2,float a,float b,float c,int * colcode,Vector & P);
+
 
 // output to mcdiff.sps
 void print_sps(const char * filename,int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H);
