@@ -240,9 +240,9 @@ print $delta;
                    ++$i;}
   if($chisquared){
      print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens restart and try again):\n";
-$Fij=$delta x matinv($V) ;
- $cov=$Fij->xchg(0,1) x $Fij;
- $cov*=$s2;
+$Fij=$delta x matinv($V);
+ $FtF=$Fij->xchg(0,1) x $Fij;
+ $cov=$sta*matinv($FtF);  # multiply by sta=chi2 in order to get covariance matrix
      print $cov; print Fout $cov;
                 $i=0;foreach(@par){print $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
                                    print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";

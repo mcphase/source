@@ -158,7 +158,7 @@ If ${\rm err}^2$ is given, the program minimizes $\chi^2=1/N\sum_i \delta_i^2/{\
 The error is used at the end of the fitting to calculate
 a covariance matrix, which can be used to estimate correlations
 and errors of the fitting parameters: $F_{ij}=\partial \delta_i / {\rm err}_i\partial {\rm par}_j$,
-the covariance matrix is then ${\rm cov}=s^2(F^TF)^{-1}$, it's diagonal elements correspond
+the covariance matrix is then ${\rm cov}=\chi^2(F^TF)^{-1}$, it's diagonal elements correspond
 to the squared error of the fitting parameters par$_j$ and the off diagonal elements to
 the correlation among these fitting parameters.  Useful to generate
 the required {\em sta= ...} statements is the program {\prg chi2}\index{chi2}.

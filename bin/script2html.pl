@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-
 use Cwd;
 use File::Basename;
 
@@ -73,7 +72,7 @@ while (@ARGV)
                         $_=$dir."/".$_;
                        } continue {
                         $aa=$a;
-                       }
+                       } $arguments=join(' ',@arg);
         # print "script2html $arguments > ".$arg[$#arg].".htm\n";
          system("script2html $arguments > ".$arg[$#arg].".htm");
          open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
@@ -85,7 +84,7 @@ while (@ARGV)
        }
         else
        {# take care about <img src=""> commands and insert path
-        $line=~s!\<img(.*)src\s*="!\<img\1src="$dir/!;
+        $line=~s!\<img(.*)src\s*="(.*)"!&lt img\1src="$dir/\2"&gt \n \<img\1src="$dir/\2"!;
         # replace html commands <...> by &aaa& ... &bbb& 
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
                          dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
