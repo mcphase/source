@@ -3,11 +3,11 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >1) 
 
-{print " program histcol  used to generate a histogram of a column in a data file and store it as histcol.out\n";
+{print " program histcol  used to generate a histogram of a column in a data file and writes it to stdout\n";
  print " usage: histcol column step  *.*   \n column=column, step=stepwidth of histogram points (or -n 100 for 100 steps)\n *.* .. filenname\n";
 
  exit 0;}
-
+print "# $0 @ARGV\n";
 $col=$ARGV[0];shift @ARGV;
 $step=$ARGV[0];shift @ARGV;
 if ($step=~/-n/){$nofsteps=$ARGV[0];shift @ARGV; }
@@ -17,7 +17,6 @@ $min=1e100;$max=-1e100;
   foreach (@ARGV)
   {$file=$_;
    unless (open (Fin, $file)){die "\n error histcol:unable to open $file\n";}
-   print "<".$file;
    while($line=<Fin>)
      {if ($line=~/^\s*#/) {}
        else{$line=~s/D/E/g;@numbers=split(" ",$line);
@@ -27,9 +26,9 @@ $min=1e100;$max=-1e100;
       }
    close Fin;
    }
-print ">\n";
+
 if ($step=~/-n/){$step=($max-$min)/$nofsteps;}
-if($max==$min){die "Error histcol $file: maximum equal to minimum\n";}
+if($max<=$min){die "Error histcol $file: maximum equal or less than minimum\n";}
 if ($step/($max-$min)<1e-3) {die "Error histcol $file: not more than 1000 steps allowed \n";}
 # determine histogram
 @histo=();
@@ -52,8 +51,10 @@ for($hx=0;$hx<=int(($max-$min)/$step)+1;++$hx){$histo[$hx]=0;}
 
    open(Fout,">histcol.out");
    print Fout "#{Histogram of column $col in file(s) @ARGV\n";
+   print STDOUT "#{Histogram of column $col in file(s) @ARGV\n";
    for($hx=0;$hx<=int(($max-$min)/$step)+1;++$hx)
    {print Fout (($hx+0.5)*$step+$min)."   ".($histo[$hx])."\n";
+    print STDOUT (($hx+0.5)*$step+$min)."   ".($histo[$hx])."\n";
    } close Fout;
 
 

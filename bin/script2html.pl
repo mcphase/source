@@ -38,11 +38,17 @@ body { font-family:'Times',monospace;font-style=italic; }
 
 
 </head><body>
- ... this document was created $date <br>
-...  in directory $dir<br>
-...  by the command: script2html @ARGV <br><br>
+ ...this document was created $date <br>
+ ...in directory $dir<br>
+ ...by the command: script2html @ARGV <br><br>
+
 EOF
 @ARGV=map{glob($_)}@ARGV;$i=0;
+@BB=@ARGV;while(@BB){if($BB[0]=~/-fromline/){shift @BB; shift @BB;}
+                     if($BB[0]=~/-toline/){shift @BB;shift @BB;}
+                     print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';shift @BB;
+                    } 
+print "<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->";
 while (@ARGV)
 {$linetext="";
  $fromline=1;if($ARGV[0]=~/-fromline/){shift @ARGV; $fromline=$ARGV[0];shift @ARGV;$linetext=" from line $fromline";}
@@ -50,8 +56,8 @@ while (@ARGV)
  $file=$ARGV[0];shift @ARGV; ++$i;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    # get path from filename
-   $dir=dirname($file);
-   print "\n<hr>Source File $i$linetext:<h1>".$file."</h1>\n";
+   $dir=dirname($file);print "\n";
+   print '<a name="'.$file.'"><hr>Source File '.$i.$linetext.':<h1>'.$file.'</h1></a>';print "\n";
    #print '<p class="c">';
    $lnr=0;
    while(($line=<Fin>)&&$lnr<$toline)
@@ -76,7 +82,7 @@ while (@ARGV)
         # print "script2html $arguments > ".$arg[$#arg].".htm\n";
          system("script2html $arguments > ".$arg[$#arg].".htm");
          open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
-            until($line1=~/.*by the command: script2html/){$line1=<Fin1>;}
+            until($line1=~/.*<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->/){$line1=<Fin1>;}
             while($line1=<Fin1>){unless($line1=~/.*\<\/body\>\<\/html\>/){
                                  $line1=~s/\<hr\>Source File\s*/\<hr\>Source File $i\./;
                                  print $line1;}}
@@ -102,6 +108,8 @@ while (@ARGV)
        print  $line;
        }
     }else{ # line did not start with a comment - thus it is a command and should be printed as it is
+    # substitute all  < and > signs by the html code &gt and &lt
+        $line=~s/>/&gt /g;$line=~s/</&lt /g;
    $line='<span class="r">'.$line.'</span><br>'; #print commands in style "r"
    print  $line;
    }
