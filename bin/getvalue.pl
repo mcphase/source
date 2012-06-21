@@ -12,7 +12,7 @@ print STDOUT << "EOF";
 
  usage: perl getvalue.pl colx coly xvalue dx filename
 
- output: the y-value is written to stdout and environment variable MCPHASE_YVALUE
+ output: the y-value is written to stdout and to env. varaibale MCPHASE_YVALUE
          1/y-value is written to stdout MCPHASE_YVALUE_INVERSE
          standarddeviation to stdaout and MCPHASE_STA
 EOF
@@ -29,10 +29,10 @@ $dE=$ARGV[0];shift @ARGV;
 foreach(@ARGV)
 {$filename=$_;
 ($yvalue,$sta)=getvalue_by_averaging_over_intervaldE($xvalue,$colx,$coly,$dE,$filename);
-if (abs($yvalue)>1e-10){$yinv=1/$yvalue;}else{$yinv=" ";}
+if (abs($yvalue)>1e-300){$yinv=1/$yvalue;}else{$yinv=" ";}
 print "#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dE=$dE corresponds\n";
 print "#! to the yvalue=$yvalue  (1/yvalue=$yinv) deviations sta=$sta\n";
-}
+} 
 # for setting environment variables
 open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
 print Fout "set MCPHASE_YVALUE=$yvalue\n";
@@ -53,7 +53,7 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
   $Iav=0;$j=0;$esum=0;$nofpoints=0;$order=1;
   while($line=<Fin>){
-   unless($line=~/^\s*#/){$line=~s/D/E/g;@numbers=split(" ",$line);
+   unless($line=~/^\s*#/||$line=~/^\s*\n/){$line=~s/D/E/g;@numbers=split(" ",$line);
          if ($j==0){@numbers1=@numbers;}else{$order=1;if($numbers[$colx-1]<$numbers1[$colx-1]){$order=-1;}}
             ++$j;
                  unless(0==($numbers[$colx-1]-$numbers1[$colx-1])||$constx-$dE>$numbers[$colx-1]||$constx-$dE>$numbers1[$colx-1]
@@ -90,17 +90,16 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
                    $Iav+=($by+$numbers1[$coly-1])/2*($bx-$numbers1[$colx-1]);
                    $esum+=$order*($bx-$numbers1[$colx-1]);
                   }
-
    @numbers1=@numbers;
    }}
   close Fin;
-  if (abs($esum)<1e-10){print "\n firstenergy sum on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of energy values\n";<stdin>;}
+  if (abs($esum)<1e-10){print "\n firstxvalue sum on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of energy values\n";<stdin>;}
   $Iav/=$esum;
   my $sta=0;
   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
   $j=0;$esum=0;
   while($line=<Fin>){
-   unless($line=~/^\s*#/){$line=~s/D/E/g;@numbers=split(" ",$line);
+   unless($line=~/^\s*#/||$line=~/^\s*\n/){$line=~s/D/E/g;@numbers=split(" ",$line);
          if ($j==0){@numbers1=@numbers;}else{$order=1;if($numbers[$colx-1]<$numbers1[$colx-1]){$order=-1;}}
             ++$j;
                  unless(0==($numbers[$colx-1]-$numbers1[$colx-1])||$constx-$dE>$numbers[$colx-1]||$constx-$dE>$numbers1[$colx-1]
@@ -112,8 +111,8 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
        	          }
 #print "$constx $dE ".$numbers[$colx-1]." ".$numbers1[$colx-1]."\n";
    @numbers1=@numbers;
-   }}
-  if (abs($esum)<1e-10){print "\n energy sum on averaging is zero for $file\n";<stdin>;}
+   }} 
+  if (abs($esum)<1e-300){print "\n getvalue: xvalues sum on averaging is too small ($esum) for $file\n";<stdin>;}
   close Fin;$sta/=$esum;
   return ($Iav,$sta);
 }
