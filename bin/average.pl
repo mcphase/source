@@ -76,6 +76,7 @@ else {print "taking $n lines\n";}
                                  }
            }
       }
+      if($ii>-1){emptyblock();}
       close Fin;
       close Fout;
        unless (rename "range.out",$file)

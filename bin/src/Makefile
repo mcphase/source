@@ -26,9 +26,14 @@ OSTYPE=$(shell uname)
 ifneq (,$(findstring $(OSTYPE),Linux))
  LINUX = linux
 else
+ifneq (,$(findstring $(OSTYPE),Darwin))
+ LINUX = linux
+ CYGWIN=1
+else
  WINDOWS = windows
 ifneq (,$(findstring CYGWIN,$(shell uname)))
  CYGWIN=1
+endif
 endif
 endif
 #
