@@ -87,6 +87,27 @@ unit cell n
 cell 
                 n1xr1,n2xr2,n3xr3 put result into extend.j, extend.tst and extend.in
 
+\item [\prg fermicol\index{fermicol} col T filename] calculates the Fermifunction from energy in column col.
+\begin{description}
+\item[col] column containing energy values (eV) relative to EF
+ \item[T] temperature (K)
+ \item[filename] file name
+\end{description}
+\item[\prg fitfermi\index{fitfermi} T EF fwhm min max filename] 
+fits a (Gaussian convoluted) Fermi function to data in file
+\begin{description}
+\item[T] Temperature (K)
+\item[EF] initial value of Fermi Energy (eV)
+\item[fwhm] initial vlaue for resolution (eV)
+\item[min max] energy range of fit (may be less than range of experimental data points)
+\item[filename] filename (col 1 is energy in eV and col 2 intensity)
+\end{description}
+The fermifunction is defined as
+      $ f(E)=b+l(E-EF)+[d+k(E-EF)]/(\exp((E-EF)/kT)+1)$, the function
+      $ f(E)$ is convoluted with a Gaussian function of given fwhm
+            and the  result is compared to experimental data.
+
+ output:  files can be found in directory results, filename.fit is created with fitted function and parameter values
 \item[\prg formfactor\index{formfactor} *.sipf] program to calculate the neutron magnetic formfactor
 from the formfactor coefficients in the single ion parameter file *.sipf. If a radial wave function is given in *.sipf
 then the formfactorand the expectation values of the spherical Bessel functions  are evaluated by integration
