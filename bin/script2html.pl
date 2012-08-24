@@ -93,11 +93,10 @@ while (@ARGV)
         $line=~s!\<img(.*)src\s*="(.*)"!&lt img\1src="$dir/\2"&gt \n \<img\1src="$dir/\2"!;
         # replace html commands <...> by &aaa& ... &bbb& 
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
-                         dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
-                         h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
-                         map|meta|noframes|noscript|object|ol|optgroup|option|
-                         p|table|tbody|textarea|tfoot|th|title|tr|tt|ul|var
-                  )(.*?)\>/&aaa&\1\2\3&bbb&/g;
+                         |dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
+                         |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
+                         |map|meta|noframes|noscript|object|ol|optgroup|option|
+                         |p|sub|table|tbody|textarea|tfoot|th|title|tr|tt|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
         $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
 
        # substitute all remaining < and > signs by the html code &gt and &lt
