@@ -290,7 +290,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
             //lorentzfactor*************************************************************
             float lorentzf=1;
             sin2theta = 2.0 * sintheta * sqrt(1.0 - sintheta * sintheta);
-            if(lorenz == 0){lorentzf = 100;} // no lorentzfactor
+            if(lorenz == 0){lorentzf = 1.0;} // no lorentzfactor
             if(lorenz == 1){lorentzf = 1.0 / sin2theta / sin2theta;} // powder flat sample
             if(lorenz == 2){lorentzf = 1.0 / sin2theta / sintheta;}  // powder cyl. sample
             if(lorenz == 3){lorentzf = 1.0 / sin2theta;}             //single crystal

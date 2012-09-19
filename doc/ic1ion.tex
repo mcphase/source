@@ -24,15 +24,15 @@ The single ion parameter file has to be of the form (note the crystal field para
 can be calculated by {\prg pointc}\index{pointc}):
 {\footnotesize
 \begin{verbatim}
-#!../../bin/ic1ion_module/ic1ion.so
+#!MODULE=ic1ion
 #<!--mcphase.sipf-->
 # single ion property file example for module ic1ion
 
--------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
 # OBLIGATORY PARAMETERS
-------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
 
-# Configuration
+# Configuration *********************************************
 # (i) either specify single ion type by IONTYPE 
 
 # IONTYPE=Co2+
@@ -40,25 +40,23 @@ can be calculated by {\prg pointc}\index{pointc}):
 # (ii) or by giving parameters explicitly:
 # from Griffith 1971 p 487  B=1115  C=4366 ZETA=533
 # p379 CoIII=Co2+ is 3d7 configuration
-
 conf = d7
-
-# from equations p 83 A=F0-49*F4  B=F2-5*F4 C=35*F4
-# we get F4=C/35  F2=B+5*F4
-# however F0 is not determined from this table ...
-
 F0=0
 F2=1738.7
 F4=124.74
 zeta=533
+# from equations p 83 A=F0-49*F4  B=F2-5*F4 C=35*F4
+# we get F4=C/35  F2=B+5*F4
+# however F0 is not determined from this table ...
+#*******************************************************
 
 # for charges and chrgplt to work you need to specify the number of electrons in the shell
 
 nof_electrons=7
 
--------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
--------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
 
 # some keywords, each in a separate line (each keyword sets a flag to true and holds
 # for the rest of the file to be read)
@@ -130,15 +128,6 @@ Bz=0.1
 # Uncomment the next line to use the truncate method with 1/5th of all levels
 
 # truncate_matrix=0.2
-
-# another experimental feature is for the calculation of spin and orbital 
-# magnetisation density in the three spatial directions which is specified by
-
-# density=1,2,3,4,5,6
-
-# ... this triggers mcalc to output instead of the normal operators
-# the expectation value of the coefficient in the expansion of the 
-# (orbital or spin)-density in terms of tesseral harmonic functions
 
 # a list of crystal field parameters (Llm denote Wybourne parameters)
 units=meV
@@ -340,11 +329,13 @@ the convention that Ja=Jy=O1-1(J) Jb=Jz=O10(J) Jc=Jx=O11(J) and instead
 puts Ja=Sx Jb=Lx Jc=Sy Jd=Ly Je=Sz Jf=Lz, the Jn for $n>f$ being defined in the single
 ion module. 
 \item for higher order operators, the current McPhase definitions are expanded, so instead of
-Jd==O22S, we made Jg==O22S, Jh==O21S, Ji==O20, Jj==O21, Jk==O22,
-Jl==O33S, etc... these operators are to be understood as in the Stevens notation, equivalent
-operators to tesseral harmonic functions stripped by their prefactors $c_{lm}$ (factors before the
-bracket in table IV of~\cite{hutchings64-227} and in appendix~\ref{tesseral}), 
-i.e. $\langle v| O_{lm}| v' \rangle=\langle nu |\sum_i Z_l^m(\Omega_i)|nu' \rangle / c_{lm}$.
+Jd==O22S, we made Jg==T22S, Jh==T21S, Ji==T20, Jj==T21, Jk==T22,
+Jl==T33S, etc... the operators $\hat T_{kq}$ are described in equation~(\ref{tkqhermitian})
+% these operators are to be understood as in the Stevens notation, equivalent
+%operators to tesseral harmonic functions stripped by their prefactors $c_{lm}$ (factors before 
+%the
+%bracket in table IV of~\cite{hutchings64-227} and in appendix~\ref{tesseral}), 
+%i.e. $\langle v| O_{lm}| v' \rangle=\langle nu |\sum_i Z_l^m(\Omega_i)|nu' \rangle / c_{lm}$.
 \item the programs {\prg mcphas, mcdisp etc} take into account
  a modified Zeeman term $H_{Ze}=-\mu_B(2\mbf S+\mbf L)\mbf H$.
  However, in program {\prg singleion\index{singleion}} the meanfields of S and L can be
@@ -471,7 +462,7 @@ terms of the cfp's,
                                          \langle\omega|v|\omega'\rangle \langle\bar{\Omega};\omega'|\Omega'\rangle \]
 
 \noindent Once the cfp are known, only the single electron matrix element $\langle\omega|v|\omega'\rangle$ 
-is needed to be determined for each particular operator. This is generaly a straigtforward task. The
+is needed to be determined for each particular operator. This is generally a straigtforward task. The
 cfp are also dependent on the classification of the states for which they are constructed, but the
 advantage of the use of a classification based on group theory is that we can use Racah's
 theorem~\cite{racah49-1352}\footnote{Equation 11}, to factorise the cfp into terms involving only

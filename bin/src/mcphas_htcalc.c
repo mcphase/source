@@ -586,30 +586,21 @@ return 0; // ok we are done with this (HT) point- return ok
 /*****************************************************************************/
 // this sub checks if a spinconfiguration has already been added to
 // table testspins and adds it if necessary
-int checkspincf(int j,spincf & sps,qvectors & testqs,Vector & nettom,
+int checkspincf(int j,spincf & sps1,qvectors & testqs,Vector & nettom,
 		     Vector & momentq0, Vector & phi, 
                      testspincf & testspins,physproperties & physprops)
 { int i;
-  spincf spq(1,1,1,sps.nofatoms,sps.nofcomponents);
- 
+  spincf sps(1,1,1,sps1.nofatoms,sps1.nofcomponents);
+  sps=sps1;sps.reduce();// reduce inserted MR 20120907
+
 // compare spinconfigurations stabilized by 
 // index j with existing spinconfigurations in testspins
-
-      
-
-   // 1. check initial config: take just used nettom,momentq0,phi for comparison
-   if (j<0)
-   {spq.spinfromq(testqs.na(-j),testqs.nb(-j),testqs.nc(-j),testqs.q(-j),
-                  nettom,momentq0,phi);
-    if (spq==sps) {physprops.j=j;testqs.nettom(-j)=nettom;
-                  testqs.momentq0(-j)=momentq0;testqs.phi(-j)=phi;return 1;} //ok
-   } 
-
+  spincf spq(1,1,1,sps.nofatoms,sps.nofcomponents);
 
 // compare new configuration to all stored configurations 
 //check all spinconfigurations
 
- for (i= -testqs.nofqs();i<=testspins.n;++i)
+ for (i=testspins.ninitial;i>=-testqs.nofqs();--i)
  {
   if (i>0) 
    {if (sps==(*testspins.configurations[i])) 
@@ -625,6 +616,20 @@ int checkspincf(int j,spincf & sps,qvectors & testqs,Vector & nettom,
   }
  } 
 
+   //  check initial config: take just used nettom,momentq0,phi for comparison
+   if (j<0)
+   {spq.spinfromq(testqs.na(-j),testqs.nb(-j),testqs.nc(-j),testqs.q(-j),
+                  nettom,momentq0,phi);
+    if (spq==sps) {physprops.j=j;testqs.nettom(-j)=nettom;
+                  testqs.momentq0(-j)=momentq0;testqs.phi(-j)=phi;return 1;} //ok
+   } 
+
+// check newly added configuration
+for (i=testspins.ninitial+1;i<=testspins.n;++i)
+ {if (sps==(*testspins.configurations[i])) 
+	 {
+	 physprops.j=i;return 1;} //ok
+   }
 // if it gets here, the spins sps configuration has not been found
 // -. add configuration to testspins
 return (physprops.j=testspins.addspincf(sps));  //ok=1

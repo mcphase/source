@@ -16,7 +16,7 @@ class testspincf
   char * savfilename;
   
   public:
-  int n,maxn,nofatoms,nofcomponents; // number of configurations, maximum of number of configurations. nofatoms, nof moments
+  int n,ninitial,maxn,nofatoms,nofcomponents; // number of configurations, maximum of number of configurations. nofatoms, nof moments
   spincf **configurations; // array of pointers to the different
                             //configurations
 

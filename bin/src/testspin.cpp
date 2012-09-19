@@ -81,7 +81,7 @@ testspincf::testspincf (int nofconf, const char * file,const char * savfile,int 
   if (fin_coq == NULL)
     {
       fprintf (stderr, "No file %s: %s - no test spinconfigurations read - no problem - continuing ...\n",file, strerror (errno));
-      n=0;nofatoms=na;nofcomponents=nm;
+      n=0;nofatoms=na;nofcomponents=nm;ninitial=0;
      }
   else
     {
@@ -103,7 +103,7 @@ if (nofatoms!=na||nofcomponents!=nm)
    j=fseek(fin_coq,pos,SEEK_SET); 
     if (j!=0){fprintf(stderr,"Error: wrong file format of mcphas.tst\n");exit (EXIT_FAILURE);}
 
- for (i=1;i<=nofconf&&feof(fin_coq)==0                      //end of file
+ for (i=1;i<=nofconf  //&&feof(fin_coq)==0                      //end of file
 //                    &&fgets(instr,MAXNOFCHARINLINE,fin_coq)!=NULL   //error in line reading
 		    ;++i)
     {
@@ -120,7 +120,7 @@ if (nofatoms!=na||nofcomponents!=nm)
     fclose (fout);
       }
  fclose (fin_coq);
- n=i-1;
+ n=i-1;ninitial=i-1;
    }
 }
 
@@ -130,7 +130,7 @@ testspincf::testspincf (const testspincf & p)
   strcpy(savfilename,p.savfilename);
   int i;
   maxn=p.maxn;
-  n=p.n;
+  n=p.n;ninitial=p.ninitial;
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
   configurations = new spincf * [maxn+1];

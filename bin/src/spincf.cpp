@@ -18,7 +18,7 @@ int spincf::spequal(Vector a,Vector b)
  // spinconfigurations
  //if(a*b/Norm(a)/Norm(b)<COSINE){return false;} // this is by the inner product
 
- //this is by looking if any of the components of the 2 spins have differen signs
+ //this is by looking if any of the components of the 2 spins have different signs
  int i;
  for (i=a.Lo();i<=a.Hi();++i)
  {if (fabs(a(i))>SMALL||fabs(b(i))>SMALL)

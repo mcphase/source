@@ -69,7 +69,7 @@ If the internal module {\prg brillouin}
  (Brillouin function used for single ion properties,
   see appendix ~\ref{brillouin}) is used,
 the single ion property file must start with
-\begin{verbatim}#!brillouin\end{verbatim} and
+\begin{verbatim}#!MODULE=brillouin\end{verbatim} and
 the corresponding spin
  quantum number $J$ has to be given in the first uncommented
 lines.
@@ -83,7 +83,7 @@ J = 3.5
 \item [{\prg kramer}] If the internal module {\prg kramers} (anisotropic doublet ground state, see appendix %%@
 ~\ref{kramers}) is used,
 the single ion property file must start with
-\begin{verbatim}#!kramer\end{verbatim} and
+\begin{verbatim}#!MODULE=kramer\end{verbatim} and
 the corresponding saturation magnetisations have to be given in the first uncommented
 line.
 Here is an example:
@@ -261,7 +261,7 @@ R6=15.03
 
 
 
-\section{All about External Single Ion Modules}\label{extsimod}
+\section{All about Programming External Single Ion Modules}\label{extsimod}
 
 Single ion properties can be described in a very flexible way by
 user programmed single ion module functions, which are loaded at runtime.
@@ -401,11 +401,27 @@ The meaning of the symbols is as follows:
     J           single ion momentum vector <J> (n- dimensional with n>=1,
                 may be an arbitrary set of operators, restriction is that 
                 Ja, Jb, Jc are the total angular motmentum components along the
-                crystallographic a,b,c directions (note if gJ=0 this restriction is that
-                Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc). his is necessary in order that
-                mcphas\index{mcphas} gets right the Zeeman term and correctly outputs
-				magnetisation and neutron scattering. This means J4,...,Jn can be chosen 
-				as the user wants, for example Jd=O20(J) Je=O61(J) Jf=Jy-Jx^2 or similar)
+                crystallographic i,j,k directions (note if gJ=0 this restriction is that
+                Ja=Si Jb=Li Jc=Sj Jd=Lj Je=Sk Jf=Lk).... a right handed orthogonal coordinate system 
+                defined by j||b, k||(a x b) and i normal to k and j, ijk||abc for orthogonal lattices. 
+                This is necessary in order that
+                mcphas gets right the Zeeman term and correctly outputs
+                magnetisation and neutron scattering. This means J4,...,Jn can be chosen 
+                as the user wants, for example Jd=O20(J) Je=O61(J) Jf=Jy-Jx^2 or similar.
+                However, for calculation of chargedensity the sequence of operators has to
+                be as follows: 
+                * for gJ not equal 0 it must be Ji,Jj,Jk,O2-2,O2-1,O20,O21,O22,O3-3,
+                O3-2,O3-1,O30,31,O32,O33,O4-4,....,O66. (Ji,Jj,Jk are total angular momentum
+               along the ijk axes)
+                * for gJ=0 the operator sequence mus be Si,Li,Sj,Lj,Sk,Lk,
+                T2-2,T2-1,T20,T21,T22,T3-3,
+                T3-2,T3-1,T30,T31,T32,T33,T4-4,...,T66 (Tlm are the tensor operators 
+                which are  related to the tesseral harmonic functions Zlm by summing
+                oer all electrons i=1,..,nofelectrons in the unfilled shell and multiplying by a factor: e.g.
+                T20=sqrt(4pi/5) sum_i=1^nofelectrons  Z20(Omega_i)
+                or in general
+                Tlm=sqrt(4pi/2l+1) sum_i=1^nofelectrons  Zlm(Omega_i)  for l=0
+                Tlm=sqrt(4pi/2l+1) sum_i=1^nofelectrons  Zlm(Omega_i)  for l not equal 0
     lnZ         natural logarithm of single ion partition function
     U           single ion magnetic energy [meV]
     mcalc_parstorage     parameter matrix matrix (optional)

@@ -153,20 +153,20 @@ of the unfilled shell}
 \subsubsection{Chargedensity - {\prg display\_chargedensity\index{display\_chargedensity}},
 {\prg display\_chargedensities\index{display\_chargedensities}},
 {\prg chrgplt\index{chrgplt}} and  {\prg charges\index{charges}} - calculation and display of
-the charge density for a given temperature/field}
+the charge density (of the d, f shell) for a given temperature/field}
 \label{charges}
 
 \begin{description} 
 \item [chrgplt\index{chrgplt}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates chargedensity for a single ion at given temperature and magnetic field
+ calculates (partial) chargedensity for the unfilled shell of a single ion at given temperature and magnetic field
 \item [display\_chargedensity\index{display\_chargedensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the chargedensity for a single ion (using {\prg chrgplt})
+ calculates the (partial) chargedensity for the unfilled shell of a single ion (using {\prg chrgplt})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \item [charges threshold T Ha Hb Hc [mcphas.mf||h k l E(meV)]]
- calculates chargedensity for a magnetic unit cell calculated by {\prg mcphas} and
+ calculates (partial) chargedensity for the unfilled shells of magnetic ions in  a magnetic unit cell, which has been calculated by {\prg mcphas} and
  stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
 \item [display\_chargedensities threshold T Ha Hb Hc [mcphas.mf||h k l E(meV)]]
- calculates the chargedensity for a magnetic unit cell (using {\prg charges})
+ calculates the (partial) chargedensity for the unfilled shells of magnetic ions in  a magnetic unit cell (using {\prg charges})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \end{description}
 
@@ -245,7 +245,7 @@ program
 \subsubsection{Spin-, Moment- and Currentdensities}
 
 currently only available in combination with module {\prg ic1ion\index{ic1ion}}.
-Formalism based on \cite{balcar75-1581,balcar89-1}.
+Formalism based on \cite{balcar75-1581,balcar89-1,rotter11-12005}.
 
 Single ion programs:
 \begin{description}
@@ -255,19 +255,19 @@ Single ion programs:
  calculates the spindensity for a single ion (using {\prg spindensplt})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \item [orbmomdensplt\index{orbmomdensplt} threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates orbital moment density for a single ion at given temperature and magnetic field
+ calculates orbital magnetic moment density for a single ion (in Trammel gauge) at given temperature and magnetic field
 \item [display\_orbmomdensity\index{display\_orbmomdensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the orbital moment density for a single ion (using {\prg orbmomdensplt})
+ calculates the orbital magnetic moment density (in Trammel gauge) for a single ion (using {\prg orbmomdensplt})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \item [momdensplt\index{momdensplt} threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates total moment density for a single ion at given temperature and magnetic field
+ calculates total magnetic moment density for a single ion at given temperature and magnetic field
 \item [display\_momdensity\index{display\_momdensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the total moment density for a single ion (using {\prg momdensplt})
+ calculates the total magnetic moment density for a single ion (using {\prg momdensplt})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \item [currdensplt\index{currdensplt} threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates spindensity for a single ion at given temperature and magnetic field
+ calculates orbital electric current density for a single ion at given temperature and magnetic field
 \item [display\_currentdensity\index{display\_currentdensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the current density for a single ion (using {\prg currdensplt})
+ calculates the (orbital) electric current density for a single ion (using {\prg currdensplt})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 
 Programs for a magnetic unit cell:
@@ -278,14 +278,14 @@ Programs for a magnetic unit cell:
  calculates the spindensity for a magnetic unit cell (using {\prg spindensities})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \item [orbmomdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates orbital moment density for a magnetic unit cell calculated by {\prg mcphas} and
+ calculates orbital magnetic moment density (in Trammel gauge) for a magnetic unit cell calculated by {\prg mcphas} and
  stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
 \item [display\_orbmomdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates the orbital moment 
-density for a magnetic unit cell (using {\prg orbmomdensities})
+ calculates the orbital magnetic moment 
+density (in Trammel gauge) for a magnetic unit cell (using {\prg orbmomdensities})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \item [momdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates total moment density for a magnetic unit 
+ calculates total magnetic moment density for a magnetic unit 
 cell calculated by {\prg mcphas} and
  stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
 \item [display\_momdensities threshold T Ha Hb Hc [mcphas.mf]]
@@ -293,10 +293,10 @@ cell calculated by {\prg mcphas} and
 unit cell (using {\prg momdensities})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \item [currdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates current density for a magnetic unit cell calculated by {\prg mcphas} and
+ calculates (orbital) electric current density for a magnetic unit cell calculated by {\prg mcphas} and
  stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
 \item [display\_currentdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates the current 
+ calculates the (orbital) electric current 
 density for a magnetic unit cell (using {\prg currdensities})
  and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
 \end{description}

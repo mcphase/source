@@ -96,7 +96,7 @@ while (@ARGV)
                          |dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
                          |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
                          |map|meta|noframes|noscript|object|ol|optgroup|option|
-                         |p|sub|table|tbody|textarea|tfoot|th|title|tr|tt|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
+                         |p|sub|sup|table|tbody|textarea|tfoot|th|title|tr|tt|u|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
         $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
 
        # substitute all remaining < and > signs by the html code &gt and &lt

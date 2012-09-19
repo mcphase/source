@@ -20,7 +20,7 @@ int main (int argc, char **argv)
 {
 printf("***********************************************************\n");
 printf("*\n");
-printf("* orbmomdensplt - program to display orbital moment density of \n");
+printf("* orbmomdensplt - program to display orbital magnetic moment density of \n");
 printf("*               an ion given its CF pars, T and effective H\n");
 printf("* Reference: M. Rotter PRB 79 (2009) 140405R\n");
 printf("* %s\n",MCPHASVERSION);
@@ -32,7 +32,7 @@ printf("***********************************************************\n");
                     or: orbmomdensplt threshhold T Ha Hb Hc mcphas.sipf \n\n\
                     or: orbmomdensplt threshhold T Ha Hb Hc -div mcphas.sipf \n\n\
                 - given is temperature T[K] and magnetic effective field H[T]\n\
-		- the orbmomdensity vector component along direction (i,j,k) is\n\
+		- the orbital magnetic moment density vector component along direction (i,j,k) is\n\
                   calculated (if omitted abs val. of obrmomdens is calc.)\n\
                 - crystal field  parameters Blm should be read from a \n\
 	          standard mcphas single ion property file mcphas.sipf \n\

@@ -1,4 +1,4 @@
-\section{{\prg mcdiff}\index{mcdiff} - calculate and fit a magnetic Neutron or Resonant Xray %%@
+\section{{\prg mcdiff}\index{mcdiff} - calculate and fit  magnetic Neutron or Resonant Xray %%@
 Scattering}\label{mcdiff}
 
 In order to calculate neutron diffraction and resonant magnetic Xray scattering
@@ -67,7 +67,7 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #            9....|MSFdip.P|
 #            10....Re(MSFdip.P)
 #            11....Im(MSFdip.P)
-#            12....angl(Q,P)[°]
+#            12....angl(Q,P)[ï¿½]
 #            13....i(MSFxMSF*).P
 #            14....I+
 #            15....I-
@@ -203,7 +203,7 @@ calculated
 # according to fRMXS as given in equation (2) of Longfield et al. PRB 66 054417 (2002) and maximized with %%@
 respect to azimuth.
 #
-# List of atomic positions dr1 dr2 dr3, moments m scattering lengths sl,
+#! nofatoms=4 atoms in unit cell: List of atomic positions dr1 dr2 dr3, moments m scattering lengths sl,
 # Debye Waller factor (sqr(Intensity)~|NSF| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),
 # units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)
 #  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor

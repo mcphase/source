@@ -134,7 +134,7 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
  fprintf(fout, "#! T= %g K Ha= %g T Hb= %g T Hc= %g T\n",T,H(1),H(2),H(3));
  fprintf(fout, "#! Overall temperature factor B=%g A^2: Intensity is proportional to exp(-2*B*(sin(theta)/lambda)^2)\n",ovalltemp);
 
- if(lorenz == 0){sprintf(l,"100 no lorentz factor calculated");}
+ if(lorenz == 0){sprintf(l,"1.0 no lorentz factor calculated");}
  if(lorenz == 1){sprintf(l,"1 / sin^2(2theta)   neutron powder flat sample");}
  if(lorenz == 2){sprintf(l,"1 / sin(2theta) / sin(theta)    neutron powder cyl. sample");}
  if(lorenz == 3){sprintf(l,"1 / sin(2theta)     neutron single crystal");}
@@ -145,7 +145,7 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
  {fprintf(fout, "# Lorentz Factor not considered for resonant magnetic xray scattering - F1 and F2 transition intensities calculated\n");
   fprintf(fout, "# according to fRMXS as given in equation (2) of Longfield et al. PRB 66 054417 (2002) and maximized with respect to azimuth.\n#\n");
  }
- fprintf(fout, "# List of atomic positions db1 db2 db3, moments m scattering lengths sl,\n");
+ fprintf(fout, "#! nofatoms=%i atoms in unit cell: it follows a list of atomic positions db1 db2 db3, moments m scattering lengths sl,\n",n);
  fprintf(fout, "# Debye Waller factor (sqr(Intensity)~|sf| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),\n# units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)\n");
  fprintf(fout, "#  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor\n# coefficients\n");
  if (ortho==1)
@@ -209,9 +209,9 @@ fprintf(fout, "#    REFLECTION LIST\n");
    {
     if((double)(i-imin)/50==(double)((i-imin)/50))
     {if (ortho==1)
-     {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) F1:max-Isigpi azim Ipisig azim Ipipig azim F2:max-Isigpi azim Ipisig azim Ipipig azim  |^ma_q| |^mb_q| |^mc_q| |^ma^2_q||^mb^2_q||^mc^2_q||(^ma*^mb)_q||(^ma*^mc)_q||(^mb*^mc)_q|}\n",colheader[colcode[10]],colheader[colcode[11]]);}
+     {fprintf(fout, "#{h     k      l     d[A]    |Q|[1/A] 2theta Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) F1:max-Isigpi azim Ipisig azim Ipipig azim F2:max-Isigpi azim Ipisig azim Ipipig azim  |^ma_q| |^mb_q| |^mc_q| |^ma^2_q||^mb^2_q||^mc^2_q||(^ma*^mb)_q||(^ma*^mc)_q||(^mb*^mc)_q|}\n",colheader[colcode[10]],colheader[colcode[11]]);}
      else   // magnetic xrayscattering for nonortholattices currently not implemented
-     {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) \n",colheader[colcode[10]],colheader[colcode[11]]);}
+     {fprintf(fout, "#{h     k      l     d[A]    |Q|[1/A] 2theta Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) \n",colheader[colcode[10]],colheader[colcode[11]]);}
     }
     // calculate alpha_i delta_i for reflection hkl[i](1..3)  [currently ok only for ortholattices !!!]
     double alpha1,alpha2,alpha3,delta1,delta2,delta3,sqr1,sqr2;
@@ -296,7 +296,7 @@ fprintf(fout, "#    REFLECTION LIST\n");
       f2sp=abs(z1z2*st+z2z3*ct); if(f2sp*f2sp>IspF2){IspF2=f2sp*f2sp;IspF2a=azimuth*180/PI;}
       f2pp=abs(-ct*ct*(z12*st*st/ct/ct+z32)); if(f2pp*f2pp>IppF2){IppF2=f2pp*f2pp;IppF2a=azimuth*180/PI;}
       if(code==1&&ortho==1)
-       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
+       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
        hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]),myround(SMALLINT, (ikern[i]+intmag[i])),myround(SMALLINT,out10[i]),
        myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]),
        f1ps*f1ps,azimuth*180/PI,
@@ -310,7 +310,7 @@ fprintf(fout, "#    REFLECTION LIST\n");
 
     if(IspF1+IpsF1+IppF1+IspF2+IpsF2+IppF2+ikern[i]+intmag[i]>0.0001)
       {if(ortho==1)
-       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
+       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
         myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
         myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]), myround(SMALLINT,(ikern[i]+intmag[i])),myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),
         myround(SMALLINT,intmagdip[i]),
@@ -319,7 +319,7 @@ fprintf(fout, "#    REFLECTION LIST\n");
         myround(SMALLINT,abs(mx[i])),myround(SMALLINT,abs(my[i])),myround(SMALLINT,abs(mz[i])),myround(SMALLINT,abs(mx2[i])),myround(SMALLINT,abs(my2[i])),myround(SMALLINT,abs(mz2[i])),myround(SMALLINT,abs(mxmy[i])),
         myround(SMALLINT,abs(mxmz[i])),myround(SMALLINT,abs(mymz[i])));}
        else
-       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E\n",
+       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
         myround(hkl[i](1)),myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
         myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]), myround(SMALLINT,(ikern[i]+intmag[i])),
         myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]));}
@@ -328,8 +328,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
    }
    if(code==2)//calculate rpvalue and output neutrons only
    {if((double)(i-imin)/50==(double)((i-imin)/50))
-    {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) Iobs\n",colheader[colcode[10]],colheader[colcode[11]]);}
-      fprintf(fout,   "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E %8.4f\n",
+    {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs\n",colheader[colcode[10]],colheader[colcode[11]]);}
+      fprintf(fout,   "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %8.4f\n",
       myround(hkl[i](1)),myround( hkl[i](2)),myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
       myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]),myround(SMALLINT,(ikern[i]+intmag[i])),
       myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]),myround(SMALLINT,real(mx[i])));
@@ -344,8 +344,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
    }
    if(code==3)//calculate also rpvalue and chisquared and output neutrons only
    {if((double)(i-imin)/50==(double)((i-imin)/50))
-    {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t) Imag(2t)   Itot(2t) %s %s Imag_dip(2t) Iobs        error\n",colheader[colcode[10]],colheader[colcode[11]]);}
-      fprintf(fout,    "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %8.4f %5.4E %8.4f %5.4E %5.4E %5.4E %5.4E %5.4E\n",
+    {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs        error\n",colheader[colcode[10]],colheader[colcode[11]]);}
+      fprintf(fout,    "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
       myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
       myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]), myround(SMALLINT,(ikern[i]+intmag[i])),
       myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]),

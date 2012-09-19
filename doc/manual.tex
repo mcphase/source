@@ -53,13 +53,13 @@ P. Fabi n\'e Hoffmann\thanks{Forschungszentrum J\"ulich, D-52425 J\"ulich, Germa
 
 We would like to thank colleagues who generously agreed to read sections of the draft version
 of the text; their comments helped to improve the text substantially. We are particularly indebted to
-Ulrike Witte, Jane Brown, M. Loewenhaupt, A. Kreyssig, E. Faulhaber,
+Ulrike Witte, Jane Brown, M. Loewenhaupt, J.Jensen, A. Kreyssig, E. Faulhaber,
 J. Blanco, M. Haverkort, A. Severing,
-A. Doenni, H. Kitazawa, R. Kremer 
+A. Doenni, H. Kitazawa, R. Kremer, A. Tanaka 
  and Andrew Boothroyd for their help and inspiring comments.
 
 The authors thank the FWF, Royal Society and the EPSRC.
-We thank the authors of Cfield, Powls, FullProf, Spectre and Amos, output 
+We thank the authors of Cfield, Powls, FullProf, Spectre, Amos and XTLS, output 
 of these programs has been used to test McPhase. 
 
 Without the enthusiastic support of the neutron scattering 
@@ -567,12 +567,12 @@ neighbours, which
  \right)
  \end{equation}
  \end{enumerate}
-\item[section~\ref{cfieldsep} {\em Using {\prg Cfield} separately}] \ 
+\item[section~\ref{cfieldsep} {\em Using {\prg so1ion} separately}] \ 
  \begin{itemize}
- \item type: cfield -c -B m m Nd3+ 2 10 rk
+ \item type: so1ion -c -B m m Nd3+ 2 10 rk
  \item edit file bkq.parameter and enter the crystal field parameters given in section~\ref{cf1ion}
- \item type: cfield -r -B
- \item edit file cfield.output to see the result of the calculation
+ \item type: so1ion -r -B
+ \item edit file results/so1ion.output to see the result of the calculation
  \end{itemize}
 \item[section~\ref{start} {\em starting a simulation}] \ 
 
@@ -602,7 +602,7 @@ neighbours, which
 \newpage
 
 \bibliographystyle{physrev}   % here you should update any list by
-\bibliography{li110830}   % bibtex - ing the database
+\bibliography{li120914}   % bibtex - ing the database
 
 \newpage
 \printindex

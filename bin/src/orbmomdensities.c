@@ -23,11 +23,11 @@ printf("# **********************************************************\n");
 // check command line
   if (argc < 6)
     { printf ("\n \
-program orbmomdensities - display orbmomdensities at HT point\n\n \
+program orbmomdensities - display orb mag momdensities at HT point\n\n \
 use as: orbmomdensities threshhold T Ha Hb Hc [i j k] [file.mf]\n \
     or: orbmomdensities threshhold T Ha Hb Hc -div [file.mf]\n \
                         (default input file is results/mcphas.mf)\n\n \
-This program outputs orbmomdensities on of magnetic ions in the magnetic\n \
+This program outputs orbital magnetic moment densities on of magnetic ions in the magnetic\n \
 unit cell the graphics output format can be fine tuned in .mf and\n \
 and results/graphic_parameters.set\n\n \
 jvx files can be viewed by: java javaview results/orbmomdensities.jvx \n \
