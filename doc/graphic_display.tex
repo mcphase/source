@@ -5,7 +5,10 @@
 If java is installed on the system, running McPhase will
  display\index{display} the calculated magnetisation
 curve immediately during the simulation updating 
-it in regular intervals (this can be done for any other
+it in regular intervals\footnote{Depending on the Java setup on your computer, a conflict may occur between the McPhase 
+Java programs and other Java programs, such as the Matlab GUI. If you find that no graphics
+windows open, and have other Java programs running in the background, try to close all other Java programs.}
+(this can be done for any other
 curve  by using the
 program: {\prg display\index{display} x-colnr y-colnr filename}). 
 Also the text in output files can be monitored by the program:
@@ -62,7 +65,8 @@ this column.
 \item [displaycontour\index{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot] produces a graphical
 display\index{display} of a 3 dimensional dataset as a colour and/or contour plot. Here '5 6 8' 
 denote the x,y and z column in file {\prg ./results/mcdisp.dsigma.tot}, which should
-be plotted. Figure~\ref{diffus} shows an sample output of this program.
+be plotted. Figure~\ref{diffus} shows an sample output of this program. The axes labels may be changed
+in Tree View $\rightarrow$ xaxis title, etc.
 
 \item [displaytext\index{displaytext} ./results/mcphas.hkl] monitors the file mcphas.hkl in a text window
 on screen.
@@ -84,7 +88,6 @@ $b$-direction  of NdCu$_2$ for an applied magnetic field of 0.2~T
 \label{magnetizationgraphic}
 \end{figure}
 %\clearpage
-
 
 \subsection{Program {\prg spins\index{spins}} - display\index{display} of the moment configuration for a given %%@
 temperature/field}

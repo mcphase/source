@@ -11,7 +11,9 @@ unless ($#ARGV >=0)
 
 {print " program delcomments  used to remove all comment lines (starting with #) in a file, removed comments are printed to screen (stdout)\n";
 
- print " usage: delcomments *.*  \n *.* .. filenname\n";
+ print " usage: delcomments [-s \"token\"] *.*  \n *.* .. filenname\n";
+ print " -s ... option to remove comments beginning with \"token\" instead.\n";
+ print "        e.g. delcomments -s \"#:\" to remove lines commented by the range command.\n";
 
  exit 0;}
 
@@ -19,6 +21,7 @@ unless ($#ARGV >=0)
 
 #$command="#addc";foreach $d(@ARGV){$command.= " ".$d;}; $command.="\n";
 
+if ($ARGV[0]=~/^-s$/) { $commentstring = $ARGV[1]; shift @ARGV; shift @ARGV; } else { $commentstring = "#"; }
 
 
   foreach (@ARGV)
@@ -37,7 +40,7 @@ unless ($#ARGV >=0)
 
      {
 
-       if ($line=~/^\s*#/) {print $line;}
+       if ($line=~/^\s*$commentstring/) {print $line;}
 
        else{print Fout $line;}
 

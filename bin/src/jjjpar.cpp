@@ -478,8 +478,10 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
 // read the exchange parameters from file (exactly paranz parameters!)
   for  (i=1;i<=paranz;++i)
   {while((j=inputline(file, nn))==0&&feof(file)==0){}; // returns 0 if comment line or eof, exits with error, if input string too long
-   if(feof(file)!=0){ fprintf (stderr, "Error in jjjpar.cpp: input jjj parameters - \n");
-                      fprintf(stderr," end of file reached while reading exchange parameter %i(%i)",i,paranz);
+   // Additional check to see if we are on the last neighbour, as McPhaseExplorer generates bad files without EOL at the end unless you add an empty line
+   if(feof(file)!=0 && (i<paranz||(j-3)<nofcomponents)) { 
+                      fprintf (stderr, "Error in jjjpar.cpp: input jjj parameters - \n");
+                      fprintf(stderr," end of file reached while reading exchange parameter %i(%i)\n",i,paranz);
                       exit (EXIT_FAILURE);
                     }
     if(i==1){// determine nofcomponents from number of parameters read in first line of mcphas.j
