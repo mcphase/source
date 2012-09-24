@@ -67,6 +67,15 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{... in version 4.8...}
+
+- mcdiff output file neutron intensities in absolute units. lorentzf=0 option added (allows calculation without lorentzfactor, i.e. the used value for the calculation of the intensities is lorentzfactor=1.0)
+- range got an option -u to undo range
+- delcomments got an option -s to be able to specify what is the comment string starting a comment line
+- mcphas.xyt output of phase index changed: the index referred in earlier versions to the structure list in the mcphas.phs file. There, similar structures have different indices. Now the program mcphas has been changed and the phase index is determined by comparing the stabilised structure with the structures in mcphas.tst inputfile and if one of these fits (is equivalent), then the index of this structure is stored. This gives a more clean phasediagram.
+- bugs removed from script2html, average, getvalue, mcphaseexplorer, mcphas.j last line read
+
+
 \subsection*{... in version 4.7...}
 
 - some bugs corrected in quasielastic scattering beyond dipole approx 
@@ -107,21 +116,6 @@ community this program would not have come into existence.
   larger than the primitive crystal unitcell and the magnetic atoms in the crystal unit cell not ferromagnetically aligned.)
 - more examples introduced
 - calculation of intensities in mcdisp significantly speeded up
-
-\subsection*{... in version 4.4...}
-          -{\prg gauss, lorentz, convolute}  changed to avoid uncommented text line when piping to file
-           -{\prg ic1ion} standalone started by batch to be able to create ic1ion.trs containing neutron 
-           powder single ion intensities.
-           -{\prg displaybubbles} changed to ignore negative bubblesize values and display data given in intcolumn as area of bubble
-           -{\prg setup\_mcdiff\_in} changed to try to setup for going beyond dipole approximation if possible (using program charges)
-           - {\prg simannfit and searchspace} changed to input all occurencies of sta= in output of
-             calcsta. the first number following sta= is taken a the squared deviation of
-             fitcurve-experimental value. If there follows a second number after sta=, then this
-             is taken as the square of the experimental error and chisquared is computed and
-             minimized.
-           - {\prg convolute} changed to output in addition one column with the original data
-           - {\prg chi2} changed to output sta= deviation$^2$ experr$^2$ for each contribution to chisquared
-           - added example Lu2MnO4
 
 
 \newpage
