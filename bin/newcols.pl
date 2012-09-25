@@ -47,7 +47,7 @@ if ($column<1||$n<1){die "Error newcols: invalid column number $column or number
                    for($k=1;$k<=$n;++$k){print Fout $numbers[$i-1]." ";}
                                    }
                   }
-		  if ($column>=$#numbers+2){die "Error newcols: column $column does not exist (in dataline $j of file $file)\n";}
+		  if ($column>=$#numbers+2){print STDERR "Warning: column $column does not exist in dataline $j of file $file- no new column(s) created in this line\n";}
             print Fout "\n";
 
            }

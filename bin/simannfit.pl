@@ -290,7 +290,7 @@ sub sta {#local $SIG{INT}='IGNORE';
 				   foreach (@parnam)
 				    {$pnam=$_;
 				     while ($expression=~/.*\W$pnam\W/)
-                                        {$expression=~s|$pnam|$par[$i]|;
+                                        {$expression=~s|$pnam|($par[$i])|;
 					}
 				     ++$i;
 				    }
