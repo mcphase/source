@@ -24,7 +24,7 @@ $min=$ARGV[0];   shift @ARGV;
 $max=$ARGV[0];   shift @ARGV;
 
 foreach (@ARGV)
-{
+{  @Lines={};
    $file=$_;
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
