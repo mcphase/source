@@ -39,7 +39,7 @@ $value=$ARGV[0];shift @ARGV;
    while($line=<Fin>)
      { if ($line=~/^(#!|[^#])*?\b$varnam/) {
                                             #here write modified parameter set to line
-                                             $line=~s!$varnam\s*=\s*[^\s]+!$varnam=$value!;
+                                             $line=~s!$varnam\s*=\s*[^\s\;\n\t\*]+!$varnam=$value!;
                                            }
        print Fout $line;
       }
