@@ -4,7 +4,7 @@
  *           an ion given its CF pars, T and effective H
  * Author: M. Rotter
  **********************************************************/
-#define MAXNOFATOMS 100
+
 
 #include "../../version"
 #include "density.hpp"

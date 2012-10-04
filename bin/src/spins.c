@@ -4,7 +4,7 @@
  ****************************************************/
 
 
-#define MAXNOFATOMS 100
+
 #include "../../version"
 #include "spincf.hpp"
 #include "martin.h"

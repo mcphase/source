@@ -6,9 +6,6 @@
  **********************************************************/
 
 
-#define MAXNOFATOMS 100
-
-
 #include "../../version"
 #include "density.hpp"
 #include "spincf.hpp"
