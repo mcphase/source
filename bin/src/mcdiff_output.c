@@ -297,8 +297,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
       f2pp=abs(-ct*ct*(z12*st*st/ct/ct+z32)); if(f2pp*f2pp>IppF2){IppF2=f2pp*f2pp;IppF2a=azimuth*180/PI;}
       if(code==1&&ortho==1)
        {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
-       hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]),myround(SMALLINT, (ikern[i]+intmag[i])),myround(SMALLINT,out10[i]),
-       myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]),
+       hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],ikern[i], intmag[i],(ikern[i]+intmag[i]),out10[i],
+       out11[i],intmagdip[i],
        f1ps*f1ps,azimuth*180/PI,
        f1sp*f1sp,azimuth*180/PI,
        f1pp*f1pp,azimuth*180/PI,
@@ -312,8 +312,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
       {if(ortho==1)
        {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
         myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
-        myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]), myround(SMALLINT,(ikern[i]+intmag[i])),myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),
-        myround(SMALLINT,intmagdip[i]),
+        ikern[i], intmag[i], (ikern[i]+intmag[i]),out10[i],out11[i],
+        intmagdip[i],
         myround(SMALLINT,IspF1),myround(SMALLINT,IspF1a),myround(SMALLINT,IpsF1),myround(SMALLINT,IpsF1a),myround(SMALLINT,IppF1),myround(SMALLINT,IppF1a),
         myround(SMALLINT,IspF2),myround(SMALLINT,IspF2a),myround(SMALLINT,IpsF2),myround(SMALLINT,IpsF2a),myround(SMALLINT,IppF2),myround(SMALLINT,IppF2a),
         myround(SMALLINT,abs(mx[i])),myround(SMALLINT,abs(my[i])),myround(SMALLINT,abs(mz[i])),myround(SMALLINT,abs(mx2[i])),myround(SMALLINT,abs(my2[i])),myround(SMALLINT,abs(mz2[i])),myround(SMALLINT,abs(mxmy[i])),
@@ -321,8 +321,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
        else
        {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
         myround(hkl[i](1)),myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
-        myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]), myround(SMALLINT,(ikern[i]+intmag[i])),
-        myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]));}
+        ikern[i], intmag[i], (ikern[i]+intmag[i]),
+        out10[i],out11[i],intmagdip[i]);}
       }
     if(code==1&&ortho==1){fprintf(fout,"#\n");}
    }
@@ -331,8 +331,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
     {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs\n",colheader[colcode[10]],colheader[colcode[11]]);}
       fprintf(fout,   "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %8.4f\n",
       myround(hkl[i](1)),myround( hkl[i](2)),myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
-      myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]),myround(SMALLINT,(ikern[i]+intmag[i])),
-      myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]),myround(SMALLINT,real(mx[i])));
+      ikern[i], intmag[i],(ikern[i]+intmag[i]),
+      out10[i],out11[i],intmagdip[i],real(mx[i]));
      if(real(mx[i])>=0){total+=abs(mx[i]);
                         rpvalue[9]+=abs(isave[9]+ikern[i]+intmag[i]-abs(mx[i])); isave[9]=0;
                         rpvalue[10]+=abs(isave[10]+out10[i]-abs(mx[i])); isave[10]=0;
@@ -347,8 +347,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
     {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs        error\n",colheader[colcode[10]],colheader[colcode[11]]);}
       fprintf(fout,    "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
       myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
-      myround(SMALLINT,ikern[i]), myround(SMALLINT,intmag[i]), myround(SMALLINT,(ikern[i]+intmag[i])),
-      myround(SMALLINT,out10[i]),myround(SMALLINT,out11[i]),myround(SMALLINT,intmagdip[i]),
+      ikern[i], intmag[i], (ikern[i]+intmag[i]),
+      out10[i],out11[i],intmagdip[i],
       real(mx[i]),abs(my[i]));
      if(real(mx[i])>=0){total+=abs(mx[i]);
       chisquared[9]+=(isave[9]+ikern[i]+intmag[i]-abs(mx[i]))*(isave[9]+ikern[i]+intmag[i]-abs(mx[i]))/abs(my[i])/abs(my[i]);
