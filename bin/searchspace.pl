@@ -119,7 +119,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
                                                 print STDOUT "parameter set nr ".(-$searchlevel)." read from $inputfile\n";
                                                 print STDOUT ".............................................\n";
                                                 print STDOUT "parameter[value,      min,           max,           (not used)   ,minimum meshwidth]\n";
-                                                $ii=0;foreach(@par){write STDOUT;++$ii;}
+                                                $i=0;foreach(@par){write STDOUT;++$i;}
                                                 print STDOUT ".............................................\n";
                                                 print STDOUT "these valueas are stored in parameter files * and *.forfit \n";
                                                 print STDOUT ".............................sta=$sta........\n";
@@ -127,7 +127,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
                                                 }
                          }
                     }
-                   print "Error program searchspace, loading parmeter set in line ".(-$searchlevel)." failed, file too short !\n"; 
+                   print "Error program searchspace, loading parameter set in line ".(-$searchlevel)." failed, file too short !\n"; 
                    print " <Press enter to close>";$in=<STDIN>;exit 1;
                    }
 
