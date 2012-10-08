@@ -17,7 +17,8 @@ exit(0);
 }
 
 $col=$ARGV[0]; shift @ARGV;--$col;
-$T=$ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$T=eval $ARGV[0]; shift @ARGV;
 
  foreach (@ARGV)
   {$file=$_; open (Fout, ">range.out");

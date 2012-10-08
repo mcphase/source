@@ -88,9 +88,10 @@ GetOptions("help"=>\$helpflag,
 	   "input=s"=>\$input,
 	   "output=s"=>\$output,
            "verbose"=>\$verbose,
-	   "th=f"=>\$theta,
-	   "fi=f"=>\$fi);
-
+	   "th=s"=>\$theta,
+	   "fi=s"=>\$fi);
+$theta=~s/x/*/g;$theta= eval $theta;
+$fi=~s/x/*/g;$fi=eval $fi;
 usage() if $helpflag;
 
 if (!$input && !$ARGV[0]) { 

@@ -51,37 +51,50 @@ print " The neigbours of each atom are also stored in seperate files\n";
 print " results\/makenn.a*.pc, which can be used with the program pointc to evaluate\n";
 print " the pointcharge model and calculate crystal field paramaters.\n\n";
  exit 0;}
-
-my ($rmax) = $ARGV[0];
+$ARGV[0]=~s/x/*/g;
+my ($rmax) = eval $ARGV[0];
 $rkky=0;$calcdist=0;
 shift @ARGV; 
 $_=$ARGV[0];
 if(/-rkky3d/)
   {$rkky=4;shift @ARGV; $scale=$ARGV[0];shift @ARGV;
-   $ka=$ARGV[0];shift @ARGV;  $kb=$ARGV[0];shift @ARGV;   $kc=$ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$ka=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/x/*/g;$kb=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/x/*/g;$kc=eval $ARGV[0];shift @ARGV;
    print "calculating RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
    print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
 elsif(/-kaneyoshi3d/)
   {$rkky=5;shift @ARGV; $scale=$ARGV[0];shift @ARGV;
-   $Da=$ARGV[0];shift @ARGV;   $Db=$ARGV[0];shift @ARGV;
-   $Dc=$ARGV[0];shift @ARGV;$aa=$ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$Da=eval $ARGV[0];shift @ARGV;   
+   $ARGV[0]=~s/x/*/g;$Db=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$Dc=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$aa=eval $ARGV[0];shift @ARGV;
    print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
    print "J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
    print "with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A^-1 Db=$Db A^-1 Dc=$Dc A^-1  and alpha=$aa\n";}
 elsif(/-rkkz3d/)
   {$rkky=6;shift @ARGV; $scale=$ARGV[0];shift @ARGV;
-   $ka=$ARGV[0];shift @ARGV;  $kb=$ARGV[0];shift @ARGV;   $kc=$ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$ka=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/x/*/g;$kb=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/x/*/g;$kc=eval $ARGV[0];shift @ARGV;   
    print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
    print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
 elsif(/-rkky/)
-  {$rkky=1;shift @ARGV; $scale=$ARGV[0];shift @ARGV;$kf=$ARGV[0];shift @ARGV;
+  {$rkky=1;shift @ARGV;
+   $ARGV[0]=~s/x/*/g; $scale=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$kf=eval $ARGV[0];shift @ARGV;
    print "calculating RKKY interaction J(R)=A.cos(2.kf.R)/(2.kf.R)^3 for scale A=$scale meV and kf=$kf A^-1\n";}
 elsif(/-kaneyoshi/)
-  {$rkky=2;shift @ARGV; $scale=$ARGV[0];shift @ARGV;$D=$ARGV[0];shift @ARGV;$aa=$ARGV[0];shift @ARGV;
+  {$rkky=2;shift @ARGV; 
+   $ARGV[0]=~s/x/*/g;$scale=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$D=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$aa=eval $ARGV[0];shift @ARGV;
    print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
    print "J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A^-1  alpha=$aa\n";}
 elsif(/-rkkz/)
-  {$rkky=3;shift @ARGV; $scale=$ARGV[0];shift @ARGV;$kf=$ARGV[0];shift @ARGV;
+  {$rkky=3;shift @ARGV; 
+   $ARGV[0]=~s/x/*/g;$scale=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/x/*/g;$kf=eval $ARGV[0];shift @ARGV;
    print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV and kf=$kf A^-1\n";}
 $_=$ARGV[0];
 if(/-d/)

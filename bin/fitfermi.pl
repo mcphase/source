@@ -27,11 +27,11 @@ if ($#ARGV<1)
 exit(0);
 }
 
-$T=$ARGV[0]; shift @ARGV;
-$EF=$ARGV[0]; shift @ARGV;
-$fwhm=$ARGV[0]; shift @ARGV;
-$min=$ARGV[0]; shift @ARGV;
-$max=$ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;$T=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;$EF=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;$fwhm=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;$min=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;$max=eval $ARGV[0]; shift @ARGV;
 system("mkdir results");
  foreach (@ARGV)
   {$file=$_;

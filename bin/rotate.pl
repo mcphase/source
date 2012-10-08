@@ -26,7 +26,8 @@ EOF
 
 $colx=$ARGV[0];shift @ARGV;
 $coly=$ARGV[0];shift @ARGV;
-$angle=$ARGV[0]*3.1415926535897932384626433832795/180;shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$angle=eval{$ARGV[0]*3.1415926535897932384626433832795/180};shift @ARGV;
 
 
 

@@ -62,22 +62,22 @@ unless ($#ARGV >2)
  exit 0;}
 
 print "# $0 @ARGV\n";
+$ARGV[0]=~s/x/*/g;
+$Tmax=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$dT=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$Tdebye=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$scale=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$Tnorm=eval $ARGV[0];shift @ARGV;
 
-$Tmax=$ARGV[0];shift @ARGV;
 
-$dT=$ARGV[0];shift @ARGV;
-
-$Tdebye=$ARGV[0];shift @ARGV;
-
-$scale=$ARGV[0];shift @ARGV;
-
-$Tnorm=$ARGV[0];shift @ARGV;
-
-
-
-$d1=$ARGV[0];shift @ARGV;
-
-$d2=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$d1=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$d2=eval $ARGV[0];shift @ARGV;
 
 $file1=$ARGV[0];shift @ARGV;
 

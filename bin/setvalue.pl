@@ -29,7 +29,8 @@ EOF
 
 $row=$ARGV[0];shift @ARGV;
 $column=$ARGV[0];shift @ARGV;
-$const=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$const=eval $ARGV[0];shift @ARGV;
 
 
 

@@ -20,14 +20,14 @@ gauss(x)=1.0/sqrt(2*3.1415)/sigma* exp(-x^2/2sigma^2)\n";
  exit 0;}
 
 print "# $0 @ARGV\n";
-
-$fwhm=$ARGV[0];shift @ARGV;
-
-$stp=$ARGV[0];shift @ARGV;
-
-$min=$ARGV[0];shift @ARGV;
-
-$max=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$fwhm=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$stp=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$min=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$max=eval $ARGV[0];shift @ARGV;
 
 
 

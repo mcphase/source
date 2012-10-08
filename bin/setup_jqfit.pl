@@ -3,6 +3,10 @@ use Getopt::Long;
 
 GetOptions("help"=>\$helpflag);
 usage() if $helpflag||$#ARGV<2;
+$ARGV[0]=~s/x/*/g;$ARGV[0]=eval $ARGV[0];
+$ARGV[1]=~s/x/*/g;$ARGV[1]=eval $ARGV[1];
+$ARGV[2]=~s/x/*/g;$ARGV[2]=eval $ARGV[2];
+
 print STDOUT << "EOF";
 *******************************************************
 setting up exchange paramter fit for propagation vector

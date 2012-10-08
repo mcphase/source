@@ -25,10 +25,10 @@ unless ($#ARGV >0)
 
 EOF
  exit 0;}
-
-$u=$ARGV[0];shift @ARGV;
-$v=$ARGV[0];shift @ARGV;
-$w=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$u=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$v=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$w=eval $ARGV[0];shift @ARGV;
 $column=$ARGV[0];shift @ARGV;
 
 

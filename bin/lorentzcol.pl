@@ -20,9 +20,12 @@ lorentz(x)=area/3.1415/fwhm/(1.0+(x-position)^2/fwhm^2)\n";
  
 
 $column=$ARGV[0];shift @ARGV;
-$pos=$ARGV[0];shift @ARGV;
-$fwhm=$ARGV[0];shift @ARGV;
-$area=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$pos=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$fwhm=eval{$ARGV[0]/2};shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$area=eval $ARGV[0];shift @ARGV;
 
 
   foreach (@ARGV)

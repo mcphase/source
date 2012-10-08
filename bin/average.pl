@@ -33,9 +33,10 @@ if (join('',@pars) =~/\-/) {
              "median"=>\$medianflag,
              "sum"=>\$sumflag,
              "sumcol=s"=>\$sumcol,
-             "dmin=f"=>\$dmin);
+             "dmin=s"=>\$dmin);
   usage() if $helpflag;
 }
+if($dmin){$dd=$dmin;$dd=~s/x/*/g;$dmin=eval $dd;}
 @ARGV=@p;while (join('',@pars) =~ /\-/){shift @ARGV;@pars = @ARGV;}
 # if ($dmin) {shift @ARGV;} # removed because it squeezes out the column MR 1.10.2011
 $n=$ARGV[0];shift @ARGV;

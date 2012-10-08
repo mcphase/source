@@ -21,9 +21,10 @@ gauss(x)=area/sqrt(2*3.1415)/sigma* exp(-(x-position)^2/2sigma^2)\n";
  
 
 $column=$ARGV[0];shift @ARGV;
-$pos=$ARGV[0];shift @ARGV;
-$fwhm=$ARGV[0];shift @ARGV;
-$area=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$pos=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$fwhm=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$area=eval $ARGV[0];shift @ARGV;
 
 
   foreach (@ARGV)

@@ -18,10 +18,10 @@ $column=$ARGV[0];shift @ARGV;
 if ($column=~/\s*-d/) {$dd=$column;$column=$ARGV[0];shift @ARGV;}
 
 if ($column=~/\s*-u/) {$uu=$column;$column=$ARGV[0];shift @ARGV;}
-
-$min=$ARGV[0];   shift @ARGV;
-
-$max=$ARGV[0];   shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$min=eval $ARGV[0];   shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$max=eval $ARGV[0];   shift @ARGV;
 
 foreach (@ARGV)
 {  @Lines={};

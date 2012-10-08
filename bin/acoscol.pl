@@ -6,8 +6,8 @@ unless ($#ARGV >0)
 {print " program acoscol  used to calculate arccosine of a column\n";
  print " usage: acoscol col[ecolerr] *.*   \n col=column\n optional colerr= corresponding error column, e.g. 3e4 means argumentvalues are in column 3 and error in column 4\n *.* .. filenname\n";
  exit 0;}
-
-$column=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$column=eval $ARGV[0];shift @ARGV;
 if ($column=~/e/){$_=$column;($columnerr)=/e(\d*)/;($column)=/(\d*)e/;}else{$columnerr=0;}
 #print $column." ".$columnerr."\n";exit;
 

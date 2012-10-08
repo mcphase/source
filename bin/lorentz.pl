@@ -18,14 +18,14 @@ lorentz(x)=1.0/3.1415/fwhm/(1.0+x^2/fwhm^2)
  exit 0;}
 
 print "# $0 @ARGV\n";
-
-$fwhm=$ARGV[0]/2;shift @ARGV;
-
-$stp=$ARGV[0];shift @ARGV;
-
-$min=$ARGV[0];shift @ARGV;
-
-$max=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$fwhm=eval {$ARGV[0]/2};shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$stp=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$min=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$max=eval $ARGV[0];shift @ARGV;
 
 
 

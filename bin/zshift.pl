@@ -14,8 +14,8 @@ unless ($#ARGV >2)
  exit 0;}
 
  
-
-$constx=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;
+$constx=eval $ARGV[0];shift @ARGV;
 
 $colx=$ARGV[0];shift @ARGV;
 
