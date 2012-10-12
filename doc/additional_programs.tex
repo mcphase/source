@@ -497,16 +497,12 @@ simple fitting program for data in coldata.
        with constant values and use echo as a fake column manipulation program
       doing nothing.
 
-   newcol 3 exp.dat
-   factcol 3 0 exp.dat
-   shiftcol 3 1 exp.dat
+   newcol 3 -c 1.0 exp.dat
    fitcol 2 gausscol 1 132.3 0.5 10 and rem 3 in exp.dat
 
    3) to do the same with a linear background, put into a column 4 the x values
 
-   newcol 4 exp.dat
-   factcol 4 0 exp.dat
-   addcol 1 4 exp.dat
+   newcol 4 -c 4.0 exp.dat
    fitcol 2 gausscol 1 132.3 0.5 10 and rem 3 and rem 4 in exp.dat
 
    4) to fit two gaussians with fixed fwhm and stepping in position initially
@@ -577,10 +573,10 @@ a column with x values, the formula for a Lorentz curve is:
 ${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+(x-{\rm position})^2/fwhm^2)}$
 \item [\prg multcol\index{multcol}  colx coly file:] multiplies column x and column y of file, %%@
 result is stored in col y
-\item [\prg newcol\index{newcol} col file:] creates a new column col in file containing the line %%@
-number
-\item [\prg newcols\index{newcols} col n file:] creates n new columns from column col
+\item [\prg newcol\index{newcol} col {[options]} file:] creates a new column col in file containing the line numbe. option: -c 12.3  ... instead of line number put constant 12.3 into the new column
+\item [\prg newcols\index{newcols} col n {[options]} file:] creates n new columns from column col
  in file. New columns are inserted after column col and contain the same data as column col.
+ options: -c 12.3 ...  put constant 12.3 into the new columns, -n ... put line number into the new column.
 \item [\prg newline\index{newline} n text file:] creates a new line number n  in file containing %%@
 the text 
 \item [\prg potcol\index{potcol} col const file:]  col=col$^{\rm const}$ in file

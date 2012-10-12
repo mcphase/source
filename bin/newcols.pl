@@ -9,8 +9,9 @@ unless ($#ARGV >1)
 
 {print " program newcols  used to create new columns by copying contents of a given column n times\n";
  print "  .... instead of column col there will be n columns in the data file after running this program\n";
- print " usage: newcols col n  *.*   \n col=existing column \n n=number of new columns\n *.* .. filenname\n";
-
+ print " usage: newcols col n [options] *.*   \n col=existing column \n n=number of new columns\n";
+print " *.* .. filenname\noptions: -c 12.3  ... all the new columns will be filled with  the constant 12.3\n";
+print "-n ... all the new columns will be filled with the line number\n";
  exit 0;}
 
  
@@ -18,7 +19,8 @@ unless ($#ARGV >1)
 $column=$ARGV[0];shift @ARGV;
 $n=$ARGV[0];shift @ARGV;
 if ($column<1||$n<1){die "Error newcols: invalid column number $column or number of new columns $n\n";}
-
+$dc=0;if ($ARGV[0]=~m/-c/){$dc=1;shift @ARGV;$ARGV[0]=~s/x/*/g;$c=eval $ARGV[0];shift @ARGV;}
+$dn=0;if ($ARGV[0]=~m/-n/){$dn=1;shift @ARGV;}
 
   foreach (@ARGV)
 
@@ -44,7 +46,10 @@ if ($column<1||$n<1){die "Error newcols: invalid column number $column or number
 		  {++$i;
 		  print Fout $numbers[$i-1]." ";
 		  if ($i==$column) { # insert column $column $n times
-                   for($k=1;$k<=$n;++$k){print Fout $numbers[$i-1]." ";}
+                   for($k=1;$k<=$n;++$k){if($dc){print Fout $c." ";}
+                                         elsif($dn){print Fout $j." ";}
+                                         else{print Fout $numbers[$i-1]." ";}
+                                        }
                                    }
                   }
 		  if ($column>=$#numbers+2){print STDERR "Warning: column $column does not exist in dataline $j of file $file- no new column(s) created in this line\n";}

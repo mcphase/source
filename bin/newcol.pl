@@ -9,13 +9,14 @@ unless ($#ARGV >0)
 
 {print " program newcol  used to create a new column (containing line numbers)\n";
 
- print " usage: newcol col  *.*   \n col=column \n *.* .. filenname\n";
+ print " usage: newcol col [option] *.*   \n col=column \n *.* .. filenname\noptions: -c 12.3  ... the new column will be filled with the constant 12.3\n";
 
  exit 0;}
 
  
-
+$dc=0;
 $column=$ARGV[0];shift @ARGV;
+if ($ARGV[0]=~m/-c/){$dc=1;shift @ARGV;$ARGV[0]=~s/x/*/g;$c=eval $ARGV[0];shift @ARGV;}
 
 
 
@@ -46,7 +47,9 @@ $column=$ARGV[0];shift @ARGV;
 
 		  {++$i;
 
-		  if ($i==$column) {print Fout $j." ";}
+		  if ($i==$column) {if($dc){print Fout $c." ";}
+                                    else{print Fout $j." ";}
+                                   }
 
 		  print Fout $numbers[$i-1]." ";}
 
