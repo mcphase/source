@@ -104,6 +104,7 @@ float invalues[100];invalues[0]=99;
         extract(instr,"N8",(*jjjps).Np(8));extract(instr,"XI8",(*jjjps).Xip(8));extract(instr,"C8",(*jjjps).Cp(8));
         extract(instr,"N9",(*jjjps).Np(9));extract(instr,"XI9",(*jjjps).Xip(9));extract(instr,"C9",(*jjjps).Cp(9));
 
+        extract(instr,"nof_electrons",(*iops).nof_electrons);
         extract(instr,"ALPHA",(*iops).alpha);
         extract(instr,"BETA",(*iops).beta);
         extract(instr,"GAMMA",(*iops).gamma);
@@ -138,10 +139,6 @@ float invalues[100];invalues[0]=99;
   printf("#Stevens factors\nALPHA=%4g\nBETA=%4g\nGAMMA=%4g\n",(*iops).alpha,(*iops).beta,(*iops).gamma);
   printf("#Expectation values of radial wave function <r^k> in units of a0^k a0=0.5292 Angstroem\n");
   printf("R2=%4g\nR4=%4g\nR6=%4g\n\n",(*iops).r2,(*iops).r4,(*iops).r6);
-//  printf("# calculation of magnetisation density instead of chargedensity\n");
-//  printf("# switch calcmagdensity triggers: 0 ... normal mode, 1,2,3 calc <J'i>=gJ/2 (<J1,2,3 * Ji>+<Ji*J1,2,3>)\n");
-//  printf("#                                                    ... gives magnetisationdensity in a b c dir instead, useful only in chrgplt,charges !\n");
-//  printf("calcmagdensity=0\n\n");
  }
 
 // zero parameters in case initialisation put some values to the parameters ...
@@ -169,8 +166,8 @@ while(n>0)
 {
 
   printf ("pointcharge= %4g         %4g %4g %4g\n",q,x,y,z);
-  Vector B(1,45); B=0;
-  Vector gamma(1,45); gamma=0; 
+  Vector B(0,45); B=0;
+  Vector gamma(0,45); gamma=0; 
 
  // calculate Blm's and Llm's
  double r,ct,ct2,st,st2,sfi,cfi;
@@ -187,7 +184,7 @@ while(n>0)
   int l,m;   
  // cnst is the Zlm prefactors (plm) - put them into the matrix (same constants are used in jjjpar.cpp and ionpars.cpp)
  Matrix cnst(0,6,-6,6); 
-
+ cnst(0,0) = 0.28209479;
  cnst(2,0) = 0.3153962;
  cnst(2,1)=  1.092548;
  cnst(2,2)=  0.5462823;
@@ -206,6 +203,7 @@ while(n>0)
  for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);} // for negative m the prefactors plm are the same as for positive
 
  // evaluate the Zlm in order to get gamma_lm ... in the following lines Zlm(Omega_i) is evaluated
+ gamma(0)= cnst(0, 0);
  gamma(1)= cnst(2, -2)  * 2 * st2 * sfi * cfi;
  gamma(2)= cnst(2, -1)  * st * sfi * ct;
  gamma(3)= cnst(2, 0)  * (3 * ct2 - 1);
@@ -240,11 +238,12 @@ while(n>0)
 
  // this is squaring of the coefficients of Zlm, a technical trick in
  // order to save a multiplication later (good for the Blm)
- for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m)cnst(l,m)*=cnst(l,m);}
+ for(l=0;l<=6;l+=2){for(m=-l;m<=l;++m)cnst(l,m)*=cnst(l,m);}
 
  //ro = a(0, 0) / sqrt(4.0 * 3.1415);
 
  //evaluate th Zlm in order to get Blm
+ B(0)= cnst(0, 0);
  B(1)= cnst(2, -2)  * 2 * st2 * sfi * cfi;
  B(2)= cnst(2, -1)  * st * sfi * ct;
  B(3)= cnst(2, 0)  * (3 * ct2 - 1);
@@ -281,6 +280,8 @@ while(n>0)
  int i;
  double eps0=8.854187817e-12; //units C^2/Nm^2
  double echarge=1.60217646e-19;  // units C
+ //gamma00   
+ B(0)*=q/r*4*PI; gamma(0)*=q*echarge*1e10/r/eps0;
  //gamma2M   
  for (i=1;i<=5;++i){B(i)*=q/r/r/r*4*PI/5; gamma(i)*=q*echarge*1e30/r/r/r/5/eps0;}
  //gamma4M
@@ -307,6 +308,8 @@ while(n>0)
  double J2meV=1/1.60217646e-22; // 1 millielectron volt = 1.60217646 × 10-22 joules
 
  // now calculation of the B_LM  and L_LM in meV
+                    (*iops).Blm(0)+=-B(0)*e*e*(*iops).nof_electrons*umr;// printf("B(%i)=%g sum(B)=%g\n",0,B(0),(*iops).Blm(0));                  
+                    (*iops).Llm(0)+=-echarge*gamma(0)*sqrt(1.0/4.0/PI)*J2meV;//printf("gamma(%i)=%g Llm=%g\n",0,gamma(0),(*iops).Llm(0));  
  for (i=1;i<=5;++i){(*iops).Blm(i)+=-B(i)*e*e*(*iops).r2*(*iops).alpha*ehv2; // printf("B(%i)=%g sum(B)=%g\n",i,B(i),(*iops).Blm(i));
                    if(i!=3){(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/8.0/PI)*J2meV;}  //m<>0
                    else    {(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/4.0/PI)*J2meV;}  //m=0

@@ -53,8 +53,8 @@ ionpars::ionpars (int dimj) // constructor from dimj
   Jcc=ComplexMatrix(1,dimj,1,dimj);
    calcmagdensity=0;
    so1ion=0;
-   Blm=Vector(1,48);Blm=0; // vector of crystal field parameters
-   Llm=Vector(1,45);Llm=0; // vector of crystal field parameters
+   Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
+   Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
 
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;nof_electrons=0;
 
@@ -90,8 +90,8 @@ ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices fill
   Jbb=ComplexMatrix(1,dimj,1,dimj);
   Jcc=ComplexMatrix(1,dimj,1,dimj);
 
-   Blm=Vector(1,48);Blm=0; // vector of crystal field parameters
-   Llm=Vector(1,45);Llm=0; // vector of crystal field parameters
+   Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
+   Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
 
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
@@ -129,8 +129,8 @@ ionpars::ionpars(FILE * cf_file)
   char instr[MAXNOFCHARINLINE];
   iontype= new char[MAXNOFCHARINLINE];
   char  moduletype[MAXNOFCHARINLINE];
-   Blm=Vector(1,48);Blm=0; // vector of crystal field parameters
-   Llm=Vector(1,45);Llm=0; // vector of crystal field parameters
+   Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
+   Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
    calcmagdensity=0;so1ion=0;strcpy(moduletype,"cfield");
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;gJ=0;
   fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
@@ -167,6 +167,8 @@ ionpars::ionpars(FILE * cf_file)
         extract(instr,"R2",r2r);
         extract(instr,"R4",r4r);
         extract(instr,"R6",r6r);
+
+        extract(instr,"B00",Blm(0));
 
         extract(instr,"B22S",Blm(1));
         extract(instr,"B21S",Blm(2));
@@ -221,6 +223,8 @@ ionpars::ionpars(FILE * cf_file)
    extract(instr,"Dy2",Blm(47));
    extract(instr,"Dz2",Blm(48));
 
+	extract(instr,"L00",Llm(0));
+ 
         extract(instr,"L22S",Llm(1));
         extract(instr,"L21S",Llm(2));
 	extract(instr,"L20",Llm(3));
@@ -554,11 +558,11 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
 
 // ------------------------------------------------------------
 // here transform the Llm (if present) to Blm ...
-Vector thetaJ(0,6);thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
+Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
 
 // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
 Matrix cnst(0,6,-6,6);
- 
+cnst(0,0) = 0.28209479;
 cnst(2,0) = 0.3153962;
 cnst(2,1)=  1.092548;
 cnst(2,2)=  0.5462823;
@@ -577,9 +581,9 @@ cnst(6,6)=  0.6831942;
 for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);} 
 
    fprintf(stderr,"crystal field parameters:\n");  
-   const char lm[]="B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 ";
+   const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 ";
    char lm4[5];lm4[4]='\0';
-   for(i=1;i<=48;++i){strncpy(lm4,lm+(i-1)*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
+   for(i=0;i<=48;++i){strncpy(lm4,lm+(i-1)*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
                                   double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
@@ -699,6 +703,8 @@ void ionpars::save(FILE * file) // save ion parameters to file
 
 void ionpars::savBlm(FILE * outfile)
 {fprintf(outfile,"units=meV\n");
+   if(Blm(0)!=0){fprintf(outfile,"B00=%g\n",myround(Blm(0)));}
+
    if(Blm(1)!=0){fprintf(outfile,"B22S=%g\n",myround(Blm(1)));}
    if(Blm(2)!=0){fprintf(outfile,"B21S=%g\n",myround(Blm(2)));}
    if(Blm(3)!=0){fprintf(outfile,"B20=%g\n",myround(Blm(3)));}
@@ -756,6 +762,8 @@ void ionpars::savBlm(FILE * outfile)
 
 void ionpars::savLlm(FILE * outfile)
 {fprintf(outfile,"units=meV\n");
+   if(Llm(0)!=0){fprintf(outfile,"L00=%g\n",myround(Llm(0)));}
+
    if(Llm(1)!=0){fprintf(outfile,"L22S=%g\n",myround(Llm(1)));}
    if(Llm(2)!=0){fprintf(outfile,"L21S=%g\n",myround(Llm(2)));}
    if(Llm(3)!=0){fprintf(outfile,"L20=%g\n",myround(Llm(3)));}
