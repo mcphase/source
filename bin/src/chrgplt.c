@@ -65,7 +65,7 @@ cryststruct cs;
  FILE * fout;
 
  // read cf-parameters into class object jjjpar
- jjjpar jjjps(0.0,0.0,0.0,argv[6]);
+jjjpar jjjps(0.0,0.0,0.0,argv[6]);
   int dim;
   double lnz,u;
   if(jjjps.gJ==0)

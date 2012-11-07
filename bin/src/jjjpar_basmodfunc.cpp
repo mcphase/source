@@ -99,7 +99,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
      {if(strcmp(modulefilename,"so1ion")==0)
      {module_type=4;fprintf (stderr,"#[internal]\n");
       fclose(cf_file);cf_file = fopen_errchk (sipffilename, "rb"); // reopen file
-      iops=new ionpars(cf_file);
+     iops=new ionpars(cf_file);
       nof_electrons=(*iops).nof_electrons;
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);

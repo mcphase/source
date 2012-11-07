@@ -53,7 +53,9 @@ if ($ARGV[0]=~m/-c/){$dc=1;shift @ARGV;$ARGV[0]=~s/x/*/g;$c=eval $ARGV[0];shift 
 
 		  print Fout $numbers[$i-1]." ";}
 
-		  if ($column==$#numbers+2){print Fout $j;}    
+		  if ($column==$#numbers+2){if($dc){print Fout $c." ";}
+                                    else{print Fout $j." ";}
+                                   }    
 
             print Fout "\n";
 

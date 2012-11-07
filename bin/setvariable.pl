@@ -37,9 +37,9 @@ $value=$ARGV[0];shift @ARGV;
    print "<".$file;
    open (Fout, ">range.out");$ri=0;
    while($line=<Fin>)
-     { if ($line=~/^(#!|[^#])*?\b$varnam/) {
+     { if ($line=~/^(#!|[^#])*?\b$varnam\s*=/) {
                                             #here write modified parameter set to line
-                                             $line=~s!$varnam\s*=\s*[^\s\;\n\t\*]+!$varnam=$value!;
+                                             $line=~s/([!#\s])$varnam\s*=\s*[^\s\;\n\t\*]+/$1$varnam=$value/g;
                                            }
        print Fout $line;
       }

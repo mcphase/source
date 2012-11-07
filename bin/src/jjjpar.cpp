@@ -561,7 +561,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   magFFj2=Vector(1,7);magFFj2=0;
   magFFj4=Vector(1,7);magFFj4=0;
   magFFj6=Vector(1,7);magFFj6=0;
-  Zc=Vector(1,7);Zc=0;
+  Zc=Vector(1,7);Zc=0; 
   set_zlm_constants();
    Np=Vector(1,9);Np=0; // vectors of radial wave function parameters
    Xip=Vector(1,9);Xip=0;
@@ -578,7 +578,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 jjjpar::jjjpar(int n,int diag,int nofmom) 
 { cffilename= new char [MAXNOFCHARINLINE];jl_lmax=6;
   diagonalexchange=diag;
-  paranz=n;xyz=Vector(1,3);xyz=0;
+  paranz=n;xyz=Vector(1,3);xyz=0; 
   set_zlm_constants();
   int i1;r2=0;r4=0;r6=0;
   module_type=1;ABC=Vector(1,3);ABC=0;

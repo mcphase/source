@@ -24,7 +24,7 @@ $ARGV[0]=~s/x/*/g;
 $max=eval $ARGV[0];   shift @ARGV;
 
 foreach (@ARGV)
-{  @Lines={};
+{  @Lines=();
    $file=$_;
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   

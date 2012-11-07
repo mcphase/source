@@ -583,7 +583,7 @@ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
    fprintf(stderr,"crystal field parameters:\n");  
    const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 ";
    char lm4[5];lm4[4]='\0';
-   for(i=0;i<=48;++i){strncpy(lm4,lm+(i-1)*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
+   for(i=0;i<=48;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
                                   double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
@@ -598,7 +598,6 @@ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
                                    fprintf(stderr,"\n");  
                                   }
                      }
-
 // here set the crystal field Hamiltonian Matrix
   Hcf= Matrix(1,dimj,1,dimj); 
   Hcf=0;
