@@ -14,15 +14,15 @@ unless ($#ARGV >=0)
  print " usage: delcomments [-s \"token\"] *.*  \n *.* .. filenname\n";
  print " -s ... option to remove comments beginning with \"token\" instead.\n";
  print "        e.g. delcomments -s \"#:\" to remove lines commented by the range command.\n";
-
+ print " -c ... option to remove comments and replace by empty line instead of deleteing the line\n";
  exit 0;}
 
 
 
-#$command="#addc";foreach $d(@ARGV){$command.= " ".$d;}; $command.="\n";
-
+$delline=1;
+if ($ARGV[0]=~/^-c$/) { $delline=0;shift @ARGV;}
 if ($ARGV[0]=~/^-s$/) { $commentstring = $ARGV[1]; shift @ARGV; shift @ARGV; } else { $commentstring = "#"; }
-
+if ($ARGV[0]=~/^-c$/) { $delline=0;shift @ARGV;}
 
   foreach (@ARGV)
 
@@ -40,7 +40,9 @@ if ($ARGV[0]=~/^-s$/) { $commentstring = $ARGV[1]; shift @ARGV; shift @ARGV; } e
 
      {
 
-       if ($line=~/^\s*$commentstring/) {print $line;}
+       if ($line=~/^\s*$commentstring/) {print $line;
+                                         if($delline==0){print Fout "\n";}
+                                         }
 
        else{print Fout $line;}
 

@@ -425,7 +425,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   set_zlm_constants();
   i=7;
   while(i>0){fgets_errchk (instr, MAXNOFCHARINLINE, file);
-             if(instr[strspn(instr," \t")]!='#'){fprintf (stderr, "Error reading mcphas.j - exchangeparameters start before all variables (da,db,dc,gJ,nofneighbors,diagonalexchange and cffilename) have been given\n");
+             if(instr[strspn(instr," \t")]!='#'){fprintf (stderr, "Error reading mcphas.j - exchangeparameters start before all variables (da,db,dc,gJ,nofneighbours,diagonalexchange and cffilename) have been given\n");
                                                  exit (EXIT_FAILURE);}
              i+=extract(instr,"x",xyz[1])-1;
              i+=extract(instr,"y",xyz[2])-1;
