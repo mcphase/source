@@ -85,6 +85,6 @@ for($iX=0; $iX<=$#Xdat; $iX++) {
          }
       }
       print sprintf("%10.9e %10.9e %10.9e\n",$Xdat[$iX],$y,$z);
-   }
+   } print "#\n";
 }
 

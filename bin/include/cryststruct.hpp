@@ -4,7 +4,7 @@
 #ifndef CRYSTSTRUC
 #define CRYSTSTRUC
 
-#define MAXNOFATOMS 1000
+#define MAXNOFATOMS 5000
 
 class cryststruct
 { public:

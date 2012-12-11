@@ -22,7 +22,7 @@ int spincf::spequal(Vector a,Vector b)
  int i;
  for (i=a.Lo();i<=a.Hi();++i)
  {if (fabs(a(i))>SMALL||fabs(b(i))>SMALL)
-  {if(copysign(1.0,a(i))!=copysign(1.0,b(i))){return false;}
+  {if(signbit(a(i))!=signbit(b(i))){return false;}
   }
  }
 return true;

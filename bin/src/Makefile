@@ -28,7 +28,6 @@ ifneq (,$(findstring $(OSTYPE),Linux))
 else
 ifneq (,$(findstring $(OSTYPE),Darwin))
  LINUX = linux
- CYGWIN=1
 else
  WINDOWS = windows
 ifneq (,$(findstring CYGWIN,$(shell uname)))
@@ -200,7 +199,7 @@ qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp my
 	$(CCC) $(CFLAGS) $<
 
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
-	$(CCC) $(CFLAGS) $(THREADFLAG) $<
+	$(CCC) $(CFLAGS)  $<
 
 mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c jq.hpp mdcf.hpp $(INCL)
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
@@ -319,7 +318,7 @@ ip.o: ionpars.cpp
 
 ../mcphasit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o
 	@echo Linking ../mcphasit
-	@$(LINKER)  -Wall  -o ../mcphasit  $^ $(LFLAGS) $(THREADLINK)
+	@$(LINKER)  -Wall  -o ../mcphasit  $^ $(LFLAGS) 
 
 ../spins$(EXE): spincf.o spins.o martin.o myev.o  $(VOBS) density.o ionpars.o jjjpar.o $(CFIELDOBJS) $(FUNCTIONOBJS) graphic_parameters.o par.o
 	@echo Linking ../spins

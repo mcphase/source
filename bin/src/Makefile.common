@@ -54,9 +54,12 @@ LINKER += -m32
 endif
 endif
 else
+ifeq ($(shell uname),Darwin)
+LINOPTS = -fPIC 
+else
 LINOPTS =-D_WINDOWS
 endif
-
+endif
 
 # C compiler  ############################################################ 
 CC= gcc -pipe $(ARCHFLAG)

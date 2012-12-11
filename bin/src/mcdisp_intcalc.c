@@ -198,7 +198,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
    #define pol (*thrdat.pol[thread_id])
    #define polICIC (*thrdat.polICIC[thread_id])
    #define polICn (*thrdat.polICn[thread_id])
-     efine polnIC (*thrdat.polnIC[thread_id])
+   #define polnIC (*thrdat.polnIC[thread_id])
    #define ev_real (*thrdat.ev_real[thread_id])
    #define ev_imag (*thrdat.ev_imag[thread_id])
    #define eev_real (*thrdat.eev_real[thread_id])

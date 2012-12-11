@@ -317,24 +317,13 @@ float threej (float AJ1,float  AJ2,float  AJ3,float AM1,float AM2,float AM3)
 //}
 
 
-// If gcc version 4.5.0 or greater, conflicts with declaration in <cmath>
-#if GCC_VERSION < 40500
-//copysign function
-double copysign(double a,double b)
-{//if fabs(a)
- //return a*a/fabs(a)*b/fabs(b);
-#if defined CYGWIN || defined __CYGWIN__ 
- return copysign(a,b);
-#else
- return _copysign(a,b);
-#endif
-}
-#endif
-// */
+
+
+// MaCOS,linux etc check ... compare http://sourceforge.net/p/predef/wiki/OperatingSystems/
 //sleep function
 int sleep(int a)
 {
-#if defined CYGWIN || defined __CYGWIN__ 
+#if defined CYGWIN || defined __CYGWIN__ || (__APPLE__ & __MACH__)
 #include<unistd.h>
   return usleep(a*1000);
 #else
