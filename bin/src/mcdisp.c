@@ -1108,7 +1108,7 @@ diffint=0;diffintbey=0;
                      thrdat.Ec[ithread] = new ComplexMatrix(1,dimA,1,ini.extended_eigenvector_dimension); *thrdat.Ec[ithread]=Ec;
                      thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
                   }
-                  ithread=0; num_threads_started=-1; int oldi=-1; double QQ; Vector vQQ(1,dimA);
+                  ithread=0; num_threads_started=-1; int oldi=-1; double QQ;// Vector vQQ(1,dimA); removed MR 14.1.2013
 #endif
                       Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                                        abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
@@ -1152,11 +1152,13 @@ diffint=0;diffintbey=0;
                      #define ev_imag (*thrdat.ev_imag[ithread])
                      #define eev_real (*thrdat.eev_real[ithread])
                      #define eev_imag (*thrdat.eev_imag[ithread])
-                     for(ithread=0; ithread<num_threads_started; ithread++)
+                     for(ithread=0; ithread<NUM_THREADS; ithread++)
                      {
-                        ints(tin[ithread]->level) = tin[ithread]->intensity; vQQ(tin[ithread]->level) = tin[ithread]->QQ;
-                        QQ = vQQ(tin[ithread]->level); intsbey(tin[ithread]->level) = tin[ithread]->intensitybey;
-                        i = tin[ithread]->level;
+                         i=oldi+ithread; if(i>dimA) break;
+                        if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
+                      {ints(tin[ithread]->level) = tin[ithread]->intensity; 
+                       intsbey(tin[ithread]->level) = tin[ithread]->intensitybey;
+                      }       
 #else
                      if(do_gobeyond==0){intsbey(i)=-1.1;}else{intsbey(i)=+1.1;}
                      if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
