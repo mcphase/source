@@ -25,6 +25,7 @@ void inimcdis::errexit() // type info and error exit
     printf (" -maxE E                  single ion transitions within this energy range will \n");
     printf ("                          be considered\n");
     printf (" -r                   ... refine energies\n");
+    printf (" -f                   ... fast algorithm for inelastic modes (no quasielastic transitions considered!)\n");
     printf (" -d                   ... calculate intensities in dipole approximation only\n");
     printf (" -v                   ... verbose\n");
     printf (" -a                   ... do not overwrite output files in results - append new results\n");
@@ -100,10 +101,16 @@ void inimcdis::save()
   fprintf(fout,"#\n");
   fprintf(fout,"# hklfile=file1\n");
   fprintf(fout,"# hklfile=file2\n");
-  fprintf(fout,"# ...\n");
+  fprintf(fout,"# ...\n#\n");
+  fprintf(fout,"# or\n");
+  fprintf(fout,"#\n");
+  fprintf(fout,"# (iii) some lines in reciprocal space \n");
+  fprintf(fout,"#\n");
+  fprintf(fout,"#hklline=h1=0 k1=1 l1=0 to hN=1 kN=1 lN=0 Nstp=21\n"); 
+  fprintf(fout,"#hklline=h1=0 k1=2 l1=0 to hN=1 kN=1 lN=0 Nstp=21\n"); 
   fprintf(fout,"#\n");
   fprintf(fout,"# or\n");
-  fprintf(fout,"# (iii) a list of Q vectors with (optional) energies of observed excitations to be fitted\n");
+  fprintf(fout,"# (iv) a list of Q vectors with (optional) energies of observed excitations to be fitted\n");
   fprintf(fout,"# h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]]\n");
   if(hkllist==0) {fprintf(fout,"0.45 1 1 0.523 0.745\n 0.75 1 1 0.523 0.745\n");}
   else { for (j=1;j<=(int)qmax(1);++j) 
@@ -142,9 +149,9 @@ void inimcdis::save()
 //constructor ... load initial parameters from file
 inimcdis::inimcdis (const char * file,const char * spinfile)
 { float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
-  char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE];
+  char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE];
   int i=0,j=0,nofhklfiles=0;
-  FILE *fin,*finhkl;
+  FILE *fin,*finhkl;float N,h1,k1,l1,hN,kN,lN; 
   fin=fopen(spinfile,"rb");if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);errexit();}
   instr[0]='#';  
   // while(instr[strspn(instr," \t")]=='#')//substituted MR 29.7.11 in order to be able to place parameters in comment lines
@@ -195,6 +202,9 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
      extract(instr,"extended_eigenvector_dimension",extended_eigenvector_dimension);
      if(!extract(instr,"hklfile",hklfile,MAXNOFCHARINLINE-1))
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;fclose(finhkl);++nofhklfiles;
+                 }
+     if(!extract(instr,"hklline",hklline,MAXNOFCHARINLINE-1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
+                 {if(!extract(instr,"Nstp",N))i+=N;++nofhklfiles;
                  }
   }
   if (extended_eigenvector_dimension<nofcomponents){fprintf(stderr,"ERROR: reading extended_eigenvector_dimension=%i which is less than nofcomponents=%i - increase extended_eigenvector_dimension in mcdisp.par and restart ! \n",extended_eigenvector_dimension,nofcomponents);exit(EXIT_FAILURE);}
@@ -247,13 +257,30 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
                      }
                   fclose(finhkl);
                  }
+                if(!extract(instr,"hklline",hklline,MAXNOFCHARINLINE-1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
+                 { if(extract(instr,"h1",h1)){printf("error mcdisp reading mcdisp.par: in hklline - h1 not found");exit (EXIT_FAILURE);}
+                   if(extract(instr,"k1",k1)){printf("error mcdisp reading mcdisp.par: in hklline - k1 not found");exit (EXIT_FAILURE);}
+                   if(extract(instr,"l1",l1)){printf("error mcdisp reading mcdisp.par: in hklline - l1 not found");exit (EXIT_FAILURE);}
+                   if(extract(instr,"hN",hN)){printf("error mcdisp reading mcdisp.par: in hklline - hN not found");exit (EXIT_FAILURE);}
+                   if(extract(instr,"kN",kN)){printf("error mcdisp reading mcdisp.par: in hklline - kN not found");exit (EXIT_FAILURE);}
+                   if(extract(instr,"lN",lN)){printf("error mcdisp reading mcdisp.par: in hklline - lN not found");exit (EXIT_FAILURE);}
+                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading mcdisp.par: in hklline - N  not found");exit (EXIT_FAILURE);}
+                    printf("# ... hklline (%g %g %g) to (%g %g %g) with %g points\n",h1,k1,l1,hN,kN,lN,N);
+                   ++nofhklfiles;hklfile_start_index[nofhklfiles]=qmax(1)+1;
+                   for(i=1;i<=N;++i){++qmax(1); hkls[(int)qmax(1)]=new double [NOFHKLCOLUMNS+1];
+                                     hkls[(int)qmax(1)][0]=3;
+                                     hkls[(int)qmax(1)][1]=h1+(hN-h1)*(i-1)/(N-1);
+                                     hkls[(int)qmax(1)][2]=k1+(kN-k1)*(i-1)/(N-1);
+                                     hkls[(int)qmax(1)][3]=l1+(lN-l1)*(i-1)/(N-1);
+                                    }
+                 }
               }
        fclose (fin_coq);
        fin_coq = fopen(file, "rb");
        while (feof(fin_coq)==0) // insert hkl from list in mcdisp.par
                     {if ((i=inputline(fin_coq,nn))>=3)
 	              {// here check if hkl already in list and if yes, extend its energies
-                                        if((int)qmax(1)>1&&fabs(hkls[(int)qmax(1)][1]-nn[1])+fabs(hkls[(int)qmax(1)][2]-nn[2])+fabs(hkls[(int)qmax(1)][3]-nn[3])<0.001)
+                       if((int)qmax(1)>1&&fabs(hkls[(int)qmax(1)][1]-nn[1])+fabs(hkls[(int)qmax(1)][2]-nn[2])+fabs(hkls[(int)qmax(1)][3]-nn[3])<0.001)
                        {if(i>3)
                         {int nold=hkls[(int)qmax(1)][0];
                          hkls[(int)qmax(1)+1]=new double [nold+1];

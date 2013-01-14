@@ -309,7 +309,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
      // here we fill the eigenvector mf with the information from chi
      if((ss-1)*md.nofcomponents+j==1){ev_real.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=real(chileft)*sqrt(fabs(en));// add this transition
                                       ev_imag.mf(i1,j1,k1)(md.nofcomponents*(l1-1)+i)+=imag(chileft)*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
-                                      }
+                                     }
 
 //if(intensitybey>0){  chibey((s-1)*md.nofcomponents+i,(ss-1)*md.nofcomponents+j)=
 //     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.V(i2,j2,k2)((bb-1)*md.nofcomponents+j,bb))*md.sqrt_Gamma(i2,j2,k2)(md.nofcomponents*bb,md.nofcomponents*bb);}

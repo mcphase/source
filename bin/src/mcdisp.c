@@ -319,7 +319,7 @@ void writeheader(par & inputpars,FILE * fout)
 
 
 // procedure to calculate the dispersion
-void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
+void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
   FILE * fin;
   FILE * fout;
@@ -337,7 +337,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
   double sta_without_weights=0,sta_int_without_weights=0,sta_without_antipeaks_weights=0,sta_int_without_antipeaks_weights=0;
   double jqsta=-1.0e10;  double jqsta_int=0;
   double jq0=0;
-  Vector hkl(1,3),q(1,3);
+  Vector hkl(1,3),q(1,3),qold(1,3),qijk(1,3);                 
   Vector mf(1,ini.nofcomponents),extmf(1,ini.extended_eigenvector_dimension);
   int jmin;
   IntVector noftransitions(1,inputpars.nofatoms); // vector to remember how many transitions are on each atom
@@ -365,11 +365,13 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
   //calculate single ion properties of every atom in magnetic unit cell
   mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents);
 
-  //initialize output of transitions
+ if(calc_fast==1){minE=1e-10;} // in case of fast calculation only consider positive deltas !!
+  
+ //initialize output of transitions
  if (do_readtrs==0)
  {printf("saving ./results/mcdisp.trs\n");
   fout = fopen_errchk ("./results/mcdisp.trs","w");
-   fprintf(fout, "#{output file of program %s",MCDISPVERSION);
+   fprintf(fout, "#output file of program %s",MCDISPVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcdisp.trs-->\n");
    fprintf(fout,"#*********************************************************************\n");
@@ -445,7 +447,6 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
    fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",ini.T,ini.Ha,ini.Hb,ini.Hc);
    fprintf(fout,"#*********************************************************************\n");
           fprintf (fout, "#i j k ionnr transnr energy |gamma_s|  sigma [barn/sr](*)\n");
- 
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
    fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
@@ -544,11 +545,11 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
    }  
   }}}}
    fclose(fout);
- }
+ } // do_readtrs==0
   if (do_createtrs==1){fprintf(stdout,"single ion transition file ./results/mcdisp.trs created - please comment transitions which should not enter the calculation and restart with option -t\n");exit(0);}
 
   printf("\n#reading ./results/mcdisp.trs\n\n");
-// read transitions to beconsidered from file
+// read transitions to be considered from file
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   fin = fopen_errchk ("./results/mcdisp.trs","rb");
   noftransitions=0;
@@ -585,7 +586,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int do_gobeyond,int do_Erefine,int 
     md.sqrt_gamma(i,j,k)=0; // and sqrt(gamma^s) matrix sqrt_gamma
  }}}
 
-// determine the dimension of the matrix Ass' s,s'=1....dimA
+// determine the dimension of the dynamical matrix Ass' s,s'=1....dimA
 int dimA=0;
 for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
  dimA+=md.baseindex_max(i1,j1,k1);
@@ -655,7 +656,7 @@ for(int ii=extUijkl.Rlo(); ii<=extUijkl.Rhi(); ii++){if (fabs(abs(extu1(ii))-abs
                                                  extUijkl(ii,ini.extended_eigenvector_dimension)=extu1(ii);}
 
          // treat correctly case for neutron energy loss
-	 if (nn[6]<0) // if transition energy is greater than zero do a conjugation of the matrix
+	 if (nn[6]<0) // if transition energy is less than zero do a conjugation of the matrix
 	 {//Uijkl=Uijkl.Conjugate();extUijkl=extUijkl.Conjugate();
 	    for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++)       for(int jj=Uijkl.Clo(); jj<=Uijkl.Chi(); jj++)       Uijkl[ii][jj]=conj(Uijkl[ii][jj]);
 	    for(int ii=extUijkl.Rlo(); ii<=extUijkl.Rhi(); ii++) for(int jj=extUijkl.Clo(); jj<=extUijkl.Chi(); jj++) extUijkl[ii][jj]=conj(extUijkl[ii][jj]);
@@ -716,7 +717,7 @@ if (do_jqfile==0)
           fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities (dipapprox vs full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   foutqei = fopen_errchk ("./results/mcdisp.qei",filemode);
   writeheader(inputpars,foutqei); fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
-          fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+          fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)}\n");
   foutqev = fopen_errchk ("./results/mcdisp.qev",filemode);
   writeheader(inputpars,foutqev);   fprintf(foutqev,"#!<--mcphas.mcdisp.qev-->\n");
           fprintf (foutqev, "#!spins_wave_amplitude=1.0\n");
@@ -735,7 +736,7 @@ if (do_jqfile==0)
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
   writeheader(inputpars,foutdstot); printf("#saving mcdisp.dsigma.tot\n");
    fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
-          fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma/dOmeg dsigma_beydip/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}",ini.emin,ini.emax);
+          fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma/dOmeg dsigma_beydip/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)}",ini.emin,ini.emax);
 
    if (do_Erefine==1){
           errno = 0;
@@ -761,7 +762,7 @@ if (do_jqfile==1)
 }
 
 //MAIN LOOP - do calculation of excitation energy for every Q vector     
-int counter;
+int counter;qijk=0;double qincr=0;
 for (hkl(1)=ini.qmin(1);hkl(1)<=ini.qmax(1);hkl(1)+=ini.deltaq(1)){
 for (hkl(2)=ini.qmin(2);hkl(2)<=ini.qmax(2);hkl(2)+=ini.deltaq(2)){
 for (hkl(3)=ini.qmin(3);hkl(3)<=ini.qmax(3);hkl(3)+=ini.deltaq(3)){
@@ -772,7 +773,7 @@ for (hkl(3)=ini.qmin(3);hkl(3)<=ini.qmax(3);hkl(3)+=ini.deltaq(3)){
 		     hkl(3)=ini.hkls[counter][3];
  		    }
  q=inputpars.r.Transpose()*hkl;
-               
+
 fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
  if(do_verbose==1){fprintf(stdout,"#Setting up J(q) matrix .... \n");}
  // calculate J(q)
@@ -919,8 +920,14 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
      for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
       s=index_s(i1,j1,k1,l1,t1,md,ini);
       b=md.baseindex(i1,j1,k1,l1,t1);
-      if(md.delta(i1,j1,k1)(b)<0){Lambda(s,s)=-1;}else{Lambda(s,s)=+1;}
-      Ac(s,s)=md.delta(i1,j1,k1)(b)*Lambda(s,s);
+      if(calc_fast==1){ // this is fast algorithms dynamical matrix assignment
+                       Lambda(s,s)=+0.5/md.delta(i1,j1,k1)(b);
+                       Ac(s,s)=+0.5*md.delta(i1,j1,k1)(b);
+                      }
+      else            { // this is standard DMD as described in the review rotter et al JPcondMat 2012
+                       if(md.delta(i1,j1,k1)(b)<0){Lambda(s,s)=-1;}else{Lambda(s,s)=+1;}
+                       Ac(s,s)=md.delta(i1,j1,k1)(b)*Lambda(s,s);
+                      }
 //      if(do_verbose==1){fprintf(stdout,"#i=%i j=%i k=%i atomnr=%i trans=%i ... s=%i ",i1,j1,k1,l1,t1,s);
 //                        fprintf(stdout,"#lambda(%i,%i)xdelta(%i)=%g + i %g\n",s,s,s,real(Ac(s,s)),imag(Ac(s,s)));
 //                       }
@@ -1013,7 +1020,7 @@ if (do_jqfile==1){
       }
       if(eigrval%2==1) fprintf(stderr,"# Warning: Trace matrix Lambda is not diagonal\n");
    }
-   En=1.0/En;
+   En=1.0/En;if(calc_fast==1){for(i1=1;i1<=dimA;++i1)En(i1)=sqrt(En(i1));}
    sortE(En,Tau);
         //   Tau=Tau.Conjugate();
   	// conjugate inserted 31.10.05, because when calculating simple AF - I noticed
@@ -1103,10 +1110,9 @@ diffint=0;diffintbey=0;
                   }
                   ithread=0; num_threads_started=-1; int oldi=-1; double QQ; Vector vQQ(1,dimA);
 #endif
-                      Vector qijk(1,3); // determine QQ for printout
                       Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                                        abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
-                      hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);
+                      qold=qijk;hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);qincr+=Norm(qijk-qold); 
 
 #ifdef _THREADS  
                   for (i=1;i<=dimA;i+=NUM_THREADS)
@@ -1202,8 +1208,10 @@ diffint=0;diffintbey=0;
                      if(intsbey(i)<0)intsbey(i)=-1;
                      //printout rectangular function to .mdcisp.qom
 	             fprintf (fout, " %4.4g %4.4g",myround(ints(i)),myround(intsbey(i)));
-                     fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
+                     fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g\n",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),qincr);
+                     // printout eigenvectors only if evaluated during intensity calculation...
+                  if(ints(i)>-1){
                      fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Ha),myround(ini.Hb),myround(ini.Hc),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                          myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                      fprintf (foutqev, "#eigenvector real part\n");
@@ -1219,6 +1227,7 @@ diffint=0;diffintbey=0;
                      fprintf (foutqee, "#eigenvector imaginary part\n");
                      eev_imag.print(foutqee); // 
                      fprintf (foutqee, "#\n");
+                                }
                  if(do_verbose==1){fprintf(stdout, "#IdipFF= %4.4g Ibeyonddip=%4.4g\n",ints(i),intsbey(i));}
                      if(En(i)>=ini.emin&&En(i)<=ini.emax){diffint+=ints(i);diffintbey+=intsbey(i);}
 #ifdef _THREADS
@@ -1243,7 +1252,7 @@ diffint=0;diffintbey=0;
                   delete[] thrdat.pol; delete[] thrdat.polICIC; delete[] thrdat.polICn; delete[] thrdat.polnIC;
                   delete[] thrdat.ev_real; delete[] thrdat.ev_imag; delete[] thrdat.eev_real; delete[] thrdat.eev_imag; 
 #endif
-    fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %4.4g",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),diffint,diffintbey);
+    fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g",ini.Ha,ini.Hb,ini.Hc,ini.T,hkl(1),hkl(2),hkl(3),diffint,diffintbey,qincr);
     sta+=dd*dd;sta_int+=dd_int*dd_int;
     sta_without_antipeaks+=dd_without_antipeaks*dd_without_antipeaks;
     sta_int_without_antipeaks+=dd_int_without_antipeaks*dd_int_without_antipeaks;
@@ -1414,7 +1423,8 @@ diffint=0;diffintbey=0;
 #endif
 
    if (ini.hkllist==1){hkl(1)=(double)counter;}
-}}}
+               
+}}} // next hkl
     if (do_jqfile==1) 
      {fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
       fprintf(jqfile,"#the sum of squared differences between the highest eigenvalue\n");
@@ -1449,7 +1459,7 @@ diffint=0;diffintbey=0;
 //*************************************************************************************************
 // main program
 int main (int argc, char **argv)
-{int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0,do_readtrs=0,calc_beyond=1;
+{int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0,do_readtrs=0,calc_beyond=1,calc_fast=0;
  const char * spinfile="mcdisp.mf"; //default spin-configuration-input file
  const char * filemode="w";
  double epsilon; //imaginary part of omega to avoid divergence
@@ -1469,7 +1479,8 @@ for (i=1;i<=argc-1;++i){
 		                                                epsilon=strtod(argv[i+1],NULL);++i;
 							        fprintf(stdout,"#epsilon= %g\n",epsilon);
 				     }		
-        else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
+       else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
+        else {if(strcmp(argv[i],"-f")==0) {calc_fast=0;} // calc_fast=1: MR 3.1.2013 attempt to speed up DMD by halfing matrix size, however this does not work - is there a possibility ?
          else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL;maxlevels=1;}
           else {if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
            else {if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
@@ -1507,6 +1518,7 @@ for (i=1;i<=argc-1;++i){
 	    }
            }	
           }
+         }
     }
 inimcdis ini("mcdisp.par",spinfile);
 
@@ -1521,7 +1533,7 @@ if (argc > 10) {ini.errexit();}
 
 
 //calculate dispersion and save to files
-dispcalc(ini,inputpars,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
+dispcalc(ini,inputpars,calc_fast,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
   
  printf("RESULTS saved in directory ./results/  - files:\n");
    printf("  mcdisp.qei  - T,H,qvector vs energies and neutron intensities\n");

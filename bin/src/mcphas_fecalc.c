@@ -251,6 +251,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
 
 //printf ("hello end of mf procedure");
 
+
 // calculate free energy fe and energy u
 fe=0;u=0; // initialize fe and u
 for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)

@@ -36,10 +36,10 @@ $value=$ARGV[0];shift @ARGV;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file;
    open (Fout, ">range.out");$ri=0;
-   while($line=<Fin>)
+  while($line=<Fin>)
      { if ($line=~/^(#!|[^#])*?\b$varnam\s*=/) {
                                             #here write modified parameter set to line
-                                             $line=~s/([!#\s])$varnam\s*=\s*[^\s\;\n\t\*]+/$1$varnam=$value/g;
+                                             $line=~s/(^(#!|[^#])*?\b)$varnam\s*=\s*[^\s\;\n\t\*]+/$1$varnam=$value/g;
                                            }
        print Fout $line;
       }
