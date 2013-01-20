@@ -2,8 +2,7 @@
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 print "sleeping ".$ARGV[0]."s\n";
-
-sleep $ARGV[0];
+$ARGV[0]=~s/x/*/g;sleep eval $ARGV[0];
 
 
 

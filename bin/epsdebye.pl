@@ -14,74 +14,42 @@ unless ($#ARGV >2)
 	        
 
 		    calculates the strain epsilon using the debye model
-
 		    according to the following formula:
-
-		    
 
 		    epsilon=scale*T*D(Tdebye/T)+const
 
-		    
-
 		    with
-
-		    
 
 		    D(z)=3/z^3 integral_0^z [x^3/(e^x-1)]dx
 
-		    
-
-		    
-
                  Range is from zero to Tmax in stepwidths dT
-
 		 unless a datafile is given. The const is chosen such that
-
 		 the result epsilon is zero at T=Tnorm. 
 
-
-
                  If a  datafile is given, with data column d1 and d2,the strain
-
                  is calculated for T-values of data column d1 and epsilon
-
 		  is compared to data in column d2 - a standard 
-
                  deviation sta is calculated as a sum of squared deviations.
-
                  As output the datafile is given, an additional is column added 
-
 		 containing the calculated strain epsilon. The datafile has to
-
 		 be sorted according to descending T values !!!
-
-		     
 
                  output is written to stdout.\n";
 
  exit 0;}
 
 print "# $0 @ARGV\n";
-$ARGV[0]=~s/x/*/g;
-$Tmax=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$dT=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$Tdebye=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$scale=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$Tnorm=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$Tmax=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$dT=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$Tdebye=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$scale=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$Tnorm=eval $ARGV[0];shift @ARGV;
 
 
-$ARGV[0]=~s/x/*/g;
-$d1=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$d2=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$d1=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$d2=eval $ARGV[0];shift @ARGV;
 
 $file1=$ARGV[0];shift @ARGV;
-
-
 
 
 

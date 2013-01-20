@@ -8,9 +8,10 @@ unless ($#ARGV >1)
 
  exit 0;}
 print "# $0 @ARGV\n";
-$col=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$col=eval $ARGV[0];shift @ARGV;
 $step=$ARGV[0];shift @ARGV;
-if ($step=~/-n/){$nofsteps=$ARGV[0];shift @ARGV; }
+if ($step=~/-n/){$ARGV[0]=~s/x/*/g;$nofsteps=eval $ARGV[0];shift @ARGV; }
+         else {$step=eval $step;}
 
 # get minimum and maximum
 $min=1e100;$max=-1e100;

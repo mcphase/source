@@ -38,10 +38,12 @@ EOF
  
 
 $colx=$ARGV[0];shift @ARGV;
-$calcm=0;if($colx=~/-m/){$colx=$ARGV[0];shift @ARGV;$calcm=1;}
+$calcm=0;if($colx=~/-m/){$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;$calcm=1;}
+                  else {$colx=~s/x/*/g;$colx=eval $colx;}
 $coly=$ARGV[0];shift @ARGV;
 if ($coly=~/e/){$_=$coly;($colyerr)=/e(\d*)/;($coly)=/(\d*)e/;}else{$colyerr=0;}
-
+$coly=~s/x/*/g;$coly=eval $coly;
+$colyerr=~s/x/*/g;$colyerr=eval $colyerr;
 
 
   foreach (@ARGV)

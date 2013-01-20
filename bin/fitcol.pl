@@ -62,7 +62,7 @@ exit(0);
 }
 
 mkdir ("./results");
-$coldata=$ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;$coldata=eval $ARGV[0]; shift @ARGV;
 
 # slice out the programs
 @index{@ARGV} = (0..$#ARGV);@progs=@ARGV[0..$index{"in"}-1];$file=$ARGV[$index{"in"}+1];

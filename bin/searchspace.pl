@@ -57,7 +57,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
 .
 
  @parnam=();@par=();@parmin=();@parmax=();@parerr=();@parstp=();@parav=();
-  $searchlevel=$ARGV[0]; shift @ARGV;
+ $ARGV[0]=~s/x/*/g; $searchlevel=eval $ARGV[0]; shift @ARGV;
   if($searchlevel<0){# in this case only read line number -$searchlevel from input file and update parameter files
                      $inputfile=$ARGV[0]; shift @ARGV;
                     }

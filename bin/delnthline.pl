@@ -31,7 +31,7 @@ unless ($#ARGV >0)
 
 
 
-$n=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$n=eval $ARGV[0];shift @ARGV;
 
 
  foreach (@ARGV)

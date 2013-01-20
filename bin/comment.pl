@@ -23,6 +23,10 @@ $command="#addc";foreach $d(@ARGV){$command.= " ".$d;}; $command.="\n";
 
 $col1=$ARGV[0];shift @ARGV;
 $col2=$ARGV[0];shift @ARGV;
+      unless($col1=~/-t/||$col1=~/-n/)
+       { $col1=~s/x/*/g;$col1=eval $col1;
+         $col2=~s/x/*/g;$col2=eval $col2;
+           }
 
   foreach (@ARGV)
 

@@ -42,8 +42,8 @@ exit(0);
 
 }
 
-$col=$ARGV[0]; shift @ARGV;--$col;
-$n=$ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/x/*/g;$col=eval $ARGV[0]; shift @ARGV;--$col;
+$ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;
 
  foreach (@ARGV)
   { $file=$_;print "<".$file;

@@ -23,12 +23,10 @@ open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
 open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
 }
-$colx=$ARGV[0];shift @ARGV;
-$coly=$ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$xvalue=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$dE=eval $ARGV[0];shift @ARGV; 
+$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$xvalue=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$dE=eval $ARGV[0];shift @ARGV; 
 foreach(@ARGV)
 {$filename=$_;
 ($yvalue,$sta)=getvalue_by_averaging_over_intervaldE($xvalue,$colx,$coly,$dE,$filename);

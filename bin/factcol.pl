@@ -7,11 +7,11 @@ unless ($#ARGV >1)
  print " usage: factcol col[ecolerr] const  *.*   \n col=column, const=constant \n optional colerr= corresponding error column, e.g. 3e4 means argumentvalues are in column 3 and error in column 4\n *.* .. filenname\n";
  exit 0;}
 
-$column=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$column=$ARGV[0];shift @ARGV;
 if ($column=~/e/){$_=$column;($columnerr)=/e(\d*)/;($column)=/(\d*)e/;}else{$columnerr=0;}
+$column=eval $column;$columnerr=eval $columnerr;
 if ($column==$columnerr){die "Error factcolerr: error column $columnerr = datacolumn $column\n";}
-$ARGV[0]=~s/x/*/g;
-$const=eval $ARGV[0] ;shift @ARGV;
+$ARGV[0]=~s/x/*/g;$const=eval $ARGV[0] ;shift @ARGV;
 
   foreach (@ARGV)
   {

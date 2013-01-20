@@ -21,8 +21,14 @@ unless ($#ARGV >11)
 EOF
 exit(1);
 }
-$cx = $ARGV[0]; $cy = $ARGV[1]; $cz = $ARGV[2]; $file1 = $ARGV[3];
-$c1 = $ARGV[4]; $c2 = $ARGV[5]; $c3 = $ARGV[6]; $file2 = $ARGV[7];
+$ARGV[0]=~s/x/*/g;$cx =eval $ARGV[0];
+$ARGV[1]=~s/x/*/g;$cy =eval $ARGV[1]; 
+$ARGV[2]=~s/x/*/g;$cz =eval $ARGV[2]; 
+$file1 = $ARGV[3];
+$ARGV[4]=~s/x/*/g;$c1 =eval $ARGV[4]; 
+$ARGV[5]=~s/x/*/g;$c2 =eval $ARGV[5]; 
+$ARGV[6]=~s/x/*/g;$c3 =eval $ARGV[6]; 
+$file2 = $ARGV[7];
 $ARGV[8]=~s/x/*/g;$lx=eval $ARGV[8];
 $ARGV[9]=~s/x/*/g;$ux=eval $ARGV[9];
 $ARGV[10]=~s/x/*/g;$Nx=eval $ARGV[10];

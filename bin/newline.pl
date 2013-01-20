@@ -13,7 +13,7 @@ unless ($#ARGV >0)
 
  exit 0;}
 
-$n=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$n=eval $ARGV[0];shift @ARGV;
 $commandstring=join(" ",@ARGV);
 if($commandstring=~/-f/)
 {@aa=split('-f',$commandstring);

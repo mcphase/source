@@ -15,10 +15,7 @@ unless ($#ARGV >0)
 
  exit 0;}
 
- 
-
-$column=$ARGV[0];shift @ARGV;
-
+$ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
 
   foreach (@ARGV)
 

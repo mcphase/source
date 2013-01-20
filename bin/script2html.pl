@@ -51,8 +51,8 @@ EOF
 print "<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->";
 while (@ARGV)
 {$linetext="";
- $fromline=1;if($ARGV[0]=~/-fromline/){shift @ARGV; $fromline=$ARGV[0];shift @ARGV;$linetext=" from line $fromline";}
- $toline=1e10;if($ARGV[0]=~/-toline/){shift @ARGV; $toline=$ARGV[0];shift @ARGV;$linetext=$linetext." up to line $toline";}
+ $fromline=1;if($ARGV[0]=~/-fromline/){shift @ARGV;$ARGV[0]=~s/x/*/g; $fromline=eval $ARGV[0];shift @ARGV;$linetext=" from line $fromline";}
+ $toline=1e10;if($ARGV[0]=~/-toline/){shift @ARGV; $ARGV[0]=~s/x/*/g;$toline=eval $ARGV[0];shift @ARGV;$linetext=$linetext." up to line $toline";}
  $file=$ARGV[0];shift @ARGV; ++$i;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    # get path from filename

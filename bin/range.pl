@@ -18,6 +18,7 @@ $column=$ARGV[0];shift @ARGV;
 if ($column=~/\s*-d/) {$dd=$column;$column=$ARGV[0];shift @ARGV;}
 
 if ($column=~/\s*-u/) {$uu=$column;$column=$ARGV[0];shift @ARGV;}
+$column=~s/x/*/g;$column=eval $column;
 $ARGV[0]=~s/x/*/g;
 $min=eval $ARGV[0];   shift @ARGV;
 $ARGV[0]=~s/x/*/g;

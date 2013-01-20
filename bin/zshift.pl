@@ -17,9 +17,8 @@ unless ($#ARGV >2)
 $ARGV[0]=~s/x/*/g;
 $constx=eval $ARGV[0];shift @ARGV;
 
-$colx=$ARGV[0];shift @ARGV;
-
-$column=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
 
 
 

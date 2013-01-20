@@ -18,24 +18,13 @@ if ($#ARGV<2)
 
 {print "program spectrum: creates spectrum as xy table from file mcdisp.qom or mcdisp.dsigma
 
-		      
-
-    use as spectrum h k l [filename(s)] 
+   use as spectrum h k l [filename(s)] 
 
           hkl  ...... scattering vector (millerindices)
-
 	  filename... filename to be read (results/mcdisp.qom as default)
 
-	  
-
-    
-
 \n";
-
-
-
 exit(0);
-
 }
 
 

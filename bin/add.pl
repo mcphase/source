@@ -33,13 +33,15 @@ EOF
  exit 0;}
 
 
-$colx1=$ARGV[0];shift @ARGV;
-$coly1=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$colx1=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$coly1=$ARGV[0];shift @ARGV;
 if ($coly1=~/e/){$_=$coly1;($coly1err)=/e(\d*)/;($coly1)=/(\d*)e/;}else{$coly1err=0;}
+$coly1= eval $coly1; $coly1err= eval $coly1err;
 $file1=$ARGV[0];shift @ARGV;
-$colx2=$ARGV[0];shift @ARGV;
-$coly2=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$colx2=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$coly2=$ARGV[0];shift @ARGV;
 if ($coly2=~/e/){$_=$coly2;($coly2err)=/e(\d*)/;($coly2)=/(\d*)e/;}else{$coly2err=0;}
+$coly2= eval $coly2; $coly2err= eval $coly2err;
 $file2=$ARGV[0];shift @ARGV;
 
 #read file2

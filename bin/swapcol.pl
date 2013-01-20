@@ -15,9 +15,8 @@ unless ($#ARGV >1)
 
  
 
-$colx=$ARGV[0];shift @ARGV;
-
-$coly=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;
 
 
 

@@ -78,7 +78,7 @@ sub calc()
  $AARGV[0]=~s/x/*/g;$H=eval $AARGV[0];shift @AARGV;$Hm=$H;
  $AARGV[0]=~s/x/*/g;$AARGV[1]=~s/x/*/g;$AARGV[2]=~s/x/*/g;
  $direction= pdl[eval $AARGV[0],eval $AARGV[1],eval $AARGV[2]];shift @AARGV;shift @AARGV;shift @AARGV;
- $nstp=$AARGV[0];shift @AARGV;
+ $ARGV[0]=~s/x/*/g;$nstp=eval $AARGV[0];shift @AARGV;
   if ($nstp<1) {die "Error program anisotropy: nofsteps <1\n";}
  $module=$AARGV[0];shift @AARGV;
  for ($module)

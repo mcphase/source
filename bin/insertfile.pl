@@ -7,7 +7,7 @@ unless ($#ARGV >1)
  print " usage: insertfile linenumber file1 file2 [file3 ...] \n";
  exit 0;}
 
-$linenr=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$linenr=eval $ARGV[0];shift @ARGV;
 $file1=$ARGV[0];shift @ARGV;
 print "inserting to $file1 at line $linenr:\n";
 

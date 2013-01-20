@@ -16,7 +16,7 @@ unless ($#ARGV >0)
 
  
 
-$colx=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
 
 
 

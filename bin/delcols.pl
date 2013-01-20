@@ -11,8 +11,8 @@ unless ($#ARGV >1)
  print " usage: delcols col n  *.*   \n col=first column to be deleted\n n=number of columns to be deleted\n *.* .. filenname\n";
  exit 0;}
 
-$column=$ARGV[0];shift @ARGV;
-$n=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$n=eval $ARGV[0];shift @ARGV;
   foreach (@ARGV)
   {   $file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   

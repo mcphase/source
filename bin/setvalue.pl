@@ -27,10 +27,9 @@ EOF
 }
  
 
-$row=$ARGV[0];shift @ARGV;
-$column=$ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
-$const=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$row=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$const=eval $ARGV[0];shift @ARGV;
 
 
 

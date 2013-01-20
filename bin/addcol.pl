@@ -8,11 +8,12 @@ unless ($#ARGV >1)
  print " Error addition is done by colyerr=sqrt(colxerr^2+colyerr^2)\n";
  exit 0;}
 
-$colx=$ARGV[0];shift @ARGV;
+$ARGV[0]=~s/x/*/g;$colx=$ARGV[0];shift @ARGV;
 if ($colx=~/e/){$_=$colx;($colxerr)=/e(\d*)/;($colx)=/(\d*)e/;}else{$colxerr=0;}
-$coly=$ARGV[0];shift @ARGV;
+$colx=eval $colx;$colxerr=eval $colxerr;
+$ARGV[0]=~s/x/*/g;$coly=$ARGV[0];shift @ARGV;
 if ($coly=~/e/){$_=$coly;($colyerr)=/e(\d*)/;($coly)=/(\d*)e/;}else{$colyerr=0;}
-
+$coly=eval $coly;$colyerr=eval $colyerr;
 
   foreach (@ARGV)
 
