@@ -42,7 +42,7 @@ int inipar::load ()
   xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;
   qmin(1)=1;qmin(2)=1;qmin(3)=1;qmax=0;deltaq=0;maxqperiod=0;maxnofspins=0;nofrndtries=0;
   maxnofmfloops=0;maxstamf=0;bigstep=0;maxspinchange=0;
-  nofspincorrs=0;maxnofhkls=0;maxQ=0;
+  nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
   
   while (fgets(instr,MAXNOFCHARINLINE,fin_coq)!=NULL)
   {if(instr[strspn(instr," \t")]!='#'&&instr[strspn(instr," \t")]!='[') // comment lines headed by # or [ are ignored in mcphas.ini
@@ -82,6 +82,7 @@ int inipar::load ()
     extract(instr,"maxstamf",maxstamf); 
     extract(instr,"bigstep",bigstep); 
     extract(instr,"maxspinchange",maxspinchange); 
+    extract(instr,"maxnoftestspincf",maxnoftestspincf);
 
     extract(instr,"nofspincorrs",nofspincorrs); 
     extract(instr,"maxnofhkls",maxnofhkls); 
@@ -108,6 +109,7 @@ int inipar::load ()
   if(nofrndtries==0){fprintf(stderr,"Warning reading nofrndtries=0\n");}
   if (maxnofspins==0){maxnofspins=maxqperiod*maxqperiod*maxqperiod;
                       fprintf(stderr,"warning ... reading maxnofspins=0: putting it to %i\n",maxnofspins);}
+  if (maxnoftestspincf<1){fprintf(stderr,"ERROR maxnoftestspincf<1 not possible\n");return 1;}
 
   if(maxnofmfloops==0){fprintf(stderr,"Error reading maxnofmfloops\n");return 1;}
   if(maxstamf==0){fprintf(stderr,"Error reading maxstamf\n");return 1;}
@@ -170,7 +172,8 @@ void inipar::print (const char * filename)
     fprintf(fout,"maxnofspins=%i\n",maxnofspins);
     fprintf(fout,"# number of random (Monte Carlo) spin inversions  to try for each initial spinconfiguration\n");
     fprintf(fout,"nofrndtries=%i\n\n",nofrndtries);
-
+    fprintf(fout,"# maximum number of test spin configurations in table\n");
+    fprintf(fout,"maxnoftestspincf=%i\n\n",maxnoftestspincf);
 
     fprintf(fout,"[PARAMETERS FOR SUB FECALC SELFCONSISTENCY PROCESS]\
                   \n# maximum number of selfconsistency loops\n");
@@ -231,7 +234,8 @@ inipar::inipar (const inipar & p)
   maxqperiod=p.maxqperiod;
   maxnofspins=p.maxnofspins;
   nofrndtries=p.nofrndtries;
-  
+  maxnoftestspincf=p.maxnoftestspincf;
+
   maxnofmfloops=p.maxnofmfloops;
   maxstamf=p.maxstamf;
   bigstep=p.bigstep;

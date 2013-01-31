@@ -7,11 +7,6 @@
 
 #include<mcphas.h>
 
-// maximum number of spinconfigurations allowed in phasediagramm
-#define MAXNOFSPINCF 500
-
-
-
 inipar ini("mcphas.ini");
 int verbose=0;
 const char * filemode="w";
@@ -86,7 +81,7 @@ mmax1=0;for (im=1;im<=inputpars.nofcomponents&&im<=3;++im){mmax1(im)=mmax(im);}
 
 T=0.0;h=0;
 // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
-   testspincf testspins (MAXNOFSPINCF,"./mcphas.tst","./results/mcphas.phs",inputpars.nofatoms,inputpars.nofcomponents);
+   testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.nofatoms,inputpars.nofcomponents);
    testspins.save("./results/_mcphas.tst","w");
    qvectors testqs (ini,inputpars.rez,mmax,"./results/mcphas.qvc",inputpars.nofatoms,inputpars.nofcomponents,verbose);
 

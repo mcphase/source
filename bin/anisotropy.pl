@@ -156,6 +156,7 @@ sub ic1ion()
                       next if ($line=~/ymax/);
                       print F $line;}
   print F << "EOF";
+
 calcmag
  xT   = 1
  xHa  = 0

@@ -98,7 +98,7 @@ fits a (Gaussian convoluted) Fermi function to data in file
 \begin{description}
 \item[T] Temperature (K)
 \item[EF] initial value of Fermi Energy (eV)
-\item[fwhm] initial vlaue for resolution (eV)
+\item[fwhm] initial vlaue for resolution (eV) (if less than zero the fwhm is not fitted and set to |fwhm|)
 \item[min max] energy range of fit (may be less than range of experimental data points)
 \item[filename] filename (col 1 is energy in eV and col 2 intensity)
 \end{description}
@@ -367,9 +367,15 @@ the program {\prg delcol} deletes a column from a data file,
 some general features are:
 \begin{itemize}
 \item data files are overwritten 
-\item multiple files may be handled by one command, e.g. {\prg delcol 4 *.dat} deletes column 4 %%@
+\item multiple files may be handled by one command, e.g. {\prg delcol 4 *.dat} deletes column 4
 in all 
 files ending with .dat
+\item arguments may contain mathematical expressions, e.g. 
+\begin{description}
+\item{\prg shifttcol 3x2+27 2xx4 data.dat} \dots adds to each number in column 33 in file data.dat the number $2^4=8$. 
+\item{\prg factcol 2 sin(3.1415/2) data.dat} \dots multiplies column 2 in file data.dat with   sin(3.1415/2)
+,i.e. with 0.999999989
+\end{description}
 \end{itemize}
 
 \begin{description}
@@ -413,7 +419,7 @@ used directly for generating useful input for fitting in {\prg simannfit}\index{
                 is calculated according to sum\_i (file1\_i - file2\_i)\^2
                 this standard deviation is output to stdout, e.g. as sta=143.3
 \item [\prg convolute\index{convolute} c1 c2 file cx cy convfuncfile [d1 d2 datafile]:] %%@
-convolute\index{convolute}s data given as column c1 vs column
+convolutes data given as column c1 vs column
                        c2 in file (data pairs $x_i,y_i$) with the convolution function given in %%@
 column cx vs cy
 		        of convfuncfile (function $c(x)$)
@@ -425,6 +431,17 @@ column cx vs cy
 		     sum of squared deviations.Values out of range of convfile are assumed to be zero,
 			convfile has to be sorted according to ascending x.
 			Formula: $f(x)=\sum_i y_i c(x-x_i)$ , 
+		       output is written to stdout. 
+\item [\prg convolute2d\index{convolute2d} c1 c2 c3 file cx cy cz convfuncfile minx maxx Nx miny maxy Ny:] 
+convolutes a 2 dimensional function data given as column c3(c1,c2) in file (data tripls $x_i,y_i, z_i$) with the convolution function given in column cx vs cy vs cz
+		        of convfuncfile (function $c(x,y)$)
+		       Range and number of points of output file is determined from minx maxx Nx and 
+                        miny, maxy Ny.
+			Formula: $f(x,y)=\sum_i z_i c(x-x_i,y-y_i)$ . In the program the contribution to
+                        the sum is evaluated for a discrete triplet cx cy cz of the convolution function, the 
+                        resulting x,y will not correspond to a point on the grid defined by minx, max Nx, miny,maxy Ny -
+                        therefore the contribution is distributed (according to distance) onto the neighbouring grid
+                       points.
 		       output is written to stdout. 
 \item [\prg coscol\index{coscol} col const file:] calculates cosinus of a column cos(col) 
 \item [\prg delcol\index{delcol} col file:] deletes column col in file
@@ -641,6 +658,11 @@ is zero at a specified value constx of colx.
 (stdout), the formula for a gaussian is:
 $\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
 ${\rm gauss}(x)=\frac{exp(-x^2/2 \sigma^2)}{\sqrt{2*\pi}\sigma}$
+\item [\prg gauss2d\index{gauss2d} fwhm1 fwhm2 theta  stpx minx maxx stpy miny maxy:] calculate a 2 dimensional gaussian, output goes to console %%@
+(stdout), the formula for a two dimensional gaussian is:
+$\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
+${\rm gauss}(x,y)=\frac{exp(-u_1^2/2 \sigma_1^2)}{\sqrt{2*\pi}\sigma_1}\frac{exp(-u_2^2/2 \sigma_2^2)}{\sqrt{2*\pi}\sigma_2}$ with $u_1=x cos(\theta)-ysin(\theta)$ and $u_2=y cos(\theta)+xsin(\theta)$,
+$\theta$ is the rotation angle in degree.
 \item [\prg lorentz\index{lorentz} fwhm stp min max:] calculate a lorentzian, output goes to %%@
 console (stdout)the formula for a Lorentz curve is: 
 ${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+x^2/fwhm^2)}$

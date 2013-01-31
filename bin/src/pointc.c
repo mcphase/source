@@ -18,7 +18,7 @@ int main (int argc, char **argv)
 
 
   if (argc < 3)
-    { printf ("\nProgram to calculate Crystal field Parameters from Point Charges \n\n\
+    { printf ("\n Program to calculate Crystal field Parameters from Point Charges \n\n\
             Usage: pointc Ce3+ 0.2 4 1 5.3\n\n\
              ... meaning calculate Blms (Stevens Parameters) \n\
                              and   Llms (Wybourne Parameters) \n\
@@ -30,7 +30,7 @@ int main (int argc, char **argv)
              (note,progam makenn creates useful files for this option from \n\
              the crystal structure).\n\
              results are written to stdout (including radial matrix elements\n\
-             and Stevens factors)\n\n\
+             and Stevens factors), results\\pointc.out contains results of convergence\n\n\
           Note: if an ion is not implemented, it's parameters can be \n\
                 entered in a single ion property file and pointc is\n\
                 started as \n\
@@ -68,6 +68,7 @@ int main (int argc, char **argv)
     }
 
 FILE * table_file;
+FILE * conv_file;
 FILE * sipf_file;
 char instr[MAXNOFCHARINLINE];
 int n=0;
@@ -144,7 +145,8 @@ float invalues[100];invalues[0]=99;
 // zero parameters in case initialisation put some values to the parameters ...
 (*iops).Blm=0;
 (*iops).Llm=0;
-
+conv_file=fopen_errchk("results/pointc.out","w");
+fprintf(conv_file,"#charge(|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B66 L66\n");
 if (argc<5) // read pointcharges from file
 {table_file=fopen_errchk(argv[2],"r");
  while(n==0&&feof(table_file)==false)n=inputline(table_file, invalues);
@@ -172,6 +174,7 @@ while(n>0)
  // calculate Blm's and Llm's
  double r,ct,ct2,st,st2,sfi,cfi;
  r = sqrt(x * x + y * y + z * z);
+ fprintf (conv_file," %4g  %4g %4g %4g  %4g  ",q,x,y,z,r);
  ct = z/r;                 //z
  ct2 = ct * ct;      
  st = sqrt(x*x+y*y)/r;
@@ -309,19 +312,30 @@ while(n>0)
 
  // now calculation of the B_LM  and L_LM in meV
                     (*iops).Blm(0)+=-B(0)*e*e*(*iops).nof_electrons*umr;// printf("B(%i)=%g sum(B)=%g\n",0,B(0),(*iops).Blm(0));                  
+                    fprintf (conv_file,"%g ",-B(0)*e*e*(*iops).nof_electrons*umr);
                     (*iops).Llm(0)+=-echarge*gamma(0)*sqrt(1.0/4.0/PI)*J2meV;//printf("gamma(%i)=%g Llm=%g\n",0,gamma(0),(*iops).Llm(0));  
+                    fprintf (conv_file,"%g ",-echarge*gamma(0)*sqrt(1.0/4.0/PI)*J2meV);
  for (i=1;i<=5;++i){(*iops).Blm(i)+=-B(i)*e*e*(*iops).r2*(*iops).alpha*ehv2; // printf("B(%i)=%g sum(B)=%g\n",i,B(i),(*iops).Blm(i));
-                   if(i!=3){(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/8.0/PI)*J2meV;}  //m<>0
-                   else    {(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/4.0/PI)*J2meV;}  //m=0
+                    fprintf (conv_file,"%g ",-B(i)*e*e*(*iops).r2*(*iops).alpha*ehv2);
+                   if(i!=3){(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/8.0/PI)*J2meV;
+                            fprintf (conv_file,"%g ",-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/8.0/PI)*J2meV);}  //m<>0
+                   else    {(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/4.0/PI)*J2meV;
+                            fprintf (conv_file,"%g ",-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/4.0/PI)*J2meV);}  //m=0
                   }
  for (i=13;i<=21;++i){(*iops).Blm(i)+=-B(i)*e*e*(*iops).r4*(*iops).beta*ehv4; 
-                   if(i!=17){(*iops).Llm(i)+=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/8.0/PI)*J2meV;}  //m<>0
-                   else     {(*iops).Llm(i)+=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/4.0/PI)*J2meV;}  //m=0
+                            fprintf (conv_file,"%g ",-B(i)*e*e*(*iops).r4*(*iops).beta*ehv4);
+                   if(i!=17){(*iops).Llm(i)+=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/8.0/PI)*J2meV;
+                            fprintf (conv_file,"%g ",-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/8.0/PI)*J2meV);}  //m<>0
+                   else     {(*iops).Llm(i)+=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/4.0/PI)*J2meV;
+                            fprintf (conv_file,"%g ",-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/4.0/PI)*J2meV);}  //m=0
                     }
  for (i=33;i<=45;++i){(*iops).Blm(i)+=-B(i)*e*e*(*iops).r6*ehv6*(*iops).gamma;
-                   if(i!=39){(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/8.0/PI);}  //m<>0
-                   else     {(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/4.0/PI);}  //m=0
-                    }
+                            fprintf (conv_file,"%g ",-B(i)*e*e*(*iops).r6*ehv6*(*iops).gamma);
+                   if(i!=39){(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/8.0/PI);
+                            fprintf (conv_file,"%g ",-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/8.0/PI));}  //m<>0
+                   else     {(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/4.0/PI);
+                            fprintf (conv_file,"%g ",-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/4.0/PI));}  //m=0
+                    } fprintf(conv_file,"\n");
 // now Llm=-|e|q*<r^l> sqrt((2l+1)/4pi) Zlm(Omegai)/[r^(l+1)eps0(2l+1)] in SI units [N m=J] transformed to meV by J2mEV
 //     Ll0=-|e|q*<r^l> sqrt((2l+1)/8pi) ...  for m=0
 
@@ -337,7 +351,7 @@ while(n>0)
 }
 
 if (argc<5){fclose(table_file);}
-
+fclose(conv_file);
 printf ("# 1 meV = 8.066 cm-1\n# 1 cm-1 = 0.124 meV\n");
 printf ("# 1 meV = 11.6 K\n# 1 K = 0.0862 meV\n");
 

@@ -36,6 +36,8 @@ class inipar
   // number of random spininversions  to try
   // at each configuration
   int nofrndtries;
+  // maximum number of test spinconfigurations 
+  int maxnoftestspincf;
 
   
   

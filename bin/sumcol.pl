@@ -7,7 +7,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >0) 
 
-{print " program sumcol  used to sum columnx, the result goes to stdout\n";
+{print " program sumcol  used to sum columnx in a file, the result goes to the file and total sum to stdout\n";
  print " and is written to the environment variables MCPHASE_SUM, \n";
  print " MCPHASE_STA,MCPHASE_STAPPOINT,MCPHASE_SUMABS,MCPHASE_SUMABSPPOINT\n";
  print " usage: sumcol colx *.*   \n colx=columnx \n *.* .. filenname\n";
@@ -32,12 +32,12 @@ $ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
    print "<".$file;
 
                   $i=0;$sum=0;$sta=0;$abs=0;
-
+   open (Fout, ">range.out");
    while($line=<Fin>)
 
      {
 
-       if ($line=~/^\s*#/) {;}
+       if ($line=~/^\s*#/) {print Fout $line;}
 
        else{$line=~s/D/E/g;@numbers=split(" ",$line);
 
@@ -48,12 +48,34 @@ $ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
                   $sta+=$numbers[$colx-1]*$numbers[$colx-1];
 
                   $abs+=abs($numbers[$colx-1]);
-
+                  $numbers[$colx-1]=$sum;
+                  foreach (@numbers)
+		  {print Fout $_." ";}     
+                  print Fout "\n";
            }
 
       }
 
       close Fin;
+close Fout;
+
+       unless (rename "range.out",$file)
+
+          {unless(open (Fout, ">$file"))     
+
+      {die "\n error:unable to write to $file\n";}
+
+      open (Fin, "range.out");
+
+      while($line=<Fin>){ print Fout $line;}
+
+      close Fin;
+
+      close Fout;
+
+      system "del range.out"; 
+
+     }
 
    print ">\n";
 
