@@ -67,12 +67,35 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{... in version 4.9..}
+\begin{itemize}
+\item
+- maxnoftestspincf added to mcphas.ini
+\item
+- sumcol changed to write summing in data file
+\item
+- pointc creates results/pointc.out with contribution of individiual pointc to cef pars
+\item
+- in perl programs such as factcol the columns can be addressed by expressions
+           such as  {\prg factcol 3-1x15 2.3 file.dat}
+\item
+- two dimensional convolution {\prg convolute2d}and gaussian creation {\prg gauss2d}
+\item
+- bug in parallelized mcdisp remove,  mcdisp.qev only print out eigenvectors, if intensity is calculated 
+\item
+- {\prg delcomments} option -c introduced
+\end{itemize}
+
 \subsection*{... in version 4.8...}
 
 - mcdiff output file neutron intensities in absolute units. lorentzf=0 option added (allows calculation without lorentzfactor, i.e. the used value for the calculation of the intensities is lorentzfactor=1.0)
+
 - range got an option -u to undo range
+
 - delcomments got an option -s to be able to specify what is the comment string starting a comment line
+
 - mcphas.xyt output of phase index changed: the index referred in earlier versions to the structure list in the mcphas.phs file. There, similar structures have different indices. Now the program mcphas has been changed and the phase index is determined by comparing the stabilised structure with the structures in mcphas.tst inputfile and if one of these fits (is equivalent), then the index of this structure is stored. This gives a more clean phasediagram.
+
 - bugs removed from script2html, average, getvalue, mcphaseexplorer, mcphas.j last line read
 
 
@@ -94,28 +117,7 @@ community this program would not have come into existence.
   several scripts. This makes documentation of calculations easier
   (see tutorial)
 
-\subsection*{... in version 4.6...}
 
-- mcdiff changed: polarisation vector P may be of length less than 1 enabling calculations for
-   less than 100\% beam polarisation, nat substituted by natcryst in mcdiff.in in order to
-  avoid confusion of number of atoms in crystal basis and number of magnetic atoms.
-- bugfix in average dmin option
-- crystal field parameter notation for the low symmetry parameters
-  ($m<0$) BlmS and LlmS in ic1ion/icf1ion were changed to be in accordance
-  with manual. In previous McPhase versions
-  parameters with $m<0$ had a negative sign with respect to the
-  standard definition,  now they have a positive sign as described 
-  in chapter~\ref{cfparconventions}, where an overview on different
-  crystal field parameter conventions used in literature is given.
-- going beyond dipole approximation in neutron spectroscopy option
-  has been changed correcting an error in equations (\ref{Xcalc}) %, (\ref{nunewcalc})
-
-\subsection*{... in version 4.5...}
- - a bug in mcphasit removed (which produced wrong output if magnetic structures are stabilized in a calculation involving a
-   crystallographic primitive basis with more than one magnetic atom and a magnetic structure with a supercell which is 
-  larger than the primitive crystal unitcell and the magnetic atoms in the crystal unit cell not ferromagnetically aligned.)
-- more examples introduced
-- calculation of intensities in mcdisp significantly speeded up
 
 
 \newpage

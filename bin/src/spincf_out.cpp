@@ -797,7 +797,6 @@ for(l=1;l<=nofatoms;++l)
   fprintf(fout,"<pointSet color=\"hide\" point=\"show\" dim=\"1\">\n");
   fprintf(fout,"<points >\n");
   double radius=0;double dx,dy,dz,R,fi,theta;
-
   extract(cs.cffilenames[l],"radius",radius);
   if(radius!=0) // this is a trick: if radius is given as cffilename then a sphere with this is radius is generated (pointcharge)
   {   if(gp.show_pointcharges>0)

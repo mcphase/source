@@ -63,7 +63,6 @@ cryststruct cs;
   hc=strtod(argv[5],NULL);
 
  FILE * fout;
-
  // read cf-parameters into class object jjjpar
 jjjpar jjjps(0.0,0.0,0.0,argv[6]);
   int dim;
@@ -135,10 +134,7 @@ printf("\n");
 
 // read pointcharge-parameters
 if(gp.show_pointcharges>0) nofpc=read_pointcharge_parameters(gp,cs.cffilenames,argv[6],cs.x,cs.y,cs.z,jjjps,cs.abc);
-
   spincf s(1,1,1,nofpc+1,dim);
-  
-  
  // Vector gJJ(1,nofpc+1);gJJ=0;gJJ(1)=jjjps.gJ;
   cs.gJ[1]=jjjps.gJ;
   Vector hkl(1,3);hkl=0;s=s*0;

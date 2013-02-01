@@ -86,6 +86,10 @@ int factorial(int number) {
 }
 extern double factorial(double number);
 
+template <typename T> int signum(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 #ifndef __linux__
 // return rounded integer (not needed any more in MINGW 3.1.3)
 //extern double rint(double value);
