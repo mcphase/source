@@ -36,10 +36,10 @@ if (join('',@pars) =~/\-/) {
              "dmin=s"=>\$dmin);
   usage() if $helpflag;
 }
-if($dmin){$dd=$dmin;$dd=~s/x/*/g;$dmin=eval $dd;}
+if($dmin){$dd=$dmin;$dd=~s/exp/essp/g;$dd=~s/x/*/g;$dd=~s/essp/exp/g;$dmin=eval $dd;}
 @ARGV=@p;while (join('',@pars) =~ /\-/){shift @ARGV;@pars = @ARGV;}
 # if ($dmin) {shift @ARGV;} # removed because it squeezes out the column MR 1.10.2011
-$ARGV[0]=~s/x/*/g;$n=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essssssssssssssp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essssssssssssssp/exp/g;$n=eval $ARGV[0];shift @ARGV;
 
 if ($avflag) {print "averaging ...\n";}
 elsif ($sumflag) {print "summing  ...\n";}

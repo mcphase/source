@@ -40,17 +40,17 @@ unless ($#ARGV >4)
 
 
 print "# $0 @ARGV\n";
-$ARGV[0]=~s/x/*/g;$c1=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$c2=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$c1=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$c2=eval $ARGV[0];shift @ARGV;
 $file1=$ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$cx=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$cy=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$cx=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$cy=eval $ARGV[0];shift @ARGV;
 $file2=$ARGV[0];shift @ARGV;
 
-$ARGV[0]=~s/x/*/g;$d1=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$d2=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$d1=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$d2=eval $ARGV[0];shift @ARGV;
 $file3=$ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$d3=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$d3=eval $ARGV[0];shift @ARGV;
 
 # determine range of convolution function data
 $minr=1e100;

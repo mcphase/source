@@ -15,9 +15,9 @@ print " put result into results/extend.j, results/extend.tst and results/extend.
  exit 0;}
 
 
-$ARGV[0]=~s/x/*/g;my ($n1) = eval $ARGV[0];shift @ARGV; 
-$ARGV[0]=~s/x/*/g;my ($n2) = eval $ARGV[0];shift @ARGV; 
-$ARGV[0]=~s/x/*/g;my ($n3) = eval $ARGV[0]; 
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n1) = eval $ARGV[0];shift @ARGV; 
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n2) = eval $ARGV[0];shift @ARGV; 
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n3) = eval $ARGV[0]; 
 
  print "reading mcphas.j ....\n";
  my ($latt,$p) = getlattice("./mcphas.j");

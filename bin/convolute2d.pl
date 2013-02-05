@@ -21,20 +21,20 @@ unless ($#ARGV >11)
 EOF
 exit(1);
 }
-$ARGV[0]=~s/x/*/g;$cx =eval $ARGV[0];
-$ARGV[1]=~s/x/*/g;$cy =eval $ARGV[1]; 
-$ARGV[2]=~s/x/*/g;$cz =eval $ARGV[2]; 
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$cx =eval $ARGV[0];
+$ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$cy =eval $ARGV[1]; 
+$ARGV[2]=~s/exp/essp/g;$ARGV[2]=~s/x/*/g;$ARGV[2]=~s/essp/exp/g;$cz =eval $ARGV[2]; 
 $file1 = $ARGV[3];
-$ARGV[4]=~s/x/*/g;$c1 =eval $ARGV[4]; 
-$ARGV[5]=~s/x/*/g;$c2 =eval $ARGV[5]; 
-$ARGV[6]=~s/x/*/g;$c3 =eval $ARGV[6]; 
+$ARGV[4]=~s/exp/essp/g;$ARGV[4]=~s/x/*/g;$ARGV[4]=~s/essp/exp/g;$c1 =eval $ARGV[4]; 
+$ARGV[5]=~s/exp/essp/g;$ARGV[5]=~s/x/*/g;$ARGV[5]=~s/essp/exp/g;$c2 =eval $ARGV[5]; 
+$ARGV[6]=~s/exp/essp/g;$ARGV[6]=~s/x/*/g;$ARGV[6]=~s/essp/exp/g;$c3 =eval $ARGV[6]; 
 $file2 = $ARGV[7];
-$ARGV[8]=~s/x/*/g;$lx=eval $ARGV[8];
-$ARGV[9]=~s/x/*/g;$ux=eval $ARGV[9];
-$ARGV[10]=~s/x/*/g;$Nx=eval $ARGV[10];
-$ARGV[11]=~s/x/*/g;$ly=eval $ARGV[11];
-$ARGV[12]=~s/x/*/g;$uy=eval $ARGV[12];
-$ARGV[13]=~s/x/*/g;$Ny=eval $ARGV[13];
+$ARGV[8]=~s/exp/essp/g;$ARGV[8]=~s/x/*/g;$ARGV[8]=~s/essp/exp/g;$lx=eval $ARGV[8];
+$ARGV[9]=~s/exp/essp/g;$ARGV[9]=~s/x/*/g;$ARGV[9]=~s/essp/exp/g;$ux=eval $ARGV[9];
+$ARGV[10]=~s/exp/essp/g;$ARGV[10]=~s/x/*/g;$ARGV[10]=~s/essp/exp/g;$Nx=eval $ARGV[10];
+$ARGV[11]=~s/exp/essp/g;$ARGV[11]=~s/x/*/g;$ARGV[11]=~s/essp/exp/g;$ly=eval $ARGV[11];
+$ARGV[12]=~s/exp/essp/g;$ARGV[12]=~s/x/*/g;$ARGV[12]=~s/essp/exp/g;$uy=eval $ARGV[12];
+$ARGV[13]=~s/exp/essp/g;$ARGV[13]=~s/x/*/g;$ARGV[13]=~s/essp/exp/g;$Ny=eval $ARGV[13];
 
 # determine range of convolution function data
 $minx=1e100; $maxx=-1e100; 

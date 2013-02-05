@@ -19,9 +19,9 @@ unless ($#ARGV >1)
 
  
 
-$ARGV[0]=~s/x/*/g;$col1=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$col2=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$col3=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$col1=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$col2=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$col3=eval $ARGV[0];shift @ARGV;
 
 
   foreach (@ARGV)

@@ -25,10 +25,10 @@ unless ($#ARGV >0)
 
 EOF
  exit 0;}
-$ARGV[0]=~s/x/*/g;$u=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$v=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$w=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$u=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$v=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$w=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$column=eval $ARGV[0];shift @ARGV;
 
 
   foreach (@ARGV)

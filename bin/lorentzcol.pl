@@ -19,10 +19,10 @@ lorentz(x)=area/3.1415/fwhm/(1.0+(x-position)^2/fwhm^2)\n";
 
  
 
-$ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$pos=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$fwhm=eval{$ARGV[0]/2};shift @ARGV;
-$ARGV[0]=~s/x/*/g;$area=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$column=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$pos=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$fwhm=eval{$ARGV[0]/2};shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$area=eval $ARGV[0];shift @ARGV;
 
 
   foreach (@ARGV)

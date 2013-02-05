@@ -16,7 +16,7 @@ unless ($#ARGV >1)
  
 
 $ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$const=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$const=eval $ARGV[0];shift @ARGV;
 
 
 

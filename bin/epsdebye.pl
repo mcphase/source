@@ -39,15 +39,15 @@ unless ($#ARGV >2)
  exit 0;}
 
 print "# $0 @ARGV\n";
-$ARGV[0]=~s/x/*/g;$Tmax=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$dT=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$Tdebye=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$scale=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$Tnorm=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Tmax=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$dT=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Tdebye=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Tnorm=eval $ARGV[0];shift @ARGV;
 
 
-$ARGV[0]=~s/x/*/g;$d1=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$d2=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$d1=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$d2=eval $ARGV[0];shift @ARGV;
 
 $file1=$ARGV[0];shift @ARGV;
 

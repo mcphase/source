@@ -2,9 +2,9 @@
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 
-$ARGV[0]=~s/x/*/g;$Tmin=eval $ARGV[0];
-$ARGV[1]=~s/x/*/g;$Tmax=eval $ARGV[1];
-$ARGV[2]=~s/x/*/g;$deltaT=eval $ARGV[2];
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Tmin=eval $ARGV[0];
+$ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$Tmax=eval $ARGV[1];
+$ARGV[2]=~s/exp/essp/g;$ARGV[2]=~s/x/*/g;$ARGV[2]=~s/essp/exp/g;$deltaT=eval $ARGV[2];
 
 unless($#ARGV>=2)
 

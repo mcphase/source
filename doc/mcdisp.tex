@@ -127,24 +127,30 @@ described in section~\ref{spins}.
 # It follows either 
 #
 # (i) a Q vector mesh to be mapped in the calculation
-#!hmin=1 hmax=24 deltah=1
-#!kmin=0 kmax=0 deltak=1000
-#!lmin=0 lmax=0 deltal=1000
+#!hmin=0 hmax=1 deltah=0.05
+#!kmin=1 kmax=1 deltak=0.05
+#!lmin=0 lmax=0 deltal=0.02
 #
 # or 
 # (ii) file(s) containing list of Q vectors with (optional) energies of observed excitations to be fitted
-# h k l [E1(meV) E2(meV) ...]
+# h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]]
 #
 # hklfile=file1
 # hklfile=file2
 # ...
 #
 # or
+#
+# (iii) some lines in reciprocal space 
+#
+#hklline=h1=0 k1=1 l1=0 to hN=1 kN=1 lN=0 Nstp=21
+#hklline=h1=0 k1=2 l1=0 to hN=1 kN=1 lN=0 Nstp=21
+#
+# or
 # (iv) a list of Q vectors with (optional) energies of observed excitations to be fitted
-# h k l [E1(meV) E2(meV) ...]
-0.297 0.297 0 11 
-0.311 0.311 0 10 
-
+# h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]]
+0.45 1 1 0.523 0.745
+ 0.75 1 1 0.523 0.745
 
 \end{verbatim}
 }
@@ -1164,7 +1170,7 @@ the averaging of the powder neutron cross section.
 just type: powdermagnon 0.3 2 0.1 80
 
 meaning take file {\prg mcphas.j\index{mcphas.j}}, generate a reflection list and put it to 
-file {\prg mcdisp.par\index{mcdisp.par}}. Parameters are 
+file {\prg mcdisp.par\index{mcdisp.par}}. Parameters in the above command are 
 \begin{itemize}
 \item
  0.3 ....qmin   [1/A] minimal q vector
@@ -1195,9 +1201,9 @@ meaning take  results from file {\prg results\\mcdisp.qei} and average the
 spectra. Output is printed to the console (STDOUT) and can be piped to a file in
 order to print it with {\prg displaycontour\index{displaycontour}}. An example is given in fig.~
 \ref{prni2b2c_2K} and \ref{prni2b2c_10K}.
-Parameters in the command line are:
+Parameters in the above command  are:
 \begin{itemize}
 \item 0.5 ....Emin   [meV] minimal energy
-\item 0.5 ....Emax   [meV] maximal energy
-\item 0.5 ....deltaE [meV] energy step width
+\item 30 ....Emax   [meV] maximal energy
+\item 0.2....deltaE [meV] energy step width
 \end{itemize}

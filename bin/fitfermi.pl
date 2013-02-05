@@ -28,11 +28,11 @@ if ($#ARGV<1)
 exit(0);
 }
 unless ($^O=~/MSWin/){print "program fitfermi currently runs only under Windows operating systm\n";exit(1);}
-$ARGV[0]=~s/x/*/g;$T=eval $ARGV[0]; shift @ARGV;
-$ARGV[0]=~s/x/*/g;$EF=eval $ARGV[0]; shift @ARGV;
-$ARGV[0]=~s/x/*/g;$fwhm=eval $ARGV[0]; shift @ARGV;
-$ARGV[0]=~s/x/*/g;$min=eval $ARGV[0]; shift @ARGV;
-$ARGV[0]=~s/x/*/g;$max=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$T=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$EF=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$fwhm=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$min=eval $ARGV[0]; shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$max=eval $ARGV[0]; shift @ARGV;
 unless (-d "results") {system("mkdir results");}
  foreach (@ARGV)
   {$file=$_;

@@ -63,7 +63,7 @@ Installation Procedure:
  make fast=1
 
  if you have a multiple core processor, change #define NUM_THREADS
- in bin/src/mcphas_htcalc_threaded.c to according to your system, i.e. to
+ in bin/src/mcdisp.c to according to your system, i.e. to
  2 for a double core or 4 for a quadruple core computer and 
  recompile mcphas.exe by typing:
 
@@ -155,7 +155,7 @@ c) Now the installation should be complete. To test the Program:
  (this might work not on all systems)
 
  if you have a multiple core processor, change #define NUM_THREADS
- in bin/src/mcphas_htcalc_threaded.c to according to your system, i.e. to
+ in bin/src/mcdisp.c to according to your system, i.e. to
  2 for a double core or 4 for a quadruple core computer and 
  recompile mcphas.exe by typing:
 

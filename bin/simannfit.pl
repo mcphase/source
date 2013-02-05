@@ -41,10 +41,10 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 
  @parnam=();@par=();@parmin=();@parmax=();@parerr=();@parstp=();@parav=();@thisparstp=();
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
-  $ARGV[0]=~s/x/*/g;$stattemp=eval $ARGV[0]; shift @ARGV;
+  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
   $starttime=time;$maxtim=1e10;$maxstep=1e24;
-  if ($ARGV[0]=~"-t") {shift @ARGV; $ARGV[0]=~s/x/*/g;$maxtim=eval $ARGV[0]; shift @ARGV;}
-  if ($ARGV[0]=~"-s") {shift @ARGV; $ARGV[0]=~s/x/*/g;$maxstep=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0]=~"-t") {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxtim=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0]=~"-s") {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxstep=eval $ARGV[0]; shift @ARGV;}
 
  while(!open(Fout,">results/simannfit.status")){print "Error opening file results/simannfit.status\n";<STDIN>;}
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";

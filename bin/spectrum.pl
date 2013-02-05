@@ -30,11 +30,11 @@ exit(0);
 
 
 #if(($in)=($ARGV[0]=~m|\A(\d)\Z|)){shift @ARGV;}
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $h=eval $ARGV[0]; shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $k=eval $ARGV[0]; shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $l=eval $ARGV[0]; shift @ARGV;
 
 $eps=0.00001;

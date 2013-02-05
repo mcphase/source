@@ -26,7 +26,7 @@ EOF
  
 
 $varnam=$ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;$value=eval $ARGV[0];shift @ARGV;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$value=eval $ARGV[0];shift @ARGV;
 
 
 

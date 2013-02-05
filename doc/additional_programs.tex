@@ -478,6 +478,17 @@ a error colmn may be given and is also multiplied by the absvalue of the constan
 with
              a number format given by format. Format is a number format string according
              to c conventions, for example 8.4f or 4.4g  ...             
+\item [\prg fillcol  col expression *.*\index{fillcol}]  used to fill column with numbers in data file
+\begin{verbatim}
+ col       ....   column
+ expression ...   e.g. 'tan(c1x7.52)+c2'
+                  here c1,c2,.. refer to column 1,2,...
+                  operations are multiplication (x), division(/)
+                  addition (+), subtraction(-), power (xx)
+                  trigonometric functions tan,cos,sin, asin,atan,acos
+                  exp,(natural) log
+ *.*       ....   filenname
+\end{verbatim}
 \item [\prg fitcol coldata prog col parprog1 parprog2 ... {[]} in filename:]
 simple fitting program for data in coldata.
 \begin{verbatim}

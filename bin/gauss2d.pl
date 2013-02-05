@@ -20,23 +20,23 @@ gauss(x)=1.0/sqrt(2*3.1415)/sigma* exp(-x^2/2sigma^2)\n";
  exit 0;}
 
 print "# $0 @ARGV\n";
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $fwhm1=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $fwhm2=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $rotangle=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $stpx=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $minx=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $maxx=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $stpy=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $miny=eval $ARGV[0];shift @ARGV;
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 $maxy=eval $ARGV[0];shift @ARGV;
 
 $rotangle*=3.141592654/180;

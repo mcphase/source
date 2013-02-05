@@ -55,9 +55,9 @@ print " The powder average is generated - output is printed to the console (STDO
  exit 0;}
 
 
-$ARGV[0]=~s/x/*/g;
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($qmin) = eval $ARGV[0];
-$ARGV[1]=~s/x/*/g;
+$ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;
 my ($qmax) =eval $ARGV[1];
 
 
@@ -75,11 +75,11 @@ if($qmin=="-r")
     open($h,$qmax);
 
 
-$ARGV[2]=~s/x/*/g;
+$ARGV[2]=~s/exp/essp/g;$ARGV[2]=~s/x/*/g;$ARGV[2]=~s/essp/exp/g;
 my ($Emin) = eval $ARGV[2];
-$ARGV[3]=~s/x/*/g;
+$ARGV[3]=~s/exp/essp/g;$ARGV[3]=~s/x/*/g;$ARGV[3]=~s/essp/exp/g;
 my ($Emax) = eval $ARGV[3];
-$ARGV[4]=~s/x/*/g;
+$ARGV[4]=~s/exp/essp/g;$ARGV[4]=~s/x/*/g;$ARGV[4]=~s/essp/exp/g;
 my ($deltaE) = eval $ARGV[4];
 
 $n=int(($Emax-$Emin)/$deltaE);
