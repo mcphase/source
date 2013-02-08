@@ -59,8 +59,8 @@ FILE * fin_coq, * fout;
                                        // here set for 3+48 components, module ic1ion
                                       }
    // check for spinfconfiguration which is nearest to the T/H values chosen by user in command line
-   double T,ha,hb,hc;
-   check_for_best(fin_coq,strtod(argv[2],NULL),strtod(argv[3],NULL),strtod(argv[4],NULL),strtod(argv[5],NULL),savmf,T,ha,hb,hc,outstr);
+   double T;Vector Hext(1,3);
+   check_for_best(fin_coq,strtod(argv[2],NULL),strtod(argv[3],NULL),strtod(argv[4],NULL),strtod(argv[5],NULL),savmf,T,Hext,outstr);
   fclose (fin_coq);
   
 // create plot of spin+chargeconfiguration -----------------------------------------------------------
@@ -76,9 +76,9 @@ FILE * fin_coq, * fout;
   spincf extendedspincf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,max_ext_nof_components);
 
           // the following is for the printout of charges.out ...........................
-           fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,ha,hb,hc,savmf.na(),savmf.nb(),savmf.nc(),inputpars.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
+           fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),inputpars.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
             fprintf(fout,"#J=value {atom-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] <Ja> <Jb> <Jc> ...\n");
-          fprintf(fout,"#{corresponding effective fields heff [meV]- if passed to mcdiff only these are used for caculation (not the magnetic moments)}\n");
+          fprintf(fout,"#{corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}\n");
 
   // determine primitive magnetic unit cell
      Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3);
@@ -87,11 +87,11 @@ FILE * fin_coq, * fout;
 	       
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
-// 1.b: mcalc has to be used to calculate all the <Olm>.
+// 1.b: Icalc has to be used to calculate all the <Olm>.
 for(ii=1;ii<=inputpars.nofatoms;++ii)
 { Vector h(1,ext_nof_components[ii]);h=0;
  //(*inputpars.jjj[ii]).eigenstates(hh,T); // initialize eigenstate matrices
-  (*inputpars.jjj[ii]).mcalc_parameter_storage_init(h,T);} // initialize mcalc module parameter storage
+  (*inputpars.jjj[ii]).Icalc_parameter_storage_init(h,Hext,T);} // initialize Icalc module parameter storage
 
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
@@ -103,7 +103,7 @@ for(ii=1;ii<=inputpars.nofatoms;++ii)
     h=0;
    for(nt=1;nt<=savmf.nofcomponents;++nt){h(nt)=hh(nt+savmf.nofcomponents*(ii-1));}
             if((*inputpars.jjj[ii]).module_type!=1&&(*inputpars.jjj[ii]).module_type!=3)
-            {(*inputpars.jjj[ii]).mcalc(moments,T,h,lnz,u,(*inputpars.jjj[ii]).mcalc_parstorage); // here we trigger single ion
+            {(*inputpars.jjj[ii]).Icalc(moments,T,h,Hext,lnz,u,(*inputpars.jjj[ii]).Icalc_parstorage); // here we trigger single ion
                                                            // module to calculate all 48 (ext_nof_components)
                                                            // higher order moments 
             }
@@ -126,7 +126,7 @@ for(ii=1;ii<=inputpars.nofatoms;++ii)
                          fprintf(fout," %4.4f",myround(1e-5,extendedspincf.m(i,j,k)(nt+max_ext_nof_components*(ii-1))));
                         }
                          fprintf(fout,"\n");
-                      fprintf(fout,"                  corresponding effective fields heff [meV]-->          ");
+                      fprintf(fout,"                  corresponding exchange fields hxc [meV]-->          ");
                       for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout meanfields
                         {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
                          fprintf(fout,"\n");
@@ -144,19 +144,19 @@ fclose(fout);
              spincf savev_real(extendedspincf*0.0);
              spincf savev_imag(extendedspincf*0.0);
   fout = fopen_errchk ("./results/charges.grid", "w");
-     extendedspincf.cd(fout,cs,gp,savev_real,savev_imag,0.0,hkl,T,hh);
+     extendedspincf.cd(fout,cs,gp,savev_real,savev_imag,0.0,hkl,T,hh,Hext);
     fclose (fout);
 
   fout = fopen_errchk ("./results/charges.jvx", "w");
     gp.showprim=0;gp.spins_wave_amplitude=0;
      extendedspincf.jvx_cd(fout,outstr,cs,gp,
-                  0.0,savev_real,savev_imag,hkl,T,hh);
+                  0.0,savev_real,savev_imag,hkl,T,hh,Hext);
     fclose (fout);
 
   fout = fopen_errchk ("./results/charges_prim.jvx", "w");
      gp.showprim=1;
     extendedspincf.jvx_cd(fout,outstr,cs,gp,
-                  0.0,savev_real,savev_imag,hkl,T,hh);
+                  0.0,savev_real,savev_imag,hkl,T,hh,Hext);
     fclose (fout);
 
 
@@ -210,7 +210,7 @@ if (argc>=10){// try a spinwave picture
                  if (dd<delta)
                  {delta=dd;
                   sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
-                  hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9];                                        
+                  hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9]; 
                   savev_real=ev_real;
                   savev_imag=ev_imag;                  
                  }
@@ -236,12 +236,12 @@ if (argc>=10){// try a spinwave picture
                sprintf(filename,"./results/charges.%i.jvx",i+1);
                fin_coq = fopen_errchk (filename, "w");gp.showprim=0;
                      extendedspincf.jvx_cd(fin_coq,outstr,cs,gp,
-                                  phase,savev_real,savev_imag,hkl,T,hh);
+                                  phase,savev_real,savev_imag,hkl,T,hh,Hext);
                fclose (fin_coq);
                sprintf(filename,"./results/charges_prim.%i.jvx",i+1);
                fin_coq = fopen_errchk (filename, "w");gp.showprim=1;
                      extendedspincf.jvx_cd(fin_coq,outstr,cs,gp,
-                                  phase,savev_real,savev_imag,hkl,T,hh);
+                                  phase,savev_real,savev_imag,hkl,T,hh,Hext);
                fclose (fin_coq);
               }
           printf("# %s\n",outstr);

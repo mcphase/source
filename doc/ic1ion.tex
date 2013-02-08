@@ -90,7 +90,7 @@ Bz=0.1
 # save_matrices
 
 # if the next line is uncommented then it will use the Arnoldi method to calculate only 
-# a few of the lowest eigenvalues in mcalc() [those for which the thermal occupation
+# a few of the lowest eigenvalues in Icalc() [those for which the thermal occupation
 # factor at 300K is nonzero]. Note: this method may sometimes give erroneous eigenvectors
 # due to numerical instabilities. In addition, it may be disabled in Mac OS X versions.
 
@@ -99,7 +99,7 @@ Bz=0.1
 # Another more reliable method to find only a few of the lowest eigenvalue uses the 
 # relatively robust representation algorithm in Lapack and can be accessibly by 
 # uncommenting the keyword: "partial" below. This method takes about 2/3 the
-# time of the full computation of mcalc(), whereas the arnoldi routine takes about
+# time of the full computation of Icalc(), whereas the arnoldi routine takes about
 # 1/5 the time.
 
 # partial
@@ -108,7 +108,7 @@ Bz=0.1
 # the lowest lying energy levels to be used in the calculation of the moments.
 # This option is activated by uncommenting the line below, specifying a ratio X of
 # levels to keep. For example, if X=0.2, for f2, 20% of the full 91 levels == 18
-# levels will be used for the mcalc() calculation.
+# levels will be used for the Icalc() calculation.
 # This routine first calculates and diagonalises the singleion Hamiltonian without 
 # the Zeeman or mean-field terms, and then uses these eigenvectors to make a unitary 
 # transformation matrix to rotate the multipolar and L and S operators into this
@@ -119,7 +119,7 @@ Bz=0.1
 # carried out at the start - the diagonalisation of the single ion Hamiltonian, and
 # matrix-matrix multiplication to rotate the operator matrices. Once done the rotated 
 # matrices are stored in memory and then reused when the <J> expectation values have 
-# to be evaluated. the routine uses the mcalc_parstorage matrix for storing the 
+# to be evaluated. the routine uses the Icalc_parstorage matrix for storing the 
 # rotated matrices.
 # One should experiment with the value of X and compare it with using the full matrix 
 # diagonalisation before relying on the results. 

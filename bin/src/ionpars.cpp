@@ -586,9 +586,9 @@ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
    for(i=0;i<=48;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
-                                  double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
-                                  if((Blm(i)!=0)&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-14)>0.001)){fprintf(stderr,"Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond ! \npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i));getchar();}
-                                  Blm(i)=Blmcalc;// here set the Blm as calculated from the Llm
+                                  double BlIcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){BlIcalc*=sqrt(2.0);}
+                                  if((Blm(i)!=0)&(fabs(Blm(i)-BlIcalc)/(fabs(BlIcalc)+1e-14)>0.001)){fprintf(stderr,"Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond ! \npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i));getchar();}
+                                  Blm(i)=BlIcalc;// here set the Blm as calculated from the Llm
                                   }
                      if(Blm(i)!=0){fprintf(stderr," %s=%12.6g meV ",lm4,Blm(i));
                                    if(i<=45){if((l!=3)&(l!=5)){Llm(i)=Blm(i)/thetaJ(l)/cnst(l,m)/sqrt(4.0*PI/(2*l+1));if(m!=0){Llm(i)/=sqrt(2.0);}
@@ -816,9 +816,9 @@ void ionpars::savLlm(FILE * outfile)
 }
 
 //------------------------------------------------------------------------------------------------
-// ROUTINE CFIELD mcalc for full crystal field + higher order interactions
+// ROUTINE CFIELD Icalc for full crystal field + higher order interactions
 //------------------------------------------------------------------------------------------------
-Vector & ionpars::cfield(double & T, Vector & gjmbH, double & lnZs, double & U, ComplexMatrix & ests)
+Vector & ionpars::cfield(double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & ests)
 {//ABC not used !!!
     /*on input
     T		temperature[K]
@@ -834,16 +834,18 @@ Vector & ionpars::cfield(double & T, Vector & gjmbH, double & lnZs, double & U, 
     U		single ion magnetic energy
 */
 // check dimensions of vector
-if(gjmbH.Hi()>48)
+
+
+if(gjmbHxc.Hi()>48)
    {fprintf(stderr,"Error internal module cfield: wrong number of dimensions - check number of columns in file mcphas.j\n");
     exit(EXIT_FAILURE);}
-static Vector JJ(1,gjmbH.Hi());
-cfieldJJ(JJ, T,  gjmbH, lnZs, U, ests);
+static Vector JJ(1,gjmbHxc.Hi());
+cfieldJJ(JJ, T,  gjmbHxc,Hext, lnZs, U, ests);
 return JJ;
 }
 
 
-void ionpars::cfieldJJ(Vector & JJ,double & T, Vector & gjmbH, double & lnZs, double & U, ComplexMatrix & /*ests*/)
+void ionpars::cfieldJJ(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & /*ests*/)
 {//ABC not used !!!
     /*on input
     T		temperature[K]
@@ -858,6 +860,11 @@ void ionpars::cfieldJJ(Vector & JJ,double & T, Vector & gjmbH, double & lnZs, do
     Z		single ion partition function
     U		single ion magnetic energy
 */
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc;
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
 // check dimensions of vector
 if(gjmbH.Hi()>48)
    {fprintf(stderr,"Error internal module cfield: wrong number of dimensions - check number of columns in file mcphas.j\n");
@@ -992,7 +999,7 @@ if(gjmbH.Hi()>48)
 
 }
 /**************************************************************************/
-void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector & gjmbH, double & T)
+void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  gjmbHxc,Vector & Hext, double & T)
 {   /*on input
     gJmbH	vector of effective field [meV]
       on output
@@ -1000,7 +1007,11 @@ void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector & gjmbH, double & 
     eigenvalues ares stored as real part of row zero
     boltzmann population numbers are stored as imaginary part of row zero
 */
-
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc;
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
 // check dimensions of vector
 if(gjmbH.Hi()>48)
    {fprintf(stderr,"Error internal module cfield: wrong number of dimensions - check number of columns in file mcphas.j\n");
@@ -1068,7 +1079,7 @@ if(gjmbH.Hi()>48)
 
 /**************************************************************************/
 // for mcdisp this routine is needed
-int ionpars::cfielddm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,float & delta,ComplexMatrix & ests)
+int ionpars::cfielddm(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 {  /*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -1079,7 +1090,11 @@ int ionpars::cfielddm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,floa
     u1(i)	<-|Ji|+> sqrt(n+-n-),  n+,n-
     .... occupation number of states (- to + transition chosen according to transitionnumber)
 */
-
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc;
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
 
 // check dimensions of vector
 if(gjmbH.Hi()>48)
@@ -1102,7 +1117,7 @@ if(gjmbH.Hi()>48)
 
  Vector JJ(1,gjmbH.Hi());
 double lnz,u;JJ=0;
-if (T>0){cfieldJJ(JJ,T,gjmbH,lnz,u,ests);  //expectation values <J>
+if (T>0){cfieldJJ(JJ,T,gjmbHxc,Hext,lnz,u,ests);  //expectation values <J>
         }
         else
         {T=-T;}
@@ -1222,7 +1237,7 @@ if (delta>SMALL)
 
 // return number of all transitions     
 // return (int)((J+1)*(2*J+1));
-printf("noft=%i dj=%i\n",noft,dj);
+//printf("noft=%i dj=%i\n",noft,dj);
 return noft;
 
 }

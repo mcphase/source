@@ -3,7 +3,7 @@
 //                        currdensities
 /*****************************************************************/
 
-void check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hcin, spincf & savmf, double & T,double & ha, double& hb,double&hc,char*outstr)
+void check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hcin, spincf & savmf, double & T,Vector & Hext,char*outstr)
 {// load mfconfigurations and check which one is nearest -------------------------------
 
 int n;
@@ -25,7 +25,7 @@ int n;
       if (dd<delta)
        {delta=dd;
         sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
-        savmf=spins;T=numbers[3];ha=numbers[5];hb=numbers[6];hc=numbers[7];
+        savmf=spins;T=numbers[3];Hext(1)=numbers[5];Hext(2)=numbers[6];Hext(3)=numbers[7];
        }
     }
 }

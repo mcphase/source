@@ -450,7 +450,6 @@ int *J;J=new int[n+1]; // code for indicating if ion is nonmagnetic (J=1),
             // use L and S values with dipole approx (J=-2) 
             // go beyond dipole approx for gJ=0 (L and S separately)
 jjjpar ** jjjpars = new jjjpar * [n+1];
-double lnZ,U;
 printf("                 reading magnetic atoms and moments ...\n");
 
 fprintf(fout,"# %%SECTION 4%% DESCRIPTION OF MAGNETIC UNIT CELL AND LIST OF MAGNETIC ATOMS\n");
@@ -463,7 +462,7 @@ fprintf(fout,"#                        nr1 nr2 and nr3 times along r1 r2 and r3,
 fprintf(fout,"#                        respectively to get magnetic unit cell\n");
 fprintf(fout,"# 'nat' denotes the number of magnetic atoms in magnetic unit cell\n");
 fprintf(fout,"#\n");
-fprintf(fout,"# Temperature,    Magnetic Field: Magnetic Unit Cell\n");
+fprintf(fout,"# Temperature,  External Magnetic Field: Magnetic Unit Cell\n");
 fprintf(fout,"#! T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i \n",T,H(1),H(2),H(3),nr1,nr2,nr3,natmagnetic);
 fprintf(fout,"#\n");
 fprintf(fout,"#\n");
@@ -481,12 +480,12 @@ fprintf(fout,"#                in case of non orthogonal lattices instead of Ma 
 fprintf(fout,"#                have to be given, which refer to an right handed orthogonal coordinate system \n");
 fprintf(fout,"#                defined by j||b, k||(a x b) and i normal to k and j\n");
 fprintf(fout,"# '<Ja>' '<Jb>' '<Jc>' (optional) denote the momentum components \n");
-fprintf(fout,"# 'gjmbHeffa' 'gjmbHeffb' 'gjmbHeffc' (optional line, used to go beyond dipole approx for formfactor)\n");
+fprintf(fout,"# 'gjmbHxc1' 'gjmbHxc2' 'gjmbHxc3' (optional line, used to go beyond dipole approx for formfactor)\n");
 fprintf(fout,"#                                     denote the corresponding meanfields multiplied by \n");
 fprintf(fout,"#                                     Lande factor and Bohr magneton \n");
 fprintf(fout,"#\n");
 fprintf(fout,"#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] <Ja>     <Jb>     <Jc> ...\n");
-fprintf(fout,"#{corresponding effective fields gjmbHeff [meV]- if passed to mcdiff only these are used for caculation (not the magnetic moments)}\n");
+fprintf(fout,"#{corresponding exchange fields gjmbHxc [meV]- if passed to mcdiff only these are used for caculation (not the magnetic moments)}\n");
 
 mfcf mfields(1,1,1,natmagnetic,51); // 51 is maximum of nofmfcomponents - we take it here !
 mfields.clear();
@@ -545,45 +544,47 @@ fprintf(fout,"\n");
                              {J[i]=0; // J=0 tells that full calculation should be done for this ion
                               fseek(fin_coq,pos+strchr(instr,'>')-instr+1,SEEK_SET); 
                               j=inputline(fin_coq,numbers);printf("dimension of mf = %i\n",j);
-                              Vector heff(1,j);for(k=1;k<=j;++k){heff(k)=numbers[k];mfields.mf(1,1,1)(51*(i-1)+k)=heff(k);}
-                              if ((*jjjpars[i]).gJ==0)
- 			      {J[i]=-3;fprintf(stderr,"mcdiff: gJ=0 - going beyond dipolar approximation for intermediate coupling");
-   			             (*jjjpars[i]).eigenstates(heff,T); // calculate eigenstates
-                                     (*jjjpars[i]).mcalc_parameter_storage_init(heff,T);// initialise parameter storage for mcalc
-                               // do some consistency checks
-                               ComplexMatrix mcalcpars((*jjjpars[i]).mcalc_parstorage.Rlo(),(*jjjpars[i]).mcalc_parstorage.Rhi(),(*jjjpars[i]).mcalc_parstorage.Clo(),(*jjjpars[i]).mcalc_parstorage.Chi());
-                                             mcalcpars=(*jjjpars[i]).mcalc_parstorage;
-                               Vector moment(1,j);(*jjjpars[i]).mcalc(moment,T,heff,lnZ,U,mcalcpars);
-                               for(k=1;k<=j;++k){if (fabs((*jjjpars[i]).mom(k+3)-moment(k))>0.001){fprintf(stderr,"Warning mcdiff: meanfields and <J> read from input file not consistent for atom %i - using values calculated from meanfield\n",i);}
-                                                  (*jjjpars[i]).mom(3+k)=moment(k);//printf("m(%i)=%g ",k,moment(k));
-                                                 }
-                               (*jjjpars[i]).mom(1)=2*(*jjjpars[i]).mom(4)+(*jjjpars[i]).mom(5);
-                               (*jjjpars[i]).mom(2)=2*(*jjjpars[i]).mom(6)+(*jjjpars[i]).mom(7);
-                               (*jjjpars[i]).mom(3)=2*(*jjjpars[i]).mom(8)+(*jjjpars[i]).mom(9);
+                              Vector gjmbHxc(1,j);for(k=1;k<=j;++k){gjmbHxc(k)=numbers[k];mfields.mf(1,1,1)(51*(i-1)+k)=gjmbHxc(k);}
+                              (*jjjpars[i]).eigenstates(gjmbHxc,H,T); // calculate eigenstates
+                              (*jjjpars[i]).Icalc_parameter_storage_init(gjmbHxc,H,T);// initialise parameter storage for Icalc
+                              // do some consistency checks
+                               ComplexMatrix Icalcpars((*jjjpars[i]).Icalc_parstorage.Rlo(),(*jjjpars[i]).Icalc_parstorage.Rhi(),(*jjjpars[i]).Icalc_parstorage.Clo(),(*jjjpars[i]).Icalc_parstorage.Chi());
+                                             Icalcpars=(*jjjpars[i]).Icalc_parstorage;
+                               Vector moment(1,3),L(1,3),S(1,3);(*jjjpars[i]).mcalc(moment,T,gjmbHxc,H,Icalcpars);                                                                
+                               if (fabs((*jjjpars[i]).mom(1)-moment(1))>0.001){fprintf(stderr,"Warning mcdiff: a-component meanfields and moments not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               if (fabs((*jjjpars[i]).mom(2)-moment(2))>0.001){fprintf(stderr,"Warning mcdiff: b-component meanfields and moments not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               if (fabs((*jjjpars[i]).mom(3)-moment(3))>0.001){fprintf(stderr,"Warning mcdiff: c-component meanfields and moments not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               (*jjjpars[i]).mom(1)=moment(1);
+                               (*jjjpars[i]).mom(2)=moment(2);
+                               (*jjjpars[i]).mom(3)=moment(3);
+                              if ((*jjjpars[i]).gJ==0) // this has to be thought over on how to trigger here different beyond
+                                                       // mechanisms if gJ is not going to be used !!!
+   		              {J[i]=-3;fprintf(stderr,"mcdiff: gJ=0 - going beyond dipolar approximation for intermediate coupling");
+   			      (*jjjpars[i]).Lcalc(L,T,gjmbHxc,H,Icalcpars);
+                              (*jjjpars[i]).Scalc(S,T,gjmbHxc,H,Icalcpars);
+                               if (fabs((*jjjpars[i]).mom(4)-S(1))>0.001){fprintf(stderr,"Warning mcdiff: meanfields and <Sa> read from input file not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               (*jjjpars[i]).mom(4)=S(1);
+   			       if (fabs((*jjjpars[i]).mom(5)-L(1))>0.001){fprintf(stderr,"Warning mcdiff: meanfields and <La> read from input file not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               (*jjjpars[i]).mom(5)=L(1);
+   			       if (fabs((*jjjpars[i]).mom(6)-S(2))>0.001){fprintf(stderr,"Warning mcdiff: meanfields and <Sb> read from input file not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               (*jjjpars[i]).mom(6)=S(2);
+   			       if (fabs((*jjjpars[i]).mom(7)-L(2))>0.001){fprintf(stderr,"Warning mcdiff: meanfields and <Lb> read from input file not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               (*jjjpars[i]).mom(7)=L(2);
+   			       if (fabs((*jjjpars[i]).mom(8)-S(3))>0.001){fprintf(stderr,"Warning mcdiff: meanfields and <Sc> read from input file not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               (*jjjpars[i]).mom(8)=S(3);
+   			       if (fabs((*jjjpars[i]).mom(9)-L(3))>0.001){fprintf(stderr,"Warning mcdiff: meanfields and <Lc> read from input file not consistent for atom %i - using values calculated from meanfield\n",i);}
+                               (*jjjpars[i]).mom(9)=L(3);
 			      }
 			      else
 			      {// beyond formalism for rare earth		    
-                               (*jjjpars[i]).eigenstates(heff,T); //calculate some eigenstates
-                               (*jjjpars[i]).mcalc_parameter_storage_init(heff,T);// initialise parameter storage for mcalc
-                                     // do some consistency checks
-                               ComplexMatrix mcalcpars((*jjjpars[i]).mcalc_parstorage.Rlo(),(*jjjpars[i]).mcalc_parstorage.Rhi(),(*jjjpars[i]).mcalc_parstorage.Clo(),(*jjjpars[i]).mcalc_parstorage.Chi());
-                                             mcalcpars=(*jjjpars[i]).mcalc_parstorage;
-                               Vector moment(1,j);(*jjjpars[i]).mcalc(moment,T,heff,lnZ,U,mcalcpars);
-                               if (fabs((*jjjpars[i]).mom(1)-(*jjjpars[i]).gJ*moment(1))>0.001){fprintf(stderr,"Warning mcdiff: a-component meanfields and moments not consistent for atom %i - using values calculated from meanfield\n",i);}
-                               if (fabs((*jjjpars[i]).mom(2)-(*jjjpars[i]).gJ*moment(2))>0.001){fprintf(stderr,"Warning mcdiff: b-component meanfields and moments not consistent for atom %i - using values calculated from meanfield\n",i);}
-                               if (fabs((*jjjpars[i]).mom(3)-(*jjjpars[i]).gJ*moment(3))>0.001){fprintf(stderr,"Warning mcdiff: c-component meanfields and moments not consistent for atom %i - using values calculated from meanfield\n",i);}
-                               (*jjjpars[i]).mom(1)=(*jjjpars[i]).gJ*moment(1);
-                               (*jjjpars[i]).mom(2)=(*jjjpars[i]).gJ*moment(2);
-                               (*jjjpars[i]).mom(3)=(*jjjpars[i]).gJ*moment(3);
-                            
-                     
                                if(Norm((*jjjpars[i]).Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",cffilename);}
                                }
+
                                if(Norm((*jjjpars[i]).magFFj4)==0){fprintf(stderr,"WARNING mcdiff: <j4(Q)> coefficients not found or zero in file %s\n",cffilename);}
                                if(Norm((*jjjpars[i]).magFFj6)==0){fprintf(stderr,"WARNING mcdiff: <j6(Q)> coefficients not found or zero in file %s\n",cffilename);}
 
-fprintf(fout,"                  corresponding effective fields gjmbHeff [meV]-->");
-for(k=1;k<=j;++k){fprintf(fout," %+8.5f",heff(k));}
+fprintf(fout,"                    corresponding exchange fields gjmbHxc [meV]-->");
+for(k=1;k<=j;++k){fprintf(fout," %+8.5f",gjmbHxc(k));}
 fprintf(fout,"\n");
  			      }
                              if((*jjjpars[i]).SLR==0){fprintf(stderr,"WARNING mcdiff: SCATTERINGLENGTHREAL not found or zero in file %s\n",cffilename);}

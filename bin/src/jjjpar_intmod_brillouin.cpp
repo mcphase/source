@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------------------------
-//routine mcalc for brillouin function
+//routine Icalc for brillouin function
 //------------------------------------------------------------------------------------------------
-void jjjpar::brillouin (Vector & Jret, double & T, Vector & gjmbH, double & lnZ, double & U)
+void jjjpar::brillouin (Vector & Jret, double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZ, double & U)
 { /*on input
     ABC(1)  J=S....Spin quantum number
     gJ		lande factor
@@ -14,12 +14,14 @@ void jjjpar::brillouin (Vector & Jret, double & T, Vector & gjmbH, double & lnZ,
 */
 
 // check dimensions of vector
-if(Jret.Hi()!=3||gjmbH.Hi()!=3||ABC.Hi()!=1)
+if(Jret.Hi()!=3||gjmbHxc.Hi()!=3||Hext.Hi()!=3||ABC.Hi()!=1)
    {fprintf(stderr,"Error loadable module brillouin.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
+
     
 double JJ,KBT,XJ,gmhkt,Jav,gmh,Z,X;
-
+Vector gjmbH(1,3);
+gjmbH=gjmbHxc+gJ*MU_B*Hext;
 // program brillouin function for S=J=ABC(1)
 JJ=ABC[1];
 KBT=T*KB;
@@ -75,7 +77,7 @@ if (gmh>0)
 // for mcdisp this routine is needed
 /**************************************************************************/
 
-int jjjpar::brillouindm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,float & delta)
+int jjjpar::brillouindm(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta)
 { 
   /*on input
     tn          transition-number
@@ -90,7 +92,8 @@ int jjjpar::brillouindm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,fl
 
 static Vector Jret(1,3);
 int pr;
-
+Vector gjmbH(1,3);
+gjmbH=gjmbHxc+gJ*MU_B*Hext;
   pr=1;
   if (tn<0) {pr=0;tn*=-1;}
   if (T<0) {T=-T;}

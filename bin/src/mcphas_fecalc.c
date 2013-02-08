@@ -35,11 +35,11 @@ double fecalc(Vector  Hex,double T,par & inputpars,
  sdim=sps.in(sps.na(),sps.nb(),sps.nc()); // dimension of spinconfigurations
  Vector  * lnzi; lnzi=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){lnzi[i]=Vector(1,inputpars.nofatoms);} // partition sum for every atom
  Vector  * ui; ui=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){ui[i]=Vector(1,inputpars.nofatoms);} // magnetic energy for every atom
- ComplexMatrix ** mcalcpars;mcalcpars=new ComplexMatrix*[inputpars.nofatoms*sdim+2];
+ ComplexMatrix ** Icalcpars;Icalcpars=new ComplexMatrix*[inputpars.nofatoms*sdim+2];
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {for (l=1;l<=inputpars.nofatoms;++l){
-  mcalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]=new ComplexMatrix((*inputpars.jjj[l]).mcalc_parstorage.Rlo(),(*inputpars.jjj[l]).mcalc_parstorage.Rhi(),(*inputpars.jjj[l]).mcalc_parstorage.Clo(),(*inputpars.jjj[l]).mcalc_parstorage.Chi());
-  (*mcalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1])=(*inputpars.jjj[l]).mcalc_parstorage;
+  Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]=new ComplexMatrix((*inputpars.jjj[l]).Icalc_parstorage.Rlo(),(*inputpars.jjj[l]).Icalc_parstorage.Rhi(),(*inputpars.jjj[l]).Icalc_parstorage.Clo(),(*inputpars.jjj[l]).Icalc_parstorage.Chi());
+  (*Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1])=(*inputpars.jjj[l]).Icalc_parstorage;
   }}}}
  int diagonalexchange=1;
  FILE * fin_coq;
@@ -129,8 +129,8 @@ for (r=1;sta>ini.maxstamf;++r)
     {delete []jj;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.nofatoms;++l){
-      delete mcalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
-     }}}} delete []mcalcpars;
+      delete Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
+     }}}} delete []Icalcpars;
 
      if (verbose==1) fprintf(stderr,"feDIV!MAXlooP");
      return 20000;}
@@ -138,8 +138,8 @@ for (r=1;sta>ini.maxstamf;++r)
     {delete []jj;delete []lnzi;delete []ui;
           for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.nofatoms;++l){
-      delete mcalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
-     }}}} delete []mcalcpars;
+      delete Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
+     }}}} delete []Icalcpars;
      if (verbose==1) fprintf(stderr,"feDIV!MAXspinchangE");
      return 20001;}
 
@@ -147,19 +147,6 @@ for (r=1;sta>ini.maxstamf;++r)
  sta=0;
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {mf.mf(i,j,k)=0;
-  for (l=1;l<=inputpars.nofatoms;++l){
-    if(inputpars.gJ(l)==0)              {
-     for (i1=1;i1<=6&&i1<=inputpars.nofcomponents;++i1){
-            if(i1==2||i1==4||i1==6){ mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+i1]=Hex(i1/2)*MU_B;}
-	    else                   { mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+i1]=2*Hex((i1+1)/2)*MU_B;}
-  				                       }
-            				}
-    else                                {
-     for (i1=1;i1<=3&&i1<=inputpars.nofcomponents;++i1){
-               mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+i1]=Hex(i1)*inputpars.gJ(l)*MU_B;
-  				                       }
-					}
-				     }
 //  for (i1=1;i1<=sps.na();++i1){if (i<i1){di=i-i1+sps.na();}else{di=i-i1;}
 //                               for (j1=1;j1<=sps.nb();++j1){if (j<j1){dj=j-j1+sps.nb();}else{dj=j-j1;}
 //			                                    for (k1=1;k1<=sps.nc();++k1){if (k<k1){dk=k-k1+sps.nc();}else{dk=k-k1;}
@@ -207,7 +194,7 @@ for (r=1;sta>ini.maxstamf;++r)
    lm1m3=inputpars.nofcomponents*(l-1);
    for(m1=1;m1<=inputpars.nofcomponents;++m1)
    {d1[m1]=mf.mf(i,j,k)[lm1m3+m1];}
-   (*inputpars.jjj[l]).mcalc(moment,T,d1,lnzi[s][l],ui[s][l],(*mcalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+   (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
    for(m1=1;m1<=inputpars.nofcomponents;++m1)
    {sps.m(i,j,k)(lm1m3+m1)=moment[m1];}
   }
@@ -263,27 +250,6 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
   for(m1=1;m1<=inputpars.nofcomponents;++m1)
    {d1[m1]=sps.m(i,j,k)[inputpars.nofcomponents*(l-1)+m1];
   meanfield[m1]=mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+m1];}
-  // subtract external field (only necessary for magnetic field, not for quadrupolar fields,
-  // because the Cf parameters are treated separately in mcalc and not as part of the quadrupolar
-  // field)
-  if(inputpars.gJ(l)==0)
-  {for(m1=1;m1<=6&&m1<=inputpars.nofcomponents;++m1)
-
-                           {if(m1==2||m1==4||m1==6) {meanfield[m1]-=Hex[m1/2]*MU_B;}
-
-                            else                    {meanfield[m1]-=2*Hex[(m1+1)/2]*MU_B;}
-
-                           }
-
-                          }
- else
-
-                          {
-for(m1=1;m1<=3&&m1<=inputpars.nofcomponents;++m1)
-                           {meanfield[m1]-=Hex[m1]*inputpars.gJ(l)*MU_B;}
-
-                          }
-
   // add correction term
   fe+=0.5*(meanfield*d1);
   u+=0.5*(meanfield*d1);
@@ -306,8 +272,8 @@ if (ini.displayall==1)
  delete []jj;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.nofatoms;++l){
- delete mcalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
-     }}}} delete []mcalcpars;
+ delete Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
+     }}}} delete []Icalcpars;
 ++successrate;
 return fe;
 }

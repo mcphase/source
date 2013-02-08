@@ -56,11 +56,11 @@ gp.show_pointcharges=1;
  gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.set
 cryststruct cs;
 
-  double T,ha,hb,hc;
+  double T;Vector Hext(1,3);
   T=strtod(argv[2],NULL);
-  ha=strtod(argv[3],NULL);
-  hb=strtod(argv[4],NULL);
-  hc=strtod(argv[5],NULL);
+  Hext(1)=strtod(argv[3],NULL);
+  Hext(2)=strtod(argv[4],NULL);
+  Hext(3)=strtod(argv[5],NULL);
 
  FILE * fout;
  // read cf-parameters into class object jjjpar
@@ -83,16 +83,14 @@ Vector h(1,dim);
   h=0;
 
 fout = fopen_errchk ("results/chrgplt.coeff", "w");
-fprintf(fout,"# coefficients for density calculation\n#T=%g K field H=(%g,%g,%g) Tesla\n",T,ha,hb,hc);
+fprintf(fout,"# coefficients for density calculation\n#T=%g K field H=(%g,%g,%g) Tesla\n",T,Hext(1),Hext(2),Hext(3));
 
-printf("# T=%g K field H=(%g,%g,%g) Tesla\n",T,ha,hb,hc);
-  if(jjjps.gJ==0){ h(1)=2.0*MU_B*ha;h(3)=2.0*MU_B*hb;h(5)=2.0*MU_B*hc;h(2)=MU_B*ha;h(4)=MU_B*hb;h(6)=MU_B*hc;}
-  else { h(1)=jjjps.gJ*MU_B*ha;h(2)=jjjps.gJ*MU_B*hb;h(3)=jjjps.gJ*MU_B*hc;}
+printf("# T=%g K field H=(%g,%g,%g) Tesla\n",T,Hext(1),Hext(2),Hext(3));
   //int dj=(int)(2.0*(*iops).J+1);
 
-  jjjps.mcalc_parameter_storage_init(h,T);
+  jjjps.Icalc_parameter_storage_init(h,Hext,T);
   printf("calculating expectation values ....\n");
-  jjjps.mcalc(moments,T,h,lnz,u,jjjps.mcalc_parstorage);
+  jjjps.Icalc(moments,T,h,Hext,lnz,u,jjjps.Icalc_parstorage);
 //  cfield  has to be used to calculate all the <Olm>.
 //  printf("Stevens factors: alpha beta gamma = %4g %4g %4g \n",(*iops).alpha,(*iops).beta,(*iops).gamma);
 //  printf("Lande Factor: gJ = %4g\n",(*iops).gJ);
@@ -123,8 +121,8 @@ printf("\n");
   fclose (fout);
 
  char text[1000];
- if(jjjps.module_type==0||jjjps.module_type==4){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=abc</title>\n", T, ha, hb, hc);}
- if(jjjps.module_type==2){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=cab</title>\n", T, ha, hb, hc);}
+ if(jjjps.module_type==0||jjjps.module_type==4){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=abc</title>\n", T, Hext(1),Hext(2),Hext(3));}
+ if(jjjps.module_type==2){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=cab</title>\n", T, Hext(1),Hext(2),Hext(3));}
 
  cs.cffilenames[1]=new char[MAXNOFCHARINLINE];
  cs.abc(1)=6.0;cs.abc(2)=6.0;cs.abc(3)=6.0;
@@ -142,22 +140,22 @@ if(gp.show_pointcharges>0) nofpc=read_pointcharge_parameters(gp,cs.cffilenames,a
 
   for(i=1;i<=dim;++i)s.m(1,1,1)(i)=moments(i);
   fout = fopen_errchk ("results/chrgplt.jvx", "w");
-   s.jvx_cd(fout,text,cs,gp,0.0,ev_real,ev_imag,hkl,T,h);
+   s.jvx_cd(fout,text,cs,gp,0.0,ev_real,ev_imag,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/chrgplt.grid", "w");
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/chrgplti.grid", "w");
   gp.gridi=1;gp.gridj=200;gp.gridk=200;
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/chrgpltj.grid", "w");
   gp.gridi=200;gp.gridj=1;gp.gridk=200;
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/chrgpltk.grid", "w");
   gp.gridi=200;gp.gridj=200;gp.gridk=1;
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
 fprintf(stderr,"# ************************************************************************\n");
 fprintf(stderr,"# *             end of program chrgplt\n");

@@ -33,7 +33,7 @@ printf("#*****************************************************\n");
   double lnz,u;
 
   double T;
-  Vector h(1,inputpars.nofcomponents);
+  Vector h(1,inputpars.nofcomponents),hext(1,3);
   Vector moment(1,inputpars.nofcomponents);
   Vector qvector (1,3);
   Vector nettom(1,inputpars.nofcomponents*inputpars.nofatoms);
@@ -48,10 +48,10 @@ printf("#*****************************************************\n");
   qvector(2)=strtod(argv[5],NULL);
   qvector(3)=strtod(argv[6],NULL);
      
-   T=1;
+   T=1;hext=0;
    h=0;for(i=1;i<=inputpars.nofcomponents;++i)h(i)=0.1;
   for(i=1;i<=inputpars.nofatoms;++i)
-  {(*inputpars.jjj[i]).mcalc(moment,T,h,lnz,u,(*inputpars.jjj[i]).mcalc_parameter_storage_init(h,T));
+  {(*inputpars.jjj[i]).Icalc(moment,T,h,hext,lnz,u,(*inputpars.jjj[i]).Icalc_parameter_storage_init(h,hext,T));
    for(j=1;j<=inputpars.nofcomponents;++j){nettom(j+(i-1)*inputpars.nofcomponents)=moment(j);
                                           // set phases according to atomic position phi=2*pi*q*r
                                            phi(j+(i-1)*inputpars.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        

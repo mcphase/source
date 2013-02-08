@@ -44,11 +44,11 @@ class ionpars
    Vector Llm; // Cf parameters  
 
    // functions needed to calculate thermal expectation value of moment  
-   Vector & cfield (double & T,Vector & H, double & Z,double & U, ComplexMatrix & ests);
-   void cfieldJJ(Vector & JJ,double & T, Vector & gjmbH, double & lnZs, double & U, ComplexMatrix & ests);
-   void cfeigenstates (ComplexMatrix *est, Vector & H, double & T);
+   Vector & cfield (double & T,Vector &  gjmbHxc,Vector & Hext, double & Z,double & U, ComplexMatrix & ests);
+   void cfieldJJ(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & ests);
+   void cfeigenstates (ComplexMatrix *est, Vector &  gjmbHxc,Vector & Hext, double & T);
    // and transition matrix elements
-   int  cfielddm (int & tn,double & T,Vector &  heff, ComplexVector & u1,float & delta,ComplexMatrix & ests);
+   int  cfielddm (int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & u1,float & delta,ComplexMatrix & ests);
    int cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & v1);
    // calculate scattering operator <M(Q)>=-2x<Q>_TH in units of mb
    // according to stored eigenstate matrix est

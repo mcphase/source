@@ -411,7 +411,7 @@ int check_atom_in_big_unitcell(Vector & dd,Vector & maxv1,Vector & minv1,Matrix 
 
 //output for javaview
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
-                    double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbH)
+                    double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext)
 { int i,j,k,l,ctr=0;int i1,j1,k1;
  // some checks
  if(nofatoms!=savev_real.nofatoms||nofa!=savev_real.na()||nofb!=savev_real.nb()||nofc!=savev_real.nc()||
@@ -752,7 +752,7 @@ for(l=1;l<=nofatoms;++l)
               // omega t= phase
               //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
  // here we calculate the chargedensity of ion
-   cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,gjmbH);
+   cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,gjmbHxc,Hext);
    for(ii=1;ii<=cd.nofpoints();++ii)
      {R=cd.rtf(ii)(1);theta=cd.rtf(ii)(2);fi=cd.rtf(ii)(3);
      if(ionpar.module_type==2){// mind abc||yzx in module cfield
@@ -826,7 +826,7 @@ for(l=1;l<=nofatoms;++l)
               // omega t= phase
               //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
  // here we calculate the chargedensity of ion
-   cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,  gjmbH);
+   cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,  gjmbHxc,Hext);
    for(ii=1;ii<=cd.nofpoints();++ii)
      {R=cd.rtf(ii)(1);theta=cd.rtf(ii)(2);fi=cd.rtf(ii)(3);
      if(ionpar.module_type==2){// mind abc||yzx in module cfield
@@ -897,7 +897,7 @@ fprintf(fout,"</jvx-model>\n");
 // output of chargedensity on grid as ascii file points are equally spaced as specified
 // nofpoints*
 void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
-                spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T, Vector &  gjmbH)
+                spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext)
 {// some checks
  if(nofatoms!=savev_real.nofatoms||nofa!=savev_real.na()||nofb!=savev_real.nb()||nofc!=savev_real.nc()||
     nofatoms!=savev_imag.nofatoms||nofa!=savev_imag.na()||nofb!=savev_imag.nb()||nofc!=savev_imag.nc()||
@@ -1022,7 +1022,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
                          if (dd(2)<0)fi=-fi;
                               }
 
-    ro[((i-1)*nofpointsj+(j-1))*nofpointsk+k-1]+=cd.denscalc(theta,fi,R,moments,ionpar,T,gjmbH);
+    ro[((i-1)*nofpointsj+(j-1))*nofpointsk+k-1]+=cd.denscalc(theta,fi,R,moments,ionpar,T,gjmbHxc,Hext);
 //    if(strncmp(gp.title+14,"spindensity",10)==0)
     // here we calculate the spindensity of ion  (negative sign, because rocalc does give positive values)
 //    {if(nofcomponents>=3*49)

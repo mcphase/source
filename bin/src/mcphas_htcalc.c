@@ -2,7 +2,7 @@
 // htcalc.c
 
 #ifdef _THREADS
-#ifdef __linux__
+#if defined  (__linux__) || defined (__APPLE__)
 #include <pthread.h>
 #define MUTEX_LOCK     pthread_mutex_lock
 #define MUTEX_UNLOCK   pthread_mutex_unlock
@@ -135,7 +135,7 @@ void checkini(testspincf & testspins,qvectors & testqs)
 #define testspins (*thrdat.testspins)
 #define T thrdat.T
 #define femin thrdat.femin
-#ifdef __linux__
+#if defined  (__linux__) || defined (__APPLE__)
 void *htcalc_iteration(void *input)
 #else
 DWORD WINAPI htcalc_iteration(void *input)
@@ -155,7 +155,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
  Vector momentq0(1,inputpars.nofcomponents*inputpars.nofatoms),phi(1,inputpars.nofcomponents*inputpars.nofatoms);
  Vector nettom(1,inputpars.nofcomponents*inputpars.nofatoms),q(1,3);
  Vector mmom(1,inputpars.nofcomponents);
- Vector h1(1,inputpars.nofcomponents),hkl(1,3);
+ Vector h1(1,inputpars.nofcomponents),h1ext(1,3),hkl(1,3);
+ h1ext=0;
  char text[10000];
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  mfcf * mf;
@@ -177,7 +178,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
 	     {for(i=1;i<=inputpars.nofatoms;++i)
 	      {for(ii=1;ii<=inputpars.nofcomponents;++ii)
 	        {iii=inputpars.nofcomponents*(i-1)+ii;h1=0;h1(ii)=10*MU_B;
-                 (*inputpars.jjj[i]).mcalc(mmom,T,h1,lnz,u,(*inputpars.jjj[i]).mcalc_parstorage);
+                 (*inputpars.jjj[i]).Icalc(mmom,T,h1,h1ext,lnz,u,(*inputpars.jjj[i]).Icalc_parstorage);
 		 nettom(iii)=mmom(ii)*rnd(1);
 	         momentq0(iii)=rnd(1);
 	         phi(iii)=rnd(1)*3.1415;
@@ -199,7 +200,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
 		       {sps.mi(rr)(ri+ii)=rnd(1.0) ;}
 		       } // randomize spin rr
                     }
-     if (H*sps.nettomagmom(inputpars.gJ)<0) //see if nettomoment positiv
+     if (H*sps.nettoI(inputpars.gJ)<0) //see if nettomoment positiv
         {sps.invert();momentq0=-momentq0;} //if not - invert spinconfiguration
 
       //!!!calculate free eneregy - this is the heart of this loop !!!!
@@ -347,7 +348,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
       #undef testspins
       #undef T
       #undef femin
-      #ifdef __linux__
+      #if defined  (__linux__) || defined (__APPLE__)
       pthread_exit(NULL);
       #else
       return 0;
@@ -433,7 +434,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  MUTEX_INIT(mutex_min);
  EVENT_INIT(checkfinish);
  THRLC_INIT(threadSpecificKey);
- #ifdef __linux__
+ #if defined  (__linux__) || defined (__APPLE__)
  pthread_t threads[NUM_THREADS]; int rc; void *status;
  pthread_attr_t attr;
  pthread_attr_init(&attr);
@@ -451,7 +452,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
        htcalc_iteration(j, femin, spsmin, H, T, inputpars, testqs, testspins, physprops);
 #else
        (*tin[ithread]).j = j;
-       #ifdef __linux__
+       #if defined  (__linux__) || defined (__APPLE__)
        rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
        if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
        #else
@@ -462,7 +463,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
        if(ithread%NUM_THREADS==0 || all_threads_started)
        {
           all_threads_started = true;
-          #ifdef __linux__
+          #if defined  (__linux__) || defined (__APPLE__)
           pthread_mutex_lock (&mutex_loop); 
           while(thrdat.thread_id==-1) pthread_cond_wait(&checkfinish, &mutex_loop);
           ithread = thrdat.thread_id;
@@ -481,7 +482,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 // Wait for all threads to finish, before moving on to calculate physical properties!
   for(int th=0; th<(all_threads_started?NUM_THREADS:ithread); th++)
   {
-     #ifdef __linux__
+     #if defined  (__linux__) || defined (__APPLE__)
      rc = pthread_join(threads[th], &status); 
      if(rc) { printf("Error return code %i from joining thread %i\n",rc,th+1); exit(EXIT_FAILURE); }
      #else
@@ -491,7 +492,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 
   femin = thrdat.femin;
 
- #ifdef __linux__
+ #if defined  (__linux__) || defined (__APPLE__)
  pthread_attr_destroy(&attr);
  pthread_mutex_destroy(&mutex_loop);
  pthread_mutex_destroy(&mutex_tests);
@@ -538,7 +539,7 @@ else // if yes ... then
      #else
      sps=thrdat.spsmin;//take spinconfiguration which gave minimum free energy as starting value
      #endif
-     if (H*sps.nettomagmom(inputpars.gJ)<0)   //see if nettomoment positiv
+     if (H*sps.nettoI(inputpars.gJ)<0)   //see if nettomoment positiv
         {sps.invert();} //if not - invert spinconfiguration
   // now really calculate the physical properties
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);

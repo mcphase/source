@@ -24,12 +24,12 @@
 
 #ifdef _INTEGRAL
 #include "../include/vector.h"
-extern "C" void mcalc(Vector &J, double *T, Vector &gjmbH, double *gJ, Vector &ABC, char **sipffilename, double *lnZ, double *U, ComplexMatrix &est);
-extern "C" int estates(ComplexMatrix &est, Vector &gjmbheff, double *gJ, double *T, Vector &ABC, char **sipffilename);
-extern "C" int du1calc(int &tn, double &T, Vector &gjmbH, double &g_J, Vector &ABC, char **sipffilename, ComplexMatrix &mat, float &delta, ComplexMatrix &est);
+extern "C" void Icalc(Vector &J, double *T, Vector &gjmbHxc, Vector & Hext, double *gJ, Vector &ABC, char **sipffilename, double *lnZ, double *U, ComplexMatrix &est);
+extern "C" int estates(ComplexMatrix &est, Vector &gjmbHxc, Vector & Hext, double *gJ, double *T, Vector &ABC, char **sipffilename);
+extern "C" int du1calc(int &tn, double &T, Vector &gjmbHxc, Vector & Hext, double &g_J, Vector &ABC, char **sipffilename, ComplexMatrix &mat, float &delta, ComplexMatrix &est);
 extern "C" int mq(ComplexVector &Mq, double &th, double &ph, double &J0, double &J2, double &J4, double &J6, ComplexMatrix &est);
 extern "C" int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2, double &J4, double &J6, ComplexMatrix &est, double &T, ComplexMatrix &mat);
-extern "C" void mcalc_parameter_storage_matrix_init(ComplexMatrix *est, Vector &gjmbheff, double *g_J, double *T, Vector &ABC, char **sipffilename);
+extern "C" void Icalc_parameter_storage_matrix_init(ComplexMatrix *est, Vector &gjmbheff, double *g_J, double *T, Vector &ABC, char **sipffilename);
 #endif
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -424,32 +424,32 @@ int main(int argc, char *argv[])
    
 #ifdef _INTEGRAL
  //clock_t start,end; end = clock();
-   Vector J(1,6,0.), gmbH(1,6,.0578838263), ABC; gmbH[1]*=2; gmbH[3]*=2; gmbH[5]*=2; 
+   Vector J(1,6,0.), Hext(1,3,1.0),gmbHxc(1,6,0.), ABC;  
    double T=2.0,lnZ=0.,U=0.,gJ=0.;
    char *filearray[1]; 
    filearray[0] = infile;
-   ComplexMatrix est; mcalc_parameter_storage_matrix_init(&est,gmbH,&gJ,&T,ABC,filearray);
+   ComplexMatrix est; Icalc_parameter_storage_matrix_init(&est,gmbHxc,,Hext,&gJ,&T,ABC,filearray);
  //ComplexMatrix est; int Hsz=getdim(pars.n,pars.l); est = ComplexMatrix(0,Hsz,0,Hsz);
    end = clock();
 
-   mcalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,est);
-   start = clock(); std::cerr << "Time to do mcalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
+   Icalc(J,&T,gmbHxc,Hext,&gJ,ABC,filearray,&lnZ,&U,est);
+   start = clock(); std::cerr << "Time to do Icalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
    std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
    std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";
 
 //for (int it=0; it<1000; it++) {
 // end = clock();
-// mcalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,est);
-// start = clock(); std::cerr << "Time to do mcalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
+// Icalc(J,&T,gmbHxc,Hext,&gJ,ABC,filearray,&lnZ,&U,est);
+// start = clock(); std::cerr << "Time to do Icalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 // std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
 // std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";
 // if(it%100==0) { std::cerr << it << " "; } } std::cerr << "\n";
  //gmbH[1] = 0.; gmbH[2] = 0.; gmbH[3] = 0.; gmbH[4] = 0.; gmbH[5] = 0.; gmbH[6] = 0.; 
-   estates(est,gmbH,&gJ,&T,ABC,filearray);
+   estates(est,gmbHxc,Hext,&gJ,&T,ABC,filearray);
    end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
    
    int imq, tn = 2; float delta=0.; ComplexMatrix mat6(1,6,1,6);
-   imq = du1calc(tn,T,gmbH,gJ,ABC,filearray,mat6,delta,est);
+   imq = du1calc(tn,T,gmbHxc,Hext,gJ,ABC,filearray,mat6,delta,est);
    start = clock(); std::cerr << "Time to calculate du1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 
    ComplexVector Mq;

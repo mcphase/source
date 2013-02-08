@@ -13,7 +13,7 @@ unless ($#ARGV >2)
 
  the formula for a gaussian is:
 sigma=fwhm/2/sqrt(2*log(2))
-gauss(x)=1.0/sqrt(2*3.1415)/sigma* exp(-x^2/2sigma^2)\n";
+gauss(x)=1.0/sqrt(2*3.14159265359)/sigma* exp(-x^2/2sigma^2)\n";
 
 
 
@@ -35,7 +35,7 @@ for($i=$min;$i<$max;$i+=$stp)
 
 {$sigma=$fwhm/2/sqrt(2*log(2));
 
-$gauss=1.0/sqrt(2*3.1415)/$sigma* exp(-$i*$i/$sigma/$sigma/2);
+$gauss=1.0/sqrt(2*3.14159265359)/$sigma* exp(-$i*$i/$sigma/$sigma/2);
 
 print $i." ".$gauss."\n";
 

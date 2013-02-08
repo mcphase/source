@@ -53,13 +53,13 @@ printf("***********************************************************\n");
       exit (1);
     }
 
-  double T,ha,hb,hc,xx=0,yy=0,zz=0;
-
+  double T,xx=0,yy=0,zz=0;
+  Vector Hext(1,3);
 
   T=strtod(argv[2],NULL);
-  ha=strtod(argv[3],NULL);
-  hb=strtod(argv[4],NULL);
-  hc=strtod(argv[5],NULL);
+  Hext(1)=strtod(argv[3],NULL);
+  Hext(2)=strtod(argv[4],NULL);
+  Hext(3)=strtod(argv[5],NULL);
 int doijk=0;
 if (argc>9){
   xx=strtod(argv[6],NULL);
@@ -105,25 +105,23 @@ int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,
  FILE * fout;
 
 
- if(jjjps.gJ==0){ h(1)=2.0*MU_B*ha;h(3)=2.0*MU_B*hb;h(5)=2.0*MU_B*hc;h(2)=MU_B*ha;h(4)=MU_B*hb;h(6)=MU_B*hc;}
-  else { h(1)=jjjps.gJ*MU_B*ha;h(2)=jjjps.gJ*MU_B*hb;h(3)=jjjps.gJ*MU_B*hc;}
    //int dj=(int)(2.0*(*iops).J+1);
 
-  jjjps.mcalc_parameter_storage_init(h,T);
+  jjjps.Icalc_parameter_storage_init(h,Hext,T);
 
 
   printf("calculating expectation values ....\n");
 //double lnz,u;
-  //jjjps.mcalc(moms,T,h,lnz,u,jjjps.mcalc_parstorage);
-if(xx!=0||doijk<3)jjjps.spindensity_mcalc (momentsx,1, T, h, jjjps.mcalc_parstorage);
-if(yy!=0||doijk<3)jjjps.spindensity_mcalc (momentsy,2, T, h, jjjps.mcalc_parstorage);
-if(zz!=0||doijk<3)jjjps.spindensity_mcalc (momentsz,3, T, h, jjjps.mcalc_parstorage);
+  //jjjps.Icalc(moms,T,h,lnz,u,jjjps.Icalc_parstorage);
+if(xx!=0||doijk<3)jjjps.spindensity_coeff (momentsx,1, T, h,Hext, jjjps.Icalc_parstorage);
+if(yy!=0||doijk<3)jjjps.spindensity_coeff (momentsy,2, T, h,Hext, jjjps.Icalc_parstorage);
+if(zz!=0||doijk<3)jjjps.spindensity_coeff (momentsz,3, T, h,Hext, jjjps.Icalc_parstorage);
 if(doijk==3){ moments=xx*momentsx+yy*momentsy+zz*momentsz;}
 
 int i,nofpc=0;
 fout = fopen_errchk ("results/spindensplt.coeff", "w");
-fprintf(fout,"# coefficients for density calculation\n#T=%g K field H=(%g,%g,%g) Tesla\n",T,ha,hb,hc);
-printf("# T=%g K field H=(%g,%g,%g) Tesla\n",T,ha,hb,hc);
+fprintf(fout,"# coefficients for density calculation\n#T=%g K field H=(%g,%g,%g) Tesla\n",T,Hext(1),Hext(2),Hext(3));
+printf("# T=%g K field H=(%g,%g,%g) Tesla\n",T,Hext(1),Hext(2),Hext(3));
 printf("#spindensity is expanded in tesseral harmonics Zlm\n\
 #   Ms(r).(%g,%g,%g)= sum_lm aS(l,m) R^2(r) Zlm(Omega)\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
@@ -166,8 +164,8 @@ if(gp.read())printf("#reading graphic parameters from results/graphic_parameters
 cryststruct cs;
 
  char text[1000];
- if(jjjps.module_type==0||jjjps.module_type==4){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=abc, spindensity Ms(r).(%g,%g,%g)</title>\n", T, ha, hb, hc,xx,yy,zz);}
- if(jjjps.module_type==2){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=cab, spindensity Ms(r).(%g,%g,%g)</title>\n", T, ha, hb, hc,xx,yy,zz);}
+ if(jjjps.module_type==0||jjjps.module_type==4){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=abc, spindensity Ms(r).(%g,%g,%g)</title>\n", T,Hext(1),Hext(2),Hext(3),xx,yy,zz);}
+ if(jjjps.module_type==2){sprintf(text,"<title>T=%4gK h||a=%4gT h||b=%4gT h||c=%4gT with coordinates xyz=cab, spindensity Ms(r).(%g,%g,%g)</title>\n", T,Hext(1),Hext(2),Hext(3),xx,yy,zz);}
 
  cs.cffilenames[1]=new char[MAXNOFCHARINLINE];
  cs.abc(1)=6.0;cs.abc(2)=6.0;cs.abc(3)=6.0;
@@ -190,22 +188,22 @@ if(gp.show_pointcharges>0) nofpc=read_pointcharge_parameters(gp,cs.cffilenames,a
   if(doijk==0) sprintf(gp.title,"abs value  of spindensity |Ms(r)|");
   printf("%s\n",gp.title);
   fout = fopen_errchk ("results/spindensplt.jvx", "w");
-   s.jvx_cd(fout,text,cs,gp,0.0,ev_real,ev_imag,hkl,T,h);
+   s.jvx_cd(fout,text,cs,gp,0.0,ev_real,ev_imag,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/spindensplt.grid", "w");
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/spindensplti.grid", "w");
   gp.gridi=1;gp.gridj=200;gp.gridk=200;
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/spindenspltj.grid", "w");
   gp.gridi=200;gp.gridj=1;gp.gridk=200;
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
   fout = fopen_errchk ("results/spindenspltk.grid", "w");
   gp.gridi=200;gp.gridj=200;gp.gridk=1;
-  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h);
+  s.cd(fout,cs,gp,ev_real,ev_imag,0.0,hkl,T,h,Hext);
   fclose (fout);
 fprintf(stderr,"# ************************************************************************\n");
 fprintf(stderr,"# *             end of program spindensplt\n");

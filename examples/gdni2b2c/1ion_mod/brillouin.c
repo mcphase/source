@@ -24,12 +24,12 @@ void _init(void)
 void _fini(void)
 {  fprintf(stdout,"brillouin.so: is removed\n");}
 
-//routine mcalc for brillouin 
+//routine Icalc for brillouin 
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" __declspec(dllexport) void Icalc(Vector & J,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #else
-extern "C" void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" void Icalc(Vector & J,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #endif
 {   
@@ -43,6 +43,8 @@ extern "C" void mcalc(Vector & J,double * T, Vector & gjmbH,double * g_J, Vector
     Z		single ion partition function
     U		single ion magnetic energy
 */
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc+(*g_J)*MU_B*Hext;
 // check dimensions of vector
 if(J.Hi()!=3||gjmbH.Hi()!=3||ABC.Hi()!=1)
    {fprintf(stderr,"Error loadable module brillouin.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
@@ -104,10 +106,10 @@ return;
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __MINGW32
-extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
+extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
                        ComplexVector & u1,float & delta,ComplexMatrix & est)
 #else
-extern "C" int du1calc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & ABC, char ** sipffile,
+extern "C" int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
                        ComplexVector & u1,float & delta,ComplexMatrix & est)
 #endif
 { 
@@ -123,9 +125,10 @@ extern "C" int du1calc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & 
 */
 static Vector J(1,3);
 int pr;
-
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc+(*g_J)*MU_B*Hext;
 // clalculate thermal expectation values (needed for quasielastic scattering)
-//  mcalc(J,&T,gjmbH,g_J,ABC,&lnz,&u);
+//  Icalc(J,&T,gjmbH,g_J,ABC,&lnz,&u);
   pr=1;
   if (tn<0) {pr=0;tn*=-1;}
   if (T<0){T=-T;}

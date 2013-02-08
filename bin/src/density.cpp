@@ -42,10 +42,10 @@ void density::moments_init(Vector & moments)
    }
 }
 
-double density::denscalc(double &theta,double& fi,double& R,Vector & moments,jjjpar & ionpar,double & T, Vector &  gjmbH)
+double density::denscalc(double &theta,double& fi,double& R,Vector & moments,jjjpar & ionpar,double & T, Vector &  gjmbHxc,Vector & Hext)
    {double ro;
      switch (type)
-     {case 0:      ro=ionpar.rocalc(theta,fi,R,moments,T, gjmbH);break;
+     {case 0:      ro=ionpar.rocalc(theta,fi,R,moments,T, gjmbHxc,Hext);break;
       case 1:      ro=ionpar.spindensity_calc(theta,fi,R,moments);break;
       case 2:      ro=ionpar.orbmomdensity_calc(theta,fi,R,moments);break;
       case 3:      ro=ionpar.spindensity_calc(theta,fi,R,momentsx)+
@@ -66,7 +66,7 @@ double density::denscalc(double &theta,double& fi,double& R,Vector & moments,jjj
     return ro;
    }
 
-void density::calc_cd_surface(Vector & moments,jjjpar & ionpar,  double ccc,double & T, Vector &  gjmbH)
+void density::calc_cd_surface(Vector & moments,jjjpar & ionpar,  double ccc,double & T, Vector &  gjmbHxc,Vector & Hext)
 { // double ccc = surface value of density
 // here the set of points for this ion should be created corresponding to its
 // charge density: 
@@ -88,11 +88,11 @@ for(tt=0;tt<=3.1415/dtheta;++tt){for(ff=0;ff<=2*3.1415/dfi;++ff){
    rp=0;theta=(double)tt*dtheta;fi=(double)ff*dfi;
    nt=0;
    for(rin=0.1;rin<=3.0;rin+=0.2){
-   R=rin; ro=denscalc(theta,fi,R,moments,ionpar, T, gjmbH);
+   R=rin; ro=denscalc(theta,fi,R,moments,ionpar, T, gjmbHxc,Hext);
    deltaa=fabs(ro-ccc);rstpp=rstp;delta1=1e4;
    for(iii=1;(iii<=100)&(delta1>=max);++iii)
      {R+=rstpp;
-      ro=denscalc(theta,fi,R,moments,ionpar,T, gjmbH);
+      ro=denscalc(theta,fi,R,moments,ionpar,T, gjmbHxc,Hext);
      delta1=fabs(ro-ccc);
       if(delta1>=max){
                       if(delta1<deltaa){deltaa=delta1;}

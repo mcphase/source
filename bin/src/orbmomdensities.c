@@ -37,7 +37,8 @@ jvx files can be viewed by: java javaview results/orbmomdensities.jvx \n \
       exit (1);
     }
 FILE * fin_coq, * fout;
-   double T,ha,hb,hc,xx=0,yy=0,zz=0;
+   double T,xx=0,yy=0,zz=0;
+   Vector Hext(1,3);
 int doijk=0;// to be implemented : orbmomdensity-component along specific direction (doijk=1,2,3)
  graphic_parameters gp;
  gp.threshhold=strtod(argv[1],NULL);
@@ -71,7 +72,7 @@ if (argc>7&&strncmp(argv[6],"-div",4)==0)
    n=headerinput(fin_coq,stderr,gp,cs);
 
    // check for spinfconfiguration which is nearest to the T/H values chosen by user in command line
-   check_for_best(fin_coq,strtod(argv[2],NULL),strtod(argv[3],NULL),strtod(argv[4],NULL),strtod(argv[5],NULL),savmf,T,ha,hb,hc,outstr);
+   check_for_best(fin_coq,strtod(argv[2],NULL),strtod(argv[3],NULL),strtod(argv[4],NULL),strtod(argv[5],NULL),savmf,T,Hext,outstr);
   fclose (fin_coq);
 
 // create plot of  -----------------------------------------------------------
@@ -92,9 +93,9 @@ if (argc>7&&strncmp(argv[6],"-div",4)==0)
 
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
-// 1.b: mcalc has to be used to calculate all the <Olm>.
+// 1.b: Icalc has to be used to calculate all the <Olm>.
 hh=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
-{(*inputpars.jjj[ii]).mcalc_parameter_storage_init(hh,T);} // initialize mcalc module parameter storage
+{(*inputpars.jjj[ii]).Icalc_parameter_storage_init(hh,Hext,T);} // initialize Icalc module parameter storage
 
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
@@ -110,11 +111,11 @@ hh=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
     h=0;
    for(nt=1;nt<=savmf.nofcomponents;++nt){h(nt)=hh(nt+savmf.nofcomponents*(ii-1));}
             if((*inputpars.jjj[ii]).module_type==0)
-            {//(*inputpars.jjj[ii]).mcalc(moms,T,h,lnz,u,(*inputpars.jjj[ii]).mcalc_parstorage); // here we trigger single ion
+            {//(*inputpars.jjj[ii]).Icalc(moms,T,h,Hext,lnz,u,(*inputpars.jjj[ii]).Icalc_parstorage); // here we trigger single ion
                                                            // module to calculate all dim moments of orbmomdensity
-if(xx!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_mcalc (momentsx,1, T, h, (*inputpars.jjj[ii]).mcalc_parstorage);
-if(yy!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_mcalc (momentsy,2, T, h, (*inputpars.jjj[ii]).mcalc_parstorage);
-if(zz!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_mcalc (momentsz,3, T, h, (*inputpars.jjj[ii]).mcalc_parstorage);
+if(xx!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsx,1, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
+if(yy!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsy,2, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
+if(zz!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsz,3, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
 if(doijk==3){ moments=xx*momentsx+yy*momentsy+zz*momentsz;}
 else       {
             for(nt=1;nt<=49;++nt){moments(nt)=momentsx(nt);moments(nt+49)=momentsy(nt);moments(nt+2*49)=momentsz(nt);}
@@ -155,19 +156,19 @@ else       {
   printf("%s\n",gp.title);
 
   fout = fopen_errchk ("./results/orbmomdensities.grid", "w");
-     extendedspincf.cd(fout,cs,gp,savev_real,savev_imag,0.0,hkl,T,hh);
+     extendedspincf.cd(fout,cs,gp,savev_real,savev_imag,0.0,hkl,T,hh,Hext);
     fclose (fout);
 
   fout = fopen_errchk ("./results/orbmomdensities.jvx", "w");
     gp.showprim=0;
      extendedspincf.jvx_cd(fout,outstr,cs,gp,
-                  0.0,savev_real,savev_imag,hkl,T,hh);
+                  0.0,savev_real,savev_imag,hkl,T,hh,Hext);
     fclose (fout);
 
   fout = fopen_errchk ("./results/orbmomdensities_prim.jvx", "w");
      gp.showprim=1;
     extendedspincf.jvx_cd(fout,outstr,cs,gp,
-                  0.0,savev_real,savev_imag,hkl,T,hh);
+                  0.0,savev_real,savev_imag,hkl,T,hh,Hext);
     fclose (fout);
 
 

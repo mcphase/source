@@ -178,7 +178,7 @@ v1=v1.Conjugate();
 
 //**************************************************************************/
 #ifdef _THREADS
-#ifdef __linux__
+#if defined  (__linux__) || defined (__APPLE__)
 void *intcalc_approx(void *input)
 #else
 DWORD WINAPI intcalc_approx(void *input)
@@ -557,7 +557,7 @@ MUTEX_LOCK(&mutex_loop);
 thrdat.thread_id = thread_id;
 EVENT_SIG(checkfinish);
 MUTEX_UNLOCK(&mutex_loop);
-#ifdef __linux__
+#if defined  (__linux__) || defined (__APPLE__)
 pthread_exit(NULL);
 #else
 return 0;
@@ -572,7 +572,7 @@ return intensity;
 
 //**************************************************************************/
 #ifdef _THREADS
-#ifdef __linux__
+#if defined  (__linux__) || defined (__APPLE__)
 void *intcalc(void *input)
 #else
 DWORD WINAPI intcalc(void *input)
@@ -805,7 +805,7 @@ MUTEX_LOCK(&mutex_loop);
 thrdat.thread_id = thread_id;
 EVENT_SIG(checkfinish);
 MUTEX_UNLOCK(&mutex_loop);
-#ifdef __linux__
+#if defined  (__linux__) || defined (__APPLE__)
 pthread_exit(NULL);
 #else
 return 0;

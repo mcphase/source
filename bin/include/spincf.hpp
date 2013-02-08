@@ -30,10 +30,10 @@ public:
               // omega t= phase
 
     void jvx_cd(FILE * fout,char * text,cryststruct & cs,
-              graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbH);
+              graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext);
 
     void cd(FILE * fout,cryststruct & cs,graphic_parameters & gp,
-                spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T, Vector &  gjmbH);
+                spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T,Vector &  gjmbHxc,Vector & Hext);
 
     void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ);
     void calc_prim_mag_unitcell(Matrix & p,Vector & abc, Matrix & r);
@@ -84,7 +84,7 @@ private:
     int nb(); // returns number of spins
     int nc(); // returns number of spins
  
-    Vector nettomagmom ( Vector & gJ); // returns nettomagneticmoment [muB]
+    Vector nettoI ( Vector & gJ); // returns nettomagneticmoment [muB]
     Vector totalJ (); // returns nettomoment <J>
     void invert();// inverts all spins (AND higher order moments)
     void reduce();// reduces spinconfiguration

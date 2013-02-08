@@ -14,7 +14,7 @@ unless ($#ARGV >0)
 
  the formula for a gaussian is:
 sigma=fwhm/2/sqrt(2*log(2))
-gauss(x)=area/sqrt(2*3.1415)/sigma* exp(-(x-position)^2/2sigma^2)\n";
+gauss(x)=area/sqrt(2*3.14159265359)/sigma* exp(-(x-position)^2/2sigma^2)\n";
 
  exit 0;}
 
@@ -45,7 +45,7 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$area=eval $ARGV
 		  {++$i;
 		  if ($i==$column) {$x=$numbers[$i-1]-$pos;
                                     $x1=-$x*$x/$sigma/$sigma/2;
-                                    if(abs($x1)<100){$numbers[$i-1]=$area/sqrt(2*3.1415)/$sigma* exp(-$x*$x/$sigma/$sigma/2);}
+                                    if(abs($x1)<100){$numbers[$i-1]=$area/sqrt(2*3.14159265359)/$sigma* exp(-$x*$x/$sigma/$sigma/2);}
                                              else {$numbers[$i-1]=0;}
                                    }
 		  print Fout $numbers[$i-1]." ";}     

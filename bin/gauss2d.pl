@@ -13,7 +13,7 @@ unless ($#ARGV >2)
 
  the formula for a gaussian is:
 sigma=fwhm/2/sqrt(2*log(2))
-gauss(x)=1.0/sqrt(2*3.1415)/sigma* exp(-x^2/2sigma^2)\n";
+gauss(x)=1.0/sqrt(2*3.14159265359)/sigma* exp(-x^2/2sigma^2)\n";
 
 
 
@@ -51,8 +51,8 @@ $sigma2=$fwhm2/2/sqrt(2*log(2));
 $u=$x*cos($rotangle)-$y*sin($rotangle);
 $v=$x*sin($rotangle)+$y*cos($rotangle);
 
-$gauss=1.0/sqrt(2*3.141592654)/$sigma1* exp(-$u*$u/$sigma1/$sigma1/2);
-$gauss*=1.0/sqrt(2*3.141592654)/$sigma2* exp(-$v*$v/$sigma2/$sigma2/2);
+$gauss=1.0/sqrt(2*3.14159265359)/$sigma1* exp(-$u*$u/$sigma1/$sigma1/2);
+$gauss*=1.0/sqrt(2*3.14159265359)/$sigma2* exp(-$v*$v/$sigma2/$sigma2/2);
 
 print $x." ".$y." ".$gauss."\n";
 } print "#\n";

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------------------------
-//routine mcalc for cluster
+//routine Icalc for cluster
 //------------------------------------------------------------------------------------------------
-void jjjpar::cluster_mcalc (Vector & Jret,double & T, Vector & gjmbH, double & lnZ, double & U)
+void jjjpar::cluster_Icalc (Vector & Jret,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZ, double & U)
 { /*on input
     ABC(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     gJ		lande factor
@@ -12,15 +12,16 @@ void jjjpar::cluster_mcalc (Vector & Jret,double & T, Vector & gjmbH, double & l
     Z		single ion partition function
     U		single ion magnetic energy
 */
+
 int dim=1; int *d0= new int [(*clusterpars).nofatoms+1];
            int *dn= new int [(*clusterpars).nofatoms+1];
 // determine dimension of H matrix
 for (int n=1;n<=(*clusterpars).nofatoms;++n)
 {d0[n]=dim;
- dn[n]=(*(*clusterpars).jjj[n]).opmat(0,gjmbH).Rhi();
+ dn[n]=(*(*clusterpars).jjj[n]).opmat(0,gjmbHxc,Hext).Rhi();
  dim*=dn[n];
- if(gjmbH.Hi()!=(*(*clusterpars).jjj[n]).nofcomponents)
- {fprintf(stderr,"Error module cluster - mcalc: in current version dimensions of meanfield must match number of components of each atom in cluster, individual coupling between atoms in different clusters are not implemented yet\n");exit(EXIT_FAILURE);}
+ if(gjmbHxc.Hi()!=(*(*clusterpars).jjj[n]).nofcomponents)
+ {fprintf(stderr,"Error module cluster - Icalc: in current version dimensions of meanfield must match number of components of each atom in cluster, individual coupling between atoms in different clusters are not implemented yet\n");exit(EXIT_FAILURE);}
 }
 
  Matrix H(1,dim,1,dim);
@@ -28,7 +29,7 @@ for (int n=1;n<=(*clusterpars).nofatoms;++n)
 
 // fill H matrix with sum over Hi of individual spins
 for (int i=1;i<=(*clusterpars).nofatoms;++i)
-{Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,gjmbH));
+{Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,gjmbHxc,Hext));
   //1. determine dimensions
   int di=dn[i];
   int dx=1,dz=1;
@@ -62,8 +63,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
  int i=n;int j=(*(*clusterpars).jjj[n]).sublattice[nn];
  if(i>j){i=j;j=n;}
  Matrix SinS(-0.5*(*(*clusterpars).jjj[n]).jij[nn](1,1)*
-             herm_dirprod((*(*clusterpars).jjj[i]).opmat(1,gjmbH),
-                          (*(*clusterpars).jjj[j]).opmat(1,gjmbH)
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(1,gjmbHxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(1,gjmbHxc,Hext)
                          )
              );
 
@@ -72,8 +73,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
  {
   if(a==1&&b==1) break;
   SinS+=-0.5*(*(*clusterpars).jjj[n]).jij[nn](a,b)*
-             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,gjmbH),
-                          (*(*clusterpars).jjj[j]).opmat(b,gjmbH)
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,gjmbHxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(b,gjmbHxc,Hext)
                     );
  }
  
@@ -160,12 +161,12 @@ EigenSystemHermitean (H,En,zr,zc,sort,maxiter);
      U=En*wn;
 
 Matrix Ja(1,dim,1,dim);
-for(int a=1;a<=gjmbH.Hi();++a)
+for(int a=1;a<=gjmbHxc.Hi();++a)
 {// calculate expecation Value of J
  // determine Matrix Ja= sum_i Jai
  Ja=0;// reset Ja
  for(int i=1;i<=(*clusterpars).nofatoms;++i)
- {Matrix Jai((*(*clusterpars).jjj[i]).opmat(a,gjmbH));
+ {Matrix Jai((*(*clusterpars).jjj[i]).opmat(a,gjmbHxc,Hext));
 
 // myPrintMatrix(stdout,Jai);
 
@@ -204,7 +205,7 @@ for(int a=1;a<=gjmbH.Hi();++a)
 delete []d0;delete []dn;
 }
 
-int jjjpar::cluster_dm(int & tn,double & T,Vector & gjmbH,ComplexVector & u1,float & delta)
+int jjjpar::cluster_dm(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta)
 { 
   /*on input
     transitionnumber ... number of transition to be computed - meaningless for kramers doublet, because there is only 1 transition
@@ -223,9 +224,9 @@ int dim=1; int *d0= new int [(*clusterpars).nofatoms+1];
 // determine dimension of H matrix
 for (int n=1;n<=(*clusterpars).nofatoms;++n)
 {d0[n]=dim;
- dn[n]=(*(*clusterpars).jjj[n]).opmat(0,gjmbH).Rhi();
+ dn[n]=(*(*clusterpars).jjj[n]).opmat(0,gjmbHxc,Hext).Rhi();
  dim*=dn[n];
- if(gjmbH.Hi()!=(*(*clusterpars).jjj[n]).nofcomponents)
+ if(gjmbHxc.Hi()!=(*(*clusterpars).jjj[n]).nofcomponents)
  {fprintf(stderr,"Error module cluster - du1calc: in current version dimensions of meanfield must match number of components of each atom in cluster, individual coupling between atoms in different clusters are not implemented yet\n");exit(EXIT_FAILURE);}
 }
 
@@ -233,7 +234,7 @@ for (int n=1;n<=(*clusterpars).nofatoms;++n)
  H=0; // initialize to zero
 // fill H matrix with sum over Hi of individual spins
 for (int i=1;i<=(*clusterpars).nofatoms;++i)
-{Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,gjmbH));
+{Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,gjmbHxc,Hext));
   //1. determine dimensions
   int di=dn[i];
   int dx=1,dz=1;
@@ -264,8 +265,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
  int i=n;int j=(*(*clusterpars).jjj[n]).sublattice[nn];
  if(i>j){i=j;j=n;}
  Matrix SinS(-0.5*(*(*clusterpars).jjj[n]).jij[nn](1,1)*
-             herm_dirprod((*(*clusterpars).jjj[i]).opmat(1,gjmbH),
-                          (*(*clusterpars).jjj[j]).opmat(1,gjmbH)
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(1,gjmbHxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(1,gjmbHxc,Hext)
                          )
              );
 
@@ -274,8 +275,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
  {
   if(a==1&&b==1) break;
   SinS+=-0.5*(*(*clusterpars).jjj[n]).jij[nn](a,b)*
-             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,gjmbH),
-                          (*(*clusterpars).jjj[j]).opmat(b,gjmbH)
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,gjmbHxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(b,gjmbHxc,Hext)
                     );
  }
 
@@ -346,16 +347,16 @@ if(jj==ii)delta=-SMALL; //if transition within the same level: take negative del
       }
      Zs=Sum(wn);wn/=Zs;
 
-Vector Jret(1,gjmbH.Hi());Jret=0;
-ComplexVector iJj(1,gjmbH.Hi());
+Vector Jret(1,gjmbHxc.Hi());Jret=0;
+ComplexVector iJj(1,gjmbHxc.Hi());
 
 Matrix Ja(1,dim,1,dim);
-for(int a=1;a<=gjmbH.Hi();++a)
+for(int a=1;a<=gjmbHxc.Hi();++a)
 {// calculate expecation Value of J
  // determine Matrix Ja= sum_i Jai
  Ja=0;// reset Ja
  for(int i=1;i<=(*clusterpars).nofatoms;++i)
- {Matrix Jai((*(*clusterpars).jjj[i]).opmat(a,gjmbH));
+ {Matrix Jai((*(*clusterpars).jjj[i]).opmat(a,gjmbHxc,Hext));
   //1. determine dimensions
   int di=dn[i];
   int dx=1,dz=1;
@@ -393,7 +394,7 @@ delete []d0;delete []dn;
 
 
 // 3. set u1
-for(int l=1;l<=gjmbH.Hi();++l)
+for(int l=1;l<=gjmbHxc.Hi();++l)
 {if(ii==jj){//take into account thermal expectation values <Jret>
           u1(l)=(iJj(l)-Jret(l));}
  else    {u1(l)=iJj(l);}

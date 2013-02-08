@@ -161,7 +161,7 @@ paramete.o: paramete.cpp paramete.hpp martin.h vector.h
 par.o: par.cpp par.hpp jjjpar.hpp martin.h vector.h
 	$(CCC) $(CFLAGS) $< 
 
-jjjpar.o: jjjpar.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
+jjjpar.o: jjjpar.cpp jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
 	$(CCC) $(CFLAGS) $< 
 
 testspin.o: testspin.cpp testspin.hpp spincf.hpp martin.h

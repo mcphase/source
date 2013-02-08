@@ -18,7 +18,7 @@ int main (int argc, char **argv)
 { spincf savspins;
  FILE * fin_coq, * fout;
  float delta,dd,ddT,ddHa,ddHb,ddHc;
-double T,Ha,Hb,Hc;
+double T; Vector Hext(1,3);
  int i,n=0;
  cryststruct cs;
  long int pos=0,j;
@@ -74,7 +74,7 @@ gp.read();
 gp.show_density=0;
 // load spinsconfigurations and check which one is nearest -------------------------------   
 
-     check_for_best(fin_coq,strtod(argv[1],NULL),strtod(argv[2],NULL),strtod(argv[3],NULL),strtod(argv[4],NULL),savspins,T,Ha,Hb,Hc,outstr);
+     check_for_best(fin_coq,strtod(argv[1],NULL),strtod(argv[2],NULL),strtod(argv[3],NULL),strtod(argv[4],NULL),savspins,T,Hext,outstr);
 
   fclose (fin_coq);
 
@@ -121,7 +121,7 @@ Vector gJJ(1,n); for (i=1;i<=n;++i){gJJ(i)=cs.gJ[i];}
     fclose (fin_coq);
 
              Vector hkl(1,3);hkl=0;
-             Vector gjmbH(1,3);gjmbH=0;
+             Vector gjmbHxc(1,3);gjmbHxc=0;
              spincf savev_real(savspins*0.0);
              spincf savev_imag(savspins*0.0);
             // to do jvx output of static structure put zeros into these spinconfigurations
@@ -129,13 +129,13 @@ Vector gJJ(1,n); for (i=1;i<=n;++i){gJJ(i)=cs.gJ[i];}
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin_coq = fopen_errchk ("./results/spins.jvx", "w");
     gp.showprim=0;gp.spins_wave_amplitude=0;
-     savspins.jvx_cd(fin_coq,outstr,cs,gp,0.0,savev_real,savev_imag,hkl,T,gjmbH);
+     savspins.jvx_cd(fin_coq,outstr,cs,gp,0.0,savev_real,savev_imag,hkl,T,gjmbHxc,Hext);
     fclose (fin_coq);
 
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin_coq = fopen_errchk ("./results/spins_prim.jvx", "w");
      gp.showprim=1;
-     savspins.jvx_cd(fin_coq,outstr,cs,gp,0.0,savev_real,savev_imag,hkl,T,gjmbH);
+     savspins.jvx_cd(fin_coq,outstr,cs,gp,0.0,savev_real,savev_imag,hkl,T,gjmbHxc,Hext);
     fclose (fin_coq);
 
 if (argc>=9){// try a spinwave picture
@@ -202,12 +202,12 @@ if (argc>=9){// try a spinwave picture
                fin_coq = fopen_errchk (filename, "w");
                //printf("swa %g\n",gp.spins_wave_amplitude);
                gp.showprim=0;
-                     savspins.jvx_cd(fin_coq,outstr,cs,gp,phase,savev_real,savev_imag,hkl,T,gjmbH);
+                     savspins.jvx_cd(fin_coq,outstr,cs,gp,phase,savev_real,savev_imag,hkl,T,gjmbHxc,Hext);
                fclose (fin_coq);
                sprintf(filename,"./results/spins_prim.%i.jvx",i+1);
                fin_coq = fopen_errchk (filename, "w");
                gp.showprim=1;
-                     savspins.jvx_cd(fin_coq,outstr,cs,gp,phase,savev_real,savev_imag,hkl,T,gjmbH);
+                     savspins.jvx_cd(fin_coq,outstr,cs,gp,phase,savev_real,savev_imag,hkl,T,gjmbHxc,Hext);
                fclose (fin_coq);
               }
           printf("# %s\n",outstr);  

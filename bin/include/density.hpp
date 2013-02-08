@@ -29,8 +29,8 @@ Vector momentlz;
   
   // sub for calculation of charge density given a radiu R and polar angles teta, 
   // fi and expansion coeff. alm
-  double denscalc(double & theta, double & fi,double & R,Vector & moments,jjjpar & ionpar,double & T, Vector &  gjmbH);
-  void calc_cd_surface(Vector & moments,jjjpar & ionpar,double ccc,double & T, Vector &  gjmbH);
+  double denscalc(double & theta, double & fi,double & R,Vector & moments,jjjpar & ionpar,double & T, Vector &  gjmbHxc,Vector & Hext);
+  void calc_cd_surface(Vector & moments,jjjpar & ionpar,double ccc,double & T, Vector &  gjmbHxc,Vector & Hext);
   //ccc ... surface value of density
 
   void moments_init(Vector & moments);

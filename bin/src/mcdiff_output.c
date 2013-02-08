@@ -2,7 +2,6 @@
 void print_sps(const char * filename,int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H)
 {// fout = fopen_errchk (filename, "w");
 int nofcomponents=3;
-for (int i=1;i<=natmagnetic;++i){if((*jjjpars[i]).gJ==0){nofcomponents=6;}}
 spincf spins(1,1,1,natmagnetic,nofcomponents);
 FILE * fout;int i;
 time_t curtime;
@@ -27,16 +26,9 @@ time_t curtime;
  for (i=1;i<=natmagnetic;++i)
  { Vector abc(1,3);
    abc=(*jjjpars[i]).xyz(1)*nr1*r1s+(*jjjpars[i]).xyz(2)*nr2*r2s+(*jjjpars[i]).xyz(3)*nr3*r3s;
-  if((*jjjpars[i]).gJ!=0){ spins.m(1,1,1)(nofcomponents*(i-1)+1)=(*jjjpars[i]).mom(1);
+   spins.m(1,1,1)(nofcomponents*(i-1)+1)=(*jjjpars[i]).mom(1);
    spins.m(1,1,1)(nofcomponents*(i-1)+2)=(*jjjpars[i]).mom(2);
-   spins.m(1,1,1)(nofcomponents*(i-1)+3)=(*jjjpars[i]).mom(3);}
-  else
- { spins.m(1,1,1)(nofcomponents*(i-1)+1)=(*jjjpars[i]).mom(4);
-   spins.m(1,1,1)(nofcomponents*(i-1)+2)=(*jjjpars[i]).mom(5);
-   spins.m(1,1,1)(nofcomponents*(i-1)+3)=(*jjjpars[i]).mom(6);
-   spins.m(1,1,1)(nofcomponents*(i-1)+4)=(*jjjpars[i]).mom(7);
-   spins.m(1,1,1)(nofcomponents*(i-1)+5)=(*jjjpars[i]).mom(8);
-   spins.m(1,1,1)(nofcomponents*(i-1)+6)=(*jjjpars[i]).mom(9);}
+   spins.m(1,1,1)(nofcomponents*(i-1)+3)=(*jjjpars[i]).mom(3);
    fprintf(fout,"#! da=%8.5f [a] db=%8.5f [b] dc=%8.5f [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g cffilename=%s\n",
    abc(1),abc(2),abc(3), (*jjjpars[i]).paranz, (*jjjpars[i]).diagonalexchange, (*jjjpars[i]).gJ, (*jjjpars[i]).cffilename);
  }

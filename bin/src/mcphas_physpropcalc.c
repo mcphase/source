@@ -1,10 +1,17 @@
 /************************************************************************/
 
 void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,par & inputpars)
-{ int i,j,k,l,n;div_t result;float mmax; char text[100];FILE * fin_coq;
+{ int i,j,k,l,n;div_t result;float mmax; char text[100];FILE * fin_coq;Vector mom(1,3);
  //save fe and u
  // calculate nettomoment from spinstructure
-     physprops.m=sps.nettomagmom(inputpars.gJ)/(double)sps.n()/(double)sps.nofatoms;
+     physprops.m=0;
+    for (l=1;l<=inputpars.nofatoms;++l){
+    // go through magnetic unit cell and sum up the contribution of every atom
+    for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
+     (*inputpars.jjj[l]).mcalc(mom,T, mf.mf(i,j,k),H,(*inputpars.jjj[l]).Icalc_parstorage);
+     physprops.m+=mom;
+    }}}}
+    physprops.m/=(double)sps.n()*(double)sps.nofatoms;
 
 
 // thermal expansion - magnetostricton correlation-functions

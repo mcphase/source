@@ -306,12 +306,12 @@ programs.}
 {l|l|l} 
 Module - Function       & obligatory for & optional for \\  
 \hline
-void mcalc              & {\prg mcphas}         & \\
+void Icalc              & {\prg mcphas}         & \\
                         & {\prg mcdiff}         &\\
 						& {\prg singleion}      &\\
 						& {\prg charges}        &\\
 						& {\prg chrgplt}        &\\
-void mcalc\_parameter\_storage\_matrix\_init   && {\prg mcphas}       \\
+void Icalc\_parameter\_storage\_matrix\_init   && {\prg mcphas}       \\
                         && {\prg mcdiff}         \\
 						&& {\prg singleion}     \\
 						&& {\prg charges}        \\
@@ -323,11 +323,11 @@ int du1calc				& {\prg mcdisp} &\\
 						& {\prg singleion}     \\	
 void mq					& & {\prg mcdiff} \\
 int dv1calc              & & {\prg mcdisp} \\										
-void spindensity\_mcalc  &{\prg spindensplt}&\\
+void spindensity\_coeff  &{\prg spindensplt}&\\
                         &{\prg spindensities}&\\
                         &{\prg momdensplt}&\\
                         &{\prg momdensities}&\\
-void orbmomdensity\_mcalc &{\prg orbmomdensplt} &\\
+void orbmomdensity\_coeff &{\prg orbmomdensplt} &\\
                         &{\prg orbmomdensities}&\\
                         &{\prg momdensplt}&\\
                         &{\prg momdensities}&\\
@@ -368,7 +368,7 @@ first
 
 
 %*************************************************************************************
-\subsection{External module function {\prg mcalc} - used by {\prg mcphas},{\prg singleion\index{singleion}},{\prg %%@
+\subsection{External module function {\prg Icalc} - used by {\prg mcphas},{\prg singleion\index{singleion}},{\prg %%@
 charges\index{charges}} and {\prg chrgplt\index{chrgplt}},{\prg mcdiff\index{mcdiff}} }
 
 In order to run {\prg mcphas},{\prg singleion\index{singleion}},,{\prg charges\index{charges}} and {\prg %%@
@@ -376,23 +376,24 @@ chrgplt\index{chrgplt}} the following function has to be
 present in the module file {\prg *.so}:
 
 \begin{verbatim}
-extern "C" void mcalc(Vector & J,double * T, Vector & gjmbH,double * gJ, Vector & MODPAR,
-                      char ** sipffilename, double * lnZ,double * U,ComplexMatrix & mcalc_parstorage);
+extern "C" void Icalc(Vector & J,double * T, Vector & gjmbHxc, Vector & Hext,double * gJ, Vector & MODPAR,
+                      char ** sipffilename, double * lnZ,double * U,ComplexMatrix & Icalc_parstorage);
 \end{verbatim}
 
 Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) void %%@
-mcalc(...)}.
+Icalc(...)}.
 
 The meaning of the symbols is as follows:
 {\footnotesize
 \begin{verbatim}
   on input
     T           temperature[K]
-    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gjmbHxc       vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+    Hext       external magnetic field [T]
     gJ          Lande factor
     MODPAR      Vector with Parameters  read in single ion property file
     sipffilename    file name of the single ion parameter file
-    mcalc_parstorage parameter matrix (initialized by mcalc_parameter_storage_matrix_init)
+    Icalc_parstorage parameter matrix (initialized by Icalc_parameter_storage_matrix_init)
                    it should/may contain any information, e.g. population numbers of the
 				   states (imaginary part of row 0)
                    and eigenvalues (real part of row 0) with values set by the most recent call
@@ -424,8 +425,8 @@ The meaning of the symbols is as follows:
                 Tlm=sqrt(4pi/2l+1) sum_i=1^nofelectrons  Zlm(Omega_i)  for l not equal 0
     lnZ         natural logarithm of single ion partition function
     U           single ion magnetic energy [meV]
-    mcalc_parstorage     parameter matrix matrix (optional)
-                   it should/may contain any information for the next call of mcalc, e.g.
+    Icalc_parstorage     parameter matrix matrix (optional)
+                   it should/may contain any information for the next call of Icalc, e.g.
                    population numbers of the states (imaginary part of row 0)
                    and eigenvalues (real part of row 0) ...
 \end{verbatim}
@@ -460,25 +461,25 @@ Another more complicated example, the calculation of the magnetisation
 in a tetragonal quasi-quartet system is given in Appendix~\ref{dyni2b2c}.
 
 %*************************************************************************************
-\subsection{External module function {\prg mcalc\_parameter\_storage\_matrix\_init} - used by {\prg %%@
+\subsection{External module function {\prg Icalc\_parameter\_storage\_matrix\_init} - used by {\prg %%@
 mcphas\index{mcphas}},{\prg singleion\index{singleion}},{\prg charges\index{charges}} and {\prg %%@
 chrgplt\index{chrgplt}},{\prg mcdiff\index{mcdiff}}  }
 
 This routine is optional, i.e. it may be programmed, but is not absolutely necessary.
-Before any call to mcalc this function will be called. subsequent calls to mcalc will provide this matrix to %%@
-mcalc, mcalc may set values to this matrix to be read in the next call
-of mcalc.
+Before any call to Icalc this function will be called. subsequent calls to Icalc will provide this matrix to %%@
+Icalc, Icalc may set values to this matrix to be read in the next call
+of Icalc.
 
 This feature provides the designer of a single ion module  with the possiblity to store information for subsquent %%@
-calls of mcalc,
+calls of Icalc,
  usually the eigenvalues and eigenstates of a problem. This can be very useful to accelerate computations. For %%@
 example, in {\prg mcphas} meanfield iterations require
 to solve a similar eigenvalue problem in each iteration step. Therefore the {\prg mcphas} module provides
-to the single ion module on every call to the function {\prg mcalc} the parmeter matrix {\prg }
+to the single ion module on every call to the function {\prg Icalc} the parmeter matrix {\prg }
 which the module stored in its last call for a specfic ion in the magnetic unit cell.
 
 At the start of the programs {\prg mcphas} {\prg mcdiff} {\prg singleion} the function {\prg %%@
-mcalc\_parameter\_storage\_matrix\_init}
+Icalc\_parameter\_storage\_matrix\_init}
 is called (if present in the module) and it should initialize a Complex Matrix by a command such as
 
 {\prg (*parstorage)=ComplexMatrix(0,nofrows,1,nofcols);}
@@ -493,17 +494,17 @@ The routine should look similar to
 #include "vector.h"          // MatPack vector class must be included
 
 #ifdef __linux__
-extern "C" void mcalc_parameter_storage_matrix_init(
+extern "C" void Icalc_parameter_storage_matrix_init(
 #else
-extern "C" __declspec(dllexport) void mcalc_parameter_storage_matrix_init(
+extern "C" __declspec(dllexport) void Icalc_parameter_storage_matrix_init(
 #endif
 // on output
                      ComplexMatrix * parstorage,    // storage matrix
 // on input
-                      Vector &gjmbH,      // Input vector of mean fields (meV)
-					                      // (can be n dimensional)
-                      double *g_J,        // Input Lande g-factor
-                      double &T,          // Input temperature (K)
+                       gjmbHxc ,                 //   vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+                       Hext  ,                     // external magnetic field [T]
+                      double *g_J,             // Input Lande g-factor
+                      double &T,                // Input temperature (K)
                       Vector &MODPAR,     // Input vector of parameters 
 					                      //from single ion property file
                       char **sipffilename)// Single ion properties filename
@@ -559,8 +560,8 @@ extern "C" __declspec(dllexport) void estates(
                                               // numbers of the states (imaginary part of row 0)
                                               // and eigenvalues (real part of row 0)
 // on input
-                      Vector &gjmbH,      // Input vector of mean fields (meV) 
-					                      //(can be n dimensional) 
+                       gjmbHxc ,                 //   vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+                       Hext  ,                     // external magnetic field [T]
                       double *g_J,        // Input Lande g-factor
                       double &T,          // Input temperature (K)
                       Vector &MODPAR,     // Input vector of parameters from 
@@ -599,7 +600,7 @@ ${\mbf u^s_{\alpha1}}$ is not normalised and thus the matrix  $M^s_{\alpha\beta}
 The format to be used is:
 {\footnotesize
 \begin{verbatim}
-extern "C" int du1calc(int & tn,double & T,Vector & gjmbH,double * g_J,Vector & MODPAR,
+extern "C" int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & MODPAR,
 char ** sipffilename,ComplexVector & u1,float & delta, ComplexMatrix & est)
 \end{verbatim}
 
@@ -613,7 +614,8 @@ on input
    sipffilename    file name of the single ion parameter file
    g_J             Lande factor
    T               Temperature[K]
-   gjmbH           Vector of effective field [meV] (can be n dimensional)
+   gjmbHxc     vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+   Hext           external magnetic field [T]
    est             eigenstate matrix (initialized by estates)
                    it should/may also contain population numbers of the states
 				   (imaginary part of row 0)
@@ -625,7 +627,7 @@ on output
    delta           transition energy [meV]
    u1             vector u1=<-|Jalpha-<Jalpha>|+>sqrt((n- - n+)) (if T>0)
                           vector u1=<-|Jalpha|+>sqrt((n- - n+)) (if T<0)
-                note that as in mcalc the single ion momentum vector <-|J|+> 
+                note that as in Icalc the single ion momentum vector <-|J|+> 
 				(n- dimensional with n>=1)
                 may be an arbitrary set of operators, restriction is that 
                 Ja, Jb, Jc are the total angular motmentum components along the
@@ -831,7 +833,7 @@ In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--
 \end{enumerate}
 
 %*************************************************************************************
-\subsection{External module function {\prg spindensity\_mcalc} -
+\subsection{External module function {\prg spindensity\_coeff} -
 used by {\prg spindensplt\index{spindensplt}},
 {\prg spindensities\index{spindensities}},
 {\prg momdensplt\index{momdensplt}},
@@ -842,12 +844,12 @@ the following function has to be
 present in the module file {\prg *.so}:
 
 \begin{verbatim}
-extern "C" void spindensity_mcalc(Vector &aSlm, int & xyz, double *T,Vector &gjmbH,
-     double *gJ,Vector &MODPAR,char **sipffilename,ComplexMatrix & mcalc_parstorage);
+extern "C" void spindensity_coeff(Vector &aSlm, int & xyz, double *T,Vector &gjmbHxc, Vector & Hext,
+     double *gJ,Vector &MODPAR,char **sipffilename,ComplexMatrix & Icalc_parstorage);
 \end{verbatim}
 
 Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) void %%@
-spindensity\_mcalc(...)}.
+spindensity\_coeff(...)}.
 
 The meaning of the symbols is as follows:
 {\footnotesize
@@ -855,11 +857,12 @@ The meaning of the symbols is as follows:
   on input
     xyz         direction index 1,2,3 = x,y,z (component for the spindensity vector to be calculated)
     T           temperature[K]
-    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gjmbHxc     vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+     Hext      external magnetic field [T]
     gJ          Lande factor
     MODPAR      Vector with Parameters  read in single ion property file
     sipffilename    file name of the single ion parameter file
-    mcalc_parstorage parameter matrix (initialized by mcalc_parameter_storage_matrix_init)
+    Icalc_parstorage parameter matrix (initialized by Icalc_parameter_storage_matrix_init)
                    it should/may contain any information, e.g. population numbers of the
 				   states (imaginary part of row 0)
                    and eigenvalues (real part of row 0) with values set by the most recent call
@@ -880,7 +883,7 @@ The module function must perform the following tasks:
 \end{enumerate}
 
 %*************************************************************************************
-\subsection{External module function {\prg orbmomdensity\_mcalc} -
+\subsection{External module function {\prg orbmomdensity\_coeff} -
 used by {\prg orbmomdensplt\index{spindensplt}},
 {\prg orbmomdensities\index{spindensities}},
 {\prg momdensplt\index{momdensplt}},
@@ -894,12 +897,12 @@ the following function has to be
 present in the module file {\prg *.so}:
 
 \begin{verbatim}
-extern "C" void orbmomdensity_mcalc(Vector &aLlm, int & xyz, double *T,Vector &gjmbH,
-     double *gJ,Vector &MODPAR,char **sipffilename,ComplexMatrix & mcalc_parstorage);
+extern "C" void orbmomdensity_coeff(Vector &aLlm, int & xyz, double *T,Vector &gjmbHxc, Vector & Hext,
+     double *gJ,Vector &MODPAR,char **sipffilename,ComplexMatrix & Icalc_parstorage);
 \end{verbatim}
 
 Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) void %%@
-orbmomdensity\_mcalc(...)}.
+orbmomdensity\_coeff(...)}.
 
 The meaning of the symbols is as follows:
 {\footnotesize
@@ -907,11 +910,12 @@ The meaning of the symbols is as follows:
   on input
     xyz         direction index 1,2,3 = x,y,z (component for the spindensity vector to be calculated)
     T           temperature[K]
-    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gjmbHxc     vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+    Hext        external magnetic field [T]
     gJ          Lande factor
     MODPAR      Vector with Parameters  read in single ion property file
     sipffilename    file name of the single ion parameter file
-    mcalc_parstorage parameter matrix (initialized by mcalc_parameter_storage_matrix_init)
+    Icalc_parstorage parameter matrix (initialized by Icalc_parameter_storage_matrix_init)
                    it should/may contain any information, e.g. population numbers of the
 				   states (imaginary part of row 0)
                    and eigenvalues (real part of row 0) with values set by the most recent call
@@ -951,7 +955,7 @@ it will be used by programs {\prg chrgplt\index{chrgplt}},
 
 \begin{verbatim}
 extern "C" double ro_calc(double & teta,double & fi,double &R,Vector &aLlm, double *T,
-     Vector &gjmbH, double *gJ,Vector &MODPAR,char **sipffilename);
+     Vector &gjmbHxc,Vector & Hext, double *gJ,Vector &MODPAR,char **sipffilename);
 \end{verbatim}
 
 Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) double %%@
@@ -963,7 +967,8 @@ The meaning of the symbols is as follows:
   on input
     teta, fi, R(Angsgtroem) .... spatial position in spherical coordinates
     T           temperature[K]
-    gjmbH       vector of mean field [meV] (can be n-dimensional, for a set of n operators)
+    gjmbHxc     vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+    Hext       external magnetic field [T]
     gJ          Lande factor
     MODPAR      Vector with Parameters  read in single ion property file
     sipffilename    file name of the single ion parameter file

@@ -121,7 +121,7 @@ int spincf::nc()
 {return nofc;
 }
 
-Vector spincf::nettomagmom(Vector & gJ) // returns nettomagnetic moment [mu_b]
+Vector spincf::nettoI(Vector & gJ) // returns nettomagnetic moment [mu_b]
 {
  int i,j,k,l; 
  Vector ret(1,3);

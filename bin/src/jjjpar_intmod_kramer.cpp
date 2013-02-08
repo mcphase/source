@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------------------------
-//routine mcalc for kramers doublet
+//routine Icalc for kramers doublet
 //------------------------------------------------------------------------------------------------
-void jjjpar::kramer (Vector & Jret,double & T, Vector & gjmbH, double & lnZ, double & U)
+void jjjpar::kramer (Vector & Jret,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZ, double & U)
 { /*on input
     ABC(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     gJ		lande factor
@@ -15,6 +15,8 @@ void jjjpar::kramer (Vector & Jret,double & T, Vector & gjmbH, double & lnZ, dou
   double alpha, betar, betai, lambdap,lambdap_KBT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, jap, jam, jbp, jbm, jcp, jcm,Z;
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
+  Vector gjmbH(1,3);
+  gjmbH=gjmbHxc+gJ*MU_B*Hext;
 
   alpha = ABC[2] * gjmbH[2];
   betar = -ABC[1] * gjmbH[1];
@@ -89,7 +91,7 @@ void jjjpar::kramer (Vector & Jret,double & T, Vector & gjmbH, double & lnZ, dou
 //     gjmbH[1]/MU_B/gjJ, gjmbH[2]/MU_B/gjJ, gjmbH[3]/MU_B/gjJ, J[1], J[2], J[3]);
 }
 
-int jjjpar::kramerdm(int & transitionnumber,double & T,Vector & gjmbH,ComplexVector & u1,float & delta)
+int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta)
 { 
   /*on input
     transitionnumber ... number of transition to be computed - meaningless for kramers doublet, because there is only 1 transition
@@ -107,11 +109,13 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector & gjmbH,ComplexVec
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
   double Z;
   double lnz,u;
-  
+  Vector gjmbH(1,3);
+  gjmbH=gjmbHxc+gJ*MU_B*Hext;
+
   static Vector Jret(1,3);
   Jret=0;
   // clalculate thermal expectation values (needed for quasielastic scattering)
-  if(T>0){kramer(Jret,T,gjmbH,lnz,u);}else{T=-T;}
+  if(T>0){kramer(Jret,T,gjmbHxc,Hext,lnz,u);}else{T=-T;}
   int pr;
   pr=1;
   if (transitionnumber<0) {pr=0;transitionnumber*=-1;}
@@ -238,7 +242,7 @@ return 3; // kramers doublet has always exactly one transition + 2 levels (quasi
 }
 /**************************************************************************/
 
-Matrix jjjpar::krameropmat (int & n ,Vector & gjmbH)
+Matrix jjjpar::krameropmat (int & n ,Vector &  gjmbHxc,Vector & Hext)
 {
  /* on input
     ABC(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
@@ -267,6 +271,8 @@ Matrix jjjpar::krameropmat (int & n ,Vector & gjmbH)
  //  They are checked for conformance !
  // void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi,
  // 			   int sort, int maxiter)
+ Vector gjmbH(1,3);
+  gjmbH=gjmbHxc+gJ*MU_B*Hext;
 
 Matrix opmat(1,2,1,2);
 switch(n)

@@ -86,7 +86,7 @@ int checkspincf(int j,spincf & sps,qvectors & testqs, Vector & nettom,
     Z		single ion partition function
     U		single ion magnetic energy
 */
-//void mcalc (float & A, float & M, float & C,float & gJ,double & T,
+//void Icalc (float & A, float & M, float & C,float & gJ,double & T,
 //                          Vector & H, Vector &  m, float & Z,float & U);
 
 

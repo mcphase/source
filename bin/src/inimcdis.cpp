@@ -134,12 +134,12 @@ void inimcdis::save()
   fprintf(fout,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
   fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
   fprintf(fout,"#*********************************************************************\n");
-  fprintf(fout,"#'T'             temperature T\n");
-  fprintf(fout,"#'Ha' 'Hb' 'Hc'  magnetic field\n");
+  fprintf(fout,"#'T'             temperature T(K)\n");
+  fprintf(fout,"#'Ha' 'Hb' 'Hc'  magnetic field(T)\n");
   fprintf(fout,"#'n'             number of atoms in magnetic unit cell\n");
   fprintf(fout,"#'nofatoms'      number of atoms in primitive crystal unit cell\n");
   fprintf(fout,"#'nofcomponents' dimension of moment vector of a magnetic atoms\n");
-  fprintf(fout,"#! T=%g Ha=%g Hb=%g Hc=%g n=%i nofatoms=%i nofcomponents=%i\n",T,Ha,Hb,Hc,mf.n(),nofatoms,nofcomponents);
+  fprintf(fout,"#! T=%g  Ha=%g  Hb=%g Hc=%g  n=%i nofatoms=%i nofcomponents=%i\n",T,Hext(1),Hext(2),Hext(3),mf.n(),nofatoms,nofcomponents);
   mf.print(fout);
   fclose (fout);
 
@@ -150,7 +150,7 @@ void inimcdis::save()
 inimcdis::inimcdis (const char * file,const char * spinfile)
 { float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE];
-  int i=0,j=0,nofhklfiles=0;
+  int i=0,j=0,nofhklfiles=0;Hext=Vector(1,3);
   FILE *fin,*finhkl;float N,h1,k1,l1,hN,kN,lN; 
   fin=fopen(spinfile,"rb");if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);errexit();}
   instr[0]='#';  
@@ -158,9 +158,9 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
   info= new char [strlen(instr)+1];
   extract(instr,"T",T); 
-  extract(instr,"Ha",Ha);
-  extract(instr,"Hb",Hb);
-  extract(instr,"Hc",Hc);
+  extract(instr,"Ha",Hext[1]);
+  extract(instr,"Hb",Hext[2]);
+  extract(instr,"Hc",Hext[3]);
   strcpy(info,instr);
   printf("#%s \n# reading mean field configuration mf=gj muB heff [meV]\n",instr);
    

@@ -18,6 +18,7 @@
 		     // energy the matrix Mijkl contains wn-wn' or wn/kT
 
 #include "jjjpar_basmodfunc.cpp" // basic sipf module functions
+#include "jjjpar_observables.cpp" // function for physical observables
 #include "jjjpar_intmod_kramer.cpp"   // some functions for module_type=1
 #include "jjjpar_intmod_brillouin.cpp"// some functions for module_type=3
 #include "jjjpar_intmod_cluster.cpp"// some functions for module_type=5
@@ -630,16 +631,16 @@ jjjpar::jjjpar (const jjjpar & p)
   cffilename= new char [strlen(p.cffilename)+1];
   strcpy(cffilename,p.cffilename);
   if (p.module_type==1||p.module_type==0)  ABC=p.ABC;
-  if ((p.module_type==1||p.module_type==0) && (p.mcalc_parstorage.Cols()>0) && (p.mcalc_parstorage.Rows()>0))
+  if ((p.module_type==1||p.module_type==0) && (p.Icalc_parstorage.Cols()>0) && (p.Icalc_parstorage.Rows()>0))
   {
-     mcalc_parstorage = ComplexMatrix(p.mcalc_parstorage.Rlo(),p.mcalc_parstorage.Rhi(),p.mcalc_parstorage.Clo(),p.mcalc_parstorage.Chi());
-     mcalc_parstorage = p.mcalc_parstorage;
+     Icalc_parstorage = ComplexMatrix(p.Icalc_parstorage.Rlo(),p.Icalc_parstorage.Rhi(),p.Icalc_parstorage.Clo(),p.Icalc_parstorage.Chi());
+     Icalc_parstorage = p.Icalc_parstorage;
   }
   if (p.module_type==5) {clusterpars=new par(*p.clusterpars);}
   if (p.module_type==2||p.module_type==4)  {iops=new ionpars(*p.iops);//((int)(2*(*p.iops).J+1));iops=p.iops;
                            int dj;dj=(int)(2*J()+1);
                            est=ComplexMatrix(0,dj,1,dj);est=p.est;
-                           mcalc_parstorage=ComplexMatrix(0,dj,1,dj);mcalc_parstorage=p.mcalc_parstorage;
+                           Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=p.Icalc_parstorage;
                            }
 //  if (module_type==2)  iops=new ionpars(4);iops=p.iops;
 //  if (module_type==2)  iops=p.iops;
@@ -656,7 +657,7 @@ jjjpar::jjjpar (const jjjpar & p)
 */
    m=p.m;   dm=p.dm;
    mq=p.mq;    ddnn=p.ddnn;
-   estates=p.estates;    mcalc_parameter_storage=p.mcalc_parameter_storage;
+   estates=p.estates;    Icalc_parameter_storage=p.Icalc_parameter_storage;
    sd_m=p.sd_m;
    od_m=p.od_m;
 /*  }*/
@@ -689,9 +690,9 @@ jjjpar::~jjjpar ()
    delete []cffilename;// will not work in linux
    if (module_type==5) delete clusterpars;
    if (module_type==2||module_type==4) delete iops;
-#ifdef __linux__
-// if (module_type==0)dlclose(handle);
-#endif
+//#ifdef __linux__
+// i#ifdef __linux__f (module_type==0)dlclose(handle);
+//#endif
  
  }
 

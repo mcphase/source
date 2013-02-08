@@ -31,7 +31,7 @@ int main (int argc, char **argv)
   double stamax=1e33;
   Vector xv(1,3);
   Vector yv(1,3);
-  Vector h(1,3);Vector mmax1(1,3);
+  Vector h(1,3);
   
 fprintf(stderr,"**************************************************************************\n");
 fprintf(stderr,"*\n");
@@ -59,47 +59,47 @@ fprintf(stderr,"****************************************************************
  if(verbose==1){printf("reading parameters from file mcphas.j\n");}
  par inputpars("./mcphas.j"); inputpars.save("./results/_mcphas.j"); 
 
-  Vector mmax(1,inputpars.nofatoms*inputpars.nofcomponents);
-  Vector mmom(1,inputpars.nofcomponents);
-  Vector h1(1,inputpars.nofcomponents);
+  Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
+  Vector Imom(1,inputpars.nofcomponents);
+  Vector mmax(1,3*inputpars.nofcomponents);
+  Vector mmom(1,3);
+  Vector h1(1,inputpars.nofcomponents),h1ext(1,3);h1ext=0;
  
 // here save single ion property files to results
 inputpars.save_sipfs("./results/_");
 
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
-T=1.0;for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).mcalc_parameter_storage_init(h1,T); // initialize eigenstate matrix
-      for (im=1;im<=inputpars.nofcomponents;++im){h1=0;
-                            if((*inputpars.jjj[l]).gJ!=0){h1(im)=10*MU_B*(*inputpars.jjj[l]).gJ;}
-                            else                         {h1(im)=20*MU_B;} //just put some high field
-                            (*inputpars.jjj[l]).mcalc(mmom,T,h1,z,u,(*inputpars.jjj[l]).mcalc_parstorage);
-                            mmax(inputpars.nofcomponents*(l-1)+im)=mmom(im);
-                           //printf("mmax(%i)=%g\n",inputpars.nofcomponents*(l-1)+im,mmax(inputpars.nofcomponents*(l-1)+im));
+T=1.0;for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
+      for (im=1;im<=inputpars.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
+                            (*inputpars.jjj[l]).Icalc(Imom,T,h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
+                            Imax(inputpars.nofcomponents*(l-1)+im)=Imom(im);
+                            //printf("Imax(%i)=%g\n",inputpars.nofcomponents*(l-1)+im,Imax(inputpars.nofcomponents*(l-1)+im));
 			   }
-                                        }
-mmax1=0;for (im=1;im<=inputpars.nofcomponents&&im<=3;++im){mmax1(im)=mmax(im);}
+      for (im=1;im<=3;++im){h1=0;h1ext=0;h1ext(im)=20*MU_B; //just put some high field
+                          (*inputpars.jjj[l]).mcalc(mmom,T,h1,h1ext,(*inputpars.jjj[l]).Icalc_parstorage);
+                            mmax(3*(l-1)+im)=mmom(im);
+                           }
+                                  }
 
 
 T=0.0;h=0;
 // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
    testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.nofatoms,inputpars.nofcomponents);
    testspins.save("./results/_mcphas.tst","w");
-   qvectors testqs (ini,inputpars.rez,mmax,"./results/mcphas.qvc",inputpars.nofatoms,inputpars.nofcomponents,verbose);
+   qvectors testqs (ini,inputpars.rez,Imax,"./results/mcphas.qvc",inputpars.nofatoms,inputpars.nofcomponents,verbose);
 
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
    	
-// transform mmax to contain saturation moments [muB] 
-for(l=1;l<=inputpars.nofatoms;++l){for (im=1;im<=inputpars.nofcomponents&&im<=3;++im){if((*inputpars.jjj[l]).gJ!=0)mmax(3*(l-1)+im)*=inputpars.gJ(l);}}
-
 if (argc>options&&strncmp(argv[argc-1],"-",1)!=0){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
  { //begin initialize display file
    FILE * fout;fout = fopen_errchk ("./results/.mcphas.fum","w");
    fprintf (fout, " %4.4g %6.6g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g\n",
-            0.0,ini.ymin,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-Max(mmax1),0.0,0.0);
+            0.0,ini.ymin,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-Max(mmax),0.0,0.0);
    fprintf (fout, " %4.4g %6.6g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g\n",
-            0.0,ini.ymax+1e-4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Max(mmax1),0.0,0.0);
+            0.0,ini.ymax+1e-4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Max(mmax),0.0,0.0);
    fclose(fout); //end initialize display file
   
   for (y=ini.ymin;y<=ini.ymax;y+=ini.ystep)

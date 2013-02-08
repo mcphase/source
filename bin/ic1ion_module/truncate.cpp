@@ -32,7 +32,7 @@
 // --------------------------------------------------------------------------------------------------------------- //
 void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<double> &iHic, int JHi, int JLo)
 {
-   std::cout << "mcalc(): Calculating rotated matrix for truncation." << std::flush;
+   std::cout << "Icalc(): Calculating rotated matrix for truncation." << std::flush;
    clock_t start,end; start = clock();
    int info,Hsz=getdim(pars.n,pars.l);
    complexdouble *Vf; Vf = new complexdouble[Hsz*Hsz]; double *Ef; Ef = new double[Hsz]; 
@@ -51,7 +51,7 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
    {
       #ifndef _WINDOWS
       struct stat status; int dirstat=0; stat("results/mms/",&status); if(!S_ISDIR(status.st_mode)) dirstat = mkdir("results/mms",0777);
-      if(dirstat!=0) { std::cerr << "mcalc(): " << errno << "\n"; exit(EXIT_FAILURE); }
+      if(dirstat!=0) { std::cerr << "Icalc(): " << errno << "\n"; exit(EXIT_FAILURE); }
       #else
       DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY)) 
       if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::Jmat(): Cannot create mms directory\n";
@@ -80,7 +80,7 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
       if(fabs(Hrot[ii*cb+jj].r)<DBL_EPSILON) Hrot[ii*cb+jj].r=0.; if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) Hrot[ii*cb+jj].i=0.; } 
    memcpy(&est[memloc+100][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
    // Calculates the rotated multipolar operators for the mean field terms
-   std::cout << " Using " << cb << " levels of " << Hsz << ".\nmcalc(): Starting calculation of rotated mean field operators... " << std::flush;
+   std::cout << " Using " << cb << " levels of " << Hsz << ".\nIcalc(): Starting calculation of rotated mean field operators... " << std::flush;
    icmfmat mfmat(pars.n,pars.l,JHi-JLo+1,pars.save_matrices); double redmat;
    for(int iJ=(JLo-1); iJ<JHi; iJ++)
    {

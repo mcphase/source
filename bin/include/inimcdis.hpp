@@ -28,9 +28,7 @@ class inimcdis
    // may be used to plot charge density waves. extended_eigenvevtor_dimension must not be 
    // larger than allowed by du1calc, the routine which creates the matrix Malphabeta (see model section)
   double T;
-  double Ha;
-  double Hb;
-  double Hc;
+  Vector Hext;
   double emax;
   double emin; // energy boundary for dispersion (used for calc. of sta - see manual)
   double ki;

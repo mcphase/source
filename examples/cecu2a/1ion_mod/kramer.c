@@ -29,12 +29,12 @@
 #endif
 //{  fprintf(stdout,"kramer.so: is removed\n");}
 
-//routine mcalc for kramers doublet
+//routine Icalc for kramers doublet
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) void mcalc(Vector & Jr,double * T, Vector & gjmbHin,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" __declspec(dllexport) void Icalc(Vector & Jr,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #else
-extern "C" void mcalc(Vector & Jr,double * T, Vector & gjmbHin,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" void Icalc(Vector & Jr,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #endif
 {   
@@ -51,6 +51,8 @@ extern "C" void mcalc(Vector & Jr,double * T, Vector & gjmbHin,double * g_J, Vec
     Z		single ion partition function
     U		single ion magnetic energy
 */
+Vector gjmbHin(1,gjmbHxc.Hi());
+gjmbHin=gjmbHxc+(*g_J)*MU_B*Hext;
 // check dimensions of vector
 if(Jr.Hi()!=3||gjmbHin.Hi()!=3||ABC.Hi()!=5)
    {fprintf(stderr,"Error loadable module kramer.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
@@ -164,10 +166,10 @@ return;
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
+extern "C" __declspec(dllexport) int du1calc(int & tn,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
                        ComplexVector & u1r,float & delta,ComplexMatrix & est)
 #else
-extern "C" int du1calc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector & ABC, char ** sipffile,
+extern "C" int du1calc(int & tn,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
                        ComplexVector & u1r,float & delta,ComplexMatrix & est)
 #endif
 { 
@@ -187,12 +189,13 @@ extern "C" int du1calc(int & tn,double & T,Vector & gjmbHin,double * g_J,Vector 
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
   double Z,lnz,u;
   static int pr;
-
+Vector gjmbHin(1,gjmbHxc.Hi());
+gjmbHin=gjmbHxc+(*g_J)*MU_B*Hext;
   static Vector Jin(1,3);
   static Vector J(1,3);
   static ComplexVector u1(1,3);
   // clalculate thermal expectation values (needed for quasielastic scattering)
-  Jin=0;if(T>0){ mcalc(Jin,&T,gjmbHin,g_J,ABC,sipffile,&lnz,&u,est);}
+  Jin=0;if(T>0){ Icalc(Jin,&T,gjmbHxc,Hext,g_J,ABC,sipffile,&lnz,&u,est);}
                 else {T=-T;}
 
 // rotate effective field

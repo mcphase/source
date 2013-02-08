@@ -256,10 +256,10 @@ dummyc=Jbb;Jbb=Jcc;Jcc=Jaa;Jaa=dummyc;
 
 module_ionpars iops("#ATTENTION in module cfield.so the AXES xyz are parallel to cab\n#The higher order interactions are described by the  PKQ Operators defined in cfield:\n#O20(c) .... Jd\n#O22(c) .... Je\n#O40(c) .... Jf\n#O42(c) .... Jg\n#O44(c) .... Jh\n#O60(c) .... Ji\n#O62(c) .... Jj\n#O64(c) .... Jk\n#O66(c) .... Jl\n");  // get 1ion parameters - operator matrices
 #ifdef __declspec
-extern "C" __declspec(dllexport) void mcalc(Vector & J,double & T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" __declspec(dllexport) void Icalc(Vector & J,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
                       double & lnZ,double & U)
 #else
-extern "C" void mcalc(Vector & J,double & T, Vector & gjmbH,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" void Icalc(Vector & J,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
                       double & lnZ,double & U)
 #endif  
 
@@ -274,9 +274,13 @@ extern "C" void mcalc(Vector & J,double & T, Vector & gjmbH,double * g_J, Vector
     Z		single ion partition function
     U		single ion magnetic energy
 */
-    UNUSED_PARAMETER(g_J);
     UNUSED_PARAMETER(ABC);
     UNUSED_PARAMETER(sipffile);
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc;
+gjmbH(1)+=(*g_J)*MU_B*Hext(1);
+gjmbH(2)+=(*g_J)*MU_B*Hext(2);
+gjmbH(3)+=(*g_J)*MU_B*Hext(3);
 
 // check dimensions of vector
 if(J.Hi()>12||gjmbH.Hi()>12)
@@ -379,10 +383,10 @@ return;
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __declspec
-extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
+extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbHxc, Vector & Hext,double * gJ,Vector & ABC, char ** sipffile,
                        ComplexVector & u1,float & delta)
 #else
-extern "C" int du1calc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & ABC, char ** sipffile,
+extern "C" int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * gJ,Vector & ABC, char ** sipffile,
                        ComplexVector & u1,float & delta)
 #endif
 {//ABC not used !!!
@@ -395,6 +399,11 @@ extern "C" int du1calc(int & tn,double & T,Vector & gjmbH,double * gJ,Vector & A
     mat         transition element matrix
     delta       energy of transition
 */
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc;
+gjmbH(1)+=(*gJ)*MU_B*Hext(1);
+gjmbH(2)+=(*gJ)*MU_B*Hext(2);
+gjmbH(3)+=(*gJ)*MU_B*Hext(3);
 // check dimensions of vector
 if(gjmbH.Hi()>12)
    {fprintf(stderr,"Error loadable module cfield.so: wrong number of dimensions - check number of columns in file mcphas.j\n");
@@ -416,7 +425,7 @@ if(gjmbH.Hi()>12)
    static Vector J(1,gjmbH.Hi());
    double lnz,u;
    J=0;
-   if (T>0){ mcalc(J,T,gjmbH,gJ,ABC,sipffile,lnz,u);} else {T=-T;}
+   if (T>0){ Icalc(J,T,gjmbHxc,Hext,gJ,ABC,sipffile,lnz,u);} else {T=-T;}
    // setup hamiltonian
    int dj;
    dj=iops.Hcf.Rhi();
@@ -488,7 +497,7 @@ for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 // 2. set delta
 delta=En(j)-En(i);
 
-if (delta<-0.000001){fprintf(stderr,"ERROR module cfield.so - dmcalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if (delta<-0.000001){fprintf(stderr,"ERROR module cfield.so - dIcalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
 

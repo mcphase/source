@@ -43,16 +43,16 @@ double fecalc(Vector Hex, double T, par &inputpars, spincf &sps, mfcf &mf, doubl
    Vector *lnzi; lnzi = new Vector [sdim+2]; for(i=0;i<=sdim+1;++i) lnzi[i] = Vector(1,inputpars.nofatoms); // partition sum for every atom
    Vector *ui;   ui   = new Vector [sdim+2]; for(i=0;i<=sdim+1;++i) ui[i]   = Vector(1,inputpars.nofatoms); // magnetic energy for every atom
    ComplexMatrix ** ests; ests=new ComplexMatrix*[inputpars.nofatoms*sdim+2];
-   s = sps.in(1,1,1); (*inputpars.jjj[1]).mcalc(moment,T,d1,lnzi[s][1],ui[s][1],(*inputpars.jjj[1]).est);
+   s = sps.in(1,1,1); (*inputpars.jjj[1]).Icalc(moment,T,d1,lnzi[s][1],ui[s][1],(*inputpars.jjj[1]).est);
    for (i=1;i<=sps.na();++i)
       for(j=1;j<=sps.nb();++j)
          for(k=1;k<=sps.nc();++k)
             for (l=1;l<=inputpars.nofatoms;++l)
             {
                ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1] = 
-                  new ComplexMatrix((*inputpars.jjj[l]).mcalc_parstorage.Rlo(),(*inputpars.jjj[l]).mcalc_parstorage.Rhi(),
-		                    (*inputpars.jjj[l]).mcalc_parstorage.Clo(),(*inputpars.jjj[l]).est.Chi());
-               (*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1])=(*inputpars.jjj[l]).mcalc_parstorage;
+                  new ComplexMatrix((*inputpars.jjj[l]).Icalc_parstorage.Rlo(),(*inputpars.jjj[l]).Icalc_parstorage.Rhi(),
+		                    (*inputpars.jjj[l]).Icalc_parstorage.Clo(),(*inputpars.jjj[l]).est.Chi());
+               (*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1])=(*inputpars.jjj[l]).Icalc_parstorage;
             }
 
    int diagonalexchange=1;
@@ -70,7 +70,7 @@ double fecalc(Vector Hex, double T, par &inputpars, spincf &sps, mfcf &mf, doubl
             {
                int lm1m3 = inputpars.nofcomponents*(l-1);
                for(m1=1; m1<=inputpars.nofcomponents; ++m1) d1[m1] = mf.mf(i,j,k)[lm1m3+m1];
-               (*inputpars.jjj[l]).mcalc(moment,T,d1,lnzi[s][l],ui[s][l],(*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+               (*inputpars.jjj[l]).Icalc(moment,T,d1,lnzi[s][l],ui[s][l],(*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
                for(m1=1; m1<=inputpars.nofcomponents; ++m1) spsold.m(i,j,k)(lm1m3+m1) = moment[m1];
             }
          } */
@@ -223,7 +223,7 @@ double fecalc(Vector Hex, double T, par &inputpars, spincf &sps, mfcf &mf, doubl
                   lm1m3=inputpars.nofcomponents*(l-1);
                   for(m1=1;m1<=inputpars.nofcomponents;++m1)
                      d1[m1] = mf.mf(i,j,k)[lm1m3+m1];
-                  (*inputpars.jjj[l]).mcalc(moment,T,d1,lnzi[s][l],ui[s][l],(*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+                  (*inputpars.jjj[l]).Icalc(moment,T,d1,lnzi[s][l],ui[s][l],(*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
                   for(m1=1;m1<=inputpars.nofcomponents;++m1)
                   sps.m(i,j,k)(lm1m3+m1) = moment[m1];
                }
@@ -251,7 +251,7 @@ double fecalc(Vector Hex, double T, par &inputpars, spincf &sps, mfcf &mf, doubl
                   meanfield[m1]=mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+m1];
                }
                // subtract external field (only necessary for magnetic field, not for quadrupolar fields,
-               // because the Cf parameters are treated separately in mcalc and not as part of the quadrupolar
+               // because the Cf parameters are treated separately in Icalc and not as part of the quadrupolar
                // field)
                if(inputpars.gJ(l)==0)
                   for(m1=1; m1<=6&&m1<=inputpars.nofcomponents; ++m1)
@@ -303,7 +303,7 @@ double fecalcfirst(Vector Hex, double T, par &inputpars, mfcf &mf, double &u)
                   sps.mi(rr)(ri+ii) = rnd(1.0);
             } // randomize spin rr
          }
-         if (Hex*sps.nettomagmom(inputpars.gJ)<0) {  // see if nettomoment positiv
+         if (Hex*sps.nettoI(inputpars.gJ)<0) {  // see if nettomoment positiv
             sps.invert(); momentq0=-momentq0; }      // if not - invert spinconfiguration
 
          mftst = new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
@@ -334,7 +334,7 @@ double fecalcnoloop(Vector Hex, double T, par &inputpars, mfcf &mf, double &u)
    Vector *lnzi; lnzi = new Vector [sdim+2]; for(i=0;i<=sdim+1;++i) lnzi[i] = Vector(1,inputpars.nofatoms); // partition sum for every atom
    Vector *ui;   ui   = new Vector [sdim+2]; for(i=0;i<=sdim+1;++i) ui[i]   = Vector(1,inputpars.nofatoms); // magnetic energy for every atom
    ComplexMatrix ** ests; ests=new ComplexMatrix*[inputpars.nofatoms*sdim+2];
-   s = sps.in(1,1,1); (*inputpars.jjj[1]).mcalc(moment,T,d1,lnzi[s][1],ui[s][1],(*inputpars.jjj[1]).est);
+   s = sps.in(1,1,1); (*inputpars.jjj[1]).Icalc(moment,T,d1,lnzi[s][1],ui[s][1],(*inputpars.jjj[1]).est);
    for (i=1;i<=sps.na();++i)
       for(j=1;j<=sps.nb();++j)
          for(k=1;k<=sps.nc();++k)
@@ -357,7 +357,7 @@ double fecalcnoloop(Vector Hex, double T, par &inputpars, mfcf &mf, double &u)
                lm1m3=inputpars.nofcomponents*(l-1);
                for(m1=1;m1<=inputpars.nofcomponents;++m1)
                   d1[m1] = mf.mf(i,j,k)[lm1m3+m1];
-               (*inputpars.jjj[l]).mcalc(moment,T,d1,lnzi[s][l],ui[s][l],(*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+               (*inputpars.jjj[l]).Icalc(moment,T,d1,lnzi[s][l],ui[s][l],(*ests[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
                for(m1=1;m1<=inputpars.nofcomponents;++m1)
                sps.m(i,j,k)(lm1m3+m1) = moment[m1];
             }
@@ -381,7 +381,7 @@ double fecalcnoloop(Vector Hex, double T, par &inputpars, mfcf &mf, double &u)
                   meanfield[m1]=mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+m1];
                }
                // subtract external field (only necessary for magnetic field, not for quadrupolar fields,
-               // because the Cf parameters are treated separately in mcalc and not as part of the quadrupolar
+               // because the Cf parameters are treated separately in Icalc and not as part of the quadrupolar
                // field)
                if(inputpars.gJ(l)==0)
                   for(m1=1; m1<=6&&m1<=inputpars.nofcomponents; ++m1)
@@ -441,7 +441,7 @@ int main (int argc, char **argv)
    //determine saturation momentum (used for scaling the plots, generation of qvectors)
    for(int l=1;l<=inputpars.nofatoms;++l)
    {
-      h1=0; (*inputpars.jjj[l]).mcalc_parameter_storage_init(h1,T); // initialize eigenstate matrix
+      h1=0; (*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,T); // initialize eigenstate matrix
    }
    double fe;
   

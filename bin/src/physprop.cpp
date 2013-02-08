@@ -431,8 +431,8 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
    fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components\n");
    fprintf (fout, "    #mfa(1) mfa(2) .... selfconsistent Mean field configuration \n"); 
-   fprintf (fout, "    #mfb(1) mfb(2) .... UNITS: mf(i)=gJ*mu_B*heff(i)[meV] \n"); 
-   fprintf (fout, "    #mfc(1) mfc(2) ....         (i.e. divide by gJ and mu_B=0.05788meV/T to get effective field[T]}\n");
+   fprintf (fout, "    #mfb(1) mfb(2) .... UNITS: mf(i)=gJ*mu_B*hxc(i)[meV] \n"); 
+   fprintf (fout, "    #mfc(1) mfc(2) ....         (i.e. divide by gJ and mu_B=0.05788meV/T to get exchange field[T]}\n");
     fclose(fout);
    }  
      fout = fopen_errchk ("./results/mcphas.mf","a");
