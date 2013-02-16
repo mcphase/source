@@ -18,7 +18,6 @@ PLAT = _LINUX
 #  selected.  Define LOADER and LOADOPTS to refer to the loader and 
 #  desired load options for your machine.
 #
-FORTRAN  = gfortran
 ifeq ($(shell uname),Linux)
  LINUX = LINUX
  PLAT = _LINUX
@@ -41,6 +40,10 @@ ifneq ($(shell gcc --version|grep " 4."),)
 endif
 endif
 
+ifdef icc
+FORTRAN  = ifort
+endif
+
 ifneq (,$(findstring CYGWIN,$(shell uname)))
 ifneq ($(shell gcc --version|grep " 3."),)
 FLAGS+=-mno-cygwin
@@ -59,16 +62,24 @@ RANLIB   = i686-w64-mingw32-ranlib
 endif
 endif
 
+ifdef icc
+FLAGS   += -g -fPIC
+else
 ifdef MSYS
 FLAGS   += -pipe -g
 else
 FLAGS   += -pipe -g -fPIC
 endif
+endif
 ifdef fast
+ifdef icc
+FLAGS   += -O2 -xHost
+else
 ifneq ($(shell gcc --version|grep " 3."),)
 FLAGS   += -O2
 else
 FLAGS   += -O2 -march=native
+endif
 endif
 endif
 ifdef profile
@@ -84,7 +95,11 @@ DRVOPTS  = $(OPTS)
 NOOPT    = -fPIC -O0
 LOADER   = $(FORTRAN)
 LOADOPTS =
+ifdef icc
+CC       = icc
+else
 CC       = gcc
+endif
 CFLAGS   = $(FLAGS)
 ifdef b32
 FLAGS   += -m32
