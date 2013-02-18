@@ -31,13 +31,27 @@ GCC42=1
 LFLAGS=-static-libgcc
 endif
 
+ifdef icc
+CC=icc
+CCC=icpc
+LINKER=icpc
+else
+CC=gcc
+CCC=g++
+LINKER=g++
+endif
+
 # Checks whether we support the -march=native target
 ifdef fast
+ifdef icc
+ARCHFLAG=-O2 -xHOST
+else
 ifdef GCC42
 ARCHFLAG=-O2 -march=native 
 #ARCHFLAG=-O2 -march=core2 -msse4 -msse4.1 -msse4.2 -mcx16 -msahf
 else
 ARCHFLAG=-O2
+endif
 endif
 endif
 
@@ -62,9 +76,7 @@ endif
 endif
 
 # C compiler  ############################################################ 
-CC= gcc -pipe $(ARCHFLAG)
-LINKER = g++
-#CC=icc
+CC+= -pipe $(ARCHFLAG)
 #COPTS= -ansi -O3 -fomit-frame-pointer -fforce-addr -mcpu=i486
 #COPTS= -DDEBUG
 COPTS=-ansi $(LINOPTS)
@@ -74,7 +86,7 @@ LFLAGS=-pg
 endif
 
 # C++ compiler ##########################################################
-CCC= g++ $(ARCHFLAG)
+CCC+= $(ARCHFLAG)
 #CCC=$(CC)
 #CCC= g++ 
 

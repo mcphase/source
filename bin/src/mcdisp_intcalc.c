@@ -241,15 +241,15 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
    bval=md.baseindex_max(i2,j2,k2); if(bval>maxb) maxb=bval; 
    nval=md.in(i2,j2,k2); if(nval>md.ncel) md.ncel=nval; } md.ncel++;
    if(maxb==md.nofcomponents) maxb++; // To ensure matrix is not square so overloaded operator ComplexMatrix=(complex<double>) sets all elements to 1e-16 not just diagonal.
-   if(md.Ug==0) { md.Ug = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.Ug[i]=0; }
-   if(md.gU==0) { md.gU = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.gU[i]=0; }
-   if(md.bUg==0) { md.bUg = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.bUg[i]=0; }
-   if(md.bgU==0) { md.bgU = new ComplexMatrix *[md.ncel]; }//for(i=1;i<=md.ncel;i++) md.bgU[i]=0; }
+   if(md.Ug==0) { md.Ug = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.Ug[i]=0; }
+   if(md.gU==0) { md.gU = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.gU[i]=0; }
+   if(md.bUg==0) { md.bUg = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.bUg[i]=0; }
+   if(md.bgU==0) { md.bgU = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.bgU[i]=0; }
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){ int in1=md.in(i1,j1,k1);
-   md.gU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.gU[in1]=defval; 
-   md.Ug[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.Ug[in1]=defval;
-   md.bgU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb);*md.bgU[in1]=defval; 
-   md.bUg[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb);*md.bUg[in1]=defval; }}}
+   if(md.gU[in1]==0) { md.gU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.gU[in1]=defval; }
+   if(md.Ug[in1]==0) { md.Ug[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb); *md.Ug[in1]=defval; }
+   if(md.bgU[in1]==0) { md.bgU[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb);*md.bgU[in1]=defval; }
+   if(md.bUg[in1]==0) { md.bUg[in1] = new ComplexMatrix(1,md.nofcomponents,1,maxb);*md.bUg[in1]=defval; } }}}
   
 // determine chi
   //  chi=0;chibey=0;

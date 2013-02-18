@@ -203,7 +203,7 @@ mdcf::~mdcf ()
  delete lb[id];
  delete d[id];
  // For caching values in calculation of transform of chi''
- if(Ug) delete Ug[id]; if(gU) delete gU[id]; if(bUg) delete bUg[id]; if(bgU) delete bgU[id];
+ if(Ug[id]!=0) delete Ug[id]; if(gU[id]!=0) delete gU[id]; if(bUg[id]!=0) delete bUg[id]; if(bgU[id]!=0) delete bgU[id];
  }}}
  delete []s;delete []m;delete []d;delete []l;delete []nt;
  delete []sb;
@@ -211,8 +211,8 @@ mdcf::~mdcf ()
 delete []lb;
 // for(i=1;i<=ncel;i++) { if(Ug[i]!=0) { delete Ug[i]; Ug[i]=0; } if(bUg[i]!=0) { delete bUg[i]; bUg[i]=0; } 
 //                        if(gU[i]!=0) { delete gU[i]; gU[i]=0; } if(bgU[i]!=0) { delete bgU[i]; bgU[i]=0; } }
- if(Ug) { delete []Ug; Ug=0; } if(bUg) { delete []bUg; bUg=0; }
- if(gU) { delete []gU; gU=0; } if(bgU) { delete []bgU; bgU=0; }
+ if(Ug!=0) { delete []Ug; Ug=0; } if(bUg!=0) { delete []bUg; bUg=0; }
+ if(gU!=0) { delete []gU; gU=0; } if(bgU!=0) { delete []bgU; bgU=0; }
 }
 
 

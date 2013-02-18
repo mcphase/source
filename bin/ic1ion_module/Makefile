@@ -1,5 +1,11 @@
+ifdef icc
+CC = icpc
+LINKER = icpc
+else
 CC = g++
 LINKER = g++
+PEDANT = --pedantic
+endif
 
 # Determines if we have a gcc4.x.x compiler
 ifeq ($(findstring false,$(shell ./checkgcc.sh -4 $(CC))),false)
@@ -73,17 +79,21 @@ CFLAGS+= -fpermissive
 ##################################################################################
 #------------------------------    MSYS    --------------------------------------#
 ifdef WINDOWS
-CFLAGS+= -g -Wall --pedantic -D_WINDOWS
+CFLAGS+= -g -Wall $(PEDANT) -D_WINDOWS
 else
-CFLAGS+= -g -ansi -Wall --pedantic -fPIC
+CFLAGS+= -g -ansi -Wall $(PEDANT) -fPIC
 endif
 #------------------------------    FAST    --------------------------------------#
 ifdef fast
+ifdef icc
+CFLAGS+= -xHOST
+else
 ifdef GCC42
 CFLAGS+= -pipe -O2 -march=native
 #CFLAGS+= -O2 -pipe -fomit-frame-pointer -march=core2 -msse4 -msse4.1 -msse4.2 -mcx16 -msahf
 else
 CFLAGS+= -pipe -O2
+endif
 endif
 ifndef profile
 CFLAGS+= -fomit-frame-pointer
@@ -113,6 +123,9 @@ LDFLAGS+= -static
 endif
 endif
 endif
+endif
+ifdef icc
+LDFLAGS += -lifcore
 endif
 #------------------------------  32/64bit  --------------------------------------#
 ifdef b32
