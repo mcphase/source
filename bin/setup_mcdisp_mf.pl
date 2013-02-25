@@ -17,14 +17,14 @@ reading results/mcphas.mf
 ....writing mcdisp.mf
 EOF
 
-system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3] results/mcphas.mf > mcdisp.mf");
+system ("spins -f results/mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > mcdisp.mf");
 
 print STDOUT << "EOF";
 reading results/mcphas.sps
 ....writing results/spins.*
 EOF
 
-system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3] results/mcphas.sps");
+system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
 
 
 print STDOUT << "EOF";

@@ -108,10 +108,13 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 //                                       ' (with respect to coordinates 1,2,3=yzx)
 // (*jjjpars[1...n]).gj		      Lande factor
 // J[1..n] // code for indicating if ion is J=1: nonmagnetic,
-            //J[i]= 0  rare earth beyond dipole approx, but with given nonzero gJ (stevens-balcar formalism),
-            //J[i]=-1 rare earth with dipole approx (if gJ>0), spin formfactor only (if gJ=0)
-            //J[i]=-2 and gJ=0,general L and S moments given, use dipole approximation and separate formfactor for spin and orbital moment
-            //J[i]=-3 intermediate coupling (gJ=0), go beyond dipole approximation
+            //J[i]= 0 GO BEYOND: using MQ function, for dipole intensities use mom(1-3)
+            //                   rare earth expression (if gJ>0), spin formfactor only (if gJ=0)
+            //J[i]=-1 DIPOLE ONLY: rare earth (if gJ>0), spin formfactor only (if gJ=0)
+            //J[i]=-2 DIPOLE ONLY: gJ=0,general L and S moments given, use dipole approximation 
+            //         and separate formfactor for spin and orbital moment
+            //J[i]=-3 GO BEYOND: using MQ function, go beyond dipole approximation. 
+            //         for dipole use L and S stored in mom(4-9)
 // (*jjjpars[1...n]).magFFj0(1..7)         formfactor j0 for atom 1...n <j0(kr)>-terms A,a,B,b,C,c,D
 // (*jjjpars[1...n]).magFFj2(1..7)         formfactor j2 for atom 1...n <j2(kr)>-terms A,a,B,b,C,c,D
 //     <jl(kr)> is defined as = integral[0,inf] U^2(r) jl(kr) 4 pi r^2 dr
@@ -173,7 +176,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
                                              FQ = (*jjjpars[i]).F(Q); //rare earth
 
                                              if(J[i]==0){ // go beyond dipole approximation for rare earth
-                                                         ComplexVector MQ(1,3);MQ=(*jjjpars[i]).MQ(Qvec);
+                                                         ComplexVector MQ(1,3);(*jjjpars[i]).MQ(MQ,Qvec);
 					               msfx+=0.5*MQ(1)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);//MQ(123)=MQ(xyz)
 					               msfy+=0.5*MQ(2)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               msfz+=0.5*MQ(3)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
@@ -206,7 +209,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					                msfdipz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               }
                                      if(J[i]==-3){ // go beyond dipole approximation for gJ=0 (intermediate coupling)
-                                                       ComplexVector MQ(1,3);MQ=(*jjjpars[i]).MQ(Qvec);
+                                                       ComplexVector MQ(1,3);(*jjjpars[i]).MQ(MQ,Qvec);
                                              FQL = (*jjjpars[i]).F(-Q); // orbital formfactor
                                                         msfdipx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
 					                msfdipy+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);

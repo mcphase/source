@@ -45,7 +45,7 @@ void density::moments_init(Vector & moments)
 double density::denscalc(double &theta,double& fi,double& R,Vector & moments,jjjpar & ionpar,double & T, Vector &  gjmbHxc,Vector & Hext)
    {double ro;
      switch (type)
-     {case 0:      ro=ionpar.rocalc(theta,fi,R,moments,T, gjmbHxc,Hext);break;
+     {case 0:      ro=ionpar.chargedensity_calc(theta,fi,R,moments);break;
       case 1:      ro=ionpar.spindensity_calc(theta,fi,R,moments);break;
       case 2:      ro=ionpar.orbmomdensity_calc(theta,fi,R,moments);break;
       case 3:      ro=ionpar.spindensity_calc(theta,fi,R,momentsx)+
@@ -78,7 +78,7 @@ Vector mom(1,3);
 moments_init(moments); // initialize moments
 
 int imax = 3,iii,iv;
-Vector rp(1,imax),rrttff(1,6);
+Vector rp(1,imax),rrttff(1,6);rrttff=0;
 double rmax = 0;
 double rstp = .1;
 double max = fabs(.01 * ccc);  //end of intervalschachtelung to find r(ro=ccc)

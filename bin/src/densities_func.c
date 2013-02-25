@@ -77,10 +77,10 @@ char *token;cs.abc=0;
 		       extract(instr,"dc",cs.z[n+1])==0)))
 		  {++n;if(n>cs.nofatoms||cs.nofatoms>cs.maxnofatoms)
                     {fprintf(stderr,"ERROR reading file:maximum number of atoms in unit cell exceeded\n");exit(EXIT_FAILURE);}
-                   cs.cffilenames[n]=new char[MAXNOFCHARINLINE];
-                   extract(instr,"cffilename",cs.cffilenames[n],(size_t)MAXNOFCHARINLINE);
+                   cs.sipffilenames[n]=new char[MAXNOFCHARINLINE];
+                   extract(instr,"sipffilename",cs.sipffilenames[n],(size_t)MAXNOFCHARINLINE);
                    extract(instr,"gJ",cs.gJ[n]);
-//		   printf("%s\n",cs.cffilenames[n]);
+//		   printf("%s\n",cs.sipffilenames[n]);
                   }
   }
     j=fseek(fin_coq,pos,SEEK_SET);

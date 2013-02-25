@@ -179,14 +179,13 @@ sub getlattice {
                                    ($x[$n])=extract("da",$_);
                                    ($y[$n])=extract("db",$_);
                                    ($z[$n])=extract("dc",$_);
-                                   ($gJ[$n])=extract("gJ",$_);
-				   if (/^.*\Qx=\E/){($x[$n])=extract("x",$_);}
+                                   if (/^.*\Qx=\E/){($x[$n])=extract("x",$_);}
 				   if (/^.*\Qy=\E/){($y[$n])=extract("y",$_);}
 				   if (/^.*\Qz=\E/){($z[$n])=extract("z",$_);}
-				     ($cffilename)=extractstring("cffilename",$_);
-                                     ($charge[$n])=extractfromfile("CHARGE",$cffilename);
-                                     if($charge[$n]==""){$charge[$n]=$cffilename;}                                 
-                                             #               print "$cffilename  charge=".$charge[$n]."\n";
+				     ($sipffilename)=extractstring("sipffilename",$_);
+                                     ($charge[$n])=extractfromfile("CHARGE",$sipffilename);
+                                     if($charge[$n]==""){$charge[$n]=$sipffilename;}                                 
+                                             #               print "$sipffilename  charge=".$charge[$n]."\n";
                                                            
 
 				  }

@@ -14,8 +14,6 @@ class ionpars
 {private: 
    // calculates scattering operator 
    void MQM(ComplexMatrix & MQXM,ComplexMatrix & MQYM,ComplexMatrix & MQZM, double th, double ph,double J0,double J2,double J4,double J6, Vector & Zc);
-  int calcmagdensity;  // 0 ... normal mode, 1,2,3 calc <J'i>=gJ/2 (<J1,2,3 * Ji>+<Ji*J1,2,3>) ... gives magnetisationdensity in a b c dir instead
-                        // of chargedensiy in chrgplt,charges ...
   
  public:
    int so1ion; // switch to identify the coordinate system orientation with respect to the axes abc
@@ -36,7 +34,7 @@ class ionpars
    ComplexMatrix Jaa;
    ComplexMatrix Jbb;
    ComplexMatrix Jcc;
- 
+   Matrix cnst;
 
    Matrix **Olm; ComplexMatrix **OOlm; // array of matrices
  
@@ -50,6 +48,9 @@ class ionpars
    // and transition matrix elements
    int  cfielddm (int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & u1,float & delta,ComplexMatrix & ests);
    int cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & v1);
+   // charge density coefficients
+   void chargedensity_coeffcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
+   int dchargedensity_coeff1calc(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & chargedensity_coeff1,float & delta,ComplexMatrix & ests);
    // calculate scattering operator <M(Q)>=-2x<Q>_TH in units of mb
    // according to stored eigenstate matrix est
    // calculates the scattering operator given the polar angles th, ph (with respect to the CEF coordinate 

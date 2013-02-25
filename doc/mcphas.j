@@ -19,7 +19,7 @@
 #! r1c=   0 r2c=   0 r3c=   1
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
-#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=1 gJ=0.857143 cffilename=Ce3p.sipf
+#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=1  cffilename=Ce3p.sipf
 # da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
 +0	+0	+1	-0.1	-0.1	-0.1	
 +0	+0	-1	-0.1	-0.1	-0.1	

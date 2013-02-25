@@ -6,7 +6,7 @@ Neutron form factors are a function of the scattering vector
 $\mbf Q$ and expressed in terms of expectation values
 of spherical Bessel functions $j_l(|\mbf Q|r)$ defined as 
 
-\begin{equation}
+\begin{equation}\label{jls}
 \langle j_l(|\mbf Q|) \rangle =\int_0^{\inf} R^2(r) j_l(|\mbf Q|r) 4\pi r^2 dr
 \end{equation}
 
@@ -18,10 +18,14 @@ by the simple expression
 F(|\mbf Q|)=\langle j_0(|\mbf Q|) \rangle + \frac{2-g}{g}\langle j_2(|\mbf Q|) \rangle  
 \end{equation}
 
-This expression is used in modules {\prg mcdiff\index{mcdiff}} and {\prg mcdisp\index{mcdisp}} to calculate the neutron
+The $\langle j_l(|\mbf Q|) \rangle$ are used in modules {\prg mcdiff\index{mcdiff}} and {\prg mcdisp\index{mcdisp}} 
+to calculate the neutron
 scattering cross section. In order to do this task, the single ion property files have
  to contain information on the different $\langle j_l(|\mbf Q|) \rangle$ for
- $l=0,2,4,6$. For the most common magnetic ions these expressions have been calculated
+ $l=0,2,4,6$. If the sipf file contains a radial wave function, then this is used to
+calculate $\langle j_l(|\mbf Q|) \rangle$. If no radial wavefunction is given, then
+ coefficients as outlined below may be given to calculate the formfactor.
+ For the most common magnetic ions the expression (\ref{jls}) has been calculated
  and expressed by coefficients of an expansion in exponential functions:
  
 \begin{eqnarray}

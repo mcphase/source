@@ -19,6 +19,7 @@ show_density=1.0;
 scale_density_vectors=0;
 spins_scale_moment=1.0;
 spins_show_ellipses=1;
+spins_colour=1;
 
 spins_show_static_moment_direction=1;
 spins_wave_amplitude=0;
@@ -65,6 +66,7 @@ extract(instr,"scale_density_vectors",scale_density_vectors);
 extract(instr,"density_dtheta",density_dtheta);
 extract(instr,"density_dfi",density_dfi);
 extract(instr,"spins_scale_moment",spins_scale_moment);
+extract(instr,"spins_colour",spins_colour);
 extract(instr,"spins_show_ellipses",spins_show_ellipses);
 
 extract(instr,"spins_show_static_moment_direction",spins_show_static_moment_direction);

@@ -384,7 +384,7 @@ $i=0;$nr=1;$nrmag=1;
            {
            print Fout "#********************************************************************* \n";
            print Fout "#ATOM TYPE $_ ; number of the atom in the UNIT CELL = $nr ; number of the atom within this type = $nofatoms[$i]\n";
-           print Fout "#! da= $x[$ii] [a] db= $y[$ii] [b] dc= $z[$ii] [c] nofneighbours=0 diagonalexchange=1 gJ= 2 cffilename= $_.sipf\n";
+           print Fout "#! da= $x[$ii] [a] db= $y[$ii] [b] dc= $z[$ii] [c] nofneighbours=0 diagonalexchange=1 sipffilename= $_.sipf\n";
 
            ($SR)=extract("SCATTERINGLENGTHREAL","$_.sipf");
            ($SI)=extract("SCATTERINGLENGTHIMAG","$_.sipf");
@@ -393,7 +393,7 @@ $i=0;$nr=1;$nrmag=1;
            {print Fout2 "# $SR $SI $x[$ii] $y[$ii] $z[$ii] $x[$ii] $y[$ii] $z[$ii] 0  # $_.sipf\n";
            print Foutmag "#********************************************************************* \n";
            print Foutmag "#ATOM TYPE $_ ; number of the atom in the UNIT CELL = $nrmag ; number of the atom within this type = $nofatoms[$i]\n";
-           print Foutmag "#! da= $x[$ii] [a] db= $y[$ii] [b] dc= $z[$ii] [c] nofneighbours=0 diagonalexchange=1 gJ= 2 cffilename= $_.sipf\n";
+           print Foutmag "#! da= $x[$ii] [a] db= $y[$ii] [b] dc= $z[$ii] [c] nofneighbours=0 diagonalexchange=1 sipffilename= $_.sipf\n";
            ++$nrmag;
            }
            else

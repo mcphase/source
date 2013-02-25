@@ -44,24 +44,8 @@ Vector spincf::moment(int i,int j,int k,int l) // returns moment of atom l (1,no
  for(m=1;m<=nofcomponents;++m){xyz(m)=mom[in(i,j,k)](nofcomponents*(l-1)+m);}
  return xyz;
 }
-Vector spincf::magmom(int i,int j,int k,int l,double & gJ) // returns magnetic moment
-{       Vector xyz(1,3);int m,maxm;
-       xyz=0;
-       if (gJ==0)  //load magnetic moment into vector xyz
-       {             // intermediate coupling  <M>=2*<S>+<L>
-        if(nofcomponents>6){maxm=6;}else{maxm=nofcomponents;}
-        for(m=1;m<=maxm;++m){if(m==2||m==4||m==6){xyz((m+1)/2)+=mom[in(i,j,k)](nofcomponents*(l-1)+m);}
-                             else                {xyz((m+1)/2)+=2.0*mom[in(i,j,k)](nofcomponents*(l-1)+m);}
-                            }
-       }
-       else // LS coupling
-       {if(nofcomponents>3){maxm=3;}else{maxm=nofcomponents;}
-        for(m=1;m<=maxm;++m){xyz(m)=mom[in(i,j,k)](nofcomponents*(l-1)+m)*gJ;}
-       }
-       return xyz;
-}
 
-// (Slow) Fourier Transform of momentumconfiguration <J> ... i.e. for magnetic moments multiply by lande factor !!!
+// (Slow) Fourier Transform of momentumconfiguration <I> 
 void  spincf::FT(ComplexVector * mq)
 {int i,j,k,l;
  int qh,qk,ql;
@@ -121,22 +105,6 @@ int spincf::nc()
 {return nofc;
 }
 
-Vector spincf::nettoI(Vector & gJ) // returns nettomagnetic moment [mu_b]
-{
- int i,j,k,l; 
- Vector ret(1,3);
- ret=0;
- for (i=1;i<=nofa;++i)
- { for (j=1;j<=nofb;++j)
-   {for (k=1;k<=nofc;++k)
-    {for (l=1;l<=nofatoms;++l)
-     {ret+=magmom(i,j,k,l,gJ(l));
-     }    
-    }
-   }
-  }     
- return ret;
-}
 
 Vector spincf::totalJ() // returns total moment <J>
 {Vector ret(1,nofcomponents);
@@ -393,7 +361,8 @@ return dd;
 
 //zuweisung
 spincf & spincf::operator= (const spincf & op2)
-{int i,j,k;
+{if(this!=&op2){ // this is to avoid problems when copying to itself !!
+ int i,j,k;
  nofa=op2.nofa; nofb=op2.nofb; nofc=op2.nofc;
  mxa=op2.mxa; mxb=op2.mxb; mxc=op2.mxc;
  nofatoms=op2.nofatoms;
@@ -410,7 +379,8 @@ spincf & spincf::operator= (const spincf & op2)
     {for (k=1;k<=nofc;++k)
      {mom[in(i,j,k)]=op2.mom[in(i,j,k)];} 
     }
-  }           
+  }  
+}
   return *this;
 }
 
@@ -421,6 +391,7 @@ spincf & spincf::operator + (const spincf & op2)
  {fprintf (stderr,"Error in adding spincfonfigurations - not equal dimension\n");
  exit (EXIT_FAILURE);}
  static spincf op1((*this)); 
+ op1=(*this);
  for (i=1;i<=nofa;++i)
   {for (j=1;j<=nofb;++j)
     {for (k=1;k<=nofc;++k)
@@ -434,12 +405,14 @@ spincf & spincf::operator + (const spincf & op2)
 spincf & spincf::operator * (const double factor)
 {int i,j,k;
  static spincf op1((*this)); 
+ op1=(*this);
   for (i=1;i<=nofa;++i)
   {for (j=1;j<=nofb;++j)
     {for (k=1;k<=nofc;++k)
-     {op1.mom[in(i,j,k)]=mom[in(i,j,k)]*factor;} 
+     {op1.mom[in(i,j,k)]=mom[in(i,j,k)]*factor;
+      } 
     }
-  }           
+  }  
   return op1;
 }
 

@@ -16,13 +16,23 @@ $PI=3.141592654;
 unless ($#ARGV>=0) 
 
 {
+print STDOUT << "EOF";
 
-print " usage: makenn 23.3 [options] \n\n";
-print " meaning take mcphas.j, generate all neighbors within sphere of 23.3A and\n";
-print " put them into makenn.j, in interaction columns put the classical dipole interaction\n";
-print " the output values are sorted by ascending distance\n";
-print " Note that in order to use makenn you have to set up a \n";
-print " working  mcphas.j file with the crystal structure. \n\n";
+ usage: makenn 23.3 [options] 
+
+ meaning take mcphas.j, generate all neighbors within sphere of 23.3A 
+ and put them into makenn.j,the output values are sorted by ascending distance
+
+ in interaction columns put the classical dipole interaction: this is 
+ done assuming the operator sequence 
+  I1=Sa I2=La I3=Sb I4=Lb I5=Sc I6=Lc   for sipf files with gJ=0
+  I1=Ja I2=Jb I3=Jc    for sipf files with gJ<>0
+
+
+ Note that in order to use makenn you have to set up a 
+ working  mcphas.j file with the crystal structure. 
+
+EOF
 print " option -rkky A(meV) kf(1/A) calculates the rkky interaction\n";
 print "              according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3\n";
 print "              scaling A<0, kf should be the Fermi wavevector (usually\n";
@@ -372,15 +382,14 @@ sub getlattice {
                                    ($x[$n])=extract("da",$_);
                                    ($y[$n])=extract("db",$_);
                                    ($z[$n])=extract("dc",$_);
-                                   ($gJ[$n])=extract("gJ",$_);
-				   if (/^.*\Qx=\E/){($x[$n])=extract("x",$_);}
+                                   if (/^.*\Qx=\E/){($x[$n])=extract("x",$_);}
 				   if (/^.*\Qy=\E/){($y[$n])=extract("y",$_);}
 				   if (/^.*\Qz=\E/){($z[$n])=extract("z",$_);}
-				     ($cffilename)=extractstring("cffilename",$_);
-                                     ($charge[$n])=extractfromfile("CHARGE",$cffilename);
-                                     if($charge[$n]==""){$charge[$n]=$cffilename;}                                 
-                                             #               print "$cffilename  charge=".$charge[$n]."\n";
-                                                           
+				     ($sipffilename)=extractstring("sipffilename",$_);
+                                     ($charge[$n])=extractfromfile("CHARGE",$sipffilename);
+                                     if($charge[$n]==""){$charge[$n]=$sipffilename;}                                 
+                                             #               print "$sipffilename  charge=".$charge[$n]."\n";
+                                    ($gJ[$n])=extractfromfile("GJ",$sipffilename);                       
 
 				  }
 

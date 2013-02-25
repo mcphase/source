@@ -13,6 +13,39 @@
 
 /****************************************************************************/
 /****************************************************************************/
+// 0. phonon displacement p in A
+/****************************************************************************/
+/****************************************************************************/
+int jjjpar::pcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)
+{ switch (module_type)
+  {case 1: 
+   case 2:
+   case 4: 
+   case 3: 
+   case 5: fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
+          return 0;break;
+   default: if (p==NULL) {mom=0;return false;} 
+            else{(*p)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+  }
+}
+
+
+int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1,float & delta,ComplexMatrix & ests)
+{ switch (module_type)
+  {case 0: if(dp1==NULL){fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*dp1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&p1,&delta,&ests);}
+           break;
+   case 1:
+   case 2:
+   case 3:
+   case 4:
+   case 5: 
+   default:fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
+          return 0;break;
+   }
+}
+/****************************************************************************/
+/****************************************************************************/
 // 1. MAGNETIC MOMENT in units  muB
 /****************************************************************************/
 /****************************************************************************/
@@ -31,8 +64,25 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,Com
                                        // ... in future this has to be substituted by cluster _mcalc
                                        // and operators of magnetic moments have to be handled specially
    default: if (m==NULL) {mom=0;return false;} 
-            else{(*m)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename,&parstorage);return true;}
+            else{(*m)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
+}
+
+int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1,float & delta,ComplexMatrix & ests)
+{ComplexVector uu1(1,Hxc.Hi());int nnt,i;
+ switch (module_type)
+  {case 0: if(dm1==NULL){fprintf(stderr,"Problem: dmcalc  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&m1,&delta,&ests);}
+           break;
+   case 1: return (gJ*kramerdm(transitionnumber,T,Hxc,Hext,m1,delta));break;
+   case 2:
+   case 4: uu1(1)=m1(1);
+           nnt=(*iops).cfielddm(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
+           for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
+   case 3: return gJ*brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);break;
+  default:fprintf(stderr,"Problem: dm1calc in internal module cluster not implemented, continuing ... \n");
+          return 0;break;
+   }
 }
 
 int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)
@@ -49,8 +99,23 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
                                        // ... in future this has to be substituted by cluster _mcalc
                                        // and operators of magnetic moments have to be handled specially
    default: if (L==NULL) {Lmom=0;return false;} 
-            else{(*L)(&Lmom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename,&parstorage);return true;}
+            else{(*L)(&Lmom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
+}
+
+int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1,float & delta,ComplexMatrix & ests)
+{ switch (module_type)
+  {case 0: if(dL1==NULL){fprintf(stderr,"Problem: dLcalc  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*dL1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&L1,&delta,&ests);}
+           break;
+   case 1:
+   case 2:
+   case 3:
+   case 4:
+   case 5: 
+   default:fprintf(stderr,"Problem: dL1calc in internal modules not implemented, continuing ... \n");
+          return 0;break;
+   }
 }
 
 
@@ -68,8 +133,23 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
                                        // ... in future this has to be substituted by cluster _mcalc
                                        // and operators of magnetic moments have to be handled specially
    default: if (S==NULL) {Smom=0;return false;} 
-            else{(*S)(&Smom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename,&parstorage);return true;}
+            else{(*S)(&Smom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
+}
+
+int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1,float & delta,ComplexMatrix & ests)
+{ switch (module_type)
+  {case 0: if(dS1==NULL){fprintf(stderr,"Problem: dScalc  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*dS1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&S1,&delta,&ests);}
+           break;
+   case 1:
+   case 2:
+   case 3:
+   case 4:
+   case 5: 
+   default:fprintf(stderr,"Problem: dS1calc in internal modules not implemented, continuing ... \n");
+          return 0;break;
+   }
 }
 
 /****************************************************************************/
@@ -84,7 +164,7 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
 // according to stored eigenstate matrix est
 // input: Qvec ..... Q Vector components 123=xyz=cab
 /****************************************************************************/
-ComplexVector & jjjpar::MQ(Vector & Qvec)
+int jjjpar::MQ(ComplexVector & Mq, Vector & Qvec)
 {double J0,J2,J4,J6;
  double Q,th,ph;
             Q = Norm(Qvec); //dspacing
@@ -95,20 +175,25 @@ ComplexVector & jjjpar::MQ(Vector & Qvec)
       J6=j6(Q);
             complex<double>dummy;
 switch (module_type)
-  {case 0:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for external module we must provide th and ph with respect
+  {case 0:  if (mq==NULL) {mom=0;return false;} 
+            else{getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for external module we must provide th and ph with respect
                                                        // to abc coordinate system
             (*mq)(&Mq,&th,&ph,&J0,&J2,&J4,&J6,&est);
-            return Mq;break;
+            if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
+
+            return true;}break;
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // internal module cfield needs transformation because
                                                        // of its convention ijk||yzx where  j||b k||axb and i||jxk
             Mq=(*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);
              // cfield module provides Mq(123)=Mq(xyz)
              // we must transform this to mcdiff internal ijk||yzx coordinate system
             dummy=Mq(3);Mq(3)=Mq(1);Mq(1)=Mq(2);Mq(2)=dummy;
-            return Mq;break;
+            if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
+            return true;break;
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for so1ion we must th and ph with respect to abc coordinate system
-            return (*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);break;
-   default: fprintf(stderr,"ERROR in scattering operator function M(Q) for ion %s \nM(Q) is currently only implemented for internal module cfield and so1ion:\n",cffilename);exit(EXIT_FAILURE);
+             if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
+            Mq=(*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);return true;break;
+   default: return false; // all other internal modules do not currently provide mq
   }
 }
 
@@ -156,7 +241,7 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
             return i;break;
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give cfielddn polar angles with respect to xyz
             return (*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,v1);break;
-   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dv1calc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",cffilename);
+   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dv1calc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",sipffilename);
                            washere=1;}
             return 0;
   }
@@ -391,7 +476,11 @@ long double jjjpar::cn(int n,int N,long double x)    // Need real part
 
 /****************************************************************************/
 /****************************************************************************/
-// 3. charge density ----------------------------------------------------------
+/****************************************************************************/
+/****************************************************************************/
+// DENSITIES  ----------------------------------------------------------
+/****************************************************************************/
+/****************************************************************************/
 /****************************************************************************/
 /****************************************************************************/
 
@@ -465,7 +554,7 @@ void jjjpar::save_radial_wavefunction(const char * filename)
     FILE * fout;
     if (radial_wavefunction(r)==0){fprintf(stderr,"Warning: save_radial_wavefunction not possible\n");return;}
     fout=fopen_errchk(filename,"w");
-    fprintf(fout,"# radial wave function for %s\n",cffilename);
+    fprintf(fout,"# radial wave function for %s\n",sipffilename);
     fprintf(fout,"# the radial wave function is expanded as \n");
     fprintf(fout,"# R(r)=sum_p C_p R_Np,XIp(r)\n");
     fprintf(fout,"# R_Np,XIp(r)=r^(Np-1).exp(-XIp * r).(2 * XIp)^(Np+0.5)/sqrt(2Np!)\n");
@@ -481,94 +570,6 @@ void jjjpar::save_radial_wavefunction(const char * filename)
     for(r=0.01;r<=10;r*=1.05){fprintf(fout,"%8.8g  %8.8g\n",r,radial_wavefunction(r));}
     fclose(fout);
    }
-
-
-//***********************************************************************
-// sub for calculation of charge density given a radiu R and polar angles teta,
-// fi and expansion coefficients alm
-//***********************************************************************
-double jjjpar::rocalc (double & teta,double & fi,double & R, Vector & moments,double & T, Vector &  gjmbHxc,Vector & Hext)
-{double ro,rr;
-if((module_type==0)&&(ro_calc!=NULL)){(*ro_calc)(&ro,&teta,&fi,&R,&moments,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename);return ro;}
-if (R>4.0||R<0){ro=0;}else{
- int l,m;
-  Vector tetan(1,6);
- int offset=0; // for cfield module
- if(module_type==0){offset=3;} // for external modules this is to treat ic1ion correctly
- if(module_type==2||module_type==4){
-                    tetan(2)=(*iops).alpha;// Stevens factors
-                    tetan(4)=(*iops).beta;
-                    tetan(6)=(*iops).gamma;
-// if(calcmagdensity>0){fprintf(stderr,"Problem: calcmagdensity>0 in %s, magnetisation densities in module so1ion and cfield do not work correctly yet, quitting... \n",cffilename);
-//     exit(EXIT_FAILURE);}  // here I quit because it is yet unclear if the formulas programmed in are correct
-                           // I assume that there is proportionality between
-                           //         sum_i(2si+li) Zlm(Omega_i) to
-                           // and
-                           //               1/2 (J Olm(J) + Olm(J) J)   (see ionpars.cpp, function cfield() )
-                           // with coefficients being gJ*tetan(l)
-                           // ... this is probably not correct: 1. Wigner eckhardt holds only for spherical tensor operators and not for products of such
-                           //                                   2. even if it holds, then the coefficients have to be calculated for spin and orbital contributions and added
-                           // todo: check Wigner Eckhardt theorem and if it holds calculate coefficients
-                           //
-                                    }
-
-Matrix a(0,6,-6,6);
- if(nof_electrons==0){fprintf(stderr,"Error: nof_electrons=0 ... perhaps single ion property file %s does not contain the number of electrons in the shell: 'nof_electrons=...'\n",cffilename);
-     exit(EXIT_FAILURE);}
- a(0, 0) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
-//if(calcmagdensity>0)a(0, 0) = moments(calcmagdensity) / sqrt(4.0 * 3.1415);
-
-a(2,-2)=moments(offset+4);
-a(2,-1)=moments(offset+5);
-a(2,0)=moments(offset+6);
-a(2,1)=moments(offset+7);
-a(2,2)=moments(offset+8);
-
-a(4,-4)=moments(offset+16);
-a(4,-3)=moments(offset+17);
-a(4,-2)=moments(offset+18);
-a(4,-1)=moments(offset+19);
-a(4, 0)=moments(offset+20);
-a(4, 1)=moments(offset+21);
-a(4, 2)=moments(offset+22);
-a(4, 3)=moments(offset+23);
-a(4, 4)=moments(offset+24);
-
-a(6,-6)=moments(offset+36);
-a(6,-5)=moments(offset+37);
-a(6,-4)=moments(offset+38);
-a(6,-3)=moments(offset+39);
-a(6,-2)=moments(offset+40);
-a(6,-1)=moments(offset+41);
-a(6,-0)=moments(offset+42);
-a(6, 1)=moments(offset+43);
-a(6, 2)=moments(offset+44);
-a(6, 3)=moments(offset+45);
-a(6, 4)=moments(offset+46);
-a(6, 5)=moments(offset+47);
-a(6, 6)=moments(offset+48);
-
-
-// r given in Angstroems, returns R(r) in units of 1/A^1.5
-rr=radial_wavefunction(R);
-rr=rr*rr;// then the chargedensity will be in units of 1/A^3
-for(l=1;l<=5;l+=2){for(m=-l;m<=l;++m){a(l,m)=0;}}
-
-
-// the following should correspond exactly to lines 111 ff in program chrgplt.c
-if(module_type==2||module_type==4){for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){a(l,m)*=tetan(l)*cnst(l,m);}}
-         } // these are prefactors in case of module cfield and so1ion(stevens parameters tetan and zlm prefactors)
-else     {for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){if(m!=0){a(l,m)*=sqrt((2.0*l+1)/8/PI);}else{a(l,m)*=sqrt((2.0*l+1)/4/PI);}}}
-         } // in case
-           // of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
-           // MR 23.8.2011: if Tkq are define as in our review then the above should be right
-
-
- ro=-rr*zlmsum(a,teta,fi); // minus, because electrons are negative
- }
-return ro;
-}
-
 
 // sum over different Zlm using the coefficients a(l,m)
 double jjjpar::zlmsum(Matrix & a, double & teta, double & fi)
@@ -687,9 +688,107 @@ int l,m;
 for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 }
 
+
 /****************************************************************************/
 /****************************************************************************/
-// 4. moment density ----------------------------------------------------------
+// 3.CHARGE DENSITIES  ----------------------------------------------------------
+/****************************************************************************/
+/****************************************************************************/
+
+//***********************************************************************
+// function to calculate coefficients of expansion of chargedensity in terms
+// of Zlm R^2(r) at a given temperature T and  effective field H
+//***********************************************************************
+int jjjpar::chargedensity_coeff (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
+{mom=0;
+ switch (module_type)
+  {case 1: fprintf(stderr,"Problem: chargedensity  in module kramer is not possible, continuing ... \n");
+           return false;break;
+   case 2:
+   case 4: (*iops).chargedensity_coeffcalc(mom,T,Hxc,Hext,parstorage);
+           break;
+   case 3: fprintf(stderr,"Problem: chargedensity  in module brillouin is not possible, continuing ... \n");
+           return false;break;
+   case 0: if(cd_m==NULL){fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return false;} else {(*cd_m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           break;
+   case 5:fprintf(stderr,"Problem: chargedensity is not possible in module cluster, continuing ... \n");
+           return false;break;
+   default:fprintf(stderr,"Problem: chargedensity is not possible in module, continuing ... \n");
+           return false;break;
+  }
+
+// Indices for chargedensity
+//            0 not used
+//          0 1  2  3 4 5 6  7  8  9 101112131415 16 17 18 19 20 2122232425262728 
+int k[] = {-1,0, 2, 2,2,2,2, 4, 4, 4, 4,4,4,4,4,4, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+printf("# coefficients for density calculation\n");
+printf("#chargedensity is expanded in tesseral harmonics Zlm\n\
+#   ro(r)= sum_lm a(l,m) R^2(r) Zlm(Omega)\n#\n ");
+for(int i=1;i<=CHARGEDENS_EV_DIM;++i)printf("#! a(%i,%i) =%12.6f\n",k[i],q[i],myround(mom(i)));
+printf("\n");
+return true;
+}
+
+int jjjpar::dchargedensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & chargedensity_coeff1,float & delta,ComplexMatrix & ests)
+{switch (module_type)
+  {case 1: fprintf(stderr,"Problem: chargedensity  in module kramer is not possible, continuing ... \n");
+           return 0;break;
+   case 2:
+   case 4: return(*iops).dchargedensity_coeff1calc(transitionnumber,T,Hxc,Hext,chargedensity_coeff1,delta,ests);
+           break;
+   case 3: fprintf(stderr,"Problem: chargedensity  in module brillouin is not possible, continuing ... \n");
+           return 0;break;
+   case 0: if(cd_dm==NULL){fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*cd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&chargedensity_coeff1,&delta,&ests);}
+           break;
+   case 5:fprintf(stderr,"Problem: chargedensity is not possible in module cluster, continuing ... \n");
+           return 0;break;
+   default:fprintf(stderr,"Problem: chargedensity is not possible in module, continuing ... \n");
+           return 0;break;
+  }
+}
+
+//***********************************************************************
+// sub for calculation of charge density given a radiu R and polar angles teta,
+// fi and expansion coefficients alm
+//***********************************************************************
+double jjjpar::chargedensity_calc (double & teta,double & fi,double & R, Vector & moments)
+{double ro,rr;
+
+if((module_type==0)&&(ro_calc!=NULL)){(*ro_calc)(&ro,&teta,&fi,&R,&moments,&gJ,&ABC,&sipffilename);return ro;}
+if (R>4.0||R<0){ro=0;}else{
+ int l,m;
+ Matrix a(0,6,-6,6); 
+ for(l=1;l<=5;l+=2){for(m=-l;m<=l;++m){a(l,m)=0;}}
+// a(0, 0) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
+// Indices for spindensity
+//          0 not used
+//          0 1  2  3 4 5 6  7  8  9 101112131415 16 17 18 19 20 2122232425262728 
+int k[] = {-1,0, 2, 2,2,2,2, 4, 4, 4, 4,4,4,4,4,4, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+// R given in Angstroems, returns R(r) in units of 1/A^1.5
+   rr=radial_wavefunction(R);
+   rr=rr*rr;// then the chargedensity will be in units of 1/A^3
+int i;
+ if(moments.Hi()==28)
+ {
+ for (i=1;i<=28;++i){a(k[i],q[i])=moments(i);}
+  ro=-rr*zlmsum(a,teta,fi); // minus, because electrons are negative
+}
+ else
+ {fprintf(stderr,"Error jjjpar.chargedensity_calc: dimension of moments=%i must be 28\n",moments.Hi());
+  exit(EXIT_FAILURE);
+ }
+ }
+return ro;
+}
+
+
+/****************************************************************************/
+/****************************************************************************/
+// 4.SPIN DENSITIES  ----------------------------------------------------------
 /****************************************************************************/
 /****************************************************************************/
 
@@ -697,15 +796,16 @@ for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 // function to calculate coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
 /****************************************************************************/
-void jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage)
-{switch (module_type)
-  {case 1: fprintf(stderr,"Problem: magnetisation densities in module kramer are not possible, quitting... \n");
-           exit(EXIT_FAILURE);break;
+int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage)
+{mom=0;
+ switch (module_type)
+  {case 1: fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
+           return false;break;
    case 2:
-   case 4: fprintf(stderr,"Problem: magnetisation densities in module so1ion and cfield do not work correctly yet, quitting... \n");
-           exit(EXIT_FAILURE);break;
+   case 4: fprintf(stderr,"Problem: spindensity  in module so1ion and cfield do not work, continuing ... \n");
+           return false;break;
 // comment on module so1ion/cfield:
-//fprintf(stderr,"Problem: calcmagdensity>0 in %s, magnetisation densities in module so1ion and cfield do not work correctly yet, quitting... \n",cffilename);
+//fprintf(stderr,"Problem: calcmagdensity>0 in %s, spindensity  in module so1ion and cfield do not work correctly yet, quitting... \n",sipffilename);
 //     exit(EXIT_FAILURE);}  // here I quit because it is yet unclear if the formulas programmed in are correct
                            // I assume that there is proportionality between
                            //         sum_i(2si+li) Zlm(Omega_i) to
@@ -716,46 +816,41 @@ void jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbH
                            //                                   2. even if it holds, then the coefficients have to be calculated for spin and orbital contributions and added
                            // todo: check Wigner Eckhardt theorem and if it holds calculate coefficients
                            //
-   case 3: fprintf(stderr,"Problem: magnetisation densities in module brillouin are not possible, quitting... \n");
-           exit(EXIT_FAILURE);break;
-   case 0: (*sd_m)(&mom,&xyz,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename,&parstorage);break;
-   case 5:fprintf(stderr,"Problem: magnetisation densities are not possible in module cluster, quitting... \n");
-           exit(EXIT_FAILURE);break;
-   default:fprintf(stderr,"Problem: magnetisation densities are not possible in module, quitting... \n");
-           exit(EXIT_FAILURE);break;
+   case 3: fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
+           return false;break;
+   case 0: if(sd_m==NULL){fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return false;} else {(*sd_m)(&mom,&xyz,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           break;
+   case 5:fprintf(stderr,"Problem: spindensity is not possible in module cluster, continuing ... \n");
+           return false;break;
+   default:fprintf(stderr,"Problem: spindensity is not possible in module, continuing ... \n");
+           return false;break;
   }
+// Indices for spindensity
+//          0 not used
+//          0 1  2 3 4  5  6 7 8  9 10 11 1213141516 17 18 192021222324 25 26 27 28 29303132333435 36 37 38 39 40 414243444546474849
+int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+for(int i=1;i<=SPINDENS_EV_DIM;++i){printf("#! aS%i(%i,%i) =%12.6f\n",xyz,k[i],q[i],myround(mom(i)));}
+return true;
 }
 
-/****************************************************************************/
-// function to calculate coefficients of expansion of orbital moment density in terms
-// of Zlm F(r) at a given temperature T and  effective field H
-/****************************************************************************/
-void jjjpar::orbmomdensity_coeff (Vector &mom,int  xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage)
+int jjjpar::dspindensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & spindensity_coeff1,float & delta,ComplexMatrix & ests)
 {switch (module_type)
-  {case 1: fprintf(stderr,"Problem: magnetisation densities in module kramer are not possible, quitting... \n");
-           exit(EXIT_FAILURE);break;
+  {case 1: fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
+           return 0;break;
    case 2:
-   case 4: fprintf(stderr,"Problem: magnetisation densities in module so1ion and cfield do not work correctly yet, quitting... \n");
-           exit(EXIT_FAILURE);break;
-// comment on module so1ion/cfield:
-//fprintf(stderr,"Problem: calcmagdensity>0 in %s, magnetisation densities in module so1ion and cfield do not work correctly yet, quitting... \n",cffilename);
-//     exit(EXIT_FAILURE);}  // here I quit because it is yet unclear if the formulas programmed in are correct
-                           // I assume that there is proportionality between
-                           //         sum_i(2si+li) Zlm(Omega_i) to
-                           // and
-                           //               1/2 (J Olm(J) + Olm(J) J)   (see ionpars.cpp, function cfield() )
-                           // with coefficients being gJ*tetan(l)
-                           // ... this is probably not correct: 1. Wigner eckhardt holds only for spherical tensor operators and not for products of such
-                           //                                   2. even if it holds, then the coefficients have to be calculated for spin and orbital contributions and added
-                           // todo: check Wigner Eckhardt theorem and if it holds calculate coefficients
-                           //
-   case 3: fprintf(stderr,"Problem: magnetisation densities in module brillouin are not possible, quitting... \n");
-           exit(EXIT_FAILURE);break;
-   case 0: (*od_m)(&mom,&xyz,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename,&parstorage);break;
-   case 5:fprintf(stderr,"Problem: magnetisation densities are not possible in module cluster, quitting... \n");
-           exit(EXIT_FAILURE);break;
-   default:fprintf(stderr,"Problem: magnetisation densities are not possible in module, quitting... \n");
-           exit(EXIT_FAILURE);break;
+   case 4: fprintf(stderr,"Problem: spindensity  in module  so1ion/cfeld is not possible, continuing ... \n");
+           return 0;break;
+   case 3: fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
+           return 0;break;
+   case 0: if(cd_dm==NULL){fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&spindensity_coeff1,&delta,&ests);}
+           break;
+   case 5:fprintf(stderr,"Problem: spindensity is not possible in module cluster, continuing ... \n");
+           return 0;break;
+   default:fprintf(stderr,"Problem: spindensity is not possible in module, continuing ... \n");
+           return 0;break;
   }
 }
 
@@ -850,6 +945,74 @@ return mm;
  }
  return grad;
 }
+
+/****************************************************************************/
+/****************************************************************************/
+// 5.ORBITAL MOMENT DENSITIES  ----------------------------------------------------------
+/****************************************************************************/
+/****************************************************************************/
+
+/****************************************************************************/
+// function to calculate coefficients of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+/****************************************************************************/
+int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage)
+{mom=0;
+ switch (module_type)
+  {case 1: fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
+           return false;break;
+   case 2:
+   case 4: fprintf(stderr,"Problem: orbmomdensity  in module so1ion and cfield do not work, continuing ... \n");
+           return false;break;
+// comment on module so1ion/cfield:
+//fprintf(stderr,"Problem: calcmagdensity>0 in %s, orbmomdensity  in module so1ion and cfield do not work correctly yet, quitting... \n",sipffilename);
+//     exit(EXIT_FAILURE);}  // here I quit because it is yet unclear if the formulas programmed in are correct
+                           // I assume that there is proportionality between
+                           //         sum_i(2si+li) Zlm(Omega_i) to
+                           // and
+                           //               1/2 (J Olm(J) + Olm(J) J)   (see ionpars.cpp, function cfield() )
+                           // with coefficients being gJ*tetan(l)
+                           // ... this is probably not correct: 1. Wigner eckhardt holds only for spherical tensor operators and not for products of such
+                           //                                   2. even if it holds, then the coefficients have to be calculated for spin and orbital contributions and added
+                           // todo: check Wigner Eckhardt theorem and if it holds calculate coefficients
+                           //
+   case 3: fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
+           return false;break;
+   case 0: if(od_m==NULL){fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return false;} else {(*od_m)(&mom,&xyz,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           break;
+   case 5:fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
+           return false;break;
+   default:fprintf(stderr,"Problem: orbmomdensity is not possible in module, continuing ... \n");
+           return false;break;
+  }
+// Indices for spindensity
+//          0 not used
+//          0 1  2 3 4  5  6 7 8  9 10 11 1213141516 17 18 192021222324 25 26 27 28 29303132333435 36 37 38 39 40 414243444546474849
+int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+for(int i=1;i<=ORBMOMDENS_EV_DIM;++i){printf("#! aL%i(%i,%i) =%12.6f\n",xyz,k[i],q[i],myround(mom(i)));}
+return true;
+}
+int jjjpar::dorbmomdensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & orbmomdensity_coeff1,float & delta,ComplexMatrix & ests)
+{switch (module_type)
+  {case 1: fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
+           return 0;break;
+   case 2:
+   case 4: fprintf(stderr,"Problem: orbmomdensity  in module  so1ion/cfeld is not possible, continuing ... \n");
+           return 0;break;
+   case 3: fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
+           return 0;break;
+   case 0: if(cd_dm==NULL){fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*od_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&orbmomdensity_coeff1,&delta,&ests);}
+           break;
+   case 5:fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
+           return 0;break;
+   default:fprintf(stderr,"Problem: orbmomdensity is not possible in module, continuing ... \n");
+           return 0;break;
+  }
+}
+
 //***********************************************************************
 // subs for calculation gradient of orbital moment density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)
@@ -873,35 +1036,6 @@ return mm;
  m1=orbmomdensity_calc(teta1,fi1,R1,momentx,momenty,momentz);
  m2=orbmomdensity_calc(teta2,fi2,R2,momentx,momenty,momentz);
  m3=orbmomdensity_calc(teta3,fi3,R3,momentx,momenty,momentz);
- //            d/dx     d/dy      d/dz
- m1=(m1-m0)/d; m2=(m2-m0)/d; m3=(m3-m0)/d;grad=MatrixfromVectors(m1,m2,m3);
- }
- return grad;
-}
-
-//***********************************************************************
-// subs for calculation gradient of current density given a radiu R and polar angles teta,
-// fi and expansion coeff. of Zlm R^2(r)
-//***********************************************************************
- Matrix jjjpar::gradcurrdensity_calc(double & teta,double & fi,double & R, Vector & momentx, Vector & momenty, Vector & momentz)
-{static Matrix grad(1,3,1,3);
- if (R>3.9||R<0){grad=0;}else{
- Vector m0(1,3);Vector m1(1,3);Vector m2(1,3);Vector m3(1,3);
- double d=0.01; // differential in Angstroem
- double teta1,teta2,teta3,fi1,fi2,fi3,R1,R2,R3;
- double ct,st,sf,cf;
- ct = cos(teta);  st = sin(teta);   // y/r=st sfi
- sf = sin(fi);    cf = cos(fi);
- // now we use Jacobi Matrix (dr,dth,dfi)=J (dx,dy,dz)
-  // dx                      dy             dz
- R1=R+d*st*cf;          R2=R+d*st*sf;       R3=R+d*ct;
- teta1=teta+d*ct*cf/R;  teta2=teta+d*ct*sf/R; teta3=teta-d*st/R;
- if(st>0){fi1=fi-d*sf/st/R;fi2=fi+d*cf/st/R;}else{fi1=fi;fi2=fi;} fi3=fi;
-
- m0=currdensity_calc(teta,fi,R,momentx,momenty,momentz);
- m1=currdensity_calc(teta1,fi1,R1,momentx,momenty,momentz);
- m2=currdensity_calc(teta2,fi2,R2,momentx,momenty,momentz);
- m3=currdensity_calc(teta3,fi3,R3,momentx,momenty,momentz);
  //            d/dx     d/dy      d/dz
  m1=(m1-m0)/d; m2=(m2-m0)/d; m3=(m3-m0)/d;grad=MatrixfromVectors(m1,m2,m3);
  }
@@ -967,6 +1101,62 @@ int i;
  }
 return mm;
 }
+
+/************************************************************************************/
+// evaluate F(r) for orbital momentum density (see mynotes, balcar 1975)
+/************************************************************************************/
+double jjjpar::Fr(double rr) // evaluate F(r)=1/r integral_r^inf dx R^2(x)
+                      // r in units of Angstroems, F(r) in units of 1/A^3
+   {//printf("%g ",rr);
+
+    double F_R=0;int p,pp,i;double a0=0.5292;
+    double fp,fpp,sumi;
+    int ok=0;
+    double r=rr/a0;// r is the distance in units of a0
+    for(p=1;p<=9;++p){if(Np(p)!=0){ok=1;
+                                   if(Xip(p)<=0){fprintf (stderr,"\n\nWarning: calculation of radial integral F(r=%g) failed due to Xi%i<=0 - continuing with F(r=%g)=0\n\n\n",r,p,r);return 0;}
+    fp=exp(-Xip(p)*r)*pow(r,Np(p)-1)*Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)factorial(2*(int)Np(p)));
+
+    for(pp=1;pp<=9;++pp){if(Np(pp)!=0){
+     fpp=exp(-Xip(pp)*r)*pow(r,Np(pp)-1)*Cp(pp)*pow(2.0*Xip(pp),Np(pp)+0.5)/sqrt((double)factorial(2*(int)Np(pp)));
+     sumi=0;for(i=1;i<=Np(p)+Np(pp)-2;++i){sumi+=pow(r,-i)/factorial((int)Np(p)+(int)Np(pp)-2-i)/pow(Xip(p)+Xip(pp),i+1);}
+     sumi*=factorial(Np(p)+Np(pp)-2)/r;
+                   F_R+=fp*fpp*sumi;
+                          }             }
+                     }            }
+    // now we have F_R in units of 1/a0^3
+    F_R/=a0*a0*a0;
+    // now we have F_R in units of 1/A^3
+    //printf("%g ",F_R);
+    if (ok==1) return F_R;
+
+
+//  we have to find the 4f wavefunction R4f(r) for each single ion and the Zlm, cfield has nothing: so we have
+//     to take this from chrgplt.bas - a little problem: how do we get the correct R4f(r) ? for a first attempt
+//     we could just take the same for all RE.
+
+    static int washere=0;
+    if(washere==0){washere=1;fprintf (stderr,"\n\n!! Warning !!: radial wave function parameters not found, will use 4f hydrogen radial wave function\n\n\n");}
+double rs;
+//k^2 = 11 / 10 * 11 / 9 * 11 / 8 * 11 / 7 * 11 / 6 * 11 / 5 * 11 / 4 * 11 / 3 * 11 / 2 * 11 / 1 * 11
+rs = rr * exp(-rr);
+fp = 280.4 * rs * rs * rs * rs  * exp(-1.5 * rr);
+
+sumi=0;for(i=1;i<=8;++i){sumi+=pow(r,-i)/factorial(8-i)/pow(11.0,i+1);}
+sumi*=factorial(8)/r;
+F_R+=fp*fp*sumi;
+
+    // now we have F_R in units of 1/a0^3
+    F_R/=a0*a0*a0;
+
+return F_R;
+   }
+
+/****************************************************************************/
+/****************************************************************************/
+// 4.CURRENT DENSITIES  ----------------------------------------------------------
+/****************************************************************************/
+/****************************************************************************/
 
 //***********************************************************************
 // sub for calculation of orbital current density given a radiu R and polar angles teta,
@@ -1098,53 +1288,33 @@ if(q[i]<-1){
 return mm;
 }
 
+//***********************************************************************
+// subs for calculation gradient of current density given a radiu R and polar angles teta,
+// fi and expansion coeff. of Zlm R^2(r)
+//***********************************************************************
+ Matrix jjjpar::gradcurrdensity_calc(double & teta,double & fi,double & R, Vector & momentx, Vector & momenty, Vector & momentz)
+{static Matrix grad(1,3,1,3);
+ if (R>3.9||R<0){grad=0;}else{
+ Vector m0(1,3);Vector m1(1,3);Vector m2(1,3);Vector m3(1,3);
+ double d=0.01; // differential in Angstroem
+ double teta1,teta2,teta3,fi1,fi2,fi3,R1,R2,R3;
+ double ct,st,sf,cf;
+ ct = cos(teta);  st = sin(teta);   // y/r=st sfi
+ sf = sin(fi);    cf = cos(fi);
+ // now we use Jacobi Matrix (dr,dth,dfi)=J (dx,dy,dz)
+  // dx                      dy             dz
+ R1=R+d*st*cf;          R2=R+d*st*sf;       R3=R+d*ct;
+ teta1=teta+d*ct*cf/R;  teta2=teta+d*ct*sf/R; teta3=teta-d*st/R;
+ if(st>0){fi1=fi-d*sf/st/R;fi2=fi+d*cf/st/R;}else{fi1=fi;fi2=fi;} fi3=fi;
 
-/************************************************************************************/
-// evaluate F(r) for orbital momentum density (see mynotes, balcar 1975)
-/************************************************************************************/
-double jjjpar::Fr(double rr) // evaluate F(r)=1/r integral_r^inf dx R^2(x)
-                      // r in units of Angstroems, F(r) in units of 1/A^3
-   {//printf("%g ",rr);
-
-    double F_R=0;int p,pp,i;double a0=0.5292;
-    double fp,fpp,sumi;
-    int ok=0;
-    double r=rr/a0;// r is the distance in units of a0
-    for(p=1;p<=9;++p){if(Np(p)!=0){ok=1;
-                                   if(Xip(p)<=0){fprintf (stderr,"\n\nWarning: calculation of radial integral F(r=%g) failed due to Xi%i<=0 - continuing with F(r=%g)=0\n\n\n",r,p,r);return 0;}
-    fp=exp(-Xip(p)*r)*pow(r,Np(p)-1)*Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)factorial(2*(int)Np(p)));
-
-    for(pp=1;pp<=9;++pp){if(Np(pp)!=0){
-     fpp=exp(-Xip(pp)*r)*pow(r,Np(pp)-1)*Cp(pp)*pow(2.0*Xip(pp),Np(pp)+0.5)/sqrt((double)factorial(2*(int)Np(pp)));
-     sumi=0;for(i=1;i<=Np(p)+Np(pp)-2;++i){sumi+=pow(r,-i)/factorial((int)Np(p)+(int)Np(pp)-2-i)/pow(Xip(p)+Xip(pp),i+1);}
-     sumi*=factorial(Np(p)+Np(pp)-2)/r;
-                   F_R+=fp*fpp*sumi;
-                          }             }
-                     }            }
-    // now we have F_R in units of 1/a0^3
-    F_R/=a0*a0*a0;
-    // now we have F_R in units of 1/A^3
-    //printf("%g ",F_R);
-    if (ok==1) return F_R;
+ m0=currdensity_calc(teta,fi,R,momentx,momenty,momentz);
+ m1=currdensity_calc(teta1,fi1,R1,momentx,momenty,momentz);
+ m2=currdensity_calc(teta2,fi2,R2,momentx,momenty,momentz);
+ m3=currdensity_calc(teta3,fi3,R3,momentx,momenty,momentz);
+ //            d/dx     d/dy      d/dz
+ m1=(m1-m0)/d; m2=(m2-m0)/d; m3=(m3-m0)/d;grad=MatrixfromVectors(m1,m2,m3);
+ }
+ return grad;
+}
 
 
-//  we have to find the 4f wavefunction R4f(r) for each single ion and the Zlm, cfield has nothing: so we have
-//     to take this from chrgplt.bas - a little problem: how do we get the correct R4f(r) ? for a first attempt
-//     we could just take the same for all RE.
-
-    static int washere=0;
-    if(washere==0){washere=1;fprintf (stderr,"\n\n!! Warning !!: radial wave function parameters not found, will use 4f hydrogen radial wave function\n\n\n");}
-double rs;
-//k^2 = 11 / 10 * 11 / 9 * 11 / 8 * 11 / 7 * 11 / 6 * 11 / 5 * 11 / 4 * 11 / 3 * 11 / 2 * 11 / 1 * 11
-rs = rr * exp(-rr);
-fp = 280.4 * rs * rs * rs * rs  * exp(-1.5 * rr);
-
-sumi=0;for(i=1;i<=8;++i){sumi+=pow(r,-i)/factorial(8-i)/pow(11.0,i+1);}
-sumi*=factorial(8)/r;
-F_R+=fp*fp*sumi;
-
-    // now we have F_R in units of 1/a0^3
-    F_R/=a0*a0*a0;
-
-return F_R;
-   }

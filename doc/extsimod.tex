@@ -954,8 +954,7 @@ it will be used by programs {\prg chrgplt\index{chrgplt}},
 {\prg charges\index{charges}}:
 
 \begin{verbatim}
-extern "C" double ro_calc(double & teta,double & fi,double &R,Vector &aLlm, double *T,
-     Vector &gjmbHxc,Vector & Hext, double *gJ,Vector &MODPAR,char **sipffilename);
+extern "C" double ro_calc(double & teta,double & fi,double &R,Vector &aLlm,  double *gJ,Vector &MODPAR,char **sipffilename);
 \end{verbatim}
 
 Note for windows users with MINGW the declaration should be {\prg extern "C" \_\_declspec(dllexport) double %%@
@@ -966,9 +965,6 @@ The meaning of the symbols is as follows:
 \begin{verbatim}
   on input
     teta, fi, R(Angsgtroem) .... spatial position in spherical coordinates
-    T           temperature[K]
-    gjmbHxc     vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
-    Hext       external magnetic field [T]
     gJ          Lande factor
     MODPAR      Vector with Parameters  read in single ion property file
     sipffilename    file name of the single ion parameter file

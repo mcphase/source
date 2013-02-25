@@ -160,6 +160,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
  char text[10000];
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  mfcf * mf;
+ mfcf * mf1;
+ spincf * magmom;
  FILE * felog; // logfile for q dependence of fe
  FILE * fin_coq;
 
@@ -200,22 +202,26 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
 		       {sps.mi(rr)(ri+ii)=rnd(1.0) ;}
 		       } // randomize spin rr
                     }
-     if (H*sps.nettoI(inputpars.gJ)<0) //see if nettomoment positiv
-        {sps.invert();momentq0=-momentq0;} //if not - invert spinconfiguration
-
-      //!!!calculate free eneregy - this is the heart of this loop !!!!
+      //!!!calculate free energy - this is the heart of this loop !!!!
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
       fe=fecalc(H ,T,inputpars,sps,(*mf),u,testspins,testqs);
-      delete mf;
-    
+          
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
             {               // first - reduce the spinconfiguration if possible
                if (verbose==1){fprintf(stdout,"fe(tryrandom=%i)= %f meV\n",tryrandom,fe); fflush(stdout);}
 	       sps1=sps;sps1.reduce();
-                   mf=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.nofatoms,inputpars.nofcomponents);
-               if ((fered=fecalc(H ,T,inputpars,sps1,(*mf),u,testspins,testqs))<=fe+1e-141)sps=sps1;
-                   delete mf; 
+                   mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.nofatoms,inputpars.nofcomponents);
+               if ((fered=fecalc(H ,T,inputpars,sps1,(*mf1),u,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
+                   magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
+                   int i1,j1,k1,l1,m1;Vector mom(1,3);
+                   for (l1=1;l1<=inputpars.nofatoms;++l1){
+                    // go through magnetic unit cell and sum up the contribution of every atom
+                  for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
+                   (*inputpars.jjj[l1]).mcalc(mom,T,(*mf).mf(i1,j1,k1),H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                   for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
+                    }}}}
+                   delete mf1; 
                  // display spinstructure
                 if (verbose==1)
                 {Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
@@ -223,18 +229,19 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
                  float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
 		 
 		 for (is=1;is<=inputpars.nofatoms;++is)
-		   {x[is]=(*inputpars.jjj[is]).xyz[1];
+		   {
+                    x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
                      sprintf(text,"fe=%g,fered=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,fered,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
                     fin_coq = fopen_errchk ("./results/.spins3dab.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
                     fin_coq = fopen_errchk ("./results/.spins3dac.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
                     fin_coq = fopen_errchk ("./results/.spins3dbc.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
 		   
                     fin_coq = fopen_errchk ("./results/.spins.eps", "w");
@@ -242,12 +249,12 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
                     fclose (fin_coq);
 		delete[]x;delete []y; delete []z;
 	        }
-                   
+                delete magmom;   
                            // see if spinconfiguration is already stored
              #ifndef _THREADS
 	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops))//0 means error in checkspincf/addspincf
 	        {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
-                 testspins.save(filemode);testqs.save(filemode); 
+                 testspins.save(filemode);testqs.save(filemode); delete mf;
 		 return 1;}
 	     femin=fe; spsmin=sps;	   
             //printout fe
@@ -257,11 +264,12 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
              int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,(*thrdat.physprops)); //0 means error in checkspincf/addspincf
              MUTEX_UNLOCK(&mutex_tests); 
 	     if (checksret==0) {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
-                 testspins.save(filemode);testqs.save(filemode); 
+                 testspins.save(filemode);testqs.save(filemode); delete mf;
 		 goto ret;}
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=femin;
              #endif
 	     }
+            delete mf;
             //printout fe
             #ifdef _THREADS
 	    if (tryrandom==ini.nofrndtries && verbose==1) {
@@ -270,7 +278,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
                if(tlsfemin==femin) printf("fe=%gmeV, struc no %i in struct-table (initial values from struct %i)",fe,(*thrdat.physprops).j,j); }
             #endif
             if (tryrandom==ini.nofrndtries&&verbose==1){printf("\n");}
-	    
+ 
 	    
   // log fe if required
    if (ini.logfevsQ==1) {
@@ -385,6 +393,7 @@ int  htcalc (Vector Habc,double T,par & inputpars,qvectors & testqs,
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  spincf  spsmin(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  mfcf * mf;
+ spincf * magmom;
  FILE * felog; // logfile for q dependence of fe
  FILE * fin_coq;
 
@@ -539,11 +548,18 @@ else // if yes ... then
      #else
      sps=thrdat.spsmin;//take spinconfiguration which gave minimum free energy as starting value
      #endif
-     if (H*sps.nettoI(inputpars.gJ)<0)   //see if nettomoment positiv
-        {sps.invert();} //if not - invert spinconfiguration
+   //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
       physprops.fe=fecalc(H ,T,inputpars,sps,(*mf),physprops.u,testspins,testqs); 
+      magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
+                   int i1,j1,k1,l1,m1;Vector mom(1,3);
+                   for (l1=1;l1<=inputpars.nofatoms;++l1){
+                    // go through magnetic unit cell and sum up the contribution of every atom
+                  for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
+                   (*inputpars.jjj[l1]).mcalc(mom,T,(*mf).mf(i1,j1,k1),H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                    for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
+                    }}}}
              // display spinstructure
                 if (verbose==1)
                 {
@@ -554,19 +570,20 @@ else // if yes ... then
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
                      sprintf(text,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(H),physprops.H(1),physprops.H(2),physprops.H(3),sps.n());
                     fin_coq = fopen_errchk ("./results/.spins3dab.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
                     fin_coq = fopen_errchk ("./results/.spins3dac.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
                     fin_coq = fopen_errchk ("./results/.spins3dbc.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
 		 fin_coq = fopen_errchk ("./results/.spins.eps", "w");
                      sps.eps(fin_coq,text);
                     fclose (fin_coq);
                 delete[]x;delete []y; delete []z;
 		}
+  delete magmom;
  //check if fecalculation gives again correct result
    if (physprops.fe>femin+(0.00001*fabs(femin))){fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
                             T,Norm(H),femin,physprops.j,physprops.fe);delete mf;return 2;}

@@ -38,13 +38,14 @@ the {\prg mcphas.j\index{mcphas.j}} and single ion input files. In addition, the
 								
 				\item Option {\prg -c}  can be used to create  a single ion
 				transition file {\prg ./results/mcdisp.trs}, which contains
-				all single ion transitions used in the calculation. This file can
+				all single ion transitions used in the calculation. It also contains the 
+                                    neutron intensities of the non interacting subsystems. This file can
 				be edited (uncommenting single ion transitions which should not
 				by used by a \# sign at the beginning of the line)
 				and then the program can be restarted using the 
 				\item  option {\prg -t} to
 				read the single ion transition file {\prg ./results/mcdisp.trs} and
-				calculate energies and neutron intensities.
+				calculate energies and neutron intensities of dispersive modes.
 				\item Option {\prg -ninit n} to set the maximum number of low lying
                                  initial states, which will be considered in calculating a single ion susceptibility (not functional
                                  in all single ion modules).
@@ -83,8 +84,7 @@ T=2 Ha=0 Hb=0 Hc=0 n=10 nofatoms=2 nofcomponents=3
 The file {\prg mcdisp.mf\index{mcdisp.mf}} can be easily set up by using the program {\prg %%@
 setup\_mcdisp\_mf\index{setup\_mcdisp\_mf}} or alternatively by the program {\prg spins\index{spins}} 
 described in section~\ref{spins}.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            the mean field components
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$                     
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 
 \subparagraph{example of input file {\prg mcdisp.par\index{mcdisp.par}}}
@@ -112,17 +112,13 @@ described in section~\ref{spins}.
 #!emin=0.1
 #!emax=80
 #
-# optional parameter is extended_eigenvector_dimension
-# which is used to define, how many components of the
-# eigenvector should be in the ouput to file mcdisp.qee
-# important for charge density movies, e.g.(i) for module so1ion
-#  - f electrons - chargedensity fluctuation needs coefficients
-#  l=3, i.e. eigenvector should be extended to 3+5+7+9+11+13=48,
-#  (ii) for module ic1ion with f-electrons eigenvector has to be
-#  extended to 6+5+7+9+11+13=51 (here there are 6 components for 
-#  all spin and orbital moments), (iii) for module ic1ion and d-
-#  electrons l=2 it suffices 6+5+7+9=27 
-#!extended_eigenvector_dimension=3
+# optional switches which can be 0 or 1 are
+#!calculate_magmoment_oscillation=1  creates mcdisp.qev
+#!calculate_spinmoment_oscillation=1  creates mcdisp.qes
+#!calculate_orbmoment_oscillation=1  creates mcdisp.qeo
+#!calculate_chargedensity_oscillation=1  creates mcdisp.qee
+#!calculate_spindensity_oscillation=1  creates mcdisp.qsd
+#!calculate_orbmomdensity_oscillation=1  creates mcdisp.qod
 #
 # It follows either 
 #

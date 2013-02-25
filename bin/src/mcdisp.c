@@ -18,7 +18,6 @@
 		       // energies gives different results than file
 
 
-
 #include <mcdisp.h>
 #include "../../version"
 #include "myev.c"
@@ -52,9 +51,16 @@
 // Declares a struct to store all the information needed for each disp_calc iteration
 // ----------------------------------------------------------------------------------- //
 typedef struct{
-   ComplexMatrix **chi, **chibey, **Ec;
+   ComplexMatrix **chi, **chibey;
+   ComplexMatrix **Echargedensity;mfcf  **qee_real, **qee_imag;
+   ComplexMatrix **Espindensity;mfcf  **qsd_real, **qsd_imag;
+   ComplexMatrix **Eorbmomdensity;mfcf  **qod_real, **qod_imag;
+   ComplexMatrix **Ep;mfcf  **qep_real, **qep_imag;
+   ComplexMatrix **Em;mfcf  **qem_real, **qem_imag;
+   ComplexMatrix **ES;mfcf  **qes_real, **qes_imag;
+   ComplexMatrix **EL;mfcf  **qel_real, **qel_imag;
    Matrix **pol, **polICIC, **polICn, **polnIC;
-   mfcf **ev_real, **ev_imag, **eev_real, **eev_imag;
+   mfcf **ev_real, **ev_imag;
    ComplexMatrix **Tau;
    Vector hkl, q;  jq **J;
    inimcdis **ini;
@@ -86,6 +92,7 @@ EVENT_TYPE checkfinish;
 #endif // if _THREADS
 
 #include "mcdisp_intcalc.c"
+#include "mcdisp_observables.c"
 
 #ifdef _THREADS
 #define inputpars (*thrdat.inputpars[thread_id])
@@ -280,42 +287,6 @@ void staout(FILE*fout,double & sta,double & sta_int,double & sta_without_antipea
     fprintf(fout,"#!sta_int_without_antipeaks_weights= %8.6g \n",sta_int_without_antipeaks_weights);
     }
 
-// some function to write fileheader efficiently
-void writeheader(par & inputpars,FILE * fout)
-{  time_t curtime;
-  struct tm *loctime;
-   fprintf(fout, "#{output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
-  
-   fprintf(fout,"#*********************************************************************\n");
-   fprintf(fout,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(fout,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(fout,"#*********************************************************************\n");
-  fprintf(fout, "# List of atomic positions dr1 dr2 dr3, moments m \n");
-  fprintf(fout, "# Debye Waller factor (sqr(Intensity)~|sf| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),\n# units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)\n");
-  fprintf(fout, "#  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor\n# coefficients\n");
-  fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
-  fprintf(fout, "#                         ...with j||b, k||(a x b) and i normal to k and j\n");
- 
- for (int i = 1;i<=inputpars.nofatoms;++i)
- {if((double)(i)/50==(double)(i/50))
-  {
-  fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
-  
-  }
-  fprintf(fout, "# %6.3f %6.3f %6.3f %6.3f %6.3f ",(*inputpars.jjj[i]).xyz(1),(*inputpars.jjj[i]).xyz(2),(*inputpars.jjj[i]).xyz(3),(*inputpars.jjj[i]).DWF,(*inputpars.jjj[i]).gJ);
-  if((*inputpars.jjj[i]).Np(1)!=0){
-  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",(*inputpars.jjj[i]).cffilename,(*inputpars.jjj[i]).jl_lmax);
-  }
-  else
-  {
-  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*inputpars.jjj[i]).magFFj0(j));}
-  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*inputpars.jjj[i]).magFFj2(j));}
-  }
-  fprintf(fout, "\n");
- }
-}
 
 
 // procedure to calculate the dispersion
@@ -325,7 +296,13 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
   FILE * fout;
   FILE * foutqei;
   FILE * foutqev;
+  FILE * foutqep;
   FILE * foutqee;
+  FILE * foutqem;
+  FILE * foutqes;
+  FILE * foutqel;
+  FILE * foutqsd;
+  FILE * foutqod;
   FILE * fout1;
   FILE * foutds;
   FILE * foutdstot;
@@ -338,29 +315,59 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
   double jqsta=-1.0e10;  double jqsta_int=0;
   double jq0=0;
   Vector hkl(1,3),q(1,3),qold(1,3),qijk(1,3);                 
-  Vector mf(1,ini.nofcomponents),extmf(1,ini.extended_eigenvector_dimension);
+  Vector mf(1,ini.nofcomponents);
   int jmin;
   IntVector noftransitions(1,inputpars.nofatoms); // vector to remember how many transitions are on each atom
   //int offset[inputpars.nofatoms+1]; // vector to remember where higher  transitions are stored
                                     // (as "separate ions on the same unit cell position")
-  mf=0;extmf=0;
+  mf=0;
    int sort=0;int maxiter=1000000;
   time_t curtime;
   struct tm *loctime;
   float d;
-  double gamman,extgamman;
-  Vector gamma(1,ini.nofcomponents);Vector extgamma(1,ini.extended_eigenvector_dimension);
+  double gamman;
+  Vector gamma(1,ini.nofcomponents);
   complex<double> imaginary(0,1);
   ComplexVector u1(1,ini.nofcomponents);
-  ComplexVector extu1(1,ini.extended_eigenvector_dimension);
   // transition matrix Mij
   ComplexMatrix Mijkl(1,ini.nofcomponents,1,ini.nofcomponents);
- // extended transition matrix Mij
-  ComplexMatrix extMijkl(1,ini.extended_eigenvector_dimension,1,ini.extended_eigenvector_dimension);
   // transformation matrix Uij
   ComplexMatrix Uijkl(1,ini.nofcomponents,1,ini.nofcomponents);
-// extended transformation matrix Uij
-  ComplexMatrix extUijkl(1,ini.extended_eigenvector_dimension,1,ini.extended_eigenvector_dimension);
+
+  double chargedensity_gamman; 
+  Vector chargedensity_gamma(1,CHARGEDENS_EV_DIM);ComplexVector chargedensity_coeff1(1,CHARGEDENS_EV_DIM);
+  // extended transition matrix Mij,transformation matrix Uij
+  ComplexMatrix chargedensity_Mijkl(1,CHARGEDENS_EV_DIM,1,CHARGEDENS_EV_DIM),chargedensity_Uijkl(1,CHARGEDENS_EV_DIM,1,CHARGEDENS_EV_DIM);
+
+  double spindensity_gamman; 
+  Vector spindensity_gamma(1,SPINDENS_EV_DIM);ComplexVector spindensity_coeff1(1,SPINDENS_EV_DIM);
+  // extended transition matrix Mij,transformation matrix Uij
+  ComplexMatrix spindensity_Mijkl(1,SPINDENS_EV_DIM,1,SPINDENS_EV_DIM),spindensity_Uijkl(1,SPINDENS_EV_DIM,1,SPINDENS_EV_DIM);
+
+  double orbmomdensity_gamman; 
+  Vector orbmomdensity_gamma(1,ORBMOMDENS_EV_DIM);ComplexVector orbmomdensity_coeff1(1,ORBMOMDENS_EV_DIM);
+  // extended transition matrix Mij,transformation matrix Uij
+  ComplexMatrix orbmomdensity_Mijkl(1,ORBMOMDENS_EV_DIM,1,ORBMOMDENS_EV_DIM),orbmomdensity_Uijkl(1,ORBMOMDENS_EV_DIM,1,ORBMOMDENS_EV_DIM);
+
+  double magmom_gamman; 
+  Vector magmom_gamma(1,MAGMOM_EV_DIM);ComplexVector magmom_coeff1(1,MAGMOM_EV_DIM);
+  // extended transition matrix Mij,transformation matrix Uij
+  ComplexMatrix magmom_Mijkl(1,MAGMOM_EV_DIM,1,MAGMOM_EV_DIM),magmom_Uijkl(1,MAGMOM_EV_DIM,1,MAGMOM_EV_DIM);
+
+  double spin_gamman; 
+  Vector spin_gamma(1,SPIN_EV_DIM);ComplexVector spin_coeff1(1,SPIN_EV_DIM);
+  // extended transition matrix Mij,transformation matrix Uij
+  ComplexMatrix spin_Mijkl(1,SPIN_EV_DIM,1,SPIN_EV_DIM),spin_Uijkl(1,SPIN_EV_DIM,1,SPIN_EV_DIM);
+
+  double orbmom_gamman; 
+  Vector orbmom_gamma(1,ORBMOM_EV_DIM);ComplexVector orbmom_coeff1(1,ORBMOM_EV_DIM);
+  // extended transition matrix Mij,transformation matrix Uij
+  ComplexMatrix orbmom_Mijkl(1,ORBMOM_EV_DIM,1,ORBMOM_EV_DIM),orbmom_Uijkl(1,ORBMOM_EV_DIM,1,ORBMOM_EV_DIM);
+
+  double phonon_gamman; 
+  Vector phonon_gamma(1,PHONON_EV_DIM);ComplexVector phonon_coeff1(1,PHONON_EV_DIM);
+  // extended transition matrix Mij,transformation matrix Uij
+  ComplexMatrix phonon_Mijkl(1,PHONON_EV_DIM,1,PHONON_EV_DIM),phonon_Uijkl(1,PHONON_EV_DIM,1,PHONON_EV_DIM);
 
   //calculate single ion properties of every atom in magnetic unit cell
   mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents);
@@ -471,7 +478,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
      if((*inputpars.jjj[l]).transitionnumber>i1){fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n (within first crystallographic unit of magnetic unit cell)\n please increase energy range in option -maxE and -minE\n",minE,maxE);
                             exit(EXIT_FAILURE);}
      }
-     // calculate powder neutron intensities
+     // calculate powder neutron intensities ... substitute by dm1calc obtained magmom_Mijkl !!! (when all modules are ready)
      double intensityp=0, intensitym=0;int k1;
      if ((*inputpars.jjj[l]).gJ!=0)
      { for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
@@ -593,7 +600,13 @@ for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.m
  }}}
 
 // matrix E^s_alpha' used to store the coefficients for extending the eigenvector (see manual)
-ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
+ComplexMatrix Echargedensity(1,dimA,1,CHARGEDENS_EV_DIM);Echargedensity=0;
+ComplexMatrix Espindensity(1,dimA,1,SPINDENS_EV_DIM);Espindensity=0;
+ComplexMatrix Eorbmomdensity(1,dimA,1,ORBMOMDENS_EV_DIM);Eorbmomdensity=0;
+ComplexMatrix Ephonon(1,dimA,1,PHONON_EV_DIM);Ephonon=0;
+ComplexMatrix Emagmom(1,dimA,1,MAGMOM_EV_DIM);Emagmom=0;
+ComplexMatrix Espin(1,dimA,1,SPIN_EV_DIM);Espin=0;
+ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
   
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
@@ -609,7 +622,7 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
       // do calculation for atom s=(ijkl)
       for(ll=1;ll<=ini.nofcomponents;++ll)
        {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);    //mf ... mean field vector of atom s
-        extmf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);}
+        }
 
       fprintf(stdout,"#transition %i of ion %i of cryst. unit cell at pos  %i %i %i in mag unit cell:\n",tn,l,i,j,k);
       if(nn[6]<SMALL){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
@@ -618,78 +631,89 @@ ComplexMatrix Ec(1,dimA,1,ini.extended_eigenvector_dimension);Ec=0;
         (*inputpars.jjj[l]).transitionnumber=tn; // try calculation for transition  j
       d=1e10;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
         Mijkl = u1^u1;gamman=Norm2(u1);u1/=sqrt(gamman);
+       if(fabs((fabs(d)-fabs(nn[6]))/(fabs(nn[6])+1.0))>SMALLEDIF)
+        {fprintf(stderr,"ERROR mcdisp: reading mcdisp.trs with transition energy delta %g meV different from internal calculation %g meV\n",nn[6],d);	 
+         exit(EXIT_FAILURE);}
            if (do_verbose==1){
                   fprintf(stdout,"#Matrix M(s=%i %i %i %i)\n",i,j,k,l);
                    myPrintComplexMatrix(stdout,Mijkl);
                               }
       
-       // here we if required calculate the higher dimension matrix used to do the
-       // extension of chi to higher value of (uncoupled) nofcomponents in intcalc_approx ... needed for chargedensityfluctuations, extended eigenvectors ...
- if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with extended_eigenvector_dimension=%i (read from mcdisp.par)\n",i,j,k,l,ini.extended_eigenvector_dimension);}
-             d=1e10;extu1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,extmf,ini.Hext,extu1,d,md.est(i,j,k,l));
-        extMijkl = extu1^extu1;extgamman=Norm2(extu1);extu1/=sqrt(extgamman);
-
-        (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
-
-       j1=md.baseindex(i,j,k,l,jmin); 
-      
-       if(fabs((fabs(d)-fabs(nn[6]))/(fabs(nn[6])+1.0))>SMALLEDIF)
-        {fprintf(stderr,"ERROR mcdisp: reading mcdisp.trs with transition energy delta %g meV different from internal calculation %g meV\n",nn[6],d);	 
-         exit(EXIT_FAILURE);}
-       md.delta(i,j,k)(j1)=nn[6]; // set delta
      // diagonalizeMs to get unitary transformation matrix Us
-      myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);myEigenSystemHermitean (extMijkl,extgamma,extUijkl,sort=1,maxiter);
-
+      myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);
        if (fabs(gamman-gamma(ini.nofcomponents))>SMALL){fprintf(stderr,"ERROR eigenvalue of single ion matrix M inconsistent: analytic value gamma= %g numerical diagonalisation of M gives gamma= %g\n",gamman,gamma(ini.nofcomponents));
                            exit(EXIT_FAILURE);}
-       if (fabs(extgamman-extgamma(ini.extended_eigenvector_dimension))>SMALL){fprintf(stderr,"ERROR eigenvalue of extended single ion matrix extM inconsistent: analytic value gamma= %g numerical diagonalisation of extM gives gamma= %g\n",extgamman,extgamma(ini.nofcomponents));
-                           exit(EXIT_FAILURE);}
-
 // take highest eigenvector to be the same phase as u1
 for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii,ini.nofcomponents)))>SMALL)
                                                 {fprintf(stderr,"ERROR eigenvector of single ion matrix M inconsistent\n");
                                                  myPrintComplexVector(stderr,u1);u1=Uijkl.Column(ini.nofcomponents);myPrintComplexVector(stderr,u1);exit(EXIT_FAILURE);}
                                                Uijkl(ii,ini.nofcomponents)=u1(ii);}
-for(int ii=extUijkl.Rlo(); ii<=extUijkl.Rhi(); ii++){if (fabs(abs(extu1(ii))-abs(extUijkl(ii,ini.extended_eigenvector_dimension)))>SMALL)
-                                                {fprintf(stderr,"ERROR eigenvector of extended single ion matrix M inconsistent\n");
-                                                 myPrintComplexVector(stderr,extu1);extu1=extUijkl.Column(ini.extended_eigenvector_dimension);myPrintComplexVector(stderr,extu1);exit(EXIT_FAILURE);}
-                                                 extUijkl(ii,ini.extended_eigenvector_dimension)=extu1(ii);}
-
          // treat correctly case for neutron energy loss
 	 if (nn[6]<0) // if transition energy is less than zero do a conjugation of the matrix
-	 {//Uijkl=Uijkl.Conjugate();extUijkl=extUijkl.Conjugate();
-	    for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++)       for(int jj=Uijkl.Clo(); jj<=Uijkl.Chi(); jj++)       Uijkl[ii][jj]=conj(Uijkl[ii][jj]);
-	    for(int ii=extUijkl.Rlo(); ii<=extUijkl.Rhi(); ii++) for(int jj=extUijkl.Clo(); jj<=extUijkl.Chi(); jj++) extUijkl[ii][jj]=conj(extUijkl[ii][jj]);
+	 {  for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++)       for(int jj=Uijkl.Clo(); jj<=Uijkl.Chi(); jj++)       Uijkl[ii][jj]=conj(Uijkl[ii][jj]);
 	 }
-        // here we should also go for complex conjugate for the vector
-         complex <double> extgammas;
-     if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL) 
+       j1=md.baseindex(i,j,k,l,jmin); 
+       md.delta(i,j,k)(j1)=nn[6]; // set delta
+
+
+//----------------------------------OBSERVABLES -------------------------------------------------
+if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with eigenvector dimension for observable=%i\n",i,j,k,l,CHARGEDENS_EV_DIM);}
+//-----------------------------------------------------------------------------------
+if(ini.calculate_chargedensity_oscillation){d=1e10;chargedensity_coeff1(1)=complex <double> (ninit,pinit);
+   if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,d,md.est(i,j,k,l))==0)
+       fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,inputpars,chargedensity_Mijkl,md,
+             chargedensity_gamma,chargedensity_gamman,chargedensity_Uijkl,maxiter,nn,ini, gamma,Echargedensity);}
+if(ini.calculate_spindensity_oscillation){d=1e10;spindensity_coeff1(1)=complex <double> (ninit,pinit);
+   if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,d,md.est(i,j,k,l))==0)
+       fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,inputpars,spindensity_Mijkl,md,
+             spindensity_gamma,spindensity_gamman,spindensity_Uijkl,maxiter,nn,ini, gamma,Espindensity);}
+if(ini.calculate_orbmomdensity_oscillation){d=1e10;orbmomdensity_coeff1(1)=complex <double> (ninit,pinit);
+   if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,d,md.est(i,j,k,l))==0)
+       fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,inputpars,orbmomdensity_Mijkl,md,
+             orbmomdensity_gamma,orbmomdensity_gamman,orbmomdensity_Uijkl,maxiter,nn,ini, gamma,Eorbmomdensity);}
+if(ini.calculate_phonon_oscillation){d=1e10;phonon_coeff1(1)=complex <double> (ninit,pinit);
+   if((*inputpars.jjj[l]).dp1calc(ini.T,mf,ini.Hext,phonon_coeff1,d,md.est(i,j,k,l))==0)
+       fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,inputpars,phonon_Mijkl,md,
+             phonon_gamma,phonon_gamman,phonon_Uijkl,maxiter,nn,ini, gamma,Ephonon);}
+if(ini.calculate_magmoment_oscillation){d=1e10;magmom_coeff1(1)=complex <double> (ninit,pinit);
+   if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,d,md.est(i,j,k,l))==0)
+       fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,inputpars,magmom_Mijkl,md,
+             magmom_gamma,magmom_gamman,magmom_Uijkl,maxiter,nn,ini, gamma,Emagmom);}
+if(ini.calculate_spinmoment_oscillation){d=1e10;spin_coeff1(1)=complex <double> (ninit,pinit);
+   if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,d,md.est(i,j,k,l))==0)
+       fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,inputpars,spin_Mijkl,md,
+             spin_gamma,spin_gamman,spin_Uijkl,maxiter,nn,ini, gamma,Espin);}
+if(ini.calculate_orbmoment_oscillation){d=1e10;orbmom_coeff1(1)=complex <double> (ninit,pinit);
+   if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,orbmom_coeff1,d,md.est(i,j,k,l))==0)
+       fillE(jmin,i,j,k,l,ORBMOM_EV_DIM,orbmom_coeff1,inputpars,orbmom_Mijkl,md,
+             orbmom_gamma,orbmom_gamman,orbmom_Uijkl,maxiter,nn,ini, gamma,Eorbmom);}
+//----------------------------------------------------------------------------------------------
+
+         if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL) 
                            // mind in manual the 1st dimension alpha=1 corresponds
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
                            {if (nn[6]>SMALL)
 			    {md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(gamma(ini.nofcomponents));// gamma(ini.nofcomponents)=sqr(gamma^s)
-                            extgammas=sqrt(extgamma(ini.extended_eigenvector_dimension));}
+                            }
 			    else if (nn[6]<-SMALL)
                             {md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(gamma(ini.nofcomponents));// gamma(ini.nofcomponents)=sqr(gamma^s)
-                            extgammas=imaginary*sqrt(extgamma(ini.extended_eigenvector_dimension));}
+                            }
  			    else
 			    { //quasielastic line needs gamma=SMALL .... because Mijkl and therefore gamma have been set to 
 			      // wn/kT instead of wn-wn'=SMALL*wn/kT (in jjjpar.cpp -mdcalc routines)
 			      //set fix delta but keep sign
 			          if (nn[6]>0){md.delta(i,j,k)(j1)=SMALL;
   			     md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(SMALL*gamma(ini.nofcomponents));
-                                              extgammas=sqrt(extgamma(ini.extended_eigenvector_dimension));}
+                                              }
 				  else        {md.delta(i,j,k)(j1)=-SMALL;
                              md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(SMALL*gamma(ini.nofcomponents));
-			                      extgammas=imaginary*sqrt(extgamma(ini.extended_eigenvector_dimension));}
+			                      }
 			    }
 			   }else 
                            {fprintf(stderr,"ERROR eigenvalue of single ion matrix <0: ev1=%g ev2=%g ev3=%g ... evn=%g\n",gamma(1),gamma(2),gamma(3),gamma(ini.nofcomponents));
                             exit(EXIT_FAILURE);}
-//printf("extgamma %g %+g i\n",real(extgammas),imag(extgammas));
-        for(k1=1;k1<=ini.extended_eigenvector_dimension;++k1){Ec(index_s(i,j,k,l,jmin,md,ini),k1)=extgammas*extUijkl(k1,ini.extended_eigenvector_dimension);}
-
+        (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
         for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){
         md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Uijkl(m,n);
         md.M(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Mijkl(m,n);
@@ -725,14 +749,15 @@ if (do_jqfile==0)
           fprintf (foutqev, "#!spins_show_static_moment_direction=1.0\n");
           fprintf (foutqev, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 
-  foutqee = fopen_errchk ("./results/mcdisp.qee",filemode);
-   writeheader(inputpars,foutqee);  fprintf(foutqee,"#!<--mcphas.mcdisp.qee-->\n");
-          fprintf (foutqee, "#!spins_wave_amplitude=1.0\n");
-          fprintf (foutqee, "#!spins_show_ellipses=1.0\n");
-          fprintf (foutqee, "#!spins_show_static_moment_direction=1.0\n");
-          fprintf (foutqee, "#!extended_eigenvector_dimension=%i\n",ini.extended_eigenvector_dimension); 
-          fprintf (foutqee, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
-
+  //------------observables-----------------------------------
+if(ini.calculate_chargedensity_oscillation)foutqee=evfileinit(filemode,"./results/mcdisp.qee",inputpars,"qee",CHARGEDENS_EV_DIM);
+if(ini.calculate_spindensity_oscillation)foutqsd=evfileinit(filemode,"./results/mcdisp.qsd",inputpars,"qsd",SPINDENS_EV_DIM);
+if(ini.calculate_orbmomdensity_oscillation)foutqod=evfileinit(filemode,"./results/mcdisp.qod",inputpars,"qod",ORBMOMDENS_EV_DIM);
+if(ini.calculate_phonon_oscillation)foutqep=evfileinit(filemode,"./results/mcdisp.qep",inputpars,"qep",PHONON_EV_DIM);
+if(ini.calculate_magmoment_oscillation)foutqem=evfileinit(filemode,"./results/mcdisp.qem",inputpars,"qem",MAGMOM_EV_DIM);
+if(ini.calculate_spinmoment_oscillation)foutqes=evfileinit(filemode,"./results/mcdisp.qes",inputpars,"qes",SPIN_EV_DIM);
+if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mcdisp.qel",inputpars,"qel",ORBMOM_EV_DIM);
+  //-----------------------------------------------------------
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
   writeheader(inputpars,foutdstot); printf("#saving mcdisp.dsigma.tot\n");
    fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
@@ -1063,8 +1088,20 @@ if (do_jqfile==1){
    // is not included in the output file]
 #ifndef _THREADS  
   double QQ; mfcf ev_real(ini.mf),ev_imag(ini.mf);
-             mfcf eev_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ini.extended_eigenvector_dimension);
-             mfcf eev_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ini.extended_eigenvector_dimension);
+             mfcf qee_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
+             mfcf qee_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
+             mfcf qsd_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
+             mfcf qsd_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
+             mfcf qod_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
+             mfcf qod_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
+             mfcf qep_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
+             mfcf qep_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
+             mfcf qem_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
+             mfcf qem_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
+             mfcf qes_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
+             mfcf qes_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
+             mfcf qel_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
+             mfcf qel_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
 #endif
   double diffint=0,diffintbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
@@ -1087,11 +1124,24 @@ diffint=0;diffintbey=0;
 #else
                   // Populates the thread data structure
                   thrdat.ev_real  = new mfcf*[NUM_THREADS];          thrdat.ev_imag  = new mfcf*[NUM_THREADS];
-                  thrdat.eev_real = new mfcf*[NUM_THREADS];          thrdat.eev_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qee_real = new mfcf*[NUM_THREADS];          thrdat.qee_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qsd_real = new mfcf*[NUM_THREADS];          thrdat.qsd_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qod_real = new mfcf*[NUM_THREADS];          thrdat.qod_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qep_real = new mfcf*[NUM_THREADS];          thrdat.qep_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qem_real = new mfcf*[NUM_THREADS];          thrdat.qem_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qes_real = new mfcf*[NUM_THREADS];          thrdat.qes_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qel_real = new mfcf*[NUM_THREADS];          thrdat.qel_imag = new mfcf*[NUM_THREADS];
                   thrdat.chi      = new ComplexMatrix*[NUM_THREADS]; thrdat.chibey   = new ComplexMatrix*[NUM_THREADS];
                   thrdat.pol      = new Matrix*[NUM_THREADS];        thrdat.polICIC  = new Matrix*[NUM_THREADS];
                   thrdat.polICn   = new Matrix*[NUM_THREADS];        thrdat.polnIC   = new Matrix*[NUM_THREADS];
-                  thrdat.Ec       = new ComplexMatrix*[NUM_THREADS]; thrdat.Tau      = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Echargedensity       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Espindensity       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Eorbmomdensity       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Ephonon       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Emagmom       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Espin       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Eorbmom       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Tau      = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.hkl = hkl; thrdat.thread_id = -1;
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
@@ -1103,9 +1153,29 @@ diffint=0;diffintbey=0;
                      thrdat.polICn[ithread] = new Matrix(1,md.nofcomponents,1,md.nofcomponents);
                      thrdat.polnIC[ithread] = new Matrix(1,md.nofcomponents,1,md.nofcomponents);
                      thrdat.ev_real[ithread] = new mfcf(ini.mf); thrdat.ev_imag[ithread] = new mfcf(ini.mf);
-                     thrdat.eev_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ini.extended_eigenvector_dimension);
-                     thrdat.eev_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ini.extended_eigenvector_dimension);
-                     thrdat.Ec[ithread] = new ComplexMatrix(1,dimA,1,ini.extended_eigenvector_dimension); *thrdat.Ec[ithread]=Ec;
+
+                     thrdat.qee_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
+                     thrdat.qee_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
+                     thrdat.Echargedensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Echargedensity[ithread]=Echargedensity;
+                     thrdat.qsd_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
+                     thrdat.qsd_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
+                     thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;
+                     thrdat.qod_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
+                     thrdat.qod_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
+                     thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;
+                     thrdat.qep_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
+                     thrdat.qep_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
+                     thrdat.Ephonon[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Ephonon[ithread]=Ephonon;
+                     thrdat.qem_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
+                     thrdat.qem_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
+                     thrdat.Emagmom[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Emagmom[ithread]=Emagmom;
+                     thrdat.qes_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
+                     thrdat.qes_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
+                     thrdat.Espin[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Espin[ithread]=Espin;
+                     thrdat.qel_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
+                     thrdat.qel_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
+                     thrdat.Eorbmom[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Eorbmom[ithread]=Eorbmom;
+
                      thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
                   }
                   ithread=0; num_threads_started=-1; int oldi=-1; double QQ;// Vector vQQ(1,dimA); removed MR 14.1.2013
@@ -1150,8 +1220,20 @@ diffint=0;diffintbey=0;
                      #endif
                      #define ev_real (*thrdat.ev_real[ithread])
                      #define ev_imag (*thrdat.ev_imag[ithread])
-                     #define eev_real (*thrdat.eev_real[ithread])
-                     #define eev_imag (*thrdat.eev_imag[ithread])
+                     #define qee_real (*thrdat.qee_real[ithread])
+                     #define qee_imag (*thrdat.qee_imag[ithread])
+                     #define qsd_real (*thrdat.qsd_real[ithread])
+                     #define qsd_imag (*thrdat.qsd_imag[ithread])
+                     #define qod_real (*thrdat.qod_real[ithread])
+                     #define qod_imag (*thrdat.qod_imag[ithread])
+                     #define qep_real (*thrdat.qep_real[ithread])
+                     #define qep_imag (*thrdat.qep_imag[ithread])
+                     #define qem_real (*thrdat.qem_real[ithread])
+                     #define qem_imag (*thrdat.qem_imag[ithread])
+                     #define qes_real (*thrdat.qes_real[ithread])
+                     #define qes_imag (*thrdat.qes_imag[ithread])
+                     #define qel_real (*thrdat.qel_real[ithread])
+                     #define qel_imag (*thrdat.qel_imag[ithread])
                      for(ithread=0; ithread<NUM_THREADS; ithread++)
                      {
                          i=oldi+ithread; if(i>dimA) break;
@@ -1164,7 +1246,15 @@ diffint=0;diffintbey=0;
                      if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                      {
                      ints(i)=intcalc_approx(chi,chibey,pol,polICIC,polICn,polnIC,
-                                            intsbey(i),ev_real,ev_imag,eev_real,eev_imag,Ec,dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,QQ);
+                                            intsbey(i),ev_real,ev_imag,
+                                            qee_real,qee_imag,Echargedensity,
+                                            qsd_real,qsd_imag,Espindensity,
+                                            qod_real,qod_imag,Eorbmomdensity,
+                                            qep_real,qep_imag,Ephonon,
+                                            qem_real,qem_imag,Emagmom,
+                                            qes_real,qes_imag,Espin,
+                                            qel_real,qel_imag,Eorbmom,
+                                            dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,QQ);
                      }
                      else
                      {ints(i)=-1;intsbey(i)=-1;
@@ -1222,14 +1312,14 @@ diffint=0;diffintbey=0;
                      ev_imag.print(foutqev); // 
                      fprintf (foutqev, "#\n");
 
-                     fprintf (foutqee, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                              myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
-                     fprintf (foutqee, "#eigenvector real part\n");
-                     eev_real.print(foutqee); // here we printout the eigenvector of the excitation
-                     fprintf (foutqee, "#eigenvector imaginary part\n");
-                     eev_imag.print(foutqee); // 
-                     fprintf (foutqee, "#\n");
-                                }
+if(ini.calculate_chargedensity_oscillation)print_ev(foutqee,i,ini,hkl,QQ,En,ints,intsbey,qee_real,qee_imag);
+if(ini.calculate_spindensity_oscillation)print_ev(foutqsd,i,ini,hkl,QQ,En,ints,intsbey,qsd_real,qsd_imag);
+if(ini.calculate_orbmomdensity_oscillation)print_ev(foutqod,i,ini,hkl,QQ,En,ints,intsbey,qod_real,qod_imag);
+if(ini.calculate_phonon_oscillation)print_ev(foutqep,i,ini,hkl,QQ,En,ints,intsbey,qep_real,qep_imag);
+if(ini.calculate_magmoment_oscillation)print_ev(foutqem,i,ini,hkl,QQ,En,ints,intsbey,qem_real,qem_imag);
+if(ini.calculate_spinmoment_oscillation)print_ev(foutqes,i,ini,hkl,QQ,En,ints,intsbey,qes_real,qes_imag);
+if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,intsbey,qel_real,qel_imag);
+                          }
                  if(do_verbose==1){fprintf(stdout, "#IdipFF= %4.4g Ibeyonddip=%4.4g\n",ints(i),intsbey(i));}
                      if(En(i)>=ini.emin&&En(i)<=ini.emax){diffint+=ints(i);diffintbey+=intsbey(i);}
 #ifdef _THREADS
@@ -1240,19 +1330,52 @@ diffint=0;diffintbey=0;
 #ifdef _THREADS
                   #undef ev_real
                   #undef ev_imag
-                  #undef eev_real
-                  #undef eev_imag
+                  #undef qee_real
+                  #undef qee_imag
+                  #undef qsd_real
+                  #undef qsd_imag
+                  #undef qod_real
+                  #undef qod_imag
+                  #undef qep_real
+                  #undef qep_imag
+                  #undef qem_real
+                  #undef qem_imag
+                  #undef qes_real
+                  #undef qes_imag
+                  #undef qel_real
+                  #undef qel_imag
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
                      delete thrdat.chi[ithread]; delete thrdat.chibey[ithread]; 
                      delete thrdat.pol[ithread]; delete thrdat.polICIC[ithread]; delete thrdat.polICn[ithread]; delete thrdat.polnIC[ithread];
-                     delete thrdat.ev_real[ithread]; delete thrdat.ev_imag[ithread]; delete thrdat.eev_real[ithread]; delete thrdat.eev_imag[ithread];
-                     delete thrdat.Ec[ithread]; delete thrdat.Tau[ithread]; delete tin[ithread]; 
+                     delete thrdat.ev_real[ithread]; delete thrdat.ev_imag[ithread];
+                     delete thrdat.qee_real[ithread]; delete thrdat.qee_imag[ithread];delete thrdat.Echargedensity[ithread]; 
+                     delete thrdat.qsd_real[ithread]; delete thrdat.qsd_imag[ithread];delete thrdat.Espindensity[ithread]; 
+                     delete thrdat.qod_real[ithread]; delete thrdat.qod_imag[ithread];delete thrdat.Eorbmomdensity[ithread]; 
+                     delete thrdat.qep_real[ithread]; delete thrdat.qep_imag[ithread];delete thrdat.Ephonon[ithread]; 
+                     delete thrdat.qem_real[ithread]; delete thrdat.qem_imag[ithread];delete thrdat.Emagmom[ithread]; 
+                     delete thrdat.qes_real[ithread]; delete thrdat.qes_imag[ithread];delete thrdat.Espin[ithread]; 
+                     delete thrdat.qel_real[ithread]; delete thrdat.qel_imag[ithread];delete thrdat.Eorbmom[ithread]; 
+                     delete thrdat.Tau[ithread]; delete tin[ithread]; 
                   }
-                  delete[] thrdat.Ec;  delete[] thrdat.Tau;
+                  delete[] thrdat.Echargedensity;  
+                  delete[] thrdat.Espindensity;  
+                  delete[] thrdat.Eorbmomdensity;  
+                  delete[] thrdat.Ephonon;  
+                  delete[] thrdat.Emagmom;  
+                  delete[] thrdat.Espin;  
+                  delete[] thrdat.Eorbmom;  
+                  delete[] thrdat.Tau;
                   delete[] thrdat.chi; delete[] thrdat.chibey;
                   delete[] thrdat.pol; delete[] thrdat.polICIC; delete[] thrdat.polICn; delete[] thrdat.polnIC;
-                  delete[] thrdat.ev_real; delete[] thrdat.ev_imag; delete[] thrdat.eev_real; delete[] thrdat.eev_imag; 
+                  delete[] thrdat.ev_real; delete[] thrdat.ev_imag; 
+                  delete[] thrdat.qee_real; delete[] thrdat.qee_imag; 
+                  delete[] thrdat.qsd_real; delete[] thrdat.qsd_imag; 
+                  delete[] thrdat.qod_real; delete[] thrdat.qod_imag; 
+                  delete[] thrdat.qep_real; delete[] thrdat.qep_imag; 
+                  delete[] thrdat.qem_real; delete[] thrdat.qem_imag; 
+                  delete[] thrdat.qes_real; delete[] thrdat.qes_imag; 
+                  delete[] thrdat.qel_real; delete[] thrdat.qel_imag; 
 #endif
     fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g",ini.Hext(1),ini.Hext(2),ini.Hext(3),ini.T,hkl(1),hkl(2),hkl(3),diffint,diffintbey,qincr);
     sta+=dd*dd;sta_int+=dd_int*dd_int;
@@ -1452,6 +1575,12 @@ diffint=0;diffintbey=0;
     fclose(foutqei);
     fclose(foutqev);
     fclose(foutqee);
+    fclose(foutqsd);
+    fclose(foutqod);
+    fclose(foutqep);
+    fclose(foutqem);
+    fclose(foutqes);
+    fclose(foutqel);
     fclose(fout);
                  if (do_Erefine==1){fclose(foutds);}
     fclose(foutdstot);
@@ -1541,7 +1670,7 @@ dispcalc(ini,inputpars,calc_fast,calc_beyond,do_Erefine,do_jqfile,do_createtrs,d
    printf("  mcdisp.qei  - T,H,qvector vs energies and neutron intensities\n");
    printf("  mcdisp.qom  - T,H,qvector vs all mode energies in one line (and neutron intensities)\n");
    printf("  mcdisp.qev  - T,H,qvector,E vs eigenvectors\n");
-   printf("  mcdisp.qee  - T,H,qvector,E vs extended eigenvectors (more components to plot chrgedens.)\n");
+   printf("  mcdisp.qee,qsd,qod,qep,qem,qes,qel  - T,H,qvector,E vs extended eigenvectors (more components to plot observables.)\n");
    printf("  mcdisp.dsigma.tot  - T,H,qvector vs total intensity (sum of all modes)\n");
    printf("  mcdisp.dsigma      - (option -r) T,H,qvector,E vs intensity obtained from dyn susz\n");
    printf("  mcdisp.trs  - single ion transitions used\n");

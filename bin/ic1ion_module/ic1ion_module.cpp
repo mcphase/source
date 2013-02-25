@@ -1,5 +1,5 @@
 /* ic1ion_module.cpp
- *
+ *********************************************************
  * Functions:
  *   void myPrintMatrix(FILE * file,sMat<double> & M,int d)                        // Prints out full matrix
  *   bool checkmat(ComplexMatrix &cmat, complexdouble *fmat,int r, int c)          // Compares Matpack and fortran matrices
@@ -27,6 +27,8 @@
  *   int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2,           // Calculates the transition matrix
  *                 double &J4, double &J6, ComplexMatrix &est, double &T,          //   elements beyond the dipole
  *                 ComplexVector & v1)                                             //   approximation.
+ *   void chargedensity_coeff(Vector & mom,double *T,Vector &gjmbHxc,Vector&Hext,      // Calc. coeffs. of expansion of chargedensity 
+ *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm R^2(r) at given T / H_eff
  *   void spindensity_coeff(Vector & mom, int & xyz,double *T,Vector &gjmbHxc,Vector&Hext,      // Calc. coeffs. of expansion of spindensity 
  *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm R^2(r) at given T / H_eff
  *   void orbmomdensity_coeff(Vector & mom,int & xyz, double *T,Vector &gjmbHxc,Vector&Hext,    // Calc. coeffs. of expansion of orbital moment density
@@ -849,6 +851,51 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
    }
 }
 
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate the coefficients of expansion of chargedensity in terms
+// of Zlm R^2(r) at a given temperature T and  effective field H
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+void chargedensity_coeff(Vector &mom,          // Output single ion moments =expectation values of
+                                           // of Zlm R^2(r) at a given temperature T and  effective field H
+                      double *T,           // Input scalar temperature
+                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (meV) 
+ /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename, // Single ion properties filename
+                      ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
+{Vector moments(1,51),ABC; double gJ=0.,lnZ,U;
+ Vector Hxc(1,51);Hxc=0;for(int i=1;i<=gjmbHxc.Hi();++i){Hxc(i)=gjmbHxc(i);}
+  Icalc(moments,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
+
+   // Parses the input file for parameters
+   icpars pars; 
+   const char *filename = sipffilename[0];
+   ic_parseinput(filename,pars);
+  
+// a(0, 0) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
+// Indices for spindensity
+//            0 not used
+//            0 1  2  3 4 5 6  7  8  9 101112131415 16 17 18 19 20 2122232425262728 
+//int k[] = {-1,0, 2, 2,2,2,2, 4, 4, 4, 4,4,4,4,4,4, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+//int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+mom(1) =  pars.n / sqrt(4.0 * 3.1415); // nofelectrons 
+for(int i=2;i<=6;++i)mom(i)=moments(5+i)*sqrt((2.0*2+1)/8/PI);
+mom(4)*=sqrt(2);
+for(int i=7;i<=15;++i)mom(i)=moments(12+i)*sqrt((2.0*4+1)/8/PI);
+mom(11)*=sqrt(2);
+for(int i=16;i<=28;++i)mom(i)=moments(23+i)*sqrt((2.0*6+1)/8/PI);
+mom(22)*=sqrt(2);
+
+//   {for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){if(m!=0){a(l,m)*=sqrt((2.0*l+1)/8/PI);}else{a(l,m)*=sqrt((2.0*l+1)/4/PI);}}}
+//         } // in case
+           // of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
+           // MR 23.8.2011: if Tkq are define as in our review then the above should be right
+}
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H

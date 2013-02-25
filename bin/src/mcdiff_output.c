@@ -29,8 +29,8 @@ time_t curtime;
    spins.m(1,1,1)(nofcomponents*(i-1)+1)=(*jjjpars[i]).mom(1);
    spins.m(1,1,1)(nofcomponents*(i-1)+2)=(*jjjpars[i]).mom(2);
    spins.m(1,1,1)(nofcomponents*(i-1)+3)=(*jjjpars[i]).mom(3);
-   fprintf(fout,"#! da=%8.5f [a] db=%8.5f [b] dc=%8.5f [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g cffilename=%s\n",
-   abc(1),abc(2),abc(3), (*jjjpars[i]).paranz, (*jjjpars[i]).diagonalexchange, (*jjjpars[i]).gJ, (*jjjpars[i]).cffilename);
+   fprintf(fout,"#! da=%8.5f [a] db=%8.5f [b] dc=%8.5f [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g sipffilename=%s\n",
+   abc(1),abc(2),abc(3), (*jjjpars[i]).paranz, (*jjjpars[i]).diagonalexchange, (*jjjpars[i]).gJ, (*jjjpars[i]).sipffilename);
  }
    fprintf (fout, "#!show_abc_unitcell=1.0\n");
    fprintf (fout, "#!show_primitive_crystal_unitcell=1.0\n");
@@ -73,8 +73,8 @@ time_t curtime;
  for (i=1;i<=natmagnetic;++i)
  { Vector abc(1,3);
    abc=(*jjjpars[i]).xyz(1)*nr1*r1s+(*jjjpars[i]).xyz(2)*nr2*r2s+(*jjjpars[i]).xyz(3)*nr3*r3s;
-   fprintf(fout,"#! da=%8.5f [a] db=%8.5f [b] dc=%8.5f [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g cffilename=%s\n",
-   abc(1),abc(2),abc(3), (*jjjpars[i]).paranz, (*jjjpars[i]).diagonalexchange, (*jjjpars[i]).gJ, (*jjjpars[i]).cffilename);
+   fprintf(fout,"#! da=%8.5f [a] db=%8.5f [b] dc=%8.5f [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g sipffilename=%s\n",
+   abc(1),abc(2),abc(3), (*jjjpars[i]).paranz, (*jjjpars[i]).diagonalexchange, (*jjjpars[i]).gJ, (*jjjpars[i]).sipffilename);
  }
    fprintf (fout, "#!show_abc_unitcell=1.0\n");
    fprintf (fout, "#!show_primitive_crystal_unitcell=1.0\n");
@@ -157,11 +157,14 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
    }
   }
   fprintf(fout, "# %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f%+6.3fi %6.3f %6.3f ",myround((*jjjpars[i]).xyz(1)),myround((*jjjpars[i]).xyz(2)),myround((*jjjpars[i]).xyz(3)),myround((*jjjpars[i]).mom(1)),myround((*jjjpars[i]).mom(2)),myround((*jjjpars[i]).mom(3)),myround((*jjjpars[i]).SLR),myround((*jjjpars[i]).SLI),myround((*jjjpars[i]).DWF),myround((*jjjpars[i]).gJ));
-  if(J[i]==0||J[i]==-3){fprintf(fout,"F(Q) beyond dip.approx.");}
-  if(J[i]==-1){fprintf(fout,"formfactor F(Q)=j0-(1-2/gJ)j2 (note that in case of transition metals mcdiff sets gJ=2) FF coefficients:");}
-  if(J[i]==-2){fprintf(fout,"FL(Q)=(j0+j2)/2 and FS(Q)=j0 formfactors separate for spin and orb. moments, FF coefficients:");}
+  if(J[i]==0&&(*jjjpars[i]).gJ==0){fprintf(fout,"<M(Q)> for Imag calc. going beyond dip.approx., for Imag_dip <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
+  if(J[i]==0&&(*jjjpars[i]).gJ!=0){fprintf(fout,"<M(Q)> for Imag calc. going beyond dip.approx., for Imag_dip <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
+  if(J[i]==-3){fprintf(fout,"<M(Q)> for Imag calc. going beyond dip.approx., for Imag_dip <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients: ");}
+  if(J[i]==-1&&(*jjjpars[i]).gJ==0){fprintf(fout,"dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
+  if(J[i]==-1&&(*jjjpars[i]).gJ!=0){fprintf(fout,"dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
+  if(J[i]==-2){fprintf(fout,"dipole approx: <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients:");}
   if((*jjjpars[i]).Np(1)!=0){
-  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",(*jjjpars[i]).cffilename,(*jjjpars[i]).jl_lmax);
+  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",(*jjjpars[i]).sipffilename,(*jjjpars[i]).jl_lmax);
   }
   else
   {

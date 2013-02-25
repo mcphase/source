@@ -23,19 +23,20 @@ public:
     void printall(FILE * fout,cryststruct & cs);
     void eps(FILE * fout);
     void eps(FILE * fout,const char * text);
-    void eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation, Vector & gJ);
-    void fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ);
+    void eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation, Vector & gJ,spincf & magmom);
+    void fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ,spincf & magmom);
 
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
 
     void jvx_cd(FILE * fout,char * text,cryststruct & cs,
-              graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext);
+              graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
+              Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag);
 
     void cd(FILE * fout,cryststruct & cs,graphic_parameters & gp,
                 spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T,Vector &  gjmbHxc,Vector & Hext);
 
-    void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ);
+    void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ,spincf & magmom);
     void calc_prim_mag_unitcell(Matrix & p,Vector & abc, Matrix & r);
 private:
  // frame of display
@@ -57,10 +58,9 @@ private:
    int iv[4];
    int spequal(Vector a,Vector b);// routine to compare spins
      
-   Vector magmom(int i,int j,int k,int l,double & gJ); // returns magnetic moment (1,3)
-   Vector moment(int i,int j,int k,int l); // returns moment of atom l (1,nofcomponents)
    // take vector dd and calculate distance nearest atom in spinconfiguration
    double nndist(float * x, float * y, float * z,Vector & abc,Matrix & p,Vector &dd);
+    Vector moment(int i,int j,int k,int l); // returns moment of atom l (1,nofcomponents)
  public:
 
     Vector pos(int i, int j, int k, int l,Vector & abc,Matrix & r,float * x,float *y,float*z);
@@ -84,7 +84,6 @@ private:
     int nb(); // returns number of spins
     int nc(); // returns number of spins
  
-    Vector nettoI ( Vector & gJ); // returns nettomagneticmoment [muB]
     Vector totalJ (); // returns nettomoment <J>
     void invert();// inverts all spins (AND higher order moments)
     void reduce();// reduces spinconfiguration

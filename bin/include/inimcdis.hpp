@@ -24,9 +24,13 @@ class inimcdis
   int hkllist; 
   int nofatoms; //nofatoms in primitive cryst unit cell
   int nofcomponents; //number of components of mean field (including magnetic, quadrupolar fields ...
-  int extended_eigenvector_dimension; // for the creation of eiegnevectors in mcdisp.eev which 
-   // may be used to plot charge density waves. extended_eigenvevtor_dimension must not be 
-   // larger than allowed by du1calc, the routine which creates the matrix Malphabeta (see model section)
+  int calculate_magmoment_oscillation; //  creates mcdisp.qem
+  int calculate_spinmoment_oscillation; //  creates mcdisp.qes
+  int calculate_orbmoment_oscillation; //  creates mcdisp.qeo
+  int calculate_chargedensity_oscillation; //  creates mcdisp.qee
+  int calculate_spindensity_oscillation; //  creates mcdisp.qsd
+  int calculate_orbmomdensity_oscillation; //  creates mcdisp.qod
+  int calculate_phonon_oscillation; //  creates mcdisp.qep
   double T;
   Vector Hext;
   double emax;

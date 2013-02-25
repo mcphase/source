@@ -1,10 +1,9 @@
 /************************************************************************/
-
 void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,par & inputpars)
-{ int i,j,k,l,n;div_t result;float mmax; char text[100];FILE * fin_coq;Vector mom(1,3);
+{ int i,j,k,l,n;div_t result;float mmax; char text[100];FILE * fin_coq;
  //save fe and u
  // calculate nettomoment from spinstructure
-     physprops.m=0;
+    Vector mom(1,3);physprops.m=0;
     for (l=1;l<=inputpars.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
@@ -17,7 +16,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // thermal expansion - magnetostricton correlation-functions
 // according to each neighbour given in mcphas.j a correlation
 // function is calculated - up to ini.nofspincorrs neighbours
- int nmax,i1,j1,k1,l1,i2,j2,k2,is;Vector xyz(1,3),d(1,3),d_rint(1,3);
+ int nmax,i1,j1,k1,l1,m1,i2,j2,k2,is;Vector xyz(1,3),d(1,3),d_rint(1,3);
  nmax=ini.nofspincorrs;
  for (l=1;l<=inputpars.nofatoms;++l){if(nmax>(*inputpars.jjj[l]).paranz){nmax=(*inputpars.jjj[l]).paranz;}}
 
@@ -78,16 +77,39 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                        abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
   double QQ;
- mq = new ComplexVector [sps.in(sps.na(),sps.nb(),sps.nc())+2];for(i=0;i<=sps.in(sps.na(),sps.nb(),sps.nc())+1;++i){mq[i]=ComplexVector(1,sps.nofcomponents*sps.nofatoms);}
+  mq = new ComplexVector [mf.in(mf.na(),mf.nb(),mf.nc())+2];
+  for(i=0;i<=mf.in(mf.na(),mf.nb(),mf.nc())+1;++i)
+  {mq[i]=ComplexVector(1,3*mf.nofatoms);}
   float in;
-  sps.FT(mq); //Fourier trafo of momentum configuration
+  //sps.FT(mq); //Fourier trafo of momentum configuration
+  for(qh=0;qh<mf.na();++qh){for(qk=0;qk<mf.nb();++qk){for(ql=0;ql<mf.nc();++ql)
+     {mq[mf.in(qh,qk,ql)]=0;
+     for(i=0;i<mf.na();++i){for(j=0;j<mf.nb();++j){for(k=0;k<mf.nc();++k)
+      { g=exp(piq*((double)qh*i/mf.na()+(double)qk*j/mf.nb()+(double)ql*k/mf.nc()));
+	for (l=1;l<=mf.nofatoms;++l) {
+                                    (*inputpars.jjj[l]).mcalc(mom,T, mf.mf(i+1,j+1,k+1),H,(*inputpars.jjj[l]).Icalc_parstorage);
+                                    mq[mf.in(qh,qk,ql)](3*(l-1)+1)+=g*mom(1);
+                                    mq[mf.in(qh,qk,ql)](3*(l-1)+2)+=g*mom(2);
+                                    mq[mf.in(qh,qk,ql)](3*(l-1)+3)+=g*mom(3);
+                                   }
+      }}}
+//      fprintf(stdout,"%g %g %g %g %g \n",qh,qk,ql,imag(mq[in(qh,qk,ql)](1)),real(mq[in(qh,qk,ql)](1)));
+     }}}
+ for (qk=1;qk<=mf.nb();++qk)
+ {for (ql=1;ql<=mf.nc();++ql) mq[mf.in(mf.na(),qk,ql)]=mq[mf.in(0,qk,ql)];}
+ for (qh=1;qh<=mf.na();++qh)
+ {for (ql=1;ql<=mf.nc();++ql) mq[mf.in(qh,mf.nb(),ql)]=mq[mf.in(qh,0,ql)];}
+ for (qh=1;qh<=mf.na();++qh)
+ {for (qk=1;qk<=mf.nb();++qk) mq[mf.in(qh,qk,mf.nc())]=mq[mf.in(qh,qk,0)];}
+ mq[mf.in(mf.na(),mf.nb(),mf.nc())]=mq[mf.in(0,0,0)];
+
      // mq[n]=mq[0];
 
-  for(qh=0;qh<=sps.na();++qh){for(qk=0;qk<=sps.nb();++qk){for(ql=0;ql<=sps.nc();++ql)
+  for(qh=0;qh<=mf.na();++qh){for(qk=0;qk<=mf.nb();++qk){for(ql=0;ql<=mf.nc();++ql)
    {
       Vector q(1,3),hkl(1,3),Q(1,3);
       // this is q- Vector
-      q(1)=(double)qh/sps.na();q(2)=(double)qk/sps.nb();q(3)=(double)ql/sps.nc();
+      q(1)=(double)qh/mf.na();q(2)=(double)qk/mf.nb();q(3)=(double)ql/mf.nc();
 
       // try different Q vectors corresponding to q !!
      int i1,j1,k1;
@@ -134,17 +156,9 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       {//multiply mq by lattice positions exp(iqr_i) and sum into a
        ri=inputpars.rez*(const Vector&)(*inputpars.jjj[l]).xyz; // ri ... atom position with respect to primitive lattice
        g=exp(piq*(Q*ri))*(*inputpars.jjj[l]).debyewallerfactor(QQ)*(*inputpars.jjj[l]).F(QQ)/2.0; // and formfactor + debey waller factor
-       if((*inputpars.jjj[l]).gJ==0)
-        {for(l1=1;l1<=6&&l1<=inputpars.nofcomponents;++l1){
-         if(l1==2||l1==4||l1==6){a(l1/2)+=g*mq[sps.in(qh,qk,ql)](inputpars.nofcomponents*(l-1)+l1);}
-         else                   {a((l1+1)/2)+=2.0*g*mq[sps.in(qh,qk,ql)](inputpars.nofcomponents*(l-1)+l1);}
-                                                           }
-        }
-       else
-        {for(l1=1;l1<=3&&l1<=inputpars.nofcomponents;++l1){
-         a(l1)+=g*mq[sps.in(qh,qk,ql)](inputpars.nofcomponents*(l-1)+l1)*(*inputpars.jjj[l]).gJ;
-                                                           }
-        }
+        for(l1=1;l1<=3;++l1){
+         a(l1)+=g*mq[mf.in(qh,qk,ql)](3*(l-1)+l1);
+                            }
       }
       if (QQ<ini.maxQ||(i1==0&&j1==0&&k1==0&&ini.maxQ==0))
           {
@@ -191,7 +205,15 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 
 //save mfarrangement
       physprops.mf=mf;
-
+   spincf * magmom;
+    magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
+                   for (l1=1;l1<=inputpars.nofatoms;++l1){
+                    // go through magnetic unit cell and sum up the contribution of every atom
+                  for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
+                   (*inputpars.jjj[l1]).mcalc(mom,T,mf.mf(i1,j1,k1),H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                    for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
+                    }}}}
+  
 // display spinstructure
   float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
 		 for (is=1;is<=inputpars.nofatoms;++is)
@@ -200,13 +222,13 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
     sprintf(text,"physpropclc:T=%gK, |H|=%gT, Ha=%gT, Hb=%gT, Hc=%gT  %i spins",myround(T),myround(Norm(H)),myround(physprops.H(1)),myround(physprops.H(2)),myround(physprops.H(3)),sps.n());
                     fin_coq = fopen_errchk ("./results/.spins3dab.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
                     fin_coq = fopen_errchk ("./results/.spins3dac.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
                     fin_coq = fopen_errchk ("./results/.spins3dbc.eps", "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ);
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
    fin_coq = fopen_errchk ("./results/.spins.eps", "w");
     sps.eps(fin_coq,text);
@@ -214,4 +236,5 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 delete[]x;delete []y; delete []z;
   //sps.display(text);
 delete []mq;
+delete magmom;
 }

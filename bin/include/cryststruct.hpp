@@ -11,7 +11,7 @@ class cryststruct
 int nofatoms,nofcomponents,maxnofatoms;
    float x[MAXNOFATOMS],y[MAXNOFATOMS],z[MAXNOFATOMS];
    double gJ[MAXNOFATOMS];
-   char * cffilenames[MAXNOFATOMS];
+   char * sipffilenames[MAXNOFATOMS];
    Matrix r;
    Vector abc;
 

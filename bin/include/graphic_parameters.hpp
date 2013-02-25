@@ -21,6 +21,7 @@ double spins_wave_amplitude;
 double spins_show_ellipses;
 double spins_show_static_moment_direction;
 double spins_show_oscillation;
+double spins_colour;
 
 //DENSITY
 double show_density,scale_density_vectors;

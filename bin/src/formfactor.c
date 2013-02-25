@@ -21,6 +21,9 @@ int main (int argc, char **argv)
             Usage: formfactor *.sipf\n\n\
             The formfactor is calculated from the coefficients given in the single\n\
             ion property file *.sipf, also the expectation values <jl(Q)> are output\n\
+            Note: if a radial wave function is parametrized in the sipf file, then\n\
+            this will be used to calculate the formfactor. If not, then the formfactor\n\
+            will be calculated from coefficients FF*, which have to be given in the sipf-file.\n\
 	\n");
       exit (1);
     }

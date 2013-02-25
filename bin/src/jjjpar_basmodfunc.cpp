@@ -17,7 +17,7 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 /************************************************************************************/
 // get parameters from sipf file
 /************************************************************************************/
-void jjjpar::get_parameters_from_sipfile(char * sipffilename)
+void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
 {FILE * cf_file;
  int i,j;
  float nn[MAXNOFNUMBERSINLINE];
@@ -25,11 +25,11 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
   char modulefilename[MAXNOFCHARINLINE];
 
  char instr[MAXNOFCHARINLINE];
-  cf_file = fopen_errchk (sipffilename, "rb");
+  cf_file = fopen_errchk (sipf_filename, "rb");
   fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
   if(extract(instr,"MODULE=",modulefilename,(size_t)MAXNOFCHARINLINE))
    {if(extract(instr,"#!",modulefilename,(size_t)MAXNOFCHARINLINE))
-    {fprintf(stderr,"Error: single ion property file %s does not start with '#!' or 'MODULE='\n",sipffilename);
+    {fprintf(stderr,"Error: single ion property file %s does not start with '#!' or 'MODULE='\n",sipf_filename);
      exit(EXIT_FAILURE);}
    }
    //ic1ion entered without path ?
@@ -41,7 +41,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
       if (strncmp(modulefilename,"icf1ion",6)==0)
       {strcpy(modulefilename,getenv("MCPHASE_DIR")); strcat(modulefilename,"/bin/ic1ion_module/icf1ion.so"); }
 
-  fprintf (stderr,"#parsing single ion property file: %s - loading module %s\n",sipffilename,modulefilename);
+  fprintf (stderr,"#parsing single ion property file: %s - loading module %s\n",sipf_filename,modulefilename);
 
   if(strcmp(modulefilename,"kramer")==0)
     {module_type=1;fprintf (stderr,"[internal]\n");
@@ -56,7 +56,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
                                           }
       }
       // input all  lines starting with comments
-      if(i!=0){fprintf(stderr,"Error reading |<+-|Ja|-+>|,|<+-|Jb|-+>|,|<+-|Jc|+->| from file %s\ncorrect file format is:\n",sipffilename);
+      if(i!=0){fprintf(stderr,"Error reading |<+-|Ja|-+>|,|<+-|Jb|-+>|,|<+-|Jc|+->| from file %s\ncorrect file format is:\n",sipf_filename);
               fprintf(stderr,"\nMODULE=kramer\n#comment lines ..\n#matrix elements A=|<+-|Ja|-+>| B=|<+-|Jb|-+>| C=|<+-|Jc|+->|\nA=2 \nB=3 \nC=1\n\n");exit(EXIT_FAILURE);}
       // now we have the numbers corresponding to the vector ABC() in nn[]
       fprintf(stderr," ... kramers doublet with A=<+|Ja|->=%g B=<+-|Jb|+->=+-%g C=<+|Jc|->/i=%g\n",ABC(1),ABC(2),ABC(3));
@@ -74,7 +74,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
                                            i+=extract(instr,"J",ABC(1))-1;
                                           }
       }// input all  lines starting with comments
-      if(i!=0){fprintf(stderr,"Error reading spin quantum number J=S from file %s\ncorrect file format is:\n",sipffilename);
+      if(i!=0){fprintf(stderr,"Error reading spin quantum number J=S from file %s\ncorrect file format is:\n",sipf_filename);
               fprintf(stderr,"\n#!brillouin\n#comment lines ..\n# Quantum number  J\nJ=3.5\n\n");exit(EXIT_FAILURE);}
       // now we have the numbers corresponding to the vector ABC() in nn[]
       fprintf(stderr," ... Brillouin function with J=S=%g\n",ABC(1));
@@ -84,7 +84,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
      else
      {if(strcmp(modulefilename,"cfield")==0)
      {module_type=2;fprintf (stderr,"#[internal]\n");
-      fclose(cf_file);cf_file = fopen_errchk (sipffilename, "rb"); // reopen file
+      fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
        
       iops=new ionpars(cf_file);
 
@@ -98,7 +98,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
      else
      {if(strcmp(modulefilename,"so1ion")==0)
      {module_type=4;fprintf (stderr,"#[internal]\n");
-      fclose(cf_file);cf_file = fopen_errchk (sipffilename, "rb"); // reopen file
+      fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
      iops=new ionpars(cf_file);
       nof_electrons=(*iops).nof_electrons;
       int dj;dj=(int)(2*J()+1);
@@ -118,7 +118,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipffilename)
                                            i+=extract(instr,"structurefile",clusterfilename,sizeof(clusterfilename))-1;
                                           }
       }// input all  lines starting with comments
-      if(i!=0){fprintf(stderr,"Error reading structurefile from file %s\ncorrect file format is:\n",sipffilename);
+      if(i!=0){fprintf(stderr,"Error reading structurefile from file %s\ncorrect file format is:\n",sipf_filename);
               fprintf(stderr,"\n#!MODULE=cluster\n#comment lines ..\n# next line contains cluster structure filename\nstructurefile=cluster.j\n\n");exit(EXIT_FAILURE);}
       fprintf(stderr," ... reading cluster structure from %s\n",clusterfilename);
       clusterpars =new par(clusterfilename);
@@ -163,18 +163,36 @@ module_type=0;
     I=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"Icalc");
     //*(int **)(&m)=GetProcAddress(handle,"Icalc");
      if (I==NULL) {fprintf (stderr,"jjjpar::jjjpar error %d  module %s loading function Icalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
+    du=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"du1calc");
+    //*(void **)(&du)=GetProcAddress(handle,"du1calc");
+     if (du==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function du1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    
+    p=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"pcalc");
+    //*(int **)(&p)=GetProcAddress(handle,"pcalc");
+     if (p==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function pcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dp1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dp1calc");
+    //*(void **)(&du)=GetProcAddress(handle,"dp1calc");
+     if (dp1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dp1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
     m=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"mcalc");
     //*(int **)(&m)=GetProcAddress(handle,"mcalc");
-     if (m==NULL) {fprintf (stderr,"jjjpar::jjjpar error %d  module %s loading function mcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+     if (m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dm1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dm1calc");
+    //*(void **)(&dm1)=GetProcAddress(handle,"dm1calc");
+     if (dm1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dm1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
     L=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Lcalc");
     //*(int **)(&L)=GetProcAddress(handle,"Lcalc");
-     if (S==NULL) {fprintf (stderr,"jjjpar::jjjpar error %d  module %s loading function Lcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+     if (L==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function Lcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dL1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dL1calc");
+    //*(void **)(&dL1)=GetProcAddress(handle,"dL1calc");
+     if (dL1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dL1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
     S=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Scalc");
     //*(int **)(&S)=GetProcAddress(handle,"Scalc");
-     if (m==NULL) {fprintf (stderr,"jjjpar::jjjpar error %d  module %s loading function Scalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"du1calc");
-    //*(void **)(&dm)=GetProcAddress(handle,"du1calc");
-     if (dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function du1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+     if (S==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function Scalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dS1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dS1calc");
+    //*(void **)(&dS1)=GetProcAddress(handle,"dS1calc");
+     if (dS1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dS1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
     mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mq");
     //*(void **)(&mq)=GetProcAddress(handle,"mq");
      if (mq==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mq not possible - continuing\n",(int)GetLastError(),modulefilename);}
@@ -194,16 +212,30 @@ module_type=0;
     //*(void **)(&dnn)=GetProcAddress(handle,"dv1calc");
      if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dv1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
+    cd_m=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"chargedensity_coeff");
+    //*(void **)(&cd_m)=GetProcAddress(handle,"chargedensity_coeff");
+    if (cd_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function chargedensity_coeff not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    cd_dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dchargedensity_coeff1");
+    //*(void **)(&cd_dm)=GetProcAddress(handle,"dchargedensity_coeff1");
+     if (cd_dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dchargedensity_coeff1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
+
     sd_m=(void(*)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"spindensity_coeff");
     //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_coeff");
     if (sd_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function spindensity_coeff not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    sd_dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dspindensity_coeff1");
+    //*(void **)(&sd_dm)=GetProcAddress(handle,"dspindensity_coeff1");
+     if (sd_dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dspindensity_coeff1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     od_m=(void(*)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"orbmomdensity_coeff");
     //*(void **)(&od_m)=GetProcAddress(handle,"orbmomdensity_coeff");
     if (od_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function orbmomdensity_coeff not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    od_dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dorbmomdensity_coeff1");
+    //*(void **)(&od_dm)=GetProcAddress(handle,"dorbmomdensity_coeff1");
+     if (od_dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dorbmomdensity_coeff1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
-    ro_calc=(void(*)(double*,double*,double*,double*,Vector*,double*,Vector*,Vector*,double*,Vector*,char**))GetProcAddress(handle,"ro_calc");
-    //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_coeff");
+    ro_calc=(void(*)(double*,double*,double*,double*,Vector*,double*,Vector*,char**))GetProcAddress(handle,"ro_calc");
+    //*(void **)(&ro_calc)=GetProcAddress(handle,"spindensity_coeff");
     if (ro_calc==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function ro_calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
 #else
@@ -216,15 +248,29 @@ module_type=0;
 	      }
  *(void **)(&I)=dlsym(handle,"Icalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s\n",error);exit (EXIT_FAILURE);}
+  *(void **)(&du)=dlsym(handle,"du1calc");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);du=NULL;}
+
+ *(void **)(&p)=dlsym(handle,"pcalc");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);p=NULL;}
+ *(void **)(&dp1)=dlsym(handle,"dp1calc");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dp1=NULL;}
+
+
  *(void **)(&m)=dlsym(handle,"mcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);m=NULL;}
+ *(void **)(&dm1)=dlsym(handle,"dm1calc");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dm1=NULL;}
  *(void **)(&L)=dlsym(handle,"Lcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);L=NULL;}
+ *(void **)(&dL1)=dlsym(handle,"dL1calc");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dL1=NULL;}
  *(void **)(&S)=dlsym(handle,"Scalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);S=NULL;}
-  *(void **)(&dm)=dlsym(handle,"du1calc");
-  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dm=NULL;}
-  *(void **)(&mq)=dlsym(handle,"mq");
+ *(void **)(&dS1)=dlsym(handle,"dS1calc");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dS1=NULL;}
+ 
+ *(void **)(&mq)=dlsym(handle,"mq");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);mq=NULL;}
   *(void **)(&estates)=dlsym(handle,"estates");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);estates=NULL;
@@ -239,11 +285,20 @@ module_type=0;
   *(void **)(&ddnn)=dlsym(handle,"dv1calc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ddnn=NULL;}
 
+  *(void **)(&cd_m)=dlsym(handle,"chargedensity_coeff");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);cd_m=NULL;}
+  *(void **)(&cd_dm)=dlsym(handle,"dchargedensity_coeff1")
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);cd_dm=NULL;}
+
   *(void **)(&sd_m)=dlsym(handle,"spindensity_coeff");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);sd_m=NULL;}
+  *(void **)(&sd_dm)=dlsym(handle,"dspindensity_coeff1")
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);sd_dm=NULL;}
 
   *(void **)(&od_m)=dlsym(handle,"orbmomdensity_coeff");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);od_m=NULL;}
+  *(void **)(&od_dm)=dlsym(handle,"dorbmomdensity_coeff1")
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);od_dm=NULL;}
 
   *(void **)(&ro_calc)=dlsym(handle,"ro_calc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ro_calc=NULL;}
@@ -269,7 +324,7 @@ module_type=0;
 
   DWF=0;  gJ=0;
 
-  cf_file = fopen_errchk (sipffilename, "rb");
+  cf_file = fopen_errchk (sipf_filename, "rb");
   while(feof(cf_file)==false)
   {fgets(instr, MAXNOFCHARINLINE, cf_file);
    if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
@@ -332,10 +387,10 @@ module_type=0;
  fclose (cf_file);
 // check gJ
 if(module_type==2&&fabs(gJ-(*iops).gJ)>0.00001)
-{fprintf(stderr,"Error internal module cfield : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipffilename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
+{fprintf(stderr,"Error internal module cfield : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipf_filename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
 if(module_type==4&&fabs(gJ-(*iops).gJ)>0.00001)
-{fprintf(stderr,"Error internal module so1ion : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipffilename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
-if (gJ==0){printf("# reading gJ=0 in single ion property file %s -> entering intermediate coupling mode by assigning Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc (S... Spin, L... angular momentum)\n",sipffilename);
+{fprintf(stderr,"Error internal module so1ion : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipf_filename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
+if (gJ==0){printf("# reading gJ=0 in single ion property file %s -> entering intermediate coupling mode by assigning Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc (S... Spin, L... angular momentum)\n",sipf_filename);
            if (module_type==1){fprintf(stderr,"Error internal module kramers: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
            if (module_type==2){fprintf(stderr,"Error internal module cfield : intermediate coupling not supported\n");exit(EXIT_FAILURE);}
            if (module_type==3){fprintf(stderr,"Error internal module brillouin: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
@@ -408,7 +463,7 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,do
    case 4: (*iops).cfieldJJ(mom,T,gjmbHxc,Hext,lnZ,U,parstorage);break;
    case 3: brillouin(mom,T,gjmbHxc,Hext,lnZ,U);break;
    case 5: cluster_Icalc(mom,T,gjmbHxc,Hext,lnZ,U);break;
-   default: (*I)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename,&lnZ,&U,&parstorage);
+   default: (*I)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
   }
 }
 
@@ -419,7 +474,7 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,do
 /****************************************************************************/
 int jjjpar::du1calc(double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 { switch (module_type)
-  {case 0: if (dm!=NULL){return (*dm)(&transitionnumber,&T,&gjmbHxc,&Hext,&gJ,&ABC,&cffilename,&u1,&delta,&ests);}
+  {case 0: if (du!=NULL){return (*du)(&transitionnumber,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&ests);}
            else return 0;
            break;
    case 1: return kramerdm(transitionnumber,T,gjmbHxc,Hext,u1,delta);break;
@@ -437,7 +492,7 @@ int jjjpar::du1calc(double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u
 /****************************************************************************/
 ComplexMatrix & jjjpar::eigenstates (Vector &  gjmbHxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case 0:  if(estates!=NULL){(*estates)(&est,&gjmbHxc,&Hext,&gJ,&T,&ABC,&cffilename);}
+  {case 0:  if(estates!=NULL){(*estates)(&est,&gjmbHxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
             return est;break;
    case 2:
    case 4: (*iops).cfeigenstates(&est,gjmbHxc,Hext,T);return est;break;
@@ -450,7 +505,7 @@ ComplexMatrix & jjjpar::eigenstates (Vector &  gjmbHxc,Vector & Hext,double & T)
 /****************************************************************************/
 ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  gjmbHxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case 0:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&gjmbHxc,&Hext,&gJ,&T,&ABC,&cffilename);}
+  {case 0:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&gjmbHxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
             return Icalc_parstorage;break;
    case 2:
    case 4: (*iops).cfeigenstates(&Icalc_parstorage,gjmbHxc,Hext,T);return Icalc_parstorage;break;

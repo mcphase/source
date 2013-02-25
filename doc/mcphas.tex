@@ -2,7 +2,7 @@
 Diffraction, etc.)}
 \label{runmcphas}
 
-In order to perform calculations beyond the capabilities of {\prg cfield\index{cfield}} it is necessary
+In order to perform calculations beyond the capabilities of {\prg so1ion\index{so1ion}} it is necessary
 to use the program {\prg mcphas}. 
 \begin{itemize}
 \item As a first step it is possible to
@@ -253,8 +253,8 @@ If {\prg diagonalexchange}
 If {\prg diagonalexchange}
  is 2, specific components of the exchange tensor can be given in columns 4 onwards. The indices of these components
  must be given in the following line (Line 9a below).
-The Land\'e factor of the ion (gJ) and the file name of the corresponding single ion
-parameter file (cffilename).
+The file name of the corresponding single ion
+parameter file (sipffilename).
 \item [Line 9a:]  If {\prg diagonalexchange=2}, then this line gives the indices of the exchange tensor corresponding to 
  the columns 4 onwards. It must have a variable called {\prg indexexchange} followed by a list of names of components of the interaction
  tensor separated by space. E.g.
@@ -337,7 +337,7 @@ files are equivalent:
 #! r1c=   0 r2c=   0 r3c=   1
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
-#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=0 gJ=0.857143 cffilename=Ce3p.sipf
+#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=0  sipffilename=Ce3p.sipf
 # da[a] db[b] dc[c] Jaa[meV] Jbb[meV] Jcc[meV] Jab[meV] Jba[meV] Jac[meV] Jca[meV] Jbc[meV] Jcb[meV]
 +0	+0	+1	-0.1	-0.1	-0.1   0  0  0  0  0  0
 +0	+0	-1	-0.1	-0.1	-0.1   0  0  0  0  0  0
@@ -358,7 +358,7 @@ Using diagonalexchange this may be shortened to
 #! r1c=   0 r2c=   0 r3c=   1
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
-#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=1 gJ=0.857143 cffilename=Ce3p.sipf
+#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=1  sipffilename=Ce3p.sipf
 # da[a] db[b] dc[c] Jaa[meV] Jbb[meV] Jcc[meV] Jab[meV] Jba[meV] Jac[meV] Jca[meV] Jbc[meV] Jcb[meV]
 +0	+0	+1	-0.1	-0.1	-0.1   
 +0	+0	-1	-0.1	-0.1	-0.1   
@@ -380,7 +380,7 @@ zero parameters may be omitted:
 #! r1c=   0 r2c=   0 r3c=   1
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
-#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=2 gJ=0.857143 cffilename=Ce3p.sipf
+#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=2  sipffilename=Ce3p.sipf
 # da[a] db[b] dc[c] Jaa[meV] Jbb[meV] Jcc[meV] Jab[meV] Jba[meV] Jac[meV] Jca[meV] Jbc[meV] Jcb[meV]
 #! indexexchange = JaJa JaJc JcJa JbJb JcJc
 +0	+0	+1	-0.1 0 0 -0.1	-0.1  
@@ -400,7 +400,7 @@ zero parameters may be omitted:
 #! r1c=   0 r2c=   0 r3c=   1
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
-#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=2 gJ=0.857143 cffilename=Ce3p.sipf
+#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=2 sipffilename=Ce3p.sipf
 # da[a] db[b] dc[c] Jaa[meV] Jbb[meV] Jcc[meV] Jab[meV] Jba[meV] Jac[meV] Jca[meV] Jbc[meV] Jcb[meV]
 #! indexexchange = 1,1 1,3, 3,1 2,2 3,3
 +0	+0	+1	-0.1 0 0 -0.1	-0.1  
@@ -424,7 +424,7 @@ only half of it may be given:
 #! r1c=   0 r2c=   0 r3c=   1
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
-#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=2 gJ=0.857143 cffilename=Ce3p.sipf
+#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=2 sipffilename=Ce3p.sipf
 # da[a] db[b] dc[c] Jaa[meV] Jbb[meV] Jcc[meV] Jab[meV] Jba[meV] Jac[meV] Jca[meV] Jbc[meV] Jcb[meV]
 #! symmetricexchange=1 indexexchange = JaJa JaJc JbJb JcJc
 +0	+0	+1	-0.1 0  -0.1	-0.1  
@@ -604,9 +604,7 @@ curve(s).
 \item [\prg mcphas.qvc]    the set of test q-vectors used for calculation of free energy.
                            Components of these q vectors refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
 \item [\prg mcphas.phs]    spin-configuration table of different types of spin-configurations. 
-                            Note, in case of non-orthogonal axes the convention in these tables 
-                            is $mb||\vec b$, $mc||(\vec a \times \vec b)$ and $ma$ perpendicular to $mb$ and $mc$.
-
+                           
                            {\em Note}: 
                            there is no natural criteria for deciding, if one spin-configuration is
 			   different from another one. Therefore the list of ''different''
@@ -622,22 +620,17 @@ curve(s).
 			   moments in $b$ direction. 
 \item [\prg mcphas.sps]    $T-H$ dependence of spin-configuration. The spin configurations stored in this
                            file may be displayed using the program {\prg spins\index{spins}}, an example is given
-			   in figure~\ref{spingraphic}.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            also for the moment components $ma, mb, mc$ in these tables 
-                            is $mb||\vec b$, $mc||(\vec a \times \vec b)$ and $ma$ perpendicular to $mb$ and $mc$.
+			   in figure~\ref{spingraphic}. The expectation values $\langle I_{\alpha} \rangle$ ($\alpha=1,\dots,nofcomponents$, note that for the single ion module {\prg so1ion} $I_1=J_x,I_2=J_y,I_3=J_z,I_4=O_2^{-2},I_5=O_2^{-1}, \dots$, for the complete list see appendix \ref{stevens}) are stored in this file  for i=1,2,...,number of spins in magnetic unit cell.
+                            
 
-\item [\prg mcphas.mf]     $T-H$ dependence of exchange field configuration, stored as $g_J \mu_B H_{xc}(i)$(unit is in meV)
+\item [\prg mcphas.mf]     $T-H$ dependence of exchange field configuration, stored as $H_{xc}(i)$(unit is in meV)
                             for i=1,2,...,number of spins in magnetic unit cell.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            also for the mean field components in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-\item [\prg mcphas.fum]    free energy, magnetic energy (the derivative with respect to temperature gives the specific %%@
-heat),
-                           magnetisation data and (if cfield is used with higher order interactions)
-                           expectation values of the Stevens Operators $<O_l^m>$ . As an example for the information
+                           
+\item [\prg mcphas.fum]    free energy, magnetic energy (the derivative with respect to temperature gives the specific heat),
+                           magnetisation data (if a {\prg mcalc} function is present in the single ion module).
+                            As an example for the information
 			   contained in this file the calculated magnetisation and magnetostriction of NdCu$_2$ is shown in
-			   figures~\ref{magnetization} and ~\ref{magnetizationgraphic}.
+			   fig~\ref{magnetization}.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
                             also for the magnetisation components $ma,mb,mc$ in these tables 
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
@@ -649,27 +642,32 @@ heat),
 	       the following sum of dyadic products:
 
 	       \begin{equation}
-	        \frac{1}{n}\sum_{s=1}^n <{\mbf J}^s> \times  <{\mbf J}^{s+k}>
+	        \frac{1}{n}\sum_{s=1}^n <{\mbf I}^s> \times  <{\mbf I}^{s+k}>
 	       \end{equation}
-	       with $n$ being the number of moments in the magnetic unit cell.
-	       Single ion and two-ion magnetostriction can be calculated using the $<O_l^m>$ and the
-	       spin-spin correlation functions. As an example the magnetostriction analysis of
+	       with $n$ being the number of magnetic atoms in the magnetic unit cell.
+                For example for the single ion module {\prg so1ion} $I_1=J_x,I_2=J_y,I_3=J_z,I_4=O_2^{-2},I_5=O_2^{-1}, \dots$, for the complete list see appendix \ref{stevens}.
+	       Single ion and two-ion magnetostriction can be calculated using the $<I_{\alpha}>$ from {\prg mcphas.xyt} and the
+	       spin-spin correlation functions from {\prg mcphas1.j1 .j1 .j2 ...}. As an example the magnetostriction analysis of
 	       NdCu$_2$ is shown in figure~\ref{magnetostrictiongraphic}. For details 
              please refer to~\cite{rotter02-8885}.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
                             also for the moment components in these tables 
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \item [\prg mcphas.xyt]    phase diagram as x,y,T, H, phase-number j according to spin-configuration table
-               given in mcphas.phs, a periodicity key, nettomoments <J>.
+               given in mcphas.phs, a periodicity key, thermal expectationvalues $\langle I_{\alpha} \rangle$ (averaged over the unit cell).
  Figure~\ref{phasediagramgraphic}
 	       shows the phase diagram of NdCu$_2$ for magnetic fields parallel to the orthorhombic $b$-direction.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ 
                              in these tables 
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+              Note that  the phase-number is not necessarily a unique number for each phase in the phase diagram, because
+the program numbers phases according to their similarity in the moments. For example, any tetragonal easy plane magnet 
+will have domains with moments parallel to $a$ and $b$. The program will generate both domains and find equal energy for both. It will give each domain a separate phase number, because spin directions are completely different. Because both domains have the same free energy at every temperature, the phase-index will vary in a random manner. In order to generate a beautiful phase diagram figure, such equivalent domains have to be identified and phase numbers have to be substituted.
 \item [\prg mcphas.hkl]    calculated (unpolarised) neutron diffraction data (the calculated magnetic intensities
-    correspond to the magnetic structure + Polarisation factor. The
-    Lorentz-factor , magnetic form factor and  instrumental corrections are not calculated.)
- As an example figure~\ref{neutintgraphic}
+    correspond to the magnetic structure + Polarisation factor + magnetic Formfactor (dipole approx). The
+    Lorentz-factor  and  instrumental corrections are not calculated.). The single ion module function
+    {\prg mcalc} is used to evaluate the magnetic moment on each site.
+    As an example figure~\ref{neutintgraphic}
     shows the calculated temperature dependence of magnetic amplitudes for NdCu$_2$.
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ 
@@ -677,16 +675,19 @@ heat),
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
     
 \item [\prg mcphasa.hkl]    Fourier Transform of the $a$-component of the magnetic Moments.
+                           $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$. The single ion module function
+    {\prg mcalc} is used to evaluate the magnetic moment on each site.
+                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
+                            the magnetic moment component in these tables 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+\item [\prg mcphasb.hkl]    Fourier Transform of the $b$-component of the magnetic Moments. The single ion module function
+    {\prg mcalc} is used to evaluate the magnetic moment on each site. 
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
                             the magnetic moment component in these tables 
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-\item [\prg mcphasb.hkl]    Fourier Transform of the $b$-component of the magnetic Moments.
-                           $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            the magnetic moment component in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-\item [\prg mcphasc.hkl]    Fourier Transform of the $c$-component of the magnetic Moments.
+\item [\prg mcphasc.hkl]    Fourier Transform of the $c$-component of the magnetic Moments. The single ion module function
+    {\prg mcalc} is used to evaluate the magnetic moment on each site.
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
                             the magnetic moment component in these tables 

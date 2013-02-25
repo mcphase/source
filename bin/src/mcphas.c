@@ -133,14 +133,14 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
       physprop.H=h;
 
 //calculate physical properties at HT- point
-      j=htcalc(physprop.H,T,inputpars,testqs,testspins,physprop);
+   j=htcalc(physprop.H,T,inputpars,testqs,testspins,physprop);
        switch (j)
        {case 0:
             //save physical properties of HT-point
 	    //sta=(sta*nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
           sta+=physprop.save (verbose,filemode,j,inputpars);
-	    ++nofstapoints;
+   	    ++nofstapoints;
           if (sta>stamax){fprintf(stdout,"stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 
 	 case 1: goto endproper;

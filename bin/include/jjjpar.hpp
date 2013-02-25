@@ -22,6 +22,14 @@ typedef void fnc_t();
 #define MAXSAVEQ 5   // Number of Q vector values to save in calculation of F(Q)
                      //  so as to not repeat calculations.
 
+#define MAGMOM_EV_DIM 3  // eigenvector dimension for moment oscillation
+#define SPIN_EV_DIM 3  // eigenvector dimension for spin oscillation
+#define ORBMOM_EV_DIM 3  // eigenvector dimension for orbmom oscillation
+#define CHARGEDENS_EV_DIM 28  // eigenvector dimension for chargedensity oscillation
+#define SPINDENS_EV_DIM 49  // eigenvector dimension for spindensity oscillation
+#define ORBMOMDENS_EV_DIM 49  // eigenvector dimension for orbmomdensity oscillation
+#define PHONON_EV_DIM 3 // phonon eigenvector dimension ?? check if this is sensible ??
+
 class par;
 class jjjpar
 {
@@ -29,7 +37,7 @@ public:
 // ********************************************************************************
 //                               basic parameters
 // ********************************************************************************
-  char * cffilename; // single ion parameter filename
+  char * sipffilename; // single ion parameter filename
   char * modulefilename; // module name
     double J(); // returns total angular momentum if possible
    Vector &  tetan(); //returns stevens parameters if possible
@@ -83,27 +91,27 @@ private:
 
 public:
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents
-   // from exchange field gjmbHxc [meV] and external field Hext
-   void  Icalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage);
+   // from exchange field Hxc [meV] and external field Hext
+   void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage);
 
    // returns transition element matrix M  and transition energy delta (to calculate chi0 in mcdisp,see manual)
-   int  du1calc (double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & u1,float & delta,ComplexMatrix & ests);
+   int  du1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,ComplexMatrix & ests);
    int transitionnumber; // the transition associated with the ion (important if there are more in the single ion spectrum)
 
    ComplexMatrix est; // eigenstates
    ComplexMatrix Icalc_parstorage; // paramter storage for Icalc
    // returns eigenvalues and eigenstates matrix parameters of ion (if possible)
-   ComplexMatrix & eigenstates (Vector &  gjmbHxc,Vector & Hext, double & T);
+   ComplexMatrix & eigenstates (Vector &  Hxc,Vector & Hext, double & T);
    // initialisis parameter storage for Icalc parameters (if possible)
-   ComplexMatrix & Icalc_parameter_storage_init (Vector &  gjmbHxc,Vector & Hext,double & T);
+   ComplexMatrix & Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T);
    // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
-   Matrix opmat(int n,Vector &  gjmbHxc,Vector & Hext);
+   Matrix opmat(int n,Vector &  Hxc,Vector & Hext);
 
 private:
   // external module functions, intern_Icalc=0
  
   void (*I)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*);
-  int  (*dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+  int  (*du)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
   void (*estates)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
   void (*Icalc_parameter_storage)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
@@ -113,25 +121,37 @@ public:
 // ********************************************************************************
 //                                       OBSERVABLES 
 // ********************************************************************************
+//0. PHONON displacement
+int pcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
+int  dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dp1,float & delta,ComplexMatrix & ests);
+private:
+void (*p)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+int  (*dp1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
+public:
 //1. MAGNETIC MOMENT
    // returns magnetic moment
-   int mcalc(Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext,ComplexMatrix & ests);
-   int Lcalc(Vector &L, double & T, Vector &  gjmbHxc,Vector & Hext,ComplexMatrix & ests);
-   int Scalc(Vector &S, double & T, Vector &  gjmbHxc,Vector & Hext,ComplexMatrix & ests);
+   int mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
+   int Lcalc(Vector &L, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
+   int Scalc(Vector &S, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
+   int  dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dm1,float & delta,ComplexMatrix & ests);
+   int  dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dL1,float & delta,ComplexMatrix & ests);
+   int  dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dS1,float & delta,ComplexMatrix & ests);
 
 private:  // handle for mcalc in loadable modules
   void (*m)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   void (*L)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   void (*S)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+  int  (*dm1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+  int  (*dL1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+  int  (*dS1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
 //2 . NEUTRON SCATTERING OPERATOR  --------------------------------------
    // calculate scattering operator <M(Q)>=-2x<Q>_TH in units of mb
    // according to stored eigenstate matrix est, requires a call to eigenstates first
 public:
-   ComplexVector & MQ(Vector & Qvec);
-   ComplexVector Mq;
-
+  int MQ(ComplexVector & Mq,Vector & Qvec);
+  
   // returns transition element matrix N(Q) in order to be able to go beyond
    // dipolar approximation in mcdisp - it requires a call to eigenstates first
    int dv1calc(Vector & Qvec, double & T, ComplexVector & v1, ComplexMatrix & ests);
@@ -182,8 +202,8 @@ public:
 //   debyewallerfactor = EXP(-2 * DWF *s*s)
    double debyewallerfactor(double & Q);
 
-// 3. charge density ----------------------------------------------------------
-
+//  DENSITIES ----------------------------------------------------------
+// ... radial wave functions
    Vector Np,Xip,Cp; // radial wave function parameters
    // evaluate radial wave function // r given in Angstroems, returns R(r) in units of 1/A^1.5
    double radial_wavefunction(double r);
@@ -198,45 +218,68 @@ public:
    double r4;  // radial wave function exp values
    double r6;
 
-   // calculation of chargedensity
-   double rocalc (double & teta,double & fi,double & R, Vector & moments,double & T, Vector &  gjmbHxc,Vector & Hext);
-   void (*ro_calc)(double*,double*,double*,double*,Vector*,double*,Vector*,Vector*,double*,Vector*,char**);
 private:
   double rk_from_radial_wavefunction(int k); // needed for public radial wave function <r^n> calculation
    void set_zlm_constants();
    // sum over different Zlm using the coefficients a(l,m)
    double zlmsum(Matrix & a, double & teta, double & fi);
 
-// 4. moment density ----------------------------------------------------------
+// 3. charge density ----------------------------------------------------------
 public:
+   // calculation of chargedensity
+   // function to calculate coefficients of expansion of chargedensity in terms
+   // of Zlm R^2(r) at a given temperature T and  effective field H
+   int chargedensity_coeff (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
+   int dchargedensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dchargedensity_coeff1,float & delta,ComplexMatrix & ests);
+
+   double chargedensity_calc (double & teta,double & fi,double & R, Vector & moments);
+private:
+   void (*ro_calc)(double*,double*,double*,double*,Vector*,double*,Vector*,char**);
+   void  (*cd_m)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+   int   (*cd_dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+
+public:
+// 4. spindensities ----------------------------------------------------------
 // function to calculate coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
-void spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage);
-
-// function to calculate coefficients of expansion of orbital moment density in terms
-// of Zlm F(r) at a given temperature T and  effective field H
-void orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage);
-
+int spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
+int dspindensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dspindensity_coeff1,float & delta,ComplexMatrix & ests);
 // sub for calculation of spin density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)
-
 double spindensity_calc (double & teta,double & fi,double & R, Vector & moments);
 Vector spindensity_calc (double & teta,double & fi,double & R, Vector & momentsx, Vector & momentsy, Vector & momentsz);
-
    double Fr(double r); // evaluate F(r)=1/r integral_r^inf dx R^2(x)
                         // r in units of Angstroems, F(r) in units of 1/A^3
+// subs for calculation gradient of spin and orbital moment density given a radius R and polar angles teta,
+// fi and expansion coeff. of Zlm R^2(r)
+ Matrix gradspindensity_calc(double & teta,double & fi,double & R, Vector & momentsx, Vector & momentsy, Vector & momentsz);
+private:
+  void  (*sd_m)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+   int   (*sd_dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
+// 5. orbmomdensities ----------------------------------------------------------
+public:
+// function to calculate coefficients of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+int orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
+int dorbmomdensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dorbmomdensity_coeff1,float & delta,ComplexMatrix & ests);
 // sub for calculation of orbital moment density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)
 double orbmomdensity_calc (double & teta,double & fi,double & R, Vector & moments);
 Vector orbmomdensity_calc (double & teta,double & fi,double & R, Vector & momentsx, Vector & momentsy, Vector & momentsz);
-Vector currdensity_calc (double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
-
-// subs for calculation gradient of spin and orbital moment density given a radiu R and polar angles teta,
+// subs for calculation gradient of spin and orbital moment density given a radius R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)
- Matrix gradspindensity_calc(double & teta,double & fi,double & R, Vector & momentsx, Vector & momentsy, Vector & momentsz);
  Matrix gradorbmomdensity_calc(double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
- Matrix gradcurrdensity_calc(double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
+private:
+  void  (*od_m)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+  int   (*od_dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+
+// 6. currentdensities ----------------------------------------------------------
+public:
+Vector currdensity_calc (double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
+// subs for calculation gradient of spin and orbital moment density given a radius R and polar angles teta,
+// fi and expansion coeff. of Zlm R^2(r)
+Matrix gradcurrdensity_calc(double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
 
 private:
 //#ifdef __linux__
@@ -251,8 +294,6 @@ private:
 void *handle;
 #endif
   
-  void  (*sd_m)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
-  void  (*od_m)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
 
 
 // ********************************************************************************
@@ -260,9 +301,9 @@ void *handle;
 // ********************************************************************************
 
   // kramers internal module functions, module_type=1
-  void kramer (Vector &mom,double & T,Vector &  gjmbHxc,Vector & Hext, double & Z,double & U);
-  int  kramerdm (int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & u1,float & delta);
-  Matrix krameropmat (int & n ,Vector &  gjmbHxc,Vector & Hext);
+  void kramer (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  int  kramerdm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
+  Matrix krameropmat (int & n ,Vector &  Hxc,Vector & Hext);
 
   // realisation of class iops - cfield internal module functions, intern_Icalc=2
   // the class iops calls for some functionality the program cfield (e.g. for
@@ -270,12 +311,12 @@ void *handle;
   ionpars * iops;
 
   // brillouin internal module functions,module_type=3
-  void brillouin (Vector &mom, double & T,Vector &  gjmbHxc,Vector & Hext, double & Z,double & U);
-  int  brillouindm (int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & u1,float & delta);
+  void brillouin (Vector &mom, double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  int  brillouindm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
 
   // cluster internal module functions, module_type=5
-  void cluster_Icalc (Vector &mom,double & T,Vector &  gjmbHxc,Vector & Hext, double & Z,double & U);
-  int  cluster_dm (int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & u1,float & delta);
+  void cluster_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  int  cluster_dm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
   par * clusterpars;
 
 

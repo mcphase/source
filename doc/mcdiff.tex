@@ -1,4 +1,4 @@
-\section{{\prg mcdiff}\index{mcdiff} - calculate and fit  magnetic Neutron or Resonant Xray %%@
+\section{{\prg mcdiff}\index{mcdiff} - calculate and fit  magnetic Neutron or Resonant Xray 
 Scattering}\label{mcdiff}
 
 In order to calculate neutron diffraction and resonant magnetic Xray scattering
@@ -158,15 +158,12 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #                in case of non orthogonal lattices instead of Ma Mb Mc the components Mi Mj Mk
 #                have to be given, which refer to an right handed orthogonal coordinate system 
 #                defined by j||b, k||(a x b) and i normal to k and j
-# '<Ja>' '<Jb>' '<Jc>' (optional) denote the momentum components 
-# 'gjmbHeffa' 'gjmbHeffb' 'gjmbHeffc' (optional line, used to go beyond dipole approx for formfactor)
-#                                     denote the corresponding meanfields multiplied by 
-#                                     Lande factor and Bohr magneton 
+#  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components 
+# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)
+#                                     denote the exchange fields in meV 
 #
-#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] <Ja>     <Jb>     %%@
-<Jc> ...
-#{corresponding effective fields gjmbHeff [meV]- if passed to mcdiff only these are used for caculation (not %%@
-the magnetic moments)}
+#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>] 
+#{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}
 {mcphas.cf1}  0.00000  0.00000  0.00000   0.00000  0.00000  0.00000   +0.00000 +0.00000 -2.13030  +0.00000 %%@
 +0.00000 -2.48540
 {mcphas.cf1}  0.00000  0.00000  1.00000   0.00000  0.00000  1.00000   +0.00000 +0.00000 +2.13030  +0.00000 %%@
@@ -480,17 +477,24 @@ Similar, the magnetic elastic scattering function can be written as a product:
 el,\alpha\beta}&=&\delta(\hbar \omega) 
 \left ( \frac{(2\pi)^3}{v_0}\sum_{\mbf \tau} \delta(\mbf Q-\mbf \tau) \right )
 \frac{1}{N_B} \left ( \sum_{dd',\alpha\beta}(\delta_{\alpha\beta}-\hat \mbf Q_{\alpha} \hat \mbf Q_{\beta})
-{\frac{1}{2\mu_B}F(Q)}_d M_{d\alpha} \right. 
+\frac{1}{2\mu_B}F_d(Q) M_{d\alpha} \right. 
 \nonumber \\ 
-&&\left.  {\frac{1}{2\mu_B}F(Q)}_{d'} M_{d'\beta}
+&&\left.  \frac{1}{2\mu_B}F_{d'}(Q) M_{d'\beta}
  e^{-i\mbf Q(\mbf B_d-\mbf B_{d'})} e^{-W_d-W_{d'}} \right )\\
 &=&\delta(\hbar \omega)\left ( \frac{(2\pi)^3}{v_0}\sum_{\mbf \tau} \delta(\mbf Q-\mbf \tau) \right )
 \frac{1}{N_B} |\vec{\rm MSF}|^2
 \end{eqnarray}
 
-with $M_{d\alpha}/\mu_B=g_J\langle J_{d\alpha} \rangle_{T,H}$.
-Here $g_J$, $F(Q)$ and $\langle J_{d\alpha} \rangle_{T,H}$ denote the
-Land\'e factor, the form factor and the expectation value of the total angular
+In dipole approximation the products  $F_d(Q) M_{d\alpha}$ are evaluated as follows
+ (see also appendix~\ref{ffacts}):
+\begin{quotation}
+\item[rare earth ($g_J\neq0$ in sipf file):] $F_d(Q) M_{d\alpha}=g_J \mu_B\langle J_{d\alpha} \rangle_{T,H}\left [\langle j_0(Q) \rangle + \frac{2-g_J}{g_J}\langle j_2(Q) \rangle \right ]$
+\item[transition metals ($g_J=0$ in sipf file) given (only) magnetic moments $\langle Ma \rangle, \langle Mb \rangle, \langle Mc \rangle$  in {\prg mcdiff.in}:] $F_d(Q) M_{d\alpha}= \langle M_{d\alpha} \rangle_{T,H}\left [\langle j_0(Q) \rangle  \right ]$ (i.e. a quenched orbital moment is assumed)
+\item[transition metals ($g_J=0$ in sipf file) given $\langle Ma \rangle, \langle Mb \rangle, \langle Mc \rangle$  and  $\langle Sa \rangle, \langle La \rangle, \langle Sb \rangle, \langle Lb \rangle, \langle Sc \rangle, \langle Lc \rangle$  in {\prg mcdiff.in}:]  $F_d(Q) M_{d\alpha}= \mu_B\langle 2 S_{d\alpha} \rangle_{T,H}\langle j_0(Q) \rangle +\mu_B \langle L_{d\alpha} \rangle_{T,H}\left [ \langle j_0(Q) \rangle + \langle j_2(Q) \rangle \right ] $
+\end{quotation}
+
+	Here $g_J$, $F_d(Q)$, $\langle S_{d\alpha} \rangle_{T,H}$ , $\langle L_{d\alpha} \rangle_{T,H}$  and $\langle J_{d\alpha} \rangle_{T,H}$ denote the
+Land\'e factor, the form factor, the expectation value of the spin-, orbital- and total angular
 momentum operator of the atom $d$ in the unit cell, respectively.
 
 Program {\prg mcdiff\index{mcdiff}} calculates the 
@@ -576,40 +580,39 @@ in the following format:
 #                in case of non orthogonal lattices instead of Ma Mb Mc the components Mi Mj Mk
 #                have to be given, which refer to an right handed orthogonal coordinate system 
 #                defined by j||b, k||(a x b) and i normal to k and j
-# '<Ja>' '<Jb>' '<Jc>' (optional) denote the momentum components 
-# 'gjmbHxc1' 'gjmbHxc2' 'gjmbHxc3' (optional line, used to go beyond dipole approx for formfactor)
-#                                     denote the corresponding meanfields multiplied by 
-#                                     Lande factor and Bohr magneton 
+#  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components 
+# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)
+#                                     denote the exchange fields in meV 
 #
-#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] <Ja>     <Jb>     <Jc> ...
-#{corresponding exchange fields gjmbHxc [meV]- if passed to mcdiff only these are used for caculation (not the magnetic moments)}
+#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>] 
+#{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}
 {Ce3p.sipf}  0.00000  0.00000  0.00000   0.00000  0.00000  0.00000   +0.69590 +0.69620 +0.00000  
-                    corresponding exchange fields gjmbHxc [meV]--> +0.58640 +0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> +0.58640 +0.58660 +0.00000
 {Ce3p.sipf}  0.50000  0.50000  0.50000   0.00000  0.00000  1.00000   -0.69590 -0.69620 +0.00000 
-                    corresponding exchange fields gjmbHxc [meV]--> -0.58640 -0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> -0.58640 -0.58660 +0.00000
 {Ce3p.sipf}  0.00000  1.00000  0.00000   0.00000  1.00000  0.00000   -0.69590 -0.69620 +0.00000 
-                    corresponding exchange fields gjmbHxc [meV]--> -0.58640 -0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> -0.58640 -0.58660 +0.00000
 {Ce3p.sipf}  0.50000  1.50000  0.50000   0.00000  1.00000  1.00000   +0.69590 +0.69620 +0.00000 
-                    corresponding exchange fields gjmbHxc [meV]--> +0.58640 +0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> +0.58640 +0.58660 +0.00000
 {Ce3p.sipf}  1.00000  0.00000  0.00000   1.00000  0.00000  0.00000   -0.69590 -0.69620 +0.00000 
-                    corresponding exchange fields gjmbHxc [meV]--> -0.58640 -0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> -0.58640 -0.58660 +0.00000
 {Ce3p.sipf}  1.50000  0.50000  0.50000   1.00000  0.00000  1.00000   +0.69590 +0.69620 +0.00000 
-                    corresponding exchange fields gjmbHxc [meV]--> +0.58640 +0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> +0.58640 +0.58660 +0.00000
 {Ce3p.sipf}  1.00000  1.00000  0.00000   1.00000  1.00000  0.00000   +0.69590 +0.69620 +0.00000  
-                    corresponding exchange fields gjmbHxc [meV]--> +0.58640 +0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> +0.58640 +0.58660 +0.00000
 {Ce3p.sipf}  1.50000  1.50000  0.50000   1.00000  1.00000  1.00000   -0.69590 -0.69620 +0.00000
-                    corresponding exchange fields gjmbHxc [meV]--> -0.58640 -0.58660 +0.00000
+                    corresponding exchange fields Hxc [meV]--> -0.58640 -0.58660 +0.00000
 
 \end{verbatim}
 }
 
-Such a file can be easily created by using the program {\prg charges\index{charges}}, which
-works similar to {\prg spins\index{spins}}. Alternatively, if no complete {\prg mcphas} model
+Such a file can be easily created by using the program {\prg spins\index{spins}}. Alternatively, if no complete {\prg mcphas} model
 calculation is available, the meanfields can be varied such as to
 give a good fit to experimental data.
 
 If such information is given the formalism used by {\prg mcdiff\index{mcdiff}} changes in the following way. 
-Instead of equation (\ref{msf}) the magnetic structure factor $|MSF|^2$ is calculated according to
+(i) If possible, the expectation values of  $\langle L_{d\alpha} \rangle_{T,H}$  $\langle S_{d\alpha} \rangle_{T,H}$    $\langle M_{d\alpha} \rangle_{T,H}$ are evaluated by the module functions {\prg Lcalc, Scalc and mcalc}, respectively. These values are used to calculate the neutron intensities in dipole approximation (Idip).
+(ii) For the full intensity calculation instead of equation (\ref{msf}) the magnetic structure factor $|MSF|^2$ is calculated according to
 
 \begin{eqnarray}
 |\vec{\rm MSF}|^2 &=& \left ( \sum_{dd',\alpha\beta}(\delta_{\alpha\beta}-\hat \mbf Q_{\alpha} \hat \mbf Q_{\beta})
@@ -622,7 +625,10 @@ Here the thermal expectation values $\langle \dots \rangle_{T,H}$
  of the scattering operators $\hat \mathcal Q_{\alpha}$  have to be evaluated
 for each ion $d$. Note that  the scattering operators correspond to the
 Fourier transform of the atomic magnetisation density: $\hat \mathcal Q=\frac{1}{2\mu_B}\hat M(\mbf Q)$.
-Once the eigenstates of each ion are known  in terms of 
+If present in the single ion module, the function {\prg mq} is called to calculate this quantity.
+
+For example, for the single ion module {\prg so1ion} the scattering operator $\hat \mathcal Q=\frac{1}{2\mu_B}\hat M(\mbf Q)$ is calculated as follows (for {\prg ic1ion} see section~\ref{ic1ionmq}): 
+once the eigenstates of each ion are known  in terms of 
 atomic wave functions $|SLJM \rangle $ (with $M=-J,-J+1,\dots J$) this
 evaluation can be performed by means of the following expressions for
  the matrix elements of the scattering operator (compare chapter 11.6.2

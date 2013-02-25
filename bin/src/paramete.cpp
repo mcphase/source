@@ -27,7 +27,7 @@ int parameters::savjjj(FILE *file)
   fprintf(file,"nofatoms=1\n");
 
   fprintf(file,"****************************************************************************\n");
-  fprintf(file,"atom=1 da=0 [a]  db=0 [b] dc=0 [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g cffilename=mcphas.cf\n",paranz,diagonalexchange,gJ);
+  fprintf(file,"atom=1 da=0 [a]  db=0 [b] dc=0 [c] nofneighbours=%i diagonalexchange=%i gJ=%4.6g sipffilename=mcphas.cf\n",paranz,diagonalexchange,gJ);
   fprintf(file,"da[a]     db[b]     dc[c]      Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
   for (i = 1; i <= paranz; ++i)
     {

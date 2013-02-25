@@ -77,7 +77,7 @@ print Fout << "EOF";
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
 # ****************************************************************************
-#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=$gJ cffilename=$ARGV[1]
+#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=$gJ sipffilename=$ARGV[1]
 # da[a]      db[b]      dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
 EOF
 close Fout;

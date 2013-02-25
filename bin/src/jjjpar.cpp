@@ -228,7 +228,7 @@ void jjjpar::save(FILE * file)
 }
 
 void jjjpar::saveatom(FILE * file) 
-{   fprintf(file,"#! da=%4.6g [a] db=%4.6g [b] dc=%4.6g [c] nofneighbours=%i diagonalexchange=%i gJ=%g cffilename=%s\n",xyz(1),xyz(2),xyz(3),paranz,diagonalexchange,gJ,cffilename);
+{   fprintf(file,"#! da=%4.6g [a] db=%4.6g [b] dc=%4.6g [c] nofneighbours=%i diagonalexchange=%i sipffilename=%s\n",xyz(1),xyz(2),xyz(3),paranz,diagonalexchange,sipffilename);
 }
 
 //save single ion parameter file filename to path*
@@ -236,9 +236,9 @@ void jjjpar::save_sipf(const char * path)
 {char  instr[MAXNOFCHARINLINE];
  char * savfilename;
  int i;
- savfilename= new char[strlen(cffilename)+strlen(path)+2];
+ savfilename= new char[strlen(sipffilename)+strlen(path)+2];
  strcpy(savfilename,path);
- strcpy(savfilename+strlen(path),cffilename);
+ strcpy(savfilename+strlen(path),sipffilename);
  FILE * fout; FILE * cfin;
  fout = fopen_errchk (savfilename, "w");
 
@@ -330,7 +330,7 @@ void jjjpar::save_sipf(const char * path)
           break;
    default: // in case of external single ion module just save a copy of the input file 
            char *token;
-           cfin=fopen_errchk(cffilename,"rb");
+           cfin=fopen_errchk(sipffilename,"rb");
            while(feof(cfin)==false){fgets(instr, MAXNOFCHARINLINE, cfin);
                       // strip /r (dos line feed) from line if necessary
                       while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
@@ -415,18 +415,17 @@ void jjjpar::save_sipf(const char * path)
 jjjpar::jjjpar(FILE * file,int nofcomps) 
 { jl_lmax=6;
   char instr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE];
-  cffilename= new char [MAXNOFCHARINLINE];
+  sipffilename= new char [MAXNOFCHARINLINE];
   int i,j,i1,j1,k1;
   int symmetricexchange=0,indexexchangenum=0;
   Matrix exchangeindices;
-  double gjcheck;
   float nn[MAXNOFNUMBERSINLINE];
   nn[0]=MAXNOFNUMBERSINLINE;
   xyz=Vector(1,3);
   set_zlm_constants();
-  i=7;
+  i=6;
   while(i>0){fgets_errchk (instr, MAXNOFCHARINLINE, file);
-             if(instr[strspn(instr," \t")]!='#'){fprintf (stderr, "Error reading mcphas.j - exchangeparameters start before all variables (da,db,dc,gJ,nofneighbours,diagonalexchange and cffilename) have been given\n");
+             if(instr[strspn(instr," \t")]!='#'){fprintf (stderr, "Error reading mcphas.j - exchangeparameters start before all variables (da,db,dc,nofneighbours,diagonalexchange and sipffilename) have been given\n");
                                                  exit (EXIT_FAILURE);}
              i+=extract(instr,"x",xyz[1])-1;
              i+=extract(instr,"y",xyz[2])-1;
@@ -436,8 +435,8 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
              i+=extract(instr,"dc",xyz[3])-1;
              i+=extract(instr,"nofneighbours",paranz)-1;
              i+=extract(instr,"diagonalexchange",diagonalexchange)-1;
-             i+=extract(instr,"gJ",gjcheck)-1;
-             i+=extract(instr,"cffilename",cffilename,(size_t)MAXNOFCHARINLINE)-1;
+             i+=extract(instr,"cffilename",sipffilename,(size_t)MAXNOFCHARINLINE)-1;
+             i+=extract(instr,"sipffilename",sipffilename,(size_t)MAXNOFCHARINLINE)-1;
             }
 
  // MDL 29.08.10 - Added to check if exchange parameters are indexed.
@@ -466,10 +465,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   transitionnumber=1;
   
   //start reading again at the beginning of the file to get formfactors, debye waller factor
-  get_parameters_from_sipfile(cffilename);
-  if (gJ!=gjcheck){fprintf (stderr, "Error: Lande factor gJ in file mcphas.j and %s are not the same\n",cffilename);
-                   exit (EXIT_FAILURE);}
-  Mq=ComplexVector(1,3);
+  get_parameters_from_sipfile(sipffilename);
 
   nofcomponents=nofcomps; // default value for nofcomponents - (important in case nofparameters=0)
              dn = new Vector[paranz+1];if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
@@ -544,10 +540,9 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
   jij=0; dn=0; sublattice=0;paranz=0;diagonalexchange=1;
   mom=Vector(1,9); mom=0; 
-  Mq=ComplexVector(1,3);
-  cffilename= new char [MAXNOFCHARINLINE];
-  strcpy(cffilename,sipffile);
-  get_parameters_from_sipfile(cffilename);
+  sipffilename= new char [MAXNOFCHARINLINE];
+  strcpy(sipffilename,sipffile);
+  get_parameters_from_sipfile(sipffilename);
   set_zlm_constants();
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 
@@ -570,14 +565,14 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
    r2=0;r4=0;r6=0;
   nof_electrons=0; // no electorns by default
   paranz=0;
-  cffilename= new char [MAXNOFCHARINLINE];
+  sipffilename= new char [MAXNOFCHARINLINE];
   module_type=1;
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 }
 
 //constructor without file
 jjjpar::jjjpar(int n,int diag,int nofmom) 
-{ cffilename= new char [MAXNOFCHARINLINE];jl_lmax=6;
+{ sipffilename= new char [MAXNOFCHARINLINE];jl_lmax=6;
   diagonalexchange=diag;
   paranz=n;xyz=Vector(1,3);xyz=0; 
   set_zlm_constants();
@@ -609,65 +604,68 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
 }
 
 //copy constructor
-jjjpar::jjjpar (const jjjpar & p)
-{ int i;jl_lmax=p.jl_lmax;
+jjjpar::jjjpar (const jjjpar & pp)
+{ int i;jl_lmax=pp.jl_lmax;
   xyz=Vector(1,3);
-  nofcomponents=p.nofcomponents;
+  nofcomponents=pp.nofcomponents;
   mom=Vector(1,nofcomponents); 
-  xyz=p.xyz;paranz=p.paranz;
+  xyz=pp.xyz;paranz=pp.paranz;
   set_zlm_constants();
-  SLR=p.SLR;SLI=p.SLI;
-  nof_electrons=p.nof_electrons;
+  SLR=pp.SLR;SLI=pp.SLI;
+  nof_electrons=pp.nof_electrons;
 
-  diagonalexchange=p.diagonalexchange;
-  gJ=p.gJ;module_type=p.module_type;
-  Mq=ComplexVector(1,3);
-  Mq=p.Mq;
+  diagonalexchange=pp.diagonalexchange;
+  gJ=pp.gJ;module_type=pp.module_type;
+  
+  Np=pp.Np; Xip=pp.Xip;Cp=pp.Cp;
+  r2=pp.r2;r4=pp.r4;r6=pp.r6;
 
-  Np=p.Np; Xip=p.Xip;Cp=p.Cp;
-  r2=p.r2;r4=p.r4;r6=p.r6;
-
-  transitionnumber=p.transitionnumber;
-  cffilename= new char [strlen(p.cffilename)+1];
-  strcpy(cffilename,p.cffilename);
-  if (p.module_type==1||p.module_type==0)  ABC=p.ABC;
-  if ((p.module_type==1||p.module_type==0) && (p.Icalc_parstorage.Cols()>0) && (p.Icalc_parstorage.Rows()>0))
+  transitionnumber=pp.transitionnumber;
+  sipffilename= new char [strlen(pp.sipffilename)+1];
+  strcpy(sipffilename,pp.sipffilename);
+  if (pp.module_type==1||pp.module_type==0)  ABC=pp.ABC;
+  if ((pp.module_type==1||pp.module_type==0) && (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
   {
-     Icalc_parstorage = ComplexMatrix(p.Icalc_parstorage.Rlo(),p.Icalc_parstorage.Rhi(),p.Icalc_parstorage.Clo(),p.Icalc_parstorage.Chi());
-     Icalc_parstorage = p.Icalc_parstorage;
+     Icalc_parstorage = ComplexMatrix(pp.Icalc_parstorage.Rlo(),pp.Icalc_parstorage.Rhi(),pp.Icalc_parstorage.Clo(),pp.Icalc_parstorage.Chi());
+     Icalc_parstorage = pp.Icalc_parstorage;
   }
-  if (p.module_type==5) {clusterpars=new par(*p.clusterpars);}
-  if (p.module_type==2||p.module_type==4)  {iops=new ionpars(*p.iops);//((int)(2*(*p.iops).J+1));iops=p.iops;
+  if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);}
+  if (pp.module_type==2||pp.module_type==4)  {iops=new ionpars(*pp.iops);//((int)(2*(*pp.iops).J+1));iops=pp.iops;
                            int dj;dj=(int)(2*J()+1);
-                           est=ComplexMatrix(0,dj,1,dj);est=p.est;
-                           Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=p.Icalc_parstorage;
+                           est=ComplexMatrix(0,dj,1,dj);est=pp.est;
+                           Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=pp.Icalc_parstorage;
                            }
-//  if (module_type==2)  iops=new ionpars(4);iops=p.iops;
-//  if (module_type==2)  iops=p.iops;
+//  if (module_type==2)  iops=new ionpars(4);iops=pp.iops;
+//  if (module_type==2)  iops=pp.iops;
   
 //#ifdef __linux__
 /*  if (module_type==0)
   {char * error;
-   handle=dlopen (cffilename,RTLD_NOW | RTLD_GLOBAL);
+   handle=dlopen (sipffilename,RTLD_NOW | RTLD_GLOBAL);
    if (!handle){fprintf (stderr, "Could not load dynamic library\n");
                if ((error=dlerror())!=NULL) 
 	         {fprintf (stderr,"%s\n",error);}
 	       exit (EXIT_FAILURE);
 	      }
 */
-   m=p.m;   dm=p.dm;
-   mq=p.mq;    ddnn=p.ddnn;
-   estates=p.estates;    Icalc_parameter_storage=p.Icalc_parameter_storage;
-   sd_m=p.sd_m;
-   od_m=p.od_m;
+   I=pp.I;   du=pp.du;
+   estates=pp.estates;    Icalc_parameter_storage=pp.Icalc_parameter_storage;
+   mq=pp.mq;    ddnn=pp.ddnn;
+   p=pp.p;dp1=pp.dp1;
+   m=pp.m;dm1=pp.dm1;
+   L=pp.L;dL1=pp.dL1;
+   S=pp.S;dS1=pp.dS1;
+   cd_m=pp.cd_m;cd_dm=pp.cd_dm;
+   sd_m=pp.sd_m;sd_dm=pp.sd_dm;
+   od_m=pp.od_m;od_dm=pp.od_dm;
 /*  }*/
 //#endif
-  magFFj0=Vector(1,7);magFFj0=p.magFFj0;
-  magFFj2=Vector(1,7);magFFj2=p.magFFj2;
-  magFFj4=Vector(1,7);magFFj4=p.magFFj4;
-  magFFj6=Vector(1,7);magFFj6=p.magFFj6;
-  Zc=Vector(1,7);Zc=p.Zc;
-  DWF=p.DWF;  
+  magFFj0=Vector(1,7);magFFj0=pp.magFFj0;
+  magFFj2=Vector(1,7);magFFj2=pp.magFFj2;
+  magFFj4=Vector(1,7);magFFj4=pp.magFFj4;
+  magFFj6=Vector(1,7);magFFj6=pp.magFFj6;
+  Zc=Vector(1,7);Zc=pp.Zc;
+  DWF=pp.DWF;  
 int i1;
 //dimension arrays
   jij = new Matrix[paranz+1];for(i1=0;i1<=paranz;++i1){jij[i1]=Matrix(1,nofcomponents,1,nofcomponents);}
@@ -677,7 +675,7 @@ int i1;
   sublattice = new int[paranz+1];
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   for (i=1;i<=paranz;++i)
-  {jij[i]=p.jij[i];dn[i]=p.dn[i];sublattice[i]=p.sublattice[i];}
+  {jij[i]=pp.jij[i];dn[i]=pp.dn[i];sublattice[i]=pp.sublattice[i];}
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 }
 
@@ -687,7 +685,7 @@ jjjpar::~jjjpar ()
 {  if(jij!=0)        delete []jij; //will not work in linux
    if(dn!=0)         delete []dn;  // will not work in linux
    if(sublattice!=0) delete []sublattice;
-   delete []cffilename;// will not work in linux
+   delete []sipffilename;// will not work in linux
    if (module_type==5) delete clusterpars;
    if (module_type==2||module_type==4) delete iops;
 //#ifdef __linux__

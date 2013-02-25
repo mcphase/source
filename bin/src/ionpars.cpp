@@ -23,7 +23,25 @@
   r2=p.r2;r4=p.r4;r6=p.r6;
   Blm=p.Blm; // vector of crystal field parameters
   Llm=p.Llm; // vector of crystal field parameters
-  calcmagdensity=p.calcmagdensity;
+  // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
+cnst=Matrix(0,6,-6,6);int l,m;
+cnst(0,0) = 0.28209479;
+cnst(2,0) = 0.3153962;
+cnst(2,1)=  1.092548;
+cnst(2,2)=  0.5462823;
+cnst(4,0)=  0.1057871;
+cnst(4,1)=  0.6690465;
+cnst(4,2)=  0.4730943;
+cnst(4,3)=  1.77013;
+cnst(4,4)=  0.625845;
+cnst(6,0)=  0.06357014;
+cnst(6,1)=  0.582621;
+cnst(6,2)=  0.4606094;
+cnst(6,3)=  0.921205;
+cnst(6,4)=  0.5045723;
+cnst(6,5)=  2.366619;
+cnst(6,6)=  0.6831942;
+for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 
   
    int i;
@@ -51,13 +69,30 @@ ionpars::ionpars (int dimj) // constructor from dimj
   Jaa=ComplexMatrix(1,dimj,1,dimj);
   Jbb=ComplexMatrix(1,dimj,1,dimj);
   Jcc=ComplexMatrix(1,dimj,1,dimj);
-   calcmagdensity=0;
    so1ion=0;
    Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
 
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;nof_electrons=0;
-
+// cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
+cnst=Matrix(0,6,-6,6);int l,m;
+cnst(0,0) = 0.28209479;
+cnst(2,0) = 0.3153962;
+cnst(2,1)=  1.092548;
+cnst(2,2)=  0.5462823;
+cnst(4,0)=  0.1057871;
+cnst(4,1)=  0.6690465;
+cnst(4,2)=  0.4730943;
+cnst(4,3)=  1.77013;
+cnst(4,4)=  0.625845;
+cnst(6,0)=  0.06357014;
+cnst(6,1)=  0.582621;
+cnst(6,2)=  0.4606094;
+cnst(6,3)=  0.921205;
+cnst(6,4)=  0.5045723;
+cnst(6,5)=  2.366619;
+cnst(6,6)=  0.6831942;
+for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
    iontype = new char [MAXNOFCHARINLINE];
@@ -78,7 +113,6 @@ ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices fill
   getpar(ion, &dimj, &alpha, &beta, &gamma, &gJ,&r2, &r4,&r6, &nof_electrons );
    iontype = new char [strlen(ion)+1];
    strcpy(iontype,ion);
-   calcmagdensity=0;
    so1ion=0;
 
   J=((double)dimj-1)/2;
@@ -89,6 +123,25 @@ ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices fill
   Jaa=ComplexMatrix(1,dimj,1,dimj);
   Jbb=ComplexMatrix(1,dimj,1,dimj);
   Jcc=ComplexMatrix(1,dimj,1,dimj);
+// cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
+cnst=Matrix(0,6,-6,6);int l,m;
+cnst(0,0) = 0.28209479;
+cnst(2,0) = 0.3153962;
+cnst(2,1)=  1.092548;
+cnst(2,2)=  0.5462823;
+cnst(4,0)=  0.1057871;
+cnst(4,1)=  0.6690465;
+cnst(4,2)=  0.4730943;
+cnst(4,3)=  1.77013;
+cnst(4,4)=  0.625845;
+cnst(6,0)=  0.06357014;
+cnst(6,1)=  0.582621;
+cnst(6,2)=  0.4606094;
+cnst(6,3)=  0.921205;
+cnst(6,4)=  0.5045723;
+cnst(6,5)=  2.366619;
+cnst(6,6)=  0.6831942;
+for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 
    Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
@@ -131,7 +184,26 @@ ionpars::ionpars(FILE * cf_file)
   char  moduletype[MAXNOFCHARINLINE];
    Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
-   calcmagdensity=0;so1ion=0;strcpy(moduletype,"cfield");
+   // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
+cnst=Matrix(0,6,-6,6);
+cnst(0,0) = 0.28209479;
+cnst(2,0) = 0.3153962;
+cnst(2,1)=  1.092548;
+cnst(2,2)=  0.5462823;
+cnst(4,0)=  0.1057871;
+cnst(4,1)=  0.6690465;
+cnst(4,2)=  0.4730943;
+cnst(4,3)=  1.77013;
+cnst(4,4)=  0.625845;
+cnst(6,0)=  0.06357014;
+cnst(6,1)=  0.582621;
+cnst(6,2)=  0.4606094;
+cnst(6,3)=  0.921205;
+cnst(6,4)=  0.5045723;
+cnst(6,5)=  2.366619;
+cnst(6,6)=  0.6831942;
+for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
+so1ion=0;strcpy(moduletype,"cfield");
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;gJ=0;
   fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
   // strip /r (dos line feed) from line if necessary
@@ -162,8 +234,7 @@ ionpars::ionpars(FILE * cf_file)
         extract(instr,"GAMMA",gammar);
 
         extract(instr,"GJ",gJr);
-       extract(instr,"calcmagdensity",calcmagdensity);
-
+       
         extract(instr,"R2",r2r);
         extract(instr,"R4",r4r);
         extract(instr,"R6",r6r);
@@ -337,12 +408,6 @@ ionpars::ionpars(FILE * cf_file)
     
 
 if (pr==1) {printf("#using %s ...\n",moduletype);
-            switch(calcmagdensity)
-               {case 1: printf("# - calculating magnetization density in x direction\n"); break;
-                case 2: printf("# - calculating magnetization density in y direction\n"); break;
-                case 3: printf("# - calculating magnetization density in z direction\n"); break;
-                default: ;
-               }
            }
   
   fprintf(stderr,"# module %s ... for ion %s\n",moduletype,iontype);
@@ -559,26 +624,6 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
 // ------------------------------------------------------------
 // here transform the Llm (if present) to Blm ...
 Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
-
-// cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
-Matrix cnst(0,6,-6,6);
-cnst(0,0) = 0.28209479;
-cnst(2,0) = 0.3153962;
-cnst(2,1)=  1.092548;
-cnst(2,2)=  0.5462823;
-cnst(4,0)=  0.1057871;
-cnst(4,1)=  0.6690465;
-cnst(4,2)=  0.4730943;
-cnst(4,3)=  1.77013;
-cnst(4,4)=  0.625845;
-cnst(6,0)=  0.06357014;
-cnst(6,1)=  0.582621;
-cnst(6,2)=  0.4606094;
-cnst(6,3)=  0.921205;
-cnst(6,4)=  0.5045723;
-cnst(6,5)=  2.366619;
-cnst(6,6)=  0.6831942;
-for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);} 
 
    fprintf(stderr,"crystal field parameters:\n");  
    const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 ";
@@ -846,12 +891,10 @@ return JJ;
 
 
 void ionpars::cfieldJJ(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & /*ests*/)
-{//ABC not used !!!
-    /*on input
+{   /*on input
     T		temperature[K]
-    gJmbH	vector of effective field [meV]
-    gJ          Lande factor
-    ABC         single ion parameter values (A, B, C corresponding to <+|Ja|->,<-|Jb|->,<+|Jc|->/i
+    gJmbHxc	vector of exchange field [meV]
+    Hext        external magnetic field [T]
   on output    
     JJ		single ion momentum vector <J> (if T>0 thermal exp value <J>T 
                                                 if T<0 the program asks for w_n and calculates
@@ -985,14 +1028,7 @@ if(gjmbH.Hi()>48)
 // here the expectation values of the multipolar moments are calculated
    for(j=4;j<=JJ.Hi();++j)
    {
-// calcmagdensity;  // 0 ... normal mode, 1,2,3 calc <J'i>=gJ/2 (<J1,2,3 * Ji>+<Ji*J1,2,3>) ... gives magnetisationdensity in a b c dir instead
-                       // of chargedensiy in chrgplt,charges ...
-    switch(calcmagdensity)
-    {case 1:  zolm=(0.5*gJ)*(((Jaa*(*OOlm[j-3]))+((*OOlm[j-3])*Jaa))*z);break;
-     case 2:  zolm=(0.5*gJ)*(((Jbb*(*OOlm[j-3]))+((*OOlm[j-3])*Jbb))*z);break;
-     case 3:  zolm=(0.5*gJ)*(((Jcc*(*OOlm[j-3]))+((*OOlm[j-3])*Jcc))*z);break;
-     default: zolm=(*OOlm[j-3])*z;
-    }
+     zolm=(*OOlm[j-3])*z;
     for (i=1;i<=dj;++i) JJ[j]+=wn(i)*real(z.Column(i)*zolm.Column(i));
    };
   
@@ -1205,7 +1241,7 @@ for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 // 2. set delta
 delta=En(j)-En(i);
 
-if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion or cfield.so - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion or cfield.so - dchargedensity_coeff1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
 // 3. set mat
@@ -1334,6 +1370,283 @@ if (delta>SMALL)
 
 return noft;
 }
+
+//**********************************************************************/
+// routine to calculate the charge density coefficients of Zlm() R(r)^2
+// *********************************************************************
+void ionpars::chargedensity_coeffcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
+{
+    /*on input
+    T		temperature[K]
+    Hxc 	vector of exchange field [meV]
+  on output    
+    mom		chargedensity coefficients: (if T>0 thermal exp value <mom>T 
+                                                if T<0 the program asks for w_n and calculates
+						       exp value <mom>=sum_n w_n <n|mom|n>
+						       
+*/
+Vector gjmbH(1,Hxc.Hi());
+gjmbH=Hxc;
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
+// check dimensions of vector
+if(gjmbH.Hi()>48)
+   {fprintf(stderr,"Error internal module so1ion/cfield: wrong number of dimensions - check number of columns in file mcphas.j\n");
+    exit(EXIT_FAILURE);}
+
+if(mom.Hi()!=28){fprintf(stderr,"Error internal module so1ion/cfield chargedensity_coeff: moment vector has not dimension 28 but %i\n",mom.Hi());
+    exit(EXIT_FAILURE);}
+
+//  Driver routine to compute the  eigenvalues and normalized eigenvectors 
+//  of a complex Hermitian matrix z.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].The eigenvalues are returned
+//  in d[lo..hi] in ascending numerical  order if the sort flag is set  to
+//  True, otherwise  not ordered for sort = False. The real  and imaginary
+//  parts of the eigenvectors are  returned in  the columns of  zr and zi. 
+//  The storage requirement is 3*n*n + 4*n complex numbers. 
+//  All matrices and vectors have to be allocated and removed by the user.
+//  They are checked for conformance !
+// void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
+// 			   int sort, int maxiter)
+
+
+   // setup hamiltonian
+   int dj,i,j;
+  
+   dj=Hcf.Rhi();
+   Matrix Ham(1,dj,1,dj);
+//   Matrix Tam(1,dj,1,dj); // transformed Hamiltonian
+   ComplexMatrix z(1,dj,1,dj);
+   ComplexMatrix za(1,dj,1,dj);
+   ComplexMatrix zb(1,dj,1,dj);
+   ComplexMatrix zc(1,dj,1,dj);
+   ComplexMatrix zolm(1,dj,1,dj);    
+
+   Ham=Hcf-gjmbH(1)*Ja-gjmbH(2)*Jb-gjmbH(3)*Jc;
+
+// here the zeeman term is extended for multipolar fields
+   for(j=4;j<=Hxc.Hi();++j){Ham-=gjmbH(j)*(*Olm[j-3]);}
+
+// diagonalize
+   Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
+   int sort=0;int maxiter=1000000;
+   if (T<0) sort=1;
+   EigenSystemHermitean (Ham,En,zr,zi,sort,maxiter);
+
+   // calculate Z and wn (occupation probability)
+     Vector wn(1,dj);
+     double x,y;
+     x=Min(En);
+     double Zs;
+
+     if (T>0)
+     { for (i=1;i<=dj;++i)
+       {if ((y=(En(i)-x)/KB/T)<600) wn[i]=exp(-y); 
+        else wn[i]=0.0;
+       }
+       Zs=Sum(wn);wn/=Zs;
+     } 
+     else
+     { printf ("Temperature T<0: please choose probability distribution of states by hand\n");
+                         printf ("Number   Energy     Excitation Energy\n");
+     for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV\n",i,En(i),En(i)-x);
+     char instr[MAXNOFCHARINLINE];
+     for (i=1;i<=dj;++i)
+      {printf("eigenstate %i: %4.4g meV %4.4g meV  - please enter probability w(%i):",i,En(i),En(i)-x,i);
+       fgets(instr, MAXNOFCHARINLINE, stdin);
+ 
+       wn(i)=strtod(instr,NULL);
+      }
+       Zs=Sum(wn);wn/=Zs;
+                         printf ("\n\nNumber   Energy     Excitation Energy   Probability\n");
+     for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV %4.4g  \n",i,En(i),En(i)-x,wn(i));
+     }
+   z=ComplexMatrix(zr,zi);
+   mom=0;
+ if(nof_electrons==0){fprintf(stderr,"Error so1ion/cfield: nof_electrons=0 ... perhaps single ion property file does not contain the number of electrons in the shell: 'nof_electrons=...'\n");
+     exit(EXIT_FAILURE);}
+  mom(1) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
+// a(0, 0) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
+// Indices for chargedensity
+//            0 not used
+//          0 1  2  3 4 5 6  7  8  9 101112131415 16 17 18 19 20 2122232425262728 
+int k[] = {-1,0, 2, 2,2,2,2, 4, 4, 4, 4,4,4,4,4,4, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+
+// here the expectation values of the multipolar moments are calculated
+ for(j=4;j<=8;++j){zolm=(*OOlm[j-3])*z;for (i=1;i<=dj;++i) mom[j-2]+=alpha*cnst(k[j-2],q[j-2])*wn(i)*real(z.Column(i)*zolm.Column(i));}
+ for(j=16;j<=24;++j){zolm=(*OOlm[j-3])*z;for (i=1;i<=dj;++i) mom[j-9]+=beta*cnst(k[j-9],q[j-9])*wn(i)*real(z.Column(i)*zolm.Column(i));}
+ for(j=36;j<=48;++j){zolm=(*OOlm[j-3])*z;for (i=1;i<=dj;++i) mom[j-20]+=gamma*cnst(k[j-20],q[j-20])*wn(i)*real(z.Column(i)*zolm.Column(i));}
+
+     // theta_J*cnst(l,m)  are prefactors to get coefficients of Zlm*R(r)^2 
+    //in case of module cfield and so1ion(stevens parameters tetan and zlm prefactors)
+
+}
+
+
+//**********************************************************************/
+// routine to calculate the transition matrix elements of the charge density coefficients (of Zlm() R(r)^2)
+// *********************************************************************
+int ionpars::dchargedensity_coeff1calc(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & cd1,float & delta,ComplexMatrix & ests)
+{  /*on input
+    tn      ... number of transition to be computed 
+    sign(tn)... 1... without printout, -1 with extensive printout
+    T		temperature[K]
+    gjmbH	vector of effective field [meV]
+  on output    
+    delta-+	energy of transition [meV]
+    cd1(i)	<-|theta_l plm Olm|+> sqrt(n+-n-),  n+,n-
+    .... occupation number of states (- to + transition chosen according to transitionnumber)
+*/
+Vector gjmbH(1,gjmbHxc.Hi());
+gjmbH=gjmbHxc;
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
+
+// check dimensions of vector
+if(gjmbH.Hi()>48)
+   {fprintf(stderr,"Error loadable module cfield.so: wrong number of dimensions - check number of columns in file mcphas.j\n");
+    exit(EXIT_FAILURE);}
+
+//  Driver routine to compute the  eigenvalues and normalized eigenvectors 
+//  of a complex Hermitian matrix z.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].The eigenvalues are returned
+//  in d[lo..hi] in ascending numerical  order if the sort flag is set  to
+//  True, otherwise  not ordered for sort = False. The real  and imaginary
+//  parts of the eigenvectors are  returned in  the columns of  zr and zi. 
+//  The storage requirement is 3*n*n + 4*n complex numbers. 
+//  All matrices and vectors have to be allocated and removed by the user.
+//  They are checked for conformance !
+// void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
+// 			   int sort, int maxiter)
+
+ Vector JJ(1,28);JJ=0;
+if (T>0){chargedensity_coeffcalc(JJ,T,gjmbHxc,Hext,ests); // expectation values for cd coeffs
+        }
+        else
+        {T=-T;}
+   double ninit=cd1[1].real();
+   double pinit=cd1[1].imag();
+  int pr;
+  pr=1;
+  if (tn<0) {pr=0;tn*=-1;}
+   // setup hamiltonian
+   int dj,j;
+   dj=Hcf.Rhi();
+   Matrix Ham(1,dj,1,dj);
+    
+   Ham=Hcf-gjmbH(1)*Ja-gjmbH(2)*Jb-gjmbH(3)*Jc;
+ for(j=4;j<=gjmbH.Hi();++j){Ham-=gjmbH(j)*(*Olm[j-3]);
+double dd; dd=NormFro((*OOlm[j-3])-(*OOlm[j-3]).Conjugate().Transpose());
+   if (dd>1e-5) {printf("j=%i\n",j);myPrintComplexMatrix(stderr,(*OOlm[j-3]));}
+}
+
+/*   int i1,j1; //printout matrix
+    printf ("\n");
+   for (i1=1;i1<=dj;++i1){
+    for (j1=1;j1<=dj;++j1) {printf ("%4.6g ",
+    real(((*OOlm[5])-Jcc*Jcc+Jaa*Jaa)(i1,j1)));}
+//    real((Jcc*Jaa+Jaa*Jcc)(i1,j1)));}
+//    real((*OOlm[1])(i1,j1)));}
+    printf ("\n");
+    }
+    printf ("\n");
+   for (i1=1;i1<=dj;++i1){
+    for (j1=1;j1<=dj;++j1) {printf ("%4.6g ",
+    imag(((*OOlm[5])-Jcc*Jcc+Jaa*Jaa)(i1,j1)));}
+//   imag((Jcc*Jaa+Jaa*Jcc)(i1,j1)));}
+//   imag((*OOlm[1])(i1,j1)));}
+    printf ("\n");
+    }
+exit(0);      
+*/    
+   // diagonalize
+   Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
+   int sort=1;int maxiter=1000000;
+   EigenSystemHermitean (Ham,En,zr,zi,sort,maxiter);
+    
+   // calculate Z and wn (occupation probability)
+     Vector wn(1,dj);double Zs;
+     double x,y;int i,k,l;
+     x=Min(En);
+     for (i=1;i<=dj;++i)
+     {if ((y=(En(i)-x)/KB/T)<700) wn[i]=exp(-y); 
+      else wn[i]=0.0;
+//      printf("%4.4g\n",En(i));
+      }
+     Zs=Sum(wn);wn/=Zs;  
+     Zs*=exp(-x/KB/T);
+   if (ninit>dj)ninit=dj;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zii;
+   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(En(i)-x)/KB/T))>(pinit*zsum));++i){noft+=dj-i+1;zsum+=zii;}
+
+
+   // calculate Ja,Jb,Jc
+     ComplexMatrix z(1,dj,1,dj);
+     ComplexMatrix ** zp;
+     zp=new ComplexMatrix*[28+1];
+     Vector expval(1,28);
+     for(l=1;l<=28;++l)
+      {zp[l]= new ComplexMatrix(1,dj,1,dj);}
+     z=ComplexMatrix(zr,zi);
+     (*zp[1])=0;
+     for(j=2;j<=6;++j){(*zp[j])=(*OOlm[j-1])*z;}
+     for(j=7;j<=15;++j){(*zp[j])=(*OOlm[j-1+7])*z;}
+     for(j=16;j<=28;++j){(*zp[j])=(*OOlm[j-1+7+11])*z;}
+     
+// calculate mat and delta for transition number tn
+// 1. get i and j from tn
+k=0;
+for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
+{++k;if(k==tn)break;
+}if(k==tn)break;}
+
+// 2. set delta
+delta=En(j)-En(i);
+
+if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion or cfield.so - dchargedensity_coeff1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
+
+// 3. set mat
+for(l=1;l<=28;++l)
+{if(i==j){//take into account thermal expectation values <Jl>
+          cd1(l)=(((*zp[l]).Column(j)*z.Column(i))-JJ(l));}
+ else    {cd1(l)=((*zp[l]).Column(j)*z.Column(i));}}
+           // ... in complex vector scalar product a*b is defined as: a.conj(b) !!! (see cvector.cc)
+
+if (delta>SMALL)
+   { if(pr==1){
+      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
+      printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",i,j,abs(cd1(1))*abs(cd1(1)),i,j,abs(cd1(2))*abs(cd1(2)),i,j,abs(cd1(3))*abs(cd1(3)));
+      printf(" n%i-n%i=%4.4g\n",i,j,wn(i)-wn(j));}
+    cd1*=sqrt(wn(i)-wn(j)); // occupation factor
+     }else
+   {// quasielastic scattering has not wi-wj but wj*epsilon/kT
+     if(pr==1){
+      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
+      printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",i,j,abs(cd1(1))*abs(cd1(1)),i,j,abs(cd1(2))*abs(cd1(2)),i,j,abs(cd1(3))*abs(cd1(3)));
+      printf(" n%i=%4.4g\n",i,wn(i));}
+    cd1*=sqrt(wn(i)/KB/T);
+   }
+
+//clean up memory
+     for(l=1;l<=28;++l)
+      {delete zp[l];}
+     delete []zp;
+
+// return number of all transitions     
+// return (int)((J+1)*(2*J+1));
+//printf("noft=%i dj=%i\n",noft,dj);
+return noft;
+}   
+
 
 //**********************************************************************/
 // routine to calculate the scattering operator to go beyond dip approx

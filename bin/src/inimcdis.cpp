@@ -69,18 +69,14 @@ void inimcdis::save()
   fprintf(fout,"#!emax=%g\n",emax);
 
   fprintf(fout,"#\n");
-  fprintf(fout,"# optional parameter is extended_eigenvector_dimension\n");
-  fprintf(fout,"# which is used to define, how many components of the\n");
-  fprintf(fout,"# eigenvector should be in the ouput to file mcdisp.qee\n");
-  fprintf(fout,"# important for charge density movies, e.g.(i) for module so1ion\n");
-  fprintf(fout,"#  - f electrons - chargedensity fluctuation needs coefficients\n");
-  fprintf(fout,"#  l=3, i.e. eigenvector should be extended to 3+5+7+9+11+13=48,\n");
-  fprintf(fout,"#  (ii) for module ic1ion with f-electrons eigenvector has to be\n");
-  fprintf(fout,"#  extended to 6+5+7+9+11+13=51 (here there are 6 components for \n");
-  fprintf(fout,"#  all spin and orbital moments), (iii) for module ic1ion and d-\n");
-  fprintf(fout,"#  electrons l=2 it suffices 6+5+7+9=27 \n");
-  fprintf(fout,"#!extended_eigenvector_dimension=%i\n",extended_eigenvector_dimension);
-
+  fprintf(fout,"# optional switches which can be 0 or 1 are\n");
+  fprintf(fout,"#!calculate_magmoment_oscillation=%i  creates mcdisp.qem\n",calculate_magmoment_oscillation);
+  fprintf(fout,"#!calculate_spinmoment_oscillation=%i  creates mcdisp.qes\n",calculate_spinmoment_oscillation);
+  fprintf(fout,"#!calculate_orbmoment_oscillation=%i  creates mcdisp.qeo\n",calculate_orbmoment_oscillation);
+  fprintf(fout,"#!calculate_chargedensity_oscillation=%i  creates mcdisp.qee\n",calculate_chargedensity_oscillation);
+  fprintf(fout,"#!calculate_spindensity_oscillation=%i  creates mcdisp.qsd\n",calculate_spindensity_oscillation);
+  fprintf(fout,"#!calculate_orbmomdensity_oscillation=%i  creates mcdisp.qod\n",calculate_orbmomdensity_oscillation);
+  fprintf(fout,"#!calculate_phonon_oscillation=%i  creates mcdisp.qep\n",calculate_phonon_oscillation);
   fprintf(fout,"#\n");
   fprintf(fout,"# It follows either \n");
   fprintf(fout,"#\n");
@@ -178,7 +174,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
   FILE *fin_coq;
   errno = 0;
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
-  emin=-DBL_MAX;emax=DBL_MAX;extended_eigenvector_dimension=nofcomponents;
+  emin=-DBL_MAX;emax=DBL_MAX;
   printf("reading file %s\n",file);
   fin_coq = fopen(file, "rb"); if (fin_coq==NULL) {fprintf(stderr,"ERROR - file %s not found \n",file);errexit();}   
   // save the parameters read from mcdisp.par into results/mcdisp.par)
@@ -199,7 +195,13 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
      extract(instr,"emax",emax); 
      extract(instr,"ki",ki); 
      extract(instr,"kf",kf); 
-     extract(instr,"extended_eigenvector_dimension",extended_eigenvector_dimension);
+     extract(instr,"calculate_magmoment_oscillation",calculate_magmoment_oscillation);
+     extract(instr,"calculate_spinmoment_oscillation",calculate_spinmoment_oscillation);
+     extract(instr,"calculate_orbmoment_oscillation",calculate_orbmoment_oscillation);
+     extract(instr,"calculate_chargedensity_oscillation",calculate_chargedensity_oscillation);
+     extract(instr,"calculate_spindensity_oscillation",calculate_spindensity_oscillation);
+     extract(instr,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
+     extract(instr,"calculate_phonon_oscillation",calculate_phonon_oscillation);
      if(!extract(instr,"hklfile",hklfile,MAXNOFCHARINLINE-1))
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;fclose(finhkl);++nofhklfiles;
                  }
@@ -207,7 +209,6 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
                  {if(!extract(instr,"Nstp",N))i+=N;++nofhklfiles;
                  }
   }
-  if (extended_eigenvector_dimension<nofcomponents){fprintf(stderr,"ERROR: reading extended_eigenvector_dimension=%i which is less than nofcomponents=%i - increase extended_eigenvector_dimension in mcdisp.par and restart ! \n",extended_eigenvector_dimension,nofcomponents);exit(EXIT_FAILURE);}
   if (ki==0) {if (kf==0) kf=100;
               fprintf(stdout,"#Calculating intensities for  kf=const=%4.4g/A\n",kf);
 	     }
@@ -327,8 +328,14 @@ inimcdis::inimcdis (const inimcdis & p)
   emax=p.emax;
   kf=p.kf;
   ki=p.ki;
-  extended_eigenvector_dimension=p.extended_eigenvector_dimension;
-  deltaq=p.deltaq;  
+  calculate_magmoment_oscillation=p.calculate_magmoment_oscillation;
+  calculate_spinmoment_oscillation=p.calculate_spinmoment_oscillation;
+  calculate_orbmoment_oscillation=p.calculate_orbmoment_oscillation;
+  calculate_chargedensity_oscillation=p.calculate_chargedensity_oscillation;
+  calculate_spindensity_oscillation=p.calculate_spindensity_oscillation;
+  calculate_orbmomdensity_oscillation=p.calculate_orbmomdensity_oscillation;
+  calculate_phonon_oscillation=p.calculate_phonon_oscillation;
+    deltaq=p.deltaq;  
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
   mf=mfcf(1,1,1,nofatoms,nofcomponents);mf=p.mf;T=p.T;

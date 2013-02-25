@@ -184,7 +184,15 @@ void *intcalc_approx(void *input)
 DWORD WINAPI intcalc_approx(void *input)
 #endif
 #else
-double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Matrix & polICIC,Matrix & polICn,Matrix & polnIC, double & intensitybey,mfcf & ev_real,mfcf & ev_imag,mfcf & eev_real,mfcf & eev_imag,ComplexMatrix & Ec,int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl,/*const*/ mdcf & md,int do_verbose,double & QQ)
+double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Matrix & polICIC,Matrix & polICn,Matrix & polnIC, double & intensitybey,mfcf & ev_real,mfcf & ev_imag,
+        mfcf & qee_real,mfcf & qee_imag,ComplexMatrix & Echargedensity,
+        mfcf & qsd_real,mfcf & qsd_imag,ComplexMatrix & Espindensity,
+        mfcf & qod_real,mfcf & qod_imag,ComplexMatrix & Eorbmomdensity,
+        mfcf & qep_real,mfcf & qep_imag,ComplexMatrix & Ephonon,
+        mfcf & qem_real,mfcf & qem_imag,ComplexMatrix & Emagmom,
+        mfcf & qes_real,mfcf & qes_imag,ComplexMatrix & Espin,
+        mfcf & qel_real,mfcf & qel_imag,ComplexMatrix & Eorbmom,
+        int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl,/*const*/ mdcf & md,int do_verbose,double & QQ)
 #endif
 {//calculates approximate intensity for energylevel i - according to chapter 8.2 mcphas manual
 
@@ -201,9 +209,27 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
    #define polnIC (*thrdat.polnIC[thread_id])
    #define ev_real (*thrdat.ev_real[thread_id])
    #define ev_imag (*thrdat.ev_imag[thread_id])
-   #define eev_real (*thrdat.eev_real[thread_id])
-   #define eev_imag (*thrdat.eev_imag[thread_id])
-   #define Ec (*thrdat.Ec[thread_id])
+   #define qee_real (*thrdat.qee_real[thread_id])
+   #define qee_imag (*thrdat.qee_imag[thread_id])
+   #define qsd_real (*thrdat.qsd_real[thread_id])
+   #define qsd_imag (*thrdat.qsd_imag[thread_id])
+   #define qod_real (*thrdat.qod_real[thread_id])
+   #define qod_imag (*thrdat.qod_imag[thread_id])
+   #define qep_real (*thrdat.qep_real[thread_id])
+   #define qep_imag (*thrdat.qep_imag[thread_id])
+   #define qem_real (*thrdat.qem_real[thread_id])
+   #define qem_imag (*thrdat.qem_imag[thread_id])
+   #define qes_real (*thrdat.qes_real[thread_id])
+   #define qes_imag (*thrdat.qes_imag[thread_id])
+   #define qel_real (*thrdat.qel_real[thread_id])
+   #define qel_imag (*thrdat.qel_imag[thread_id])
+   #define Echargedensity (*thrdat.Echargedensity[thread_id])
+   #define Espindensity (*thrdat.Espindensity[thread_id])
+   #define Eorbmomdensity (*thrdat.Eorbmomdensity[thread_id])
+   #define Ephonon (*thrdat.Ephonon[thread_id])
+   #define Emagmom (*thrdat.Emagmom[thread_id])
+   #define Espin (*thrdat.Espin[thread_id])
+   #define Eorbmom (*thrdat.Eorbmom[thread_id])
    int level =  myinput->level;//, dimA = myinput->dimA, do_verbose = myinput->do_verbose;
    #define Tau (*thrdat.Tau[thread_id])
    double en = myinput->En; 
@@ -233,7 +259,13 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
  
  // init eigenvector to zero
   ev_real.clear();ev_imag.clear();
-  eev_real.clear();eev_imag.clear();
+  qee_real.clear();qee_imag.clear();
+  qsd_real.clear();qsd_imag.clear();
+  qod_real.clear();qod_imag.clear();
+  qep_real.clear();qep_imag.clear();
+  qem_real.clear();qem_imag.clear();
+  qes_real.clear();qes_imag.clear();
+  qel_real.clear();qel_imag.clear();
 
  // Added code to re-use previously calculated values of sqrt(gamma)*U and conj(U)*conj(sqrt(gamma)). mdl 110705
  int maxb=-1,bval,/*ncel=-1,*/nval; complex<double> defval(-0.1,0.), tval; md.ncel=-1;
@@ -272,9 +304,33 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol,Ma
       int in1=md.in(i1,j1,k1), in2=md.in(i2,j2,k2);
 
     for(j=1;j<=md.nofcomponents;++j){
-     if((ss-1)*md.nofcomponents+j==1){for(i=1;i<=ini.extended_eigenvector_dimension;++i)
-                                        {eev_real.mf(i1,j1,k1)(ini.extended_eigenvector_dimension*(l1-1)+i)+=real(Ec(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
-                                         eev_imag.mf(i1,j1,k1)(ini.extended_eigenvector_dimension*(l1-1)+i)+=imag(Ec(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+     if((ss-1)*md.nofcomponents+j==1){if(ini.calculate_chargedensity_oscillation)for(i=1;i<=CHARGEDENS_EV_DIM;++i)
+                                        {qee_real.mf(i1,j1,k1)(CHARGEDENS_EV_DIM*(l1-1)+i)+=real(Echargedensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qee_imag.mf(i1,j1,k1)(CHARGEDENS_EV_DIM*(l1-1)+i)+=imag(Echargedensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                        }
+                                     if(ini.calculate_spindensity_oscillation)for(i=1;i<=SPINDENS_EV_DIM;++i)
+                                        {qsd_real.mf(i1,j1,k1)(SPINDENS_EV_DIM*(l1-1)+i)+=real(Espindensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qsd_imag.mf(i1,j1,k1)(SPINDENS_EV_DIM*(l1-1)+i)+=imag(Espindensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                        }
+                                     if(ini.calculate_orbmomdensity_oscillation)for(i=1;i<=ORBMOMDENS_EV_DIM;++i)
+                                        {qod_real.mf(i1,j1,k1)(ORBMOMDENS_EV_DIM*(l1-1)+i)+=real(Eorbmomdensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qod_imag.mf(i1,j1,k1)(ORBMOMDENS_EV_DIM*(l1-1)+i)+=imag(Eorbmomdensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                        }
+                                     if(ini.calculate_phonon_oscillation)for(i=1;i<=PHONON_EV_DIM;++i)
+                                        {qep_real.mf(i1,j1,k1)(PHONON_EV_DIM*(l1-1)+i)+=real(Ephonon(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qep_imag.mf(i1,j1,k1)(PHONON_EV_DIM*(l1-1)+i)+=imag(Ephonon(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                        }
+                                     if(ini.calculate_magmoment_oscillation)for(i=1;i<=MAGMOM_EV_DIM;++i)
+                                        {qem_real.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i)+=real(Emagmom(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qem_imag.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i)+=imag(Emagmom(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                        }
+                                     if(ini.calculate_spinmoment_oscillation)for(i=1;i<=SPIN_EV_DIM;++i)
+                                        {qes_real.mf(i1,j1,k1)(SPIN_EV_DIM*(l1-1)+i)+=real(Espin(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qes_imag.mf(i1,j1,k1)(SPIN_EV_DIM*(l1-1)+i)+=imag(Espin(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                        }
+                                     if(ini.calculate_orbmoment_oscillation)for(i=1;i<=ORBMOM_EV_DIM;++i)
+                                        {qel_real.mf(i1,j1,k1)(ORBMOM_EV_DIM*(l1-1)+i)+=real(Eorbmom(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qel_imag.mf(i1,j1,k1)(ORBMOM_EV_DIM*(l1-1)+i)+=imag(Eorbmom(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                         }
                                      }
     for(i=1;i<=md.nofcomponents;++i){
@@ -550,9 +606,27 @@ myinput->QQ=QQ;
 #undef polnIC
 #undef ev_real
 #undef ev_imag
-#undef eev_real
-#undef eev_imag
-#undef Ec
+#undef qee_real
+#undef qee_imag
+#undef qsd_real
+#undef qsd_imag
+#undef qod_real
+#undef qod_imag
+#undef qep_real
+#undef qep_imag
+#undef qem_real
+#undef qem_imag
+#undef qes_real
+#undef qes_imag
+#undef qel_real
+#undef qel_imag
+#undef Echargedensity
+#undef Espindensity
+#undef Eorbmomdensity
+#undef Ephonon
+#undef Emagmom
+#undef Espin
+#undef Eorbmom
 MUTEX_LOCK(&mutex_loop);
 thrdat.thread_id = thread_id;
 EVENT_SIG(checkfinish);

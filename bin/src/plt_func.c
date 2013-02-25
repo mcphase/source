@@ -3,7 +3,7 @@
 /********************************************************************/
 
 
-int read_pointcharge_parameters(graphic_parameters & gp,char ** cffilenames,char * cffile,float * x, float *y, float*z,jjjpar & jjjps,Vector & abc)
+int read_pointcharge_parameters(graphic_parameters & gp,char ** sipffilenames,char * cffile,float * x, float *y, float*z,jjjpar & jjjps,Vector & abc)
 {FILE * cf_file;int pchere;int nofpc=0;
  
 cf_file = fopen_errchk (cffile, "rb");
@@ -13,8 +13,8 @@ while(pchere>3)
 {if(jjjps.module_type==0||jjjps.module_type==4){printf("pointcharge %g |e| at xyz=%g %g %g mind: xyz=abc\n",par[1],par[2],par[3],par[4]);}
  if(jjjps.module_type==2){printf("pointcharge %g |e| at xyz=%g %g %g mind: xyz=cab\n",par[1],par[2],par[3],par[4]);}
  ++nofpc;if(nofpc>MAXNOFATOMS){fprintf(stderr,"Error chrgplt - too many pointcharges");exit(1);}
-  cffilenames[1+nofpc]=new char[MAXNOFCHARINLINE];
-  sprintf(cffilenames[1+nofpc],"pointcharge radius=%g",gp.scale_pointcharges*0.529177*signum(par[1])*pow((double)fabs(par[1]),0.3333));
+  sipffilenames[1+nofpc]=new char[MAXNOFCHARINLINE];
+  sprintf(sipffilenames[1+nofpc],"pointcharge radius=%g",gp.scale_pointcharges*0.529177*signum(par[1])*pow((double)fabs(par[1]),0.3333));
   if(jjjps.module_type==0||jjjps.module_type==4){
   x[nofpc+1]=par[2]/abc(1)+x[1];// these are the positions in Angstroem
   y[nofpc+1]=par[3]/abc(2)+y[1];// however in order to be in line with the cfield xyz=cab
