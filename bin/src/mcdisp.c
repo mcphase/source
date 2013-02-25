@@ -478,15 +478,24 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
      if((*inputpars.jjj[l]).transitionnumber>i1){fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n (within first crystallographic unit of magnetic unit cell)\n please increase energy range in option -maxE and -minE\n",minE,maxE);
                             exit(EXIT_FAILURE);}
      }
-     // calculate powder neutron intensities ... substitute by dm1calc obtained magmom_Mijkl !!! (when all modules are ready)
-     double intensityp=0, intensitym=0;int k1;
-     if ((*inputpars.jjj[l]).gJ!=0)
-     { for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
-     else
-     { for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
+     // calculate powder neutron intensities 
+// old: removed 25.2.2013 and replaced by dm1calc derived intensities
+//     if ((*inputpars.jjj[l]).gJ!=0)
+//     { for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
+//     else
+//     { for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
+     double intensityp=0, intensitym=0;int k1; ComplexVector dm1(1,3);
+     dm1(1)=complex <double> (ninit,pinit);
+     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,d,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
+     {for(k1=1;k1<=3;++k1){intensityp+=Norm2(dm1);} // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
      if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
                                   else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
+     }
+     else
+     {intensityp=-1;intensitym=-1;}     
+
+
                 
 
    jmin=(*inputpars.jjj[l]).transitionnumber;
@@ -522,14 +531,24 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
      { 
       // calculate powder neutron intensities
      intensityp=0; intensitym=0;
-     if ((*inputpars.jjj[l]).gJ!=0)
-     { for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
-     else
-    { for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
-    intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
+    // old: removed 25.2.2013 and replaced by dm1calc derived intensities
+    //if ((*inputpars.jjj[l]).gJ!=0)
+     //{ for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
+     //else
+    //{ for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
+    //intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
+    // if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
+    //                              else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
+      dm1(1)=complex <double> (ninit,pinit);
+     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,d,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
+     {for(k1=1;k1<=3;++k1){intensityp+=Norm2(dm1);} // Norm2 ... sum of modulus squared
+     intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
      if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
                                   else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
-               
+     }
+     else
+     {intensityp=-1;intensitym=-1;}     
+         
       if (do_verbose==1){fprintf(stdout,"Matrix M(s=%i %i %i)\n",i,j,k);
                   myPrintComplexMatrix(stdout,Mijkl);
                  //fprintf(stdout,"Frobenius Norm(M)=sqrt(sum_i,j |Mij|^2)=%g\n",NormFro(Mijkl));
