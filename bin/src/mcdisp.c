@@ -485,9 +485,9 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
 //     else
 //     { for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
      double intensityp=0, intensitym=0;int k1; ComplexVector dm1(1,3);
-     dm1(1)=complex <double> (ninit,pinit);
+     d=1e10;dm1(1)=complex <double> (ninit,pinit);
      if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,d,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
-     {for(k1=1;k1<=3;++k1){intensityp+=Norm2(dm1);} // Norm2 ... sum of modulus squared
+     {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
      if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
                                   else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
@@ -524,7 +524,6 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
       fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
       d=maxE;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
       Mijkl = u1^u1;
-        (*inputpars.jjj[l]).transitionnumber=jmin; // put back transition number for 1st transition
    //printf("noftransitions read by mcdisp: %i",i1);
       
       if (minE<d&&d<maxE) //only consider transition if it is in interval emin/emax
@@ -539,9 +538,9 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
     //intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
     // if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
     //                              else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
-      dm1(1)=complex <double> (ninit,pinit);
+     d=maxE; dm1(1)=complex <double> (ninit,pinit);
      if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,d,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
-     {for(k1=1;k1<=3;++k1){intensityp+=Norm2(dm1);} // Norm2 ... sum of modulus squared
+     {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
      if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
                                   else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
@@ -567,6 +566,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
      {fprintf(stdout," .... transition not stored because  out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      }
 
+   (*inputpars.jjj[l]).transitionnumber=jmin; // put back transition number for 1st transition
 
    }  
   }}}}

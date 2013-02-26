@@ -22,7 +22,7 @@ $line=<Fin>;close Fin;
 unless($line=~/\Q#!MODULE=icf1ion\E/){print "error: file $ARGV[0] does not start with #!MODULE=icf1ion\n";exit(0);}
 # if yes then do also a mcdisp calculation to create icf1ion.trs ...
 if($T==0){$T=1;}
-($T)=extract("T","$ARGV[0]");
+($T)=extract("TEMP","$ARGV[0]");
 ($Bx)=extract("Bx","$ARGV[0]");
 ($By)=extract("By","$ARGV[0]");
 ($Bz)=extract("Bz","$ARGV[0]");
@@ -40,12 +40,12 @@ print Fout << "EOF";
 #! T=$T Ha=$Bx Hb=$By Hc=$Bz n=1 spins nofatoms=1 in primitive basis nofcomponents=6 - momentum configuration <J(i)>
 EOF
 $MB=5.788378E-02;
-print Fout (2*$Bx*$MB)."\n";
-print Fout ($Bx*$MB)."\n";
-print Fout (2*$By*$MB)."\n";
-print Fout ($By*$MB)."\n";
-print Fout (2*$Bz*$MB)."\n";
-print Fout ($Bz*$MB)."\n";
+print Fout "0\n";
+print Fout "0\n";
+print Fout "0\n";
+print Fout "0\n";
+print Fout "0\n";
+print Fout "0\n";
 close Fout;
 
 # set up mcdisp.par
@@ -55,7 +55,6 @@ print Fout << "EOF";
 # autocreated Parameter file  mcdisp.par
 #<!--mcdisp.mcdisp.par>
 #!kf=100000
-#!extended_eigenvector_dimension=6
 0.1 0 0
 0 0.1 0
 0 0 0.1

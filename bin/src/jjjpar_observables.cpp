@@ -71,7 +71,7 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,Com
 int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1,float & delta,ComplexMatrix & ests)
 {ComplexVector uu1(1,Hxc.Hi());int nnt,i;
  switch (module_type)
-  {case 0: if(dm1==NULL){fprintf(stderr,"Problem: dmcalc  is not possible in module %s, continuing ... \n",modulefilename);
+  {case 0: if(dm1==NULL){fprintf(stderr,"Problem: dm1calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&m1,&delta,&ests);}
            break;
    case 1: return (gJ*kramerdm(transitionnumber,T,Hxc,Hext,m1,delta));break;
@@ -81,8 +81,9 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
    case 3: return gJ*brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);break;
   default:fprintf(stderr,"Problem: dm1calc in internal module cluster not implemented, continuing ... \n");
-          return 0;break;
+          break;
    }
+return 0;
 }
 
 int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)

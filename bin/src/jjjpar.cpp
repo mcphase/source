@@ -563,6 +563,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
    r2=0;r4=0;r6=0;
+   modulefilename=new char[MAXNOFCHARINLINE];
   nof_electrons=0; // no electorns by default
   paranz=0;
   sipffilename= new char [MAXNOFCHARINLINE];
@@ -583,7 +584,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   mom=Vector(1,nofcomponents);
   mom=0;
   nof_electrons=0;// no electorns by default
-
+  modulefilename=new char[MAXNOFCHARINLINE];
   dn = new Vector[n+1];for(i1=0;i1<=n;++i1){dn[i1]=Vector(1,3);}
   if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   sublattice = new int[paranz+1];
@@ -613,7 +614,8 @@ jjjpar::jjjpar (const jjjpar & pp)
   set_zlm_constants();
   SLR=pp.SLR;SLI=pp.SLI;
   nof_electrons=pp.nof_electrons;
-
+  modulefilename=new char[MAXNOFCHARINLINE];
+  strncpy (modulefilename,pp.modulefilename, MAXNOFCHARINLINE-1);
   diagonalexchange=pp.diagonalexchange;
   gJ=pp.gJ;module_type=pp.module_type;
   
@@ -686,6 +688,7 @@ jjjpar::~jjjpar ()
    if(dn!=0)         delete []dn;  // will not work in linux
    if(sublattice!=0) delete []sublattice;
    delete []sipffilename;// will not work in linux
+  delete []modulefilename;// will not work in linux
    if (module_type==5) delete clusterpars;
    if (module_type==2||module_type==4) delete iops;
 //#ifdef __linux__

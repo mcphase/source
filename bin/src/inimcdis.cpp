@@ -179,6 +179,13 @@ inimcdis::inimcdis (const char * file,const char * spinfile)
   fin_coq = fopen(file, "rb"); if (fin_coq==NULL) {fprintf(stderr,"ERROR - file %s not found \n",file);errexit();}   
   // save the parameters read from mcdisp.par into results/mcdisp.par)
   ki=0;kf=0;
+  calculate_magmoment_oscillation=0;
+  calculate_spinmoment_oscillation=0;
+  calculate_orbmoment_oscillation=0;
+  calculate_chargedensity_oscillation=0;
+  calculate_spindensity_oscillation=0;
+  calculate_orbmomdensity_oscillation=0;
+  calculate_phonon_oscillation=0;
   qmin=0;qmax=0;deltaq=0;
   while (fgets(instr,MAXNOFCHARINLINE,fin_coq)!=NULL)
   {++i;

@@ -22,7 +22,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
  int i,j;
  float nn[MAXNOFNUMBERSINLINE];
  nn[0]=MAXNOFNUMBERSINLINE;
-  char modulefilename[MAXNOFCHARINLINE];
+ modulefilename=new char[MAXNOFCHARINLINE];
 
  char instr[MAXNOFCHARINLINE];
   cf_file = fopen_errchk (sipf_filename, "rb");

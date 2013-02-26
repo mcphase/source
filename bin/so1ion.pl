@@ -24,7 +24,7 @@ $line=<Fin>;close Fin;
 unless($line=~m/\Q#!MODULE=so1ion\E/){print "error: file $ARGV[1] does not start with #!MODULE=so1ion\n";exit(0);}
 # if yes then do also a mcdisp calculation to create so1ion.trs ...
 
-($T)=extract("T","$ARGV[1]");
+($T)=extract("TEMP","$ARGV[1]");
 ($gJ)=extract("GJ","$ARGV[1]");
 ($Bx)=extract("Bx","$ARGV[1]");
 ($By)=extract("By","$ARGV[1]");
@@ -43,9 +43,9 @@ print Fout << "EOF";
 #! T=$T Ha=$Bx Hb=$By Hc=$Bz n=1 spins nofatoms=1 in primitive basis nofcomponents=3 - momentum configuration <J(i)>
 EOF
 $MB=5.788378E-02;
-print Fout ($gJ*$Bx*$MB)."\n";
-print Fout ($gJ*$By*$MB)."\n";
-print Fout ($gJ*$Bz*$MB)."\n";
+print Fout "0\n";
+print Fout "0\n";
+print Fout "0\n";
 close Fout;
 
 # set up mcdisp.par
@@ -55,7 +55,6 @@ print Fout << "EOF";
 # autocreated Parameter file  mcdisp.par
 #<!--mcdisp.mcdisp.par>
 #!kf=100000
-#!extended_eigenvector_dimension=3
 0.1 0 0
 0 0.1 0
 0 0 0.1
@@ -77,7 +76,7 @@ print Fout << "EOF";
 #! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
 # ****************************************************************************
 # ****************************************************************************
-#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 gJ=$gJ sipffilename=$ARGV[1]
+#! da=   0 [a] db=   0 [b] dc=   0 [c]   nofneighbours=0 diagonalexchange=1 sipffilename=$ARGV[1]
 # da[a]      db[b]      dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
 EOF
 close Fout;
