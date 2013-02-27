@@ -3,20 +3,29 @@
  * Functions:
  *   void myPrintMatrix(FILE * file,sMat<double> & M,int d)                        // Prints out full matrix
  *   bool checkmat(ComplexMatrix &cmat, complexdouble *fmat,int r, int c)          // Compares Matpack and fortran matrices
- *   void Icalc(Vector &J, double *T, Vector &gjmbHxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *   void Icalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
  *                 char **sipffile, double *lnZ, double *U, ComplexMatrix &est)    //
- *   void mcalc(Vector &J, double *T, Vector &gjmbHxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)    //
- *   void Lcalc(Vector &J, double *T, Vector &gjmbHxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)    //
- *   void Scalc(Vector &J, double *T, Vector &gjmbHxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)    //
- *   int du1calc(int &tn, double &T, Vector &gjmbHxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *   int du1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
  *                 char **sipffilename, ComplexVector & u1, float &delta,          //   matrix elements
  *                 ComplexMatrix &est)                                             //
- *   void Icalc_parameter_storage_matrix_init(ComplexMatrix *est,Vector &gjmbHxc,Vector&Hext // initialises parameter storage matrix 
+ *   void mcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)    //
+ *   int dm1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *                 char **sipffilename, ComplexVector & m1, float &delta,          //   matrix elements of the magnetic moment operator
+ *                 ComplexMatrix &est)                                             //
+ *   void Lcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)    //
+ *   int dL1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *                 char **sipffilename, ComplexVector & L1, float &delta,          //   matrix elements of the angular momentum  operator
+ *                 ComplexMatrix &est)                                             //
+ *   void Scalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)    //
+ *   int dS1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *                 char **sipffilename, ComplexVector & S1, float &delta,          //   matrix elements of the spin operator
+ *                 ComplexMatrix &est)                                             //
+ *   void Icalc_parameter_storage_matrix_init(ComplexMatrix *est,Vector &Hxc,Vector&Hext // initialises parameter storage matrix 
  *                 double *g_J,double &T,Vector &ABC,char **sipffilename)          // for Icalc
- *   void estates(ComplexMatrix *est, Vector &gjmbHxc,Vector&Hext, double *g_J, double &T,    // Calculates the energy and wavefunctions
+ *   void estates(ComplexMatrix *est, Vector &Hxc,Vector&Hext, double *g_J, double &T,    // Calculates the energy and wavefunctions
  *                 Vector &ABC, char **sipffilename)                               //   "estates" matrix
  *   bool get_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l,         // Calculates/loads the Q_q operators
  *                 std::vector<double> &Jvec)                                      //   for beyond dipole calculations
@@ -27,11 +36,14 @@
  *   int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2,           // Calculates the transition matrix
  *                 double &J4, double &J6, ComplexMatrix &est, double &T,          //   elements beyond the dipole
  *                 ComplexVector & v1)                                             //   approximation.
- *   void chargedensity_coeff(Vector & mom,double *T,Vector &gjmbHxc,Vector&Hext,      // Calc. coeffs. of expansion of chargedensity 
+ *   void chargedensity_coeff(Vector & mom,double *T,Vector &Hxc,Vector&Hext,      // Calc. coeffs. of expansion of chargedensity 
  *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm R^2(r) at given T / H_eff
- *   void spindensity_coeff(Vector & mom, int & xyz,double *T,Vector &gjmbHxc,Vector&Hext,      // Calc. coeffs. of expansion of spindensity 
+ *   int dchargedensity_coeff1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *                 char **sipffilename, ComplexVector & dc1, float &delta,          //   matrix elements of the chargedensity coefficients
+ *                 ComplexMatrix &est)                                             //
+ *   void spindensity_coeff(Vector & mom, int & xyz,double *T,Vector &Hxc,Vector&Hext,      // Calc. coeffs. of expansion of spindensity 
  *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm R^2(r) at given T / H_eff
- *   void orbmomdensity_coeff(Vector & mom,int & xyz, double *T,Vector &gjmbHxc,Vector&Hext,    // Calc. coeffs. of expansion of orbital moment density
+ *   void orbmomdensity_coeff(Vector & mom,int & xyz, double *T,Vector &Hxc,Vector&Hext,    // Calc. coeffs. of expansion of orbital moment density
  *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm F(r) at given T / H_eff
  *
  * This file is part of the ic1ionmodule of the McPhase package, calculating the single-ion properties of a rare
@@ -89,8 +101,8 @@ __declspec(dllexport)
 #endif
            void Icalc(Vector &J,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
                       double *T,          // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
@@ -104,8 +116,8 @@ __declspec(dllexport)
 // pthread_t thrid = pthread_self();
 //#endif
   // sum exchange field and external field
-  Vector gjmbH(1,gjmbHxc.Hi());
-  gjmbH=gjmbHxc;
+  Vector gjmbH(1,Hxc.Hi());
+  gjmbH=Hxc;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -206,14 +218,14 @@ __declspec(dllexport)
 #endif
            void mcalc(Vector &mom,          // Output magnetic moment (mub)
                       double *T,          // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
-{Vector J(1,6),ABC; double gJ=0.,lnZ,U;
-  Icalc(J,T,gjmbHxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
+{Vector J(1,Hxc.Hi()),ABC; double gJ=0.,lnZ,U;
+  Icalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
  mom(1)=GS*J(1)+J(2);
  mom(2)=GS*J(3)+J(4);
  mom(3)=GS*J(5)+J(6);
@@ -228,14 +240,14 @@ __declspec(dllexport)
 #endif
            void Lcalc(Vector &L,          // Output magnetic moment (mub)
                       double *T,          // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
-{Vector J(1,6),ABC; double gJ=0.,lnZ,U;
-  Icalc(J,T,gjmbHxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
+{Vector J(1,Hxc.Hi()),ABC; double gJ=0.,lnZ,U;
+  Icalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
  L(1)=J(2);
  L(2)=J(4);
  L(3)=J(6);
@@ -250,14 +262,14 @@ __declspec(dllexport)
 #endif
            void Scalc(Vector &S,          // Output magnetic moment (mub)
                       double *T,          // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
-{Vector J(1,6),ABC; double gJ=0.,lnZ,U;
-  Icalc(J,T,gjmbHxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
+{Vector J(1,Hxc.Hi()),ABC; double gJ=0.,lnZ,U;
+  Icalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
  S(1)=J(1);
  S(2)=J(3);
  S(3)=J(5);
@@ -272,8 +284,8 @@ __declspec(dllexport)
 #endif
            int du1calc(int &tn,            // Input transition number; if tn>0, print debug info
                       double &T,          // Input temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
  /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
@@ -282,8 +294,8 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
-  Vector gjmbH(1,gjmbHxc.Hi());
-  gjmbH=gjmbHxc;
+  Vector gjmbH(1,Hxc.Hi());
+  gjmbH=Hxc;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -337,6 +349,84 @@ __declspec(dllexport)
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate transition matrix elements of magnetic moment operator
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           int dm1calc(int &tn,            // Input transition number; if tn>0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector & m1, // Output m1 vector (1,3)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ ComplexVector u1(1,Hxc.Hi());Vector ABC; double gJ=0.;  u1(1)=m1(1);
+  int nt=du1calc(tn,T,Hxc,Hext, gJ,ABC,sipffilename,u1,delta,est);
+ m1(1)=GS*u1(1)+u1(2);
+ m1(2)=GS*u1(3)+u1(4);
+ m1(3)=GS*u1(5)+u1(6);
+ return nt;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate transition matrix elements of orbital angular momentum operator
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           int dL1calc(int &tn,            // Input transition number; if tn>0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector & L1, // Output L1 vector (1,3)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ ComplexVector u1(1,Hxc.Hi());Vector ABC; double gJ=0.;u1(1)=L1(1);
+  int nt=du1calc(tn,T,Hxc,Hext, gJ,ABC,sipffilename,u1,delta,est);
+ L1(1)=u1(2);
+ L1(2)=u1(4);
+ L1(3)=u1(6);
+ return nt;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate transition matrix elements of spin operator
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           int dS1calc(int &tn,            // Input transition number; if tn>0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector & S1, // Output S1 vector (1,3)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ ComplexVector u1(1,Hxc.Hi());Vector ABC; double gJ=0.;u1(1)=S1(1);
+  int nt=du1calc(tn,T,Hxc,Hext, gJ,ABC,sipffilename,u1,delta,est);
+ S1(1)=u1(1);
+ S1(2)=u1(3);
+ S1(3)=u1(5);
+ return nt;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
 // Routine to initialise the storage matrix "est" for Icalc
 // --------------------------------------------------------------------------------------------------------------- //
 extern "C"
@@ -345,15 +435,15 @@ __declspec(dllexport)
 #endif
           void Icalc_parameter_storage_matrix_init(
                       ComplexMatrix *est, // Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,   // Input  Lande g-factor
                       double * /*T*/,     // Input  temperature
  /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 { // sum exchange field and external field
-  Vector gjmbH(1,gjmbHxc.Hi());
-  gjmbH=gjmbHxc;
+  Vector gjmbH(1,Hxc.Hi());
+  gjmbH=Hxc;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -390,15 +480,15 @@ extern "C"
 __declspec(dllexport)
 #endif
           void estates(ComplexMatrix *est,// Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,   // Input  Lande g-factor
                       double &T,          // Input  temperature
  /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 {// sum exchange field and external field
-  Vector gjmbH(1,gjmbHxc.Hi());
-  gjmbH=gjmbHxc;
+  Vector gjmbH(1,Hxc.Hi());
+  gjmbH=Hxc;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -862,15 +952,15 @@ __declspec(dllexport)
 void chargedensity_coeff(Vector &mom,          // Output single ion moments =expectation values of
                                            // of Zlm R^2(r) at a given temperature T and  effective field H
                       double *T,           // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename, // Single ion properties filename
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {Vector moments(1,51),ABC; double gJ=0.,lnZ,U;
- Vector Hxc(1,51);Hxc=0;for(int i=1;i<=gjmbHxc.Hi();++i){Hxc(i)=gjmbHxc(i);}
-  Icalc(moments,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
+ Vector Hxce(1,51);Hxce=0;for(int i=1;i<=Hxc.Hi();++i){Hxce(i)=Hxc(i);}
+  Icalc(moments,T,Hxce,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
 
    // Parses the input file for parameters
    icpars pars; 
@@ -896,6 +986,39 @@ mom(22)*=sqrt(2);
            // of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
            // MR 23.8.2011: if Tkq are define as in our review then the above should be right
 }
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate transition matrix elements of chargedensity coefficient operator
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           int dchargedensity_coeff1(int &tn,            // Input transition number; if tn>0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector & dc1, // Output m1 vector (1,3)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ ComplexVector u1(1,51);Vector ABC; double gJ=0.;u1(1)=dc1(1);
+  Vector Hxce(1,51);Hxce=0;for(int i=1;i<=Hxc.Hi();++i){Hxce(i)=Hxc(i);}
+  int nt=du1calc(tn,T,Hxce,Hext, gJ,ABC,sipffilename,u1,delta,est);
+ dc1(1)=0;
+ for(int i=2;i<=6;++i)dc1(i)=u1(5+i)*sqrt((2.0*2+1)/8/PI);
+ dc1(4)*=sqrt(2);
+ for(int i=7;i<=15;++i)dc1(i)=u1(12+i)*sqrt((2.0*4+1)/8/PI);
+ dc1(11)*=sqrt(2);
+ for(int i=16;i<=28;++i)dc1(i)=u1(23+i)*sqrt((2.0*6+1)/8/PI);
+ dc1(22)*=sqrt(2);
+ return nt;
+}
+
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
@@ -908,15 +1031,15 @@ void spindensity_coeff(Vector &J,          // Output single ion moments =expecta
                                            // of Zlm R^2(r) at a given temperature T and  effective field H
                       int & xyz,           // direction 1,2,3 = x,y,z
                       double *T,           // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename, // Single ion properties filename
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {// sum exchange field and external field
-  Vector gjmbH(1,gjmbHxc.Hi());
-  gjmbH=gjmbHxc;
+  Vector gjmbH(1,Hxc.Hi());
+  gjmbH=Hxc;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -940,15 +1063,15 @@ void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expecta
                                            // of Zlm R^2(r) at a given temperature T and  effective field H
                       int & xyz,           // direction 1,2,3 = x,y,z
                       double *T,           // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,      // Input vector of exchange fields (meV) 
+                      Vector &Hext,      // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename, // Single ion properties filename
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {// sum exchange field and external field
-  Vector gjmbH(1,gjmbHxc.Hi());
-  gjmbH=gjmbHxc;
+  Vector gjmbH(1,Hxc.Hi());
+  gjmbH=Hxc;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
