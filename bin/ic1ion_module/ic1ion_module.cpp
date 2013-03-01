@@ -8,19 +8,19 @@
  *   int du1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
  *                 char **sipffilename, ComplexVector & u1, float &delta,          //   matrix elements
  *                 ComplexMatrix &est)                                             //
- *   void mcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *   void mcalcVector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
  *                 char **sipffile,  ComplexMatrix &est)    //
- *   int dm1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *   int dm1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
  *                 char **sipffilename, ComplexVector & m1, float &delta,          //   matrix elements of the magnetic moment operator
  *                 ComplexMatrix &est)                                             //
- *   void Lcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *   void LcalcVector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
  *                 char **sipffile,  ComplexMatrix &est)    //
- *   int dL1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *   int dL1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
  *                 char **sipffilename, ComplexVector & L1, float &delta,          //   matrix elements of the angular momentum  operator
  *                 ComplexMatrix &est)                                             //
- *   void Scalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *   void ScalcVector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
  *                 char **sipffile,  ComplexMatrix &est)    //
- *   int dS1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
+ *   int dS1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
  *                 char **sipffilename, ComplexVector & S1, float &delta,          //   matrix elements of the spin operator
  *                 ComplexMatrix &est)                                             //
  *   void Icalc_parameter_storage_matrix_init(ComplexMatrix *est,Vector &Hxc,Vector&Hext // initialises parameter storage matrix 
@@ -31,11 +31,11 @@
  *                 std::vector<double> &Jvec)                                      //   for beyond dipole calculations
  *   void save_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l,        // Saves the Q_q operators to a file
  *                 std::vector<double> &Jvec)                                      //
- *   void mq(ComplexVector &Mq, double &th, double &ph, double &J0, double &J2,    // Calculates the thermal expectation
+ *   void mqcalc(ComplexVector &Mq, double &th, double &ph, double &J0, double &J2,    // Calculates the thermal expectation
  *                 double &J4, double &J6, ComplexMatrix &est)                     //   of the magnetisation density
- *   int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2,           // Calculates the transition matrix
+ *   int dmq1(int &tn, double &th, double &ph, double &J0, double &J2,           // Calculates the transition matrix
  *                 double &J4, double &J6, ComplexMatrix &est, double &T,          //   elements beyond the dipole
- *                 ComplexVector & v1)                                             //   approximation.
+ *                 ComplexVector & mq1)                                             //   approximation.
  *   void chargedensity_coeff(Vector & mom,double *T,Vector &Hxc,Vector&Hext,      // Calc. coeffs. of expansion of chargedensity 
  *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm R^2(r) at given T / H_eff
  *   int dchargedensity_coeff1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
@@ -355,7 +355,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dm1calc(int &tn,            // Input transition number; if tn>0, print debug info
+           int dm1(int &tn,            // Input transition number; if tn>0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 
@@ -381,7 +381,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dL1calc(int &tn,            // Input transition number; if tn>0, print debug info
+           int dL1(int &tn,            // Input transition number; if tn>0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 
@@ -407,7 +407,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dS1calc(int &tn,            // Input transition number; if tn>0, print debug info
+           int dS1(int &tn,            // Input transition number; if tn>0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 
@@ -594,7 +594,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-          void mq(ComplexVector &Mq,      // Output expectation values -2[<Q>_{x} <Q>_y <Q>_z]
+          void mqcalc(ComplexVector &Mq,      // Output expectation values -2[<Q>_{x} <Q>_y <Q>_z]
                   double &th, double &ph, // Input polar and azimuth angles theta and phi
                   double &J0, double &J2, // Input radial parameters <j_0>, <j_2>
                   double &J4, double &J6, // Input radial parameters <j_4>, <j_6>
@@ -602,7 +602,7 @@ __declspec(dllexport)
 {
    int i,q,n=1,Hsz=est.Cols()-1; orbital l;
    n = (int)est[0][0].real(); i = (int)est[0][0].imag(); l = (orbital)i;
-   if(i>3 || i<0) { std::cerr << "ic1ion mq(): Error only s-, p-, d-, and f-electrons supported.\n"; exit(EXIT_FAILURE); }
+   if(i>3 || i<0) { std::cerr << "ic1ion mqcalc(): Error only s-, p-, d-, and f-electrons supported.\n"; exit(EXIT_FAILURE); }
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
@@ -659,17 +659,16 @@ extern "C"
 __declspec(dllexport)
 #endif
            int                            // Returns total number of transitions
-               dv1calc(int &tn,            // Input transition number |tn|. If tn<0 omit printout. If tn>0 print info.
+               dmq1(int &tn,            // Input transition number |tn|. If tn<0 omit printout. If tn>0 print info.
                   double &th,             // Input zenith angle (with the z==b axis) in radians.
                   double &ph,             // Input azimuth angle (with the x==a axis, to projection in x-y plane).
                   double &J0, double &J2, // Input radial parameters <j_0>, <j_2>
                   double &J4, double &J6, // Input radial parameters <j_4>, <j_6>
                   ComplexMatrix &est,     // Input eigenvalues/vectors of the system Hamiltonian, H_SI+H_mf 
                   double &T,              // Input temperature (K)
-                  ComplexVector & v1)     // Output transition vector, v1(alpha) = <-|Qalpha-<Qalpha>|+> sqrt(n- - n+)
+                  ComplexVector & mq1)     // Output transition vector, mq1=<-|M(Q)|+> sqrt(n- - n+) in units of MU_B
 /* 
      Note on Qalpha (Qa or Qb)
-       if gJ>0:
         Kartesian components of the scattering operator Qalpha, alpha=1,2,3=a,b,c
         according to Lovesey Neutron Scattering equation 6.87b 
         scattering operator is given in  spherical coordinates Q-1,Q0,Q+1 (introduced
@@ -678,21 +677,24 @@ __declspec(dllexport)
         Q2=Qb      =Qz= Q0                   
         Q3=Qaxb    =Qx=-1/sqrt(2)(Q+1 - Q-1)
                    
-       if gJ=0 
-        the orbital and spin contributions have to be given as separate components of Qalpha=1,2,3,4,5,6
+       
+        the orbital and spin contributions 
         according to Lovesey Neutron Scattering equations 11.55 and 11.71 (the spin part 11.71 has to be
         divided by 2), i.e.
-        <-|Q1,3,5|+>=<-|QSa,b,c|+>=
+        <-|QSa,b,c|+>=
           =<-|sum_i exp(i k ri) s_(a,b,c)|+> /2                   as defined by 11.71 / 2
 				   
-        <-|Q2,4,6|+>=<-|QLa,b,c|+>=
+        <-|QLa,b,c|+>=
           =<-|sum_i exp(i k ri) (-(k x grad_i)_(a,b,c)/|k|)|+>     as defined by 11.54 /(-|k|)
+
+        mq1=<-|M(Q)|+> sqrt(n- - n+)
+        <-|M(Q)|+>=-2<-|Q|+>=-2<-|2 QS + QL|+>
 */
 {
    // check if printout should be done and make tn positive
    int pr=1; if (tn<0) { pr=0; tn*=-1; }
-   double ninit=v1[1].real();
-   double pinit=v1[1].imag();
+   double ninit=mq1[1].real();
+   double pinit=mq1[1].imag();
 
    int i,iJ,q,n=1,Hsz=est.Cols()-1; orbital l;//=D; find_nl_from_dim(Hsz,*&n,*&l,(complexdouble*)&est[1][1]);
    n = (int)est[0][0].real(); i = (int)est[0][0].imag(); l = (i==2) ? D : F;
@@ -800,7 +802,7 @@ __declspec(dllexport)
 
    // check if zij are complex conjugate
    for(iJ=1;iJ<=6;++iJ)
-      if(fabs(zij[iJ].i+zji[iJ].i)>SMALL) { std::cerr << "ERROR module ic1ion - dv1calc: <i|Qalpha|j>not hermitian\n"; exit(EXIT_FAILURE); }
+      if(fabs(zij[iJ].i+zji[iJ].i)>SMALL) { std::cerr << "ERROR module ic1ion - dmq1: <i|Qalpha|j>not hermitian\n"; exit(EXIT_FAILURE); }
 
                 
    complex<double> im(0,1);
@@ -808,13 +810,13 @@ __declspec(dllexport)
    
    for(a=1; a<=6; a++){iQalphaj(a) = complex<double> (zij[a].r,zij[a].i);if(a%2==1){iQalphaj(a)*=0.5;}} 
                                                                          // divide spin part by 2
-   v1 = 0;
-   for(a=1; a<=6; a++)
-         v1(a) = iQalphaj(a);
+   mq1 = 0;
+   for(a=1; a<=3; a++)
+         mq1(a) =-2.0*(2.0*iQalphaj(-1+2*a)+iQalphaj(2*a));
 
    double delta;
    delta = est[0][j].real()-est[0][i].real();
-   if(delta<-0.000001) { std::cerr << "ERROR module ic1ion - dv1calc: energy gain delta gets negative\n"; exit(EXIT_FAILURE); }
+   if(delta<-0.000001) { std::cerr << "ERROR module ic1ion - dmq1: energy gain delta gets negative\n"; exit(EXIT_FAILURE); }
 
    if(j==i) delta = -SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
@@ -825,8 +827,7 @@ __declspec(dllexport)
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV",i,j,delta);
-         printf(" |<%i|Qa|%i>|^2=%6.3f |<%i|Qb|%i>|^2=%6.3f |<%i|Qc|%i>|^2=%6.3f",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
-         printf(" |<%i|Qd|%i>|^2=%6.3f |<%i|Qe|%i>|^2=%6.3f |<%i|Qf|%i>|^2=%6.3f",i,j,abs(v1(4))*abs(v1(4)),i,j,abs(v1(5))*abs(v1(5)),i,j,abs(v1(6))*abs(v1(6)));
+         printf(" |<%i|MQa|%i>|^2=%6.3f |<%i|MQb|%i>|^2=%6.3f |<%i|MQc|%i>|^2=%6.3f",i,j,abs(mq1(1))*abs(mq1(1)),i,j,abs(mq1(2))*abs(mq1(2)),i,j,abs(mq1(3))*abs(mq1(3)));
          printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
       }
    }
@@ -837,12 +838,11 @@ __declspec(dllexport)
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV",i,j,delta);
-         printf(" |<%i|Qa|%i>|^2=%6.3f |<%i|Qb|%i>|^2=%6.3f |<%i|Qc|%i>|^2=%6.3f",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
-         printf(" |<%i|Qd|%i>|^2=%6.3f |<%i|Qe|%i>|^2=%6.3f |<%i|Qf|%i>|^2=%6.3f",i,j,abs(v1(4))*abs(v1(4)),i,j,abs(v1(5))*abs(v1(5)),i,j,abs(v1(6))*abs(v1(6)));
+         printf(" |<%i|MQa|%i>|^2=%6.3f |<%i|MQb|%i>|^2=%6.3f |<%i|MQc|%i>|^2=%6.3f",i,j,abs(mq1(1))*abs(mq1(1)),i,j,abs(mq1(2))*abs(mq1(2)),i,j,abs(mq1(3))*abs(mq1(3)));
          printf(" n%i=%6.3f\n",i,therm/Z);
       }
    }
-         v1 *= sqrt(therm / Z);
+         mq1 *= sqrt(therm / Z);
 
  if (ninit>Hsz)ninit=Hsz;
  if (pinit<SMALL)pinit=SMALL;

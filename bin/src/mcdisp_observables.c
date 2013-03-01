@@ -83,7 +83,7 @@ void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observa
         for(int k1=1;k1<=ev_dim;++k1){Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)=observable_gammas*observable_Uijkl(k1,ev_dim);}
 }
 
-FILE * evfileinit(const char * filename,const char*filemode,par & inputpars,const char * filetype,int ev_dim)
+FILE * evfileinit(const char * filemode,const char*filename,par & inputpars,const char * filetype,int ev_dim)
   {FILE * fout = fopen_errchk (filename,filemode);
    writeheader(inputpars,fout);  fprintf(fout,"#!<--mcphas.mcdisp.%s-->\n",filetype);
           fprintf (fout, "#!spins_wave_amplitude=1.0\n");

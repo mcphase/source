@@ -199,7 +199,7 @@ switch (module_type)
 }
 
 /****************************************************************************/
-// returns transition element matrix N(Q) first eigenvector v1 in order to be able to go beyond
+// returns transition element  dMQ(1..3) in order to be able to go beyond
 //
 // dipolar approximation in mcdisp - it requires a call to eigenstates first
 //
@@ -211,13 +211,13 @@ switch (module_type)
 //     Q                 components of Qvector in euclidian coordinates 123=abc
 //  on output
 //    int   	total number of transitions
-//    N(i,j)	<-|Q|+><+|Q|-> (n+-n-),  n+,n- population numbers
+//    dMQ	<-|M(Q)|+> sqrt(n- - n+),  n+,n- population numbers
 //    with Q the scattering operator according to Lovesey 11.4, p 222, eq 6.87b
 //     (note that  <M(Q)>=-2x<Q>_TH in units of mb)
 //    .... occupation number of states (- to + transition chosen according to transitionnumber)
 //
 /****************************************************************************/
-int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix & ests)
+int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix & ests)
 
 {double J0,J2,J4,J6;
  double Q,th,ph;
@@ -233,16 +233,16 @@ int jjjpar::dv1calc(Vector & Qvec,double & T, ComplexVector & v1,ComplexMatrix &
   {static int washere=0;
 
    case 0:if (ddnn!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
-                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&v1);break;}
+                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ);break;}
           else {return 0;}
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give cfielddn polar angles with respect to xyz
-            i=(*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,v1);
+            i=(*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);
             // and we have to switch indices in matrix nat(1..3,1..3) to conform with xyz||cba changed MR 3.4.10
-            dummy=v1(1);v1(1)=v1(2);v1(2)=v1(3);v1(3)=dummy; // changed MR 3.4.10
+            dummy=dMQ(1);dMQ(1)=dMQ(2);dMQ(2)=dMQ(3);dMQ(3)=dummy; // changed MR 3.4.10
             return i;break;
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give cfielddn polar angles with respect to xyz
-            return (*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,v1);break;
-   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dv1calc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",sipffilename);
+            return (*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);break;
+   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dMQcalc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",sipffilename);
                            washere=1;}
             return 0;
   }

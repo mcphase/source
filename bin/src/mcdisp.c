@@ -128,7 +128,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
          for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); // rint d for loop below to determine crystallographic unit ss ...
 
          xyz=(*inputpars.jjj[ll]).dn[l];
-         d=inputpars.rez*(const Vector&)xyz;// set d to distance for later use to determie phase factor in J(Q) ...
+         d=inputpars.rez*(const Vector&)xyz;// set d to distance for later use to determine phase factor in J(Q) ...
 
          expqd = exp(ipi*(q*d)); REexpqd = real(expqd); IMexpqd = imag(expqd);
 
@@ -141,7 +141,6 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
          for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
          s=J.in(i1,j1,k1); 
 
-         
          //calc ss (check in which crystallographic unit ss of the magnetic cell the neighbour l-ll lies)	 
          i=(int)(i1+d_rint(1)-1); // calculate 
 	 j=(int)(j1+d_rint(2)-1);
@@ -170,20 +169,18 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 	  sl=(*inputpars.jjj[ll]).sublattice[l]; // the whole loop has also to be done 
                                                  // for all the other transitions of sublattice sl
 
-            
+           
           // therefore calculate offset of the set of transitions
           for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
 	  for(tll=1;tll<=md.noft(i,j,k,sl);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,sl,tll)-1);
 	  
-       
+         
 	     for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){ //this should also be ok for nofcomponents > 3 !!! (components 1-3 denote the magnetic moment)
-//           jsss(ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1)+m,ini.nofcomponents*(md.baseindex(i,j,k,sl,tll)-1)+n)=(*inputpars.jjj[ll]).jij[l](m,n);
-         jjval = (*inputpars.jjj[ll]).jij[l](m,n); jsss[jsi+m][jsj+n] += complex<double>(jjval*REexpqd, jjval*IMexpqd);
+         jjval = (*inputpars.jjj[ll]).jij[l](m,n);  
+         jsss[jsi+m][jsj+n] += complex<double>(jjval*REexpqd, jjval*IMexpqd);
                                               }                                 } // but orbitons should be treated correctly by extending 3 to n !!
-	                                         }} 
-// increase Js,ss(q) taking into account the phase factors for the distance l-ll
-          // J.mati(s,ss)+=jsss*exp(ipi*(q*d)); // changed
-//        jsss*=exp(ipi*(q*d)); J.mati(s,ss)+=jsss;
+	                                         }}        
+
           ++nofneighbours; // count neighbours summed up
 	 }}}
    }
@@ -221,20 +218,6 @@ int index_s(int i,int j,int k,int l, int t, const mdcf & md, const inimcdis & in
  return s;
 }
 
-//void s2ijklt(int s, int & i, int & j, int & k, int & l, int & t, mdcf & md, inimcdis & ini)
-//{// the reverse of index_s function, returns i j k l t given the index_s
-//int ss=0,sss;
-// ijk ... index of crystallographic unit cell in magnetic unit cell
-// l   ... number of atom in crystallographic cell
-// t   ... transitionnumber
- //for(i=1;i<=ini.mf.na();++i){
- //for(j=1;j<=ini.mf.nb();++j){
- //for(k=1;k<=ini.mf.nc();++k){
- //sss=md.baseindex_max(i,j,k);
- //if (ss+sss<	s){ss+=sss;}else{md.baseindex2ltn(s-ss,i,j,k,l,t);return;}
- //}}}
- //fprintf(stderr,"mcdisp internal error: index s too large in function s2ijklt\n");exit(1);
-//}
 
 void sortE(Vector & d,ComplexMatrix & z)
 {       int i,j,k;
@@ -835,6 +818,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
            Jl.mati(s,ss)= 0;// set Js,ss(q)=0 
    }}}
  }}}
+
 #ifdef _THREADS
    // Initialises mutual exclusions and threads
    MUTEX_INIT(mutex_loop);
@@ -889,7 +873,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
       }
       else ithread++;
 #endif
-    }
+   }
 #ifdef _THREADS
     #if defined  (__linux__) || defined (__APPLE__)
     for(int th=0; th<ithread; th++)
@@ -1089,7 +1073,13 @@ if (do_jqfile==1){
                        {fprintf(foutqei,"#!hklfile_number=%i\n",is);
                         fprintf(fout,"#!hklfile_number=%i\n",is);
                         fprintf(foutqev,"#!hklfile_number=%i\n",is);
-                        fprintf(foutqee,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_chargedensity_oscillation)fprintf(foutqee,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_spindensity_oscillation)fprintf(foutqsd,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_orbmomdensity_oscillation)fprintf(foutqod,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_phonon_oscillation)fprintf(foutqep,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_magmoment_oscillation)fprintf(foutqem,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_spinmoment_oscillation)fprintf(foutqes,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_orbmoment_oscillation)fprintf(foutqel,"#!hklfile_number=%i\n",is);
                         fprintf(foutdstot,"#!hklfile_number=%i\n",is);
                         if (do_Erefine==1){fprintf(foutds,"#!hklfile_number=%i\n",is);}
                        }
@@ -1135,7 +1125,7 @@ diffint=0;diffintbey=0;
 
  #ifndef _THREADS
                      ComplexMatrix chi(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-                     ComplexMatrix chibey(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
+                     ComplexMatrix chibey(1,3*dimA,1,3*dimA);
                      Matrix pol(1,md.nofcomponents,1,md.nofcomponents);
                      Matrix polICIC(1,md.nofcomponents,1,md.nofcomponents);
                      Matrix polICn(1,md.nofcomponents,1,md.nofcomponents);
@@ -1593,13 +1583,15 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
 
     fclose(foutqei);
     fclose(foutqev);
-    fclose(foutqee);
-    fclose(foutqsd);
-    fclose(foutqod);
-    fclose(foutqep);
-    fclose(foutqem);
-    fclose(foutqes);
-    fclose(foutqel);
+
+                        if(ini.calculate_chargedensity_oscillation)fclose(foutqee);
+                        if(ini.calculate_spindensity_oscillation)fclose(foutqsd);
+                        if(ini.calculate_orbmomdensity_oscillation)fclose(foutqod);
+                        if(ini.calculate_phonon_oscillation)fclose(foutqep);
+                        if(ini.calculate_magmoment_oscillation)fclose(foutqem);
+                        if(ini.calculate_spinmoment_oscillation)fclose(foutqes);
+                        if(ini.calculate_orbmoment_oscillation)fclose(foutqel);
+                        
     fclose(fout);
                  if (do_Erefine==1){fclose(foutds);}
     fclose(foutdstot);

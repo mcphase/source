@@ -170,32 +170,36 @@ module_type=0;
     p=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"pcalc");
     //*(int **)(&p)=GetProcAddress(handle,"pcalc");
      if (p==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function pcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    dp1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dp1calc");
-    //*(void **)(&du)=GetProcAddress(handle,"dp1calc");
-     if (dp1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dp1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dp1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dp1");
+    //*(void **)(&du)=GetProcAddress(handle,"dp1");
+     if (dp1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dp1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     m=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"mcalc");
     //*(int **)(&m)=GetProcAddress(handle,"mcalc");
      if (m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    dm1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dm1calc");
-    //*(void **)(&dm1)=GetProcAddress(handle,"dm1calc");
-     if (dm1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dm1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dm1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dm1");
+    //*(void **)(&dm1)=GetProcAddress(handle,"dm1");
+     if (dm1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dm1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     L=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Lcalc");
     //*(int **)(&L)=GetProcAddress(handle,"Lcalc");
      if (L==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function Lcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    dL1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dL1calc");
-    //*(void **)(&dL1)=GetProcAddress(handle,"dL1calc");
-     if (dL1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dL1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dL1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dL1");
+    //*(void **)(&dL1)=GetProcAddress(handle,"dL1");
+     if (dL1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dL1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
     S=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Scalc");
     //*(int **)(&S)=GetProcAddress(handle,"Scalc");
      if (S==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function Scalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    dS1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dS1calc");
-    //*(void **)(&dS1)=GetProcAddress(handle,"dS1calc");
-     if (dS1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dS1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mq");
-    //*(void **)(&mq)=GetProcAddress(handle,"mq");
-     if (mq==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mq not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dS1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dS1");
+    //*(void **)(&dS1)=GetProcAddress(handle,"dS1");
+     if (dS1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dS1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mqcalc");
+    //*(void **)(&mq)=GetProcAddress(handle,"mqcalc");
+     if (mq==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mqcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*))GetProcAddress(handle,"dmq1");
+    //*(void **)(&dnn)=GetProcAddress(handle,"dmq1");
+     if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dmq1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
+
     estates=(void(*)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**))GetProcAddress(handle,"estates");
     //*(void **)(&estates)=GetProcAddress(handle,"estates");
      if (estates==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function estates not possible - continuing\n",(int)GetLastError(),modulefilename);
@@ -208,9 +212,6 @@ module_type=0;
                                   Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
                                   }
 
-  ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*))GetProcAddress(handle,"dv1calc");
-    //*(void **)(&dnn)=GetProcAddress(handle,"dv1calc");
-     if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dv1calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     cd_m=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"chargedensity_coeff");
     //*(void **)(&cd_m)=GetProcAddress(handle,"chargedensity_coeff");
@@ -253,25 +254,28 @@ module_type=0;
 
  *(void **)(&p)=dlsym(handle,"pcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);p=NULL;}
- *(void **)(&dp1)=dlsym(handle,"dp1calc");
+ *(void **)(&dp1)=dlsym(handle,"dp1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dp1=NULL;}
 
 
  *(void **)(&m)=dlsym(handle,"mcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);m=NULL;}
- *(void **)(&dm1)=dlsym(handle,"dm1calc");
+ *(void **)(&dm1)=dlsym(handle,"dm1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dm1=NULL;}
  *(void **)(&L)=dlsym(handle,"Lcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);L=NULL;}
- *(void **)(&dL1)=dlsym(handle,"dL1calc");
+ *(void **)(&dL1)=dlsym(handle,"dL1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dL1=NULL;}
  *(void **)(&S)=dlsym(handle,"Scalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);S=NULL;}
- *(void **)(&dS1)=dlsym(handle,"dS1calc");
+ *(void **)(&dS1)=dlsym(handle,"dS1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dS1=NULL;}
  
- *(void **)(&mq)=dlsym(handle,"mq");
+ *(void **)(&mq)=dlsym(handle,"mqcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);mq=NULL;}
+  *(void **)(&ddnn)=dlsym(handle,"dmq1");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ddnn=NULL;}
+
   *(void **)(&estates)=dlsym(handle,"estates");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);estates=NULL;
                                 est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
@@ -282,8 +286,6 @@ module_type=0;
                                 Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
                                }
 
-  *(void **)(&ddnn)=dlsym(handle,"dv1calc");
-  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ddnn=NULL;}
 
   *(void **)(&cd_m)=dlsym(handle,"chargedensity_coeff");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);cd_m=NULL;}

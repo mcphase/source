@@ -1278,7 +1278,7 @@ return noft;
 
 }
 
-int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & v1)
+int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & dMQ)
 {/*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -1286,21 +1286,21 @@ int ionpars::cfielddn(int & tn,double & th,double & ph,double & J0,double & J2,d
     th ph  .... polar angles of the scattering vector with respect to xyz=cab coordinate system (cfield) or xyz=abc (so1ion)
 on output    
     int   	total number of transitions
-    v1(i)	<-|Q-<Q>|+> sqrt(n+-n-),  n+,n-
-     // note that  <M(Q)>=-2x<Q>_TH in units of mb
+    dMQ(i)	-2<-|Q-<Q>|+> sqrt(n+-n-),  n+,n-
+     // note that  <M(Q)>=-2<Q>_TH in units of mb
     .... occupation number of states (- to + transition chosen according to transitionnumber)
 */
   int pr;pr=1;if (tn<0) {pr=0;tn*=-1;}
   int i,j=1,k,l;
   int dj=(int)(2*J+1);
   double delta;
-   double ninit=v1(1).real();
-   double pinit=v1(1).imag();
+   double ninit=dMQ(1).real();
+   double pinit=dMQ(1).imag();
    if (ninit>dj)ninit=dj;
    if (pinit<SMALL)pinit=SMALL;
    double zsum=0,zii;
    int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(real(est(0,i))-real(est(0,1)))/KB/T))>(pinit*zsum));++i){noft+=dj-i;zsum+=zii;}
-//printf("!!! dv1 noft = %i ninit= %g pinit= %g zii=%g zsum=%g T=%g!!!!\n",noft,ninit,pinit,zii,zsum,T);
+//printf("!!! ddMQ noft = %i ninit= %g pinit= %g zii=%g zsum=%g T=%g!!!!\n",noft,ninit,pinit,zii,zsum,T);
 //noft=(int)((J+1)*(2*J+1));
 
 // calculate nat for transition number tn
@@ -1314,7 +1314,7 @@ for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 delta=real(est(0,j))-real(est(0,i));
 
  
-if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - dv1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - ddMQcalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
 	 ComplexMatrix * MQMi[4];
@@ -1323,9 +1323,9 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
          MQMi[3]=new ComplexMatrix(1,dj,1,dj);
         MQM((*MQMi[1]),(*MQMi[2]),(*MQMi[3]),th,ph,J0,J2,J4,J6,Zc);
         //      x           y         z   // this has been fixed for module so1ion now 3.4.10 MR
-        //      a           b         c   // ... for module cfield a backtransformation in dv1calc has been introduced in jjjpar.cpp
+        //      a           b         c   // ... for module cfield a backtransformation in ddMQcalc has been introduced in jjjpar.cpp
       
-// 3. set v1
+// 3. set dMQ
          int K,M,Md;
          ComplexVector Malpha(1,3);Malpha=0;
           for(K=1;K<=3;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
@@ -1343,26 +1343,26 @@ if(i==j){//take into account thermal expectation values <Jl> //MR120120
          delete MQMi[1];delete MQMi[2]; delete MQMi[3];
 
 
-       // set vector v1= <i|Ml|j>
-       v1=0;
+       // set vector dMQ=2* <i|Ml|j>
+       dMQ=0;
           for(l=1;l<=3;++l)
-          {v1(l)=Malpha(l);}
+          {dMQ(l)=-2.0*Malpha(l);}
 
 // multiply by occupation number difference ...
 
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Qa-<Qa>|%i>|^2=%4.4g |<%i|Qb-<Qb>|%i>|^2=%4.4g |<%i|Qc-<Qc>|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+      printf(" |<%i|MQa-<MQa>|%i>|^2=%4.4g |<%i|MQb-<MQb>|%i>|^2=%4.4g |<%i|MQc-<MQc>|%i>|^2=%4.4g",i,j,abs(dMQ(1))*abs(dMQ(1)),i,j,abs(dMQ(2))*abs(dMQ(2)),i,j,abs(dMQ(3))*abs(dMQ(3)));
       printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
-    v1*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
+    dMQ*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
      }else
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Qa-<Qa>|%i>|^2=%4.4g |<%i|Qb-<Qb>|%i>|^2=%4.4g |<%i|Qc-<Qc>|%i>|^2=%4.4g",i,j,abs(v1(1))*abs(v1(1)),i,j,abs(v1(2))*abs(v1(2)),i,j,abs(v1(3))*abs(v1(3)));
+      printf(" |<%i|MQa-<MQa>|%i>|^2=%4.4g |<%i|MQb-<MQb>|%i>|^2=%4.4g |<%i|MQc-<MQc>|%i>|^2=%4.4g",i,j,abs(dMQ(1))*abs(dMQ(1)),i,j,abs(dMQ(2))*abs(dMQ(2)),i,j,abs(dMQ(3))*abs(dMQ(3)));
       printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
-    v1*=sqrt(imag(est(0,i))/KB/T);
+    dMQ*=sqrt(imag(est(0,i))/KB/T);
    }
 
 

@@ -176,7 +176,7 @@ mfcf.o: mfcf.cpp mfcf.hpp vector.h
 mdcf.o: mdcf.cpp mdcf.hpp vector.h
 	$(CCC) $(CFLAGS) $< 
 
-jq.o: jq.cpp jq.hpp vector.h
+jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 	$(CCC) $(CFLAGS) $< 
 
 inipar.o: inipar.cpp inipar.hpp martin.h vector.h 
