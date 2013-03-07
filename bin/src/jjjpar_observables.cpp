@@ -115,7 +115,7 @@ int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1
    case 3:
    case 4:
    case 5: 
-   default:fprintf(stderr,"Problem: dL1calc in internal modules not implemented, continuing ... \n");
+   default: if(transitionnumber<0)fprintf(stderr,"Problem: dL1calc in internal modules not implemented, continuing ... \n");
           return 0;break;
    }
 }
@@ -149,7 +149,7 @@ int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1
    case 3:
    case 4:
    case 5: 
-   default:fprintf(stderr,"Problem: dS1calc in internal modules not implemented, continuing ... \n");
+   default:if(transitionnumber<0)fprintf(stderr,"Problem: dS1calc in internal modules not implemented, continuing ... \n");
           return 0;break;
    }
 }
