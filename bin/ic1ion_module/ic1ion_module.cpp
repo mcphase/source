@@ -282,7 +282,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int du1calc(int &tn,            // Input transition number; if tn>0, print debug info
+           int du1calc(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 
@@ -307,7 +307,7 @@ __declspec(dllexport)
    int i,j,k;
  
    // check if printout should be done and make tn positive
-   int pr=1; if (tn<0) { pr=0; tn*=-1; }
+   int pr=0; if (tn<0) { pr=1; tn*=-1; }
    double ninit=u1[1].real();
    double pinit=u1[1].imag();
    // Copies the already calculated energy levels / wavefunctions from *est
@@ -355,7 +355,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dm1(int &tn,            // Input transition number; if tn>0, print debug info
+           int dm1(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 
@@ -381,7 +381,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dL1(int &tn,            // Input transition number; if tn>0, print debug info
+           int dL1(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 
@@ -407,7 +407,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dS1(int &tn,            // Input transition number; if tn>0, print debug info
+           int dS1(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 
@@ -659,7 +659,7 @@ extern "C"
 __declspec(dllexport)
 #endif
            int                            // Returns total number of transitions
-               dmq1(int &tn,            // Input transition number |tn|. If tn<0 omit printout. If tn>0 print info.
+               dmq1(int &tn,            // Input transition number |tn|. If tn>0 omit printout. If tn<0 print info.
                   double &th,             // Input zenith angle (with the z==b axis) in radians.
                   double &ph,             // Input azimuth angle (with the x==a axis, to projection in x-y plane).
                   double &J0, double &J2, // Input radial parameters <j_0>, <j_2>
@@ -692,7 +692,7 @@ __declspec(dllexport)
 */
 {
    // check if printout should be done and make tn positive
-   int pr=1; if (tn<0) { pr=0; tn*=-1; }
+   int pr=0; if (tn<0) { pr=1; tn*=-1; }
    double ninit=mq1[1].real();
    double pinit=mq1[1].imag();
 
@@ -994,7 +994,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int dchargedensity_coeff1(int &tn,            // Input transition number; if tn>0, print debug info
+           int dchargedensity_coeff1(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (T) 

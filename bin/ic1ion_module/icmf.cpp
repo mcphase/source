@@ -715,8 +715,8 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ja|%i>|^2=%6.3f\n |<%i|Jb|%i>|^2=%6.3f\n |<%i|Jc|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
-         printf(" |<%i|Jd|%i>|^2=%6.3f\n |<%i|Je|%i>|^2=%6.3f\n |<%i|Jf|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+         printf(" |<%i|Ia|%i>|^2=%6.3f\n |<%i|Ib|%i>|^2=%6.3f\n |<%i|Ic|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+         printf(" |<%i|Id|%i>|^2=%6.3f\n |<%i|Ie|%i>|^2=%6.3f\n |<%i|If|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
          printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
       }
    }
@@ -726,8 +726,8 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ja-<Ja>|%i>|^2=%6.3f\n |<%i|Jb-<Jb>|%i>|^2=%6.3f\n |<%i|Jc-<Jc>|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
-         printf(" |<%i|Jd-<Jd>|%i>|^2=%6.3f\n |<%i|Je-<Je>|%i>|^2=%6.3f\n |<%i|Jf-<Jf>|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+         printf(" |<%i|Ia-<Ia>|%i>|^2=%6.3f\n |<%i|Ib-<Ib>|%i>|^2=%6.3f\n |<%i|Ic-<Ic>|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+         printf(" |<%i|Id-<Id>|%i>|^2=%6.3f\n |<%i|Ie-<Ie>|%i>|^2=%6.3f\n |<%i|If-<If>|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
          printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
       }
    }

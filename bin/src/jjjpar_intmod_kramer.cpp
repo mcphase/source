@@ -117,8 +117,8 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  gjmbHxc,Vector 
   // clalculate thermal expectation values (needed for quasielastic scattering)
   if(T>0){kramer(Jret,T,gjmbHxc,Hext,lnz,u);}else{T=-T;}
   int pr;
-  pr=1;
-  if (transitionnumber<0) {pr=0;transitionnumber*=-1;}
+  pr=0;
+  if (transitionnumber<0) {pr=1;transitionnumber*=-1;}
 
   alpha = ABC[2]* gjmbH[2];
   betar = -ABC[1] * gjmbH[1];

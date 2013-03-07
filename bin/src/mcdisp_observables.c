@@ -6,7 +6,7 @@
 void writeheader(par & inputpars,FILE * fout)
 {  time_t curtime;
   struct tm *loctime;
-   fprintf(fout, "#{output file of program %s",MCDISPVERSION);
+   fprintf(fout, "#output file of program %s",MCDISPVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
   
    fprintf(fout,"#*********************************************************************\n");
@@ -14,12 +14,11 @@ void writeheader(par & inputpars,FILE * fout)
    fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
    fprintf(fout,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
    fprintf(fout,"#*********************************************************************\n");
-  fprintf(fout, "# List of atomic positions dr1 dr2 dr3, moments m \n");
+  fprintf(fout, "# List of atomic positions dr1 dr2 dr3\n");
   fprintf(fout, "# Debye Waller factor (sqr(Intensity)~|sf| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),\n# units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)\n");
-  fprintf(fout, "#  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor\n# coefficients\n");
+  fprintf(fout, "#  and  Lande factors total angular momentum J, <j0> and <j2> formfactor\n# coefficients\n");
   fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
-  fprintf(fout, "#                         ...with j||b, k||(a x b) and i normal to k and j\n");
- 
+  
  for (int i = 1;i<=inputpars.nofatoms;++i)
  {if((double)(i)/50==(double)(i/50))
   {
@@ -27,15 +26,7 @@ void writeheader(par & inputpars,FILE * fout)
   
   }
   fprintf(fout, "# %6.3f %6.3f %6.3f %6.3f %6.3f ",(*inputpars.jjj[i]).xyz(1),(*inputpars.jjj[i]).xyz(2),(*inputpars.jjj[i]).xyz(3),(*inputpars.jjj[i]).DWF,(*inputpars.jjj[i]).gJ);
-  if((*inputpars.jjj[i]).Np(1)!=0){
-  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",(*inputpars.jjj[i]).sipffilename,(*inputpars.jjj[i]).jl_lmax);
-  }
-  else
-  {
-  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*inputpars.jjj[i]).magFFj0(j));}
-  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*inputpars.jjj[i]).magFFj2(j));}
-  }
-  fprintf(fout, "\n");
+  (*inputpars.jjj[i]).FFinfo(fout);
  }
 }
 

@@ -94,8 +94,8 @@ static Vector Jret(1,3);
 int pr;
 Vector gjmbH(1,3);
 gjmbH=gjmbHxc+gJ*MU_B*Hext;
-  pr=1;
-  if (tn<0) {pr=0;tn*=-1;}
+  pr=0;
+  if (tn<0) {pr=1;tn*=-1;}
   if (T<0) {T=-T;}
   double JJ,KBT,XJ,gmhkt,gmh,Z,R,X,sinth,hxxyy,jjkt;
   complex <double> i(0,1),bx,by,bz;

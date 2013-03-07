@@ -96,11 +96,11 @@ time_t curtime;
 //*******************************************************************************************************
 //*******************************************************************************************************
 void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
-              Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int * J,int m,
+              Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int m,
               float a,float b,float c,int * colcode,Vector & P, Vector & Pxyz)
 {// output of the header to filename
  FILE * fout;char l[MAXNOFCHARINLINE];
- int i,j,ortho=1;
+ int i,ortho=1;
  double alpha,beta,gamma;
    extract(unitcell, "alpha", alpha); extract(unitcell, "beta", beta); extract(unitcell, "gamma", gamma);
    if(alpha!=90||beta!=90||gamma!=90){ortho=0;}
@@ -139,7 +139,7 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
  }
  fprintf(fout, "#! nofatoms=%i atoms in unit cell: it follows a list of atomic positions db1 db2 db3, moments m scattering lengths sl,\n",n);
  fprintf(fout, "# Debye Waller factor (sqr(Intensity)~|sf| ~sum_i ()i exp(-2 DWFi sin^2(theta) / lambda^2)=EXP (-Wi),\n# units DWF [A^2], relation to other notations 2*DWF=B=8 pi^2 <u^2>)\n");
- fprintf(fout, "#  and  Lande factors total angular momentum J (=0 if dipole approximation is used) <j0> and <j2> formfactor\n# coefficients\n");
+ fprintf(fout, "#  and  Lande factors gJ for total angular momentum J  <j0> and <j2> formfactor\n# coefficients\n");
  if (ortho==1)
  {fprintf(fout, "#  db1[b1]db2[b2]db3[b3]ma[MuB]mb[MuB]mc[MuB]sl[10^-12cm]  DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
  } else
@@ -157,28 +157,14 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
    }
   }
   fprintf(fout, "# %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f%+6.3fi %6.3f %6.3f ",myround((*jjjpars[i]).xyz(1)),myround((*jjjpars[i]).xyz(2)),myround((*jjjpars[i]).xyz(3)),myround((*jjjpars[i]).mom(1)),myround((*jjjpars[i]).mom(2)),myround((*jjjpars[i]).mom(3)),myround((*jjjpars[i]).SLR),myround((*jjjpars[i]).SLI),myround((*jjjpars[i]).DWF),myround((*jjjpars[i]).gJ));
-  if(J[i]==0&&(*jjjpars[i]).gJ==0){fprintf(fout,"<M(Q)> for Imag calc. going beyond dip.approx., for Imag_dip <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
-  if(J[i]==0&&(*jjjpars[i]).gJ!=0){fprintf(fout,"<M(Q)> for Imag calc. going beyond dip.approx., for Imag_dip <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
-  if(J[i]==-3){fprintf(fout,"<M(Q)> for Imag calc. going beyond dip.approx., for Imag_dip <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients: ");}
-  if(J[i]==-1&&(*jjjpars[i]).gJ==0){fprintf(fout,"dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
-  if(J[i]==-1&&(*jjjpars[i]).gJ!=0){fprintf(fout,"dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
-  if(J[i]==-2){fprintf(fout,"dipole approx: <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients:");}
-  if((*jjjpars[i]).Np(1)!=0){
-  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",(*jjjpars[i]).sipffilename,(*jjjpars[i]).jl_lmax);
-  }
-  else
-  {
-  for (j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*jjjpars[i]).magFFj0(j));}
-  for (j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",(*jjjpars[i]).magFFj2(j));}
-  }
-  fprintf(fout, "\n");
+  (*jjjpars[i]).FFinfo(fout);
  }
  fprintf(fout, "#}\n");
  fclose(fout);
 }
 
 void printreflist(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
-              Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int * J,int m,
+              Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int m,
               Vector * hkl,float * ikern,float * intmag,float * intmagdip,float * D,float * theta,float * out10,
               float * out11,complex <double>*mx,complex <double>*my,complex <double>*mz,complex <double>*mxmy,
               complex <double>*mxmz,complex <double>*mymz,complex <double>*mx2,complex <double>*my2,complex <double>*mz2,

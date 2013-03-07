@@ -1160,8 +1160,8 @@ if (T>0){cfieldJJ(JJ,T,gjmbHxc,Hext,lnz,u,ests);  //expectation values <J>
    double ninit=u1[1].real();
    double pinit=u1[1].imag();
   int pr;
-  pr=1;
-  if (tn<0) {pr=0;tn*=-1;}
+  pr=0;
+  if (tn<0) {pr=1;tn*=-1;}
    // setup hamiltonian
    int dj,j;
    dj=Hcf.Rhi();
@@ -1290,7 +1290,7 @@ on output
      // note that  <M(Q)>=-2<Q>_TH in units of mb
     .... occupation number of states (- to + transition chosen according to transitionnumber)
 */
-  int pr;pr=1;if (tn<0) {pr=0;tn*=-1;}
+  int pr;pr=0;if (tn<0) {pr=1;tn*=-1;}
   int i,j=1,k,l;
   int dj=(int)(2*J+1);
   double delta;
@@ -1534,8 +1534,8 @@ if (T>0){chargedensity_coeffcalc(JJ,T,gjmbHxc,Hext,ests); // expectation values 
    double ninit=cd1[1].real();
    double pinit=cd1[1].imag();
   int pr;
-  pr=1;
-  if (tn<0) {pr=0;tn*=-1;}
+  pr=0;
+  if (tn<0) {pr=1;tn*=-1;}
    // setup hamiltonian
    int dj,j;
    dj=Hcf.Rhi();

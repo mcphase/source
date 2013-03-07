@@ -19,7 +19,9 @@ class mdcf
    ComplexMatrix ** l; //matrix to store eigenvalues sqrt_gamma
    ComplexMatrix ** sb; //matrix to store V
    ComplexVector ** dmqs; // big vector to store all dmq1 
+   ComplexVector ** dmq_dips; // big vector to store all dmq_dip1 
    ComplexVector ** lb; //matrix to store eigenvalues sqrt_gamma
+   ComplexVector ** lb_dip; //matrix to store eigenvalues sqrt_gamma
    Vector ** d;
    IntVector ** nt; // vector to store number of transitions for each atom
    ComplexMatrix ** eigenstates; // matrix to store the eigenstates of ions
@@ -43,8 +45,11 @@ class mdcf
     ComplexMatrix & V(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
     ComplexMatrix & Vi(int in); // returns pointer to eigenvector matrix i
     ComplexVector & dMQs(int i,int j,int k) const; // returns pointer to vector MQ (ijk) 
+    ComplexVector & dMQ_dips(int i,int j,int k) const; // returns pointer to vector MQ_dip (ijk) 
     ComplexVector & sqrt_Gamma(int i,int j,int k) const; // returns pointer to eigenvaluevector (ijk) 
     ComplexVector & sqrt_Gammai(int in); // returns pointer to eigenvalue vector i
+    ComplexVector & sqrt_Gamma_dip(int i,int j,int k) const; // returns pointer to eigenvaluevector (ijk) 
+    ComplexVector & sqrt_Gamma_dipi(int in); // returns pointer to eigenvalue vector i
     ComplexMatrix & est(int i, int j, int k, int l); // returns pointer to eigenstate matrix for atom ijkl
     void est_ini(int i, int j, int k, int l,ComplexMatrix & M); // initialize est
 

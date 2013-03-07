@@ -217,8 +217,8 @@ int jjjpar::cluster_dm(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext,Compl
     delta	splitting of kramers doublet [meV]
     u1(i)	<-|(Ji-<Ji>)|+> sqrt(tanh(delta/2kT))
 */
-  int pr=1,subtractexpvalue=1;if(T<0){subtractexpvalue=0;T=-T;}
-  if (tn<0) {pr=0;tn*=-1;}
+  int pr=0,subtractexpvalue=1;if(T<0){subtractexpvalue=0;T=-T;}
+  if (tn<0) {pr=1;tn*=-1;}
 int dim=1; int *d0= new int [(*clusterpars).nofatoms+1];
            int *dn= new int [(*clusterpars).nofatoms+1];
 // determine dimension of H matrix

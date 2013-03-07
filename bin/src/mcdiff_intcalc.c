@@ -91,7 +91,7 @@ return 0;
 }
 
 int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vector rez2, Vector rez3,
- float scale,double T,float lambda,float ovalltemp,int lorenz,int & n,int * J,float & d,float & Theta,
+ float scale,double T,float lambda,float ovalltemp,int lorenz,int & n,float & d,float & Theta,
  float & Imag,float & Imagdip,float & inuc,float & OUT10,float & OUT11,complex <double> & mqx,
  complex <double> & mqy,complex <double> & mqz,complex <double> & mqxy,complex <double> & mqxz,
  complex <double> & mqyz,complex <double> & mqx2,complex <double> & mqy2,complex <double> & mqz2,
@@ -107,13 +107,14 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 // (*jjjpars[1...n]).mom(1..3)(45)(67)(89)        atomic magnetic moment Ma Mb Mc [mb] and (if input) Sa La Sb Lb Sc Lc
 //                                       ' (with respect to coordinates 1,2,3=yzx)
 // (*jjjpars[1...n]).gj		      Lande factor
-// J[1..n] // code for indicating if ion is J=1: nonmagnetic,
-            //J[i]= 0 GO BEYOND: using MQ function, for dipole intensities use mom(1-3)
+//(*jjjpars[1...n]).FF_type      1  -2    +2   +3   -3
+            // (*jjjpars[1...n]).FF_type // code for indicating if ion is FF_type=1: nonmagnetic,
+            //=-2 GO BEYOND: using MQ function, for dipole intensities use mom(1-3)
             //                   rare earth expression (if gJ>0), spin formfactor only (if gJ=0)
-            //J[i]=-1 DIPOLE ONLY: rare earth (if gJ>0), spin formfactor only (if gJ=0)
-            //J[i]=-2 DIPOLE ONLY: gJ=0,general L and S moments given, use dipole approximation 
+            //=+2 DIPOLE ONLY: rare earth (if gJ>0), spin formfactor only (if gJ=0)
+            //=+3 DIPOLE ONLY: gJ=0,general L and S moments given, use dipole approximation 
             //         and separate formfactor for spin and orbital moment
-            //J[i]=-3 GO BEYOND: using MQ function, go beyond dipole approximation. 
+            //=-3 GO BEYOND: using MQ function, go beyond dipole approximation. 
             //         for dipole use L and S stored in mom(4-9)
 // (*jjjpars[1...n]).magFFj0(1..7)         formfactor j0 for atom 1...n <j0(kr)>-terms A,a,B,b,C,c,D
 // (*jjjpars[1...n]).magFFj2(1..7)         formfactor j2 for atom 1...n <j2(kr)>-terms A,a,B,b,C,c,D
@@ -168,14 +169,20 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
                                  nsf+=scl*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 
                                 //magnetic structure factors
-                                if(J[i]<=0){   // i.e. atom is magnetic
+                             //J[i]         1   0    -1   -2   -3
+                             //FF_type      1  -2    +2   +3   -3
+                               // if(J[i]<=0){   // i.e. atom is magnetic
+                             if((*jjjpars[i]).FF_type!=1){
 
                                              // formfactor F(Q)
-                                             if(J[i]==-1){if((*jjjpars[i]).gJ==0)(*jjjpars[i]).gJ=2.0;} // set gJ to 2 in case it is zero (non rare earth)
+                                             //if(J[i]==-1)
+                                               if((*jjjpars[i]).FF_type==+2)
+                                               {if((*jjjpars[i]).gJ==0)(*jjjpars[i]).gJ=2.0;} // set gJ to 2 in case it is zero (non rare earth)
                                                                                                         // so that we get spin only formfactor
                                              FQ = (*jjjpars[i]).F(Q); //rare earth
 
-                                             if(J[i]==0){ // go beyond dipole approximation for rare earth
+                                             //if(J[i]==0){ // go beyond dipole approximation for rare earth
+                                               if((*jjjpars[i]).FF_type==-2){
                                                          ComplexVector MQ(1,3);(*jjjpars[i]).MQ(MQ,Qvec);
 					               msfx+=0.5*MQ(1)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);//MQ(123)=MQ(xyz)
 					               msfy+=0.5*MQ(2)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
@@ -184,7 +191,8 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					               msfdipy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               msfdipz+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                }
- 					      if(J[i]==-1){// dipole approximation - use magnetic moments and rare earth formfactor
+ 					      //if(J[i]==-1){// dipole approximation - use magnetic moments and rare earth formfactor
+                                               if((*jjjpars[i]).FF_type==+2){
                                                            //                        for transition metals always set gJ=2 (spin only moment)
                                                         msfx+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                msfy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
@@ -193,7 +201,8 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					                msfdipy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                msfdipz+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               }
-					      if(J[i]==-2){// dipole approximation - use S and L moments (only if gJ=0)
+					      //if(J[i]==-2){// dipole approximation - use S and L moments (only if gJ=0)
+                                               if((*jjjpars[i]).FF_type==+3){
                                                         FQL = (*jjjpars[i]).F(-Q); // orbital formfactor
                                                         msfx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
 					                msfy+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
@@ -208,7 +217,8 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					                msfdipy+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                msfdipz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               }
-                                     if(J[i]==-3){ // go beyond dipole approximation for gJ=0 (intermediate coupling)
+                                     //if(J[i]==-3){ // go beyond dipole approximation for gJ=0 (intermediate coupling)
+                                     if((*jjjpars[i]).FF_type==-3){
                                                        ComplexVector MQ(1,3);(*jjjpars[i]).MQ(MQ,Qvec);
                                              FQL = (*jjjpars[i]).F(-Q); // orbital formfactor
                                                         msfdipx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
@@ -321,7 +331,7 @@ return true;
 }
 
 void neutint(jjjpar ** jjjpars,int code,double T,float lambda, float thetamax, float ovalltemp,int lorenz,
-             Vector r1,Vector r2,Vector r3,int & n,int * J,int & m,Vector *  hkl,float * D,float * theta,
+             Vector r1,Vector r2,Vector r3,int & n,int & m,Vector *  hkl,float * D,float * theta,
              float * intmag,float * intmagdip,float * ikern,float * out10,float * out11,complex <double>*mx,
              complex <double>*my,complex <double>*mz,complex <double>*mxmy,complex <double>*mxmz,
              complex <double>*mymz,complex <double>*mx2,complex <double>*my2,complex <double>*mz2,
@@ -343,11 +353,15 @@ void neutint(jjjpar ** jjjpars,int code,double T,float lambda, float thetamax, f
 // (*jjjpars[1...n]).mom(1..3)(45)(67)(89)        atomic magnetic moment Ma Mb Mc [mb] and (if input) Sa La Sb Lb Sc Lc
 //                                       ' (with respect to coordinates 1,2,3=yzx)
 // (*jjjpars[1...n]).gj		      Lande factor
-// J[1..n] // code for indicating if ion is nonmagnetic (J=1),
-            //rare earth with dipole approx (J=-1),
-            //rare earth beyond dipole approx, but with given nonzero gJ (stevens-balcar formalism) (J=0),
-            //gJ=0,general L and S moments given, use dipole approximation and separate formfactor for spin and orbital moment (J=-2)
-            //intermediate coupling (gJ=0), go beyond dipole approximation (J=-3)
+//(*jjjpars[1...n]).FF_type      1  -2    +2   +3   -3
+            // (*jjjpars[1...n]).FF_type // code for indicating if ion is FF_type=1: nonmagnetic,
+            //=-2 GO BEYOND: using MQ function, for dipole intensities use mom(1-3)
+            //                   rare earth expression (if gJ>0), spin formfactor only (if gJ=0)
+            //=+2 DIPOLE ONLY: rare earth (if gJ>0), spin formfactor only (if gJ=0)
+            //=+3 DIPOLE ONLY: gJ=0,general L and S moments given, use dipole approximation 
+            //         and separate formfactor for spin and orbital moment
+            //=-3 GO BEYOND: using MQ function, go beyond dipole approximation. 
+            //         for dipole use L and S stored in mom(4-9)
 // (*jjjpars[1...n]).magFFj0(1..7)         formfactor j0 for atom 1...n <j0(kr)>-terms A,a,B,b,C,c,D
 // (*jjjpars[1...n]).magFFj2(1..7)         formfactor j2 for atom 1...n <j2(kr)>-terms A,a,B,b,C,c,D
 //     <jl(kr)> is defined as = integral[0,inf] U^2(r) jl(kr) 4 pi r^2 dr
@@ -412,7 +426,7 @@ if(code==0){ m = 0;// reset m
                 complex <double> mqy=0,mqy2=0,mqxz=0;
                 complex <double> mqz=0,mqz2=0,mqyz=0;
 
-          if(getint(jjjpars,hi,ki,li,thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,J,d,Theta,Imag,Imagdip,inuc,OUT10,OUT11,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,colcode,Pxyz))
+          if(getint(jjjpars,hi,ki,li,thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Theta,Imag,Imagdip,inuc,OUT10,OUT11,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,colcode,Pxyz))
           {// reflection was found below thetamax....
 
             //sort according to descending d spacing
@@ -474,7 +488,7 @@ else
                hkl[i](1)=rint(hkl[i](1));
                hkl[i](2)=rint(hkl[i](2));
                hkl[i](3)=rint(hkl[i](3));
-          if(!getint(jjjpars,(int)hkl[i](1),(int)hkl[i](2),(int)hkl[i](3),thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,J,d,Theta,Imag,Imagdip,inuc,OUT10,OUT11,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,colcode,Pxyz))
+          if(!getint(jjjpars,(int)hkl[i](1),(int)hkl[i](2),(int)hkl[i](3),thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Theta,Imag,Imagdip,inuc,OUT10,OUT11,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,colcode,Pxyz))
                 {fprintf(stderr,"ERROR mcdiff: theta for reflection number %i above thetamax=%g\n",i,thetamax);exit(1);}
                D[i] = d; theta[i] = Theta;
                intmag[i] = Imag;intmagdip[i] = Imagdip;  ikern[i] = inuc;

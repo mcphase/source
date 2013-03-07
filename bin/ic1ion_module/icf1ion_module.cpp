@@ -718,7 +718,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           int du1calc(int &tn,            // Input transition number; if tn>0, print debug info
+           int du1calc(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
                       Vector &Hext,      // Input vector of external field (meV) 
@@ -756,7 +756,7 @@ __declspec(dllexport)
    double Z=0., therm;
 
    // check if printout should be done and make tn positive
-   int pr=1; if (tn<0) { pr=0; tn*=-1; }
+   int pr=0; if (tn<0) { pr=1; tn*=-1; }
    double ninit=u1[1].real();
    double pinit=u1[1].imag();
 
@@ -1629,7 +1629,7 @@ extern "C"
 __declspec(dllexport)
 #endif
            int                            // Returns total number of transitions
-               dv1calc(int &tn,            // Input transition number |tn|. If tn<0 omit printout. If tn>0 print info.
+               dv1calc(int &tn,            // Input transition number |tn|. If tn>0 omit printout. If tn<0 print info.
                   double &th,             // Input zenith angle (with the z==b axis) in radians.
                   double &ph,             // Input azimuth angle (with the x==a axis, to projection in x-y plane).
                   double &J0, double &J2, // Input radial parameters <j_0>, <j_2>
@@ -1660,7 +1660,7 @@ __declspec(dllexport)
 * /
 {
    // check if printout should be done and make tn positive
-   int pr=1; if (tn<0) { pr=0; tn*=-1; }
+   int pr=0; if (tn<0) { pr=1; tn*=-1; }
    double ninit=v1[1].real();
    double pinit=v1[1].imag();
 

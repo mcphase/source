@@ -423,7 +423,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   nn[0]=MAXNOFNUMBERSINLINE;
   xyz=Vector(1,3);
   set_zlm_constants();
-  i=6;
+  i=6; FF_type=0;
   while(i>0){fgets_errchk (instr, MAXNOFCHARINLINE, file);
              if(instr[strspn(instr," \t")]!='#'){fprintf (stderr, "Error reading mcphas.j - exchangeparameters start before all variables (da,db,dc,nofneighbours,diagonalexchange and sipffilename) have been given\n");
                                                  exit (EXIT_FAILURE);}
@@ -551,7 +551,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile)
 // constructor with positions scattering length dwf
 jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
- mom=Vector(1,9); mom=0; 
+ mom=Vector(1,9); mom=0; FF_type=0;
  DWF=dwf;SLR=slr;SLI=sli;
   magFFj0=Vector(1,7);magFFj0=0;  magFFj0[1]=1;
   magFFj2=Vector(1,7);magFFj2=0;
@@ -582,7 +582,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   transitionnumber=1;
   nofcomponents=nofmom;
   mom=Vector(1,nofcomponents);
-  mom=0;
+  mom=0; FF_type=0;
   nof_electrons=0;// no electorns by default
   modulefilename=new char[MAXNOFCHARINLINE];
   dn = new Vector[n+1];for(i1=0;i1<=n;++i1){dn[i1]=Vector(1,3);}
@@ -613,6 +613,7 @@ jjjpar::jjjpar (const jjjpar & pp)
   xyz=pp.xyz;paranz=pp.paranz;
   set_zlm_constants();
   SLR=pp.SLR;SLI=pp.SLI;
+  FF_type=pp.FF_type;
   nof_electrons=pp.nof_electrons;
   modulefilename=new char[MAXNOFCHARINLINE];
   strncpy (modulefilename,pp.modulefilename, MAXNOFCHARINLINE-1);

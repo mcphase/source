@@ -443,12 +443,6 @@ printf ("                 nat=%i magnetic atoms\n",natmagnetic);
 
 n = nr1 * nr2 * nr3 * nat + natmagnetic; //atoms in der magnetic unit cell
 
-
-int *J;J=new int[n+1]; // code for indicating if ion is nonmagnetic (J=1),
-            // go beyond dipole approx for rare earth (J=0)
-            // use magnetic moment with dipole approx (J=-1)
-            // use L and S values with dipole approx (J=-2) 
-            // go beyond dipole approx for gJ=0 (L and S separately)
 jjjpar ** jjjpars = new jjjpar * [n+1];
 printf("                 reading magnetic atoms and moments ...\n");
 
@@ -490,7 +484,7 @@ mfcf mfields(1,1,1,natmagnetic,51); // 51 is maximum of nofmfcomponents - we tak
 mfields.clear();
 
 for(i=1;i<=natmagnetic;++i){
-                            instr[0]='#';J[i]=-1;
+                            instr[0]='#';
                             while(instr[strspn(instr," \t")]=='#'){pos=ftell(fin_coq);
                                                                    if(feof(fin_coq)==1){fprintf(stderr,"mcdiff Error: end of file before all magnetic atoms could be read\n");exit(EXIT_FAILURE);}
                                                                   fgets(instr,MAXNOFCHARINLINE,fin_coq);
@@ -516,10 +510,14 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
                          }
                             if (j<9) {fprintf(stderr,"ERROR mcdiff: too few parameters for magnetic atom %i: %s\n",i,instr);exit(EXIT_FAILURE);}
                              jjjpars[i]=new jjjpar((double)numbers[4] / nr1,(double)numbers[5] / nr2,(double)numbers[6] / nr3, sipffilename);
+                             //J[i]=-1;
+                             //J[i]         1   0    -1   -2   -3
+                             //FF_type      1  -2    +2   +3   -3
+                             (*jjjpars[i]).FF_type=+2;
                              (*jjjpars[i]).save_sipf("./results/_");// save read single ion parameter file
                               // store moment and components of S and L (if given)
                               for(k=7;k<=j&&k<=15;++k){(*jjjpars[i]).mom(k-6) = numbers[k];}
-                              if((*jjjpars[i]).gJ==0){if(j>=15){J[i]=-2; // do not use input moment but spin and angular momentum for calculation
+                              if((*jjjpars[i]).gJ==0){if(j>=15){(*jjjpars[i]).FF_type=+3;//J[i]=-2; // do not use input moment but spin and angular momentum for calculation
                                                                 // do some consistency checks
                                                                 if (fabs((*jjjpars[i]).mom(1)-2*(*jjjpars[i]).mom(4)-(*jjjpars[i]).mom(5))/(fabs((*jjjpars[i]).mom(1))+1.0)>0.001){fprintf(stderr,"Warning mcdiff: a-component magnetic moment=%g and <La>+2<Sa>=%g not consistent for atom %i - setting moment=<La>+2<Sa>\n",(*jjjpars[i]).mom(1),2*(*jjjpars[i]).mom(4)+(*jjjpars[i]).mom(5),i);}
                                                                 if (fabs((*jjjpars[i]).mom(2)-2*(*jjjpars[i]).mom(6)-(*jjjpars[i]).mom(7))/(fabs((*jjjpars[i]).mom(2))+1.0)>0.001){fprintf(stderr,"Warning mcdiff: b-component magnetic moment=%g and <Lb>+2<Sb>=%g not consistent for atom %i - setting moment=<Lb>+2<Sb>\n",(*jjjpars[i]).mom(2),2*(*jjjpars[i]).mom(6)+(*jjjpars[i]).mom(7),i);}
@@ -528,7 +526,7 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
                                                                 (*jjjpars[i]).mom(2)=2*(*jjjpars[i]).mom(6)+(*jjjpars[i]).mom(7);
                                                                 (*jjjpars[i]).mom(3)=2*(*jjjpars[i]).mom(8)+(*jjjpars[i]).mom(9);
                                                                 }
-                                                           else {J[i]=-1;} // just use spin formfactor
+                                                           else {(*jjjpars[i]).FF_type=+2;}//J[i]=-1;} // just use spin formfactor
                                                       }
 fprintf(fout,"{%s} %8.5f %8.5f %8.5f  ",sipffilename,numbers[4]*r1s(1)+numbers[5]*r2s(1)+numbers[6]*r3s(1),numbers[4]*r1s(2)+numbers[5]*r2s(2)+numbers[6]*r3s(2),numbers[4]*r1s(3)+numbers[5]*r2s(3)+numbers[6]*r3s(3));
 fprintf(fout,"%8.5f %8.5f %8.5f  ",numbers[4],numbers[5],numbers[6]); // positions
@@ -563,8 +561,8 @@ fprintf(fout,"\n");
                                 (*jjjpars[i]).mom(3)=moment(3);
                                }
                                // check if <L> and <S> are present, if yes   
-                              if(J[i]==-2)
-   		              {J[i]=-3;
+                              if((*jjjpars[i]).FF_type==+3)//if(J[i]==-2)
+   		              {(*jjjpars[i]).FF_type=-3;//J[i]=-3;
                               // check if Lcalc and Scalc are present
                                if((*jjjpars[i]).Lcalc(L,T,gjmbHxc,H,Icalcpars)&&
                               (*jjjpars[i]).Scalc(S,T,gjmbHxc,H,Icalcpars))
@@ -583,8 +581,8 @@ fprintf(fout,"\n");
                                 }
 			      }
 			      else
-			      {    
-                              J[i]=0; // J=0 tells that full calculation should be done for this ion using 
+			      { (*jjjpars[i]).FF_type=-2;   
+                              //J[i]=0; // J=0 tells that full calculation should be done for this ion using 
                                       // for dip intensities Ma Mb and Mc
                                }
 
@@ -620,8 +618,8 @@ for(na = 1;na<=nr1;++na){
    if(nat!=0){
     for(i=1;i<=nat;++i){
       ++ncryst;
-      J[ncryst]=1;
       jjjpars[ncryst]=new jjjpar((na + x1[i] - 1) / nr1,(nb + y1[i] - 1) / nr2,(nc + z1[i] - 1) / nr3,sl1r[i],sl1i[i],dwf1[i]);
+      (*jjjpars[ncryst]).FF_type=+1;//J[ncryst]=1;
       (*jjjpars[ncryst]).mom=0;
       (*jjjpars[ncryst]).gJ=0;
       }
@@ -679,10 +677,10 @@ if (argc>1){int nr;
 
 // transformieren der millerindizes auf kristallographische einheitszelle
 printheader(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
-          r2, r3, n,  J, m,a,b,c,colcode,P,Pxyz);
+          r2, r3, n,  m,a,b,c,colcode,P,Pxyz);
 
 
-neutint(jjjpars,code,T,lambda, thetamax, ovalltemp, lorenz, r1, r2, r3, n,  J, m, hkl, D, theta, intmag,intmagdip, ikern, out10, out11,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2,colcode,Pxyz);
+neutint(jjjpars,code,T,lambda, thetamax, ovalltemp, lorenz, r1, r2, r3, n,  m, hkl, D, theta, intmag,intmagdip, ikern, out10, out11,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2,colcode,Pxyz);
 
 
 
@@ -699,7 +697,7 @@ for(i=1;i<=m;++i){hhkkll=hkl[i];
 
 
 printreflist(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
-          r2, r3, n,  J, m, hkl, ikern, intmag,intmagdip, D, theta, out10, out11,mx,my,mz,mxmy,mxmz,mymz,
+          r2, r3, n,  m, hkl, ikern, intmag,intmagdip, D, theta, out10, out11,mx,my,mz,mxmy,mxmz,mymz,
           mx2,my2,mz2,a,b,c,colcode,P,Pxyz);
 
 fprintf (stderr,"...results written to ./results/mcdiff.out\n");
@@ -711,7 +709,6 @@ fprintf (stderr,"***********************************************************\n")
 //  for (i=1;i<=n;++i){delete jjjpars[i];}
 //  delete []jjjpars;
   delete []hkl;
-  delete []J;
  return 0;
 }
 

@@ -163,6 +163,12 @@ private :
 public:
   double SLR,SLI; // scattering length
   double DWF; // DebeyWallerFactor [A^2]
+  int FF_type; // use by program mcdisp, mcdiff to store which formfactor this ion is
+void FFinfo(FILE * fout); // formfactor information print to fout, for mcdiff and mcdisp
+                         // info about formactor is printed according to settings of FFtype
+                         // FF_type has to be set by mcdiff / mcdisp correctly before calling
+                         // this function
+
   Vector magFFj0; // magnetic formfactor numbers
   Vector magFFj2; // magnetic formfactor numbers
   Vector magFFj4; // magnetic formfactor numbers

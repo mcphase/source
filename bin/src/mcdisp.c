@@ -59,8 +59,7 @@ typedef struct{
    ComplexMatrix **Em;mfcf  **qem_real, **qem_imag;
    ComplexMatrix **ES;mfcf  **qes_real, **qes_imag;
    ComplexMatrix **EL;mfcf  **qel_real, **qel_imag;
-   Matrix **pol, **polICIC, **polICn, **polnIC;
-   mfcf **ev_real, **ev_imag;
+   Matrix **pol;
    ComplexMatrix **Tau;
    Vector hkl, q;  jq **J;
    inimcdis **ini;
@@ -278,7 +277,6 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
   FILE * fin;
   FILE * fout;
   FILE * foutqei;
-  FILE * foutqev;
   FILE * foutqep;
   FILE * foutqee;
   FILE * foutqem;
@@ -503,7 +501,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
                        break;} //check if number of transitions  bigger than maximal number 
                                 //(given by -max option in command line)
       
-        (*inputpars.jjj[l]).transitionnumber=j1; // try calculation for transition  j
+        (*inputpars.jjj[l]).transitionnumber=-j1; // try calculation for transition  j
       fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
       d=maxE;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
       Mijkl = u1^u1;
@@ -630,7 +628,7 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
       if(nn[6]<SMALL){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
       
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
-        (*inputpars.jjj[l]).transitionnumber=tn; // try calculation for transition  j
+        (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  tn with printout
       d=1e10;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
         Mijkl = u1^u1;gamman=Norm2(u1);u1/=sqrt(gamman);
        if(fabs((fabs(d)-fabs(nn[6]))/(fabs(nn[6])+1.0))>SMALLEDIF)
@@ -737,20 +735,9 @@ if (do_verbose==1){
 //initialize output files
   errno = 0;
 if (do_jqfile==0)
-{ printf("#saving mcdisp.qom and mcdisp.qei and mcdisp.qev\n");
+{ printf("#saving mcdisp.qom and mcdisp.qei\n");
   fout = fopen_errchk ("./results/mcdisp.qom",filemode);
-  writeheader(inputpars,fout); fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
-          fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities (dipapprox vs full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   foutqei = fopen_errchk ("./results/mcdisp.qei",filemode);
-  writeheader(inputpars,foutqei); fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
-          fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)}\n");
-  foutqev = fopen_errchk ("./results/mcdisp.qev",filemode);
-  writeheader(inputpars,foutqev);   fprintf(foutqev,"#!<--mcphas.mcdisp.qev-->\n");
-          fprintf (foutqev, "#!spins_wave_amplitude=1.0\n");
-          fprintf (foutqev, "#!spins_show_ellipses=1.0\n");
-          fprintf (foutqev, "#!spins_show_static_moment_direction=1.0\n");
-          fprintf (foutqev, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
-
   //------------observables-----------------------------------
 if(ini.calculate_chargedensity_oscillation)foutqee=evfileinit(filemode,"./results/mcdisp.qee",inputpars,"qee",CHARGEDENS_EV_DIM);
 if(ini.calculate_spindensity_oscillation)foutqsd=evfileinit(filemode,"./results/mcdisp.qsd",inputpars,"qsd",SPINDENS_EV_DIM);
@@ -761,19 +748,13 @@ if(ini.calculate_spinmoment_oscillation)foutqes=evfileinit(filemode,"./results/m
 if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mcdisp.qel",inputpars,"qel",ORBMOM_EV_DIM);
   //-----------------------------------------------------------
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
-  writeheader(inputpars,foutdstot); printf("#saving mcdisp.dsigma.tot\n");
-   fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
-          fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma/dOmeg dsigma_beydip/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)}",ini.emin,ini.emax);
+  printf("#saving mcdisp.dsigma.tot\n");
 
    if (do_Erefine==1){
           errno = 0;
   foutds = fopen_errchk ("./results/mcdisp.dsigma",filemode);
-  writeheader(inputpars,foutds); printf("#saving mcdisp.dsigma\n");
-   fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
-          fprintf (foutds, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
-          fprintf (foutdstot, "for DMD algorithm  vs summing dsigma for diff energies");
-                     }  
-          fprintf (foutdstot, "\n");
+  printf("#saving mcdisp.dsigma\n");
+                      }
 }
  
 // initialize file with jq matrix
@@ -1067,27 +1048,7 @@ if (do_jqfile==1){
  if(do_verbose==1){// fprintf(stdout,"#eigenvectors (matrix Tau):\n");
                    // myPrintComplexMatrix(stdout,Tau); 
                     fprintf(stdout,"#saving the following eigenvalues (meV) to mcdisp.qom:\n");}
-   int dim=3;
-   if (ini.hkllist==1){dim=(int)((ini.hkls[counter][0]-3)/4);
-                       if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
-                       {fprintf(foutqei,"#!hklfile_number=%i\n",is);
-                        fprintf(fout,"#!hklfile_number=%i\n",is);
-                        fprintf(foutqev,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_chargedensity_oscillation)fprintf(foutqee,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_spindensity_oscillation)fprintf(foutqsd,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_orbmomdensity_oscillation)fprintf(foutqod,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_phonon_oscillation)fprintf(foutqep,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_magmoment_oscillation)fprintf(foutqem,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_spinmoment_oscillation)fprintf(foutqes,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_orbmoment_oscillation)fprintf(foutqel,"#!hklfile_number=%i\n",is);
-                        fprintf(foutdstot,"#!hklfile_number=%i\n",is);
-                        if (do_Erefine==1){fprintf(foutds,"#!hklfile_number=%i\n",is);}
-                       }
-                      }
-   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-
    for (i=1;i<=dimA;++i){
-	       fprintf (fout, " %4.4g ",myround(En(i)));
                if(do_verbose==1){fprintf(stdout, " %4.4g",En(i));}
                          }
 
@@ -1096,7 +1057,7 @@ if (do_jqfile==1){
    // been printed out above, so any refinement of energies during intcalc
    // is not included in the output file]
 #ifndef _THREADS  
-  double QQ; mfcf ev_real(ini.mf),ev_imag(ini.mf);
+  double QQ; 
              mfcf qee_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
              mfcf qee_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
              mfcf qsd_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
@@ -1115,8 +1076,63 @@ if (do_jqfile==1){
   double diffint=0,diffintbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
                   fprintf (fout, " > ");
-diffint=0;diffintbey=0;
-                  if(do_gobeyond)do_gobeyond=intcalc_beyond_ini(ini,inputpars,md,do_verbose,hkl,ninit,pinit);
+  diffint=0;diffintbey=0;
+                  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,hkl,ninit,pinit);
+   if(qincr==0) { //write header for output files
+                   fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
+                   writeheader(inputpars,fout);
+                   fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities (dipapprox vs full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+          
+                   fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
+                   writeheader(inputpars,foutqei);
+                   fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.] Imag [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)}\n");
+
+                        if(ini.calculate_chargedensity_oscillation)writeheader(inputpars,foutqee);
+                        if(ini.calculate_spindensity_oscillation)writeheader(inputpars,foutqsd);
+                        if(ini.calculate_orbmomdensity_oscillation)writeheader(inputpars,foutqod);
+                        if(ini.calculate_phonon_oscillation)writeheader(inputpars,foutqep);
+                        if(ini.calculate_magmoment_oscillation)writeheader(inputpars,foutqem);
+                        if(ini.calculate_spinmoment_oscillation)writeheader(inputpars,foutqes);
+                        if(ini.calculate_orbmoment_oscillation)writeheader(inputpars,foutqel);
+
+
+
+                        fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
+                        writeheader(inputpars,foutdstot);
+                        fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)}",ini.emin,ini.emax);
+
+                        if (do_Erefine==1){
+                         fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
+                         writeheader(inputpars,foutds);
+                         fprintf (foutds, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+                         fprintf (foutdstot, "for DMD algorithm  vs summing dsigma for diff energies");
+                                          }  
+                         fprintf (foutdstot, "\n");                       
+                }
+
+   int dim=3;
+   if (ini.hkllist==1){dim=(int)((ini.hkls[counter][0]-3)/4);
+                       if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
+                       {fprintf(foutqei,"#!hklfile_number=%i\n",is);
+                        fprintf(fout,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_chargedensity_oscillation)fprintf(foutqee,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_spindensity_oscillation)fprintf(foutqsd,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_orbmomdensity_oscillation)fprintf(foutqod,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_phonon_oscillation)fprintf(foutqep,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_magmoment_oscillation)fprintf(foutqem,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_spinmoment_oscillation)fprintf(foutqes,"#!hklfile_number=%i\n",is);
+                        if(ini.calculate_orbmoment_oscillation)fprintf(foutqel,"#!hklfile_number=%i\n",is);
+                        fprintf(foutdstot,"#!hklfile_number=%i\n",is);
+                        if (do_Erefine==1){fprintf(foutds,"#!hklfile_number=%i\n",is);}
+                       }
+                      }
+   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+   for (i=1;i<=dimA;++i){
+	       fprintf (fout, " %4.4g ",myround(En(i)));
+               if(do_verbose==1){fprintf(stdout, " %4.4g",En(i));}
+                         }
+
+
                   Vector dd(1,dim),dd_int(1,dim);  dd+=100000.0;dd_int+=100000.0;
                   Vector dd1(1,dim),dd1_int(1,dim);  dd1+=100000.0;dd1_int+=100000.0;
                   Vector dd_without_antipeaks(1,dim),dd_int_without_antipeaks(1,dim);  dd_without_antipeaks+=100000.0;dd_int_without_antipeaks+=100000.0;
@@ -1124,15 +1140,12 @@ diffint=0;diffintbey=0;
                   Vector dd_without_antipeaks_weights(1,dim),dd_int_without_antipeaks_weights(1,dim);  dd_without_antipeaks_weights+=100000.0;dd_int_without_antipeaks_weights+=100000.0;
 
  #ifndef _THREADS
-                     ComplexMatrix chi(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
+                     ComplexMatrix chi(1,3*dimA,1,3*dimA);
                      ComplexMatrix chibey(1,3*dimA,1,3*dimA);
-                     Matrix pol(1,md.nofcomponents,1,md.nofcomponents);
-                     Matrix polICIC(1,md.nofcomponents,1,md.nofcomponents);
-                     Matrix polICn(1,md.nofcomponents,1,md.nofcomponents);
-                     Matrix polnIC(1,md.nofcomponents,1,md.nofcomponents);
+                     Matrix pol(1,3,1,3);
+                     
 #else
                   // Populates the thread data structure
-                  thrdat.ev_real  = new mfcf*[NUM_THREADS];          thrdat.ev_imag  = new mfcf*[NUM_THREADS];
                   thrdat.qee_real = new mfcf*[NUM_THREADS];          thrdat.qee_imag = new mfcf*[NUM_THREADS];
                   thrdat.qsd_real = new mfcf*[NUM_THREADS];          thrdat.qsd_imag = new mfcf*[NUM_THREADS];
                   thrdat.qod_real = new mfcf*[NUM_THREADS];          thrdat.qod_imag = new mfcf*[NUM_THREADS];
@@ -1141,8 +1154,7 @@ diffint=0;diffintbey=0;
                   thrdat.qes_real = new mfcf*[NUM_THREADS];          thrdat.qes_imag = new mfcf*[NUM_THREADS];
                   thrdat.qel_real = new mfcf*[NUM_THREADS];          thrdat.qel_imag = new mfcf*[NUM_THREADS];
                   thrdat.chi      = new ComplexMatrix*[NUM_THREADS]; thrdat.chibey   = new ComplexMatrix*[NUM_THREADS];
-                  thrdat.pol      = new Matrix*[NUM_THREADS];        thrdat.polICIC  = new Matrix*[NUM_THREADS];
-                  thrdat.polICn   = new Matrix*[NUM_THREADS];        thrdat.polnIC   = new Matrix*[NUM_THREADS];
+                  thrdat.pol      = new Matrix*[NUM_THREADS];        
                   thrdat.Echargedensity       = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Espindensity       = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Eorbmomdensity       = new ComplexMatrix*[NUM_THREADS]; 
@@ -1155,13 +1167,10 @@ diffint=0;diffintbey=0;
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
                      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,En);
-                     thrdat.chi[ithread] = new ComplexMatrix(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-                     thrdat.chibey[ithread] = new ComplexMatrix(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-                     thrdat.pol[ithread] = new Matrix(1,md.nofcomponents,1,md.nofcomponents);
-                     thrdat.polICIC[ithread] = new Matrix(1,md.nofcomponents,1,md.nofcomponents);
-                     thrdat.polICn[ithread] = new Matrix(1,md.nofcomponents,1,md.nofcomponents);
-                     thrdat.polnIC[ithread] = new Matrix(1,md.nofcomponents,1,md.nofcomponents);
-                     thrdat.ev_real[ithread] = new mfcf(ini.mf); thrdat.ev_imag[ithread] = new mfcf(ini.mf);
+                     thrdat.chi[ithread] = new ComplexMatrix(1,3*dimA,1,3*dimA);
+                     thrdat.chibey[ithread] = new ComplexMatrix(1,3*dimA,1,3*dimA);
+                     thrdat.pol[ithread] = new Matrix(1,3,1,3);
+                     
 
                      thrdat.qee_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
                      thrdat.qee_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
@@ -1227,8 +1236,6 @@ diffint=0;diffintbey=0;
                      #else
                      WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
                      #endif
-                     #define ev_real (*thrdat.ev_real[ithread])
-                     #define ev_imag (*thrdat.ev_imag[ithread])
                      #define qee_real (*thrdat.qee_real[ithread])
                      #define qee_imag (*thrdat.qee_imag[ithread])
                      #define qsd_real (*thrdat.qsd_real[ithread])
@@ -1254,8 +1261,7 @@ diffint=0;diffintbey=0;
                      if(do_gobeyond==0){intsbey(i)=-1.1;}else{intsbey(i)=+1.1;}
                      if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                      {
-                     ints(i)=intcalc_approx(chi,chibey,pol,polICIC,polICn,polnIC,
-                                            intsbey(i),ev_real,ev_imag,
+                     ints(i)=intcalc_approx(chi,chibey,pol,intsbey(i),
                                             qee_real,qee_imag,Echargedensity,
                                             qsd_real,qsd_imag,Espindensity,
                                             qod_real,qod_imag,Eorbmomdensity,
@@ -1313,13 +1319,6 @@ diffint=0;diffintbey=0;
                                          myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),qincr);
                      // printout eigenvectors only if evaluated during intensity calculation...
                   if(ints(i)>-1){
-                     fprintf (foutqev, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
-                     fprintf (foutqev, "#eigenvector real part\n");
-                     ev_real.print(foutqev); // here we printout the eigenvector of the excitation
-                     fprintf (foutqev, "#eigenvector imaginary part\n");
-                     ev_imag.print(foutqev); // 
-                     fprintf (foutqev, "#\n");
 
 if(ini.calculate_chargedensity_oscillation)print_ev(foutqee,i,ini,hkl,QQ,En,ints,intsbey,qee_real,qee_imag);
 if(ini.calculate_spindensity_oscillation)print_ev(foutqsd,i,ini,hkl,QQ,En,ints,intsbey,qsd_real,qsd_imag);
@@ -1337,8 +1336,6 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
 #endif
 		   }
 #ifdef _THREADS
-                  #undef ev_real
-                  #undef ev_imag
                   #undef qee_real
                   #undef qee_imag
                   #undef qsd_real
@@ -1356,8 +1353,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
                      delete thrdat.chi[ithread]; delete thrdat.chibey[ithread]; 
-                     delete thrdat.pol[ithread]; delete thrdat.polICIC[ithread]; delete thrdat.polICn[ithread]; delete thrdat.polnIC[ithread];
-                     delete thrdat.ev_real[ithread]; delete thrdat.ev_imag[ithread];
+                     delete thrdat.pol[ithread]; 
                      delete thrdat.qee_real[ithread]; delete thrdat.qee_imag[ithread];delete thrdat.Echargedensity[ithread]; 
                      delete thrdat.qsd_real[ithread]; delete thrdat.qsd_imag[ithread];delete thrdat.Espindensity[ithread]; 
                      delete thrdat.qod_real[ithread]; delete thrdat.qod_imag[ithread];delete thrdat.Eorbmomdensity[ithread]; 
@@ -1376,8 +1372,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.Eorbmom;  
                   delete[] thrdat.Tau;
                   delete[] thrdat.chi; delete[] thrdat.chibey;
-                  delete[] thrdat.pol; delete[] thrdat.polICIC; delete[] thrdat.polICn; delete[] thrdat.polnIC;
-                  delete[] thrdat.ev_real; delete[] thrdat.ev_imag; 
+                  delete[] thrdat.pol; 
                   delete[] thrdat.qee_real; delete[] thrdat.qee_imag; 
                   delete[] thrdat.qsd_real; delete[] thrdat.qsd_imag; 
                   delete[] thrdat.qod_real; delete[] thrdat.qod_imag; 
@@ -1582,7 +1577,6 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
       staout(stdout,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
 
     fclose(foutqei);
-    fclose(foutqev);
 
                         if(ini.calculate_chargedensity_oscillation)fclose(foutqee);
                         if(ini.calculate_spindensity_oscillation)fclose(foutqsd);
@@ -1680,7 +1674,6 @@ dispcalc(ini,inputpars,calc_fast,calc_beyond,do_Erefine,do_jqfile,do_createtrs,d
  printf("RESULTS saved in directory ./results/  - files:\n");
    printf("  mcdisp.qei  - T,H,qvector vs energies and neutron intensities\n");
    printf("  mcdisp.qom  - T,H,qvector vs all mode energies in one line (and neutron intensities)\n");
-   printf("  mcdisp.qev  - T,H,qvector,E vs eigenvectors\n");
    printf("  mcdisp.qee,qsd,qod,qep,qem,qes,qel  - T,H,qvector,E vs extended eigenvectors (more components to plot observables.)\n");
    printf("  mcdisp.dsigma.tot  - T,H,qvector vs total intensity (sum of all modes)\n");
    printf("  mcdisp.dsigma      - (option -r) T,H,qvector,E vs intensity obtained from dyn susz\n");

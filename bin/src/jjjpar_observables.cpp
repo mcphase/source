@@ -80,7 +80,8 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
            nnt=(*iops).cfielddm(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
    case 3: return gJ*brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);break;
-  default:fprintf(stderr,"Problem: dm1calc in internal module cluster not implemented, continuing ... \n");
+   case 5:fprintf(stderr,"Problem: dm1calc in internal module cluster not implemented, continuing ... \n");break;
+  default:fprintf(stderr,"Problem: dm1calc in internal module ... not implemented, continuing ... \n");
           break;
    }
 return 0;
@@ -454,6 +455,38 @@ long double jjjpar::cn(int n,int N,long double x)    // Need real part
          complex <double> c(x,-1.0); return (long double)(factorial((double)(N-n))*imag(pow(c,-N+n-1.)));
     }
  }
+
+// formfactor information print to fout
+void jjjpar::FFinfo(FILE * fout) // has to be consistent with mcdisp_intcalc settings FF_type
+                                 // and mcdiff settings of FF_type
+{ if(FF_type!=0){
+  switch(FF_type)
+   {case 1: fprintf(fout,"no contribution to magnetic neutron intensity Imag");break;
+    case -1: fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, no contribution to Imag_dip for this ion, FF coefficients:");break;
+    case 3: fprintf(fout,"contribution to magnetic n-intensity Imag calc. in dip approx:  <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients:");break;
+    case -3: fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with:  <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients:");break;
+    case 2: if(gJ!=0){fprintf(fout,"contribution to magnetic n-intensity Imag calc. in dip approx: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
+            else {fprintf(fout,"contribution to magnetic n-intensity Imag calc. in dip approx: <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
+            break;
+    case -2: if(gJ!=0){fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
+            else {fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with: <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
+            break;
+    default: fprintf(stderr,"Error: inconsistency in formfactor calculation\n"); exit(1);
+   }
+
+  if(FF_type!=1){  
+  if(Np(1)!=0){
+  fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",sipffilename,jl_lmax);
+  }
+  else
+  {
+  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",magFFj0(j));}
+  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",magFFj2(j));}
+  }                }
+    }
+  fprintf(fout, "\n");
+}
+
 
 #define DIV4PI 0.07957747154594766788444  // Value of 1/4/PI to save some computation time avoiding division
 
