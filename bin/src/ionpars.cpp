@@ -468,13 +468,13 @@ if (pr==1) {printf("#using %s ...\n",moduletype);
 
   &dimj,&alpha,&beta,&gamma,&gJ,&r2,&r4,&r6, &nof_electrons);
 
-if(fabs(alphar-alpha)/fabs(alphar+1)>SMALL) {fprintf(stderr,"Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using internal value\n",moduletype,alpha,alphar);}
-if(fabs(betar-beta)/fabs(betar+1)>SMALL) {fprintf(stderr,"Warning module %s internal value for Stevens Parameter (beta=%g) different from input file (beta=%g), using internal value\n",moduletype,beta,betar);}
-if(fabs(gammar-gamma)/fabs(gammar+1)>SMALL) {fprintf(stderr,"Warning module %s internal value for Stevens Parameter (gamma=%g) different from input file (gamma=%g), using internal value\n",moduletype,gamma,gammar);}
-if(fabs(gJr-gJ)/fabs(gJr+1)>SMALL) {fprintf(stderr,"Warning module %s internal value for Lande Factor (gJ=%g) different from input file (gJ=%g), using internal value\n",moduletype,gJ,gJr);}
-if(fabs(r2r-r2)/fabs(r2r+1)>SMALL) {fprintf(stderr,"Warning module %s internal value for radial Matrix element (<r2>=%g) different from input file (<r2>=%g), using internal value\n",moduletype,r2,r2r);}
-if(fabs(r4r-r4)/fabs(r4r+1)>SMALL) {fprintf(stderr,"Warning module %s internal value for radial Matrix element (<r4>=%g) different from input file (<r4>=%g), using internal value\n",moduletype,r4,r4r);}
-if(fabs(r6r-r6)/fabs(r6r+1)>SMALL) {fprintf(stderr,"Warning module %s internal value for radial Matrix element (<r6>=%g) different from input file (<r6>=%g), using internal value\n",moduletype,r6,r6r);}
+if(fabs(alphar-alpha)/fabs(alphar+1)>SMALL) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using internal value\n",moduletype,alpha,alphar);}
+if(fabs(betar-beta)/fabs(betar+1)>SMALL) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (beta=%g) different from input file (beta=%g), using internal value\n",moduletype,beta,betar);}
+if(fabs(gammar-gamma)/fabs(gammar+1)>SMALL) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (gamma=%g) different from input file (gamma=%g), using internal value\n",moduletype,gamma,gammar);}
+if(fabs(gJr-gJ)/fabs(gJr+1)>SMALL) {fprintf(stderr,"#Warning module %s internal value for Lande Factor (gJ=%g) different from input file (gJ=%g), using internal value\n",moduletype,gJ,gJr);}
+if(fabs(r2r-r2)/fabs(r2r+1)>SMALL) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r2>=%g) different from input file (<r2>=%g), using internal value\n",moduletype,r2,r2r);}
+if(fabs(r4r-r4)/fabs(r4r+1)>SMALL) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r4>=%g) different from input file (<r4>=%g), using internal value\n",moduletype,r4,r4r);}
+if(fabs(r6r-r6)/fabs(r6r+1)>SMALL) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r6>=%g) different from input file (<r6>=%g), using internal value\n",moduletype,r6,r6r);}
 
 if (pr==1) printf("#end using %s\n",moduletype);
 
@@ -625,17 +625,17 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
 // here transform the Llm (if present) to Blm ...
 Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
 
-   fprintf(stderr,"crystal field parameters:\n");  
+   fprintf(stderr,"#crystal field parameters:\n");  
    const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 ";
    char lm4[5];lm4[4]='\0';
    for(i=0;i<=48;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
-                     if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
+                     if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"#Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
                                   double BlIcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){BlIcalc*=sqrt(2.0);}
-                                  if((Blm(i)!=0)&(fabs(Blm(i)-BlIcalc)/(fabs(BlIcalc)+1e-14)>0.001)){fprintf(stderr,"Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond ! \npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i));getchar();}
+                                  if((Blm(i)!=0)&(fabs(Blm(i)-BlIcalc)/(fabs(BlIcalc)+1e-14)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond ! \npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i));getchar();}
                                   Blm(i)=BlIcalc;// here set the Blm as calculated from the Llm
                                   }
-                     if(Blm(i)!=0){fprintf(stderr," %s=%12.6g meV ",lm4,Blm(i));
+                     if(Blm(i)!=0){fprintf(stderr,"#! %s=%12.6g meV ",lm4,Blm(i));
                                    if(i<=45){if((l!=3)&(l!=5)){Llm(i)=Blm(i)/thetaJ(l)/cnst(l,m)/sqrt(4.0*PI/(2*l+1));if(m!=0){Llm(i)/=sqrt(2.0);}
                                                  lm4[0]='L';fprintf(stderr,"<-> %s=%12.6g meV",lm4,Llm(i));}
                                                 else
@@ -667,19 +667,19 @@ if(so1ion==0)
  printf("#xyz .... Coordinate system of the crystal field parameters used in cfield\n");
  printf("#abc .... Crystal axes\n");
  printf("#The interactions are described by the  PKQ Operators defined in cfield\n");
- printf("#O11(s) .... Ja=Jy\n");
- printf("#O10(c) .... Jb=Jz\n");
- printf("#O11(c) .... Jc=Jx\n");
- printf("#O22(s) .... Jd\n");
- printf("#O21(s) .... Je\n");
- printf("#O20(c) .... Jf\n");
- printf("#O21(c) .... Jg\n");
- printf("#O22(c) .... Jh\n");
- printf("#O33(s) .... Ji\n");
- printf("#O32(s) .... Jj\n");
- printf("#O31(s) .... Jk\n");
- printf("#O30(c) .... Jl\n");
- printf("#O31(c) .... Jm\n");
+ printf("#O11(s) .... Ia=Jy\n");
+ printf("#O10(c) .... Ib=Jz\n");
+ printf("#O11(c) .... Ic=Jx\n");
+ printf("#O22(s) .... Id\n");
+ printf("#O21(s) .... Ie\n");
+ printf("#O20(c) .... If\n");
+ printf("#O21(c) .... Ig\n");
+ printf("#O22(c) .... Ih\n");
+ printf("#O33(s) .... Ii\n");
+ printf("#O32(s) .... Ij\n");
+ printf("#O31(s) .... Ik\n");
+ printf("#O30(c) .... Il\n");
+ printf("#O31(c) .... Im\n");
  printf("# etc ... 45 moments up to l<=6\n");
  printf("#\n");
              }
@@ -690,19 +690,19 @@ if(so1ion==0)
  printf("#xyz .... Coordinate system of the crystal field parameters used in so1ion\n");
  printf("#abc .... Crystal axes\n");
  printf("#The interactions are described by the  PKQ Operators defined in so1ion\n");
- printf("#O11(s) .... Ja=Jx\n");
- printf("#O10(c) .... Jb=Jy\n");
- printf("#O11(c) .... Jc=Jz\n");
- printf("#O22(s) .... Jd\n");
- printf("#O21(s) .... Je\n");
- printf("#O20(c) .... Jf\n");
- printf("#O21(c) .... Jg\n");
- printf("#O22(c) .... Jh\n");
- printf("#O33(s) .... Ji\n");
- printf("#O32(s) .... Jj\n");
- printf("#O31(s) .... Jk\n");
- printf("#O30(c) .... Jl\n");
- printf("#O31(c) .... Jm\n");
+ printf("#O11(s) .... Ia=Jx\n");
+ printf("#O10(c) .... Ib=Jy\n");
+ printf("#O11(c) .... Ic=Jz\n");
+ printf("#O22(s) .... Id\n");
+ printf("#O21(s) .... Ie\n");
+ printf("#O20(c) .... If\n");
+ printf("#O21(c) .... Ig\n");
+ printf("#O22(c) .... Ih\n");
+ printf("#O33(s) .... Ii\n");
+ printf("#O32(s) .... Ij\n");
+ printf("#O31(s) .... Ik\n");
+ printf("#O30(c) .... Il\n");
+ printf("#O31(c) .... Im\n");
  printf("# etc ... 45 moments up to l<=6\n");
  printf("#\n");
              }
@@ -1573,7 +1573,7 @@ exit(0);
     
    // calculate Z and wn (occupation probability)
      Vector wn(1,dj);double Zs;
-     double x,y;int i,k,l;
+     double x,y;int i,l;
      x=Min(En);
      for (i=1;i<=dj;++i)
      {if ((y=(En(i)-x)/KB/T)<700) wn[i]=exp(-y); 
@@ -1592,21 +1592,32 @@ exit(0);
      ComplexMatrix z(1,dj,1,dj);
      ComplexMatrix ** zp;
      zp=new ComplexMatrix*[28+1];
-     Vector expval(1,28);
      for(l=1;l<=28;++l)
       {zp[l]= new ComplexMatrix(1,dj,1,dj);}
      z=ComplexMatrix(zr,zi);
      (*zp[1])=0;
-     for(j=2;j<=6;++j){(*zp[j])=(*OOlm[j-1])*z;}
-     for(j=7;j<=15;++j){(*zp[j])=(*OOlm[j-1+7])*z;}
-     for(j=16;j<=28;++j){(*zp[j])=(*OOlm[j-1+7+11])*z;}
-     
+// a(0, 0) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
+// Indices for chargedensity
+//            0 not used
+//          0 1  2  3 4 5 6  7  8  9 101112131415 16 17 18 19 20 2122232425262728 
+int k[] = {-1,0, 2, 2,2,2,2, 4, 4, 4, 4,4,4,4,4,4, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+
+     for(j=2;j<=6;++j){(*zp[j])=alpha*cnst(k[j],q[j])*(*OOlm[j-1])*z;}
+     for(j=7;j<=15;++j){(*zp[j])=beta*cnst(k[j],q[j])*(*OOlm[j-1+7])*z;}
+     for(j=16;j<=28;++j){(*zp[j])=gamma*cnst(k[j],q[j])*(*OOlm[j-1+7+11])*z;}
+
+     // theta_J*cnst(l,m)  are prefactors to get coefficients of Zlm*R(r)^2 
+    //in case of module cfield and so1ion(stevens parameters tetan and zlm prefactors)
+  
+
+   
 // calculate mat and delta for transition number tn
 // 1. get i and j from tn
-k=0;
+int kk=0;
 for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
-{++k;if(k==tn)break;
-}if(k==tn)break;}
+{++kk;if(kk==tn)break;
+}if(kk==tn)break;}
 
 // 2. set delta
 delta=En(j)-En(i);
@@ -1624,14 +1635,14 @@ for(l=1;l<=28;++l)
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",i,j,abs(cd1(1))*abs(cd1(1)),i,j,abs(cd1(2))*abs(cd1(2)),i,j,abs(cd1(3))*abs(cd1(3)));
+      for(l=1;l<=28;++l)printf(" |<%i|cd_coeff%i|%i>|^2=%4.4g ",i,l,j,abs(cd1(l))*abs(cd1(l)));
       printf(" n%i-n%i=%4.4g\n",i,j,wn(i)-wn(j));}
     cd1*=sqrt(wn(i)-wn(j)); // occupation factor
      }else
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",i,j,abs(cd1(1))*abs(cd1(1)),i,j,abs(cd1(2))*abs(cd1(2)),i,j,abs(cd1(3))*abs(cd1(3)));
+      for(l=1;l<=28;++l)printf(" |<%i|cd_coeff%i-<cd_coeff%i>|%i>|^2=%4.4g ",i,l,l,j,abs(cd1(l))*abs(cd1(l)));
       printf(" n%i=%4.4g\n",i,wn(i));}
     cd1*=sqrt(wn(i)/KB/T);
    }

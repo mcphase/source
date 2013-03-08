@@ -91,6 +91,7 @@ gp.scale_view_2=1.0;
 gp.scale_view_3=1.0;
 gp.spins_scale_moment=0;
 gp.show_density=0;
+sprintf(gp.title,"output of program spins");
 
  // check command line
  if (argc < 5){help_and_exit();}
@@ -178,9 +179,12 @@ break;
   doijk=3;
                                      }
 
-if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;arrowdim=SPIN_EV_DIM;gp.spins_colour=3; gp.spins_scale_moment=1;}
-else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;arrowdim=ORBMOM_EV_DIM;gp.spins_colour=2; gp.spins_scale_moment=1;}
-else if(strcmp(argv[1+os],"-M")==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_colour=1; gp.spins_scale_moment=1;}
+if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;arrowdim=SPIN_EV_DIM;gp.spins_colour=3; gp.spins_scale_moment=1;
+                              sprintf(gp.title,"%s arrows correspond to the spins",gp.title);}
+else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;arrowdim=ORBMOM_EV_DIM;gp.spins_colour=2; gp.spins_scale_moment=1;
+                                   sprintf(gp.title,"%s arrows correspond to the orbital angular momenta",gp.title);}
+else if(strcmp(argv[1+os],"-M")==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_colour=1; gp.spins_scale_moment=1;
+                                   sprintf(gp.title,"%s arrows correspond to the magnetic moments",gp.title);}
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;dophon=1;}
 
@@ -205,7 +209,7 @@ gp.read();
   par inputpars("./mcphas.j");
 
   Vector hh(1,savmf.nofcomponents*savmf.nofatoms);
-  spincf extendedspincf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,dim);
+  spincf densitycf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,dim);
   spincf spinconf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,3);
 
 
@@ -228,7 +232,7 @@ hh=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
     hh=savmf.m(i,j,k);
-  extendedspincf.m(i,j,k)=0;
+  densitycf.m(i,j,k)=0;
   for(ii=1;ii<=inputpars.nofatoms;++ii)
  {  Vector h(1,savmf.nofcomponents);
     Vector moms(1,savmf.nofcomponents);
@@ -316,7 +320,7 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
  default: help_and_exit();
 }
                    for(nt=1;nt<=dim;++nt)
-		        {extendedspincf.m(i,j,k)(nt+dim*(ii-1))=moments(nt);
+		        {densitycf.m(i,j,k)(nt+dim*(ii-1))=moments(nt);
                     }
 } // gp.show_density
 
@@ -324,7 +328,9 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
   fclose (fout);
   
 // create plot of spinconfiguration -----------------------------------------------------------
-  printf("#%s\n",gp.title);
+printf("# ************************************************************************\n");
+printf("#%s\n",gp.title);
+printf("# ************************************************************************\n");
 
     fin = fopen_errchk ("./results/spins.eps", "w");
      savmf.eps(fin,outstr);
@@ -362,8 +368,8 @@ Vector gJJ(1,n); for (i=1;i<=n;++i){gJJ(i)=cs.gJ[i];}
 
              Vector hkl(1,3);hkl=0;
              Vector gjmbHxc(1,3);gjmbHxc=0;
-             spincf savev_real(extendedspincf*0.0);
-             spincf savev_imag(extendedspincf*0.0);
+             spincf densityev_real(densitycf*0.0);
+             spincf densityev_imag(densitycf*0.0);
              spincf spinconfev_real(spinconf*0.0);
              spincf spinconfev_imag(spinconf*0.0);
             // to do jvx output of static structure put zeros into these spinconfigurations
@@ -371,13 +377,13 @@ Vector gJJ(1,n); for (i=1;i<=n;++i){gJJ(i)=cs.gJ[i];}
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins.jvx", "w");
     gp.showprim=0;gp.spins_wave_amplitude=0;
-     extendedspincf.jvx_cd(fin,outstr,cs,gp,0.0,savev_real,savev_imag,hkl,T,gjmbHxc,Hext,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,spinconf,spinconfev_real,spinconfev_imag);
     fclose (fin);
 
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins_prim.jvx", "w");
      gp.showprim=1;
-     extendedspincf.jvx_cd(fin,outstr,cs,gp,0.0,savev_real,savev_imag,hkl,T,gjmbHxc,Hext,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,spinconf,spinconfev_real,spinconfev_imag);
     fclose (fin);
 
 //***************************************************************************************************************
@@ -484,8 +490,8 @@ if (argc-os>=6){
 		    ;)
 
                { fgets(instr,MAXNOFCHARINLINE,fin); 
-                 spincf ev_real(extendedspincf.na(),extendedspincf.nb(),extendedspincf.nc(),extendedspincf.nofatoms,extended_eigenvector_dimension);
-                 spincf ev_imag(extendedspincf.na(),extendedspincf.nb(),extendedspincf.nc(),extendedspincf.nofatoms,extended_eigenvector_dimension);
+                 spincf ev_real(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
+                 spincf ev_imag(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
                  ev_real.load(fin);ev_imag.load(fin);
                  ddT=strtod(argv[1+os],NULL)-numbers[4];ddT*=ddT;
                  ddHa=strtod(argv[2+os],NULL)-numbers[1];ddHa*=ddHa;
@@ -501,18 +507,18 @@ if (argc-os>=6){
                  {delta=dd;
                   sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
                   hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9]; 
-                  savev_real=ev_real;
-                  savev_imag=ev_imag;                  
+                  densityev_real=ev_real;
+                  densityev_imag=ev_imag;                  
                  }
                }
               fclose (fin);
-              }//gp.show_density
-//----------------------------------------------------------------------------------------------------------
-              fprintf(stdout,"#%s - eigenvector\n",outstr);
+              fprintf(stdout,"#%s - density oscillation - eigenvector\n",outstr);
               fprintf(stdout,"#real\n");
-              savev_real.print(stdout);
+              densityev_real.print(stdout);
               fprintf(stdout,"#imag\n");
-              savev_imag.print(stdout);
+              densityev_imag.print(stdout);
+             }//gp.show_density
+//----------------------------------------------------------------------------------------------------------           
               gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.set
                         // in case he wants to overwrite some default settings
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
@@ -527,13 +533,13 @@ if (argc-os>=6){
                char filename[MAXNOFCHARINLINE];
                sprintf(filename,"./results/spins.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=0;
-                     extendedspincf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,savev_real,savev_imag,hkl,T,hh,Hext,spinconf,spinconfev_real,spinconfev_imag);
+                     densitycf.jvx_cd(fin,outstr,cs,gp,
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,spinconf,spinconfev_real,spinconfev_imag);
                fclose (fin);
                sprintf(filename,"./results/spins_prim.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=1;
-                     extendedspincf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,savev_real,savev_imag,hkl,T,hh,Hext,spinconf,spinconfev_real,spinconfev_imag);
+                     densitycf.jvx_cd(fin,outstr,cs,gp,
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,spinconf,spinconfev_real,spinconfev_imag);
                fclose (fin);
               }
           printf("# %s\n",outstr);

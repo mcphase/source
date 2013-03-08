@@ -660,31 +660,31 @@ for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii
 if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with eigenvector dimension for observable=%i\n",i,j,k,l,CHARGEDENS_EV_DIM);}
 //-----------------------------------------------------------------------------------
 if(ini.calculate_chargedensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;chargedensity_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,d,md.est(i,j,k,l))==0)
+   if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,d,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,inputpars,chargedensity_Mijkl,md,
              chargedensity_gamma,chargedensity_gamman,chargedensity_Uijkl,maxiter,nn,ini, gamma,Echargedensity);}
 if(ini.calculate_spindensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;spindensity_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,d,md.est(i,j,k,l))==0)
+   if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,d,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,inputpars,spindensity_Mijkl,md,
              spindensity_gamma,spindensity_gamman,spindensity_Uijkl,maxiter,nn,ini, gamma,Espindensity);}
 if(ini.calculate_orbmomdensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;orbmomdensity_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,d,md.est(i,j,k,l))==0)
+   if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,d,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,inputpars,orbmomdensity_Mijkl,md,
              orbmomdensity_gamma,orbmomdensity_gamman,orbmomdensity_Uijkl,maxiter,nn,ini, gamma,Eorbmomdensity);}
 if(ini.calculate_phonon_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;phonon_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dp1calc(ini.T,mf,ini.Hext,phonon_coeff1,d,md.est(i,j,k,l))==0)
+   if((*inputpars.jjj[l]).dp1calc(ini.T,mf,ini.Hext,phonon_coeff1,d,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,inputpars,phonon_Mijkl,md,
              phonon_gamma,phonon_gamman,phonon_Uijkl,maxiter,nn,ini, gamma,Ephonon);}
 if(ini.calculate_magmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;magmom_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,d,md.est(i,j,k,l))==0)
+   if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,d,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,inputpars,magmom_Mijkl,md,
              magmom_gamma,magmom_gamman,magmom_Uijkl,maxiter,nn,ini, gamma,Emagmom);}
 if(ini.calculate_spinmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;spin_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,d,md.est(i,j,k,l))==0)
+   if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,d,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,inputpars,spin_Mijkl,md,
              spin_gamma,spin_gamman,spin_Uijkl,maxiter,nn,ini, gamma,Espin);}
 if(ini.calculate_orbmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;orbmom_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,orbmom_coeff1,d,md.est(i,j,k,l))==0)
+   if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,orbmom_coeff1,d,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,ORBMOM_EV_DIM,orbmom_coeff1,inputpars,orbmom_Mijkl,md,
              orbmom_gamma,orbmom_gamman,orbmom_Uijkl,maxiter,nn,ini, gamma,Eorbmom);}
 //----------------------------------------------------------------------------------------------
@@ -738,15 +738,6 @@ if (do_jqfile==0)
 { printf("#saving mcdisp.qom and mcdisp.qei\n");
   fout = fopen_errchk ("./results/mcdisp.qom",filemode);
   foutqei = fopen_errchk ("./results/mcdisp.qei",filemode);
-  //------------observables-----------------------------------
-if(ini.calculate_chargedensity_oscillation)foutqee=evfileinit(filemode,"./results/mcdisp.qee",inputpars,"qee",CHARGEDENS_EV_DIM);
-if(ini.calculate_spindensity_oscillation)foutqsd=evfileinit(filemode,"./results/mcdisp.qsd",inputpars,"qsd",SPINDENS_EV_DIM);
-if(ini.calculate_orbmomdensity_oscillation)foutqod=evfileinit(filemode,"./results/mcdisp.qod",inputpars,"qod",ORBMOMDENS_EV_DIM);
-if(ini.calculate_phonon_oscillation)foutqep=evfileinit(filemode,"./results/mcdisp.qep",inputpars,"qep",PHONON_EV_DIM);
-if(ini.calculate_magmoment_oscillation)foutqem=evfileinit(filemode,"./results/mcdisp.qem",inputpars,"qem",MAGMOM_EV_DIM);
-if(ini.calculate_spinmoment_oscillation)foutqes=evfileinit(filemode,"./results/mcdisp.qes",inputpars,"qes",SPIN_EV_DIM);
-if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mcdisp.qel",inputpars,"qel",ORBMOM_EV_DIM);
-  //-----------------------------------------------------------
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
   printf("#saving mcdisp.dsigma.tot\n");
 
@@ -1087,16 +1078,15 @@ if (do_jqfile==1){
                    writeheader(inputpars,foutqei);
                    fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.] Imag [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)}\n");
 
-                        if(ini.calculate_chargedensity_oscillation)writeheader(inputpars,foutqee);
-                        if(ini.calculate_spindensity_oscillation)writeheader(inputpars,foutqsd);
-                        if(ini.calculate_orbmomdensity_oscillation)writeheader(inputpars,foutqod);
-                        if(ini.calculate_phonon_oscillation)writeheader(inputpars,foutqep);
-                        if(ini.calculate_magmoment_oscillation)writeheader(inputpars,foutqem);
-                        if(ini.calculate_spinmoment_oscillation)writeheader(inputpars,foutqes);
-                        if(ini.calculate_orbmoment_oscillation)writeheader(inputpars,foutqel);
-
-
-
+  //------------observables-----------------------------------
+if(ini.calculate_chargedensity_oscillation)foutqee=evfileinit(filemode,"./results/mcdisp.qee",inputpars,"qee",CHARGEDENS_EV_DIM);
+if(ini.calculate_spindensity_oscillation)foutqsd=evfileinit(filemode,"./results/mcdisp.qsd",inputpars,"qsd",SPINDENS_EV_DIM);
+if(ini.calculate_orbmomdensity_oscillation)foutqod=evfileinit(filemode,"./results/mcdisp.qod",inputpars,"qod",ORBMOMDENS_EV_DIM);
+if(ini.calculate_phonon_oscillation)foutqep=evfileinit(filemode,"./results/mcdisp.qep",inputpars,"qep",PHONON_EV_DIM);
+if(ini.calculate_magmoment_oscillation)foutqem=evfileinit(filemode,"./results/mcdisp.qem",inputpars,"qem",MAGMOM_EV_DIM);
+if(ini.calculate_spinmoment_oscillation)foutqes=evfileinit(filemode,"./results/mcdisp.qes",inputpars,"qes",SPIN_EV_DIM);
+if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mcdisp.qel",inputpars,"qel",ORBMOM_EV_DIM);
+  //-----------------------------------------------------------
                         fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
                         writeheader(inputpars,foutdstot);
                         fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)}",ini.emin,ini.emax);

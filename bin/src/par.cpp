@@ -93,7 +93,7 @@ par::par (const char *filejjj)
   if  (ferror(fin_coq)==1)
   {fprintf(stderr,"ERROR Reading file %s\n",filejjj);exit(1);}
   fclose (fin_coq);
-  fprintf(stderr,"Finished Reading file %s\n",filejjj);
+  fprintf(stderr,"#Finished Reading file %s\n",filejjj);
 }
 
 //kopier-konstruktor

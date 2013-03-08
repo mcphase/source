@@ -38,11 +38,10 @@ void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observa
 {complex<double> imaginary(0,1);  int sort;
     // here we if required calculate the higher dimension matrix used to do the
        // extension of chi to higher value of (uncoupled) nofcomponents in intcalc_approx ... needed for observablefluctuations, extended eigenvectors ...
-          {observable_coeff1=0;observable_coeff1(1)=1e-10;}
+       //   {observable_coeff1=0;observable_coeff1(1)=1e-10;}
           observable_Mijkl = observable_coeff1^observable_coeff1;observable_gamman=Norm2(observable_coeff1);observable_coeff1/=sqrt(observable_gamman);
           myEigenSystemHermitean (observable_Mijkl,observable_gamma,observable_Uijkl,sort=1,maxiter);
-          if (fabs(observable_gamman-observable_gamma(ev_dim))>SMALL){fprintf(stderr,"ERROR eigenvalue of extended single ion matrix extM inconsistent: analytic value gamma= %g numerical diagonalisation of extM gives gamma= %g\n",observable_gamman,observable_gamma(ev_dim));
-                           exit(EXIT_FAILURE);}
+          if (fabs(observable_gamman-observable_gamma(ev_dim))>SMALL){fprintf(stderr,"WARNING eigenvalue of extended single ion matrix observable_Mijkl inconsistent: analytic value gamma= %g numerical diagonalisation of extM gives gamma= %g\n",observable_gamman,observable_gamma(ev_dim));}
           for(int ii=observable_Uijkl.Rlo(); ii<=observable_Uijkl.Rhi(); ii++){if (fabs(abs(observable_coeff1(ii))-abs(observable_Uijkl(ii,ev_dim)))>SMALL)
                                                 {fprintf(stderr,"ERROR eigenvector of extended single ion matrix M inconsistent\n");
                                                  myPrintComplexVector(stderr,observable_coeff1);observable_coeff1=observable_Uijkl.Column(ev_dim);myPrintComplexVector(stderr,observable_coeff1);exit(EXIT_FAILURE);}
@@ -54,7 +53,7 @@ void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observa
          complex <double> observable_gammas;
          if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL) 
                            // mind in manual the 1st dimension alpha=1 corresponds
-			   // to the nth dimension here, because myEigensystmHermitean
+			   // to the nth dimension here, because myEigensystemHermitean
 			   // sorts the eigenvalues according to ascending order !!!
                            {if (nn[6]>SMALL)
 			    {observable_gammas=sqrt(observable_gamma(ev_dim));}
@@ -70,17 +69,18 @@ void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observa
 			   }else 
                            {fprintf(stderr,"ERROR eigenvalue of single ion matrix <0: ev1=%g ev2=%g ev3=%g ... evn=%g\n",gamma(1),gamma(2),gamma(3),gamma(ini.nofcomponents));
                             exit(EXIT_FAILURE);}
-         //printf("observable_gamma %g %+g i\n",real(observable_gammas),imag(observable_gammas));
+        //printf("observable_gamma %g %+g i\n",real(observable_gammas),imag(observable_gammas));
         for(int k1=1;k1<=ev_dim;++k1){Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)=observable_gammas*observable_Uijkl(k1,ev_dim);}
 }
 
 FILE * evfileinit(const char * filemode,const char*filename,par & inputpars,const char * filetype,int ev_dim)
   {FILE * fout = fopen_errchk (filename,filemode);
-   writeheader(inputpars,fout);  fprintf(fout,"#!<--mcphas.mcdisp.%s-->\n",filetype);
+          fprintf(fout,"#!<--mcphas.mcdisp.%s-->\n",filetype);
           fprintf (fout, "#!spins_wave_amplitude=1.0\n");
           fprintf (fout, "#!spins_show_ellipses=1.0\n");
           fprintf (fout, "#!spins_show_static_moment_direction=1.0\n");
           fprintf (fout, "#!extended_eigenvector_dimension=%i\n",ev_dim); 
+          writeheader(inputpars,fout);
           fprintf (fout, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   return fout;
   }
