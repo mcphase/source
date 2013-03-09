@@ -149,12 +149,14 @@ testspincf::testspincf (const testspincf & p)
 
 //destruktor
 testspincf::~testspincf ()
-{int i;
+{//printf("hello destruktor testspin\n");  
+ int i;
  for (i=1;i<n;++i)
    {//  delete configuration i 
     delete configurations[i];
     }
 delete []configurations;
 delete []savfilename;
-}
+//printf("hello destruktor testspin\n");  
+ }
 

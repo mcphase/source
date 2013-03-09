@@ -685,7 +685,8 @@ int i1;
 
 //destruktor
 jjjpar::~jjjpar ()
-{  if(jij!=0)        delete []jij; //will not work in linux
+{// printf("hello destruktor jjjpar\n");  
+   if(jij!=0)        delete []jij; //will not work in linux
    if(dn!=0)         delete []dn;  // will not work in linux
    if(sublattice!=0) delete []sublattice;
    delete []sipffilename;// will not work in linux
@@ -695,6 +696,7 @@ jjjpar::~jjjpar ()
 //#ifdef __linux__
 // i#ifdef __linux__f (module_type==0)dlclose(handle);
 //#endif
+// printf("hello destruktor jjjpar\n");  
  
  }
 

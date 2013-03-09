@@ -103,6 +103,19 @@ if (gmh>0)
 //  printf ("Ha=%g Hb=%g Hc=%g ma=%g mb=%g mc=%g \n", H[1], H[2], H[3], m[1], m[2], m[3]);
 return;
 }
+
+#ifdef __MINGW32__
+extern "C" __declspec(dllexport) void mcalc(Vector & J,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
+                      ComplexMatrix & est)
+#else
+extern "C" void mcalc(Vector & J,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
+                      ComplexMatrix & est)
+#endif
+{double lnZ,U;
+ Icalc(J,T,gjmbHxc,Hext,g_J,ABC,sipffile,&lnZ,&U,est);
+ double GJ=2.0;
+ J*=GJ;
+}
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __MINGW32

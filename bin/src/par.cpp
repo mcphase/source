@@ -118,7 +118,8 @@ par::par(const par & p)
 
 //destruktor
 par::~par ()
-{  int i;
+{// printf("hello destruktor par\n"); 
+  int i;
   for(i=1;i<=3;++i)
   {delete []rems[i];}
   for(i=1;i<=nofatoms;++i)  

@@ -287,7 +287,8 @@ qvectors::qvectors (const qvectors & q)
 
 //destruktor
 qvectors::~qvectors ()
-{int k;
+{//printf("hello destruktor qvectors\n");  
+ int k;
  for (k=1;k<=nofqs();++k)
   {delete q0[k];delete n[k];delete nm[k];delete mq0[k];delete ph[k];
   }
@@ -296,4 +297,6 @@ qvectors::~qvectors ()
   delete []q0;delete []n;
   delete []nm;delete []mq0;delete []ph;
   delete []savfilename;
+//printf("hello destruktor qvectors\n");  
+ 
 }

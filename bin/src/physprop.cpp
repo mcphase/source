@@ -80,7 +80,11 @@ physproperties::physproperties (const physproperties & p)
 
 //destruktor
 physproperties::~physproperties ()
-{delete []jj;delete []hkli;}
+{//printf("hello destruktor physprop\n");  
+delete []jj;delete []hkli;
+//printf("hello destruktor physprop\n");  
+ 
+}
 
 void physproperties::update_maxnofhkls(int maxnofhkli)
 {delete []hkli;
@@ -326,9 +330,13 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
 
       }
    int * inew;inew=new int[nofhkls+1];float *intensity;intensity=new float[nofhkls+1];
+   if(inew==NULL){fprintf (stderr, "Out of memory for inew\n");exit (EXIT_FAILURE);}
+   if(intensity==NULL){fprintf (stderr, "Out of memory for intensity\n");exit (EXIT_FAILURE);}
+   //printf("nofhkls=%i\n",nofhkls);
    for (i=1;i<=nofhkls;++i) {intensity[i]=hkli[i](4);}
+  if (verbose==1)printf(" .... sorting hkl according to neutron intensities\n");
    sort(intensity,1,nofhkls,inew); // sort according to ascending intensity
-
+  if (verbose==1)printf(" .... saving mcphas.hkl\n");
   //neutrons
   fout = fopen_errchk ("./results/mcphas.hkl","a");fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
@@ -336,6 +344,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
     fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](4)));
     } fprintf(fout,"\n");
    fclose(fout);
+  if (verbose==1)printf(" .... saving mcphas*.hkl\n");
   //xray a component
       if(ortho==0){fout = fopen_errchk ("./results/mcphasi.hkl","a");
    }else{

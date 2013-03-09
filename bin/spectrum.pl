@@ -23,6 +23,8 @@ if ($#ARGV<2)
           hkl  ...... scattering vector (millerindices)
 	  filename... filename to be read (results/mcdisp.qom as default)
 
+   ouput: to stdout - energy vs intensity
+
 \n";
 exit(0);
 }
@@ -45,9 +47,8 @@ my (@file) = @ARGV;
 
  unless ($file[0])
 
-{$file[0] = "./results/mcdisp.qom";
+{$file[0] = "./results/mcdisp.qom";}
 
- print "using data from file ./results/mcdisp.qom\n";}
 
  
 
@@ -59,7 +60,9 @@ my (@file) = @ARGV;
 
     foreach(@file)
 
-    {my ($data,$Limits) = get_detector_data_2D($_);
+    { print "#using data from file ".$_."\n";
+      print "#E(meV) Imag[barn/sr/f.u.]\n";
+     my ($data,$Limits) = get_detector_data_2D($_);
 
     $int=$data->slice("$intcol,:");
 

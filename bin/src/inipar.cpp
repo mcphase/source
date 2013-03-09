@@ -248,4 +248,8 @@ inipar::inipar (const inipar & p)
 
 //destruktor
 inipar::~inipar ()
-{delete []savfilename;}
+{//printf("hello destruktor inipar\n");  
+ 
+delete []savfilename;
+//printf("hello destruktor inipar\n");  
+ }

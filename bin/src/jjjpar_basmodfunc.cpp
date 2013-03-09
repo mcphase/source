@@ -289,17 +289,17 @@ module_type=0;
 
   *(void **)(&cd_m)=dlsym(handle,"chargedensity_coeff");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);cd_m=NULL;}
-  *(void **)(&cd_dm)=dlsym(handle,"dchargedensity_coeff1")
+  *(void **)(&cd_dm)=dlsym(handle,"dchargedensity_coeff1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);cd_dm=NULL;}
 
   *(void **)(&sd_m)=dlsym(handle,"spindensity_coeff");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);sd_m=NULL;}
-  *(void **)(&sd_dm)=dlsym(handle,"dspindensity_coeff1")
+  *(void **)(&sd_dm)=dlsym(handle,"dspindensity_coeff1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);sd_dm=NULL;}
 
   *(void **)(&od_m)=dlsym(handle,"orbmomdensity_coeff");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);od_m=NULL;}
-  *(void **)(&od_dm)=dlsym(handle,"dorbmomdensity_coeff1")
+  *(void **)(&od_dm)=dlsym(handle,"dorbmomdensity_coeff1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);od_dm=NULL;}
 
   *(void **)(&ro_calc)=dlsym(handle,"ro_calc");

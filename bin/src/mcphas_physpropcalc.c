@@ -105,7 +105,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 
      // mq[n]=mq[0];
 
-  for(qh=0;qh<=mf.na();++qh){for(qk=0;qk<=mf.nb();++qk){for(ql=0;ql<=mf.nc();++ql)
+  j=0;for(qh=0;qh<=mf.na();++qh){for(qk=0;qk<=mf.nb();++qk){for(ql=0;ql<=mf.nc();++ql)
    {
       Vector q(1,3),hkl(1,3),Q(1,3);
       // this is q- Vector

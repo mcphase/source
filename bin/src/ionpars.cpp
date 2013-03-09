@@ -631,9 +631,9 @@ Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ
    for(i=0;i<=48;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"#Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
-                                  double BlIcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){BlIcalc*=sqrt(2.0);}
-                                  if((Blm(i)!=0)&(fabs(Blm(i)-BlIcalc)/(fabs(BlIcalc)+1e-14)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond ! \npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i));getchar();}
-                                  Blm(i)=BlIcalc;// here set the Blm as calculated from the Llm
+                                  double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
+                                  if((Blm(i)!=0)&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-14)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond !\n Will use Blm=%12.6g calculated from Llm.\npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i),Blmcalc);getchar();}
+                                  Blm(i)=Blmcalc;// here set the Blm as calculated from the Llm
                                   }
                      if(Blm(i)!=0){fprintf(stderr,"#! %s=%12.6g meV ",lm4,Blm(i));
                                    if(i<=45){if((l!=3)&(l!=5)){Llm(i)=Blm(i)/thetaJ(l)/cnst(l,m)/sqrt(4.0*PI/(2*l+1));if(m!=0){Llm(i)/=sqrt(2.0);}
@@ -930,7 +930,7 @@ if(gjmbH.Hi()>48)
 
    // setup hamiltonian
    int dj,i,j;
-  
+ 
    dj=Hcf.Rhi();
    Matrix Ham(1,dj,1,dj);
 //   Matrix Tam(1,dj,1,dj); // transformed Hamiltonian
@@ -939,17 +939,20 @@ if(gjmbH.Hi()>48)
    ComplexMatrix zb(1,dj,1,dj);
    ComplexMatrix zc(1,dj,1,dj);
    ComplexMatrix zolm(1,dj,1,dj);    
+  
 
+/*  int i1,j1; //printout matrix
+   for (i1=1;i1<=dj;++i1){
+    for (j1=1;j1<=dj;++j1) printf ("%4.6g ",Ja(i1,j1));
+    printf("\n");
+    }
+    printf ("\nH=%g %g %g\n",gjmbH(1),gjmbH(2),gjmbH(3));*/
    Ham=Hcf-gjmbH(1)*Ja-gjmbH(2)*Jb-gjmbH(3)*Jc;
+ 
 
 // here the zeeman term is extended for multipolar fields
    for(j=4;j<=JJ.Hi();++j){Ham-=gjmbH(j)*(*Olm[j-3]);}
 
-/*   int i1,j1; //printout matrix
-   for (i1=1;i1<=dj;++i1){
-    for (j1=1;j1<=dj;++j1) printf ("%4.6g ",(*Olm[j])(i1,j1));
-    printf ("\n");
-    }*/
    // use old eigenstates ests to transform matrix to nearly diagonal form ... however we deleted this because it needs more time to transform than to solve the eigenvalue problem
 /*   Tam=0;
    for(i=1;i<=dj;++i){for(j=1;j<=dj;++j){
@@ -969,6 +972,7 @@ if(gjmbH.Hi()>48)
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
    int sort=0;int maxiter=1000000;
    if (T<0) sort=1;
+
    EigenSystemHermitean (Ham,En,zr,zi,sort,maxiter);
 
    // calculate Z and wn (occupation probability)
@@ -1015,7 +1019,7 @@ if(gjmbH.Hi()>48)
 //     myPrintComplexMat(stdout,z);
 
    za=Jaa*z;zb=Jbb*z;zc=Jcc*z;
-    
+  
      JJ=0;
 //    ComplexVector ddd;
     for (i=1;i<=dj;++i)

@@ -491,8 +491,9 @@ spincf::spincf (const spincf & p)
 
 //destruktor
 spincf::~spincf ()
-{
+{//printf("hello destruktor spincf\n");  
   delete []mom;
+//printf("hello destruktor spincf\n");  
 }
 
 

@@ -8,7 +8,10 @@
 \usepackage{graphicx}
  \usepackage{makeidx}
 \usepackage{lscape}
+\usepackage{amssymb,amsbsy,bbm,dsfont}
 \makeindex
+\newcommand{\m}[1]{\overline{#1}}
+\newcommand{\M}[1]{\underline{#1}}
 \newcommand{\mbf}[1]{\mathbf #1}
 \newcommand{\V}[1]{ \stackrel{=}{\mathbf #1}}
 \newcommand{\B}[1]{#1}
@@ -18,6 +21,10 @@
 \newcommand{\ket}[1]{|#1\rangle}
 \newcommand{\threej}[2]{\left( \begin{array}{ccc} #1 \\ #2 \end{array} \right)}
 \newcommand{\sixj}[2]{\left\{ \begin{array}{ccc} #1 \\ #2 \end{array} \right\}}
+\newcommand{\hili}[1]{{#1}}
+\newcommand{\hl}[1]{{#1}}
+\newcommand*\Bell{\ensuremath{\boldsymbol\ell}}
+\newcommand{\Trace}[1]{\rm Tr \{ #1 \} }
 
 \begin{document}
 
@@ -290,6 +297,7 @@ GdNi$_2$B$_2$C & magnetostriction and phase diagram, spin only (L=0) & {\prg bri
 \cite{doerr02-5609}\\
 GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, magnetic structure & {\prg cfield} & \\
 La$_2$CoO$_4$ & dispersive magnetic excitations / spinwaves &{\prg  ic1ion} & \cite{lewtas10-184420}\\
+Ho$_2$Ti$_2$O$_7$ & diffuse magnetic scattering & {\prg so1ion} & \cite{bramwell01-1495}\\
 LuMnO$_3$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
 NdCu$_2$  & crystal field, magnetic structure, phase diagrams, excitations & {\prg cfield}& %%@
 \cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29,rotter02-751,rotter02-8885} \\

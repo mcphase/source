@@ -276,6 +276,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
   FILE * fin;
   FILE * fout;
+  FILE * foutqom;
   FILE * foutqei;
   FILE * foutqep;
   FILE * foutqee;
@@ -465,7 +466,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
 //     { for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
 //     else
 //     { for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
-     double intensityp=0, intensitym=0;int k1; ComplexVector dm1(1,3);
+     double intensityp=0, intensitym=0; ComplexVector dm1(1,3);
      d=1e10;dm1(1)=complex <double> (ninit,pinit);
      if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,d,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
      {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
@@ -736,7 +737,7 @@ if (do_verbose==1){
   errno = 0;
 if (do_jqfile==0)
 { printf("#saving mcdisp.qom and mcdisp.qei\n");
-  fout = fopen_errchk ("./results/mcdisp.qom",filemode);
+  foutqom = fopen_errchk ("./results/mcdisp.qom",filemode);
   foutqei = fopen_errchk ("./results/mcdisp.qei",filemode);
   foutdstot = fopen_errchk ("./results/mcdisp.dsigma.tot",filemode);
   printf("#saving mcdisp.dsigma.tot\n");
@@ -1066,13 +1067,13 @@ if (do_jqfile==1){
 #endif
   double diffint=0,diffintbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
-                  fprintf (fout, " > ");
+                  
   diffint=0;diffintbey=0;
                   intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,hkl,ninit,pinit);
    if(qincr==0) { //write header for output files
-                   fprintf(fout,"#!<--mcphas.mcdisp.qom-->\n");
-                   writeheader(inputpars,fout);
-                   fprintf (fout, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities (dipapprox vs full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+                   fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
+                   writeheader(inputpars,foutqom);
+                   fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
           
                    fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
                    writeheader(inputpars,foutqei);
@@ -1089,13 +1090,12 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
   //-----------------------------------------------------------
                         fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
                         writeheader(inputpars,foutdstot);
-                        fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)}",ini.emin,ini.emax);
+                        fprintf (foutdstot, "#!Total Scattering Cross Section (obtained by DMD method) in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)}",ini.emin,ini.emax);
 
                         if (do_Erefine==1){
                          fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
                          writeheader(inputpars,foutds);
                          fprintf (foutds, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
-                         fprintf (foutdstot, "for DMD algorithm  vs summing dsigma for diff energies");
                                           }  
                          fprintf (foutdstot, "\n");                       
                 }
@@ -1104,7 +1104,7 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
    if (ini.hkllist==1){dim=(int)((ini.hkls[counter][0]-3)/4);
                        if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
                        {fprintf(foutqei,"#!hklfile_number=%i\n",is);
-                        fprintf(fout,"#!hklfile_number=%i\n",is);
+                        fprintf(foutqom,"#!hklfile_number=%i\n",is);
                         if(ini.calculate_chargedensity_oscillation)fprintf(foutqee,"#!hklfile_number=%i\n",is);
                         if(ini.calculate_spindensity_oscillation)fprintf(foutqsd,"#!hklfile_number=%i\n",is);
                         if(ini.calculate_orbmomdensity_oscillation)fprintf(foutqod,"#!hklfile_number=%i\n",is);
@@ -1116,12 +1116,12 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
                         if (do_Erefine==1){fprintf(foutds,"#!hklfile_number=%i\n",is);}
                        }
                       }
-   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+   fprintf (foutqom, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
    for (i=1;i<=dimA;++i){
-	       fprintf (fout, " %4.4g ",myround(En(i)));
+	       fprintf (foutqom, " %4.4g ",myround(En(i)));
                if(do_verbose==1){fprintf(stdout, " %4.4g",En(i));}
                          }
-
+                  fprintf (foutqom, " > ");
 
                   Vector dd(1,dim),dd_int(1,dim);  dd+=100000.0;dd_int+=100000.0;
                   Vector dd1(1,dim),dd1_int(1,dim);  dd1+=100000.0;dd1_int+=100000.0;
@@ -1303,8 +1303,8 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
 	             }
 
                      if(intsbey(i)<0)intsbey(i)=-1;
-                     //printout rectangular function to .mdcisp.qom
-	             fprintf (fout, " %4.4g %4.4g",myround(ints(i)),myround(intsbey(i)));
+                     //printout rectangular function to .mcdisp.
+	             fprintf (foutqom, " %4.4g",myround(intsbey(i)));
                      fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g\n",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                          myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),qincr);
                      // printout eigenvectors only if evaluated during intensity calculation...
@@ -1531,7 +1531,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                      }  
 
    fprintf (foutdstot, "\n");              
-   fprintf (fout, "\n");
+   fprintf (foutqom, "\n");
    }
 #ifdef _THREADS
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
@@ -1562,7 +1562,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
     else
      {
 
-      staout(fout,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
+      staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(foutqei,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(stdout,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
 
@@ -1576,7 +1576,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                         if(ini.calculate_spinmoment_oscillation)fclose(foutqes);
                         if(ini.calculate_orbmoment_oscillation)fclose(foutqel);
                         
-    fclose(fout);
+    fclose(foutqom);
                  if (do_Erefine==1){fclose(foutds);}
     fclose(foutdstot);
      }

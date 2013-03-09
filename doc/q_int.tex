@@ -23,7 +23,7 @@ In order to include the higher order interactions, the number of columns in the 
 {\prg mcphas.j\index{mcphas.j}} has to be increased. The additional columns then contain the higher order
 exchange constants.
 
-Using the module {\prg Cfield}, the input file {\prg mcphas.j\index{mcphas.j}} may look as given for the 
+Using the module {\prg so1ion}, the input file {\prg mcphas.j\index{mcphas.j}} may look as given for the 
 example GdRu$_2$Si$_2$ in {\prg examples/gdru2si2}:
 
 {\footnotesize
@@ -47,7 +47,7 @@ example GdRu$_2$Si$_2$ in {\prg examples/gdru2si2}:
 #! r1c= 0.5 r2c=   0 r3c=   1
 #! nofatoms=1  nofcomponents=8  number of atoms in primitive unit cell/number of components of each spin
 #****************************************************************************}
-#! da=   0 [a] db=   0 [b] dc=   0 [c] nofneighbours=38 diagonalexchange=1 gJ=   2 sipffilename=Gd3p_cfield.sipf
+#! da=   0 [a] db=   0 [b] dc=   0 [c] nofneighbours=38 diagonalexchange=1 gJ=   2 sipffilename=Gd3p.sipf
 # da[a]    db[b]      dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  %%@
 Jcb[meV]} 
 -1.0 0.0 0.0 0.08390 0.08390 0.21890 -0.0024 -0.0096 -0.0008 -0.0096 -0.0024 
@@ -105,9 +105,10 @@ given according to the following scheme:
 \end{verbatim}
 
 The other input and output files have the same format as usual, but with the modification, that
-there are now $n$ components of the 'spins' instead of 3 ($<J_a>$,$<J_b>$,$<J_c>$).
-The components $<J_a>$,$<J_b>$,$<J_c>$,$<J_d>$,$<J_e>$, etc. correspond to $<O_{11}(s)>$, $<O_{10}>$,
-$<O_{11}>$, $<O_{22}(s)>$, $<O_{21}(s)>$,$<O_{20}>$,$<O_{21}>$,$<O_{22}>$,$<O_{33}(s)>$, ...
+there are now $n$ components of the 'spins' in {\prg mcphas.sps} instead of 3 ($<J_a>$,$<J_b>$,$<J_c>$).
+The expectation values of the operators
+ $<I_a>$,$<I_b>$,$<I_c>$,$<I_d>$,$<I_e>$, etc. correspond to $<J_a>$,$<J_b>$,$<J_c>$,
+ $<O_{22}(s)>$, $<O_{21}(s)>$,$<O_{20}>$,$<O_{21}>$,$<O_{22}>$,$<O_{33}(s)>$, ...
  respectively. Table~\ref{olms} contains a list of first and second order Stevens parameters.
 For a full list please refer to appendix~\ref{stevens}.
 
@@ -124,15 +125,15 @@ Stevens Operator & Notation used in module {\prg so1ion\index{so1ion}} & {\prg c
 \hline
 $O_{00}=1$ ($O_0^0(s)=0$) &\\
 \hline
-$O_{11}(s)=\frac{-i}{2}[J_+-J_-]=J_y$ &  $J_b$&  $J_a$\\
-$O_{10}=J_z$  ($O_1^0(s)=0$) & $J_c$&  $J_b$ \\
-$O_{11}=\frac{1}{2}[J_++J_-]=J_x$ &  $J_a$&  $J_c$\\
+$O_{11}(s)=\frac{-i}{2}[J_+-J_-]=J_y$ &  $I_b$&  $I_a$\\
+$O_{10}=J_z$  ($O_1^0(s)=0$) & $I_c$&  $I_b$ \\
+$O_{11}=\frac{1}{2}[J_++J_-]=J_x$ &  $I_a$&  $I_c$\\
 \hline
-$O_{22}(s)=\frac{-i}{2}[J_+^2-J_-^2]=J_xJ_y+J_yJ_x$($=2P_{xy}$) & $J_d$ & $J_d$ \\
-$O_{21}(s)=\frac{-i}{4}[(J_+-J_-)J_z+J_z(J_+-J_-)]=\frac{1}{2}[J_yJ_z+J_zJ_y]$($=P_{yz}$) & $J_e$& $J_e$  \\
-$O_{20}=[3J_z^2-J(J+1)]$ ($O_2^0(s)=0$) & $J_f$& $J_f$  \\
-$O_{21}=\frac{1}{4}[(J_++J_-)J_z+J_z(J_++J_-)]=\frac{1}{2}[J_xJ_z+J_zJ_x]$($=P_{xz}$) & $J_g$& $J_g$  \\
-$O_{22}=\frac{1}{2}[J_+^2+J_-^2]=[J_x^2-J_y^2]$ & $J_h$& $J_h$  \\
+$O_{22}(s)=\frac{-i}{2}[J_+^2-J_-^2]=J_xJ_y+J_yJ_x$($=2P_{xy}$) & $I_d$ & $I_d$ \\
+$O_{21}(s)=\frac{-i}{4}[(J_+-J_-)J_z+J_z(J_+-J_-)]=\frac{1}{2}[J_yJ_z+J_zJ_y]$($=P_{yz}$) & $I_e$& $I_e$  \\
+$O_{20}=[3J_z^2-J(J+1)]$ ($O_2^0(s)=0$) & $I_f$& $I_f$  \\
+$O_{21}=\frac{1}{4}[(J_++J_-)J_z+J_z(J_++J_-)]=\frac{1}{2}[J_xJ_z+J_zJ_x]$($=P_{xz}$) & $I_g$& $I_g$  \\
+$O_{22}=\frac{1}{2}[J_+^2+J_-^2]=[J_x^2-J_y^2]$ & $I_h$& $I_h$  \\
 \hline
  \end{tabular}
 \end{center}   
@@ -140,8 +141,8 @@ $O_{22}=\frac{1}{2}[J_+^2+J_-^2]=[J_x^2-J_y^2]$ & $J_h$& $J_h$  \\
 
 The {\prg indexexchange} parameter discussed in section~\ref{mcphasj} may be useful in keeping the input
 of the exchange components short. For example the $\zeta$ and $\eta$ strain modes on the quasi-cubic sites
-of a double hexagonal close packed structure involves the coupling of $P_{zx}$ ($J_g$) and $P_{xy}$ ($J_d$) 
-as well as $P_{yz}$ ($J_e$) and $O_2^2$ $(J_h)$ quadrupoles, so the {\prg diagonalexchange=1} option 
+of a double hexagonal close packed structure involves the coupling of $P_{zx}$ ($I_g$) and $P_{xy}$ ($I_d$) 
+as well as $P_{yz}$ ($I_e$) and $O_2^2$ $(I_h)$ quadrupoles, so the {\prg diagonalexchange=1} option 
 cannot be used. Thus 64 components need to be specified to describe the $8\times 8$ exchange tensor. 
 However, we can simplify this with the {\prg indexexchange} parameter by setting {\prg diagonalexchange=2}, 
 as follows for UPd$_3$:
@@ -171,9 +172,9 @@ as follows for UPd$_3$:
 The programs {\prg mcphas} and {\prg mcdisp\index{mcdisp}} are run completely the same way as usual, only
 the output files contain also information about the (thermal) expectation values of $<O_l^m>$
 dependent on temperature and magnetic field. 
-Using the module cfield the notation $<J_a>$,$<J_b>$,$<J_c>$,
-$<J_d>$, $<J_e>$, etc. correspond to $<O_{11}(s)>$, $<O_{10}>$,
-$<O_{11}>$, $<O_{22}(s)>$, $<O_{21}(s)>$,$<O_{20}>$,$<O_{21}>$,$<O_{22}>$,$<O_{33}(s)>$, ...
+Using the module so1ion the notation $<I_a>$,$<I_b>$,$<I_c>$,
+$<I_d>$, $<I_e>$, etc. correspond to $<J_a>$, $<J_b>$,
+$<J_c>$, $<O_{22}(s)>$, $<O_{21}(s)>$,$<O_{20}>$,$<O_{21}>$,$<O_{22}>$,$<O_{33}(s)>$, ...
  respectively.
 Note that by the higher order interactions not only the static properties are changed, but also the
 dispersion of the magnetic excitations is influenced.
@@ -223,3 +224,5 @@ of this orthorhombic system.
 [plot created with program {\prg displaycontour\index{displaycontour}}]}
 \label{qintensity}
 \end{figure}
+
+\clearpage

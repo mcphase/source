@@ -255,12 +255,14 @@ dummyc=Jbb;Jbb=Jcc;Jcc=Jaa;Jaa=dummyc;
 }
 
 module_ionpars iops("#ATTENTION in module cfield.so the AXES xyz are parallel to cab\n#The higher order interactions are described by the  PKQ Operators defined in cfield:\n#O20(c) .... Jd\n#O22(c) .... Je\n#O40(c) .... Jf\n#O42(c) .... Jg\n#O44(c) .... Jh\n#O60(c) .... Ji\n#O62(c) .... Jj\n#O64(c) .... Jk\n#O66(c) .... Jl\n");  // get 1ion parameters - operator matrices
+
+
 #ifdef __declspec
 extern "C" __declspec(dllexport) void Icalc(Vector & J,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
-                      double & lnZ,double & U)
+                      double & lnZ,double & U,ComplexMatrix &est)
 #else
 extern "C" void Icalc(Vector & J,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
-                      double & lnZ,double & U)
+                      double & lnZ,double & U,ComplexMatrix &est)
 #endif  
 
 {//ABC not used !!!
@@ -379,15 +381,29 @@ if(J.Hi()>12||gjmbH.Hi()>12)
 return;
 }
 /**************************************************************************/
+#ifdef __declspec
+extern "C" __declspec(dllexport) void mcalc(Vector & mom,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
+                      ComplexMatrix &est)
+#else
+extern "C" void mcalc(Vector & mom,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
+                      ComplexMatrix &est)
+#endif  
+{double U,lnZ;
+ static Vector J(1,gjmbHxc.Hi());
+ Icalc(J,T,gjmbHxc,Hext,g_J,ABC,sipffile,U,lnZ,est);
+ mom(1)=J(1);
+ mom(2)=J(2);
+ mom(3)=J(3);
+}
 
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __declspec
 extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbHxc, Vector & Hext,double * gJ,Vector & ABC, char ** sipffile,
-                       ComplexVector & u1,float & delta)
+                       ComplexVector & u1,float & delta,ComplexMatrix &est)
 #else
 extern "C" int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * gJ,Vector & ABC, char ** sipffile,
-                       ComplexVector & u1,float & delta)
+                       ComplexVector & u1,float & delta,ComplexMatrix &est)
 #endif
 {//ABC not used !!!
     /*on input
@@ -425,7 +441,7 @@ if(gjmbH.Hi()>12)
    static Vector J(1,gjmbH.Hi());
    double lnz,u;
    J=0;
-   if (T>0){ Icalc(J,T,gjmbHxc,Hext,gJ,ABC,sipffile,lnz,u);} else {T=-T;}
+   if (T>0){ Icalc(J,T,gjmbHxc,Hext,gJ,ABC,sipffile,lnz,u,est);} else {T=-T;}
    // setup hamiltonian
    int dj;
    dj=iops.Hcf.Rhi();
