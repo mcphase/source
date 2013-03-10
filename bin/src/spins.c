@@ -217,7 +217,6 @@ gp.read();
 fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),inputpars.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
 fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc>\n");
 fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
-
 // determine primitive magnetic unit cell
 Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3);
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
@@ -274,7 +273,7 @@ switch(arrow)
  case 2: (*inputpars.jjj[ii]).Lcalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
  case 3: (*inputpars.jjj[ii]).mcalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
 }
-if(arrow){
+if(arrow>0){
        for(nt=1;nt<=3;++nt)
 		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt);
                     }}
@@ -404,7 +403,7 @@ if (argc-os>=6){
               numbers[0]=13;
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
 //----------------------------------------------------------------------------------------------------------
-            if(arrow){
+            if(arrow>0){
              switch(arrow)
              {case 1:  fin = fopen_errchk ("./results/mcdisp.qes", "rb");
               case 2:  fin = fopen_errchk ("./results/mcdisp.qeo", "rb");
