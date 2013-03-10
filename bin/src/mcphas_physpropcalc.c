@@ -1,13 +1,14 @@
 /************************************************************************/
 void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,par & inputpars)
-{ int i,j,k,l,n;div_t result;float mmax; char text[100];FILE * fin_coq;
+{ int i,j,k,l,n,m1;div_t result;float mmax; char text[100];FILE * fin_coq;
  //save fe and u
  // calculate nettomoment from spinstructure
-    Vector mom(1,3);physprops.m=0;
+    Vector mom(1,3),d1(1,inputpars.nofcomponents);physprops.m=0;
     for (l=1;l<=inputpars.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
-     (*inputpars.jjj[l]).mcalc(mom,T, mf.mf(i,j,k),H,(*inputpars.jjj[l]).Icalc_parstorage);
+      for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+m1];}                  
+     (*inputpars.jjj[l]).mcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
      physprops.m+=mom;
     }}}}
     physprops.m/=(double)sps.n()*(double)sps.nofatoms;
@@ -16,7 +17,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // thermal expansion - magnetostricton correlation-functions
 // according to each neighbour given in mcphas.j a correlation
 // function is calculated - up to ini.nofspincorrs neighbours
- int nmax,i1,j1,k1,l1,m1,i2,j2,k2,is;Vector xyz(1,3),d(1,3),d_rint(1,3);
+ int nmax,i1,j1,k1,l1,i2,j2,k2,is;Vector xyz(1,3),d(1,3),d_rint(1,3);
  nmax=ini.nofspincorrs;
  for (l=1;l<=inputpars.nofatoms;++l){if(nmax>(*inputpars.jjj[l]).paranz){nmax=(*inputpars.jjj[l]).paranz;}}
 
@@ -87,7 +88,8 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
      for(i=0;i<mf.na();++i){for(j=0;j<mf.nb();++j){for(k=0;k<mf.nc();++k)
       { g=exp(piq*((double)qh*i/mf.na()+(double)qk*j/mf.nb()+(double)ql*k/mf.nc()));
 	for (l=1;l<=mf.nofatoms;++l) {
-                                    (*inputpars.jjj[l]).mcalc(mom,T, mf.mf(i+1,j+1,k+1),H,(*inputpars.jjj[l]).Icalc_parstorage);
+                                    for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=mf.mf(i+1,j+1,k+1)[inputpars.nofcomponents*(l-1)+m1];}                  
+                                    (*inputpars.jjj[l]).mcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
                                     mq[mf.in(qh,qk,ql)](3*(l-1)+1)+=g*mom(1);
                                     mq[mf.in(qh,qk,ql)](3*(l-1)+2)+=g*mom(2);
                                     mq[mf.in(qh,qk,ql)](3*(l-1)+3)+=g*mom(3);
@@ -210,7 +212,8 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
                    for (l1=1;l1<=inputpars.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                   (*inputpars.jjj[l1]).mcalc(mom,T,mf.mf(i1,j1,k1),H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                   for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=mf.mf(i1,j1,k1)[inputpars.nofcomponents*(l1-1)+m1];}                  
+                   (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                     for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
   

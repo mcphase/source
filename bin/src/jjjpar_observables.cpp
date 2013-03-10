@@ -33,7 +33,7 @@ int jjjpar::pcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,Com
 int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1,ComplexMatrix & ests)
 {float delta=maxE;p1(1)=complex <double> (ninit,pinit); 
  switch (module_type)
-  {case 0: if(dp1==NULL){fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
+  {case 0: if(dp1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dp1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&p1,&delta,&ests);}
            break;
    case 1:
@@ -41,7 +41,7 @@ int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1
    case 3:
    case 4:
    case 5: 
-   default:fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
+   default:if(transitionnumber<0)fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
           return 0;break;
    }
 }
@@ -73,7 +73,7 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
 {float delta=maxE;m1(1)=complex <double> (ninit,pinit);
  ComplexVector uu1(1,Hxc.Hi());int nnt,i;
  switch (module_type)
-  {case 0: if(dm1==NULL){fprintf(stderr,"Problem: dm1calc  is not possible in module %s, continuing ... \n",modulefilename);
+  {case 0: if(dm1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&m1,&delta,&ests);}
            break;
    case 1: nnt=kramerdm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
@@ -82,8 +82,8 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
            nnt=(*iops).cfielddm(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
    case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
-   case 5:fprintf(stderr,"Problem: dm1calc in internal module cluster not implemented, continuing ... \n");break;
-  default:fprintf(stderr,"Problem: dm1calc in internal module ... not implemented, continuing ... \n");
+   case 5:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module cluster not implemented, continuing ... \n");break;
+  default:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module ... not implemented, continuing ... \n");
           break;
    }
 return 0;
@@ -110,7 +110,7 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
 int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1,ComplexMatrix & ests)
 {float delta=maxE;L1(1)=complex <double> (ninit,pinit);
   switch (module_type)
-  {case 0: if(dL1==NULL){fprintf(stderr,"Problem: dLcalc  is not possible in module %s, continuing ... \n",modulefilename);
+  {case 0: if(dL1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dL1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&L1,&delta,&ests);}
            break;
    case 1:
@@ -145,7 +145,7 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
 int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1,ComplexMatrix & ests)
 {float delta=maxE;S1(1)=complex <double> (ninit,pinit);
  switch (module_type)
-  {case 0: if(dS1==NULL){fprintf(stderr,"Problem: dScalc  is not possible in module %s, continuing ... \n",modulefilename);
+  {case 0: if(dS1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dS1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dS1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&S1,&delta,&ests);}
            break;
    case 1:
@@ -223,7 +223,7 @@ switch (module_type)
 //
 /****************************************************************************/
 int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix & ests)
-{dMQ(1)=complex <double> (ninit,pinit);
+{double delta=maxE;dMQ(1)=complex <double> (ninit,pinit);
  double J0,J2,J4,J6;
  double Q,th,ph;
  int i;     complex<double>dummy; // introduced 3.4.10 MR
@@ -238,7 +238,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
   {static int washere=0;
 
    case 0:if (ddnn!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
-                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ,&maxE);break;}
+                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ,&delta);break;}
           else {return 0;}
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give cfielddn polar angles with respect to xyz
             i=(*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);
@@ -772,17 +772,17 @@ return true;
 int jjjpar::dchargedensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & chargedensity_coeff1,ComplexMatrix & ests)
 {float delta=maxE;chargedensity_coeff1(1)=complex <double> (ninit,pinit);
  switch (module_type)
-  {case 1: fprintf(stderr,"Problem: chargedensity  in module kramer is not possible, continuing ... \n");
+  {case 1: if(transitionnumber<0)fprintf(stderr,"Problem: chargedensity  in module kramer is not possible, continuing ... \n");
            return 0;break;
    case 2:
    case 4: return(*iops).dchargedensity_coeff1calc(transitionnumber,T,Hxc,Hext,chargedensity_coeff1,delta,ests);
            break;
-   case 3: fprintf(stderr,"Problem: chargedensity  in module brillouin is not possible, continuing ... \n");
+   case 3: if(transitionnumber<0)fprintf(stderr,"Problem: chargedensity  in module brillouin is not possible, continuing ... \n");
            return 0;break;
-   case 0: if(cd_dm==NULL){fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
+   case 0: if(cd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*cd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&chargedensity_coeff1,&delta,&ests);}
            break;
-   case 5:fprintf(stderr,"Problem: chargedensity is not possible in module cluster, continuing ... \n");
+   case 5:if(transitionnumber<0)fprintf(stderr,"Problem: chargedensity is not possible in module cluster, continuing ... \n");
            return 0;break;
    default:fprintf(stderr,"Problem: chargedensity is not possible in module, continuing ... \n");
            return 0;break;
@@ -877,17 +877,17 @@ return true;
 int jjjpar::dspindensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & spindensity_coeff1,ComplexMatrix & ests)
 {float delta=maxE;spindensity_coeff1(1)=complex <double> (ninit,pinit);
  switch (module_type)
-  {case 1: fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
+  {case 1: if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
            return 0;break;
    case 2:
-   case 4: fprintf(stderr,"Problem: spindensity  in module  so1ion/cfeld is not possible, continuing ... \n");
+   case 4: if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  in module  so1ion/cfeld is not possible, continuing ... \n");
            return 0;break;
-   case 3: fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
+   case 3: if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
            return 0;break;
-   case 0: if(cd_dm==NULL){fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
+   case 0: if(sd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&spindensity_coeff1,&delta,&ests);}
            break;
-   case 5:fprintf(stderr,"Problem: spindensity is not possible in module cluster, continuing ... \n");
+   case 5:if(transitionnumber<0)fprintf(stderr,"Problem: spindensity is not possible in module cluster, continuing ... \n");
            return 0;break;
    default:fprintf(stderr,"Problem: spindensity is not possible in module, continuing ... \n");
            return 0;break;
@@ -1037,17 +1037,17 @@ return true;
 int jjjpar::dorbmomdensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & orbmomdensity_coeff1,ComplexMatrix & ests)
 {float delta=maxE;orbmomdensity_coeff1(1)=complex <double> (ninit,pinit);
  switch (module_type)
-  {case 1: fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
+  {case 1: if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
            return 0;break;
    case 2:
-   case 4: fprintf(stderr,"Problem: orbmomdensity  in module  so1ion/cfeld is not possible, continuing ... \n");
+   case 4: if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  in module  so1ion/cfeld is not possible, continuing ... \n");
            return 0;break;
-   case 3: fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
+   case 3: if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
            return 0;break;
-   case 0: if(cd_dm==NULL){fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
+   case 0: if(od_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*od_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&orbmomdensity_coeff1,&delta,&ests);}
            break;
-   case 5:fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
+   case 5:if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
            return 0;break;
    default:fprintf(stderr,"Problem: orbmomdensity is not possible in module, continuing ... \n");
            return 0;break;

@@ -31,10 +31,10 @@
 
 //routine Icalc for kramers doublet
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) void Icalc(Vector & Jr,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" __declspec(dllexport) void Icalc(Vector & Jr,double * T, Vector & Hxc,Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #else
-extern "C" void Icalc(Vector & Jr,double * T, Vector & gjmbHxc,Vector & Hext,double * g_J, Vector & ABC,char ** sipffile,
+extern "C" void Icalc(Vector & Jr,double * T, Vector & Hxc,Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #endif
 {   
@@ -42,7 +42,7 @@ extern "C" void Icalc(Vector & Jr,double * T, Vector & gjmbHxc,Vector & Hext,dou
     T		temperature[K]
     gJmbHin	vector of effective field [meV]
     gJ          Lande factor
-    ABC         single ion parameter values (A, B, C corresponding to <+|Ja|->,<-|Jb|->,<+|Jc|->/i
+    MODPAR         single ion parameter values (A, B, C corresponding to <+|Ja|->,<-|Jb|->,<+|Jc|->/i
                  MODPAR4= angle of rotation around c axis (deg)
                  MODPAR5= angle of rotation around new x axis (degree)
 
@@ -51,18 +51,18 @@ extern "C" void Icalc(Vector & Jr,double * T, Vector & gjmbHxc,Vector & Hext,dou
     Z		single ion partition function
     U		single ion magnetic energy
 */
-Vector gjmbHin(1,gjmbHxc.Hi());
-gjmbHin=gjmbHxc+(*g_J)*MU_B*Hext;
 // check dimensions of vector
-if(Jr.Hi()!=3||gjmbHin.Hi()!=3||ABC.Hi()!=5)
+if(Jr.Hi()!=3||Hxc.Hi()!=3||MODPAR.Hi()!=5)
    {fprintf(stderr,"Error loadable module kramer.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
+Vector gjmbHin(1,Hxc.Hi());
+gjmbHin=Hxc+(*g_J)*MU_B*Hext;
 
 // rotate effective field
-double sf=sin(ABC(4)*PI/180);
-double cf=cos(ABC(4)*PI/180);
-double st=sin(-ABC(5)*PI/180);
-double ct=cos(-ABC(5)*PI/180);
+double sf=sin(MODPAR(4)*PI/180);
+double cf=cos(MODPAR(4)*PI/180);
+double st=sin(-MODPAR(5)*PI/180);
+double ct=cos(-MODPAR(5)*PI/180);
 Vector J(1,3);
 Vector gjmbH(1,3);
 Matrix rot(1,3,1,3);
@@ -82,9 +82,9 @@ gjmbH=rot*gjmbHin;
   double alpha, betar, betai, lambdap,lambdap_K_BT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, jap, jam, jbp, jbm, jcp, jcm,Z;
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
-  alpha = ABC[2] * gjmbH[2];
-  betar = -ABC[1] * gjmbH[1];
-  betai = -ABC[3] * gjmbH[3];
+  alpha = MODPAR[2] * gjmbH[2];
+  betar = -MODPAR[1] * gjmbH[1];
+  betai = -MODPAR[3] * gjmbH[3];
 
   lambdap2 = alpha * alpha + betar * betar + betai * betai;
   lambdap = sqrt (lambdap2);
@@ -110,17 +110,17 @@ gjmbH=rot*gjmbHin;
 
   if (nennerp > SMALL)
     {
-      jap = -ABC[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
+      jap = -MODPAR[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
 //      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
-      jbp = ABC[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
-      jcp = -2.0 * ABC[3] * betai * (alpha_lambdap) / nennerp;
+      jbp = MODPAR[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
+      jcp = -2.0 * MODPAR[3] * betai * (alpha_lambdap) / nennerp;
     }
   else
     {
       jap = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbp = -copysign (ABC[2], alpha);
+	  jbp = -copysign (MODPAR[2], alpha);
 	}
       else
 	{
@@ -131,17 +131,17 @@ gjmbH=rot*gjmbHin;
 
   if (nennerm > SMALL)
     {
-      jam = -ABC[1] * 2.0 * betar * (alphaplambdap) / nennerm;
+      jam = -MODPAR[1] * 2.0 * betar * (alphaplambdap) / nennerm;
 //      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
-      jbm = ABC[2] * (2.0 * alpha*alphaplambdap) / nennerm;
-      jcm = -2.0 * ABC[3] * betai * (alphaplambdap) / nennerm;
+      jbm = MODPAR[2] * (2.0 * alpha*alphaplambdap) / nennerm;
+      jcm = -2.0 * MODPAR[3] * betai * (alphaplambdap) / nennerm;
     }
   else
     {
       jam = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbm = copysign (ABC[2], alpha);
+	  jbm = copysign (MODPAR[2], alpha);
 	}
       else
 	{
@@ -163,19 +163,30 @@ Jr=brot*J;
 
 return;
 }
+
+#ifdef __MINGW32__
+extern "C" __declspec(dllexport) void mcalc(Vector & Jr,double * T, Vector & Hxc,Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffile,
+                      ComplexMatrix & est)
+#else
+extern "C" void mcalc(Vector & Jr,double * T, Vector & Hxc,Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffile,
+                      ComplexMatrix & est)
+#endif
+{ double U,lnz;
+  Icalc(Jr,T, Hxc,Hext,g_J,MODPAR,sipffile,&U,&lnz,est); 
+}
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __MINGW32__
-extern "C" __declspec(dllexport) int du1calc(int & tn,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
+extern "C" __declspec(dllexport) int du1calc(int & tn,double & T, Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR, char ** sipffile,
                        ComplexVector & u1r,float & delta,ComplexMatrix & est)
 #else
-extern "C" int du1calc(int & tn,double & T, Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
+extern "C" int du1calc(int & tn,double & T, Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR, char ** sipffile,
                        ComplexVector & u1r,float & delta,ComplexMatrix & est)
 #endif
 { 
   /*on input
     tn          transition-number - meaningless for kramers doublet, because there is only one transition
-    ABC         A,M,Ci...saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
+    MODPAR         A,M,Ci...saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     g_J		lande factor
     T		temperature[K]
     gjmbH	vector of effective field [meV]
@@ -189,20 +200,19 @@ extern "C" int du1calc(int & tn,double & T, Vector & gjmbHxc,Vector & Hext,doubl
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
   double Z,lnz,u;
   static int pr;
-Vector gjmbHin(1,gjmbHxc.Hi());
-gjmbHin=gjmbHxc+(*g_J)*MU_B*Hext;
+  static Vector gjmbHin(1,3);
+gjmbHin=Hxc+(*g_J)*MU_B*Hext;
   static Vector Jin(1,3);
   static Vector J(1,3);
   static ComplexVector u1(1,3);
   // clalculate thermal expectation values (needed for quasielastic scattering)
-  Jin=0;if(T>0){ Icalc(Jin,&T,gjmbHxc,Hext,g_J,ABC,sipffile,&lnz,&u,est);}
+  Jin=0;if(T>0){ Icalc(Jin,&T,Hxc,Hext,g_J,MODPAR,sipffile,&lnz,&u,est);}
                 else {T=-T;}
-
 // rotate effective field
-double sf=sin(ABC(4)*PI/180);
-double cf=cos(ABC(4)*PI/180);
-double st=sin(-ABC(5)*PI/180);
-double ct=cos(-ABC(5)*PI/180);
+double sf=sin(MODPAR(4)*PI/180);
+double cf=cos(MODPAR(4)*PI/180);
+double st=sin(-MODPAR(5)*PI/180);
+double ct=cos(-MODPAR(5)*PI/180);
 Vector gjmbH(1,3);
 Matrix rot(1,3,1,3);
       rot(1,1)=cf;    rot(1,2)=sf;   rot(1,3)=0;
@@ -216,12 +226,12 @@ Matrix brot(1,3,1,3);
 gjmbH=rot*gjmbHin;
 J=rot*Jin;
 
-  pr=1;
-  if (tn<0) {pr=0;tn*=-1;}
+  pr=0;
+  if (tn<0) {pr=1;tn*=-1;}
 
-  alpha = ABC[2] * gjmbH[2];
-  betar = -ABC[1] * gjmbH[1];
-  betai = -ABC[3] * gjmbH[3];
+  alpha = MODPAR[2] * gjmbH[2];
+  betar = -MODPAR[1] * gjmbH[1];
+  betai = -MODPAR[3] * gjmbH[3];
   lambdap2 = alpha * alpha + betar * betar + betai * betai;
   lambdap = sqrt (lambdap2);
   
@@ -248,23 +258,24 @@ if (tn==2)
 
   if (nenner > SMALL)
     {
-      ja = -ABC[1] * 2.0*(alpha * betar+i * betai * lambdap) / nenner;
-      jb = -ABC[2] * 2.0 * (betar*betar+betai*betai) / nenner;
-      jc = -ABC[3] * 2.0*(alpha*betai -i *betar*lambdap) / nenner;
+      ja = -MODPAR[1] * 2.0*(alpha * betar+i * betai * lambdap) / nenner;
+      jb = -MODPAR[2] * 2.0 * (betar*betar+betai*betai) / nenner;
+      jc = -MODPAR[3] * 2.0*(alpha*betai -i *betar*lambdap) / nenner;
     }
   else
     {
       if (alpha > SMALL)
-	{ja = ABC[1];  // <-| is the ground state
+	{ja = MODPAR[1];  // <-| is the ground state
   	 jb = 0;
-         jc = -i*ABC[3];
+         jc = -i*MODPAR[3];
 	}
       else
-	{ja = ABC[1];  // <+| is the ground state
+	{ja = MODPAR[1];  // <+| is the ground state
   	 jb = 0;
-         jc = i*ABC[3]; 	
+         jc = i*MODPAR[3]; 	
 	}
     }
+
  if (delta>SMALL)
   {// now lets calculate mat
   u1(1)=ja*sqrt(nm-np);
@@ -272,51 +283,51 @@ if (tn==2)
   u1(3)=jc*sqrt(nm-np);
   } else
   {// quasielastic scattering needs epsilon * nm / KT ....
-  u1(1,1)=ja*sqrt(nm/K_B/T);
-  u1(2,1)=jb*sqrt(nm/K_B/T);
-  u1(3,1)=jc*sqrt(nm/K_B/T);
+  u1(1)=ja*sqrt(nm/K_B/T);
+  u1(2)=jb*sqrt(nm/K_B/T);
+  u1(3)=jc*sqrt(nm/K_B/T);
   }
  }
  else
  { delta=-SMALL; // transition within the same level
   if (nennerp > SMALL)
     {
-      jap = -ABC[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
+      jap = -MODPAR[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
 //      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
-      jbp = ABC[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
-      jcp = -2.0 * ABC[3] * betai * (alpha_lambdap) / nennerp;
+      jbp = MODPAR[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
+      jcp = -2.0 * MODPAR[3] * betai * (alpha_lambdap) / nennerp;
     }
   else
     {
       jap = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbp = -copysign (ABC[2], alpha);
+	  jbp = -copysign (MODPAR[2], alpha);
 	}
       else
 	{
-	  jbp = -ABC[2];
+	  jbp = -MODPAR[2];
 	}
       jcp = 0;
     }
 
   if (nennerm > SMALL)
     {
-      jam = -ABC[1] * 2.0 * betar * (alphaplambdap) / nennerm;
+      jam = -MODPAR[1] * 2.0 * betar * (alphaplambdap) / nennerm;
 //      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
-      jbm = ABC[2] * (2.0 * alpha*alphaplambdap) / nennerm;
-      jcm = -2.0 * ABC[3] * betai * (alphaplambdap) / nennerm;
+      jbm = MODPAR[2] * (2.0 * alpha*alphaplambdap) / nennerm;
+      jcm = -2.0 * MODPAR[3] * betai * (alphaplambdap) / nennerm;
     }
   else
     {
       jam = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbm = copysign (ABC[2], alpha);
+	  jbm = copysign (MODPAR[2], alpha);
 	}
       else
 	{
-	  jbm = ABC[2];
+	  jbm = MODPAR[2];
 	}
       jcm = 0;
     }
@@ -345,4 +356,16 @@ u1r(i)+=brot(i,i1)*u1(i1);
 return 3;// kramers doublet has always exactly one transition + 2 levels (quasielastic scattering)!
 }
 
+/**************************************************************************/
+// for mcdisp this routine is needed
+#ifdef __MINGW32__
+extern "C" __declspec(dllexport) int dm1(int & tn,double & T, Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR, char ** sipffile,
+                       ComplexVector & m1,float & maxE,ComplexMatrix & est)
+#else
+extern "C" int dm1(int & tn,double & T, Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR, char ** sipffile,
+                       ComplexVector & m1,float & maxE,ComplexMatrix & est)
+#endif
+{int nnt;
+nnt=du1calc(tn,T,Hxc,Hext,g_J,MODPAR,sipffile,m1,maxE,est);m1*=(*g_J);return nnt; 
+}
 //\end{verbatim}}

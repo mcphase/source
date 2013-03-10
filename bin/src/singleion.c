@@ -42,7 +42,7 @@ printf("# **************************************************************\n");
   ComplexVector u1(1,inputpars.nofcomponents);
   complex<double> np(1000000,0.01);u1(1)=np; // set (ninit,pinit)=(max number of initial states, minimal occupancy) to be
                         // included into list of transitions
-int nmax=5;// max number of transtions to  be output
+int nmax=5;// max number of transitions to  be output
                              i=1;if(!strcmp(argv[i],"-nt")){nmax=(int)strtod(argv[i+1],NULL);i+=2;}
                              T=strtod(argv[i],NULL);
 
@@ -56,7 +56,7 @@ h=0;for(j=1;j<=argc-i0-1;++j){++i;if(!strcmp(argv[i],"-nt")){nmax=(int)strtod(ar
 
 printf("#\n#atom-number T[K] ");
 for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
-for(j=1;j<=inputpars.nofcomponents;++j)printf("gjmbHxc%i(meV) ",j);
+for(j=1;j<=inputpars.nofcomponents;++j)printf("Hxc%i(meV) ",j);
 for(j=1;j<=inputpars.nofcomponents;++j)printf(" <I%c> ",'a'-1+j);
   printf("transition-energies(meV)...\n");
 
@@ -70,12 +70,12 @@ for(j=1;j<=inputpars.nofcomponents;++j)printf(" <I%c> ",'a'-1+j);
   for(j=1;j<=inputpars.nofcomponents;++j)printf(" %4g ",m(j));  // printout corresponding moments 
  double TT=fabs(T);
  if(nmax>0)
-  {(*inputpars.jjj[i]).transitionnumber=-1;
+  {(*inputpars.jjj[i]).transitionnumber=1;
    nt=(*inputpars.jjj[i]).du1calc(TT,h,hext,u1,d,(*inputpars.jjj[i]).eigenstates(h,hext,T));
 
           // get nt = number of transitions
    for(j=1;j<=nt&&j<=nmax;++j)
-   {(*inputpars.jjj[i]).transitionnumber=-j;d=1e10;
+   {(*inputpars.jjj[i]).transitionnumber=j;
    (*inputpars.jjj[i]).du1calc(TT,h,hext,u1,d,(*inputpars.jjj[i]).est);
    printf(" %4g ",d);
    }

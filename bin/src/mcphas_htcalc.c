@@ -210,17 +210,18 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
       if (fe<femin)
             {               // first - reduce the spinconfiguration if possible
                if (verbose==1){fprintf(stdout,"fe(tryrandom=%i)= %f meV\n",tryrandom,fe); fflush(stdout);}
-	       sps1=sps;sps1.reduce();
+	       sps1=sps;sps1.reduce(); 
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.nofatoms,inputpars.nofcomponents);
                if ((fered=fecalc(H ,T,inputpars,sps1,(*mf1),u,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
                    magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
-                   int i1,j1,k1,l1,m1;Vector mom(1,3);
+                   int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
                    for (l1=1;l1<=inputpars.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                   (*inputpars.jjj[l1]).mcalc(mom,T,(*mf).mf(i1,j1,k1),H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                   for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.nofcomponents*(l1-1)+m1];}
+                   (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                    for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
-                    }}}}
+                    }}}} 
                    delete mf1; 
                  // display spinstructure
                 if (verbose==1)
@@ -245,7 +246,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
                     fclose (fin_coq);
 		   
                     fin_coq = fopen_errchk ("./results/.spins.eps", "w");
-                     sps.eps(fin_coq,text);
+                     (*magmom).eps(fin_coq,text);
                     fclose (fin_coq);
 		delete[]x;delete []y; delete []z;
 	        }
@@ -553,11 +554,12 @@ else // if yes ... then
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
       physprops.fe=fecalc(H ,T,inputpars,sps,(*mf),physprops.u,testspins,testqs); 
       magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
-                   int i1,j1,k1,l1,m1;Vector mom(1,3);
+                   int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
                    for (l1=1;l1<=inputpars.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                   (*inputpars.jjj[l1]).mcalc(mom,T,(*mf).mf(i1,j1,k1),H,(*inputpars.jjj[l1]).Icalc_parstorage);
+                  for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.nofcomponents*(l1-1)+m1];}                  
+                   (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                     for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
              // display spinstructure
@@ -579,7 +581,7 @@ else // if yes ... then
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
 		 fin_coq = fopen_errchk ("./results/.spins.eps", "w");
-                     sps.eps(fin_coq,text);
+                     (*magmom).eps(fin_coq,text);
                     fclose (fin_coq);
                 delete[]x;delete []y; delete []z;
 		}

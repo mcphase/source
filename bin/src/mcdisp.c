@@ -661,7 +661,7 @@ for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii
 
 
 //----------------------------------OBSERVABLES -------------------------------------------------
-if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with eigenvector dimension for observable=%i\n",i,j,k,l,CHARGEDENS_EV_DIM);}
+if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with eigenvector dimension for observable\n",i,j,k,l);}
 //-----------------------------------------------------------------------------------
 if(ini.calculate_chargedensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
    if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,md.est(i,j,k,l))!=0)

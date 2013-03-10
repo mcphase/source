@@ -14,11 +14,11 @@ setting up mcdisp.mf to be used by mcdisp
 T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T
 *******************************************************
 reading results/mcphas.mf
-.... trying to calculate results/charges.*
+.... trying to calculate results/spins.*
 EOF
 
 print STDOUT << "EOF";
-reading results/mcphas.sps
+reading results/mcphas.mf
 ....writing results/spins.*
 EOF
 

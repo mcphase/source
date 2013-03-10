@@ -79,7 +79,7 @@ double T; Vector Hext(1,3);
  char outstr[MAXNOFCHARINLINE];
   int dim=28;
  char text[1000];
- int os=0; int doijk=0,arrow=0,arrowdim=3;
+ int os=0; int doijk=0,arrow=0,arrowdim=3,density=0;
  double xx=0,yy=0,zz=0;
 graphic_parameters gp;
 gp.show_abc_unitcell=1.0;
@@ -97,16 +97,16 @@ sprintf(gp.title,"output of program spins");
  if (argc < 5){help_and_exit();}
 // first: option without graphics just screendump <I> or exchange field configuration at given HT
  if (strcmp(argv[1],"-f")==0)
- { fin = fopen_errchk (argv[2], "rb");os=2;}
+ { fin = fopen_errchk (argv[2], "rb");os=2;printf("# reading from file %s\n",argv[2]);}
  else  // second ... other options with graphics !!
- { fin = fopen_errchk ("./results/mcphas.sps", "rb");
+ { fin = fopen_errchk ("./results/mcphas.mf", "rb");printf("# reading from file ./results/mcphas.mf\n");
   if(strcmp(argv[1],"-c")==0){os=1;}
   if(strcmp(argv[1],"-s")==0){os=1;}
   if(strcmp(argv[1],"-o")==0){os=1;} 
   if(strcmp(argv[1],"-m")==0){os=1;}
   if(strcmp(argv[1],"-j")==0){os=1;}
   if(os==1)
-  {gp.show_density=1;
+  {gp.show_density=1;density=1;
 
 switch(argv[1][1]) // dimension definition from jjjpar.hpp
 {case 'c': dim=CHARGEDENS_EV_DIM;
@@ -278,7 +278,7 @@ if(arrow){
        for(nt=1;nt<=3;++nt)
 		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt);
                     }}
-if(gp.show_density){
+if(density){
 switch(argv[1][1]) // dimension definition from jjjpar.hpp
 {case 'c':  (*inputpars.jjj[ii]).chargedensity_coeff (moments, T, h, Hext, (*inputpars.jjj[ii]).Icalc_parstorage); break;
  case 's':  if(xx!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsx,1, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
@@ -331,9 +331,11 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
 printf("# ************************************************************************\n");
 printf("#%s\n",gp.title);
 printf("# ************************************************************************\n");
+              if(arrow==0)gp.spins_scale_moment=0;
+              if(density==0)gp.show_density=0;
 
     fin = fopen_errchk ("./results/spins.eps", "w");
-     savmf.eps(fin,outstr);
+     spinconf.eps(fin,outstr);
     fclose (fin);
 
 // here the 3d file should be created
@@ -456,7 +458,7 @@ if (argc-os>=6){
               fclose (fin);
               }//arrow
 //----------------------------------------------------------------------------------------------------------
-            if(gp.show_density){
+            if(density){
              switch(argv[1][1]) // dimension definition from jjjpar.hpp
                 {case 'c':fin = fopen_errchk ("./results/mcdisp.qee", "rb");break;
                  case 's':fin = fopen_errchk ("./results/mcdisp.qsd", "rb");break;
@@ -521,6 +523,8 @@ if (argc-os>=6){
 //----------------------------------------------------------------------------------------------------------           
               gp.read();// read graphic parameters which are set by user in file results/graphic_parameters.set
                         // in case he wants to overwrite some default settings
+              if(arrow==0)gp.spins_scale_moment=0;
+              if(density==0)gp.show_density=0;
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
               double phase;
