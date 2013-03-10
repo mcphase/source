@@ -8,7 +8,7 @@
 //***********************************************************************
 // returns 1 on success and zero on failure
 //***********************************************************************
-void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_gobeyond,Vector & hkl, double ninit,double pinit)
+void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_gobeyond,Vector & hkl)
 {int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);double QQ;
  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
@@ -49,20 +49,16 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
                                                //mf ... exchange field vector of atom s
       (*inputpars.jjj[l]).transitionnumber=tn; // try calculation for transition  tn
       if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=-tn;
-      mq1(1)=complex <double> (ninit,pinit);
       // try dipole approximation for this ion
       // dipole approx: <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0
       ComplexVector L1(1,3),S1(1,3),mq1_dip(1,3);
-     float dL=1e10;L1(1)=complex <double> (ninit,pinit);
-     float dS=1e10;S1(1)=complex <double> (ninit,pinit);                                  
-      if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,L1,dL,md.est(i,j,k,l))!=0&&
-         (*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,S1,dS,md.est(i,j,k,l))!=0)
+      if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,L1,md.est(i,j,k,l))!=0&&
+         (*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,S1,md.est(i,j,k,l))!=0)
          {mq1=(*inputpars.jjj[l]).F(-QQ)*L1+2.0*(*inputpars.jjj[l]).F(QQ)*S1;(*inputpars.jjj[l]).FF_type=3;}
       else  {ComplexVector m1(1,3); // try dipole approximation using dm1calc
                                     // gJ=0 dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0  
-                                    // gJ>0 dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2   
-             float d=1e10;m1(1)=complex <double> (ninit,pinit);
-             if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,m1,d,md.est(i,j,k,l))!=0)
+                                    // gJ>0 dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2                
+             if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,m1,md.est(i,j,k,l))!=0)
              {mq1=m1*(*inputpars.jjj[l]).F(QQ);(*inputpars.jjj[l]).FF_type=2;}
              else {printf("#warning mcdisp - functions dmq1,dm1calc,dL1calcd,S1calc not implemented for single ion module of ion %s, no magnetic neutron intensity from this ion\n",(*inputpars.jjj[l]).sipffilename);
                    mq1=0;mq1(1)= complex <double> (1e-10,0.0);(*inputpars.jjj[l]).FF_type=1;
@@ -70,7 +66,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
              }
       mq1_dip=mq1; 
       // try if going beyond dip approximation for formfactor works
-     if(do_gobeyond){mq1(1)=complex <double> (ninit,pinit);
+     if(do_gobeyond){
       if((*inputpars.jjj[l]).dMQ1calc(qijk,ini.T,mq1,md.est(i,j,k,l))!=0)// calculate <-|M(Q)|+>
       {if(do_verbose)printf("#going beyond dipole approx for ion %s\n",(*inputpars.jjj[l]).sipffilename);
        (*inputpars.jjj[l]).FF_type*=-1; // put FFTYPE negative to indicate that going beyond works

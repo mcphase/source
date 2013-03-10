@@ -196,7 +196,7 @@ module_type=0;
     mq=(void(*)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*))GetProcAddress(handle,"mqcalc");
     //*(void **)(&mq)=GetProcAddress(handle,"mqcalc");
      if (mq==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function mqcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*))GetProcAddress(handle,"dmq1");
+    ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*,double*))GetProcAddress(handle,"dmq1");
     //*(void **)(&dnn)=GetProcAddress(handle,"dmq1");
      if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dmq1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
@@ -324,7 +324,7 @@ module_type=0;
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
 
-  DWF=0;  gJ=0;
+  DWF=0;  gJ=0;maxE=1e10;pinit=0;ninit=1e10;
 
   cf_file = fopen_errchk (sipf_filename, "rb");
   while(feof(cf_file)==false)
@@ -475,7 +475,8 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,do
 // for effective field heff and temperature given on input
 /****************************************************************************/
 int jjjpar::du1calc(double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
-{ switch (module_type)
+{delta=maxE;u1(1)=complex <double> (ninit,pinit);
+  switch (module_type)
   {case 0: if (du!=NULL){return (*du)(&transitionnumber,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&ests);}
            else return 0;
            break;

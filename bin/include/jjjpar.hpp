@@ -45,7 +45,7 @@ public:
   Vector xyz,mom; // atom position, moment
   int paranz;   // number of exchange parameters
   int nofcomponents; // number of moments (components of moment vector)
-  double gJ;
+  double gJ,ninit,pinit,maxE;
   Matrix *jij; // exchange constants 
   Vector *dn; // exchange - coordinates of neighbors 
   int *sublattice; // sublattice of neighbours
@@ -123,7 +123,7 @@ public:
 // ********************************************************************************
 //0. PHONON displacement
 int pcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
-int  dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dp1,float & delta,ComplexMatrix & ests);
+int  dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dp1,ComplexMatrix & ests);
 private:
 void (*p)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
 int  (*dp1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
@@ -134,9 +134,9 @@ public:
    int mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
    int Lcalc(Vector &L, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
    int Scalc(Vector &S, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
-   int  dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dm1,float & delta,ComplexMatrix & ests);
-   int  dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dL1,float & delta,ComplexMatrix & ests);
-   int  dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dS1,float & delta,ComplexMatrix & ests);
+   int  dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dm1,ComplexMatrix & ests);
+   int  dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dL1,ComplexMatrix & ests);
+   int  dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dS1,ComplexMatrix & ests);
 
 private:  // handle for mcalc in loadable modules
   void (*m)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
@@ -154,11 +154,11 @@ public:
   
   // returns transition element matrix N(Q) in order to be able to go beyond
    // dipolar approximation in mcdisp - it requires a call to eigenstates first
-   int dMQ1calc(Vector & Qvec, double & T, ComplexVector & v1, ComplexMatrix & ests);
+   int dMQ1calc(Vector & Qvec, double & T, ComplexVector & dMQ1, ComplexMatrix & ests);
 
 private :
   void (*mq)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*);
-  int  (*ddnn)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*);
+  int  (*ddnn)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*,double*);
 
 public:
   double SLR,SLI; // scattering length
@@ -236,7 +236,7 @@ public:
    // function to calculate coefficients of expansion of chargedensity in terms
    // of Zlm R^2(r) at a given temperature T and  effective field H
    int chargedensity_coeff (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
-   int dchargedensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dchargedensity_coeff1,float & delta,ComplexMatrix & ests);
+   int dchargedensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dchargedensity_coeff1,ComplexMatrix & ests);
 
    double chargedensity_calc (double & teta,double & fi,double & R, Vector & moments);
 private:
@@ -249,7 +249,7 @@ public:
 // function to calculate coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
 int spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
-int dspindensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dspindensity_coeff1,float & delta,ComplexMatrix & ests);
+int dspindensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dspindensity_coeff1,ComplexMatrix & ests);
 // sub for calculation of spin density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)
 double spindensity_calc (double & teta,double & fi,double & R, Vector & moments);
@@ -268,7 +268,7 @@ public:
 // function to calculate coefficients of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
 int orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
-int dorbmomdensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dorbmomdensity_coeff1,float & delta,ComplexMatrix & ests);
+int dorbmomdensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dorbmomdensity_coeff1,ComplexMatrix & ests);
 // sub for calculation of orbital moment density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)
 double orbmomdensity_calc (double & teta,double & fi,double & R, Vector & moments);

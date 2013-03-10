@@ -319,32 +319,21 @@ ion parameter file is just the same as given in the above format for running {\p
 a stand alone program. However, some input files have to follow special conventions in order that 
 {\prg mcphas, mcdisp, mcdiff} work correctly: 
 
-{\bf Note:} in case of intermediate coupling
-it is necessary to specify
-L and S seperately (in interactions and Zeeman term and neutron cross sections ...)
-therefore  ''gJ=0'' in {\prg mcphas.j\index{mcphas.j}} has a special meaning:
 \begin{itemize}
-\item  it modifies
-the convention that Ja=Jy=O1-1(J) Jb=Jz=O10(J) Jc=Jx=O11(J) and instead
-puts Ja=Sx Jb=Lx Jc=Sy Jd=Ly Je=Sz Jf=Lz, the Jn for $n>f$ being defined in the single
-ion module. 
-\item for higher order operators, the current McPhase definitions are expanded, so instead of
-Jd==O22S, we made Jg==T22S, Jh==T21S, Ji==T20, Jj==T21, Jk==T22,
-Jl==T33S, etc... the operators $\hat T_{kq}$ are described in equation~(\ref{tkqhermitian})
+\item the standard operator sequence for ic1ion is different from all other modules, it is
+puts Ia=Sx Ib=Lx Ic=Sy Id=Ly Ie=Sz If=Lz
+\item for higher order operators, we made Ig==T22S, Ih==T21S, Ii==T20, Ij==T21, Ik==T22,
+Il==T33S, etc... the operators $\hat T_{kq}$ are described in equation~(\ref{tkqhermitian})
 % these operators are to be understood as in the Stevens notation, equivalent
 %operators to tesseral harmonic functions stripped by their prefactors $c_{lm}$ (factors before 
 %the
 %bracket in table IV of~\cite{hutchings64-227} and in appendix~\ref{tesseral}), 
 %i.e. $\langle v| O_{lm}| v' \rangle=\langle nu |\sum_i Z_l^m(\Omega_i)|nu' \rangle / c_{lm}$.
-\item the programs {\prg mcphas, mcdisp etc} take into account
- a modified Zeeman term $H_{Ze}=-\mu_B(2\mbf S+\mbf L)\mbf H$.
- However, in program {\prg singleion\index{singleion}} the meanfields of S and L can be
- separately given by specifying gjmbH=$g \mu_B H$ with g=2 or 1 depending
- on whether it is spin or orbital component of the field. 
-\item the magnetic moments are calculated and shown in plots according 
+\item the magnetic moments are calculated in mcalc according 
 to $\mbf M=\mu_B(2<\mbf S>+<\mbf L>)$
-\item Also the inelastic neutron scattering cross section in {\prg mcdisp\index{mcdisp}} is evaluated using the first
-6x6 components of the dynamical matrix  in dipole approximation for the magnetic formfactor.
+\item Also the inelastic neutron scattering cross section
+ in {\prg mcdisp\index{mcdisp}} is evaluated using the first
+  in dipole approximation and beyond for the magnetic formfactor.
 \end{itemize}
 
 \subsection{{\prg icf1ion} - Intermediate Crystal Field module}

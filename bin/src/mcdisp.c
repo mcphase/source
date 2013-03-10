@@ -431,8 +431,9 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
    fprintf(fout,"#             k,i   E -> E                                     |\n");
    fprintf(fout,"#                    i    k                                    |\n");
    fprintf(fout,"#-------------------------------------------------------------- \n");
-   fprintf(fout,"#! ninit= %g (max number of initial states)\n",ninit);
-   fprintf(fout,"#! pinit= %g (minimum population number of initial states)\n",pinit);
+   fprintf(fout,"#! ninit= %g (max number of initial states) -do not modify: needed to cound transitions\n",ninit);
+   fprintf(fout,"#! pinit= %g (minimum population number of initial states)-do not modify: needed to cound transitions\n",pinit);
+   fprintf(fout,"#! maxE= %g meV(maximum value of transition energy)-do not modify: needed to cound transitions\n",maxE);
    fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",ini.T,ini.Hext(1),ini.Hext(2),ini.Hext(3));
    fprintf(fout,"#*********************************************************************\n");
           fprintf (fout, "#i j k ionnr transnr energy |gamma_s|  sigma [barn/sr](*)\n");
@@ -446,7 +447,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
    md.est_ini(i,j,k,l,(*inputpars.jjj[l]).eigenstates(mf,ini.Hext,ini.T)); 
    (*inputpars.jjj[l]).transitionnumber=1;
    fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-   d=1e10;u1(1)=complex <double> (ninit,pinit);i1=(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
+   (*inputpars.jjj[l]).maxE=maxE;(*inputpars.jjj[l]).pinit=pinit;(*inputpars.jjj[l]).ninit=ninit;
+   i1=(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
    Mijkl = u1^u1;
       // here Mijkl is a nxn matrix n ... numberofcomponents
    noftransitions(l)=0;
@@ -455,7 +457,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
      fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      ++(*inputpars.jjj[l]).transitionnumber;
      fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-     d=1e10;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
+     (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
      Mijkl=u1^u1;
      if((*inputpars.jjj[l]).transitionnumber>i1){fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n (within first crystallographic unit of magnetic unit cell)\n please increase energy range in option -maxE and -minE\n",minE,maxE);
                             exit(EXIT_FAILURE);}
@@ -467,8 +469,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
 //     else
 //     { for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
      double intensityp=0, intensitym=0; ComplexVector dm1(1,3);
-     d=1e10;dm1(1)=complex <double> (ninit,pinit);
-     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,d,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
+     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
      {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
      if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
@@ -476,9 +477,6 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
      }
      else
      {intensityp=-1;intensitym=-1;}     
-
-
-                
 
    jmin=(*inputpars.jjj[l]).transitionnumber;
   if (do_verbose==1){fprintf(stdout,"Matrix M(s=%i %i %i)\n",i,j,k);
@@ -494,6 +492,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
     { fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,jmin,myround(-d),myround(gamma(ini.nofcomponents)),myround(intensitym));
     ++noftransitions(l);}
 
+   // now do  other transitions of the same ion:
    for(j1=jmin+1;j1<=i1;++j1) 
    // for every transition add new "atom" to list ... changed to "setnumberoftransitions" for
    // ion l in cryst unit cell ijk
@@ -504,7 +503,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
       
         (*inputpars.jjj[l]).transitionnumber=-j1; // try calculation for transition  j
       fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-      d=maxE;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
+      (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
       Mijkl = u1^u1;
    //printf("noftransitions read by mcdisp: %i",i1);
       
@@ -520,8 +519,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
     //intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
     // if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
     //                              else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
-     d=maxE; dm1(1)=complex <double> (ninit,pinit);
-     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,d,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
+     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
      {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
      if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
@@ -566,13 +564,14 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
  while(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL&&nparread<6)
  {nparread+=1-extract(instr,"ninit",ninit);
   nparread+=1-extract(instr,"pinit",pinit);
+  nparread+=1-extract(instr,"maxE",maxE);
   nparread+=1-extract(instr,"T",Tr);
   nparread+=1-extract(instr,"Ha",Har);
   nparread+=1-extract(instr,"Hb",Hbr);
   nparread+=1-extract(instr,"Hc",Hcr);
  }
 
- if (Tr!=ini.T||Har!=ini.Hext(1)||Hbr!=ini.Hext(2)||Hcr!=ini.Hext(3)||nparread!=6){fprintf(stderr,"ERROR: reading mcdisp.trs one of the parameters not set or not in line with mcdisp.ini: ninit pinit T Ha Hb Hc ! \n");exit(EXIT_FAILURE);}
+ if (Tr!=ini.T||Har!=ini.Hext(1)||Hbr!=ini.Hext(2)||Hcr!=ini.Hext(3)||nparread!=7){fprintf(stderr,"ERROR: reading mcdisp.trs one of the parameters not set or not in line with mcdisp.mf mcdisp.par: ninit pinit maxE T Ha Hb Hc ! \n");exit(EXIT_FAILURE);}
   while (feof(fin)==0)
   {if ((i1=inputline(fin,nn))>=5)
    {if(i==(int)nn[1]&&j==(int)nn[2]&&k==(int)nn[3])
@@ -587,6 +586,10 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_fast, int do_gobeyond,int 
        {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s in first 
                                                               //crystallographic unit of magnetic unit cell
        if(do_readtrs!=0)md.est_ini(i,j,k,l,(*inputpars.jjj[l]).eigenstates(mf,ini.Hext,ini.T)); // initialize ests if not already done above
+       (*inputpars.jjj[l]).ninit=ninit; // set the constants with values read from mcdisp.trs for each ion so calls to du1calc
+       (*inputpars.jjj[l]).pinit=pinit; // dm1calc etc have the same transition number scheme
+       (*inputpars.jjj[l]).maxE=maxE;
+
        }
 
     md.U(i,j,k)=0; // initialize transformation matrix U
@@ -630,7 +633,7 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
       
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  tn with printout
-      d=1e10;u1(1)=complex <double> (ninit,pinit);(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
+        (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
         Mijkl = u1^u1;gamman=Norm2(u1);u1/=sqrt(gamman);
        if(fabs((fabs(d)-fabs(nn[6]))/(fabs(nn[6])+1.0))>SMALLEDIF)
         {fprintf(stderr,"ERROR mcdisp: reading mcdisp.trs with transition energy delta %g meV different from internal calculation %g meV\n",nn[6],d);	 
@@ -660,32 +663,32 @@ for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii
 //----------------------------------OBSERVABLES -------------------------------------------------
 if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with eigenvector dimension for observable=%i\n",i,j,k,l,CHARGEDENS_EV_DIM);}
 //-----------------------------------------------------------------------------------
-if(ini.calculate_chargedensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;chargedensity_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,d,md.est(i,j,k,l))!=0)
+if(ini.calculate_chargedensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+   if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,inputpars,chargedensity_Mijkl,md,
              chargedensity_gamma,chargedensity_gamman,chargedensity_Uijkl,maxiter,nn,ini, gamma,Echargedensity);}
-if(ini.calculate_spindensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;spindensity_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,d,md.est(i,j,k,l))!=0)
+if(ini.calculate_spindensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+   if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,inputpars,spindensity_Mijkl,md,
              spindensity_gamma,spindensity_gamman,spindensity_Uijkl,maxiter,nn,ini, gamma,Espindensity);}
-if(ini.calculate_orbmomdensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;orbmomdensity_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,d,md.est(i,j,k,l))!=0)
+if(ini.calculate_orbmomdensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+   if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,inputpars,orbmomdensity_Mijkl,md,
              orbmomdensity_gamma,orbmomdensity_gamman,orbmomdensity_Uijkl,maxiter,nn,ini, gamma,Eorbmomdensity);}
-if(ini.calculate_phonon_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;phonon_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dp1calc(ini.T,mf,ini.Hext,phonon_coeff1,d,md.est(i,j,k,l))!=0)
+if(ini.calculate_phonon_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+   if((*inputpars.jjj[l]).dp1calc(ini.T,mf,ini.Hext,phonon_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,inputpars,phonon_Mijkl,md,
              phonon_gamma,phonon_gamman,phonon_Uijkl,maxiter,nn,ini, gamma,Ephonon);}
-if(ini.calculate_magmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;magmom_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,d,md.est(i,j,k,l))!=0)
+if(ini.calculate_magmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+   if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,inputpars,magmom_Mijkl,md,
              magmom_gamma,magmom_gamman,magmom_Uijkl,maxiter,nn,ini, gamma,Emagmom);}
-if(ini.calculate_spinmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;spin_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,d,md.est(i,j,k,l))!=0)
+if(ini.calculate_spinmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+   if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,inputpars,spin_Mijkl,md,
              spin_gamma,spin_gamman,spin_Uijkl,maxiter,nn,ini, gamma,Espin);}
-if(ini.calculate_orbmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;d=1e10;orbmom_coeff1(1)=complex <double> (ninit,pinit);
-   if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,orbmom_coeff1,d,md.est(i,j,k,l))!=0)
+if(ini.calculate_orbmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+   if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,orbmom_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,ORBMOM_EV_DIM,orbmom_coeff1,inputpars,orbmom_Mijkl,md,
              orbmom_gamma,orbmom_gamman,orbmom_Uijkl,maxiter,nn,ini, gamma,Eorbmom);}
 //----------------------------------------------------------------------------------------------
@@ -1069,7 +1072,7 @@ if (do_jqfile==1){
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
                   
   diffint=0;diffintbey=0;
-                  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,hkl,ninit,pinit);
+                  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,hkl);
    if(qincr==0) { //write header for output files
                    fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
                    writeheader(inputpars,foutqom);

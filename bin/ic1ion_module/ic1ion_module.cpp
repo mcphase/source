@@ -35,7 +35,7 @@
  *                 double &J4, double &J6, ComplexMatrix &est)                     //   of the magnetisation density
  *   int dmq1(int &tn, double &th, double &ph, double &J0, double &J2,           // Calculates the transition matrix
  *                 double &J4, double &J6, ComplexMatrix &est, double &T,          //   elements beyond the dipole
- *                 ComplexVector & mq1)                                             //   approximation.
+ *                 ComplexVector & mq1, double &delta)                             //   approximation.
  *   void chargedensity_coeff(Vector & mom,double *T,Vector &Hxc,Vector&Hext,      // Calc. coeffs. of expansion of chargedensity 
  *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)    //   in terms of Zlm R^2(r) at given T / H_eff
  *   int dchargedensity_coeff1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,       // Calculates the transition
@@ -666,7 +666,9 @@ __declspec(dllexport)
                   double &J4, double &J6, // Input radial parameters <j_4>, <j_6>
                   ComplexMatrix &est,     // Input eigenvalues/vectors of the system Hamiltonian, H_SI+H_mf 
                   double &T,              // Input temperature (K)
-                  ComplexVector & mq1)     // Output transition vector, mq1=<-|M(Q)|+> sqrt(n- - n+) in units of MU_B
+                  ComplexVector & mq1,    // input mq1(1)= ninit + i pinit   
+                                          //  Output transition vector, mq1=<-|M(Q)|+> sqrt(n- - n+) in units of MU_B
+                  double & maxE)         // input maxE maximal transition energy
 /* 
      Note on Qalpha (Qa or Qb)
         Kartesian components of the scattering operator Qalpha, alpha=1,2,3=a,b,c

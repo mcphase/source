@@ -30,8 +30,9 @@ int jjjpar::pcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,Com
 }
 
 
-int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1,float & delta,ComplexMatrix & ests)
-{ switch (module_type)
+int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1,ComplexMatrix & ests)
+{float delta=maxE;p1(1)=complex <double> (ninit,pinit); 
+ switch (module_type)
   {case 0: if(dp1==NULL){fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dp1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&p1,&delta,&ests);}
            break;
@@ -68,18 +69,19 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,Com
   }
 }
 
-int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1,float & delta,ComplexMatrix & ests)
-{ComplexVector uu1(1,Hxc.Hi());int nnt,i;
+int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1,ComplexMatrix & ests)
+{float delta=maxE;m1(1)=complex <double> (ninit,pinit);
+ ComplexVector uu1(1,Hxc.Hi());int nnt,i;
  switch (module_type)
   {case 0: if(dm1==NULL){fprintf(stderr,"Problem: dm1calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&m1,&delta,&ests);}
            break;
-   case 1: return (gJ*kramerdm(transitionnumber,T,Hxc,Hext,m1,delta));break;
+   case 1: nnt=kramerdm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
    case 2:
    case 4: uu1(1)=m1(1);
            nnt=(*iops).cfielddm(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
-   case 3: return gJ*brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);break;
+   case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
    case 5:fprintf(stderr,"Problem: dm1calc in internal module cluster not implemented, continuing ... \n");break;
   default:fprintf(stderr,"Problem: dm1calc in internal module ... not implemented, continuing ... \n");
           break;
@@ -105,8 +107,9 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
   }
 }
 
-int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1,float & delta,ComplexMatrix & ests)
-{ switch (module_type)
+int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1,ComplexMatrix & ests)
+{float delta=maxE;L1(1)=complex <double> (ninit,pinit);
+  switch (module_type)
   {case 0: if(dL1==NULL){fprintf(stderr,"Problem: dLcalc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dL1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&L1,&delta,&ests);}
            break;
@@ -139,8 +142,9 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
   }
 }
 
-int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1,float & delta,ComplexMatrix & ests)
-{ switch (module_type)
+int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1,ComplexMatrix & ests)
+{float delta=maxE;S1(1)=complex <double> (ninit,pinit);
+ switch (module_type)
   {case 0: if(dS1==NULL){fprintf(stderr,"Problem: dScalc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dS1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&S1,&delta,&ests);}
            break;
@@ -219,8 +223,8 @@ switch (module_type)
 //
 /****************************************************************************/
 int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix & ests)
-
-{double J0,J2,J4,J6;
+{dMQ(1)=complex <double> (ninit,pinit);
+ double J0,J2,J4,J6;
  double Q,th,ph;
  int i;     complex<double>dummy; // introduced 3.4.10 MR
             Q = Norm(Qvec); //dspacing
@@ -234,7 +238,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
   {static int washere=0;
 
    case 0:if (ddnn!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
-                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ);break;}
+                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ,&maxE);break;}
           else {return 0;}
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give cfielddn polar angles with respect to xyz
             i=(*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);
@@ -765,8 +769,9 @@ printf("\n");
 return true;
 }
 
-int jjjpar::dchargedensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & chargedensity_coeff1,float & delta,ComplexMatrix & ests)
-{switch (module_type)
+int jjjpar::dchargedensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & chargedensity_coeff1,ComplexMatrix & ests)
+{float delta=maxE;chargedensity_coeff1(1)=complex <double> (ninit,pinit);
+ switch (module_type)
   {case 1: fprintf(stderr,"Problem: chargedensity  in module kramer is not possible, continuing ... \n");
            return 0;break;
    case 2:
@@ -869,8 +874,9 @@ for(int i=1;i<=SPINDENS_EV_DIM;++i){printf("#! aS%i(%i,%i) =%12.6f\n",xyz,k[i],q
 return true;
 }
 
-int jjjpar::dspindensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & spindensity_coeff1,float & delta,ComplexMatrix & ests)
-{switch (module_type)
+int jjjpar::dspindensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & spindensity_coeff1,ComplexMatrix & ests)
+{float delta=maxE;spindensity_coeff1(1)=complex <double> (ninit,pinit);
+ switch (module_type)
   {case 1: fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
            return 0;break;
    case 2:
@@ -1028,8 +1034,9 @@ int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,
 for(int i=1;i<=ORBMOMDENS_EV_DIM;++i){printf("#! aL%i(%i,%i) =%12.6f\n",xyz,k[i],q[i],myround(mom(i)));}
 return true;
 }
-int jjjpar::dorbmomdensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & orbmomdensity_coeff1,float & delta,ComplexMatrix & ests)
-{switch (module_type)
+int jjjpar::dorbmomdensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & orbmomdensity_coeff1,ComplexMatrix & ests)
+{float delta=maxE;orbmomdensity_coeff1(1)=complex <double> (ninit,pinit);
+ switch (module_type)
   {case 1: fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
            return 0;break;
    case 2:

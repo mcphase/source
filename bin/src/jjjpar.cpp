@@ -599,7 +599,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
    Np=Vector(1,9);Np=0; // vectors of radial wave function parameters
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
-  DWF=0;gJ=0;
+  DWF=0;gJ=0;maxE=1e10;pinit=0;ninit=1e10;
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 
 }
@@ -619,7 +619,7 @@ jjjpar::jjjpar (const jjjpar & pp)
   strncpy (modulefilename,pp.modulefilename, MAXNOFCHARINLINE-1);
   diagonalexchange=pp.diagonalexchange;
   gJ=pp.gJ;module_type=pp.module_type;
-  
+  ninit=pp.ninit;maxE=pp.maxE;pinit=pp.pinit;
   Np=pp.Np; Xip=pp.Xip;Cp=pp.Cp;
   r2=pp.r2;r4=pp.r4;r6=pp.r6;
 
