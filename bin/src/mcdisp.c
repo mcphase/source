@@ -1080,7 +1080,7 @@ if (do_jqfile==1){
           
                    fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
                    writeheader(inputpars,foutqei);
-                   fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.] Imag [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)}\n");
+                   fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.] Imag [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)\n");
 
   //------------observables-----------------------------------
 if(ini.calculate_chargedensity_oscillation)foutqee=evfileinit(filemode,"./results/mcdisp.qee",inputpars,"qee",CHARGEDENS_EV_DIM);
@@ -1093,7 +1093,7 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
   //-----------------------------------------------------------
                         fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
                         writeheader(inputpars,foutdstot);
-                        fprintf (foutdstot, "#!Total Scattering Cross Section (obtained by DMD method) in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)}",ini.emin,ini.emax);
+                        fprintf (foutdstot, "#!Total Scattering Cross Section (obtained by DMD method) in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)",ini.emin,ini.emax);
 
                         if (do_Erefine==1){
                          fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
@@ -1582,7 +1582,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
     fclose(foutqom);
                  if (do_Erefine==1){fclose(foutds);}
     fclose(foutdstot);
-     }
+     } 
 }
 
 //*************************************************************************************************

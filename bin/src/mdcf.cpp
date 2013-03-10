@@ -207,7 +207,10 @@ mdcf::~mdcf ()
  delete lb_dip[id];
  delete d[id];
  // For caching values in calculation of transform of chi''
- if(Ug[id]!=0) delete Ug[id]; if(gU[id]!=0) delete gU[id]; if(bUg[id]!=0) delete bUg[id]; if(bgU[id]!=0) delete bgU[id];
+ if(Ug!=0){if(Ug[id]!=0) delete Ug[id];}
+ if(gU!=0){if(gU[id]!=0) delete gU[id]; }
+ if(bUg!=0){if(bUg[id]!=0) delete bUg[id]; }
+ if(bgU!=0){if(bgU[id]!=0) delete bgU[id];}
  }}}
  delete []s;delete []m;delete []d;delete []l;delete []nt;
  delete []sb;
