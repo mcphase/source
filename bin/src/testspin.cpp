@@ -46,13 +46,13 @@ void testspincf::save (const char*filename, const char * filemode)
  fprintf(fout,"#! nofatoms=%i\n",nofatoms);
  fprintf(fout,"#! nofcomponents=%i\n",nofcomponents);
  fprintf(fout,"# File Format: blocks of 3xnofatoms lines consisting of\n");
- fprintf(fout,"# ma[1] ma[2] ma[3] .... ma[n]\n");
- fprintf(fout,"# mb[1] mb[2] mb[3] .... mb[n]\n");
- fprintf(fout,"# mc[1] mc[2] mc[3] .... mc[n]\n");
+ fprintf(fout,"# <Ia>[1] <Ia>[2] <Ia>[3] .... <Ia>[n]\n");
+ fprintf(fout,"# <Ib>[1] <Ib>[2] <Ib>[3] .... <Ib>[n]\n");
+ fprintf(fout,"# <Ic>[1] <Ic>[2] <Ic>[3] .... <Ic>[n]\n");
 
  for (i=1;i<=n;++i)
    {// print  configuration i 
-    fprintf(fout,"#{momentum configuration %i}\n",i);
+    fprintf(fout,"#{configuration %i}\n",i);
     configurations[i]->print(fout);
     }
   fclose(fout);
