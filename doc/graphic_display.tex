@@ -70,239 +70,223 @@ in Tree View $\rightarrow$ xaxis title, etc.
 
 \item [displaytext\index{displaytext} ./results/mcphas.hkl] monitors the file mcphas.hkl in a text window
 on screen.
-
-\item [show 1 11 ./results/mcphas.fum]     produces a gnuplot graphic 
-({\prg gnuplot} must be installed
-on the system in order to use this).
 \end{description} 
-the following example shows the temperature dependence of the magnetisation
-of NdCu$_2$
 
-\begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page
-\begin{center}\leavevmode
-\includegraphics[angle=-90, width=0.7\textwidth]{figsrc/ndcu2b/resultss/mag0_2T.ps}
-\end{center}
-\caption{Calculated temperature dependence of the magnetisation  along the crystallographic
-$b$-direction  of NdCu$_2$ for an applied magnetic field of 0.2~T 
-[plot created by program {\prg show+gnuplot}]}
-\label{magnetizationgraphic}
-\end{figure}
-%\clearpage
+\subsection{Programs {\prg display\_density}\index{display\_density} 
+- display of the charge- spin- moment- current- density of a single ion}\label{displaydensity}
 
-\subsection{Program {\prg spins\index{spins}} - display\index{display} of the moment configuration for a given %%@
-temperature/field}
-\label{spins}
+The program {\prg display\_density}\index{display\_density} is used to display a surface of constant
+charge density for an open shell ion, which is described by a single ion property file.
+In addition, also, the spin-, orbital moment, total magnetic moment and orbital current
+densities can be displayed. 
+
 
 \begin{description} 
-\item [spins T Ha Hb Hc [file.sps||file.mf||h k l E(meV)]]       produces plot of spin-configuration at $T-H$ %%@
-point
+\item [ display\_density\index{display\_density}  c$|$s$|$o$|$m$|$j [-p i j k$|$-div] [-S$|$-L$|$-M] mcphas.sipf
+ T Ha Hb Hc]
 \end{description} 
+\begin{verbatim}
+                 c ... calculate chargedensity
+                 s ... calculate spindensity
+                 o ... calculate angular orbital momentum density
+                 m ... calculate magnetic moment density
+                 j ... calculate currentdensity
+        optional p i j k ... calculate projection of spin/orbital/current/magnetic 
+                             moment density along direction i j k, e.g. 0 0 1
+        optional -div    ... calculate divergence of spin/orbital/current/magnetic 
+                             moment density
+        optional -S  ... show arrow indicating spin
+        optional -L  ... show arrow indicating orbital angular momentum
+        optional -M  ... show arrow indicating magnetic moment
+                 - crystal field  parameters Blm should be read from a
+                   standard mcphas single ion property file mcphas.sipf
+                 - given is temperature T[K] and magnetic effective field H[T]
+                options: if T<0 then no thermal boltzmann distribution is taken
+                the statistical probability of each CF state has to be entered
+                by hand.
+     example:
+               display_density c Pr3p.sipf 2 0 0 1
+             ...calculates the charge density using crystal field from Pr3p.sipf
+                at T=2K and H=(0,0,1) Tesla
+\end{verbatim}
 
-Note, the graphics output format can be fine tuned in .sps and .qev input filescan be fine tuned in .mf input %%@
-files by setting the variables
-{\prg show\_abc\_unitcell, show\_primitive\_crystal\_unitcell, show\_magnetic\_unitcell, show\_atoms, %%@
-scale\_view\_1,
-scale\_view\_2, scale\_view\_3}, and in
-the  .qev input file bye setting 
-{\prg spins\_wave\_amplitude, spins\_show\_ellipses, spins\_show\_direction\_of\_static\_moment}.
-                          Note, in case of non-orthogonal axes the convention 
-                           for applied field $Ha, Hb,Hc$ 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-\
-Output files:
-\begin{enumerate}
-  \item encapsulated postscript ps-file {\prg results/spins*.eps}, 
-  \item the files {\prg results/spins.fst} and {\prg results/spins\_prim.fst} are created, 
-                which can be read by the fullprof program {\prg fp\_studio}
-                for on screen display\index{display} of a spin configuration,
-  \item the spin-configuration is printed to stdout - therefore
-                               this program can be used with a .mf file 
-			       to generate an input file
-			       for program {\prg  McDisp} (example: {\prg spins 1 1 0 0 spins.mf $>$ mcdisp.mf})  
-  \item the text file {\prg results/spins.out} is created, which is useful to produce input files for
-              the diffraction program {\prg mcdiff\index{mcdiff}}
-  \item the graphics files {\prg results/spins.jvx} and {\prg results/spins\_prim.jvx}, which can be displayed
-         by the program {\prg javaview}, e.g. by the command {\prg java javaview spin\_prim.jvx}.
-  \item if {\prg spins} is used with arguments {\prg h k l E(meV)}, it takes the eigenvectors of magnetic %%@
-excitations
-        from the file {\prg results/mcdisp.qev} (usually created by {\prg mcdisp}) and produces a graphical
-        animation of the spin osciallation which is associated with this magnetic mode. The output is a series
-        of files {\prg results/spins.*.jvx} and {\prg results/spins\_prim.*.jvx} which can be viewed by program
-        {\prg javaview}, e.g. by the command {\prg java javaview "model=results/spins\_prim.*.jvx" 
-        Animation.LastKey=16 background="255 255 255"}.  {\prg javaview} is also able to produce a sequence
-		of gif files (press c in the animation window), which can then be processed by an animatino editor
-		to generate an animation, which can be inserted in presentations. For example, you can use {\prg %%@
-Imagemagick}
-        to create an animation. The following command will issue a proper gif animation, which you can include in %%@
-power point        
-        presentations etc.: {\prg convert -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif}.
- \end{enumerate}
+Note: if T$<$0, then no thermal Boltzmann distribution is taken - 
+		the statistical probability of each CF state has to be 
+		entered by hand.
+
+For the calculation of the charge density the  formula are used as given in
+appendix~\ref{chargedensityoperator}. 
+Spin-, Moment- and Currentdensities
+currently only available in combination with module {\prg ic1ion\index{ic1ion}}.
+Formalism based on \cite{balcar75-1581,balcar89-1,rotter11-12005}.
+
+
+Technical information: the program {\prg display\_density} is actually a script which
+calls  {\prg densplt\index{densplt}} 
+ (a program with the same arguments as {\prg display\_density}
+which calculates the iso surfaces and stores
+it in format for the java based graphic program {\prg javaview} and
+also as a grid. The way in which this is done is controlled by 
+the parameter file {\prg results/graphic\_parameters.set}
+.... in  order to display the results graphically the following java
+programs are called:
+\begin{verbatim}
+ javaview results/densplt.jvx
+ displaycontour 2 3 4 results/densplti.grid
+ displaycontour 1 3 4 results/denspltj.grid
+ displaycontour 1 2 4 results/denspltk.grid
+\end{verbatim}
+
+Note on javaview: You can create also several plots (for instance for different temperatures) and store these
+in a sequence such as densplt.1.jvx, densplt.2.jvx, ... animate
+the view of 4 jvx files by typing: java javaview model=densplt.*.jvx Animation.LastKey=4 
+
+
+\subsection{Programs {\prg display\_densities}\index{display\_densities}  - display of the superstructure
+and excitations}\label{displaydensities}
+
+
+The program {\prg display\_densities}\index{display\_densities} 
+can be used simply to popout spin/exchange field configuration 
+and also to display a 3d animation of spin/moment/densities, even including a movie of
+excitations.
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode
 \includegraphics[angle=0, width=1.0\textwidth]{figsrc/ndcu2b/resultss/spinsab.eps}
 \end{center}
 \caption{Calculated Spin-Structure of NdCu$_2$ at $T=$~1.5~K and $H=0$.
-[plot created by program {\prg display\_spins}\index{display\_spins}]}
+[plot created by program {\prg display\_densities}\index{display\_densities}]}
 \label{spingraphic}
 \end{figure}
 
-\subsection{Programs to calculate and display Charge-, Spin-, Moment- and Currentdensities
-of the unfilled shell}\label{displaydensities}
-                          Note, in case of non-orthogonal axes the convention 
-                           for applied field $Ha, Hb,Hc$ 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 
-\subsubsection{Chargedensity - {\prg display\_chargedensity\index{display\_chargedensity}},
-{\prg display\_chargedensities\index{display\_chargedensities}},
-{\prg chrgplt\index{chrgplt}} and  {\prg charges\index{charges}} - calculation and display of
-the charge density (of the d, f shell) for a given temperature/field}
-\label{charges}
+
+
 
 \begin{description} 
-\item [chrgplt\index{chrgplt}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates (partial) chargedensity for the unfilled shell of a single ion at given temperature and magnetic field
-\item [display\_chargedensity\index{display\_chargedensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the (partial) chargedensity for the unfilled shell of a single ion (using {\prg chrgplt})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\item [charges threshold T Ha Hb Hc [mcphas.mf||h k l E(meV)]]
- calculates (partial) chargedensity for the unfilled shells of magnetic ions in  a magnetic unit cell, which has been calculated by {\prg mcphas} and
- stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
-\item [display\_chargedensities threshold T Ha Hb Hc [mcphas.mf||h k l E(meV)]]
- calculates the (partial) chargedensity for the unfilled shells of magnetic ions in  a magnetic unit cell (using {\prg charges})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\end{description}
+\item[ display\_densities -f mcphas.sps T Ha Hb Hc]
+ if used with -f filename this file has to be a mcphas.mf or mcphas.sps file,
+the spin configuration
+   at given temperature T[K] and magnetic effective field H[T]
+    is read and extracted from this file and printed on screen (stdout), nothing
+ else is done
+\item[display\_densities [-c$|$-s$|$-o$|$-m$|$-j] [-p i j k$|$-div] [-S$|$-L$|$-M] [-P] T Ha Hb Hc [h k l E]]
+ if used without a filename, the information is read from results/mcphas.* res
+ults/mcdisp.*
+   output files and 3d graphical animations are created.
+\end{description} 
+\begin{verbatim}
+   options are:
+         -c ... calculate chargedensity
+         -s ... calculate spindensity
+         -o ... calculate angular orbital momentum density
+         -m ... calculate magnetic moment density
+         -j ... calculate currentdensity
+         -p i j k ... calculate projection of spin/orbital/current/magnetic moment density
+                  along direction i j k, e.g. 0 0 1
+         -div    ... calculate divergence of spin/orbital/current/magnetic moment density
+         -S  ... show arrow indicating spin
+         -L  ... show arrow indicating orbital angular momentum
+         -M  ... show arrow indicating magnetic moment
+         -P  ... calculate phononic displacement
+         note, that in order to animate changes in the above quantities, the corresponding
+         switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion
+         modules have to be capable of calculating the corresponding observables.
 
-   For the calculation of the charge density the following formulas are used (see %%@
-appendix~\ref{chargedensityoperator} for a derivation), 
-
-(i) for external single ion modules ({\prg ic1ion})
-   
-  \begin{equation}\label{chargedensity}
-	       \langle \hat\rho(\mbf r)\rangle=
-	       -|e|  |R(r)|^2 \sum_{l,m}Z_l^{m}(\Omega) \langle\sum_i Z_l^{m}(\Omega_i)\rangle
-   \end{equation} 
-  
-(ii) for module {\prg so1ion} ({\prg cfield})
-   
-   \begin{equation}\label{chargedensity_operator}
-	       \langle \hat\rho(\mbf r)\rangle=-|e||R_{4f}(r)|^2 \sum_{l=0,2,4,6}\sum_{m=-n,...,n}
-	        |p_{nm}| \theta_{l} \langle O_l^m(\mbf J)\rangle_T Z_{lm}(\Omega)
-	      \end{equation}
-		  
-For the notation see \cite{hutchings64-227}: the $R_{4f}$ is the radial part of the
-4f wave function (in program {\prg charges\index{charges}} this is taken the same for all
-rare earth), $e$ the elementary charge, $p_{nm}$ the pre factors of harmonic tesseral
-functions $Z_{lm}(\Omega)$ as given in table IV in \cite{hutchings64-227} and in appendix~\ref{tesseral}, %%@
-$\Theta_l$
-correspond to the number of electrons ($\nu$) for $l=0$
- and the Stevens factors $\alpha$,$\beta$ and $\gamma$ for $l=$~2,4,6, respectively.
-
-The program {\prg chrgplt\index{chrgplt}} just calculates the single ion
-problem and therefore only uses a single ion parameter file.
-{\prg charges\index{charges}} on the other hand requires input files and the result of a
-full {\prg mcphas} simulation.
-
-Note, the graphics output format of program {\prg charges} 
-can be fine tuned in .mf input files by setting the variables
-{\prg show\_abc\_unitcell, show\_primitive\_crystal\_unitcell, show\_magnetic\_unitcell, show\_atoms, %%@
-scale\_view\_1,
-scale\_view\_2, scale\_view\_3, show\_spindensity, show\_chargedensity}, and in
-the  .qee input file bye setting {\prg spins\_wave\_amplitude, spins\_show\_ellipses, %%@
-spins\_show\_direction\_of\_static\_moment}.
-
-
-Output files:
-\begin{enumerate}
-  \item the charge moments and some information are printed to stdout 
-  \item the graphics files {\prg chrgplt\index{chrgplt}.jvx}, {\prg results/charges.jvx} and {\prg %%@
-results/charges\_prim.jvx}, which can be displayed
-         by the program {\prg javaview}, e.g. by the command {\prg java javaview results/charges\_prim.jvx}.
-  \item the files {\prg chrgplt*.grid  charges*.grid} containing the charge density
-on a grid. {\prg *i.grid *j.grid *k.grid} contain the charge densities
-in three orthogonal planes. {\prg *.grid} contains the full charge density on a
-three dimensional grid. Grid parameters can be set in {\prg results/graphic\_parameters.set}.
-  \item {\prg charges} produces the text file {\prg results/charges.out} is created, which is useful to produce %%@
-input files for
-              the diffraction program {\prg mcdiff\index{mcdiff}} in order to go beyond the dipole approximation
-              for calculating the neutron form factor.
-  \item if {\prg charges} is used with arguments {\prg h k l E(meV)}, it takes the eigenvectors of magnetic %%@
-excitations
-        from the file {\prg results/mcdisp.qee} (usually created by {\prg mcdisp}) and produces a graphical
-        animation of the spin/charge oscillation which is associated with this excitation. The output is a series
-        of files {\prg results/charges.*.jvx} and {\prg results/charges\_prim.*.jvx} which can be viewed by %%@
-program
-        {\prg javaview}, e.g. by the command {\prg java javaview "model=results/charges\_prim.*.jvx" 
-        Animation.LastKey=16 background="255 255 255"}.
- \end{enumerate}
+     example:
+        display_densities -c 2 0 0 1
+        ...calculates the charge density at T=2K and H=(0,0,1) Tesla
+\end{verbatim}
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode
 \includegraphics[angle=0, width=0.7\textwidth]{figsrc/ndcu2b/resultss/chargesab.eps}
 \end{center}
 \caption{Calculated 4f Charge-Structure of NdCu$_2$ at $T=$~1.5~K and $H=0$.
-[plot created by program {\prg display\_chargedensities}\index{display\_chargedensities}]}
+[plot created by program {\prg display\_densities}\index{display\_densities}]}
 \label{chargegraphic}
 \end{figure}
 
-\subsubsection{Spin-, Moment- and Currentdensities}
+The program can be used to calculate (partial) chargedensity for the unfilled shells
+ of magnetic ions in  a magnetic unit cell, which has been calculated by {\prg mcphas} and
+ stored in {\prg mcphas.mf} for a specific temperature and magnetic field.
+   For the calculation of the charge density the  formula are used as given in
+appendix~\ref{chargedensityoperator}. 
+In order to do so {\prg display\_densities}\index{display\_densities}  requires input files and the result of a
+full {\prg mcphas} simulation.
+Alternatively, {\prg display\_densities}\index{display\_densities}
+can  calculate the spindensity, the orbital magnetic moment density, the total magnetic
+moment density (in Trammel gauge) and the (orbital) electric current density.
 
-currently only available in combination with module {\prg ic1ion\index{ic1ion}}.
-Formalism based on \cite{balcar75-1581,balcar89-1,rotter11-12005}.
+ The program outputs a magnetic structure (and magnetic excitation)
+  graphic/movie in the output files of different format:
+  results/spins*.eps (postscript), results/spins*.fst (fp\_studio),
+  results/spins.out (ascii) and results/spins*.jvx (javaview).
 
-Single ion programs:
-\begin{description}
-\item [spindensplt\index{spindensplt} threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates spindensity for a single ion at given temperature and magnetic field
-\item [display\_spindensity\index{display\_spindensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the spindensity for a single ion (using {\prg spindensplt})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\item [orbmomdensplt\index{orbmomdensplt} threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates orbital magnetic moment density for a single ion (in Trammel gauge) at given temperature and magnetic field
-\item [display\_orbmomdensity\index{display\_orbmomdensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the orbital magnetic moment density (in Trammel gauge) for a single ion (using {\prg orbmomdensplt})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\item [momdensplt\index{momdensplt} threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates total magnetic moment density for a single ion at given temperature and magnetic field
-\item [display\_momdensity\index{display\_momdensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the total magnetic moment density for a single ion (using {\prg momdensplt})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\item [currdensplt\index{currdensplt} threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates orbital electric current density for a single ion at given temperature and magnetic field
-\item [display\_currentdensity\index{display\_currentdensity}  threshold T Ha Hb Hc [singleion-parameter-file]]
- calculates the (orbital) electric current density for a single ion (using {\prg currdensplt})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
+Output files:
+\begin{enumerate}
+  \item encapsulated postscript ps-file {\prg results/spins*.eps}
+                  of a spin/orbital/totalmagnetic moment configuration, 
+  \item the files {\prg results/spins.fst} and {\prg results/spins\_prim.fst} are created, 
+                which can be read by the fullprof program {\prg fp\_studio}
+                for on screen display\index{display} of a spin/orbital/totalmagnetic moment configuration,
+  \item the configuration of expectation values $\langle\mbf I\rangle$ (or whatever is stored in the file addressed by the option -f)
+                 is printed to stdout - therefore this program can be used with option {\prg -f results/mcphas.mf} 
+			       to generate an input file
+			       for program {\prg  McDisp} (example: {\prg spins -f results/mcphas.mf 1 1 0 0  $>$ mcdisp.mf})  
+  \item the text file {\prg results/spins.out} is created, which is useful to produce input files for
+              the diffraction program {\prg mcdiff\index{mcdiff}} (done in the script {\prg setup\_mcdiff\_in})
+  \item the graphics files {\prg results/spins.jvx} and {\prg results/spins\_prim.jvx}, which can be displayed
+         by the program {\prg javaview}, e.g. by the command {\prg java javaview spin\_prim.jvx}.
+  \item if {\prg spins} is used with arguments {\prg h k l E(meV)}, it takes the eigenvectors of magnetic 
+excitations
+        from files {\prg results/mcdisp.q*}  created by {\prg mcdisp}) and produces a graphical
+        animation of the spin osciallation which is associated with this magnetic mode. The output is a series
+        of files {\prg results/spins.*.jvx} and {\prg results/spins\_prim.*.jvx} which can be viewed by program
+        {\prg javaview}, e.g. by the command {\prg java javaview "model=results/spins\_prim.*.jvx" 
+        Animation.LastKey=16 background="255 255 255"}.  {\prg javaview} is also able to produce a sequence
+		of gif files (press c in the animation window), which can then be processed by an animation editor
+		to generate an animation, which can be inserted in presentations. For example, you can use
+ {\prg  Imagemagick} graphics package (has to be installed separately!)
+        to create an animation. The following command will issue a proper gif animation, which you can include in 
+           power point        
+        presentations etc.: {\prg convert -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif}.
+ \end{enumerate}
 
-Programs for a magnetic unit cell:
-\item [spindensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates spindensity for a magnetic unit cell calculated by {\prg mcphas} and
- stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
-\item [display\_spindensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates the spindensity for a magnetic unit cell (using {\prg spindensities})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\item [orbmomdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates orbital magnetic moment density (in Trammel gauge) for a magnetic unit cell calculated by {\prg mcphas} and
- stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
-\item [display\_orbmomdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates the orbital magnetic moment 
-density (in Trammel gauge) for a magnetic unit cell (using {\prg orbmomdensities})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\item [momdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates total magnetic moment density for a magnetic unit 
-cell calculated by {\prg mcphas} and
- stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
-\item [display\_momdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates the total moment density for a magnetic 
-unit cell (using {\prg momdensities})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\item [currdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates (orbital) electric current density for a magnetic unit cell calculated by {\prg mcphas} and
- stored in {\prg mcphas.mf} for a specifc temperature and magnetic field
-\item [display\_currentdensities threshold T Ha Hb Hc [mcphas.mf]]
- calculates the (orbital) electric current 
-density for a magnetic unit cell (using {\prg currdensities})
- and displays it on screen (using {\prg javaview} and {\prg displaycontour}).
-\end{description}
+                          Note, in case of non-orthogonal axes the convention 
+                           for applied field $Ha, Hb,Hc$ 
+                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+
+
+  The graphics output format can be fine tuned in {\prg results/graphic\_parameters.set} 
+  by  {\prg spins\_scale\_moment},
+{\prg show\_abc\_unitcell, show\_primitive\_crystal\_unitcell, show\_magnetic\_unitcell, show\_atoms, 
+scale\_view\_1,
+scale\_view\_2, scale\_view\_3},  
+{\prg spins\_wave\_amplitude, spins\_show\_ellipses, spins\_show\_direction\_of\_static\_moment}.
+{\prg show\_abc\_unitcell, show\_primitive\_crystal\_unitcell, show\_magnetic\_unitcell, show\_atoms, %%@
+ show\_density}...
+
+Technical information: the program {\prg display\_densities}\index{display\_densities} 
+is actually a script which
+calls  {\prg spins\index{spins}} 
+ (a program with the same arguments as {\prg display\_densities}
+which calculates the iso surfaces and stores
+it in format for the java based graphic program {\prg javaview} and
+also as a grid. The way in which this is done is controlled by 
+the parameter file {\prg results/graphic\_parameters.set}
+.... in  order to display the results graphically the following java
+programs are called:
+\begin{verbatim}
+  java javaview results/spins.jvx
+  java javaview "model=results/spins.*.jvx" Animation.LastKey=16 background="255 255 255"
+\end{verbatim}
+
+
+
+
+
 
 
 \subsection{Program {\prg hkl\index{hkl}}, {\prg hkl2d\index{hkl2d}} and {\prg mcdiff\index{mcdiff}} - graphical %%@
@@ -334,11 +318,10 @@ program mcdiff~\index{mcdiff}. The
 recommended procedure is to use 
 
 \begin{description}
-\item[{\prg spins\index{spins}} T Ha Hb Hc:] to generate a file {\prg spins.out} which
-contains the spin configuration, lattice etc. information at a the
+\item[{\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}} T Ha Hb Hc:] to generate a file {\prg mcdiff.in} which
+contains the spin configuration, lattice etc. information at a
 desired temperature. Edit this output file and at the beginning
-of the file insert some additional information as described in section~\ref{mcdiff}
-and rename it to {\prg mcdiff.in}.
+of the file insert some additional information as described in section~\ref{mcdiff}.
 
 Continue by using  the modules
 \item[{\prg mcdiff\index{mcdiff}}:] as described in detail in section~\ref{mcdiff} to
@@ -355,18 +338,18 @@ reflection list with a specific resolution function.
 \subsection{Program {\prg phased} - graphical display\index{display} of magnetic phase diagrams}
 \begin{description}
 \item [phased    [file]]       produces graphic of magnetic xy($HT$)-phase diagram [file]. Note that
-{\prg perl} and {\prg pgplot} are needed in order to use this program.
+{\prg perl} and {\prg pgplot} are needed in order to use this program. Thus it is more
+convenient to use {\prg displaycontour}:
+\item [substitute "p " "  " results/mcphas.xyt] to substitute the p in the file with spaces
+\item [displaycontour 1 2 8 results/mcphas.xyt] to display the phase indices as coloured phase diagram.
+\end{description}
 
 Mind that the plot produced is based on the phase number given in {\prg mcphas.xyt}, which may be
 different for the ''same'' magnetic structure as mentioned above
 (section~\ref{outputfiles}, {\prg mcphas.phs}). It is recommended to check carefully, if
 some magnetic structures are physically equal, although numbered with different phase numbers by
 the program. If such a case is detected, the phase numbers in {\prg mcphas.xyt} should
-be put to the same value in order to be able to identify the stability region in the plot
-produced by {\prg phased}.
-
-
-\end{description}
+be put to the same value in order to be able to identify the stability region in the plot.
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode

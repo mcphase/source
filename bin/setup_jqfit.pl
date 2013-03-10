@@ -46,11 +46,6 @@ print Fout << "EOF";
 #!emin=0.1
 #!emax=10
 #
-# optional parameter is extended_eigenvector_dimension
-# which is used to define, how many components of the
-# eigenvector should be in the ouput to file mcdisp.qee
-# (important for charge density movies)
-#!extended_eigenvector_dimension=3
 #
 # It follows either
 #

@@ -11,9 +11,9 @@
 /**********************************************************************/
 void helpexit()
 { printf (" program single ion  - display single ion expectations values <Ia> <Ib> ... and transition energies at given T and H\n \
-                use as: singleion [option] T[K] Hexta[T] Hextb[T] Hextc[T] gjmbHxc1 gmbHxc2 gjmbHxc3 ... gjmbHxcnofcomponents [meV] \n\n \
+                use as: singleion [option] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents [meV] \n\n \
                       Hext ..... external field in Tesla \n \
-                      gjmbHxc... exchange (molecular) field in meV   \n \
+                      Hxc... exchange (molecular) field in meV   \n \
       by default only 5 transition energies are output, start with option -nt n to output n transition energies\n\n");
       exit (1);
 }

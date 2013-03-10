@@ -99,7 +99,7 @@ T=2 Ha=0 Hb=0 Hc=0 n=10 nofatoms=2 nofcomponents=3
 
 The file {\prg mcdisp.mf\index{mcdisp.mf}} can be easily set up by using the program {\prg %%@
 setup\_mcdisp\_mf\index{setup\_mcdisp\_mf}} or alternatively by the program {\prg spins\index{spins}} 
-described in section~\ref{spins}.
+described in section~\ref{displaydensities}.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$                     
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 
@@ -1225,7 +1225,7 @@ $\Delta \langle \hat \mathcal O^n_{\alpha = (lm)}\rangle
 =\Delta \langle\sum_i Z_l^{m}(\Omega_i)\rangle_n =
 \Delta |p_{lm}| \theta_{l} \langle O_l^m(\mbf J_n)\rangle$
  can be directly inserted into
-(\ref{chargedensity_operator}) in order to evaluate the charge density oscillations. 
+(\ref{chargedensity2}) in order to evaluate the charge density oscillations. 
 This is done by program
 {\prg spins} with option {\prg -c},
  the commands are {\prg spins -c -M T Ha Hb Hc h k l E} and {\prg java javaview 

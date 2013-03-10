@@ -9,19 +9,7 @@ in magnetism, ...
 parameters in
 file1.j - output is written to stdout
 
-\item [\prg chrgplt\index{chrgplt} threshold T Ha Hb Hc mcphas.cf:]
-                calculates  the 4f-charge density of a single rare earth ion
-                given is temperature T[K] and magnetic effective field H[T]
- 		and crystal field  parameters Blm should be read from a 
-	        standard mcphas\index{mcphas} single ion property file mcphas.cf 
-                options: if T$<$0, then no thermal Boltzmann distribution
-		 is taken
-		the statistical probability of each CF state has to be 
-		entered by hand ... to view charge plots type: java javaview chrgplt\index{chrgplt}.jvx.
-		You can create also several plots (for instance for different temperatures) and store %%@
-these
-		in a sequence such as chrgplt.1.jvx, chrgplt.2.jvx, ... animate
-		the view of 4 jvx files by typing: java javaview model=chrgplt.*.jvx Animation.LastKey=4 
+
 \item [\prg anisotropy:] program to calculate the magnetic anistropy
 \begin{verbatim}
     usage: anisotropy -h 
@@ -45,8 +33,6 @@ these
 
     ./results/anisotropy.out  contains anisotropy information 
 \end{verbatim}
-\item [\prg coq2jjj:]         programs to reformat input file {\prg mcphas.coq}
-                      ({\prg McPhas} version 1.0) to new format
 
 \item [\prg cpso1ion 10 100 1 {[options]}: ] calculates the specific heat in the temperature %%@
 interval 10-100 K with a step width
@@ -280,7 +266,7 @@ output of powdercell,output is written to mcphas.j.  Example of input file:
                     have done a {\prg mcphas\index{mcphas}} calculation to stabilise
                     a magnetic structure at the desired Temperature/Field.
                   { \prg   setup\_mcdiff\_in} reads the results of this calculation
-                    from {\prg results/mcphas.sps} and generates an input file
+                    from {\prg results/mcphas.mf} and generates an input file
                     {\prg mcdiff.in}
 
 \begin{verbatim}
@@ -345,8 +331,13 @@ output of powdercell,output is written to mcphas.j.  Example of input file:
       to calculate the standard deviation and then you can start
       a fit by simannfit or searchspace
 \end{verbatim}\index{simannfit}\index{searchspace}
-\item [\prg singleion\index{singleion} T Ha Hb Hc:] used to display\index{display} the single %%@
-ion moment at a specified field [T] and temperature [K].
+\item [\prg singleion\index{singleion} [option] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents]
+ single ion  - display single ion expectations values $<Ia>, <Ib> $... and transition energies.
+\begin{verbatim}
+                      Hext ..... external field in Tesla 
+                      Hxc... exchange (molecular) field in meV  
+\end{verbatim}      
+by default only 5 transition energies are output, start with option -nt n to output n transition energies.
 \end{description} 
 
 \section{Programs for Manipulation of Columns and Lines in Data Files}
