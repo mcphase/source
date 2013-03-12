@@ -110,7 +110,8 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
 int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1,ComplexMatrix & ests)
 {float delta=maxE;L1(1)=complex <double> (ninit,pinit);
   switch (module_type)
-  {case 0: if(dL1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
+  {static int washere=0;
+   case 0: if(dL1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dL1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&L1,&delta,&ests);}
            break;
    case 1:
@@ -118,7 +119,7 @@ int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1
    case 3:
    case 4:
    case 5: 
-   default: if(transitionnumber<0)fprintf(stderr,"Problem: dL1calc in internal modules not implemented, continuing ... \n");
+   default: if(transitionnumber<0&& washere==0){washere=1;fprintf(stderr,"Problem: dL1calc in internal modules not implemented, continuing ... \n");}
           return 0;break;
    }
 }
@@ -465,7 +466,7 @@ void jjjpar::FFinfo(FILE * fout) // has to be consistent with mcdisp_intcalc set
                                  // and mcdiff settings of FF_type
 { if(FF_type!=0){
   switch(FF_type)
-   {case 1: fprintf(fout,"no contribution to magnetic neutron intensity Imag");break;
+   {case 1: fprintf(fout,"no contribution to magnetic neutron/xray intensity Imag");break;
     case -1: fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, no contribution to Imag_dip for this ion, FF coefficients:");break;
     case 3: fprintf(fout,"contribution to magnetic n-intensity Imag calc. in dip approx:  <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients:");break;
     case -3: fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with:  <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0, FF coefficients:");break;
@@ -475,6 +476,7 @@ void jjjpar::FFinfo(FILE * fout) // has to be consistent with mcdisp_intcalc set
     case -2: if(gJ!=0){fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
             else {fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with: <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
             break;
+    case 4:fprintf(fout,"ion ioncluded in rixs intensity calculation");break;
     default: fprintf(stderr,"Error: inconsistency in formfactor calculation\n"); exit(1);
    }
 
@@ -1359,3 +1361,48 @@ return mm;
 }
 
 
+/****************************************************************************/
+// returns transition element  drixs(1..9) in order to calculate the RIXS intensity
+//
+//  - it requires a call to eigenstates first
+//
+//on input
+//    transitionnumber has to be set correctly to that one which is to be computed
+//    sign(transitionnumber)... 1... without printout, -1 with extensive printout
+//    est		matrix with eigenstates, eigenvalues [meV], population numbers
+//    T                 temperature
+//     Q                 components of Qvector in euclidian coordinates 123=abc
+//  on output
+//    int   	total number of transitions
+//    drixs	<-|Rij|+> sqrt(n- - n+),  n+,n- population numbers
+//               Rij transition operator according to Haverkort RIXS PRL
+//    .... occupation number of states (- to + transition chosen according to transitionnumber)
+//
+/****************************************************************************/
+int jjjpar::drixs1calc(Vector & Qvec,double & T, ComplexVector & drixs,ComplexMatrix & ests)
+{double delta=maxE;drixs(1)=complex <double> (ninit,pinit);
+ double J0,J2,J4,J6;
+ double Q,th,ph;
+ int i;     complex<double>dummy; // introduced 3.4.10 MR
+            Q = Norm(Qvec); //dspacing
+      //      d = 2.0 * PI / Q; s=0.5 / d;
+      J0=j0(Q); // formfactor coefficients left here in case these are needed in future ??
+      J2=j2(Q);
+      J4=j4(Q);
+      J6=j6(Q);
+	 // calculate th and ph (polar angles of Q with respect to xyz of CEF)
+ switch (module_type)
+  {static int washere=0;
+
+   case 0:if (rixs!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
+                          return (*rixs)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&drixs,&delta);break;}
+          else {return 0;}
+   case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give cfielddn polar angles with respect to xyz
+            return (*iops).cfielddrixs1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,drixs);break;
+   case 2:  // for cfield because of coordinate rotation (complicated because of tensor) not implemented, not necessary I believe !
+   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function drixs1calc - for ion %s \ndoing RIXS  is not implemented\n",sipffilename);
+                           washere=1;}
+            return 0;
+  }
+
+}

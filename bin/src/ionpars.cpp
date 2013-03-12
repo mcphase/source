@@ -1375,6 +1375,102 @@ if (delta>SMALL)
 return noft;
 }
 
+int ionpars::cfielddrixs1(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & drixs)
+{/*on input
+    tn      ... number of transition to be computed 
+    sign(tn)... 1... without printout, -1 with extensive printout
+    est		matrix with eigenstates, eigenvalues [meV], population numbers
+    th ph  .... polar angles of the scattering vector with respect to xyz=cab coordinate system (cfield) or xyz=abc (so1ion)
+on output    
+    int   	total number of transitions
+    drixs(1...9)	-2<-|Rij-<Rij>|+> sqrt(n+-n-),  n+,n-
+     // Rij transition operator according to Haverkort PRL (9 components for different polarisation channels
+    .... occupation number of states (- to + transition chosen according to transitionnumber)
+*/
+  int pr;pr=0;if (tn<0) {pr=1;tn*=-1;}
+  int i,j=1,k,l;
+  int dj=(int)(2*J+1);
+  double delta;
+   double ninit=drixs(1).real();
+   double pinit=drixs(1).imag();
+   if (ninit>dj)ninit=dj;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zii;
+   int noft=0;for(i=1;(i<=ninit)&((zii=exp(-(real(est(0,i))-real(est(0,1)))/KB/T))>(pinit*zsum));++i){noft+=dj-i;zsum+=zii;}
+//printf("!!! ddMQ noft = %i ninit= %g pinit= %g zii=%g zsum=%g T=%g!!!!\n",noft,ninit,pinit,zii,zsum,T);
+//noft=(int)((J+1)*(2*J+1));
+
+// calculate nat for transition number tn
+// 1. get i and j from tn (as in du1calc
+k=0;
+for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
+{++k;if(k==tn)break;
+}if(k==tn)break;}
+
+// 2. set delta
+delta=real(est(0,j))-real(est(0,i));
+
+ 
+if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - ddMQcalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
+
+printf("rixs operator for ion ionpars to be programmed"); drixs=0;
+/*
+	 ComplexMatrix * MQMi[4];
+         MQMi[1]=new ComplexMatrix(1,dj,1,dj);
+         MQMi[2]=new ComplexMatrix(1,dj,1,dj);
+         MQMi[3]=new ComplexMatrix(1,dj,1,dj);
+        MQM((*MQMi[1]),(*MQMi[2]),(*MQMi[3]),th,ph,J0,J2,J4,J6,Zc);
+        //      x           y         z   // this has been fixed for module so1ion now 3.4.10 MR
+        //      a           b         c   // ... for module cfield a backtransformation in ddMQcalc has been introduced in jjjpar.cpp
+      
+// 3. set dMQ
+         int K,M,Md;
+         ComplexVector Malpha(1,3);Malpha=0;
+          for(K=1;K<=3;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
+             Malpha(K)+=conj(est(M,i))*(*MQMi[K])(M,Md)*est(Md,j); 
+            }}} 
+if(i==j){//take into account thermal expectation values <Jl> //MR120120
+         ComplexVector mm(1,3); mm=0;                        //MR120120
+         for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){  //MR120120
+           mm(1)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[1])(M,Md)*est(Md,K); //MR120120
+           mm(2)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[2])(M,Md)*est(Md,K); //MR120120
+           mm(3)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[3])(M,Md)*est(Md,K); //MR120120
+         }}} // --> mm(1,..3)  thermal expextation values of M              //MR120120
+          Malpha-=mm;// subtract thermal expectation values                 //MR120120
+         }  //MR120120
+         delete MQMi[1];delete MQMi[2]; delete MQMi[3];
+
+
+       // set vector drixs=2* <i|Ml|j>
+       drixs=0;
+          for(l=1;l<=9;++l)
+          {drixs(l)=-2.0*Malpha(l);}
+*/
+// multiply by occupation number difference ...
+
+if (delta>SMALL)
+   { if(pr==1){
+      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
+      for(int i1=1;i1<=9;++i1)printf(" |<%i|Rij%i-<Rij%i>|%i>|^2=%4.4g",i,i1,i1,j,abs(drixs(i1))*abs(drixs(i1)));
+      printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
+    drixs*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
+     }else
+   {// quasielastic scattering has not wi-wj but wj*epsilon/kT
+     if(pr==1){
+      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
+      for(int i1=1;i1<=9;++i1)printf(" |<%i|Rij%i-<Rij%i>|%i>|^2=%4.4g",i,i1,i1,j,abs(drixs(i1))*abs(drixs(i1)));
+      printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
+    drixs*=sqrt(imag(est(0,i))/KB/T);
+   }
+
+
+// return number of all transitions     
+
+return noft;
+}
+
+
 //**********************************************************************/
 // routine to calculate the charge density coefficients of Zlm() R(r)^2
 // *********************************************************************

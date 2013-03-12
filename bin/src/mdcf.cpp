@@ -153,18 +153,18 @@ void mdcf::est_ini(int i, int j, int k, int l,ComplexMatrix & M) // initialize e
 }
 
 // has to be called before mdcf object can be used for calculation
-void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr)
-{      (*nt[in(i,j,k)])=notr;
+void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
+{      (*nt[in(i,j,k)])=notr;mqdim=mqd;
        int sumnt=sum((*nt[in(i,j,k)]));
       if (sumnt<1){sumnt=1;} // MR 2011.08.09. in case there is no transition for this subsystem then initialize all matrices/Vector to 1...
      s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
      m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
      l[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
      sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
-     dmqs[in(i,j,k)]= new ComplexVector(1,3*sumnt);
-     dmq_dips[in(i,j,k)]= new ComplexVector(1,3*sumnt);
-     lb[in(i,j,k)]= new ComplexVector(1,3*sumnt);
-     lb_dip[in(i,j,k)]= new ComplexVector(1,3*sumnt);
+     dmqs[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
+     dmq_dips[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
+     lb[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
+     lb_dip[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
      d[in(i,j,k)]= new Vector(1,sumnt);
       
 }
@@ -229,6 +229,7 @@ mdcf::mdcf (const mdcf & p)
 { int i,j,k;
   nofa=p.nofa;nofb=p.nofb;nofc=p.nofc;
   mxa=p.mxa; mxb=p.mxb; mxc=p.mxc;
+  mqdim=p.mqdim;
   nofatoms=p.nofatoms;nofcomponents=p.nofcomponents;
 //dimension arrays
   s = new ComplexMatrix*[mxa*mxb*mxc+1]; //(1,nofcomponents*nofatoms,1,nofcomponents*nofatoms);
@@ -266,10 +267,10 @@ mdcf::mdcf (const mdcf & p)
       m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
       l[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
       sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,sum((*nt[in(i,j,k)])));// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
-      dmqs[in(i,j,k)]= new ComplexVector(1,3*sum((*nt[in(i,j,k)])));
-      dmq_dips[in(i,j,k)]= new ComplexVector(1,3*sum((*nt[in(i,j,k)])));
-      lb[in(i,j,k)]= new ComplexVector(1,3*sum((*nt[in(i,j,k)])));
-      lb_dip[in(i,j,k)]= new ComplexVector(1,3*sum((*nt[in(i,j,k)])));
+      dmqs[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
+      dmq_dips[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
+      lb[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
+      lb_dip[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
       d[in(i,j,k)]= new Vector(1,sum((*nt[in(i,j,k)])),1,sum((*nt[in(i,j,k)])));
 
       *d[in(i,j,k)]=*p.d[in(i,j,k)];

@@ -14,6 +14,7 @@ class mdcf
  // number of spins  
    int nofa,nofb,nofc;
    int mxa,mxb,mxc;
+   int mqdim; // dimension of transition operator (unpol neutrons M(Q): dim=3, rixs: some tensor for e e' components of polarisation i.e. dim =9)
    ComplexMatrix ** m; //matrix to store M
    ComplexMatrix ** s; //matrix to store U
    ComplexMatrix ** l; //matrix to store eigenvalues sqrt_gamma
@@ -69,7 +70,7 @@ class mdcf
 mdcf (int n1,int n2,int n3,int n,int nc);	//konstruktor
 
 // initialisierung 
-    void set_noftransitions (int i, int j, int k, IntVector & notr);
+    void set_noftransitions (int i, int j, int k, IntVector & notr,int mqd);
 
      mdcf (const mdcf & spins);	// kopier-konstruktor
    

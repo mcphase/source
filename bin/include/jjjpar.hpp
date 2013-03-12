@@ -287,6 +287,19 @@ Vector currdensity_calc (double & teta,double & fi,double & R, Vector & momentlx
 // fi and expansion coeff. of Zlm R^2(r)
 Matrix gradcurrdensity_calc(double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
 
+//7 . Resonant X-ray Scattering  --------------------------------------
+   // calculate scattering operator <M(Q)>=-2x<Q>_TH in units of mb
+   // according to stored eigenstate matrix est, requires a call to eigenstates first
+public:
+  //int RMXS(ComplexVector & Mq,Vector & Qvec); // resonant magnetic xray scattering - maybe to be needed in mcdiff ?
+  
+  // returns transition elements of RIXS operator - it requires a call to eigenstates first
+   int drixs1calc(Vector & Qvec, double & T, ComplexVector & drixs1, ComplexMatrix & ests);
+
+private :
+  //void (*rmx)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*);
+  int  (*rixs)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*,double*);
+
 private:
 //#ifdef __linux__
 //  void *handle;

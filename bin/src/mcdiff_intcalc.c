@@ -247,7 +247,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
                                                          mux=(*jjjpars[i]).mom(1); // this is still here because correlation functions are calculated
                                                          muy=(*jjjpars[i]).mom(2); // only for orhtogonal lattices (see printeln sub) and so we take
                                                          muz=(*jjjpars[i]).mom(3); // the convention of the mcdiff program (a||x,b||y,c||z)
-                                                         mqx+=mux*exp(-2*PI*qr*im);
+                                                         mqx+=mux*exp(-2*PI*qr*im); // moreover think of using jjjpar RXMS function to calculate moments ???
                                                          mqy+=muy*exp(-2*PI*qr*im);
                                                          mqz+=muz*exp(-2*PI*qr*im);
                                                          mqx2+=mux*mux*exp(-2*PI*qr*im);

@@ -199,6 +199,9 @@ module_type=0;
     ddnn=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*,double*))GetProcAddress(handle,"dmq1");
     //*(void **)(&dnn)=GetProcAddress(handle,"dmq1");
      if (ddnn==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function dmq1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    rixs=(int(*)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*,double*))GetProcAddress(handle,"drixs1");
+    //*(void **)(&dnn)=GetProcAddress(handle,"rixs1");
+     if (rixs==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function drixs1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     estates=(void(*)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**))GetProcAddress(handle,"estates");
     //*(void **)(&estates)=GetProcAddress(handle,"estates");
@@ -275,6 +278,8 @@ module_type=0;
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);mq=NULL;}
   *(void **)(&ddnn)=dlsym(handle,"dmq1");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ddnn=NULL;}
+  *(void **)(&rixs)=dlsym(handle,"drixs1");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);rixs=NULL;}
 
   *(void **)(&estates)=dlsym(handle,"estates");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);estates=NULL;
