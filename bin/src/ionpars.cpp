@@ -21,6 +21,7 @@
   gJ=p.gJ;nof_electrons=p.nof_electrons;
   alpha=p.alpha;beta=p.beta;gamma=p.gamma;
   r2=p.r2;r4=p.r4;r6=p.r6;
+  sigma0=p.sigma0;sigma1=p.sigma1;sigma2=p.sigma2;
   Blm=p.Blm; // vector of crystal field parameters
   Llm=p.Llm; // vector of crystal field parameters
   // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
@@ -47,10 +48,12 @@ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
    int i;
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
+   Ri= new ComplexMatrix * [10];
    iontype = new char [strlen(p.iontype)+1];
    strcpy(iontype,p.iontype);
   
-
+  for(i=1;i<=9;++i){Ri[i]= new ComplexMatrix(1,(*p.Ri[i]).Rhi(),1,(*p.Ri[i]).Chi());
+                   (*Ri[i])=(*p.Ri[i]);}
  for(i=1;i<=NOF_OLM_MATRICES;++i)
  { Olm [i]= new Matrix(1,(*p.Olm[i]).Rhi(),1,(*p.Olm[i]).Chi()); 
  // define first matrix 
@@ -74,6 +77,7 @@ ionpars::ionpars (int dimj) // constructor from dimj
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
 
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;nof_electrons=0;
+   sigma0=0;sigma1=0;sigma2=0;
 // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
 cnst=Matrix(0,6,-6,6);int l,m;
 cnst(0,0) = 0.28209479;
@@ -96,9 +100,11 @@ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
    iontype = new char [MAXNOFCHARINLINE];
-
+   Ri = new ComplexMatrix * [10];
 
  int i;   
+  for(i=1;i<=9;++i){Ri[i]= new ComplexMatrix(1,dimj,1,dimj);
+                   }
  for(i=1;i<=NOF_OLM_MATRICES;++i)
  { Olm [i]= new Matrix(1,dimj,1,dimj); 
  // define first matrix 
@@ -114,7 +120,7 @@ ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices fill
    iontype = new char [strlen(ion)+1];
    strcpy(iontype,ion);
    so1ion=0;
-
+  sigma0=0;sigma1=0;sigma2=0;
   J=((double)dimj-1)/2;
   Ja=Matrix(1,dimj,1,dimj);
   Jb=Matrix(1,dimj,1,dimj);
@@ -148,10 +154,12 @@ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
-
+   Ri = new ComplexMatrix * [10];
 
  int i;   
- for(i=1;i<=NOF_OLM_MATRICES;++i)
+  for(i=1;i<=9;++i){Ri[i]= new ComplexMatrix(1,dimj,1,dimj);
+                   }
+for(i=1;i<=NOF_OLM_MATRICES;++i)
  { Olm [i]= new Matrix(1,dimj,1,dimj); 
  // define first matrix 
    OOlm [i] = new ComplexMatrix(1,dimj,1,dimj); 
@@ -162,11 +170,12 @@ for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 ionpars::~ionpars(){
  int i;
  delete []iontype;
-
+ for (i=1;i<=9;++i)delete Ri[i];
  for (i=1;i<=NOF_OLM_MATRICES;++i)
   {delete Olm[i];delete OOlm[i];}
    delete[] Olm;
    delete[] OOlm;
+   delete[] Ri;
   
  } //destructor
 
@@ -205,6 +214,7 @@ cnst(6,6)=  0.6831942;
 for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 so1ion=0;strcpy(moduletype,"cfield");
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;gJ=0;
+ double s0r=0,s0i=0,s1r=0,s1i=0,s2r=0,s2i=0;
   fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
   // strip /r (dos line feed) from line if necessary
   char *token;  
@@ -238,6 +248,13 @@ so1ion=0;strcpy(moduletype,"cfield");
         extract(instr,"R2",r2r);
         extract(instr,"R4",r4r);
         extract(instr,"R6",r6r);
+
+        extract(instr,"SIGMA0r",s0r);
+        extract(instr,"SIGMA1r",s1r);
+        extract(instr,"SIGMA2r",s2r);
+        extract(instr,"SIGMA0i",s0i);
+        extract(instr,"SIGMA1i",s1i);
+        extract(instr,"SIGMA2i",s2i);
 
         extract(instr,"B00",Blm(0));
 
@@ -479,7 +496,9 @@ if(fabs(r6r-r6)/fabs(r6r+1)>SMALL) {fprintf(stderr,"#Warning module %s internal 
 if (pr==1) printf("#end using %s\n",moduletype);
 
    J=((double)dimj-1)/2; //momentum quantum number
-
+   sigma0=complex<double>(s0r,s0i);
+   sigma1=complex<double>(s1r,s1i);
+   sigma2=complex<double>(s2r,s2i);
 if (pr==1) printf("#J=%g\n",J);
 
    Ja = Matrix(1,dimj,1,dimj); 
@@ -504,6 +523,24 @@ if (pr==1) printf("#J=%g\n",J);
    }
 
 //---------------------------------------------------------------------------
+	Ri= new ComplexMatrix * [10];
+         for(i=1;i<=9;++i)Ri[i]=new ComplexMatrix(1,dimj,1,dimj);
+      // here fill the matrices Ri[1...9] with the 11 12 13 21 22 23 31 32 33
+      // matrices of the RIXS scattering operator R
+       complex<double> f1=sigma1/J;
+       complex<double> f2=sigma2/(J*(2*J-1));
+      // SIGMA0 contribution (haverkort PRL 105 (2010) 167404 equation (8)
+       (*Ri[1])=sigma0-f2*0.6666*(Jaa*Jaa+Jbb*Jbb+Jcc*Jcc);
+                        (*Ri[5])=(*Ri[1]);
+                                         (*Ri[9])=(*Ri[1]);
+      // SIGMA1 contribution (haverkort PRL 105 (2010) 167404 equation (8)
+                        (*Ri[2])=f1*Jcc;(*Ri[3])=-f1*Jbb;
+       (*Ri[4])=-f1*Jcc;                 (*Ri[6])=f1*Jaa;
+       (*Ri[7])=f1*Jbb; (*Ri[8])=-f1*Jaa;
+      // SIGMA2 contribution (haverkort PRL 105 (2010) 167404 equation (8)
+       (*Ri[1])+=2.0*f2*Jaa*Jaa; (*Ri[2])+=f2*(Jaa*Jbb+Jbb*Jaa); (*Ri[3])+=f2*(Jaa*Jcc+Jcc*Jaa);
+       (*Ri[4])+=f2*(Jbb*Jcc+Jcc*Jbb); (*Ri[5])+=2.0*f2*Jbb*Jbb; (*Ri[6])+=f2*Jaa;
+       (*Ri[7])+=f2*(Jcc*Jaa+Jaa*Jcc); (*Ri[8])+=f2*(Jbb*Jcc+Jcc*Jbb); (*Ri[9])+=2.0*f2*Jcc*Jcc;
 
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
@@ -747,57 +784,11 @@ void ionpars::save(FILE * file) // save ion parameters to file
 
 void ionpars::savBlm(FILE * outfile)
 {fprintf(outfile,"units=meV\n");
-   if(Blm(0)!=0){fprintf(outfile,"B00=%g\n",myround(Blm(0)));}
-
-   if(Blm(1)!=0){fprintf(outfile,"B22S=%g\n",myround(Blm(1)));}
-   if(Blm(2)!=0){fprintf(outfile,"B21S=%g\n",myround(Blm(2)));}
-   if(Blm(3)!=0){fprintf(outfile,"B20=%g\n",myround(Blm(3)));}
-   if(Blm(4)!=0){fprintf(outfile,"B21=%g\n",myround(Blm(4)));}
-   if(Blm(5)!=0){fprintf(outfile,"B22=%g\n",myround(Blm(5)));}
-   
-   if(Blm(6)!=0){fprintf(outfile,"B33S=%g\n",myround(Blm(6)));}
-   if(Blm(7)!=0){fprintf(outfile,"B32S=%g\n",myround(Blm(7)));}
-   if(Blm(8)!=0){fprintf(outfile,"B31S=%g\n",myround(Blm(8)));}
-   if(Blm(9)!=0){fprintf(outfile,"B30=%g\n",myround(Blm(9)));}
-   if(Blm(10)!=0){fprintf(outfile,"B31=%g\n",myround(Blm(10)));}
-   if(Blm(11)!=0){fprintf(outfile,"B32=%g\n",myround(Blm(11)));}
-   if(Blm(12)!=0){fprintf(outfile,"B32=%g\n",myround(Blm(12)));}
-
-   if(Blm(13)!=0){fprintf(outfile,"B44S=%g\n",myround(Blm(13)));}
-   if(Blm(14)!=0){fprintf(outfile,"B43S=%g\n",myround(Blm(14)));}
-   if(Blm(15)!=0){fprintf(outfile,"B42S=%g\n",myround(Blm(15)));}
-   if(Blm(16)!=0){fprintf(outfile,"B41S=%g\n",myround(Blm(16)));}
-   if(Blm(17)!=0){fprintf(outfile,"B40=%g\n",myround(Blm(17)));}
-   if(Blm(18)!=0){fprintf(outfile,"B41=%g\n",myround(Blm(18)));}
-   if(Blm(19)!=0){fprintf(outfile,"B42=%g\n",myround(Blm(19)));}
-   if(Blm(20)!=0){fprintf(outfile,"B43=%g\n",myround(Blm(20)));}
-   if(Blm(21)!=0){fprintf(outfile,"B44=%g\n",myround(Blm(21)));}
-  
-   if(Blm(22)!=0){fprintf(outfile,"B55S=%g\n",myround(Blm(22)));}
-   if(Blm(23)!=0){fprintf(outfile,"B54S=%g\n",myround(Blm(23)));}
-   if(Blm(24)!=0){fprintf(outfile,"B53S=%g\n",myround(Blm(24)));}
-   if(Blm(25)!=0){fprintf(outfile,"B52S=%g\n",myround(Blm(25)));}
-   if(Blm(26)!=0){fprintf(outfile,"B51S=%g\n",myround(Blm(26)));}
-   if(Blm(27)!=0){fprintf(outfile,"B50=%g\n",myround(Blm(27)));}
-   if(Blm(28)!=0){fprintf(outfile,"B51=%g\n",myround(Blm(28)));}
-   if(Blm(29)!=0){fprintf(outfile,"B52=%g\n",myround(Blm(29)));}
-   if(Blm(30)!=0){fprintf(outfile,"B53=%g\n",myround(Blm(30)));}
-   if(Blm(31)!=0){fprintf(outfile,"B54=%g\n",myround(Blm(31)));}
-   if(Blm(32)!=0){fprintf(outfile,"B55=%g\n",myround(Blm(32)));}
-
-   if(Blm(33)!=0){fprintf(outfile,"B66S=%g\n",myround(Blm(33)));}
-   if(Blm(34)!=0){fprintf(outfile,"B65S=%g\n",myround(Blm(34)));}
-   if(Blm(35)!=0){fprintf(outfile,"B64S=%g\n",myround(Blm(35)));}
-   if(Blm(36)!=0){fprintf(outfile,"B63S=%g\n",myround(Blm(36)));}
-   if(Blm(37)!=0){fprintf(outfile,"B62S=%g\n",myround(Blm(37)));}
-   if(Blm(38)!=0){fprintf(outfile,"B61S=%g\n",myround(Blm(38)));}
-   if(Blm(39)!=0){fprintf(outfile,"B60=%g\n",myround(Blm(39)));}
-   if(Blm(40)!=0){fprintf(outfile,"B61=%g\n",myround(Blm(40)));}
-   if(Blm(41)!=0){fprintf(outfile,"B62=%g\n",myround(Blm(41)));}
-   if(Blm(42)!=0){fprintf(outfile,"B63=%g\n",myround(Blm(42)));}
-   if(Blm(43)!=0){fprintf(outfile,"B64=%g\n",myround(Blm(43)));}
-   if(Blm(44)!=0){fprintf(outfile,"B65=%g\n",myround(Blm(44)));}
-   if(Blm(45)!=0){fprintf(outfile,"B66=%g\n",myround(Blm(45)));}
+    char lm3[4];lm3[3]='\0';
+   const char lm[]="00 22S21S20 21 22 33S32S31S30 31 32 33 44S43S42S41S40 41 42 43 44 55S54S53S52S51S50 51 52 53 54 55 66S65S64S63S62S61S60 61 62 63 64 65 66 ";
+   for(int i=0;i<=45;++i){strncpy(lm3,lm+i*3,3);
+   if(Blm(i)!=0){fprintf(outfile,"B%s=%g\n",lm3,myround(Blm(i)));}
+                  }
    if(Blm(46)!=0){fprintf(outfile,"Dx2=%g\n",myround(Blm(46)));}
    if(Blm(47)!=0){fprintf(outfile,"Dy2=%g\n",myround(Blm(47)));}
    if(Blm(48)!=0){fprintf(outfile,"Dz2=%g\n",myround(Blm(48)));}
@@ -806,58 +797,12 @@ void ionpars::savBlm(FILE * outfile)
 
 void ionpars::savLlm(FILE * outfile)
 {fprintf(outfile,"units=meV\n");
-   if(Llm(0)!=0){fprintf(outfile,"L00=%g\n",myround(Llm(0)));}
-
-   if(Llm(1)!=0){fprintf(outfile,"L22S=%g\n",myround(Llm(1)));}
-   if(Llm(2)!=0){fprintf(outfile,"L21S=%g\n",myround(Llm(2)));}
-   if(Llm(3)!=0){fprintf(outfile,"L20=%g\n",myround(Llm(3)));}
-   if(Llm(4)!=0){fprintf(outfile,"L21=%g\n",myround(Llm(4)));}
-   if(Llm(5)!=0){fprintf(outfile,"L22=%g\n",myround(Llm(5)));}
+   char lm3[4];lm3[3]='\0';
+   const char lm[]="00 22S21S20 21 22 33S32S31S30 31 32 33 44S43S42S41S40 41 42 43 44 55S54S53S52S51S50 51 52 53 54 55 66S65S64S63S62S61S60 61 62 63 64 65 66 ";
+   for(int i=0;i<=45;++i){strncpy(lm3,lm+i*3,3);
+   if(Llm(i)!=0){fprintf(outfile,"L%s=%g\n",lm3,myround(Llm(i)));}
+                         }
   
-   if(Llm(6)!=0){fprintf(outfile,"L33S=%g\n",myround(Llm(6)));}
-   if(Llm(7)!=0){fprintf(outfile,"L32S=%g\n",myround(Llm(7)));}
-   if(Llm(8)!=0){fprintf(outfile,"L31S=%g\n",myround(Llm(8)));}
-   if(Llm(9)!=0){fprintf(outfile,"L30=%g\n",myround(Llm(9)));}
-   if(Llm(10)!=0){fprintf(outfile,"L31=%g\n",myround(Llm(10)));}
-   if(Llm(11)!=0){fprintf(outfile,"L32=%g\n",myround(Llm(11)));}
-   if(Llm(12)!=0){fprintf(outfile,"L32=%g\n",myround(Llm(12)));}
-
-   if(Llm(13)!=0){fprintf(outfile,"L44S=%g\n",myround(Llm(13)));}
-   if(Llm(14)!=0){fprintf(outfile,"L43S=%g\n",myround(Llm(14)));}
-   if(Llm(15)!=0){fprintf(outfile,"L42S=%g\n",myround(Llm(15)));}
-   if(Llm(16)!=0){fprintf(outfile,"L41S=%g\n",myround(Llm(16)));}
-   if(Llm(17)!=0){fprintf(outfile,"L40=%g\n",myround(Llm(17)));}
-   if(Llm(18)!=0){fprintf(outfile,"L41=%g\n",myround(Llm(18)));}
-   if(Llm(19)!=0){fprintf(outfile,"L42=%g\n",myround(Llm(19)));}
-   if(Llm(20)!=0){fprintf(outfile,"L43=%g\n",myround(Llm(20)));}
-   if(Llm(21)!=0){fprintf(outfile,"L44=%g\n",myround(Llm(21)));}
- 
-   if(Llm(22)!=0){fprintf(outfile,"L55S=%g\n",myround(Llm(22)));}
-   if(Llm(23)!=0){fprintf(outfile,"L54S=%g\n",myround(Llm(23)));}
-   if(Llm(24)!=0){fprintf(outfile,"L53S=%g\n",myround(Llm(24)));}
-   if(Llm(25)!=0){fprintf(outfile,"L52S=%g\n",myround(Llm(25)));}
-   if(Llm(26)!=0){fprintf(outfile,"L51S=%g\n",myround(Llm(26)));}
-   if(Llm(27)!=0){fprintf(outfile,"L50=%g\n",myround(Llm(27)));}
-   if(Llm(28)!=0){fprintf(outfile,"L51=%g\n",myround(Llm(28)));}
-   if(Llm(29)!=0){fprintf(outfile,"L52=%g\n",myround(Llm(29)));}
-   if(Llm(30)!=0){fprintf(outfile,"L53=%g\n",myround(Llm(30)));}
-   if(Llm(31)!=0){fprintf(outfile,"L54=%g\n",myround(Llm(31)));}
-   if(Llm(32)!=0){fprintf(outfile,"L55=%g\n",myround(Llm(32)));}
- 
-   if(Llm(33)!=0){fprintf(outfile,"L66S=%g\n",myround(Llm(33)));}
-   if(Llm(34)!=0){fprintf(outfile,"L65S=%g\n",myround(Llm(34)));}
-   if(Llm(35)!=0){fprintf(outfile,"L64S=%g\n",myround(Llm(35)));}
-   if(Llm(36)!=0){fprintf(outfile,"L63S=%g\n",myround(Llm(36)));}
-   if(Llm(37)!=0){fprintf(outfile,"L62S=%g\n",myround(Llm(37)));}
-   if(Llm(38)!=0){fprintf(outfile,"L61S=%g\n",myround(Llm(38)));}
-   if(Llm(39)!=0){fprintf(outfile,"L60=%g\n",myround(Llm(39)));}
-   if(Llm(40)!=0){fprintf(outfile,"L61=%g\n",myround(Llm(40)));}
-   if(Llm(41)!=0){fprintf(outfile,"L62=%g\n",myround(Llm(41)));}
-   if(Llm(42)!=0){fprintf(outfile,"L63=%g\n",myround(Llm(42)));}
-   if(Llm(43)!=0){fprintf(outfile,"L64=%g\n",myround(Llm(43)));}
-   if(Llm(44)!=0){fprintf(outfile,"L65=%g\n",myround(Llm(44)));}
-   if(Llm(45)!=0){fprintf(outfile,"L66=%g\n",myround(Llm(45)));}
-
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1414,45 +1359,32 @@ delta=real(est(0,j))-real(est(0,i));
 if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion/cfield.so - ddMQcalc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(j==i)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
-printf("rixs operator for ion ionpars to be programmed"); drixs=0;
-/*
-	 ComplexMatrix * MQMi[4];
-         MQMi[1]=new ComplexMatrix(1,dj,1,dj);
-         MQMi[2]=new ComplexMatrix(1,dj,1,dj);
-         MQMi[3]=new ComplexMatrix(1,dj,1,dj);
-        MQM((*MQMi[1]),(*MQMi[2]),(*MQMi[3]),th,ph,J0,J2,J4,J6,Zc);
-        //      x           y         z   // this has been fixed for module so1ion now 3.4.10 MR
-        //      a           b         c   // ... for module cfield a backtransformation in ddMQcalc has been introduced in jjjpar.cpp
+
       
-// 3. set dMQ
+// 3. set drixs
          int K,M,Md;
-         ComplexVector Malpha(1,3);Malpha=0;
-          for(K=1;K<=3;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
-             Malpha(K)+=conj(est(M,i))*(*MQMi[K])(M,Md)*est(Md,j); 
+         drixs=0;
+          for(K=1;K<=9;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
+             drixs(K)+=conj(est(M,i))*(*Ri[K])(M,Md)*est(Md,j); 
             }}} 
-if(i==j){//take into account thermal expectation values <Jl> //MR120120
-         ComplexVector mm(1,3); mm=0;                        //MR120120
-         for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){  //MR120120
-           mm(1)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[1])(M,Md)*est(Md,K); //MR120120
-           mm(2)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[2])(M,Md)*est(Md,K); //MR120120
-           mm(3)+=imag(est(0,K))*conj(est(M,K))*(*MQMi[3])(M,Md)*est(Md,K); //MR120120
-         }}} // --> mm(1,..3)  thermal expextation values of M              //MR120120
-          Malpha-=mm;// subtract thermal expectation values                 //MR120120
+if(i==j){//take into account thermal expectation values <Jl> 
+         ComplexVector Rav(1,9); Rav=0;                        
+         for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){  
+           for(l=1;l<=9;++l){
+           Rav(l)+=imag(est(0,K))*conj(est(M,K))*(*Ri[l])(M,Md)*est(Md,K); }           
+         }}} // --> Rav(1,..9)  thermal expextation values of R              
+          drixs-=Rav;// subtract thermal expectation values                
          }  //MR120120
-         delete MQMi[1];delete MQMi[2]; delete MQMi[3];
 
 
-       // set vector drixs=2* <i|Ml|j>
-       drixs=0;
-          for(l=1;l<=9;++l)
-          {drixs(l)=-2.0*Malpha(l);}
-*/
 // multiply by occupation number difference ...
 
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      for(int i1=1;i1<=9;++i1)printf(" |<%i|Rij%i-<Rij%i>|%i>|^2=%4.4g",i,i1,i1,j,abs(drixs(i1))*abs(drixs(i1)));
+      for(int i1=1;i1<=9;++i1)
+       {printf(" |<%i|Rij%i-<Rij%i>|%i>|^2=%4.4g",i,i1,i1,j,abs(drixs(i1))*abs(drixs(i1)));
+       if(i1%3)printf("\n");}
       printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
     drixs*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
      }else

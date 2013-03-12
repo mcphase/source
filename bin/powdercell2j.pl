@@ -433,13 +433,13 @@ print " k ?\n";$k=<STDIN>;$k=~s/\n//;
 print " l ?\n";$l=<STDIN>;$l=~s/\n//;
 
 copy("mcphas_magnetic_atoms.j","mcphas.j");
-system ("spinsfromq $na $nb $nc $h $k $l > powdercell2j.sps");
+system ("spinsfromq $na $nb $nc $h $k $l > results/mcphas.mf");
 #system ("fact 1 0 powdercell2j.sps");
 #system ("spins 0 0 0 0 powdercell2j.sps > powdercell2j.spo");
 #system ("javaview results/spins.jvx");
-system("display_spins 0 0 0 0 powdercell2j.sps > powdercell2j.spo");
-mydel  ("powdercell2j.spo");
-mydel  ("powdercell2j.sps");
+system("display_densities -M 1 0 0 0 > results/powdercell2j.spo");
+mydel  ("results/powdercell2j.spo");
+mydel  ("results/mcphas.mf");
 mydel ("scatteringlengths.txt");
 
 print Fout2 << "EOF";

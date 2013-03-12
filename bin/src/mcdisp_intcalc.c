@@ -56,10 +56,11 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
       {if((*inputpars.jjj[l]).drixs1calc(qijk,ini.T,mq1,md.est(i,j,k,l))!=0)
        // calculate <-|Rijomega|+> see haverkort paper: transition operator for RIXS
       {if(do_verbose)printf("#calculating RIXS intensity for ion %s\n",(*inputpars.jjj[l]).sipffilename);
-       (*inputpars.jjj[l]).FF_type*=4; // put FFTYPE to RIXS to indicate that this is implemented
+       (*inputpars.jjj[l]).FF_type=4; // put FFTYPE to RIXS to indicate that this is implemented
+      mq1_dip=mq1;
       }
      else{ if(do_verbose)printf("#warning mcdisp - function drixs1 not implemented for single ion module of ion %s, no intensity from this ion\n",(*inputpars.jjj[l]).sipffilename);
-           mq1=0;mq1(1)= complex <double> (1e-10,0.0);(*inputpars.jjj[l]).FF_type=1;mq1=mq1_dip;
+           mq1=0;mq1(1)= complex <double> (1e-10,0.0);(*inputpars.jjj[l]).FF_type=1;mq1_dip=mq1;
           }
       }else
       {

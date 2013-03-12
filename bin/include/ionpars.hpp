@@ -11,7 +11,7 @@
 //          - diagonalize cfproblem and calculate moment and transition matrix elements
 
 class ionpars  
-{private: 
+{private:  
    // calculates scattering operator 
    void MQM(ComplexMatrix & MQXM,ComplexMatrix & MQYM,ComplexMatrix & MQZM, double th, double ph,double J0,double J2,double J4,double J6, Vector & Zc);
   
@@ -21,15 +21,17 @@ class ionpars
               // 1 .... so1ion xyz||abc
    char * iontype; // description string
    int nof_electrons; // nof 4f electrons
-   double J;// momentum quantum number
-   double gJ; // Lande factor
+   double J;// momentum quantum number 
+   double gJ; // Lande factor 
    double alpha;
    double beta;  // stevens factors
    double gamma;
    double r2;
    double r4;  // radial wave function exp values
    double r6;
-  
+
+   complex<double> sigma0,sigma1,sigma2; // optical conductivity for RIXS operator
+
    Matrix Ja; Matrix Jb; Matrix Jc; Matrix Hcf;
    ComplexMatrix Jaa;
    ComplexMatrix Jbb;
@@ -37,7 +39,7 @@ class ionpars
    Matrix cnst;
 
    Matrix **Olm; ComplexMatrix **OOlm; // array of matrices
- 
+   ComplexMatrix ** Ri; // for RIXS
    Vector Blm; // Cf parameters  
    Vector Llm; // Cf parameters  
 

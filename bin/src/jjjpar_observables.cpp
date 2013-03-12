@@ -476,11 +476,11 @@ void jjjpar::FFinfo(FILE * fout) // has to be consistent with mcdisp_intcalc set
     case -2: if(gJ!=0){fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2  FF coefficients:");}
             else {fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with: <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
             break;
-    case 4:fprintf(fout,"ion ioncluded in rixs intensity calculation");break;
+    case 4:fprintf(fout,"ion included in rixs intensity calculation");break;
     default: fprintf(stderr,"Error: inconsistency in formfactor calculation\n"); exit(1);
    }
 
-  if(FF_type!=1){  
+  if(FF_type!=1&&FF_type!=4){  
   if(Np(1)!=0){
   fprintf(fout," - formfactor calc. from radial wave function parameters in %s: <jl(Q)> considered up to l=%i",sipffilename,jl_lmax);
   }
@@ -1383,7 +1383,7 @@ int jjjpar::drixs1calc(Vector & Qvec,double & T, ComplexVector & drixs,ComplexMa
 {double delta=maxE;drixs(1)=complex <double> (ninit,pinit);
  double J0,J2,J4,J6;
  double Q,th,ph;
- int i;     complex<double>dummy; // introduced 3.4.10 MR
+        
             Q = Norm(Qvec); //dspacing
       //      d = 2.0 * PI / Q; s=0.5 / d;
       J0=j0(Q); // formfactor coefficients left here in case these are needed in future ??
@@ -1400,7 +1400,7 @@ int jjjpar::drixs1calc(Vector & Qvec,double & T, ComplexVector & drixs,ComplexMa
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give cfielddn polar angles with respect to xyz
             return (*iops).cfielddrixs1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,drixs);break;
    case 2:  // for cfield because of coordinate rotation (complicated because of tensor) not implemented, not necessary I believe !
-   default: if(washere==0){fprintf(stderr,"Warning in scattering operator function drixs1calc - for ion %s \ndoing RIXS  is not implemented\n",sipffilename);
+   default: drixs=0;if(washere==0){fprintf(stderr,"Warning in scattering operator function drixs1calc - for ion %s \ndoing RIXS  is not implemented\n",sipffilename);
                            washere=1;}
             return 0;
   }
