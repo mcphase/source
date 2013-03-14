@@ -269,8 +269,7 @@ void staout(FILE*fout,double & sta,double & sta_int,double & sta_without_antipea
     fprintf(fout,"#!sta_int_without_antipeaks_weights= %8.6g \n",sta_int_without_antipeaks_weights);
     }
 
-
-
+// *******************************************************************************************
 // procedure to calculate the dispersion
 void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
@@ -1080,12 +1079,16 @@ if (do_jqfile==1){
                    fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
                    if(calc_rixs){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
                                  writeheader(inputpars,foutqei);
-                                 fprintf(foutqei,"#RIXS intensity components 11',12',etc refer to the components  1,...,6=ei ei,ej ej,ek ek,ei ej,ei ek,ej ek of incoming polarization e / outgoing polarisation e'\n");
-                                 fprintf(foutqei,"#(note ijk form an euclidian righthanded coordinate system j||b, k||(a x b) and i normal to j and k, where abc denot the crystal lattice vectors as defined in mcphas.j)\n");
-                                 fprintf(foutqei,"# e.g. if incoming polarization is e=(ei,ej,ek)=(1/sqrt(2),1/sqrt(2),0) and you want to know the intensity for e'=(ei',ej',ek')=(0,0,1)\n");
-                                 fprintf(foutqei,"# you have to sum I=I13'*ei*ei*ek'*ek'+I23'*ej*ej*ek'*ek'+I43' *ei*ej*ek'*ek'=\n");
-                                 fprintf(foutqei,"# i.e. I=I13'/2+I23'/2+I43'/2\n");
-                                 fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV]  qincrement[1/A] (for plotting) Irixs11 12' 13' 14' 15' 16' 21' 22' 23' 24' 25' 26' ...66'  [a.u./sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+                                 fprintf(foutqei,"#RIXS intensity components:azimuth is defined as in Longfield et al. PRB 66 054417 (2002)\n");
+                                 fprintf(foutqei,"coordinate system u1,u2,u3: the scattering plane, defined by the\n");
+                                 fprintf(foutqei,"direction of the incident and final wave vectors k and k', contains u1 lying\n");
+                                 fprintf(foutqei,"perpendicular to Q and in the sense of k, and u3 parallel to the scattering\n");
+                                 fprintf(foutqei,"vector Q= k-k'.\n");
+                                 fprintf(foutqei,"angles for azimuth=0: alpha_i=angle(ai,u3), delta_i=angle(ai_perp,u1)\n");
+                                 fprintf(foutqei,"(where a1,a2,a3=a,b,c and ai_perp is the projection of ai onto the plane\n");
+                                 fprintf(foutqei,"perpendicular to Q. In the chosen experimental geometry\n");
+                                 fprintf(foutqei,"azimuth=0, when a1=a points to the x-ray source.\n");
+                                 fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h   k   l Q[A^-1] energy[meV]qincr[1/A](for plots) Irix: Isigmasigma azimuthsigmasigma   Isigmapi azsigmapi   Ipisigma azpisigma   Ipipi azpipi          Irightright azrightright Irightleft azreightleft Ileftright azleftright Ileftleft azlefteft(deg)   [a.u./sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
                    fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV]\n");
                    }else{
                    writeheader(inputpars,foutqom);
@@ -1143,7 +1146,7 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
                   Vector dd_without_antipeaks_weights(1,dim),dd_int_without_antipeaks_weights(1,dim);  dd_without_antipeaks_weights+=100000.0;dd_int_without_antipeaks_weights+=100000.0;
 
  #ifndef _THREADS
-                     int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=6;dimchibey=9;}
+                     int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
                      ComplexMatrix chi(1,dimchi*dimA,1,dimchi*dimA);
                      ComplexMatrix chibey(1,dimchibey*dimA,1,dimchibey*dimA);
                      Matrix pol(1,3,1,3);
@@ -1171,7 +1174,7 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
                      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,En);
-                     int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=6;dimchibey=9;}
+                     int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
                      thrdat.chi[ithread] = new ComplexMatrix(1,dimchi*dimA,1,dimchi*dimA);
                      thrdat.chibey[ithread] = new ComplexMatrix(1,dimchibey*dimA,1,dimchibey*dimA);
                      thrdat.pol[ithread] = new Matrix(1,3,1,3);
@@ -1282,10 +1285,46 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
                      }
 #endif
                       //printout rectangular function to .mcdisp.
-	             if(calc_rixs){fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g      ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+	             if(calc_rixs){
+                          // determine Isp Ipp Ips Isp  from chi(9x9 matrix)
+                         // here calculate azimuth dependence of I and maximize ....
+                         // ...
+                                   double Iss=-1,azss=0,Isp=-1,azsp=0,Ips=-1,azps=0,Ipp=-1,azpp=0;
+                                   double Irr=-1,azrr=0,Irl=-1,azrl=0,Ilr=-1,azlr=0,Ill=-1,azll=0;
+                                   double Isst=0,Ispt=0,Ipst=0,Ippt=0;
+                                   double Irrt=0,Irlt=0,Ilrt=0,Illt=0;
+                                   ComplexVector eis(1,3),eos(1,3),eip(1,3),eop(1,3);
+                                   ComplexVector eir(1,3),eor(1,3),eil(1,3),eol(1,3);
+                        for(double azimuth=0.0;azimuth<=2*PI&&ints(i)>-1;azimuth+=PI/90)                             
+                              { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, abc,QQ,En(i));
+                                // eis,p and eos,p are polarisation vectors for sigma/pi plarisation in terms of
+                                // eir,l and eor,l are polarisation vectors for righ/left circular plarisation in terms of
+                                // the ijk coordinate system ijk form an euclidian righthanded 
+                                //coordinate system j||b, k||(a x b) and i normal to j and k,
+                                // where abc denot the crystal lattice vectors as defined in mcphas.j
+                                Isst=calc_irix(eis,eos,chi);if(Isst>Iss){Iss=Isst;azss=azimuth*180/PI;}
+                                Ispt=calc_irix(eis,eop,chi);if(Ispt>Isp){Isp=Ispt;azsp=azimuth*180/PI;}
+                                Ipst=calc_irix(eip,eos,chi);if(Ipst>Ips){Ips=Ipst;azps=azimuth*180/PI;}
+                                Ippt=calc_irix(eip,eop,chi);if(Ippt>Ipp){Ipp=Ippt;azpp=azimuth*180/PI;}
+                                Irrt=calc_irix(eir,eor,chi);if(Irrt>Irr){Irr=Irrt;azrr=azimuth*180/PI;}
+                                Irlt=calc_irix(eir,eol,chi);if(Irlt>Irl){Irl=Irlt;azrl=azimuth*180/PI;}
+                                Ilrt=calc_irix(eil,eor,chi);if(Ilrt>Ilr){Ilr=Ilrt;azlr=azimuth*180/PI;}
+                                Illt=calc_irix(eil,eol,chi);if(Illt>Ill){Ill=Illt;azll=azimuth*180/PI;}
+                               if(calc_rixs==2){fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g           ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                          myround(QQ),myround(En(i)),qincr);
-                                   for(i1=1;i1<=6;++i1)for(j1=1;j1<=6;++j1)fprintf (foutqei, " %4.4g",myround(1e-8,real(chi(i1,j1))));
+                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Isst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ispt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ipst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ippt),myround(1e-8,azimuth*180/PI));
+                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Irlt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ilrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Illt),myround(1e-8,azimuth*180/PI));
                                    fprintf (foutqei, "\n");
+                                                }
+                              }
+                              fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g           ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                         myround(QQ),myround(En(i)),qincr);
+                                 if(ints(i)>-1){
+                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Iss),myround(1e-8,azss),myround(1e-8,Isp),myround(1e-8,azsp),myround(1e-8,Ips),myround(1e-8,azps),myround(1e-8,Ipp),myround(1e-8,azpp));
+                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irr),myround(1e-8,azrr),myround(1e-8,Irl),myround(1e-8,azrl),myround(1e-8,Ilr),myround(1e-8,azlr),myround(1e-8,Ill),myround(1e-8,azll));
+                                               } else {fprintf(foutqei, " -1 0  -1 0  -1 0  -1 0   -1 0  -1 0  -1 0  -1 0 ");}
+                                   fprintf (foutqei, "\n");
+                                                
                      }else{
                     if (ini.hkllist==1)
 	             {double test; // add to sta distance to nearest measured peak squared
@@ -1628,8 +1667,9 @@ for (i=1;i<=argc-1;++i){
 		                                                epsilon=strtod(argv[i+1],NULL);++i;
 							        fprintf(stdout,"#epsilon= %g\n",epsilon);
 				     }		
-       else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
-        else {if(strcmp(argv[i],"-x")==0) {calc_rixs=1;} 
+      else {if(strcmp(argv[i],"-xa")==0) {calc_rixs=2;calc_beyond=0;} // rixs with azimuth dependence 
+       else {if(strcmp(argv[i],"-x")==0) {calc_rixs=1;calc_beyond=0;}  // rixs without azimuth dep .. Irixs max only
+        else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
          else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL;maxlevels=1;}
           else {if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
            else {if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
@@ -1668,6 +1708,7 @@ for (i=1;i<=argc-1;++i){
            }	
           }
          }
+        }
     }
 inimcdis ini("mcdisp.par",spinfile);
 

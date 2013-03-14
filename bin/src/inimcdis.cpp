@@ -56,6 +56,8 @@ void inimcdis::save()
   fprintf(fout,"#           f.u.=crystallogrpaphic unit cell (r1xr2xr3) for inelastic and diffuse scattering\n");
   fprintf(fout,"#\n");
   fprintf(fout,"# depending on what is kept constant it follows either kf or ki (1/A)\n");
+  fprintf(fout,"# for neutrons: E=(hbar k)^2/2m_n=81.8meV/lambda(A)^2=2.072meV (k(1/A))^2 ...  k(1/A)=sqrt(0.483*E(meV))\n");
+  fprintf(fout,"# for X-rays:   E=c hbar k   =1.24e06 meV/lambda(A)=1973202 meV k(1/A)    ...  k(1/A)=5.0679e-7*E(meV)\n");
   if(kf!=0){fprintf(fout,"#!kf=%g\n",kf);}else{fprintf(fout,"#!ki=%g\n",ki);}
   fprintf(fout,"# \n");
   fprintf(fout,"# emin and emax define the energy range in which neutron intensities are calculated\n");
