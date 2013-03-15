@@ -426,7 +426,7 @@ void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters 
   Matrix p(1,3,1,3);
   calc_prim_mag_unitcell_old(p,cs.abc,cs.r);
   calc_minmax_scale_relabc(minv,maxv,ijkmin,ijkmax,p,cs.abc,gp.scale_view_1,gp.scale_view_2,gp.scale_view_3);
-   if(gp.showprim==1){ijkmin(1)=1;ijkmin(2)=1;ijkmin(3)=1;ijkmax(1)=-2+(int)(gp.scale_view_1);ijkmax(2)=-2+(int)(gp.scale_view_2);ijkmax(3)=-2+(int)(gp.scale_view_3);} // show only primitive magnetic unit cell
+   if(gp.showprim==1){ijkmin(1)=1;ijkmin(2)=1;ijkmin(3)=1;ijkmax(1)=-1;ijkmax(2)=-1;ijkmax(3)=-1;} // show only primitive magnetic unit cell
   max_min=maxv-minv;
   calc_prim_mag_unitcell(p,cs.abc,cs.r);
 
@@ -567,7 +567,7 @@ fprintf(fout,"        <points>\n");
 	 {dd=pos(i,j,k,l,cs);
          dd+=dd0;
             if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
-            (gp.showprim==1&&gp.scale_view_1>(double)(i1*nofa+i)/nofa&&gp.scale_view_2>(double)(j1*nofb+j)/nofb&&gp.scale_view_3>(double)(k1*nofc+k)/nofc))
+            (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
      ++ctr;
@@ -584,7 +584,7 @@ fprintf(fout,"        <colors type=\"rgb\">\n");
          for(l=1;l<=nofatoms;++l)
 	 {dd=pos(i,j,k,l, cs);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
-             (gp.showprim==1&&gp.scale_view_1>(double)(i1*nofa+i)/nofa&&gp.scale_view_2>(double)(j1*nofb+j)/nofb&&gp.scale_view_3>(double)(k1*nofc+k)/nofc))
+             (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {
 fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atoms),(int)(gp.show_atoms*((l*97)%256)),0);
 	     }
@@ -610,7 +610,7 @@ fprintf(fout,"        <points>\n");
          for(l=1;l<=nofatoms;++l)
 	 {dd=pos(i,j,k,l, cs);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
-                   (gp.showprim==1&&gp.scale_view_1>(double)(i1*nofa+i)/nofa&&gp.scale_view_2>(double)(j1*nofb+j)/nofb&&gp.scale_view_3>(double)(k1*nofc+k)/nofc))
+                   (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
@@ -661,7 +661,7 @@ fprintf(fout,"        <points>\n");
          for(l=1;l<=nofatoms;++l)
 	 {dd=pos(i,j,k,l, cs);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
-                     (gp.showprim==1&&gp.scale_view_1>(double)(i1*nofa+i)/nofa&&gp.scale_view_2>(double)(j1*nofb+j)/nofb&&gp.scale_view_3>(double)(k1*nofc+k)/nofc))
+                     (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
@@ -700,7 +700,7 @@ fprintf(fout,"        <points>\n");
          for(l=1;l<=nofatoms;++l)
 	 {dd=pos(i,j,k,l, cs);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
-                    (gp.showprim==1&&gp.scale_view_1>(double)(i1*nofa+i)/nofa&&gp.scale_view_2>(double)(j1*nofb+j)/nofb&&gp.scale_view_3>(double)(k1*nofc+k)/nofc))
+                    (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
