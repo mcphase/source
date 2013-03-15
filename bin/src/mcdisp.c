@@ -55,10 +55,10 @@ typedef struct{
    ComplexMatrix **Echargedensity;mfcf  **qee_real, **qee_imag;
    ComplexMatrix **Espindensity;mfcf  **qsd_real, **qsd_imag;
    ComplexMatrix **Eorbmomdensity;mfcf  **qod_real, **qod_imag;
-   ComplexMatrix **Ep;mfcf  **qep_real, **qep_imag;
-   ComplexMatrix **Em;mfcf  **qem_real, **qem_imag;
-   ComplexMatrix **ES;mfcf  **qes_real, **qes_imag;
-   ComplexMatrix **EL;mfcf  **qel_real, **qel_imag;
+   ComplexMatrix **Ephonon;mfcf  **qep_real, **qep_imag;
+   ComplexMatrix **Emagmom;mfcf  **qem_real, **qem_imag;
+   ComplexMatrix **Espin;mfcf  **qes_real, **qes_imag;
+   ComplexMatrix **Eorbmom;mfcf  **qel_real, **qel_imag;
    Matrix **pol;
    ComplexMatrix **Tau;
    Vector hkl, q;  jq **J;

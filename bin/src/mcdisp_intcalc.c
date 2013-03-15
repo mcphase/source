@@ -150,7 +150,6 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
         int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl,/*const*/ mdcf & md,int do_verbose,int calc_rixs,double & QQ)
 #endif
 {//calculates approximate intensity for energylevel i - according to chapter 8.2 mcphas manual
-int mqdim=3;if(calc_rixs)mqdim=9;
 
 #ifdef _THREADS
    intcalcapr_input *myinput; myinput = (intcalcapr_input *)input;
@@ -183,13 +182,14 @@ int mqdim=3;if(calc_rixs)mqdim=9;
    int level =  myinput->level;//, dimA = myinput->dimA, do_verbose = myinput->do_verbose;
    #define Tau (*thrdat.Tau[thread_id])
    double en = myinput->En; 
+   int calc_rixs = myinput->calc_rixs;
    #define ini (*thrdat.ini[thread_id])
    #define inputpars (*thrdat.inputpars[thread_id])
    #define hkl thrdat.hkl
    #define md (*thrdat.md[thread_id])
    double QQ;
 #endif
-
+ int mqdim=3;if(calc_rixs)mqdim=9;
  int i,j,i1,j1,k1,l1,t1,i2,j2,k2,l2,t2,s,ss,s3,ss3,b,bb;
  double intensity=1.2; 
  double ki,kf;
