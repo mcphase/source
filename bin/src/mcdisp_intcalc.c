@@ -147,7 +147,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
         mfcf & qem_real,mfcf & qem_imag,ComplexMatrix & Emagmom,
         mfcf & qes_real,mfcf & qes_imag,ComplexMatrix & Espin,
         mfcf & qel_real,mfcf & qel_imag,ComplexMatrix & Eorbmom,
-        int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl,/*const*/ mdcf & md,int do_verbose,int calc_rixs,double & QQ)
+        int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl, mdcf & md,int do_verbose,int calc_rixs,double & QQ)
 #endif
 {//calculates approximate intensity for energylevel i - according to chapter 8.2 mcphas manual
 

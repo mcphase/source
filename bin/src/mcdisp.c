@@ -867,7 +867,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
              J.mat(i1,j1,k1,i2,j2,k2)+=(*thrdat.J[th]).mat(i1,j1,k1,i2,j2,k2); 
     }
     for (ithread=0; ithread<NUM_THREADS; ithread++) {
-       delete thrdat.J[ithread]; delete tin[ithread]; }
+       delete thrdat.J[ithread];delete thrdat.md[ithread]; delete tin[ithread]; }
     delete[] thrdat.J; //delete tin;
 #endif
 
@@ -1092,7 +1092,7 @@ if (do_jqfile==1){
                    fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV]\n");
                    }else{
                    writeheader(inputpars,foutqom);
-                   fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+                   fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
                    fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
                    writeheader(inputpars,foutqei);
                    fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.] Imag [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)\n");
@@ -1178,29 +1178,29 @@ if(ini.calculate_orbmoment_oscillation)foutqel=evfileinit(filemode,"./results/mc
                      thrdat.chi[ithread] = new ComplexMatrix(1,dimchi*dimA,1,dimchi*dimA);
                      thrdat.chibey[ithread] = new ComplexMatrix(1,dimchibey*dimA,1,dimchibey*dimA);
                      thrdat.pol[ithread] = new Matrix(1,3,1,3);
-                     
+                     thrdat.md[ithread] = new mdcf(md);
 
                      thrdat.qee_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
                      thrdat.qee_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
                      thrdat.Echargedensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Echargedensity[ithread]=Echargedensity;
                      thrdat.qsd_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
                      thrdat.qsd_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
-                     thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;
+                     thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,SPINDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;
                      thrdat.qod_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
                      thrdat.qod_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
-                     thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;
+                     thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,ORBMOMDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;
                      thrdat.qep_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
                      thrdat.qep_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
-                     thrdat.Ephonon[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Ephonon[ithread]=Ephonon;
+                     thrdat.Ephonon[ithread] = new ComplexMatrix(1,dimA,1,PHONON_EV_DIM); *thrdat.Ephonon[ithread]=Ephonon;
                      thrdat.qem_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
                      thrdat.qem_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
-                     thrdat.Emagmom[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Emagmom[ithread]=Emagmom;
+                     thrdat.Emagmom[ithread] = new ComplexMatrix(1,dimA,1,MAGMOM_EV_DIM); *thrdat.Emagmom[ithread]=Emagmom;
                      thrdat.qes_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
                      thrdat.qes_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
-                     thrdat.Espin[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Espin[ithread]=Espin;
+                     thrdat.Espin[ithread] = new ComplexMatrix(1,dimA,1,SPIN_EV_DIM); *thrdat.Espin[ithread]=Espin;
                      thrdat.qel_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
                      thrdat.qel_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
-                     thrdat.Eorbmom[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Eorbmom[ithread]=Eorbmom;
+                     thrdat.Eorbmom[ithread] = new ComplexMatrix(1,dimA,1,ORBMOM_EV_DIM); *thrdat.Eorbmom[ithread]=Eorbmom;
 
                      thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
                   }
@@ -1405,7 +1405,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
                      delete thrdat.chi[ithread]; delete thrdat.chibey[ithread]; 
-                     delete thrdat.pol[ithread]; 
+                     delete thrdat.pol[ithread]; delete thrdat.md[ithread]; 
                      delete thrdat.qee_real[ithread]; delete thrdat.qee_imag[ithread];delete thrdat.Echargedensity[ithread]; 
                      delete thrdat.qsd_real[ithread]; delete thrdat.qsd_imag[ithread];delete thrdat.Espindensity[ithread]; 
                      delete thrdat.qod_real[ithread]; delete thrdat.qod_imag[ithread];delete thrdat.Eorbmomdensity[ithread]; 
@@ -1497,7 +1497,7 @@ if(!calc_rixs){fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g 
           thrdat.J = new jq*[NUM_THREADS]; thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
           for (int ithread=0; ithread<NUM_THREADS; ithread++) 
           {
-             tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); tin[ithread]->epsilon=epsilon; thrdat.J[ithread] = new jq(J);
+             tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); tin[ithread]->epsilon=epsilon; thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md);
           }
           int ithread=0; double oldE=0.;
           Vector vIntensity(1,(int)((ini.emax-ini.emin)/(epsilon/2)+1)); int iE=1;
@@ -1585,7 +1585,7 @@ if(!calc_rixs){fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g 
 #ifdef _THREADS
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {
-             delete thrdat.J[ithread]; delete tin[ithread];
+             delete thrdat.md[ithread];delete thrdat.J[ithread]; delete tin[ithread];
           }
           delete[] thrdat.J; //delete tin;
 #endif
