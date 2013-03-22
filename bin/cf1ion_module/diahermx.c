@@ -1313,7 +1313,7 @@ void info_ewproblem( ewproblem ) /* Diagonalisierungsroutine testen */
     CHAR   *tdelta  = "< %2d , %2d | %2d , %2d > =  %20.12e + i * %20.12e\n";
     FILE   *fopen(),*out;
  
-    out    = fopen_errchk("results/egnwert.info","w");
+    out    = fopen_errchk("results/eignwert.info","w");
  
     comhes = ewproblem->comhes;
     mx     = comhes   ->matrix;        /* urspruengliche Matrix holen       */

@@ -1340,7 +1340,7 @@ DOUBLE magnetm(mat_Ji,setup,ewproblem,kristallfeld,Bx,By,Bz,t)
     DOUBLE    Bx,By,Bz; /* angelegetes aeusseres feld*/
     DOUBLE    t; /* angelegete  Temperatur    */
 {
-    DOUBLE    Bxmol,Bymol,Bzmol; /* Molekularfeld   */
+    DOUBLE    Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2; /* Molekularfeld   */
     ITERATION *iteration;
     INT    i/*,k*/,r/*,s*/,anz_niveaus,*gi;
     VEKTOR *ev_ir;
@@ -1363,9 +1363,12 @@ DOUBLE magnetm(mat_Ji,setup,ewproblem,kristallfeld,Bx,By,Bz,t)
     Bxmol        = B1MOL(iteration);
     Bymol        = B2MOL(iteration);
     Bzmol        = B3MOL(iteration);
+    Dx2        = B1S(iteration);
+    Dy2        = B2S(iteration);
+    Dz2        = B3S(iteration);
  
   
-    HMAG(iteration) = calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol);
+    HMAG(iteration) = calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2);
 
     ewproblem       = solve(setup,ewproblem,NEIN,kristallfeld,art);
 /* here changed to NOSPACE to NEIN MR okt 2002 - because NOSPACE leads

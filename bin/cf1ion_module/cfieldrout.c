@@ -515,18 +515,18 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
 {
     KRISTALLFELD *kristallfeld,*init_iterationnew();
     EWPROBLEM /* *ewproblem,*/ *setuphcf();
-    SETUP        *setup;
+    /*SETUP        *setup;*/
     INT          m,n;
     INT          i,j;
     DOUBLE       Bx,By,Bz,myB;
     ITERATION    *iteration;
     MATRIX       *calc_Bmag();
 
-
     init_einheit();
 
-    setup = cfield_setup(); /* setup's aus SETUP-file holen */
-    
+
+   /* setup = cfield_setup(); *//* setup's aus SETUP-file holen */
+  
 /* determine crystal field stevens operator matrices */
 
     kristallfeld=init_iterationnew(iontype);/*sets up HMAG */
@@ -568,7 +568,7 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
 
     Bx=0.0;By=0.0; Bz=0.0;
     HMAG(iteration)=calc_Bmag( DIMJ(iteration),GJ(iteration),myB,Bx,By,Bz);
-/*  ewproblem=*/setuphcf(setup,(EWPROBLEM*)0,NEIN,kristallfeld,BKQ);
+/*  ewproblem=*/setuphcf((EWPROBLEM*)0,NEIN,kristallfeld,BKQ);
 
     /* h += singleion anisotropy */
     for( n= DIMJ(iteration); n>=1 ; --n) for( m=DIMJ(iteration) ; m>=1 ; --m) {
@@ -958,14 +958,12 @@ EWPROBLEM *solve(setup,ewproblem,overwrite,kristallfeld,modus)
                                  setuphcf()
 ------------------------------------------------------------------------------*/
 /* Kristallfeldhamiltonian loesen */
-EWPROBLEM *setuphcf(setup,ewproblem,overwrite,kristallfeld,modus)
-    SETUP        *setup;
+EWPROBLEM *setuphcf(ewproblem,overwrite,kristallfeld,modus)
     EWPROBLEM    *ewproblem;
     INT          overwrite;
     KRISTALLFELD *kristallfeld;
     CHAR modus;
 {
-    UNUSED_PARAMETER(setup);
     UNUSED_PARAMETER(overwrite);
 
     EWPROBLEM *diagonalisiere();
@@ -2854,23 +2852,24 @@ MATRIX *calcBmol( dimj,bmag,gjs,myB,Bx,By,Bz )   /* gjs = 2(gJ-1) */
 /*------------------------------------------------------------------------------
                                     calc_iBmag()
 ------------------------------------------------------------------------------*/
-MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol )
+MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 )
     MATRIX *bmag;
-    DOUBLE gj,myB,Bx,By,Bz;
+    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2;
     DOUBLE Bxmol,Bymol,Bzmol;
 {
     INT    m,n,dimj;
-    DOUBLE jm,jp;
+    DOUBLE jm,jp,jx2,jy2;
  
     #include "define_j.c"          /* mj,J2,J+,... definieren */
                                    /* <nj| A |mj>             */
     dimj = MXDIM(bmag);
+/*    printf("dim=%i\n",dimj);*/
     for( n=dimj ; n>=1 ; --n)
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-/*       sign changed 24.9.08 because  Zeeman term has negative sign */
-              R(bmag,n,m) = -2.0*(gj-1.0)*myB*(0.5*Bxmol*( jm+jp )
+ /* sign changed 24.9.08 because zeeman term has negative sign */
+             R(bmag,n,m) = -2.0*(gj-1.0)*myB*(0.5*Bxmol*( jm+jp )
                             + mj*Bzmol*D(nj,mj)  );
               I(bmag,n,m) = -2.0*(gj-1.0)*myB* 0.5*Bymol*( jm-jp );
          }
@@ -2878,8 +2877,12 @@ MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol )
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-/*       sign changed 24.9.08 because  Zeeman term has negative sign */
-              R(bmag,n,m) += -gj*myB*(0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  );
+              jx2=0.25*(JM(mj)*JP(mj-1)*D(nj,mj)+JM(mj+1)*JP(mj)*D(nj,mj));
+              jy2=jx2;
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM(mj)*JM(mj-1);jy2-=0.25*JM(mj)*JM(mj-1);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP(mj+1)*JP(mj);jy2-=0.25*JP(mj+1)*JP(mj);}
+ /* sign changed 24.9.08 because zeeman term has negative sign */
+             R(bmag,n,m) += -gj*myB*(0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  )+Dz2*mj*mj*D(nj,mj)+Dx2*jx2+Dy2*jy2;
               I(bmag,n,m) += -gj*myB* 0.5*By*( jm-jp );
          }
     return( bmag );

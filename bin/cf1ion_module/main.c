@@ -3549,13 +3549,13 @@ MATRIX *calcBmol( dimj,bmag,gjs,myB,Bx,By,Bz )   /* gjs = 2(gJ-1) */
 /*------------------------------------------------------------------------------
                                     calc_iBmag()
 ------------------------------------------------------------------------------*/
-MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol )
+MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 )
     MATRIX *bmag;
-    DOUBLE gj,myB,Bx,By,Bz;
+    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2;
     DOUBLE Bxmol,Bymol,Bzmol;
 {
     INT    m,n,dimj;
-    DOUBLE jm,jp;
+    DOUBLE jm,jp,jx2,jy2;
  
     #include "define_j.c"          /* mj,J2,J+,... definieren */
                                    /* <nj| A |mj>             */
@@ -3574,8 +3574,12 @@ MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol )
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
+              jx2=0.25*(JM(mj)*JP(mj-1)*D(nj,mj)+JM(mj+1)*JP(mj)*D(nj,mj));
+              jy2=jx2;
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM(mj)*JM(mj-1);jy2-=0.25*JM(mj)*JM(mj-1);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP(mj+1)*JP(mj);jy2-=0.25*JP(mj+1)*JP(mj);}
  /* sign changed 24.9.08 because zeeman term has negative sign */
-             R(bmag,n,m) += -gj*myB*(0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  );
+             R(bmag,n,m) += -gj*myB*(0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  )+Dz2*mj*mj*D(nj,mj)+Dx2*jx2+Dy2*jy2;
               I(bmag,n,m) += -gj*myB* 0.5*By*( jm-jp );
          }
     return( bmag );

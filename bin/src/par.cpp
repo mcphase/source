@@ -60,7 +60,9 @@ par::par (const char *filejjj)
   jjj=new jjjpar * [nofatoms+1];
   gJ=Vector(1,nofatoms);
   for(i=1;i<=nofatoms;++i)  
-  {jjj[i]=new jjjpar(fin_coq,nofcomponents);  
+  {//printf("creating atom %i (of %i)...\n",i,nofatoms);
+   jjj[i]=new jjjpar(fin_coq,nofcomponents);
+   if(jjj[i]==NULL){ fprintf (stderr, "Out of memory creating atoms jjjpar by constructor\n");exit (EXIT_FAILURE);}
    gJ(i)=(*jjj[i]).gJ;
   // fgets (instr, MAXNOFCHARINLINE, fin_coq);
    //rems[3+i]=new char[strlen(instr)+2];strcpy(rems[3+i],instr); not needed any more (causes memory leak) MR 30.3.10
