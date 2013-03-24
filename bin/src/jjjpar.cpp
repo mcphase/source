@@ -422,7 +422,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   float nn[MAXNOFNUMBERSINLINE];
   nn[0]=MAXNOFNUMBERSINLINE;
   xyz=Vector(1,3);
-  set_zlm_constants();
+  cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   i=6; FF_type=0;
   while(i>0){fgets_errchk (instr, MAXNOFCHARINLINE, file);
              if(instr[strspn(instr," \t")]!='#'){fprintf (stderr, "Error reading mcphas.j - exchangeparameters start before all variables (da,db,dc,nofneighbours,diagonalexchange and sipffilename) have been given\n");
@@ -543,7 +543,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile)
   sipffilename= new char [MAXNOFCHARINLINE];
   strcpy(sipffilename,sipffile);
   get_parameters_from_sipfile(sipffilename);
-  set_zlm_constants();
+   cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 
 }
@@ -558,7 +558,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   magFFj4=Vector(1,7);magFFj4=0;
   magFFj6=Vector(1,7);magFFj6=0;
   Zc=Vector(1,7);Zc=0; 
-  set_zlm_constants();
+   cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
    Np=Vector(1,9);Np=0; // vectors of radial wave function parameters
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
@@ -576,7 +576,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
 { sipffilename= new char [MAXNOFCHARINLINE];jl_lmax=6;
   diagonalexchange=diag;
   paranz=n;xyz=Vector(1,3);xyz=0; 
-  set_zlm_constants();
+   cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   int i1;r2=0;r4=0;r6=0;
   module_type=1;ABC=Vector(1,3);ABC=0;
   transitionnumber=1;
@@ -611,7 +611,7 @@ jjjpar::jjjpar (const jjjpar & pp)
   nofcomponents=pp.nofcomponents;
   mom=Vector(1,nofcomponents); 
   xyz=pp.xyz;paranz=pp.paranz;
-  set_zlm_constants();
+   cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   SLR=pp.SLR;SLI=pp.SLI;
   FF_type=pp.FF_type;
   nof_electrons=pp.nof_electrons;

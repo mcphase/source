@@ -141,11 +141,15 @@ all :  martin.o ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE) \
         ../formfactor$(EXE) ../radwavfunc$(EXE) 
        
 test: ../ionpars$(EXE) ../jjjpar$(EXE)
+testperlparse:  ../perlparse$(EXE)
 # ****************************************************
 # compile sources 
 
 
 martin.o:  martin.c martin.h vector.h
+	$(CCC) $(CFLAGS) $< 
+
+perlparse.o:  perlparse.c martin.h vector.h myev.h
 	$(CCC) $(CFLAGS) $< 
 	
 graphic_parameters.o: graphic_parameters.cpp graphic_parameters.hpp martin.h vector.h
@@ -182,7 +186,7 @@ jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 inipar.o: inipar.cpp inipar.hpp martin.h vector.h 
 	$(CCC) $(CFLAGS) $< 
 
-ionpars.o: ionpars.cpp ionpars.hpp
+ionpars.o: ionpars.cpp ionpars.hpp perlparse.c
 	$(CCC) $(CFLAGS) $<
 
 inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp
@@ -267,6 +271,10 @@ ip.o: ionpars.cpp
 ../jjjpar$(EXE): jjjpar.o ionpars.o $(CFIELDOBJS) $(VOBS) $(FUNCTIONOBJS) martin.o myev.o
 	@echo Linking ../jjjpar
 	@$(LINKER)  -Wall  -o ../jjjpar  $^ $(LFLAGS)
+
+../perlparse$(EXE): perlparse.o $(CFIELDOBJS) $(VOBS) $(FUNCTIONOBJS) martin.o myev.o
+	@echo Linking ../perlparse
+	@$(LINKER)  -Wall  -o ../perlparse  $^ $(LFLAGS)
 
 # mcphase software suite programs
 ../cond$(EXE): cond.o paramete.o $(VOBS) martin.o

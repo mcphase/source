@@ -5,10 +5,14 @@
 #include <cstdio>
 #include <mpspecfunp.h>
 
-// ionpars: class to 
-//          - read single ion parameterfile for cfield module
-//          - load and store matrices for internal module cfield
-//          - diagonalize cfproblem and calculate moment and transition matrix elements
+#define IONPARS_MAXNOFCOMPONENTS 51
+// standard operator sequence I1,....,I51
+// module so1ion: Jx Jy Jz O22S O21S O20 O21 O22 O33S O32S .... O66 Jx^2 Jy^2 Jz^2
+
+// ionpars: class for so1ion / cfield modules to 
+//          - read single ion parameterfile for so1ion /cfield module
+//          - load and store matrices for internal module so1ion /cfield
+//          - diagonalize singleion problem and calculate obsevables and transition matrix elements
 
 class ionpars  
 {private:  
@@ -40,6 +44,8 @@ class ionpars
 
    Matrix **Olm; ComplexMatrix **OOlm; // array of matrices
    ComplexMatrix ** Ri; // for RIXS
+
+   ComplexMatrix ** In;
    Vector Blm; // Cf parameters  
    Vector Llm; // Cf parameters  
 

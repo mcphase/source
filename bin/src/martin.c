@@ -346,6 +346,89 @@ void xproduct(Vector & result,Vector a, Vector b)
  return ;
 }
 
+// calculate transition matrix element of eigenvectr <i|op|j> with eigenvectors
+// given as column vectors i and j of Matrix (zr + i zi), the Hermitian operator op is described
+// by   matrix op.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+double matelr (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
+{double sumr=0,p1r,p1i,p2r,p2i;
+  //xisyj,xjsyi,im(0,1);
+  int dl,dh;
+ if((dl=op.Rlo())!=op.Clo()||op.Rlo()!=zr.Rlo()||op.Rlo()!=zi.Rlo()||
+    (dh=op.Rhi())!=op.Chi()||op.Rhi()!=zr.Rhi()||op.Rhi()!=zi.Rhi()){fprintf(stderr,"Error matel: operator not sqaure and/or eigenvector dimension do not match\n");exit(EXIT_FAILURE);}
+ for(int i=dl;i<=dh;++i){//complex <double> xis(zr[i][k],-zi[i][k]);
+                         //complex <double> yi(zr[i][l],zi[i][l]);
+                       sumr+=(zr[i][k]*zr[i][l]+ zi[i][k]*zi[i][l])*op[i][i]; //xis*yi*op[i][i];
+  for(int j=i+1;j<=dh;++j){//complex <double> yj(zr[j][l],zi[j][l]);
+                           //complex <double> opc1(op[j][i],-op[i][j]);                          
+                                       // sum+=opc1*xis*yj;
+                           //complex <double> xjs(zr[j][k],-zi[j][k]);
+                           //complex <double> opc2(op[j][i],op[i][j]);
+                                        //sum+=opc2*xjs*yi;
+                          if(op[i][j]!=0){
+                             p1i=zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l];
+                             p2i=zr[j][k]*zi[i][l]- zi[j][k]*zr[i][l];
+                           sumr+=(p1i-p2i)*op[i][j];
+                                          }
+                          if(op[j][i]!=0){
+                             p1r=zr[i][k]*zr[j][l]+ zi[i][k]*zi[j][l];// xis*yj
+                             p2r=zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l];// xjs*yi
+                           sumr+=(p1r+p2r)*op[j][i];
+                                          }
+                                                         
+                         }
+        }
+ return sumr;
+}
+double mateli (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
+{double sumi=0,p1r,p1i,p2r,p2i;
+  //xisyj,xjsyi,im(0,1);
+  int dl,dh;
+ if((dl=op.Rlo())!=op.Clo()||op.Rlo()!=zr.Rlo()||op.Rlo()!=zi.Rlo()||
+    (dh=op.Rhi())!=op.Chi()||op.Rhi()!=zr.Rhi()||op.Rhi()!=zi.Rhi()){fprintf(stderr,"Error matel: operator not sqaure and/or eigenvector dimension do not match\n");exit(EXIT_FAILURE);}
+ for(int i=dl;i<=dh;++i){//complex <double> xis(zr[i][k],-zi[i][k]);
+                         //complex <double> yi(zr[i][l],zi[i][l]);
+                       sumi+=(zr[i][k]*zi[i][l]- zi[i][k]*zr[i][l])*op[i][i];
+  for(int j=i+1;j<=dh;++j){//complex <double> yj(zr[j][l],zi[j][l]);
+                           //complex <double> opc1(op[j][i],-op[i][j]);                          
+                                       // sum+=opc1*xis*yj;
+                           //complex <double> xjs(zr[j][k],-zi[j][k]);
+                           //complex <double> opc2(op[j][i],op[i][j]);
+                                        //sum+=opc2*xjs*yi;
+                          if(op[i][j]!=0){
+                             p1r=zr[i][k]*zr[j][l]+ zi[i][k]*zi[j][l];// xis*yj
+                             p2r=zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l];// xjs*yi
+                           sumi+=(p2r-p1r)*op[i][j];
+                                          }
+                          if(op[j][i]!=0){
+                             p1i=zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l];
+                             p2i=zr[j][k]*zi[i][l]- zi[j][k]*zr[i][l];
+                           sumi+=(p1i+p2i)*op[j][i];                           
+                                          }
+                                                         
+                         }
+        }
+ return sumi;
+}
+
+// calculate some column i of ComplexMatrix opZ which is defined as the 
+// product of two complex matrices op * Z, however Z is given as
+// as real matrices  Matrix zr + i Matrix zi, the Hermitian operator op is described
+// by   Matrix op.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+void opZcol (int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi)
+{int k,l,d=op.Rhi(); // no check of dimensions to improve speed !!
+ for(k=1;k<=d;++k){opZ[k][i]=complex<double>(op[k][k]*zr[k][i],op[k][k]*zi[k][i]);
+                   for(l=1;l<k;++l)    opZ[k][i]+=complex<double>(op[l][k]*zr[l][i]-op[k][l]*zi[l][i],op[l][k]*zi[l][i]+op[k][l]*zr[l][i]);
+                   for(l=k+1;l<=d;++l) opZ[k][i]+=complex<double>(op[k][l]*zr[l][i]+op[l][k]*zi[l][i],op[k][l]*zi[l][i]-op[l][k]*zr[l][i]);
+ 
+                  } 
+}
+
 void rezcalc(Vector r1,Vector  r2,Vector  r3,Vector  rez1,Vector  rez2,Vector  rez3)
 {// calculate reciprocal lattice rezi from real lattice ri
  float vol;
@@ -556,4 +639,47 @@ Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3)
 {static Matrix m(1,3,v1.Lo(),v1.Hi());
  for(int i=v1.Lo();i<=v1.Hi();++i){m(i,1)=v1(i);m(i,2)=v2(i);m(i,3)=v3(i);}
 return m;
+}
+
+void set_zlm_constants(Matrix & cnst)
+{// cnst is the Zlm constants - put them into the matrix ... (same code is reused in ionpars.cpp)
+if(cnst.Rlo()!=0||cnst.Rhi()!=6||cnst.Clo()!=-6||cnst.Chi()!=6){fprintf(stderr,"Error matrix in Zlm constants wrong dimension");exit(EXIT_FAILURE);}
+cnst(0,0)=0.28209479177387814347403972578039;
+
+cnst(1,0)=0.48860251190291992158638462283835;
+cnst(1,1)=0.48860251190291992158638462283835;
+
+cnst(2,0) = 0.3153962;
+cnst(2,1)=  1.092548;
+cnst(2,2)=  0.5462823;
+
+cnst(3,0)=0.373176332590115391414395913199;
+cnst(3,1)=0.45704579946446573615802069691665;
+cnst(3,2)=1.445305721320277027694690077199;
+cnst(3,3)=0.5900435899266435103456102775415;
+
+
+cnst(4,0)=  0.1057871;
+cnst(4,1)=  0.6690465;
+cnst(4,2)=  0.4730943;
+cnst(4,3)=  1.77013;
+cnst(4,4)=  0.625845;
+
+cnst(5,0)=0.11695032245342359643971519209028;
+cnst(5,1)=0.45294665119569692129844165821715;
+cnst(5,2)=2.3967683924866618775009505697816;
+cnst(5,3)=0.48923829943525038768400871584296;
+cnst(5,4)=2.0756623148810412789957985225952;
+cnst(5,5)=0.65638205684017010281411876637614;
+
+
+cnst(6,0)=  0.06357014;
+cnst(6,1)=  0.582621;
+cnst(6,2)=  0.4606094;
+cnst(6,3)=  0.921205;
+cnst(6,4)=  0.5045723;
+cnst(6,5)=  2.366619;
+cnst(6,6)=  0.6831942;
+int l,m;
+for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 }

@@ -186,24 +186,7 @@ while(n>0)
 
   int l,m;   
  // cnst is the Zlm prefactors (plm) - put them into the matrix (same constants are used in jjjpar.cpp and ionpars.cpp)
- Matrix cnst(0,6,-6,6); 
- cnst(0,0) = 0.28209479;
- cnst(2,0) = 0.3153962;
- cnst(2,1)=  1.092548;
- cnst(2,2)=  0.5462823;
- cnst(4,0)=  0.1057871;
- cnst(4,1)=  0.6690465;
- cnst(4,2)=  0.4730943;
- cnst(4,3)=  1.77013;
- cnst(4,4)=  0.625845;
- cnst(6,0)=  0.06357014;
- cnst(6,1)=  0.582621;
- cnst(6,2)=  0.4606094;
- cnst(6,3)=  0.921205;
- cnst(6,4)=  0.5045723;
- cnst(6,5)=  2.366619;
- cnst(6,6)=  0.6831942;
- for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);} // for negative m the prefactors plm are the same as for positive
+ Matrix cnst(0,6,-6,6); set_zlm_constants(cnst);
 
  // evaluate the Zlm in order to get gamma_lm ... in the following lines Zlm(Omega_i) is evaluated
  gamma(0)= cnst(0, 0);

@@ -4,15 +4,14 @@
 #include "martin.h"
 #include "ionpars.h"
 #include "myev.h"
+#include "perlparse.c"
 
 #define NOF_OLM_MATRICES 48
+#define NOF_RIXS_MATRICES 9
 
 #define SMALL 1e-6   //!!! must match SMALL in mcdisp.c and ionpars.cpp !!!
                      // because it is used to decide wether for small transition
 		     // energy the matrix Mijkl contains wn-wn' or wn/kT
-
-
-
 
  ionpars::ionpars (const ionpars & p) //copy constructor
  {J=p.J;so1ion=p.so1ion;
@@ -25,100 +24,31 @@
   Blm=p.Blm; // vector of crystal field parameters
   Llm=p.Llm; // vector of crystal field parameters
   // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
-cnst=Matrix(0,6,-6,6);int l,m;
-cnst(0,0) = 0.28209479;
-cnst(2,0) = 0.3153962;
-cnst(2,1)=  1.092548;
-cnst(2,2)=  0.5462823;
-cnst(4,0)=  0.1057871;
-cnst(4,1)=  0.6690465;
-cnst(4,2)=  0.4730943;
-cnst(4,3)=  1.77013;
-cnst(4,4)=  0.625845;
-cnst(6,0)=  0.06357014;
-cnst(6,1)=  0.582621;
-cnst(6,2)=  0.4606094;
-cnst(6,3)=  0.921205;
-cnst(6,4)=  0.5045723;
-cnst(6,5)=  2.366619;
-cnst(6,6)=  0.6831942;
-for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
-
-  
+   cnst=Matrix(0,6,-6,6);set_zlm_constants(cnst);
+ 
    int i;
-   Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
-   OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
-   Ri= new ComplexMatrix * [10];
    iontype = new char [strlen(p.iontype)+1];
    strcpy(iontype,p.iontype);
   
-  for(i=1;i<=9;++i){Ri[i]= new ComplexMatrix(1,(*p.Ri[i]).Rhi(),1,(*p.Ri[i]).Chi());
+    Ri= new ComplexMatrix * [1+NOF_RIXS_MATRICES];
+    for(i=1;i<=NOF_RIXS_MATRICES;++i){Ri[i]= new ComplexMatrix(1,(*p.Ri[i]).Rhi(),1,(*p.Ri[i]).Chi());
                    (*Ri[i])=(*p.Ri[i]);}
- for(i=1;i<=NOF_OLM_MATRICES;++i)
- { Olm [i]= new Matrix(1,(*p.Olm[i]).Rhi(),1,(*p.Olm[i]).Chi()); 
- // define first matrix 
-   OOlm [i] = new ComplexMatrix(1,(*p.OOlm[i]).Rhi(),1,(*p.OOlm[i]).Chi()); 
-   (*Olm[i])=(*p.Olm[i]);
-   (*OOlm[i])=(*p.OOlm[i]);
- }  
+    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
+    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
+    for(i=1;i<=NOF_OLM_MATRICES;++i){ Olm [i]= new Matrix(1,(*p.Olm[i]).Rhi(),1,(*p.Olm[i]).Chi()); 
+                                      OOlm [i] = new ComplexMatrix(1,(*p.OOlm[i]).Rhi(),1,(*p.OOlm[i]).Chi()); 
+                   (*Olm[i])=(*p.Olm[i]);
+                   (*OOlm[i])=(*p.OOlm[i]);
+    In= new ComplexMatrix * [1+IONPARS_MAXNOFCOMPONENTS+3+NOF_OLM_MATRICES+NOF_RIXS_MATRICES]; 
+    for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i){In[i]= new ComplexMatrix(1,(*p.In[i]).Rhi(),1,(*p.In[i]).Chi());
+                   (*In[i])=(*p.In[i]);}
+   }  
 
-}
+ }
 ionpars::ionpars (int dimj) // constructor from dimj
- {J=((double)dimj-1)/2;
-  Ja=Matrix(1,dimj,1,dimj);
-  Jb=Matrix(1,dimj,1,dimj);
-  Jc=Matrix(1,dimj,1,dimj);
-  Hcf=Matrix(1,dimj,1,dimj);
-  Jaa=ComplexMatrix(1,dimj,1,dimj);
-  Jbb=ComplexMatrix(1,dimj,1,dimj);
-  Jcc=ComplexMatrix(1,dimj,1,dimj);
-   so1ion=0;
-   Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
-   Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
-
+ { 
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;nof_electrons=0;
-   sigma0=0;sigma1=0;sigma2=0;
-// cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
-cnst=Matrix(0,6,-6,6);int l,m;
-cnst(0,0) = 0.28209479;
-cnst(2,0) = 0.3153962;
-cnst(2,1)=  1.092548;
-cnst(2,2)=  0.5462823;
-cnst(4,0)=  0.1057871;
-cnst(4,1)=  0.6690465;
-cnst(4,2)=  0.4730943;
-cnst(4,3)=  1.77013;
-cnst(4,4)=  0.625845;
-cnst(6,0)=  0.06357014;
-cnst(6,1)=  0.582621;
-cnst(6,2)=  0.4606094;
-cnst(6,3)=  0.921205;
-cnst(6,4)=  0.5045723;
-cnst(6,5)=  2.366619;
-cnst(6,6)=  0.6831942;
-for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
-   Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
-   OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
-   iontype = new char [MAXNOFCHARINLINE];
-   Ri = new ComplexMatrix * [10];
 
- int i;   
-  for(i=1;i<=9;++i){Ri[i]= new ComplexMatrix(1,dimj,1,dimj);
-                   }
- for(i=1;i<=NOF_OLM_MATRICES;++i)
- { Olm [i]= new Matrix(1,dimj,1,dimj); 
- // define first matrix 
-   OOlm [i] = new ComplexMatrix(1,dimj,1,dimj); 
- }  
-
-}
-
- 
-ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices filled with values !)
- {int dimj;
-  getpar(ion, &dimj, &alpha, &beta, &gamma, &gJ,&r2, &r4,&r6, &nof_electrons );
-   iontype = new char [strlen(ion)+1];
-   strcpy(iontype,ion);
    so1ion=0;
   sigma0=0;sigma1=0;sigma2=0;
   J=((double)dimj-1)/2;
@@ -130,63 +60,75 @@ ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices fill
   Jbb=ComplexMatrix(1,dimj,1,dimj);
   Jcc=ComplexMatrix(1,dimj,1,dimj);
 // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
-cnst=Matrix(0,6,-6,6);int l,m;
-cnst(0,0) = 0.28209479;
-cnst(2,0) = 0.3153962;
-cnst(2,1)=  1.092548;
-cnst(2,2)=  0.5462823;
-cnst(4,0)=  0.1057871;
-cnst(4,1)=  0.6690465;
-cnst(4,2)=  0.4730943;
-cnst(4,3)=  1.77013;
-cnst(4,4)=  0.625845;
-cnst(6,0)=  0.06357014;
-cnst(6,1)=  0.582621;
-cnst(6,2)=  0.4606094;
-cnst(6,3)=  0.921205;
-cnst(6,4)=  0.5045723;
-cnst(6,5)=  2.366619;
-cnst(6,6)=  0.6831942;
-for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
+   cnst=Matrix(0,6,-6,6);set_zlm_constants(cnst);
+   iontype = new char [MAXNOFCHARINLINE];
+   Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
+   Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
+ int i;   
+   Ri = new ComplexMatrix * [1+NOF_RIXS_MATRICES];
+  for(i=1;i<=NOF_RIXS_MATRICES;++i)Ri[i]= new ComplexMatrix(1,dimj,1,dimj);
+   Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
+   OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
+  for(i=1;i<=NOF_OLM_MATRICES;++i){ Olm [i]= new Matrix(1,dimj,1,dimj); 
+                                    OOlm [i] = new ComplexMatrix(1,dimj,1,dimj); 
+                                  }  
+   In = new ComplexMatrix * [1+IONPARS_MAXNOFCOMPONENTS+3+NOF_OLM_MATRICES+NOF_RIXS_MATRICES];
+  for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new ComplexMatrix(1,dimj,1,dimj);
+  
+}
+
+ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices filled with values !)
+ {int dimj;
+  getpar(ion, &dimj, &alpha, &beta, &gamma, &gJ,&r2, &r4,&r6, &nof_electrons );
+   iontype = new char [strlen(ion)+1];
+   strcpy(iontype,ion);
+
+    so1ion=0;
+   sigma0=0;sigma1=0;sigma2=0;
+  J=((double)dimj-1)/2;
+  Ja=Matrix(1,dimj,1,dimj);
+  Jb=Matrix(1,dimj,1,dimj);
+  Jc=Matrix(1,dimj,1,dimj);
+  Hcf=Matrix(1,dimj,1,dimj);
+  Jaa=ComplexMatrix(1,dimj,1,dimj);
+  Jbb=ComplexMatrix(1,dimj,1,dimj);
+  Jcc=ComplexMatrix(1,dimj,1,dimj);
+// cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
+cnst=Matrix(0,6,-6,6);set_zlm_constants(cnst);
 
    Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
 
+ int i;   
+   Ri = new ComplexMatrix * [1+NOF_RIXS_MATRICES];
+  for(i=1;i<=NOF_RIXS_MATRICES;++i)Ri[i]= new ComplexMatrix(1,dimj,1,dimj);
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
    OOlm= new ComplexMatrix * [1+NOF_OLM_MATRICES]; 
-   Ri = new ComplexMatrix * [10];
-
- int i;   
-  for(i=1;i<=9;++i){Ri[i]= new ComplexMatrix(1,dimj,1,dimj);
-                   }
-for(i=1;i<=NOF_OLM_MATRICES;++i)
- { Olm [i]= new Matrix(1,dimj,1,dimj); 
- // define first matrix 
-   OOlm [i] = new ComplexMatrix(1,dimj,1,dimj); 
- }  
-
+  for(i=1;i<=NOF_OLM_MATRICES;++i){ Olm [i]= new Matrix(1,dimj,1,dimj); 
+                                    OOlm [i] = new ComplexMatrix(1,dimj,1,dimj); 
+                                  }  
+   In = new ComplexMatrix * [1+IONPARS_MAXNOFCOMPONENTS+3+NOF_OLM_MATRICES+NOF_RIXS_MATRICES];
+  for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new ComplexMatrix(1,dimj,1,dimj);
+  
 }
 
 ionpars::~ionpars(){
  int i;
  delete []iontype;
- for (i=1;i<=9;++i)delete Ri[i];
- for (i=1;i<=NOF_OLM_MATRICES;++i)
-  {delete Olm[i];delete OOlm[i];}
+ for (i=1;i<=NOF_RIXS_MATRICES;++i)delete Ri[i];
+ for (i=1;i<=NOF_OLM_MATRICES;++i)  {delete Olm[i];delete OOlm[i];}
+ for (i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)delete In[i];
    delete[] Olm;
    delete[] OOlm;
    delete[] Ri;
-  
+   delete[] In; 
  } //destructor
-
 
 ionpars::ionpars(FILE * cf_file) 
 //constructor with commands from file handle (filename of cf parameters etc)
-{      
-   static int pr=1;
-//  FILE * tryfile;
+{ static int pr=1;
   int dimj;complex<double> im(0,1);
-  int i,j,l,m; //30 ... maximum number of 2j+1
+  int i,j,l,m; 
   double alphar,betar,gammar,r2r,r4r,r6r,gJr;
   char instr[MAXNOFCHARINLINE];
   iontype= new char[MAXNOFCHARINLINE];
@@ -194,31 +136,14 @@ ionpars::ionpars(FILE * cf_file)
    Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
    // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
-cnst=Matrix(0,6,-6,6);
-cnst(0,0) = 0.28209479;
-cnst(2,0) = 0.3153962;
-cnst(2,1)=  1.092548;
-cnst(2,2)=  0.5462823;
-cnst(4,0)=  0.1057871;
-cnst(4,1)=  0.6690465;
-cnst(4,2)=  0.4730943;
-cnst(4,3)=  1.77013;
-cnst(4,4)=  0.625845;
-cnst(6,0)=  0.06357014;
-cnst(6,1)=  0.582621;
-cnst(6,2)=  0.4606094;
-cnst(6,3)=  0.921205;
-cnst(6,4)=  0.5045723;
-cnst(6,5)=  2.366619;
-cnst(6,6)=  0.6831942;
-for(l=2;l<=6;l+=2){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
-so1ion=0;strcpy(moduletype,"cfield");
+   cnst=Matrix(0,6,-6,6);set_zlm_constants(cnst);
+   so1ion=0;strcpy(moduletype,"cfield");
    alpha=0;beta=0;gamma=0;r2=0;r4=0;r6=0;gJ=0;
- double s0r=0,s0i=0,s1r=0,s1i=0,s2r=0,s2i=0;
-  fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
-  // strip /r (dos line feed) from line if necessary
-  char *token;  
-  while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}  
+   double s0r=0,s0i=0,s1r=0,s1i=0,s2r=0,s2i=0;
+   fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
+   // strip /r (dos line feed) from line if necessary
+    char *token;while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}  
+
    if(!(strncmp(instr,"#!MODULE=cfield ",16)==0||
         strncmp(instr,"#!MODULE=cfield\n",16)==0||
         strncmp(instr,"#!cfield ",9)==0||
@@ -231,6 +156,8 @@ so1ion=0;strcpy(moduletype,"cfield");
          fprintf(stderr,"ERROR class ionpars - file does not start with #!MODULE=cfield or #!MODULE=so1ion\n");exit(EXIT_FAILURE);
          }
         }
+const char kq[]="00\022S21S20\021\022\033S32S31S30\031\032\033\044S43S42S41S40\041\042\043\044\055S54S53S52S51S50\051\052\053\054\055\066S65S64S63S62S61S60\061\062\063\064\065\066\0";
+char kq3[5];kq3[4]='\0';
   
 // read in lines and get IONTYPE=  and CF parameters Blm
    while(feof(cf_file)==false)
@@ -238,6 +165,15 @@ so1ion=0;strcpy(moduletype,"cfield");
    if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
         extract(instr,"IONTYPE",iontype,(size_t)MAXNOFCHARINLINE);
         extract(instr,"nof_electrons",nof_electrons); //MR 120127
+
+        kq3[0]='B';for(int i=0;i<=45;++i){strncpy(kq3+1,kq+i*3,3);        
+                                          extract(instr,kq3,Blm(i));}
+        extract(instr,"Dx2",Blm(46));
+        extract(instr,"Dy2",Blm(47));
+        extract(instr,"Dz2",Blm(48));
+
+        kq3[0]='L';for(int i=0;i<=45;++i){strncpy(kq3+1,kq+i*3,3);        
+                                          extract(instr,kq3,Llm(i));}
 
         extract(instr,"ALPHA",alphar);
         extract(instr,"BETA",betar);
@@ -255,115 +191,6 @@ so1ion=0;strcpy(moduletype,"cfield");
         extract(instr,"SIGMA0i",s0i);
         extract(instr,"SIGMA1i",s1i);
         extract(instr,"SIGMA2i",s2i);
-
-        extract(instr,"B00",Blm(0));
-
-        extract(instr,"B22S",Blm(1));
-        extract(instr,"B21S",Blm(2));
-	extract(instr,"B20",Blm(3));
-        extract(instr,"B21",Blm(4));
-	extract(instr,"B22",Blm(5));
-   
-	extract(instr,"B33S",Blm(6));
-	extract(instr,"B32S",Blm(7));
-	extract(instr,"B31S",Blm(8));
-	extract(instr,"B30",Blm(9));
-   extract(instr,"B31",Blm(10));
-   extract(instr,"B32",Blm(11));
-   extract(instr,"B32",Blm(12));
-
-   extract(instr,"B44S",Blm(13));
-   extract(instr,"B43S",Blm(14));
-   extract(instr,"B42S",Blm(15));
-   extract(instr,"B41S",Blm(16));
-   extract(instr,"B40",Blm(17));
-   extract(instr,"B41",Blm(18));
-   extract(instr,"B42",Blm(19));
-   extract(instr,"B43",Blm(20));
-   extract(instr,"B44",Blm(21));
-  
-   extract(instr,"B55S",Blm(22));
-   extract(instr,"B54S",Blm(23));
-   extract(instr,"B53S",Blm(24));
-   extract(instr,"B52S",Blm(25));
-   extract(instr,"B51S",Blm(26));
-   extract(instr,"B50",Blm(27));
-   extract(instr,"B51",Blm(28));
-   extract(instr,"B52",Blm(29));
-   extract(instr,"B53",Blm(30));
-   extract(instr,"B54",Blm(31));
-   extract(instr,"B55",Blm(32));
- 
-   extract(instr,"B66S",Blm(33));
-   extract(instr,"B65S",Blm(34));
-   extract(instr,"B64S",Blm(35));
-   extract(instr,"B63S",Blm(36));
-   extract(instr,"B62S",Blm(37));
-   extract(instr,"B61S",Blm(38));
-   extract(instr,"B60",Blm(39));
-   extract(instr,"B61",Blm(40));
-   extract(instr,"B62",Blm(41));
-   extract(instr,"B63",Blm(42));
-   extract(instr,"B64",Blm(43));
-   extract(instr,"B65",Blm(44));
-   extract(instr,"B66",Blm(45));
-   extract(instr,"Dx2",Blm(46));
-   extract(instr,"Dy2",Blm(47));
-   extract(instr,"Dz2",Blm(48));
-
-	extract(instr,"L00",Llm(0));
- 
-        extract(instr,"L22S",Llm(1));
-        extract(instr,"L21S",Llm(2));
-	extract(instr,"L20",Llm(3));
-        extract(instr,"L21",Llm(4));
-	extract(instr,"L22",Llm(5));
-   
-	extract(instr,"L33S",Llm(6));
-	extract(instr,"L32S",Llm(7));
-	extract(instr,"L31S",Llm(8));
-	extract(instr,"L30",Llm(9));
-   extract(instr,"L31",Llm(10));
-   extract(instr,"L32",Llm(11));
-   extract(instr,"L32",Llm(12));
-
-   extract(instr,"L44S",Llm(13));
-   extract(instr,"L43S",Llm(14));
-   extract(instr,"L42S",Llm(15));
-   extract(instr,"L41S",Llm(16));
-   extract(instr,"L40",Llm(17));
-   extract(instr,"L41",Llm(18));
-   extract(instr,"L42",Llm(19));
-   extract(instr,"L43",Llm(20));
-   extract(instr,"L44",Llm(21));
-  
-   extract(instr,"L55S",Llm(22));
-   extract(instr,"L54S",Llm(23));
-   extract(instr,"L53S",Llm(24));
-   extract(instr,"L52S",Llm(25));
-   extract(instr,"L51S",Llm(26));
-   extract(instr,"L50",Llm(27));
-   extract(instr,"L51",Llm(28));
-   extract(instr,"L52",Llm(29));
-   extract(instr,"L53",Llm(30));
-   extract(instr,"L54",Llm(31));
-   extract(instr,"L55",Llm(32));
- 
-   extract(instr,"L66S",Llm(33));
-   extract(instr,"L65S",Llm(34));
-   extract(instr,"L64S",Llm(35));
-   extract(instr,"L63S",Llm(36));
-   extract(instr,"L62S",Llm(37));
-   extract(instr,"L61S",Llm(38));
-   extract(instr,"L60",Llm(39));
-   extract(instr,"L61",Llm(40));
-   extract(instr,"L62",Llm(41));
-   extract(instr,"L63",Llm(42));
-   extract(instr,"L64",Llm(43));
-   extract(instr,"L65",Llm(44));
-   extract(instr,"L66",Llm(45));
-
-
 	}}
 
 
@@ -423,7 +250,6 @@ so1ion=0;strcpy(moduletype,"cfield");
   double  modycr[31*31],modyci[31*31];
   double  modzcr[31*31],modzci[31*31];
     
-
 if (pr==1) {printf("#using %s ...\n",moduletype);
            }
   
@@ -523,8 +349,8 @@ if (pr==1) printf("#J=%g\n",J);
    }
 
 //---------------------------------------------------------------------------
-	Ri= new ComplexMatrix * [10];
-         for(i=1;i<=9;++i)Ri[i]=new ComplexMatrix(1,dimj,1,dimj);
+	Ri= new ComplexMatrix * [1+NOF_RIXS_MATRICES];
+         for(i=1;i<=NOF_RIXS_MATRICES;++i)Ri[i]=new ComplexMatrix(1,dimj,1,dimj);
       // here fill the matrices Ri[1...9] with the 11 12 13 21 22 23 31 32 33
       // matrices of the RIXS scattering operator R
        complex<double> f1=sigma1/J;
@@ -684,74 +510,49 @@ Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ
   Hcf= Matrix(1,dimj,1,dimj); 
   Hcf=0;
 
-   if(Hcf==(double)0.0){
-
-   for(l=1;l<=48;++l){Hcf+=Blm(l)*(*Olm[l]);
-//                   if(Blm(l)!=0){if(l<24){fprintf(stderr,"B%c=%g   ",l+99,Blm(l));}
-//		                     else{fprintf(stderr,"B(z+%i)=%g   ",l-23,Blm(l));}
-//		                }
-                  }
-   }
+   if(Hcf==(double)0.0){for(l=1;l<=48;++l){Hcf+=Blm(l)*(*Olm[l]);}}
 
 if(so1ion==0)
- {//ATTENTION FOR cfield the AXES xyz are parallel to cab
- Matrix dummy(1,dimj,1,dimj);
- dummy=Jb;Jb=Jc;Jc=Ja;Ja=dummy;
- ComplexMatrix dummyc(1,dimj,1,dimj);
- dummyc=Jbb;Jbb=Jcc;Jcc=Jaa;Jaa=dummyc;
+  {//ATTENTION FOR cfield the AXES xyz are parallel to cab
+   Matrix dummy(1,dimj,1,dimj); dummy=Jb;Jb=Jc;Jc=Ja;Ja=dummy;
+   ComplexMatrix dummyc(1,dimj,1,dimj);dummyc=Jbb;Jbb=Jcc;Jcc=Jaa;Jaa=dummyc;
 
- if (pr==1) {printf("#Axis Convention using cfield as a module:  a||y b||z  c||x\n");
- printf("#xyz .... Coordinate system of the crystal field parameters used in cfield\n");
- printf("#abc .... Crystal axes\n");
- printf("#The interactions are described by the  PKQ Operators defined in cfield\n");
- printf("#O11(s) .... Ia=Jy\n");
- printf("#O10(c) .... Ib=Jz\n");
- printf("#O11(c) .... Ic=Jx\n");
- printf("#O22(s) .... Id\n");
- printf("#O21(s) .... Ie\n");
- printf("#O20(c) .... If\n");
- printf("#O21(c) .... Ig\n");
- printf("#O22(c) .... Ih\n");
- printf("#O33(s) .... Ii\n");
- printf("#O32(s) .... Ij\n");
- printf("#O31(s) .... Ik\n");
- printf("#O30(c) .... Il\n");
- printf("#O31(c) .... Im\n");
- printf("# etc ... 45 moments up to l<=6\n");
- printf("#\n");
+  if (pr==1) {printf("#Axis Convention using cfield as a module:  a||y b||z  c||x\n");
+  printf("#xyz .... Coordinate system of the crystal field parameters used in cfield\n");
+  printf("#abc .... Crystal axes\n");
+  printf("#The interactions are described by the  PKQ Operators defined in cfield\n");
+  printf("#O11(s) .... Ia=Jy\n#O10(c) .... Ib=Jz\n#O11(c) .... Ic=Jx\n");
+  printf("#O22(s) .... Id\n#O21(s) .... Ie\n#O20(c) .... If\n#O21(c) .... Ig\nO22(c) .... Ih\n");
+  printf("#O33(s) .... Ii\n#O32(s) .... Ij\n#O31(s) .... Ik\n#O30(c) .... Il\n#O31(c) .... Im\n");
+  printf("# etc ... 45 moments up to l<=6\n\n");
+              }
+  }
+  else
+  {//ATTENTION FOR so1ion the AXES xyz are parallel to abc
+  if (pr==1) {printf("#Axis Convention using so1ion as a module:  a||x b||y  c||z\n");
+  printf("#xyz .... Coordinate system of the crystal field parameters used in so1ion\n");
+  printf("#abc .... Crystal axes\n");
+  printf("#The interactions are described by the  PKQ Operators defined in so1ion\n");
+  printf("#O11(s) .... Ia=Jx\n#O10(c) .... Ib=Jy\n#O11(c) .... Ic=Jz\n");
+  printf("#O22(s) .... Id\n#O21(s) .... Ie\n#O20(c) .... If\n#O21(c) .... Ig\nO22(c) .... Ih\n");
+  printf("#O33(s) .... Ii\n#O32(s) .... Ij\n#O31(s) .... Ik\n#O30(c) .... Il\n#O31(c) .... Im\n");
+  printf("# etc ... 45 moments up to l<=6\n\n");
              }
- }
- else
- {//ATTENTION FOR so1ion the AXES xyz are parallel to abc
- if (pr==1) {printf("#Axis Convention using so1ion as a module:  a||x b||y  c||z\n");
- printf("#xyz .... Coordinate system of the crystal field parameters used in so1ion\n");
- printf("#abc .... Crystal axes\n");
- printf("#The interactions are described by the  PKQ Operators defined in so1ion\n");
- printf("#O11(s) .... Ia=Jx\n");
- printf("#O10(c) .... Ib=Jy\n");
- printf("#O11(c) .... Ic=Jz\n");
- printf("#O22(s) .... Id\n");
- printf("#O21(s) .... Ie\n");
- printf("#O20(c) .... If\n");
- printf("#O21(c) .... Ig\n");
- printf("#O22(c) .... Ih\n");
- printf("#O33(s) .... Ii\n");
- printf("#O32(s) .... Ij\n");
- printf("#O31(s) .... Ik\n");
- printf("#O30(c) .... Il\n");
- printf("#O31(c) .... Im\n");
- printf("# etc ... 45 moments up to l<=6\n");
- printf("#\n");
-             }
- }
-pr=0;
+  }
+ pr=0;
+ // now fill interaction operators In with values
+  In = new ComplexMatrix * [1+IONPARS_MAXNOFCOMPONENTS+3+NOF_OLM_MATRICES+NOF_RIXS_MATRICES];
+  for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new ComplexMatrix(1,dimj,1,dimj);
+  // standard operator sequence I1,....,I51
+  // module so1ion: Jx Jy Jz O22S O21S O20 O21 O22 O33S O32S .... O66 Jx^2 Jy^2 Jz^2
+  (*In[1])=Jaa;(*In[1])=Jbb;(*In[1])=Jcc;
+  for(i=4;i<=IONPARS_MAXNOFCOMPONENTS;++i){(*In[i])=(*OOlm[i-3]);}
 }
 
 
 void ionpars::save(FILE * file) // save ion parameters to file 
 {
   fprintf(file,"#-----------\nIONTYPE=%s\n#-----------\n\n",iontype);
-
 
   if(abs(Blm)>1e-10) {fprintf(file,"#--------------------------------------------------------------------------\n");
                       if(so1ion==0){
@@ -792,7 +593,6 @@ void ionpars::savBlm(FILE * outfile)
    if(Blm(46)!=0){fprintf(outfile,"Dx2=%g\n",myround(Blm(46)));}
    if(Blm(47)!=0){fprintf(outfile,"Dy2=%g\n",myround(Blm(47)));}
    if(Blm(48)!=0){fprintf(outfile,"Dz2=%g\n",myround(Blm(48)));}
-
 }
 
 void ionpars::savLlm(FILE * outfile)
@@ -802,7 +602,6 @@ void ionpars::savLlm(FILE * outfile)
    for(int i=0;i<=45;++i){strncpy(lm3,lm+i*3,3);
    if(Llm(i)!=0){fprintf(outfile,"L%s=%g\n",lm3,myround(Llm(i)));}
                          }
-  
 }
 
 //------------------------------------------------------------------------------------------------
@@ -855,7 +654,7 @@ gjmbH(2)+=gJ*MU_B*Hext(2);
 gjmbH(3)+=gJ*MU_B*Hext(3);
 // check dimensions of vector
 if(gjmbH.Hi()>48)
-   {fprintf(stderr,"Error internal module cfield: wrong number of dimensions - check number of columns in file mcphas.j\n");
+   {fprintf(stderr,"Error internal module cfield/so1ion: wrong number of dimensions - check number of columns in file mcphas.j\n");
     exit(EXIT_FAILURE);}
 
 //  Driver routine to compute the  eigenvalues and normalized eigenvectors 
@@ -892,6 +691,7 @@ if(gjmbH.Hi()>48)
     printf("\n");
     }
     printf ("\nH=%g %g %g\n",gjmbH(1),gjmbH(2),gjmbH(3));*/
+
    Ham=Hcf-gjmbH(1)*Ja-gjmbH(2)*Jb-gjmbH(3)*Jc;
  
 
@@ -956,31 +756,34 @@ if(gjmbH.Hi()>48)
    // calculate U
      U=En*wn;
    // calculate <Ja>,<Jb>,<Jc>
-     z=ComplexMatrix(zr,zi);
+//     z=ComplexMatrix(zr,zi);
 //     z=ests(1,dj,1,dj)*z; // transform to original eigenstates ... however we deleted this because it needs more time to transform than to solve the eigenvalue problem
 //     ests(1,dj,1,dj)=z;
 //     for (i=1;i<=dj;++i) {ests(0,i)=complex <double> (En(i),wn(i));}
 //     myPrintComplexMat(stdout,ests);     
 //     myPrintComplexMat(stdout,z);
 
-   za=Jaa*z;zb=Jbb*z;zc=Jcc*z;
-  
+//   za=Jaa*z;zb=Jbb*z;zc=Jcc*z;
+//     opZcol (i,za,Ja,zr,zi);JJ[1]+=wn(i)*real(z.Column(i)*za.Column(i));
+//     opZcol (i,zb,Jb,zr,zi);JJ[2]+=wn(i)*real(z.Column(i)*zb.Column(i));
+//     opZcol (i,zc,Jc,zr,zi);JJ[3]+=wn(i)*real(z.Column(i)*zc.Column(i));
+//     zolm=(*OOlm[j-3])*z;
+//    for (i=1;i<=dj;++i) JJ[j]+=wn(i)*real(z.Column(i)*zolm.Column(i));
+
      JJ=0;
 //    ComplexVector ddd;
     for (i=1;i<=dj;++i)
-    {
-     JJ[1]+=wn(i)*real(z.Column(i)*za.Column(i));
-     JJ[2]+=wn(i)*real(z.Column(i)*zb.Column(i));
-     JJ[3]+=wn(i)*real(z.Column(i)*zc.Column(i));
+    { if(wn(i)>1e-5){
+  //     JJ[1]+=wn(i)*real(z.Column(i)*za.Column(i));
+  //     JJ[2]+=wn(i)*real(z.Column(i)*zb.Column(i));
+  //     JJ[3]+=wn(i)*real(z.Column(i)*zc.Column(i));
+     JJ[1]+=wn(i)*matelr(i,i,zr,zi,Ja);
+     JJ[2]+=wn(i)*matelr(i,i,zr,zi,Jb);
+     JJ[3]+=wn(i)*matelr(i,i,zr,zi,Jc);   
+     // here the expectation values of the multipolar moments are calculated
+       for(j=4;j<=JJ.Hi();++j)JJ[j]+=wn(i)*matelr(i,i,zr,zi,(*Olm[j-3]));
+                    }
     }
-     
-// here the expectation values of the multipolar moments are calculated
-   for(j=4;j<=JJ.Hi();++j)
-   {
-     zolm=(*OOlm[j-3])*z;
-    for (i=1;i<=dj;++i) JJ[j]+=wn(i)*real(z.Column(i)*zolm.Column(i));
-   };
-  
 
 }
 /**************************************************************************/
@@ -1118,8 +921,8 @@ if (T>0){cfieldJJ(JJ,T,gjmbHxc,Hext,lnz,u,ests);  //expectation values <J>
     
    Ham=Hcf-gjmbH(1)*Ja-gjmbH(2)*Jb-gjmbH(3)*Jc;
  for(j=4;j<=gjmbH.Hi();++j){Ham-=gjmbH(j)*(*Olm[j-3]);
-double dd; dd=NormFro((*OOlm[j-3])-(*OOlm[j-3]).Conjugate().Transpose());
-   if (dd>1e-5) {printf("j=%i\n",j);myPrintComplexMatrix(stderr,(*OOlm[j-3]));}
+//double dd; dd=NormFro((*OOlm[j-3])-(*OOlm[j-3]).Conjugate().Transpose());
+//   if (dd>1e-5) {printf("j=%i\n",j);myPrintComplexMatrix(stderr,(*OOlm[j-3]));}
 }
 
 /*   int i1,j1; //printout matrix
@@ -1364,15 +1167,15 @@ if(j==i)delta=-SMALL; //if transition within the same level: take negative delta
 // 3. set drixs
          int K,M,Md;
          drixs=0;
-          for(K=1;K<=9;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
+          for(K=1;K<=NOF_RIXS_MATRICES;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){
              drixs(K)+=conj(est(M,i))*(*Ri[K])(M,Md)*est(Md,j); 
             }}} 
 if(i==j){//take into account thermal expectation values <Jl> 
-         ComplexVector Rav(1,9); Rav=0;                        
+         ComplexVector Rav(1,NOF_RIXS_MATRICES); Rav=0;                        
          for(K=1;K<=dj;++K){for(M=1;M<=dj;++M){for(Md=1;Md<=dj;++Md){  
-           for(l=1;l<=9;++l){
+           for(l=1;l<=NOF_RIXS_MATRICES;++l){
            Rav(l)+=imag(est(0,K))*conj(est(M,K))*(*Ri[l])(M,Md)*est(Md,K); }           
-         }}} // --> Rav(1,..9)  thermal expextation values of R              
+         }}} // --> Rav(1,..NOF_RIXS_MATRICES)  thermal expextation values of R              
           drixs-=Rav;// subtract thermal expectation values                
          }  //MR120120
 
@@ -1382,7 +1185,7 @@ if(i==j){//take into account thermal expectation values <Jl>
 if (delta>SMALL)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      for(int i1=1;i1<=9;++i1)
+      for(int i1=1;i1<=NOF_RIXS_MATRICES;++i1)
        {printf(" |<%i|Rij%i-<Rij%i>|%i>|^2=%4.4g",i,i1,i1,j,abs(drixs(i1))*abs(drixs(i1)));
        if(i1%3)printf("\n");}
       printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
@@ -1391,7 +1194,7 @@ if (delta>SMALL)
    {// quasielastic scattering has not wi-wj but wj*epsilon/kT
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      for(int i1=1;i1<=9;++i1)printf(" |<%i|Rij%i-<Rij%i>|%i>|^2=%4.4g",i,i1,i1,j,abs(drixs(i1))*abs(drixs(i1)));
+      for(int i1=1;i1<=NOF_RIXS_MATRICES;++i1)printf(" |<%i|Rij%i-<Rij%i>|%i>|^2=%4.4g",i,i1,i1,j,abs(drixs(i1))*abs(drixs(i1)));
       printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
     drixs*=sqrt(imag(est(0,i))/KB/T);
    }
@@ -1575,8 +1378,8 @@ if (T>0){chargedensity_coeffcalc(JJ,T,gjmbHxc,Hext,ests); // expectation values 
     
    Ham=Hcf-gjmbH(1)*Ja-gjmbH(2)*Jb-gjmbH(3)*Jc;
  for(j=4;j<=gjmbH.Hi();++j){Ham-=gjmbH(j)*(*Olm[j-3]);
-double dd; dd=NormFro((*OOlm[j-3])-(*OOlm[j-3]).Conjugate().Transpose());
-   if (dd>1e-5) {printf("j=%i\n",j);myPrintComplexMatrix(stderr,(*OOlm[j-3]));}
+//double dd; dd=NormFro((*OOlm[j-3])-(*OOlm[j-3]).Conjugate().Transpose());
+//   if (dd>1e-5) {printf("j=%i\n",j);myPrintComplexMatrix(stderr,(*OOlm[j-3]));}
 }
 
 /*   int i1,j1; //printout matrix

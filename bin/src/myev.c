@@ -44,7 +44,7 @@ int myReadComplexMatrix (FILE * file, ComplexMatrix & M)
   numbers[0]=M.Rhi()-M.Rlo()+2;
  
      //read comment line 
-     if(fgets(instr,MAXNOFCHARINLINE,file)==false) {fprintf (stderr, "ERROR reading complex matrix - comment line before real part\n");return false;}
+     if(fgets(instr,MAXNOFCHARINLINE,file)==NULL) {fprintf (stderr, "ERROR reading complex matrix - comment line before real part\n");return false;}
 
     // read real part
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
@@ -53,7 +53,7 @@ int myReadComplexMatrix (FILE * file, ComplexMatrix & M)
     }
 
      //read comment line 
-     if(fgets(instr,MAXNOFCHARINLINE,file)==false) {fprintf (stderr, "ERROR reading complex matrix - comment line before imaginary part\n");return false;}
+     if(fgets(instr,MAXNOFCHARINLINE,file)==NULL) {fprintf (stderr, "ERROR reading complex matrix - comment line before imaginary part\n");return false;}
     // read imaginary part
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
     j1=inputline(file,numbers);if(j1!=M.Chi()-M.Clo()+1) {fprintf (stderr, "ERROR reading complex matrix - number of columns read (%i) does not match matrix dimension (%i)\n",j1,M.Chi()-M.Clo()+1);return false;}

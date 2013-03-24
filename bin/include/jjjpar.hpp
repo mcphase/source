@@ -226,7 +226,6 @@ public:
 
 private:
   double rk_from_radial_wavefunction(int k); // needed for public radial wave function <r^n> calculation
-   void set_zlm_constants();
    // sum over different Zlm using the coefficients a(l,m)
    double zlmsum(Matrix & a, double & teta, double & fi);
 

@@ -101,6 +101,25 @@ extern int sleep(int a);
 // some vector functions
 void xproduct(Vector & result,Vector a, Vector b);
 
+// calculate transition matrix element of eigenvectr <i|op|j> with eigenvectors
+// given as column vectors i and j of Matrix (zr + i zi), the Hermitian operator op is described
+// by   matrix op.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+double matelr (int i,int j,Matrix & zr, Matrix & zi, Matrix & op);
+double mateli (int i,int j,Matrix & zr, Matrix & zi, Matrix & op);
+
+// calculate some column i of ComplexMatrix opZ which is defined as the 
+// product of two complex matrices op * Z, however Z is given as
+// as real matrices  Matrix zr + i Matrix zi, the Hermitian operator op is described
+// by   Matrix op.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+void  opZcol(int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi);
+
+
 // calculate reciprocal lattice rezi from real lattice ri
 void rezcalc(Vector r1,Vector  r2,Vector  r3,Vector  rez1,Vector  rez2,Vector  rez3);
 
@@ -142,5 +161,6 @@ double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);// <a|M|b> 
 
 Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3);
 
+void set_zlm_constants(Matrix & cnst);
 #endif
 
