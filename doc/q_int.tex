@@ -2,7 +2,8 @@
 \label{qint}
 
 
-The module {\prg Cfield} allows also to calculate systems with higher order interactions such
+Some modules such as {\prg so1ion}\index{so1ion}
+ allow also to calculate systems with higher order interactions such
 as quadrupolar interactions. Quadrupolar and higher order interactions can be calculated, which
 can be described by products of Stevens operators. The general two ion exchange coupling is
 
@@ -11,6 +12,7 @@ can be described by products of Stevens operators. The general two ion exchange 
  {\mathcal H}_{JJ}=
              -\frac{1}{2}  \sum_{nn'} \sum_ {ll'} \sum_{mm'}
      {\mathcal K}_{ll'}^{mm'}(nn') O_{lm}({\mbf J}^n) O_{l'm'}({\mbf J}^{n'})
+=-\frac{1}{2}  \sum_{nn'} \sum_{\stackrel{\alpha=(lm)}{ \alpha'=(l'm')}} J_{\alpha\alpha'}(nn') \hat I_{\alpha} \hat I_{\alpha'}
 \end{equation}
 
 For further information on the notation and symmetry restrictions to the
@@ -20,8 +22,8 @@ parameters in the Hamiltonian refer to~\cite{jensen91-1}.
 \subsection{Setting up {\prg mcphas.j\index{mcphas.j}} and other input files}
 
 In order to include the higher order interactions, the number of columns in the input file
-{\prg mcphas.j\index{mcphas.j}} has to be increased. The additional columns then contain the higher order
-exchange constants.
+{\prg mcphas.j\index{mcphas.j}} has to be increased. The additional columns then
+ contain the higher order exchange constants.
 
 Using the module {\prg so1ion}, the input file {\prg mcphas.j\index{mcphas.j}} may look as given for the 
 example GdRu$_2$Si$_2$ in {\prg examples/gdru2si2}:
@@ -48,8 +50,8 @@ example GdRu$_2$Si$_2$ in {\prg examples/gdru2si2}:
 #! nofatoms=1  nofcomponents=8  number of atoms in primitive unit cell/number of components of each spin
 #****************************************************************************}
 #! da=   0 [a] db=   0 [b] dc=   0 [c] nofneighbours=38 diagonalexchange=1 gJ=   2 sipffilename=Gd3p.sipf
-# da[a]    db[b]      dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  %%@
-Jcb[meV]} 
+# da[a]    db[b]      dc[c]       J11[meV]  J22[meV]  J33[meV]  J44[meV]  J55[meV]  J66[meV]  J77[meV]  Jbc[meV]  %%@
+J88[meV]} 
 -1.0 0.0 0.0 0.08390 0.08390 0.21890 -0.0024 -0.0096 -0.0008 -0.0096 -0.0024 
 1.0 0.0 0.0 0.08390 0.08390 0.21890 -0.0024 -0.0096 -0.0008 -0.0096 -0.0024 
 0.0 -1.0 0.0 0.08390 0.08390 0.21890 -0.0024 -0.0096 -0.0008 -0.0096 -0.0024 
@@ -90,27 +92,44 @@ Jcb[meV]}
 0.0 0.0 -1.0 0.24850 0.24850 0.13560 0.0 0.0 0.0 0.0 0.0 
 \end{verbatim}
 }
-here the meaning of the Jaa, Jbb, Jcc, Jdd, Jee \dots is the exchange ${\mathcal K}_{ll'}^{mm'}(ss')$ between %%@
-$O_1^1(s)$, $O_1^0(c)$,$O_1^1(c)$, $O_2^2(s)$, $O_2^1(s)$,$O_2^0(c)$,$O_2^1(c)$,$O_2^2(c)$,$O_3^3(s)$, ...
-according to equation table~\ref{olms}.
+here the meaning of the J11, J22, J33, J44, J55 \dots is the 
+exchange constant $J_{\alpha\alpha}$ between the operators $\hat I_1 \cdot \hat I_1$, $\hat I_2 \cdot \hat I_2$,
+$\hat I_3 \cdot \hat I_3$, $\hat I_4 \cdot \hat I_4$, ... etc. in equation (\ref{multipolehamiltonrepeated}).
+Note that in our notation the indices of the interaction operators $\hat \mbf I$ are sometimes
+denoted by numbers, sometimes by characters: $\hat I_1,\hat I_2,\hat I_3, \hat I_4, \dots \equiv \hat I_a,\hat I_b,\hat I_c, \hat I_d, \dots$.
+
+By default in module {\prg so1ion} the operator sequence is $\hat I_1,\hat I_2,\hat I_3, \hat I_4, \dots =$
+$O_1^1(c)$,$O_1^1(s)$, $O_1^0(c)$, $O_2^2(s)$, $O_2^1(s)$,$O_2^0(c)$,$O_2^1(c)$,$O_2^2(c)$,$O_3^3(s)$, ...
+according to equation (\ref{multipolehamiltonrepeated}) and table~\ref{olms}.
  The exchange constants for the
 products of these Stevens operators have to be 
 given according to the following scheme:
 
 \begin{verbatim}
-   aa bb cc ab ba ac ca bc cb (3x3 matrix)
-   aa bb cc dd ab ba ac ca ad da bc cb bd db cd dc (4x4 matrix)
-   aa bb cc dd ee ab ba ac ca ad da ae ea bc cb bd db be eb cd dc ce ec de ed (5x5 matrix)
+   11 22 33 12 21 13 31 23 32 (3x3 matrix)
+   11 22 33 44 12 21 13 31 14 41 23 32 24 42 34 43 (4x4 matrix)
+   11 22 33 44 55 12 21 13 31 14 41 15 51 23 32 24 42 25 52 34 43 35 53 45 54 (5x5 matrix)
    etc ...
 \end{verbatim}
 
 The other input and output files have the same format as usual, but with the modification, that
 there are now $n$ components of the 'spins' in {\prg mcphas.sps} instead of 3 ($<J_a>$,$<J_b>$,$<J_c>$).
 The expectation values of the operators
- $<I_a>$,$<I_b>$,$<I_c>$,$<I_d>$,$<I_e>$, etc. correspond to $<J_a>$,$<J_b>$,$<J_c>$,
+ $<I_a>$,$<I_b>$,$<I_c>$,$<I_d>$,$<I_e>$, etc. correspond to the
+interaction operator sequence of the single ion module, which for {\prg so1ion} is 
+by default $<J_a>$,$<J_b>$,$<J_c>$,
  $<O_{22}(s)>$, $<O_{21}(s)>$,$<O_{20}>$,$<O_{21}>$,$<O_{22}>$,$<O_{33}(s)>$, ...
- respectively. Table~\ref{olms} contains a list of first and second order Stevens parameters.
+ respectively.
+ Table~\ref{olms} contains a list of first and second order Stevens parameters.
 For a full list please refer to appendix~\ref{stevens}.
+
+Note that the $\hat I_{\alpha}$ may be completely redefined
+ by perl parsing the single ion property file - see section \ref{simod} for details.
+This may be useful to shorten notation, if by symmetry the coupling (\ref{multipolehamiltonrepeated}) 
+may be rewritten in products of linear combinations of operators such as needed
+for pseudo spin models of multipolar order~\cite{shiina97-1741},
+ e.g $(5 O_4^4(n)+ O40(n)) \cdot (5 O_4^4(n')+  O40(n'))$
+
 
 \begin{table}[hb] 
 \begin{center}  
@@ -125,9 +144,9 @@ Stevens Operator & Notation used in module {\prg so1ion\index{so1ion}} & {\prg c
 \hline
 $O_{00}=1$ ($O_0^0(s)=0$) &\\
 \hline
+$O_{11}=\frac{1}{2}[J_++J_-]=J_x$ &  $I_a$&  $I_c$\\
 $O_{11}(s)=\frac{-i}{2}[J_+-J_-]=J_y$ &  $I_b$&  $I_a$\\
 $O_{10}=J_z$  ($O_1^0(s)=0$) & $I_c$&  $I_b$ \\
-$O_{11}=\frac{1}{2}[J_++J_-]=J_x$ &  $I_a$&  $I_c$\\
 \hline
 $O_{22}(s)=\frac{-i}{2}[J_+^2-J_-^2]=J_xJ_y+J_yJ_x$($=2P_{xy}$) & $I_d$ & $I_d$ \\
 $O_{21}(s)=\frac{-i}{4}[(J_+-J_-)J_z+J_z(J_+-J_-)]=\frac{1}{2}[J_yJ_z+J_zJ_y]$($=P_{yz}$) & $I_e$& $I_e$  \\
@@ -139,6 +158,7 @@ $O_{22}=\frac{1}{2}[J_+^2+J_-^2]=[J_x^2-J_y^2]$ & $I_h$& $I_h$  \\
 \end{center}   
 \end{table}
 
+\subsection{Option {\prg indexexchange} in order to shorten notation in {\prg mcphas.j}}
 The {\prg indexexchange} parameter discussed in section~\ref{mcphasj} may be useful in keeping the input
 of the exchange components short. For example the $\zeta$ and $\eta$ strain modes on the quasi-cubic sites
 of a double hexagonal close packed structure involves the coupling of $P_{zx}$ ($I_g$) and $P_{xy}$ ($I_d$) 
@@ -166,6 +186,8 @@ as follows for UPd$_3$:
  0.5 -0.5  0   -0.022 -0.022 -0.022 -0.0034195 -0.019714 -0.00034044 -0.019714 -0.00085486 -0.0065221 -0.0050197
 -0.5  0.5  0   -0.022 -0.022 -0.022 -0.0034195 -0.019714 -0.00034044 -0.019714 -0.00085486 -0.0065221 -0.0050197
 \end{verbatim} }
+
+
 
 \subsection{Running {\prg McPhase} and {\prg McDisp}}
 

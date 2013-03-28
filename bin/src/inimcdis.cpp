@@ -25,7 +25,8 @@ void inimcdis::errexit() // type info and error exit
     printf (" -maxE E                  single ion transitions within this energy range will \n");
     printf ("                          be considered\n");
     printf (" -r                   ... refine energies\n");
-    printf (" -x                   ... calculate resonant inelastic x-ray intensities instead of neutron intensities\n");
+    printf (" -x                   ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
+    printf (" -xa                  ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection\n");
     printf (" -d                   ... calculate intensities in dipole approximation only\n");
     printf (" -v                   ... verbose\n");
     printf (" -a                   ... do not overwrite output files in results - append new results\n");

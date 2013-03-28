@@ -86,7 +86,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      {module_type=2;fprintf (stderr,"#[internal]\n");
       fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
        
-      iops=new ionpars(cf_file);
+      iops=new ionpars(cf_file,sipf_filename);
 
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -99,7 +99,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      {if(strcmp(modulefilename,"so1ion")==0)
      {module_type=4;fprintf (stderr,"#[internal]\n");
       fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
-      iops=new ionpars(cf_file);
+      iops=new ionpars(cf_file,sipf_filename);
       nof_electrons=(*iops).nof_electrons;
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -467,7 +467,7 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,do
 {switch (module_type)
   {case 1: kramer(mom,T,gjmbHxc,Hext,lnZ,U);break;
    case 2:
-   case 4: (*iops).cfieldJJ(mom,T,gjmbHxc,Hext,lnZ,U,parstorage);break;
+   case 4: (*iops).Icalc(mom,T,gjmbHxc,Hext,lnZ,U,parstorage);break;
    case 3: brillouin(mom,T,gjmbHxc,Hext,lnZ,U);break;
    case 5: cluster_Icalc(mom,T,gjmbHxc,Hext,lnZ,U);break;
    default: (*I)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
@@ -487,7 +487,7 @@ int jjjpar::du1calc(double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u
            break;
    case 1: return kramerdm(transitionnumber,T,gjmbHxc,Hext,u1,delta);break;
    case 2:
-   case 4: return (*iops).cfielddm(transitionnumber,T,gjmbHxc,Hext,u1,delta,ests);break;
+   case 4: return (*iops).du1calc(transitionnumber,T,gjmbHxc,Hext,u1,delta,ests);break;
    case 3: return brillouindm(transitionnumber,T,gjmbHxc,Hext,u1,delta);break;
    case 5: return cluster_dm(transitionnumber,T,gjmbHxc,Hext,u1,delta);break;
    default: return 0;

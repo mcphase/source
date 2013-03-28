@@ -94,6 +94,7 @@ params= 1.6 0.58333   1.1
 \begin{verbatim}#!MODULE=so1ion\end{verbatim}
 
 then the ion name should be given followed by a list of nonzero crystal field parameters
+(for a more detailed description of this module refer to section~\ref{cfield}).
 
 \begin{verbatim}
 #!MODULE=so1ion
@@ -110,8 +111,45 @@ then the ion name should be given followed by a list of nonzero crystal field pa
  B66  =  0.0
 \end{verbatim}
 
- - for a description of this module refer
-to section~\ref{cfield}.
+The standard operator sequence of this module can be modified by enabling 
+perl parsing\index{perl parsing}
+of the sipf file, i.e. putting instead of ''IONTYPE='' a line ''\#!perl with IONTYPE=''.
+Then (i) all variables have to be given in perl notation, i.e. putting a ''\$'' sign
+in front of the variable name. (ii) all lines (except comment lines starting with
+'\#') and variable declarations have to end with ';'. In the following example
+we show how to redefine operator $\hat I_1$ (by default the x component of the
+total angular momentum $\hat J_x$ to $\hat I_1 \equiv 5 \hat O_4^4 + O_4^0$.
+Moreover, one of the RIXS operator is (re)defined, which enables to specify 
+the appropriate tensor (note, that this will be only effective, if all the variables
+SIGMA0r,SIGMA0i,SIGMA1r,SIGMA1i,SIGMA2r,SIGMA2i are zero).
+
+\begin{verbatim}
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+#!perl with IONTYPE=Ce3+
+ $B20=  0.1e-1;                                       
+ $B22  =  -0.3e-1;
+ $B40  =  0.0;
+ $B42  =  0.0;
+ $B44  =  0.0;
+ $B60  =  0.0;
+ $B62  =  0.0;
+ $B64  =  0.0;
+ $B66  =  0.0;
+ $I1 = 5.0 * $O44 + $O40; # for quadrupolar interactions
+
+# for anisotropic Resonant Inelastic X-ray Scattering
+$sigma1_a2u=1.423;
+$R12=-2* $sigma1_a2u * $Jz;
+# Note: Operators which may be redefined here are denoted by the variables:
+# I1 I2 I3 ....
+# Jx Jy Jz
+# Jx2 Jy2 Jz2  (=Jx*Jx Jy*Jy Jz*Jz)
+# O22S O21S O20 O21 O22 O31S .... O66
+\end{verbatim}
+
+
+
 \end{quote}
 
 In addition to the basic parameters described above the single ion property file 
@@ -345,6 +383,8 @@ int dS1		& & {\prg mcdisp} &  $\langle-|\hat \mbf S|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
 void mqcalc      	& & {\prg mcdiff} & FT of magnetic moment $\langle\hat \mbf M(\mbf Q)\rangle$\\
 int dmq1		& & {\prg mcdisp} &  $\langle-|\hat \mbf M(\mbf Q)|+\rangle\sqrt{(p_--p_+)}$\\
+\hline
+int drixs1 & & {\prg mcdisp} & RIXS transition operator $\hat \mbf R$,eq. (\ref{rixsop})\\
 \hline
 void chargedensity\_coeff  & {\prg densplt -c}&&coeff of $-|e|Z_l^m(\Omega)R^2(r)$ in equ.(\ref{chargedensity2})\\
 &{\prg spins -c} & & i.e. $\langle\sum_i Z_l^m(\Omega_i)\rangle$\\
@@ -945,6 +985,7 @@ on output
 }
 
 %*************************************************************************************
+
 \subsubsection{External module functions {\prg dmq1} - used by {\prg mcdisp\index{mcdisp}}  }
 
 Similarly  ''going beyond''  dipolar approximation in the program {\prg mcdisp\index{mcdisp}}
@@ -1032,6 +1073,81 @@ be the same for du1calc and all the corresponding d...1 functions for observable
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
 the ${\mbf m^s_{\alpha1}}(\mbf Q)$ 
+ would be zero because $(p_--p_+)$ vanishes (compare expression (\ref{mmatrix})).
+In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--p_+)$.
+\end{enumerate}
+
+%************************************************************************************************
+
+\subsubsection{External module functions {\prg drixs1} - used by {\prg mcdisp\index{mcdisp}}  }
+Very similar to the inelastic neutron scattering (module function {\prg dmq1})
+the Resonant inelastic X-ray scattering cross sections in the program {\prg mcdisp\index{mcdisp}}
+can be done with  module functions {\prg drixs1} and {\prg estates}. 
+The input of {\prg drixs1} 
+has similar arguments as
+{\prg du1calc}, but as additional argument an orientation
+of the scattering vector,
+output should be a corresponding vector
+ ${{\mbf r\mbf i\mbf x\mbf s}^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}
+\langle -|\hat \mbf R_{\alpha}^{\dag}(\mbf Q)-\langle \hat \mbf R_{\alpha}^{\dag}(\mbf Q)\rangle|+\rangle$.
+Here $\hat R_{\alpha}$ with $\alpha= xx, xy ,xz, yx, yy, yz, zx,zy, zz$ are the 9 
+  components of the RIXS scattering operator, see equ (\ref{rixsop}).
+ {\prg drixs1} is called many times, for
+ every scattering vector. In order to
+ do an efficient calculation the eigenstates should be calculated only
+ once, this is the task of function {\prg estates} (see above).
+
+The format to be used is:
+{\footnotesize
+\begin{verbatim}
+extern "C" int drixs1(int & tn,double & th,double & ph,double J0,
+double & J2, double & J4, double & J6,ComplexMatrix & est,double & T,
+ComplexVector & rixs, float & maxE)
+\end{verbatim}
+
+The meaning of the symbols is as follows:
+
+\begin{verbatim}
+on input
+   |tn|            transition-number  
+   sign(tn)        >0 standard with printouts for user information, 
+                   <0 routine should omit any printout
+   th              polar angle theta of the scattering vector Q 
+                   (angle with the axb axis=c axis) in rad
+   ph              polar angle phi of the scattering vector Q 
+                   (angle with bx(axb)=a in the projection into
+                   the  bx(axb),b plane = angle with a in the projection into 
+				   the ab plane) in rad
+   J0,J2,J4,J6     form factor functions <jn(Q)>   
+   est             eigenstate matrix (as calculated by estates),
+                   it should also contain population numbers of the states (row 0)
+   T               Temperature[K]
+   rixs(1)           ninit + i pinit (from mcdisp options  -ninit and -pinit)
+   maxE            maximum transition energy (from mcdisp option maxE)
+on output
+   int             total number of transitions
+   rixs            vector rixs(alpha)=<-|Ralpha|+>sqrt(p- - p+) 
+                   with alpha=1,..9=xx, xy ,xz, yx, yy, yz, zx,zy, zz
+                   
+     Note on coordinate system:
+        x||bx(axb)
+        y||b                         
+        z||axb    
+\end{verbatim}
+}
+
+The module function must perform the following tasks:
+\begin{enumerate}
+\item for the transition number tn the vector mq1  is to be filled with the 9-components 
+of ${{\mbf r\mbf i\mbf x\mbf s}^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}
+\langle -|\hat \mbf R_{\alpha}^{\dag}(\mbf Q)-\langle \hat \mbf R_{\alpha}^{\dag}(\mbf Q)\rangle|+\rangle$
+, i.e. for $\alpha=1,..9$.
+{\em IMPORTANT: the numbering scheme of transitions has to
+be the same for du1calc and all the corresponding d...1 functions for observables !}
+\item
+If the energy of this transition
+is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
+the ${{\mbf r\mbf i\mbf x\mbf s}^s_{\alpha1}}(\mbf Q)$ 
  would be zero because $(p_--p_+)$ vanishes (compare expression (\ref{mmatrix})).
 In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--p_+)$.
 \end{enumerate}

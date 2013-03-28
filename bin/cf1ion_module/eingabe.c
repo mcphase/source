@@ -2007,50 +2007,63 @@ ITERATION *read_Dkq(name,vsymmetrienr_vor)  /* Dkq aus file name lesen */
     fclose(fp);
     return( iteration );
 }
-/*------------------------------------------------------------------------------
-                          read_Lkq()
-------------------------------------------------------------------------------*/
-ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
+INT  extract(line,parnam,var,unit)
+CHAR * line;
+const CHAR * parnam;
+DOUBLE * var;
+const CHAR * unit;
+{CHAR * token;
+      /*read V20*/
+      if ((token = strstr (line, parnam))!=NULL)
+        {          token+=strlen(parnam);
+         if (strstr (token, "=")!=NULL)
+           {while(strstr(token," ")==token)++token;
+            if(token ==strstr (token, "="))
+              {++token;while(strstr(token," ")==token)++token;
+                              (*var)  = strtod (token, NULL);
+               printf("%s=%g %s ",parnam,(*var),unit);
+               return 1;
+              }
+           }
+        } 
+  return 0;
+}
+
+/************************************************************************************/
+/*  for reading in case of opiont -L -B (read_Lkq and read_Bkq) from new file format */
+/************************************************************************************/
+ITERATION *read_new_format(type,iteration,name,vsymmetrienr_vor)
+CHAR type;
+ITERATION *iteration;
     CHAR *name;
     INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
-{
-    FILE      *fp,*fopen();
+{   FILE      *fp,*fopen();
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
-    INT       buffer_size=381,einheitnr_in,einheitnr_out;
+    INT       buffer_size=381,einheitnr_in,einheitnr_out,ia=0,ib=0,ic=0;
     DOUBLE    versionsnummer;
-    DOUBLE    x1=-1.,x2=-1.,x3=-1.,myB;
+    DOUBLE    myB,d,alpha,beta,gamma;
 
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),v40=0,v44=0,v60=0,v64=0,sqrt(),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0,*token;
     CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
+    ITERATION  *iter_alloc();
     ITERATION *auswahlregel();
     STEVENS   *calc_Pkq();
     MATRIX    *readBmag();
- 
-    printf("Reading file %s ....\n",name);
-    string   = STRING_ALLOC(buffer_size);
-     printf("Reading file %s ....\n",name);
-    string   = STRING_ALLOC(buffer_size);
- 
-    if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
-    line=fgets( string , buffer_size , fp );
-    fclose(fp);
-    if(strncmp(line,"#!cfield",8)==0||strncmp(line,"#!so1ion",8)==0||strncmp(line,"#!MODULE",8)==0)
-   {/* read mcphas single ion input file */
+  /* read mcphas single ion input file */
        printf("file format as single ion input module #!MODULE=so1ion or #!MODULE=cfield\n");
+    string   = STRING_ALLOC(buffer_size);
+
 
     /* some fixed quantitities */
     symmetrienr =0;
      versionsnummer=VERSION;
     c = 'm'; /* unit is meV */
     einheitnr_in = is_einheit_imp(c);
-    if( einheitnr_in == NICHTIMP )
-         read_error(21,fp,name);
-/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
+    if( einheitnr_in == NICHTIMP )read_error(21,fp,name);
     myB        = EINHEITIMP[ einheitnr_in ].myB;
     c = 'm';
     einheitnr_out= is_einheit_imp(c);
@@ -2061,29 +2074,10 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
      temperatur=10.0; /* can be modified by reading in a temperature below*/
 
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
-    while(feof(fp)==0)
+    while(feof(fp)==0&&ion==0)
     {line=fgets( string , buffer_size , fp );
      if(feof(fp)==0&&strstr (line, "#")==NULL)      
      {while ((token=strchr(line,'\r'))!=NULL){*token=' ';}
-      /*read temperature*/
-      if ((token = strstr (line, "TEMP"))!=NULL)
-        {token+=strlen("TEMP");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token,"=")!=token)++token;
-            ++token;
-            temperatur = strtod (token, NULL);
-            printf("T=%g K ",temperatur);
-           }
-        } 
-      if ((token = strstr (line, "T"))!=NULL)
-        {token+=strlen("T");
-         if (strstr (token, "=")==token||strstr (token, " =")==token||strstr (token, "  =")==token)
-           {while(strstr(token,"=")!=token)++token;
-            ++token;
-            temperatur = strtod (token, NULL);
-            printf("T=%g K ",temperatur);
-           }
-        } 
       /*read iontype*/
       if ((token = strstr (line, "IONTYPE"))!=NULL)
         {token+=strlen("IONTYPE");
@@ -2102,11 +2096,13 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     }
     fclose(fp);printf("\n");
 
+    if(strncmp(ion,"S=",2)==0)  /* J=... ion !! same as S= */
+     {ion[0]='J';}    
   
     anz_nn    = 0;
     ionennr   = isimplementiert(ion);
     dimj      = IONENIMP[ ionennr ].dimj;
-    if(strncmp(ion,"S=",2)==0)  /* S=... ion !! extract dimj from string ion */
+    if(strncmp(ion,"J=",2)==0)  /* S=... ion !! extract dimj from string ion */
      {dimj =(int)( 2 * strtod (ion+2, NULL)+1);
       IONENIMP[ ionennr ].dimj=dimj;
      }    
@@ -2123,451 +2119,108 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     EINHEITNROUT(iteration)     =  einheitnr_out;
     PKQ(      iteration)     =  calc_Pkq( dimj );
     SYMMETRIENR(iteration) =  symmetrienr;
-    TEMPERATUR( iteration) =  temperatur;
     EFVERSION(  iteration) =  versionsnummer;
  
  
     modus='a';/* Magnetfeld: . Symmnr...  */
- 
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
     while(feof(fp)==0)
     {line=fgets( string , buffer_size , fp );
-     if(feof(fp)==0&&strstr (line, "#")==NULL)      
-     {while ((token=strchr(line,'\r'))!=NULL){*token=' ';}
+     if(feof(fp)==0&&strstr (line, "#")==NULL){while ((token=strchr(line,'\r'))!=NULL){*token=' ';}
+        if(extract(line,"GJ",&GJ(iteration)," "))if(fabs(IONENIMP[ ionennr ].gj-GJ(iteration))>1e-4)
+           fprintf(stderr,"# Warning: taking Lande factor from sipf file which does not correspond to "
+                           "internal tabulated value GJinternal=%g\n",IONENIMP[ ionennr ].gj);
+        if(extract(line,"R2",&IONENIMP[ ionennr ].r2,"a0^2 a0=0.5292 A"));
+        if(extract(line,"R4",&IONENIMP[ ionennr ].r4,"a0^4 a0=0.5292 A"));
+        if(extract(line,"R6",&IONENIMP[ ionennr ].r6,"a0^6 a0=0.5292 A"));
+        if(extract(line,"ALPHA",&alpha," "))ia=1;
+        if(extract(line,"BETA",&beta," "))ib=1;
+        if(extract(line,"GAMMA",&gamma," "))ic=1;
+        if(extract(line,"nof_electrons",&d," "))IONENIMP[ ionennr ].elektronen_in_vier_f=(INT)d; 
+   switch(type)
+   {case 'L':     
+     extract(line,"L20",&RT(V20(iteration)),"meV");
+     extract(line,"L21",&RT(V21(iteration)),"meV");
+     extract(line,"L21S",&IT(V21(iteration)),"meV");IT(V21(iteration))*=-1.0;
+     extract(line,"L22",&RT(V22(iteration)),"meV");
+     extract(line,"L22S",&IT(V22(iteration)),"meV");IT(V22(iteration))*=-1.0;
+     extract(line,"L40",&RT(V40(iteration)),"meV");
+     extract(line,"L41",&RT(V41(iteration)),"meV");
+     extract(line,"L41S",&IT(V41(iteration)),"meV");IT(V41(iteration))*=-1.0;
+     extract(line,"L42",&RT(V42(iteration)),"meV");
+     extract(line,"L42S",&IT(V42(iteration)),"meV");IT(V42(iteration))*=-1.0;
+     extract(line,"L43",&RT(V43(iteration)),"meV");
+     extract(line,"L43S",&IT(V43(iteration)),"meV");IT(V43(iteration))*=-1.0;
+     extract(line,"L44",&RT(V44(iteration)),"meV");
+     extract(line,"L44S",&IT(V44(iteration)),"meV");IT(V44(iteration))*=-1.0;
+     extract(line,"L60", &RT(V60(iteration)),"meV");
+     extract(line,"L61", &RT(V61(iteration)),"meV");
+     extract(line,"L61S",&IT(V61(iteration)),"meV");IT(V61(iteration))*=-1.0;
+     extract(line,"L62", &RT(V62(iteration)),"meV");
+     extract(line,"L62S",&IT(V62(iteration)),"meV");IT(V62(iteration))*=-1.0;
+     extract(line,"L63", &RT(V63(iteration)),"meV");
+     extract(line,"L63S",&IT(V63(iteration)),"meV");IT(V63(iteration))*=-1.0;
+     extract(line,"L64", &RT(V64(iteration)),"meV");
+     extract(line,"L64S",&IT(V64(iteration)),"meV");IT(V64(iteration))*=-1.0;
+     extract(line,"L65", &RT(V65(iteration)),"meV");
+     extract(line,"L65S",&IT(V65(iteration)),"meV");IT(V65(iteration))*=-1.0;
+     extract(line,"L66", &RT(V66(iteration)),"meV");
+     extract(line,"L66S",&IT(V66(iteration)),"meV");IT(V66(iteration))*=-1.0;
+    break;
+    case 'B':
+     extract(line,"B20",&RT(V20(iteration)),"meV");
+     extract(line,"B21",&RT(V21(iteration)),"meV");
+     extract(line,"B21S",&IT(V21(iteration)),"meV");IT(V21(iteration))*=-1.0;
+     extract(line,"B22",&RT(V22(iteration)),"meV");
+     extract(line,"B22S",&IT(V22(iteration)),"meV");IT(V22(iteration))*=-1.0;
+     extract(line,"B40",&RT(V40(iteration)),"meV");
+     extract(line,"B41",&RT(V41(iteration)),"meV");
+     extract(line,"B41S",&IT(V41(iteration)),"meV");IT(V41(iteration))*=-1.0;
+     extract(line,"B42",&RT(V42(iteration)),"meV");
+     extract(line,"B42S",&IT(V42(iteration)),"meV");IT(V42(iteration))*=-1.0;
+     extract(line,"B43",&RT(V43(iteration)),"meV");
+     extract(line,"B43S",&IT(V43(iteration)),"meV");IT(V43(iteration))*=-1.0;
+     extract(line,"B44",&RT(V44(iteration)),"meV");
+     extract(line,"B44S",&IT(V44(iteration)),"meV");IT(V44(iteration))*=-1.0;
+     extract(line,"B60", &RT(V60(iteration)),"meV");
+     extract(line,"B61", &RT(V61(iteration)),"meV");
+     extract(line,"B61S",&IT(V61(iteration)),"meV");IT(V61(iteration))*=-1.0;
+     extract(line,"B62", &RT(V62(iteration)),"meV");
+     extract(line,"B62S",&IT(V62(iteration)),"meV");IT(V62(iteration))*=-1.0;
+     extract(line,"B63", &RT(V63(iteration)),"meV");
+     extract(line,"B63S",&IT(V63(iteration)),"meV");IT(V63(iteration))*=-1.0;
+     extract(line,"B64", &RT(V64(iteration)),"meV");
+     extract(line,"B64S",&IT(V64(iteration)),"meV");IT(V64(iteration))*=-1.0;
+     extract(line,"B65", &RT(V65(iteration)),"meV");
+     extract(line,"B65S",&IT(V65(iteration)),"meV");IT(V65(iteration))*=-1.0;
+     extract(line,"B66", &RT(V66(iteration)),"meV");
+     extract(line,"B66S",&IT(V66(iteration)),"meV");IT(V66(iteration))*=-1.0;
+    break;
+    default: printf("error - not implemented cf parameter type for this format of input file\n");exit(1);
+    }
+     extract(line,"Bx", &B1(iteration),"T");
+     extract(line,"By", &B2(iteration),"T");
+     extract(line,"Bz", &B3(iteration),"T");
+      /*read temperature*/
+      extract(line,"TEMP",&temperatur,"K");
 
-
-      /*read V20*/
-      if ((token = strstr (line, "L20"))!=NULL)
-        {          token+=strlen("L20");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V20(iteration) )  = strtod (token, NULL);
-            printf("L20=%g meV ",RT( V20(iteration) ));
-              }
-           }
-        } 
-
-      /*read V21*/
-      if ((token = strstr (line, "L21"))!=NULL)
-        {          token+=strlen("L21");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V21(iteration) )  = strtod (token, NULL);
-            printf("L21=%g meV ",RT( V21(iteration) ));
-              }
-           }
-        } 
-
-      /*read V21S*/
-      if ((token = strstr (line, "L21S"))!=NULL)
-        {          token+=strlen("L21S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V21(iteration) )  = -strtod (token, NULL);
-            printf("L21S=%g meV ",-IT( V21(iteration) ));
-              }
-           }
-        } 
-
-      /*read V22*/
-      if ((token = strstr (line, "L22"))!=NULL)
-        {          token+=strlen("L22");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V22(iteration) )  = strtod (token, NULL);
-            printf("L22=%g meV ",RT( V22(iteration) ));
-              }
-           }
-        } 
-
-      /*read V22S*/
-      if ((token = strstr (line, "L22S"))!=NULL)
-        {          token+=strlen("L22S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V22(iteration) )  = -strtod (token, NULL);
-            printf("L22S=%g meV ",-IT( V22(iteration) ));
-              }
-           }
-        } 
-      /*read V40*/
-      if ((token = strstr (line, "L40"))!=NULL)
-        {          token+=strlen("L40");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V40(iteration) )  = strtod (token, NULL);
-            printf("L40=%g meV ",RT( V40(iteration) ));
-              }
-           }
-        } 
-
-      /*read V41*/
-      if ((token = strstr (line, "L41"))!=NULL)
-        {          token+=strlen("L41");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V41(iteration) )  = strtod (token, NULL);
-            printf("L41=%g meV ",RT( V41(iteration) ));
-              }
-           }
-        } 
-
-      /*read V41S*/
-      if ((token = strstr (line, "L41S"))!=NULL)
-        {          token+=strlen("L41S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V41(iteration) )  = -strtod (token, NULL);
-            printf("L41S=%g meV ",-IT( V41(iteration) ));
-              }
-           }
-        } 
-
-
-      /*read V42*/
-      if ((token = strstr (line, "L42"))!=NULL)
-        {          token+=strlen("L42");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V42(iteration) )  = strtod (token, NULL);
-            printf("L42=%g meV ",RT( V42(iteration) ));
-              }
-           }
-        } 
-
-      /*read V42S*/
-      if ((token = strstr (line, "L42S"))!=NULL)
-        {          token+=strlen("L42S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V42(iteration) )  = -strtod (token, NULL);
-            printf("L42S=%g meV ",-IT( V42(iteration) ));
-              }
-           }
-        } 
-
-      /*read V43*/
-      if ((token = strstr (line, "L43"))!=NULL)
-        {          token+=strlen("L43");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V43(iteration) )  = strtod (token, NULL);
-            printf("L43=%g meV ",RT( V43(iteration) ));
-              }
-           }
-        } 
-
-      /*read V43S*/
-      if ((token = strstr (line, "L43S"))!=NULL)
-        {          token+=strlen("L43S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V43(iteration) )  = -strtod (token, NULL);
-            printf("L43S=%g meV ",-IT( V43(iteration) ));
-              }
-           }
-        } 
-      /*read V44*/
-      if ((token = strstr (line, "L44"))!=NULL)
-        {          token+=strlen("L44");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V44(iteration) )  = strtod (token, NULL);
-            printf("L44=%g meV ",RT( V44(iteration) ));
-              }
-           }
-        } 
-
-      /*read V44S*/
-      if ((token = strstr (line, "L44S"))!=NULL)
-        {          token+=strlen("L44S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V44(iteration) )  = -strtod (token, NULL);
-            printf("L44S=%g meV ",-IT( V44(iteration) ));
-              }
-           }
-        } 
-
-      /*read V60*/
-      if ((token = strstr (line, "L60"))!=NULL)
-        {          token+=strlen("L60");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V60(iteration) )  = strtod (token, NULL);
-            printf("L60=%g meV ",RT( V60(iteration) ));
-              }
-           }
-        } 
-
-      /*read V61*/
-      if ((token = strstr (line, "L61"))!=NULL)
-        {          token+=strlen("L61");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V61(iteration) )  = strtod (token, NULL);
-            printf("L61=%g meV ",RT( V61(iteration) ));
-              }
-           }
-        } 
-
-      /*read V61S*/
-      if ((token = strstr (line, "L61S"))!=NULL)
-        {          token+=strlen("L61S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V61(iteration) )  = -strtod (token, NULL);
-            printf("L61S=%g meV ",-IT( V61(iteration) ));
-              }
-           }
-        } 
-
-
-      /*read V62*/
-      if ((token = strstr (line, "L62"))!=NULL)
-        {          token+=strlen("L62");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V62(iteration) )  = strtod (token, NULL);
-            printf("L62=%g meV ",RT( V62(iteration) ));
-              }
-           }
-        } 
-
-      /*read V62S*/
-      if ((token = strstr (line, "L62S"))!=NULL)
-        {          token+=strlen("L62S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V62(iteration) )  = -strtod (token, NULL);
-            printf("L62S=%g meV ",-IT( V62(iteration) ));
-              }
-           }
-        } 
-
-      /*read V63*/
-      if ((token = strstr (line, "L63"))!=NULL)
-        {          token+=strlen("L63");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V63(iteration) )  = strtod (token, NULL);
-            printf("L63=%g meV ",RT( V63(iteration) ));
-              }
-           }
-        } 
-
-      /*read V63S*/
-      if ((token = strstr (line, "L63S"))!=NULL)
-        {          token+=strlen("L63S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V63(iteration) )  = -strtod (token, NULL);
-            printf("L63S=%g meV ",-IT( V63(iteration) ));
-              }
-           }
-        } 
-      /*read V64*/
-      if ((token = strstr (line, "L64"))!=NULL)
-        {          token+=strlen("L64");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V64(iteration) )  = strtod (token, NULL);
-            printf("L64=%g meV ",RT( V64(iteration) ));
-              }
-           }
-        } 
-
-      /*read V64S*/
-      if ((token = strstr (line, "L64S"))!=NULL)
-        {          token+=strlen("L64S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V64(iteration) )  = -strtod (token, NULL);
-            printf("L64S=%g meV ",-IT( V64(iteration) ));
-              }
-           }
-        } 
-
-      /*read V65*/
-      if ((token = strstr (line, "L65"))!=NULL)
-        {          token+=strlen("L65");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V65(iteration) )  = strtod (token, NULL);
-            printf("L65=%g meV ",RT( V65(iteration) ));
-              }
-           }
-        } 
-
-      /*read V65S*/
-      if ((token = strstr (line, "L65S"))!=NULL)
-        {          token+=strlen("L65S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V65(iteration) )  = -strtod (token, NULL);
-            printf("L65S=%g meV ",-IT( V65(iteration) ));
-              }
-           }
-        } 
-
-      /*read V66*/
-      if ((token = strstr (line, "L66"))!=NULL)
-        {          token+=strlen("L66");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V66(iteration) )  = strtod (token, NULL);
-            printf("L66=%g meV ",RT( V66(iteration) ));
-              }
-           }
-        } 
-
-      /*read V66S*/
-      if ((token = strstr (line, "L66S"))!=NULL)
-        {          token+=strlen("L66S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V66(iteration) )  = -strtod (token, NULL);
-            printf("L66S=%g meV ",-IT( V66(iteration) ));
-              }
-           }
-        } 
-
-   /*read Bx*/
-      if ((token = strstr (line, "Bx"))!=NULL)
-        {          token+=strlen("Bx");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B1(iteration)=x1   = strtod (token, NULL);
-            printf("Bx=%g T ", B1(iteration) );
-              }
-           }
-        } 
-
-   /*read By*/
-      if ((token = strstr (line, "By"))!=NULL)
-        {          token+=strlen("By");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B2(iteration) =x2  = strtod (token, NULL);
-            printf("By=%g T ", B2(iteration) );
-              }
-           }
-        } 
-   /*read Bz*/
-      if ((token = strstr (line, "Bz"))!=NULL)
-        {          token+=strlen("Bz");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B3(iteration) =x3  = strtod (token, NULL);
-            printf("Bz=%g T ", B3(iteration) );
-              }
-           }
-        } 
-
-   /*read Dx2*/
-      if ((token = strstr (line, "Dx2"))!=NULL)
-        {          token+=strlen("Dx2");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B1S(iteration) = strtod (token, NULL);
-            printf("Dx2=%g meV ", B1S(iteration) );
-              }
-           }
-        } 
-
-   /*read Dy2*/
-      if ((token = strstr (line, "Dy2"))!=NULL)
-        {          token+=strlen("Dy2");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B2S(iteration) = strtod (token, NULL);
-            printf("Dy2=%g meV ", B2S(iteration) );
-              }
-           }
-        } 
-   /*read Dz2*/
-      if ((token = strstr (line, "Dz2"))!=NULL)
-        {          token+=strlen("Dz2");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B3S(iteration) = strtod (token, NULL);
-            printf("Dz2=%g meV ", B3S(iteration) );
-              }
-           }
-        } 
-
+     extract(line,"Dx2", &B1S(iteration),"meV");
+     extract(line,"Dy2", &B2S(iteration),"meV");
+     extract(line,"Dz2", &B3S(iteration),"meV"); 
      }
     }
     printf("\n");
- 
-     /* Auswahlregeln fuer Lkq beachten */
+    e_4f = E4f( ionennr );
+    if(ia)alpha_J[ e_4f ]=alpha;
+    if(ib)beta_J[ e_4f ]=beta;
+    if(ic)gamma_J[ e_4f ]=gamma;
+
+     /* Auswahlregeln beachten */
     iteration = auswahlregel(iteration,symmetrienr);
+    
+
+   switch(type)
+   {case 'L': 
  
      /* Lkq auf Dkq umrechnen                 */
     /*                                       */
@@ -2595,18 +2248,14 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
      IT( V63(iteration) ) *=  -1;
      IT( V65(iteration) ) *=  -1;
  
- 
- 
- 
     /* Dkq auf Vkq umrechnen            */
     /*                                  */
     /* Vkq = Dkq * epsilon_kq * theta_k */
     /*                                  */
     /*                                  */
  
-     e_4f = E4f( ionennr );
- 
- 
+     
+
      RT( V20(iteration) ) *=  epn2n(0) * alpha_J[ e_4f ];
      RT( V21(iteration) ) *=  epn1n(1) * alpha_J[ e_4f ];
      RT( V22(iteration) ) *=  epn0n(2) * alpha_J[ e_4f ];
@@ -2624,9 +2273,7 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
      RT( V64(iteration) ) *=  epn2n(4) * gamma_J[ e_4f ];
      RT( V65(iteration) ) *=  epn1n(5) * gamma_J[ e_4f ];
      RT( V66(iteration) ) *=  epn0n(6) * gamma_J[ e_4f ];
- 
- 
- 
+  
      IT( V21(iteration) ) *=  epn1n(1) * alpha_J[ e_4f ];
      IT( V22(iteration) ) *=  epn0n(2) * alpha_J[ e_4f ];
  
@@ -2650,14 +2297,55 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
        if( ABSD(2.0*epn2n(4)*v64 + 21.0*epn6n(0)*v60) > EPS1)
        read_error(53,fp,name);
     }
+    break;
+    case 'B':
+  
+     /* Bkq auf Vkq umrechnen       */
+     /*                             */
+     /*       | Bk0  ,         q =0 */
+     /* Vkq = |                     */
+     /*       | Bkq/2/omegakq, q >0 */
+     /*                             */
  
+ 
+     RT( V21(iteration) ) /=  2 * omegan1n(1);
+     RT( V22(iteration) ) /=  2 * omegan0n(2);
+ 
+     RT( V41(iteration) ) /=  2 * omegan3n(1);
+     RT( V42(iteration) ) /=  2 * omegan2n(2);
+     RT( V43(iteration) ) /=  2 * omegan1n(3);
+     RT( V44(iteration) ) /=  2 * omegan0n(4);
+ 
+     RT( V61(iteration) ) /=  2 * omegan5n(1);
+     RT( V62(iteration) ) /=  2 * omegan4n(2);
+     RT( V63(iteration) ) /=  2 * omegan3n(3);
+     RT( V64(iteration) ) /=  2 * omegan2n(4);
+     RT( V65(iteration) ) /=  2 * omegan1n(5);
+     RT( V66(iteration) ) /=  2 * omegan0n(6);
+ 
+ 
+     IT( V21(iteration) ) /=  2 * omegan1n(1);
+     IT( V22(iteration) ) /=  2 * omegan0n(2);
+ 
+     IT( V41(iteration) ) /=  2 * omegan3n(1);
+     IT( V42(iteration) ) /=  2 * omegan2n(2);
+     IT( V43(iteration) ) /=  2 * omegan1n(3);
+     IT( V44(iteration) ) /=  2 * omegan0n(4);
+ 
+     IT( V61(iteration) ) /=  2 * omegan5n(1);
+     IT( V62(iteration) ) /=  2 * omegan4n(2);
+     IT( V63(iteration) ) /=  2 * omegan3n(3);
+     IT( V64(iteration) ) /=  2 * omegan2n(4);
+     IT( V65(iteration) ) /=  2 * omegan1n(5);
+     IT( V66(iteration) ) /=  2 * omegan0n(6);
+    break;
+    default: read_error(53,fp,name);    
+   }
 
      MODUS(iteration) = 'r';
  
+    TEMPERATUR( iteration) =  temperatur;
     /* falls ein Magnetfeld angelegt wurde : */
- 
-    isinlimits(fp,name ,0, x1,x2,x3,MODUS(iteration) );
- 
     HMAG(iteration) = calc_Bmag( DIMJ(iteration),GJ(iteration),
                                           myB,B1(iteration),
                                               B2(iteration),
@@ -2669,8 +2357,42 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
         BMOL( iteration) = 0.0;
         PHI(  iteration) = 0.0;
         THETA(iteration) = 0.0;
+ 
+       fclose(fp);
+ return (iteration);
+}
+/*------------------------------------------------------------------------------
+                          read_Lkq()
+------------------------------------------------------------------------------*/
+ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
+    CHAR *name;
+    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+                          /* dann vsymmetrienr_vor <  0          */
+{
+    FILE      *fp,*fopen();
+    INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
+    INT       buffer_size=381,einheitnr_in,einheitnr_out;
+    DOUBLE    versionsnummer;
+    DOUBLE    myB;
 
-  
+    DOUBLE    sin(),cos();
+    DOUBLE    a_tof(),v40=0,v44=0,v60=0,v64=0,sqrt(),temperatur;
+    CHAR  /*  *einheit_in,*einheit_out,*/modus;
+    CHAR      *ion=0;
+    CHAR      c,*string,*line,*fgets(),*a_tos();
+    ITERATION *iteration,*iter_alloc();
+    ITERATION *auswahlregel();
+    STEVENS   *calc_Pkq();
+    MATRIX    *readBmag();
+ 
+    printf("Reading file %s ....\n",name);
+    string   = STRING_ALLOC(buffer_size);
+ 
+    if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
+    line=fgets( string , buffer_size , fp );
+    fclose(fp);
+    if(strncmp(line,"#!cfield",8)==0||strncmp(line,"#!so1ion",8)==0||strncmp(line,"#!MODULE",8)==0)
+   {iteration=read_new_format('L',iteration,name,vsymmetrienr_vor);
    }
     else
    { /*read classical input file bkq.parmeter*/
@@ -2906,9 +2628,9 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     }
  
     HMAG(iteration) = readBmag(fp,name,modus,myB,iteration,buffer_size,string);
+    fclose(fp);
   } 
  
-    fclose(fp);
     return( iteration );
 }
 /*------------------------------------------------------------------------------
@@ -3457,10 +3179,12 @@ ITERATION *read_Bkqnew(ion)  /* Vkq aus file name lesen */
     symmetrienr =0;
  /*triclinic */
  
+  if(strncmp(ion,"S=",2)==0) /* S=... ion !! extract dimj from string ion  equivalent to J=*/
+     {ion[0]='J';     }    
     anz_nn    = 0;
     ionennr   = isimplementiert(ion);
     dimj      = IONENIMP[ ionennr ].dimj;
-  if(strncmp(ion,"S=",2)==0) /* S=... ion !! extract dimj from string ion */
+  if(strncmp(ion,"J=",2)==0) /* J=... ion !! extract dimj from string ion */
      {dimj =(int)( 2 * strtod (ion+2, NULL)+1);
       IONENIMP[ ionennr ].dimj=dimj;
      }    
@@ -3514,31 +3238,6 @@ ITERATION *read_Bkqnew(ion)  /* Vkq aus file name lesen */
     /* Auswahlregeln fuer Bkq beachten */
     iteration = auswahlregel(iteration,symmetrienr);
  
- 
-     /* Bkq auf Vkq umrechnen       */
-     /*                             */
-     /*       | Bk0  ,         q =0 */
-     /* Vkq = |                     */
-     /*       | Bkq/2/omegakq, q >0 */
-     /*                             */
- 
- 
-     RT( V21(iteration) ) /=  2 * omegan1n(1);
-     RT( V22(iteration) ) /=  2 * omegan0n(2);
- 
-     RT( V41(iteration) ) /=  2 * omegan3n(1);
-     RT( V42(iteration) ) /=  2 * omegan2n(2);
-     RT( V43(iteration) ) /=  2 * omegan1n(3);
-     RT( V44(iteration) ) /=  2 * omegan0n(4);
- 
-     RT( V61(iteration) ) /=  2 * omegan5n(1);
-     RT( V62(iteration) ) /=  2 * omegan4n(2);
-     RT( V63(iteration) ) /=  2 * omegan3n(3);
-     RT( V64(iteration) ) /=  2 * omegan2n(4);
-     RT( V65(iteration) ) /=  2 * omegan1n(5);
-     RT( V66(iteration) ) /=  2 * omegan0n(6);
- 
- 
        B1(iteration) = 0.0;
         B2(iteration) = 0.0;
         B3(iteration) = 0.0;
@@ -3573,14 +3272,14 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
-    DOUBLE    x1=-1.,x2=-1.,x3=-1.,myB;
+    DOUBLE    myB;
     DOUBLE    sin(),cos();
     DOUBLE    omegan0n(),omegan1n(),omegan2n();
     DOUBLE    omegan3n(),omegan4n(),omegan5n();
     DOUBLE    omegan6n();
     DOUBLE    a_tof(),b40,b44,b60,b64,sqrt(),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
-    CHAR      *ion=0,*token;
+    CHAR      *ion=0;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();
     ITERATION *auswahlregel();
@@ -3594,598 +3293,8 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     line=fgets( string , buffer_size , fp );
     fclose(fp);
     if(strncmp(line,"#!cfield",8)==0||strncmp(line,"#!so1ion",8)==0||strncmp(line,"#!MODULE",8)==0)
-   {/* read mcphas single ion input file */
-       printf("file format as single ion input module #!MODULE=so1ion or #!MODULE=cfield\n");
- 
-
-    /* some fixed quantitities */
-    symmetrienr =0;
-     versionsnummer=VERSION;
-    c = 'm'; /* unit is meV */
-    einheitnr_in = is_einheit_imp(c);
-    if( einheitnr_in == NICHTIMP )
-         read_error(21,fp,name);
-/*  einheit_in = EINHEITIMP[ einheitnr_in ].einheit; */
-    myB        = EINHEITIMP[ einheitnr_in ].myB;
-    c = 'm';
-    einheitnr_out= is_einheit_imp(c);
-    if( einheitnr_out== NICHTIMP )
-         read_error(21,fp,name);
-/*  einheit_out= EINHEITIMP[ einheitnr_out].einheit; */
-
-     temperatur=10.0; /* can be modified by reading in a temperature below*/
-
-    if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
-    while(feof(fp)==0)
-    {line=fgets( string , buffer_size , fp );
-     if(feof(fp)==0&&strstr (line, "#")==NULL)      
-     {while ((token=strchr(line,'\r'))!=NULL){*token=' ';}
-      /*read temperature*/
-      if ((token = strstr (line, "TEMP"))!=NULL)
-        {token+=strlen("TEMP");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token,"=")!=token)++token;
-            ++token;
-            temperatur = strtod (token, NULL);
-            printf("T=%g K ",temperatur);
-           }
-        } 
-      if ((token = strstr (line, "T"))!=NULL)
-        {token+=strlen("T");
-         if (strstr (token, "=")==token||strstr (token, " =")==token||strstr (token, "  =")==token)
-           {while(strstr(token,"=")!=token)++token;
-            ++token;
-            temperatur = strtod (token, NULL);
-            printf("T=%g K ",temperatur);
-           }
-        } 
-      /*read iontype*/
-      if ((token = strstr (line, "IONTYPE"))!=NULL)
-        {token+=strlen("IONTYPE");
-         if (strstr (token, "=")!=NULL)
-           {token = strstr (token, "=")+1;
-           while (*token==' '){++token;} /* remove starting spaces*/
-           ion =a_tos( token , 0,5);
-            /*strncpy(ion,token,1)*/;/*maximal 5 characters*/
-            /*remove from string var all characters after delimiters*/
-            strtok(ion," \n");
-            printf("IONTYPE=%s ",ion);
-           }
-        } 
-
-     }
+   {iteration=read_new_format('B',iteration,name,vsymmetrienr_vor);
     }
-    fclose(fp);printf("\n");
-
-  
-    anz_nn    = 0;
-    ionennr   = isimplementiert(ion);
-    dimj      = IONENIMP[ ionennr ].dimj;
-    if(strncmp(ion,"S=",2)==0)  /* S=... ion !! extract dimj from string ion */
-     {dimj =(int)( 2 * strtod (ion+2, NULL)+1);
-      IONENIMP[ ionennr ].dimj=dimj;
-              }    
-/*  zwei_j    = dimj - 1 ; */
- 
-    iteration = iter_alloc(dimj,anz_nn);
- 
-    ANZ_NN(   iteration)     =  anz_nn;
-    DIMJ(     iteration)     =  dimj;
-    GJ(       iteration)     =  IONENIMP[ ionennr ].gj;
-    IONNAME(  iteration)     =  IONENIMP[ ionennr ].ionname;
-    IONENNUMMER(iteration)   = ionennr;
-    EINHEITNRIN( iteration)     =  einheitnr_in;
-    EINHEITNROUT(iteration)     =  einheitnr_out;
-    PKQ(      iteration)     =  calc_Pkq( dimj );
-    SYMMETRIENR(iteration) =  symmetrienr;
-    TEMPERATUR( iteration) =  temperatur;
-    EFVERSION(  iteration) =  versionsnummer;
- 
- 
-    modus='a';/* Magnetfeld: . Symmnr...  */
- 
-    if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
-    while(feof(fp)==0)
-    {line=fgets( string , buffer_size , fp );
-     if(feof(fp)==0&&strstr (line, "#")==NULL)      
-     {while ((token=strchr(line,'\r'))!=NULL){*token=' ';}
-
-
-      /*read V20*/
-      if ((token = strstr (line, "B20"))!=NULL)
-        {          token+=strlen("B20");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V20(iteration) )  = strtod (token, NULL);
-            printf("B20=%g meV ",RT( V20(iteration) ));
-              }
-           }
-        } 
-
-      /*read V21*/
-      if ((token = strstr (line, "B21"))!=NULL)
-        {          token+=strlen("B21");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V21(iteration) )  = strtod (token, NULL);
-            printf("B21=%g meV ",RT( V21(iteration) ));
-              }
-           }
-        } 
-
-      /*read V21S*/
-      if ((token = strstr (line, "B21S"))!=NULL)
-        {          token+=strlen("B21S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V21(iteration) )  = -strtod (token, NULL);
-            printf("B21S=%g meV ",-IT( V21(iteration) ));
-              }
-           }
-        } 
-
-      /*read V22*/
-      if ((token = strstr (line, "B22"))!=NULL)
-        {          token+=strlen("B22");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V22(iteration) )  = strtod (token, NULL);
-            printf("B22=%g meV ",RT( V22(iteration) ));
-              }
-           }
-        } 
-
-      /*read V22S*/
-      if ((token = strstr (line, "B22S"))!=NULL)
-        {          token+=strlen("B22S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V22(iteration) )  = -strtod (token, NULL);
-            printf("B22S=%g meV ",-IT( V22(iteration) ));
-              }
-           }
-        } 
-      /*read V40*/
-      if ((token = strstr (line, "B40"))!=NULL)
-        {          token+=strlen("B40");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V40(iteration) )  = strtod (token, NULL);
-            printf("B40=%g meV ",RT( V40(iteration) ));
-              }
-           }
-        } 
-
-      /*read V41*/
-      if ((token = strstr (line, "B41"))!=NULL)
-        {          token+=strlen("B41");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V41(iteration) )  = strtod (token, NULL);
-            printf("B41=%g meV ",RT( V41(iteration) ));
-              }
-           }
-        } 
-
-      /*read V41S*/
-      if ((token = strstr (line, "B41S"))!=NULL)
-        {          token+=strlen("B41S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V41(iteration) )  = -strtod (token, NULL);
-            printf("B41S=%g meV ",-IT( V41(iteration) ));
-              }
-           }
-        } 
-
-
-      /*read V42*/
-      if ((token = strstr (line, "B42"))!=NULL)
-        {          token+=strlen("B42");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V42(iteration) )  = strtod (token, NULL);
-            printf("B42=%g meV ",RT( V42(iteration) ));
-              }
-           }
-        } 
-
-      /*read V42S*/
-      if ((token = strstr (line, "B42S"))!=NULL)
-        {          token+=strlen("B42S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V42(iteration) )  = -strtod (token, NULL);
-            printf("B42S=%g meV ",-IT( V42(iteration) ));
-              }
-           }
-        } 
-
-      /*read V43*/
-      if ((token = strstr (line, "B43"))!=NULL)
-        {          token+=strlen("B43");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V43(iteration) )  = strtod (token, NULL);
-            printf("B43=%g meV ",RT( V43(iteration) ));
-              }
-           }
-        } 
-
-      /*read V43S*/
-      if ((token = strstr (line, "B43S"))!=NULL)
-        {          token+=strlen("B43S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V43(iteration) )  = -strtod (token, NULL);
-            printf("B43S=%g meV ",-IT( V43(iteration) ));
-              }
-           }
-        } 
-      /*read V44*/
-      if ((token = strstr (line, "B44"))!=NULL)
-        {          token+=strlen("B44");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V44(iteration) )  = strtod (token, NULL);
-            printf("B44=%g meV ",RT( V44(iteration) ));
-              }
-           }
-        } 
-
-      /*read V44S*/
-      if ((token = strstr (line, "B44S"))!=NULL)
-        {          token+=strlen("B44S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V44(iteration) )  = -strtod (token, NULL);
-            printf("B44S=%g meV ",-IT( V44(iteration) ));
-              }
-           }
-        } 
-
-      /*read V60*/
-      if ((token = strstr (line, "B60"))!=NULL)
-        {          token+=strlen("B60");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V60(iteration) )  = strtod (token, NULL);
-            printf("B60=%g meV ",RT( V60(iteration) ));
-              }
-           }
-        } 
-
-      /*read V61*/
-      if ((token = strstr (line, "B61"))!=NULL)
-        {          token+=strlen("B61");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V61(iteration) )  = strtod (token, NULL);
-            printf("B61=%g meV ",RT( V61(iteration) ));
-              }
-           }
-        } 
-
-      /*read V61S*/
-      if ((token = strstr (line, "B61S"))!=NULL)
-        {          token+=strlen("B61S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V61(iteration) )  = -strtod (token, NULL);
-            printf("B61S=%g meV ",-IT( V61(iteration) ));
-              }
-           }
-        } 
-
-
-      /*read V62*/
-      if ((token = strstr (line, "B62"))!=NULL)
-        {          token+=strlen("B62");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V62(iteration) )  = strtod (token, NULL);
-            printf("B62=%g meV ",RT( V62(iteration) ));
-              }
-           }
-        } 
-
-      /*read V62S*/
-      if ((token = strstr (line, "B62S"))!=NULL)
-        {          token+=strlen("B62S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V62(iteration) )  = -strtod (token, NULL);
-            printf("B62S=%g meV ",-IT( V62(iteration) ));
-              }
-           }
-        } 
-
-      /*read V63*/
-      if ((token = strstr (line, "B63"))!=NULL)
-        {          token+=strlen("B63");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V63(iteration) )  = strtod (token, NULL);
-            printf("B63=%g meV ",RT( V63(iteration) ));
-              }
-           }
-        } 
-
-      /*read V63S*/
-      if ((token = strstr (line, "B63S"))!=NULL)
-        {          token+=strlen("B63S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V63(iteration) )  = -strtod (token, NULL);
-            printf("B63S=%g meV ",-IT( V63(iteration) ));
-              }
-           }
-        } 
-      /*read V64*/
-      if ((token = strstr (line, "B64"))!=NULL)
-        {          token+=strlen("B64");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V64(iteration) )  = strtod (token, NULL);
-            printf("B64=%g meV ",RT( V64(iteration) ));
-              }
-           }
-        } 
-
-      /*read V64S*/
-      if ((token = strstr (line, "B64S"))!=NULL)
-        {          token+=strlen("B64S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V64(iteration) )  = -strtod (token, NULL);
-            printf("B64S=%g meV ",-IT( V64(iteration) ));
-              }
-           }
-        } 
-
-      /*read V65*/
-      if ((token = strstr (line, "B65"))!=NULL)
-        {          token+=strlen("B65");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V65(iteration) )  = strtod (token, NULL);
-            printf("B65=%g meV ",RT( V65(iteration) ));
-              }
-           }
-        } 
-
-      /*read V65S*/
-      if ((token = strstr (line, "B65S"))!=NULL)
-        {          token+=strlen("B65S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V65(iteration) )  = -strtod (token, NULL);
-            printf("B65S=%g meV ",-IT( V65(iteration) ));
-              }
-           }
-        } 
-
-      /*read V66*/
-      if ((token = strstr (line, "B66"))!=NULL)
-        {          token+=strlen("B66");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              RT( V66(iteration) )  = strtod (token, NULL);
-            printf("B66=%g meV ",RT( V66(iteration) ));
-              }
-           }
-        } 
-
-      /*read V66S*/
-      if ((token = strstr (line, "B66S"))!=NULL)
-        {          token+=strlen("B66S");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              IT( V66(iteration) )  = -strtod (token, NULL);
-            printf("B66S=%g meV ",-IT( V66(iteration) ));
-              }
-           }
-        } 
-
-   /*read Bx*/
-      if ((token = strstr (line, "Bx"))!=NULL)
-        {          token+=strlen("Bx");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B1(iteration)=x1   = strtod (token, NULL);
-            printf("Bx=%g T ", B1(iteration) );
-              }
-           }
-        } 
-
-   /*read By*/
-      if ((token = strstr (line, "By"))!=NULL)
-        {          token+=strlen("By");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B2(iteration) =x2  = strtod (token, NULL);
-            printf("By=%g T ", B2(iteration) );
-              }
-           }
-        } 
-   /*read Bz*/
-      if ((token = strstr (line, "Bz"))!=NULL)
-        {          token+=strlen("Bz");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B3(iteration) =x3  = strtod (token, NULL);
-            printf("Bz=%g T ", B3(iteration) );
-              }
-           }
-        } 
-
-   /*read Dx2*/
-      if ((token = strstr (line, "Dx2"))!=NULL)
-        {          token+=strlen("Dx2");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B1S(iteration) = strtod (token, NULL);
-            printf("Dx2=%g meV ", B1S(iteration) );
-              }
-           }
-        } 
-
-   /*read Dy2*/
-      if ((token = strstr (line, "Dy2"))!=NULL)
-        {          token+=strlen("Dy2");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B2S(iteration) = strtod (token, NULL);
-            printf("Dy2=%g meV ", B2S(iteration) );
-              }
-           }
-        } 
-   /*read Dz2*/
-      if ((token = strstr (line, "Dz2"))!=NULL)
-        {          token+=strlen("Dz2");
-         if (strstr (token, "=")!=NULL)
-           {while(strstr(token," ")==token)++token;
-            if(token ==strstr (token, "="))
-              {++token;while(strstr(token," ")==token)++token;
-                              B3S(iteration) = strtod (token, NULL);
-            printf("Dz2=%g meV ", B3S(iteration) );
-              }
-           }
-        } 
-
-     }
-    }
-    fclose(fp);printf("\n");
- 
-     /* Auswahlregeln fuer Bkq beachten */
-    iteration = auswahlregel(iteration,symmetrienr);
- 
-     /* Bkq auf Vkq umrechnen       */
-     /*                             */
-     /*       | Bk0  ,         q =0 */
-     /* Vkq = |                     */
-     /*       | Bkq/2/omegakq, q >0 */
-     /*                             */
- 
- 
-     RT( V21(iteration) ) /=  2 * omegan1n(1);
-     RT( V22(iteration) ) /=  2 * omegan0n(2);
- 
-     RT( V41(iteration) ) /=  2 * omegan3n(1);
-     RT( V42(iteration) ) /=  2 * omegan2n(2);
-     RT( V43(iteration) ) /=  2 * omegan1n(3);
-     RT( V44(iteration) ) /=  2 * omegan0n(4);
- 
-     RT( V61(iteration) ) /=  2 * omegan5n(1);
-     RT( V62(iteration) ) /=  2 * omegan4n(2);
-     RT( V63(iteration) ) /=  2 * omegan3n(3);
-     RT( V64(iteration) ) /=  2 * omegan2n(4);
-     RT( V65(iteration) ) /=  2 * omegan1n(5);
-     RT( V66(iteration) ) /=  2 * omegan0n(6);
- 
- 
-     IT( V21(iteration) ) /=  2 * omegan1n(1);
-     IT( V22(iteration) ) /=  2 * omegan0n(2);
- 
-     IT( V41(iteration) ) /=  2 * omegan3n(1);
-     IT( V42(iteration) ) /=  2 * omegan2n(2);
-     IT( V43(iteration) ) /=  2 * omegan1n(3);
-     IT( V44(iteration) ) /=  2 * omegan0n(4);
- 
-     IT( V61(iteration) ) /=  2 * omegan5n(1);
-     IT( V62(iteration) ) /=  2 * omegan4n(2);
-     IT( V63(iteration) ) /=  2 * omegan3n(3);
-     IT( V64(iteration) ) /=  2 * omegan2n(4);
-     IT( V65(iteration) ) /=  2 * omegan1n(5);
-     IT( V66(iteration) ) /=  2 * omegan0n(6);
- 
-     MODUS(iteration) = 'r';
- 
-    /* falls ein Magnetfeld angelegt wurde : */
- 
-    isinlimits(fp,name ,0, x1,x2,x3,MODUS(iteration) );
- 
-    HMAG(iteration) = calc_Bmag_D( DIMJ(iteration),GJ(iteration),
-                                          myB,B1(iteration),
-                                              B2(iteration),
-                                              B3(iteration),
-                                              B1S(iteration),
-                                              B2S(iteration),
-                                              B3S(iteration) );
- 
-        B1MOL(iteration) = 0.0;
-        B2MOL(iteration) = 0.0;
-        B3MOL(iteration) = 0.0;
-        BMOL( iteration) = 0.0;
-        PHI(  iteration) = 0.0;
-        THETA(iteration) = 0.0;
-
-  
-   }
     else
    { /*read classical input file bkq.parmeter*/
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);

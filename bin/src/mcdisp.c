@@ -6,10 +6,10 @@
  *            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400
  ***********************************************************************/
 
-#define SMALL 1e-6    // deviation from single ion gap delta to take energy into account as not being equal to
+#define SMALL_QUASIELASTIC_ENERGY 1e-6    // deviation from single ion gap delta to take energy into account as not being equal to
                       // delta and therefore being included into output 
-		      // transitions of single ions less then SMALL have in Mijkl wn/kT instead of wn-wn'
-		      // !!! must match SMALL in jjjpar.cpp !!!!
+		      // transitions of single ions less then SMALL_QUASIELASTIC_ENERGY have in Mijkl wn/kT instead of wn-wn'
+		      // !!! must match SMALL_QUASIELASTIC_ENERGY in jjjpar.hpp !!!!
 #define SMALLINT 1e-4 // small intensity treshhold in barn/f.u. - only peaks larger than this threshold will
                       // be included in sta_int calculation
 #define ANTIPEAK_CUTOFF 100 // if antipeaks are fitted,  sta contribution never increases above this cutoff
@@ -470,7 +470,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
      if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
      {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
-     if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
+     if (d>SMALL_QUASIELASTIC_ENERGY){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
                                   else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
      }
      else
@@ -515,12 +515,12 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
      //else
     //{ for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
     //intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
-    // if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
+    // if (d>SMALL_QUASIELASTIC_ENERGY){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
     //                              else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
      if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
      {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
-     if (d>SMALL){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
+     if (d>SMALL_QUASIELASTIC_ENERGY){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
                                   else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
      }
      else
@@ -531,7 +531,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
                  //fprintf(stdout,"Frobenius Norm(M)=sqrt(sum_i,j |Mij|^2)=%g\n",NormFro(Mijkl));
                   fprintf(stdout,"...diagonalising\n");
                     }  // diagonalizeMs to get unitary transformation matrix Us and eigenvalues gamma
-     //if(NormFro(Mijkl)>SMALL*1e-5) {myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter); } \\ diagonalisation only possible for nonzero matrices !!!
+     //if(NormFro(Mijkl)>SMALL_QUASIELASTIC_ENERGY*1e-5) {myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter); } \\ diagonalisation only possible for nonzero matrices !!!
      //             else {gamma=0;gamma(ini.nofcomponents)=Trace(Mijkl);}
       gamma=0;gamma(ini.nofcomponents)=real(Trace(Mijkl));
      if(minE<d&&d<maxE)
@@ -628,7 +628,7 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
         }
 
       fprintf(stdout,"#transition %i of ion %i of cryst. unit cell at pos  %i %i %i in mag unit cell:\n",tn,l,i,j,k);
-      if(nn[6]<SMALL){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
+      if(nn[6]<SMALL_QUASIELASTIC_ENERGY){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
       
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  tn with printout
@@ -644,10 +644,10 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
       
      // diagonalizeMs to get unitary transformation matrix Us
       myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);
-       if (fabs(gamman-gamma(ini.nofcomponents))>SMALL){fprintf(stderr,"ERROR eigenvalue of single ion matrix M inconsistent: analytic value gamma= %g numerical diagonalisation of M gives gamma= %g\n",gamman,gamma(ini.nofcomponents));
+       if (fabs(gamman-gamma(ini.nofcomponents))>SMALL_QUASIELASTIC_ENERGY){fprintf(stderr,"ERROR eigenvalue of single ion matrix M inconsistent: analytic value gamma= %g numerical diagonalisation of M gives gamma= %g\n",gamman,gamma(ini.nofcomponents));
                            exit(EXIT_FAILURE);}
 // take highest eigenvector to be the same phase as u1
-for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii,ini.nofcomponents)))>SMALL)
+for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii,ini.nofcomponents)))>SMALL_QUASIELASTIC_ENERGY)
                                                 {fprintf(stderr,"ERROR eigenvector of single ion matrix M inconsistent\n");
                                                  myPrintComplexVector(stderr,u1);u1=Uijkl.Column(ini.nofcomponents);myPrintComplexVector(stderr,u1);exit(EXIT_FAILURE);}
                                                Uijkl(ii,ini.nofcomponents)=u1(ii);}
@@ -692,25 +692,25 @@ if(ini.calculate_orbmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn
              orbmom_gamma,orbmom_gamman,orbmom_Uijkl,maxiter,nn,ini, gamma,Eorbmom);}
 //----------------------------------------------------------------------------------------------
 
-         if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL) 
+         if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL_QUASIELASTIC_ENERGY) 
                            // mind in manual the 1st dimension alpha=1 corresponds
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
-                           {if (nn[6]>SMALL)
+                           {if (nn[6]>SMALL_QUASIELASTIC_ENERGY)
 			    {md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(gamma(ini.nofcomponents));// gamma(ini.nofcomponents)=sqr(gamma^s)
                             }
-			    else if (nn[6]<-SMALL)
+			    else if (nn[6]<-SMALL_QUASIELASTIC_ENERGY)
                             {md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(gamma(ini.nofcomponents));// gamma(ini.nofcomponents)=sqr(gamma^s)
                             }
  			    else
-			    { //quasielastic line needs gamma=SMALL .... because Mijkl and therefore gamma have been set to 
-			      // wn/kT instead of wn-wn'=SMALL*wn/kT (in jjjpar.cpp -mdcalc routines)
+			    { //quasielastic line needs gamma=SMALL_QUASIELASTIC_ENERGY .... because Mijkl and therefore gamma have been set to 
+			      // wn/kT instead of wn-wn'=SMALL_QUASIELASTIC_ENERGY*wn/kT (in jjjpar.cpp -mdcalc routines)
 			      //set fix delta but keep sign
-			          if (nn[6]>0){md.delta(i,j,k)(j1)=SMALL;
-  			     md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(SMALL*gamma(ini.nofcomponents));
+			          if (nn[6]>0){md.delta(i,j,k)(j1)=SMALL_QUASIELASTIC_ENERGY;
+  			     md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(SMALL_QUASIELASTIC_ENERGY*gamma(ini.nofcomponents));
                                               }
-				  else        {md.delta(i,j,k)(j1)=-SMALL;
-                             md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(SMALL*gamma(ini.nofcomponents));
+				  else        {md.delta(i,j,k)(j1)=-SMALL_QUASIELASTIC_ENERGY;
+                             md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gamma(ini.nofcomponents));
 			                      }
 			    }
 			   }else 
@@ -1037,7 +1037,7 @@ if (do_jqfile==1){
    ComplexMatrix test(1,dimA,1,dimA);
    test=Tau.Conjugate().Transpose()*Ac*Tau;
    ComplexMatrix unit(1,dimA,1,dimA);unit=1;
-   if( NormFro(unit-test)>SMALL){
+   if( NormFro(unit-test)>SMALL_QUASIELASTIC_ENERGY){
  if(do_verbose==1){myPrintComplexMatrix(stdout,test); }
  fprintf(stderr,"Error: eigenvectors t not correctly normalised\n"); 
  fprintf(stderr,"   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); }
@@ -1079,15 +1079,15 @@ if (do_jqfile==1){
                    fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
                    if(calc_rixs){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
                                  writeheader(inputpars,foutqei);
-                                 fprintf(foutqei,"#RIXS intensity components:azimuth is defined as in Longfield et al. PRB 66 054417 (2002)\n");
-                                 fprintf(foutqei,"coordinate system u1,u2,u3: the scattering plane, defined by the\n");
-                                 fprintf(foutqei,"direction of the incident and final wave vectors k and k', contains u1 lying\n");
-                                 fprintf(foutqei,"perpendicular to Q and in the sense of k, and u3 parallel to the scattering\n");
-                                 fprintf(foutqei,"vector Q= k-k'.\n");
-                                 fprintf(foutqei,"angles for azimuth=0: alpha_i=angle(ai,u3), delta_i=angle(ai_perp,u1)\n");
-                                 fprintf(foutqei,"(where a1,a2,a3=a,b,c and ai_perp is the projection of ai onto the plane\n");
-                                 fprintf(foutqei,"perpendicular to Q. In the chosen experimental geometry\n");
-                                 fprintf(foutqei,"azimuth=0, when a1=a points to the x-ray source.\n");
+                                 fprintf(foutqei,"#RIXS intensity components:azimuth is defined as in Longfield et al. PRB 66 054417 (2002)\n"
+                                 "coordinate system u1,u2,u3: the scattering plane, defined by the\n"
+                                 "direction of the incident and final wave vectors k and k', contains u1 lying\n"
+                                 "perpendicular to Q and in the sense of k, and u3 parallel to the scattering\n"
+                                 "vector Q= k-k'.\n"
+                                 "angles for azimuth=0: alpha_i=angle(ai,u3), delta_i=angle(ai_perp,u1)\n"
+                                 "(where a1,a2,a3=a,b,c and ai_perp is the projection of ai onto the plane\n"
+                                 "perpendicular to Q. In the chosen experimental geometry\n"
+                                 "azimuth=0, when a1=a points to the x-ray source.\n");
                                  fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h   k   l Q[A^-1] energy[meV]qincr[1/A](for plots) Irix: Isigmasigma azimuthsigmasigma   Isigmapi azsigmapi   Ipisigma azpisigma   Ipipi azpipi          Irightright azrightright Irightleft azreightleft Ileftright azleftright Ileftleft azlefteft(deg)   [a.u./sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
                    fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV]\n");
                    }else{
@@ -1670,7 +1670,7 @@ for (i=1;i<=argc-1;++i){
       else {if(strcmp(argv[i],"-xa")==0) {calc_rixs=2;calc_beyond=0;} // rixs with azimuth dependence 
        else {if(strcmp(argv[i],"-x")==0) {calc_rixs=1;calc_beyond=0;}  // rixs without azimuth dep .. Irixs max only
         else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
-         else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL;maxlevels=1;}
+         else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
           else {if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
            else {if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
             else {if(strcmp(argv[i],"-a")==0) filemode="a";       

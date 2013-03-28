@@ -40,10 +40,11 @@ peaks.
 is stored in output file {\prg mcdisp.dsigma}.
 {\em Note}: option {\prg -r} will only work correctly if all the single ion modules
 which are used conform to the following convention: if $g_J\neq0$, then 
-$\hat I_1=\hat J_a,\hat I_2=\hat J_b,\hat I_3=\hat J_c$, 
-if $g_J=0$ then $\hat I_1=\hat S_a, \hat I_2=\hat L_a, \hat I_3=\hat S_b, \hat I_4=\hat L_b,
-\hat I_5=\hat S_c,\hat  I_6=\hat L_c$ (here $\hat \mbf S, \hat \mbf L,\hat \mbf J$ refer to the
-spin-, orbital- and total angular momentum, respectively).
+$\hat I_1=\hat J_x,\hat I_2=\hat J_y,\hat I_3=\hat J_z$, 
+if $g_J=0$ then $\hat I_1=\hat S_x, \hat I_2=\hat L_x, \hat I_3=\hat S_y, \hat I_4=\hat L_y,
+\hat I_5=\hat S_z,\hat  I_6=\hat L_z$ (here $\hat \mbf S, \hat \mbf L,\hat \mbf J$ refer to the
+spin-, orbital- and total angular momentum, respectively in a coordinate system where
+$y||b$,$z||(a \times b)$ and $x$ perpendicular to $y$ and $z$).
 				\item To create an output
 				of the Fourier transform ${\mathcal J}({\mbf Q})$ use option
 				{\prg -jq}. 
@@ -68,6 +69,8 @@ spin-, orbital- and total angular momentum, respectively).
                                  \item Option {\prg -pinit p} to set the minimum thermal population of a 
                                  initial state in order to be considered in the singleion ion susceptibility (not functional in
                                  all singleion ion modules).
+    \item Option {\prg -x} to calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities.
+    \item Option {\prg-xa} to calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection.
 				\end{itemize}
 \item [\prg mcdispit [options]][file.mf]]  same as {\prg mcdisp}, but no graphic window
 \end{description} 
@@ -1572,3 +1575,84 @@ Parameters in the above command  are:
 \item 30 ....Emax   [meV] maximal energy
 \item 0.2....deltaE [meV] energy step width
 \end{itemize}
+
+
+\subsection{Resonant Inelastic X-ray Scattering(RIXS)\index{RIXS}}
+
+Using the option {\prg -x} and {\prg -xa}  the RIXS cross section can be calculated
+by {\prg mcdisp}\index{mcdisp}. 
+Option {\prg -x} calculates resonant inelastic x-ray intensities 
+maximized with respect to azimuth.
+ Option {\prg-xa}  calculates resonant inelastic x-ray 
+intensities with complete azimuth dependence for each reflection.
+		
+The formalism is based on \cite[equ.8 ff]{haverkort10-167404},
+e.g. the observables $\hat \mathcal O_{\alpha}$ are the 9 components ($\alpha$
+=xx xy xz yx yy yz zx zy zz)
+of the tensor $\mbf R$, which is related to the operator
+$R_{\omega,j}^{\epsilon_i\epsilon_o}$ in \cite{haverkort10-167404} by
+
+\begin{equation}
+R_{\omega,j}^{\epsilon_i\epsilon_o}=\mbf \epsilon_o^{\star} \cdot \mbf R \cdot \mbf \epsilon_i
+\end{equation}
+
+Here the vector $\mbf \epsilon$ describes the polarisation of the incoming / outgoing
+photon beam (linear (real) or circular polarized (complex) light).
+Vector components (e.g. $\hat \mbf S$ to the xyz coordinate system, where
+$y||b$,$z||(a \times b)$ and $x$ perpendicular to $y$ and $z$.
+
+For the isotropic ion the scattering operator $R_{\omega,j}^{\epsilon_i\epsilon_o}$
+is given by
+
+\begin{eqnarray}\label{rixsop}
+R_{\omega,j}^{\epsilon_i\epsilon_o}&=&\mbf \epsilon_o^{\star} \cdot \mbf R \cdot \mbf \epsilon_i \\
+&=& \sigma^{(0)} \mbf \epsilon_i \cdot \mbf \epsilon_o^{\star} + \frac{\sigma^{(1)}}{s}
+\mbf \epsilon_o^{\star} \times \mbf \epsilon_i \hat \mbf S_j \nonumber \\
+&& \frac{\sigma^{(2)}}{s(2s-1)} \left ( 
+\mbf \epsilon_i \cdot \hat \mbf S_j \mbf \epsilon_o^{\star} \cdot \hat \mbf S_j 
++ \mbf \epsilon_o^{\star} \cdot \hat \mbf S_j \mbf \epsilon_i \cdot \hat \mbf S_j  
+- \frac{2}{3} \mbf \epsilon_i \cdot \mbf \epsilon_o^{\star} \hat \mbf S_j^2
+\right )
+\end{eqnarray}
+
+
+In order to use this expression,  the conductivities $\sigma$ have
+to be entered in the {\prg sipf} file, e.g.
+
+\begin{verbatim}
+SIGMA0r=1.32
+SIGMA1r=1.32
+SIGMA2r=1.32
+SIGMA0i=1.32
+SIGMA1i=1.32
+SIGMA2i=1.32
+\end{verbatim}
+('r' and 'i' stand for real and imaginary part, respectively).
+
+Note: in module {\prg so1ion}\index{so1ion} the scattering operator
+is given in terms of the total angular momentum $\hat \mbf J$ instead
+of $\hat \mbf S$.
+
+If a more complex tensor $\mbf R$ is required, it's components
+can be defined in the sipf file using the perlparse option.
+
+
+\subsubsection*{Scattering geometry}
+
+\begin{quote}
+\item[Coordinate system, see\cite{longfield02-054417}:] Euclidean (orthonormal) system 
+$[\mbf u_1,\mbf u_2,\mbf u_3]$. The scattering plane, defined by the
+direction of the incident and final wave vectors  
+$\mbf k$ and $\mbf k'$, contains $\mbf u_1$ lying
+perpendicular and in the sense of $\mbf k$ and $\mbf u_3$ parallel to the scattering
+vector $\mbf Q=\mbf k-\mbf k'$. 
+\item[Polarisation of the Photon beam:] $\sigma$ and $\pi$ refer to the polarisation
+of the beam parallel and perpendicular to $\mbf u2$, respectively.
+\item[Angles for azimuth $\Psi=0$:] $\alpha_i=\angle(\mbf a_i \cdot \mbf u_3)_{\Psi=0}$,
+$\delta_i=\angle(\mbf a_i^{\perp}\cdot \mbf u_1)_{\Psi=0}$,
+where $\mbf a_{1,2,3}=\mbf a,\mbf b,\mbf c$ and $\mbf a_i^{\perp}$ is the projection of
+$\mbf a_i$ onto the plane perpendicular to $\mbf Q$.
+ In the chosen experimental geometry
+azimuth $\Psi=0$, when $\mbf a_1 = \mbf a$ points to the x-ray source.
+\end{quote}
+

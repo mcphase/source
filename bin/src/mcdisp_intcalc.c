@@ -42,7 +42,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
     // Malphabeta(transition matrix elements)
 
 //      fprintf(stdout,"#transition %i of ion %i of cryst. unit cell at pos  %i %i %i in mag unit cell:\n",tn,l,i,j,k);
-//      if(nn[6]<SMALL){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
+//      if(nn[6]<SMALL_QUASIELASTIC_ENERGY){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
       
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
        
@@ -100,23 +100,23 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
                             // mind in manual the 1st dimension alpha=1 corresponds
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
-        if (nn[6]>SMALL)
+        if (nn[6]>SMALL_QUASIELASTIC_ENERGY)
 	    {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=sqrt(Gamman);
              md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=sqrt(gamma);}
-	    else if (nn[6]<-SMALL)
+	    else if (nn[6]<-SMALL_QUASIELASTIC_ENERGY)
             {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=imaginary*sqrt(Gamman);
              md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=imaginary*sqrt(gamma);}
 	    else
-	    { //quasielastic line needs gamma=SMALL .... because Mijkl and therefore gamma have been set to 
-              // wn/kT instead of wn-wn'=SMALL*wn/kT (in jjjpar.cpp -mdcalc routines)
+	    { //quasielastic line needs gamma=SMALL_QUASIELASTIC_ENERGY .... because Mijkl and therefore gamma have been set to 
+              // wn/kT instead of wn-wn'=SMALL_QUASIELASTIC_ENERGY*wn/kT (in jjjpar.cpp -mdcalc routines)
 	      //set fix delta but keep sign
 	      if (nn[6]>0){
-  			     if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=sqrt(SMALL*Gamman);
-  			     md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=sqrt(SMALL*gamma);
+  			     if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
+  			     md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
                            }
 	      else        {
-                             if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL*Gamman);
-                             md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL*gamma);
+                             if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
+                             md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
 	                     }
 	    }
 
@@ -361,17 +361,17 @@ if(calc_rixs){
 
 
    double bose;
-   if (fabs(en/KB/ini.T)>SMALL*0.1)
+   if (fabs(en/KB/ini.T)>SMALL_QUASIELASTIC_ENERGY*0.1)
    {bose=1.0/(1.0-exp(-en*(1.0/KB/ini.T)));  
    }else{//quasielastic needs special treatment
          //if(fabs(en/KB/ini.T)>1e-30){bose=ini.T*KB/en;}
          //else{bose=1e30;} .... this is no good
-         //(problem: quasielastic intensity depends on value of SMALL !!)
-	 // in principle this SMALL in denominator has to cancel with epsilon
+         //(problem: quasielastic intensity depends on value of SMALL_QUASIELASTIC_ENERGY !!)
+	 // in principle this SMALL_QUASIELASTIC_ENERGY in denominator has to cancel with epsilon
 	 // in population matrix Mijkl(i.e. gamma) ... therefore we skip it:
-	 // (for small energies delta_s the md.sqrt_gamma has been set = sqr(SMALL*gamma) and this is
+	 // (for small energies delta_s the md.sqrt_gamma has been set = sqr(SMALL_QUASIELASTIC_ENERGY*gamma) and this is
 	 // inserted into the calculation of chi above)
-//         bose=ini.T*KB/(SMALL*0.1); // changed by MR 9.3.11 because factor omegar introduced in DMD formulas
+//         bose=ini.T*KB/(SMALL_QUASIELASTIC_ENERGY*0.1); // changed by MR 9.3.11 because factor omegar introduced in DMD formulas
 //   bose=ini.T*KB;
      bose=ini.T*KB/en;  // replaced by the following line MR 9.3.11
    }
@@ -520,12 +520,12 @@ double intcalc(int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector 
       b=md.baseindex(i1,j1,k1,l1,t1);   
    for(i=1;i<=md.nofcomponents;++i)
    {
-     if (md.delta(i1,j1,k1)(b)>SMALL)
+     if (md.delta(i1,j1,k1)(b)>SMALL_QUASIELASTIC_ENERGY)
      { //normal inelastic intensity
       cc(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=1.0/(md.delta(i1,j1,k1)(b)-z);
       dd(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=0.0;
      }
-    else if (md.delta(i1,j1,k1)(b)<-SMALL)
+    else if (md.delta(i1,j1,k1)(b)<-SMALL_QUASIELASTIC_ENERGY)
      {cc(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=0.0;
       dd(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=1.0/(-md.delta(i1,j1,k1)(b)+z);
      }
@@ -745,7 +745,7 @@ u3=qijk/QQ;
 dadbdc2ijk(a,e1,abc); // transforms (100) given in terms of abc to ijk coordinate system
 xproduct(u2,qijk,a); u2=u2/Norm(u2); // warning 
                                  //!! might be zero !! then choose e.g. b to point into source drection
-if(Norm(u2)<SMALL){e1(1)=0;e1(2)=1; dadbdc2ijk(a,e1,abc);xproduct(u2,qijk,a);  }
+if(Norm(u2)<SMALL_QUASIELASTIC_ENERGY){e1(1)=0;e1(2)=1; dadbdc2ijk(a,e1,abc);xproduct(u2,qijk,a);  }
 // u1 = u2x u3
 xproduct(u1,u2,u3);
 // 2. for azimuth 0 write now down the components of vector e in ijk coordinate system

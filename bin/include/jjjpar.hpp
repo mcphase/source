@@ -298,7 +298,7 @@ public:
 private :
   //void (*rmx)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*);
   int  (*rixs)(int*,double*,double*,double*,double*,double*,double*,ComplexMatrix*,double*,ComplexVector*,double*);
-
+            //(transitionnumber,th,ph,J0,J2,J4,J6,ests,T,drixs,maxE)
 private:
 //#ifdef __linux__
 //  void *handle;

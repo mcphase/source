@@ -353,7 +353,7 @@ void xproduct(Vector & result,Vector a, Vector b)
 //  corresponding to the lower triangle) in the positions
 //  of the upper triangle of z[lo..hi,lo..hi].
 double matelr (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
-{double sumr=0,p1r,p1i,p2r,p2i;
+{double sumr=0;//,p1r,p1i,p2r,p2i;
   //xisyj,xjsyi,im(0,1);
   int dl,dh;
  if((dl=op.Rlo())!=op.Clo()||op.Rlo()!=zr.Rlo()||op.Rlo()!=zi.Rlo()||
@@ -368,14 +368,14 @@ double matelr (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
                            //complex <double> opc2(op[j][i],op[i][j]);
                                         //sum+=opc2*xjs*yi;
                           if(op[i][j]!=0){
-                             p1i=zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l];
-                             p2i=zr[j][k]*zi[i][l]- zi[j][k]*zr[i][l];
-                           sumr+=(p1i-p2i)*op[i][j];
+                             //p1i=zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l];
+                             //p2i=zr[j][k]*zi[i][l]- zi[j][k]*zr[i][l];
+                           sumr+=(zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l]-zr[j][k]*zi[i][l]+ zi[j][k]*zr[i][l])*op[i][j];
                                           }
                           if(op[j][i]!=0){
-                             p1r=zr[i][k]*zr[j][l]+ zi[i][k]*zi[j][l];// xis*yj
-                             p2r=zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l];// xjs*yi
-                           sumr+=(p1r+p2r)*op[j][i];
+                            // p1r=zr[i][k]*zr[j][l]+ zi[i][k]*zi[j][l];// xis*yj
+                            // p2r=zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l];// xjs*yi
+                           sumr+=(zr[i][k]*zr[j][l]+ zi[i][k]*zi[j][l]+zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l])*op[j][i];
                                           }
                                                          
                          }
@@ -383,7 +383,7 @@ double matelr (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
  return sumr;
 }
 double mateli (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
-{double sumi=0,p1r,p1i,p2r,p2i;
+{double sumi=0;//,p1r,p1i,p2r,p2i;
   //xisyj,xjsyi,im(0,1);
   int dl,dh;
  if((dl=op.Rlo())!=op.Clo()||op.Rlo()!=zr.Rlo()||op.Rlo()!=zi.Rlo()||
@@ -398,14 +398,14 @@ double mateli (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
                            //complex <double> opc2(op[j][i],op[i][j]);
                                         //sum+=opc2*xjs*yi;
                           if(op[i][j]!=0){
-                             p1r=zr[i][k]*zr[j][l]+ zi[i][k]*zi[j][l];// xis*yj
-                             p2r=zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l];// xjs*yi
-                           sumi+=(p2r-p1r)*op[i][j];
+                             //p1r=zr[i][k]*zr[j][l]+ zi[i][k]*zi[j][l];// xis*yj
+                             //p2r=zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l];// xjs*yi
+                           sumi+=(zr[j][k]*zr[i][l]+ zi[j][k]*zi[i][l]-zr[i][k]*zr[j][l]- zi[i][k]*zi[j][l])*op[i][j];
                                           }
                           if(op[j][i]!=0){
-                             p1i=zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l];
-                             p2i=zr[j][k]*zi[i][l]- zi[j][k]*zr[i][l];
-                           sumi+=(p1i+p2i)*op[j][i];                           
+                             //p1i=zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l];
+                             //p2i=zr[j][k]*zi[i][l]- zi[j][k]*zr[i][l];
+                           sumi+=(zr[i][k]*zi[j][l]- zi[i][k]*zr[j][l]+zr[j][k]*zi[i][l]- zi[j][k]*zr[i][l])*op[j][i];                           
                                           }
                                                          
                          }

@@ -195,7 +195,7 @@ sub so1ion()
                       next if ($line=~/By\s*=/);
                       next if ($line=~/Bz\s*=/);
                       print F $line;}
-print F sprintf(" T=%8.3f\n",$T);
+print F sprintf(" TEMP=%8.3f\n",$T);
 print F sprintf(" Bx = %8.3f\n",$Hx);
 print F sprintf(" By = %8.3f\n",$Hy);
 print F sprintf(" Bz = %8.3f\n",$Hz);
@@ -206,7 +206,6 @@ close F;
   ($Mz)=extract("mz","./results/so1ion.out");
    $M=sqrt($Mx*$Mx+$My*$My+$Mz*$Mz);
    $Mp=($Mx*$Hx+$My*$Hy+$Mz*$Hz)/$H;
-
 }
 
 # **********************************************************************************************

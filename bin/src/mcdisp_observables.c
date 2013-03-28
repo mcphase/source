@@ -41,8 +41,8 @@ void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observa
        //   {observable_coeff1=0;observable_coeff1(1)=1e-10;}
           observable_Mijkl = observable_coeff1^observable_coeff1;observable_gamman=Norm2(observable_coeff1);observable_coeff1/=sqrt(observable_gamman);
           myEigenSystemHermitean (observable_Mijkl,observable_gamma,observable_Uijkl,sort=1,maxiter);
-          if (fabs(observable_gamman-observable_gamma(ev_dim))>SMALL){fprintf(stderr,"WARNING eigenvalue of extended single ion matrix observable_Mijkl inconsistent: analytic value gamma= %g numerical diagonalisation of extM gives gamma= %g\n",observable_gamman,observable_gamma(ev_dim));}
-          for(int ii=observable_Uijkl.Rlo(); ii<=observable_Uijkl.Rhi(); ii++){if (fabs(abs(observable_coeff1(ii))-abs(observable_Uijkl(ii,ev_dim)))>SMALL)
+          if (fabs(observable_gamman-observable_gamma(ev_dim))>SMALL_QUASIELASTIC_ENERGY){fprintf(stderr,"WARNING eigenvalue of extended single ion matrix observable_Mijkl inconsistent: analytic value gamma= %g numerical diagonalisation of extM gives gamma= %g\n",observable_gamman,observable_gamma(ev_dim));}
+          for(int ii=observable_Uijkl.Rlo(); ii<=observable_Uijkl.Rhi(); ii++){if (fabs(abs(observable_coeff1(ii))-abs(observable_Uijkl(ii,ev_dim)))>SMALL_QUASIELASTIC_ENERGY)
                                                 {fprintf(stderr,"ERROR eigenvector of extended single ion matrix M inconsistent\n");
                                                  myPrintComplexVector(stderr,observable_coeff1);observable_coeff1=observable_Uijkl.Column(ev_dim);myPrintComplexVector(stderr,observable_coeff1);exit(EXIT_FAILURE);}
                                                  observable_Uijkl(ii,ev_dim)=observable_coeff1(ii);}
@@ -51,17 +51,17 @@ void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observa
 	 }
         // here we should also go for complex conjugate for the vector
          complex <double> observable_gammas;
-         if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL) 
+         if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL_QUASIELASTIC_ENERGY) 
                            // mind in manual the 1st dimension alpha=1 corresponds
 			   // to the nth dimension here, because myEigensystemHermitean
 			   // sorts the eigenvalues according to ascending order !!!
-                           {if (nn[6]>SMALL)
+                           {if (nn[6]>SMALL_QUASIELASTIC_ENERGY)
 			    {observable_gammas=sqrt(observable_gamma(ev_dim));}
-			    else if (nn[6]<-SMALL)
+			    else if (nn[6]<-SMALL_QUASIELASTIC_ENERGY)
                             {observable_gammas=imaginary*sqrt(observable_gamma(ev_dim));}
  			    else
-			    { //quasielastic line needs gamma=SMALL .... because Mijkl and therefore gamma have been set to 
-			      // wn/kT instead of wn-wn'=SMALL*wn/kT (in jjjpar.cpp -mdcalc routines)
+			    { //quasielastic line needs gamma=SMALL_QUASIELASTIC_ENERGY .... because Mijkl and therefore gamma have been set to 
+			      // wn/kT instead of wn-wn'=SMALL_QUASIELASTIC_ENERGY*wn/kT (in jjjpar.cpp -mdcalc routines)
 			      //set fix delta but keep sign
 			          if (nn[6]>0){observable_gammas=sqrt(observable_gamma(ev_dim));}
 				  else        {observable_gammas=imaginary*sqrt(observable_gamma(ev_dim));}

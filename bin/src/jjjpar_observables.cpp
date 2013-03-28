@@ -50,13 +50,12 @@ int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1
 // 1. MAGNETIC MOMENT in units  muB
 /****************************************************************************/
 /****************************************************************************/
-
 int jjjpar::mcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)
 {double lnZ,U;
  switch (module_type)
   {case 1: kramer(mom,T,gjmbHxc,Hext,lnZ,U);mom*=gJ;return true;break;
    case 2:
-   case 4: (*iops).cfieldJJ(mom,T,gjmbHxc,Hext,lnZ,U,parstorage);mom*=gJ;return true;break;
+   case 4: (*iops).Jcalc(mom,T,gjmbHxc,Hext,parstorage);mom*=gJ;return true;break;
    case 3: brillouin(mom,T,gjmbHxc,Hext,lnZ,U);mom*=gJ;return true;break;
    case 5: cluster_Icalc(mom,T,gjmbHxc,Hext,lnZ,U);mom*=gJ;return true;break; 
                                        // currently only 3 operators in cluster
@@ -79,7 +78,7 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
    case 1: nnt=kramerdm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
    case 2:
    case 4: uu1(1)=m1(1);
-           nnt=(*iops).cfielddm(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
+           nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
    case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
    case 5:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module cluster not implemented, continuing ... \n");break;
@@ -94,7 +93,7 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
  switch (module_type)
   {case 1: kramer(Lmom,T,gjmbHxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
    case 2:
-   case 4: (*iops).cfieldJJ(Lmom,T,gjmbHxc,Hext,lnZ,U,parstorage);Lmom*=(2.0-gJ);return true;break;
+   case 4: (*iops).Jcalc(Lmom,T,gjmbHxc,Hext,parstorage);Lmom*=(2.0-gJ);return true;break;
    case 3: brillouin(Lmom,T,gjmbHxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
    case 5: cluster_Icalc(Lmom,T,gjmbHxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break; 
                                        // currently only 3 operators in cluster
@@ -130,7 +129,7 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  gjmbHxc,Vector & Hext ,Co
  switch (module_type)
   {case 1: kramer(Smom,T,gjmbHxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
    case 2:
-   case 4: (*iops).cfieldJJ(Smom,T,gjmbHxc,Hext,lnZ,U,parstorage);Smom*=(gJ-1.0);return true;break;
+   case 4: (*iops).Jcalc(Smom,T,gjmbHxc,Hext,parstorage);Smom*=(gJ-1.0);return true;break;
    case 3: brillouin(Smom,T,gjmbHxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
    case 5: cluster_Icalc(Smom,T,gjmbHxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break; 
                                        // currently only 3 operators in cluster
@@ -241,13 +240,13 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
    case 0:if (ddnn!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
                           return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ,&delta);break;}
           else {return 0;}
-   case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give cfielddn polar angles with respect to xyz
-            i=(*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);
+   case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give dMQ1 polar angles with respect to xyz
+            i=(*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);
             // and we have to switch indices in matrix nat(1..3,1..3) to conform with xyz||cba changed MR 3.4.10
             dummy=dMQ(1);dMQ(1)=dMQ(2);dMQ(2)=dMQ(3);dMQ(3)=dummy; // changed MR 3.4.10
             return i;break;
-   case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give cfielddn polar angles with respect to xyz
-            return (*iops).cfielddn(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);break;
+   case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give dMQ1 polar angles with respect to xyz
+            return (*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);break;
    default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dMQcalc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",sipffilename);
                            washere=1;}
             return 0;
@@ -1354,7 +1353,7 @@ int jjjpar::drixs1calc(Vector & Qvec,double & T, ComplexVector & drixs,ComplexMa
    case 0:if (rixs!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
                           return (*rixs)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&drixs,&delta);break;}
           else {return 0;}
-   case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give cfielddn polar angles with respect to xyz
+   case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give dMQ1 polar angles with respect to xyz
             return (*iops).cfielddrixs1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,drixs);break;
    case 2:  // for cfield because of coordinate rotation (complicated because of tensor) not implemented, not necessary I believe !
    default: drixs=0;if(washere==0){fprintf(stderr,"Warning in scattering operator function drixs1calc - for ion %s \ndoing RIXS  is not implemented\n",sipffilename);
