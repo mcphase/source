@@ -640,7 +640,7 @@ void ionpars::savLlm(FILE * outfile)
  // -------------------------------------------------------------------------------------
 
 /**************************************************************************/
-void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  gjmbHxc,Vector & Hext, double & T)
+void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  Hxc,Vector & Hext, double & T)
 {   /*on input
     gJmbH	vector of effective field [meV]
       on output
@@ -651,7 +651,7 @@ void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  gjmbHxc,Vector 
    int i,j,sort=1,dj=Hcf.Rhi();
    (*eigenstates) = ComplexMatrix(0,dj,1,dj);
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
-   setup_and_solve_Hamiltonian(gjmbHxc,Hext,En,zr,zi,sort);
+   setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
    
    for(i=1;i<=dj;++i)for(j=1;j<=dj;++j)(*eigenstates)(i,j)=complex <double> (zr(i,j),zi(i,j));
  
@@ -694,10 +694,10 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
     }
 }
 /**************************************************************************/
-void ionpars::Jcalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & /*ests*/)
+void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & /*ests*/)
 {   /*on input
     T		temperature[K]
-    gJmbHxc	vector of exchange field [meV]
+    Hxc	vector of exchange field [meV]
     Hext        external magnetic field [T]
   on output    
     JJ		single ion momentum vector <J> (if T>0 thermal exp value <J>T 
@@ -706,7 +706,7 @@ void ionpars::Jcalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, Com
     */
    int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
-   setup_and_solve_Hamiltonian(gjmbHxc,Hext,En,zr,zi,sort);
+   setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
    // calculate Z and wn (occupation probability)
    Vector wn(1,dj); double Zs,lnZs;
    calculate_Z_wn(En,T,Zs,lnZs,wn);
@@ -845,7 +845,7 @@ void ionpars::MQM(ComplexMatrix & MQXM,ComplexMatrix & MQYM,ComplexMatrix & MQZM
 
 /**************************************************************************/
 // for mcdisp this routine is needed
-int ionpars::du1calc(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
+int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 {  /*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -867,7 +867,7 @@ int ionpars::du1calc(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext,Complex
   // 1. get i and j  delta=En(j)-En(i) from tn
   getijdelta_from_transitionnumber(i,j,delta,dj,tn,pr,ests);
   char optype[5];
-  for(int l=1;l<=gjmbHxc.Hi();++l){sprintf(optype,"I%i",l);
+  for(int l=1;l<=Hxc.Hi();++l){sprintf(optype,"I%i",l);
   u1(l)=observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*In[l]));}
 if(T<0)T=-T;
 // return number of all transitions     
@@ -875,7 +875,7 @@ if(T<0)T=-T;
 }
 /**************************************************************************/
 // for mcdisp this routine is needed
-int ionpars::dJ1calc(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & J1,float & delta,ComplexMatrix & ests)
+int ionpars::dJ1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & J1,float & delta,ComplexMatrix & ests)
 {  /*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -906,7 +906,7 @@ if(T<0)T=-T;
 //**********************************************************************/
 // routine to calculate the transition matrix elements of the charge density coefficients (of Zlm() R(r)^2)
 // *********************************************************************
-int ionpars::dchargedensity_coeff1calc(int & tn,double & T,Vector &  gjmbHxc,Vector & Hext, ComplexVector & cd1,float & delta,ComplexMatrix & ests)
+int ionpars::dchargedensity_coeff1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & cd1,float & delta,ComplexMatrix & ests)
 {  /*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -1073,7 +1073,7 @@ gjmbH(3)+=gJ*MU_B*Hext(3);
 
 // check dimensions of vector
 if(gjmbH.Hi()>48)
-   {fprintf(stderr,"Error loadable module cfield.so: wrong number of dimensions - check number of columns in file mcphas.j\n");
+   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > 48 - check number of columns in file mcphas.j\n",gjmbH.Hi());
     exit(EXIT_FAILURE);}
 
 //  Driver routine to compute the  eigenvalues and normalized eigenvectors 

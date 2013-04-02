@@ -74,6 +74,31 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{ ... in version 5.0 ...}
+\begin{itemize} 
+\item perl parse option added to so1ion to be able to redefine operators $\hat I_{\alpha}$
+\item resonant inelastic x-ray scattering cross section calculation possible with mcdisp option -x
+\item the many programs  for displaying movies and densities (display\_spindensity, display\_chargedensities ...) are substituted by two programs: {\prg display\_density} and {\prg display\_densities}, which have options to enable all kind of graphics-movies-calculations.
+\item mcdiff/mcdisp: new and more complete logic for taking various possible 
+       formfactors explained in manual and implemented in program mcdiff
+\item mcphas.j:  {\prg cffilename} in mcphas.j replaced by {\prg sipffilename} !!
+       removed gJ from mcphas.j input files (not read any more)
+\item change of concept: in mcphas.mf, mcdisp.mf, mcdiff.in we store/input now the exchange      
+        field and not the effective field ! Thus program singleion will be started by:
+        singleion [option] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1Hxc2 Hxc3 ...   
+         Hxcnofcomponents [meV] 
+\item   a clear and complete distinction between interaction
+         operators $\hat I_{\alpha}$ and observables $\hat \mathcal O$ is made. Therefore the
+         user programmed c-module functions had to be redefined - thus loadable modules     
+         programmed by users, which conforming to the old module function
+         names (such as dmcalc du1calc etc ...) and definitions will not work in mcphas 5.0.   
+          e. g. external module function {\prg mcalc} is replaced by {\prg Icalc} (interaction 
+        operators) and  
+        { \prg mcalc} (magnetic moment).
+\item in output of mcphas:  *.hkl files are created using mcalc function of sipf module
+        (i.e. they are based on the observable magnetic moment)
+\end{itemize}
+
 \subsection*{... in version 4.9..}
 \begin{itemize}
 \item

@@ -16,7 +16,7 @@
 // 0. phonon displacement p in A
 /****************************************************************************/
 /****************************************************************************/
-int jjjpar::pcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)
+int jjjpar::pcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
 { switch (module_type)
   {case 1: 
    case 2:
@@ -25,7 +25,7 @@ int jjjpar::pcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,Com
    case 5: fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
           return 0;break;
    default: if (p==NULL) {mom=0;return false;} 
-            else{(*p)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*p)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -50,21 +50,21 @@ int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1
 // 1. MAGNETIC MOMENT in units  muB
 /****************************************************************************/
 /****************************************************************************/
-int jjjpar::mcalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)
+int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
 {double lnZ,U;
  switch (module_type)
-  {case 1: kramer(mom,T,gjmbHxc,Hext,lnZ,U);mom*=gJ;return true;break;
+  {case 1: kramer(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break;
    case 2:
-   case 4: (*iops).Jcalc(mom,T,gjmbHxc,Hext,parstorage);mom*=gJ;return true;break;
-   case 3: brillouin(mom,T,gjmbHxc,Hext,lnZ,U);mom*=gJ;return true;break;
-   case 5: cluster_Icalc(mom,T,gjmbHxc,Hext,lnZ,U);mom*=gJ;return true;break; 
+   case 4: (*iops).Jcalc(mom,T,Hxc,Hext,parstorage);mom*=gJ;return true;break;
+   case 3: brillouin(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break;
+   case 5: cluster_Icalc(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break; 
                                        // currently only 3 operators in cluster
                                        // implemented which are Ma Mb Mc
                                        // of (coupled) kramers doublet sipfs
                                        // ... in future this has to be substituted by cluster _mcalc
                                        // and operators of magnetic moments have to be handled specially
    default: if (m==NULL) {mom=0;return false;} 
-            else{(*m)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -88,21 +88,21 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
 return 0;
 }
 
-int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)
+int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
 {double lnZ,U;
  switch (module_type)
-  {case 1: kramer(Lmom,T,gjmbHxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
+  {case 1: kramer(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
    case 2:
-   case 4: (*iops).Jcalc(Lmom,T,gjmbHxc,Hext,parstorage);Lmom*=(2.0-gJ);return true;break;
-   case 3: brillouin(Lmom,T,gjmbHxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
-   case 5: cluster_Icalc(Lmom,T,gjmbHxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break; 
+   case 4: (*iops).Jcalc(Lmom,T,Hxc,Hext,parstorage);Lmom*=(2.0-gJ);return true;break;
+   case 3: brillouin(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
+   case 5: cluster_Icalc(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break; 
                                        // currently only 3 operators in cluster
                                        // implemented which are Ma Mb Mc
                                        // of (coupled) kramers doublet sipfs
                                        // ... in future this has to be substituted by cluster _mcalc
                                        // and operators of magnetic moments have to be handled specially
    default: if (L==NULL) {Lmom=0;return false;} 
-            else{(*L)(&Lmom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*L)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -124,21 +124,21 @@ int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1
 }
 
 
-int jjjpar::Scalc (Vector &Smom, double & T, Vector &  gjmbHxc,Vector & Hext ,ComplexMatrix & parstorage)
+int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
 {double lnZ,U;
  switch (module_type)
-  {case 1: kramer(Smom,T,gjmbHxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
+  {case 1: kramer(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
    case 2:
-   case 4: (*iops).Jcalc(Smom,T,gjmbHxc,Hext,parstorage);Smom*=(gJ-1.0);return true;break;
-   case 3: brillouin(Smom,T,gjmbHxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
-   case 5: cluster_Icalc(Smom,T,gjmbHxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break; 
+   case 4: (*iops).Jcalc(Smom,T,Hxc,Hext,parstorage);Smom*=(gJ-1.0);return true;break;
+   case 3: brillouin(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
+   case 5: cluster_Icalc(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break; 
                                        // currently only 3 operators in cluster
                                        // implemented which are Ma Mb Mc
                                        // of (coupled) kramers doublet sipfs
                                        // ... in future this has to be substituted by cluster _mcalc
                                        // and operators of magnetic moments have to be handled specially
    default: if (S==NULL) {Smom=0;return false;} 
-            else{(*S)(&Smom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*S)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -793,7 +793,7 @@ return ro;
 // function to calculate coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
 /****************************************************************************/
-int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage)
+int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
 {mom=0;
  switch (module_type)
   {case 1: fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
@@ -816,7 +816,7 @@ int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHx
    case 3: fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
            return false;break;
    case 0: if(sd_m==NULL){fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return false;} else {(*sd_m)(&mom,&xyz,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           return false;} else {(*sd_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
            break;
    case 5:fprintf(stderr,"Problem: spindensity is not possible in module cluster, continuing ... \n");
            return false;break;
@@ -954,7 +954,7 @@ return mm;
 // function to calculate coefficients of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
 /****************************************************************************/
-int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & parstorage)
+int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
 {mom=0;
  switch (module_type)
   {case 1: fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
@@ -977,7 +977,7 @@ int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  gjmb
    case 3: fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
            return false;break;
    case 0: if(od_m==NULL){fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return false;} else {(*od_m)(&mom,&xyz,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           return false;} else {(*od_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
            break;
    case 5:fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
            return false;break;

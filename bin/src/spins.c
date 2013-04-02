@@ -207,7 +207,6 @@ gp.read();
 
   int ii,nt,k,j;
   par inputpars("./mcphas.j");
-
   Vector hh(1,savmf.nofcomponents*savmf.nofatoms);
   spincf densitycf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,dim);
   spincf spinconf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,3);
@@ -225,16 +224,16 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
 // 1.b: Icalc has to be used to calculate all the <Olm>.
-hh=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
-{(*inputpars.jjj[ii]).Icalc_parameter_storage_init(hh,Hext,T);} // initialize Icalc module parameter storage
+Vector h(1,inputpars.nofcomponents);
+h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
+{(*inputpars.jjj[ii]).Icalc_parameter_storage_init(h,Hext,T);} // initialize Icalc module parameter storage
 
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
     hh=savmf.m(i,j,k);
   densitycf.m(i,j,k)=0;
   for(ii=1;ii<=inputpars.nofatoms;++ii)
- {  Vector h(1,savmf.nofcomponents);
-    Vector moms(1,savmf.nofcomponents);
+ {  
     Vector magmom(1,3),mom(1,3);
     Vector Lmom(1,3);
     Vector Smom(1,3);
@@ -248,7 +247,7 @@ hh=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
   Vector momently(1,ORBMOMDENS_EV_DIM);
   Vector momentlz(1,ORBMOMDENS_EV_DIM);
     h=0;
-   for(nt=1;nt<=savmf.nofcomponents;++nt){h(nt)=hh(nt+savmf.nofcomponents*(ii-1));}
+   for(nt=1;nt<=inputpars.nofcomponents;++nt){h(nt)=hh(nt+inputpars.nofcomponents*(ii-1));}
 
            // output atoms and moments in primitive unit cell to fout
               Vector dd3(1,3);

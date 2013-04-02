@@ -459,18 +459,18 @@ int jjjpar::get_exchange_indices(char *instr, Matrix *exchangeindices)
 
 /****************************************************************************/
 // function to calculate calculate expectation values <Ialpha> alpha=1...nofcomponents
-// from exchange field gjmbHxc [meV] and external field Hext
+// from exchange field Hxc [meV] and external field Hext
 // this is the heart of the meanfield algorithm an it is necessary to
 // keep this routine as efficient as possible
 /****************************************************************************/
-void jjjpar::Icalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,double & lnZ,double & U,ComplexMatrix & parstorage)
+void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double & lnZ,double & U,ComplexMatrix & parstorage)
 {switch (module_type)
-  {case 1: kramer(mom,T,gjmbHxc,Hext,lnZ,U);break;
+  {case 1: kramer(mom,T,Hxc,Hext,lnZ,U);break;
    case 2:
-   case 4: (*iops).Icalc(mom,T,gjmbHxc,Hext,lnZ,U,parstorage);break;
-   case 3: brillouin(mom,T,gjmbHxc,Hext,lnZ,U);break;
-   case 5: cluster_Icalc(mom,T,gjmbHxc,Hext,lnZ,U);break;
-   default: (*I)(&mom,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
+   case 4: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
+   case 3: brillouin(mom,T,Hxc,Hext,lnZ,U);break;
+   case 5: cluster_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
+   default: (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
   }
 }
 
@@ -479,17 +479,17 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  gjmbHxc,Vector & Hext ,do
 // the transition matrix mat first eigenvector u1 corresponding to jjjpar.transitionnumber and delta
 // for effective field heff and temperature given on input
 /****************************************************************************/
-int jjjpar::du1calc(double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
+int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 {delta=maxE;u1(1)=complex <double> (ninit,pinit);
   switch (module_type)
-  {case 0: if (du!=NULL){return (*du)(&transitionnumber,&T,&gjmbHxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&ests);}
+  {case 0: if (du!=NULL){return (*du)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&ests);}
            else return 0;
            break;
-   case 1: return kramerdm(transitionnumber,T,gjmbHxc,Hext,u1,delta);break;
+   case 1: return kramerdm(transitionnumber,T,Hxc,Hext,u1,delta);break;
    case 2:
-   case 4: return (*iops).du1calc(transitionnumber,T,gjmbHxc,Hext,u1,delta,ests);break;
-   case 3: return brillouindm(transitionnumber,T,gjmbHxc,Hext,u1,delta);break;
-   case 5: return cluster_dm(transitionnumber,T,gjmbHxc,Hext,u1,delta);break;
+   case 4: return (*iops).du1calc(transitionnumber,T,Hxc,Hext,u1,delta,ests);break;
+   case 3: return brillouindm(transitionnumber,T,Hxc,Hext,u1,delta);break;
+   case 5: return cluster_dm(transitionnumber,T,Hxc,Hext,u1,delta);break;
    default: return 0;
   }
 }
@@ -498,12 +498,12 @@ int jjjpar::du1calc(double & T,Vector &  gjmbHxc,Vector & Hext,ComplexVector & u
 /****************************************************************************/
 // returns eigenvalues, boltzmann population and eigenstates matrix parameters of ion
 /****************************************************************************/
-ComplexMatrix & jjjpar::eigenstates (Vector &  gjmbHxc,Vector & Hext,double & T)
+ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case 0:  if(estates!=NULL){(*estates)(&est,&gjmbHxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
+  {case 0:  if(estates!=NULL){(*estates)(&est,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
             return est;break;
    case 2:
-   case 4: (*iops).cfeigenstates(&est,gjmbHxc,Hext,T);return est;break;
+   case 4: (*iops).cfeigenstates(&est,Hxc,Hext,T);return est;break;
    default: est=0;return est;
   }
 }
@@ -511,21 +511,21 @@ ComplexMatrix & jjjpar::eigenstates (Vector &  gjmbHxc,Vector & Hext,double & T)
 /****************************************************************************/
 // returns eigenvalues, boltzmann population and eigenstates matrix parameters of ion
 /****************************************************************************/
-ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  gjmbHxc,Vector & Hext,double & T)
+ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case 0:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&gjmbHxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
+  {case 0:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
             return Icalc_parstorage;break;
    case 2:
-   case 4: (*iops).cfeigenstates(&Icalc_parstorage,gjmbHxc,Hext,T);return Icalc_parstorage;break;
+   case 4: (*iops).cfeigenstates(&Icalc_parstorage,Hxc,Hext,T);return Icalc_parstorage;break;
    default: Icalc_parstorage=0;return Icalc_parstorage;
   }
 }
 /****************************************************************************/
 // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
 /****************************************************************************/
-Matrix jjjpar::opmat(int n,Vector &  gjmbHxc,Vector & Hext)
+Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
 {switch (module_type)
-  {case 1:  return krameropmat(n,gjmbHxc,Hext);break;
+  {case 1:  return krameropmat(n,Hxc,Hext);break;
    default: fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %i\n",module_type);exit(EXIT_FAILURE);
   }
 }
