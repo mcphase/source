@@ -16,12 +16,14 @@
 class inimcdis
 { private:
   char * savfilename;
-    
+  Vector qmin,qmax,deltaq;
+  void read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector & abc);   
   public:
   int * hklfile_start_index;
   char * info;
+  char * prefix;
   double ** hkls;
-  int hkllist; 
+  int nofhkls; 
   int nofatoms; //nofatoms in primitive cryst unit cell
   int nofcomponents; //number of components of mean field (including magnetic, quadrupolar fields ...
   int calculate_magmoment_oscillation; //  creates mcdisp.qem
@@ -37,12 +39,10 @@ class inimcdis
   double emin; // energy boundary for dispersion (used for calc. of sta - see manual)
   double ki;
   double kf; // constant ki/kf
-  // qvectors to be considered
-  Vector qmin,qmax,deltaq;
   mfcf mf;
    void save(); // save parameters to results/_mcdisp.ini results/_mcdisp.mf
    void errexit();
-  inimcdis (const char * file,const char * spinfile); //constructor
+  inimcdis (const char * file,const char * spinfile, char * prefix,Vector & abc); //constructor
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor
 };

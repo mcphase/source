@@ -9,10 +9,12 @@
 #include<cfloat>
 #endif
 
+
+// ********************************************************************************************************
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -
 // output: var ... value of parameter
 // returns 1 on error and 0 if successful
-  int extract(char * instr,const char * parameter,double & var)
+int extract(char * instr,const char * parameter,double & var)
 { //const char delimiters[] = " =:\n";
   char *token,*td,*te;
   
@@ -39,15 +41,16 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   return 0;
 }
 
-// same for in and double 
+// same for int and double 
 // extract a variable named [parmeter] into var out of a string [instr]
   int extract(char * instr,const char * parameter,int & var)
       {double dd;if(0==extract(instr,parameter,dd)){var=(int)dd;return 0;}else{return 1;}}
   int extract(char * instr,const char * parameter,float & var)
       {double dd;if(0==extract(instr,parameter,dd)){var=(float)dd;return 0;}else{return 1;}}
 
+
 //the same for a string ... maximal n characters are copied
-  int extract(char * instr,const char * parameter,char * var,size_t n)
+int extract(char * instr,const char * parameter,char * var,size_t n)
 { const char delimiters[] = " \n";
   char *token,*td,*te;
   
@@ -60,7 +63,7 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
 
   if ((token = strstr (instr, parameter))==NULL) return 1; // check if parameter is found - if not return 1
-
+  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"£€/><;@:=+-~|")){return 1;} // no space etc before parameter
  td=instr;while ((te=strstr(td,"#!"))!=NULL){td=te+1;} // skip all "#!" signs and
  if ((td=strchr(td,'#'))!=NULL){if(td<token) return 1;} // check if comment sign "#" appears before parameter - if yes return 1
 
@@ -74,7 +77,26 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   return 0;
 }
 
+// same for variable with prefix
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var)
+{if(0==extract(instr,parameter,var)){return 0;}
+ else{char par[MAXNOFCHARINLINE];sprintf(par,"%s%s",prefix,parameter);  if(0==extract(instr,par,var)){return 0;}}
+ return 1;
+}
+// same for int variable with prefix
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var)
+{if(0==extract(instr,parameter,var)){return 0;}
+ else{char par[MAXNOFCHARINLINE];sprintf(par,"%s%s",prefix,parameter);  if(0==extract(instr,par,var)){return 0;}}
+ return 1;
+}
+// same for char variable with prefix
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var,size_t n)
+{if(0==extract(instr,parameter,var,n)){return 0;}
+ else{char par[MAXNOFCHARINLINE];sprintf(par,"%s%s",prefix,parameter);  if(0==extract(instr,par,var,n)){return 0;}}
+ return 1;
+}
 
+//****************************************************************************************************************
 //open a file: similar fopen but with error check 
 FILE * fopen_errchk (const char * filename,const char * mode)
 { FILE *file;
@@ -502,6 +524,17 @@ get_abc_in_ijk(rtoijk,abc);
 qijk=rtoijk.Inverse().Transpose()*hkl;
 qijk*=2*PI;
 }
+
+void ijk2hkl(Vector & hkl, Vector & qijk,Vector & abc)
+{// transforms Q vector in ijk coordinate system to Miller indices (in terms of reciprocal lattice abc*)
+Matrix rtoijk(1,3,1,3); // define transformation matrix to calculate components of
+                           // r1 r2 and r3 with respect to the ijk coordinate system
+                           //defined by  j||b, k||(a x b) and i normal to k and j
+get_abc_in_ijk(rtoijk,abc);
+hkl=rtoijk.Transpose()*qijk;
+hkl/=2*PI;
+}
+
 
 void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a)
 {// problem: we want to find all lattice vectors Rn=ni*ai which are within a

@@ -33,6 +33,10 @@ extern   int extract(char * instr,const char * parameter,int & var);
 extern   int extract(char * instr,const char * parameter,float & var);
 extern   int extract(char * instr,const char * parameter,char * var, size_t n);
 
+// extract a variable which is there also if it is preceded by a prefix
+extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var);
+extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var);
+extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var, size_t n);
 
 // open file: like fopen but with error check 
 extern  FILE * fopen_errchk (const char * filename, const char * mode);
@@ -142,6 +146,10 @@ void ijk2dadbdc(Vector & dadbdc,Vector & rijk, Vector & abc);
 void hkl2ijk(Vector & qijk,Vector & hkl, Vector & abc);
 // transforms Miller indices (in terms of reciprocal lattice abc*)
 // to Q vector in ijk coordinate system
+
+void ijk2hkl(Vector & hkl, Vector & qijk,Vector & abc);
+// transforms Q vector in ijk coordinate system to Miller indices (in terms of reciprocal lattice abc*)
+
 
 void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
 // problem: we want to find all lattice vectors Rn=ni*ai which are within a

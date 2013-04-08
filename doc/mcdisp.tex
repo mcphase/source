@@ -66,9 +66,18 @@ $y||b$,$z||(a \times b)$ and $x$ perpendicular to $y$ and $z$).
 				\item Option {\prg -ninit n} to set the maximum number of low lying
                                  initial states, which will be considered in calculating a single ion susceptibility (not functional
                                  in all single ion modules).
-                                 \item Option {\prg -pinit p} to set the minimum thermal population of a 
+ \item Option {\prg -pinit p} to set the minimum thermal population of a 
                                  initial state in order to be considered in the singleion ion susceptibility (not functional in
                                  all singleion ion modules).
+ \item Option {\prg -prefix 001} to allow for easy parallel processing: all output files {\prg results/mcdisp.*}
+                  will then be created with prefix {\prg 001}, i.e. {\prg results/001mcdisp.*}.
+                  Moreover,  in {\prg mcdisp.par} it is then possible to enter
+                  variables like {\prg hklline=}  with prefix, in our case {\prg 001}, i.e. {\prg 001hklline}: this will trigger
+                  the program to read these variables only if started with the option {\prg -prefix 001}. Another process
+                  maybe started with {\prg -prefix 002} and will read variables such as {\prg 002hklline} and ignore {\prg 001hklline}.
+                  Variables without prefixes will always be read and used.
+                  After finishing the different processes, the results of the calculations stored e.g. in {\prg 001mcdisp.qei} and
+                  {\prg 002mcdisp.qei} may be merged by commands like {\prg appendfile mcdisp.qei 001mcdisp.qei 002mcdisp.qei}.
     \item Option {\prg -x} to calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities.
     \item Option {\prg-xa} to calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection.
 				\end{itemize}

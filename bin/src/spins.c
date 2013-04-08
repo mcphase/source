@@ -402,7 +402,7 @@ if (argc-os>=6){
               numbers[0]=13;
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
 //----------------------------------------------------------------------------------------------------------
-            if(arrow>0){
+            if(arrow>0){double checkdd=1e7;
              switch(arrow)
              {case 1:  fin = fopen_errchk ("./results/mcdisp.qes", "rb");
               case 2:  fin = fopen_errchk ("./results/mcdisp.qeo", "rb");
@@ -435,10 +435,10 @@ if (argc-os>=6){
                  spincf ev_real(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
                  spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
                  ev_real.load(fin);ev_imag.load(fin);
-                 ddT=strtod(argv[1+os],NULL)-numbers[4];ddT*=ddT;
-                 ddHa=strtod(argv[2+os],NULL)-numbers[1];ddHa*=ddHa;
-                 ddHb=strtod(argv[3+os],NULL)-numbers[2];ddHb*=ddHb;
-                 ddHc=strtod(argv[4+os],NULL)-numbers[3];ddHc*=ddHc;
+                 ddT=T-numbers[4];ddT*=ddT;
+                 ddHa=Hext(1)-numbers[1];ddHa*=ddHa;
+                 ddHb=Hext(2)-numbers[2];ddHb*=ddHb;
+                 ddHc=Hext(3)-numbers[3];ddHc*=ddHc;
                  ddh=strtod(argv[5+os],NULL)-numbers[5];ddh*=ddh;
                  ddk=strtod(argv[6+os],NULL)-numbers[6];ddk*=ddk;
                  ddl=strtod(argv[7+os],NULL)-numbers[7];ddl*=ddl;
@@ -446,7 +446,7 @@ if (argc-os>=6){
                  
                  dd=sqrt(ddT+ddHa+ddHb+ddHc+ddh+ddk+ddl+ddE+0.000001);
                  if (dd<delta)
-                 {delta=dd;
+                 {delta=dd;checkdd=fabs(T-numbers[4])+fabs(Hext(1)-numbers[1])+fabs(Hext(2)-numbers[2])+fabs(Hext(3)-numbers[3]);
                   sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
                   hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9]; 
                   spinconfev_real=ev_real;
@@ -454,9 +454,19 @@ if (argc-os>=6){
                  }
                }
               fclose (fin);
-              }//arrow
+             if(checkdd>1e-7)
+               {fprintf(stderr,"Error program spins - inconsistent output files mcphas.mf and mcdisp.*:  temperature/magnetic field in static configuration\n" 
+                               "(from results/mcphas.mf) is different from mcdisp output files results/mcdisp.qes,qem,qeo:\n %s\n"
+                               "... probably you need to rerun setup_mcdisp_mf and mcdisp with T=%g Ha=%g Hb=%g Hc=%g",outstr,T,Hext(1),Hext(2),Hext(3));exit(EXIT_FAILURE);}
+               fprintf(stdout,"#%s - moment oscillation - eigenvector\n",outstr);
+              fprintf(stdout,"#real\n");
+              spinconfev_real.print(stdout);
+              fprintf(stdout,"#imag\n");
+              spinconfev_imag.print(stdout);
+             }//arrow
+     
 //----------------------------------------------------------------------------------------------------------
-            if(density){
+            if(density){double checkdd=1e7;
              switch(argv[1][1]) // dimension definition from jjjpar.hpp
                 {case 'c':fin = fopen_errchk ("./results/mcdisp.qee", "rb");break;
                  case 's':fin = fopen_errchk ("./results/mcdisp.qsd", "rb");break;
@@ -493,10 +503,10 @@ if (argc-os>=6){
                  spincf ev_real(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
                  spincf ev_imag(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
                  ev_real.load(fin);ev_imag.load(fin);
-                 ddT=strtod(argv[1+os],NULL)-numbers[4];ddT*=ddT;
-                 ddHa=strtod(argv[2+os],NULL)-numbers[1];ddHa*=ddHa;
-                 ddHb=strtod(argv[3+os],NULL)-numbers[2];ddHb*=ddHb;
-                 ddHc=strtod(argv[4+os],NULL)-numbers[3];ddHc*=ddHc;
+                 ddT=T-numbers[4];ddT*=ddT;
+                 ddHa=Hext(1)-numbers[1];ddHa*=ddHa;
+                 ddHb=Hext(2)-numbers[2];ddHb*=ddHb;
+                 ddHc=Hext(3)-numbers[3];ddHc*=ddHc;
                  ddh=strtod(argv[5+os],NULL)-numbers[5];ddh*=ddh;
                  ddk=strtod(argv[6+os],NULL)-numbers[6];ddk*=ddk;
                  ddl=strtod(argv[7+os],NULL)-numbers[7];ddl*=ddl;
@@ -504,7 +514,7 @@ if (argc-os>=6){
                  
                  dd=sqrt(ddT+ddHa+ddHb+ddHc+ddh+ddk+ddl+ddE+0.000001);
                  if (dd<delta)
-                 {delta=dd;
+                 {delta=dd;checkdd=fabs(T-numbers[4])+fabs(Hext(1)-numbers[1])+fabs(Hext(2)-numbers[2])+fabs(Hext(3)-numbers[3]);
                   sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
                   hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9]; 
                   densityev_real=ev_real;
@@ -512,6 +522,10 @@ if (argc-os>=6){
                  }
                }
               fclose (fin);
+             if(checkdd>1e-7)
+               {fprintf(stderr,"Error program spins - inconsistent output files mcphas.mf and mcdisp.*:  temperature/magnetic field in static configuration\n" 
+                               "(from results/mcphas.mf) is different from mcdisp output files results/mcdisp.qee,qsd,qod:\n %s\n"
+                               "... probably you need to rerun setup_mcdisp_mf and mcdisp with T=%g Ha=%g Hb=%g Hc=%g",outstr,T,Hext(1),Hext(2),Hext(3));exit(EXIT_FAILURE);}
               fprintf(stdout,"#%s - density oscillation - eigenvector\n",outstr);
               fprintf(stdout,"#real\n");
               densityev_real.print(stdout);

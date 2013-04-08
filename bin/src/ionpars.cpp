@@ -410,8 +410,8 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
     operatornames[0]=opnam;
     for (i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i){operatornames[i]=new char[4];sprintf(operatornames[i],"I%i",i);
                                              }
-    for (i=1;i<=NOF_OLM_MATRICES;++i){operatornames[IONPARS_MAXNOFCOMPONENTS+i]=new char[4];
-                                      operatornames[IONPARS_MAXNOFCOMPONENTS+i][0]='O';
+    for (i=1;i<=NOF_OLM_MATRICES;++i){operatornames[IONPARS_MAXNOFCOMPONENTS+i]=new char[5];
+                                      operatornames[IONPARS_MAXNOFCOMPONENTS+i][0]='O';operatornames[IONPARS_MAXNOFCOMPONENTS+i][4]='\0';
                                       if(i>45)operatornames[IONPARS_MAXNOFCOMPONENTS+i][0]='J'; // Jx2 Jy2 Jz2
                               strncpy(operatornames[IONPARS_MAXNOFCOMPONENTS+i]+1,kq+i*3,3);
                                    if(operatornames[IONPARS_MAXNOFCOMPONENTS+i][3]==' ')
@@ -435,14 +435,14 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
                                  ;
                  char * numbernames[110];
                  for (i=0;i<16;++i)numbernames[i]=numnam+8*i;
-                 for (i=0;i<=45;++i){ numbernames[16+i]=new char[4];
-                                      numbernames[16+i][0]='B';
+                 for (i=0;i<=45;++i){ numbernames[16+i]=new char[5];
+                                      numbernames[16+i][0]='B';numbernames[16+i][4]='\0';
                               strncpy(numbernames[16+i]+1,kq+i*3,3);
                                    if(numbernames[16+i][3]==' ')
                                       numbernames[16+i][3]='\0';
                                         }
-                 for (i=0;i<=45;++i){ numbernames[62+i]=new char[4];
-                                      numbernames[62+i][0]='L';
+                 for (i=0;i<=45;++i){ numbernames[62+i]=new char[5];
+                                      numbernames[62+i][0]='L';numbernames[62+i][4]='\0';
                               strncpy(numbernames[62+i]+1,kq+i*3,3);
                                    if(numbernames[62+i][3]==' ')
                                       numbernames[62+i][3]='\0';
