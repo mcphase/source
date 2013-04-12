@@ -48,7 +48,8 @@ time_t curtime;
  fclose(fout);
 }
 
-void print_mf(const char * filename,mfcf & mfields,int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H)
+void print_mf(const char * filename,mfcf & mfields,int natmagnetic,float a,float b,float c,float alpha,float beta,
+float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H)
 {
 FILE * fout;int i;
 time_t curtime;
@@ -97,7 +98,7 @@ time_t curtime;
 //*******************************************************************************************************
 void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
               Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int m,
-              float a,float b,float c,int * colcode,Vector & P, Vector & Pxyz)
+              float a,float b,float c,Vector & P, Vector & Pxyz)
 {// output of the header to filename
  FILE * fout;char l[MAXNOFCHARINLINE];
  int i,ortho=1;
@@ -165,10 +166,10 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
 
 void printreflist(jjjpar ** jjjpars,int code,const char * filename,const char* infile,char * unitcell,double T,
               Vector & H,float lambda,float ovalltemp,int lorenz,Vector r1,Vector r2,Vector r3,int n,int m,
-              Vector * hkl,float * ikern,float * intmag,float * intmagdip,float * D,float * theta,float * out10,
-              float * out11,complex <double>*mx,complex <double>*my,complex <double>*mz,complex <double>*mxmy,
+              Vector * hkl,float * ikern,float * intmag,float * intmagdip,float * D,float ** out,
+              complex <double>*mx,complex <double>*my,complex <double>*mz,complex <double>*mxmy,
               complex <double>*mxmz,complex <double>*mymz,complex <double>*mx2,complex <double>*my2,complex <double>*mz2,
-              float a,float b,float c,int * colcode,Vector & P, Vector & Pxyz)
+              float a,float b,float c,Vector & P, Vector & Pxyz)
 {FILE * fout;
  int i,chinr=0,ortho=1;
  double isave[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -178,8 +179,9 @@ void printreflist(jjjpar ** jjjpars,int code,const char * filename,const char* i
   fout = fopen_errchk (filename, "a");
 
 fprintf(fout, "#    REFLECTION LIST\n");
- if(colcode[10]>4||colcode[11]>4){fprintf(fout, "#    Polarization Vector P= %g a + %g b + %g c (|P|=%g)\n",P(1),P(2),P(3),Norm(Pxyz));}
- hkl[0] = 0; D[0] = 100; theta[0] = 0; ikern[0] = 0; intmag[0] = 0;intmagdip[0] = 0; out10[0] = 0; out11[0] = 0;mx[0]=0;my[0]=0;mz[0]=0;mx2[0]=0;my2[0]=0;mz2[0]=0;mxmy[0]=0;mxmz[0]=0;mymz[0]=0;
+ fprintf(fout, "#    Polarization Vector P= %g a + %g b + %g c (|P|=%g)\n",P(1),P(2),P(3),Norm(Pxyz));
+ hkl[0] = 0; D[0] = 10000;  ikern[0] = 0; intmag[0] = 0;intmagdip[0] = 0;
+ mx[0]=0;my[0]=0;mz[0]=0;mx2[0]=0;my2[0]=0;mz2[0]=0;mxmy[0]=0;mxmz[0]=0;mymz[0]=0;
  double rpvalue[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
  double chisquared[]={0,0,0,0,0,0,0,0,0,0,0,0,0};
  double total=0;
@@ -190,9 +192,13 @@ fprintf(fout, "#    REFLECTION LIST\n");
    {
     if((double)(i-imin)/50==(double)((i-imin)/50))
     {if (ortho==1)
-     {fprintf(fout, "#{h     k      l     d[A]    |Q|[1/A] 2theta Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) F1:max-Isigpi azim Ipisig azim Ipipig azim F2:max-Isigpi azim Ipisig azim Ipipig azim  |^ma_q| |^mb_q| |^mc_q| |^ma^2_q||^mb^2_q||^mc^2_q||(^ma*^mb)_q||(^ma*^mc)_q||(^mb*^mc)_q|}\n",colheader[colcode[10]],colheader[colcode[11]]);}
+     {fprintf(fout, "#{h     k      l  %s %s %s Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) " 
+                    "F1:max-Isigpi azim Ipisig azim Ipipig azim F2:max-Isigpi azim Ipisig azim Ipipig azim " 
+                    " |^ma_q| |^mb_q| |^mc_q| |^ma^2_q||^mb^2_q||^mc^2_q||(^ma*^mb)_q||(^ma*^mc)_q||(^mb*^mc)_q|}\n",
+                    colheader[colcode[4]],colheader[colcode[5]],colheader[colcode[6]],colheader[colcode[10]],colheader[colcode[11]]);}
      else   // magnetic xrayscattering for nonortholattices currently not implemented
-     {fprintf(fout, "#{h     k      l     d[A]    |Q|[1/A] 2theta Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) \n",colheader[colcode[10]],colheader[colcode[11]]);}
+     {fprintf(fout, "#{h     k      l  %s %s %s Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) \n",
+              colheader[colcode[4]],colheader[colcode[5]],colheader[colcode[6]],colheader[colcode[10]],colheader[colcode[11]]);}
     }
     // calculate alpha_i delta_i for reflection hkl[i](1..3)  [currently ok only for ortholattices !!!]
     double alpha1,alpha2,alpha3,delta1,delta2,delta3,sqr1,sqr2;
@@ -265,9 +271,9 @@ fprintf(fout, "#    REFLECTION LIST\n");
       z32+=mxmy[i]*(ang(3,1)*ang(3,2)+ang(3,2)*ang(3,1));
       z32+=mxmz[i]*(ang(3,1)*ang(3,3)+ang(3,3)*ang(3,1));
       z32+=mymz[i]*(ang(3,2)*ang(3,3)+ang(3,3)*ang(3,2));
-      st=sin(theta[i]*PI/180);
-      ct=cos(theta[i]*PI/180);
-      s2t=sin(2.0*theta[i]*PI/180);
+      st=lambda*0.5/D[i];
+      ct=sqrt(1-st*st);
+      s2t=2*st*ct;
 
       f1ps=abs(z1*ct+z3*st); if(f1ps*f1ps>IpsF1){IpsF1=f1ps*f1ps;IpsF1a=azimuth*180/PI;}
       f1sp=abs(z3*st-z1*ct); if(f1sp*f1sp>IspF1){IspF1=f1sp*f1sp;IspF1a=azimuth*180/PI;}
@@ -277,9 +283,9 @@ fprintf(fout, "#    REFLECTION LIST\n");
       f2sp=abs(z1z2*st+z2z3*ct); if(f2sp*f2sp>IspF2){IspF2=f2sp*f2sp;IspF2a=azimuth*180/PI;}
       f2pp=abs(-ct*ct*(z12*st*st/ct/ct+z32)); if(f2pp*f2pp>IppF2){IppF2=f2pp*f2pp;IppF2a=azimuth*180/PI;}
       if(code==1&&ortho==1)
-       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
-       hkl[i](1), hkl[i](2), hkl[i](3),D[i],2 * PI / D[i],2 * theta[i],ikern[i], intmag[i],(ikern[i]+intmag[i]),out10[i],
-       out11[i],intmagdip[i],
+       {fprintf(fout, "%6.3f %6.3f %6.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
+       hkl[i](1), hkl[i](2), hkl[i](3),out[4][i],out[5][i],out[6][i],ikern[i], intmag[i],(ikern[i]+intmag[i]),out[10][i],
+       out[11][i],intmagdip[i],
        f1ps*f1ps,azimuth*180/PI,
        f1sp*f1sp,azimuth*180/PI,
        f1pp*f1pp,azimuth*180/PI,
@@ -291,70 +297,81 @@ fprintf(fout, "#    REFLECTION LIST\n");
 
     if(IspF1+IpsF1+IppF1+IspF2+IpsF2+IppF2+ikern[i]+intmag[i]>0.0001)
       {if(ortho==1)
-       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
-        myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
-        ikern[i], intmag[i], (ikern[i]+intmag[i]),out10[i],out11[i],
+       {fprintf(fout, "%6.3f %6.3f %6.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E        %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f   %8.6f %3.0f %8.6f %3.0f %8.6f %3.0f  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f\n",
+        myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),out[4][i],out[5][i],out[6][i],
+        ikern[i], intmag[i], (ikern[i]+intmag[i]),out[10][i],out[11][i],
         intmagdip[i],
         myround(SMALLINT,IspF1),myround(SMALLINT,IspF1a),myround(SMALLINT,IpsF1),myround(SMALLINT,IpsF1a),myround(SMALLINT,IppF1),myround(SMALLINT,IppF1a),
         myround(SMALLINT,IspF2),myround(SMALLINT,IspF2a),myround(SMALLINT,IpsF2),myround(SMALLINT,IpsF2a),myround(SMALLINT,IppF2),myround(SMALLINT,IppF2a),
         myround(SMALLINT,abs(mx[i])),myround(SMALLINT,abs(my[i])),myround(SMALLINT,abs(mz[i])),myround(SMALLINT,abs(mx2[i])),myround(SMALLINT,abs(my2[i])),myround(SMALLINT,abs(mz2[i])),myround(SMALLINT,abs(mxmy[i])),
         myround(SMALLINT,abs(mxmz[i])),myround(SMALLINT,abs(mymz[i])));}
        else
-       {fprintf(fout, "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
-        myround(hkl[i](1)),myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
+       {fprintf(fout, "%6.3f %6.3f %6.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
+        myround(hkl[i](1)),myround(hkl[i](2)), myround(hkl[i](3)),out[4][i],out[5][i],out[6][i],
         ikern[i], intmag[i], (ikern[i]+intmag[i]),
-        out10[i],out11[i],intmagdip[i]);}
+        out[10][i],out[11][i],intmagdip[i]);}
       }
     if(code==1&&ortho==1){fprintf(fout,"#\n");}
    }
    if(code==2)//calculate rpvalue and output neutrons only
    {if((double)(i-imin)/50==(double)((i-imin)/50))
-    {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs\n",colheader[colcode[10]],colheader[colcode[11]]);}
-      fprintf(fout,   "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %8.4f\n",
-      myround(hkl[i](1)),myround( hkl[i](2)),myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
+    {fprintf(fout, "#{h     k      l  %s %s %s Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs\n",
+             colheader[colcode[4]],colheader[colcode[5]],colheader[colcode[6]],colheader[colcode[10]],colheader[colcode[11]]);}
+      fprintf(fout,   "%6.3f %6.3f %6.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %8.4f\n",
+      myround(hkl[i](1)),myround( hkl[i](2)),myround(hkl[i](3)),out[4][i],out[5][i],out[6][i],
       ikern[i], intmag[i],(ikern[i]+intmag[i]),
-      out10[i],out11[i],intmagdip[i],real(mx[i]));
+      out[10][i],out[11][i],intmagdip[i],real(mx[i]));
      if(real(mx[i])>=0){total+=abs(mx[i]);
                         rpvalue[9]+=abs(isave[9]+ikern[i]+intmag[i]-abs(mx[i])); isave[9]=0;
-                        rpvalue[10]+=abs(isave[10]+out10[i]-abs(mx[i])); isave[10]=0;
-                        rpvalue[11]+=abs(isave[11]+out11[i]-abs(mx[i])); isave[11]=0;
                         rpvalue[12]+=abs(isave[12]+ikern[i]+intmagdip[i]-abs(mx[i]));isave[12]=0;
+                        for(int j=1;j<=usrdefoutcols[0];++j)
+                        {rpvalue[usrdefoutcols[j]]+=abs(isave[usrdefoutcols[j]]+out[usrdefoutcols[j]][i]-abs(mx[i])); 
+                         isave[usrdefoutcols[j]]=0;}                        
                       }
-     else {isave[9]+=ikern[i]+intmag[i];isave[10]+=out11[i];isave[11]+=out11[i];isave[12]+=ikern[i]+intmagdip[i];
+     else {isave[9]+=ikern[i]+intmag[i];
+           isave[12]+=ikern[i]+intmagdip[i];
+           for(int j=1;j<=usrdefoutcols[0];++j)isave[usrdefoutcols[j]]+=out[usrdefoutcols[j]][i];
           }
    }
    if(code==3)//calculate also rpvalue and chisquared and output neutrons only
    {if((double)(i-imin)/50==(double)((i-imin)/50))
-    {fprintf(fout, "#{h     k      l      d[A]    |Q|[1/A] 2theta  Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs        error\n",colheader[colcode[10]],colheader[colcode[11]]);}
-      fprintf(fout,    "%6.3f %6.3f %6.3f %7.4f %7.4f %7.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
-      myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),myround(D[i]),myround(2 * PI / D[i]),myround(2 * theta[i]),
+    {fprintf(fout, "#{h     k      l  %s %s %s Inuc(2t)    Imag(2t)  Itot(2t)[b/atom] %s %s Imag_dip(2t) Iobs        error\n",
+          colheader[colcode[4]],colheader[colcode[5]],colheader[colcode[6]],colheader[colcode[10]],colheader[colcode[11]]);}
+      fprintf(fout,    "%6.3f %6.3f %6.3f %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E %5.4E\n",
+      myround(hkl[i](1)), myround(hkl[i](2)), myround(hkl[i](3)),out[4][i],out[5][i],out[6][i],
       ikern[i], intmag[i], (ikern[i]+intmag[i]),
-      out10[i],out11[i],intmagdip[i],
+      out[10][i],out[11][i],intmagdip[i],
       real(mx[i]),abs(my[i]));
      if(real(mx[i])>=0){total+=abs(mx[i]);
       chisquared[9]+=(isave[9]+ikern[i]+intmag[i]-abs(mx[i]))*(isave[9]+ikern[i]+intmag[i]-abs(mx[i]))/abs(my[i])/abs(my[i]);
-      chisquared[10]+=(isave[10]+out10[i]-abs(mx[i]))*(isave[10]+out10[i]-abs(mx[i]))/abs(my[i])/abs(my[i]);
-      chisquared[11]+=(isave[11]+out11[i]-abs(mx[i]))*(isave[11]+out11[i]-abs(mx[i]))/abs(my[i])/abs(my[i]);
       chisquared[12]+=(isave[12]+ikern[i]+intmagdip[i]-abs(mx[i]))*(isave[12]+ikern[i]+intmagdip[i]-abs(mx[i]))/abs(my[i])/abs(my[i]);
-      ++chinr;
       rpvalue[9]+=abs(isave[9]+ikern[i]+intmag[i]-abs(mx[i])); isave[9]=0;
-      rpvalue[10]+=abs(isave[10]+out10[i]-abs(mx[i])); isave[10]=0;
-      rpvalue[11]+=abs(isave[11]+out11[i]-abs(mx[i])); isave[11]=0;
       rpvalue[12]+=abs(isave[12]+ikern[i]+intmagdip[i]-abs(mx[i])); isave[12]=0;
-                      }
-     else {isave[9]+=ikern[i]+intmag[i];isave[10]+=out10[i];isave[11]+=out11[i];isave[12]+=ikern[i]+intmagdip[i];
+      for(int j=1;j<=usrdefoutcols[0];++j)
+      {chisquared[usrdefoutcols[j]]+=(isave[usrdefoutcols[j]]+out[usrdefoutcols[j]][i]-abs(mx[i]))*(isave[usrdefoutcols[j]]+out[usrdefoutcols[j]][i]-abs(mx[i]))/abs(my[i])/abs(my[i]);
+      rpvalue[usrdefoutcols[j]]+=abs(isave[usrdefoutcols[j]]+out[usrdefoutcols[j]][i]-abs(mx[i])); isave[usrdefoutcols[j]]=0;
+      }
+      ++chinr;
+                            }
+     else {isave[9]+=ikern[i]+intmag[i];
+           isave[12]+=ikern[i]+intmagdip[i];
+           for(int j=1;j<=usrdefoutcols[0];++j)isave[usrdefoutcols[j]]+=out[usrdefoutcols[j]][i];
           }
    }
 
  }
 if (code>=2){rpvalue[9]*=100.0/total;fprintf(fout,"#!rpvalue=%6.2f\n",rpvalue[9]);
-             rpvalue[10]*=100.0/total;fprintf(fout,"#!rpvaluecol10=%6.2f\n",rpvalue[10]);
-             rpvalue[11]*=100.0/total;fprintf(fout,"#!rpvaluecol11=%6.2f\n",rpvalue[11]);
-             rpvalue[12]*=100.0/total;fprintf(fout,"#!rpvaluedip=%6.2f\n",rpvalue[12]);}
+             rpvalue[12]*=100.0/total;fprintf(fout,"#!rpvaluedip=%6.2f\n",rpvalue[12]); 
+            for(int j=1;j<=usrdefoutcols[0];++j){rpvalue[usrdefoutcols[j]]*=100.0/total;
+                                                  fprintf(fout,"#!rpvaluecol%i=%6.2f\n",usrdefoutcols[j],rpvalue[usrdefoutcols[j]]);
+                                                 }
+            }
 if (code==3){chisquared[9]*=1.0/(double)chinr;fprintf(fout,"#!chisquared=%6.4f\n",chisquared[9]);
-             chisquared[10]*=1.0/(double)chinr;fprintf(fout,"#!chisquaredcol10=%6.4f\n",chisquared[10]);
-             chisquared[11]*=1.0/(double)chinr;fprintf(fout,"#!chisquaredcol11=%6.4f\n",chisquared[11]);
-             chisquared[12]*=1.0/(double)chinr;fprintf(fout,"#!chisquareddip=%6.4f\n",chisquared[12]);}
+             chisquared[12]*=1.0/(double)chinr;fprintf(fout,"#!chisquareddip=%6.4f\n",chisquared[12]);
+             for(int j=1;j<=usrdefoutcols[0];++j){
+             chisquared[usrdefoutcols[j]]*=1.0/(double)chinr;fprintf(fout,"#!chisquaredcol%i=%6.4f\n",usrdefoutcols[j],chisquared[usrdefoutcols[j]]);
+                                                 }            
+            }
 
 fclose(fout);
 return;}

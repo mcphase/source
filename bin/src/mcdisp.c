@@ -5,22 +5,47 @@
  * reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
  *            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400
  ***********************************************************************/
-
-#define SMALL_QUASIELASTIC_ENERGY 1e-6    // deviation from single ion gap delta to take energy into account as not being equal to
-                      // delta and therefore being included into output 
-		      // transitions of single ions less then SMALL_QUASIELASTIC_ENERGY have in Mijkl wn/kT instead of wn-wn'
-		      // !!! must match SMALL_QUASIELASTIC_ENERGY in jjjpar.hpp !!!!
-#define SMALLINT 1e-4 // small intensity treshhold in barn/f.u. - only peaks larger than this threshold will
-                      // be included in sta_int calculation
-#define ANTIPEAK_CUTOFF 100 // if antipeaks are fitted,  sta contribution never increases above this cutoff
-#define SMALLEDIF 1e-5 // small difference in calculation of transition energy
-                       // used to give error if recalculation of mcdisp.trs
-		       // energies gives different results than file
-
+ 
 
 #include <mcdisp.h>
 #include "../../version"
 #include "myev.c"
+
+void errexit() // type info and error exit 
+{     printf (" \n %s \n",MCDISPVERSION);
+    printf ("use as: mcdisp\n"); 
+    printf (" or as: mcdisp [options] [file]\n");
+    printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
+    printf ("Options:\n");
+    printf (" -jq                  ... calculate J(Q) (Fourier transform of exchange)\n");
+    printf (" -max n               ... restrict single ion susceptibility to n lowest\n");
+    printf ("                          lying transitions starting from the ground state\n");
+    printf (" -minE E              ... an energy range may be given by minE and maxE: only\n");
+    printf (" -maxE E                  single ion transitions within this energy range will \n");
+    printf ("                          be considered\n");
+    printf (" -r                   ... refine energies\n");
+    printf (" -x                   ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
+    printf (" -xa                  ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection\n");
+    printf (" -d                   ... calculate intensities in dipole approximation only\n");
+    printf (" -v                   ... verbose\n");
+    printf (" -a                   ... do not overwrite output files in results - append new results\n");
+    printf (" -c                   ... only create single ion transition file ./results/mcdisp.trs and exit\n");
+    printf (" -t                   ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
+    printf (" -ninit n             ... maximum number n of (low energy) initial states (single ion transitions)\n");
+    printf ("                          (not functional with all single ion modules)\n");
+    printf (" -pinit p             ... minimum populationnumber p of initial state (single ion transitions)\n");
+    printf ("                          in order to be considered (not functional with all single ion modules)\n");
+    printf (" -prefix 001          ... prefix for parameters to be read from mcdisp.par and used for creation of output files\n"
+            "                          (usful for running in parallel calculations for different zones: e.g. put in\n"
+            "                           mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
+            "                          and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
+            "                          output files, e.g. *mcdisp.qei  with appendfile)\n");
+    printf ("\n");
+    printf ("Note: files which must be in current directory -\n");
+    printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
+      exit (EXIT_FAILURE);
+} 
+
 
 #ifdef _THREADS
 // ----------------------------------------------------------------------------------- //
@@ -91,7 +116,7 @@ EVENT_TYPE checkfinish;
 #endif // if _THREADS
 
 #include "mcdisp_intcalc.c"
-#include "mcdisp_observables.c"
+#include "mcdisp_output.c"
 
 #ifdef _THREADS
 #define inputpars (*thrdat.inputpars[thread_id])
@@ -247,27 +272,6 @@ void sortE(Vector & d,ComplexMatrix & z)
 }
 
 
-// some function to efficiently output standard deviations
-void staout(FILE*fout,double & sta,double & sta_int,double & sta_without_antipeaks,double & sta_int_without_antipeaks,double & sta_without_weights,double & sta_int_without_weights,double & sta_without_antipeaks_weights,double & sta_int_without_antipeaks_weights)
-    {
-    fprintf(fout,"#definitions:\n#\n");
-    fprintf(fout,"#sta                               = sum_i |weight(i)|*[Eexp(i) - nearestEcalc]^[2*sign(weight(i))]\n");
-    fprintf(fout,"#sta_int                           = sum_i |weight(i)|*[Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^[2*sign(weight(i))]\n",SMALLINT);
-    fprintf(fout,"#sta_without_antipeaks             = sum_i_with_weight(i)>0  weight(i)*[Eexp(i) - nearestEcalc]^2\n");
-    fprintf(fout,"#sta_int_without_antipeaks         = sum_i_with_weight(i)>0  weight(i)*[Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^2\n",SMALLINT);
-    fprintf(fout,"#sta_without_weights               = sum_i [Eexp(i) - nearestEcalc]^[2*sign(weight(i))]\n");
-    fprintf(fout,"#sta_int_without_weights           = sum_i [Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^[2*sign(weight(i))]\n",SMALLINT);
-    fprintf(fout,"#sta_without_antipeaks_weights     = sum_i_with_weight(i)>0 [Eexp(i) - nearestEcalc]^2\n");
-    fprintf(fout,"#sta_int_without_antipeaks_weights = sum_i_with_weight(i)>0 [Eexp(i) - nearestEcalc_with_Int>%gb/srf.u.]^2\n#\n",SMALLINT);
-    fprintf(fout,"#!sta= %8.6g \n",sta);
-    fprintf(fout,"#!sta_int= %8.6g \n",sta_int);
-    fprintf(fout,"#!sta_without_antipeaks= %8.6g \n",sta_without_antipeaks);
-    fprintf(fout,"#!sta_int_without_antipeaks= %8.6g \n",sta_int_without_antipeaks);
-    fprintf(fout,"#!sta_without_weights= %8.6g \n",sta_without_weights);
-    fprintf(fout,"#!sta_int_without_weights= %8.6g \n",sta_int_without_weights);
-    fprintf(fout,"#!sta_without_antipeaks_weights= %8.6g \n",sta_without_antipeaks_weights);
-    fprintf(fout,"#!sta_int_without_antipeaks_weights= %8.6g \n",sta_int_without_antipeaks_weights);
-    }
 
 // *******************************************************************************************
 // procedure to calculate the dispersion
@@ -297,6 +301,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
   double jqsta=-1.0e10;  double jqsta_int=0;
   double jq0=0;
   Vector hkl(1,3),q(1,3),qold(1,3),qijk(1,3);                 
+  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
+                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
   Vector mf(1,ini.nofcomponents);
   int jmin;
   IntVector noftransitions(1,inputpars.nofatoms); // vector to remember how many transitions are on each atom
@@ -737,25 +743,9 @@ if (do_verbose==1){
 
   }}}}
 
+//**************************************************************************************
 //initialize output files
-  errno = 0;
-if (do_jqfile==0)
-{ printf("#saving mcdisp.qei and mcdisp.qom\n");
-  
-         sprintf(filename,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);
- if(calc_rixs){sprintf(filename,"./results/%smcdisp.qex",ini.prefix); foutqei = fopen_errchk (filename,filemode);}
- else { sprintf(filename,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,filemode);
-        sprintf(filename,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,filemode);
-         printf("#saving %s\n",filename);
-
-           if (do_Erefine==1){
-          errno = 0;
-            sprintf(filename,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,filemode);
-              printf("#saving %s\n",filename);
-                      }
-        }
-}
- 
+//************************************************************************************* 
 // initialize file with jq matrix
 if (do_jqfile==1)
 {  sprintf(filename,"./results/%smcdisp.jq",ini.prefix);printf("#saving %s\n",filename);
@@ -770,7 +760,7 @@ if (do_jqfile==1)
 // ************************************************************************************************
 //MAIN LOOP - do calculation of excitation energy for every Q vector     
 // ************************************************************************************************
-int counter;qijk=0;double qincr=0;
+int counter;qijk=0;double qincr=-1;
 for(counter=1;counter<=ini.nofhkls;++counter){
 		     hkl(1)=ini.hkls[counter][1];
 		     hkl(2)=ini.hkls[counter][2];
@@ -1072,71 +1062,43 @@ if (do_jqfile==1){
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
                   
   diffint=0;diffintbey=0;
-                  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,calc_rixs,hkl);
-   if(qincr==0) { //write header for output files
-          
-                   fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
-                   if(calc_rixs){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
-                                 writeheader(inputpars,foutqei);
-                                 fprintf(foutqei,"#RIXS intensity components:azimuth is defined as in Longfield et al. PRB 66 054417 (2002)\n"
-                                 "coordinate system u1,u2,u3: the scattering plane, defined by the\n"
-                                 "direction of the incident and final wave vectors k and k', contains u1 lying\n"
-                                 "perpendicular to Q and in the sense of k, and u3 parallel to the scattering\n"
-                                 "vector Q= k-k'.\n"
-                                 "angles for azimuth=0: alpha_i=angle(ai,u3), delta_i=angle(ai_perp,u1)\n"
-                                 "(where a1,a2,a3=a,b,c and ai_perp is the projection of ai onto the plane\n"
-                                 "perpendicular to Q. In the chosen experimental geometry\n"
-                                 "azimuth=0, when a1=a points to the x-ray source.\n");
-                                 fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h   k   l Q[A^-1] energy[meV]qincr[1/A](for plots) Irix: Isigmasigma azimuthsigmasigma   Isigmapi azsigmapi   Ipisigma azpisigma   Ipipi azpipi          Irightright azrightright Irightleft azreightleft Ileftright azleftright Ileftleft azlefteft(deg)   [a.u./sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
-                   fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV]\n");
-                   }else{
-                   writeheader(inputpars,foutqom);
-                   fprintf (foutqom, "#dispersion \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
-                   fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
-                   writeheader(inputpars,foutqei);
-                   fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.] Imag [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)  vs qincrement[1/A] (for plotting)\n");
-                        fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");
-                        writeheader(inputpars,foutdstot);
-                        fprintf (foutdstot, "#!Total Scattering Cross Section (obtained by DMD method) in energy range [emin=%g ; emax=%g]\n#Ha[T] Hb[T] Hc[T] T[K] h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3) vs qincrement[1/A] (for plotting)",ini.emin,ini.emax);
+  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,calc_rixs,hkl);
+  qold=qijk;hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);
 
-                        if (do_Erefine==1){
-                         fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
-                         writeheader(inputpars,foutds);
-                         fprintf (foutds, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
-                                          }  
-                         fprintf (foutdstot, "\n");                       
-                   }
-                   
-  //------------observables-----------------------------------
-if(ini.calculate_chargedensity_oscillation){sprintf(filename,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);}
-if(ini.calculate_spindensity_oscillation)  {sprintf(filename,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",SPINDENS_EV_DIM);}
-if(ini.calculate_orbmomdensity_oscillation){sprintf(filename,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",ORBMOMDENS_EV_DIM);}
-if(ini.calculate_phonon_oscillation)       {sprintf(filename,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);}
-if(ini.calculate_magmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);}
-if(ini.calculate_spinmoment_oscillation)   {sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
-if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
-  //-----------------------------------------------------------
-                }
-   int dim=3;
-   dim=(int)((ini.hkls[counter][0]-3)/4);
-                       if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
-                       {fprintf(foutqei,"#!hklfile_number=%i\n",is);fprintf(foutqom,"#!hklfile_number=%i\n",is);                                       
-                        if(!calc_rixs){fprintf(foutdstot,"#!hklfile_number=%i\n",is);
-                                       if (do_Erefine==1){fprintf(foutds,"#!hklfile_number=%i\n",is);}
-                                      }
-                        if(ini.calculate_chargedensity_oscillation)fprintf(foutqee,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_spindensity_oscillation)fprintf(foutqsd,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_orbmomdensity_oscillation)fprintf(foutqod,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_phonon_oscillation)fprintf(foutqep,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_magmoment_oscillation)fprintf(foutqem,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_spinmoment_oscillation)fprintf(foutqes,"#!hklfile_number=%i\n",is);
-                        if(ini.calculate_orbmoment_oscillation)fprintf(foutqel,"#!hklfile_number=%i\n",is);
-                        }
-                      
-                  fprintf (foutqom, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-                  for (i=1;i<=dimA;++i){fprintf (foutqom, " %4.4g ",myround(En(i)));
-                         }               fprintf (foutqom, " > ");
+  if(qincr==-1){qincr=0;qold=qijk;
+              // for the first q vector in the loop we have to initialize files ...
+              sprintf(filename,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+              if(calc_rixs){sprintf(filename,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
+                     else {sprintf(filename,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+                           sprintf(filename,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+                           if(do_Erefine==1){
+                           sprintf(filename,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);                    
+                                            }
+                           }
+               writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,do_Erefine);                  
+               //------------observables-----------------------------------
+               if(ini.calculate_chargedensity_oscillation){sprintf(filename,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);}
+               if(ini.calculate_spindensity_oscillation)  {sprintf(filename,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",SPINDENS_EV_DIM);}
+               if(ini.calculate_orbmomdensity_oscillation){sprintf(filename,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",ORBMOMDENS_EV_DIM);}
+               if(ini.calculate_phonon_oscillation)       {sprintf(filename,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);}
+               if(ini.calculate_magmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);}
+               if(ini.calculate_spinmoment_oscillation)   {sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
+               if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
+               //-----------------------------------------------------------
+ 
+              }
+         qincr+=Norm(qijk-qold); 
+ 
+         writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
+                             ini,calc_rixs,do_Erefine,counter);
+                                       
+                  ini.print_usrdefcols(foutqom,qijk,qincr);
+                  fprintf (foutqom, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+                  for (i=1;i<=dimA;++i)fprintf (foutqom, " %4.4g ",myround(En(i)));
+                  fprintf (foutqom, " > ");
 
+                  int dim=3;
+                  dim=(int)((ini.hkls[counter][0]-3)/4);
                   Vector dd(1,dim),dd_int(1,dim);  dd+=100000.0;dd_int+=100000.0;
                   Vector dd1(1,dim),dd1_int(1,dim);  dd1+=100000.0;dd1_int+=100000.0;
                   Vector dd_without_antipeaks(1,dim),dd_int_without_antipeaks(1,dim);  dd_without_antipeaks+=100000.0;dd_int_without_antipeaks+=100000.0;
@@ -1204,9 +1166,7 @@ if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp
                   }
                   ithread=0; num_threads_started=-1; int oldi=-1; double QQ;// Vector vQQ(1,dimA); removed MR 14.1.2013
 #endif
-                      Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                                       abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
-                      qold=qijk;hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);qincr+=Norm(qijk-qold); 
+                      
 
 #ifdef _THREADS  
                   for (i=1;i<=dimA;i+=NUM_THREADS)
@@ -1308,15 +1268,17 @@ if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp
                                 Irlt=calc_irix(eir,eol,chi);if(Irlt>Irl){Irl=Irlt;azrl=azimuth*180/PI;}
                                 Ilrt=calc_irix(eil,eor,chi);if(Ilrt>Ilr){Ilr=Ilrt;azlr=azimuth*180/PI;}
                                 Illt=calc_irix(eil,eol,chi);if(Illt>Ill){Ill=Illt;azll=azimuth*180/PI;}
-                               if(calc_rixs==2){fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g           ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(En(i)),qincr);
-                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Isst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ispt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ipst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ippt),myround(1e-8,azimuth*180/PI));
-                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Irlt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ilrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Illt),myround(1e-8,azimuth*180/PI));
-                                   fprintf (foutqei, "\n");
+                               if(calc_rixs==2){ini.print_usrdefcols(foutqei,qijk,qincr);
+                                                fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                                         myround(QQ),myround(En(i)));
+                                                fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Isst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ispt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ipst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ippt),myround(1e-8,azimuth*180/PI));
+                                                fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Irlt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ilrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Illt),myround(1e-8,azimuth*180/PI));
+                                                fprintf (foutqei, "\n");
                                                 }
                               }
-                              fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g           ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(En(i)),qincr);
+                              ini.print_usrdefcols(foutqei,qijk,qincr);
+                              fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                                myround(QQ),myround(En(i)));
                                  if(ints(i)>-1){
                                  fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Iss),myround(1e-8,azss),myround(1e-8,Isp),myround(1e-8,azsp),myround(1e-8,Ips),myround(1e-8,azps),myround(1e-8,Ipp),myround(1e-8,azpp));
                                  fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irr),myround(1e-8,azrr),myround(1e-8,Irl),myround(1e-8,azrl),myround(1e-8,Ilr),myround(1e-8,azlr),myround(1e-8,Ill),myround(1e-8,azll));
@@ -1362,8 +1324,9 @@ if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp
 
                      if(intsbey(i)<0)intsbey(i)=-1;
                       fprintf (foutqom, " %4.4g",myround(intsbey(i)));
-                      fprintf (foutqei, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g\n",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),qincr);
+                      ini.print_usrdefcols(foutqei,qijk,qincr);
+                      fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
                        if(do_verbose==1){fprintf(stdout, "#IdipFF= %4.4g Ibeyonddip=%4.4g\n",ints(i),intsbey(i));}
                        if(En(i)>=ini.emin&&En(i)<=ini.emax){diffint+=ints(i);diffintbey+=intsbey(i);}
                       }
@@ -1430,7 +1393,8 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.qes_real; delete[] thrdat.qes_imag; 
                   delete[] thrdat.qel_real; delete[] thrdat.qel_imag; 
 #endif
-if(!calc_rixs){fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g",ini.Hext(1),ini.Hext(2),ini.Hext(3),ini.T,hkl(1),hkl(2),hkl(3),diffint,diffintbey,qincr);
+if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
+               fprintf (foutdstot, "%4.4g %4.4g  %4.4g %4.4g %4.4g",hkl(1),hkl(2),hkl(3),diffint,diffintbey);
     sta+=dd*dd;sta_int+=dd_int*dd_int;
     sta_without_antipeaks+=dd_without_antipeaks*dd_without_antipeaks;
     sta_int_without_antipeaks+=dd_int_without_antipeaks*dd_int_without_antipeaks;
@@ -1440,7 +1404,6 @@ if(!calc_rixs){fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g 
     sta_int_without_antipeaks_weights+=dd_int_without_antipeaks_weights*dd_int_without_antipeaks_weights;
               }
               //initialize output file for display
-            errno = 0;
             sprintf(filename,"./results/.%smcdisp.qom",ini.prefix);fout1 = fopen_errchk (filename,"w");
             fprintf (fout1, "#%s ",MCDISPVERSION);
             curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout1);
@@ -1485,7 +1448,6 @@ if(!calc_rixs){fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g 
    // do refinement of energies by output of scattering cross section vs enrgy transfer if required
   if (do_Erefine==1&&!calc_rixs){double totint=0;
                 if(do_verbose==1){fprintf(stdout, "#refining calculation with exact calculation of energy dependence of scattering cross section\n");}
-          errno = 0;
           sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"w");
           fprintf (foutds1, "#{%s ",MCDISPVERSION);
           curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds1);
@@ -1575,7 +1537,8 @@ if(!calc_rixs){fprintf (foutdstot, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g 
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds1, " %4.4g %4.4g \n",myround(E),myround(intensity));
           fclose(foutds1);	   
-                     fprintf (foutds, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+                     ini.print_usrdefcols(foutds,qijk,qincr);
+                     fprintf (foutds, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds, " %4.4g %4.4g \n",myround(E),myround(intensity));
 	   }
 
@@ -1658,7 +1621,9 @@ int main (int argc, char **argv)
  fprintf(stderr,"#***********************************************************************\n\n");
 
 
-// check command line and initialize parameters ini
+//***************************************************************************************
+// check command line parameters 
+//***************************************************************************************
 for (i=1;i<=argc-1;++i){
    if(strcmp(argv[i],"-r")==0) {do_Erefine=1; if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -r needs argument epsilon\n");exit(EXIT_FAILURE);}
 		                                                epsilon=strtod(argv[i+1],NULL);++i;
@@ -1696,8 +1661,10 @@ for (i=1;i<=argc-1;++i){
   		                                  strcpy(prefix,argv[i+1]);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
-           	   else{spinfile=argv[i];}
-                        } // prefix
+                    else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
+           	      else{spinfile=argv[i];}
+                         } // help
+                       } // prefix
 		     } // pinit
 		    } // ninit
 		   } // minE
@@ -1718,9 +1685,8 @@ for (i=1;i<=argc-1;++i){
                                        abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
 
   inimcdis ini("mcdisp.par",spinfile,prefix,abc);
-  if (argc > 23) {ini.errexit();}                     
-  if(ini.nofcomponents!=inputpars.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.nofcomponents);exit(1);}
-  if(ini.nofatoms!=inputpars.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.nofatoms);exit(1);}
+  if(ini.nofcomponents!=inputpars.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.nofcomponents);exit(EXIT_FAILURE);}
+  if(ini.nofatoms!=inputpars.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.nofatoms);exit(EXIT_FAILURE);}
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix);
 

@@ -1,101 +1,11 @@
 // routines for calculation of intensities for program mcdiff
 
-// different output data for columns 10 and 11
-double setcoloutput(int i,float & scale, double & ovallt,float & lorentzf,complex <double> & nsf,float & msf2,float & msf2dip, Vector & Pxyz,
-                   complex <double> & msfx, complex <double> & msfy, complex <double> & msfz,
-                   complex <double> & msfdipx, complex <double> &msfdipy, complex <double> &msfdipz,Vector & Qvec)
-{double cosw,crossx,crossy,crossz,Ip,Im,sinw2,R;
-         // here do some precalculations with formulas common to several options
-         switch (i) {case 13: // beyond cases
-                     case 14:
-                     case 15:
-                     case 16:
-                     case 23:
-                     case 24:crossx=imag(msfy*conj(msfz)-msfz*conj(msfy));
-                             crossy=imag(-msfx*conj(msfz)+msfz*conj(msfx));
-                             crossz=imag(msfx*conj(msfy)-msfy*conj(msfx));
-                            Ip=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
-                            Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                            Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
-                            Im=abs(nsf) * abs(nsf)+msf2 * 3.65 / 4 / PI;
-                            Im+=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                            Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))+conj(nsf)*(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3)));
-                             break;
-                     case 17:  // dipolar cases
-                     case 18:
-                     case 19:
-                     case 20:
-                     case 25:
-                     case 26: crossx=imag(msfdipy*conj(msfdipz)-msfdipz*conj(msfdipy));
-                              crossy=imag(-msfdipx*conj(msfdipz)+msfdipz*conj(msfdipx));
-                              crossz=imag(msfdipx*conj(msfdipy)-msfdipy*conj(msfdipx));
-                             Ip=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
-                             Ip-=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                             Ip+=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
-                             Im=abs(nsf) * abs(nsf)+msf2dip * 3.65 / 4 / PI;
-                             Im+=(crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3))* 3.65 / 4 / PI;
-                             Im-=sqrt(3.65/4/PI)*real(nsf*conj(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))+conj(nsf)*(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3)));
-                              break;
-default: break;
-                    }
-
-         switch (i) {
-case 0:  return lorentzf;break;//   "LF          ",
-case 1:  return abs(nsf);break;//    "|NSF|[b]    ",
-case 2:  return real(nsf);break;//    "Re(NSF)[b]  ",
-case 3:  return imag(nsf);break;//    "Im(NSF)[b]  ",
-case 4:  return sqrt(msf2+1e-100);break;//    "|MSF|       ",
-case 5:  return abs(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3));break;//    "|MSF.P|     ",
-case 6:  return real(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3));break;//    "Re(MSF.P)   ",
-case 7:  return imag(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3));break;//   "Im(MSF.P)   ",
-case 8:  return sqrt(msf2dip+1e-100);break;//    "|MSFdip|    ",
-case 9:  return abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "|MSFdip.P|  ",
-case 10: return real(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Re(MSFdip.P)",
-case 11: return imag(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Im(MSFdip.P)"
-case 12: cosw=(Pxyz/Norm(Pxyz))*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[°]"
-case 13: return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //"i(MSFxMSF*).P",
-case 14: return Ip* lorentzf * scale * ovallt;
-                     //              "I+          ",
-case 15: return Im* lorentzf * scale * ovallt;
-                     //              "I-          ",
-case 16: return Ip/Im;     //              "I+/I-       "
-case 17: return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //i(MSFdip x MSFdip*).P
-case 18: return Ip* lorentzf * scale * ovallt;
-          //Idip+
-case 19: return Im* lorentzf * scale * ovallt;
-         // Idip-
-case 20: return Ip/Im;         // Idip+/Idip-
-case 21: cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
-         return 2.0*abs(msfx*Pxyz(1)+msfy*Pxyz(2)+msfz*Pxyz(3))/sinw2;break;//|MSF.P|/sin^2(angl(Q,P)
-case 22: cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
-         return 2.0*abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3))/sinw2;break;//|MSFdip.P|/sin^2(angl(Q,P)
-case 23: R= Ip/Im;     //   I+/I-
-         cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
-         return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))-sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
-         //2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
-case 24: R= Ip/Im;     //   I+/I-
-         cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
-         return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))+sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
-         //2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
-case 25:  R= Ip/Im;         // Idip+/Idip-
-          cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
-          return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))-sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
-         //2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
-case 26:  R= Ip/Im;         // Idip+/Idip-
-          cosw=(Pxyz/Norm(Pxyz))*(Qvec/Norm(Qvec));sinw2=1.00000001-cosw*cosw;
-          return 2*abs(nsf)*sqrt(4*PI/3.65)*(fabs((1+R)/(1-R))+sqrt((1+2*R+R*R)/(1-2*R+R*R)-1.0/sinw2));
-         //2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
-         }
-
-return 0;
-}
-
 int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vector rez2, Vector rez3,
- float scale,double T,float lambda,float ovalltemp,int lorenz,int & n,float & d,float & Theta,
- float & Imag,float & Imagdip,float & inuc,float & OUT10,float & OUT11,complex <double> & mqx,
+ float scale,double T,float lambda,float ovalltemp,int lorenz,int & n,float & d,
+ float & Imag,float & Imagdip,float & inuc,float * outn,complex <double> & mqx,
  complex <double> & mqy,complex <double> & mqz,complex <double> & mqxy,complex <double> & mqxz,
  complex <double> & mqyz,complex <double> & mqx2,complex <double> & mqy2,complex <double> & mqz2,
- int * colcode, Vector & Pxyz)
+ Vector & Pxyz)
 {
 // this routine calculates the intensity of elastic neutrons for a reflection (hi ki li)
 //
@@ -133,18 +43,16 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 // lorenz                             code for lorentzfactor to be used
 // n                                  number of atoms per unit cell
 // Pxyz                               Projection Vector
-// colcode                            code for output column type of data
 
 // output:
 // d                                  d spacing in A
-// theta                              scattering angle
 // Imag, Imagdip, inuc                scattering intensities
-// OUT10                                 output column 10, default structure factor
-// OUT11                           outpu column 11, default Lorentz Factor
+// outn[4,5,6,10,11]                  output column 4,5,6,10,11
 // mx,my,mz,mxmy,mxmz,mymz,mx2my2mz2[].. fouriertransform of momentunitvectors (for mag xray scattering)
 
 
             double s,Q,FQ,FQL,sintheta,qr,sin2theta,ovallt,mux,muy,muz;
+            float Theta;
             int i;
             Vector Qvec(1,3);
             //calculate d spacing and intensity for h,k,l triple (d,intmag,ikern)************
@@ -241,7 +149,6 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					                    msfz+=0.5*MQ(3)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
                                                            }
 					               }
-//printf("added ion %i MOUT10=(%8.6f %+8.6f i,%8.6f %+8.6f i,%8.6f %+8.6f i)\n         MSFdip=(%8.6f %+8.6f i,%8.6f %+8.6f i,%8.6f %+8.6f i)\n",i,real(msfx),imag(msfx),real(msfy),imag(msfy),real(msfz),imag(msfz),real(msfdipx),imag(msfdipx),real(msfdipy),imag(msfdipy),real(msfdipz),imag(msfdipz));
 // myPrintVector(stdout,(*jjjpars[i]).mom);//equivalent to moment ...
 
                                                          mux=(*jjjpars[i]).mom(1); // this is still here because correlation functions are calculated
@@ -321,21 +228,18 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
             Imag = msf2 * 3.65 / 4 / PI * lorentzf * scale * ovallt;
             Imagdip = msf2dip * 3.65 / 4 / PI * lorentzf * scale * ovallt;
 
-             // output column 10
-            OUT10 = setcoloutput(colcode[10],scale,ovallt,lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec);
-             // output column 11
-            OUT11 = setcoloutput(colcode[11],scale,ovallt,lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec);
-
+             // output user defined columns 
+            for(int i=1;i<=usrdefoutcols[0];++i)outn[usrdefoutcols[i]] =setcoloutput(colcode[usrdefoutcols[i]],scale,ovallt,lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec,d,Theta,Q);
 
 return true;
 }
 
 void neutint(jjjpar ** jjjpars,int code,double T,float lambda, float thetamax, float ovalltemp,int lorenz,
-             Vector r1,Vector r2,Vector r3,int & n,int & m,Vector *  hkl,float * D,float * theta,
-             float * intmag,float * intmagdip,float * ikern,float * out10,float * out11,complex <double>*mx,
+             Vector r1,Vector r2,Vector r3,int & n,int & m,Vector *  hkl,float * D,
+             float * intmag,float * intmagdip,float * ikern,float ** out,complex <double>*mx,
              complex <double>*my,complex <double>*mz,complex <double>*mxmy,complex <double>*mxmz,
              complex <double>*mymz,complex <double>*mx2,complex <double>*my2,complex <double>*mz2,
-             int * colcode,Vector & Pxyz)
+             Vector & Pxyz)
 {//****************************************************************************
 // this routine calculates the intensity of elastic neutrons
 // for a given magnetic unit cell (crystal axis orthogonal)
@@ -372,7 +276,6 @@ void neutint(jjjpar ** jjjpars,int code,double T,float lambda, float thetamax, f
 // (*jjjpars[1...n]).Zc		         Z-factors from Lovesey table 11.1 for Z(K) calc (needed to go beyond dipole approx)
 // (*jjjpars[1...n]).eigenstates(1..2J+1,1..2J+1)   CF+MF eigenstates (needed to go beyond dipole approx)
 // Pxyz                                  Projection Vector
-// colcode                            code for output column type of data
 
 // output
 // m                                  number of calculated reflections
@@ -382,19 +285,18 @@ void neutint(jjjpar ** jjjpars,int code,double T,float lambda, float thetamax, f
 // intmag[1...m]                        magnetic intensity
 // intmagdip[1...m]                     magnetic intensity in dipole approx
 // ikern[1...m]                       nuclear intensity
-// out10[1...m]                       output column 10, default   nuclear structurfactor |sf|
-// out11[1...m]                       output column 11, default  lorentzfactor
+// out[4,5,6,10,11][1...m]            output column 4,5,6,10,11
 // mx,my,mz,mxmy,mxmz,mymz,mx2my2mz2[].. fouriertransform of momentunitvectors (for mag xray scattering)
 
 //****experimental parameters*************************************************
 float scale,inuc;
-float OUT10,Imag,Imagdip,Theta,OUT11,d;
-
+float Imag,Imagdip,d;
+float outn[NOFOUTPUTCOLUMNS+1];
 scale = 1 /(double)(n) /(double)(n); // scalingfactor of intensities
 //***************************************************************************
 
 
-D[0] = 10000;
+D[0]=100000;
 int i;
 //calculate reciprocal lattice vectors from r1,r2,r3
   Vector rez1(1,3),rez2(1,3),rez3(1,3),nmin(1,3),nmax(1,3);
@@ -426,7 +328,7 @@ if(code==0){ m = 0;// reset m
                 complex <double> mqy=0,mqy2=0,mqxz=0;
                 complex <double> mqz=0,mqz2=0,mqyz=0;
 
-          if(getint(jjjpars,hi,ki,li,thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Theta,Imag,Imagdip,inuc,OUT10,OUT11,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,colcode,Pxyz))
+          if(getint(jjjpars,hi,ki,li,thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Imag,Imagdip,inuc,outn,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,Pxyz))
           {// reflection was found below thetamax....
 
             //sort according to descending d spacing
@@ -439,14 +341,12 @@ if(code==0){ m = 0;// reset m
                msort = m;
                while(D[msort-1]<=d){
                 D[msort] = D[msort - 1];
-                theta[msort]= theta[msort - 1];
                 hkl[msort] = hkl[msort - 1];
                 intmag[msort] = intmag[msort - 1];
                 intmagdip[msort] = intmagdip[msort - 1];
                 ikern[msort] = ikern[msort - 1];
-                out10[msort] = out10[msort - 1];
-                out11[msort] = out11[msort - 1];
-
+                for(int i=1;i<=usrdefoutcols[0];++i)out[usrdefoutcols[i]][msort] = out[usrdefoutcols[i]][msort - 1];
+                
                 mx[msort] = mx[msort - 1];
                 my[msort] = my[msort - 1];
                 mz[msort] = mz[msort - 1];
@@ -458,10 +358,10 @@ if(code==0){ m = 0;// reset m
                 mz2[msort] = mz2[msort - 1];
                   --msort;
                }
+               D[msort]=d;
                hkl[msort](1) = hi;hkl[msort](2) = ki; hkl[msort](3) = li;
-               D[msort] = d; theta[msort] = Theta;
                intmag[msort] = Imag;intmagdip[msort] = Imagdip;  ikern[msort] = inuc;
-               out10[msort] = OUT10; out11[msort] = OUT11;
+               for(int i=1;i<=usrdefoutcols[0];++i)out[usrdefoutcols[i]][msort] = outn[usrdefoutcols[i]];                
                mx[msort]=(double)sqrt(scale)*mqx;
                my[msort]=(double)sqrt(scale)*mqy;
                mz[msort]=(double)sqrt(scale)*mqz;
@@ -488,11 +388,10 @@ else
                hkl[i](1)=rint(hkl[i](1));
                hkl[i](2)=rint(hkl[i](2));
                hkl[i](3)=rint(hkl[i](3));
-          if(!getint(jjjpars,(int)hkl[i](1),(int)hkl[i](2),(int)hkl[i](3),thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Theta,Imag,Imagdip,inuc,OUT10,OUT11,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,colcode,Pxyz))
+          if(!getint(jjjpars,(int)hkl[i](1),(int)hkl[i](2),(int)hkl[i](3),thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Imag,Imagdip,inuc,outn,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,Pxyz))
                 {fprintf(stderr,"ERROR mcdiff: theta for reflection number %i above thetamax=%g\n",i,thetamax);exit(1);}
-               D[i] = d; theta[i] = Theta;
-               intmag[i] = Imag;intmagdip[i] = Imagdip;  ikern[i] = inuc;
-               out10[i] = OUT10; out11[i] = OUT11;
+               D[i]=d;intmag[i] = Imag;intmagdip[i] = Imagdip;  ikern[i] = inuc;
+               for(int j=1;j<=usrdefoutcols[0];++j)out[usrdefoutcols[j]][i] = outn[usrdefoutcols[j]];
                if(code==1){
                mx[i]=(double)sqrt(scale)*mqx;
                my[i]=(double)sqrt(scale)*mqy;

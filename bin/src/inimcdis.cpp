@@ -5,52 +5,65 @@
 
 
 #define NOFHKLCOLUMNS 7
+int usrdefcols[]={4, 1,2,3,4}; // user defined output columns (first number is number of usr def output columns)
+                                             // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
+int colcod[]=    {-1,5,6,7,4}; // field to store code for assigning type of data to columns of output,
+                                           // set default values here (see list below for different types)
+                                           // using the out11 command in mcdiff.in these codes can be modified
+#define COLHEADDIM 8
+// different output data for columns 10 and 11
+const char * colhead []= {  "Qinc[1/A] ", //  0
+                            "Qx[1/A]   ",  //   1
+                            "Qy[1/A]   ", //    2
+                            "Qz[1/A]   ", //    3                                                  
+                            "T[K]      ", //    4                                                  
+                            "Ha[T]     ", //    5                                                  
+                            "Hb[T]     ", //    6                                                  
+                            "Hc[T]     ", //    7 
+                            "|Q|[1/A]  "  //    8                                                                  
+                           };
+
+// different output data for user defined columns ...
+double inimcdis::setcolvalue(int i,Vector & Qvec, double & Qincr)
+{
+         switch (i) {
+case 0:  return Qincr;break;
+case 1:  return Qvec(1);break;
+case 2:  return Qvec(2);break;
+case 3:  return Qvec(3);break;
+case 4:  return T;break;
+case 5:  return Hext(1);break;
+case 6:  return Hext(1);break;
+case 7:  return Hext(1);break;
+case 8:  return Norm(Qvec);break;
+default: fprintf(stderr,"Error mcdisp: unknown column code\n");exit(EXIT_FAILURE);
+                    }
+
+return 0;
+}
 
 
  // *************************************************************************
  // ************************ inipar *************************************
  // *************************************************************************
  // class of initial parameters for program mcphas
-
-void inimcdis::errexit() // type info and error exit 
-{     printf (" \n %s \n",MCDISPVERSION);
-    printf ("use as: mcdisp\n"); 
-    printf (" or as: mcdisp [options] [file]\n");
-    printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
-    printf ("Options:\n");
-    printf (" -jq                  ... calculate J(Q) (Fourier transform of exchange)\n");
-    printf (" -max n               ... restrict single ion susceptibility to n lowest\n");
-    printf ("                          lying transitions starting from the ground state\n");
-    printf (" -minE E              ... an energy range may be given by minE and maxE: only\n");
-    printf (" -maxE E                  single ion transitions within this energy range will \n");
-    printf ("                          be considered\n");
-    printf (" -r                   ... refine energies\n");
-    printf (" -x                   ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
-    printf (" -xa                  ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection\n");
-    printf (" -d                   ... calculate intensities in dipole approximation only\n");
-    printf (" -v                   ... verbose\n");
-    printf (" -a                   ... do not overwrite output files in results - append new results\n");
-    printf (" -c                   ... only create single ion transition file ./results/mcdisp.trs and exit\n");
-    printf (" -t                   ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
-    printf (" -ninit n             ... maximum number n of (low energy) initial states (single ion transitions)\n");
-    printf ("                          (not functional with all single ion modules)\n");
-    printf (" -pinit p             ... minimum populationnumber p of initial state (single ion transitions)\n");
-    printf ("                          in order to be considered (not functional with all single ion modules)\n");
-    printf (" -prefix 001          ... prefix for parameters to be read from mcdisp.par and used for creation of output files\n"
-            "                          (usful for running in parallel calculations for different zones: e.g. put in\n"
-            "                           mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
-            "                          and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
-            "                          output files, e.g. *mcdisp.qei  with appendfile)\n");
-    printf ("\n");
-    printf ("Note: files which must be in current directory -\n");
-    printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
-      exit (EXIT_FAILURE);
-} 
  // *************************************************************************
 
+// print user defined column headers
+void inimcdis::print_usrdefcolhead(FILE *fout)
+{fprintf(fout,"#");
+ for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s",colhead[colcod[usrdefcols[i]]]);
+}
+
+// print user defined column headers
+void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr)
+{
+ for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr)));
+}
+// save parameters (which were read from mcdisp.par)
 void inimcdis::save()
 {  FILE * fout;int i,j;
-  fout=fopen(savfilename,"w");if (fout==NULL) {fprintf(stderr,"ERROR - file %s cannot be opened \n",savfilename);errexit();} 
+  fout=fopen(savfilename,"w");if (fout==NULL) {fprintf(stderr,"ERROR - file %s cannot be opened \n",savfilename);exit(EXIT_FAILURE);} 
   fprintf(fout,"# Parameter file  mcdisp.par - read by %s\n",MCDISPVERSION);
   fprintf(fout,"#<!--mcdisp.mcdisp.par>\n");
   fprintf(fout,"#*********************************************************************\n");
@@ -85,6 +98,13 @@ void inimcdis::save()
   fprintf(fout,"#!calculate_spindensity_oscillation=%i  creates mcdisp.qsd\n",calculate_spindensity_oscillation);
   fprintf(fout,"#!calculate_orbmomdensity_oscillation=%i  creates mcdisp.qod\n",calculate_orbmomdensity_oscillation);
   fprintf(fout,"#!calculate_phonon_oscillation=%i  creates mcdisp.qep\n",calculate_phonon_oscillation);
+  fprintf(fout,"#\n" 
+               "#     out* controls the type of output in user defined columns in files mcdisp.qei,qex,qom,dsigma,dsigma.tot\n");
+  for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"#!out%i=%i \n",usrdefcols[i],colcod[usrdefcols[i]]);
+  fprintf(fout,"#     ... in out*=n the numbers n have the following meaning:\n");
+  for(i=0;i<=COLHEADDIM;++i){
+  fprintf(fout,"#            %i....%s\n",i,colhead[i]);
+                   }
   fprintf(fout,"#\n");
   fprintf(fout,"# Commands such as the following have been read and used to generate the hkl list below:\n");
   fprintf(fout,"#\n");
@@ -198,13 +218,13 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector 
 // *************************************************************************
 //constructor ... load initial parameters from file
 inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector & abc)
-{ 
-  char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE];
+{ errno=1;
+  char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
   int nofhkllists=1;Hext=Vector(1,3);
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
   prefix= new char [strlen(pref)+1]; strcpy(prefix,pref); // set prefix
  // ****************************** read mf configuration from spinfile *****************************************  
-  fin=fopen(spinfile,"rb");if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);errexit();}
+  fin=fopen(spinfile,"rb");if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);exit(EXIT_FAILURE);}
   instr[0]='#';  
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
   extract(instr,"T",T); 
@@ -239,7 +259,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
  // ******************************** reading parameters  from mcdisp.par ****************************************************
   int i=0,hklblock=0,QxQyQzblock=0,j;
   printf("reading file %s\n",file);
-  fin = fopen(file, "rb"); if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",file);errexit();}   
+  fin = fopen(file, "rb"); if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",file);exit(EXIT_FAILURE);}   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
   {++i; // i is used to estimate an upper boundary for the number of hkls in the hkl list 
      extract_with_prefix(instr,prefix,"emin",emin); 
@@ -253,6 +273,11 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
      extract_with_prefix(instr,prefix,"calculate_spindensity_oscillation",calculate_spindensity_oscillation);
      extract_with_prefix(instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
      extract_with_prefix(instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation);
+
+     for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
+     {sprintf(somestring,"out%i",usrdefcols[j]);
+      extract(instr, somestring,colcod[usrdefcols[j]]);
+     }
 
      hklblock+=1-extract_with_prefix(instr,prefix,"hmin",qmin[1]); 
      hklblock+=1-extract_with_prefix(instr,prefix,"kmin",qmin[2]); 
@@ -497,8 +522,6 @@ inimcdis::inimcdis (const inimcdis & p)
   mf=mfcf(1,1,1,nofatoms,nofcomponents);mf=p.mf;T=p.T;
   nofhkls=p.nofhkls;
   int i,j;
-  if (nofhkls==1)
-   {
       hkls=new double *[nofhkls+10];
       for (j=1;j<=nofhkls;++j) 
   	      {if ((int)p.hkls[j][0]==3){hkls[j]=new double [8];}
@@ -509,7 +532,7 @@ inimcdis::inimcdis (const inimcdis & p)
        int nofhkllists=p.hklfile_start_index[0];
        hklfile_start_index= new int [nofhkllists+1];hklfile_start_index[0]=nofhkllists;
       for (j=1;j<=nofhkllists;++j) hklfile_start_index[j]=p.hklfile_start_index[j]; 
-   }
+   
 }
 
 //destruktor

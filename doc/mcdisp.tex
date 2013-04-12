@@ -149,15 +149,35 @@ described in section~\ref{displaydensities}.
 #!calculate_orbmomdensity_oscillation=0  creates mcdisp.qod
 #!calculate_phonon_oscillation=0  creates mcdisp.qep
 #
-# It follows either 
+#     out* controls the type of output in user defined columns in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
+#!out1=1 
+#!out2=6 
+#!out3=7 
+#!out4=4 
+#     ... in out*=n the numbers n have the following meaning:
+#            0....Qinc[1/A] 
+#            1....Qx[1/A]   
+#            2....Qy[1/A]   
+#            3....Qz[1/A]   
+#            4....T[K]      
+#            5....Ha[T]     
+#            6....Hb[T]     
+#            7....Hc[T]     
+#            8....|Q|[1/A]  
 #
-# (i) a Q vector mesh to be mapped in the calculation
-#!hmin=0 hmax=1 deltah=0.05
-#!kmin=1 kmax=1 deltak=0.05
-#!lmin=0 lmax=0 deltal=0.02
+# Commands such as the following are used to generate a hkl list (to activate put #! instead of # at beginning of line):
 #
-# or 
-# (ii) file(s) containing list of Q vectors with (optional) energies of observed excitations to be fitted
+# - a Q vector mesh to be mapped in the calculation it can be in Miller indices
+#hmin=0 hmax=1 deltah=0.1
+#kmin=0 kmax=1 deltak=0.1
+#lmin=0 lmax=1 deltal=0.1
+#
+# or in Qx Qy Qz (1/A) where y||b z||axb and x perpendicular to y and z
+#Qxmin=0 Qxmax=1 deltaQx=0.1
+#Qymin=0 Qymax=1 deltaQy=0.1
+#Qzmin=0 Qzmax=1 deltaQz=0.1
+#
+# - file(s) containing list of Q vectors with (optional) energies of observed excitations to be fitted
 # h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]]
 #
 # hklfile=file1
@@ -165,33 +185,41 @@ described in section~\ref{displaydensities}.
 # ...
 #
 # or
+# Qx Qy Qz(1/A) [E(meV) [statistical_weight  [intensity [fwhm ]]]]
 #
-# (iii) some lines in reciprocal space 
+# QxQyQzfile=file1
+# QxQyQzfile=file2
+# ...
+#
+#
+# - some lines in reciprocal space 
 #
 #hklline=h1=0 k1=1 l1=0 to hN=1 kN=1 lN=0 Nstp=21
 #hklline=h1=0 k1=2 l1=0 to hN=1 kN=1 lN=0 Nstp=21
 #
+#QxQyQzline=Qx1=0 Qy1=1 Qz1=0 to QxN=1 QyN=1 QzN=0 Nstp=21
+#QxQyQzline=Qx1=0 Qy1=2 Qz1=0 to QxN=1 QyN=1 QzN=0 Nstp=21
+#
+# - some planes in reciprocal space 
+#
+#hklplane=h0=0 k0=1 l0=0 to hN=1 kN=1 lN=0 Nstp=21 to hM=1 kM=0 lM=3 Mstp=21  
 # or
-# (iv) a list of Q vectors with (optional) energies of observed excitations to be fitted
+#QxyQzplane=Qx0=0 Qy0=1 Qz0=0 to QxN=1 QyN=1 QzN=0 Nstp=21 to QxM=1 QyM=0 QzM=3 Mstp=21  
+# 
+#
+# - a list of Q vectors with (optional) energies of observed excitations to be fitted
 # h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]]
-0.45 1 1 0.523 0.745
- 0.75 1 1 0.523 0.745
+1 0 0 
+2 0 0 
+3 0 0 
+0.1 0 0 
+0 0.1 0 
+0 0 0.1 
 
 \end{verbatim}
 }
 
-this file describes, which $q$ vector range to
-calculate:
-
-\begin{verbatim}
-#   q vector range (qmin qmax deltaq)
-hmin=0 hmax=0.2 deltah=0.01
-kmin=1 kmax=1 deltak=0.05
-lmin=0 lmax=0 deltal=0.02
-\end{verbatim}
-
-alternatively these lines can be commented and a
-list of reflections can be given in {\prg mcdisp.par\index{mcdisp.par}}.
+this file describes, which $q$ vectors will be calculated.
 Miller indices always refer to the lattice $\vec a^*, \vec b^*, \vec c^*$, which
 is the reciprocal lattice of $\vec a, \vec b, \vec c$ as defined by lattice
 parameters $a,b,c$ and angles $\alpha,\beta,\gamma$ as given in

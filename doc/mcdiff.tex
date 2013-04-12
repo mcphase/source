@@ -17,7 +17,7 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 
 {\footnotesize
 \begin{verbatim}
-# this file is the input file read by program mcdiff version 3.0 Tue Jun 23 12:51:43 2009
+#
 #<!--mcdiff.mcdiff.in>
 #***************************************************************
 #      mcdiff is a program for the calculation of elastic
@@ -36,16 +36,16 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #
 # %SECTION 1%  OVERALL PARAMETERS
 #
-#! lambda   = 0.9  wavelength (A)
+#! lambda   = 2.3587  wavelength (A)
 #
-#! thetamax = 19   maximum bragg angle (deg)
+#! thetamax = 10   maximum bragg angle (deg)
 #
-#! ovalltemp= 0.3  overall temperature factor (A^2) 
+#! ovalltemp= 0  overall temperature factor (A^2) 
 #           ...I ~ EXP(-2 * ovalltemp * sintheta^2 / lambda^2) 
 #                  relation to other notations:
 #                  ovalltemp = Biso = 8 pi^2 Uiso^2
 #
-#! lorentz=1  type of lorentzfactor to be used
+#! lorentz=0  type of lorentzfactor to be used
 #            0.....no lorentzfactor 
 #            1.....neutron powder flat sample
 #            2.....neutron powder cylindrical sample
@@ -53,65 +53,79 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #            4.....neutron TOF powder cyl. sample - d-pattern log scaled
 #            5.....neutron TOF powder cyl. sample - d-pattern normal scaled
 #
-#! out10=1    type of desired output in column 10 and 11 of mcdiff.out
-#! out11=0    (optional) default is NSF in column 10 and LF in column 11
-#            0....LF
-#            1....|NSF|[b]
-#            2....Re(NSF)[b]
-#            3....Im(NSF)[b]
-#            4....|MSF|
-#            5....|MSF.P|
-#            6....Re(MSF.P)
-#            7....Im(MSF.P)
-#            8....|MSFdip|
-#            9....|MSFdip.P|
+#     out* controls the type of output in user defined column * of mcdiff.out
+#! out4=30    (optional)
+#! out5=31    (optional)
+#! out6=32    (optional)
+#! out10=1    (optional)
+#! out11=0    (optional)
+#     ... in out*=n the numbers n have the following meaning:
+#            0....LF          
+#            1....|NSF|[b]    
+#            2....Re(NSF)[b]  
+#            3....Im(NSF)[b]  
+#            4....|MSF|       
+#            5....|MSF.P|     
+#            6....Re(MSF.P)   
+#            7....Im(MSF.P)   
+#            8....|MSFdip|    
+#            9....|MSFdip.P|  
 #            10....Re(MSFdip.P)
 #            11....Im(MSFdip.P)
-#            12....angl(Q,P)[ï¿½]
+#            12....angl(Q,P)[°]
 #            13....i(MSFxMSF*).P
-#            14....I+
-#            15....I-
-#            16....I+/I-
+#            14....I+          
+#            15....I-          
+#            16....I+/I-       
 #            17....i(MSFxMSF*)dip.P
-#            18....Idip+
-#            19....Idip-
-#            20....Idip+/Idip-
+#            18....Idip+       
+#            19....Idip-       
+#            20....Idip+/Idip- 
 #            21....2*|MSF.P|/sin^2(angl(Q,P)
 #            22....2*|MSFdip.P|/sin^2(angl(Q,P)
 #            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
 #            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
 #            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
 #            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#            27....Qx[1/A]     
+#            28....Qy[1/A]     
+#            29....Qz[1/A]     
+#            30....d[A]        
+#            31....|Q|[1/A]    
+#            32....2theta      
 #
-#           In the above the intensities I+ and I- are the spinflip and nonspineflip intensities
+#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
 #           in a polarised neutron experiment:
 #            I+-=LF exp(-OTF Q^2/8pi^2) 
-#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 
 #                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
+#           LF  ..... Lorentzfactor
+#           MSF ..... magnetic structure factor
+#           NSF ..... nuclear structure factor
 #
 #
-#             For some of the above options we need the Projection (=polarization of neutron beam) vector
-#! Pa=  1.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
+#             For some of the above options we need the
+#! Pa=  0.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
 #! Pb=  0.0000   Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)
-#! Pc=  0.0000
+#! Pc=  1.0000
 #
 #
 # %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
 #
 #
-#! natcryst=1      number of nonmagnetic atoms in primitive crystalographic unit cell
+#! natcryst=0      number of nonmagnetic atoms in primitive crystalographic unit cell
 #
 # it follows a list of natcryst lines with nonmagnetic atoms
 # ... notes: - if an occupancy other than 1.0 is needed, just reduce 
 #              the scattering length linear accordingly
-#            - da db and dc are not used by the program (unless you enter a line #! use_dadbdc=1), 
-#              dr1,dr2 and dr3 refer to the primitive lattice given below
 #            - Debye Waller Factor notation: sqr(Intensity) ~ structure factor ~ 
 #              ~sum_n ()n exp(-2 DWFn sin^2(theta) / lambda^2)=EXP (-Wn),  
 #              relation to other notations: 2*DWF = B = 8 pi^2 <u^2>, units DWF (A^2)
 #
+#! use_dadbdc=0
+#            - 0 means: da db and dc are not used by the program (unless you enter a line #! use_dadbdc=1),
+#               dr1,dr2 and dr3 refer to the primitive lattice given below
 # Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
-   0.77200   0.00000                        0.50000  0.50000  0.50000  0.50000  0.50000  0.50000  0.00000
 #
 #
 # %SECTION 3% DESCRIPTION OF THE LATTICE
@@ -122,12 +136,12 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 # -----------------------------------------------------------------------------
 #
 # lattice constants (A) and angles 
-#! a=4.3843 b=4.3843 c=2.4194 alpha=  90 beta=  90 gamma=  90
+#! a=4.3843 b=7.0326 c=7.4194 alpha=  90 beta=  90 gamma=  90
 #
 # primitive lattice vectors 
-#! r1a= 1.000000 r2a= 0.000000 r3a= 0.000000
-#! r1b= 0.000000 r2b= 1.000000 r3b= 0.000000   primitive lattice vectors (a)(b)(c)
-#! r1c= 0.000000 r2c= 0.000000 r3c= 1.000000
+#! r1a= 0.500000 r2a= 0.000000 r3a= 0.000000
+#! r1b= 0.500000 r2b= 1.000000 r3b= 0.000000   primitive lattice vectors (a)(b)(c)
+#! r1c= 0.500000 r2c= 0.000000 r3c= 1.000000
 #
 #
 #
@@ -141,8 +155,8 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #                        respectively to get magnetic unit cell
 # 'nat' denotes the number of magnetic atoms in magnetic unit cell
 #
-# Temperature,    Magnetic Field: Magnetic Unit Cell
-#! T=2 K Ha=0 T Hb= 0 T Hc= 0 T: nr1=1 nr2=1 nr3=2 nat=2 
+# Temperature,  External Magnetic Field: Magnetic Unit Cell
+#! T=1.5 K Ha=0 T Hb= 0 T Hc= 0 T: nr1=10 nr2=1 nr3=1 nat=20 
 #
 #
 # It follows a list of nat lines with to describe the magnetic moment configuration
@@ -152,23 +166,38 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #                                      Lande factor
 #                                      Neutron Scattering Length (10^-12 cm) 
 #                 -it may contain a    Debey Waller Factor
-# 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1), 
+# 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1)
 # 'dr1','dr2' and 'dr3' refer to the primitive lattice given below
-# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons along the axes a b and c
-#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mi Mj Mk
+# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons
+#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mx My Mz
 #                have to be given, which refer to an right handed orthogonal coordinate system 
-#                defined by j||b, k||(a x b) and i normal to k and j
+#                defined by y||b, z||(a x b) and x normal to y and z
 #  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components 
 # 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)
-#                                     denote the exchange fields in meV 
+#                                     denote the corresponding exchange fields in meV
 #
-#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>] 
+#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc> ]
 #{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}
-{mcphas.cf1}  0.00000  0.00000  0.00000   0.00000  0.00000  0.00000   +0.00000 +0.00000 -2.13030  +0.00000 %%@
-+0.00000 -2.48540
-{mcphas.cf1}  0.00000  0.00000  1.00000   0.00000  0.00000  1.00000   +0.00000 +0.00000 +2.13030  +0.00000 %%@
-+0.00000 +2.48540
-
+{Nd3p.sipf}  0.00000  0.00000  0.00000   0.00000  0.00000  0.00000   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  0.00000  0.50000  0.07660  -0.00000  0.50000  0.07660   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  0.50000  0.50000  0.50000   1.00000  0.00000  0.00000   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  0.50000  1.00000  0.57660   1.00000  0.50000  0.07660   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  1.00000  1.00000  1.00000   2.00000  0.00000  0.00000   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  1.00000  1.50000  1.07660   2.00000  0.50000  0.07660   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  1.50000  1.50000  1.50000   3.00000 -0.00000 -0.00000   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  1.50000  2.00000  1.57660   3.00000  0.50000  0.07660   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  2.00000  2.00000  2.00000   4.00000  0.00000  0.00000   +0.00000 +2.11700 +0.00000  +0.00000 +0.00000 -0.79390 +3.70470 +0.00000 +0.00000
+{Nd3p.sipf}  2.00000  2.50000  2.07660   4.00000  0.50000  0.07660   +0.00000 +2.11700 +0.00000  +0.00000 +0.00000 -0.79390 +3.70470 +0.00000 +0.00000
+{Nd3p.sipf}  2.50000  2.50000  2.50000   5.00000  0.00000 -0.00000   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  2.50000  3.00000  2.57660   5.00000  0.50000  0.07660   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  3.00000  3.00000  3.00000   6.00000 -0.00000 -0.00000   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  3.00000  3.50000  3.07660   6.00000  0.50000  0.07660   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  3.50000  3.50000  3.50000   7.00000  0.00000  0.00000   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  3.50000  4.00000  3.57660   7.00000  0.50000  0.07660   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
+{Nd3p.sipf}  4.00000  4.00000  4.00000   8.00000  0.00000  0.00000   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  4.00000  4.50000  4.07660   8.00000  0.50000  0.07660   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
+{Nd3p.sipf}  4.50000  4.50000  4.50000   9.00000  0.00000  0.00000   +0.00000 -2.11700 +0.00000  +0.00000 +0.00000 +0.79390 -3.70470 +0.00000 +0.00000
+{Nd3p.sipf}  4.50000  5.00000  4.57660   9.00000  0.50000  0.07660   +0.00000 -2.11700 +0.00000  +0.00000 +0.00000 +0.79390 -3.70470 +0.00000 +0.00000
 \end{verbatim}
 }
 

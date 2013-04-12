@@ -15,10 +15,10 @@ int main (int argc, char **argv)
   float ovalltemp,thetamax,lambda,a=0,b=0,c=0,alpha=0,beta=0,gamma=0;
   double T=0;
   int i,j,k,n,lorenz,nat, nofatoms,nr1=0,nr2=0,nr3=0,natmagnetic;
-  int colcode[40]; // field to store code for assigning type of data to columns of output
   long int pos=0;
   int use_dadbdc=0;
   char instr[MAXNOFCHARINLINE+1];
+  char somestring[MAXNOFCHARINLINE+1];
   char sipffilename[MAXNOFCHARINLINE+1];
   char unitcellstr[MAXNOFCHARINLINE+1];
   float numbers[70];numbers[0]=70;
@@ -116,7 +116,7 @@ fprintf(fout,"#\n");
 
 // input section 1 *******************************************************
 
-  instr[0]='#';colcode[10]=1;colcode[11]=0;
+  instr[0]='#';
  while (instr[strspn(instr," \t")]=='#'&&strstr (instr, "%SECTION 2%")==NULL) // pointer to 'ltrimstring' 
   { pos=ftell(fin_coq); 
     if (pos==-1) 
@@ -129,8 +129,10 @@ fprintf(fout,"#\n");
    extract(instr, "natcryst", nat);
    extract(instr, "ovalltemp", ovalltemp);
    extract(instr, "lorentz", lorenz);
-   extract(instr, "out10",colcode[10]);
-   extract(instr, "out11",colcode[11]);
+   for(int i=1;i<=usrdefoutcols[0];++i) // extract user defined output columns
+   {sprintf(somestring,"out%i",usrdefoutcols[i]);
+    extract(instr, somestring,colcode[usrdefoutcols[i]]);
+   }
    extract(instr, "Pa",P(1));
    extract(instr, "Pb",P(2));
    extract(instr, "Pc",P(3));
@@ -142,8 +144,9 @@ if (lambda == 0){fprintf(stderr,"ERROR mcdiff: no wavelength lambda given or lin
 if (thetamax == 0){fprintf(stderr,"ERROR mcdiff: no thetamax given or line does not start with # in section 1\n");exit(EXIT_FAILURE);}
 printf("     section 1 - lambda=%g A thetamax= %g deg\n",lambda, thetamax);
 printf("                 ovalltemp=%g A^2 lorentz-type=%i\n",ovalltemp,lorenz);
-printf("                 output: column 10=%s column 11=%s\n",colheader[colcode[10]],colheader[colcode[11]]);
-
+printf("                 output:");
+for(int i=1;i<=usrdefoutcols[0];++i)printf("column %i=%s",usrdefoutcols[i],colheader[colcode[usrdefoutcols[i]]]);
+printf("\n");
 fprintf(fout,"# %%SECTION 1%%  OVERALL PARAMETERS\n");
 fprintf(fout,"#\n");
 fprintf(fout,"#! lambda   = %g  wavelength (A)\n",lambda);
@@ -161,9 +164,11 @@ fprintf(fout,"#            1.....neutron powder flat sample\n");
 fprintf(fout,"#            2.....neutron powder cylindrical sample\n");
 fprintf(fout,"#            3.....neutron single crystal\n");
 fprintf(fout,"#            4.....neutron TOF powder cyl. sample - d-pattern log scaled\n");
-fprintf(fout,"#            5.....neutron TOF powder cyl. sample - d-pattern normal scaled\n");
-fprintf(fout,"#! out10=%i    type of desired output in column 10 and 11 of mcdiff.out\n",colcode[10]);
-fprintf(fout,"#! out11=%i    (optional) default is NSF in column 10 and LF in column 11\n",colcode[11]);
+fprintf(fout,"#            5.....neutron TOF powder cyl. sample - d-pattern normal scaled\n#\n");
+fprintf(fout,"#     out* controls the type of output in user defined column * of mcdiff.out (optional)\n");
+for(int i=1;i<=usrdefoutcols[0];++i)
+fprintf(fout,"#! out%i=%i \n",usrdefoutcols[i],colcode[usrdefoutcols[i]]);
+fprintf(fout,"#     ... in out*=n the numbers n have the following meaning:\n");
 for(i=0;i<=COLHEADERDIM;++i){
 fprintf(fout,"#            %i....%s\n",i,colheader[i]);
                    }
@@ -172,7 +177,10 @@ fprintf(fout,"#           In the above the intensities I+ and I- are the spinfli
 fprintf(fout,"#           in a polarised neutron experiment:\n");
 fprintf(fout,"#            I+-=LF exp(-OTF Q^2/8pi^2) \n");
 fprintf(fout,"#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 \n");
-fprintf(fout,"#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]\n");
+fprintf(fout,"#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]\n"
+             "#           LF  ..... Lorentzfactor\n"
+             "#           MSF ..... magnetic structure factor\n"
+             "#           NSF ..... nuclear structure factor\n");
 fprintf(fout,"#\n");
 fprintf(fout,"#\n");
 fprintf(fout,"#             For some of the above options we need the\n");
@@ -470,9 +478,9 @@ fprintf(fout,"#                 -it may contain a    Debey Waller Factor\n");
 fprintf(fout,"# 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1)\n");
 fprintf(fout,"# 'dr1','dr2' and 'dr3' refer to the primitive lattice given below\n");
 fprintf(fout,"# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons\n");
-fprintf(fout,"#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mi Mj Mk\n");
+fprintf(fout,"#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mx My Mz\n");
 fprintf(fout,"#                have to be given, which refer to an right handed orthogonal coordinate system \n");
-fprintf(fout,"#                defined by j||b, k||(a x b) and i normal to k and j\n");
+fprintf(fout,"#                defined by y||b, z||(a x b) and x normal to y and z\n");
 fprintf(fout,"#  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components \n");
 fprintf(fout,"# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)\n");
 fprintf(fout,"#                                     denote the corresponding exchange fields in meV\n");
@@ -631,12 +639,15 @@ delete []sl1r;delete[]sl1i;delete[]dwf1;
 int m=0;
 Vector * hkl = new Vector[MAXNOFREFLECTIONS+1];for(i=0;i<=MAXNOFREFLECTIONS;++i){hkl[i]=Vector(1,3);}
 float D[MAXNOFREFLECTIONS+1];
-float theta[MAXNOFREFLECTIONS+1];
 float intmag[MAXNOFREFLECTIONS+1];
 float intmagdip[MAXNOFREFLECTIONS+1];
 float ikern[MAXNOFREFLECTIONS+1];
-float out10[MAXNOFREFLECTIONS+1];
-float out11[MAXNOFREFLECTIONS+1];
+float * out[NOFOUTPUTCOLUMNS+1];
+for(int i=1;i<=usrdefoutcols[0];++i)
+ {out[usrdefoutcols[i]]=new float [MAXNOFREFLECTIONS+1];
+  if(out[usrdefoutcols[i]]==NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+ }
+
 complex <double> mx[MAXNOFREFLECTIONS+1];
 complex <double> my[MAXNOFREFLECTIONS+1];
 complex <double> mz[MAXNOFREFLECTIONS+1];
@@ -677,10 +688,10 @@ if (argc>1){int nr;
 
 // transformieren der millerindizes auf kristallographische einheitszelle
 printheader(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
-          r2, r3, n,  m,a,b,c,colcode,P,Pxyz);
+          r2, r3, n,  m,a,b,c,P,Pxyz);
 
 
-neutint(jjjpars,code,T,lambda, thetamax, ovalltemp, lorenz, r1, r2, r3, n,  m, hkl, D, theta, intmag,intmagdip, ikern, out10, out11,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2,colcode,Pxyz);
+neutint(jjjpars,code,T,lambda, thetamax, ovalltemp, lorenz, r1, r2, r3, n,  m, hkl, D, intmag,intmagdip, ikern, out,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2,Pxyz);
 
 
 
@@ -697,8 +708,8 @@ for(i=1;i<=m;++i){hhkkll=hkl[i];
 
 
 printreflist(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
-          r2, r3, n,  m, hkl, ikern, intmag,intmagdip, D, theta, out10, out11,mx,my,mz,mxmy,mxmz,mymz,
-          mx2,my2,mz2,a,b,c,colcode,P,Pxyz);
+          r2, r3, n,  m, hkl, ikern, intmag,intmagdip, D, out,mx,my,mz,mxmy,mxmz,mymz,
+          mx2,my2,mz2,a,b,c,P,Pxyz);
 
 fprintf (stderr,"...results written to ./results/mcdiff.out\n");
 fprintf (stderr,"***********************************************************\n");
@@ -709,6 +720,7 @@ fprintf (stderr,"***********************************************************\n")
 //  for (i=1;i<=n;++i){delete jjjpars[i];}
 //  delete []jjjpars;
   delete []hkl;
+  for(i=1;i<=usrdefoutcols[0];++i)delete out[usrdefoutcols[i]];  
  return 0;
 }
 

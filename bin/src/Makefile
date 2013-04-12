@@ -189,7 +189,7 @@ inipar.o: inipar.cpp inipar.hpp martin.h vector.h
 ionpars.o: ionpars.cpp ionpars.hpp perlparse.c
 	$(CCC) $(CFLAGS) $<
 
-inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp
+inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp 
 	$(CCC) $(CFLAGS) $< 
 
 physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp
@@ -201,7 +201,7 @@ qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp my
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 	$(CCC) $(CFLAGS)  $<
 
-mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_observables.c jq.hpp mdcf.hpp $(INCL)
+mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp $(INCL)
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
 
 cond.o: cond.c paramete.hpp martin.h
