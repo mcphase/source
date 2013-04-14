@@ -1139,7 +1139,7 @@ void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,double & lnZs,Ve
 int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
 {// calculate number of transitions
    int dj=est.Rhi();
-   int n=ninit;
+   double n=ninit;
    if (n>dj)n=dj;
    //if (pinit<SMALL_PROBABILITY)pinit=SMALL_PROBABILITY;
    double zsum=0,zii,x;

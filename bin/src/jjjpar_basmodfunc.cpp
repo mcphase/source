@@ -397,12 +397,12 @@ if(module_type==2&&fabs(gJ-(*iops).gJ)>0.00001)
 {fprintf(stderr,"Error internal module cfield : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipf_filename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
 if(module_type==4&&fabs(gJ-(*iops).gJ)>0.00001)
 {fprintf(stderr,"Error internal module so1ion : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipf_filename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
-if (gJ==0){printf("# reading gJ=0 in single ion property file %s -> entering intermediate coupling mode by assigning Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc (S... Spin, L... angular momentum)\n",sipf_filename);
-           if (module_type==1){fprintf(stderr,"Error internal module kramers: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-           if (module_type==2){fprintf(stderr,"Error internal module cfield : intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-           if (module_type==3){fprintf(stderr,"Error internal module brillouin: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-           if (module_type==4){fprintf(stderr,"Error internal module so1ion : intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-          }
+//if (gJ==0){printf("# reading gJ=0 in single ion property file %s -> entering intermediate coupling mode by assigning Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc (S... Spin, L... angular momentum)\n",sipf_filename);
+//           if (module_type==1){fprintf(stderr,"Error internal module kramers: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
+//           if (module_type==2){fprintf(stderr,"Error internal module cfield : intermediate coupling not supported\n");exit(EXIT_FAILURE);}
+//           if (module_type==3){fprintf(stderr,"Error internal module brillouin: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
+//           if (module_type==4){fprintf(stderr,"Error internal module so1ion : intermediate coupling not supported\n");exit(EXIT_FAILURE);}
+//          }
 
 }
 
@@ -504,7 +504,7 @@ ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
             return est;break;
    case 2:
    case 4: (*iops).cfeigenstates(&est,Hxc,Hext,T);return est;break;
-   default: est=0;return est;
+   default: est=ComplexMatrix(0,2,1,2);est=0;return est;
   }
 }
 
@@ -533,7 +533,7 @@ ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hex
             return Icalc_parstorage;break;
    case 2:
    case 4: (*iops).cfeigenstates(&Icalc_parstorage,Hxc,Hext,T);return Icalc_parstorage;break;
-   default: Icalc_parstorage=0;return Icalc_parstorage;
+   default: Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;return Icalc_parstorage;
   }
 }
 /****************************************************************************/

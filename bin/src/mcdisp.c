@@ -931,7 +931,6 @@ if (do_jqfile==1){
  
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
                              ini,calc_rixs,do_Erefine,counter);
-                                       
                   ini.print_usrdefcols(foutqom,qijk,qincr);
                   fprintf (foutqom, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
                   for (i=1;i<=dimA;++i)fprintf (foutqom, " %4.4g ",myround(En(i)));
@@ -1284,7 +1283,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 	    
 		    
                 if(do_verbose==1){fprintf(stdout, "\n");}
-		    
+//*********************************************************************		    
    // do refinement of energies by output of scattering cross section vs enrgy transfer if required
   if (do_Erefine==1&&!calc_rixs){double totint=0;
                 if(do_verbose==1){fprintf(stdout, "#refining calculation with exact calculation of energy dependence of scattering cross section\n");}
@@ -1390,19 +1389,23 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           delete[] thrdat.J; //delete tin;
 #endif
 	             fprintf (foutdstot, " %4.4g ",totint);
-                     }  
+                     }  // do_Erefine
+//*********************************************************************		    
 
    if(!calc_rixs)fprintf (foutdstot, "\n");              
    fprintf (foutqom, "\n");
    } // do jqfile
+  
 #ifdef _THREADS
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
-   {
-      delete thrdat.md[ithread]; delete thrdat.ini[ithread]; delete thrdat.inputpars[ithread]; 
+   {  //delete thrdat.md[ithread];  ... already done above
+      delete thrdat.ini[ithread]; 
+      delete thrdat.inputpars[ithread]; 
    }
    delete[] thrdat.inputpars; delete[] thrdat.md; delete[] thrdat.ini;
 #endif
 
+                                     
 
 } // next hkl
     if (do_jqfile==1) 

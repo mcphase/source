@@ -18,7 +18,6 @@ if(Jret.Hi()!=3||Hxc.Hi()!=3||Hext.Hi()!=3||ABC.Hi()!=1)
    {fprintf(stderr,"Error loadable module brillouin.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
 
-    
 double JJ,KBT,XJ,gmhkt,Jav,gmh,Z,X;
 Vector gjmbH(1,3);
 gjmbH=Hxc+gJ*MU_B*Hext;

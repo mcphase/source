@@ -100,11 +100,12 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
      {//first and following  transitions out of energy range ... do not consider them
      //fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      ++jjj.transitionnumber;
-     fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
+     //fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
      jjj.du1calc(T,mf,Hext,u1,d,est);
      if(jjj.transitionnumber>nt){return 1;}
      }
-    if(jjj.transitionnumber>nt){return 1;}
+   // fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
+     if(jjj.transitionnumber>nt){return 1;}
     gamma=Norm2(u1);
      // calculate powder neutron intensities 
      double intensityp=0, intensitym=0; ComplexVector dm1(1,3);

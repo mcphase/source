@@ -58,6 +58,7 @@ class htcalc_input { public:
    { 
       thread_id = _tid; j = _j; inputpars = new par(*pars_in);
    }
+   ~htcalc_input(){delete inputpars;}
 };
 // ----------------------------------------------------------------------------------- //
 // Declares these variables global, so all threads can see them
@@ -427,7 +428,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
     //set testspins
     //j=0;  //uncomment this for debugging purposes
     j = -testqs.nofqs()-1;
-    
+  
 #ifdef _THREADS
 // ----------------------------------------------------------------------------------- //
 // Populates the thread data structure
@@ -458,7 +459,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  HANDLE threads[NUM_THREADS];
  DWORD tid[NUM_THREADS], dwError;
  #endif
-
+ 
  bool all_threads_started = false; int ithread=0;
 #endif
  for (k= -testqs.nofqs();k<=testspins.n;++k)
@@ -474,7 +475,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
        threads[ithread] = CreateThread(NULL, 0, htcalc_iteration, (void *) tin[ithread], 0, &tid[ithread]);
        if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
        #endif
-       ithread++;
+        ithread++;
        if(ithread%NUM_THREADS==0 || all_threads_started)
        {
           all_threads_started = true;

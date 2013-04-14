@@ -614,20 +614,18 @@ jjjpar::jjjpar (const jjjpar & pp)
   transitionnumber=pp.transitionnumber;
   sipffilename= new char [strlen(pp.sipffilename)+1];
   strcpy(sipffilename,pp.sipffilename);
-  if (pp.module_type==1||pp.module_type==0)  ABC=pp.ABC;
-  if ((pp.module_type==1||pp.module_type==0) && (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
-  {
-     Icalc_parstorage = ComplexMatrix(pp.Icalc_parstorage.Rlo(),pp.Icalc_parstorage.Rhi(),pp.Icalc_parstorage.Clo(),pp.Icalc_parstorage.Chi());
+  if (pp.module_type==3||pp.module_type==1||pp.module_type==0)  ABC=pp.ABC;
+  if ((pp.module_type==3||pp.module_type==1||pp.module_type==0) &&
+      (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
+  {  Icalc_parstorage = ComplexMatrix(pp.Icalc_parstorage.Rlo(),pp.Icalc_parstorage.Rhi(),pp.Icalc_parstorage.Clo(),pp.Icalc_parstorage.Chi());
      Icalc_parstorage = pp.Icalc_parstorage;
   }
-  if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);}
   if (pp.module_type==2||pp.module_type==4)  {iops=new ionpars(*pp.iops);//((int)(2*(*pp.iops).J+1));iops=pp.iops;
                            int dj;dj=(int)(2*J()+1);
                            est=ComplexMatrix(0,dj,1,dj);est=pp.est;
                            Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=pp.Icalc_parstorage;
                            }
-//  if (module_type==2)  iops=new ionpars(4);iops=pp.iops;
-//  if (module_type==2)  iops=pp.iops;
+   if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);}
   
 //#ifdef __linux__
 /*  if (module_type==0)
