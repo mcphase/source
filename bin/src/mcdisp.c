@@ -367,7 +367,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
  // ********************************************** write mcdisp.trs *******************************************************
  sprintf(filename,"./results/%smcdisp.trs",ini.prefix);printf("# saving  %s\n",filename);
   fout = fopen_errchk (filename,"w");
-   trs_header_out(fout,pinit,ninit,maxE,ini.T,ini.Hext);
+   trs_header_out(fout,pinit,ninit,maxE,ini.T,ini.Hext,'I');
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
    fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
@@ -379,7 +379,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
       (*inputpars.jjj[l]).maxE=maxE;(*inputpars.jjj[l]).pinit=pinit;(*inputpars.jjj[l]).ninit=ninit;
      noftransitions(l)=0;int noft;
      if(trs_write_next_line(fout,(*inputpars.jjj[l]),noft,i,j,k,l,noftransitions(l),ini.T,mf,ini.Hext,
-                    md.est(i,j,k,l),d,minE,maxE))
+                    md.est(i,j,k,l),d,minE,maxE,'I'))
        {fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
                         " (within first crystallographic unit of magnetic unit cell)\n"
                         " please increase energy range in option -maxE and -minE\n",minE,maxE);
@@ -391,7 +391,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
    int idummy;  
    while(noftransitions(l)<maxlevels&&
          !trs_write_next_line(fout,(*inputpars.jjj[l]),idummy,i,j,k,l,
-                              noftransitions(l),ini.T,mf,ini.Hext,md.est(i,j,k,l),d,minE,maxE));
+                              noftransitions(l),ini.T,mf,ini.Hext,md.est(i,j,k,l),d,minE,maxE,'I'));
  
    (*inputpars.jjj[l]).transitionnumber=jmin; // put back transition number for 1st transition
   }}}}

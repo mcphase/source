@@ -650,17 +650,16 @@ void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  Hxc,Vector & He
 */
    int i,j,sort=1,dj=Hcf.Rhi();
    (*eigenstates) = ComplexMatrix(0,dj,1,dj);
-   Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
+   Vector En(1,dj),wn(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
    setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
    
    for(i=1;i<=dj;++i)for(j=1;j<=dj;++j)(*eigenstates)(i,j)=complex <double> (zr(i,j),zi(i,j));
  
     //calculate partition sum
-     double zz=0;double KBT,E0;KBT=T*KB;E0=En(1);
-      for(j=1;j<=dj;++j){zz+=exp(-((En(j)-E0)/KBT));}
-
+    double zz;
+    calculate_Z_wn(En,T,zz,wn);
      // put boltzmann population into row 0 of eigenstates...
-     for(j=1;j<=dj;++j){(*eigenstates)(0,j)=complex<double>(En(j),exp(-(En(j)-E0)/KBT)/zz);}
+     for(j=1;j<=dj;++j){(*eigenstates)(0,j)=complex<double>(En(j),wn(j));}
 }
 
 /**************************************************************************/
@@ -869,7 +868,7 @@ int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVect
   char optype[5];
   for(int l=1;l<=Hxc.Hi();++l){sprintf(optype,"I%i",l);
   u1(l)=observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*In[l]));}
-if(T<0)T=-T;
+
 // return number of all transitions     
      return noft(ests,T,pinit,ninit);
 }
@@ -901,7 +900,7 @@ int ionpars::dJ1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVect
   J1(3)=observable1(i,j,delta,zr,zi,T,ests,pr,"Jc",Jc);
 
 
-if(T<0)T=-T;
+
 // return number of all transitions     
      return noft(ests,T,pinit,ninit);
 }
@@ -948,7 +947,7 @@ for(l=16;l<=28;++l){sprintf(optype,"cd_coeff%i",l);
      // theta_J*cnst(l,m)  are prefactors to get coefficients of Zlm*R(r)^2 
     //in case of module cfield and so1ion(stevens parameters tetan and zlm prefactors)
 
-if(T<0)T=-T;
+
 // return number of all transitions     
      return noft(ests,T,pinit,ninit);
 }   
@@ -1117,8 +1116,8 @@ void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,double & lnZs,Ve
        lnZs=log(Zs)-x/KB/T;    
        Zs*=exp(-x/KB/T);
      } 
-     else
-     { printf ("Temperature T<0: please choose probability distribution of states by hand\n");
+     if (T==0)
+     { printf ("Temperature T==0: please choose probability distribution of states by hand\n");
                          printf ("Number   Energy     Excitation Energy\n");
      for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV\n",i,En(i),En(i)-x);
      char instr[MAXNOFCHARINLINE];
@@ -1133,19 +1132,23 @@ void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,double & lnZs,Ve
                          printf ("\n\nNumber   Energy     Excitation Energy   Probability\n");
      for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV %4.4g  \n",i,En(i),En(i)-x,wn(i));
      }
-     
+     if (T<0){Zs=1;lnZs=0;wn=0;wn((int)(-T))=1;}     
 }
 
 
 int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
 {// calculate number of transitions
    int dj=est.Rhi();
-   if (ninit>dj)ninit=dj;
+   int n=ninit;
+   if (n>dj)n=dj;
    //if (pinit<SMALL_PROBABILITY)pinit=SMALL_PROBABILITY;
    double zsum=0,zii,x;
    int noft=0;
-   for(int i=1;(i<=ninit)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
+   if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
    {noft+=dj-i+1;zsum+=zii;}
+   
+   if(T<0)for(int i=1;i<=n;++i)
+   {noft+=dj-i+1;}
    return noft;
 }
 
@@ -1164,7 +1167,7 @@ void ionpars::popnr_diff(ComplexVector& dMQ,int &i,int &j,ComplexMatrix & est,fl
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
       for(int l=1;l<=dMQ.Hi();++l)printf(" |<%i|%s%i-<%s%i>|%i>|^2=%4.4g",i,n,l,n,l,j,abs(dMQ(l))*abs(dMQ(l)));
       printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
-    dMQ*=sqrt(imag(est(0,i))/KB/T);
+    dMQ*=sqrt(imag(est(0,i))/KB/fabs(T));
    }
 }
 

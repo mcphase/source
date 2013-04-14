@@ -118,7 +118,7 @@ for (i=1;i<argc;++i)
   // transition matrix Mij
   ComplexVector obs1(1,observable_nofcomponents),u1(1,nofcomponents);
  
-double TT=fabs(T);
+double TT=T;
 
 if (!do_sipf)
   {par inputpars("./mcphas.j");
@@ -149,12 +149,12 @@ if (!do_sipf)
       if(nmax>0)
       { sprintf(filename,"./results/%s.trs",(*inputpars.jjj[i]).sipffilename);
         fout_trs = fopen_errchk (filename,"w");
-        trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext);
+        trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
  
         (*inputpars.jjj[i]).maxE=maxE;(*inputpars.jjj[i]).pinit=pinit;(*inputpars.jjj[i]).ninit=ninit;
         (*inputpars.jjj[i]).transitionnumber=0;int tc=0;
         if(trs_write_next_line(fout_trs,(*inputpars.jjj[i]),nt,1,1,1,1,tc,TT,Hxc,Hext,
-                                    (*inputpars.jjj[i]).eigenstates(Hxc,Hext,TT),d,-1e100,maxE))
+                                    (*inputpars.jjj[i]).eigenstates(Hxc,Hext,TT),d,-1e100,maxE,observable))
         {fprintf(stderr,"Warning singleion: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
                         " (within first crystallographic unit of magnetic unit cell)\n"
                         " please increase energy range in option -maxE \n",0.0,maxE);
@@ -162,7 +162,7 @@ if (!do_sipf)
         else
         {printf("%4g ",d);
          while(tc<nmax&&!trs_write_next_line(fout_trs,(*inputpars.jjj[i]),nt,1,1,1,1,tc,TT,Hxc,Hext,
-                          (*inputpars.jjj[i]).est,d,-1e100,maxE)){printf("%4g ",d);if(d>=0)--tc;}
+                          (*inputpars.jjj[i]).est,d,-1e100,maxE,observable)){printf("%4g ",d);if(d>=0)--tc;}
         }
         (*inputpars.jjj[i]).print_eigenstates(fout);fclose(fout);
         fclose(fout_trs);
@@ -197,11 +197,11 @@ if (!do_sipf)
       if(nmax>0)
       { sprintf(filename,"./results/%s.trs",jjj.sipffilename);
         fout_trs = fopen_errchk (filename,"w");
-        trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext);
+        trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
  
         jjj.maxE=maxE;jjj.pinit=pinit;jjj.ninit=ninit;
         jjj.transitionnumber=0;int tc=0;
-        if(trs_write_next_line(fout_trs,jjj,nt,1,1,1,1,tc,TT,Hxc,Hext,jjj.eigenstates(Hxc,Hext,TT),d,-1e100,maxE))
+        if(trs_write_next_line(fout_trs,jjj,nt,1,1,1,1,tc,TT,Hxc,Hext,jjj.eigenstates(Hxc,Hext,TT),d,-1e100,maxE,observable))
         {fprintf(stderr,"Warning singleion: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
                         " (within first crystallographic unit of magnetic unit cell)\n"
                         " please increase energy range in option -maxE \n",0.0,maxE);
@@ -209,7 +209,7 @@ if (!do_sipf)
         else
         {printf("%4g ",d);
          while(tc<nmax&&!trs_write_next_line(fout_trs,jjj,nt,1,1,1,1,tc,TT,Hxc,Hext,
-                          jjj.est,d,-1e100,maxE)){if(d>=0)--tc;printf("%4g ",d);}
+                          jjj.est,d,-1e100,maxE,observable)){if(d>=0)--tc;printf("%4g ",d);}
         }
         jjj.print_eigenstates(fout);fclose(fout);
         fclose(fout_trs);
