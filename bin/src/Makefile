@@ -109,7 +109,7 @@ RCSCI    =      ci -u -f -s"Rel" -r$(VERSION) -m"$(LOCKMSG)"
 
 INCL = mcphas.h  testspin.hpp qvectors.hpp spincf.hpp par.hpp  jjjpar.hpp inipar.hpp \
        mfcf.hpp vector.h martin.h graphic_parameters.hpp
-OBJS = jjjpar.o par.o physprop.o qvectors.o mcphas.o testspin.o spincf.o inipar.o \
+OBJS = jjjpar.o par.o physprop.o qvectors.o testspin.o spincf.o inipar.o \
         mfcf.o martin.o ionpars.o graphic_parameters.o
 
 VOBS = ivector.o imatrix.o dvector.o dmatrix.o dmatmul.o cvector.o cmatrix.o cmatmul.o \
@@ -138,7 +138,7 @@ all :  martin.o ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE) \
 	../mcdispit$(EXE) ../mcphasit$(EXE) ../spins$(EXE) \
 	../spinsfromq$(EXE) ../addj$(EXE) ../singleion$(EXE)   \
 	../densplt$(EXE)  ../pointc$(EXE) ../mcdiff$(EXE) \
-        ../formfactor$(EXE) ../radwavfunc$(EXE) 
+        ../formfactor$(EXE) ../radwavfunc$(EXE) ../anisotropyit$(EXE)
        
 test: ../ionpars$(EXE) ../jjjpar$(EXE)
 testperlparse:  ../perlparse$(EXE)
@@ -199,6 +199,9 @@ qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp my
 	$(CCC) $(CFLAGS) $<
 
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
+	$(CCC) $(CFLAGS)  $<
+
+anisotropy.o: anisotropy.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 	$(CCC) $(CFLAGS)  $<
 
 mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_io.c $(INCL)
@@ -293,9 +296,13 @@ ip.o: ionpars.cpp
 	@echo Linking ../mcdispit
 	@$(LINKER)  -Wall  -o ../mcdispit   $^  $(LFLAGS) $(THREADLINK)
 
-../mcphasit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o
+../mcphasit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o mcphas.o
 	@echo Linking ../mcphasit
 	@$(LINKER)  -Wall  -o ../mcphasit  $^ $(LFLAGS) 
+
+../anisotropyit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o anisotropy.o
+	@echo Linking ../anisotropyit
+	@$(LINKER)  -Wall  -o ../anisotropyit  $^ $(LFLAGS) 
 
 ../spins$(EXE): spincf.o spins.o martin.o myev.o  $(VOBS) density.o ionpars.o jjjpar.o $(CFIELDOBJS) $(FUNCTIONOBJS) graphic_parameters.o par.o
 	@echo Linking ../spins

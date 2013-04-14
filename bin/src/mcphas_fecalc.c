@@ -1,7 +1,7 @@
 /*****************************************************************************/
 // here the free energy is calculated for a given (initial) spinconfiguration
 // using the meanfield algorithm
-double fecalc(Vector  Hex,double T,par & inputpars,
+double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
              spincf & sps,mfcf & mf,double & u,testspincf & testspins, qvectors & testqs)
 {/*on input:
     T		Temperature[K]
@@ -206,7 +206,7 @@ for (r=1;sta>ini.maxstamf;++r)
   #ifdef _THREADS
   MUTEX_LOCK (&mutex_tests);
   #endif
-  checkini(testspins,testqs);
+  checkini(testspins,testqs,ini);
   #ifdef _THREADS
   MUTEX_UNLOCK (&mutex_tests);
   #endif

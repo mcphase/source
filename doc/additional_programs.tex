@@ -11,27 +11,33 @@ file1.j - output is written to stdout
 
 
 \item [\prg anisotropy:] program to calculate the magnetic anistropy
+by doing a mcphas or
+               single ion calculation for different external magnetic field
+               directions and evaluating the expectation value of the magnetic 
+               moment.
 \begin{verbatim}
-    usage: anisotropy -h 
-           anisotropy T H xn yn zn nofsteps so1ion -r sipffilename -B
-           anisotropy T H xn yn zn nofsteps ic1ion sipffilename
-           anisotropy T H xn yn zn nofsteps icf1ion sipffilename
+     usage: anisotropy -h
+           anisotropy  T H xn yn zn nofsteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
 
      -h           : this (help) message
       T           : temperature in Kelvin
-      H           : absolute value of the magnetic field
+      H           : absolute value of the external magnetic field (T)
       xn,yn,zn    : direction normal to plane, in which the anisotropy
                     should be calculated ... e.g. if you want to
                     calculate the anisotropy in the xy plane, then
                     enter xn yn zn = 0 0 1
       nofsteps    : number of steps to be calculated 
-      so1ion      : use so1ion module
-      ic1ion      : use ic1ion module
-      sipffilename: filename of single ion parameter file
+
+    option:
+    -r sipffilename: filename of single ion parameter file
+                      Hxc1,Hxc2,... are the exchange field components (meV)
+                     (exchange field is kept constant, external magnetic
+                     field is rotated in the anisotropy calculation)
 
     output files:
 
-    ./results/anisotropy.out  contains anisotropy information 
+    ./results/anisotropy.out  contains anisotropy information
+
 \end{verbatim}
 
 \item [\prg cpso1ion 10 100 1 {[options]}: ] calculates the specific heat in the temperature %%@

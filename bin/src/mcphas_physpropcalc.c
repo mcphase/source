@@ -1,5 +1,5 @@
 /************************************************************************/
-void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,par & inputpars)
+void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars)
 { int i,j,k,l,n,m1;div_t result;float mmax; char text[100];FILE * fin_coq;
  //save fe and u
  // calculate nettomoment from spinstructure

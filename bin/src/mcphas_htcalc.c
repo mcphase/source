@@ -44,6 +44,7 @@ typedef struct{
    double T;
    qvectors * testqs;  
    testspincf * testspins;
+   inipar * ini;
    physproperties * physprops; 
    double femin;
    spincf spsmin;
@@ -70,7 +71,7 @@ THRLC_TYPE threadSpecificKey;
 
 #endif // def _THREADS
 
-void checkini(testspincf & testspins,qvectors & testqs)
+void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
 {struct stat filestatus;
  static time_t last_modify_time;
  static int washere=0;
@@ -130,9 +131,11 @@ void checkini(testspincf & testspins,qvectors & testqs)
 }
 
 #ifdef _THREADS
+#define ini (*thrdat.ini)
 #define inputpars (*myinput->inputpars)
 #define testqs (*thrdat.testqs)
 #define testspins (*thrdat.testspins)
+#define H thrdat.H
 #define T thrdat.T
 #define femin thrdat.femin
 #if defined  (__linux__) || defined (__APPLE__)
@@ -141,7 +144,7 @@ void *htcalc_iteration(void *input)
 DWORD WINAPI htcalc_iteration(void *input)
 #endif
 #else
-int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
+int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,inipar & ini, par &inputpars, qvectors &testqs, testspincf &testspins, physproperties &physprops)
 #endif
 {
  fflush(stderr); fflush(stdout);
@@ -204,7 +207,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
                     }
       //!!!calculate free energy - this is the heart of this loop !!!!
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
-      fe=fecalc(H ,T,inputpars,sps,(*mf),u,testspins,testqs);
+      fe=fecalc(H ,T,ini,inputpars,sps,(*mf),u,testspins,testqs);
           
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
@@ -212,7 +215,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
                if (verbose==1){fprintf(stdout,"fe(tryrandom=%i)= %f meV\n",tryrandom,fe); fflush(stdout);}
 	       sps1=sps;sps1.reduce(); 
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.nofatoms,inputpars.nofcomponents);
-               if ((fered=fecalc(H ,T,inputpars,sps1,(*mf1),u,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
+               if ((fered=fecalc(H ,T,ini,inputpars,sps1,(*mf1),u,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
                    magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
                    for (l1=1;l1<=inputpars.nofatoms;++l1){
@@ -253,7 +256,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
                 delete magmom;   
                            // see if spinconfiguration is already stored
              #ifndef _THREADS
-	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops))//0 means error in checkspincf/addspincf
+	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini))//0 means error in checkspincf/addspincf
 	        {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
                  testspins.save(filemode);testqs.save(filemode); delete mf;
 		 return 1;}
@@ -262,7 +265,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
 	    if (verbose==1) printf("fe=%gmeV, struc no %i in struct-table (initial values from struct %i)",fe,physprops.j,j);
              #else
              MUTEX_LOCK(&mutex_tests); 
-             int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,(*thrdat.physprops)); //0 means error in checkspincf/addspincf
+             int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,(*thrdat.physprops),ini); //0 means error in checkspincf/addspincf
              MUTEX_UNLOCK(&mutex_tests); 
 	     if (checksret==0) {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
                  testspins.save(filemode);testqs.save(filemode); delete mf;
@@ -352,9 +355,11 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
       thrdat.thread_id = thread_id;
       EVENT_SIG(checkfinish);
       MUTEX_UNLOCK(&mutex_loop);
+      #undef ini
       #undef inputpars
       #undef testqs
       #undef testspins
+      #undef H
       #undef T
       #undef femin
       #if defined  (__linux__) || defined (__APPLE__)
@@ -365,7 +370,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T, p
       #endif // def _THREADS
 }
 
-int  htcalc (Vector Habc,double T,par & inputpars,qvectors & testqs,
+int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs,
              testspincf & testspins, physproperties & physprops)
 {/* calculates magnetic structure at a given HT- point  
   on input: 
@@ -401,7 +406,7 @@ int  htcalc (Vector Habc,double T,par & inputpars,qvectors & testqs,
 if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check mcphas.ini !");exit(EXIT_FAILURE);}
 
  srand(time(0)); // initialize random number generator
- checkini(testspins,testqs); // check if user pressed a button
+ checkini(testspins,testqs,ini); // check if user pressed a button
  if (ini.logfevsQ==1) {felog=fopen_errchk("./results/mcphas.log","a");
                fprintf(felog,"#Logging of h k l fe[meV] spinconf_nr n1xn2xn3 T=%g Ha=%g Hb=%g Hc=%g\n",T,Habc(1),Habc(2),Habc(3));
                fclose(felog);
@@ -459,7 +464,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  for (k= -testqs.nofqs();k<=testspins.n;++k)
  {++j; if (j>testspins.n) j=-testqs.nofqs();
 #ifndef _THREADS
-       htcalc_iteration(j, femin, spsmin, H, T, inputpars, testqs, testspins, physprops);
+       htcalc_iteration(j, femin, spsmin, H, T,ini, inputpars, testqs, testspins, physprops);
 #else
        (*tin[ithread]).j = j;
        #if defined  (__linux__) || defined (__APPLE__)
@@ -552,7 +557,7 @@ else // if yes ... then
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
-      physprops.fe=fecalc(H ,T,inputpars,sps,(*mf),physprops.u,testspins,testqs); 
+      physprops.fe=fecalc(H ,T,ini,inputpars,sps,(*mf),physprops.u,testspins,testqs); 
       magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
                    for (l1=1;l1<=inputpars.nofatoms;++l1){
@@ -589,7 +594,7 @@ else // if yes ... then
  //check if fecalculation gives again correct result
    if (physprops.fe>femin+(0.00001*fabs(femin))){fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
                             T,Norm(H),femin,physprops.j,physprops.fe);delete mf;return 2;}
- physpropclc(H,T,sps,(*mf),physprops,inputpars);
+ physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
       delete mf;
  }
 
@@ -608,7 +613,7 @@ return 0; // ok we are done with this (HT) point- return ok
 // table testspins and adds it if necessary
 int checkspincf(int j,spincf & sps1,qvectors & testqs,Vector & nettom,
 		     Vector & momentq0, Vector & phi, 
-                     testspincf & testspins,physproperties & physprops)
+                     testspincf & testspins,physproperties & physprops,inipar & ini)
 { int i;
   spincf sps(1,1,1,sps1.nofatoms,sps1.nofcomponents);
   sps=sps1;sps.reduce();// reduce inserted MR 20120907

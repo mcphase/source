@@ -1,34 +1,23 @@
 #!/usr/bin/perl
-use Getopt::Long;
+#use Getopt::Long;
 #use Math::Trig;
 use PDL;
 use PDL::Slatec;
 #use Switch;
 use File::Copy;
 
-
-@command=@ARGV;
-@AARGV=@ARGV;
-GetOptions("help"=>\$helpflag,
-           "ic1ion"=>\$ic1ion,
-           "icf1ion"=>\$icf1ion,
-           "so1ion"=>\$so1ion);
-usage() if $helpflag||$#AARGV<2;
-$fileout="./results/anisotropy.out";
+usage() if $#ARGV<2;
 $PI=3.141592654;
 print STDOUT << "EOF";
 *******************************************************
                program anisotropy
-   calculating anistropy using module $module
+        M Rotter 2013 - calculating magnetic anistropy 
 *******************************************************
 EOF
 
-calc(); # do calculation
-
+system("anisotropyit @ARGV");
 print STDOUT << "EOF";
 *******************************************************
-file $fileout created
-
 you may now view an anisotropy plot by command
 
     display 8 13 results/anisotropy.out
@@ -44,24 +33,28 @@ sub usage() {
 
   print STDERR << "EOF";
 
-    anistropy: program to calculate the magnetic anistropy
+    anistropy: program to calculate the magnetic anisotropy by doing a mcphas or
+               single ion calculation for different external magnetic field
+               directions and evaluating the expectation value of the magnetic 
+               moment.
 
     usage: anisotropy -h
-           anisotropy T H xn yn zn nofsteps so1ion -r sipffilename -B
-           anisotropy T H xn yn zn nofsteps ic1ion sipffilename
-           anisotropy T H xn yn zn nofsteps icf1ion sipffilename
+           anisotropy  T H xn yn zn nofsteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
 
      -h           : this (help) message
       T           : temperature in Kelvin
-      H           : absolute value of the magnetic field
+      H           : absolute value of the external magnetic field (T)
       xn,yn,zn    : direction normal to plane, in which the anisotropy
                     should be calculated ... e.g. if you want to
                     calculate the anisotropy in the xy plane, then
                     enter xn yn zn = 0 0 1
       nofsteps    : number of steps to be calculated 
-      so1ion      : use so1ion module
-      ic1ion      : use ic1ion module
-      sipffilename: filename of single ion parameter file
+
+    option:
+    -r sipffilename: filename of single ion parameter file
+                      Hxc1,Hxc2,... are the exchange field components (meV)
+                     (exchange field is kept constant, external magnetic
+                     field is rotated in the anisotropy calculation)
 
     output files:
 

@@ -7,7 +7,6 @@
 
 #include<mcphas.h>
 
-inipar ini("mcphas.ini");
 int verbose=0;
 const char * filemode="w";
 
@@ -39,6 +38,7 @@ fprintf(stderr,"* mcphas - program to calculate static magnetic properties (phas
 fprintf(stderr,"*\n");
 fprintf(stderr,"* reference: M. Rotter JMMM 272-276 (2004) 481\n");
 fprintf(stderr,"**************************************************************************\n\n");
+inipar ini("mcphas.ini");
   
 // check command line
   for (im=1;im<=argc-1;++im)
@@ -134,7 +134,7 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
       physprop.H=h;
 
 //calculate physical properties at HT- point
-   j=htcalc(physprop.H,T,inputpars,testqs,testspins,physprop);
+   j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);
        switch (j)
        {case 0:
             //save physical properties of HT-point

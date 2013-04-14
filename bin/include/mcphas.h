@@ -21,7 +21,7 @@ int normalizedadbdc(Vector & dadbdc,double n,par & inputpars);
      //calculation of physical properties at given HT point
 
 /*check if parameter file mcphas.ini has been changed*/
-void checkini(testspincf & testspins,qvectors & testqs);
+void checkini(testspincf & testspins,qvectors & testqs,inipar & ini);
 
 
 /* calculate magnetic structure at a given HT- point
@@ -38,12 +38,12 @@ void checkini(testspincf & testspins,qvectors & testqs);
  // returns 1 if too maxnofspinconfigurations is exceeded
  // returns 2 if no spinconfiguration has been found at ht point
  */
-int htcalc(Vector H,double T,par & inputpars,qvectors & testqs,
+int htcalc(Vector H,double T,inipar & ini, par & inputpars,qvectors & testqs,
                      testspincf & testspins,physproperties & physprops);
 
 // calculate physical properties for stabilized HT point
 void physpropclc(Vector H,double T,
-                               spincf & sps,mfcf & mf,physproperties & physprops,par & inputpars);
+                               spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars);
 
 // here the free energy is calculated for a given (initial) spinconfiguration
 // using the meanfield algorithm
@@ -60,7 +60,7 @@ void physpropclc(Vector H,double T,
     u		mangetic energy[meV]
 
  */
-double fecalc(Vector H,double T,par & inputpars,
+double fecalc(Vector H,double T,inipar & ini,par & inputpars,
             spincf & sps,mfcf & mf,double & u,testspincf & testspins,qvectors & testqs);
 
 
@@ -69,7 +69,7 @@ double fecalc(Vector H,double T,par & inputpars,
 // table testspins and adds it if necessary
 int checkspincf(int j,spincf & sps,qvectors & testqs, Vector & nettom,
 		    Vector & momentq0, Vector & phi,
-                     testspincf & testspins,physproperties & physprops);
+                     testspincf & testspins,physproperties & physprops,inipar & ini);
 
 
 // subroutine to calculate magnetisation M from effective field H
