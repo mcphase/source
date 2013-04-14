@@ -73,6 +73,11 @@ else
 LFLAGS +=          $(XLIBS) $(EZLIB) -lstdc++ -lm ${LBLAS}
 endif
 
+# uncomment next line and set NUM_THREADS in mcphas_htcalc.c and mcdisp.c
+# according to your machine if you want to use multiple processing to speed up
+# calculations
+threads=1
+# 
 ifdef threads
 THREADFLAG=-D_THREADS
 ifdef LINUX
@@ -199,13 +204,17 @@ qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp my
 	$(CCC) $(CFLAGS) $<
 
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
-	$(CCC) $(CFLAGS)  $<
+	$(CCC) $(CFLAGS) $(THREADFLAG) $<
 
 anisotropy.o: anisotropy.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
-	$(CCC) $(CFLAGS)  $<
+#	$(CCC) $(CFLAGS)   $<
+	$(CCC) $(CFLAGS)  $(THREADFLAG) $<
+# .... threading does not work yet
 
 mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_io.c $(INCL)
+#	$(CCC) $(CFLAGS)  $<
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
+# .... threading does not work yet ? keep it in test stage ...
 
 cond.o: cond.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<

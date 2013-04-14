@@ -70,7 +70,7 @@ void errexit() // type info and error exit
 #define EVENT_INIT(e) e = CreateEvent (NULL, TRUE, FALSE, NULL)
 #define EVENT_SIG(e)  SetEvent(e)
 #endif
-#define NUM_THREADS 2
+#define NUM_THREADS 4
 
 // ----------------------------------------------------------------------------------- //
 // Declares a struct to store all the information needed for each disp_calc iteration
@@ -881,8 +881,8 @@ if (do_jqfile==1){
    // calculate and printout intensities [the energies have already
    // been printed out above, so any refinement of energies during intcalc
    // is not included in the output file]
-#ifndef _THREADS  
   double QQ; 
+#ifndef _THREADS  
              mfcf qee_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
              mfcf qee_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
              mfcf qsd_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
@@ -1004,7 +1004,7 @@ if (do_jqfile==1){
 
                      thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
                   }
-                  ithread=0; num_threads_started=-1; int oldi=-1; double QQ;// Vector vQQ(1,dimA); removed MR 14.1.2013
+                  ithread=0; num_threads_started=-1; int oldi=-1;// Vector vQQ(1,dimA); removed MR 14.1.2013
 #endif
                       
 

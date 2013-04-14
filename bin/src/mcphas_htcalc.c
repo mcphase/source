@@ -34,7 +34,7 @@ void dataDestructor(void *data) { }
 #define THRLC_GET(v)   TlsGetValue (v)
 #define THRLC_GET_FAIL 0
 #endif
-#define NUM_THREADS 3
+#define NUM_THREADS 4
 
 // ----------------------------------------------------------------------------------- //
 // Declares a struct to store all the information needed for each htcalc iteration
@@ -135,7 +135,6 @@ void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
 #define inputpars (*myinput->inputpars)
 #define testqs (*thrdat.testqs)
 #define testspins (*thrdat.testspins)
-#define H thrdat.H
 #define T thrdat.T
 #define femin thrdat.femin
 #if defined  (__linux__) || defined (__APPLE__)
@@ -435,6 +434,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 // ----------------------------------------------------------------------------------- //
    thrdat.H = H;
    thrdat.T = T;
+   thrdat.ini=&ini;
    thrdat.testqs = &testqs;
    thrdat.testspins = &testspins;
    thrdat.physprops = &physprops;
