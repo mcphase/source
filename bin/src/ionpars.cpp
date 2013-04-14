@@ -300,8 +300,8 @@ if(so1ion==0)
    Matrix dummy(1,dimj,1,dimj); dummy=Jb;Jb=Jc;Jc=Ja;Ja=dummy;
    ComplexMatrix dummyc(1,dimj,1,dimj);dummyc=Jbb;Jbb=Jcc;Jcc=Jaa;Jaa=dummyc;
 
-  if (pr==1) {printf("#Axis Convention for module cfield:  z||b, x||(a x b) and y normal to x and z\n");
-  printf("#xyz .... Coordinate system of the crystal field parameters, magnetic moment\n");
+  if (pr==1) {printf("#Axis Convention for module cfield:  z'||b, x'||(a x b) and y' normal to x' and z'\n");
+  printf("#x'y'z' .... Coordinate system of the crystal field parameters, magnetic moment\n");
   printf("#abc .... Crystal axes\n");
   printf("#Standard Interactions operator sequence  (Stevens Operators Olm imported from cfield code of Peter Hoffmann/Fabi)\n");
   printf("#I1,I2,I3,....= Jy(=O11(s)),Jz=(O10(c)),Jx(=O11(c)),O22(s),O21(s),O20(c),O21(c),O22(c),O33(s),...,O66(c)\n\n");  
@@ -899,6 +899,8 @@ int ionpars::dJ1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVect
   J1(1)=observable1(i,j,delta,zr,zi,T,ests,pr,"Ja",Ja);
   J1(2)=observable1(i,j,delta,zr,zi,T,ests,pr,"Jb",Jb);
   J1(3)=observable1(i,j,delta,zr,zi,T,ests,pr,"Jc",Jc);
+
+
 if(T<0)T=-T;
 // return number of all transitions     
      return noft(ests,T,pinit,ninit);
@@ -1065,8 +1067,8 @@ return noft(est,T,pinit,ninit);
 // ************************************************************************************************
 void ionpars::setup_and_solve_Hamiltonian(Vector &  Hxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int sort)
 {
-Vector gjmbH(1,Hxc.Hi());
-gjmbH=Hxc;
+Vector gjmbH(1,max(3,Hxc.Hi()));gjmbH=0;
+for(int i=1;i<=Hxc.Hi();++i)gjmbH(i)=Hxc(i);
 gjmbH(1)+=gJ*MU_B*Hext(1);
 gjmbH(2)+=gJ*MU_B*Hext(2);
 gjmbH(3)+=gJ*MU_B*Hext(3);
@@ -1139,10 +1141,10 @@ int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
 {// calculate number of transitions
    int dj=est.Rhi();
    if (ninit>dj)ninit=dj;
-   if (pinit<SMALL_PROBABILITY)pinit=SMALL_PROBABILITY;
-   double zsum=0,zii;
+   //if (pinit<SMALL_PROBABILITY)pinit=SMALL_PROBABILITY;
+   double zsum=0,zii,x;
    int noft=0;
-   for(int i=1;(i<=ninit)&((zii=exp(-(real(est(0,i))-real(est(0,1)))/KB/T))>(pinit*zsum));++i)
+   for(int i=1;(i<=ninit)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
    {noft+=dj-i+1;zsum+=zii;}
    return noft;
 }

@@ -63,12 +63,12 @@ public:
    void save_sipf(const char * path); //save single ion parameter file filename to path*
 
 
-   jjjpar (FILE * fin, int nofcomp); //konstruktor with filehandle of mcphas.j file
+   jjjpar (FILE * fin, int nofcomp); //constructor with filehandle of mcphas.j file
    jjjpar (double x, double y, double z,char * sipffile); // constructor with filename of single ion parameter file
                // constructor with positions scattering length dwf
    jjjpar(double x,double y,double z, double slr,double sli, double dwf);
-   jjjpar (int n=1,int diag=0,int nofmom=3); // konstructor without file
-   jjjpar (const jjjpar & jjjpars);	// kopier-konstruktor
+   jjjpar (int n=1,int diag=0,int nofmom=3); // constructor without file
+   jjjpar (const jjjpar & jjjpars);	// copy-constructor
    
   ~jjjpar ();		//destruktor
   
@@ -102,6 +102,7 @@ public:
    ComplexMatrix Icalc_parstorage; // paramter storage for Icalc
    // returns eigenvalues and eigenstates matrix parameters of ion (if possible)
    ComplexMatrix & eigenstates (Vector &  Hxc,Vector & Hext, double & T);
+   void print_eigenstates(FILE *fout);
    // initialisis parameter storage for Icalc parameters (if possible)
    ComplexMatrix & Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T);
    // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)

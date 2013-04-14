@@ -152,7 +152,7 @@ HEADER = maths states ic1ion icpars icmf
 .PHONY: default all clean
 
 default: all
-all: ../ic1ionit$(EXE) ic1ion.so ../icf1ionit$(EXE) icf1ion.so
+all: ../ic1ion$(EXE) ic1ion.so ../icf1ion$(EXE) icf1ion.so
 
 # Defines some variables
 OBJ := $(foreach objs,$(OBJECT),$(objs).o)
@@ -170,13 +170,13 @@ libs/liblapack.a:
 	cd libs && make
 
 ifdef integral
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
+../ic1ion$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ionit ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
+	@$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
 else
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
+../ic1ion$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ionit ic1ion.o states.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
+	@$(LINKER) -o ../ic1ion ic1ion.o states.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
 endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp
@@ -219,9 +219,9 @@ else
 endif
 
 ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o  # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
-../icf1ionit$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o
+../icf1ion$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o
 	@echo Linking $@
-	@$(LINKER) -o ../icf1ionit icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+	@$(LINKER) -o ../icf1ion icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 icf1ion.so: checkgcc libs/liblapack.a $(ICOBJ) icf1ion_module.o
 	@echo Linking $@
 ifdef WINDOWS

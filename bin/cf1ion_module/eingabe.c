@@ -2013,7 +2013,9 @@ const CHAR * parnam;
 DOUBLE * var;
 const CHAR * unit;
 {CHAR * token;
-      /*read V20*/
+ // check if line is true comment line -> if yes return 1
+ if (line[strspn(line," \t")]=='#'&&line[strspn(line," \t#")]!='!') return 0;
+
       if ((token = strstr (line, parnam))!=NULL)
         {          token+=strlen(parnam);
          if (strstr (token, "=")!=NULL)
@@ -2076,11 +2078,14 @@ ITERATION *iteration;
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
     while(feof(fp)==0&&ion==0)
     {line=fgets( string , buffer_size , fp );
-     if(feof(fp)==0&&strstr (line, "#")==NULL)      
+     // check if line is true comment line -> if yes do not read it
+     if(feof(fp)==0&&(line[strspn(line," \t")]!='#'||line[strspn(line," \t#")]=='!'))      
      {while ((token=strchr(line,'\r'))!=NULL){*token=' ';}
       /*read iontype*/
       if ((token = strstr (line, "IONTYPE"))!=NULL)
         {token+=strlen("IONTYPE");
+         if(strstr(line,"perl")!=NULL){fprintf(stderr,"ERROR so1ion/cfield: perl parsing not implemented "
+                                          "- try to use program singleion !\n");exit(EXIT_FAILURE);}
          if (strstr (token, "=")!=NULL)
            {token = strstr (token, "=")+1;
            while (*token==' '){++token;} /* remove starting spaces*/
@@ -2095,6 +2100,7 @@ ITERATION *iteration;
      }
     }
     fclose(fp);printf("\n");
+    if(ion==0){fprintf(stderr,"ERROR so1ion/cfield:IONTYPE not found!\n");exit(EXIT_FAILURE);}
 
     if(strncmp(ion,"S=",2)==0)  /* J=... ion !! same as S= */
      {ion[0]='J';}    

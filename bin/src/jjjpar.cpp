@@ -59,10 +59,6 @@ Vector & jjjpar::tetan ()
 }
 
 
-
-
-
-
 // additional
 // function to look if string s2 lies in string s1, checking the first n characters of s2
 int strncomp(const char * s1,const char * s2, size_t n)
@@ -74,14 +70,6 @@ int strncomp(const char * s1,const char * s2, size_t n)
  }
  return strncmp(s1,s2,n);
 }
-
-
-
-
-
-
-
-
 
 
 

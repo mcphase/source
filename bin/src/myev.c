@@ -73,7 +73,7 @@ void myPrintMatrix(FILE * file,Matrix & M)
 
 void myPrintVector(FILE * file,Vector & M)
 {int j1;
- fprintf (file,"#Components:\n");
+// fprintf (file,"#Components:\n");
    
     for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g ",myround(M(j1)));
     fprintf (file,"\n");    

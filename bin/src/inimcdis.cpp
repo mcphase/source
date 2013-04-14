@@ -33,8 +33,8 @@ case 2:  return Qvec(2);break;
 case 3:  return Qvec(3);break;
 case 4:  return T;break;
 case 5:  return Hext(1);break;
-case 6:  return Hext(1);break;
-case 7:  return Hext(1);break;
+case 6:  return Hext(2);break;
+case 7:  return Hext(3);break;
 case 8:  return Norm(Qvec);break;
 default: fprintf(stderr,"Error mcdisp: unknown column code\n");exit(EXIT_FAILURE);
                     }

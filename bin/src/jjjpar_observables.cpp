@@ -70,7 +70,7 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
 
 int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1,ComplexMatrix & ests)
 {float delta=maxE;m1(1)=complex <double> (ninit,pinit);
- ComplexVector uu1(1,Hxc.Hi());int nnt,i;
+ ComplexVector uu1(1,m1.Hi());int nnt,i;
  switch (module_type)
   {case 0: if(dm1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&m1,&delta,&ests);}

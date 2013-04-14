@@ -333,11 +333,51 @@ output of powdercell,output is written to mcphas.j.  Example of input file:
 \end{verbatim}\index{simannfit}\index{searchspace}
 \item [\prg singleion\index{singleion} [option] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents]
  single ion  - display single ion expectations values $<Ia>, <Ib> $... and transition energies.
+\begin{verbatim} 
+           Hext ..... external field in Tesla 
+           Hxc... exchange (molecular) field in meV   
+\end{verbatim}
+{\prg singleion} reads {\prg mcphas.j} and the singleion parameter files quoted therein
+and calculatesenergies, eigenstates, expectation values $<I>$ for the given
+temperature, external magnetic field Hext and exchange field Hxc (the
+interaction constants given in mcphas.j are ignored).
+
+for each single ion property file the following files are generated:
 \begin{verbatim}
-                      Hext ..... external field in Tesla 
-                      Hxc... exchange (molecular) field in meV  
+   results/file.sipf.levels.cef .. energy levels and eigenstates and <I>
+   results/file.sipf.trs ......... transition energies,matrix elements
+                                   and (powder) neutron intensities
+   results/_file.sipf    ......... parameters as read by singleion
+
+options: -nt ......... by default only 5 transition energies are output,
+                       if you want more, start e.g. with 
+                       option -nt 7 to output 7 transition energies
+         -pinit 0.1 .. consider only transitions with population of initial state > 0.1
+         -ninit 3  ... consider only transitions from the 3 lowest eigenstates
+         -maxE 30  ... consider only transitions with energy lower than 30 meV
+         -r ion.sipf . do not read mcphas-j but only the single ion
+                       parameter file ion.sipf
+         -M  ......... calculate expectation values and transition matrix
+                       elements for magnetic moment M instead of I
+         -S  ......... calculate expectation values and transition matrix
+                       elements for spin S
+         -L  ......... calculate expectation values and transition matrix
+                       elements for orbital momentum L
+
+note: for calculating T or H dependencies you can put single ion in a loop
+       and pipe the result into a file
+
+  .... linux:   for B in $(seq 0 0.1 14); do singleion 2 $B 0 0 0 0 0; done > results/fielddep.dat
+
+  .... windows command line: for /L %B in (0,1,14)  do singleion 2 %B 0 0 0 0 0 >> results\fielddep.dat
+
+  .... windows batch file (needed for noninteger numbers):
+          @echo off && setlocal ENABLEDELAYEDEXPANSION
+          for /L %%I in (0,2,140) do ( set /A W=%%I/10 && set /A "f = %%I %% 10"
+          set B=!w!.!f!
+          @echo on && singleion 2 0 0 !B! 0 0 0 && @echo off )
+          endlocal && @echo on 
 \end{verbatim}      
-by default only 5 transition energies are output, start with option -nt n to output n transition energies.
 \end{description} 
 
 \section{Programs for Manipulation of Columns and Lines in Data Files}

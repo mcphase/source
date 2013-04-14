@@ -496,7 +496,7 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
 
 
 /****************************************************************************/
-// returns eigenvalues, boltzmann population and eigenstates matrix parameters of ion
+// initialises matrix est and returns in it eigenvalues, boltzmann population and eigenstates matrix parameters of ion
 /****************************************************************************/
 ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)
@@ -508,8 +508,24 @@ ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
   }
 }
 
+void jjjpar::print_eigenstates(FILE *fout)
+{fprintf(fout,"#! Eigenvalues = ");
+ Vector ev(Real(est.Row(0))); myPrintVector(fout,ev);
+ fprintf(fout,"#Eigenvectors [as colunmns]\n");
+ ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
+ myPrintComplexMatrix(fout,es);
+//----------------------------------------------------------------------------//
+// Submatrix extraction 
+//----------------------------------------------------------------------------//
+
+//Matrix Matrix::operator () (int rlo, int rhi, int clo, int chi) const
+//
+// The elements of this matrix within the index range [rlo..rhi,clo..chi] 
+
+}  
+
 /****************************************************************************/
-// returns eigenvalues, boltzmann population and eigenstates matrix parameters of ion
+// initialises matrix Icalc_parstorage and returns eigenvalues, boltzmann population and eigenstates matrix parameters of ion
 /****************************************************************************/
 ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)

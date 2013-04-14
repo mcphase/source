@@ -7,7 +7,7 @@ use Getopt::Long;
 use Math::Complex;
 
 $SMALL=1e-5;
-#$debug = true;
+$debug = true;
 
 # -------------------------------------------------------------------------------------- #
 # Subfunctions: 
@@ -27,6 +27,7 @@ sub mmult {
         die "IndexError: matrices don't match: $m1cols != $m2rows";
     }
     my $result = [];
+    for $i (range($m1rows)) { for $j (range($m2cols)) { $result->[$i][$j]=0; } }
     my ($i, $j, $k);
     for $i (range($m1rows)) {
         for $j (range($m2cols)) {
@@ -323,7 +324,7 @@ foreach $T (@Temp) {
 
   $res=0;
   for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
-    $xi=$ii%($J2+1); $res += $matel->[$ii][$jj] * $p[$xi] * $f[$jj%($J2+1)+$xi*($J2+1)]; } }
+    $xi=$ii%($J2+1); $res += ($matel->[$ii][$jj]*~$matel->[$ii][$jj]) * $p[$xi] * $f[$jj%($J2+1)+$xi*($J2+1)]; } }
 
   $res /= $J*($J+1)*(4/3); 
   if($rho0) { push(@reslist,$rho0*$res); } else { push(@reslist,$res); }

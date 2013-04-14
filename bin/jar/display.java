@@ -212,6 +212,7 @@ static public void windowclose(){
   public static void main(String[] args) {
       xmin=1e30;xmax=-1e30;detymin=true;detymax=true;doexit=false;
       ymin=1e30;ymax=-1e30;detxmin=true;detxmax=true;
+      detxText=true;detyText=true;
            String ss; String s;
       if (args.length<1)
       {System.out.println("- too few arguments...\n");
@@ -220,7 +221,7 @@ static public void windowclose(){
        System.out.println("         xcol,ycol ... column to be taken as x-, y- axis\n in a lineplot");
        System.out.println("        when using option -o file.jpg the application creates a jpg file on exiting\n");
        System.out.println("        when using option -xmin 23.3 the application sets the minimum of the display xaxis to 23.3\n");
-       System.out.println("        similar are options -xmax -ymin -ymax ....\n");
+       System.out.println("        similar are options -xmax -ymin -ymax -xtext -ytext....\n");
        System.out.println("        when using option -c file.jpg the application only creates a jpg file and exits immediatly\n");
        System.out.println("        if optional errorcolumns are added then instead of lines symbols and errorbars are shown\n");
        System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to\n");
@@ -280,6 +281,17 @@ static public void windowclose(){
              detymax=false;ss=SF.FirstWord(s);ymax=p.parseDouble(ss);
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ytext")) // option "-ytext meV"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detyText=false;ss=SF.FirstWord(s);xText=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-xtext")) // option "-xtext meV"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detxText=false;ss=SF.FirstWord(s);yText=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else {System.out.println("ERROR: option,"+SF.TrimString(s)+" not implemented !\n\n");System.exit(0);}
           }
        for(int i=k;s.length()>0;	i+=0)
        {Integer pp;
@@ -328,7 +340,7 @@ static public void windowclose(){
  static int[] colyerr;
  static double scale;
  static double xmin,xmax,ymin,ymax;
- static boolean detxmin,detymin,detxmax,detymax,doexit;
+ static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,doexit;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
@@ -561,8 +573,8 @@ protected static void reload_data(int i){    try{
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
-        if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
-        if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
+        if(detyText==false&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
+        if(detxText==false&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}

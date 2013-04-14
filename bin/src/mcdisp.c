@@ -117,7 +117,8 @@ EVENT_TYPE checkfinish;
 
 #include "mcdisp_intcalc.c"
 #include "mcdisp_output.c"
-
+#include "trs_io.c"   // for in out of trs file
+ 
 #ifdef _THREADS
 #define inputpars (*thrdat.inputpars[thread_id])
 #define ini (*thrdat.ini[thread_id])
@@ -361,202 +362,43 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
   mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents);
 
   
- //initialize output of transitions
  if (do_readtrs==0)
- {sprintf(filename,"./results/%smcdisp.trs",ini.prefix);printf("# saving  %s\n",filename);
+ {
+ // ********************************************** write mcdisp.trs *******************************************************
+ sprintf(filename,"./results/%smcdisp.trs",ini.prefix);printf("# saving  %s\n",filename);
   fout = fopen_errchk (filename,"w");
-   fprintf(fout, "#output file of program %s",MCDISPVERSION);
-   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
-   fprintf(fout,"#!<--mcphas.mcdisp.trs-->\n");
-   fprintf(fout,"#*********************************************************************\n");
-   fprintf(fout,"# mcdisp - program to calculate the dispersion of magnetic excitations\n");
-   fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-   fprintf(fout,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
-   fprintf(fout,"#*********************************************************************\n");
-   fprintf(fout,"#(*)The unpolarized powder average neutron cross section sigma for each transition \n");
-   fprintf(fout,"#   is calculated neglecting the formfactor, the Debye Wallerfactor, factor k'/k as follows:\n");
-   fprintf(fout,"#-------------------------------------------------------------- \n");
-   fprintf(fout,"#            Transition intensities in barn/sr.                |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"# =                    - E /T     -----                        |\n");
-   fprintf(fout,"# |                   e   i       \\                   2        |\n");
-   fprintf(fout,"# |     = const --------------     >    |<i,r|M |k,s>|         |\n");
-   fprintf(fout,"# |             ----    - E /T    /            T               |\n");
-   fprintf(fout,"# =             >    n e   i      -----                        |\n");
-   fprintf(fout,"#  E -> E       ----  i            r,s                         |\n");
-   fprintf(fout,"#   i    k       i                                             |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                            with                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                -----                         |\n");
-   fprintf(fout,"#                      2     2   \\                        2    |\n");
-   fprintf(fout,"#        |<i,r|M |k,s>|   = ---   >     |<i,r|M -<M >|k,s>|    |\n");
-   fprintf(fout,"#               T            3   /             u   u           |\n");
-   fprintf(fout,"#                                -----                         |\n");
-   fprintf(fout,"#                             u = x,y,z                        |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                             and                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                   1       2                  |\n");
-   fprintf(fout,"#                  const  =      ( --- r   )                   |\n");
-   fprintf(fout,"#                                   2   0                      |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                      -12                     |\n");
-   fprintf(fout,"#                  r     = -0.53908* 10    cm                  |\n");
-   fprintf(fout,"#                   0                                          |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                 M   =  L  + 2 S  = g  J                      |\n");
-   fprintf(fout,"#                                     J                        |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#--------------------------------------------------------------|\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                       1.Sum rule :                           |\n");
-   fprintf(fout,"#                                                 - E /T       |\n");
-   fprintf(fout,"#                                            n   e   i         |\n");
-   fprintf(fout,"#  ----  =       2                            i                |\n");
-   fprintf(fout,"#  >     |     =--- *g *g *const * J(J+1) * ----------------   |\n");
-   fprintf(fout,"#  ----  =       3    J  J                  ----     - E /T    |\n");
-   fprintf(fout,"#   k     E -> E                            >    n  e   i      |\n");
-   fprintf(fout,"#          i    k                           ----  i            |\n");
-   fprintf(fout,"#                                            i                 |\n");
-   fprintf(fout,"#--------------------------------------------------------------|\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                       2. sum rule :                          |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#                                                              |\n");
-   fprintf(fout,"#            ----  =            2                              |\n");
-   fprintf(fout,"#            >     |         = --- * const*g *g *J(J+1)        |\n");
-   fprintf(fout,"#            ----  =            3           J  J               |\n");
-   fprintf(fout,"#             k,i   E -> E                                     |\n");
-   fprintf(fout,"#                    i    k                                    |\n");
-   fprintf(fout,"#-------------------------------------------------------------- \n");
-   fprintf(fout,"#! ninit= %g (max number of initial states) -do not modify: needed to cound transitions\n",ninit);
-   fprintf(fout,"#! pinit= %g (minimum population number of initial states)-do not modify: needed to cound transitions\n",pinit);
-   fprintf(fout,"#! maxE= %g meV(maximum value of transition energy)-do not modify: needed to cound transitions\n",maxE);
-   fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",ini.T,ini.Hext(1),ini.Hext(2),ini.Hext(3));
-   fprintf(fout,"#*********************************************************************\n");
-          fprintf (fout, "#i j k ionnr transnr energy |gamma_s|  sigma [barn/sr](*)\n");
+   trs_header_out(fout,pinit,ninit,maxE,ini.T,ini.Hext);
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
    fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
-      for(ll=1;ll<=ini.nofcomponents;++ll)
-       {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s in first 
-                                                              //crystallographic unit of magnetic unit cell
-   
-   md.est_ini(i,j,k,l,(*inputpars.jjj[l]).eigenstates(mf,ini.Hext,ini.T)); 
-   (*inputpars.jjj[l]).transitionnumber=1;
-   fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-   (*inputpars.jjj[l]).maxE=maxE;(*inputpars.jjj[l]).pinit=pinit;(*inputpars.jjj[l]).ninit=ninit;
-   i1=(*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
-   Mijkl = u1^u1;
-      // here Mijkl is a nxn matrix n ... numberofcomponents
-   noftransitions(l)=0;
-    while (minE>d||d>maxE) //only consider transition if it is in interval minE/maxE
-     {//first and following  transitions out of energy range ... do not consider them
-     fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
-     ++(*inputpars.jjj[l]).transitionnumber;
-     fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-     (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
-     Mijkl=u1^u1;
-     if((*inputpars.jjj[l]).transitionnumber>i1){fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n (within first crystallographic unit of magnetic unit cell)\n please increase energy range in option -maxE and -minE\n",minE,maxE);
-                            exit(EXIT_FAILURE);}
-     }
-     // calculate powder neutron intensities 
-// old: removed 25.2.2013 and replaced by dm1calc derived intensities
-//     if ((*inputpars.jjj[l]).gJ!=0)
-//     { for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
-//     else
-//     { for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
-     double intensityp=0, intensitym=0; ComplexVector dm1(1,3);
-     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
-     {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
-     intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
-     if (d>SMALL_QUASIELASTIC_ENERGY){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
-                                  else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
-     }
-     else
-     {intensityp=-1;intensitym=-1;}     
-
-   jmin=(*inputpars.jjj[l]).transitionnumber;
-  if (do_verbose==1){fprintf(stdout,"Matrix M(s=%i %i %i)\n",i,j,k);
-                  myPrintComplexMatrix(stdout,Mijkl);fprintf(stdout,"...diagonalising\n");
-                    } 
-     // diagonalizeMs to get unitary transformation matrix Us and eigenvalues gamma
-     //myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);
-     gamma=0;gamma(ini.nofcomponents)=real(Trace(Mijkl));
-     if(minE<d&&d<maxE)
-    { fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,jmin,myround(d),myround(gamma(ini.nofcomponents)),myround(intensityp));
-     ++noftransitions(l);}
-    if(d>=0&&minE<-d&&-d<maxE) // do not print negative energy transition if d<0 (d<0 means transiton to the same level)
-    { fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,jmin,myround(-d),myround(gamma(ini.nofcomponents)),myround(intensitym));
-    ++noftransitions(l);}
-
-   // now do  other transitions of the same ion:
-   for(j1=jmin+1;j1<=i1;++j1) 
-   // for every transition add new "atom" to list ... changed to "setnumberoftransitions" for
-   // ion l in cryst unit cell ijk
-   {
-      if (noftransitions(l)>=maxlevels){if (do_verbose) fprintf(stdout,"Maximum number of transitions for ion %i reached\n",l);
-                       break;} //check if number of transitions  bigger than maximal number 
-                                //(given by -max option in command line)
-      
-        (*inputpars.jjj[l]).transitionnumber=-j1; // try calculation for transition  j
-      fprintf(stdout,"transition number %i: ",(*inputpars.jjj[l]).transitionnumber);
-      (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
-      Mijkl = u1^u1;
-   //printf("noftransitions read by mcdisp: %i",i1);
-      
-      if (minE<d&&d<maxE) //only consider transition if it is in interval emin/emax
-     { 
-      // calculate powder neutron intensities
-     intensityp=0; intensitym=0;
-    // old: removed 25.2.2013 and replaced by dm1calc derived intensities
-    //if ((*inputpars.jjj[l]).gJ!=0)
-     //{ for(k1=1;k1<=3;++k1){intensityp+=(*inputpars.jjj[l]).gJ*(*inputpars.jjj[l]).gJ*real(Mijkl(k1,k1));}}
-     //else
-    //{ for(k1=1;k1<=3;++k1){intensityp+=4*real(Mijkl(2*k1-1,2*k1-1))+real(Mijkl(2*k1,2*k1))+2*real(Mijkl(2*k1-1,2*k1))+2*real(Mijkl(2*k1,2*k1-1));}}
-    //intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
-    // if (d>SMALL_QUASIELASTIC_ENERGY){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
-    //                              else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
-     if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,dm1,md.est(i,j,k,l))) // if dm1calc is implemented for this ion
-     {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
-     intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
-     if (d>SMALL_QUASIELASTIC_ENERGY){if(d/ini.T/KB<20){intensitym=-intensityp/(1-exp(d/ini.T/KB));intensityp/=(1-exp(-d/ini.T/KB));}else{intensitym=0;}}
-                                  else{intensityp=intensityp*ini.T*KB;intensitym=intensityp;}
-     }
-     else
-     {intensityp=-1;intensitym=-1;}     
-         
-      if (do_verbose==1){fprintf(stdout,"Matrix M(s=%i %i %i)\n",i,j,k);
-                  myPrintComplexMatrix(stdout,Mijkl);
-                 //fprintf(stdout,"Frobenius Norm(M)=sqrt(sum_i,j |Mij|^2)=%g\n",NormFro(Mijkl));
-                  fprintf(stdout,"...diagonalising\n");
-                    }  // diagonalizeMs to get unitary transformation matrix Us and eigenvalues gamma
-     //if(NormFro(Mijkl)>SMALL_QUASIELASTIC_ENERGY*1e-5) {myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter); } \\ diagonalisation only possible for nonzero matrices !!!
-     //             else {gamma=0;gamma(ini.nofcomponents)=Trace(Mijkl);}
-      gamma=0;gamma(ini.nofcomponents)=real(Trace(Mijkl));
-     if(minE<d&&d<maxE)
-     {fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,j1,myround(d),myround(gamma(ini.nofcomponents)),myround(intensityp));
-      ++noftransitions(l);}
-     if(d>=0&&minE<-d&&-d<maxE)// do not print negative energy transition if d<0 (d<0 means transiton to the same level)
-     {fprintf(fout,"%i %i %i  %i     %i     %g  %g  %g\n",i,j,k,l,j1,myround(-d),myround(gamma(ini.nofcomponents)),myround(intensitym));
-      ++noftransitions(l);}
-     }else
-     {fprintf(stdout," .... transition not stored because  out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
-     }
-
+    for(ll=1;ll<=ini.nofcomponents;++ll)
+     {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s in first 
+                                                            //crystallographic unit of magnetic unit cell
+      md.est_ini(i,j,k,l,(*inputpars.jjj[l]).eigenstates(mf,ini.Hext,ini.T)); 
+      (*inputpars.jjj[l]).transitionnumber=0;
+      (*inputpars.jjj[l]).maxE=maxE;(*inputpars.jjj[l]).pinit=pinit;(*inputpars.jjj[l]).ninit=ninit;
+     noftransitions(l)=0;int noft;
+     if(trs_write_next_line(fout,(*inputpars.jjj[l]),noft,i,j,k,l,noftransitions(l),ini.T,mf,ini.Hext,
+                    md.est(i,j,k,l),d,minE,maxE))
+       {fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
+                        " (within first crystallographic unit of magnetic unit cell)\n"
+                        " please increase energy range in option -maxE and -minE\n",minE,maxE);
+                        exit(EXIT_FAILURE);}
+    
+     jmin=(*inputpars.jjj[l]).transitionnumber;    // store number of first valid transition
+     
+// now do  other transitions of the same ion:
+   int idummy;  
+   while(noftransitions(l)<maxlevels&&
+         !trs_write_next_line(fout,(*inputpars.jjj[l]),idummy,i,j,k,l,
+                              noftransitions(l),ini.T,mf,ini.Hext,md.est(i,j,k,l),d,minE,maxE));
+ 
    (*inputpars.jjj[l]).transitionnumber=jmin; // put back transition number for 1st transition
-
-   }  
   }}}}
    fclose(fout);
+ // **********************************************end write mcdisp.trs *******************************************************
  } // do_readtrs==0
+
   if (do_createtrs==1){fprintf(stdout,"single ion transition file ./results/mcdisp.trs created - please comment transitions which should not enter the calculation and restart with option -t\n");exit(0);}
   sprintf(filename,"./results/%smcdisp.trs",ini.prefix);
   printf("\n#reading %s\n\n",filename);
@@ -645,11 +487,9 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
        if(fabs((fabs(d)-fabs(nn[6]))/(fabs(nn[6])+1.0))>SMALLEDIF)
         {fprintf(stderr,"ERROR mcdisp: reading mcdisp.trs with transition energy delta %g meV different from internal calculation %g meV\n",nn[6],d);	 
          exit(EXIT_FAILURE);}
-           if (do_verbose==1){
-                  fprintf(stdout,"#Matrix M(s=%i %i %i %i)\n",i,j,k,l);
-                   myPrintComplexMatrix(stdout,Mijkl);
-                              }
-      
+           if (do_verbose==1){fprintf(stdout,"#Matrix M(s=%i %i %i %i)\n",i,j,k,l);
+                              myPrintComplexMatrix(stdout,Mijkl);
+                              }      
      // diagonalizeMs to get unitary transformation matrix Us
       myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);
        if (fabs(gamman-gamma(ini.nofcomponents))>SMALL_QUASIELASTIC_ENERGY){fprintf(stderr,"ERROR eigenvalue of single ion matrix M inconsistent: analytic value gamma= %g numerical diagonalisation of M gives gamma= %g\n",gamman,gamma(ini.nofcomponents));
@@ -753,7 +593,7 @@ if (do_jqfile==1)
  writeheader(inputpars,jqfile); printf("#saving mcdisp.jq\n");
    fprintf(jqfile,"#!<--mcphas.mcdisp.dsigma.jq-->\n");
    fprintf (jqfile, "#Fourier Transform of 2 Ion Interaction - sta is calculated by comparing the larges eigenvalue\n# to that of the first q vector of the calculation");
-   fputs (asctime(loctime),jqfile);
+   curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),jqfile);
   if (do_verbose==1){   fprintf (jqfile, "#q=(hkl)\n #spin s() - spin s'()\n #3x3 matrix jss'(q) real im .... [meV]\n");}
   else {fprintf(jqfile,"#h  vs  k  vs  l  vs largest eigenvalue of J(hkl) matrix vs components of corresponding eigenvector re im re im re im re im\n");}
 }
@@ -1611,7 +1451,7 @@ int main (int argc, char **argv)
  const char * filemode="w";
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
  double epsilon; //imaginary part of omega to avoid divergence
- double minE=-100000.0,maxE=+100000.0,pinit=0,ninit=1e10;
+ double minE=-100000.0,maxE=+100000.0,pinit=SMALL_PROBABILITY,ninit=1e10;
  fprintf(stderr,"#***********************************************************************\n");
  fprintf(stderr,"#*\n");
  fprintf(stderr,"#* mcdisp - program to calculate the dispersion of magnetic excitations\n");
