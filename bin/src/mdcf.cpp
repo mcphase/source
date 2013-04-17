@@ -199,6 +199,7 @@ mdcf::mdcf (const mdcf & p)
   lb = new ComplexVector * [mxa*mxb*mxc+1];if(lb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb[i]=NULL;
   lb_dip = new ComplexVector * [mxa*mxb*mxc+1];if(lb_dip==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb_dip[i]=NULL;
   d = new Vector * [mxa*mxb*mxc+1]; if(d==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)d[i]=NULL;
+
   nt= new IntVector * [mxa*mxb*mxc+1];if(nt==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i){nt[i]=new IntVector(1,nofatoms);}
   eigenstates= new ComplexMatrix * [mxa*mxb*mxc*(nofatoms+1)+1]; if(eigenstates==NULL)errexit();
                            for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i){eigenstates[i]=NULL;       
@@ -208,25 +209,16 @@ mdcf::mdcf (const mdcf & p)
  for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k)
      {int id=in(i,j,k); 
       (*nt[id])=(*p.nt[id]);
-      s[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));
-      m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));
-      l[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));
-      sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
-      dmqs[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
-      dmq_dips[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
-      lb[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
-      lb_dip[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
-      d[id]= new Vector(1,sum((*nt[id])),1,sum((*nt[id])));
-
-      *d[id]=*p.d[id];
-      *s[id]=*p.s[id];
-      *m[id]=*p.m[id];
-      *l[id]=*p.l[id];
-      *sb[id]=*p.sb[id];
-      *dmqs[id]=*p.dmqs[id];
-      *dmq_dips[id]=*p.dmq_dips[id];
-      *lb[id]=*p.lb[id];
-      *lb_dip[id]=*p.lb_dip[id];
+      s[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*s[id]=*p.s[id];
+      m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*m[id]=*p.m[id];
+      l[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*l[id]=*p.l[id];
+      sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*sb[id]=*p.sb[id];// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
+      dmqs[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmqs[id]=*p.dmqs[id];
+      dmq_dips[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmq_dips[id]=*p.dmq_dips[id];
+      lb[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*lb[id]=*p.lb[id];
+      lb_dip[id]= new ComplexVector(1,mqdim*sum((*nt[id]))); *lb_dip[id]=*p.lb_dip[id];
+      d[id]= new Vector(1,sum((*nt[id])),1,sum((*nt[id])));*d[id]=*p.d[id];
+     
      } 
     }
   }           

@@ -206,7 +206,6 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
 //    qijk(2)=hkl(2)*2*PI/inputpars.b;
 //    qijk(3)=hkl(3)*2*PI/inputpars.c;
     QQ=Norm(qijk);
- 
  // init eigenvector to zero
   qee_real.clear();qee_imag.clear();
   qsd_real.clear();qsd_imag.clear();
@@ -420,6 +419,7 @@ else
 }
 } // if calc_rixs
 #ifdef _THREADS
+//printf("intcalc: %i %g :",thread_id,intensity);
 myinput->intensity=intensity;
 myinput->intensitybey=intensitybey;
 myinput->QQ=QQ;

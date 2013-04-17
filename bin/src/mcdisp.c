@@ -658,7 +658,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
    {
       tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); 
       thrdat.J[ithread] = new jq(J); tin[ithread]->dimA=0; 
-      thrdat.md[ithread] = new mdcf(md);        
+      thrdat.md[ithread] = new mdcf(md);      
    } 
    int thrcount=0, ithread=0, num_threads_started=-1;
 #endif
@@ -1008,7 +1008,7 @@ if (do_jqfile==1){
 
                      thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
                   }
-                  ithread=0; num_threads_started=-1; int oldi=-1;// Vector vQQ(1,dimA); removed MR 14.1.2013
+                  ithread=0; num_threads_started=0; int oldi=-1;// Vector vQQ(1,dimA); removed MR 14.1.2013
 #endif
                       
 
@@ -1022,30 +1022,31 @@ if (do_jqfile==1){
                      oldi=i;
                      // Runs threads until all are running - but wait until they are completed in order before printing output.
                      //  This is to ensure that the output is exactly the same as for a single thread (otherwise it would be out of order).
-                     for(ithread=0; ithread<NUM_THREADS; ithread++)
+                     for(int th=0; th<NUM_THREADS; th++)
                      {
-                        i=oldi+ithread; if(i>dimA) break;
+                        i=oldi+th; if(i>dimA) break;
                         if(do_gobeyond==0) intsbey(i)=-1.1; else intsbey(i)=+1.1;
                       if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
-                      {
-                        tin[ithread]->En=En(i); tin[ithread]->intensitybey=intsbey(i); tin[ithread]->level = i;
+                      {if(do_verbose)printf("calling thread %i ",num_threads_started);
+                       tin[num_threads_started]->En=En(i); tin[num_threads_started]->intensitybey=intsbey(i); 
+                       tin[num_threads_started]->level = i;
                         #if defined  (__linux__) || defined (__APPLE__)
-                        rc = pthread_create(&threads[ithread], &attr, intcalc_approx, (void *) tin[ithread]);
-                        if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+                        rc = pthread_create(&threads[num_threads_started], &attr, intcalc_approx, (void *) tin[num_threads_started]);
+                        if(rc) { printf("Error return code %i from thread %i\n",rc,num_threads_started+1); exit(EXIT_FAILURE); }
                         #else
-                        threads[ithread] = CreateThread(NULL, 0, intcalc_approx, (void *) tin[ithread], 0, &tid[ithread]);
-                        if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+                        threads[num_threads_started] = CreateThread(NULL, 0, intcalc_approx, (void *) tin[num_threads_started], 0, &tid[num_threads_started]);
+                        if(threads[num_threads_started]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,num_threads_started+1); exit(EXIT_FAILURE); }
                         #endif
-                        num_threads_started = ithread+1;
+                        ++num_threads_started;
                       }
                       else {ints(i)=-1;intsbey(i)=-1;}
                      }
                      #if defined  (__linux__) || defined (__APPLE__)
-                     for(int th=0; th<num_threads_started; th++)
-                        rc = pthread_join(threads[th], &status);
+                     for(int th=0; th<num_threads_started; th++)rc = pthread_join(threads[th], &status);
                      #else
                      WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
                      #endif
+                     num_threads_started=0; 
                      #define chi      (*thrdat.chi[ithread])
                      #define qee_real (*thrdat.qee_real[ithread])
                      #define qee_imag (*thrdat.qee_imag[ithread])
@@ -1061,12 +1062,15 @@ if (do_jqfile==1){
                      #define qes_imag (*thrdat.qes_imag[ithread])
                      #define qel_real (*thrdat.qel_real[ithread])
                      #define qel_imag (*thrdat.qel_imag[ithread])
-                     for(ithread=0; ithread<NUM_THREADS; ithread++)
+                     ithread=-1;
+                     for(int th=0; th<NUM_THREADS; th++)
                      {
-                         i=oldi+ithread; if(i>dimA) break;
+                         i=oldi+th; if(i>dimA) break;
                         if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
-                      {ints(tin[ithread]->level) = tin[ithread]->intensity; 
+                      {++ithread;
+                       ints(tin[ithread]->level) = tin[ithread]->intensity; 
                        intsbey(tin[ithread]->level) = tin[ithread]->intensitybey;
+                       //printf("%i %g",ithread,ints(tin[ithread]->level));
                       }       
 #else
                      if(do_gobeyond==0){intsbey(i)=-1.1;}else{intsbey(i)=+1.1;}
@@ -1097,7 +1101,8 @@ if (do_jqfile==1){
                                    double Irrt=0,Irlt=0,Ilrt=0,Illt=0;
                                    ComplexVector eis(1,3),eos(1,3),eip(1,3),eop(1,3);
                                    ComplexVector eir(1,3),eor(1,3),eil(1,3),eol(1,3);
-                        for(double azimuth=0.0;azimuth<=2*PI&&ints(i)>-1;azimuth+=PI/90)                             
+                       if (En(i)<=ini.emax&&En(i)>=ini.emin){
+                         for(double azimuth=0.0;azimuth<=2*PI&&ints(i)>-1;azimuth+=PI/90)                             
                               { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, abc,QQ,En(i));
                                 // eis,p and eos,p are polarisation vectors for sigma/pi plarisation in terms of
                                 // eir,l and eor,l are polarisation vectors for righ/left circular plarisation in terms of
@@ -1119,17 +1124,17 @@ if (do_jqfile==1){
                                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Irlt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ilrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Illt),myround(1e-8,azimuth*180/PI));
                                                 fprintf (foutqei, "\n");
                                                 }
-                              }
+                              }}
                               ini.print_usrdefcols(foutqei,qijk,qincr);
                               fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                                 myround(QQ),myround(En(i)));
-                                 if(ints(i)>-1){
+                                if (En(i)<=ini.emax&&En(i)>=ini.emin){
                                  fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Iss),myround(1e-8,azss),myround(1e-8,Isp),myround(1e-8,azsp),myround(1e-8,Ips),myround(1e-8,azps),myround(1e-8,Ipp),myround(1e-8,azpp));
                                  fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irr),myround(1e-8,azrr),myround(1e-8,Irl),myround(1e-8,azrl),myround(1e-8,Ilr),myround(1e-8,azlr),myround(1e-8,Ill),myround(1e-8,azll));
                                                } else {fprintf(foutqei, " -1 0  -1 0  -1 0  -1 0   -1 0  -1 0  -1 0  -1 0 ");}
                                    fprintf (foutqei, "\n");
                                                 
-                     }else{
+                     }else{ 
                     double test; // add to sta distance to nearest measured peak squared
  	              for (j1=1;4*j1<=ini.hkls[counter][0]-3;++j1)
 	              {if ((test=fabs(En(i)-ini.hkls[counter][4*j1]))<dd1(j1)){dd1(j1)=test;double weight=ini.hkls[counter][4*j1+1];
@@ -1175,7 +1180,7 @@ if (do_jqfile==1){
                        if(En(i)>=ini.emin&&En(i)<=ini.emax){diffint+=ints(i);diffintbey+=intsbey(i);}
                       }
                      // printout eigenvectors only if evaluated during intensity calculation...
-                  if(ints(i)>-1||calc_rixs){
+                  if (En(i)<=ini.emax&&En(i)>=ini.emin){
 
 if(ini.calculate_chargedensity_oscillation)print_ev(foutqee,i,ini,hkl,QQ,En,ints,intsbey,qee_real,qee_imag);
 if(ini.calculate_spindensity_oscillation)print_ev(foutqsd,i,ini,hkl,QQ,En,ints,intsbey,qsd_real,qsd_imag);
