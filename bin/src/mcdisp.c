@@ -71,7 +71,7 @@ void errexit() // type info and error exit
 #define EVENT_SIG(e)  SetEvent(e)
 #endif
 #define NUM_THREADS 4
-
+ 
 // ----------------------------------------------------------------------------------- //
 // Declares a struct to store all the information needed for each disp_calc iteration
 // ----------------------------------------------------------------------------------- //
@@ -404,8 +404,9 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int 
   printf("\n#reading %s\n\n",filename);
 // read transitions to be considered from file
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
-  fin = fopen_errchk (filename,"rb");
-  noftransitions=0;
+    if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
+                  fin = fopen_errchk(filename,"rb");printf("\n#... not possible, therefore reading %s\n\n",filename);}
+noftransitions=0;
  int nparread=0;double Tr,Har,Hbr,Hcr;
  char instr[MAXNOFCHARINLINE];
  while(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL&&nparread<6)
@@ -463,7 +464,8 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
   sprintf(filename,"./results/%smcdisp.trs",ini.prefix);  
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
-  fin = fopen_errchk (filename,"rb");
+  if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
+                  fin = fopen_errchk(filename,"rb");}
   jmin=0;
   while (feof(fin)==0)
   {if ((i1=inputline(fin,nn))>=5)
@@ -600,6 +602,29 @@ if (do_jqfile==1)
 // ************************************************************************************************
 //MAIN LOOP - do calculation of excitation energy for every Q vector     
 // ************************************************************************************************
+#ifdef _THREADS
+   // Initialises mutual exclusions and threads
+   MUTEX_INIT(mutex_loop);
+   MUTEX_INIT(mutex_index);
+   EVENT_INIT(checkfinish);
+   #if defined  (__linux__) || defined (__APPLE__)
+   pthread_t threads[NUM_THREADS]; int rc; void *status;
+   pthread_attr_t attr;
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+   #else
+   HANDLE threads[NUM_THREADS];
+   DWORD tid[NUM_THREADS], dwError;
+   #endif
+   int ithread;
+   intcalcapr_input *tin[NUM_THREADS];     
+   thrdat.ini = new inimcdis*[NUM_THREADS]; thrdat.inputpars = new par*[NUM_THREADS];
+   thrdat.md  = new mdcf*[NUM_THREADS];     thrdat.J         = new jq*[NUM_THREADS];
+   for (ithread=0; ithread<NUM_THREADS; ithread++) 
+   { thrdat.ini[ithread] = new inimcdis(ini); 
+     thrdat.inputpars[ithread] = new par(inputpars);
+   } 
+#endif
 int counter;qijk=0;double qincr=-1;
 for(counter=1;counter<=ini.nofhkls;++counter){
 		     hkl(1)=ini.hkls[counter][1];
@@ -628,27 +653,13 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
  }}}
 
 #ifdef _THREADS
-   // Initialises mutual exclusions and threads
-   MUTEX_INIT(mutex_loop);
-   MUTEX_INIT(mutex_index);
-   EVENT_INIT(checkfinish);
-   #if defined  (__linux__) || defined (__APPLE__)
-   pthread_t threads[NUM_THREADS]; int rc; void *status;
-   pthread_attr_t attr;
-   pthread_attr_init(&attr);
-   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-   #else
-   HANDLE threads[NUM_THREADS];
-   DWORD tid[NUM_THREADS], dwError;
-   #endif
-   intcalcapr_input *tin[NUM_THREADS];      thrdat.q = q; thrdat.thread_id = -1;
-   thrdat.ini = new inimcdis*[NUM_THREADS]; thrdat.inputpars = new par*[NUM_THREADS];
-   thrdat.md  = new mdcf*[NUM_THREADS];     thrdat.J         = new jq*[NUM_THREADS];
-   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
+       thrdat.q = q; thrdat.thread_id = -1;       
+   for (ithread=0; ithread<NUM_THREADS; ithread++) 
    {
-      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); thrdat.J[ithread] = new jq(J); tin[ithread]->dimA=0; 
-      thrdat.md[ithread] = new mdcf(md); thrdat.ini[ithread] = new inimcdis(ini); thrdat.inputpars[ithread] = new par(inputpars);
-   }
+      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); 
+      thrdat.J[ithread] = new jq(J); tin[ithread]->dimA=0; 
+      thrdat.md[ithread] = new mdcf(md);        
+   } 
    int thrcount=0, ithread=0, num_threads_started=-1;
 #endif
  // calculate Js,ss(Q) summing up contributions from the l=1-paranz parameters
@@ -689,6 +700,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
     #else
     WaitForMultipleObjects(ithread,threads,TRUE,INFINITE);
     #endif
+
     for(int th=0; th<NUM_THREADS; th++) 
     {
        nofneighbours += tin[th]->dimA;
@@ -696,9 +708,10 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
           for(int i2=1;i2<=ini.mf.na();++i2) for(int j2=1;j2<=ini.mf.nb();++j2) for(int k2=1;k2<=ini.mf.nc();++k2)
              J.mat(i1,j1,k1,i2,j2,k2)+=(*thrdat.J[th]).mat(i1,j1,k1,i2,j2,k2); 
     }
+
     for (ithread=0; ithread<NUM_THREADS; ithread++) {
        delete thrdat.J[ithread];delete thrdat.md[ithread]; delete tin[ithread]; }
-    delete[] thrdat.J; //delete tin;
+    
 #endif
 
 
@@ -748,18 +761,12 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
    ComplexMatrix J_Q(1,ini.nofcomponents*dimA,1,ini.nofcomponents*dimA);
    Ac=0;J_Q=0;Lambda=0;
    for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
-//   s=(((i1-1)*ini.mf.nb()+(j1-1))*ini.mf.nc()+(k1-1))*inputpars.nofatoms;
-//    for(l1=1;l1<=inputpars.nofatoms;++l1){
-//      Ac(s+l1,s+l1)=md.delta(i1,j1,k1)(l1);}
 
     for(l1=1;l1<=inputpars.nofatoms;++l1){
      for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
       s=index_s(i1,j1,k1,l1,t1,md,ini);
       b=md.baseindex(i1,j1,k1,l1,t1);
-//                     { // this is fast algorithms dynamical matrix assignment ... does not work MR 1301
-//                       Lambda(s,s)=+0.5/md.delta(i1,j1,k1)(b);
-//                       Ac(s,s)=+0.5*md.delta(i1,j1,k1)(b);
-//                      }
+
                        // this is standard DMD as described in the review rotter et al JPcondMat 2012
                        if(md.delta(i1,j1,k1)(b)<0){Lambda(s,s)=-1;}else{Lambda(s,s)=+1;}
                        Ac(s,s)=md.delta(i1,j1,k1)(b)*Lambda(s,s);
@@ -770,8 +777,6 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
       }}
 
    for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
-//   ss=(((i2-1)*ini.mf.nb()+(j2-1))*ini.mf.nc()+(k2-1))*inputpars.nofatoms;
-
     for(l1=1;l1<=inputpars.nofatoms;++l1){ 
      for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
     for(l2=1;l2<=inputpars.nofatoms;++l2){ 
@@ -928,7 +933,7 @@ if (do_jqfile==1){
  
               }
          qincr+=Norm(qijk-qold); 
- 
+   
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
                              ini,calc_rixs,do_Erefine,counter);
                   ini.print_usrdefcols(foutqom,qijk,qincr);
@@ -1166,7 +1171,7 @@ if (do_jqfile==1){
                       ini.print_usrdefcols(foutqei,qijk,qincr);
                       fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                          myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
-                       if(do_verbose==1){fprintf(stdout, "#IdipFF= %4.4g Ibeyonddip=%4.4g\n",ints(i),intsbey(i));}
+                       if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g\n",i,ints(i),intsbey(i));}
                        if(En(i)>=ini.emin&&En(i)<=ini.emax){diffint+=ints(i);diffintbey+=intsbey(i);}
                       }
                      // printout eigenvectors only if evaluated during intensity calculation...
@@ -1292,12 +1297,13 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds1);
           fprintf (foutds1, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 #ifdef _THREADS
-          thrdat.J = new jq*[NUM_THREADS]; thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
-          for (int ithread=0; ithread<NUM_THREADS; ithread++) 
+          thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
+          for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {
-             tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); tin[ithread]->epsilon=epsilon; thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md);
+             tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); 
+             tin[ithread]->epsilon=epsilon; thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md);
           }
-          int ithread=0; double oldE=0.;
+          ithread=0; double oldE=0.;
           Vector vIntensity(1,(int)((ini.emax-ini.emin)/(epsilon/2)+1)); int iE=1;
 #endif
 		     double intensity;
@@ -1386,7 +1392,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           {
              delete thrdat.md[ithread];delete thrdat.J[ithread]; delete tin[ithread];
           }
-          delete[] thrdat.J; //delete tin;
+          
 #endif
 	             fprintf (foutdstot, " %4.4g ",totint);
                      }  // do_Erefine
@@ -1396,18 +1402,17 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
    fprintf (foutqom, "\n");
    } // do jqfile
   
+} // next hkl
 #ifdef _THREADS
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
-   {  //delete thrdat.md[ithread];  ... already done above
-      delete thrdat.ini[ithread]; 
+   {  delete thrdat.ini[ithread]; 
       delete thrdat.inputpars[ithread]; 
    }
-   delete[] thrdat.inputpars; delete[] thrdat.md; delete[] thrdat.ini;
+   delete[] thrdat.inputpars; delete[] thrdat.md; delete[] thrdat.ini;delete[] thrdat.J; 
 #endif
 
                                      
 
-} // next hkl
     if (do_jqfile==1) 
      {fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
       fprintf(jqfile,"#the sum of squared differences between the highest eigenvalue\n");

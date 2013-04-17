@@ -492,8 +492,9 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
        fclose (fin);
        // now read also the hkls in mcdisp.par
       ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-      fin = fopen(file, "rb");read_hkl_list(fin,hkls,0,abc); fclose(fin);       
+      fin = fopen(file, "rb");read_hkl_list(fin,hkls,0,abc); fclose(fin); 
   save();
+      if(nofhkls==0){fprintf(stderr,"ERROR mcdisp: no hkl's found in mcdisp.par\n");exit(EXIT_FAILURE);}      
 }
 
 //kopier-konstruktor 

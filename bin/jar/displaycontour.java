@@ -26,6 +26,8 @@ import gov.noaa.pmel.sgt.GridCartesianRenderer;
 import gov.noaa.pmel.sgt.IndexedColorMap;
 import gov.noaa.pmel.sgt.ColorMap;
 import gov.noaa.pmel.sgt.LinearTransform;
+import gov.noaa.pmel.sgt.Layer;
+import gov.noaa.pmel.sgt.LinearTransform;
 
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTPoint;
@@ -45,12 +47,16 @@ import gov.noaa.pmel.util.Dimension2D;
 import gov.noaa.pmel.util.Rectangle2D;
 import gov.noaa.pmel.util.Point2D;
 import gov.noaa.pmel.util.IllegalTimeValue;
+import gov.noaa.pmel.util.Domain;
 
 import gov.noaa.pmel.util.GeoDateArray;
 
 import java.awt.*;
 import java.awt.print.*;
+import java.awt.image.*;
 import javax.swing.*;
+
+import javax.imageio.ImageIO;
 
 import java.awt.event.*;
 import java.io.*;
@@ -76,9 +82,22 @@ public class displaycontour extends JApplet {
  static int[] colx;
  static int[] coly;
  static int[] colz;
+ 
+ static boolean makeImg = false;
+ static boolean closeImg = false;
+ static String imgFile;
+ 
+ // %#* Edited by Nikolai
+ static String xtex="x-col";
+ static String ytex="y-col";
+ static String ztex="z-col";
+ 
+ static String[] Params;
+ static long lastmod = 0;
 
 
   static JPlotLayout rpl_;
+  static JFrame frame;
   private GridAttribute gridAttr_;
   JButton edit_;
   JButton space_ = null;
@@ -86,6 +105,8 @@ public class displaycontour extends JApplet {
   JButton print_;
   JButton layout_;
   PageFormat pageFormat = PrinterJob.getPrinterJob().defaultPage();
+  
+  UpdateThread ut;
 
   public void init() {
     double[] axis1, axis2;
@@ -112,7 +133,9 @@ public class displaycontour extends JApplet {
     setBackground(java.awt.Color.white);
     setSize(600,600);
     JPanel main = new JPanel();
-    rpl_ = makeGraph(values,axis1,axis2);
+    try {
+	rpl_ = makeGraph(values,axis1,axis2,Double.NaN,Double.NaN,Double.NaN,Double.NaN);
+	} catch(java.beans.PropertyVetoException e) { }
     JPanel button = makeButtonPanel(false);
     rpl_.setBatch(true);
     main.add(rpl_, BorderLayout.CENTER);
@@ -122,6 +145,7 @@ public class displaycontour extends JApplet {
     getContentPane().add(main, "Center");
     getContentPane().add(button, "South");
     rpl_.setBatch(false);
+	ut = new UpdateThread(this);
   }
 
   JPanel makeButtonPanel(boolean mark) {
@@ -144,22 +168,106 @@ public class displaycontour extends JApplet {
     /*
      * Optionally leave the "mark" button out of the button panel
      */
-    if(mark) {
+    if(!mark) {
       space_ = new JButton("Add Mark");
       space_.addActionListener(myAction);
       button.add(space_);
     }
     return button;
   }
-  public static void main(String[] args) {
+  public static void main(String[] args) throws java.beans.PropertyVetoException {
   if (args.length<2)
   {System.out.println("- too few arguments...\n");
     System.out.println("  program displaycontour - show data file by viewing a contour/color graphic on screen\n\n");
-    System.out.println("use as:  displayclontour xcol ycol zcol filename\n\n");
+    System.out.println("use as:  displayclontour <options> xcol ycol zcol filename\n\n");
     System.out.println("         xcol,ycol,zcol ... column to be taken as x- and y-axis and color-axis\n");
-    System.out.println("	     filename ..... filename of datafile\n\n");
+    System.out.println("         filename ..... filename of datafile\n\n");
+    System.out.println("options: -xmin <value> ..... sets the minimum of display x-axis");
+    System.out.println("	                         (similar options: -xmax, -ymin, -ymax).\n");
+    System.out.println("         -xtitle <value> ..... sets the title of display x-axis");
+    System.out.println("	                           (similar options: -ytitle, -ztitle).\n");
+    System.out.println("         -c <filename> ..... creates image of display and closes immediately\n");
+    System.out.println("         -o <filename> ..... creates image of display on closing\n\n");
   System.exit(0);
   }
+  
+  Params = args;
+  
+
+
+
+    /*
+     * Create the demo as an application // 
+     */
+    displaycontour gd = new displaycontour();
+	gd.init();
+    /*
+     * Create a new JFrame to contain the demo.
+     */
+
+    frame = new JFrame("displaycontour"); // %#* Title
+    JPanel main = new JPanel();
+    main.setLayout(new BorderLayout());
+    frame.setSize(600,600);
+    frame.getContentPane().setLayout(new BorderLayout());
+    /*
+     * Listen for windowClosing events and dispose of JFrame
+     */
+    frame.addWindowListener(new java.awt.event.WindowAdapter() {
+      public void windowClosing(java.awt.event.WindowEvent event) {
+	JFrame fr = (JFrame)event.getSource();
+	if (makeImg) makeImage(imgFile);
+	fr.setVisible(false);
+	fr.dispose();
+	System.exit(0);
+      }
+      public void windowOpened(java.awt.event.WindowEvent event) {
+	rpl_.getKeyPane().draw();
+      }
+    });
+	
+    /*
+     * Create button panel with "mark" button
+     */
+    JPanel button = gd.makeButtonPanel(true);
+    /*
+     * Create JPlotLayout and turn batching on.  With batching on the
+     * plot will not be updated as components are modified or added to
+     * the plot tree.
+     */
+    rpl_ = reloadAll(args, gd);
+    rpl_.setBatch(true);
+    /*
+     * Layout the plot, key, and buttons.
+     */
+    main.add(rpl_, BorderLayout.CENTER);
+    JPane gridKeyPane = rpl_.getKeyPane();
+    gridKeyPane.setSize(new Dimension(600,100));
+    rpl_.setKeyLayerSizeP(new Dimension2D(6.0, 1.0));
+    rpl_.setKeyBoundsP(new Rectangle2D.Double(0.0, 1.0, 6.0, 1.0));
+    main.add(gridKeyPane, BorderLayout.SOUTH);
+    frame.getContentPane().add(main, BorderLayout.CENTER);
+    frame.getContentPane().add(button, BorderLayout.SOUTH);
+    frame.pack();
+    frame.setVisible(true);
+	
+	gd.ut.run();
+	
+    /*
+     * Turn batching off. JPlotLayout will redraw if it has been
+     * modified since batching was turned on.
+     */
+    rpl_.setBatch(false);
+  }
+  
+  public static JPlotLayout reloadAll(String[] args, displaycontour gd) throws java.beans.PropertyVetoException {
+  /* Part edited by Nikolai */
+  double xmin, xmax, ymin, ymax;
+  xmin = Double.NaN;
+  ymin = Double.NaN;
+  xmax = Double.NaN;
+  ymax = Double.NaN;
+  /* ---------------------- */
 
   String ss;
   file = new String[args.length];
@@ -173,18 +281,69 @@ public class displaycontour extends JApplet {
  int j=0;
 // title= new String;
  title="displaycontour";
- for(int i=0; i<args.length-1;	i+=4)
- {file[j]=args[i+3];
-  Integer pp;
-  ss=args[i];xaxistext=ss;
+ /* Part edited by Nikolai */
+ //for(int i=0; i<args.length-1;	i+=4)
+ //{
+ int k = 0;
+ while (args[k].substring(0, 1).equals("-")) {
+	if (args[k].equalsIgnoreCase("-xmin")) {
+		xmin = Double.parseDouble(args[k+1]);
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-xmax")) {
+		xmax = Double.parseDouble(args[k+1]);
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-ymin")) {
+		ymin = Double.parseDouble(args[k+1]);
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-ymax")) {
+		ymax = Double.parseDouble(args[k+1]);
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-xtitle")) {
+		xtex = args[k+1];
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-ytitle")) {
+		ytex = args[k+1];
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-ztitle")) {
+		ztex = args[k+1];
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-title")) {
+		title = args[k+1];
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-c")) {
+		makeImg = true;
+		closeImg = true;
+		imgFile = args[k + 1];
+		++k;
+	}
+	if (args[k].equalsIgnoreCase("-o")) {
+		makeImg = true;
+		closeImg = false;
+		imgFile = args[k + 1];
+		++k;
+	}
+	++k;
+ }
+ file[j]=args[k+3];
+  //Integer pp; // -> Nutzloser Integer?
+  ss=args[k];xaxistext=ss;
   colx[j]=p.valueOf(ss).intValue();
-  ss=args[i+1];yaxistext=ss;
+  ss=args[k+1];yaxistext=ss;
   coly[j]=p.valueOf(ss).intValue();
-  ss=args[i+2];zaxistext=ss;
+  ss=args[k+2];zaxistext=ss;
   colz[j]=p.valueOf(ss).intValue();
   ++j; 
-  title=title+" "+args[i]+" "+args[i+1]+" "+args[i+2]+" "+args[i+3];
- }
+  title=title+" "+args[k]+" "+args[k+1]+" "+args[k+2]+" "+args[k+3];
+ //}
+ /* ---------------------- */
  File fileIni;
 
     double[] axis1, axis2,a1,a2;
@@ -198,6 +357,7 @@ public class displaycontour extends JApplet {
  try{int i=0;
  String s="";comment=" ";comment1=" ";
  fileIni = new File(file[i]);
+ lastmod = fileIni.lastModified();
 
     //ffnen der Datei
     DataInputStream inStream = new DataInputStream(new FileInputStream(fileIni));
@@ -316,65 +476,9 @@ public class displaycontour extends JApplet {
         for(count=0; count < ii; count++) {
       values[count] = vv[count];
     }
-
-
-
-    /*
-     * Create the demo as an application
-     */
-    displaycontour gd = new displaycontour();
-    /*
-     * Create a new JFrame to contain the demo.
-     */
-
-    JFrame frame = new JFrame("displaycontour");
-    JPanel main = new JPanel();
-    main.setLayout(new BorderLayout());
-    frame.setSize(600,600);
-    frame.getContentPane().setLayout(new BorderLayout());
-    /*
-     * Listen for windowClosing events and dispose of JFrame
-     */
-    frame.addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent event) {
-	JFrame fr = (JFrame)event.getSource();
-	fr.setVisible(false);
-	fr.dispose();
-	System.exit(0);
-      }
-      public void windowOpened(java.awt.event.WindowEvent event) {
-	rpl_.getKeyPane().draw();
-      }
-    });
-    /*
-     * Create button panel with "mark" button
-     */
-    JPanel button = gd.makeButtonPanel(true);
-    /*
-     * Create JPlotLayout and turn batching on.  With batching on the
-     * plot will not be updated as components are modified or added to
-     * the plot tree.
-     */
-    rpl_ = gd.makeGraph(values,axis1,axis2);
-    rpl_.setBatch(true);
-    /*
-     * Layout the plot, key, and buttons.
-     */
-    main.add(rpl_, BorderLayout.CENTER);
-    JPane gridKeyPane = rpl_.getKeyPane();
-    gridKeyPane.setSize(new Dimension(600,100));
-    rpl_.setKeyLayerSizeP(new Dimension2D(6.0, 1.0));
-    rpl_.setKeyBoundsP(new Rectangle2D.Double(0.0, 1.0, 6.0, 1.0));
-    main.add(gridKeyPane, BorderLayout.SOUTH);
-    frame.getContentPane().add(main, BorderLayout.CENTER);
-    frame.getContentPane().add(button, BorderLayout.SOUTH);
-    frame.pack();
-    frame.setVisible(true);
-    /*
-     * Turn batching off. JPlotLayout will redraw if it has been
-     * modified since batching was turned on.
-     */
-    rpl_.setBatch(false);
+	
+    rpl_ = gd.makeGraph(values,axis1,axis2,xmin,ymin,xmax,ymax);
+	return rpl_;
   }
 
   void edit_actionPerformed(java.awt.event.ActionEvent e) {
@@ -432,7 +536,9 @@ public class displaycontour extends JApplet {
 
 
     
-  JPlotLayout makeGraph(double[] values,double[]axis1,double[]axis2) {
+  JPlotLayout makeGraph(double[] values,double[]axis1,double[]axis2,
+		double xMin, double yMin, double xMax, double yMax)
+		throws java.beans.PropertyVetoException{
     /*
      * This example uses a pre-created "Layout" for raster time
      * series to simplify the construction of a plot. The
@@ -450,10 +556,10 @@ public class displaycontour extends JApplet {
     keyLabel.setHeightP(0.16);
 
 
-      keyLabel.setText("displaycontour");
-      xMeta = new SGTMetaData("col"+xaxistext, "");
-      yMeta = new SGTMetaData("col"+yaxistext, "");
-      zMeta = new SGTMetaData("col"+zaxistext, "");
+      keyLabel.setText(title); // %#* Title
+      xMeta = new SGTMetaData(xtex, ""); // %#* X-Achse
+      yMeta = new SGTMetaData(ytex, ""); // %#* Y-Achse
+      zMeta = new SGTMetaData(ztex, ""); // %#* Z-Achse
   
   newData = new SimpleGrid(values, axis1, axis2, "Test Series");
 
@@ -473,7 +579,7 @@ public class displaycontour extends JApplet {
      * Create the layout without a Logo image and with the
      * ColorKey on a separate Pane object.
      */   
-    rpl = new JPlotLayout(true, false, false, "test layout", null, true);
+    rpl = new JPlotLayout(true, false, false, "test layout " + lastmod, null, true);
     rpl.setEditClasses(false);
     /*
      * Create a GridAttribute for CONTOUR style.
@@ -481,6 +587,8 @@ public class displaycontour extends JApplet {
     Range2D datar = new Range2D(-20.0f, 45.0f, 5.0f);
     clevels = ContourLevels.getDefault(datar);
     gridAttr_ = new GridAttribute(clevels);
+	
+	
     /*
      * Create a ColorMap and change the style to RASTER_CONTOUR.
      */
@@ -491,7 +599,7 @@ public class displaycontour extends JApplet {
      * Add the grid to the layout and give a label for
      * the ColorKey.
      */
-    rpl.addData(newData, gridAttr_, "col"+zaxistext);
+    rpl.addData(newData, gridAttr_, ztex);
     /*
      * Change the layout's three title lines.
      */        
@@ -511,10 +619,46 @@ public class displaycontour extends JApplet {
     rpl.setLayerSizeP(new Dimension2D(6.0, 6.0));
     rpl.setKeyLayerSizeP(new Dimension2D(6.0, 1.02));
     rpl.setKeyBoundsP(new Rectangle2D.Double(0.01, 1.01, 5.98, 1.0));
+  
+  /* %#* Part edited by Nikolai */
+  Range2D xd = rpl.getRange().getXRange();
+  Range2D yd = rpl.getRange().getYRange();
+  if (!Double.isNaN(xMin)) xd.start = xMin;
+  if (!Double.isNaN(yMin)) yd.start = yMin;
+  if (!Double.isNaN(xMax)) xd.end = xMax;
+  if (!Double.isNaN(yMax)) yd.end = yMax;
+  xd.delta = Double.NaN;
+  yd.delta = Double.NaN;
+  rpl.setRange(new Domain(xd, yd));
+  rpl.setClipping(true);
+  if (rpl.getFirstLayer().getGraph() instanceof CartesianGraph) {
+  CartesianGraph cg = ((CartesianGraph)rpl.getFirstLayer().getGraph());
+  if (!cg.isClipping())
+  {
+	cg.setClipping(true);
+  }
+  cg.setClip(xd.start, xd.end, yd.start, yd.end);
+  }
+  rpl.setBatch(true);
+  /*
+  Component[] c = rpl.getComponents();
+  Layer ly;
+  for (int i = 0; i < c.length; i++) {
+	if (c[i] instanceof Layer) {
+		ly = (Layer)c[i];
+		((CartesianGraph)ly.getGraph())
+			.setClip(xd.start, xd.end, yd.start, yd.end);
+	}
+  }
+  */
+  rpl.setBatch(false);
+  //rpl.setForeground(Color.WHITE);
+  //rpl.setBackground(Color.BLACK);
 
     return rpl;
   }
-
+  
+  
   ColorMap createColorMap(Range2D datar) {
     int[] red =
     {  0,  0,  0,  0,  0,  0,  0,  0,
@@ -568,9 +712,8 @@ public class displaycontour extends JApplet {
 	       
            if(obj == layout_) 
                layout_actionPerformed(event);
-
-        }
     }
+	}
 
  static private String FirstWord(String strSource)
  {String fw;
@@ -612,8 +755,88 @@ public class displaycontour extends JApplet {
 
     return(strSource);
  }
-
-
+ 
+ public static void makeImage(String fileName)
+ {
+	try {
+		//BufferedImage buff = frameToImage(frame, null);
+		BufferedImage buff = componentToImage(frame.getContentPane().getComponent(0), null);
+		File f = new File(fileName);
+		if (buff == null) System.out.println("Image is null");
+		ImageIO.write(buff, "jpg", f);
+	} catch(Exception e) {
+		System.out.println("Coudn't write Image. ERROR: " + e);
+	}
+ }
+ 
+ public static BufferedImage componentToImage(Component component, Rectangle region) throws IOException
+{
+    BufferedImage img = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_RGB);
+    Graphics g = img.getGraphics();
+    g.setColor(component.getForeground());
+    g.setFont(component.getFont());
+    component.paintAll(g);
+	component.paint(g);
+    if (region == null)
+    {
+        region = new Rectangle(0, 0, img.getWidth(), img.getHeight());
+    }
+    return img.getSubimage(region.x, region.y, region.width, region.height);
+}
+ 
+ public class UpdateThread extends Thread {
+ 
+		private displaycontour gd;
+ 
+		public UpdateThread(displaycontour dc) {
+			gd = dc;
+		}
+		
+		public void run() {
+            setPriority(MIN_PRIORITY); // be nice
+			
+			int j = 0;
+			String f = "";
+			f = file[j];
+			File fileIni;
+			
+          while(true){
+                try {
+                    sleep(500);
+					if (rpl_.isBatch()) rpl_.setBatch(false);
+					fileIni = new File(f);
+					if (fileIni.lastModified() != lastmod) {
+						int k= 0;
+						if (((JPanel)frame.getContentPane().getComponent(0)).getComponent(1) instanceof JPlotLayout) {
+							k = 1;
+						}
+						((JPanel)gd.getContentPane().getComponent(0)).remove(k);
+						rpl_ = reloadAll(Params, gd);
+						((JPanel)frame.getContentPane().getComponent(0)).add(rpl_, BorderLayout.CENTER);
+						//frame.repaint();
+						frame.setVisible(false);
+						frame.setVisible(true);
+					}
+				}
+				catch (IndexOutOfBoundsException e) {
+                    // suppress
+					System.out.println("INDEX ERROR! " + e);
+				}
+                catch (InterruptedException e) {
+                    // suppress
+					System.out.println("INTERRUPT ERROR! " + e);
+                }
+				catch (java.beans.PropertyVetoException e) {
+					System.out.println("PROPERTY ERROR! " + e);
+				}
+				catch(Exception e) {
+					System.out.println("ERROR! " + e);
+				}
+				if (closeImg) frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+			}
+		}
+	}
+ 
 }
 
 

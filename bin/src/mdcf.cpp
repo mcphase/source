@@ -107,41 +107,6 @@ int mdcf::nc()
 
 /**************************************************************************/
 
-//constructors
-mdcf::mdcf (int n1,int n2,int n3,int n,int nc)
-{  int i;
-   nofa=n1;nofb=n2;nofc=n3;
-   mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
-   nofatoms=n;nofcomponents=nc;
-
-//dimension arrays
-  s = new ComplexMatrix * [mxa*mxb*mxc+1];//(1,nofcomponents*nofatoms,1,nofcomponents*nofatoms);
-  if (s == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  m = new ComplexMatrix * [mxa*mxb*mxc+1];
-  if (m == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  l = new ComplexMatrix * [mxa*mxb*mxc+1];
-  if (l == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  sb = new ComplexMatrix * [mxa*mxb*mxc+1];
-  if (sb == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  dmqs = new ComplexVector * [mxa*mxb*mxc+1];
-  if (dmqs == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  dmq_dips = new ComplexVector * [mxa*mxb*mxc+1];
-  if (dmq_dips == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  lb = new ComplexVector * [mxa*mxb*mxc+1];
-  if (lb == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  lb_dip = new ComplexVector * [mxa*mxb*mxc+1];
-  if (lb_dip == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  d = new Vector * [mxa*mxb*mxc+1]; 
-  if (d == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
-  nt= new IntVector * [mxa*mxb*mxc+1];
-  if (nt == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  for(i=0;i<=mxa*mxb*mxc;++i){nt[i]=new IntVector(1,nofatoms);}
-
-  eigenstates= new ComplexMatrix * [mxa*mxb*mxc*(nofatoms+1)+1];   
-  if (eigenstates == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  
-  Ug=0; gU=0; bUg=0; bgU=0;
-}
 
 ComplexMatrix & mdcf::est(int i, int j, int k, int l)
 {return (*eigenstates[ind(i,j,k,l)]);}
@@ -190,39 +155,31 @@ int mdcf::baseindex_max(int i, int j, int k) const
 int mdcf::noft(int i, int j, int k,int l) const
 {return (*nt[in(i,j,k)])(l);}
 
-//destruktor
-mdcf::~mdcf ()
-{int i,j,k;
- for (i=1;i<=nofa;++i){
- for (j=1;j<=nofb;++j){
- for (k=1;k<=nofc;++k){
- int id = in(i,j,k);
- delete s[id];
- delete m[id];
- delete l[id];
- delete sb[id];
- delete dmqs[id];
- delete dmq_dips[id];
- delete lb[id];
- delete lb_dip[id];
- delete d[id];
- // For caching values in calculation of transform of chi''
- if(Ug!=0){if(Ug[id]!=0) delete Ug[id];}
- if(gU!=0){if(gU[id]!=0) delete gU[id]; }
- if(bUg!=0){if(bUg[id]!=0) delete bUg[id]; }
- if(bgU!=0){if(bgU[id]!=0) delete bgU[id];}
- }}}
- delete []s;delete []m;delete []d;delete []l;delete []nt;
- delete []sb;
- delete []dmqs;
- delete []dmq_dips;
-delete []lb;
-delete []lb_dip;
- if(Ug!=0) { delete []Ug; Ug=0; } if(bUg!=0) { delete []bUg; bUg=0; }
- if(gU!=0) { delete []gU; gU=0; } if(bgU!=0) { delete []bgU; bgU=0; }
+void mdcf::errexit()
+{ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+
+//constructors
+mdcf::mdcf (int n1,int n2,int n3,int n,int nc)
+{  int i;
+   nofa=n1;nofb=n2;nofc=n3;
+   mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
+   nofatoms=n;nofcomponents=nc;
+
+//dimension arrays
+  s = new ComplexMatrix * [mxa*mxb*mxc+1];if(s==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)s[i]=NULL;
+  m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
+  l = new ComplexMatrix * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
+  sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
+  dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
+  dmq_dips = new ComplexVector * [mxa*mxb*mxc+1];if(dmq_dips==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmq_dips[i]=NULL;
+  lb = new ComplexVector * [mxa*mxb*mxc+1];if(lb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb[i]=NULL;
+  lb_dip = new ComplexVector * [mxa*mxb*mxc+1];if(lb_dip==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb_dip[i]=NULL;
+  d = new Vector * [mxa*mxb*mxc+1]; if(d==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)d[i]=NULL;
+  nt= new IntVector * [mxa*mxb*mxc+1];if(nt==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i){nt[i]=new IntVector(1,nofatoms);}
+  eigenstates= new ComplexMatrix * [mxa*mxb*mxc*(nofatoms+1)+1]; if(eigenstates==NULL)errexit();
+                           for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i)eigenstates[i]=NULL;       
+  Ug=0; gU=0; bUg=0; bgU=0;
 }
-
-
 
 //kopier-konstruktor
 mdcf::mdcf (const mdcf & p)
@@ -232,59 +189,86 @@ mdcf::mdcf (const mdcf & p)
   mqdim=p.mqdim;
   nofatoms=p.nofatoms;nofcomponents=p.nofcomponents;
 //dimension arrays
-  s = new ComplexMatrix*[mxa*mxb*mxc+1]; //(1,nofcomponents*nofatoms,1,nofcomponents*nofatoms);
-  if (s == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  m = new ComplexMatrix*[mxa*mxb*mxc+1];
-  if (m == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  l = new ComplexMatrix*[mxa*mxb*mxc+1];
-  if (l == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  sb = new ComplexMatrix *[mxa*mxb*mxc+1];//(1,nofcomponents*nofatoms,1,nofatoms);
-  if (sb == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  dmqs = new ComplexVector *[mxa*mxb*mxc+1];
-  if (dmqs == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  dmq_dips = new ComplexVector *[mxa*mxb*mxc+1];
-  if (dmq_dips == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  lb = new ComplexVector *[mxa*mxb*mxc+1];
-  if (lb == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  lb_dip = new ComplexVector *[mxa*mxb*mxc+1];
-  if (lb_dip == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
-  d = new Vector*[mxa*mxb*mxc+1];//(1,nofatoms);
-  if (d == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
-  nt = new IntVector*[mxa*mxb*mxc+1];//(1,nofatoms);
-  if (nt == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+//dimension arrays
+  s = new ComplexMatrix * [mxa*mxb*mxc+1];if(s==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)s[i]=NULL;
+  m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
+  l = new ComplexMatrix * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
+  sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
+  dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
+  dmq_dips = new ComplexVector * [mxa*mxb*mxc+1];if(dmq_dips==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmq_dips[i]=NULL;
+  lb = new ComplexVector * [mxa*mxb*mxc+1];if(lb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb[i]=NULL;
+  lb_dip = new ComplexVector * [mxa*mxb*mxc+1];if(lb_dip==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb_dip[i]=NULL;
+  d = new Vector * [mxa*mxb*mxc+1]; if(d==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)d[i]=NULL;
+  nt= new IntVector * [mxa*mxb*mxc+1];if(nt==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i){nt[i]=new IntVector(1,nofatoms);}
+  eigenstates= new ComplexMatrix * [mxa*mxb*mxc*(nofatoms+1)+1]; if(eigenstates==NULL)errexit();
+                           for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i){eigenstates[i]=NULL;       
+                                                                    if(p.eigenstates[i]!=NULL)eigenstates[i]=new ComplexMatrix((*p.eigenstates[i]));
+                                                                    }
 
-  eigenstates= new ComplexMatrix * [mxa*mxb*mxc*nofatoms+1];   
-  if (eigenstates == NULL){ fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
+ for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k)
+     {int id=in(i,j,k); 
+      (*nt[id])=(*p.nt[id]);
+      s[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));
+      m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));
+      l[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));
+      sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
+      dmqs[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
+      dmq_dips[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
+      lb[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
+      lb_dip[id]= new ComplexVector(1,mqdim*sum((*nt[id])));
+      d[id]= new Vector(1,sum((*nt[id])),1,sum((*nt[id])));
 
-
- for (i=1;i<=nofa;++i)
-  {for (j=1;j<=nofb;++j)
-    {for (k=1;k<=nofc;++k)
-     {
-      nt[in(i,j,k)]=p.nt[in(i,j,k)];
-
-      s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-      m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-      l[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,nofcomponents*sum((*nt[in(i,j,k)])));
-      sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sum((*nt[in(i,j,k)])),1,sum((*nt[in(i,j,k)])));// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
-      dmqs[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
-      dmq_dips[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
-      lb[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
-      lb_dip[in(i,j,k)]= new ComplexVector(1,mqdim*sum((*nt[in(i,j,k)])));
-      d[in(i,j,k)]= new Vector(1,sum((*nt[in(i,j,k)])),1,sum((*nt[in(i,j,k)])));
-
-      *d[in(i,j,k)]=*p.d[in(i,j,k)];
-      *s[in(i,j,k)]=*p.s[in(i,j,k)];
-      *m[in(i,j,k)]=*p.m[in(i,j,k)];
-      *l[in(i,j,k)]=*p.l[in(i,j,k)];
-      *sb[in(i,j,k)]=*p.sb[in(i,j,k)];
-      *dmqs[in(i,j,k)]=*p.dmqs[in(i,j,k)];
-      *dmq_dips[in(i,j,k)]=*p.dmq_dips[in(i,j,k)];
-      *lb[in(i,j,k)]=*p.lb[in(i,j,k)];
-      *lb_dip[in(i,j,k)]=*p.lb_dip[in(i,j,k)];
+      *d[id]=*p.d[id];
+      *s[id]=*p.s[id];
+      *m[id]=*p.m[id];
+      *l[id]=*p.l[id];
+      *sb[id]=*p.sb[id];
+      *dmqs[id]=*p.dmqs[id];
+      *dmq_dips[id]=*p.dmq_dips[id];
+      *lb[id]=*p.lb[id];
+      *lb_dip[id]=*p.lb_dip[id];
      } 
     }
   }           
 
   Ug=0; gU=0; bUg=0; bgU=0;
+} 
+//destruktor
+mdcf::~mdcf ()
+{int i,j,k;
+ for(i=0;i<=mxa*mxb*mxc;++i){
+ if(s[i]!=NULL)delete s[i];
+ if(m[i]!=NULL)delete m[i];
+ if(l[i]!=NULL)delete l[i];
+ if(sb[i]!=NULL)delete sb[i];
+ if(dmqs[i]!=NULL)delete dmqs[i];
+ if(dmq_dips[i]!=NULL)delete dmq_dips[i];
+ if(lb[i]!=NULL)delete lb[i];
+ if(lb_dip[i]!=NULL)delete lb_dip[i];
+ if(d[i]!=NULL)delete d[i];
+}
+ for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i)if(eigenstates[i]!=NULL)delete eigenstates[i];
+
+ for (i=1;i<=nofa;++i){ for (j=1;j<=nofb;++j){ for (k=1;k<=nofc;++k){
+ int id = in(i,j,k);
+ // For caching values in calculation of transform of chi''
+ if(Ug!=0){if(Ug[id]!=0) delete Ug[id];}
+ if(gU!=0){if(gU[id]!=0) delete gU[id]; }
+ if(bUg!=0){if(bUg[id]!=0) delete bUg[id]; }
+ if(bgU!=0){if(bgU[id]!=0) delete bgU[id];}
+ }}}
+ delete []s;
+ delete []m;
+ delete []l;
+ delete []sb;
+ delete []dmqs;
+ delete []dmq_dips;
+ delete []lb;
+ delete []lb_dip;
+ delete []d;
+ for(i=0;i<=mxa*mxb*mxc;++i){delete nt[i];}
+ delete []nt;
+ delete []eigenstates;
+ if(Ug!=0) { delete []Ug; Ug=0; } if(bUg!=0) { delete []bUg; bUg=0; }
+ if(gU!=0) { delete []gU; gU=0; } if(bgU!=0) { delete []bgU; bgU=0; }
 }

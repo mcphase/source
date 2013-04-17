@@ -27,7 +27,8 @@ class mdcf
    IntVector ** nt; // vector to store number of transitions for each atom
    ComplexMatrix ** eigenstates; // matrix to store the eigenstates of ions
    int iv[4];
-       
+   void errexit();
+
   public:
  // array of spins 
     int nofatoms,nofcomponents;

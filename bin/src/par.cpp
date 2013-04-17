@@ -64,8 +64,6 @@ par::par (const char *filejjj)
    jjj[i]=new jjjpar(fin_coq,nofcomponents);
    if(jjj[i]==NULL){ fprintf (stderr, "Out of memory creating atoms jjjpar by constructor\n");exit (EXIT_FAILURE);}
    gJ(i)=(*jjj[i]).gJ;
-  // fgets (instr, MAXNOFCHARINLINE, fin_coq);
-   //rems[3+i]=new char[strlen(instr)+2];strcpy(rems[3+i],instr); not needed any more (causes memory leak) MR 30.3.10
    
    if(nofcomponents!=(*jjj[i]).nofcomponents)
    {fprintf(stderr,"ERROR reading mcphas.j: nofcomponents (%i) not consistent for atom %i (%i read in fileheader)\n",(*jjj[i]).nofcomponents,i,nofcomponents);exit(EXIT_FAILURE);}
@@ -112,10 +110,10 @@ par::par(const par & p)
   {rems[i] = new char[strlen(p.rems[i])+2];
    strcpy(rems[i],p.rems[i]);}
 
-  jjj=new jjjpar * [nofatoms+1];
-  for (i=1;i<=nofatoms;++i) jjj[i] = new jjjpar(*p.jjj[i]);
-//  {jjj[i]=new jjjpar();
-//   jjj[i]=p.jjj[i];}
+ jjj=new jjjpar * [nofatoms+1]; for (i=1;i<=nofatoms;++i){ jjj[i] = new jjjpar(*p.jjj[i]);
+  for(int n=1;n<=(*jjj[i]).paranz;++n)
+   {(*jjj[i]).sublattice[n]=(*p.jjj[i]).sublattice[n];
+ }}
 }
 
 //destruktor
@@ -124,9 +122,7 @@ par::~par ()
   int i;
   for(i=1;i<=3;++i)
   {delete []rems[i];}
-  for(i=1;i<=nofatoms;++i)  
-  {delete jjj[i];}
-   delete []jjj;
+  for(i=1;i<=nofatoms;++i){delete jjj[i];}delete []jjj;
 }
 
 int par::newatom(jjjpar * p) //creates new atom from an existing and returns its index

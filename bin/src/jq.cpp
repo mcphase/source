@@ -96,7 +96,9 @@ jq::jq (const jq & p)
 
  for (int i1=1;i1<=nofa;++i1){ for (int j1=1;j1<=nofb;++j1){ for (int k1=1;k1<=nofc;++k1){
  for (int i2=1;i2<=nofa;++i2){ for (int j2=1;j2<=nofb;++j2){ for (int k2=1;k2<=nofc;++k2){
-    ind = iin(in(i1,j1,k1),in(i2,j2,k2)); jj[ind]= new ComplexMatrix(1,(*p.jj[ind]).Rhi(),1,(*p.jj[ind]).Chi()); (*jj[ind])=(*p.jj[ind]);
+    ind = iin(in(i1,j1,k1),in(i2,j2,k2)); 
+    jj[ind]= new ComplexMatrix(1,(*p.jj[ind]).Rhi(),1,(*p.jj[ind]).Chi()); 
+    (*jj[ind])=(*p.jj[ind]);
  }}}}}} 
 
 }

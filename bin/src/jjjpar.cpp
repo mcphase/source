@@ -682,7 +682,7 @@ jjjpar::~jjjpar ()
 //#ifdef __linux__
 // i#ifdef __linux__f (module_type==0)dlclose(handle);
 //#endif
-// printf("hello destruktor jjjpar\n");  
+// printf("hello end destruktor jjjpar\n");  
  
  }
 
