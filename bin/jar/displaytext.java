@@ -42,10 +42,16 @@ import java.lang.ref.WeakReference;
 public class displaytext extends JPanel implements FileListener {
     protected JTextArea textArea;
     protected JScrollPane scrollPane;
+	protected JButton saveButton;
+	
     private final static String newline = "\n";
     private static String filename;
     static myStringfunc SF=new myStringfunc();
     static int w,h;
+	
+	static boolean relative = false;
+	
+	protected int xval, yval, /* Test */xmax, ymax;
 
     public displaytext(String filen) {
         super(new GridBagLayout());
@@ -60,9 +66,41 @@ public class displaytext extends JPanel implements FileListener {
       monitor.addListener (this);
 
         textArea = new JTextArea(h, w);
-        textArea.setEditable(false);
+        textArea.setEditable(true);
         textArea.setFont(new Font("Courier New",0,12));
         scrollPane = new JScrollPane(textArea);
+		
+		// Load scrollBar values
+		xval = scrollPane.getHorizontalScrollBar().getValue();
+		yval = scrollPane.getVerticalScrollBar().getValue();
+		/* Test */
+		xmax = scrollPane.getHorizontalScrollBar().getMaximum();
+		ymax = scrollPane.getVerticalScrollBar().getMaximum();
+		
+		scrollPane.getVerticalScrollBar().addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mouseReleased(java.awt.event.MouseEvent e) {
+		// Load scrollBar values
+		xval = scrollPane.getHorizontalScrollBar().getValue();
+		yval = scrollPane.getVerticalScrollBar().getValue();
+		/* Test */
+		xmax = scrollPane.getHorizontalScrollBar().getMaximum();
+		ymax = scrollPane.getVerticalScrollBar().getMaximum();
+			}
+		});
+		
+		saveButton = new JButton("save");
+		saveButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				try {
+					byte[] toSave = textArea.getText().getBytes();
+					FileOutputStream fos = new FileOutputStream(filename);
+					fos.write(toSave);
+					fos.close();
+				} catch (Exception ex) {
+					System.out.println("FILE SAVING ERROR! " + ex);
+				}
+			}
+		});
 
       //Add Components to this panel.
         GridBagConstraints c = new GridBagConstraints();
@@ -75,6 +113,16 @@ public class displaytext extends JPanel implements FileListener {
         c.weightx = 1.0;
         c.weighty = 1.0;
         add(scrollPane, c);
+		
+		//Add Components to this panel.
+        GridBagConstraints g = new GridBagConstraints();
+        g.gridwidth = GridBagConstraints.REMAINDER;
+
+        g.fill = GridBagConstraints.HORIZONTAL;
+//        add(textField, c);
+
+        g.fill = GridBagConstraints.BOTH;
+		add(saveButton, g);
 
       try {FileInputStream fstream = new FileInputStream(filen);
            DataInputStream in = new DataInputStream(fstream);
@@ -107,6 +155,24 @@ public class displaytext extends JPanel implements FileListener {
         textArea.setEditable(false);
         textArea.setFont(new Font("Courier New",0,12));
         scrollPane = new JScrollPane(textArea);
+		
+		// Load scrollBar values
+		xval = scrollPane.getHorizontalScrollBar().getValue();
+		yval = scrollPane.getVerticalScrollBar().getValue();
+		/* Test */
+		xmax = scrollPane.getHorizontalScrollBar().getMaximum();
+		ymax = scrollPane.getVerticalScrollBar().getMaximum();
+		
+		scrollPane.getVerticalScrollBar().addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mouseReleased(java.awt.event.MouseEvent e) {
+		// Load scrollBar values
+		xval = scrollPane.getHorizontalScrollBar().getValue();
+		yval = scrollPane.getVerticalScrollBar().getValue();
+		/* Test */
+		xmax = scrollPane.getHorizontalScrollBar().getMaximum();
+		ymax = scrollPane.getVerticalScrollBar().getMaximum();
+			}
+		});
 
       //Add Components to this panel.
         GridBagConstraints c = new GridBagConstraints();
@@ -133,6 +199,14 @@ public class displaytext extends JPanel implements FileListener {
          catch (Exception e) { System.err.println("File input error"); }
 
     }
+	
+	static int Max(int i1, int i2) {
+		return (i1 > i2) ? i1 : i2;
+	}
+	
+	static int Min(int i1, int i2) {
+		return (i1 < i2) ? i1 : i2;
+	}
 
     public void fileChanged (File file)
     { //System.out.println ("File changed: " + file);
@@ -150,7 +224,25 @@ public class displaytext extends JPanel implements FileListener {
             textArea.append(newline); 
             }
          in.close();fstream.close();
-         scrollPane.setViewport(viewport); 
+         scrollPane.setViewport(viewport);
+		 /* %#* Nikolai */
+		 JScrollBar hbar = scrollPane.getHorizontalScrollBar();
+		 JScrollBar vbar = scrollPane.getVerticalScrollBar();
+		 if (relative) {
+			double xrel, yrel;
+			xrel = (double)xval / xmax;
+			yrel = (double)yval / ymax;
+			hbar.setValues((int)(xrel * hbar.getMaximum()), 1, 0, hbar.getMaximum());
+			vbar.setValues((int)(yrel * vbar.getMaximum()), 1, 0, vbar.getMaximum());
+		 } else {
+			hbar.setValues(Min(xval, hbar.getMaximum()), 1, 0, hbar.getMaximum());
+			vbar.setValues(Min(yval, vbar.getMaximum()), 1, 0, vbar.getMaximum());
+		 }
+		 xmax = hbar.getMaximum();
+		 ymax = vbar.getMaximum();
+		 scrollPane.setHorizontalScrollBar(hbar);
+		 scrollPane.setVerticalScrollBar(vbar);
+		 /* ----------- */
          }
          catch (Exception e) { System.err.println("File input error"); System.exit(1);}
     }
@@ -185,10 +277,11 @@ public class displaytext extends JPanel implements FileListener {
       if (args.length<1)
        {System.out.println("- too few arguments...\n");
         System.out.println("  program displaytext - show and watch text file by viewing a text box on screen\n\n");
-        System.out.println("use as:  display [options] filename\n\n");
+        System.out.println("use as:  displaytext [options] filename\n\n");
         System.out.println("	 filename ..... filename of textfile\n");
         System.out.println("	 option -w 100 ..... width of display\n");
         System.out.println("	 option -h 10  ..... height of display\n\n");
+        System.out.println("	 option -r ..... reset scrollbar relative to old position when reloading\n\n");
         System.exit(0);
        }
       int j=0;int k=0;
@@ -210,6 +303,9 @@ public class displaytext extends JPanel implements FileListener {
               h=p.valueOf(SF.DataCol(ss)).intValue();
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
+		   else if (SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-r")) {
+				relative = true;
+			}
           }
        
         filename=s;

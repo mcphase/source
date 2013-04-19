@@ -7,7 +7,7 @@ use Getopt::Long;
 use Math::Complex;
 
 $SMALL=1e-5;
-$debug = true;
+#$debug = true;
 
 # -------------------------------------------------------------------------------------- #
 # Subfunctions: 
@@ -287,7 +287,7 @@ for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
 
 # Calculates the matrix elements |<V|s.J|V>|^2
 $sJVi = mmult($sJmat,$Vi); $matel = mmult($tVi,$sJVi);
-for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) { $matel->[$ii][$jj]*=$matel->[$ii][$jj]; } }
+for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) { $matel->[$ii][$jj]*=~$matel->[$ii][$jj]; } }
 
 if ($debug) {
   print "Eigenvalues:\n",join("\t",@E),"\n";
@@ -324,7 +324,7 @@ foreach $T (@Temp) {
 
   $res=0;
   for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
-    $xi=$ii%($J2+1); $res += ($matel->[$ii][$jj]*~$matel->[$ii][$jj]) * $p[$xi] * $f[$jj%($J2+1)+$xi*($J2+1)]; } }
+    $xi=$ii%($J2+1); $res += $matel->[$ii][$jj] * $p[$xi] * $f[$jj%($J2+1)+$xi*($J2+1)]; } }
 
   $res /= $J*($J+1)*(4/3); 
   if($rho0) { push(@reslist,$rho0*$res); } else { push(@reslist,$res); }
