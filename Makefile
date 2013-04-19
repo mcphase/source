@@ -4,6 +4,7 @@ include bin/src/Makefile.common
 
 cfdir = bin/cf1ion_module
 icdir = bin/ic1ion_module
+bfkdir = bin/bfk
 mcpdir = bin/src
 vecdir = bin/src/vector
 funcdir = bin/src/functions
@@ -25,6 +26,9 @@ cfield: vector
 
 ic1ion: vector
 	cd $(icdir) && $(MAKE)
+
+bfk   : 
+	cd $(bfkdir) && $(MAKE)
 
 mcphase: vector cfield ic1ion
 	cd $(mcpdir) && $(MAKE)

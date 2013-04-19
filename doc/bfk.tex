@@ -1,0 +1,735 @@
+
+%\documentclass[a4paper,12pt]{article}
+%\usepackage{epsfig}
+
+%\begin{document}
+%\pagenumbering{arabic}
+%\thispagestyle{empty}
+%\setcounter{page}{1}
+
+%{\Large
+%\centerline
+\section{Inelastic neutron-scattering from RE ions in a crystal field
+%}}
+%{\Large
+%\centerline{
+and calculation of the dynamical susceptibility}
+%}
+%\bigskip
+
+\bigskip
+This is an extension  of the theory published by Klaus W. Becker, Peter Fulde and
+Joachim Keller in Z. Physik B
+28,9-18, 1977 
+"Line width of crystal-field excitations in metallic rare-earth systems"
+and an  introduction to the computer program for the calculation of  the neutron 
+scattering cross section. The computer program is written by J. Keller,
+University of Regensburg.
+
+\medskip
+
+\noindent
+Scattering cross section:
+ 
+The neutron-scattering cross section is related to the dynamic susceptibility
+of the spins of    the RE ions by 
+(Stephen W. Lovesey; "Theory of neutron 
+scattering from condensed matter"
+Vol 2, equ. 11,144)
+
+
+
+$$
+{d^2\sigma \over d\Omega d E'}=  {k' \over
+k}({r_0\over 2}g F(\kappa))^2{1\over \pi }
+\sum_{\alpha\beta}(\delta_{\alpha\beta} 
+- \hat \kappa_\alpha \hat \kappa_\beta)
+{ \chi{"}_{\alpha,\beta}(\omega)\over 1-e^{-\beta \hbar \omega}} 
+$$
+where
+$$
+\chi_{\alpha,\beta}(z)=\int_{-\infty}^{+\infty} dt e^{izt}\chi_{\alpha\beta}(t), \quad z=\omega
++i\delta 
+$$
+is the Fourier-Laplace transform of the spin susceptibility
+$$
+\chi_{\alpha\beta}(t)={i\over \hbar} \Theta(t)\langle [J^\dagger_\alpha(t), J_\beta(0)]\rangle 
+$$
+Here $k$ and
+$ k'$ denote the  wave number of the neutron before and after the
+scattering. $\vec \kappa = \vec k' - \vec k$ is the scattering wave vector,
+$\tilde \kappa = \vec \kappa/\vert\vec\kappa\vert$. 
+$r_0= -0.54 \cdot 10^{-12}$ cm, $g_l$ is the Land\'e factor, 
+$F(\kappa)$ the atomic form factor of the
+rare earth ion.
+  
+\bigskip
+\noindent
+The model:
+
+We calculate the spin susceptibility of a RE ion in the presence of exchange
+interaction with conduction electrons. The system is described by the
+Hamiltonian
+$$
+H=H_{cf}+H_{el}+H_{el,cf} 
+$$
+The first part is the cf-Hamiltonian of the spin-system: 
+$$ 
+H_{cf}= \sum_n E_n K_{nn}, \quad K_{nm}= \vert n\rangle \langle m\vert
+$$  
+written in terms of the crystal field eigenstates $\vert n\rangle$. 
+The second part is the Hamiltonian of the conduction electrons
+$$
+H_{el}=\sum_{k\alpha}\epsilon_kc^\dagger_{k\alpha}c_{k\alpha}
+$$
+The third part is the 
+ interaction between local moments and  the conduction electrons
+$$
+H_{el,cf}= - J_{ex}\vec J \cdot \vec \sigma, \quad \vec \sigma = \sum_{k\alpha
+q\beta}\vec \sigma_{\alpha\beta}c^\dagger_{k\alpha}c_{k+q\beta}, \quad \vec
+J=\sum_{n,m}\vec J_{n,m}K_{nm}.
+$$
+We assume, that the energies $E_n$ and the eigenstates $\vert n\rangle$
+expressed by angular momentum eigenstates are known.
+
+For the calculation of the dynamic susceptibility we use the Mori-Zwanzig
+projection formalism:
+For a set of dynamical variables $A_i$ we define the susceptibilities 
+$$
+\chi_{i,k}(t)=i \Theta(t) \langle [A_i^\dagger(t),A_k(0)]\rangle
+$$ 
+and their Laplace transform
+$$
+\chi_{i,k}(z)=i\int_0^\infty dt e^{izt} \langle [A_i^\dagger(t),A_k(0)]\rangle
+$$ 
+(From here on we skip factors of $\hbar$ which drop out from the final
+result if we replace the frequencies $\omega$ by the correponding energies
+$\hbar \omega$.  The corresponding static (isothermal) susceptibilities are given by
+$$
+\chi_{i,k}(0) = \int_0^\beta d \lambda \langle e^{\lambda H}
+A_i^\dagger e^{-\lambda H}  A_k\rangle
+$$
+With help of the Liouvillian ${\cal L}$ acting on operators as 
+$$
+{\cal L}A=[H,A]
+$$ 
+the time dependence of an operator can be expressed by
+$$
+A(t)=e^{iHt}Ae^{-iHt}= e^{i{\cal L}t}A, \quad e^{\lambda H}Ae^{-\lambda H}=
+e^{\lambda {\cal L} }A
+$$
+and the static and dynamical susceptibilities can be written as
+$$
+\chi_{i,k}(0) = \int_0^\beta d \lambda \langle (e^{\lambda {\cal L}}
+A_i^\dagger)   A_k\rangle
+$$
+$$
+\chi_{i,k}(z)=i\int_0^\infty dt e^{izt} \langle [e^{it{\cal
+L}}A_i^\dagger,A_k(0)]\rangle= i\int_0^\infty dt e^{izt} \langle [A^\dagger,e^{-it{\cal
+L}}A_i(0)]\rangle
+$$ 
+which can be formally integrated to yield
+$$
+\chi_{i,k}(z)= -\langle [A_i^\dagger,{1\over {z-\cal
+L}}A_k(0)]\rangle
+$$ 
+The static susceptibilities are used to define a scalar product between  the
+dynamical variables:
+$$
+(A_i \vert A_k) =  {1\over \beta }\int_0^\beta d\lambda \langle
+(e^{\lambda{\cal L}}A_i^\dagger)A_k\rangle ={1\over \beta} \chi_{ik}(0)
+$$
+It fulfills the axioms of a scalar product and  furthermore it has the important property
+$$
+({\cal L}A_i\vert A_k)=(A_i\vert {\cal L}A_k)={1\over \beta}\langle
+[A_i^\dagger,A_k]\rangle
+$$
+With help of this relation the dynamical susceptibility can be
+expressed as
+$$
+\chi_{i,k}(z)= -\beta (A_i\vert {{\cal L}\over {z-\cal L}} A_k)
+$$
+and finally as 
+$$
+\chi_{ik}(z)=\chi_{ik}(0)-z\beta (A_i\vert {1\over {z-\cal L}}A_k)  
+$$
+The second term is the so-called relaxation function 
+$$
+\Phi_{ik}(z)=(A_i \vert {1 \over {z-\cal L}}A_k)
+$$
+
+The idea of the projection formalism to calculate the dynamical
+susceptibility of a variable $A$ is to project this variable  onto a closed
+set of dynamical variables $A_i$ and to solve approximately the coupled
+equations between these variables. For this purpose a projector is defined
+by
+$$
+{\cal P} A= \sum_{\nu \mu}A_\nu P^{-1}_{\nu \mu}(A_\mu\vert A) \quad
+P_{\nu\mu}=(A_\nu\vert A_\mu)
+$$ 
+where $ P^{-1}_{\nu \mu}=[P^{-1}]_{\nu \mu}$ is the ${\nu\mu}$-component of the inverse matrix of
+$P$. 
+
+For the  resolvent operator of the relaxation function
+$$
+{\cal F}(z)= {1\over {z-\cal L}}, \quad ({z-\cal L}){\cal F}(z)=1 
+$$
+one obtains the exact equation
+$$
+({\cal P}(z-{\cal P}{\cal L}{\cal P} - {\cal P} {\cal M}(z) {\cal P}){\cal P} {\cal
+F}(z) {\cal P}= {\cal P}
+$$
+with the memory function
+$$
+{\cal M}(z)={\cal PLQ}{1\over z-{\cal QLQ} }{\cal QLP}
+$$ 
+where ${\cal Q}=1-{\cal P}$. In components
+$$
+\Phi_{\nu\mu}(z)= (A_\nu\vert {1\over z-{\cal L}} A_\mu)
+$$
+$$
+\sum_\lambda \Bigl(z\delta_{\nu\lambda}-\sum_\kappa\bigl[L_{\nu\kappa}+
+M_{\nu\kappa}(z)\bigr]P^{-1}_{\kappa\lambda}\Bigr)\Phi_{\lambda\mu}(z)
+=P_{\nu \mu}
+$$
+with
+$$
+L_{\nu\mu}=(A_\nu\vert {\cal L}A_\mu)
+$$
+and the memory function 
+$$
+M_{\nu\mu}(z)=(A_\nu\vert{\cal M}(z)A_\mu)
+$$
+
+Now we apply the formalism to the coupled spin-electron system and restrict
+ourselves to the lowest order contributions of the spin electron
+interaction. As dynamical variables we choose a decomposition of the  
+original spin-variable:
+$$
+J^\alpha=\sum_{n_1,n_2}J^\alpha_{n_2,n_1}K_{n_2,n_1}=\sum_\nu J^\alpha_\nu A_\nu, 
+\quad 
+A_\nu= K_{n_1n_2}   
+$$
+where $\nu$ denotes a transition $n_2 \gets n_1$ performed with the
+standard-basis operator $\vert n_2\rangle\langle n_1\vert$. 
+
+In lowest (zeroth) order in the el-cf interaction  
+$$
+{\cal L}A_\nu = (E_{n_2}-E_{n_1)}A_\nu
+$$
+and  the scalar product is diagonal in lowest order in the transition
+operators,
+$$
+P_{\nu\mu}=(A_\nu\vert A_\mu)\simeq\delta_{\nu
+\mu}P_\nu, \quad P_\nu=(A_\nu\vert
+A_\nu)={p(n_1)-p(n_2)\over \beta (E_{n2}-E_{n_1})}
+$$
+where $p(n)=\exp(-\beta E_n)/Z$ is the thermal occupation number. For the
+frequency term we then get 
+$$
+L_{\nu\mu}=\delta_{\nu\mu}(A_\nu\vert A_\nu) (E_{n_2}-E_{n_1} )
++O(J_{ex}^2)
+$$
+Neglecting the second-order energy corrections in the following we obtain
+the equation for the relaxation function 
+$$
+\Phi_{\nu\mu}(z)=\bigl[\Omega^{-1}\bigr]_{\nu\mu}(z)
+P_\mu, \quad
+\Omega_{\nu\mu}(z)=(z-E_\nu)\delta_{\nu\mu} -
+M_{\nu\mu}(z)[P^{-1}]_\mu, \quad
+E_\nu = E_{n_2}- E_{n_1}
+$$
+and it remains to calculate the memoryfunction containing the relaxation
+processes. 
+
+In lowest order in the electron-spin interaction ${\cal QL}A_\nu$ can be replaced by ${\cal L}_{el,cf}A_\nu$.
+Then we get for the memory function
+$$
+M_{\nu \mu}(z)= ({\cal L}_{el,cf}A_\nu \vert{1\over z- {\cal
+L}_0}{\cal L}_{el,cf}A_\mu)=
+M_{n_2n_1,m_2m_1}(z)
+$$
+with
+$$
+M_{n_2n_1,m_2m_1}(z)=({\cal L}_{el,cf} K_{n_2n_1}\vert{1\over z-{\cal
+L}_0}{\cal L}_{el,cf} K_{m_2m_1})
+$$
+
+Now
+$$
+{\cal L}_{el,cf} K_{n_2n_1} = J_{ex}\sum_t \vec \sigma(\vec  J_{n_1t}
+K_{n_2t} - \vec
+J_{tn_2}K_{tn_1})
+$$
+with
+$$
+\vec \sigma = \sum_{k\alpha, k+q\beta}\vec \sigma_{\alpha\beta}
+c^\dagger_{k\alpha}c_{k+q\beta}
+$$
+With help of the symmetry properties 
+$$
+( \sigma^i K_{nm}\vert {1\over z- {\cal L}_0}\sigma^j K_{n'm'})=
+\delta_{ij}\delta_{nn'}\delta_{mm'}G_{nm}(z)
+$$
+with
+$$
+G_{nm}(z)=( \sigma^i K_{nm}\vert {1\over  {z-\cal L}_0}\sigma^i K_{nm})
+$$
+we obtain
+\eqnarray
+M_{n_2n_1,m_2m_1}(z)=J_{ex}^2\sum_i\Bigl[&
+\delta_{n_2m_2}\sum_tJ^i_{m_1t}J^i_{tn_1}G_{n_2t}
++ \delta_{n_1m_1}\sum_tJ^i_{
+n_2t}J^i_{tm_2}G_{tn_1}\nonumber \\
+&-J^i_{m_1n_1}J^i_{n_2m_2}G_{n_2m_1}
+-J^i_{n_2m_2}J^i_{m_1n_1}G_{m_2n_1}\Bigr]\nonumber
+\endeqnarray
+
+
+In order to calculate the relaxation functions $G_{n,m}(z)$
+we use the general relation between relaxation function and dynamic
+susceptibility
+$$
+\chi(z)= \chi(0)-\beta z \Phi(z)
+$$
+and calculate instead the corresponding susceptibility (using tr
+$\sigma^i\sigma^i)=2$):
+\eqnarray
+G_{nm}(z)&= {2\over \beta \omega}\sum_{k,k+q} \langle \Bigl[K_{mn}
+ c^\dagger_{k+q}c_{k},(z - E_n +
+E_m  -\epsilon_k+\epsilon_{k+q})^{-1} K_{nm}
+c^\dagger_{k}c_{k+q}\Bigr]\rangle \nonumber\\
+&=  {2\over \beta \omega
+}\sum_{k,q}(f_{k+q}(1-f_{k})p_m-f_{k}(1-f_{k+q})p_n)(
+z-E_n+E_m-\epsilon_{k}+\epsilon_{k+q})^{-1}\nonumber
+\endeqnarray
+We are interested in the imaginary part describing the relaxation processes:
+$$
+Im G_{nm}(\omega+i\delta)= - {2\pi \over \beta \omega
+}\sum_{k,q}\Bigl(f_{k+q}(1-f_{k})p_m-f_{k}(1-f_{k+q})p_n \Bigr)
+ \delta(\omega -E_n+E_m-\epsilon_{k}+\epsilon_{k+q})
+$$
+Writing $ \rho=\omega - \omega_{nm}$ and $\omega_{nm}=E_n-E_m$  we obtain
+$$
+Im G_{nm}(\omega+i\delta)= - {2\pi N^2(0)\over \beta \omega} \int d\epsilon  
+ (f(\epsilon)(1-f(\epsilon+\rho) p_m
+- f(\epsilon+\rho)(1-f(\epsilon))p_n)
+$$
+For the integrals we get
+\eqnarray
+\int d\epsilon f(\epsilon)(1-f(\epsilon+\rho)=&\int d\epsilon
+\exp(\beta(\epsilon+\rho))/
+(1+\exp(\beta\epsilon))(1+\exp(\beta(\epsilon+\rho))\nonumber\\
+=& 
+(\omega-\omega_{nm})\exp(\beta(\omega-\omega_{nm}))/
+(-1+\exp(\beta(\omega-\omega_{nm})\nonumber
+\endeqnarray
+\eqnarray
+\int d\epsilon f(\epsilon+\rho )(1-f(\epsilon)=&\int d\epsilon
+\exp(\beta(\epsilon)/
+(1+\exp(\beta\epsilon))(1+\exp(\beta(\epsilon+\rho))\nonumber\\
+=& 
+(\omega-\omega_{nm})/
+(-1+\exp(\beta(\omega-\omega_{nm}))\nonumber
+\endeqnarray
+This makes
+$$
+Im G_{nm}=-{2\pi N^2(0)\over \beta \omega}(\omega -\omega_{nm}) {1-\exp(-\beta
+\omega)\over
+1-\exp[(\omega_{nm}-\omega)\beta]}p_m
+$$
+which has to be used to calculate the imaginary part of the memory function.
+Writing 
+$$
+F_{nm}(\omega )= {1\over \beta \omega}(\omega -\omega_{nm}) {1-\exp(-\beta
+\omega)\over
+1-\exp[(\omega_{nm}-\omega)\beta]}p_m
+$$
+which also be written in symmetrized form as
+$$
+F_{nm}(\omega )= {\sqrt{p_np_m}\over \beta}{(\omega -\omega_{nm})\over
+\omega} {\exp(\beta \omega)/2) - \exp(-\beta \omega)/2)\over
+\exp(\beta (\omega-\omega_{nm})/2) - \exp(-\beta (\omega -\omega_{nm})/2)}
+$$
+we obtain with $g=J_{ex}N(0)$
+\eqnarray
+M_{n_2n_1,m_2m_1}(\omega) =- i 2\pi g^2
+\sum_i\Bigl[&
+\delta_{n_2m_2}\sum_tJ^i_{m_1t}J^i_{tn_1}F_{n_2t}
++ \delta_{n_1m_1}\sum_tJ^i_{
+n_2t}J^i_{tm_2}F_{tn_1}\nonumber\\
+&-J^i_{m_1n_1}J^i_{n_2m_2}F_{n_2m_1}
+-J^i_{n_2m_2}J^i_{m_1n_1}F_{m_2n_1}\Bigr]
+\nonumber
+\endeqnarray
+from which we get the memory function matrix in the space of dynamical variables
+$$
+M_{\nu \mu}(\omega)= M_{n_2n_1,m_2m_1}(\omega)
+$$
+
+\bigskip
+\noindent
+
+
+Summary:
+For the neutron scattering cross section we need the function 
+$Im u^{\alpha\beta}(\omega+i\delta)/(1-\exp(-\beta\omega)$, where
+$u^{\alpha\beta}(z)$ is the frequency dependent part of the dynamic
+susceptibility $\chi^\alpha\beta(z)$ for spin components  $J^\alpha$,$J^\beta$, which is
+related to the corresponding relaxation function $\Phi^{\alpha,\beta}$ by
+$$
+u^{\alpha\beta}(z)= -\beta z \Phi^{\alpha\beta}(z)
+$$
+For the full dynamical susceptibility we need also the static suseptibility
+$$
+\chi^{\alpha\beta}(z) = \chi^{\alpha\beta}(0) - \beta z \Phi^{\alpha\beta}(z)  
+$$
+where in lowest order in the exchange interaction 
+$$
+\chi^{\alpha\beta}(0)  = \sum_\nu \beta (J^\alpha_\nu)^\dagger P_\nu J^\beta_\nu
+$$
+The above relaxation function is calculated with help of the Mori-Zwanzig
+projection formalism by 
+$$
+\Phi^{\alpha\beta}(z)=\sum_{\mu\nu}
+(J^\alpha_\nu)^*\Phi_{\nu\mu}(z)J^\beta_\mu
+$$
+where $\nu$ denotes a transition from $n_1$ to $n_2$ between crystal field
+levels of the magnetic ion. The partial relaxation functions are obtained by 
+solving the matrix
+equation
+$$
+\Phi_{\nu\mu}(z)= [\Omega^{-1}]_{\nu\mu}P_\mu      
+$$
+with
+$$
+\Omega_{\nu\mu}(z)= (z-\omega_\nu)\delta_{\nu\mu}  -M_{\nu\mu}(z)/P_\mu
+$$
+where $\omega_\nu =E_{n_2}- E_{n_1}$ is the energy difference of cf-levels.
+
+Only terms in  lowest  order in the el-ion interaction are kept. We neglect
+frequency shifts due to the electron-ion interaction. 
+Then the  memory function is purely
+imaginary (with a negative  sign).
+
+Note that compared to our paper BFK, Z.Physik B28, 9-18, 1977 we have used here 
+a different sign-convention.
+
+For numerical reasons it is more convenient to calculate the relaxation
+function in the following way:
+$$
+\Phi_{\nu\mu}(z)= P_\nu[\bar\Omega^{-1}]_{\nu\mu}P_\mu      
+$$
+with
+$$
+\bar \Omega_{\nu\mu}(z)= P_\nu(z-\omega_\nu)\delta_{\nu\mu}  - M_{\nu\mu}(z)
+$$
+
+From the relaxation function we get for the dynamic scattering cross section 
+$$
+{d^2\sigma \over d\Omega d E'} =  {k' \over
+k}S(\vec \kappa,\omega)
+$$
+with
+$$
+S(\vec \kappa, \omega)=({r_0\over 2}g F(\kappa))^2{1\over \pi }
+\sum_{\alpha\beta}(\delta_{\alpha\beta} 
+- \hat \kappa_\alpha \hat \kappa_\beta)
+Im \Phi^{\alpha,\beta}(\omega){-\beta \omega \over 1-e^{-\beta \hbar \omega}} 
+$$
+Here the scattering function depends only on the scattering vector
+$\vec \kappa= \vec k - \vec k'$ and the energy loss $(\hbar)\omega =E(k)-E(k')$
+Note that in our formulas $\omega$ contains a factor $\hbar$ and is the
+energy loss. If we want to have meV as energy unit and Kelvin as temperature
+unit, we have to write $\beta= 11.6/T$.
+   
+For the analysis of polarised neutron scattering the different
+spin-components $S^{\alpha\beta}(\vec \kappa,\omega)$ of $S$ are needed. 
+These are defined by
+$$
+S(\vec \kappa,\omega)= \sum_{\alpha\beta}(\delta_{\alpha\beta} 
+- \hat \kappa_\alpha \hat \kappa_\beta)S^{\alpha\beta}(\vec \kappa,\omega)
+$$
+
+
+\bigskip
+\newpage
+
+\vfill
+\eject
+\parindent=0pt
+{\large Construction of the program for single-ion dynamical susceptibility:}
+
+
+1. Module CommonData, module MatrixElements
+
+Contains definitions of global variables and arrays used in the program and
+in different  subroutines 
+
+2. Subroutine ReadData
+
+Subroutine to read-in data about the magnetic ions, the coupling 
+constant $g=J_{ex} N(0)$ and the temperature  T (in Kelvin). 
+It is assumed that the data about the
+magnetic ions (number of of states Ns, Lande factor, energies of the 
+CEF states and 
+eigenvectors) are contained in an input-file provided by other 
+programs of McPhase, in particular from so1ion. The program picks-up the
+required data by searching lines beginning with \#! or blanks. Furthermore a file
+containing information about the energy range of the calculation is
+required. All these informations are entered via the commandline of the
+executable of the program. For a detailed prescription to run the program see below.
+
+
+3. Subroutine Matrixelements
+
+a) Calculates angular momentum matrices jjx, jjy, jjz for the crystal-field eigenstates
+(2-dim arrays, dimension Ns x Ns). The three directional components are also
+stored in the 3-dimensional array jjj(3,Ns,Ns). 
+
+b) Calculates Boltzmann-factors $p(n)$. A cut-off in the exponent $\beta
+E(n)$ is introduced such that Boltzmann factors with large negative
+exponents
+are set equal to zero. 
+
+c) Defines  a set of transitions  $\nu$  between states
+n1 and n2, stored in two  1-dim
+arrays v1($\nu$), v2($\nu$). If both Boltzmann factors of the two states
+involved are zero, this transition is eliminated from the set of allowed
+transitions.  
+
+d) Calculates static suscepibilities $Pp(\mu)$ for the standard basis operators
+$K_{n,m}$ for the allowed transitions.  
+
+e) All these reults are stored in a  file bfkmatrix for examination, if
+something goes wrong.
+ 
+
+4. MatrixInversionSubroutine
+
+adapted from Numerical Recipes, to be used for the inversion of the complex
+matrix $\Omega_{\nu\mu}$. Called by 5. 
+
+5. Subroutine SuscepComponents
+
+Calculates the matrix relaxation function for the set of dynamical variables
+obtained for the standard basis operators for a given energy (freqency)
+$\omega$ and multiplies them with the corresponding spin-matrix-elements to
+get the complex dynamical susceptibility of the RE ion.  
+
+6. Subroutine OutputResults 
+
+Here the results for the dynamical susceptibility is calculated for
+different energies and printed into a file chibfk.res in the subdirectory
+/Results.
+
+
+
+\newpage
+{\large How  to run the program chibfk\index{chibfk}}.
+
+The program is started by typing-in the name of the  executable program (chibfk). 
+%If the
+%program is translated by gfortran, this name would be a.out, but this name can
+%be changed to another name. 
+Via the commandline the value of the dimensionless coupling 
+constant g with the conduction electrons and the temperature T (in Kelvin) is
+entered. The next entry is the name of the file containing information about
+the level structure of  the RE ions (for instance the output levels.cef 
+from so1ion). Finally the name
+of a file (for instance mcdisp.par), containing information about 
+the energy range emin, emax 
+of  the calculation is required. These files should be in the same directory 
+as the executable program.
+Then the commandline has the form: 
+
+chibfk 0.02 20 levels.cef mcdisp.par
+
+Results are calculated for the different directionl components of the
+dynamical susceptibility and written into a file /Results/chibfk.res in a
+subdirectory Results. 
+ 
+Joachim Keller, April 2013 
+
+
+\vfill
+\eject
+\parindent=0pt
+{\large Construction of the program for the neutron scattering:}
+
+
+1. Module CommonData, module MatrixElements, module Ffp
+
+Contains definitions of global variables and arrays used in the proram and
+in different  subroutines 
+
+2. Subroutine ReadData
+
+Subroutine to read-in data about the magnetic ions, the coupling 
+constant $g=J_{ex} N(0)$ and the temperature  T (in Kelvin). 
+It is assumed that the data about the
+magnetic ions (number of of states Ns, Lande factor, energies of the 
+CEF states and 
+eigenvectors) are contained in an input-file provided by other 
+programs of McPhase, in particular from so1ion. Also required is a file
+containing the formfactor $F(Q)$. For one mode of calculation a list of
+Omega and Q values is required, for wihch the cross section shall be
+calculated.  For a detailed prescription to run the program see below.
+
+
+3. Subroutine Matrixelements
+
+a) Calculates angular momentum matrices jjx, jjy, jjz for the crystal-field eigenstates
+(2-dim arrays, dimension Ns x Ns). The three directional components are also
+stored in the 3-dimensional array jjj(3,Ns,Ns). 
+
+b) Calculates Boltzmann-factors $p(n)$. A cut-off in the exponent $\beta
+E(n)$ is introduced such that Boltzmann factors with large negative
+exponents
+are set equal to zero. 
+
+c) Defines  a set of transitions  $\nu$  between states
+n1 and n2, stored in two  1-dim
+arrays v1($\nu$), v2($\nu$). If both Boltzmann factors of the two states
+involved are zero, this transition is eliminated from the set of allowed
+transitions.  
+
+d) Calculates static suscepibilities $Pp(\mu)$ for the standard basis operators
+$K_{n,m}$ for the allowed transitions.  
+
+e) All these reults are stored in a  file bfkmatrix for examination, if
+something goes wrong.
+ 
+
+4. MatrixInversionSubroutine
+
+adapted from Numerical Recipes, to be used for the inversion of the complex
+matrix $\Omega_{\nu\mu}$. Called by 5. 
+
+5. Subroutine SuscepComponente
+
+Calculates the matrix relaxation function for the set of dynamical variables
+obtained for the standard basis operators for a given energy (freqency)
+$\omega$ and multiplies them with the coresponding spin-matrix-elements.
+
+6. Subroutine Strfak(Q)
+
+Calculates atomic formfactor from a list of formfactor values by
+interpolation. 
+
+7. Real Function Scatfunction( kappa,omega) 
+
+Calculates the spin-dependend components of the dynamical scattering
+cross section for given energy loss x, and multiplies them with the
+directional part of the cross-section, uses SuscepComponents.
+Calculates 
+$\sum_{\alpha,\beta} (\delta_{\alpha, \beta}- \tilde \kappa_\alpha \tilde
+\kappa_\beta) \chi''_{\alpha \beta}(\omega)/(1-\exp(-\beta\omega))$
+for a given energy loss $\omega$ and scattering vector $\kappa$.
+
+
+9. Subroutine OutputResults 
+
+Here the results for the scattering cross section are printed into the
+output file. 
+6 different calculational modes $0,1,\dots ,5$ can be used. In mode 0 the
+freqency dependent part of the dynamical cross section is analysed and $Im
+\chi^{\alpha\alpha}(\omega)/\tanh{\beta\omega/2}$ is calculated. This
+quantity should fulfill a sumrule 
+$$
+\sum_\alpha {1\over\pi}\int d\omega Im \chi^{\alpha\alpha}/\tanh(\beta\omega) 
+= J(J+1) 
+$$
+In mode 1 and 2 the components of the cross section are calculated,
+using the form factor $F(Q)$ as input. In mode 1 the
+scattering function $S(\vec Q,\omega)$ is calculated for a set of $\vec
+Q$ and $\omega $ values specified by an input file. In mode 2 the same
+is done for the 9 different spin components $S^{\alpha\beta}$ separately 
+
+In modes 3-5
+the complete scattering cross section is calculated for different scattering
+geometries: In mode 3 the  
+direction of the wave vector $\vec k$ and the energy $E=k^2/2m$ of the incoming 
+beam is fixed. The direction of the scattering wave vector $\vec q$ is fixed, 
+but the 
+length of $\vec q$ is variable. The wave vector of the scattered
+particles is  $\vec ks=\vec k-\vec q$, their energy is $Es=ks^2/2m$ and
+the energy loss is $\omega =E-Es$. In mode 4 the direction  of the wave vectors 
+$\vec k$ and $\vec ks$ of the incoming and scattered beam
+are fixed, while the energy $Es$ of the scattered beam is variable. In mode 5
+the energy $E$ of the incoming beam is variable 
+and the energy $Es=k^2/2m$ of the scattered particles  fixed.  
+
+
+
+
+\bigskip
+
+{\large How  to run the program bfk\index{bfk}}.
+
+It is generally assummed that the necessary data 
+about the magnetic ion are contained  in an input-file provided by other
+parts of McPhase, in particular the file levels.cef from so1ion. 
+This input-file must provide the 
+following information: Type of rare-earth ion  (the J-value and Lande-factor
+are derived from this information), 
+energies and eigenstates of the ion in the crystalline electric field. 
+This information is stored in a workfile cefworkfile.dat for later use. 
+
+Also
+information about the atomic formfactor must be provided, for instance by the
+file 'formfactor.out' generated by the program formfactor. The essential
+information contained on this file is transfered to the workfile    
+strworkfile.dat. 
+
+These two input files are read-in by the program, if it is started with an
+empty command-line. Then it asks for the name of the two files.   
+These names of the files containing the
+CEF-data and the formfactor are stored in the files bfkdata0.dat (for mode
+0), bfkdata12.dat (for modes
+1 and 2) and
+bfkdata345.dat (for modes 3-5).  
+ bfkdata12.dat also contains the name of the file containing
+the list of $q$-values and energy-loss values for which the scattering
+function will be calculated.    
+
+Further input is needed  for the scattering geometry for the modes 3-5 which
+will be stored in bfkdata345.dat. This is the direction of the wave vectors 
+$\vec k$, $\vec k'$ and(or)
+$\vec q$, which are read-in as vectors of arbitrary length. Furthermore
+the energy  of the incoming beam (mode 3 and mode 4) or of the scattered beam
+(mode 5) is needed. 
+
+Finally the value 
+of the temperature $T$ (in Kelvin) and the value of the (dimensionless) 
+coupling constant $g$ with the
+conduction electrons are needed. They are asked for, if the program is
+started with the name of the executable program and an empty command line 
+ together with the number (mode=$0,1,\dots ,5$) of the
+calculation mode and the type of storage of the results. Here one has the
+choice between overwriting the results of the previous run in the output
+file (mst=1), or to append the
+new results to the previous results in the output file (mst=2). 
+The names of the files containing the results of the calculation are
+bfkresults0.dat bfkresults12.dat and bfkresults345.dat.
+
+In the following runs  the values of g and T, mode of calculation, and type
+of output can be  provided by the
+command-line by starting the program with a filled-in command line: 
+ a.out (name of executable ) 
+g T mode mst. In these runs the workfiles cefworkfile.dat and
+strworkfile.dat are used instead of the original files (containing
+also commentary text lines). 
+
+The program can also be run without the original
+files, if the workfiles have been filled-in with the correct information and
+have the correct
+format. The program is then started with a filled-in commandline. Missing
+data are asked for by the program.     
+
+
+Joachim Keller, March 2013 
+
+%\end{document}
+\newpage
+

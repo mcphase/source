@@ -137,7 +137,7 @@ if (!do_sipf)
       }          
       sprintf(filename,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
       fout=fopen_errchk(filename,"w"); 
-      fprintf(fout,"#\n#sipffile=%s T= %g ",(*inputpars.jjj[i]).sipffilename,T);
+     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",(*inputpars.jjj[i]).est.Chi(),(*inputpars.jjj[i]).sipffilename,T);
                                    for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
                                    for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
                                    for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j));
@@ -184,7 +184,7 @@ if (!do_sipf)
                                    printf("transition-energies(meV)...\n");
       sprintf(filename,"./results/%s.levels.cef",jjj.sipffilename);
       fout=fopen_errchk(filename,"w");  
-    fprintf(fout,"#\n#sipffile=%s T= %g K ",jjj.sipffilename,T);
+    fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,T);
                                    for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
                                    for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
                                    for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j));

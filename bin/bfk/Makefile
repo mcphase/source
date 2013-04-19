@@ -1,0 +1,31 @@
+#makefile for program bfk
+
+
+#  Operating system
+OSTYPE=$(shell uname)
+#  (linux windows)
+ifneq (,$(findstring $(OSTYPE),Linux))
+ LINUX = linux
+else
+ WINDOWS = windows
+ifneq (,$(findstring CYGWIN,$(shell uname)))
+ CYGWIN=1
+endif
+endif
+
+ifdef WINDOWS
+EXE=.exe
+endif
+
+all :  ../bfk$(EXE) ../chibfk$(EXE) 
+
+../bfk$(EXE): bfk.f95
+	gfortran -static -o ../bfk $^ 
+
+../chibfk$(EXE): chi.f95
+	gfortran -static  -o ../chibfk $^ 
+
+clean:
+	rm -vf ./*.o 
+
+        
