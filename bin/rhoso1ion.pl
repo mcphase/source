@@ -287,7 +287,9 @@ for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
 
 # Calculates the matrix elements |<V|s.J|V>|^2
 $sJVi = mmult($sJmat,$Vi); $matel = mmult($tVi,$sJVi);
-for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) { $matel->[$ii][$jj]*=~$matel->[$ii][$jj]; } }
+for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) { 
+  if($isreal) { $matel->[$ii][$jj]*=$matel->[$ii][$jj]; } else { $matel->[$ii][$jj]*=~$matel->[$ii][$jj]; }
+} }
 
 if ($debug) {
   print "Eigenvalues:\n",join("\t",@E),"\n";

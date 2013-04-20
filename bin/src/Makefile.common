@@ -44,7 +44,7 @@ endif
 # Checks whether we support the -march=native target
 ifdef fast
 ifdef icc
-ARCHFLAG=-O2 -xHOST
+ARCHFLAG=-O2 -xHOST -IPF_fma -long_double -IPF_fltacc#-ipo
 else
 ifdef GCC42
 ARCHFLAG=-O2 -march=native 

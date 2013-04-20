@@ -17,6 +17,7 @@
 
 #include "maths.hpp"
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <cstring>
 
@@ -52,7 +53,7 @@ void mm_gout(sMat<double> M, const char *filename, const char *comments="")
 sMat<double> mm_gin(const char *filename)
 {
    char comments[1024];
-   int i,r,c,sz,ppos;
+   int i,r,c,sz;
    double elem;
    bool commentsflag = true;
 
@@ -62,13 +63,12 @@ sMat<double> mm_gin(const char *filename)
    FILEIN.getline(comments,1024);            // Gets the first line %%MatrixMarket matrix coordinate real general
    while(commentsflag)
    {
-      ppos = FILEIN.tellg();
       FILEIN.getline(comments,1024);         // Gets the comments line
       if(comments[0]!=35 && comments[0]!=37) // 35==# 37==%
          commentsflag=false;
    }
-   FILEIN.seekg(ppos);
-   FILEIN >> r >> c >> sz;                   // Gets the number of rows, columns and non-zero elements
+   std::stringstream commentstream(comments,std::stringstream::in);
+   commentstream >> r >> c >> sz;            // Gets the number of rows, columns and non-zero elements
 
    FILEIN.precision(24);
    sMat<double> retval(r,c);
@@ -115,7 +115,7 @@ void mm_sout(sMat<double> M, const char *filename, const char *comments="")
 sMat<double> mm_sin(const char *filename)
 {
    char comments[1024];
-   int i,r,c,sz,ppos;
+   int i,r,c,sz;
    double elem;
    bool commentsflag = true;
 
@@ -125,13 +125,12 @@ sMat<double> mm_sin(const char *filename)
    FILEIN.getline(comments,1024);            // Gets the first line %%MatrixMarket matrix coordinate real symmetric
    while(commentsflag)
    {
-      ppos = FILEIN.tellg();
       FILEIN.getline(comments,1024);         // Gets the comments line
       if(comments[0]!=35 && comments[0]!=37) // 35==# 37==%
          commentsflag=false;
    }
-   FILEIN.seekg(ppos);
-   FILEIN >> r >> c >> sz;                   // Gets the number of rows, columns and non-zero elements
+   std::stringstream commentstream(comments,std::stringstream::in);
+   commentstream >> r >> c >> sz;            // Gets the number of rows, columns and non-zero elements
 
    sMat<double> retval(r,c);
 

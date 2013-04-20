@@ -78,12 +78,12 @@ endif
 # calculations
 threads=1
 # 
-ifdef threads
+#ifdef threads
 THREADFLAG=-D_THREADS
 ifdef LINUX
 THREADLINK=-lpthread
 endif
-endif
+#endif
 
 #---------------------------------------------------------------------
 # RCS options
@@ -307,11 +307,11 @@ ip.o: ionpars.cpp
 
 ../mcphasit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o mcphas.o
 	@echo Linking ../mcphasit
-	@$(LINKER)  -Wall  -o ../mcphasit  $^ $(LFLAGS) 
+	@$(LINKER)  -Wall  -o ../mcphasit  $^ $(LFLAGS) $(THREADLINK)
 
 ../anisotropyit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o anisotropy.o
 	@echo Linking ../anisotropyit
-	@$(LINKER)  -Wall  -o ../anisotropyit  $^ $(LFLAGS) 
+	@$(LINKER)  -Wall  -o ../anisotropyit  $^ $(LFLAGS) $(THREADLINK)
 
 ../spins$(EXE): spincf.o spins.o martin.o myev.o  $(VOBS) density.o ionpars.o jjjpar.o $(CFIELDOBJS) $(FUNCTIONOBJS) graphic_parameters.o par.o
 	@echo Linking ../spins

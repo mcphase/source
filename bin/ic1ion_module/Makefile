@@ -86,7 +86,7 @@ endif
 #------------------------------    FAST    --------------------------------------#
 ifdef fast
 ifdef icc
-CFLAGS+= -xHOST
+CFLAGS+= -xHOST -O2 -IPF_fma -long_double -IPF_fltacc#-ipo
 else
 ifdef GCC42
 CFLAGS+= -pipe -O2 -march=native

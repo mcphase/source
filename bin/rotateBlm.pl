@@ -216,9 +216,9 @@ if (!$output) {
     if ($Ion) { print "\nIontype is ".$Ion."\n"; }
     print "\nRotated crystal field parameters:\n";
   }
-  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { print "$Bo2{$i} = $_\n"; } }
-  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { print "$Bo4{$i} = $_\n"; } }
-  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { print "$Bo6{$i} = $_\n"; } }
+  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { if(abs($_)>1e-8) { print "$Bo2{$i} = $_\n"; } } }
+  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { if(abs($_)>1e-8) { print "$Bo4{$i} = $_\n"; } } }
+  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { if(abs($_)>1e-8) { print "$Bo6{$i} = $_\n"; } } }
 }
 else {
   open (outfile, ">$output") or die "$0: cannot open $output for output.";
