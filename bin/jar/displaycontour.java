@@ -61,6 +61,7 @@ import javax.imageio.ImageIO;
 import java.awt.event.*;
 import java.io.*;
 import java.lang.*;
+import java.util.*;
 /**
  * Example demonstrating how to use <code>JPlotLayout</code>
  * to create a raster-contour plot.
@@ -179,7 +180,7 @@ public class displaycontour extends JApplet {
   if (args.length<2)
   {System.out.println("- too few arguments...\n");
     System.out.println("  program displaycontour - show data file by viewing a contour/color graphic on screen\n\n");
-    System.out.println("use as:  displayclontour <options> xcol ycol zcol filename\n\n");
+    System.out.println("use as:  displaycontour <options> xcol ycol zcol filename\n\n");
     System.out.println("         xcol,ycol,zcol ... column to be taken as x- and y-axis and color-axis\n");
     System.out.println("         filename ..... filename of datafile\n\n");
     System.out.println("options: -xmin <value> ..... sets the minimum of display x-axis");
@@ -360,7 +361,7 @@ public class displaycontour extends JApplet {
  lastmod = fileIni.lastModified();
 
     //ffnen der Datei
-    DataInputStream inStream = new DataInputStream(new FileInputStream(fileIni));
+	Scanner sc = new Scanner(fileIni);
     String strLine;
     String sx;
     String sy;
@@ -370,9 +371,9 @@ public class displaycontour extends JApplet {
     int clz = colz[i];   
     int washere=0;
      //Auslesen der Datei
-    while (inStream.available() > 0)
+    while (sc.hasNextLine())
     {
-      strLine = inStream.readLine();
+      strLine = sc.nextLine();
       if ((strLine.length() == 0)
         ||(TrimString(strLine).substring(0, 1).equalsIgnoreCase("#")))
       {if((TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))&&washere==1){washere=2;comment1=strLine ;}
@@ -438,15 +439,9 @@ public class displaycontour extends JApplet {
       if(ii>0){if(a2[ii]<a2[ii-1]&&jj==0){jj=ii;}}
       
      ++ii;
-    }  
-
- }
- catch(EOFException e)
-    {
-      System.out.println("EOF: " + e.getLocalizedMessage());
-      //EntSession.CWatch("Unplaniges 'End Of File' in DSN-Konfigurationsdatei!");
     }
-
+	sc.close();
+ }
     catch (FileNotFoundException e)
     {
       System.out.println("File not found: " + e.getLocalizedMessage());
@@ -459,7 +454,6 @@ public class displaycontour extends JApplet {
       System.out.println("Dateifehler: " + e.getLocalizedMessage());
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
-
     
     axis1=new double[ii/jj];
     axis2=new double[jj];
@@ -810,7 +804,11 @@ public class displaycontour extends JApplet {
 						if (((JPanel)frame.getContentPane().getComponent(0)).getComponent(1) instanceof JPlotLayout) {
 							k = 1;
 						}
-						((JPanel)gd.getContentPane().getComponent(0)).remove(k);
+						
+						if (((JPanel)gd.getContentPane().getComponent(0)).getComponentCount() > 0) {
+							((JPanel)gd.getContentPane().getComponent(0)).remove(k);
+						}
+						fileIni = null;
 						rpl_ = reloadAll(Params, gd);
 						((JPanel)frame.getContentPane().getComponent(0)).add(rpl_, BorderLayout.CENTER);
 						//frame.repaint();
@@ -820,7 +818,7 @@ public class displaycontour extends JApplet {
 				}
 				catch (IndexOutOfBoundsException e) {
                     // suppress
-					System.out.println("INDEX ERROR! " + e);
+					System.out.println("INDEX ERROR! " + e + e.getCause());
 				}
                 catch (InterruptedException e) {
                     // suppress

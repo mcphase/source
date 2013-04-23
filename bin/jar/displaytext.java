@@ -37,12 +37,18 @@ import javax.swing.*;
 import java.io.*;
 import java.util.*;
 import java.lang.ref.WeakReference;
+import java.util.regex.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Utilities; 
 
 
 public class displaytext extends JPanel implements FileListener {
-    protected JTextArea textArea;
+    protected JTextArea textArea, numberArea;
     protected JScrollPane scrollPane;
 	protected JButton saveButton;
+	
+    private boolean areaLineBreak = false;
+    private boolean numberLineBreak = true; 
 	
     private final static String newline = "\n";
     private static String filename;
@@ -69,6 +75,13 @@ public class displaytext extends JPanel implements FileListener {
         textArea.setEditable(true);
         textArea.setFont(new Font("Courier New",0,12));
         scrollPane = new JScrollPane(textArea);
+		
+        numberArea = new JTextArea();
+		numberArea.setMargin(new Insets(0, 4, 0, 4));
+        numberArea.setBackground(new Color(240, 240, 255));
+        numberArea.setForeground(new Color(180, 180, 180));
+        numberArea.setEditable(false);
+		scrollPane.setRowHeaderView(numberArea);
 		
 		// Load scrollBar values
 		xval = scrollPane.getHorizontalScrollBar().getValue();
@@ -135,9 +148,65 @@ public class displaytext extends JPanel implements FileListener {
          in.close();fstream.close();
           }
          catch (Exception e) { System.err.println("File input error"); }
+		 
+		 gibNummern();
 
 
     }
+	
+	 public void gibNummern() {
+        StringBuilder sb = new StringBuilder();
+        int zeilenZahl = textArea.getLineCount();
+        int textLength = textArea.getText().length();
+
+        if (!areaLineBreak & zeilenZahl != 0) {
+            for (int i = 0; i < zeilenZahl; i++) {
+                sb.append(String.valueOf(i + 1) + "\n");
+            }
+        }
+
+        try {
+            if (numberLineBreak && areaLineBreak) {
+                Pattern p = Pattern.compile(System
+                        .getProperty("line.separator"));
+                sb.append("1\n");
+                int n = 1;
+                for (int i = 0; i < textLength; i++) {
+                    int lineEnd = Utilities.getRowEnd(textArea, i);
+                    int lineStart = Utilities.getRowEnd(textArea, i + 1);
+                    if (lineEnd < lineStart) {
+                        String s = textArea.getText().substring(lineEnd,
+                                lineStart);
+                        Matcher m = p.matcher(s);
+                        boolean result = m.find();
+                        if (!result) {
+                            sb.append("\n");
+                        } else {
+                            n++;
+                            sb.append(String.valueOf(n) + "\n");
+                        }
+                    }
+                }
+
+            } else if (!numberLineBreak && areaLineBreak) {
+                int n = 0;
+
+                for (int i = 0; i < textLength; i++) {
+                    int lineEnd = Utilities.getRowEnd(textArea, i);
+                    int lineStart = Utilities.getRowEnd(textArea, i + 1);
+                    if (lineEnd < lineStart) {
+                        n++;
+                        sb.append(String.valueOf(n) + "\n");
+                    }
+                }
+
+                sb.append(String.valueOf(++n) + "\n");
+            }
+        } catch (BadLocationException e1) {
+            e1.printStackTrace();
+        }
+        numberArea.setText(sb.toString());
+    } 
 
     public displaytext(String filen,int rows,int columns) {
         super(new GridBagLayout());
@@ -245,6 +314,7 @@ public class displaytext extends JPanel implements FileListener {
 		 /* ----------- */
          }
          catch (Exception e) { System.err.println("File input error"); System.exit(1);}
+		 gibNummern();
     }
 
     /**

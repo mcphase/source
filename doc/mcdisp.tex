@@ -1313,6 +1313,32 @@ in terms of the magnetisation operator instead of the scattering operator
 $\hat \mathcal Q_{\alpha} \equiv -\hat M_{\alpha}(\mbf Q)/(2\mu_B)$ (where $\alpha=x,y,z$ and $\mu_B$ is the
 Bohr magneton).
 
+The double differential neutron scattering cross section is usually being evaluated base on the master equation (see e.g. \cite{lovesey84-1})
+
+\begin{equation}\label{masterequ}
+\frac{d^2\sigma}{d\Omega dE'}=\frac{k'}{k}\left( \frac{m_n}{2\pi \hbar^2}  \right)^2
+\sum_{if,s_n} P_{s_n} P_i \left | \langle s_n|\langle i|H_{int}(\mbf Q)|f\rangle|s_n'\rangle \right |^2 \delta(\hbar \omega+E_i-E_f)
+\end{equation}
+
+Here $m_n$ is the neutron mass, $\mbf k$ and $\mbf k'$ the incoming and scattered neutron wave vector, $|s_n\rangle$ and 
+ $|s_n'\rangle$ the spin state of the incoming and scattered neutron, $P_{s_n}$ the polarisation of the incoming neutron
+beam (i.e. the probability for the neutron spin state $|s_n>$ in the incoming neutron beam). $|i\rangle$ and $|f\rangle$ denote
+the initial and final states of the target, $E_i$ and $E_f$ the corresponding energies, $P_i$ the population number
+of the target state $|i\rangle$. Finally $H_{int}(\mbf Q)$ is the interaction operator which consists of spin dependent
+and spin independent parts
+
+\begin{equation}
+H_{int}(\mbf Q)=\hat \beta (\mbf Q) + \hat {\mbf s}_n \cdot \hat {\mbf \alpha} (\mbf Q)
+\end{equation}
+
+Here $\hat \beta$ contains the nuclear spin independent scattering and $\hat \alpha$ the nuclear spin dependent
+and the electronic magnetic scattering operators.
+The accurate evaluation of (\ref{masterequ}) involves the computation of terms $\hat \beta^{\dagger} \dots \hat \beta$ (nuclear scattering, phonons),
+$\hat \alpha^{\dagger} \dots \hat \alpha$ (electronic magnetic scattering and nuclear magnetic scattering) 
+and mixed terms $\alpha^{\dagger} \dots \beta$ (interference terms, not included in mcdisp currently, maybe nonzero only for
+polarized beams).  We do not take into account any un
+
+
 The general expression for the double differential scattering cross section 
 for unpolarised neutrons has been given frequently in literature (see e.g. \cite{lovesey84-1}):
 
