@@ -108,7 +108,15 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
             writeheader(inputpars,foutqei);
             fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
             ini.print_usrdefcolhead(foutqei);fprintf(foutqei,"h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.]"
-                                                          " Imag [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+                                                          " Imag [barn/sr/f.u.] Inuc [barn/sr/f.u.]");
+            switch(ini.outS)
+            {case 0:break;
+             case 1:fprintf(foutqei,"Smag_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 2:fprintf(foutqei,"Smag: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 3:fprintf(foutqei,"Smag_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             case 4:fprintf(foutqei,"Smag: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+            }
+            fprintf(foutqei,"f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
            fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");writeheader(inputpars,foutdstot);
            fprintf (foutdstot, "#!Total Scattering Cross Section (obtained by DMD method) in energy range [emin=%g ; emax=%g]\n",ini.emin,ini.emax);

@@ -11,6 +11,7 @@
 #include <complex>
 #include <martin.h>
 
+#define SMALL_GAMMA   1e-10  // small value of transition matrix element gamma
 #define SMALL_QUASIELASTIC_ENERGY 1e-6    // deviation from single ion gap delta to take energy into account as not being equal to
                       // delta and therefore being included into output 
 		      // transitions of single ions less then SMALL_QUASIELASTIC_ENERGY have in Mijkl wn/kT instead of wn-wn'

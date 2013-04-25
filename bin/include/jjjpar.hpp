@@ -124,10 +124,10 @@ public:
 // ********************************************************************************
 //0. PHONON displacement
 int pcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
-int  dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dp1,ComplexMatrix & ests);
+int  dP1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dP1,ComplexMatrix & ests);
 private:
 void (*p)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
-int  (*dp1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+int  (*dP1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
 public:
 //1. MAGNETIC MOMENT

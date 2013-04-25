@@ -30,11 +30,11 @@ int jjjpar::pcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
 }
 
 
-int  jjjpar::dp1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & p1,ComplexMatrix & ests)
-{float delta=maxE;p1(1)=complex <double> (ninit,pinit); 
+int  jjjpar::dP1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & P1,ComplexMatrix & ests)
+{float delta=maxE;P1(1)=complex <double> (ninit,pinit); 
  switch (module_type)
-  {case 0: if(dp1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*dp1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&p1,&delta,&ests);}
+  {case 0: if(dP1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*dP1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&P1,&delta,&ests);}
            break;
    case 1:
    case 2:

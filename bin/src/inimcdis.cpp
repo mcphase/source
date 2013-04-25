@@ -106,6 +106,18 @@ void inimcdis::save()
   fprintf(fout,"#            %i....%s\n",i,colhead[i]);
                    }
   fprintf(fout,"#\n");
+  fprintf(fout,"# optional switch outS for control of the output of the magnetic scattering function in results/mcdisp.qei\n");
+  fprintf(fout,"#! outS=%i\n",outS);
+  fprintf(fout,"# .. valid values are\n"
+               "# 0: not output of Salphabeta\n"
+               "# 1: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=x,y,z\n"
+               "# 2: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=x,y,z\n"
+               "# 3: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=u,v,w\n"
+               "# 4: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=u,v,w\n"
+               "# xyz coordinate refer to y||b, z||(a x b) and x normal to y and z\n"
+               "# uvw coordinates refer to u||-Q, w perpendicular to the scattering plane\n"
+               "#     (as determined by the cross product of subsequent vectors in the input\n"
+               "#     q-vector list) and v perpendicular to u and w\n#\n#\n");
   fprintf(fout,"# Commands such as the following have been read and used to generate the hkl list below:\n");
   fprintf(fout,"#\n");
   fprintf(fout,"# - a Q vector mesh to be mapped in the calculation it can be in Miller indices\n");
@@ -255,6 +267,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
   calculate_spindensity_oscillation=0;
   calculate_orbmomdensity_oscillation=0;
   calculate_phonon_oscillation=0;
+  outS=0;
   qmin=0;qmax=0;deltaq=0;
  // ******************************** reading parameters  from mcdisp.par ****************************************************
   int i=0,hklblock=0,QxQyQzblock=0,j;
@@ -273,7 +286,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
      extract_with_prefix(instr,prefix,"calculate_spindensity_oscillation",calculate_spindensity_oscillation);
      extract_with_prefix(instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
      extract_with_prefix(instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation);
-
+     extract_with_prefix(instr,prefix,"outS",outS);
      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {sprintf(somestring,"out%i",usrdefcols[j]);
       extract(instr, somestring,colcod[usrdefcols[j]]);
@@ -517,6 +530,7 @@ inimcdis::inimcdis (const inimcdis & p)
   calculate_spindensity_oscillation=p.calculate_spindensity_oscillation;
   calculate_orbmomdensity_oscillation=p.calculate_orbmomdensity_oscillation;
   calculate_phonon_oscillation=p.calculate_phonon_oscillation;
+  outS=p.outS;
     deltaq=p.deltaq;  
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;

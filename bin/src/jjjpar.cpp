@@ -640,7 +640,7 @@ jjjpar::jjjpar (const jjjpar & pp)
    I=pp.I;   du=pp.du;
    estates=pp.estates;    Icalc_parameter_storage=pp.Icalc_parameter_storage;
    mq=pp.mq;    ddnn=pp.ddnn;
-   p=pp.p;dp1=pp.dp1;
+   p=pp.p;dP1=pp.dP1;
    m=pp.m;dm1=pp.dm1;
    L=pp.L;dL1=pp.dL1;
    S=pp.S;dS1=pp.dS1;

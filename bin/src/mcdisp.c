@@ -76,7 +76,7 @@ void errexit() // type info and error exit
 // Declares a struct to store all the information needed for each disp_calc iteration
 // ----------------------------------------------------------------------------------- //
 typedef struct{
-   ComplexMatrix **chi, **chibey;
+   ComplexMatrix **chi, **chibey, **chiPhon;
    ComplexMatrix **Echargedensity;mfcf  **qee_real, **qee_imag;
    ComplexMatrix **Espindensity;mfcf  **qsd_real, **qsd_imag;
    ComplexMatrix **Eorbmomdensity;mfcf  **qod_real, **qod_imag;
@@ -94,12 +94,12 @@ typedef struct{
 } intcalcapr_thread_data;
 class intcalcapr_input { public:
    int thread_id;
-   int dimA, level, do_verbose,calc_rixs;
-   double En, intensity, intensitybey, QQ;
+   int dimA, level, do_verbose,calc_rixs,do_phonon;
+   double En, intensity, intensitybey, intensityP, QQ;
    double epsilon; int iE;
-   intcalcapr_input(int _dimA, int _tid, int _level, int _doverb, int _calcrixs, double _En)
+   intcalcapr_input(int _dimA, int _tid, int _level, int _doverb, int _calcrixs,int _do_phonon, double _En)
    { 
-      thread_id = _tid; dimA = _dimA; level = _level; do_verbose = _doverb;calc_rixs= _calcrixs; En = _En;
+      thread_id = _tid; dimA = _dimA; level = _level; do_verbose = _doverb;calc_rixs= _calcrixs, do_phonon=_do_phonon; En = _En;
    }
 };
 // ----------------------------------------------------------------------------------- //
@@ -272,11 +272,48 @@ void sortE(Vector & d,ComplexMatrix & z)
     }
 }
 
-
+// rotate chi(1..3,1..3) from xyz to uvw coordinates
+void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
+{Vector hkl(1,3),u(1,3),v(1,3),w(1,3),q1(1,3),q2(1,3);q1=0;q2=0;
+ hkl(1)=ini.hkls[counter][1];
+ hkl(2)=ini.hkls[counter][2];
+ hkl(3)=ini.hkls[counter][3];
+ hkl2ijk(u,hkl,abc);
+ u*=-1;
+ int i=counter-1;
+ if(counter==0){i++;}
+ hkl(1)=ini.hkls[i][1];
+ hkl(2)=ini.hkls[i][2];
+ hkl(3)=ini.hkls[i][3];
+ hkl2ijk(q1,hkl,abc);
+ while(q1*q2==0&&i<ini.nofhkls){
+ hkl(1)=ini.hkls[i+1][1];
+ hkl(2)=ini.hkls[i+1][2];
+ hkl(3)=ini.hkls[i+1][3];
+ hkl2ijk(q2,hkl,abc);
+     i++;}
+ while(q1*q2==0&&i>1){i--;
+ hkl(1)=ini.hkls[i][1];
+ hkl(2)=ini.hkls[i][2];
+ hkl(3)=ini.hkls[i][3];
+ hkl2ijk(q1,hkl,abc);
+     }
+ if(q1*q2==0){fprintf(stderr,"Error mcdisp: for option outS=3,4 more than 1 linear independent hkl set has to be given in order to determine scattering plane\n");exit(EXIT_FAILURE);}
+ xproduct(w,q1,q2);
+ xproduct(v,w,u);
+// normalize
+ u=u/Norm(u);
+ v=v/Norm(v);
+ w=w/Norm(w);
+ // now u v w is determined in terms of xyz coordinates
+ ComplexMatrix rot(1,3,1,3);
+ for(int i=1;i<=3;++i){rot(i,1)=u(i);rot(i,2)=v(i);rot(i,3)=w(i);}
+ chi(1,3,1,3)=rot.Transpose()*chi(1,3,1,3)*rot;
+}
 
 // *******************************************************************************************
 // procedure to calculate the dispersion
-void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs, int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
+void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
   FILE * fin;
   FILE * fout;
@@ -525,7 +562,7 @@ if(ini.calculate_orbmomdensity_oscillation){(*inputpars.jjj[l]).transitionnumber
        fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,inputpars,orbmomdensity_Mijkl,md,
              orbmomdensity_gamma,orbmomdensity_gamman,orbmomdensity_Uijkl,maxiter,nn,ini, gamma,Eorbmomdensity);}
 if(ini.calculate_phonon_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
-   if((*inputpars.jjj[l]).dp1calc(ini.T,mf,ini.Hext,phonon_coeff1,md.est(i,j,k,l))!=0)
+   if((*inputpars.jjj[l]).dP1calc(ini.T,mf,ini.Hext,phonon_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,inputpars,phonon_Mijkl,md,
              phonon_gamma,phonon_gamman,phonon_Uijkl,maxiter,nn,ini, gamma,Ephonon);}
 if(ini.calculate_magmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
@@ -656,7 +693,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
        thrdat.q = q; thrdat.thread_id = -1;       
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
    {
-      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); 
+      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
       thrdat.J[ithread] = new jq(J); tin[ithread]->dimA=0; 
       thrdat.md[ithread] = new mdcf(md);      
    } 
@@ -846,6 +883,7 @@ if (do_jqfile==1){
    Vector En(1,dimA);
    Vector ints(1,dimA);
    Vector intsbey(1,dimA);
+   Vector intsP(1,dimA);
 //   myEigenValuesHermitean (Ac,En,sort,maxiter);
   
 //   myEigenSystemHermitean (Ac,En,Tau,sort,maxiter);
@@ -907,7 +945,7 @@ if (do_jqfile==1){
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
                   
   diffint=0;diffintbey=0;
-  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,calc_rixs,hkl);
+  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl);
   qold=qijk;hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);
 
   if(qincr==-1){qincr=0;qold=qijk;
@@ -933,7 +971,6 @@ if (do_jqfile==1){
  
               }
          qincr+=Norm(qijk-qold); 
-   
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
                              ini,calc_rixs,do_Erefine,counter);
                   ini.print_usrdefcols(foutqom,qijk,qincr);
@@ -948,15 +985,13 @@ if (do_jqfile==1){
                   Vector dd_without_antipeaks(1,dim),dd_int_without_antipeaks(1,dim);  dd_without_antipeaks+=100000.0;dd_int_without_antipeaks+=100000.0;
                   Vector dd_without_weights(1,dim),dd_int_without_weights(1,dim);  dd_without_weights+=100000.0;dd_int_without_weights+=100000.0;
                   Vector dd_without_antipeaks_weights(1,dim),dd_int_without_antipeaks_weights(1,dim);  dd_without_antipeaks_weights+=100000.0;dd_int_without_antipeaks_weights+=100000.0;
-
- #ifndef _THREADS
+#ifndef _THREADS
                      int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
+                     ComplexMatrix chiPhon(1,dimA,1,dimA);
                      ComplexMatrix chi(1,dimchi*dimA,1,dimchi*dimA);
                      ComplexMatrix chibey(1,dimchibey*dimA,1,dimchibey*dimA);
-                     Matrix pol(1,3,1,3);
-                     
-#else
-                  // Populates the thread data structure
+                     Matrix pol(1,3,1,3);                     
+#else               // Populates the thread data structure
                   thrdat.qee_real = new mfcf*[NUM_THREADS];          thrdat.qee_imag = new mfcf*[NUM_THREADS];
                   thrdat.qsd_real = new mfcf*[NUM_THREADS];          thrdat.qsd_imag = new mfcf*[NUM_THREADS];
                   thrdat.qod_real = new mfcf*[NUM_THREADS];          thrdat.qod_imag = new mfcf*[NUM_THREADS];
@@ -965,6 +1000,7 @@ if (do_jqfile==1){
                   thrdat.qes_real = new mfcf*[NUM_THREADS];          thrdat.qes_imag = new mfcf*[NUM_THREADS];
                   thrdat.qel_real = new mfcf*[NUM_THREADS];          thrdat.qel_imag = new mfcf*[NUM_THREADS];
                   thrdat.chi      = new ComplexMatrix*[NUM_THREADS]; thrdat.chibey   = new ComplexMatrix*[NUM_THREADS];
+                  thrdat.chiPhon     = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.pol      = new Matrix*[NUM_THREADS];        
                   thrdat.Echargedensity       = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Espindensity       = new ComplexMatrix*[NUM_THREADS]; 
@@ -977,8 +1013,9 @@ if (do_jqfile==1){
                   thrdat.hkl = hkl; thrdat.thread_id = -1;
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
-                     tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,En);
+                     tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,En);
                      int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
+                     thrdat.chiPhon[ithread] = new ComplexMatrix(1,dimA,1,dimA);
                      thrdat.chi[ithread] = new ComplexMatrix(1,dimchi*dimA,1,dimchi*dimA);
                      thrdat.chibey[ithread] = new ComplexMatrix(1,dimchibey*dimA,1,dimchibey*dimA);
                      thrdat.pol[ithread] = new Matrix(1,3,1,3);
@@ -1023,12 +1060,12 @@ if (do_jqfile==1){
                      // Runs threads until all are running - but wait until they are completed in order before printing output.
                      //  This is to ensure that the output is exactly the same as for a single thread (otherwise it would be out of order).
                      for(int th=0; th<NUM_THREADS; th++)
-                     {
+                     { 
                         i=oldi+th; if(i>dimA) break;
                         if(do_gobeyond==0) intsbey(i)=-1.1; else intsbey(i)=+1.1;
                       if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                       {if(do_verbose)printf("calling thread %i ",num_threads_started);
-                       tin[num_threads_started]->En=En(i); tin[num_threads_started]->intensitybey=intsbey(i); 
+                       tin[num_threads_started]->En=En(i); tin[num_threads_started]->intensitybey=intsbey(i);tin[num_threads_started]->intensitybey=intsP(i); 
                        tin[num_threads_started]->level = i;
                         #if defined  (__linux__) || defined (__APPLE__)
                         rc = pthread_create(&threads[num_threads_started], &attr, intcalc_approx, (void *) tin[num_threads_started]);
@@ -1036,11 +1073,11 @@ if (do_jqfile==1){
                         #else
                         threads[num_threads_started] = CreateThread(NULL, 0, intcalc_approx, (void *) tin[num_threads_started], 0, &tid[num_threads_started]);
                         if(threads[num_threads_started]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,num_threads_started+1); exit(EXIT_FAILURE); }
-                        #endif
+                        #endif  
                         ++num_threads_started;
                       }
-                      else {ints(i)=-1;intsbey(i)=-1;}
-                     }
+                      else {ints(i)=-1;intsbey(i)=-1;intsP(i)=-1;}
+                      }
                      #if defined  (__linux__) || defined (__APPLE__)
                      for(int th=0; th<num_threads_started; th++)rc = pthread_join(threads[th], &status);
                      #else
@@ -1048,6 +1085,7 @@ if (do_jqfile==1){
                      #endif
                      num_threads_started=0; 
                      #define chi      (*thrdat.chi[ithread])
+                     #define chibey   (*thrdat.chibey[ithread])
                      #define qee_real (*thrdat.qee_real[ithread])
                      #define qee_imag (*thrdat.qee_imag[ithread])
                      #define qsd_real (*thrdat.qsd_real[ithread])
@@ -1070,13 +1108,14 @@ if (do_jqfile==1){
                       {++ithread;
                        ints(tin[ithread]->level) = tin[ithread]->intensity; 
                        intsbey(tin[ithread]->level) = tin[ithread]->intensitybey;
+                       intsP(tin[ithread]->level) = tin[ithread]->intensityP;
                        //printf("%i %g",ithread,ints(tin[ithread]->level));
                       }       
 #else
                      if(do_gobeyond==0){intsbey(i)=-1.1;}else{intsbey(i)=+1.1;}
                      if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                      {
-                     ints(i)=intcalc_approx(chi,chibey,pol,intsbey(i),
+                     ints(i)=intcalc_approx(chi,chibey,chiPhon,pol,intsbey(i),intsP(i),
                                             qee_real,qee_imag,Echargedensity,
                                             qsd_real,qsd_imag,Espindensity,
                                             qod_real,qod_imag,Eorbmomdensity,
@@ -1084,10 +1123,10 @@ if (do_jqfile==1){
                                             qem_real,qem_imag,Emagmom,
                                             qes_real,qes_imag,Espin,
                                             qel_real,qel_imag,Eorbmom,
-                                            dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,calc_rixs,QQ);
+                                            dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,calc_rixs,do_phonon,QQ);
                      }
                      else
-                     {ints(i)=-1;intsbey(i)=-1;
+                     {ints(i)=-1;intsbey(i)=-1;intsP(i)=-1;
                      }
 #endif
                       //printout rectangular function to .mcdisp.
@@ -1174,13 +1213,22 @@ if (do_jqfile==1){
                      if(intsbey(i)<0)intsbey(i)=-1;
                       fprintf (foutqom, " %4.4g",myround(intsbey(i)));
                       ini.print_usrdefcols(foutqei,qijk,qincr);
-                      fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
-                       if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g\n",i,ints(i),intsbey(i));}
+                      fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g  ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)));
+                  if (En(i)<=ini.emax&&En(i)>=ini.emin){                       
+                       switch(ini.outS)
+                         {case 0: break;
+                          case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
+                          case 3: rottouvw(chi,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 4: rottouvw(chibey,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
+                         } }
+                       fprintf(foutqei,"\n");
+                       if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
                        if(En(i)>=ini.emin&&En(i)<=ini.emax){diffint+=ints(i);diffintbey+=intsbey(i);}
                       }
                      // printout eigenvectors only if evaluated during intensity calculation...
-                  if (En(i)<=ini.emax&&En(i)>=ini.emin){
+                  if (En(i)<=ini.emax&&En(i)>=ini.emin){ 
 
 if(ini.calculate_chargedensity_oscillation)print_ev(foutqee,i,ini,hkl,QQ,En,ints,intsbey,qee_real,qee_imag);
 if(ini.calculate_spindensity_oscillation)print_ev(foutqsd,i,ini,hkl,QQ,En,ints,intsbey,qsd_real,qsd_imag);
@@ -1211,9 +1259,10 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   #undef qel_real
                   #undef qel_imag
                   #undef chi
+                  #undef chibey
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
-                     delete thrdat.chi[ithread]; delete thrdat.chibey[ithread]; 
+                     delete thrdat.chi[ithread]; delete thrdat.chibey[ithread];delete thrdat.chiPhon[ithread]; 
                      delete thrdat.pol[ithread]; delete thrdat.md[ithread]; 
                      delete thrdat.qee_real[ithread]; delete thrdat.qee_imag[ithread];delete thrdat.Echargedensity[ithread]; 
                      delete thrdat.qsd_real[ithread]; delete thrdat.qsd_imag[ithread];delete thrdat.Espindensity[ithread]; 
@@ -1232,7 +1281,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.Espin;  
                   delete[] thrdat.Eorbmom;  
                   delete[] thrdat.Tau;
-                  delete[] thrdat.chi; delete[] thrdat.chibey;
+                  delete[] thrdat.chi; delete[] thrdat.chibey;delete[] thrdat.chiPhon;
                   delete[] thrdat.pol; 
                   delete[] thrdat.qee_real; delete[] thrdat.qee_imag; 
                   delete[] thrdat.qsd_real; delete[] thrdat.qsd_imag; 
@@ -1305,7 +1354,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {
-             tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,0.); 
+             tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
              tin[ithread]->epsilon=epsilon; thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md);
           }
           ithread=0; double oldE=0.;
@@ -1543,9 +1592,9 @@ for (i=1;i<=argc-1;++i){
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix);
 
-
+int do_phonon=1;
 //calculate dispersion and save to files
-dispcalc(ini,inputpars,calc_rixs,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
+dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
   
  printf("#RESULTS saved in directory ./results/  - files:\n");
   if(calc_rixs){printf("#  %smcdisp.qex  - T,H,qvector vs energies and resonant inelastic X-ray (RIXS) intensities\n",ini.prefix);}

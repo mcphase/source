@@ -19,9 +19,11 @@ class mdcf
    ComplexMatrix ** s; //matrix to store U
    ComplexMatrix ** l; //matrix to store eigenvalues sqrt_gamma
    ComplexMatrix ** sb; //matrix to store V
+   ComplexVector ** dps; // big vector to store all dmq1 
    ComplexVector ** dmqs; // big vector to store all dmq1 
    ComplexVector ** dmq_dips; // big vector to store all dmq_dip1 
    ComplexVector ** lb; //matrix to store eigenvalues sqrt_gamma
+   ComplexVector ** Pb; //matrix to store eigenvalues sqrt_gammaP
    ComplexVector ** lb_dip; //matrix to store eigenvalues sqrt_gamma
    Vector ** d;
    IntVector ** nt; // vector to store number of transitions for each atom
@@ -36,7 +38,7 @@ class mdcf
     int ind(int i,int j, int k,int l); 
    
     int ncel;
-    ComplexMatrix **Ug, **bUg, **gU, **bgU; // Cache for U*sqrt(gamma) and sqrt(gamma)*U values, and beyond equiv.
+    ComplexMatrix **Ug,**gU, **bUg,**bgU,**PUg,**PgU; // Cache for U*sqrt(gamma) and sqrt(gamma)*U values, and beyond equiv.
     
     ComplexMatrix & M(int i,int j,int k); // returns pointer to  matrix M(ijk) 
     ComplexMatrix & Mi(int in); // returns pointer to matrix M(i)
@@ -46,8 +48,11 @@ class mdcf
     ComplexMatrix & sqrt_gammai(int in); // returns pointer to eigenvalue matrix i
     ComplexMatrix & V(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
     ComplexMatrix & Vi(int in); // returns pointer to eigenvector matrix i
+    ComplexVector & dPs(int i,int j,int k) const; // returns pointer to vector P (ijk) 
     ComplexVector & dMQs(int i,int j,int k) const; // returns pointer to vector MQ (ijk) 
     ComplexVector & dMQ_dips(int i,int j,int k) const; // returns pointer to vector MQ_dip (ijk) 
+    ComplexVector & sqrt_GammaP(int i,int j,int k) const; // returns pointer to eigenvaluevector (ijk) 
+    ComplexVector & sqrt_GammaPi(int in); // returns pointer to eigenvalue vector i
     ComplexVector & sqrt_Gamma(int i,int j,int k) const; // returns pointer to eigenvaluevector (ijk) 
     ComplexVector & sqrt_Gammai(int in); // returns pointer to eigenvalue vector i
     ComplexVector & sqrt_Gamma_dip(int i,int j,int k) const; // returns pointer to eigenvaluevector (ijk) 

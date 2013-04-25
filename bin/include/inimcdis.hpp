@@ -35,6 +35,7 @@ class inimcdis
   int calculate_spindensity_oscillation; //  creates mcdisp.qsd
   int calculate_orbmomdensity_oscillation; //  creates mcdisp.qod
   int calculate_phonon_oscillation; //  creates mcdisp.qep
+  int outS;
   double T;
   Vector Hext;
   double emax;

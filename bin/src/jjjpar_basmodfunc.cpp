@@ -170,9 +170,9 @@ module_type=0;
     p=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"pcalc");
     //*(int **)(&p)=GetProcAddress(handle,"pcalc");
      if (p==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d  module %s loading function pcalc not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    dp1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dp1");
-    //*(void **)(&du)=GetProcAddress(handle,"dp1");
-     if (dp1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dp1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    dP1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dP1");
+    //*(void **)(&du)=GetProcAddress(handle,"dP1");
+     if (dP1==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dP1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     m=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"mcalc");
     //*(int **)(&m)=GetProcAddress(handle,"mcalc");
@@ -257,8 +257,8 @@ module_type=0;
 
  *(void **)(&p)=dlsym(handle,"pcalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);p=NULL;}
- *(void **)(&dp1)=dlsym(handle,"dp1");
-  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dp1=NULL;}
+ *(void **)(&dP1)=dlsym(handle,"dP1");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dP1=NULL;}
 
 
  *(void **)(&m)=dlsym(handle,"mcalc");

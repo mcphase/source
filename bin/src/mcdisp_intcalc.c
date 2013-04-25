@@ -1,14 +1,11 @@
 //calculate intensities for given energy
 
-
-
-
 //***********************************************************************//
-// initialize intensity calculation for going beyond dipole approximation
+// initialize intensity calculation for a specific Q vector (calls d*1calc)
 //***********************************************************************
 // returns 1 on success and zero on failure
 //***********************************************************************
-void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_gobeyond,int calc_rixs,Vector & hkl)
+void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_gobeyond,int calc_rixs,int do_phonon,Vector & hkl)
 {int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);double QQ;
  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
@@ -17,18 +14,22 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
  
-//    qijk(1)=hkl(1)*2*PI/inputpars.a; // only correct for ortholattices !!!!
-//    qijk(2)=hkl(2)*2*PI/inputpars.b;
-//    qijk(3)=hkl(3)*2*PI/inputpars.c;
-
  float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
  if(do_verbose==1) printf("#initializing intensity calculation\n");
-  double Gamman,gamma; 
-  complex<double> imaginary(0,1);
+  double Gamman,gamma,gammaP; 
+  complex<double> imaginary(0,1),dP1;
   FILE * fin; 
   Vector mf(1,ini.nofcomponents);
       int mqdim=3;if(calc_rixs)mqdim=9;
-      ComplexVector L1(1,3),S1(1,3),mq1_dip(1,mqdim),mq1(1,mqdim);
+      ComplexVector L1(1,3),S1(1,3),P1(1,3),mq1_dip(1,mqdim),mq1(1,mqdim);
+
+  // Precalculate values of Debye-Waller and Form Factors for this Q-vector to save calls to (*inputpars.jjj[ion]).* functions
+  double DBWF[inputpars.nofatoms+1];
+  complex <double> SL[inputpars.nofatoms+1];
+  for(l=1;l<=inputpars.nofatoms;++l) {
+     DBWF[l] = (*inputpars.jjj[l]).debyewallerfactor(QQ);
+     SL[l] = complex <double> ((*inputpars.jjj[l]).SLR,(*inputpars.jjj[l]).SLI);
+  }
 
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
@@ -52,17 +53,17 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
       (*inputpars.jjj[l]).transitionnumber=tn; // try calculation for transition  tn
       if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=-tn;
 
-  if(calc_rixs)
+  if(calc_rixs)// RIXS
       {if((*inputpars.jjj[l]).drixs1calc(qijk,ini.T,mq1_dip,md.est(i,j,k,l))!=0)
        // calculate <-|Rijomega|+> see haverkort paper: transition operator for RIXS
-      {if(do_verbose)printf("#calculating RIXS intensity for ion %s\n",(*inputpars.jjj[l]).sipffilename);
+       {if(do_verbose)printf("#calculating RIXS intensity for ion %s\n",(*inputpars.jjj[l]).sipffilename);
        (*inputpars.jjj[l]).FF_type=4; // put FFTYPE to RIXS to indicate that this is implemented
-      }
-     else{ if(do_verbose)printf("#warning mcdisp - function drixs1 not implemented for single ion module of ion %s, no intensity from this ion\n",(*inputpars.jjj[l]).sipffilename);
+       }
+       else{ if(do_verbose)printf("#warning mcdisp - function drixs1 not implemented for single ion module of ion %s, no intensity from this ion\n",(*inputpars.jjj[l]).sipffilename);
            mq1_dip=0;mq1_dip(1)= complex <double> (1e-10,0.0);(*inputpars.jjj[l]).FF_type=1;
-          }
+           }
       }else
-      {
+      {// neutron intensities
       // try dipole approximation for this ion
       // dipole approx: <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0
       if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,L1,md.est(i,j,k,l))!=0&&
@@ -79,32 +80,48 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
              }
       // try if going beyond dip approximation for formfactor works
      if(do_gobeyond){
-      if((*inputpars.jjj[l]).dMQ1calc(qijk,ini.T,mq1,md.est(i,j,k,l))!=0)// calculate <-|M(Q)|+>
-      {if(do_verbose)printf("#going beyond dipole approx for ion %s\n",(*inputpars.jjj[l]).sipffilename);
-       (*inputpars.jjj[l]).FF_type*=-1; // put FFTYPE negative to indicate that going beyond works
-      }
-     else{ if(do_verbose)printf("#warning mcdisp - function dmq1 not implemented for single ion module of ion %s, only doing dipolar intensity\n",(*inputpars.jjj[l]).sipffilename);
-           mq1=mq1_dip;
-          }
+        if((*inputpars.jjj[l]).dMQ1calc(qijk,ini.T,mq1,md.est(i,j,k,l))!=0)// calculate <-|M(Q)|+>
+        {if(do_verbose)printf("#going beyond dipole approx for ion %s\n",(*inputpars.jjj[l]).sipffilename);
+         (*inputpars.jjj[l]).FF_type*=-1; // put FFTYPE negative to indicate that going beyond works
+        }
+        else{ if(do_verbose)printf("#warning mcdisp - function dmq1 not implemented for single ion module of ion %s, only doing dipolar intensity\n",(*inputpars.jjj[l]).sipffilename);
+             mq1=mq1_dip;
+            }
                     }
-       } // if calc_rixs
-   
-      if(do_gobeyond){Gamman=Norm2(mq1);mq1/=sqrt(Gamman);}
+      // try to calculate phonon intensity
+      if(do_phonon){
+                  if((*inputpars.jjj[l]).dP1calc(ini.T,mf,ini.Hext,P1,md.est(i,j,k,l))==0)
+                  {dP1=0;gammaP=SMALL_GAMMA;}
+                  else
+                  {dP1=0;for(int pp1=1;pp1<=3;++pp1)dP1+=DBWF[l]*SL[l]*(P1(pp1)*qijk(pp1));
+                   gammaP=real(dP1*conj(dP1));dP1/=sqrt(gammaP);
+                  }
+                   }
+     } // if calc_rixs
+
+      if(do_gobeyond){mq1*=DBWF[l]; // multiply Debye Waller factor
+                      Gamman=Norm2(mq1);mq1/=sqrt(Gamman);
+                      }
+      mq1_dip*=DBWF[l]; // multiply Debye Waller factor
       gamma=Norm2(mq1_dip);mq1_dip/=sqrt(gamma);
+
        (*inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
        j1=md.baseindex(i,j,k,l,jmin); 
       
          // treat correctly case for neutron energy loss
 	 if (nn[6]<0){if(do_gobeyond)mq1=mq1.Conjugate();
+                      if(do_phonon)dP1=conj(dP1);
                       mq1_dip=mq1_dip.Conjugate();}
                             // mind in manual the 1st dimension alpha=1 corresponds
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
         if (nn[6]>SMALL_QUASIELASTIC_ENERGY)
 	    {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=sqrt(Gamman);
+             if(do_phonon)md.sqrt_GammaP(i,j,k)(1*j1)=sqrt(gammaP);
              md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=sqrt(gamma);}
 	    else if (nn[6]<-SMALL_QUASIELASTIC_ENERGY)
             {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=imaginary*sqrt(Gamman);
+             if(do_phonon)md.sqrt_GammaP(i,j,k)(1*j1)=imaginary*sqrt(gammaP);
              md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=imaginary*sqrt(gamma);}
 	    else
 	    { //quasielastic line needs gamma=SMALL_QUASIELASTIC_ENERGY .... because Mijkl and therefore gamma have been set to 
@@ -112,17 +129,19 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
 	      //set fix delta but keep sign
 	      if (nn[6]>0){
   			     if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
+  			     if(do_phonon)md.sqrt_GammaP(i,j,k)(1*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gammaP);
   			     md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
                            }
 	      else        {
                              if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
+                             if(do_phonon)md.sqrt_Gamma(i,j,k)(1*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gammaP);
                              md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
 	                     }
 	    }
 
         if(do_gobeyond)for(m=1;m<=mqdim;++m){md.dMQs(i,j,k)(mqdim*(j1-1)+m)=mq1(m);}
-        for(m=1;m<=mqdim;++m){md.dMQ_dips(i,j,k)(mqdim*(j1-1)+m)=mq1_dip(m);}
-       
+        if(do_phonon)md.dPs(i,j,k)(1*(j1-1)+1)=dP1;
+        for(m=1;m<=mqdim;++m){md.dMQ_dips(i,j,k)(mqdim*(j1-1)+m)=mq1_dip(m);}       
     }}}
     fclose(fin);
   }}}}
@@ -139,7 +158,8 @@ void *intcalc_approx(void *input)
 DWORD WINAPI intcalc_approx(void *input)
 #endif
 #else
-double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, double & intensitybey,
+double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix & chiPhon,
+        Matrix & pol, double & intensitybey,double & intensityP,
         mfcf & qee_real,mfcf & qee_imag,ComplexMatrix & Echargedensity,
         mfcf & qsd_real,mfcf & qsd_imag,ComplexMatrix & Espindensity,
         mfcf & qod_real,mfcf & qod_imag,ComplexMatrix & Eorbmomdensity,
@@ -147,7 +167,8 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
         mfcf & qem_real,mfcf & qem_imag,ComplexMatrix & Emagmom,
         mfcf & qes_real,mfcf & qes_imag,ComplexMatrix & Espin,
         mfcf & qel_real,mfcf & qel_imag,ComplexMatrix & Eorbmom,
-        int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,const par & inputpars,Vector & hkl, mdcf & md,int do_verbose,int calc_rixs,double & QQ)
+        int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,
+       const par & inputpars,Vector & hkl, mdcf & md,int do_verbose,int calc_rixs,int do_phonon,double & QQ)
 #endif
 {//calculates approximate intensity for energylevel i - according to chapter 8.2 mcphas manual
 
@@ -155,8 +176,10 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
    intcalcapr_input *myinput; myinput = (intcalcapr_input *)input;
    int thread_id = myinput->thread_id;
    double intensitybey = myinput->intensitybey;
+   double intensityP = myinput->intensityP;
    #define chi (*thrdat.chi[thread_id])
    #define chibey (*thrdat.chibey[thread_id])
+   #define chiPhon (*thrdat.chiPhon[thread_id])
    #define pol (*thrdat.pol[thread_id])
    #define qee_real (*thrdat.qee_real[thread_id])
    #define qee_imag (*thrdat.qee_imag[thread_id])
@@ -183,6 +206,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
    #define Tau (*thrdat.Tau[thread_id])
    double en = myinput->En; 
    int calc_rixs = myinput->calc_rixs;
+   int do_phonon = myinput->do_phonon;
    #define ini (*thrdat.ini[thread_id])
    #define inputpars (*thrdat.inputpars[thread_id])
    #define hkl thrdat.hkl
@@ -226,11 +250,15 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
    if(md.gU==0) { md.gU = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.gU[i]=0; }
    if(md.bUg==0) { md.bUg = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.bUg[i]=0; }
    if(md.bgU==0) { md.bgU = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.bgU[i]=0; }
+   if(md.PUg==0) { md.PUg = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.PUg[i]=0; }
+   if(md.PgU==0) { md.PgU = new ComplexMatrix *[md.ncel+1]; for(i=1;i<=md.ncel;i++) md.PgU[i]=0; }
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){ int in1=md.in(i1,j1,k1);
    if(md.gU[in1]==0) { md.gU[in1] = new ComplexMatrix(1,mqdim,1,maxb); *md.gU[in1]=defval; }
    if(md.Ug[in1]==0) { md.Ug[in1] = new ComplexMatrix(1,mqdim,1,maxb); *md.Ug[in1]=defval; }
    if(md.bgU[in1]==0) { md.bgU[in1] = new ComplexMatrix(1,mqdim,1,maxb);*md.bgU[in1]=defval; }
-   if(md.bUg[in1]==0) { md.bUg[in1] = new ComplexMatrix(1,mqdim,1,maxb);*md.bUg[in1]=defval; } }}}
+   if(md.bUg[in1]==0) { md.bUg[in1] = new ComplexMatrix(1,mqdim,1,maxb);*md.bUg[in1]=defval; }
+   if(md.PgU[in1]==0) { md.PgU[in1] = new ComplexMatrix(1,1,1,maxb);*md.PgU[in1]=defval; }
+   if(md.PUg[in1]==0) { md.PUg[in1] = new ComplexMatrix(1,1,1,maxb);*md.PUg[in1]=defval; } }}}
 
 // determine chi
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
@@ -245,6 +273,15 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
       b=md.baseindex(i1,j1,k1,l1,t1);
       bb=md.baseindex(i2,j2,k2,l2,t2);
       int in1=md.in(i1,j1,k1), in2=md.in(i2,j2,k2);
+
+      if(do_phonon)
+      {for(j=1;j<=1;++j){for(i=1;i<=1;++i){
+        if((*md.PgU[in1])(i,b)==defval)  (*md.PgU[in1])(i,b)  = conj(md.sqrt_GammaP(i1,j1,k1)(1*b))
+                                                                 * md.dPs(i1,j1,k1)((b-1)*1+i);
+        if((*md.PUg[in2])(j,bb)==defval) (*md.PUg[in2])(j,bb) = conj(md.dPs(i2,j2,k2)((bb-1)*1+j))
+                                                                 * md.sqrt_GammaP(i2,j2,k2)(1*bb);
+         chiPhon((s-1)*1+i,(ss-1)*1+j) = PI * (*md.PgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.PUg[in2])(j,bb);
+      }}} // i,j,do_phonon
 
       if(intensitybey>0)
       {for(j=1;j<=mqdim;++j){for(i=1;i<=mqdim;++i){
@@ -319,15 +356,10 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,Matrix & pol, d
     for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
     }}
   
-  // Precalculate values of Debye-Waller and Form Factors for this Q-vector to save calls to (*inputpars.jjj[ion]).* functions
-  double DBWF[md.nofatoms+1];//, Fqm[md.nofatoms+1], Fqp[md.nofatoms+1];
-  for(l1=1;l1<=md.nofatoms;++l1) {
-     DBWF[l1] = (*inputpars.jjj[l1]).debyewallerfactor(QQ);
-  }
-
 ComplexMatrix ch(1,mqdim,1,mqdim),chb(1,mqdim,1,mqdim);
-ch=0;chb=0;
- //multiply polarization factor, formfactor and debyewallerfactor
+complex <double> chP;
+ch=0;chb=0;chP=0;
+ //multiply polarization factor, formfactor 
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
  for(l1=1;l1<=md.nofatoms;++l1){
  for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
@@ -340,15 +372,15 @@ ch=0;chb=0;
       ss=(index_s(i2,j2,k2,l2,t2,md,ini)-1);ss3=ss*mqdim;
  for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){
 if(calc_rixs){
-           ch(i,j)+=chi(s3+i,ss3+j)*( DBWF[l1] * DBWF[l2] );               
+           ch(i,j)+=chi(s3+i,ss3+j);               
       }else{
      if(intensitybey>0) {
-           chb(i,j)+=chibey(s3+i,ss3+j)*( pol(i,j) * DBWF[l1] * DBWF[l2] ); 
+           chb(i,j)+=chibey(s3+i,ss3+j)* pol(i,j) ; 
                          } // i,j,intesitybey
-           ch(i,j)+=chi(s3+i,ss3+j)*( pol(i,j) * DBWF[l1] * DBWF[l2] ); 
-                         
+           ch(i,j)+=chi(s3+i,ss3+j)*pol(i,j);                          
             }
            }}
+if(do_phonon) {chP+=chiPhon(s+1,ss+1);}
   }}
   }}}
  }}
@@ -383,26 +415,35 @@ if(calc_rixs){
 if (calc_rixs){// use 1-9 components of chi to store result !!! (other components do not count          
    for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chi(i,j)=(bose/(double)ini.mf.n())*ch(i,j);}}
             } 
-       else{sumS=Sum(ch)/PI/2.0*3.65/4.0/PI/(double)ini.mf.n();sumS*=0.5*bose;
-intensity=fabs(real(sumS));
+       else{ch*=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
+            for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chi(i,j)=ch(i,j);}}
+            sumS=Sum(ch);intensity=fabs(real(sumS));
                       if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g negative,E=%g, bose=%g\n",real(sumS),en,bose);exit(1);}
                       if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
-if(intensitybey>0){sumS=Sum(chb)/PI/2.0*3.65/4.0/PI/(double)ini.mf.n();sumS*=0.5*bose;
-                   intensitybey=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
+            if(intensitybey>0){chb*=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
+                               for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chibey(i,j)=chb(i,j);}}
+                               sumS=Sum(chb);intensitybey=fabs(real(sumS));
+                               intensitybey=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
-                  }
+                              }
+            if(do_phonon){sumS=chP/PI/2.0/(double)ini.mf.n();sumS*=bose;
+                          intensityP=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
+                                                   if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
+                         }                              
 // here should be entered factor  k/k' + absolute scale factor
 if (ini.ki==0)
 {if (ini.kf*ini.kf+0.4811*en<0)
  {fprintf(stderr,"warning mcdisp - calculation of intensity: energy transfer %g meV cannot be reached with kf=const=%g/A at (%g,%g,%g)\n",en,ini.kf,hkl(1),hkl(2),hkl(3));
   intensity=0;
   intensitybey=0;
+  intensityP=0;
  }
  else
  { 
  ki=sqrt(ini.kf*ini.kf+0.4811*en);
  intensity*=ini.kf/ki;
  intensitybey*=ini.kf/ki;
+ intensityP*=ini.kf/ki;
  }
 }
 else
@@ -410,11 +451,13 @@ else
  {fprintf(stderr,"warning mcdisp - calculation of intensity: energy transfer %g meV cannot be reached with ki=const=%g/A at (%g,%g,%g)\n",en,ini.ki,hkl(1),hkl(2),hkl(3));
     intensity=0;
     intensitybey=0;
+    intensityP=0;
  }
  else
  {kf=sqrt(ini.ki*ini.ki-0.4811*en);
   intensity*=kf/ini.ki;
   intensitybey*=kf/ini.ki;
+  intensityP*=kf/ini.ki;
  }
 }
 } // if calc_rixs
@@ -422,6 +465,7 @@ else
 //printf("intcalc: %i %g :",thread_id,intensity);
 myinput->intensity=intensity;
 myinput->intensitybey=intensitybey;
+myinput->intensityP=intensityP;
 myinput->QQ=QQ;
 #undef md
 #undef hkl
@@ -430,6 +474,7 @@ myinput->QQ=QQ;
 #undef inputpars
 #undef chi
 #undef chibey
+#undef chiPhon
 #undef pol
 #undef qee_real
 #undef qee_imag

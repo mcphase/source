@@ -27,6 +27,9 @@ ComplexMatrix & mdcf::U(int na, int nb, int nc) const
 ComplexMatrix & mdcf::V(int na, int nb, int nc) const
 { return (*sb[in(na,nb,nc)]);
 }
+ComplexVector & mdcf::dPs(int na, int nb, int nc) const
+{ return (*dps[in(na,nb,nc)]);
+}
 ComplexVector & mdcf::dMQs(int na, int nb, int nc) const
 { return (*dmqs[in(na,nb,nc)]);
 }
@@ -39,6 +42,9 @@ ComplexMatrix & mdcf::M(int na, int nb, int nc)
 
 ComplexMatrix & mdcf::sqrt_gamma(int na, int nb, int nc) const
 { return (*l[in(na,nb,nc)]);
+}
+ComplexVector & mdcf::sqrt_GammaP(int na, int nb, int nc) const
+{ return (*Pb[in(na,nb,nc)]);
 }
 ComplexVector & mdcf::sqrt_Gamma(int na, int nb, int nc) const
 { return (*lb[in(na,nb,nc)]);
@@ -62,6 +68,9 @@ ComplexMatrix & mdcf::Mi(int i)
 
 ComplexMatrix & mdcf::sqrt_gammai(int i)
 { return (*l[i]);
+}
+ComplexVector & mdcf::sqrt_GammaPi(int i)
+{ return (*Pb[i]);
 }
 ComplexVector & mdcf::sqrt_Gammai(int i)
 { return (*lb[i]);
@@ -126,12 +135,13 @@ void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
      m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
      l[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
      sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
+     dps[in(i,j,k)]= new ComplexVector(1,1*sumnt);
      dmqs[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
      dmq_dips[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
+     Pb[in(i,j,k)]= new ComplexVector(1,1*sumnt);
      lb[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
      lb_dip[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
-     d[in(i,j,k)]= new Vector(1,sumnt);
-      
+     d[in(i,j,k)]= new Vector(1,sumnt);      
 }
 
 int mdcf::baseindex(int i, int j, int k, int l, int tn) const
@@ -170,15 +180,17 @@ mdcf::mdcf (int n1,int n2,int n3,int n,int nc)
   m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
   l = new ComplexMatrix * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
   sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
+  dps = new ComplexVector * [mxa*mxb*mxc+1];if(dps==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dps[i]=NULL;
   dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
   dmq_dips = new ComplexVector * [mxa*mxb*mxc+1];if(dmq_dips==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmq_dips[i]=NULL;
+  Pb = new ComplexVector * [mxa*mxb*mxc+1];if(Pb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)Pb[i]=NULL;
   lb = new ComplexVector * [mxa*mxb*mxc+1];if(lb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb[i]=NULL;
   lb_dip = new ComplexVector * [mxa*mxb*mxc+1];if(lb_dip==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb_dip[i]=NULL;
   d = new Vector * [mxa*mxb*mxc+1]; if(d==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)d[i]=NULL;
   nt= new IntVector * [mxa*mxb*mxc+1];if(nt==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i){nt[i]=new IntVector(1,nofatoms);}
   eigenstates= new ComplexMatrix * [mxa*mxb*mxc*(nofatoms+1)+1]; if(eigenstates==NULL)errexit();
                            for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i)eigenstates[i]=NULL;       
-  Ug=0; gU=0; bUg=0; bgU=0;
+  Ug=0; gU=0; bUg=0; bgU=0; PUg=0; PgU=0;
 }
 
 //kopier-konstruktor
@@ -194,8 +206,10 @@ mdcf::mdcf (const mdcf & p)
   m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
   l = new ComplexMatrix * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
   sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
+  dps = new ComplexVector * [mxa*mxb*mxc+1];if(dps==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dps[i]=NULL;
   dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
   dmq_dips = new ComplexVector * [mxa*mxb*mxc+1];if(dmq_dips==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmq_dips[i]=NULL;
+  Pb = new ComplexVector * [mxa*mxb*mxc+1];if(Pb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)Pb[i]=NULL;
   lb = new ComplexVector * [mxa*mxb*mxc+1];if(lb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb[i]=NULL;
   lb_dip = new ComplexVector * [mxa*mxb*mxc+1];if(lb_dip==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)lb_dip[i]=NULL;
   d = new Vector * [mxa*mxb*mxc+1]; if(d==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)d[i]=NULL;
@@ -213,8 +227,10 @@ mdcf::mdcf (const mdcf & p)
       m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*m[id]=*p.m[id];
       l[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*l[id]=*p.l[id];
       sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*sb[id]=*p.sb[id];// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
+      dps[id]= new ComplexVector(1,1*sum((*nt[id])));*dps[id]=*p.dps[id];
       dmqs[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmqs[id]=*p.dmqs[id];
       dmq_dips[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmq_dips[id]=*p.dmq_dips[id];
+      Pb[id]= new ComplexVector(1,1*sum((*nt[id])));*Pb[id]=*p.Pb[id];
       lb[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*lb[id]=*p.lb[id];
       lb_dip[id]= new ComplexVector(1,mqdim*sum((*nt[id]))); *lb_dip[id]=*p.lb_dip[id];
       d[id]= new Vector(1,sum((*nt[id])),1,sum((*nt[id])));*d[id]=*p.d[id];
@@ -223,7 +239,7 @@ mdcf::mdcf (const mdcf & p)
     }
   }           
 
-  Ug=0; gU=0; bUg=0; bgU=0;
+  Ug=0; gU=0; bUg=0; bgU=0;PUg=0; PgU=0;
 } 
 //destruktor
 mdcf::~mdcf ()
@@ -233,8 +249,10 @@ mdcf::~mdcf ()
  if(m[i]!=NULL)delete m[i];
  if(l[i]!=NULL)delete l[i];
  if(sb[i]!=NULL)delete sb[i];
+ if(dps[i]!=NULL)delete dps[i];
  if(dmqs[i]!=NULL)delete dmqs[i];
  if(dmq_dips[i]!=NULL)delete dmq_dips[i];
+ if(Pb[i]!=NULL)delete Pb[i];
  if(lb[i]!=NULL)delete lb[i];
  if(lb_dip[i]!=NULL)delete lb_dip[i];
  if(d[i]!=NULL)delete d[i];
@@ -248,19 +266,27 @@ mdcf::~mdcf ()
  if(gU!=0){if(gU[id]!=0) delete gU[id]; }
  if(bUg!=0){if(bUg[id]!=0) delete bUg[id]; }
  if(bgU!=0){if(bgU[id]!=0) delete bgU[id];}
+ if(PUg!=0){if(PUg[id]!=0) delete PUg[id]; }
+ if(PgU!=0){if(PgU[id]!=0) delete PgU[id];}
  }}}
  delete []s;
  delete []m;
  delete []l;
  delete []sb;
+ delete []dps;
  delete []dmqs;
  delete []dmq_dips;
+ delete []Pb;
  delete []lb;
  delete []lb_dip;
  delete []d;
  for(i=0;i<=mxa*mxb*mxc;++i){delete nt[i];}
  delete []nt;
  delete []eigenstates;
- if(Ug!=0) { delete []Ug; Ug=0; } if(bUg!=0) { delete []bUg; bUg=0; }
- if(gU!=0) { delete []gU; gU=0; } if(bgU!=0) { delete []bgU; bgU=0; }
+ if(Ug!=0) { delete []Ug; Ug=0; } 
+ if(gU!=0) { delete []gU; gU=0; } 
+ if(bUg!=0) { delete []bUg; bUg=0; }
+ if(bgU!=0) { delete []bgU; bgU=0; }
+ if(PUg!=0) { delete []PUg; PUg=0; }
+ if(PgU!=0) { delete []PgU; PgU=0; }
 }

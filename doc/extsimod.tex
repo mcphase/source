@@ -386,6 +386,8 @@ int dmq1		& & {\prg mcdisp} &  $\langle-|\hat \mbf M(\mbf Q)|+\rangle\sqrt{(p_--
 \hline
 int drixs1 & & {\prg mcdisp} & RIXS transition operator $\hat \mbf R$,eq. (\ref{rixsop})\\
 \hline
+int dP1 & & {\prg mcdisp} & phonon displacement (\AA) $\langle-|\hat \mbf P|+\rangle=\frac{\hbar}{\sqrt{2m\Delta}}$\\
+\hline
 void chargedensity\_coeff  & {\prg densplt -c}&&coeff of $-|e|Z_l^m(\Omega)R^2(r)$ in equ.(\ref{chargedensity2})\\
 &{\prg spins -c} & & i.e. $\langle\sum_i Z_l^m(\Omega_i)\rangle$\\
                         &{\prg display\_density -c}&&\\
@@ -1169,6 +1171,94 @@ In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--
 \item if $T<0$ all quantities should be evaluated assuming that all Boltzmann probabilities $p_i$
  are zero except for the state number $n=(-T)$, for which the probability $p_n=1$.
 \end{enumerate}
+
+
+%*************************************************************************************
+
+\subsubsection{External module function {\prg dP1} - used by {\prg mcdisp\index{mcdisp}}}
+
+In order to calculate neutron intensities for phonon scattering
+the external single ion module has to provide the transition matrix elements of
+ the phonon displacement $p_{\alpha}$ in units of \AA, which is usually given by:
+$\langle-|\hat \mbf P_{\alpha}|+\rangle=\frac{\hbar}{\sqrt{2m\Delta_{\alpha}}}$,
+with $\alpha=1,2,3$ for the different spatial directions and $m$ is the mass of the
+oscillating atom. 
+
+Note, that in this
+expression the sum over the different equally spaced phonon levels (of the harmonic oscillator)
+in the single ion susceptibility is already done. If the levels are not equally spaced, such
+as by interaction with other degrees of freedom, one has to take into account each transition
+separately by the expression
+${\rm P1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|P^s_{\alpha}-\langle P^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
+
+The format to be used is:
+{\footnotesize
+\begin{verbatim}
+extern "C" int dP1(int & tn,double & T,Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR,
+char ** sipffilename,ComplexVector & p1,float & maxE, ComplexMatrix & est)
+\end{verbatim}
+
+The meaning of the symbols is as follows:
+
+\begin{verbatim}
+on input
+   |tn|            transition-number  
+   sign(tn)        >0 standard, <0 routine should do some printout to stdout for user information
+   MODPAR          Vector with Parameters  read in single ion property file
+   sipffilename    file name of the single ion parameter file
+   g_J             Lande factor
+   T               Temperature[K]
+   Hxc             vector of exchange field [meV] (can be n-dimensional, for a set of n operators)
+   Hext            external magnetic field [T]
+   est             eigenstate matrix (initialized by estates)
+                   it should/may also contain population numbers of the states
+				   (imaginary part of row 0)
+                   and eigenvalues (real part of row 0) with values set by the most recent call
+				   for this ion (use of this matrix is optional)
+   u1(1)           ninit + i pinit (from mcdisp options  -ninit and -pinit)
+   maxE            upper boundary for transition energy (meV) to be considered
+                   (from mcdisp option -maxE)
+on output
+   int             total number of transitions (normally =3 for the unperturbed 
+                   atomic Einstein oscillator in three 
+                   independent spatial directions, but may be larger if
+                   coupling of phonons to other degrees of freedom such as CEF
+                   is treated on a quantum mechanical level in the module)                   
+   P1              transition matrix element vector of the phonon displacement
+                   for an Einstein oscillator p1=hbar/sqrt(2m hbar Delta), 
+                   or more general if phonon levels are not equally spaced:
+                    P1=<-|P-<P>|+>sqrt((p- - p+))                                           
+\end{verbatim}
+}
+The module function must perform the following tasks:
+\begin{enumerate}
+\item check if the dimensions of vector Hxc (taken by {\prg mcphas} from the number of 
+interaction constant columns in {\prg mcphas.j\index{mcphas.j}})
+ and MODPAR (taken by {\prg mcphas} from the number of params in the single ion property
+file) agree with the module specifications. If the check fails the module function should exit the
+program with an appropriate error message
+\item the module function should do a numbering of all possible single ion transitions and return
+the total number of transitions as an integer. Input file parameters params are supplied as a vector MODPAR and
+Lande factor as g\_J and  can be used for this purpose. The numbering will depend on
+the parameters ninit, pinit and maxE which are provided as input. These parameters
+have to be considered. {\em IMPORTANT: the numbering scheme of transitions has to
+be the same for du1calc and all the corresponding d...1 functions for observables !}
+\item for the transition number tn the vector p1 is to
+ be filled with the displacement transition matrix elements (\AA)
+ $\langle-|\hat \mbf P_{\alpha}|+\rangle=\frac{\hbar}{\sqrt{2m\Delta_{\alpha}}}$ (equally spaced
+Einstein oscillator)
+or more general
+${\mbf P1^s_{\alpha}}=\sqrt{(p_--p_+)}\langle -|P^s_{\alpha}-\langle P^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
+\item
+If the energy of this transition
+is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
+the above expression  would be zero because $(p_--p_+)$ vanishes.
+In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--p_+)$.
+\item if $T<0$ all quantities should be evaluated assuming that all Boltzmann probabilities $p_i$
+ are zero except for the state number $n=(-T)$, for which the probability $p_n=1$.
+\end{enumerate}
+ 
+
 
 %*************************************************************************************
 \subsubsection{External module function {\prg chargedensity\_coeff} -

@@ -76,7 +76,7 @@ endif
 # uncomment next line and set NUM_THREADS in mcphas_htcalc.c and mcdisp.c
 # according to your machine if you want to use multiple processing to speed up
 # calculations
-threads=1
+ threads=1
 # 
 #ifdef threads
 THREADFLAG=-D_THREADS

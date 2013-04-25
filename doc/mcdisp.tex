@@ -165,6 +165,20 @@ described in section~\ref{displaydensities}.
 #            7....Hc[T]     
 #            8....|Q|[1/A]  
 #
+# optional switch outS for control of the output of the magnetic scattering function in results/mcdisp.qei
+#! outS=3
+# .. valid values are
+# 0: not output of Salphabeta
+# 1: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=x,y,z
+# 2: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=x,y,z
+# 3: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=u,v,w
+# 4: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=u,v,w
+# xyz coordinate refer to y||b, z||(a x b) and x normal to y and z
+# uvw coordinates refer to u||-Q, w perpendicular to the scattering plane
+#     (as determined by the cross product of subsequent vectors in the input
+#     q-vector list) and v perpendicular to u and w
+#
+#
 # Commands such as the following are used to generate a hkl list (to activate put #! instead of # at beginning of line):
 #
 # - a Q vector mesh to be mapped in the calculation it can be in Miller indices
@@ -1300,11 +1314,11 @@ H=0 and T=1.5~K [plot created by program
 }\label{animationAF1}
 \end{figure}
 
-\subsection{Application to Neutron scattering from Interacting Magnetic Ions}
+\subsection{Application to Neutron scattering}
 \label{neutronformalism}
 
-We now apply the theory outlined above to the inelastic scattering of neutrons by electrons of magnetic ions
-in a crystalline solid. The observable measured here is the
+We now apply the theory outlined above to the inelastic scattering of neutrons 
+in a crystalline solid. The observables measured here are the atomic displacement (for phonons) and the
 Fourier transform of the magnetisation (=magnetic moment density) operator of a magnetic ion ($\hat \mbf M(\mbf Q)$).
 The magnetisation operator consists of a spin and an orbital contribution and thus
 its Fourier transform may be written as a sum $\hat \mbf M(\mbf Q)=\hat \mbf M_S(\mbf Q)+\hat \mbf M_L(\mbf Q)$.
@@ -1324,22 +1338,21 @@ Here $m_n$ is the neutron mass, $\mbf k$ and $\mbf k'$ the incoming and scattere
  $|s_n'\rangle$ the spin state of the incoming and scattered neutron, $P_{s_n}$ the polarisation of the incoming neutron
 beam (i.e. the probability for the neutron spin state $|s_n>$ in the incoming neutron beam). $|i\rangle$ and $|f\rangle$ denote
 the initial and final states of the target, $E_i$ and $E_f$ the corresponding energies, $P_i$ the population number
-of the target state $|i\rangle$. Finally $H_{int}(\mbf Q)$ is the interaction operator which consists of spin dependent
+of the target state $|i\rangle$. Finally $H_{int}(\mbf Q)$ is the interaction operator which consists of neutron spin dependent
 and spin independent parts
 
 \begin{equation}
-H_{int}(\mbf Q)=\hat \beta (\mbf Q) + \hat {\mbf s}_n \cdot \hat {\mbf \alpha} (\mbf Q)
+H_{int}(\mbf Q)=\hat \beta (\mbf Q) + \hat {\mbf s}_n \cdot \hat {\bm \alpha} (\mbf Q)
 \end{equation}
 
-Here $\hat \beta$ contains the nuclear spin independent scattering and $\hat \alpha$ the nuclear spin dependent
+Here $\hat \beta$ contains the nuclear spin independent scattering and $\hat {\bm \alpha}$ the nuclear spin dependent
 and the electronic magnetic scattering operators.
 The accurate evaluation of (\ref{masterequ}) involves the computation of terms $\hat \beta^{\dagger} \dots \hat \beta$ (nuclear scattering, phonons),
 $\hat \alpha^{\dagger} \dots \hat \alpha$ (electronic magnetic scattering and nuclear magnetic scattering) 
 and mixed terms $\alpha^{\dagger} \dots \beta$ (interference terms, not included in mcdisp currently, maybe nonzero only for
-polarized beams).  We do not take into account any un
-
-
-The general expression for the double differential scattering cross section 
+polarized beams).  We do not take into account any preferred occupancy of nuclear spin states in the sample, either.
+Then the neutron intensity may be separated into nuclear (phonon) and magnetic intensity.
+The corresponding expression for the double differential scattering cross section 
 for unpolarised neutrons has been given frequently in literature (see e.g. \cite{lovesey84-1}):
 
 %\begin{eqnarray}
@@ -1352,29 +1365,92 @@ for unpolarised neutrons has been given frequently in literature (see e.g. \cite
 %\end{eqnarray}
 
 %[BETTER USE THE FOLLOWING]
-\begin{eqnarray}\label{dsdoderepeated}
-\frac{d^2\sigma}{d\Omega dE'}&=&N\frac{k'}{k}\left( \frac{ \gamma r_0}{2 \mu_B}  \right)^2
+%\begin{eqnarray}\label{dsdoderepeated}
+%\frac{d^2\sigma}{d\Omega dE'}&=&N\frac{k'}{k}\left( \frac{ \gamma r_0}{2 \mu_B}  \right)^2
 %\sum_{\mbf Q} \delta_{\vec\kappa,\mbf Q}
-\sum_{\alpha\beta=1,2,3}(\delta_{\alpha\beta}- \frac{Q_{\alpha} Q_{\beta}}{|\mbf Q|^2}) 
-S^{\alpha \beta}_{\rm mag}(\mbf Q,\omega)+
-N\frac{k'}{k}S_{\rm nuc}(\mbf Q,\omega) \nonumber \\
+%\sum_{\alpha\beta=1,2,3}(\delta_{\alpha\beta}- \frac{Q_{\alpha} Q_{\beta}}{|\mbf Q|^2}) 
+%S^{\alpha \beta}_{\rm mag}(\mbf Q,\omega)+
+%N\frac{k'}{k}S_{\rm nuc}(\mbf Q,\omega) \nonumber \\
+%S_{\rm mag}&=&S_{\rm mag}^{\rm el}+S_{\rm mag}^{\rm inel} \label{smag} 
+%\end{eqnarray}
+
+\begin{eqnarray}\label{dsdoderepeated}
+\frac{d^2\sigma}{d\Omega dE'}&=&
+N\frac{k'}{k}S_{\rm nuc}(\mbf Q,\omega) +
+N\frac{k'}{k} \sum_{\alpha\beta=1,2,3} S^{\alpha \beta}_{\rm mag}(\mbf Q,\omega) \nonumber \\
+S_{\rm nuc}&=&S_{\rm nuc}^{\rm el}+S_{\rm nuc}^{\rm inel} \label{snuc} \\ 
 S_{\rm mag}&=&S_{\rm mag}^{\rm el}+S_{\rm mag}^{\rm inel} \label{smag} 
 \end{eqnarray}
 
 
 In (\ref{dsdoderepeated}) $N$ denotes the number of magnetic atoms in the sample, $\mbf k$ and $\mbf k'$ the wave vector %%@
 of the incoming and scattered neutron, respectively.
-The total magnetic cross section is $4\pi (\gamma r_0)^2=4\pi\left(\frac{\hbar \gamma e^2}{mc^2}\right)^2
-=3.65$~barn. 
 $\hbar \omega=E-E'$  and
 $\mbf Q =\mbf k-\mbf k'$  denote the energy and momentum transfer.
 The van Hove scattering functions $S_{\rm mag}$ and $S_{\rm nuc}$ may be split into an elastic and an inelastic part. We %%@
-will discuss here only the inelastic magnetic scattering 
-function\footnote{
-the coherent inelastic nuclear scattering may be treated in a similar way by associating
-the observable $\mathcal O$ with $\mathcal O \leftrightarrow b e^{i\mbf Q \mbf u}$,
-where $b$ denotes the nuclear coherent scattering length.
-}, which is given by
+will discuss here only the inelastic scattering. 
+
+\subsubsection{Coherent Nuclear Inelastic Scattering - 1 Phonon processes}
+
+The coherent inelastic nuclear scattering (by phonons) is given by
+
+\begin{eqnarray}\label{Snucinel}
+S_{\rm nuc}^{\rm inel}(\mbf Q,\omega)&=&
+\frac{1}{2\pi\hbar}\int_{-\infty}^{+\infty}dt e^{i\omega t}
+\frac{1}{N}\sum_{nn'} b_n b_{n'} e^{-W_n(Q)- W_{n'}(Q)}\\
+&\times&  e^{-i\mbf Q \cdot (\mbf R_n-\mbf R_{n'})}  
+ (\langle  \mbf Q \cdot \hat {\mbf u}^{n}(t)  {\mbf Q} \cdot \hat{\mbf u}^{n'}(0) \rangle_{T,H}
+\nonumber
+\end{eqnarray}
+
+ - here $b$ denotes the nuclear coherent scattering length and $\hat {\mbf u}$ the 
+displacement. 
+If we split the index $n$ into basis and 
+lattice part $n=(\Bell,s)$ and 
+compare equation~(\ref{sigmass}), we see that %%@
+the nucler scattering function depends on the correlation function between the inner product of
+scattering vector and displacement operator
+$\mbf Q \cdot \hat \mbf u$, which is the observable in the case of coherent nuclear inelastic neutron scattering 
+($\mathcal O \leftrightarrow b_s   e^{-W_s(Q)} \mbf Q \cdot\hat \mbf u^s$).
+
+%may be treated by associating
+%the observable $\mathcal O$ with $\mathcal O \leftrightarrow b e^{i\mbf Q \mbf u}$,
+%, which is given by
+
+\begin{eqnarray}
+S_{\rm nuc}^{\rm inel}(\mbf Q,\omega)&=&\sum_{ss'} 
+\frac{\hili{\Sigma^{ss'}}({\mbf Q},\omega)}{2\pi \hbar N_b} 
+\end{eqnarray}
+
+ $W_s(Q)$ is  the Debye-Waller
+factor of the atom number $s$ in the  unit cell.
+$N_b$ denotes the number of magnetic
+atoms in the magnetic unit cell.
+Therefore, if the generalised eigenvalue problem (\ref{evproblem}) for the dynamical matrix
+has been solved, the nuclear neutron scattering function can
+be  evaluated with the help of equations (\ref{fluctdissbeyond}) and (\ref{Xcalc}):
+
+\begin{eqnarray}\label{sinelnucfinal}
+S_{\rm nuc}^{\rm inel}(\mbf Q,\omega)&=&
+\sum_{r,ss'}  
+\frac{(\sqrt{\Gamma_{\rm nuc}^s(\mbf Q)})^\ast\sqrt{\Gamma_{\rm nuc}^{s'}(\mbf Q)}}
+{N_b(1-e^{-\hbar\hili{\omega^r}(\mbf Q)/kT})} \times \\ \nonumber
+&& \times \mathcal V^s_{{\rm nuc},\alpha1}(\mbf Q)
+\hili{ \mathcal T^{sr}}(\mbf Q)\hbar \hili{\omega^r}(\mbf Q)
+ \delta(\hbar \hili{\omega^r}(\mbf Q) - 
+\hbar \omega) \hili{\mathcal T^{rs'\dag}}(\mbf Q) 
+\mathcal V^{s'\dag}_{{\rm nuc},1\beta}(\mbf Q)
+\end{eqnarray}
+
+Once the eigenvectors \hili{$\M{\mathcal T}$} of the system have been determined, this expression can be 
+ evaluated. {\prg mcdisp} evaluates for every mode the expression (\ref{sinelnucfinal}) with exception
+of the $\delta$-function and multiplies it by $k'/k$ in order to get the nuclear Intensity $I_{\rm nuc}$ in
+barns/meV formula unit.
+
+\subsubsection{Magnetic inelastic Scattering}
+
+Similar, the magnetic inelastic scattering is given by
+
 
 %\begin{eqnarray}
 %S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\frac{1}{2\pi\hbar}\int_{-\infty}^{+\infty}dt e^{i\omega t}
@@ -1386,12 +1462,16 @@ where $b$ denotes the nuclear coherent scattering length.
 %[BETTER USE THE FOLLOWING]
 
 \begin{eqnarray}\label{Sinel}
-S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\frac{1}{2\pi\hbar}\int_{-\infty}^{+\infty}dt e^{i\omega t}
-\frac{1}{N}\sum_{nn'} e^{-W_n(Q)- W_{n'}(Q)} e^{-i\mbf Q \cdot (\mbf R_n-\mbf R_{n'})}  \\
-&\times& (\langle \hat M_{\alpha}^{n \dag}(t,\mbf Q)  \hat M_{\beta}^{n'}(0,\mbf Q) \rangle_{T,H}
+S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\left( \frac{ \gamma r_0}{2 \mu_B}  \right)^2
+(\delta_{\alpha\beta}- \frac{Q_{\alpha} Q_{\beta}}{|\mbf Q|^2}) 
+\frac{1}{2\pi\hbar}\int_{-\infty}^{+\infty}dt e^{i\omega t}
+\frac{1}{N}\sum_{nn'} e^{-W_n(Q)- W_{n'}(Q)}\\
+&\times&  e^{-i\mbf Q \cdot (\mbf R_n-\mbf R_{n'})}   (\langle \hat M_{\alpha}^{n \dag}(t,\mbf Q)  \hat M_{\beta}^{n'}(0,\mbf Q) \rangle_{T,H}
 - \langle \hat M^{n \dag}_{\alpha}(\mbf Q)\rangle_{T,H} \langle \hat M^{n'}_{\beta}(\mbf Q) \rangle_{T,H})\nonumber
 \end{eqnarray}
 
+The total magnetic cross section is $4\pi (\gamma r_0)^2=4\pi\left(\frac{\hbar \gamma e^2}{mc^2}\right)^2
+=3.65$~barn. 
 In (\ref{Sinel}) the first term in the bracket corresponds to the total and the second term to the elastic
 scattering.
 If we split the index $n$ into basis and 
@@ -1399,11 +1479,12 @@ lattice part $n=(\Bell,s)$ and
 compare equation~(\ref{sigmass}), we see that %%@
 the scattering function depends on the correlation function between the magnetisation operator
 $\hat \mbf M(\mbf Q)$, which is the observable in the case of magnetic neutron scattering 
-($\mathcal O \leftrightarrow \hat \mbf M(\mbf Q)$).
+($\mathcal O \leftrightarrow \frac{ \gamma r_0}{2 \mu_B}  e^{-W(Q)} \hat \mbf M_{\perp}(\mbf Q)$).
 
 \begin{equation}\label{sinelmag}
 S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)=
-\sum_{ss'}  e^{-W_s(Q)- W_{s'}(Q)} \frac{\hili{\Sigma^{ss'}_{\alpha\beta}}({\mbf Q},\omega)}{2\pi \hbar N_b} 
+\sum_{ss'} 
+  \frac{\hili{\Sigma^{ss'}_{\alpha\beta}}({\mbf Q},\omega)}{2\pi \hbar N_b} 
 \end{equation}
 
  $W_s(Q)$ is  the Debye-Waller
@@ -1419,17 +1500,28 @@ be  evaluated with the help of equations (\ref{fluctdissbeyond}) and (\ref{Xcalc
 \begin{eqnarray}\label{sinelmagfinal}
 S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&
 \sum_{r,ss'}  
-\frac{(\sqrt{\Gamma^s(\mbf Q)})^\ast\sqrt{\Gamma^{s'}(\mbf Q)} 
-e^{-W_s(Q)- W_{s'}(Q)}}{N_b(1-e^{-\hbar\hili{\omega^r}(\mbf Q)/kT})} \times \\ \nonumber
-&& \times \mathcal V^s_{\alpha1}(\mbf Q)
+\frac{(\sqrt{\Gamma_{\rm mag}^s(\mbf Q)})^\ast\sqrt{\Gamma_{\rm mag}^{s'}(\mbf Q)} }
+{N_b(1-e^{-\hbar\hili{\omega^r}(\mbf Q)/kT})} \times \\ \nonumber
+&& \times \mathcal V^s_{{\rm mag},\alpha1}(\mbf Q)
 \hili{ \mathcal T^{sr}}(\mbf Q)\hbar \hili{\omega^r}(\mbf Q)
  \delta(\hbar \hili{\omega^r}(\mbf Q) - 
 \hbar \omega) \hili{\mathcal T^{rs'\dag}}(\mbf Q) 
-\mathcal V^{s'\dag}_{1\beta}(\mbf Q)
+\mathcal V^{s'\dag}_{{\rm mag},1\beta}(\mbf Q)
 \end{eqnarray}
 
 Once the eigenvectors \hili{$\M{\mathcal T}$} of the system have been determined, this expression can be 
  evaluated. 
+{\prg mcdisp} evaluates for every mode the expression (\ref{sinelmagfinal}) with exception
+of the $\delta$-function and multiplies it by $k'/k$ in order to get the nuclear Intensity $I_{\rm nuc}$ in
+barns/meV formula unit. In addition, the components of the magnetic scattering function
+$S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)$ can be output (to be used to interpret
+polarised magnetic neutron scattering).$\alpha,\beta$ then refer to either the xyz coordinate system
+($y||b$,$z||(a \times b)$ and $x$ perpendicular to $y$ and $z$)
+or the uvw coordinate system 
+($u||-Q$,$w$ perpendicular to the scattering plane (as determined by the cross product of
+subsequent vectors in the input q-vector list of {\prg mcdisp})
+ and $v$ perpendicular to $u$ and $w$).
+
 Form factor effects on the scattering intensity are
  due to the $\mbf Q$-dependence of the magnetisation operator, which means that
 the transformation matrices \hili{$\m{\mathcal V}^s$}

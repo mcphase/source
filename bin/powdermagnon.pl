@@ -43,13 +43,10 @@ print "... then run mcdisp\n";
 print "\n";
 
 print ".... then restart powdermagnon by: powdermagnon -r results/mcdisp.qei 0.5 30 0.2 \n";
-
+print " binning Parameters:\n";
 print " 0.5 ....Emin   [meV] minimal energy\n";
-
 print " 30  ....Emax   [meV] maximal energy\n";
-
-print " 0.5 ....deltaE [meV] energy stepwidth\n";
-
+print " 0.2 ....deltaE [meV] energy stepwidth\n";
 print " The powder average is generated - output is printed to the console (STDOUT)\n";
 
  exit 0;}
@@ -62,80 +59,51 @@ my ($qmax) =eval $ARGV[1];
 
 
 
-if($qmin=="-r")
-
+if($ARGV[0]=="-r")
 {#read output file mcdisp.qei and create powder average 
-
- print "#Emin=".$Emin." meV   Emax=".$Emax." meV deltaE=".$deltaE." meV\n";
-
- print "#Ha[T] Hb[T] Hc[T] T[K] Q[A^-1] energy[meV] powderintensity [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n";
-
     my $h = new FileHandle;
-
-    open($h,$qmax);
-
-
+    open($h,$ARGV[1]);
 $ARGV[2]=~s/exp/essp/g;$ARGV[2]=~s/x/*/g;$ARGV[2]=~s/essp/exp/g;
 my ($Emin) = eval $ARGV[2];
 $ARGV[3]=~s/exp/essp/g;$ARGV[3]=~s/x/*/g;$ARGV[3]=~s/essp/exp/g;
 my ($Emax) = eval $ARGV[3];
 $ARGV[4]=~s/exp/essp/g;$ARGV[4]=~s/x/*/g;$ARGV[4]=~s/essp/exp/g;
 my ($deltaE) = eval $ARGV[4];
+print "#Emin=".$Emin." meV   Emax=".$Emax." meV deltaE=".$deltaE." meV\n";
+print "#Ha[T] Hb[T] Hc[T] T[K] Q[A^-1] energy[meV] powderintensity [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n";
 
 $n=int(($Emax-$Emin)/$deltaE);
 
 my (@ints)=();$#ints=$n;
 my (@intsbey)=();$#intsbey=$n;
 
-
-
 $qold=0;$counter=1;
-
 $qhold=0;$qkold=0;$qlold=0;
 
 while(<$h>)
-
  {next if /^\s*#/;
-
   $line=$_;
-
   $line=~s/D/E/g;@numbers=split(" ",$line);
-
   $q=$numbers[7];
-
   if($q!=$qold&&$qold!=0){
-
      for($i=0;$i<=$n;++$i){
-
      $E=$Emin+($i-0.5)*$deltaE;$ints[$i]/=$counter;$intsbey[$i]/=$counter;
-
      print $numbers1[0]." ".$numbers1[1]." ".$numbers1[2]." ".$numbers1[3]." ";
-
      print $qold." ".$E." ".$ints[$i]." ".$intsbey[$i]."\n";}
-
      $counter=0;@ints=0;@intsbey=0;
-
                }
-
   if($numbers[8]<=$Emax&&$numbers[8]>=$Emin)
   {  $i=int(($numbers[8]-$Emin)/$deltaE);
      $ints[$i]+=$numbers[9];
      $intsbey[$i]+=$numbers[10];
   }
   $qold=$q;
-
   $qh=$numbers[4];
-
   $qk=$numbers[5];
-
   $ql=$numbers[6];
-
   if($qh!=$qhold||$qk!=$qkold||$ql!=$qlold){++$counter;}
-
   $qhold=$qh;
-
   $qkold=$qk;
-
   $qlold=$ql;
   @numbers1=@numbers;
  }
