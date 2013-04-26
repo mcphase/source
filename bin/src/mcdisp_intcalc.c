@@ -460,9 +460,9 @@ else
   intensityP*=kf/ini.ki;
  }
 }
-} // if calc_rixs
+               } // if calc_rixs
 #ifdef _THREADS
-//printf("intcalc: %i %g :",thread_id,intensity);
+//printf("intcalc: %i %g :",thread_id,intensitybey);
 myinput->intensity=intensity;
 myinput->intensitybey=intensitybey;
 myinput->intensityP=intensityP;

@@ -5,7 +5,7 @@
  * reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
  *            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400
  ***********************************************************************/
- 
+  
 
 #include <mcdisp.h>
 #include "../../version"
@@ -1065,7 +1065,7 @@ if (do_jqfile==1){
                         if(do_gobeyond==0) intsbey(i)=-1.1; else intsbey(i)=+1.1;
                       if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                       {if(do_verbose)printf("calling thread %i ",num_threads_started);
-                       tin[num_threads_started]->En=En(i); tin[num_threads_started]->intensitybey=intsbey(i);tin[num_threads_started]->intensitybey=intsP(i); 
+                       tin[num_threads_started]->En=En(i); tin[num_threads_started]->intensitybey=intsbey(i);tin[num_threads_started]->intensityP=intsP(i); 
                        tin[num_threads_started]->level = i;
                         #if defined  (__linux__) || defined (__APPLE__)
                         rc = pthread_create(&threads[num_threads_started], &attr, intcalc_approx, (void *) tin[num_threads_started]);
@@ -1210,7 +1210,7 @@ if (do_jqfile==1){
                       }
 	             
 
-                     if(intsbey(i)<0)intsbey(i)=-1;
+                     //if(intsbey(i)<0)intsbey(i)=-1.2;
                       fprintf (foutqom, " %4.4g",myround(intsbey(i)));
                       ini.print_usrdefcols(foutqei,qijk,qincr);
                       fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g  ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
