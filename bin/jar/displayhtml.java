@@ -40,7 +40,8 @@ public class displayhtml extends JFrame implements HyperlinkListener {
 	public static void main(String[] args) {
 		if (args.length<1) {
 			System.out.println("- too few arguments...\n");
-			System.out.println("  program displayhtml - show html file by viewing a editorpane on screen\n\n");
+			System.out.println("  program displayhtml - show html file by viewing a editorpane on screen\n");
+			System.out.println("                        NOTE: html-file will be automatically reloaded when it is changed\n\n");
 			System.out.println("use as:  displayhtml <options> filename\n\n");
 			System.out.println("         filename ..... filename of html-file (for online-files, please");
 			System.out.println("                        don't forget to set \"http://\" before starting program)\n\n");

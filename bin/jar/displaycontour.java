@@ -87,6 +87,7 @@ public class displaycontour extends JApplet {
  static boolean makeImg = false;
  static boolean closeImg = false;
  static String imgFile;
+ static boolean png = false;
  
  // %#* Edited by Nikolai
  static String xtex="x-col";
@@ -179,7 +180,8 @@ public class displaycontour extends JApplet {
   public static void main(String[] args) throws java.beans.PropertyVetoException {
   if (args.length<2)
   {System.out.println("- too few arguments...\n");
-    System.out.println("  program displaycontour - show data file by viewing a contour/color graphic on screen\n\n");
+    System.out.println("  program displaycontour - show data file by viewing a contour/color graphic on screen\n");
+    System.out.println("                           NOTE: data file will be automatically reloaded when it is changed\n\n");
     System.out.println("use as:  displaycontour <options> xcol ycol zcol filename\n\n");
     System.out.println("         xcol,ycol,zcol ... column to be taken as x- and y-axis and color-axis\n");
     System.out.println("         filename ..... filename of datafile\n\n");
@@ -188,7 +190,8 @@ public class displaycontour extends JApplet {
     System.out.println("         -xtitle <value> ..... sets the title of display x-axis");
     System.out.println("	                           (similar options: -ytitle, -ztitle).\n");
     System.out.println("         -c <filename> ..... creates image of display and closes immediately\n");
-    System.out.println("         -o <filename> ..... creates image of display on closing\n\n");
+    System.out.println("         -o <filename> ..... creates image of display on closing\n");
+    System.out.println("         -png ..... created image will be in png-format instead of jpg-format\n\n");
   System.exit(0);
   }
   
@@ -331,6 +334,9 @@ public class displaycontour extends JApplet {
 		imgFile = args[k + 1];
 		++k;
 	}
+	if (args[k].equalsIgnoreCase("-png")) {
+		png = true;
+	}
 	++k;
  }
  file[j]=args[k+3];
@@ -441,6 +447,7 @@ public class displaycontour extends JApplet {
      ++ii;
     }
 	sc.close();
+	System.out.println(ii + " " + jj);
  }
     catch (FileNotFoundException e)
     {
@@ -470,6 +477,8 @@ public class displaycontour extends JApplet {
         for(count=0; count < ii; count++) {
       values[count] = vv[count];
     }
+	
+	frame.setTitle(title);
 	
     rpl_ = gd.makeGraph(values,axis1,axis2,xmin,ymin,xmax,ymax);
 	return rpl_;
@@ -757,7 +766,7 @@ public class displaycontour extends JApplet {
 		BufferedImage buff = componentToImage(frame.getContentPane().getComponent(0), null);
 		File f = new File(fileName);
 		if (buff == null) System.out.println("Image is null");
-		ImageIO.write(buff, "jpg", f);
+		ImageIO.write(buff, ((png) ? "jpg" : "png"), f);
 	} catch(Exception e) {
 		System.out.println("Coudn't write Image. ERROR: " + e);
 	}
@@ -810,10 +819,13 @@ public class displaycontour extends JApplet {
 						}
 						fileIni = null;
 						rpl_ = reloadAll(Params, gd);
+						rpl_.setBatch(true);
 						((JPanel)frame.getContentPane().getComponent(0)).add(rpl_, BorderLayout.CENTER);
 						//frame.repaint();
 						frame.setVisible(false);
 						frame.setVisible(true);
+						rpl_.setBatch(false);
+						rpl_.repaint();
 					}
 				}
 				catch (IndexOutOfBoundsException e) {

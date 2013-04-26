@@ -346,7 +346,8 @@ public class displaytext extends JPanel implements FileListener {
       String s;String ss;
       if (args.length<1)
        {System.out.println("- too few arguments...\n");
-        System.out.println("  program displaytext - show and watch text file by viewing a text box on screen\n\n");
+        System.out.println("  program displaytext - show and watch text file by viewing a text box on screen\n");
+		System.out.println("                        NOTE: file will be automatically reloaded when it is changed\n\n");
         System.out.println("use as:  displaytext [options] filename\n\n");
         System.out.println("	 filename ..... filename of textfile\n");
         System.out.println("	 option -w 100 ..... width of display\n");
