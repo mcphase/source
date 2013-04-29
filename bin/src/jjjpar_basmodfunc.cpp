@@ -34,12 +34,11 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
    }
    //ic1ion entered without path ?
       if (strncmp(modulefilename,"ic1ion",6)==0)
-      {strcpy(modulefilename,getenv("MCPHASE_DIR"));
-    //   strcat(modulefilename,"\\bin\\ic1ion_module\\ic1ion.so");
-       strcat(modulefilename,"/bin/ic1ion_module/ic1ion.so");
-}
-      if (strncmp(modulefilename,"icf1ion",6)==0)
+      {strcpy(modulefilename,getenv("MCPHASE_DIR"));strcat(modulefilename,"/bin/ic1ion_module/ic1ion.so");}
+      if (strncmp(modulefilename,"icf1ion",7)==0)
       {strcpy(modulefilename,getenv("MCPHASE_DIR")); strcat(modulefilename,"/bin/ic1ion_module/icf1ion.so"); }
+      if (strncmp(modulefilename,"phonon",6)==0)
+      {strcpy(modulefilename,getenv("MCPHASE_DIR")); strcat(modulefilename,"/bin/phonon_module/phonon.so"); }
 
   fprintf (stderr,"#parsing single ion property file: %s - loading module %s\n",sipf_filename,modulefilename);
 
