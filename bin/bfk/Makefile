@@ -22,7 +22,7 @@ all :  ../bfk$(EXE) ../chibfk$(EXE)
 ../bfk$(EXE): bfk.f95
 	gfortran -static -o ../bfk $^ 
 
-../chibfk$(EXE): chi.f95
+../chibfk$(EXE): chibfk.f95
 	gfortran -static  -o ../chibfk $^ 
 
 clean:

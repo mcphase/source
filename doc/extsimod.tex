@@ -386,7 +386,7 @@ int dmq1		& & {\prg mcdisp} &  $\langle-|\hat \mbf M(\mbf Q)|+\rangle\sqrt{(p_--
 \hline
 int drixs1 & & {\prg mcdisp} & RIXS transition operator $\hat \mbf R$,eq. (\ref{rixsop})\\
 \hline
-int dP1 & & {\prg mcdisp} & phonon displacement (\AA) $\langle-|\hat \mbf P|+\rangle=\frac{\hbar}{\sqrt{2m\Delta}}$\\
+int dP1 & & {\prg mcdisp} & phonon displacement (\AA) $\langle-|\hat \mbf P|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
 void chargedensity\_coeff  & {\prg densplt -c}&&coeff of $-|e|Z_l^m(\Omega)R^2(r)$ in equ.(\ref{chargedensity2})\\
 &{\prg spins -c} & & i.e. $\langle\sum_i Z_l^m(\Omega_i)\rangle$\\
@@ -1179,10 +1179,11 @@ In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--
 
 In order to calculate neutron intensities for phonon scattering
 the external single ion module has to provide the transition matrix elements of
- the phonon displacement $p_{\alpha}$ in units of \AA, which is usually given by:
-$\langle-|\hat \mbf P_{\alpha}|+\rangle=\frac{\hbar}{\sqrt{2m\Delta_{\alpha}}}$,
+ the phonon displacement $P_{\alpha}$ in units of \AA, which for the transition i (=1,2,3)
+is usually given by:
+$\langle-|\hat P_{\alpha}|+\rangle=S_{i\alpha}\frac{\hbar}{\sqrt{2m\Delta_i}}$,
 with $\alpha=1,2,3$ for the different spatial directions and $m$ is the mass of the
-oscillating atom. 
+oscillating atom (compare section~\ref{phonons}). 
 
 Note, that in this
 expression the sum over the different equally spaced phonon levels (of the harmonic oscillator)
@@ -1245,8 +1246,7 @@ have to be considered. {\em IMPORTANT: the numbering scheme of transitions has t
 be the same for du1calc and all the corresponding d...1 functions for observables !}
 \item for the transition number tn the vector p1 is to
  be filled with the displacement transition matrix elements (\AA)
- $\langle-|\hat \mbf P_{\alpha}|+\rangle=\frac{\hbar}{\sqrt{2m\Delta_{\alpha}}}$ (equally spaced
-Einstein oscillator)
+$\langle-|\hat P_{\alpha}|+\rangle=S_{tn,\alpha}\frac{\hbar}{\sqrt{2m\Delta_{tn}}}$
 or more general
 ${\mbf P1^s_{\alpha}}=\sqrt{(p_--p_+)}\langle -|P^s_{\alpha}-\langle P^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
 \item

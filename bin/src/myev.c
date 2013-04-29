@@ -98,6 +98,19 @@ void myEigenValuesHermitean (ComplexMatrix & M,Vector & lambda,int & sort,int & 
   Matrix mat1(M.Rlo(),M.Rhi(),M.Clo(),M.Chi());
   int i1,j1;
   checkHerm(M);
+//  Driver routine to compute the  eigenvalues and normalized eigenvectors 
+//  of a complex Hermitian matrix z.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].The eigenvalues are returned
+//  in d[lo..hi] in ascending numerical  order if the sort flag is set  to
+//  True, otherwise  not ordered for sort = False. The real  and imaginary
+//  parts of the eigenvectors are  returned in  the columns of  zr and zi. 
+//  The storage requirement is 3*n*n + 4*n complex numbers. 
+//  All matrices and vectors have to be allocated and removed by the user.
+//  They are checked for conformance !
+// void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
+// 			   int sort, int maxiter)
 
   // put matrix to format needed for library diagonalize function
    for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=M.Chi();++j1){

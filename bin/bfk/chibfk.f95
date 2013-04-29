@@ -1,5 +1,5 @@
-!  Program calculates dynamical single ion susceptibility for RE ions
-!  Uses as input the spin-eigenstates of the ion,  
+!  Program chibfk(2404).f95 calculates dynamical single ion susceptibility for RE ions
+!  Uses as input the spin-eigenstates of the ion,   
 
 module CommonData
 ! This module contains data used by all other subroutines 
@@ -15,13 +15,12 @@ real :: diff(3,3), sf(3,3), kv(3), ksv(3), kapv(3), kapnv(3)
 complex :: chi(3,3)
 !real :: kapg(Nc),kapf(Nc),strg(Nc),strf(Nc)
 real :: E0, Es, k1,k2,k3,ks1,ks2,ks3,kap1,kap2,kap3,kapv1,kapv2,kapv3
-real :: enloss, kappa, Emax, Emin
+real :: enloss, kappa, Emax, Emin, epsilon
 real :: jav(3)
 integer :: mode,mst !scattering mode, file type
 integer :: Npoints=200
 real :: beta, g, gam, temp ! 1/k_B T, coupl. const 
 real, parameter :: Pi=3.14159, ek2=2.072, meVkT=11.6, cutoff=100., r0=-0.54 
-real, parameter :: epsilon=0.5
 ! exp. cut-off
 complex, parameter :: Iunit=(0.0,1.0)
 character(len=20) :: outfilename
@@ -60,10 +59,10 @@ integer :: zz,ww, type_of_contence,linetype(50), linenumber, nlines
 real :: s,dk,kn,knn,ksn,ks,k0, Evr(Np,Np),Evi(Np,Np), v(Np),f, x, y 
 real ::  x1,x2,x3,y1,y2,y3,strfak
 complex ::  cs
-character(len=10)::  arg 
-character(len=10) :: name(5)
+character(len=20)::  arg 
+character(len=20) :: name(5)
 character(len=10) :: couplc, tempp, mod,filet
-character(len=150) :: line(150),tline(150),bb,zeile
+character(len=150) :: line(150),tline(150),bb, bbd ,zeile
 character(len=20) :: redata(12),re(12), number
 
 
@@ -129,21 +128,25 @@ nlines=n-1
 m=0
 do n=1,nlines
   if (line(n)(1:1)=='#') then
-    if (line(n)(1:4)=='#!J=') then
-      m=m+1
-      bb=line(n)
-      do k=1,12
-        do l=1,30
-          i=5+l 
-           if (bb(i:i+1) == re(k)) then
-            tline(m)=redata(k) 
-          end if
-        end do
-      end do
-    end if
-    if (line(n)(1:15)=='#! Eigenvalues=') then
-      m=m+1
-      tline(m)=line(n)(16:150)
+    if (line(n)(1:2)=='#!') then
+      bb=line(n)(3:150)
+      nn=0
+      do while (bb(1:1)==' ')
+        bbd=bb(2:150)
+        bb=bbd
+      end do      
+      if (bb(1:1)== 'd') then
+        m=m+1        
+        bbd=bb(2:150)
+        nn=index(bbd,'=')
+        tline(m)=bbd(nn+1:nn+3)
+      end if
+      if (bb(1:11)=='Eigenvalues') then
+        m=m+1
+        bbd=bb(12:150)
+        nn=index(bbd,'=')
+        tline(m)=bbd(nn+1:150)
+      end if
     end if
   else 
     m=m+1
@@ -157,7 +160,7 @@ end do
 close(16)
 close(15)
 
-!Analyse file with energy range (mcdisp.par)
+!Analyse file with energy range (parfile.par)
 open(17,file=enfilename,action='read')
 n=1 
 do 
@@ -176,6 +179,10 @@ do n=1,nlines
     number=line(n)(8:30)
     read(number,*) emax
   end if
+  if (line(n)(1:10)=='#!epsilon=') then
+    number=line(n)(11:30)
+    read(number,*) epsilon
+  end if
 end do
 close(17)
 
@@ -184,7 +191,7 @@ gam= 2*Pi*g**2
 
 !open  workfile 
   open(16,file='cefworkfile.dat',action='read')
-  read(16,*) Ns, gl 
+  read(16,*) Ns
   read(16,*) (En(n),n=1,Ns)
    do j=1,Ns
      read(16,*) (Evr(j,i), i=1,Ns)
@@ -219,22 +226,23 @@ complex :: cs, csz,csp,csm
 ! En(Np)(energy levels), Ev(Np,Np)(complex eigenvectors) 
 ! beta(inv temperature), cutoff(exp cutoff)
 ! check of eigenvectors for orthogonality:
+open(19,file='jmatrix.dat')
+
 do i = 1,Ns
 do j = 1,Ns
 cs=(0.,0.)
 do k = 1,Ns
 cs=cs+conjg(Ev(j,k))*Ev(i,k)
 end do
+write(19,*) i,j,cs
 if ((cabs((cs-1)*cs)>= 0.001) )then
-write( *,*) 'Mistake in Eigenvektor' 
+write(*,*) 'low accuracy of eigen vectors' 
 end if
 end do
 end do
 
 !the file jmatrix is generated only for checking the correctnes of  the 
 !matrix elements
-open(19,file='jmatrix.dat')
-
 ! Calculation of spin matrix elements
 Jj=(Ns-1.)/2. !j-value
 do i = 1,Ns
@@ -700,7 +708,7 @@ real :: z
 end subroutine
 end interface
 !write(*,*) 'Hier angekommen'
-write(*,'(A)') 'results written into /Results chibfk.res'
+write(*,'(A)') 'results written into Results/chibfk.res'
 open(21,file='./Results/chibfk.res',action='write')
 
 write(21,*) '# results for the dynamical susceptibility of RE ions'
