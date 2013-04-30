@@ -169,7 +169,7 @@ if (transitionnumber==2)
          jc = i*ABC[3]; 	
 	}
     }
- if (delta>SMALL)
+ if (delta>SMALL_QUASIELASTIC_ENERGY)
  {// now lets calculate mat
  u1(1)=ja*sqrt(nm-np);
  u1(2)=jb*sqrt(nm-np);
@@ -182,7 +182,7 @@ if (transitionnumber==2)
  }
 }
 else
-{ delta=-SMALL; // transition within the same level
+{ delta=-SMALL_QUASIELASTIC_ENERGY; // transition within the same level
   if (nennerp > SMALL)
     {
       jap = -ABC[1] * 2.0 * betar * (alpha_lambdap) / nennerp;

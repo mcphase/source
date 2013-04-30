@@ -91,7 +91,7 @@ for (i=1;i<argc;++i)
 	                              do_sipf=1;strcpy(sipffile,argv[i+1]);++i;
     			             }       
   else{T=strtod(argv[i],NULL);++i;  // now read T
-       Hext=0;for(j=1;j<=3;++j){++i;if(i<argc){Hext(j)=strtod(argv[i],NULL);}} // read Hexta Hextb Hextc
+       Hext=0;for(j=1;j<=3;++j){if(i<argc){Hext(j)=strtod(argv[i],NULL);}++i;} // read Hexta Hextb Hextc
        Hxc_in=0;for(j=1;i<argc&&j<HXCMAXDIM;++j){++nofcomponents;Hxc_in(j)=strtod(argv[i],NULL);++i;} //read Hxc1 Hxc2 ... Hxcn
       } // T Hext Hxc
     } // -r

@@ -140,7 +140,7 @@ else
 if (tn==2) // transition to finite energy
  {delta=gmh; //set delta !!!
 
- if (delta>SMALL)
+ if (delta>SMALL_QUASIELASTIC_ENERGY)
   {// now lets calculate mat
   u1(1)=bx*sqrt(-R/Z);
   u1(2)=by*sqrt(-R/Z);
@@ -154,7 +154,7 @@ if (tn==2) // transition to finite energy
   }
  }
  else
- { delta=-SMALL; // tn=1 ... transition within the same level
+ { delta=-SMALL_QUASIELASTIC_ENERGY; // tn=1 ... transition within the same level
    if(X==1.0){jjkt=JJ*(2*JJ*JJ+3*JJ+1)/3/KBT/(2*JJ+1);}
    else {if(X>1e50)
          {jjkt=JJ*JJ*KBT;}

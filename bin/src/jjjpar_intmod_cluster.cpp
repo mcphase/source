@@ -334,7 +334,7 @@ for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj)
 delta=En(jj)-En(ii);
 
 if (delta<-0.000001){fprintf(stderr,"ERROR module cluster - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
-if(jj==ii)delta=-SMALL; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
+if(jj==ii)delta=-SMALL_QUASIELASTIC_ENERGY; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
 // calculate Z and wn (occupation probability)
      Vector wn(1,dim);double Zs;
@@ -400,7 +400,7 @@ for(int l=1;l<=Hxc.Hi();++l)
  else    {u1(l)=iJj(l);}
 }
 
-if (delta>SMALL)
+if (delta>SMALL_QUASIELASTIC_ENERGY)
    { if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",ii,jj,delta);
       printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",ii,jj,abs(u1(1))*abs(u1(1)),ii,jj,abs(u1(2))*abs(u1(2)),ii,jj,abs(u1(3))*abs(u1(3)));

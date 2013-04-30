@@ -13,7 +13,8 @@
 #define MAXNOFNUMBERSINLINE 2500
 #define MAXNOFCHARINLINE 7024
 
-#define SMALL 1e-6   //!!! must match SMALL in mcdisp.c and ionpars.cpp !!!
+#define SMALL 1e-6   
+#define SMALL_QUASIELASTIC_ENERGY 1e-6   //!!! must match SMALL_QUASIELASTIC_ENERGY in mcdisp.h and ionpars.hpp !!!
                      // because it is used to decide whether for small transition
 		     // energy the matrix Mijkl contains wn-wn' or wn/kT
 
