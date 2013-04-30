@@ -83,8 +83,8 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      else
      {if(strcmp(modulefilename,"cfield")==0)
      {module_type=2;fprintf (stderr,"#[internal]\n");
-      fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
-       
+      //fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
+       fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename);
 
       int dj;dj=(int)(2*J()+1);
@@ -97,7 +97,8 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      else
      {if(strcmp(modulefilename,"so1ion")==0)
      {module_type=4;fprintf (stderr,"#[internal]\n");
-      fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
+     // fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
+      fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename);
       nof_electrons=(*iops).nof_electrons;
       int dj;dj=(int)(2*J()+1);
@@ -316,7 +317,7 @@ module_type=0;
     }
    }
   }
-  fclose(cf_file);
+ // fclose(cf_file);
 
   magFFj0=Vector(1,7);magFFj0=0;  magFFj0[1]=1;
   magFFj2=Vector(1,7);magFFj2=0;

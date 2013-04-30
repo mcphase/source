@@ -1,0 +1,159 @@
+\section{Including Phonons and Crystal-Field Phonon interactions}\label{phonons}
+
+In this section we discuss, how lattice dynamics may be considered in the framework of
+the Hamiltonian (\ref{fullhamiltonian}). We will see that this corresponds 
+to a system of coupled Einstein oscillators. One such oscillator can be modelled 
+by setting up a {\prg sipf} file with the module {\prg phonon}. Coupling has
+to be done in {\prg mcdisp.j}. Rephrasing lattice dynamics in this way allows 
+to couple phonons to the crystal field.
+
+A three dimensional Einstein oscillator (for atom $n$) in a solid can be described by 
+the following Hamiltonian
+
+\begin{equation}\label{einstein}
+H_E(n)=\frac{a_0^2{\mbf p_n}^2}{2m_n} + \frac{1}{2} {\mbf u}^T_n \m{K}(nn) {\mbf u}_n
+\end{equation}
+
+Here $\mbf u$ is the dimensionless displacement vector ($\mbf u_n={\mbf P}_n/a_0=\Delta {\mbf r}_n/a_0$, 
+with the Bohr radius $a_0=0.5219$~\AA), $m_n$ the
+mass of the atom $n$, $\mbf p_n=d\mbf u_n/dt$ the conjugate momentum to $\mbf u_n$ and
+$\m{K}(nn)$ the Matrix describing the restoring force.
+
+Coupling such oscillators leads to the Hamiltonian
+
+\begin{equation}
+H_{phon}=\sum_n H_E(n) -\frac{1}{2} \sum_{n\neq n'} {\mbf u}_n^T \m{K}(nn')  {\mbf u}_{n'}
+\end{equation}
+
+In a mean field type of theory 
+the phonon single ion module has thus to solve the Hamiltonian
+
+\begin{equation}\label{phonsiham}
+H_E=\frac{a_0^2{\mbf p}^2}{2m} + \frac{1}{2} {\mbf u}^T \m{K} {\mbf u} - {\mbf F}^T {\mbf u}
+\end{equation}
+
+Here the force $\mbf F$ corresponds to the exchange field $\mbf H_{xc}$ and $\mbf u$ to
+ the general operator $\mbf I$ and $\m{K}(nn')$ to $\mathcal J(nn')$ of equation (\ref{fullhamiltonian}),
+respectively. The single ion Hamiltonian (\ref{phonsiham}) can be solved by transforming
+it to normal coordinates (main axis of the Einstein oscillator) using the transformation
+matrix $\m{S}$, which diagonalises $\m{K}=\m{S}^T\m{\Omega}\m{S}$:
+
+\begin{equation}
+ \mbf u'=\m{S} \mbf u -\m{\Omega}^{-1} \m{S} \mbf F
+\end{equation}
+
+\begin{equation}\label{phonsihamdiag}
+H_E=\frac{a_0^2{\mbf p'}^2}{2m}+\frac{1}{2} {\mbf u'}^T \m{\Omega} {\mbf u'} 
+-\frac{1}{2}\mbf F^T \m{S}^T \m{\Omega}^{-1} \m{S} \mbf F
+\end{equation}
+
+Due to the action of the force $\mbf F$ the equilibrium position of the oscillator
+is $\mbf u_0=\m{S}^T\m{\Omega}^{-1}\m{S}\mbf F$ (it is the task of the function
+{\prg Icalc} to return this equilibrium position), the energies correspond to the three elements
+of the diagonal matrix $\m{\Omega}$, i.e. $\Omega_{11}=m a_0^2 (\Delta_1 /\hbar)^2$,
+$\Omega_{22}=m a_0^2 (\Delta_2 /\hbar)^2$,
+$\Omega_{33}=m a_0^2 (\Delta_3 /\hbar)^2$. In order to run {\prg mcdisp} we
+have to calculate the transition matrix elements:
+
+The single ion susceptibility for such a transition, e.g. $\Delta_1$ - corresponds to
+
+\begin{eqnarray}
+\m{\chi}^0&=&\sum_{\nu\mu}\frac{\langle \nu|\mbf u|\mu\rangle\langle \mu |\mbf u^T|\nu \rangle}{\Delta_1 -\hbar \omega}
+(p_{\nu} -p_{\mu}) \\
+&=&\sum_{\nu\mu}\frac{\langle \nu|\m{S}^T \mbf u'|\mu\rangle\langle \mu |\mbf u'^T \m{S}|\nu \rangle}{\Delta_1 -\hbar \omega}
+(p_{\nu} -p_{\mu}) 
+\end{eqnarray}
+Because the different components of $\mbf u'$ commute and the Hamiltonian (\ref{phonsihamdiag})
+is separable, for the transition $\Delta_1$ only the terms with $u_1'$ in the nominator
+contribute:
+
+\begin{eqnarray}
+\chi^0_{\alpha\beta}&=&S^T_{\alpha1}\sum_{\nu\mu}\frac{\langle \nu|u_1'|\mu\rangle\langle \mu | u_1'|\nu \rangle}{\Delta_1 -\hbar \omega}
+(p_{\nu} -p_{\mu}) S_{1\beta}\\
+&=& S^T_{\alpha1}S_{1\beta}\frac{\hbar^2}{2ma_0^2\Delta_1}\left(\frac{1}{\Delta_1-\hbar\omega}+\frac{1}{\Delta_1+\hbar\omega}\right )
+\end{eqnarray}
+
+In order to derive the last result we had to express $u_1'$ in terms of ladder  operators
+$u_1'=a_0^{-1} \hbar/\sqrt{2m\Delta_1}(a+a^{\dagger})$ and  apply $a^{\dagger}|\nu\rangle=\sqrt{\nu+1}|\nu+1\rangle$,
+$a|\nu\rangle=\sqrt{\nu}|\nu-1\rangle$ and $\sum_{\nu=0}^{\infty}(p_{\nu}-p_{\nu+1})(\nu+1)=1$,
+$p_{\nu}=exp(-\nu\Delta_1/kT)(1-exp(-\Delta_1/kT))$. This shows that the single ion susceptibility
+of our atom can be written as a sum of three effective transitions (with temperature independent
+susceptibility)
+
+\begin{eqnarray}
+\chi^0_{\alpha\beta}
+&=& \sum_{i=1,2,3} S^T_{\alpha i}S_{i\beta}\frac{\hbar^2}{2ma_0^2\Delta_i}
+\left(\frac{1}{\Delta_i-\hbar\omega}+\frac{1}{\Delta_i+\hbar\omega}\right )
+\end{eqnarray}
+
+Thus the module {\prg phonon} has to provide in it's function {\prg du1calc} these three
+transitions (=number of transitions).
+
+\subsection{Using Single Ion Module {\prg phonon}}
+
+The module {\prg phonon} allows to consider the phononic degrees of freedom in McPhas.
+The single ion input file for an oscillating atom has to have the following format:
+
+\begin{verbatim}
+#!MODULE=phonon
+#<!--mcphase.sipf-->
+#
+# phonon
+# MODPAR1=mass of atom in units of m0 (atomic mass unit=1.660539e-27 kg)
+#
+#-----------
+MODPAR1=57  # mass in(m0)
+MODPAR2=7   # Kxx
+MODPAR3=7   # Kyy
+MODPAR4=8   # Kzz
+MODPAR5=0   # Kxy  in (meV)
+MODPAR6=0   # Kxz
+MODPAR7=0   # Kyz
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.769
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+SCATTERINGLENGTHREAL=0.945
+SCATTERINGLENGTHIMAG=0
+\end{verbatim}
+
+Thus the single ion property file contains the matrix $\m{K}(nn)$, the matrix $\m{K}(nn')$ decribing the
+forces between
+different ions $n$ and $n'$ have to be given in the file {\prg mcphas.j}, which could
+look like:
+
+\begin{verbatim}
+# 
+#<!--mcphase.mcphas.j-->
+*************************************************************
+# Lattice Constants (A)
+#! a=4.047 b=4.047 c=9.612 alpha=  90 beta=  90 gamma=  90
+#! r1a=   1 r2a=   0 r3a= 0.5
+#! r1b=   0 r2b=   1 r3b= 0.5   primitive lattice vectors [a][b][c]
+#! r1c=   0 r2c=   0 r3c= 0.5
+#! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
+#*********************************************************************
+#! da=   0 [a] db=   0 [b] dc=   0 [c] nofneighbours=2 diagonalexchange=1 sipffilename=phonon.sipf
+#da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
+0 0 1 1.1 1.1 1.1
+0 0 -1 1.1 1.1 1.1 
+#*********************************************************************
+\end{verbatim}
+
+It is planned that these files should be created automatically from the 
+output of DFT programs. [to be done]
+
+If crystal field - phonon coupling is to be input, magnetic ions may be added to {\prg mcphas.j}.
+They should not be placed at exactly the same position as the phonon atoms - i.e. da db dc should be chosen
+(slightly) different to enable the mcphas.j loader to identify which  is which.
+
+The coupling between phononic and crystal field degrees of freedom should be derived from
+$H_{cf-phon}=(\mbf \nabla_{\mbf u(n')} B_l^m(n))   \mbf u(n')  O_l^m(\mbf J_n)$. This could be done
+using the program {\prg pointc} and {\prg makenn} applying small differential changes to
+the atomic positions in the unit cell in order to evaluate the gradient of the crystal field
+parameters. [efficient program to do this task is to be written]
