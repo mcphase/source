@@ -515,7 +515,7 @@ return intensity;
 
 
 //**************************************************************************/
-#ifdef _THREADS
+#ifdef _THREADSREFINE
 #if defined  (__linux__) || defined (__APPLE__)
 void *intcalc(void *input)
 #else
@@ -528,7 +528,7 @@ double intcalc(int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector 
  double intensity=1.2;
  double QQ,ki,kf;
 
-#ifdef _THREADS
+#ifdef _THREADSREFINE
    intcalcapr_input *myinput; myinput = (intcalcapr_input *)input;
    int thread_id = myinput->thread_id;
    int dimA = myinput->dimA;
@@ -542,7 +542,7 @@ double intcalc(int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector 
    int do_verbose = myinput->do_verbose;
    double epsilon = myinput->epsilon; 
 #endif
-
+ 
  complex<double> z(en,epsilon);
  complex<double> eps(epsilon/4,0);
  // determine chi
@@ -737,7 +737,7 @@ else
 }
 
 
-#ifdef _THREADS
+#ifdef _THREADSREFINE
 #undef ini
 #undef inputpars
 #undef J

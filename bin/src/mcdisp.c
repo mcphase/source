@@ -1350,7 +1350,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           fprintf (foutds1, "#{%s ",MCDISPVERSION);
           curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds1);
           fprintf (foutds1, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
-#ifdef _THREADS
+#ifdef _THREADSREFINE
           thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {
@@ -1361,7 +1361,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           Vector vIntensity(1,(int)((ini.emax-ini.emin)/(epsilon/2)+1)); int iE=1;
 #endif
 		     double intensity;
-#ifdef _THREADS
+#ifdef _THREADSREFINE
                      tin[ithread]->En=ini.emin; tin[ithread]->iE=iE;
                      #if defined  (__linux__) || defined (__APPLE__)
                      rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
@@ -1377,7 +1377,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 #endif
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emin,myround(intensity));
-#ifdef _THREADS
+#ifdef _THREADSREFINE
                      tin[ithread]->En=ini.emax; tin[ithread]->iE=iE;
                      #if defined  (__linux__) || defined (__APPLE__)
                      rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
@@ -1394,17 +1394,17 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emax,myround(intensity));
 	  fclose(foutds1);
-#ifdef _THREADS
+#ifdef _THREADSREFINE
 	  for(E=ini.emin;E<=ini.emax;E+=(epsilon/2)*NUM_THREADS)
 #else
 	  for(E=ini.emin;E<=ini.emax;E+=epsilon/2)
 #endif
 	   {
-#ifndef _THREADS
+#ifndef _THREADSREFINE
 		     intensity=intcalc(dimA,E,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
 		     totint+=intensity*epsilon/2;
 #else
-                     oldE=E;
+                   oldE=E;
                      for(ithread=0; ithread<NUM_THREADS; ithread++)
                      {
                         E=oldE+(epsilon/2)*ithread; if(E>ini.emax) break;
@@ -1440,8 +1440,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      fprintf (foutds, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds, " %4.4g %4.4g \n",myround(E),myround(intensity));
 	   }
-
-#ifdef _THREADS
+#ifdef _THREADSREFINE
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {
              delete thrdat.md[ithread];delete thrdat.J[ithread]; delete tin[ithread];
