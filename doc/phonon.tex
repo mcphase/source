@@ -11,7 +11,7 @@ A three dimensional Einstein oscillator (for atom $n$) in a solid can be describ
 the following Hamiltonian
 
 \begin{equation}\label{einstein}
-H_E(n)=\frac{a_0^2{\mbf p_n}^2}{2m_n} + \frac{1}{2} {\mbf u}^T_n \m{K}(nn) {\mbf u}_n
+H_E(n)=\frac{a_0^2{\mbf p_n}^2}{2m_n} - \frac{1}{2} {\mbf u}^T_n \m{K}(nn) {\mbf u}_n
 \end{equation}
 
 Here $\mbf u$ is the dimensionless displacement vector ($\mbf u_n={\mbf P}_n/a_0=\Delta {\mbf r}_n/a_0$, 
@@ -25,11 +25,15 @@ Coupling such oscillators leads to the Hamiltonian
 H_{phon}=\sum_n H_E(n) -\frac{1}{2} \sum_{n\neq n'} {\mbf u}_n^T \m{K}(nn')  {\mbf u}_{n'}
 \end{equation}
 
+Note that our coupling constants $K_{\alpha\beta}(nn')=-A_{\alpha\beta}(nn')$, where
+ $A_{\alpha\beta}$ are the second-order derivatives of the potenatial energy
+as defined e.g. in \cite[page 99]{lovesey84-1}.
+
 In a mean field type of theory 
 the phonon single ion module has thus to solve the Hamiltonian
 
 \begin{equation}\label{phonsiham}
-H_E=\frac{a_0^2{\mbf p}^2}{2m} + \frac{1}{2} {\mbf u}^T \m{K} {\mbf u} - {\mbf F}^T {\mbf u}
+H_E=\frac{a_0^2{\mbf p}^2}{2m} - \frac{1}{2} {\mbf u}^T \m{K} {\mbf u} - {\mbf F}^T {\mbf u}
 \end{equation}
 
 Here the force $\mbf F$ corresponds to the exchange field $\mbf H_{xc}$ and $\mbf u$ to

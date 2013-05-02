@@ -42,9 +42,9 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
                 MODPAR[1]   mass (m0)  m0=atomic mass unit=1.660539e-27 kg
                 MODPAR[2]   Kxx
                 MODPAR[3]   Kyy
-                MODPAR[4]   Kzz            K is the force matrix [meV]
-                MODPAR[5]   Kxy
-                MODPAR[6]   Kxz
+                MODPAR[4]   Kzz            K is minus second derivative 
+                MODPAR[5]   Kxy            of the potential energy with respect
+                MODPAR[6]   Kxz             to nuclear displacements [meV]
                 MODPAR[7]   Kyz
 
   on output    
@@ -86,9 +86,9 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
 // 
 double Delta1,Delta2,Delta3,K_BT,X,Y,Z;
 
-Delta1=sqrt(Omega(1)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
-Delta2=sqrt(Omega(2)*1.6022e-22/m/a0/a0)*6582e-16;
-Delta3=sqrt(Omega(3)*1.6022e-22/m/a0/a0)*6582e-16;
+Delta1=sqrt(-Omega(1)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
+Delta2=sqrt(-Omega(2)*1.6022e-22/m/a0/a0)*6582e-16;
+Delta3=sqrt(-Omega(3)*1.6022e-22/m/a0/a0)*6582e-16;
 K_BT=(*T)*K_B;
 X=exp(-Delta1/K_BT);
 Y=exp(-Delta2/K_BT);
@@ -102,7 +102,7 @@ Z=exp(-Delta3/K_BT);
 // u0=ST Omega^-1 S Fxc= (SrT-iSiT)*Om*(Sr+iSi)*F
 // =(SrT-iSiT) (Om Sr F + i Om Si F)= 
 // SrT Om Sr F + SiT Om Si F + i (must be zero)
-Matrix Om(1,3,1,3);Om=0;Om(1,1)=1/Omega(1);Om(2,2)=1/Omega(2);Om(3,3)=1/Omega(3);
+Matrix Om(1,3,1,3);Om=0;Om(1,1)=-1/Omega(1);Om(2,2)=-1/Omega(2);Om(3,3)=-1/Omega(3);
 Vector uu(1,3);
 uu=Sr.Transpose()*Om*Sr*Fxc+Si.Transpose()*Om*Si*Fxc;
 
@@ -170,7 +170,7 @@ double hbar=6582e-16;
 double mev2J=1.6022e-22;
 // Omegai=m a0^2 (Deltai/hbar)^2
 // 
-delta=sqrt(Omega(tn)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
+delta=sqrt(-Omega(tn)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
 
 u1=0;
 for(int i=1;i<=3;++i)
