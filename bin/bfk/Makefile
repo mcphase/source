@@ -17,15 +17,15 @@ ifdef WINDOWS
 EXE=.exe
 endif
 
-all :  ../bfk$(EXE) ../chibfk$(EXE) 
+all :  clean ../bfk$(EXE) ../chibfk$(EXE) 
 
 ../bfk$(EXE): bfk.f95
-	gfortran -static -o ../bfk $^ 
+	gfortran -static -lgfortran -o ../bfk $^ 
 
 ../chibfk$(EXE): chibfk.f95
-	gfortran -static  -o ../chibfk $^ 
+	gfortran -static -lgfortran -o ../chibfk $^ 
 
 clean:
-	rm -vf ./*.o 
+	rm -vf ./*.o commondata.mod matrixelements.mod
 
         

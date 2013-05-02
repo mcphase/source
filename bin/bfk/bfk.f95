@@ -2,7 +2,7 @@
 !  Uses as input the spin-eigenstates of the ion,  
 !  Output is the scattering cross section for different 
 !  scattering geometries.
-
+ 
 module CommonData
 ! This module contains data and variables used by all other subroutines 
 implicit none

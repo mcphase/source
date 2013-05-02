@@ -1,6 +1,6 @@
 !  Program chibfk(2404).f95 calculates dynamical single ion susceptibility for RE ions
 !  Uses as input the spin-eigenstates of the ion,   
-
+ 
 module CommonData
 ! This module contains data used by all other subroutines 
 implicit none
