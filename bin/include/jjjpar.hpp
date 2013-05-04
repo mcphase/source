@@ -61,6 +61,7 @@ public:
    void save (FILE *file); // to save the parameters to a filehandle
    void saveatom (FILE *file); // to save the atom coordinates and properties to a filehandle
    void save_sipf(const char * path); //save single ion parameter file filename to path*
+   void save_sipf(FILE *file); //save single ion parameter file filename to path*
 
 
    jjjpar (FILE * fin, int nofcomp); //constructor with filehandle of mcphas.j file
@@ -327,8 +328,9 @@ void *handle;
   // realisation of class iops - cfield internal module functions, intern_Icalc=2
   // the class iops calls for some functionality the program cfield (e.g. for
   // getting stevens factors and other parameters, for the matrices Olm etc.)
+public:
   ionpars * iops;
-
+private:
   // brillouin internal module functions,module_type=3
   void brillouin (Vector &mom, double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
   int  brillouindm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);

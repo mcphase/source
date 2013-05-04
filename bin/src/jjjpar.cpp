@@ -222,15 +222,21 @@ void jjjpar::saveatom(FILE * file)
 
 //save single ion parameter file filename to path*
 void jjjpar::save_sipf(const char * path)
-{char  instr[MAXNOFCHARINLINE];
- char * savfilename;
- int i;
+{char * savfilename;
  savfilename= new char[strlen(sipffilename)+strlen(path)+2];
  strcpy(savfilename,path);
  strcpy(savfilename+strlen(path),sipffilename);
- FILE * fout; FILE * cfin;
+ FILE * fout; 
  fout = fopen_errchk (savfilename, "w");
+ save_sipf(fout);
+ fclose(fout);
+ delete []savfilename;
 
+}
+
+void jjjpar::save_sipf(FILE * fout)
+{ char  instr[MAXNOFCHARINLINE];
+ int i;FILE * cfin;
  switch (module_type)
   {case 1: fprintf(fout,"#!MODULE=kramer\n#<!--mcphase.sipf-->\n");
            fprintf(fout,"#***************************************************************\n");
@@ -394,8 +400,6 @@ void jjjpar::save_sipf(const char * path)
 
    }
 
- fclose(fout);
- delete []savfilename;
 }
 
 

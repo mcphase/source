@@ -9,172 +9,13 @@
 #include "jjjpar.hpp"
 #include "../../version"
 #include "martin.h"
+#define SMALL_DISPLACEMENT  0.01
 
-
-/**********************************************************************/
-// main program
-int main (int argc, char **argv)
-{// check command line
-
-
-  if (argc < 3)
-    { printf ("\n Program to calculate Crystal field Parameters from Point Charges \n\n\
-            Usage: pointc Ce3+ 0.2 4 1 5.3\n\n\
-             ... meaning calculate Blms (Stevens Parameters) \n\
-                             and   Llms (Wybourne Parameters) \n\
-             for one pointcharge of +0.2|e| in distance\n\
-             x=4 A y=1 A z=5.3 A from a Ce3+ ion.\n\n\
-             Alternative Usage: pointc Ce3+ filename\n\
-             ... meaning read several charges+coordinates from file,\n\
-             file format: column 1=charge, column 2-4 = x y z coordinate.\n\
-             (note,progam makenn creates useful files for this option from \n\
-             the crystal structure).\n\
-             results are written to stdout (including radial matrix elements\n\
-             and Stevens factors), results\\pointc.out contains results of convergence\n\n\
-          Note: if an ion is not implemented, it's parameters can be \n\
-                entered in a single ion property file and pointc is\n\
-                started as \n\
-                  pointc file.sipf 0.2 4 1 5.3\n\n\
-\n\
-                the single ion property file must then contain the \n\
-                following information (# denotes comments):\n\
-\n\
-                  #the name of the ion\n\
-                  IONTYPE=Ce3+\n\
-                  #stevens parameters(optional,necessary for output of Blm)\n\
-                  ALPHA=-0.0571429\n\
-                  BETA=0.00634921\n\
-                  GAMMA=0\n\
-                  # the radial matrix elements RN=<r^N> \n\
-                  # in units of a0^N (a0=0.5292 A)\n\
-                  R2=1.309\n\
-                  R4=3.964\n\
-                  R6=23.31\n\
-                  # radial wave function parameters, for transition metal ions the the values are tabulated in\n\
-                  # Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave\n\
-                  # function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)\n\
-                  # for rare earth ions see Freeman & Watson PR 127(1962)2058, Sovers J. Phys. Chem. Sol. 28(1966)1073\n\
-                  # e.g. Co2+ is isoelectronic to Fe+, looking at page 422\n\
-                  # of Clemente & Roetti the parameters are \n\
-                  N1=3 XI1=4.95296 C1=0.36301 \n\
-                  N2=3 XI2=12.2963 C2=0.02707 \n\
-                  N3=3 XI3=7.03565 C3=0.14777\n\
-                  N4=3 XI4=2.74850 C4=0.49771 \n\
-                  N5=3 XI5=1.69027 C5=0.11388 \n\
-                  # if the above parameters are given the radial wave function\n\
-                  # is output to file results\\radwavfun.dat\n\
-	\n");
-      exit (1);
-    }
-
-FILE * table_file;
-FILE * conv_file;
-FILE * sipf_file;
-char instr[MAXNOFCHARINLINE];
-int n=0;
-float invalues[100];invalues[0]=99;
-  double q,x,y,z;
-// set stevens parameters and landefactor, J and <r^l> of ion
-
-
-// read create class object ionpars from iontype - sets J, gJ, Stevens factors from the
-// routine getpar in cfieldrout.c, thus takes the single ion parameters from
-// the same source as the cfield program ...
- ionpars * iops;
- jjjpar * jjjps;
- char *token;
- if((sipf_file=fopen(argv[1],"r"))) //read ion parameters from file
- { iops=new ionpars(2);
-   jjjps=new jjjpar(1,1,1);
-   while(feof(sipf_file)==false)
-  {if(fgets(instr, MAXNOFCHARINLINE, sipf_file)){// strip /r (dos line feed) from line if necessary
-                                      while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
-                                      printf("%s",instr);
-                                    }
-   
-//   if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-        extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE);
-        
-        extract(instr,"N1",(*jjjps).Np(1));extract(instr,"XI1",(*jjjps).Xip(1));extract(instr,"C1",(*jjjps).Cp(1));
-        extract(instr,"N2",(*jjjps).Np(2));extract(instr,"XI2",(*jjjps).Xip(2));extract(instr,"C2",(*jjjps).Cp(2));
-        extract(instr,"N3",(*jjjps).Np(3));extract(instr,"XI3",(*jjjps).Xip(3));extract(instr,"C3",(*jjjps).Cp(3));
-        extract(instr,"N4",(*jjjps).Np(4));extract(instr,"XI4",(*jjjps).Xip(4));extract(instr,"C4",(*jjjps).Cp(4));
-        extract(instr,"N5",(*jjjps).Np(5));extract(instr,"XI5",(*jjjps).Xip(5));extract(instr,"C5",(*jjjps).Cp(5));
-        extract(instr,"N6",(*jjjps).Np(6));extract(instr,"XI6",(*jjjps).Xip(6));extract(instr,"C6",(*jjjps).Cp(6));
-        extract(instr,"N7",(*jjjps).Np(7));extract(instr,"XI7",(*jjjps).Xip(7));extract(instr,"C7",(*jjjps).Cp(7));
-        extract(instr,"N8",(*jjjps).Np(8));extract(instr,"XI8",(*jjjps).Xip(8));extract(instr,"C8",(*jjjps).Cp(8));
-        extract(instr,"N9",(*jjjps).Np(9));extract(instr,"XI9",(*jjjps).Xip(9));extract(instr,"C9",(*jjjps).Cp(9));
-
-        extract(instr,"nof_electrons",(*iops).nof_electrons);
-        extract(instr,"ALPHA",(*iops).alpha);
-        extract(instr,"BETA",(*iops).beta);
-        extract(instr,"GAMMA",(*iops).gamma);
-
-        extract(instr,"R2",  (*jjjps).r2);
-        extract(instr,"R4",  (*jjjps).r4);
-        extract(instr,"R6",  (*jjjps).r6);
-//        }
-  }
-      if((*jjjps).r2==0){(*jjjps).r2_from_radial_wavefunction();printf("#<r^2>  from radial wavefunction in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);}
-      if((*jjjps).r4==0){(*jjjps).r4_from_radial_wavefunction();printf("#<r^4>  from radial wavefunction in units of a0^4 a0=0.5292 Angstroem\nR4=%g\n",(*jjjps).r4);}
-      if((*jjjps).r6==0){(*jjjps).r6_from_radial_wavefunction();printf("#<r^6>  from radial wavefunction in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);}
-     
-      (*iops).r2=(*jjjps).r2;
-      (*iops).r4=(*jjjps).r4;
-      (*iops).r6=(*jjjps).r6;
-  fclose(sipf_file);
- }
- else
- {printf ("#!MODULE=so1ion\n#<!--mcphase.sipf-->\n");
-  printf("#*********************=*************************************************\n");
-  printf("# program pointc - crystal field parameters by the pointcharge model\n");
-  printf("# Martin Rotter, %s\n",MCPHASVERSION);
-  printf("# Reference: Ernst Bauer and Martin Rotter - Crystal field effects \n");
-  printf("#            in Rare Earth Compounds, in print\n");
-  printf("#***********************************************************************\n");
-  iops=new ionpars(argv[1]);  // read ion parameters from internal table  
-  printf ("IONTYPE=%s\n",(*iops).iontype);
-// printout the information used in pointc to output 
-  printf("#J=%4g\n",(*iops).J);
-  printf("#Lande Factor gJ\n GJ = %4g\n",(*iops).gJ);
-  printf("#Stevens factors\nALPHA=%4g\nBETA=%4g\nGAMMA=%4g\n",(*iops).alpha,(*iops).beta,(*iops).gamma);
-  printf("#Expectation values of radial wave function <r^k> in units of a0^k a0=0.5292 Angstroem\n");
-  printf("R2=%4g\nR4=%4g\nR6=%4g\n\n",(*iops).r2,(*iops).r4,(*iops).r6);
- }
-
-// zero parameters in case initialisation put some values to the parameters ...
-(*iops).Blm=0;
-(*iops).Llm=0;
-conv_file=fopen_errchk("results/pointc.out","w");
-fprintf(conv_file,"#charge(|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B66 L66\n");
-if (argc<5) // read pointcharges from file
-{table_file=fopen_errchk(argv[2],"r");
- while(n==0&&feof(table_file)==false)n=inputline(table_file, invalues);
-  q=invalues[1];
-  x=invalues[2];
-  y=invalues[3];
-  z=invalues[4]; 
-} else 
-{ n=4;
-  q=strtod(argv[2],NULL);
-  x=strtod(argv[3],NULL);
-  y=strtod(argv[4],NULL);
-  z=strtod(argv[5],NULL);
-}
-
- // print information about pointcharges to file and calculate Blms and Llms
-  printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
-while(n>0)
+void calcCEFpar(double & q,double & x ,double & y, double & z, double & r,Vector & Blm, Vector & Llm,ionpars * iops)
 {
-
-  printf ("pointcharge= %4g         %4g %4g %4g\n",q,x,y,z);
-  Vector B(0,45); B=0;
-  Vector gamma(0,45); gamma=0; 
-
- // calculate Blm's and Llm's
- double r,ct,ct2,st,st2,sfi,cfi;
- r = sqrt(x * x + y * y + z * z);
- fprintf (conv_file," %4g  %4g %4g %4g  %4g  ",q,x,y,z,r);
+ Vector B(0,45); B=0;
+ Vector gamma(0,45); gamma=0; 
+ double ct,ct2,st,st2,sfi,cfi;
  ct = z/r;                 //z
  ct2 = ct * ct;      
  st = sqrt(x*x+y*y)/r;
@@ -294,35 +135,284 @@ while(n>0)
  double J2meV=1/1.60217646e-22; // 1 millielectron volt = 1.60217646 × 10-22 joules
 
  // now calculation of the B_LM  and L_LM in meV
-                    (*iops).Blm(0)+=-B(0)*e*e*(*iops).nof_electrons*umr;// printf("B(%i)=%g sum(B)=%g\n",0,B(0),(*iops).Blm(0));                  
-                    fprintf (conv_file,"%g ",-B(0)*e*e*(*iops).nof_electrons*umr);
-                    (*iops).Llm(0)+=-echarge*gamma(0)*sqrt(1.0/4.0/PI)*J2meV;//printf("gamma(%i)=%g Llm=%g\n",0,gamma(0),(*iops).Llm(0));  
-                    fprintf (conv_file,"%g ",-echarge*gamma(0)*sqrt(1.0/4.0/PI)*J2meV);
- for (i=1;i<=5;++i){(*iops).Blm(i)+=-B(i)*e*e*(*iops).r2*(*iops).alpha*ehv2; // printf("B(%i)=%g sum(B)=%g\n",i,B(i),(*iops).Blm(i));
-                    fprintf (conv_file,"%g ",-B(i)*e*e*(*iops).r2*(*iops).alpha*ehv2);
-                   if(i!=3){(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/8.0/PI)*J2meV;
-                            fprintf (conv_file,"%g ",-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/8.0/PI)*J2meV);}  //m<>0
-                   else    {(*iops).Llm(i)+=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/4.0/PI)*J2meV;
-                            fprintf (conv_file,"%g ",-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/4.0/PI)*J2meV);}  //m=0
+                    Blm(0)=-B(0)*e*e*(*iops).nof_electrons*umr;// printf("B(%i)=%g sum(B)=%g\n",0,B(0),(*iops).Blm(0));                  
+                    Llm(0)=-echarge*gamma(0)*sqrt(1.0/4.0/PI)*J2meV;//printf("gamma(%i)=%g Llm=%g\n",0,gamma(0),(*iops).Llm(0));  
+ for (i=1;i<=5;++i){Blm(i)=-B(i)*e*e*(*iops).r2*(*iops).alpha*ehv2; // printf("B(%i)=%g sum(B)=%g\n",i,B(i),(*iops).Blm(i));
+                   if(i!=3){Llm(i)=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/8.0/PI)*J2meV;
+                           }  //m<>0
+                   else    {Llm(i)=-echarge*(*iops).r2*a0*a0*1e-20*gamma(i)*sqrt(5.0/4.0/PI)*J2meV;
+                           }  //m=0
                   }
- for (i=13;i<=21;++i){(*iops).Blm(i)+=-B(i)*e*e*(*iops).r4*(*iops).beta*ehv4; 
-                            fprintf (conv_file,"%g ",-B(i)*e*e*(*iops).r4*(*iops).beta*ehv4);
-                   if(i!=17){(*iops).Llm(i)+=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/8.0/PI)*J2meV;
-                            fprintf (conv_file,"%g ",-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/8.0/PI)*J2meV);}  //m<>0
-                   else     {(*iops).Llm(i)+=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/4.0/PI)*J2meV;
-                            fprintf (conv_file,"%g ",-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/4.0/PI)*J2meV);}  //m=0
+ for (i=13;i<=21;++i){Blm(i)=-B(i)*e*e*(*iops).r4*(*iops).beta*ehv4; 
+                      
+                   if(i!=17){Llm(i)=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/8.0/PI)*J2meV;
+                            }  //m<>0
+                   else     {Llm(i)=-echarge*(*iops).r4*a0*a0*a0*a0*1e-40*gamma(i)*sqrt(9.0/4.0/PI)*J2meV;
+                            }  //m=0
                     }
- for (i=33;i<=45;++i){(*iops).Blm(i)+=-B(i)*e*e*(*iops).r6*ehv6*(*iops).gamma;
-                            fprintf (conv_file,"%g ",-B(i)*e*e*(*iops).r6*ehv6*(*iops).gamma);
-                   if(i!=39){(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/8.0/PI);
-                            fprintf (conv_file,"%g ",-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/8.0/PI));}  //m<>0
-                   else     {(*iops).Llm(i)+=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/4.0/PI);
-                            fprintf (conv_file,"%g ",-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/4.0/PI));}  //m=0
-                    } fprintf(conv_file,"\n");
+ for (i=33;i<=45;++i){Blm(i)=-B(i)*e*e*(*iops).r6*ehv6*(*iops).gamma;
+                            
+                   if(i!=39){Llm(i)=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/8.0/PI);
+                            }  //m<>0
+                   else     {Llm(i)=-echarge*(*iops).r6*a0*a0*a0*a0*a0*a0*1e-60*gamma(i)*J2meV*sqrt(13.0/4.0/PI);
+                            }  //m=0
+                    } 
 // now Llm=-|e|q*<r^l> sqrt((2l+1)/4pi) Zlm(Omegai)/[r^(l+1)eps0(2l+1)] in SI units [N m=J] transformed to meV by J2mEV
 //     Ll0=-|e|q*<r^l> sqrt((2l+1)/8pi) ...  for m=0
 
 // now Blm=-e^2 <r^l> theta_l 4pi*q*|plm|*Zlm(Omegai)/[r^(l+1)(2l+1)]
+}
+
+/**********************************************************************/
+// main program
+int main (int argc, char **argv)
+{// check command line
+
+
+  if (argc < 3)
+    { printf (
+"\n Program to calculate Crystal field Parameters from Point Charges \n\n"
+" Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos\n\n"
+"example 1: pointc  Ce3+ 0.2 4 1 5.3\n\n"
+"           ... meaning calculate Blm (Stevens Parameters) \n"
+"               and   Llm (Wybourne Parameters) \n"
+"               for one pointcharge of +0.2|e| in distance\n"
+"               x=4 A y=1 A z=5.3 A from a Ce3+ ion.\n\n"
+"example 2: pointc Ce3+ file.pos\n"
+"          ... meaning read several charges+coordinates from file.pos,\n"
+"              file format: column 1=charge, column 2-4 = x y z coordinate.\n"
+"              (note,progam makenn creates useful files for this option from \n"
+"              the crystal structure).\n\n"
+"example 3: pointc file.sipf 0.2 4 1 5.3\n"
+"          ... the single ion property file.sipf must contain in the first line\n"
+" #!MODULE=so1ion \n"
+" # and should conatin the following information (# denotes comments):\n"
+" #the name of the ion\n"
+" IONTYPE=Ce3+\n"
+" #stevens parameters(optional,necessary for output of Blm)\n"
+" ALPHA=-0.0571429\n"
+" BETA=0.00634921\n"
+" GAMMA=0\n"
+" # the radial matrix elements RN=<r^N> \n"
+" # in units of a0^N (a0=0.5292 A)\n"
+" R2=1.309\n"
+" R4=3.964\n"
+" R6=23.31\n"
+" #radial wave function parameters, for transition metal ions the the values\n"
+" #are tabulated in Clementi & Roetti Atomic data and nuclear data tables 14 \n"
+" #(1974) 177-478, the radial wave function is expanded as\n"
+" # R(r)=sum_p Cp r^(Np-1) exp(-XIp r)(2 XIp)^(Np+0.5)/sqrt(2Np!)\n"
+" #rare earth:Freeman&Watson PR127(1962)2058,Sovers J.Phys.Chem.Sol.28(1966)1073\n"
+" #e.g. Co2+ is isoelectronic to Fe+, looking at page 422\n"
+" #of Clemente & Roetti the parameters are \n"
+" N1=3 XI1=4.95296 C1=0.36301 \n"
+" N2=3 XI2=12.2963 C2=0.02707 \n"
+" N3=3 XI3=7.03565 C3=0.14777\n"
+" N4=3 XI4=2.74850 C4=0.49771 \n"
+" N5=3 XI5=1.69027 C5=0.11388 \n"
+" # if the above parameters are given the radial wave function\n"
+" # is output to file results\\radwavfun.dat\n\n"
+"OUTPUT:  stdout ... sipf file with CEF pars(including radial matrix elements\n"
+"                    and Stevens factors)\n"
+"         results\\pointc.out ...contains results of convergence when summing up\n"
+"                 contributions of different neighbours one by one...\n"
+"         results\\pointc.dBlm .. for option -d ... derivatives dBlm/du\n" 
+"         results\\pointc.dLlm .. for option -d ... derivatives dLlm/du\n" 
+"                 ... derivatives are with respect to u=neighborposition(A)/a0\n"
+);
+      exit (1);
+    }
+
+FILE * table_file;
+FILE * conv_file;
+FILE * sipf_file;
+FILE * dBlm_file;
+FILE * dLlm_file;
+//char instr[MAXNOFCHARINLINE];
+int i,n=0,ac=0;
+float invalues[100];invalues[0]=99;
+  double q,x,y,z;int do_deriv=0;
+// set stevens parameters and landefactor, J and <r^l> of ion
+if(strcmp(argv[1],"-d")==0) {ac=1;do_deriv=1;dBlm_file=fopen_errchk("results/pointc.dBlm","w");
+                                        dLlm_file=fopen_errchk("results/pointc.dLlm","w");} // calculate derivatives of Blm Llm
+
+// read create class object ionpars from iontype - sets J, gJ, Stevens factors from the
+// routine getpar in cfieldrout.c, thus takes the single ion parameters from
+// the same source as the cfield program ...
+ ionpars * iops;
+ jjjpar * jjjps;
+ //char *token;
+ if((sipf_file=fopen(argv[1+ac],"r"))) //read ion parameters from file
+ {
+
+ /*  iops=new ionpars(2);
+   jjjps=new jjjpar(1,1,1);
+   while(feof(sipf_file)==false)
+  {if(fgets(instr, MAXNOFCHARINLINE, sipf_file)){// strip /r (dos line feed) from line if necessary
+                                      while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
+                                      printf("%s",instr);
+                                    }
+   
+//   if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
+        extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE);
+        
+        extract(instr,"N1",(*jjjps).Np(1));extract(instr,"XI1",(*jjjps).Xip(1));extract(instr,"C1",(*jjjps).Cp(1));
+        extract(instr,"N2",(*jjjps).Np(2));extract(instr,"XI2",(*jjjps).Xip(2));extract(instr,"C2",(*jjjps).Cp(2));
+        extract(instr,"N3",(*jjjps).Np(3));extract(instr,"XI3",(*jjjps).Xip(3));extract(instr,"C3",(*jjjps).Cp(3));
+        extract(instr,"N4",(*jjjps).Np(4));extract(instr,"XI4",(*jjjps).Xip(4));extract(instr,"C4",(*jjjps).Cp(4));
+        extract(instr,"N5",(*jjjps).Np(5));extract(instr,"XI5",(*jjjps).Xip(5));extract(instr,"C5",(*jjjps).Cp(5));
+        extract(instr,"N6",(*jjjps).Np(6));extract(instr,"XI6",(*jjjps).Xip(6));extract(instr,"C6",(*jjjps).Cp(6));
+        extract(instr,"N7",(*jjjps).Np(7));extract(instr,"XI7",(*jjjps).Xip(7));extract(instr,"C7",(*jjjps).Cp(7));
+        extract(instr,"N8",(*jjjps).Np(8));extract(instr,"XI8",(*jjjps).Xip(8));extract(instr,"C8",(*jjjps).Cp(8));
+        extract(instr,"N9",(*jjjps).Np(9));extract(instr,"XI9",(*jjjps).Xip(9));extract(instr,"C9",(*jjjps).Cp(9));
+
+        extract(instr,"nof_electrons",(*iops).nof_electrons);
+        extract(instr,"ALPHA",(*iops).alpha);
+        extract(instr,"BETA",(*iops).beta);
+        extract(instr,"GAMMA",(*iops).gamma);
+
+        extract(instr,"R2",  (*jjjps).r2);
+        extract(instr,"R4",  (*jjjps).r4);
+        extract(instr,"R6",  (*jjjps).r6);
+//        }
+  }
+      if((*jjjps).r2==0){(*jjjps).r2_from_radial_wavefunction();printf("#<r^2>  from radial wavefunction in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);}
+      if((*jjjps).r4==0){(*jjjps).r4_from_radial_wavefunction();printf("#<r^4>  from radial wavefunction in units of a0^4 a0=0.5292 Angstroem\nR4=%g\n",(*jjjps).r4);}
+      if((*jjjps).r6==0){(*jjjps).r6_from_radial_wavefunction();printf("#<r^6>  from radial wavefunction in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);}
+     
+      (*iops).r2=(*jjjps).r2;
+      (*iops).r4=(*jjjps).r4;
+      (*iops).r6=(*jjjps).r6;
+*/
+  
+  fclose(sipf_file);
+  printf("#!MODULE=so1ion\n");
+  jjjps=new jjjpar(0,0,0,argv[1+ac]);
+  if((*jjjps).module_type!=4){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' !\n",argv[1+ac]);exit(1);}  
+  iops=(*jjjps).iops;
+      if((*iops).r2==0){(*jjjps).r2_from_radial_wavefunction();
+                        printf("#<r^2>  from radial wavefunction in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);
+                        (*iops).r2=(*jjjps).r2;}
+      if((*iops).r4==0){(*jjjps).r4_from_radial_wavefunction();
+                        printf("#<r^4>  from radial wavefunction in units of a0^4 a0=0.5292 Angstroem\nR4=%g\n",(*jjjps).r4);
+                        (*iops).r4=(*jjjps).r4;}
+      if((*iops).r6==0){(*jjjps).r6_from_radial_wavefunction();
+                        printf("#<r^6>  from radial wavefunction in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);
+                        (*iops).r6=(*jjjps).r6;}
+(*iops).Blm=0;
+(*iops).Llm=0;
+(*jjjps).save_sipf(stdout);
+ }
+ else
+ {printf ("#!MODULE=so1ion\n#<!--mcphase.sipf-->\n");
+  printf("#*********************=*************************************************\n");
+  printf("# program pointc - crystal field parameters by the pointcharge model\n");
+  printf("# Martin Rotter, %s\n",MCPHASVERSION);
+  printf("# Reference: Ernst Bauer and Martin Rotter - Crystal field effects \n");
+  printf("#            in Rare Earth Compounds, in print\n");
+  printf("#***********************************************************************\n");
+  iops=new ionpars(argv[1+ac]);  // read ion parameters from internal table  
+//  printf ("IONTYPE=%s\n",(*iops).iontype);
+// printout the information used in pointc to output 
+//  printf("#Stevens factors\nALPHA=%4g\nBETA=%4g\nGAMMA=%4g\n",(*iops).alpha,(*iops).beta,(*iops).gamma);
+//  printf("#Expectation values of radial wave function <r^k> in units of a0^k a0=0.5292 Angstroem\n");
+//  printf("R2=%4g\nR4=%4g\nR6=%4g\n\n",(*iops).r2,(*iops).r4,(*iops).r6);
+(*iops).Blm=0;
+(*iops).Llm=0;
+(*iops).save(stdout);  
+ printf("#J=%4g\n",(*iops).J);
+ printf("#Lande Factor gJ\n GJ = %4g\n",(*iops).gJ);
+ }
+
+// zero parameters in case initialisation put some values to the parameters ...
+conv_file=fopen_errchk("results/pointc.out","w");
+fprintf(conv_file,"#charge(|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B66 L66\n");
+if (do_deriv){fprintf(dBlm_file,"#x y z(A) dB00/dux dB00/duy dB00/duz dB22S/dux dB22S/duy dB22S/duz dB21S/du ... dB20/du... dB22/du... dB66/duz\n");
+              fprintf(dLlm_file,"#x y z(A) dL00/dux dL00/duy dL00/duz dL22S/dux dL22S/duy dL22S/duz dL21S/du ... dL20/du... dL22/du... dL66/duz\n");}
+Vector dBlm0x(0,45),dLlm0x(0,45);dBlm0x=0;dLlm0x=0;
+Vector dBlm0y(0,45),dLlm0y(0,45);dBlm0y=0;dLlm0y=0;
+Vector dBlm0z(0,45),dLlm0z(0,45);dBlm0z=0;dLlm0z=0;
+if (argc<5) // read pointcharges from file
+{table_file=fopen_errchk(argv[2+ac],"r");
+ while(n==0&&feof(table_file)==false)n=inputline(table_file, invalues);
+  q=invalues[1];
+  x=invalues[2];
+  y=invalues[3];
+  z=invalues[4]; 
+} else 
+{ n=4;
+  q=strtod(argv[2+ac],NULL);
+  x=strtod(argv[3+ac],NULL);
+  y=strtod(argv[4+ac],NULL);
+  z=strtod(argv[5+ac],NULL);
+}
+
+ // print information about pointcharges to file and calculate Blms and Llms
+  printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
+while(n>0)
+{
+
+  printf ("pointcharge= %4g         %4g %4g %4g\n",q,x,y,z);
+ // calculate Blm's and Llm's
+ double r;
+ Vector Blm(0,45),Llm(0,45);
+ r = sqrt(x * x + y * y + z * z);
+ fprintf (conv_file," %4g  %4g %4g %4g  %4g  ",q,x,y,z,r);
+ // calculate Blm Llm for this neighbour
+ calcCEFpar(q,x,y,z,r,Blm,Llm,iops);
+
+ // sum to iops.Blm and iops.Lllm
+                    (*iops).Blm(0)+=Blm(0);fprintf (conv_file,"%g ",Blm(0));
+                    (*iops).Llm(0)+=Llm(0);fprintf (conv_file,"%g ",Llm(0));
+ for (i=1;i<=5;++i){(*iops).Blm(i)+=Blm(i);fprintf (conv_file,"%g ",Blm(i));
+                    (*iops).Llm(i)+=Llm(i);fprintf (conv_file,"%g ",Llm(i));
+                   }
+ for (i=13;i<=21;++i){(*iops).Blm(i)+=Blm(i);fprintf (conv_file,"%g ",Blm(i));
+                    (*iops).Llm(i)+=Llm(i);fprintf (conv_file,"%g ",Llm(i));
+                   }
+ for (i=33;i<=45;++i){(*iops).Blm(i)+=Blm(i);fprintf (conv_file,"%g ",Blm(i));
+                    (*iops).Llm(i)+=Llm(i);fprintf (conv_file,"%g ",Llm(i));
+                   }
+ fprintf(conv_file,"\n");
+
+ if(do_deriv){Vector dBlmx(0,45),dLlmx(0,45);
+              Vector dBlmy(0,45),dLlmy(0,45);
+              Vector dBlmz(0,45),dLlmz(0,45);
+              double x1=x+SMALL_DISPLACEMENT;              
+              double y1=y+SMALL_DISPLACEMENT;              
+              double z1=z+SMALL_DISPLACEMENT;  
+              double a0 = .5292;//(Angstroem)            
+               r = sqrt(x1 * x1 + y * y + z * z);calcCEFpar(q,x1,y,z,r,dBlmx,dLlmx,iops);
+               dBlmx-=Blm;dLlmx-=Llm;
+               dBlmx*=a0/SMALL_DISPLACEMENT;dLlmx*=a0/SMALL_DISPLACEMENT;
+               r = sqrt(x * x + y1 * y1 + z * z);calcCEFpar(q,x,y1,z,r,dBlmy,dLlmy,iops);
+               dBlmy-=Blm;dLlmy-=Llm;
+               dBlmy*=a0/SMALL_DISPLACEMENT;dLlmy*=a0/SMALL_DISPLACEMENT;
+               r = sqrt(x * x + y * y + z1 * z1);calcCEFpar(q,x,y,z1,r,dBlmz,dLlmz,iops);
+               dBlmz-=Blm;dLlmz-=Llm;
+               dBlmz*=a0/SMALL_DISPLACEMENT;dLlmz*=a0/SMALL_DISPLACEMENT;
+               dBlm0x-=dBlmx;dBlm0y-=dBlmy;dBlm0z-=dBlmz;
+               dLlm0x-=dLlmx;dLlm0y-=dLlmy;dLlm0z-=dLlmz;
+              fprintf (dBlm_file,"%4g %4g %4g   ",x,y,z);
+              fprintf (dLlm_file,"%4g %4g %4g   ",x,y,z);
+              fprintf(dBlm_file,"%4g %4g %4g ",dBlmx(0),dBlmy(0),dBlmz(0));
+              fprintf(dLlm_file,"%4g %4g %4g ",dLlmx(0),dLlmy(0),dLlmz(0));
+              for(i=1;i<=5;++i){fprintf(dBlm_file,"%4g %4g %4g ",dBlmx(i),dBlmy(i),dBlmz(i));
+                                fprintf(dLlm_file,"%4g %4g %4g ",dLlmx(i),dLlmy(i),dLlmz(i));
+                                }
+              for(i=13;i<=21;++i){fprintf(dBlm_file,"%4g %4g %4g ",dBlmx(i),dBlmy(i),dBlmz(i));
+                                fprintf(dLlm_file,"%4g %4g %4g ",dLlmx(i),dLlmy(i),dLlmz(i));
+                                }
+              for(i=33;i<=45;++i){fprintf(dBlm_file,"%4g %4g %4g ",dBlmx(i),dBlmy(i),dBlmz(i));
+                                fprintf(dLlm_file,"%4g %4g %4g ",dLlmx(i),dLlmy(i),dLlmz(i));
+                                }
+             fprintf(dBlm_file,"\n");
+             fprintf(dLlm_file,"\n");
+
+             }
+
+ 
+
  n=0;
  if (argc<5)
  { while((n==0)&(feof(table_file)==false))n=inputline(table_file, invalues);
@@ -331,10 +421,28 @@ while(n>0)
   y=invalues[3];
   z=invalues[4]; 
  }
-}
+} // next pointcharge
 
 if (argc<5){fclose(table_file);}
 fclose(conv_file);
+if(do_deriv){
+              fprintf (dBlm_file,"%4g 0.0 0.0 0.0   ",x,y,z);
+              fprintf (dLlm_file,"%4g 0.0 0.0 0.0   ",x,y,z);
+              fprintf(dBlm_file,"%4g %4g %4g ",dBlm0x(0),dBlm0y(0),dBlm0z(0));
+              fprintf(dLlm_file,"%4g %4g %4g ",dLlm0x(0),dLlm0y(0),dLlm0z(0));
+              for(i=1;i<=5;++i){fprintf(dBlm_file,"%4g %4g %4g ",dBlm0x(i),dBlm0y(i),dBlm0z(i));
+                                fprintf(dLlm_file,"%4g %4g %4g ",dLlm0x(i),dLlm0y(i),dLlm0z(i));
+                                }
+              for(i=13;i<=21;++i){fprintf(dBlm_file,"%4g %4g %4g ",dBlm0x(i),dBlm0y(i),dBlm0z(i));
+                                  fprintf(dLlm_file,"%4g %4g %4g ",dLlm0x(i),dLlm0y(i),dLlm0z(i));
+                                }
+              for(i=33;i<=45;++i){fprintf(dBlm_file,"%4g %4g %4g ",dBlm0x(i),dBlm0y(i),dBlm0z(i));
+                                  fprintf(dLlm_file,"%4g %4g %4g ",dLlm0x(i),dLlm0y(i),dLlm0z(i));
+                                }
+             fprintf(dBlm_file,"\n");
+             fprintf(dLlm_file,"\n");
+
+             fclose(dBlm_file);fclose(dLlm_file);}
 printf ("# 1 meV = 8.066 cm-1\n# 1 cm-1 = 0.124 meV\n");
 printf ("# 1 meV = 11.6 K\n# 1 K = 0.0862 meV\n");
 

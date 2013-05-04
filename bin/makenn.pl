@@ -514,7 +514,8 @@ print $l1 "#--------------------------------------------------------------------
 
   if ($rkky==0) # here anisotropic interaction comes in
 
-   {   if($gJ!=0&&$gJ[$ddd]!=0)
+   { 
+       if($gJ!=0&&$gJ[$ddd]!=0)
          {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
           print $l sprintf("%+10.9e %+10.9e ",$Jab->index($n)->at($n1),$Jba->index($n)->at($n1));
