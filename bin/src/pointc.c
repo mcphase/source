@@ -290,13 +290,13 @@ if(strcmp(argv[1],"-d")==0) {ac=1;do_deriv=1;dBlm_file=fopen_errchk("results/poi
   jjjps=new jjjpar(0,0,0,argv[1+ac]);
   if((*jjjps).module_type!=4){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' !\n",argv[1+ac]);exit(1);}  
   iops=(*jjjps).iops;
-      if((*iops).r2==0){(*jjjps).r2_from_radial_wavefunction();
+      if((*iops).r2==1e300||(*iops).r2==0){(*jjjps).r2_from_radial_wavefunction();
                         printf("#<r^2>  from radial wavefunction in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);
                         (*iops).r2=(*jjjps).r2;}
-      if((*iops).r4==0){(*jjjps).r4_from_radial_wavefunction();
+      if((*iops).r4==1e300||(*iops).r4==0){(*jjjps).r4_from_radial_wavefunction();
                         printf("#<r^4>  from radial wavefunction in units of a0^4 a0=0.5292 Angstroem\nR4=%g\n",(*jjjps).r4);
                         (*iops).r4=(*jjjps).r4;}
-      if((*iops).r6==0){(*jjjps).r6_from_radial_wavefunction();
+      if((*iops).r6==1e300||(*iops).r6==0){(*jjjps).r6_from_radial_wavefunction();
                         printf("#<r^6>  from radial wavefunction in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);
                         (*iops).r6=(*jjjps).r6;}
 (*iops).Blm=0;
@@ -426,8 +426,8 @@ while(n>0)
 if (argc<5){fclose(table_file);}
 fclose(conv_file);
 if(do_deriv){
-              fprintf (dBlm_file,"%4g 0.0 0.0 0.0   ",x,y,z);
-              fprintf (dLlm_file,"%4g 0.0 0.0 0.0   ",x,y,z);
+              fprintf (dBlm_file,"0.0 0.0 0.0   ");
+              fprintf (dLlm_file,"0.0 0.0 0.0   ");
               fprintf(dBlm_file,"%4g %4g %4g ",dBlm0x(0),dBlm0y(0),dBlm0z(0));
               fprintf(dLlm_file,"%4g %4g %4g ",dLlm0x(0),dLlm0y(0),dLlm0z(0));
               for(i=1;i<=5;++i){fprintf(dBlm_file,"%4g %4g %4g ",dBlm0x(i),dBlm0y(i),dBlm0z(i));
