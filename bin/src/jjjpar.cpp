@@ -335,7 +335,8 @@ void jjjpar::save_sipf(FILE * fout)
    }
 
   if(module_type>0) // in case of internal modules save common information
-   {fprintf(fout,"#----------------\n# Lande factor gJ\n#----------------\nGJ=%g\n\n",gJ);
+   {fprintf(fout,"#----------------\n# number of electrons in unfilled shell gJ\n#----------------\nnof_electrons=%i\n\n",nof_electrons);
+    fprintf(fout,"#----------------\n# Lande factor gJ\n#----------------\nGJ=%g\n\n",gJ);
     fprintf(fout,"#-------------------------------------------------------\n");
     fprintf(fout,"# Neutron Scattering Length (10^-12 cm) (can be complex)\n");
     fprintf(fout,"#-------------------------------------------------------\n");
