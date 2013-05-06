@@ -145,7 +145,7 @@ extern "C" int du1calc(int & tn,double & T,Vector & Fxc, Vector & Hext,
 int pr;
 
   pr=0;if (tn<0) {pr=1;tn*=-1;}
-  if (T<0){T=-T;}
+  if (T<0){T=-T;} 
 //if(gjmbH.Hi()<6||MODPAR.Hi()<1)
 //   {fprintf(stderr,"Error loadable module phonon.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
 //    exit(EXIT_FAILURE);}

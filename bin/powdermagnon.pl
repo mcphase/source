@@ -70,12 +70,13 @@ my ($Emax) = eval $ARGV[3];
 $ARGV[4]=~s/exp/essp/g;$ARGV[4]=~s/x/*/g;$ARGV[4]=~s/essp/exp/g;
 my ($deltaE) = eval $ARGV[4];
 print "#Emin=".$Emin." meV   Emax=".$Emax." meV deltaE=".$deltaE." meV\n";
-print "#Ha[T] Hb[T] Hc[T] T[K] Q[A^-1] energy[meV] powderintensity [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n";
+print "#Ha[T] Hb[T] Hc[T] T[K] Q[A^-1] energy[meV] powderintensity powderintensity_bey powderintensity_nuc [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n";
 
 $n=int(($Emax-$Emin)/$deltaE);
 
 my (@ints)=();$#ints=$n;
 my (@intsbey)=();$#intsbey=$n;
+my (@intsnuc)=();$#intsnuc=$n;
 
 $qold=0;$counter=1;
 $qhold=0;$qkold=0;$qlold=0;
@@ -87,15 +88,19 @@ while(<$h>)
   $q=$numbers[7];
   if($q!=$qold&&$qold!=0){
      for($i=0;$i<=$n;++$i){
-     $E=$Emin+($i-0.5)*$deltaE;$ints[$i]/=$counter;$intsbey[$i]/=$counter;
+     $E=$Emin+($i-0.5)*$deltaE;
+     $ints[$i]/=$counter;
+     $intsbey[$i]/=$counter;
+     $intsnuc[$i]/=$counter;
      print $numbers1[0]." ".$numbers1[1]." ".$numbers1[2]." ".$numbers1[3]." ";
-     print $qold." ".$E." ".$ints[$i]." ".$intsbey[$i]."\n";}
-     $counter=0;@ints=0;@intsbey=0;
+     print $qold." ".$E." ".$ints[$i]." ".$intsbey[$i]." ".$intsnuc[$i]."\n";}
+     $counter=0;@ints=0;@intsbey=0;@intsnuc=0;
                }
   if($numbers[8]<=$Emax&&$numbers[8]>=$Emin)
   {  $i=int(($numbers[8]-$Emin)/$deltaE);
      $ints[$i]+=$numbers[9];
      $intsbey[$i]+=$numbers[10];
+     $intsnuc[$i]+=$numbers[11];
   }
   $qold=$q;
   $qh=$numbers[4];
