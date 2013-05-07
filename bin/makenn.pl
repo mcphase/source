@@ -300,22 +300,22 @@ my $i,$j;$i=0;
              if(open (Fin,$file))
              {while($line=<Fin>){
                 if($line=~/^(#!|[^#])*\bMODPAR2\s*=\s*/) {($Kxxread)=($line=~m/^(?:#!|[^#])*\bMODPAR2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kxxread+=$Kxx/4;
+                                                           $Kxxread+=$Kxx/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR2\s*=\s*[^\s\;\n\t\*]+/$1MODPAR2=$Kxxread/g;}
                 if($line=~/^(#!|[^#])*\bMODPAR3\s*=\s*/) {($Kyyread)=($line=~m/^(?:#!|[^#])*\bMODPAR3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kyyread+=$Kyy/4;
+                                                           $Kyyread+=$Kyy/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR3\s*=\s*[^\s\;\n\t\*]+/$1MODPAR3=$Kyyread/g;}
                 if($line=~/^(#!|[^#])*\bMODPAR4\s*=\s*/) {($Kzzread)=($line=~m/^(?:#!|[^#])*\bMODPAR4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kzzread+=$Kzz/4;
+                                                           $Kzzread+=$Kzz/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR4\s*=\s*[^\s\;\n\t\*]+/$1MODPAR4=$Kzzread/g;}
                 if($line=~/^(#!|[^#])*\bMODPAR5\s*=\s*/) {($Kxyread)=($line=~m/^(?:#!|[^#])*\bMODPAR5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kxyread+=$Kxy/4;
+                                                           $Kxyread+=$Kxy/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR5\s*=\s*[^\s\;\n\t\*]+/$1MODPAR5=$Kxyread/g;}
                 if($line=~/^(#!|[^#])*\bMODPAR6\s*=\s*/) {($Kyzread)=($line=~m/^(?:#!|[^#])*\bMODPAR6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kyzread+=$Kyz/4;
+                                                           $Kyzread+=$Kyz/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR6\s*=\s*[^\s\;\n\t\*]+/$1MODPAR6=$Kyzread/g;}
                 if($line=~/^(#!|[^#])*\bMODPAR7\s*=\s*/) {($Kxzread)=($line=~m/^(?:#!|[^#])*\bMODPAR7\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kxzread+=$Kxz/4;
+                                                           $Kxzread+=$Kxz/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR7\s*=\s*[^\s\;\n\t\*]+/$1MODPAR7=$Kxzread/g;}
                $line_store[$i]=$line;++$i;}
               close Fin;
