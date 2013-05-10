@@ -149,7 +149,7 @@ $nn,$_,$imax[$nn-1]
       # input data int piddle
       open($h,$file);
       open($l,">./results/hkl.asc");
-      print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs Intensity of  ".$v[$n]."vs sqrt(int) from file $file\n");
+      print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values of Intensity(or |m(Q)|) of ".$v[$n]."vs sqrt(int or |m(Q)|) as read from file $file\n");
       while(<$h>)
       {next if /^\s*#/;  
       $x=new PDL(split " ");
