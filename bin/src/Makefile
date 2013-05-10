@@ -204,6 +204,7 @@ qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp my
 	$(CCC) $(CFLAGS) $<
 
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
+#	$(CCC) $(CFLAGS)  $<
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
 
 anisotropy.o: anisotropy.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c

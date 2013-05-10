@@ -176,6 +176,9 @@ endproper:
    fprintf(stderr,"          End of Program mcphas\n");
    fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(stderr,"**********************************************\n");
+#ifdef _THREADS
+for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
+#endif
 
 return(0);
 }

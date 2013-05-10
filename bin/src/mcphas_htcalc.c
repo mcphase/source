@@ -64,6 +64,7 @@ class htcalc_input { public:
 // Declares these variables global, so all threads can see them
 // ----------------------------------------------------------------------------------- //
 htcalc_thread_data thrdat;
+htcalc_input *tin[NUM_THREADS];
 MUTEX_TYPE mutex_loop;
 MUTEX_TYPE mutex_tests;
 MUTEX_TYPE mutex_min;
@@ -436,15 +437,17 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    thrdat.H = H;
    thrdat.T = T;
    thrdat.ini=&ini;
-   thrdat.testqs = &testqs;
+   thrdat.testqs = &testqs; 
    thrdat.testspins = &testspins;
    thrdat.physprops = &physprops;
    thrdat.femin = femin;
    thrdat.spsmin = spsmin; 
    thrdat.thread_id = -1;
-   htcalc_input *tin[NUM_THREADS];
-   for (int ithread=0; ithread<NUM_THREADS; ithread++) tin[ithread] = new htcalc_input(0,ithread,&inputpars);
- 
+//   htcalc_input *tin[NUM_THREADS];
+   static int washere=0;
+   if(washere==0){washere=1;
+                  for (int ithread=0; ithread<NUM_THREADS; ithread++) tin[ithread] = new htcalc_input(0,ithread,&inputpars);}
+  
  MUTEX_INIT(mutex_loop);
  MUTEX_INIT(mutex_tests);
  MUTEX_INIT(mutex_min);

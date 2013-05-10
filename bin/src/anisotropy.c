@@ -131,7 +131,9 @@ fclose(fout);
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program anisotropy\n");
    fprintf(stderr,"**********************************************\n");
-
+#ifdef _THREADS
+for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
+#endif
 return(0);
 }
 
