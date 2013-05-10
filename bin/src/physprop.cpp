@@ -283,10 +283,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       if(ortho==0){
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - i component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  FT||i       h   k   l   FT||i       h   k   l   FT||i ...}\n");
+   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  |mi(Q)|      h   k   l   |mi(Q)|      h   k   l   |mi(Q)|[mu_B/atom] ...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - a component\n"); 
-   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  FT||a       h   k   l   FT||a       h   k   l   FT||a ...}\n");
+   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  |ma(Q)|      h   k   l   |ma(Q)|      h   k   l  |ma(Q)| [mu_B/atom]...}\n");
    }
    fclose(fout);
    //xray b component
@@ -302,10 +302,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       if(ortho==0){
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - j component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  FT||j       h   k   l   FT||j       h   k   l   FT||j ...}\n");
+   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  |mj(Q)|       h   k   l   |mj(Q)|       h   k   l   |mj(Q)|[mu_B/atom]...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - b component\n"); 
-   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  FT||b       h   k   l   FT||b       h   k   l   FT||b ...}\n");
+   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  |mb(Q)|       h   k   l   |mb(Q)|      h   k   l  |mb(Q)| [mu_B/atom] ...}\n");
    }
    fclose(fout);
    //xray c component
@@ -321,10 +321,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       if(ortho==0){
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - k component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  FT||k       h   k   l   FT||k       h   k   l   FT||k ...}\n");
+   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  |mk(Q)|       h   k   l  |mk(Q)|      h   k   l   |mk(Q)| [mu_B/atom]...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - c component\n"); 
-   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  FT||c       h   k   l   FT||c       h   k   l   FT||c ...}\n");
+   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  |mc(Q)|       h   k   l   |mc(Q)|       h   k   l   |mc(Q)| [mu_B/atom]...}\n");
    }
    fclose(fout);
 

@@ -71,8 +71,8 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       // check if maxnofhklis was modified by user
   if (ini.maxnofhkls!=physprops.maxnofhkls){physprops.update_maxnofhkls(ini.maxnofhkls);}
   mmax=0; int qh,qk,ql;j=0;
-  ComplexVector a(1,3),qeuklid(1,3);
-    complex<double> piq(0,2*3.1415926535),g;
+  ComplexVector a(1,3),aFT(1,3),qeuklid(1,3);
+    complex<double> piq(0,2*3.1415926535),g,gFT;
   ComplexVector * mq;
   Vector ri(1,3);
       Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
@@ -153,13 +153,15 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       hkl2ijk(ri,hkl,abc);qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
       QQ=Norm(qeuklid);
 
-     a=0;
+     a=0;aFT=0;
      for(l=1;l<=inputpars.nofatoms;++l)
       {//multiply mq by lattice positions exp(iqr_i) and sum into a
        ri=inputpars.rez*(const Vector&)(*inputpars.jjj[l]).xyz; // ri ... atom position with respect to primitive lattice
-       g=exp(piq*(Q*ri))*(*inputpars.jjj[l]).debyewallerfactor(QQ)*(*inputpars.jjj[l]).F(QQ)/2.0; // and formfactor + debey waller factor
+       gFT=exp(piq*(Q*ri));
+       g=gFT*(*inputpars.jjj[l]).debyewallerfactor(QQ)*(*inputpars.jjj[l]).F(QQ); // and formfactor + debey waller factor
         for(l1=1;l1<=3;++l1){
          a(l1)+=g*mq[mf.in(qh,qk,ql)](3*(l-1)+l1);
+         aFT(l1)+=gFT*mq[mf.in(qh,qk,ql)](3*(l-1)+l1);
                             }
       }
       if (QQ<ini.maxQ||(i1==0&&j1==0&&k1==0&&ini.maxQ==0))
@@ -181,9 +183,9 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 	         physprops.hkli[j](2)=hkl(2);
                  physprops.hkli[j](3)=hkl(3);
 	         physprops.hkli[j](4)=in;
-		 physprops.hkli[j](5)=abs((complex<double>)a(1)/(double)sps.n()/(double)sps.nofatoms);
-		 physprops.hkli[j](6)=abs((complex<double>)a(2)/(double)sps.n()/(double)sps.nofatoms);
-		 physprops.hkli[j](7)=abs((complex<double>)a(3)/(double)sps.n()/(double)sps.nofatoms);
+		 physprops.hkli[j](5)=abs((complex<double>)aFT(1)/(double)sps.n()/(double)sps.nofatoms);
+		 physprops.hkli[j](6)=abs((complex<double>)aFT(2)/(double)sps.n()/(double)sps.nofatoms);
+		 physprops.hkli[j](7)=abs((complex<double>)aFT(3)/(double)sps.n()/(double)sps.nofatoms);
 		 }
 	    else
 	        {int jmin,jj; //determine minimal intensity in list
