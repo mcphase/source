@@ -3,28 +3,26 @@
  # perl packages to use
  use FileHandle;
  use PDL;
- #use PDL::Graphics::PGPLOT;
- #use PGPLOT;
  
  #get filename from command line if given
  my ($file) = @ARGV;
  if ($file&&$file=~/-.*h/) # look if user wants help message (option -h)
- {print "program hkl [options] [file] 
+ {print "program hkl [-FT|-h][-7] [file] 
   produces neutron intensity for one reflection from results/mcphas*.hkl file
-  Options: -n .... plot reflex number n
+  Options: -7 .... extract reflex number 7
            -h .... help
-  If no file is given the program uses file results/mcphas.hkl.\n";exit;
+           -FT ... extract value of Fourietransform from e.g. mcphasa.hkl,... file
+  If no file is given the program uses file results/mcphas.hkl. and plots the neutron intensity\n";exit;
  }
  $xcol=0;$ycol=7;$n=0;  # set default axes
+ $FT=0;
+ if ($file&&$file=~/-FT/) # look if user gives reflection number (option -n)
+ {$FT=1;shift @ARGV;($file)=@ARGV;}
  if ($file&&$file=~/-/) # look if user gives reflection number (option -n)
  {$n=-$file;shift @ARGV;($file)=@ARGV;}
+  $file = "./results/mcphas.hkl"  unless $file;
  
- $file = "./results/mcphas.hkl"  unless $file;
- 
- 
- 
- 
-     overview_plot("/xserv", $file); # plot on screen
+    overview_plot("/xserv", $file); # plot on screen
  #    overview_plot("./hkl.ps/cps", $file); #then plot on psfile
      print "Wrote output file 'results/hkl.asc'\n";
  
@@ -33,43 +31,14 @@
      my ($devspec, $datalist) = @_;
  
      my ($data,$Limits) = get_detector_data_2D($datalist);
- #open page on pgplot server to be able to disply/print
- #    my $dev = dev("$devspec");
- #    die "PGOPEN failed!" unless $dev > 0;
- #unless ($title)
- #{# input plot title
- #print "plot title: <Neutron Intensity>";$title=($_=<STDIN>);
- #   $title="Neutron Intensity"  unless /./;$title=~s/\n//;	
- #}
- 
- #plot data
- #    plot_array_2D($data,$Limits);
- #close page on pgplot server
- #	pgclos;
- #close;
  	return ();
  }
  
  sub plot_array_2D {
      my ($data,$Limits) = @_;
      my ($x0,$x1,$y0,$y1,$xcol,$ycol,$xtext,$ytext) = @{$Limits};
- #    pgvstd; # set standard (default) viewport
- #    pgpap(6.5,1.0);
- #    hold;   # wait with display until release command is given
- #    pgswin ($x0,$x1,$y0,$y1); #@{$info->{'Limits'}}; #set window
- #    pgbox("BCNSTI", 0.0, 0.0, "BCNSTI", 0.0, 0.0); #draw labeled frame arount viewport
- 
-     #draw datapoints from slice of piddle "$data"
- #    points $data->slice("$xcol,:"),$data->slice("$ycol,:") ;
- #    pglab($xtext,$ytext, "");
      print "#".$xtext." ".$ytext."\n";
      print $data->slice("$xcol,:")." ".$data->slice("$ycol,:")."\n" ;
-     #label plot
- 
- 
- #    pgmtxt("T", 2.5, 0.5, 0.5, $title);
- #    pgebuf; #end the buffer and
- #    release; #display it
  }
  
  # Get numerical data, reading it from file 
@@ -78,7 +47,6 @@
       unless ($info->{'file read'})
      {($info->{'Numeric Data'},$ytext,$info->{'file read'}) = read_data_file_2D($info);
       $in=1;
- #     unless ($n)
       unless (1)
       {# let user select axes
       print "\n 1. x\n 2. y\n 3. T(K)\n 4. |H|(T)\n 5. Ha(T)\n 6. Hb(T)\n 7. Hc(T)\n";
@@ -123,18 +91,20 @@ $nn,$_,$imax[$nn-1]
       {next if /^\s*#/;  
       $x=new PDL(split " ");
  
-       for ($k=7;$k<(($x->dims)[0]-1);$k+=4)
+       for ($k=7;$k<(($x->dims)[0]-1);$k+=4+$FT)
        {
  
         $y=$x->slice($k.":".($k+2));
         $ok=0;
         $nn=0;foreach (@v){++$nn;if (sum($y==$_)==3){
-          if ($imax[$nn-1]<$x->at($k+3)){$imax[$nn-1]=$x->at($k+3);}
+          $int=$x->at($k+3);if($FT==1){$int=$x->at($k+3)*$x->at($k+3)+$x->at($k+4)*$x->at($k+4);}
+          if ($imax[$nn-1]<$int){$imax[$nn-1]=$int;}
                                             $ok=1;}       
                           }
         if ($ok==0){
         $v[($#v-$[+1)]=($y);   # addy $y to list $v
-        $imax[($#imax-$[+1)]=$x->at($k+3);
+        $int=$x->at($k+3);if($FT==1){$int=$x->at($k+3)*$x->at($k+3)+$x->at($k+4)*$x->at($k+4);}
+         $imax[($#imax-$[+1)]=$int;
                    }
        }
       }
@@ -149,18 +119,28 @@ $nn,$_,$imax[$nn-1]
       # input data int piddle
       open($h,$file);
       open($l,">./results/hkl.asc");
-      print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values of Intensity(or |m(Q)|) of ".$v[$n]."vs sqrt(int or |m(Q)|) as read from file $file\n");
+      if($FT==0)
+      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values of Intensity of ".$v[$n]."vs sqrt(int or |m(Q)|) as read from file $file\n");}
+      else
+      {print $l ("# x y T[K] |H| Ha Hb Hc [T]  vs  values REAL(m(Q)) vs IMAG(m(Q)) of ".$v[$n]." as read from file $file\n");}
       while(<$h>)
       {next if /^\s*#/;  
       $x=new PDL(split " ");
-       for ($k=7;$k<(($x->dims)[0]-1);$k+=4)
+       for ($k=7;$k<(($x->dims)[0]-1);$k+=4+$FT)
        {$y=$x->slice($k.":".($k+2));
         if (sum(abs($y-$v[$n])<1e-5)==3){
         #add xyz to piddle
         $y=$x->slice("0:6");
-        $z=$x->slice(($k+3).":".($k+3));
+        if($FT==0)
+        {$z=$x->slice(($k+3).":".($k+3));
         push(@xlist,$y->append($z));
         $out=(($y->append($z))->append(sqrt($z)));
+        }else
+       {$z=$x->slice(($k+3).":".($k+3));
+        $z1=$x->slice(($k+4).":".($k+4));
+        push(@xlist,$y->append($z));
+        $out=(($y->append($z))->append($z1));
+        }
         $out=~s/\[/ /g;   
         $out=~s/\]/ /g;   
         print $l ($out."\n");
