@@ -183,12 +183,12 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 	         physprops.hkli[j](2)=hkl(2);
                  physprops.hkli[j](3)=hkl(3);
 	         physprops.hkli[j](4)=in;
-		 physprops.hkli[j](5)=real((complex<double>)aFT(1)/(double)sps.n()/(double)sps.nofatoms);
-		 physprops.hkli[j](7)=real((complex<double>)aFT(2)/(double)sps.n()/(double)sps.nofatoms);
-		 physprops.hkli[j](9)=real((complex<double>)aFT(3)/(double)sps.n()/(double)sps.nofatoms);
-		 physprops.hkli[j](6)=imag((complex<double>)aFT(1)/(double)sps.n()/(double)sps.nofatoms);
-		 physprops.hkli[j](8)=imag((complex<double>)aFT(2)/(double)sps.n()/(double)sps.nofatoms);
-		 physprops.hkli[j](10)=imag((complex<double>)aFT(3)/(double)sps.n()/(double)sps.nofatoms);
+		 physprops.hkli[j](5)=real(aFT(1))/(double)sps.n()/(double)sps.nofatoms;
+		 physprops.hkli[j](7)=real(aFT(2))/(double)sps.n()/(double)sps.nofatoms;
+		 physprops.hkli[j](9)=real(aFT(3))/(double)sps.n()/(double)sps.nofatoms;
+		 physprops.hkli[j](6)=imag(aFT(1))/(double)sps.n()/(double)sps.nofatoms;
+		 physprops.hkli[j](8)=imag(aFT(2))/(double)sps.n()/(double)sps.nofatoms;
+		 physprops.hkli[j](10)=imag(aFT(3))/(double)sps.n()/(double)sps.nofatoms;
 		 }
 	    else
 	        {int jmin,jj; //determine minimal intensity in list
@@ -198,15 +198,15 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 	              physprops.hkli[jmin](2)=hkl(2);
                       physprops.hkli[jmin](3)=hkl(3);
 	              physprops.hkli[jmin](4)=in;
-	              physprops.hkli[jmin](5)=real((complex<double>)aFT(1)/(double)sps.n()/(double)sps.nofatoms);
-		      physprops.hkli[jmin](7)=real((complex<double>)aFT(2)/(double)sps.n()/(double)sps.nofatoms);
-		      physprops.hkli[jmin](9)=real((complex<double>)aFT(3)/(double)sps.n()/(double)sps.nofatoms);
-		      physprops.hkli[jmin](6)=imag((complex<double>)aFT(1)/(double)sps.n()/(double)sps.nofatoms);
-		      physprops.hkli[jmin](8)=imag((complex<double>)aFT(2)/(double)sps.n()/(double)sps.nofatoms);
-		      physprops.hkli[jmin](10)=imag((complex<double>)aFT(3)/(double)sps.n()/(double)sps.nofatoms);
+	              physprops.hkli[jmin](5)=real(aFT(1))/(double)sps.n()/(double)sps.nofatoms;
+		      physprops.hkli[jmin](7)=real(aFT(2))/(double)sps.n()/(double)sps.nofatoms;
+		      physprops.hkli[jmin](9)=real(aFT(3))/(double)sps.n()/(double)sps.nofatoms;
+		      physprops.hkli[jmin](6)=imag(aFT(1))/(double)sps.n()/(double)sps.nofatoms;
+		      physprops.hkli[jmin](8)=imag(aFT(2))/(double)sps.n()/(double)sps.nofatoms;
+		      physprops.hkli[jmin](10)=imag(aFT(3))/(double)sps.n()/(double)sps.nofatoms;
 		   }
             }
-           }
+           }}
       }}}//}}}
 
    }}}physprops.nofhkls=j;
