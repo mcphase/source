@@ -359,7 +359,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
 ComplexMatrix ch(1,mqdim,1,mqdim),chb(1,mqdim,1,mqdim);
 complex <double> chP;
 ch=0;chb=0;chP=0;
- //multiply polarization factor, formfactor 
+ //multiply polarization factor
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
  for(l1=1;l1<=md.nofatoms;++l1){
  for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){

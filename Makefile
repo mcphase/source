@@ -42,6 +42,7 @@ clean:
 	cd $(funcdir) && $(MAKE) clean
 	cd $(cfdir) && $(MAKE) clean
 	cd $(icdir) && $(MAKE) cleanall
+	cd $(phdir) && $(MAKE) cleanall
 	cd $(mcpdir) && $(MAKE) clean
 	rm -vf bin/addj.exe bin/charges.exe bin/coq2jjj.exe \
 		bin/mcdispit.exe bin/singleion.exe bin/cfield.exe \
