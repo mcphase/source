@@ -140,8 +140,8 @@ LINKER= $(CCC) $(LDFLAGS)
 #
 
 all :  martin.o ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE) \
-	../mcdispit$(EXE) ../mcphasit$(EXE) ../spins$(EXE) \
-	../spinsfromq$(EXE) ../addj$(EXE) ../singleion$(EXE)   \
+	../singleion$(EXE) ../mcdispit$(EXE) ../mcphasit$(EXE) ../spins$(EXE) \
+	../spinsfromq$(EXE) ../addj$(EXE)    \
 	../densplt$(EXE)  ../pointc$(EXE) ../mcdiff$(EXE) \
         ../formfactor$(EXE) ../radwavfunc$(EXE) ../anisotropyit$(EXE)
        

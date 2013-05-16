@@ -61,7 +61,7 @@ sub usage() {
 	      [-o output_file] [--output output_file]
               [-v] [--verbose] [-th theta] [-fi fi] [CF parameters]
      -h          : this (help) message
-     -i in_file  : input CF parameters file in cfield or mcphase formats
+     -i in_file  : input CF parameters file in so1ion formats
      -o out_file : output CF parameters file in mcphase format
      -v          : verbose mode. Will print out input parameters as read.
      -th	 : polar angle theta in degrees
@@ -222,17 +222,22 @@ if (!$output) {
 }
 else {
   open (outfile, ">$output") or die "$0: cannot open $output for output.";
-  
-  print outfile << "EOF";
-#!cfield
+ 
+if ($input) {
+  open (input_file, $input) or die "$0: cannot open $input for input CF parameters";
+  while(<input_file>) {                                   # Selects out lines with crystal field parameters
+   unless ($_ =~ s/(B[0-9\ CcSs]+)\s*[=:]\s*([-\.\de]*)// ) { # () are groups which may be access with $1, $2 etc.
+    print outfile $_;                                         # * means match previous char any number of times.       
+    }}
+  close (input_file);}
+else 
+ { print outfile << "EOF";
+#!MODULE=so1ion
 #<!--mcphase.sipf-->
 EOF
   
   $Ion =~ s/ //;
   print outfile " IONTYPE=$Ion\n";
-  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { print outfile " $Bo2{$i} = $_\n"; } }
-  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { print outfile " $Bo4{$i} = $_\n"; } }
-  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { print outfile " $Bo6{$i} = $_\n"; } }
   print outfile << "EOF";
 #   D = 2 * pi / Q
 #   s = 1 / 2 / D: sintheta = lambda * s
@@ -240,6 +245,10 @@ EOF
 DWF=0
 # debeywallerfactor = EXP(-2 * DWF *s*s)
 EOF
+}
+  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { print outfile " $Bo2{$i} = $_\n"; } }
+  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { print outfile " $Bo4{$i} = $_\n"; } }
+  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { print outfile " $Bo6{$i} = $_\n"; } }
   close (outfile);
 }
 

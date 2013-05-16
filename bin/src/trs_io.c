@@ -96,7 +96,7 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
                      Vector & Hext,ComplexMatrix & est,float & d,double  minE,double  maxE, char observable)    
     {ComplexVector u1(1,mf.Hi());double gamma;
      ++jjj.transitionnumber;nt=jjj.du1calc(T,mf,Hext,u1,d,est);
-    while (minE>d||d>maxE) //only consider transition if it is in interval minE/maxE
+    while (minE>=d||d>=maxE) //only consider transition if it is in interval minE/maxE
      {//first and following  transitions out of energy range ... do not consider them
      //fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      ++jjj.transitionnumber;
