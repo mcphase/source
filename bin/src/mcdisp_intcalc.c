@@ -13,9 +13,9 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
     QQ=Norm(qijk);
 
 // polarisation factor
-    ComplexMatrix pol(1,3,1,3);
+    ComplexMatrix pol(1,3,1,3);pol=0;
     for(i=1;i<=3;++i){pol(i,i)=1.0;
-    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/QQ;//(qijk*qijk);
+    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/QQ/QQ;//(qijk*qijk);
     }}
 
  // transforms Miller indices (in terms of reciprocal lattice abc*)
