@@ -1,29 +1,31 @@
-!  Program bfk2103.f95 calculates unpolarised neutron scattering from RE ions
-!  Uses as input the spin-eigenstates of the ion,  
-!  Output is the scattering cross section for different 
-!  scattering geometries.
- 
+!  Program bfk(2705).f95 calculates dynamical  susceptibility and 
+!  inelastic neutron scattering cross-section for single RE ions
+!  Uses as input the spin-eigenstates of the ion, 
 module CommonData
-! This module contains data and variables used by all other subroutines 
+! This module contains data used by all other subroutines
 implicit none
 save 
 integer :: Ns,Ms !number of states, number of dynamical variables
 integer, parameter :: Np=20 !max number of states
 integer, parameter :: Mp=100 !max number of transitions
 integer, parameter :: Nc=250 !max number of scatt. vect. 
-integer :: Npoints=200
+!integer :: nlg,nlf
 real :: gl !  Lande factor
-real ::  sf(3,3), kv(3), ksv(3), kapv(3), kapnv(3)
-real :: E0, Es, k1,k2,k3,ks1,ks2,ks3,kap1,kap2,kap3,kapv1,kapv2,kapv3
-real :: enloss, kappa, Emax
-real :: jav(3) !calculated magnetisation 
-integer :: mode,mst !scattering mode, output-file type
-real :: beta, temp !temperature (K), rec. temperatur (meV)
-real :: g, gam ! dimensionless coupl. const JexN(0), 2Pi g^2 
+real :: diff(3,3), sf(3,3), kv(3), ksv(3), kapv(3), kapnv(3)
+complex :: chi(3,3)
+real :: E, E0, Es, k1,k2,k3,ks1,ks2,ks3,kap1,kap2,kap3,kapv1,kapv2,kapv3
+real :: enloss, kappa 
+real :: jav(3)
+complex :: Phi(Mp,Mp) !Relaxation function matrix
+real :: emin,emax, k11,k12,k13,k21,k22,k23
+integer ::  Npoints, status_read
+integer :: mode,mst !scattering mode, file type
+real :: beta, g, gam, temp ! 1/k_B T, coupl. const 
 real, parameter :: Pi=3.14159, ek2=2.072, meVkT=11.6, cutoff=100., r0=-0.54 
+! exp. cut-off
 complex, parameter :: Iunit=(0.0,1.0)
 character(len=20) :: outfilename
-character(len=20) :: cefname, strfilename, tablename !names of input files
+character(len=30) :: cefname, parfilename, formfactorname,scatfilename
 end module CommonData
 !--------------------------------------------------------------------------
 
@@ -34,12 +36,11 @@ save
 integer :: v1(Mp), v2(Mp) !states belonging to one transition
 real :: En(Np), p(Np), Pp(Mp) !energy eigen values, Boltzmann factors, static 
 ! susceptibilities
-complex :: Ev(Np,Np),jjj(3,Np,Np) !eigenstates, spin matrixelements 
+complex :: Ev(Np,Np),jjj(3,Np,Np) !eigenstates, spin matrixelements, magnetisation
 complex :: jjx(Np,Np),jjy(Np,Np), jjz(Np,Np), jjp(Np,Np), jjm(Np,Np)
 end module MatrixElements
 !---------------------------------------------------------------
-
-module Ffp
+module FormfactorPreparation
 use CommonData
 ! transformation of table of structure factor kapg(n), strg(n)
 ! to table kapf(n), strf(n) with equidistant kappa steps
@@ -48,9 +49,7 @@ save
 real :: kapg(Nc),kapf(Nc),strg(Nc),strf(Nc)
 integer :: nlg, nlf
 contains 
-subroutine Fft
-!transforms any formfactor table into table with equidistant
-!wave vector steps 
+subroutine FormfactorTransformation
 implicit none
 integer :: m, n, nn
 real :: dk, y1,y2,x1,x2,s,x
@@ -75,155 +74,106 @@ real :: dk, y1,y2,x1,x2,s,x
     s=s+y2*(x-x1)/(x2-x1)
     strf(m)=s
   end do
-end subroutine Fft
-end module Ffp
+end subroutine FormFactorTransformation
+real function Strfak(kapa)
+! Berechnet Strukturfaktor für beliebige Werte von kappa 
+!durch Interpolation
+!kapa Betrag des Streuvektors,
+!strf(n) Tafel der Werte des Struktur-Faktors
+!max kapa-value
+implicit none
+save
+integer :: n,nn
+real, intent(in) :: kapa
+real :: s1, s2, kappa1,kappa2,dkap
+dkap=kapf(2)-kapf(1)
+nn=int(kapa/dkap)
+if (nn .gt. nlf-2) then
+write(*,*) 'Mistake in number of lines in form factor table' 
+end if 
+kappa1=dkap*nn
+kappa2=dkap*(nn+1)
+s1=strf(nn+1)
+s2=strf(nn+2)
+strfak=s1*(kapa-kappa2)/(kappa1-kappa2) + s2*(kapa-kappa1)/(kappa2-kappa1)
+end function
 
+
+
+end module FormfactorPreparation
 !----------------------------------------------------------------------------
 subroutine DataRead
-!  Reads input-data. 
+!  Reads input-data from command line and input-files  
+!  The entries in the command line are coupling constant,
+!  temperature T, mode of calculation and mode of datastorage.
+!  The 5th entry is the name of a file containing information 
+!  about the RE ion: number of levels,
 !  Eigen-energies En(n) and eigen-states Ev(n,k) of RE ion in 
 !  a crystalline electric field.
-!  It asks for the coupling with conduction electrons g=J_ex N(0), 
-!  temperature T and name of input-file. In following runs this information can  
-!  be provided by command-line input.
-!  Controll parameters to run the program are asked for in the first run and 
-!  stored in the files bfkdata0.dat, bfkdata12.dat or bfkdata345.dat
- 
+!  The 6th entry should be the name of a parameter-file containing 
+!  information about the energy and momentum range of the calculation,  
+!  the names of a file with q and omega values for which the scattering
+!  cross section should be calculated, and a file with  the atomic
+!  formfactor of the RE ion.  
+!  If the commandline has less than 2 entries the program stops-
+!  If the commandline has only the first n entries, the  other entries 
+!  are assumed to be unchanged
 
 use CommonData
 use MatrixElements
-use Ffp
+use FormfactorPreparation
 implicit none
-save
-integer :: i,j, k,l, status_read,n,nn,m,cline, vv1(Mp),vv2(Mp) 
-integer :: zz,ww, nlines
+!save
+integer :: i,j, k,kl,n,m, l, ii ,nn, cline, vv1(Mp),vv2(Mp), w 
+integer :: zz,ww, type_of_contence,linetype(50), linenumber, nlines
 real :: s,dk,kn,knn,ksn,ks,k0, Evr(Np,Np),Evi(Np,Np), v(Np),f, x, y 
+!real :: strg(Nc), kapg(Nc)
 real ::  x1,x2,x3,y1,y2,y3,strfak
+! kv(i) direction of incoming beam, ksv(i) of scattered beam, 
+! and kap(i) of vector kappa
 complex ::  cs
-character(len=10)::  arg 
-character(len=10) :: name(5)
-character(len=10) :: couplc, tempp, mod,filet
-character(len=150) :: line(150),tline(150), bb, zeile
+character(len=30)::  arg 
+character(len=30) :: name(6)
+character(len=10) :: couplc, tempp, mod
+character(len=150) :: line(20), tline(50), bb, zeile
 character(len=20) :: redata(12),re(12)
-
-
-!  read information from command-line   
-
-k=0
+character(len=40) :: number
+character(len=50) :: vector
+!  read information from command-line
 do i=1, iargc() ! number of entries in commandline
     call getarg(i,arg) ! entries in command line
     name(i)= arg
 end do
-n=iargc() !number of entries
+nn=iargc() !number of entries
 !check if command line contains information 
-if (n==0) then 
-  k=0
+if (nn .le. 2) then
+  write(*,*) 'command line entries incomplete'
+  write(*,*) 'should contain at least'
+  write(*,*) 'coupling constant and temperature,'
+  write(*,*) 'the rest is assumed to be unchanged' 
 end if
-if (n==1) then
-  k=1
-  couplc=name(1)
-  read(couplc,*) x
-  g=x
-end if
-if (n == 2) then
-  k=2
-  couplc=name(1)
-  read(couplc,*) x
-  g=x
-  tempp=name(2)
-  read(tempp,*) y
-  temp=y
-end if
-if (n == 3  ) then
-  k=3
-  couplc=name(1)
-  read(couplc,*) x
-  g=x
-  tempp=name(2)
-  read(tempp,*) y
-  temp=y
+couplc=name(1)
+read(couplc,*) x
+g=x
+tempp=name(2)
+read(tempp,*) y
+temp=y
+if (nn>2) then
   mod=name(3)
-  read(mod,*) zz
-  mode=zz
+  read(mod,*) mode
 end if
-if (n == 4  ) then
-  k=4
-  couplc=name(1)
-  read(couplc,*) x
-  g=x
-  tempp=name(2)
-  read(tempp,*) y
-  temp=y
-  mod=name(3)
-  read(mod,*) zz
-  mode=zz
-  filet=name(4)
-  read(filet,*) ww
-  mst=ww
+if (nn>3) then
+  mod=name(4)
+  read(mod,*) mst
 end if
-if (n == 5) then
-  k=5 
-  write(*,*) 'more than 4 entries in commandline, input ignored'
+if (nn > 4 ) then
+  cefname=name(5)
 end if
-if (k==0 .or. k==5) then
-  cline=0
+if (nn > 5) then
+  parfilename=name(6)
 end if
-if (k==1) then 
-  write(*,*) 'Input for temperature is missing'
-  write(*,*) 'temperature (in K)'
-  read(*,*) temp
-  cline=1
-end if
-if (k==2 .or. k==3 .or. k==4) then
-  cline=1
-end if 
-! cline=0 commandline empty, generate new datafile
-! cline=1, no new datafile required
-if (cline == 0) then
-  write(*,*) 'There were no data transferred via the command-line'
-  write(*,*) 'You may use the command-line in the next run'
-  write(*,*) 'to specify the dimensionless coupling constant g=Jex N(0),'
-  write(*,*) 'temperature, mode of calculation m=0,1,2,3,4,5 '
-  write(*,*) 'and type of output m=1 (overwrite), m=2 append'
-  write(*,*) 'all other quantities are assumed to be unchanged.'   
-
-  write(*,*) 'type dimensionless coupling constant g'
-  read(*,*) g
-  write(*,*) 'temperature (in K)'
-  read(*,*) temp
-
-  write(*,*) 'give name of input file with CEF data (normally levels.cef' 
-  write(*,*) 'generated by so1ion'
-  read(*,*) cefname 
-  outfilename='bfkresults.dat'
-  write(*,*) 'give name of file with formfactor (output file formfactor'
-  write(*,*) 'of program formfactor)'
-  read(*,*) strfilename
-
-  write(*,*) 'Determine  type of calculation and scattering geometry'
-  write(*,*) 'mode=0: calculates Im chi(i,i)*coth(beta*omega)'
-  write(*,*) 'for 0<omega<Emax at Npoints'
-  write(*,*) 'mode=1: calculates scattering function S(Q,omega) for' 
-  write(*,*) 'given set of scattering wave vectors (in 1/A)' 
-  write(*,*) 'and energy loss omega (in meV) provided by a data file'
-  write(*,*) 'mode=2: calculates different components of the scattering'
-  write(*,*) 'function for given wave vector and energy loss'
-  write(*,*) 'for modes 3-5 different scattering geometries are used'
-  write(*,*) 'mode=3: direction and energy of incoming beam fixed,'
-  write(*,*) 'scattering wave vector variable ' 
-  write(*,*) 'mode=4: direction and energy of incoming beam fixed,'
-  write(*,*) 'direction of scattered beam fixed, energy variable' 
-  write(*,*) 'mode=5: direction of incoming beam fixed, energy variable'
-  write(*,*) 'direction and energy of scattered beam fixed' 
-  write(*,*) 'give number of mode m=0,1,2,3,4,5'
-  read(*,*) mode
-  write(*,*) 'give storage mode of results: mst=1: results of previous run'
-  write(*,*) 'are overwritten, mst=2: all results' 
-  write(*,*) 'are stored consecutively, new results are  appended.' 
-  read(*,*)  mst   
-
+if (nn.ge.5) then
 ! Analyse file with cef-data
-  open(15,file=cefname, action='read')
   redata(1)= ' 6   0.857   Ce '
   redata(2)= ' 9   0.800   Pr '
   redata(3)= ' 10  0.727   Nd '
@@ -248,10 +198,10 @@ if (cline == 0) then
   re(10)='Er'
   re(11)='Tb'
   re(12)='Yb'
-  open(15,file=cefname)
+  open(11,file=cefname,action='read')
   n=1
   do 
-    read(15,'(A)',iostat=status_read) line(n)
+    read(11,'(A)',iostat=status_read) line(n)
     if(status_read /= 0) exit
     n=n+1
   end do 
@@ -259,9 +209,9 @@ if (cline == 0) then
   m=0
   do n=1,nlines
     if (line(n)(1:1)=='#') then
-      if (line(n)(1:4)=='#!J=') then
+      if ((line(n)(1:4)=='#!d=').or.(line(n)(1:4)=='#!J=')) then
          m=m+1
-         bb=line(n)
+         bb=line(n)(5:150)
          do k=1,12
            do l=1,30
              i=5+l 
@@ -280,239 +230,182 @@ if (cline == 0) then
       tline(m)=line(n)
     end if
   end do
-  open(16,file='cefworkfile.dat')  
+  open(12,file='cefworkfile.dat')  
   do n=1,m
-    write(16,'(A)') tline(n)
+    write(12,'(A)') tline(n)
   end do
-  close(16)
-  close(15)
-
-
-  open(12,file='bfkdata0.dat',action='write')
-  open(13,file='bfkdata12.dat',action='write')
-  open(14,file='bfkdata345.dat',action='write')
-  write(12,'(A)') cefname
-  write(12,'(A)') outfilename
-  write(13,'(A)') cefname
-  write(13,'(A)') outfilename
-  write(13,'(A)') strfilename
-  write(14,'(A)') cefname
-  write(14,'(A)') outfilename
-  write(14,'(A)') strfilename
-
-  if ( mode==0) then
-    write(*,*) 'give maximum value of energy loss and number of points'
-    read(*,*)   Emax, Npoints
-    write(12,*) Emax, Npoints
-  end if
-
-  if ( mode==1 .or. mode == 2) then
-    write(*,*) 'give name of file with table of scattering vectors' 
-    write(*,*) 'and values of energy loss'
-    read(*,*) tablename
-    write(13,'(A)') tablename
-  end if  
-
-  if (mode == 3) then
-    write(*,*) 'E0 (energy of incoming beam)'
-    read(*,*) E0
-    write(*,*) 'k1,k2,k3 (direction of incoming beam)'    
-    read(*,*) k1,k2,k3
-    write(*,*) 'kap1,kap2,kap3 (direction of scattering wave-vector kappa)'
-    read(*,*) kap1, kap2,kap3
-    write(14,*)  E0
-    write(14,*) k1,k2,k3
-    write(14,*) kap1,kap2,kap3
-  end if
-
-  if (mode == 4) then
-    write(*,*) 'E0 (energy of incoming beam in mev)'
-    read(*,*) E0
-    write(*,*) 'k1,k2,k3 (direction of incoming beam)'
-    read(*,*) k1,k2,k3
-    write(*,*) 'ks1,ks2,ks3 (direction of scattered beam)'
-    read(*,*) ks1,ks2,ks3
-    write(14,*) E0
-    write(14,*) k1,k2,k3
-    write(14,*) ks1,ks2,ks3
-  end if
-
-  if (mode == 5) then
-    write(*,*) 'Es (energy of scattered beam)'
-    read(*,*) Es
-    write(*,*) 'k1,k2,k3 (direction of incoming beam)'  
-    read(*,*) k1,k2,k3 
-    write(*,*) ' ks1, ks2, ks3 (direction  of scattered beam)'
-    read(*,*) ks1,ks2,ks3
-    write(14,*) Es   
-    write(14,*) k1,k2,k3
-    write(14,*) ks1,ks2,ks3
-  end if
-
+  close(11)
   close(12)
-  close(13)
-  close(14)
-
-  open(17,file=strfilename,action='read')
-
-  n=2
-  kapg(1)=0.
-  strg(1)=1.
-  m=0
-  einlesen: do
-  read(17,*, iostat=status_read) kapg(n), strg(n)
-  if (status_read ==0) then
+end if ! nn>5
+w=0
+if (nn==6) then
+!Analyse file with parameters
+  open(13,file='paramfile.par',action='read')
+  n=1 
+  do 
+    read(13,'(A)',iostat=status_read) line(n)
+    if(status_read /= 0) exit
     n=n+1
-    m=1
-    cycle
-  end if
-  if (status_read /=0 .and. m/=0) exit
-  end do einlesen
-  nlg=n
+  end do
+  m=0
+  nlines=n-1
+  do n=1,nlines
+    if (line(n)(1:7)=='#!emin=') then
+      number=line(n)(8:40)
+      read(number,*) emin
+    end if
+    if (line(n)(1:7)=='#!emax=') then
+      number=line(n)(8:40)
+      read(number,*) emax
+    end if
+    if (line(n)(1:10)=='#!Npoints=') then
+      number=line(n)(11:40)
+      read(number,*) Npoints
+    end if
+    if (line(n)(1:4)=='#!E=') then
+      number=line(n)(5:40)
+      read(number,*) E
+    end if
+    if (line(n)(1:5)=='#!k1=') then
+      vector=line(n)(6:50)
+      read(vector,*) k11, k12, k13
+    end if
+!    if (line(n)(1:6)=='#!k12=') then
+!      number=line(n)(7:40)
+!      read(number,*) k12
+!    end if
+!     if (line(n)(1:6)=='#!k13=') then
+!      number=line(n)(7:40)
+!      read(number,*) k13
+!    end if
+    if (line(n)(1:6)=='#!k2=') then
+      vector=line(n)(6:50)
+      read(vector,*) k21, k22, k23
+    end if
+!    if (line(n)(1:6)=='#!k22=') then
+!      number=line(n)(7:30)
+!      read(number,*) k22
+!    end if
+!    if (line(n)(1:6)=='#!k23=') then
+!      number=line(n)(7:30)
+!      read(number,*) k23
+!    end if
+    if (line(n)(1:15)=='#!scatfilename=') then
+       scatfilename=line(n)(16:40)
+    end if
+    if (line(n)(1:17)=='#!formfactorname=') then
+       formfactorname=line(n)(18:40)
+       w=1
+    end if
+  end do
+  close(13)
+  open(14,file='bfkdata.dat',action='write')
+  write(14,*) w
+  write(14,*) emax,emin, Npoints
+  write(14,*) E
+  write(14,*) k11,k12,k13
+  write(14,*) k21,k22,k23
+  write(14,'(A)') scatfilename
+  write(14,'(A)') formfactorname
+  close(14)
+  if (w==1) then !if formfactor data are availablle, they are read-in and 
+    if (mode>1) then
+      open(17,file=formfactorname,action='read')
+      n=2
+      kapg(1)=0.
+      strg(1)=1.
+      m=0
+      einlesen: do
+        read(17,*, iostat=status_read) kapg(n), strg(n)
+        if (status_read ==0) then
+           n=n+1
+           m=1
+           cycle
+        end if
+        if (status_read /=0 .and. m/=0) exit
+      end do einlesen
+      nlg=n
+      close(17)
 
-  close(17)
 !transfer of structure factor data to field strworkfile.dat with 
 !equidistant steps kap(n)
-
-!-------------------------------------
-
-  call Fft
-  open(18,file='strworkfile.dat')
-  do n=1,nlf
-     write(18,*) kapf(n),strf(n)
-  end do
-  close(18) 
-end if  !end cline=0
-
+      call FormfactorTransformation
+      open(18,file='strworkfile.dat')
+      do n=1,nlf
+        write(18,*) kapf(n),strf(n)
+      end do
+      close(18) 
+    end if  !mode >1
+  end if ! w=1
+end if
+!prepare necessary data for the calculations  
 beta = 11.6/temp
 gam= 2*Pi*g**2
-
 !open different workfiles 
-if (mode == 0) then
-  open(12,file='bfkdata0.dat')
-  read(12,'(A)') cefname
-  read(12,'(A)') outfilename
-  read(12,*,iostat=status_read) Emax, Npoints
-  if (status_read /= 0) then
-    write(*,*) 'data missing in input-file bfkdata0.dat'
-    write(*,*) 'give values for Emax and Npoints'
-    read (*,*) Emax, Npoints
-    write(12,*) Emax, NPoints
-  end if  
-end if
-
-if((mode == 1) .or. (mode == 2))then
-  open(13,file='bfkdata12.dat')
-  read(13,'(A)') cefname
-  read(13,'(A)') outfilename
-  read(13,'(A)') strfilename
-  read(13,'(A)',iostat=status_read) tablename  
-  if (status_read /= 0) then
-    write(*,*) 'data missing in input-file bfkdata12.dat'
-    write(*,*) 'give name of file with data for kappa and energy loss'
-    read (*,*) tablename
-    write(13,'(A)') tablename 
-  end if   
-end if
-  
-if((mode==3).or.(mode==4).or.(mode==5)) then 
-  open(14,file='bfkdata345.dat')
-  read(14,'(A)') cefname
-  read(14,'(A)') outfilename
-  read(14,'(A)') strfilename
-end if   
-
-if (mode == 3)  then
-  read(14,*,iostat=status_read) E0
-  if (status_read /= 0) then
-    write(*,*) 'input data missing'
-    write(*,*) 'give energy value and direction of wave vectors'
-    write(*,*) 'in the following lines' 
-    write(*,*) 'E0 (energy of incoming beam in mev)'
-    read(*,*) E0     
-    write(*,*) 'k1,k2,k3 (direction of incoming beam)'
-    read(*,*)  k1,k2,k3
-    write(*,*) 'kap1,kap2,kap3 (direction of scattering vector)'
-    read(*,*)  kap1,kap2,kap3
-    write(14,*) E0
-    write(14,*)  k1,k2,k3
-    write(14,*) kap1,kap2,kap3
-  else
-    read(14,*)  k1,k2,k3
-    read(14,*) kap1,kap2,kap3
-  end if
-end if
-
-
-if (mode == 4) then
-  read(14,*,iostat=status_read) E0
-  if (status_read /= 0) then
-    write(*,*) 'input data missing'
-    write(*,*) 'give energy value and direction of wave vectors'
-    write(*,*) 'in the following lines' 
-    write(*,*) 'E0 (energy of incoming beam in mev)'
-    read(*,*) E0
-    write(*,*) 'k1,k2,k3 (direction of incoming beam)'
-    read(*,*) k1,k2,k3
-    write(*,*) 'ks1,ks2,ks3 (direction of scattered beam)'
-    read(*,*) ks1,ks2,ks3
-    write(14,*) E0
-    write(14,*) k1,k2,k3
-    write(14,*) ks1,ks2,ks3
-  else
-    read(14,*) k1,k2,k3
-    read(14,*) ks1,ks2,ks3
-  end if  
-end if 
-
-if (mode == 5) then   
-  read(14,*,iostat=status_read) Es
-  if (status_read /= 0) then
-    write(*,*) 'input data missing'
-    write(*,*) 'give energy value and direction of wave vectors'
-    write(*,*) 'in the following lines' 
-    write(*,*) 'Es (energy of scattered  beam in mev)'
-    read(*,*) Es     
-    write(*,*) 'k1,k2,k3 (direction of incoming beam)'
-    read(*,*)  k1,k2,k3
-    write(*,*) 'ks1,ks2,ks3 (direction of scattered beam)'
-    read(*,*)  ks1,ks2,ks3
-    write(14,*) Es
-    write(14,*)  k1,k2,k3
-    write(14,*) ks1,ks2,ks3
-  else
-    read(14,*)  k1,k2,k3
-    read(14,*) ks1,ks2,ks3
-  end if
-end if
-
-  close(12)
-  close(14)
-  close(13)
-  open(16,file='cefworkfile.dat',action='read')
-  read(16,*) Ns, gl 
-  read(16,*) (En(n),n=1,Ns)
-   do j=1,Ns
-     read(16,*) (Evr(j,i), i=1,Ns)
-   end do  
+open(12,file='cefworkfile.dat',action='read')
+read(12,*) Ns, gl 
+read(12,*) (En(n),n=1,Ns)
+do j=1,Ns
+  read(12,*) (Evr(j,i), i=1,Ns)
+end do  
+do j=1,Ns
+  read(12,*) (Evi(j,i), i=1,Ns)
+end do  
+close(12)
+do i=1,Ns
   do j=1,Ns
-    read(16,*) (Evi(j,i), i=1,Ns)
-  end do  
-  close(16)
-  do i=1,Ns
-    do j=1,Ns
-      Ev(j,i)=cmplx(Evr(j,i),Evi(j,i)) 
-    end do
+    Ev(j,i)=cmplx(Evr(j,i),Evi(j,i)) 
   end do
+end do
+close(12)
+open(14,file='bfkdata.dat')
+read(14,*) w
+read(14,*,iostat=status_read) emax,emin,Npoints
+if (status_read/=0) then
+  write(*,*) 'input data missing'
+  write(*,*) 'give values for emax,emin,Npoints'
+  read(*,*) emax,emin,Npoints  
+  write(14,*) emax,emin, Npoints
+end if
+read(14,*,iostat=status_read) E
+if (status_read/=0) then
+  write(*,*) 'input data missing'
+  write(*,*) 'give value for scattering energy E'
+  read(*,*) E 
+  write(14,*) E
+end if
+read(14,*,iostat=status_read) k11,k12,k13
+if (status_read/=0) then
+  write(*,*) 'input data missing'
+  write(*,*) 'give values for k11,k12,k13 direction of incoming beam'
+  read(*,*) k11,k12,k13  
+  write(14,*) k11,k12,k13
+end if
+read(14,*,iostat=status_read) k21,k22,k23
+if (status_read/=0) then
+  write(*,*) 'input data missing'
+  write(*,*) 'give values for k21,k22,k23 direction of scattering'
+  read(*,*) k21,k22,k23  
+  write(14,*) k21,k22,k23
+end if
+close(12)
+close(14)
+close(13)
+if (w==1) then
   open(18,file='strworkfile.dat')
-  n=1 
-  do
-    read(18,*,iostat=status_read) kapf(n), strf(n)
-    if (status_read /= 0 ) exit
-    n=n+1
-  end do
-  nlf =n
-
+  n=1
+  m=0
+  read: do
+    read(18,*,iostat=status_read) kapf(n),strf(n)
+    if (status_read==0) then
+      n=n+1
+      m=1   
+      cycle
+    end if
+  if (status_read /= 0 .and. m/=0) exit
+  end do read
+  nlf=n
+end if
 end subroutine DataRead
 
 !--------------------------------------------------------
@@ -827,7 +720,7 @@ end subroutine MatInv
 
 !-------------------------------------------------------------------------- 
 
-subroutine SuscepComponents(x)  
+subroutine Relmatrix(x)  
 !calculates the memory function matrix for the spin-operators 
 !as function of frequency x and the different spin components
 !of the dynamic susceptibility/(1-exp(-beta*omega))
@@ -838,7 +731,7 @@ implicit none
 real :: x,y,zx,s,F(Np,Np),cut
 complex :: mat, cs, css
 integer :: t,n,m,i,j,k,l,nn,mm,n1,n2,m1,m2
-complex :: Phi(Mp,Mp), Mem(Mp,Mp),Om(Mp,Mp),Ominv(Mp,Mp)
+complex :: Mem(Mp,Mp),Om(Mp,Mp),Ominv(Mp,Mp)
 real :: Delta,s0,s1,s2
 ! the following quantities used in this procedure are defined in CommonData
 ! or MatrixElements:
@@ -936,6 +829,7 @@ do nn=1,Ms
     Mem(nn,mm)=-iunit*gam*cs
   end do
 end do
+
 !  Omega-Matrix
 do nn=1,Ms
 do mm=1,Ms
@@ -943,7 +837,7 @@ cs=0.
 if (nn == mm) then
 n1=v1(nn)
 n2=v2(nn)
-cs=cs-(x-En(n1)+En(n2))*Pp(nn)
+cs=cs+(x-En(n1)+En(n2))*Pp(nn)
 end if
 cs=cs-Mem(nn,mm)
 OM(nn,mm)=cs
@@ -957,10 +851,26 @@ do mm=1,Ms
 Phi(nn,mm)=Pp(nn)*OMinv(nn,mm)*Pp(mm)
 end do
 end do
+end subroutine Relmatrix
 
+!--------------------------------------------------------
+subroutine SuscepComponents(x)
+use CommonData
+use MatrixElements
+implicit none
+integer :: k,l,n,m,n1,n2,m1,m2
+complex :: cs,css
+real :: x
+interface
+  subroutine Relmatrix(x)
+  real :: x
+  end subroutine
+end interface
+call Relmatrix(x)
 do k=1,3
 do l=1,3
    cs=0
+   css=0
    do n=1,Ms
    do m=1,Ms
      n1=v1(n)
@@ -968,47 +878,30 @@ do l=1,3
      m1=v1(m)
      m2=v2(m)
      cs = cs+jjj(k,n1,n2)*Phi(n,m)*jjj(l,m2,m1)
+     if( n==m )then
+        css=css + jjj(k,n1,n2)*Pp(n)*jjj(l,m2,m1)
+     end if  
     end do
-    end do     
+    end do 
+    chi(k,l)=beta*(css-x*cs)      
     if (abs(x) <= 0.0001) then
        sf(k,l)=-aimag(cs)
      else  
        sf(k,l)=-aimag(cs)*beta*x /(1-exp(-beta*x))                    
-     end if
+    end if
 end do
 end do
+
 return
-end subroutine SuscepComponents   
+end subroutine SuscepComponents
+
+!---------------------------------------------- 
 
 
-!--------------------------------------------
 
-real function Strfak(kapa)
-! Berechnet Strukturfaktor für beliebige Werte von kappa 
-!durch Interpolation
-!kapa Betrag des Streuvektors,
-!strf(n) Tafel der Werte des Struktur-Faktors
-!max kapa-value
-use CommonData
-use Ffp
-implicit none
-save
-integer :: n,nn
-real, intent(in) :: kapa
-real :: s1, s2, kappa1,kappa2,dkap
-dkap=kapf(2)-kapf(1)
-nn=int(kapa/dkap)
-if (nn .gt. nlf-2) then
-write(*,*) 'Mistake in number of lines in form factor table' 
-end if 
-kappa1=dkap*nn
-kappa2=dkap*(nn+1)
-s1=strf(nn+1)
-s2=strf(nn+2)
-strfak=s1*(kapa-kappa2)/(kappa1-kappa2) + s2*(kapa-kappa1)/(kappa2-kappa1)
-end function
-!-------------------------------------------------------------------
 
+
+!-------------------------------------------------
 real function ScatFunction(qv,omega)
 ! calculates the essential part of the scattering cross section  
 ! as function of the scattering wave vector kappav and energy loss omega
@@ -1017,7 +910,7 @@ use MatrixElements
 implicit none
 save
 integer :: n,m,k,l,n1,n2,m1,m2
-real :: diff(3,3), omega, s,q, qv(3),qnv(3)
+real :: omega, s,q, qv(3),qnv(3)
 complex :: cs
 interface
 subroutine SuscepComponents(z)
@@ -1047,15 +940,16 @@ end do
 Scatfunction=cs
 return
 end function    
-
 !--------------------------------------------
 
 subroutine OutputResults
 use CommonData
+use MatrixElements
+use FormfactorPreparation
 implicit none
 integer :: i,k,l,n,nn
-real :: diff(3,3)
-integer :: type, status_read,m
+
+integer :: type,m
 real :: deltax,x,y,sum, s,st, sff(3,3), ss(3,3)
 real :: dksv(3),dkv(3),dkapv(3),xksv(3),xkv(3),xkapv(3)
 real :: k0,kn,ks,ksn,kapn,kq,ksq,dcs
@@ -1063,60 +957,71 @@ real :: k0,kn,ks,ksn,kapn,kq,ksq,dcs
 ! outfilename (name of file with results), cefname (name of file 
 ! with cef-data, strfilename (name of original file with formfactor)
 ! 
-character(len=20) :: f, erg(6)
+character(len=20) :: f(7),erg(7)
 
 interface
-real function strfak(kapa) !calculates formfactor by interpolation  
-real :: kapa
-end function
 real function ScatFunction(kapv,omega)
 real :: kapv(3), omega
-integer :: n
 end function
 subroutine SuscepComponents(z)
 real :: z
 end subroutine
 end interface
 
-erg(1)='0.dat'
-erg(2)='1.dat'
-erg(3)='2.dat'
-erg(4)='3.dat'
-erg(5)='4.dat'
-erg(6)='5.dat'
-
-
-do n=0,5
-if (mode==n) then
-  i=index(outfilename,'.')
-  if (i==0) then 
-    f=trim(outfilename)//erg(n+1)
-  else
-    f=outfilename(1:i-1)//erg(n+1)
-  end if
-end if  
-end do
-
-write(*,'(A)') 'results written into',  f
+if (mode==0) then
 if (mst == 1) then  
-open(21,file=f,action='write')
+open(21,file='./results/bfk0.res',action='write')
 end if
 if (mst == 2) then
-open(21,file=f,action='write',position='append')
+open(21,file='./results/bfk0.res',action='write',position='append')
+end if
+write(*,*) 'Results are written into ./results/bfk0.res'
+write(21,*) '#results of program bfk using level-scheme ', cefname
+write(21,'(A15,F6.2,A18,F6.2)') '#temperature ', temp, ' coupling constant ', g
+write(21,'(A32,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
+write(21, *)'# calculation mode', mode
+write(21,*) '# results for the dynamical susceptibility of RE ions'
+write(21,*) '# energy loss, real and imaginary part of the dynamical susceptibility'
+write(21,*) '# chi(1,1)    chi(1,2)   chi(1,3)' 
+write(21,*) '# chi(2,1)    chi(2,2)   chi(2,3)'
+write(21,*) '# chi(3,1)    chi(3,2 )  chi(3,3)'  
+   
+
+deltax =(emax-emin)/Npoints
+  do n=0,Npoints
+    x=emin+n*deltax
+    if (abs(x) < 0.00001) then
+      x=x+0.00001 
+     end if
+    call SuscepComponents(x)
+    write(21,*) x
+    do i=1,3
+      write(21,'(5X,6F12.6)') (chi(i,k),k=1,3)
+    end do
+  end do
 end if
 
-write(21,*) '#results of program bfk using leve-scheme ', cefname
-write(21,'(A14,F6.2,A18,F6.2)') '#temperature ', temp, ' coupling constant ', g
-write(21,'(A33,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
 
 
 
-if (mode==0) then
-  write(21,*) '#mode =', mode , 'Calculates S(i,i)=Im Chi(i,i)*coth(beta*omega/2)'
+if (mode==1) then
+if (mst == 1) then  
+open(21,file='./results/bfk1.res',action='write')
+end if
+if (mst == 2) then
+open(21,file='./results/bfk1.res',action='write',position='append')
+end if
+write(*,*) 'Results are written into ./results/bfk1.res'
+
+write(21,*) '#results of program bfk using level-scheme ', cefname
+write(21,'(A15,F6.2,A18,F6.2)') '#temperature ', temp, 'coupling constant ', g
+write(21,'(A32,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
+
+  write(21,*) '# mode =', mode , 'Calculates S(i,i)=Im Chi(i,i)*coth(beta*omega/2)'
   write(21,*) '#and checks sum-rule (S(1,1)+S(2,2)+S(3,3))/Pi = J*(J+1)' 
   write(21,*) '#energy loss,    S(1,1)         S(2,2)       S(3,3)'
 
-  deltax=Emax/Npoints
+  deltax=(Emax-emin)/Npoints
   s=0
   m=4
   do n=1,10
@@ -1129,6 +1034,9 @@ if (mode==0) then
       end do
     end do
     write(21,'(4G14.5)') x,(ss(i,i),i=1,3)
+!    do i=1,3
+!      write(21,'(6F12.6)') (chi(i,k),k=1,3)
+!    end do
     s=s+(ss(1,1)+ss(2,2)+ss(3,3))*m*x/(y*10.)
   end do
 
@@ -1142,23 +1050,34 @@ if (mode==0) then
     end do
     write(21,'(4G14.5)') x,(ss(i,i),i=1,3)
     s=s+(ss(1,1)+ss(2,2)+ss(3,3))*deltax
+!    do i=1,3
+!      write(21,'(6F12.6)') (chi(i,k),k=1,3)
+!    end do
   end do
   sum=s/Pi
   write(21,*)'#Integral (ss(1,1)+ss(2,2)+ss(3,3)/Pi: ', sum, ( Ns**2-1.)/4 
+end if 
+!--------------------------------------------------------------------------
+if (mode==2) then
+if (mst == 1) then  
+open(21,file='./results/bfk2.res',action='write')
+end if
+if (mst == 2) then
+open(21,file='./results/bfk2.res',action='write',position='append')
+end if
 
-else
+write(*,*) 'Results are written into ./results/bfk2.res'
 
-  if ((mode==1) .or. (mode==2)) then
-
-    write(21,*) '#strfactor ', strfilename 
-    write(21,*) '#scattering mode m=  ', mode   
-  end if  
-  if (mode==1) then
-    open(22,file=tablename, action='read')
+write(21,*) '#results of program bfk using level-scheme', cefname
+write(21,'(A15,F6.2,A18,F6.2)') '#temperature ', temp, ' coupling constant ', g
+write(21,'(A32,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
+write(21,*) '#formfactor', formfactorname 
+write(21,*) '#calculation mode m=  ', mode   
     write(21,*) '# Calculation of scattering cross section for given set of '
     write(21,*) '# scattering wave vector q and energy loss'
-    write(21,*) '# provided by input-file ', tablename
+    write(21,*) '# provided by input-file ', scatfilename
     write(21,*) '# q (A^-1) energy loss (meV) cross section (1/meV,steradian)'
+    open(22,file=scatfilename, action='read')
 
     calculation: do
       read(22,*,iostat=status_read) kapv(1), kapv(2), kapv(3), enloss
@@ -1176,17 +1095,28 @@ else
   end if      
 
 !-------------------------------------------
+if (mode==3) then
+if (mst == 1) then  
+open(21,file='./results/bfk3.res',action='write')
+end if
+if (mst == 2) then
+open(21,file='./results/bfk3.res',action='write',position='append')
+end if
+write(*,*) 'Results are written into ./results/bfk3.res'
 
-    if (mode==2) then
-       write(21,*) '#calculation of different components of the scattering functions'
-       write(21,*) '#as function of q and omega provided by input-file ',tablename 
 
-       write(21,*) '#Q,  energy-loss '
+write(21,*) '#results of program bfk using leve-scheme ', cefname
+write(21,'(A15,F6.2,A18,F6.2)') '#temperature ', temp, ' coupling constant ', g
+write(21,'(A32,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
+write(21,*) '#calculation mode m=  ', mode
+write(21,*) '#calculation of different components of the scattering functions'
+write(21,*) '#as function of q and omega provided by input-file ',scatfilename 
+write(21,*) '#Q,  energy-loss '
 write(21,*) '#                      S(1,1),S(1,2),S(1,3)'
 write(21,*) '#                      S(2,1),S(2,2),S(2,3)'
 write(21,*) '#                      S(3,1),S(3,2),S(3,3)'
 
-open(22,file=tablename,action='read')
+open(22,file=scatfilename,action='read')
 status_read=0
 calc: do 
     read(22,*,iostat=status_read) kapv(1),kapv(2),kapv(3),enloss
@@ -1210,14 +1140,33 @@ end do calc
 close(22)
 end if      
 !-----------------------------------------------------
+if (mode==4) then
 
-if (mode==3) then
-write(21,*) '# calculation of cross section for fixed direction k and energy E0'
-write(21,*) '# of incoming beam, fixed direction but variable length of scattering'
-write(21,*) '# wave vector q '
-write(21,'(A)') ' #E0,    k1,   k2,   k3;   q1,   q2,   q3 '
-write(21,'(7F6.2)') E0,k1,k2,k3,kap1,kap2,kap3
-write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian)'
+  if (mst == 1) then  
+    open(21,file='./results/bfk4.res',action='write')
+  end if
+  if (mst == 2) then
+    open(21,file='./results/bfk4.res',action='write',position='append')
+  end if
+write(*,*) 'Results are written into ./results/bfk4.res'
+
+  write(21,'(A43,A10)')'#results of program bfk using level-scheme', cefname
+  write(21,'(A12,F6.2,A18,F6.2)') '#temperature ', temp, ' coupling constant ', g
+  write(21,'(A32,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
+write(21,*) '#calculation mode m=  ', mode
+  write(21,'(A)') '#calculation of cross section for fixed direction k and energy E'
+  write(21,'(A)') '#of incident beam, fixed direction but variable length of scattering'
+  write(21,'(A)') '#wave vector q '
+  E0=E
+  k1=k11
+  k2=k12
+  k3=k13
+  kap1=k21
+  kap2=k22
+  kap3=k23
+  write(21,'(A)') '# E0,    k1,   k2,   k3;   q1,   q2,   q3 '
+  write(21,'(7F6.2)') E,k1,k2,k3,kap1,kap2,kap3
+  write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian)'
 
   k0=sqrt(E0/ek2)
   kn=sqrt(k1**2 + k2**2 +k3**2)
@@ -1229,10 +1178,11 @@ write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian
   kapv(2)=kap2*k0/kapn
   kapv(3)=kap3*k0/kapn
   do i=1,3
-    dkapv(i)=kapv(i)/200
+    dkapv(i)=kapv(i)/Npoints
   end  do
 
-  do n=1,200
+  do n=-Npoints,Npoints
+!    if (n/= 0) then
      do i=1,3
        xkapv(i)=n *dkapv(i)
        ksv(i)= kv(i)-xkapv(i)
@@ -1248,18 +1198,43 @@ write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian
      dcs=ScatFunction(xkapv,enloss)
      dcs=ks/k0*(r0*gl/2*st)**2/Pi*dcs
       write(21,'(3G14.5)') kappa,enloss,dcs
+!    end if
    end do
 end if
 
-!-----------------------------------------------------------------------
-if (mode==4) then
-write(21,*) '# calculation of cross section for fixed direction k and energy E0'
-write(21,*) '# of incoming beam, fixed direction ks but variable energy of '
-write(21,*) '# scattered beam. vector q = vector k0 - vector ks '
 
-write(21,'(A)') ' #E0,    k1,   k2,   k3;   ks1,  ks2,  ks3 '
-write(21,'(7F6.2)') E0,k1,k2,k3,ks1,ks2,ks3
-write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian)'
+
+
+!----------------
+if (mode==5) then
+if (mst == 1) then  
+open(21,file='./results/bfk5.res',action='write')
+end if
+if (mst == 2) then
+open(21,file='./results/bfk5.res',action='write',position='append')
+end if
+
+write(*,*) 'Results are written into ./results/bfk5.res'
+
+  write(21,'(A43,A10)') '#results of program bfk using level-scheme ',cefname
+  write(21,'(A15,F6.2,A18,F6.2)') '# temperature ', temp, ' coupling constant ', g
+  write(21,'(A32,3G10.3)') '# magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
+write(21,*) '#calculation mode m=  ', mode
+  write(21,'(A)') '# calculation of cross section for fixed direction k and energy E'
+  write(21,'(A)') '# of incident beam, fixed direction ks but variable energy of '
+  write(21,'(A)') '# scattered beam. vector q = vector k0 - vector ks '
+
+  E0=E
+  k1=k11
+  k2=k12
+  k3=k13
+  ks1=k21
+  ks2=k22
+  ks3=k23
+
+  write(21,'(A)') '# E,    k1,   k2,   k3;   ks1,  ks2,  ks3 '
+  write(21,'(7F6.2)') E0,k1,k2,k3,ks1,ks2,ks3
+  write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian)'
 
   k0=sqrt(E0/ek2)
   kn=sqrt(k1**2+k2**2+k3**2)
@@ -1273,19 +1248,20 @@ write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian
   ksv(2)=ks2*k0/ksn
   ksv(3)=ks3*k0/ksn
   do i=1,3
-    dksv(i)=ksv(i)/200
+    dksv(i)=ksv(i)/Npoints
   end  do
-    do n=1,200
+    do n=-Npoints,Npoints
+!      if (n/=0) then 
       do i=1,3
         xksv(i)=float(n)*dksv(i)
-        kapv(i)=-xksv(i)+kv(i) ! scattering vector
+        xkapv(i)=xksv(i)-kv(i) ! scattering vector
       end do
       ksq=xksv(1)**2+xksv(2)**2+xksv(3)**2
       ks=sqrt(ksq)
 ! length of scattering vector:
-      kappa=sqrt(kapv(1)**2+kapv(2)**2 + kapv(3)**2+0.00001)
+      kappa=sqrt(xkapv(1)**2+xkapv(2)**2 + xkapv(3)**2+0.00001)
       do i=1,3
-         kapnv(i)=kapv(i)/kappa ! normalised length of scattering wave vector
+         kapnv(i)=xkapv(i)/kappa ! normalised length of scattering wave vector
       end do
       st=strfak(kappa)
       k0=sqrt(E0/ek2)
@@ -1294,19 +1270,39 @@ write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian
 !differential crosssection 
       dcs=ks/k0*(r0*gl/2*st)**2/Pi*ScatFunction(kapv,enloss)
       write(21,'(3G14.5)') kappa,enloss,dcs
+!   end if  
   end do
+  
 end if
 !-----------------------------------------------
-if (mode==5) then
-!write(21,'(A32,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
-write(21,*) '# calculation of cross section for fixed direction ks and energy Es'
-write(21,*) '# of scattered beam, fixed direction k but variable energy of '
-write(21,*) '# incoming beam. vector q = vector k - vector ks '
+if (mode==6) then
+  if (mst == 1) then  
+    open(21,file='./results/bfk6.res',action='write')
+  end if
+  if (mst == 2) then
+    open(21,file='./results/bfk6.res',action='write',position='append')
+  end if
+write(*,*) 'Results are written into ./results/bfk6.res'
 
+  write(21,'(A43,A10)') '#results of program bfk using level-scheme ', cefname
+  write(21,'(A12,F6.2,A18,F6.2)') '#temperature ', temp, ' coupling constant ', g
+  write(21,'(A30,3G10.3)') '#magnetisation <Jx>, <Jy>, <Jz> ', jav(1), jav(2), jav(3)
+  write(21,*) '#calculation  mode m=  ', mode
+  write(21,'(A)') '#calculation of cross section for fixed direction ks and energy Es'
+  write(21,'(A)') '#of scattered beam, fixed direction k but variable energy of '
+  write(21,'(A)') '#incident beam'
 
-write(21,'(A)') ' #Es,     k1,    k2,   k3;   ks1,  ks2,  ks3 '
-write(21,'(7F6.2)') Es,k1,k2,k3,ks1,ks2,ks3
-write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian)'
+  Es=E
+  k1=k11
+  k2=k12
+  k3=k13
+  ks1=k21
+  ks2=k22
+  ks3=k23
+
+  write(21,'(A)') '# Es,     k1,    k2,   k3;   ks1,  ks2,  ks3 '
+  write(21,'(7F6.2)') Es,k1,k2,k3,ks1,ks2,ks3
+  write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian)'
 
 
   ks=sqrt(Es/ek2)
@@ -1322,11 +1318,11 @@ write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian
   ksv(3)=ks3*ks/ksn
   
   do i=1,3
-    dkv(i)=kv(i)/200
+    dkv(i)=kv(i)/Npoints
   end  do
 
-  do n=1,100
-    if (n /= 0 ) then
+  do n=-Npoints,Npoints
+!    if (n /= 0 ) then
       do i=1,3
         xkv(i)=kv(i)+n*dkv(i)
         kapv(i)=-ksv(i)+xkv(i)
@@ -1339,18 +1335,25 @@ write(21,*) '#q (in A^(-1)), energy-loss (meV), cross section(barns/meV,stradian
       end do
 
       st=strfak(kappa)
+      do k=1,3
+        do l=1,3
+          diff(k,l)=-kapnv(l)*kapnv(k)
+          if (l==k) then
+             diff(k,l)=diff(k,l)+1
+          end if
+        end do
+      end do
       ksq=ks**2
       kq=k0**2
       enloss=ek2*(kq-ksq)
 !differential crosssection
       dcs=ks/k0*(r0*gl/2*st)**2/Pi*ScatFunction(kapv,enloss)
       write(21,'(3G14.5)') kappa,enloss,dcs
-    end if
+ !   end if
   end do
 end if
 
 close(21)
-end if
 end subroutine OutputResults
 !--------------------------------------------
 
@@ -1363,5 +1366,4 @@ call OutputResults
 
 end program
 !-------------------------------------------------------------------
-
 

@@ -1,4 +1,5 @@
 
+
 %\documentclass[a4paper,12pt]{article}
 %\usepackage{epsfig}
 
@@ -10,12 +11,11 @@
 %{\Large
 %\centerline
 \section{Inelastic neutron-scattering from RE ions in a crystal field
-%}}
-%{\Large
-%\centerline{
-and calculation of the dynamical susceptibility}
 %}
-%\bigskip
+%\centerline{
+including damping effects due to the exchange interaction with conduction
+elecrons}
+%}
 
 \bigskip
 This is an extension  of the theory published by Klaus W. Becker, Peter Fulde and
@@ -29,72 +29,58 @@ University of Regensburg.
 \medskip
 
 \noindent
-Scattering cross section:
- 
+Here we present a brief outline of the theoretical concepts to calculate the
+dynamical susceptibility of the Re ions and the scattering cross section.  
+
 The neutron-scattering cross section is related to the dynamic susceptibility
-of the spins of    the RE ions by 
-(Stephen W. Lovesey; "Theory of neutron 
-scattering from condensed matter"
-Vol 2, equ. 11,144)
-
-
-
+of the  RE ions 
 $$
-{d^2\sigma \over d\Omega d E'}=  {k' \over
-k}({r_0\over 2}g F(\kappa))^2{1\over \pi }
-\sum_{\alpha\beta}(\delta_{\alpha\beta} 
-- \hat \kappa_\alpha \hat \kappa_\beta)
-{ \chi{"}_{\alpha,\beta}(\omega)\over 1-e^{-\beta \hbar \omega}} 
+\chi_{\alpha\beta}(t)={i\over \hbar} \Theta(t)\langle [J^\dagger_\alpha(t), J_\beta(0)]\rangle 
 $$
-where
+whose Fourier-Laplace transform
 $$
 \chi_{\alpha,\beta}(z)=\int_{-\infty}^{+\infty} dt e^{izt}\chi_{\alpha\beta}(t), \quad z=\omega
 +i\delta 
 $$
-is the Fourier-Laplace transform of the spin susceptibility
+determines the inelastic neutron scattering crossection   
+(Stephen W. Lovesey; "Theory of neutron 
+scattering from condensed matter"
+Vol 2, equ. 11,144).
 $$
-\chi_{\alpha\beta}(t)={i\over \hbar} \Theta(t)\langle [J^\dagger_\alpha(t), J_\beta(0)]\rangle 
+{d^2\sigma \over d\Omega d E'}=  {k' \over
+k}({r_0\over 2}g_J F(Q))^2{1\over \pi }
+\sum_{\alpha\beta}(\delta_{\alpha\beta} 
+- \tilde Q_\alpha \tilde Q_\beta)
+{ \chi{"}_{\alpha,\beta}(\omega)\over 1-e^{-\beta \hbar \omega}} 
 $$
 Here $k$ and
 $ k'$ denote the  wave number of the neutron before and after the
-scattering. $\vec \kappa = \vec k' - \vec k$ is the scattering wave vector,
-$\tilde \kappa = \vec \kappa/\vert\vec\kappa\vert$. 
-$r_0= -0.54 \cdot 10^{-12}$ cm, $g_l$ is the Land\'e factor, 
-$F(\kappa)$ the atomic form factor of the
+scattering. $\vec Q = \vec k - \vec k'$ is the scattering wave vector,
+$\tilde Q = \vec Q/\vert\vec Q\vert$. 
+$r_0= -0.54 \cdot 10^{-12}$ cm is the basic scattering length, $g_J$ is the Land\'e factor, 
+$F(Q)$ the atomic form factor of the
 rare earth ion.
   
 \bigskip
 \noindent
-The model:
+Formal evaluation of the dynamic and static susceptiblity.
 
-We calculate the spin susceptibility of a RE ion in the presence of exchange
-interaction with conduction electrons. The system is described by the
-Hamiltonian
+The dynamic spin-susceptibilities are correlation functions of the form
 $$
-H=H_{cf}+H_{el}+H_{el,cf} 
-$$
-The first part is the cf-Hamiltonian of the spin-system: 
+\chi_{i,k}(t)=i \Theta(t) \langle [A_i^\dagger(t),A_k(0)]\rangle
 $$ 
-H_{cf}= \sum_n E_n K_{nn}, \quad K_{nm}= \vert n\rangle \langle m\vert
-$$  
-written in terms of the crystal field eigenstates $\vert n\rangle$. 
-The second part is the Hamiltonian of the conduction electrons
+where $A(t)$ is a Heisenberg operator
 $$
-H_{el}=\sum_{k\alpha}\epsilon_kc^\dagger_{k\alpha}c_{k\alpha}
+A(t)= \exp(iHt)A\exp(-iHt)
 $$
-The third part is the 
- interaction between local moments and  the conduction electrons
+Introducing a Liouville operator (acting on operators of dynamical
+variables) by ${\cal L}A = [H,A]$  the Heisenberg operator can also be
+written formally as  
 $$
-H_{el,cf}= - J_{ex}\vec J \cdot \vec \sigma, \quad \vec \sigma = \sum_{k\alpha
-q\beta}\vec \sigma_{\alpha\beta}c^\dagger_{k\alpha}c_{k+q\beta}, \quad \vec
-J=\sum_{n,m}\vec J_{n,m}K_{nm}.
+A(t)= \exp(i{\cal L}t) A
 $$
-We assume, that the energies $E_n$ and the eigenstates $\vert n\rangle$
-expressed by angular momentum eigenstates are known.
-
-For the calculation of the dynamic susceptibility we use the Mori-Zwanzig
-projection formalism:
-For a set of dynamical variables $A_i$ we define the susceptibilities 
+With help of this definition the dynamical susceptibility $\chi_{i,k}$ of 
+two variables $A_i, A_k$ can be written as
 $$
 \chi_{i,k}(t)=i \Theta(t) \langle [A_i^\dagger(t),A_k(0)]\rangle
 $$ 
@@ -102,37 +88,26 @@ and their Laplace transform
 $$
 \chi_{i,k}(z)=i\int_0^\infty dt e^{izt} \langle [A_i^\dagger(t),A_k(0)]\rangle
 $$ 
-(From here on we skip factors of $\hbar$ which drop out from the final
-result if we replace the frequencies $\omega$ by the correponding energies
-$\hbar \omega$.  The corresponding static (isothermal) susceptibilities are given by
+With help of the Liouvillian these quantities can be written as
 $$
-\chi_{i,k}(0) = \int_0^\beta d \lambda \langle e^{\lambda H}
-A_i^\dagger e^{-\lambda H}  A_k\rangle
+\chi_{i,k}(t)=i \Theta(t) \langle [A_i^\dagger,A_k\exp^{-i{\cal L}t}\rangle
 $$
-With help of the Liouvillian ${\cal L}$ acting on operators as 
-$$
-{\cal L}A=[H,A]
-$$ 
-the time dependence of an operator can be expressed by
-$$
-A(t)=e^{iHt}Ae^{-iHt}= e^{i{\cal L}t}A, \quad e^{\lambda H}Ae^{-\lambda H}=
-e^{\lambda {\cal L} }A
-$$
-and the static and dynamical susceptibilities can be written as
-$$
-\chi_{i,k}(0) = \int_0^\beta d \lambda \langle (e^{\lambda {\cal L}}
-A_i^\dagger)   A_k\rangle
-$$
-$$
-\chi_{i,k}(z)=i\int_0^\infty dt e^{izt} \langle [e^{it{\cal
-L}}A_i^\dagger,A_k(0)]\rangle= i\int_0^\infty dt e^{izt} \langle [A^\dagger,e^{-it{\cal
-L}}A_i(0)]\rangle
-$$ 
-which can be formally integrated to yield
+and their Laplace transform
 $$
 \chi_{i,k}(z)= -\langle [A_i^\dagger,{1\over {z-\cal
 L}}A_k(0)]\rangle
 $$ 
+
+The static isothermal susceptibilities can also formally be calculated with help of
+the Liouvillian.   
+$$
+\chi_{i,k}(0) = \int_0^\beta d \lambda \langle e^{\lambda H}
+A_i^\dagger e^{-\lambda H}  A_k\rangle
+ = \int_0^\beta d \lambda \langle (e^{\lambda {\cal L}}
+A_i^\dagger)   A_k\rangle
+$$
+
+
 The static susceptibilities are used to define a scalar product between  the
 dynamical variables:
 $$
@@ -156,6 +131,64 @@ $$
 The second term is the so-called relaxation function 
 $$
 \Phi_{ik}(z)=(A_i \vert {1 \over {z-\cal L}}A_k)
+$$
+
+\bigskip
+
+
+
+
+
+
+
+\noindent
+The model:
+
+
+
+We calculate the spin susceptibility of a RE ion in the presence of exchange
+interaction with conduction electrons. The system is described by the
+Hamiltonian
+$$
+H=H_{cf}+H_{el}+H_{el,cf} 
+$$
+The first part is the cf-Hamiltonian of the spin-system: 
+$$ 
+H_{cf}= \sum_n E_n K_{nn}, \quad K_{nm}= \vert n\rangle \langle m\vert
+$$  
+written in terms of the crystal field eigenstates $\vert n\rangle$. 
+The second part is the Hamiltonian of the conduction electrons
+$$
+H_{el}=\sum_{k\alpha}\epsilon_kc^\dagger_{k\alpha}c_{k\alpha}
+$$
+The third part is the 
+ interaction between local moments and  the conduction electrons
+$$
+H_{el,cf}= - J_{ex}\vec J \cdot \vec \sigma, \quad \vec \sigma = \sum_{k\alpha
+Q\beta}\vec \sigma_{\alpha\beta}c^\dagger_{k\alpha}c_{k+Q\beta}, \quad \vec
+J=\sum_{n,m}\vec J_{n,m}K_{nm}.
+$$
+We assume, that the energies $E_n$ and the eigenstates $\vert n\rangle$
+expressed by angular momentum eigenstates are known.
+
+\bigskip
+\noindent
+Definition of dynamical variables
+
+In our case we use as dynamical variable the standard-basis operators
+$$
+A_\mu= K_{\mu}
+$$
+ describing a  transition $\mu= [nm]$ between CEF levels $m$ and $n$. 
+In the absence of the interaction with conduction electrons
+$$
+{\cal L}A_\mu = (E_n-E_m)A_\mu
+$$
+In order to
+get the spin suceptibility we have to multiply the final expressions by the
+spin-matrixelements:
+$$ 
+\chi_{\alpha \beta}   
 $$
 
 The idea of the projection formalism to calculate the dynamical
@@ -263,8 +296,8 @@ J_{tn_2}K_{tn_1})
 $$
 with
 $$
-\vec \sigma = \sum_{k\alpha, k+q\beta}\vec \sigma_{\alpha\beta}
-c^\dagger_{k\alpha}c_{k+q\beta}
+\vec \sigma = \sum_{k\alpha, k+Q\beta}\vec \sigma_{\alpha\beta}
+c^\dagger_{k\alpha}c_{k+Q\beta}
 $$
 With help of the symmetry properties 
 $$
@@ -295,19 +328,19 @@ $$
 and calculate instead the corresponding susceptibility (using tr
 $\sigma^i\sigma^i)=2$):
 \eqnarray
-G_{nm}(z)&= {2\over \beta \omega}\sum_{k,k+q} \langle \Bigl[K_{mn}
- c^\dagger_{k+q}c_{k},(z - E_n +
-E_m  -\epsilon_k+\epsilon_{k+q})^{-1} K_{nm}
-c^\dagger_{k}c_{k+q}\Bigr]\rangle \nonumber\\
+G_{nm}(z)&= {2\over \beta \omega}\sum_{k,k+Q} \langle \Bigl[K_{mn}
+ c^\dagger_{k+Q}c_{k},(z - E_n +
+E_m  -\epsilon_k+\epsilon_{k+Q})^{-1} K_{nm}
+c^\dagger_{k}c_{k+Q}\Bigr]\rangle \nonumber\\
 &=  {2\over \beta \omega
-}\sum_{k,q}(f_{k+q}(1-f_{k})p_m-f_{k}(1-f_{k+q})p_n)(
-z-E_n+E_m-\epsilon_{k}+\epsilon_{k+q})^{-1}\nonumber
+}\sum_{k,Q}(f_{k+Q}(1-f_{k})p_m-f_{k}(1-f_{k+Q})p_n)(
+z-E_n+E_m-\epsilon_{k}+\epsilon_{k+Q})^{-1}\nonumber
 \endeqnarray
 We are interested in the imaginary part describing the relaxation processes:
 $$
 Im G_{nm}(\omega+i\delta)= - {2\pi \over \beta \omega
-}\sum_{k,q}\Bigl(f_{k+q}(1-f_{k})p_m-f_{k}(1-f_{k+q})p_n \Bigr)
- \delta(\omega -E_n+E_m-\epsilon_{k}+\epsilon_{k+q})
+}\sum_{k,Q}\Bigl(f_{k+Q}(1-f_{k})p_m-f_{k}(1-f_{k+Q})p_n \Bigr)
+ \delta(\omega -E_n+E_m-\epsilon_{k}+\epsilon_{k+Q})
 $$
 Writing $ \rho=\omega - \omega_{nm}$ and $\omega_{nm}=E_n-E_m$  we obtain
 $$
@@ -373,20 +406,18 @@ $$
 
 Summary:
 For the neutron scattering cross section we need the function 
-$Im u^{\alpha\beta}(\omega+i\delta)/(1-\exp(-\beta\omega)$, where
-$u^{\alpha\beta}(z)$ is the frequency dependent part of the dynamic
-susceptibility $\chi^\alpha\beta(z)$ for spin components  $J^\alpha$,$J^\beta$, which is
+$Im \chi^{\alpha\beta}(\omega+i\delta)/(1-\exp(-\beta\omega)$, where
+$\chi^{\alpha\beta}(z)$ is the frequency dependent part of the dynamic
+susceptibility $\chi^{\alpha\beta}(z)$ for spin components  $J^\alpha$,$J^\beta$, which is
 related to the corresponding relaxation function $\Phi^{\alpha,\beta}$ by
-$$
-u^{\alpha\beta}(z)= -\beta z \Phi^{\alpha\beta}(z)
-$$
-For the full dynamical susceptibility we need also the static suseptibility
 $$
 \chi^{\alpha\beta}(z) = \chi^{\alpha\beta}(0) - \beta z \Phi^{\alpha\beta}(z)  
 $$
-where in lowest order in the exchange interaction 
+For the full dynamical susceptibility we need the static suseptibility
+$ \chi^{\alpha\beta}(0) $
+which  in lowest order in the exchange interaction is given by 
 $$
-\chi^{\alpha\beta}(0)  = \sum_\nu \beta (J^\alpha_\nu)^\dagger P_\nu J^\beta_\nu
+\chi^{\alpha\beta}(0)  = \sum_\nu  (J^\alpha_\nu)^\dagger \beta P_\nu J^\beta_\nu
 $$
 The above relaxation function is calculated with help of the Mori-Zwanzig
 projection formalism by 
@@ -428,29 +459,42 @@ $$
 From the relaxation function we get for the dynamic scattering cross section 
 $$
 {d^2\sigma \over d\Omega d E'} =  {k' \over
-k}S(\vec \kappa,\omega)
+k}S(\vec Q,\omega)
 $$
 with
 $$
-S(\vec \kappa, \omega)=({r_0\over 2}g F(\kappa))^2{1\over \pi }
+S(\vec Q, \omega)=({r_0\over 2}g_J F(\kappa))^2{1\over \pi }
 \sum_{\alpha\beta}(\delta_{\alpha\beta} 
-- \hat \kappa_\alpha \hat \kappa_\beta)
+- \hat Q_\alpha \hat Q_\beta)
 Im \Phi^{\alpha,\beta}(\omega){-\beta \omega \over 1-e^{-\beta \hbar \omega}} 
 $$
 Here the scattering function depends only on the scattering vector
-$\vec \kappa= \vec k - \vec k'$ and the energy loss $(\hbar)\omega =E(k)-E(k')$
+$\vec Q= \vec k - \vec k'$ and the energy loss $(\hbar)\omega =E(k)-E(k')$
 Note that in our formulas $\omega$ contains a factor $\hbar$ and is the
 energy loss. If we want to have meV as energy unit and Kelvin as temperature
 unit, we have to write $\beta= 11.6/T$.
    
 For the analysis of polarised neutron scattering the different
-spin-components $S^{\alpha\beta}(\vec \kappa,\omega)$ of $S$ are needed. 
+spin-components $S^{\alpha\beta}(\vec Q,\omega)$ of $S$ are needed. 
 These are defined by
 $$
-S(\vec \kappa,\omega)= \sum_{\alpha\beta}(\delta_{\alpha\beta} 
-- \hat \kappa_\alpha \hat \kappa_\beta)S^{\alpha\beta}(\vec \kappa,\omega)
+S(\vec Q,\omega)= \sum_{\alpha\beta}(\delta_{\alpha\beta} 
+- \hat Q_\alpha \hat Q_\beta)S^{\alpha\beta}(\vec Q,\omega)
 $$
-
+with
+$$
+S^{\alpha\beta}(\vec Q,\omega)=
+Im \chi^{\alpha\beta}/(1-e^{-\beta \hbar \omega})=
+Im \Phi^{\alpha,\beta}(\omega){-\beta \omega \over 1-e^{-\beta \hbar \omega}} 
+$$
+The complex dynamic susceptbility is calculated from
+$$
+\chi^{\alpha\beta}(\omega)= \chi^{\alpha\beta}(0)-\beta \omega
+\Phi^{\alpha\beta}(\omega)= \sum_{\mu\nu}\beta (J^\alpha_\mu)^*(P_{\mu\nu}-\omega
+\Phi_{\mu\nu}(\omega ))J^\beta_\nu
+$$
+where the static susceptibilities $\beta P_{\mu\nu}$ are diagonal in our
+approximation.  
 
 \bigskip
 \newpage
@@ -458,28 +502,63 @@ $$
 \vfill
 \eject
 \parindent=0pt
-{\large Construction of the program for single-ion dynamical susceptibility:}
+{\large Description of the program:}
 
+The program calculates the dynamical susceptibility
+and the neutron scattering cross-section of single RE ions in the presence
+of crystal fields and Landau damping due to the exchange interaction with 
+conduction electrons.
 
-1. Module CommonData, module MatrixElements
+It needs the following input-files (not all are needed for all tasks)
 
-Contains definitions of global variables and arrays used in the program and
-in different  subroutines 
+1. A file containing the information about the RE ion: Type of ion, number of
+CF-levels, energy eigenvalues and eigenstates. The date are extracted from
+the input-file by reading the information contained in lines starting with
+$\#!$ or blanks, see the attached example. 
 
+2. File with the formfactor data for RE ion
+
+3. File with a list of ($\vec Q,\omega$)-values, for which the calculation
+shall be performed
+
+4. A parameter-file containing  the names of the files with the
+formfactor, the  table with the ($\vec Q,\omega$)-values, the energy range, 
+scattering direction etc., see the attached example.
+
+5. The value of the coupling constant $g=j_{ex}N(0)$, the temperature,  
+the mode of calculation, the form of the out-put, the name of the file with
+the CEF-data, the  name of the parameter file are provided by the
+commandline, which is used to start the program. 
+
+   
+The program consists of a number of modules and subroutines which are
+briefly described in the following: 
+ 
+1. Modules CommonData, MatrixElements, FormfactorPreparation
+
+These modules contain definitions of global variables and arrays 
+used in the program and in different  subroutines. 
+FormfactorPreparation also contains the
+subroutine FormfactorTransformation which transforms an input-file with
+formfactor data into a file with formfactor values for equidistant Q-values. 
+and the function Formfac to calculate the formfactor at
+arbitrary Q-values.
+  
 2. Subroutine ReadData
 
-Subroutine to read-in data about the magnetic ions, the coupling 
-constant $g=J_{ex} N(0)$ and the temperature  T (in Kelvin). 
-It is assumed that the data about the
-magnetic ions (number of of states Ns, Lande factor, energies of the 
-CEF states and 
-eigenvectors) are contained in an input-file provided by other 
-programs of McPhase, in particular from so1ion. The program picks-up the
-required data by searching lines beginning with \#! or blanks. Furthermore a file
-containing information about the energy range of the calculation is
-required. All these informations are entered via the commandline of the
-executable of the program. For a detailed prescription to run the program see below.
+Subroutine to read-in data needed to calculate the dynamical susceptibility
+and the neutron scattering cross-section.
 
+It reads the commandline, containing the coupling $g=j_{ex} N(0)$,  
+the temperature  $T$ (in Kelvin), mode of calculation (see below), form of out-put, 
+name of the
+file with RE data, name of the parameter-file (containing also the name of
+the file with the formfactor data). The information about the RE ion is
+transferred into a workfile cefworkfile.dat for inspection and use in the
+following runs. The data contained in the parameter-file are stored in the
+file bfkdata.dat. The latter two have to be given only in the first run. If
+they are left-out  in the following runs, the are assumed    to be
+unchanged.
 
 3. Subroutine Matrixelements
 
@@ -498,10 +577,10 @@ arrays v1($\nu$), v2($\nu$). If both Boltzmann factors of the two states
 involved are zero, this transition is eliminated from the set of allowed
 transitions.  
 
-d) Calculates static suscepibilities $Pp(\mu)$ for the standard basis operators
+d) Calculates static suscepibilities $P(\mu)$ for the standard basis operators
 $K_{n,m}$ for the allowed transitions.  
 
-e) All these reults are stored in a  file bfkmatrix for examination, if
+e) All these reults are stored in a  file bfkmatrix.dat for examination, if
 something goes wrong.
  
 
@@ -510,226 +589,164 @@ something goes wrong.
 adapted from Numerical Recipes, to be used for the inversion of the complex
 matrix $\Omega_{\nu\mu}$. Called by 5. 
 
-5. Subroutine SuscepComponents
+5. Subroutine Relmatrix
 
-Calculates the matrix relaxation function for the set of dynamical variables
-obtained for the standard basis operators for a given energy (freqency)
-$\omega$ and multiplies them with the corresponding spin-matrix-elements to
-get the complex dynamical susceptibility of the RE ion.  
+Calculates the matrix relaxation function $\Phi_{\mu,\nu}(\omega)$ for the set 
+of dynamical variables
+obtained from  the standard basis operators for a given energy (freqency)
+$\omega$.
 
-6. Subroutine OutputResults 
+6. Subroutine Suscepcomponents 
 
-Here the results for the dynamical susceptibility is calculated for
-different energies and printed into a file chibfk.res in the subdirectory
-/Results.
-
-
-
-\newpage
-{\large How  to run the program chibfk\index{chibfk}}.
-
-The program is started by typing-in the name of the  executable program (chibfk). 
-%If the
-%program is translated by gfortran, this name would be a.out, but this name can
-%be changed to another name. 
-Via the commandline the value of the dimensionless coupling 
-constant g with the conduction electrons and the temperature T (in Kelvin) is
-entered. The next entry is the name of the file containing information about
-the level structure of  the RE ions (for instance the output levels.cef 
-from so1ion). Finally the name
-of a file (for instance mcdisp.par), containing information about 
-the energy range emin, emax 
-of  the calculation is required. These files should be in the same directory 
-as the executable program.
-Then the commandline has the form: 
-
-chibfk 0.02 20 levels.cef mcdisp.par
-
-Results are calculated for the different directionl components of the
-dynamical susceptibility and written into a file /Results/chibfk.res in a
-subdirectory Results. 
- 
-Joachim Keller, April 2013 
-
-
-\vfill
-\eject
-\parindent=0pt
-{\large Construction of the program for the neutron scattering:}
-
-
-1. Module CommonData, module MatrixElements, module Ffp
-
-Contains definitions of global variables and arrays used in the proram and
-in different  subroutines 
-
-2. Subroutine ReadData
-
-Subroutine to read-in data about the magnetic ions, the coupling 
-constant $g=J_{ex} N(0)$ and the temperature  T (in Kelvin). 
-It is assumed that the data about the
-magnetic ions (number of of states Ns, Lande factor, energies of the 
-CEF states and 
-eigenvectors) are contained in an input-file provided by other 
-programs of McPhase, in particular from so1ion. Also required is a file
-containing the formfactor $F(Q)$. For one mode of calculation a list of
-Omega and Q values is required, for wihch the cross section shall be
-calculated.  For a detailed prescription to run the program see below.
-
-
-3. Subroutine Matrixelements
-
-a) Calculates angular momentum matrices jjx, jjy, jjz for the crystal-field eigenstates
-(2-dim arrays, dimension Ns x Ns). The three directional components are also
-stored in the 3-dimensional array jjj(3,Ns,Ns). 
-
-b) Calculates Boltzmann-factors $p(n)$. A cut-off in the exponent $\beta
-E(n)$ is introduced such that Boltzmann factors with large negative
-exponents
-are set equal to zero. 
-
-c) Defines  a set of transitions  $\nu$  between states
-n1 and n2, stored in two  1-dim
-arrays v1($\nu$), v2($\nu$). If both Boltzmann factors of the two states
-involved are zero, this transition is eliminated from the set of allowed
-transitions.  
-
-d) Calculates static suscepibilities $Pp(\mu)$ for the standard basis operators
-$K_{n,m}$ for the allowed transitions.  
-
-e) All these reults are stored in a  file bfkmatrix for examination, if
-something goes wrong.
- 
-
-4. MatrixInversionSubroutine
-
-adapted from Numerical Recipes, to be used for the inversion of the complex
-matrix $\Omega_{\nu\mu}$. Called by 5. 
-
-5. Subroutine SuscepComponente
-
-Calculates the matrix relaxation function for the set of dynamical variables
-obtained for the standard basis operators for a given energy (freqency)
-$\omega$ and multiplies them with the coresponding spin-matrix-elements.
-
-6. Subroutine Strfak(Q)
-
-Calculates atomic formfactor from a list of formfactor values by
-interpolation. 
-
-7. Real Function Scatfunction( kappa,omega) 
-
-Calculates the spin-dependend components of the dynamical scattering
-cross section for given energy loss x, and multiplies them with the
-directional part of the cross-section, uses SuscepComponents.
-Calculates 
-$\sum_{\alpha,\beta} (\delta_{\alpha, \beta}- \tilde \kappa_\alpha \tilde
-\kappa_\beta) \chi''_{\alpha \beta}(\omega)/(1-\exp(-\beta\omega))$
-for a given energy loss $\omega$ and scattering vector $\kappa$.
-
-
-9. Subroutine OutputResults 
-
-Here the results for the scattering cross section are printed into the
-output file. 
-6 different calculational modes $0,1,\dots ,5$ can be used. In mode 0 the
-freqency dependent part of the dynamical cross section is analysed and $Im
-\chi^{\alpha\alpha}(\omega)/\tanh{\beta\omega/2}$ is calculated. This
-quantity should fulfill a sumrule 
+Calculates the different components of the
+dynamical susceptibility
 $$
-\sum_\alpha {1\over\pi}\int d\omega Im \chi^{\alpha\alpha}/\tanh(\beta\omega) 
+\chi^{\alpha,\beta}(\omega) = \beta\sum_{\mu \nu}(J^\alpha)_\mu)^*
+\bigl[P_\mu\delta_{\mu\nu}-\omega \Phi_{\mu\nu}(\omega)\bigr]J^\beta_\nu
+$$ 
+and 
+$$
+Im \chi^{\alpha\beta}(\omega)/(1-\exp(-\beta\omega))
+$$
+7. Function Scatfunction(Q,$\omega$)
+
+Calculates
+$$
+S(\vec Q,\omega)= \sum_{\alpha\beta}\bigl(\delta_{\alpha\beta} - \tilde
+Q^\alpha\tilde Q^\beta\bigr) Im \chi^{\alpha\beta}/(1-\exp(-\beta\omega))
+$$
+
+
+8. Subroutine OutputResults 
+
+Here the results for the dynamical susceptibility, the scattering function
+and the differential neutron scattering cross section for different
+scattering geometries are calculated, and the results written into files 
+bfkm.res for different scattering-modes m=0-6, which are written into the  
+subdirectory /results. Depending on the value of ms=1,2 the new results
+over-write the previews results or append.  
+
+Depending on the number m=0-6 (3. entry of the commandline) the following
+results are calculated. 
+
+mode=0: all nine components $\chi^{\alpha\beta}(\omega)$  of the complex 
+dynamic susceptibility are calculated for $Npoint$ equidistant energies  $\omega$ 
+between $emin$ and $emax$. 
+
+mode=1: the diagonal components of $Im \chi^{\alpha\alpha}(\omega)/\tanh{\beta\omega/2}$
+are calculated and the frequency integral is compared with the sum-rule 
+$$
+\sum_\alpha {1\over\pi}\int d\omega {Im
+\chi^{\alpha\alpha}\over \tanh(\beta\omega/2)} 
 = J(J+1) 
 $$
-In mode 1 and 2 the components of the cross section are calculated,
-using the form factor $F(Q)$ as input. In mode 1 the
-scattering function $S(\vec Q,\omega)$ is calculated for a set of $\vec
-Q$ and $\omega $ values specified by an input file. In mode 2 the same
-is done for the 9 different spin components $S^{\alpha\beta}$ separately 
+The sum-rule sometimes is not very well fulfilled, since within this
+approximation the Landau damping does not fall-off fast enough at large
+energies
 
-In modes 3-5
-the complete scattering cross section is calculated for different scattering
-geometries: In mode 3 the  
-direction of the wave vector $\vec k$ and the energy $E=k^2/2m$ of the incoming 
-beam is fixed. The direction of the scattering wave vector $\vec q$ is fixed, 
+mode=2: The scattering function 
+$$
+S(\vec Q,\omega)=\sum_{\alpha,\beta} (\delta_{\alpha, \beta}- \tilde Q_\alpha \tilde
+Q_\beta){ \chi''_{\alpha \beta}(\omega)\over 1-\exp(-\beta\omega)}
+$$ 
+is calculated for a given set of values for  
+energy loss $\omega$ and scattering vector $\vec Q$ contained in a file
+specified in the parameterfile. 
+
+mode=3: The 9 different components of the scattering-function 
+$$
+(r_0g_JF(\vec Q)/2)^2{1\over \pi} S^{\alpha\beta}(\vec Q,\omega), \quad 
+S^{\alpha\beta}(\vec Q,\omega)= {Im \chi^{\alpha,\beta}(\omega)\over
+1-exp(-\beta\omega)}
+$$
+are  calculated. 
+
+mode= 4-6: the neutron scattering cross section
+$$
+{d^2\sigma \over d\Omega d E'} =  {k' \over
+k}S(\vec Q,\omega)
+$$
+with
+$$
+S(\vec Q, \omega)=({r_0\over 2}g F(Q))^2{1\over \pi }
+\sum_{\alpha\beta}(\delta_{\alpha\beta} 
+- \hat Q_\alpha \hat Q_\beta)
+{Im \chi^{\alpha,\beta}(\omega)\over 1-exp(-\beta \omega)} 
+$$
+
+is  calculated for different scattering geometries:
+In mode 4 the  
+direction of the wave vector $\vec k$ and the energy $E=k^2/2m$ of the
+incident 
+beam is fixed. The direction of the scattering wave vector $\vec Q$ is fixed, 
 but the 
-length of $\vec q$ is variable. The wave vector of the scattered
-particles is  $\vec ks=\vec k-\vec q$, their energy is $Es=ks^2/2m$ and
-the energy loss is $\omega =E-Es$. In mode 4 the direction  of the wave vectors 
-$\vec k$ and $\vec ks$ of the incoming and scattered beam
-are fixed, while the energy $Es$ of the scattered beam is variable. In mode 5
-the energy $E$ of the incoming beam is variable 
-and the energy $Es=k^2/2m$ of the scattered particles  fixed.  
+length of $\vec Q$ is variable. The wave vector of the scattered
+particles is  $\vec k'=\vec k-\vec Q$, their energy is $E'=k'^2/2m$ and
+the energy loss is $\omega =E-E'$. In mode 5 the direction  of the wave vectors 
+$\vec k$ and $\vec k'$ of the incoming and scattered beam
+are fixed, while the energy $E'$ of the scattered beam is variable. In mode
+6
+the energy $E$ of the incident particles is variable 
+and the energy $E'=k^2/2m$ of the scattered particles  fixed.  
+
+\newpage
+{\large How to run the program:}
+
+\bigskip
+The translated program is started with a command-line 
+like 
+
+bfk 0.1 10 0 1 prlevels.cef paramfile.par
 
 
+with  the following
+structure:
 
+name of the program: bfk;  coupling constant g; temperature T (in K); type of
+calculation: mode =1...6; type of output: mst=1 overwrite, mst=2 append new
+results;  name of file with RE ion data; name of parameter file.
+
+\medskip
+
+The last two entries can be skipped in later runs, if they are not changed.
+
+The mode number mode = 1 \dots 6
+refers to the subject of calculation. The output- number 
+mst=1,2 refers to the type of output-storage.
+
+\medskip
+The file with RE data should have the  form produced by sol1on (see the attached example). 
+The
+lines starting with numbers or blanks contain information, the lines
+starting with \# are commentaries, the lines starting with  \#! also carry
+information.
+
+\medskip 
+The parameterfile contains additional parameters needed to run the program:
+energy range and number of energy values. Energies of incident or scattered
+particles, direction of incident  or scattered particles. 
+
+mode=4: E energy of incident particles, k11,k12,k13 direction if incident
+particles (vector with arbitrary length), k21,k22,k23 direction of scattered
+particles. 
+
+mode=5: E energy of incident particles, k11,k12,k13 direction if incident
+particles (vector with arbitrary length), k21,k22,k23 direction of
+scattering vector $\vec Q$.
+
+mode =6: E energy of scattered  particles, k11,k12,k13 direction if incident
+particles (vector with arbitrary length), k21,k22,k23 direction of
+scattered particles. 
+
+\medskip
+The parameterfile also contains the namme of a file with  a list of
+scattering vectors  $\vec Q$ and energy loss ($\omega$) needed for mode
+2,3
+
+ Finally it contains the name of a file with the formfactor of the ion.  
 
 \bigskip
 
-{\large How  to run the program bfk\index{bfk}}.
-
-It is generally assummed that the necessary data 
-about the magnetic ion are contained  in an input-file provided by other
-parts of McPhase, in particular the file levels.cef from so1ion. 
-This input-file must provide the 
-following information: Type of rare-earth ion  (the J-value and Lande-factor
-are derived from this information), 
-energies and eigenstates of the ion in the crystalline electric field. 
-This information is stored in a workfile cefworkfile.dat for later use. 
-
-Also
-information about the atomic formfactor must be provided, for instance by the
-file 'formfactor.out' generated by the program formfactor. The essential
-information contained on this file is transfered to the workfile    
-strworkfile.dat. 
-
-These two input files are read-in by the program, if it is started with an
-empty command-line. Then it asks for the name of the two files.   
-These names of the files containing the
-CEF-data and the formfactor are stored in the files bfkdata0.dat (for mode
-0), bfkdata12.dat (for modes
-1 and 2) and
-bfkdata345.dat (for modes 3-5).  
- bfkdata12.dat also contains the name of the file containing
-the list of $q$-values and energy-loss values for which the scattering
-function will be calculated.    
-
-Further input is needed  for the scattering geometry for the modes 3-5 which
-will be stored in bfkdata345.dat. This is the direction of the wave vectors 
-$\vec k$, $\vec k'$ and(or)
-$\vec q$, which are read-in as vectors of arbitrary length. Furthermore
-the energy  of the incoming beam (mode 3 and mode 4) or of the scattered beam
-(mode 5) is needed. 
-
-Finally the value 
-of the temperature $T$ (in Kelvin) and the value of the (dimensionless) 
-coupling constant $g$ with the
-conduction electrons are needed. They are asked for, if the program is
-started with the name of the executable program and an empty command line 
- together with the number (mode=$0,1,\dots ,5$) of the
-calculation mode and the type of storage of the results. Here one has the
-choice between overwriting the results of the previous run in the output
-file (mst=1), or to append the
-new results to the previous results in the output file (mst=2). 
-The names of the files containing the results of the calculation are
-bfkresults0.dat bfkresults12.dat and bfkresults345.dat.
-
-In the following runs  the values of g and T, mode of calculation, and type
-of output can be  provided by the
-command-line by starting the program with a filled-in command line: 
- a.out (name of executable ) 
-g T mode mst. In these runs the workfiles cefworkfile.dat and
-strworkfile.dat are used instead of the original files (containing
-also commentary text lines). 
-
-The program can also be run without the original
-files, if the workfiles have been filled-in with the correct information and
-have the correct
-format. The program is then started with a filled-in commandline. Missing
-data are asked for by the program.     
-
-
-Joachim Keller, March 2013 
+J. Keller, May 2013
 
 %\end{document}
-\newpage
-
