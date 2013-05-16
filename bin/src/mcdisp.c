@@ -25,7 +25,8 @@ void errexit() // type info and error exit
     printf ("                          be considered\n");
     printf (" -r                   ... refine energies\n");
     printf (" -x                   ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
-    printf (" -xa                  ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection\n");
+    printf (" -xa   stp            ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection (stp in deg)\n");
+    printf (" -xaf  az             ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n");
     printf (" -d                   ... calculate intensities in dipole approximation only\n");
     printf (" -v                   ... verbose\n");
     printf (" -a                   ... do not overwrite output files in results - append new results\n");
@@ -1143,8 +1144,10 @@ if (do_jqfile==1){
                                    double Irrt=0,Irlt=0,Ilrt=0,Illt=0;
                                    ComplexVector eis(1,3),eos(1,3),eip(1,3),eop(1,3);
                                    ComplexVector eir(1,3),eor(1,3),eil(1,3),eol(1,3);
+                       double daz=PI/90;if (calc_rixs==2)daz=epsilon*PI/180;
+                       double azmin=0.0,azmax=2*PI;if (calc_rixs==3){azmin=epsilon*PI/180;azmax=azmin;}
                        if (En(i)<=ini.emax&&En(i)>=ini.emin){
-                         for(double azimuth=0.0;azimuth<=2*PI&&ints(i)>-1;azimuth+=PI/90)                             
+                         for(double azimuth=azmin;azimuth<=azmax&&ints(i)>-1;azimuth+=daz)                             
                               { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, abc,QQ,En(i));
                                 // eis,p and eos,p are polarisation vectors for sigma/pi plarisation in terms of
                                 // eir,l and eor,l are polarisation vectors for righ/left circular plarisation in terms of
@@ -1533,7 +1536,16 @@ for (i=1;i<=argc-1;++i){
 		                                                epsilon=strtod(argv[i+1],NULL);++i;
 							        fprintf(stdout,"#epsilon= %g\n",epsilon);
 				     }		
-      else {if(strcmp(argv[i],"-xa")==0) {calc_rixs=2;calc_beyond=0;} // rixs with azimuth dependence 
+     else {if(strcmp(argv[i],"-xaf")==0) {calc_rixs=3;calc_beyond=0; // rixs with azimuth fixed
+                                                  if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -xaf needs argument(s)\n");exit(EXIT_FAILURE);}
+		                                  epsilon=strtod(argv[i+1],NULL);++i; // use epsilon to convey azimuth
+						  fprintf(stdout,"#maximum number of single ion excitations taken into account (starting with lowest energy): %i\n",maxlevels);
+					         }
+      else {if(strcmp(argv[i],"-xa")==0) {calc_rixs=2;calc_beyond=0; // rixs with azimuth dependence in steps
+                                                  if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -xa needs argument(s)\n");exit(EXIT_FAILURE);}
+		                                  epsilon=strtod(argv[i+1],NULL);++i; // use epsilon to convey azimuth step
+						  fprintf(stdout,"#maximum number of single ion excitations taken into account (starting with lowest energy): %i\n",maxlevels);
+					         }
        else {if(strcmp(argv[i],"-x")==0) {calc_rixs=1;calc_beyond=0;}  // rixs without azimuth dep .. Irixs max only
         else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
          else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
@@ -1568,7 +1580,7 @@ for (i=1;i<=argc-1;++i){
                     else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
            	      else{spinfile=argv[i];}
                          } // help
-                       } // prefix
+                       } // prefi
 		     } // pinit
 		    } // ninit
 		   } // minE
@@ -1582,6 +1594,7 @@ for (i=1;i<=argc-1;++i){
           }
          }
         }
+      } // xaf
     }
   // as class load  parameters from file
   par inputpars("./mcphas.j");
@@ -1590,6 +1603,7 @@ for (i=1;i<=argc-1;++i){
 
   inimcdis ini("mcdisp.par",spinfile,prefix,abc);
   if(ini.nofcomponents!=inputpars.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.nofcomponents);exit(EXIT_FAILURE);}
+  if(do_Erefine&&calc_rixs){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf\n");exit(EXIT_FAILURE);}
   if(ini.nofatoms!=inputpars.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.nofatoms);exit(EXIT_FAILURE);}
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix);
