@@ -318,6 +318,7 @@ module_type=0;
    }
   }
  // fclose(cf_file);
+ fseek(cf_file,0,SEEK_SET);
 
   magFFj0=Vector(1,7);magFFj0=0;  magFFj0[1]=1;
   magFFj2=Vector(1,7);magFFj2=0;
@@ -331,7 +332,7 @@ module_type=0;
 
   DWF=0;  gJ=0;maxE=1e10;pinit=0;ninit=1e10;
 
-  cf_file = fopen_errchk (sipf_filename, "rb");
+ // cf_file = fopen_errchk (sipf_filename, "rb");
   while(feof(cf_file)==false)
   {fgets(instr, MAXNOFCHARINLINE, cf_file);
    if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...

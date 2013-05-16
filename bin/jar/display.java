@@ -65,7 +65,7 @@ import java.text.NumberFormat;
  */
 public class display extends ApplicationFrame implements KeyListener,WindowListener  {
 
-static final int MAX_NOF_FILES = 10;
+static final int MAX_NOF_FILES = 20;
 static myStringfunc SF=new myStringfunc();
 static int xy[]={0,0,0,0};
 static Frame frame;

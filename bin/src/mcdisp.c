@@ -275,6 +275,7 @@ void sortE(Vector & d,ComplexMatrix & z)
 // rotate chi(1..3,1..3) from xyz to uvw coordinates
 void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
 {Vector hkl(1,3),u(1,3),v(1,3),w(1,3),q1(1,3),q2(1,3);q1=0;q2=0;
+ ComplexMatrix M(1,3,1,3);
  hkl(1)=ini.hkls[counter][1];
  hkl(2)=ini.hkls[counter][2];
  hkl(3)=ini.hkls[counter][3];
@@ -297,8 +298,9 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  hkl(3)=ini.hkls[i][3];
  hkl2ijk(q1,hkl,abc);
      }
- if(q1*q2==0){fprintf(stderr,"Error mcdisp: for option outS=3,4 more than 1 linear independent hkl set has to be given in order to determine scattering plane\n");exit(EXIT_FAILURE);}
+//printf("q1*q2=%g q1=(%g %g %g) q2=(%g %g %g)\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3));
  xproduct(w,q1,q2);
+ if(Norm(w)<SMALL_XPROD_FOR_PARALLEL_VECTORS){fprintf(stderr,"Error mcdisp: for option outS=3,4 more than 1 linear independent hkl set has to be given in order to determine scattering plane\n");exit(EXIT_FAILURE);}
  xproduct(v,w,u);
 // normalize
  u=u/Norm(u);
@@ -307,7 +309,9 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  // now u v w is determined in terms of xyz coordinates
  ComplexMatrix rot(1,3,1,3);
  for(int i=1;i<=3;++i){rot(i,1)=u(i);rot(i,2)=v(i);rot(i,3)=w(i);}
- chi(1,3,1,3)=rot.Transpose()*chi(1,3,1,3)*rot;
+ M=rot.Transpose()*chi(1,3,1,3)*rot;
+ for(int i=1;i<=3;++i)for(int j=1;j<=3;++j)chi(i,j)=M(i,j);
+ 
 }
 
 // *******************************************************************************************
