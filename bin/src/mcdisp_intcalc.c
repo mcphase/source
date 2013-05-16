@@ -11,9 +11,16 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
  hkl2ijk(qijk,hkl, abc);
     QQ=Norm(qijk);
+
+// polarisation factor
+    ComplexMatrix pol(1,3,1,3);
+    for(i=1;i<=3;++i){pol(i,i)=1.0;
+    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/QQ;//(qijk*qijk);
+    }}
+
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
- 
+  char filename[MAXNOFCHARINLINE];
  float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
  if(do_verbose==1) printf("#initializing intensity calculation\n");
   double Gamman,gamma,gammaP; 
@@ -31,9 +38,12 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
      SL[l] = complex <double> ((*inputpars.jjj[l]).SLR,(*inputpars.jjj[l]).SLI);
   }
 
+  sprintf(filename,"./results/%smcdisp.trs",ini.prefix);  
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.nofatoms;++l){
-  fin = fopen_errchk ("./results/mcdisp.trs","rb");
+  if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
+                  fin = fopen_errchk(filename,"rb");}
+
   jmin=0;
   while (feof(fin)==0)
   {if ((i1=inputline(fin,nn))>=5)
@@ -87,7 +97,10 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
         else{ if(do_verbose)printf("#warning mcdisp - function dmq1 not implemented for single ion module of ion %s, only doing dipolar intensity\n",(*inputpars.jjj[l]).sipffilename);
              mq1=mq1_dip;
             }
-                    }
+         mq1=pol*mq1;// take into account polarisation factor ... only Mper scatters
+                  } // do_gobeyond
+         mq1_dip=pol*mq1_dip;// take into account polarisation factor ... only Mper scatters
+
       // try to calculate phonon intensity
       if(do_phonon){
                   if((*inputpars.jjj[l]).dP1calc(ini.T,mf,ini.Hext,P1,md.est(i,j,k,l))==0)
@@ -100,7 +113,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
      } // if calc_rixs
 
       if(do_gobeyond){mq1*=DBWF[l]; // multiply Debye Waller factor
-                      Gamman=Norm2(mq1);mq1/=sqrt(Gamman);
+                      Gamman=Norm2(mq1);if(Gamman>SMALL_NORM)mq1/=sqrt(Gamman);
                       }
       mq1_dip*=DBWF[l]; // multiply Debye Waller factor
       gamma=Norm2(mq1_dip);if(gamma>SMALL_NORM)mq1_dip/=sqrt(gamma);
@@ -351,15 +364,16 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
  // polarization factor
 // neutrons only sense first mqdimxmqdim part of S !! - this is taken into account by setting 0 all
 // higher components in the polarization factor !!!
-    pol=0; double qsqr=qijk*qijk;
-    for(i=1;i<=3;++i){pol(i,i)=1.0;
-    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
-    }}
+ //   pol=0; double qsqr=qijk*qijk;
+ //   for(i=1;i<=3;++i){pol(i,i)=1.0;
+ //   for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
+ //   }}
   
+
 ComplexMatrix ch(1,mqdim,1,mqdim),chb(1,mqdim,1,mqdim);
 complex <double> chP;
 ch=0;chb=0;chP=0;
- //multiply polarization factor
+ //multiply polarization factor .... removed from here
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
  for(l1=1;l1<=md.nofatoms;++l1){
  for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
@@ -375,9 +389,9 @@ if(calc_rixs){
            ch(i,j)+=chi(s3+i,ss3+j);               
       }else{
      if(intensitybey>0) {
-           chb(i,j)+=chibey(s3+i,ss3+j)* pol(i,j) ; 
+           chb(i,j)+=chibey(s3+i,ss3+j);//* pol(i,j) ; 
                          } // i,j,intesitybey
-           ch(i,j)+=chi(s3+i,ss3+j)*pol(i,j);                          
+           ch(i,j)+=chi(s3+i,ss3+j);//*pol(i,j);                          
             }
            }}
 if(do_phonon) {chP+=chiPhon(s+1,ss+1);}
@@ -417,12 +431,12 @@ if (calc_rixs){// use 1-9 components of chi to store result !!! (other component
             } 
        else{ch*=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
             for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chi(i,j)=ch(i,j);}}
-            sumS=Sum(ch);intensity=fabs(real(sumS));
+            sumS=Trace(ch);intensity=fabs(real(sumS)); // if polarisation factor is already in Mperp we need Trace instead of of sum
                       if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g negative,E=%g, bose=%g\n",real(sumS),en,bose);exit(1);}
                       if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
             if(intensitybey>0){chb*=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
                                for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chibey(i,j)=chb(i,j);}}
-                               sumS=Sum(chb);intensitybey=fabs(real(sumS));
+                               sumS=Trace(chb);intensitybey=fabs(real(sumS));// if polarisation factor is already in Mperp we need Trace instead of of sum
                                intensitybey=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                               }

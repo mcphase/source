@@ -1378,7 +1378,9 @@ for unpolarised neutrons has been given frequently in literature (see e.g. \cite
 \begin{eqnarray}\label{dsdoderepeated}
 \frac{d^2\sigma}{d\Omega dE'}&=&
 N\frac{k'}{k}S_{\rm nuc}(\mbf Q,\omega) +
-N\frac{k'}{k} \sum_{\alpha\beta=1,2,3} S^{\alpha \beta}_{\rm mag}(\mbf Q,\omega) \nonumber \\
+N\frac{k'}{k} 
+% \sum_{\alpha\beta=1,2,3} 
+Tr\{S_{\rm mag}(\mbf Q,\omega)\} \nonumber \\
 S_{\rm nuc}&=&S_{\rm nuc}^{\rm el}+S_{\rm nuc}^{\rm inel} \label{snuc} \\ 
 S_{\rm mag}&=&S_{\rm mag}^{\rm el}+S_{\rm mag}^{\rm inel} \label{smag} 
 \end{eqnarray}
@@ -1464,11 +1466,11 @@ Similar, the magnetic inelastic scattering is given by
 
 \begin{eqnarray}\label{Sinel}
 S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\left( \frac{ \gamma r_0}{2 \mu_B}  \right)^2
-(\delta_{\alpha\beta}- \frac{Q_{\alpha} Q_{\beta}}{|\mbf Q|^2}) 
+%(\delta_{\alpha\beta}- \frac{Q_{\alpha} Q_{\beta}}{|\mbf Q|^2}) 
 \frac{1}{2\pi\hbar}\int_{-\infty}^{+\infty}dt e^{i\omega t}
 \frac{1}{N}\sum_{nn'} e^{-W_n(Q)- W_{n'}(Q)}\\
-&\times&  e^{-i\mbf Q \cdot (\mbf R_n-\mbf R_{n'})}   (\langle \hat M_{\alpha}^{n \dag}(t,\mbf Q)  \hat M_{\beta}^{n'}(0,\mbf Q) \rangle_{T,H}
-- \langle \hat M^{n \dag}_{\alpha}(\mbf Q)\rangle_{T,H} \langle \hat M^{n'}_{\beta}(\mbf Q) \rangle_{T,H})\nonumber
+&\times&  e^{-i\mbf Q \cdot (\mbf R_n-\mbf R_{n'})}   (\langle \hat M_{\perp\alpha}^{n \dag}(t,\mbf Q)  \hat M_{\perp\beta}^{n'}(0,\mbf Q) \rangle_{T,H}
+- \langle \hat M^{n \dag}_{\perp\alpha}(\mbf Q)\rangle_{T,H} \langle \hat M^{n'}_{\perp\beta}(\mbf Q) \rangle_{T,H})\nonumber
 \end{eqnarray}
 
 The total magnetic cross section is $4\pi (\gamma r_0)^2=4\pi\left(\frac{\hbar \gamma e^2}{mc^2}\right)^2
@@ -1479,7 +1481,7 @@ If we split the index $n$ into basis and
 lattice part $n=(\Bell,s)$ and 
 compare equation~(\ref{sigmass}), we see that %%@
 the scattering function depends on the correlation function between the magnetisation operator
-$\hat \mbf M(\mbf Q)$, which is the observable in the case of magnetic neutron scattering 
+$\hat \mbf M_{\perp}(\mbf Q)=\hat \mbf M(\mbf Q)-\mbf Q (\hat \mbf M_{\perp}(\mbf Q) \cdot \mbf Q)/Q^2$, which is the observable in the case of magnetic neutron scattering 
 ($\mathcal O \leftrightarrow \frac{ \gamma r_0}{2 \mu_B}  e^{-W(Q)} \hat \mbf M_{\perp}(\mbf Q)$).
 
 \begin{equation}\label{sinelmag}
@@ -1532,10 +1534,10 @@ $\mbf Q$-dependent.  These quantities have
 matrix elements\footnote{\hili{using the appropriate 
 expression for the matrix elements of of the scattering
 operator as given in~\cite[equ. (11.86) or (11.87b)]{lovesey84-1}.}} 
-of \hili{$\hat \mbf M(\mbf Q)$ for every 
+of \hili{$\hat \mbf M_{\perp}(\mbf Q)$ for every 
 scattering vector $\mbf Q$ 
 and diagonalising the matrix (\ref{mumatrix}) }
-with $\mathcal O \leftrightarrow \hat \mbf M(\mbf Q)$.
+with $\mathcal O \leftrightarrow \hat \mbf M_{\perp}(\mbf Q)$.
 For small $Q$ this procedure can be simplified by using the dipole approximation,
 which is described below.
 
@@ -1605,7 +1607,8 @@ In this approximation the observable is the total angular momentum operator
 
 
 {\prg mcdisp\index{mcdisp}} automatically calculates the intensity in
-dipole approximation and also going beyond, if possible, the result
+dipole approximation and also going beyond, if the single ion module of an
+ion allows for that, the result
 is stored in file {\prg mcdisp.qei}.
 
 

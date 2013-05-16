@@ -303,7 +303,7 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  xproduct(w,q1,q2);
  if(Norm(w)<SMALL_XPROD_FOR_PARALLEL_VECTORS){fprintf(stderr,"Error mcdisp: for option outS=3,4 more than 1 linear independent hkl set has to be given in order to determine scattering plane\n");exit(EXIT_FAILURE);}
  xproduct(v,w,u);
-// normalize
+ // normalize
  u=u/Norm(u);
  v=v/Norm(v);
  w=w/Norm(w);
@@ -311,7 +311,7 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  ComplexMatrix rot(1,3,1,3);
  for(int i=1;i<=3;++i){rot(i,1)=u(i);rot(i,2)=v(i);rot(i,3)=w(i);}
  M=rot.Transpose()*chi(1,3,1,3)*rot;
- for(int i=1;i<=3;++i)for(int j=1;j<=3;++j)chi(i,j)=M(i,j);
+ for(int i=1;i<=3;++i)for(int j=1;j<=3;++j){chi(i,j)=M(i,j);}
  
 }
 
