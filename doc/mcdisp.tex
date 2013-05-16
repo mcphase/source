@@ -174,9 +174,9 @@ described in section~\ref{displaydensities}.
 # 3: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=u,v,w
 # 4: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=u,v,w
 # xyz coordinate refer to y||b, z||(a x b) and x normal to y and z
-# uvw coordinates refer to u||-Q, w perpendicular to the scattering plane
+# uvw coordinates refer to u||Q=k-k', w perpendicular to the scattering plane
 #     (as determined by the cross product of subsequent vectors in the input
-#     q-vector list) and v perpendicular to u and w
+#     q-vector list) and v perpendicular to u and w, such that uvw for a righthanded system
 #
 #
 # Commands such as the following are used to generate a hkl list (to activate put #! instead of # at beginning of line):
@@ -1518,9 +1518,9 @@ $S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)$ can be output (to be used to
 polarised magnetic neutron scattering).$\alpha,\beta$ then refer to either the xyz coordinate system
 ($y||b$,$z||(a \times b)$ and $x$ perpendicular to $y$ and $z$)
 or the uvw coordinate system 
-($u||-Q$,$w$ perpendicular to the scattering plane (as determined by the cross product of
+($\mbf u||\mbf Q=\mbf k- \mbf k'$,$\mbf w$ perpendicular to the scattering plane (as determined by the cross product of
 subsequent vectors in the input q-vector list of {\prg mcdisp})
- and $v$ perpendicular to $u$ and $w$).
+ and $\mbf v$ perpendicular to $\mbf u$ and $\mbf w$, such that uvw for a righthanded system).
 
 Form factor effects on the scattering intensity are
  due to the $\mbf Q$-dependence of the magnetisation operator, which means that

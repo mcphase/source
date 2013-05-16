@@ -115,9 +115,9 @@ void inimcdis::save()
                "# 3: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=u,v,w\n"
                "# 4: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=u,v,w\n"
                "# xyz coordinate refer to y||b, z||(a x b) and x normal to y and z\n"
-               "# uvw coordinates refer to u||-Q, w perpendicular to the scattering plane\n"
+               "# uvw coordinates refer to u||Q=k-k', w perpendicular to the scattering plane\n"
                "#     (as determined by the cross product of subsequent vectors in the input\n"
-               "#     q-vector list) and v perpendicular to u and w\n#\n#\n");
+               "#     q-vector list) and v perpendicular to u and w, such that uvw for a righthanded system\n#\n#\n");
   fprintf(fout,"# Commands such as the following have been read and used to generate the hkl list below:\n");
   fprintf(fout,"#\n");
   fprintf(fout,"# - a Q vector mesh to be mapped in the calculation it can be in Miller indices\n");

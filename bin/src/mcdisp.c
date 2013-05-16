@@ -279,7 +279,6 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  hkl(2)=ini.hkls[counter][2];
  hkl(3)=ini.hkls[counter][3];
  hkl2ijk(u,hkl,abc);
- u*=-1;
  int i=counter-1;
  if(i==0){i++;}
  hkl(1)=ini.hkls[i][1];
