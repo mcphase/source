@@ -103,12 +103,12 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
                       Gamman=Norm2(mq1);mq1/=sqrt(Gamman);
                       }
       mq1_dip*=DBWF[l]; // multiply Debye Waller factor
-      gamma=Norm2(mq1_dip);mq1_dip/=sqrt(gamma);
+      gamma=Norm2(mq1_dip);if(gamma>SMALL_NORM)mq1_dip/=sqrt(gamma);
 
        (*inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
        j1=md.baseindex(i,j,k,l,jmin); 
       
-         // treat correctly case for neutron energy loss
+         // treat correctly case for  energy loss
 	 if (nn[6]<0){if(do_gobeyond)mq1=mq1.Conjugate();
                       if(do_phonon)dP1=conj(dP1);
                       mq1_dip=mq1_dip.Conjugate();}
@@ -303,7 +303,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
                                                                  * md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i);
         if((*md.Ug[in2])(j,bb)==defval) (*md.Ug[in2])(j,bb) = conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))
                                                                  * md.sqrt_Gamma_dip(i2,j2,k2)(mqdim*bb);
-                        
+                      
         //chileft=conj(md.sqrt_gamma(i1,j1,k1)(mqdim*b))*md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i)*Tau(s,level);
         //chi((s-1)*mqdim+i,(ss-1)*mqdim+j)=
         //     PI*chileft*en*conj(Tau(ss,level))*conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))*md.sqrt_gamma(i2,j2,k2)(mqdim*bb);
@@ -889,7 +889,7 @@ u123_to_ijk(eol,azimuth,qijk,hkl,abc,QQ);
 
 
 // *******************************************************************************************
-// rixs function to calculate rxs intensity from rixs susceiptibility
+// rixs function to calculate rxs intensity from rixs susceptibility
 double calc_irix(ComplexVector &ei,ComplexVector & eo,ComplexMatrix & chi)
 {double Intensity=0;
 // chi(1-9,1-9) ... Rij components 1,2,3,...9 are equivalent
@@ -897,7 +897,8 @@ double calc_irix(ComplexVector &ei,ComplexVector & eo,ComplexMatrix & chi)
 // to eiei',eiej',eiek',ejei',ejej',ejek',ekei',ekej',ekek' 
  ComplexVector ee(1,9),dummy(1,9);int k=1;
  for(int i=1;i<=3;++i)for(int j=1;j<=3;++j){ee(k)=ei(i)*conj(eo(j));++k;}
-for(int i=1;i<=9;++i){dummy(i)=0;for(int j=1;j<=9;++j){dummy(i)+=chi(i,j)*ee(j);}} //matvec mult
+for(int i=1;i<=9;++i){dummy(i)=0;for(int j=1;j<=9;++j){dummy(i)+=chi(i,j)*ee(j);
+}} //matvec mult
  //( programmed here by indices because only the indices 1...9 of chi contain valid data 
  Intensity=real(ee*dummy); // note a*b of complex vectors conjugates the second vector
                               // so we do not need to conjugate the vector here

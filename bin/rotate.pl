@@ -12,7 +12,7 @@ unless ($#ARGV >1)
   usage: rotate xcol ycol angle  *.*
 
  xcol,yxol=columns containing x and y , 
- angle=angle of rotation around z
+ angle=angle of rotation around z (deg)
  *.* .. filenname
  
  the rotation is done using the following formula

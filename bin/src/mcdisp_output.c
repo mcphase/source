@@ -82,14 +82,14 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
  if(calc_rixs){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
                writeheader(inputpars,foutqei);
                fprintf(foutqei,"#RIXS intensity components:azimuth is defined as in Longfield et al. PRB 66 054417 (2002)\n"
-                               "coordinate system u1,u2,u3: the scattering plane, defined by the\n"
-                               "direction of the incident and final wave vectors k and k', contains u1 lying\n"
-                               "perpendicular to Q and in the sense of k, and u3 parallel to the scattering\n"
-                               "vector Q= k-k'.\n"
-                               "angles for azimuth=0: alpha_i=angle(ai,u3), delta_i=angle(ai_perp,u1)\n"
-                               "(where a1,a2,a3=a,b,c and ai_perp is the projection of ai onto the plane\n"
-                               "perpendicular to Q. In the chosen experimental geometry\n"
-                               "azimuth=0, when a1=a points to the x-ray source.\n");
+                               "#coordinate system u1,u2,u3: the scattering plane, defined by the\n"
+                               "#direction of the incident and final wave vectors k and k', contains u1 lying\n"
+                               "#perpendicular to Q and in the sense of k, and u3 parallel to the scattering\n"
+                               "#vector Q= k-k'.\n"
+                               "#angles for azimuth=0: alpha_i=angle(ai,u3), delta_i=angle(ai_perp,u1)\n"
+                               "#(where a1,a2,a3=a,b,c and ai_perp is the projection of ai onto the plane\n"
+                               "#perpendicular to Q. In the chosen experimental geometry\n"
+                               "#azimuth=0, when a1=a points to the x-ray source.\n");
              fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
              ini.print_usrdefcolhead(foutqei);
              fprintf (foutqei,"h   k   l Q[A^-1] energy[meV] " 

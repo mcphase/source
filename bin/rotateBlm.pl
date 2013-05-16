@@ -197,11 +197,11 @@ my $MR6 = [
   [$SF6 *( $CT**6 + 15*$CT**4 + 15*$CT**2 + 1)/32 ,- $ST2*$SF5 * ( $CT**4 + 10*$CT**2 + 5 ) / 64  ,11*$ST**2*$SF4 *( $CT**4 + 6*$CT**2+1) / 32,- 11*$ST**3*$CT*$SF3* ( $CT**2 + 3 ) / 32      ,33*$ST**4*$SF2 *( $CT**2 + 1 ) / 32              ,- 33*$ST**5*$CT*$SF / 32                            ,231*$ST**6 / 32                                   ,- 33*$ST**5*$CT*$CF / 32                  ,33*$ST**4*$CF2 *( $CT**2 + 1 ) / 32          ,- 11*$ST**3*$CT*$CF3* ( $CT**2 + 3 ) / 32        ,11*$ST**2*$CF4 *( $CT**4 + 6*$CT**2 + 1 ) / 32    ,- $ST2*$CF5 * ( $CT**4 + 10*$CT**2 + 5 ) / 64,$CF6 *( $CT**6 + 15*$CT**4 + 15*$CT**2 + 1 ) / 32]
 ];
 
-my $B2 = [ [$B{"B22S"}],[$B{"B21S"}],[$B{"B20"}],[$B{"B21"}],[$B{"B22"}] ];
+my $B2 = [ [$B{"B22S"}],[-$B{"B21S"}],[$B{"B20"}],[-$B{"B21"}],[$B{"B22"}] ];
 my $R2 = mmult($MR2, $B2);
-my $B4 = [ [$B{"B44S"}],[$B{"B43S"}],[$B{"B42S"}],[$B{"B41S"}],[$B{"B40"}],[$B{"B41"}],[$B{"B42"}],[$B{"B43"}],[$B{"B44"}] ];
+my $B4 = [ [$B{"B44S"}],[-$B{"B43S"}],[$B{"B42S"}],[-$B{"B41S"}],[$B{"B40"}],[-$B{"B41"}],[$B{"B42"}],[-$B{"B43"}],[$B{"B44"}] ];
 my $R4 = mmult($MR4, $B4);
-my $B6 = [ [$B{"B66S"}],[$B{"B65S"}],[$B{"B64S"}],[$B{"B63S"}],[$B{"B62S"}],[$B{"B61S"}],[$B{"B60"}],[$B{"B61"}],[$B{"B62"}],[$B{"B63"}],[$B{"B64"}],[$B{"B65"}],[$B{"B66"}] ];
+my $B6 = [ [$B{"B66S"}],[-$B{"B65S"}],[$B{"B64S"}],[-$B{"B63S"}],[$B{"B62S"}],[-$B{"B61S"}],[$B{"B60"}],[-$B{"B61"}],[$B{"B62"}],[-$B{"B63"}],[$B{"B64"}],[-$B{"B65"}],[$B{"B66"}] ];
 my $R6 = mmult($MR6, $B6);
 my %Bo2 = (0, "B22S", 1, "B21S", 2, "B20 ", 3, "B21 ", 4, "B22 ");
 my %Bo4 = (0, "B44S", 1, "B43S", 2, "B42S", 3, "B41S", 4, "B40 ", 5, "B41 ", 6, "B42 ", 7, "B43 ", 8, "B44 ");
@@ -216,9 +216,9 @@ if (!$output) {
     if ($Ion) { print "\nIontype is ".$Ion."\n"; }
     print "\nRotated crystal field parameters:\n";
   }
-  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { if(abs($_)>1e-8) { print "$Bo2{$i} = $_\n"; } } }
-  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { if(abs($_)>1e-8) { print "$Bo4{$i} = $_\n"; } } }
-  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { if(abs($_)>1e-8) { print "$Bo6{$i} = $_\n"; } } }
+  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { if(abs($_)>1e-8) {if($i % 2){$_=-$_}; print "$Bo2{$i} = $_\n"; } } }
+  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { if(abs($_)>1e-8) {if($i % 2){$_=-$_}; print "$Bo4{$i} = $_\n"; } } }
+  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { if(abs($_)>1e-8){if($i % 2){$_=-$_}; print "$Bo6{$i} = $_\n"; } } }
 }
 else {
   open (outfile, ">$output") or die "$0: cannot open $output for output.";
@@ -246,9 +246,9 @@ DWF=0
 # debeywallerfactor = EXP(-2 * DWF *s*s)
 EOF
 }
-  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { print outfile " $Bo2{$i} = $_\n"; } }
-  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { print outfile " $Bo4{$i} = $_\n"; } }
-  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { print outfile " $Bo6{$i} = $_\n"; } }
+ for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { if(abs($_)>1e-8) {if($i % 2){$_=-$_}; print outfile "$Bo2{$i} = $_\n"; } } }
+  for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { if(abs($_)>1e-8) {if($i % 2){$_=-$_}; print  outfile "$Bo4{$i} = $_\n"; } } }
+  for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { if(abs($_)>1e-8){if($i % 2){$_=-$_}; print  outfile "$Bo6{$i} = $_\n"; } } }
   close (outfile);
 }
 
