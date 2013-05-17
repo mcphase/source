@@ -7,7 +7,7 @@
  ***********************************************************************/
   
 
-#include <mcdisp.h>
+#include <mcdisp.h> 
 #include "../../version"
 #include "myev.c"
 
@@ -714,7 +714,7 @@ int num_threads_started=-1;
     #else
     if(ithread>0){retval=WaitForMultipleObjects(ithread,threads,TRUE,INFINITE);
     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+ithread-1){printf("Error waitformultipleobjects jsssend\n"); exit(EXIT_FAILURE); }
-    for(int th=0; th<NUM_THREADS; th++)CloseHandle(threads[th]);}
+    for(int th=0; th<ithread; th++)CloseHandle(threads[th]);}
     #endif
 
     for(int th=0; th<NUM_THREADS; th++) 
