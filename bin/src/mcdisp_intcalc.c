@@ -83,7 +83,8 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
                                     // gJ=0 dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0  
                                     // gJ>0 dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2                
              if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,m1,md.est(i,j,k,l))!=0)
-             {mq1_dip=m1*(*inputpars.jjj[l]).F(QQ);(*inputpars.jjj[l]).FF_type=2;}
+             {mq1_dip=m1*(*inputpars.jjj[l]).F(QQ);(*inputpars.jjj[l]).FF_type=2; 
+             }
              else {if(do_verbose)printf("#warning mcdisp - functions dmq1,dm1calc,dL1calcd,S1calc not implemented for single ion module of ion %s, no magnetic neutron intensity from this ion\n",(*inputpars.jjj[l]).sipffilename);
                    mq1_dip=0;mq1_dip(1)= complex <double> (1e-10,0.0);(*inputpars.jjj[l]).FF_type=1;
                   }
@@ -299,31 +300,24 @@ int sm1,ssm1,in1,in2;
       } // i,j,do_phonon
 
       if(intensitybey>0)
-      {for(j=1;j<=mqdim;++j){for(i=1;i<=mqdim;++i){
+      {for(j=1;j<=mqdim;++j){
+         if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.dMQs(i2,j2,k2)((bb-1)*mqdim+j))
+                                                                 * md.sqrt_Gamma(i2,j2,k2)(mqdim*bb);
+         for(i=1;i<=mqdim;++i){
         if((*md.bgU[in1])(i,b)==defval)  (*md.bgU[in1])(i,b)  = conj(md.sqrt_Gamma(i1,j1,k1)(mqdim*b))
                                                                  * md.dMQs(i1,j1,k1)((b-1)*mqdim+i);
-        if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.dMQs(i2,j2,k2)((bb-1)*mqdim+j))
-                                                                 * md.sqrt_Gamma(i2,j2,k2)(mqdim*bb);
-                        
-        //chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(mqdim*b))*md.dMQs(i1,j1,k1)((b-1)*mqdim+i)*Tau(s,level);
-        //chibey(s3+i,ss3+j)=
-        //     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.dMQs(i2,j2,k2)((bb-1)*mqdim+j))*md.sqrt_Gamma(i2,j2,k2)(mqdim*bb);
+                       
          chibey(i,j)+= PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);         
-    // en inserted  MR 9.3.11
       }}} // i,j,intensitybey
 
-
-      for(j=1;j<=mqdim;++j){for(i=1;i<=mqdim;++i){
-        if((*md.gU[in1])(i,b)==defval)  (*md.gU[in1])(i,b)  = conj(md.sqrt_Gamma_dip(i1,j1,k1)(mqdim*b))
-                                                                 * md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i);
+      for(j=1;j<=mqdim;++j){
         if((*md.Ug[in2])(j,bb)==defval) (*md.Ug[in2])(j,bb) = conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))
                                                                  * md.sqrt_Gamma_dip(i2,j2,k2)(mqdim*bb);
-                      
-        //chileft=conj(md.sqrt_gamma(i1,j1,k1)(mqdim*b))*md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i)*Tau(s,level);
-        //chi(s3+i,ss3+j)=
-        //     PI*chileft*en*conj(Tau(ss,level))*conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))*md.sqrt_gamma(i2,j2,k2)(mqdim*bb);
+         for(i=1;i<=mqdim;++i){
+        if((*md.gU[in1])(i,b)==defval)  (*md.gU[in1])(i,b)  = conj(md.sqrt_Gamma_dip(i1,j1,k1)(mqdim*b))
+                                                                 * md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i);
+                     
          chi(i,j)+= PI * (*md.gU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.Ug[in2])(j,bb);         
-        // en inserted  MR 9.3.11
       }}
                      
     for(j=1;j<=md.nofcomponents;++j){ 
@@ -346,7 +340,10 @@ int sm1,ssm1,in1,in2;
                                      if(ini.calculate_magmoment_oscillation)for(i=1;i<=MAGMOM_EV_DIM;++i)
                                         {qem_real.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i)+=real(Emagmom(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
                                          qem_imag.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i)+=imag(Emagmom(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
-                                        }
+                                        // check consistency:
+                                         //printf("chi %i: %g = ev: %g %g \n",i,
+                                         //         abs(chi(i,i)),qem_real.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i),qem_imag.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i));
+                                         }//printf("at E=%g\n",en);  
                                      if(ini.calculate_spinmoment_oscillation)for(i=1;i<=SPIN_EV_DIM;++i)
                                         {qes_real.mf(i1,j1,k1)(SPIN_EV_DIM*(l1-1)+i)+=real(Espin(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
                                          qes_imag.mf(i1,j1,k1)(SPIN_EV_DIM*(l1-1)+i)+=imag(Espin(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR

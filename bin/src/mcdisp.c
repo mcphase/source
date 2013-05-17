@@ -364,40 +364,13 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   // transformation matrix Uij
   ComplexMatrix Uijkl(1,ini.nofcomponents,1,ini.nofcomponents);
 
-  double chargedensity_gamman; 
-  Vector chargedensity_gamma(1,CHARGEDENS_EV_DIM);ComplexVector chargedensity_coeff1(1,CHARGEDENS_EV_DIM);
-  // extended transition matrix Mij,transformation matrix Uij
-  ComplexMatrix chargedensity_Mijkl(1,CHARGEDENS_EV_DIM,1,CHARGEDENS_EV_DIM),chargedensity_Uijkl(1,CHARGEDENS_EV_DIM,1,CHARGEDENS_EV_DIM);
-
-  double spindensity_gamman; 
-  Vector spindensity_gamma(1,SPINDENS_EV_DIM);ComplexVector spindensity_coeff1(1,SPINDENS_EV_DIM);
-  // extended transition matrix Mij,transformation matrix Uij
-  ComplexMatrix spindensity_Mijkl(1,SPINDENS_EV_DIM,1,SPINDENS_EV_DIM),spindensity_Uijkl(1,SPINDENS_EV_DIM,1,SPINDENS_EV_DIM);
-
-  double orbmomdensity_gamman; 
-  Vector orbmomdensity_gamma(1,ORBMOMDENS_EV_DIM);ComplexVector orbmomdensity_coeff1(1,ORBMOMDENS_EV_DIM);
-  // extended transition matrix Mij,transformation matrix Uij
-  ComplexMatrix orbmomdensity_Mijkl(1,ORBMOMDENS_EV_DIM,1,ORBMOMDENS_EV_DIM),orbmomdensity_Uijkl(1,ORBMOMDENS_EV_DIM,1,ORBMOMDENS_EV_DIM);
-
-  double magmom_gamman; 
-  Vector magmom_gamma(1,MAGMOM_EV_DIM);ComplexVector magmom_coeff1(1,MAGMOM_EV_DIM);
-  // extended transition matrix Mij,transformation matrix Uij
-  ComplexMatrix magmom_Mijkl(1,MAGMOM_EV_DIM,1,MAGMOM_EV_DIM),magmom_Uijkl(1,MAGMOM_EV_DIM,1,MAGMOM_EV_DIM);
-
-  double spin_gamman; 
-  Vector spin_gamma(1,SPIN_EV_DIM);ComplexVector spin_coeff1(1,SPIN_EV_DIM);
-  // extended transition matrix Mij,transformation matrix Uij
-  ComplexMatrix spin_Mijkl(1,SPIN_EV_DIM,1,SPIN_EV_DIM),spin_Uijkl(1,SPIN_EV_DIM,1,SPIN_EV_DIM);
-
-  double orbmom_gamman; 
-  Vector orbmom_gamma(1,ORBMOM_EV_DIM);ComplexVector orbmom_coeff1(1,ORBMOM_EV_DIM);
-  // extended transition matrix Mij,transformation matrix Uij
-  ComplexMatrix orbmom_Mijkl(1,ORBMOM_EV_DIM,1,ORBMOM_EV_DIM),orbmom_Uijkl(1,ORBMOM_EV_DIM,1,ORBMOM_EV_DIM);
-
-  double phonon_gamman; 
-  Vector phonon_gamma(1,PHONON_EV_DIM);ComplexVector phonon_coeff1(1,PHONON_EV_DIM);
-  // extended transition matrix Mij,transformation matrix Uij
-  ComplexMatrix phonon_Mijkl(1,PHONON_EV_DIM,1,PHONON_EV_DIM),phonon_Uijkl(1,PHONON_EV_DIM,1,PHONON_EV_DIM);
+  ComplexVector chargedensity_coeff1(1,CHARGEDENS_EV_DIM);
+  ComplexVector spindensity_coeff1(1,SPINDENS_EV_DIM);
+  ComplexVector orbmomdensity_coeff1(1,ORBMOMDENS_EV_DIM);
+  ComplexVector magmom_coeff1(1,MAGMOM_EV_DIM);
+  ComplexVector spin_coeff1(1,SPIN_EV_DIM);
+  ComplexVector orbmom_coeff1(1,ORBMOM_EV_DIM);
+  ComplexVector phonon_coeff1(1,PHONON_EV_DIM);
 
   //calculate single ion properties of every atom in magnetic unit cell
   mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents);
@@ -483,7 +456,7 @@ noftransitions=0;
        }
 
     md.U(i,j,k)=0; // initialize transformation matrix U
-    md.M(i,j,k)=0; // initialize matrix M
+    if(do_Erefine==1)md.M(i,j,k)=0; // initialize matrix M
     md.sqrt_gamma(i,j,k)=0; // and sqrt(gamma^s) matrix sqrt_gamma
  }}}
 
@@ -553,34 +526,27 @@ for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii
 //----------------------------------OBSERVABLES -------------------------------------------------
 if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with eigenvector dimension for observable\n",i,j,k,l);}
 //-----------------------------------------------------------------------------------
-if(ini.calculate_chargedensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+if(ini.calculate_chargedensity_oscillation){
    if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,inputpars,chargedensity_Mijkl,md,
-             chargedensity_gamma,chargedensity_gamman,chargedensity_Uijkl,maxiter,nn,ini, gamma,Echargedensity);}
-if(ini.calculate_spindensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+       fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,md,nn,ini, gamma,Echargedensity);}
+if(ini.calculate_spindensity_oscillation){
    if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,inputpars,spindensity_Mijkl,md,
-             spindensity_gamma,spindensity_gamman,spindensity_Uijkl,maxiter,nn,ini, gamma,Espindensity);}
-if(ini.calculate_orbmomdensity_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+       fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,md,nn,ini, gamma,Espindensity);}
+if(ini.calculate_orbmomdensity_oscillation){
    if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,inputpars,orbmomdensity_Mijkl,md,
-             orbmomdensity_gamma,orbmomdensity_gamman,orbmomdensity_Uijkl,maxiter,nn,ini, gamma,Eorbmomdensity);}
-if(ini.calculate_phonon_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+       fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,md,nn,ini, gamma,Eorbmomdensity);}
+if(ini.calculate_phonon_oscillation){
    if((*inputpars.jjj[l]).dP1calc(ini.T,mf,ini.Hext,phonon_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,inputpars,phonon_Mijkl,md,
-             phonon_gamma,phonon_gamman,phonon_Uijkl,maxiter,nn,ini, gamma,Ephonon);}
-if(ini.calculate_magmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+       fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,md,nn,ini, gamma,Ephonon);}
+if(ini.calculate_magmoment_oscillation){
    if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,inputpars,magmom_Mijkl,md,
-             magmom_gamma,magmom_gamman,magmom_Uijkl,maxiter,nn,ini, gamma,Emagmom);}
-if(ini.calculate_spinmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+       fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,md,nn,ini, gamma,Emagmom);}
+if(ini.calculate_spinmoment_oscillation){
    if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,inputpars,spin_Mijkl,md,
-             spin_gamma,spin_gamman,spin_Uijkl,maxiter,nn,ini, gamma,Espin);}
-if(ini.calculate_orbmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn;
+       fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,md,nn,ini, gamma,Espin);}
+if(ini.calculate_orbmoment_oscillation){
    if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,orbmom_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,ORBMOM_EV_DIM,orbmom_coeff1,inputpars,orbmom_Mijkl,md,
-             orbmom_gamma,orbmom_gamman,orbmom_Uijkl,maxiter,nn,ini, gamma,Eorbmom);}
+       fillE(jmin,i,j,k,l,ORBMOM_EV_DIM,orbmom_coeff1,md,nn,ini, gamma,Eorbmom);}
 //----------------------------------------------------------------------------------------------
 
          if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL_QUASIELASTIC_ENERGY) 
@@ -610,7 +576,7 @@ if(ini.calculate_orbmoment_oscillation){(*inputpars.jjj[l]).transitionnumber=-tn
         (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
         for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){
         md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Uijkl(m,n);
-        md.M(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Mijkl(m,n);
+        if(do_Erefine==1)md.M(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Mijkl(m,n);
         }}    
 if (do_verbose==1){
                   fprintf(stdout,"#Matrix M(s=%i %i %i)\n",i,j,k);
