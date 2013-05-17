@@ -991,9 +991,9 @@ if (do_jqfile==1){
                   Vector dd_without_antipeaks_weights(1,dim),dd_int_without_antipeaks_weights(1,dim);  dd_without_antipeaks_weights+=100000.0;dd_int_without_antipeaks_weights+=100000.0;
 #ifndef _THREADS
                      int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
-                     ComplexMatrix chiPhon(1,dimA,1,dimA);
-                     ComplexMatrix chi(1,dimchi*dimA,1,dimchi*dimA);
-                     ComplexMatrix chibey(1,dimchibey*dimA,1,dimchibey*dimA);
+                     ComplexMatrix chiPhon(1,1,1,1);
+                     ComplexMatrix chi(1,dimchi,1,dimchi);
+                     ComplexMatrix chibey(1,dimchibey,1,dimchibey);
                      Matrix pol(1,3,1,3);                     
 #else               // Populates the thread data structure
                   thrdat.qee_real = new mfcf*[NUM_THREADS];          thrdat.qee_imag = new mfcf*[NUM_THREADS];
@@ -1019,9 +1019,9 @@ if (do_jqfile==1){
                   {
                      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,En);
                      int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
-                     thrdat.chiPhon[ithread] = new ComplexMatrix(1,dimA,1,dimA);
-                     thrdat.chi[ithread] = new ComplexMatrix(1,dimchi*dimA,1,dimchi*dimA);
-                     thrdat.chibey[ithread] = new ComplexMatrix(1,dimchibey*dimA,1,dimchibey*dimA);
+                     thrdat.chiPhon[ithread] = new ComplexMatrix(1,1,1,1);
+                     thrdat.chi[ithread] = new ComplexMatrix(1,dimchi,1,dimchi);
+                     thrdat.chibey[ithread] = new ComplexMatrix(1,dimchibey,1,dimchibey);
                      thrdat.pol[ithread] = new Matrix(1,3,1,3);
                      thrdat.md[ithread] = new mdcf(md);
 

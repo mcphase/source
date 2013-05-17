@@ -135,7 +135,7 @@ complex ::  cs
 character(len=30)::  arg 
 character(len=30) :: name(6)
 character(len=10) :: couplc, tempp, mod
-character(len=150) :: line(20), tline(50), bb, zeile
+character(len=150) :: line(50), tline(50), bb, zeile
 character(len=20) :: redata(12),re(12)
 character(len=40) :: number
 character(len=50) :: vector
@@ -240,7 +240,7 @@ end if ! nn>5
 w=0
 if (nn==6) then
 !Analyse file with parameters
-  open(13,file='paramfile.par',action='read')
+  open(13,file=parfilename,action='read')
   n=1 
   do 
     read(13,'(A)',iostat=status_read) line(n)
@@ -309,7 +309,7 @@ if (nn==6) then
   write(14,'(A)') formfactorname
   close(14)
   if (w==1) then !if formfactor data are availablle, they are read-in and 
-    if (mode>1) then
+!    if (mode>1) then
       open(17,file=formfactorname,action='read')
       n=2
       kapg(1)=0.
@@ -335,7 +335,7 @@ if (nn==6) then
         write(18,*) kapf(n),strf(n)
       end do
       close(18) 
-    end if  !mode >1
+!    end if  !mode >1
   end if ! w=1
 end if
 !prepare necessary data for the calculations  
@@ -1366,4 +1366,3 @@ call OutputResults
 
 end program
 !-------------------------------------------------------------------
-

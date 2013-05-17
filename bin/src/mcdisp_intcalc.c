@@ -273,28 +273,30 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
    if(md.PgU[in1]==0) { md.PgU[in1] = new ComplexMatrix(1,1,1,maxb);*md.PgU[in1]=defval; }
    if(md.PUg[in1]==0) { md.PUg[in1] = new ComplexMatrix(1,1,1,maxb);*md.PUg[in1]=defval; } }}}
 
+chi=0;chibey=0;chiPhon=0;
+int sm1,ssm1,in1,in2;
+
 // determine chi
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
-    
- for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
-    for(l1=1;l1<=md.nofatoms;++l1){
-    for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
-    for(l2=1;l2<=md.nofatoms;++l2){
-    for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
-      s=index_s(i1,j1,k1,l1,t1,md,ini);
-      ss=index_s(i2,j2,k2,l2,t2,md,ini);
+   in1=md.in(i1,j1,k1);      
+ for(l1=1;l1<=md.nofatoms;++l1){
+ for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
+      s=index_s(i1,j1,k1,l1,t1,md,ini);sm1=s-1;s3=sm1*mqdim;
       b=md.baseindex(i1,j1,k1,l1,t1);
+  for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
+    in2=md.in(i2,j2,k2);
+  for(l2=1;l2<=md.nofatoms;++l2){
+  for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
+      ss=index_s(i2,j2,k2,l2,t2,md,ini);ssm1=ss-1;ss3=ss3;
       bb=md.baseindex(i2,j2,k2,l2,t2);
-      int in1=md.in(i1,j1,k1), in2=md.in(i2,j2,k2);
-
+   
       if(do_phonon)
-      {for(j=1;j<=1;++j){for(i=1;i<=1;++i){
-        if((*md.PgU[in1])(i,b)==defval)  (*md.PgU[in1])(i,b)  = conj(md.sqrt_GammaP(i1,j1,k1)(1*b))
-                                                                 * md.dPs(i1,j1,k1)((b-1)*1+i);
-        if((*md.PUg[in2])(j,bb)==defval) (*md.PUg[in2])(j,bb) = conj(md.dPs(i2,j2,k2)((bb-1)*1+j))
-                                                                 * md.sqrt_GammaP(i2,j2,k2)(1*bb);
-         chiPhon((s-1)*1+i,(ss-1)*1+j) = PI * (*md.PgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.PUg[in2])(j,bb);
-      }}} // i,j,do_phonon
+      { if((*md.PgU[in1])(1,b)==defval)  (*md.PgU[in1])(1,b)  = conj(md.sqrt_GammaP(i1,j1,k1)(b))
+                                                                 * md.dPs(i1,j1,k1)(b);
+        if((*md.PUg[in2])(1,bb)==defval) (*md.PUg[in2])(1,bb) = conj(md.dPs(i2,j2,k2)(bb))
+                                                                 * md.sqrt_GammaP(i2,j2,k2)(bb);
+         chiPhon(1,1)+= PI * (*md.PgU[in1])(1,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.PUg[in2])(1,bb);          
+      } // i,j,do_phonon
 
       if(intensitybey>0)
       {for(j=1;j<=mqdim;++j){for(i=1;i<=mqdim;++i){
@@ -304,10 +306,10 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
                                                                  * md.sqrt_Gamma(i2,j2,k2)(mqdim*bb);
                         
         //chileftbey=conj(md.sqrt_Gamma(i1,j1,k1)(mqdim*b))*md.dMQs(i1,j1,k1)((b-1)*mqdim+i)*Tau(s,level);
-        //chibey((s-1)*mqdim+i,(ss-1)*mqdim+j)=
+        //chibey(s3+i,ss3+j)=
         //     PI*chileftbey*en*conj(Tau(ss,level))*conj(md.dMQs(i2,j2,k2)((bb-1)*mqdim+j))*md.sqrt_Gamma(i2,j2,k2)(mqdim*bb);
-         chibey((s-1)*mqdim+i,(ss-1)*mqdim+j) = PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);
-        // en inserted  MR 9.3.11
+         chibey(i,j)+= PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);         
+    // en inserted  MR 9.3.11
       }}} // i,j,intensitybey
 
 
@@ -318,14 +320,14 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
                                                                  * md.sqrt_Gamma_dip(i2,j2,k2)(mqdim*bb);
                       
         //chileft=conj(md.sqrt_gamma(i1,j1,k1)(mqdim*b))*md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i)*Tau(s,level);
-        //chi((s-1)*mqdim+i,(ss-1)*mqdim+j)=
+        //chi(s3+i,ss3+j)=
         //     PI*chileft*en*conj(Tau(ss,level))*conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))*md.sqrt_gamma(i2,j2,k2)(mqdim*bb);
-         chi((s-1)*mqdim+i,(ss-1)*mqdim+j) = PI * (*md.gU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.Ug[in2])(j,bb);
+         chi(i,j)+= PI * (*md.gU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.Ug[in2])(j,bb);         
         // en inserted  MR 9.3.11
       }}
                      
     for(j=1;j<=md.nofcomponents;++j){ 
-     if((ss-1)*md.nofcomponents+j==1){if(ini.calculate_chargedensity_oscillation)for(i=1;i<=CHARGEDENS_EV_DIM;++i)
+     if(ssm1*md.nofcomponents+j==1){if(ini.calculate_chargedensity_oscillation)for(i=1;i<=CHARGEDENS_EV_DIM;++i)
                                         {qee_real.mf(i1,j1,k1)(CHARGEDENS_EV_DIM*(l1-1)+i)+=real(Echargedensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
                                          qee_imag.mf(i1,j1,k1)(CHARGEDENS_EV_DIM*(l1-1)+i)+=imag(Echargedensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                         }
@@ -359,47 +361,8 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
   }}}
  }}}
 
+
   complex<double> im(0,1.0);
-
- // polarization factor
-// neutrons only sense first mqdimxmqdim part of S !! - this is taken into account by setting 0 all
-// higher components in the polarization factor !!!
- //   pol=0; double qsqr=qijk*qijk;
- //   for(i=1;i<=3;++i){pol(i,i)=1.0;
- //   for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
- //   }}
-  
-
-ComplexMatrix ch(1,mqdim,1,mqdim),chb(1,mqdim,1,mqdim);
-complex <double> chP;
-ch=0;chb=0;chP=0;
- //multiply polarization factor .... removed from here
- for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
- for(l1=1;l1<=md.nofatoms;++l1){
- for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
-//   s=((((i1-1)*ini.mf.nb()+(j1-1))*ini.mf.nc()+(k1-1))*md.nofatoms+(l1-1));
-      s=(index_s(i1,j1,k1,l1,t1,md,ini)-1);s3=s*mqdim;
-  for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
-  for(l2=1;l2<=md.nofatoms;++l2){
-  for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
-//   ss=((((i2-1)*ini.mf.nb()+(j2-1))*ini.mf.nc()+(k2-1))*md.nofatoms+(l2-1));
-      ss=(index_s(i2,j2,k2,l2,t2,md,ini)-1);ss3=ss*mqdim;
- for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){
-if(calc_rixs){
-           ch(i,j)+=chi(s3+i,ss3+j);               
-      }else{
-     if(intensitybey>0) {
-           chb(i,j)+=chibey(s3+i,ss3+j);//* pol(i,j) ; 
-                         } // i,j,intesitybey
-           ch(i,j)+=chi(s3+i,ss3+j);//*pol(i,j);                          
-            }
-           }}
-if(do_phonon) {chP+=chiPhon(s+1,ss+1);}
-  }}
-  }}}
- }}
- }}}
-
 
  // determine dsigma in barns per cryst unit cell !
  //divide by number of crystallographic unit cells  (ini.mf.n()) in magnetic unit cell
@@ -426,21 +389,21 @@ if(do_phonon) {chP+=chiPhon(s+1,ss+1);}
                     //                      we remove normalisation of tau in eigenvalueGeneral
                     //                      so that Tau is in units of sqrt of meV^-1
 
+
 if (calc_rixs){// use 1-9 components of chi to store result !!! (other components do not count          
-   for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chi(i,j)=(bose/(double)ini.mf.n())*ch(i,j);}}
-            } 
-       else{ch*=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
-            for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chi(i,j)=ch(i,j);}}
-            sumS=Trace(ch);intensity=fabs(real(sumS)); // if polarisation factor is already in Mperp we need Trace instead of of sum
+               chi*=bose/(double)ini.mf.n();
+              } 
+       else{double factor=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
+            chi*=factor;
+            sumS=Trace(chi);intensity=fabs(real(sumS)); // if polarisation factor is already in Mperp we need Trace instead of of sum
                       if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g negative,E=%g, bose=%g\n",real(sumS),en,bose);exit(1);}
                       if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
-            if(intensitybey>0){chb*=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
-                               for(i=1;i<=mqdim;++i){for(j=1;j<=mqdim;++j){chibey(i,j)=chb(i,j);}}
-                               sumS=Trace(chb);intensitybey=fabs(real(sumS));// if polarisation factor is already in Mperp we need Trace instead of of sum
+            if(intensitybey>0){chibey*=factor;
+                               sumS=Trace(chibey);intensitybey=fabs(real(sumS));// if polarisation factor is already in Mperp we need Trace instead of of sum
                                intensitybey=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                               }
-            if(do_phonon){sumS=chP/PI/2.0/(double)ini.mf.n();sumS*=bose;
+            if(do_phonon){sumS=chiPhon(1,1)/PI/2.0/(double)ini.mf.n();sumS*=bose;
                           intensityP=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                          }                              

@@ -573,8 +573,8 @@ protected static void reload_data(int i){    try{
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
-        if(detyText==false&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
-        if(detxText==false&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
+        if(detyText==true&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
+        if(detxText==true&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
