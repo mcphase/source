@@ -341,8 +341,8 @@ int sm1,ssm1,in1,in2;
                                         {qem_real.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i)+=real(Emagmom(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
                                          qem_imag.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i)+=imag(Emagmom(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                         // check consistency:
-                                         //printf("chi %i: %g = ev: %g %g \n",i,
-                                         //         abs(chi(i,i)),qem_real.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i),qem_imag.mf(i1,j1,k1)(MAGMOM_EV_DIM*(l1-1)+i));
+                                        // printf("Emagmom(s=%i,alpha=%i)= %g %+g i \n",s,i,
+                                        //          real(Emagmom(s,i)),imag(Emagmom(s,i)));
                                          }//printf("at E=%g\n",en);  
                                      if(ini.calculate_spinmoment_oscillation)for(i=1;i<=SPIN_EV_DIM;++i)
                                         {qes_real.mf(i1,j1,k1)(SPIN_EV_DIM*(l1-1)+i)+=real(Espin(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition

@@ -111,7 +111,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      {module_type=5;fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,1);i=1;
       char clusterfilename[MAXNOFCHARINLINE];
-      nof_electrons=0; // not to be used in module brillouin !!
+      nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...

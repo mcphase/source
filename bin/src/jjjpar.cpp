@@ -621,7 +621,7 @@ jjjpar::jjjpar (const jjjpar & pp)
   sipffilename= new char [strlen(pp.sipffilename)+1];
   strcpy(sipffilename,pp.sipffilename);
   if (pp.module_type==3||pp.module_type==1||pp.module_type==0)  ABC=pp.ABC;
-  if ((pp.module_type==3||pp.module_type==1||pp.module_type==0) &&
+  if ((pp.module_type==5||pp.module_type==3||pp.module_type==1||pp.module_type==0) &&
       (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
   {  Icalc_parstorage = ComplexMatrix(pp.Icalc_parstorage.Rlo(),pp.Icalc_parstorage.Rhi(),pp.Icalc_parstorage.Clo(),pp.Icalc_parstorage.Chi());
      Icalc_parstorage = pp.Icalc_parstorage;

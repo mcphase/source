@@ -36,6 +36,7 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  Vector  * lnzi; lnzi=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){lnzi[i]=Vector(1,inputpars.nofatoms);} // partition sum for every atom
  Vector  * ui; ui=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){ui[i]=Vector(1,inputpars.nofatoms);} // magnetic energy for every atom
  ComplexMatrix ** Icalcpars;Icalcpars=new ComplexMatrix*[inputpars.nofatoms*sdim+2];
+
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {for (l=1;l<=inputpars.nofatoms;++l){
   Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]=new ComplexMatrix((*inputpars.jjj[l]).Icalc_parstorage.Rlo(),(*inputpars.jjj[l]).Icalc_parstorage.Rhi(),(*inputpars.jjj[l]).Icalc_parstorage.Clo(),(*inputpars.jjj[l]).Icalc_parstorage.Chi());
@@ -44,7 +45,7 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  int diagonalexchange=1;
  FILE * fin_coq;
  time_t time_of_last_output=0;
-
+         
  spincf  spsold(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents); // spinconf variable to store old sps
  mfcf  mfold(mf.na(),mf.nb(),mf.nc(),inputpars.nofatoms,inputpars.nofcomponents); // spinconf variable to store old mf
  spsold=sps;

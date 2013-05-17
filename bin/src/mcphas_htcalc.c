@@ -51,7 +51,7 @@ typedef struct{
    int thread_id;
 } htcalc_thread_data;
 class htcalc_input { public:
-   int j;
+   int j; 
    int thread_id;
    par *inputpars;
    htcalc_input(int _j, int _tid, par *pars_in) 
@@ -206,6 +206,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 		       {sps.mi(rr)(ri+ii)=rnd(1.0) ;}
 		       } // randomize spin rr
                     }
+ 
       //!!!calculate free energy - this is the heart of this loop !!!!
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
       fe=fecalc(H ,T,ini,inputpars,sps,(*mf),u,testspins,testqs);
@@ -429,7 +430,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
     //set testspins
     //j=0;  //uncomment this for debugging purposes
     j = -testqs.nofqs()-1;
-  
+
 #ifdef _THREADS
 // ----------------------------------------------------------------------------------- //
 // Populates the thread data structure
@@ -447,7 +448,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    static int washere=0;
    if(washere==0){washere=1;
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) tin[ithread] = new htcalc_input(0,ithread,&inputpars);}
-  
+   
  MUTEX_INIT(mutex_loop);
  MUTEX_INIT(mutex_tests);
  MUTEX_INIT(mutex_min);
@@ -470,7 +471,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 #ifndef _THREADS
        htcalc_iteration(j, femin, spsmin, H, T,ini, inputpars, testqs, testspins, physprops);
 #else
-       (*tin[ithread]).j = j;
+        (*tin[ithread]).j = j;
        #if defined  (__linux__) || defined (__APPLE__)
        rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
        if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
@@ -480,8 +481,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
        #endif
         ithread++;
        if(ithread%NUM_THREADS==0 || all_threads_started)
-       {
-          all_threads_started = true;
+       {  all_threads_started = true;
           #if defined  (__linux__) || defined (__APPLE__)
           pthread_mutex_lock (&mutex_loop); 
           while(thrdat.thread_id==-1) pthread_cond_wait(&checkfinish, &mutex_loop);

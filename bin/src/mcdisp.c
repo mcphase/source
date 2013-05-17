@@ -855,8 +855,8 @@ if (do_jqfile==1){
  }
  else
  {// no jqfile but excitations to be calculated
- if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i matrix A...\n",dimA,dimA);
-              //             myPrintComplexMatrix(stdout,Ac); 
+ if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i matrix A, A=\n",dimA,dimA);
+                           myPrintComplexMatrix(stdout,Ac); 
                    }
    // diagonalize Ac to get energies  and eigenvectors !!!
    Vector En(1,dimA);
@@ -884,17 +884,17 @@ if (do_jqfile==1){
 	// that the eigensystemhgermitean returns eigenvectors as column vectors, but
 	// the components need to be complex conjugated
          // conjugate removed again MR 11.4.2011 because now done correctly in myev.c
- // check normalisation of eigenvectors --------------------
-   ComplexMatrix test(1,dimA,1,dimA);
+ if(do_verbose==1){   ComplexMatrix test(1,dimA,1,dimA);
+   // check normalisation of eigenvectors -------------------- only do this in verbose mode MR 5.6.2013
    test=Tau.Conjugate().Transpose()*Ac*Tau;
    ComplexMatrix unit(1,dimA,1,dimA);unit=1;
    if( NormFro(unit-test)>SMALL_QUASIELASTIC_ENERGY){
- if(do_verbose==1){myPrintComplexMatrix(stdout,test); }
+    myPrintComplexMatrix(stdout,test); 
  fprintf(stderr,"Error: eigenvectors t not correctly normalised\n"); 
- fprintf(stderr,"   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); }
+ fprintf(stderr,"   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); }}
 //-------------------------------------------------------
- if(do_verbose==1){// fprintf(stdout,"#eigenvectors (matrix Tau):\n");
-                   // myPrintComplexMatrix(stdout,Tau); 
+ if(do_verbose==1){ fprintf(stdout,"#eigenvectors (matrix Tau):\n");
+                    myPrintComplexMatrix(stdout,Tau); 
                fprintf(stdout,"#saving the following eigenvalues (meV) to mcdisp.qom:\n");
    for (i=1;i<=dimA;++i){fprintf(stdout, " %4.4g",En(i));}
                          }        
