@@ -506,6 +506,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
      if(rc) { printf("Error return code %i from joining thread %i\n",rc,th+1); exit(EXIT_FAILURE); }
      #else
      if(WaitForSingleObject(threads[th],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for thread %i to end\n",th+1); exit(EXIT_FAILURE); }
+     CloseHandle(threads[th]);
      #endif
   }
 

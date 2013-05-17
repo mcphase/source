@@ -233,8 +233,7 @@ mdcf::mdcf (const mdcf & p)
       Pb[id]= new ComplexVector(1,1*sum((*nt[id])));*Pb[id]=*p.Pb[id];
       lb[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*lb[id]=*p.lb[id];
       lb_dip[id]= new ComplexVector(1,mqdim*sum((*nt[id]))); *lb_dip[id]=*p.lb_dip[id];
-      d[id]= new Vector(1,sum((*nt[id])),1,sum((*nt[id])));*d[id]=*p.d[id];
-     
+      d[id]= new Vector(1,sum((*nt[id])),1,sum((*nt[id])));*d[id]=*p.d[id];     
      } 
     }
   }           

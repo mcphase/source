@@ -49,6 +49,7 @@ void errexit() // type info and error exit
 
 
 #ifdef _THREADS
+#define _THREADS_JSSS 1
 // ----------------------------------------------------------------------------------- //
 // Defines to ease interchange between linux and windows thread codes...
 // ----------------------------------------------------------------------------------- //
@@ -120,7 +121,7 @@ EVENT_TYPE checkfinish;
 #include "mcdisp_output.c"
 #include "trs_io.c"   // for in out of trs file
  
-#ifdef _THREADS
+#ifdef _THREADS_JSSS
 #define inputpars (*thrdat.inputpars[thread_id])
 #define ini (*thrdat.ini[thread_id])
 #define md (*thrdat.md[thread_id])
@@ -135,7 +136,7 @@ DWORD WINAPI jsss_mult(void *input)
 void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimcdis &ini, jq &J, mdcf &md)
 #endif
 {
-#ifdef _THREADS
+#ifdef _THREADS_JSSS
     intcalcapr_input *myinput; myinput = (intcalcapr_input *)input;
     int nofneighbours=myinput->dimA, ll=myinput->level;
     int thread_id = myinput->thread_id;
@@ -210,11 +211,11 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
           ++nofneighbours; // count neighbours summed up
 	 }}}
    }
-#ifdef _THREADS
+#ifdef _THREADS_JSSS
    myinput->dimA=nofneighbours;
 #endif
 }
-#ifdef _THREADS
+#ifdef _THREADS_JSSS
 #undef inputpars
 #undef ini
 #undef md
@@ -611,6 +612,7 @@ if (do_jqfile==1)
 // ************************************************************************************************
 #ifdef _THREADS
    // Initialises mutual exclusions and threads
+   int retval;
    MUTEX_INIT(mutex_loop);
    MUTEX_INIT(mutex_index);
    EVENT_INIT(checkfinish);
@@ -659,7 +661,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
    }}}
  }}}
 
-#ifdef _THREADS
+#ifdef _THREADS_JSSS
        thrdat.q = q; thrdat.thread_id = -1;       
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
    {
@@ -667,24 +669,27 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
       thrdat.J[ithread] = new jq(J); tin[ithread]->dimA=0; 
       thrdat.md[ithread] = new mdcf(md);      
    } 
-   int thrcount=0, ithread=0, num_threads_started=-1;
+   int thrcount=0, ithread=0;
+#endif
+#ifdef _THREADS
+int num_threads_started=-1;
 #endif
  // calculate Js,ss(Q) summing up contributions from the l=1-paranz parameters
    
    for(ll=1;ll<=inputpars.nofatoms;++ll)
    { //sum up l.th neighbour interaction of crystallographic atom ll
      // 1. transform dn(l) to primitive lattice and round it to integer value
-  #ifndef _THREADS
+  #ifndef _THREADS_JSSS
       jsss_mult(ll,nofneighbours,q,inputpars,ini,J,md);
   #else
       thrcount++;
       tin[ithread]->level=ll;
       #if defined  (__linux__) || defined (__APPLE__)
       rc = pthread_create(&threads[ithread], &attr, jsss_mult, (void *) tin[ithread]);
-      if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+      if(rc) { printf("Error return code %i from jsss thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
       #else
       threads[ithread] = CreateThread(NULL, 0, jsss_mult, (void *) tin[ithread], 0, &tid[ithread]);
-      if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+      if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from jsss thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
       #endif
       num_threads_started = ithread+1;
       if(thrcount%NUM_THREADS==0)
@@ -693,19 +698,23 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
          for(int th=0; th<NUM_THREADS; th++)
             rc = pthread_join(threads[th], &status);
          #else
-         WaitForMultipleObjects(NUM_THREADS,threads,TRUE,INFINITE);
+         retval=WaitForMultipleObjects(NUM_THREADS,threads,TRUE,INFINITE);
+         if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
+         for(int th=0; th<NUM_THREADS; th++)CloseHandle(threads[th]);
          #endif
          ithread=0;
       }
       else ithread++;
 #endif
    }
-#ifdef _THREADS
+#ifdef _THREADS_JSSS
     #if defined  (__linux__) || defined (__APPLE__)
     for(int th=0; th<ithread; th++)
        rc = pthread_join(threads[th], &status);
     #else
-    WaitForMultipleObjects(ithread,threads,TRUE,INFINITE);
+    retval=WaitForMultipleObjects(ithread,threads,TRUE,INFINITE);
+    if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
+    for(int th=0; th<NUM_THREADS; th++)CloseHandle(threads[th]);
     #endif
 
     for(int th=0; th<NUM_THREADS; th++) 
@@ -717,7 +726,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
     }
 
     for (ithread=0; ithread<NUM_THREADS; ithread++) {
-       delete thrdat.J[ithread];delete thrdat.md[ithread]; delete tin[ithread]; }
+       delete thrdat.J[ithread];delete thrdat.md[ithread];delete tin[ithread]; }
     
 #endif
 
@@ -1039,10 +1048,10 @@ if (do_jqfile==1){
                        tin[num_threads_started]->level = i;
                         #if defined  (__linux__) || defined (__APPLE__)
                         rc = pthread_create(&threads[num_threads_started], &attr, intcalc_approx, (void *) tin[num_threads_started]);
-                        if(rc) { printf("Error return code %i from thread %i\n",rc,num_threads_started+1); exit(EXIT_FAILURE); }
+                        if(rc) { printf("Error return code %i from intcalc thread %i\n",rc,num_threads_started+1); exit(EXIT_FAILURE); }
                         #else
                         threads[num_threads_started] = CreateThread(NULL, 0, intcalc_approx, (void *) tin[num_threads_started], 0, &tid[num_threads_started]);
-                        if(threads[num_threads_started]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,num_threads_started+1); exit(EXIT_FAILURE); }
+                        if(threads[num_threads_started]==NULL) { dwError=GetLastError(); printf("Error code %i from intcalc thread %i\n",dwError,num_threads_started+1); exit(EXIT_FAILURE); }
                         #endif  
                         ++num_threads_started;
                       }
@@ -1051,7 +1060,9 @@ if (do_jqfile==1){
                      #if defined  (__linux__) || defined (__APPLE__)
                      for(int th=0; th<num_threads_started; th++)rc = pthread_join(threads[th], &status);
                      #else
-                     WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
+                     retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
+                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
+                      for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);         
                      #endif
                      num_threads_started=0; 
                      #define chi      (*thrdat.chi[ithread])
@@ -1337,11 +1348,12 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      tin[ithread]->En=ini.emin; tin[ithread]->iE=iE;
                      #if defined  (__linux__) || defined (__APPLE__)
                      rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
-                     if(rc) { printf("Error return code %i from joining thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+                     if(rc) { printf("Error return code %i from erefine joining thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                      #else
                      threads[ithread] = CreateThread(NULL, 0, intcalc, (void *) tin[ithread], 0, &tid[ithread]);
-                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
-                     if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
+                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+                     if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for erefine thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
+                     CloseHandle(threads[ithread]);
                      #endif
                      intensity=tin[ithread]->intensity;
 #else
@@ -1353,12 +1365,13 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      tin[ithread]->En=ini.emax; tin[ithread]->iE=iE;
                      #if defined  (__linux__) || defined (__APPLE__)
                      rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
-                     if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+                     if(rc) { printf("Error return code %i from erefine thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                      #else
                      threads[ithread] = CreateThread(NULL, 0, intcalc, (void *) tin[ithread], 0, &tid[ithread]);
-                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
-                     if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
-                     #endif
+                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+                     if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for erefine thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
+                     CloseHandle(threads[ithread]); 
+                    #endif
                      intensity=tin[ithread]->intensity;
 #else
 		     intensity=intcalc(dimA,ini.emax,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
@@ -1383,10 +1396,10 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                         tin[ithread]->En=E; tin[ithread]->iE=iE++;
                         #if defined  (__linux__) || defined (__APPLE__)
                         rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]);
-                        if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+                        if(rc) { printf("Error return code %i from erefine thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                         #else
                         threads[ithread] = CreateThread(NULL, 0, intcalc, (void *) tin[ithread], 0, &tid[ithread]);
-                        if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+                        if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                         #endif
                         num_threads_started = ithread+1;
                      }
@@ -1394,8 +1407,10 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      for(int th=0; th<num_threads_started; th++)
                         rc = pthread_join(threads[th], &status);
                      #else
-                     WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
-                     #endif
+                     retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
+                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
+                     for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);
+                        #endif
                      for(ithread=0; ithread<NUM_THREADS; ithread++) vIntensity(tin[ithread]->iE) = tin[ithread]->intensity;
                      E=oldE;
 	   }
@@ -1570,6 +1585,7 @@ for (i=1;i<=argc-1;++i){
   inimcdis ini("mcdisp.par",spinfile,prefix,abc);
   if(ini.nofcomponents!=inputpars.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.nofcomponents);exit(EXIT_FAILURE);}
   if(do_Erefine&&calc_rixs){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf\n");exit(EXIT_FAILURE);}
+  if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}
   if(ini.nofatoms!=inputpars.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.nofatoms);exit(EXIT_FAILURE);}
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix);
