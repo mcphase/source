@@ -170,10 +170,13 @@ described in section~\ref{displaydensities}.
 #! outS=3
 # .. valid values are
 # 0: not output of Salphabeta
-# 1: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=x,y,z
-# 2: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=x,y,z
-# 3: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=u,v,w
-# 4: output Salphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=u,v,w
+# 1: output Sperpalphabeta(Q,omega) in dipole approximation, with alpha,beta=x,y,z
+# 2: output Sperpalphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=x,y,z
+# 3: output Sperpalphabeta(Q,omega) in dipole approximation, with alpha,beta=u,v,w
+# 4: output Sperpalphabeta(Q,omega) going beyond dipole approximation (if possible), with alpha,beta=u,v,w
+# 5: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=x,y,z (no output of dip intensity)
+# 6: output Salphabeta(Q,omega) in dipole approximation, with alpha,beta=u,v,w (no output of dip intensity)
+#
 # xyz coordinate refer to y||b, z||(a x b) and x normal to y and z
 # uvw coordinates refer to u||Q=k-k', w perpendicular to the scattering plane
 #     (as determined by the cross product of subsequent vectors in the input
@@ -1380,7 +1383,7 @@ for unpolarised neutrons has been given frequently in literature (see e.g. \cite
 N\frac{k'}{k}S_{\rm nuc}(\mbf Q,\omega) +
 N\frac{k'}{k} 
 % \sum_{\alpha\beta=1,2,3} 
-Tr\{S_{\rm mag}(\mbf Q,\omega)\} \nonumber \\
+Tr\{S_{\rm mag\perp}(\mbf Q,\omega)\} \nonumber \\
 S_{\rm nuc}&=&S_{\rm nuc}^{\rm el}+S_{\rm nuc}^{\rm inel} \label{snuc} \\ 
 S_{\rm mag}&=&S_{\rm mag}^{\rm el}+S_{\rm mag}^{\rm inel} \label{smag} 
 \end{eqnarray}
@@ -1464,8 +1467,9 @@ Similar, the magnetic inelastic scattering is given by
 
 %[BETTER USE THE FOLLOWING]
 
-\begin{eqnarray}\label{Sinel}
-S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\left( \frac{ \gamma r_0}{2 \mu_B}  \right)^2
+
+\begin{eqnarray}\label{Sinelperp}
+S_{\rm mag\perp}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\left( \frac{ \gamma r_0}{2 \mu_B}  \right)^2
 %(\delta_{\alpha\beta}- \frac{Q_{\alpha} Q_{\beta}}{|\mbf Q|^2}) 
 \frac{1}{2\pi\hbar}\int_{-\infty}^{+\infty}dt e^{i\omega t}
 \frac{1}{N}\sum_{nn'} e^{-W_n(Q)- W_{n'}(Q)}\\
@@ -1475,7 +1479,7 @@ S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\left( \frac{ \gamma r_0}{2 
 
 The total magnetic cross section is $4\pi (\gamma r_0)^2=4\pi\left(\frac{\hbar \gamma e^2}{mc^2}\right)^2
 =3.65$~barn. 
-In (\ref{Sinel}) the first term in the bracket corresponds to the total and the second term to the elastic
+In (\ref{Sinelperp}) the first term in the bracket corresponds to the total and the second term to the elastic
 scattering.
 If we split the index $n$ into basis and 
 lattice part $n=(\Bell,s)$ and 
@@ -1485,7 +1489,7 @@ $\hat \mbf M_{\perp}(\mbf Q)=\hat \mbf M(\mbf Q)-\mbf Q (\hat \mbf M_{\perp}(\mb
 ($\mathcal O \leftrightarrow \frac{ \gamma r_0}{2 \mu_B}  e^{-W(Q)} \hat \mbf M_{\perp}(\mbf Q)$).
 
 \begin{equation}\label{sinelmag}
-S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)=
+S_{\rm mag\perp}^{\rm inel,\alpha\beta}(\mbf Q,\omega)=
 \sum_{ss'} 
   \frac{\hili{\Sigma^{ss'}_{\alpha\beta}}({\mbf Q},\omega)}{2\pi \hbar N_b} 
 \end{equation}
@@ -1501,7 +1505,7 @@ has been solved, the magnetic neutron scattering function can
 be  evaluated with the help of equations (\ref{fluctdissbeyond}) and (\ref{Xcalc}):
 
 \begin{eqnarray}\label{sinelmagfinal}
-S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&
+S_{\rm mag\perp}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&
 \sum_{r,ss'}  
 \frac{(\sqrt{\Gamma_{\rm mag}^s(\mbf Q)})^\ast\sqrt{\Gamma_{\rm mag}^{s'}(\mbf Q)} }
 {N_b(1-e^{-\hbar\hili{\omega^r}(\mbf Q)/kT})} \times \\ \nonumber
@@ -1611,8 +1615,23 @@ dipole approximation and also going beyond, if the single ion module of an
 ion allows for that, the result
 is stored in file {\prg mcdisp.qei}.
 
+In dipole approximation a scattering function without polarisation factor
+can be defined:
 
+\begin{eqnarray}\label{Sinel}
+S_{\rm mag}^{\rm inel,\alpha\beta}(\mbf Q,\omega)&=&\left( \frac{ \gamma r_0}{2 \mu_B}  \right)^2
+%(\delta_{\alpha\beta}- \frac{Q_{\alpha} Q_{\beta}}{|\mbf Q|^2}) 
+\frac{1}{2\pi\hbar}\int_{-\infty}^{+\infty}dt e^{i\omega t}
+\frac{1}{N}\sum_{nn'} e^{-W_n(Q)- W_{n'}(Q)}\\
+&\times&  e^{-i\mbf Q \cdot (\mbf R_n-\mbf R_{n'})}   (\langle \hat M_{\perp\alpha}^{n \dag}(t,\mbf Q)  \hat M_{\perp\beta}^{n'}(0,\mbf Q) \rangle_{T,H}
+- \langle \hat M^{n \dag}_{\alpha}(\mbf Q)\rangle_{T,H} \langle \hat M^{n'}_{\beta}(\mbf Q) \rangle_{T,H})\nonumber
+\end{eqnarray}
 
+{\prg mcdisp} can be set to ouput this scattering function, which is sometimes
+convenient to analyse a model system. However, we have to keep in mind that
+it does not correspond to a observable in neutron scattering (the polarisation
+factor is missing and going beyond dipole approximation it depends on the
+gauge of the orbital magnetic moment density).
 
 %***********************************************************************************
 

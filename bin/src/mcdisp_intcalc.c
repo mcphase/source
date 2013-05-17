@@ -100,7 +100,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
             }
          mq1=pol*mq1;// take into account polarisation factor ... only Mper scatters
                   } // do_gobeyond
-         mq1_dip=pol*mq1_dip;// take into account polarisation factor ... only Mper scatters
+         if(ini.outS<5)mq1_dip=pol*mq1_dip;// take into account polarisation factor ... only Mper scatters
 
       // try to calculate phonon intensity
       if(do_phonon){
@@ -392,9 +392,12 @@ if (calc_rixs){// use 1-9 components of chi to store result !!! (other component
               } 
        else{double factor=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
             chi*=factor;
+            if(ini.outS<5){
             sumS=Trace(chi);intensity=fabs(real(sumS)); // if polarisation factor is already in Mperp we need Trace instead of of sum
                       if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g negative,E=%g, bose=%g\n",real(sumS),en,bose);exit(1);}
                       if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: dipolar approx intensity %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
+                          }else
+                          {intensity=-1;} // no dipole intensity output if scattering function is not including pol factor !
             if(intensitybey>0){chibey*=factor;
                                sumS=Trace(chibey);intensitybey=fabs(real(sumS));// if polarisation factor is already in Mperp we need Trace instead of of sum
                                intensitybey=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
@@ -404,7 +407,7 @@ if (calc_rixs){// use 1-9 components of chi to store result !!! (other component
                           intensityP=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                          }                              
-// here should be entered factor  k/k' + absolute scale factor
+// here should be entered factor  k/k' 
 if (ini.ki==0)
 {if (ini.kf*ini.kf+0.4811*en<0)
  {fprintf(stderr,"warning mcdisp - calculation of intensity: energy transfer %g meV cannot be reached with kf=const=%g/A at (%g,%g,%g)\n",en,ini.kf,hkl(1),hkl(2),hkl(3));
@@ -415,9 +418,9 @@ if (ini.ki==0)
  else
  { 
  ki=sqrt(ini.kf*ini.kf+0.4811*en);
- intensity*=ini.kf/ki;
- intensitybey*=ini.kf/ki;
- intensityP*=ini.kf/ki;
+ if(intensity>0)intensity*=ini.kf/ki;
+ if(intensitybey>0)intensitybey*=ini.kf/ki;
+ if(intensityP>0)intensityP*=ini.kf/ki;
  }
 }
 else
@@ -429,9 +432,9 @@ else
  }
  else
  {kf=sqrt(ini.ki*ini.ki-0.4811*en);
-  intensity*=kf/ini.ki;
-  intensitybey*=kf/ini.ki;
-  intensityP*=kf/ini.ki;
+  if(intensity>0)intensity*=kf/ini.ki;
+  if(intensitybey>0)intensitybey*=kf/ini.ki;
+  if(intensityP>0)intensityP*=kf/ini.ki;
  }
 }
                } // if calc_rixs

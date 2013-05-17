@@ -97,11 +97,13 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
                                                           " Imag [barn/sr/f.u.] Inuc [barn/sr/f.u.]");
             switch(ini.outS)
             {case 0:break;
-             case 1:fprintf(foutqei,"Smag_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 2:fprintf(foutqei,"Smag: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
-             case 3:fprintf(foutqei,"Smag_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
-             case 4:fprintf(foutqei,"Smag: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
-            }
+             case 1:fprintf(foutqei,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 2:fprintf(foutqei,"Smagperp: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 3:fprintf(foutqei,"Smagperp_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             case 4:fprintf(foutqei,"Smagperp: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             case 5:fprintf(foutqei,"Smag_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 6:fprintf(foutqei,"Smag_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             }
             fprintf(foutqei,"f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
            fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");writeheader(inputpars,foutdstot);

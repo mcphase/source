@@ -699,7 +699,7 @@ int num_threads_started=-1;
             rc = pthread_join(threads[th], &status);
          #else
          retval=WaitForMultipleObjects(NUM_THREADS,threads,TRUE,INFINITE);
-         if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
+         if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects jsss\n"); exit(EXIT_FAILURE); }
          for(int th=0; th<NUM_THREADS; th++)CloseHandle(threads[th]);
          #endif
          ithread=0;
@@ -712,9 +712,9 @@ int num_threads_started=-1;
     for(int th=0; th<ithread; th++)
        rc = pthread_join(threads[th], &status);
     #else
-    retval=WaitForMultipleObjects(ithread,threads,TRUE,INFINITE);
-    if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
-    for(int th=0; th<NUM_THREADS; th++)CloseHandle(threads[th]);
+    if(ithread>0){retval=WaitForMultipleObjects(ithread,threads,TRUE,INFINITE);
+    if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+ithread-1){printf("Error waitformultipleobjects jsssend\n"); exit(EXIT_FAILURE); }
+    for(int th=0; th<NUM_THREADS; th++)CloseHandle(threads[th]);}
     #endif
 
     for(int th=0; th<NUM_THREADS; th++) 
@@ -1060,9 +1060,9 @@ if (do_jqfile==1){
                      #if defined  (__linux__) || defined (__APPLE__)
                      for(int th=0; th<num_threads_started; th++)rc = pthread_join(threads[th], &status);
                      #else
-                     retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
-                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
-                      for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);         
+                     if(num_threads_started>0){retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
+                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects=%i num_threads_started=%i\n",retval,num_threads_started); exit(EXIT_FAILURE); }
+                      for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);}         
                      #endif
                      num_threads_started=0; 
                      #define chi      (*thrdat.chi[ithread])
@@ -1205,6 +1205,8 @@ if (do_jqfile==1){
                           case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
                           case 3: rottouvw(chi,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                           case 4: rottouvw(chibey,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
+                          case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 6: rottouvw(chi,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                          } }
                        fprintf(foutqei,"\n");
                        if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
@@ -1407,9 +1409,9 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      for(int th=0; th<num_threads_started; th++)
                         rc = pthread_join(threads[th], &status);
                      #else
-                     retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
-                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+NUM_THREADS-1){printf("Error waitformultipleobjects\n"); exit(EXIT_FAILURE); }
-                     for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);
+                     if(num_threads_started>0){retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
+                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects erfine\n"); exit(EXIT_FAILURE); }
+                     for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);}
                         #endif
                      for(ithread=0; ithread<NUM_THREADS; ithread++) vIntensity(tin[ithread]->iE) = tin[ithread]->intensity;
                      E=oldE;
