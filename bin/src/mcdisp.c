@@ -6,7 +6,7 @@
  *            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400
  ***********************************************************************/
   
-
+ 
 #include <mcdisp.h> 
 #include "../../version"
 #include "myev.c"
@@ -786,12 +786,11 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
                        // this is standard DMD as described in the review rotter et al JPcondMat 2012
                        if(md.delta(i1,j1,k1)(b)<0){Lambda(s,s)=-1;}else{Lambda(s,s)=+1;}
                        Ac(s,s)=md.delta(i1,j1,k1)(b)*Lambda(s,s);
-                      
-//      if(do_verbose==1){fprintf(stdout,"#i=%i j=%i k=%i atomnr=%i trans=%i ... s=%i ",i1,j1,k1,l1,t1,s);
-//                        fprintf(stdout,"#lambda(%i,%i)xdelta(%i)=%g + i %g\n",s,s,s,real(Ac(s,s)),imag(Ac(s,s)));
-//                       }
-      }}
-
+                     
+      if(do_verbose==1){fprintf(stdout,"#i=%i j=%i k=%i atomnr=%i trans=%i ... s=%i ",i1,j1,k1,l1,t1,s);
+                        fprintf(stdout,"#lambda(%i,%i)xdelta(%i)=%g + i %g\n",s,s,s,real(Ac(s,s)),imag(Ac(s,s)));
+                       }
+      }} 
    for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
     for(l1=1;l1<=inputpars.nofatoms;++l1){ 
      for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){

@@ -201,7 +201,6 @@ mdcf::mdcf (const mdcf & p)
   mqdim=p.mqdim;
   nofatoms=p.nofatoms;nofcomponents=p.nofcomponents;
 //dimension arrays
-//dimension arrays
   s = new ComplexMatrix * [mxa*mxb*mxc+1];if(s==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)s[i]=NULL;
   m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
   l = new ComplexMatrix * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
@@ -219,7 +218,6 @@ mdcf::mdcf (const mdcf & p)
                            for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i){eigenstates[i]=NULL;       
                                                                     if(p.eigenstates[i]!=NULL)eigenstates[i]=new ComplexMatrix((*p.eigenstates[i]));
                                                                     }
-
  for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k)
      {int id=in(i,j,k); 
       (*nt[id])=(*p.nt[id]);
@@ -233,11 +231,10 @@ mdcf::mdcf (const mdcf & p)
       Pb[id]= new ComplexVector(1,1*sum((*nt[id])));*Pb[id]=*p.Pb[id];
       lb[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*lb[id]=*p.lb[id];
       lb_dip[id]= new ComplexVector(1,mqdim*sum((*nt[id]))); *lb_dip[id]=*p.lb_dip[id];
-      d[id]= new Vector(1,sum((*nt[id])),1,sum((*nt[id])));*d[id]=*p.d[id];     
+      d[id]= new Vector(1,sum((*nt[id])));*d[id]=*p.d[id];     
      } 
     }
   }           
-
   Ug=0; gU=0; bUg=0; bgU=0;PUg=0; PgU=0;
 } 
 //destruktor
@@ -256,18 +253,6 @@ mdcf::~mdcf ()
  if(lb_dip[i]!=NULL)delete lb_dip[i];
  if(d[i]!=NULL)delete d[i];
 }
- for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i)if(eigenstates[i]!=NULL)delete eigenstates[i];
-
- for (i=1;i<=nofa;++i){ for (j=1;j<=nofb;++j){ for (k=1;k<=nofc;++k){
- int id = in(i,j,k);
- // For caching values in calculation of transform of chi''
- if(Ug!=0){if(Ug[id]!=0) delete Ug[id];}
- if(gU!=0){if(gU[id]!=0) delete gU[id]; }
- if(bUg!=0){if(bUg[id]!=0) delete bUg[id]; }
- if(bgU!=0){if(bgU[id]!=0) delete bgU[id];}
- if(PUg!=0){if(PUg[id]!=0) delete PUg[id]; }
- if(PgU!=0){if(PgU[id]!=0) delete PgU[id];}
- }}}
  delete []s;
  delete []m;
  delete []l;
@@ -279,13 +264,28 @@ mdcf::~mdcf ()
  delete []lb;
  delete []lb_dip;
  delete []d;
+ 
  for(i=0;i<=mxa*mxb*mxc;++i){delete nt[i];}
  delete []nt;
+
+for(i=0;i<=mxa*mxb*mxc*(nofatoms+1);++i)if(eigenstates[i]!=NULL)delete eigenstates[i];
  delete []eigenstates;
+
+ for (i=1;i<=nofa;++i){ for (j=1;j<=nofb;++j){ for (k=1;k<=nofc;++k){
+ int id = in(i,j,k);
+ // For caching values in calculation of transform of chi''
+ if(Ug!=0){if(Ug[id]!=0) delete Ug[id];}
+ if(gU!=0){if(gU[id]!=0) delete gU[id]; }
+ if(bUg!=0){if(bUg[id]!=0) delete bUg[id]; }
+ if(bgU!=0){if(bgU[id]!=0) delete bgU[id];}
+ if(PUg!=0){if(PUg[id]!=0) delete PUg[id]; }
+ if(PgU!=0){if(PgU[id]!=0) delete PgU[id];}
+ }}}
  if(Ug!=0) { delete []Ug; Ug=0; } 
  if(gU!=0) { delete []gU; gU=0; } 
  if(bUg!=0) { delete []bUg; bUg=0; }
  if(bgU!=0) { delete []bgU; bgU=0; }
  if(PUg!=0) { delete []PUg; PUg=0; }
  if(PgU!=0) { delete []PgU; PgU=0; }
+
 }

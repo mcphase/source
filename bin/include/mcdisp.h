@@ -17,7 +17,7 @@
 #define SMALL_QUASIELASTIC_ENERGY 1e-6    // deviation from single ion gap delta to take energy into account as not being equal to
                       // delta and therefore being included into output 
 		      // transitions of single ions less then SMALL_QUASIELASTIC_ENERGY have in Mijkl wn/kT instead of wn-wn'
-		      // !!! must match SMALL_QUASIELASTIC_ENERGY in jjjpar.hpp !!!!
+		      // !!! must match SMALL_QUASIELASTIC_ENERGY in jjjpar.cpp and ionpars.hpp !!!!
 #define SMALLINT 1e-4 // small intensity treshhold in barn/f.u. - only peaks larger than this threshold will
                       // be included in sta_int calculation
 #define ANTIPEAK_CUTOFF 100 // if antipeaks are fitted,  sta contribution never increases above this cutoff
