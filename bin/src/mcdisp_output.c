@@ -119,8 +119,8 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
                          writeheader(inputpars,foutds);
                          fprintf (foutds, "#Scattering Cross Section \n");
                          ini.print_usrdefcolhead(foutds);
-                         fprintf(foutds,"h k l  energy[meV] dsigma/dOmegadE' [barn/mev/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n"); 
-                             }  
+                         fprintf (foutds, "h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixri chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+                           }  
           }
 }
 

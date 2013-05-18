@@ -1318,7 +1318,9 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"w");
           fprintf (foutds1, "#{%s ",MCDISPVERSION);
           curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds1);
-          fprintf (foutds1, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+          fprintf (foutds1, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixri chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+          ComplexMatrix ch(1,md.nofcomponents,1,md.nofcomponents);
+   
 #ifdef _THREADSREFINE
           thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
@@ -1343,10 +1345,12 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      #endif
                      intensity=tin[ithread]->intensity;
 #else
-		     intensity=intcalc(dimA,ini.emin,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
+		     intensity=intcalc(ch,dimA,ini.emin,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
 #endif
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emin,myround(intensity));
+	             fprintf (foutds1, " %4.4g %4.4g   ",ini.emin,myround(intensity));
+                     for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
+                     fprintf(foutds1,"\n");
 #ifdef _THREADSREFINE
                      tin[ithread]->En=ini.emax; tin[ithread]->iE=iE;
                      #if defined  (__linux__) || defined (__APPLE__)
@@ -1360,10 +1364,12 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                     #endif
                      intensity=tin[ithread]->intensity;
 #else
-		     intensity=intcalc(dimA,ini.emax,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
+		     intensity=intcalc(ch,dimA,ini.emax,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
 #endif
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	             fprintf (foutds1, " %4.4g %4.4g \n",ini.emax,myround(intensity));
+	             fprintf (foutds1, " %4.4g %4.4g ",ini.emax,myround(intensity));
+                     for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
+                     fprintf(foutds1,"\n");
 	  fclose(foutds1);
 #ifdef _THREADSREFINE
 	  for(E=ini.emin;E<=ini.emax;E+=(epsilon/2)*NUM_THREADS)
@@ -1372,7 +1378,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 #endif
 	   {
 #ifndef _THREADSREFINE
-		     intensity=intcalc(dimA,E,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
+		     intensity=intcalc(ch,dimA,E,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
 		     totint+=intensity*epsilon/2;
 #else
                    oldE=E;
@@ -1407,11 +1413,15 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 
           sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	             fprintf (foutds1, " %4.4g %4.4g \n",myround(E),myround(intensity));
+	             fprintf (foutds1, " %4.4g %4.4g ",myround(E),myround(intensity));
+                     for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
+                     fprintf(foutds1,"\n");
           fclose(foutds1);	   
                      ini.print_usrdefcols(foutds,qijk,qincr);
                      fprintf (foutds, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	             fprintf (foutds, " %4.4g %4.4g \n",myround(E),myround(intensity));
+	             fprintf (foutds, " %4.4g %4.4g ",myround(E),myround(intensity));
+                     for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
+                     fprintf(foutds,"\n");
 	   }
 #ifdef _THREADSREFINE
           for (ithread=0; ithread<NUM_THREADS; ithread++) 

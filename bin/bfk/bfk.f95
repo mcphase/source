@@ -1,4 +1,4 @@
-!  Program bfk(2705).f95 calculates dynamical  susceptibility and 
+!  Program bfk(0606).f95 calculates dynamical  susceptibility and 
 !  inelastic neutron scattering cross-section for single RE ions
 !  Uses as input the spin-eigenstates of the ion, 
 module CommonData
@@ -124,6 +124,7 @@ use MatrixElements
 use FormfactorPreparation
 implicit none
 !save
+integer :: io_error
 integer :: i,j, k,kl,n,m, l, ii ,nn, cline, vv1(Mp),vv2(Mp), w 
 integer :: zz,ww, type_of_contence,linetype(50), linenumber, nlines
 real :: s,dk,kn,knn,ksn,ks,k0, Evr(Np,Np),Evi(Np,Np), v(Np),f, x, y 
@@ -135,7 +136,7 @@ complex ::  cs
 character(len=30)::  arg 
 character(len=30) :: name(6)
 character(len=10) :: couplc, tempp, mod
-character(len=150) :: line(50), tline(50), bb, zeile
+character(len=100) :: line(50), tline(50), bb, zeile
 character(len=20) :: redata(12),re(12)
 character(len=40) :: number
 character(len=50) :: vector
@@ -198,7 +199,11 @@ if (nn.ge.5) then
   re(10)='Er'
   re(11)='Tb'
   re(12)='Yb'
-  open(11,file=cefname,action='read')
+  open(11,file=cefname,action='read',status='old',iostat=io_error)
+  if (io_error /= 0) then
+     write(*,*) 'Fehler beim Öffnen der Datei', cefname 
+     stop
+  end if  
   n=1
   do 
     read(11,'(A)',iostat=status_read) line(n)
@@ -206,12 +211,13 @@ if (nn.ge.5) then
     n=n+1
   end do 
   nlines=n-1
+write(*,*) 'Zahl der Zeilen der Datei  ', cefname 
   m=0
   do n=1,nlines
     if (line(n)(1:1)=='#') then
       if ((line(n)(1:4)=='#!d=').or.(line(n)(1:4)=='#!J=')) then
          m=m+1
-         bb=line(n)(5:150)
+         bb=line(n)(5:100)
          do k=1,12
            do l=1,30
              i=5+l 
@@ -221,16 +227,21 @@ if (nn.ge.5) then
            end do
          end do
       end if
-      if (line(n)(1:15)=='#! Eigenvalues=') then
+      if (line(n)(1:14)=='#! Eigenvalues') then
         m=m+1
-        tline(m)=line(n)(16:150)
+        bb=line(n)(15:100)
+        k=index(bb,'=')
+        tline(m)=bb(k+1:100)
       end if
     else 
       m=m+1
       tline(m)=line(n)
     end if
   end do
-  open(12,file='cefworkfile.dat')  
+  open(12,file='cefworkfile.dat',action='write',iostat=io_error)  
+  if (io_error /= 0) then 
+    write(*,*) 'Fehler beim Öffnen der Datei cefworkfile' 
+  end if
   do n=1,m
     write(12,'(A)') tline(n)
   end do
@@ -251,50 +262,34 @@ if (nn==6) then
   nlines=n-1
   do n=1,nlines
     if (line(n)(1:7)=='#!emin=') then
-      number=line(n)(8:40)
+      number=line(n)(8:50)
       read(number,*) emin
     end if
     if (line(n)(1:7)=='#!emax=') then
-      number=line(n)(8:40)
+      number=line(n)(8:50)
       read(number,*) emax
     end if
     if (line(n)(1:10)=='#!Npoints=') then
-      number=line(n)(11:40)
+      number=line(n)(11:50)
       read(number,*) Npoints
     end if
     if (line(n)(1:4)=='#!E=') then
-      number=line(n)(5:40)
+      number=line(n)(5:50)
       read(number,*) E
     end if
     if (line(n)(1:5)=='#!k1=') then
       vector=line(n)(6:50)
       read(vector,*) k11, k12, k13
     end if
-!    if (line(n)(1:6)=='#!k12=') then
-!      number=line(n)(7:40)
-!      read(number,*) k12
-!    end if
-!     if (line(n)(1:6)=='#!k13=') then
-!      number=line(n)(7:40)
-!      read(number,*) k13
-!    end if
     if (line(n)(1:6)=='#!k2=') then
       vector=line(n)(6:50)
       read(vector,*) k21, k22, k23
     end if
-!    if (line(n)(1:6)=='#!k22=') then
-!      number=line(n)(7:30)
-!      read(number,*) k22
-!    end if
-!    if (line(n)(1:6)=='#!k23=') then
-!      number=line(n)(7:30)
-!      read(number,*) k23
-!    end if
     if (line(n)(1:15)=='#!scatfilename=') then
-       scatfilename=line(n)(16:40)
+       scatfilename=line(n)(16:50)
     end if
     if (line(n)(1:17)=='#!formfactorname=') then
-       formfactorname=line(n)(18:40)
+       formfactorname=line(n)(18:50)
        w=1
     end if
   end do
@@ -308,13 +303,12 @@ if (nn==6) then
   write(14,'(A)') scatfilename
   write(14,'(A)') formfactorname
   close(14)
-  if (w==1) then !if formfactor data are availablle, they are read-in and 
-!    if (mode>1) then
-      open(17,file=formfactorname,action='read')
-      n=2
-      kapg(1)=0.
-      strg(1)=1.
-      m=0
+  if (w==1) then !if formfactor data are available, they are read-in and 
+    open(17,file=formfactorname,action='read')
+    n=2
+    kapg(1)=0.
+    strg(1)=1.
+    m=0
       einlesen: do
         read(17,*, iostat=status_read) kapg(n), strg(n)
         if (status_read ==0) then
@@ -324,18 +318,17 @@ if (nn==6) then
         end if
         if (status_read /=0 .and. m/=0) exit
       end do einlesen
-      nlg=n
-      close(17)
+    nlg=n
+    close(17)
 
 !transfer of structure factor data to field strworkfile.dat with 
 !equidistant steps kap(n)
-      call FormfactorTransformation
-      open(18,file='strworkfile.dat')
-      do n=1,nlf
-        write(18,*) kapf(n),strf(n)
-      end do
-      close(18) 
-!    end if  !mode >1
+    call FormfactorTransformation
+    open(18,file='strworkfile.dat')
+    do n=1,nlf
+      write(18,*) kapf(n),strf(n)
+    end do
+    close(18) 
   end if ! w=1
 end if
 !prepare necessary data for the calculations  
@@ -416,7 +409,7 @@ use CommonData
 use MatrixElements
 implicit none
 !save
-integer :: i,j,k,n, nn,m,l, mm,n1,n2,it,vv1(Mp),vv2(Mp),M0
+integer :: i,j,k,n, nn,m,l, mm,n1,n2,it,vv1(Mp),vv2(Mp),M0, flag
 real :: Jj, mj, q, s,z, ss
 real :: jp(Np,Np),jm(Np,Np),jz(Np,Np), qq(Np,Np), Ps(Mp)
 complex :: cs, csz,csp,csm
@@ -426,6 +419,7 @@ complex :: cs, csz,csp,csm
 ! En(Np)(energy levels), Ev(Np,Np)(complex eigenvectors) 
 ! beta(inv temperature), cutoff(exp cutoff)
 ! check of eigenvectors for orthogonality:
+flag=0
 do i = 1,Ns
 do j = 1,Ns
 cs=(0.,0.)
@@ -433,11 +427,13 @@ do k = 1,Ns
 cs=cs+conjg(Ev(j,k))*Ev(i,k)
 end do
 if ((cabs((cs-1)*cs)>= 0.001) )then
-write( *,*) 'Mistake in Eigenvektor' 
+flag=1
 end if
 end do
 end do
-
+if (flag == 1) then
+   write( *,*) 'Eigenvektors not accurate, bad orthognality relations, see jmatrix.dat'
+end if
 !the file jmatrix is generated only for checking the correctnes of  the 
 !matrix elements
 open(19,file='jmatrix.dat')
@@ -1366,3 +1362,4 @@ call OutputResults
 
 end program
 !-------------------------------------------------------------------
+

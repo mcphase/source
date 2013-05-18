@@ -234,7 +234,7 @@ static public void windowclose(){
     System.out.println("	 # displayxtext=meV \n");
 //    System.out.println("	 # displaylegend=false (toggle also with 'L' key)\n\n");
        System.exit(0);
-      } scale=1;
+      } scale=0.2;
        file = new String[MAX_NOF_FILES];
        lastmod = new long[MAX_NOF_FILES];
        colx = new int[MAX_NOF_FILES];

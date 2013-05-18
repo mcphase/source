@@ -499,7 +499,7 @@ void *intcalc(void *input)
 DWORD WINAPI intcalc(void *input)
 #endif
 #else
-double intcalc(int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector & q,Vector & hkl,mdcf & md,int do_verbose,double epsilon)
+double intcalc(ComplexMatrix & ch,int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector & q,Vector & hkl,mdcf & md,int do_verbose,double epsilon)
 #endif
 {int i,j,i1,j1,k1,l1,t1,i2,j2,k2,l2,t2,s,ss,bmax,bbmax,b;
  double intensity=1.2;
@@ -597,7 +597,7 @@ double intcalc(int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector 
    bose=1.0/(1.0-exp(-z*(1.0/KB/ini.T)));
  //  bose=1.0;
    S=bose/(im)*(chi-chi.Transpose().Conjugate());
-   
+   ch=0;
  // polarization factor
 // neutrons only sense first 3x3 part of S !! - this is taken into account by setting 0 all
 // higher components in the polarization factor !!!
@@ -636,20 +636,17 @@ double intcalc(int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector 
                       if(i==1||i==3||i==5){polICn(i,j)*=2.0;} // this accounts for the 
     }}
 
-
-
  //multiply polarization factor, formfactor and debeywallerfactor
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
  for(l1=1;l1<=md.nofatoms;++l1){
    for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
-//   s=((((i1-1)*ini.mf.nb()+(j1-1))*ini.mf.nc()+(k1-1))*md.nofatoms+(l1-1))*md.nofcomponents;
       s=(index_s(i1,j1,k1,l1,t1,md,ini)-1)*md.nofcomponents;
   for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
   for(l2=1;l2<=md.nofatoms;++l2){
    for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
-//   ss=((((i2-1)*ini.mf.nb()+(j2-1))*ini.mf.nc()+(k2-1))*md.nofatoms+(l2-1))*md.nofcomponents;
       ss=(index_s(i2,j2,k2,l2,t2,md,ini)-1)*md.nofcomponents;
     for(i=1;i<=md.nofcomponents;++i){for(j=1;j<=md.nofcomponents;++j){
+      ch(i,j)+=chi(s+i,ss+j);
       if((*inputpars.jjj[l1]).gJ==0&&(*inputpars.jjj[l2]).gJ==0)
       {S(s+i,ss+j)*=polICIC(i,j); 
        S(s+i,ss+j)*=0.5*(*inputpars.jjj[l1]).debyewallerfactor(QQ); //  debey waller factor

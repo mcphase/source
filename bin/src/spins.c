@@ -48,12 +48,15 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
  graphic/movie in the output files of different format:\n \
  results/spins*.eps (postscript), results/spins*.fst (fp_studio), \n \
  results/spins.out (ascii) and results/spins*.jvx (javaview)\n\n \
- the graphics output format can be fine tuned in .sps and .qev input files\n \
- by show_abc_unitcell, show_primitive_crystal_unitcell, spins_scale_moment\n \
+ the graphics output format can be fine tuned in .sps and .qev input files\n"
+" or results/graphics_parameters.set by show_abc_unitcell,\n"
+" show_primitive_crystal_unitcell, spins_scale_moment, spins_wave_amplitude\n \
  show_magnetic_unitcell, show_atoms, scale_view_1,scale_view_2, scale_view_3 ...\n\n \
  jvx files can be viewed by:\n\
  java javaview results/spins.jvx \n \
- java javaview \"model=results/spins.*.jvx\" Animation.LastKey=16 background=\"255 255 255\" \n");
+ java javaview \"model=results/spins.*.jvx\" Animation.LastKey=16 background=\"255 255 255\" \n"
+" gif images stored by javaview can be connected to movies by ImageMagick \n"
+" convert  -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif\n");
  exit (1);
     }
 

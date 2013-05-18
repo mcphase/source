@@ -690,7 +690,7 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
      // here the expectation values of the multipolar moments are calculated
      for(int j=1;j<=I.Hi();++j)I[j]+=wn(i)*matelr(i,i,zr,zi,(*In[j]));
                                    }
-    }
+    } //printf("%g %g\n",I[1],I[2]);
 }
 /**************************************************************************/
 void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & /*ests*/)
