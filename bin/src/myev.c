@@ -83,7 +83,7 @@ void myPrintComplexVector(FILE * file,ComplexVector & M)
 {int j1;
  fprintf (file,"#Components:\n");
    
-    for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g %+6.3g i ",myround(real(M(j1))),myround(imag(M(j1))));
+    for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g %+6.3g i\n",myround(real(M(j1))),myround(imag(M(j1))));
     fprintf (file,"\n");    
 }    
 

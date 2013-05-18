@@ -57,9 +57,9 @@ int jq::nc()
 /**************************************************************************/
 
 //constructors
-jq::jq (int n1,int n2,int n3,mdcf & m)
+jq::jq (int n1,int n2,int n3,int nofcomp,mdcf & m)
 {  nofa=n1;nofb=n2;nofc=n3;
-   nofatoms=m.nofatoms;nofcomponents=m.nofcomponents;
+   nofatoms=m.nofatoms;nofcomponents=nofcomp;
 
    mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
    mx=mxa*mxb*mxc+1;

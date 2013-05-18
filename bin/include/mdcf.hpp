@@ -17,7 +17,7 @@ class mdcf
    int mqdim; // dimension of transition operator (unpol neutrons M(Q): dim=3, rixs: some tensor for e e' components of polarisation i.e. dim =9)
    ComplexMatrix ** m; //matrix to store M
    ComplexMatrix ** s; //matrix to store U
-   ComplexMatrix ** l; //matrix to store eigenvalues sqrt_gamma
+   ComplexVector ** l; //matrix to store eigenvalues sqrt_gamma
    ComplexMatrix ** sb; //matrix to store V
    ComplexVector ** dps; // big vector to store all dmq1 
    ComplexVector ** dmqs; // big vector to store all dmq1 
@@ -44,8 +44,8 @@ class mdcf
     ComplexMatrix & Mi(int in); // returns pointer to matrix M(i)
     ComplexMatrix & U(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
     ComplexMatrix & Ui(int in); // returns pointer to eigenvector matrix i
-    ComplexMatrix & sqrt_gamma(int i,int j,int k) const; // returns pointer to eigenvaluematrix (ijk) 
-    ComplexMatrix & sqrt_gammai(int in); // returns pointer to eigenvalue matrix i
+    ComplexVector & sqrt_gamma(int i,int j,int k) const; // returns pointer to eigenvaluematrix (ijk) 
+    ComplexVector & sqrt_gammai(int in); // returns pointer to eigenvalue matrix i
     ComplexMatrix & V(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
     ComplexMatrix & Vi(int in); // returns pointer to eigenvector matrix i
     ComplexVector & dPs(int i,int j,int k) const; // returns pointer to vector P (ijk) 

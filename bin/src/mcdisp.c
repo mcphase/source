@@ -495,30 +495,18 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
         }
 
       fprintf(stdout,"#transition %i of ion %i of cryst. unit cell at pos  %i %i %i in mag unit cell:\n",tn,l,i,j,k);
-      if(nn[6]<SMALL_QUASIELASTIC_ENERGY){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}
-      
+      if(nn[6]<SMALL_QUASIELASTIC_ENERGY){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}      
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  tn with printout
         (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
-        Mijkl = u1^u1;gamman=Norm2(u1);u1/=sqrt(gamman);
+        if(do_Erefine)Mijkl = u1^u1;
+        gamman=Norm2(u1);u1/=sqrt(gamman);
        if(fabs((fabs(d)-fabs(nn[6]))/(fabs(nn[6])+1.0))>SMALLEDIF)
         {fprintf(stderr,"ERROR mcdisp: reading mcdisp.trs with transition energy delta %g meV different from internal calculation %g meV\n",nn[6],d);	 
          exit(EXIT_FAILURE);}
-           if (do_verbose==1){fprintf(stdout,"#Matrix M(s=%i %i %i %i)\n",i,j,k,l);
-                              myPrintComplexMatrix(stdout,Mijkl);
-                              }      
-     // diagonalizeMs to get unitary transformation matrix Us
-      myEigenSystemHermitean (Mijkl,gamma,Uijkl,sort=1,maxiter);
-       if (fabs(gamman-gamma(ini.nofcomponents))>SMALL_QUASIELASTIC_ENERGY){fprintf(stderr,"ERROR eigenvalue of single ion matrix M inconsistent: analytic value gamma= %g numerical diagonalisation of M gives gamma= %g\n",gamman,gamma(ini.nofcomponents));
-                           exit(EXIT_FAILURE);}
-// take highest eigenvector to be the same phase as u1
-for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++){if (fabs(abs(u1(ii))-abs(Uijkl(ii,ini.nofcomponents)))>SMALL_QUASIELASTIC_ENERGY)
-                                                {fprintf(stderr,"ERROR eigenvector of single ion matrix M inconsistent\n");
-                                                 myPrintComplexVector(stderr,u1);u1=Uijkl.Column(ini.nofcomponents);myPrintComplexVector(stderr,u1);exit(EXIT_FAILURE);}
-                                               Uijkl(ii,ini.nofcomponents)=u1(ii);}
          // treat correctly case for neutron energy loss
-	 if (nn[6]<0) // if transition energy is less than zero do a conjugation of the matrix
-	 {  for(int ii=Uijkl.Rlo(); ii<=Uijkl.Rhi(); ii++)       for(int jj=Uijkl.Clo(); jj<=Uijkl.Chi(); jj++)       Uijkl[ii][jj]=conj(Uijkl[ii][jj]);
+	 if (nn[6]<0) // if transition energy is less than zero do a conjugation of the matrix U
+	 {  for(int ii=u1.Lo();ii<=u1.Hi();++ii)u1(ii)=conj(u1(ii));
 	 }
        j1=md.baseindex(i,j,k,l,jmin); 
        md.delta(i,j,k)(j1)=nn[6]; // set delta
@@ -529,63 +517,56 @@ if (do_verbose==1){ fprintf(stdout,"# ... recalculate now M(s=%i %i %i %i) with 
 //-----------------------------------------------------------------------------------
 if(ini.calculate_chargedensity_oscillation){
    if((*inputpars.jjj[l]).dchargedensity_coeff1(ini.T,mf,ini.Hext,chargedensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,md,nn,ini, gamma,Echargedensity);}
+       fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,md,nn,ini,Echargedensity);}
 if(ini.calculate_spindensity_oscillation){
    if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,md,nn,ini, gamma,Espindensity);}
+       fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,md,nn,ini,Espindensity);}
 if(ini.calculate_orbmomdensity_oscillation){
    if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,md,nn,ini, gamma,Eorbmomdensity);}
+       fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,md,nn,ini,Eorbmomdensity);}
 if(ini.calculate_phonon_oscillation){
    if((*inputpars.jjj[l]).dP1calc(ini.T,mf,ini.Hext,phonon_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,md,nn,ini, gamma,Ephonon);}
+       fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,md,nn,ini,Ephonon);}
 if(ini.calculate_magmoment_oscillation){
    if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,md,nn,ini, gamma,Emagmom);}
+       fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,md,nn,ini,Emagmom);}
 if(ini.calculate_spinmoment_oscillation){
    if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,md,nn,ini, gamma,Espin);}
+       fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,md,nn,ini,Espin);}
 if(ini.calculate_orbmoment_oscillation){
    if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,orbmom_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,ORBMOM_EV_DIM,orbmom_coeff1,md,nn,ini, gamma,Eorbmom);}
+       fillE(jmin,i,j,k,l,ORBMOM_EV_DIM,orbmom_coeff1,md,nn,ini,Eorbmom);}
 //----------------------------------------------------------------------------------------------
 
-         if (gamma(ini.nofcomponents)>=0&&fabs(gamma(ini.nofcomponents-1))<SMALL_QUASIELASTIC_ENERGY) 
                            // mind in manual the 1st dimension alpha=1 corresponds
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
-                           {if (nn[6]>SMALL_QUASIELASTIC_ENERGY)
-			    {md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(gamma(ini.nofcomponents));// gamma(ini.nofcomponents)=sqr(gamma^s)
+          if (nn[6]>SMALL_QUASIELASTIC_ENERGY)
+			    {md.sqrt_gamma(i,j,k)(j1)=sqrt(gamman);// gamma(ini.nofcomponents)=sqr(gamma^s)
                             }
 			    else if (nn[6]<-SMALL_QUASIELASTIC_ENERGY)
-                            {md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(gamma(ini.nofcomponents));// gamma(ini.nofcomponents)=sqr(gamma^s)
+                            {md.sqrt_gamma(i,j,k)(j1)=imaginary*sqrt(gamman);// gamma(ini.nofcomponents)=sqr(gamma^s)
                             }
  			    else
 			    { //quasielastic line needs gamma=SMALL_QUASIELASTIC_ENERGY .... because Mijkl and therefore gamma have been set to 
 			      // wn/kT instead of wn-wn'=SMALL_QUASIELASTIC_ENERGY*wn/kT (in jjjpar.cpp -mdcalc routines)
 			      //set fix delta but keep sign
 			          if (nn[6]>0){md.delta(i,j,k)(j1)=SMALL_QUASIELASTIC_ENERGY;
-  			     md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=sqrt(SMALL_QUASIELASTIC_ENERGY*gamma(ini.nofcomponents));
+  			     md.sqrt_gamma(i,j,k)(j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gamman);
                                               }
 				  else        {md.delta(i,j,k)(j1)=-SMALL_QUASIELASTIC_ENERGY;
-                             md.sqrt_gamma(i,j,k)(ini.nofcomponents*(j1-1)+ini.nofcomponents,ini.nofcomponents*(j1-1)+ini.nofcomponents)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gamma(ini.nofcomponents));
+                             md.sqrt_gamma(i,j,k)(j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gamman);
 			                      }
 			    }
-			   }else 
-                           {fprintf(stderr,"ERROR eigenvalue of single ion matrix <0: ev1=%g ev2=%g ev3=%g ... evn=%g\n",gamma(1),gamma(2),gamma(3),gamma(ini.nofcomponents));
-                            exit(EXIT_FAILURE);}
         (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
-        for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){
-        md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Uijkl(m,n);
-        if(do_Erefine==1)md.M(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Mijkl(m,n);
-        }}    
+        for(m=1;m<=ini.nofcomponents;++m){
+        //md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*j1)=u1(m);
+        md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,j1)=u1(m);
+        if(do_Erefine==1)for(n=1;n<=ini.nofcomponents;++n)md.M(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Mijkl(m,n);
+        }
 if (do_verbose==1){
-                  fprintf(stdout,"#Matrix M(s=%i %i %i)\n",i,j,k);
-                  myPrintComplexMatrix(stdout,Mijkl); 
-                  fprintf(stdout,"#Eigenvalues:\n");
-                  myPrintVector(stdout,gamma); 
-                  fprintf(stdout,"#Matrix U(s=%i%i%i)\n",i,j,k);
-                  myPrintComplexMatrix(stdout,Uijkl); 
+                  fprintf(stdout,"#Ualpha1 (s=%i %i %i):\n",i,j,k);
+                  myPrintComplexVector(stdout,u1); 
                  }
 
     }}}
@@ -646,8 +627,8 @@ for(counter=1;counter<=ini.nofhkls;++counter){
 fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
  if(do_verbose==1){fprintf(stdout,"#Setting up J(q) matrix .... \n");}
  // calculate J(q)
- jq J(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),md);
- jq Jl(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),md);
+ jq J(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),md.nofcomponents,md);
+ jq Jl(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),1,md);
 
 // int signa,signb,signc,sa,sb,sc,
  long int nofneighbours=0;
@@ -748,7 +729,10 @@ if(do_verbose==1){fprintf(stdout,"#Transform J(q) matrix  with U...\n");}
  s=ini.mf.in(i1,j1,k1);
   for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
   ss=ini.mf.in(i2,j2,k2);
-  Jl.mati(s,ss)=md.sqrt_gamma(i1,j1,k1)*md.U(i1,j1,k1).Hermitean()*J.mati(s,ss)*md.U(i2,j2,k2)*md.sqrt_gamma(i2,j2,k2).Conjugate();
+  Jl.mati(s,ss)=md.U(i1,j1,k1).Hermitean()*J.mati(s,ss)*md.U(i2,j2,k2);
+   for(int kk=1;kk<=Jl.mati(s,ss).Rhi();++kk)for(int jj=1;jj<=Jl.mati(s,ss).Chi();++jj)
+   Jl.mati(s,ss)(kk,jj)*=md.sqrt_gamma(i1,j1,k1)(kk)*conj(md.sqrt_gamma(i2,j2,k2)(jj));
+
 //if (do_verbose==1){
 //                  fprintf(stdout,"#J(s=%i%i%i,s''=%i%i%i)=\n",i1,j1,k1,i2,j2,k2);
 //                  myPrintComplexMatrix(stdout,J.mati(s,ss)); 
@@ -800,7 +784,8 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
       ss=index_s(i2,j2,k2,l2,t2,md,ini);
       b=md.baseindex(i1,j1,k1,l1,t1);
       bb=md.baseindex(i2,j2,k2,l2,t2);
-     Ac(s,ss)-=Jl.mati(Jl.in(i1,j1,k1),Jl.in(i2,j2,k2))(ini.nofcomponents*(b-1)+ini.nofcomponents,ini.nofcomponents*(bb-1)+ini.nofcomponents);
+//     Ac(s,ss)-=Jl.mati(Jl.in(i1,j1,k1),Jl.in(i2,j2,k2))(ini.nofcomponents*b,ini.nofcomponents*bb);
+       Ac(s,ss)-=Jl.mati(Jl.in(i1,j1,k1),Jl.in(i2,j2,k2))(b,bb);
                                              //nofcomponents^th dimension corresponds to 1st in manual 
 					     // and it is only necessary to take into 
 					     // acount this dimension!!

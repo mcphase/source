@@ -40,7 +40,7 @@ ComplexMatrix & mdcf::M(int na, int nb, int nc)
 { return (*m[in(na,nb,nc)]);
 }
 
-ComplexMatrix & mdcf::sqrt_gamma(int na, int nb, int nc) const
+ComplexVector & mdcf::sqrt_gamma(int na, int nb, int nc) const
 { return (*l[in(na,nb,nc)]);
 }
 ComplexVector & mdcf::sqrt_GammaP(int na, int nb, int nc) const
@@ -66,7 +66,7 @@ ComplexMatrix & mdcf::Mi(int i)
 { return (*m[i]);
 }
 
-ComplexMatrix & mdcf::sqrt_gammai(int i)
+ComplexVector & mdcf::sqrt_gammai(int i)
 { return (*l[i]);
 }
 ComplexVector & mdcf::sqrt_GammaPi(int i)
@@ -131,9 +131,9 @@ void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
 {      (*nt[in(i,j,k)])=notr;mqdim=mqd;
        int sumnt=sum((*nt[in(i,j,k)]));
       if (sumnt<1){sumnt=1;} // MR 2011.08.09. in case there is no transition for this subsystem then initialize all matrices/Vector to 1...
-     s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);
      m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
-     l[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);
+     l[in(i,j,k)]= new ComplexVector(1,sumnt);
      sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
      dps[in(i,j,k)]= new ComplexVector(1,1*sumnt);
      dmqs[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
@@ -178,7 +178,7 @@ mdcf::mdcf (int n1,int n2,int n3,int n,int nc)
 //dimension arrays
   s = new ComplexMatrix * [mxa*mxb*mxc+1];if(s==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)s[i]=NULL;
   m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
-  l = new ComplexMatrix * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
+  l = new ComplexVector * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
   sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
   dps = new ComplexVector * [mxa*mxb*mxc+1];if(dps==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dps[i]=NULL;
   dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
@@ -203,7 +203,7 @@ mdcf::mdcf (const mdcf & p)
 //dimension arrays
   s = new ComplexMatrix * [mxa*mxb*mxc+1];if(s==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)s[i]=NULL;
   m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
-  l = new ComplexMatrix * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
+  l = new ComplexVector * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
   sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
   dps = new ComplexVector * [mxa*mxb*mxc+1];if(dps==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dps[i]=NULL;
   dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
@@ -221,9 +221,9 @@ mdcf::mdcf (const mdcf & p)
  for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k)
      {int id=in(i,j,k); 
       (*nt[id])=(*p.nt[id]);
-      s[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*s[id]=*p.s[id];
+      s[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*s[id]=*p.s[id];
       m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*m[id]=*p.m[id];
-      l[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*l[id]=*p.l[id];
+      l[id]= new ComplexVector(1,sum((*nt[id])));*l[id]=*p.l[id];
       sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*sb[id]=*p.sb[id];// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
       dps[id]= new ComplexVector(1,1*sum((*nt[id])));*dps[id]=*p.dps[id];
       dmqs[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmqs[id]=*p.dmqs[id];

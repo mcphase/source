@@ -3,7 +3,7 @@
 //**************************************************************************************
 void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observable_coeff1,
     mdcf & md,float * nn,
-    inimcdis & ini,Vector & gamma,ComplexMatrix & Eobservable)
+    inimcdis & ini,ComplexMatrix & Eobservable)
 {complex<double> imaginary(0,1); double observable_gamman;
     // here we if required calculate the higher dimension matrix used to do the
        // extension of chi to higher value of (uncoupled) nofcomponents in intcalc_approx ... needed for observablefluctuations, extended eigenvectors ...
@@ -17,16 +17,19 @@ void fillE(int jmin,int i,int j, int k, int l,int ev_dim,ComplexVector & observa
 			    { //quasielastic line needs gamma=SMALL_QUASIELASTIC_ENERGY .... because Mijkl and therefore gamma have been set to 
 			      // wn/kT instead of wn-wn'=SMALL_QUASIELASTIC_ENERGY*wn/kT (in jjjpar.cpp -mdcalc routines)
 			      //set fix delta but keep sign
-			          if (nn[6]>0){observable_gammas=sqrt(observable_gamman);}
-				  else        {observable_gammas=imaginary*sqrt(observable_gamman);}
+			          if (nn[6]>0){observable_gammas=sqrt(SMALL_QUASIELASTIC_ENERGY*observable_gamman);}
+				  else        {observable_gammas=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*observable_gamman);}
 			    }			   
         //printf("observable_gamma %g %+g i\n",real(observable_gammas),imag(observable_gammas));
         if (nn[6]<0) // if transition energy is less than zero do a conjugation of the matrix
-	 {for(int k1=1;k1<=ev_dim;++k1){Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)=observable_gammas*conj(observable_coeff1(k1));}
-         }else{
-          for(int k1=1;k1<=ev_dim;++k1){Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)=conj(observable_gammas)*observable_coeff1(k1);}
-         }            
+	 {for(int k1=1;k1<=ev_dim;++k1){Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)=conj(observable_gammas)*conj(observable_coeff1(k1));}
+         }else{                                                                     // conj inserted 7.6.2013 MR -- thus a spin movies bug removed
+          for(int k1=1;k1<=ev_dim;++k1){Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)=observable_gammas *observable_coeff1(k1);}
+         }        
 
+// check consistency:
+//      for(int k1=1;k1<=ev_dim;++k1)  printf("Emagmom(s=%i,alpha=%i)= %g %+g i \n",index_s(i,j,k,l,jmin,md,ini),k1,
+//      real(Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)),imag(Eobservable(index_s(i,j,k,l,jmin,md,ini),k1)));    
 }
 
 //******************************************************************************
