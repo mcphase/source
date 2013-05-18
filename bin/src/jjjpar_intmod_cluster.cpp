@@ -123,7 +123,9 @@ int sort=1;int maxiter=1000000;
 // myPrintMatrix(stdout,H);
 //printf("now diagonalise\n");
 EigenSystemHermitean (H,En,zr,zc,sort,maxiter);
+//printf("Eigenvector real\n");
 // myPrintMatrix(stdout,zr);
+//printf("Eigenvector imag\n"); 
 // myPrintMatrix(stdout,zc);
 // calculate Z and wn (occupation probability)
      Vector wn(1,dim);double Zs;
@@ -168,7 +170,7 @@ for(int a=1;a<=Hxc.Hi();++a)
  for(int i=1;i<=(*clusterpars).nofatoms;++i)
  {Matrix Jai((*(*clusterpars).jjj[i]).opmat(a,Hxc,Hext));
 
-// myPrintMatrix(stdout,Jai);
+// myPrintMatrix(stdout,Jai);printf("\n");
 
   //1. determine dimensions
   int di=dn[i];
@@ -192,12 +194,15 @@ for(int a=1;a<=Hxc.Hi();++a)
    Ja(r,s)+=Jai(ai+1,bi+1);
   }
  }
-//printf("hello %i %i ");
+
+//printf("Matrix of Operator");
 // myPrintMatrix(stdout,Ja);
  // determine expectation value
  Jret[a]=0;
  for(int i=1;i<=dim&&wn[i]>0.00001;++i)
- {Jret[a]+=wn[i]*aMb_real(Ja,zr,zc,i,i); }
+ {Jret[a]+=wn[i]*aMb_real(Ja,zr,zc,i,i); 
+ // if(fabs(aMb_imag(Ja,zr,zc,i,i))>SMALL){fprintf(stderr,"ERROR module cluster - Icalc: expectation value imaginary\n");exit(EXIT_FAILURE);}
+ }
 }
 
 //  printf ("Ha=%g Hb=%g Hc=%g Ja=%g Jb=%g Jc=%g \n", 
@@ -386,6 +391,7 @@ for(int a=1;a<=Hxc.Hi();++a)
 if (subtractexpvalue==1)
 { for(int i=1;i<=dim&&wn[i]>0.00001;++i)
  {Jret(a)+=wn[i]*aMb_real(Ja,zr,zc,i,i);
+// if(fabs(aMb_imag(Ja,zr,zc,i,i))>SMALL){fprintf(stderr,"ERROR module cluster - du1calc: expectation value imaginary\n");exit(EXIT_FAILURE);}
  }
 }
 }

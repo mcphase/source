@@ -641,7 +641,7 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib) // transiti
    {real+=zr(a,ia)*M(a,b)*zr(b,ib)-zr(a,ia)*M(b,a)*zc(b,ib)+zc(a,ia)*M(b,a)*zr(b,ib)+zc(a,ia)*M(a,b)*zc(b,ib);
    }
     real+=zr(a,ia)*M(a,a)*zr(a,ib)+zc(a,ia)*M(a,a)*zc(a,ib);
-   for(int b=a+1;b<M.Rhi();++b)
+   for(int b=a+1;b<=M.Rhi();++b)
    {real+=zr(a,ia)*M(b,a)*zr(b,ib)+zr(a,ia)*M(a,b)*zc(b,ib)+zc(a,ia)*M(b,a)*zc(b,ib)-zc(a,ia)*M(a,b)*zr(b,ib);
    }
 
@@ -658,7 +658,7 @@ double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib)
    {imag+=zc(a,ia)*M(b,a)*zc(b,ib)-zc(a,ia)*M(a,b)*zr(b,ib)+zr(a,ia)*M(b,a)*zr(b,ib)+zr(a,ia)*M(a,b)*zc(b,ib);
    }
     imag+=zr(a,ia)*M(a,a)*zc(a,ib)-zc(a,ia)*M(a,a)*zr(a,ib);
-   for(int b=a+1;b<M.Rhi();++b)
+   for(int b=a+1;b<=M.Rhi();++b)
    {imag+=zr(a,ia)*M(b,a)*zc(b,ib)-zr(a,ia)*M(a,b)*zr(b,ib)-zc(a,ia)*M(b,a)*zr(b,ib)-zc(a,ia)*M(a,b)*zc(b,ib);
    }
 
