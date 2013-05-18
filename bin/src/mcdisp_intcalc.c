@@ -130,26 +130,26 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_verbose,int do_
 			   // to the nth dimension here, because myEigensystmHermitean
 			   // sorts the eigenvalues according to ascending order !!!
         if (nn[6]>SMALL_QUASIELASTIC_ENERGY)
-	    {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=sqrt(Gamman);
-             if(do_phonon)md.sqrt_GammaP(i,j,k)(1*j1)=sqrt(gammaP);
-             md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=sqrt(gamma);}
+	    {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(j1)=sqrt(Gamman);
+             if(do_phonon)md.sqrt_GammaP(i,j,k)(j1)=sqrt(gammaP);
+             md.sqrt_Gamma_dip(i,j,k)(j1)=sqrt(gamma);}
 	    else if (nn[6]<-SMALL_QUASIELASTIC_ENERGY)
-            {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=imaginary*sqrt(Gamman);
-             if(do_phonon)md.sqrt_GammaP(i,j,k)(1*j1)=imaginary*sqrt(gammaP);
-             md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=imaginary*sqrt(gamma);}
+            {if(do_gobeyond)md.sqrt_Gamma(i,j,k)(j1)=imaginary*sqrt(Gamman);
+             if(do_phonon)md.sqrt_GammaP(i,j,k)(j1)=imaginary*sqrt(gammaP);
+             md.sqrt_Gamma_dip(i,j,k)(j1)=imaginary*sqrt(gamma);}
 	    else
 	    { //quasielastic line needs gamma=SMALL_QUASIELASTIC_ENERGY .... because Mijkl and therefore gamma have been set to 
               // wn/kT instead of wn-wn'=SMALL_QUASIELASTIC_ENERGY*wn/kT (in jjjpar.cpp -mdcalc routines)
 	      //set fix delta but keep sign
 	      if (nn[6]>0){
-  			     if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
-  			     if(do_phonon)md.sqrt_GammaP(i,j,k)(1*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gammaP);
-  			     md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
+  			     if(do_gobeyond)md.sqrt_Gamma(i,j,k)(j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
+  			     if(do_phonon)md.sqrt_GammaP(i,j,k)(j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gammaP);
+  			     md.sqrt_Gamma_dip(i,j,k)(j1)=sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
                            }
 	      else        {
-                             if(do_gobeyond)md.sqrt_Gamma(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
-                             if(do_phonon)md.sqrt_Gamma(i,j,k)(1*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gammaP);
-                             md.sqrt_Gamma_dip(i,j,k)(mqdim*j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
+                             if(do_gobeyond)md.sqrt_Gamma(i,j,k)(j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*Gamman);
+                             if(do_phonon)md.sqrt_Gamma(i,j,k)(j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gammaP);
+                             md.sqrt_Gamma_dip(i,j,k)(j1)=imaginary*sqrt(SMALL_QUASIELASTIC_ENERGY*gamma);
 	                     }
 	    }
 
@@ -302,9 +302,9 @@ int sm1,ssm1,in1,in2;
       if(intensitybey>0)
       {for(j=1;j<=mqdim;++j){
          if((*md.bUg[in2])(j,bb)==defval) (*md.bUg[in2])(j,bb) = conj(md.dMQs(i2,j2,k2)((bb-1)*mqdim+j))
-                                                                 * md.sqrt_Gamma(i2,j2,k2)(mqdim*bb);
+                                                                 * md.sqrt_Gamma(i2,j2,k2)(bb);
          for(i=1;i<=mqdim;++i){
-        if((*md.bgU[in1])(i,b)==defval)  (*md.bgU[in1])(i,b)  = conj(md.sqrt_Gamma(i1,j1,k1)(mqdim*b))
+        if((*md.bgU[in1])(i,b)==defval)  (*md.bgU[in1])(i,b)  = conj(md.sqrt_Gamma(i1,j1,k1)(b))
                                                                  * md.dMQs(i1,j1,k1)((b-1)*mqdim+i);
                        
          chibey(i,j)+= PI * (*md.bgU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.bUg[in2])(j,bb);         
@@ -312,9 +312,9 @@ int sm1,ssm1,in1,in2;
 
       for(j=1;j<=mqdim;++j){
         if((*md.Ug[in2])(j,bb)==defval) (*md.Ug[in2])(j,bb) = conj(md.dMQ_dips(i2,j2,k2)((bb-1)*mqdim+j))
-                                                                 * md.sqrt_Gamma_dip(i2,j2,k2)(mqdim*bb);
+                                                                 * md.sqrt_Gamma_dip(i2,j2,k2)(bb);
          for(i=1;i<=mqdim;++i){
-        if((*md.gU[in1])(i,b)==defval)  (*md.gU[in1])(i,b)  = conj(md.sqrt_Gamma_dip(i1,j1,k1)(mqdim*b))
+        if((*md.gU[in1])(i,b)==defval)  (*md.gU[in1])(i,b)  = conj(md.sqrt_Gamma_dip(i1,j1,k1)(b))
                                                                  * md.dMQ_dips(i1,j1,k1)((b-1)*mqdim+i);
                      
          chi(i,j)+= PI * (*md.gU[in1])(i,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.Ug[in2])(j,bb);         

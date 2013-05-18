@@ -737,11 +737,11 @@ if(do_verbose==1){fprintf(stdout,"#Transform J(q) matrix  with U...\n");}
 //                  fprintf(stdout,"#J(s=%i%i%i,s''=%i%i%i)=\n",i1,j1,k1,i2,j2,k2);
 //                  myPrintComplexMatrix(stdout,J.mati(s,ss)); 
 //                  fprintf(stdout,"#sqr(gamma_s=%i%i%i)=\n",i1,j1,k1);
-//                  myPrintComplexMatrix(stdout,md.sqrt_gamma(i1,j1,k1));
+//                  myPrintComplexVector(stdout,md.sqrt_gamma(i1,j1,k1));
 //                  fprintf(stdout,"#U(s=%i%i%i)=\n",i1,j1,k1);
 //                  myPrintComplexMatrix(stdout,md.U(i1,j1,k1));
 //                  fprintf(stdout,"#sqr(gamma_s=%i%i%i)=\n",i2,j2,k2);
-//                  myPrintComplexMatrix(stdout,md.sqrt_gamma(i2,j2,k2));
+//                  myPrintComplexVector(stdout,md.sqrt_gamma(i2,j2,k2));
 //                  fprintf(stdout,"#U(s=%i%i%i)=\n",i2,j2,k2);
 //                  myPrintComplexMatrix(stdout,md.U(i2,j2,k2));
 //                  fprintf(stdout,"#sqr(gamma_s) U(s)T* J(s=%i%i%i,s''=%i%i%i) U(s'') sqr(gamma_s'')*=\n",i1,j1,k1,i2,j2,k2);

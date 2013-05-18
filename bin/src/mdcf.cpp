@@ -138,9 +138,9 @@ void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
      dps[in(i,j,k)]= new ComplexVector(1,1*sumnt);
      dmqs[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
      dmq_dips[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
-     Pb[in(i,j,k)]= new ComplexVector(1,1*sumnt);
-     lb[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
-     lb_dip[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);
+     Pb[in(i,j,k)]= new ComplexVector(1,sumnt);
+     lb[in(i,j,k)]= new ComplexVector(1,sumnt);
+     lb_dip[in(i,j,k)]= new ComplexVector(1,sumnt);
      d[in(i,j,k)]= new Vector(1,sumnt);      
 }
 
@@ -228,9 +228,9 @@ mdcf::mdcf (const mdcf & p)
       dps[id]= new ComplexVector(1,1*sum((*nt[id])));*dps[id]=*p.dps[id];
       dmqs[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmqs[id]=*p.dmqs[id];
       dmq_dips[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmq_dips[id]=*p.dmq_dips[id];
-      Pb[id]= new ComplexVector(1,1*sum((*nt[id])));*Pb[id]=*p.Pb[id];
-      lb[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*lb[id]=*p.lb[id];
-      lb_dip[id]= new ComplexVector(1,mqdim*sum((*nt[id]))); *lb_dip[id]=*p.lb_dip[id];
+      Pb[id]= new ComplexVector(1,sum((*nt[id])));*Pb[id]=*p.Pb[id];
+      lb[id]= new ComplexVector(1,sum((*nt[id])));*lb[id]=*p.lb[id];
+      lb_dip[id]= new ComplexVector(1,sum((*nt[id]))); *lb_dip[id]=*p.lb_dip[id];
       d[id]= new Vector(1,sum((*nt[id])));*d[id]=*p.d[id];     
      } 
     }
