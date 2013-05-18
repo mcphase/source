@@ -81,7 +81,12 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
            nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
    case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
-   case 5:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module cluster not implemented, continuing ... \n");break;
+   case 5: nnt=cluster_dm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
+                                       // currently only 3 operators in cluster
+                                       // implemented which are Ma Mb Mc
+                                       // of (coupled) kramers doublet sipfs
+                                       // ... in future this has to be substituted by cluster_mcalc
+                                       // and operators of magnetic moments have to be handled specially
   default:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module ... not implemented, continuing ... \n");
           break;
    }
