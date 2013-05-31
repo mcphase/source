@@ -50,6 +50,7 @@ void errexit() // type info and error exit
 
 #ifdef _THREADS
 #define _THREADS_JSSS 1
+#define _THREADSREFINE 1
 // ----------------------------------------------------------------------------------- //
 // Defines to ease interchange between linux and windows thread codes...
 // ----------------------------------------------------------------------------------- //
@@ -86,6 +87,7 @@ typedef struct{
    ComplexMatrix **Emagmom;mfcf  **qem_real, **qem_imag;
    ComplexMatrix **Espin;mfcf  **qes_real, **qes_imag;
    ComplexMatrix **Eorbmom;mfcf  **qel_real, **qel_imag;
+   ComplexMatrix **ch;
    Matrix **pol;
    ComplexMatrix **Tau;
    Vector hkl, q;  jq **J;
@@ -97,8 +99,8 @@ typedef struct{
 class intcalcapr_input { public:
    int thread_id;
    int dimA, level, do_verbose,calc_rixs,do_phonon;
-   double En, intensity, intensitybey, intensityP, QQ;
-   double epsilon; int iE;
+   double  En,intensity, intensitybey, intensityP, QQ;
+   double epsilon; int iE,Estp;
    intcalcapr_input(int _dimA, int _tid, int _level, int _doverb, int _calcrixs,int _do_phonon, double _En)
    { 
       thread_id = _tid; dimA = _dimA; level = _level; do_verbose = _doverb;calc_rixs= _calcrixs, do_phonon=_do_phonon; En = _En;
@@ -374,7 +376,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   ComplexVector phonon_coeff1(1,PHONON_EV_DIM);
 
   //calculate single ion properties of every atom in magnetic unit cell
-  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents);
+  int nofEstps=0;if(do_Erefine)nofEstps=(int)((ini.emax-ini.emin)/(fabs(epsilon)/2)+1);
+  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents,nofEstps);
 
   
  if (do_readtrs==0)
@@ -460,7 +463,7 @@ noftransitions=0;
     if(do_Erefine==1)md.M(i,j,k)=0; // initialize matrix M
     md.sqrt_gamma(i,j,k)=0; // and sqrt(gamma^s) matrix sqrt_gamma
  }}}
-
+ 
 // determine the dimension of the dynamical matrix Ass' s,s'=1....dimA
 int dimA=0;
 for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
@@ -560,7 +563,6 @@ if(ini.calculate_orbmoment_oscillation){
 			    }
         (* inputpars.jjj[l]).transitionnumber=j1; // put back transition number for 1st transition
         for(m=1;m<=ini.nofcomponents;++m){
-        //md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*j1)=u1(m);
         md.U(i,j,k)(ini.nofcomponents*(j1-1)+m,j1)=u1(m);
         if(do_Erefine==1)for(n=1;n<=ini.nofcomponents;++n)md.M(i,j,k)(ini.nofcomponents*(j1-1)+m,ini.nofcomponents*(j1-1)+n)=Mijkl(m,n);
         }
@@ -648,7 +650,7 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
    {
       tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
       thrdat.J[ithread] = new jq(J); tin[ithread]->dimA=0; 
-      thrdat.md[ithread] = new mdcf(md);      
+      thrdat.md[ithread] = new mdcf(md,0);      
    } 
    int thrcount=0, ithread=0;
 #endif
@@ -904,11 +906,9 @@ if (do_jqfile==1){
              mfcf qel_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
              mfcf qel_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
 #endif
-  double diffint=0,diffintbey=0;
+  double DMDtotint=0,DMDtotintbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
-                  
-  diffint=0;diffintbey=0;
-  intcalc_ini(ini,inputpars,md,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl);
+  intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl,counter);
   qold=qijk;hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);
 
   if(qincr==-1){qincr=0;qold=qijk;
@@ -982,7 +982,7 @@ if (do_jqfile==1){
                      thrdat.chi[ithread] = new ComplexMatrix(1,dimchi,1,dimchi);
                      thrdat.chibey[ithread] = new ComplexMatrix(1,dimchibey,1,dimchibey);
                      thrdat.pol[ithread] = new Matrix(1,3,1,3);
-                     thrdat.md[ithread] = new mdcf(md);
+                     thrdat.md[ithread] = new mdcf(md,1);
 
                      thrdat.qee_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
                      thrdat.qee_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
@@ -1194,7 +1194,7 @@ if (do_jqfile==1){
                          } }
                        fprintf(foutqei,"\n");
                        if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
-                       if(En(i)>=ini.emin&&En(i)<=ini.emax){diffint+=ints(i);diffintbey+=intsbey(i);}
+                       if(En(i)>=ini.emin&&En(i)<=ini.emax){DMDtotint+=ints(i);DMDtotintbey+=intsbey(i);}
                       }
                      // printout eigenvectors only if evaluated during intensity calculation...
                   if (En(i)<=ini.emax&&En(i)>=ini.emin){ 
@@ -1261,7 +1261,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.qel_real; delete[] thrdat.qel_imag; 
 #endif
 if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
-               fprintf (foutdstot, "%4.4g %4.4g  %4.4g %4.4g %4.4g",hkl(1),hkl(2),hkl(3),diffint,diffintbey);
+               fprintf (foutdstot, "%4.4g %4.4g  %4.4g %4.4g %4.4g",hkl(1),hkl(2),hkl(3),DMDtotint,DMDtotintbey);
     sta+=dd*dd;sta_int+=dd_int*dd_int;
     sta_without_antipeaks+=dd_without_antipeaks*dd_without_antipeaks;
     sta_int_without_antipeaks+=dd_int_without_antipeaks*dd_int_without_antipeaks;
@@ -1279,38 +1279,37 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
             fprintf (fout1, "#displaytitle=(%4.4f %4.4f %4.4f) blue: DMD_Dipapprox red: DMD_exact green: Minv_Dipapprox\n",hkl(1),hkl(2),hkl(3));
             //fprintf (fout1,"#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] intensities(dip approx for FF) [barn/meV/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 		     if (do_Erefine==0) epsilon=(Max(En)-Min(En))/100;
-		     if (epsilon<=0) epsilon=0.1;
+		    // if (epsilon<=0) epsilon=0.1;
                   for (i=1;i<=dimA;++i)
 		    { 
 		     if (ints(i)>SMALLINT)  // draw triangles to show calculated intensity
-		      {for (E=0;E<=ints(i)/epsilon;E+=ints(i)/2/epsilon/10)
+		      {for (E=0;E<=ints(i)/fabs(epsilon);E+=ints(i)/2/fabs(epsilon)/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)-epsilon+E*epsilon*epsilon/ints(i)),myround(E),myround(En(i)));
+	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)-fabs(epsilon)+E*fabs(epsilon)*fabs(epsilon)/ints(i)),myround(E),myround(En(i)));
 		       }
-		       for (E=ints(i)/epsilon;E>=0;E-=ints(i)/2/epsilon/10)
+		       for (E=ints(i)/fabs(epsilon);E>=0;E-=ints(i)/2/fabs(epsilon)/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)+epsilon-E*epsilon*epsilon/ints(i)),myround(E),myround(En(i)));
+	                fprintf (fout1, " %4.4g %4.4g %4.4g 0\n",myround(En(i)+fabs(epsilon)-E*fabs(epsilon)*fabs(epsilon)/ints(i)),myround(E),myround(En(i)));
 		       }
                        fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	               fprintf (fout1, " %4.4g 0 %4.4g 0\n",myround(En(i)+epsilon),myround(En(i)));
+	               fprintf (fout1, " %4.4g 0 %4.4g 0\n",myround(En(i)+fabs(epsilon)),myround(En(i)));
 		      }
 		     if (intsbey(i)>SMALLINT)  // draw triangles to show calculated intensity
-		      {for (E=0;E<=intsbey(i)/epsilon;E+=intsbey(i)/2/epsilon/10)
+		      {for (E=0;E<=intsbey(i)/fabs(epsilon);E+=intsbey(i)/2/fabs(epsilon)/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g \n",myround(En(i)),myround(En(i)-epsilon+E*epsilon*epsilon/intsbey(i)),E);
+	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g \n",myround(En(i)),myround(En(i)-fabs(epsilon)+E*fabs(epsilon)*fabs(epsilon)/intsbey(i)),E);
 		       }
-		       for (E=intsbey(i)/epsilon;E>=0;E-=intsbey(i)/2/epsilon/10)
+		       for (E=intsbey(i)/fabs(epsilon);E>=0;E-=intsbey(i)/2/fabs(epsilon)/10)
                        {fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g\n",myround(En(i)),myround(En(i)+epsilon-E*epsilon*epsilon/intsbey(i)),E);
+	                fprintf (fout1, " %4.4g 0 %4.4g %4.4g\n",myround(En(i)),myround(En(i)+fabs(epsilon)-E*fabs(epsilon)*fabs(epsilon)/intsbey(i)),E);
 		       }
                        fprintf (fout1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	               fprintf (fout1, " %4.4g 0 %4.4g 0 \n",myround(En(i)),myround(En(i)+epsilon));
+	               fprintf (fout1, " %4.4g 0 %4.4g 0 \n",myround(En(i)),myround(En(i)+fabs(epsilon)));
 		      }
 		    }
 	  fclose(fout1);   
-	    
-		    
-                if(do_verbose==1){fprintf(stdout, "\n");}
+              if(do_verbose==1){fprintf(stdout, "\n");}
+
 //*********************************************************************		    
    // do refinement of energies by output of scattering cross section vs enrgy transfer if required
   if (do_Erefine==1&&!calc_rixs){double totint=0;
@@ -1320,77 +1319,91 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds1);
           fprintf (foutds1, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixri chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
           ComplexMatrix ch(1,md.nofcomponents,1,md.nofcomponents);
-   
 #ifdef _THREADSREFINE
+          ComplexMatrix *chpointer[nofEstps+1];
+          for(int Estp=0;Estp<nofEstps;Estp++){chpointer[Estp]=new ComplexMatrix(1,md.nofcomponents,1,md.nofcomponents);}
+          thrdat.ch = new ComplexMatrix*[NUM_THREADS];                  
           thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
-          {
-             tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
-             tin[ithread]->epsilon=epsilon; thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md);
+          {  tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
+             tin[ithread]->epsilon=fabs(epsilon); thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md,1);
+             thrdat.ch[ithread] = new ComplexMatrix(1,md.nofcomponents,1,md.nofcomponents);
           }
-          ithread=0; double oldE=0.;
-          Vector vIntensity(1,(int)((ini.emax-ini.emin)/(epsilon/2)+1)); int iE=1;
+          ithread=0; int oldEstp=0.;
+          Vector vIntensity(1,(int)((ini.emax-ini.emin)/(fabs(epsilon)/2)+1)); int iE=1;
 #endif
-		     double intensity;
+	     double intensity;
 #ifdef _THREADSREFINE
-                     tin[ithread]->En=ini.emin; tin[ithread]->iE=iE;
+                     tin[ithread]->Estp=0; tin[ithread]->iE=iE;
                      #if defined  (__linux__) || defined (__APPLE__)
-                     rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
+                     rc = pthread_create(&threads[ithread], &attr, intcalc_Erefine, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
                      if(rc) { printf("Error return code %i from erefine joining thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                      #else
-                     threads[ithread] = CreateThread(NULL, 0, intcalc, (void *) tin[ithread], 0, &tid[ithread]);
+                     threads[ithread] = CreateThread(NULL, 0, intcalc_Erefine, (void *) tin[ithread], 0, &tid[ithread]);
                      if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                      if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for erefine thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
                      CloseHandle(threads[ithread]);
                      #endif
                      intensity=tin[ithread]->intensity;
+                     ch=(*thrdat.ch[ithread]);
 #else
-		     intensity=intcalc(ch,dimA,ini.emin,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
+//		     intensity=intcalc(ch,dimA,ini.emin,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
+		     intensity=intcalc_Erefine(ch,0,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
 #endif
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds1, " %4.4g %4.4g   ",ini.emin,myround(intensity));
                      for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
                      fprintf(foutds1,"\n");
+
 #ifdef _THREADSREFINE
-                     tin[ithread]->En=ini.emax; tin[ithread]->iE=iE;
+                     tin[ithread]->Estp=nofEstps-1; tin[ithread]->iE=iE;
                      #if defined  (__linux__) || defined (__APPLE__)
-                     rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
+                     rc = pthread_create(&threads[ithread], &attr, intcalc_Erefine, (void *) tin[ithread]); rc = pthread_join(threads[ithread], &status); 
                      if(rc) { printf("Error return code %i from erefine thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                      #else
-                     threads[ithread] = CreateThread(NULL, 0, intcalc, (void *) tin[ithread], 0, &tid[ithread]);
+                     threads[ithread] = CreateThread(NULL, 0, intcalc_Erefine, (void *) tin[ithread], 0, &tid[ithread]);
                      if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                      if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for erefine thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
                      CloseHandle(threads[ithread]); 
                     #endif
                      intensity=tin[ithread]->intensity;
+                     ch=(*thrdat.ch[ithread]);
 #else
-		     intensity=intcalc(ch,dimA,ini.emax,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
+//		     intensity=intcalc(ch,dimA,ini.emax,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
+		     intensity=intcalc_Erefine(ch,nofEstps-1,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
 #endif
-                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+                    fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds1, " %4.4g %4.4g ",ini.emax,myround(intensity));
                      for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
                      fprintf(foutds1,"\n");
 	  fclose(foutds1);
 #ifdef _THREADSREFINE
-	  for(E=ini.emin;E<=ini.emax;E+=(epsilon/2)*NUM_THREADS)
+	  for(int Estp=0;Estp<nofEstps;Estp+=NUM_THREADS)
 #else
-	  for(E=ini.emin;E<=ini.emax;E+=epsilon/2)
+	  for(int Estp=0;Estp<nofEstps;++Estp)
 #endif
-	   {
+	   {E=ini.emin+Estp*fabs(epsilon)/2;
 #ifndef _THREADSREFINE
-		     intensity=intcalc(ch,dimA,E,ini,inputpars,J,q,hkl,md,do_verbose,epsilon);   
-		     totint+=intensity*epsilon/2;
+//		    intensity=intcalc(ch,dimA,E,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
+		    intensity=intcalc_Erefine(ch,Estp,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
+		     totint+=intensity*fabs(epsilon)/2;
+          sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
+                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	             fprintf (foutds1, " %4.4g %4.4g ",myround(E),myround(intensity));
+                     for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
+                     fprintf(foutds1,"\n");
+          fclose(foutds1);	   
 #else
-                   oldE=E;
+                   oldEstp=Estp;
                      for(ithread=0; ithread<NUM_THREADS; ithread++)
                      {
-                        E=oldE+(epsilon/2)*ithread; if(E>ini.emax) break;
-                        tin[ithread]->En=E; tin[ithread]->iE=iE++;
+                        Estp=oldEstp+ithread; if(Estp>=nofEstps) break;
+                        tin[ithread]->Estp=Estp; tin[ithread]->iE=iE++;
                         #if defined  (__linux__) || defined (__APPLE__)
-                        rc = pthread_create(&threads[ithread], &attr, intcalc, (void *) tin[ithread]);
+                        rc = pthread_create(&threads[ithread], &attr, intcalc_Erefine, (void *) tin[ithread]);
                         if(rc) { printf("Error return code %i from erefine thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                         #else
-                        threads[ithread] = CreateThread(NULL, 0, intcalc, (void *) tin[ithread], 0, &tid[ithread]);
+                        threads[ithread] = CreateThread(NULL, 0, intcalc_Erefine, (void *) tin[ithread], 0, &tid[ithread]);
                         if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                         #endif
                         num_threads_started = ithread+1;
@@ -1403,20 +1416,20 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects erfine\n"); exit(EXIT_FAILURE); }
                      for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);}
                         #endif
-                     for(ithread=0; ithread<NUM_THREADS; ithread++) vIntensity(tin[ithread]->iE) = tin[ithread]->intensity;
-                     E=oldE;
+                     sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
+                      for(ithread=0; ithread<NUM_THREADS; ithread++) {vIntensity(tin[ithread]->iE) = tin[ithread]->intensity;
+                                                                     (*chpointer[tin[ithread]->iE-1])  =(*thrdat.ch[ithread]); 
+                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+	              fprintf (foutds1, " %4.4g %4.4g\n ",myround(ini.emin+tin[ithread]->Estp*fabs(epsilon)/2),myround(tin[ithread]->intensity));
+                                                                      }
+                     fclose(foutds1);	   
+                     Estp=oldEstp;
 	   }
-	  iE=1; for(E=ini.emin;E<=ini.emax;E+=epsilon/2)
-	   {
-                     intensity = vIntensity(iE++); totint+=intensity*epsilon/2;
+	  iE=1; for(int Estp=0;Estp<nofEstps;Estp++)
+	   {E=ini.emin+Estp*fabs(epsilon)/2;
+                     ch=(*chpointer[iE-1]);
+                     intensity = vIntensity(iE++); totint+=intensity*fabs(epsilon)/2;
 #endif
-
-          sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
-                     fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	             fprintf (foutds1, " %4.4g %4.4g ",myround(E),myround(intensity));
-                     for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
-                     fprintf(foutds1,"\n");
-          fclose(foutds1);	   
                      ini.print_usrdefcols(foutds,qijk,qincr);
                      fprintf (foutds, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds, " %4.4g %4.4g ",myround(E),myround(intensity));
@@ -1427,8 +1440,10 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
           {
              delete thrdat.md[ithread];delete thrdat.J[ithread]; delete tin[ithread];
+             delete thrdat.ch[ithread];
           }
-          
+          delete[] thrdat.ch; 
+          for(int Estp=0;Estp<nofEstps;Estp++)delete chpointer[Estp];
 #endif
 	             fprintf (foutdstot, " %4.4g ",totint);
                      }  // do_Erefine
@@ -1444,7 +1459,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
    {  delete thrdat.ini[ithread]; 
       delete thrdat.inputpars[ithread]; 
    }
-   delete[] thrdat.inputpars; delete[] thrdat.md; delete[] thrdat.ini;delete[] thrdat.J; 
+   delete[] thrdat.inputpars; delete[] thrdat.md; delete[] thrdat.ini;delete[] thrdat.J;
 #endif
 
                                      

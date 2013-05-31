@@ -1166,10 +1166,12 @@ void ionpars::popnr_diff(ComplexVector& dMQ,int &i,int &j,ComplexMatrix & est,fl
      if(pr==1){
       printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
       for(int l=1;l<=dMQ.Hi();++l)printf(" |<%i|%s%i-<%s%i>|%i>|^2=%4.4g",i,n,l,n,l,j,abs(dMQ(l))*abs(dMQ(l)));
-      printf(" n%i=%4.4g\n",i,imag(est(0,i)));}
+      printf(" n%i=%4.4g\n",i,imag(est(0,i)));
+      }
     dMQ*=sqrt(imag(est(0,i))/KB/fabs(T));
    }
 }
+// ----------------------------------------------------------------------
 
 void ionpars::getijdelta_from_transitionnumber(int & i,int & j,float & delta,int & dj,int & tn,int & pr,ComplexMatrix &ests)
 {int  k=0;for(i=1;i<=dj;++i){for(j=i;j<=dj;++j){++k;if(k==tn)break;}if(k==tn)break;} 
@@ -1184,7 +1186,7 @@ void ionpars::getijdelta_from_transitionnumber(int & i,int & j,float & delta,int
            }
 }
 
-
+// ----------------------------------------------------------------------
 // calculates the transition matrix element <i|O-<O>|j>sqrt((ni-nj))
   complex<double> ionpars::observable1(int & i,int & j,float & delta,Matrix & zr,Matrix & zi,
                          double & T,ComplexMatrix&est,int & pr,const char *optype,Matrix & O)

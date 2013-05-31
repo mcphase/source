@@ -28,6 +28,7 @@ class mdcf
    Vector ** d;
    IntVector ** nt; // vector to store number of transitions for each atom
    ComplexMatrix ** eigenstates; // matrix to store the eigenstates of ions
+   ComplexMatrix *** chi0s; // matrix to store the chi0 of ions
    int iv[4];
    void errexit();
 
@@ -36,8 +37,10 @@ class mdcf
     int nofatoms,nofcomponents;
     int in(int i,int j, int k) const; // indexing functions
     int ind(int i,int j, int k,int l); 
-   
+    int inM(int i,int j, int k,int l); 
+    int nofEstps;
     int ncel;
+    int storage; // indicates if storage except nt should be created !
     ComplexMatrix **Ug,**gU, **bUg,**bgU,**PUg,**PgU; // Cache for U*sqrt(gamma) and sqrt(gamma)*U values, and beyond equiv.
     
     ComplexMatrix & M(int i,int j,int k); // returns pointer to  matrix M(ijk) 
@@ -58,6 +61,7 @@ class mdcf
     ComplexVector & sqrt_Gamma_dip(int i,int j,int k) const; // returns pointer to eigenvaluevector (ijk) 
     ComplexVector & sqrt_Gamma_dipi(int in); // returns pointer to eigenvalue vector i
     ComplexMatrix & est(int i, int j, int k, int l); // returns pointer to eigenstate matrix for atom ijkl
+    ComplexMatrix ** chi0pointer(int i, int j, int k, int l); // returns pointer to chi0matrices for atom ijkl
     void est_ini(int i, int j, int k, int l,ComplexMatrix & M); // initialize est
 
     Vector & delta(int i,int j,int k); // returns pointer to matrix (ijk) 
@@ -73,12 +77,12 @@ class mdcf
     int baseindex_max(int i, int j, int k) const;
     int noft(int i, int j, int k, int l) const; // returns number of transitions of ion l in cryst unit ijk
    
-mdcf (int n1,int n2,int n3,int n,int nc);	//konstruktor
+mdcf (int n1,int n2,int n3,int n,int nc,int nstps);	//konstruktor
 
 // initialisierung 
     void set_noftransitions (int i, int j, int k, IntVector & notr,int mqd);
 
-     mdcf (const mdcf & spins);	// kopier-konstruktor
+     mdcf (const mdcf & spins,int store);	// kopier-konstruktor
    
 ~mdcf ();		//destruktor
 

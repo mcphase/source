@@ -110,9 +110,11 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
             fprintf(foutqei,"f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
            fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");writeheader(inputpars,foutdstot);
-           fprintf (foutdstot, "#!Total Scattering Cross Section (obtained by DMD method) in energy range [emin=%g ; emax=%g]\n",ini.emin,ini.emax);
+           fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n",ini.emin,ini.emax);
            ini.print_usrdefcolhead(foutdstot);
-           fprintf(foutdstot,"h k l  dsigma_mag_dip/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+           fprintf(foutdstot,"h k l   Itot-DMDdip Itot-DMDbey ");
+           if(do_Erefine)fprintf(foutdstot,"Itot-integrated from mcdisp.dsigma ");
+           fprintf(foutdstot," ... Itot is given as dsigma_/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.]f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
             if (do_Erefine==1){
                        fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");

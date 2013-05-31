@@ -495,6 +495,66 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
   }
 }
 
+/****************************************************************************/
+// this function calculates series of single ion susceptibility matrices for 
+// different energies
+   // output:returns 0 on success
+   //        the Matrices chi0pointer[1....nofstps] must exist and will be filled with values
+   //        ...... the contribution of transition transitionnumber is added to these matrices
+   // input: emin est nofstps define energies, eps is the imaginary part of the energy
+   //        Q       the Q vector in 1/A
+   //        qcounter is a counter telling which q vector in the list is calculated
+   //                  sign(qcounter) <0 indicates that chi0c matrices should be cleared
+   //        delta ... sign determines if energy gain or loss term is added
+/****************************************************************************/
+int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int & nofstps, double & epsilon, Vector & Q, 
+                  int qcounter,float & delta,double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,
+                   int i1,int j1,int k1,int l1)
+{ // for the moment do nothing module specific but use existing module function to calculate internal
+  // well defined chi0
+  // ... in future we may then do something more clever by putting here values from a file which is created by external
+  // programs such as bfk ... this is triggered by epsilon <0
+ 
+ if(fabs(qcounter)<2)// only do something for first q vector (all others will have the same chi0 [currently not q dependence in chi0]
+ {if(qcounter<0){for(int i=0;i<nofstps;++i)(*chi0pointer[i])=0; // clear matrices
+  }else{
+  if(epsilon>0){ // use internal chi0
+  ComplexVector u1(1,nofcomponents);float dd;
+  ComplexMatrix M(1,nofcomponents,1,nofcomponents);
+  du1calc(T,Hxc,Hext,u1,dd,ests);  
+  complex<double> eps(epsilon*3,0),cc,imag(0,1),d(dd,0);
+  if(dd>SMALL_QUASIELASTIC_ENERGY)
+  { if(delta<0){ //treat correctly energy gain of neutron
+                u1=u1.Conjugate();d=-d;
+                M=-u1^u1;
+               } else {
+                M=u1^u1;
+               }
+  for(int i=0;i<nofstps;++i){
+     complex<double> z(emin+i*estp,epsilon);    
+     cc=1.0/(d-z);(*chi0pointer[i])+=cc*M;       
+                            } //i
+  }else{
+     //quasielastic intensity ...  artificially we introduce a splitting epsilon !!! compare Jensen 91 p 158
+     // factor 0.5 because every transition is counted as half positive and half negative energy...
+   M=u1^u1;
+   for(int i=0;i<nofstps;++i){
+     complex<double> z(emin+i*estp,epsilon);    
+     //  cc=eps/(eps-z);(*chi0pointer[i])+=cc*M;
+     cc=0.5*eps/(eps-z);(*chi0pointer[i])+=cc*M;
+     cc=0.5*eps/(eps+z);(*chi0pointer[i])+=cc*M.Transpose();
+                            } //i
+  } 
+  }else{ // load externally chi0 from bfk0.res type of file
+   // 1. output levels.cef
+   // 2. create bfk.par
+   // 3. start bfk and create bfk0.res
+   // 4. read in chi0 from bfk0.res
+
+  }  
+ }} //qcounter
+ return 0; // success
+}
 
 /****************************************************************************/
 // initialises matrix est and returns in it eigenvalues, boltzmann population and eigenstates matrix parameters of ion

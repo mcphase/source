@@ -99,6 +99,18 @@ public:
    int  du1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,ComplexMatrix & ests);
    int transitionnumber; // the transition associated with the ion (important if there are more in the single ion spectrum)
 
+   // calculates series of single ion susceptibility matrices for different energies 
+   // output:returns 0 on success
+   //        the Matrices chi0pointer[1....nofstps] must exist and will be filled with values
+   //        ...... the contribution of transition transitionnumber is added to these matrices
+   // input: emin est nofstps define energies, eps is the imaginary part of the energy
+   //        Q       the Q vector in 1/A
+   //        qcounter is a counter telling which q vector in the list is calculated
+   //                  sign(qcounter) <0 indicates that chi0c matrices should be cleared and nothing calculated
+   //        delta ... sign determines if energy gain or loss term is added
+   int chi0(ComplexMatrix ** chi0pointer,double & emin, double estp, int & nofstps, double & eps,Vector & Q, 
+            int qcounter,float & delta, double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,int i1,int j1,int k1,int l1);
+
    ComplexMatrix est; // eigenstates
    ComplexMatrix Icalc_parstorage; // paramter storage for Icalc
    // returns eigenvalues and eigenstates matrix parameters of ion (if possible)
