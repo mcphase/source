@@ -5,7 +5,7 @@ include bin/src/Makefile.common
 cfdir = bin/cf1ion_module
 icdir = bin/ic1ion_module
 phdir = bin/phonon_module
-bfkdir = bin/bfk
+bfkdir = bin/bfk_src
 mcpdir = bin/src
 vecdir = bin/src/vector
 funcdir = bin/src/functions

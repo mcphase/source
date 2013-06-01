@@ -23,13 +23,17 @@ print STDOUT << "EOF";
  meaning take mcphas.j, generate all neighbors within sphere of 23.3A 
  and put them into makenn.j,the output values are sorted by ascending distance
 
- in interaction columns put the classical dipole interaction: this is 
+ in interaction columns put the classical dipole interaction (meV): this is 
  done assuming the operator sequence 
   I1=Sa I2=La I3=Sb I4=Lb I5=Sc I6=Lc   for sipf files with gJ=0
   I1=Ja I2=Jb I3=Jc    for sipf files with gJ<>0
+ (S=spin,L=orbital momentum, J=total angular momentum)
 
-
- Note that in order to use makenn you have to set up a 
+ formula for classical dipole interaction tensor:
+ 
+ Jalphabeta(R)=(mu0/4pi)(gJ muB)^2 (3 Ralpha Rbeta- delte_alphabeta R^2)/R^5
+ 
+  Note that in order to use makenn you have to set up a 
  working  mcphas.j file with the crystal structure. 
 
 EOF
@@ -407,6 +411,13 @@ sub getinteraction {
   else
 
   {
+# muB=0.927405e-23 Ampere m^2
+# mu0/4 pi=1e-7 kgm s^-2 Amp^-2
+# m^3=10^30Angstroem^3
+# 1meV= 16.0218e-23 J
+#
+#c=(mu0/4pi)(gJ muB)^2=0.92740^2  Angstroem^3 meV/16.0218
+
   my $c = $gJthis * $gJ * .927405 * .927405 / 16.02183;  #[meV A^3]
   $jaa = $c * (3 * $rx * $rx -$r *$r) /$r /$r /$r /$r /$r;
   $jbb = $c * (3 * $ry * $ry -$r *$r) /$r /$r /$r /$r /$r;
