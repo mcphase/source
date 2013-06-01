@@ -546,11 +546,41 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
                             } //i
   } 
   }else{ // load externally chi0 from bfk0.res type of file
+   if(module_type!=4||Hxc.Hi()!=3){fprintf(stderr,"Error mcdisp -r <0 cannot load external chi0: not module so1ion or mf dimension !=3\n");exit(EXIT_FAILURE);}
+   printf("running singleion and bfk and loading chi0 from bfk0.res\n");
    // 1. output levels.cef
+   char command[MAXNOFCHARINLINE],instr[MAXNOFCHARINLINE];
+   sprintf(command,"singleion -r %s %g %g %g %g  %g %g %g",sipffilename,T,Hext(1),Hext(2),Hext(3),Hxc(1),Hxc(2),Hxc(3));
+   system(command);
    // 2. create bfk.par
+   FILE *file;
+   file=fopen_errchk("./results/bfk.par","w");
+   fprintf(file,"# Parameter file  bfk.par\n"
+                "#\n"
+                "#!emin=%g\n"
+                "#!emax=%g\n"
+                "#!Npoints=%i\n"
+                "#!E=50\n"
+                "#!k1= 1. 0. 0. \n"
+                "#!k2= 1. 0. 0.\n"
+                "#!formfactorname=results/formfactor.out\n"
+                "#!scatfilename=hklE.dat\n",emin,emin+nofstps*estp,nofstps);
+   fclose(file);
    // 3. start bfk and create bfk0.res
+   // currently coupling constant to conduction electrons  is HARD CODED in here 0.01 in next line !!!
+   sprintf(command,"bfk 0.01 %g 0 1 results/%s.levels.cef results/bfk.par",T,sipffilename);
+   system(command);
    // 4. read in chi0 from bfk0.res
-
+    file=fopen_errchk("results/bfk0.res","r");
+   instr[0]='#'; float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE; 
+   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,file);}
+    for(int i=0;i<nofstps;++i)
+      {inputline(file,nn);if(fabs(nn[1]-(emin+i*estp))>SMALL){fprintf(stderr,"Error mcdisp -r reading bfk0.res energies not consistent\n");exit(EXIT_FAILURE);}
+       inputline(file,nn);(*chi0pointer[i])(1,1)=nn[1];(*chi0pointer[i])(1,2)=nn[2];(*chi0pointer[i])(1,3)=nn[3];
+       inputline(file,nn);(*chi0pointer[i])(2,1)=nn[1];(*chi0pointer[i])(2,2)=nn[2];(*chi0pointer[i])(2,3)=nn[3];
+       inputline(file,nn);(*chi0pointer[i])(3,1)=nn[1];(*chi0pointer[i])(3,2)=nn[2];(*chi0pointer[i])(3,3)=nn[3];
+      }
+   fclose(file);
   }  
  }} //qcounter
  return 0; // success

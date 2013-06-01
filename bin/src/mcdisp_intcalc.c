@@ -49,7 +49,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
                                                //mf ... exchange field vector of atom s
 
   if(do_Erefine) // clear chi0 matrices (put sign of qcounter negative
-  {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, epsilon/2,md.nofEstps,epsilon,
+  {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2),md.nofEstps,epsilon,
                   qijk,-qcounter,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
 
   jmin=0;
@@ -69,7 +69,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
       if(do_verbose==1)(*inputpars.jjj[l]).transitionnumber=-tn;
 
   if(do_Erefine) // fill chi0 matrices 
-  {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, epsilon/2, md.nofEstps,epsilon,
+  {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2), md.nofEstps,epsilon,
                   qijk,qcounter,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
 
   if(calc_rixs)// RIXS
