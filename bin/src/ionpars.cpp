@@ -156,7 +156,8 @@ int perlp=1;//by default try perlparse
         extract(instr,"SIGMA0i",s0i);
         extract(instr,"SIGMA1i",s1i);
         extract(instr,"SIGMA2i",s2i);
- } fclose(cf_file);
+ } //fclose(cf_file);
+ fseek(cf_file,0,SEEK_SET);
 
   double Jxr[31*31],Jxi[31*31],Jyr[31*31],Jyi[31*31],Jzr[31*31],Jzi[31*31];
   double  mo22sr[31*31],mo22si[31*31];
@@ -577,7 +578,7 @@ if(fabs(s0r)+fabs(s1r)+fabs(s2r)+fabs(s0i)+fabs(s1i)+fabs(s2i)>SMALL_DEVIATION)
   Hcf=0;if(Hcf==(double)0.0){for(l=1;l<=NOF_OLM_MATRICES;++l){Hcf+=Blm(l)*(*Olm[l]);}}
 
 // for compatibility
- cf_file=fopen_errchk(cffilename,"r");
+ //cf_file=fopen_errchk(cffilename,"r");
 }
 
 void ionpars::save(FILE * file) // save ion parameters to file 

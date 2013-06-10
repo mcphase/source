@@ -44,6 +44,7 @@ clean:
 	cd $(icdir) && $(MAKE) cleanall
 	cd $(phdir) && $(MAKE) cleanall
 	cd $(mcpdir) && $(MAKE) clean
+	cd $(phdir) && $(MAKE) clean
 	rm -vf bin/addj.exe bin/charges.exe bin/coq2jjj.exe \
 		bin/mcdispit.exe bin/singleion.exe bin/cfield.exe \
 		bin/cond.exe bin/jjj2j.exe bin/mcphasit.exe bin/spins.exe \
@@ -51,8 +52,8 @@ clean:
                 bin/mcdiff.exe bin/cf1ion_module/cfield.dll \
                 bin/ic1ion.exe bin/icf1ion.exe bin/so1ion.exe \
                 bin/ic1ion_module/ic1ion.dll \
-                bin/fediff.exe bin/mf2fe.exe \               
-                bin/formfactor.exe bin/radwavfunc.exe
+                bin/fediff.exe bin/mf2fe.exe \
+		bin/formfactor.exe bin/radwavfunc.exe
 	rm -vf bin/addj bin/charges bin/coq2jjj \
 		bin/mcdispit bin/singleion bin/cfield \
 		bin/cond bin/jjj2j bin/mcphasit bin/spins \

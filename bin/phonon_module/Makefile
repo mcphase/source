@@ -4,6 +4,8 @@ vpath %.h  ../include
 vpath %.hpp ../include
 vpath %.o  ../src/vector
 
+include ../src/Makefile.common
+
 INCLDIRS =      -I. \
 		-I../include \
 		-I/usr/include/readline \
@@ -20,11 +22,12 @@ VECOBJS= matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
 		chgeigen.o matlapl.o moment.o matexph.o matsqth.o magicsquare.o
 
 phonon.so: phonon.o  $(VECOBJS)
-	g++  -Wall -o phonon.so $^ -shared -static-libgcc -static-libgfortran
+	${CCC}  -Wall -o phonon.so $^ -shared -static-libgcc -static-libgfortran
 
 phonon.o: phonon.c
-	g++  -Wall -fPIC -c  -o phonon.o phonon.c  $(INCLDIRS)
+	${CCC}  -Wall -fPIC -c  -o phonon.o phonon.c  $(INCLDIRS)
 
+cleanall:
 clean:
 	rm -vf phonon.o
 

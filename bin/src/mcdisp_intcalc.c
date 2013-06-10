@@ -501,7 +501,7 @@ return intensity;
 //**************************************************************************/
 #ifdef _THREADSREFINE
 #if defined  (__linux__) || defined (__APPLE__)
-void *intcalc(void *input)
+void *intcalc_Erefine(void *input)
 #else
 DWORD WINAPI intcalc_Erefine(void *input)
 #endif

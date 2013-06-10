@@ -109,6 +109,7 @@ ifdef cross32
 CC=i686-w64-mingw32-gcc -m32 -pipe $(ARCHFLAG)
 CCC=i686-w64-mingw32-g++ -m32 -pipe $(ARCHFLAG)
 CYGFLAGS=
+LFLAGS+= -static-libgcc -static-libstdc++
 endif
 endif
 
