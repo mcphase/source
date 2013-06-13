@@ -836,10 +836,9 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
    int k[] = {0,1, 1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    sMat<double> Upq,Umq;  //if(n>(2*_l+1)) n = 4*_l+2-n;
-   if(xyz>0)
-   {std::cout << "Calculating the expectation values of the spin density operator\n";}
-   else
-   {std::cout << "Calculating the expectation values of the orbital moment density operator \n";}
+   char xyzstr[] = "xyz";
+   if(xyz>0) { std::cout << "Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
+   else      { std::cout << "Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
 
    // Rest of the runs only calculate the new matrix elements
    for(iJ=0; iJ<(_num_op>6?_num_op:6); iJ++)
