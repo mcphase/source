@@ -88,9 +88,14 @@ class icmfmat
         iceig&VE,int xyz, double T,                //   <V|orbmomdensitycoeff_of_Zlm|V>exp(-beta*T)
         std::vector<std::vector<double> >&matel,
         bool save_matrices);
-      void u1(std::vector<double>&u1, std::vector<double>&iu1,    // Calculates the vector u1 = <i|Ja-<Ja>|j>
-        iceig&V, double T, int i, int j, int p,    // * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
-	float&d, bool save_matrices);
+      void u1(std::vector<double> &u1,             // Calculates the vector u1 = <i|Ja-<Ja>|j>
+        std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
+        int i, int j, int p, float &d,
+        bool save_matrices);
+      void dod_u1(int xyz, std::vector<double>&u1, // Calculates the vector u1 = <i|M(q)-<M(q)>|j>
+        std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
+        int i, int j, int p, float &d, 
+        bool save_matrices);
       #ifdef JIJCONV
       std::vector<double> jijconv;                 // Conversion from Stevens/Wybourne norm of Jij pars
       #endif

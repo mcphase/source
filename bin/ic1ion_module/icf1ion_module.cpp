@@ -331,12 +331,6 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
       else                                              // Lx, Ly or Lz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
             rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2)/2.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(J2p,2,J2,L2,S2,L2);
-//    for (int J2p=J2min; J2p<=J2max; J2p+=2) 
-//    {
-//       Lrm = pow(-1.,(S2+L2+J2)/2.+1.)  * sqrt((L2+1.)*(J2+1.)*(J2p+1.)*(L2/2.)*(L2/2.+1.)) * sixj(L2,J2,S2,J2p,L2,2);
-//       Srm = pow(-1.,(S2+L2+J2p)/2.+1.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(S2,J2,L2,J2p,S2,2);
-//       rm(J2-J2min,J2p-J2min)  = -( Lrm + GS*Srm );
-//    }
    }
 
    sMat<double> mu(ns,ns);
@@ -371,9 +365,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
          if(fabs(elm)>SMALL) mu(i,j)=elm; 
       }
    else { std::cerr << "icf_mumat: Error, index > 5 or index < 0.\n"; exit(EXIT_FAILURE); }
-// {
-//    mu(i,j) = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],2*q,mJ2[j]);
-// }
+
    return mu;
 }
 
@@ -480,11 +472,11 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
          for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
             F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
-#ifdef _G77 
+            #ifdef _G77 
             F77NAME(zdotc)(&zme, &Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-#else
+            #else
             zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-#endif
+            #endif
             me[ind_j] = zme.r;
             // For first run calculate also the partition function and internal energy
             if(iJ==J.Lo()) 
@@ -550,12 +542,6 @@ __declspec(dllexport)
    icpars pars; 
    const char *filename = sipffilename[0];
    ic_parseinput(filename,pars);
-
-   // Prints out single ion parameters and filename.
-// std::cout << "#ic1ion: Single ion parameter file: " << filename << "\n";
-// std::cout << "#ic1ion: Read in parameters (in " << pars.e_units << "): F2=" << pars.F[1] << ",F4=" << pars.F[2];
-// if(pars.l==F) std::cout << ",F6=" << pars.F[3]; std::cout << ",xi=" << pars.xi << "\n";
-// std::cout << "#ic1ion: \t" << pars.B.cfparsout(", ") << "in " << pars.B.units() << "\n";
 
    // Converts the Jij parameters if necessary
    std::vector<double> vgjmbH(J.Hi()+1,0.); 
@@ -789,7 +775,6 @@ __declspec(dllexport)
    (*est) = ComplexMatrix(0,Hsz,0,Hsz);
 
    // Diagonalises the Hamiltonian H = Hcf + sum_a(gjmbH_a*Ja)
-// iceig VE; if(Hcfi.isempty()) VE.calc(Hcfi); else VE.calc(Hcf,Hcfi);
    double *vE = new double[Hsz], *rV=0; complexdouble *zV=0; int info; 
    if(Hcfi.isempty()) {
       rV = new double[Hsz*Hsz]; info = ic_diag(Hcf,rV,vE); }
@@ -1089,47 +1074,6 @@ __declspec(dllexport)
    return nt;
 }
 
-/*
-// --------------------------------------------------------------------------------------------------------------- //
-// Loads a Q_q matrix from file if the file exists and has the same parameters n,l,Jvec
-// --------------------------------------------------------------------------------------------------------------- //
-bool get_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vector<double> &Jvec)
-{
-   int i, j, mn, r, c, sz, ml;
-   std::vector<double> mJv(6,0.); 
-   char filename[] = "results/mcphas.Qq"; filename[16]=q+120;               // 120==x, 121==y, 122==z
-   std::fstream FILEIN; FILEIN.open(filename, std::fstream::in);
-   if(FILEIN.fail()==true) return false;
-   FILEIN >> mn >> ml; for(i=0; i<6; i++) FILEIN >> mJv[i]; FILEIN >> r >> c;
-   if(mn!=n || ml!=(int)l) return false; for(i=0; i<6; i++) if(fabs(mJv[i]-Jvec[i])>1e-4) return false;
-   Qq.clear(); sMat<double> emptymat(r,c); double Qt;
-   for(i=0; i<6; i++) 
-   {
-      Qq.push_back(emptymat); FILEIN >> sz; for(j=0; j<sz; j++) {  FILEIN >> r >> c >> Qt; Qq[i](r,c) = Qt; }
-   }
-   return true;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Saves a Q_q matrix to a temporary file in the results/ directory
-// --------------------------------------------------------------------------------------------------------------- //
-void save_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vector<double> &Jvec)
-{
-   int i,j,sz;
-   std::vector< std::vector<int> > nz;
-   char filename[] = "results/mcphas.Qq"; filename[16]=q+120;               // 120==x, 121==y, 122==z
-   std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out);
-   FILEOUT << n << " " << (int)l << " "; for(i=0; i<6; i++) FILEOUT << Jvec[i] << " "; FILEOUT << "\n";
-   FILEOUT << Qq[0].nr() << " " << Qq[0].nc() << " ";
-   for(i=0; i<6; i++)
-   {
-      nz = Qq[i].find(); sz = nz.size(); FILEOUT << sz << "\n";
-      for(j=0; j<sz; j++) FILEOUT << nz[j][0] << " " << nz[j][1] << " " << Qq[i](nz[j][0],nz[j][1]) << "\n";
-   }
-   FILEOUT.close();
-}
-*/
-
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the a(K,K') matrix - the routine returns a true if the matrix is real, and false if it is imaginary
 //    The matrix is returned in the argument aKK
@@ -1144,39 +1088,6 @@ bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
    // Determines number and angular momentum quantum numbers of basis states
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
    for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
-
-   // Loads a previously save matrix if it exists
-/* char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
-   nstr[0] = (l==F?102:100); if(n<10) { nstr[1] = n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = n+38; nstr[3] = 0; }
-   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 65;   // 65 is ASCII for "A", 100=="d" and 102=="f"
-   nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-   aKK = mm_gin(filename); if(!aKK.isempty()) return 1;
-
-   bool df;
-   if(l==D) df = true;
-   else if(l==F) df = false;
-   else {  std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; return false; }
-
-   int np = (n==1)?n:(n-1); 
-   fconf confp(np,l);
-   fconf conf(n,l);
-   int num_states = (int)conf.states.size(), ns=0;
-   int i,j,k,kk,v,vp,isz,jsz,iJ,jJ;
-   int j2min,j2max,j2pmin,j2pmax;
-   int L2,L2p,S2,S2p,J2,J2p,L2b,S2b;
-   std::vector<int> indexJstart,indexJstop;
-   std::vector<cfpls> cfpsi,cfpsj;
-   double rmLS,sumcfp;
-
-   // Determines the L S J values for each matrix elements and the index of each J-J' block
-   for(i=0; i<num_states; i++)
-   {
-      j2min = abs(abs(conf.states[i].L)*2-conf.states[i].S2); j2max = abs(conf.states[i].L)*2+conf.states[i].S2;
-      indexJstart.push_back(ns+1);
-      for(j=j2min; j<=j2max; j+=2) ns++;
-      indexJstop.push_back(ns);
-   }
-*/
 
    aKK.zero(ns,ns);
 
@@ -1241,58 +1152,6 @@ bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
    for(int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       aKK(i,j) = pow(-1.,(J2[j]+S2+L2+L2)/2.+l) * sqrt(J2[j]+1.) * sixj(J2[j],2*Kp,J2[i],L2,S2,L2) * rmLS;
 
-   // Calculates the matrix elements at particular |J,M>, |J',M'>
-/* for(i=0; i<num_states; i++)
-   {
-      L2 = abs(conf.states[i].L)*2; S2 = conf.states[i].S2; v = conf.states[i].v;
-      if(n!=1) 
-      {
-         if(df) cfpsi = racah_parents(n,v,S2,conf.states[i].L); 
-         else   cfpsi = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L);
-      }
-
-      for(j=0; j<num_states; j++)
-      {
-         L2p = abs(conf.states[j].L)*2; S2p = conf.states[j].S2; vp = conf.states[j].v;
-
-         if(S2!=S2p) continue;                                  // delta_SS'
-         if(abs(L2-L2p)>(2*Kp)) continue;                       // Triangular condition on 6j symbol in 3.6.9
-
-	 if(n==1) 
-            rmLS = -redmat;
-         else
-         {
-            if(df) cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); 
-            else   cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);
-
-            sumcfp = 0.; isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
-            for(k=0; k<isz; k++)
-               for(kk=0; kk<jsz; kk++)
-                  if(cfpsi[k].ind==cfpsj[kk].ind) {
-                     L2b = 2*abs(confp.states[cfpsi[k].ind].L); S2b = confp.states[cfpsi[k].ind].S2;
-                     sumcfp += cfpsi[k].cfp*cfpsj[kk].cfp * pow(-1.,L2b/2) * sixj(L2p,2*Kp,L2,2*l,L2b,2*l); }
-            rmLS = sqrt( (L2+1.)*(L2p+1.) ) * n * sumcfp * redmat;
-         }
-
-         // Caculate the J-dependent reduced matrix elements 
-         j2min = abs(L2-S2); j2max = L2+S2; j2pmin = abs(L2p-S2p); j2pmax = L2p+S2p;
-         iJ=indexJstart[i]-1; jJ=indexJstart[j]-1;
-         for(J2=j2min; J2<=j2max; J2+=2)
-         {
-            for(J2p=j2pmin; J2p<=j2pmax; J2p+=2)
-            {
-               if(abs(J2-J2p)<=(2*Kp))                          // Triangular condition on 6j symbol in 3.6.9
-                  aKK(iJ,jJ) = pow(-1.,(J2p+S2+L2+L2p)/2.+l) * sqrt(J2p+1.) * sixj(J2p,2*Kp,J2,L2,S2,L2p) * rmLS;
-               jJ++;
-            }
-            iJ++; jJ=indexJstart[j]-1;
-         }
-      }
-   }
-*/
-// std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out); FILEOUT.close();
-// rmzeros(aKK); mm_gout(aKK,filename); return 1;
-
    rmzeros(aKK); return 1;
 }
 
@@ -1310,32 +1169,6 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
    for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
 
-/* // Loads a previously save matrix if it exists
-   char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
-   nstr[0] = (l==F?102:100); if(n<10) { nstr[1] = n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = n+38; nstr[3] = 0; }
-   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 67;   // 67 is ASCII for "C", 100=="d" and 102=="f"
-   nstr[1] = K+48; nstr[2] = Kp+48; nstr[3] = 0; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-   cKK = mm_gin(filename); if(!cKK.isempty()) return 1;
-
-   bool df;
-   if(l==D) df = true;
-   else if(l==F) df = false;
-   else { std::cerr << "racah_mumat(): Only d- and f- configurations are implemented.\n"; return false; }
-   int np = (n==1)?n:(n-1);
-   fconf confp(np,l);
-   fconf conf(n,l);
-   int num_states = (int)conf.states.size(), ns=0;
-   int i,j,k,kk,j2min,j2max,j2pmin,j2pmax;
-   int L2,L2p,S2,S2p,J2,J2p;
-   std::vector<cfpls> cfpsi,cfpsj;
-   std::vector<int> indexJstart,indexJstop,irm;
-   sMat<double> mJmat_i(1,1);
-   sMat<double> rmJ;
-   std::vector< std::vector< sMat<double> > > mJmat;
-   std::vector< sMat<double> > mJmat_row;
-   double rmLS,sumcfp;
-   int v,vp,isz,jsz,L2b,S2b,iJ,jJ; 
-
    // Eqn. 3.6.11
    //
    //                  K      1/2                            1/2      1/2+S'+L'
@@ -1346,15 +1179,6 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
    //              /\   ( 0 0 0 )  { S  L  J  }    ---                        { s  Sb s  }  { l  Lb l  }
    //                                               t
 
-   // Determines the L S J values for each matrix elements and the index of each J-J' block
-   for(i=0; i<num_states; i++)
-   {
-      j2min = abs(abs(conf.states[i].L)*2-conf.states[i].S2); j2max = abs(conf.states[i].L)*2+conf.states[i].S2;
-      indexJstart.push_back(ns+1);
-      for(j=j2min; j<=j2max; j+=2) { ns++; irm.push_back(i); }
-      indexJstop.push_back(ns);
-   }
-*/
    cKK.zero(ns,ns);
 
    // The triangular conditions require that K<=2l and K=even (from 3j), and that (K-1)<=K'<=(K+1) (from 9j)
@@ -1392,62 +1216,7 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
    for(int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       if(abs(J2[i]-J2[j])<=(2*Kp))                          // Triangular condition on 9j symbol in 3.6.11
          cKK(i,j) = sqrt(J2[j]+1.) * ninej(2,2*K,2*Kp,S2,L2,J2[j],S2,L2,J2[i]) * rmLS;
-/*
-   rmJ.zero(num_states,num_states);
-   // Calculates the matrix elements at particular |J,M>, |J',M'>
-   for(i=0; i<num_states; i++)
-   {
-      L2 = abs(conf.states[i].L)*2; S2 = conf.states[i].S2; v = conf.states[i].v;
-      if(n!=1) 
-      {
-         if(df) cfpsi = racah_parents(n,v,S2,conf.states[i].L); 
-         else   cfpsi = racah_parents(n,v,conf.states[i].U,S2,conf.states[i].L); 
-      }
 
-      for(j=0; j<num_states; j++)
-      {
-         L2p = abs(conf.states[j].L)*2; S2p = conf.states[j].S2; vp = conf.states[j].v;
-
-         if(abs(S2-S2p)>2)     continue;                        // Triangular condition on 6j symbol in 3.6.11
-         if(abs(L2-L2p)>(2*K)) continue;                        // Triangular condition on 6j symbol in 3.6.11
-
-	 if(n==1)
-	    rmLS = redmat;
-	 else
-	 {
-            if(df) cfpsj = racah_parents(n,vp,S2p,conf.states[j].L); 
-            else   cfpsj = racah_parents(n,vp,conf.states[j].U,S2p,conf.states[j].L);
-
-            sumcfp = 0.; isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
-            for(k=0; k<isz; k++)
-               for(kk=0; kk<jsz; kk++)
-                  if(cfpsi[k].ind==cfpsj[kk].ind) {
-                     L2b = 2*abs(confp.states[cfpsi[k].ind].L); S2b = confp.states[cfpsi[k].ind].S2;
-                     sumcfp += cfpsi[k].cfp*cfpsj[kk].cfp * pow(-1.,(1+S2p+L2p+L2b+S2b)/2.) 
-                                  * sixj(S2,2,S2p,1,S2b,1)*sixj(L2,2*K,L2p,2*l,L2b,2*l); }
-
-            rmLS = sqrt( (S2+1.)*(S2p+1.)*(L2+1.)*(L2p+1.) ) * n * sumcfp * redmat;
-         }
-
-         // Caculate the J-dependent reduced matrix elements 
-         j2min = abs(L2-S2); j2max = L2+S2; j2pmin = abs(L2p-S2p); j2pmax = L2p+S2p;
-         iJ=indexJstart[i]-1; jJ=indexJstart[j]-1;
-         for(J2=j2min; J2<=j2max; J2+=2)
-         {
-            for(J2p=j2pmin; J2p<=j2pmax; J2p+=2)
-            {
-               if(abs(J2-J2p)<=(2*Kp))                          // Triangular condition on 9j symbol in 3.6.11
-                  cKK(iJ,jJ) = sqrt(J2p+1.) * ninej(2,2*K,2*Kp,S2p,L2p,J2p,S2,L2,J2) * rmLS;
-               jJ++;
-            }
-            iJ++; jJ=indexJstart[j]-1;
-         }
-      }
-   }
-
-   std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out); FILEOUT.close();
-   rmzeros(cKK); mm_gout(cKK,filename); return 1;
-*/
    rmzeros(cKK); return 1;
 }
 
@@ -1469,15 +1238,6 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
    bool iA,ic;
    complexdouble Ykq; double Tj,Tj2;
 
-/* int k,minJ2,maxJ2,valJ,valJ_i,valJ_j;
-   int imJ_i,imJ_j,J2,J2p,Jz2,Jz2p;
-   std::vector< std::vector<int> > nz;
-
-   sMat<double> mJmat_i(1,1);
-   std::vector< std::vector< sMat<double> > > mJmat;
-   std::vector< sMat<double> > mJmat_row;
-   std::vector<int> iJst,iJen;
-*/
    // Determines number of basis states
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2; for (int J2=J2min; J2<=J2max; J2+=2) ns+=J2+1; 
    int ins=0; std::vector<int> J2(ns), Jz2(ns), irm(ns);
@@ -1485,177 +1245,6 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
         J2[ins]=iJ2; Jz2[ins]=imJ2; irm[ins]=(iJ2-J2min)/2; ins++; }
 
    Qmat.zero(ns,ns); Qq.clear(); for(i=0; i<6; i++) Qq.push_back(Qmat);
-
-/* // Initialises a cell array of matrices of q- and Jz- dependent matrices so that we don't have to calculate
-   //    each (2J+1)x(2J'+1) matrix more than once, for each J and J' values.
-   valJ = (J2max-J2min)/2;
-   for(i=0; i<=valJ; i++) mJmat_row.push_back(mJmat_i);
-   for(i=0; i<=valJ; i++) mJmat.push_back(mJmat_row);
-*/
-   for(Kp=0; Kp<=(2*l+1); Kp++)                                 // K may take even values between [0,2l]; K' odd values [1,(2l+1)]
-   {
-      if(Kp%2==1)                                               // Calculates the matrices for the first term with A+B
-      {
-         iA = icf_loveseyAKK(Akk,Kp-1,Kp,n,l); if(iA) Akk*= (J[Kp-1]+J[Kp+1])*((2*Kp+1)/(Kp+1.)); else { std::cerr << errormsg; return; }
-         ic = icf_loveseyCKK(ckk,Kp-1,Kp,n,l); if(ic) Bkk = ckk*J[Kp-1];                          else { std::cerr << errormsg; return; }
-         ic = icf_loveseyCKK(ckk,Kp+1,Kp,n,l); if(ic) Bkk+= ckk*(J[Kp+1]*sqrt(Kp/(Kp+1.)));       else { std::cerr << errormsg; return; }
-         Bkk *= ((Kp+1.)/(2*Kp+1.)) * ( (2*Kp+1)/(Kp+1.) ); K = Kp-1; ckk = Bkk+Akk;
-      }
-      else                                                      // Calculates the matrices for the second term with just B
-      {
-         ic = icf_loveseyCKK(ckk,Kp,Kp,n,l); if(ic) ckk *= J[Kp]; else { std::cerr << errormsg; return; } K = Kp;
-      }
-
-      for(Q=-K; Q<=K; Q++)
-      {
-         Qp = -(Q-q); if(Qp<-Kp || Qp>Kp) continue;             // 3j symbol requires Q+Q'-q = 0
- 
-         Ykq = spherical_harmonics(K,Q,theta,phi); 
-         Tj = pow(-1.,K-Kp+q) * sqrt(3) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q);
-         if((fabs(Ykq.r)<DBL_EPSILON && fabs(Ykq.i)<DBL_EPSILON) || fabs(Tj)<DBL_EPSILON) continue;
-
-         Qmat.zero(ns,ns); QLmat.zero(ns,ns); QSmat.zero(ns,ns);
-
-/*       nz = ckk.find();
-         for(i=0; i<(int)nz.size(); i++)                        // The matrices above already contain the dependence on |vULSJ>
-         {                                                      //    we now use the W-E theorem to add the Jz, Q, dependence
-            J2 = conf.states[nz[i][0]].J2;
-            J2p = conf.states[nz[i][1]].J2;
-            valJ_i = (J2-minJ2)/2; valJ_j = (J2p-minJ2)/2;
-            if(mJmat[valJ_i][valJ_j].isempty())
-            {
-               mJmat[valJ_i][valJ_j].zero(J2+1,J2p+1);
-               for(imJ_i=0; imJ_i<=J2; imJ_i++)
-               {
-                  Jz2 = imJ_i*2-J2;
-                  for(imJ_j=0; imJ_j<=J2p; imJ_j++)
-                  {
-                     Jz2p = imJ_j*2-J2p; Tj2 = threej(2*Kp,J2p,J2,2*Qp,Jz2p,-Jz2);
-                     if(fabs(Tj2)>DBL_EPSILON) mJmat[valJ_i][valJ_j](imJ_i,imJ_j) = pow(-1.,Kp+(-J2p+Jz2)/2.) * sqrt(J2+1.) * Tj2;
-                  }
-               }
-            }
-            Qmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*ckk(nz[i][0],nz[i][1]));
-            if(Kp%2==1)
-            {
-               QLmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Akk(nz[i][0],nz[i][1]));
-               QSmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Bkk(nz[i][0],nz[i][1]));
-            }
-         }
-         for(i=0; i<=valJ; i++) for(j=0; j<=valJ; j++) mJmat[i][j].clear();
-*/
-         for(i=0; i<ns; i++) for(j=0; j<ns; j++)
-         {
-            Tj2 = threej(2*Kp,J2[j],J2[i],2*Qp,Jz2[j],-Jz2[i]); if(fabs(Tj2)<DBL_EPSILON) continue;
-            Tj2 *= pow(-1.,Kp+(-J2[j]+Jz2[i])/2.) * sqrt(J2[i]+1.);
-            if(Kp%2==1)
-            {
-               QLmat(i,j) = Tj2 * Akk(irm[i],irm[j]);
-               QSmat(i,j) = Tj2 * Bkk(irm[i],irm[j]);
-            }
-            Qmat(i,j) = Tj2 * ckk(irm[i],irm[j]);
-         }
-
-         Qq[0] += Qmat*(Ykq.r*Tj); Qq[1] += Qmat*(Ykq.i*Tj);
-         if(Kp%2==1) { Qq[2] += QSmat*(Ykq.r*Tj); Qq[3] += QSmat*(Ykq.i*Tj);  Qq[4] += QLmat*(Ykq.r*Tj); Qq[5] += QLmat*(Ykq.i*Tj); }
-         else        { Qq[2] += Qmat*(Ykq.r*Tj); Qq[3] += Qmat*(Ykq.i*Tj); }
-      }
-   }
-
-   for(i=0; i<6; i++) { rmzeros(Qq[i]); Qq[i] *= sqrt(4*PI); }
-
-/* 
-   // Determines number and angular momentum quantum numbers of basis states
-   J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
-   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
-
-   sMat<double> aKK(ns,ns), cKK(ns,ns);
-
-   // Selection rules on K for a(K,K')
-   if(K<0  || K>(2*abs(l))   || (K%2)!=0)      return 1;        // Eqn 4.2.2
-   if(Kp<1 || Kp>=(2*abs(l)) || ((Kp+1)%2)!=0) return 1;        // Eqn 4.2.3
-   if(K!=(Kp+1) && K!=(Kp-1))                  return 1;        // Eqn 4.2.4  (first 3j symbol, needs 1+K+K' even)
-   // The triangular conditions require that K<=2l and K=even (from 3j), and that (K-1)<=K'<=(K+1) (from 9j) for c(K,K')
-   if(K%2!=0 || abs(Kp-K)>1) return 1;
-
-   // Calculate the non-state dependent part of the matrix elements
-   double AKKl = pow(-1.,l+1.) * sqrt( (2.*l+3.)*(l+1.)/(2.*l+1.) ) * threej(2*l,2*Kp,2*(l+1),0,0,0) * sixj(2,2*Kp,2*Kp,2*l,2*(l+1),2*l);
-   double Aredmat = sqrt(2) * (2*l+1)*(2*l+1) * (2*Kp+1.) * sqrt(2*K+1.) * threej(2,2*K,2*Kp,0,0,0) * sixj(2,2,2,2*Kp,2*K,2*Kp) * AKKl;
-   double Credmat = sqrt(1./2) * (2*l+1.) * sqrt(2*K+1.) * (2*Kp+1.) * threej(2*l,2*K,2*l,0,0,0); 
-
-   if(fabs(Aredmat)>DBL_EPSILON || fabs(Credmat)>DBL_EPSILON)
-   {
-      // Determines the factor i^(K'-1) - because K' is always odd, matrix is always real
-      if((Kp-1)%4==0) Aredmat = -Aredmat;
-      // Determines the factor i^K - because K is always even, matrix is always real
-      if(K%4==2) Credmat = -Credmat;
-
-      double ArmLS=0., Asumcfp=0., CrmLS=0., Csumcfp=0.;
-      if (n>1)
-      {
-         fconf confp(n-1,l);
-         std::vector<cfpls> cfps;
-         switch(l) {
-            case P:  cfps = racah_parents(n,gs.S2,gs.L); break;
-            case D:  cfps = racah_parents(n,gs.v,gs.S2,gs.L); break;
-            default: cfps = racah_parents(n,gs.v,gs.U,gs.S2,gs.L);  }
-         int sz = (int)cfps.size(), pL2, pS2;
-         for(int k=0; k<sz; k++)
-         {
-            pS2 = confp.states[cfps[k].ind].S2; pL2 = abs(confp.states[cfps[k].ind].L)*2;
-            Asumcfp += cfps[k].cfp*cfps[k].cfp * pow(-1.,pL2/2) * sixj(L2,2*Kp,L2,2*l,pL2,2*l);
-            Csumcfp += cfps[k].cfp*cfps[k].cfp * pow(-1.,(1+S2+L2+pL2+pS2)/2.) * sixj(S2,2,S2,1,pS2,1)*sixj(L2,2*K,L2,2*l,pL2,2*l); 
-         }
-         ArmLS = (L2+1.) * n * Asumcfp * Aredmat; CrmLS = (L2+1.)*(S2+1.) * n * sumcfp * redmat;
-      }
-      else  // Single electron
-      {
-         ArmLS = -redmat; CrmLS = redmat;
-      }
-
-      for(int i=0; i<ns; i++) for(int j=0; j<ns; j++)
-      {
-         if(abs(J2[i]-J2[j])<=(2*Kp))                          // Triangular condition on 9j symbol in 3.6.11
-            cKK(i,j) = sqrt(J2[j]+1.) * ninej(2,2*K,2*Kp,S2,L2,J2[j],S2,L2,J2[i]) * CrmLS; 
-         aKK(i,j) = pow(-1.,(J2[j]+S2+L2+L2)/2.+l) * sqrt(J2[j]+1.) * sixj(J2[j],2*Kp,J2[i],L2,S2,L2) * ArmLS;
-      }
-   }
-
-   std::vector<int> mJ2, irm; J2.clear(); mJ2.reserve(100); irm.reserve(100); J2.reserve(100);
-   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) for (int imJ2=-iJ2; imJ2<=iJ2; imJ2+=2) {
-      J2.push_back(iJ2); mJ2.push_back(imJ2); irm.push_back(iJ2-J2min); }
-*/
-/*
-   int i,j,ns=getdim(n,l);                                      // Number of states = ^{4l+2}C_{n}
-
-   std::string errormsg("lovesey_Qq(): Unable to calculate the A(K,K') or B(K,K') matrix\n");
-   double theta = Jvec[0], phi = Jvec[1], J[]={Jvec[2],0,Jvec[3],0,Jvec[4],0,Jvec[5]};
-   int K,Kp,Q,Qp;
-   sMat<double> Akk,Bkk,ckk,Qmat,QLmat,QSmat;
-   Qmat.zero(ns,ns); Qq.clear(); for(i=0; i<6; i++) Qq.push_back(Qmat);
-
-   bool iA,ic;
-   complexdouble Ykq; double Tj,Tj2;
-
-   int k,minJ2,maxJ2,valJ,valJ_i,valJ_j;
-   int imJ_i,imJ_j,J2,J2p,Jz2,Jz2p;
-   std::vector< std::vector<int> > nz;
-
-   sMat<double> mJmat_i(1,1);
-   std::vector< std::vector< sMat<double> > > mJmat;
-   std::vector< sMat<double> > mJmat_row;
-   std::vector<int> iJst,iJen;
-   fconf conf(n,0,l); minJ2=99; maxJ2=0; k=0;
-   for(i=0; i<(int)conf.states.size(); i++) {
-      j = conf.states[i].J2; if(j<minJ2) minJ2 = j; if(j>maxJ2) maxJ2 = j; iJst.push_back(k+1); k+=j+1; iJen.push_back(k); }
-
-   // Initialises a cell array of matrices of q- and Jz- dependent matrices so that we don't have to calculate
-   //    each (2J+1)x(2J'+1) matrix more than once, for each J and J' values.
-   valJ = (maxJ2-minJ2)/2;
-   for(i=0; i<=valJ; i++)
-      mJmat_row.push_back(mJmat_i);
-   for(i=0; i<=valJ; i++)
-      mJmat.push_back(mJmat_row);
 
    // The scattering operator is given by: (eqn. 3.7.9 and 3.7.11 for the orbital and spin parts respectively)
    //
@@ -1689,14 +1278,14 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
    {
       if(Kp%2==1)                                               // Calculates the matrices for the first term with A+B
       {
-         iA = lovesey_aKK(Akk,Kp-1,Kp,n,l); if(iA) Akk*= (J[Kp-1]+J[Kp+1])*((2*Kp+1)/(Kp+1.)); else { std::cerr << errormsg; return; }
-         ic = lovesey_cKK(ckk,Kp-1,Kp,n,l); if(ic) Bkk = ckk*J[Kp-1];                          else { std::cerr << errormsg; return; }
-         ic = lovesey_cKK(ckk,Kp+1,Kp,n,l); if(ic) Bkk+= ckk*(J[Kp+1]*sqrt(Kp/(Kp+1.)));       else { std::cerr << errormsg; return; }
+         iA = icf_loveseyAKK(Akk,Kp-1,Kp,n,l); if(iA) Akk*= (J[Kp-1]+J[Kp+1])*((2*Kp+1)/(Kp+1.)); else { std::cerr << errormsg; return; }
+         ic = icf_loveseyCKK(ckk,Kp-1,Kp,n,l); if(ic) Bkk = ckk*J[Kp-1];                          else { std::cerr << errormsg; return; }
+         ic = icf_loveseyCKK(ckk,Kp+1,Kp,n,l); if(ic) Bkk+= ckk*(J[Kp+1]*sqrt(Kp/(Kp+1.)));       else { std::cerr << errormsg; return; }
          Bkk *= ((Kp+1.)/(2*Kp+1.)) * ( (2*Kp+1)/(Kp+1.) ); K = Kp-1; ckk = Bkk+Akk;
       }
       else                                                      // Calculates the matrices for the second term with just B
       {
-         ic = lovesey_cKK(ckk,Kp,Kp,n,l); if(ic) ckk *= J[Kp]; else { std::cerr << errormsg; return; } K = Kp;
+         ic = icf_loveseyCKK(ckk,Kp,Kp,n,l); if(ic) ckk *= J[Kp]; else { std::cerr << errormsg; return; } K = Kp;
       }
 
       for(Q=-K; Q<=K; Q++)
@@ -1709,33 +1298,18 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
 
          Qmat.zero(ns,ns); QLmat.zero(ns,ns); QSmat.zero(ns,ns);
 
-         nz = ckk.find();
-         for(i=0; i<(int)nz.size(); i++)                        // The matrices above already contain the dependence on |vULSJ>
-         {                                                      //    we now use the W-E theorem to add the Jz, Q, dependence
-            J2 = conf.states[nz[i][0]].J2;
-            J2p = conf.states[nz[i][1]].J2;
-            valJ_i = (J2-minJ2)/2; valJ_j = (J2p-minJ2)/2;
-            if(mJmat[valJ_i][valJ_j].isempty())
-            {
-               mJmat[valJ_i][valJ_j].zero(J2+1,J2p+1);
-               for(imJ_i=0; imJ_i<=J2; imJ_i++)
-               {
-                  Jz2 = imJ_i*2-J2;
-                  for(imJ_j=0; imJ_j<=J2p; imJ_j++)
-                  {
-                     Jz2p = imJ_j*2-J2p; Tj2 = threej(2*Kp,J2p,J2,2*Qp,Jz2p,-Jz2);
-                     if(fabs(Tj2)>DBL_EPSILON) mJmat[valJ_i][valJ_j](imJ_i,imJ_j) = pow(-1.,Kp+(-J2p+Jz2)/2.) * sqrt(J2+1.) * Tj2;
-                  }
-               }
-            }
-            Qmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*ckk(nz[i][0],nz[i][1]));
+         // The matrices above already contain the dependence on |vULSJ> - we now use the W-E theorem to add the Jz, Q, dependence
+         for(i=0; i<ns; i++) for(j=0; j<ns; j++)
+         {
+            Tj2 = threej(2*Kp,J2[j],J2[i],2*Qp,Jz2[j],-Jz2[i]); if(fabs(Tj2)<DBL_EPSILON) continue;
+            Tj2 *= pow(-1.,Kp+(-J2[j]+Jz2[i])/2.) * sqrt(J2[i]+1.);
             if(Kp%2==1)
             {
-               QLmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Akk(nz[i][0],nz[i][1]));
-               QSmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*Bkk(nz[i][0],nz[i][1]));
+               QLmat(i,j) = Tj2 * Akk(irm[i],irm[j]);
+               QSmat(i,j) = Tj2 * Bkk(irm[i],irm[j]);
             }
+            Qmat(i,j) = Tj2 * ckk(irm[i],irm[j]);
          }
-         for(i=0; i<=valJ; i++) for(j=0; j<=valJ; j++) mJmat[i][j].clear();
 
          Qq[0] += Qmat*(Ykq.r*Tj); Qq[1] += Qmat*(Ykq.i*Tj);
          if(Kp%2==1) { Qq[2] += QSmat*(Ykq.r*Tj); Qq[3] += QSmat*(Ykq.i*Tj);  Qq[4] += QLmat*(Ykq.r*Tj); Qq[5] += QLmat*(Ykq.i*Tj); }
@@ -1743,7 +1317,8 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
       }
    }
 
-   for(i=0; i<6; i++) { rmzeros(Qq[i]); Qq[i] *= sqrt(4*PI); } */
+   for(i=0; i<6; i++) { rmzeros(Qq[i]); Qq[i] *= sqrt(4*PI); }
+
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -1782,25 +1357,7 @@ __declspec(dllexport)
    }
    icf_loveseyQq(Qmat[2],0,n,l,Jvec);
 
-/* if(!get_Qq(Qmat[0],0,n,l,Jvec) || !get_Qq(Qmat[1],1,n,l,Jvec))            // Qmat[0]==Qx, Qmat[1]==Qy, Qmat[2]==Qz
-   {
-      lovesey_Qq(Qm,-1,n,l,Jvec); lovesey_Qq(Qp,1,n,l,Jvec);
-      for(i=0; i<6; i++)  
-      {
-         Qmat[0].push_back( (Qp[i]-Qm[i]) * (-1/sqrt(2.)) );                 // Qx = -1/sqrt(2) * (Q_{+1} - Q_{-1})
-         if(i%2==0) Qmat[1].push_back( (Qp[i+1]+Qm[i+1]) * (-1/sqrt(2.)) );  // real(Qy) = i^2/sqrt(2) * imag(Q_{+1}+Q_{-1})
-         else       Qmat[1].push_back( (Qp[i-1]+Qm[i-1]) *  (1/sqrt(2.)) );  // imag(Qy) = i/sqrt(2) * real(Q_{+1}+Q_{-1})
-      }
-      save_Qq(Qmat[0],0,n,l,Jvec); save_Qq(Qmat[1],1,n,l,Jvec); 
-   }
-
-   if(!get_Qq(Qmat[2],2,n,l,Jvec))                                           // Loads the Q_q matrix if prev. saved
-   {
-      lovesey_Qq(Qmat[2],0,n,l,Jvec);                                        // Calcs. scattering operator matrix Q_q
-      save_Qq(Qmat[2],2,n,l,Jvec);
-  // myPrintMatrix(stdout,Qmat[2][0],Hsz-1);
-   }
-*/ for(q=0; q<3; q++)
+   for(q=0; q<3; q++)
    {
       zQmat = zmat2f(Qmat[q][0],Qmat[q][1]);
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
@@ -1813,12 +1370,12 @@ __declspec(dllexport)
          #else
          zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
          #endif
-//         printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
+//       printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
          zMqr += (-2.)*zme.r*est[0][i].imag(); zMqi += (-2.)*zme.i*est[0][i].imag(); if(q==0) Z += est[0][i].imag();
       }
       free(zQmat); free(zt); Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
    }
-//   printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
+// printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -1887,28 +1444,7 @@ __declspec(dllexport)
       else       Qmat[1].push_back( (Qp[i-1]+Qm[i-1]) *  (1./sqrt(2.)) );      // imag(Qy) = i/sqrt(2) * real(Q_{+1}+Q_{-1})
    }
    icf_loveseyQq(Qmat[2],0,n,l,Jvec);
-/*
-   if(!get_Qq(Qq[0],0,n,l,Jvec) || !get_Qq(Qq[1],1,n,l,Jvec))                  // Qq[0]==Qx, Qq[1]==Qy, Qq[2]==Qz
-   {
-      lovesey_Qq(Qm1,-1,n,l,Jvec); lovesey_Qq(Qp1,1,n,l,Jvec);
-      for(i=0; i<6; i++)  
-      {
-         Qq[0].push_back( (Qp1[i]-Qm1[i]) * (-1.0/sqrt(2.0)) );                // Qx = -1/sqrt(2) * (Q_{+1} - Q_{-1})
-         if(i%2==0) Qq[1].push_back( (Qp1[i+1]+Qm1[i+1]) * (-1.0/sqrt(2.0)) ); // real(Qy) = i^2/sqrt(2) * imag(Q_{+1}+Q_{-1})
-         else       Qq[1].push_back( (Qp1[i-1]+Qm1[i-1]) *  (1.0/sqrt(2.0)) ); // imag(Qy) = i/sqrt(2) * real(Q_{+1}+Q_{-1})
-      }
-      save_Qq(Qq[0],0,n,l,Jvec); save_Qq(Qq[1],1,n,l,Jvec); 
-    //myPrintMatrix(stdout,Qq[0][2],Hsz-1);
-    //myPrintMatrix(stdout,Qq[0][3],Hsz-1);
-    //myPrintMatrix(stdout,Qq[0][4],Hsz-1);
-    //myPrintMatrix(stdout,Qq[0][5],Hsz-1);
-   }
-   if(!get_Qq(Qq[2],2,n,l,Jvec))                                               // Loads the Q_q matrix if prev. saved
-   {
-      lovesey_Qq(Qq[2],0,n,l,Jvec);                                            // Calcs. scattering operator matrix Q_q
-      save_Qq(Qq[2],2,n,l,Jvec);
-   }
-*/
+
    for(i=0; i<Hsz; i++) { 
       therm = exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)); Z += therm; if(therm<DBL_EPSILON) break; }
 
@@ -1920,29 +1456,29 @@ __declspec(dllexport)
       zQmat = zmat2f(Qmat[q][2],Qmat[q][3]);    // Spin part
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
+      #ifdef _G77
       F77NAME(zdotc)(&zij[2*q+1], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       F77NAME(zdotc)(&zji[2*q+1], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-#else
+      #else
       zij[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-#endif
+      #endif
       free(zQmat); free(zt);
 
       zQmat = zmat2f(Qmat[q][4],Qmat[q][5]);    // orbital part
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
+      #ifdef _G77
       F77NAME(zdotc)(&zij[2*q+2], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       F77NAME(zdotc)(&zji[2*q+2], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-#else
+      #else
       zij[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-#endif
+      #endif
       if(i==j)                                  // subtract thermal expectation value from zij=zii
       {                                         // MR120120 ... reintroduced
          complexdouble expQ;double thexp=0;
@@ -1950,11 +1486,11 @@ __declspec(dllexport)
          {
             therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
             F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
+            #ifdef _G77
             F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-#else
+            #else
             expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-#endif
+            #endif
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
@@ -2062,30 +1598,7 @@ bool icf_balcarMSq(sMat<double> &MSq, int q, int K, int Q, int n, orbital l)
    // Since for icf1ion, we only calculated for the lowest LS-multiplet, S==S' and L==L'
 
    if(K%2!=0 || K>(2*abs(l)) || Q<-K || Q>K || q<-1 || q>1) return 1;
-/*
-   int i,j;
-   int k,minJ2,maxJ2,valJ,valJ_i,valJ_j;
-   int imJ_i,imJ_j,J2,J2p,Jz2,Jz2p;
-   std::vector<int> iJst,iJen;
-   fconf conf(n,0,l); minJ2=99; maxJ2=0; k=0;
-   for(i=0; i<(int)conf.states.size(); i++) {
-      j = conf.states[i].J2; if(j<minJ2) minJ2 = j; if(j>maxJ2) maxJ2 = j; iJst.push_back(k+1); k+=j+1; iJen.push_back(k); }
 
-   bool ic; 
-   double Tj,Tj2,phase = 1.; / *if(q%2==1) phase = -1.;* / if(K%4==2) phase = -phase;
-   std::vector< std::vector<int> > nz;
-
-   // Initialises a cell array of matrices of q- and Jz- dependent matrices so that we don't have to calculate
-   //    each (2J+1)x(2J'+1) matrix more than once, for each J and J' values.
-   sMat<double> mJmat_i(1,1);
-   std::vector< std::vector< sMat<double> > > mJmat;
-   std::vector< sMat<double> > mJmat_row;
-   valJ = (maxJ2-minJ2)/2;
-   for(i=0; i<=valJ; i++)
-      mJmat_row.push_back(mJmat_i);
-   for(i=0; i<=valJ; i++)
-      mJmat.push_back(mJmat_row);
-*/
    // Simplifying, using the C(K,K') coeficients previously calculated in icf_loveseyCKK()  (Balcar+Lovesey Book, eqn 3.8.5)
    //
    //          S                    -2uB    ---  K     2    ---   [             M+q-J'      1/2  -K                           ]
@@ -2113,40 +1626,7 @@ bool icf_balcarMSq(sMat<double> &MSq, int q, int K, int Q, int n, orbital l)
       }
       MSq += Qmat;
    }
-/*
-   for(Kp=(K-1); Kp<=(K+1); Kp++)
-   {
-      if(Qp<-Kp || Qp>Kp) continue; Qmat.zero(ns,ns);
-      Tj = -phase * sqrt(3/PI) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q);
-      ic = lovesey_cKK(ckk,K,Kp,n,l); if(ic) ckk *= Tj; else { std::cerr << errormsg; return Qmat; }
-      
-      nz = ckk.find();
-      for(i=0; i<(int)nz.size(); i++)                        // The matrices above already contain the dependence on |vULSJ>
-      {                                                      //    we now use the W-E theorem to add the Jz, Q, dependence
-         J2 = conf.states[nz[i][0]].J2;
-         J2p = conf.states[nz[i][1]].J2;
-         valJ_i = (J2-minJ2)/2; valJ_j = (J2p-minJ2)/2;
-         if(mJmat[valJ_i][valJ_j].isempty())
-         {
-            mJmat[valJ_i][valJ_j].zero(J2+1,J2p+1);
-            for(imJ_i=0; imJ_i<=J2; imJ_i++)
-            {
-               Jz2 = imJ_i*2-J2;
-               for(imJ_j=0; imJ_j<=J2p; imJ_j++)
-               {
-                  Jz2p = imJ_j*2-J2p; Tj2 = threej(J2,2*Kp,J2p,-Jz2,2*Qp,Jz2p);
-                  if(fabs(Tj2)>DBL_EPSILON) mJmat[valJ_i][valJ_j](imJ_i,imJ_j) = pow(-1.,(-J2p+Jz2)/2.+q) * sqrt(J2+1.) * Tj2;
-               }
-            }
-         }
-         Qmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*ckk(nz[i][0],nz[i][1]));
-      }
-      for(i=0; i<=valJ; i++) for(j=0; j<=valJ; j++) mJmat[i][j].clear();
 
-      MSq += Qmat;
-   }
-   return MSq;
-*/
    return 1;
 }
 
@@ -2168,10 +1648,6 @@ bool icf_balcarMLq(sMat<double> &MLq, int q, int K, int Q, int n, orbital l)
         J2[ins]=iJ2; Jz2[ins]=imJ2; irm[ins]=(iJ2-J2min)/2; ins++; }
 
    sMat<double> akk,Qmat; MLq.zero(ns,ns);
-/*
-   std::string errormsg("balcar_MLq(): Unable to calculate the a(K,K') matrix\n");
-   int i,j,ns=getdim(n,l);                                      // Number of states = ^{4l+2}C_{n}
-   sMat<double> akk,Mmat,Qmat; Mmat.zero(ns,ns);
 
    // Eqn 12 of Balcar 1975:
    //                                                       infty
@@ -2193,31 +1669,9 @@ bool icf_balcarMLq(sMat<double> &MLq, int q, int K, int Q, int n, orbital l)
    // The first 3j symbol imposes the selection rule that K=even,0<=K<=2l. The 9j symbol means (K-1)<=K'<=(K+1), whilst
    // the final 3j symbol means that Q+Q'=q, that is Q'=q-Q, and that -K'<=Q'<=K', so there is only ever one Q' term
    // in the sum.
-*/
+
    if(K%2!=0 || K>(2*l) || Q<-K || Q>K || q<-1 || q>1) return 1;
    int Kp,Qp=q-Q;
-/*
-   int k,minJ2,maxJ2,valJ,valJ_i,valJ_j;
-   int imJ_i,imJ_j,J2,J2p,Jz2,Jz2p;
-   std::vector<int> iJst,iJen;
-   fconf conf(n,0,l); minJ2=99; maxJ2=0; k=0;
-   for(i=0; i<(int)conf.states.size(); i++) {
-      j = conf.states[i].J2; if(j<minJ2) minJ2 = j; if(j>maxJ2) maxJ2 = j; iJst.push_back(k+1); k+=j+1; iJen.push_back(k); }
-
-   bool iA;
-   double Tj,Tj2,phase = 1.;/ * if(q%2==1) phase = -1.;* / if(K%4==2) phase = -phase;
-   std::vector< std::vector<int> > nz;
-
-   // Initialises a cell array of matrices of q- and Jz- dependent matrices so that we don't have to calculate
-   //    each (2J+1)x(2J'+1) matrix more than once, for each J and J' values.
-   sMat<double> mJmat_i(1,1);
-   std::vector< sMat<double> > mJmat_row;
-   std::vector< std::vector< sMat<double> > > mJmat;
-   valJ = (maxJ2-minJ2)/2;
-   for(i=0; i<=valJ; i++)
-      mJmat_row.push_back(mJmat_i);
-   for(i=0; i<=valJ; i++)
-      mJmat.push_back(mJmat_row);
 
    // Noting that the e(K,K') coefficient is, from Balcar and Lovesey, eqn 3.6.4:
    //
@@ -2239,7 +1693,7 @@ bool icf_balcarMLq(sMat<double> &MLq, int q, int K, int Q, int n, orbital l)
    //                                                    r          K',Q'
    //
    // Finally, we use the relation 4.2.14 of Balcar and Lovesey,  e(K,K') = +/- 0.5(2K'+1) a(K,K')  where + is for K'=K+1, - for K'=K-1
-*/
+
    int i,j;
    bool iA;
    double Tj, Tj2, prefact = (K%4==2) ? 1 : -1; prefact*=sqrt(3./PI); // Prefactor is (-2/sqrt(4PI))*sqrt(3)i^-K. Elements in units of uB
@@ -2258,41 +1712,7 @@ bool icf_balcarMLq(sMat<double> &MLq, int q, int K, int Q, int n, orbital l)
       }
       MLq += Qmat;
    }
-/*
-   for(Kp=(K-1); Kp<=(K+1); Kp+=2)       // The 3j symbol in A(K,K') means that K==Kp gives zero... (NB. Does this apply to E(K,K') too?)
-   {
-      if(Qp<-Kp || Qp>Kp) continue; Qmat.zero(ns,ns);
-      if(Kp==(K-1)) Tj = -phase * sqrt(3/PI) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q) * -(2*Kp+1);
-      else          Tj = -phase * sqrt(3/PI) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q) *  (2*Kp+1);
-      iA = lovesey_aKK(akk,K,Kp,n,l); if(iA) akk *= Tj; else { std::cerr << errormsg; return Qmat; }
-      
-      nz = akk.find();
-      for(i=0; i<(int)nz.size(); i++)                        // The matrices above already contain the dependence on |vULSJ>
-      {                                                      //    we now use the W-E theorem to add the Jz, Q, dependence
-         J2 = conf.states[nz[i][0]].J2;
-         J2p = conf.states[nz[i][1]].J2;
-         valJ_i = (J2-minJ2)/2; valJ_j = (J2p-minJ2)/2;
-         if(mJmat[valJ_i][valJ_j].isempty())
-         {
-            mJmat[valJ_i][valJ_j].zero(J2+1,J2p+1);
-            for(imJ_i=0; imJ_i<=J2; imJ_i++)
-            {
-               Jz2 = imJ_i*2-J2;
-               for(imJ_j=0; imJ_j<=J2p; imJ_j++)
-               {
-                  Jz2p = imJ_j*2-J2p; Tj2 = threej(J2,2*Kp,J2p,-Jz2,2*Qp,Jz2p);
-                  if(fabs(Tj2)>DBL_EPSILON) mJmat[valJ_i][valJ_j](imJ_i,imJ_j) = pow(-1.,(-J2p+Jz2)/2.+q) * sqrt(J2+1.) * Tj2;
-               }
-            }
-         }
-         Qmat.pset(iJst[nz[i][0]],iJen[nz[i][0]],iJst[nz[i][1]],iJen[nz[i][1]],mJmat[valJ_i][valJ_j]*akk(nz[i][0],nz[i][1]));
-      }
-      for(i=0; i<=valJ; i++) for(j=0; j<=valJ; j++) mJmat[i][j].clear();
 
-      Mmat += Qmat;
-   }
-   return Mmat;
-*/
    return 1;
 }
 
@@ -2379,28 +1799,8 @@ complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
 }
 
 //--------------------------------------------------------------------------------------------------------------
-void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, double *T, Vector &J)//, double *lnZ, double *U)
+void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, double *T, Vector &J)
 {
-/*
-   double *vt=0, Z=0., U=0.; complexdouble *zt=0, zme;
-   std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; matel.clear();
-   int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1;
-   if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
-   sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   char uplo = 'U';
-   // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
-   if (T<0){Esz=(int)(-T);printf ("Temperature T<0: please choose probability distribution of states by hand\n");
-                          printf ("Number   Excitation Energy\n");
-   for (ind_j=0;ind_j<Esz;++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
-   } // MR 17.9.2010
-   for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++)
-      if(fabs(VE.zV(ii,jj).r*VE.zV(ii,jj).r+VE.zV(ii,jj).i*VE.zV(ii,jj).i)<DBL_EPSILON*100000)
-      {
-         VE.zV(ii,jj) = 0.;
-      }
-*/
    int k[] = {0,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    int Hsz=icf_getdim(pars), incx=1;
@@ -2411,8 +1811,7 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
 
    std::vector<double> E, ex((J.Hi()>6?J.Hi():6)+2,0.), me, eb;
    int iJ, ind_j, Esz;
-// if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
-// sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
+
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    char uplo = 'U';
 
@@ -2451,11 +1850,11 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
       for(ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|J.H|Vi>
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
-#ifdef _G77 
+         #ifdef _G77 
          F77NAME(zdotc)(&zme, &Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-#else
+         #else
          zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-#endif
+         #endif
          me[ind_j] = zme.r;
          // For first run calculate also the partition function and internal energy
          if(iJ==J.Lo())
@@ -2474,123 +1873,16 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
             }
             J[iJ] += me[ind_j]*eb[ind_j];
             Z += eb[ind_j];
-//          *U += (E[ind_j]+vE[0])*eb[ind_j];
 //MRend 10.9.2010
          }
          else  // Rest of the runs only calculate the new matrix elements
             J[iJ]+=me[ind_j]*eb[ind_j];
       }
-//    if(iJ==J.Lo()) *U/=Z;
       J[iJ]/=Z;
       if(fabs(J[iJ])<DBL_EPSILON) J[iJ]=0.;
       free(zJmat); free(zt);
    }
   
-// *lnZ = log(Z)-vE[0]/(KB**T);
-/*
-   // For first run calculate also the partition function and internal energy
-   me.assign(Esz,0.); eb.assign(Esz,0.); Z=0.;
-   if(!VE.iscomplex())
-   {
-      double *fJmat=J[0].f_array(); vt = (double*)malloc(Hsz*sizeof(double));
-      for(ind_j=0; ind_j<Esz; ind_j++)
-      {  // Calculates the matrix elements <Vi|J.H|Vi>
-         F77NAME(dsymv)(&uplo, &Hsz, &alpha, fJmat, &Hsz, VE.V(ind_j), &incx, &beta, vt, &incx);
-         #ifdef _G77
-         F77NAME(ddot)(me[ind_j],&Hsz, VE.V(ind_j), &incx, vt, &incx);
-         #else
-         me[ind_j] = F77NAME(ddot)(&Hsz, VE.V(ind_j), &incx, vt, &incx);
-         #endif
- //MR 17.9.2010
-      if (T<0)
-      {  char instr[MAXNOFCHARINLINE];
-         printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-         if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
-         eb[ind_j]=strtod(instr,NULL);
-      }
-       else
-      {  eb[ind_j] = exp(-E[ind_j]/(KB*T));} ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MRend 17.9.2010
-      }
-      free(fJmat); free(vt); matel.push_back(me); ex[0]/=Z; U/=Z;
-   }
-   else
-   {
-      complexdouble *zJmat;
-      zeroes.zero(J[0].nr(),J[0].nc()); if(iflag[0]==0) zJmat=zmat2f(J[0],zeroes); else zJmat = zmat2f(zeroes,J[0]);
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      for(ind_j=0; ind_j<Esz; ind_j++)
-      {  // Calculates the matrix elements <Vi|J.H|Vi>
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-         #ifdef _G77
-         F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
-         #else
-         zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
-         #endif
-         me[ind_j] = zme.r;
-//       eb[ind_j] = exp(-E[ind_j]/(KB*T)); ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MR 17.9.2010
-         if (T<0)
-         {  char instr[MAXNOFCHARINLINE];
-            printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
-            eb[ind_j]=strtod(instr,NULL);
-         }
-         else
-         {  eb[ind_j] = exp(-E[ind_j]/(KB*T)); } ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MRend 17.9.2010                                                                   !!!!    -----------------!!!!
-      }
-      free(zJmat); free(zt); matel.push_back(me); ex[0]/=Z; U/=Z;
-   }
-
-   char nstr[6]; char basename[255]; strcpy(basename,"results/mms/");
-   if(save_matrices) {
-   #ifndef _WINDOWS
-   struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
-      if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::expJ(): Can't create mms dir, " << strerror(errno) << "\n";
-   #else
-   DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY))
-      if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::expJ(): Cannot create mms directory\n";
-   #endif
-   nstr[0] = (_l==F?102:100); if(_n<10) { nstr[1] = _n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = _n+38; nstr[3] = 0; }
-   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;   // 85 is ASCII for "U", 100=="d" and 102=="f"
-   } else { strcpy(basename,"nodir/"); }
-   int k[] = {0,1, 1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   int q[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-   sMat<double> Upq,Umq;  //if(n>(2*_l+1)) n = 4*_l+2-n;
-   if(xyz>0)
-   {std::cout << "Calculating the expectation values of the spin density operator\n";}
-   else
-   {std::cout << "Calculating the expectation values of the orbital moment density operator \n";}
-
-   // Rest of the runs only calculate the new matrix elements
-   for(iJ=0; iJ<(_num_op>6?_num_op:6); iJ++)
-   {  ex[iJ]=0;
-      me.assign(Esz,0.);
-      // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      if((k[iJ]%2==1) || (k[iJ]>4 && _l==D)) { matel.push_back(me); continue; }
-         complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
-         
-         zJmat = balcar_Mq(xyz,k[iJ],q[iJ],_n,_l); // minus sign stands for orbital density coeff
-         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-         for(ind_j=0; ind_j<Esz; ind_j++)
-         {  // Calculates the matrix elements <Vi|J.H|Vi>
-            F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-            #ifdef _G77
-            F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
-            #else
-            zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
-            #endif
-            me[ind_j] = zme.r;
-            ex[iJ]+=me[ind_j]*eb[ind_j];
-         }
-         free(zJmat); free(zt); matel.push_back(me); ex[iJ]/=Z;
-      
-      if(fabs(ex[iJ])<DBL_EPSILON) ex[iJ]=0.;
-   }
-   //ex[iJ] = log(Z)-VE.E(0)/(KB*T); ex[iJ+1] = U;
-   return ex;
-*/
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -2624,49 +1916,6 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
    #endif
       for(i=gjmbH.Lo(); i<=gjmbH.Hi(); i++) vgjmbH[i] = -gjmbH[i];
 
-/* 
-   // Calculates the IC Hamiltonian matrix
-   int i,k,q,Hsz=getdim(pars.n,pars.l);
-   complexdouble *H=0,*Jm=0; 
-   bool Hicnotcalc = false;
-   std::vector<double> parval; parval.reserve(35);
-   if(pars.n==1) { parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
-   else {
-      for(i=0; i<4; i++) parval.push_back(pars.F[i]); parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
-      for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
-   if(parval.size()%2==1) parval.push_back(0.);
-
-   if((est.Cols()!=(Hsz+1) || est.Rows()!=(Hsz+1)) && pars.truncate_level==1) Hicnotcalc = true;
-   else if(real(est[0][0])==-0.1 && imag(est[0][0])==-0.1)  // Hic previously calculated
-   {
-      for(i=0; i<(int)(parval.size()/2); i++) if(real(est[0][i+1])!=parval[2*i] && imag(est[0][i+1])!=parval[2*i+1]) { Hicnotcalc = true; break; }
-   }
-   else Hicnotcalc = true;
-   if(Hicnotcalc)
-   {
-      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM; H = zmat2f(Hic,iHic);
-//    est = ComplexMatrix(0,Hsz,0,Hsz); I comment this out - you should not reinitialize est !!!
-      if( (est.Rhi()!=Hsz||est.Chi()!=Hsz) && pars.truncate_level==1)
-      {
-         std::cerr << "ERROR module ic1ion - Icalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
-      }
-      if (!((int)(parval.size()/2)>Hsz && pars.truncate_level==1))
-      {
-         est[0][0] = complex<double> (-0.1,-0.1);
-         for(i=0; i<(int)(parval.size()/2); i++) est[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
-      }
-      if(pars.truncate_level!=1)  // Truncates the matrix, and stores the single ion part in a memorymapped array (Linux only)
-         truncate_hmltn(pars, est, Hic, iHic, J.Hi(), J.Lo());
-      else
-         for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
-      free(H);
-   }
-   if(pars.truncate_level!=1)  // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-      { std::cerr << "spin/orbmomdensity using truncate otion not yet implemented... exiting ";exit(EXIT_FAILURE);}
-//          truncate_expJ(pars,est,gjmbH,J,*T,lnZ,U,Jm);
-   else
-   {
-*/
    // Calculates the IC Hamiltonian matrix
    int nfact = (int)ceil(sqrt(J.Hi()-J.Lo()+2));
    int k,q,Hsz=icf_getdim(pars),esz=Hsz*nfact;
@@ -2752,29 +2001,6 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
    if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
 
    icf_spindensityexpJ(pars,zV,vE,xyz,T,J); delete[]vE; delete[]zV;
-/*
-      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-//    icmfmat mfmat(pars.n,pars.l,J.Hi()-J.Lo()+1,pars.save_matrices,pars.density);
-//    std::vector<double> vgjmbH((J.Hi()-J.Lo()+1),0.); for(i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i];
-      icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices,pars.density);
-      std::vector<double> vgjmbH(51,0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
-      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
-      complex<double> a(1.,0.); int incx = 1;
-      Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
-
-      // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
-      iceig VE; if(pars.partial) VE.lcalc(pars,Jm); 
-      #ifndef NO_ARPACK
-      else if(pars.arnoldi) VE.acalc(pars,Jm); 
-      #endif
-      else VE.calc(Hsz,Jm); free(Jm);
-
-      // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
-      std::vector< std::vector<double> > matel;
-      std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,*T,matel,pars.save_matrices);
-      for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()];//printf("ss=%g\n",J(1));
-   }
-*/
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -2916,6 +2142,220 @@ void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expecta
       if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
    }
    sdod_Icalc(J,-xyz,T,gjmbH,sipffilename,est);
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate the matrix elements of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+// --------------------------------------------------------------------------------------------------------------- //
+int      sdod_du1calc(int type,           // spin==1, orbi==-1
+                      int &tn,            // Input transition number; if tn<0, print debug info
+                      double &T,          // Input temperature
+                      Vector &gjmbH,      // Input vector of exchange fields + external fields (meV)
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector &u1,  // Output Slm1/Llm1 vector (1,49)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+{
+   int i,j,k;
+
+   int K[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+   int Q[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+// int im[]= {0, 1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+
+   int sz = gjmbH.Hi();
+   sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op;
+   complexdouble *zJmat=0, *zt=0, zme; zme.r=0; zme.i=0.; 
+   std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
+   std::vector<double> u(sz+1),iu(sz+1);
+   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   char uplo = 'U';
+   double Z=0., therm;
+
+   // check if printout should be done and make tn positive
+   int pr=0; if (tn<0) { pr=1; tn*=-1; }
+   double ninit=u1[1].real();
+   double pinit=u1[1].imag();
+
+   // Copies the already calculated energy levels / wavefunctions from *est
+   if(est.Rows()!=est.Cols()) { std::cerr << "sdod_du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
+   int Hsz = est.Rows()-1, iJ, incx = 1;
+   j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
+   if(est[0][j+1].real()-est[0][i+1].real()<delta)
+   {
+      double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
+
+      // Parses the input file for parameters
+      icpars pars; const char *filename = sipffilename[0];
+      ic_parseinput(filename,pars);
+
+      // Calculates the transition matrix elements:
+      //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
+      //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
+      for(iJ=0; iJ<sz; iJ++)
+      {
+//       if(iJ<6) op = icf_mumat(pars.n, iJ, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
+//       if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes);
+         zJmat = icf_balcarMq(type*3,K[iJ],Q[iJ],pars.n,pars.l); // minus sign stands for orbital density coeff
+         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[j+1][1], &incx, &zbeta, zt, &incx);
+         #ifdef _G77 
+         F77NAME(zdotc)(&zij[iJ], &Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
+         #else
+         zij[iJ] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
+         #endif
+
+         if(i==j && T>0) // subtract thermal expectation value from zij=zii
+         {
+            std::vector<double> eb, E; E.reserve(Hsz);
+            int Esz; for(Esz=0; Esz<Hsz; Esz++) { E.push_back(en[Esz]-en[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || en[Esz+1]==0) break; }
+            eb.assign(Esz,0.); double Jj=0.;
+
+            for(int ind_j=0; ind_j<Esz; ind_j++)
+            {  // Calculates the matrix elements <Vi|J.H|Vi>
+               F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, &zbeta, zt, &incx);
+               #ifdef _G77 
+               F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
+               #else
+               zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
+               #endif
+               // For first run calculate also the partition function and internal energy
+               if(iJ==0)
+               {
+//MR 10.9.2010
+                  if (T<0) 
+                  {
+                     char instr[MAXNOFCHARINLINE];
+                     printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
+                     if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { fprintf(stderr,"Error reading input\n"); exit(1); }
+                     eb[ind_j]=strtod(instr,NULL); 
+                  }
+//MRend 10.9.2010
+                  else
+                     eb[ind_j] = exp(-E[ind_j]/(KB*T));  
+		  Z+=eb[ind_j];
+	       }
+               Jj+=zme.r*eb[ind_j];
+            }
+            zij[iJ].r -= Jj/Z; 
+         }
+         free(zJmat); free(zt);
+      }
+
+      if (T<0) T=-T;
+
+      // Calculates the vector u , iu
+      for(iJ=0; iJ<sz; iJ++)
+      {  
+         u[iJ+1] = zij[iJ].r;
+         iu[iJ+1] =zij[iJ].i;
+      }
+
+      delta = en[j]-en[i];
+      if(delta<-0.000001) {
+         std::cerr << "ERROR module ic1ion - du1calc: energy gain delta gets negative\n"; exit(EXIT_FAILURE); }
+      if(j==i)delta=-SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
+   
+      // Calculates the partition function
+      Z=0.; for(iJ=0; iJ<Hsz; iJ++) { therm = exp(-(en[iJ]-en[0])/(KB*T)); Z += therm; if(therm<DBL_EPSILON) break; }
+   
+      // do some printout if wishes and set correct occupation factor
+      if (delta>SMALL)
+      {
+         therm = exp(-(en[i]-en[0])/(KB*T)) - exp(-(en[j]-en[0])/(KB*T));
+         if(pr==1)
+         {
+            printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
+            printf(" |<%i|Ja|%i>|^2=%6.3f\n |<%i|Jb|%i>|^2=%6.3f\n |<%i|Jc|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+            printf(" |<%i|Jd|%i>|^2=%6.3f\n |<%i|Je|%i>|^2=%6.3f\n |<%i|Jf|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+            printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
+         }
+      }
+      else
+      {
+         therm = exp(-(en[i]-en[0])/(KB*T))/(KB*T);    // quasielastic scattering has not wi-wj but wj*epsilon/kT
+         if(pr==1)
+         {
+            printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
+            printf(" |<%i|Ja-<Ja>|%i>|^2=%6.3f\n |<%i|Jb-<Jb>|%i>|^2=%6.3f\n |<%i|Jc-<Jc>|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
+            printf(" |<%i|Jd-<Jd>|%i>|^2=%6.3f\n |<%i|Je-<Je>|%i>|^2=%6.3f\n |<%i|Jf-<Jf>|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+            printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
+         }
+      }
+   
+      // multiply matrix Mab by occupation factor
+      for(iJ=1; iJ<=sz; iJ++)
+	    u1(iJ) = complex<double> ( u[iJ]*sqrt(therm/Z), iu[iJ]*sqrt(therm/Z) );
+
+      delete[]en;
+   }
+
+   if (ninit>Hsz)ninit=Hsz;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zi;
+   // determine number of thermally reachable states
+   int noft = 0;
+   for(i=0; (i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum)); ++i) { noft += Hsz-i-1; zsum += zi; }
+
+   return noft;
+}                 
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate the matrix elements of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+int dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector &Slm1,// Output Llm1 vector (1,49)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ 
+   Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
+   int nt = sdod_du1calc(1,tn,T,Hxce,sipffilename,Slm1,delta,est);
+// Slm1(1)=0;
+// for(int i=2; i<=6; ++i) Slm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Slm1(4) *=sqrt(2);
+// for(int i=7; i<=15;++i) Slm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Slm1(11)*=sqrt(2);
+// for(int i=16;i<=28;++i) Slm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Slm1(22)*=sqrt(2);
+   return nt;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate the matrix elements of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector &Llm1,// Output Llm1 vector (1,49)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ 
+   Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
+   int nt = sdod_du1calc(-1,tn,T,Hxce,sipffilename,Llm1,delta,est);
+// Llm1(1)=0;
+// for(int i=2; i<=6; ++i) Llm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Llm1(4) *=sqrt(2);
+// for(int i=7; i<=15;++i) Llm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Llm1(11)*=sqrt(2);
+// for(int i=16;i<=28;++i) Llm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Llm1(22)*=sqrt(2);
+   return nt;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //

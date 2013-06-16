@@ -113,12 +113,7 @@ __declspec(dllexport)
                       double *U,          // Output scalar internal energy 
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
-//#ifndef __linux__
-// int thrid = GetCurrentThreadId();
-//#else
-// pthread_t thrid = pthread_self();
-//#endif
-  // sum exchange field and external field
+   // sum exchange field and external field
    Vector gjmbH(1,Hxc.Hi());
    gjmbH=Hxc;
    // Calculates the Zeeman term if magnetic field is not zero
@@ -133,12 +128,6 @@ __declspec(dllexport)
    icpars pars; 
    const char *filename = sipffilename[0];
    ic_parseinput(filename,pars);
-
-   // Prints out single ion parameters and filename.
-// std::cout << "#ic1ion: Single ion parameter file: " << filename << "\n";
-// std::cout << "#ic1ion: Read in parameters (in " << pars.e_units << "): F2=" << pars.F[1] << ",F4=" << pars.F[2];
-// if(pars.l==F) std::cout << ",F6=" << pars.F[3]; std::cout << ",xi=" << pars.xi << "\n";
-// std::cout << "#ic1ion: \t" << pars.B.cfparsout(", ") << "in " << pars.B.units() << "\n";
 
    // Converts the Jij parameters if necessary
    std::vector<double> vgjmbH((J.Hi()-J.Lo()+1),0.); 
@@ -639,7 +628,7 @@ __declspec(dllexport)
    {
       lovesey_Qq(Qmat[2],0,n,l,Jvec);                                        // Calcs. scattering operator matrix Q_q
       save_Qq(Qmat[2],2,n,l,Jvec);
-  // myPrintMatrix(stdout,Qmat[2][0],Hsz-1);
+    //myPrintMatrix(stdout,Qmat[2][0],Hsz-1);
    }
    for(q=0; q<3; q++)
    {
@@ -654,12 +643,12 @@ __declspec(dllexport)
 #else
          zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
 #endif
-//         printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
+//       printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
          zMqr += (-2.)*zme.r*est[0][i].imag(); zMqi += (-2.)*zme.i*est[0][i].imag(); if(q==0) Z += est[0][i].imag();
       }
       free(zQmat); free(zt); Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
    }
-//   printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
+// printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -730,10 +719,7 @@ __declspec(dllexport)
          else       Qq[1].push_back( (Qp1[i-1]+Qm1[i-1]) *  (1.0/sqrt(2.0)) ); // imag(Qy) = i/sqrt(2) * real(Q_{+1}+Q_{-1})
       }
       save_Qq(Qq[0],0,n,l,Jvec); save_Qq(Qq[1],1,n,l,Jvec); 
-    //myPrintMatrix(stdout,Qq[0][2],Hsz-1);
-    //myPrintMatrix(stdout,Qq[0][3],Hsz-1);
-    //myPrintMatrix(stdout,Qq[0][4],Hsz-1);
-    //myPrintMatrix(stdout,Qq[0][5],Hsz-1);
+    //for(int iQ=2; iQ<6; iQ++) myPrintMatrix(stdout,Qq[0][iQ],Hsz-1);
    }
    if(!get_Qq(Qq[2],2,n,l,Jvec))                                               // Loads the Q_q matrix if prev. saved
    {
@@ -751,48 +737,29 @@ __declspec(dllexport)
    {  zQmat = zmat2f(Qq[q][2],Qq[q][3]);     // Spin part
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
+      #ifdef _G77
       F77NAME(zdotc)(&zij[2*q+1], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
-#else
-      zij[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
-#endif
-//         int k;for(k=0;k<Hsz;++k)printf("%6.3f %+6.3f i  ",real(est(j,1+k)),imag(est(j,1+k)));
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
       F77NAME(zdotc)(&zji[2*q+1], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-#else
+      #else
+      zij[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
+      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-#endif
-//      if(i==j)                               //subtract thermal expectation value from zij=zii
-//      {
-//         complexdouble expQ; double thexp=0;
-//         for(iJ=1;iJ<=Hsz;++iJ)
-//         {
-//            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
-//            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
-//#ifdef _G77
-//            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-//#else
-//            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-//#endif
-//            thexp += expQ.r * therm / Z;
-//         }
-//         zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
-//      }
+      #endif
       free(zQmat); free(zt);
 
       zQmat = zmat2f(Qq[q][4],Qq[q][5]);     // orbital part
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
+      #ifdef _G77
       F77NAME(zdotc)(&zij[2*q+2], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       F77NAME(zdotc)(&zji[2*q+2], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-#else
+      #else
       zij[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-#endif
+      #endif
       if(i==j)                               //subtract thermal expectation value from zij=zii
       {                                      //MR120120 ... reintroduced
          complexdouble expQ;double thexp=0;
@@ -800,11 +767,11 @@ __declspec(dllexport)
          {
             therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
             F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
+            #ifdef _G77
             F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-#else
+            #else
             expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-#endif
+            #endif
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
@@ -815,7 +782,6 @@ __declspec(dllexport)
    // check if zij are complex conjugate
    for(iJ=1;iJ<=6;++iJ)
       if(fabs(zij[iJ].i+zji[iJ].i)>SMALL) { std::cerr << "ERROR module ic1ion - dmq1: <i|Qalpha|j>not hermitian\n"; exit(EXIT_FAILURE); }
-
                 
    complex<double> im(0,1);
    ComplexVector iQalphaj(1,6);
@@ -888,12 +854,6 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
    const char *filename = sipffilename[0];
    ic_parseinput(filename,pars);
 
-   // Prints out single ion parameters and filename.
-// std::cout << "#ic1ion: Single ion parameter file: " << filename << "\n";
-// std::cout << "#ic1ion: Read in parameters (in " << pars.e_units << "): F2=" << pars.F[1] << ",F4=" << pars.F[2];
-// if(pars.l==F) std::cout << ",F6=" << pars.F[3]; std::cout << ",xi=" << pars.xi << "\n";
-// std::cout << "#ic1ion: \t" << pars.B.cfparsout(", ") << "in " << pars.B.units() << "\n";
-
    // Calculates the IC Hamiltonian matrix
    int i,k,q,Hsz=getdim(pars.n,pars.l);
    complexdouble *H=0,*Jm=0; 
@@ -931,13 +891,10 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
       free(H);
    }
    if(pars.truncate_level!=1)  // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-//    { std::cerr << "spin/orbmomdensity using truncate otion not yet implemented... exiting ";exit(EXIT_FAILURE);}
       truncate_spindensity_expJ(pars,est,gjmbH,J,*T,xyz);
    else
    {
       // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-//    icmfmat mfmat(pars.n,pars.l,J.Hi()-J.Lo()+1,pars.save_matrices,pars.density);
-//    std::vector<double> vgjmbH((J.Hi()-J.Lo()+1),0.); for(i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i];
       icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices,pars.density);
       std::vector<double> vgjmbH(51,0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
       sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
@@ -1100,4 +1057,124 @@ void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expecta
       if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
    }
    sdod_Icalc(J,-xyz,T,gjmbH,sipffilename,est);
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate the matrix elements of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+// --------------------------------------------------------------------------------------------------------------- //
+int      sdod_du1calc(int type,           // spin==1, orbi==-1
+                      int &tn,            // Input transition number; if tn<0, print debug info
+                      double &T,          // Input temperature
+                      Vector &gjmbH,      // Input vector of exchange fields + external fields (meV)
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector &u1,  // Output Llm1 vector (1,49)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+{
+   int i,j,k;
+ 
+   // check if printout should be done and make tn positive
+   int pr=0; if (tn<0) { pr=1; tn*=-1; }
+   double ninit=u1[1].real();
+   double pinit=u1[1].imag();
+   // Copies the already calculated energy levels / wavefunctions from *est
+   if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
+   int Hsz = est.Rows()-1;
+   j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
+   if(est[0][j+1].real()-est[0][i+1].real()<delta)
+   {
+      double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
+
+      // Parses the input file for parameters
+      icpars pars; const char *filename = sipffilename[0];
+      ic_parseinput(filename,pars);
+
+      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
+      int num_op = gjmbH.Hi()-gjmbH.Lo()+1; icmfmat mfmat(pars.n,pars.l,(num_op>6?num_op:6),pars.save_matrices);
+
+      iceig VE(Hsz,en,(complexdouble*)&est[1][0],1);
+ 
+      // Calculates the transition matrix elements:
+      //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
+      //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
+      //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
+  
+      std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
+      mfmat.dod_u1(type*3,u,iu,VE,T,i,j,pr,delta,pars.save_matrices);
+
+      for(i=1; i<=(num_op>6?num_op:6); i++)
+         u1(i) = complex<double> (u[i], iu[i]);
+   }
+   // determine number of thermally reachable states
+   if (ninit>Hsz)ninit=Hsz;
+   if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zi;
+   int noft=0; 
+   for(i=0; (i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum)); ++i)
+   {
+      noft += Hsz-i-1; 
+      zsum += zi;
+   }
+// removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit   return noft;
+// int noft=0;for(i=0;(i<Hsz)&((exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)))>SMALL);++i)noft+=Hsz-i-1; 
+   return noft;
+}                 
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate the matrix elements of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+int dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector &Slm1,// Output Llm1 vector (1,49)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ 
+   Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
+   int nt = sdod_du1calc(1,tn,T,Hxce,sipffilename,Slm1,delta,est);
+// Slm1(1)=0;
+// for(int i=2; i<=6; ++i) Slm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Slm1(4) *=sqrt(2);
+// for(int i=7; i<=15;++i) Slm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Slm1(11)*=sqrt(2);
+// for(int i=16;i<=28;++i) Slm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Slm1(22)*=sqrt(2);
+   return nt;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Routine to calculate the matrix elements of expansion of orbital moment density in terms
+// of Zlm F(r) at a given temperature T and  effective field H
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, print debug info
+                      double &T,          // Input temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
+ /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexVector &Llm1,// Output Llm1 vector (1,49)
+                      float &delta,       // Output transition energy
+                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
+                                          // Returns total number of transitions
+{ 
+   Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
+   int nt = sdod_du1calc(-1,tn,T,Hxce,sipffilename,Llm1,delta,est);
+// Llm1(1)=0;
+// for(int i=2; i<=6; ++i) Llm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Llm1(4) *=sqrt(2);
+// for(int i=7; i<=15;++i) Llm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Llm1(11)*=sqrt(2);
+// for(int i=16;i<=28;++i) Llm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Llm1(22)*=sqrt(2);
+   return nt;
 }
