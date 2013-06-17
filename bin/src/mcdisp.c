@@ -989,10 +989,10 @@ if (do_jqfile==1){
                      thrdat.Echargedensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Echargedensity[ithread]=Echargedensity;
                      thrdat.qsd_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
                      thrdat.qsd_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
-                     thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,SPINDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;
+                     thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,3*SPINDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;
                      thrdat.qod_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
                      thrdat.qod_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
-                     thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,ORBMOMDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;
+                     thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,3*ORBMOMDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;
                      thrdat.qep_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
                      thrdat.qep_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
                      thrdat.Ephonon[ithread] = new ComplexMatrix(1,dimA,1,PHONON_EV_DIM); *thrdat.Ephonon[ithread]=Ephonon;
