@@ -274,7 +274,7 @@ Vector spindensity_calc (double & teta,double & fi,double & R, Vector & momentsx
  Matrix gradspindensity_calc(double & teta,double & fi,double & R, Vector & momentsx, Vector & momentsy, Vector & momentsz);
 private:
   void  (*sd_m)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
-   int   (*sd_dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+   int   (*sd_dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,int*,float*,ComplexMatrix*);
 
 // 5. orbmomdensities ----------------------------------------------------------
 public:
@@ -291,7 +291,7 @@ Vector orbmomdensity_calc (double & teta,double & fi,double & R, Vector & moment
  Matrix gradorbmomdensity_calc(double & teta,double & fi,double & R, Vector & momentlx, Vector & momently, Vector & momentlz);
 private:
   void  (*od_m)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
-  int   (*od_dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+  int   (*od_dm)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,int*,float*,ComplexMatrix*);
 
 // 6. currentdensities ----------------------------------------------------------
 public:

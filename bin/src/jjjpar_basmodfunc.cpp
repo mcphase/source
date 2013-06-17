@@ -227,14 +227,14 @@ module_type=0;
     sd_m=(void(*)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"spindensity_coeff");
     //*(void **)(&sd_m)=GetProcAddress(handle,"spindensity_coeff");
     if (sd_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function spindensity_coeff not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    sd_dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dspindensity_coeff1");
+    sd_dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,int*,float*,ComplexMatrix*))GetProcAddress(handle,"dspindensity_coeff1");
     //*(void **)(&sd_dm)=GetProcAddress(handle,"dspindensity_coeff1");
      if (sd_dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dspindensity_coeff1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
     od_m=(void(*)(Vector*,int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"orbmomdensity_coeff");
     //*(void **)(&od_m)=GetProcAddress(handle,"orbmomdensity_coeff");
     if (od_m==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function orbmomdensity_coeff not possible - continuing\n",(int)GetLastError(),modulefilename);}
-    od_dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dorbmomdensity_coeff1");
+    od_dm=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,int*,float*,ComplexMatrix*))GetProcAddress(handle,"dorbmomdensity_coeff1");
     //*(void **)(&od_dm)=GetProcAddress(handle,"dorbmomdensity_coeff1");
      if (od_dm==NULL) {fprintf (stderr,"jjjpar::jjjpar warning %d module %s loading function dorbmomdensity_coeff1 not possible - continuing\n",(int)GetLastError(),modulefilename);}
 

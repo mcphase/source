@@ -1375,7 +1375,7 @@ The format to be used is:
 {\footnotesize
 \begin{verbatim}
 extern "C" int dspindensity_ceoff1(int & tn,double & T,Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR,
-char ** sipffilename,ComplexVector & aSlm1,float & maxE, ComplexMatrix & est)
+char ** sipffilename,ComplexVector & aSlm1,int & xyz,float & maxE, ComplexMatrix & est)
 \end{verbatim}
 }
 The meaning of the symbols follows exactly that of function 
@@ -1454,7 +1454,7 @@ The format to be used is:
 {\footnotesize
 \begin{verbatim}
 extern "C" int dspindensity_ceoff1(int & tn,double & T,Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR,
-char ** sipffilename,ComplexVector & aLlm1,float & maxE, ComplexMatrix & est)
+char ** sipffilename,ComplexVector & aLlm1,int & xyz,float & maxE, ComplexMatrix & est)
 \end{verbatim}
 }
 The meaning of the symbols follows exactly that of function 

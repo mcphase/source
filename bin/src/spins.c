@@ -520,9 +520,28 @@ if (argc-os>=6){
                  {delta=dd;checkdd=fabs(T-numbers[4])+fabs(Hext(1)-numbers[1])+fabs(Hext(2)-numbers[2])+fabs(Hext(3)-numbers[3]);
                   sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
                   hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9]; 
-                  densityev_real=ev_real;
-                  densityev_imag=ev_imag;                  
-                 }
+
+            switch(argv[1][1]) // dimension definition from jjjpar.hpp
+            {case 's': 
+             case 'o': 
+                      if(doijk==3){// moments=xx*momentsx+yy*momentsy+zz*momentsz;
+                   for(ii=1;ii<=inputpars.nofatoms;++ii)
+                   for (i=1;i<=savmf.na();++i)for(j=1;j<=savmf.nb();++j)for(k=1;k<=savmf.nc();++k)
+                  for(nt=1;nt<=dim;++nt){densityev_real.m(i,j,k)(nt+dim*(ii-1))=xx*ev_real.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_real.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_real.m(i,j,k)(nt+2*dim+3*dim*(ii-1));
+                                         densityev_imag.m(i,j,k)(nt+dim*(ii-1))=xx*ev_imag.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_imag.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_imag.m(i,j,k)(nt+2*dim+3*dim*(ii-1));
+                                        }
+                      }
+                      else{densityev_real=ev_real;
+                           densityev_imag=ev_imag;
+                     }
+                       break;
+            case 'c': 
+            case 'j': densityev_real=ev_real;
+                      densityev_imag=ev_imag;
+                     break;
+            default: help_and_exit();
+                     }
+                    }
                }
               fclose (fin);
              if(checkdd>1e-7)

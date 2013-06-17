@@ -848,7 +848,17 @@ int jjjpar::dspindensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexV
    case 3: if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
            return 0;break;
    case 0: if(sd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&spindensity_coeff1,&delta,&ests);}
+           return 0;} else {int xyz=1,ret;
+                            ComplexVector coeff(1,SPINDENS_EV_DIM);
+            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(i)=coeff(i);
+                                xyz=2;
+            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(SPINDENS_EV_DIM+i)=coeff(i);
+                                xyz=3;
+            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(2*SPINDENS_EV_DIM+i)=coeff(i);
+             return ret;              }
            break;
    case 5:if(transitionnumber<0)fprintf(stderr,"Problem: spindensity is not possible in module cluster, continuing ... \n");
            return 0;break;
@@ -1008,8 +1018,17 @@ int jjjpar::dorbmomdensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, Comple
    case 3: if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
            return 0;break;
    case 0: if(od_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*od_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&orbmomdensity_coeff1,&delta,&ests);}
-           break;
+           return 0;} else {int xyz=1,ret;
+                            ComplexVector coeff(1,ORBMOMDENS_EV_DIM);
+            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(i)=coeff(i);
+                                xyz=2;
+            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(ORBMOMDENS_EV_DIM+i)=coeff(i);
+                                xyz=3;
+            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(2*ORBMOMDENS_EV_DIM+i)=coeff(i);
+             return ret;              } break;
    case 5:if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
            return 0;break;
    default:fprintf(stderr,"Problem: orbmomdensity is not possible in module, continuing ... \n");

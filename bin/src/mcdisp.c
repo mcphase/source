@@ -368,8 +368,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   ComplexMatrix Uijkl(1,ini.nofcomponents,1,ini.nofcomponents);
 
   ComplexVector chargedensity_coeff1(1,CHARGEDENS_EV_DIM);
-  ComplexVector spindensity_coeff1(1,SPINDENS_EV_DIM);
-  ComplexVector orbmomdensity_coeff1(1,ORBMOMDENS_EV_DIM);
+  ComplexVector spindensity_coeff1(1,3*SPINDENS_EV_DIM);
+  ComplexVector orbmomdensity_coeff1(1,3*ORBMOMDENS_EV_DIM);
   ComplexVector magmom_coeff1(1,MAGMOM_EV_DIM);
   ComplexVector spin_coeff1(1,SPIN_EV_DIM);
   ComplexVector orbmom_coeff1(1,ORBMOM_EV_DIM);
@@ -472,8 +472,8 @@ for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.m
 
 // matrix E^s_alpha' used to store the coefficients for extending the eigenvector (see manual)
 ComplexMatrix Echargedensity(1,dimA,1,CHARGEDENS_EV_DIM);Echargedensity=0;
-ComplexMatrix Espindensity(1,dimA,1,SPINDENS_EV_DIM);Espindensity=0;
-ComplexMatrix Eorbmomdensity(1,dimA,1,ORBMOMDENS_EV_DIM);Eorbmomdensity=0;
+ComplexMatrix Espindensity(1,dimA,1,3*SPINDENS_EV_DIM);Espindensity=0;
+ComplexMatrix Eorbmomdensity(1,dimA,1,3*ORBMOMDENS_EV_DIM);Eorbmomdensity=0;
 ComplexMatrix Ephonon(1,dimA,1,PHONON_EV_DIM);Ephonon=0;
 ComplexMatrix Emagmom(1,dimA,1,MAGMOM_EV_DIM);Emagmom=0;
 ComplexMatrix Espin(1,dimA,1,SPIN_EV_DIM);Espin=0;
@@ -523,10 +523,10 @@ if(ini.calculate_chargedensity_oscillation){
        fillE(jmin,i,j,k,l,CHARGEDENS_EV_DIM,chargedensity_coeff1,md,nn,ini,Echargedensity);}
 if(ini.calculate_spindensity_oscillation){
    if((*inputpars.jjj[l]).dspindensity_coeff1(ini.T,mf,ini.Hext,spindensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,SPINDENS_EV_DIM,spindensity_coeff1,md,nn,ini,Espindensity);}
+       fillE(jmin,i,j,k,l,3*SPINDENS_EV_DIM,spindensity_coeff1,md,nn,ini,Espindensity);}
 if(ini.calculate_orbmomdensity_oscillation){
    if((*inputpars.jjj[l]).dorbmomdensity_coeff1(ini.T,mf,ini.Hext,orbmomdensity_coeff1,md.est(i,j,k,l))!=0)
-       fillE(jmin,i,j,k,l,ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,md,nn,ini,Eorbmomdensity);}
+       fillE(jmin,i,j,k,l,3*ORBMOMDENS_EV_DIM,orbmomdensity_coeff1,md,nn,ini,Eorbmomdensity);}
 if(ini.calculate_phonon_oscillation){
    if((*inputpars.jjj[l]).dP1calc(ini.T,mf,ini.Hext,phonon_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,PHONON_EV_DIM,phonon_coeff1,md,nn,ini,Ephonon);}
@@ -893,10 +893,10 @@ if (do_jqfile==1){
 #ifndef _THREADS  
              mfcf qee_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
              mfcf qee_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
-             mfcf qsd_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
-             mfcf qsd_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
-             mfcf qod_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
-             mfcf qod_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
+             mfcf qsd_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
+             mfcf qsd_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
+             mfcf qod_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
+             mfcf qod_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
              mfcf qep_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
              mfcf qep_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
              mfcf qem_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
@@ -924,8 +924,8 @@ if (do_jqfile==1){
                writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,do_Erefine);                  
                //------------observables-----------------------------------
                if(ini.calculate_chargedensity_oscillation){sprintf(filename,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);}
-               if(ini.calculate_spindensity_oscillation)  {sprintf(filename,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",SPINDENS_EV_DIM);}
-               if(ini.calculate_orbmomdensity_oscillation){sprintf(filename,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",ORBMOMDENS_EV_DIM);}
+               if(ini.calculate_spindensity_oscillation)  {sprintf(filename,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);}
+               if(ini.calculate_orbmomdensity_oscillation){sprintf(filename,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);}
                if(ini.calculate_phonon_oscillation)       {sprintf(filename,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);}
                if(ini.calculate_magmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);}
                if(ini.calculate_spinmoment_oscillation)   {sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
@@ -987,11 +987,11 @@ if (do_jqfile==1){
                      thrdat.qee_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
                      thrdat.qee_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
                      thrdat.Echargedensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Echargedensity[ithread]=Echargedensity;
-                     thrdat.qsd_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
-                     thrdat.qsd_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPINDENS_EV_DIM);
+                     thrdat.qsd_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
+                     thrdat.qsd_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
                      thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,SPINDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;
-                     thrdat.qod_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
-                     thrdat.qod_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOMDENS_EV_DIM);
+                     thrdat.qod_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
+                     thrdat.qod_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
                      thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,ORBMOMDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;
                      thrdat.qep_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
                      thrdat.qep_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);

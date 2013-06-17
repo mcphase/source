@@ -332,13 +332,13 @@ int sm1,ssm1,in1,in2;
                                         {qee_real.mf(i1,j1,k1)(CHARGEDENS_EV_DIM*(l1-1)+i)+=real(Echargedensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
                                          qee_imag.mf(i1,j1,k1)(CHARGEDENS_EV_DIM*(l1-1)+i)+=imag(Echargedensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                         }
-                                     if(ini.calculate_spindensity_oscillation)for(i=1;i<=SPINDENS_EV_DIM;++i)
-                                        {qsd_real.mf(i1,j1,k1)(SPINDENS_EV_DIM*(l1-1)+i)+=real(Espindensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
-                                         qsd_imag.mf(i1,j1,k1)(SPINDENS_EV_DIM*(l1-1)+i)+=imag(Espindensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                     if(ini.calculate_spindensity_oscillation)for(i=1;i<=3*SPINDENS_EV_DIM;++i)
+                                        {qsd_real.mf(i1,j1,k1)(3*SPINDENS_EV_DIM*(l1-1)+i)+=real(Espindensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qsd_imag.mf(i1,j1,k1)(3*SPINDENS_EV_DIM*(l1-1)+i)+=imag(Espindensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                         }
-                                     if(ini.calculate_orbmomdensity_oscillation)for(i=1;i<=ORBMOMDENS_EV_DIM;++i)
-                                        {qod_real.mf(i1,j1,k1)(ORBMOMDENS_EV_DIM*(l1-1)+i)+=real(Eorbmomdensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
-                                         qod_imag.mf(i1,j1,k1)(ORBMOMDENS_EV_DIM*(l1-1)+i)+=imag(Eorbmomdensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                     if(ini.calculate_orbmomdensity_oscillation)for(i=1;i<=3*ORBMOMDENS_EV_DIM;++i)
+                                        {qod_real.mf(i1,j1,k1)(3*ORBMOMDENS_EV_DIM*(l1-1)+i)+=real(Eorbmomdensity(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qod_imag.mf(i1,j1,k1)(3*ORBMOMDENS_EV_DIM*(l1-1)+i)+=imag(Eorbmomdensity(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
                                         }
                                      if(ini.calculate_phonon_oscillation)for(i=1;i<=PHONON_EV_DIM;++i)
                                         {qep_real.mf(i1,j1,k1)(PHONON_EV_DIM*(l1-1)+i)+=real(Ephonon(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
