@@ -1063,7 +1063,7 @@ void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expecta
 // Routine to calculate the matrix elements of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
 // --------------------------------------------------------------------------------------------------------------- //
-int      sdod_du1calc(int type,           // spin==1, orbi==-1
+int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction to calculate
                       int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &gjmbH,      // Input vector of exchange fields + external fields (meV)
@@ -1101,7 +1101,7 @@ int      sdod_du1calc(int type,           // spin==1, orbi==-1
       //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
   
       std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
-      mfmat.dod_u1(type*3,u,iu,VE,T,i,j,pr,delta,pars.save_matrices);
+      mfmat.dod_u1(xyz,u,iu,VE,T,i,j,pr,delta,pars.save_matrices);
 
       for(i=1; i<=(num_op>6?num_op:6); i++)
          u1(i) = complex<double> (u[i], iu[i]);
@@ -1137,12 +1137,13 @@ int dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, p
  /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexVector &Slm1,// Output Llm1 vector (1,49)
+                      int xyz,            // Indicating which of x,y,z direction to calculate
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
    Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   int nt = sdod_du1calc(1,tn,T,Hxce,sipffilename,Slm1,delta,est);
+   int nt = sdod_du1calc(xyz,tn,T,Hxce,sipffilename,Slm1,delta,est);
 // Slm1(1)=0;
 // for(int i=2; i<=6; ++i) Slm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Slm1(4) *=sqrt(2);
 // for(int i=7; i<=15;++i) Slm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Slm1(11)*=sqrt(2);
@@ -1166,12 +1167,13 @@ int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, p
  /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexVector &Llm1,// Output Llm1 vector (1,49)
+                      int xyz,            // Indicating which of x,y,z direction to calculate
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
    Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   int nt = sdod_du1calc(-1,tn,T,Hxce,sipffilename,Llm1,delta,est);
+   int nt = sdod_du1calc(-xyz,tn,T,Hxce,sipffilename,Llm1,delta,est);
 // Llm1(1)=0;
 // for(int i=2; i<=6; ++i) Llm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Llm1(4) *=sqrt(2);
 // for(int i=7; i<=15;++i) Llm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Llm1(11)*=sqrt(2);

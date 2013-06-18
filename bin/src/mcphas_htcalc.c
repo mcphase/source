@@ -474,7 +474,13 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
         (*tin[ithread]).j = j;
        #if defined  (__linux__) || defined (__APPLE__)
        rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
-       if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+       if(rc) 
+       {
+          printf("Warning, failed to create thread %i - joining and retrying.\n",ithread+1);
+          pthread_join(threads[ithread], &status); 
+          rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
+          if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
+       }
        #else
        threads[ithread] = CreateThread(NULL, 0, htcalc_iteration, (void *) tin[ithread], 0, &tid[ithread]);
        if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
