@@ -210,12 +210,12 @@ mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 anisotropy.o: anisotropy.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
 #	$(CCC) $(CFLAGS)   $<
 	$(CCC) $(CFLAGS)  $(THREADFLAG) $<
-# .... threading does not work yet
+
 
 mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_io.c $(INCL)
 #	$(CCC) $(CFLAGS)  $<
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
-# .... threading does not work yet ? keep it in test stage ...
+
 
 cond.o: cond.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<

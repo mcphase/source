@@ -234,6 +234,7 @@ cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
 int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 { 
   /*on input
+   delta        maxE
    code         defining, what should be calculated
          1....   Ia (interaction operators for du1calc)
          2....    m (total magnetic moment for dm1calc), or
@@ -250,96 +251,96 @@ int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & d
    double ninit=u1[1].real();
    double pinit=u1[1].imag();
  
-Vector En(1,dim);
-Vector wn(1,dim);
-Matrix zr(1,dim,1,dim);
-Matrix zc(1,dim,1,dim);
- for(int i=1;i<=dim;++i){En(i)=real(ests(0,i));wn(i)=imag(ests(0,i));}
-
-   for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
-
-// calculate mat and delta for transition number tn
 // 1. get i and j from tn
 int k=0,ii=1,jj=1;
 for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj){++k;if(k==tn)break;}if(k==tn)break;}
-// 2. set delta
-delta=En(jj)-En(ii);
-if (delta<-0.000001){fprintf(stderr,"ERROR module cluster - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
-if(jj==ii)delta=-SMALL_QUASIELASTIC_ENERGY; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
+if(real(ests(0,jj))-real(ests(0,ii))<delta)
+ {
+    Vector En(1,dim);
+    Vector wn(1,dim);
+    for(int i=1;i<=dim;++i){En(i)=real(ests(0,i));wn(i)=imag(ests(0,i));}
 
-int maxn;
- switch(code)
-{case 1: maxn=u1.Hi();break;
- case 2: maxn=3; break;
- case 3: maxn=(*clusterpars).nofatoms*3;break;
-}
+    Matrix zr(1,dim,1,dim);
+    Matrix zc(1,dim,1,dim);
+    for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
 
-Vector Jret(1,maxn);Jret=0;
-ComplexVector iJj(1,maxn);
-for(int a=1;a<=maxn;++a)
-{// transition matrix element
- switch(code)
- {case 1:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*Ia[a]),zr,zc,ii,jj));break;
-  case 2:  iJj(a)=complex<double>(aMb_real((*cluster_M[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a]),zr,zc,ii,jj)); break;
-  case 3:  iJj(a)=complex<double>(aMb_real((*cluster_M[a+3]),zr,zc,ii,jj),aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj));break;
- }
+    // calculate mat and delta for transition number tn
+    // 2. set delta
+    delta=En(jj)-En(ii);
+    if (delta<-0.000001){fprintf(stderr,"ERROR module cluster - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+    if(jj==ii)delta=-SMALL_QUASIELASTIC_ENERGY; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
- // determine expectation value
- Jret(a)=0;
- if (subtractexpvalue==1&&ii==jj)
- { for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-  { switch(code)
-   {case 1: Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i);break;
-    case 2: Jret(a)+=wn[i]*aMb_real((*cluster_M[a]),zr,zc,i,i); break;
-    case 3: Jret(a)+=wn[i]*aMb_real((*cluster_M[a+3]),zr,zc,i,i);break;
-   }
-  }
- }
-}
-
-// 3. set u1
-for(int l=1;l<=maxn;++l)
-{if(ii==jj){//take into account thermal expectation values <Jret>
-          u1(l)=(iJj(l)-Jret(l));}
- else    {u1(l)=iJj(l);}
-}
-
-//printf("code %i: %g %g %g\n",code,Jret(1),Jret(2),Jret(3));
-//myPrintMatrix(stdout,(*cluster_M[1]));
-//myPrintMatrix(stdout,(*cluster_M[2]));
-//myPrintMatrix(stdout,(*cluster_M[3]));
-
-
-
-if (delta>SMALL_QUASIELASTIC_ENERGY)
-   { if(pr==1){
-      printf("delta(%i->%i)=%4.4gmeV",ii,jj,delta);
-      printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",ii,jj,abs(u1(1))*abs(u1(1)),ii,jj,abs(u1(2))*abs(u1(2)),ii,jj,abs(u1(3))*abs(u1(3)));
-      printf(" n%i-n%i=%4.4g\n",ii,jj,wn(ii)-wn(jj));}
-    u1*=sqrt(wn(ii)-wn(jj)); // occupation factor
-     }else
-   {// quasielastic scattering has not wi-wj but wj*epsilon/kT
-     if(pr==1){
-      printf("delta(%i->%i)=%4.4gmeV",ii,jj,delta);
-      printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",ii,jj,abs(u1(1))*abs(u1(1)),ii,jj,abs(u1(2))*abs(u1(2)),ii,jj,abs(u1(3))*abs(u1(3)));
-      printf(" n%i=%4.4g\n",ii,wn(ii));}
-    u1*=sqrt(wn(ii)/KB/T);
+   int maxn;
+   switch(code)
+   {case 1: maxn=u1.Hi();break;
+    case 2: maxn=3; break;
+    case 3: maxn=(*clusterpars).nofatoms*3;break;
    }
 
+   Vector Jret(1,maxn);Jret=0;
+   ComplexVector iJj(1,maxn);
+   for(int a=1;a<=maxn;++a)
+   {// transition matrix element
+    switch(code)
+    {case 1:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*Ia[a]),zr,zc,ii,jj));break;
+     case 2:  iJj(a)=complex<double>(aMb_real((*cluster_M[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a]),zr,zc,ii,jj)); break;
+     case 3:  iJj(a)=complex<double>(aMb_real((*cluster_M[a+3]),zr,zc,ii,jj),aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj));break;
+    }
 
-if (pr==1) printf ("delta=%4.6g meV\n",delta);
+    // determine expectation value
+    Jret(a)=0;
+    if (subtractexpvalue==1&&ii==jj)
+    { for(int i=1;i<=dim&&wn[i]>0.00001;++i)
+     { switch(code)
+      {case 1: Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i);break;
+       case 2: Jret(a)+=wn[i]*aMb_real((*cluster_M[a]),zr,zc,i,i); break;
+       case 3: Jret(a)+=wn[i]*aMb_real((*cluster_M[a+3]),zr,zc,i,i);break;
+      }
+     }
+    }
+   }
 
-// return number of all transitions
-   double n=ninit;
-   if (n>dim)n=dim;
-   double zsum=0,zii,x;
-   int noft=0;
-   if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
-   {noft+=dim-i+1;zsum+=zii;}
+   // 3. set u1
+   for(int l=1;l<=maxn;++l)
+   {if(ii==jj){//take into account thermal expectation values <Jret>
+             u1(l)=(iJj(l)-Jret(l));}
+    else    {u1(l)=iJj(l);} 
+   }
+
+   //printf("code %i: %g %g %g\n",code,Jret(1),Jret(2),Jret(3));
+   //myPrintMatrix(stdout,(*cluster_M[1]));
+   //myPrintMatrix(stdout,(*cluster_M[2]));
+   //myPrintMatrix(stdout,(*cluster_M[3]));
+
+   if (delta>SMALL_QUASIELASTIC_ENERGY)
+      { if(pr==1){
+         printf("delta(%i->%i)=%4.4gmeV",ii,jj,delta);
+         printf(" |<%i|Ja|%i>|^2=%4.4g |<%i|Jb|%i>|^2=%4.4g |<%i|Jc|%i>|^2=%4.4g",ii,jj,abs(u1(1))*abs(u1(1)),ii,jj,abs(u1(2))*abs(u1(2)),ii,jj,abs(u1(3))*abs(u1(3)));
+         printf(" n%i-n%i=%4.4g\n",ii,jj,wn(ii)-wn(jj));}
+       u1*=sqrt(wn(ii)-wn(jj)); // occupation factor
+        }else
+      {// quasielastic scattering has not wi-wj but wj*epsilon/kT
+        if(pr==1){
+         printf("delta(%i->%i)=%4.4gmeV",ii,jj,delta);
+         printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",ii,jj,abs(u1(1))*abs(u1(1)),ii,jj,abs(u1(2))*abs(u1(2)),ii,jj,abs(u1(3))*abs(u1(3)));
+         printf(" n%i=%4.4g\n",ii,wn(ii));}
+       u1*=sqrt(wn(ii)/KB/T);
+      }
+
+
+   if (pr==1) printf ("delta=%4.6g meV\n",delta);
+}
+   // return number of all transitions
+      double n=ninit;
+      if (n>dim)n=dim;
+      double zsum=0,zii,x;
+      int noft=0;
+      if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
+      {noft+=dim-i+1;zsum+=zii;}
    
-   if(T<0)for(int i=1;i<=n;++i)
-   {noft+=dim-i+1;}
-//printf("nt=%i",noft);
+      if(T<0)for(int i=1;i<=n;++i)
+      {noft+=dim-i+1;}
+      //printf("nt=%i",noft);
  return noft;
 
 
