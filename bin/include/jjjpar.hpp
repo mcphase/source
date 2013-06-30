@@ -40,6 +40,7 @@ public:
 // ********************************************************************************
   char * sipffilename; // single ion parameter filename
   char * modulefilename; // module name
+  char * clusterfilename;
     double J(); // returns total angular momentum if possible
    Vector &  tetan(); //returns stevens parameters if possible
 

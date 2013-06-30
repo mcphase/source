@@ -214,6 +214,11 @@ the 4f shell and the nucleus of Pr, respectively. For more details on this
 example see folder {\prg examples/Pr3Pd20Si6}. Another example worth looking
 at is {\prg examples/LaCo3\_podlesnyak\_polaron}. There the calculation of the 
 magnetic structure factor of a spin polaron is demonstrated.
+Note: currently the observables, which are implemented in the cluster module are 
+magnetisation and Fourier transform of magnetization density ($M(\mbf Q)$).
+In order to enable these, the three components of the magnetization (M1 M2 M3)
+have to be given in terms of the operators I1\_1,I1\_2,...In\_m... (n=1,..,nofatoms of cluster,
+m=1... nofcomponents of cluster). 
 \end{quote}
 
 In addition to the basic parameters described above the single ion property file 

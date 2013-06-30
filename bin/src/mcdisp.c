@@ -503,7 +503,8 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
         (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  tn with printout
         (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,md.est(i,j,k,l));
         if(do_Erefine)Mijkl = u1^u1;
-        gamman=Norm2(u1);u1/=sqrt(gamman);
+        gamman=Norm2(u1);if(gamman==0)gamman=SMALL_GAMMA;
+        u1/=sqrt(gamman);
        if(fabs((fabs(d)-fabs(nn[6]))/(fabs(nn[6])+1.0))>SMALLEDIF)
         {fprintf(stderr,"ERROR mcdisp: reading mcdisp.trs with transition energy delta %g meV different from internal calculation %g meV\n",nn[6],d);	 
          exit(EXIT_FAILURE);}

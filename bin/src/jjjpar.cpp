@@ -307,23 +307,26 @@ void jjjpar::save_sipf(FILE * fout)
            fprintf(fout,"#\n# crystal field paramerized in Stevens formalism\n#\n");
            (*iops).save(fout);
           break;
-   case 5: fprintf(fout,"#!MODULE=cluster\n#<!--mcphase.sipf-->\n");
-           fprintf(fout,"#***************************************************************\n");
-           fprintf(fout,"# Single Ion Parameter File for Module Cluster for\n");
-           fprintf(fout,"# %s\n",MCPHASVERSION);
-           fprintf(fout,"# - program to calculate static magnetic properties\n");
-           fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
-           fprintf(fout,"# %s\n",MCDISPVERSION);
-           fprintf(fout,"# - program to calculate the dispersion of magnetic excitations\n");
-           fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-           fprintf(fout,"# %s\n",MCDIFFVERSION);
-           fprintf(fout,"# - program to calculate neutron and magnetic xray diffraction\n");
-           fprintf(fout,"# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n");
-           fprintf(fout,"#****************************************************************\n#\n");
-           fprintf(fout,"#\n# single ion subsystem consists of cluster of ions\n");
-           fprintf(fout,"# cluster structure is desribed in file\n#\n");
-//           fprintf(fout,"structurefile = %s\n\n",clusterfile);
-          break;
+   case 5: //fprintf(fout,"#!MODULE=cluster\n#<!--mcphase.sipf-->\n");
+           //fprintf(fout,"#***************************************************************\n");
+           //fprintf(fout,"# Single Ion Parameter File for Module Cluster for\n");
+           //fprintf(fout,"# %s\n",MCPHASVERSION);
+           //fprintf(fout,"# - program to calculate static magnetic properties\n");
+           //fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
+           //fprintf(fout,"# %s\n",MCDISPVERSION);
+           //fprintf(fout,"# - program to calculate the dispersion of magnetic excitations\n");
+           //fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
+           //fprintf(fout,"# %s\n",MCDIFFVERSION);
+           //fprintf(fout,"# - program to calculate neutron and magnetic xray diffraction\n");
+           //fprintf(fout,"# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n");
+           //fprintf(fout,"#****************************************************************\n#\n");
+           //fprintf(fout,"#\n# single ion subsystem consists of cluster of ions\n");
+           //fprintf(fout,"# cluster structure is desribed in file\n#\n");
+           //fprintf(fout,"#!structurefile = %s\n\n",clusterfile);
+           //break;
+           {char clustsavfile[MAXNOFCHARINLINE];sprintf(clustsavfile,"results/_%s",clusterfilename);
+           (*clusterpars).save(clustsavfile);
+           (*clusterpars).save_sipfs("results/_");}
    default: // in case of external single ion module just save a copy of the input file 
            char *token;
            cfin=fopen_errchk(sipffilename,"rb");
@@ -335,7 +338,7 @@ void jjjpar::save_sipf(FILE * fout)
            fclose(cfin);
    }
 
-  if(module_type>0) // in case of internal modules save common information
+  if(module_type>0&&module_type!=5) // in case of internal modules save common information
    {fprintf(fout,"#----------------\n# number of electrons in unfilled shell gJ\n#----------------\nnof_electrons=%i\n\n",nof_electrons);
     fprintf(fout,"#----------------\n# Lande factor gJ\n#----------------\nGJ=%g\n\n",gJ);
     fprintf(fout,"#-------------------------------------------------------\n");
@@ -411,6 +414,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
 { jl_lmax=6;
   char instr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE];
   sipffilename= new char [MAXNOFCHARINLINE];
+  clusterfilename=new char [MAXNOFCHARINLINE];
   int i,j,i1,j1,k1;
   int symmetricexchange=0,indexexchangenum=0;
   Matrix exchangeindices;
@@ -538,6 +542,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n)
   jij=0; dn=0; sublattice=0;paranz=0;diagonalexchange=1;
   mom=Vector(1,9); mom=0; nofcomponents=n;
   sipffilename= new char [MAXNOFCHARINLINE];
+  clusterfilename=new char [MAXNOFCHARINLINE];
   strcpy(sipffilename,sipffile);
   get_parameters_from_sipfile(sipffilename);
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
@@ -564,6 +569,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   nof_electrons=0; // no electorns by default
   paranz=0;
   sipffilename= new char [MAXNOFCHARINLINE];
+  clusterfilename=new char [MAXNOFCHARINLINE];
   module_type=1;
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
 }
@@ -571,6 +577,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 //constructor without file
 jjjpar::jjjpar(int n,int diag,int nofmom) 
 { sipffilename= new char [MAXNOFCHARINLINE];jl_lmax=6;
+  clusterfilename=new char [MAXNOFCHARINLINE];
   diagonalexchange=diag;
   paranz=n;xyz=Vector(1,3);xyz=0; 
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
@@ -614,6 +621,8 @@ jjjpar::jjjpar (const jjjpar & pp)
   nof_electrons=pp.nof_electrons;
   modulefilename=new char[MAXNOFCHARINLINE];
   strncpy (modulefilename,pp.modulefilename, MAXNOFCHARINLINE-1);
+  clusterfilename=new char [MAXNOFCHARINLINE];
+  strncpy(clusterfilename,pp.clusterfilename, MAXNOFCHARINLINE-1);
   diagonalexchange=pp.diagonalexchange;
   gJ=pp.gJ;module_type=pp.module_type;
   ninit=pp.ninit;maxE=pp.maxE;pinit=pp.pinit;
@@ -698,6 +707,7 @@ jjjpar::~jjjpar ()
    if(dn!=0)         delete []dn;  // will not work in linux
    if(sublattice!=0) delete []sublattice;
    delete []sipffilename;// will not work in linux
+  delete []clusterfilename;
   delete []modulefilename;// will not work in linux
    if (module_type==5) {for(int i=1;i<=nofcomponents;++i)
                             { delete Ia[i];}

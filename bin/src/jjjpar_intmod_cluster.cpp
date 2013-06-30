@@ -89,6 +89,8 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
 
  if(perlparse(sipffilename,numbers,numbernames,strings,stringnames,Iaa,operatornames)==false)
    {printf("Error perl parsing sipf file %s\n",sipffilename);exit(EXIT_FAILURE);}
+for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents;++i)
+  {delete Iaa[i];delete operatornames[i];}
 
 // here we fill the interaction operator matrices with values
 Ia= new Matrix * [nofcomponents+1];
@@ -98,6 +100,8 @@ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
       else{(*Ia[n])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n])(i,j));}
 }
 //(*Ia[i])=(*Iaa[i]);
+delete           Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n];
+delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n]; 
 }
 
 // here we should initialize set the operator matrices cluster_M  ... total magnetic moment
@@ -112,6 +116,8 @@ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
    if(i<j){(*cluster_M[n])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])(j,i));}
       else{(*cluster_M[n])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])(i,j));}
 }
+delete           Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n];
+delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n]; 
 }
 // now do the individual atom magnetic moments
  for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
@@ -122,10 +128,12 @@ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
    if(i<j){(*cluster_M[index_M])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])(j,i));}
       else{(*cluster_M[index_M])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])(i,j));}
 }
+delete           Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index];
+delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]; 
 }
 
- for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms;++i)
-  {delete Iaa[i];delete operatornames[i];}
+// for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms;++i)
+//  {delete Iaa[i];delete operatornames[i];}
 printf("#module cluster initialized\n");
 }
 //------------------------------------------------------------------------------------------------
@@ -278,7 +286,7 @@ for(int a=1;a<=maxn;++a)
 
  // determine expectation value
  Jret(a)=0;
- if (subtractexpvalue==1)
+ if (subtractexpvalue==1&&ii==jj)
  { for(int i=1;i<=dim&&wn[i]>0.00001;++i)
   { switch(code)
    {case 1: Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i);break;
@@ -349,7 +357,7 @@ void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,do
     eigenvalues ares stored as real part of row zero
     boltzmann population numbers are stored as imaginary part of row zero
 */
- 
+ fprintf(stderr,"# calculating eigenstates of cluster ...");
 (*eigenstates) = ComplexMatrix(0,dim,1,dim);
  Vector En(1,dim);
  Matrix zr(1,dim,1,dim);
@@ -368,6 +376,7 @@ void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,do
  for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j)
  {(*eigenstates)(i,j)=complex<double>(zr(i,j),zc(i,j));
  }
+ fprintf(stderr," ... done\n");
 }
 
 void jjjpar::cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext)

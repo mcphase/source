@@ -110,11 +110,10 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      else if (strcmp(modulefilename,"cluster")==0)
      {module_type=5;fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,1);i=1;
-      char clusterfilename[MAXNOFCHARINLINE];
       nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
-       i+=extract(instr,"structurefile",clusterfilename,sizeof(clusterfilename))-1;
+       i+=extract(instr,"structurefile",clusterfilename,MAXNOFCHARINLINE)-1;
       }// input all  lines starting with comments
       if(i!=0){fprintf(stderr,"Error reading structurefile from file %s\ncorrect file format is:\n",sipf_filename);
               fprintf(stderr,"\n#!MODULE=cluster\n#comment lines ..\n# next line contains cluster structure filename\n"

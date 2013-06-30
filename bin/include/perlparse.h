@@ -8,5 +8,10 @@ int perlparse(char*sipffilename
               ,char **  strings,char ** stringnames    // string variables
               ,ComplexMatrix **  operators,char ** operatornames    // operators
               );
+int myparse(char*sipffilename
+              ,double ** numbers,char ** numbernames    // number 
+              ,char **  strings,char ** stringnames    // string variables
+              ,ComplexMatrix **  operators,char ** operatornames    // operators
+              );
 
 #endif
