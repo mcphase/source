@@ -290,13 +290,13 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  hkl(2)=ini.hkls[i][2];
  hkl(3)=ini.hkls[i][3];
  hkl2ijk(q1,hkl,abc);
- while(q1*q2==0&&i<ini.nofhkls){
+ while(fabs(q1*q2)-Norm(q1)*Norm(q2)<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i<ini.nofhkls){
  hkl(1)=ini.hkls[i+1][1];
  hkl(2)=ini.hkls[i+1][2];
  hkl(3)=ini.hkls[i+1][3];
  hkl2ijk(q2,hkl,abc);
      i++;}
- while(q1*q2==0&&i>1){i--;
+ while(fabs(q1*q2)-Norm(q1)*Norm(q2)<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i>1){i--;
  hkl(1)=ini.hkls[i][1];
  hkl(2)=ini.hkls[i][2];
  hkl(3)=ini.hkls[i][3];

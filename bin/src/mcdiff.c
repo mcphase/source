@@ -22,6 +22,7 @@ int main (int argc, char **argv)
   char sipffilename[MAXNOFCHARINLINE+1];
   char unitcellstr[MAXNOFCHARINLINE+1];
   float numbers[70];numbers[0]=70;
+  float numbers1[70];numbers1[0]=70;
   Vector r1(1,3),r2(1,3),r3(1,3),H(1,3),P(1,3);
   Vector rez1(1,3),rez2(1,3),rez3(1,3);
 fprintf(stderr,"***********************************************************************\n");
@@ -517,17 +518,17 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
                                  numbers[6]= (numbers[1]*rez3(1)+numbers[2]*rez3(2)+numbers[3]*rez3(3))/2/PI;
                          }
                             if (j<9) {fprintf(stderr,"ERROR mcdiff: too few parameters for magnetic atom %i: %s\n",i,instr);exit(EXIT_FAILURE);}
-                             // determine j .... dimension of exchange field if present >>>>>>>>>>>>>>>>
-                            long int currentpos=ftell(fin_coq);instr[0]='#';
+                             // determine jxc .... dimension of exchange field if present >>>>>>>>>>>>>>>>
+                            long int currentpos=ftell(fin_coq);instr[0]='#';int jxc;
                             while(instr[strspn(instr," \t")]=='#'&&feof(fin_coq)==0){pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
                             if (strchr(instr,'>')==NULL||instr[strspn(instr," \t")]=='#')
-                             {j=1;} // no ">" found --> do dipole approx
+                             {jxc=1;} // no ">" found --> do dipole approx
                              else          
                              {fseek(fin_coq,pos+strchr(instr,'>')-instr+1,SEEK_SET); 
-                              j=inputline(fin_coq,numbers);printf("dimension of mf = %i\n",j);
+                              jxc=inputline(fin_coq,numbers1);printf("dimension of mf = %i\n",jxc);
                              }
                              fseek(fin_coq,currentpos,SEEK_SET); //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                             jjjpars[i]=new jjjpar((double)numbers[4] / nr1,(double)numbers[5] / nr2,(double)numbers[6] / nr3, sipffilename,j);
+                             jjjpars[i]=new jjjpar((double)numbers[4] / nr1,(double)numbers[5] / nr2,(double)numbers[6] / nr3, sipffilename,jxc);
                              //J[i]=-1;
                              //J[i]         1   0    -1   -2   -3
                              //FF_type      1  -2    +2   +3   -3
