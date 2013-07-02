@@ -121,8 +121,8 @@ bool qR7::operator != (const qR7 & wp) const
 
 bool qR7::isequal (const char * Wstr)
 {
-   char ws;
-   int  w1n,w2n,w3n;
+   char ws=0;
+   int  w1n=0,w2n=1,w3n=2;
 
    ws = Wstr[0]; w1n = atoi(&ws);
    ws = Wstr[1]; w2n = atoi(&ws);
@@ -154,8 +154,8 @@ bool qG2::operator != (const qG2 & up) const
 
 bool qG2::isequal (const char * Ustr)
 {
-   char us;
-   int  u1n,u2n;
+   char us=0;
+   int  u1n=0,u2n=1;
 
    us = Ustr[0]; u1n = atoi(&us);
    us = Ustr[1]; u2n = atoi(&us);

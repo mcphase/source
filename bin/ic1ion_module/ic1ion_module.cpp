@@ -1016,8 +1016,8 @@ void spindensity_coeff(Vector &J,          // Output single ion moments =expecta
                       char **sipffilename, // Single ion properties filename
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {  // sum exchange field and external field
-   Vector gjmbH(1,Hxc.Hi());
-   gjmbH=Hxc;
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -1047,8 +1047,8 @@ void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expecta
                       char **sipffilename, // Single ion properties filename
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {  // sum exchange field and external field
-   Vector gjmbH(1,Hxc.Hi());
-   gjmbH=Hxc;
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
