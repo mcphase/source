@@ -476,7 +476,6 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
        rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
        if(rc) 
        {
-          printf("Warning, failed to create thread %i - joining and retrying.\n",ithread+1);
           pthread_join(threads[ithread], &status); 
           rc = pthread_create(&threads[ithread], &attr, htcalc_iteration, (void *) tin[ithread]);
           if(rc) { printf("Error return code %i from thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }

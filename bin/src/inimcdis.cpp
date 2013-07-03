@@ -203,7 +203,7 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector 
                                       nn[1]=hkl(1);nn[2]=hkl(2);nn[3]=hkl(3);
                                      }
                        // here check if hkl already in list and if yes, extend its energies
-                     if(nofhkls>1&&fabs(hkls[nofhkls][1]-nn[1])+fabs(hkls[nofhkls][2]-nn[2])+fabs(hkls[nofhkls][3]-nn[3])<0.001)
+                     if(nofhkls>1&&fabs(hkls[nofhkls][1]-nn[1])+fabs(hkls[nofhkls][2]-nn[2])+fabs(hkls[nofhkls][3]-nn[3])<1e-9)
                        {if(i>3)
                         {int nold=hkls[nofhkls][0];
                          hkls[nofhkls+1]=new double [nold+1];
@@ -303,7 +303,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
      hklblock+=1-extract_with_prefix(instr,prefix,"deltah",deltaq[1]); 
      hklblock+=1-extract_with_prefix(instr,prefix,"deltak",deltaq[2]); 
      hklblock+=1-extract_with_prefix(instr,prefix,"deltal",deltaq[3]); 
-     if(hklblock==9){++nofhkllists;hklblock=0;i+=(int)fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1);}
+     if(hklblock==9){++nofhkllists;hklblock=0;i+=(int)ceil(fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1));}
 
      QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qxmin",qmin[1]); 
      QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qymin",qmin[2]); 
@@ -314,7 +314,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
      QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQx",deltaq[1]); 
      QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQy",deltaq[2]); 
      QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQz",deltaq[3]); 
-     if(QxQyQzblock==9){++nofhkllists;QxQyQzblock=0;i+=(int)fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1);}
+     if(QxQyQzblock==9){++nofhkllists;QxQyQzblock=0;i+=(int)ceil(fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1));}
 
      if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1))
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;
