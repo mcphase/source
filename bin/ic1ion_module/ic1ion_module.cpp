@@ -309,7 +309,8 @@ __declspec(dllexport)
    if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
    int Hsz = est.Rows()-1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
-   if(est[0][j+1].real()-est[0][i+1].real()<delta)
+   double maxE=delta;
+   if(delta=(est[0][j+1].real()-est[0][i+1].real())<=maxE)
    {
       double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
 

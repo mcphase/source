@@ -250,11 +250,11 @@ int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & d
   if (tn<0) {pr=1;tn*=-1;}
    double ninit=u1[1].real();
    double pinit=u1[1].imag();
- 
+   double maxE=delta; 
 // 1. get i and j from tn
 int k=0,ii=1,jj=1;
 for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj){++k;if(k==tn)break;}if(k==tn)break;}
-if(real(ests(0,jj))-real(ests(0,ii))<delta)
+if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
  {
     Vector En(1,dim);
     Vector wn(1,dim);
@@ -330,6 +330,7 @@ if(real(ests(0,jj))-real(ests(0,ii))<delta)
 
    if (pr==1) printf ("delta=%4.6g meV\n",delta);
 }
+
    // return number of all transitions
       double n=ninit;
       if (n>dim)n=dim;
