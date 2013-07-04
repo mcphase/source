@@ -73,7 +73,7 @@ void errexit() // type info and error exit
 #define EVENT_INIT(e) e = CreateEvent (NULL, TRUE, FALSE, NULL)
 #define EVENT_SIG(e)  SetEvent(e)
 #endif
-#define NUM_THREADS 4
+#define NUM_THREADS 2
  
 // ----------------------------------------------------------------------------------- //
 // Declares a struct to store all the information needed for each disp_calc iteration
