@@ -217,7 +217,7 @@ __declspec(dllexport)
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
-   Vector J(1,Hxc.Hi()), ABC; 
+   Vector J(1,6), ABC; 
    double gJ=0., lnZ, U;
    Icalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
    mom(1)=GS*J(1)+J(2);
@@ -240,7 +240,7 @@ __declspec(dllexport)
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
-   Vector J(1,Hxc.Hi()), ABC; 
+   Vector J(1,6), ABC; 
    double gJ=0., lnZ, U;
    Icalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
    L(1)=J(2);
@@ -263,7 +263,7 @@ __declspec(dllexport)
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
-   Vector J(1,Hxc.Hi()), ABC; 
+   Vector J(1,6), ABC; 
    double gJ=0., lnZ, U;
    Icalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,&lnZ,&U,est);
    S(1)=J(1);
@@ -289,8 +289,8 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
-   Vector gjmbH(1,Hxc.Hi());
-   gjmbH=Hxc;
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -310,7 +310,7 @@ __declspec(dllexport)
    int Hsz = est.Rows()-1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    double maxE=delta;
-   if(delta=(est[0][j+1].real()-est[0][i+1].real())<=maxE)
+   if((delta=(est[0][j+1].real()-est[0][i+1].real()))<=maxE)
    {
       double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
 
@@ -369,7 +369,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,Hxc.Hi());
+   ComplexVector u1(1,6);
    u1(1) = m1(1);
    int nt = du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
    m1(1)=GS*u1(1)+u1(2);
@@ -397,7 +397,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,Hxc.Hi());
+   ComplexVector u1(1,6);
    u1(1) = L1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
    L1(1)=u1(2);
@@ -425,7 +425,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,Hxc.Hi());
+   ComplexVector u1(1,6);
    u1(1) = S1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
    S1(1)=u1(1);

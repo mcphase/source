@@ -391,11 +391,12 @@ void Icalc_parameter_storage_matrix_init(
    ic_parseinput(filename,pars);
 
    // If we just want a blank estates matrix for later use (e.g. in Icalc)
-   int nfact = (int)ceil(sqrt(gjmbHxc.Elements()+1));
+   int nelm = (gjmbHxc.Elements()<6) ? 6 : gjmbHxc.Elements();
+   int nfact = (int)ceil(sqrt(nelm+1));
    int Hsz = icf_getdim(pars)*nfact;
    (*est) = ComplexMatrix(0,Hsz,0,Hsz);
    (*est)(0,0) = complex<double> (pars.n, pars.l);
-   (*est)(0,1) = complex<double> (nfact,gjmbHxc.Elements());
+   (*est)(0,1) = complex<double> (nfact, nelm);
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -519,8 +520,8 @@ __declspec(dllexport)
 #endif
            void Icalc(Vector &J,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
                       double *T,          // Input scalar temperature
-                      Vector &gjmbHxc,      // Input vector of exchange fields (meV) 
-                      Vector &Hext,      // Input vector of external field (meV) 
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (meV) 
  /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
@@ -529,8 +530,8 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
    // sum exchange field and external field
-   Vector gjmbH(1,gjmbHxc.Hi());
-   gjmbH=gjmbHxc;
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -553,6 +554,7 @@ __declspec(dllexport)
    #endif
       for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i] = -gjmbH[i];
 
+   //          0 1 2 3 4 5 6  7  8 91011 12 13 1415161718 19 20 21 222324252627 28 29 30 31 32333435363738 39 40 41 42 43 4445464748495051
    int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int Q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    int im[]= {-1,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
@@ -660,7 +662,7 @@ __declspec(dllexport)
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
-   Vector J(1,Hxc.Hi());
+   Vector J(1,6);
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
    mom(1)=GS*J(1)+J(2);
@@ -683,7 +685,7 @@ __declspec(dllexport)
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
-   Vector J(1,Hxc.Hi()); 
+   Vector J(1,6); 
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
    L(1)=J(2);
@@ -706,7 +708,7 @@ __declspec(dllexport)
                       char **sipffilename,// Single ion properties filename
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
-   Vector J(1,Hxc.Hi()); 
+   Vector J(1,6); 
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
    S(1)=J(1);
@@ -722,15 +724,15 @@ extern "C"
 __declspec(dllexport)
 #endif
          void estates(ComplexMatrix *est, // Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
-                      Vector &gjmbHxc,    // Input vector of exchange fields (meV) 
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (meV) 
  /* Not Used */       double & /*g_J*/,   // Input  Lande g-factor
                       double &T,          // Input  temperature
  /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 {  // sum exchange field and external field
-   Vector gjmbH(1,gjmbHxc.Hi());
-   gjmbH=gjmbHxc;
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -816,7 +818,7 @@ __declspec(dllexport)
 #endif
           int du1calc(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
-                      Vector &gjmbHxc,    // Input vector of exchange fields (meV) 
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (meV) 
  /* Not Used */       double & /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
@@ -826,8 +828,8 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
-   Vector gjmbH(1,gjmbHxc.Hi());
-   gjmbH=gjmbHxc;
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -861,7 +863,7 @@ __declspec(dllexport)
    int Hsz = est.Rows()-1, iJ, incx = 1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    double maxE=delta;
-   if(delta=(est[0][j+1].real()-est[0][i+1].real())<=maxE)
+   if((delta=(est[0][j+1].real()-est[0][i+1].real()))<=maxE)
    {
       double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
 //    iceig VE(Hsz,en,(complexdouble*)&est[1][0],1);
@@ -1010,7 +1012,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,Hxc.Hi());
+   ComplexVector u1(1,6);
    u1(1) = m1(1);
    int nt = du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
    m1(1)=GS*u1(1)+u1(2);
@@ -1038,7 +1040,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,Hxc.Hi());
+   ComplexVector u1(1,6);
    u1(1) = L1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
    L1(1)=u1(2);
@@ -1066,7 +1068,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,Hxc.Hi());
+   ComplexVector u1(1,6);
    u1(1) = S1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
    S1(1)=u1(1);
@@ -2034,6 +2036,11 @@ void chargedensity_coeff(
    icpars pars; 
    const char *filename = sipffilename[0];
    ic_parseinput(filename,pars);
+
+// Definitions in Icalc()
+// //          0 1 2 3 4 5 6  7  8 91011 12 13 1415161718 19 20 21 222324252627 28 29 30 31 32333435363738 39 40 41 42 43 4445464748495051
+// int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+// int Q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
   
 // a(0, 0) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
 // Indices for spindensity
