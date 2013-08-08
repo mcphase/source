@@ -290,7 +290,8 @@ __declspec(dllexport)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;  // MR: why "=0" ? I think it should always store available
+                                                      // components of Hxc in gjmbH !!!
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -320,7 +321,8 @@ __declspec(dllexport)
 
       // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
       int num_op = gjmbH.Hi()-gjmbH.Lo()+1; icmfmat mfmat(pars.n,pars.l,(num_op>6?num_op:6),pars.save_matrices);
-
+                // MR: why num_op is defined by gjmbH dimension and not by u1 dimension ? (mfmat matrices should be initalised
+                //     to be able to calculate the components of vector u1. 
       iceig VE(Hsz,en,(complexdouble*)&est[1][0],1);
  
       // Calculates the transition matrix elements:

@@ -314,7 +314,7 @@ public class displaytext extends JPanel implements FileListener {
 		 /* ----------- */
          }
          catch (Exception e) { System.err.println("File input error"); System.exit(1);}
-		 gibNummern();
+		 /*gibNummern();*/
     }
 
     /**
