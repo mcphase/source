@@ -271,7 +271,7 @@ sMat<double> icf_ukq(int n, int k, int q, orbital e_l)
 
    // Determines reduced matrix elements (Stevens operator equivalent factor)
    double rmU=0., p = pow(-1.,(double)abs(e_l))*(2.*e_l+1.);
-   if (n>1 && n<(4*e_l+1))
+   if (n>1) // && n<(4*e_l+1))
    {
       fconf confp(n-1,e_l);
       std::vector<cfpls> cfps;
@@ -531,7 +531,7 @@ __declspec(dllexport)
 {
    // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -552,7 +552,7 @@ __declspec(dllexport)
       for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i] = -gjmbH[i]*pars.jijconv[i]; }
    else
    #endif
-      for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i] = -gjmbH[i];
+      for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i] = -gjmbH[i];  // Vector of Exchange + External field to be added to matrix in lines 628, 637
 
    //          0 1 2 3 4 5 6  7  8 91011 12 13 1415161718 19 20 21 222324252627 28 29 30 31 32333435363738 39 40 41 42 43 4445464748495051
    int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
@@ -732,7 +732,7 @@ __declspec(dllexport)
                       char **sipffilename)// Input  Single ion properties filename
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -829,7 +829,7 @@ __declspec(dllexport)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -975,7 +975,7 @@ __declspec(dllexport)
       }
    
       // multiply matrix Mab by occupation factor
-      for(iJ=1; iJ<=sz; iJ++)
+      for(iJ=1; iJ<=u1.Hi(); iJ++)
 	    u1(iJ) = complex<double> ( u[iJ]*sqrt(therm/Z), iu[iJ]*sqrt(therm/Z) );
 
       delete[]en;

@@ -20,8 +20,7 @@
 #include <iomanip>
 #include <ctime>
 
-void Fk2F(std::vector<double> F) { // Converts from F_k to F^k
-   F[1] *= 225.; F[2] *= 1089.; F[3] *= (184041./25); }
+#define Fk2F(F) F[1] *= 225.; F[2] *= 1089.; F[3] *= (184041./25); 
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Looks up values of Slater and spin orbit radial integrals from published spectroscopic data
