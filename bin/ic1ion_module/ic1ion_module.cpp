@@ -115,7 +115,7 @@ __declspec(dllexport)
 {
    // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -137,7 +137,7 @@ __declspec(dllexport)
       for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i]*pars.jijconv[i]; }
    else
    #endif
-      for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i];
+      for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i-J.Lo()] = -gjmbH[i];  // Vector of exchange + external fields to be added to matrix in line 189
 
    // Calculates the IC Hamiltonian matrix
    int i,k,q,Hsz=getdim(pars.n,pars.l);
@@ -290,8 +290,7 @@ __declspec(dllexport)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;  // MR: why "=0" ? I think it should always store available
-                                                      // components of Hxc in gjmbH !!!
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -333,7 +332,7 @@ __declspec(dllexport)
       std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
       mfmat.u1(u,iu,VE,T,i,j,pr,delta,pars.save_matrices);
 
-      for(i=1; i<=(num_op>6?num_op:6); i++)
+      for(i=1; i<=u1.Hi(); i++)
          u1(i) = complex<double> (u[i], iu[i]);
    }
    // determine number of thermally reachable states
@@ -489,7 +488,7 @@ __declspec(dllexport)
                       char **sipffilename)// Input  Single ion properties filename
 { // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -1020,7 +1019,7 @@ void spindensity_coeff(Vector &J,          // Output single ion moments =expecta
                       ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -1106,7 +1105,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
       std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
       mfmat.dod_u1(xyz,u,iu,VE,T,i,j,pr,delta,pars.save_matrices);
 
-      for(i=1; i<=(num_op>6?num_op:6); i++)
+      for(i=1; i<=u1.Hi(); i++)
          u1(i) = complex<double> (u[i], iu[i]);
    }
    // determine number of thermally reachable states
