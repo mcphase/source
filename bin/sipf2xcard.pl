@@ -274,7 +274,7 @@ sub ic1ion()
                    }
  close Fin;
 
- system("ic1ionit -h $file > ic1ion.log");
+ system("ic1ion -h $file > ic1ion.log");
  chdir "results";
  unless (open(Fin,"ic1ion.out")){die "cannot open file ic1ion.out\n";}
  while($line=<Fin>){
@@ -294,17 +294,17 @@ sub ic1ion()
                 if($line=~/^.*L20\s*=/) {($L20)=($line=~m|L20\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L21\s*=/) {($L21)=($line=~m|L21\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L22\s*=/) {($L22)=($line=~m|L22\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L21S\s*=/) {($L21s)=($line=~m|L21S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L21S\s*=/) {($L22s)=($line=~m|L21S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L21s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L22s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L40\s*=/) {($L40)=($line=~m|L40\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L41\s*=/) {($L41)=($line=~m|L41\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L42\s*=/) {($L42)=($line=~m|L42\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L43\s*=/) {($L43)=($line=~m|L43\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L44\s*=/) {($L44)=($line=~m|L44\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L41S\s*=/) {($L41s)=($line=~m|L41S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L42S\s*=/) {($L42s)=($line=~m|L42S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L43S\s*=/) {($L43s)=($line=~m|L43S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L44S\s*=/) {($L44s)=($line=~m|L44S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-1\s*=/) {($L41s)=($line=~m|L4-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-2\s*=/) {($L42s)=($line=~m|L4-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-3\s*=/) {($L43s)=($line=~m|L4-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-4\s*=/) {($L44s)=($line=~m|L4-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
 if($spdf=~/f/){
                 if($line=~/^.*F\^6\s*=/) {($F6)=($line=~m|F\^6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L60\s*=/) {($L60)=($line=~m|L60\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
@@ -314,12 +314,12 @@ if($spdf=~/f/){
                 if($line=~/^.*L64\s*=/) {($L64)=($line=~m|L64\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L65\s*=/) {($L65)=($line=~m|L65\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L66\s*=/) {($L66)=($line=~m|L66\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L61S\s*=/) {($L61s)=($line=~m|L61S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L62S\s*=/) {($L62s)=($line=~m|L62S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L63S\s*=/) {($L63s)=($line=~m|L63S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L64S\s*=/) {($L64s)=($line=~m|L64S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L65S\s*=/) {($L65s)=($line=~m|L65S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L66S\s*=/) {($L66s)=($line=~m|L66S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-1\s*=/) {($L61s)=($line=~m|L6-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-2\s*=/) {($L62s)=($line=~m|L6-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-3\s*=/) {($L63s)=($line=~m|L6-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-4\s*=/) {($L64s)=($line=~m|L6-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-5\s*=/) {($L65s)=($line=~m|L6-5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-6\s*=/) {($L66s)=($line=~m|L6-6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
               }
                     }
               close Fin;
@@ -339,7 +339,7 @@ sub icf1ion()
                    }
  close Fin;
 
- system("icf1ionit $file > icf1ion.log");
+ system("icf1ion $file > icf1ion.log");
  chdir "results";
  unless (open(Fin,"icf1ion.out")){die "cannot open file icf1ion.out\n";}
  while($line=<Fin>){
@@ -357,17 +357,17 @@ sub icf1ion()
                 if($line=~/^.*L20\s*=/) {($L20)=($line=~m|L20\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L21\s*=/) {($L21)=($line=~m|L21\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L22\s*=/) {($L22)=($line=~m|L22\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L21S\s*=/) {($L21s)=($line=~m|L21S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L21S\s*=/) {($L22s)=($line=~m|L21S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L21s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L22s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L40\s*=/) {($L40)=($line=~m|L40\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L41\s*=/) {($L41)=($line=~m|L41\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L42\s*=/) {($L42)=($line=~m|L42\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L43\s*=/) {($L43)=($line=~m|L43\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L44\s*=/) {($L44)=($line=~m|L44\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L41S\s*=/) {($L41s)=($line=~m|L41S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L42S\s*=/) {($L42s)=($line=~m|L42S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L43S\s*=/) {($L43s)=($line=~m|L43S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L44S\s*=/) {($L44s)=($line=~m|L44S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-1\s*=/) {($L41s)=($line=~m|L4-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-2\s*=/) {($L42s)=($line=~m|L4-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-3\s*=/) {($L43s)=($line=~m|L4-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-4\s*=/) {($L44s)=($line=~m|L4-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
 if($spdf=~/f/){
                 if($line=~/^.*L60\s*=/) {($L60)=($line=~m|L60\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L61\s*=/) {($L61)=($line=~m|L61\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
@@ -376,12 +376,12 @@ if($spdf=~/f/){
                 if($line=~/^.*L64\s*=/) {($L64)=($line=~m|L64\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L65\s*=/) {($L65)=($line=~m|L65\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L66\s*=/) {($L66)=($line=~m|L66\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L61S\s*=/) {($L61s)=($line=~m|L61S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L62S\s*=/) {($L62s)=($line=~m|L62S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L63S\s*=/) {($L63s)=($line=~m|L63S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L64S\s*=/) {($L64s)=($line=~m|L64S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L65S\s*=/) {($L65s)=($line=~m|L65S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L66S\s*=/) {($L66s)=($line=~m|L66S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-1\s*=/) {($L61s)=($line=~m|L6-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-2\s*=/) {($L62s)=($line=~m|L6-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-3\s*=/) {($L63s)=($line=~m|L6-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-4\s*=/) {($L64s)=($line=~m|L6-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-5\s*=/) {($L65s)=($line=~m|L6-5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-6\s*=/) {($L66s)=($line=~m|L6-6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
               }
                     }
               close Fin;
@@ -411,17 +411,17 @@ $spdf="f";$n=4;$conf=$n.$spdf;
                 if($line=~/^.*L20\s*=/) {($L20)=($line=~m|L20\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L21\s*=/) {($L21)=($line=~m|L21\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L22\s*=/) {($L22)=($line=~m|L22\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L21S\s*=/) {($L21s)=($line=~m|L21S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L21S\s*=/) {($L22s)=($line=~m|L21S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L21s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L2-1\s*=/) {($L22s)=($line=~m|L2-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L40\s*=/) {($L40)=($line=~m|L40\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L41\s*=/) {($L41)=($line=~m|L41\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L42\s*=/) {($L42)=($line=~m|L42\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L43\s*=/) {($L43)=($line=~m|L43\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L44\s*=/) {($L44)=($line=~m|L44\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L41S\s*=/) {($L41s)=($line=~m|L41S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L42S\s*=/) {($L42s)=($line=~m|L42S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L43S\s*=/) {($L43s)=($line=~m|L43S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L44S\s*=/) {($L44s)=($line=~m|L44S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-1\s*=/) {($L41s)=($line=~m|L4-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-2\s*=/) {($L42s)=($line=~m|L4-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-3\s*=/) {($L43s)=($line=~m|L4-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L4-4\s*=/) {($L44s)=($line=~m|L4-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
 if($spdf=~/f/){
                 if($line=~/^.*L60\s*=/) {($L60)=($line=~m|L60\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L61\s*=/) {($L61)=($line=~m|L61\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
@@ -430,12 +430,12 @@ if($spdf=~/f/){
                 if($line=~/^.*L64\s*=/) {($L64)=($line=~m|L64\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L65\s*=/) {($L65)=($line=~m|L65\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
                 if($line=~/^.*L66\s*=/) {($L66)=($line=~m|L66\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L61S\s*=/) {($L61s)=($line=~m|L61S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L62S\s*=/) {($L62s)=($line=~m|L62S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L63S\s*=/) {($L63s)=($line=~m|L63S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L64S\s*=/) {($L64s)=($line=~m|L64S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L65S\s*=/) {($L65s)=($line=~m|L65S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
-                if($line=~/^.*L66S\s*=/) {($L66s)=($line=~m|L66S\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-1\s*=/) {($L61s)=($line=~m|L6-1\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-2\s*=/) {($L62s)=($line=~m|L6-2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-3\s*=/) {($L63s)=($line=~m|L6-3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-4\s*=/) {($L64s)=($line=~m|L6-4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-5\s*=/) {($L65s)=($line=~m|L6-5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
+                if($line=~/^.*L6-6\s*=/) {($L66s)=($line=~m|L6-6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|); }
               }
                     }
               close Fin;
