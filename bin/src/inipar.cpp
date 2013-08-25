@@ -135,7 +135,7 @@ int inipar::load ()
        nofthreads = sysinfo.dwNumberOfProcessors;
 #endif
     }
-    if(nofthreads<1) nofthreads=1;                   // All else fails: use only 1 thread
+    if(nofthreads<1||nofthreads>255) nofthreads=1;   // All else fails: use only 1 thread
   }
 
   if(maxnofmfloops==0){fprintf(stderr,"Error reading maxnofmfloops\n");return 1;}

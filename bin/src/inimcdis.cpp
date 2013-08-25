@@ -373,7 +373,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
        nofthreads = sysinfo.dwNumberOfProcessors;
 #endif
     }
-    if(nofthreads<1) nofthreads=1;                   // All else fails: use only 1 thread
+    if(nofthreads<1||nofthreads>255) nofthreads=1;             // All else fails: use only 1 thread
   }
   // reread mcdisp.par creating the hkl list ******************************************************************
   hkls=new double *[i+10]; // dimension the list
