@@ -39,7 +39,8 @@ class inipar
   // maximum number of test spinconfigurations 
   int maxnoftestspincf;
 
-  
+  // Number of threads to use in mcphas
+  int nofthreads;
   
   //PARAMETER FOR SUB FECALC - SELFCONSISTENCY PROCESS
   // maximum number of selfconsistency loops

@@ -34,7 +34,7 @@ void dataDestructor(void *data) { }
 #define THRLC_GET(v)   TlsGetValue (v)
 #define THRLC_GET_FAIL 0
 #endif
-#define NUM_THREADS 2
+#define NUM_THREADS ini.nofthreads
 
 // ----------------------------------------------------------------------------------- //
 // Declares a struct to store all the information needed for each htcalc iteration
@@ -64,7 +64,7 @@ class htcalc_input { public:
 // Declares these variables global, so all threads can see them
 // ----------------------------------------------------------------------------------- //
 htcalc_thread_data thrdat;
-htcalc_input *tin[NUM_THREADS];
+htcalc_input *tin[256];  // Max number of threads - hard coded because global variable.
 MUTEX_TYPE mutex_loop;
 MUTEX_TYPE mutex_tests;
 MUTEX_TYPE mutex_min;

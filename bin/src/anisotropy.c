@@ -19,9 +19,9 @@ int main (int argc, char **argv)
 { char sipffilename[MAXNOFCHARINLINE];
   int im,l,nofsteps;
   int do_sipffile=0;
+  int nofthreads=1;
   double z,u;
   double T,H;
-  float nn[20];nn[0]=19;
   Vector xv(1,3);
   Vector yv(1,3);
   Vector h(1,3);
@@ -88,6 +88,7 @@ if(do_sipffile){
 // as class par load  parameters from file
  if(verbose==1){printf("reading parameters from file mcphas.j\n");}
  inipar ini("mcphas.ini"); par inputpars("./mcphas.j"); inputpars.save("./results/_mcphas.j"); 
+ nofthreads = ini.nofthreads;
   Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
   Vector Imom(1,inputpars.nofcomponents);
   Vector h1(1,inputpars.nofcomponents),h1ext(1,3);h1ext=0; 
@@ -132,7 +133,7 @@ fclose(fout);
    fprintf(stderr,"          End of Program anisotropy\n");
    fprintf(stderr,"**********************************************\n");
 #ifdef _THREADS
-for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
+for (int ithread=0; ithread<nofthreads; ithread++) delete tin[ithread];
 #endif
 return(0);
 }

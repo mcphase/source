@@ -73,7 +73,7 @@ void errexit() // type info and error exit
 #define EVENT_INIT(e) e = CreateEvent (NULL, TRUE, FALSE, NULL)
 #define EVENT_SIG(e)  SetEvent(e)
 #endif
-#define NUM_THREADS 2
+#define NUM_THREADS ini.nofthreads
  
 // ----------------------------------------------------------------------------------- //
 // Declares a struct to store all the information needed for each disp_calc iteration
@@ -596,7 +596,6 @@ if (do_jqfile==1)
 // ************************************************************************************************
 #ifdef _THREADS
    // Initialises mutual exclusions and threads
-   int retval;
    MUTEX_INIT(mutex_loop);
    MUTEX_INIT(mutex_index);
    EVENT_INIT(checkfinish);
@@ -608,6 +607,7 @@ if (do_jqfile==1)
    #else
    HANDLE threads[NUM_THREADS];
    DWORD tid[NUM_THREADS], dwError;
+   int retval;
    #endif
    int ithread;
    intcalcapr_input *tin[NUM_THREADS];     

@@ -3,6 +3,14 @@
 #include <martin.h>
 #include "../../version"
 
+#if defined(__linux__)
+#include <sys/sysinfo.h>
+#elif defined(__FreeBSD__) || defined(__APPLE__)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#else
+#include <windows.h>
+#endif
 
 #define NOFHKLCOLUMNS 7
 int usrdefcols[]={4, 1,2,3,4}; // user defined output columns (first number is number of usr def output columns)
@@ -247,7 +255,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
   extract(instr,"Hc",Hext[3]);
   info= new char [strlen(instr)+1];strcpy(info,instr);
   printf("#%s \n# reading mean field configuration mf=gj muB heff [meV]\n",instr);
-  nofatoms=1;nofcomponents=3;
+  nofatoms=1;nofcomponents=3;nofthreads=0;
   extract(instr,"nofatoms",nofatoms); 
   extract(instr,"nofcomponents",nofcomponents); 
   mf=mfcf(1,1,1,nofatoms,nofcomponents); 
@@ -289,6 +297,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
      extract_with_prefix(instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
      extract_with_prefix(instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation);
      extract_with_prefix(instr,prefix,"outS",outS);
+     extract_with_prefix(instr,prefix,"nofthreads",nofthreads);
      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {sprintf(somestring,"out%i",usrdefcols[j]);
       extract(instr, somestring,colcod[usrdefcols[j]]);
@@ -347,6 +356,25 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
 	     {kf=0;
 	      fprintf(stdout,"#Calculating intensities for ki=const=%4.4g/A\n",ki);
 	     }
+  // Checks if nofthreads set in mcdisp.par, if not check environment or use system calls
+  if(nofthreads<1) {
+    char* c_nofthreads=getenv("MCPHASE_NOFTHREADS");  // Check if system environment variable set from dos.bat/lin.bat
+    if (c_nofthreads)
+       nofthreads = atoi(c_nofthreads);
+    else {
+#if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
+       nofthreads = get_nprocs();
+#elif defined(__FreeBSD__) || defined(__APPLE__)
+       int m[2], count; size_t len;
+       m[0] = CTL_HW; m[1] = HW_NCPU; len = sizeof(int);
+       sysctl(m, 2, &nofthreads, &len, NULL, 0);
+#else
+       SYSTEM_INFO sysinfo; GetSystemInfo(&sysinfo);
+       nofthreads = sysinfo.dwNumberOfProcessors;
+#endif
+    }
+    if(nofthreads<1) nofthreads=1;                   // All else fails: use only 1 thread
+  }
   // reread mcdisp.par creating the hkl list ******************************************************************
   hkls=new double *[i+10]; // dimension the list
   nofhkls=0;hklblock=0;QxQyQzblock=0;

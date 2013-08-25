@@ -36,6 +36,7 @@ class inimcdis
   int calculate_orbmomdensity_oscillation; //  creates mcdisp.qod
   int calculate_phonon_oscillation; //  creates mcdisp.qep
   int outS;
+  int nofthreads;
   double T;
   Vector Hext;
   double emax;
