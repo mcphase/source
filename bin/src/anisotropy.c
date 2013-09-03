@@ -59,10 +59,10 @@ if (argc>=8)if (strcmp(argv[7],"-r")==0)
  FILE * fout;fout=fopen_errchk("./results/anisotropy.out","w");
 fprintf(fout,
 "# output file of program: anisotropy @command\n"
-"#! displayxtext=azimuth(deg) in plane perpendicular to $direction\n"
+"#! displayxtext=azimuth(deg) in plane perpendicular to [%g %g %g] direction\n"
 "#! displayytext=M||H(mub)\n"
 "#! displaytitle= Anisotropy plot az=0 corresponds to [%g %g %g]\n"
-"# phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[mb] Mx[mb] My[mb] Mz[mb] MparallelH[mb]\n",r1(1),r1(2),r1(3));
+"# phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[mb] Mx[mb] My[mb] Mz[mb] MparallelH[mb]\n",direction(1),direction(2),direction(3),r1(1),r1(2),r1(3));
 
 if(do_sipffile){
  jjjpar jjj(0,0,0,sipffilename,argc-9);jjj.save_sipf("./results/_");
