@@ -612,7 +612,7 @@ ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
 
 void jjjpar::print_eigenstates(FILE *fout)
 {fprintf(fout,"#! Eigenvalues = ");
- Vector ev(Real(est.Row(0))); myPrintVector(fout,ev);
+ Vector ev(Real(est.Row(0))(1,est.Chi())); myPrintVector(fout,ev);
  fprintf(fout,"#Eigenvectors [as colunmns]\n");
  ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
  myPrintComplexMatrix(fout,es);
