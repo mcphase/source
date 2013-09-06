@@ -375,6 +375,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
     }
     if(nofthreads<1||nofthreads>255) nofthreads=1;             // All else fails: use only 1 thread
   }
+  printf("# nofthreads=%i\n",nofthreads);
   // reread mcdisp.par creating the hkl list ******************************************************************
   hkls=new double *[i+10]; // dimension the list
   nofhkls=0;hklblock=0;QxQyQzblock=0;
