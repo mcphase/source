@@ -279,6 +279,7 @@ void sortE(Vector & d,ComplexMatrix & z)
 // rotate chi(1..3,1..3) from xyz to uvw coordinates
 void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
 {Vector hkl(1,3),u(1,3),v(1,3),w(1,3),q1(1,3),q2(1,3);q1=0;q2=0;
+ static Vector wold(1,3);
  ComplexMatrix M(1,3,1,3);
  hkl(1)=ini.hkls[counter][1];
  hkl(2)=ini.hkls[counter][2];
@@ -290,19 +291,20 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  hkl(2)=ini.hkls[i][2];
  hkl(3)=ini.hkls[i][3];
  hkl2ijk(q1,hkl,abc);
- while(fabs(q1*q2)-Norm(q1)*Norm(q2)<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i<ini.nofhkls){
+ while(fabs(fabs(q1*q2)-Norm(q1)*Norm(q2))<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i<ini.nofhkls){
  hkl(1)=ini.hkls[i+1][1];
  hkl(2)=ini.hkls[i+1][2];
  hkl(3)=ini.hkls[i+1][3];
  hkl2ijk(q2,hkl,abc);
      i++;}
- while(fabs(q1*q2)-Norm(q1)*Norm(q2)<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i>1){i--;
+//printf("A:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i counter=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,counter);
+ while(fabs(fabs(q1*q2)-Norm(q1)*Norm(q2))<SMALL_XPROD_FOR_PARALLEL_VECTORS&&i>1){i--;
  hkl(1)=ini.hkls[i][1];
  hkl(2)=ini.hkls[i][2];
  hkl(3)=ini.hkls[i][3];
  hkl2ijk(q1,hkl,abc);
      }
-//printf("q1*q2=%g q1=(%g %g %g) q2=(%g %g %g)\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3));
+//printf("B:q1*q2=%g q1=(%g %g %g) q2=(%g %g %g) i=%i counter=%i\n",q1*q2,q1(1),q1(2),q1(3),q2(1),q2(2),q2(3),i,counter);
  xproduct(w,q1,q2);
  if(Norm(w)<SMALL_XPROD_FOR_PARALLEL_VECTORS){fprintf(stderr,"Error mcdisp: for option outS=3,4 more than 1 linear independent hkl set has to be given in order to determine scattering plane\n");exit(EXIT_FAILURE);}
  xproduct(v,w,u);
@@ -310,6 +312,8 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
  u=u/Norm(u);
  v=v/Norm(v);
  w=w/Norm(w);
+ if(Norm(w-wold)>SMALL_NORM){printf("#for this and the following q vectors the vector w (perp to scattering plane) is w=(wx,wy,wz)=(%8.4f %8.4f %8.4f) with x||(b x (a x b)),y||b,z||(a x b)\n",w(1),w(2),w(3));}
+ wold=w;
  // now u v w is determined in terms of xyz coordinates
  ComplexMatrix rot(1,3,1,3);
  for(int i=1;i<=3;++i){rot(i,1)=u(i);rot(i,2)=v(i);rot(i,3)=w(i);}
