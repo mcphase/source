@@ -530,7 +530,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
    // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
@@ -578,7 +578,7 @@ __declspec(dllexport)
    else Hicnotcalc = true;
 
    int oldJhi = J.Hi();
-   if((est.Rhi()!=esz||est.Chi()!=esz) && !Hicnotcalc)   // Probably from spins: need all multipolar operators, not just those used in MF loop.
+   if((est.Rhi()!=esz||est.Chi()!=esz))   // Probably from spins: need all multipolar operators, not just those used in MF loop.
    {
       nfact = (int)real(est[0][1]); esz = Hsz*nfact;
       oldJhi = (int)imag(est[0][1]);
@@ -731,7 +731,7 @@ __declspec(dllexport)
  /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
                       char **sipffilename)// Input  Single ion properties filename
 {  // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
@@ -828,7 +828,7 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi());
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)

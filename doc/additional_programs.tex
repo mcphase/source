@@ -40,6 +40,14 @@ by doing a mcphas or
 
 \end{verbatim}
 
+\item [\prg cfsplit:] Calculates via group theory, the multiplicity of crystal field split levels 
+for particular point symmetries. The command is: "{\prg cfsplit $\langle$PTGP$\rangle$ $\langle$J$\rangle$}"
+where {\prg $\langle$PTGP$\rangle$} is the name of the point group (both Hermman-Maguin and 
+Schoenflies notation are understood), and {\prg $\langle$J$\rangle$} is the half-integer value 
+of the total angular momentum J of the lowest multiplet. E.g. "{\prg cfsplit Oh 2}" gives the 
+familiar cubic Eg/T2g splitting (last line of output).
+See also: {\prg symhmltn} which calculates the allowed two-ion exchange terms for a point group.
+
 \item [\prg cpsingleion 10 100 1 file.levels.cef {[options]}: ] 
 By runnning {\prg singleion} some file.levels.cef is created in folder results.
 The {\prg cpsingleion} program may then be used. It
@@ -392,6 +400,17 @@ note: for calculating T or H dependencies you can put single ion in a loop
           @echo on && singleion 2 0 0 !B! 0 0 0 && @echo off )
           endlocal && @echo on 
 \end{verbatim}      
+
+\item [\prg symhmltn:] Calculates via group theory, the allowed two-ion multipolar exchange terms
+between two ions whose center has some particular point symmetry. Syntax is: 
+"{\prg symhmltn $\langle$PTGP$\rangle$ $\langle$l$\rangle$}" where {\prg $\langle$PTGP$\rangle$} is 
+the name of the point group (both Hermman-Maguin and Schoenflies notation are understood), and 
+{\prg $\langle$l$\rangle$} is the integer multipolar order (l=1 for dipolar exchange, l=2 for 
+quadrupolar, etc.).
+E.g. "{\prg symhmltn Oh 1}" gives the familiar Heisenberg exchange terms. 
+See also: {\prg cfsplit} which calculates the multiplicities of the crystal field split levels of a
+particular point group.
+
 \end{description} 
 
 \section{Programs for Manipulation of Columns and Lines in Data Files}
