@@ -137,7 +137,7 @@ integer :: i,j, k,kl,n,m, l, ii ,nn, cline, vv1(Mp),vv2(Mp), w, status_read
 integer :: ww, type_of_contence,linetype(50), linenumber, nlines
 real :: s,dk,kn,knn,ksn,ks,k0, Evr(Np,Np),Evi(Np,Np), v(Np),f, x, y,gJ,dd
 integer ::  io_error,ddi
-real ::  x1,x2,x3,y1,y2,y3,strfak
+real ::  x1,x2,x3,y1,y2,y3
 ! kv(i) direction of incoming beam, ksv(i) of scattered beam, 
 ! and kap(i) of vector kappa
 complex ::  cs

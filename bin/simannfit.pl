@@ -398,13 +398,13 @@ sub mydel  { my ($file1)=@_;
 sub read_write_statusfile {
      open(Fout,">./results/simannfit.status");$i=0;
      print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
-     if($chisquared){print Fout "Current sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2)) sta of stored parameters=$stasave\n";}
-              else {print Fout " Current     sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")   sta of stored parameters=$stasave\n";}
+     if($chisquared){print Fout " Current sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n sta of stored parameters=$stasave\n";}
+              else {print Fout " Current     sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")  \n sta of stored parameters=$stasave\n";}
      print Fout "----------------------------------------------------------------------------------------\n";
-     print Fout "Statistical Temperature=$stattemp      Step Ratio=$stps\n";
+     print Fout " Statistical Temperature=$stattemp      Step Ratio=$stps\n";
      print Fout "----------------------------------------------------------------------------------------\n";
      $est=sprintf("%6.2f",(time-$starttime)/3600);$maxtimest=sprintf("%6.2f",($maxtim)/3600);
-     print Fout "Time since start of simannfit: $est hours (limit:$maxtimest), $stepnumber steps (limit:$maxstep)\n";
+     print Fout " Time since start of simannfit: $est hours (limit:$maxtimest), $stepnumber steps (limit:$maxstep)\n";
      print Fout "----------------------------------------------------------------------------------------\n";
      print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
      foreach(@par){$parcent=int(10*($par[$i]-$parmin[$i])/(1e-10+$parmax[$i]-$parmin[$i]));

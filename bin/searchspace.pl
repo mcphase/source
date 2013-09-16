@@ -13,7 +13,7 @@ use File::Copy;
 unless ($#ARGV >0) 
 {print "***************************************************\n";
  print " program searchspace used to search parameter space\n\n";
- print " usage: searchspace i  * \n\n";
+ print " usage: searchspace i [-jpglog 3.5e-1 file.jpg] * \n\n";
  print " i ... level of parameter search (i=0 for first scan, for i>0 a\n";
  print " file searchspace.i with parameter sets must exist)\n\n";
  print " * .. filename(s) of paramter file(s)\n";
@@ -22,15 +22,21 @@ unless ($#ARGV >0)
  print " at every iteration step and  the standard sta deviation is \n";
  print " recorded in filesearchspace.i  i=1,2,3, ....\n\n";
  print " localminima are also recorded (searchspace.i.localminima)\n\n";
+ print STDOUT << "EOF";
+ option -jpglog: if sta is less then 3.5e-1, then the image file.jpg 
+ (which should be created by calcsta) is copied to results/parsetnr.jpg
+
+
+EOF
  print " Note: at each level searchspace covers parameterspace\n";
  print "       with a more dense net of points. The minimum distance\n";
  print "       of these points is taken from the parameter-stepwidths\n\n";
  print "***************************************************\n";
- print " alternative usage:  searchspace -27 results/searchspace.3 * \n\n";
+ print " alternative usage:  searchspace -27.03 results/searchspace.3 * \n\n";
  print " If used with option -n, the program reads a parameter set \n";
- print " (line nr 27) from thesearchspace file (e.g. results/searchspace.3)\n";
- print "  and puts this parameter set to the parameter files *\n";
- print "  and *.forfit\n\n";
+ print " nr 27.03 from the searchspace file (e.g. results/searchspace.3)\n";
+ print " and puts this parameter set to the parameter files *\n";
+ print " and *.forfit\n\n";
  print "***************************************************\n";
  print " <Press enter to close>";$in=<STDIN>;
  exit 0;}
@@ -61,6 +67,12 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
   if($searchlevel<0){# in this case only read line number -$searchlevel from input file and update parameter files
                      $inputfile=$ARGV[0]; shift @ARGV;
                     }
+# treat option -jpglog
+$jpglog=0;
+ if($ARGV[0]=~/-jpglog/)
+{shift @ARGV;$ARGV[0]=~s/x/*/g; $jpglog=eval $ARGV[0];shift @ARGV;
+ $jpgimagefile=$ARGV[0];shift @ARGV;
+}
 
 
  while(!open(Fout,">results/searchspace.status")){print "Error opening file results/searchspace.status\n";<STDIN>;}
@@ -92,15 +104,15 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
     if ($#par<0) {print "Error searchspace: no parameters found in input files @ARGV\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
     print ($#par+1);print " parameters found\n"; close Fout;
 
-  if($searchlevel<0){# in this case only read line number -$searchlevel from input file and update parameter files
+  if($searchlevel<0){# in this case only read parameter set -$searchlevel from input file and update parameter files
                     print "reading points from file $inputfile\n";
-                    open (Fin1,$inputfile);$ii=0;
+                    open (Fin1,$inputfile);
                     while($line=<Fin1>)
                     {if ($line=~/^\s*#/) {;}
-                     else{--$ii;
-                          if($ii==$searchlevel){$line=~s/D/E/g;@numbers=split(" ",$line);
-                                                $i=0;foreach(@par){$par[$i]=$numbers[$i];++$i}
-                                                $sta=$numbers[$i]; #sta at input parameter position
+                     else{$line=~s/D/E/g;@numbers=split(" ",$line);
+                          if($numbers[0]==-$searchlevel){
+                                                $i=0;foreach(@par){$par[$i]=$numbers[$i+1];++$i}
+                                                $sta=$numbers[$i+1]; #sta at input parameter position
                                                 writefiles();
                                                 # output parameter information to status file and to screen
                                                 open(Fout,">results/searchspace.status");
@@ -127,7 +139,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
                                                 }
                          }
                     }
-                   print "Error program searchspace, loading parameter set in line ".(-$searchlevel)." failed, file too short !\n"; 
+                   print "Error program searchspace, loading parameter set ".(-$searchlevel)." failed !\n"; 
                    print " <Press enter to close>";$in=<STDIN>;exit 1;
                    }
 
@@ -139,14 +151,14 @@ $starttime=time;$stamin=1e10;
 # open and initialize output file
 print "storing points in file searchspace.$searchlevel\n";
 open (Foutlevel,">results/searchspace.$searchlevel");
-print Foutlevel "#";foreach(@parnam){print Foutlevel $_." ";}print Foutlevel "sta variance chisquared\n";
+print Foutlevel "#ParSetNr ";foreach(@parnam){print Foutlevel $_." ";}print Foutlevel "sta variance chisquared\n";
 open(Foutlocalmin,">results/searchspace.$searchlevel.localminima");
-print Foutlocalmin "#";foreach(@parnam){print Foutlocalmin $_." ";}print Foutlocalmin "sta\n";
+print Foutlocalmin "#ParSetNr ";foreach(@parnam){print Foutlocalmin $_." ";}print Foutlocalmin "sta\n";
 
 if ($searchlevel==0)
 {$pointstocalculate=($#par+1)*2;
             $i=0;foreach(@par){$par[$i]=$parmin[$i]+($parmax[$i]-$parmin[$i])/2;++$i}
-            @parorigin=@par;
+            @parorigin=@par;$pointcounterorigin=$pointcounter+1;
             ($sta)=sta(); #sta at input parameter position
        $staorigin=$sta;$i=0;$minimum=1;
        foreach(@par)
@@ -157,26 +169,26 @@ if ($searchlevel==0)
           ($sta)=sta();
            read_write_statusfile();
           last if ($sta==0);
-          if ($sta<$stamin){$stamin=$sta; foreach (@ARGV)
-                                       {$file=$_; mycopy ($file,$file.".min.".$searchlevel);
-                                        mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+          if ($sta<$stamin){$stamin=$sta; # foreach (@ARGV)
+                                          # {$file=$_; mycopy ($file,$file.".min.".$searchlevel);
+                                          # mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+                                          $pointcountermin=$pointcounter+1;
 			}
 
           if ($sta<=$staorigin){$minimum=0;}
-          $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta." ".$s2." ".$chisquared."\n";
-	    ++$pointcounter; 
+           write_set();++$pointcounter; 
           $par[$i]-=2*$dpar;
           ($sta)=sta();
           read_write_statusfile();
           last if ($sta==0);
-          if ($sta<$stamin){$stamin=$sta; foreach (@ARGV)
-                                       {$file=$_; mycopy ($file,$file.".min.".$searchlevel);
-                                        mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+          if ($sta<$stamin){$stamin=$sta; #foreach (@ARGV)
+                                       #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
+                                       # mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+                                          $pointcountermin=$pointcounter+1;
 			}
           if ($sta<=$staorigin){$minimum=0;}
-          $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta."\n";
+           write_set();++$pointcounter;
           $par[$i]+=$dpar;
-  	    ++$pointcounter;
          }
          last if ($sta==0);
         ++$i;
@@ -186,11 +198,13 @@ if ($searchlevel==0)
         {#the input parameters are probably a (local) minimum - so save to file results/searchspace.$searchlevel.localminima
           ($sta)=sta();
 #        last if ($sta==0);
-       if ($sta<$stamin){$stamin=$sta; foreach (@ARGV)
-                                       {$file=$_; mycopy ($file,$file.".min.".$searchlevel);
-                                        mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+       if ($sta<$stamin){$stamin=$sta; #foreach (@ARGV)
+                                       #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
+                                       # mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+                                          $pointcountermin=$pointcounter+1;
 			}
 #          foreach (@ARGV){$file=$_; mycopy ($file.".forfit",$file.".$searchlevel.$minnumber");} # do not save these lots of files, this is confusing
+          print Foutlocalmin $pointcounterorigin." ";
           $ii=0;foreach(@parorigin){$dd=sprintf("%e ",$parorigin[$ii]);print Foutlocalmin $dd;++$ii} print Foutlocalmin $staorigin."\n";
 	  ++$minnumber;
        }
@@ -206,38 +220,37 @@ else
   {
    if ($line=~/^\s*#/) {;}
    else{$line=~s/D/E/g;@numbers=split(" ",$line);
-            $i=0;foreach(@par){$par[$i]=$numbers[$i];++$i}
-            $sta=$numbers[$i]; #sta at input parameter position
+            $pointcounterorigin=$numbers[0];$i=0;foreach(@par){$par[$i]=$numbers[$i+1];++$i}
+            $sta=$numbers[$i+1]; #sta at input parameter position
        $staorigin=$sta;$i=0;$minimum=1;@parorigin=@par;
        foreach(@par)
-        {$dpar=($parmax[$i]-$parmin[$i])/2**($searchlevel+2);
+        { $dpar=($parmax[$i]-$parmin[$i])/2**($searchlevel+2);
          if (abs($dpar)>abs($parstp[$i]))
-         {
-          $par[$i]+=$dpar;
+         {$par[$i]+=$dpar;
           ($sta)=sta();
           open(Fin,"results/searchspace.status");$line=<Fin>;
           if ($line=~/exiting searchspace/){$sta=0;close Fin;}
           last if ($sta==0);
-          if ($sta<$stamin){$stamin=$sta; foreach (@ARGV)
-                                       {$file=$_; mycopy ($file,$file.".min.".$searchlevel);
-                                        mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+          if ($sta<$stamin){$stamin=$sta;# foreach (@ARGV)
+                                       #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
+                                       # mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+                                          $pointcountermin=$pointcounter+1;
 			}
 
           if ($sta<=$staorigin){$minimum=0;}
-          $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta."\n";
-	   ++$pointcounter; 
+           write_set();++$pointcounter; 
           $par[$i]-=2*$dpar;
           ($sta)=sta();
           read_write_statusfile();
           last if ($sta==0);
-          if ($sta<$stamin){$stamin=$sta; foreach (@ARGV)
-                                       {$file=$_; mycopy ($file,$file.".min.".$searchlevel);
-                                        mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+          if ($sta<$stamin){$stamin=$sta; #foreach (@ARGV)
+                                       #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
+                                       # mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
+                                          $pointcountermin=$pointcounter+1;
 			}
           if ($sta<=$staorigin){$minimum=0;}
-          $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta."\n";
+           write_set();++$pointcounter; 
           $par[$i]+=$dpar;
-	   ++$pointcounter;
           }
          last if ($sta==0);
         ++$i;
@@ -247,11 +260,13 @@ else
        if ($minimum==1&&$sta!=0)
         {#the input parameters are probably a (local) minimum - so save a file
           ($sta)=sta();if ($sta>$staorigin*1.00000001){$warning="#WARNING - calculation of sta gave another result at some point than stored in file searchspace.".($searchlevel-1)."\n";}
-       if ($sta<$stamin&&$sta!=0){$stamin=$sta; foreach (@ARGV)
-                                       {$file=$_; mycopy ($file,$file.".min.".$searchlevel);
-                                        mycopy ($file.".forfit",$file.".forfit.min.$searchlevel");}
+       if ($sta<$stamin&&$sta!=0){$stamin=$sta;# foreach (@ARGV)
+                                       #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
+                                       # mycopy ($file.".forfit",$file.".forfit.min.$searchlevel");}
+                                          $pointcountermin=$pointcounter+1;
 			}
 #          foreach (@ARGV){$file=$_; mycopy ($file.".forfit",$file.".$searchlevel.$minnumber");}
+          print Foutlocalmin $pointcounterorigin." ";
           $ii=0;foreach(@parorigin){$dd=sprintf("%e ",$parorigin[$ii]);print Foutlocalmin $dd;++$ii} print Foutlocalmin $staorigin."\n";
 	  ++$minnumber;
         }
@@ -267,11 +282,11 @@ print Foutlevel "#$pointcounter points calculated in  $hours h.\n# Time estimate
 print Foutlevel "#".($#ssta+1)." contributions to sta found in output of calcsta ...\n";
    if($chisquared){print Foutlevel "#sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
                else{print Foutlevel "#sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
-print Foutlevel "#Mininimal found sta minsta=$stamin\n";
+print Foutlevel "#Mininimal found sta minsta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)."\n";
 print Foutlevel "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
 print Foutlocalmin "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
 close Foutlevel;close Foutlocalmin;
- foreach (@ARGV) {$file=$_; mycopy($file.".min.$searchlevel",$file);}
+# foreach (@ARGV) {$file=$_; mycopy($file.".min.$searchlevel",$file);}
      open(Fout,">results/searchspace.status");
 print Fout ".......... searchspace stopped...............\n"; 
 print Fout ".............................................\n";
@@ -280,7 +295,7 @@ print Fout ".............................................\n";
 print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
 if($chisquared){print Fout "sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
                else{print Fout "sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
-print Fout "Mininimal found sta=$stamin\n";
+print Fout "Mininimal found sta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)."\n";
 print Fout "noflocalminima=".($minnumber-1)." local minima found (see results/searchspace.$searchlevel.localminima)\n";
 print Fout ".............................................\n";
 print Fout "Time estimate for next level ".($searchlevel+1).": $estimate h\n";
@@ -384,6 +399,15 @@ sub writefiles {
  }
 }
 
+sub write_set()
+{       my $dd=sprintf("%g ",($pointcounter+1)+$searchlevel/100);print Foutlevel $dd;
+        my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta." ".$s2." ".$chisquared."\n";
+        if($jpglog>$sta){$dd=sprintf("%g.jpg",($pointcounter+1)+$searchlevel/100);
+                         print Foutlevel '#<img src="'.$dd.'">'."\n";
+                         mycopy($jpgimagefile,"./results/".$dd);
+                        }
+}
+
 sub mycopy { my ($file1,$file2)=@_;
 
              if ($^O=~/MSWin/){$file1=~s|\/|\\|g;$file2=~s|\/|\\|g;
@@ -414,7 +438,8 @@ sub read_write_statusfile {
      $est=sprintf("%6.2f",($pointstocalculate-$pointcounter)*(time-$starttime)/3600/($pointcounter+1));
      $passed=sprintf("%6.2f",(time-$starttime)/3600);
      print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
-     print Fout "Searchlevel $searchlevel   Current sta=$sta Minimum sta=$stamin\n";
+     print Fout "Searchlevel $searchlevel parameter set nr ".($pointcounter+1)."  Current sta=$sta \n";
+     print Fout "Minimum sta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)."\n";
     if($chisquared){print Fout "sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
                else{print Fout "sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
      print Fout "--------------------------------------------------------------------\n";

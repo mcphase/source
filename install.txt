@@ -62,16 +62,26 @@ Installation Procedure:
  make clean
  make fast=1
 
- if you have a multiple core processor, change #define NUM_THREADS
- in bin/src/mcdisp.c and mcphas_htcalc.c  according to your system, i.e. to
- 2 for a double core or 4 for a quadruple core computer. 
- Then  recompile mcphas.exe by typing:
+ If you have a multiple core processor and want to set the number of threads -
+ There are 3 ways to set the number of threads:
 
- cd bin/src
- set threads=1
- make
+1. Using a system variable: MCPHASE_NOFTHREADS - this could be set
+e.g. in dos.bat (I've not changed this file - so for the distribution
+you could change it maybe to a commented out value for users to see).
 
-(or you can modify the Makefile to specify threads=1). make
+2. In mcphas.ini or mcdisp.par with the variable: nofthreads=
+
+3. If neither of the above variables are specified, the program
+attempts to determine the number of (logical) cores and sets the
+number of threads equal to this value. For a modern-ish quad core
+computer this number will probably be 8 (two logical cores per
+physical cores with hyperthreading).
+
+If it fails to determine the number of cores it sets it to 1.
+
+There is a hardcoded maximum of 255 threads.
+
+
 ]
 
 -------------------------------------------------------------------
@@ -154,13 +164,24 @@ c) Now the installation should be complete. To test the Program:
  
  (this might work not on all systems)
 
- if you have a multiple core processor, change #define NUM_THREADS
- in bin/src/mcdisp.c and mcphas_htcalc.c to according to your system, i.e. to
- 2 for a double core or 4 for a quadruple core computer. 
- Then recompile mcphas.exe by typing:
+  If you have a multiple core processor and want to set the number of threads -
+  There are 3 ways to set the number of threads:
 
- cd bin/src
- threads=1  make
+ 1. Using a system variable: MCPHASE_NOFTHREADS - this could be set
+ e.g. in dos.bat (I've not changed this file - so for the distribution
+ you could change it maybe to a commented out value for users to see).
+
+ 2. In mcphas.ini or mcdisp.par with the variable: nofthreads=
+
+ 3. If neither of the above variables are specified, the program
+ attempts to determine the number of (logical) cores and sets the
+ number of threads equal to this value. For a modern-ish quad core
+ computer this number will probably be 8 (two logical cores per
+ physical cores with hyperthreading).
+
+ If it fails to determine the number of cores it sets it to 1.
+
+ There is a hardcoded maximum of 255 threads.
 
 f) type 
 

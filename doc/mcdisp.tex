@@ -120,7 +120,7 @@ described in section~\ref{displaydensities}.
 
 {\footnotesize
 \begin{verbatim}
-# Parameter file  mcdisp.par - read by mcdisp version 3.6
+# Parameter file  mcdisp.par - read by mcdisp version 5.1
 #<!--mcdisp.mcdisp.par>
 #*********************************************************************
 # mcdisp - program to calculate the dispersion of magnetic excitations
@@ -149,6 +149,10 @@ described in section~\ref{displaydensities}.
 #!calculate_spindensity_oscillation=0  creates mcdisp.qsd
 #!calculate_orbmomdensity_oscillation=0  creates mcdisp.qod
 #!calculate_phonon_oscillation=0  creates mcdisp.qep
+#
+# (optional) number of parallel threads on your machine
+#  (if not set program will attempt to determine this automatically)
+# nofthreads=2
 #
 #     out* controls the type of output in user defined columns in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
 #!out1=1 
@@ -180,7 +184,7 @@ described in section~\ref{displaydensities}.
 # xyz coordinate refer to y||b, z||(a x b) and x normal to y and z
 # uvw coordinates refer to u||Q=k-k', w perpendicular to the scattering plane
 #     (as determined by the cross product of subsequent vectors in the input
-#     q-vector list) and v perpendicular to u and w, such that uvw for a righthanded system
+#     q-vector list) and v perpendicular to u and w, such that uvw form a righthanded system
 #
 #
 # Commands such as the following are used to generate a hkl list (to activate put #! instead of # at beginning of line):
