@@ -59,7 +59,7 @@ sub extract {$value="not found";
              $var="\Q$variable\E";
              if(open (Fin,$filename))
              {while($line=<Fin>){
-                if($line=~/^.*$var\s*=/) {($value)=($line=~m|$var\s*=\s*([^\s]+)|);}                                        }
+                if($line=~/^.*$var\s*=/) {($value)=($line=~m|$var\s*=\s*([^\s^>^<^=]+)|);}                                        }
               close Fin;
        	     }
              else

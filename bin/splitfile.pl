@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-BEGIN{@ARGV=map{glob($_)}@ARGV}
+
 
 #\begin{verbatim}
 
@@ -14,7 +14,7 @@ unless ($#ARGV >0)
  exit 0;}
 
 $string=$ARGV[0];shift @ARGV;
-
+@ARGV=map{glob($_)}@ARGV;
   foreach (@ARGV)
   {$file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
