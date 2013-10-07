@@ -270,7 +270,7 @@ if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
     if (delta<-0.000001){fprintf(stderr,"ERROR module cluster - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
     if(jj==ii)delta=-SMALL_QUASIELASTIC_ENERGY; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
-   int maxn;
+   int maxn=0;
    switch(code)
    {case 1: maxn=u1.Hi();break;
     case 2: maxn=3; break;

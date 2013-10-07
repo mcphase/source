@@ -466,7 +466,7 @@ void Icalc_parameter_storage_matrix_init(
    }
    else
    {
-      int Jlo=Hxc.Lo(), Jhi=Hxc.Hi(), cb = (int)(pars.truncate_level*(double)Hsz), matsize=cb*cb;
+      int Jlo=Hxc.Lo(), Jhi=Hxc.Hi()<6?6:Hxc.Hi(), cb = (int)(pars.truncate_level*(double)Hsz), matsize=cb*cb;
       for (int ii=Jlo; ii<=Jhi; ii++) matsize += (cb*cb);
       (*est) = ComplexMatrix(0,matsize+100+Hsz*Hsz,0,0);
    }

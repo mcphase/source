@@ -647,6 +647,13 @@ jjjpar::jjjpar (const jjjpar & pp)
                           // est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());est=pp.est;
                           // Ia
                           // cluster_ini_Imat(); 
+                          dim=1; Vector Hxc(1,(*clusterpars).nofcomponents);Vector Hext(1,3);
+                          dnn= new int [(*clusterpars).nofatoms+1];
+                          // determine dimension of H matrix
+                          for (int n=1;n<=(*clusterpars).nofatoms;++n)
+                          {dnn[n]=(*(*clusterpars).jjj[n]).opmat(1,Hxc,Hext).Rhi();
+                           dim*=dnn[n];
+                          }
                           Ia= new Matrix * [nofcomponents+1];
                           for(int n = 1;n<=nofcomponents;++n){Ia[n]=new Matrix(1,dim,1,dim);(*Ia[n])=(*pp.Ia[n]);}
                           // cluster_M
