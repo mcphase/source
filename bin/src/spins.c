@@ -220,9 +220,9 @@ gp.read();
   for (j=1;j<=inputpars.nofatoms;++j){
          if(arrow==4&&(*inputpars.jjj[j]).module_type==5){for(k=1;k<=(*(*inputpars.jjj[j]).clusterpars).nofatoms;++k)
                                                  {++ii;par inputpars4((*(*inputpars.jjj[j]).clusterpars));
-                                                 cs4.x[ii]=(*inputpars4.jjj[k]).xyz(1);
-                                                 cs4.y[ii]=(*inputpars4.jjj[k]).xyz(2);
-                                                 cs4.z[ii]=(*inputpars4.jjj[k]).xyz(3);cs4.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
+                                                 cs4.x[ii]=cs.x[j]+(*inputpars4.jjj[k]).xyz(1);
+                                                 cs4.y[ii]=cs.y[j]+(*inputpars4.jjj[k]).xyz(2);
+                                                 cs4.z[ii]=cs.z[j]+(*inputpars4.jjj[k]).xyz(3);cs4.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
                                                  strcpy(cs4.sipffilenames[ii],(*inputpars4.jjj[k]).sipffilename);
                                                  //check if cluster abc  are the same as inputpars
            if(fabs(cs4.abc(1)-inputpars4.a)>1e-6)
