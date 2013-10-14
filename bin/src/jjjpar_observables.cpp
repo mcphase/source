@@ -212,7 +212,7 @@ switch (module_type)
             Mq=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
              dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
             double QR=Qvec*rijk;
-            complex<double> exponent(cos(QR),sin(QR));
+            complex<double> exponent(cos(QR),sin(QR)); 
             for(int n=1;n<=3;++n)
             {Mq(n)+=exponent*mom(3*(a-1)+n)*(*(*clusterpars).jjj[a]).F(Q)*(*(*clusterpars).jjj[a]).debyewallerfactor(Q);
             }}}
