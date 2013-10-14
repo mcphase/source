@@ -116,7 +116,7 @@ CC=i686-w64-mingw32-gcc -m32 -pipe $(ARCHFLAG)
 CCC=i686-w64-mingw32-g++ -m32 -pipe $(ARCHFLAG)
 FC=i686-w64-mingw32-gfortran -m32 -pipe $(ARCHFLAG)
 CYGFLAGS=
-LFLAGS+= -static-libgcc -static-libstdc++
+LFLAGS+= -static-libgcc -static-libstdc++ -static-libgfortran
 endif
 endif
 
@@ -145,9 +145,9 @@ LFLAGS= -openmp -lstdc++
 endif
 
 ifdef gotoblas
-LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -lgfortran -lpthread
+LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -static-libgfortran -lpthread
 else
-LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -lgfortran
+LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -static-libgfortran
 endif
 
 #CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium

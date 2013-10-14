@@ -67,7 +67,7 @@ testspincf::testspincf (int nofconf, const char * file,const char * savfile,int 
   strcpy(savfilename,savfile);
   FILE *fin_coq;
   FILE *fout;
-  long int pos=0,pos_old=0,j;
+  long int pos=0,j;
   char instr[MAXNOFCHARINLINE];
   char text[MAXNOFCHARINLINE];
   int i;
@@ -89,7 +89,7 @@ testspincf::testspincf (int nofconf, const char * file,const char * savfile,int 
    // input file header ------------------------------------------------------------------
   instr[0]='#';
    while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring' 
-  {pos_old=pos;pos=ftell(fin_coq);
+  {pos=ftell(fin_coq);
    if (pos==-1) 
        {fprintf(stderr,"Error reading file %s\n",savfile);exit (EXIT_FAILURE);}
    fgets(instr,MAXNOFCHARINLINE,fin_coq);

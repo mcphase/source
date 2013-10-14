@@ -2048,7 +2048,7 @@ ITERATION *iteration;
 
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),v40=0,v44=0,v60=0,v64=0,sqrt(),temperatur;
-    CHAR  /*  *einheit_in,*einheit_out,*/modus;
+    /*CHAR     *einheit_in,*einheit_out,modus;*/
     CHAR      *ion=0,*token;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION  *iter_alloc();
@@ -2128,7 +2128,7 @@ ITERATION *iteration;
     EFVERSION(  iteration) =  versionsnummer;
  
  
-    modus='a';/* Magnetfeld: . Symmnr...  */
+   /* modus='a';*//* Magnetfeld: . Symmnr...  */
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
     while(feof(fp)==0)
     {line=fgets( string , buffer_size , fp );
@@ -2386,7 +2386,7 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0;
     CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
+    ITERATION *iteration=0,*iter_alloc();
     ITERATION *auswahlregel();
     STEVENS   *calc_Pkq();
     MATRIX    *readBmag();
@@ -2655,7 +2655,7 @@ ITERATION *read_Wkq(name,vsymmetrienr_vor)  /* Wkq aus file name lesen */
     
     DOUBLE    sin(),cos();
     DOUBLE    a_tof(),w40,w44,w60,w64,sqrt(),temperatur;
-    CHAR  /*  *einheit_in,*einheit_out,*/modus;
+    CHAR   /* *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
     CHAR      c,*string,*line,*fgets(),*a_tos();
     ITERATION *iteration,*iter_alloc();

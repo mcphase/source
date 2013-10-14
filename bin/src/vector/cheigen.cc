@@ -85,7 +85,7 @@ void EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi,
     // Use equivalent LAPACK routine with Relatively Robust Representations instead of EISPACK routine in MatPack.
 //  else
     {
-       int lda = hi, info = 0;
+       int  info = 0; //lda = hi,
        char jobz = 'V';
        int lwork = 18*hi;
        double *work=0;
@@ -156,7 +156,7 @@ void EigenValuesHermitean (Matrix& z, Vector& d, int sort, int maxiter)
     // Use equivalent LAPACK routine with Relatively Robust Representations instead of EISPACK routine in MatPack.
 //  else
     {
-       int lda = hi, info = 0;
+       int  info = 0; //lda = hi,
        char jobz = 'N';         // Compute eigenvalues only
        int lwork = 18*hi;
        double *work=0;
@@ -366,7 +366,7 @@ void Chtrbk (Matrix& a, Vector& t1, Vector& t2, Matrix& zr, Matrix& zi)
 //
 {
     int i,j,k,l;
-    double f,g,h,s,si;
+    double f,g,h; // ,s,si;
     double *ai,*zik,*zrk;
     double *sv, *siv;
     double t1k, t2k;
