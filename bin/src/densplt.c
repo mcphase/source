@@ -250,7 +250,6 @@ int i,nofpc=0;
 if(gp.show_pointcharges>0) nofpc=read_pointcharge_parameters(gp,cs.sipffilenames,argv[2+os],cs.x,cs.y,cs.z,jjjps,cs.abc);
   spincf s(1,1,1,nofpc+1,dim);
   spincf magmom(1,1,1,nofpc+1,3);
-  cs.gJ[1]=jjjps.gJ;
   Vector hkl(1,3);hkl=0;s=s*0;magmom=magmom*0;
   spincf ev_real(s),ev_imag(s);
   spincf magmomev_real(magmom),magmomev_imag(magmom);

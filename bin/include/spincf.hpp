@@ -20,7 +20,6 @@ public:
 
     void print(FILE * fout);
 //print list of atoms + positions + moments
-    void printall(FILE * fout,cryststruct & cs);
     void eps(FILE * fout);
     void eps(FILE * fout,const char * text);
     void eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation, Vector & gJ,spincf & magmom);
@@ -32,6 +31,9 @@ public:
     void jvx_cd(FILE * fout,char * text,cryststruct & cs,
               graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
               Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag);
+    void jvx_cd(FILE * fout,char * text,cryststruct & cs,
+              graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
+              Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag);
 
     void cd(FILE * fout,cryststruct & cs,graphic_parameters & gp,
                 spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T,Vector &  gjmbHxc,Vector & Hext);

@@ -63,6 +63,14 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
   }
 }
 
+int jjjpar::micalc (Vector &momi, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{double lnZ,U;
+ switch (module_type)
+  {case 5: cluster_Icalc_mcalc_Micalc (3,momi,T,Hxc,Hext,lnZ,U);return true;break;                                        
+   default: return mcalc(momi,T,Hxc,Hext,parstorage);break;
+  }
+}
+
 int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1,ComplexMatrix & ests)
 {float delta=maxE;m1(1)=complex <double> (ninit,pinit);
  ComplexVector uu1(1,m1.Hi());int nnt,i;
@@ -81,6 +89,16 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
           break;
    }
 return 0;
+}
+
+int  jjjpar::dmi1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & mi1,ComplexMatrix & ests)
+{float delta=maxE;mi1(1)=complex <double> (ninit,pinit);
+ ComplexVector uu1(1,mi1.Hi());int nnt,i;
+ switch (module_type)
+  {case 5: nnt=cluster_dm(3,transitionnumber,T,mi1,delta,ests);return nnt;break;
+   default:return dm1calc(T,Hxc,Hext,mi1,ests);break;
+   }
+ return 0;
 }
 
 int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)

@@ -34,7 +34,8 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
          -div    ... calculate divergence of spin/orbital/current/magnetic moment density  \n\
          -S  ... show arrow indicating spin\n\
          -L  ... show arrow indicating orbital angular momentum\n\
-         -M  ... show arrow indicating magnetic moment\n\
+         -M  ... show arrow indicating magnetic moment (for cluster show total moment)\n\
+         -Mi ... show arrow indicating magnetic moment (for cluster show individual moments)\n\
          -P  ... calculate phononic displacement\n\
          note, that in order to animate changes in the above quantities, the corresponding\n\
          switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion\n\
@@ -75,7 +76,7 @@ printf("# **********************************************************\n");
  FILE * fin, * fout;
 double T; Vector Hext(1,3);
  int i,n=0,dophon=0;
- cryststruct cs;
+ cryststruct cs,cs4;
  spincf savmf;
  float numbers[13];numbers[9]=1;numbers[10]=3;
  numbers[0]=13;
@@ -186,8 +187,10 @@ if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;arrowdim=SPIN_EV_DIM;gp.spins_colou
                               sprintf(gp.title,"%s arrows correspond to the spins",gp.title);}
 else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;arrowdim=ORBMOM_EV_DIM;gp.spins_colour=2; gp.spins_scale_moment=1;
                                    sprintf(gp.title,"%s arrows correspond to the orbital angular momenta",gp.title);}
-else if(strcmp(argv[1+os],"-M")==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_colour=1; gp.spins_scale_moment=1;
-                                   sprintf(gp.title,"%s arrows correspond to the magnetic moments",gp.title);}
+else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_colour=1; gp.spins_scale_moment=1;
+                                   sprintf(gp.title,"%s arrows correspond to the magnetic moments",gp.title);
+                                   if(strcmp(argv[os],"-Mi")==0)arrow=4;
+                                   }
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;dophon=1;}
 
@@ -195,7 +198,7 @@ if(strcmp(argv[1+os],"-P")==0){os+=1;dophon=1;}
 
    fout = fopen_errchk ("./results/spins.out", "w");
 // input file header and conf------------------------------------------------------------------
-   n=headerinput(fin,fout,gp,cs);
+   n=headerinput(fin,fout,gp,cs);cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
 // load spinsconfigurations and check which one is nearest -------------------------------   
 check_for_best(fin,strtod(argv[1+os],NULL),strtod(argv[2+os],NULL),strtod(argv[3+os],NULL),strtod(argv[4+os],NULL),savmf,T,Hext,outstr);
 fclose (fin);
@@ -212,11 +215,39 @@ gp.read();
   par inputpars("./mcphas.j");
   Vector hh(1,savmf.nofcomponents*savmf.nofatoms);
   spincf densitycf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,dim);
-  spincf spinconf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,3);
+  ii=0; 
+  // if individual ions of the cluster are to be shown make nofatoms in spincf larger !
+  for (j=1;j<=inputpars.nofatoms;++j){
+         if(arrow==4&&(*inputpars.jjj[j]).module_type==5){for(k=1;k<=(*(*inputpars.jjj[j]).clusterpars).nofatoms;++k)
+                                                 {++ii;par inputpars4((*(*inputpars.jjj[j]).clusterpars));
+                                                 cs4.x[ii]=(*inputpars4.jjj[k]).xyz(1);
+                                                 cs4.y[ii]=(*inputpars4.jjj[k]).xyz(2);
+                                                 cs4.z[ii]=(*inputpars4.jjj[k]).xyz(3);cs4.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
+                                                 strcpy(cs4.sipffilenames[ii],(*inputpars4.jjj[k]).sipffilename);
+                                                 //check if cluster abc  are the same as inputpars
+           if(fabs(cs4.abc(1)-inputpars4.a)>1e-6)
+              {fprintf(stderr,"Error program spins - a=%g in cluster %s not the same as a=%g in mcphas.j\n",cs4.abc(1),(*inputpars.jjj[j]).sipffilename,inputpars4.a);exit(1);}
+           if(fabs(cs4.abc(2)-inputpars4.b)>1e-6)
+              {fprintf(stderr,"Error program spins - b=%g in cluster %s not the same as b=%g in mcphas.j\n",cs4.abc(2),(*inputpars.jjj[j]).sipffilename,inputpars4.b);exit(1);}
+           if(fabs(cs4.abc(3)-inputpars4.c)>1e-6)
+              {fprintf(stderr,"Error program spins - c=%g in cluster %s not the same as c=%g in mcphas.j\n",cs4.abc(3),(*inputpars.jjj[j]).sipffilename,inputpars4.c);exit(1);}
+           if(fabs(cs4.abc(4)-inputpars4.alpha)>1e-6)
+              {fprintf(stderr,"Error program spins - alpha=%g in cluster %s not the same as alpha=%g in mcphas.j\n",cs4.abc(4),(*inputpars.jjj[j]).sipffilename,inputpars4.alpha);exit(1);}
+           if(fabs(cs4.abc(5)-inputpars4.beta)>1e-6)
+              {fprintf(stderr,"Error program spins - beta=%g in cluster %s not the same as beta=%g in mcphas.j\n",cs4.abc(5),(*inputpars.jjj[j]).sipffilename,inputpars4.beta);exit(1);}
+           if(fabs(cs4.abc(6)-inputpars4.gamma)>1e-6)
+              {fprintf(stderr,"Error program spins - gamma=%g in cluster %s not the same as gamma=%g in mcphas.j\n",cs4.abc(6),(*inputpars.jjj[j]).sipffilename,inputpars4.gamma);exit(1);}                                                 
+                                                 }
+                                               }
+                                               else
+                                              {++ii;cs4.x[ii]=cs.x[j];cs4.y[ii]=cs.y[j];cs4.z[ii]=cs.z[j];cs4.sipffilenames[ii]=cs.sipffilenames[j];}
+              } cs4.nofatoms=ii;
+
+  spincf spinconf(savmf.na(),savmf.nb(),savmf.nc(),ii,3);
 
 
 // the following is for the printout of spins.out ...........................
-fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),inputpars.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
+fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
 fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc>\n");
 fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
 // determine primitive magnetic unit cell
@@ -234,7 +265,7 @@ h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
     hh=savmf.m(i,j,k);
-  densitycf.m(i,j,k)=0;
+  densitycf.m(i,j,k)=0;int i4=1,ii4=1;
   for(ii=1;ii<=inputpars.nofatoms;++ii)
  {  
     Vector magmom(1,3),mom(1,3);
@@ -252,33 +283,67 @@ h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
     h=0;
    for(nt=1;nt<=inputpars.nofcomponents;++nt){h(nt)=hh(nt+inputpars.nofcomponents*(ii-1));}
 
-           // output atoms and moments in primitive unit cell to fout
-              Vector dd3(1,3);
-              dd3=savmf.pos(i,j,k,ii, cs);
-              dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
-              fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
-	              cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
-if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
-   {           for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
-    if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage)&&
-       (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
-      {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f %4.4f",myround(1e-5,Smom(nt)),myround(1e-5,Lmom(nt)));}
-      }
-   }
-  fprintf(fout,"\n                 corresponding exchange fields hxc [meV]-->          ");
-                      for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout exchangefields
-                        {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
-                         fprintf(fout,"\n");
-
 switch(arrow)
 {case 1: (*inputpars.jjj[ii]).Scalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
  case 2: (*inputpars.jjj[ii]).Lcalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
  case 3: (*inputpars.jjj[ii]).mcalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
 }
-if(arrow>0){
-       for(nt=1;nt<=3;++nt)
+switch(arrow)
+{case 1:
+ case 2:
+ case 3:
+         for(nt=1;nt<=3;++nt)
 		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt);
-                    }}
+                    };break;
+ case 4: int dim4;
+         dim4=3;if((*inputpars.jjj[ii]).module_type==5)
+                           dim4=(*(*inputpars.jjj[ii]).clusterpars).nofatoms*3;
+         Vector momi(1,dim4);
+         (*inputpars.jjj[ii]).micalc(momi,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);
+         // now put the components of momi to the spinconf                                               
+         for(nt=1;nt<=dim4;++nt){spinconf.m(i,j,k)(nt+i4-1)=momi(nt);};i4+=dim4;
+         break;
+}
+
+// output atoms and moments in primitive unit cell to fout  ------------------------------------
+Vector dd3(1,3);
+if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
+    for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).nofatoms;++nt)
+     {dd3=spinconf.pos(i,j,k,ii4, cs4);
+      dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
+      fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
+            cs4.sipffilenames[ii4],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
+            fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(1+3*(ii4-1))));
+            fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(2+3*(ii4-1))));
+            fprintf(fout," %4.4f\n",myround(1e-5,spinconf.m(i,j,k)(3+3*(ii4-1))));
+       // do not print out L S or exchange fields for cluster module
+      ++ii4;
+     }
+    }
+else{++ii4;
+    // output the positions
+    dd3=savmf.pos(i,j,k,ii, cs);
+    dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
+    fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
+            cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
+    //ouput the magnetic moment if possible
+    if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
+   {           for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
+     // and output the orbital and spin momentum if possible 
+     if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage)&&
+        (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
+      {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f %4.4f",myround(1e-5,Smom(nt)),myround(1e-5,Lmom(nt)));}
+      }
+   }
+    // finally output a line with the exchange fields 
+  fprintf(fout,"\n                 corresponding exchange fields hxc [meV]-->          ");
+                      for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout exchangefields
+                        {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
+                         fprintf(fout,"\n");
+  }
+// -----------------------------------------------------------------------------------------------
+
+
 if(density){
 switch(argv[1][1]) // dimension definition from jjjpar.hpp
 {case 'c':  (*inputpars.jjj[ii]).chargedensity_coeff (moments, T, h, Hext, (*inputpars.jjj[ii]).Icalc_parstorage); break;
@@ -325,7 +390,8 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
                     }
 } // gp.show_density
 
-  }}}}
+  }}
+}}
   fclose (fout);
   
 // create plot of spinconfiguration -----------------------------------------------------------
@@ -341,34 +407,33 @@ printf("# **********************************************************************
 
 // here the 3d file should be created
     fin = fopen_errchk ("./results/spinsab.eps", "w");
-Vector gJJ(1,n); for (i=1;i<=n;++i){gJJ(i)=cs.gJ[i];}
-     savmf.eps3d(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,1,gJJ,spinconf);
+Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,1,gJJ,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spinsac.eps", "w");
-     savmf.eps3d(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,2,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,2,gJJ,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spinsbc.eps", "w");
-     savmf.eps3d(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,3,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,3,gJJ,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spins3dab.eps", "w");
-     savmf.eps3d(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,4,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,4,gJJ,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spins3dac.eps", "w");
-     savmf.eps3d(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,5,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,5,gJJ,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spins3dbc.eps", "w");
-     savmf.eps3d(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,6,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,6,gJJ,spinconf);
     fclose (fin);
 
     fin = fopen_errchk ("./results/spins.fst", "w");
-     savmf.fst(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,gJJ,spinconf);
+     spinconf.fst(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,gJJ,spinconf);
     fclose (fin);
 
     
    fin = fopen_errchk ("./results/spins_prim.fst", "w");
-     savmf.fstprim(fin,outstr,cs.abc,cs.r,cs.x,cs.y,cs.z,gJJ,spinconf);
+     spinconf.fstprim(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,gJJ,spinconf);
     fclose (fin);
-
              Vector hkl(1,3);hkl=0;
              Vector gjmbHxc(1,3);gjmbHxc=0;
              spincf densityev_real(densitycf*0.0);
@@ -380,13 +445,13 @@ Vector gJJ(1,n); for (i=1;i<=n;++i){gJJ(i)=cs.gJ[i];}
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins.jvx", "w");
     gp.showprim=0;gp.spins_wave_amplitude=0;
-     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
     fclose (fin);
 
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins_prim.jvx", "w");
      gp.showprim=1;
-     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
     fclose (fin);
 
 //***************************************************************************************************************
@@ -410,6 +475,8 @@ if (argc-os>=6){
              {case 1:  fin = fopen_errchk ("./results/mcdisp.qes", "rb");
               case 2:  fin = fopen_errchk ("./results/mcdisp.qeo", "rb");
               case 3:  fin = fopen_errchk ("./results/mcdisp.qem", "rb");
+              case 4:  fprintf(stderr,"mcdisp: output of individual moment oscillation in eigenvector file mcdisp.qemi not yet implemented - thus exiting program spins\n");
+                       fin = fopen_errchk ("./results/mcdisp.qemi", "rb");
              }
              // input file header ------------------------------------------------------------------
              instr[0]='#';
@@ -572,12 +639,12 @@ if (argc-os>=6){
                sprintf(filename,"./results/spins.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=0;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,spinconf,spinconfev_real,spinconfev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
                fclose (fin);
                sprintf(filename,"./results/spins_prim.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=1;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,spinconf,spinconfev_real,spinconfev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
                fclose (fin);
               }
           printf("# %s\n",outstr);

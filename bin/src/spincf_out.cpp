@@ -409,10 +409,16 @@ int check_atom_in_big_unitcell(Vector & dd,Vector & maxv1,Vector & minv1,Matrix 
            {return 0;}
 }
 
-//output for javaview
+//output for javaview (old)
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
                     double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
                     Vector & Hext,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag)
+{jvx_cd(fout,text,cs,gp,phase,savev_real,savev_imag,hkl,T,gjmbHxc,Hext,cs,magmom,magmomev_real,magmomev_imag);}
+
+//output for javaview
+void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
+                    double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
+                    Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag)
 { int i,j,k,l,ctr=0;int i1,j1,k1;
  // some checks
  if(nofatoms!=savev_real.nofatoms||nofa!=savev_real.na()||nofb!=savev_real.nb()||nofc!=savev_real.nc()||
@@ -607,8 +613,8 @@ fprintf(fout,"        <points>\n");
  for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=nofatoms;++l)
-	 {dd=pos(i,j,k,l, cs);
+         for(l=1;l<=magmom.nofatoms;++l)
+	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                    (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -658,8 +664,8 @@ fprintf(fout,"        <points>\n");
  for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=nofatoms;++l)
-	 {dd=pos(i,j,k,l, cs);
+         for(l=1;l<=magmom.nofatoms;++l)
+	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                      (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -697,8 +703,8 @@ fprintf(fout,"        <points>\n");
  for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=nofatoms;++l)
-	 {dd=pos(i,j,k,l, cs);
+         for(l=1;l<=magmom.nofatoms;++l)
+	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                     (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -1250,52 +1256,3 @@ void spincf::print(FILE * fout) //print spinconfiguration to stream
  }
 // fprintf(fout,"\n"); //new line to end spinconfiguration - removed aug 07
 }
-
-void spincf::printall(FILE * fout,cryststruct & cs) //print spinconfiguration to stream
-{ int i,j,k,l,lc,m,maxm;
-
- // determine primitive magnetic unit cell
-  Vector dd(1,3),ddp(1,3);
-  Vector xyz(1,3),dd0(1,3),mmm(1,3);
-  Matrix p(1,3,1,3);
-  calc_prim_mag_unitcell(p,cs.abc,cs.r);
-  Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
-  Matrix abc_in_ijk_Inverse(1,3,1,3); abc_in_ijk_Inverse=abc_in_ijk.Inverse();
-
-
- fprintf(fout,"#!nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",nofa,nofb,nofc,nofatoms*nofa*nofb*nofc);
- fprintf(fout,"#{atom file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3]  <Ma> <Mb> <Mc> [mb] <I1> <I2> <I3> <J4> <J5> ...\n");
-
-   // output atoms and moments in primitive unit cell
-  for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=nofatoms;++l)
-	 {dd=pos(i,j,k,l, cs);
-         dd0=p.Inverse()*dd;dd0(1)*=nofa;dd0(2)*=nofb;dd0(3)*=nofc;
-         ddp=abc_in_ijk_Inverse*dd;
-              fprintf(fout,"{%s} %+4.4f %+4.4f %+4.4f %+4.4f %+4.4f %+4.4f ",
-	              cs.sipffilenames[l],myround(ddp(1)),myround(ddp(2)),myround(ddp(3)),myround(dd0(1)),myround(dd0(2)),myround(dd0(3)));
-             if(cs.gJ[l]!=0)
-              {fprintf(fout," %+4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](1+nofcomponents*(l-1))));
-               if(nofcomponents>=2){fprintf(fout," %+4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](2+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
-               if(nofcomponents>=2){fprintf(fout," %+4.4f",myround(1e-5,cs.gJ[l]*mom[in(i,j,k)](3+nofcomponents*(l-1))));}else{fprintf(fout," %4.4f",0.0);}
-              }
-             else   // if gJ=0 it means we have so print out total moment
-              { //load magnetic moment into vector mmm
-               if(nofcomponents>6){maxm=6;}else{maxm=nofcomponents;}
-                mmm=0;
-                for(m=1;m<=maxm;++m){if(m==2||m==4||m==6){mmm((m+1)/2)+=mom[in(i,j,k)](nofcomponents*(l-1)+m);}
-                                     else                {mmm((m+1)/2)+=2*mom[in(i,j,k)](nofcomponents*(l-1)+m);}
-                                     }
-
-               fprintf(fout," %+4.4f %+4.4f %+4.4f",myround(1e-5,mmm(1)),myround(1e-5,mmm(2)),myround(1e-5,mmm(3)));
-              }
-             {for (lc=1;lc<=nofcomponents;++lc)
-              {fprintf(fout," %+4.4f",myround(1e-5,mom[in(i,j,k)](lc+nofcomponents*(l-1))));}
-              fprintf(fout,"\n");
-	     }
-
-	 }
-  }}}
-
-}
-

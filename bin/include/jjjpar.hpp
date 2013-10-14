@@ -148,9 +148,11 @@ public:
 //1. MAGNETIC MOMENT
    // returns magnetic moment
    int mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
+   int micalc(Vector &momi,  double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
    int Lcalc(Vector &L, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
    int Scalc(Vector &S, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
    int  dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dm1,ComplexMatrix & ests);
+   int  dmi1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dmi1,ComplexMatrix & ests);
    int  dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dL1,ComplexMatrix & ests);
    int  dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dS1,ComplexMatrix & ests);
 
@@ -344,6 +346,7 @@ void *handle;
   // getting stevens factors and other parameters, for the matrices Olm etc.)
 public:
   ionpars * iops;
+  par * clusterpars;
 private:
   // brillouin internal module functions,module_type=3
   void brillouin (Vector &mom, double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
@@ -354,7 +357,6 @@ private:
   void cluster_Micalc (Vector &mom,ComplexMatrix & ests);
   int  cluster_dm (int code,int & tn,double & T, ComplexVector & u1,float & delta,ComplexMatrix & ests);
   void cluster_est(ComplexMatrix * est,Vector &Hxc,Vector &Hext,double & T);
-  par * clusterpars;
   void cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext);
   void cluster_ini_Imat();
   Matrix ** Ia; Matrix ** cluster_M; 

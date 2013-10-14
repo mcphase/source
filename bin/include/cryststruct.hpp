@@ -10,8 +10,7 @@ class cryststruct
 { public:
 int nofatoms,nofcomponents,maxnofatoms;
    float x[MAXNOFATOMS],y[MAXNOFATOMS],z[MAXNOFATOMS];
-   double gJ[MAXNOFATOMS];
-   char * sipffilenames[MAXNOFATOMS];
+  char * sipffilenames[MAXNOFATOMS];
    Matrix r;
    Vector abc;
 

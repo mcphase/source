@@ -79,7 +79,6 @@ char *token;cs.abc=0;
                     {fprintf(stderr,"ERROR reading file:maximum number of atoms in unit cell exceeded\n");exit(EXIT_FAILURE);}
                    cs.sipffilenames[n]=new char[MAXNOFCHARINLINE];
                    extract(instr,"sipffilename",cs.sipffilenames[n],(size_t)MAXNOFCHARINLINE);
-                   extract(instr,"gJ",cs.gJ[n]);
 //		   printf("%s\n",cs.sipffilenames[n]);
                   }
   }

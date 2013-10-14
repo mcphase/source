@@ -1,3 +1,3 @@
-#define MCPHASVERSION "mcphas version 5.1"
-#define MCDISPVERSION "mcdisp version 5.1"
-#define MCDIFFVERSION "mcdiff version 5.1"
+#define MCPHASVERSION "mcphas version 5.2"
+#define MCDISPVERSION "mcdisp version 5.2"
+#define MCDIFFVERSION "mcdiff version 5.2"
