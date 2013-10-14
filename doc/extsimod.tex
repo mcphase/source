@@ -216,9 +216,30 @@ at is {\prg examples/LaCo3\_podlesnyak\_polaron}. There the calculation of the
 magnetic structure factor of a spin polaron is demonstrated.
 Note: currently the observables, which are implemented in the cluster module are 
 magnetisation and Fourier transform of magnetization density ($M(\mbf Q)$).
-In order to enable these, the three components of the magnetization (M1 M2 M3)
+In order to enable these, the three components of the magnetization (M1 M2 M3) and of the 
+individual magnetic moments of the cluster (M1\_1 M1\_2 M1\_3 M2\_1 M2\_2 M2\_3 ... Mn\_1 Mn\_2 Mn\_3)
 have to be given in terms of the operators I1\_1,I1\_2,...In\_m... (n=1,..,nofatoms of cluster,
 m=1... nofcomponents of cluster). 
+
+On the operators
+\begin{itemize}
+\item in the mean field loop only the I1 I2 I3  operators are used, the interactions in mcphas.j refer to these operators. 
+\item I1\_1 I1\_2 etc are not used later on, only on loading the module they are needed to be 
+      able to define other operators
+\item M1 M2 M3 are the components (x y z) of the magnetic moment (observable), these are 
+      used in order to be able to calculate the magnetic moment in {\prg mcphas.fum}, to draw a
+      magnetic moment picture in {\prg spins.c} ({\prg display\_densities}) and to generate output for 
+      mcdiff (done by spins.c)
+\item M1\_1 etc are the components of the magnetic moment of ion 1 in the cluster 
+      (observable), they are what we need in order to "look into the cluster"
+      ({\prg jvx fst, spins.out spins*.eps}). For {\prg mcdisp} and {\prg mcdiff} these operators are needed
+      in order to "go beyond dipole approximation for the total cluster" ... i.e. dipole 
+      approximation = based on the total moment M1 M2 M3 observable (treats cluster as 
+      one atom situated at the position which you enter for the cluster in mcphas.j),
+       beyond dipole intensities = based on M1\_1 M1\_2 at positions described by cluster.j 
+      relatively to the position of the cluster center which you enter in mcphas.j
+\end{itemize}
+
 \end{quote}
 
 In addition to the basic parameters described above the single ion property file 
