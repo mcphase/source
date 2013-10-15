@@ -93,7 +93,7 @@ return 0;
 
 int  jjjpar::dmi1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & mi1,ComplexMatrix & ests)
 {float delta=maxE;mi1(1)=complex <double> (ninit,pinit);
- ComplexVector uu1(1,mi1.Hi());int nnt,i;
+ ComplexVector uu1(1,mi1.Hi());int nnt;
  switch (module_type)
   {case 5: nnt=cluster_dm(3,transitionnumber,T,mi1,delta,ests);return nnt;break;
    default:return dm1calc(T,Hxc,Hext,mi1,ests);break;

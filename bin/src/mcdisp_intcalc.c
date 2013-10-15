@@ -235,7 +235,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
    double QQ;
 #endif
  int mqdim=3;if(calc_rixs)mqdim=9;
- int i,j,i1,j1,k1,l1,t1,i2,j2,k2,l2,t2,s,ss,s3,ss3,b,bb;
+ int i,j,i1,j1,k1,l1,t1,i2,j2,k2,l2,t2,s,ss,ss3,b,bb;
  double intensity=1.2; 
  double ki,kf;
  complex <double> sumS;
@@ -282,14 +282,14 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
    if(md.PUg[in1]==0) { md.PUg[in1] = new ComplexMatrix(1,1,1,maxb);*md.PUg[in1]=defval; } }}}
 
 chi=0;chibey=0;chiPhon=0;
-int sm1,ssm1,in1,in2;
+int ssm1,in1,in2;
 
 // determine chi
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
    in1=md.in(i1,j1,k1);      
  for(l1=1;l1<=md.nofatoms;++l1){
  for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
-      s=index_s(i1,j1,k1,l1,t1,md,ini);sm1=s-1;s3=sm1*mqdim;
+      s=index_s(i1,j1,k1,l1,t1,md,ini);// sm1=s-1;//s3=sm1*mqdim;
       b=md.baseindex(i1,j1,k1,l1,t1);
   for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
     in2=md.in(i2,j2,k2);
@@ -515,7 +515,7 @@ double intcalc_Erefine(ComplexMatrix & ch, int Estp,inimcdis & ini,par & inputpa
 #ifdef _THREADSREFINE
    intcalcapr_input *myinput; myinput = (intcalcapr_input *)input;
    int thread_id = myinput->thread_id;
-   int dimA = myinput->dimA;
+   //int dimA = myinput->dimA;
    int Estp  = myinput->Estp; 
    #define ini (*thrdat.ini[thread_id])
    #define inputpars (*thrdat.inputpars[thread_id])
@@ -889,7 +889,7 @@ double intcalc(ComplexMatrix & ch,int dimA, double en,inimcdis & ini,par & input
    #define hkl thrdat.hkl
    #define md (*thrdat.md[thread_id])
    #define ch (*thrdat.ch[thread_id])
-   int do_verbose = myinput->do_verbose;
+   // int do_verbose = myinput->do_verbose;
    double epsilon = myinput->epsilon; 
 #endif
  

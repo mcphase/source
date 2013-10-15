@@ -2040,7 +2040,7 @@ ITERATION *iteration;
     CHAR *name;
     INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
-{   FILE      *fp,*fopen();
+{   FILE      *fp=0,*fopen();
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out,ia=0,ib=0,ic=0;
     DOUBLE    versionsnummer;
@@ -3287,7 +3287,7 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0;
     CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
+    ITERATION *iteration=0,*iter_alloc();
     ITERATION *auswahlregel();
     STEVENS   *calc_Pkq();
     MATRIX    *readBmag();

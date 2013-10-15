@@ -145,9 +145,9 @@ LFLAGS= -openmp -lstdc++
 endif
 
 ifdef gotoblas
-LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -static-libgfortran -lpthread
+LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -lgfortran -lpthread
 else
-LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -static-libgfortran
+LFLAGS+= -static -L../ic1ion_module/libs -llapack -lblas -lgfortran
 endif
 
 #CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium

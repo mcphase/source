@@ -27,7 +27,7 @@ int main (int argc, char **argv)
 
 FILE * sipf_file;
 char instr[MAXNOFCHARINLINE];
-float invalues[100];invalues[0]=99;
+//float invalues[100];invalues[0]=99;
 // set stevens parameters and landefactor, J and <r^l> of ion
 
 

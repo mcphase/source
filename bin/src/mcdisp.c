@@ -216,6 +216,11 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 #ifdef _THREADS_JSSS
    myinput->dimA=nofneighbours;
 #endif
+#if defined  (__linux__) || defined (__APPLE__)
+#else
+return true;
+#endif
+
 }
 #ifdef _THREADS_JSSS
 #undef inputpars
@@ -677,7 +682,7 @@ int num_threads_started=-1;
       if(rc) { printf("Error return code %i from jsss thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
       #else
       threads[ithread] = CreateThread(NULL, 0, jsss_mult, (void *) tin[ithread], 0, &tid[ithread]);
-      if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from jsss thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+      if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %lu from jsss thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
       #endif
       num_threads_started = ithread+1;
       if(thrcount%NUM_THREADS==0)
@@ -1040,7 +1045,7 @@ if (do_jqfile==1){
                         if(rc) { printf("Error return code %i from intcalc thread %i\n",rc,num_threads_started+1); exit(EXIT_FAILURE); }
                         #else
                         threads[num_threads_started] = CreateThread(NULL, 0, intcalc_approx, (void *) tin[num_threads_started], 0, &tid[num_threads_started]);
-                        if(threads[num_threads_started]==NULL) { dwError=GetLastError(); printf("Error code %i from intcalc thread %i\n",dwError,num_threads_started+1); exit(EXIT_FAILURE); }
+                        if(threads[num_threads_started]==NULL) { dwError=GetLastError(); printf("Error code %lu from intcalc thread %i\n",dwError,num_threads_started+1); exit(EXIT_FAILURE); }
                         #endif  
                         ++num_threads_started;
                       }
@@ -1345,7 +1350,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      if(rc) { printf("Error return code %i from erefine joining thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                      #else
                      threads[ithread] = CreateThread(NULL, 0, intcalc_Erefine, (void *) tin[ithread], 0, &tid[ithread]);
-                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %lu from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                      if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for erefine thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
                      CloseHandle(threads[ithread]);
                      #endif
@@ -1367,7 +1372,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                      if(rc) { printf("Error return code %i from erefine thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                      #else
                      threads[ithread] = CreateThread(NULL, 0, intcalc_Erefine, (void *) tin[ithread], 0, &tid[ithread]);
-                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+                     if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %lu from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                      if(WaitForSingleObject(threads[ithread],INFINITE)==0xFFFFFFFF) { printf("Error in waiting for erefine thread %i to end\n",ithread+1); exit(EXIT_FAILURE); }
                      CloseHandle(threads[ithread]); 
                     #endif
@@ -1409,7 +1414,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                         if(rc) { printf("Error return code %i from erefine thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
                         #else
                         threads[ithread] = CreateThread(NULL, 0, intcalc_Erefine, (void *) tin[ithread], 0, &tid[ithread]);
-                        if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+                        if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %lu from erefine thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
                         #endif
                         num_threads_started = ithread+1;
                      }

@@ -345,13 +345,8 @@ float threej (float AJ1,float  AJ2,float  AJ3,float AM1,float AM2,float AM3)
 //sleep function
 int sleep(int a)
 {
-#if defined CYGWIN || defined __CYGWIN__ || (__APPLE__ & __MACH__)
 #include<unistd.h>
   return usleep(a*1000);
-#else
-  _sleep(a*1000);
-  return true;
-#endif
 }
 
 #endif

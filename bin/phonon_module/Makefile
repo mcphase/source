@@ -22,8 +22,8 @@ VECOBJS= matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
 		chgeigen.o matlapl.o moment.o matexph.o matsqth.o magicsquare.o
 
 phonon.so: phonon.o  $(VECOBJS)
-	${CCC}  -Wall -o phonon.so $^ -shared -static-libgcc -static-libgfortran $(LFLAGS)
-
+	${CCC}  -Wall -o phonon.so $^ -shared -static-libgcc  -L../ic1ion_module/libs -llapack -lblas -lgfortran
+  
 phonon.o: phonon.c
 	${CCC}  -Wall -fPIC -c  -o phonon.o phonon.c  $(INCLDIRS)
 

@@ -482,7 +482,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
        }
        #else
        threads[ithread] = CreateThread(NULL, 0, htcalc_iteration, (void *) tin[ithread], 0, &tid[ithread]);
-       if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %i from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
+       if(threads[ithread]==NULL) { dwError=GetLastError(); printf("Error code %lu from thread %i\n",dwError,ithread+1); exit(EXIT_FAILURE); }
        #endif
         ithread++;
        if(ithread%NUM_THREADS==0 || all_threads_started)

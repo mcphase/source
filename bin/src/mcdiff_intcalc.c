@@ -304,7 +304,7 @@ int i;
 
 if(code==0){ m = 0;// reset m
  double qmax;//,rr;
- int htrue,ktrue,ltrue,msort,hi,ki,li;
+ int msort,hi,ki,li;//htrue,ktrue,ltrue,
  qmax = 4.0 * PI * sin(thetamax / 180 * PI) / lambda;
 // rr=r1*r1; hmax =(int)( qmax / 2 / PI * sqrt(rr) + 1);
 // rr=r2*r2; kmax =(int)( qmax / 2 / PI * sqrt(rr) + 1);
@@ -323,10 +323,10 @@ if(code==0){ m = 0;// reset m
         for (li=(int)nmin(3);li<=nmax(3);++li){
 
 
-        if(hi==0&&li==0&&ki==0){htrue=1;ktrue=1;ltrue=1;} //goto 30
-        else {  complex <double> mqx=0,mqx2=0,mqxy=0;
-                complex <double> mqy=0,mqy2=0,mqxz=0;
-                complex <double> mqz=0,mqz2=0,mqyz=0;
+        if(hi!=0||li!=0||ki!=0)//{htrue=1;ktrue=1;ltrue=1;} //goto 30
+         {  complex <double> mqx=0,mqx2=0,mqxy=0;
+            complex <double> mqy=0,mqy2=0,mqxz=0;
+            complex <double> mqz=0,mqz2=0,mqyz=0;
 
           if(getint(jjjpars,hi,ki,li,thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Imag,Imagdip,inuc,outn,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,Pxyz))
           {// reflection was found below thetamax....

@@ -75,15 +75,15 @@ printf("# **********************************************************\n");
 
  FILE * fin, * fout;
 double T; Vector Hext(1,3);
- int i,n=0,dophon=0;
+ int i,n=0;//,dophon=0;
  cryststruct cs,cs4;
  spincf savmf;
- float numbers[13];numbers[9]=1;numbers[10]=3;
- numbers[0]=13;
+ //float numbers[13];numbers[9]=1;numbers[10]=3;
+ //numbers[0]=13;
  char outstr[MAXNOFCHARINLINE];
   int dim=28;
  char text[1000];
- int os=0; int doijk=0,arrow=0,arrowdim=3,density=0;
+ int os=0; int doijk=0,arrow=0,density=0;//,arrowdim=3;
  double xx=0,yy=0,zz=0;
 graphic_parameters gp;
 gp.show_abc_unitcell=1.0;
@@ -183,16 +183,16 @@ break;
   doijk=3;
                                      }
 
-if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;arrowdim=SPIN_EV_DIM;gp.spins_colour=3; gp.spins_scale_moment=1;
+if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;gp.spins_colour=3; gp.spins_scale_moment=1;//arrowdim=SPIN_EV_DIM;
                               sprintf(gp.title,"%s arrows correspond to the spins",gp.title);}
-else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;arrowdim=ORBMOM_EV_DIM;gp.spins_colour=2; gp.spins_scale_moment=1;
+else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;gp.spins_colour=2; gp.spins_scale_moment=1;//arrowdim=ORBMOM_EV_DIM;
                                    sprintf(gp.title,"%s arrows correspond to the orbital angular momenta",gp.title);}
-else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_colour=1; gp.spins_scale_moment=1;
+else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins_scale_moment=1;//arrowdim=MAGMOM_EV_DIM;
                                    sprintf(gp.title,"%s arrows correspond to the magnetic moments",gp.title);
                                    if(strcmp(argv[os],"-Mi")==0)arrow=4;
                                    }
 
-if(strcmp(argv[1+os],"-P")==0){os+=1;dophon=1;}
+if(strcmp(argv[1+os],"-P")==0){os+=1;}//dophon=1;}
 
  }
 
@@ -462,7 +462,7 @@ Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
 //***************************************************************************************************************
 
 if (argc-os>=6){
-               double E;
+              // double E;
              long int pos=0;
              int extended_eigenvector_dimension;
               char instr[MAXNOFCHARINLINE];
@@ -518,7 +518,7 @@ if (argc-os>=6){
                  if (dd<delta)
                  {delta=dd;checkdd=fabs(T-numbers[4])+fabs(Hext(1)-numbers[1])+fabs(Hext(2)-numbers[2])+fabs(Hext(3)-numbers[3]);
                   sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
-                  hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9]; 
+                  hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];//E=numbers[9]; 
                   spinconfev_real=ev_real;
                   spinconfev_imag=ev_imag;                  
                  }
@@ -586,7 +586,7 @@ if (argc-os>=6){
                  if (dd<delta)
                  {delta=dd;checkdd=fabs(T-numbers[4])+fabs(Hext(1)-numbers[1])+fabs(Hext(2)-numbers[2])+fabs(Hext(3)-numbers[3]);
                   sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
-                  hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];E=numbers[9]; 
+                  hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];//E=numbers[9]; 
 
             switch(argv[1][1]) // dimension definition from jjjpar.hpp
             {case 's': 

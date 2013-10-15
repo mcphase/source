@@ -375,9 +375,9 @@ Matrix rtoijk(1,3,1,3); // define transformation matrix to calculate components 
 // ri(3)=                             + ris(3)*(c.(axb))/(|a||b|sin(gamma))
 // note (a.i)=(a.(bx(axb))/|bx(axb)|=|a|sin(gamma)
 // i.e.
-//         / |a|sin(gamma) 0         (c.i)                         \
+//         | |a|sin(gamma) 0         (c.i)                         |
 // rtoijk= | |a|cos(gamma) |b|       |c|cos(alpha)                 |
-//         \ 0             0         (c.(axb))/(|a||b|sin(gamma))  /
+//         | 0             0         (c.(axb))/(|a||b|sin(gamma))  |
 //
 // to get (c.i) we write in components
 // a=|a|(sin(gamma),cos(gamma),0)

@@ -1,6 +1,6 @@
 /************************************************************************/
 void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars)
-{ int i,j,k,l,n,m1;div_t result;float mmax; char text[100];FILE * fin_coq;
+{ int i,j,k,l,n,m1;div_t result; char text[100];FILE * fin_coq;
  //save fe and u
  // calculate nettomoment from spinstructure
     Vector mom(1,3),d1(1,inputpars.nofcomponents);physprops.m=0;
@@ -70,7 +70,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // neutron intensities (structure factor)
       // check if maxnofhklis was modified by user
   if (ini.maxnofhkls!=physprops.maxnofhkls){physprops.update_maxnofhkls(ini.maxnofhkls);}
-  mmax=0; int qh,qk,ql;j=0;
+  int qh,qk,ql;j=0;
   ComplexVector a(1,3),aFT(1,3),qeuklid(1,3);
     complex<double> piq(0,2*3.1415926535),g,gFT;
   ComplexVector * mq;
