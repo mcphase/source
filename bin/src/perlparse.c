@@ -135,8 +135,11 @@ int myparse(char*sipffilename
        if(tokvar==NULL||tokvar>tokeq) { fprintf(stderr,"Error parsing statement: %s\nYou must specify a variable name before the '='.\n",statement); return false; }
        while(tokvar!=NULL && tokvar<t2)
        {
+          unsigned int opnamelen=0;
           for(int iop=0; operatornames[iop]!=NULL; iop++) 
-             if(strncmp(tokvar+1,operatornames[iop],strlen(operatornames[iop]))==0) { varpos[vc]=tokvar; idvar[vc++]=iop; break; }
+             if(strncmp(tokvar+1,operatornames[iop],strlen(operatornames[iop]))==0) { 
+                if(strlen(operatornames[iop])>opnamelen) { idvar[vc]=iop; opnamelen=strlen(operatornames[iop]); } }
+          varpos[vc++]=tokvar;
           tokvar=strchr(tokvar+1,'$');
           if(vc>0 && tokvar<tokeq && tokvar!=NULL) { 
              fprintf(stderr,"Error parsing statement: %s\nOnly one variable may be LHS of '=' in each statement\n",statement); return false; }
