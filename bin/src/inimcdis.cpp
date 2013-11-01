@@ -586,7 +586,7 @@ inimcdis::~inimcdis ()
 {delete []savfilename;delete []info;
  delete []prefix;
  int i;
- if (nofhkls==1)
+//if (nofhkls==1)
  { for (i=1;i<=nofhkls;++i) 
    { delete []hkls[i];}
    delete []hkls;

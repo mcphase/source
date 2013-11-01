@@ -359,8 +359,10 @@ private:
   void cluster_est(ComplexMatrix * est,Vector &Hxc,Vector &Hext,double & T);
   void cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext);
   void cluster_ini_Imat();
+  void cluster_Iaa(ComplexMatrix *Iai, int a, int i);
   Matrix ** Ia; Matrix ** cluster_M; 
-  int * dnn; int dim; 
+  Matrix *clusterH; Vector *oldHext; bool justinit; // Added to cache Hamiltonian matrices between iterations when Hext=same
+  int * dnn; int dim; bool useperl, sparsemat;
 };
 
 #include<par.hpp>

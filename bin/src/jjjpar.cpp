@@ -663,6 +663,8 @@ jjjpar::jjjpar (const jjjpar & pp)
                             cluster_M[index_M]=new Matrix(1,dim,1,dim);
                             (*cluster_M[index_M])=(*pp.cluster_M[index_M]);
                            }                        
+                          clusterH = new Matrix(1,dim,1,dim); *clusterH = *pp.clusterH; 
+                          oldHext = new Vector(1,3); *oldHext = *pp.oldHext;
                           }
   
 //#ifdef __linux__
@@ -723,6 +725,7 @@ jjjpar::~jjjpar ()
                          delete cluster_M[index_M];}
                         delete Ia;delete cluster_M; delete []dnn;
                         delete clusterpars;                         
+                        delete clusterH; delete oldHext;
                        }
    if (module_type==2||module_type==4) delete iops;
 //#ifdef __linux__

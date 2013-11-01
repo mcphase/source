@@ -91,7 +91,7 @@ int myparse(char*sipffilename
               ,double ** numbers,char ** numbernames    // number 
               ,char **  strings,char ** stringnames    // string variables
               ,ComplexMatrix **  operators,char ** operatornames    // operators
-              )
+              ,int **sq2, double **csn, char **statements, int *iocs, int* oes)
 {FILE * fin; 
  char  instr[MAXNOFCHARINLINE];
  printf("# using noperl parsing\n");
@@ -101,8 +101,7 @@ int myparse(char*sipffilename
  char operr[]="Error parsing statement: %s\nOnly up to 99 %s allowed.\n";
  char sterr[]="Error. Inconsistent parsing of statement: %s\n";
  double constval[99];
- int idvar[99], idop[99], vc, oc, cc, seq[999], seq2[999];
- ComplexMatrix dummy, dummy2; char dummystr[MAXNOFCHARINLINE];
+ int idvar[99], idop[99], vc, oc, cc, seq[999], seq2[999], iline=0;
 
  while(feof(fin)==0)
  if(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL && instr[strspn(instr," \t")]!='#' && strlen(instr)>3)
@@ -238,75 +237,16 @@ int myparse(char*sipffilename
        seq2[i1]=0;
 //     printf("%s\t[[",statement); for(int ii=0; ii<=iseq; ii++) printf("%i ",seq2[ii]); printf("]]\n");
 
-       // Prints out what we think the input should be for debugging purposes
-       printf("%s\t==>\t",statement);
-
-       // Now do the matrix manipulations, do the first operation outside the loop
-       int is5=0;
-       t0=statement+strlen(operatornames[seq2[0]])+1;
-       if(*(t0+1)=='=') {                          // Operator-assignment [+=,-=,*=]
-          if(!oe||seq2[1]<3) { fprintf(stderr,sterr,statement); return false; }
-          if(seq2[2]<0) {
-                dummy = (*operators[-seq2[2]]); i0=3; } else {              // Simple assignment
-          switch(seq2[2]) {
-             case 5:          sprintf(dummystr," %f * op(%i)[%s] ",constval[ioc],-seq2[4],operatornames[-seq2[4]]); is5=1;
-             case 7: if(!is5){sprintf(dummystr," op(%i)[%s] * %f ",-seq2[4],operatornames[-seq2[4]],constval[ioc]);}is5=0;
-                dummy =    constval[ioc++]     * (*operators[-seq2[4]]);    // Scalar*Matrix or Matrix*Scalar
-                break;
-             case 6: sprintf(dummystr," op(%i)[%s] * op(%i)[%s] ",-seq2[3],operatornames[-seq2[3]],-seq2[4],operatornames[-seq2[4]]);
-                dummy = (*operators[-seq2[3]]) * (*operators[-seq2[4]]);    // Matrix*Matrix
-                break;
-             default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
-          } i0 = 5; }
-          switch(*t0) {
-             case '+': if(seq2[1]!=3) { fprintf(stderr,sterr,statement); return false; }
-                (*operators[seq2[0]]) += dummy; printf(" op(%i)[%s] += %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
-             case '-': if(seq2[1]!=4) { fprintf(stderr,sterr,statement); return false; }
-                (*operators[seq2[0]]) -= dummy; printf(" op(%i)[%s] -= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
-             case '*': if(seq2[1]!=7) { fprintf(stderr,sterr,statement); return false; }
-                                                printf(" op(%i)[%s] *= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
-                dummy2 = (*operators[seq2[0]]) * dummy; (*operators[seq2[0]]) = dummy2;
-          }
+       if(sq2!=NULL && csn!=NULL && statements!=NULL && iocs!=NULL && oes!=NULL)  // Output only the sequence and return
+       {
+          i0=0; int *sqv = new int[999]; while(seq2[i0]!=0&&i0<999) { sqv[i0]=seq2[i0]; i0++; } sq2[iline]=sqv;
+          double *vcs = new double[99]; for(i0=0; i0<99; i0++) vcs[i0]=constval[i0]; csn[iline]=vcs;
+          char *stam = new char[MAXNOFCHARINLINE]; strcpy(stam,statement); statements[iline]=stam;
+          iocs[iline]=ioc; oes[iline++]=oe;
+          if(iline>999) { fprintf(stderr,"noperl: Sorry I can only handle up to 999 statements for now.\n"); return false; }
        }
-       else {                                      // Assignment
-          if(seq2[1]<0) {     sprintf(dummystr," op(%i)[%s] ",-seq2[1],operatornames[-seq2[1]]);
-                (*operators[seq2[0]]) = (*operators[-seq2[1]]); i0=2; } else {              // Simple assignment
-          switch(seq2[1]) {
-             case 5:          sprintf(dummystr," %f * op(%i)[%s] ",constval[ioc],-seq2[3],operatornames[-seq2[3]]); is5=1;
-             case 7: if(!is5){sprintf(dummystr," op(%i)[%s] * %f ",-seq2[3],operatornames[-seq2[3]],constval[ioc]);}is5=0;
-                (*operators[seq2[0]]) =    constval[ioc++]     * (*operators[-seq2[3]]);    // Scalar*Matrix or Matrix*Scalar
-                break;
-             case 6: sprintf(dummystr," op(%i)[%s] * op(%i)[%s] ",-seq2[2],operatornames[-seq2[2]],-seq2[3],operatornames[-seq2[3]]);
-                (*operators[seq2[0]]) = (*operators[-seq2[2]]) * (*operators[-seq2[3]]);    // Matrix*Matrix
-                break;
-             default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
-          } i0 = 4; }
-          printf(" op(%i)[%s] = %s ",seq2[0],operatornames[seq2[0]],dummystr);
-       }
-
-       int pm;
-       while(seq2[i0]!=0) {
-          switch(seq2[i0]) {
-             case 3:
-             case 4:          sprintf(dummystr," op(%i)[%s] ",-seq2[i0+1],operatornames[-seq2[i0+1]]);
-                dummy = (*operators[-seq2[i0+1]]); 
-                pm = seq2[i0];   i0 += 2;
-                break;
-             case 5:          sprintf(dummystr," %f * op(%i)[%s] ",constval[ioc],-seq2[i0+2],operatornames[-seq2[i0+2]]); is5=1;
-             case 7: if(!is5){sprintf(dummystr," op(%i)[%s] * %f ",-seq2[i0+2],operatornames[-seq2[i0+2]],constval[ioc]);}is5=0;
-                dummy =      constval[ioc++]      * (*operators[-seq2[i0+2]]); // Scalar*Matrix or Matrix*Scalar
-                pm = seq2[i0+3]; i0 += 4;
-                break;
-             case 6: sprintf(dummystr," op(%i)[%s] * op(%i)[%s] ",-seq2[i0+1],operatornames[-seq2[i0+1]],-seq2[i0+2],operatornames[-seq2[i0+2]]);
-                dummy = (*operators[-seq2[i0+1]]) * (*operators[-seq2[i0+2]]); // Matrix*Matrix
-                pm = seq2[i0+3]; i0 += 4;
-                break;
-             default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
-          }
-          printf(" %c %s ",(pm==3?'+':'-'),dummystr);
-          if(pm==3) (*operators[seq2[0]]) += dummy; else (*operators[seq2[0]]) -= dummy;
-       }
-       printf("\n");
+       else 
+          if(myparse_execute(operators, operatornames, seq2, constval, statement, ioc, oe)==false) return false;
     }
  }
 /*
@@ -390,8 +330,90 @@ printf("op(%i)[%s] = %f * op(%i)[%s]\n",i1,operatornames[i1],cst,i2,operatorname
   }
 */
  fclose(fin);
+ if(sq2!=NULL && csn!=NULL && statements!=NULL && iocs!=NULL && oes!=NULL) return iline;
  return true;
 }
+
+int myparse_execute(ComplexMatrix **operators, char **operatornames, int *seq2, double *constval, char *statement, int ioc, int oe)
+{
+    char *t0; //line[MAXNOFCHARINLINE], *t0, *t1, *t2, *tokvar, *tokeq, *tokop, statement[MAXNOFCHARINLINE], *varpos[99], *oppos[99];
+    char dummystr[MAXNOFCHARINLINE];
+    char sterr[]="Error. Inconsistent parsing of statement: %s\n";
+    int i0=0;
+    ComplexMatrix dummy, dummy2;
+
+       // Prints out what we think the input should be for debugging purposes
+       printf("%s\t==>\t",statement);
+
+       // Now do the matrix manipulations, do the first operation outside the loop
+       int is5=0;
+       t0=statement+strlen(operatornames[seq2[0]])+1;
+       if(*(t0+1)=='=') {                          // Operator-assignment [+=,-=,*=]
+          if(!oe||seq2[1]<3) { fprintf(stderr,sterr,statement); return false; }
+          if(seq2[2]<0) {
+                dummy = (*operators[-seq2[2]]); i0=3; } else {              // Simple assignment
+          switch(seq2[2]) {
+             case 5:          sprintf(dummystr," %f * op(%i)[%s] ",constval[ioc],-seq2[4],operatornames[-seq2[4]]); is5=1;
+             case 7: if(!is5){sprintf(dummystr," op(%i)[%s] * %f ",-seq2[4],operatornames[-seq2[4]],constval[ioc]);}is5=0;
+                dummy =    constval[ioc++]     * (*operators[-seq2[4]]);    // Scalar*Matrix or Matrix*Scalar
+                break;
+             case 6: sprintf(dummystr," op(%i)[%s] * op(%i)[%s] ",-seq2[3],operatornames[-seq2[3]],-seq2[4],operatornames[-seq2[4]]);
+                dummy = (*operators[-seq2[3]]) * (*operators[-seq2[4]]);    // Matrix*Matrix
+                break;
+             default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
+          } i0 = 5; }
+          switch(*t0) {
+             case '+': if(seq2[1]!=3) { fprintf(stderr,sterr,statement); return false; }
+                (*operators[seq2[0]]) += dummy; printf(" op(%i)[%s] += %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
+             case '-': if(seq2[1]!=4) { fprintf(stderr,sterr,statement); return false; }
+                (*operators[seq2[0]]) -= dummy; printf(" op(%i)[%s] -= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
+             case '*': if(seq2[1]!=7) { fprintf(stderr,sterr,statement); return false; }
+                                                printf(" op(%i)[%s] *= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
+                dummy2 = (*operators[seq2[0]]) * dummy; (*operators[seq2[0]]) = dummy2;
+          }
+       }
+       else {                                      // Assignment
+          if(seq2[1]<0) {     sprintf(dummystr," op(%i)[%s] ",-seq2[1],operatornames[-seq2[1]]);
+                (*operators[seq2[0]]) = (*operators[-seq2[1]]); i0=2; } else {              // Simple assignment
+          switch(seq2[1]) {
+             case 5:          sprintf(dummystr," %f * op(%i)[%s] ",constval[ioc],-seq2[3],operatornames[-seq2[3]]); is5=1;
+             case 7: if(!is5){sprintf(dummystr," op(%i)[%s] * %f ",-seq2[3],operatornames[-seq2[3]],constval[ioc]);}is5=0;
+                (*operators[seq2[0]]) =    constval[ioc++]     * (*operators[-seq2[3]]);    // Scalar*Matrix or Matrix*Scalar
+                break;
+             case 6: sprintf(dummystr," op(%i)[%s] * op(%i)[%s] ",-seq2[2],operatornames[-seq2[2]],-seq2[3],operatornames[-seq2[3]]);
+                (*operators[seq2[0]]) = (*operators[-seq2[2]]) * (*operators[-seq2[3]]);    // Matrix*Matrix
+                break;
+             default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
+          } i0 = 4; }
+          printf(" op(%i)[%s] = %s ",seq2[0],operatornames[seq2[0]],dummystr);
+       }
+
+       int pm;
+       while(seq2[i0]!=0) {
+          switch(seq2[i0]) {
+             case 3:
+             case 4:          sprintf(dummystr," op(%i)[%s] ",-seq2[i0+1],operatornames[-seq2[i0+1]]);
+                dummy = (*operators[-seq2[i0+1]]); 
+                pm = seq2[i0];   i0 += 2;
+                break;
+             case 5:          sprintf(dummystr," %f * op(%i)[%s] ",constval[ioc],-seq2[i0+2],operatornames[-seq2[i0+2]]); is5=1;
+             case 7: if(!is5){sprintf(dummystr," op(%i)[%s] * %f ",-seq2[i0+2],operatornames[-seq2[i0+2]],constval[ioc]);}is5=0;
+                dummy =      constval[ioc++]      * (*operators[-seq2[i0+2]]); // Scalar*Matrix or Matrix*Scalar
+                pm = seq2[i0+3]; i0 += 4;
+                break;
+             case 6: sprintf(dummystr," op(%i)[%s] * op(%i)[%s] ",-seq2[i0+1],operatornames[-seq2[i0+1]],-seq2[i0+2],operatornames[-seq2[i0+2]]);
+                dummy = (*operators[-seq2[i0+1]]) * (*operators[-seq2[i0+2]]); // Matrix*Matrix
+                pm = seq2[i0+3]; i0 += 4;
+                break;
+             default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
+          }
+          printf(" %c %s ",(pm==3?'+':'-'),dummystr);
+          if(pm==3) (*operators[seq2[0]]) += dummy; else (*operators[seq2[0]]) -= dummy;
+       }
+       printf("\n");
+  return true;
+}
+
 /* for test 
 int main(int argc,char **argv)
 {
