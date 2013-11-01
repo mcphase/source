@@ -78,7 +78,7 @@ else
 ifneq ($(shell gcc --version|grep " 3."),)
 FLAGS   += -O2
 else
-FLAGS   += -O2 -march=native
+FLAGS   += -O3 -march=native
 endif
 endif
 endif

@@ -60,7 +60,8 @@ DOBJ  = dgeqr2.o dlabad.o dlacon.o dlacpy.o dladiv.o dlae2.o dlaev2.o\
 	dormlq.o dorml2.o dlacn2.o \
 	dlaebz.o dlagtf.o dlagts.o dlaneg.o dlarra.o dlarrb.o dlarrc.o\
 	dlarrd.o dlarre.o dlarrf.o dlarrj.o dlarrk.o dlarrr.o dstebz.o\
-	dlar1v.o dlarrv.o dorm2l.o dormql.o dormtr.o dstein.o dstemr.o
+	dlar1v.o dlarrv.o dorm2l.o dormql.o dormtr.o dstein.o dstemr.o\
+	dstegr.o
 
 IOBJ  = ilaenv.o lsame.o lsamen.o xerbla.o xlaenv.o iparmq.o ieeeck.o
 

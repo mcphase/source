@@ -34,10 +34,13 @@ endif
 ifdef icc
 CC=icc
 CCC=icpc
-LINKER=icpc
+FC=ifort
+LINKER=ifort -nofor-main
+LFLAGS=
 else
 CC=gcc
 CCC=g++
+FC=gfortran
 LINKER=g++
 endif
 
@@ -47,7 +50,7 @@ ifdef icc
 ARCHFLAG=-O2 -xHOST -IPF_fma -long_double -IPF_fltacc#-ipo
 else
 ifdef GCC42
-ARCHFLAG=-O2 -march=native 
+ARCHFLAG=-O3 -march=native -ftree-vectorizer-verbose=2
 #ARCHFLAG=-O2 -march=core2 -msse4 -msse4.1 -msse4.2 -mcx16 -msahf
 else
 ARCHFLAG=-O2
@@ -90,6 +93,8 @@ CCC+= $(ARCHFLAG)
 #CCC=$(CC)
 #CCC= g++ 
 
+FC+= $(ARCHFLAG)
+
 # Check for cygwin
 ifneq (,$(findstring CYGWIN,$(shell uname)))
 ifneq ($(shell gcc --version|grep " 3."),)
@@ -102,12 +107,14 @@ ARCHFLAG+=-DNOMINMAX
 ifdef cross64
 CC=x86_64-w64-mingw32-gcc -pipe $(ARCHFLAG)
 CCC=x86_64-w64-mingw32-g++ -pipe $(ARCHFLAG)
+FC=x86_64-w64-mingw32-gfortran -pipe $(ARCHFLAG)
 LINKER=x86_64-w64-mingw32-g++ -m64
 CYGFLAGS=
 endif
 ifdef cross32
 CC=i686-w64-mingw32-gcc -m32 -pipe $(ARCHFLAG)
 CCC=i686-w64-mingw32-g++ -m32 -pipe $(ARCHFLAG)
+FC=i686-w64-mingw32-gfortran -m32 -pipe $(ARCHFLAG)
 CYGFLAGS=
 LFLAGS+= -static-libgcc -static-libstdc++
 endif
@@ -137,10 +144,10 @@ COPTS=$(CCOPTS)
 LFLAGS= -openmp -lstdc++
 endif
 
-ifdef blas
-#LBLAS=-L../../../ic1ionmodule/libs/GotoBLAS -lgoto -lpthread
-LBLAS=-L../../../ic1ionmodule/libs -lblas -llapack -lgfortran
-BLAS=-D_MATPACK_USE_BLAS_
+ifdef gotoblas
+LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -lgfortran -lpthread
+else
+LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -lgfortran
 endif
 
 #CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium

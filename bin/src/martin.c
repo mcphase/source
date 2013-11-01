@@ -636,6 +636,8 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib) // transiti
                                                                      // of zr+izc
 
   if(M.Rhi()!=M.Chi()){fprintf(stderr,"Error martin.c aMb_real: Matrix M not square\n");exit(EXIT_FAILURE);}
+
+  if(M.Rhi()<20) {
   for(int a=1;a<=M.Rhi();++a)
   {for(int b=1;b<a;++b)
    {real+=zr(a,ia)*M(a,b)*zr(b,ib)-zr(a,ia)*M(b,a)*zc(b,ib)+zc(a,ia)*M(b,a)*zr(b,ib)+zc(a,ia)*M(a,b)*zc(b,ib);
@@ -646,7 +648,41 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib) // transiti
    }
 
   }
+  } else { // Use vectorizable version - need to define some helper vectors -> more overheads. So for small matrices use original. MDL 131022
 
+  int N=M.Rhi(), a, b;
+  double *zra = new double[N+1], *zrb = new double[N+1], *zca = new double[N+1], *zcb = new double[N+1], *rv = new double[N+1], *Ma, *Mb; 
+  double zraa, zcaa, zrbb, zcbb;
+  for(a=1; a<=N; a++) {
+     zra[a] = zr(a,ia);
+     zrb[a] = zr(a,ib);
+     zca[a] = zc(a,ia);
+     zcb[a] = zc(a,ib);
+     rv[a] = 0.;
+  }
+  
+  for(a=1; a<=N; a++)
+  {
+     Ma = M[a]; zraa=zra[a]; zcaa=zca[a];
+     for(b=1; b<a; b++) 
+        rv[b] += zraa*Ma[b]*zrb[b] + zcaa*Ma[b]*zcb[b];
+     for(b=a+1; b<=N; b++) 
+        rv[b] += zraa*Ma[b]*zcb[b] - zcaa*Ma[b]*zrb[b];
+     real += zr(a,ia)*M(a,a)*zr(a,ib) + zc(a,ia)*M(a,a)*zc(a,ib);
+  }
+  for(b=1; b<=N; b++) { real += rv[b]; rv[b] = 0.; }
+
+  for(b=1; b<=N; b++) {
+     Mb = M[b]; zrbb=zrb[b]; zcbb=zcb[b];
+     for(a=b+1; a<=N; a++)
+        rv[a] += zca[a]*Mb[a]*zrbb - zra[a]*Mb[a]*zcbb;
+     for(a=1; a<b; a++)
+        rv[a] += zra[a]*Mb[a]*zrbb + zca[a]*Mb[a]*zcbb;
+  }
+  for(a=1; a<=N; a++) real += rv[a];
+
+  delete[]zra; delete[]zca; delete[]zrb; delete[]zcb; delete[]rv;
+ }
  return real;
 }
 

@@ -89,7 +89,7 @@ ifdef icc
 CFLAGS+= -xHOST -O2 -IPF_fma -long_double -IPF_fltacc#-ipo
 else
 ifdef GCC42
-CFLAGS+= -pipe -O2 -march=native
+CFLAGS+= -pipe -O3 -march=native
 #CFLAGS+= -O2 -pipe -fomit-frame-pointer -march=core2 -msse4 -msse4.1 -msse4.2 -mcx16 -msahf
 else
 CFLAGS+= -pipe -O2
@@ -172,11 +172,11 @@ libs/liblapack.a:
 ifdef integral
 ../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
+	@$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 else
 ../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ion ic1ion.o states.o $(OBJ) $(LDFLAGS) $(VECOBJ) $(STATIC)
+	@$(LINKER) -o ../ic1ion ic1ion.o states.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp
@@ -187,7 +187,7 @@ else
 endif
 
 states.o: states.cpp states.hpp
-	$(CC) $(patsubst -O2,   ,${CFLAGS}) -c $<
+	$(CC) $(patsubst -O3,   ,${CFLAGS}) -c $<
 
 truncate.o: truncate.cpp
 	$(CC) $(CFLAGS) -I../include -c $<

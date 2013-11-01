@@ -694,7 +694,7 @@ Matrix operator ^ (const Vector& A, const Vector& B)
     int csize = B.ncol;
     int rsize = A.ncol;
     Matrix T(nrl,nrh,ncl,nch);
-    double *a = A.V+nrl;
+    double *a = A.V+nrl, aval;
     double *b = B.V+ncl;
     double **t = &T[nrl];
     double *tp,*bp;   
@@ -703,7 +703,8 @@ Matrix operator ^ (const Vector& A, const Vector& B)
 	bp = b;
 	tp = *t++ + ncl; 
 	n = csize;
-	while (n--) *tp++ = *bp++ * *a; 
+	aval = *a;
+	while (n--) *tp++ = *bp++ * aval; 
 	a++;
     }
     return T.Value();

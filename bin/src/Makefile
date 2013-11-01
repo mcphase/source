@@ -132,7 +132,7 @@ FUNCTIONOBJS=hypot3d.o hypot3f.o initds.o derf.o derfc.o ddaws.o ddaws2.o cwofz.
 	laguerrel.o hermiteh.o legendrep.o legendrepa.o harmonicy.o powi.o powii.o clnrel.o cgamma.o \
 	clngam.o c9lgmc.o threejm.o threejj.o clebsch.o sixj.o
 
-LINKER= $(CCC) $(LDFLAGS)
+#LINKER= $(CCC) $(LDFLAGS)
 #OBJS := $(patsubst %.c,%.o,$(wildcard ./src/*.c)) \
 #	$(patsubst %.cpp,%.o,$(wildcard ./src/*.cpp)) 
 #---------------------------------------------------------------------
