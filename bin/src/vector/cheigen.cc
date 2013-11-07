@@ -422,6 +422,7 @@ void Chtrbk (Matrix& a, Vector& t1, Vector& t2, Matrix& zr, Matrix& zi)
 		}
 	    }
 */
+        {
 	    for (j = lo; j <= hi; j++) {
                 sv[j]  = 0.;
                 siv[j] = 0.;
@@ -450,6 +451,7 @@ void Chtrbk (Matrix& a, Vector& t1, Vector& t2, Matrix& zr, Matrix& zi)
                     zik[j] -= siv[j] * f - sv[j]  * g;
                 }
             }
+        }
 
     }
     delete[]sv; delete[]siv;

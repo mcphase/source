@@ -28,7 +28,7 @@
 # Checks to see if the gcc compiler is newer than 4.2
 ifneq ($(shell gcc --version|grep " 4.[2-9]"),)
 GCC42=1
-LFLAGS=-static-libgcc
+LFLAGS=-static-libgcc -static-libgfortran
 endif
 
 ifdef icc
@@ -147,7 +147,7 @@ endif
 ifdef gotoblas
 LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -lgfortran -lpthread
 else
-LFLAGS+= -static -L../ic1ion_module/libs -llapack -lblas -lgfortran
+LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -lgfortran
 endif
 
 #CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium
