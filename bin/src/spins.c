@@ -189,7 +189,7 @@ else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;gp.spins_colour=2; gp.spins_sc
                                    sprintf(gp.title,"%s arrows correspond to the orbital angular momenta",gp.title);}
 else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins_scale_moment=1;//arrowdim=MAGMOM_EV_DIM;
                                    sprintf(gp.title,"%s arrows correspond to the magnetic moments",gp.title);
-                                   if(strcmp(argv[os],"-Mi")==0)arrow=4;
+                                   if(strcmp(argv[os],"-Mi")==0){arrow=4;}
                                    }
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;}//dophon=1;}
@@ -472,11 +472,11 @@ if (argc-os>=6){
 //----------------------------------------------------------------------------------------------------------
             if(arrow>0){double checkdd=1e7;
              switch(arrow)
-             {case 1:  fin = fopen_errchk ("./results/mcdisp.qes", "rb");
-              case 2:  fin = fopen_errchk ("./results/mcdisp.qeo", "rb");
-              case 3:  fin = fopen_errchk ("./results/mcdisp.qem", "rb");
+             {case 1:  fin = fopen_errchk ("./results/mcdisp.qes", "rb");break;
+              case 2:  fin = fopen_errchk ("./results/mcdisp.qeo", "rb");break;
+              case 3:  fin = fopen_errchk ("./results/mcdisp.qem", "rb");break;
               case 4:  fprintf(stderr,"mcdisp: output of individual moment oscillation in eigenvector file mcdisp.qemi not yet implemented - thus exiting program spins\n");
-                       fin = fopen_errchk ("./results/mcdisp.qemi", "rb");
+                       fin = fopen_errchk ("./results/mcdisp.qemi", "rb");break;
              }
              // input file header ------------------------------------------------------------------
              instr[0]='#';
