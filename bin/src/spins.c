@@ -522,6 +522,11 @@ if (argc-os>=6){
                   spinconfev_real=ev_real;
                   spinconfev_imag=ev_imag;                  
                  }
+                 pos=ftell(fin); 
+                 fgets(instr,MAXNOFCHARINLINE,fin); 
+                 while (instr[strspn(instr," \t")]=='#'&&feof(fin)==0) // pointer to 'ltrimstring' 
+                  {pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
+                 j=fseek(fin,pos,SEEK_SET);
                }
               fclose (fin);
              if(checkdd>1e-7)

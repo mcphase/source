@@ -9,8 +9,8 @@ void check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hc
 int n;
    double ddT,ddHa,ddHb,ddHc,dd,delta;
  float numbers[13];numbers[9]=1;numbers[10]=3;
- numbers[0]=13;
-
+ numbers[0]=13;char instr[MAXNOFCHARINLINE];
+ long int pos=0;
  for (delta=1000.0;feof(fin_coq)==0                      //end of file
                     &&(n=inputline(fin_coq,numbers))>=8   //error in line reading (8 old format, 9 new format)
 		    ;)
@@ -27,6 +27,11 @@ int n;
         sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
         savmf=spins;T=numbers[3];Hext(1)=numbers[5];Hext(2)=numbers[6];Hext(3)=numbers[7];
        }
+      pos=ftell(fin_coq); 
+                 fgets(instr,MAXNOFCHARINLINE,fin_coq); 
+                 while (instr[strspn(instr," \t")]=='#'&&feof(fin_coq)==0) // pointer to 'ltrimstring' 
+                  {pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
+       fseek(fin_coq,pos,SEEK_SET);
     }
 }
    
