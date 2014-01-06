@@ -2369,6 +2369,88 @@ int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, p
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
+// returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif                                    // on input
+int    opmat(int &n,                      // n     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
+             char **sipffilename,         // Single ion properties filename
+             Vector &Hxc,                 // Hext  vector of external field [meV]
+             Vector &Hext,                // Hxc   vector of exchange field [meV]
+                                          // on output   
+             Matrix &outmat)              // operator matrix of Hamiltonian, I1, I2, I3 depending on n
+{
+   // Parses the input file for parameters
+   const char *filename = sipffilename[0];
+   icpars pars; ic_parseinput(filename,pars);
+
+   //          0 1 2 3 4 5 6  7  8 91011 12 13 1415161718 19 20 21 222324252627 28 29 30 31 32333435363738 39 40 41 42 43 4445464748495051
+   int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+   int Q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+   int im[]= {-1,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+
+   if(n==0)                               // return Hamiltonian
+   {
+      std::vector<double> gjmbH(max(6,Hxc.Hi()),0.); for(int i=1; i<=Hxc.Hi(); i++) gjmbH[i-1]=-Hxc(i);
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH[1]-=MUB*Hext(1); gjmbH[0]-=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH[3]-=MUB*Hext(2); gjmbH[2]-=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH[5]-=MUB*Hext(3); gjmbH[4]-=GS*MUB*Hext(3); }
+      #ifdef JIJCONV
+      if(pars.B.norm().find("Stevens")!=std::string::npos) {
+         pars.jijconvcalc();
+         for(int i=0; i<Hxc.Hi(); i++) gjmbH[i] *= pars.jijconv[i]; }
+      #endif
+
+      // check dimensions of vector
+      if(Hxc.Hi()>52) {
+         fprintf(stderr,"Error module ic1ion: dimension of exchange field=%i > 52 - check number of columns in file mcphas.j\n",Hxc.Hi()); exit(EXIT_FAILURE); }
+
+      sMat<double> Hcfi, Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM;
+      for(int ind=1; ind<=(int)gjmbH.size(); ind++)
+      {
+         if(ind<=6) {       // Calculates Sx,Lx etc and copies them to est too. 
+            if(ind==3 || ind==4) Hcfi += icf_mumat(pars.n, ind-1, pars.l)*gjmbH[ind-1]; else Hcf += icf_mumat(pars.n, ind-1, pars.l)*gjmbH[ind-1]; }
+         else {             // Calculates multipolar operator matrices and copies them to est. 
+            if(im[ind]==1) Hcfi += icf_ukq(pars.n,K[ind],Q[ind],pars.l)*gjmbH[ind-1];   else Hcf += icf_ukq(pars.n,K[ind],Q[ind],pars.l)*gjmbH[ind-1]; }
+      }
+      
+      sMat<double> tmp = Hcf+Hcfi;
+      std::vector< std::vector<int> > u = tmp.findlower();
+      Matrix retval(1,tmp.nr(),1,tmp.nc()); retval=0;
+      for (int j=0; j<(int)u.size(); j++)
+      {
+         retval(u[j][0]+1,u[j][1]+1) = Hcf(u[j][0],u[j][1]);
+         retval(u[j][1]+1,u[j][0]+1) = Hcfi(u[j][0],u[j][1]);
+      }
+      outmat = retval; return 0;
+   }
+   else
+   {  
+      if(n>51) {
+         fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
+
+      sMat<double> Jmat; if(n<=6) Jmat = icf_mumat(pars.n, n-1, pars.l); else Jmat = icf_ukq(pars.n,K[n],Q[n],pars.l);
+      Matrix retval(1,Jmat.nr(),1,Jmat.nc()); retval=0;
+      if(im[n]==1)
+      {
+         std::vector< std::vector<int> > u = Jmat.findlower();
+         for (int j=0; j<(int)u.size(); j++)
+            retval(u[j][1]+1,u[j][0]+1) = Jmat(u[j][0],u[j][1]);
+      }
+      else
+      {
+         std::vector< std::vector<int> > u = Jmat.findlower();
+         for (int j=0; j<(int)u.size(); j++)
+            retval(u[j][0]+1,u[j][1]+1) = Jmat(u[j][0],u[j][1]);
+      }
+      outmat = retval; return 0;
+   }
+   std::cerr << "icf1ion::opmat - failed to calculate operator matrices\n"; return 1; //exit(EXIT_FAILURE);
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
 // Prints out a header to a specified file
 // --------------------------------------------------------------------------------------------------------------- //
 void icf_printheader(const char *outfile, icpars &pars)

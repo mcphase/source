@@ -534,6 +534,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
      }}}
   }
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 }
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot
@@ -547,6 +548,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n)
   get_parameters_from_sipfile(sipffilename);
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 
 }
 
@@ -572,6 +574,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   clusterfilename=new char [MAXNOFCHARINLINE];
   module_type=1;
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 }
 
 //constructor without file
@@ -605,6 +608,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
    Cp=Vector(1,9);Cp=0;
   DWF=0;gJ=0;maxE=1e10;pinit=0;ninit=1e10;
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 
 }
 
@@ -706,6 +710,12 @@ int i1;
   for (i=1;i<=paranz;++i)
   {jij[i]=pp.jij[i];dn[i]=pp.dn[i];sublattice[i]=pp.sublattice[i];}
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  
+  for(i1=0; i1<52; i1++) { 
+     if(pp.opmatM[i1]==0) opmatM[i1]=0; 
+     else { 
+        opmatM[i1] = new Matrix((*pp.opmatM[i1]).Clo(),(*pp.opmatM[i1]).Chi(),(*pp.opmatM[i1]).Rlo(),(*pp.opmatM[i1]).Rhi()); 
+        (*opmatM[i1]) = (*pp.opmatM[i1]); } }
 }
 
 
@@ -728,6 +738,9 @@ jjjpar::~jjjpar ()
                         delete clusterH; delete oldHext;
                        }
    if (module_type==2||module_type==4) delete iops;
+  for(int ii=0; ii<52; ii++) 
+     if(opmatM[ii]!=0) { delete opmatM[ii]; opmatM[ii]=0; }
+ 
 //#ifdef __linux__
 // i#ifdef __linux__f (module_type==0)dlclose(handle);
 //#endif

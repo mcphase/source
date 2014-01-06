@@ -240,6 +240,8 @@ module_type=0;
     //*(void **)(&ro_calc)=GetProcAddress(handle,"spindensity_coeff");
     if (ro_calc==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function ro_calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
+    dyn_opmat=(Matrix(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
+    if (dyn_opmat==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function opmat not possible - continuing\n",(int)GetLastError(),modulefilename);}
 #else
   char * error;
   handle=dlopen (modulefilename,RTLD_NOW | RTLD_GLOBAL);
@@ -308,7 +310,8 @@ module_type=0;
   *(void **)(&ro_calc)=dlsym(handle,"ro_calc");
   if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);ro_calc=NULL;}
 
-
+  *(void **)(&dyn_opmat)=dlsym(handle,"opmat");
+  if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dyn_opmat=NULL;}
 
 #endif
      }
@@ -642,8 +645,24 @@ ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hex
 // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
 /****************************************************************************/
 Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
-{switch (module_type)
-  {case 1:  return krameropmat(n,Hxc,Hext);break;
+{
+ int retval;
+ switch (module_type)
+  {
+   case 0:  if(opmatM[n]==0) {
+               if(dyn_opmat!=NULL) {
+                  opmatM[n] = new Matrix;
+                  retval=(*dyn_opmat)(&n, &sipffilename, &Hxc, &Hext, opmatM[n]); 
+                  if(retval==0) { return *opmatM[n]; }
+                  else { 
+                     fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat failed in module %i\n",module_type); exit(EXIT_FAILURE); } }
+               else { 
+                  fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %i\n",module_type); exit(EXIT_FAILURE); } }
+            else {
+               return *opmatM[n];
+            }
+            break;
+   case 1:  return krameropmat(n,Hxc,Hext);break;
    case 4:  return (*iops).opmat(n,Hxc,Hext);break;
    default: fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %i\n",module_type);exit(EXIT_FAILURE);
   }

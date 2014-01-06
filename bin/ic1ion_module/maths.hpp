@@ -67,6 +67,7 @@ template <class T> class sMat {
      std::vector<int> size() const;                                     // Returns the size of the matrix: _r and _c
      std::vector< std::vector<int> > find() const;                      // Returns the indices of the nonzero elements
      std::vector< std::vector<int> > findupper() const;                 // Returns the indices of upper triangle elements
+     std::vector< std::vector<int> > findlower() const;                 // Returns the indices of lower triangle elements
      bool issymm() const;                                               // Determines if matrix is symmetric
      bool issquare() const { return _r==_c; };                          // Determines if matrix is square
      bool isempty() const { return _ls.empty(); }                       // Determines if matrix is empty
@@ -164,6 +165,25 @@ template <class T> std::vector< std::vector<int> > sMat<T>::find() const
       retval[r] = row; r++;
    }
 
+   return retval;
+}
+
+template <class T> std::vector< std::vector<int> > sMat<T>::findlower() const
+{
+   int r,n = 0;
+   typename std::map<_ind,T>::iterator i;
+   std::vector<int> row(2);
+   std::vector< std::vector<int> > retval(_ls.size()/2+_r,row);
+   std::map<_ind,T> tmp_ls = _ls;
+
+   for (r=0; r<_r; r++)
+      for (i=tmp_ls.lower_bound(_ind(r,0)); i!=tmp_ls.lower_bound(_ind(r,r)); i++)
+      {
+         row[0] = i->first.r; row[1] = i->first.c;
+         retval[n++] = row;
+      }
+
+   retval.erase(retval.begin()+n,retval.end());
    return retval;
 }
 

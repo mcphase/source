@@ -113,6 +113,38 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
+// Routine for opmat() function for cluster module. Returns only req matrix in packed format (Real Upper, i Lower).
+// --------------------------------------------------------------------------------------------------------------- //
+void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, Matrix &retmat)
+{
+   int info,Hsz=getdim(pars.n,pars.l);
+   int cb = (int)(pars.truncate_level*(double)Hsz); Matrix outmat(1,cb,1,cb); outmat=0;
+   complexdouble *Vf; Vf = new complexdouble[Hsz*Hsz]; double *Ef; Ef = new double[Hsz]; 
+
+   // Calculates the eigenvectors and puts it into *est matrix for use by truncate_expJ()
+   sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; if(!iHic.isempty()) iHic/=MEV2CM;
+   info = ic_diag(Hic,iHic,Vf,Ef); if(info!=0) { std::cerr << "truncate_hmltn_packed: Error diagonalising, info==" << info << "\n"; }
+   delete[]Ef; 
+   for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) { 
+      if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) Vf[ii*Hsz+jj].r=0.; if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) Vf[ii*Hsz+jj].i=0.; } 
+
+   // Calculates the rotated single ion Hamiltonian
+   sMat<double> zeroes; zeroes.zero(Hsz,Hsz); sMat<double> Upq,Umq; complexdouble *zJmat=zmat2f(Mat,iMat);;
+   complexdouble *Hrot,*zmt; zmt = new complexdouble[Hsz*cb]; Hrot = new complexdouble[cb*cb];
+   char notranspose='N',transpose='C',uplo='U',side='L'; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,Vf,&Hsz,&zbeta,zmt,&Hsz);
+   F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&cb); free(zJmat);
+   for(int ii=0; ii<cb; ii++) for(int jj=ii; jj<cb; jj++) { 
+      if(fabs(Hrot[ii*cb+jj].r)>DBL_EPSILON) outmat(ii+1,jj+1)=Hrot[ii*cb+jj].r; 
+      if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) outmat(jj+1,ii+1)=Hrot[ii*cb+jj].i; 
+   } 
+ //memcpy(&outmat[0][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
+   delete[]Vf; delete[]Hrot; delete[]zmt;
+
+   retmat = outmat;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
 // Uses the stored eigenvectors of the single ion Hamiltonian to truncate the matrix. Calc. expectation values.
 // --------------------------------------------------------------------------------------------------------------- //
 void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, double *lnZ, double *U)

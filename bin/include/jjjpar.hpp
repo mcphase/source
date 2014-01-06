@@ -132,6 +132,8 @@ private:
   void (*estates)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
   void (*Icalc_parameter_storage)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
 
+  int  (*dyn_opmat)(int*,char**,Vector*,Vector*,Matrix*);
+  Matrix *opmatM[52];
 
 public:
 // ********************************************************************************

@@ -239,7 +239,7 @@ int myparse(char*sipffilename
 
        if(sq2!=NULL && csn!=NULL && statements!=NULL && iocs!=NULL && oes!=NULL)  // Output only the sequence and return
        {
-          i0=0; int *sqv = new int[999]; while(seq2[i0]!=0&&i0<999) { sqv[i0]=seq2[i0]; i0++; } sq2[iline]=sqv;
+          i0=0; int *sqv = new int[999]; while(seq2[i0]!=0&&i0<999) { sqv[i0]=seq2[i0]; i0++; } sqv[i0]=0; sq2[iline]=sqv;
           double *vcs = new double[99]; for(i0=0; i0<99; i0++) vcs[i0]=constval[i0]; csn[iline]=vcs;
           char *stam = new char[MAXNOFCHARINLINE]; strcpy(stam,statement); statements[iline]=stam;
           iocs[iline]=ioc; oes[iline++]=oe;

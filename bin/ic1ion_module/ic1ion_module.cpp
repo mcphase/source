@@ -64,6 +64,7 @@
 void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<double> &iHic, int JHi, int JLo);
 void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, double *lnZ, double *U);
 void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, int xyz);
+void truncate_hmltn_packed(icpars &pars, sMat<double> &Hic, sMat<double> &iHic, Matrix &retmat);
 
 void myPrintMatrix(FILE * file,sMat<double> & M,int d)
 {
@@ -75,6 +76,20 @@ void myPrintMatrix(FILE * file,sMat<double> & M,int d)
       fprintf (file,"\n");
    }
 }    
+
+void zmat2pack(sMat<double> &r, sMat<double> &i, Matrix &outmat)
+{
+   sMat<double> tmp = r+i;
+   std::vector< std::vector<int> > u = tmp.findlower();
+   // Allocates an _r*_c array and initiallises all elements to zero.
+   Matrix retval(1,tmp.nr(),1,tmp.nc()); retval=0;
+   for (int j=0; j<(int)u.size(); j++)
+   {
+      retval(u[j][0]+1,u[j][1]+1) = r(u[j][0],u[j][1]);
+      retval(u[j][1]+1,u[j][0]+1) = i(u[j][0],u[j][1]);
+   }
+   outmat = retval;
+}
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Checks whether the Matpack matrix is the same as the c-array
@@ -1169,7 +1184,7 @@ int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, p
  /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexVector &Llm1,// Output Llm1 vector (1,49)
-                      int & xyz,            // Indicating which of x,y,z direction to calculate
+                      int & xyz,          // Indicating which of x,y,z direction to calculate
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
@@ -1181,4 +1196,117 @@ int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, p
 // for(int i=7; i<=15;++i) Llm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Llm1(11)*=sqrt(2);
 // for(int i=16;i<=28;++i) Llm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Llm1(22)*=sqrt(2);
    return nt;
+}
+
+// --------------------------------------------------------------------------------------------------------------- //
+// returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
+// --------------------------------------------------------------------------------------------------------------- //
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif                                    // on input
+int    opmat(int &n,                      // n     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
+             char **sipffilename,         // Single ion properties filename
+             Vector &Hxc,                 // Hext  vector of external field [meV]
+             Vector &Hext,                // Hxc   vector of exchange field [meV]
+                                          // on output   
+             Matrix &outmat)              // operator matrix of Hamiltonian, I1, I2, I3 depending on n
+{
+   // Parses the input file for parameters
+   icpars pars; const char *filename = sipffilename[0];
+   ic_parseinput(filename,pars);
+
+   if(n==0)                               // return Hamiltonian
+   {
+      std::vector<double> gjmbH(max(6,Hxc.Hi()),0.); for(int i=1; i<=Hxc.Hi(); i++) gjmbH[i-1]=-Hxc(i);
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH[1]-=MUB*Hext(1); gjmbH[0]-=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH[3]-=MUB*Hext(2); gjmbH[2]-=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH[5]-=MUB*Hext(3); gjmbH[4]-=GS*MUB*Hext(3); }
+      // check dimensions of vector
+      if(Hxc.Hi()>51) {
+         fprintf(stderr,"Error module ic1ion: dimension of exchange field=%i > 51 - check number of columns in file mcphas.j\n",Hxc.Hi()); exit(EXIT_FAILURE); }
+
+      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
+      icmfmat mfmat(pars.n,pars.l,gjmbH.size(),pars.save_matrices,pars.density);
+      #ifdef JIJCONV
+      if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
+      #endif
+      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,gjmbH,pars.save_matrices); 
+
+      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; Hic+=Jmat; if(!iHic.isempty()) iHic/=MEV2CM; if(!iJmat.isempty()) iHic+=iJmat; 
+
+      if(pars.truncate_level!=1)  {       // Truncates the matrix, and packs it into real upper / imag lower triangle format
+         truncate_hmltn_packed(pars, Hic, iHic, outmat); return 0; }
+      else {
+         zmat2pack(Hic,iHic,outmat); return 0; }
+   }
+   else
+   {  
+      if(n>51) {
+         fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
+
+      // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
+      int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+      int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+      int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+      int Hsz=getdim(pars.n,pars.l); sMat<double> zeroes; zeroes.zero(Hsz,Hsz);
+
+      // Checks if the reduced matrix element is zero, if so, return zero without calculating matrix elements.
+      double redmat = pow(-1.,(double)abs(pars.l)) * (2*pars.l+1) * threej(2*pars.l,2*k[n-1],2*pars.l,0,0,0);
+      if(n>6 && fabs(redmat)<DBL_EPSILON*100)
+      {
+         if(pars.truncate_level!=1) { int cb = (int)(pars.truncate_level*(double)Hsz); zeroes.zero(cb,cb); }
+         zmat2pack(zeroes,zeroes,outmat); return 0;
+      }
+
+      // Set up directory to store matrices if the user asks for it.
+      char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
+      if(pars.save_matrices) {
+      #ifndef _WINDOWS
+      struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
+         if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::Jmat(): Can't create mms dir, " << strerror(errno) << "\n";
+      #else
+      DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY))
+         if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::Jmat(): Cannot create mms directory\n";
+      #endif
+      nstr[0] = (pars.l==F?102:100); if(pars.n<10) { nstr[1] = pars.n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = pars.n+38; nstr[3] = 0; }
+      strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;   // 85 is ASCII for "U", 100=="d" and 102=="f"
+      } else { strcpy(basename,"nodir/"); }
+      #define NSTR(K,Q) nstr[1] = K+48; nstr[2] = Q+48; nstr[3] = 0
+      #define MSTR(K,Q) nstr[1] = K+48; nstr[2] = 109;  nstr[3] = Q+48; nstr[4] = 0
+
+      // Calculates the operator matrices <Sx>, <Lx>, etc.
+      if(n>6) 
+      {
+         sMat<double> Umq,Upq,Jmat,iJmat;
+         NSTR(k[n-1],abs(q[n-1])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(pars.n,k[n-1],abs(q[n-1]),pars.l); rmzeros(Upq); mm_gout(Upq,filename); }
+         if(q[n-1]==0) { 
+            Jmat += Upq * redmat; iJmat.zero(Hsz,Hsz); }
+         else {
+            MSTR(k[n-1],abs(q[n-1])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+            Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[n-1],-abs(q[n-1]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
+            if(q[n-1]<0) {
+               if((q[n-1]%2)==0) iJmat = (Umq - Upq) * redmat; else iJmat = (Umq + Upq) * redmat; }
+            else {
+               if((q[n-1]%2)==0)  Jmat = (Umq + Upq) * redmat; else  Jmat = (Umq - Upq) * redmat; }
+         }
+
+         if(pars.truncate_level!=1) {
+            truncate_hmltn_packed(pars,Jmat,iJmat,outmat); return 0; }
+         else {
+            zmat2pack(Jmat,iJmat,outmat); return 0; }
+      }
+      else
+      {
+         icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices,pars.density);
+         if(pars.truncate_level!=1) {
+            if(im[n-1]==0) truncate_hmltn_packed(pars,mfmat.J[n-1],zeroes,outmat); else truncate_hmltn_packed(pars,zeroes,mfmat.J[n-1],outmat); }
+         else {
+            if(im[n-1]==0) zmat2pack(mfmat.J[n-1],zeroes,outmat);                  else zmat2pack(zeroes,mfmat.J[n-1],outmat); }
+         return 0;
+      }
+   }
+
+   std::cerr << "ic1ion::opmat - failed to calculate operator matrices\n"; return 1;
 }
