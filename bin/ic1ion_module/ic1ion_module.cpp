@@ -1215,6 +1215,7 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
    // Parses the input file for parameters
    icpars pars; const char *filename = sipffilename[0];
    ic_parseinput(filename,pars);
+   int nn = abs(n)-1;
 
    if(n==0)                               // return Hamiltonian
    {
@@ -1242,7 +1243,7 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
    }
    else
    {  
-      if(n>51) {
+      if(nn>51) {
          fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
 
       // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
@@ -1252,7 +1253,7 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
       int Hsz=getdim(pars.n,pars.l); sMat<double> zeroes; zeroes.zero(Hsz,Hsz);
 
       // Checks if the reduced matrix element is zero, if so, return zero without calculating matrix elements.
-      double redmat = pow(-1.,(double)abs(pars.l)) * (2*pars.l+1) * threej(2*pars.l,2*k[n-1],2*pars.l,0,0,0);
+      double redmat = pow(-1.,(double)abs(pars.l)) * (2*pars.l+1) * threej(2*pars.l,2*k[nn],2*pars.l,0,0,0);
       if(n>6 && fabs(redmat)<DBL_EPSILON*100)
       {
          if(pars.truncate_level!=1) { int cb = (int)(pars.truncate_level*(double)Hsz); zeroes.zero(cb,cb); }
@@ -1276,23 +1277,23 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
       #define MSTR(K,Q) nstr[1] = K+48; nstr[2] = 109;  nstr[3] = Q+48; nstr[4] = 0
 
       // Calculates the operator matrices <Sx>, <Lx>, etc.
-      if(n>6) 
+      if(abs(n)>6) 
       {
          sMat<double> Umq,Upq,Jmat,iJmat;
-         NSTR(k[n-1],abs(q[n-1])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-         Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(pars.n,k[n-1],abs(q[n-1]),pars.l); rmzeros(Upq); mm_gout(Upq,filename); }
-         if(q[n-1]==0) { 
+         NSTR(k[nn],abs(q[nn])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(pars.n,k[nn],abs(q[nn]),pars.l); rmzeros(Upq); mm_gout(Upq,filename); }
+         if(q[nn]==0) { 
             Jmat += Upq * redmat; iJmat.zero(Hsz,Hsz); }
          else {
-            MSTR(k[n-1],abs(q[n-1])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-            Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[n-1],-abs(q[n-1]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
-            if(q[n-1]<0) {
-               if((q[n-1]%2)==0) iJmat = (Umq - Upq) * redmat; else iJmat = (Umq + Upq) * redmat; }
+            MSTR(k[nn],abs(q[nn])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+            Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[nn],-abs(q[nn]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
+            if(q[nn]<0) {
+               if((q[nn]%2)==0) iJmat = (Umq - Upq) * redmat; else iJmat = (Umq + Upq) * redmat; }
             else {
-               if((q[n-1]%2)==0)  Jmat = (Umq + Upq) * redmat; else  Jmat = (Umq - Upq) * redmat; }
+               if((q[nn]%2)==0)  Jmat = (Umq + Upq) * redmat; else  Jmat = (Umq - Upq) * redmat; }
          }
 
-         if(pars.truncate_level!=1) {
+         if(pars.truncate_level!=1 || n<6) {
             truncate_hmltn_packed(pars,Jmat,iJmat,outmat); return 0; }
          else {
             zmat2pack(Jmat,iJmat,outmat); return 0; }
@@ -1300,10 +1301,10 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
       else
       {
          icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices,pars.density);
-         if(pars.truncate_level!=1) {
-            if(im[n-1]==0) truncate_hmltn_packed(pars,mfmat.J[n-1],zeroes,outmat); else truncate_hmltn_packed(pars,zeroes,mfmat.J[n-1],outmat); }
+         if(pars.truncate_level!=1 || n<0) {
+            if(im[nn]==0) truncate_hmltn_packed(pars,mfmat.J[nn],zeroes,outmat); else truncate_hmltn_packed(pars,zeroes,mfmat.J[nn],outmat); }
          else {
-            if(im[n-1]==0) zmat2pack(mfmat.J[n-1],zeroes,outmat);                  else zmat2pack(zeroes,mfmat.J[n-1],outmat); }
+            if(im[nn]==0) zmat2pack(mfmat.J[nn],zeroes,outmat);                  else zmat2pack(zeroes,mfmat.J[nn],outmat); }
          return 0;
       }
    }

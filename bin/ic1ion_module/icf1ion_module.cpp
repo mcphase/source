@@ -2426,7 +2426,7 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
       }
       outmat = retval; return 0;
    }
-   else
+   else if(n>0)
    {  
       if(n>51) {
          fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
@@ -2446,6 +2446,38 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
             retval(u[j][0]+1,u[j][1]+1) = Jmat(u[j][0],u[j][1]);
       }
       outmat = retval; return 0;
+   }
+   else
+   {  
+      if(n<51) {
+         fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
+
+      // Calculates the single-ion (without external field) Hamiltonian and operator matrix in LS-basis
+      sMat<double> Jmat; if(n>=6) Jmat = icf_mumat(pars.n, abs(n)-1, pars.l); else Jmat = icf_ukq(pars.n,K[abs(n)],Q[abs(n)],pars.l);
+      sMat<double> Hcfi, Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM;
+      int Hsz=Hcf.nr(); sMat<double> zeros(Hsz,Hsz);
+      Matrix retval(1,Hsz,1,Hsz); retval=0;
+
+      // Diagonalise H_singleion, remove small (==zero) elements, converts operator matrix to dense format to use BLAS matrix multiplication.
+      complexdouble *Vf; Vf = new complexdouble[Hsz*Hsz]; double *Ef; Ef = new double[Hsz];
+      int info = ic_diag(Hcf,Hcfi,Vf,Ef); if(info!=0) { std::cerr << "icf1ion::opmat(): Error diagonalising, info==" << info << "\n"; }
+      delete[]Ef;
+      for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) {
+         if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) Vf[ii*Hsz+jj].r=0.; if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) Vf[ii*Hsz+jj].i=0.; }
+      complexdouble *zJmat; if(im[n]==1) zJmat=zmat2f(zeros,Jmat); else zJmat=zmat2f(Jmat,zeros);
+
+      // Rotates the operator matrix into basis where H_singleion is diagonal using calculated eigenvectors with BLAS routines.
+      complexdouble *Hrot,*zmt; zmt = new complexdouble[Hsz*Hsz]; Hrot = new complexdouble[Hsz*Hsz];
+      char notranspose='N',transpose='C',uplo='U',side='L'; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+      F77NAME(zhemm)(&side,&uplo,&Hsz,&Hsz,&zalpha,zJmat,&Hsz,Vf,&Hsz,&zbeta,zmt,&Hsz);
+      F77NAME(zgemm)(&transpose,&notranspose,&Hsz,&Hsz,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&Hsz); free(zJmat);
+
+      // Populates the output matrix and frees temporary dense matrices (arrays).
+      for(int ii=0; ii<Hsz; ii++) for(int jj=ii; jj<Hsz; jj++) {
+         if(fabs(Hrot[ii*Hsz+jj].r)>DBL_EPSILON) outmat(ii+1,jj+1)=Hrot[ii*Hsz+jj].r;
+         if(fabs(Hrot[ii*Hsz+jj].i)<DBL_EPSILON) outmat(jj+1,ii+1)=Hrot[ii*Hsz+jj].i;
+      }
+      delete[]Vf; delete[]Hrot; delete[]zmt;
    }
    std::cerr << "icf1ion::opmat - failed to calculate operator matrices\n"; return 1; //exit(EXIT_FAILURE);
 }
