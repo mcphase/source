@@ -139,7 +139,7 @@ FUNCTIONOBJS=hypot3d.o hypot3f.o initds.o derf.o derfc.o ddaws.o ddaws2.o cwofz.
 # Build mcphas
 #
 
-all :  martin.o ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE) \
+all :  martin.o ../clusterize$(EXE) ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE) \
 	../singleion$(EXE) ../mcdispit$(EXE) ../mcphasit$(EXE) ../spins$(EXE) \
 	../spinsfromq$(EXE) ../addj$(EXE)    \
 	../densplt$(EXE)  ../pointc$(EXE) ../mcdiff$(EXE) \
@@ -220,6 +220,9 @@ mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_
 cond.o: cond.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<
 
+clusterize.o: clusterize.c 
+	$(CCC) $(CFLAGS) $<
+
 coq2jjj.o: coq2jjj.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<
 
@@ -293,6 +296,10 @@ ip.o: ionpars.cpp
 ../cond$(EXE): cond.o paramete.o $(VOBS) martin.o
 	@echo Linking ../cond
 	@$(LINKER)  -Wall  -o ../cond $^ $(LFLAGS)
+
+../clusterize$(EXE): clusterize.o $(VOBS) martin.o par.o jjjpar.o ionpars.o $(FUNCTIONOBJS) myev.o  $(CFIELDOBJS) perlparse.o
+	@echo Linking ../clusterize
+	@$(LINKER)  -Wall  -o ../clusterize $^ $(LFLAGS)
 
 ../coq2jjj$(EXE): coq2jjj.o paramete.o $(VOBS) martin.o
 	@echo Linking ../coq2jjj

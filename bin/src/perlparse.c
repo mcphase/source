@@ -235,12 +235,12 @@ int myparse(char*sipffilename
           }
        }
        seq2[i1]=0;
-//     printf("%s\t[[",statement); for(int ii=0; ii<=iseq; ii++) printf("%i ",seq2[ii]); printf("]]\n");
+    // printf("%s\t[[",statement); for(int ii=0; ii<=iseq; ii++) printf("%i ",seq2[ii]); printf("]]\n");
 
        if(sq2!=NULL && csn!=NULL && statements!=NULL && iocs!=NULL && oes!=NULL)  // Output only the sequence and return
        {
-          i0=0; int *sqv = new int[999]; while(seq2[i0]!=0&&i0<999) { sqv[i0]=seq2[i0]; i0++; } sqv[i0]=0; sq2[iline]=sqv;
-          double *vcs = new double[99]; for(i0=0; i0<99; i0++) vcs[i0]=constval[i0]; csn[iline]=vcs;
+         i0=0; int *sqv = new int[999]; while(seq2[i0]!=0&&i0<998) { sqv[i0]=seq2[i0]; i0++; } sqv[i0]=0;sq2[iline]=sqv;
+         double *vcs = new double[99]; for(i0=0; i0<99; i0++) vcs[i0]=constval[i0]; csn[iline]=vcs;
           char *stam = new char[MAXNOFCHARINLINE]; strcpy(stam,statement); statements[iline]=stam;
           iocs[iline]=ioc; oes[iline++]=oe;
           if(iline>999) { fprintf(stderr,"noperl: Sorry I can only handle up to 999 statements for now.\n"); return false; }
@@ -344,6 +344,7 @@ int myparse_execute(ComplexMatrix **operators, char **operatornames, int *seq2, 
 
        // Prints out what we think the input should be for debugging purposes
        printf("%s\t==>\t",statement);
+  //  printf("%s\t[[",statement); for(int ii=0; seq2[ii]!=0; ii++) printf("%i ",seq2[ii]); printf("]]\n");
 
        // Now do the matrix manipulations, do the first operation outside the loop
        int is5=0;
@@ -387,10 +388,9 @@ int myparse_execute(ComplexMatrix **operators, char **operatornames, int *seq2, 
           } i0 = 4; }
           printf(" op(%i)[%s] = %s ",seq2[0],operatornames[seq2[0]],dummystr);
        }
-
-       int pm;
+      int pm;
        while(seq2[i0]!=0) {
-          switch(seq2[i0]) {
+         switch(seq2[i0]) {
              case 3:
              case 4:          sprintf(dummystr," op(%i)[%s] ",-seq2[i0+1],operatornames[-seq2[i0+1]]);
                 dummy = (*operators[-seq2[i0+1]]); 

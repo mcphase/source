@@ -57,8 +57,7 @@ public:
    void addpars (int number, jjjpar & addjjj); // enlarge the set of parameters by
                                                         // inserting a new exchange parameters addjjj
 							// into field at position number
-
-
+   void delpar (int number); // remove a neighbour from list
 
    void save (FILE *file); // to save the parameters to a filehandle
    void saveatom (FILE *file); // to save the atom coordinates and properties to a filehandle
@@ -132,7 +131,7 @@ private:
   void (*estates)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
   void (*Icalc_parameter_storage)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
 
-  int  (*dyn_opmat)(int*,char**,Vector*,Vector*,Matrix*);
+  Matrix (*dyn_opmat)(int*,char**,Vector*,Vector*,Matrix*);
   Matrix *opmatM[52];
 
 public:

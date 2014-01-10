@@ -14,6 +14,16 @@
 
 
 //constructor 
+par::par(float ai,float bi,float ci,float alphai,float betai,float gammai,int nofci)
+{r=Matrix(1,3,1,3);rez=Matrix(1,3,1,3);
+ a=ai;b=bi;c=ci;alpha=alphai;beta=betai;gamma=gammai;nofcomponents=nofci;
+  rems[1]=new char[40];rems[1][0]='\0';
+  rems[2]=new char[40];rems[2][0]='\0';
+  rems[3]=new char[40];rems[3][0]='\0';
+  nofatoms=0;
+  jjj=new jjjpar * [nofatoms+1];
+}
+
 par::par (const char *filejjj)
 { int i,j,n,l;
   FILE *fin_coq;
@@ -123,6 +133,7 @@ par::~par ()
   for(i=1;i<=3;++i)
   {delete []rems[i];}
   for(i=1;i<=nofatoms;++i){delete jjj[i];}delete []jjj;
+// printf("hello end of destruktor par\n");   
 }
 
 int par::newatom(jjjpar * p) //creates new atom from an existing and returns its index

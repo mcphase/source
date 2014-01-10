@@ -28,7 +28,8 @@ class par
 
   //jjjpar 
    
-par (const char *filejjj);	//konstruktor
+   par (const char *filejjj);	//konstruktor
+   par (float ai,float bi,float ci,float alphai,float betai,float gammai,int nofcompi);
    par (const par & pars);	// kopier-konstruktor
    
 ~par ();		//destruktor

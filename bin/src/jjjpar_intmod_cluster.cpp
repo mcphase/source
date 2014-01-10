@@ -112,7 +112,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
              else    { (*Ia[cluster_seq[iln][0]-cluster_Ia_ind0+1])(i,j) = real((*Iaa[cluster_seq[iln][0]])(i,j)); }
           }
        }
-       if(rhs[cluster_seq[iln][0]]==0) Iaa[cluster_seq[iln][0]] = NULL;
+        if(rhs[cluster_seq[iln][0]]==0) Iaa[cluster_seq[iln][0]] = NULL;
     }
     delete dum;
 

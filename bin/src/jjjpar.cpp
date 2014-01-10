@@ -187,6 +187,31 @@ void jjjpar::addpars (int number, jjjpar & addjjj)
   delete []dnn;
 }
 
+// remove neighbour from list
+void jjjpar::delpar (int number)
+{ Matrix * jijn;
+  Vector * dnn;
+  int * sublatticen;
+  int i;
+  --paranz;
+  jijn = new Matrix[paranz+1];
+  dnn = new Vector[paranz+1];
+  sublatticen = new int[paranz+1];
+  int offset=0;
+  for (i=1;i<=paranz;++i)
+  {if(i==number)offset=1;
+   jijn[i]=jij[i+offset];
+   dnn[i]=dn[i+offset];
+   sublatticen[i]=sublattice[i+offset];
+  }
+
+  delete []jij;
+  delete []dn;
+  delete []sublattice;
+  dn=dnn;jij=jijn;sublattice=sublatticen;
+}
+
+
 /************************************************************************************/
 // save/get parameters 
 /************************************************************************************/

@@ -18,7 +18,7 @@ unless ($#ARGV>=0)
 {
 print STDOUT << "EOF";
 
- usage: makenn 23.3 [options] 
+ usage: makenn 23.3 [options] [-d]
 
  meaning take mcphas.j, generate all neighbors within sphere of 23.3A 
  and put them into makenn.j,the output values are sorted by ascending distance
@@ -64,7 +64,7 @@ print " option -bvk filename\n";
 print "              for phonon take Born van Karman model with longitudinal and\n";
 print "              transversal spring constants from file - file format:\n";
 print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(n/M)\n";
-print " option -d puts to the last column the distance of the neighbors (A)\n\n";
+print "        -d puts to the last column the distance of the neighbors (A)\n\n";
 print " The neigbours of each atom are also stored in seperate files\n";
 print " results\/makenn.a*.pc, which can be used with the program pointc to evaluate\n";
 print " the pointcharge model and calculate crystal field paramaters.\n\n";
