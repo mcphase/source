@@ -271,13 +271,13 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
             float ddelta=delta;
             nnt=cluster_dm(3,transitionnumber,T,m1,ddelta,ests);
             // now we have all magnetic moments in m1 vector and we have to do the
-            // magnetic structure factor = sum_i Mi exp(iQri) Fi(Q) * DWF
+            // dmq1=(magnetic structure factor)* = sum_i Mi exp(-iQri) Fi(Q) * DWF
             Vector abc(1,6); abc(1)=(*clusterpars).a; abc(2)=(*clusterpars).b; abc(3)=(*clusterpars).c;
                    abc(4)=(*clusterpars).alpha; abc(5)=(*clusterpars).beta; abc(6)=(*clusterpars).gamma;
             dMQ=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
              dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
             double QR=Qvec*rijk;
-            complex<double> exponent(cos(QR),sin(QR));
+            complex<double> exponent(cos(QR),-sin(QR));
             for(int n=1;n<=3;++n)
             {dMQ(n)+=m1(3*(a-1)+n)*exponent*(*(*clusterpars).jjj[a]).F(Q)*(*(*clusterpars).jjj[a]).debyewallerfactor(Q);
             }}}

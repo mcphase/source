@@ -112,16 +112,17 @@ for($i=0;$i<$ii;++$i) # take data points
      $wyf=1-$wyc;
      
      $z=$czvalues[$i]*$c3values[$j];
- 
+    if($ixc>0&&$iyc>0){
      $a[$ixf][$iyf]+=$wxf*$wyf*$z;
      $a[$ixf][$iyc]+=$wxf*$wyc*$z;
      $a[$ixc][$iyf]+=$wxc*$wyf*$z;
-     $a[$ixc][$iyc]+=$wxc*$wyc*$z;
+     $a[$ixc][$iyc]+=$wxc*$wyc*$z;}
     }
    } #next $j
  } # next $i
 
 # print results
+#print "results:\n";
 for($ix=0;$ix<$Nx;++$ix){
 for($iy=0;$iy<$Ny;++$iy){
 $x=$lx+$ix*$dx;
