@@ -84,6 +84,7 @@ extern "C"
                       int *nev, double *bm, double *vt, int *incy);
   void F77NAME(dsymv)(char *uplo, int *n, double *alpha, double *a, int *lda, double *x, int *incx, 
                       double *beta, double *y, int *incy);
+  void F77NAME(dtrmv)(char *uplo, char *trans, char *diag, int *n, double *a, int *lda, double *x, int *incx);
   void F77NAME(dsymm)(char *side, char *uplo, int *m, int *n, double *alpha, double *A, int *lda,
                       double *B, int *ldb, double *beta, double *C, int *ldc);
   void F77NAME(dgemm)(char *transa, char *transb, int *m, int *n, int *k, double *alpha, double *A,
@@ -135,6 +136,10 @@ extern "C"
                       double *vl, double *vu, int *il, int *iu, double *abstol, int *numfnd,
                       double *eigval, double *z, int *ldz, int *isuppz, double *work, 
 		      int *lwork, int *iwork, int *liwork, int *info);
+  void F77NAME(dstegr)(char *jobz, char *range, int *n, double *d, double *e, // Tridiagonal RRR eigenproblem
+                      double *vl, double *vu, int *il, int *iu, double *abstol, int *numfnd, double *eigval,
+                      double *z, int *ldz, int *isuppz, double *work,
+                      int *lwork, int *iwork, int *liwork, int *info);
 
   // Double precision complex routines.
   void F77NAME(zheev)(char *jobz, char *uplo, int *N, complexdouble *S, int *lda, 
@@ -143,6 +148,11 @@ extern "C"
                       double *vl, double *vu, int *il, int *iu, double *abstol, int *numfnd, double *eigval, 
                       complexdouble *z, int *ldz, int *isuppz, complexdouble *zwork, 
 		      int *lwork, double *rwork, int *lrwork, int *iwork, int *liwork, int *info);
+
+  void F77NAME(zhegvd)(int *itype, char *jobz, char *uplo, int *n, // Divide+Conquer generalised eig
+                      complexdouble *za, int *lda, complexdouble *zb, int *ldb, double *e, complexdouble *zwork, 
+                      int *lwork, double *rwork, int *lrwork, int *iwork, int *liwork, int *info);
+
 #ifndef NO_ARPACK
   // Double precision real ARPACK routines.
   void F77NAME(dnaupd)(int *ido, char *bmat, int *Hsz, char *whichp, int *nev, double *tol,

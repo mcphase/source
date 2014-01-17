@@ -1,6 +1,8 @@
+#define EPS DBL_EPSILON
+
 void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster module
 {// vector of matrix pointers which index the I1,I2,...In matrices of the cluster
- ComplexMatrix * Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms+1];
+ zsMat<double> * Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms+1];
  // initialize these matrices
  dim=1; Vector Hxc(1,(*clusterpars).nofcomponents);Vector Hext(1,3);
  dnn= new int [(*clusterpars).nofatoms+1];
@@ -24,10 +26,10 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  // initialize matrix and vector to cache Hamiltonian matrix from runs where Hext is constant
  clusterH = new Matrix(1,dim,1,dim); oldHext = new Vector(1,3); justinit=true;
 
- Iaa[0]=new ComplexMatrix(1,dim,1,dim);(*Iaa[0])=1; 
+ Iaa[0]=new zsMat<double>(dim,dim); (*Iaa[0])=1.; //Iaa[0]=new ComplexMatrix(1,dim,1,dim);(*Iaa[0])=1; 
  for(int a=1;a<=(*clusterpars).nofatoms;++a)
    for(int i=1;i<=(*clusterpars).nofcomponents;++i) {
-     Iaa[(a-1)*(*clusterpars).nofcomponents+i] = new ComplexMatrix(1,dim,1,dim); 
+     Iaa[(a-1)*(*clusterpars).nofcomponents+i] = new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim); 
      cluster_Iaa(Iaa[(a-1)*(*clusterpars).nofcomponents+i],a,i); }
 
   // her we should make possible the perlparsing the cluster sipf file
@@ -83,17 +85,17 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
     }
 
     // If any operator other than In_m are required on the right hand sides, we need to allocate them now before performing the operations
-    for(int i=cluster_Ia_ind0; i<=nop; i++) if(rhs[i]==1) Iaa[i]=new ComplexMatrix(1,dim,1,dim);
+    for(int i=cluster_Ia_ind0; i<=nop; i++) if(rhs[i]==1) Iaa[i]=new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim);
     // Allocates the interaction and cluster moment matrices
-    Ia= new Matrix * [nofcomponents+1];
-    cluster_M= new Matrix * [3+3*(*clusterpars).nofatoms+1];
-    for(int n = 1;n<=nofcomponents;++n) Ia[n]=new Matrix(1,dim,1,dim);
-    for(int n = 1;n<=3;++n) cluster_M[n]=new Matrix(1,dim,1,dim);
+    Ia= new zsMat<double> * [nofcomponents+1];
+    cluster_M= new zsMat<double> * [3+3*(*clusterpars).nofatoms+1];
+    for(int n = 1;n<=nofcomponents;++n) Ia[n]=new zsMat<double>(dim,dim);
+    for(int n = 1;n<=3;++n) cluster_M[n]=new zsMat<double>(dim,dim);
     for(int a=1;a<=(*clusterpars).nofatoms;++a) for(int n=1;n<=3;++n) {
-       int index_M=3*a+n; cluster_M[index_M]=new Matrix(1,dim,1,dim); }
+       int index_M=3*a+n; cluster_M[index_M]=new zsMat<double>(dim,dim); }
 
     // Runs through the list of operators to be defined
-    ComplexMatrix *dum = new ComplexMatrix(1,dim,1,dim);
+    zsMat<double> *dum = new zsMat<double>(dim,dim);
     for(int iln=0; iln<cluster_nlines; iln++) {
        *dum = 0;
        // If matrix is not required on RHS, it is unallocated and _should_ be zero - set it to a dummy (zero) matrix's address
@@ -101,16 +103,24 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
        if(myparse_execute(Iaa, operatornames, cluster_seq[iln], cluster_seqconst[iln], 
                           cluster_statements[iln], cluster_seqconstInd[iln], cluster_opassignflags[iln])==false) exit(EXIT_FAILURE);
        if(cluster_seq[iln][0]>=cluster_M_ind0) {
-          for(int i=1;i<=dim;++i) for(int j=1;j<=dim;++j) {
-             if(i<j) { (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = imag((*Iaa[cluster_seq[iln][0]])(j,i)); }
-             else    { (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = real((*Iaa[cluster_seq[iln][0]])(i,j)); }
-          }
+        //for(int i=1;i<=dim;++i) for(int j=1;j<=dim;++j) {
+//           if(i<j) {
+//              const complex<double> tva = (*Iaa[cluster_seq[iln][0]])(j,i);
+//              (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = imag(tva); }
+//           else    { 
+//              const complex<double> tva = (*Iaa[cluster_seq[iln][0]])(i,j);
+//              (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = real(tvz); }
+        //   if(i<j) { (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = imag((*Iaa[cluster_seq[iln][0]])[make_pair(j,i)]); }
+        //   else    { (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = real((*Iaa[cluster_seq[iln][0]])[make_pair(i,j)]); }
+        //}
+          *cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1] = *Iaa[cluster_seq[iln][0]];
        }
        else if(cluster_seq[iln][0]>=cluster_Ia_ind0) {
-          for(int i=1;i<=dim;++i) for(int j=1;j<=dim;++j) {
-             if(i<j) { (*Ia[cluster_seq[iln][0]-cluster_Ia_ind0+1])(i,j) = imag((*Iaa[cluster_seq[iln][0]])(j,i)); }
-             else    { (*Ia[cluster_seq[iln][0]-cluster_Ia_ind0+1])(i,j) = real((*Iaa[cluster_seq[iln][0]])(i,j)); }
-          }
+        //for(int i=1;i<=dim;++i) for(int j=1;j<=dim;++j) {
+        //   if(i<j) { (*Ia[cluster_seq[iln][0]-cluster_Ia_ind0+1])(i,j) = imag((*Iaa[cluster_seq[iln][0]])[make_pair(j,i)]); }
+        //   else    { (*Ia[cluster_seq[iln][0]-cluster_Ia_ind0+1])(i,j) = real((*Iaa[cluster_seq[iln][0]])[make_pair(i,j)]); }
+        //}
+          *Ia[cluster_seq[iln][0]-cluster_Ia_ind0+1] = *Iaa[cluster_seq[iln][0]]; 
        }
         if(rhs[cluster_seq[iln][0]]==0) Iaa[cluster_seq[iln][0]] = NULL;
     }
@@ -137,13 +147,13 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  for(int i=1;i<=nofcomponents;++i)
  {operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+i]=new char[5];
   sprintf(operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+i],"I%i",i);
-  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+i]=new ComplexMatrix(1,dim,1,dim);                     
+  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+i]=new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim);                     
  }
  // now initialize the cluster total magnetic moment operators
  for(int i=1;i<=3;++i) 
  {operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+i]=new char[5];
   sprintf(operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+i],"M%i",i);
-  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+ i]=new ComplexMatrix(1,dim,1,dim);                     
+  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+ i]=new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim);                     
  }
 
  // now initialize the cluster individual magnetic moment operators 
@@ -152,7 +162,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  {int index=(a-1)*3+n;
   operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]=new char[5];
   sprintf(operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index],"M%i_%i",a,n);
-  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]=new ComplexMatrix(1,dim,1,dim);                     
+  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]=new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim);                     
  } 
   operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms+1]=NULL;
 
@@ -162,13 +172,13 @@ for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents;++i)
   {delete Iaa[i];delete operatornames[i];}
 
 // here we fill the interaction operator matrices with values
-Ia= new Matrix * [nofcomponents+1];
-for(int n = 1;n<=nofcomponents;++n){Ia[n]=new Matrix(1,dim,1,dim);
-for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
-   if(i<j){(*Ia[n])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n])(j,i));}
-      else{(*Ia[n])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n])(i,j));}
-}
-//(*Ia[i])=(*Iaa[i]);
+Ia= new zsMat<double> * [nofcomponents+1];
+for(int n = 1;n<=nofcomponents;++n){Ia[n]=new zsMat<double>(dim,dim);
+//for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
+//   if(i<j){(*Ia[n])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n])[make_pair(j,i)]);}
+//      else{(*Ia[n])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n])[make_pair(i,j)]);}
+//}
+(*Ia[n])=(*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n]);
 delete           Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n];
 delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n]; 
 }
@@ -178,13 +188,15 @@ delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n];
 // in the mcalc, dm1calc, MQ and dMQ1 functions of the cluster module ...
 // to be done !!!
 
-cluster_M= new Matrix * [3+3*(*clusterpars).nofatoms+1];
+cluster_M= new zsMat<double> * [3+3*(*clusterpars).nofatoms+1];
 // first do the total moment
-for(int n = 1;n<=3;++n){cluster_M[n]=new Matrix(1,dim,1,dim);
-for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
-   if(i<j){(*cluster_M[n])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])(j,i));}
-      else{(*cluster_M[n])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])(i,j));}
-}
+for(int n = 1;n<=3;++n){cluster_M[n]=new zsMat<double>(dim,dim);
+//for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
+// //if(i<j){(*cluster_M[n])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])[make_pair(j,i)]);}
+// //   else{(*cluster_M[n])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])[make_pair(i,j)]);}
+//   (*cluster_M[n])(i,j) = (*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])[make_pair(i,j)];
+//}
+(*cluster_M[n]) = (*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n]);
 delete           Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n];
 delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n]; 
 }
@@ -192,10 +204,11 @@ delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcom
  for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
 {int index=(a-1)*3+n; // a .... atom index  n ... xyz components of magnetic moment
  int index_M=3*a+n;
- cluster_M[index_M]=new Matrix(1,dim,1,dim);
+ cluster_M[index_M]=new zsMat<double>(dim,dim);
  for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
-   if(i<j){(*cluster_M[index_M])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])(j,i));}
-      else{(*cluster_M[index_M])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])(i,j));}
+ //if(i<j){(*cluster_M[index_M])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])[make_pair(j,i)]);}
+ //   else{(*cluster_M[index_M])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])[make_pair(i,j)]);}
+   (*cluster_M[index_M])(i,j) = (*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])[make_pair(i,j)];
 }
 delete           Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index];
 delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]; 
@@ -210,7 +223,7 @@ printf("#module cluster initialized\n");
 //------------------------------------------------------------------------------------------------
 // Routine to calculate the Iaa (Ia_i) matrix for some particular a,i
 //------------------------------------------------------------------------------------------------
-void jjjpar::cluster_Iaa(ComplexMatrix *Iai, int a, int i)
+void jjjpar::cluster_Iaa(zsMat<double> *Iai, int a, int i)
 {
  Vector Hxc(1,(*clusterpars).nofcomponents);Vector Hext(1,3);
  // initialize matrices
@@ -233,7 +246,7 @@ void jjjpar::cluster_Iaa(ComplexMatrix *Iai, int a, int i)
   ma = dz; mx = dz*dnn[a];
 //for(int m=a;  m<=(*clusterpars).nofatoms;++m)mx*=dnn[m];
 //for(int m=a+1;m<=(*clusterpars).nofatoms;++m)ma*=dnn[m];
-
+/*
   //2. insertion loop
   if(useperl) {
   for(int ix=0;ix<=dx-1;++ix)
@@ -252,7 +265,8 @@ void jjjpar::cluster_Iaa(ComplexMatrix *Iai, int a, int i)
    else if (r==s) {(*Iai)(r,s)+=complex<double>(Jai(ai+1,bi+1),0.0);}   
               else{(*Iai)(r,s)+=complex<double>(Jai(ai+1,bi+1),Jai(bi+1,ai+1));}   
   }
-  } else {
+  } else { 
+*/
 //Matrix outmat(1,dim,1,dim); outmat=0;
 /*  for(int ix=0;ix<=dx-1;++ix) for(int iz=0;iz<=dz-1;++iz)
        for(int ai=0;ai<=da-1;++ai) for(int bi=0;bi<=ai;++bi)
@@ -274,10 +288,13 @@ myPrintMatrix(stdout,outmat);printf("\n");*/
     for(int ai=0; ai<da; ai++) { int r=ix*mx+ai*dz+1;
      for(int bi=0; bi<=ai; bi++) { int s=ix*mx+bi*dz+1;
       for(int iz=0; iz<dz; iz++) {
-               if (r==s) {(*Iai)(r+iz,s+iz)+=complex<double>(Jai(ai+1,bi+1),0.0);}   
-          else if(r>s)   {(*Iai)(r+iz,s+iz)+=complex<double>(Jai(ai+1,bi+1),Jai(bi+1,ai+1));}
+//             if (r==s) {(*Iai)(r+iz,s+iz)+=complex<double>(Jai(ai+1,bi+1),0.0);}   
+//        else if(r>s)   {(*Iai)(r+iz,s+iz)+=complex<double>(Jai(ai+1,bi+1),Jai(bi+1,ai+1));}
+         if(r==s)     { if(fabs(Jai(ai+1,bi+1))>EPS)                           (*Iai)(r+iz,s+iz) = complex<double>(Jai(ai+1,bi+1),0.); }
+         else if(r>s) { if(fabs(Jai(ai+1,bi+1))>EPS||fabs(Jai(bi+1,ai+1))>EPS) (*Iai)(r+iz,s+iz) = complex<double>(Jai(ai+1,bi+1),Jai(bi+1,ai+1)); }
+         else if(r<s) { if(fabs(Jai(ai+1,bi+1))>EPS||fabs(Jai(bi+1,ai+1))>EPS) (*Iai)(r+iz,s+iz) = complex<double>(Jai(bi+1,ai+1),-Jai(ai+1,bi+1)); }
       } } }
-  }
+//}
  }
 }
 
@@ -423,13 +440,18 @@ if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
    }
 
    Vector Jret(1,maxn);Jret=0;
-   ComplexVector iJj(1,maxn);
+   ComplexVector iJj(1,maxn); Matrix aMb_tempV(1,6,1,dim); double rv, iv;
    for(int a=1;a<=maxn;++a)
    {// transition matrix element
     switch(code)
-    {case 1:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*Ia[a]),zr,zc,ii,jj));break;
-     case 2:  iJj(a)=complex<double>(aMb_real((*cluster_M[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a]),zr,zc,ii,jj)); break;
-     case 3:  iJj(a)=complex<double>(aMb_real((*cluster_M[a+3]),zr,zc,ii,jj),aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj));break;
+  //{case 1: rv=aMb_real((*Ia[a]),zr,zc,ii,jj,&aMb_tempV);          iv=aMb_imag((*Ia[a]),zr,zc,ii,jj,&aMb_tempV);         //break;
+  //iJj(a)=complex<double>(rv,iv); 
+  //break;
+   //case 2: rv=aMb_real((*cluster_M[a]),zr,zc,ii,jj,&aMb_tempV);   iv=aMb_imag((*cluster_M[a]),zr,zc,ii,jj,&aMb_tempV);    break;
+   //case 3: rv=aMb_real((*cluster_M[a+3]),zr,zc,ii,jj,&aMb_tempV); iv=aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj,&aMb_tempV);  break;
+    {case 1: iJj(a) = aMb_complex((*Ia[a]),zr,zc,ii,jj); break;
+     case 2: iJj(a) = aMb_complex((*cluster_M[a]),zr,zc,ii,jj); break;
+     case 3: iJj(a) = aMb_complex((*cluster_M[a+3]),zr,zc,ii,jj); break;
     }
     // determine expectation value
     Jret(a)=0;
@@ -633,7 +655,21 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
 *oldHext = Hext; } H = *clusterH;
 
 // insert exchange field
-for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]);
+//for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]);
+for(int i =1;i<=Hxc.Hi();++i)H-=(Hxc(i)*(*Ia[i])).fp_matrix();
+//Matrix mIa; for(int i =1;i<=Hxc.Hi();++i) { mIa = (*Ia[i]).fp_matrix(); H-=Hxc(i)*mIa; }
+//Matrix mIa(1,dim,1,dim); for(int i =1;i<=Hxc.Hi();++i) { mIa = (*Ia[i]).fp_matrix(); myPrintMatrix(stdout,mIa); printf("----\n"); }
+/*
+//Matrix mIa(1,dim,1,dim);
+Matrix tIa(1,dim,1,dim);
+for(int ii =1;ii<=Hxc.Hi();++ii) { tIa = 0;
+      for(int i=1;i<=dim;++i) for(int j=1;j<=dim;++j) {
+         if(i<j) { tIa(i,j) = imag((*Ia[ii])[make_pair(j,i)]); }
+         else    { tIa(i,j) = real((*Ia[ii])[make_pair(i,j)]); } }
+H-=Hxc(ii)*tIa; 
+//mIa = 0; mIa = (*Ia[ii]).fp_matrix();
+//myPrintMatrix(stdout,tIa); printf("----\n");
+}*/
 
 // diagonalize H
 int sort=1;int maxiter=1000000;
