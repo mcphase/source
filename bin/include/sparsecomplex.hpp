@@ -43,8 +43,8 @@ template <class T> class zsMat {
            int c;                                                       //   we provide by overloading '<'
            _ind(int r_, int c_) : r(r_), c(c_) {};
            ~_ind() {};
-           bool operator < (const _ind & i) const { return (r<i.r || (r==i.r && c<i.c)); }
-           bool operator <= (const _ind & i) const { return (r<i.r || (r==i.r && c<=i.c)); }
+           bool operator < (const _ind & i) const { return (c<i.c || (c==i.c && r<i.r)); }    // Column-major
+           bool operator <= (const _ind & i) const { return (c<i.c || (c==i.c && r<=i.r)); }
      };
      std::map<_ind,std::complex<T> > _ls;                              // List of elements
 
@@ -60,6 +60,7 @@ template <class T> class zsMat {
      std::vector<int> size() const;                                     // Returns the size of the matrix: _r and _c
      std::vector< std::vector<int> > find() const;                      // Returns the indices of the nonzero elements
      std::vector< std::vector<int> > findupper() const;                 // Returns the indices of upper triangle elements
+     std::vector< std::vector<int> > findlower() const;                 // Returns the indices of lower triangle elements
      std::vector<int> find_col(int i) const;                            // Returns the non-zero indices of column i
      bool issymm() const;                                               // Determines if matrix is symmetric
      bool isherm() const;                                               // Determines if matrix is Hermitian
@@ -81,14 +82,14 @@ template <class T> class zsMat {
      T* fp_array() const;                                               // Returns Hermitian matrix as a Fortran packed 2D array
      Matrix fp_matrix() const;                                          // Returns Hermitian matrix as a Fortran packed 2D array
      void packed2tril();                                                // Rearranges a Hermitian matrix from packed to lower triangular
-   //std::map<_ind,std::complex<T> > ls() { return _ls; }
      void mcol(int c, T val);                                           // Multiplies a given column by a constant
      void mrow(int r, T val);                                           // Multiplies a given row by a constant
      void mcol(int c, std::complex<T> val);                             // Multiplies a given column by a constant
      void mrow(int r, std::complex<T> val);                             // Multiplies a given row by a constant
 
-     // For TRLAN
-     void trlanmv(int*nrow, int*ncol, double*xin, int*ldx, double*yout, int*ldy);
+     // For iterative eigensolvers
+     void MultMv(std::complex<T> *v, std::complex<T> *w);               // Calculates the matrix-vector product w = M*v (assume Hermitian)
+     void MultMvNH(std::complex<T> *v, std::complex<T> *w);             // Calculates the matrix-vector product w = M*v (non-Hermitian)
 
      // Overloaded operators
      zsMat<T> operator =  (const zsMat & m);                            // Copy assignment - overwrites previous matrix
@@ -118,34 +119,6 @@ template <class T> class zsMat {
      friend std::istream & operator >> <> (std::istream & i, zsMat & m);
 
 };  // End of template <class T> class zsMat
-
-/* --------------------------------------------------------------------------------------------------------------- //
-   Template functions declared in this file
-// --------------------------------------------------------------------------------------------------------------- //
-   enum normp { inf = 3, fro = 4 };                                     // Enumeration for the norm function
-  
-   T atoT(const std::string &s)                                         // Convert a string to a T using istreams
-   std::string dispvect(const std::vector<T> &V)                        // Displays a std::vector in row format
-   T vmax(const std::vector<T> &V)                                      // Finds the maximum value of a vector
-   std::vector<T> mmax(const sMat<T> &M)                                // Finds the maximum values along a column
-   std::vector<T> mmax(const sMat<T> &M, std::vector<int> &ind)         //    with indeces
-   std::vector<T> msum(const sMat<T> &M)                                // Calcs. sum of each column of a matrix
-   T vsum(const std::vector<T> &V)                                      // Calcs. sum of all elements of a vector
-   std::vector<T> diag(const sMat<T> &M, int d=0)                       // Returns the diagonal elements as vector
-   sMat<T> triu(const sMat<T> &M)                                       // Returns the upper triangle   
-   sMat<T> triu(const sMat<T> &M, int d)                                //    from diagonal d
-   sMat<T> tril(const sMat<T> &M)                                       // Returns the lower triangle 
-   sMat<T> tril(const sMat<T> &M, int d)                                //    from diagonal d
-   std::vector<T> all(const sMat<T> &M, int dim)                        // Returns a vector whose element is 1 if all
-   std::vector<T> all(sMat<T> & M)                                      //    elements along dimension dim is nonzero
-   std::vector<T> vsort(const std::vector<T> &v)                        // Sorts a vector using the gnome sort
-   std::vector<T> vsort(const std::vector<T> &v, std::vector<int> &ind) //    with indices
-   sMat<T> msort(const sMat<T> &m)                                      // Sorts a matrix along its column
-   sMat<T> msort(const sMat<T> &m, sMat<int> &ind, const char *descend) //    with indices, descending if specified
-   std::vector<T> setunion(std::vector<T> &a, std::vector<T> &b)        // Calculates the set-theoretic union
-   std::vector<T> setdiff(std::vector<T> &a, std::vector<T> &b)         // Calculates the set-theoretic difference
-   std::vector<T> setxor(std::vector<T> &a, std::vector<T> &b)          // Calculates the set-theoretic xor
-// --------------------------------------------------------------------------------------------------------------- */
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Member functions
@@ -177,14 +150,14 @@ template <class T> std::vector< std::vector<int> > zsMat<T>::find() const
 
 template <class T> std::vector< std::vector<int> > zsMat<T>::findupper() const
 {
-   int r,n = 0;
+   int c,n = 0;
    typename std::map<_ind,std::complex<T> >::iterator i;
    std::vector<int> row(2);
    std::vector< std::vector<int> > retval(_ls.size()/2+_r,row);
    std::map<_ind,std::complex<T> > tmp_ls = _ls;
 
-   for (r=1; r<=_r; r++)
-      for (i=tmp_ls.lower_bound(_ind(r,r)); i!=tmp_ls.lower_bound(_ind(r,_c)); i++)
+   for (c=1; c<=_c; c++)
+      for (i=tmp_ls.lower_bound(_ind(1,c)); i!=tmp_ls.lower_bound(_ind(c,c)); i++)
       {
          row[0] = i->first.r; row[1] = i->first.c;
          retval[n++] = row;
@@ -194,14 +167,34 @@ template <class T> std::vector< std::vector<int> > zsMat<T>::findupper() const
    return retval;
 }
 
-template <class T> std::vector<int> zsMat<T>::find_col(int r) const
+template <class T> std::vector< std::vector<int> > zsMat<T>::findlower() const
+{
+   int c,n = 0;
+   typename std::map<_ind,std::complex<T> >::iterator i;
+   std::vector<int> row(2);
+   std::vector< std::vector<int> > retval(_ls.size()/2+_r,row);
+   std::map<_ind,std::complex<T> > tmp_ls = _ls;
+
+   for (c=1; c<=_c; c++)
+      for (i=tmp_ls.lower_bound(_ind(c,c)); i!=tmp_ls.lower_bound(_ind(_r,c)); i++)
+      {
+         row[0] = i->first.r; row[1] = i->first.c;
+         retval[n++] = row;
+      }
+
+   retval.erase(retval.begin()+n,retval.end());
+   return retval;
+}
+
+
+template <class T> std::vector<int> zsMat<T>::find_col(int c) const
 {
    int n = 0;
    typename std::map<_ind,std::complex<T> >::iterator i;
    std::vector<int> retval(_c,0);
    std::map<_ind,std::complex<T> > tmp_ls = _ls;
 
-   for (i=tmp_ls.lower_bound(_ind(r,0)); i!=tmp_ls.lower_bound(_ind(r,_c)); i++)
+   for (i=tmp_ls.lower_bound(_ind(0,c)); i!=tmp_ls.lower_bound(_ind(_r,c)); i++)
       retval[n++] = i->first.c;
 
    retval.erase(retval.begin()+n,retval.end());
@@ -296,18 +289,18 @@ template <class T> void zsMat<T>::resize(int rs, int rn, int cs, int cn)// Resiz
    _ls.erase(_ls.upper_bound(_ind(rn,cn)),_ls.end());
    if(rs==1 && cs==1)
    {
-      for(i=1; i<=rn; i++)
-         _ls.erase(_ls.upper_bound(_ind(i,cn)),_ls.lower_bound(_ind(i+1,0)));
+      for(i=1; i<=cn; i++)
+         _ls.erase(_ls.upper_bound(_ind(rn,i)),_ls.lower_bound(_ind(0,i+1)));
       _r = rn; _c = cn;
    }
    else
    {
       _ls.erase(_ls.begin(),_ls.lower_bound(_ind(rs,cs)));
-      for(i=rs; i<rn; i++)
+      for(i=cs; i<cn; i++)
       {  
-         _ls.erase(_ls.lower_bound(_ind(i,0)),_ls.lower_bound(_ind(i,cs)));
-         _ls.erase(_ls.upper_bound(_ind(i,cn)),_ls.lower_bound(_ind(i+1,0)));
-         for(it=_ls.lower_bound(_ind(i,cs)); it!=_ls.upper_bound(_ind(i,cn)); i++)
+         _ls.erase(_ls.lower_bound(_ind(0,i)),_ls.lower_bound(_ind(rs,i)));
+         _ls.erase(_ls.upper_bound(_ind(rn,i)),_ls.lower_bound(_ind(0,i+1)));
+         for(it=_ls.lower_bound(_ind(rs,i)); it!=_ls.upper_bound(_ind(rn,i)); i++)
          {
             _ls[_ind(i-rs,it->first.c-cs)] = it->second; _ls.erase(it);
          }
@@ -400,8 +393,8 @@ template <class T> void zsMat<T>::h_array(std::complex<T>* retval) const   // As
    std::map<_ind,std::complex<T> > tmp_ls = _ls;
    memset(retval,0,_r*_c*sizeof(std::complex<T>));
    // _Assume_(!) the matrix is Hermitian and only loop through the lower triangle.
-   for (int r=1; r<=_r; r++)
-      for (i=tmp_ls.lower_bound(_ind(r,1)); i!=tmp_ls.lower_bound(_ind(r,r+1)); i++)
+   for (int c=1; c<=_c; c++)
+      for (i=tmp_ls.lower_bound(_ind(c,c)); i!=tmp_ls.lower_bound(_ind(_r+1,c)); i++)
       {
          retval[_r*(i->first.r-1)+(i->first.c-1)] = i->second;
          if(i->first.c!=i->first.r)
@@ -435,8 +428,8 @@ template <class T> T* zsMat<T>::fp_array() const                // Returns Hermi
    retval = (T*) calloc(_r*_c,sizeof(T));                       // Allocates an _r*_c array and initiallises all elements to zero.
 
    // _Assume_(!) the matrix is Hermitian and only loop through the lower triangle.
-   for (int r=1; r<=_r; r++)
-      for (i=tmp_ls.lower_bound(_ind(r,1)); i!=tmp_ls.lower_bound(_ind(r,r+1)); i++)
+   for (int c=1; c<=_c; c++)
+      for (i=tmp_ls.lower_bound(_ind(c,c)); i!=tmp_ls.lower_bound(_ind(_r+1,c)); i++)
       {
          retval[_r*(i->first.r-1)+(i->first.c-1)] = real(i->second);
          if(i->first.c!=i->first.r)
@@ -454,8 +447,8 @@ template <class T> Matrix zsMat<T>::fp_matrix() const           // Returns Hermi
    std::map<_ind,std::complex<T> > tmp_ls = _ls;
 
    // _Assume_(!) the matrix is Hermitian and only loop through the lower triangle.
-   for (int r=1; r<=_r; r++)
-      for (i=tmp_ls.lower_bound(_ind(r,1)); i!=tmp_ls.lower_bound(_ind(r,r+1)); i++)
+   for (int c=1; c<=_c; c++)
+      for (i=tmp_ls.lower_bound(_ind(c,c)); i!=tmp_ls.lower_bound(_ind(_r+1,c)); i++)
       {
          retval(i->first.r,i->first.c) = real(i->second);
          if(i->first.c!=i->first.r)
@@ -475,8 +468,8 @@ template <class T> T* zsMat<T>::cp_array() const                // Returns Hermi
    retval = (T*) calloc(_r*_c,sizeof(T));                       // Allocates an _r*_c array and initiallises all elements to zero.
 
    // _Assume_(!) the matrix is Hermitian and only loop through the lower triangle.
-   for (int r=1; r<=_r; r++)
-      for (i=tmp_ls.lower_bound(_ind(r,1)); i!=tmp_ls.lower_bound(_ind(r,r+1)); i++)
+   for (int c=1; c<=_c; c++)
+      for (i=tmp_ls.lower_bound(_ind(c,c)); i!=tmp_ls.lower_bound(_ind(_r+1,c)); i++)
       {
          retval[_r*(i->first.c-1)+(i->first.r-1)] = real(i->second);
          if(i->first.c!=i->first.r)
@@ -511,59 +504,66 @@ template <class T> void zsMat<T>::packed2tril()                 // Rearranges a 
 
 template <class T> void zsMat<T>::mcol(int c, T val)            // Multiplies a particular column by a constant
 {
-   int r;
    typename std::map<_ind,std::complex<T> >::iterator it;
-   for(r=1; r<=_r; r++)
+   for (it=_ls.lower_bound(_ind(1,c)); it!=_ls.lower_bound(_ind(0,c+1)); it++)
+      it->second *= val;
+}
+template <class T> void zsMat<T>::mrow(int r, T val)            // Multiplies a particular column by a constant
+{
+   int c;
+   typename std::map<_ind,std::complex<T> >::iterator it;
+   for(c=1; c<=_r; c++)
    {
       it = _ls.find(_ind(r,c));
       if(it!=_ls.end())
          it->second *= val;
    }
 }
-template <class T> void zsMat<T>::mrow(int r, T val)            // Multiplies a particular column by a constant
-{
-   typename std::map<_ind,std::complex<T> >::iterator lb,ub,it;
-   lb = _ls.lower_bound(_ind(r,0));
-   ub = _ls.upper_bound(_ind(r,_c));
-   if (lb->first < ub->first)
-      for(it=lb; it->first<ub->first; it++)
-         it->second *= val;
-}
 template <class T> void zsMat<T>::mcol(int c, std::complex<T> val)
 {
-   int r;
    typename std::map<_ind,std::complex<T> >::iterator it;
-   for(r=1; r<=_r; r++) {
+   for (it=_ls.lower_bound(_ind(1,c)); it!=_ls.lower_bound(_ind(0,c+1)); it++)
+      it->second *= val;
+}
+template <class T> void zsMat<T>::mrow(int r, std::complex<T> val) 
+{
+   int c;
+   typename std::map<_ind,std::complex<T> >::iterator it;
+   for(c=1; c<=_r; c++) {
       it = _ls.find(_ind(r,c));
       if(it!=_ls.end())
          it->second *= val; }
 }
-template <class T> void zsMat<T>::mrow(int r, std::complex<T> val) 
-{
-   typename std::map<_ind,std::complex<T> >::iterator lb,ub,it;
-   lb = _ls.lower_bound(_ind(r,0)); ub = _ls.upper_bound(_ind(r,_c));
-   if (lb->first < ub->first)
-      for(it=lb; it->first<ub->first; it++)
-         it->second *= val;
-}
 
 // --------------------------------------------------------------------------------------------------------------- //
-// Matrix-Vector multiplication for TRLAN
+// Matrix-Vector multiplication for iterative methods
 // --------------------------------------------------------------------------------------------------------------- //
-template <class T> void zsMat<T>::trlanmv(int*nrow, int*ncol, double*xin, int*ldx, double*yout, int*ldy)
-{
-   if(*nrow!=_r) { std::cerr << "trlanmv: TRLAN expects " <<  *nrow << "rows but matrix has " << _r << ".\n"; }
-   
-   typename std::map<_ind,std::complex<T> >::iterator it;
-
-   for(int j=0; j<*ncol; j++)
+template <class T> void zsMat<T>::MultMv(std::complex<T> *v, std::complex<T> *w)  // Calculates the matrix-vector product w = M*v
+{                                                                                 // Needed by ARPACK
+   typename std::map<_ind,std::complex<T> >::iterator i;
+   // We have to assume that the size of the vector v is equal to _r
+   memset(w,0,_r*sizeof(std::complex<T>));
+   for (int c=1; c<=_c; c++)
    {
-      for(int i=1; i<=_c; i++)
+      // Assume(!) matrix is Hermitian and loops only over the lower triangle
+      for (i=_ls.lower_bound(_ind(c,c)); i!=_ls.lower_bound(_ind(_r+1,c)); i++)
       {
-         yout[(i-1)+(*ldy)*j] = 0.;
-         for(it=_ls.lower_bound(_ind(i,0)); it!=_ls.lower_bound(_ind(i,_c)); it++)
-            yout[(i-1)+(*ldy)*j] += real(it->second * xin[(it->first.c-1)+(*ldx)*j]);
+         w[i->first.r-1] += (i->second * v[c-1]);
+         if(i->first.c!=i->first.r)
+            w[c-1] += conj(i->second)*v[i->first.r-1];
       }
+   }
+
+}
+template <class T> void zsMat<T>::MultMvNH(std::complex<T>*v, std::complex<T>*w)  // Calculates the matrix-vector product w = M*v
+{                                                                                 // Needed by ARPACK
+   typename std::map<_ind,std::complex<T> >::iterator i;
+   // We have to assume that the size of the vector v is equal to _r
+   memset(w,0,_r*sizeof(std::complex<T>));
+   for (int c=1; c<=_c; c++)
+   {
+      for (i=_ls.lower_bound(_ind(1,c)); i!=_ls.lower_bound(_ind(0,c+1)); i++)
+         w[i->first.r-1] += (i->second * v[c-1]);
    }
 }
 
@@ -766,26 +766,23 @@ template <class T> zsMat<T> zsMat<T>::operator *= (const zsMat<T> & m)  // Matri
       std::cerr << "Error: zsMat<T>::operator *= (const zsMat<T>): Matrix sizes are incommensurate!\n";
    else
    {
-      int r,c;
-      typename std::map<_ind,std::complex<T> >::iterator lb,ub,it;
-      std::complex<T> elem;
-
       // Using the traditional method, except ignoring zeros in the sparse structure
-      tmp._r = _r;
+      tmp._r = _r; 
       tmp._c = m._c;
-      for(r=1; r<=_r; r++)
-      {
-         lb = _ls.lower_bound(_ind(r,0));
-         ub = _ls.upper_bound(_ind(r,_c));
-         if(lb->first < ub->first)
-            for(c=1; c<=m._c; c++)
+      typename std::map<_ind,std::complex<T> >::iterator it;
+      std::map<_ind,std::complex<T> > mls = m._ls;
+      std::complex<T> elem;
+      
+      for (int c=1; c<=_c; c++)       // Loops through the columns of the multiplier
+         for(int r=1; r<=_r; r++)     // Loops through the rows of the multiplican
+         {
+            elem = 0.;                // Loops through the rows of the mulitplier, ignoring zeros
+            for (it=mls.lower_bound(_ind(c,c)); it!=mls.lower_bound(_ind(_r+1,c)); it++)
             {
-               elem = 0.0;
-               for(it=lb; it->first<ub->first; it++)
-                  elem += (it->second * m._ls.find(_ind(it->first.c,c))->second);
-               tmp(r,c) = elem;
+                  elem += (_ls.find(_ind(r,it->first.r))->second * it->second);
             }
-      }
+            if(elem!=0.) tmp(r,c) = elem;
+         }
       *this = tmp;
    }
    return *this;
@@ -799,26 +796,17 @@ template <class T> zsMat<T> operator * (const zsMat<T> & m1, const zsMat<T> & m2
 template <class T> zsMat<T> zsMat<T>::operator *= (const std::vector<T> & v)
 {
    zsMat<T> tmp;                                                        // Binary matrix.vector multiplication
-   int i;
-   typename std::map<_ind,std::complex<T> >::iterator lb,ub,it;
-   T elem;
+   typename std::map<_ind,std::complex<T> >::iterator i;
 
    if(_c != (int)v.size())
       std::cerr << "Error: zsMat<T>::operator * (zsMat<T>, std::vector<T>): Matrix and vector sizes incommensurate!\n";
    else
    {
       tmp._r = _r; tmp._c = 1;
-      for(i=1; i<=_c; i++)
+      for (int c=1; c<=_c; c++)
       {
-         lb = _ls.lower_bound(_ind(i,0));
-         ub = _ls.upper_bound(_ind(i,_c));
-         if (lb->first < ub->first)
-         {
-            elem = 0.0;
-            for(it=lb; it->first<ub->first; it++)
-               elem += (it->second * v[it->first.c]);
-            tmp(i,0) = elem;
-         }
+         for (i=_ls.lower_bound(_ind(1,c)); i!=_ls.lower_bound(_ind(0,c+1)); i++)
+            tmp(c,1) += (i->second * v[c-1]);
       }
       *this = tmp;
    }
@@ -840,29 +828,21 @@ template <class T> std::vector<T> operator * (const zsMat<T> & m1, const std::ve
 template <class T> zsMat<T> zsMat<T>::operator *= (const std::vector<std::complex<T> > & v)
 {
    zsMat<T> tmp;                                                        // Binary matrix.vector multiplication
-   int i;
-   typename std::map<_ind,std::complex<T> >::iterator lb,ub,it;
-   T elem;
+   typename std::map<_ind,std::complex<T> >::iterator i;
 
    if(_c != (int)v.size())
       std::cerr << "Error: zsMat<T>::operator * (zsMat<T>, std::vector<T>): Matrix and vector sizes incommensurate!\n";
    else
    {
       tmp._r = _r; tmp._c = 1;
-      for(i=1; i<=_c; i++)
+      for (int c=1; c<=_c; c++)
       {
-         lb = _ls.lower_bound(_ind(i,0));
-         ub = _ls.upper_bound(_ind(i,_c));
-         if (lb->first < ub->first)
-         {
-            elem = 0.0;
-            for(it=lb; it->first<ub->first; it++)
-               elem += (it->second * v[it->first.c]);
-            tmp(i,0) = elem;
-         }
+         for (i=_ls.lower_bound(_ind(1,c)); i!=_ls.lower_bound(_ind(0,c+1)); i++)
+            tmp(c,1) += (i->second * v[c-1]);
       }
       *this = tmp;
    }
+
    return *this;
 }
 template <class T> std::vector<T> operator * (const zsMat<T> & m1, const std::vector<std::complex<T> > & v)
@@ -951,371 +931,5 @@ template <class T> std::istream & operator >> (std::istream & i, zsMat<T> & m)
 // Declaration for functions in feast.cpp
 // --------------------------------------------------------------------------------------------------------------- //
 void feast_zheev(zsMat<double> &H, Vector &en, Matrix &zr, Matrix &zc);
-
-#if 0
-// --------------------------------------------------------------------------------------------------------------- //
-// Function to convert a string to a T for the sMat<T> template class using input streams.
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> T atoT(const std::string &s)
-{
-   std::istringstream iss(s);
-   T t;
-   iss >> t;
-   return t;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Displays a std::vector in row format
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::string dispvect(const std::vector<T> &V)
-{
-   int i;
-   int sz = (int)V.size();
-   std::stringstream retval;
-   retval << "[ ";
-   for (i=0; i<sz; i++)
-      retval << V[i] << " ";
-   retval << "]";
-
-   return retval.str();
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the maximum value of a vector 
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> T vmax(const std::vector<T> &V)
-{
-   int i;
-   T retval = 0;
-   int n = V.size();
-
-   for(i=0; i<n; i++)
-      if(V[i] > retval) retval = V[i];
-
-   return retval;
-}
-template <class T> T vmax(const std::vector<T> &V, int &ind)  // Returns the index of the maximum value as well.
-{
-   int i,n = V.size(); T retval = 0;
-   for(i=0; i<n; i++)
-      if(V[i] > retval) { retval = V[i]; ind = i; }
-   return retval;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the maximum values of a matrix along a column
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> mmax(const sMat<T> &M)
-{
-   std::vector< std::vector<int> > nz = M.find();
-   int i,sz = (int)nz.size();
-   std::vector<T> retval(M.nc(),0);
-
-   for (i=0; i<sz; i++)
-      if( M(nz[i][0],nz[i][1]) > retval[nz[i][1]] ) retval[nz[i][1]] = M(nz[i][0],nz[i][1]);
-
-   return retval;
-}
-// Returns the index of the maximum value as well.
-template <class T> std::vector<T> mmax(const sMat<T> &M, std::vector<int> &ind)
-{
-   std::vector< std::vector<int> > nz = M.find(); int i,sz = (int)nz.size();
-   std::vector<T> retval(M.nc(),0); ind.clear(); ind.resize(M.nc(),0);
-   for (i=0; i<sz; i++)
-      if( M(nz[i][0],nz[i][1]) > retval[nz[i][1]] ) { retval[nz[i][1]] = M(nz[i][0],nz[i][1]); ind[nz[i][1]] = nz[i][0]; }
-   return retval;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the sum of each column of a matrix
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> msum(const sMat<T> &M)
-{
-   std::vector< std::vector<int> > nz = M.find();
-   int i,sz = (int)nz.size();
-   std::vector<T> retval(M.nc(),0);
-
-   for (i=0; i<sz; i++)
-      retval[nz[i][1]] += M(nz[i][0],nz[i][1]);
-
-   return retval;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the sum of all the elements of a vector
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> T vsum(const std::vector<T> &V)
-{
-   int i;
-   T retval = 0;
-   int n = V.size();
-
-   for(i=0; i<n; i++)
-      retval += V[i];
-
-   return retval;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Returns the diagonal elements of a matrix as a vector
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> diag(const sMat<T> &M, int d=0)
-{
-   int i;
-   int n = M.nc()>M.nr() ? M.nc() : M.nr();
-   std::vector<T> r(n-d,0.);
-   for(i=0; i<(n-d); i++)
-      r[i] = M(i,i+d);
-   return r;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Returns the upper or lower triangle as a sparse matrix
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> sMat<T> triu(const sMat<T> &M, int d)
-{
-   int n = (int)M.nr(); int m = (int)M.nc();
-   sMat<T> r(n,m);
-   std::vector< std::vector<int> > nz = M.find();
-   int i,sz = (int)nz.size();
-
-   for (i=0; i<sz; i++)
-      if(nz[i][1]>=(nz[i][0]+d))
-         r(nz[i][0],nz[i][1]) = M(nz[i][0],nz[i][1]);
-
-   return r;
-}
-template <class T> sMat<T> triu(const sMat<T> &M)
-{
-   return triu<T>(M,0);
-}
-template <class T> sMat<T> tril(const sMat<T> &M, int d)
-{
-   int n = (int)M.nr(); int m = (int)M.nc();
-   sMat<double> r(n,m);
-   std::vector< std::vector<int> > nz = M.find();
-   int i,sz = (int)nz.size();
-
-   for (i=0; i<sz; i++)
-      if(nz[i][1]<=(nz[i][0]+d))
-         r(nz[i][0],nz[i][1]) = M(nz[i][0],nz[i][1]);
-
-   return r;
-}
-template <class T> sMat<T> tril(const sMat<T> &M)
-{
-   return tril<T>(M,0);
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Returns a vector whose element is 1 if all elements along a row/column is nonzero, and 0 otherwise
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> all(const sMat<T> &M, int dim)
-{
-   int i,j,n,m;
-   if(dim==2) { n = (int)M.nr(); m = (int)M.nc(); } else { n = (int)M.nc(); m = (int)M.nr(); }
-   std::vector<T> retval(n,1);
-
-   if(dim==2)
-   {
-      for(i=0; i<n; i++)
-         for(j=0; j<m; j++)
-            if(M(i,j)==0)
-            {
-               retval[i] = 0;
-               break;
-            }
-   }
-   else
-   {
-      for(i=0; i<n; i++)
-         for(j=0; j<m; j++)
-            if(M(j,i)==0)
-            {
-               retval[i] = 0;
-               break;
-            }
-   }
-
-   return retval;
-}
-template <class T> std::vector<T> all(sMat<T> & M)
-{
-   return all(M,1);
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Sorts using the Gnome sort
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> vsort(const std::vector<T> &v)
-{
-   unsigned int i=1,j=2;
-   std::vector<T> r = v;
-   T elem;
-   while(i<v.size())
-   {
-      if(r[i-1]<=r[i]) { i=j; j++; }
-      else { elem = r[i-1]; r[i-1] = r[i]; r[i] = elem; i--; if(i==0) i=1; }
-   }
-   return r;
-}
-template <class T> std::vector<T> vsort(const std::vector<T> &v, std::vector<int> &ind)
-{
-   unsigned int i=1,j=2;
-   int ii;
-   std::vector<T> r = v;
-   T elem;
-
-   ind.clear(); for(ii=0; ii<(int)v.size(); ii++) ind.push_back(ii);
-
-   while(i<v.size())
-   {
-      if(r[i-1]<=r[i]) { i=j; j++; }
-      else { elem = r[i-1]; r[i-1] = r[i]; r[i] = elem; ii=ind[i-1]; ind[i-1]=ind[i]; ind[i]=ii; i--; if(i==0) i=1; }
-   }
-   return r;
-}
-template <class T> sMat<T> msort(const sMat<T> &m)                   // Sorts along each column
-{
-   unsigned int i,j,col;
-   T elem;
-   sMat<T> r = m;
-   for(col=0; col<(unsigned int)m.nc(); col++)
-   {
-      i=1; j=2;
-      while(i<(unsigned int)m.nr())
-      {
-         if(r(i-1,col)<=r(i,col)) { i=j; j++; }
-         else { elem = r(i-1,col); r(i-1,col) = r(i,col); r(i,col) = elem; i--; if(i==0) i=1; }
-      }
-   }
-   return r;
-}
-template <class T> sMat<T> msort(const sMat<T> &m, sMat<int> &ind)   // Sorts along each column
-{
-   unsigned int i,j,col;
-   int ielm;
-   T elem;
-   sMat<T> r = m;
-   ind.zero(m.nr(),m.nc());
-   for(col=0; col<(unsigned int)m.nc(); col++)
-   {
-      for(i=0; i<(unsigned int)m.nr(); i++) ind(i,col) = (int)i;
-      i=1; j=2;
-      while(i<(unsigned int)m.nr())
-      {
-         if(r(i-1,col)<=r(i,col)) { i=j; j++; }
-         else 
-         { 
-            elem = r(i-1,col); r(i-1,col) = r(i,col); r(i,col) = elem; 
-            ielm = ind(i-1,col); ind(i-1,col)=ind(i,col); ind(i,col)=ielm; i--; if(i==0) i=1; 
-         }
-      }
-   }
-   return r;
-}
-template <class T> sMat<T> msort(const sMat<T> &m, sMat<int> &ind, const char *descend) 
-{
-   unsigned int i,j,col;
-   int ielm;
-   T elem;
-   sMat<T> r = m;
-   ind.zero(m.nr(),m.nc());
-   for(col=0; col<(unsigned int)m.nc(); col++)
-   {
-      for(i=0; i<(unsigned int)m.nr(); i++) ind(i,col) = (int)i;
-      i=1; j=2;
-      while(i<(unsigned int)m.nr())
-      {
-         if(r(i-1,col)>=r(i,col)) { i=j; j++; }
-         else 
-         { 
-            elem = r(i-1,col); r(i-1,col) = r(i,col); r(i,col) = elem; 
-            ielm = ind(i-1,col); ind(i-1,col)=ind(i,col); ind(i,col)=ielm; i--; if(i==0) i=1; 
-         }
-      }
-   }
-   return r;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the set-theoretic union, that is the elements that are in both a and b, same as Matlab union(a,b)
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> setunion(const std::vector<T> &a, const std::vector<T> &b)
-{
-   unsigned int i;
-   std::vector<T> r = a; r.reserve(a.size()+b.size());
-
-   // Does the union
-   for(i=0; i<b.size(); i++) r.push_back(b[i]);
-
-   // Sorts using the Gnome sort
-   r = vsort(r);
-
-   // Removes duplicate
-   i = 1;
-   while(i<r.size())
-      if(r[i]==r[i-1]) { r.erase(r.begin()+i); } else { i++; }
-
-   return r;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the set-theoretic difference, that is the elements of a that is not in b
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> setdiff(const std::vector<T> &a, const std::vector<T> &b)
-{
-   unsigned int i,j;
-   std::vector<T> r = a;
-
-   // For each element of b, loops over elements of a, and if same, delete element of a... not efficient!
-   for(i=0; i<b.size(); i++)
-      for(j=0; j<r.size(); j++)
-         if(r[j]==b[i]) { r.erase(r.begin()+j); break; }
-   
-   // Sorts using the Gnome sort
-   r = vsort(r);
-
-   return r;
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the set-theoretic xor, that is the elements of a and b that is not in the other
-// --------------------------------------------------------------------------------------------------------------- //
-template <class T> std::vector<T> setxor(const std::vector<T> &a, const std::vector<T> &b)
-{
-   return setunion(setdiff(a,b),setdiff(b,a));
-}
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Enumeration for the norm function
-// --------------------------------------------------------------------------------------------------------------- //
-enum normp { one = 1, lsvd = 2, inf = 3, fro = 4 };
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Declarations for functions in maths.cpp
-// --------------------------------------------------------------------------------------------------------------- //
-float sign(float val);                                                    // Determines the sign of a float 
-double sign(double val);                                                  // Determines the sign of a double
-eigVE<double> eig(const sMat<double>  & M);                               // Diagonalises M by tri-diag and QL fact.
-std::vector<double> svd(const sMat<double> &M);                           // Calculates the single value decomposition
-std::vector<double> svd(const sMat<double> &M, sMat<double> &V);          // Calculates svd and the left matrix too
-std::vector<double> svd(const sMat<double> &M, sMat<double> &U,sMat<double> &V); // Calculates svd and both U/V 
-sMat<double> qr(const sMat<double> & M, sMat<double> & Q);                // Calculates the QR decomposition of M
-sMat<double> qr(const sMat<double> & M, sMat<double> & Q, int zero);      // Calculates the 'economy' QR decomposition
-sMat<double> qr(const sMat<double> & M, int zero);                        // Calculates only R of M = Q*R
-sMat<double> mabs(const sMat<double> & M);                                // Calculates the absolute of each element
-std::vector<double> vabs(const std::vector<double> & V);                  // Calculates the absolute of each element
-double norm(const sMat<double> & M);                                      // Calculates the norm, in similar way to
-double norm(const sMat<double> & M, normp p);                             //    the matlab function (see maths.cpp)
-sMat<double> randn(int m, int n);                                         // Generates a normal-dist. random matrix
-sMat<double> orth(const sMat<double> & M);                                // Generates an orthonormal basis using svd
-int rank(const sMat<double> & M, double tol);                             // Estimate # linearly indep. rows/columns
-void rmzeros(sMat<double> & M);                                           // Removes entries < eps
-std::vector<double> f2vec(double *v, int n);                              // Converts a 1D C-array into a std::vector
-sMat<double> f2mat(double *M, int m, int n);                              // Converts a 2D C-array into an sMat
-complexdouble* zmat2f(sMat<double> &r, sMat<double> &i);                  // Converts two sMat to complex C-array
-complexdouble spherical_harmonics(int k, int q, double th, double phi);   // Calculates the spherical harmonic
-#endif
 
 #endif
