@@ -70,6 +70,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
        operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]=new char[5];
        sprintf(operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index],"M%i_%i",a,n); }
     int nop = (*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index;
+    operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms+1]=NULL;
 
     // Call myparse to get the sequence of operations for each statement
     cluster_nlines = myparse(sipffilename,numbers,numbernames,strings,stringnames,Iaa,operatornames,
@@ -82,6 +83,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
     for(int i=0; i<cluster_nlines; i++) { 
        lhs[cluster_seq[i][0]] = 1; 
        isq = 1; while(cluster_seq[i][isq]!=0) { if(cluster_seq[i][isq]<0) rhs[-cluster_seq[i][isq]] = 1; isq++; }
+       if(cluster_seq[i][1]>2) rhs[cluster_seq[i][0]] = 1; // For assignment operators, += -= *= need to save matrix too.
     }
 
     // If any operator other than In_m are required on the right hand sides, we need to allocate them now before performing the operations
@@ -122,10 +124,21 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
         //}
           *Ia[cluster_seq[iln][0]-cluster_Ia_ind0+1] = *Iaa[cluster_seq[iln][0]]; 
        }
-        if(rhs[cluster_seq[iln][0]]==0) Iaa[cluster_seq[iln][0]] = NULL;
+       if(rhs[cluster_seq[iln][0]]==0) Iaa[cluster_seq[iln][0]] = NULL;
     }
     delete dum;
 
+    char ploutname[MAXNOFCHARINLINE];  sprintf(ploutname,"results/_%s.pl.out",sipffilename);
+    FILE *PLOUT = fopen(ploutname,"w");
+    for(int a=0; a<=nop; a++)
+    {
+       if(a<cluster_Ia_ind0) dum = Iaa[a]; else if(a<cluster_M_ind0) dum = Ia[a-cluster_Ia_ind0+1]; else dum = cluster_M[a-cluster_M_ind0+1]; 
+       fprintf(PLOUT,"%s=\n#Real Part\n",operatornames[a]);
+       for(int i=1; i<=dim; i++) { fprintf(PLOUT,"%8.5f",real((*dum)[make_pair(i,1)])); for(int j=2; j<=dim; j++) fprintf(PLOUT," %8.5f",real((*dum)[make_pair(i,j)])); fprintf(PLOUT,"\n"); }
+       fprintf(PLOUT,"#Imaginary Part\n");
+       for(int i=1; i<=dim; i++) { fprintf(PLOUT,"%+8.5f",imag((*dum)[make_pair(i,1)])); for(int j=2; j<=dim; j++) fprintf(PLOUT," %+8.5f",imag((*dum)[make_pair(i,j)])); fprintf(PLOUT,"\n"); }
+    }
+    fclose(PLOUT);
     for(int i=0; i<cluster_Ia_ind0; i++) delete Iaa[i];
     for(int i=cluster_Ia_ind0; i<=nop; i++) if(rhs[i]==1) delete Iaa[i];
 
@@ -205,11 +218,12 @@ delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcom
 {int index=(a-1)*3+n; // a .... atom index  n ... xyz components of magnetic moment
  int index_M=3*a+n;
  cluster_M[index_M]=new zsMat<double>(dim,dim);
- for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
+ (*cluster_M[index_M]) = (*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]);
+ //for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
  //if(i<j){(*cluster_M[index_M])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])[make_pair(j,i)]);}
  //   else{(*cluster_M[index_M])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])[make_pair(i,j)]);}
-   (*cluster_M[index_M])(i,j) = (*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])[make_pair(i,j)];
-}
+ //  (*cluster_M[index_M])(i,j) = (*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])[make_pair(i,j)];
+ //}
 delete           Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index];
 delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]; 
 }

@@ -464,6 +464,7 @@ int myparse_execute(zsMat<double> **operators, char **operatornames, int *seq2, 
        if(*(t0+1)=='=') {                          // Operator-assignment [+=,-=,*=]
           if(!oe||seq2[1]<3) { fprintf(stderr,sterr,statement); return false; }
           if(seq2[2]<0) {
+                sprintf(dummystr,"op(%i)[%s]",-seq2[2],operatornames[-seq2[2]]);
                 dummy = (*operators[-seq2[2]]); i0=3; } else {              // Simple assignment
           switch(seq2[2]) {
              case 5:          sprintf(dummystr," %f * op(%i)[%s] ",constval[ioc],-seq2[4],operatornames[-seq2[4]]); is5=1;
@@ -481,8 +482,8 @@ int myparse_execute(zsMat<double> **operators, char **operatornames, int *seq2, 
              case '-': if(seq2[1]!=4) { fprintf(stderr,sterr,statement); return false; }
                 (*operators[seq2[0]]) -= dummy; printf(" op(%i)[%s] -= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
              case '*': if(seq2[1]!=7) { fprintf(stderr,sterr,statement); return false; }
-                                                printf(" op(%i)[%s] *= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
                 dummy2 = (*operators[seq2[0]]) * dummy; (*operators[seq2[0]]) = dummy2;
+                                                printf(" op(%i)[%s] *= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
           }
        }
        else {                                      // Assignment
