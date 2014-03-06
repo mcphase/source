@@ -534,10 +534,11 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
                 "#!emax=%g\n"
                 "#!Npoints=%i\n"
                 "#!E=50\n"
-                "#!k1= 1. 0. 0. \n"
-                "#!k2= 1. 0. 0.\n"
-                "#!formfactorname=results/formfactor.out\n"
-                "#!scatfilename=hklE.dat\n",emin,emin+nofstps*estp,nofstps);
+//                "#!k1= 1. 0. 0. \n"
+//                "#!k2= 1. 0. 0.\n"
+//                "#!formfactorname=results/formfactor.out\n"
+//                "#!scatfilename=hklE.dat\n"
+                ,emin,emin+nofstps*estp,nofstps);
    fclose(file);
    // 3. start bfk and create bfk0.res
    // currently coupling constant to conduction electrons  - get it from bfk.par "#!g="

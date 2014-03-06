@@ -815,12 +815,13 @@ eip(3)=-sa;
 eop(1)=-cb;
 eop(2)=0;
 eop(3)=-sb;
-
+                                
  complex<double> imaginary(0,1);
-eor=eos+imaginary*eop;
-eol=eos-imaginary*eop;
-eir=eis+imaginary*eip;
-eil=eis-imaginary*eip;
+double sq2m1=1/sqrt(2);
+eor=sq2m1*(eos+imaginary*eop);
+eol=sq2m1*(eos-imaginary*eop);
+eir=sq2m1*(eis+imaginary*eip);
+eil=sq2m1*(eis-imaginary*eip);
 
 // STEP 2 transform the vectors to coordinate system i j k
 u123_to_ijk(eis,azimuth,qijk,hkl,abc,QQ);
@@ -860,7 +861,7 @@ for(int i=1;i<=9;++i){dummy(i)=0;for(int j=1;j<=9;++j){dummy(i)+=chi(i,j)*ee(j);
 
 
 
-//*************** OLD OLD OLD 
+//*************** OLD OLD OLD .... removed june 2013 !!! . intcalc() is not used any more !!!
 
 //**************************************************************************/
 #ifdef _THREADSREFINE

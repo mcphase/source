@@ -634,9 +634,10 @@ jjjpar::jjjpar (const jjjpar & pp)
                            est=ComplexMatrix(0,dj,1,dj);est=pp.est;
                            Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=pp.Icalc_parstorage;
                            }
-   if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);
+   if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);dim=pp.dim;
                           // est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());est=pp.est;
                           // Ia
+                          // cluster_ini_Imat(); 
                           Ia= new Matrix * [nofcomponents+1];
                           for(int n = 1;n<=nofcomponents;++n){Ia[n]=new Matrix(1,dim,1,dim);(*Ia[n])=(*pp.Ia[n]);}
                           // cluster_M

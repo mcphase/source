@@ -271,8 +271,8 @@ for(int a=1;a<=maxn;++a)
 {// transition matrix element
  switch(code)
  {case 1:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*Ia[a]),zr,zc,ii,jj));break;
-  case 2:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a]),zr,zc,ii,jj)); break;
-  case 3:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj));break;
+  case 2:  iJj(a)=complex<double>(aMb_real((*cluster_M[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a]),zr,zc,ii,jj)); break;
+  case 3:  iJj(a)=complex<double>(aMb_real((*cluster_M[a+3]),zr,zc,ii,jj),aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj));break;
  }
 
  // determine expectation value
@@ -288,14 +288,19 @@ for(int a=1;a<=maxn;++a)
  }
 }
 
-
-
 // 3. set u1
 for(int l=1;l<=maxn;++l)
 {if(ii==jj){//take into account thermal expectation values <Jret>
           u1(l)=(iJj(l)-Jret(l));}
  else    {u1(l)=iJj(l);}
 }
+
+//printf("code %i: %g %g %g\n",code,Jret(1),Jret(2),Jret(3));
+//myPrintMatrix(stdout,(*cluster_M[1]));
+//myPrintMatrix(stdout,(*cluster_M[2]));
+//myPrintMatrix(stdout,(*cluster_M[3]));
+
+
 
 if (delta>SMALL_QUASIELASTIC_ENERGY)
    { if(pr==1){
@@ -401,7 +406,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
 {// determine interaction operator of atom n with neighbour nn
  // get i and j from n and sublattice[nn]
  int i=n;int j=(*(*clusterpars).jjj[n]).sublattice[nn];
- if(i>j){i=j;j=n;}
+ int ilj=1;
+ if(i>j){i=j;j=n;ilj=0;} // if n>nn exchange i and j ... so that we always have i < j
  Matrix SinS(-0.5*(*(*clusterpars).jjj[n]).jij[nn](1,1)*
              herm_dirprod((*(*clusterpars).jjj[i]).opmat(1,Hxc,Hext),
                           (*(*clusterpars).jjj[j]).opmat(1,Hxc,Hext)
@@ -412,12 +418,19 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
  for(int b=1;b<=(*(*clusterpars).jjj[j]).nofcomponents;++b)
  {
   if(a==1&&b==1) break;
+  if(ilj){
   SinS+=-0.5*(*(*clusterpars).jjj[n]).jij[nn](a,b)*
              herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,Hxc,Hext),
                           (*(*clusterpars).jjj[j]).opmat(b,Hxc,Hext)
                     );
+          } else { // if n>nn then take transpose of exchange parameter jij !! (J(ij)=JT(ji))
+  SinS+=-0.5*(*(*clusterpars).jjj[n]).jij[nn](b,a)*
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,Hxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(b,Hxc,Hext)
+                    );
+          }
  }
- 
+//printf("hello n=%i nn=%i i=%i j=%i ...\n",n,nn,i,j);  myPrintMatrix(stdout,SinS);
  // insert SinS into H
  //1. determine dimensions
   int di=dnn[i];
@@ -447,8 +460,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
   for(int bj=0;bj<=dj-1;++bj)
   {int r=ix*mx+ai*mi+iy*my+aj*mj+iz+1;
    int s=ix*mx+bi*mi+iy*my+bj*mj+iz+1;
-   int k=aj*di+ai+1;// ??
-   int l=bj*di+bi+1;// ??
+   int k=ai*dj+aj+1;// ??
+   int l=bi*dj+bj+1;// ??
    H(r,s)+=SinS(k,l);
 //printf("hello %i %i %i %i %g %g\n",r,s,k,l,H(r,s),SinS(k,l));
   } 

@@ -2316,7 +2316,7 @@ int dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, p
  /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexVector &Slm1,// Output Llm1 vector (1,49)
-                      int xyz,            // Indicating which of x,y,z direction to calculate
+                      int & xyz,            // Indicating which of x,y,z direction to calculate
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
@@ -2346,7 +2346,7 @@ int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, p
  /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
                       ComplexVector &Llm1,// Output Llm1 vector (1,49)
-                      int xyz,            // Indicating which of x,y,z direction to calculate
+                      int & xyz,            // Indicating which of x,y,z direction to calculate
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
