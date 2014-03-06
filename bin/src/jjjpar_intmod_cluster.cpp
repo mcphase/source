@@ -71,7 +71,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
   Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+i]=new ComplexMatrix(1,dim,1,dim);                     
  }
  // now initialize the cluster total magnetic moment operators
- for(int i=1;i<=3;++i)
+ for(int i=1;i<=3;++i) 
  {operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+i]=new char[5];
   sprintf(operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+i],"M%i",i);
   Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+ i]=new ComplexMatrix(1,dim,1,dim);                     
@@ -106,7 +106,7 @@ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
 // to be done !!!
 
  for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms;++i)
-  {delete Iaa[i];operatornames[i];}
+  {delete Iaa[i];delete operatornames[i];}
 
 }
 //------------------------------------------------------------------------------------------------

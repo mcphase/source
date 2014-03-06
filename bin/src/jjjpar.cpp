@@ -459,10 +459,12 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
 // read single ion parameter file and see which type it is (internal module or loadable)
   transitionnumber=1;
   
+  // must be set before getting pars from sipffile (cluster module needs it)
+  nofcomponents=nofcomps; // default value for nofcomponents - (important in case nofparameters=0)
+
   //start reading again at the beginning of the file to get formfactors, debye waller factor
   get_parameters_from_sipfile(sipffilename);
 
-  nofcomponents=nofcomps; // default value for nofcomponents - (important in case nofparameters=0)
              dn = new Vector[paranz+1];if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
              for(i1=0;i1<=paranz;++i1){dn[i1]=Vector(1,3);}
              sublattice = new int[paranz+1];if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
