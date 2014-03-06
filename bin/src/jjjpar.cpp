@@ -7,6 +7,7 @@
 // it is used by many programs in the package
 // moreover, it loads also the user defined single ion module functions (linux only)
 #include "jjjpar.hpp"
+#include "perlparse.h"
 #include "../../version"
 #include<par.hpp>
 
@@ -530,10 +531,10 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
 }
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot
-jjjpar::jjjpar(double x,double y,double z, char * sipffile)
+jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
   jij=0; dn=0; sublattice=0;paranz=0;diagonalexchange=1;
-  mom=Vector(1,9); mom=0; 
+  mom=Vector(1,9); mom=0; nofcomponents=n;
   sipffilename= new char [MAXNOFCHARINLINE];
   strcpy(sipffilename,sipffile);
   get_parameters_from_sipfile(sipffilename);
@@ -631,7 +632,8 @@ jjjpar::jjjpar (const jjjpar & pp)
                            est=ComplexMatrix(0,dj,1,dj);est=pp.est;
                            Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=pp.Icalc_parstorage;
                            }
-   if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);}
+   if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);
+                           cluster_ini_Imat();}
   
 //#ifdef __linux__
 /*  if (module_type==0)
@@ -683,7 +685,11 @@ jjjpar::~jjjpar ()
    if(sublattice!=0) delete []sublattice;
    delete []sipffilename;// will not work in linux
   delete []modulefilename;// will not work in linux
-   if (module_type==5) delete clusterpars;
+   if (module_type==5) {for(int i=1;i<=nofcomponents;++i)
+                            { delete Ia[i];}
+                        delete Ia;delete []dnn;
+                        delete clusterpars;                         
+                       }
    if (module_type==2||module_type==4) delete iops;
 //#ifdef __linux__
 // i#ifdef __linux__f (module_type==0)dlclose(handle);

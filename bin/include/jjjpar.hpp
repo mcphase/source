@@ -16,6 +16,7 @@ typedef void fnc_t();
 
 #include<martin.h>
 #include<ionpars.hpp>
+#include<perlparse.h>
 #include<myev.h>
 #include<stdlib.h>
 
@@ -65,7 +66,7 @@ public:
 
 
    jjjpar (FILE * fin, int nofcomp); //constructor with filehandle of mcphas.j file
-   jjjpar (double x, double y, double z,char * sipffile); // constructor with filename of single ion parameter file
+   jjjpar (double x, double y, double z,char * sipffile,int n); // constructor with filename of single ion parameter file
                // constructor with positions scattering length dwf
    jjjpar(double x,double y,double z, double slr,double sli, double dwf);
    jjjpar (int n=1,int diag=0,int nofmom=3); // constructor without file
@@ -351,8 +352,10 @@ private:
   void cluster_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
   int  cluster_dm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
   par * clusterpars;
-
-
+  void cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext);
+  void cluster_ini_Imat();
+  Matrix ** Ia; Matrix ** cluster_M; 
+  int * dnn; int dim; 
 };
 
 #include<par.hpp>

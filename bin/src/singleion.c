@@ -171,7 +171,7 @@ if (!do_sipf)
       printf("\n");
      }
    } else { // option -r sipffile
-   jjjpar jjj(0,0,0,sipffile);jjj.nofcomponents=nofcomponents;jjj.save_sipf("./results/_");
+   jjjpar jjj(0,0,0,sipffile,nofcomponents);jjj.save_sipf("./results/_");
      switch(observable)
       {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
        case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;

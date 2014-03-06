@@ -114,16 +114,16 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
       nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
-       if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-                                           i+=extract(instr,"structurefile",clusterfilename,sizeof(clusterfilename))-1;
-                                          }
+       i+=extract(instr,"structurefile",clusterfilename,sizeof(clusterfilename))-1;
       }// input all  lines starting with comments
       if(i!=0){fprintf(stderr,"Error reading structurefile from file %s\ncorrect file format is:\n",sipf_filename);
-              fprintf(stderr,"\n#!MODULE=cluster\n#comment lines ..\n# next line contains cluster structure filename\nstructurefile=cluster.j\n\n");exit(EXIT_FAILURE);}
+              fprintf(stderr,"\n#!MODULE=cluster\n#comment lines ..\n# next line contains cluster structure filename\n"
+                            "#!structurefile=cluster.j\n"
+                            "\n");exit(EXIT_FAILURE);}
       fprintf(stderr," ... reading cluster structure from %s\n",clusterfilename);
       clusterpars =new par(clusterfilename);
       est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
-      Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
+      Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors      
      }
      else
       {fprintf (stderr,"#[external]\n");
@@ -393,6 +393,7 @@ module_type=0;
  }
 
  fclose (cf_file);
+ if(module_type==5)cluster_ini_Imat();
 // check gJ
 if(module_type==2&&fabs(gJ-(*iops).gJ)>0.00001)
 {fprintf(stderr,"Error internal module cfield : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipf_filename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}

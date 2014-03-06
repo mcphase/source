@@ -94,7 +94,7 @@ if(strcmp(argv[2+os],"-L")==0){os+=1;arrow=2;arrowdim=ORBMOM_EV_DIM;gp.spins_col
 if(strcmp(argv[2+os],"-M")==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_colour=1;}
 
   // read cf-parameters into class object jjjpar
-  jjjpar jjjps(0.0,0.0,0.0,argv[2+os]);
+  jjjpar jjjps(0.0,0.0,0.0,argv[2+os],1);
   Vector Hext(1,3);
   T=strtod(argv[3+os],NULL);
   Hext(1)=strtod(argv[4+os],NULL);
@@ -184,7 +184,7 @@ if(gp.read())printf("#reading graphic parameters from results/graphic_parameters
   Vector momentlx(1,ORBMOMDENS_EV_DIM);
   Vector momently(1,ORBMOMDENS_EV_DIM);
   Vector momentlz(1,ORBMOMDENS_EV_DIM);
-  Vector h(1,6);h=0; // exchange field =0 ... dimension 6 ok for every module ?
+  Vector h(1,jjjps.nofcomponents);h=0; // exchange field =0 ... dimension 6 ok for every module ?
 
   jjjps.Icalc_parameter_storage_init(h,Hext,T);
 

@@ -4,7 +4,7 @@
 #include "martin.h"
 #include "ionpars.h"
 #include "myev.h"
-#include "perlparse.c"
+#include "perlparse.h"
 
 
  ionpars::ionpars (const ionpars & p) //copy constructor

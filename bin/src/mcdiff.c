@@ -517,7 +517,17 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
                                  numbers[6]= (numbers[1]*rez3(1)+numbers[2]*rez3(2)+numbers[3]*rez3(3))/2/PI;
                          }
                             if (j<9) {fprintf(stderr,"ERROR mcdiff: too few parameters for magnetic atom %i: %s\n",i,instr);exit(EXIT_FAILURE);}
-                             jjjpars[i]=new jjjpar((double)numbers[4] / nr1,(double)numbers[5] / nr2,(double)numbers[6] / nr3, sipffilename);
+                             // determine j .... dimension of exchange field if present >>>>>>>>>>>>>>>>
+                            long int currentpos=ftell(fin_coq);instr[0]='#';
+                            while(instr[strspn(instr," \t")]=='#'&&feof(fin_coq)==0){pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
+                            if (strchr(instr,'>')==NULL||instr[strspn(instr," \t")]=='#')
+                             {j=1;} // no ">" found --> do dipole approx
+                             else          
+                             {fseek(fin_coq,pos+strchr(instr,'>')-instr+1,SEEK_SET); 
+                              j=inputline(fin_coq,numbers);printf("dimension of mf = %i\n",j);
+                             }
+                             fseek(fin_coq,currentpos,SEEK_SET); //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                             jjjpars[i]=new jjjpar((double)numbers[4] / nr1,(double)numbers[5] / nr2,(double)numbers[6] / nr3, sipffilename,j);
                              //J[i]=-1;
                              //J[i]         1   0    -1   -2   -3
                              //FF_type      1  -2    +2   +3   -3

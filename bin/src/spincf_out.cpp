@@ -744,7 +744,7 @@ for(l=1;l<=nofatoms;++l)
   int ctr=0;
   extract(cs.sipffilenames[l],"radius",radius);
   if(radius==0) // this is a trick: if radius is given as sipffilename then a sphere with this is radius is generated (pointcharge)
-  {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l]);
+  {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l],1);
    density cd(gp.title,dtheta,dfi);int ndd;
    for (i=1;i<=1+(nofa-1)*gp.scale_view_1;++i){for(j=1;j<=1+(nofb-1)*gp.scale_view_2;++j){for(k=1;k<=1+(nofc-1)*gp.scale_view_2;++k){
    dd=pos(i,j,k,l, cs);
@@ -818,7 +818,7 @@ for(l=1;l<=nofatoms;++l)
         }}}
   } }
   else
-  {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l]);
+  {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l],1);
    density cd(gp.title,dtheta,dfi);int ndd;
    for (i=1;i<=1+(nofa-1)*gp.scale_view_1;++i){for(j=1;j<=1+(nofb-1)*gp.scale_view_2;++j){for(k=1;k<=1+(nofc-1)*gp.scale_view_2;++k){
    dd=pos(i,j,k,l, cs);
@@ -959,7 +959,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
         }}}
   } }
   else
-  {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l]);
+  {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l],1);
    int ndd;
    // here we should introduce another loop to go around +-1 around the primitive
    // magnetic unit cell so that we see also atoms at the borders in the density map:

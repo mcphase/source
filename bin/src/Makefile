@@ -115,7 +115,7 @@ RCSCI    =      ci -u -f -s"Rel" -r$(VERSION) -m"$(LOCKMSG)"
 INCL = mcphas.h  testspin.hpp qvectors.hpp spincf.hpp par.hpp  jjjpar.hpp inipar.hpp \
        mfcf.hpp vector.h martin.h graphic_parameters.hpp
 OBJS = jjjpar.o par.o physprop.o qvectors.o testspin.o spincf.o inipar.o \
-        mfcf.o martin.o ionpars.o graphic_parameters.o
+        mfcf.o martin.o ionpars.o graphic_parameters.o perlparse.o
 
 VOBS = ivector.o imatrix.o dvector.o dmatrix.o dmatmul.o cvector.o cmatrix.o cmatmul.o \
 	dludcomp.o dsvdcomp.o dortho.o cludcomp.o tred.o imtql.o imtql2.o rseigen.o cheigen.o \
@@ -154,7 +154,7 @@ testperlparse:  ../perlparse$(EXE)
 martin.o:  martin.c martin.h vector.h
 	$(CCC) $(CFLAGS) $< 
 
-perlparse.o:  perlparse.c martin.h vector.h myev.h
+perlparse.o:  perlparse.c martin.h vector.h myev.h perlparse.h
 	$(CCC) $(CFLAGS) $< 
 	
 graphic_parameters.o: graphic_parameters.cpp graphic_parameters.hpp martin.h vector.h
@@ -166,7 +166,7 @@ paramete.o: paramete.cpp paramete.hpp martin.h vector.h
 par.o: par.cpp par.hpp jjjpar.hpp martin.h vector.h ionpars.hpp
 	$(CCC) $(CFLAGS) $< 
 
-jjjpar.o: jjjpar.cpp ionpars.hpp jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
+jjjpar.o: jjjpar.cpp ionpars.hpp perlparse.h jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
 	$(CCC) $(CFLAGS) $< 
 
 testspin.o: testspin.cpp testspin.hpp spincf.hpp martin.h
@@ -191,7 +191,7 @@ jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 inipar.o: inipar.cpp inipar.hpp martin.h vector.h 
 	$(CCC) $(CFLAGS) $< 
 
-ionpars.o: ionpars.cpp ionpars.hpp perlparse.c
+ionpars.o: ionpars.cpp ionpars.hpp perlparse.h
 	$(CCC) $(CFLAGS) $<
 
 inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp 
@@ -298,11 +298,11 @@ ip.o: ionpars.cpp
 	@echo Linking ../coq2jjj
 	@$(LINKER)  -Wall  -o ../coq2jjj $^ $(LFLAGS)
 
-../jjj2j$(EXE): jjj2j.o par.o jjjpar.o  $(VOBS) martin.o $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o myev.o
+../jjj2j$(EXE): jjj2j.o par.o jjjpar.o  $(VOBS) martin.o $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o myev.o perlparse.o
 	@echo Linking ../jjj2j
 	@$(LINKER)  -Wall  -o ../jjj2j $^ $(LFLAGS)
 
-../mcdispit$(EXE): mcdisp.o martin.o par.o jjjpar.o inimcdis.o jq.o mdcf.o mfcf.o ionpars.o  $(VOBS) $(FUNCTIONOBJS)  $(CFIELDOBJS)
+../mcdispit$(EXE): mcdisp.o martin.o par.o jjjpar.o inimcdis.o jq.o mdcf.o mfcf.o ionpars.o perlparse.o $(VOBS) $(FUNCTIONOBJS)  $(CFIELDOBJS)
 	@echo Linking ../mcdispit
 	@$(LINKER)  -Wall  -o ../mcdispit   $^  $(LFLAGS) $(THREADLINK)
 
@@ -310,43 +310,43 @@ ip.o: ionpars.cpp
 	@echo Linking ../mcphasit
 	@$(LINKER)  -Wall  -o ../mcphasit  $^ $(LFLAGS) $(THREADLINK)
 
-../anisotropyit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o anisotropy.o
+../anisotropyit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o perlparse.o density.o anisotropy.o
 	@echo Linking ../anisotropyit
 	@$(LINKER)  -Wall  -o ../anisotropyit  $^ $(LFLAGS) $(THREADLINK)
 
-../spins$(EXE): spincf.o spins.o martin.o myev.o  $(VOBS) density.o ionpars.o jjjpar.o $(CFIELDOBJS) $(FUNCTIONOBJS) graphic_parameters.o par.o
+../spins$(EXE): spincf.o spins.o martin.o myev.o  $(VOBS) density.o ionpars.o jjjpar.o perlparse.o $(CFIELDOBJS) $(FUNCTIONOBJS) graphic_parameters.o par.o
 	@echo Linking ../spins
 	@$(LINKER)  -Wall  -o ../spins $^  $(LFLAGS)
 
-../spinsfromq$(EXE): spincf.o spinsfromq.o martin.o jjjpar.o par.o myev.o $(FUNCTIONOBJS)  $(VOBS) $(CFIELDOBJS) ionpars.o density.o
+../spinsfromq$(EXE): spincf.o spinsfromq.o martin.o jjjpar.o par.o myev.o perlparse.o $(FUNCTIONOBJS)  $(VOBS) $(CFIELDOBJS) ionpars.o density.o
 	@echo Linking ../spinsfromq
 	@$(LINKER)  -Wall  -o ../spinsfromq $^  $(LFLAGS)
 
-../singleion$(EXE):  singleion.o martin.o  jjjpar.o par.o myev.o $(VOBS) $(FUNCTIONOBJS)  $(CFIELDOBJS) ionpars.o density.o
+../singleion$(EXE):  singleion.o martin.o  jjjpar.o par.o myev.o perlparse.o $(VOBS) $(FUNCTIONOBJS)  $(CFIELDOBJS) ionpars.o density.o
 	@echo Linking ../singleion
 	@$(LINKER)  -Wall  -o ../singleion $^  $(LFLAGS)
 
-../densplt$(EXE): densplt.o martin.o $(VOBS) $(CFIELDOBJS) myev.o $(FUNCTIONOBJS) ionpars.o density.o spincf.o jjjpar.o graphic_parameters.o  par.o
+../densplt$(EXE): densplt.o martin.o $(VOBS) $(CFIELDOBJS) myev.o perlparse.o $(FUNCTIONOBJS) ionpars.o density.o spincf.o jjjpar.o graphic_parameters.o  par.o
 	@echo Linking ../densplt
 	@$(LINKER)  -Wall  -o ../densplt $^  $(LFLAGS)
 
-../pointc$(EXE): pointc.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o  $(FUNCTIONOBJS) jjjpar.o  par.o
+../pointc$(EXE): pointc.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o perlparse.o  $(FUNCTIONOBJS) jjjpar.o  par.o
 	@echo Linking ../pointc
 	@$(LINKER)  -Wall  -o ../pointc $^  $(LFLAGS)
 
-../formfactor$(EXE): formfactor.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o  $(FUNCTIONOBJS) jjjpar.o  par.o
+../formfactor$(EXE): formfactor.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o perlparse.o $(FUNCTIONOBJS) jjjpar.o  par.o
 	@echo Linking ../formfactor
 	@$(LINKER)  -Wall  -o ../formfactor $^  $(LFLAGS)
 
-../radwavfunc$(EXE): radwavfunc.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o  $(FUNCTIONOBJS) jjjpar.o  par.o
+../radwavfunc$(EXE): radwavfunc.o martin.o $(VOBS) $(CFIELDOBJS) ionpars.o myev.o perlparse.o  $(FUNCTIONOBJS) jjjpar.o  par.o
 	@echo Linking ../radwavfunc
 	@$(LINKER)  -Wall  -o ../radwavfunc $^  $(LFLAGS)
 
-../addj$(EXE): addj.o par.o martin.o myev.o jjjpar.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
+../addj$(EXE): addj.o par.o martin.o myev.o jjjpar.o perlparse.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
 	@echo Linking ../addj
 	@$(LINKER)  -Wall  -o ../addj $^  $(LFLAGS)
 
-../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o
+../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o perlparse.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o
 	@echo Linking ../mcdiff
 	@$(LINKER)  -Wall  -o ../mcdiff $^  $(LFLAGS)
 

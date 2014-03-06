@@ -4,6 +4,7 @@
 
 #include "martin.h"
 #include "myev.h"
+#include "perlparse.h"
 
 void PrintComplexMatrix(FILE * fout, char * name, ComplexMatrix & mat)
 {fprintf(fout,"my $%s=new Math::Matrix (\n",name);

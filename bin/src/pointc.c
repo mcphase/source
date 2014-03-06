@@ -287,7 +287,7 @@ if(strcmp(argv[1],"-d")==0) {ac=1;do_deriv=1;dBlm_file=fopen_errchk("results/poi
   
   fclose(sipf_file);
   printf("#!MODULE=so1ion\n");
-  jjjps=new jjjpar(0,0,0,argv[1+ac]);
+  jjjps=new jjjpar(0,0,0,argv[1+ac],1);
   if((*jjjps).module_type!=4){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' !\n",argv[1+ac]);exit(1);}  
   iops=(*jjjps).iops;
       if((*iops).r2==1e300||(*iops).r2==0){(*jjjps).r2_from_radial_wavefunction();

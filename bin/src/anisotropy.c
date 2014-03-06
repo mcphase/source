@@ -65,7 +65,7 @@ fprintf(fout,
 "# phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[mb] Mx[mb] My[mb] Mz[mb] MparallelH[mb]\n",r1(1),r1(2),r1(3));
 
 if(do_sipffile){
- jjjpar jjj(0,0,0,sipffilename);jjj.save_sipf("./results/_");
+ jjjpar jjj(0,0,0,sipffilename,argc-9);jjj.save_sipf("./results/_");
  int nofcomponents=argc-9;
  Vector Hxc(1,nofcomponents);
  for(int j=1;j<=nofcomponents;++j)Hxc=(int)strtod (argv[j+8], NULL); 

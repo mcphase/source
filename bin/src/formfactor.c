@@ -35,7 +35,7 @@ FILE * fout;
 // routine getpar in cfieldrout.c, thus takes the single ion parameters from
 // the same source as the cfield program ...
   jjjpar * jjjps;
-jjjps=new jjjpar(0,0,0,argv[1]);
+jjjps=new jjjpar(0,0,0,argv[1],1);
 char s[2];
 
 if ((*jjjps).gJ!=0){strcpy(s,"\0");}else{strcpy(s,"S");}
