@@ -643,6 +643,7 @@ ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hex
 Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
 {switch (module_type)
   {case 1:  return krameropmat(n,Hxc,Hext);break;
+   case 4:  return (*iops).opmat(n,Hxc,Hext);break;
    default: fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %i\n",module_type);exit(EXIT_FAILURE);
   }
 }

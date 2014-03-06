@@ -30,7 +30,7 @@
     for(i=1;i<=NOF_OLM_MATRICES;++i){ Olm [i]= new Matrix(1,(*p.Olm[i]).Rhi(),1,(*p.Olm[i]).Chi()); 
                    (*Olm[i])=(*p.Olm[i]);}
     In= new Matrix * [1+IONPARS_MAXNOFCOMPONENTS]; 
-    for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i){In[i]= new Matrix(1,(*p.In[i]).Rhi(),1,(*p.In[i]).Chi());
+    for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i){In[i]= new Matrix(1,(*p.In[i]).Rhi(),1,(*p.In[i]).Chi());
                    (*In[i])=(*p.In[i]);}  
  }
 ionpars::ionpars (int dimj) // constructor from dimj
@@ -54,7 +54,7 @@ ionpars::ionpars (int dimj) // constructor from dimj
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
   for(i=1;i<=NOF_OLM_MATRICES;++i){ Olm [i]= new Matrix(1,dimj,1,dimj); }  
    In = new Matrix * [1+IONPARS_MAXNOFCOMPONENTS];
-  for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new Matrix(1,dimj,1,dimj);  
+  for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new Matrix(1,dimj,1,dimj);  
 }
 
 ionpars::ionpars (char * ion) // constructor from iontype (mind:no matrices filled with values !)
@@ -79,7 +79,7 @@ cnst=Matrix(0,6,-6,6);set_zlm_constants(cnst);
    Olm = new Matrix * [1+NOF_OLM_MATRICES];  // define array of pointers to our Olm matrices
   for(i=1;i<=NOF_OLM_MATRICES;++i){ Olm [i]= new Matrix(1,dimj,1,dimj); }  
    In = new Matrix * [1+IONPARS_MAXNOFCOMPONENTS];
-  for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new Matrix(1,dimj,1,dimj);
+  for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new Matrix(1,dimj,1,dimj);
 }
 
 ionpars::~ionpars(){
@@ -87,7 +87,7 @@ ionpars::~ionpars(){
  delete []iontype;
  for (i=1;i<=NOF_RIXS_MATRICES;++i)delete Ri[i];
  for (i=1;i<=NOF_OLM_MATRICES;++i)  {delete Olm[i];}
- for (i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)delete In[i];
+ for (i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i)delete In[i];
    delete[] Olm;
    delete[] Ri;
    delete[] In; 
@@ -383,7 +383,7 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
 	Ri= new ComplexMatrix * [1+NOF_RIXS_MATRICES];
          for(i=1;i<=NOF_RIXS_MATRICES;++i){Ri[i]=new ComplexMatrix(1,dimj,1,dimj);(*Ri[i])=0;}
   In = new Matrix * [1+IONPARS_MAXNOFCOMPONENTS];
-  for(i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new Matrix(1,dimj,1,dimj);
+  for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new Matrix(1,dimj,1,dimj);
 //---------------------------------------------------------------------------
  if (perlp){
    ComplexMatrix * OOlm  [1+NOF_OLM_MATRICES]; 
@@ -693,6 +693,213 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
                                    }
     } //printf("%g %g\n",I[1],I[2]);
 }
+
+
+/**************************************************************************/
+// for mcdisp this routine is needed
+int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
+{  /*on input
+    tn      ... number of transition to be computed 
+    sign(tn)... 1... without printout, -1 with extensive printout
+    T		temperature[K]
+    gjmbH	vector of effective field [meV]
+  on output    
+    delta-+	energy of transition [meV]
+    u1(i)	<-|Ii|+> sqrt(n+-n-),  n+,n-
+    .... occupation number of states (- to + transition chosen according to transitionnumber)
+*/
+   double ninit=u1[1].real();
+   double pinit=u1[1].imag();
+  int pr=0;if (tn<0) {pr=1;tn*=-1;}
+  int i,j,dj=Hcf.Rhi();
+  // set eigenvectors
+   Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
+   for(i=1;i<=dj;++i)for(j=1;j<=dj;++j){zr(i,j)=real(ests(i,j));zi(i,j)=imag(ests(i,j));}
+  // calculate mat and delta for transition number tn
+  // 1. get i and j  delta=En(j)-En(i) from tn
+  getijdelta_from_transitionnumber(i,j,delta,dj,tn,pr,ests);
+  char optype[5];
+  for(int l=1;l<=Hxc.Hi();++l){sprintf(optype,"I%i",l);
+  u1(l)=observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*In[l]));}
+
+// return number of all transitions     
+     return noft(ests,T,pinit,ninit);
+}
+
+Matrix ionpars::opmat (int & n ,Vector &  Hxc,Vector & Hext)
+   // on input
+   // n		which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
+   // Hext,Hxc	vector of external and exchange field [meV]
+   // on output    
+   // operator matrix of Hamiltonian, I1, I2, I3 depending on n
+{
+if(n==0){// return Hamiltonian
+Vector gjmbH(1,max(3,Hxc.Hi()));gjmbH=0;
+for(int i=1;i<=Hxc.Hi();++i)gjmbH(i)=Hxc(i);
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
+// check dimensions of vector
+if(gjmbH.Hi()>NOF_OLM_MATRICES)
+   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > 48 - check number of columns in file mcphas.j\n",gjmbH.Hi());
+    exit(EXIT_FAILURE);}
+   (*In[n])=Hcf;for(int j=1;j<=gjmbH.Hi();++j){(*In[n])-=gjmbH(j)*(*In[j]);}
+  }
+else
+ {if(n>NOF_OLM_MATRICES)
+   {fprintf(stderr,"Error module so1ion/cfield: operatormatrix index=%i > 48 - check number of columns in file mcphas.j\n",n);
+    exit(EXIT_FAILURE);}
+ }
+return (*In[n]);
+}
+
+
+// *************************************************************************************************
+// ************************* private helper functions *********************************************
+// ************************************************************************************************
+void ionpars::setup_and_solve_Hamiltonian(Vector &  Hxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int sort)
+{
+Vector gjmbH(1,max(3,Hxc.Hi()));gjmbH=0;
+for(int i=1;i<=Hxc.Hi();++i)gjmbH(i)=Hxc(i);
+gjmbH(1)+=gJ*MU_B*Hext(1);
+gjmbH(2)+=gJ*MU_B*Hext(2);
+gjmbH(3)+=gJ*MU_B*Hext(3);
+
+// check dimensions of vector
+if(gjmbH.Hi()>48)
+   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > 48 - check number of columns in file mcphas.j\n",gjmbH.Hi());
+    exit(EXIT_FAILURE);}
+
+//  Driver routine to compute the  eigenvalues and normalized eigenvectors 
+//  of a complex Hermitian matrix z.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].The eigenvalues are returned
+//  in d[lo..hi] in ascending numerical  order if the sort flag is set  to
+//  True, otherwise  not ordered for sort = False. The real  and imaginary
+//  parts of the eigenvectors are  returned in  the columns of  zr and zi. 
+//  The storage requirement is 3*n*n + 4*n complex numbers. 
+//  All matrices and vectors have to be allocated and removed by the user.
+//  They are checked for conformance !
+// void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
+// 			   int sort, int maxiter)
+   int j,dj=Hcf.Rhi();
+   Matrix Ham(1,dj,1,dj);    
+   Ham=Hcf;for(j=1;j<=gjmbH.Hi();++j){Ham-=gjmbH(j)*(*In[j]);}
+   // diagonalize
+   int maxiter=1000000;
+   EigenSystemHermitean (Ham,En,zr,zi,sort,maxiter);
+
+}
+
+void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,Vector & wn)
+{double lnZs;
+ calculate_Z_wn(En,T,Zs,lnZs,wn);
+}
+void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,double & lnZs,Vector & wn)
+{   // calculate Z and wn (occupation probability)
+     int i,dj=wn.Hi();
+     double y,x=Min(En);
+     if (T>0)
+     { for (i=1;i<=dj;++i)
+       {if ((y=(En(i)-x)/KB/T)<600) wn[i]=exp(-y); 
+        else wn[i]=0.0;
+       }
+       Zs=Sum(wn);wn/=Zs;
+       lnZs=log(Zs)-x/KB/T;    
+       Zs*=exp(-x/KB/T);
+     } 
+     if (T==0)
+     { printf ("Temperature T==0: please choose probability distribution of states by hand\n");
+                         printf ("Number   Energy     Excitation Energy\n");
+     for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV\n",i,En(i),En(i)-x);
+     char instr[MAXNOFCHARINLINE];
+     for (i=1;i<=dj;++i)
+      {printf("eigenstate %i: %4.4g meV %4.4g meV  - please enter probability w(%i):",i,En(i),En(i)-x,i);
+       fgets(instr, MAXNOFCHARINLINE, stdin);
+ 
+       wn(i)=strtod(instr,NULL);
+      }
+       Zs=Sum(wn);wn/=Zs;
+       lnZs=log(Zs);    
+                         printf ("\n\nNumber   Energy     Excitation Energy   Probability\n");
+     for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV %4.4g  \n",i,En(i),En(i)-x,wn(i));
+     }
+     if (T<0){Zs=1;lnZs=0;wn=0;wn((int)(-T))=1;}     
+}
+
+
+int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
+{// calculate number of transitions
+   int dj=est.Rhi();
+   double n=ninit;
+   if (n>dj)n=dj;
+   //if (pinit<SMALL_PROBABILITY)pinit=SMALL_PROBABILITY;
+   double zsum=0,zii,x;
+   int noft=0;
+   if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
+   {noft+=dj-i+1;zsum+=zii;}
+   
+   if(T<0)for(int i=1;i<=n;++i)
+   {noft+=dj-i+1;}
+   return noft;
+}
+
+
+
+void ionpars::popnr_diff(ComplexVector& dMQ,int &i,int &j,ComplexMatrix & est,float & delta,double & T,int &pr,const char * n)
+{if (delta>SMALL_QUASIELASTIC_ENERGY)
+   { if(pr==1){
+      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
+      for(int l=1;l<=dMQ.Hi();++l)printf(" |<%i|%s%i-<%s%i>|%i>|^2=%4.4g",i,n,l,n,l,j,abs(dMQ(l))*abs(dMQ(l)));
+      printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
+      dMQ*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
+   }else
+   {// quasielastic scattering has not wi-wj but wj*epsilon/kT
+     if(pr==1){
+      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
+      for(int l=1;l<=dMQ.Hi();++l)printf(" |<%i|%s%i-<%s%i>|%i>|^2=%4.4g",i,n,l,n,l,j,abs(dMQ(l))*abs(dMQ(l)));
+      printf(" n%i=%4.4g\n",i,imag(est(0,i)));
+      }
+    dMQ*=sqrt(imag(est(0,i))/KB/fabs(T));
+   }
+}
+// ----------------------------------------------------------------------
+
+void ionpars::getijdelta_from_transitionnumber(int & i,int & j,float & delta,int & dj,int & tn,int & pr,ComplexMatrix &ests)
+{int  k=0;for(i=1;i<=dj;++i){for(j=i;j<=dj;++j){++k;if(k==tn)break;}if(k==tn)break;} 
+  if(j==i){delta=-SMALL_QUASIELASTIC_ENERGY; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
+          }else{delta=real(ests(0,j))-real(ests(0,i));
+                if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion or cfield.so - "
+                                     "d*calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
+           }
+  if(pr==1){printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
+            if(delta>SMALL_QUASIELASTIC_ENERGY){printf(" n%i-n%i=%4.4g",i,j,imag(ests(0,i))-imag(ests(0,j)));
+           }else{ printf(" n%i=%4.4g",i,imag(ests(0,i)));}
+           }
+}
+
+// ----------------------------------------------------------------------
+// calculates the transition matrix element <i|O-<O>|j>sqrt((ni-nj))
+  complex<double> ionpars::observable1(int & i,int & j,float & delta,Matrix & zr,Matrix & zi,
+                         double & T,ComplexMatrix&est,int & pr,const char *optype,Matrix & O)
+  {static complex<double> ret;
+   ret=complex<double>(matelr(i,j,zr,zi,O),mateli(i,j,zr,zi,O));
+   double Oav=0;int dj=Hcf.Rhi();
+   // calculate and subtract expectation value if T>0
+   if(T>0&&i==j){for(int l=1;l<=dj;++l)if(imag(est(0,l))>SMALL_PROBABILITY)Oav+=imag(est(0,l))*matelr(l,l,zr,zi,O);
+                 ret-=Oav; 
+                }
+   if(pr==1)printf(" |<%i|%s-<%s>|%i>|^2=%4.4g",i,optype,optype,j,abs(ret)*abs(ret));
+   if (delta>SMALL_QUASIELASTIC_ENERGY){ret*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
+                                  }else{ret*=sqrt(imag(est(0,i))/KB/fabs(T));
+                                       }
+  return ret;
+  }
+
+
+/**************************************************************************/
+//                          OBSERVABLES
 /**************************************************************************/
 void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & /*ests*/)
 {   /*on input
@@ -843,36 +1050,6 @@ void ionpars::MQM(ComplexMatrix & MQXM,ComplexMatrix & MQYM,ComplexMatrix & MQZM
 }
 
 
-/**************************************************************************/
-// for mcdisp this routine is needed
-int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
-{  /*on input
-    tn      ... number of transition to be computed 
-    sign(tn)... 1... without printout, -1 with extensive printout
-    T		temperature[K]
-    gjmbH	vector of effective field [meV]
-  on output    
-    delta-+	energy of transition [meV]
-    u1(i)	<-|Ii|+> sqrt(n+-n-),  n+,n-
-    .... occupation number of states (- to + transition chosen according to transitionnumber)
-*/
-   double ninit=u1[1].real();
-   double pinit=u1[1].imag();
-  int pr=0;if (tn<0) {pr=1;tn*=-1;}
-  int i,j,dj=Hcf.Rhi();
-  // set eigenvectors
-   Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
-   for(i=1;i<=dj;++i)for(j=1;j<=dj;++j){zr(i,j)=real(ests(i,j));zi(i,j)=imag(ests(i,j));}
-  // calculate mat and delta for transition number tn
-  // 1. get i and j  delta=En(j)-En(i) from tn
-  getijdelta_from_transitionnumber(i,j,delta,dj,tn,pr,ests);
-  char optype[5];
-  for(int l=1;l<=Hxc.Hi();++l){sprintf(optype,"I%i",l);
-  u1(l)=observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*In[l]));}
-
-// return number of all transitions     
-     return noft(ests,T,pinit,ninit);
-}
 /**************************************************************************/
 // for mcdisp this routine is needed
 int ionpars::dJ1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & J1,float & delta,ComplexMatrix & ests)
@@ -1062,148 +1239,7 @@ return noft(est,T,pinit,ninit);
 }
 
 
-// *************************************************************************************************
-// ************************* private helper functions *********************************************
-// ************************************************************************************************
-void ionpars::setup_and_solve_Hamiltonian(Vector &  Hxc,Vector & Hext,Vector & En,Matrix & zr,Matrix & zi,int sort)
-{
-Vector gjmbH(1,max(3,Hxc.Hi()));gjmbH=0;
-for(int i=1;i<=Hxc.Hi();++i)gjmbH(i)=Hxc(i);
-gjmbH(1)+=gJ*MU_B*Hext(1);
-gjmbH(2)+=gJ*MU_B*Hext(2);
-gjmbH(3)+=gJ*MU_B*Hext(3);
 
-// check dimensions of vector
-if(gjmbH.Hi()>48)
-   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > 48 - check number of columns in file mcphas.j\n",gjmbH.Hi());
-    exit(EXIT_FAILURE);}
-
-//  Driver routine to compute the  eigenvalues and normalized eigenvectors 
-//  of a complex Hermitian matrix z.The real parts of the elements must be
-//  stored in the lower triangle of z,the imaginary parts (of the elements
-//  corresponding to the lower triangle) in the positions
-//  of the upper triangle of z[lo..hi,lo..hi].The eigenvalues are returned
-//  in d[lo..hi] in ascending numerical  order if the sort flag is set  to
-//  True, otherwise  not ordered for sort = False. The real  and imaginary
-//  parts of the eigenvectors are  returned in  the columns of  zr and zi. 
-//  The storage requirement is 3*n*n + 4*n complex numbers. 
-//  All matrices and vectors have to be allocated and removed by the user.
-//  They are checked for conformance !
-// void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
-// 			   int sort, int maxiter)
-   int j,dj=Hcf.Rhi();
-   Matrix Ham(1,dj,1,dj);    
-   Ham=Hcf;for(j=1;j<=gjmbH.Hi();++j){Ham-=gjmbH(j)*(*In[j]);}
-   // diagonalize
-   int maxiter=1000000;
-   EigenSystemHermitean (Ham,En,zr,zi,sort,maxiter);
-
-}
-
-void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,Vector & wn)
-{double lnZs;
- calculate_Z_wn(En,T,Zs,lnZs,wn);
-}
-void ionpars::calculate_Z_wn(Vector & En,double & T,double & Zs,double & lnZs,Vector & wn)
-{   // calculate Z and wn (occupation probability)
-     int i,dj=wn.Hi();
-     double y,x=Min(En);
-     if (T>0)
-     { for (i=1;i<=dj;++i)
-       {if ((y=(En(i)-x)/KB/T)<600) wn[i]=exp(-y); 
-        else wn[i]=0.0;
-       }
-       Zs=Sum(wn);wn/=Zs;
-       lnZs=log(Zs)-x/KB/T;    
-       Zs*=exp(-x/KB/T);
-     } 
-     if (T==0)
-     { printf ("Temperature T==0: please choose probability distribution of states by hand\n");
-                         printf ("Number   Energy     Excitation Energy\n");
-     for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV\n",i,En(i),En(i)-x);
-     char instr[MAXNOFCHARINLINE];
-     for (i=1;i<=dj;++i)
-      {printf("eigenstate %i: %4.4g meV %4.4g meV  - please enter probability w(%i):",i,En(i),En(i)-x,i);
-       fgets(instr, MAXNOFCHARINLINE, stdin);
- 
-       wn(i)=strtod(instr,NULL);
-      }
-       Zs=Sum(wn);wn/=Zs;
-       lnZs=log(Zs);    
-                         printf ("\n\nNumber   Energy     Excitation Energy   Probability\n");
-     for (i=1;i<=dj;++i) printf ("%i    %4.4g meV   %4.4g meV %4.4g  \n",i,En(i),En(i)-x,wn(i));
-     }
-     if (T<0){Zs=1;lnZs=0;wn=0;wn((int)(-T))=1;}     
-}
-
-
-int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
-{// calculate number of transitions
-   int dj=est.Rhi();
-   double n=ninit;
-   if (n>dj)n=dj;
-   //if (pinit<SMALL_PROBABILITY)pinit=SMALL_PROBABILITY;
-   double zsum=0,zii,x;
-   int noft=0;
-   if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
-   {noft+=dj-i+1;zsum+=zii;}
-   
-   if(T<0)for(int i=1;i<=n;++i)
-   {noft+=dj-i+1;}
-   return noft;
-}
-
-
-
-void ionpars::popnr_diff(ComplexVector& dMQ,int &i,int &j,ComplexMatrix & est,float & delta,double & T,int &pr,const char * n)
-{if (delta>SMALL_QUASIELASTIC_ENERGY)
-   { if(pr==1){
-      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      for(int l=1;l<=dMQ.Hi();++l)printf(" |<%i|%s%i-<%s%i>|%i>|^2=%4.4g",i,n,l,n,l,j,abs(dMQ(l))*abs(dMQ(l)));
-      printf(" n%i-n%i=%4.4g\n",i,j,imag(est(0,i))-imag(est(0,j)));}
-      dMQ*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
-   }else
-   {// quasielastic scattering has not wi-wj but wj*epsilon/kT
-     if(pr==1){
-      printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-      for(int l=1;l<=dMQ.Hi();++l)printf(" |<%i|%s%i-<%s%i>|%i>|^2=%4.4g",i,n,l,n,l,j,abs(dMQ(l))*abs(dMQ(l)));
-      printf(" n%i=%4.4g\n",i,imag(est(0,i)));
-      }
-    dMQ*=sqrt(imag(est(0,i))/KB/fabs(T));
-   }
-}
-// ----------------------------------------------------------------------
-
-void ionpars::getijdelta_from_transitionnumber(int & i,int & j,float & delta,int & dj,int & tn,int & pr,ComplexMatrix &ests)
-{int  k=0;for(i=1;i<=dj;++i){for(j=i;j<=dj;++j){++k;if(k==tn)break;}if(k==tn)break;} 
-  if(j==i){delta=-SMALL_QUASIELASTIC_ENERGY; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
-          }else{delta=real(ests(0,j))-real(ests(0,i));
-                if (delta<-0.000001){fprintf(stderr,"ERROR module so1ion or cfield.so - "
-                                     "d*calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
-           }
-  if(pr==1){printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
-            if(delta>SMALL_QUASIELASTIC_ENERGY){printf(" n%i-n%i=%4.4g",i,j,imag(ests(0,i))-imag(ests(0,j)));
-           }else{ printf(" n%i=%4.4g",i,imag(ests(0,i)));}
-           }
-}
-
-// ----------------------------------------------------------------------
-// calculates the transition matrix element <i|O-<O>|j>sqrt((ni-nj))
-  complex<double> ionpars::observable1(int & i,int & j,float & delta,Matrix & zr,Matrix & zi,
-                         double & T,ComplexMatrix&est,int & pr,const char *optype,Matrix & O)
-  {static complex<double> ret;
-   ret=complex<double>(matelr(i,j,zr,zi,O),mateli(i,j,zr,zi,O));
-   double Oav=0;int dj=Hcf.Rhi();
-   // calculate and subtract expectation value if T>0
-   if(T>0&&i==j){for(int l=1;l<=dj;++l)if(imag(est(0,l))>SMALL_PROBABILITY)Oav+=imag(est(0,l))*matelr(l,l,zr,zi,O);
-                 ret-=Oav; 
-                }
-   if(pr==1)printf(" |<%i|%s-<%s>|%i>|^2=%4.4g",i,optype,optype,j,abs(ret)*abs(ret));
-   if (delta>SMALL_QUASIELASTIC_ENERGY){ret*=sqrt(imag(est(0,i))-imag(est(0,j))); // occupation factor
-                                  }else{ret*=sqrt(imag(est(0,i))/KB/fabs(T));
-                                       }
-  return ret;
-  }
 // ----------------------------------------------------------------------
 // for testing the code uncomment and make test and start ionpars.exe
 /* int main(int argc, char **argv)

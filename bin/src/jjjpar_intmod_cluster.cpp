@@ -107,8 +107,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
   for(int bj=0;bj<=dj-1;++bj)
   {int r=ix*mx+ai*mi+iy*my+aj*mj+iz+1;
    int s=ix*mx+bi*mi+iy*my+bj*mj+iz+1;
-   int k=ai*di+aj+1;
-   int l=bi*di+bj+1;
+   int k=aj*di+ai+1;// ??
+   int l=bj*di+bi+1;// ??
    H(r,s)+=SinS(k,l);
 //printf("hello %i %i %i %i %g %g\n",r,s,k,l,H(r,s),SinS(k,l));
   } 
@@ -313,8 +313,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
   for(int bj=0;bj<=dj-1;++bj)
   {int r=ix*mx+ai*mi+iy*my+aj*mj+iz+1;
    int s=ix*mx+bi*mi+iy*my+bj*mj+iz+1;
-   int k=ai*di+aj+1;
-   int l=bi*di+bj+1;
+   int k=aj*di+ai+1;// ??
+   int l=bj*di+bi+1;// ??
    H(r,s)+=SinS(k,l);
   }
 
