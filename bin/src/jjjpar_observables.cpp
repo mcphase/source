@@ -57,12 +57,7 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
    case 2:
    case 4: (*iops).Jcalc(mom,T,Hxc,Hext,parstorage);mom*=gJ;return true;break;
    case 3: brillouin(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break;
-   case 5: cluster_Icalc(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break; 
-                                       // currently only 3 operators in cluster
-                                       // implemented which are Ma Mb Mc
-                                       // of (coupled) kramers doublet sipfs
-                                       // ... in future this has to be substituted by cluster _mcalc
-                                       // and operators of magnetic moments have to be handled specially
+   case 5: cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZ,U);return true;break;                                        
    default: if (m==NULL) {mom=0;return false;} 
             else{(*m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
@@ -81,12 +76,7 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
            nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
    case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
-   case 5: nnt=cluster_dm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
-                                       // currently only 3 operators in cluster
-                                       // implemented which are Ma Mb Mc
-                                       // of (coupled) kramers doublet sipfs
-                                       // ... in future this has to be substituted by cluster_mcalc
-                                       // and operators of magnetic moments have to be handled specially
+   case 5: nnt=cluster_dm(2,transitionnumber,T,m1,delta,ests);return nnt;break;
   default:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module ... not implemented, continuing ... \n");
           break;
    }
@@ -100,12 +90,7 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case 2:
    case 4: (*iops).Jcalc(Lmom,T,Hxc,Hext,parstorage);Lmom*=(2.0-gJ);return true;break;
    case 3: brillouin(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
-   case 5: cluster_Icalc(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break; 
-                                       // currently only 3 operators in cluster
-                                       // implemented which are Ma Mb Mc
-                                       // of (coupled) kramers doublet sipfs
-                                       // ... in future this has to be substituted by cluster _mcalc
-                                       // and operators of magnetic moments have to be handled specially
+   case 5: return false;break; 
    default: if (L==NULL) {Lmom=0;return false;} 
             else{(*L)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
@@ -136,12 +121,7 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case 2:
    case 4: (*iops).Jcalc(Smom,T,Hxc,Hext,parstorage);Smom*=(gJ-1.0);return true;break;
    case 3: brillouin(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
-   case 5: cluster_Icalc(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break; 
-                                       // currently only 3 operators in cluster
-                                       // implemented which are Ma Mb Mc
-                                       // of (coupled) kramers doublet sipfs
-                                       // ... in future this has to be substituted by cluster _mcalc
-                                       // and operators of magnetic moments have to be handled specially
+   case 5: return false;break; 
    default: if (S==NULL) {Smom=0;return false;} 
             else{(*S)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
@@ -204,6 +184,7 @@ switch (module_type)
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for so1ion we must th and ph with respect to abc coordinate system
              if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
             Mq=(*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);return true;break;
+   case 5:
    default: return false; // all other internal modules do not currently provide mq
   }
 }
@@ -252,6 +233,22 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
             return i;break;
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give dMQ1 polar angles with respect to xyz
             return (*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);break;
+   case 5:  int nnt;
+            {ComplexVector m1(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
+            float ddelta=delta;
+            nnt=cluster_dm(3,transitionnumber,T,m1,ddelta,ests);
+            // now we have all magnetic moments in m1 vector and we have to do the
+            // magnetic structure factor = sum_i Mi exp(iQri) Fi(Q) * DWF
+            Vector abc(1,6); abc(1)=(*clusterpars).a; abc(2)=(*clusterpars).b; abc(3)=(*clusterpars).c;
+                   abc(4)=(*clusterpars).alpha; abc(5)=(*clusterpars).beta; abc(6)=(*clusterpars).gamma;
+            dMQ=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
+             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
+            double QR=Qvec*rijk;
+            complex<double> exponent(cos(QR),sin(QR));
+            for(int n=1;n<=3;++n)
+            {dMQ(n)+=m1(3*(a-1)+n)*exponent*(*(*clusterpars).jjj[a]).F(Q)*(*(*clusterpars).jjj[a]).debyewallerfactor(Q);
+            }}}
+            return nnt;break;
    default: if(washere==0){fprintf(stderr,"Warning in scattering operator function dMQcalc - for ion %s \ngoing beyond dipolar approximation is not implemented\n",sipffilename);
                            washere=1;}
             return 0;

@@ -635,7 +635,18 @@ jjjpar::jjjpar (const jjjpar & pp)
                            Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=pp.Icalc_parstorage;
                            }
    if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);
-                           cluster_ini_Imat();}
+                          // est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());est=pp.est;
+                          // Ia
+                          Ia= new Matrix * [nofcomponents+1];
+                          for(int n = 1;n<=nofcomponents;++n){Ia[n]=new Matrix(1,dim,1,dim);(*Ia[n])=(*pp.Ia[n]);}
+                          // cluster_M
+                          cluster_M= new Matrix * [3+3*(*clusterpars).nofatoms+1];
+                          for(int a=0;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+                           {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
+                            cluster_M[index_M]=new Matrix(1,dim,1,dim);
+                            (*cluster_M[index_M])=(*pp.cluster_M[index_M]);
+                           }                        
+                          }
   
 //#ifdef __linux__
 /*  if (module_type==0)
@@ -689,7 +700,10 @@ jjjpar::~jjjpar ()
   delete []modulefilename;// will not work in linux
    if (module_type==5) {for(int i=1;i<=nofcomponents;++i)
                             { delete Ia[i];}
-                        delete Ia;delete []dnn;
+                       for(int a=0;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+                        {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
+                         delete cluster_M[index_M];}
+                        delete Ia;delete cluster_M; delete []dnn;
                         delete clusterpars;                         
                        }
    if (module_type==2||module_type==4) delete iops;

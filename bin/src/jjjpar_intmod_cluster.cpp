@@ -1,6 +1,5 @@
 void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster module
 {// vector of matrix pointers which index the I1,I2,...In matrices of the cluster
- Ia= new Matrix * [nofcomponents+1];
  ComplexMatrix * Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms+1];
  // initialize these matrices
  dim=1; Vector Hxc(1,(*clusterpars).nofcomponents);Vector Hext(1,3);
@@ -79,10 +78,11 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
 
  // now initialize the cluster individual magnetic moment operators 
  //(for neutron form factor in dipole approx - function MQ dMQ1)
- for(int i=1;i<=(*clusterpars).nofatoms;++i)for(int j=1;j<=3;++j)
- {operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+(i-1)*3+j]=new char[5];
-  sprintf(operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+(i-1)*3+j],"M%i_%i",i,j);
-  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+(i-1)*3+j]=new ComplexMatrix(1,dim,1,dim);                     
+ for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+ {int index=(a-1)*3+n;
+  operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]=new char[5];
+  sprintf(operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index],"M%i_%i",a,n);
+  Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]=new ComplexMatrix(1,dim,1,dim);                     
  } 
   operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms+1]=NULL;
 
@@ -90,6 +90,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
    {printf("Error perl parsing sipf file %s\n",sipffilename);exit(EXIT_FAILURE);}
 
 // here we fill the interaction operator matrices with values
+Ia= new Matrix * [nofcomponents+1];
 for(int n = 1;n<=nofcomponents;++n){Ia[n]=new Matrix(1,dim,1,dim);
 for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
    if(i<j){(*Ia[n])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+n])(j,i));}
@@ -98,12 +99,29 @@ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
 //(*Ia[i])=(*Iaa[i]);
 }
 
-// here we should initialize set the operator matrices cluster_M (do not forget to
-// put into descructor, copy constructor should also be made easier: cp only Ia and cluster_M and
-// do not run this function another time)  ... total magnetic moment
+// here we should initialize set the operator matrices cluster_M  ... total magnetic moment
 // operator storage and individual magnetic moments: this should then be used
 // in the mcalc, dm1calc, MQ and dMQ1 functions of the cluster module ...
 // to be done !!!
+
+cluster_M= new Matrix * [3+3*(*clusterpars).nofatoms+1];
+// first do the total moment
+for(int n = 1;n<=3;++n){cluster_M[n]=new Matrix(1,dim,1,dim);
+for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
+   if(i<j){(*cluster_M[n])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])(j,i));}
+      else{(*cluster_M[n])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+n])(i,j));}
+}
+}
+// now do the individual atom magnetic moments
+ for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+{int index=(a-1)*3+n; // a .... atom index  n ... xyz components of magnetic moment
+ int index_M=3*a+n;
+ cluster_M[index_M]=new Matrix(1,dim,1,dim);
+ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
+   if(i<j){(*cluster_M[index_M])(i,j)=imag((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])(j,i));}
+      else{(*cluster_M[index_M])(i,j)=real((*Iaa[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index])(i,j));}
+}
+}
 
  for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms;++i)
   {delete Iaa[i];delete operatornames[i];}
@@ -112,8 +130,12 @@ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
 //------------------------------------------------------------------------------------------------
 //routine Icalc for cluster
 //------------------------------------------------------------------------------------------------
-void jjjpar::cluster_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
+void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
 { /*on input
+   code         defining, what should be calculated
+         1....   Ia (interaction operators for Icalc)
+         2....    m (total magnetic moment for mcalc), or
+         3....    Mi (individual magnetic moments (for MQ)
     T		temperature[K]
     gjmbH	vector of effective field [meV]
   on output    
@@ -163,28 +185,51 @@ cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
    // calculate U
      U=En*wn;
 
-for(int a=1;a<=Hxc.Hi();++a)
-{// calculate expecation Value of J
-//printf("Matrix of Operator");
-// myPrintMatrix(stdout,Ja);
-// determine expectation value
- Jret[a]=0;
- for(int i=1;i<=dim&&wn[i]>0.00001;++i)
- {Jret[a]+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i); 
- // if(fabs(aMb_imag((*Ia[a]),zr,zc,i,i))>SMALL){fprintf(stderr,"ERROR module cluster - Icalc: expectation value imaginary\n");exit(EXIT_FAILURE);}
- }
+ switch(code)
+
+{case 1:for(int a=1;a<=Hxc.Hi();++a)
+        {// calculate expecation Value of J
+         //printf("Matrix of Operator");
+         // myPrintMatrix(stdout,Ja);
+         // determine expectation value
+         Jret(a)=0;
+         for(int i=1;i<=dim&&wn[i]>0.00001;++i)
+         {Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i); 
+          // if(fabs(aMb_imag((*Ia[a]),zr,zc,i,i))>SMALL){fprintf(stderr,"ERROR module cluster - Icalc: expectation value imaginary\n");exit(EXIT_FAILURE);}
+         }
+        }break;
+ case 2:for(int n=1;n<=3;++n)
+        {// calculate expecation Value of m
+         Jret(n)=0;
+         for(int i=1;i<=dim&&wn[i]>0.00001;++i)
+         {Jret(n)+=wn[i]*aMb_real((*cluster_M[n]),zr,zc,i,i); 
+         }
+        }break;
+ case 3:for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+        {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
+         int index=(a-1)*3+n; // calculate expecation Value of m
+         Jret(index)=0;
+         for(int i=1;i<=dim&&wn[i]>0.00001;++i)
+         {Jret(index)+=wn[i]*aMb_real((*cluster_M[index_M]),zr,zc,i,i); 
+         }
+        }break;
 }
 
 //  printf ("Ha=%g Hb=%g Hc=%g Ja=%g Jb=%g Jc=%g \n", 
 //     gjmbH[1]/MU_B/gjJ, gjmbH[2]/MU_B/gjJ, gjmbH[3]/MU_B/gjJ, J[1], J[2], J[3]);
 }
+//------------------------------------------------------------------------------------------------
+//routine ducalc for cluster
+//------------------------------------------------------------------------------------------------
 
-int jjjpar::cluster_dm(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta)
+int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & delta,ComplexMatrix & ests)
 { 
   /*on input
+   code         defining, what should be calculated
+         1....   Ia (interaction operators for du1calc)
+         2....    m (total magnetic moment for dm1calc), or
+         3....    Mi (individual magnetic moments (for dMQ1)
     transitionnumber ... number of transition to be computed - meaningless for kramers doublet, because there is only 1 transition
-    ABC[i]	saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
-    gJ		lande factor
     T		temperature[K]
     gjmbH	vector of effective field [meV]
   on output    
@@ -193,58 +238,60 @@ int jjjpar::cluster_dm(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVe
 */
   int pr=0,subtractexpvalue=1;if(T<0){subtractexpvalue=0;T=-T;}
   if (tn<0) {pr=1;tn*=-1;}
-
+   double ninit=u1[1].real();
+   double pinit=u1[1].imag();
+ 
 Vector En(1,dim);
+Vector wn(1,dim);
 Matrix zr(1,dim,1,dim);
 Matrix zc(1,dim,1,dim);
-cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
+ for(int i=1;i<=dim;++i){En(i)=real(ests(0,i));wn(i)=imag(ests(0,i));}
+
+   for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
+
 // calculate mat and delta for transition number tn
 // 1. get i and j from tn
 int k=0,ii=1,jj=1;
-for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj)
-{++k;if(k==tn)break;
-}if(k==tn)break;}
-
+for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj){++k;if(k==tn)break;}if(k==tn)break;}
 // 2. set delta
 delta=En(jj)-En(ii);
-
 if (delta<-0.000001){fprintf(stderr,"ERROR module cluster - du1calc: energy gain delta gets negative\n");exit(EXIT_FAILURE);}
 if(jj==ii)delta=-SMALL_QUASIELASTIC_ENERGY; //if transition within the same level: take negative delta !!- this is needed in routine intcalc
 
-// calculate Z and wn (occupation probability)
-     Vector wn(1,dim);double Zs;
-     double x,y;
-     x=Min(En);
-     for (int i=1;i<=dim;++i)
-     {if ((y=(En(i)-x)/KB/T)<700) wn[i]=exp(-y);
-      else wn[i]=0.0;
-//      printf("%4.4g\n",En(i));
-      }
-     Zs=Sum(wn);wn/=Zs;
+int maxn;
+ switch(code)
+{case 1: maxn=u1.Hi();break;
+ case 2: maxn=3; break;
+ case 3: maxn=(*clusterpars).nofatoms*3;break;
+}
 
-Vector Jret(1,Hxc.Hi());Jret=0;
-ComplexVector iJj(1,Hxc.Hi());
-
-for(int a=1;a<=Hxc.Hi();++a)
-{// calculate expecation Value of J
- 
- // transition matrix element
- iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*Ia[a]),zr,zc,ii,jj));
+Vector Jret(1,maxn);Jret=0;
+ComplexVector iJj(1,maxn);
+for(int a=1;a<=maxn;++a)
+{// transition matrix element
+ switch(code)
+ {case 1:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*Ia[a]),zr,zc,ii,jj));break;
+  case 2:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a]),zr,zc,ii,jj)); break;
+  case 3:  iJj(a)=complex<double>(aMb_real((*Ia[a]),zr,zc,ii,jj),aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj));break;
+ }
 
  // determine expectation value
  Jret(a)=0;
-if (subtractexpvalue==1)
-{ for(int i=1;i<=dim&&wn[i]>0.00001;++i)
- {Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i);
-// if(fabs(aMb_imag((*Ia[a]),zr,zc,i,i))>SMALL){fprintf(stderr,"ERROR module cluster - du1calc: expectation value imaginary\n");exit(EXIT_FAILURE);}
+ if (subtractexpvalue==1)
+ { for(int i=1;i<=dim&&wn[i]>0.00001;++i)
+  { switch(code)
+   {case 1: Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i);break;
+    case 2: Jret(a)+=wn[i]*aMb_real((*cluster_M[a]),zr,zc,i,i); break;
+    case 3: Jret(a)+=wn[i]*aMb_real((*cluster_M[a+3]),zr,zc,i,i);break;
+   }
+  }
  }
-}
 }
 
 
 
 // 3. set u1
-for(int l=1;l<=Hxc.Hi();++l)
+for(int l=1;l<=maxn;++l)
 {if(ii==jj){//take into account thermal expectation values <Jret>
           u1(l)=(iJj(l)-Jret(l));}
  else    {u1(l)=iJj(l);}
@@ -267,13 +314,54 @@ if (delta>SMALL_QUASIELASTIC_ENERGY)
 
 
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
+
 // return number of all transitions
- return (int)(dim*(dim+1)/2);
+   double n=ninit;
+   if (n>dim)n=dim;
+   double zsum=0,zii,x;
+   int noft=0;
+   if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)
+   {noft+=dim-i+1;zsum+=zii;}
+   
+   if(T<0)for(int i=1;i<=n;++i)
+   {noft+=dim-i+1;}
+ return noft;
 
 
 
 }
 
+//------------------------------------------------------------------------------------------------
+//routine estates for cluster
+//------------------------------------------------------------------------------------------------
+void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,double & T)
+{ /*on input
+    gJmbH	vector of effective field [meV]
+      on output
+    Matrix containing the eigenvalues and eigenfunctions of the crystalfield problem
+    eigenvalues ares stored as real part of row zero
+    boltzmann population numbers are stored as imaginary part of row zero
+*/
+ 
+(*eigenstates) = ComplexMatrix(0,dim,1,dim);
+ Vector En(1,dim);
+ Matrix zr(1,dim,1,dim);
+ Matrix zc(1,dim,1,dim);
+ cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
+     Vector wn(1,dim);double Zs;
+     double x,y;
+     x=Min(En);
+     for (int i=1;i<=dim;++i)
+     {if ((y=(En(i)-x)/KB/T)<700) wn[i]=exp(-y);
+      else wn[i]=0.0;
+      }
+     Zs=Sum(wn);wn/=Zs;
+ for(int i=1;i<=dim;++i)(*eigenstates)(0,i)=complex<double>(En(i),wn(i));
+
+ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j)
+ {(*eigenstates)(i,j)=complex<double>(zr(i,j),zc(i,j));
+ }
+}
 
 void jjjpar::cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext)
 {Matrix H(1,dim,1,dim);

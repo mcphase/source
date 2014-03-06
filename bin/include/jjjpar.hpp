@@ -349,8 +349,9 @@ private:
   int  brillouindm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
 
   // cluster internal module functions, module_type=5
-  void cluster_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
-  int  cluster_dm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
+  void cluster_Icalc_mcalc_Micalc (int code,Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  int  cluster_dm (int code,int & tn,double & T, ComplexVector & u1,float & delta,ComplexMatrix & ests);
+  void cluster_est(ComplexMatrix * est,Vector &Hxc,Vector &Hext,double & T);
   par * clusterpars;
   void cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext);
   void cluster_ini_Imat();

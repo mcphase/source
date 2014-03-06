@@ -91,7 +91,7 @@ T=0.0;h=0;
 
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
-   	
+                        
 if (argc>options&&strncmp(argv[argc-1],"-",1)!=0){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)

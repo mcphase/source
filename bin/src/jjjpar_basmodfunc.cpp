@@ -122,7 +122,6 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
                             "\n");exit(EXIT_FAILURE);}
       fprintf(stderr," ... reading cluster structure from %s\n",clusterfilename);
       clusterpars =new par(clusterfilename);
-      est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
       Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors      
      }
      else
@@ -471,7 +470,7 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
    case 2:
    case 4: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
    case 3: brillouin(mom,T,Hxc,Hext,lnZ,U);break;
-   case 5: cluster_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
+   case 5: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
    default: (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
   }
 }
@@ -491,7 +490,7 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
    case 2:
    case 4: return (*iops).du1calc(transitionnumber,T,Hxc,Hext,u1,delta,ests);break;
    case 3: return brillouindm(transitionnumber,T,Hxc,Hext,u1,delta);break;
-   case 5: return cluster_dm(transitionnumber,T,Hxc,Hext,u1,delta);break;
+   case 5: return cluster_dm(1,transitionnumber,T,u1,delta,ests);break;
    default: return 0;
   }
 }
@@ -606,6 +605,7 @@ ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
             return est;break;
    case 2:
    case 4: (*iops).cfeigenstates(&est,Hxc,Hext,T);return est;break;
+   case 5: cluster_est(&est,Hxc,Hext,T);return est;break;
    default: est=ComplexMatrix(0,2,1,2);est=0;return est;
   }
 }
