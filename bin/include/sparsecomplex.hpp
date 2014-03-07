@@ -396,9 +396,9 @@ template <class T> void zsMat<T>::h_array(std::complex<T>* retval) const   // As
    for (int c=1; c<=_c; c++)
       for (i=tmp_ls.lower_bound(_ind(c,c)); i!=tmp_ls.lower_bound(_ind(_r+1,c)); i++)
       {
-         retval[_r*(i->first.r-1)+(i->first.c-1)] = i->second;
+         retval[_r*(i->first.r-1)+(i->first.c-1)] = conj(i->second);
          if(i->first.c!=i->first.r)
-            retval[_c*(i->first.c-1)+(i->first.r-1)] = conj(i->second);
+            retval[_c*(i->first.c-1)+(i->first.r-1)] = i->second;
       }
 }
 template <class T> std::complex<T>* zsMat<T>::f_array_tr() const// Returns the transposed matrix as a Fortran style 2D array

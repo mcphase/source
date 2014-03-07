@@ -360,12 +360,13 @@ private:
   void cluster_Micalc (Vector &mom,ComplexMatrix & ests);
   int  cluster_dm (int code,int & tn,double & T, ComplexVector & u1,float & delta,ComplexMatrix & ests);
   void cluster_est(ComplexMatrix * est,Vector &Hxc,Vector &Hext,double & T);
-  void cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext);
+  void cluster_calcH_and_diagonalize(Vector & En,ComplexMatrix &zc,Vector & Hxc,Vector & Hext);
   void cluster_ini_Imat();
   void cluster_Iaa(zsMat<double> *Iai, int a, int i);
   zsMat<double> ** Ia; zsMat<double> ** cluster_M; 
-  Matrix *clusterH; Vector *oldHext; bool justinit; // Added to cache Hamiltonian matrices between iterations when Hext=same
+  zsMat<double> *clusterH; Vector *oldHext; bool justinit; // Added to cache Hamiltonian matrices between iterations when Hext=same
   int * dnn; int dim; bool useperl, sparsemat;
+
 };
 
 #include<par.hpp>

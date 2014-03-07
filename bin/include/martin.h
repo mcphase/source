@@ -168,6 +168,8 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);           
 double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);            // <a|M|b>  a,b are columns ia and ib
 complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int ia,int ib);  // of zr+izc
 double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib);
+double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
+complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
 
 
 Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3);

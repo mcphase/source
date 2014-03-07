@@ -147,7 +147,7 @@ endif
 ifdef gotoblas
 LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -lgfortran -lpthread
 else
-LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -lgfortran
+LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -lgfortran
 endif
 
 #CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium

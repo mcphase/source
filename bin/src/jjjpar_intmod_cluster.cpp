@@ -16,15 +16,13 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  // Before initializing (allocating) matrices for other operators, check to see if we are using own parser, and if
  //   so get the sequence of operations and perform them here directly for each operator without allocating all the
  //   matrices  -  MDL 131024
- useperl=true; sparsemat=false; FILE *fin=fopen(sipffilename,"rb"); char instr[MAXNOFCHARINLINE];
+ useperl=true; FILE *fin=fopen(sipffilename,"rb"); char instr[MAXNOFCHARINLINE];
  while(feof(fin)==0) if(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL) {
     if(strncmp(instr,"#!noperl",8)==0) useperl=false; 
-    else if(strncmp(instr,"#!use_sparse_matrix",13)==0) { sparsemat=true;
-       char *valsto = strchr(instr,'=')+1; if(strstr(valsto,"false")!=NULL || atoi(valsto)<=0) sparsemat=false; }
  }
 
  // initialize matrix and vector to cache Hamiltonian matrix from runs where Hext is constant
- clusterH = new Matrix(1,dim,1,dim); oldHext = new Vector(1,3); justinit=true;
+ clusterH = new zsMat<double>(dim,dim); oldHext = new Vector(1,3); justinit=true;
 
  Iaa[0]=new zsMat<double>(dim,dim); (*Iaa[0])=1.; //Iaa[0]=new ComplexMatrix(1,dim,1,dim);(*Iaa[0])=1; 
  for(int a=1;a<=(*clusterpars).nofatoms;++a)
@@ -128,6 +126,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
     }
     delete dum;
 
+    if(dim<200) {
     char ploutname[MAXNOFCHARINLINE];  sprintf(ploutname,"results/_%s.pl.out",sipffilename);
     FILE *PLOUT = fopen(ploutname,"w");
     for(int a=0; a<=nop; a++)
@@ -139,6 +138,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
        for(int i=1; i<=dim; i++) { fprintf(PLOUT,"%+8.5f",imag((*dum)[make_pair(i,1)])); for(int j=2; j<=dim; j++) fprintf(PLOUT," %+8.5f",imag((*dum)[make_pair(i,j)])); fprintf(PLOUT,"\n"); }
     }
     fclose(PLOUT);
+    }
     for(int i=0; i<cluster_Ia_ind0; i++) delete Iaa[i];
     for(int i=cluster_Ia_ind0; i<=nop; i++) if(rhs[i]==1) delete Iaa[i];
 
@@ -331,9 +331,9 @@ void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Vector & Jret,double & T, Vect
 
 
 Vector En(1,dim);
-Matrix zr(1,dim,1,dim);
-Matrix zc(1,dim,1,dim);
-cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
+//Matrix zr(1,dim,1,dim);
+ComplexMatrix zc(1,dim,1,dim);
+cluster_calcH_and_diagonalize(En,zc,Hxc,Hext);
 
 // calculate Z and wn (occupation probability)
      Vector wn(1,dim);double Zs;
@@ -379,7 +379,7 @@ cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
          // determine expectation value
          Jret(a)=0;
          for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-         {Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i); 
+         {Jret(a)+=wn[i]*aMb_real((*Ia[a]),zc,i,i); 
           // if(fabs(aMb_imag((*Ia[a]),zr,zc,i,i))>SMALL){fprintf(stderr,"ERROR module cluster - Icalc: expectation value imaginary\n");exit(EXIT_FAILURE);}
          }
         }break;
@@ -387,7 +387,7 @@ cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
         {// calculate expecation Value of m
          Jret(n)=0;
          for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-         {Jret(n)+=wn[i]*aMb_real((*cluster_M[n]),zr,zc,i,i); 
+         {Jret(n)+=wn[i]*aMb_real((*cluster_M[n]),zc,i,i); 
          }
         }break;
  case 3:for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
@@ -395,7 +395,7 @@ cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
          int index=(a-1)*3+n; // calculate expecation Value of m
          Jret(index)=0;
          for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-         {Jret(index)+=wn[i]*aMb_real((*cluster_M[index_M]),zr,zc,i,i); 
+         {Jret(index)+=wn[i]*aMb_real((*cluster_M[index_M]),zc,i,i); 
          }
         }break;
 }
@@ -436,9 +436,9 @@ if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
     Vector wn(1,dim);
     for(int i=1;i<=dim;++i){En(i)=real(ests(0,i));wn(i)=imag(ests(0,i));}
 
-    Matrix zr(1,dim,1,dim);
-    Matrix zc(1,dim,1,dim);
-    for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
+  //Matrix zr(1,dim,1,dim);
+  //Matrix zc(1,dim,1,dim);
+  //for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
 
     // calculate mat and delta for transition number tn
     // 2. set delta
@@ -463,18 +463,18 @@ if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
   //break;
    //case 2: rv=aMb_real((*cluster_M[a]),zr,zc,ii,jj,&aMb_tempV);   iv=aMb_imag((*cluster_M[a]),zr,zc,ii,jj,&aMb_tempV);    break;
    //case 3: rv=aMb_real((*cluster_M[a+3]),zr,zc,ii,jj,&aMb_tempV); iv=aMb_imag((*cluster_M[a+3]),zr,zc,ii,jj,&aMb_tempV);  break;
-    {case 1: iJj(a) = aMb_complex((*Ia[a]),zr,zc,ii,jj); break;
-     case 2: iJj(a) = aMb_complex((*cluster_M[a]),zr,zc,ii,jj); break;
-     case 3: iJj(a) = aMb_complex((*cluster_M[a+3]),zr,zc,ii,jj); break;
+    {case 1: iJj(a) = aMb_complex((*Ia[a]),ests,ii,jj); break;
+     case 2: iJj(a) = aMb_complex((*cluster_M[a]),ests,ii,jj); break;
+     case 3: iJj(a) = aMb_complex((*cluster_M[a+3]),ests,ii,jj); break;
     }
     // determine expectation value
     Jret(a)=0;
     if (subtractexpvalue==1&&ii==jj)
     { for(int i=1;i<=dim&&wn[i]>0.00001;++i)
      { switch(code)
-      {case 1: Jret(a)+=wn[i]*aMb_real((*Ia[a]),zr,zc,i,i);break;
-       case 2: Jret(a)+=wn[i]*aMb_real((*cluster_M[a]),zr,zc,i,i); break;
-       case 3: Jret(a)+=wn[i]*aMb_real((*cluster_M[a+3]),zr,zc,i,i);break;
+      {case 1: Jret(a)+=wn[i]*aMb_real((*Ia[a]),ests,i,i);break;
+       case 2: Jret(a)+=wn[i]*aMb_real((*cluster_M[a]),ests,i,i); break;
+       case 3: Jret(a)+=wn[i]*aMb_real((*cluster_M[a+3]),ests,i,i);break;
       }
      }
     }
@@ -542,9 +542,9 @@ void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,do
  fprintf(stderr,"# calculating eigenstates of cluster ...");
 (*eigenstates) = ComplexMatrix(0,dim,1,dim);
  Vector En(1,dim);
- Matrix zr(1,dim,1,dim);
- Matrix zc(1,dim,1,dim);
- cluster_calcH_and_diagonalize(En,zr,zc,Hxc,Hext);
+ //Matrix zr(1,dim,1,dim);
+ //ComplexMatrix zc(1,dim,1,dim);
+ cluster_calcH_and_diagonalize(En,(*eigenstates),Hxc,Hext);
      Vector wn(1,dim);double Zs;
      double x,y;
      x=Min(En);
@@ -555,21 +555,21 @@ void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,do
      Zs=Sum(wn);wn/=Zs;
  for(int i=1;i<=dim;++i)(*eigenstates)(0,i)=complex<double>(En(i),wn(i));
 
- for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j)
- {(*eigenstates)(i,j)=complex<double>(zr(i,j),zc(i,j));
- }
+ //for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j)
+ //{(*eigenstates)(i,j)=complex<double>(zr(i,j),zc(i,j));
+ //}
  fprintf(stderr," ... done\n");
 }
 
-void jjjpar::cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext)
-{Matrix H(1,dim,1,dim);Vector ZeroHxc(1,1);ZeroHxc=0;
- H=0; // initialize to zero
+void jjjpar::cluster_calcH_and_diagonalize(Vector & En,ComplexMatrix &zc,Vector & Hxc,Vector & Hext)
+{zsMat<double> H(dim,dim); Vector ZeroHxc(1,1);ZeroHxc=0;
+ H.zero(); // initialize to zero
 
  bool isHextsame=true; 
   for(int i=Hext.Lo(); i<=Hext.Hi(); i++) { if(fabs(Hext[i]-(*oldHext)[i])>DBL_EPSILON) { isHextsame=false; break; } }
  if(justinit) { isHextsame = false; justinit=false; }
  if(!isHextsame) {
-    *clusterH = 0;
+    (*clusterH).zero();
 // fill H matrix with sum over Hi of individual spins
 for (int i=1;i<=(*clusterpars).nofatoms;++i)
 {Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,ZeroHxc,Hext)); // here we need ZeroHxc because
@@ -594,7 +594,7 @@ for (int i=1;i<=(*clusterpars).nofatoms;++i)
   {int r=ix*mx+ai*mi+iz+1;
    int s=ix*mx+bi*mi+iz+1;
 //   printf("hello %i %i %i %i\n",r,s,ai,bi);
-   (*clusterH)(r,s)+=Hi(ai+1,bi+1);
+   if(r>=s) (*clusterH)(r,s)+=Hi(ai+1,bi+1); else (*clusterH)(s,r)+=complex<double>(0.,Hi(ai+1,bi+1));
   }
 }
 // myPrintMatrix(stdout,H);
@@ -662,7 +662,7 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
    int s=ix*mx+bi*mi+iy*my+bj*mj+iz+1;
    int k=ai*dj+aj+1;// ??
    int l=bi*dj+bj+1;// ??
-   (*clusterH)(r,s)+=SinS(k,l);
+   if(r>=s) (*clusterH)(r,s)+=SinS(k,l); else (*clusterH)(s,r)+=complex<double>(0.,SinS(k,l));
 //printf("hello %i %i %i %i %g %g\n",r,s,k,l,H(r,s),SinS(k,l));
   } 
 }
@@ -670,30 +670,31 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
 
 // insert exchange field
 //for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]);
-for(int i =1;i<=Hxc.Hi();++i)H-=(Hxc(i)*(*Ia[i])).fp_matrix();
-//Matrix mIa; for(int i =1;i<=Hxc.Hi();++i) { mIa = (*Ia[i]).fp_matrix(); H-=Hxc(i)*mIa; }
-//Matrix mIa(1,dim,1,dim); for(int i =1;i<=Hxc.Hi();++i) { mIa = (*Ia[i]).fp_matrix(); myPrintMatrix(stdout,mIa); printf("----\n"); }
-/*
-//Matrix mIa(1,dim,1,dim);
-Matrix tIa(1,dim,1,dim);
-for(int ii =1;ii<=Hxc.Hi();++ii) { tIa = 0;
-      for(int i=1;i<=dim;++i) for(int j=1;j<=dim;++j) {
-         if(i<j) { tIa(i,j) = imag((*Ia[ii])[make_pair(j,i)]); }
-         else    { tIa(i,j) = real((*Ia[ii])[make_pair(i,j)]); } }
-H-=Hxc(ii)*tIa; 
-//mIa = 0; mIa = (*Ia[ii]).fp_matrix();
-//myPrintMatrix(stdout,tIa); printf("----\n");
-}*/
 
 // diagonalize H
-int sort=1;int maxiter=1000000;
+//int sort=1;int maxiter=1000000;
+//Matrix Hp = H.fp_matrix();
 // myPrintMatrix(stdout,H);
 //printf("now diagonalise\n");
-EigenSystemHermitean (H,En,zr,zc,sort,maxiter);
+//EigenSystemHermitean (Hp,En,zr,zc,sort,maxiter);
 //printf("Eigenvector real\n");
 // myPrintMatrix(stdout,zr);
 //printf("Eigenvector imag\n"); 
 // myPrintMatrix(stdout,zc);
+
+{
+// clock_t start,end; start = clock();
+   char jobz = 'V', uplo = 'U'; int lda=dim, n=dim, info=0, lwork=4*n;
+   complexdouble *zwork=0, *zm=0; zwork = new complexdouble[lwork];
+   int lrwork = 3*n-2; double *rwork = new double[lrwork];
+   for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]); zm = new complexdouble[dim*dim]; H.h_array((std::complex<double>*)zm);
+   F77NAME(zheev)(&jobz, &uplo, &n, zm, &lda, &En[1], zwork, &lwork, rwork, &info);
+   for (int i=0; i<dim; i++) for (int j=0; j<dim; j++) { zc(i+1,j+1)=std::complex<double>(zm[dim*j+i].r,zm[dim*j+i].i); }
+   delete []rwork; delete[]zm; delete []zwork;
+   if(info!=0) { fprintf(stderr,"cluster_module:zheev return error %d\n",info); exit(-1); }
+// end = clock(); printf("zheev took %f s\n",(double)(end-start)/CLOCKS_PER_SEC);
+}
+
 
 }
 
@@ -705,18 +706,18 @@ void jjjpar::cluster_Micalc (Vector &mom,ComplexMatrix & ests)
 {
 Vector En(1,dim);
 Vector wn(1,dim);
-Matrix zr(1,dim,1,dim);
-Matrix zc(1,dim,1,dim);
+//Matrix zr(1,dim,1,dim);
+//Matrix zc(1,dim,1,dim);
  for(int i=1;i<=dim;++i){En(i)=real(ests(0,i));wn(i)=imag(ests(0,i));}
 
-   for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
+   //for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
 
 for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
         {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
          int index=(a-1)*3+n; // calculate expecation Value of m
          mom(index)=0;
          for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-         {mom(index)+=wn[i]*aMb_real((*cluster_M[index_M]),zr,zc,i,i); 
+         {mom(index)+=wn[i]*aMb_real((*cluster_M[index_M]),ests,i,i); 
          }
         }
 }

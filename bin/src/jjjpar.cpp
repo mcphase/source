@@ -11,6 +11,8 @@
 #include "../../version"
 #include<par.hpp>
 
+#include<ctime>
+
 #define MAXNOFNUMBERSINLINE 2500
 #define MAXNOFCHARINLINE 7024
 
@@ -692,7 +694,7 @@ jjjpar::jjjpar (const jjjpar & pp)
                             cluster_M[index_M]=new zsMat<double>(dim,dim);
                             (*cluster_M[index_M])=(*pp.cluster_M[index_M]);
                            }                        
-                          clusterH = new Matrix(1,dim,1,dim); *clusterH = *pp.clusterH; 
+                          clusterH = new zsMat<double>(dim,dim); *clusterH = *pp.clusterH; 
                           oldHext = new Vector(1,3); *oldHext = *pp.oldHext;
                           }
   
