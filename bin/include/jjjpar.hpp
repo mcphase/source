@@ -33,6 +33,21 @@ typedef void fnc_t();
 #define ORBMOMDENS_EV_DIM 49  // eigenvector dimension for orbmomdensity oscillation
 #define PHONON_EV_DIM 3 // phonon eigenvector dimension ?? check if this is sensible ??
 
+// Class to store work matrices for iterative eigensolvers (e.g. ARPACK, FEAST) - since these routines are called 
+// often each MF iterations and deleting/allocating them many times seems to give memory errors.
+class iterwork {
+  public:
+     complexdouble *zwork;
+     double *dwork;
+     int *iwork, zsize, dsize, isize;
+     iterwork(): zsize(0), dsize(0), isize(0) {}; 
+     iterwork(int lzwork, int ldwork, int liwork);
+    ~iterwork(); 
+     void realloc_z(int lzwork);
+     void realloc_d(int ldwork);
+     void realloc_i(int liwork);
+};
+
 class par;
 class jjjpar
 {
@@ -365,7 +380,9 @@ private:
   void cluster_Iaa(zsMat<double> *Iai, int a, int i);
   zsMat<double> ** Ia; zsMat<double> ** cluster_M; 
   zsMat<double> *clusterH; Vector *oldHext; bool justinit; // Added to cache Hamiltonian matrices between iterations when Hext=same
-  int * dnn; int dim; bool useperl, sparsemat;
+  int * dnn; int dim; bool useperl;
+  iterwork *workspace;
+  double truncate; int fdim; bool is1sttrunc; complexdouble *zm;
 
 };
 

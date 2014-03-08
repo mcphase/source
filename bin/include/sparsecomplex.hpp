@@ -76,7 +76,9 @@ template <class T> class zsMat {
      void reshape(int r, int c) { _r = r; _c = c; };                    // Changes shape without changing entries!
      std::string display_full() const;                                  // Outputs a string of the full matrix
      std::complex<T> *f_array() const;                                  // Returns matrix as a Fortran style 2D array
+     void f_array(std::complex<T>* retval) const;                       // Returns matrix as a Fortran style 2D array (pre-allocated)
      std::complex<T> *f_array_tr() const;                               // Returns matrix as a Fortran style 2D array
+     std::complex<T> *h_array() const;                                  // Returns matrix as a Fortran style 2D array
      void h_array(std::complex<T>* retval) const;                       // Returns matrix as a Fortran style 2D array (pre-allocated)
      T* cp_array() const;                                               // Returns Hermitian matrix as a C-style packed 2D array
      T* fp_array() const;                                               // Returns Hermitian matrix as a Fortran packed 2D array
@@ -385,6 +387,33 @@ template <class T> std::complex<T>* zsMat<T>::f_array() const   // Returns matri
    for (i=tmp_ls.begin(); i!=tmp_ls.end(); i++) 
       retval[_r*(i->first.c-1)+(i->first.r-1)] = i->second; 
 
+   return retval;
+}
+template <class T> void zsMat<T>::f_array(std::complex<T>*retval) const   // Assumes matrix already allocated
+{
+   // Fortran 2D arrays are column-major dense contiguous blocks of memory, unlike a 2D C-array which is a 1D array
+   // of pointers to other 1D arrays. So effectively what we output is a pointer to a N*M length 1D C-array.
+   typename std::map<_ind,std::complex<T> >::iterator i;
+   std::map<_ind,std::complex<T> > tmp_ls = _ls;
+   // Allocates an _r*_c array and initiallises all elements to zero.
+   memset(retval,0,_r*_c*sizeof(std::complex<T>));
+   for (i=tmp_ls.begin(); i!=tmp_ls.end(); i++) 
+      retval[_r*(i->first.c-1)+(i->first.r-1)] = i->second; 
+}
+template <class T> std::complex<T>* zsMat<T>::h_array() const   // Returns matrix as a Fortran style 2D array
+{
+   std::complex<T> *retval;
+   typename std::map<_ind,std::complex<T> >::iterator i;
+   std::map<_ind,std::complex<T> > tmp_ls = _ls;
+   retval = (std::complex<T>*) calloc(_r*_c,sizeof(std::complex<T>));
+   // _Assume_(!) the matrix is Hermitian and only loop through the lower triangle.
+   for (int c=1; c<=_c; c++)
+      for (i=tmp_ls.lower_bound(_ind(c,c)); i!=tmp_ls.lower_bound(_ind(_r+1,c)); i++)
+      {
+         retval[_r*(i->first.r-1)+(i->first.c-1)] = conj(i->second);
+         if(i->first.c!=i->first.r)
+            retval[_c*(i->first.c-1)+(i->first.r-1)] = i->second;
+      }
    return retval;
 }
 template <class T> void zsMat<T>::h_array(std::complex<T>* retval) const   // Assumes matrix already allocated
