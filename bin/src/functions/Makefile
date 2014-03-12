@@ -47,10 +47,10 @@ INCLUDE= ../../include
 .SUFFIXES: .cc .o
 
 .c.o: 
-	${CC} -c ${COPTS} -I ${INCLUDE} ${BLAS} $<
+	${CC} -c ${COPTS} -I ${INCLUDE} ${BLAS} -I../../ic1ion_module $<
 
 .cc.o: 
-	${CCC} -c ${CCOPTS} -I ${INCLUDE} ${BLAS} $<
+	${CCC} -c ${CCOPTS} -I ${INCLUDE} ${BLAS} -I../../ic1ion_module $<
 
 
 ###########################################################################

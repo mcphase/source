@@ -86,7 +86,7 @@ SOBJ  = isamax.o sasum.o saxpy.o scopy.o sdot.o  snrm2.o srot.o  srotg.o\
 
 DOBJ  = idamax.o dasum.o daxpy.o dcopy.o ddot.o  dnrm2.o drot.o  drotg.o\
         dscal.o  dswap.o dgemv.o dger.o  dsymv.o dsyr2.o dtrmm.o dgbmv.o\
-	dsyr2k.o dtrmv.o 
+	dsyr2k.o dtrmv.o dcabs1.o 
 
 COBJ  = icamax.o caxpy.o ccopy.o cdotc.o cdotu.o cgbmv.o  cgemv.o cgerc.o\
         cgeru.o  cscal.o csscal.o cswap.o ctrmm.o ctrsv.o scasum.o scnrm2.o\
@@ -95,7 +95,7 @@ COBJ  = icamax.o caxpy.o ccopy.o cdotc.o cdotu.o cgbmv.o  cgemv.o cgerc.o\
 ZOBJ  = izamax.o zaxpy.o zcopy.o zdotc.o zdotu.o zgbmv.o  zgemv.o zgerc.o\
         zgeru.o zscal.o zdscal.o zswap.o ztrmm.o ztrsv.o dzasum.o dznrm2.o\
         idamax.o dscal.o zhemm.o\
-        zher2k.o zhemv.o zher2.o ztrmv.o dcabs1.o
+        zher2k.o zhemv.o zher2.o ztrmv.o zherk.o zdrot.o
 
 # The following BLAS routine are not required by ARPACK source code.
 # They are called by the driver programs in the EXAMPLES directory.

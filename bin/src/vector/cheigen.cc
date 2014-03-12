@@ -18,15 +18,6 @@
 #include <cstdio>
 
 //----------------------------------------------------------------------------//
-#define F77NAME(x) x##_
-extern "C"
-{
-void F77NAME(dstegr)(char *jobz, char *range, int *n, double *d, double *e,
-                      double *vl, double *vu, int *il, int *iu, double *abstol, int *numfnd, double *eigval,
-                      double *z, int *ldz, int *isuppz, double *work,
-                      int *lwork, int *iwork, int *liwork, int *info);
-}
-
 void EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
 			   int sort, int maxiter)
 //

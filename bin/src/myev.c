@@ -95,8 +95,8 @@ void myPrintComplexNumber(FILE * file,complex<double> & M)
 
 void myEigenValuesHermitean (ComplexMatrix & M,Vector & lambda,int & sort,int & maxiter)
 { // this sub diagonalizes M and puts eigenvalues to lambda
-  Matrix mat1(M.Rlo(),M.Rhi(),M.Clo(),M.Chi());
-  int i1,j1;
+//Matrix mat1(M.Rlo(),M.Rhi(),M.Clo(),M.Chi());
+//int i1,j1;
   checkHerm(M);
 //  Driver routine to compute the  eigenvalues and normalized eigenvectors 
 //  of a complex Hermitian matrix z.The real parts of the elements must be
@@ -113,13 +113,23 @@ void myEigenValuesHermitean (ComplexMatrix & M,Vector & lambda,int & sort,int & 
 // 			   int sort, int maxiter)
 
   // put matrix to format needed for library diagonalize function
-   for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=M.Chi();++j1){
+/* for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=M.Chi();++j1){
     mat1(j1,i1)=imag(M(i1,j1)); 
     mat1(i1,j1)=real(M(i1,j1));
    }}
    EigenValuesHermitean (mat1,lambda,sort,maxiter);
    return;
-
+*/
+  // Modified to use LAPACK routines instead - MDL 131101
+  int n=M.Rhi(), lda = n, info = 0, lwork = 4*n, il, iu, numfnd, ldz=n, *isuppz = new int[2*n];
+  int lrwork = 24*n,liwork=10*n, *iwork = new int[liwork];
+  char jobz = 'N', uplo = 'U', range = 'A';
+  complexdouble *zwork=0, *zm; zwork = new complexdouble[lwork];
+  zm = new complexdouble[n*n]; memcpy(zm,&M[1][1],n*n*sizeof(complexdouble));
+  double vl, vu, abstol = 0.00001, *rwork = new double[lrwork];
+  F77NAME(zheevr)(&jobz, &range, &uplo, &n, zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, &lambda[1],
+          zm, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
+  delete []isuppz; delete []rwork; delete []iwork; delete []zwork; delete []zm;
 }
 
 void myEigenSystemHermitean (ComplexMatrix & M,Vector & lambda,ComplexMatrix & l,int & sort,int & maxiter)
@@ -133,7 +143,7 @@ void myEigenSystemHermitean (ComplexMatrix & M,Vector & lambda,ComplexMatrix & l
    checkHerm(M);
 
   // put matrix to format needed for library diagonalize function
-   for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=M.Chi();++j1){
+   for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=i1;++j1){
     mat1(j1,i1)=imag(M(i1,j1)); 
     mat1(i1,j1)=real(M(i1,j1));
    }}
@@ -155,19 +165,39 @@ void myEigenSystemHermitean (ComplexMatrix & M,Vector & lambda,ComplexMatrix & l
   // l=li;l*=ii;l+=lr;
 //  l=ComplexMatrix(li,lr); ...  ... changed 11.4.2011 because this is a bug and gives complex conjugate eigenvectors, other programs changed accordingly
   l=ComplexMatrix(lr,li);
+/*
+  printf("amr=["); for(int i=1; i<=M.Rhi(); i++) { for(int j=1; j<=M.Rhi(); j++) printf("%g ",real(M(i,j))); printf(";\n"); } printf("];\n");
+  printf("ami=["); for(int i=1; i<=M.Rhi(); i++) { for(int j=1; j<=M.Rhi(); j++) printf("%g ",imag(M(i,j))); printf(";\n"); } printf("];\n");
+  printf("mpe=["); for(int i=1; i<=M.Rhi(); i++) printf("%g ",lambda[i]); printf("];\n");
+  printf("mmr=["); for(int i=1; i<=M.Rhi(); i++) { for(int j=1; j<=M.Rhi(); j++) printf("%g ",real(l(i,j))); printf(";\n"); } printf("];\n");
+  printf("mmi=["); for(int i=1; i<=M.Rhi(); i++) { for(int j=1; j<=M.Rhi(); j++) printf("%g ",imag(l(i,j))); printf(";\n"); } printf("];\n");
+  // Modified to use LAPACK routines instead - MDL 131101
+  int n=M.Rhi(), lda = n, info = 0, lwork = 4*n, il, iu, numfnd, ldz=n, *isuppz = new int[2*n];
+  int lrwork = 24*n,liwork=10*n, *iwork = new int[liwork];
+  char jobz = 'V', uplo = 'U', range = 'A';
+  complexdouble *zwork=0, *zm; zwork = new complexdouble[lwork];
+  double vl, vu, abstol = 0.00001, *rwork = new double[lrwork];
+  zm = new complexdouble[n*n]; memcpy(zm,&M[1][1],n*n*sizeof(complexdouble));
+  F77NAME(zheevr)(&jobz, &range, &uplo, &n, zm, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, &lambda[1],
+          (complexdouble*)&l[1][1], &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info); 
+  l=l.Hermitean();
+  printf("lpe=["); for(int i=1; i<=M.Rhi(); i++) printf("%g ",lambda[i]); printf("];\n");
+  printf("lmr=["); for(int i=1; i<=M.Rhi(); i++) { for(int j=1; j<=M.Rhi(); j++) printf("%g ",real(l(i,j))); printf(";\n"); } printf("];\n");
+  printf("lmi=["); for(int i=1; i<=M.Rhi(); i++) { for(int j=1; j<=M.Rhi(); j++) printf("%g ",imag(l(i,j))); printf(";\n"); } printf("];\n");
+  delete []isuppz; delete []rwork; delete []iwork; delete []zwork; delete []zm; */
    return;
 }
 
 
 int myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector & e, ComplexMatrix & T, int & sort, int & maxiter)
 { // this sub diagonalizes M and puts eigenvalues to lambda, the eigenvectors to l
-  Matrix mata(a.Rlo(),a.Rhi(),a.Clo(),a.Chi());
+/*Matrix mata(a.Rlo(),a.Rhi(),a.Clo(),a.Chi());
   Matrix matb(b.Rlo(),b.Rhi(),b.Clo(),b.Chi());
   Matrix zr(T.Rlo(),T.Rhi(),T.Clo(),T.Chi());
   Matrix zi(T.Rlo(),T.Rhi(),T.Clo(),T.Chi());
   ComplexVector x(T.Rlo(),T.Rhi());
   complex<double> ii(0,1);  
-  int i1,j1,retval=0;
+*/int /*i1,j1,*/retval=0;
 
   //check if a,b it is hermitean
   bool isherm;
@@ -175,7 +205,7 @@ int myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector & 
   isherm = checkHerm(b,false); if(!isherm) { fprintf(stderr,"myEigenSystemHermiteanGeneral: Matrix b is not Hermitian\n"); retval += 2; }
 
   // put matrix to format needed for library diagonalize function
-   for(i1=a.Rlo();i1<=a.Rhi();++i1){for(j1=a.Clo();j1<=a.Chi();++j1){
+/* for(i1=a.Rlo();i1<=a.Rhi();++i1){for(j1=a.Clo();j1<=a.Chi();++j1){
     mata(j1,i1)=imag(a(i1,j1)); 
     mata(i1,j1)=real(a(i1,j1));
    }}
@@ -223,7 +253,19 @@ EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
 //    x=x/Norm(x);
 //    for(j1=T.Rlo();j1<=T.Rhi();++j1) {T(j1,i1)=x(j1);}
 //   }
+*/
+  // Modified to use LAPACK routines instead - MDL 131101
+  int itype=1, n=a.Rhi(), lda = n, ldb = n, lwork = 2*n+n*n, lrwork = 1+5*n+2*n*n, liwork=3+5*n, *iwork = new int[liwork];
+  char jobz = 'V', uplo = 'U', range = 'A';
+  complexdouble *zwork=0, *zb; zwork = new complexdouble[lwork];
+  memcpy(&T[1][1],&a[1][1],n*n*sizeof(complexdouble));
+  zb = new complexdouble[n*n]; memcpy(zb,&b[1][1],n*n*sizeof(complexdouble));
+  double *rwork = new double[lrwork];
+  F77NAME(zhegvd)(&itype, &jobz, &uplo, &n, (complexdouble*)&T[1][1], &lda, zb, &ldb, &e[1], zwork, &lwork, rwork, &lrwork, 
+                  iwork, &liwork, &retval);
+  T=T.Hermitean();
+  delete []rwork; delete []iwork; delete []zwork; delete []zb;
+  if(retval>n) { fprintf(stderr,"Chreduce: matrix B is not positiv definite - possible reason: magnetic structure in mcdisp.mf  metastable.\n"); exit(0); }
 
    return retval;
-
 }

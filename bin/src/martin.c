@@ -626,13 +626,14 @@ Matrix herm_dirprod(Matrix  R, Matrix  T) // direct product
 return P;
 }
 
-double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib) // transition matrix element
+double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib  // transition matrix element
+               ,Matrix *V)
 {double real=0.0;                                                    // <a|M|b>  a,b are columns ia and ib
                                                                      // of zr+izc
-
+/*
   if(M.Rhi()!=M.Chi()){fprintf(stderr,"Error martin.c aMb_real: Matrix M not square\n");exit(EXIT_FAILURE);}
 
-  if(M.Rhi()<20) {
+//if(M.Rhi()<20) {
   for(int a=1;a<=M.Rhi();++a)
   {for(int b=1;b<a;++b)
    {real+=zr(a,ia)*M(a,b)*zr(b,ib)-zr(a,ia)*M(b,a)*zc(b,ib)+zc(a,ia)*M(b,a)*zr(b,ib)+zc(a,ia)*M(a,b)*zc(b,ib);
@@ -678,11 +679,88 @@ double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib) // transiti
 
   delete[]zra; delete[]zca; delete[]zrb; delete[]zcb; delete[]rv;
  }
+*/
+ // Use library routine for matrix*vector multiplication. We want: a'*M*b where a,b are complex. M is Hermitian
+ // The real part is: (R[M]*R[a].R[b])-(I[M]*R[a].I[b])+(I[M]*I[a].R[b])+(R[M]*I[a].I[b])
+ // The imag part is: (I[M]*I[a].I[b])-(R[M]*I[a].R[b])+(I[M]*R[a].R[b])+(R[M]*R[a].I[b])
+ // where R[] and I[] are the real and imaginary parts, and "." is the dot product
+ // We can use the BLAS function DSYMV to compute R[M]*R[a] etc. quickly, and save these vectors to a temporary
+ //   vector for the use of the aMb_imag() function if needed. Then use the BLAS function DDOT for the dot product.
+ // Actually, since M is stored in packed format with R[M] in the upper triangle and I[M] in the (strict) lower
+ //   triangle, to get I[M]*R[a] we need to do two multiplication: L[M]*R[a]-U[M]*R[a]==L[M]*R[a]-(L[M]')*R[a]
+ //   where L[M] is the (strict) lower triangle, and U[M] is the (strict) upper triangle (diagonal of I[M] is zero).
+ //   This triangle multiplication can be done with the BLAS function DTRMV
+// Vector *rMa, *iMa;
+// rMa = new Vector(1,M.Rhi());
+// iMa = new Vector(1,M.Rhi());
+//         rM*ra.rb - iM*ra.ib + iM*ia.rb + rM*ia.ib - real
+//         iM*ia.ib - rM*ia.rb + iM*ra.rb + rM*ra.ib - imag
+
+/*for(int a=1;a<=M.Rhi();++a) 
+    for(int b=1;b<=M.Rhi();++b) if(fabs(M(a,b))>1e-3) printf("(%i,%i)=%f\n",a,b,M(a,b));
+  printf("---\n");*/
+
+//atrix Ma(1,6,1,M.Rhi()); // Matrix rows are: R[M]*R[a], R[M]*I[A], L[M]*R[a], U[M]*R[a], L[M]*I[a], U[M]*I[a]
+ Matrix *Ma; if(V==0) Ma = new Matrix(1,6,1,M.Rhi()); else Ma = V;
+ char up = 'U', lo = 'L', tr = 'T', nt = 'N'; int n=M.Rhi(), inc=1; double alpha=1., beta=0.;//, r2=0., valr=real;
+ // DTRMV does the operation: x=M*x not y=M*x+y so we need to copy the elements of <a| into new vectors
+//or(int i=1; i<=M.Rhi(); i++) { Ma(3,i)=zr(i,ia); Ma(4,i)=zr(i,ia); Ma(5,i)=zc(i,ia); Ma(6,i)=zc(i,ia); } 
+//or(int i=1; i<=M.Rhi(); i++) { Ma[3][i]=zr[i][ia]; Ma[4][i]=zr[i][ia]; Ma[5][i]=zc[i][ia]; Ma[6][i]=zc[i][ia]; } 
+ for(int i=1; i<=M.Rhi(); i++) { (*Ma)(3,i)=zr(i,ia);   (*Ma)(5,i)=zc(i,ia); } 
+ for(int i=1; i<=M.Rhi(); i++) { (*Ma)(4,i)=(*Ma)(3,i); (*Ma)(6,i)=(*Ma)(5,i); } 
+//emcpy(&M[4][1],&M[3][1],n*sizeof(double)); memcpy(&M[6][1],&M[5][1],n*sizeof(double));
+ F77NAME(dsymv)(&up, &n, &alpha, (double*)&M[1][1], &n, (double*)&zr[1][ia], &n, &beta, (double*)&(*Ma)[1][1], &inc);
+ F77NAME(dsymv)(&up, &n, &alpha, (double*)&M[1][1], &n, (double*)&zc[1][ia], &n, &beta, (double*)&(*Ma)[2][1], &inc);
+ Vector di(1,M.Rhi()); for(int i=1; i<=M.Rhi(); i++) { di[i]=M(i,i); M(i,i)=0.; }
+ F77NAME(dtrmv)(&lo, &nt, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[3][1], &inc);  // L[M]*R[a]
+ F77NAME(dtrmv)(&lo, &tr, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[4][1], &inc);  // L[M]'*R[a]
+ F77NAME(dtrmv)(&lo, &nt, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[5][1], &inc);  // L[M]*I[a]
+ F77NAME(dtrmv)(&lo, &tr, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[6][1], &inc);  // L[M]'*I[a]
+ for(int i=1; i<=M.Rhi(); i++) M(i,i)=di[i]; 
+#ifdef _G77 
+ F77NAME(ddot)(&real, &n, (double*)&(*Ma)[1][1], &inc, (double*)&zr[1][ib], &n);              // R[M]*R[a].R[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[3][1], &inc, (double*)&zc[1][ib], &n); real += r2;  // L[M]*R[a].I[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[4][1], &inc, (double*)&zc[1][ib], &n); real -= r2;  // U[M]*R[a].I[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[5][1], &inc, (double*)&zr[1][ib], &n); real -= r2;  // L[M]*I[a].R[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[6][1], &inc, (double*)&zr[1][ib], &n); real += r2;  // U[M]*I[a].R[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[2][1], &inc, (double*)&zc[1][ib], &n); real += r2;  // R[M]*I[a].I[b]
+#else
+ real = F77NAME(ddot)(&n, (double*)&(*Ma)[1][1], &inc, (double*)&zr[1][ib], &n)
+       +F77NAME(ddot)(&n, (double*)&(*Ma)[3][1], &inc, (double*)&zc[1][ib], &n)
+       -F77NAME(ddot)(&n, (double*)&(*Ma)[4][1], &inc, (double*)&zc[1][ib], &n)
+       -F77NAME(ddot)(&n, (double*)&(*Ma)[5][1], &inc, (double*)&zr[1][ib], &n)
+       +F77NAME(ddot)(&n, (double*)&(*Ma)[6][1], &inc, (double*)&zr[1][ib], &n)
+       +F77NAME(ddot)(&n, (double*)&(*Ma)[2][1], &inc, (double*)&zc[1][ib], &n);
+#endif
+// delete rMa; delete iMa;
+ if(V==0) delete Ma;
+
+// char up = 'L'; int n=M.Rhi(), inc=1;
+/*
+ printf("M=["); for(int i=1; i<=n; i++) { for(int j=1; j<=n; j++) printf("%g ",M(i,j)); printf(";\n"); } printf("];");
+ printf("ar=[");for(int i=1; i<=n; i++) printf("%g ",zr(i,ia)); printf("];\n");
+ printf("ai=[");for(int i=1; i<=n; i++) printf("%g ",zc(i,ia)); printf("];\n");
+ printf("br=[");for(int i=1; i<=n; i++) printf("%g ",zr(i,ib)); printf("];\n");
+ printf("bi=[");for(int i=1; i<=n; i++) printf("%g ",zc(i,ib)); printf("];\n");
+ printf("zM=triu(M)+sqrt(-1)*tril(M,1)'; zM=zM+triu(M,1)'; a=ar+ai*sqrt(-1); b=br+bi*sqrt(-1);\n"); */
+// printf("orig_real=%f;\t",real);
+/*
+ complexdouble zM[n*n], zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
+ for(int i=1; i<=n; i++) { 
+    za[i-1].r = zr(i,ia); za[i-1].i = zc(i,ia); zb[i-1].r = zr(i,ib); zb[i-1].i = zc(i,ib);
+    for(int j=1; j<=n; j++)zM[(i-1)*n+j-1].r=M(j,i);
+    for(int j=1; j<n; j++) zM[(i-1)*n+j-1].i=M(i,j); }
+ F77NAME(zhemv)(&up, &n, &alpha, zM, &n, zb, &inc, &beta, zV, &inc);
+ val = F77NAME(zdotc)(&n, za, &inc, zV, &inc); real = val.r;
+// printf("lapa=%f+%f*sqrt(-1);\n",real,val.i);
+ printf("%f\t%f\t%f\n",real,valr,real-valr);
+*/
  return real;
 }
 
-double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib)
+double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib, Matrix*V)
 {double imag=0.0;
+/*
  if(M.Rhi()!=M.Chi()){fprintf(stderr,"Error martin.c aMb_imag: Matrix M not square\n");exit(EXIT_FAILURE);}
   for(int a=1;a<=M.Rhi();++a)
   {for(int b=1;b<a;++b)
@@ -694,10 +772,153 @@ double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib)
    }
 
   }
+*/
+/* printf("M=["); for(int i=1; i<=M.Rhi(); i++) { for(int j=1; j<=M.Rhi(); j++) printf("%g ",M(i,j)); printf(";\n"); } printf("];");
+ printf("ar=[");for(int i=1; i<=M.Rhi(); i++) printf("%g ",zr(i,ia)); printf("];\n");
+ printf("ai=[");for(int i=1; i<=M.Rhi(); i++) printf("%g ",zc(i,ia)); printf("];\n");
+ printf("br=[");for(int i=1; i<=M.Rhi(); i++) printf("%g ",zr(i,ib)); printf("];\n");
+ printf("bi=[");for(int i=1; i<=M.Rhi(); i++) printf("%g ",zc(i,ib)); printf("];\n");
+ printf("zM=triu(M)+sqrt(-1)*tril(M,1)'; zM=zM+triu(M,1)'; a=ar+ai*sqrt(-1); b=br+bi*sqrt(-1);\n"); */
+  
+/*for(int a=1;a<=M.Rhi();++a) 
+    for(int b=1;b<=M.Rhi();++b) if(fabs(M(a,b))>1e-3) printf("(%i,%i)=%f\n",a,b,M(a,b));
+  printf("---\n"); */
 
+// Matrix Ma(1,6,1,M.Rhi()); // Matrix rows are: R[M]*R[a], R[M]*I[A], L[M]*R[a], U[M]*R[a], L[M]*I[a], U[M]*I[a]
+ // Checks if matrix vector product computed in a previous aMb_real() run
+ Matrix *Ma; 
+ char up = 'U', lo = 'L', tr = 'T', nt = 'N'; int n=M.Rhi(), inc=1; double alpha=1., beta=0.;// r2=0.,vali=imag;
+ if(V==0) { Ma = new Matrix(1,6,1,M.Rhi()); 
+ // DTRMV does the operation: x=M*x not y=M*x+y so we need to copy the elements of <a| into new vectors
+ for(int i=1; i<=M.Rhi(); i++) { (*Ma)(3,i)=zr(i,ia);   (*Ma)(5,i)=zc(i,ia); } 
+ for(int i=1; i<=M.Rhi(); i++) { (*Ma)(4,i)=(*Ma)(3,i); (*Ma)(6,i)=(*Ma)(5,i); } 
+//emcpy(&M[4][1],&M[3][1],n*sizeof(double)); memcpy(&M[6][1],&M[5][1],n*sizeof(double));
+ F77NAME(dsymv)(&up, &n, &alpha, (double*)&M[1][1], &n, (double*)&zr[1][ia], &n, &beta, (double*)&(*Ma)[1][1], &inc);
+ F77NAME(dsymv)(&up, &n, &alpha, (double*)&M[1][1], &n, (double*)&zc[1][ia], &n, &beta, (double*)&(*Ma)[2][1], &inc);
+ Vector di(1,M.Rhi()); for(int i=1; i<=M.Rhi(); i++) { di[i]=M(i,i); M(i,i)=0.; }
+ F77NAME(dtrmv)(&lo, &nt, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[3][1], &inc);  // L[M]*R[a]
+ F77NAME(dtrmv)(&lo, &tr, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[4][1], &inc);  // L[M]'*R[a]
+ F77NAME(dtrmv)(&lo, &nt, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[5][1], &inc);  // L[M]*I[a]
+ F77NAME(dtrmv)(&lo, &tr, &nt, &n, (double*)&M[1][1], &n, (double*)&(*Ma)[6][1], &inc);  // L[M]'*I[a]
+ for(int i=1; i<=M.Rhi(); i++) M(i,i)=di[i]; 
+ } else Ma = V;
+#ifdef _G77 
+ F77NAME(ddot)(&real, &n, (double*)&(*Ma)[1][1], &inc, (double*)&zr[1][ib], &n);              // R[M]*R[a].R[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[3][1], &inc, (double*)&zc[1][ib], &n); real -= r2;  // L[M]*R[a].I[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[4][1], &inc, (double*)&zc[1][ib], &n); real += r2;  // U[M]*R[a].I[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[5][1], &inc, (double*)&zr[1][ib], &n); real -= r2;  // L[M]*I[a].R[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[6][1], &inc, (double*)&zr[1][ib], &n); real += r2;  // U[M]*I[a].R[b]
+ F77NAME(ddot)(&r2,   &n, (double*)&(*Ma)[2][1], &inc, (double*)&zc[1][ib], &n); real -= r2;  // R[M]*I[a].I[b]
+#else
+//         rM*ra.rb - iM*ra.ib + iM*ia.rb + rM*ia.ib - real
+//         rM*ra.ib + iM*ra.rb + iM*ia.ib - rM*ia.rb
+//         iM*ia.ib - rM*ia.rb + iM*ra.rb + rM*ra.ib - imag
+ imag = F77NAME(ddot)(&n, (double*)&(*Ma)[1][1], &inc, (double*)&zc[1][ib], &n)
+       -F77NAME(ddot)(&n, (double*)&(*Ma)[3][1], &inc, (double*)&zr[1][ib], &n)
+       +F77NAME(ddot)(&n, (double*)&(*Ma)[4][1], &inc, (double*)&zr[1][ib], &n)
+       -F77NAME(ddot)(&n, (double*)&(*Ma)[5][1], &inc, (double*)&zc[1][ib], &n)
+       +F77NAME(ddot)(&n, (double*)&(*Ma)[6][1], &inc, (double*)&zc[1][ib], &n)
+       -F77NAME(ddot)(&n, (double*)&(*Ma)[2][1], &inc, (double*)&zr[1][ib], &n);
+#endif
+// printf("%f\t%f\t%f\n",imag,vali,imag-vali);
+/*
+ char up = 'L'; int n=M.Rhi(), inc=1;
+ complexdouble zM[n*n], zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
+ for(int i=1; i<=n; i++) { 
+    za[i-1].r = zr(i,ia); za[i-1].i = zc(i,ia); zb[i-1].r = zr(i,ib); zb[i-1].i = zc(i,ib);
+    for(int j=1; j<=n; j++)zM[(i-1)*n+j-1].r=M(j,i);
+    for(int j=1; j<n; j++) zM[(i-1)*n+j-1].i=M(i,j); }
+ printf("Zr=["); for(int i=1; i<=n; i++) { for(int j=1; j<=n; j++) printf("%g ",zM[(i-1)*n+j-1].r); printf(";\n"); } printf("];");
+ printf("Zi=["); for(int i=1; i<=n; i++) { for(int j=1; j<=n; j++) printf("%g ",zM[(i-1)*n+j-1].i); printf(";\n"); } printf("];");
+ F77NAME(zhemv)(&up, &n, &alpha, zM, &n, zb, &inc, &beta, zV, &inc);
+ val = F77NAME(zdotc)(&n, za, &inc, zV, &inc); imag = val.i;
+// printf("%f\t%f\t%f\n",imag,val.i,imag-val.i);
+*/
+ if(V==0) delete Ma;
  return imag;
 }
 
+complex<double> aMb_complex(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib) // transition matrix element
+{
+ char up = 'L'; int n=M.nr(), inc=1;
+ complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
+ complex<double> *zM = M.f_array();
+ for(int i=1; i<=n; i++) { 
+    za[i-1].r = zr(i,ia); za[i-1].i = zc(i,ia); zb[i-1].r = zr(i,ib); zb[i-1].i = zc(i,ib);
+ // for(int j=1; j<=n; j++)zM[(i-1)*n+j-1].r=M(j,i);
+ // for(int j=1; j<n; j++) zM[(i-1)*n+j-1].i=M(i,j); 
+ }
+// printf("Zr=["); for(int i=1; i<=n; i++) { for(int j=1; j<=n; j++) printf("%g ",zM[(i-1)*n+j-1].r); printf(";\n"); } printf("];");
+// printf("Zi=["); for(int i=1; i<=n; i++) { for(int j=1; j<=n; j++) printf("%g ",zM[(i-1)*n+j-1].i); printf(";\n"); } printf("];");
+ F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
+ val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);
+/*
+  for(int a=1;a<=M.nr();++a) 
+    for(int b=1;b<=M.nr();++b) { //if(abs(M[make_pair(a,b)])>1e-3) printf("(%i,%i)=%f,%f\n",a,b,real(M[make_pair(a,b)]),imag(M[make_pair(a,b)])); 
+     //if(a<b) { if(fabs(imag(M[make_pair(a,b)])>1e-3)) printf("(%i,%i)=%f\n",b,a,imag(M[make_pair(a,b)])); }
+     //else    { if(fabs(real(M[make_pair(b,a)])>1e-3)) printf("(%i,%i)=%f\n",b,a,real(M[make_pair(b,a)])); } }
+       if(a<b) { if(fabs(imag(zM[b*M.nr()+a])>1e-3)) printf("(%i,%i)=%f\n",a,b,imag(zM[b*M.nr()+a])); }
+       else    { if(fabs(real(zM[a*M.nr()+b])>1e-3)) printf("(%i,%i)=%f\n",a,b,real(zM[a*M.nr()+b])); } }
+  printf("---\n");
+*/
+ free(zM);
+// printf("%f\n",val.r);
+ return complex<double>(val.r,val.i);
+}
+
+double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib) // transition matrix element
+{
+ char up = 'L'; int n=M.nr(), inc=1;
+ complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
+ complex<double> *zM = M.f_array();
+ for(int i=1; i<=n; i++) { 
+    za[i-1].r = zr(i,ia); za[i-1].i = zc(i,ia); zb[i-1].r = zr(i,ib); zb[i-1].i = zc(i,ib);
+ }
+ F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
+ val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);
+/*
+//for(int a=1;a<=M.nr();++a) printf("(%i)%f\n",a,real(M[make_pair(a,a)])); printf("---i\n");
+//for(int a=1;a<=M.nr();++a) printf("(%i)%f\n",a,imag(M[make_pair(a,a)])); printf("---\n");
+  for(int a=1;a<=M.nr();++a) 
+    for(int b=1;b<=M.nr();++b) { //if(abs(M[make_pair(a,b)])>1e-3) printf("(%i,%i)=%f,%f\n",a,b,real(M[make_pair(a,b)]),imag(M[make_pair(a,b)])); 
+     //if(a<b) { if(fabs(imag(M[make_pair(a,b)])>1e-3)) printf("(%i,%i)=%f\n",b,a,imag(M[make_pair(a,b)])); }
+     //else    { if(fabs(real(M[make_pair(b,a)])>1e-3)) printf("(%i,%i)=%f\n",b,a,real(M[make_pair(b,a)])); } }
+       if(a<b) { if(fabs(imag(zM[b*M.nr()+a])>1e-3)) printf("(%i,%i)=%f\n",a,b,imag(zM[b*M.nr()+a])); }
+       else    { if(fabs(real(zM[a*M.nr()+b])>1e-3)) printf("(%i,%i)=%f\n",a,b,real(zM[a*M.nr()+b])); } }
+//for(int a=1;a<=M.nr();++a) { printf("["); for(int b=1;b<=M.nr();++b) printf("%g+i%g ",real(M[make_pair(a,b)]),imag(M[make_pair(a,b)])); printf("]\n"); } 
+  printf("---\n");
+*/
+ free(zM);
+
+        //   if(i<j) { (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = imag((*Iaa[cluster_seq[iln][0]])[make_pair(j,i)]); }
+        //   else    { (*cluster_M[cluster_seq[iln][0]-cluster_M_ind0+1])(i,j) = real((*Iaa[cluster_seq[iln][0]])[make_pair(i,j)]); }
+/*
+  double rl=0.;
+  for(int a=1;a<=M.nr();++a)
+  {for(int b=1;b<a;++b)
+   {rl+=zr(a,ia)*real(M[make_pair(a,b)])*zr(b,ib)-zr(a,ia)*imag(M[make_pair(a,b)])*zc(b,ib)+zc(a,ia)*imag(M[make_pair(a,b)])*zr(b,ib)+zc(a,ia)*real(M[make_pair(a,b)])*zc(b,ib);
+   }
+    rl+=zr(a,ia)*real(M[make_pair(a,a)])*zr(a,ib)+zc(a,ia)*real(M[make_pair(a,a)])*zc(a,ib);
+   for(int b=a+1;b<=M.nr();++b)
+   {rl+=zr(a,ia)*imag(M[make_pair(a,b)])*zr(b,ib)+zr(a,ia)*real(M[make_pair(a,b)])*zc(b,ib)+zc(a,ia)*imag(M[make_pair(a,b)])*zc(b,ib)-zc(a,ia)*real(M[make_pair(a,b)])*zr(b,ib);
+   }
+// {rl+=zr(a,ia)*real(M[make_pair(a,b)])*zr(b,ib)-zr(a,ia)*real(M[make_pair(b,a)])*zc(b,ib)+zc(a,ia)*real(M[make_pair(b,a)])*zr(b,ib)+zc(a,ia)*real(M[make_pair(a,b)])*zc(b,ib);
+// }
+//  rl+=zr(a,ia)*real(M[make_pair(a,a)])*zr(a,ib)+zc(a,ia)*real(M[make_pair(a,a)])*zc(a,ib);
+// for(int b=a+1;b<=M.nr();++b)
+// {rl+=zr(a,ia)*real(M[make_pair(b,a)])*zr(b,ib)+zr(a,ia)*real(M[make_pair(a,b)])*zc(b,ib)+zc(a,ia)*real(M[make_pair(b,a)])*zc(b,ib)-zc(a,ia)*real(M[make_pair(a,b)])*zr(b,ib);
+// }
+// {real+=zr(a,ia)*M(a,b)*zr(b,ib)-zr(a,ia)*M(b,a)*zc(b,ib)+zc(a,ia)*M(b,a)*zr(b,ib)+zc(a,ia)*M(a,b)*zc(b,ib);
+// }
+//  real+=zr(a,ia)*M(a,a)*zr(a,ib)+zc(a,ia)*M(a,a)*zc(a,ib);
+// for(int b=a+1;b<=M.Rhi();++b)
+// {real+=zr(a,ia)*M(b,a)*zr(b,ib)+zr(a,ia)*M(a,b)*zc(b,ib)+zc(a,ia)*M(b,a)*zc(b,ib)-zc(a,ia)*M(a,b)*zr(b,ib);
+// }
+  }
+ printf("%f %f, %f\n",val.r,val.i,rl);*/
+// printf("%f\n",val.r);
+ return val.r;
+}
 
 Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3)
 {static Matrix m(1,3,v1.Lo(),v1.Hi());

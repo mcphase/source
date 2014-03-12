@@ -50,7 +50,7 @@ ifdef icc
 ARCHFLAG=-O2 -xHOST -IPF_fma -long_double -IPF_fltacc#-ipo
 else
 ifdef GCC42
-ARCHFLAG=-O3 -march=native -ftree-vectorizer-verbose=2
+ARCHFLAG=-O3 -march=native#-ftree-vectorizer-verbose=2
 #ARCHFLAG=-O2 -march=core2 -msse4 -msse4.1 -msse4.2 -mcx16 -msahf
 else
 ARCHFLAG=-O2

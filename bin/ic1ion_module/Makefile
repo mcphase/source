@@ -190,24 +190,24 @@ states.o: states.cpp states.hpp
 	$(CC) $(patsubst -O3,   ,${CFLAGS}) -c $<
 
 truncate.o: truncate.cpp
-	$(CC) $(CFLAGS) -I../include -c $<
+	$(CC) $(CFLAGS) -I../include -I. -c $<
 
 ic1ion_module.o: ic1ion_module.cpp
 ifdef integral
-	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -c $<
+	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
 ifdef WINDOWS
-	$(CC) $(CFLAGS) -I../include -DBUILD_DLL -c $<
+	$(CC) $(CFLAGS) -I../include -I. -DBUILD_DLL -c $<
 else
-	$(CC) $(CFLAGS) -I../include -c $<
+	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 endif
 
 icf1ion_module.o: icf1ion_module.cpp
 ifdef integral
-	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -c $<
+	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
-	$(CC) $(CFLAGS) -I../include -c $<
+	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 
 ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o

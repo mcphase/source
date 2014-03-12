@@ -683,13 +683,13 @@ jjjpar::jjjpar (const jjjpar & pp)
                           {dnn[n]=(*(*clusterpars).jjj[n]).opmat(1,Hxc,Hext).Rhi();
                            dim*=dnn[n];
                           }
-                          Ia= new Matrix * [nofcomponents+1];
-                          for(int n = 1;n<=nofcomponents;++n){Ia[n]=new Matrix(1,dim,1,dim);(*Ia[n])=(*pp.Ia[n]);}
+                          Ia= new zsMat<double> * [nofcomponents+1];
+                          for(int n = 1;n<=nofcomponents;++n){Ia[n]=new zsMat<double>(dim,dim);(*Ia[n])=(*pp.Ia[n]);}
                           // cluster_M
-                          cluster_M= new Matrix * [3+3*(*clusterpars).nofatoms+1];
+                          cluster_M= new zsMat<double> * [3+3*(*clusterpars).nofatoms+1];
                           for(int a=0;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
                            {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
-                            cluster_M[index_M]=new Matrix(1,dim,1,dim);
+                            cluster_M[index_M]=new zsMat<double>(dim,dim);
                             (*cluster_M[index_M])=(*pp.cluster_M[index_M]);
                            }                        
                           clusterH = new Matrix(1,dim,1,dim); *clusterH = *pp.clusterH; 

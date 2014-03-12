@@ -22,6 +22,7 @@
 #include<ctime>
 #include <stdio.h>
 #include<vector.h>
+#include "sparsecomplex.hpp"
 
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -
 // output: var ... value of parameter
@@ -163,9 +164,11 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
  //  corresponding to the lower triangle) in the positions
  //  of the upper triangle of z[lo..hi,lo..hi].
 Matrix herm_dirprod(Matrix  A, Matrix  B); // direct product
-double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);// transition matrix element
-double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);// <a|M|b>  a,b are columns ia and ib
-                                                                     // of zr+izc
+double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);            // transition matrix element
+double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);            // <a|M|b>  a,b are columns ia and ib
+complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int ia,int ib);  // of zr+izc
+double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib);
+
 
 Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3);
 

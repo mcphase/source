@@ -8,6 +8,7 @@ include ../src/Makefile.common
 
 INCLDIRS =      -I. \
 		-I../include \
+		-I../ic1ion_module \
 		-I/usr/include/readline \
 		-I/local/lib  \
 		-I/usr/X11R6/include

@@ -61,9 +61,12 @@ DOBJ  = dgeqr2.o dlabad.o dlacon.o dlacpy.o dladiv.o dlae2.o dlaev2.o\
 	dlaebz.o dlagtf.o dlagts.o dlaneg.o dlarra.o dlarrb.o dlarrc.o\
 	dlarrd.o dlarre.o dlarrf.o dlarrj.o dlarrk.o dlarrr.o dstebz.o\
 	dlar1v.o dlarrv.o dorm2l.o dormql.o dormtr.o dstein.o dstemr.o\
-	dstegr.o
+	dstegr.o \
+	dlaed0.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o dlaed5.o dlaed6.o\
+	dlaed7.o dlaed8.o dlaed9.o dlaeda.o dlamrg.o dstedc.o 
 
-IOBJ  = ilaenv.o lsame.o lsamen.o xerbla.o xlaenv.o iparmq.o ieeeck.o
+IOBJ  = ilaenv.o lsame.o lsamen.o xerbla.o xlaenv.o iparmq.o ieeeck.o\
+	ilazlc.o ilazlr.o
 
 CIOBJ = icmax1.o 
 
@@ -85,7 +88,9 @@ ZOBJ  = zgeqr2.o zlacon.o zlacpy.o zladiv.o zlahqr.o zlange.o zlanhs.o\
 	zlasr.o  zung2l.o zlarft.o zlarfb.o zung2r.o\
 	disnan.o dlaisnan.o\
 	zlansy.o zlar1v.o zlarrv.o zstein.o zstemr.o zunm2l.o zunmql.o\
-	zunmqr.o zunmtr.o zlacn2.o
+	zunmqr.o zunmtr.o zlacn2.o\
+	zheevd.o zhegs2.o zhegst.o zhegvd.o zlacrm.o zlaed0.o zlaed7.o\
+	zlaed8.o zpotf2.o zpotrf.o zstedc.o
 #
 # The following LAPACK routines are not needed by ARPACK
 # source code.  They are used by the drivers in EXAMPLES

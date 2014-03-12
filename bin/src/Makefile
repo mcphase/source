@@ -15,8 +15,8 @@
 # make looks in the following directories for files
 vpath %.c  ./
 vpath %.cpp ./
-vpath %.h  ../include
-vpath %.hpp ../include
+vpath %.h  ../include ../ic1ion_module
+vpath %.hpp ../include ../ic1ion_module
 vpath %.o  ./ ./vector ../cf1ion_module ./functions
 
 #---------------------------------------------------------------------
@@ -46,6 +46,7 @@ endif
 
 INCLDIRS =      -I. \
 		-I../include \
+ 		-I../ic1ion_module \
 #		-I/usr/include/readline \
 		-I/local/lib  \
 		-I/usr/X11R6/include

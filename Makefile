@@ -11,7 +11,7 @@ vecdir = bin/src/vector
 funcdir = bin/src/functions
 calcdir = bin/src/calc
 
-all: vector functions cfield mcphase phonon
+all: vector functions mcphase phonon
 
 vector: 
 	cd $(vecdir) && $(MAKE) 
@@ -34,7 +34,7 @@ bfk   :
 phonon   : 
 	cd $(phdir) && $(MAKE)
 
-mcphase: vector cfield ic1ion
+mcphase: vector ic1ion cfield
 	cd $(mcpdir) && $(MAKE)
 
 clean: 
