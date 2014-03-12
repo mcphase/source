@@ -697,10 +697,10 @@ jjjpar::jjjpar (const jjjpar & pp)
                           clusterH = new zsMat<double>(dim,dim); *clusterH = *pp.clusterH; 
                           oldHext = new Vector(1,3); *oldHext = *pp.oldHext;
                           workspace = new iterwork(pp.workspace->zsize,pp.workspace->dsize,pp.workspace->isize);
-                          truncate = pp.truncate; fdim=dim;
+                          truncate = pp.truncate; fdim=dim; arpack = pp.arpack; feast = pp.feast;
                           if (truncate>1e-6 && truncate!=1) { 
                              dim = (int)ceil(truncate*(double)dim); is1sttrunc = pp.is1sttrunc; 
-                             zm = new complexdouble[fdim*fdim]; memcpy(zm,pp.zm,fdim*fdim*sizeof(complexdouble)); }
+                             zm = new complexdouble[fdim*dim]; memcpy(zm,pp.zm,fdim*dim*sizeof(complexdouble)); }
                           }
   
 //#ifdef __linux__
@@ -790,9 +790,9 @@ iterwork::iterwork(int lzwork, int ldwork, int liwork)
    dwork = new double[ldwork]; dsize=ldwork;
    iwork = new int[liwork]; isize=liwork;
 }
-void iterwork::realloc_z(int lzwork) { if(zsize>0) delete[]zwork; zwork = new complexdouble[lzwork]; zsize=lzwork; }
-void iterwork::realloc_d(int ldwork) { if(dsize>0) delete[]dwork; dwork = new double[ldwork]; dsize=ldwork; }
-void iterwork::realloc_i(int liwork) { if(isize>0) delete[]iwork; iwork = new int[liwork]; isize=liwork; }
+void iterwork::realloc_z(int lzwork) { if(zsize>0) delete[]zwork; printf("reallocating z from %d to %d\n",zsize,lzwork); zwork = new complexdouble[lzwork]; zsize=lzwork; }
+void iterwork::realloc_d(int ldwork) { if(dsize>0) delete[]dwork; printf("reallocating d from %d to %d\n",dsize,ldwork); dwork = new double[ldwork]; dsize=ldwork; }
+void iterwork::realloc_i(int liwork) { if(isize>0) delete[]iwork; printf("reallocating i from %d to %d\n",isize,liwork); iwork = new int[liwork]; isize=liwork; }
 iterwork::~iterwork()
 {
    if(zsize>0) delete[]zwork; if(dsize>0) delete[]dwork; if(isize>0) delete[]iwork;

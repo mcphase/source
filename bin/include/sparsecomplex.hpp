@@ -74,6 +74,7 @@ template <class T> class zsMat {
      void zero(int r, int c) { _ls.clear(); _r = r; _c = c; };          // Zeros all entries, changes shape as well
      void resize(int rs, int rn, int cs, int cn);                       // Resizes a matrix and deletes extra elements
      void reshape(int r, int c) { _r = r; _c = c; };                    // Changes shape without changing entries!
+     void makeLherm();                                                  // Makes the matrix Hermitian from the lower triangle.
      std::string display_full() const;                                  // Outputs a string of the full matrix
      std::complex<T> *f_array() const;                                  // Returns matrix as a Fortran style 2D array
      void f_array(std::complex<T>* retval) const;                       // Returns matrix as a Fortran style 2D array (pre-allocated)
@@ -92,6 +93,8 @@ template <class T> class zsMat {
      // For iterative eigensolvers
      void MultMv(std::complex<T> *v, std::complex<T> *w);               // Calculates the matrix-vector product w = M*v (assume Hermitian)
      void MultMvNH(std::complex<T> *v, std::complex<T> *w);             // Calculates the matrix-vector product w = M*v (non-Hermitian)
+     void MultMMH(std::complex<T> *A, std::complex<T> *B, int c);       // Calculates the matrix-matrix product A = M*B (assume Hermitian)
+     void MultMM(std::complex<T> *A, std::complex<T> *B, int c);        // Calculates the matrix-matrix product A = M*B (non-Hermitian)
 
      // Overloaded operators
      zsMat<T> operator =  (const zsMat & m);                            // Copy assignment - overwrites previous matrix
@@ -277,6 +280,22 @@ template <class T> zsMat<T> zsMat<T>::hermitian()
    _ls = tmp_ls;
    i = _c; _c = _r; _r = i;
    return *this;
+}
+
+template <class T> void zsMat<T>::makeLherm()
+{
+   int c,n = 0,i,j;
+   typename std::map<_ind,std::complex<T> >::iterator it;
+   std::vector<int> row(2);
+   std::vector< std::vector<int> > retval(_ls.size()/2+_r,row);
+   std::map<_ind,std::complex<T> > tmp_ls = _ls; _ls.clear();
+   for (c=1; c<=_c; c++)
+      for (it=tmp_ls.lower_bound(_ind(c,c)); it!=tmp_ls.lower_bound(_ind(_r+1,c)); it++)
+      {
+         i = it->first.r; j = it->first.c;
+         _ls[_ind(i,j)] = it->second;
+         if(i!=j) _ls[_ind(j,i)] = conj(it->second);
+      }
 }
 
 template <class T> void zsMat<T>::resize(int rs, int rn, int cs, int cn)// Resizes a matrix and deletes extra elements
@@ -595,6 +614,31 @@ template <class T> void zsMat<T>::MultMvNH(std::complex<T>*v, std::complex<T>*w)
          w[i->first.r-1] += (i->second * v[c-1]);
    }
 }
+template <class T> void zsMat<T>::MultMM(std::complex<T>*A, std::complex<T>*B, int c) 
+{                                                                                 // Calc. matrix-matrix product A=M*B
+   // Assume A is correct size _r*c, B also correct, _c*c
+   memset(A,0,_r*c*sizeof(std::complex<T>));
+   typename std::map<_ind,std::complex<T> >::iterator it; int i,k;
+   for(int j=0; j<c; j++)
+   {
+      for(it=_ls.begin(); it!=_ls.end(); it++) { 
+         i = it->first.r-1; k = it->first.c-1; A[_r*j+i] += (it->second) * B[_c*j+k]; }
+   }
+}
+template <class T> void zsMat<T>::MultMMH(std::complex<T>*A, std::complex<T>*B, int c) 
+{                                                                                 // Calc. matrix-matrix product A=M*B (Hermitian)
+   // Assume A is correct size _r*c, B also correct, _c*c
+   memset(A,0,_r*c*sizeof(std::complex<T>));
+   typename std::map<_ind,std::complex<T> >::iterator it; int i,k;
+   for(int j=0; j<c; j++)
+   {
+      for(int y=1; y<=_c; y++) for (it=_ls.lower_bound(_ind(y,y)); it!=_ls.lower_bound(_ind(_r+1,y)); it++)
+      {
+         i = it->first.r-1; k = it->first.c-1; A[_r*j+i] += (it->second) * B[_c*j+k]; 
+         if(i!=k) A[_r*j+k] += conj(it->second) * B[_c*j+i];
+      }
+   }
+}
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Overloaded operators
@@ -806,9 +850,9 @@ template <class T> zsMat<T> zsMat<T>::operator *= (const zsMat<T> & m)  // Matri
          for(int r=1; r<=_r; r++)     // Loops through the rows of the multiplican
          {
             elem = 0.;                // Loops through the rows of the mulitplier, ignoring zeros
-            for (it=mls.lower_bound(_ind(c,c)); it!=mls.lower_bound(_ind(_r+1,c)); it++)
+            for (it=mls.lower_bound(_ind(1,c)); it!=mls.lower_bound(_ind(_r+1,c)); it++)
             {
-                  elem += (_ls.find(_ind(r,it->first.r))->second * it->second);
+               elem += (_ls.find(_ind(r,it->first.r))->second * it->second);
             }
             if(elem!=0.) tmp(r,c) = elem;
          }

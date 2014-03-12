@@ -16,16 +16,37 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  // Before initializing (allocating) matrices for other operators, check to see if we are using own parser, and if
  //   so get the sequence of operations and perform them here directly for each operator without allocating all the
  //   matrices  -  MDL 131024
- useperl=true; truncate=0; FILE *fin=fopen(sipffilename,"rb"); char instr[MAXNOFCHARINLINE];
+ useperl=true; truncate=0; feast=0; arpack=0; FILE *fin=fopen(sipffilename,"rb"); char instr[MAXNOFCHARINLINE];
  while(feof(fin)==0) if(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL) {
     if(strncmp(instr,"#!noperl",8)==0) useperl=false; 
-    else if(strncmp(instr,"#!truncate",10)==0) { char *valsto = strchr(instr,'=')+1; truncate = atof(valsto); }
+    else if(strncmp(instr,"#!eigsolver",11)==0) {      // Parses eigensolver string - can be either: truncate, arpack or feast
+       char chomp[MAXNOFCHARINLINE], ts=0, fs=0, as=0; // New string without whitespaces
+       char *ii=instr, *ic=chomp; while(*ii!=0) { if(*ii!=11||*ii!=' ') { *ic=tolower(*ii); ic++; } ii++; } *ic=0;
+       ic=strchr(chomp,'=');
+       do 
+       {
+          ic++;
+          if(strncmp(ic,"truncate",8)==0) { 
+             ii=strchr(ic,'='); if(ii==NULL) truncate=DBL_MAX; else { ii++; if(*ii=='e') truncate=DBL_EPSILON; else if(*ii=='f'||*ii=='a') ts=*ii; else truncate=atof(ii); } }
+          else if(strncmp(ic,"feast",5)==0) {
+             ii=strchr(ic,'='); if(ii==NULL) feast=DBL_MAX;    else { ii++; if(*ii=='e') feast=DBL_EPSILON;    else if(*ii=='t'||*ii=='a') fs=*ii; else feast=atof(ii); } }
+          else if(strncmp(ic,"arpack",6)==0) {
+             ii=strchr(ic,'='); if(ii==NULL) arpack=DBL_MAX;   else { ii++; if(*ii=='e') arpack=DBL_EPSILON;   else if(*ii=='t'||*ii=='f') as=*ii; else arpack=atof(ii); } }
+       }
+       while( (ic=strchr(ic,','))!=NULL );
+       if(ts!=0) { if(ts=='f') truncate=feast;  else truncate=arpack; }
+       if(fs!=0) { if(fs=='t') feast=truncate;  else feast=arpack; }
+       if(as!=0) { if(as=='t') arpack=truncate; else arpack=feast; }
+       if(feast!=0 && arpack!=0) { fprintf(stderr,"WARNING: cluster_module cannot use both FEAST and ARPACK together. FEAST will be used.\n"); arpack=0; }
+       printf("truncate=%g\tfeast=%g\tarpack=%g\n",truncate,feast,arpack); /*truncate=0;*/ feast=0; arpack=0; 
+    }
+  //else if(strncmp(instr,"#!truncate",10)==0) { char *valsto = strchr(instr,'=')+1; truncate = atof(valsto); }
  }
 
  // initialize matrix and vector to cache Hamiltonian matrix from runs where Hext is constant
  clusterH = new zsMat<double>(dim,dim); oldHext = new Vector(1,3); justinit=true;
  // Allocates workspace for iterative eigensolvers
- workspace = new iterwork(dim*(dim+dim)+dim*4+3*dim*dim+8*dim+(dim-1)+2*dim,dim,dim);
+ workspace = new iterwork(dim,dim,dim);
 
  Iaa[0]=new zsMat<double>(dim,dim); (*Iaa[0])=1.; //Iaa[0]=new ComplexMatrix(1,dim,1,dim);(*Iaa[0])=1; 
  for(int a=1;a<=(*clusterpars).nofatoms;++a)
@@ -236,7 +257,7 @@ delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcom
 }
 fdim=dim; 
 if (truncate>1e-6 && truncate!=1) {
-   dim = (int)(ceil(truncate*(double)dim)); is1sttrunc = true; zm = new complexdouble[fdim*fdim]; }
+   dim = (int)(ceil(truncate*(double)dim)); is1sttrunc = true; zm = new complexdouble[fdim*dim]; }
 // for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms;++i)
 //  {delete Iaa[i];delete operatornames[i];}
 printf("#module cluster initialized\n");
@@ -532,6 +553,60 @@ if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
 
 }
 
+int arpackeig(zsMat<double> &M, Vector &En, complexdouble*zc, int nev, iterwork &workspace)
+{
+   int n = M.nr();
+   int ido=0,ncv=(2*nev>n?n:2*nev),iparam[]={1,0,10000,1,nev,0,1,0,0,0,0};
+   //         IPARAM=ISHIFT,,MAXITER,NB,NCONV,,MODE,NP,NUMOP,NUMOPB,NUMREO
+   int lworkl=3*ncv*ncv+8*ncv,info=0;  // Must be > 3*NCV**2 + 5*NCV
+   char bmat='I';
+   double tol=1e-12;
+
+   // Check workspace is large enough. 
+   int litwk=n*(n+ncv)+n*4+lworkl+nev+2*ncv;
+   if(workspace.zsize<litwk) workspace.realloc_z(litwk); memset(workspace.zwork,0,litwk*sizeof(complexdouble));
+   if(workspace.dsize<ncv)   workspace.realloc_d(ncv);   memset(workspace.dwork,0,ncv*sizeof(double));
+   if(workspace.isize<ncv)   workspace.realloc_i(ncv);   memset(workspace.iwork,0,ncv*sizeof(int));
+
+   complexdouble zalpha; zalpha.r=1; zalpha.i=0; //complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+
+   char whichp[]="SR";       // LM/SM==Largest/Smallest Magnitude; LR/SR==RealPart; LI/SI==ImaginaryPart
+   int ipntr[14];
+   complexdouble *z=&workspace.zwork[0], *resid=&workspace.zwork[n*n], *v=&workspace.zwork[n*n+n], *workd=&workspace.zwork[n*(n+ncv)+n];
+   complexdouble *workl=&workspace.zwork[n*(n+ncv)+n*4], *d=&workspace.zwork[n*(n+ncv)+n*4+lworkl], *workev=&workspace.zwork[n*(n+ncv)+n*4+lworkl+nev];
+   double *rwork = &workspace.dwork[0]; int *select = &workspace.iwork[0];
+   while(ido!=99)
+   {
+      F77NAME(znaupd)(&ido, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, ipntr, workd, workl, &lworkl, rwork, &info);
+      if(ido==1 || ido==-1)
+         M.MultMv((std::complex<double>*)&workd[ipntr[0]],(std::complex<double>*)&workd[ipntr[1]]);
+   }
+   int rvec=1; char howmny='A';
+   F77NAME(zneupd)(&rvec, &howmny, select, d, z, &n, &zalpha, workev, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam,
+                   ipntr, workd, workl, &lworkl, rwork, &info);
+   int i=1,j=2,ii; double elem; std::vector<int> ind(nev,0);
+   for(ii=0; ii<nev; ii++) { En[ii+1] = d[ii].r; ind[ii] = ii; }
+   while(i<nev)
+   {
+      if(En[i]<=En[i+1]) { i=j; j++; }
+      else { elem = En[i]; En[i] = En[i+1]; En[i+1] = elem; ii=ind[i-1]; ind[i-1]=ind[i]; ind[i]=ii; i--; if(i==0) i=1; }
+   }
+   for(i=0; i<nev; i++) {
+      for(j=0; j<n; j++) zc[n*i+j]=z[ind[i]*n+j]; //{ zr(j+1,i+1)=z[ind[i]*n+j].r; zc(j+1,i+1)=z[ind[i]*n+j].i; }
+   }
+
+   return info;
+}
+void rmzeros(zsMat<double> & M)
+{  
+   std::vector< std::vector<int> > nz;
+   int i,sz;
+   nz = M.find(); sz = (int)nz.size();
+   for (i=0; i<sz; i++)
+      if(abs(M(nz[i][0],nz[i][1]))<DBL_EPSILON*1000) M.del(nz[i][0],nz[i][1]);
+}
+
+
 //------------------------------------------------------------------------------------------------
 //routine estates for cluster
 //------------------------------------------------------------------------------------------------
@@ -675,31 +750,33 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
 if (truncate>1e-6 && truncate!=1) 
 {
    char jobz = 'V', uplo = 'U'; int lda=fdim, n=fdim, info=0, lwork=4*n, lrwork = 3*n-2;
-   int zsz = lwork + fdim*dim + fdim*fdim + dim*dim, dsz = lrwork+fdim;
+   int zsz = lwork + fdim*dim + dim*dim, dsz = lrwork+fdim;
 
    if(workspace->zsize<zsz) workspace->realloc_z(zsz); memset(workspace->zwork,0,zsz*sizeof(complexdouble));
    if(workspace->dsize<dsz) workspace->realloc_d(dsz); memset(workspace->dwork,0,dsz*sizeof(double));
    complexdouble *zwork=&workspace->zwork[0], *zmt=&workspace->zwork[lwork]; 
-   complexdouble *op0=&workspace->zwork[lwork+fdim*dim], *opr=&workspace->zwork[lwork+fdim*dim+fdim*fdim], zv;
+   complexdouble *opr=&workspace->zwork[lwork+fdim*dim], zv;
    double *rwork=&workspace->dwork[0], *eigv=&workspace->dwork[lrwork];
 
-   (*clusterH).h_array((std::complex<double>*)op0);
    // Diagonalise the full Hamiltonian
    if(is1sttrunc)
    {
       clock_t start,end; start = clock();
-      printf("Truncate cluster: full dimension=%d\ttruncated dimension=%d\n",fdim,dim);
+      printf("Truncate cluster: full dimension=%d\ttruncated dimension=%d\n",fdim,dim); fflush(stdout);
+      (*clusterH).h_array((std::complex<double>*)zm);
       if(fdim>200) { printf("Diagonalising Full Hamiltonian..."); fflush(stdout); }
-      memcpy(zm,op0,fdim*fdim*sizeof(complexdouble));
       F77NAME(zheev)(&jobz, &uplo, &n, zm, &lda, eigv, zwork, &lwork, rwork, &info);
       if(info!=0) { 
          fprintf(stderr,"cluster_module:zheev return error %d\n",info); exit(-1); }
-         end = clock(); if(fdim>200) printf("done. In %f s\n",(double)(end-start)/CLOCKS_PER_SEC); fflush(stdout);
-    //if(fdim>200) { printf("eigval="); for(int ii=0; ii<10; ii++) printf("%g ",eigv[ii]); printf(" ... "); for(int ii=fdim-10; ii<fdim; ii++) printf("%g ",eigv[ii]); printf("\n"); }
+    //memset(zm,0,fdim*dim*sizeof(complexdouble)); arpackeig(*clusterH,En,zm,dim,*workspace); if(workspace->dsize!=dsz) { rwork=&workspace->dwork[0]; }
+    //if(workspace->zsize!=zsz) { zwork=&workspace->zwork[0]; zmt=&workspace->zwork[lwork]; opr=&workspace->zwork[lwork+fdim*dim]; }
+      end = clock(); if(fdim>200) printf("done. In %f s\n",(double)(end-start)/CLOCKS_PER_SEC); fflush(stdout);
+      if(fdim>200) { printf("eigval="); for(int ii=1; ii<10; ii++) printf("%g ",eigv[ii]); printf(" ... "); for(int ii=fdim-10; ii<fdim; ii++) printf("%g ",eigv[ii]); printf("\n"); }
+    //if(fdim>200) { printf("eigval="); for(int ii=1; ii<10; ii++) printf("%g ",En[ii]); printf(" ... "); for(int ii=dim-10; ii<dim; ii++) printf("%g ",En[ii]); printf("\n"); }
    }
    // Use the eigenvectors to transform the full Hamiltonian
-   char notranspose='N',transpose='C',side='L'; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   F77NAME(zhemm)(&side,&uplo,&fdim,&dim,&zalpha,op0,&fdim,zm,&fdim,&zbeta,zmt,&fdim);
+   char notranspose='N',transpose='C'; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   (*clusterH).MultMMH((std::complex<double>*)zmt,(std::complex<double>*)zm,dim);
    F77NAME(zgemm)(&transpose,&notranspose,&dim,&dim,&fdim,&zalpha,zm,&fdim,zmt,&fdim,&zbeta,opr,&dim);
    (*clusterH).zero(dim,dim); 
    for(int i=0; i<dim; i++) for(int j=0; j<dim; j++) { 
@@ -712,8 +789,7 @@ if (truncate>1e-6 && truncate!=1)
       if(fdim>200) { printf("Rotating operator matrices..."); fflush(stdout); }
       for(int a=1; a<=nofcomponents; a++)
       {
-         (*Ia[a]).h_array((std::complex<double>*)op0); 
-         F77NAME(zhemm)(&side,&uplo,&fdim,&dim,&zalpha,op0,&fdim,zm,&fdim,&zbeta,zmt,&fdim);
+         (*Ia[a]).MultMMH((std::complex<double>*)zmt,(std::complex<double>*)zm,dim);
          F77NAME(zgemm)(&transpose,&notranspose,&dim,&dim,&fdim,&zalpha,zm,&fdim,zmt,&fdim,&zbeta,opr,&dim);
          (*Ia[a]).zero(dim,dim); 
          for(int i=0; i<dim; i++) for(int j=0; j<dim; j++) { 
@@ -721,8 +797,7 @@ if (truncate>1e-6 && truncate!=1)
       }
       for(int a=1; a<=(*clusterpars).nofatoms*3+3; a++)
       {
-         (*cluster_M[a]).h_array((std::complex<double>*)op0); 
-         F77NAME(zhemm)(&side,&uplo,&fdim,&dim,&zalpha,op0,&fdim,zm,&fdim,&zbeta,zmt,&fdim);
+         (*cluster_M[a]).MultMMH((std::complex<double>*)zmt,(std::complex<double>*)zm,dim);
          F77NAME(zgemm)(&transpose,&notranspose,&dim,&dim,&fdim,&zalpha,zm,&fdim,zmt,&fdim,&zbeta,opr,&dim);
          (*cluster_M[a]).zero(dim,dim); 
          for(int i=0; i<dim; i++) for(int j=0; j<dim; j++) { 

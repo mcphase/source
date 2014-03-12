@@ -382,7 +382,7 @@ private:
   zsMat<double> *clusterH; Vector *oldHext; bool justinit; // Added to cache Hamiltonian matrices between iterations when Hext=same
   int * dnn; int dim; bool useperl;
   iterwork *workspace;
-  double truncate; int fdim; bool is1sttrunc; complexdouble *zm;
+  double truncate, feast, arpack; int fdim; bool is1sttrunc; complexdouble *zm;
 
 };
 
