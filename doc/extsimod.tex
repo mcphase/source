@@ -26,6 +26,8 @@ INTERNAL MODULES  & \\
 \hline
 {\prg brillouin} & $J_a,J_b,J_c$\\
 \hline
+{\prg cluster} & defined in sipf file\\
+\hline
 \hline
 EXTERNAL MODULES & \\
 \hline
@@ -148,8 +150,70 @@ $R12=-2* $sigma1_a2u * $Jz;
 # O22S O21S O20 O21 O22 O31S .... O66
 \end{verbatim}
 
+\item[{\prg cluster\index{cluster}}]
+This module is designed to combine several subsystems (described
+by other modules - currently kramer or so1ion) into a cluster with bilinear
+interactions. The Hamiltonian of such a cluster is then
+diagonalized exactly. Clusters can interact via interaction operators
+$I_n$, which can be defined in the sipf file. 
 
+Here is an example of a cluster module input file, which is designed
+to model the hyperfine interaction of the f electrons and the nucleus
+of Pr$^{3+}$.
 
+\begin{verbatim}
+#!MODULE=cluster
+#<!--mcphase.sipf-->
+# here must be set the filename containing the structure of the cluster
+#!structurefile=cluster.j
+
+# in this example we set I1,I2,I3 the I1 I2 I3 of the first ion in the cluster, which 
+# is modelled by Pr3p.sipf (electronic magnetic moment) ... these degrees of freedom
+# interact by Heisenberg/RKKY interactions
+$I1=$I1_1;
+$I2=$I1_2;
+$I3=$I1_3;
+
+# here should follow the description of cluster magnetic moments in terms
+# of moments of the individual ions
+$GJ=0.8;
+$Gnuc=-0.9367e-3;
+$M1=$I1_1->multiply_scalar($GJ)+ $I2_1->multiply_scalar($Gnuc);
+$M2=$I1_2->multiply_scalar($GJ)+ $I2_2->multiply_scalar($Gnuc);
+$M3=$I1_3->multiply_scalar($GJ)+ $I2_3->multiply_scalar($Gnuc); 
+\end{verbatim}
+
+The structure of the cluster is described by a structurefile which has
+to contain the information about the internal structure of the cluster
+(positions and sipf files of the constituting subsystems, interactions),
+the notation is exactly the same as for the input file {\prg mcphas.j},
+here comes an example to be used with the above {\prg cluster.sipf} to describe
+hyperfine interactions in Pr:
+\begin{verbatim}
+# cluster description
+#<!--mcphase.mcphas.j-->
+#
+# Lattice Constants (A)
+#! a=4.261 b=4.261 c=4.261 alpha=  90 beta=  90 gamma=  90
+#! r1a= 1 r2a= 0 r3a= 0
+#! r1b= 0 r2b= 1 r3b= 0   primitive lattice vectors [a][b][c]
+#! r1c= 0 r2c= 0 r3c= 1
+#! nofatoms=2  nofcomponents=3  number of atoms in cluster unit cell/number of components of each spin
+#*********************************************************************
+#! da=   0 [a] db=   0 [b] dc=   0 [c] nofneighbours=1 diagonalexchange=1  sipffilename=Pr3p.sipf
+#da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
+# A=52mK=52e-3*0.08622 meV
++0       0         0.01      -4.4824e-3  -4.4824e-3  -4.4824e-3
+#*********************************************************************
+#! da=   0 [a] db=   0 [b] dc=   0.01 [c] nofneighbours=1 diagonalexchange=1  sipffilename=prnuc.sipf
+#da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]
++0       0        -0.01      -4.4824e-3  -4.4824e-3  -4.4824e-3
+\end{verbatim}
+Of course the sipf files{\prg Pr3p.sipf }and {\prg prnuc.sipf} must exist and describe
+the 4f shell and the nucleus of Pr, respectively. For more details on this
+example see folder {\prg examples/Pr3Pd20Si6}. Another example worth looking
+at is {\prg examples/LaCo3\_podlesnyak\_polaron}. There the calculation of the 
+magnetic structure factor of a spin polaron is demonstrated.
 \end{quote}
 
 In addition to the basic parameters described above the single ion property file 

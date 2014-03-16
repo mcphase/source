@@ -184,7 +184,21 @@ switch (module_type)
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for so1ion we must th and ph with respect to abc coordinate system
              if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
             Mq=(*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);return true;break;
-   case 5:
+   case 5: 
+            {Vector mom(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
+             cluster_Micalc (mom,est);
+            // now we have all magnetic moments in m1 vector and we have to do the
+            // magnetic structure factor = sum_i Mi exp(iQri) Fi(Q) * DWF
+            Vector abc(1,6); abc(1)=(*clusterpars).a; abc(2)=(*clusterpars).b; abc(3)=(*clusterpars).c;
+                   abc(4)=(*clusterpars).alpha; abc(5)=(*clusterpars).beta; abc(6)=(*clusterpars).gamma;
+            Mq=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
+             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
+            double QR=Qvec*rijk;
+            complex<double> exponent(cos(QR),sin(QR));
+            for(int n=1;n<=3;++n)
+            {Mq(n)+=exponent*mom(3*(a-1)+n)*(*(*clusterpars).jjj[a]).F(Q)*(*(*clusterpars).jjj[a]).debyewallerfactor(Q);
+            }}}
+            return true;break;
    default: return false; // all other internal modules do not currently provide mq
   }
 }
@@ -235,6 +249,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
             return (*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);break;
    case 5:  int nnt;
             {ComplexVector m1(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
+             m1(1)=dMQ(1);
             float ddelta=delta;
             nnt=cluster_dm(3,transitionnumber,T,m1,ddelta,ests);
             // now we have all magnetic moments in m1 vector and we have to do the

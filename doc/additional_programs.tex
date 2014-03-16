@@ -40,9 +40,12 @@ by doing a mcphas or
 
 \end{verbatim}
 
-\item [\prg cpso1ion 10 100 1 {[options]}: ] calculates the specific heat in the temperature %%@
+\item [\prg cpsingleion 10 100 1 file.levels.cef {[options]}: ] 
+By runnning {\prg singleion} some file.levels.cef is created in folder results.
+The {\prg cpsingleion} program may then be used. It
+calculates the specific heat in the temperature 
 interval 10-100 K with a step width
-of 1 K. Alternatively a comparison to experimental data can be made by {\bf cpso1ion 1 2 %%@
+of 1 K. Alternatively a comparison to experimental data can be made by {\bf cpso1ion 1 2 
 cpexp.dat},
 where the temperatures are given in column 1 and the experimental specific heat in column
 2 of file cpexp.dat. The calculated specific heat is compared to the experimental data and
@@ -51,9 +54,14 @@ Other quantities can be calculated using the options: -s  (calculate entropy  (J
 of cp),
 -f (calculate free energy (J/mol) instead of cp),-u  (calculate magnetic energy (J/mol) instead %%@
 of cp),
--z (calculate partition sum instead of cp).
-\item[\prg cpic1ion 10 100 1 [options]:] same as {\prg cpso1ion} but for output of program
-ic1ion.
+-z (calculate partition sum instead of cp)
+
+\item [\prg cpso1ion 10 100 1 {[options]}: ] same as {\prg cpsingleion} but for output of program
+ic1ion (no file.levels.cef required, takes values from so1ion.out) .
+\item[\prg cpic1ion 10 100 1 [options]:] same as {\prg cpsingleion} but for output of program
+ic1ion (no file.levels.cef required, takes values from ic1ion.out) .
+\item[\prg cpic1ion 10 100 1 [options]:] same as {\prg cpsingleion} but for output of program
+ic1ion (no file.levels.cef required, takes values from icf1ion.out) .
 					  
 \item [\prg epsdebye\index{epsdebye} Tmax dT Tdebye scale [d1 d2 datafile]:]	        
 		    calculates the phonon induced strain $\epsilon$ using the debye model

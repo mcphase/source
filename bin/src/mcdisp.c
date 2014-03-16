@@ -1278,7 +1278,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
             fprintf (fout1, "#displayxtext=E(meV)\n");
             fprintf (fout1, "#displaytitle=(%4.4f %4.4f %4.4f) blue: DMD_Dipapprox red: DMD_exact green: Minv_Dipapprox\n",hkl(1),hkl(2),hkl(3));
             //fprintf (fout1,"#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] intensities(dip approx for FF) [barn/meV/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
-		     if (do_Erefine==0) epsilon=(Max(En)-Min(En))/100;
+		     if (do_Erefine==0) epsilon=(Max(En)-Min(En)+0.001)/100;
 		    // if (epsilon<=0) epsilon=0.1;
                   for (i=1;i<=dimA;++i)
 		    { 
@@ -1452,7 +1452,6 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
    if(!calc_rixs)fprintf (foutdstot, "\n");              
    fprintf (foutqom, "\n");
    } // do jqfile
-  
 } // next hkl
 #ifdef _THREADS
    for (ithread=0; ithread<NUM_THREADS; ithread++) 

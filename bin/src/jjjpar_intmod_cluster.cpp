@@ -4,12 +4,12 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  // initialize these matrices
  dim=1; Vector Hxc(1,(*clusterpars).nofcomponents);Vector Hext(1,3);
  dnn= new int [(*clusterpars).nofatoms+1];
-
  // determine dimension of H matrix
  for (int n=1;n<=(*clusterpars).nofatoms;++n)
  {dnn[n]=(*(*clusterpars).jjj[n]).opmat(1,Hxc,Hext).Rhi();
   dim*=dnn[n];
  }
+ printf("# cluster module - number of matrices: %i  dimension=%i  \n",(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms,dim);
  // initialize matrices
  Iaa[0]=new ComplexMatrix(1,dim,1,dim);(*Iaa[0])=1;
  for(int a=1;a<=(*clusterpars).nofatoms;++a)
@@ -40,8 +40,9 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  //printf("hello %i %i %i %i\n",r,s,ai,bi);
   // here we should fill the matrices with values corresponding to the
   // I1 I2 of the individual atoms of the cluster
-   if(r<s){(*Iaa[(a-1)*(*clusterpars).nofcomponents+i])(r,s)+=complex<double>(Jai(bi+1,ai+1),-Jai(ai+1,bi+1));}
-      else{(*Iaa[(a-1)*(*clusterpars).nofcomponents+i])(r,s)+=complex<double>(Jai(ai+1,bi+1),Jai(bi+1,ai+1));}   
+   if(r<s)        {(*Iaa[(a-1)*(*clusterpars).nofcomponents+i])(r,s)+=complex<double>(Jai(bi+1,ai+1),-Jai(ai+1,bi+1));}
+   else if (r==s) {(*Iaa[(a-1)*(*clusterpars).nofcomponents+i])(r,s)+=complex<double>(Jai(ai+1,bi+1),0.0);}   
+              else{(*Iaa[(a-1)*(*clusterpars).nofcomponents+i])(r,s)+=complex<double>(Jai(ai+1,bi+1),Jai(bi+1,ai+1));}   
   }
  }
 
@@ -125,7 +126,7 @@ for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){
 
  for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms;++i)
   {delete Iaa[i];delete operatornames[i];}
-
+printf("#module cluster initialized\n");
 }
 //------------------------------------------------------------------------------------------------
 //routine Icalc for cluster
@@ -330,6 +331,7 @@ if (pr==1) printf ("delta=%4.6g meV\n",delta);
    
    if(T<0)for(int i=1;i<=n;++i)
    {noft+=dim-i+1;}
+//printf("nt=%i",noft);
  return noft;
 
 
@@ -369,12 +371,14 @@ void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,do
 }
 
 void jjjpar::cluster_calcH_and_diagonalize(Vector & En,Matrix & zr, Matrix & zc,Vector & Hxc,Vector & Hext)
-{Matrix H(1,dim,1,dim);
+{Matrix H(1,dim,1,dim);Vector ZeroHxc(1,1);ZeroHxc=0;
  H=0; // initialize to zero
 
 // fill H matrix with sum over Hi of individual spins
 for (int i=1;i<=(*clusterpars).nofatoms;++i)
-{Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,Hxc,Hext));
+{Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,ZeroHxc,Hext)); // here we need ZeroHxc because
+                                                            // exchange operators are set by user (Ia)
+                                                            // and not in the single ion module
   //1. determine dimensions
   int di=dnn[i];
   int dx=1,dz=1;
@@ -409,8 +413,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
  int ilj=1;
  if(i>j){i=j;j=n;ilj=0;} // if n>nn exchange i and j ... so that we always have i < j
  Matrix SinS(-0.5*(*(*clusterpars).jjj[n]).jij[nn](1,1)*
-             herm_dirprod((*(*clusterpars).jjj[i]).opmat(1,Hxc,Hext),
-                          (*(*clusterpars).jjj[j]).opmat(1,Hxc,Hext)
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(1,ZeroHxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(1,ZeroHxc,Hext)
                          )
              );
 
@@ -420,13 +424,13 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
   if(a==1&&b==1) break;
   if(ilj){
   SinS+=-0.5*(*(*clusterpars).jjj[n]).jij[nn](a,b)*
-             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,Hxc,Hext),
-                          (*(*clusterpars).jjj[j]).opmat(b,Hxc,Hext)
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,ZeroHxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(b,ZeroHxc,Hext)
                     );
           } else { // if n>nn then take transpose of exchange parameter jij !! (J(ij)=JT(ji))
   SinS+=-0.5*(*(*clusterpars).jjj[n]).jij[nn](b,a)*
-             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,Hxc,Hext),
-                          (*(*clusterpars).jjj[j]).opmat(b,Hxc,Hext)
+             herm_dirprod((*(*clusterpars).jjj[i]).opmat(a,ZeroHxc,Hext),
+                          (*(*clusterpars).jjj[j]).opmat(b,ZeroHxc,Hext)
                     );
           }
  }
@@ -467,6 +471,8 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
   } 
 }
 
+// insert exchange field
+for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]);
 
 // diagonalize H
 int sort=1;int maxiter=1000000;
@@ -484,4 +490,22 @@ EigenSystemHermitean (H,En,zr,zc,sort,maxiter);
 //                   OBSERVABLES
 /**************************************************************************/
 
-// to  be done
+void jjjpar::cluster_Micalc (Vector &mom,ComplexMatrix & ests)
+{
+Vector En(1,dim);
+Vector wn(1,dim);
+Matrix zr(1,dim,1,dim);
+Matrix zc(1,dim,1,dim);
+ for(int i=1;i<=dim;++i){En(i)=real(ests(0,i));wn(i)=imag(ests(0,i));}
+
+   for(int i=1;i<=dim;++i)for(int j=1;j<=dim;++j){zr(i,j)=real(ests(i,j));zc(i,j)=imag(ests(i,j));}
+
+for(int a=1;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+        {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
+         int index=(a-1)*3+n; // calculate expecation Value of m
+         mom(index)=0;
+         for(int i=1;i<=dim&&wn[i]>0.00001;++i)
+         {mom(index)+=wn[i]*aMb_real((*cluster_M[index_M]),zr,zc,i,i); 
+         }
+        }
+}

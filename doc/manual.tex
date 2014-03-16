@@ -79,11 +79,15 @@ community this program would not have come into existence.
 
 \subsection*{ ... in version 5.0 ...}
 \begin{itemize} 
+\item cluster module for calculation of clusters of ions and/or hyperfine interactions 
+\item bfk program added (J Keller) - Becker-Fulde-Keller model for conduction electron interactions
+\item singleion program extended to be able to read sipf files directly, cpsingleion to calculate specific
+        heat, entropy etc.
 \item perl parse option added to so1ion to be able to redefine operators $\hat I_{\alpha}$
 \item resonant inelastic x-ray scattering cross section calculation possible with mcdisp option -x
 \item the many programs  for displaying movies and densities (display\_spindensity, display\_chargedensities ...) are substituted by two programs: {\prg display\_density} and {\prg display\_densities}, which have options to enable all kind of graphics-movies-calculations.
 \item mcdiff/mcdisp: new and more complete logic for taking various possible 
-       formfactors explained in manual and implemented in program mcdiff
+       formfactors explained in manual and implemented in program mcdiff, parallelizing option -prefix for mcdisp
 \item mcphas.j:  {\prg cffilename} in mcphas.j replaced by {\prg sipffilename} !!
        removed gJ from mcphas.j input files (not read any more)
 \item change of concept: in mcphas.mf, mcdisp.mf, mcdiff.in we store/input now the exchange      
@@ -100,6 +104,8 @@ community this program would not have come into existence.
         { \prg mcalc} (magnetic moment).
 \item in output of mcphas:  *.hkl files are created using mcalc function of sipf module
         (i.e. they are based on the observable magnetic moment)
+\item some bugs removed: spin/density animations of osciallations, icf1ion, threading, rhoso1ion
+        rotateBlm
 \end{itemize}
 
 \subsection*{... in version 4.9..}
@@ -301,7 +307,7 @@ experimental data.
 
 \begin{table}[thb] 
 \begin{center}  
-\caption {Description of the calculations, which come along with the program package {\prg McPhase} in directory {\prg %%@
+\caption {Description of the example calculations, which come along with the program package {\prg McPhase} in directory {\prg %%@
 examples}:}   
 \label{examples}   
 \begin{tabular} 
@@ -323,6 +329,7 @@ GdNi$_2$B$_2$C & magnetostriction and phase diagram, spin only (L=0) & {\prg bri
 GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, magnetic structure & {\prg cfield} & \\
 helix\_spinwave & spinwave calculation for a helical magnetic structure & {\prg so1ion} & \\
 Ho$_2$Ti$_2$O$_7$ & diffuse magnetic scattering & {\prg so1ion} & \cite{bramwell01-1495}\\
+LaSrCoO$_3$ & spin polarons quasielastic scattering & {\prg cluster}\index{cluster} & \cite{podlesnyak11-134430,podlesnyak08-247603} \\
 La$_2$CoO$_4$ & dispersive magnetic excitations / spinwaves &{\prg  ic1ion} & \cite{lewtas10-184420}\\
 LuMnO$_3$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
 NdBa$_2$Cu$_3$O$_7$ & fit of magnetic neutron diffraction data going beyond dipapprox & {\prg cfield}\index{cfield} & \cite{rotter09-140405} \\
@@ -331,6 +338,7 @@ NdCu$_2$  & crystal field, magnetic structure, phase diagrams, excitations & {\p
 NiO            & INS and RIXS on NiO & {\prg so1ion}\index{so1ion} & \\
 PrNi$_2$B$_2$C & crystal field - fit to neutrons,cp, susc & {\prg cfield}&\cite{mazumdar08-144422}\\
 PrNi$_2$Si$_2$ & excitons in an amplitude modulated mag structure & {\prg so1ion}\index{so1ion} & \cite{blanco13-104411} \\
+Pr$_3$Pd$_{20}$Si$_6$ & hyperfine interactions & {\prg cluster}\index{cluster} & \\
 TbCu$_2$ & magnetic phases with field parallel $a$ & {\prg cfield} \\
 testic1ion & Pr$^{3+}$ chargedensity in IC and LS coupling & {\prg ic1ion,cfield} &\\
 tungsten\_phonons & phonons in tungsten & {\prg phonon} & \\

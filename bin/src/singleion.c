@@ -217,4 +217,9 @@ if (!do_sipf)
       }
       printf("\n");
    }
+printf("# **********************************************************************\n"
+       "# end of program singleion\n"
+       "# ... you can now use 'cpsingleion' to calculate specific heat,\n"
+       "#      entropy etc from results/*.levels.cef\n"
+       "# **********************************************************************\n");
 }

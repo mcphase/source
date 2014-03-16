@@ -1,10 +1,7 @@
 \begin{verbatim}
 *************************************************************************************
                    HOW TO... 	                  HOW TO...
-        HOW TO...
-                                HOW TO...
-*************************************************************************************
-
+                                  HOW TO...
 *************************************************************************************
 HOW TO CREATE ....
 -------------------------------------------------------------------------------------
@@ -48,7 +45,7 @@ HOW TO CALCULATE ...
                                                      04magnetic_phases_mcphas
                                           - examples PrNi2B2C, NdCu2
                                           - manual   chapter mcphas
-                                          - programs cpcalc, mcphas, dif
+                                          - programs cpsingleion, mcphas, dif
 -------------------------------------------------------------------------------------
 
 
@@ -57,22 +54,22 @@ HOW TO DISPLAY ....
 -------------------------------------------------------------------------------------
 .... SIMPLE XY GRAPHS ?                   - tutorial 01some_programs
                                           - manual   chapter Programs f. graph. display
-                                          - programs display, displaybubbles
+                                          - programs display
 -------------------------------------------------------------------------------------
 .... MAGNETIC STRUCTURE ?                 - tutorial 04magnetic_phases_mcphas
                                           - examples NdCu2
                                           - manual   chapter Programs f. graph. display
-                                          - programs spins, javaview
+                                          - programs display_density,display_densities,javaview
 -------------------------------------------------------------------------------------
 .... CHARGE DENSITIES ?                   - tutorial 03crystal_fields_cfield_so1ion
                                           - examples NdCu2, PrNi2Si2, PrNi2B2C,testic1ion
                                           - manual   chapter Programs f. graph. display
-                                          - programs chrgplt, charges, javaview
+                                          - programs display_density,display_densities,javaview
 -------------------------------------------------------------------------------------
 .... SPIN AND ORBITAL WAVES ?             - tutorial 05excitations_mcdisp
                                           - examples NdCu2, PrNi2Si2 
                                           - manual   chapter Programs f. graph. display
-                                          - programs spins, charges, java javaview
+                                          - programs display_density,display_densities,javaview
 
 *************************************************************************************
 HOW TO FIT ...
@@ -114,12 +111,12 @@ HOW TO TREAT/INCLUDE ...
 .... RARE EARTH IONS ?
                                           - examples NdCu2, any rare earth based 
                                           - manual   chapter so1ion
-                                          - programs so1ion
+                                          - programs singlein, so1ion
 -------------------------------------------------------------------------------------
 .... TRANSITION METAL and ACTINIDE IONS
                                           - examples testic1ion
                                           - manual   chapter  ic1ion
-                                          - programs ic1ion
+                                          - programs singleion, ic1ion
 -------------------------------------------------------------------------------------
 .... BIQUADRATIC/QUADRUPOLAR ORBITAL INTERACTIONS ? 
                                           - examples GdRu2Si2, DyCu2

@@ -26,8 +26,6 @@ the test structures and try to find a structure with a lower free energy.
 Probably the propagation vector of the stable magnetic structure is near
 to the Q-vector, where mcdisp gave the error.
 
-
-
 EXTERNAL MODULE IC1ION
 
 -) I cannot find ic1ion.mag after running ic1ion - what is the reason ?
@@ -50,8 +48,6 @@ No, usually it is sufficient to give the IONTYPE, e.g. IONTYPE=Co3+ and then
 the program automatically looks up F2 F4 F6 and XI in an internal table.
 However, if you are not happy with the values from the table, you can explicitely enter
 these constants. 
-
 However for some ions these parameters are not available in standard tables, then
 you have to enter them. Please always check ic1ion.out to see if output is correct.
-
 \end{verbatim}

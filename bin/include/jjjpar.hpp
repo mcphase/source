@@ -350,6 +350,7 @@ private:
 
   // cluster internal module functions, module_type=5
   void cluster_Icalc_mcalc_Micalc (int code,Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  void cluster_Micalc (Vector &mom,ComplexMatrix & ests);
   int  cluster_dm (int code,int & tn,double & T, ComplexVector & u1,float & delta,ComplexMatrix & ests);
   void cluster_est(ComplexMatrix * est,Vector &Hxc,Vector &Hext,double & T);
   par * clusterpars;
