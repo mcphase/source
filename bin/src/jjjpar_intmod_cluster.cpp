@@ -152,7 +152,6 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
 
     if(dim<200) {
     char ploutname[MAXNOFCHARINLINE];  sprintf(ploutname,"results/_%s.pl.out",sipffilename);
-    if(dim<200) {
     FILE *PLOUT = fopen(ploutname,"w");
     for(int a=0; a<=nop; a++)
     {
@@ -164,17 +163,15 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
     }
     fclose(PLOUT);
     }
-    }
     for(int i=0; i<cluster_Ia_ind0; i++) delete Iaa[i];
     for(int i=cluster_Ia_ind0; i<=nop; i++) if(rhs[i]==1) delete Iaa[i];
 
     // Delete the operatornames arrays
-  //for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents;++i) delete operatornames[i];
-    for(int a=1;a<=(*clusterpars).nofatoms;++a) for(int i=1;i<=(*clusterpars).nofcomponents;++i) delete operatornames[(a-1)*(*clusterpars).nofcomponents+i];
-    for(int i=1;i<=nofcomponents;++i) delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+i];
-    for(int i=1;i<=3;++i) delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+i];
+    for(int a=1;a<=(*clusterpars).nofatoms;++a) for(int i=1;i<=(*clusterpars).nofcomponents;++i) delete[]operatornames[(a-1)*(*clusterpars).nofcomponents+i];
+    for(int i=1;i<=nofcomponents;++i) delete[]operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+i];
+    for(int i=1;i<=3;++i) delete[]operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+i];
     for(int a=1;a<=(*clusterpars).nofatoms;++a) for(int n=1;n<=3;++n) { int index=(a-1)*3+n; 
-       delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]; }
+       delete[]operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+index]; }
     // Delete the sequence arrays
     for(int i=0; i<cluster_nlines; i++) {
        delete[]cluster_seq[i]; delete[]cluster_seqconst[i]; delete[]cluster_statements[i]; }
@@ -338,6 +335,7 @@ myPrintMatrix(stdout,outmat);printf("\n");*/
          else if(r>s) { if(fabs(Jai(ai+1,bi+1))>EPS||fabs(Jai(bi+1,ai+1))>EPS) (*Iai)(r+iz,s+iz) = complex<double>(Jai(ai+1,bi+1),Jai(bi+1,ai+1)); }
          else if(r<s) { if(fabs(Jai(ai+1,bi+1))>EPS||fabs(Jai(bi+1,ai+1))>EPS) (*Iai)(r+iz,s+iz) = complex<double>(Jai(bi+1,ai+1),-Jai(ai+1,bi+1)); }
       } } }
+   (*Iai).tocsc();
 //}
  }
 }
@@ -597,14 +595,6 @@ int arpackeig(zsMat<double> &M, Vector &En, complexdouble*zc, int nev, iterwork 
 
    return info;
 }
-void rmzeros(zsMat<double> & M)
-{  
-   std::vector< std::vector<int> > nz;
-   int i,sz;
-   nz = M.find(); sz = (int)nz.size();
-   for (i=0; i<sz; i++)
-      if(abs(M(nz[i][0],nz[i][1]))<DBL_EPSILON*1000) M.del(nz[i][0],nz[i][1]);
-}
 
 
 //------------------------------------------------------------------------------------------------
@@ -648,7 +638,7 @@ void jjjpar::cluster_calcH_and_diagonalize(Vector & En,ComplexMatrix &zc,Vector 
   for(int i=Hext.Lo(); i<=Hext.Hi(); i++) { if(fabs(Hext[i]-(*oldHext)[i])>DBL_EPSILON) { isHextsame=false; break; } }
  if(justinit) { isHextsame = false; justinit=false; }
  if(!isHextsame) {
-    (*clusterH).zero();
+    (*clusterH).zero(); (*clusterH).totri();
     Vector ZeroHxc(1,1);ZeroHxc=0;
 // fill H matrix with sum over Hi of individual spins
 for (int i=1;i<=(*clusterpars).nofatoms;++i)
@@ -674,7 +664,7 @@ for (int i=1;i<=(*clusterpars).nofatoms;++i)
   {int r=ix*mx+ai*mi+iz+1;
    int s=ix*mx+bi*mi+iz+1;
 //   printf("hello %i %i %i %i\n",r,s,ai,bi);
-   if(r>=s) (*clusterH)(r,s)+=Hi(ai+1,bi+1); else (*clusterH)(s,r)+=complex<double>(0.,Hi(ai+1,bi+1));
+   if(fabs(Hi(ai+1,bi+1))>EPS) { if(r>=s) (*clusterH)(r,s)+=Hi(ai+1,bi+1); else (*clusterH)(s,r)+=complex<double>(0.,Hi(ai+1,bi+1)); }
   }
 }
 // myPrintMatrix(stdout,H);
@@ -742,7 +732,7 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
    int s=ix*mx+bi*mi+iy*my+bj*mj+iz+1;
    int k=ai*dj+aj+1;// ??
    int l=bi*dj+bj+1;// ??
-   if(r>=s) (*clusterH)(r,s)+=SinS(k,l); else (*clusterH)(s,r)+=complex<double>(0.,SinS(k,l));
+   if(fabs(SinS(k,l))>EPS) { if(r>=s) (*clusterH)(r,s)+=SinS(k,l); else (*clusterH)(s,r)+=complex<double>(0.,SinS(k,l)); }
 //printf("hello %i %i %i %i %g %g\n",r,s,k,l,H(r,s),SinS(k,l));
   } 
 }
@@ -806,7 +796,7 @@ if (truncate>1e-6 && truncate!=1)
       end = clock(); if(fdim>200) { printf("done. In %f s\n",(double)(end-start)/CLOCKS_PER_SEC); fflush(stdout); }
    }
 }
-
+(*clusterH).tocsc();
 *oldHext = Hext; } H = *clusterH;
 
 // insert exchange field

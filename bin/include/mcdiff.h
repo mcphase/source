@@ -2,7 +2,7 @@
 //libraries, classes and  functions in mcdiff
 //********************************************
 
-#define MAXNOFREFLECTIONS 6000
+#define MAXNOFREFLECTIONS 240000
 #define SMALL 1e-8
 #define SMALLINT 1e-4
 #define NOFOUTPUTCOLUMNS 12
