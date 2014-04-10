@@ -41,7 +41,7 @@ else
 CC=gcc
 CCC=g++
 FC=gfortran
-LINKER=g++
+LINKER=gfortran
 endif
 
 # Checks whether we support the -march=native target
