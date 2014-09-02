@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#!/usr/bin/perl
 
 use FileHandle;
 
@@ -342,7 +342,7 @@ sub getinteraction {
  if($bvk==1)
  { # here do the Born von Karman calculation using spring constants
   $a0 = .5292e-10;#(m)
-  $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 × 10-22 joules
+  $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 ï¿½ 10-22 joules
   $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
   for($n=1;$n<=$nof_springs;++$n){
          if(abs($r-$bondlength[$n])<0.01
@@ -552,9 +552,9 @@ sub printneighbourlist {
       else
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=0!;}
       }
-      print $l ($text);
       last if (/^(#!|[^#])*diagonalexchange\s*=\s*/);
      }
+      print $l ($text);
 # the next lines are to advance $h to the end of the numeric table
 
       while(<$h>)

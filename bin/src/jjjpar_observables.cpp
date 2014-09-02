@@ -188,7 +188,7 @@ switch (module_type)
             else{getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for external module we must provide th and ph with respect
                                                        // to abc coordinate system
             (*mq)(&Mq,&th,&ph,&J0,&J2,&J4,&J6,&est);
-            if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
+            if(Norm(Zc)<SMALL){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);return false;}
 
             return true;}break;
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // internal module cfield needs transformation because
@@ -200,7 +200,8 @@ switch (module_type)
             if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
             return true;break;
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for so1ion we must th and ph with respect to abc coordinate system
-             if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
+            //printf("normzc=%g \n",Norm(Zc));
+            if(Norm(Zc)<SMALL){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);return false;}
             Mq=(*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);return true;break;
    case 5: 
             {Vector mom(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
