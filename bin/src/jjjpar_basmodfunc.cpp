@@ -240,7 +240,7 @@ module_type=0;
     //*(void **)(&ro_calc)=GetProcAddress(handle,"spindensity_coeff");
     if (ro_calc==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function ro_calc not possible - continuing\n",(int)GetLastError(),modulefilename);}
 
-    dyn_opmat=(Matrix(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
+    dyn_opmat=(int(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
     if (dyn_opmat==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function opmat not possible - continuing\n",(int)GetLastError(),modulefilename);}
 #else
   char * error;
@@ -659,6 +659,9 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
                else { 
                   fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %i\n",module_type); exit(EXIT_FAILURE); } }
             else {
+               if(n==0) {  // Need to recalculate Hamiltonian since have different Hxc, Hext from initialisation.
+                 if((*dyn_opmat)(&n, &sipffilename, &Hxc, &Hext, opmatM[n])!=0) { fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat failed in module %i\n",module_type); } 
+               } 
                return *opmatM[n];
             }
             break;

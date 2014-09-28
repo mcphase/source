@@ -741,6 +741,21 @@ int i1;
      else { 
         opmatM[i1] = new Matrix((*pp.opmatM[i1]).Clo(),(*pp.opmatM[i1]).Chi(),(*pp.opmatM[i1]).Rlo(),(*pp.opmatM[i1]).Rhi()); 
         (*opmatM[i1]) = (*pp.opmatM[i1]); } }
+  if(pp.dyn_opmat!=NULL && module_type==0) {
+    // For the cluster module, during the MF loop, we need to be able to call the external module to recalculate the Hamiltonian for different Hxc, Hext.
+    #ifdef __MINGW32__
+      handle=LoadLibrary(pp.modulefilename);
+      if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n"); exit (EXIT_FAILURE); } 
+      dyn_opmat=(int(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
+      if (dyn_opmat==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function opmat not possible - continuing\n",(int)GetLastError(),modulefilename);}
+    #else
+      char * error;
+      handle=dlopen (pp.modulefilename,RTLD_NOW | RTLD_GLOBAL);
+      if (!handle){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n"); if ((error=dlerror())!=NULL) {fprintf (stderr,"%s\n",error);} exit (EXIT_FAILURE); } 
+      *(void **)(&dyn_opmat)=dlsym(handle,"opmat");
+      if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dyn_opmat=NULL;}
+    #endif
+  }
 }
 
 
