@@ -1,0 +1,690 @@
+#!/usr/bin/perl
+#
+# cif2mcphas.pl
+#
+# Perl script to convert a CIF into a mcphas.j input file, similarly to powdercell2j.pl
+# Invoke as:
+#
+# cif2mcphas.pl [CIFFILE]
+#
+# Fri Sep 26 12:00:53 KST 2014 - Duc Le - mducle@snu.ac.kr
+
+use PDL;
+use PDL::Slatec;
+
+# Loads the tables of symmetry equivalent positions, and atomic/ionic information
+push @INC, $ENV{'MCPHASE_DIR'}.'bin/';
+require 'itc_syms.pl';
+require 'elements.pl';
+
+# Set to 1 to print extra information, and to not create any files, but to pipe everything to STDOUT
+$debug = 0;
+
+@cpname = ("_cell_length_a",
+           "_cell_length_b",
+           "_cell_length_c",
+           "_cell_angle_alpha",
+           "_cell_angle_beta",
+           "_cell_angle_gamma");
+@datcol = ("_atom_site_label",
+           "_atom_type_oxidation_number",
+           "_atom_site_fract_x",
+           "_atom_site_fract_y",
+           "_atom_site_fract_z",
+           "_atom_site_Cartn_x",
+           "_atom_site_Cartn_y",
+           "_atom_site_Cartn_z",
+           "_atom_site_type_symbol");
+$isloop = 0;
+$loophd = 0;
+$lpfdct = 0;
+$symlp  = 0;
+$poslp  = 0;
+$nofatom= 0;
+
+$cif = $ARGV[0];
+
+# ------------------------------------------------------------------------------------------------------------------------ #
+# Subroutines
+# ------------------------------------------------------------------------------------------------------------------------ #
+sub nearest {
+  my ($p, $n) = @_;
+  return substr( $n + ( '0.' . '0' x $p . '5' ), 0, $p + length(int($n)) + 1 );
+}
+
+# Works out largest common factor of an array.  http://www.perlmonks.org/?node_id=56906
+sub gcf {
+  my ($x, $y) = @_;
+  ($x, $y) = ($y, $x % $y) while $y;
+  return $x;
+}
+
+sub multigcf {
+  my $x = shift;
+  $x = gcf($x, shift) while @_;
+  return $x;
+}
+
+# ------------------------------------------------------------------------------------------------------------------------ #
+# Reads CIF and parses it to get the structure parameters and atomic coordinates.
+# ------------------------------------------------------------------------------------------------------------------------ #
+while (<>) {
+  $_ =~ s/\R//g;            # safe chomp
+  if ($_ =~ /_cell/) {
+    @line = split; 
+    $cellpar{@line[0]} = @line[1];
+  }
+  if ($_ =~ /loop_/) {      # Check if start of loop structure. We're interested in two loops:
+    $isloop = 1;            #   The symmpetry equivalent position loop
+    $loophd = 1;            #   and the data loop.
+    $symlp = 0;
+    $poslp = 0;
+    $lpfdct = 0;
+  } elsif($_ =~ /_symmetry_space_group_name_H-M/) { 
+    $spagrp = $_;
+    $spagrp =~ s/_symmetry_space_group_name_H-M//g;
+    $spagrp =~ s/HR/H/; $spagrp =~ s/://g; $spagrp =~ s/'//g; $spagrp =~ s/^\s+//g;
+  } else {                  # First we parse the loop column headers in this else{} block
+    if($isloop == 1) {
+      if($_ =~ /\s*_/) {
+        if($loophd == 1) {
+          if($_ =~ /_symmetry_equiv_pos_as_xyz/)  { $symlp = 1; $symcol = $lpfdct; }
+          for $ic (0..$#datcol) {
+            if($_ =~ /$datcol[$ic]/) {
+              $poslp = 1; $poscol[$ic] = $lpfdct;
+            }
+          }
+          $lpfdct++;
+        } else {            # see a line with a _parameter -> end of loop
+          $isloop = 0;
+          $symlp = 0;
+          $poslp = 0;
+          $lpfdct = 0;
+        }
+      } else {              # Finished reading loop header, but still in the loop. 
+        $loophd = 0;
+        if($symlp==1) {     # We're in a symmetry equiv pos loop.
+          push @sympos, $_;
+        } 
+        elsif($poslp>0 && $_!~/^\s*$/) {   # We're in the data loop.
+          @line = split; 
+          for $ic (0..$#datcol) {
+            if(!($poscol[$ic]eq"")) { $dat[$nofatom][$ic] = $line[$poscol[$ic]]; }
+          }
+          $nofatom++;
+        }
+      }
+    }
+  }
+}
+
+# Got the data, now check it is ok
+$errct=0;
+foreach $cpn (@cpname) {
+  if ($cellpar{$cpn} eq "") { print STDERR "Error: cell parameter $cpn not found.\n"; $errct++; }
+}
+if($errct>0) { die "Sorry, $0 is stupid and needs all lattice constants and angles. (Even for cubic structures)\n"
+                  ."  Please edit $cif and make sure each of the above mention parameters is present.\n"; }
+
+@vrn = ("","","x","y","z");
+for $ic (2..4) {
+  if($poscol[$ic] eq "" && $poscol[$ic+3] eq "") {
+    die "Error: position data is missing the $vrn[$ic] coordinate. $0 requires either the fractional or Cartesian coordinates.\n"
+       ."  Please Make sure the data _loop has a column called _atom_site_fract_$vrn[$ic] or _atom_site_Cartn_$vrn[$ic].\n"; }
+}
+
+# ------------------------------------------------------------------------------------------------------------------------ #
+# Calculates the Cartesian to relative coordinate transformation and converts coordinates if necessary.
+# ------------------------------------------------------------------------------------------------------------------------ #
+
+# Determine the transformation matrix to convert from fractional to Cartesian coordinates and back.
+#   this is not using the McPhase convention (y||b), but rather using the OpenBabel convention, with x||a
+$PI=3.141592654;
+$a = $cellpar{"_cell_length_a"};
+$b = $cellpar{"_cell_length_b"};
+$c = $cellpar{"_cell_length_c"};
+$alpha = $cellpar{"_cell_angle_alpha"}*$PI/180;
+$beta  = $cellpar{"_cell_angle_beta"}*$PI/180;
+$gamma = $cellpar{"_cell_angle_gamma"}*$PI/180;
+$ca = cos($alpha); $cb = cos($beta); $cc = cos($gamma);
+$v = 1-$ca*$ca-$cb*$cb-$cc*$cc+2*$ca*$cb*$cc;
+if($debug==1) { print STDERR "v=$v\n"; }
+if($v<0) { die "Unit cell parameters: alpha=$alpha,beta=$beta,gamma=$gamma are not geometrically consistent.\n"; }
+$v=sqrt($v);
+$rtoijk = pdl [ [ $a, $b*cos($gamma), $c*cos($beta) ],
+                [  0, $b*sin($gamma), $c*(cos($alpha)-cos($beta)*cos($gamma))/sin($gamma) ],
+                [  0,              0, $c*$v/sin($gamma) ] ];
+$invrtoijk = matinv($rtoijk);
+
+if($debug==1) {
+  print STDERR $rtoijk;
+  print STDERR $invrtoijk;
+}
+
+# If the data is in Cartesians, convert it back to fractional before applying the symmetry equivalent positions
+if($poscol[2] eq "") {
+  for $j (0..$nofatom-1) {
+    $cpos = pdl [ ($dat[$j][5]), ($dat[$j][6]), ($dat[$j][7]) ];
+    $fpos = $invrtoijk x transpose($cpos);
+    $dat[$j][2] = sprintf "%.5f",$fpos->at(0,0); $dat[$j][2]*=1;
+    $dat[$j][3] = sprintf "%.5f",$fpos->at(0,1); $dat[$j][3]*=1;
+    $dat[$j][4] = sprintf "%.5f",$fpos->at(0,2); $dat[$j][4]*=1;
+  }
+} else {  # Otherwise, still round the data to 5 d.p. only, and convert to Cartesians for mcdiff.in
+  for $j (0..$nofatom-1) { 
+    $dat[$j][2] = sprintf "%.5f",$dat[$j][2]; $dat[$j][2]*=1;
+    $dat[$j][3] = sprintf "%.5f",$dat[$j][3]; $dat[$j][3]*=1;
+    $dat[$j][4] = sprintf "%.5f",$dat[$j][4]; $dat[$j][4]*=1;
+  }
+}
+
+# ------------------------------------------------------------------------------------------------------------------------ #
+# Determines the symmetry equivalent positions, oxidation states and other single ion parameters
+# ------------------------------------------------------------------------------------------------------------------------ #
+
+# If there is no symmetry equivalent positions in the file, we look it up from a table.
+if($symcol eq "") { 
+  if(!($spagrp eq "")) {
+    @sympos = split(";",$symop{$spagrp});
+  } else {
+    die "Error:   no _symmetry_equiv_pos_as_xyz or _symmetry_space_group_name_H-M field - I cannot determine the symmetry equivalent positions.
+         Please edit the cif file to add these fields, or use a program like Babel or SPACEGROUP to generate another cif.\n"
+  } 
+}
+
+# Checks if oxidation state is given in the CIF file (either in the _oxidation_number or _type_symbol fields)
+for $j(0..$nofatom-1) {
+  push @oxyguess, 0;
+  if(defined $dat[$j][1]) { 
+    push @oxy, sprintf "%.0f", $dat[$j][1];  # Rounds the number
+  } elsif(defined $dat[$j][8]) {
+    $pp = $dat[$j][8]; $pp =~ s/[A-Za-z]*//;
+    if($pp =~ /\+/) { $pp =~ s/\+//; push @oxy, $pp; } elsif($pp =~ /\-/) { $pp =~ s/\-//; push @oxy, (-1)*$pp; } else { push @oxy, ""; }
+  } else {
+    push @oxy, "";
+    $oxyguess[-1]=1;
+  }
+  if($oxy[$j]==0) { $oxyguess[$j]=1; }
+}
+# If the oxidation state is undefined, look it up in the table
+for $j(0..$nofatom-1) {
+  $at = $dat[$j][0]; $at =~ s/[0-9]+//;
+  $attab = $element{$at}; 
+  if(!$attab) { die "Error, unknown element: $at\n"; }
+  if($oxy[$j] eq "" || $oxy[$j]==0) {
+    $oxyref = ${$attab}[-1];
+    if($oxyref =~ /,/) { 
+      @a_oxyref = split(",",$oxyref); $oxy[$j] = $a_oxyref[0];
+    } else { $oxy[$j] = $oxyref; }
+  }
+  push @ismag, ${$attab}[2]; 
+  push @realb, ${$attab}[0]/10;  # Why div by 10? (This code was in powdercell2j.pl)
+  push @imagb, ${$attab}[1]/10;  
+  if($ismag[$j]) {
+    $eltab = $magions{$at.$oxy[$j]."+"}; 
+    if(${$eltab}[0] eq "") { $ismag[$j] = 0; }
+  }
+}
+
+# Prints the extracted / converted data
+if($debug==1) {
+  print STDERR "Spacegroup:|$spagrp|\n";
+  foreach $cpn (@cpname) {
+    print STDERR "cellpar{$cpn}=$cellpar{$cpn}\n";
+  }
+  print STDERR "symcol = $symcol\n";
+  foreach $ic (0..$#datcol) {
+    print STDERR "poscol[$ic]=$poscol[$ic]|$datcol[$ic]\n";
+  }
+  foreach $so (@sympos) {
+    print STDERR "$so\n";
+  }
+  print STDERR "nofatom=$nofatom\n";
+  for $j(0..$nofatom-1) {
+    for $ic(0..$#datcol) {
+      print STDERR "$dat[$j][$ic]\t";
+    }
+    print STDERR "\n";
+  }
+  print STDERR "     oxidation\tismag\tRe[b]\tIm[b]:\n";
+  for $j(0..$nofatom-1) {
+    print STDERR "$dat[$j][0]\t$oxy[$j]\t$ismag[$j]\t$realb[$j]\t$imagb[$j]\n"; 
+  }
+}
+
+# Loops over each inequivalent atom and apply each symmetry equivalent operator
+for $j(0..$nofatom-1) {
+  @epos = ();
+  foreach $sym (@sympos) {
+    $x = $dat[$j][2];
+    $y = $dat[$j][3];
+    $z = $dat[$j][4];
+    $op = $sym; $op =~ s/'//g; $op =~ s/([xyz])/\$$1/g; 
+    $op =~ s/^/\$xx=/; $op =~ s/$/;/; 
+    $op =~ s/,/;\$yy=/; 
+    $op =~ s/,/;\$zz=/;
+   #print STDERR "x=$x; y=$y; z=$z; sym=$op\n";
+    eval $op;
+   #print STDERR "xx=$xx; yy=$yy; zz=$zz;\n";
+    push @epos, "$xx;$yy;$zz";
+  }
+  # uniq from: http://perlmaven.com/unique-values-in-an-array-in-perl
+  @uepos = keys { map { $_ => 1 } @epos }; @epos = ();
+  foreach $eps (@uepos) {
+    @seps=split(";",$eps); 
+    for (0..2) { if($seps[$_]<0) { $seps[$_]+=1; } }
+    for (0..2) { if($seps[$_]>1) { $seps[$_]-=1; } }
+    $st = "$seps[0];$seps[1];$seps[2]"; $st =~ s/667/666/g; $st =~ s/334/333/g;
+    push @epos, $st;
+  }
+  @uepos = keys { map { $_ => 1 } @epos };
+
+  # Loops through and checks there are no duplicates
+  @same = ();
+  foreach $ii(0..$#uepos) {
+    @seps=split(";",@uepos[$ii]); 
+    foreach $jj($ii+1..$#uepos) {
+      @scps=split(";",@uepos[$jj]); 
+      $df = abs($seps[0]-$scps[0])+abs($seps[1]-$scps[1])+abs($seps[2]-$scps[2]);
+      if($df<1e-3) { push @same,$jj; }
+    }
+  }
+  foreach (@same) { $uepos[$_]=undef; }
+  @uepos = grep defined, @uepos;
+
+  $atom = $dat[$j][$0]; $atom =~ s/[0-9]//g; $atom = sprintf "%-4s",$atom;
+  push @atoms, $atom;
+  if($ismag[$j]) { $ion = $atom.$oxy[$j]."p"; $ion=~s/\s+//g; } else { $ion = $atom; }
+
+  # Populates the arrays of atom types and positions
+  foreach $eps (@uepos) {
+    @seps=split(";",$eps); 
+    push @pos, sprintf "%-4s:% 10.5f:% 10.5f:% 10.5f:%-5s:%d",$atom,@seps,$ion,$j;
+    $seen=0; foreach(@atp) { if($_=~/$atom/) { $seen=1; } }
+    if(!$seen || !defined($atp[-1])) { push @atp, $atom; } $htp{$atom}++;
+   #printf $atom."% 14.5f% 14.5f% 14.5f\n",@seps;
+   #$cpos = pdl [ $seps[0], $seps[1], $seps[2] ];
+   #$fpos = $rtoijk x transpose($cpos);
+   #$ceps[0] = sprintf "% 14.5f",$fpos->at(0,0); #$ceps[0]*=1;
+   #$ceps[1] = sprintf "% 14.5f",$fpos->at(0,1); #$ceps[1]*=1;
+   #$ceps[2] = sprintf "% 14.5f",$fpos->at(0,2); #$ceps[2]*=1;
+   #print $atom.join(" ",@ceps)."\n";
+   $mults[$j]++;
+  }
+}
+#print "$_ $htp{$_}\n" for (keys %htp);
+if($debug==1) { foreach (@pos) { print STDERR "$_\n"; } }
+
+# Determine common factors for chemical formula 
+for (keys %htp) { push @nat, $htp{$_}; } $denom = multigcf(@nat);
+if($debug==1) { print STDERR "denom=$denom\n"; }
+
+# Convert back from radians
+$alpha *= 180/$PI; $beta *= 180/$PI; $gamma *= 180/$PI;
+
+# ------------------------------------------------------------------------------------------------------------------------ #
+# Prints out information for user
+# ------------------------------------------------------------------------------------------------------------------------ #
+print "$0: This is the structure and chemical data extracted from the CIF and/or guessed\n";
+print "a=$a b=$b c=$c  alpha=$alpha beta=$beta gamma=$gamma\n";
+if($spagrp eq "") {
+  print "No spacegroup symbol found in CIF, but the following symmetry equivalent positions will be used:\n";
+  foreach $so (@sympos) { print "$so\n"; }
+} else { print "spacegroup is $spagrp\n"; }
+print "----------------------------------------------------------------------------------\n";
+print "Label\tElement\tValence\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
+print "----------------------------------------------------------------------------------\n";
+@magornot = ( "NonMagnetic", "Magnetic" );
+for $j(0..$nofatom-1) {
+  print "$dat[$j][0]\t$atoms[$j]\t$oxy[$j]\t$mults[$j]\t$magornot[$ismag[$j]]\t$dat[$j][2]\t$dat[$j][3]\t$dat[$j][4]\n";
+}
+print "----------------------------------------------------------------------------------\n";
+print "Mult. is the multiplicity and is calculated by applying all the symmetry equivalent\n";
+print "   positions to the coordinates found in the CIF. Note this assumes full occupation of all sites.\n";
+print "   If this is wrong, please check the CIF and file a bug.\n";
+print "If the ionic valence or whether the ion is magnetic or not is incorrect,\n";
+print "   please use the interactive option to specify it.\n";
+print "If positions or structure parameters are correct, please check the CIF file, and file a bug.\n";
+
+# ------------------------------------------------------------------------------------------------------------------------ #
+# Outputs the data to mcphas.j and sipf files.
+# ------------------------------------------------------------------------------------------------------------------------ #
+
+# Prints out the mcphas_all_atoms.j without neighbours (use makenn.pl)
+if($debug==0) { open (FOUT, ">mcphas_all_atoms.j"); } else { *FOUT = *STDOUT; }
+print FOUT "#<!--mcphase.mcphas.j-->\n";
+print FOUT "#***************************************************************\n";
+print FOUT "# Lattice and Exchange Parameter file for\n";
+print FOUT "# mcphas version 5.2\n";
+print FOUT "# - program to calculate static magnetic properties\n";
+print FOUT "# reference: M. Rotter JMMM 272-276 (2004) 481\n";
+print FOUT "# mcdisp version 5.2\n";
+print FOUT "# - program to calculate the dispersion of magnetic excitations\n";
+print FOUT "# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n";
+print FOUT "#***************************************************************\n";
+print FOUT "#\n";
+print FOUT "# "; foreach (@atp) { $at=$_; $fml=$htp{$_}/$denom; $at=~s/\s+//g; print FOUT "$at ($fml) "; } print FOUT "\n";
+print FOUT "#\n";
+print FOUT "# Lattice Constants (A)\n";
+print FOUT "#\n";
+print FOUT "#! a= $a b= $b c= $c  alpha= $alpha beta= $beta gamma= $gamma\n";
+print FOUT "#\n";
+print FOUT "#! r1a=   1 r2a= 0 r3a=  0\n";
+print FOUT "#! r1b=   0 r2b= 1 r3b=  0   primitive lattice vectors [a][b][c]\n";
+print FOUT "#! r1c=   0 r2c= 0 r3c=  1\n";
+print FOUT "#\n";
+print FOUT "#! nofatoms= $#pos  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
+for (0..$#pos) {
+  @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
+  print FOUT "#********************************************************************* \n";
+  print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $_ ; number of the atom within this type = $ntype\n";
+  print FOUT "#! da= $ps[1] [a] db= $ps[2] [b] dc= $ps[3] [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
+  if($ismag[$ions{$ps[4]}]) { $nmag++; }
+}
+print FOUT "#********************************************************************* \n";
+if($debug==0) { close FOUT; }
+
+# Prints out the mcphas_magnetic_atoms.j without neighbours (use makenn.pl)
+if($debug==0) { open (FOUT, ">mcphas_magnetic_atoms.j"); }
+print FOUT "#<!--mcphase.mcphas.j-->\n";
+print FOUT "#***************************************************************\n";
+print FOUT "# Lattice and Exchange Parameter file for\n";
+print FOUT "# mcphas version 5.2\n";
+print FOUT "# - program to calculate static magnetic properties\n";
+print FOUT "# reference: M. Rotter JMMM 272-276 (2004) 481\n";
+print FOUT "# mcdisp version 5.2\n";
+print FOUT "# - program to calculate the dispersion of magnetic excitations\n";
+print FOUT "# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n";
+print FOUT "#***************************************************************\n";
+print FOUT "#\n";
+print FOUT "# "; foreach (@atp) { $at=$_; $fml=$htp{$_}/$denom; $at=~s/\s+//g; print FOUT "$at ($fml) "; } print FOUT "\n";
+print FOUT "#\n";
+print FOUT "# Lattice Constants (A)\n";
+print FOUT "#\n";
+print FOUT "#! a= $a b= $b c= $c  alpha= $alpha beta= $beta gamma= $gamma\n";
+print FOUT "#\n";
+print FOUT "#! r1a=   1 r2a= 0 r3a=  0\n";
+print FOUT "#! r1b=   0 r2b= 1 r3b=  0   primitive lattice vectors [a][b][c]\n";
+print FOUT "#! r1c=   0 r2c= 0 r3c=  1\n";
+print FOUT "#\n";
+print FOUT "#! nofatoms= $nmag  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
+for (0..$#pos) {
+  @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
+  if($ismag[$ions{$ps[4]}]) {
+    print FOUT "#********************************************************************* \n";
+    print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $_ ; number of the atom within this type = $ntype\n";
+    print FOUT "#! da= $ps[1] [a] db= $ps[2] [b] dc= $ps[3] [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
+  }
+}
+print FOUT "#********************************************************************* \n";
+if($debug==0) { close FOUT; }
+
+# Generates the associated single ion parameter files (sipf). 
+$sipfheader = 
+  "#<!--mcphase.sipf-->\n".
+  "#***************************************************************\n".
+  "# Single Ion Parameter File for Module Kramer for\n".
+  "# mcphas version 5.2\n".
+  "# - program to calculate static magnetic properties\n".
+  "# reference: M. Rotter JMMM 272-276 (2004) 481\n".
+  "# mcdisp version 5.2\n".
+  "# - program to calculate the dispersion of magnetic excitations\n".
+  "# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n".
+  "# mcdiff version 5.2\n".
+  "# - program to calculate neutron and magnetic xray diffraction\n".
+  "# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n".
+  "#***************************************************************\n";
+for (keys %ions) {
+  if($debug==0) { open (FOUT, ">$_.sipf"); }
+  if($ismag[$ions{$_}]) {
+    $ionname = $_; $ionname =~ s/p/\+/g;
+    $eltab = $magions{$ionname};             # Looks up information about the magnetic ions
+    $fftab = $magff{$ionname};               #   and form factor
+    $nofelectrons = ${$eltab}[0];
+    if($nofelectrons =~ /f/) {
+      $so1ionname = ${$eltab}[3];
+    } else { $so1ionname = "S=".${$eltab}[1]; }
+    $nofelectrons =~ s/^[0-9][a-z]//;
+    print FOUT "#!module=so1ion\n";
+    print FOUT $sipfheader;
+    print FOUT "#IONTYPE=$ionname\n";
+    print FOUT "IONTYPE=$so1ionname\n";
+    print FOUT "CHARGE=$oxy[$ions{$_}]\n";
+    print FOUT "MAGNETIC=$ismag[$ions{$_}]\n";
+    print FOUT "nof_electrons=$nofelectrons\n";
+    print FOUT "\n";
+    print FOUT "#----------------\n";
+    print FOUT "# Lande factor gJ\n";
+    print FOUT "#----------------\n";
+    print FOUT "GJ=2\n";
+    print FOUT "\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "# Radial integrals for point charge calculations\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "R2=${$eltab}[4]\n";
+    print FOUT "R4=${$eltab}[5]\n";
+    print FOUT "R6=${$eltab}[6]\n";
+    print FOUT "\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)\n";
+    print FOUT "#                      with s=sin(theta)/lambda=Q/4pi\n";
+    print FOUT "# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>\n";
+    print FOUT "# unit of DWF is [A^2]\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "DWF=0\n";
+    print FOUT "\n";
+    print FOUT "#Neutron magnetic form factor coefficients\n";
+    print FOUT ${$fftab}[1];
+    print FOUT "\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "# Neutron Scattering Length (10^-12 cm) (can be complex)\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "SCATTERINGLENGTHREAL=$realb[$ions{$_}]\n";
+    print FOUT "SCATTERINGLENGTHIMAG=$imagb[$ions{$_}]\n";
+    print FOUT "#  ... note: - if an occupancy other than 1.0 is needed, just reduce \n";
+    print FOUT "#              the scattering length linear accordingly\n";
+  }
+  else {
+    print FOUT "#!MODULE=kramer\n";
+    print FOUT $sipfheader;
+    print FOUT "#IONTYPE=$_".abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-")."\n";
+    print FOUT "CHARGE=$oxy[$ions{$_}]\n";
+    print FOUT "MAGNETIC=$ismag[$ions{$_}]\n";
+    print FOUT "\n";
+    print FOUT "# this is a crystal field ground state doublet\n";
+    print FOUT "# module, parameters are the following 3 matrix\n";
+    print FOUT "# elements\n";
+    print FOUT "#\n";
+    print FOUT "# A=|<+-|Ja|-+>| B=|<+-|Jb|-+>| C=|<+-|Jc|+->|\n";
+    print FOUT "A = 2.000000\n";
+    print FOUT "B = 2.543750\n";
+    print FOUT "C = 1.600000\n";
+    print FOUT "#----------------\n";
+    print FOUT "# Lande factor gJ\n";
+    print FOUT "#----------------\n";
+    print FOUT "GJ=2\n";
+    print FOUT "\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)\n";
+    print FOUT "#                      with s=sin(theta)/lambda=Q/4pi\n";
+    print FOUT "# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>\n";
+    print FOUT "# unit of DWF is [A^2]\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "DWF=0\n";
+    print FOUT "\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "# Neutron Scattering Length (10^-12 cm) (can be complex)\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "SCATTERINGLENGTHREAL=$realb[$ions{$_}]\n";
+    print FOUT "SCATTERINGLENGTHIMAG=$imagb[$ions{$_}]\n";
+    print FOUT "#  ... note: - if an occupancy other than 1.0 is needed, just reduce \n";
+    print FOUT "#              the scattering length linear accordingly\n";
+  }
+  if($debug==0) { close FOUT; }
+}
+
+# Prints out the mcdiff.in file
+if($debug==0) { open (FOUT, ">mcdiff.in"); }
+print FOUT << "EOF";
+# this file is the input file created by program powdercell2j
+#<!--mcdiff.mcdiff.in>
+#***************************************************************
+#      mcdiff is a program for the calculation of elastic
+#   neutron diffraction and resonant magnetic Xray scattering
+#  reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+# this input file contains 4 sections corresponding to different
+# groups of parameters
+#
+# - all lines have to start with a # sign with the  exception of
+#   the lines containing atomic positional parameters
+# - the other parameters have to be defined in the corresponding
+#   section by statements such as parameter=value
+# - the sequence of the parameters within a section is arbitrary
+#
+#
+# %SECTION 1%  OVERALL PARAMETERS
+#
+#! lambda   = 2.4  wavelength (A)
+#
+#! thetamax = 60   maximum bragg angle (deg)
+#
+#! ovalltemp= 0  overall temperature factor (A^2)
+#           ...I ~ EXP(-2 * ovalltemp * sintheta^2 / lambda^2)
+#                  relation to other notations:
+#                  ovalltemp = Biso = 8 pi^2 Uiso^2
+#
+#! lorentz=0  type of lorentzfactor to be used
+#            0.....no lorentzfactor
+#            1.....neutron powder flat sample
+#            2.....neutron powder cylindrical sample
+#            3.....neutron single crystal
+#            4.....neutron TOF powder cyl. sample - d-pattern log scaled
+#            5.....neutron TOF powder cyl. sample - d-pattern normal scaled
+#
+#! out10=1    type of desired output in column 10 and 11 of mcdiff.out
+#! out11=0    (optional) default is NSF in column 10 and LF in column 11
+#            0....LF
+#            1....|NSF|[b]
+#            2....Re(NSF)[b]
+#            3....Im(NSF)[b]
+#            4....|MSF|
+#            5....|MSF.P|
+#            6....Re(MSF.P)
+#            7....Im(MSF.P)
+#            8....|MSFdip|
+#            9....|MSFdip.P|
+#            10....Re(MSFdip.P)
+#            11....Im(MSFdip.P)
+#            12....angl(Q,P)[°]
+#            13....i(MSFxMSF*).P
+#            14....I+
+#            15....I-
+#            16....I+/I-
+#            17....i(MSFxMSF*)dip.P
+#            18....Idip+
+#            19....Idip-
+#            20....Idip+/Idip-
+#            21....2*|MSF.P|/sin^2(angl(Q,P)
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P)
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#
+#
+#           In the above the intensities I+ and I- are the intensities in a polarised neutron scattering experiment
+#           with incoming polarisation parallel (I+) and antiparallel (I-) to P:
+#            I+-=LF exp(-OTF Q^2/8pi^2)
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2
+#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P))]
+#
+#
+#             For some of the above options we need the
+#! Pa=  0.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
+#! Pb=  0.0000   Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)
+#! Pc=  1.0000
+#
+#
+#
+#
+# %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
+#
+#
+#! natcryst=$#pos      number of nonmagnetic atoms in primitive crystalographic unit cell
+#
+# it follows a list of nat lines with nonmagnetic atoms
+# ... notes: - if an occupancy other than 1.0 is needed, just reduce
+#              the scattering length linear accordingly
+#            - da db and dc are not used by the program, dr1,dr2 and dr3
+#              refer to the primitive lattice given below
+#            - Debye Waller Factor notation: sqr(Intensity) ~ structure factor ~
+#              ~sum_n ()n exp(-2 DWFn sin^2(theta) / lambda^2)=EXP (-Wn),
+#              relation to other notations: 2*DWF = B = 8 pi^2 <u^2>, units DWF (A^2)
+#
+#! use_dadbdc=1
+#
+# Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
+EOF
+for (0..$#pos) {
+  @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
+  if($ismag[$ions{$ps[4]}]==0) {
+    $fpos = pdl [ ($ps[1]), ($ps[2]), ($ps[3]) ];
+    $cpos = $rtoijk x transpose($fpos);
+    printf FOUT "%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f 0  # %s.sipf\n",
+       $realb[$ions{$ps[4]}], $imagb[$ions{$ps[4]}], $ps[1], $ps[2], $ps[3], $cpos->at(0,0), $cpos->at(0,1), $cpos->at(0,2), $ps[4];
+  }
+}
+# print STDOUT "press enter to generate mcdiff.in file, too\n";
+# <STDIN>;
+# print " Please enter the magnetic supercell dimension na nb nc and the propagation vector (h,k,l):\n";
+# print " na (>=1)?\n";$na=<STDIN>;$na=~s/\n//;
+# print " nb (>=1) ?\n";$nb=<STDIN>;$nb=~s/\n//;
+# print " nc (>=1) ?\n";$nc=<STDIN>;$nc=~s/\n//;
+# print " h ?\n";$h=<STDIN>;$h=~s/\n//;
+# print " k ?\n";$k=<STDIN>;$k=~s/\n//;
+# print " l ?\n";$l=<STDIN>;$l=~s/\n//;
+# 
+# copy("mcphas_magnetic_atoms.j","mcphas.j");
+# system ("spinsfromq $na $nb $nc $h $k $l > results/mcphas.mf");
+# #system ("fact 1 0 powdercell2j.sps");
+# #system ("spins 0 0 0 0 powdercell2j.sps > powdercell2j.spo");
+# #system ("javaview results/spins.jvx");
+# system("display_densities -M 1 0 0 0 > results/powdercell2j.spo");
+# mydel  ("results/powdercell2j.spo");
+# mydel  ("results/mcphas.mf");
+# mydel ("scatteringlengths.txt");
+print FOUT << "EOF";
+#
+#
+# %SECTION 3% DESCRIPTION OF THE LATTICE
+#
+#
+# Note: what follows here may directly be taken from the output of program spins
+#       (file spins.out) or charges (file charges.out)
+# -----------------------------------------------------------------------------
+EOF
+if($debug==0) { close FOUT; }
+
+print "END OF PROGRAM $0\n";
+print "\n";
+print "Created files:\n";
+print "\n";
+print " mcphas_all.j                           ... contains all atoms (magnetic and nonmag)\n";
+print " mcphas_magnetic_atoms.j                ... contains only magnetic atoms\n";
+for (keys %ions) {
+  $atm = $atoms[$ions{$_}]; $atm =~ s/\s+//g;
+  printf " %-39s... contains single parameters for %s ion\n", "$_.sipf", $atm.abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-");
+}
+print "\n";
+print "   running \"makenn R\" command  will create from mcphas.j a number of files\n";
+print "   \"makenn.aN.pc\" equal with the number of the atoms in the unit cell.\n";
+print "   in this file you find the neighbours of the N atom in the unit cell.\n";
+print "   It is important to know what number corresponds to each atom type!\n";
+print "\n";
+print " mcdiff.in                              ... input file for mcdiff\n";
+print "   running javaview results/spins.jvx displays the corresponding\n";
+print "   spinstructure (collinear), !! mind to edit formfactor information\n";
+print "   in the magnetic ions .sipf files before running mcdiff !!\n";
+print "\n";
+
