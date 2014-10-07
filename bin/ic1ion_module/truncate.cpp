@@ -27,6 +27,8 @@
 #include <windows.h>
 #endif
 
+truncRot g_truncRot;
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Truncates the matrix, and stores the single ion part in the estates array
 // --------------------------------------------------------------------------------------------------------------- //
@@ -115,18 +117,29 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine for opmat() function for cluster module. Returns only req matrix in packed format (Real Upper, i Lower).
 // --------------------------------------------------------------------------------------------------------------- //
-void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, Matrix &retmat)
+void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, Matrix &retmat, const char* filename)
 {
    int info,Hsz=getdim(pars.n,pars.l);
    int cb = (int)(pars.truncate_level*(double)Hsz); Matrix outmat(1,cb,1,cb); outmat=0;
-   complexdouble *Vf; Vf = new complexdouble[Hsz*Hsz]; double *Ef; Ef = new double[Hsz]; 
+   complexdouble *Vf; //Vf = new complexdouble[Hsz*Hsz]; 
+ //double *Ef; Ef = new double[Hsz]; 
 
-   // Calculates the eigenvectors and puts it into *est matrix for use by truncate_expJ()
-   sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; if(!iHic.isempty()) iHic/=MEV2CM;
-   info = ic_diag(Hic,iHic,Vf,Ef); if(info!=0) { std::cerr << "truncate_hmltn_packed: Error diagonalising, info==" << info << "\n"; }
-   delete[]Ef; 
-   for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) { 
-      if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) Vf[ii*Hsz+jj].r=0.; if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) Vf[ii*Hsz+jj].i=0.; } 
+   // Checks whether this sipf file has previously been seen; if not add 
+   int iV;
+   bool found=false;
+   for(iV=0; iV<(int)g_truncRot.sipfs.size(); iV++) { 
+      if(strcmp(filename,g_truncRot.sipfs[iV].c_str())==0) { found=true; Vf = g_truncRot.V[iV]; break; }
+   }
+
+   // Not previously seen - calculate the rotation matrix and push it into the vector
+   if(!found) 
+   { 
+      g_truncRot.sipfs.push_back(std::string(filename)); 
+      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; if(!iHic.isempty()) iHic/=MEV2CM;
+      double *Ef; Ef = new double[Hsz]; Vf = new complexdouble[Hsz*Hsz]; g_truncRot.V.push_back(Vf);
+      info = ic_diag(Hic,iHic,Vf,Ef); if(info!=0) { std::cerr << "truncate_hmltn_packed: Error diagonalising, info==" << info << "\n"; }
+      delete[]Ef; 
+   }
 
    // Calculates the rotated single ion Hamiltonian
    sMat<double> zeroes; zeroes.zero(Hsz,Hsz); sMat<double> Upq,Umq; complexdouble *zJmat=zmat2f(Mat,iMat);;
@@ -139,7 +152,8 @@ void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, 
       if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) outmat(jj+1,ii+1)=Hrot[ii*cb+jj].i; 
    } 
  //memcpy(&outmat[0][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
-   delete[]Vf; delete[]Hrot; delete[]zmt;
+ //delete[]Vf; 
+   delete[]Hrot; delete[]zmt;
 
    retmat = outmat;
 }

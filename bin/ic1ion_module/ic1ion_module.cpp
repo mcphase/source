@@ -64,7 +64,7 @@
 void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<double> &iHic, int JHi, int JLo);
 void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, double *lnZ, double *U);
 void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, int xyz);
-void truncate_hmltn_packed(icpars &pars, sMat<double> &Hic, sMat<double> &iHic, Matrix &retmat);
+void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, Matrix &retmat, const char* filename);
 
 void myPrintMatrix(FILE * file,sMat<double> & M,int d)
 {
@@ -1213,8 +1213,8 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
              Matrix &outmat)              // operator matrix of Hamiltonian, I1, I2, I3 depending on n
 {
    // Parses the input file for parameters
-   icpars pars; const char *filename = sipffilename[0];
-   ic_parseinput(filename,pars);
+   icpars pars; const char *sipffile = sipffilename[0];
+   ic_parseinput(sipffile,pars);
    int nn = abs(n)-1;
 
    if(n==0)                               // return Hamiltonian
@@ -1237,7 +1237,7 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
       sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; Hic+=Jmat; if(!iHic.isempty()) iHic/=MEV2CM; if(!iJmat.isempty()) iHic+=iJmat; 
 
       if(pars.truncate_level!=1)  {       // Truncates the matrix, and packs it into real upper / imag lower triangle format
-         truncate_hmltn_packed(pars, Hic, iHic, outmat); return 0; }
+         truncate_hmltn_packed(pars, Hic, iHic, outmat, sipffile); return 0; }
       else {
          zmat2pack(Hic,iHic,outmat); return 0; }
    }
@@ -1294,7 +1294,7 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
          }
 
          if(pars.truncate_level!=1 || n<6) {
-            truncate_hmltn_packed(pars,Jmat,iJmat,outmat); return 0; }
+            truncate_hmltn_packed(pars,Jmat,iJmat,outmat,sipffile); return 0; }
          else {
             zmat2pack(Jmat,iJmat,outmat); return 0; }
       }
@@ -1302,7 +1302,7 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
       {
          icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices,pars.density);
          if(pars.truncate_level!=1 || n<0) {
-            if(im[nn]==0) truncate_hmltn_packed(pars,mfmat.J[nn],zeroes,outmat); else truncate_hmltn_packed(pars,zeroes,mfmat.J[nn],outmat); }
+            if(im[nn]==0) truncate_hmltn_packed(pars,mfmat.J[nn],zeroes,outmat,sipffile); else truncate_hmltn_packed(pars,zeroes,mfmat.J[nn],outmat,sipffile); }
          else {
             if(im[nn]==0) zmat2pack(mfmat.J[nn],zeroes,outmat);                  else zmat2pack(zeroes,mfmat.J[nn],outmat); }
          return 0;

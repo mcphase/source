@@ -250,6 +250,9 @@ icpars::icpars()
    partial = false; arnoldi = false; truncate_level = 1; num_eigv = 4;
    partial_standalone = false; arnoldi_standalone = false;
 }
+truncRot::~truncRot() {
+   for(int ii=0; ii<(int)V.size(); ii++) { if(V[ii]!=0) { delete[]V[ii]; V[ii]=0; } } 
+}
 // --------------------------------------------------------------------------------------------------------------- //
 // Methods functions for the class icpars
 // --------------------------------------------------------------------------------------------------------------- //

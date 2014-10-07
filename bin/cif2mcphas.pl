@@ -7,13 +7,17 @@
 #
 # cif2mcphas.pl [CIFFILE]
 #
+# This program is part of the McPhase package, licensed under the GNU GPL v2. Please see the COPYING file
+#
 # Fri Sep 26 12:00:53 KST 2014 - Duc Le - mducle@snu.ac.kr
 
 use PDL;
 use PDL::Slatec;
+use File::Copy;
+use Getopt::Long;
 
 # Loads the tables of symmetry equivalent positions, and atomic/ionic information
-push @INC, $ENV{'MCPHASE_DIR'}.'bin/';
+push @INC, $ENV{'MCPHASE_DIR'}.'/bin/';
 require 'itc_syms.pl';
 require 'elements.pl';
 
@@ -34,13 +38,35 @@ $debug = 0;
            "_atom_site_Cartn_x",
            "_atom_site_Cartn_y",
            "_atom_site_Cartn_z",
-           "_atom_site_type_symbol");
+           "_atom_site_type_symbol",
+           "_atom_type_symbol");
 $isloop = 0;
 $loophd = 0;
 $lpfdct = 0;
 $symlp  = 0;
 $poslp  = 0;
 $nofatom= 0;
+
+# Parses command line options
+GetOptions("help"=>\$helpflag,
+           "interactive"=>\$interact,
+           "debug"=>\$debug,
+           "checkpos"=>\$checkpos);
+
+if ($#ARGV<0 || $helpflag) {
+   print " $0:\n";
+   print "   - script to convert a CIF into McPhase input files, similarly to powdercell2j\n\n";
+   print " Syntax: $0 [CIFNAME] \n\n";
+   print " where [CIFNAME] is a the name of the Crystallographic Information File.\n\n";
+   print " Options include:\n";
+   print "    --help         - prints this message\n";
+   print "    --interactive  - prompts user for information such as valence states\n";
+   print "\n";
+   print " By default, this script is automatic, so if the oxidation (valence) states are not\n";
+   print " given in the CIF, it will be guessed at based on the element, as is whether the ion\n";
+   print " is magnetic or not.\n";
+   exit(0);
+}
 
 $cif = $ARGV[0];
 
@@ -70,6 +96,7 @@ sub multigcf {
 # ------------------------------------------------------------------------------------------------------------------------ #
 while (<>) {
   $_ =~ s/\R//g;            # safe chomp
+  if ($_ =~ /#/) { next; }  # Ignore comments (for ICSD Karlsruhe data)
   if ($_ =~ /_cell/) {
     @line = split; 
     $cellpar{@line[0]} = @line[1];
@@ -79,19 +106,27 @@ while (<>) {
     $loophd = 1;            #   and the data loop.
     $symlp = 0;
     $poslp = 0;
+    $othlp = 0;
     $lpfdct = 0;
+    @poscol = ();
   } elsif($_ =~ /_symmetry_space_group_name_H-M/) { 
     $spagrp = $_;
     $spagrp =~ s/_symmetry_space_group_name_H-M//g;
-    $spagrp =~ s/HR/H/; $spagrp =~ s/://g; $spagrp =~ s/'//g; $spagrp =~ s/^\s+//g;
+    $spagrp =~ s/HR/H/; $spagrp =~ s/://g; $spagrp =~ s/['"]//g; $spagrp =~ s/^\s+//g;
+  } elsif($_ =~ /_symmetry_Int_Tables_number/) {
+    @line = split; $spanum = @line[1];
   } else {                  # First we parse the loop column headers in this else{} block
     if($isloop == 1) {
-      if($_ =~ /\s*_/) {
+      if($_ =~ /^\s*_/) {
         if($loophd == 1) {
-          if($_ =~ /_symmetry_equiv_pos_as_xyz/)  { $symlp = 1; $symcol = $lpfdct; }
+          if($_ =~ /_symmetry_equiv_pos_as_xyz/ || $_ =~ /_space_group_symop_operation_xyz/)  { 
+            $symlp = 1; $symcol = $lpfdct; 
+          }
           for $ic (0..$#datcol) {
-            if($_ =~ /$datcol[$ic]/) {
-              $poslp = 1; $poscol[$ic] = $lpfdct;
+            $_ =~ s/\s*//g;
+            if($_ eq $datcol[$ic]) {
+              if($ic>1 && $ic<8) { $poslp = 1; $coordseen[$ic] = 1;} else { $othlp = 1; }
+              $poscol[$ic] = $lpfdct;
             }
           }
           $lpfdct++;
@@ -99,7 +134,9 @@ while (<>) {
           $isloop = 0;
           $symlp = 0;
           $poslp = 0;
+          $othlp = 0;
           $lpfdct = 0;
+         #@poscol = ();
         }
       } else {              # Finished reading loop header, but still in the loop. 
         $loophd = 0;
@@ -108,11 +145,41 @@ while (<>) {
         } 
         elsif($poslp>0 && $_!~/^\s*$/) {   # We're in the data loop.
           @line = split; 
+          if($brokenline) {
+            $brokenline = 0; 
+            @line = (@line0,@line);
+          } elsif($#line < $poscol[2]) {   # data continues on next line
+            $brokenline = 1;
+            @line0 = @line;
+            next;
+          }
           for $ic (0..$#datcol) {
             if(!($poscol[$ic]eq"")) { $dat[$nofatom][$ic] = $line[$poscol[$ic]]; }
           }
           $nofatom++;
         }
+        elsif($othlp>0) {   # We're in some other loop which has the fields we want
+          @line = split;    #  e.g. ICSD (Karlsruhe) puts oxidation states in separate loops
+          if(!($poscol[9]eq"")) {          # Use _atom_type_symbol to index these field
+            for $ic (0..$#datcol) {
+              if(!($poscol[$ic]eq"") && $ic!=9) {
+                $otherdat{$line[$poscol[9]].":".$datcol[$ic]} = $line[$poscol[$ic]];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+# Check if we have a subsidiary table, and if so merge its data with the main table.
+for (keys %otherdat) {
+  @keydat = split(":");
+  for $j(0..$nofatom-1) {
+    if ($dat[$j][8] eq $keydat[0]) { 
+      for $ic (0..$#datcol) {
+        if($keydat[1] =~ /$datcol[$ic]/) { $dat[$j][$ic] = $otherdat{$_}; }
       }
     }
   }
@@ -128,7 +195,7 @@ if($errct>0) { die "Sorry, $0 is stupid and needs all lattice constants and angl
 
 @vrn = ("","","x","y","z");
 for $ic (2..4) {
-  if($poscol[$ic] eq "" && $poscol[$ic+3] eq "") {
+  if(!$coordseen[$ic] && !$coordseen[$ic+3]) {
     die "Error: position data is missing the $vrn[$ic] coordinate. $0 requires either the fractional or Cartesian coordinates.\n"
        ."  Please Make sure the data _loop has a column called _atom_site_fract_$vrn[$ic] or _atom_site_Cartn_$vrn[$ic].\n"; }
 }
@@ -162,7 +229,7 @@ if($debug==1) {
 }
 
 # If the data is in Cartesians, convert it back to fractional before applying the symmetry equivalent positions
-if($poscol[2] eq "") {
+if($coordseen[2] eq "") {
   for $j (0..$nofatom-1) {
     $cpos = pdl [ ($dat[$j][5]), ($dat[$j][6]), ($dat[$j][7]) ];
     $fpos = $invrtoijk x transpose($cpos);
@@ -182,14 +249,80 @@ if($poscol[2] eq "") {
 # Determines the symmetry equivalent positions, oxidation states and other single ion parameters
 # ------------------------------------------------------------------------------------------------------------------------ #
 
+# If the spacegroup symbol is not given but the number is, use it instead if it is unique
+if($spagrp eq "" && $spanum>0 && $spanum<231) {
+  $posspagrp = $spaidx[$spanum-1];
+  if($#{$posspagrp}==0) {
+    $spagrp = ${$posspagrp}[0];
+    if($debug) { print STDERR "Warning - spacegroup string assigned based on ITC spacegroup number\n"; }
+  }
+}
 # If there is no symmetry equivalent positions in the file, we look it up from a table.
-if($symcol eq "") { 
+if($symcol eq "" || join(",",@sympos)!~/[xyzXYZ]/) { 
   if(!($spagrp eq "")) {
-    @sympos = split(";",$symop{$spagrp});
+    $symops = $symop{$spagrp};
+    if($symops eq "") {
+      $tstalias = $alias{$spagrp}; 
+      if($tstalias eq "") { die "Error: Hermann-Maugin symbol '$spagrp' is not recognised.\n"; }
+      $symops = $symop{$tstalias};
+    }
+    @sympos = split(";",$symops);
   } else {
     die "Error:   no _symmetry_equiv_pos_as_xyz or _symmetry_space_group_name_H-M field - I cannot determine the symmetry equivalent positions.
          Please edit the cif file to add these fields, or use a program like Babel or SPACEGROUP to generate another cif.\n"
   } 
+} elsif($spagrp eq "" || ($symop{$spagrp} eq "" && $symop{$alias{$spagrp}} eq "")) {
+# If the spacegroup string is undefined, attempt to work out what it is from the symmetry equivalent positions
+  if(!($spagrp eq "")) { $spagrp0=$spagrp; }
+  $maxmatch = 0;
+  if($spanum>0 && $spanum<231) { 
+    foreach (@{$spaidx[$spanum-1]}) { push @posspg, $_; }
+  } else {
+    for (keys %symop) { push @posspg, $_; }
+  }
+  foreach(@posspg) {
+    @testsyms = split(";",$symop{$_});
+    if($#testsyms==$#sympos) {
+      if($debug) { print STDERR "$_  ---->  "; }
+      $matchsum = 0;
+      for $tstsymstr(@testsyms) { 
+        $x = rand; $y = rand; $z = rand;
+        $op = lc $tstsymstr; 
+        $op =~ s/^[\-0-9\.]+\s//g; $op =~ s/^\s+[\-a-wA-W0-9]+\s+//g; $op =~ s/'\s+[0-9]+$//; $op =~ s/'//g; $op =~ s/([xyz])/\$$1/g; 
+        $op =~ s/^/\$xx=/; $op =~ s/$/;/; $op =~ s/,/;\$yy=/; $op =~ s/,/;\$zz=/;
+        eval $op;
+        $match = 0;
+        for $symposstr0(@sympos) {
+          $symposstr=$symposstr0; $symposstr =~ s/^[a-wA-W0-9\s]*'//g; $symposstr =~ s/'//g; $symposstr =~ s/\s+//g;
+          if($symposstr eq $tstsymstr) { $match=1; last; }
+          else {
+            $op = lc $symposstr0; 
+            $op =~ s/^[\-0-9\.]+\s//g; $op =~ s/^\s+[\-a-wA-W0-9]+\s+//g; $op =~ s/'\s+[0-9]+$//; $op =~ s/'//g; $op =~ s/([xyz])/\$$1/g; 
+            $op =~ s/^/\$x1=/; $op =~ s/$/;/; $op =~ s/,/;\$y1=/; $op =~ s/,/;\$z1=/;
+            eval $op;
+            if(abs($xx-$x1)<0.001 && abs($yy-$y1)<0.001 && abs($zz-$z1)<0.001) {
+              $match=0.5; last;
+            }
+          }
+        }
+        if($match) { $matchsum+=$match; }
+      }
+      if($debug) { print STDERR "$matchsum\n"; }
+      if($matchsum==$#sympos) { 
+        $spagrp = $_; undef $maybematch; last;
+      } elsif($matchsum>$maxmatch) {
+        $spagrp = $_; $maybematch=1; $maxmatch = $matchsum; 
+      }
+    }
+  }
+  if(defined $spagrp0 && $maxmatch>0) { 
+    print STDERR "WARNING: Hermann-Maugin symbol '$spagrp0' is not recognised. Guessing it should be '$spagrp'.\n"; 
+  }
+  if($maxmatch==0) { 
+    print STDERR "WARNING: Hermann-Maugin symbol '$spagrp' ";
+    if($spanum>0 && $spanum<231) { print STDERR "with ITC table number $spanum "; }
+    print STDERR "is not recognised.\n";
+  }
 }
 
 # Checks if oxidation state is given in the CIF file (either in the _oxidation_number or _type_symbol fields)
@@ -208,21 +341,60 @@ for $j(0..$nofatom-1) {
 }
 # If the oxidation state is undefined, look it up in the table
 for $j(0..$nofatom-1) {
-  $at = $dat[$j][0]; $at =~ s/[0-9]+//;
+  $at = $dat[$j][0]; $at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
+  $at = lc $at; $at = ucfirst $at;
   $attab = $element{$at}; 
-  if(!$attab) { die "Error, unknown element: $at\n"; }
+  if(!$attab) { die "Error, unknown element: ".$dat[$j][0]."\n"; }
   if($oxy[$j] eq "" || $oxy[$j]==0) {
-    $oxyref = ${$attab}[-1];
+    $oxyref = ${$attab}[3];
     if($oxyref =~ /,/) { 
       @a_oxyref = split(",",$oxyref); $oxy[$j] = $a_oxyref[0];
     } else { $oxy[$j] = $oxyref; }
   }
   push @ismag, ${$attab}[2]; 
-  push @realb, ${$attab}[0]/10;  # Why div by 10? (This code was in powdercell2j.pl)
+  push @realb, ${$attab}[0]/10;  # convert from femtometres to 10^-12cm
   push @imagb, ${$attab}[1]/10;  
   if($ismag[$j]) {
     $eltab = $magions{$at.$oxy[$j]."+"}; 
     if(${$eltab}[0] eq "") { $ismag[$j] = 0; }
+  }
+}
+
+# If in interactive mode, asks the user if a site is magnetic or not, and (if needed) what valence
+#   Note interactive mode is disabled if debug mode is active.
+if($interact) {
+  print "Please enter \"1\", \"yes\", \"y\", etc. if the following is true; \"0\", \"no\", \"n\", if false\n";
+  print "and a number value for the valence if applicable (the \"+\" sign is not needed).\n";
+  print "The default option is shown in brackets. If you accept the default, just press \"enter\"\n";
+  for $j(0..$nofatom-1) {
+    $at = $dat[$j][0]; $at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
+    $at = lc $at; $at = ucfirst $at;
+    if($oxyguess[$j]) {
+      print "What is the valence (oxidation state) of ions on site $dat[$j][0]? (".($oxy[$j]>0?"+":"-")."$oxy[$j])\n";
+      if(!$debug) {
+        $ans = <>; $ans =~ s/\R//g;
+        if(!($ans eq "")) { 
+          if($ans !~ /[0-9\-]/) { 
+            print "Sorry, I don't understand the valence state $ans. Assuming default valence: ".($oxy[$j]>0?"+":"-")."$oxy[$j]\n"; 
+          } else {
+            $oxy[$j] = $ans;
+            $eltab = $magions{$at.$oxy[$j]."+"};
+            if(${$eltab}[0] eq "") { $ismag[$j] = 0; } else { $ismag[$j] = 1; }
+          }
+        }
+      }
+    }
+    print "Are the ions on site $dat[$j][0] ($at".abs($oxy[$j]).($oxy[$j]>0?"+":"-").") magnetic? (".($ismag[$j]?"true":"false").")\n";
+    if(!$debug) { 
+      $ans = <>; $ans =~ s/\R//g;
+      if(!($ans eq "")) {
+        if($ans=~/[yYtT1]/) { 
+          $ismag[$j] = 1;
+        } else { 
+          $ismag[$j] = 0;
+        }
+      }
+    }
   }
 }
 
@@ -252,29 +424,56 @@ if($debug==1) {
   }
 }
 
+# Checks that each site position is unique
+@same = (); @isame = ();
+foreach $ii(0..$nofatom-1) {
+  $atom = $dat[$ii][0]; $atom =~ s/_//g; $atom =~ s/[0-9]+[A-Z]+//g;
+  $atom =~ s/[0-9]+//g; $atom =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
+  $atom = lc $atom; $atom1 = ucfirst $atom;
+  foreach $jj($ii+1..$nofatom-1) {
+    $atom = $dat[$jj][0]; $atom =~ s/_//g; $atom =~ s/[0-9]+[A-Z]+//g;
+    $atom =~ s/[0-9]+//g; $atom =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
+    $atom = lc $atom; $atom2 = ucfirst $atom;
+    if($atom1 eq $atom2 && !($atom1 eq -1) && !($atom2 eq -1)) {
+      $df = abs($dat[$ii][2]-$dat[$jj][2])+abs($dat[$ii][3]-$dat[$jj][3])+abs($dat[$ii][4]-$dat[$jj][4]);
+      if($df<1e-3) { push @same,$jj; push @isame, $ii; }
+    }
+  }
+}
+foreach $ii(0..$#same) { 
+  print STDERR "Warning: site $dat[$same[$ii]][0] has the same coordinates as site $dat[$isame[$ii]][0].". 
+               " $dat[$same[$ii]][0] will be ignored in further calculations.\n";
+  $dat[$same[$ii]][0] = -1;
+}
+
 # Loops over each inequivalent atom and apply each symmetry equivalent operator
 for $j(0..$nofatom-1) {
+  if($dat[$j][0] eq -1) { push @atoms, -1; next; }
   @epos = ();
   foreach $sym (@sympos) {
     $x = $dat[$j][2];
     $y = $dat[$j][3];
     $z = $dat[$j][4];
-    $op = $sym; $op =~ s/'//g; $op =~ s/([xyz])/\$$1/g; 
+    $op = lc $sym; 
+    $op =~ s/^[\-0-9\.]+\s//g;
+    $op =~ s/^\s+[\-a-wA-W0-9]+\s+//g;
+    $op =~ s/'\s+[0-9]+$//;
+    $op =~ s/'//g; $op =~ s/([xyz])/\$$1/g; 
     $op =~ s/^/\$xx=/; $op =~ s/$/;/; 
     $op =~ s/,/;\$yy=/; 
     $op =~ s/,/;\$zz=/;
-   #print STDERR "x=$x; y=$y; z=$z; sym=$op\n";
+    if($debug) { print STDERR "x=$x; y=$y; z=$z; sym=$op\t---->\t"; }
     eval $op;
-   #print STDERR "xx=$xx; yy=$yy; zz=$zz;\n";
+    if($debug) { print STDERR "xx=$xx; yy=$yy; zz=$zz;\n"; }
     push @epos, "$xx;$yy;$zz";
   }
   # uniq from: http://perlmaven.com/unique-values-in-an-array-in-perl
   @uepos = keys { map { $_ => 1 } @epos }; @epos = ();
   foreach $eps (@uepos) {
     @seps=split(";",$eps); 
-    for (0..2) { if($seps[$_]<0) { $seps[$_]+=1; } }
-    for (0..2) { if($seps[$_]>1) { $seps[$_]-=1; } }
-    $st = "$seps[0];$seps[1];$seps[2]"; $st =~ s/667/666/g; $st =~ s/334/333/g;
+    for (0..2) { if($seps[$_]<0)  { $seps[$_]+=ceil(abs($seps[$_])); } }
+    for (0..2) { if($seps[$_]>=1) { $seps[$_]-=floor(abs($seps[$_])); } }
+    $st = "$seps[0];$seps[1];$seps[2]"; $st =~ s/6667/6666/g; $st =~ s/3334/3333/g;
     push @epos, $st;
   }
   @uepos = keys { map { $_ => 1 } @epos };
@@ -292,7 +491,9 @@ for $j(0..$nofatom-1) {
   foreach (@same) { $uepos[$_]=undef; }
   @uepos = grep defined, @uepos;
 
-  $atom = $dat[$j][$0]; $atom =~ s/[0-9]//g; $atom = sprintf "%-4s",$atom;
+  $atom = $dat[$j][0]; $atom =~ s/_//g; $atom =~ s/[0-9]+[A-Z]+//g; 
+  $atom =~ s/[0-9]+//g; $atom =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g; $atom = sprintf "%-4s",$atom;
+  $atom = lc $atom; $atom = ucfirst $atom;
   push @atoms, $atom;
   if($ismag[$j]) { $ion = $atom.$oxy[$j]."p"; $ion=~s/\s+//g; } else { $ion = $atom; }
 
@@ -309,6 +510,7 @@ for $j(0..$nofatom-1) {
    #$ceps[1] = sprintf "% 14.5f",$fpos->at(0,1); #$ceps[1]*=1;
    #$ceps[2] = sprintf "% 14.5f",$fpos->at(0,2); #$ceps[2]*=1;
    #print $atom.join(" ",@ceps)."\n";
+    if($checkpos) { printf "%-4s% 10.5f% 10.5f% 10.5f\n",$atom,@seps; }
    $mults[$j]++;
   }
 }
@@ -319,24 +521,28 @@ if($debug==1) { foreach (@pos) { print STDERR "$_\n"; } }
 for (keys %htp) { push @nat, $htp{$_}; } $denom = multigcf(@nat);
 if($debug==1) { print STDERR "denom=$denom\n"; }
 
+if($checkpos) { exit(0); }
+
 # Convert back from radians
 $alpha *= 180/$PI; $beta *= 180/$PI; $gamma *= 180/$PI;
 
 # ------------------------------------------------------------------------------------------------------------------------ #
 # Prints out information for user
 # ------------------------------------------------------------------------------------------------------------------------ #
-print "$0: This is the structure and chemical data extracted from the CIF and/or guessed\n";
+print "This is the structure and chemical data extracted from the CIF and/or guessed\n";
 print "a=$a b=$b c=$c  alpha=$alpha beta=$beta gamma=$gamma\n";
 if($spagrp eq "") {
   print "No spacegroup symbol found in CIF, but the following symmetry equivalent positions will be used:\n";
   foreach $so (@sympos) { print "$so\n"; }
-} else { print "spacegroup is $spagrp\n"; }
+} else { print "spacegroup is $spagrp".(defined $maybematch?" (possibly)":"")."\n"; }
 print "----------------------------------------------------------------------------------\n";
 print "Label\tElement\tValence\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
 print "----------------------------------------------------------------------------------\n";
 @magornot = ( "NonMagnetic", "Magnetic" );
 for $j(0..$nofatom-1) {
-  print "$dat[$j][0]\t$atoms[$j]\t$oxy[$j]\t$mults[$j]\t$magornot[$ismag[$j]]\t$dat[$j][2]\t$dat[$j][3]\t$dat[$j][4]\n";
+  if(!($dat[$j][0] eq -1)) {
+    print "$dat[$j][0]\t$atoms[$j]\t$oxy[$j]\t$mults[$j]\t$magornot[$ismag[$j]]\t$dat[$j][2]\t$dat[$j][3]\t$dat[$j][4]\n";
+  }
 }
 print "----------------------------------------------------------------------------------\n";
 print "Mult. is the multiplicity and is calculated by applying all the symmetry equivalent\n";
@@ -365,7 +571,7 @@ print FOUT "#***************************************************************\n";
 print FOUT "#\n";
 print FOUT "# "; foreach (@atp) { $at=$_; $fml=$htp{$_}/$denom; $at=~s/\s+//g; print FOUT "$at ($fml) "; } print FOUT "\n";
 print FOUT "#\n";
-print FOUT "# Lattice Constants (A)\n";
+print FOUT "# Lattice Constants (A)    Spacegroup=$spagrp".(defined $maybematch?" (possibly)":"")."\n";
 print FOUT "#\n";
 print FOUT "#! a= $a b= $b c= $c  alpha= $alpha beta= $beta gamma= $gamma\n";
 print FOUT "#\n";
@@ -399,7 +605,7 @@ print FOUT "#***************************************************************\n";
 print FOUT "#\n";
 print FOUT "# "; foreach (@atp) { $at=$_; $fml=$htp{$_}/$denom; $at=~s/\s+//g; print FOUT "$at ($fml) "; } print FOUT "\n";
 print FOUT "#\n";
-print FOUT "# Lattice Constants (A)\n";
+print FOUT "# Lattice Constants (A)    Spacegroup=$spagrp".(defined $maybematch?" (possibly)":"")."\n";
 print FOUT "#\n";
 print FOUT "#! a= $a b= $b c= $c  alpha= $alpha beta= $beta gamma= $gamma\n";
 print FOUT "#\n";
@@ -418,6 +624,7 @@ for (0..$#pos) {
 }
 print FOUT "#********************************************************************* \n";
 if($debug==0) { close FOUT; }
+copy("mcphas_magnetic_atoms.j","mcphas.j");
 
 # Generates the associated single ion parameter files (sipf). 
 $sipfheader = 
@@ -666,12 +873,12 @@ print FOUT << "EOF";
 EOF
 if($debug==0) { close FOUT; }
 
-print "END OF PROGRAM $0\n";
+#print "END OF PROGRAM $0\n";
 print "\n";
 print "Created files:\n";
 print "\n";
 print " mcphas_all.j                           ... contains all atoms (magnetic and nonmag)\n";
-print " mcphas_magnetic_atoms.j                ... contains only magnetic atoms\n";
+print " mcphas_magnetic_atoms.j == mcphas.j    ... contains only magnetic atoms\n";
 for (keys %ions) {
   $atm = $atoms[$ions{$_}]; $atm =~ s/\s+//g;
   printf " %-39s... contains single parameters for %s ion\n", "$_.sipf", $atm.abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-");

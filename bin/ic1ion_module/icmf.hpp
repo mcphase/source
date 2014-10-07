@@ -53,6 +53,7 @@ class iceig
       void acalc(icpars &pars, sMat<double> &J, sMat<double> &iJ);
       #endif
       bool iscomplex() { return _zV!=0; }          // Determines of eigenvalues are complex
+      bool isblank() { return _V==0||_zV==0; }     // True if blank
       int Hsz() { return _Hsz; }
       std::string strout();                        // Prints the eigenstates out as a matrix
 };

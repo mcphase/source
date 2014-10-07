@@ -558,7 +558,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
            if(dt!=0) { jij[i](j1,i1)=dt; jij[i](i1,j1)=dt; }
      }}}
   }
-  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 }
 
@@ -572,7 +572,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n)
   strcpy(sipffilename,sipffile);
   get_parameters_from_sipfile(sipffilename);
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
-  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 
 }
@@ -598,7 +598,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   sipffilename= new char [MAXNOFCHARINLINE];
   clusterfilename=new char [MAXNOFCHARINLINE];
   module_type=1;
-  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 }
 
@@ -632,7 +632,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
   DWF=0;gJ=0;maxE=1e10;pinit=0;ninit=1e10;
-  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 
 }
@@ -734,7 +734,7 @@ int i1;
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   for (i=1;i<=paranz;++i)
   {jij[i]=pp.jij[i];dn[i]=pp.dn[i];sublattice[i]=pp.sublattice[i];}
-  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]-1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
+  for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   
   for(i1=0; i1<52; i1++) { 
      if(pp.opmatM[i1]==0) opmatM[i1]=0; 

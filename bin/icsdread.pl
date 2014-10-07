@@ -11,15 +11,38 @@
 # Without the redirection, this script will print to standard output (the command line).
 # The script will also read an html file of the ICSD record if that was previously downloaded.
 #
+# This program is part of the McPhase package, licensed under the GNU GPL v2. Please see the COPYING file
+#
 # Fri Sep 26 11:58:53 KST 2014 - Duc Le - mducle@snu.ac.kr
 
 use LWP::Simple;
+use Getopt::Long;
 
 $debug=0;
 
 # Loads the table of symmetry equivalent positions
-push @INC, $ENV{'MCPHASE_DIR'}.'bin/';
+push @INC, $ENV{'MCPHASE_DIR'}.'/bin/';
 require 'itc_syms.pl';
+
+# Parses command line options
+GetOptions("help"=>\$helpflag,
+           "interactive"=>\$interact,
+           "debug"=>\$debug);
+
+if ($#ARGV<0 || $helpflag) {
+   print " $0:\n";
+   print "   - script to generate a CIF from a record of the Korean ICSD mirror (free)\n\n";
+   print "     Search for the structure you want at http://icsd.kisti.re.kr/ and note the ICSD ID number.\n";
+   print "     Then invoke this script with:\n";
+   print "         $0 [NUMBER] > outfile.cif\n\n";
+   print " Options include:\n";
+   print "    --help         - prints this message\n";
+   print "\n";
+   print " By default, this script outputs to STDOUT, so the redirction \">\" is needed to pipe to a file.\n";
+   print " This script will also open a previously downloaded html file of the ICSD record if given that\n";
+   print " instead of an ICSD ID number.\n";
+   exit(0);
+}
 
 # Checks whether to read from a file or download from website
 if(-e $ARGV[0]) {
@@ -134,7 +157,13 @@ $sgnum  = $fieldval{"SG Number"};
 $crysys = $fieldval{"Crystal System"};
 $pearsn = $fieldval{"PEARSON"};
 
-$sympos = "    '".$symop{$spagrp}; $sympos =~ s/;/'\n    '/g; $sympos.="'";
+$symops = $symop{$spagrp};
+if($symops eq "") {
+  $tstalias = $alias{$spagrp}; 
+  if($tstalias eq "") { die "Error: Hermann-Maugin symbol '$spagrp' is not recognised.\n"; }
+  $symops = $symop{$tstalias};
+}
+$sympos = "    '".$symops; $sympos =~ s/;/'\n    '/g; $sympos.="'";
 
 $title = $formul; $title =~ s/\s+//g; 
 

@@ -89,6 +89,7 @@ class cfpars
       cfpars(std::string&i,int n,orbital l); // Constructor for a particular ion, assigning a Stevens factor, and <r^k>.
 };
 
+// --------------------------------------------------------------------------------------------------------------- //
 // Defines a class to hold the values needed to for input to the module
 // --------------------------------------------------------------------------------------------------------------- //
 class icpars
@@ -148,5 +149,18 @@ class icpars
 
       icpars();                              // Blank constructor
 };
+
+// --------------------------------------------------------------------------------------------------------------- //
+// Defines a class to hold the rotation matrix for the truncate option, for use with the cluster module
+//   and declares it as a global variable
+// --------------------------------------------------------------------------------------------------------------- //
+class truncRot
+{
+   public:
+   std::vector<std::string> sipfs;
+   std::vector<complexdouble*> V;
+  ~truncRot();
+};
+extern truncRot g_truncRot;
 
 #endif
