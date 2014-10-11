@@ -652,7 +652,7 @@ for (keys %ions) {
       $so1ionname = ${$eltab}[3];
     } else { $so1ionname = "S=".${$eltab}[1]; }
     $nofelectrons =~ s/^[0-9][a-z]//;
-    print FOUT "#!module=so1ion\n";
+    print FOUT "#!MODULE=so1ion\n";
     print FOUT $sipfheader;
     print FOUT "#IONTYPE=$ionname\n";
     print FOUT "IONTYPE=$so1ionname\n";

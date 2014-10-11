@@ -27,7 +27,8 @@ $outputfile = "results/mcphas.jvx";
 # Parses command line options
 GetOptions("help"=>\$helpflag,
            "debug"=>\$debug,
-           "output"=>\$outputfile);
+           "individual"=>\$clusterflag,
+           "output=s"=>\$outputfile);
 
 if ($#ARGV<0 || $helpflag) {
    print " $0:\n";
@@ -37,6 +38,11 @@ if ($#ARGV<0 || $helpflag) {
    print " Options include:\n";
    print "    --help          - prints this message\n";
    print "    --output [FILE] - outputs JVX data to [FILE] instead of default results/mcphas.jvx\n\n";
+   print "    --individual    - for input files for the cluster module, plot individual atomic positions\n";
+   print "                      and intra-cluster exchange as well as cluster centres and mean-field exchange.\n\n";
+   print " Note that UNIX switch conventions apply so you can use \"short\" switches (-h, -o -i) as well.\n";
+   print " E.g. to plot individual atoms and output to a different file:\n";
+   print "   $0 mcphas.j -i -o results/cluster.jvx\n";
    exit(0);
 }
 
@@ -139,23 +145,101 @@ for $ii (0..$#{$atoms{"da"}}) {
         ($module{$sipf}) = ($_ =~ m/\s*=\s*([\d.eEdD\-\+\.\w]+)/); }
       if($_ =~ /IONTYPE/) {
         ($iontyp{$sipf}) = ($_ =~ m/\s*=\s*([\d.eEdD\-\+\.\w\=]+)/); }
+      if($_ =~ /structurefile/) {
+        ($cluste{$sipf}) = ($_ =~ m/\s*=\s*([\d.eEdD\-\+\.\w\=]+)/); }
     }
     close FSIPF;
-    $attab = $element{$iontyp{$sipf}};
-    if(!$attab) {
-      $at = $sipf; $at =~ s/\.sipf//;
+    if($module{$sipf} =~ /cluster/ && $clusterflag) {
+      $atidx=0;
+      open(FCLUS,$cluste{$sipf}); # looks inside cluster.j file for relative coordinates of cluster atoms and exchanges
+      while(<FCLUS>) {
+        $_ =~ s/\R//g;            # safe chomp
+        if($_ =~ /^#!/) {         # extracts the structure/lattice parameters
+          foreach $id (@atpn) {
+            if($_ =~ /\s+$id\s*=/) {
+              if($id eq "da") { $atidx++; @{$cluster_neighbours{$ii."|".$atidx}}=(); }
+              ($cluster_atoms{$ii."|".$atidx."|".$id}) = ($_ =~ m/\s+$id\s*=\s*([\d.eEdD\-\+\.\w]+)/);
+            }
+          }
+        }
+        if($_ !~ /^#/) {
+          @ll = split; $sumj=0; for $ii(3..$#ll) { $sumj+=abs($ll[$ii]); }
+          if(abs($sumj)>1e-6) {
+            push @{$cluster_neighbours{$ii."|".$atidx}}, $_." ".(sprintf "%5.2f",$sumj);
+            if($sumj>$maxsumj) { $maxsumj = $sumj; }
+          }
+        }
+        $cluster_natom[$ii] = $atidx;
+      }
+      close FCLUS;
+      if($debug) {
+        print STDERR "Cluster centre:\t\t\t";
+        for (@atpn) { print STDERR "$_=${$atoms{$_}}[$ii]\t"; }
+        print STDERR "\n";
+        for $atidx (1..$cluster_natom[$ii]) {
+          print STDERR "Atom $atidx, relative coordinates:\t";
+          for (@atpn) { print STDERR "$_=".$cluster_atoms{$ii."|".$atidx."|".$_}."\t"; }
+          print STDERR "\n";
+        }
+      }
+      # Opens the real single ion parameter files for the atoms within the cluster
+      for $atidx (1..$cluster_natom[$ii]) {
+        $sipf = $cluster_atoms{$ii."|".$atidx."|sipffilename"};
+        if(!(defined $cluster_sipfseen{$sipf})) {
+          $cluster_sipfseen{$sipf} = 1;
+          open(FSIPF,$sipf);
+          while(<FSIPF>) {
+            $_ =~ s/\R//g;            # safe chomp
+            if($_ =~ /#!MODULE/) {
+              ($module{$sipf}) = ($_ =~ m/\s*=\s*([\d.eEdD\-\+\.\w]+)/); }
+            if($_ =~ /IONTYPE/) {
+              ($iontyp{$sipf}) = ($_ =~ m/\s*=\s*([\d.eEdD\-\+\.\w\=]+)/); }
+          }
+          close FSIPF;
+          $at = $iontyp{$sipf}; $at =~ s/\.sipf//;
+          $at =~ s/_//g; $at =~ s/[0-9]+[A-Za-z\-\+]+//g; $at =~ s/[0-9]+//g;
+          $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\/\|\[\]\{\}\$]//g;
+          $at = lc $at; $at = ucfirst $at;
+          $attab = $element{$at};
+          if(!$attab) {
+            $at = $sipf; $at =~ s/\.sipf//;
+            $at =~ s/_//g; $at =~ s/[0-9]+[A-Za-z\-\+]+//g; $at =~ s/[0-9]+//g;
+            $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\/\|\[\]\{\}\$]//g;
+            $at = lc $at; $at = ucfirst $at;
+            $attab = $element{$at};
+            if(!$attab) {
+              print STDERR "Warning: unknown element: ".$iontyp{$sipf}." - assuming it's carbon!\n";
+              $attab = $element{"C"};
+            }
+          }
+          if($debug) { print STDERR "at=$at\n"; }
+          $atcol{$sipf} = ${$attab}[5];
+          $r_ion{$sipf} = ${$attab}[4];
+          if($debug) { print STDERR "|$sipf|:\t$module{$sipf}\t$iontyp{$sipf}\t$r_ion{$sipf}\t@{$atcol{$sipf}}\n"; }
+        }
+      }
+    } else {
+      $at = $iontyp{$sipf}; $at =~ s/\.sipf//;
       $at =~ s/_//g; $at =~ s/[0-9]+[A-Za-z\-\+]+//g; $at =~ s/[0-9]+//g; 
-      $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
+      $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\/\|\[\]\{\}\$]//g;
       $at = lc $at; $at = ucfirst $at;
       $attab = $element{$at};
       if(!$attab) {
-        print STDERR "Warning: unknown element: ".$iontyp{$sipf}." - assuming it's carbon!\n";
-        $attab = $element{"C"};
+        $at = $sipf; $at =~ s/\.sipf//;
+        $at =~ s/_//g; $at =~ s/[0-9]+[A-Za-z\-\+]+//g; $at =~ s/[0-9]+//g; 
+        $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\/\|\[\]\{\}\$]//g;
+        $at = lc $at; $at = ucfirst $at;
+        $attab = $element{$at};
+        if(!$attab) {
+          print STDERR "Warning: unknown element: ".$iontyp{$sipf}." - assuming it's carbon!\n";
+          $attab = $element{"C"};
+        }
       }
+      if($debug) { print STDERR "at=$at\n"; }
+      $atcol{$sipf} = ${$attab}[5];
+      $r_ion{$sipf} = ${$attab}[4];
+      if($debug) { print STDERR "|$sipf|:\t$module{$sipf}\t$iontyp{$sipf}\t$r_ion{$sipf}\t@{$atcol{$sipf}}\n"; }
     }
-    $atcol{$sipf} = ${$attab}[5];
-    $r_ion{$sipf} = ${$attab}[4];
-    if($debug) { print STDERR "|$sipf|:\t$module{$sipf}\t$iontyp{$sipf}\t$r_ion{$sipf}\t@{$atcol{$sipf}}\n"; }
   }
 }
 
@@ -211,32 +295,150 @@ print FOUT "    </geometry>\n";
 
 # Draws each type of *sipf as an individual geometry - so user and make each visible or not separately
 for $sipf (keys %sipfseen) {
-  @colours = ();
-  printf FOUT "    <geometry name=\"%s\">\n", $sipf;
-  print FOUT "      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n";
-  print FOUT "        <points>\n";
-  for $i1(0..1) { for $i2(0..1) { for $i3(0..1) { 
-    for $ii (0..$#{$atoms{"da"}}) {
-      if(!($sipf eq ${$atoms{"sipffilename"}}[$ii])) { next; }
-      $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
-      if($p1>=0 && $p1<=1 && $p2>=0 && $p2<=1 && $p3>=0 && $p3<=1) {
-        $fpos = pdl [ $p1, $p2, $p3 ];
-        $cpos = $fpos x $rtoijk;
-        printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
-        push @colours, join(":",@{$atcol{${$atoms{"sipffilename"}}[$ii]}});
+  if($module{$sipf} =~ /cluster/ && $clusterflag) {
+    # Clusters - put a cube at the centre of the cluster, and plots the cluster atoms as spheres connected by lines to centre.
+    for $i1(0..1) { for $i2(0..1) { for $i3(0..1) {
+      for $ii (0..$#{$atoms{"da"}}) {
+        if(!($sipf eq ${$atoms{"sipffilename"}}[$ii])) { next; }
+        @colours = (); @thicknesses = ();
+        $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
+        if($p1>=0 && $p1<=1 && $p2>=0 && $p2<=1 && $p3>=0 && $p3<=1) {
+          $fpos = pdl [ $p1, $p2, $p3 ];
+          $cpos = $fpos x $rtoijk;
+          # Plots a cube at the centre of the cluster
+          printf FOUT "    <geometry name=\"cluster type %s id %d\">\n", $sipf, $ii;
+          print FOUT "      <pointSet dim=\"3\" point=\"show\" color=\"show\" thicknesses=\"show\">\n";
+          print FOUT "        <points>\n";
+          # Points are: centre of cluster, 8 points defining cube, then atomic centres and these shifted slightly to get lines
+          #  as an ultra-thin face because we're not allowed a pointset+lineset+faceset in single geometry
+          printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
+          printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0)+0.001;
+          push @colours, "0:0:0"; push @colours, "0:0:0";
+          push @thicknesses, 0;   push @thicknesses, 0;
+          for $xx (-0.5,0.5) { for $yy (-0.5,0.5) { for $zz (-0.5,0.5) { 
+            printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0)+$xx,$cpos->at(1,0)+$yy,$cpos->at(2,0)+$zz;
+            push @colours, "0:0:0";
+            push @thicknesses, 0;
+          }}}
+          for $atidx (1..$cluster_natom[$ii]) {
+            $q1 = $cluster_atoms{$ii."|".$atidx."|da"}+$p1;
+            $q2 = $cluster_atoms{$ii."|".$atidx."|db"}+$p2;
+            $q3 = $cluster_atoms{$ii."|".$atidx."|dc"}+$p3;
+            $fpos = pdl [ $q1, $q2, $q3 ];
+            $cpos = $fpos x $rtoijk;
+            printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
+            printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0)+0.001;
+            push @colours, join(":",@{$atcol{$cluster_atoms{$ii."|".$atidx."|sipffilename"}}}); push @colours, "0:0:0";
+            push @thicknesses, $r_ion{$cluster_atoms{$ii."|".$atidx."|sipffilename"}}*10;       push @thicknesses, 0;
+          }
+          print FOUT "        </points>\n";
+          print FOUT "        <colors type=\"rgb\">\n";
+          for (@colours) {
+            printf FOUT "          <c> %3d %3d %3d </c>\n", split(":",$_);
+          }
+          print FOUT "        </colors>\n";
+          print FOUT "        <thicknesses>\n";
+          for (@thicknesses) {
+            printf FOUT "          <th> %f </th>\n", $_;
+          }
+          print FOUT "        </thicknesses>\n";
+          print FOUT "      </pointSet>\n";
+          print FOUT "      <faceSet face=\"show\" edge=\"show\">\n";
+          print FOUT "        <faces>\n";             # - - - 1    z
+          print FOUT "          <f> 2 3 5 4 </f>\n";  # - - + 2   / \ (2,6)----(4,8)   (1,2,4,3)
+          print FOUT "          <f> 2 3 7 6 </f>\n";  # - + - 3    |    |        |     (1,2,6,5)
+          print FOUT "          <f> 3 5 9 7 </f>\n";  # - + + 4    |    |        |     (2,4,8,6)
+          print FOUT "          <f> 5 4 8 9 </f>\n";  # + - - 5         |        |     (4,3,7,8)
+          print FOUT "          <f> 4 2 6 8 </f>\n";  # + - + 6       (1,5)----(3,7)   (3,1,5,7)
+          print FOUT "          <f> 6 7 9 8 </f>\n";  # + + - 7                        (5,6,8,7)
+          for $atidx (1..$cluster_natom[$ii]) {       # + + + 8    ------>  y
+            printf FOUT "          <f> 0 %d %d 1 </f>\n", $atidx*2+8, $atidx*2+9;
+          }
+          print FOUT "          <color type=\"rgb\">0 97 255 </color>\n";
+          print FOUT "          <colorTag type=\"rgb\">255 0 255</colorTag>\n";
+          print FOUT "        </faces>\n";
+          print FOUT "      </faceSet>\n";
+          print FOUT "    </geometry>\n";
+          # Plots the exchange interactions within the cluster as rectangular "lines"
+          printf FOUT "    <geometry name=\"cluster type %s id %d exchanges\">\n", $sipf, $ii;
+          print FOUT "      <pointSet dim=\"3\" point=\"hide\">\n";
+          print FOUT "        <points>\n";
+          $ptid = 0; @exln = (); @exth = (); @colours = (); @exfc = ();                  # (0,1) (2,3)
+          @cub = ( [0,2,4,6], [0,2,3,1], [2,3,5,4], [4,5,7,6], [6,7,1,0], [1,3,5,7] );   # (6,7) (4,5)
+          for $atidx (1..$cluster_natom[$ii]) {
+            $q1 = $cluster_atoms{$ii."|".$atidx."|da"}+$p1;
+            $q2 = $cluster_atoms{$ii."|".$atidx."|db"}+$p2;
+            $q3 = $cluster_atoms{$ii."|".$atidx."|dc"}+$p3;
+            $fpos0 = pdl [ $q1, $q2, $q3 ];
+            $cpos0 = $fpos0 x $rtoijk;
+            for (@{$cluster_neighbours{$ii."|".$atidx}}) {
+              @pos = split;
+              $fpos = pdl [ $q1+$pos[0], $q2+$pos[1], $q3+$pos[2] ];
+              $cpos = $fpos x $rtoijk;
+              $axis = norm($cpos0 - $cpos); $perp = norm( crossp $axis, $fpos0 ); 
+              $ux=$axis->at(0,0); $uy=$axis->at(1,0); $uz=$axis->at(2,0); 
+              for $th(-$PI,-$PI/2,0,$PI/2) {
+                $R = pdl [ [ cos($th)+$ux*$ux*(1-cos($th)), $ux*$uy*(1-cos($th))-$uz*sin($th), $ux*$uz*(1-cos($th))+$uy*sin($th) ],
+                           [ $uy*$ux*(1-cos($th))+$uz*sin($th), cos($th)+$uy*$uy*(1-cos($th)), $uy*$uz*(1-cos($th))-$ux*sin($th) ],
+                           [ $uz*$ux*(1-cos($th))-$uy*sin($th), $uz*$uy*(1-cos($th))+$ux*sin($th), cos($th)+$uz*$uz*(1-cos($th)) ] ];
+                $vpos = ($perp x $R)*(0.05*(log($pos[-1]/$maxsumj*9+1)/log(10))) + $cpos;
+                printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$vpos->at(0,0),$vpos->at(1,0),$vpos->at(2,0);
+                $vpos = ($perp x $R)*(0.05*(log($pos[-1]/$maxsumj*9+1)/log(10))) + $cpos0;
+                printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$vpos->at(0,0),$vpos->at(1,0),$vpos->at(2,0);
+              }
+              for $nn(0..5) { 
+                $lin=""; for $mm(0..3) { $lin.=$cub[$nn][$mm]+$ptid.":"; } push @exfc, $lin; 
+                push @colours, join(":",@{$atcol{$cluster_atoms{$ii."|".$atidx."|sipffilename"}}});
+              } 
+              $ptid += 8;
+            }
+          }
+          print FOUT "        </points>\n";
+          print FOUT "      </pointSet>\n";
+          print FOUT "      <faceSet face=\"show\" edge=\"show\" color=\"show\">\n";
+          print FOUT "        <faces>\n";
+          for (@exfc) {
+            printf FOUT "          <f> %d %d %d %d </f>\n", split(":"); 
+          }
+          print FOUT "        </faces>\n";
+          print FOUT "        <colors>\n";
+          for (@colours) {
+            printf FOUT "          <c> %3d %3d %3d </c>\n", split(":");
+          }
+          print FOUT "        </colors>\n";
+          print FOUT "      </faceSet>\n";
+          print FOUT "    </geometry>\n";
+        }
       }
+    }}}
+  } else {
+    @colours = ();
+    printf FOUT "    <geometry name=\"%s\">\n", $sipf;
+    print FOUT "      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n";
+    print FOUT "        <points>\n";
+    for $i1(0..1) { for $i2(0..1) { for $i3(0..1) { 
+      for $ii (0..$#{$atoms{"da"}}) {
+        if(!($sipf eq ${$atoms{"sipffilename"}}[$ii])) { next; }
+        $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
+        if($p1>=0 && $p1<=1 && $p2>=0 && $p2<=1 && $p3>=0 && $p3<=1) {
+          $fpos = pdl [ $p1, $p2, $p3 ];
+          $cpos = $fpos x $rtoijk;
+          printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
+          push @colours, join(":",@{$atcol{${$atoms{"sipffilename"}}[$ii]}});
+        }
+      }
+    }}}
+    printf FOUT "          <thickness>% 10.5f</thickness>\n",$r_ion{$sipf}*10;
+    print FOUT "        </points>\n";
+    print FOUT "        <colors type=\"rgb\">\n";
+    for (@colours) {
+      @cl = split(":");
+      printf FOUT "          <c> %3d %3d %3d </c>\n", @cl;
     }
-  }}}
-  printf FOUT "          <thickness>% 10.5f</thickness>\n",$r_ion{$sipf}*10;
-  print FOUT "        </points>\n";
-  print FOUT "        <colors type=\"rgb\">\n";
-  for (@colours) {
-    @cl = split(":");
-    printf FOUT "          <c> %3d %3d %3d </c>\n", @cl;
+    print FOUT "        </colors>\n";
+    print FOUT "      </pointSet>\n";
+    print FOUT "    </geometry>\n";
   }
-  print FOUT "        </colors>\n";
-  print FOUT "      </pointSet>\n";
-  print FOUT "    </geometry>\n";
 }
 
 # Draws the exchange interactions for each atom as lines

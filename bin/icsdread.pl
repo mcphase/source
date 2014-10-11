@@ -26,7 +26,6 @@ require 'itc_syms.pl';
 
 # Parses command line options
 GetOptions("help"=>\$helpflag,
-           "interactive"=>\$interact,
            "debug"=>\$debug);
 
 if ($#ARGV<0 || $helpflag) {
@@ -40,7 +39,7 @@ if ($#ARGV<0 || $helpflag) {
    print "\n";
    print " By default, this script outputs to STDOUT, so the redirction \">\" is needed to pipe to a file.\n";
    print " This script will also open a previously downloaded html file of the ICSD record if given that\n";
-   print " instead of an ICSD ID number.\n";
+   print " instead of an ICSD ID number. (E.g. if the input is a valid file name and not a number)\n";
    exit(0);
 }
 
