@@ -51,24 +51,68 @@ $nofatom= 0;
 GetOptions("help"=>\$helpflag,
            "interactive"=>\$interact,
            "debug"=>\$debug,
-           "checkpos"=>\$checkpos);
+           "create"=>\$create,
+           "poscheck"=>\$checkpos);
 
-if ($#ARGV<0 || $helpflag) {
+if (!$create && ($#ARGV<0 || $helpflag)) {
    print " $0:\n";
    print "   - script to convert a CIF into McPhase input files, similarly to powdercell2j\n\n";
    print " Syntax: $0 [CIFNAME] \n\n";
    print " where [CIFNAME] is a the name of the Crystallographic Information File.\n\n";
    print " Options include:\n";
-   print "    --help         - prints this message\n";
-   print "    --interactive  - prompts user for information such as valence states\n";
+   print "    --help        or -h : prints this message\n";
+   print "    --create      or -c : creates a blank CIF file without and structure information.\n";
+   print "    --interactive or -i : prompts user for information such as valence states\n";
    print "\n";
    print " By default, this script is automatic, so if the oxidation (valence) states are not\n";
    print " given in the CIF, it will be guessed at based on the element, as is whether the ion\n";
-   print " is magnetic or not.\n";
+   print " is magnetic or not.\n\n";
+   print " Also by default, $0 will overwrite all output files (*.j, *.sipf)!\n\n";
+   print " If you don't have a CIF of the structure you're studying, you can create a blank CIF\n";
+   print " using the -c option, then fill in the required information (lattice parameters and\n";
+   print " inequivalent site positions, and then rerun $0 on this CIF.\n";
    exit(0);
 }
 
-$cif = $ARGV[0];
+if ($#ARGV<0) { $cif = "new.cif"; } else { $cif = $ARGV[0]; }
+
+if ($create) {
+   if (-e $cif) { 
+     print "Warning: File $cif already exists. Do you want to overwrite this? (y/n)";
+     $ans = <>; $ans =~ s/\R//g;
+     if($ans !~ /[Yy]/) { print "Exiting without creating file.\n"; exit(0); }
+   }
+   open (FOUT, ">$cif");
+   print FOUT <<EOF;
+; Please replace text in square brackets [] with your data
+_cell_length_a                     [a_in_Angstrom]
+_cell_length_b                     [b_in_Angstrom]
+_cell_length_c                     [b_in_Angstrom]
+_cell_angle_alpha                  [alpha_in_degrees]
+_cell_angle_beta                   [beta_in_degrees]
+_cell_angle_gamma                  [gamma_in_degrees]
+; The H-M symbol generally needed by cif2mcphas but some spacegroups
+; which have only one setting can be identified purely by the number.
+; Most orthorhombic or low symmetry spacegroups have multiple centring,
+; origin choices or unique axes which will require an H-M symbol.
+; If this is the case, and you give just the spacegroup number,
+; cif2mcphas may return with an error.
+; If you don't use one of these fields, you must comment it out, by
+; putting a ";" or "#" at the start of the line.
+_symmetry_space_group_name_H-M     [Hermann-Maguin_symbol_with_spaces]
+_symmetry_Int_Tables_number        [SpacegroupNumber]
+; At the end of the file, please list the non-equivalent
+; sites' fractional coordinates of this structure.
+loop_
+_atom_site_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+[AtomSite] [x_coord] [y_coord] [z_coord]
+EOF
+   print "Empty CIF $cif created. Please edit it and rerun \"$0 $cif\"\n";
+   exit(0);
+}
 
 # ------------------------------------------------------------------------------------------------------------------------ #
 # Subroutines
@@ -97,6 +141,7 @@ sub multigcf {
 while (<>) {
   $_ =~ s/\R//g;            # safe chomp
   if ($_ =~ /#/) { next; }  # Ignore comments (for ICSD Karlsruhe data)
+  if ($_ =~ /^;/) { next; } # Ignore comments (generally)
   if ($_ =~ /_cell/) {
     @line = split; 
     $cellpar{@line[0]} = @line[1];
@@ -251,10 +296,21 @@ if($coordseen[2] eq "") {
 
 # If the spacegroup symbol is not given but the number is, use it instead if it is unique
 if($spagrp eq "" && $spanum>0 && $spanum<231) {
+  print STDERR "No Hermann-Maguin symbol detected in CIF, using ITC spacegroup number instead.\n";
   $posspagrp = $spaidx[$spanum-1];
+  $possrhom = $rhoms{$spanum};
   if($#{$posspagrp}==0) {
     $spagrp = ${$posspagrp}[0];
-    if($debug) { print STDERR "Warning - spacegroup string assigned based on ITC spacegroup number\n"; }
+    print STDERR "H-M symbol \"$spagrp\" assigned based on ITC spacegroup number $spanum.\n"; 
+  } elsif(!($possrhom eq "") && 
+       ( ((abs($a-$b)+abs($b-$c))<0.001 && (abs($alpha-$beta)+abs($beta-$gamma))<0.001) || 
+         ($cellpar{"_cell_angle_gamma"}==120 && abs($a-$b)<0.001) )) { 
+    # It's a rhombohedral group - try to work out if using rhombohedral or hexagonal cell.
+    if(abs($b-$c)<0.001) { $spagrp = $possrhom." R"; } else { $spagrp = $possrhom." H"; }
+    print STDERR "H-M symbol \"$spagrp\" assigned based on ITC spacegroup number $spanum and lattice parameters.\n"; 
+  } else {
+    die "Error: spacegroup number $spanum has multiple settings (centring, origin or unique axes) which cannot be determined solely from the ITC number. 
+         Please edit the CIF and give the Hermann-Maguin symbol, or use Babel, SPACEGROUP or Vesta to generate another CIF.\n";
   }
 }
 # If there is no symmetry equivalent positions in the file, we look it up from a table.
@@ -265,6 +321,11 @@ if($symcol eq "" || join(",",@sympos)!~/[xyzXYZ]/) {
       $tstalias = $alias{$spagrp}; 
       if($tstalias eq "") { die "Error: Hermann-Maugin symbol '$spagrp' is not recognised.\n"; }
       $symops = $symop{$tstalias};
+    }
+    if($spagrp =~ /^\s+H/) { 
+      print STDERR "Warning: spacegroup $spagrp is an H-centred trigonal cell - this has not been tested.\n"; 
+      print STDERR "Please check the generated coordinates in the mcphas.j file carefully,\n";
+      print STDERR "or use mcphas2jvx to plot the positions to see they are what you expect.\n"
     }
     @sympos = split(";",$symops);
   } else {
@@ -278,7 +339,7 @@ if($symcol eq "" || join(",",@sympos)!~/[xyzXYZ]/) {
   if($spanum>0 && $spanum<231) { 
     foreach (@{$spaidx[$spanum-1]}) { push @posspg, $_; }
   } else {
-    for (keys %symop) { push @posspg, $_; }
+    for (keys %symop) { if($_!~/^H/) { push @posspg, $_; } }   # Ignore the H-centred groups for now...
   }
   foreach(@posspg) {
     @testsyms = split(";",$symop{$_});
@@ -733,7 +794,7 @@ for (keys %ions) {
 # Prints out the mcdiff.in file
 if($debug==0) { open (FOUT, ">mcdiff.in"); }
 print FOUT << "EOF";
-# this file is the input file created by program powdercell2j
+# this file is the input file created by program cif2mcphas 
 #<!--mcdiff.mcdiff.in>
 #***************************************************************
 #      mcdiff is a program for the calculation of elastic
