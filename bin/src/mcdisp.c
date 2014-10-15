@@ -600,7 +600,7 @@ if (do_jqfile==1)
    fprintf (jqfile, "#Fourier Transform of 2 Ion Interaction - sta is calculated by comparing the larges eigenvalue\n# to that of the first q vector of the calculation");
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),jqfile);
   if (do_verbose==1){   fprintf (jqfile, "#q=(hkl)\n #spin s() - spin s'()\n #3x3 matrix jss'(q) real im .... [meV]\n");}
-  else {fprintf(jqfile,"#h  vs  k  vs  l  vs largest eigenvalue of J(hkl) matrix vs components of corresponding eigenvector re im re im re im re im\n");}
+  else {fprintf(jqfile,"#h  vs  k  vs  l  vs Qincr[1/A] vs largest eigenvalue of J(hkl) matrix vs components of corresponding eigenvector re im re im re im re im\n");}
 }
 // ************************************************************************************************
 //MAIN LOOP - do calculation of excitation energy for every Q vector     
@@ -726,11 +726,12 @@ int num_threads_started=-1;
 #endif
 
 
-if (do_jqfile==1){if (do_verbose==1){fprintf (jqfile, "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
+if (do_jqfile==1){qold=qijk;hkl2ijk(qijk,hkl, abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
+                  if (do_verbose==1){fprintf (jqfile, "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
                                      fprintf(jqfile,"nofneighbours= %li\n",nofneighbours);
                                     }
                   else
-                  {fprintf (jqfile, "%g  %g  %g ",hkl(1),hkl(2),hkl(3));}
+                  {fprintf (jqfile, "%g  %g  %g %g  ",hkl(1),hkl(2),hkl(3),qincr);}
                   }
 
 
