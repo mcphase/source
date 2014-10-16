@@ -46,7 +46,7 @@ endif
 
 INCLDIRS =      -I. \
 		-I../include \
- 		-I../ic1ion_module \
+		-I../ic1ion_module \
 #		-I/usr/include/readline \
 		-I/local/lib  \
 		-I/usr/X11R6/include
@@ -145,7 +145,7 @@ all :  martin.o ../clusterize$(EXE) ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE
 	../spinsfromq$(EXE) ../addj$(EXE)    \
 	../densplt$(EXE)  ../pointc$(EXE) ../mcdiff$(EXE) \
         ../formfactor$(EXE) ../radwavfunc$(EXE) ../anisotropyit$(EXE)
-       
+
 test: ../ionpars$(EXE) ../jjjpar$(EXE)
 testperlparse:  ../perlparse$(EXE)
 # ****************************************************
@@ -157,7 +157,7 @@ martin.o:  martin.c martin.h vector.h
 
 perlparse.o:  perlparse.c martin.h vector.h myev.h perlparse.h
 	$(CCC) $(CFLAGS) $< 
-	
+
 graphic_parameters.o: graphic_parameters.cpp graphic_parameters.hpp martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 

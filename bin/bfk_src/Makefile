@@ -21,12 +21,10 @@ all :  clean ../bfk$(EXE)
 #../chibfk$(EXE) 
 
 ../bfk$(EXE): bfk.f95
-	gfortran -static -lgfortran -o ../bfk $^ 
+	gfortran  -lgfortran -o ../bfk $^ 
 
 #../chibfk$(EXE): chibfk.f95
 #	gfortran -static -lgfortran -o ../chibfk $^ 
 
 clean:
 	rm -vf ./*.o commondata.mod matrixelements.mod
-
-        

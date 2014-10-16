@@ -32,7 +32,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
 
   // Precalculate values of Debye-Waller and Form Factors for this Q-vector to save calls to (*inputpars.jjj[ion]).* functions
   double DBWF[inputpars.nofatoms+1];
-  complex <double> SL[inputpars.nofatoms+1];
+  complex <double> * SL;SL=new complex<double>[inputpars.nofatoms+1];
   for(l=1;l<=inputpars.nofatoms;++l) {
      DBWF[l] = (*inputpars.jjj[l]).debyewallerfactor(QQ);
      SL[l] = complex <double> ((*inputpars.jjj[l]).SLR,(*inputpars.jjj[l]).SLI);
@@ -166,7 +166,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
     }}}
     fclose(fin);
   }}}}
-  
+ delete []SL;
 }
 
 #include <time.h>

@@ -72,7 +72,8 @@ endif
 endif
 else
 ifeq ($(shell uname),Darwin)
-LINOPTS = -fPIC 
+LINOPTS = -fPIC -fpermissive
+LINKER=g++
 else
 LINOPTS =-D_WINDOWS
 endif
@@ -145,9 +146,13 @@ LFLAGS= -openmp -lstdc++
 endif
 
 ifdef gotoblas
-LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -lgfortran -lpthread
+LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -L/usr/local/gfortran/lib -lgfortran -lpthread
 else
-LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -lgfortran
+LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
+endif
+
+ifneq ($(shell uname),Darwin)
+LFLAGS+=-static-libgcc
 endif
 
 #CCOPTS= -O3 -fomit-frame-pointer -fforce-addr -mpentium

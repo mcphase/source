@@ -24,12 +24,20 @@ ifeq ($(shell uname),Linux)
  FORTRAN=gfortran --std=legacy
  LIBFORTRAN=-lgfortran
 else
+ifeq ($(shell uname),Darwin)
+ LINUX = LINUX
+ PLAT = _LINUX
+ FORTRAN=gfortran --std=legacy
+ LIBFORTRAN=-lgfortran
+else
  MSYS=1
  PLAT = _WINDOWS
  FORTRAN= g77
  LIBFORTRAN=-lg2c
 endif
+endif
 
+ifneq ($(shell uname),Darwin)
 ifneq ($(shell gcc --version|grep " 3."),)
  FORTRAN=g77
  LIBFORTRAN=-lg2c
@@ -37,6 +45,7 @@ else
 ifneq ($(shell gcc --version|grep " 4."),)
  FORTRAN=gfortran --std=legacy
  LIBFORTRAN=-lgfortran
+endif
 endif
 endif
 
