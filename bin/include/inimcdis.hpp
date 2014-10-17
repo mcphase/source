@@ -13,11 +13,14 @@
 #include<vector.h>
 #include<mfcf.hpp>
 
+#define NOFHKLCOLUMNS 7
+
 class inimcdis
 { private:
+  int do_jqf;
   char * savfilename;
   Vector qmin,qmax,deltaq;
-  void read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector & abc);   
+  void read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_jqfile,Vector & abc);   
   double setcolvalue(int i,Vector & Qvec, double & Qincr);
 
   public:
@@ -47,7 +50,7 @@ class inimcdis
    void save(); // save parameters to results/_mcdisp.ini results/_mcdisp.mf
    void print_usrdefcolhead(FILE *fout);
    void print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr);
-  inimcdis (const char * file,const char * spinfile, char * prefix,Vector & abc); //constructor
+  inimcdis (const char * file,const char * spinfile, char * prefix,int do_jqfile,Vector & abc); //constructor
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor
 };

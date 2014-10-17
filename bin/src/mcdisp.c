@@ -41,6 +41,7 @@ void errexit() // type info and error exit
             "                           mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
             "                          and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
             "                          output files, e.g. *mcdisp.qei  with appendfile)\n");
+    printf (" -ignore_not_posdef_matrix_error   ... ignores error when energies get complex due to unphysical mf groundstate\n");
     printf ("\n");
     printf ("Note: files which must be in current directory -\n");
     printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
@@ -331,7 +332,9 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
 
 // *******************************************************************************************
 // procedure to calculate the dispersion
-void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do_gobeyond,int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
+void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do_gobeyond,
+              int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int do_ignore_not_posdef_matrix_error,
+              int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
   FILE * fin;
   FILE * fout;
@@ -847,10 +850,12 @@ if (do_jqfile==1){
                        else{if((jqsta<0)&(Tn(i2)-jq0>jqsta)){jqsta=Tn(i2)-jq0;}}
                       }
                       double test;
-                      for (j1=1;j1<=ini.hkls[counter][0]-3;++j1)
-	              {test=fabs(Tn(i2+1-j1)-ini.hkls[counter][j1+3]);
-                      jqsta_int+=test*test;}
-	             
+                     for(int kk=NOFHKLCOLUMNS;kk<=ini.hkls[counter][0];kk+=NOFHKLCOLUMNS-3){
+                      for (j1=1;j1<=ini.hkls[counter][kk-NOFHKLCOLUMNS+7];++j1)
+	              {test=fabs(Tn(i2+1-j1)-ini.hkls[counter][kk-NOFHKLCOLUMNS+j1+3]);
+                      jqsta_int+=test*test;//fprintf(stdout,"%i %g test=%g\n",counter,ini.hkls[counter][0],test);
+                      }
+    	                                                                  }
  }
  else
  {// no jqfile but excitations to be calculated
@@ -873,7 +878,8 @@ if (do_jqfile==1){
          fprintf(stderr,"# Dynamical Matrix Ac not hermitian. Check exchange parameter file mcphas.j is consistent\n");
          fprintf(stderr,"#   Note that each interaction between pairs of ions must match - e.g. Interaction between\n");
          fprintf(stderr,"#   Atom 1 with Neighbour 2 (which is atom 2) must equal interaction between Atom 2 with Neighbour 1\n");
-         fprintf(stderr,"#   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); 
+         fprintf(stderr,"#   Press q to quit, or any other key to ignore this error.\n"); 
+         if(do_ignore_not_posdef_matrix_error==0){if(getchar()=='q') exit(1);}
                       }
       if(eigrval%2==1) fprintf(stderr,"# Warning: Trace matrix Lambda is not diagonal\n");
                  }
@@ -1489,7 +1495,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
       fprintf(jqfile,"#distance to the closest eigenvalue\n");
       fprintf(jqfile,"#!sta=%g\n",jqsta);
       fprintf(jqfile,"#another standard deviation is given below: calculated as squared sum of differences between\n");
-      fprintf(jqfile,"#the highest eigenvalue of J(Q) and energies in column 4 of mcdisp.par, if column 5 6 etc \n");
+      fprintf(jqfile,"#the highest eigenvalue of J(Q) and energies in column 4 of mcdisp.par, if column 5 and 6  \n");
       fprintf(jqfile,"#in mcdisp.par contain values, then these are compared to the other eigenvalues of J(Q)\n");
       fprintf(jqfile,"#!sta4=%g\n",jqsta_int);fclose(jqfile);}
     else
@@ -1518,6 +1524,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 // main program
 int main (int argc, char **argv)
 {int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
+ int do_ignore_not_posdef_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0;
  const char * spinfile="mcdisp.mf"; //default spin-configuration-input file
  const char * filemode="w";
@@ -1582,9 +1589,13 @@ for (i=1;i<=argc-1;++i){
   		                                  strcpy(prefix,argv[i+1]);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
-                    else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
+                    else {if(strcmp(argv[i],"-ignore_not_posdef_matrix_error")==0) {do_ignore_not_posdef_matrix_error=1;
+ 						  fprintf(stdout,"#ignoring not positive definite matrices\n");
+ 					         }
+                     else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
            	      else{spinfile=argv[i];}
                          } // help
+                        } // do_ignore_not_posdef_matrix_error
                        } // prefi
 		     } // pinit
 		    } // ninit
@@ -1606,7 +1617,7 @@ for (i=1;i<=argc-1;++i){
   Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                                        abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
 
-  inimcdis ini("mcdisp.par",spinfile,prefix,abc);
+  inimcdis ini("mcdisp.par",spinfile,prefix,do_jqfile,abc);
   if(ini.nofcomponents!=inputpars.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.nofcomponents);exit(EXIT_FAILURE);}
   if(do_Erefine&&calc_rixs){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf\n");exit(EXIT_FAILURE);}
   if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}
@@ -1616,7 +1627,7 @@ for (i=1;i<=argc-1;++i){
 
 int do_phonon=1;
 //calculate dispersion and save to files
-dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
+dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,do_ignore_not_posdef_matrix_error,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
   
  printf("#RESULTS saved in directory ./results/  - files:\n");
   if(calc_rixs){printf("#  %smcdisp.qex  - T,H,qvector vs energies and resonant inelastic X-ray (RIXS) intensities\n",ini.prefix);}

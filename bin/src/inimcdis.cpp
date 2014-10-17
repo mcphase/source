@@ -12,7 +12,7 @@
 #include <windows.h>
 #endif
 
-#define NOFHKLCOLUMNS 7
+
 int usrdefcols[]={4, 1,2,3,4}; // user defined output columns (first number is number of usr def output columns)
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
 int colcod[]=    {-1,5,6,7,4}; // field to store code for assigning type of data to columns of output,
@@ -173,11 +173,16 @@ void inimcdis::save()
                else             { int k;
                for(k=NOFHKLCOLUMNS;k<=hkls[j][0];k+=NOFHKLCOLUMNS-3){
                for(i=1;i<=3;++i){fprintf(fout,"%g ",hkls[j][i]);} // print hkl
+               if(do_jqf){for(i=4;i<=3+hkls[j][k-NOFHKLCOLUMNS+7];++i)fprintf(fout,"%g ",hkls[j][k-NOFHKLCOLUMNS+i]);
+                          fprintf(fout,"\n"); 
+                         }else{
                                  fprintf(fout,"%g ",hkls[j][k-NOFHKLCOLUMNS+4]);// print E
                                  fprintf(fout,"%g ",hkls[j][k-NOFHKLCOLUMNS+5]);// print weight
-                                 for(i=6;i<=NOFHKLCOLUMNS&&hkls[j][k-NOFHKLCOLUMNS+6]>0;++i)fprintf(fout,"%g ",hkls[j][k-NOFHKLCOLUMNS+i]);
+                                 for(i=6;i<=NOFHKLCOLUMNS&&hkls[j][k-NOFHKLCOLUMNS+i]>0;++i)fprintf(fout,"%g ",hkls[j][k-NOFHKLCOLUMNS+i]);
                fprintf(fout,"\n");
-                                 }}
+                                 }
+                                                                    }
+                                }
 	      }
   fprintf(fout,"\n");
   fclose (fout);
@@ -200,7 +205,7 @@ void inimcdis::save()
 }
 
 
-void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector & abc)
+void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_jqfile,Vector & abc)
 {int i,j;
  float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;  
                  while (feof(finhkl)==0)
@@ -212,7 +217,7 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector 
                                      }
                        // here check if hkl already in list and if yes, extend its energies
                      if(nofhkls>1&&fabs(hkls[nofhkls][1]-nn[1])+fabs(hkls[nofhkls][2]-nn[2])+fabs(hkls[nofhkls][3]-nn[3])<1e-9)
-                       {if(i>3)
+                       {if(i>3) // only do the energy field extension if energies are given ...
                         {int nold=hkls[nofhkls][0];
                          hkls[nofhkls+1]=new double [nold+1];
                          for(j=0;j<=nold;++j){hkls[nofhkls+1][j]=hkls[nofhkls][j];}
@@ -220,8 +225,10 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector 
                          hkls[nofhkls]=new double [nold+NOFHKLCOLUMNS-3+1];hkls[nofhkls][0]=nold+NOFHKLCOLUMNS-3;
                          for(j=1;j<=nold;++j){hkls[nofhkls][j]=hkls[nofhkls+1][j];}
                          for(j=4;j<=i&&j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][nold+j-3]=nn[j];}
-                         for(j=i+1;j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][nold+j-3]=0.0;}
+                         for(j=i+1;j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][nold+j-3]=0.0;} // put weight,int,fwhm ... to zero unless entered
                          if(i==4){hkls[nofhkls][nold+2]=1.0;} // put weight to 1 if not entered
+                         if(do_jqfile){if(i>6){hkls[nofhkls][nold+4]=3;}
+                                       else{hkls[nofhkls][nold+4]=i-3;}}//store number of J(Q) eigenvalues in fwhm column
                          delete []hkls[nofhkls+1];
                         }
                        }
@@ -231,16 +238,18 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,Vector 
 	               hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                        hkls[nofhkls][0]=NOFHKLCOLUMNS;if (i==3)hkls[nofhkls][0]=3;
                        for(j=1;j<=i&&j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][j]=nn[j];}
-                       for(j=i+1;j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][j]=0.0;}
+                       for(j=i+1;j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][j]=0.0;} // put weight,int,fwhm ... to zero unless entered
                        if(i==4){hkls[nofhkls][5]=1.0;} // put weight to 1 if not entered
+                       if(do_jqfile){if(i>6){hkls[nofhkls][7]=3;}
+                                     else{hkls[nofhkls][7]=i-3;}}//store number of J(Q) eigenvalues in fwhm column
                        }
 	              }
                      }
 }
 // *************************************************************************
 //constructor ... load initial parameters from file
-inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector & abc)
-{ errno=1;
+inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_jqfile,Vector & abc)
+{ errno=1;do_jqf=do_jqfile;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
   int nofhkllists=1;Hext=Vector(1,3);
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
@@ -522,13 +531,13 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
                  // treat hklfile statements
                 if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1))
                  {finhkl=fopen_errchk(hklfile,"rb");++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                  read_hkl_list(finhkl,hkls,0,abc);
+                  read_hkl_list(finhkl,hkls,0,do_jqfile,abc);
                   fclose(finhkl);
                  }
                  // treat QxQyQzfile statements
                 if(!extract_with_prefix(instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1))
                  {finhkl=fopen_errchk(hklfile,"rb");++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                  read_hkl_list(finhkl,hkls,1,abc);
+                  read_hkl_list(finhkl,hkls,1,do_jqfile,abc);
                   fclose(finhkl);
                  }
 
@@ -536,14 +545,15 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,Vector &
        fclose (fin);
        // now read also the hkls in mcdisp.par
       ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-      fin = fopen(file, "rb");read_hkl_list(fin,hkls,0,abc); fclose(fin); 
+      fin = fopen(file, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
   save();
       if(nofhkls==0){fprintf(stderr,"ERROR mcdisp: no hkl's found in mcdisp.par\n");exit(EXIT_FAILURE);}      
 }
 
 //kopier-konstruktor 
 inimcdis::inimcdis (const inimcdis & p)
-{ savfilename= new char [strlen(p.savfilename)+1];
+{ do_jqf=p.do_jqf;
+  savfilename= new char [strlen(p.savfilename)+1];
   strcpy(savfilename,p.savfilename);
  info= new char [strlen(p.info)+1];strcpy(info,p.info);
  prefix= new char [strlen(p.prefix)+1]; strcpy(prefix,p.prefix);  
@@ -570,7 +580,7 @@ inimcdis::inimcdis (const inimcdis & p)
   int i,j;
       hkls=new double *[nofhkls+10];
       for (j=1;j<=nofhkls;++j) 
-  	      {if ((int)p.hkls[j][0]==3){hkls[j]=new double [8];}
+  	      {if ((int)p.hkls[j][0]==3){hkls[j]=new double [NOFHKLCOLUMNS+1];}
                else {hkls[j]=new double [(int)p.hkls[j][0]+1];}
                for(i=0;i<=p.hkls[j][0];++i)
          	    {hkls[j][i]=p.hkls[j][i];}
