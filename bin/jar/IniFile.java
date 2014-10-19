@@ -51,7 +51,7 @@ private int iMaxKeys;
     try{
     fileIni = new File(m_strFileName);
 
-    //Öffnen der Ini-Datei
+    //Oeffnen der Ini-Datei
     DataInputStream inStream = new DataInputStream(new FileInputStream(fileIni));
 
 
@@ -110,7 +110,7 @@ private int iMaxKeys;
     {
       System.out.println("EOF: " + e.getLocalizedMessage());
       iRet = 1;
-      //EntSession.CWatch("Unplanmäßiges 'End Of File' in DSN-Konfigurationsdatei!");
+      //EntSession.CWatch("Unplanmaessiges 'End Of File' in DSN-Konfigurationsdatei!");
     }
 
     catch (FileNotFoundException e)
@@ -173,7 +173,7 @@ private int iMaxKeys;
     {
       System.out.println("EOF: " + e.getLocalizedMessage());
       iRet = 1;
-      //EntSession.CWatch("Unplanmäßiges 'End Of File' in DSN-Konfigurationsdatei!");
+      //EntSession.CWatch("Unplanmï¿½ï¿½iges 'End Of File' in DSN-Konfigurationsdatei!");
     }
 
     catch (FileNotFoundException e)

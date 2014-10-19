@@ -235,7 +235,7 @@ String s="abcdefghijkl";
 	    public void windowClosing(WindowEvent e) {System.exit(0);}
 	});
  myPanel.initChart();
-       myFrame.add(myPanel.bRot);                                          //fügt dem JFrame den Button hinzu
+       myFrame.add(myPanel.bRot);                                          //fuegt dem JFrame den Button hinzu
        myFrame.pack();
  myFrame.add(myPanel);
  myFrame.setSize(400,400);
