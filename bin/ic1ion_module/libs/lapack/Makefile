@@ -41,32 +41,32 @@ include ../make.inc
 #
 SOBJ  = sgeqr2.o slabad.o slacon.o slacpy.o sladiv.o slae2.o slaev2.o\
         slaexc.o slagtm.o slahqr.o slaln2.o slange.o slanhs.o\
-        slanst.o slanv2.o slaptm.o slapy2.o slapy3.o slaran.o slarf.o\
-        slarfg.o slarfx.o slarnd.o slarnv.o slartg.o slaruv.o slascl.o\
+        slanst.o slanv2.o slapy2.o slapy3.o slarf.o\
+        slarfg.o slarfx.o slarnv.o slartg.o slaruv.o slascl.o\
         slaset.o slasr.o  slasrt.o slassq.o slasy2.o sorm2r.o ssteqr.o\
         strevc.o strexc.o strsen.o strsyl.o
 
 DOBJ  = dgeqr2.o dlabad.o dlacon.o dlacpy.o dladiv.o dlae2.o dlaev2.o\
         dlaexc.o dlagtm.o dlahqr.o dlaln2.o dlange.o dlanhs.o\
-        dlanst.o dlanv2.o dlaptm.o dlapy2.o dlapy3.o dlaran.o dlarf.o\
-        dlarfg.o dlarfx.o dlarnd.o dlarnv.o dlartg.o dlaruv.o dlascl.o\
+        dlanst.o dlanv2.o dlapy2.o dlapy3.o dlarf.o\
+        dlarfg.o dlarfx.o dlarnv.o dlartg.o dlaruv.o dlascl.o\
         dlaset.o dlasr.o  dlasrt.o dlassq.o dlasy2.o dorm2r.o dsteqr.o\
         dtrevc.o dtrexc.o dtrsen.o dtrsyl.o \
 	dsyev.o  dlansy.o dsytrd.o dsterf.o dorgtr.o dlatrd.o dsytd2.o\
 	dorgqr.o dorgql.o dorg2r.o dlarft.o dlarfb.o dorg2l.o\
 	dgesvd.o dgeqrf.o dorgbr.o dorglq.o dorgl2.o dgebrd.o dlabrd.o\
-	dgebd2.o dbdsqr.o dlasv2.o dlas2.o  dlasq1.o dlasq2.o dlazq3.o\
-	dlazq4.o dlasq5.o dlasq6.o dgelqf.o dgelq2.o dormbr.o dormqr.o\
+	dgebd2.o dbdsqr.o dlasv2.o dlas2.o  dlasq1.o dlasq2.o\
+	dlasq5.o dlasq6.o dgelqf.o dgelq2.o dormbr.o dormqr.o\
 	dormlq.o dorml2.o dlacn2.o \
 	dlaebz.o dlagtf.o dlagts.o dlaneg.o dlarra.o dlarrb.o dlarrc.o\
 	dlarrd.o dlarre.o dlarrf.o dlarrj.o dlarrk.o dlarrr.o dstebz.o\
 	dlar1v.o dlarrv.o dorm2l.o dormql.o dormtr.o dstein.o dstemr.o\
-	dstegr.o \
+	dstegr.o dlasq3.o dlasq4.o\
 	dlaed0.o dlaed1.o dlaed2.o dlaed3.o dlaed4.o dlaed5.o dlaed6.o\
-	dlaed7.o dlaed8.o dlaed9.o dlaeda.o dlamrg.o dstedc.o 
+	dlaed7.o dlaed8.o dlaed9.o dlaeda.o dlamrg.o dstedc.o
 
-IOBJ  = ilaenv.o lsame.o lsamen.o xerbla.o xlaenv.o iparmq.o ieeeck.o\
-	ilazlc.o ilazlr.o
+IOBJ  = ilaenv.o lsame.o  lsamen.o xerbla.o iparmq.o ieeeck.o\
+	ilazlc.o ilazlr.o iladlc.o iladlr.o
 
 CIOBJ = icmax1.o 
 
@@ -74,13 +74,12 @@ ZIOBJ = izmax1.o
 
 COBJ  = cgeqr2.o clacon.o clacpy.o cladiv.o clahqr.o clange.o clanhs.o\
         clarf.o  clarfg.o clarnv.o clartg.o clascl.o claset.o classq.o\
-        clatrs.o cmach.o  crot.o   ctrevc.o ctrexc.o ctrsen.o ctrsyl.o\
-        cunm2r.o\
+        clatrs.o crot.o   ctrevc.o ctrexc.o ctrsen.o ctrsyl.o cunm2r.o\
         scsum1.o slabad.o sladiv.o slamch.o slapy2.o slapy3.o slaruv.o
 
 ZOBJ  = zgeqr2.o zlacon.o zlacpy.o zladiv.o zlahqr.o zlange.o zlanhs.o\
         zlarf.o  zlarfg.o zlarnv.o zlartg.o zlascl.o zlaset.o zlassq.o\
-        zlatrs.o zmach.o  zrot.o   ztrevc.o ztrexc.o ztrsen.o ztrsyl.o\
+        zlatrs.o zrot.o   ztrevc.o ztrexc.o ztrsen.o ztrsyl.o\
         zunm2r.o\
         dzsum1.o dlabad.o dladiv.o dlamch.o dlapy2.o dlapy3.o dlaruv.o\
 	zheev.o  zhesv.o  zhetf2.o zhetrf.o zhetrs.o zlahef.o zlanhe.o\
@@ -90,7 +89,7 @@ ZOBJ  = zgeqr2.o zlacon.o zlacpy.o zladiv.o zlahqr.o zlange.o zlanhs.o\
 	zlansy.o zlar1v.o zlarrv.o zstein.o zstemr.o zunm2l.o zunmql.o\
 	zunmqr.o zunmtr.o zlacn2.o\
 	zheevd.o zhegs2.o zhegst.o zhegvd.o zlacrm.o zlaed0.o zlaed7.o\
-	zlaed8.o zpotf2.o zpotrf.o zstedc.o
+	zlaed8.o zpotf2.o zpotrf.o zstedc.o\
 #
 # The following LAPACK routines are not needed by ARPACK
 # source code.  They are used by the drivers in EXAMPLES

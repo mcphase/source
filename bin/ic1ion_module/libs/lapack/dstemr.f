@@ -1,11 +1,321 @@
+*> \brief \b DSTEMR
+*
+*  =========== DOCUMENTATION ===========
+*
+* Online html documentation available at 
+*            http://www.netlib.org/lapack/explore-html/ 
+*
+*> \htmlonly
+*> Download DSTEMR + dependencies 
+*> <a href="http://www.netlib.org/cgi-bin/netlibfiles.tgz?format=tgz&filename=/lapack/lapack_routine/dstemr.f"> 
+*> [TGZ]</a> 
+*> <a href="http://www.netlib.org/cgi-bin/netlibfiles.zip?format=zip&filename=/lapack/lapack_routine/dstemr.f"> 
+*> [ZIP]</a> 
+*> <a href="http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstemr.f"> 
+*> [TXT]</a>
+*> \endhtmlonly 
+*
+*  Definition:
+*  ===========
+*
+*       SUBROUTINE DSTEMR( JOBZ, RANGE, N, D, E, VL, VU, IL, IU,
+*                          M, W, Z, LDZ, NZC, ISUPPZ, TRYRAC, WORK, LWORK,
+*                          IWORK, LIWORK, INFO )
+* 
+*       .. Scalar Arguments ..
+*       CHARACTER          JOBZ, RANGE
+*       LOGICAL            TRYRAC
+*       INTEGER            IL, INFO, IU, LDZ, NZC, LIWORK, LWORK, M, N
+*       DOUBLE PRECISION VL, VU
+*       ..
+*       .. Array Arguments ..
+*       INTEGER            ISUPPZ( * ), IWORK( * )
+*       DOUBLE PRECISION   D( * ), E( * ), W( * ), WORK( * )
+*       DOUBLE PRECISION   Z( LDZ, * )
+*       ..
+*  
+*
+*> \par Purpose:
+*  =============
+*>
+*> \verbatim
+*>
+*> DSTEMR computes selected eigenvalues and, optionally, eigenvectors
+*> of a real symmetric tridiagonal matrix T. Any such unreduced matrix has
+*> a well defined set of pairwise different real eigenvalues, the corresponding
+*> real eigenvectors are pairwise orthogonal.
+*>
+*> The spectrum may be computed either completely or partially by specifying
+*> either an interval (VL,VU] or a range of indices IL:IU for the desired
+*> eigenvalues.
+*>
+*> Depending on the number of desired eigenvalues, these are computed either
+*> by bisection or the dqds algorithm. Numerically orthogonal eigenvectors are
+*> computed by the use of various suitable L D L^T factorizations near clusters
+*> of close eigenvalues (referred to as RRRs, Relatively Robust
+*> Representations). An informal sketch of the algorithm follows.
+*>
+*> For each unreduced block (submatrix) of T,
+*>    (a) Compute T - sigma I  = L D L^T, so that L and D
+*>        define all the wanted eigenvalues to high relative accuracy.
+*>        This means that small relative changes in the entries of D and L
+*>        cause only small relative changes in the eigenvalues and
+*>        eigenvectors. The standard (unfactored) representation of the
+*>        tridiagonal matrix T does not have this property in general.
+*>    (b) Compute the eigenvalues to suitable accuracy.
+*>        If the eigenvectors are desired, the algorithm attains full
+*>        accuracy of the computed eigenvalues only right before
+*>        the corresponding vectors have to be computed, see steps c) and d).
+*>    (c) For each cluster of close eigenvalues, select a new
+*>        shift close to the cluster, find a new factorization, and refine
+*>        the shifted eigenvalues to suitable accuracy.
+*>    (d) For each eigenvalue with a large enough relative separation compute
+*>        the corresponding eigenvector by forming a rank revealing twisted
+*>        factorization. Go back to (c) for any clusters that remain.
+*>
+*> For more details, see:
+*> - Inderjit S. Dhillon and Beresford N. Parlett: "Multiple representations
+*>   to compute orthogonal eigenvectors of symmetric tridiagonal matrices,"
+*>   Linear Algebra and its Applications, 387(1), pp. 1-28, August 2004.
+*> - Inderjit Dhillon and Beresford Parlett: "Orthogonal Eigenvectors and
+*>   Relative Gaps," SIAM Journal on Matrix Analysis and Applications, Vol. 25,
+*>   2004.  Also LAPACK Working Note 154.
+*> - Inderjit Dhillon: "A new O(n^2) algorithm for the symmetric
+*>   tridiagonal eigenvalue/eigenvector problem",
+*>   Computer Science Division Technical Report No. UCB/CSD-97-971,
+*>   UC Berkeley, May 1997.
+*>
+*> Further Details
+*> 1.DSTEMR works only on machines which follow IEEE-754
+*> floating-point standard in their handling of infinities and NaNs.
+*> This permits the use of efficient inner loops avoiding a check for
+*> zero divisors.
+*> \endverbatim
+*
+*  Arguments:
+*  ==========
+*
+*> \param[in] JOBZ
+*> \verbatim
+*>          JOBZ is CHARACTER*1
+*>          = 'N':  Compute eigenvalues only;
+*>          = 'V':  Compute eigenvalues and eigenvectors.
+*> \endverbatim
+*>
+*> \param[in] RANGE
+*> \verbatim
+*>          RANGE is CHARACTER*1
+*>          = 'A': all eigenvalues will be found.
+*>          = 'V': all eigenvalues in the half-open interval (VL,VU]
+*>                 will be found.
+*>          = 'I': the IL-th through IU-th eigenvalues will be found.
+*> \endverbatim
+*>
+*> \param[in] N
+*> \verbatim
+*>          N is INTEGER
+*>          The order of the matrix.  N >= 0.
+*> \endverbatim
+*>
+*> \param[in,out] D
+*> \verbatim
+*>          D is DOUBLE PRECISION array, dimension (N)
+*>          On entry, the N diagonal elements of the tridiagonal matrix
+*>          T. On exit, D is overwritten.
+*> \endverbatim
+*>
+*> \param[in,out] E
+*> \verbatim
+*>          E is DOUBLE PRECISION array, dimension (N)
+*>          On entry, the (N-1) subdiagonal elements of the tridiagonal
+*>          matrix T in elements 1 to N-1 of E. E(N) need not be set on
+*>          input, but is used internally as workspace.
+*>          On exit, E is overwritten.
+*> \endverbatim
+*>
+*> \param[in] VL
+*> \verbatim
+*>          VL is DOUBLE PRECISION
+*> \endverbatim
+*>
+*> \param[in] VU
+*> \verbatim
+*>          VU is DOUBLE PRECISION
+*>
+*>          If RANGE='V', the lower and upper bounds of the interval to
+*>          be searched for eigenvalues. VL < VU.
+*>          Not referenced if RANGE = 'A' or 'I'.
+*> \endverbatim
+*>
+*> \param[in] IL
+*> \verbatim
+*>          IL is INTEGER
+*> \endverbatim
+*>
+*> \param[in] IU
+*> \verbatim
+*>          IU is INTEGER
+*>
+*>          If RANGE='I', the indices (in ascending order) of the
+*>          smallest and largest eigenvalues to be returned.
+*>          1 <= IL <= IU <= N, if N > 0.
+*>          Not referenced if RANGE = 'A' or 'V'.
+*> \endverbatim
+*>
+*> \param[out] M
+*> \verbatim
+*>          M is INTEGER
+*>          The total number of eigenvalues found.  0 <= M <= N.
+*>          If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
+*> \endverbatim
+*>
+*> \param[out] W
+*> \verbatim
+*>          W is DOUBLE PRECISION array, dimension (N)
+*>          The first M elements contain the selected eigenvalues in
+*>          ascending order.
+*> \endverbatim
+*>
+*> \param[out] Z
+*> \verbatim
+*>          Z is DOUBLE PRECISION array, dimension (LDZ, max(1,M) )
+*>          If JOBZ = 'V', and if INFO = 0, then the first M columns of Z
+*>          contain the orthonormal eigenvectors of the matrix T
+*>          corresponding to the selected eigenvalues, with the i-th
+*>          column of Z holding the eigenvector associated with W(i).
+*>          If JOBZ = 'N', then Z is not referenced.
+*>          Note: the user must ensure that at least max(1,M) columns are
+*>          supplied in the array Z; if RANGE = 'V', the exact value of M
+*>          is not known in advance and can be computed with a workspace
+*>          query by setting NZC = -1, see below.
+*> \endverbatim
+*>
+*> \param[in] LDZ
+*> \verbatim
+*>          LDZ is INTEGER
+*>          The leading dimension of the array Z.  LDZ >= 1, and if
+*>          JOBZ = 'V', then LDZ >= max(1,N).
+*> \endverbatim
+*>
+*> \param[in] NZC
+*> \verbatim
+*>          NZC is INTEGER
+*>          The number of eigenvectors to be held in the array Z.
+*>          If RANGE = 'A', then NZC >= max(1,N).
+*>          If RANGE = 'V', then NZC >= the number of eigenvalues in (VL,VU].
+*>          If RANGE = 'I', then NZC >= IU-IL+1.
+*>          If NZC = -1, then a workspace query is assumed; the
+*>          routine calculates the number of columns of the array Z that
+*>          are needed to hold the eigenvectors.
+*>          This value is returned as the first entry of the Z array, and
+*>          no error message related to NZC is issued by XERBLA.
+*> \endverbatim
+*>
+*> \param[out] ISUPPZ
+*> \verbatim
+*>          ISUPPZ is INTEGER ARRAY, dimension ( 2*max(1,M) )
+*>          The support of the eigenvectors in Z, i.e., the indices
+*>          indicating the nonzero elements in Z. The i-th computed eigenvector
+*>          is nonzero only in elements ISUPPZ( 2*i-1 ) through
+*>          ISUPPZ( 2*i ). This is relevant in the case when the matrix
+*>          is split. ISUPPZ is only accessed when JOBZ is 'V' and N > 0.
+*> \endverbatim
+*>
+*> \param[in,out] TRYRAC
+*> \verbatim
+*>          TRYRAC is LOGICAL
+*>          If TRYRAC.EQ..TRUE., indicates that the code should check whether
+*>          the tridiagonal matrix defines its eigenvalues to high relative
+*>          accuracy.  If so, the code uses relative-accuracy preserving
+*>          algorithms that might be (a bit) slower depending on the matrix.
+*>          If the matrix does not define its eigenvalues to high relative
+*>          accuracy, the code can uses possibly faster algorithms.
+*>          If TRYRAC.EQ..FALSE., the code is not required to guarantee
+*>          relatively accurate eigenvalues and can use the fastest possible
+*>          techniques.
+*>          On exit, a .TRUE. TRYRAC will be set to .FALSE. if the matrix
+*>          does not define its eigenvalues to high relative accuracy.
+*> \endverbatim
+*>
+*> \param[out] WORK
+*> \verbatim
+*>          WORK is DOUBLE PRECISION array, dimension (LWORK)
+*>          On exit, if INFO = 0, WORK(1) returns the optimal
+*>          (and minimal) LWORK.
+*> \endverbatim
+*>
+*> \param[in] LWORK
+*> \verbatim
+*>          LWORK is INTEGER
+*>          The dimension of the array WORK. LWORK >= max(1,18*N)
+*>          if JOBZ = 'V', and LWORK >= max(1,12*N) if JOBZ = 'N'.
+*>          If LWORK = -1, then a workspace query is assumed; the routine
+*>          only calculates the optimal size of the WORK array, returns
+*>          this value as the first entry of the WORK array, and no error
+*>          message related to LWORK is issued by XERBLA.
+*> \endverbatim
+*>
+*> \param[out] IWORK
+*> \verbatim
+*>          IWORK is INTEGER array, dimension (LIWORK)
+*>          On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
+*> \endverbatim
+*>
+*> \param[in] LIWORK
+*> \verbatim
+*>          LIWORK is INTEGER
+*>          The dimension of the array IWORK.  LIWORK >= max(1,10*N)
+*>          if the eigenvectors are desired, and LIWORK >= max(1,8*N)
+*>          if only the eigenvalues are to be computed.
+*>          If LIWORK = -1, then a workspace query is assumed; the
+*>          routine only calculates the optimal size of the IWORK array,
+*>          returns this value as the first entry of the IWORK array, and
+*>          no error message related to LIWORK is issued by XERBLA.
+*> \endverbatim
+*>
+*> \param[out] INFO
+*> \verbatim
+*>          INFO is INTEGER
+*>          On exit, INFO
+*>          = 0:  successful exit
+*>          < 0:  if INFO = -i, the i-th argument had an illegal value
+*>          > 0:  if INFO = 1X, internal error in DLARRE,
+*>                if INFO = 2X, internal error in DLARRV.
+*>                Here, the digit X = ABS( IINFO ) < 10, where IINFO is
+*>                the nonzero error code returned by DLARRE or
+*>                DLARRV, respectively.
+*> \endverbatim
+*
+*  Authors:
+*  ========
+*
+*> \author Univ. of Tennessee 
+*> \author Univ. of California Berkeley 
+*> \author Univ. of Colorado Denver 
+*> \author NAG Ltd. 
+*
+*> \date November 2013
+*
+*> \ingroup doubleOTHERcomputational
+*
+*> \par Contributors:
+*  ==================
+*>
+*> Beresford Parlett, University of California, Berkeley, USA \n
+*> Jim Demmel, University of California, Berkeley, USA \n
+*> Inderjit Dhillon, University of Texas, Austin, USA \n
+*> Osni Marques, LBNL/NERSC, USA \n
+*> Christof Voemel, University of California, Berkeley, USA
+*
+*  =====================================================================
       SUBROUTINE DSTEMR( JOBZ, RANGE, N, D, E, VL, VU, IL, IU,
      $                   M, W, Z, LDZ, NZC, ISUPPZ, TRYRAC, WORK, LWORK,
      $                   IWORK, LIWORK, INFO )
-      IMPLICIT NONE
 *
-*  -- LAPACK computational routine (version 3.1) --
-*     Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd..
-*     November 2006
+*  -- LAPACK computational routine (version 3.5.0) --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*     November 2013
 *
 *     .. Scalar Arguments ..
       CHARACTER          JOBZ, RANGE
@@ -18,198 +328,6 @@
       DOUBLE PRECISION   D( * ), E( * ), W( * ), WORK( * )
       DOUBLE PRECISION   Z( LDZ, * )
 *     ..
-*
-*  Purpose
-*  =======
-*
-*  DSTEMR computes selected eigenvalues and, optionally, eigenvectors
-*  of a real symmetric tridiagonal matrix T. Any such unreduced matrix has
-*  a well defined set of pairwise different real eigenvalues, the corresponding
-*  real eigenvectors are pairwise orthogonal.
-*
-*  The spectrum may be computed either completely or partially by specifying
-*  either an interval (VL,VU] or a range of indices IL:IU for the desired
-*  eigenvalues.
-*
-*  Depending on the number of desired eigenvalues, these are computed either
-*  by bisection or the dqds algorithm. Numerically orthogonal eigenvectors are
-*  computed by the use of various suitable L D L^T factorizations near clusters
-*  of close eigenvalues (referred to as RRRs, Relatively Robust
-*  Representations). An informal sketch of the algorithm follows.
-*
-*  For each unreduced block (submatrix) of T,
-*     (a) Compute T - sigma I  = L D L^T, so that L and D
-*         define all the wanted eigenvalues to high relative accuracy.
-*         This means that small relative changes in the entries of D and L
-*         cause only small relative changes in the eigenvalues and
-*         eigenvectors. The standard (unfactored) representation of the
-*         tridiagonal matrix T does not have this property in general.
-*     (b) Compute the eigenvalues to suitable accuracy.
-*         If the eigenvectors are desired, the algorithm attains full
-*         accuracy of the computed eigenvalues only right before
-*         the corresponding vectors have to be computed, see steps c) and d).
-*     (c) For each cluster of close eigenvalues, select a new
-*         shift close to the cluster, find a new factorization, and refine
-*         the shifted eigenvalues to suitable accuracy.
-*     (d) For each eigenvalue with a large enough relative separation compute
-*         the corresponding eigenvector by forming a rank revealing twisted
-*         factorization. Go back to (c) for any clusters that remain.
-*
-*  For more details, see:
-*  - Inderjit S. Dhillon and Beresford N. Parlett: "Multiple representations
-*    to compute orthogonal eigenvectors of symmetric tridiagonal matrices,"
-*    Linear Algebra and its Applications, 387(1), pp. 1-28, August 2004.
-*  - Inderjit Dhillon and Beresford Parlett: "Orthogonal Eigenvectors and
-*    Relative Gaps," SIAM Journal on Matrix Analysis and Applications, Vol. 25,
-*    2004.  Also LAPACK Working Note 154.
-*  - Inderjit Dhillon: "A new O(n^2) algorithm for the symmetric
-*    tridiagonal eigenvalue/eigenvector problem",
-*    Computer Science Division Technical Report No. UCB/CSD-97-971,
-*    UC Berkeley, May 1997.
-*
-*  Notes:
-*  1.DSTEMR works only on machines which follow IEEE-754
-*  floating-point standard in their handling of infinities and NaNs.
-*  This permits the use of efficient inner loops avoiding a check for
-*  zero divisors.
-*
-*  Arguments
-*  =========
-*
-*  JOBZ    (input) CHARACTER*1
-*          = 'N':  Compute eigenvalues only;
-*          = 'V':  Compute eigenvalues and eigenvectors.
-*
-*  RANGE   (input) CHARACTER*1
-*          = 'A': all eigenvalues will be found.
-*          = 'V': all eigenvalues in the half-open interval (VL,VU]
-*                 will be found.
-*          = 'I': the IL-th through IU-th eigenvalues will be found.
-*
-*  N       (input) INTEGER
-*          The order of the matrix.  N >= 0.
-*
-*  D       (input/output) DOUBLE PRECISION array, dimension (N)
-*          On entry, the N diagonal elements of the tridiagonal matrix
-*          T. On exit, D is overwritten.
-*
-*  E       (input/output) DOUBLE PRECISION array, dimension (N)
-*          On entry, the (N-1) subdiagonal elements of the tridiagonal
-*          matrix T in elements 1 to N-1 of E. E(N) need not be set on
-*          input, but is used internally as workspace.
-*          On exit, E is overwritten.
-*
-*  VL      (input) DOUBLE PRECISION
-*  VU      (input) DOUBLE PRECISION
-*          If RANGE='V', the lower and upper bounds of the interval to
-*          be searched for eigenvalues. VL < VU.
-*          Not referenced if RANGE = 'A' or 'I'.
-*
-*  IL      (input) INTEGER
-*  IU      (input) INTEGER
-*          If RANGE='I', the indices (in ascending order) of the
-*          smallest and largest eigenvalues to be returned.
-*          1 <= IL <= IU <= N, if N > 0.
-*          Not referenced if RANGE = 'A' or 'V'.
-*
-*  M       (output) INTEGER
-*          The total number of eigenvalues found.  0 <= M <= N.
-*          If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
-*
-*  W       (output) DOUBLE PRECISION array, dimension (N)
-*          The first M elements contain the selected eigenvalues in
-*          ascending order.
-*
-*  Z       (output) DOUBLE PRECISION array, dimension (LDZ, max(1,M) )
-*          If JOBZ = 'V', and if INFO = 0, then the first M columns of Z
-*          contain the orthonormal eigenvectors of the matrix T
-*          corresponding to the selected eigenvalues, with the i-th
-*          column of Z holding the eigenvector associated with W(i).
-*          If JOBZ = 'N', then Z is not referenced.
-*          Note: the user must ensure that at least max(1,M) columns are
-*          supplied in the array Z; if RANGE = 'V', the exact value of M
-*          is not known in advance and can be computed with a workspace
-*          query by setting NZC = -1, see below.
-*
-*  LDZ     (input) INTEGER
-*          The leading dimension of the array Z.  LDZ >= 1, and if
-*          JOBZ = 'V', then LDZ >= max(1,N).
-*
-*  NZC     (input) INTEGER
-*          The number of eigenvectors to be held in the array Z.
-*          If RANGE = 'A', then NZC >= max(1,N).
-*          If RANGE = 'V', then NZC >= the number of eigenvalues in (VL,VU].
-*          If RANGE = 'I', then NZC >= IU-IL+1.
-*          If NZC = -1, then a workspace query is assumed; the
-*          routine calculates the number of columns of the array Z that
-*          are needed to hold the eigenvectors.
-*          This value is returned as the first entry of the Z array, and
-*          no error message related to NZC is issued by XERBLA.
-*
-*  ISUPPZ  (output) INTEGER ARRAY, dimension ( 2*max(1,M) )
-*          The support of the eigenvectors in Z, i.e., the indices
-*          indicating the nonzero elements in Z. The i-th computed eigenvector
-*          is nonzero only in elements ISUPPZ( 2*i-1 ) through
-*          ISUPPZ( 2*i ). This is relevant in the case when the matrix
-*          is split. ISUPPZ is only accessed when JOBZ is 'V' and N > 0.
-*
-*  TRYRAC  (input/output) LOGICAL
-*          If TRYRAC.EQ..TRUE., indicates that the code should check whether
-*          the tridiagonal matrix defines its eigenvalues to high relative
-*          accuracy.  If so, the code uses relative-accuracy preserving
-*          algorithms that might be (a bit) slower depending on the matrix.
-*          If the matrix does not define its eigenvalues to high relative
-*          accuracy, the code can uses possibly faster algorithms.
-*          If TRYRAC.EQ..FALSE., the code is not required to guarantee
-*          relatively accurate eigenvalues and can use the fastest possible
-*          techniques.
-*          On exit, a .TRUE. TRYRAC will be set to .FALSE. if the matrix
-*          does not define its eigenvalues to high relative accuracy.
-*
-*  WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
-*          On exit, if INFO = 0, WORK(1) returns the optimal
-*          (and minimal) LWORK.
-*
-*  LWORK   (input) INTEGER
-*          The dimension of the array WORK. LWORK >= max(1,18*N)
-*          if JOBZ = 'V', and LWORK >= max(1,12*N) if JOBZ = 'N'.
-*          If LWORK = -1, then a workspace query is assumed; the routine
-*          only calculates the optimal size of the WORK array, returns
-*          this value as the first entry of the WORK array, and no error
-*          message related to LWORK is issued by XERBLA.
-*
-*  IWORK   (workspace/output) INTEGER array, dimension (LIWORK)
-*          On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
-*
-*  LIWORK  (input) INTEGER
-*          The dimension of the array IWORK.  LIWORK >= max(1,10*N)
-*          if the eigenvectors are desired, and LIWORK >= max(1,8*N)
-*          if only the eigenvalues are to be computed.
-*          If LIWORK = -1, then a workspace query is assumed; the
-*          routine only calculates the optimal size of the IWORK array,
-*          returns this value as the first entry of the IWORK array, and
-*          no error message related to LIWORK is issued by XERBLA.
-*
-*  INFO    (output) INTEGER
-*          On exit, INFO
-*          = 0:  successful exit
-*          < 0:  if INFO = -i, the i-th argument had an illegal value
-*          > 0:  if INFO = 1X, internal error in DLARRE,
-*                if INFO = 2X, internal error in DLARRV.
-*                Here, the digit X = ABS( IINFO ) < 10, where IINFO is
-*                the nonzero error code returned by DLARRE or
-*                DLARRV, respectively.
-*
-*
-*  Further Details
-*  ===============
-*
-*  Based on contributions by
-*     Beresford Parlett, University of California, Berkeley, USA
-*     Jim Demmel, University of California, Berkeley, USA
-*     Inderjit Dhillon, University of Texas, Austin, USA
-*     Osni Marques, LBNL/NERSC, USA
-*     Christof Voemel, University of California, Berkeley, USA
 *
 *  =====================================================================
 *
@@ -256,7 +374,6 @@
 *
       LQUERY = ( ( LWORK.EQ.-1 ).OR.( LIWORK.EQ.-1 ) )
       ZQUERY = ( NZC.EQ.-1 )
-      TRYRAC = ( INFO.NE.0 )
 
 *     DSTEMR needs WORK of size 6*N, IWORK of size 3*N.
 *     In addition, DLARRE needs WORK of size 6*N, IWORK of size 5*N.
@@ -274,6 +391,7 @@
       WU = ZERO
       IIL = 0
       IIU = 0
+      NSPLIT = 0
 
       IF( VALEIG ) THEN
 *        We do not reference VL, VU in the cases RANGE = 'I','A'
@@ -391,10 +509,10 @@
                IF (SN.NE.ZERO) THEN
                   IF (CS.NE.ZERO) THEN
                      ISUPPZ(2*M-1) = 1
-                     ISUPPZ(2*M-1) = 2
+                     ISUPPZ(2*M) = 2
                   ELSE
                      ISUPPZ(2*M-1) = 1
-                     ISUPPZ(2*M-1) = 1
+                     ISUPPZ(2*M) = 1
                   END IF
                ELSE
                   ISUPPZ(2*M-1) = 2
@@ -415,10 +533,10 @@
                IF (SN.NE.ZERO) THEN
                   IF (CS.NE.ZERO) THEN
                      ISUPPZ(2*M-1) = 1
-                     ISUPPZ(2*M-1) = 2
+                     ISUPPZ(2*M) = 2
                   ELSE
                      ISUPPZ(2*M-1) = 1
-                     ISUPPZ(2*M-1) = 1
+                     ISUPPZ(2*M) = 1
                   END IF
                ELSE
                   ISUPPZ(2*M-1) = 2
@@ -426,184 +544,187 @@
                END IF
             ENDIF
          ENDIF
-         RETURN
-      END IF
+
+      ELSE
 
 *     Continue with general N
 
-      INDGRS = 1
-      INDERR = 2*N + 1
-      INDGP = 3*N + 1
-      INDD = 4*N + 1
-      INDE2 = 5*N + 1
-      INDWRK = 6*N + 1
+         INDGRS = 1
+         INDERR = 2*N + 1
+         INDGP = 3*N + 1
+         INDD = 4*N + 1
+         INDE2 = 5*N + 1
+         INDWRK = 6*N + 1
 *
-      IINSPL = 1
-      IINDBL = N + 1
-      IINDW = 2*N + 1
-      IINDWK = 3*N + 1
+         IINSPL = 1
+         IINDBL = N + 1
+         IINDW = 2*N + 1
+         IINDWK = 3*N + 1
 *
-*     Scale matrix to allowable range, if necessary.
-*     The allowable range is related to the PIVMIN parameter; see the
-*     comments in DLARRD.  The preference for scaling small values
-*     up is heuristic; we expect users' matrices not to be close to the
-*     RMAX threshold.
+*        Scale matrix to allowable range, if necessary.
+*        The allowable range is related to the PIVMIN parameter; see the
+*        comments in DLARRD.  The preference for scaling small values
+*        up is heuristic; we expect users' matrices not to be close to the
+*        RMAX threshold.
 *
-      SCALE = ONE
-      TNRM = DLANST( 'M', N, D, E )
-      IF( TNRM.GT.ZERO .AND. TNRM.LT.RMIN ) THEN
-         SCALE = RMIN / TNRM
-      ELSE IF( TNRM.GT.RMAX ) THEN
-         SCALE = RMAX / TNRM
-      END IF
-      IF( SCALE.NE.ONE ) THEN
-         CALL DSCAL( N, SCALE, D, 1 )
-         CALL DSCAL( N-1, SCALE, E, 1 )
-         TNRM = TNRM*SCALE
-         IF( VALEIG ) THEN
-*           If eigenvalues in interval have to be found,
-*           scale (WL, WU] accordingly
-            WL = WL*SCALE
-            WU = WU*SCALE
+         SCALE = ONE
+         TNRM = DLANST( 'M', N, D, E )
+         IF( TNRM.GT.ZERO .AND. TNRM.LT.RMIN ) THEN
+            SCALE = RMIN / TNRM
+         ELSE IF( TNRM.GT.RMAX ) THEN
+            SCALE = RMAX / TNRM
+         END IF
+         IF( SCALE.NE.ONE ) THEN
+            CALL DSCAL( N, SCALE, D, 1 )
+            CALL DSCAL( N-1, SCALE, E, 1 )
+            TNRM = TNRM*SCALE
+            IF( VALEIG ) THEN
+*              If eigenvalues in interval have to be found,
+*              scale (WL, WU] accordingly
+               WL = WL*SCALE
+               WU = WU*SCALE
+            ENDIF
+         END IF
+*
+*        Compute the desired eigenvalues of the tridiagonal after splitting
+*        into smaller subblocks if the corresponding off-diagonal elements
+*        are small
+*        THRESH is the splitting parameter for DLARRE
+*        A negative THRESH forces the old splitting criterion based on the
+*        size of the off-diagonal. A positive THRESH switches to splitting
+*        which preserves relative accuracy.
+*
+         IF( TRYRAC ) THEN
+*           Test whether the matrix warrants the more expensive relative approach.
+            CALL DLARRR( N, D, E, IINFO )
+         ELSE
+*           The user does not care about relative accurately eigenvalues
+            IINFO = -1
          ENDIF
-      END IF
+*        Set the splitting criterion
+         IF (IINFO.EQ.0) THEN
+            THRESH = EPS
+         ELSE
+            THRESH = -EPS
+*           relative accuracy is desired but T does not guarantee it
+            TRYRAC = .FALSE.
+         ENDIF
 *
-*     Compute the desired eigenvalues of the tridiagonal after splitting
-*     into smaller subblocks if the corresponding off-diagonal elements
-*     are small
-*     THRESH is the splitting parameter for DLARRE
-*     A negative THRESH forces the old splitting criterion based on the
-*     size of the off-diagonal. A positive THRESH switches to splitting
-*     which preserves relative accuracy.
-*
-      IF( TRYRAC ) THEN
-*        Test whether the matrix warrants the more expensive relative approach.
-         CALL DLARRR( N, D, E, IINFO )
-      ELSE
-*        The user does not care about relative accurately eigenvalues
-         IINFO = -1
-      ENDIF
-*     Set the splitting criterion
-      IF (IINFO.EQ.0) THEN
-         THRESH = EPS
-      ELSE
-         THRESH = -EPS
-*        relative accuracy is desired but T does not guarantee it
-         TRYRAC = .FALSE.
-      ENDIF
-*
-      IF( TRYRAC ) THEN
-*        Copy original diagonal, needed to guarantee relative accuracy
-         CALL DCOPY(N,D,1,WORK(INDD),1)
-      ENDIF
-*     Store the squares of the offdiagonal values of T
-      DO 5 J = 1, N-1
-         WORK( INDE2+J-1 ) = E(J)**2
- 5    CONTINUE
+         IF( TRYRAC ) THEN
+*           Copy original diagonal, needed to guarantee relative accuracy
+            CALL DCOPY(N,D,1,WORK(INDD),1)
+         ENDIF
+*        Store the squares of the offdiagonal values of T
+         DO 5 J = 1, N-1
+            WORK( INDE2+J-1 ) = E(J)**2
+ 5       CONTINUE
 
-*     Set the tolerance parameters for bisection
-      IF( .NOT.WANTZ ) THEN
-*        DLARRE computes the eigenvalues to full precision.
-         RTOL1 = FOUR * EPS
-         RTOL2 = FOUR * EPS
-      ELSE
-*        DLARRE computes the eigenvalues to less than full precision.
-*        DLARRV will refine the eigenvalue approximations, and we can
-*        need less accurate initial bisection in DLARRE.
-*        Note: these settings do only affect the subset case and DLARRE
-         RTOL1 = SQRT(EPS)
-         RTOL2 = MAX( SQRT(EPS)*5.0D-3, FOUR * EPS )
-      ENDIF
-      CALL DLARRE( RANGE, N, WL, WU, IIL, IIU, D, E,
+*        Set the tolerance parameters for bisection
+         IF( .NOT.WANTZ ) THEN
+*           DLARRE computes the eigenvalues to full precision.
+            RTOL1 = FOUR * EPS
+            RTOL2 = FOUR * EPS
+         ELSE
+*           DLARRE computes the eigenvalues to less than full precision.
+*           DLARRV will refine the eigenvalue approximations, and we can
+*           need less accurate initial bisection in DLARRE.
+*           Note: these settings do only affect the subset case and DLARRE
+            RTOL1 = SQRT(EPS)
+            RTOL2 = MAX( SQRT(EPS)*5.0D-3, FOUR * EPS )
+         ENDIF
+         CALL DLARRE( RANGE, N, WL, WU, IIL, IIU, D, E,
      $             WORK(INDE2), RTOL1, RTOL2, THRESH, NSPLIT,
      $             IWORK( IINSPL ), M, W, WORK( INDERR ),
      $             WORK( INDGP ), IWORK( IINDBL ),
      $             IWORK( IINDW ), WORK( INDGRS ), PIVMIN,
      $             WORK( INDWRK ), IWORK( IINDWK ), IINFO )
-      IF( IINFO.NE.0 ) THEN
-         INFO = 10 + ABS( IINFO )
-         RETURN
-      END IF
-*     Note that if RANGE .NE. 'V', DLARRE computes bounds on the desired
-*     part of the spectrum. All desired eigenvalues are contained in
-*     (WL,WU]
+         IF( IINFO.NE.0 ) THEN
+            INFO = 10 + ABS( IINFO )
+            RETURN
+         END IF
+*        Note that if RANGE .NE. 'V', DLARRE computes bounds on the desired
+*        part of the spectrum. All desired eigenvalues are contained in
+*        (WL,WU]
 
 
-      IF( WANTZ ) THEN
+         IF( WANTZ ) THEN
 *
-*        Compute the desired eigenvectors corresponding to the computed
-*        eigenvalues
+*           Compute the desired eigenvectors corresponding to the computed
+*           eigenvalues
 *
-         CALL DLARRV( N, WL, WU, D, E,
+            CALL DLARRV( N, WL, WU, D, E,
      $                PIVMIN, IWORK( IINSPL ), M,
      $                1, M, MINRGP, RTOL1, RTOL2,
      $                W, WORK( INDERR ), WORK( INDGP ), IWORK( IINDBL ),
      $                IWORK( IINDW ), WORK( INDGRS ), Z, LDZ,
      $                ISUPPZ, WORK( INDWRK ), IWORK( IINDWK ), IINFO )
-         IF( IINFO.NE.0 ) THEN
-            INFO = 20 + ABS( IINFO )
-            RETURN
+            IF( IINFO.NE.0 ) THEN
+               INFO = 20 + ABS( IINFO )
+               RETURN
+            END IF
+         ELSE
+*           DLARRE computes eigenvalues of the (shifted) root representation
+*           DLARRV returns the eigenvalues of the unshifted matrix.
+*           However, if the eigenvectors are not desired by the user, we need
+*           to apply the corresponding shifts from DLARRE to obtain the
+*           eigenvalues of the original matrix.
+            DO 20 J = 1, M
+               ITMP = IWORK( IINDBL+J-1 )
+               W( J ) = W( J ) + E( IWORK( IINSPL+ITMP-1 ) )
+ 20         CONTINUE
          END IF
-      ELSE
-*        DLARRE computes eigenvalues of the (shifted) root representation
-*        DLARRV returns the eigenvalues of the unshifted matrix.
-*        However, if the eigenvectors are not desired by the user, we need
-*        to apply the corresponding shifts from DLARRE to obtain the
-*        eigenvalues of the original matrix.
-         DO 20 J = 1, M
-            ITMP = IWORK( IINDBL+J-1 )
-            W( J ) = W( J ) + E( IWORK( IINSPL+ITMP-1 ) )
- 20      CONTINUE
-      END IF
 *
 
-      IF ( TRYRAC ) THEN
-*        Refine computed eigenvalues so that they are relatively accurate
-*        with respect to the original matrix T.
-         IBEGIN = 1
-         WBEGIN = 1
-         DO 39  JBLK = 1, IWORK( IINDBL+M-1 )
-            IEND = IWORK( IINSPL+JBLK-1 )
-            IN = IEND - IBEGIN + 1
-            WEND = WBEGIN - 1
-*           check if any eigenvalues have to be refined in this block
- 36         CONTINUE
-            IF( WEND.LT.M ) THEN
-               IF( IWORK( IINDBL+WEND ).EQ.JBLK ) THEN
-                  WEND = WEND + 1
-                  GO TO 36
+         IF ( TRYRAC ) THEN
+*           Refine computed eigenvalues so that they are relatively accurate
+*           with respect to the original matrix T.
+            IBEGIN = 1
+            WBEGIN = 1
+            DO 39  JBLK = 1, IWORK( IINDBL+M-1 )
+               IEND = IWORK( IINSPL+JBLK-1 )
+               IN = IEND - IBEGIN + 1
+               WEND = WBEGIN - 1
+*              check if any eigenvalues have to be refined in this block
+ 36            CONTINUE
+               IF( WEND.LT.M ) THEN
+                  IF( IWORK( IINDBL+WEND ).EQ.JBLK ) THEN
+                     WEND = WEND + 1
+                     GO TO 36
+                  END IF
                END IF
-            END IF
-            IF( WEND.LT.WBEGIN ) THEN
-               IBEGIN = IEND + 1
-               GO TO 39
-            END IF
+               IF( WEND.LT.WBEGIN ) THEN
+                  IBEGIN = IEND + 1
+                  GO TO 39
+               END IF
 
-            OFFSET = IWORK(IINDW+WBEGIN-1)-1
-            IFIRST = IWORK(IINDW+WBEGIN-1)
-            ILAST = IWORK(IINDW+WEND-1)
-            RTOL2 = FOUR * EPS
-            CALL DLARRJ( IN,
+               OFFSET = IWORK(IINDW+WBEGIN-1)-1
+               IFIRST = IWORK(IINDW+WBEGIN-1)
+               ILAST = IWORK(IINDW+WEND-1)
+               RTOL2 = FOUR * EPS
+               CALL DLARRJ( IN,
      $                   WORK(INDD+IBEGIN-1), WORK(INDE2+IBEGIN-1),
      $                   IFIRST, ILAST, RTOL2, OFFSET, W(WBEGIN),
      $                   WORK( INDERR+WBEGIN-1 ),
      $                   WORK( INDWRK ), IWORK( IINDWK ), PIVMIN,
      $                   TNRM, IINFO )
-            IBEGIN = IEND + 1
-            WBEGIN = WEND + 1
- 39      CONTINUE
-      ENDIF
+               IBEGIN = IEND + 1
+               WBEGIN = WEND + 1
+ 39         CONTINUE
+         ENDIF
 *
-*     If matrix was scaled, then rescale eigenvalues appropriately.
+*        If matrix was scaled, then rescale eigenvalues appropriately.
 *
-      IF( SCALE.NE.ONE ) THEN
-         CALL DSCAL( M, ONE / SCALE, W, 1 )
+         IF( SCALE.NE.ONE ) THEN
+            CALL DSCAL( M, ONE / SCALE, W, 1 )
+         END IF
+  
       END IF
+    
 *
 *     If eigenvalues are not in increasing order, then sort them,
 *     possibly along with eigenvectors.
 *
-      IF( NSPLIT.GT.1 ) THEN
+      IF( NSPLIT.GT.1 .OR. N.EQ.2 ) THEN
          IF( .NOT. WANTZ ) THEN
             CALL DLASRT( 'I', M, W, IINFO )
             IF( IINFO.NE.0 ) THEN
