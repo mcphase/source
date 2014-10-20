@@ -225,17 +225,17 @@ gp.read();
                                                  cs4.z[ii]=cs.z[j]+(*inputpars4.jjj[k]).xyz(3);cs4.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
                                                  strcpy(cs4.sipffilenames[ii],(*inputpars4.jjj[k]).sipffilename);
                                                  //check if cluster abc  are the same as inputpars
-           if(fabs(cs4.abc(1)-inputpars4.a)>1e-6)
+           if(fabs(cs4.abc(1)-inputpars4.a)>1e-5)
               {fprintf(stderr,"Error program spins - a=%g in cluster %s not the same as a=%g in mcphas.j\n",cs4.abc(1),(*inputpars.jjj[j]).sipffilename,inputpars4.a);exit(1);}
-           if(fabs(cs4.abc(2)-inputpars4.b)>1e-6)
+           if(fabs(cs4.abc(2)-inputpars4.b)>1e-5)
               {fprintf(stderr,"Error program spins - b=%g in cluster %s not the same as b=%g in mcphas.j\n",cs4.abc(2),(*inputpars.jjj[j]).sipffilename,inputpars4.b);exit(1);}
-           if(fabs(cs4.abc(3)-inputpars4.c)>1e-6)
+           if(fabs(cs4.abc(3)-inputpars4.c)>1e-5)
               {fprintf(stderr,"Error program spins - c=%g in cluster %s not the same as c=%g in mcphas.j\n",cs4.abc(3),(*inputpars.jjj[j]).sipffilename,inputpars4.c);exit(1);}
-           if(fabs(cs4.abc(4)-inputpars4.alpha)>1e-6)
+           if(fabs(cs4.abc(4)-inputpars4.alpha)>1e-5)
               {fprintf(stderr,"Error program spins - alpha=%g in cluster %s not the same as alpha=%g in mcphas.j\n",cs4.abc(4),(*inputpars.jjj[j]).sipffilename,inputpars4.alpha);exit(1);}
-           if(fabs(cs4.abc(5)-inputpars4.beta)>1e-6)
+           if(fabs(cs4.abc(5)-inputpars4.beta)>1e-5)
               {fprintf(stderr,"Error program spins - beta=%g in cluster %s not the same as beta=%g in mcphas.j\n",cs4.abc(5),(*inputpars.jjj[j]).sipffilename,inputpars4.beta);exit(1);}
-           if(fabs(cs4.abc(6)-inputpars4.gamma)>1e-6)
+           if(fabs(cs4.abc(6)-inputpars4.gamma)>1e-5)
               {fprintf(stderr,"Error program spins - gamma=%g in cluster %s not the same as gamma=%g in mcphas.j\n",cs4.abc(6),(*inputpars.jjj[j]).sipffilename,inputpars4.gamma);exit(1);}                                                 
                                                  }
                                                }

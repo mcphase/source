@@ -47,7 +47,7 @@ endif
 # Checks whether we support the -march=native target
 ifdef fast
 ifdef icc
-ARCHFLAG=-O2 -xHOST -IPF_fma -long_double -IPF_fltacc#-ipo
+ARCHFLAG=-O3 -xHOST -IPF_fma -long_double -IPF_fltacc#-ipo
 else
 ifdef GCC42
 ARCHFLAG=-O3 -march=native#-ftree-vectorizer-verbose=2
@@ -149,6 +149,7 @@ ifdef gotoblas
 LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -L/usr/local/gfortran/lib -lgfortran -lpthread
 else
 LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
+#LFLAGS+= -llapack -lf77blas -latlas
 endif
 
 ifneq ($(shell uname),Darwin)

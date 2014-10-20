@@ -203,6 +203,7 @@ int myEigenSystemHermiteanGeneral (ComplexMatrix& a, ComplexMatrix& b, Vector & 
   bool isherm;
   isherm = checkHerm(a,false); if(!isherm) { fprintf(stderr,"myEigenSystemHermiteanGeneral: Matrix a is not Hermitian\n"); retval += 1; }
   isherm = checkHerm(b,false); if(!isherm) { fprintf(stderr,"myEigenSystemHermiteanGeneral: Matrix b is not Hermitian\n"); retval += 2; }
+  if(retval!=0) { return retval; }
 
   // put matrix to format needed for library diagonalize function
 /* for(i1=a.Rlo();i1<=a.Rhi();++i1){for(j1=a.Clo();j1<=a.Chi();++j1){
@@ -256,7 +257,7 @@ EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
 */
   // Modified to use LAPACK routines instead - MDL 131101
   int itype=1, n=a.Rhi(), lda = n, ldb = n, lwork = 2*n+n*n, lrwork = 1+5*n+2*n*n, liwork=3+5*n, *iwork = new int[liwork];
-  char jobz = 'V', uplo = 'U', range = 'A';
+  char jobz = 'V', uplo = 'U'; //, range = 'A';
   complexdouble *zwork=0, *zb; zwork = new complexdouble[lwork];
   memcpy(&T[1][1],&a[1][1],n*n*sizeof(complexdouble));
   zb = new complexdouble[n*n]; memcpy(zb,&b[1][1],n*n*sizeof(complexdouble));
@@ -265,7 +266,84 @@ EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
                   iwork, &liwork, &retval);
   T=T.Hermitean();
   delete []rwork; delete []iwork; delete []zwork; delete []zb;
-  if(retval>n) { fprintf(stderr,"Chreduce: matrix B is not positiv definite - possible reason: magnetic structure in mcdisp.mf  metastable.\n"); exit(0); }
+  if(retval<0) { 
+    fprintf(stderr,"myEigenSystemHermiteanGeneral: Input %d to ZHEGVD is incorrect in myev.c - This should not happen! Please file a bug report.\n",-retval); exit(0); }
+  else if(retval>0 && retval<=n) { 
+    fprintf(stderr,"myEigenSystemHermiteanGeneral: Algorithm failed to converge. No eigenvalues/vectors calculated.\n"); }
+  else if(retval>n) {
+    fprintf(stderr,"myEigenSystemHermiteanGeneral: matrix B is not positiv definite. No eigenvalues/vectors calculated.\n"); }
+  return (retval==0)?0:-retval;
+}
 
-   return retval;
+// Added a general non-symmetric eigenproblem solver using ZGGEV from LAPACK - MDL 141019
+int myEigenSystemGeneral (ComplexMatrix& a, ComplexMatrix& b, ComplexVector & e, ComplexMatrix & T)
+{
+  T = 0;
+  int n=a.Rhi(), lda = n, ldb = n, lwork, incx = 1, retval;
+  double *rwork = new double[8*n];
+  char jobz = 'V', jobn = 'N', uplo = 'U';
+  complexdouble *zwork=0, *za, *zb, *alpha, *beta, *zv;
+  alpha = new complexdouble[n*n]; beta = new complexdouble[n*n];
+  za = new complexdouble[n*n]; memset(za,0,n*n*sizeof(complexdouble)); 
+  zb = new complexdouble[n*n]; memset(zb,0,n*n*sizeof(complexdouble)); 
+  zv = new complexdouble[n*n]; memset(zv,0,n*n*sizeof(complexdouble));
+  double el;
+  for(int ii=0; ii<n; ii++) for(int jj=0; jj<n; jj++) { 
+    el=real(a(jj+1,ii+1)); if(fabs(el)>FLT_EPSILON) za[ii*n+jj].r = el;
+    el=imag(a(jj+1,ii+1)); if(fabs(el)>FLT_EPSILON) za[ii*n+jj].i = el;
+    el=real(b(jj+1,ii+1)); if(fabs(el)>FLT_EPSILON) zb[ii*n+jj].r = el;
+    el=imag(b(jj+1,ii+1)); if(fabs(el)>FLT_EPSILON) zb[ii*n+jj].i = el;
+  }
+  lwork = -1; // Workspace query
+  F77NAME(zggev)(&jobn, &jobz, &n, za, &lda, zb, &ldb, alpha, beta, NULL, &n, zv, &n, zv, &lwork, rwork, &retval);
+  lwork = (int)zv[0].r; zwork = new complexdouble[lwork];
+  // Use non-symmetric generalised eigensolver instead, and check which (if any) eigenvalues are complex/imaginary. Then ignore these...
+  F77NAME(zggev)(&jobn, &jobz, &n, za, &lda, zb, &ldb, alpha, beta, NULL, &n, zv, &n, zwork, &lwork, rwork, &retval);
+  delete[]zwork; delete[]rwork; delete[]za;
+  if(retval<0) { 
+    fprintf(stderr,"myEigenSystemGeneral: Input %d to ZGGEV is incorrect in myev.c - This should not happen! Please file a bug report.\n",-retval); exit(0); }
+  else if(retval==n+1) { 
+    fprintf(stderr,"myEigenSystemGeneral: Input to ZHGEQZ is incorrect in myev.c - This should not happen! Please file a bug report.\n"); } 
+  else if(retval==n+2) { 
+    fprintf(stderr,"myEigenSystemGeneral: Input to ZTGEVC is incorrect in myev.c - This should not happen! Please file a bug report.\n"); } 
+  else if(retval!=0) { 
+    fprintf(stderr,"myEigenSystemGeneral: QZ iteration failed for eigenvalues 1 to %d. Eigenvectors not calculated.\n",retval); }
+  // Post-processing to check eigenvalues and get eigenvectors into V'*B*V=+/-1 normalisation (-1 if eigencolumn is not positive - e.g. B not +def)
+  double dn, er, ei, nm; complexdouble zme, zalpha, zbeta, *zt; zalpha.r=1.; zalpha.i=0.; zbeta.r=0.; zbeta.i=0.; zt = new complexdouble[n];
+  e = complex<double>(DBL_MAX,0.);
+  for(int ii=0; ii<n; ii++) for(int jj=0; jj<n; jj++) { 
+    el=real(b(jj+1,ii+1)); if(fabs(el)>FLT_EPSILON) zb[ii*n+jj].r = el;
+    el=imag(b(jj+1,ii+1)); if(fabs(el)>FLT_EPSILON) zb[ii*n+jj].i = el;
+  }
+  for(int ii=0; ii<n; ii++) 
+  {
+    // Eigenvalue is given as the quotient E=alpha/beta (a+ib)/(c+id)=[(ac+bd)+i(bc-ad)]/(c^2+d^2)
+    dn = beta[ii].r*beta[ii].r  + beta[ii].i*beta[ii].i; 
+    if(dn<DBL_EPSILON) continue; 
+    er = alpha[ii].r*beta[ii].r + alpha[ii].i*beta[ii].i;
+    ei = alpha[ii].i*beta[ii].r - alpha[ii].r*beta[ii].i;
+    if(fabs(ei)>FLT_EPSILON || retval!=0) {
+      // Make sure that we don't calculate intensities in case ZGGEV fails (retval!=0), as eigenvectors were not computed.
+      e[ii+1] = complex<double>(er/dn,ei/dn+(ei==0?1e-14:0));
+      for(int jj=0; jj<n; jj++) 
+        T(jj+1,ii+1) = complex<double>(zv[ii*n+jj].r, zv[ii*n+jj].i);
+    } else {
+      e[ii+1] = complex<double>(er/dn,0.);
+      // Renormalises the eigenvectors corresponding to real eigenvalues only.
+      // The normalisation requires scaling each column by the factor x^2=V(:,ii)'*B*V(:,ii), so that that W(:,ii)'*B*W(:,ii)=1, where W(:,ii)=V(:,ii)/x
+      int id=ii*n; memset(zt,0,n*sizeof(complexdouble));
+      F77NAME(zhemv)(&uplo, &n, &zalpha, zb, &n, &zv[id], &incx, &zbeta, zt, &incx);
+      #ifdef _G77 
+      F77NAME(zdotc)(&zme, &n, &zv[id], &incx, zt, &incx);
+      #else
+      zme = F77NAME(zdotc)(&n, &zv[id], &incx, zt, &incx);
+      #endif
+      nm = sqrt(fabs(zme.r));
+      if(nm<DBL_EPSILON) continue;
+      for(int jj=0; jj<n; jj++) 
+        T(jj+1,ii+1) = complex<double>(zv[ii*n+jj].r/nm, zv[ii*n+jj].i/nm);
+    }
+  }
+  delete[]alpha; delete[]beta; delete[]zv; delete[]zt; delete[]zb;
+  return retval;
 }

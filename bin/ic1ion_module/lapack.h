@@ -153,6 +153,15 @@ extern "C"
                       complexdouble *za, int *lda, complexdouble *zb, int *ldb, double *e, complexdouble *zwork, 
                       int *lwork, double *rwork, int *lrwork, int *iwork, int *liwork, int *info);
 
+  void F77NAME(zggev)(char *jobvl, char *jobvr, int *n, complexdouble *A, int *lda, complexdouble *B, int *ldb,
+                      complexdouble *alpha, complexdouble *beta, complexdouble *vl, int *ldvl,
+                      complexdouble *vr, int *ldvr, complexdouble *work, int *lwork, double *rwork, int *info);
+  void F77NAME(zggevx)(char *balanc, char *jobvl, char *jobvr, char *sense, int *n, complexdouble *A, int *lda, 
+                      complexdouble *B, int *ldb, complexdouble *alpha, complexdouble *beta, 
+                      complexdouble *vl, int *ldvl, complexdouble *vr, int *ldvr, int *ilo, int *ihi, 
+                      double *lscale, double *rscale, double *abnrm, double *bbnrm, double *rconde, double *rcondv,
+                      complexdouble *work, int *lwork, double *rwork, int *iwork, bool *bwork, int *info);
+
 #ifndef NO_ARPACK
   // Double precision real ARPACK routines.
   void F77NAME(dnaupd)(int *ido, char *bmat, int *Hsz, char *whichp, int *nev, double *tol,

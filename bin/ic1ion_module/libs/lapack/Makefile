@@ -90,6 +90,9 @@ ZOBJ  = zgeqr2.o zlacon.o zlacpy.o zladiv.o zlahqr.o zlange.o zlanhs.o\
 	zunmqr.o zunmtr.o zlacn2.o\
 	zheevd.o zhegs2.o zhegst.o zhegvd.o zlacrm.o zlaed0.o zlaed7.o\
 	zlaed8.o zpotf2.o zpotrf.o zstedc.o\
+	zggev.o  zggbal.o zgeqrf.o zgghrd.o zhgeqz.o ztgevc.o zggbak.o\
+	zggevx.o ztgsna.o ztgexc.o ztgsyl.o ztgex2.o ztgsy2.o zgetc2.o\
+	zgesc2.o zlatdf.o zgecon.o zdrscl.o
 #
 # The following LAPACK routines are not needed by ARPACK
 # source code.  They are used by the drivers in EXAMPLES

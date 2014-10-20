@@ -41,7 +41,7 @@ void errexit() // type info and error exit
             "                           mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
             "                          and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
             "                          output files, e.g. *mcdisp.qei  with appendfile)\n");
-    printf (" -ignore_not_posdef_matrix_error   ... ignores error when energies get complex due to unphysical mf groundstate\n");
+    printf (" -ignore_non_hermitian_matrix_error   ... ignores error when energies get complex due to unphysical mf groundstate\n");
     printf ("\n");
     printf ("Note: files which must be in current directory -\n");
     printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
@@ -283,6 +283,33 @@ void sortE(Vector & d,ComplexMatrix & z)
 	}
     }
 }
+void sortEc(ComplexVector & d,ComplexMatrix & z)
+{       int i,j,k;
+    complex <double> p;
+    complex <double> p1;
+    // lowest and highest column index of the matrix
+    int lo = z.Clo();
+    int hi = z.Chi();
+
+    for (i = lo; i <= hi; i++) {
+	k = i;
+	p = d(i);
+	for (j = i+1; j <= hi; j++)
+	    if (real(d(j)) < real(p)) {  // Sorts by the real part of d
+		k = j;
+		p = d(j);
+	    }
+	if (k != i) {
+	    d(k) = d(i);
+	    d(i) = p;
+	    for (j = lo; j <= hi; j++) {
+		p1 = z(j,i);
+		z(j,i) = z(j,k);
+		z(j,k) = p1;
+	    }
+	}
+    }
+}
 
 // rotate chi(1..3,1..3) from xyz to uvw coordinates
 void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
@@ -333,25 +360,25 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
 // *******************************************************************************************
 // procedure to calculate the dispersion
 void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do_gobeyond,
-              int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int do_ignore_not_posdef_matrix_error,
+              int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int do_ignore_non_hermitian_matrix_error,
               int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
   FILE * fin;
   FILE * fout;
-  FILE * foutqom;
-  FILE * foutqei;
-  FILE * foutqep;
-  FILE * foutqee;
-  FILE * foutqem;
-  FILE * foutqes;
-  FILE * foutqel;
-  FILE * foutqsd;
-  FILE * foutqod;
-  FILE * fout1;
-  FILE * foutds;
-  FILE * foutdstot;
-  FILE * foutds1;
-  FILE * jqfile;
+  FILE * foutqom=NULL;
+  FILE * foutqei=NULL;
+  FILE * foutqep=NULL;
+  FILE * foutqee=NULL;
+  FILE * foutqem=NULL;
+  FILE * foutqes=NULL;
+  FILE * foutqel=NULL;
+  FILE * foutqsd=NULL;
+  FILE * foutqod=NULL;
+  FILE * fout1=NULL;
+  FILE * foutds=NULL;
+  FILE * foutdstot=NULL;
+  FILE * foutds1=NULL;
+  FILE * jqfile=NULL;
   float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
   double E;
   char filename[MAXNOFCHARINLINE];
@@ -633,6 +660,7 @@ if (do_jqfile==1)
    } 
 #endif
 int counter;qijk=0;double qincr=-1;
+ 
 for(counter=1;counter<=ini.nofhkls;++counter){
 		     hkl(1)=ini.hkls[counter][1];
 		     hkl(2)=ini.hkls[counter][2];
@@ -861,10 +889,12 @@ if (do_jqfile==1){
  {// no jqfile but excitations to be calculated
  if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i matrix A, A=\n",dimA,dimA);
                            myPrintComplexMatrix(stdout,Ac); 
+                           myPrintComplexMatrix(stdout,Lambda); 
                    }
 
    // diagonalize Ac to get energies  and eigenvectors !!!
    Vector En(1,dimA);
+   ComplexVector Enc(1,dimA);  // For complex eigenvalues in case the non-symmetric eigensolver is used.
    Vector ints(1,dimA);
    Vector intsbey(1,dimA);
    Vector intsP(1,dimA);
@@ -873,28 +903,85 @@ if (do_jqfile==1){
 //   myEigenSystemHermitean (Ac,En,Tau,sort,maxiter);
 //    myPrintVector(stdout,En);
    int eigrval = myEigenSystemHermiteanGeneral (Lambda,Ac,En,Tau,sort=0,maxiter);
-   if(eigrval>0) {  // 0==sucess. +1==Lambda not hermitian. +2==Ac not hermitian, +3==Lambda AND Ac not hermitian
-      if(eigrval>1) {
-         fprintf(stderr,"# Dynamical Matrix Ac not hermitian. Check exchange parameter file mcphas.j is consistent\n");
-         fprintf(stderr,"#   Note that each interaction between pairs of ions must match - e.g. Interaction between\n");
-         fprintf(stderr,"#   Atom 1 with Neighbour 2 (which is atom 2) must equal interaction between Atom 2 with Neighbour 1\n");
-         fprintf(stderr,"#   Press q to quit, or any other key to ignore this error.\n"); 
-         if(do_ignore_not_posdef_matrix_error==0){if(getchar()=='q') exit(1);}
-                      }
-      if(eigrval%2==1) fprintf(stderr,"# Warning: Trace matrix Lambda is not diagonal\n");
-                 }
-   En=1.0/En;
-   sortE(En,Tau);
+   bool notposdef = false;
+   // myEigenSystemHermiteanGeneral return values modified (MDL 141019)
+   if(eigrval==0) 
+   {
+     En=1.0/En;
+     sortE(En,Tau);
         //  Tau=Tau.Conjugate();
   	// conjugate inserted 31.10.05, because when calculating simple AF - I noticed
 	// that the eigensystemhgermitean returns eigenvectors as column vectors, but
 	// the components need to be complex conjugated
          // conjugate removed again MR 11.4.2011 because now done correctly in myev.c
+   }
+   else if(eigrval>0) {  // 0==sucess. +1==Lambda not hermitian. +2==Ac not hermitian, +3==Lambda AND Ac not hermitian
+      if(eigrval>1) {
+         fprintf(stderr,"# Dynamical Matrix Ac not hermitian. Check exchange parameter file mcphas.j is consistent\n");
+         fprintf(stderr,"#   Note that each interaction between pairs of ions must match - e.g. Interaction between\n");
+         fprintf(stderr,"#   Atom 1 with Neighbour 2 (which is atom 2) must equal interaction between Atom 2 with Neighbour 1\n");
+         fprintf(stderr,"#   Press q to quit, or any other key to ignore this error.\n"); 
+         if(do_ignore_non_hermitian_matrix_error==0) {
+            if(getchar()=='q') exit(1); 
+         } else {
+            // Skips q-point, but make sure qincr is correct.
+            fprintf(stderr,"# Skipping this q-point.\n");
+            if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
+               qold=qijk; hkl2ijk(qijk,hkl, abc); qincr+=Norm(qijk-qold);
+               ini.print_usrdefcols(foutqei,qijk,qincr);
+               fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
+               fprintf(foutqei, "-1    -1   -1\n");
+            }
+            continue;
+         }
+      }
+      if(eigrval%2==1) fprintf(stderr,"# Warning: Trace matrix Lambda is not diagonal\n");
+      notposdef = true;
+                 }
+   else if(eigrval<0 && eigrval>=-dimA) { // -dimA<eigrval<0 means algorithm did not converge.
+      fprintf(stderr,"# The Hermitian-definite eigensolver failed to converge. Trying again with a non-symmetric eigensolver.\n");
+      fprintf(stderr,"#   This can generate complex/imaginary eigenvalues, which will be outputed as comments in mcdisp.qei\n");
+      fprintf(stderr,"#   without intensities. Real eigenvalues will be treated normally.\n");
+      notposdef = true;
+   }
+   else if(eigrval<-dimA) {               // eigrval<-dimA means Ac is not positive definite;
+      fprintf(stderr,"# At Q=(%g,%g,%g), the dynamical matrix Ac(Q) is not positive definite, so real eigenvalues are not guaranteed.\n",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+      fprintf(stderr,"#   possible reason: magnetic structure in mcdisp.mf is metastable, leading to soft modes at this Q-vector which could\n");
+      fprintf(stderr,"#   be a possible ordering wavevector for the actual stable structure. It could also be due to rounding errors.\n");
+      fprintf(stderr,"#   McDisp will now use a non-symmetric eigensolver. Real eigenvalues will be treated as normal. Complex/imaginary eigenvalues\n");
+      fprintf(stderr,"#   will be outputed to mcdisp.qei in a commented out line, but the corresponding intensities will not be calculated.\n");
+      notposdef = true;
+   }
+   if(notposdef) {
+      eigrval = myEigenSystemGeneral(Lambda,Ac,Enc,Tau);
+      if(eigrval!=0) { 
+         fprintf(stderr,"# The non-symmetric eigensolver failed. This Q point will be skipped.\n");
+         if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
+            qold=qijk; hkl2ijk(qijk,hkl, abc); qincr+=Norm(qijk-qold);
+            ini.print_usrdefcols(foutqei,qijk,qincr);
+            fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
+            fprintf(foutqei, "-1    -1   -1\n");
+         }
+         continue;
+      }
+      Enc=1./Enc;
+      sortEc(Enc,Tau);    // Sorts by the real part of the eigenvalues
+      for(i=1; i<=dimA; i++) En(i) = (imag(Enc(i))==0) ? real(Enc(i)) : -DBL_MAX;  // Sets -DBL_MAX as flag that eigenvalue is complex
+   }
+
  if(do_verbose==1){   ComplexMatrix test(1,dimA,1,dimA);
    // check normalisation of eigenvectors -------------------- only do this in verbose mode MR 5.6.2013
+   bool notnorm = false;
    test=Tau.Hermitean()*Ac*Tau;
-   ComplexMatrix unit(1,dimA,1,dimA);unit=1;
-   if( NormFro(unit-test)>SMALL_QUASIELASTIC_ENERGY){
+   if(notposdef) {    // For the non-symmetric solver, only the eigenvectors corresponding to real eigenvalues have been normalised.
+     for(i=1; i<=dimA; i++) {
+       if(En(i)!=-DBL_MAX) { if(fabs(fabs(real(test(i,i)))-1)>SMALL_QUASIELASTIC_ENERGY) { notnorm = true; break; } }
+     }
+   } else { 
+     ComplexMatrix unit(1,dimA,1,dimA);unit=1;
+     if( NormFro(unit-test)>SMALL_QUASIELASTIC_ENERGY) notnorm = true;
+   }
+   if(notnorm) {
     myPrintComplexMatrix(stdout,test); 
  fprintf(stderr,"Error: eigenvectors t not correctly normalised\n"); 
  fprintf(stderr,"   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); }}
@@ -951,7 +1038,6 @@ if (do_jqfile==1){
                if(ini.calculate_spinmoment_oscillation)   {sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
                if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
                //-----------------------------------------------------------
- 
               }
          qincr+=Norm(qijk-qold); 
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
@@ -1046,7 +1132,8 @@ if (do_jqfile==1){
                      { 
                         i=oldi+th; if(i>dimA) break;
                         if(do_gobeyond==0) intsbey(i)=-1.1; else intsbey(i)=+1.1;
-                      if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
+                      if (En(i)!=-DBL_MAX && // Matrix Ac is not +ve definite, and this eigenvalue is not real - don't do intensity
+                          En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                       {if(do_verbose)printf("calling thread %i ",num_threads_started);
                        tin[num_threads_started]->En=En(i); tin[num_threads_started]->intensitybey=intsbey(i);tin[num_threads_started]->intensityP=intsP(i); 
                        tin[num_threads_started]->level = i;
@@ -1089,6 +1176,7 @@ if (do_jqfile==1){
                      for(int th=0; th<NUM_THREADS; th++)
                      {
                          i=oldi+th; if(i>dimA) break;
+                        if (En(i)!=-DBL_MAX)   // Matrix Ac is not +ve definite, and this eigenvalue is not real - don't do intensity
                         if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                       {++ithread;
                        ints(tin[ithread]->level) = tin[ithread]->intensity; 
@@ -1098,7 +1186,8 @@ if (do_jqfile==1){
                       }       
 #else
                      if(do_gobeyond==0){intsbey(i)=-1.1;}else{intsbey(i)=+1.1;}
-                     if (En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
+                     if (En(i)!=-DBL_MAX && // Matrix Ac is not +ve definite, and this eigenvalue is not real - don't do intensity
+                         En(i)<=ini.emax&&En(i)>=ini.emin) // only do intensity calculation if within energy range
                      {
                      ints(i)=intcalc_approx(chi,chibey,chiPhon,pol,intsbey(i),intsP(i),
                                             qee_real,qee_imag,Echargedensity,
@@ -1127,7 +1216,8 @@ if (do_jqfile==1){
                                    ComplexVector eir(1,3),eor(1,3),eil(1,3),eol(1,3);
                        double daz=PI/90;if (calc_rixs==2)daz=epsilon*PI/180;
                        double azmin=0.0,azmax=2*PI;if (calc_rixs==3){azmin=epsilon*PI/180;azmax=azmin;}
-                       if (En(i)<=ini.emax&&En(i)>=ini.emin){
+                       if (En(i)!=-DBL_MAX && // Matrix Ac is not +ve definite, and this eigenvalue is not real - don't do intensity
+                           En(i)<=ini.emax&&En(i)>=ini.emin){
                          for(double azimuth=azmin;azimuth<=azmax&&ints(i)>-1;azimuth+=daz)                             
                               { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, abc,QQ,En(i));
                                 // eis,p and eos,p are polarisation vectors for sigma/pi plarisation in terms of
@@ -1151,16 +1241,24 @@ if (do_jqfile==1){
                                                 fprintf (foutqei, "\n");
                                                 }
                               }}
+                              if (En(i)==-DBL_MAX) {
+                              fprintf (foutqei, "#| "); 
+                              ini.print_usrdefcols(foutqei,qijk,qincr);
+                              fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g%si%-4.4g    ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                                myround(QQ),myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
+                              } else {
                               ini.print_usrdefcols(foutqei,qijk,qincr);
                               fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                                 myround(QQ),myround(En(i)));
-                                if (En(i)<=ini.emax&&En(i)>=ini.emin){
+                              }
+                                if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){
                                  fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Iss),myround(1e-8,azss),myround(1e-8,Isp),myround(1e-8,azsp),myround(1e-8,Ips),myround(1e-8,azps),myround(1e-8,Ipp),myround(1e-8,azpp));
                                  fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irr),myround(1e-8,azrr),myround(1e-8,Irl),myround(1e-8,azrl),myround(1e-8,Ilr),myround(1e-8,azlr),myround(1e-8,Ill),myround(1e-8,azll));
                                                } else {fprintf(foutqei, " -1 0  -1 0  -1 0  -1 0   -1 0  -1 0  -1 0  -1 0 ");}
                                    fprintf (foutqei, "\n");
                                                 
                      }else{ 
+                     if(En(i)!=-DBL_MAX) {
                     double test; // add to sta distance to nearest measured peak squared
  	              for (j1=1;4*j1<=ini.hkls[counter][0]-3;++j1)
 	              {if ((test=fabs(En(i)-ini.hkls[counter][4*j1]))<dd1(j1)){dd1(j1)=test;double weight=ini.hkls[counter][4*j1+1];
@@ -1195,14 +1293,19 @@ if (do_jqfile==1){
                                                                                             dd_int_without_antipeaks_weights(j1)=0;}
                                                                                }
                       }
-	             
 
                      //if(intsbey(i)<0)intsbey(i)=-1.2;
-                      fprintf (foutqom, " %4.4g",myround(intsbey(i)));
+                      fprintf (foutqom, " %6.6g",myround(intsbey(i)));
                       ini.print_usrdefcols(foutqei,qijk,qincr);
-                      fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g  ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                      fprintf (foutqei, "%6.6g %6.6g %6.6g  %6.6g %6.6g  %6.6g  %6.6g %6.6g  ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                          myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)));
-                  if (En(i)<=ini.emax&&En(i)>=ini.emin){                       
+	             } else {
+                      fprintf (foutqei, "#| "); 
+                      ini.print_usrdefcols(foutqei,qijk,qincr);
+                      fprintf (foutqei, "%6.6g %6.6g %6.6g  %6.6g %6.6g%si%-6.6g  -1     -1    -1     ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                                         myround(QQ),myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
+                     } 
+                  if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){                       
                        switch(ini.outS)
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
@@ -1214,10 +1317,10 @@ if (do_jqfile==1){
                          } }
                        fprintf(foutqei,"\n");
                        if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
-                       if(En(i)>=ini.emin&&En(i)<=ini.emax){DMDtotint+=ints(i);DMDtotintbey+=intsbey(i);}
+                       if(En(i)!=-DBL_MAX&&En(i)>=ini.emin&&En(i)<=ini.emax){DMDtotint+=ints(i);DMDtotintbey+=intsbey(i);}
                       }
                      // printout eigenvectors only if evaluated during intensity calculation...
-                  if (En(i)<=ini.emax&&En(i)>=ini.emin){ 
+                  if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){ 
 
 if(ini.calculate_chargedensity_oscillation)print_ev(foutqee,i,ini,hkl,QQ,En,ints,intsbey,qee_real,qee_imag);
 if(ini.calculate_spindensity_oscillation)print_ev(foutqsd,i,ini,hkl,QQ,En,ints,intsbey,qsd_real,qsd_imag);
@@ -1300,7 +1403,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
             //fprintf (fout1,"#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] intensities(dip approx for FF) [barn/meV/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
 		     if (do_Erefine==0) epsilon=(Max(En)-Min(En)+0.001)/100;
 		    // if (epsilon<=0) epsilon=0.1;
-                  for (i=1;i<=dimA;++i)
+                  for (i=1;i<=dimA;++i) if(En(i)!=-DBL_MAX)
 		    { 
 		     if (ints(i)>SMALLINT)  // draw triangles to show calculated intensity
 		      {for (E=0;E<=ints(i)/fabs(epsilon);E+=ints(i)/2/fabs(epsilon)/10)
@@ -1524,12 +1627,12 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 // main program
 int main (int argc, char **argv)
 {int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
- int do_ignore_not_posdef_matrix_error=0;
+ int do_ignore_non_hermitian_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0;
  const char * spinfile="mcdisp.mf"; //default spin-configuration-input file
  const char * filemode="w";
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
- double epsilon; //imaginary part of omega to avoid divergence
+ double epsilon=0.05; //imaginary part of omega to avoid divergence
  double minE=-100000.0,maxE=+100000.0,pinit=SMALL_PROBABILITY,ninit=1e10;
  fprintf(stderr,"#***********************************************************************\n");
  fprintf(stderr,"#*\n");
@@ -1589,13 +1692,13 @@ for (i=1;i<=argc-1;++i){
   		                                  strcpy(prefix,argv[i+1]);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
-                    else {if(strcmp(argv[i],"-ignore_not_posdef_matrix_error")==0) {do_ignore_not_posdef_matrix_error=1;
+                    else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
                      else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
            	      else{spinfile=argv[i];}
                          } // help
-                        } // do_ignore_not_posdef_matrix_error
+                        } // do_ignore_non_hermitian_matrix_error
                        } // prefi
 		     } // pinit
 		    } // ninit
@@ -1627,7 +1730,7 @@ for (i=1;i<=argc-1;++i){
 
 int do_phonon=1;
 //calculate dispersion and save to files
-dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,do_ignore_not_posdef_matrix_error,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
+dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,do_ignore_non_hermitian_matrix_error,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
   
  printf("#RESULTS saved in directory ./results/  - files:\n");
   if(calc_rixs){printf("#  %smcdisp.qex  - T,H,qvector vs energies and resonant inelastic X-ray (RIXS) intensities\n",ini.prefix);}
