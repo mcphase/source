@@ -11,6 +11,8 @@
 #include "../../version"
 #include<par.hpp>
 
+#include<ctime>
+
 #define MAXNOFNUMBERSINLINE 2500
 #define MAXNOFCHARINLINE 7024
 
@@ -692,8 +694,13 @@ jjjpar::jjjpar (const jjjpar & pp)
                             cluster_M[index_M]=new zsMat<double>(dim,dim);
                             (*cluster_M[index_M])=(*pp.cluster_M[index_M]);
                            }                        
-                          clusterH = new Matrix(1,dim,1,dim); *clusterH = *pp.clusterH; 
+                          clusterH = new zsMat<double>(dim,dim); *clusterH = *pp.clusterH; 
                           oldHext = new Vector(1,3); *oldHext = *pp.oldHext;
+                          workspace = new iterwork(pp.workspace->zsize,pp.workspace->dsize,pp.workspace->isize);
+                          truncate = pp.truncate; fdim=dim; arpack = pp.arpack; feast = pp.feast;
+                          if (truncate>1e-6 && truncate!=1) { 
+                             dim = (int)ceil(truncate*(double)dim); is1sttrunc = pp.is1sttrunc; 
+                             zm = new complexdouble[fdim*dim]; memcpy(zm,pp.zm,fdim*dim*sizeof(complexdouble)); }
                           }
   
 //#ifdef __linux__
@@ -776,6 +783,8 @@ jjjpar::~jjjpar ()
                         delete Ia;delete cluster_M; delete []dnn;
                         delete clusterpars;                         
                         delete clusterH; delete oldHext;
+                        delete workspace;
+                        if (truncate>1e-6 && truncate!=1) delete []zm;
                        }
    if (module_type==2||module_type==4) delete iops;
   for(int ii=0; ii<52; ii++) 
@@ -788,6 +797,21 @@ jjjpar::~jjjpar ()
  
  }
 
+// Class to store work matrices for iterative eigensolvers (e.g. ARPACK, FEAST) - since these routines are called many times per
+// MF iterations, deleting/allocating them many times seems to give memory errors.
+iterwork::iterwork(int lzwork, int ldwork, int liwork)
+{
+   zwork = new complexdouble[lzwork]; zsize=lzwork;
+   dwork = new double[ldwork]; dsize=ldwork;
+   iwork = new int[liwork]; isize=liwork;
+}
+void iterwork::realloc_z(int lzwork) { if(zsize>0) delete[]zwork; printf("reallocating z from %d to %d\n",zsize,lzwork); zwork = new complexdouble[lzwork]; zsize=lzwork; }
+void iterwork::realloc_d(int ldwork) { if(dsize>0) delete[]dwork; printf("reallocating d from %d to %d\n",dsize,ldwork); dwork = new double[ldwork]; dsize=ldwork; }
+void iterwork::realloc_i(int liwork) { if(isize>0) delete[]iwork; printf("reallocating i from %d to %d\n",isize,liwork); iwork = new int[liwork]; isize=liwork; }
+iterwork::~iterwork()
+{
+   if(zsize>0) delete[]zwork; if(dsize>0) delete[]dwork; if(isize>0) delete[]iwork;
+}
 
 // for test
 /*int main(int argc, char **argv)

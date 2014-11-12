@@ -148,7 +148,7 @@ endif
 ifdef gotoblas
 LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -L/usr/local/gfortran/lib -lgfortran -lpthread
 else
-LFLAGS+= -L../ic1ion_module/libs -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
+LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
 #LFLAGS+= -llapack -lf77blas -latlas
 endif
 

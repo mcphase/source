@@ -257,7 +257,7 @@ EigenSystemHermiteanGeneral (mata, matb, e,zr, zi,sort, maxiter);
 */
   // Modified to use LAPACK routines instead - MDL 131101
   int itype=1, n=a.Rhi(), lda = n, ldb = n, lwork = 2*n+n*n, lrwork = 1+5*n+2*n*n, liwork=3+5*n, *iwork = new int[liwork];
-  char jobz = 'V', uplo = 'U'; //, range = 'A';
+  char jobz = 'V', uplo = 'U';
   complexdouble *zwork=0, *zb; zwork = new complexdouble[lwork];
   memcpy(&T[1][1],&a[1][1],n*n*sizeof(complexdouble));
   zb = new complexdouble[n*n]; memcpy(zb,&b[1][1],n*n*sizeof(complexdouble));

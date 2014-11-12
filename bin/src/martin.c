@@ -920,6 +920,29 @@ double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib) // t
  return val.r;
 }
 
+double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib) // transition matrix element
+{
+ char up = 'L'; int n=M.nr(), inc=1;
+ complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
+ complex<double> *zM = M.f_array();
+ for(int i=1; i<=n; i++) { za[i-1].r = real(zc(i,ia)); zb[i-1].r = real(zc(i,ib)); za[i-1].i = imag(zc(i,ia)); zb[i-1].i = imag(zc(i,ib)); }
+ F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
+ val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);
+ free(zM);
+ return val.r;
+}
+complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib) // transition matrix element
+{
+ char up = 'L'; int n=M.nr(), inc=1;
+ complexdouble zV[n], za[n], zb[n], alpha, beta, val; alpha.r=1; alpha.i=0; beta.r=0; beta.i=0;
+ complex<double> *zM = M.f_array();
+ for(int i=1; i<=n; i++) { za[i-1].r = real(zc(i,ia)); zb[i-1].r = real(zc(i,ib)); za[i-1].i = imag(zc(i,ia)); zb[i-1].i = imag(zc(i,ib)); }
+ F77NAME(zhemv)(&up, &n, &alpha, (complexdouble*)zM, &n, zb, &inc, &beta, zV, &inc); 
+ val = F77NAME(zdotc)(&n, za, &inc, zV, &inc);
+ free(zM);
+ return std::complex<double>(val.r,val.i);
+}
+
 Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3)
 {static Matrix m(1,3,v1.Lo(),v1.Hi());
  for(int i=v1.Lo();i<=v1.Hi();++i){m(i,1)=v1(i);m(i,2)=v2(i);m(i,3)=v3(i);}
