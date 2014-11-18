@@ -48,10 +48,19 @@ template <class T> class zsMat {
 
      size_t _nnz;                                                       // A hash of the non-zero pattern (of the vector _p)
      void _genhash();                                                   // Generates a hash of the non-zero pattern [_p].
+     std::vector<size_t> _subset;                                       // Vector of hashes of matrices that are superset of self
 
      // Algorithms from CXSparse. Reference: Direct Methods for Sparse Linear Systems, Timothy A. Davis, SIAM 2006.
      std::vector<int> _wi;                                              // Integer workspace for CSC algorithms
      std::vector< std::complex<T> > _wx;                                // Workspace for CSC algorithms
+/*   std::vector<int> _csc_pinv;                                        // Row pivots
+     std::vector<int> _csc_sym_pinv;                                    //  inverse row perm. for QR, fill red. perm for Chol
+     std::vector<int> _csc_sym_q;                                       //  fill-reducing column permutation for LU and QR
+     std::vector<int> _csc_sym_parent;                                  //  elimination tree for Cholesky and QR
+     std::vector<int> _csc_sym_cp;                                      //  column pointers for Cholesky, row counts for QR
+     std::vector<int> _csc_sym_leftmost;                                //  leftmost[i] = min(find(A(i,:))), for QR
+     int _csc_sym_m2, unz, lnz;                                         //  m2=rows for QR, unz,lnz= entries in L,U or V,R
+*/
      void _cs_compress();                                               // Converts from triplet to compressed sparse column format
      void _cs_dupl();                                                   // Sums duplicated entries
      void _cs_fkeep (int(*fkeep)(int,int,std::complex<T>,void*),void*); // Keeps entries where function fkeep()==true
@@ -117,11 +126,12 @@ template <class T> class zsMat {
      std::complex<T>  operator [] (std::pair<int,int>);                 // Read-only subscript operator
 
      // Algorithms from CXSparse. Reference: Direct Methods for Sparse Linear Systems, Timothy A. Davis, SIAM 2006.
-     zsMat<T> cs_add(zsMat &B, std::complex<T> alpha, std::complex<T> beta); 
-     zsMat<T> add_scal(const std::complex<T> v);
-     void tocsc() { _cs_compress(); _cs_dupl(); }
-     void totri();
-     void tridupl();
+     zsMat<T> cs_add(zsMat &B, std::complex<T> a, std::complex<T> b);   // Returns the sum C = a*self + b*B, a,b=scalar
+     zsMat<T> add_scal(const std::complex<T> v);                        // Returns the sum C = self + v*I, I=identity
+     void to_csc() { _cs_compress(); _cs_dupl(); }                      // Converts from triplet to compressed column form
+     void to_tri();                                                     // Converts from compressed column to triplet form
+     void tridupl();                                                    // Removes duplicated elements in triplet form
+     bool is_subset(const zsMat &B);                                    // Determines if sparsity of B is subset of self
 
      // Friend function  to provide input/output via <iostream>
      friend std::ostream & operator << <> (std::ostream & o, const zsMat & m);
@@ -187,7 +197,7 @@ template <class T> void zsMat<T>::_cs_dupl()
    _x.erase(_x.begin()+nz,_x.end());
    _genhash();
 }
-template <class T> void zsMat<T>::totri()               // Converts from compressed sparse column to triplet format
+template <class T> void zsMat<T>::to_tri()              // Converts from compressed sparse column to triplet format
 {
    if(!_iscsc) return;
    if(_x.empty()) { _iscsc = false; return; }
@@ -355,6 +365,7 @@ template <class T> zsMat<T> zsMat<T>::_cs_add(const zsMat &B, bool sub)
    C._i.erase(C._i.begin()+nz,C._i.end());
    C._x.erase(C._x.begin()+nz,C._x.end());
    C._genhash();
+   C._subset.push_back(B._nnz);
    return C;
 }
 template <class T> zsMat<T> zsMat<T>::_cs_adds(const zsMat &B, bool sub)
@@ -382,6 +393,7 @@ template <class T> zsMat<T> zsMat<T>::_cs_adds(const zsMat &B, bool sub)
    Ci.erase(Ci.begin()+nz,Ci.end()); _i = Ci;
    Cx.erase(Cx.begin()+nz,Cx.end()); _x = Cx;
    _genhash();
+   _subset.push_back(B._nnz);
    return *this;
 }
 template <class T> zsMat<T> zsMat<T>::_cs_add_pat(const zsMat &B, bool sub)
@@ -393,8 +405,8 @@ template <class T> zsMat<T> zsMat<T>::_cs_add_pat(const zsMat &B, bool sub)
    {
       i = _p[j];
       for(int p=B._p[j]; p<B._p[j+1]; p++) {            // Scatter B(:,j)
-         while(_i[i]<B._i[p] && i<_p[j+1]) i++;
-         if(_i[i]==B._i[p]) { if(sub) _x[i] -= B._x[p]; else _x[i] += B._x[p]; }
+         for(i=_p[j]; i<_p[j+1]; i++) {
+            if(_i[i]==B._i[p]) { if(sub) _x[i] -= B._x[p]; else _x[i] += B._x[p]; break; } }
       }
    }
    return *this;
@@ -437,10 +449,17 @@ template <class T> zsMat<T> zsMat<T>::add_scal(const std::complex<T> v) // Adds 
 template <class T> void zsMat<T>::_genhash()
 {
    std::tr1::hash<int> hash_value;
-   _nnz = hash_value(_p[0]);
+   _nnz = hash_value(_p[0]+_i[0]);
    // Hash-combiner stolen from Boost: http://www.boost.org/doc/html/hash/reference.html#boost.hash_combine
-   for(int j=1; j<_n; j++) 
-      _nnz ^= hash_value(_p[j]) + 0x9e3779b9 + (_nnz << 6) + (_nnz >> 2);
+   for(int j=1; j<_n; j++) for(int i=_p[j]; i<_p[j+1]; i++) {
+      _nnz ^= hash_value(_p[j]+_i[i]) + 0x9e3779b9 + (_nnz << 6) + (_nnz >> 2); }
+   _subset.clear();
+}
+template <class T> bool zsMat<T>::is_subset(const zsMat<T> &B)
+{
+   if(_nnz==B._nnz) return true;
+   for(int i=0; i<_subset.size(); i++) { if(B._nnz==_subset[i]) return true; }
+   return false;
 }
 template <class T> std::vector< std::vector<int> > zsMat<T>::find() const
 {
@@ -466,15 +485,15 @@ template <class T> zsMat<T> zsMat<T>::transpose()
    if(_iscsc)
    {
       int nz = (int)_x.size(), q;
-      std::vector<int> Cp(_n,0), w(_n,0), Ci(nz,0); std::vector< std::complex<T> > Cx(nz,0);
+      std::vector<int> Cp(_n+1,0), w(_n,0), Ci(nz,0); std::vector< std::complex<T> > Cx(nz,0);
       for(int k=0; k<nz; k++) w[_i[k]]++;               // Row counts
       cs_cumsum(Cp,w,_m);                               // Row pointers
-      for(int j=0; j<nz; j++)
+      for(int j=0; j<_n; j++)
       {  
          for(int p=_p[j]; p<_p[j+1]; p++)
          {
             Ci[q=w[_i[p]]++] = j;                       // Place A(i,j) as C(j,i)
-            Cx[q] = _x[q];
+            Cx[q] = _x[p];
          }
       }
       _p = Cp; _i = Ci; _x = Cx;
@@ -494,15 +513,15 @@ template <class T> zsMat<T> zsMat<T>::hermitian()
    if(_iscsc)
    {
       int nz = (int)_x.size(), q;
-      std::vector<int> Cp(_n,0), w(_n,0), Ci(nz,0); std::vector< std::complex<T> > Cx(nz,0);
+      std::vector<int> Cp(_n+1,0), w(_n,0), Ci(nz,0); std::vector< std::complex<T> > Cx(nz,0);
       for(int k=0; k<nz; k++) w[_i[k]]++;               // Row counts
       cs_cumsum(Cp,w,_m);                               // Row pointers
-      for(int j=0; j<nz; j++)
+      for(int j=0; j<_n; j++)
       {  
          for(int p=_p[j]; p<_p[j+1]; p++)
          {
             Ci[q=w[_i[p]]++] = j;                       // Place A(i,j) as C(j,i)
-            Cx[q] = conj(_x[q]);
+            Cx[q] = conj(_x[p]);
          }
       }
       _p = Cp; _i = Ci; _x = Cx;
@@ -567,7 +586,6 @@ template <class T> void zsMat<T>::f_array(std::complex<T>*retval) const   // Ass
          retval[_m*j+_i[c]] = _x[c]; }
    else {
       for(int i=0; i<_x.size(); i++) retval[_m*_p[i]+_i[i]] += _x[i]; }
-   return retval;
 }
 template <class T> std::complex<T>* zsMat<T>::h_array() const   // Returns matrix as a Fortran style 2D array
 {
@@ -578,7 +596,7 @@ template <class T> std::complex<T>* zsMat<T>::h_array() const   // Returns matri
       for(int j=0; j<_n; j++) for(int c=_p[j]; c<_p[j+1]; c++)
       {
          if(_i[c]>=j) {
-            retval[_m*_i[c]+j] = _x[c]; if(_i[c]!=j) retval[_n*j+_i[c]] = _x[c];
+            retval[_m*_i[c]+j] = conj(_x[c]); if(_i[c]!=j) retval[_n*j+_i[c]] = _x[c];
          }
       }
    }
@@ -605,6 +623,7 @@ template <class T> void zsMat<T>::h_array(std::complex<T>* retval) const   // As
    else 
    {
       for(int i=0; i<_x.size(); i++) {
+         // Need to use += here because triplet forms have duplicate elements that should be summed together.
          if(_i[i]>=_p[i]) {
             retval[_m*_i[i]+_p[i]] += conj(_x[i]); if(_i[i]!=_p[i]) retval[_n*_p[i]+_i[i]] += _x[i]; } }
    }
@@ -663,7 +682,7 @@ template <class T> Matrix zsMat<T>::fp_matrix() const           // Returns Hermi
       for(int j=0; j<_n; j++) for(int c=_p[j]; c<_p[j+1]; c++)
       {
          if(_i[c]>=j) {
-            retval(_i[c],j) = real(_x[c]); if(_i[c]!=j) retval(j,_i[c]) = imag(_x[c]);
+            retval(_i[c]+1,j+1) = real(_x[c]); if(_i[c]!=j) retval(j+1,_i[c]+1) = imag(_x[c]);
          }
       }
    }
@@ -671,7 +690,7 @@ template <class T> Matrix zsMat<T>::fp_matrix() const           // Returns Hermi
    {
       for(int i=0; i<_x.size(); i++) {
          if(_i[i]>=_p[i]) {
-            retval(_i[i],_p[i]) += real(_x[i]); if(_i[i]!=_p[i]) retval(_p[i],_i[i]) += imag(_x[i]); }
+            retval(_i[i]+1,_p[i]+1) += real(_x[i]); if(_i[i]!=_p[i]) retval(_p[i]+1,_i[i]+1) += imag(_x[i]); }
       }
    }
 
@@ -764,22 +783,20 @@ template <class T> void zsMat<T>::MultMMH(std::complex<T>*A, std::complex<T>*B, 
    memset(A,0,_m*c*sizeof(std::complex<T>));
    if(_iscsc) 
    {
-      for(int j=0; j<c; j++)
+      for(int k=0; k<_n; k++)  // Aik = sum_j Mij Bjk (calculates each column k of A in turn)
       {
-         for(int k=0; k<_n; k++) for(int n=_p[j]; n<_p[j+1]; n++)
-         {
-            if(_i[n]<=k) {
-               A[_m*j+_i[n]] += _x[n] * B[_n*j+k]; if(_i[n]!=k) A[_m*j+k] += conj(_x[n]) * B[_n*j+_i[n]]; 
+         for(int j=0; j<c; j++)
+            for(int n=_p[j]; n<_p[j+1]; n++) {
+               if(_i[n]>=j) A[_m*k+_i[n]] += _x[n] * B[_n*k+j]; if(_i[n]!=j) A[_m*k+j] += conj(_x[n]) * B[_n*k+_i[n]];
             }
-         }
       }
    }
    else 
    {
       for(int j=0; j<c; j++) {
          for(int n=0; n<_x.size(); n++) {
-            if(_i[n]<=_p[n])
-               A[_m*j+_i[n]] += _x[n] * B[_n*j+_p[n]]; if(_i[n]!=_p[n]) A[_m*j+_p[n]] += conj(_x[n]) * B[_n*j+_i[n]]; 
+            if(_i[n]>=_p[n]) {
+               A[_m*j+_i[n]] += _x[n] * B[_n*j+_p[n]]; if(_i[n]!=_p[n]) A[_m*j+_p[n]] += conj(_x[n]) * B[_n*j+_i[n]]; }
          }
       }
    }
@@ -833,7 +850,7 @@ template <class T> std::complex<T> zsMat<T>::operator () (int r, int c) const
    r--; c--;
    if(_iscsc)
    {
-      if((double)r>(double)_m/2.)        // Try to speed up search by looking from either ends
+/*    if((double)r>(double)_m/2.)        // Try to speed up search by looking from either ends
       {
          for(int n=_p[c+1]-1; n>=_p[c]; n--) {
             if(_i[n]>r) return std::complex<T> (0,0);
@@ -842,11 +859,10 @@ template <class T> std::complex<T> zsMat<T>::operator () (int r, int c) const
          return std::complex<T> (0,0);
       }
       else
-      {
+*/    {
          for(int n=_p[c]; n<_p[c+1]; n++) {
-            if(_i[n]<r) return std::complex<T> (0,0);
-            else 
-            if(_i[n]==r) return _x[n];
+          //if(_i[n]<r) return std::complex<T> (0,0);
+          /*else*/ if(_i[n]==r) return _x[n];
          }
          return std::complex<T> (0,0);
       }
@@ -864,7 +880,7 @@ template <class T> std::complex<T> zsMat<T>::operator [] (std::pair<int,int> rc)
    if (r>_m || c>_n) return std::complex<T> (0,0);
    if(_iscsc)
    {
-      if((double)r>(double)_m/2.)        // Try to speed up search by looking from either ends
+/*    if((double)r>(double)_m/2.)        // Try to speed up search by looking from either ends
       {
          for(int n=_p[c+1]-1; n>=_p[c]; n--) {
             if(_i[n]>r) return std::complex<T> (0,0);
@@ -873,26 +889,28 @@ template <class T> std::complex<T> zsMat<T>::operator [] (std::pair<int,int> rc)
          return std::complex<T> (0,0);
       }
       else
-      {
+*/    {
          for(int n=_p[c]; n<_p[c+1]; n++) {
-            if(_i[n]<r) return std::complex<T> (0,0);
-            else if(_i[n]==r) return _x[n];
+          //if(_i[n]<r) return std::complex<T> (0,0);
+          /*else*/ if(_i[n]==r) return _x[n];
          }
          return std::complex<T> (0,0);
       }
    }
    else
    {
+      std::complex<T> rv(0,0); 
       for(int i=0; i<_x.size(); i++)
-         if(_p[i]==c && _i[i]==r) return _x[i];
-      return std::complex<T> (0,0);
+         if(_p[i]==c && _i[i]==r) rv += _x[i];
+      return rv;
    }
    return std::complex<T> (0,0);
 }
 
 template <class T> zsMat<T> zsMat<T>::operator = (const zsMat<T> & m)
 {
-   _m = m._m; _n = m._n; _p = m._p; _i = m._i; _x = m._x; _iscsc = m._iscsc; _nnz = m._nnz;
+   _m = m._m; _n = m._n; _p = m._p; _i = m._i; _x = m._x; 
+   _iscsc = m._iscsc; _nnz = m._nnz; _subset = m._subset;
    return *this;
 }
 template <class T> zsMat<T> zsMat<T>::operator = (const T val)          // Assignment of value to diagonal
@@ -930,7 +948,7 @@ template <class T> zsMat<T> zsMat<T>::operator += (const zsMat<T> &m)   // Adds 
    if(_iscsc)
    {
       if(m._iscsc) {
-         if(_nnz==m._nnz) return _cs_add_pat(m); else return _cs_adds(m); }
+         if(is_subset(m)) return _cs_add_pat(m); else return _cs_adds(m); }
       else { 
          zsMat<T> n(m); n._cs_compress(); n._cs_dupl(); return _cs_adds(n); } 
    }
@@ -968,7 +986,7 @@ template <class T> zsMat<T> zsMat<T>::operator -= (const zsMat<T> &m)   // Subtr
    if(_iscsc)
    {
       if(m._iscsc) {
-         if(_nnz==m._nnz) return _cs_add_pat(m, true); else return _cs_adds(m, true); }
+         if(is_subset(m)) return _cs_add_pat(m, true); else return _cs_adds(m, true); }
       else { 
          zsMat<T> n(m); n._cs_compress(); n._cs_dupl(); return _cs_adds(n, true); } 
    }

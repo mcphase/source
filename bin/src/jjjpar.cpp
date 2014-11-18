@@ -780,7 +780,7 @@ jjjpar::~jjjpar ()
                        for(int a=0;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
                         {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
                          delete cluster_M[index_M];}
-                        delete Ia;delete cluster_M; delete []dnn;
+                        delete[]Ia;delete[]cluster_M; delete []dnn;
                         delete clusterpars;                         
                         delete clusterH; delete oldHext;
                         delete workspace;
