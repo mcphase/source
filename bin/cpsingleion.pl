@@ -79,7 +79,7 @@ $noflevels=1; # initialize noflevels
 
 
 
-$dT=0.1; # this is fixed value for calculation of derivative of energy
+$dT=0.001; # this is fixed value for calculation of derivative of energy
 
 
 
@@ -172,7 +172,6 @@ $T=$T0+$dT/2;
 	    
 
 	    $T=$T0-$dT/2;
-
             $Zm=0;$Um=0;
 
             for ($i=0;$i<=$noflevels;++$i)

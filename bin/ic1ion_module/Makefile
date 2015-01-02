@@ -107,13 +107,17 @@ LDFLAGS = -L. -lmwrefblas -lmwlapack -lmwarpack
 else
 LDFLAGS = -L/usr/local/MATLAB/bin/glnxa64 -Wl,-rpath,/usr/local/MATLAB/bin/glnxa64 -lut -lmwbinder -lmwblas -lmwlapack -Llibs $(LIBARPACK) $(LIBFORTRAN)
 endif
-else
+else    # if matlab
 ifdef gotoblas
 LDFLAGS = -Llibs -Llibs/GotoBLAS $(LIBARPACK) -llapack -lgoto $(LIBFORTRAN)
 ifeq (,$(findstring CYGWIN,$(shell uname)))
 LDFLAGS += -lpthread
 endif
-else
+else    # if gotoblas
+ifdef MKLROOT
+LFLAGS+= -L../ic1ion_module/libs -larpack -fopenmp -m64 -I$(MKLROOT)/include -L$(MKLROOT)/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
+CFLAGS+= -D_G77
+else    # if mkl
 #LDFLAGS = $(LIBARPACK) -llapack -lf77blas -latlas
 LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas -L/usr/local/gfortran/lib $(LIBFORTRAN)
 #LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
@@ -121,10 +125,11 @@ LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas -L/usr/local/gfortran/lib $(LIBFO
 ifdef MSYS
 ifdef GCC4
 LDFLAGS+= -static
-endif
-endif
-endif
-endif
+endif   
+endif   # ifdef MSYS
+endif   # else ~mkl
+endif   # else ~gotoblas
+endif   # else ~matlab
 ifdef icc
 LDFLAGS += -lifcore
 endif

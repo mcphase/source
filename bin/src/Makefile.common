@@ -146,10 +146,15 @@ LFLAGS= -openmp -lstdc++
 endif
 
 ifdef gotoblas
-LFLAGS = -L../ic1ion_module/libs -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -L/usr/local/gfortran/lib -lgfortran -lpthread
+LFLAGS = -L../ic1ion_module/libs -larpack -L../ic1ion_module/libs/GotoBLAS -llapack -lgoto -L/usr/local/gfortran/lib -lgfortran -lpthread
+else
+ifdef MKLROOT
+LFLAGS+= -L../ic1ion_module/libs -larpack -fopenmp -m64 -I$(MKLROOT)/include -L$(MKLROOT)/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
+CCOPTS+= -D_G77
 else
 LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
 #LFLAGS+= -llapack -lf77blas -latlas
+endif
 endif
 
 ifneq ($(shell uname),Darwin)
