@@ -735,7 +735,7 @@ template <class T> void zsMat<T>::MultMv(std::complex<T> *v, std::complex<T> *w)
       for(int j=0; j<_n; j++) for(int c=_p[j]; c<_p[j+1]; c++)
       {
          // Assume(!) matrix is Hermitian and loops only over the lower triangle
-         if(_i[c]<=j) {
+         if(_i[c]>=j) {
             w[_i[c]] += _x[c] * v[j]; if(_i[c]!=j) w[j] += conj(_x[c]) * v[_i[c]];
          }
       }
@@ -783,9 +783,9 @@ template <class T> void zsMat<T>::MultMMH(std::complex<T>*A, std::complex<T>*B, 
    memset(A,0,_m*c*sizeof(std::complex<T>));
    if(_iscsc) 
    {
-      for(int k=0; k<_n; k++)  // Aik = sum_j Mij Bjk (calculates each column k of A in turn)
+      for(int k=0; k<c; k++)   // Aik = sum_j Mij Bjk (calculates each column k of A in turn)
       {
-         for(int j=0; j<c; j++)
+         for(int j=0; j<_n; j++)
             for(int n=_p[j]; n<_p[j+1]; n++) {
                if(_i[n]>=j) A[_m*k+_i[n]] += _x[n] * B[_n*k+j]; if(_i[n]!=j) A[_m*k+j] += conj(_x[n]) * B[_n*k+_i[n]];
             }

@@ -16,7 +16,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  // Before initializing (allocating) matrices for other operators, check to see if we are using own parser, and if
  //   so get the sequence of operations and perform them here directly for each operator without allocating all the
  //   matrices  -  MDL 131024
- useperl=true; truncate=0; feast=0; arpack=0; FILE *fin=fopen(sipffilename,"rb"); char instr[MAXNOFCHARINLINE];
+ useperl=true; truncate=0; feast=0; arpack=0; oldeig=false; FILE *fin=fopen(sipffilename,"rb"); char instr[MAXNOFCHARINLINE];
  while(feof(fin)==0) if(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL) {
     if(strncmp(instr,"#!noperl",8)==0) useperl=false; 
     else if(strncmp(instr,"#!eigsolver",11)==0) {      // Parses eigensolver string - can be either: truncate, arpack or feast
@@ -32,13 +32,17 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
              ii=strchr(ic,'='); if(ii==NULL) feast=DBL_MAX;    else { ii++; if(*ii=='e') feast=DBL_EPSILON;    else if(*ii=='t'||*ii=='a') fs=*ii; else feast=atof(ii); } }
           else if(strncmp(ic,"arpack",6)==0) {
              ii=strchr(ic,'='); if(ii==NULL) arpack=DBL_MAX;   else { ii++; if(*ii=='e') arpack=DBL_EPSILON;   else if(*ii=='t'||*ii=='f') as=*ii; else arpack=atof(ii); } }
+          else if(strncmp(ic,"oldeig",6)==0||strncmp(ic,"matpack",7)==0) { oldeig = true; }
        }
        while( (ic=strchr(ic,','))!=NULL );
        if(ts!=0) { if(ts=='f') truncate=feast;  else truncate=arpack; }
        if(fs!=0) { if(fs=='t') feast=truncate;  else feast=arpack; }
        if(as!=0) { if(as=='t') arpack=truncate; else arpack=feast; }
        if(feast!=0 && arpack!=0) { fprintf(stderr,"WARNING: cluster_module cannot use both FEAST and ARPACK together. FEAST will be used.\n"); arpack=0; }
-       printf("truncate=%g\tfeast=%g\tarpack=%g\n",truncate,feast,arpack); /*truncate=0;*/ feast=0; arpack=0; 
+       else if(arpack!=0) { 
+          fprintf(stderr,"\n -----------\n WARNING: ARPACK eigensolver selected. Note that this option is buggy. Proceed at you own risk!\n ----------- \n"); fflush(stderr); }
+       if(arpack==DBL_MAX) arpack = 0.1; if(truncate==DBL_MAX) truncate = 0.1;
+       printf("truncate=%g\tfeast=%g\tarpack=%g\n",truncate,feast,arpack); /*truncate=0;*/ feast=0; /*arpack=0;*/
     }
   //else if(strncmp(instr,"#!truncate",10)==0) { char *valsto = strchr(instr,'=')+1; truncate = atof(valsto); }
  }
@@ -254,8 +258,8 @@ delete operatornames[(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcom
 
 }
 fdim=dim; 
-if (truncate>1e-6 && truncate!=1) {
-   dim = (int)(ceil(truncate*(double)dim)); is1sttrunc = true; zm = new complexdouble[fdim*dim]; }
+if (truncate>1e-6 && truncate<1) {
+   dim = (int)(ceil(truncate*(double)dim)); is1sttrunc = true; zm = new complexdouble[fdim*fdim]; }
 // for(int i=0;i<=(*clusterpars).nofatoms*(*clusterpars).nofcomponents+nofcomponents+3+3*(*clusterpars).nofatoms;++i)
 //  {delete Iaa[i];delete operatornames[i];}
 printf("#module cluster initialized\n");
@@ -591,7 +595,7 @@ int arpackeig(zsMat<double> &M, Vector &En, complexdouble*zc, int nev, iterwork 
       else { elem = En[i]; En[i] = En[i+1]; En[i+1] = elem; ii=ind[i-1]; ind[i-1]=ind[i]; ind[i]=ii; i--; if(i==0) i=1; }
    }
    for(i=0; i<nev; i++) {
-      for(j=0; j<n; j++) zc[n*i+j]=z[ind[i]*n+j]; //{ zr(j+1,i+1)=z[ind[i]*n+j].r; zc(j+1,i+1)=z[ind[i]*n+j].i; }
+      for(j=0; j<n; j++) zc[n*j+i]=z[ind[i]*n+j]; //{ zr(j+1,i+1)=z[ind[i]*n+j].r; zc(j+1,i+1)=z[ind[i]*n+j].i; }
    }
 
    return info;
@@ -666,7 +670,9 @@ for (int i=1;i<=(*clusterpars).nofatoms;++i)
   {int r=ix*mx+ai*mi+iz+1;
    int s=ix*mx+bi*mi+iz+1;
 //   printf("hello %i %i %i %i\n",r,s,ai,bi);
-   if(fabs(Hi(ai+1,bi+1))>EPS) { if(r>=s) (*clusterH)(r,s)+=Hi(ai+1,bi+1); else (*clusterH)(s,r)+=complex<double>(0.,Hi(ai+1,bi+1)); }
+   //if(fabs(Hi(ai+1,bi+1))>EPS) { if(r>=s) (*clusterH)(r,s)+=Hi(ai+1,bi+1); else (*clusterH)(s,r)+=complex<double>(0.,Hi(ai+1,bi+1)); }
+   if(r>=s) (*clusterH)(r,s)+=Hi(ai+1,bi+1); else (*clusterH)(s,r)+=complex<double>(0.,Hi(ai+1,bi+1));
+   //(*clusterH)(r,s)+=Hi(ai+1,bi+1);
   }
 }
 // myPrintMatrix(stdout,H);
@@ -734,12 +740,14 @@ for (int nn=1;nn<=(*(*clusterpars).jjj[n]).paranz;++nn)
    int s=ix*mx+bi*mi+iy*my+bj*mj+iz+1;
    int k=ai*dj+aj+1;// ??
    int l=bi*dj+bj+1;// ??
-   if(fabs(SinS(k,l))>EPS) { if(r>=s) (*clusterH)(r,s)+=SinS(k,l); else (*clusterH)(s,r)+=complex<double>(0.,SinS(k,l)); }
+   //if(fabs(SinS(k,l))>EPS) { if(r>=s) (*clusterH)(r,s)+=SinS(k,l); else (*clusterH)(s,r)+=complex<double>(0.,SinS(k,l)); }
+   if(r>=s) (*clusterH)(r,s)+=SinS(k,l); else (*clusterH)(s,r)+=complex<double>(0.,SinS(k,l));
+   //(*clusterH)(r,s)+=SinS(k,l);
 //printf("hello %i %i %i %i %g %g\n",r,s,k,l,H(r,s),SinS(k,l));
   } 
 }
 
-if (truncate>1e-6 && truncate!=1) 
+if (truncate>1e-6 && truncate<1) 
 {
    char jobz = 'V', uplo = 'U'; int lda=fdim, n=fdim, info=0, lwork=4*n, lrwork = 3*n-2;
    int zsz = lwork + fdim*dim + dim*dim, dsz = lrwork+fdim;
@@ -811,19 +819,28 @@ else
 //for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]);
 
 // diagonalize H
-//int sort=1;int maxiter=1000000;
-//Matrix Hp = H.fp_matrix();
+if(oldeig) {
+int sort=1;int maxiter=1000000;
+Matrix Hp = H.fp_matrix();
 // myPrintMatrix(stdout,H);
 //printf("now diagonalise\n");
-//Matrix zr(1,dim,1,dim);
-//Matrix zi(1,dim,1,dim);
-//EigenSystemHermitean (Hp,En,zr,zi,sort,maxiter);
-//for(int i=1; i<=dim; i++) { for(int j=1; j<=dim; j++) { zc(i,j) = std::complex<double>(zr(i,j),zi(i,j)); } }
+Matrix zr(1,dim,1,dim);
+Matrix zi(1,dim,1,dim);
+EigenSystemHermitean (Hp,En,zr,zi,sort,maxiter);
+for(int i=1; i<=dim; i++) { for(int j=1; j<=dim; j++) { zc(i,j) = std::complex<double>(zr(i,j),zi(i,j)); } }
 //printf("Eigenvector real\n");
 // myPrintMatrix(stdout,zr);
 //printf("Eigenvector imag\n"); 
 // myPrintMatrix(stdout,zc);
-
+}
+else if (arpack>1e-6 && arpack!=1 && !(truncate>1e-6 && truncate<1) ) {
+   int nev = ceil(arpack*dim);
+   memset(&zc[1][1],0,dim*dim*sizeof(complexdouble)); 
+   arpackeig(*clusterH,En,(complexdouble*)&zc[1][1],nev,*workspace);
+   double emax = fabs(En[nev-1]*100); if(fabs(En[1]*100)>emax) emax = fabs(En[1]*100);
+   for (int ii=nev; ii<dim; ii++) { En[ii+1] = emax; }
+}
+else
 {
    clock_t start,end; start = clock();
    char jobz = 'V', uplo = 'U', range = 'A'; int n=dim, lda=n, ldz=n, info=0, lwork=4*n, il, iu, numfnd, lrwork = 24*n, liwork=10*n;
@@ -844,7 +861,22 @@ else
       fprintf(stderr,"cluster_module:zheevr return error %d\n",info); exit(-1); }
    end = clock(); if(dim>200) fprintf(stderr,"zheev took %f s\n",(double)(end-start)/CLOCKS_PER_SEC); fflush(stderr);
 }
-
+/*{
+   clock_t start,end; start = clock();
+   char jobz = 'V', uplo = 'U'; int n=dim, lda=n, info=0, lwork=2*n;
+   int zsz = lwork + dim*dim*2, dsz = 3*n-2;
+   if(workspace->zsize<zsz) workspace->realloc_z(zsz); memset(workspace->zwork,0,zsz*sizeof(complexdouble));
+   if(workspace->dsize<dsz) workspace->realloc_d(dsz); memset(workspace->dwork,0,dsz*sizeof(double));
+   complexdouble *zwork = &workspace->zwork[0], *zmt = &workspace->zwork[lwork];
+   double *rwork = &workspace->dwork[0];
+   for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]); H.h_array((std::complex<double>*)zmt);
+   F77NAME(zheev)(&jobz, &uplo, &n, zmt, &lda, &En[1], zwork, &lwork, rwork, &info);
+   for (int i=0; i<dim; i++) for (int j=0; j<dim; j++) { 
+      zc(i+1,j+1)=std::complex<double>(zmt[dim*j+i].r,zmt[dim*j+i].i); }
+   if(info!=0) { 
+      fprintf(stderr,"cluster_module:zheev return error %d\n",info); exit(-1); }
+   end = clock(); if(dim>200) fprintf(stderr,"zheev took %f s\n",(double)(end-start)/CLOCKS_PER_SEC); fflush(stderr);
+}*/
 
 }
 
