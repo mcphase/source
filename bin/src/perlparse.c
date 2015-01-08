@@ -45,7 +45,7 @@ int myReadComplexMatrix (FILE * file, zsMat<double> & M)
    for (i1=1;i1<=M.nr();++i1){
     j1=inputline(file,numbers);if(j1!=M.nc()) {fprintf (stderr, "ERROR reading complex matrix - number of columns read (%i) does not match matrix dimension (%i)\n",j1,M.nc());return false;} 
     for (j1=1;j1<=M.nc();++j1) {
-       if(fabs(numbers[j1-M.nc()+1])>EPS) M(i1,j1)=complex <double> (numbers[j1],0); }
+       if(fabs(numbers[j1])>EPS) M(i1,j1)=complex <double> (numbers[j1],0); }
     }
 
      //read comment line 
@@ -53,7 +53,7 @@ int myReadComplexMatrix (FILE * file, zsMat<double> & M)
     // read imaginary part
    for (i1=1;i1<=M.nr();++i1){
     j1=inputline(file,numbers);if(j1!=M.nc()) {fprintf (stderr, "ERROR reading complex matrix - number of columns read (%i) does not match matrix dimension (%i)\n",j1,M.nc());return false;}
-    for (j1=1;j1<=M.nc();++j1) { if(fabs(numbers[j1-M.nc()+1])>EPS) M(i1,j1)+=complex <double> (0,numbers[j1]); }
+    for (j1=1;j1<=M.nc();++j1) { if(fabs(numbers[j1])>EPS) M(i1,j1)+=complex <double> (0,numbers[j1]); }
     }
 delete []numbers;
 return true;

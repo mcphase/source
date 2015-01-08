@@ -448,6 +448,7 @@ template <class T> zsMat<T> zsMat<T>::add_scal(const std::complex<T> v) // Adds 
 // --------------------------------------------------------------------------------------------------------------- //
 template <class T> void zsMat<T>::_genhash()
 {
+   if(_x.empty()) { _nnz = 0; return; }  // Empty matrix.
    std::tr1::hash<int> hash_value;
    _nnz = hash_value(_p[0]+_i[0]);
    // Hash-combiner stolen from Boost: http://www.boost.org/doc/html/hash/reference.html#boost.hash_combine
@@ -811,38 +812,53 @@ template <class T> std::complex<T>& zsMat<T>::operator () (int r, int c)
    r--; c--;
    if(_iscsc)
    {
-      if((double)r>(double)_m/2.)        // Try to speed up search by looking from either ends
+/*    if((double)r>(double)_m/2.)        // Try to speed up search by looking from either ends
       {
          for(int n=_p[c+1]-1; n>=_p[c]; n--) {
             if(_i[n]<r)
             {
                _i.insert(_i.begin()+n,r); _x.insert(_x.begin()+n,std::complex<T>(0,0));
                for(int m=c+1; m<=_n; m++) _p[m]++; 
+               _genhash();
                return _x.at(n);
             }
             else if(_i[n]==r) return _x.at(n);
          }
       }
       else
-      {
-         for(int n=_p[c]; n<_p[c+1]; n++) {
-            if(_i[n]>r)
-            {
-               _i.insert(_i.begin()+n-1,r); _x.insert(_x.begin()+n-1,std::complex<T>(0,0));
-               for(int m=c+1; m<=_n; m++) _p[m]++; 
-               return _x.at(n-1);
+*/    {
+         if(_p[c]==_p[c+1]) {
+            _i.insert(_i.begin()+_p[c],r); _x.insert(_x.begin()+_p[c],std::complex<T>(0,0));
+            for(int m=c+1; m<=_n; m++) _p[m]++; 
+            _genhash();
+            return _x.at(_p[c]);
+         }
+         else
+         {
+            for(int n=_p[c]; n<_p[c+1]; n++) {
+               if(_i[n]>r)
+               {
+                  _i.insert(_i.begin()+n,r); _x.insert(_x.begin()+n,std::complex<T>(0,0));
+                  for(int m=c+1; m<=_n; m++) _p[m]++; 
+                  _genhash();
+                  return _x.at(n);
+               }
+               else if(_i[n]==r) return _x.at(n);
             }
-            else if(_i[n]==r) return _x.at(n);
+            // This should run if the column is empty or the required element is before the current first element
+            _i.insert(_i.begin()+_p[c],r); _x.insert(_x.begin()+_p[c],std::complex<T>(0,0));
+            for(int m=c+1; m<=_n; m++) _p[m]++; 
+            _genhash();
+            return _x.at(_p[c]);
          }
       }
-      _genhash();
    }
    else
    {
       _p.push_back(c); _i.push_back(r); _x.push_back(std::complex<T>(0,0)); 
       return _x.back();
    }
-   std::cerr << "zsMat::Error in setting element (" << r << "," << c << "\n"; exit(-1);
+   std::cerr << "zsMat::Error in setting element (" << r << "," << c << ")\n"; exit(-1);
 }
 template <class T> std::complex<T> zsMat<T>::operator () (int r, int c) const
 {

@@ -815,11 +815,10 @@ else
 
 *oldHext = Hext; } H = *clusterH;
 
-// insert exchange field
-//for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]);
-
-// diagonalize H
 if(oldeig) {
+// insert exchange field
+for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]);
+// diagonalize H
 int sort=1;int maxiter=1000000;
 Matrix Hp = H.fp_matrix();
 // myPrintMatrix(stdout,H);
