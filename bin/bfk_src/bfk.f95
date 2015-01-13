@@ -622,7 +622,7 @@ do nn=1,M0
   Ps(nn)=ss
   write(19,*) 'Ps',  nn, Ps(nn), vv1(nn), vv2(nn)
 ! if Boltzmann factors are zero, the transtions are eliminated
-  if (p(n1)< 0.000001.and. p(n2)<0.000001)  then
+  if (p(n1)< 0.000001 .and. p(n2)<0.000001)  then
     vv1(nn)=0
     vv2(nn)=0
   end if
@@ -823,7 +823,7 @@ do n=1,Ns
     else 
       if ((zx> cut) .and. (zx-y > cut) ) then
         F(n,m)=p(m)/beta*(x-Delta)/x
-      else if ((zx > cut).and. (abs(zx-y)<cut)) then 
+      else if ((zx > cut) .and. (abs(zx-y)<cut)) then 
         F(n,m)=p(m)/beta*(x-Delta)/x/(1-exp(y-zx))
       else if ((abs(zx) < cut) .and. (zx-y > cut)) then 
         F(n,m)=p(m)/beta*(x-Delta)/x*(1-exp(-zx))

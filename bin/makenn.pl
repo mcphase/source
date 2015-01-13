@@ -7,10 +7,10 @@ use PDL;
 
 use PDL::Slatec;
 
-print "********************************************************\n";
-print " makenn - create table with neighbors and interactions\n";
-print " References: M. Rotter et al. PRB 68 (2003) 144418\n";
-print "********************************************************\n";
+print "#********************************************************\n";
+print "# makenn - create table with neighbors and interactions\n";
+print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
+print "#********************************************************\n";
 $PI=3.141592654;
 
 unless ($#ARGV>=0) 
@@ -64,14 +64,19 @@ print " option -bvk filename\n";
 print "              for phonon take Born van Karman model with longitudinal and\n";
 print "              transversal spring constants from file - file format:\n";
 print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(n/M)\n";
+print STDOUT << "EOF";
+ option -f [filename]
+              read interaction constants from table in file. To get an sample
+              file use option -f without a filename.      
+EOF
 print "        -d puts to the last column the distance of the neighbors (A)\n\n";
-print " The neigbours of each atom are also stored in seperate files\n";
+print " The neigbours of each atom are also stored in separate files\n";
 print " results\/makenn.a*.pc, which can be used with the program pointc to evaluate\n";
 print " the pointcharge model and calculate crystal field paramaters.\n\n";
  exit 0;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];
-$rkky=0;$calcdist=0;$bvk=0;
+$rkky=0;$calcdist=0;$bvk=0;$readtable=0;
 shift @ARGV; 
 $_=$ARGV[0];
 if(/-rkky3d/)
@@ -135,6 +140,53 @@ elsif(/-bvk/)
               close Fin;
        	     }
   }
+elsif(/-f/)
+  {$readtable=1;shift @ARGV;
+   unless ($#ARGV>=0) # if no filename is given print help
+   {
+    print STDOUT << "EOF";
+# Sample table of interaction constants for program makenn
+#
+# primitive unit cell range to probe for neighbours:
+#! nr1min=-1  nr2min=-1  nr3min=0 
+#! nr1max=+1  nr2max=+1  nr3max=0
+#
+#! ignore_neihgbours_behind=0   # if set to 1 then only nearest neighbour in each 
+#                               # direction is taken
+#  
+# Table of exchange interaction constants J - assumed to be isotropic
+# da [a] db [b] dc [c] J [meV]
+  1      0      0      -5.8
+  0      1      0      -5.8
+EOF
+   exit(0); }
+   $table_file=$ARGV[0];shift @ARGV;
+   $ignore_neihgbours_behind=0;
+   print "reading isotropic interactions from table in file $table_file\n";
+   # read interaction constants from file
+   unless(open(Fin,$table_file)){ die "could not open $table_file\n";}
+             $n_table=0;
+             {while(<Fin>){      
+               if (/^(#!|[^#])*nr1min\s*=\s*/){$readtable=2;($n1min)=extract("nr1min",$_);}
+               if (/^(#!|[^#])*nr2min\s*=\s*/){$readtable=2;($n2min)=extract("nr2min",$_);}
+               if (/^(#!|[^#])*nr3min\s*=\s*/){$readtable=2;($n3min)=extract("nr3min",$_);}
+               if (/^(#!|[^#])*nr1max\s*=\s*/){$readtable=2;($n1max)=extract("nr1max",$_);}
+               if (/^(#!|[^#])*nr2max\s*=\s*/){$readtable=2;($n2max)=extract("nr2max",$_);}
+               if (/^(#!|[^#])*nr3max\s*=\s*/){$readtable=2;($n3max)=extract("nr3max",$_);}
+               if (/^(#!|[^#])*ignore_neihgbours_behind\s*=\s*/){($ignore_neihgbours_behind)=extract("ignore_neihgbours_behind",$_);}
+                                 next if /^\s*#/;$line=$_;
+                                 my @numbers=split(" ",$line);
+                                 if($#numbers>=3)
+                                 {++$n_table;
+                                  $da[$n_table]=$numbers[0];
+                                  $db[$n_table]=$numbers[1];
+                                  $dc[$n_table]=$numbers[2];
+                                  $Jex[$n_table]=$numbers[3];
+                                 }
+                                }
+              close Fin;
+       	     }
+  }
 $_=$ARGV[0];
 if(/-d/)
   {$calcdist=1;print "putting distance of neighbors (A) to last column of makenn.j\n";}
@@ -192,6 +244,8 @@ $p= $p x $rtoijk;
    $r=sqrt($rr->at());
    if($r>$distmax){$distmax=$r;}
   }
+  unless($readtable>1)
+ {
 # determine $nmin,$nmax by looking at a cube with side 3rmax
      $inv=matinv(transpose($p)); #invert primitive lattice
 # print "inverted primitive lattice[A]:".$inv."\n";
@@ -209,13 +263,15 @@ $p= $p x $rtoijk;
 #   print"corner $i1 $i2 $i3 coordinates in prim bases:$n\n";
 #   print "$n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
   }}}
+  }
 print "$n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
 
      #initialize output file results/makenn.j
  my ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
-print "number of atoms = $nofatoms\n";
+print "number of atoms = $nofatoms\n calculating ...\n";
  for ($nnn=1;$nnn<=$nofatoms;++$nnn)    
- {   my $gJ=$gJ[$nnn];
+ { print "atom $nnn ...\n";
+     my $gJ=$gJ[$nnn];
      my $sipffilename=$sipf_file[$nnn];
      my ($rn)=new PDL ();
      my ($an)=new PDL ();
@@ -255,7 +311,7 @@ print "number of atoms = $nofatoms\n";
    $zz=$aabbcc->at(2);
 
    if ($r<=$rmax && $r>0){#save neighbour j format
-
+          unless($readtable>0){
     $an=$an->append( pdl ([$nz]));
     $rn=$rn->append( pdl ([$r]));
     $xn=$xn->append( pdl ([$xx]));
@@ -275,11 +331,60 @@ print "number of atoms = $nofatoms\n";
     $Jbc=$Jbc->append( pdl ([$jbc]));
     $Jca=$Jca->append( pdl ([$jca]));
     $Jcb=$Jcb->append( pdl ([$jcb]));
-    $Jcc=$Jcc->append( pdl ([$jcc]));                         }
+    $Jcc=$Jcc->append( pdl ([$jcc]));
+                               } else
+                               {# check if neighbour is in readtable - if yes, save it
+                               for($ntbl=1;$ntbl<=$n_table;++$ntbl){
+                                 if(abs($da[$ntbl]-$xx)<0.001&&
+                                    abs($db[$ntbl]-$yy)<0.001&&
+                                    abs($dc[$ntbl]-$zz)<0.001&&
+                                    $Jex[$ntbl]!=0.0)
+                                  {# ok save it
+    $an=$an->append( pdl ([$nz]));
+    $rn=$rn->append( pdl ([$r]));
+    $xn=$xn->append( pdl ([$xx]));
+    $yn=$yn->append( pdl ([$yy]));
+    $zn=$zn->append( pdl ([$zz]));
+    $in=$in->append( pdl ([$rvec->at(0)]));
+    $jn=$jn->append( pdl ([$rvec->at(1)]));
+    $kn=$kn->append( pdl ([$rvec->at(2)]));
+    $Jaa=$Jaa->append( pdl ([$Jex[$ntbl]]));
+    $Jab=$Jab->append( pdl ([0.0]));
+    $Jac=$Jac->append( pdl ([0.0]));
+    $Jba=$Jba->append( pdl ([0.0]));
+    $Jbb=$Jbb->append( pdl ([$Jex[$ntbl]]));
+    $Jbc=$Jbc->append( pdl ([0.0]));
+    $Jca=$Jca->append( pdl ([0.0]));
+    $Jcb=$Jcb->append( pdl ([0.0]));
+    $Jcc=$Jcc->append( pdl ([$Jex[$ntbl]]));
+                                  }                             } 
+                               }
+                      }
     }}}}  
 
-   $n= qsorti($rn);
+   $n= qsorti($rn); 
    $nofneighbours[$nnn]=(($rn->dims)[0]-1);
+   if ($readtable>0&&$ignore_neihgbours_behind==1)
+   {# check if there is a closer neighbour and if there is delete neighbour
+    for ($n1=2;$n1<(($rn->dims)[0]);++$n1)
+     {for ($n2=1;$n2<$n1;++$n2){  $innr=$xn->index($n)->at($n1)*$xn->index($n)->at($n2)+
+                                   $yn->index($n)->at($n1)*$yn->index($n)->at($n2)+
+                                   $zn->index($n)->at($n1)*$zn->index($n)->at($n2);
+                                  $rrn1=$xn->index($n)->at($n1)*$xn->index($n)->at($n1)+
+                                   $yn->index($n)->at($n1)*$yn->index($n)->at($n1)+
+                                   $zn->index($n)->at($n1)*$zn->index($n)->at($n1);
+                                  $rrn2=$xn->index($n)->at($n2)*$xn->index($n)->at($n2)+
+                                   $yn->index($n)->at($n2)*$yn->index($n)->at($n2)+
+                                   $zn->index($n)->at($n2)*$zn->index($n)->at($n2);
+                                  
+                                if(abs($innr*$innr-$rrn1*$rrn2)<0.0001)
+                                  {# remove neighbour n1
+                                   set $rn->index($n),$n1,0;--$nofneighbours[$nnn];
+                                  } 
+                               }
+     }
+   }
+   $n= qsorti($rn); 
    printneighbourlist($h,$l,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);
  }
 
@@ -527,6 +632,11 @@ sub printlattice {
      {#next if /^\s*#/;
       $text=$_;
       if ($nofatoms==0){($nofatoms)=extract("nofatoms",$_);}
+if ($nofatoms!=0){
+        print $l "#-------------------------------------------------------------------------------------\n";
+        print $l "# output of program makenn $rmax - table with neighbors and interactions\n";
+        print $l "# Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
+                 }
       print $l ($text);
       last if ($nofatoms!=0); # the line nofatoms= must be the last line of the file header !!!!
      }
@@ -547,7 +657,7 @@ sub printneighbourlist {
                                             $text=~s!nofneighbours\s*=\s*\d+!nofneighbours=$nofn!;}
      if (/^(#!|[^#])*diagonalexchange\s*=\s*/){
 
-      if ($rkky>=1)
+      if ($rkky>=1||$readtable>0)
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=1!;}
       else
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=0!;}
@@ -563,9 +673,6 @@ sub printneighbourlist {
       }
 
 
-print $l "#-------------------------------------------------------------------------------------\n";
-print $l "# output of program makenn $rmax - table with neighbors and interactions\n";
-print $l "# Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
 
 if ($bvk==1)
 {print $l ("# it follows the Born von Karman model according to  springs read from file $bvk_file\n");}
@@ -584,9 +691,12 @@ elsif($rkky==5)
 elsif($rkky==6)
  {print $l ("# it follows output of RKKY interaction  J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4 for scale A=$scale meV\n");
   print $l ("# kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n");}
+elsif($readtable>0)
+  {print $l ("# it follows output generated from interactions read from table $table_file\n");
+  }
 else
 {print $l ("# it follows output of classical DD interaction generated by makenn\n");}
-print $l "#-------------------------------------------------------------------------------------\n";
+
     if($alpha!=90||$beta!=90||$gamma!=90)
      {print $l ("#da[a]    db[b]     dc[c]       Jii[meV]  Jjj[meV]  Jkk[meV]  Jij[meV]  Jji[meV]  Jik[meV]  Jki[meV]  Jjk[meV]  Jkj[meV] with j||b, k||(a x b) and i normal to k and j\n");}
     else
@@ -604,15 +714,16 @@ print $l1 "#--------------------------------------------------------------------
      {print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n";}
 
  for ($n1=1;$n1<(($rn->dims)[0]);++$n1)
-# the position xyz is relative position (not absolute coordinate of neighbour)
- {print $l sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
+ {next if($rn->index($n)->at($n1)==0);
+  # the position xyz is relative position (not absolute coordinate of neighbour)
+ print $l sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
  $ddd=$an->index($n)->at($n1);
   print $l1 sprintf("%8s   %+10.6f %+10.6f %+10.6f     ",$charge[$ddd],$in->index($n)->at($n1),$jn->index($n)->at($n1),$kn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
 
   if (($gJ!=0&&$gJ[$ddd]==0)||($gJ==0&&$gJ[$ddd]!=0)){ die "error makenn. mixing of atoms with gJ=0 (intermediate coupling) and gJ>0 not implemented\n";}
-  if ($rkky==0||$bvk==1) # here anisotropic interaction comes in
+  if (($rkky==0&&$readtable==0)||$bvk==1) # here anisotropic interaction comes in
    { 
        if($bvk==1||($gJ!=0&&$gJ[$ddd]!=0))
          {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));

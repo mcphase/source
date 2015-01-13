@@ -86,7 +86,7 @@ print Fout << "EOF";
 #'n'             number of atoms in magnetic unit cell
 #'nofatoms'      number of atoms in primitive crystal unit cell
 #'nofcomponents' dimension of moment vector of a magnetic atoms
-T=1.4 Ha=5 Hb=0 Hc=0 n=1 nofatoms=$nofatoms nofcomponents=$nofcomponents
+#! T=1.4 Ha=5 Hb=0 Hc=0 n=1 nofatoms=$nofatoms nofcomponents=$nofcomponents
  1.0
 EOF
 for($i=2;$i<=$nofatoms*$nofcomponents;++$i) {print Fout "0.0000\n";}

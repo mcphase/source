@@ -58,7 +58,7 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
    if (jj == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
    // initialize mfold with zeros
-   for(s=0;s<=mfold.in(mfold.na(),mfold.nb(),mfold.nc());++s){mfold.mi(s)=0;}
+   for(s=0;s<=mfold.in(mfold.na(),mfold.nb(),mfold.nc());++s){mfold.mi(s)=1000;}
    for(s=0;s<=sdim;++s){jj[s]=0;} //clear jj(j,...)
 
    for(m=1;m<=inputpars.nofatoms;++m)
