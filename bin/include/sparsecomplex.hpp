@@ -22,7 +22,7 @@
 #include<map>
 #include<cfloat>       // For definition of EPSILON etc.
 #include "vector.h"
-#include<tr1/functional>
+#include<functional>
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Template Class to hold a complex sparse matrix of any type - and also declares a few operations and methods
@@ -449,7 +449,7 @@ template <class T> zsMat<T> zsMat<T>::add_scal(const std::complex<T> v) // Adds 
 template <class T> void zsMat<T>::_genhash()
 {
    if(_x.empty()) { _nnz = 0; return; }  // Empty matrix.
-   std::tr1::hash<int> hash_value;
+   std::hash<int> hash_value;
    _nnz = hash_value(_p[0]+_i[0]);
    // Hash-combiner stolen from Boost: http://www.boost.org/doc/html/hash/reference.html#boost.hash_combine
    for(int j=1; j<_n; j++) for(int i=_p[j]; i<_p[j+1]; i++) {
