@@ -173,6 +173,7 @@ extern "C" void mcalc(Vector & Jr,double * T, Vector & Hxc,Vector & Hext,double 
 #endif
 { double U,lnz;
   Icalc(Jr,T, Hxc,Hext,g_J,MODPAR,sipffile,&U,&lnz,est); 
+  Jr*=(*g_J);
 }
 /**************************************************************************/
 // for mcdisp this routine is needed
