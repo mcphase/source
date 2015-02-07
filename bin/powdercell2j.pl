@@ -82,6 +82,9 @@ EOF
       if ($line=~/^\s*\d/) {@c=split(" ",$line);
                             $atomtype[$p]=$c[1];
                             $x[$p]=$c[2];$y[$p]=$c[3];$z[$p]=$c[4];
+                            while($x[$p]<0.0){$x[$p]+=1.0;};while($x[$p]>1.0){$x[$p]-=1.0;};
+                            while($y[$p]<0.0){$y[$p]+=1.0;};while($y[$p]>1.0){$y[$p]-=1.0;};
+                            while($z[$p]<0.0){$z[$p]+=1.0;};while($z[$p]>1.0){$z[$p]-=1.0;};
                             $p++;
                            }
      }
@@ -273,8 +276,8 @@ print Fout2 << "EOF";
 #            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
 #
 #
-#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
-#           in a polarised neutron experiment:
+#           In the above the intensities I+ and I- are the intensities in a polarised neutron scattering experiment
+#           with incoming polarisation parallel (I+) and antiparallel (I-) to P:
 #            I+-=LF exp(-OTF Q^2/8pi^2)
 #                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2
 #                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P))]

@@ -232,6 +232,7 @@ switch (module_type)
 //    est		matrix with eigenstates, eigenvalues [meV], population numbers
 //    T                 temperature
 //     Q                 components of Qvector in euclidian coordinates 123=abc
+//    delta             transition energy
 //  on output
 //    int   	total number of transitions
 //    dMQ	<-|M(Q)|+> sqrt(n- - n+),  n+,n- population numbers
@@ -240,8 +241,8 @@ switch (module_type)
 //    .... occupation number of states (- to + transition chosen according to transitionnumber)
 //
 /****************************************************************************/
-int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix & ests)
-{double delta=maxE;dMQ(1)=complex <double> (ninit,pinit);
+int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta,ComplexMatrix & ests)
+{double ddelta=maxE;dMQ(1)=complex <double> (ninit,pinit);
  double J0,J2,J4,J6;
  double Q,th,ph;
  int i;     complex<double>dummy; // introduced 3.4.10 MR
@@ -256,7 +257,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
   {static int washere=0;
 
    case 0:if (ddnn!=NULL){getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
-                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ,&delta);break;}
+                          return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ,&ddelta);break;}
           else {return 0;}
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give dMQ1 polar angles with respect to xyz
             i=(*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);
@@ -267,16 +268,19 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,ComplexMatrix
             return (*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);break;
    case 5:  int nnt;
             {ComplexVector m1(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
-             m1(1)=dMQ(1);
-            float ddelta=delta;
-            nnt=cluster_dm(3,transitionnumber,T,m1,ddelta,ests);
+             m1(1)=dMQ(1);float dd=ddelta;
+            nnt=cluster_dm(3,transitionnumber,T,m1,dd,ests);
             // now we have all magnetic moments in m1 vector and we have to do the
-            // dmq1=(magnetic structure factor)* = sum_i Mi exp(-iQri) Fi(Q) * DWF
+            // (magnetic structure factor) = sum_i Mi exp(+iQri) Fi(Q) DWF            
+            // dmq1=<-|(magnetic structure factor)*|+> = sum_i <-|Mi|+> exp(-iQri) Fi(Q) DWF
             Vector abc(1,6); abc(1)=(*clusterpars).a; abc(2)=(*clusterpars).b; abc(3)=(*clusterpars).c;
                    abc(4)=(*clusterpars).alpha; abc(5)=(*clusterpars).beta; abc(6)=(*clusterpars).gamma;
             dMQ=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
              dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
+            //printf("Qvec=(%g %g %g)   rijk=(%g %g %g)\n",Qvec(1),Qvec(2),Qvec(3),rijk(1),rijk(2),rijk(3));
             double QR=Qvec*rijk;
+            if (delta<0){ QR=-QR;}  // in case of negative delta we must take <-|Mi|+> exp(+iQRi) Fi(Q) DWF  in order 
+                                    // to give correct results  MR 25.2.2014
             complex<double> exponent(cos(QR),-sin(QR));
             for(int n=1;n<=3;++n)
             {dMQ(n)+=m1(3*(a-1)+n)*exponent*(*(*clusterpars).jjj[a]).F(Q)*(*(*clusterpars).jjj[a]).debyewallerfactor(Q);

@@ -107,8 +107,8 @@ print Fout << "EOF";
 #            31....|Q|[1/A]    
 #            32....2theta      
 #
-#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
-#           in a polarised neutron experiment:
+#           In the above the intensities I+ and I- are the intensities in apolarised neutron experiment
+#           with incident polarisation up (+) or down (-):
 #            I+-=LF exp(-OTF Q^2/8pi^2) 
 #                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 
 #                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]

@@ -2,8 +2,6 @@
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >2) {usage();}
-GetOptions("help"=>\$helpflag);
-usage() if $helpflag;
 
 sub usage() {
 

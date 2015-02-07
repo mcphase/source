@@ -14,11 +14,20 @@
 
 // main program
 int main (int argc, char **argv)
-{printf("# program clusterize\n");
- if(argc<2){printf ("\n# Program Clusterize - use as:\n\n\
+{printf("# Program Clusterize \n");
+ if(argc<2){printf ("\n\
+Creates groups of atoms to form clusters. Each cluster is treated \n\
+as a single subsystem and exactly diagonalised. The subsystems are coupled \n\
+and treated in the standard mean field and dynamical matrix diagonalisation (DMD) \n\
+procedures in mcphas and mcdisp. Such coupled cluster calculations are \n\
+appropriate for solids with groups of magnetic ions which interact strongly and \n\
+different groups are coupled weakly. For an example see Cu2Te2O5Cl2, Jens Jensen \n\
+PRB 2008 \n\
+\n\n\
+- use as:\n\n\
  clusterize mcphas_in.j 1 2 3 0 4 5 6 0 7 8 9 \n \
  ... creates mcphas.j cluster1.sipf cluster1.j cluster2.sipf cluster2.j ... \n \
-    from input file mcphas_in.j \n \
+    from input file mcphas_in.j. Groups of atoms have to be separated by a zero.\n \
 		\n");exit(1);}
  // 1st load parameters as they are
  par inp(argv[1]);
@@ -96,9 +105,9 @@ $M2=$M1_2;\n\
 $M3=$M1_3;\n");
   for(int n=2;n<=clust.nofatoms;++n)
   {fprintf(fout,"\
-$M1+=$M%i_1;\n\
-$M2+=$M%i_2;\n\
-$M3+=$M%i_3;\n",n,n,n);
+$M1=$M1+$M%i_1;\n\
+$M2=$M2+$M%i_2;\n\
+$M3=$M3+$M%i_3;\n",n,n,n);
    }
    fprintf(fout,"\
 # for running mcdisp it is needed to define a interaction operator\n");

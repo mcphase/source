@@ -174,8 +174,8 @@ for(i=0;i<=COLHEADERDIM;++i){
 fprintf(fout,"#            %i....%s\n",i,colheader[i]);
                    }
 fprintf(fout,"#\n");
-fprintf(fout,"#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities\n");
-fprintf(fout,"#           in a polarised neutron experiment:\n");
+fprintf(fout,"#           In the above the intensities I+ and I- are the intensities in a polarised neutron\n");
+fprintf(fout,"#           experiment with incident polarisation up (+) or down (-):\n");
 fprintf(fout,"#            I+-=LF exp(-OTF Q^2/8pi^2) \n");
 fprintf(fout,"#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 \n");
 fprintf(fout,"#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]\n"

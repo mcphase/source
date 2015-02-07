@@ -173,7 +173,7 @@ public:
   
   // returns transition element matrix N(Q) in order to be able to go beyond
    // dipolar approximation in mcdisp - it requires a call to eigenstates first
-   int dMQ1calc(Vector & Qvec, double & T, ComplexVector & dMQ1, ComplexMatrix & ests);
+   int dMQ1calc(Vector & Qvec, double & T, ComplexVector & dMQ1,float & delta, ComplexMatrix & ests);
 
 private :
   void (*mq)(ComplexVector*,double*,double*,double*,double*,double*,double*,ComplexMatrix*);
