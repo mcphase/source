@@ -21,7 +21,7 @@ printf("#*****************************************************\n");
 // check command line
   if (argc < 6)
     { printf (" program spinsfromq - create spinconfiguration from q vector\n \
-                use as: spinsfromq  n1 n2 n3 h k l\n \
+                use as: spinsfromq  n1 n2 n3 h k l [h2 k2 l2]\n \
 		n1 n2 n3 .... periodicity of supercell\n \
 		h k l ....... components of qvector\n");
       exit (1);
@@ -48,8 +48,9 @@ printf("#*****************************************************\n");
   qvector(2)=strtod(argv[5],NULL);
   qvector(3)=strtod(argv[6],NULL);
      
-   T=1;hext=0;
+   T=1;hext=0;nettom=0;
    h=0;for(i=1;i<=inputpars.nofcomponents;++i)h(i)=0.1;
+  while(Norm(nettom)<0.1){
   for(i=1;i<=inputpars.nofatoms;++i)
   {(*inputpars.jjj[i]).Icalc(moment,T,h,hext,lnz,u,(*inputpars.jjj[i]).Icalc_parameter_storage_init(h,hext,T));
    for(j=1;j<=inputpars.nofcomponents;++j){nettom(j+(i-1)*inputpars.nofcomponents)=moment(j);
@@ -57,7 +58,8 @@ printf("#*****************************************************\n");
                                            phi(j+(i-1)*inputpars.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
   }
-
+  h*=2;
+  }
   printf("# q=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
   // transform hkl to primitive reciprocal lattice
   qvector=qvector*inputpars.rez.Inverse();
