@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 # batch to remove every comment line 
 
@@ -14,6 +13,8 @@ unless ($#ARGV >=0)
  print " usage: delcomments [-s \"token\"] *.*  \n *.* .. filenname\n";
  print " -s ... option to remove comments beginning with \"token\" instead.\n";
  print "        e.g. delcomments -s \"#:\" to remove lines commented by the range command.\n";
+ print " -k ... option to keep comments beginning with \"token\" .\n";
+ print "        e.g. delcomments -s \"#!\" to keep comments starting with '#!' \n";
  print " -c ... option to remove comments and replace by empty line instead of deleteing the line\n";
  print " -fromline 10 ... option to remove comments only after line number 10\n";
  print " -toline 100  ... option to remove comments only until line number 100\n";
@@ -21,13 +22,16 @@ unless ($#ARGV >=0)
 
 
 
-$delline=1;$commentstring = "#"; $fromline=1;$toline=1e100;
+$delline=1;$commentstring = "#"; $fromline=1;$toline=1e100;$keep="1";
 while($ARGV[0]=~/^-/)
 {if ($ARGV[0]=~/^-c$/) { $delline=0;shift @ARGV;}
- if ($ARGV[0]=~/^-s$/) { $commentstring = $ARGV[1]; shift @ARGV; shift @ARGV; } 
+ if ($ARGV[0]=~/^-s$/) { shift @ARGV; $commentstring = $ARGV[0]; shift @ARGV; } 
+ if ($ARGV[0]=~/^-k$/) { shift @ARGV; $keep = $ARGV[0]; shift @ARGV; } 
  if ($ARGV[0]=~/^-fromline$/) { $fromline = $ARGV[1]; shift @ARGV; shift @ARGV; } 
  if ($ARGV[0]=~/^-toline$/) { $toline = $ARGV[1]; shift @ARGV; shift @ARGV; } 
 }
+#print "s".$commentstring."s\n";
+@ARGV=map{glob($_)}@ARGV;
 
   foreach (@ARGV)
   {
@@ -39,7 +43,8 @@ while($ARGV[0]=~/^-/)
    $i=0;
    while($line=<Fin>)
      {++$i;
-       if ($fromline<=$i&&$i<=$toline&&$line=~/^\s*$commentstring/) {print $line;
+       if ($fromline<=$i&&$i<=$toline&&$line=~/^\s*\Q$commentstring\E/
+           &&!($line=~/^\s*\Q$keep\E/)) {print $line;
                                          if($delline==0){print Fout "\n";}
                                          }
        else{print Fout $line;}

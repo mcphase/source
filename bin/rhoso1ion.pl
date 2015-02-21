@@ -236,8 +236,8 @@ push(@mj,@mj);
 for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
 #    if(  ($mj[$jj]==$mj[$ii]-1) ) { $spJm->[$ii][$jj] = sqrt($Jsq-$mj[$ii]*($mj[$ii]-1)); }
 # elsif(  ($mj[$jj]==$mj[$ii]+1) ) { $smJp->[$ii][$jj] = sqrt($Jsq-$mj[$ii]*($mj[$ii]+1)); }
-     if( ($ii-$jj)>($J2) && ($mj[$jj]==$mj[$ii]-1) ) { $spJm->[$ii][$jj] = sqrt($Jsq-$mj[$ii]*($mj[$ii]-1)); }
-  elsif( ($jj-$ii)>($J2) && ($mj[$jj]==$mj[$ii]+1) ) { $smJp->[$ii][$jj] = sqrt($Jsq-$mj[$ii]*($mj[$ii]+1)); }
+     if( ($ii-$jj)>($J2) && ($mj[$jj]==$mj[$ii]-1) ) { $spJm->[$ii-1][$jj+1] = sqrt($Jsq-$mj[$ii]*($mj[$ii]-1))/2; }
+  elsif( ($jj-$ii)>($J2) && ($mj[$jj]==$mj[$ii]+1) ) { $smJp->[$ii+1][$jj-1] = sqrt($Jsq-$mj[$ii]*($mj[$ii]+1))/2; }
 } }
 
 $sJmat=[]; for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
@@ -282,8 +282,13 @@ else {
     $V->[$ii][$jj] = Math::Complex->make($vreal[$ix],$vimag[$ix++]); } }
 }
 $Vi=zeros(2*$J2+2,2*$J2+2); $tVi=zeros(2*$J2+2,2*$J2+2);
-for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
-  $Vi->[$ii][$jj] = $V->[$ii%($J2+1)][$jj%($J2+1)]; $tVi->[$jj][$ii] = $Vi->[$ii][$jj]; } }
+# Vi=[V V; V V]; tVi=Vi';
+#for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) {
+#  $Vi->[$ii][$jj] = $V->[$ii%($J2+1)][$jj%($J2+1)]; $tVi->[$jj][$ii] = $Vi->[$ii][$jj]; } }
+# Vi=[V V*0; V*0 V]; tVi=Vi';
+for $i0(0..1) { for $ii(0..$J2) { for $jj(0..$J2) {
+  $Vi->[$i0*($J2+1)+$ii][$i0*($J2+1)+$jj] = $V->[$ii][$jj]; } } }
+for $ii(0..(2*$J2+1)) { for $jj(0..(2*$J2+1)) { $tVi->[$jj][$ii] = $Vi->[$ii][$jj]; } } 
 
 # Calculates the matrix elements |<V|s.J|V>|^2
 $sJVi = mmult($sJmat,$Vi); $matel = mmult($tVi,$sJVi);

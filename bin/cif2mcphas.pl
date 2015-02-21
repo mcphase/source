@@ -619,6 +619,7 @@ print "If positions or structure parameters are correct, please check the CIF fi
 
 # Prints out the mcphas_all_atoms.j without neighbours (use makenn.pl)
 if($debug==0) { open (FOUT, ">mcphas_all_atoms.j"); } else { *FOUT = *STDOUT; }
+$nnat=$#pos+1;
 print FOUT "#<!--mcphase.mcphas.j-->\n";
 print FOUT "#***************************************************************\n";
 print FOUT "# Lattice and Exchange Parameter file for\n";
@@ -640,7 +641,7 @@ print FOUT "#! r1a=   1 r2a= 0 r3a=  0\n";
 print FOUT "#! r1b=   0 r2b= 1 r3b=  0   primitive lattice vectors [a][b][c]\n";
 print FOUT "#! r1c=   0 r2c= 0 r3c=  1\n";
 print FOUT "#\n";
-print FOUT "#! nofatoms= $#pos  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
+print FOUT "#! nofatoms= $nnat  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
 for (0..$#pos) {
   @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
   print FOUT "#********************************************************************* \n";
