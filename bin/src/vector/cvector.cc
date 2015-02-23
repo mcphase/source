@@ -83,6 +83,7 @@ ComplexVector::ComplexVector (void)
     // reset the dynamic part
     V = 0;
     D = 0;
+    isempty = true;
     temporary = 0;
     form = MpTextFormat;
 }  
@@ -108,6 +109,7 @@ ComplexVector::ComplexVector (int ncl, int nch)
  
     // set the reference count
     D = new Reference;
+    isempty = false;
     temporary = 0;
     form = MpTextFormat;
 }               
@@ -135,6 +137,7 @@ ComplexVector::ComplexVector (int ncl, int nch, complex<double> value)
 
     // set the reference count
     D = new Reference;
+    isempty = false;
     temporary = 0;
     form = MpTextFormat;
 }                   
@@ -163,6 +166,7 @@ ComplexVector::ComplexVector (Vector& re)
 
     // set the reference count
     D = new Reference;
+    isempty = false;
     temporary = 0;
     form = MpTextFormat;
 
@@ -198,6 +202,7 @@ ComplexVector::ComplexVector (Vector& re, Vector& im)
 
     // set the reference count
     D = new Reference;
+    isempty = false;
     temporary = 0;
     form = MpTextFormat;
 
@@ -220,6 +225,7 @@ ComplexVector::ComplexVector (const ComplexVector &A)
     // copy link to block
     V = A.V;
     D = A.D;
+    isempty = A.isempty;
     
     // increase the reference count
     A.addref();
@@ -238,9 +244,11 @@ ComplexVector::~ComplexVector (void)
 //
 { 
     // decrease the reference count and delete if neccessary
-    if (D) {
+    if (!isempty) {
+        if(!D) { isempty = true; } else
 	if ( (--(D->count) == 0 && temporary == 0) || D->count < 0) {
 	    delete[] (V + cl);
+            isempty = true;
 	    delete D;
 	    D = 0;   // this is crucial !!
 	    V = 0;
@@ -258,7 +266,7 @@ void ComplexVector::Remove (void)
 // Explicitly removes a vector from the memory
 //
 {
-    if (D) { 
+    if (!isempty) { 
 
 	// reset reference count and call destructor
 	D->count = 0;
@@ -283,7 +291,7 @@ void ComplexVector::Resize (int ncl, int nch)
     // allocate a new vector 
     if ((v = new complex<double>[csize])) {
 	
-	if (D) {  // check if already initialized
+	if (!isempty) {  // check if already initialized
     
 	    // compute range to copy
 	    int Lo = MpMax(ncl,cl);
@@ -305,6 +313,7 @@ void ComplexVector::Resize (int ncl, int nch)
 	    
 	    // create  the reference block
 	    D = new Reference;
+            isempty = false;
 	    temporary = 0;
 	}
 	
@@ -398,6 +407,7 @@ ComplexVector& ComplexVector::operator = (const ComplexVector& A)
 	// link right side to left side
 	V = A.V; 
 	D = A.D;
+        isempty = A.isempty;
 	D->count = 1;
 	((ComplexVector&)A).temporary = 0;
 	((ComplexVector&)A).D = 0;
@@ -416,6 +426,7 @@ ComplexVector& ComplexVector::operator = (const ComplexVector& A)
 	      Matpack.Error(AllocationFail);
 
 	    D = new Reference;
+            isempty = false;
 	} else
 	    checkdim(A);
 

@@ -52,6 +52,7 @@ GetOptions("help"=>\$helpflag,
            "interactive"=>\$interact,
            "debug"=>\$debug,
            "create"=>\$create,
+           "supercell=s"=>\$supersize,
            "poscheck"=>\$checkpos);
 
 if (!$create && ($#ARGV<0 || $helpflag)) {
@@ -62,6 +63,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print " Options include:\n";
    print "    --help        or -h : prints this message\n";
    print "    --create      or -c : creates a blank CIF file without and structure information.\n";
+   print "    --supercell   or -s : creates a super-cell of size #x#x#. (e.g. -s 2x3x4).\n";
    print "    --interactive or -i : prompts user for information such as valence states\n";
    print "\n";
    print " By default, this script is automatic, so if the oxidation (valence) states are not\n";
@@ -79,7 +81,7 @@ if ($#ARGV<0) { $cif = "new.cif"; } else { $cif = $ARGV[0]; }
 if ($create) {
    if (-e $cif) { 
      print "Warning: File $cif already exists. Do you want to overwrite this? (y/n)";
-     $ans = <>; $ans =~ s/\R//g;
+     $ans = <>; $ans =~ s/[\R\n\r]*//g;
      if($ans !~ /[Yy]/) { print "Exiting without creating file.\n"; exit(0); }
    }
    open (FOUT, ">$cif");
@@ -424,16 +426,18 @@ for $j(0..$nofatom-1) {
 # If in interactive mode, asks the user if a site is magnetic or not, and (if needed) what valence
 #   Note interactive mode is disabled if debug mode is active.
 if($interact) {
-  print "Please enter \"1\", \"yes\", \"y\", etc. if the following is true; \"0\", \"no\", \"n\", if false\n";
-  print "and a number value for the valence if applicable (the \"+\" sign is not needed).\n";
-  print "The default option is shown in brackets. If you accept the default, just press \"enter\"\n";
+  print "Please enter \"1\", \"yes\", \"y\", etc. if the following is true\n";
+  print "\"0\", \"no\", \"n\", if false and a number value for the valence\n";
+  print "if applicable (the \"+\" sign is not needed).\n";
+  print "The default option is shown in brackets. If you accept the default,\n";
+  print "just press \"enter\"\n";
   for $j(0..$nofatom-1) {
     $at = $dat[$j][0]; $at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
     $at = lc $at; $at = ucfirst $at;
-    if($oxyguess[$j]) {
+   #if($oxyguess[$j]) {
       print "What is the valence (oxidation state) of ions on site $dat[$j][0]? (".($oxy[$j]>0?"+":"-")."$oxy[$j])\n";
       if(!$debug) {
-        $ans = <>; $ans =~ s/\R//g;
+        $ans = <>; $ans =~ s/[\R\n\r]*//g;
         if(!($ans eq "")) { 
           if($ans !~ /[0-9\-]/) { 
             print "Sorry, I don't understand the valence state $ans. Assuming default valence: ".($oxy[$j]>0?"+":"-")."$oxy[$j]\n"; 
@@ -444,10 +448,10 @@ if($interact) {
           }
         }
       }
-    }
+   #}
     print "Are the ions on site $dat[$j][0] ($at".abs($oxy[$j]).($oxy[$j]>0?"+":"-").") magnetic? (".($ismag[$j]?"true":"false").")\n";
     if(!$debug) { 
-      $ans = <>; $ans =~ s/\R//g;
+      $ans = <>; $ans =~ s/[\R\n\r]*//g;
       if(!($ans eq "")) {
         if($ans=~/[yYtT1]/) { 
           $ismag[$j] = 1;
@@ -529,7 +533,7 @@ for $j(0..$nofatom-1) {
     push @epos, "$xx;$yy;$zz";
   }
   # uniq from: http://perlmaven.com/unique-values-in-an-array-in-perl
-  @uepos = keys { map { $_ => 1 } @epos }; @epos = ();
+  %seen = (); @uepos = grep { ! $seen{$_}++ } @epos; @epos = ();
   foreach $eps (@uepos) {
     @seps=split(";",$eps); 
     for (0..2) { if($seps[$_]<0)  { $seps[$_]+=ceil(abs($seps[$_])); } }
@@ -537,7 +541,7 @@ for $j(0..$nofatom-1) {
     $st = "$seps[0];$seps[1];$seps[2]"; $st =~ s/6667/6666/g; $st =~ s/3334/3333/g;
     push @epos, $st;
   }
-  @uepos = keys { map { $_ => 1 } @epos };
+  %seen = (); @uepos = grep { ! $seen{$_}++ } @epos; @epos = ();
 
   # Loops through and checks there are no duplicates
   @same = ();
@@ -596,22 +600,35 @@ if($spagrp eq "") {
   print "No spacegroup symbol found in CIF, but the following symmetry equivalent positions will be used:\n";
   foreach $so (@sympos) { print "$so\n"; }
 } else { print "spacegroup is $spagrp".(defined $maybematch?" (possibly)":"")."\n"; }
-print "----------------------------------------------------------------------------------\n";
+print "--------------------------------------------------------------------------------\n";
 print "Label\tElement\tValence\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
-print "----------------------------------------------------------------------------------\n";
+print "--------------------------------------------------------------------------------\n";
 @magornot = ( "NonMagnetic", "Magnetic" );
 for $j(0..$nofatom-1) {
   if(!($dat[$j][0] eq -1)) {
     print "$dat[$j][0]\t$atoms[$j]\t$oxy[$j]\t$mults[$j]\t$magornot[$ismag[$j]]\t$dat[$j][2]\t$dat[$j][3]\t$dat[$j][4]\n";
   }
 }
-print "----------------------------------------------------------------------------------\n";
-print "Mult. is the multiplicity and is calculated by applying all the symmetry equivalent\n";
-print "   positions to the coordinates found in the CIF. Note this assumes full occupation of all sites.\n";
-print "   If this is wrong, please check the CIF and file a bug.\n";
+print "--------------------------------------------------------------------------------\n";
+print "Mult. is the multiplicity and is calculated by applying all the symmetry\n";
+print "   equivalent positions to the coordinates found in the CIF. Note this\n";
+print "   assumes full occupation of all sites. If this is wrong, please check\n";
+print "   the CIF and file a bug.\n";
 print "If the ionic valence or whether the ion is magnetic or not is incorrect,\n";
 print "   please use the interactive option to specify it.\n";
-print "If positions or structure parameters are correct, please check the CIF file, and file a bug.\n";
+print "If positions or structure parameters are correct, please check the CIF file,\n";
+print "   and file a bug.\n";
+
+# Do we want a supercell? If so change a,b,c, lattice parameters to reflect bigger cell
+if(defined $supersize) {
+  @sss = split("x",$supersize); $sa = $sss[0]; $sb = $sss[1]; $sc = $sss[2];
+  if($#sss>2) { $wantindex = 1; } else { $wantindex = 0; }
+  print "\n";
+  print "You requested a supercell of size $sa x $sb x $sc. Please check this is correct.\n";
+  $a0=$a; $b0=$b; $c0=$c;
+  $a *= $sa; $b *= $sb; $c *= $sc; 
+  $nall = ($#pos+1) * $sa*$sb*$sc;
+} else { $sa = 1; $sb = 1; $sc = 1; $nall = ($#pos+1); }
 
 # ------------------------------------------------------------------------------------------------------------------------ #
 # Outputs the data to mcphas.j and sipf files.
@@ -641,13 +658,22 @@ print FOUT "#! r1a=   1 r2a= 0 r3a=  0\n";
 print FOUT "#! r1b=   0 r2b= 1 r3b=  0   primitive lattice vectors [a][b][c]\n";
 print FOUT "#! r1c=   0 r2c= 0 r3c=  1\n";
 print FOUT "#\n";
-print FOUT "#! nofatoms= $nnat  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
-for (0..$#pos) {
-  @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
-  print FOUT "#********************************************************************* \n";
-  print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $_ ; number of the atom within this type = $ntype\n";
-  print FOUT "#! da= $ps[1] [a] db= $ps[2] [b] dc= $ps[3] [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
-  if($ismag[$ions{$ps[4]}]) { $nmag++; }
+print FOUT "#! nofatoms= $nall  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
+$aid = 1;
+for $si (0..$sa-1) { 
+  for $sj (0..$sb-1) { 
+    for $sk (0..$sc-1) {
+      for (0..$#pos) {
+        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
+        $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
+        print FOUT "#********************************************************************* \n";
+        print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $aid ; number of the atom within this type = $ntype\n";
+        print FOUT "#! da= $pa [a] db= $pb [b] dc= $pc [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
+        $aid++;
+        if($ismag[$ions{$ps[4]}]) { $nmag++; }
+      }
+    } 
+  } 
 }
 print FOUT "#********************************************************************* \n";
 if($debug==0) { close FOUT; }
@@ -676,13 +702,23 @@ print FOUT "#! r1b=   0 r2b= 1 r3b=  0   primitive lattice vectors [a][b][c]\n";
 print FOUT "#! r1c=   0 r2c= 0 r3c=  1\n";
 print FOUT "#\n";
 print FOUT "#! nofatoms= $nmag  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
-for (0..$#pos) {
-  @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
-  if($ismag[$ions{$ps[4]}]) {
-    print FOUT "#********************************************************************* \n";
-    print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $_ ; number of the atom within this type = $ntype\n";
-    print FOUT "#! da= $ps[1] [a] db= $ps[2] [b] dc= $ps[3] [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
-  }
+$aid = 1;
+for $si (0..$sa-1) { 
+  for $sj (0..$sb-1) { 
+    for $sk (0..$sc-1) {
+      for (0..$#pos) {
+        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
+        if($ismag[$ions{$ps[4]}]) {
+          $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
+          print FOUT "#********************************************************************* \n";
+          if($wantindex==1) { print FOUT "# atomindex = [$aid](".($_+1)."|$si,$sj,$sk)\n"; }
+          print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $aid ; number of the atom within this type = $ntype\n";
+          print FOUT "#! da= $pa [a] db= $pb [b] dc= $pc [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
+          $aid++;
+        } else { $nnonmag++; }
+      }
+    } 
+  } 
 }
 print FOUT "#********************************************************************* \n";
 if($debug==0) { close FOUT; }
@@ -752,6 +788,17 @@ for (keys %ions) {
     print FOUT "SCATTERINGLENGTHIMAG=$imagb[$ions{$_}]\n";
     print FOUT "#  ... note: - if an occupancy other than 1.0 is needed, just reduce \n";
     print FOUT "#              the scattering length linear accordingly\n";
+    $zk = $zktab{$ionname};
+    if(!($zk eq "")) {
+      print FOUT "\n";
+      print FOUT "#----------------------------------------------------------------------\n";
+      print FOUT "# coefficients of Z(K') according to Lovesey (Neutron Scattering) vol.2\n";
+      print FOUT "# chapter 11.6.1 page 233: Z(K)= ZKcK-1 * <jK-1(Q)> + ZKcK+1 * <jK+1(Q)>\n";
+      print FOUT "#  ... these coefficients are needed to go beyond dipolar approx.\n";
+      print FOUT "#      for the neutron magnetic formfactor in rare earth ions\n";
+      print FOUT "#----------------------------------------------------------------------\n";
+      print FOUT $zk;
+    }
   }
   else {
     print FOUT "#!MODULE=kramer\n";
@@ -880,7 +927,7 @@ print FOUT << "EOF";
 # %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
 #
 #
-#! natcryst=$#pos      number of nonmagnetic atoms in primitive crystalographic unit cell
+#! natcryst=$nnonmag      number of nonmagnetic atoms in primitive crystalographic unit cell
 #
 # it follows a list of nat lines with nonmagnetic atoms
 # ... notes: - if an occupancy other than 1.0 is needed, just reduce
@@ -895,14 +942,21 @@ print FOUT << "EOF";
 #
 # Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
 EOF
-for (0..$#pos) {
-  @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
-  if($ismag[$ions{$ps[4]}]==0) {
-    $fpos = pdl [ ($ps[1]), ($ps[2]), ($ps[3]) ];
-    $cpos = $rtoijk x transpose($fpos);
-    printf FOUT "%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f 0  # %s.sipf\n",
-       $realb[$ions{$ps[4]}], $imagb[$ions{$ps[4]}], $ps[1], $ps[2], $ps[3], $cpos->at(0,0), $cpos->at(0,1), $cpos->at(0,2), $ps[4];
-  }
+for $si (0..$sa-1) { 
+  for $sj (0..$sb-1) { 
+    for $sk (0..$sc-1) {
+      for (0..$#pos) {
+        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
+        if($ismag[$ions{$ps[4]}]==0) {
+          $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
+          $fpos = pdl [ ($ps[1]+$si), ($ps[2]+$sj), ($ps[3]+$sk) ];
+          $cpos = $rtoijk x transpose($fpos);
+          printf FOUT "%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f 0  # %s.sipf\n",
+             $realb[$ions{$ps[4]}], $imagb[$ions{$ps[4]}], $pa, $pb, $pc, $cpos->at(0,0), $cpos->at(0,1), $cpos->at(0,2), $ps[4];
+        }
+      }
+    } 
+  } 
 }
 # print STDOUT "press enter to generate mcdiff.in file, too\n";
 # <STDIN>;
@@ -939,11 +993,11 @@ if($debug==0) { close FOUT; }
 print "\n";
 print "Created files:\n";
 print "\n";
-print " mcphas_all.j                           ... contains all atoms (magnetic and nonmag)\n";
-print " mcphas_magnetic_atoms.j == mcphas.j    ... contains only magnetic atoms\n";
+print " mcphas_all.j                         ... contains all atoms (magnetic and not)\n";
+print " mcphas_magnetic_atoms.j == mcphas.j  ... contains only magnetic atoms\n";
 for (keys %ions) {
   $atm = $atoms[$ions{$_}]; $atm =~ s/\s+//g;
-  printf " %-39s... contains single parameters for %s ion\n", "$_.sipf", $atm.abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-");
+  printf " %-37s... contains parameters for %s ion\n", "$_.sipf", $atm.abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-");
 }
 print "\n";
 print "   running \"makenn R\" command  will create from mcphas.j a number of files\n";

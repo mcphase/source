@@ -99,6 +99,7 @@ Vector::Vector (void)
     // reset the dynamic part
     V = 0;
     D = 0;
+    isempty = true;
     temporary = 0;
     form = MpTextFormat;
 }                   
@@ -124,6 +125,7 @@ Vector::Vector (int ncl, int nch)
  
     // set the reference count
     D = new Reference;
+    isempty = false;
     temporary = 0;
     form = MpTextFormat;
 }                   
@@ -151,6 +153,7 @@ Vector::Vector (int ncl, int nch, double value)
 
     // set the reference count
     D = new Reference;
+    isempty = false;
     temporary = 0;
     form = MpTextFormat;
 }                   
@@ -176,6 +179,7 @@ Vector::Vector (int ncl, int nch, double d0, double d1, ...)
     
     // set the reference count
     D = new Reference;
+    isempty = false;
     temporary = 0;
     form = MpTextFormat;
     
@@ -204,6 +208,7 @@ Vector::Vector (const Vector &A)
     // copy link to block
     V = A.V;
     D = A.D;
+    isempty = A.isempty;
     
     // increase the reference count
     A.addref();
@@ -222,10 +227,13 @@ Vector::~Vector (void)
 //
 { 
     // decrease the reference count and delete if neccessary
-    if (D) {
+    if (!isempty) {
+        if(!D) { isempty = true; } else
 	if ( (--(D->count) == 0 && temporary == 0) || D->count < 0) {
 	    delete[] (V + cl);
+            isempty = true;
 	    delete D;
+            isempty = true;
 	    D = 0;   // this is crucial !!
 	    V = 0;
 	}
@@ -241,7 +249,7 @@ void Vector::Remove (void)
 // Explicitly removes a vector from the memory
 //
 {
-    if (D) { 
+    if (!isempty) { 
 
 	// reset reference count and call destructor
 	D->count = 0;
@@ -269,7 +277,7 @@ void Vector::Resize (int ncl, int nch)
     // allocate a new vector 
     if ((v = new double[csize])) {
 	
-	if (D) {  // check if already initialized
+	if (!isempty) {  // check if already initialized
     
             // compute range to copy
             int Lo = MpMax(ncl,cl);
@@ -291,6 +299,7 @@ void Vector::Resize (int ncl, int nch)
 	    
 	    // create  the reference block
 	    D = new Reference;
+            isempty = false;
 	    temporary = 0;
 	}
 	
@@ -379,6 +388,7 @@ Vector& Vector::operator = (const Vector& A)
 	// link right side A to left side
 	V = A.V; 
 	D = A.D;
+        isempty = A.isempty;
 	D->count = 1;
 	((Vector&)A).temporary = 0;
 	((Vector&)A).D = 0;
@@ -397,6 +407,7 @@ Vector& Vector::operator = (const Vector& A)
 	        Matpack.Error(AllocationFail);
 
 	    D = new Reference;
+            isempty = false;
 	} else
 	    checkdim(A);
 

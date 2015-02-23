@@ -54,7 +54,7 @@ endif
 
 ifdef GCC4
  LIBFORTRAN=-lgfortran
- LDFLAGS=—L/usr/local/gfortran/lib/ 
+ LDFLAGS=-L/usr/local/gfortran/lib/ 
 else
  LIBFORTRAN=-lg2c
  CFLAGS+=-D_G77
@@ -115,7 +115,7 @@ LDFLAGS += -lpthread
 endif
 else    # if gotoblas
 ifdef MKLROOT
-LFLAGS+= -L../ic1ion_module/libs -larpack -fopenmp -m64 -I$(MKLROOT)/include -L$(MKLROOT)/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
+LDFLAGS+= -L../ic1ion_module/libs -larpack $(LIBFORTRAN) -fopenmp -m64 -I$(MKLROOT)/include -L$(MKLROOT)/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
 CFLAGS+= -D_G77
 else    # if mkl
 #LDFLAGS = $(LIBARPACK) -llapack -lf77blas -latlas

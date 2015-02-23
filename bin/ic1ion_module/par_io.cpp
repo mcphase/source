@@ -159,6 +159,7 @@ void getfromionname(std::string &ionname, icpars &pars)
    else if(IONCMP("ag2+")==0) { B = 502.;  C = 3.99*B; xi =1794.; /*xi=1840*/ n = 9; l=D; flgBC=1; }
    else if(IONCMP("ag3+")==0) { B = 528.;  C = 4.03*B; xi =1940.; /*xi=1930*/ n = 8; l=D; flgBC=1; }
    // 5d ions parameters from G Burns, J. Chem. Phys. v41, 1521 (1964) B,C only.
+   else if(IONCMP("re2+")==0) { F[1]=30870;F[2]=22050; xi =0.;    /*xi=   ;*/ n = 5; l=D; }
    
    else { std::cerr << "getfromionname(): Name of ion " << ionname << " not recognised.\n"; return; }
 

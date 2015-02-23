@@ -130,6 +130,7 @@ class MatrixBase {
     int rl,rh,cl,ch,ncol,nrow;
     short attribute,temporary,form; 
     struct Reference *D;
+    bool isempty;
     
     MatrixBase (void) { attribute = General; temporary = 0; form = MpTextFormat; }
 
@@ -162,6 +163,7 @@ class Vector {
 
     short temporary,form;
     struct Reference *D;
+    bool isempty;
 
     void addref (void) const { if (D) ++(D->count); }  
     void checkdim (const Vector&);
@@ -503,6 +505,7 @@ class ComplexVector {
     
     short temporary,form;
     struct Reference *D;
+    bool isempty;
     
     void addref (void) const { if (D) ++(D->count); }  
     void checkdim (const ComplexVector&);
