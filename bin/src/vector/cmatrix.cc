@@ -134,6 +134,7 @@ ComplexMatrix::ComplexMatrix (void)
     // reset the dynamic part 
     M = 0;
     D = 0;
+    isempty = true;
 }
 
 //----------------------------------------------------------------------------//
@@ -155,6 +156,7 @@ ComplexMatrix::ComplexMatrix (int nrl, int nrh, int ncl, int nch)
 
     // set the reference count
     D = new Reference;
+    isempty = false;
 }     
 
 //----------------------------------------------------------------------------//
@@ -180,6 +182,7 @@ ComplexMatrix::ComplexMatrix (int nrl, int nrh, int ncl, int nch, complex<double
 
     // set the reference count
     D = new Reference;
+    isempty = false;
 }     
 
 //----------------------------------------------------------------------------//
@@ -203,6 +206,7 @@ ComplexMatrix::ComplexMatrix (Matrix& re)
 
     // set the reference count
     D = new Reference;
+    isempty = false;
 
     if (unbound(re)) re.Matrix::~Matrix();
 }
@@ -229,6 +233,7 @@ ComplexMatrix::ComplexMatrix (Matrix& re, Matrix& im)
 
     // set the reference count
     D = new Reference;
+    isempty = false;
 
     if (unbound(re)) re.Matrix::~Matrix();
     if (unbound(im)) im.Matrix::~Matrix();
@@ -255,6 +260,7 @@ ComplexMatrix::ComplexMatrix (const ComplexMatrix& A)
     // copy link to block
     M = A.M;
     D = A.D;
+    isempty = A.isempty;
     
     // increase the reference count
     A.addref();
@@ -273,7 +279,8 @@ ComplexMatrix::~ComplexMatrix (void)
 //
 {
     // decrease the reference count and delete if neccessary
-    if (D) {
+    if (!isempty) {
+        if(!D) { isempty = true; } else
 	if ( (--(D->count) == 0 && temporary == 0) || D->count < 0) {
 
 	    // free data
@@ -281,6 +288,7 @@ ComplexMatrix::~ComplexMatrix (void)
 	    delete[] (M+rl);
 
 	    // free info block
+            isempty = true;
 	    delete D;
 	    D = 0;   // this is crucial !!
 	    M = 0;
@@ -299,7 +307,7 @@ void ComplexMatrix::Remove (void)
 // Explicitly removes a matrix from the memory
 //
 {
-    if (D) {
+    if (!isempty) {
 	
 	// reset reference count and call destructor
 	D->count = 0;
@@ -447,6 +455,7 @@ ComplexMatrix& ComplexMatrix::operator = (const ComplexMatrix& A)
 	// link right side to left side
 	M = A.M; 
 	D = A.D;
+        isempty = A.isempty;
 	D->count = 1;
 	((ComplexMatrix&)A).temporary = 0;
 	((ComplexMatrix&)A).D = 0;
@@ -462,6 +471,7 @@ ComplexMatrix& ComplexMatrix::operator = (const ComplexMatrix& A)
 	    ncol = A.ncol;
 	    M = newmat(rl,rh,cl,ch);
 	    D = new Reference;
+            isempty = false;
 	} else
 	    checkdim(A);
 

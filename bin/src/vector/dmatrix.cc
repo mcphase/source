@@ -160,6 +160,7 @@ Matrix::Matrix (void)
     // reset the dynamic part 
     M = 0;
     D = 0;
+    isempty = true;
 }
 
 //----------------------------------------------------------------------------//
@@ -181,8 +182,10 @@ Matrix::Matrix (int nrl, int nrh, int ncl, int nch)
       M = newmat(nrl,nrh,ncl,nch);
       // set the reference count
       D = new Reference;
+      isempty = false;
     } else {
       M = 0; D = 0;
+      isempty = true;
     }
 }     
 
@@ -208,8 +211,10 @@ Matrix::Matrix (int nrl, int nrh, int ncl, int nch, double value)
       copyval(M[nrl]+ncl,value,ncol*nrow);
       // set the reference count
       D = new Reference;
+      isempty = false;
     } else {
       M = 0; D = 0;
+      isempty = true;
     }
 }     
 
@@ -233,6 +238,7 @@ Matrix::Matrix (int nrl, int nrh, int ncl, int nch, double d0, double d1, ...)
       M = newmat(nrl,nrh,ncl,nch);
       // set the reference count
       D = new Reference;
+      isempty = false;
       // initialize matrix
       int nelem = ncol*nrow;
       double *v = M[nrl]+ncl;
@@ -245,6 +251,7 @@ Matrix::Matrix (int nrl, int nrh, int ncl, int nch, double d0, double d1, ...)
       va_end( ap );
     } else {
       M = 0; D = 0;
+      isempty = true;
     }
 }
 
@@ -269,6 +276,7 @@ Matrix::Matrix (const Matrix& A)
     // copy link 
     M = A.M;
     D = A.D;
+    isempty = A.isempty;
     
     // increase the reference count
     A.addref();
@@ -287,7 +295,8 @@ Matrix::~Matrix (void)
 //
 {
     // decrease the reference count and delete if neccessary
-    if (D) {
+    if (!isempty) {
+        if(!D) { isempty = true; } else
 	if ( (--(D->count) == 0 && temporary == 0) || D->count < 0) {
 
 	    // free data
@@ -295,6 +304,7 @@ Matrix::~Matrix (void)
 	    delete[] (M+rl);
 
 	    // free info block
+            isempty = true;
 	    delete D;
 	    D = 0;   // this is crucial !!
 	    M = 0;
@@ -312,7 +322,7 @@ void Matrix::Remove (void)
 // Explicitly removes a matrix from the memory
 //
 {
-    if (D) {
+    if (!isempty) {
 	
 	// reset reference count and call destructor
 	D->count = 0;
@@ -503,9 +513,11 @@ Matrix& Matrix::operator = (const Matrix& A)
 	// link right side to left side
 	M = A.M; 
 	D = A.D;
+        isempty = A.isempty;
         if (D) D->count = 1;
 	((Matrix&)A).temporary = 0;
 	((Matrix&)A).D = 0;
+	((Matrix&)A).isempty = true;
      
     } else {		// right side is bound to a variable -> copy elements
 
@@ -519,9 +531,11 @@ Matrix& Matrix::operator = (const Matrix& A)
 	    if ( nrow > 0 && ncol > 0) {
 	      M = newmat(rl,rh,cl,ch);
 	      D = new Reference;
+              isempty = false;
 	    } else {
 	      M = 0;
 	      D = 0;
+              isempty = true;
 	    }
 	} else
 	    checkdim(A);
