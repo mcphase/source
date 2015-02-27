@@ -305,7 +305,7 @@ if(so1ion==0)
   printf("#x'y'z' .... Coordinate system of the crystal field parameters, magnetic moment\n");
   printf("#abc .... Crystal axes\n");
   printf("#Standard Interactions operator sequence  (Stevens Operators Olm imported from cfield code of Peter Hoffmann/Fabi)\n");
-  printf("#I1,I2,I3,....= Jy(=O11(s)),Jz=(O10(c)),Jx(=O11(c)),O22(s),O21(s),O20(c),O21(c),O22(c),O33(s),...,O66(c)\n\n");  
+  printf("#I1,I2,I3,....= Jy(=O11(s)),Jz=(O10(c)),Jx(=O11(c)),O22(s),O21(s),O20(c),O21(c),O22(c),O33(s),...,O66(c)\n");  
               }
   }
   else
@@ -314,7 +314,7 @@ if(so1ion==0)
   printf("#xyz .... Coordinate system of the crystal field parameters, magnetic moment\n");
   printf("#abc .... Crystal axes\n");
   printf("#Standard Interactions operator sequence  (Stevens Operators Olm imported from cfield code of Peter Hoffmann/Fabi)\n");
-  printf("#I1,I2,I3,....= Jx(=O11(c)),Jy=(O11(s)),Jz(=O10(c)),O22(s),O21(s),O20(c),O21(c),O22(c),O33(s),...,O66(c)\n\n");  
+  printf("#I1,I2,I3,....= Jx(=O11(c)),Jy=(O11(s)),Jz(=O10(c)),O22(s),O21(s),O20(c),O21(c),O22(c),O33(s),...,O66(c)\n");  
              }
   }
 

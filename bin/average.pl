@@ -10,6 +10,8 @@ use as:
 
  average [-h] [-help]
          [-middle]       middle point is taken (default)
+         [-first]       first point is taken 
+         [-last]        last point is taken 
          [-av]           points are averaged
          [-sum]           points are added
          [-sumcol=12,13,14] but points in column 12,13,14 are added
@@ -31,6 +33,8 @@ if (join('',@pars) =~/\-/) {
   GetOptions("help"=>\$helpflag,
              "av"=>\$avflag,
              "median"=>\$medianflag,
+             "last"=>\$lastflag,
+             "first"=>\$firstflag,
              "sum"=>\$sumflag,
              "sumcol=s"=>\$sumcol,
              "dmin=s"=>\$dmin);
@@ -44,6 +48,8 @@ $ARGV[0]=~s/exp/essssssssssssssp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essssssssssssss
 if ($avflag) {print "averaging ...\n";}
 elsif ($sumflag) {print "summing  ...\n";}
 elsif ($medianflag) {print "taking median ...\n";}
+elsif ($lastflag) {print "taking last point ...\n";}
+elsif ($firstflag) {print "taking first point ...\n";}
 else {print "taking middle point ...\n";}
 if ($sumcol){print "...but summing column $sumcol ...\n";@scol=split(",",$sumcol);}
 if ($dmin) {print "taking blocks of lines with data in column $n closer than $dmin\n";}
@@ -94,7 +100,7 @@ else {print "taking $n lines\n";}
 
 sub emptyblock()
 {@numout=();
- for($k=0;$k<=$#numbers;++$k) {$avfl=$avflag;$sumfl=$sumflag;$medianfl=$medianflag;
+ for($k=0;$k<=$#numbers;++$k) {$avfl=$avflag;$sumfl=$sumflag;$medianfl=$medianflag;$firstfl=$firstflag;$lastfl=$lastflag;
                   if ($sumcol){foreach(@scol){if($_==$k+1){$sumfl=1;}}}
                   if ($avfl||$sumfl) {# here  average
                                                   for($i=0;$i<=$ii;++$i){$numout[$k]+=$field[$i][$k];}
@@ -113,6 +119,14 @@ sub emptyblock()
                                                    for($kk=0;$kk<=$ii;++$kk)
                                                           {if($field[$kk][$k]>-1e10&&$field[$kk][$k]<+1e10){$numout[$k]=$field[$kk][$k];}
                                                           }
+                                                 }
+                                    elsif ($firstfl)        {# here take first point
+                                                  $i=0;
+                                                 $numout[$k]=$field[$i][$k];
+                                                 }
+                                    elsif ($lastfl)        {# here take last point
+                                                  $i=$ii;
+                                                 $numout[$k]=$field[$i][$k];
                                                  }
                                     else         {# here take middle point
                                                   $i=$ii/2;

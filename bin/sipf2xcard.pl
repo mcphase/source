@@ -1,11 +1,12 @@
 #!/usr/bin/perl
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
+
 use Getopt::Long;
 use Math::Trig;
 #use PDL;
 #use PDL::Slatec;
-use Switch;
+#use Switch;
 use File::Copy;
 
 
@@ -59,12 +60,11 @@ $L63s=0.0;
 $L64s=0.0;
 $L65s=0.0;
 $L66s=0.0;
-switch ($module)
-{  case "ic1ion"  {ic1ion()}
-   case "icf1ion" {icf1ion()}
-   case "so1ion"  {so1ion()}
-  else {die "ERROR program sipf2xcard: module $module not implemented\n";}
-}
+if ($module=~/ic1ion/) {ic1ion();}
+elsif ($module=~/icf1ion/) {icf1ion();}
+elsif ($module=~/so1ion/)  {so1ion();}
+else {die "ERROR program sipf2xcard: module $module not implemented\n";}
+
 
 # transform CEF parameters to eV
 $L20*=0.001;
@@ -108,10 +108,10 @@ if ($Babs>0){$Babs=sqrt($Babs);
              $Bdiry=$By/$Babs;
              $Bdirz=$Bz/$Babs;
             }
-open (FOUT,">T.in");
-print FOUT "$T\n";
-close FOUT;
-print "file T.in created\n";
+#open (FOUT,">T.in");
+#print FOUT "$T\n";
+#close FOUT;
+#print "file T.in created\n";
 open (FOUT,">$file.xcardx");
 print FOUT << "EOF";
  XCRD:
@@ -172,8 +172,8 @@ print FOUT << "EOF";
    Mode =xas;
    Mag={$conf};
    Ninit=14;
-   Range={2000,0,0.4,0.001};
-   // this is to define that we want to calculate expectation value of Y40 and Y44
+   Range={2000,-0.015,0.560,0.001};
+      // this is to define that we want to calculate expectation value of Y40 and Y44
    //Goprt="A40;A44;A4m4";
 
  OPRT:
@@ -189,14 +189,14 @@ print FOUT << "EOF";
 
  OPRT:
 EOF
-if($spdf=~/f/){print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4,$F6};\n";}
-else {print FOUT "      Rk(#i1 $conf $conf)={$F2,$F4};\n";}
+if($spdf=~/f/){print FOUT "      Rk(#f1 $conf $conf)={$F2,$F4,$F6};\n";}
+else {print FOUT "      Rk(#f1 $conf $conf)={$F2,$F4};\n";}
 print FOUT << "EOF";
-   CAk(#i1 $conf)=Hcf;
-    Zta(#i1 $conf)=$xi;
+   CAk(#f1 $conf)=Hcf;
+    Zta(#f1 $conf)=$xi;
 
     // magnetic field in eV as muB*H
-    Ba(#i1 $conf)=Bapplied;
+    Ba(#f1 $conf)=Bapplied;
 
     // here we say we want output of neutron spectra in dipole approximation for powder
     // thus we have to do 3 calculations: for 1) <i|Mx|f><f|Mx|i>, for 2) <i|My|f><f|My|i>
