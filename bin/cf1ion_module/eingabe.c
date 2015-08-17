@@ -1665,7 +1665,7 @@ MATRIX *readBmag(fp,name,modus,myB,iteration,buffer_size,string)
     /* externes Magnetfeld lesen  */
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/*1.==== */
     line=fgets( string , buffer_size , fp ); /* : die Koordinaten der ...*/
-    line=fgets( string , buffer_size , fp );/* : º P... v º R... v º S...*/
+    line=fgets( string , buffer_size , fp );/* : ï¿½ P... v ï¿½ R... v ï¿½ S...*/
     c   = VALUE(line,2);
     switch(c){
          case 'K' : MODUS(iteration) = 'r';
@@ -1680,7 +1680,7 @@ MATRIX *readBmag(fp,name,modus,myB,iteration,buffer_size,string)
  
     for( i=1 ; i<= 3 ; ++i)/* Kopf der Magnetfeldtabelle ueberlesen */
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );
-    line=fgets( string , buffer_size , fp );   /* : º  h1 º h2 º h3 º*/
+    line=fgets( string , buffer_size , fp );   /* : ï¿½  h1 ï¿½ h2 ï¿½ h3 ï¿½*/
     B1(iteration) = x1 = a_tof(line, 2,13);
     B2(iteration) = x2 = a_tof(line,15,26);
     x3=0.0;
@@ -1714,7 +1714,7 @@ MATRIX *readBmag(fp,name,modus,myB,iteration,buffer_size,string)
  if( EFVERSION(iteration) >= 2.0 ){
     for( i=1 ; i<= 3 ; ++i)/* Kopf der Magnetfeldtabelle ueberlesen */
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );
-    line=fgets( string , buffer_size , fp );   /* : º  h1 º h2 º h3 º*/
+    line=fgets( string , buffer_size , fp );   /* : ï¿½  h1 ï¿½ h2 ï¿½ h3 ï¿½*/
     B1MOL(iteration) = x1 = a_tof(line, 2,13);
     B2MOL(iteration) = x2 = a_tof(line,15,26);
     x3=0.0;
@@ -2147,60 +2147,60 @@ ITERATION *iteration;
    {case 'L':     
      extract(line,"L20",&RT(V20(iteration)),"meV");
      extract(line,"L21",&RT(V21(iteration)),"meV");
-     extract(line,"L21S",&IT(V21(iteration)),"meV");IT(V21(iteration))*=-1.0;
+     if(extract(line,"L21S",&IT(V21(iteration)),"meV")){IT(V21(iteration))*=-1.0;}
      extract(line,"L22",&RT(V22(iteration)),"meV");
-     extract(line,"L22S",&IT(V22(iteration)),"meV");IT(V22(iteration))*=-1.0;
+     if(extract(line,"L22S",&IT(V22(iteration)),"meV")){IT(V22(iteration))*=-1.0;}
      extract(line,"L40",&RT(V40(iteration)),"meV");
      extract(line,"L41",&RT(V41(iteration)),"meV");
-     extract(line,"L41S",&IT(V41(iteration)),"meV");IT(V41(iteration))*=-1.0;
+     if(extract(line,"L41S",&IT(V41(iteration)),"meV")){IT(V41(iteration))*=-1.0;}
      extract(line,"L42",&RT(V42(iteration)),"meV");
-     extract(line,"L42S",&IT(V42(iteration)),"meV");IT(V42(iteration))*=-1.0;
+     if(extract(line,"L42S",&IT(V42(iteration)),"meV")){IT(V42(iteration))*=-1.0;}
      extract(line,"L43",&RT(V43(iteration)),"meV");
-     extract(line,"L43S",&IT(V43(iteration)),"meV");IT(V43(iteration))*=-1.0;
+     if(extract(line,"L43S",&IT(V43(iteration)),"meV")){IT(V43(iteration))*=-1.0;}
      extract(line,"L44",&RT(V44(iteration)),"meV");
-     extract(line,"L44S",&IT(V44(iteration)),"meV");IT(V44(iteration))*=-1.0;
+     if(extract(line,"L44S",&IT(V44(iteration)),"meV")){IT(V44(iteration))*=-1.0;}
      extract(line,"L60", &RT(V60(iteration)),"meV");
      extract(line,"L61", &RT(V61(iteration)),"meV");
-     extract(line,"L61S",&IT(V61(iteration)),"meV");IT(V61(iteration))*=-1.0;
+     if(extract(line,"L61S",&IT(V61(iteration)),"meV")){IT(V61(iteration))*=-1.0;}
      extract(line,"L62", &RT(V62(iteration)),"meV");
-     extract(line,"L62S",&IT(V62(iteration)),"meV");IT(V62(iteration))*=-1.0;
+     if(extract(line,"L62S",&IT(V62(iteration)),"meV")){IT(V62(iteration))*=-1.0;}
      extract(line,"L63", &RT(V63(iteration)),"meV");
-     extract(line,"L63S",&IT(V63(iteration)),"meV");IT(V63(iteration))*=-1.0;
+     if(extract(line,"L63S",&IT(V63(iteration)),"meV")){IT(V63(iteration))*=-1.0;}
      extract(line,"L64", &RT(V64(iteration)),"meV");
-     extract(line,"L64S",&IT(V64(iteration)),"meV");IT(V64(iteration))*=-1.0;
+     if(extract(line,"L64S",&IT(V64(iteration)),"meV")){IT(V64(iteration))*=-1.0;}
      extract(line,"L65", &RT(V65(iteration)),"meV");
-     extract(line,"L65S",&IT(V65(iteration)),"meV");IT(V65(iteration))*=-1.0;
+     if(extract(line,"L65S",&IT(V65(iteration)),"meV")){IT(V65(iteration))*=-1.0;}
      extract(line,"L66", &RT(V66(iteration)),"meV");
-     extract(line,"L66S",&IT(V66(iteration)),"meV");IT(V66(iteration))*=-1.0;
+     if(extract(line,"L66S",&IT(V66(iteration)),"meV")){IT(V66(iteration))*=-1.0;}
     break;
     case 'B':
      extract(line,"B20",&RT(V20(iteration)),"meV");
      extract(line,"B21",&RT(V21(iteration)),"meV");
-     extract(line,"B21S",&IT(V21(iteration)),"meV");IT(V21(iteration))*=-1.0;
+     if(extract(line,"B21S",&IT(V21(iteration)),"meV")){IT(V21(iteration))*=-1.0;}
      extract(line,"B22",&RT(V22(iteration)),"meV");
-     extract(line,"B22S",&IT(V22(iteration)),"meV");IT(V22(iteration))*=-1.0;
+     if(extract(line,"B22S",&IT(V22(iteration)),"meV")){IT(V22(iteration))*=-1.0;}
      extract(line,"B40",&RT(V40(iteration)),"meV");
      extract(line,"B41",&RT(V41(iteration)),"meV");
-     extract(line,"B41S",&IT(V41(iteration)),"meV");IT(V41(iteration))*=-1.0;
+     if(extract(line,"B41S",&IT(V41(iteration)),"meV")){IT(V41(iteration))*=-1.0;}
      extract(line,"B42",&RT(V42(iteration)),"meV");
-     extract(line,"B42S",&IT(V42(iteration)),"meV");IT(V42(iteration))*=-1.0;
+     if(extract(line,"B42S",&IT(V42(iteration)),"meV")){IT(V42(iteration))*=-1.0;}
      extract(line,"B43",&RT(V43(iteration)),"meV");
-     extract(line,"B43S",&IT(V43(iteration)),"meV");IT(V43(iteration))*=-1.0;
+     if(extract(line,"B43S",&IT(V43(iteration)),"meV")){IT(V43(iteration))*=-1.0;}
      extract(line,"B44",&RT(V44(iteration)),"meV");
-     extract(line,"B44S",&IT(V44(iteration)),"meV");IT(V44(iteration))*=-1.0;
+     if(extract(line,"B44S",&IT(V44(iteration)),"meV")){IT(V44(iteration))*=-1.0;}
      extract(line,"B60", &RT(V60(iteration)),"meV");
      extract(line,"B61", &RT(V61(iteration)),"meV");
-     extract(line,"B61S",&IT(V61(iteration)),"meV");IT(V61(iteration))*=-1.0;
+     if(extract(line,"B61S",&IT(V61(iteration)),"meV")){IT(V61(iteration))*=-1.0;}
      extract(line,"B62", &RT(V62(iteration)),"meV");
-     extract(line,"B62S",&IT(V62(iteration)),"meV");IT(V62(iteration))*=-1.0;
+     if(extract(line,"B62S",&IT(V62(iteration)),"meV")){IT(V62(iteration))*=-1.0;}
      extract(line,"B63", &RT(V63(iteration)),"meV");
-     extract(line,"B63S",&IT(V63(iteration)),"meV");IT(V63(iteration))*=-1.0;
+     if(extract(line,"B63S",&IT(V63(iteration)),"meV")){IT(V63(iteration))*=-1.0;}
      extract(line,"B64", &RT(V64(iteration)),"meV");
-     extract(line,"B64S",&IT(V64(iteration)),"meV");IT(V64(iteration))*=-1.0;
+     if(extract(line,"B64S",&IT(V64(iteration)),"meV")){IT(V64(iteration))*=-1.0;}
      extract(line,"B65", &RT(V65(iteration)),"meV");
-     extract(line,"B65S",&IT(V65(iteration)),"meV");IT(V65(iteration))*=-1.0;
+     if(extract(line,"B65S",&IT(V65(iteration)),"meV")){IT(V65(iteration))*=-1.0;}
      extract(line,"B66", &RT(V66(iteration)),"meV");
-     extract(line,"B66S",&IT(V66(iteration)),"meV");IT(V66(iteration))*=-1.0;
+     if(extract(line,"B66S",&IT(V66(iteration)),"meV")){IT(V66(iteration))*=-1.0;}
     break;
     default: printf("error - not implemented cf parameter type for this format of input file\n");exit(1);
     }
@@ -2215,7 +2215,7 @@ ITERATION *iteration;
      extract(line,"Dz2", &B3S(iteration),"meV"); 
      }
     }
-    printf("\n");
+    printf("V21i=%g\n",IT(V21(iteration)));
     e_4f = E4f( ionennr );
     if(ia)alpha_J[ e_4f ]=alpha;
     if(ib)beta_J[ e_4f ]=beta;
@@ -3709,7 +3709,7 @@ UMGEBUNG *read_nn(name) /* Lese Eingabefile name der Umgebungsatome */
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/* 3.==== */
  
     line=fgets( string , buffer_size , fp ); /* : die Koordinaten der ...*/
-    line=fgets( string , buffer_size , fp );/* : º P... v º R... v º S...*/
+    line=fgets( string , buffer_size , fp );/* : ï¿½ P... v ï¿½ R... v ï¿½ S...*/
     c   = VALUE(line,2);
     switch(c){
          case 'K' : MODUS(umgebung) = 'r';
@@ -3724,14 +3724,14 @@ UMGEBUNG *read_nn(name) /* Lese Eingabefile name der Umgebungsatome */
  
     for( i=1 ; i<= 3 ; ++i)/* Kopf der Magnetfeldtabelle ueberlesen */
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );
-    line=fgets( string , buffer_size , fp );   /* : º  h1 º h2 º h3 º*/
+    line=fgets( string , buffer_size , fp );   /* : ï¿½  h1 ï¿½ h2 ï¿½ h3 ï¿½*/
     B1(umgebung) = x1 = a_tof(line, 2,13);
     B2(umgebung) = x2 = a_tof(line,15,26);
     if(MODUS(umgebung) !='p')  B3(umgebung) = x3 = a_tof(line,28,39);
     isinlimits(fp,name ,0, x1,x2,x3,MODUS(umgebung) );
  
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/*8.==== */
-    line=fgets( string , buffer_size , fp );   /* : º_nnn__  */
+    line=fgets( string , buffer_size , fp );   /* : ï¿½_nnn__  */
  
     ANZ_NN(umgebung) = anz_nn = a_toi( line , 1 , 6 );
     Q_P(umgebung)    = DOUBLE_ALLOC(anz_nn);
@@ -3745,7 +3745,7 @@ UMGEBUNG *read_nn(name) /* Lese Eingabefile name der Umgebungsatome */
  
     for( i=1 ; i<= anz_nn ; ++i ){/* Ort und Ladung lesen */
  
-         line=fgets( string , buffer_size , fp ); /* º nnn º ... */
+         line=fgets( string , buffer_size , fp ); /* ï¿½ nnn ï¿½ ... */
  
          if(  (nummer = a_toi(line,1,5)) != i) read_error(4,fp,name)     ;
  
@@ -4239,15 +4239,15 @@ void drucke_mag( fp,modus ) /* Tabelle fuer Magnetfeld ausgeben */
  
     #define SN "%s\n"
     rsm  = "====================================================";
-    rsmt = "º External magnetic field  B (scaled with g_J)     º";
-    rsmtk= "º %8s º %8s º %8s º comment   º\n";
-    rsmk = "º            º            º            º           º";
+    rsmt = "ï¿½ External magnetic field  B (scaled with g_J)     ï¿½";
+    rsmtk= "ï¿½ %8s ï¿½ %8s ï¿½ %8s ï¿½ comment   ï¿½\n";
+    rsmk = "ï¿½            ï¿½            ï¿½            ï¿½           ï¿½";
     rsmtu= "----------------------------------------------------";
  
     pom  = "=======================================";
-    pomt = "º External Magnetic field B           º";
-    pomtk= "º %8s º %8s º comment º\n";
-    pomk = "º            º            º           º";
+    pomt = "ï¿½ External Magnetic field B           ï¿½";
+    pomtk= "ï¿½ %8s ï¿½ %8s ï¿½ comment ï¿½\n";
+    pomk = "ï¿½            ï¿½            ï¿½           ï¿½";
     pomtu= "---------------------------------------";
  
     switch(modus){
@@ -4274,11 +4274,11 @@ void drucke_mag( fp,modus ) /* Tabelle fuer Magnetfeld ausgeben */
  
     fprintf(fp,"\n");
     fprintf(fp,"===========================================================\n");
-    fprintf(fp,"º The co-ordinates of the magnetic field are given in     º\n");
-    fprintf(fp,"º %12s co-ordinates.                              º\n",s_modus);
+    fprintf(fp,"ï¿½ The co-ordinates of the magnetic field are given in     ï¿½\n");
+    fprintf(fp,"ï¿½ %12s co-ordinates.                              ï¿½\n",s_modus);
     fprintf(fp,"-----------------------------------------------------------\n");
-    fprintf(fp,"º   B := Magnetic field     º in Tesla                    º\n");
-    fprintf(fp,"º                           º                             º\n");
+    fprintf(fp,"ï¿½   B := Magnetic field     ï¿½ in Tesla                    ï¿½\n");
+    fprintf(fp,"ï¿½                           ï¿½                             ï¿½\n");
     fprintf(fp,"===========================================================\n");
     fprintf(fp,"\n");
  
@@ -4308,15 +4308,15 @@ void drucke_mag( fp,modus ) /* Tabelle fuer Magnetfeld ausgeben */
         }
  
     rsm  = "====================================================";
-    rsmt = "º Molecular field B_mol (scaled with  2[g_J -1])   º";
-    rsmtk= "º %8s º %8s º %8s º comment   º\n";
-    rsmk = "º            º            º            º           º";
+    rsmt = "ï¿½ Molecular field B_mol (scaled with  2[g_J -1])   ï¿½";
+    rsmtk= "ï¿½ %8s ï¿½ %8s ï¿½ %8s ï¿½ comment   ï¿½\n";
+    rsmk = "ï¿½            ï¿½            ï¿½            ï¿½           ï¿½";
     rsmtu= "----------------------------------------------------";
  
     pom  = "=======================================";
-    pomt = "º molecular field B_mol                 º";
-    pomtk= "º %8s º %8s º comment º\n";
-    pomk = "º            º            º           º";
+    pomt = "ï¿½ molecular field B_mol                 ï¿½";
+    pomtk= "ï¿½ %8s ï¿½ %8s ï¿½ comment ï¿½\n";
+    pomk = "ï¿½            ï¿½            ï¿½           ï¿½";
     pomtu= "---------------------------------------";
     if( modus=='r' || modus=='s' ){ /* Tabelle in rechtw. oder sphaer. Koord.*/
  
@@ -4936,7 +4936,7 @@ READ *read_einheit(name,art)
     /* externes Magnetfeld lesen  */
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );/*1.==== */
     line=fgets( string , buffer_size , fp ); /* : die Koordinaten der ...*/
-    line=fgets( string , buffer_size , fp );/* : º P... v º R... v º S...*/
+    line=fgets( string , buffer_size , fp );/* : ï¿½ P... v ï¿½ R... v ï¿½ S...*/
     c   = VALUE(line,2);
     switch(c){
          case 'K' : MODUS(read) = 'r';
@@ -4951,7 +4951,7 @@ READ *read_einheit(name,art)
  
     for( i=1 ; i<= 3 ; ++i)/* Kopf der Magnetfeldtabelle ueberlesen */
     while(  *(line=fgets( string , buffer_size , fp )) != '='  );
-    line=fgets( string , buffer_size , fp );   /* : º  h1 º h2 º h3 º*/
+    line=fgets( string , buffer_size , fp );   /* : ï¿½  h1 ï¿½ h2 ï¿½ h3 ï¿½*/
     B1(read) = x1 = a_tof(line, 2,13);
     B2(read) = x2 = a_tof(line,15,26);
     x3=0.0;

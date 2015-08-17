@@ -21,13 +21,18 @@ $debug = 0;
 @atpn = ("da", "db", "dc", 
          "nofneighbours",
          "diagonalexchange", 
-         "sipffilename");
+         "sipffilename",
+         "cffilename");
+@rmat = ("r1a","r2a","r3a",
+         "r1b","r2b","r3b",
+         "r1c","r2c","r3c");
 $outputfile = "results/mcphas.jvx";
 
 # Parses command line options
 GetOptions("help"=>\$helpflag,
            "debug"=>\$debug,
            "individual"=>\$clusterflag,
+           "primitive"=>\$primflag,
            "output=s"=>\$outputfile);
 
 if ($#ARGV<0 || $helpflag) {
@@ -40,6 +45,8 @@ if ($#ARGV<0 || $helpflag) {
    print "    --output [FILE] - outputs JVX data to [FILE] instead of default results/mcphas.jvx\n\n";
    print "    --individual    - for input files for the cluster module, plot individual atomic positions\n";
    print "                      and intra-cluster exchange as well as cluster centres and mean-field exchange.\n\n";
+   print "    --primitive     - plots only atoms explicitly specified in the .j file (without adding atoms at\n";
+   print "                      the edge of the supercell\n";
    print " Note that UNIX switch conventions apply so you can use \"short\" switches (-h, -o -i) as well.\n";
    print " E.g. to plot individual atoms and output to a different file:\n";
    print "   $0 mcphas.j -i -o results/cluster.jvx\n";
@@ -63,6 +70,11 @@ while(<>) {
     foreach $id (@atpn) {
       if($_ =~ /\s+$id\s*=/) {
         push @{$atoms{$id}}, ($_ =~ m/\s+$id\s*=\s*([\d.eEdD\-\+\.\w]+)/);
+      }
+    }
+    foreach $id (@rmat) {
+      if($_ =~ /\s+$id\s*=/) {
+        push @{$rmath{$id}}, ($_ =~ m/\s+$id\s*=\s*([\d.eEdD\-\+\.\w]+)/);
       }
     }
   } 
@@ -127,15 +139,48 @@ $rtoijk = pdl [ [ $a*$sc, $a*$cc, 0 ],
                 [      0,     $b, 0 ],
                 [   $r13,   $r23, sqrt($r33) ] ];
 $invrtoijk = matinv($rtoijk);
+$rmat = pdl [ [ $rmath{"r1a"}[0], $rmath{"r2a"}[0], $rmath{"r3a"}[0] ],
+              [ $rmath{"r1b"}[0], $rmath{"r2b"}[0], $rmath{"r3b"}[0] ],
+              [ $rmath{"r1c"}[0], $rmath{"r2c"}[0], $rmath{"r3c"}[0] ] ];
+$primcell = $rtoijk x $rmat;
+$invprim  = matinv($primcell);
 
 if($debug==1) {
   print STDERR $rtoijk;
   print STDERR $invrtoijk;
+  print STDERR $rmat;
+  print STDERR $primcell;
 }
+
+# calc_minmax_scale_relabc() function from spincf_out.cpp
+@abc=($a,$b,$c);
+for $ii (0..2) {
+  $ddd = pdl [ $rmat->at(0,ii), $rmat->at(1,ii), $rmat->at(2,ii), 
+           $rmat->at(0,ii)+$rmat->at(1,ii),  
+           $rmat->at(0,ii)+$rmat->at(2,ii),  
+           $rmat->at(1,ii)+$rmat->at(2,ii), 0, sum($rmat->slice(":,0")) ]; 
+  $t = min($ddd)/$abc[$ii]; if (abs($t-int($t))>0.0001) { push @minv, (int($t)-1.)*$abc[$ii]; } else { push @minv, min($ddd); }
+  $t = max($ddd)/$abc[$ii]; if (abs($t-int($t))>0.0001) { push @maxv, (int($t)+1.)*$abc[$ii]; } else { push @maxv, max($ddd); }
+}
+for $ii (0..2) {
+  @ddd = ();
+  $dd0 = pdl @minv;                        $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @minv; $dd0->set(0,$maxv[0]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @minv; $dd0->set(0,$maxv[2]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @minv; $dd0->set(0,$maxv[3]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @maxv;                        $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @maxv; $dd0->set(0,$minv[0]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @maxv; $dd0->set(0,$minv[2]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  $dd0 = pdl @maxv; $dd0->set(0,$minv[3]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
+  push @ijkmin, min($ddd);
+  push @ijkmax, max($ddd);
+}
+for $ii (0..2) { $minv[$ii]/=$abc[$ii]; $maxv[$ii]/=$abc[$ii]; }
 
 # Loops through the list of atoms, and look into the sipf to determine element/ion name
 for $ii (0..$#{$atoms{"da"}}) {
   $sipf = ${$atoms{"sipffilename"}}[$ii];
+  if(!$sipf) { $sipf = ${$atoms{"cffilename"}}[$ii]; }
   if(!(defined $sipfseen{$sipf})) {
     $sipfseen{$sipf} = 1;
     open(FSIPF,$sipf);
@@ -293,16 +338,27 @@ print FOUT "        </lines>\n";
 print FOUT "      </lineSet>\n";
 print FOUT "    </geometry>\n";
 
+# Determines the extent of the supercell
+if ($primflag) {
+  @r1 = (0);
+  @r2 = (0);
+  @r3 = (0);
+} else {
+  @r1 = (min($rmat->slice("0,:")), max($rmat->slice("0,:")));
+  @r2 = (min($rmat->slice("1,:")), max($rmat->slice("1,:")));
+  @r3 = (min($rmat->slice("2,:")), max($rmat->slice("2,:")));
+}
+
 # Draws each type of *sipf as an individual geometry - so user and make each visible or not separately
 for $sipf (keys %sipfseen) {
   if($module{$sipf} =~ /cluster/ && $clusterflag) {
     # Clusters - put a cube at the centre of the cluster, and plots the cluster atoms as spheres connected by lines to centre.
-    for $i1(0..1) { for $i2(0..1) { for $i3(0..1) {
+    for $i1(@r1) { for $i2(@r2) { for $i3(@r3) {
       for $ii (0..$#{$atoms{"da"}}) {
-        if(!($sipf eq ${$atoms{"sipffilename"}}[$ii])) { next; }
+        if(!($sipf eq ${$atoms{"sipffilename"}}[$ii]) && !($sipf eq ${$atoms{"cffilename"}}[$ii])) { next; }
         @colours = (); @thicknesses = ();
         $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
-        if($p1>=0 && $p1<=1 && $p2>=0 && $p2<=1 && $p3>=0 && $p3<=1) {
+        if($p1>=$ijkmin[0] && $p1<=$ijkmax[0] && $p2>=$ijkmin[1] && $p2<=$ijkmax[1] && $p3>=$ijkmin[2] && $p3<=$ijkmax[2]) {
           $fpos = pdl [ $p1, $p2, $p3 ];
           $cpos = $fpos x $rtoijk;
           # Plots a cube at the centre of the cluster
@@ -416,11 +472,11 @@ for $sipf (keys %sipfseen) {
     printf FOUT "    <geometry name=\"%s\">\n", $sipf;
     print FOUT "      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n";
     print FOUT "        <points>\n";
-    for $i1(0..1) { for $i2(0..1) { for $i3(0..1) { 
+    for $i1(@r1) { for $i2(@r2) { for $i3(@r3) {
       for $ii (0..$#{$atoms{"da"}}) {
-        if(!($sipf eq ${$atoms{"sipffilename"}}[$ii])) { next; }
+        if(!($sipf eq ${$atoms{"sipffilename"}}[$ii]) && !($sipf eq ${$atoms{"cffilename"}}[$ii])) { next; }
         $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
-        if($p1>=0 && $p1<=1 && $p2>=0 && $p2<=1 && $p3>=0 && $p3<=1) {
+        if($p1>=$ijkmin[0] && $p1<=$ijkmax[0] && $p2>=$ijkmin[1] && $p2<=$ijkmax[1] && $p3>=$ijkmin[2] && $p3<=$ijkmax[2]) {
           $fpos = pdl [ $p1, $p2, $p3 ];
           $cpos = $fpos x $rtoijk;
           printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
