@@ -39,6 +39,24 @@
 "P 1 1 21/b","P 21/b",
 "C 1 2/c 1","C 2/c",
 "B 1 1 2/b","B 2/b",
+"P n -3","P n -3 S",
+"F d -3","F d -3 S",
+"P n -3 n","P n -3 n S",
+"P n -3 m","P n -3 m S",
+"F d -3 m","F d -3 m S",
+"F d -3 c","F d -3 c S",
+"P n -3 1","P n -3 S",
+"F d -3 1","F d -3 S",
+"P n -3 n 1","P n -3 n S",
+"P n -3 m 1","P n -3 m S",
+"F d -3 m 1","F d -3 m S",
+"F d -3 c 1","F d -3 c S",
+"P n -3 2","P n -3 Z",
+"F d -3 2","F d -3 Z",
+"P n -3 n 2","P n -3 n Z",
+"P n -3 m 2","P n -3 m Z",
+"F d -3 m 2","F d -3 m Z",
+"F d -3 c 2","F d -3 c Z",
 );
 
 %rhoms = (
@@ -275,8 +293,7 @@
 ["P m -3 m"], # 221 
 ["P n -3 n S","P n -3 n Z"], # 222 
 ["P m -3 n"], # 223 
-["P n -3 m S"], # 224 
-["P n -3 m Z"], # 224 
+["P n -3 m S","P n -3 m Z"], # 224 
 ["F m -3 m"], # 225 
 ["F m -3 c"], # 226 
 ["F d -3 m S","F d -3 m Z"], # 227 
