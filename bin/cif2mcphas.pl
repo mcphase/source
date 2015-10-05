@@ -322,6 +322,14 @@ if($symcol eq "" || join(",",@sympos)!~/[xyzXYZ]/) {
     if($symops eq "") {
       $tstalias = $alias{$spagrp}; 
       if($tstalias eq "") { die "Error: Hermann-Maugin symbol '$spagrp' is not recognised.\n"; }
+      if($tstalias =~ /S$/ && $spagrp !~ /1$/) { 
+        print "--------------------------------------------------------------------------------\n";
+        print "WARNING: Spacegroup '$spagrp' has 2 origin choices, but you have not specified\n";
+        print "   which one to use. Assuming origin choice 1 (see International Tables A).\n";
+        print "   This can lead to wrong atom positions (e.g. between spinel/pyrochlore lattices.\n";
+        print "   To specify choice 1, use '$spagrp 1' or '$spagrp S' in future.\n";
+        print "   To specify choice 2, use '$spagrp 2' or '$spagrp Z' in future.\n";
+        print "--------------------------------------------------------------------------------\n"; }
       $symops = $symop{$tstalias};
     }
     if($spagrp =~ /^\s+H/) { 
