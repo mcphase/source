@@ -142,7 +142,7 @@ FUNCTIONOBJS=hypot3d.o hypot3f.o initds.o derf.o derfc.o ddaws.o ddaws2.o cwofz.
 
 all :  martin.o ../clusterize$(EXE) ../cond$(EXE) ../coq2jjj$(EXE) ../jjj2j$(EXE) \
 	../singleion$(EXE) ../mcdispit$(EXE) ../mcphasit$(EXE) ../spins$(EXE) \
-	../spinsfromq$(EXE) ../addj$(EXE)    \
+	../spinsfromq$(EXE) ../addj$(EXE)  ../reduce_unitcell$(EXE)  \
 	../densplt$(EXE)  ../pointc$(EXE) ../mcdiff$(EXE) \
         ../formfactor$(EXE) ../radwavfunc$(EXE) ../anisotropyit$(EXE)
 
@@ -255,6 +255,9 @@ radwavfunc.o:  radwavfunc.c  martin.h vector.h ionpars.hpp jjjpar.hpp
 addj.o: addj.c par.hpp  martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 
+reduce_unitcell.o: reduce_unitcell.c par.hpp  martin.h vector.h
+	$(CCC) $(CFLAGS) $<
+
 mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c spincf.hpp mfcf.hpp
 	$(CCC) $(CFLAGS) $<
 
@@ -353,6 +356,11 @@ ip.o: ionpars.cpp
 ../addj$(EXE): addj.o par.o martin.o myev.o jjjpar.o perlparse.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
 	@echo Linking ../addj
 	@$(LINKER)  -Wall  -o ../addj $^  $(LFLAGS)
+
+../reduce_unitcell$(EXE): reduce_unitcell.o par.o martin.o myev.o jjjpar.o perlparse.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
+	@echo Linking ../reduce_unitcell
+	@$(LINKER)  -Wall  -o ../reduce_unitcell $^  $(LFLAGS)
+
 
 ../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o perlparse.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o
 	@echo Linking ../mcdiff

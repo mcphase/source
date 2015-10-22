@@ -5,7 +5,7 @@
 
 #define MAXNOFNUMBERSINLINE 20
 #define MAXNOFCHARINLINE 7024
-
+#define SMALL_MATCH_LATTICEVECTOR 1e-5
 
 
  // *************************************************************************
@@ -145,15 +145,40 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
                   nnn=new jjjpar * [nofatoms+1];
                   for (j=1;j<nofatoms;++j){nnn[j]=jjj[j];} 
                   nnn[nofatoms]=new jjjpar((*p));// use copy constructor to create new atom parameter set    
-//                   nnn[nofatoms]=new jjjpar(1,0,nofcomponents);
-//		  (*nnn[nofatoms])=(*p1.jjj[nofatoms]); // add the new atom
-//                  rems[3+nofatoms]=new char[strlen(rems[2+nofatoms])+2];
-//		  strcpy(rems[3+nofatoms],rems[2+nofatoms]);
 		  delete []jjj;
 		  jjj=nnn;                        
 return nofatoms;                 
 }
 
+int par::delatom(int n) // removes atom number n 
+{jjjpar ** nnn;
+ int j;
+ if(n<1||n>nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,nofatoms);exit(EXIT_FAILURE);}
+  --nofatoms; // the number of atoms has to be decreased
+ nnn=new jjjpar * [nofatoms+1];
+ for (j=1;j<n;++j){nnn[j]=jjj[j];} 
+ for (j=n+1;j<=nofatoms+1;++j){nnn[j-1]=jjj[j];} 
+ delete []jjj;
+ jjj=nnn;                        
+return nofatoms; 
+}
+
+void par::reduce_unitcell()
+{//checks every atom in the unit cell and removes
+// any atom, which is connected to another by a lattice vector
+ int i,j;
+ Vector d(1,3),n(1,3);
+ for(i=1;i<nofatoms;++i){
+  for(j=i+1;j<=nofatoms;++j){//printf("nofatoms=%i %i %i\n",nofatoms,i,j);
+  d=(*jjj[j]).xyz-(*jjj[i]).xyz;
+  n=rez*d;
+  if(fabs(rint(n(1))-n(1))<SMALL_MATCH_LATTICEVECTOR&&
+     fabs(rint(n(2))-n(2))<SMALL_MATCH_LATTICEVECTOR&&
+     fabs(rint(n(3))-n(3))<SMALL_MATCH_LATTICEVECTOR){//printf("del %i\n",j);
+                                                      delatom(j);--j;
+                                                      }
+ }}
+}
 
 void par::add (par & p1)
 {int i;

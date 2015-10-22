@@ -35,6 +35,9 @@ class par
 ~par ();		//destruktor
 
 int newatom(jjjpar * p); //creates new atom from an existing and returns its index
+int delatom(int n); //removes atom n and returns new nofatoms
+void reduce_unitcell();//checks every atom in the unit cell and removes
+                       // any atom, which is connected to another by a lattice vector
 void add(par & b); // add exchange parameters
 void save(FILE * fout); // save lattice, atoms and exchange parameters to file
 void save(const char * filename); // save lattice, atoms and exchange parameters to file

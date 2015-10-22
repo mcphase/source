@@ -285,8 +285,6 @@ sqrt(2Np!)
       # if the above parameters are given the radial wave function is output to file %%@
 radwavfun.dat                 
 \end{verbatim}                      
-\item[\prg radwavfunc\index{radwavfunc} file.sipf:] program to evaluate the radial wave function
-given by th parametrisation in file.sipf.
 \item [\prg powdercell2j\index{powdercell2j} file:]     used to create mcphas.j type file from %%@
 output of powdercell,output is written to mcphas.j.  Example of input file:
 \begin{verbatim}
@@ -296,6 +294,12 @@ output of powdercell,output is written to mcphas.j.  Example of input file:
   1     Sr1    0.3644   0.0000   0.2500     1.0962  -4.1497  -2.7991
   ...
   \end{verbatim}
+\item[\prg radwavfunc\index{radwavfunc} file.sipf:] program to evaluate the radial wave function
+given by th parametrisation in file.sipf.
+\item[\prg reduce\_unitcell\index{reduce\_unitcell} mcphas.j:] 
+                This program checks every atom in the unit cell in file mcphas.j and removes
+                any atom, which is connected to another by a lattice vector. Useful for
+                going from a description in an extended unit cell to the primitive unit cell.
 \item [\prg rotateBlm\index{rotateBlm}]
   \begin{verbatim}
     Rotates a set of  crystal field  parameters for  Stevens equivalent
