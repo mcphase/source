@@ -551,6 +551,27 @@ by colyerr=sqrt(colxerr*colxerr+colyerr*colyerr)
 \item [\prg asincol\index{asincol} col const file:] calculates arcsine of a column arcsine(col) 
 \item [\prg atancol\index{atancol} col const file:] calculates arctangens of a column %%@
 arctan(col) 
+\item [\prg average\index{average} [option] n file:] program average  used  to 
+ reduce the amount of data in a datafile by deleting close data points.
+ The program takes sets of n lines in file and  outputs one line instead
+of the n lines. By default the the data line in the middle of the n line
+block is output. 
+ 
+\begin{description}
+ \item [options:]
+  \item[-h, -help]
+  \item       [-middle]       middle point is taken (default)
+  \item       [-first]       first point is taken 
+   \item      [-last]        last point is taken 
+   \item      [-av]           points are averaged
+   \item      [-sum]           points are added
+    \item     [-sumcol=12,13,14]  for column 12,13,14 datapoints are added up and the sum is output
+    \item     [-median]       median of points is calculated and output
+     \item    [-dmin=0.4]    takes instead of n lines a variable number
+                         of lines determined by the condition that
+                         data in column n is closer than dmin 
+\end{description}       
+
 \item [\prg chi2\index{chi2} col1 col2 col3 *.*] is used to calculate the 
  chi-squared from 3 columns in a file: if col1, col2 and col3 are calculation, 
  experiment and experimental error, respectively, then

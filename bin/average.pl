@@ -4,23 +4,25 @@ use Getopt::Long;
 sub usage()
 {print STDOUT << "EOF";
 
-program average  used  to AVERAGE data by deleting close data points
+program average  used  to reduce data by deleting close data points
 
 use as:
 
- average [-h] [-help]
+ average [option] 15 filenames    takes sets of 15 lines in data file and averages data
+
+ options:    
+         [-h] [-help]
          [-middle]       middle point is taken (default)
-         [-first]       first point is taken 
-         [-last]        last point is taken 
+         [-first]        first point is taken 
+         [-last]         last point is taken 
          [-av]           points are averaged
-         [-sum]           points are added
-         [-sumcol=12,13,14] but points in column 12,13,14 are added
+         [-sum]          points are added
+         [-sumcol=12,13,14] for column 12,13,14 datapoints are added up and the sum is output
 	 [-median]       median of points is calculated and kept
-         [-dmin=0.4]    takes instead of 15 lines a variable number
+         [-dmin=0.4]     takes instead of 15 lines a variable number
                          of lines determined by the condition that
                          data in column 15 is closer than dmin 
-         15 filenames    takes sets of 15 lines in data file and averages data
-
+         
 EOF
  exit 0;}
 
