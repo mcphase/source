@@ -329,7 +329,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
   {double value=0,s; if(fabs(Q)<0.1)return 1.0;
    if(Np(1)!=0){value=jl(0,Q);}// here enter calculation from radial wave function parameters
    else
-   {s=Q/4/PI;    value=magFFj0(1)*exp(-magFFj0(2)*s*s)+magFFj0(3)*exp(-magFFj0(4)*s*s)+magFFj0(5)*exp(-magFFj0(6)*s*s)+magFFj0(7);
+   {s=Q/4/PI;    value=magFFj0(1)*exp(-magFFj0(2)*s*s)+magFFj0(3)*exp(-magFFj0(4)*s*s)+magFFj0(5)*exp(-magFFj0(6)*s*s)+magFFj0(7)*exp(-magFFj0(8)*s*s)+magFFj0(9);
    }return value;
   }
    double jjjpar::j1(double Q)
@@ -342,7 +342,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
    s=Q/4/PI;
    if(Np(1)!=0){value=jl(2,Q);}// here enter calculation from radial wave function parameters
     else
-   { value=magFFj2(1)*exp(-magFFj2(2)*s*s)+magFFj2(3)*exp(-magFFj2(4)*s*s)+magFFj2(5)*exp(-magFFj2(6)*s*s)+magFFj2(7);
+   { value=magFFj2(1)*exp(-magFFj2(2)*s*s)+magFFj2(3)*exp(-magFFj2(4)*s*s)+magFFj2(5)*exp(-magFFj2(6)*s*s)+magFFj2(7)*exp(-magFFj2(8)*s*s)+magFFj2(9);
     value*=s*s;
    }return value;
   }
@@ -356,7 +356,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
      s=Q/4/PI;
          if(Np(1)!=0){value=jl(4,Q);}// here enter calculation from radial wave function parameters
      else
-   {  value=magFFj4(1)*exp(-magFFj4(2)*s*s)+magFFj4(3)*exp(-magFFj4(4)*s*s)+magFFj4(5)*exp(-magFFj4(6)*s*s)+magFFj4(7);
+   {  value=magFFj4(1)*exp(-magFFj4(2)*s*s)+magFFj4(3)*exp(-magFFj4(4)*s*s)+magFFj4(5)*exp(-magFFj4(6)*s*s)+magFFj4(7)*exp(-magFFj4(8)*s*s)+magFFj4(9);
       value*=s*s;
    }return value;
   }
@@ -370,11 +370,43 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
      s=Q/4/PI;
          if(Np(1)!=0){value=jl(6,Q);}// here enter calculation from radial wave function parameters
      else
-   {  value=magFFj6(1)*exp(-magFFj6(2)*s*s)+magFFj6(3)*exp(-magFFj6(4)*s*s)+magFFj6(5)*exp(-magFFj6(6)*s*s)+magFFj6(7);
+   {  value=magFFj6(1)*exp(-magFFj6(2)*s*s)+magFFj6(3)*exp(-magFFj6(4)*s*s)+magFFj6(5)*exp(-magFFj6(6)*s*s)+magFFj6(7)*exp(-magFFj6(8)*s*s)+magFFj6(9);
       value*=s*s;
     } return value;
   }
 
+   int jjjpar::checkFFcoeffnonzero(int l)
+   {
+     switch (l)
+     {case 0:if(Norm(magFFj0)==0){fprintf(stderr,"WARNING: <j0(Q)> coefficients not found or zero in file %s\n",sipffilename);return 1;}else {return 0;}
+      case 2:if(Norm(magFFj2)==0){fprintf(stderr,"WARNING: <j2(Q)> coefficients not found or zero in file %s\n",sipffilename);return 1;}else {return 0;}
+      case 4:if(Norm(magFFj4)==0){fprintf(stderr,"WARNING: <j4(Q)> coefficients not found or zero in file %s\n",sipffilename);return 1;}else {return 0;}
+      case 6:if(Norm(magFFj6)==0){fprintf(stderr,"WARNING: <j6(Q)> coefficients not found or zero in file %s\n",sipffilename);return 1;}else {return 0;}
+      default: fprintf (stderr, "error class jjjpar: checkFFcoeffnonzero called for l=%i \n",l);exit (EXIT_FAILURE);
+     } 
+   }
+   void jjjpar::magFFout(const char * linestart ,FILE * fout)
+   {fprintf(fout,"# Neutron Magnetic Form Factor coefficients - thanks to J Brown\n");
+    fprintf(fout,"#   d = 2*pi/Q      \n");
+    fprintf(fout,"#   s = 1/2/d = Q/4/pi   \n");   
+    fprintf(fout,"#   sin(theta) = lambda * s\n");
+    fprintf(fout,"#    s2= s*s = Q*Q/16/pi/pi\n");
+    fprintf(fout,"#\n");
+    fprintf(fout,"#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D*EXP(-FFj0d*s2) + FFj0E\n");
+    fprintf(fout,"#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D*EXP(-FFj2d*s2) + FFj2E)\n");
+    fprintf(fout,"#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D*EXP(-FFj4d*s2) + FFj4E)\n");
+    fprintf(fout,"#   <j6(Q)>=s2*(FFj6A*EXP(-FFj6a*s2) + FFj6B*EXP(-FFj6b*s2) + FFj6C*EXP(-FFj6c*s2) + FFj6D*EXP(-FFj6d*s2) + FFj6E)\n");
+    fprintf(fout,"#\n");
+    fprintf(fout,"#   Dipole Approximation for Neutron Magnetic Formfactor:\n");
+    fprintf(fout,"#        -Spin Form Factor       FS(Q)=<j0(Q)>\n");
+    fprintf(fout,"#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>\n");
+    fprintf(fout,"#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)\n#\n");
+    fprintf(fout,"#--------------------------------------------------------------------------------------\n");
+    fprintf(fout,"%s FFj0A=%+7.4f FFj0a=%+7.4f FFj0B=%+7.4f FFj0b=%+7.4f FFj0C=%+7.4f FFj0c=%+7.4f FFj0D=%+7.4f FFj0d=%+7.4f FFj0E=%+7.4f\n",linestart,magFFj0[1],magFFj0[2],magFFj0[3],magFFj0[4],magFFj0[5],magFFj0[6],magFFj0[7],magFFj0[8],magFFj0[9]);
+    fprintf(fout,"%s FFj2A=%+7.4f FFj2a=%+7.4f FFj2B=%+7.4f FFj2b=%+7.4f FFj2C=%+7.4f FFj2c=%+7.4f FFj2D=%+7.4f FFj2d=%+7.4f FFj2E=%+7.4f\n",linestart,magFFj2[1],magFFj2[2],magFFj2[3],magFFj2[4],magFFj2[5],magFFj2[6],magFFj2[7],magFFj2[8],magFFj2[9]);
+    fprintf(fout,"%s FFj4A=%+7.4f FFj4a=%+7.4f FFj4B=%+7.4f FFj4b=%+7.4f FFj4C=%+7.4f FFj4c=%+7.4f FFj4D=%+7.4f FFj4d=%+7.4f FFj4E=%+7.4f\n",linestart,magFFj4[1],magFFj4[2],magFFj4[3],magFFj4[4],magFFj4[5],magFFj4[6],magFFj4[7],magFFj4[8],magFFj4[9]);
+    fprintf(fout,"%s FFj6A=%+7.4f FFj6a=%+7.4f FFj6B=%+7.4f FFj6b=%+7.4f FFj6C=%+7.4f FFj6c=%+7.4f FFj6D=%+7.4f FFj6d=%+7.4f FFj6E=%+7.4f\n",linestart,magFFj6[1],magFFj6[2],magFFj6[3],magFFj6[4],magFFj6[5],magFFj6[6],magFFj6[7],magFFj6[8],magFFj6[9]);    
+   }
    double jjjpar::jl(int l,double QA){
     int p,q, pmax=0;
     double Q=QA*0.5292;// convert Q from 1/A into 1/a0
@@ -525,8 +557,8 @@ void jjjpar::FFinfo(FILE * fout) // has to be consistent with mcdisp_intcalc set
   }
   else
   {
-  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",magFFj0(j));}
-  for (int j = 1;j<=7;++j)  {fprintf(fout,"%6.3f ",magFFj2(j));}
+  for (int j = 1;j<=MAGFF_NOF_COEFF;++j)  {fprintf(fout,"%6.3f ",magFFj0(j));}
+  for (int j = 1;j<=MAGFF_NOF_COEFF;++j)  {fprintf(fout,"%6.3f ",magFFj2(j));}
   }                }
     }
   fprintf(fout, "\n");

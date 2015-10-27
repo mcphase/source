@@ -605,8 +605,8 @@ fprintf(fout,"\n");
                                       // for dip intensities Ma Mb and Mc
                                }
 
-                               if(Norm((*jjjpars[i]).magFFj4)==0){fprintf(stderr,"WARNING mcdiff: <j4(Q)> coefficients not found or zero in file %s\n",sipffilename);}
-                               if(Norm((*jjjpars[i]).magFFj6)==0){fprintf(stderr,"WARNING mcdiff: <j6(Q)> coefficients not found or zero in file %s\n",sipffilename);}
+                             (*jjjpars[i]).checkFFcoeffnonzero(4);
+                             (*jjjpars[i]).checkFFcoeffnonzero(6);
 
 fprintf(fout,"                    corresponding exchange fields gjmbHxc [meV]-->");
 for(k=1;k<=j;++k){fprintf(fout," %+8.5f",gjmbHxc(k));}
@@ -614,8 +614,8 @@ fprintf(fout,"\n");
  			      }}
                              if((*jjjpars[i]).SLR==0){fprintf(stderr,"WARNING mcdiff: SCATTERINGLENGTHREAL not found or zero in file %s\n",sipffilename);}
 //                             if((*jjjpars[i]).gJ==0){fprintf(stderr,"WARNING mcdiff: GJ not found or zero in file %s - gJ=0 means Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc !\n",sipffilename);}
-                             if(Norm((*jjjpars[i]).magFFj0)==0){fprintf(stderr,"WARNING mcdiff: <j0(Q)> coefficients not found or zero in file %s\n",sipffilename);}
-                             if(Norm((*jjjpars[i]).magFFj2)==0){fprintf(stderr,"WARNING mcdiff: <j2(Q)> coefficients not found or zero in file %s\n",sipffilename);}
+                             (*jjjpars[i]).checkFFcoeffnonzero(0);
+                             (*jjjpars[i]).checkFFcoeffnonzero(2);
                            }
   fclose(fin_coq);
   fclose(fout);

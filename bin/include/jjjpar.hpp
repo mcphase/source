@@ -204,11 +204,14 @@ void FFinfo(FILE * fout); // formfactor information print to fout, for mcdiff an
                          // info about formactor is printed according to settings of FFtype
                          // FF_type has to be set by mcdiff / mcdisp correctly before calling
                          // this function
-
+  int checkFFcoeffnonzero(int l);
+  void magFFout(const char * linestart ,FILE * fout);
+private:
   Vector magFFj0; // magnetic formfactor numbers
   Vector magFFj2; // magnetic formfactor numbers
   Vector magFFj4; // magnetic formfactor numbers
   Vector magFFj6; // magnetic formfactor numbers
+public:
   Vector Zc;      // Z-factors from Lovesey table 11.1 for Z(K) calc (needed to go beyond dipole approx)
 //  D = 2 * pi / Q
 //  s = 1 / 2 / D: sintheta = lambda * s

@@ -27,7 +27,27 @@ unless ($#ARGV >=0)
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file;
-
+   $FFj0A=1; $FFj0a=0;
+   $FFj0B=0; $FFj0b=0;
+   $FFj0C=0; $FFj0c=0;
+   $FFj0D=0; $FFj0d=0;
+   $FFj0E=0; 
+   $FFj2A=0; $FFj2a=0;
+   $FFj2B=0; $FFj2b=0;
+   $FFj2C=0; $FFj2c=0;
+   $FFj2D=0; $FFj2d=0;
+   $FFj2E=0; 
+   $FFj4A=0; $FFj4a=0;
+   $FFj4B=0; $FFj4b=0;
+   $FFj4C=0; $FFj4c=0;
+   $FFj4D=0; $FFj4d=0;
+   $FFj4E=0; 
+   $FFj6A=0; $FFj6a=0;
+   $FFj6B=0; $FFj6b=0;
+   $FFj6C=0; $FFj6c=0;
+   $FFj6D=0; $FFj6d=0;
+   $FFj6E=0; 
+ 
   while($line=<Fin>)
 
      {
@@ -46,6 +66,8 @@ unless ($#ARGV >=0)
            if($line=~/^.*FFj0C\s*=/) {($FFj0C)=($line=~m|FFj0C\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
            if($line=~/^.*FFj0c\s*=/) {($FFj0c)=($line=~m|FFj0c\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
            if($line=~/^.*FFj0D\s*=/) {($FFj0D)=($line=~m|FFj0D\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
+           if($line=~/^.*FFj0d\s*=/) {($FFj0d)=($line=~m|FFj0d\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
+           if($line=~/^.*FFj0E\s*=/) {($FFj0E)=($line=~m|FFj0E\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
 
            if($line=~/^.*FFj2A\s*=/) {($FFj2A)=($line=~m|FFj2A\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
            if($line=~/^.*FFj2a\s*=/) {($FFj2a)=($line=~m|FFj2a\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
@@ -54,6 +76,8 @@ unless ($#ARGV >=0)
            if($line=~/^.*FFj2C\s*=/) {($FFj2C)=($line=~m|FFj2C\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
            if($line=~/^.*FFj2c\s*=/) {($FFj2c)=($line=~m|FFj2c\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
            if($line=~/^.*FFj2D\s*=/) {($FFj2D)=($line=~m|FFj2D\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
+           if($line=~/^.*FFj2d\s*=/) {($FFj2d)=($line=~m|FFj2d\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
+           if($line=~/^.*FFj2E\s*=/) {($FFj2E)=($line=~m|FFj2E\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);} 
 
            if($line=~/^.*FFj4A\s*=/) {($FFj4A)=($line=~m|FFj4A\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
            if($line=~/^.*FFj4a\s*=/) {($FFj4a)=($line=~m|FFj4a\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
@@ -62,6 +86,8 @@ unless ($#ARGV >=0)
            if($line=~/^.*FFj4C\s*=/) {($FFj4C)=($line=~m|FFj4C\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
            if($line=~/^.*FFj4c\s*=/) {($FFj4c)=($line=~m|FFj4c\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
            if($line=~/^.*FFj4D\s*=/) {($FFj4D)=($line=~m|FFj4D\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
+           if($line=~/^.*FFj4d\s*=/) {($FFj4d)=($line=~m|FFj4d\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
+           if($line=~/^.*FFj4E\s*=/) {($FFj4E)=($line=~m|FFj4E\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
 
            if($line=~/^.*FFj6A\s*=/) {($FFj6A)=($line=~m|FFj6A\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
            if($line=~/^.*FFj6a\s*=/) {($FFj6a)=($line=~m|FFj6a\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
@@ -70,6 +96,8 @@ unless ($#ARGV >=0)
            if($line=~/^.*FFj6C\s*=/) {($FFj6C)=($line=~m|FFj6C\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
            if($line=~/^.*FFj6c\s*=/) {($FFj6c)=($line=~m|FFj6c\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
            if($line=~/^.*FFj6D\s*=/) {($FFj6D)=($line=~m|FFj6D\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
+           if($line=~/^.*FFj6d\s*=/) {($FFj6d)=($line=~m|FFj6d\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
+           if($line=~/^.*FFj6E\s*=/) {($FFj6E)=($line=~m|FFj6E\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);}
 
            }
 
@@ -166,16 +194,16 @@ unless ($#ARGV >=0)
    {$s=$Q/4/3.1415;
 
    $j0 = $FFj0A * exp(-$FFj0a * $s * $s) + $FFj0B  * exp(-$FFj0b * $s * $s);
-   $j0 = $j0 + $FFj0C * exp(-$FFj0c * $s * $s) + $FFj0D;
+   $j0 = $j0 + $FFj0C * exp(-$FFj0c * $s * $s) + $FFj0D * exp(-$FFj0d * $s * $s) + $FFj0E;
 
    $j2 = $FFj2A*$s*$s*exp(-$FFj2a*$s*$s)+$FFj2B*$s*$s*exp(-$FFj2b*$s*$s);
-   $j2 = $j2 + $FFj2C * $s * $s * exp(-$FFj2c * $s * $s) + $s * $s * $FFj2D;
+   $j2 = $j2 + $FFj2C * $s * $s * exp(-$FFj2c * $s * $s) + $s * $s * $FFj2D * exp(-$FFj2d * $s * $s) + $s * $s * $FFj2E;
 
    $j4 = $FFj4A*$s*$s*exp(-$FFj4a*$s*$s)+$FFj4B*$s*$s*exp(-$FFj4b*$s*$s);
-   $j4 = $j4 + $FFj4C * $s * $s * exp(-$FFj4c * $s * $s) + $s * $s * $FFj4D;
+   $j4 = $j4 + $FFj4C * $s * $s * exp(-$FFj4c * $s * $s) + $s * $s * $FFj4D * exp(-$FFj4d * $s * $s) + $s * $s * $FFj4E;
 
    $j6 = $FFj6A*$s*$s*exp(-$FFj6a*$s*$s)+$FFj6B*$s*$s*exp(-$FFj6b*$s*$s);
-   $j6 = $j6 + $FFj6C * $s * $s * exp(-$FFj6c * $s * $s) + $s * $s * $FFj6D;
+   $j6 = $j6 + $FFj6C * $s * $s * exp(-$FFj6c * $s * $s) + $s * $s * $FFj6D * exp(-$FFj6d * $s * $s) + $s * $s * $FFj6E;
 
    $F=$j0 + $j2 * (2 / $gJ - 1);
 

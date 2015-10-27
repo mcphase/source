@@ -15,6 +15,7 @@
 
 #define MAXNOFNUMBERSINLINE 2500
 #define MAXNOFCHARINLINE 7024
+#define MAGFF_NOF_COEFF 9
 
 #define SMALL 1e-6   
 #define SMALL_QUASIELASTIC_ENERGY 1e-6   //!!! must match SMALL_QUASIELASTIC_ENERGY in mcdisp.h and ionpars.hpp !!!
@@ -384,26 +385,7 @@ void jjjpar::save_sipf(FILE * fout)
     fprintf(fout,"DWF=%g\n",DWF);
 
     fprintf(fout,"#--------------------------------------------------------------------------------------\n");
-    fprintf(fout,"# Neutron Magnetic Form Factor coefficients - thanks to J Brown\n");
-    fprintf(fout,"#   d = 2*pi/Q      \n");
-    fprintf(fout,"#   s = 1/2/d = Q/4/pi   \n");   
-    fprintf(fout,"#   sin(theta) = lambda * s\n");
-    fprintf(fout,"#    s2= s*s = Q*Q/16/pi/pi\n");
-    fprintf(fout,"#\n");
-    fprintf(fout,"#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D\n");
-    fprintf(fout,"#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D\n");
-    fprintf(fout,"#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D\n");
-    fprintf(fout,"#   <j6(Q)>=s2*(FFj6A*EXP(-FFj6a*s2) + FFj6B*EXP(-FFj6b*s2) + FFj6C*EXP(-FFj6c*s2) + FFj6D\n");
-    fprintf(fout,"#\n");
-    fprintf(fout,"#   Dipole Approximation for Neutron Magnetic Formfactor:\n");
-    fprintf(fout,"#        -Spin Form Factor       FS(Q)=<j0(Q)>\n");
-    fprintf(fout,"#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>\n");
-    fprintf(fout,"#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)\n\n");
-    fprintf(fout,"#--------------------------------------------------------------------------------------\n");
-    fprintf(fout,"FFj0A=%+7.4f FFj0a=%+7.4f FFj0B=%+7.4f FFj0b=%+7.4f FFj0C=%+7.4f FFj0c=%+7.4f FFj0D=%+7.4f\n",magFFj0[1],magFFj0[2],magFFj0[3],magFFj0[4],magFFj0[5],magFFj0[6],magFFj0[7]);
-    fprintf(fout,"FFj2A=%+7.4f FFj2a=%+7.4f FFj2B=%+7.4f FFj2b=%+7.4f FFj2C=%+7.4f FFj2c=%+7.4f FFj2D=%+7.4f\n",magFFj2[1],magFFj2[2],magFFj2[3],magFFj2[4],magFFj2[5],magFFj2[6],magFFj2[7]);
-    fprintf(fout,"FFj4A=%+7.4f FFj4a=%+7.4f FFj4B=%+7.4f FFj4b=%+7.4f FFj4C=%+7.4f FFj4c=%+7.4f FFj4D=%+7.4f\n",magFFj4[1],magFFj4[2],magFFj4[3],magFFj4[4],magFFj4[5],magFFj4[6],magFFj4[7]);
-    fprintf(fout,"FFj6A=%+7.4f FFj6a=%+7.4f FFj6B=%+7.4f FFj6b=%+7.4f FFj6C=%+7.4f FFj6c=%+7.4f FFj6D=%+7.4f\n",magFFj6[1],magFFj6[2],magFFj6[3],magFFj6[4],magFFj6[5],magFFj6[6],magFFj6[7]);
+    magFFout("",fout);
     fprintf(fout,"\n\n");
 
   if(abs(Zc)>1e-10){
@@ -584,10 +566,10 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
  mom=Vector(1,9); mom=0; FF_type=0;
  DWF=dwf;SLR=slr;SLI=sli;
-  magFFj0=Vector(1,7);magFFj0=0;  magFFj0[1]=1;
-  magFFj2=Vector(1,7);magFFj2=0;
-  magFFj4=Vector(1,7);magFFj4=0;
-  magFFj6=Vector(1,7);magFFj6=0;
+  magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=0;  magFFj0[1]=1;
+  magFFj2=Vector(1,MAGFF_NOF_COEFF);magFFj2=0;
+  magFFj4=Vector(1,MAGFF_NOF_COEFF);magFFj4=0;
+  magFFj6=Vector(1,MAGFF_NOF_COEFF);magFFj6=0;
   Zc=Vector(1,7);Zc=0; 
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
    Np=Vector(1,9);Np=0; // vectors of radial wave function parameters
@@ -625,10 +607,10 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   jij = new Matrix[n+1];for(i1=0;i1<=n;++i1){jij[i1]=Matrix(1,nofcomponents,1,nofcomponents);}
   if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
-  magFFj0=Vector(1,7);magFFj0=0;  magFFj0[1]=1;
-  magFFj2=Vector(1,7);magFFj2=0;
-  magFFj4=Vector(1,7);magFFj4=0;
-  magFFj6=Vector(1,7);magFFj6=0;
+  magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=0;  magFFj0[1]=1;
+  magFFj2=Vector(1,MAGFF_NOF_COEFF);magFFj2=0;
+  magFFj4=Vector(1,MAGFF_NOF_COEFF);magFFj4=0;
+  magFFj6=Vector(1,MAGFF_NOF_COEFF);magFFj6=0;
   Zc=Vector(1,7);Zc=0;
    Np=Vector(1,9);Np=0; // vectors of radial wave function parameters
    Xip=Vector(1,9);Xip=0;
@@ -725,10 +707,10 @@ jjjpar::jjjpar (const jjjpar & pp)
    od_m=pp.od_m;od_dm=pp.od_dm;
 /*  }*/
 //#endif
-  magFFj0=Vector(1,7);magFFj0=pp.magFFj0;
-  magFFj2=Vector(1,7);magFFj2=pp.magFFj2;
-  magFFj4=Vector(1,7);magFFj4=pp.magFFj4;
-  magFFj6=Vector(1,7);magFFj6=pp.magFFj6;
+  magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=pp.magFFj0;
+  magFFj2=Vector(1,MAGFF_NOF_COEFF);magFFj2=pp.magFFj2;
+  magFFj4=Vector(1,MAGFF_NOF_COEFF);magFFj4=pp.magFFj4;
+  magFFj6=Vector(1,MAGFF_NOF_COEFF);magFFj6=pp.magFFj6;
   Zc=Vector(1,7);Zc=pp.Zc;
   DWF=pp.DWF;  
 int i1;

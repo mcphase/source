@@ -47,7 +47,7 @@ if((fout=fopen("results/formfactor.out","w"))) //read ion parameters from file
     fprintf(fout,"#   Dipole Approximation for Neutron Magnetic Formfactor:\n");
     fprintf(fout,"#        -Spin Form Factor       FS(Q)=<j0(Q)>\n");
     fprintf(fout,"#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>\n");
-    fprintf(fout,"#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)\n\n");
+    fprintf(fout,"#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)\n#\n");
     fprintf(fout,"#--------------------------------------------------------------------------------------\n");
 
    if((*jjjps).Np(1)!=0)
@@ -62,21 +62,7 @@ if((fout=fopen("results/formfactor.out","w"))) //read ion parameters from file
     fprintf(fout,"#|Q|(1/A)   F%s(Q)     |F%s(Q)|^2     <j0(Q)>     <j2(Q)>     <j4(Q)>     <j6(Q)>      <j1(Q)>     <j3(Q)>     <j5(Q)> \n",s,s);
    }
    else
-   {fprintf(fout,"# Formfactor calculated from Form Factor coefficients - thanks to J Brown\n");
-    fprintf(fout,"#   d = 2*pi/Q      \n");
-    fprintf(fout,"#   s = 1/2/d = Q/4/pi   \n");
-    fprintf(fout,"#   sin(theta) = lambda * s\n");
-    fprintf(fout,"#    s2= s*s = Q*Q/16/pi/pi\n");
-    fprintf(fout,"#\n");
-    fprintf(fout,"#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D\n");
-    fprintf(fout,"#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D\n");
-    fprintf(fout,"#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D\n");
-    fprintf(fout,"#   <j6(Q)>=s2*(FFj6A*EXP(-FFj6a*s2) + FFj6B*EXP(-FFj6b*s2) + FFj6C*EXP(-FFj6c*s2) + FFj6D\n");
-    fprintf(fout,"#\n");
-    fprintf(fout,"#FFj0A=%+7.4f FFj0a=%+7.4f FFj0B=%+7.4f FFj0b=%+7.4f FFj0C=%+7.4f FFj0c=%+7.4f FFj0D=%+7.4f\n",(*jjjps).magFFj0[1],(*jjjps).magFFj0[2],(*jjjps).magFFj0[3],(*jjjps).magFFj0[4],(*jjjps).magFFj0[5],(*jjjps).magFFj0[6],(*jjjps).magFFj0[7]);
-    fprintf(fout,"#FFj2A=%+7.4f FFj2a=%+7.4f FFj2B=%+7.4f FFj2b=%+7.4f FFj2C=%+7.4f FFj2c=%+7.4f FFj2D=%+7.4f\n",(*jjjps).magFFj2[1],(*jjjps).magFFj2[2],(*jjjps).magFFj2[3],(*jjjps).magFFj2[4],(*jjjps).magFFj2[5],(*jjjps).magFFj2[6],(*jjjps).magFFj2[7]);
-    fprintf(fout,"#FFj4A=%+7.4f FFj4a=%+7.4f FFj4B=%+7.4f FFj4b=%+7.4f FFj4C=%+7.4f FFj4c=%+7.4f FFj4D=%+7.4f\n",(*jjjps).magFFj4[1],(*jjjps).magFFj4[2],(*jjjps).magFFj4[3],(*jjjps).magFFj4[4],(*jjjps).magFFj4[5],(*jjjps).magFFj4[6],(*jjjps).magFFj4[7]);
-    fprintf(fout,"#FFj6A=%+7.4f FFj6a=%+7.4f FFj6B=%+7.4f FFj6b=%+7.4f FFj6C=%+7.4f FFj6c=%+7.4f FFj6D=%+7.4f\n",(*jjjps).magFFj6[1],(*jjjps).magFFj6[2],(*jjjps).magFFj6[3],(*jjjps).magFFj6[4],(*jjjps).magFFj6[5],(*jjjps).magFFj6[6],(*jjjps).magFFj6[7]);
+   {(*jjjps).magFFout("#",fout);
     fprintf(fout,"#\n#\n");
     fprintf(fout,"#|Q|(1/A)  F%s(Q)    |F%s(Q)|^2     <j0(Q)>     <j2(Q)>     <j4(Q)>     <j6(Q)> \n",s,s);
    }
