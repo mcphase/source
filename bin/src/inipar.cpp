@@ -209,7 +209,9 @@ void inipar::print (const char * filename)
                   \n# standard deviation is defined by ...sta=sqrt(sum_{i=1}^{n} (newmf-old mf)i^2/n) \
 		  \n# the meanfield is given by mf=gj mb H [meV] (gj...lande factor, mb... bohr magneton)\n");
     fprintf(fout,"maxstamf=%g\n",maxstamf);
-    fprintf(fout,"# mean field step ratio (=actual step/calculated step) to perform actually\n");
+    fprintf(fout,"# mean field step ratio (bigstep=actual step/calculated step<1) to perform actually\n");
+    fprintf(fout,"# note: if sta increases - then for 10 iterations set step ratio to smallstep=bigstep/n\n");
+    fprintf(fout,"# by default n=5. However, if bigstep>1 then n=integervalue(bigstep) and step ratio=bigstep-n \n");
     fprintf(fout,"bigstep=%g\n",bigstep);
 
     fprintf(fout,"# sum_{i=1}^{n} abs(actual change of angular momentum <Ji> with respect to \

@@ -6,6 +6,7 @@
 #define SMALL 1e-8
 #define SMALLINT 1e-4
 #define NOFOUTPUTCOLUMNS 12
+#define MAX_NOF_MF_COMPONENTS 51
 #include "../../version"
 #include <mpspecfunp.h>
 #include <martin.h>
@@ -34,7 +35,7 @@ const char * colheader []= {"LF          ", // 0
                            "|MSFdip.P|  ",  // 9
                            "Re(MSFdip.P)",  // 10
                            "Im(MSFdip.P)",  // 11
-                           "angl(Q,P)[°]",  // 12 
+                           "angl(Q,P)[ï¿½]",  // 12 
                            "i(MSFxMSF*).P", // 13
                            "I+          ",  // 14
                            "I-          ",  // 15
@@ -110,7 +111,7 @@ case 8:  return sqrt(msf2dip+1e-100);break;//    "|MSFdip|    ",
 case 9:  return abs(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "|MSFdip.P|  ",
 case 10: return real(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Re(MSFdip.P)",
 case 11: return imag(msfdipx*Pxyz(1)+msfdipy*Pxyz(2)+msfdipz*Pxyz(3));break;//    "Im(MSFdip.P)"
-case 12: cosw=(Pxyz/Norm(Pxyz))*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[°]"
+case 12: cosw=(Pxyz/Norm(Pxyz))*Qvec/Norm(Qvec);return 180.0 / PI * atan(sqrt(1 - cosw * cosw)/cosw); break; // "angl(Q.P)[ï¿½]"
 case 13: return (crossx*Pxyz(1)+crossy*Pxyz(2)+crossz*Pxyz(3));break; //"i(MSFxMSF*).P",
 case 14: return Ip* lorentzf * scale * ovallt;
                      //              "I+          ",

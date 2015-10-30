@@ -214,6 +214,24 @@ mfcf::mfcf (int n1,int n2,int n3,int na,int nc)
       exit (EXIT_FAILURE);} 
 }
 
+void mfcf::resetnofc(int n)
+{Vector * mfn;
+ //dimension arrays
+  mfn = new Vector[mxa*mxb*mxc+1];
+  if (mfn == NULL)
+    { fprintf (stderr, "Out of memory\n");
+      exit (EXIT_FAILURE);} 
+  for(int i=0;i<=mxa*mxb*mxc;++i){mfn[i]=Vector(1,n*nofatoms);mfn[i]=0;
+   for(int k=1;k<=nofatoms;++k){
+    for(int l=1;l<=n&&l<=nofcomponents;++l){
+    mfn[i]((k-1)*n+l)=mfi[i]((k-1)*nofcomponents+l);
+   }}
+  }
+  delete []mfi;
+  mfi=mfn;  
+  nofcomponents=n;
+}
+
 //kopier-konstruktor
 mfcf::mfcf (const mfcf & p)
 { int i,j,k;

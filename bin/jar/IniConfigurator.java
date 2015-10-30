@@ -841,7 +841,7 @@ public class IniConfigurator extends JPanel
 	
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxnofmfloops", txMaxNofMfLoops.getText(), "maximum number of selfconsistency loops");
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxstamf", txMaxStaMf.getText(), "standard deviation - limit to end selfconsistency process\n# standard deviation is defined by ...sta=sqrt(sum_{i=1}^{n} (newmf-old mf)i^2/n)\n# the meanfield is given by mf=gj mb H [meV] (gj...lande factor, mb... bohr magneton)");
-    m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "bigstep", txBigStep.getText(), "step ratio (=actual step/calculated step) to perform actually");
+    m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "bigstep", txBigStep.getText(), "mean field step ratio (bigstep=actual step/calculated step<1) to perform actually\n# note: if sta increases - then for 10 iterations set step ratio to smallstep=bigstep/n\n# by default n=5. However, if bigstep>1 then n=integervalue(bigstep) and step ratio=bigstep-n");
     //m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "smallstep", txSmallStep.getText(), "a small step (=step/calculated step) to perform actually when sta rises");
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxspinchange", txMaxSpinChange.getText(), "sum_{i=1}^{n} abs(actual change of angular momentum <Ji> with respect to\n# initial  configuration) > maxspinchange will  end selfconsistency process");
 

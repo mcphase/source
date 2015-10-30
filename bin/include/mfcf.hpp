@@ -23,6 +23,7 @@ class mfcf
   public:
    int nofatoms;
    int nofcomponents;
+   void resetnofc(int n);
  // array of spins 
    int in(int i,int j, int k); 
     int wasstable; // index to remember if it was stable
@@ -41,11 +42,11 @@ class mfcf
     int  load(FILE * fin_coq);	
      
     void clear(); // set all meanfields to zero    
-    mfcf & operator= (const mfcf & op2); // zuweisung
+   mfcf & operator= (const mfcf & op2); // zuweisung
    //zuweisung of the same meanfield vector to all atoms
-    mfcf & operator= (const Vector & vec);
+   mfcf & operator= (const Vector & vec);
    
-mfcf (int n1=1,int n2=1,int n3=1, int nofatoms=1,int nofcomponents=3);	//konstruktor mit initialisierung (wenn noetig)
+   mfcf (int n1=1,int n2=1,int n3=1, int nofatoms=1,int nofcomponents=3);	//konstruktor mit initialisierung (wenn noetig)
    mfcf (const mfcf & spins);	// kopier-konstruktor
    
 ~mfcf ();		//destruktor

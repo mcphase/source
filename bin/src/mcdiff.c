@@ -489,9 +489,9 @@ fprintf(fout,"#\n");
 fprintf(fout,"#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc> ]\n");
 fprintf(fout,"#{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}\n");
 
-mfcf mfields(1,1,1,natmagnetic,51); // 51 is maximum of nofmfcomponents - we take it here !
+mfcf mfields(1,1,1,natmagnetic,MAX_NOF_MF_COMPONENTS); // MAX_NOF_MF_COMPONENTS is maximum of nofmfcomponents - we take it here !
 mfields.clear();
-
+int maxmfcomponents=3;// for printout of mcdiff.mf we check what is the largest nofmfcomponents in mcdiff.in
 for(i=1;i<=natmagnetic;++i){
                             instr[0]='#';
                             while(instr[strspn(instr," \t")]=='#'){pos=ftell(fin_coq);
@@ -560,7 +560,9 @@ fprintf(fout,"\n");
                              {Vector Qvec(1,3);Qvec=0;ComplexVector Mq(1,3);
                               fseek(fin_coq,pos+strchr(instr,'>')-instr+1,SEEK_SET); 
                               j=inputline(fin_coq,numbers);printf("dimension of mf = %i\n",j);
-                              Vector gjmbHxc(1,j);for(k=1;k<=j;++k){gjmbHxc(k)=numbers[k];mfields.mf(1,1,1)(51*(i-1)+k)=gjmbHxc(k);}
+                              if(j>maxmfcomponents){maxmfcomponents=j;}
+                              if(j>mfields.nofcomponents){fprintf(stderr,"ERROR mcdiff: number of exchange field components too large (%i>%i) recompile with larger MAX_NOF_MF_COMPONENTS\n",j,mfields.nofcomponents);exit(EXIT_FAILURE);}
+                              Vector gjmbHxc(1,j);for(k=1;k<=j;++k){gjmbHxc(k)=numbers[k];mfields.mf(1,1,1)(mfields.nofcomponents*(i-1)+k)=gjmbHxc(k);}
                               (*jjjpars[i]).eigenstates(gjmbHxc,H,T); // calculate eigenstates
                               (*jjjpars[i]).Icalc_parameter_storage_init(gjmbHxc,H,T);// initialise parameter storage for Icalc
                               // do some consistency checks
@@ -620,7 +622,7 @@ fprintf(fout,"\n");
   fclose(fin_coq);
   fclose(fout);
 
-
+mfields.resetnofc(maxmfcomponents);
 
 // print spinconfiguration to mcdiff.sps  (useful for viewing)
 print_sps("./results/mcdiff.sps",natmagnetic,a,b,c,alpha,beta,gamma,nr1,nr2,nr3,r1s,r2s,r3s,jjjpars,T,H);
