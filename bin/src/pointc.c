@@ -132,7 +132,7 @@ void calcCEFpar(double & q,double & x ,double & y, double & z, double & r,Vector
      ehv4 = a0*a0*a0*a0 * umr;
      ehv6 = a0*a0*a0*a0*a0*a0 * umr;
 
- double J2meV=1/1.60217646e-22; // 1 millielectron volt = 1.60217646 × 10-22 joules
+ double J2meV=1/1.60217646e-22; // 1 millielectron volt = 1.60217646 ï¿½ 10-22 joules
 
  // now calculation of the B_LM  and L_LM in meV
                     Blm(0)=-B(0)*e*e*(*iops).nof_electrons*umr;// printf("B(%i)=%g sum(B)=%g\n",0,B(0),(*iops).Blm(0));                  
@@ -216,6 +216,8 @@ int main (int argc, char **argv)
 "                    and Stevens factors)\n"
 "         results\\pointc.out ...contains results of convergence when summing up\n"
 "                 contributions of different neighbours one by one...\n"
+"         results\\pointc.Blm ... Crystal field parameters Blm in Stevens Notation\n" 
+"         results\\pointc.Llm ... Crystal field parameters Llm in Wybourne Notation\n" 
 "         results\\pointc.dBlm .. for option -d ... derivatives dBlm/du\n" 
 "         results\\pointc.dLlm .. for option -d ... derivatives dLlm/du\n" 
 "                 ... derivatives are with respect to u=neighborposition(A)/a0\n"
@@ -455,12 +457,26 @@ printf("#--------------------------------------------------------\n");
 printf("# Crystal Field parameters Llm in Wybourne Notation (meV)\n");
 printf("#--------------------------------------------------------\n");
 (*iops).savLlm(stdout);
+
+table_file=fopen_errchk("./results/pointc.Blm","w");
+fprintf(table_file,"#-------------------------------------------------------\n");
+fprintf(table_file,"# Crystal Field parameters Blm in Stevens Notation (meV)\n");
+fprintf(table_file,"#-------------------------------------------------------\n");
+(*iops).savBlm(table_file);
+fclose(table_file);
+table_file=fopen_errchk("./results/pointc.Llm","w");
+fprintf(table_file,"#--------------------------------------------------------\n");
+fprintf(table_file,"# Crystal Field parameters Llm in Wybourne Notation (meV)\n");
+fprintf(table_file,"#--------------------------------------------------------\n");
+(*iops).savLlm(table_file);
+fclose(table_file);
+
   fprintf(stderr,"#***********************************************************************\n");
   fprintf(stderr,"#                         end of program pointc\n");
   fprintf(stderr,"# Reference: Ernst Bauer and Martin Rotter - Magnetism of Complex\n");
   fprintf(stderr,"#            Metallic Alloys: Crystalline Electric Field Effects \n");
   fprintf(stderr,"#            Book Series on Complex Metallic Alloys - Vol. 2, edited\n");
-  fprintf(stderr,"#            by Esther Belin-Ferré, World Scientific, 2009\n");
+  fprintf(stderr,"#            by Esther Belin-Ferrï¿½, World Scientific, 2009\n");
   fprintf(stderr,"#***********************************************************************\n");
 
 }
