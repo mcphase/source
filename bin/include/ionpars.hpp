@@ -4,6 +4,7 @@
 #include <vector.h>
 #include <cstdio>
 #include <mpspecfunp.h>
+#include <mcdisp.h>
 
 #define IONPARS_MAXNOFCOMPONENTS 51
 // standard operator sequence I1,....,I51
@@ -13,9 +14,6 @@
 #define NOF_OLM_MATRICES 48
 #define NOF_RIXS_MATRICES 9
 
-#define SMALL_QUASIELASTIC_ENERGY 1e-6   //!!! must match SMALL_QUASIELASTIC_ENERGY in mcdisp.c and ionpars.hpp !!!
-                     // because it is used to decide wether for SMALL_QUASIELASTIC_ENERGY transition
-		     // energy the matrix Mijkl contains wn-wn' or wn/kT
 #define SMALL_PROBABILITY 1e-6
 #define SMALL_DEVIATION 1e-6
 // ionpars: class for so1ion / cfield modules to 

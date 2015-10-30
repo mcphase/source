@@ -12,15 +12,13 @@
 #include<par.hpp>
 
 #include<ctime>
+#include "mcdisp.h"
 
 #define MAXNOFNUMBERSINLINE 2500
 #define MAXNOFCHARINLINE 7024
 #define MAGFF_NOF_COEFF 9
 
 #define SMALL 1e-6   
-#define SMALL_QUASIELASTIC_ENERGY 1e-6   //!!! must match SMALL_QUASIELASTIC_ENERGY in mcdisp.h and ionpars.hpp !!!
-                     // because it is used to decide whether for small transition
-		     // energy the matrix Mijkl contains wn-wn' or wn/kT
 
 #include "jjjpar_basmodfunc.cpp" // basic sipf module functions
 #include "jjjpar_observables.cpp" // function for physical observables

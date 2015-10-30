@@ -8,6 +8,17 @@
   
  
 #include <mcdisp.h> 
+#include <ctime>
+
+#include "par.hpp"
+#include "mfcf.hpp"
+#include "mdcf.hpp"
+#include "jq.hpp"
+#include "inimcdis.hpp"
+
+#include <complex>
+#include <martin.h>
+
 #include "../../version"
 #include "myev.c"
 
@@ -47,6 +58,29 @@ void errexit() // type info and error exit
     printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
       exit (EXIT_FAILURE);
 } 
+
+int index_s(int i,int j,int k,int l, int t, const mdcf & md, const inimcdis & ini)
+{int s=0,i1,j1,k1;
+// calculates the index of the Matrix A given 
+// ijk ... index of crystallographic unit cell in magnetic unit cell
+// l   ... number of atom in crystallographic cell
+// t   ... transitionnumber
+ for(i1=1;i1<i;++i1){
+ for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
+ s+=md.baseindex_max(i1,j1,k1);
+ }}}
+ i1=i;
+ for(j1=1;j1<j;++j1){for(k1=1;k1<=ini.mf.nc();++k1){
+ s+=md.baseindex_max(i1,j1,k1);
+ }}
+ j1=j;
+ for(k1=1;k1<k;++k1){
+ s+=md.baseindex_max(i1,j1,k1);
+ }
+ s+=md.baseindex(i,j,k,l,t);
+ return s;
+}
+
 
 
 #ifdef _THREADS
@@ -232,28 +266,6 @@ return true;
 #undef J
 #undef q
 #endif
-
-int index_s(int i,int j,int k,int l, int t, const mdcf & md, const inimcdis & ini)
-{int s=0,i1,j1,k1;
-// calculates the index of the Matrix A given 
-// ijk ... index of crystallographic unit cell in magnetic unit cell
-// l   ... number of atom in crystallographic cell
-// t   ... transitionnumber
- for(i1=1;i1<i;++i1){
- for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
- s+=md.baseindex_max(i1,j1,k1);
- }}}
- i1=i;
- for(j1=1;j1<j;++j1){for(k1=1;k1<=ini.mf.nc();++k1){
- s+=md.baseindex_max(i1,j1,k1);
- }}
- j1=j;
- for(k1=1;k1<k;++k1){
- s+=md.baseindex_max(i1,j1,k1);
- }
- s+=md.baseindex(i,j,k,l,t);
- return s;
-}
 
 
 void sortE(Vector & d,ComplexMatrix & z)
