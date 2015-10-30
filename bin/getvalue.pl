@@ -98,6 +98,9 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
    @numbers1=@numbers;
    }}
   close Fin;
+  if($j==1&&$numbers[$colx]==$constx){# only one point in file and specified, special ...
+            $esum=1;$Iav=$numbers[$coly];
+           }
   if (abs($esum)<1e-10){print "\n first xvalue sum on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of x values\n";<stdin>;}
   $Iav/=$esum;
   my $sta=0; # here calculate sta (scattering of data in interval dE)
@@ -117,7 +120,7 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
 #print "$constx $dE ".$numbers[$colx]." ".$numbers1[$colx]."\n";
    @numbers1=@numbers;
    }} 
-  if (abs($esum)<1e-300){print "\n getvalue: xvalues variance on averaging is too small ($esum) for $file\n";$sta=-1;}
+  if (abs($esum)<1e-300){print "\n# getvalue: xvalues variance on averaging is too small ($esum) for $file\n";$sta=-1;}
   else{$sta/=$esum;}
   close Fin;
   return ($Iav,$sta);
