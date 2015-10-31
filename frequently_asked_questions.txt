@@ -5,11 +5,11 @@ Lines beginning with # are comment lines
 Lines beginning with #! are also comment lines, but some programs will
       read information from these lines
 
-PROGRAM SO1ION and CFIELD
+MODULES SO1ION and CFIELD
 
--) are programs cfield and so1ion different ?
+-) are modules cfield and so1ion different ?
 
-no, these programs do exactly the same job (as stand alone programs).
+no, these modules do exactly the same job (as used with singleion).
 However, if used as a module in mcphas, mcdisp etc the orientation
 of the crystal field coordinate system xyz with respect to the crystal
 axes abc is different:  for MODULE=so1ion it is xyz||abc, whereas for
@@ -49,5 +49,6 @@ the program automatically looks up F2 F4 F6 and XI in an internal table.
 However, if you are not happy with the values from the table, you can explicitely enter
 these constants. 
 However for some ions these parameters are not available in standard tables, then
-you have to enter them. Please always check ic1ion.out to see if output is correct.
+you have to enter them. Please always run ic1ion and check ic1ion.out to see if output 
+is correct.
 \end{verbatim}

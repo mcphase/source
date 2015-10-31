@@ -80,6 +80,16 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{ \dots in version 5.2 \dots}
+\begin{itemize}
+\item recommended program for single ion properties is now singleion (works for all modules)
+\item pointc output creates automaticalle files results/pointc.Blm and results/pointc.Lllm with just the CF parameters
+\item mcdisp option -ignore\_non\_hermitian\_matrix\_error introduced , eigensolvers updated
+\item cif2mcphas program to create mcphase input files from crystallographic information in cif files
+\item mcdisp.jq has now a col 4 with qincr for plotting purposes
+\item bugs fixed in {\prg convolute2d, rhoso1ion, module brillouin, so1ion} Blm input for m odd, getvalue
+\end{itemize}
+
 \subsection*{ ... in version 5.1 ...}
 \begin{itemize}
 \item parallel processing: the number of parallel threads can be chosen either in a system variable
@@ -216,15 +226,13 @@ Structure of the program package showing the tasks of the different modules.}
 \end{figure}
 
 \begin{description}
-\item[so1ion(cfield):]
+\item[singleion:]
 The best way to start with the program package is probably to get
 acquainted with
-the module {\prg so1ion\index{so1ion}}, which is the most important of several 
+the program {\prg singleion\index{singleion}}, which is the most important of several 
 modules used for the calculation of single ion properties (see Section~\ref{cfield}).
-\item[ic1ion:]
-An advanced single ion module for intermediate coupling calcuations.
 \item[mcphas:]
-This module has been written to calculate the thermodynamic properties.
+This program has been written to calculate the thermodynamic properties.
 In order to  deal with the pair interactions a
  combined mean-field/monte-carlo algorithm is used in module {\prg mcphas}.
 For a given temperature $T$ and magnetic field $\mbf H$ (vector)
@@ -254,22 +262,22 @@ Several graphic programs easy the visualisation of the
 calculated data (section~\ref{graphics}).
 
 \item[mcdiff\index{mcdiff}:]
-The module {\prg McDiff} can be used to calculate the magnetic neutrons
+The program {\prg McDiff} can be used to calculate the magnetic neutrons
 or resonant x-ray diffraction intensities. Note that neutron intensities
 can be calculated going beyond the dipolar approximation for the magnetic
 formfactor.
 
 \item[mcdisp:]
-An additional module {\prg McDisp} can be used to calculate the 
+An additional program {\prg McDisp} can be used to calculate the 
 dispersion and intensity
  of magnetic excitations and diffuse magnetic scattering cross section.
   It is based on a mean field- random
 phase approximation treatment of the problem (section~\ref{mcdisp}). 
 \item[simannfit:]
 In oder to enable the determination of the parameters of the
-magnetic Hamiltonian from experimental data, a fitting module
+magnetic Hamiltonian from experimental data, a fitting tool
 {\prg Simannfit} can be used to fit experimental  magnetic structure and excitation
-data. This module is based on the simulated annealing 
+data. This tool is based on the simulated annealing 
 algorithm~\cite{kirkpatrick83-671} and described in section~\ref{simannfit}.
 \end{description}
 
@@ -332,7 +340,7 @@ CeCu$_2$  & mag phase diagram, fit of dispersive mag. excitations to neutron dat
 \cite{loewenhaupt06-775,schedler03-1313} \\
 CePd$_2$Si$_2$ & neutron diffraction going beyond dipolar approx for mag. formfactor & {\prg %%@
 so1ion}&\cite{rotter09-140405} \\
-CoO & magnetic formfactor - flipping ratios  and  highly inelastic neutron scattering  &{\prg  ic1ion} & \\
+CoO & magnetic formfactor - flipping ratios, highly inelastic neutron scattering  &{\prg  ic1ion} & \\
 DyCu$_2$ & quadrupolar order and phase diagram & {\prg cfield}\index{cfield}&\cite{yoshida98-1421} \\
 DyNi$_2$B$_2$C & magnetic phase diagram, special single ion module (quasiquartet) & {\prg %%@
 quartett.so}\index{quartett.so}& \\
@@ -342,7 +350,7 @@ GdNi$_2$B$_2$C & magnetostriction and phase diagram, spin only (L=0) & {\prg bri
 GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, magnetic structure & {\prg cfield} & \\
 helix\_spinwave & spinwave calculation for a helical magnetic structure & {\prg so1ion} & \\
 Ho$_2$Ti$_2$O$_7$ & diffuse magnetic scattering & {\prg so1ion} & \cite{bramwell01-1495}\\
-LaSrCoO$_3$ & spin polarons quasielastic scattering & {\prg cluster}\index{cluster} & \cite{podlesnyak11-134430,podlesnyak08-247603} \\
+LaCoO$_3$ & spin polarons quasielastic scattering & {\prg cluster}\index{cluster} & \cite{podlesnyak11-134430,podlesnyak08-247603} \\
 La$_2$CoO$_4$ & dispersive magnetic excitations / spinwaves &{\prg  ic1ion} & \cite{lewtas10-184420}\\
 LuMnO$_3$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
 NdBa$_2$Cu$_3$O$_7$ & fit of magnetic neutron diffraction data going beyond dipapprox & {\prg cfield}\index{cfield} & \cite{rotter09-140405} \\
@@ -355,16 +363,12 @@ Pr$_3$Pd$_{20}$Si$_6$ & hyperfine interactions & {\prg cluster}\index{cluster} &
 PuPd$_3$ & susceptibility, heat capacity & {\prg ic1ion}\index{ic1ion} & \cite{le10-155136} \\
 TbCu$_2$ & magnetic phases with field parallel $a$ & {\prg cfield} \\
 testic1ion & Pr$^{3+}$ chargedensity in IC and LS coupling & {\prg ic1ion,cfield} &\\
-tungsten\_phonons & phonons in tungsten & {\prg phonon} & \\
+tungsten& phonons in tungsten & {\prg phonon} & \\
 UPd$_3$ & dispersive CEF excitations, quadrupolar interactions  & {\prg so1ion}\index{so1ion} & \cite{le12-036002} \\
  \end{tabular}
 \end{center}   
 \end{table}
 
-
-
-Some publications referencing Mcstas: %%@
-\cite{rotter12-213201,rotter02-751,rotter02-8885,rotter03-144418,rotter03-mass,rotter03-x,rotter04-231,rotter04-xxxx,blanco13-104411,lewtas10-184420,rotter09-140405,mazumdar08-144422,loewenhaupt06-775}
 
 
 

@@ -5,25 +5,26 @@
 *************************************************************************************
 HOW TO CREATE ....
 -------------------------------------------------------------------------------------
-.... INPUT FILES FOR A NEW COMPOUND ?     - tutorial 00howto_quickly_create_input_files
-                                          - programs powdercell, powdercell2j, makenn
+.... INPUT FILES FOR A NEW COMPOUND ?     - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
+                                                     00howto_quickly_create_input_files
+                                          - programs cif2mcphas, makenn
                                                      setup_jqfit, setup_mcphasjforfit
 *************************************************************************************
 HOW TO CALCULATE ...
 -------------------------------------------------------------------------------------
-.... CRYSTAL FIELD PARAMETERS             - tutorial 03crystal_fields_cfield_so1ion
+.... CRYSTAL FIELD PARAMETERS             - tutorial 03crystal_fields_singleion
                                           - examples Gd3GaO6
                                           - manual   chapter programs for specific
                                                      tasks ... pointc
                                           - programs pointc, mpe (editor of sipf files)
 -------------------------------------------------------------------------------------
-.... CRYSTAL FIELD SPECTRA ?              - tutorial 03crystal_fields_cfield_so1ion
+.... CRYSTAL FIELD SPECTRA ?              - tutorial 03crystal_fields_singleion
                                           - examples PrNi2B2C, NdCu2
-                                          - manual   chapters so1ion, ic1ion
-                                          - programs so1ion, convolute, gauss,ic1ion, 
+                                          - manual   chapters singleion
+                                          - programs single1ion, convolute, gauss,ic1ion, 
                                                      display, pointc
 -------------------------------------------------------------------------------------
-.... NEUTRON DIFFRACTION PATTERN ?        - tutorial 00howto_quickly_create_input_files
+.... NEUTRON DIFFRACTION PATTERN ?        - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
                                                      04magnetic_phases_mcphas
                                           - examples NdBa2Cu3O7, NdCu2b_new
                                           - manual   chapter mcdiff
@@ -35,20 +36,18 @@ HOW TO CALCULATE ...
                                           - manual   chapter mcphas
                                           - programs mcphas, displaycontour
 -------------------------------------------------------------------------------------
-.... SUSCEPTIBILITY AND MAGNETIZATION ?   - tutorial 03crystal_fields_cfield_so1ion
+.... SUSCEPTIBILITY AND MAGNETIZATION ?   - tutorial 03crystal_fields_singleion
                                                      04magnetic_phases_mcphas
                                           - examples PrNi2B2C, NdCU2 
                                           - manual   chapter mcphas
-                                          - programs so1ion, ic1ion, mcphas, display
+                                          - programs singleion, mcphas, display
 -------------------------------------------------------------------------------------
-.... SPECIFIC HEAT ?                      - tutorial 03crystal_fields_cfield_so1ion
+.... SPECIFIC HEAT ?                      - tutorial 03crystal_fields_singleion
                                                      04magnetic_phases_mcphas
                                           - examples PrNi2B2C, NdCu2
                                           - manual   chapter mcphas
                                           - programs cpsingleion, mcphas, dif
 -------------------------------------------------------------------------------------
-
-
 *************************************************************************************
 HOW TO DISPLAY ....
 -------------------------------------------------------------------------------------
@@ -61,7 +60,7 @@ HOW TO DISPLAY ....
                                           - manual   chapter Programs f. graph. display
                                           - programs display_density,display_densities,javaview
 -------------------------------------------------------------------------------------
-.... CHARGE DENSITIES ?                   - tutorial 03crystal_fields_cfield_so1ion
+.... CHARGE DENSITIES ?                   - tutorial 03crystal_fields_singleion
                                           - examples NdCu2, PrNi2Si2, PrNi2B2C,testic1ion
                                           - manual   chapter Programs f. graph. display
                                           - programs display_density,display_densities,javaview
@@ -76,8 +75,7 @@ HOW TO FIT ...
 -------------------------------------------------------------------------------------
 .... DIFFRACTION DATA ?                   - tutorial 02fitting
                                           - examples NdBa2Cu3O7
-                                          - manual   chapter Searchspace and Simannfit
-                                                             mcdiff
+                                          - manual   chapters  on fitting and on mcdiff
                                           - programs mcdiff, simannfit, display,
                                                      displaytext, rpvalue, chi2,
                                                      substitute, factcol, ...
@@ -85,24 +83,21 @@ HOW TO FIT ...
 .... INTERACTION PARAMETERS ?             - tutorial 02fitting
                                           - examples CeCu2a, PrNi2B2C
                                           - manual   chapter Searchspace and Simannfit
-                                          - programs simannfit, searchspace, 
-                                                     so1ion, ic1ion, mcphas,
-                                                     mcdisp,mcdiff ...
+                                          - programs simannfit, searchspace, singleion
+                                                     mcphas, mcdisp, mcdiff ...
                                                      substitute, factcol, addcol, ... 
                                                      display, displaytext, ... 
 -------------------------------------------------------------------------------------
 .... CRYSTAL FIELD SPECTRA ?             - tutorial 02fitting
                                                      06fitting_crystal_field_spectra
                                           - examples PrNi2B2C
-                                          - manual   chapters so1ion,Searchspace and 
-                                                     Simannfit
+                                          - manual   chapters on singleion and on fitting
                                           - programs simannfit, searchspace, 
-                                                     so1ion, pointc
+                                                     singleion, pointc
 -------------------------------------------------------------------------------------
 .... SPIN WAVE DISPERSION ?               - tutorial 02fitting
                                           - examples CeCu2a
-                                          - manual   chapter mcphas, mcdiff, Searchspace 
-                                                     and Simannfit
+                                          - manual   chapter mcphas, mcdiff,fitting
                                           - programs simannfit, searchspace, 
                                                      mcphas, mcdisp, 
 *************************************************************************************
@@ -110,7 +105,7 @@ HOW TO TREAT/INCLUDE ...
 -------------------------------------------------------------------------------------
 .... RARE EARTH IONS ?
                                           - examples NdCu2, any rare earth based 
-                                          - manual   chapter so1ion
+                                          - manual   chapter singleion
                                           - programs singlein, so1ion
 -------------------------------------------------------------------------------------
 .... TRANSITION METAL and ACTINIDE IONS
