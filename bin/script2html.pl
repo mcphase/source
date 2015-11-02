@@ -49,6 +49,7 @@ EOF
                      print '<a href="#'.$BB[0].'">'.$BB[0].'</a><br>';shift @BB;
                     } 
 print "<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->";
+$br="<br>";
 while (@ARGV)
 {$linetext="";
  $fromline=1;if($ARGV[0]=~/-fromline/){shift @ARGV;$ARGV[0]=~s/x/*/g; $fromline=eval $ARGV[0];shift @ARGV;$linetext=" from line $fromline";}
@@ -64,6 +65,11 @@ while (@ARGV)
    {++$lnr;if($lnr>=$fromline){
     if ($line=~/^\s*#/||$line=~/^\s*rem/)
      { # if the line starts with a comment
+
+       # take care for verbatim \ pre commands
+       if ($line=~/.*\<pre\>/&&$line!=~/.*\<pre\>.*\<\/pre\>/){$br="";}
+       if ($line=~/.*\<\/pre\>/&&$line!=~/.*\<\/pre\>.*\<pre\>/){$br="<br>";} 
+ 
       if($line=~/.*\<\s*script2html.*\>/)
        { # look if another file should be included
          # if yes run script2htlm on this file
@@ -89,27 +95,28 @@ while (@ARGV)
         close Fin1;unlink($arg[$#arg].".htm");
        }
         else
-       {# take care about <img src=""> commands and insert path
+       {
+        # take care about <img src=""> commands and insert path
         $line=~s!\<img(.*)src\s*="(.*)"!&lt img\1src="$dir/\2"&gt \n \<img\1src="$dir/\2"!;
         # replace html commands <...> by &aaa& ... &bbb& 
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
                          |dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
                          |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
                          |map|meta|noframes|noscript|object|ol|optgroup|option|
-                         |p|sub|sup|table|tbody|textarea|tfoot|th|title|td|tr|tt|u|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
+                         |p|pre|sub|sup|table|tbody|textarea|tfoot|th|title|td|tr|tt|u|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
         $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
 
        # substitute all remaining < and > signs by the html code &gt and &lt
         $line=~s/>/&gt /g;$line=~s/</&lt /g; 
        # replace back &aaa& ... &bbb& to < ... > so that html commands are interpreted properly
         $line=~s/&aaa&/\</g;$line=~s/&bbb&/\>/g;
-       $line=~s/\n/<br>\n/g;  # print comments in style "c" (default)
+       $line=~s/\n/$br\n/g;  # print comments in style "c" (default)
        print  $line;
        }
     }else{ # line did not start with a comment - thus it is a command and should be printed as it is
     # substitute all  < and > signs by the html code &gt and &lt
         $line=~s/>/&gt /g;$line=~s/</&lt /g;
-   $line='<span class="r">'.$line.'</span><br>'; #print commands in style "r"
+   $line='<span class="r">'.$line.'</span>'.$br; #print commands in style "r"
    print  $line;
    }
   
