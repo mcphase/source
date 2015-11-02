@@ -1,5 +1,5 @@
 \newpage
-\section{A Kramers Ground State Doublet - single ion module}\label{kramers}
+\section{Module {\prg kramer}  - a Kramers Ground State Doublet Single Ion Module}\label{kramers}
 
 The crystal field ground state of a magnetic ion often can be
 approximated by a doublet. In this description the crystal field
@@ -9,9 +9,9 @@ by $|\pm>$ the non vanishing matrix elements of the angular momentum
 operator can be abbreviated by 
 
 \begin{eqnarray}
-<\pm|{\mbf J}_a|\mp>=A & A^{\star}=A & A\mbox{... saturation moment in $a$ direction}\nonumber\\
-<\pm|{\mbf J}_b|\pm>=\pm B & B^{\star}=B & B\mbox{... saturation moment in $b$ direction}\\
-<\pm|{\mbf J}_c|\mp>=C & C^{\star}=-C & C\mbox{... saturation moment in $c$ direction}\nonumber\\
+<\pm|{\hat \mbf J}_a|\mp>=A & A^{\star}=A & A\mbox{... saturation moment in $a$ direction}\nonumber\\
+<\pm|{\hat \mbf J}_b|\pm>=\pm B & B^{\star}=B & B\mbox{... saturation moment in $b$ direction}\\
+<\pm|{\hat \mbf J}_c|\mp>=C & C^{\star}=-C & C\mbox{... saturation moment in $c$ direction}\nonumber\\
 \end{eqnarray}
 
 
@@ -19,7 +19,7 @@ then the single ion Hamiltonian $H=H_{cf}- g_J \mu_b {\mbf H}{\mbf J}$
 can be written as
 
 \begin{equation}\label{hamkramer}
-H=g_J \mu_B 
+\hat H=g_J \mu_B 
 \left (
 \begin{array}{cc}
 B H_b & -A H_a- C H_c\\
@@ -52,26 +52,26 @@ using Boltzmann statistics ($Z=\exp(-\Delta/2kT)+\exp(\Delta/2kT)$) the expectat
 moment can be calculated as
 
 \begin{equation}
-<{\mbf M}>=\sum_{\pm}<\lambda_{\pm}|g_J{\mbf J}|\lambda_{\pm}>
+<{\hat \mbf M}>=\sum_{\pm}<\lambda_{\pm}|g_J{\hat \mbf J}|\lambda_{\pm}>
 \frac{\exp(-\lambda_{\pm}/kT)}{Z}
 \end{equation}
 
 with 
 
 \begin{equation}
-<\lambda_{\pm}|J_a|\lambda_{\pm}>=
+<\lambda_{\pm}|\hat J_a|\lambda_{\pm}>=
 \frac{-2A \Re[\beta^{\star}(\alpha-\lambda_{\pm})]}
 {|\alpha-\lambda_{\pm}|^2+\beta^{\star}\beta}
 \end{equation}
 
 \begin{equation}
-<\lambda_{\pm}|J_b|\lambda_{\pm}>=
+<\lambda_{\pm}|\hat J_b|\lambda_{\pm}>=
 \frac{-B \beta^{\star}\beta+B|\alpha-\lambda_{\pm}|^2}
 {|\alpha-\lambda_{\pm}|^2+\beta^{\star}\beta}
 \end{equation}
 
 \begin{equation}
-<\lambda_{\pm}|J_c|\lambda_{\pm}>=
+<\lambda_{\pm}|\hat J_c|\lambda_{\pm}>=
 \frac{2 \Re(\beta C)(\alpha-\lambda_{\pm})}
 {|\alpha-\lambda_{\pm}|^2+\beta^{\star}\beta}
 \end{equation}
@@ -86,28 +86,28 @@ For the calculation of the magnetic excitations the program {\tt mcdisp}
 needs also a function which calculates the transition matrix elements
 
 \begin{equation}
-M_{\alpha\beta}=<\lambda_-|J_{\alpha}|\lambda_+>
-<\lambda_+|J_{\beta}|\lambda_-> \tanh(\Delta/2kT)
+M_{\alpha\beta}=<\lambda_-|\hat J_{\alpha}|\lambda_+>
+<\lambda_+|\hat J_{\beta}|\lambda_-> \tanh(\Delta/2kT)
 \end{equation}
 
 using the expressions
 
 \begin{equation}
-<\lambda_-|J_a|\lambda_+>=
+<\lambda_-|\hat J_a|\lambda_+>=
 \frac{-2A (\alpha\Re(\beta)+i\lambda_+ \Im(\beta))}
 {\sqrt{(|\alpha-\lambda_{+}|^2+\beta^{\star}\beta)
 (|\alpha-\lambda_{-}|^2+\beta^{\star}\beta)}}
 \end{equation}
 
 \begin{equation}
-<\lambda_-|J_b|\lambda_+>=
+<\lambda_-|\hat J_b|\lambda_+>=
 \frac{-2B \beta^{\star} \beta}
 {\sqrt{(|\alpha-\lambda_{+}|^2+\beta^{\star}\beta)
 (|\alpha-\lambda_{-}|^2+\beta^{\star}\beta)}}
 \end{equation}
 
 \begin{equation}
-<\lambda_-|J_c|\lambda_+>=
+<\lambda_-|\hat J_c|\lambda_+>=
 \frac{2|C| (-\alpha\Im(\beta)+i\lambda_+ \Re(\beta))}
 {\sqrt{(|\alpha-\lambda_{+}|^2+\beta^{\star}\beta)
 (|\alpha-\lambda_{-}|^2+\beta^{\star}\beta)}}

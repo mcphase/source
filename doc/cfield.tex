@@ -149,7 +149,7 @@ transition (in barn/sr) at a given temperature according to the formula
 \begin{equation}
 \sigma(i\rightarrow k)=\left(\frac{\hbar \gamma e^2}{mc^2}\right)^2
 \frac{exp(-E_i/k_BT)}{\sum_j exp(-E_j/k_BT)} \frac{2}{3}\sum_{\alpha=x,y,z}
-|\langle i|J^{\alpha}|k\rangle|^2
+|\langle i|J_{\alpha}|k\rangle|^2
 \end{equation}
 
 Note: in this calculation energy and Q dependence
@@ -452,37 +452,36 @@ The use
 
 As a single ion module, {\prg so1ion\index{so1ion}} provides to {\prg mcphas} the magnetic properties
 of a single rare earth ion subject to the crystal field. Its main duty is
-to calculate the magnetic moment given an effective magnetic field. 
-To be more explicit - given the effective magnetic field $H^s_{eff}$ by {\prg mcphas}
+to calculate the magnetic moment given an external magnetic field $\mbf H$  and an exchange field $\mbf H^s$. 
+To be more explicit - given the external magnetic  and the exchange field  by {\prg mcphas}
  the module {\prg so1ion\index{so1ion}}
- diagonalises the crystal field and Zeeman Hamiltonian (\ref{cfze}) of the
- ion $n$:
+ diagonalises the crystal field and Zeeman Hamiltonian (\ref{cfze}):
 
 \begin{equation}\label{cfze}
- {\mathcal H_n}=  B_l^m O_{lm}({\mbf J}^n) 
-	     -  g_{Jn} \mu_B {\mbf J}^n {\mbf H^n_{eff}} 
+ {\hat \mathcal H}=  B_l^m \hat O_{lm}({\hat \mbf J}) 
+	     -  g_{J} \mu_B {\hat \mbf J} \cdot {\mbf H} - {\hat \mbf J} \cdot { \mbf H^s}
 \end{equation}
 
 and calculates the expectation value of the angular momentum
- $\langle \mbf J^n \rangle$
+ $\langle \hat \mbf J \rangle$
 according to
 
 \begin{equation}
-\langle \mbf J^n \rangle =
-\sum_{\Gamma} p_{\Gamma} \langle \Gamma | \mbf J^n | \Gamma \rangle
+\langle \hat \mbf J \rangle =
+\sum_{i=1}^{2J+1} p_{i} \langle i |\hat \mbf J | i \rangle
 \end{equation}
 
 with 
 
 \begin{eqnarray}
-p_{\Gamma}&=&\frac{\exp(-E_{\Gamma}/kT)}{z}\\
-z&=&\sum_{\Gamma} \exp(-E_{\Gamma}/kT)
+p_{i}&=&\frac{\exp(-\epsilon_{i}/kT)}{z}\\
+z&=&\sum_{i=1}^{2J+1} \exp(-\epsilon_{i}/kT)
 \end{eqnarray}
 
-Here $z$ is the partition sum, $|\Gamma\rangle$ the eigenstate corresponding to
-the eigenvalue $E_{\Gamma}$ of the Hamiltonian (\ref{cfze}). 
+Here $z$ is the partition sum, $|i\rangle$ the eigenstate corresponding to
+the eigenvalue $\epsilon_{i}$ of the Hamiltonian (\ref{cfze}). 
 \footnote{In addition to $\langle \mbf J_i \rangle$ the module also returns
-the partition sum $z$ and the magnetic energy $u=\sum_{\Gamma} p_{\Gamma} E_{\Gamma}$.}
+the partition sum $z$ and the magnetic energy $u=\sum_{i=1}^{2J+1} p_{i} \epsilon_{i}$.}
 
 \subsubsection{Module Usage:}
  

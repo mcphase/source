@@ -1,7 +1,7 @@
 \section{Single Ion Modules}\label{simod}
 
 In table~\ref{simodtable} the different single ion modules are listed
-together with the standard operator sequence $I_a,I_b,I_c ...$.
+together with the standard operator sequence $\hat I_a,\hat I_b,\hat I_c ...$.
 
 Usually, internal single ion modules are used as a starting point.
 Alternatively, the single ion properties can be calculated by a program
@@ -11,40 +11,40 @@ with the program package.
 
 \begin{table}[htb] 
 \begin{center}  
-\caption {Single ion\index{singleion} modules and standard operator sequence $I_a,I_b,I_c ...$.}   
+\caption {Single ion\index{singleion} modules and standard operator sequence $\hat I_a,\hat I_b,\hat I_c ...$.}   
 \label{simodtable}   
 \begin{tabular} 
 {l|l} 
-module       &$I_a,I_b,I_c ...$\\
+module       &$\hat I_a,\hat I_b,\hat I_c ...$\\
 \hline
 INTERNAL MODULES  & \\
 \hline
-{\prg so1ion}                & $J_a,J_b,J_c,O_2^{-2},O_2^{-1},O_2^{0},O_2^{1},O_2^{2},O_3^{-3}...O_6^{6}$ \\
-{\prg cfield}                & $J_c,J_a,J_b,O_2^{-2},O_2^{-1},O_2^{0},O_2^{1},O_2^{2},O_3^{-3}...O_6^{6}$ \\
+{\prg so1ion}                & $\hat J_a,\hat J_b,\hat J_c,\hat O_{2-2},\hat O_{2-1},\hat O_{20},\hat O_{21},\hat O_{22},\hat O_{3-3}...\hat O_{66}$ \\
+{\prg cfield}                & $\hat J_a,\hat J_b,\hat J_c,\hat O_{2-2},\hat O_{2-1},\hat O_{20},\hat O_{21},\hat O_{22},\hat O_{3-3}...\hat O_{66}$ \\
 \hline
-{\prg kramer} & $J_a,J_b,J_c$ \\
+{\prg kramer} & $\hat J_a,\hat J_b,\hat J_c$ \\
 \hline
-{\prg brillouin} & $J_a,J_b,J_c$\\
+{\prg brillouin} & $\hat J_a,\hat J_b,\hat J_c$\\
 \hline
 {\prg cluster} & defined in sipf file\\
 \hline
 \hline
 EXTERNAL MODULES & \\
 \hline
-{\prg examples/cecu2a/1ion\_mod/kramer.so}  &  $J_a,J_b,J_c$ \\
+{\prg examples/cecu2a/1ion\_mod/kramer.so}  &  $\hat J_a,\hat J_b,\hat J_c$ \\
 \hline
-{\prg examples/dyni2b2c/1ion\_mod/quartett.so}  &  $J_a,J_b,J_c$\\
+{\prg examples/dyni2b2c/1ion\_mod/quartett.so}  &  $\hat J_a,\hat J_b,\hat J_c$\\
 \hline
-{\prg examples/erni2b2c/1ion\_mod/quartett.so}  &  $J_a,J_b,J_c$\\
+{\prg examples/erni2b2c/1ion\_mod/quartett.so}  &  $\hat J_a,\hat J_b,\hat J_c$\\
 \hline
-{\prg examples/gdni2b2c/1ion\_mod/brillouin.so}  &  $J_a,J_b,J_c$ \\
+{\prg examples/gdni2b2c/1ion\_mod/brillouin.so}  &  $\hat J_a,\hat J_b,\hat J_c$ \\
 \hline
-{\prg examples/ndcu2b\_1dim/1ion\_mod/kramer.so}  & $J_a,J_b,J_c$ \\
+{\prg examples/ndcu2b\_1dim/1ion\_mod/kramer.so}  & $\hat J_a,\hat J_b,\hat J_c$ \\
 \hline
-{\prg ic1ion} & $S_a,L_a,S_b,L_b,S_c,L_c,T_2^{-2},T_2^{-1},T_2^{0},T_2^{1},T_2^{2},T_3^{-3}...T_6^{6}$\\
-{\prg icf1ion} & $S_a,L_a,S_b,L_b,S_c,L_c,T_2^{-2},T_2^{-1},T_2^{0},T_2^{1},T_2^{2},T_3^{-3}...T_6^{6}$\\
+{\prg ic1ion} & $\hat S_a,\hat L_a,\hat S_b,\hat L_b,\hat S_c,\hat L_c,\hat T_2^{-2},\hat T_2^{-1},\hat T_2^{0},\hat T_2^{1},\hat T_2^{2},\hat T_3^{-3}...\hat T_6^{6}$\\
+{\prg icf1ion} & $\hat S_a,\hat L_a,\hat S_b,\hat L_b,\hat S_c,\hat L_c,\hat T_2^{-2},\hat T_2^{-1},\hat T_2^{0},\hat T_2^{1},\hat T_2^{2},\hat T_3^{-3}...\hat T_6^{6}$\\
 \hline
-{\prg bin/cf1ion\_module/cfield.so} & $J_a,J_b,J_c,O_2^{-2},O_2^{-1},O_2^{0},O_2^{1},O_2^{2},O_4^{-4}...,O_4^{4},O_6^{-6}...O_6^{6}$\\
+{\prg bin/cf1ion\_module/cfield.so} & $\hat J_a,\hat J_b,\hat J_c,\hat O_{2-2},\hat O_{2-1},\hat O_{20},\hat O_{21},\hat O_{22},\hat O_{4-4}...,\hat O_{44},\hat O_{6-6}...\hat O_{66}$\\
  \end{tabular}
 \end{center}   
 \end{table}
@@ -463,7 +463,7 @@ void mcalc      	& & {\prg mcdiff} & magnetic moment $\langle\hat \mbf M\rangle$
 	                & & {\prg mcphase} &\\
 int dm1		& & {\prg mcdisp} & $\langle-| \hat\mbf M|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
-void Lcalc      	& & {\prg mcdiff} & orbital ang. momentum $\langle \mbf L\rangle$\\
+void Lcalc      	& & {\prg mcdiff} & orbital ang. momentum $\langle \hat \mbf L\rangle$\\
 	                & & {\prg mcphase} &\\
 int dL1		& & {\prg mcdisp} & $\langle-| \hat\mbf L|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
@@ -559,25 +559,27 @@ The meaning of the symbols is as follows:
 }
 The module function must perform the following tasks:
 \begin{enumerate}
-\item check if the dimensions of vectors ${\mbf I}$,Hxc (taken by {\prg mcphas} from the number of 
+\item check if the dimensions of vectors ${\hat \mbf I}$ and ${\mbf H}$xc 
+(taken by {\prg mcphas} from the number of 
 interaction constant columns in {\prg mcphas.j\index{mcphas.j}})
  and MODPAR (taken by {\prg mcphas} from the number of params in the single ion property
 file) agree with the module specifications. Note a module may be designed to 
 take different dimensions depending on the input files, however the dimensions
-of vectors  ${\mbf I}$ and Hxc has to agree and must be within the range of dimensions which
+of vectors  ${\hat \mbf I}$ and ${\mbf H}$xc  has to agree and must be within the 
+range of dimensions which
 can be treated by the module. If the check fails the module function should exit the
 program with an appropriate error message
 \item the module should calculate from external field $\mbf H_{ext}$ at a given temperature the 
-thermal expectation values of the operators $\langle Ia\rangle, \langle Ib\rangle,\langle Ic\rangle etc$ 
+thermal expectation values of the operators $\langle\hat I_a\rangle, \langle\hat  I_b\rangle,\langle\hat  I_c\rangle etc$ 
 and return them as
 a vector $\mbf I$. Input file parameters params are supplied as a vector MODPAR and
 Lande factor as gJ and  can be used for this purpose. The Hamiltonian
 is usually assumed to be of the general form
- $H=H_0- \mbf M \mbf H_{ext} - I_a {\rm Hxc}(1) -I_b {\rm Hxc}(2) -I_c {\rm Hxc}(3) 
--I_d {\rm Hxc}(4) ...$.
+ $\hat H=\hat H_0- \hat \mbf M \mbf H_{ext} - \hat I_a {\rm Hxc}(1) - \hat I_b {\rm Hxc}(2) -\hat I_c {\rm Hxc}(3) 
+-\hat I_d {\rm Hxc}(4) ...$.
 \item the natural logarithm of the partition sum Z should be calculated and returned as lnZ,
-$Z=\sum_i e^{-E_i/kT}$
-\item the magnetic energy U should be calculated and returned as U, $U=\sum_i p_i=\sum_i E_i e^{-E_i/kT}/Z$
+$Z=\sum_i e^{-\epsilon_i/kT}$
+\item the magnetic energy U should be calculated and returned as U, $U=\sum_i p_i=\sum_i \epsilon_i e^{-\epsilon_i/kT}/Z$
 \item if $T<0$ all quantities should be evaluated assuming that all Boltzmann probabilities $p_i$
  are zero except for the state number $n=(-T)$, for which the probability $p_n=1$.
 \end{enumerate}
@@ -729,7 +731,7 @@ be the same for du1calc and all the corresponding d...1 functions for observable
 transition energy of transition number {\prg tn}. The result should be returned as {\prg delta}
 \item for the transition number tn the vector u1 is to
  be filled with 
-${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|I^s_{\alpha}-\langle I^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
+${\mbf u^s_{\alpha1}}=\sqrt{(p_--p_+)}\langle -|\hat I^s_{\alpha}-\langle \hat I^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
 \item
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
@@ -866,8 +868,8 @@ and return them as
 a vector $\mbf m$. Input file parameters params are supplied as a vector MODPAR and
 Lande factor as gJ and  can be used for this purpose. The Hamiltonian
 is usually assumed to be of the general form
- $H=H_0- \mbf M \mbf H_ext - I_a {\rm Hxc}(1) -I_b {\rm Hxc}(2) -I_c {\rm Hxc}(3) 
--I_d {\rm Hxc}(4) ...$.
+ $\hat H=\hat H_0- \hat \mbf M \mbf H_{ext} - \hat I_a {\rm Hxc}(1) -\hat I_b {\rm Hxc}(2) -\hat I_c {\rm Hxc}(3) 
+-\hat I_d {\rm Hxc}(4) ...$.
 \item if $T<0$ all quantities should be evaluated assuming that all Boltzmann probabilities $p_i$
  are zero except for the state number $n=(-T)$, for which the probability $p_n=1$.
 \end{enumerate}
@@ -883,7 +885,7 @@ In order to visualized magnetic moment fluctuations and to calculate neutron int
 in dipole approximation the external single ion module has to provide the transition
 matrix elements of the magnetic moment operator in units of $\mu_B$ by the
 vector $m1$, which is given by:
- ${\rm m1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|m^s_{\alpha}-\langle m^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
+ ${\rm m1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|\hat m^s_{\alpha}-\langle\hat  m^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
 
 The format to be used is:
 {\footnotesize
@@ -932,8 +934,8 @@ have to be considered. {\em IMPORTANT: the numbering scheme of transitions has t
 be the same for du1calc and all the corresponding d...1 functions for observables !}
 \item for the transition number tn the vector m1 is to
  be filled with 
-${\mbf m1^s_{\alpha}}=\sqrt{(p_--p_+)}\langle -|m^s_{\alpha}-\langle m^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
-(note $\mbf m=2\mbf S+ \mbf L $).
+${\mbf m1^s_{\alpha}}=\sqrt{(p_--p_+)}\langle -|\hat m^s_{\alpha}-\langle\hat  m^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
+(note $\hat \mbf m=2\hat \mbf S+ \hat \mbf L $).
 \item
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
@@ -967,7 +969,7 @@ In order to visualize angular momentum fluctuations and to calculate neutron int
 in dipole approximation the external single ion module has to provide the transition
 matrix elements of the angular momentum by the
 vector $L1$, which is given by:
- ${\rm L1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|L^s_{\alpha}-\langle L^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
+ ${\rm L1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|\hat L^s_{\alpha}-\langle\hat  L^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
 
 The format to be used is:
 {\footnotesize
@@ -1002,7 +1004,7 @@ In order to visualize spin fluctuations and to calculate neutron intensities
 in dipole approximation the external single ion module has to provide the transition
 matrix elements of the spin by the
 vector $S1$, which is given by:
- ${\rm S1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|S^s_{\alpha}-\langle S^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
+ ${\rm S1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|\hat S^s_{\alpha}-\langle \hat S^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
 
 The format to be used is:
 {\footnotesize
@@ -1028,20 +1030,21 @@ The meaning of the symbols follows exactly that of function
  ion~\cite{lovesey84-1}:
  
  \begin{equation}\label{scattop}
- \hat  \mbf Q \times (\hat \mathcal Q \times \hat \mbf  Q) = \frac{-1}{2\mu_B} 
- \hat  \mbf Q \times (\mbf M(\mbf Q) \times \hat \mbf  Q) =\frac{-1}{2\mu_B} \int d\mbf r
+  \mbf Q \times (\hat \mathcal Q \times  \mbf  Q) = \frac{-1}{2\mu_B} 
+   \mbf Q \times (\hat \mbf M(\mbf Q) \times \mbf  Q) =\frac{-1}{2\mu_B} \int d\mbf r
 e^{i\mbf Q \mbf r} \left [ 
-   \hat  \mbf Q \times (\mbf M(\mbf r) \times \hat \mbf  Q) \right ]
+     \mbf Q \times (\hat \mbf M(\mbf r) \times \mbf  Q) \right ]
  \end{equation}
  
- Note that the magnetisation density consists of two contributions $\mbf M(\mbf r)=\mbf M_S(\mbf r)+\mbf M_L(\mbf %%@
-r)$, the
- spin and orbital contribution. The orbital contribution is not uniquely defined due to a gauge freedom ($\nabla %%@
-\times \mbf M_L (\mbf r)=\mbf j(\mbf r)$, the curl of the magnetisation must give the current density, so any %%@
+ Note that the magnetisation density consists of two contributions 
+$\hat \mbf M(\mbf r)=\hat \mbf M_S(\mbf r)+\hat \mbf M_L(\mbf r)$, the
+ spin and orbital contribution. The orbital contribution is not uniquely defined due to a gauge
+ freedom ($\nabla \times \hat \mbf M_L (\mbf r)=\hat \mbf j(\mbf r)$, the curl of the 
+magnetisation must give the current density, so any %%@
 gradient of a potential may be added
-to $\mbf M(\mbf r)$ without changing the result). However, this does not matter, because adding a gradient of a %%@
+to $\hat \mbf M(\mbf r)$ without changing the result). However, this does not matter, because adding a gradient of a %%@
 potential
-to $\mbf M(\mbf r)$ will just give a contribution $\mbf Q \times \mbf Q \times \mbf Q=0$ to the equation %%@
+to $\hat \mbf M(\mbf r)$ will just give a contribution $\mbf Q \times \mbf Q \times \mbf Q=0$ to the equation %%@
 (\ref{scattop}),
 thus the neutron scattering cross section is not sensitive to the chosen gauge, which is an important feature of %%@
 the theory.
@@ -1104,7 +1107,7 @@ of the scattering vector,
 output should be a corresponding vector
  ${\mbf m^s_{\alpha1}}(\mbf Q)=\sqrt{(p_--p_+)}
 \langle -|\hat \mbf M_{\alpha}^{\dag}(\mbf Q)-\langle \hat \mbf M_{\alpha}^{\dag}(\mbf Q)\rangle|+\rangle/\mu_B$.
-Here $\mathcal Q_{\alpha}=\frac{ \mbf M_{\alpha}(\mbf Q)}{-2 \mu_B}$
+Here $\hat \mathcal Q_{\alpha}=\frac{\hat  \mbf M_{\alpha}(\mbf Q)}{-2 \mu_B}$
  are the cartesian components of the scattering operator.
  {\prg dmq1} is called many times, for
  every scattering vector. In order to
@@ -1281,7 +1284,7 @@ expression the sum over the different equally spaced phonon levels (of the harmo
 in the single ion susceptibility is already done. If the levels are not equally spaced, such
 as by interaction with other degrees of freedom, one has to take into account each transition
 separately by the expression
-${\rm P1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|P^s_{\alpha}-\langle P^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
+${\rm P1}^s_{\alpha}=\sqrt{(p_--p_+)}\langle -|\hat P^s_{\alpha}-\langle\hat  P^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$. 
 
 The format to be used is:
 {\footnotesize
@@ -1339,7 +1342,7 @@ be the same for du1calc and all the corresponding d...1 functions for observable
  be filled with the displacement transition matrix elements (\AA)
 $\langle-|\hat P_{\alpha}|+\rangle=S_{tn,\alpha}\frac{\hbar}{\sqrt{2m\Delta_{tn}}}$
 or more general
-${\mbf P1^s_{\alpha}}=\sqrt{(p_--p_+)}\langle -|P^s_{\alpha}-\langle P^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
+${\mbf P1^s_{\alpha}}=\sqrt{(p_--p_+)}\langle -|\hat P^s_{\alpha}-\langle\hat  P^s_{\alpha}\rangle_{\mbf H,T}|+\rangle$.
 \item
 If the energy of this transition
 is zero, i.e. $\Delta(tn)=0$ (diffuse scattering), 
@@ -1387,9 +1390,9 @@ The module function must perform the following task:
 
 In order to visualize charge density  fluctuations 
  the external single ion module has to provide the transition
-matrix elements of the chargedensity coefficient operator $\sum_i Z_{lm}(\Omega_i)$ by a
+matrix elements of the chargedensity coefficient operator $\sum_i \hat Z_{lm}(\Omega_i)$ by a
 vector $cd1$, which is given by:
- ${\rm cd1}^s_{\alpha=lm}=\sqrt{(p_--p_+)}\langle -|\sum_i Z^s_{lm}(\Omega_i)-\langle \sum_i Z^s_{lm}(\Omega_i)\rangle_{\mbf H,T}|+\rangle$. 
+ ${\rm cd1}^s_{\alpha=lm}=\sqrt{(p_--p_+)}\langle -|\sum_i \hat  Z^s_{lm}(\Omega_i)-\langle \sum_i\hat  Z^s_{lm}(\Omega_i)\rangle_{\mbf H,T}|+\rangle$. 
 
 The format to be used is:
 {\footnotesize

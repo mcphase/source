@@ -11,18 +11,19 @@ A three dimensional Einstein oscillator (for atom $n$) in a solid can be describ
 the following Hamiltonian
 
 \begin{equation}\label{einstein}
-H_E(n)=\frac{a_0^2{\mbf p_n}^2}{2m_n} - \frac{1}{2} {\mbf u}^T_n \m{K}(nn) {\mbf u}_n
+\hat H_E(n)=\frac{a_0^2{\hat \mbf p_n}^2}{2m_n} - \frac{1}{2} {\hat \mbf u}^T_n \m{K}(nn) {\hat \mbf u}_n
 \end{equation}
 
-Here $\mbf u$ is the dimensionless displacement vector ($\mbf u_n={\mbf P}_n/a_0=\Delta {\mbf r}_n/a_0$, 
+Here $\hat \mbf u$ is the dimensionless displacement vector 
+($\hat \mbf u_n={\hat \mbf P}_n/a_0=\Delta {\hat \mbf r}_n/a_0$, 
 with the Bohr radius $a_0=0.5219$~\AA), $m_n$ the
-mass of the atom $n$, $\mbf p_n=d\mbf u_n/dt$ the conjugate momentum to $\mbf u_n$ and
+mass of the atom $n$, $\hat \mbf p_n=d\hat \mbf u_n/dt$ the conjugate momentum to $\hat \mbf u_n$ and
 $\m{K}(nn)$ the Matrix describing the restoring force.
 
 Coupling such oscillators leads to the Hamiltonian
 
 \begin{equation}
-H_{phon}=\sum_n H_E(n) -\frac{1}{2} \sum_{n\neq n'} {\mbf u}_n^T \m{K}(nn')  {\mbf u}_{n'}
+\hat H_{phon}=\sum_n \hat H_E(n) -\frac{1}{2} \sum_{n\neq n'} {\hat \mbf u}_n^T \m{K}(nn')  {\hat \mbf u}_{n'}
 \end{equation}
 
 Note that our coupling constants $K_{\alpha\beta}(nn')=-A_{\alpha\beta}(nn')$, where
@@ -33,21 +34,21 @@ In a mean field type of theory
 the phonon single ion module has thus to solve the Hamiltonian
 
 \begin{equation}\label{phonsiham}
-H_E=\frac{a_0^2{\mbf p}^2}{2m} - \frac{1}{2} {\mbf u}^T \m{K} {\mbf u} - {\mbf F}^T {\mbf u}
+\hat H_E=\frac{a_0^2{\hat \mbf p}^2}{2m} - \frac{1}{2} {\hat \mbf u}^T \m{K} {\hat \mbf u} - {\mbf F}^T {\hat \mbf u}
 \end{equation}
 
-Here the force $\mbf F$ corresponds to the exchange field $\mbf H_{xc}$ and $\mbf u$ to
- the general operator $\mbf I$ and $\m{K}(nn')$ to $\mathcal J(nn')$ of equation (\ref{fullhamiltonian}),
+Here the force $\mbf F$ corresponds to the exchange field $\mbf H_{xc}$ and $\hat \mbf u$ to
+ the general operator $\hat \mbf I$ and $\m{K}(nn')$ to $\mathcal J(nn')$ of equation (\ref{fullhamiltonian}),
 respectively. The single ion Hamiltonian (\ref{phonsiham}) can be solved by transforming
 it to normal coordinates (main axis of the Einstein oscillator) using the transformation
 matrix $\m{S}$, which diagonalises $\m{K}=\m{S}^T\m{\Omega}\m{S}$:
 
 \begin{equation}
- \mbf u'=\m{S} \mbf u -\m{\Omega}^{-1} \m{S} \mbf F
+ \hat \mbf u'=\m{S} \hat \mbf u -\m{\Omega}^{-1} \m{S} \mbf F
 \end{equation}
 
 \begin{equation}\label{phonsihamdiag}
-H_E=\frac{a_0^2{\mbf p'}^2}{2m}+\frac{1}{2} {\mbf u'}^T \m{\Omega} {\mbf u'} 
+\hat H_E=\frac{a_0^2{\hat \mbf p}^{'2}}{2m}+\frac{1}{2} {\hat \mbf u}^{'T} \m{\Omega} {\hat \mbf u'} 
 -\frac{1}{2}\mbf F^T \m{S}^T \m{\Omega}^{-1} \m{S} \mbf F
 \end{equation}
 
@@ -62,9 +63,9 @@ have to calculate the transition matrix elements:
 The single ion susceptibility for such a transition, e.g. $\Delta_1$ - corresponds to
 
 \begin{eqnarray}
-\m{\chi}^0&=&\sum_{\nu\mu}\frac{\langle \nu|\mbf u|\mu\rangle\langle \mu |\mbf u^T|\nu \rangle}{\Delta_1 -\hbar \omega}
+\m{\chi}^0&=&\sum_{\nu\mu}\frac{\langle \nu|\hat \mbf u|\mu\rangle\langle \mu |\hat \mbf u^T|\nu \rangle}{\Delta_1 -\hbar \omega}
 (p_{\nu} -p_{\mu}) \\
-&=&\sum_{\nu\mu}\frac{\langle \nu|\m{S}^T \mbf u'|\mu\rangle\langle \mu |\mbf u'^T \m{S}|\nu \rangle}{\Delta_1 -\hbar \omega}
+&=&\sum_{\nu\mu}\frac{\langle \nu|\m{S}^T \hat \mbf u'|\mu\rangle\langle \mu |\hat \mbf u'^T \m{S}|\nu \rangle}{\Delta_1 -\hbar \omega}
 (p_{\nu} -p_{\mu}) 
 \end{eqnarray}
 Because the different components of $\mbf u'$ commute and the Hamiltonian (\ref{phonsihamdiag})
@@ -72,14 +73,14 @@ is separable, for the transition $\Delta_1$ only the terms with $u_1'$ in the no
 contribute:
 
 \begin{eqnarray}
-\chi^0_{\alpha\beta}&=&S^T_{\alpha1}\sum_{\nu\mu}\frac{\langle \nu|u_1'|\mu\rangle\langle \mu | u_1'|\nu \rangle}{\Delta_1 -\hbar \omega}
+\chi^0_{\alpha\beta}&=&S^T_{\alpha1}\sum_{\nu\mu}\frac{\langle \nu|\hat u_1'|\mu\rangle\langle \mu |\hat  u_1'|\nu \rangle}{\Delta_1 -\hbar \omega}
 (p_{\nu} -p_{\mu}) S_{1\beta}\\
 &=& S^T_{\alpha1}S_{1\beta}\frac{\hbar^2}{2ma_0^2\Delta_1}\left(\frac{1}{\Delta_1-\hbar\omega}+\frac{1}{\Delta_1+\hbar\omega}\right )
 \end{eqnarray}
 
-In order to derive the last result we had to express $u_1'$ in terms of ladder  operators
-$u_1'=a_0^{-1} \hbar/\sqrt{2m\Delta_1}(a+a^{\dagger})$ and  apply $a^{\dagger}|\nu\rangle=\sqrt{\nu+1}|\nu+1\rangle$,
-$a|\nu\rangle=\sqrt{\nu}|\nu-1\rangle$ and $\sum_{\nu=0}^{\infty}(p_{\nu}-p_{\nu+1})(\nu+1)=1$,
+In order to derive the last result we had to express $\hat u_1'$ in terms of ladder  operators
+$\hat u_1'=a_0^{-1} \hbar/\sqrt{2m\Delta_1}(\hat a+\hat a^{\dagger})$ and  apply $\hat a^{\dagger}|\nu\rangle=\sqrt{\nu+1}|\nu+1\rangle$,
+$\hat a|\nu\rangle=\sqrt{\nu}|\nu-1\rangle$ and $\sum_{\nu=0}^{\infty}(p_{\nu}-p_{\nu+1})(\nu+1)=1$,
 $p_{\nu}=exp(-\nu\Delta_1/kT)(1-exp(-\Delta_1/kT))$. This shows that the single ion susceptibility
 of our atom can be written as a sum of three effective transitions (with temperature independent
 susceptibility)
@@ -157,7 +158,7 @@ They should not be placed at exactly the same position as the phonon atoms - i.e
 (slightly) different to enable the mcphas.j loader to identify which  is which.
 
 The coupling between phononic and crystal field degrees of freedom should be derived from
-$H_{cf-phon}=(\mbf \nabla_{\mbf u(n')} B_l^m(n))   \mbf u(n')  O_l^m(\mbf J_n)$. This could be done
+$\hat H_{cf-phon}=(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$. This could be done
 using the program {\prg pointc} and {\prg makenn} applying small differential changes to
 the atomic positions in the unit cell in order to evaluate the gradient of the crystal field
 parameters. [efficient program to do this task is to be written]

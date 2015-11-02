@@ -145,7 +145,7 @@ gjmbH=gjmbHxc+(*g_J)*MU_B*Hext;
   pr=1;
   if (tn<0) {pr=0;tn*=-1;}
   if (T<0){T=-T;}
-  double JJ,K_BT,XJ,gmhkt,gmh,Z,R,X,sinth,hxxyy,jjkt;
+  double JJ,K_BT,XJ,gmhkt,gmh,Z,R,X,sinth,hxxyy,jjkt,corr;
   complex <double> i(0,1),bx,by,bz;
 
 // program brillouin function for S=J=ABC(1)
@@ -215,12 +215,17 @@ if (tn==2) // transition to finite energy
 	 jjkt-=JJ*JJ*XJ*X*X;
 	 jjkt*=X/(1-X)/(1-X);
 	 jjkt/=(1/XJ-X*XJ)*K_BT;
+         jjkt/=(1/XJ-X*XJ);
+         corr=JJ*(XJ*X*X-1/XJ)+(JJ+1)*X*(1/XJ-XJ);
+         corr/=(1-X)*(1/XJ-X*XJ);
+         jjkt-=corr*corr;
+         jjkt/=K_BT;
          }
         }
  // now lets calculate mat
- u1(1)=gjmbH(1)*sqrt(jjkt);
- u1(2)=gjmbH(2)*sqrt(jjkt);
- u1(3)=gjmbH(3)*sqrt(jjkt);
+ u1(1)=gjmbH(1)*sqrt(jjkt)/gmh;
+ u1(2)=gjmbH(2)*sqrt(jjkt)/gmh;
+ u1(3)=gjmbH(3)*sqrt(jjkt)/gmh;
  }
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
 

@@ -37,8 +37,7 @@ extern "C" __declspec(dllexport) void Icalc(Vector & Jr,double * T, Vector & Hxc
 extern "C" void Icalc(Vector & Jr,double * T, Vector & Hxc,Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffile,
                       double * lnZ,double * U,ComplexMatrix & est)
 #endif
-{   
-    /*on input
+{ /*on input
     T		temperature[K]
     gJmbHin	vector of effective field [meV]
     gJ          Lande factor
@@ -77,8 +76,7 @@ Matrix brot(1,3,1,3);
 //printf("%g %g %g\n",gjmbHin(1),gjmbHin(2),gjmbHin(3));
 gjmbH=rot*gjmbHin;
 //printf("%g %g %g\n",gjmbH(1),gjmbH(2),gjmbH(3));
-
-    
+   
   double alpha, betar, betai, lambdap,lambdap_K_BT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, jap, jam, jbp, jbm, jcp, jcm,Z;
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
@@ -100,8 +98,6 @@ gjmbH=rot*gjmbHin;
   (*U)=lambdap*(np-nm); // energy
 //printf("T=%g expp=%g expm=%g \n",(*T),expp,expm);
 
-//  nennerp = (alpha - lambdap) * (alpha - lambdap) + betar * betar + betai * betai;
-//  nennerm = (alpha + lambdap) * (alpha + lambdap) + betar * betar + betai * betai;
     alphaxlambdap=alpha*lambdap;
     alpha_lambdap=alpha-lambdap;
     alphaplambdap=alpha+lambdap;
@@ -111,7 +107,6 @@ gjmbH=rot*gjmbHin;
   if (nennerp > SMALL)
     {
       jap = -MODPAR[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
-//      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
       jbp = MODPAR[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
       jcp = -2.0 * MODPAR[3] * betai * (alpha_lambdap) / nennerp;
     }
@@ -132,7 +127,6 @@ gjmbH=rot*gjmbHin;
   if (nennerm > SMALL)
     {
       jam = -MODPAR[1] * 2.0 * betar * (alphaplambdap) / nennerm;
-//      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
       jbm = MODPAR[2] * (2.0 * alpha*alphaplambdap) / nennerm;
       jcm = -2.0 * MODPAR[3] * betai * (alphaplambdap) / nennerm;
     }
@@ -245,8 +239,6 @@ J=rot*Jin;
   np = expp / Z;
   nm = expm / Z;
 
-//  nennerp = (alpha - lambdap) * (alpha - lambdap) + betar * betar + betai * betai;
-//  nennerm = (alpha + lambdap) * (alpha + lambdap) + betar * betar + betai * betai;
     alphaxlambdap=alpha*lambdap;
     alpha_lambdap=alpha-lambdap;
     alphaplambdap=alpha+lambdap;
@@ -294,7 +286,6 @@ if (tn==2)
   if (nennerp > SMALL)
     {
       jap = -MODPAR[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
-//      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
       jbp = MODPAR[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
       jcp = -2.0 * MODPAR[3] * betai * (alpha_lambdap) / nennerp;
     }
@@ -315,7 +306,6 @@ if (tn==2)
   if (nennerm > SMALL)
     {
       jam = -MODPAR[1] * 2.0 * betar * (alphaplambdap) / nennerm;
-//      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
       jbm = MODPAR[2] * (2.0 * alpha*alphaplambdap) / nennerm;
       jcm = -2.0 * MODPAR[3] * betai * (alphaplambdap) / nennerm;
     }

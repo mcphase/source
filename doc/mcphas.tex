@@ -136,49 +136,69 @@ Also the examples included in the program package may serve as starting
 points.
 
 \item [PARAMETERS FOR SUB FECALC SELFCONSISTENCY PROCESS:] the most important
-procedure in the module {\prg mcphas} is the sub fecalc. In this part of the 
+procedure in the module {\prg mcphas} is the sub {\prg fecalc}\index{fecalc}. In this part of the 
 program the self consistent calculation of the magnetic moment configuration
 is performed as shown schematically in fig.~\ref{fecalc}. 
 In the mean field approximation the Hamiltonian~(\ref{hamilton}) is approximated
-by
+by a sum over the $N_b$ sites in the magnetic supercell
 
 \begin{equation}
- {\mathcal H}=\sum_n H_{SI}^n + E_{corr}
+ {\hat \mathcal H}=\sum_{s=1}^{N_b} \hat H^{MF}(s) + E_{corr}
 \end{equation}
 
-with the single ion Hamiltonian (in case of module {\prg so1ion\index{so1ion}})
+with the single ion Hamiltonian
 
 \begin{equation}
-H_{SI}^n=  B_l^m O_{lm}({\mbf J}^n) 
-	     - g_{Jn} \mu_B {\mbf J}^n {\mbf H^n_{eff}} 
+\hat H^{MF}(s)=  \hat H(s) 
+	     - \sum_{\alpha=1}^{\rm nofcomponents} H_{\alpha}^s \hat I_{\alpha}^s
 \end{equation}
 
-and the correction term
+In case of module {\prg so1ion\index{so1ion}} in it's simplest 
+application with ${\rm nofcomponents}=3$ interaction operators only, the interaction operators
+are defined to be equal to the total angular momentum, i.e. $\hat I_{\alpha}=\hat J_{\alpha}$
+(with the magnetic moment $\mbf M=g_{J} \mu_B \langle \hat \mbf J \rangle$ )
+and the single ion Hamiltonian is given by
 
 \begin{equation}
-E_{corr}=\frac{1}{2}\sum_{n} g_{Jn} \mu_B \langle {\mbf J}^n
- \rangle (\mbf H^n_{eff}-\mbf H) 
+\hat H^{MF}_{\rm so1ion}(s)=  \underbrace{ B_l^m \hat O_{lm}({\hat \mbf J}^s) 
+	     - g_{Js} \mu_B {\hat \mbf J}^s \cdot {\mbf H} }_{\hat H(s) }-   {\hat \mbf I}^s \cdot {\mbf H}^s 
 \end{equation}
 
-and with the mean fields $ \mbf H^n_{eff}$ given by
+Note, here ${\mbf H}^s$ denotes the exchange field at the site $s$ and ${\mbf H}$ denotes the applied
+magnetic field.
+
+The correction term is defined by
+
+\begin{equation}
+E_{corr}=\frac{1}{2}\sum_{s=1}^{N_b}\sum_{\alpha=1}^{\rm nofcomponents}  \langle {\hat I}^s_{\alpha}
+ \rangle {H}^s_{\alpha} 
+\end{equation}
+
+and the components exchange fields ${\mbf H}^s$ are given by
 
 \begin{equation}\label{meanfield}
-\mbf H^n_{eff}=\mbf H + \mbf H^n_{xc}=\mbf H+\sum_{{\mbf G'}n'} \frac{{\mathcal J}
-(\mbf r_n-(\mbf G'+\mbf r_{n'}))}{g_{Jn}\mu_B } \langle{\mbf
-J}^{n'}\rangle
+H^s_{\alpha}=\sum_{\mbf G'}\sum_{s'=1}^{N_b}\sum_{\beta=1}^{\rm nofcomponents} {\mathcal J}_{\alpha\beta}
+(\mbf r_s-(\mbf G'+\mbf r_{s'})) \langle \hat I^{s'}_{\beta} \rangle
 \end{equation}
 
-These mean fields and the moments $\langle \mbf J^n \rangle$ 
+The exchange fields ${\mbf H}^s$ and the moments $\langle {\hat\mbf  I}^s \rangle$ 
 are determined in a self consistent
 way. For a given magnetic unit cell and initial configuration 
-of magnetic moments
-the mean fields are calculated according to equation~(\ref{meanfield}). 
+of moments
+the exchange fields are calculated according to equation~(\ref{meanfield}). 
 Then, for each
 magnetic ion the single ion property module is taken 
-and the magnetic moment $\langle \mbf J^n \rangle$ is 
+and the  moment $\langle {\hat\mbf  I}^s \rangle$  is 
 calculated from it's mean field. The mean fields are used again in equation~(\ref{meanfield})
 and so on .... until convergence is reached. 
-Then, the free energy ($f=-kT\sum_n \ln(z_n) + E_{corr}$ ) 
+Then, the free energy per site $f$
+
+\begin{eqnarray}\label{freeenergy}
+f&=&-kT\frac{1}{N_b}\sum_s \ln(z_s) + \frac{E_{corr}}{N_B} \\
+  z_s&=&\sum_i \exp(-\epsilon^s_i/kT) \, {\rm \dots  partition \, sum \, of \, the \, site} \, s  \\
+&&\epsilon_i^s \, {\rm  \dots  \, eigenvalues \, of \, }\hat H^{MF}(s) \nonumber
+\end{eqnarray}
+
 of the stabilised
 configuration is calculated (this is why this sub is called {\prg fecalc}). 
 The free energies of a lot of different stabilised configurations have to
@@ -258,7 +278,9 @@ parameter file (sipffilename).
 \item [Line 9a:]  If {\prg diagonalexchange=2}, then this line gives the indices of the exchange tensor corresponding to 
  the columns 4 onwards. It must have a variable called {\prg indexexchange} followed by a list of names of components of the interaction
  tensor separated by space. E.g.
+
  \verb|  #! indexexchange= JaJb JbJc  | 
+
 means column 4 gives the the interaction constant between the
  first angular momentum component of the current ion with the second angular momentum component of its neighbour, whilst 
  column 5 has the interaction constant between the second angular momentum component of this ion with the third component of its
@@ -580,11 +602,7 @@ The program {\prg display} (see section \ref{display}) can be used
 for the online display\index{display} of any other
 curve(s).
 
-
-\subsection{Output Files - {\prg mcphas.qvc,phs,sps,mf,fum,j1...,xyt,hkl} }\label{outputfiles}
- (in directory ./results/ after a simulation run) 
-
-\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{figure}[t]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode
 \includegraphics[angle=0, width=0.3\textwidth]{figsrc/magnetization_ndcu2.ps}
 \end{center}
@@ -592,13 +610,17 @@ curve(s).
 \label{magnetization}
 \end{figure}
 
-\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{figure}[t]%h=here, t=top, b=bottom, p=separate figure page
 \begin{center}\leavevmode
 \includegraphics[angle=0, width=0.8\textwidth]{figsrc/magnetostriction_ndcu2.eps}
 \end{center}
 \caption{Calculated spontaneous magnetostriction of NdCu$_2$.}
 \label{magnetostrictiongraphic}
 \end{figure}
+
+\subsection{Output Files - {\prg mcphas.qvc,phs,sps,mf,fum,j1...,xyt,hkl} }\label{outputfiles}
+ (in directory ./results/ after a simulation run) 
+
 
 \begin{description}
 \item [\prg mcphas.qvc]    the set of test q-vectors used for calculation of free energy.
@@ -620,16 +642,26 @@ curve(s).
 			   moments in $b$ direction. 
 \item [\prg mcphas.sps]    $T-H$ dependence of spin-configuration. The spin configurations stored in this
                            file may be displayed using the program {\prg spins\index{spins}}, an example is given
-			   in figure~\ref{spingraphic}. The expectation values $\langle I_{\alpha} \rangle$ ($\alpha=1,\dots,nofcomponents$, note that for the single ion module {\prg so1ion} $I_1=J_x,I_2=J_y,I_3=J_z,I_4=O_2^{-2},I_5=O_2^{-1}, \dots$, for the complete list see appendix \ref{stevens}) are stored in this file  for i=1,2,...,number of spins in magnetic unit cell.
+			   in figure~\ref{spingraphic}. The expectation values 
+                           $\langle \hat I_{\alpha} \rangle$ ($\alpha=1,\dots,{\rm nofcomponents}$, 
+                           note that for the single ion module {\prg so1ion} 
+                           $\hat I_1=\hat J_x,\hat I_2=\hat J_y,\hat I_3=\hat J_z,\hat I_4=\hat O_2^{-2},\hat I_5=\hat O_2^{-1}, \dots$,
+                           for the complete list see appendix \ref{stevens}) are stored in this file  for i=1,2,...,number of spins in magnetic unit cell.
                             
 
 \item [\prg mcphas.mf]     $T-H$ dependence of exchange field configuration, stored as $H_{xc}(i)$(unit is in meV)
                             for i=1,2,...,number of spins in magnetic unit cell.
                            
-\item [\prg mcphas.fum]    free energy, magnetic energy (the derivative with respect to temperature gives the specific heat),
-                           magnetisation data (if a {\prg mcalc} function is present in the single ion module).
+\item [\prg mcphas.fum]    free energy $f$ according to equation (\ref{freeenergy}), magnetic energy per site $u$
+\begin{equation}
+u=f+Ts=f-T\partial f/\partial T=\frac{1}{N_b}\sum_{s,i} \epsilon^s_i \frac{e^{-\epsilon^s_i/kT}}{z^s}+\frac{E_{corr}}{N_b}
+\end{equation}
+                            Note, that form the numerical derivative of $u$ with respect to temperature 
+                             the specific heat per site in mean field approximation can be calculated $c_V=\partial u/\partial T$.
+                           Finally, {\prg mcphas.fum} contains the calculated
+                           magnetisation  (only if a {\prg mcalc} function is present in the single ion module).
                             As an example for the information
-			   contained in this file the calculated magnetisation and magnetostriction of NdCu$_2$ is shown in
+			   contained in this file the calculated magnetisation  of NdCu$_2$ is shown in
 			   fig~\ref{magnetization}.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
                             also for the magnetisation components $ma,mb,mc$ in these tables 
@@ -642,11 +674,13 @@ curve(s).
 	       the following sum of dyadic products:
 
 	       \begin{equation}
-	        \frac{1}{n}\sum_{s=1}^n <{\mbf I}^s> \times  <{\mbf I}^{s+k}>
+	        \frac{1}{N_b}\sum_{s=1}^{N_b} <{\hat \mbf I}^s> \otimes  <{\hat \mbf I}^{s+k}>
 	       \end{equation}
-	       with $n$ being the number of magnetic atoms in the magnetic unit cell.
-                For example for the single ion module {\prg so1ion} $I_1=J_x,I_2=J_y,I_3=J_z,I_4=O_2^{-2},I_5=O_2^{-1}, \dots$, for the complete list see appendix \ref{stevens}.
-	       Single ion and two-ion magnetostriction can be calculated using the $<I_{\alpha}>$ from {\prg mcphas.xyt} and the
+	       with $N_b$ being the number of magnetic atoms in the magnetic unit cell.
+                For example for the single ion module {\prg so1ion} 
+               $\hat I_1=\hat J_x,\hat I_2=\hat J_y,\hat I_3=\hat J_z,\hat I_4=\hat O_2^{-2},\hat I_5=\hat O_2^{-1},
+               \dots$, for the complete list see appendix \ref{stevens}.
+	       Single ion and two-ion magnetostriction can be calculated using the $<\hat I_{\alpha}>$ from {\prg mcphas.xyt} and the
 	       spin-spin correlation functions from {\prg mcphas1.j1 .j1 .j2 ...}. As an example the magnetostriction analysis of
 	       NdCu$_2$ is shown in figure~\ref{magnetostrictiongraphic}. For details 
              please refer to~\cite{rotter02-8885}.
@@ -654,7 +688,8 @@ curve(s).
                             also for the moment components in these tables 
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \item [\prg mcphas.xyt]    phase diagram as x,y,T, H, phase-number j according to spin-configuration table
-               given in mcphas.phs, a periodicity key, thermal expectationvalues $\langle I_{\alpha} \rangle$ (averaged over the unit cell).
+               given in mcphas.phs, a periodicity key, thermal expectationvalues $\langle \hat  I_{\alpha} \rangle$ 
+               (averaged over the unit cell).
  Figure~\ref{phasediagramgraphic}
 	       shows the phase diagram of NdCu$_2$ for magnetic fields parallel to the orthorhombic $b$-direction.
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ 
@@ -693,6 +728,9 @@ will have domains with moments parallel to $a$ and $b$. The program will generat
                             the magnetic moment component in these tables 
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
 \end{description} 
+
+
+
 
 \vspace{1cm}
 {\em Exercises:}

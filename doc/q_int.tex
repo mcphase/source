@@ -11,8 +11,9 @@ can be described by products of Stevens operators. The general two ion exchange 
 \label{multipolehamiltonrepeated}
  {\mathcal H}_{JJ}=
              -\frac{1}{2}  \sum_{nn'} \sum_ {ll'} \sum_{mm'}
-     {\mathcal K}_{ll'}^{mm'}(nn') O_{lm}({\mbf J}^n) O_{l'm'}({\mbf J}^{n'})
-=-\frac{1}{2}  \sum_{nn'} \sum_{\stackrel{\alpha=(lm)}{ \alpha'=(l'm')}} J_{\alpha\alpha'}(nn') \hat I_{\alpha} \hat I_{\alpha'}
+     {\mathcal K}_{ll'}^{mm'}(nn') \hat O_{lm}({\mbf J}^n) \hat O_{l'm'}({\mbf J}^{n'})
+=-\frac{1}{2}  \sum_{nn'} \sum_{\stackrel{\alpha=(lm)}{ \alpha'=(l'm')}} J_{\alpha\alpha'}(nn') 
+\hat I_{\alpha}^n \hat I_{\alpha'}^{n'}
 \end{equation}
 
 For further information on the notation and symmetry restrictions to the
@@ -99,7 +100,8 @@ Note that in our notation the indices of the interaction operators $\hat \mbf I$
 denoted by numbers, sometimes by characters: $\hat I_1,\hat I_2,\hat I_3, \hat I_4, \dots \equiv \hat I_a,\hat I_b,\hat I_c, \hat I_d, \dots$.
 
 By default in module {\prg so1ion} the operator sequence is $\hat I_1,\hat I_2,\hat I_3, \hat I_4, \dots =$
-$O_1^1(c)$,$O_1^1(s)$, $O_1^0(c)$, $O_2^2(s)$, $O_2^1(s)$,$O_2^0(c)$,$O_2^1(c)$,$O_2^2(c)$,$O_3^3(s)$, ...
+$\hat O_{11}$,$\hat O_{11}^s$, $\hat O_{10}$, $\hat O_{22}^s$, $\hat O_{21}^s$,$\hat O_{20}$,
+$\hat O_{21}$,$\hat O_{22}$,$\hat O_{33}^s$, ...
 according to equation (\ref{multipolehamiltonrepeated}) and table~\ref{olms}.
  The exchange constants for the
 products of these Stevens operators have to be 
@@ -113,12 +115,12 @@ given according to the following scheme:
 \end{verbatim}
 
 The other input and output files have the same format as usual, but with the modification, that
-there are now $n$ components of the 'spins' in {\prg mcphas.sps} instead of 3 ($<J_a>$,$<J_b>$,$<J_c>$).
+there are now $n$ components of the 'spins' in {\prg mcphas.sps} instead of 3 ($<\hat J_a>$,$<\hat J_b>$,$<\hat J_c>$).
 The expectation values of the operators
- $<I_a>$,$<I_b>$,$<I_c>$,$<I_d>$,$<I_e>$, etc. correspond to the
+ $<\hat I_a>$,$<\hat I_b>$,$<\hat I_c>$,$<\hat I_d>$,$<\hat I_e>$, etc. correspond to the
 interaction operator sequence of the single ion module, which for {\prg so1ion} is 
-by default $<J_a>$,$<J_b>$,$<J_c>$,
- $<O_{22}(s)>$, $<O_{21}(s)>$,$<O_{20}>$,$<O_{21}>$,$<O_{22}>$,$<O_{33}(s)>$, ...
+by default $<\hat J_a>$,$<\hat J_b>$,$<\hat J_c>$,
+ $<\hat O_{22}^s>$, $<\hat O_{21}^s>$,$<\hat O_{20}>$,$<\hat O_{21}>$,$<\hat O_{22}>$,$<\hat O_{33}^s>$, ...
  respectively.
  Table~\ref{olms} contains a list of first and second order Stevens parameters.
 For a full list please refer to appendix~\ref{stevens}.
@@ -128,31 +130,32 @@ Note that the $\hat I_{\alpha}$ may be completely redefined
 This may be useful to shorten notation, if by symmetry the coupling (\ref{multipolehamiltonrepeated}) 
 may be rewritten in products of linear combinations of operators such as needed
 for pseudo spin models of multipolar order~\cite{shiina97-1741},
- e.g $(5 O_4^4(n)+ O40(n)) \cdot (5 O_4^4(n')+  O40(n'))$
+ e.g 
+$(5\hat  O_{44}(\hat \mbf J^n)+\hat  O_{40}(\hat \mbf J^n)) \cdot (5 \hat O_{44}(\hat \mbf J^{n'})+\hat  O_{40}(\hat \mbf J^{n'}))$
 
 
 \begin{table}[hb] 
 \begin{center}  
-\caption {Stevens operator equivalents $O_l^m$ and 
+\caption {Stevens operator equivalents $O_{lm}$ and 
 corresponding notation used in modules {\prg cfield\index{cfield}} and 
 {\prg so1ion\index{so1ion}} 
-($J_{\pm}=J_x\pm iJ_y)$. For a full list please refer to appendix~\ref{stevens}.}   
+($\hat J_{\pm}=\hat J_x\pm i\hat J_y)$. For a full list please refer to appendix~\ref{stevens}.}   
 \label{olms}   
 \begin{tabular} 
 {lrr} 
 Stevens Operator & Notation used in module {\prg so1ion\index{so1ion}} & {\prg cfield\index{cfield}} \\
 \hline
-$O_{00}=1$ ($O_0^0(s)=0$) &\\
+$\hat O_{00}=1$ ($O_{00}({\rm so1ion})=0$) &\\
 \hline
-$O_{11}=\frac{1}{2}[J_++J_-]=J_x$ &  $I_a$&  $I_c$\\
-$O_{11}(s)=\frac{-i}{2}[J_+-J_-]=J_y$ &  $I_b$&  $I_a$\\
-$O_{10}=J_z$  ($O_1^0(s)=0$) & $I_c$&  $I_b$ \\
+$\hat O_{11}=\frac{1}{2}[\hat J_++\hat J_-]=\hat J_x$ &  $\hat I_a$&  $\hat I_c$\\
+$\hat O_{11}(s)=\frac{-i}{2}[\hat J_+-\hat J_-]=\hat J_y$ &  $\hat I_b$&  $\hat I_a$\\
+$\hat O_{10}=\hat J_z$   & $\hat I_c$&  $\hat I_b$ \\
 \hline
-$O_{22}(s)=\frac{-i}{2}[J_+^2-J_-^2]=J_xJ_y+J_yJ_x$($=2P_{xy}$) & $I_d$ & $I_d$ \\
-$O_{21}(s)=\frac{-i}{4}[(J_+-J_-)J_z+J_z(J_+-J_-)]=\frac{1}{2}[J_yJ_z+J_zJ_y]$($=P_{yz}$) & $I_e$& $I_e$  \\
-$O_{20}=[3J_z^2-J(J+1)]$ ($O_2^0(s)=0$) & $I_f$& $I_f$  \\
-$O_{21}=\frac{1}{4}[(J_++J_-)J_z+J_z(J_++J_-)]=\frac{1}{2}[J_xJ_z+J_zJ_x]$($=P_{xz}$) & $I_g$& $I_g$  \\
-$O_{22}=\frac{1}{2}[J_+^2+J_-^2]=[J_x^2-J_y^2]$ & $I_h$& $I_h$  \\
+$\hat O_{22}(s)=\frac{-i}{2}[\hat J_+^2-\hat J_-^2]=\hat J_x\hat J_y+\hat J_y\hat J_x$($=2\hat P_{xy}$) & $\hat I_d$ & $\hat I_d$ \\
+$\hat O_{21}(s)=\frac{-i}{4}[(\hat J_+-\hat J_-)\hat J_z+\hat J_z(\hat J_+-\hat J_-)]=\frac{1}{2}[\hat J_y\hat J_z+\hat J_z\hat J_y]$($=\hat P_{yz}$) & $\hat I_e$& $\hat I_e$  \\
+$\hat O_{20}=[3\hat J_z^2-J(J+1)]$ ($O_2^0(s)=0$) & $\hat I_f$& $\hat I_f$  \\
+$\hat O_{21}=\frac{1}{4}[(\hat J_++\hat J_-)\hat J_z+\hat J_z(\hat J_++\hat J_-)]=\frac{1}{2}[\hat J_x\hat J_z+\hat J_z\hat J_x]$($=\hat P_{xz}$) & $\hat I_g$& $\hat I_g$  \\
+$\hat O_{22}=\frac{1}{2}[\hat J_+^2+\hat J_-^2]=[\hat J_x^2-\hat J_y^2]$ & $\hat I_h$& $\hat I_h$  \\
 \hline
  \end{tabular}
 \end{center}   
@@ -161,8 +164,8 @@ $O_{22}=\frac{1}{2}[J_+^2+J_-^2]=[J_x^2-J_y^2]$ & $I_h$& $I_h$  \\
 \subsection{Option {\prg indexexchange} in order to shorten notation in {\prg mcphas.j}}
 The {\prg indexexchange} parameter discussed in section~\ref{mcphasj} may be useful in keeping the input
 of the exchange components short. For example the $\zeta$ and $\eta$ strain modes on the quasi-cubic sites
-of a double hexagonal close packed structure involves the coupling of $P_{zx}$ ($I_g$) and $P_{xy}$ ($I_d$) 
-as well as $P_{yz}$ ($I_e$) and $O_2^2$ $(I_h)$ quadrupoles, so the {\prg diagonalexchange=1} option 
+of a double hexagonal close packed structure involves the coupling of $\hat P_{zx}$ ($\hat I_g$) and $\hat P_{xy}$ ($\hat I_d$) 
+as well as $\hat P_{yz}$ ($\hat I_e$) and $\hat O_2^2$ $(\hat I_h)$ quadrupoles, so the {\prg diagonalexchange=1} option 
 cannot be used. Thus 64 components need to be specified to describe the $8\times 8$ exchange tensor. 
 However, we can simplify this with the {\prg indexexchange} parameter by setting {\prg diagonalexchange=2}, 
 as follows for UPd$_3$:
@@ -194,8 +197,8 @@ as follows for UPd$_3$:
 The programs {\prg mcphas} and {\prg mcdisp\index{mcdisp}} are run completely the same way as usual, only
 the output files contain also information about the (thermal) expectation values of $<O_l^m>$
 dependent on temperature and magnetic field. 
-Using the module so1ion the notation $<I_a>$,$<I_b>$,$<I_c>$,
-$<I_d>$, $<I_e>$, etc. correspond to $<J_a>$, $<J_b>$,
+Using the module so1ion the notation $<\hat J_a>$,$<\hat J_b>$,$<\hat J_c>$,
+$<\hat J_d>$, $<\hat J_e>$, etc. correspond to $<J_a>$, $<J_b>$,
 $<J_c>$, $<O_{22}(s)>$, $<O_{21}(s)>$,$<O_{20}>$,$<O_{21}>$,$<O_{22}>$,$<O_{33}(s)>$, ...
  respectively.
 Note that by the higher order interactions not only the static properties are changed, but also the
