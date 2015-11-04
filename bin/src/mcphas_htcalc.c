@@ -297,7 +297,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                  sps.FT(mq); //Fourier trafo of spincf
 		 // get the main propagation vector by looking for the
 		 // biggest Fourier component of the magnetic moment arrangement 
-                 for(qh=0;qh<=sps.na()/2;++qh){for(qk=0;qk<=sps.nb()/2;++qk){for(ql=0;ql<=sps.nc()/2;++ql)
+                 for(qh=0;qh<=sps.na();++qh){for(qk=0;qk<=sps.nb();++qk){for(ql=0;ql<=sps.nc();++ql)
                   {// get magnetic moment from momentum fouriercomponent into b 
 		   b=0;
 		   b1 = mq[sps.in(sps.na()-qh,sps.nb()-qk,sps.nc()-ql)];

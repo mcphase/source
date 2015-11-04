@@ -115,18 +115,6 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 
       // try different Q vectors corresponding to q !!
      int i1,j1,k1;
-//     ri(1)=inputpars.a*inputpars.r(1,1);
-//     ri(2)=inputpars.b*inputpars.r(2,1);
-//     ri(3)=inputpars.c*inputpars.r(3,1);
-//     i1max=(int)(ini.maxQ*abs(ri)/2/3.1415926535)+1;
-//     ri(1)=inputpars.a*inputpars.r(1,2);
-//     ri(2)=inputpars.b*inputpars.r(2,2);
-//     ri(3)=inputpars.c*inputpars.r(3,2);
-//     j1max=(int)(ini.maxQ*abs(ri)/2/3.1415926535)+1;
-//     ri(1)=inputpars.a*inputpars.r(1,3);
-//     ri(2)=inputpars.b*inputpars.r(2,3);
-//     ri(3)=inputpars.c*inputpars.r(3,3);
-//     k1max=(int)(ini.maxQ*abs(ri)/2/3.1415926535)+1;
 
 // inserted 10.5.10 to make comaptible with nonortholattices
      Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
