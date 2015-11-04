@@ -211,7 +211,7 @@ printf ("vector	min     max    delta \n");
  ph = new Vector * [maxnofqs()+2];        
  // see what qvectors we can use (whether they lie in the specified region)
  // and store them
- nofq=0;
+ nofq=0;if (verbose){printf("#nr1 nr2 nr3 (h k l) \t (hprim kprim lprim)\n");}
  for (k=1;k<=maxnofqs();++k)
  {dd(1)=hchk[1][ia(k)];dd(2)=hchk[2][ib(k)];dd(3)=hchk[3][ic(k)];
 //  printf("iaibic(%i %i %i)\n",ia(k),ib(k),ic(k));
@@ -222,7 +222,7 @@ printf ("vector	min     max    delta \n");
       ini.qmin(3)-0.00001<=hkl(3)&&hkl(3)<=ini.qmax(3)+0.00001) //yes they are in the region-> increment nofq and store 
    {++nofq;
     q0[nofq]=new Vector (1,3); (*q0[nofq])=dd;
-    if (verbose){printf("hkl(%g %g %g)=hklprim(%g %g %g)\t",hkl(1),hkl(2),hkl(3),dd(1),dd(2),dd(3));}
+    if (verbose){printf("# %2i  %2i  %2i (%g %g %g) \t (%g %g %g)\n",hchkn[1][ia(k)],hchkn[2][ib(k)],hchkn[3][ic(k)],hkl(1),hkl(2),hkl(3),dd(1),dd(2),dd(3));}
     
    dd(1)=hchkn[1][ia(k)];dd(2)=hchkn[2][ib(k)];dd(3)=hchkn[3][ic(k)];
     n[nofq]=new Vector (1,3); (*n[nofq])=dd;
