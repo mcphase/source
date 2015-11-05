@@ -625,8 +625,8 @@ fprintf(fout,"\n");
 mfields.resetnofc(maxmfcomponents);
 
 // print spinconfiguration to mcdiff.sps  (useful for viewing)
-print_sps("./results/mcdiff.sps",natmagnetic,a,b,c,alpha,beta,gamma,nr1,nr2,nr3,r1s,r2s,r3s,jjjpars,T,H);
-print_mf("./results/mcdiff.sps",mfields,natmagnetic,a,b,c,alpha,beta,gamma,nr1,nr2,nr3,r1s,r2s,r3s,jjjpars,T,H);
+print_sps(natmagnetic,a,b,c,alpha,beta,gamma,nr1,nr2,nr3,r1s,r2s,r3s,jjjpars,T,H);
+print_mf(mfields,natmagnetic,a,b,c,alpha,beta,gamma,nr1,nr2,nr3,r1s,r2s,r3s,jjjpars,T,H);
 
 printf ("calculating ...\n");  
 

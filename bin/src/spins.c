@@ -15,13 +15,20 @@ void help_and_exit()
 program spins - popout spin/exchange field configuration\n\
               - and/or display 3d animation of spin/moment/densities and animations\n\n\
 use as: spins -f mcphas.sps T Ha Hb Hc\n\
+    or: spins -f mcphas.tst n\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] T Ha Hb Hc [h k l E]\n\
                     \n\
-1) if used with -f filename this file has to be a mcphas.mf or mcphas.sps file, the spin configuration\n\
-   at given temperature T[K] and magnetic effective field H[T]\n \
-   is read and extracted from this file and printed on screen (stdout), nothing else is done\n\
+1) if used with -f file T Ha Hb Hc,  this file has to be a mcphas.mf or mcphas.sps file,\n \
+   the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
+   is read and extracted from this file and printed on screen (stdout),\n \
+   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>), nothing else is done\n\
   \n\
-2) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
+2) if used with -f filen n,  this file has to be a mcphas.tst file,\n \
+   the spin configuration number n\n \
+   is read and extracted from this file and printed on screen (stdout),\n \
+   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>), nothing else is done\n\
+  \n\
+3) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
    output files and 3d graphical animations are created.\n\
    options are:\n\
          -c ... calculate chargedensity\n\
@@ -74,7 +81,7 @@ printf("# * %s                                     *\n",MCPHASVERSION);
 printf("# **********************************************************\n");
 
  FILE * fin, * fout;
-double T; Vector Hext(1,3);
+double T=0; Vector Hext(1,3);
  int i,n=0;//,dophon=0;
  cryststruct cs,cs4;
  spincf savmf;
@@ -98,7 +105,7 @@ gp.show_density=0;
 sprintf(gp.title,"output of program spins");
 
  // check command line
- if (argc < 5){help_and_exit();}
+ if (argc < 2){help_and_exit();}
 // first: option without graphics just screendump <I> or exchange field configuration at given HT
  if (strcmp(argv[1],"-f")==0)
  { fin = fopen_errchk (argv[2], "rb");os=2;printf("# reading from file %s\n",argv[2]);}
@@ -192,27 +199,56 @@ else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins
                                    if(strcmp(argv[os],"-Mi")==0){arrow=4;}
                                    }
 
-if(strcmp(argv[1+os],"-P")==0){os+=1;}//dophon=1;}
+if(strcmp(argv[1+os],"-P")==0){os+=1;}
 
  }
 
    fout = fopen_errchk ("./results/spins.out", "w");
+
+   print_mcdiff_in_header(fout);
 // input file header and conf------------------------------------------------------------------
    n=headerinput(fin,fout,gp,cs);cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
 // load spinsconfigurations and check which one is nearest -------------------------------   
-check_for_best(fin,strtod(argv[1+os],NULL),strtod(argv[2+os],NULL),strtod(argv[3+os],NULL),strtod(argv[4+os],NULL),savmf,T,Hext,outstr);
+double TT=0; TT=strtod(argv[1+os],NULL);
+double HHx=0,HHy=0,HHz=0;
+if (strcmp(argv[1],"-f")==0&&argc<5){TT=-TT;}
+else{HHx=strtod(argv[2+os],NULL);HHy=strtod(argv[3+os],NULL);HHz=strtod(argv[4+os],NULL);}
+check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr);
 fclose (fin);
 
   printf("#! %s - configuration\n",outstr);
   savmf.print(stdout);
-  if (strcmp(argv[1],"-f")==0) {fclose(fout);exit(0);}
+  par inputpars("./mcphas.j");
+  int ii,nt,k,j;
+// determine primitive magnetic unit cell
+Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3),dd3(1,3);
+savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
+  
+  if (strcmp(argv[1],"-f")==0) 
+ { if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
+  fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
+  fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ia> <Ib> <Ic> [created by program spins]\n");
+  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
+  {for(ii=1;ii<=inputpars.nofatoms;++ii)
+   {// output the positions
+    dd3=savmf.pos(i,j,k,ii, cs);
+    dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
+    fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
+            cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
+    //output the "magnetic" moment if possible ... actually it outputs Ia Ib Ic 
+    for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,savmf.m(i,j,k)(inputpars.nofcomponents*(ii-1)+nt)));}      
+    fprintf(fout,"\n");
+   }
+  }}}
+  
+
+  fclose(fout);exit(0);
+}
 
 // FROM HERE ON IT IS ONLY EXECUTED IF GRAPHICS ARE DESIRED ... 
 
 gp.read();
 
-  int ii,nt,k,j;
-  par inputpars("./mcphas.j");
   Vector hh(1,savmf.nofcomponents*savmf.nofatoms);
   spincf densitycf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,dim);
   ii=0; 
@@ -250,9 +286,6 @@ gp.read();
 fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
 fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc>\n");
 fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
-// determine primitive magnetic unit cell
-Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3);
-savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
 // .............................................................................                                
 	       
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
@@ -306,7 +339,6 @@ switch(arrow)
 }
 
 // output atoms and moments in primitive unit cell to fout  ------------------------------------
-Vector dd3(1,3);
 if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
     for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).nofatoms;++nt)
      {dd3=spinconf.pos(i,j,k,ii4, cs4);

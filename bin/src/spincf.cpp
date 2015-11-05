@@ -264,6 +264,7 @@ void spincf::spinfromq (int n1,int n2, int n3,Vector & qvector,Vector & nettom,
 // load spinconfiguration from file
 int spincf::load(FILE * fin_coq)	
 { int i,j,k,l,nn1,nn2;  
+  char * s;
   float na[MAXNOFSPINS];
   float nb[MAXNOFSPINS];
   float nc[MAXNOFSPINS];
@@ -271,9 +272,14 @@ int spincf::load(FILE * fin_coq)
   nb[0]=MAXNOFSPINS;
   nc[0]=MAXNOFSPINS;
   long int pos;
-  
-  pos=ftell(fin_coq);if (pos==-1) return 0;
-
+  char instr[MAXNOFCHARINLINE];
+  // input comment lines 
+  instr[0]='#';
+   while (instr[strspn(instr," \t")]=='#') 
+  {pos=ftell(fin_coq);if (pos==-1) return 0; //end of file reached
+   s=fgets(instr,MAXNOFCHARINLINE,fin_coq);if (s==NULL) return 0;
+  }
+  j=fseek(fin_coq,pos,SEEK_SET); if (j!=0) return 0;
 nn1=0;
 j=0;
 while ((i=inputline (fin_coq, na))!=0)  

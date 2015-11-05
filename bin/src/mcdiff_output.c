@@ -1,7 +1,6 @@
 // mcdiff - output of results
-void print_sps(const char * filename,int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H)
-{// fout = fopen_errchk (filename, "w");
-int nofcomponents=3;
+void print_sps(int natmagnetic,float a,float b,float c,float alpha,float beta,float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H)
+{int nofcomponents=3;
 spincf spins(1,1,1,natmagnetic,nofcomponents);
 FILE * fout;int i;
 time_t curtime;
@@ -48,7 +47,7 @@ time_t curtime;
  fclose(fout);
 }
 
-void print_mf(const char * filename,mfcf & mfields,int natmagnetic,float a,float b,float c,float alpha,float beta,
+void print_mf(mfcf & mfields,int natmagnetic,float a,float b,float c,float alpha,float beta,
 float gamma,int nr1,int nr2,int nr3,Vector r1s,Vector r2s,Vector r3s,jjjpar ** jjjpars,double T,Vector H)
 {
 FILE * fout;int i;
