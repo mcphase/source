@@ -18,19 +18,16 @@ reading results/mcphas.mf
 EOF
 
 print STDOUT << "EOF";
-reading results/mcphas.mf
-....writing results/spins.*
+reading results/mcphas.mf by program spins ...
+writing results/spins.* ...
 EOF
 
 system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
 
-print STDOUT << "EOF";
-generating mcdiff.in ...
-EOF
+print "\n\nSetting up mcdiff.in ...\n";
 
 open (Fout,">mcdiff.in");
-{print "\n\nSetting up mcdiff.in ...\n";
-open (Fin,"results/spins.out");
+{open (Fin,"results/spins.out");
 while(<Fin>) {print Fout $_;}
 close Fout,Fin;
 }

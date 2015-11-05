@@ -21,11 +21,14 @@ printf("#*****************************************************\n");
 // check command line
   if (argc < 6)
     { printf (" program spinsfromq - create spinconfiguration from q vector\n \
-                use as: spinsfromq [-m f1 f2 f3 ...] n1 n2 n3 h k l [h2 k2 l2]\n \
+                use as: spinsfromq [-m f1 f2 f3 ...] n1 n2 n3 h k l [h2 k2 l2 [h3 k3 l3]]\n \
 		n1 n2 n3 .... periodicity of supercell\n \
 		h k l ....... components of qvector\n \
                 options:\n \
-                -m f1 f2 f3 ...fnofcomponents: multiply spin components by f1 f2 f3 ... fnofcomponents\n\n");
+                -m f1 f2 f3 ...fnofcomponents: multiply spin components by f1 f2 f3 ... fnofcomponents\n \
+      formulas: M(r)=(f1*M1,f2*M2,f3*M3)*cos(Q.r)    ...for single q\n \
+                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2*(0 1 0)*cos(Q2.r) ...for double q\n \
+                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2* (0 1 0)*cos(Q2.r)+f3*M3*(0 0 1)*cos(Q3.r) ...for triple q\n");
       exit (1);
     }
 
@@ -40,6 +43,10 @@ printf("#*****************************************************\n");
   Vector factors(1,inputpars.nofcomponents);
   Vector qvector (1,3);
   Vector nettom(1,inputpars.nofcomponents*inputpars.nofatoms);
+  Vector nettom1(1,inputpars.nofcomponents*inputpars.nofatoms);
+  Vector nettom2(1,inputpars.nofcomponents*inputpars.nofatoms);
+  Vector nettom3(1,inputpars.nofcomponents*inputpars.nofatoms);
+  nettom1=0;nettom2=0;nettom3=0;
   Vector phi(1,inputpars.nofcomponents*inputpars.nofatoms);
   phi=0;
   Vector momentq0(1,inputpars.nofcomponents*inputpars.nofatoms);
@@ -66,12 +73,18 @@ printf("#*****************************************************\n");
                                           // set phases according to atomic position phi=2*pi*q*r
                                            phi(j+(i-1)*inputpars.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
+    nettom1(1+(i-1)*inputpars.nofcomponents)=moment(1);
+    nettom2(2+(i-1)*inputpars.nofcomponents)=moment(2);
+    nettom3(3+(i-1)*inputpars.nofcomponents)=moment(3);                                          
   }
   h*=2;
   }
   for(i=1;i<=inputpars.nofatoms;++i)
   {for(j=1;j<=inputpars.nofcomponents;++j){nettom(j+(i-1)*inputpars.nofcomponents)*=factors(j);
                                           }
+    nettom1(1+(i-1)*inputpars.nofcomponents)*=factors(1);
+    nettom2(2+(i-1)*inputpars.nofcomponents)*=factors(2);
+    nettom3(3+(i-1)*inputpars.nofcomponents)*=factors(3);                                          
   }
 
   printf("#! n1=%i n2=%i n3=%i\n",n1,n2,n3);
@@ -92,23 +105,33 @@ printf("#*****************************************************\n");
 // phi ....... phase (for each component)
   savspin.spinfromq (n1,n2,n3,qvector,nettom, momentq0, phi);
  if (argc>7+a)
-  {double s,t;
-   printf("# double q option\n");
-   s=nettom(1);t=nettom(2); nettom(2)=0;nettom(1)=s;
-   savspin1.spinfromq (n1,n2,n3,qvector,nettom, momentq0, phi);
+  {savspin1.spinfromq (n1,n2,n3,qvector,nettom1, momentq0, phi);
    //savspin1.print(stdout);
 
-   nettom=0;nettom(2)=t;
    qvector(1)=strtod(argv[a+7],NULL);
    qvector(2)=strtod(argv[a+8],NULL);
    qvector(3)=strtod(argv[a+9],NULL);
    printf("#! q2: hkl2=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
    qvector=qvector*inputpars.rez.Inverse();
    printf("# Miller indices of q2 with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
-   savspin2.spinfromq (n1,n2,n3,qvector,nettom, momentq0, phi);
+   savspin2.spinfromq (n1,n2,n3,qvector,nettom2, momentq0, phi);
    //savspin2.print(stdout);
    savspin=savspin1+savspin2;
-   printf("# double q structure:\n");
+   if (argc>10+a)
+   {savspin1=savspin;
+    qvector(1)=strtod(argv[a+7],NULL);
+    qvector(2)=strtod(argv[a+8],NULL);
+    qvector(3)=strtod(argv[a+9],NULL);
+   printf("#! q3: hkl2=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
+   qvector=qvector*inputpars.rez.Inverse();
+   printf("# Miller indices of q3 with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
+   savspin2.spinfromq (n1,n2,n3,qvector,nettom3, momentq0, phi);
+   //savspin2.print(stdout);
+   savspin=savspin1+savspin2;  
+    printf("# triple q structure:\n");}
+   else
+   {printf("# double q structure:\n");}
+
   }
  
   inputpars.savelattice(stdout);
