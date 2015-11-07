@@ -82,10 +82,13 @@ community this program would not have come into existence.
 
 \subsection*{ \dots in version 5.2 \dots}
 \begin{itemize}
-\item recommended program for single ion properties is now singleion (works for all modules)
-\item pointc output creates automaticalle files results/pointc.Blm and results/pointc.Lllm with just the CF parameters
-\item mcdisp option -ignore\_non\_hermitian\_matrix\_error introduced , eigensolvers updated
-\item cif2mcphas program to create mcphase input files from crystallographic information in cif files
+\item recommended program for single ion properties is now {\prg singleion}\index{singleion} (works for all modules)
+\item {\prg spinsfromq}\index{spinsfromq} new: triple q option, piping to mcphas.tst, scale moments 
+ \item {\prg   spins}\index{spins}: -f option enabled to read mcphas.tst, always output spins.out 
+                 ready to be used for {\prg mcdiff}\index{mcdiff}
+\item {\prg pointc}\index{pointc} output creates automaticalle files results/pointc.Blm and results/pointc.Lllm with just the CF parameters
+\item {\prg mcdisp}\index{mcdisp} option -ignore\_non\_hermitian\_matrix\_error introduced , eigensolvers updated
+\item {\prg cif2mcphas}\index{cif2mcphas} program to create mcphase input files from crystallographic information in cif files
 \item mcdisp.jq has now a col 4 with qincr for plotting purposes
 \item bugs fixed in {\prg convolute2d, rhoso1ion, module brillouin, so1ion} Blm input for m odd, getvalue
 \end{itemize}

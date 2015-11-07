@@ -228,9 +228,10 @@ else
          if (abs($dpar)>abs($parstp[$i]))
          {$par[$i]+=$dpar;
           ($sta)=sta();
-          open(Fin,"results/searchspace.status");$line=<Fin>;
-          if ($line=~/exiting searchspace/){$sta=0;close Fin;}
+          open(Fin,"results/searchspace.status");$line=<Fin>;close Fin;
+          if ($line=~/exiting searchspace/){$sta=0;}
           last if ($sta==0);
+          read_write_statusfile();
           if ($sta<$stamin){$stamin=$sta;# foreach (@ARGV)
                                        #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
                                        # mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
@@ -241,8 +242,10 @@ else
            write_set();++$pointcounter; 
           $par[$i]-=2*$dpar;
           ($sta)=sta();
-          read_write_statusfile();
+          open(Fin,"results/searchspace.status");$line=<Fin>;close Fin;
+          if ($line=~/exiting searchspace/){$sta=0;}
           last if ($sta==0);
+          read_write_statusfile();
           if ($sta<$stamin){$stamin=$sta; #foreach (@ARGV)
                                        #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
                                        # mycopy ($file.".forfit ",$file.".forfit.min.$searchlevel");}
