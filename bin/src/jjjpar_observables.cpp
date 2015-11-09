@@ -188,7 +188,8 @@ switch (module_type)
             else{getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for external module we must provide th and ph with respect
                                                        // to abc coordinate system
             (*mq)(&Mq,&th,&ph,&J0,&J2,&J4,&J6,&est);
-            if(Norm(Zc)<SMALL){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);return false;}
+            if(Norm(Zc)<SMALL){static int washere =0; if (washere==0){washere=1;
+            fprintf(stderr,"WARNING mcdiff: rare earth Z(K) coefficients not found or zero in file %s, this may be ok...\n",sipffilename);}}
 
             return true;}break;
    case 2:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // internal module cfield needs transformation because
