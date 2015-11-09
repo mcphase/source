@@ -27,7 +27,7 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
  // while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
  
   if ((token = strstr (instr, parameter))==NULL) return 1; // parameter string not found
-  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"£€/><;@:=+-~|"))return 1; // no space etc before parameter
+  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"ï¿½ï¿½/><;@:=+-~|"))return 1; // no space etc before parameter
  td=instr;while ((te=strstr(td,"#!"))!=NULL){td=te+1;} // skip all "#!" signs and
  if ((td=strchr(td,'#'))!=NULL){if(td<token) return 1;} // check if comment sign "#" appears before parameter - if yes return 1
  
@@ -63,7 +63,7 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
 
   if ((token = strstr (instr, parameter))==NULL) return 1; // check if parameter is found - if not return 1
-  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"£€/><;@:=+-~|")){return 1;} // no space etc before parameter
+  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"\243\200/><;@:=+-~|")){return 1;} // no space etc before parameter
  td=instr;while ((te=strstr(td,"#!"))!=NULL){td=te+1;} // skip all "#!" signs and
  if ((td=strchr(td,'#'))!=NULL){if(td<token) return 1;} // check if comment sign "#" appears before parameter - if yes return 1
 

@@ -181,10 +181,10 @@ endproper:
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
    double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
    std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
-   std::cout << "#!nofHTpoints=" << nofstapoints << "H-T points in phasediagram successfully calculated" << std::endl;
-   std::cout << "#!noffailedpoints=" << noffailedpoints << "H-T points in phasediagram failed to converge " << std::endl;
-   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << nofcalls << "times"  << std::endl;
-   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << successrate << "times"  << std::endl;
+   std::cout << "#!nofHTpoints=" << nofstapoints << " H-T points in phasediagram successfully calculated" << std::endl;
+   std::cout << "#!noffailedpoints=" << noffailedpoints << " H-T points in phasediagram failed to converge " << std::endl;
+   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << nofcalls << " times"  << std::endl;
+   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << successrate << " times"  << std::endl;
    std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
    std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
 
