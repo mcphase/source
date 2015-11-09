@@ -7,7 +7,13 @@
 
 #include<mcphas.h>
 
+
 int verbose=0;
+// for statistics 
+int nofmaxloopDIV=0,nofmaxspinchangeDIV=0;
+int successrate=0;
+int nofcalls=0;
+
 const char * filemode="w";
 
 #include "myev.h"
@@ -17,10 +23,11 @@ const char * filemode="w";
 
 // main program
 int main (int argc, char **argv)
-{ FILE * fin=NULL; 
+{ std::clock_t startcputime = std::clock();
+  FILE * fin=NULL; 
   //char instr[MAXNOFCHARINLINE];
   int im,j,l;
-  int nofstapoints=0;
+  int nofstapoints=0,noffailedpoints=0;
   int options=1; // this integer indicates how many command strings belong to options (=1+number of option-strings)
   float x,y,dumm;
   double z,u;
@@ -149,6 +156,7 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
          case 2: //ht calculation leads to no results- save dummy line
 	         physprop.save (verbose,filemode,j,inputpars);
 		 sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
+     	      ++noffailedpoints;
 	      break;	 
 	 default:  ;
 	}
@@ -159,26 +167,39 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
 endproper:
   testspins.save(filemode);testqs.save(filemode);
    if(argc>options&&strncmp(argv[argc-1],"-",1)!=0) fclose(fin);
-   printf("RESULTS saved in directory ./results/  - files:\n");
-   printf("  mcphas.fum  - total magnetic moment, energy at different T,H\n");
-   printf("  mcphas.sps  - stable configurations at different T,H\n");
-   printf("  mcphas.mf   - mean fields at different T,H\n");
-   printf("  mcphas.hkl  - strong magnetic satellites, neutron diffraction intensity\n");
-   printf("  mcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n");
-   printf("  mcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n");
-   printf("  mcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n");
-   printf("  mcphas.qvc  - ...corresponding table of all qvector generated test configs\n");
-   printf("  mcphas.phs  - ...corresponding table of all test configurations (except qvecs)\n");
-   printf("  _mcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n");
-   printf("  ...         - and a copy of the single ion parameter files used.\n\n");
-   fprintf(stdout,"sta=%g\n",sta);
+   printf("#RESULTS saved in directory ./results/  - files:\n");
+   printf("#  mcphas.fum  - total magnetic moment, energy at different T,H\n");
+   printf("#  mcphas.sps  - stable configurations at different T,H\n");
+   printf("#  mcphas.mf   - mean fields at different T,H\n");
+   printf("#  mcphas.hkl  - strong magnetic satellites, neutron diffraction intensity\n");
+   printf("#  mcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n");
+   printf("#  mcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n");
+   printf("#  mcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n");
+   printf("#!  mcphas.qvc  - ...corresponding table of all nqvc=%i qvector generated test configs\n",testqs.nofqs ());
+   printf("#!  mcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",testspins.n);
+   printf("#  _mcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n");
+   printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
+   double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+   std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
+   std::cout << "#!nofHTpoints=" << nofstapoints << "H-T points in phasediagram successfully calculated" << std::endl;
+   std::cout << "#!noffailedpoints=" << noffailedpoints << "H-T points in phasediagram failed to converge " << std::endl;
+   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << nofcalls << "times"  << std::endl;
+   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << successrate << "times"  << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
+
+   fprintf(stdout,"#! sta=%g\n",sta);
+#ifdef _THREADS
+std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;
+for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
+#else
+std::cout << "# mcphas was compiled without parallel processing option " << std::endl;
+#endif
+
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program mcphas\n");
    fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(stderr,"**********************************************\n");
-#ifdef _THREADS
-for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
-#endif
 
 return(0);
 }

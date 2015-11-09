@@ -235,7 +235,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
    double QQ;
 #endif
  int mqdim=3;if(calc_rixs)mqdim=9;
- int i,j,i1,j1,k1,l1,t1,i2,j2,k2,l2,t2,s,ss,ss3,b,bb;
+ int i,j,i1,j1,k1,l1,t1,i2,j2,k2,l2,t2,s,ss,b,bb;
  double intensity=1.2; 
  double ki,kf;
  complex <double> sumS;
@@ -295,7 +295,7 @@ int ssm1,in1,in2;
     in2=md.in(i2,j2,k2);
   for(l2=1;l2<=md.nofatoms;++l2){
   for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
-      ss=index_s(i2,j2,k2,l2,t2,md,ini);ssm1=ss-1;ss3=ss3;
+      ss=index_s(i2,j2,k2,l2,t2,md,ini);ssm1=ss-1;
       bb=md.baseindex(i2,j2,k2,l2,t2);
    
       if(do_phonon)
@@ -786,7 +786,7 @@ eis(1)=0; // sigma is parallel to u2
 eis(2)=1;
 eis(3)=0;
 eos=eis;    
-double ki,kf;
+double ki=0,kf=0;
 // determine ki kf from energy
 if (ini.ki==0)
 {if (ini.kf+5.0679e-7*en<0)

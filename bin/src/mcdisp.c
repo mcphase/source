@@ -1412,7 +1412,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
             fprintf (fout1, "#displayytext=I(barns/meV/sr/f.u.)\n");
             fprintf (fout1, "#displayxtext=E(meV)\n");
             fprintf (fout1, "#displaytitle=(%4.4f %4.4f %4.4f) blue: DMD_Dipapprox red: DMD_exact green: Minv_Dipapprox\n",hkl(1),hkl(2),hkl(3));
-            //fprintf (fout1,"#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] intensities(dip approx for FF) [barn/meV/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+            //fprintf (fout1,"#Ha[T] Hb[T] Hc[T] T[K] h k l  energies[meV] intensities(dip approx for FF) [barn/meV/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 		     if (do_Erefine==0) epsilon=(Max(En)-Min(En)+0.001)/100;
 		    // if (epsilon<=0) epsilon=0.1;
                   for (i=1;i<=dimA;++i) if(En(i)!=-DBL_MAX)
@@ -1638,7 +1638,8 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 //*************************************************************************************************
 // main program
 int main (int argc, char **argv)
-{int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
+{std::clock_t startcputime = std::clock();
+ int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
  int do_ignore_non_hermitian_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0;
  const char * spinfile="mcdisp.mf"; //default spin-configuration-input file
@@ -1757,6 +1758,16 @@ dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_c
    printf("#  _%smcdisp.mf  - input parameters read from mcdisp.mf\n",ini.prefix);
    printf("#  _%smcdisp.j   - input parameters read from mcphas.j\n",ini.prefix);
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
+   double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+   std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
+   std::cout << "#! nofhkls=" << ini.nofhkls << " different q vectors calculated " << std::endl;
+
+#ifdef _THREADS
+std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;
+#else
+std::cout << "# mcdisp was compiled without parallel processing option " << std::endl;
+#endif
+
    fprintf(stderr,"#************************************************************\n");
    fprintf(stderr,"#                    End of Program mcdisp\n");
    fprintf(stderr,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");

@@ -11,7 +11,8 @@
 
 // hauptprogramm
 int main (int argc, char **argv)
-{ FILE * fin, * fin_coq, * fout;
+{ std::clock_t startcputime = std::clock();
+  FILE * fin, * fin_coq, * fout;
   float ovalltemp,thetamax,lambda,a=0,b=0,c=0,alpha=0,beta=0,gamma=0;
   double T=0;
   int i,j,k,n,lorenz,nat, nofatoms,nr1=0,nr2=0,nr3=0,natmagnetic;
@@ -723,6 +724,10 @@ for(i=1;i<=m;++i){hhkkll=hkl[i];
 printreflist(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
           r2, r3, n,  m, hkl, ikern, intmag,intmagdip, D, out,mx,my,mz,mxmy,mxmz,mymz,
           mx2,my2,mz2,a,b,c,P,Pxyz);
+
+double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
+std::cout << "#! nofhkls=" << m << " different q vectors generated " << std::endl;
 
 fprintf (stderr,"...results written to ./results/mcdiff.out\n");
 fprintf (stderr,"***********************************************************\n");

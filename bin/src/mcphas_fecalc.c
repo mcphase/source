@@ -28,8 +28,6 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  float smallstep;
  int slowct=10;
  float stepratio=1.0;
- static int successrate=0;
- static int nofcalls=0;
  ++nofcalls;
  float spinchange=0; // initial value of spinchange
  sdim=sps.in(sps.na(),sps.nb(),sps.nc()); // dimension of spinconfigurations
@@ -133,7 +131,7 @@ for (r=1;sta>ini.maxstamf;++r)
       delete Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
 
-     if (verbose==1) fprintf(stderr,"feDIV!MAXlooP");
+     if (verbose==1) fprintf(stderr,"feDIV!MAXlooP");++nofmaxloopDIV;
      return 20000;}
  if (spinchange>ini.maxspinchange)
     {delete []jj;delete []lnzi;delete []ui;
@@ -141,7 +139,7 @@ for (r=1;sta>ini.maxstamf;++r)
      {for (l=1;l<=inputpars.nofatoms;++l){
       delete Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
-     if (verbose==1) fprintf(stderr,"feDIV!MAXspinchangE");
+     if (verbose==1) fprintf(stderr,"feDIV!MAXspinchangE");++nofmaxspinchangeDIV;
      return 20001;}
 
  //1. calculate mf from sps (and calculate sta)

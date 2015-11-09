@@ -8,6 +8,10 @@
 
 int verbose=1;
 const char * filemode="w";
+// for statistics 
+int nofmaxloopDIV=0,nofmaxspinchangeDIV=0;
+int successrate=0;
+int nofcalls=0;
 
 #include "myev.h"
 #include "mcphas_htcalc.c"
@@ -16,7 +20,8 @@ const char * filemode="w";
 
 // main program
 int main (int argc, char **argv)
-{ char sipffilename[MAXNOFCHARINLINE];
+{  std::clock_t startcputime = std::clock();
+  char sipffilename[MAXNOFCHARINLINE];
   int im,l,nofsteps;
   int do_sipffile=0;
   int nofthreads=1;
@@ -107,7 +112,7 @@ if(do_sipffile){
    qvectors testqs (ini,inputpars.rez,Imax,"./results/mcphas.qvc",inputpars.nofatoms,inputpars.nofcomponents,verbose);
  // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
-   	
+   	int nofstapoints=0,noffailedpoints=0,s=0;
  // loop different H /T points in phase diagram
  for(double az=0;az<2*PI-0.00001;az+=2*PI/nofsteps)
  {h=H*(cos(az)*r1+sin(az)*r2);
@@ -120,21 +125,40 @@ if(do_sipffile){
       physprop.T=T;
       physprop.H=h;
  //calculate physical properties at HT- point
-   if(htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop)==1)break;
+   s=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);
+   if(s==1)break;
    //save physical properties of HT-point
+   if(s==0)++nofstapoints;
+   if(s==2)++noffailedpoints;
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T,H,h(1),h(2),h(3),az*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
   } // H/T loop 
+   std::cout << "#!nofHTpoints=" << nofstapoints << "H-T points  successfully calculated" << std::endl;
+   std::cout << "#!noffailedpoints=" << noffailedpoints << "H-T points in phasediagram failed to converge " << std::endl;
+   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << nofcalls << "times"  << std::endl;
+   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << successrate << "times"  << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
+
+
 } // do_sipffile
 fclose(fout);
 //  testspins.save(filemode);testqs.save(filemode);
    printf("RESULTS saved in directory ./results/  - files: anisotropy.out\n");
+   double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+   std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
+   
+#ifdef _THREADS
+std::cout << "#! nofthreads= " << nofthreads << " threads were used in parallel processing " << std::endl;
+for (int ithread=0; ithread<nofthreads; ithread++) delete tin[ithread];
+#else
+std::cout << "# anisotropy was compiled without parallel processing option " << std::endl;
+#endif
+
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program anisotropy\n");
    fprintf(stderr,"**********************************************\n");
-#ifdef _THREADS
-for (int ithread=0; ithread<nofthreads; ithread++) delete tin[ithread];
-#endif
+
 return(0);
 }
 
