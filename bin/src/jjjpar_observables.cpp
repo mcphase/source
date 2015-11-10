@@ -198,7 +198,7 @@ switch (module_type)
              // cfield module provides Mq(123)=Mq(xyz)
              // we must transform this to mcdiff internal ijk||yzx coordinate system
             dummy=Mq(3);Mq(3)=Mq(1);Mq(1)=Mq(2);Mq(2)=dummy;
-            if(Norm(Zc)==0){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);}
+            if(Norm(Zc)<SMALL){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);return false;}
             return true;break;
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for so1ion we must th and ph with respect to abc coordinate system
             //printf("normzc=%g \n",Norm(Zc));

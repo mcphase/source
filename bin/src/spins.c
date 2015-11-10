@@ -222,6 +222,14 @@ fclose (fin);
   int ii,nt,k,j;
 // determine primitive magnetic unit cell
 Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3),dd3(1,3);
+if (inputpars.r!=cs.r){cs.r=inputpars.r;}
+if (inputpars.a!=cs.abc[1]){cs.abc[1]=inputpars.a;}
+if (inputpars.b!=cs.abc[2]){cs.abc[2]=inputpars.b;}
+if (inputpars.c!=cs.abc[3]){cs.abc[3]=inputpars.c;}
+if (inputpars.alpha!=cs.abc[4]){cs.abc[4]=inputpars.alpha;}
+if (inputpars.beta!=cs.abc[5]){cs.abc[5]=inputpars.beta;}
+if (inputpars.gamma!=cs.abc[6]){cs.abc[6]=inputpars.gamma;}
+
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
   if (strcmp(argv[1],"-f")==0) 
