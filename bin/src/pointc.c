@@ -168,8 +168,7 @@ void calcCEFpar(double & q,double & x ,double & y, double & z, double & r,Vector
 int main (int argc, char **argv)
 {// check command line
 
-
-  if (argc < 3)
+  if (argc < 3 && !(argc==2 && strcmp(argv[1],"-b")==0))
     { printf (
 "\n Program to calculate Crystal field Parameters from Point Charges \n\n"
 " Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos\n\n"
@@ -231,7 +230,7 @@ FILE * sipf_file;
 FILE * dBlm_file;
 FILE * dLlm_file;
 //char instr[MAXNOFCHARINLINE];
-int i,n=0,ac=0;
+int i,n=0,ac=0,batchmode=0;
 float invalues[100];invalues[0]=99;
   double q,x,y,z;int do_deriv=0;
 // set stevens parameters and landefactor, J and <r^l> of ion
@@ -305,6 +304,25 @@ if(strcmp(argv[1],"-d")==0) {ac=1;do_deriv=1;dBlm_file=fopen_errchk("results/poi
 (*iops).Llm=0;
 (*jjjps).save_sipf(stdout);
  }
+ else if(strcmp(argv[1],"-b")==0)  // Batch mode - do not write any files; read sipf,pcfile from stdin, prints to stdout
+ {
+    char ionname[100];
+    batchmode = 1;
+    fgets(ionname,sizeof(ionname),stdin);
+    iops=new ionpars(ionname);
+    (*iops).Blm=0;
+    (*iops).Llm=0;
+    while (n==0 && feof(stdin)==false) n=inputparline("nof_electrons", stdin, invalues); (*iops).nof_electrons = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) n=inputparline("R2", stdin, invalues);            (*iops).r2 = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) n=inputparline("R4", stdin, invalues);            (*iops).r4 = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) n=inputparline("R6", stdin, invalues);            (*iops).r6 = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) n=inputline(stdin, invalues);
+    q=invalues[1];
+    x=invalues[2];
+    y=invalues[3];
+    z=invalues[4]; 
+    table_file = stdin; 
+ }
  else
  {printf ("#!MODULE=so1ion\n#<!--mcphase.sipf-->\n");
   printf("#*********************=*************************************************\n");
@@ -326,14 +344,17 @@ if(strcmp(argv[1],"-d")==0) {ac=1;do_deriv=1;dBlm_file=fopen_errchk("results/poi
  printf("#Lande Factor gJ\n GJ = %4g\n",(*iops).gJ);
  }
 
+if(!batchmode) {
 // zero parameters in case initialisation put some values to the parameters ...
 conv_file=fopen_errchk("results/pointc.out","w");
 fprintf(conv_file,"#charge(|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B66 L66\n");
+}
 if (do_deriv){fprintf(dBlm_file,"#x y z(A) dB00/dux dB00/duy dB00/duz dB22S/dux dB22S/duy dB22S/duz dB21S/du ... dB20/du... dB22/du... dB66/duz\n");
               fprintf(dLlm_file,"#x y z(A) dL00/dux dL00/duy dL00/duz dL22S/dux dL22S/duy dL22S/duz dL21S/du ... dL20/du... dL22/du... dL66/duz\n");}
 Vector dBlm0x(0,45),dLlm0x(0,45);dBlm0x=0;dLlm0x=0;
 Vector dBlm0y(0,45),dLlm0y(0,45);dBlm0y=0;dLlm0y=0;
 Vector dBlm0z(0,45),dLlm0z(0,45);dBlm0z=0;dLlm0z=0;
+if(!batchmode) {
 if (argc<5) // read pointcharges from file
 {table_file=fopen_errchk(argv[2+ac],"r");
  while(n==0&&feof(table_file)==false)n=inputline(table_file, invalues);
@@ -348,7 +369,7 @@ if (argc<5) // read pointcharges from file
   y=strtod(argv[4+ac],NULL);
   z=strtod(argv[5+ac],NULL);
 }
-
+}
  // print information about pointcharges to file and calculate Blms and Llms
   printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
 while(n>0)
@@ -359,22 +380,24 @@ while(n>0)
  double r;
  Vector Blm(0,45),Llm(0,45);
  r = sqrt(x * x + y * y + z * z);
+ if(!batchmode) 
  fprintf (conv_file," %4g  %4g %4g %4g  %4g  ",q,x,y,z,r);
  // calculate Blm Llm for this neighbour
  calcCEFpar(q,x,y,z,r,Blm,Llm,iops);
 
  // sum to iops.Blm and iops.Lllm
-                    (*iops).Blm(0)+=Blm(0);fprintf (conv_file,"%g ",Blm(0));
-                    (*iops).Llm(0)+=Llm(0);fprintf (conv_file,"%g ",Llm(0));
- for (i=1;i<=5;++i){(*iops).Blm(i)+=Blm(i);fprintf (conv_file,"%g ",Blm(i));
-                    (*iops).Llm(i)+=Llm(i);fprintf (conv_file,"%g ",Llm(i));
+                    (*iops).Blm(0)+=Blm(0); if(!batchmode) fprintf (conv_file,"%g ",Blm(0));
+                    (*iops).Llm(0)+=Llm(0); if(!batchmode) fprintf (conv_file,"%g ",Llm(0));
+ for (i=1;i<=5;++i){(*iops).Blm(i)+=Blm(i); if(!batchmode) fprintf (conv_file,"%g ",Blm(i));
+                    (*iops).Llm(i)+=Llm(i); if(!batchmode) fprintf (conv_file,"%g ",Llm(i));
                    }
- for (i=13;i<=21;++i){(*iops).Blm(i)+=Blm(i);fprintf (conv_file,"%g ",Blm(i));
-                    (*iops).Llm(i)+=Llm(i);fprintf (conv_file,"%g ",Llm(i));
+ for (i=13;i<=21;++i){(*iops).Blm(i)+=Blm(i); if(!batchmode) fprintf (conv_file,"%g ",Blm(i));
+                    (*iops).Llm(i)+=Llm(i); if(!batchmode) fprintf (conv_file,"%g ",Llm(i));
                    }
- for (i=33;i<=45;++i){(*iops).Blm(i)+=Blm(i);fprintf (conv_file,"%g ",Blm(i));
-                    (*iops).Llm(i)+=Llm(i);fprintf (conv_file,"%g ",Llm(i));
+ for (i=33;i<=45;++i){(*iops).Blm(i)+=Blm(i); if(!batchmode) fprintf (conv_file,"%g ",Blm(i));
+                    (*iops).Llm(i)+=Llm(i); if(!batchmode) fprintf (conv_file,"%g ",Llm(i));
                    }
+ if(!batchmode) 
  fprintf(conv_file,"\n");
 
  if(do_deriv){Vector dBlmx(0,45),dLlmx(0,45);
@@ -416,6 +439,7 @@ while(n>0)
  
 
  n=0;
+ if(!batchmode) {
  if (argc<5)
  { while((n==0)&(feof(table_file)==false))n=inputline(table_file, invalues);
   q=invalues[1];
@@ -423,10 +447,15 @@ while(n>0)
   y=invalues[3];
   z=invalues[4]; 
  }
+ } else {
+   n=inputline(table_file, invalues); q=invalues[1]; x=invalues[2]; y=invalues[3]; z=invalues[4]; 
+ }
 } // next pointcharge
 
+if(!batchmode) {
 if (argc<5){fclose(table_file);}
 fclose(conv_file);
+}
 if(do_deriv){
               fprintf (dBlm_file,"0.0 0.0 0.0   ");
               fprintf (dLlm_file,"0.0 0.0 0.0   ");
@@ -457,6 +486,8 @@ printf("#--------------------------------------------------------\n");
 printf("# Crystal Field parameters Llm in Wybourne Notation (meV)\n");
 printf("#--------------------------------------------------------\n");
 (*iops).savLlm(stdout);
+
+ if(batchmode) return 0;
 
 table_file=fopen_errchk("./results/pointc.Blm","w");
 fprintf(table_file,"#-------------------------------------------------------\n");

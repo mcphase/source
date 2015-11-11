@@ -15,6 +15,7 @@ use PDL;
 use PDL::Slatec;
 use File::Copy;
 use Getopt::Long;
+use IPC::Open3;
 
 # Loads the tables of symmetry equivalent positions, and atomic/ionic information
 push @INC, $ENV{'MCPHASE_DIR'}.'/bin/';
@@ -49,11 +50,16 @@ $nofatom= 0;
 
 # Parses command line options
 GetOptions("help"=>\$helpflag,
-           "interactive"=>\$interact,
+           "interactive|i"=>\$interact,
            "debug"=>\$debug,
            "create"=>\$create,
-           "supercell=s"=>\$supersize,
-           "poscheck"=>\$checkpos);
+           "supercell|s=s"=>\$supersize,
+           "pointcharge|pc=f"=>\$pointcharge,
+           "savepcfile|sp"=>\$savepcfile,
+           "readpcfile|rp"=>\$readpcfile,
+           "so1ion"=>\$so1ion,
+           "ic1ion"=>\$ic1ion,
+           "outpos"=>\$checkpos);
 
 if (!$create && ($#ARGV<0 || $helpflag)) {
    print " $0:\n";
@@ -61,18 +67,30 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print " Syntax: $0 [CIFNAME] \n\n";
    print " where [CIFNAME] is a the name of the Crystallographic Information File.\n\n";
    print " Options include:\n";
-   print "    --help        or -h : prints this message\n";
-   print "    --create      or -c : creates a blank CIF file without and structure information.\n";
-   print "    --supercell   or -s : creates a super-cell of size #x#x#. (e.g. -s 2x3x4).\n";
-   print "    --interactive or -i : prompts user for information such as valence states\n";
+   print "    --help        or -h  : prints this message\n";
+   print "    --create      or -c  : creates a blank CIF file without and structure information.\n";
+   print "    --supercell   or -s  : creates a super-cell of size #x#x#. (e.g. -s 2x3x4).\n";
+   print "    --interactive or -i  : prompts user for information such as valence states\n";
+   print "    --pointcharge or -pc : calculates the crystal field parameters from point charges\n";
+   print "                           up to # Angstrom away from magnetic ions (e.g. -p 3.5)\n";
+   print "    --savepcfile  or -sp : write *.pc coordinate files to results folder\n";
+   print "    --readpcfile  or -rp : read from *.pc coordinate files in results folder\n";
+   print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";
+   print "    --ic1ion      or -ic : force use of ic1ion for single ion modules.\n";
    print "\n";
    print " By default, this script is automatic, so if the oxidation (valence) states are not\n";
-   print " given in the CIF, it will be guessed at based on the element, as is whether the ion\n";
-   print " is magnetic or not.\n\n";
+   print "   given in the CIF, it will be guessed at based on the element, as is whether the ion\n";
+   print "   is magnetic or not.\n\n";
    print " Also by default, $0 will overwrite all output files (*.j, *.sipf)!\n\n";
    print " If you don't have a CIF of the structure you're studying, you can create a blank CIF\n";
-   print " using the -c option, then fill in the required information (lattice parameters and\n";
-   print " inequivalent site positions, and then rerun $0 on this CIF.\n";
+   print "   using the -c option, then fill in the required information (lattice parameters and\n";
+   print "   inequivalent site positions, and then rerun $0 on this CIF.\n\n";
+   print " For the -pc pointcharge option, the -sp option can be used to generate files\n";
+   print "   containing table of neighbouring charges named results/<sipfname>.pc\n";
+   print "   You can then edit the values of the charges in this and rerun $0 with the -rp\n";
+   print "   option to re-read this table with new charges to generate CF parameters in the sipf\n\n";
+   print " Finally, by default $0 will use so1ion for f-electron ions and ic1ion for d-electron\n";
+   print "   ions, but this can be overridden using the -so or -ic flags.\n";
    exit(0);
 }
 
@@ -135,6 +153,67 @@ sub multigcf {
   my $x = shift;
   $x = gcf($x, shift) while @_;
   return $x;
+}
+
+# Lifted from makenn.pl - finds nearest neighbours of an ion within some supercell defined by limits in nmx
+sub getneighbours {
+  my ($i,$posref,$nmxref,$rtoijk) = @_;
+  my @retval = ();
+  @pos = @{$posref};
+  @nmx = @{$nmxref};
+  @p0 = split(":",$pos[$i]);
+  $rn = new PDL();
+  @dlist = ();
+  @rlist = ();
+  @alist = ();
+  @charg = ();
+  if ($debug) { print "----------------\n".join("|",@p0)."\n----------------\n"; }
+  for $i1 ($nmx[0]..$nmx[3]) {
+    for $i2 ($nmx[1]..$nmx[4]) {
+      for $i3 ($nmx[2]..$nmx[5]) {
+        for (0..$#pos) {
+          @ps = split(":",$pos[$_]);
+          $dabc = pdl [ ($ps[1]-$p0[1]+$i1), ($ps[2]-$p0[2]+$i2), ($ps[3]-$p0[3]+$i3) ];
+          #$rvec = transpose( $rtoijk x transpose($dabc) );  # For OpenBabel convention
+          $rvec = $dabc x $rtoijk;                           # For McPhase convention
+          $r = sqrt( inner($rvec, $rvec)->at(0) );
+          if($r>0 && $r<=$pointcharge) {
+            if ($debug) { print join("|",@ps)."\tr=$r\t$dabc\n"; }
+            push @dlist, $dabc;              # Relative coordinates
+            push @rlist, $rvec;              # Cartesian coordinates
+            push @alist, $_;                 # Atom number
+            push @charg, $ps[6];             # Oxidation state (valence / charge)
+            $rn = $rn->append( pdl([$r]) );  # Distance (Angstrom)
+          }
+        }
+      }
+    }
+  }
+  $n = qsorti($rn);
+  if($savepcfile) {
+    print "atom ".($i+1)." ...\n";
+    if(!$debug) { open (FOUT, ">results/$p0[7].pc"); } else { *FOUT = *STDOUT; }
+    print FOUT "#-------------------------------------------------------------------------------------\n";
+    print FOUT "#  table with neighbors and charges for atom ".($i+1)."\n";
+    print FOUT "# output of program makenn:, Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
+    print FOUT "#-------------------------------------------------------------------------------------\n";
+    if ( (abs($rtoijk->at(1,0))+abs($rtoijk->at(2,0))+abs($rtoijk->at(2,1))) > 0.001 ) {
+      print FOUT "#orthonormal coordinate system ijk is defined with respect to abc as j||b, k||(a x b) and i normal to k and j\n";
+      print FOUT "#charge[|e|]  di[A]   dj[A]   dk[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";
+    } else {
+      print FOUT "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n"; }
+  }
+  for (0..$#rlist) {
+    $id = $n->at($_+1)-1;
+    $da = $dlist[$id];
+    $xn = $rlist[$id];
+    $outstr = sprintf("%8.4g   %+10.6f %+10.6f %+10.6f     %+10.6f %+10.6f %+10.6f %+10.6f     %i\n",
+      $charg[$id],$xn->at(0,0),$xn->at(1,0),$xn->at(2,0),$da->at(0),$da->at(1),$da->at(2),$rn->index($n)->at($_+1),$alist[$id]+1);
+    if($savepcfile) { print FOUT $outstr; }
+    push @retval, join(":",split(" ",$outstr));
+  }
+  if($savepcfile && !$debug) { close FOUT; }
+  return \@retval;
 }
 
 # ------------------------------------------------------------------------------------------------------------------------ #
@@ -326,7 +405,7 @@ if($symcol eq "" || join(",",@sympos)!~/[xyzXYZ]/) {
         print "--------------------------------------------------------------------------------\n";
         print "WARNING: Spacegroup '$spagrp' has 2 origin choices, but you have not specified\n";
         print "   which one to use. Assuming origin choice 1 (see International Tables A).\n";
-        print "   This can lead to wrong atom positions (e.g. between spinel/pyrochlore lattices.\n";
+        print "   This can lead to wrong atom positions (e.g. between spinel/pyrochlore lattices).\n";
         print "   To specify choice 1, use '$spagrp 1' or '$spagrp S' in future.\n";
         print "   To specify choice 2, use '$spagrp 2' or '$spagrp Z' in future.\n";
         print "--------------------------------------------------------------------------------\n"; }
@@ -400,7 +479,7 @@ if($symcol eq "" || join(",",@sympos)!~/[xyzXYZ]/) {
 for $j(0..$nofatom-1) {
   push @oxyguess, 0;
   if(defined $dat[$j][1]) { 
-    push @oxy, sprintf "%.0f", $dat[$j][1];  # Rounds the number
+    push @oxy, sprintf "%.0f", $dat[$j][1];  # Rounds the number - to give formal oxidation (valence) state
   } elsif(defined $dat[$j][8]) {
     $pp = $dat[$j][8]; $pp =~ s/[A-Za-z]*//;
     if($pp =~ /\+/) { $pp =~ s/\+//; push @oxy, $pp; } elsif($pp =~ /\-/) { $pp =~ s/\-//; push @oxy, (-1)*$pp; } else { push @oxy, ""; }
@@ -571,9 +650,14 @@ for $j(0..$nofatom-1) {
   if($ismag[$j]) { $ion = $atom.$oxy[$j]."p"; $ion=~s/\s+//g; } else { $ion = $atom; }
 
   # Populates the arrays of atom types and positions
+  $ioncount = 1;
   foreach $eps (@uepos) {
     @seps=split(";",$eps); 
-    push @pos, sprintf "%-4s:% 10.5f:% 10.5f:% 10.5f:%-5s:%d",$atom,@seps,$ion,$j;
+    $label = $dat[$j][0]; $label =~ s/\s*//g;
+    if ($pointcharge) {
+      $label .= "_".$ioncount; $ioncount++;
+    }
+    push @pos, sprintf "%-4s:% 10.5f:% 10.5f:% 10.5f:%-5s:%d:% 10.5f:%s",$atom,@seps,$ion,$j,$oxy[$j],$label;
     $seen=0; foreach(@atp) { if($_=~/$atom/) { $seen=1; } }
     if(!$seen || !defined($atp[-1])) { push @atp, $atom; } $htp{$atom}++;
    #printf $atom."% 14.5f% 14.5f% 14.5f\n",@seps;
@@ -595,6 +679,94 @@ for (keys %htp) { push @nat, $htp{$_}; } $denom = multigcf(@nat);
 if($debug==1) { print STDERR "denom=$denom\n"; }
 
 if($checkpos) { exit(0); }
+
+# ------------------------------------------------------------------------------------------------------------------------ #
+# Use pointc to calculate crystal field parameters from point charges up to R away (R specified on commandline)
+# ------------------------------------------------------------------------------------------------------------------------ #
+if ($pointcharge) {
+  if (!$readpcfile) {
+    @nmx = (0,0,0,0,0,0);
+    # First determine maximum distance of a basis atom to origin of unit cell
+    $distmax = 0;
+    for (0..$#pos) {
+      @ps = split(":",$pos[$_]);
+      $dabc = pdl [ ($ps[1]), ($ps[2]), ($ps[3]) ];
+      $rvec = transpose( $rtoijk x transpose($dabc) ); 
+      $r = sqrt( inner($rvec, $rvec)->at(0) );
+      if ($r>$distmax) { 
+        $distmax = $r; }
+    }
+    if ($debug) { print "distmax = $distmax \n"; }
+    $distmax += $pointcharge;
+    # Determine $nmin,$nmax by looking at a cube with side 3rmax
+    for $i1 (-1,1) {
+      for $i2 (-1,1) {
+        for $i3 (-1,1) {
+          $n = inner($invrtoijk, pdl[$i1*$distmax*1.5,$i2*$distmax*1.5,$i3*$distmax*1.5]);
+          for $im (0..2) {
+            if (($n->at($im))<$nmx[$im]) { 
+              $nmx[$im] = int($n->at($im))-1; }
+            if (($n->at($im))>$nmx[$im+3]) { 
+              $nmx[$im+3] = int($n->at($im))+1; }
+          }
+        }
+      }
+    }
+    if ($debug) { print "$nmx[0] to $nmx[3], $nmx[1] to $nmx[4], $nmx[2] to $nmx[5]\n"; }
+    # Redefine B transformation matrix to follow McPhase convention (y||b)
+    $ca = cos($alpha); $cb = cos($beta); $cc = cos($gamma);
+    $v = sqrt(1-$ca*$ca-$cb*$cb-$cc*$cc+2*$ca*$cb*$cc);
+    $rtoijkmc = pdl [ [ $a*sin($gamma),                                      $a*cos($gamma), 0 ],
+                      [  0,                                                  $b,             0 ],             
+                      [ $c*(cos($beta)-cos($alpha)*cos($gamma))/sin($gamma), $c*cos($alpha), $c*$v/sin($gamma) ] ];
+    if ($debug) { print $rtoijkmc; }
+  } 
+
+  for $j (0..$#pos) {
+    @ps = split(":",$pos[$j]);
+    if($ismag[$ps[5]]) {
+      $ionname = $ps[4]; $ionname=~s/\s*//g; $ionname =~ s/p/\+/g; $eltab = $magions{$ionname};   # Looks up <r^k> values
+      $nofelectrons = ${$eltab}[0]; $nofelectrons =~ s/^[0-9][a-z]//;                             # Looks up nof_electrons
+      $so1ionname = ${$eltab}[3]; if ($so1ionname eq "") { $so1ionname = "J=1"; }                 # And ionname for pointc
+      $ionkey = $ps[7];
+      if ($readpcfile) {
+        @neighbours = ();
+        open(FIN, "results/$ps[7].pc");
+        while (<FIN>) {
+          $_ =~ s/\R//g; if ($_ =~ /#/) { next; }                                                 # chomp and ignore comments
+          @line = split; push @neighbours, join(":",@line);
+        }
+        close(FIN);
+      } else {
+        @neighbours = @{getneighbours($j,\@pos,\@nmx,$rtoijkmc)};
+      }
+      $pointcstr = join("\n",@neighbours);
+      $pointcstr = "$so1ionname\nnof_electrons=$nofelectrons\nR2=${$eltab}[5]\nR4=${$eltab}[6]\nR6=${$eltab}[7]\n".$pointcstr;
+      $pointcstr =~ s/:/\ /g;
+      if($debug) { print $pointcstr."\n"; }
+      # Now pipe list of neighbours to pointc and get its reply.
+      $pcpid = open3(\*PCIN,\*PCOUT,\*PCERR,'pointc -b') || die "Cannot run pointc.\n";
+      print PCIN $pointcstr."\n\n";
+      # Read pointc results from stdout.
+      @pc_head = ();
+      @blm_par = ();
+      @llm_par = ();
+      $part_id = 0;
+      while (<PCOUT>) { 
+        if($_ =~ /^#\-/) { $part_id+=0.5; }
+           if($part_id==0)  { push @pc_head, $_; }
+        elsif($part_id<1.5) { push @blm_par, $_; }
+        elsif($part_id<2.5) { push @llm_par, $_; }
+      }
+      # Wait for pointc to finish so we don't leave zombie processes.
+      waitpid($pcpid,0);
+      @pc_head[0]="";  # Remove first blank line.
+      if($debug) { print "----- pointc output -----".join("",@pc_head,@blm_par,@llm_par)."-------------------------\n"; }
+      $Blm{$ionkey} = join("",@pc_head,@blm_par);
+      $Llm{$ionkey} = join("",@pc_head,@llm_par);
+    }
+  }
+}
 
 # Convert back from radians
 $alpha *= 180/$PI; $beta *= 180/$PI; $gamma *= 180/$PI;
@@ -672,13 +844,15 @@ for $si (0..$sa-1) {
   for $sj (0..$sb-1) { 
     for $sk (0..$sc-1) {
       for (0..$#pos) {
-        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
+        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; 
+        $ions{$ps[7]} = $ps[5]; $ionnames{$ps[7]} = $ps[4];
+        if($pointcharge) { $ntype = 1; } else { $ntype = $mults[$ps[5]]; }
         $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
         print FOUT "#********************************************************************* \n";
         print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $aid ; number of the atom within this type = $ntype\n";
-        print FOUT "#! da= $pa [a] db= $pb [b] dc= $pc [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
+        print FOUT "#! da= $pa [a] db= $pb [b] dc= $pc [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[7].sipf\n";
         $aid++;
-        if($ismag[$ions{$ps[4]}]) { $nmag++; }
+        if($ismag[$ions{$ps[7]}]) { $nmag++; }
       }
     } 
   } 
@@ -715,13 +889,15 @@ for $si (0..$sa-1) {
   for $sj (0..$sb-1) { 
     for $sk (0..$sc-1) {
       for (0..$#pos) {
-        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
-        if($ismag[$ions{$ps[4]}]) {
+        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; 
+        $ions{$ps[7]} = $ps[5]; $ionnames{$ps[7]} = $ps[4];
+        if($pointcharge) { $ntype = 1; } else { $ntype = $mults[$ps[5]]; }
+        if($ismag[$ions{$ps[7]}]) {
           $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
           print FOUT "#********************************************************************* \n";
           if($wantindex==1) { print FOUT "# atomindex = [$aid](".($_+1)."|$si,$sj,$sk)\n"; }
           print FOUT "#ATOM TYPE $ps[0] ; number of the atom in the UNIT CELL = $aid ; number of the atom within this type = $ntype\n";
-          print FOUT "#! da= $pa [a] db= $pb [b] dc= $pc [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[4].sipf\n";
+          print FOUT "#! da= $pa [a] db= $pb [b] dc= $pc [c] nofneighbours=0 diagonalexchange=1 sipffilename= $ps[7].sipf\n";
           $aid++;
         } else { $nnonmag++; }
       }
@@ -750,18 +926,34 @@ $sipfheader =
 for (keys %ions) {
   if($debug==0) { open (FOUT, ">$_.sipf"); }
   if($ismag[$ions{$_}]) {
-    $ionname = $_; $ionname =~ s/p/\+/g;
+    $ionname = $ionnames{$_}; 
+    $ionname =~ s/p/\+/g;
     $eltab = $magions{$ionname};             # Looks up information about the magnetic ions
     $fftab = $magff{$ionname};               #   and form factor
     $nofelectrons = ${$eltab}[0];
-    if($nofelectrons =~ /f/) {
+    if ($nofelectrons =~ /f/) {
       $so1ionname = ${$eltab}[3];
-    } else { $so1ionname = "S=".${$eltab}[1]; }
+    } else { 
+      $so1ionname = "S=".${$eltab}[1]; }     # Assumes always high spin
+    if($so1ion) {
+      $modulename = "so1ion";
+      $iontype = $so1ionname;
+    } elsif ($ic1ion) {
+      $modulename = "ic1ion";
+      $iontype = $ionname;
+    } else {
+      if ($nofelectrons =~ /f/) {
+        $modulename = "so1ion";
+        $iontype = $so1ionname;
+      } else {
+        $modulename = "ic1ion";
+        $iontype = $ionname;
+      }
+    }
+    print FOUT "#!MODULE=$modulename\n";
     $nofelectrons =~ s/^[0-9][a-z]//;
-    print FOUT "#!MODULE=so1ion\n";
     print FOUT $sipfheader;
-    print FOUT "#IONTYPE=$ionname\n";
-    print FOUT "IONTYPE=$so1ionname\n";
+    print FOUT "IONTYPE=$iontype\n";
     print FOUT "CHARGE=$oxy[$ions{$_}]\n";
     print FOUT "MAGNETIC=$ismag[$ions{$_}]\n";
     print FOUT "nof_electrons=$nofelectrons\n";
@@ -769,14 +961,14 @@ for (keys %ions) {
     print FOUT "#----------------\n";
     print FOUT "# Lande factor gJ\n";
     print FOUT "#----------------\n";
-    print FOUT "GJ=2\n";
+    print FOUT "GJ=${$eltab}[4]\n";
     print FOUT "\n";
     print FOUT "#-------------------------------------------------------\n";
     print FOUT "# Radial integrals for point charge calculations\n";
     print FOUT "#-------------------------------------------------------\n";
-    print FOUT "R2=${$eltab}[4]\n";
-    print FOUT "R4=${$eltab}[5]\n";
-    print FOUT "R6=${$eltab}[6]\n";
+    print FOUT "R2=${$eltab}[5]\n";
+    print FOUT "R4=${$eltab}[6]\n";
+    print FOUT "R6=${$eltab}[7]\n";
     print FOUT "\n";
     print FOUT "#-------------------------------------------------------\n";
     print FOUT "# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)\n";
@@ -806,6 +998,32 @@ for (keys %ions) {
       print FOUT "#      for the neutron magnetic formfactor in rare earth ions\n";
       print FOUT "#----------------------------------------------------------------------\n";
       print FOUT $zk;
+    }
+    if ($modulename eq "ic1ion") {
+      print FOUT "\n";
+      print FOUT "#-----------------------------------------------------------------------\n";
+      print FOUT "# Free-ion parameters for on-site spin-orbit and Coulomb interactions\n";
+      print FOUT "# Obtained from optical spectroscopy data by Carnal et al., J. Chem Phys\n";
+      print FOUT "# v90, p3443 (1989) and v96, p8713 (1992).\n";
+      print FOUT "#-----------------------------------------------------------------------\n";
+      print FOUT "units=meV\n";
+      print FOUT "zeta=${$eltab}[8]\n";
+      print FOUT "F2=${$eltab}[9]\n";
+      print FOUT "F4=${$eltab}[10]\n";
+      if (${$eltab}[0] =~ /f/) {
+        print FOUT "F6=${$eltab}[11]\n";
+      }
+    }
+    if ($pointcharge) {
+      print FOUT "\n";
+      print FOUT "#------------------------------------------------------------------------\n";
+      print FOUT "# Crystal field parameters (in meV) from point charges up to $pointcharge A\n";
+      print FOUT "#------------------------------------------------------------------------\n";
+      if ($modulename eq "so1ion") {
+        print FOUT $Blm{$_};
+      } else {
+        print FOUT $Llm{$_};
+      }
     }
   }
   else {
@@ -954,13 +1172,13 @@ for $si (0..$sa-1) {
   for $sj (0..$sb-1) { 
     for $sk (0..$sc-1) {
       for (0..$#pos) {
-        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[4]} = $ps[5];
-        if($ismag[$ions{$ps[4]}]==0) {
+        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; $ions{$ps[7]} = $ps[5];
+        if($ismag[$ions{$ps[7]}]==0) {
           $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
           $fpos = pdl [ ($ps[1]+$si), ($ps[2]+$sj), ($ps[3]+$sk) ];
           $cpos = $rtoijk x transpose($fpos);
           printf FOUT "%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f 0  # %s.sipf\n",
-             $realb[$ions{$ps[4]}], $imagb[$ions{$ps[4]}], $pa, $pb, $pc, $cpos->at(0,0), $cpos->at(0,1), $cpos->at(0,2), $ps[4];
+             $realb[$ions{$ps[7]}], $imagb[$ions{$ps[4]}], $pa, $pb, $pc, $cpos->at(0,0), $cpos->at(0,1), $cpos->at(0,2), $ps[7];
         }
       }
     } 
