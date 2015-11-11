@@ -78,7 +78,8 @@ so1ion.o: types.c main.c
 cfieldrout.o: cfieldrout.c $(CFOBJS) 
 
 cfield.so: module.o cfield.o  $(VECOBJS) $(CFOBJS) 
-	$(CCC) $(CCOPTS) -Wall -o cfield.so $^ -shared -L../ic1ion_module/libs -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
+	$(CCC) $(CCOPTS) -Wall -o cfield.so $^ -shared -L../ic1ion_module/libs $(LFLAGS)
+# -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
 
 ../cfield$(EXE): cfield.o $(CFOBJS)
 	$(CCC) $(CCOPTS) -Wall -o ../cfield $^ $(LFLAGS)

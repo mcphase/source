@@ -14,6 +14,11 @@ endif
 ifeq ($(findstring false,$(shell ./checkgcc.sh -4.2 $(CC))),false)
 GCC42=1
 endif
+ifeq ($(findstring false,$(shell ./checkgcc.sh -5 $(CC))),false)
+GCC4=1
+GCC42=1
+GCC5=1
+endif
 
 # Figures operating system
 ifneq (,$(findstring MINGW,$(shell uname)))
@@ -123,6 +128,9 @@ LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas -L/usr/local/gfortran/lib $(LIBFO
 #LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
 #LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/mingw64_penryn/lib -lf77blas -latlas -lgfortran
 ifdef MSYS
+ifdef GCC5
+LDFLAGS+= -lquadmath
+endif   
 ifdef GCC4
 LDFLAGS+= -static
 endif   

@@ -39,6 +39,10 @@
 #define   DBL_MAX  1.797693134862316e+258
 #endif
 
+#ifndef M_1_PI
+#define M_1_PI 0.318309886183790671538
+#endif
+
 //#include "common.h"
 #include "vector.h"
 //#include <complex.h>

@@ -30,6 +30,12 @@ ifneq ($(shell gcc --version|grep " 4.[2-9]"),)
 GCC42=1
 LFLAGS=-static-libgcc -static-libgfortran
 endif
+ifneq ($(shell gcc --version|grep " 5."),)
+GCC42=1
+GCC5=1
+# for windows  it turned out -static switch is necessary for linking
+LFLAGS=-static -static-libgcc -static-libgfortran 
+endif
 
 ifdef icc
 CC=icc
@@ -154,6 +160,9 @@ CCOPTS+= -D_G77
 else
 LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
 #LFLAGS+= -llapack -lf77blas -latlas
+ifdef GCC5
+LFLAGS+= -lquadmath
+endif
 endif
 endif
 

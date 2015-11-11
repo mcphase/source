@@ -45,6 +45,11 @@ else
 ifneq ($(shell gcc --version|grep " 4."),)
  FORTRAN=gfortran --std=legacy
  LIBFORTRAN=-lgfortran
+else
+ifneq ($(shell gcc --version|grep " 5."),)
+ FORTRAN=gfortran --std=legacy
+ LIBFORTRAN=-lgfortran
+endif
 endif
 endif
 endif
