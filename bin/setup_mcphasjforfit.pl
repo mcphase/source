@@ -15,24 +15,33 @@ print STDOUT << "EOF";
 writing mcphas.j.forfit
 EOF
 
-$small=1e-7;$value="";
+
 $lowboundary=-1e0;
 $highboundary=1e0;
 $stepwidth=1e-6;
 
 open(Fout,">mcphas.j.forfit");
 
+
   while($line=<Fin>)
      { if ($line=~/^\s*#/) {print Fout $line;}
       else{$line=~s/D/E/g;@numbers=split(" ",$line);
            for($i=0;$i<=2;++$i) {print Fout $numbers[$i]." ";}
            for($i=3;$i<=$#numbers;++$i)
-           {if(abs($value-$numbers[$i])<$small){print Fout "function\[$parname\] ";}
-            else {$parname="par".$numbers[0].$numbers[1].$numbers[2];
-                  $parname=~s/\./_/g;$parname=~s/-/m/g;$parname=~s/\+/p/g;
-                  $value=$numbers[$i];
-                  print Fout "$parname\[".$value.",".$lowboundary.",".$highboundary.",0,".$stepwidth."\] ";
+           {if(abs($numbers[$i])==0){print Fout "0.0 ";}
+            else
+             {$ii=-1;
+              foreach(@values)
+               {++$ii;
+               if(abs($_-$numbers[$i])==0){print Fout "function\[$parname[$ii]\] ";$ii=-2;last;}
+               }
+              if($ii==$#values)   # introduce new parameter 
+                 {$values[$ii+1]=$numbers[$i];
+                  $parname[$ii+1]="par".$numbers[0].$numbers[1].$numbers[2]."_".($i-2);
+                  $parname[$ii+1]=~s/\./_/g;$parname[$ii+1]=~s/-/m/g;$parname[$ii+1]=~s/\+/p/g;
+                  print Fout $parname[$ii+1]."\[".$numbers[$i].",".$lowboundary.",".$highboundary.",0,".$stepwidth."\] ";
                  }
+              }
            }
            print Fout "\n";
           }
@@ -65,9 +74,12 @@ sub usage() {
 
     output files:
 
-    mcphas.j.forfit  : all interaction parameters are substituted
+    mcphas.j.forfit  : all interaction parameters values are substituted
                        with parJxxx[0.0,-1e0,1e0,0,1e-6]
 
+    - all values which are zero are left untouched
+    - all values  which are exactly equal are identified to be the same paremeter
+ 
     - after running this program you must setup a file calcsta 
       to calculate the standard deviation and then you can start
       a fit by simannfit or searchspace
