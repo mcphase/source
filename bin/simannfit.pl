@@ -13,8 +13,10 @@ unless ($#ARGV >0)
  print " at every iteration step and  the standard sta deviation is minimzed\n";
  print " simannfit gives as a parameter a maximum number for sta - if during the\n";
  print " calculation of sta in calcsta.bat this number is exceeded calcsta.bat can exit (saves time)\n";
- print " option -t sets time limit until program end (in seconds)\n";
- print " option -s gives maximal number of iteration steps to be done\n";
+ print " option -t 100 ... sets time limit until program end to 100 seconds\n";
+ print " option -s 132 ... gives maximal number of iteration steps 132 to be done\n";
+ print " option -n 50  ... specifies that every 50 steps the parameters should be\n";
+ print "                   stored in file results/simannfit.0\n";
  print " <Press enter to close>";$in=<STDIN>;
  exit 0;}
 
@@ -42,9 +44,10 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
  @parnam=();@par=();@parmin=();@parmax=();@parerr=();@parstp=();@parav=();@thisparstp=();
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
-  $starttime=time;$maxtim=1e10;$maxstep=1e24;
+  $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;
   if ($ARGV[0]=~"-t") {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxtim=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-s") {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxstep=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0]=~"-n") {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$tablestep=eval $ARGV[0]; shift @ARGV;}
 
  while(!open(Fout,">results/simannfit.status")){print "Error opening file results/simannfit.status\n";<STDIN>;}
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
@@ -85,6 +88,19 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
  }  
     if ($#par<0) {print "Error simannfit: no parameters found in input files @ARGV\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
    close Fout;
+
+  if($tablestep!=0)
+   {if(open(Foutlevel,"results/simannfit.0")){print "Appending table to results/simannfit.0 ...\n";
+       while($line=<Foutlevel>){unless ($line=~/^\s*#/)
+                                {$line=~s/D/E/g;@numbers=split(" ",$line);}
+                               }
+    $tableoffset=$numbers[0]+$tablestep;
+    close Foutlevel;} 
+    while(!open(Foutlevel,">>results/simannfit.0")){print "Error opening file results/simannfit.0\n";<STDIN>;}
+   print "storing points in file results/simannfit.0\n";
+   print Foutlevel "#IterationNr ";foreach(@parnam){print Foutlevel $_." ";}print Foutlevel "sta variance chisquared\n";
+   }
+
 print "initialize parameter storage\n";
 $parstore = zeroes $#par+3,$#par+1;
 $deltastore =  PDL->nullcreate(0);
@@ -94,6 +110,7 @@ $nof_calcsta_calls=0;
  print ($#par+1);print " parameters found - testing calculation of sta\n";
 $rnd=1;$stasave=1e20;
  ($sta)=sta();$stps=1;$noofupdates=0;$stepnumber=0;
+if($tablestep!=0){ write_set();}
 
 if($sta>0)
 {print "starting fit\n";
@@ -110,7 +127,7 @@ if($sta>0)
 	       ++$i;}
  $rnd=rand;
    ($sta)=sta(); # CALCULATE sta !!!!
-   ++$stepnumber;
+   ++$stepnumber;if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set();}
    print " ...  current sta=$sta, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
    open(Fin,"./results/simannfit.status");$line=<Fin>;
     if ($line=~/exiting simannfit/){$sta=0;close Fin;}
@@ -248,7 +265,7 @@ $Fij=$delta x matinv($V);
                                    print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
                                    ++$i;}
      }
-     close Fout;
+     close Fout;if($tablestep!=0){close Foutlevels;}
 print " <Press enter to close>";$in=<STDIN>;exit 0;
 # END OF MAIN PROGRAM
 #****************************************************************************** 
@@ -416,3 +433,10 @@ sub read_write_statusfile {
      close Fout;
 
                           }
+
+sub write_set()
+{       my $dd=sprintf("%i ",$stepnumber+$tableoffset);print Foutlevel $dd;
+        my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} 
+        print Foutlevel $sta." ".$s2." ".$chisquared."\n";
+        
+}

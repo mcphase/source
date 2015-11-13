@@ -240,7 +240,7 @@ by the command (in the example you should go to the directory {\prg /mcphas/exam
 :
 
 \begin{quote}
- {\prg simannfit 10 [-t 1000][-s 100000] mcphas.jjj [and possible other input parameter files]}.
+ {\prg simannfit 10 [-t 1000][-s 100000] [-n 200] mcphas.jjj [and possible other input parameter files]}.
 \end{quote}
 
 The ''10'' in the command means that the initial statistical
@@ -248,6 +248,8 @@ The ''10'' in the command means that the initial statistical
 is set to 10.  
 Option -t sets time limit until program end (in seconds).
 Option -s gives maximal number of iteration steps to be done.
+Option -n allows to store every 200 steps the parametersets in a table in  {\prg results/simannfit.0}.
+
 Note that the user written program {\prg calcsta} has to be in the
 directory where {\prg simannfit\index{simannfit}} is started from.
 
