@@ -48,7 +48,7 @@ of the total angular momentum J of the lowest multiplet. E.g. "{\prg cfsplit Oh 
 familiar cubic Eg/T2g splitting (last line of output).
 See also: {\prg symhmltn} which calculates the allowed two-ion exchange terms for a point group.
 
-\item [\prg cif2mcphas $\langle$INPUT.CIF$\rangle$:] 
+\item [\prg cif2mcphas {[options]} $\langle$INPUT.CIF$\rangle$:] 
 Creates a set of McPhase input files (mcphas.j, sipfs) from the crystal structure given in a CIF 
 (Crystallographic Information File), with or without user interaction. CIF input files may be obtained 
 from online repositories such as the Inorganic Crystal Structures Database (ICSD), the Crystallography 
@@ -93,6 +93,42 @@ _atom_site_fract_z
 replacing instances of e.g. [AtomSite] or [x\_coord] with the site name and fraction $x$-coordinate, etc.
 This template can also be generated using the command "{\prg cif2mcphas -c}" or "{\prg cif2mcphas --create}".
 See also: {\prg icsdread} which downloads and creates a CIF from an entry of the (free) Korean ICSD mirror.
+
+{\em Options:}
+\begin{description}
+\item[-c]
+\item[- - create]  create cif template
+\item[-i]
+\item[- - interactive] no automatic guess of pointcharges, magnetic configurations etc. 
+\item[-pc 3.6] do point charge calculation including charges up to 3.6 Angstroms.
+
+\item[-sp       ] save the .pc files with list of neighbouring ions in results/ (default is to not save these but to use coordinates internally only). If -pc is not specified, this option has no effect.
+
+\item[-rp        ] don't regenerate point charge coordinates but reread them from 
+the saved .pc files in results/ - this option is intended so that users can 
+modify the charges in the .pc file (e.g. by the program {\prg setvariable}\index{setvariable})
+ and regenerate the CF parameters 
+from the new charges. (You don't have to specify -pc with this option).
+
+\item[-so       ]  force all ions to use so1ion
+\item[-ic        ] force all ions to use ic1ion
+\end{description}
+
+Default is to create sipf files with so1ion module for f-electrons and ic1ion module for d-electrons.
+ The {\prg -so} and {\prg -ic} options have no effect unless either {\prg -pc}
+ or {\prg -rp} is specified.
+{\prg -so} takes precedent over {\prg -ic} (e.g. 
+when typing {\prg cif2mcphas -rp -so -ic file.cif} the program will ignore the
+{\prg -ic} and force all ions to use so1ion).
+
+Some examples of the syntax are:
+\begin{verbatim}
+cif2mcphas -pc 3.5 ermno3.cif
+cif2mcphas -pc 3.5 -sp ermno3.cif
+cif2mcphas -rp ermno3.cif
+cif2mcphas -pc 3.5 -so ermno3.cif
+cif2mcphas -rp -ic ermno3.cif
+\end{verbatim}
 
 \item [\prg cpsingleion 10 100 1 file.levels.cef {[options]}: ] 
 By runnning {\prg singleion} some file.levels.cef is created in folder results.

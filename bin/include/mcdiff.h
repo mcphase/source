@@ -35,7 +35,7 @@ const char * colheader []= {"LF          ", // 0
                            "|MSFdip.P|  ",  // 9
                            "Re(MSFdip.P)",  // 10
                            "Im(MSFdip.P)",  // 11
-                           "angl(Q,P)[�]",  // 12 
+                           "angl(Q,P)[deg]",  // 12 
                            "i(MSFxMSF*).P", // 13
                            "I+          ",  // 14
                            "I-          ",  // 15
