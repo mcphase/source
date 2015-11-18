@@ -18,13 +18,13 @@ public class displayhtml extends JFrame implements HyperlinkListener {
 	static String[] params;
 	
 	public displayhtml() {
-		htmlPane = new JEditorPane("text/html", "");
+		htmlPane = new JEditorPane("text/html", "<h3>displayhtml does not work on every system: please use your browser</h3>");
 		htmlPane.addHyperlinkListener(this);
 		htmlPane.setEditable(false);
 		
 		scrollPane = new JScrollPane(htmlPane);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane.setMinimumSize(new Dimension(10, 10));
+		scrollPane.setMinimumSize(new Dimension(100, 100));
 		
 		reloader = new ReloadThread(this);
 		
@@ -241,7 +241,7 @@ public class displayhtml extends JFrame implements HyperlinkListener {
 						dh.reloadSite(params);
 						oldMod = f.lastModified();
 						fw.reloadData();
-						System.out.println("SITE SUCCESSFULLY RELOADED");
+						System.out.println(fileName+" SUCCESSFULLY RELOADED");
 					}
 				} catch (InterruptedException e) {
 					System.out.println("ERROR! Reloading interrupted! " + e);

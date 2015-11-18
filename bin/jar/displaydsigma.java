@@ -4,8 +4,8 @@ import java.awt.event.*;
 import javachart.chart.*;
 import java.io.*;
 import java.lang.*;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+//import com.sun.image.codec.jpeg.JPEGCodec;
+//import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 public class displaydsigma extends Panel implements Runnable {
  public LineChart chart = new LineChart("sample");
@@ -179,7 +179,7 @@ chart.getYAxis().setTitleString(yText);
    {//char ii=i;   
     chart.addDataset(s.substring(i,i+1),vals,vals);
    }  
-    bRot.addActionListener(new ActionListener(){
+/*    bRot.addActionListener(new ActionListener(){
     public void actionPerformed(ActionEvent ed){
     try{
          FileOutputStream fos=new FileOutputStream("spectrum.jpg");
@@ -202,7 +202,7 @@ chart.getYAxis().setTitleString(yText);
     }
 
       }
-                                                 });
+                                                 });*/
  }
 
 

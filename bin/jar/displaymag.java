@@ -4,12 +4,12 @@ import java.awt.event.*;
 import javachart.chart.*;
 import java.io.*;
 import java.lang.*;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+// import com.sun.image.codec.jpeg.JPEGCodec;
+// import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 public class displaymag extends Panel implements Runnable {
  public LineChart chart = new LineChart("sample");
- Button bRot=new Button("save magnetization.jpg");                       //erstellt einen Button
+ //Button bRot=new Button("save magnetization.jpg");                       //erstellt einen Button
  Thread myThread = null;
  static   double vals[]={0.,1.};
  static String[] file;
@@ -175,7 +175,7 @@ String s="abcdefghijkl";
    {//char ii=i;   
     chart.addDataset(s.substring(i,i+1),vals,vals);
    }  
-    bRot.addActionListener(new ActionListener(){
+ /*   bRot.addActionListener(new ActionListener(){
     public void actionPerformed(ActionEvent ed){
     try{
          FileOutputStream fos=new FileOutputStream("magnetization.jpg");
@@ -198,7 +198,7 @@ String s="abcdefghijkl";
     }
 
       }
-                                                 });
+                                                 });*/
  }
 
 
@@ -235,7 +235,7 @@ String s="abcdefghijkl";
 	    public void windowClosing(WindowEvent e) {System.exit(0);}
 	});
  myPanel.initChart();
-       myFrame.add(myPanel.bRot);                                          //fuegt dem JFrame den Button hinzu
+  //     myFrame.add(myPanel.bRot);                                          //fuegt dem JFrame den Button hinzu
        myFrame.pack();
  myFrame.add(myPanel);
  myFrame.setSize(400,400);
