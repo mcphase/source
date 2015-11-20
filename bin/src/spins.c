@@ -233,7 +233,8 @@ if (inputpars.gamma!=cs.abc[6]){cs.abc[6]=inputpars.gamma;}
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
   if (strcmp(argv[1],"-f")==0) 
- { if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
+ { inputpars.savelattice(fout);
+   if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
   fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
   fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ia> <Ib> <Ic> [created by program spins]\n");
   for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
@@ -242,7 +243,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
     dd3=savmf.pos(i,j,k,ii, cs);
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
     fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
-            cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
+            (*inputpars.jjj[ii]).sipffilename,dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
     //output the "magnetic" moment if possible ... actually it outputs Ia Ib Ic 
     for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,savmf.m(i,j,k)(inputpars.nofcomponents*(ii-1)+nt)));}      
     fprintf(fout,"\n");
