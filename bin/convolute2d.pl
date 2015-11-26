@@ -12,6 +12,25 @@ unless ($#ARGV >11)
 #
 # Syntax: convolute2d col_X col_Y col_Z input_file ccol_X ccol_Y ccol_Z resolution_file minx maxx Nx miny maxy Ny
 #
+# formula:  f(x,y) = sum_i,j zi cj(x-xi,y-yi)
+#
+# input file: xi yi zi  
+# resolution_file: rxj ryj cj(rxi,ryi)
+#
+# input files may be unsorted, equal steps not necessary
+#
+# Note on normalisation assuming that the input functions are normalised and equal spaced: i.e.
+#                         sum_i zi(xi,yi) dx dy =1  
+#                         sum_j cj(rxi,ryi) drx dry =1  
+#     
+#  stepwidth of function and resolution function are dx,dy and drx,dry respectively
+#  stepwidth of output dfx=(maxx-minx)/Nx,dfy=(maxy-miny)/Ny
+#
+#                        multiply f(x,y) by dx*dy*drx*dry/(dfx*dfy) 
+#
+#     to get a normalised function obeying sum_k f(xk,yk) dfx dfy = 1
+# 
+#
 # Example: To plot a contour of a dispersion with a gaussian resolution function of
 #          fwhm=0.2 in h and fwhm=0.5meV in energy
 #
@@ -104,19 +123,25 @@ for($i=0;$i<$ii;++$i) # take data points
     $iy=($y-$ly)/$dy;
     $iyf=floor($iy);
     $iyc=ceil($iy);
-  if($ixf>=0&&$iyf>=0&&$ixc<$Nx&&$iyc<$Ny)
+  if($ixf>=-1&&$iyf>=-1&&$ixc<=$Nx&&$iyc<=$Ny)
     {$wxc=$ix-$ixf;#if($wxc<0){print "error: $ix $ixf";exit(1);}
-     $wxf=1-$wxc; #if($wxc>1){print "error: $ix $ixf";exit(1);}
+      #if($wxc>1){print "error: $ix $ixf";exit(1);}
 
      $wyc=$iy-$iyf;
      $wyf=1-$wyc;
      
      $z=$czvalues[$i]*$c3values[$j];
-    if($ixc>0&&$iyc>0){
-     $a[$ixf][$iyf]+=$wxf*$wyf*$z;
-     $a[$ixf][$iyc]+=$wxf*$wyc*$z;
-     $a[$ixc][$iyf]+=$wxc*$wyf*$z;
+    if($ixf>=0){$wxf=1-$wxc;
+                if($iyf>=0){
+     $a[$ixf][$iyf]+=$wxf*$wyf*$z;}
+               if($iyc<$Ny){
+     $a[$ixf][$iyc]+=$wxf*$wyc*$z;}
+                }
+    if($ixc<$Nx){if($iyf>=0){
+     $a[$ixc][$iyf]+=$wxc*$wyf*$z;}
+                if($iyc<$Ny){
      $a[$ixc][$iyc]+=$wxc*$wyc*$z;}
+                }
     }
    } #next $j
  } # next $i

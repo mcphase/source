@@ -12,8 +12,14 @@ unless ($#ARGV >2)
  print " usage: gauss2d fwhm1 fwhm2 rotangle stpx minx maxx stpy miny maxy
 
  the formula for a gaussian is:
-sigma=fwhm/2/sqrt(2*log(2))
-gauss(x)=1.0/sqrt(2*3.14159265359)/sigma* exp(-x^2/2sigma^2)\n";
+
+sigmai=fwhmi/2/sqrt(2*log(2))
+ 
+gauss(x)=product_(i=1,2) 1.0/sqrt(2*3.14159265359)/sigmai* exp(-ui^2/2sigmai^2)
+
+with u1 = x cos(rotangle) - y sin(rotangle)
+     u2 = x sin(rotangle) + y cos(rotangle) 
+\n";
 
 
 
