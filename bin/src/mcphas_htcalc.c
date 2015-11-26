@@ -290,14 +290,14 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
    if (ini.logfevsQ==1) {
                  ComplexVector a(1,3*inputpars.nofatoms),b(1,3*inputpars.nofatoms);
                  ComplexVector b1(1,inputpars.nofcomponents*inputpars.nofatoms);
-                 float inmax=0;int qh,qk,ql,l;
+                 float inmax=0;int qh,qk,ql,l,nk=0;
                  ComplexVector * mq;  
                  mq = new ComplexVector [sps.in(sps.na(),sps.nb(),sps.nc())+2];for(l=0;l<=sps.in(sps.na(),sps.nb(),sps.nc())+1;++l){mq[l]=ComplexVector(1,inputpars.nofcomponents*inputpars.nofatoms);}
                  Vector sq2(1,3*inputpars.nofatoms),qs(1,3),qt(1,3);float in;qs(1)=1000;
                  sps.FT(mq); //Fourier trafo of spincf
 		 // get the main propagation vector by looking for the
 		 // biggest Fourier component of the magnetic moment arrangement 
-                 for(qh=0;qh<=sps.na();++qh){for(qk=0;qk<=sps.nb();++qk){for(ql=0;ql<=sps.nc();++ql)
+                 for(qh=0;qh<sps.na();++qh){for(qk=0;qk<sps.nb();++qk){for(ql=0;ql<sps.nc();++ql)
                   {// get magnetic moment from momentum fouriercomponent into b 
 		   b=0;
 		   b1 = mq[sps.in(sps.na()-qh,sps.nb()-qk,sps.nc()-ql)];
@@ -336,13 +336,44 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                    q(3)=1.0*ql/sps.nc();
                    qt=inputpars.rez.Transpose()*q;
 		   in=Norm(sq2)*Norm(sq2);
-	           if ((in>inmax-0.01&&Norm(qt)<Norm(qs))
-		      ||in>inmax)
-                    {inmax=in;qs=qt;}
+	           if (in>inmax-0.001)
+                    {if(in<inmax+0.001){++nk;}else{nk=1;}
+                     inmax=in;qs=q;}
                    }}}
+
+// inserted 26.11.2015 to get rec vector R such that R+q is smallest
+     // try different Q vectors corresponding to q !!
+    int i1,j1,k1;
+    double QQmin=1e10,QQ;
+// inserted 10.5.10 to make comaptible with nonortholattices
+     Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
+     Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
+                      abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma; 
+     get_abc_in_ijk(abc_in_ijk,abc);
+     p=abc_in_ijk*inputpars.r; // p is the primitive crystal unit cell in ijk coordinates
+     pstar=2*PI*p.Inverse().Transpose();
+     Vector nmin(1,3),nmax(1,3),hkl(1,3),hkls(1,3),Q(1,3),qeuklid(1,3);
+     nlimits_calc(nmin, nmax, ini.maxQ, pstar);
+     // problem: we want to find all lattice vectors Rn=ni*ai which are within a
+     // sphere of radius r from the origin (ai = column vectors of matrix a)
+     // this routine returns the maximum and minimum values of ni i=1,2,3
+     // by probing the corners of a cube
+              for (i1=(int)nmin(1);i1<=nmax(1);++i1){
+              for (j1=(int)nmin(2);j1<=nmax(2);++j1){
+              for (k1=(int)nmin(3);k1<=nmax(3);++k1){
+       Q(1)=qs(1)+i1;Q(2)=qs(2)+j1;Q(3)=qs(3)+k1;
+        //project back to big lattice
+       hkl=inputpars.rez.Transpose()*Q;
+
+      // qeuklid is Q in ijk coordinate system !
+      hkl2ijk(qeuklid,hkl,abc);//qeuklid=ri;//qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
+      QQ=Norm(qeuklid);if(QQ<QQmin){QQmin=QQ;hkls=hkl;}
+ }}}
+//------------------- end if insert 26.11.2015 -->> output is hkls with smallest |Q|
+
                    felog=fopen_errchk("./results/mcphas.log","a");
                    if (verbose==1||fe>10000){fprintf(felog,"#");}
-                   fprintf(felog,"%10.6g %10.6g %10.6g %10.6g %3i %3i %3i %3i \n",qs(1),qs(2),qs(3),fe,j,sps.na(),sps.nb(),sps.nc());
+                   fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i \n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc());
                    if (verbose==1&&fe<20000){sps.print(felog);}
 	           fclose(felog);
                   delete []mq;
@@ -410,7 +441,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  srand(time(0)); // initialize random number generator
  checkini(testspins,testqs,ini); // check if user pressed a button
  if (ini.logfevsQ==1) {felog=fopen_errchk("./results/mcphas.log","a");
-               fprintf(felog,"#Logging of h k l fe[meV] spinconf_nr n1xn2xn3 T=%g Ha=%g Hb=%g Hc=%g\n",T,Habc(1),Habc(2),Habc(3));
+               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 at T=%g Ha=%g Hb=%g Hc=%g\n",T,Habc(1),Habc(2),Habc(3));
                fclose(felog);
 	      }
  if (verbose==1)

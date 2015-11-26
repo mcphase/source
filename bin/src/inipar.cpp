@@ -24,6 +24,7 @@ printf (" [file] ... input file  with sets of x y T H Ha Hb Hc points \n");
 printf (" (format as output file mcphas.xyt)\n\n");
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
+printf ("          -a     append output files (do not overwrite) \n");
 printf ("          -v     verbose mode: \n");
 printf ("                 * more information is printed to stdout, \n");
 printf (" 		  * the qvectors file mcphas.qom will contain \n");
