@@ -166,12 +166,15 @@ excitations.
 
 \begin{description} 
 \item[ display\_densities -f mcphas.sps T Ha Hb Hc]
+\item[ display\_densities -f mcphas.sps x y]
  if used with -f filename this file has to be a mcphas.mf or mcphas.sps file,
 the spin configuration
    at given temperature T[K] and magnetic effective field H[T]
     is read and extracted from this file and printed on screen (stdout), nothing
- else is done
+ else is done. Insterad of temperature and magnetic field also the x y point coordinates
+in the phasediagram can be given.
 \item[display\_densities [-c$|$-s$|$-o$|$-m$|$-j] [-p i j k$|$-div] [-S$|$-L$|$-M] [-P] T Ha Hb Hc [h k l E]]
+\item[display\_densities [-c$|$-s$|$-o$|$-m$|$-j] [-p i j k$|$-div] [-S$|$-L$|$-M] [-P] x y]
  if used without a filename, the information is read from results/mcphas.* res
 ults/mcdisp.*
    output files and 3d graphical animations are created.

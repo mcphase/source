@@ -2,24 +2,30 @@
 use Getopt::Long;
 
 GetOptions("help"=>\$helpflag);
-usage() if $helpflag||$#ARGV<2;
+usage() if $helpflag||$#ARGV<1;
 $ARGV[0]=~s/x/*/g;$ARGV[0]=eval $ARGV[0];
 $ARGV[1]=~s/x/*/g;$ARGV[1]=eval $ARGV[1];
+if ($#ARGV>2) { 
 $ARGV[2]=~s/x/*/g;$ARGV[2]=eval $ARGV[2];
 $ARGV[3]=~s/x/*/g;$ARGV[3]=eval $ARGV[3];
-
+            }
 print STDOUT << "EOF";
 *******************************************************
 setting up mcdisp.mf to be used by mcdisp
-T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T
+EOF
+if ($#ARGV>2) { 
+print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
+system ("spins -f results/mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > mcdisp.mf");
+             }
+else
+            {
+print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
+system ("spins -f results/mcphas.mf $ARGV[0] $ARGV[1]  > mcdisp.mf");
+             }
+print STDOUT << "EOF";
 *******************************************************
 reading results/mcphas.mf
 ....writing mcdisp.mf
-EOF
-
-system ("spins -f results/mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > mcdisp.mf");
-
-print STDOUT << "EOF";
 reading results/mcphas.sps
 ....writing results/spins.*
 EOF
@@ -53,10 +59,13 @@ sub usage() {
                     mcdisp.mf
 
     usage: setup_mcdisp_mf T Ha Hb Hc
+             or
+           setup_mcdisp_mf x y
 
      -h          : this (help) message
       T          : Temperature (K)
       Ha,Hb,Hc   : Magnetic Field (T)
+      x,y        : x,y values of point in the phase diagram
 
     required input files:
 

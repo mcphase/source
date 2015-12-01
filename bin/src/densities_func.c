@@ -134,7 +134,7 @@ int n;
  float numbers[13];numbers[9]=1;numbers[10]=3;
  numbers[0]=13;char instr[MAXNOFCHARINLINE];
  long int pos=0;
- if(Tin>0)
+ if(Tin>=0)
 {
  for (delta=1000.0;feof(fin_coq)==0                      //end of file
                     &&(n=inputline(fin_coq,numbers))>=8   //error in line reading (8 old format, 9 new format)
@@ -142,14 +142,20 @@ int n;
 
     { spincf spins(1,1,1,(int)numbers[9],(int)numbers[10]);
       spins.load(fin_coq);
+     if(Tin==0){ddT=0; // here hain and hbin correspond to x and y in phasediagram
+                ddHa=hain-numbers[1];ddHa*=ddHa;
+                ddHb=hbin-numbers[2];ddHb*=ddHb;
+                ddHc=0;
+      } else {
       ddT=Tin-numbers[3];ddT*=ddT;
       ddHa=hain-numbers[5];ddHa*=ddHa;
       ddHb=hbin-numbers[6];ddHb*=ddHb;
       ddHc=hcin-numbers[7];ddHc*=ddHc;
+      }
       dd=sqrt(ddT+ddHa+ddHb+ddHc+0.000001);
       if (dd<delta)
        {delta=dd;
-        sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
+        sprintf(outstr,"x=%g y=%g T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[1]),myround(numbers[2]),myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
         savmf=spins;T=numbers[3];Hext(1)=numbers[5];Hext(2)=numbers[6];Hext(3)=numbers[7];
        }
       pos=ftell(fin_coq); 
@@ -158,7 +164,8 @@ int n;
                   {pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
        fseek(fin_coq,pos,SEEK_SET);
     }
- } else
+ } 
+   else
  {// look for config number -Tin
   for(n=1;n<=-Tin;++n)
   {if(savmf.load(fin_coq)==0){fprintf(stderr,"Error program spins: loading configuration number %i\n",n);exit(1); }

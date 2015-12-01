@@ -399,7 +399,9 @@ given by th parametrisation in file.sipf.
     at the propagation vector tau. How much it is below one depends on the
     magnitude of $J(Q)$ for the competing wavevectors in the list in{\prg  mcdisp.par}.
 
-\item [\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}  T Ha Hb Hc:] program
+\item [\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}  T Ha Hb Hc:] 
+\item [\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}  x y:] 
+program
  to setup {\prg mcdiff.in} with information on spinconfiguration
                     to be used by program {\prg mcdiff\index{mcdiff}}. Note, you must
                     have done a {\prg mcphas\index{mcphas}} calculation to stabilise
@@ -409,9 +411,10 @@ given by th parametrisation in file.sipf.
                     {\prg mcdiff.in}
 
 \begin{verbatim}
-     -h          : this (help) message
+     -h          : help  message
       T          : Temperature (K)
       Ha,Hb,Hc   : Magnetic Field (T)
+     x,y         : x,y values in phasediagram
 
     required input files:
 
@@ -425,7 +428,10 @@ given by th parametrisation in file.sipf.
     - after running this program you can start mcdiff to do the calculation
       magnetic diffraction pattern
 \end{verbatim}
-\item [ \prg   setup\_mcdisp\_mf \index{setup\_mcdisp\_mf} T Ha Hb Hc:] program to setup{\prg mcdisp.mf} with information on meanfields
+\item [ \prg   setup\_mcdisp\_mf \index{setup\_mcdisp\_mf} T Ha Hb Hc:] 
+\item [ \prg   setup\_mcdisp\_mf \index{setup\_mcdisp\_mf} x y:] 
+
+program to setup{\prg mcdisp.mf} with information on meanfields
                     to be used by program {\prg mcdisp\index{mcdisp}}. Note, you must
                     have done a {\prg mcphas\index{mcphas}} calculation to stabilise
                     a magnetic structure at the desired Temperature/Field.
@@ -438,6 +444,7 @@ given by th parametrisation in file.sipf.
      -h          : this (help) message
       T          : Temperature (K)
       Ha,Hb,Hc   : Magnetic Field (T)
+      x,y        : x,y values in phasediagram
 
     required input files:
 

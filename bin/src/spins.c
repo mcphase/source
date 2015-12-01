@@ -12,23 +12,28 @@
 
 void help_and_exit()
     { printf ("\n\
-program spins - popout spin/exchange field configuration\n\
-              - and/or display 3d animation of spin/moment/densities and animations\n\n\
+program spins - popout spin/exchange field configuration\n"
+"              - and/or display 3d animation of spin/moment/densities and animations\n\n\
 use as: spins -f mcphas.sps T Ha Hb Hc\n\
+    or: spins -f mcphas.sps x y\n\
     or: spins -f mcphas.tst n\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] T Ha Hb Hc [h k l E]\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] x y\n\
                     \n\
 1) if used with -f file T Ha Hb Hc,  this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
    is read and extracted from this file and printed on screen (stdout),\n \
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>), nothing else is done\n\
   \n\
-2) if used with -f filen n,  this file has to be a mcphas.tst file,\n \
+2) if used with -f file x y, then this file has to be a mcphas.mf or mcphas.sps file,\n\
+   the spin configuration at a given x,y point is read and extracted from this file ,\n\
+   and printed on screen (stdout) etc. as 1)\n\
+3) if used with -f filen n,  this file has to be a mcphas.tst file,\n \
    the spin configuration number n\n \
    is read and extracted from this file and printed on screen (stdout),\n \
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>), nothing else is done\n\
   \n\
-3) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
+4) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
    output files and 3d graphical animations are created.\n\
    options are:\n\
          -c ... calculate chargedensity\n\
@@ -211,8 +216,12 @@ if(strcmp(argv[1+os],"-P")==0){os+=1;}
 // load spinsconfigurations and check which one is nearest -------------------------------   
 double TT=0; TT=strtod(argv[1+os],NULL);
 double HHx=0,HHy=0,HHz=0;
-if (strcmp(argv[1],"-f")==0&&argc<5){TT=-TT;}
-else{HHx=strtod(argv[2+os],NULL);HHy=strtod(argv[3+os],NULL);HHz=strtod(argv[4+os],NULL);}
+if (strcmp(argv[1],"-f")==0&&argc<5){TT=-TT;} // here TT becomes a number of a spinconfig in a file
+else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
+               }// here Hx and Hy become x and y in the phasediagram and TT=0 indicates this fact
+     else
+     {HHx=strtod(argv[2+os],NULL);HHy=strtod(argv[3+os],NULL);HHz=strtod(argv[4+os],NULL);}
+     }
 check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr);
 fclose (fin);
 
@@ -235,6 +244,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   if (strcmp(argv[1],"-f")==0) 
  { inputpars.savelattice(fout);
    if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
+  fprintf(fout,"#! %s \n",outstr);
   fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
   fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ia> <Ib> <Ic> [created by program spins]\n");
   for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
@@ -292,6 +302,7 @@ gp.read();
 
 
 // the following is for the printout of spins.out ...........................
+fprintf(fout,"#! %s \n",outstr);
 fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
 fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc>\n");
 fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
