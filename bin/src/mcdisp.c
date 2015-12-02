@@ -1026,6 +1026,7 @@ if (do_jqfile==1){
              mfcf qel_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
 #endif
   double DMDtotint=0,DMDtotintbey=0;
+  ComplexMatrix chitot(1,3,1,3),chitotbey(1,3,1,3); chitot=0;chitotbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
   intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl,counter);
   qold=qijk;hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);
@@ -1317,7 +1318,9 @@ if (do_jqfile==1){
                       fprintf (foutqei, "%6.6g %6.6g %6.6g  %6.6g %6.6g%si%-6.6g  -1     -1    -1     ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                                          myround(QQ),myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
                      } 
-                  if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){                       
+                  if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){   
+                       DMDtotint+=ints(i);DMDtotintbey+=intsbey(i);
+                       chitot=chitot+chi;chitotbey=chitotbey+chibey;                    
                        switch(ini.outS)
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
@@ -1329,7 +1332,6 @@ if (do_jqfile==1){
                          } }
                        fprintf(foutqei,"\n");
                        if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
-                       if(En(i)!=-DBL_MAX&&En(i)>=ini.emin&&En(i)<=ini.emax){DMDtotint+=ints(i);DMDtotintbey+=intsbey(i);}
                       }
                      // printout eigenvectors only if evaluated during intensity calculation...
                   if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){ 
@@ -1397,6 +1399,16 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
 #endif
 if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
                fprintf (foutdstot, "%4.4g %4.4g  %4.4g %4.4g %4.4g",hkl(1),hkl(2),hkl(3),DMDtotint,DMDtotintbey);
+               switch(ini.outS)
+                         {case 0: break;
+                          case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
+                          case 3: rottouvw(chitot,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 4: rottouvw(chitotbey,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
+                          case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 6: rottouvw(chitot,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                         } 
+                      
     sta+=dd*dd;sta_int+=dd_int*dd_int;
     sta_without_antipeaks+=dd_without_antipeaks*dd_without_antipeaks;
     sta_int_without_antipeaks+=dd_int_without_antipeaks*dd_int_without_antipeaks;

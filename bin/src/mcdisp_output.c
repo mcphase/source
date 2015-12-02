@@ -110,11 +110,21 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
             fprintf(foutqei,"f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
            fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");writeheader(inputpars,foutdstot);
-           fprintf (foutdstot, "#!Total Scattering Cross Section in energy range [emin=%g ; emax=%g]\n",ini.emin,ini.emax);
+           fprintf (foutdstot, "#!Total Scattering Cross Section Itot in energy range [emin=%g ; emax=%g]\n",ini.emin,ini.emax);
+           fprintf(foutdstot,"# ... Itot is given as dsigma_/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.]f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
            ini.print_usrdefcolhead(foutdstot);
            fprintf(foutdstot,"h k l   Itot-DMDdip Itot-DMDbey ");
-           if(do_Erefine)fprintf(foutdstot,"Itot-integrated from mcdisp.dsigma ");
-           fprintf(foutdstot," ... Itot is given as dsigma_/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.]f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+            switch(ini.outS)
+            {case 0:break;
+             case 1:fprintf(foutdstot,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 2:fprintf(foutdstot,"Smagperp: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 3:fprintf(foutdstot,"Smagperp_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             case 4:fprintf(foutdstot,"Smagperp: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             case 5:fprintf(foutdstot,"Smag_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
+             case 6:fprintf(foutdstot,"Smag_dip: Suureal(Q,omega) Suuimag Suvreal Suvimag Suwreal Suwimag ...Swwimag [barn/sr/f.u.]");break;
+             }
+            if(do_Erefine)fprintf(foutdstot," Itot-integrated from mcdisp.dsigma");
+             fprintf(foutdstot,"\n");
 
             if (do_Erefine==1){
                        fprintf(foutds,"#!<--mcphas.mcdisp.dsigma-->\n");
