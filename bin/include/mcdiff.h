@@ -3,7 +3,7 @@
 //********************************************
 
 #define MAXNOFREFLECTIONS 6000
-#define SMALL 1e-8
+#define SMALL 1e-3
 #define SMALLINT 1e-4
 #define NOFOUTPUTCOLUMNS 12
 #define MAX_NOF_MF_COMPONENTS 51

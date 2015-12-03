@@ -384,10 +384,7 @@ else
                 complex <double> mqx=0,mqx2=0,mqxy=0;
                 complex <double> mqy=0,mqy2=0,mqxz=0;
                 complex <double> mqz=0,mqz2=0,mqyz=0;
-//               printf("%g %g %g\n",hkl[i](1),hkl[i](2),hkl[i](3));
-               hkl[i](1)=rint(hkl[i](1));
-               hkl[i](2)=rint(hkl[i](2));
-               hkl[i](3)=rint(hkl[i](3));
+//               printf("%g %g %g\n",hkl[i](1),hkl[i](2),hkl[i](3));               
           if(!getint(jjjpars,(int)hkl[i](1),(int)hkl[i](2),(int)hkl[i](3),thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Imag,Imagdip,inuc,outn,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,Pxyz))
                 {fprintf(stderr,"ERROR mcdiff: theta for reflection number %i above thetamax=%g\n",i,thetamax);exit(1);}
                D[i]=d;intmag[i] = Imag;intmagdip[i] = Imagdip;  ikern[i] = inuc;

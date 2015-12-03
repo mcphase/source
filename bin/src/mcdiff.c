@@ -685,14 +685,24 @@ if (argc>1){int nr;
                                if(nr>2)
                                {hhkkll(1)=nn[1];hhkkll(2)=nn[2];hhkkll(3)=nn[3];++m;
                                 code=1;                                
-                               // transformieren der millerindizes auf magnetische einheitszelle
-                                  hkl[m](1)=hhkkll*(rtoijk.Inverse()*r1);
-                                  hkl[m](2)=hhkkll*(rtoijk.Inverse()*r2);
-                                  hkl[m](3)=hhkkll*(rtoijk.Inverse()*r3);
-                              // check if magnetic reflection is indeed on magnetic reciprocal lattice
-                              if(fabs(rint(hkl[m](1))-hkl[m](1))>SMALL||fabs(rint(hkl[m](2))-hkl[m](2))>SMALL||fabs(rint(hkl[m](3))-hkl[m](3))>SMALL)
-                                {fprintf(stderr,"Warning - reading (%g %g %g): calculation impossible, because this corresponds to ", hhkkll(1),hhkkll(2),hhkkll(3));
-                                 fprintf(stderr,"non integer magnetic reciprocal lattice (%g %g %g)\n\n", hkl[m](1), hkl[m](2), hkl[m](3));
+                               // transformieren der millerindizes auf magnetische einheitszelle(re-use nn[1-3] to store noninteger values
+                                  nn[1]=hhkkll*(rtoijk.Inverse()*r1);
+                                  nn[2]=hhkkll*(rtoijk.Inverse()*r2);
+                                  nn[3]=hhkkll*(rtoijk.Inverse()*r3);
+                                  hkl[m](1)=rint(nn[1]);// round to integer reciprocal lattice point
+                                  hkl[m](2)=rint(nn[2]);
+                                  hkl[m](3)=rint(nn[3]);
+                                 // check if magnetic reflection is indeed on magnetic reciprocal lattice
+                              if(fabs(nn[1]-hkl[m](1))>SMALL||fabs(nn[2]-hkl[m](2))>SMALL||fabs(nn[3]-hkl[m](3))>SMALL)
+                                {fprintf(stderr,"Warning mcdiff - reading hkl=(%g %g %g): calculation impossible, because this corresponds to ", hhkkll(1),hhkkll(2),hhkkll(3));
+                                 fprintf(stderr,"non integer supercell reciprocal lattice point (%g %g %g)\n", nn[1], nn[2], nn[3]);
+                                 // transform integer back to hkl
+                                   hhkkll=hkl[m](1)*rez1+hkl[m](2)*rez2+hkl[m](3)*rez3;
+                                   hhkkll/=2.0*PI;
+                                   nn[1]=hhkkll*rtoijk.Column(1);
+                                   nn[2]=hhkkll*rtoijk.Column(2);
+                                   nn[3]=hhkkll*rtoijk.Column(3);
+                                 fprintf(stderr," - will calculate hkl=(%g %g %g) instead !\n\n", nn[1], nn[2], nn[3]);
                                 }
                                 if(nr>3){mx[m]=complex <double> (nn[4],0);code=2;}// intensities given                                
                                 if(nr>4){my[m]=complex <double> (nn[5],0);code=3;}// errors given                                
@@ -700,7 +710,6 @@ if (argc>1){int nr;
        fclose(fin);      
            }
 
-// transformieren der millerindizes auf kristallographische einheitszelle
 printheader(jjjpars,code,"./results/mcdiff.out","mcdiff.in", unitcellstr,T,H, lambda, ovalltemp, lorenz, r1, 
           r2, r3, n,  m,a,b,c,P,Pxyz);
 
