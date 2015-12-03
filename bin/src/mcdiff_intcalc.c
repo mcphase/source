@@ -384,10 +384,38 @@ else
                 complex <double> mqx=0,mqx2=0,mqxy=0;
                 complex <double> mqy=0,mqy2=0,mqxz=0;
                 complex <double> mqz=0,mqz2=0,mqyz=0;
-//               printf("%g %g %g\n",hkl[i](1),hkl[i](2),hkl[i](3));               
-          if(!getint(jjjpars,(int)hkl[i](1),(int)hkl[i](2),(int)hkl[i](3),thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Imag,Imagdip,inuc,outn,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,Pxyz))
+          if(fabs(rint(hkl[i](1))-hkl[i](1))>SMALL||fabs(rint(hkl[i](2))-hkl[i](2))>SMALL||fabs(rint(hkl[i](3))-hkl[i](3))>SMALL)
+          {Imag=0;inuc=0;Imagdip=0;
+          Vector Qvec(1,3);
+            //calculate d spacing  ************
+            Qvec=rez1*hkl[i](1) + rez2*hkl[i](2)  + rez3*hkl[i](3) ;
+             //   printf("%g %g %g d=%g\n",hkl[i](1),hkl[i](2),hkl[i](3),d); 
+             double Q,s,sintheta,sin2theta;
+             float msf2=0,msf2dip=0;
+             complex<double> nsf=0,msfx=0,msfy=0,msfz=0,msfdipx=0,msfdipy=0,msfdipz=0;
+            Q= Norm(Qvec);d = 2.0 * PI / Q; //dspacing
+            s=0.5 / d;
+	    sintheta = lambda * s;
+            if (sintheta >= sin(thetamax / 180 * PI)) {fprintf(stderr,"ERROR mcdiff: theta for reflection number %i above thetamax=%g\n",i,thetamax);exit(1);}
+             float  Theta ; Theta = 180 / PI * atan(sintheta / sqrt(1 - sintheta * sintheta));
+                          double ovallt;ovallt = exp(-2 * ovalltemp * (sintheta * sintheta / lambda / lambda));
+             float lorentzf=1;
+            sin2theta = 2.0 * sintheta * sqrt(1.0 - sintheta * sintheta);
+            if(lorenz == 0){lorentzf = 1.0;} // no lorentzfactor
+            if(lorenz == 1){lorentzf = 1.0 / sin2theta / sin2theta;} // powder flat sample
+            if(lorenz == 2){lorentzf = 1.0 / sin2theta / sintheta;}  // powder cyl. sample
+            if(lorenz == 3){lorentzf = 1.0 / sin2theta;}             //single crystal
+            if(lorenz == 4){lorentzf = d * d * d;}      //TOF powder cyl sample... log scaled d-pattern
+            if(lorenz == 5){lorentzf = d * d * d * d;}  //TOF powder cyl sample... d-pattern
+
+          for(int j=1;j<=usrdefoutcols[0];++j)outn[usrdefoutcols[j]]=
+           setcoloutput(colcode[usrdefoutcols[j]],scale,ovallt,lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,
+                        msfz,msfdipx,msfdipy,msfdipz,Qvec,d,Theta,Q);
+          }
+          else
+          {if(!getint(jjjpars,(int)hkl[i](1),(int)hkl[i](2),(int)hkl[i](3),thetamax,rez1,rez2,rez3,scale,T,lambda,ovalltemp,lorenz,n,d,Imag,Imagdip,inuc,outn,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2,Pxyz))
                 {fprintf(stderr,"ERROR mcdiff: theta for reflection number %i above thetamax=%g\n",i,thetamax);exit(1);}
-               D[i]=d;intmag[i] = Imag;intmagdip[i] = Imagdip;  ikern[i] = inuc;
+          }    D[i]=d;intmag[i] = Imag;intmagdip[i] = Imagdip;  ikern[i] = inuc;
                for(int j=1;j<=usrdefoutcols[0];++j)out[usrdefoutcols[j]][i] = outn[usrdefoutcols[j]];
                if(code==1){
                mx[i]=(double)sqrt(scale)*mqx;

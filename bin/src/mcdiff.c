@@ -37,7 +37,7 @@ fprintf(stderr,"****************************************************************
    if (argc > 1)
     { if (strcmp(argv[1],"-h")==0)
       {printf (" \n \
-                use as: mcdiff [hkllistfilename]\n \
+                use as: mcdiff [-h][hkllistfilename [-z]]\n \
 		- for format of input file mcdiff.in see mcphase manual\n \
                 - optional an hkl list can be given in file hkllistfilename-in\n \
                   this case the program computes reflections in this list.\n \
@@ -49,10 +49,16 @@ fprintf(stderr,"****************************************************************
                   if in addition experimental errors are given in column 5,\n \
                   chisquared=1/N *sum_i (Icalc_i - Iexp_i)^2/err_i^2 is\n \
                   calculated also.\n \
+                - options: -h  ... prints this help message\n \
+                           -z  ... output zero intensity if (hkl) in hkllist does\n \
+                                   not correspond to reciprocal lattice of supercell\n \
+                                   (default: move hkl to nearest rec latticepoint)\n \
                 - results are saved in results/mcdiff.out\n");
         exit (1);}
     }
-
+   int zeronotmatchinghkl=0;
+   if (argc>2){if(strcmp(argv[2],"-z")==0){zeronotmatchinghkl=1;}}
+                                 
 // check if directory results exists and can be written to ...
    fout = fopen_errchk ("./results/mcdiff.out", "a");fclose(fout);
 
@@ -695,14 +701,22 @@ if (argc>1){int nr;
                                  // check if magnetic reflection is indeed on magnetic reciprocal lattice
                               if(fabs(nn[1]-hkl[m](1))>SMALL||fabs(nn[2]-hkl[m](2))>SMALL||fabs(nn[3]-hkl[m](3))>SMALL)
                                 {fprintf(stderr,"Warning mcdiff - reading hkl=(%g %g %g): calculation impossible, because this corresponds to ", hhkkll(1),hhkkll(2),hhkkll(3));
-                                 fprintf(stderr,"non integer supercell reciprocal lattice point (%g %g %g)\n", nn[1], nn[2], nn[3]);
-                                 // transform integer back to hkl
+                                 fprintf(stderr,"non integer supercell reciprocal lattice point (%g %g %g)", nn[1], nn[2], nn[3]);
+                                 if(zeronotmatchinghkl==1)
+                                 {hkl[m](1)=nn[1];// do not round to integer reciprocal lattice point
+                                  hkl[m](2)=nn[2];
+                                  hkl[m](3)=nn[3];
+                                  fprintf(stderr,"- will output zero intensity\n");
+                                 }
+                                 else
+                                 {// transform integer back to hkl
                                    hhkkll=hkl[m](1)*rez1+hkl[m](2)*rez2+hkl[m](3)*rez3;
                                    hhkkll/=2.0*PI;
                                    nn[1]=hhkkll*rtoijk.Column(1);
                                    nn[2]=hhkkll*rtoijk.Column(2);
                                    nn[3]=hhkkll*rtoijk.Column(3);
-                                 fprintf(stderr," - will calculate hkl=(%g %g %g) instead !\n\n", nn[1], nn[2], nn[3]);
+                                 fprintf(stderr,"\n - will calculate hkl=(%g %g %g) instead !\n\n", nn[1], nn[2], nn[3]);
+                                 }
                                 }
                                 if(nr>3){mx[m]=complex <double> (nn[4],0);code=2;}// intensities given                                
                                 if(nr>4){my[m]=complex <double> (nn[5],0);code=3;}// errors given                                
