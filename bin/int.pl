@@ -49,7 +49,7 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
   foreach (@ARGV)
   {$file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "<".$file;
+   print "#!<".$file;
 
   $integral=0;$j=0;$mu[1]=0;$muerr2[1]=0;$err2=0;
     open (Fout, ">range.out");

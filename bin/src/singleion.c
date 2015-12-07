@@ -6,6 +6,7 @@
 
 #include "../../version"
 #include "martin.h"
+#include "myev.h"
 #include<par.hpp>
 #include "trs_io.c"   // for in out of trs file
 #define HXCMAXDIM 100
@@ -40,8 +41,11 @@ void helpexit()
           "                       elements for spin S\n"
           "         -L  ......... calculate expectation values and transition matrix\n"
           "                       elements for orbital momentum L\n" 
-          "note: for calculating T or H dependencies you can put single ion in a loop\n"
-          "       and pipe the result into a file\n"
+          "         -opmat 2 .... output operator matrix number 2 to results/op.mat\n"
+          "    n=0 Hamiltonian, n=1,...,nofcomponents: operator Matrix In in standard basis\n"
+          "                     n=-1,..,-nofomponents: operator Matrix In for Hamiltonian eigenstates basis\n"
+          "Note: for calculating T or H dependencies you can put single ion in a loop\n"
+          "      and pipe the result into a file\n"
           "  .... linux:   for B in $(seq 0 0.1 14); do singleion 2 $B 0 0 0 0 0; done > results/fielddep.dat\n"
           "  .... windows command line: for /L %%B in (0,1,14)  do singleion 2 %%B 0 0 0 0 0 >> results\\fielddep.dat\n\n"
           "  .... windows batch file (needed for noninteger numbers):\n"     
@@ -58,8 +62,8 @@ void helpexit()
 int main (int argc, char **argv)
 { int i,j,nt,do_sipf=0;
   char sipffile[MAXNOFCHARINLINE];char  filename[MAXNOFCHARINLINE];
-  double lnz,u; double ninit=100000000,pinit=0,maxE=1e10;
-  float d=1e10;int nofcomponents=0;FILE * fout,* fout_trs;
+  double lnz,u; double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10;
+  float d=1e10;int nofcomponents=0;FILE * fout,* fout_trs, * fout_opmat;
   double T;Vector Hext(1,3),Hxc_in(1,HXCMAXDIM);
   int nmax=5;// default number of transitions to  be output
   char observable='I'; // default is operators I
@@ -90,10 +94,14 @@ for (i=1;i<argc;++i)
   else {if(strcmp(argv[i],"-r")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -r needs argument(s)\n");exit(EXIT_FAILURE);}
 	                              do_sipf=1;strcpy(sipffile,argv[i+1]);++i;
     			             }       
+  else {if(strcmp(argv[i],"-opmat")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -opmat needs argument(s)\n");exit(EXIT_FAILURE);}
+	                              opmat=strtod(argv[i+1],NULL);++i;
+    			             }       
   else{T=strtod(argv[i],NULL);++i;  // now read T
        Hext=0;for(j=1;j<=3;++j){if(i<argc){Hext(j)=strtod(argv[i],NULL);}++i;} // read Hexta Hextb Hextc
        Hxc_in=0;for(j=1;i<argc&&j<HXCMAXDIM;++j){++nofcomponents;Hxc_in(j)=strtod(argv[i],NULL);++i;} //read Hxc1 Hxc2 ... Hxcn
       } // T Hext Hxc
+    } // -opmat
     } // -r
     } //maxE         
     } //ninit         
@@ -128,13 +136,16 @@ if (!do_sipf)
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    printf("transition-energies(meV)...\n");
+   if(opmat<1e10){fout_opmat=fopen_errchk("./results/op.mat","w");}
+                   
      for(i=1;i<=inputpars.nofatoms;++i)
      {switch(observable)
       {case 'L': (*inputpars.jjj[i]).Lcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;
        case 'S': (*inputpars.jjj[i]).Scalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;
        case 'M': (*inputpars.jjj[i]).mcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;
        default: (*inputpars.jjj[i]).Icalc(I,T,Hxc,Hext,lnz,u,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));
-      }          
+      }  
+              
       sprintf(filename,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
       fout=fopen_errchk(filename,"w"); 
      fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",(*inputpars.jjj[i]).est.Chi(),(*inputpars.jjj[i]).sipffilename,T);
@@ -168,11 +179,14 @@ if (!do_sipf)
         fclose(fout_trs);
         if(nmax<nt){printf("...");}
       }
+     if(opmat<1e10){Matrix op((*inputpars.jjj[i]).opmat((int)opmat,Hxc,Hext));
+                     myPrintComplexMatrix(fout_opmat,op);}
+     
       printf("\n");
-     }
+     } if(opmat<1e10)fclose(fout_opmat);
    } else { // option -r sipffile
    jjjpar jjj(0,0,0,sipffile,nofcomponents);jjj.save_sipf("./results/_");
-     switch(observable)
+      switch(observable)
       {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
        case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
        case 'M': jjj.mcalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
@@ -214,7 +228,10 @@ if (!do_sipf)
         jjj.print_eigenstates(fout);fclose(fout);
         fclose(fout_trs);
         if(nmax<nt){printf("...");}
-      }
+      } if(opmat<1e10){fout_opmat=fopen_errchk("results/op.mat","w");
+                  Matrix op(jjj.opmat((int)opmat,Hxc,Hext));
+                  myPrintComplexMatrix(fout_opmat,op);fclose(fout_opmat);}
+ 
       printf("\n");
    }
 printf("# **********************************************************************\n"

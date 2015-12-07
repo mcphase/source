@@ -655,6 +655,7 @@ ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hex
 Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
 {
  int retval;
+ if(n>=0){
  switch (module_type)
   {
    case 0:  if(opmatM[n]==0) {
@@ -677,6 +678,28 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
    case 4:  return (*iops).opmat(n,Hxc,Hext);break;
    default: fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %i\n",module_type);exit(EXIT_FAILURE);
   }
+ } else //n<0 ... matrix within eigenstates
+ { // get eigenstates to matrix
+  ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
+  Matrix I(this->opmat(-n,Hxc,Hext)); 
+  ComplexMatrix In(1,est.Rhi(),1,est.Chi());
+  Matrix mat1(1,est.Rhi(),1,est.Chi());
+  ComplexMatrix M(1,est.Rhi(),1,est.Chi());
+  int i1,j1;
+  for (i1=I.Rlo();i1<=I.Rhi();++i1){ 
+    for (j1=I.Clo();j1<=I.Chi();++j1) { 
+    if(i1<j1)In(i1,j1)=complex <double> (I(j1,i1),-I(i1,j1));else In(i1,j1)=complex <double> (I(i1,j1),I(j1,i1)); 
+    }
+    }
+    
+  M=es.Transpose().Conjugate() * In * es;
+  for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=M.Chi();++j1){
+    mat1(j1,i1)=imag(M(i1,j1)); 
+    mat1(i1,j1)=real(M(i1,j1));
+   }}
+ //myPrintComplexMatrix(stdout,mat1);
+  return mat1;
+ }
 }
 
 

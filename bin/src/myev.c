@@ -36,6 +36,31 @@ void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
     fprintf (file,"\n");
     }
 }    
+//  print a complex Hermitian matrix z.The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+void myPrintComplexMatrix(FILE * file,Matrix & M)
+{int i1,j1;
+ fprintf (file,"#Real Part\n");
+   double va;
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){ 
+    for (j1=M.Clo();j1<=M.Chi();++j1) { 
+    if(i1<j1)va=myround(M(j1,i1));else va=myround(M(i1,j1)); 
+    if(fabs(va)>1e-8) fprintf (file,"%+9.6f ",va); else fprintf(file,"0         ");             
+    }
+   fprintf (file,"\n");
+    }
+    fprintf (file,"#Imaginary Part\n");
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){
+    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(imag(M(i1,j1)));
+        if(i1<j1)va=-myround(M(i1,j1));else va=myround(M(j1,i1)); 
+        if(i1==j1)va=0;
+    if(fabs(va)>1e-8) fprintf (file,"%+9.6f ",va); else fprintf(file,"0         "); }
+    fprintf (file,"\n");
+    }
+} 
+
 
 int myReadComplexMatrix (FILE * file, ComplexMatrix & M)
 {int i1,j1;char instr[MAXNOFCHARINLINE];
