@@ -88,6 +88,9 @@ void zmat2pack(sMat<double> &r, sMat<double> &i, Matrix &outmat)
       retval(u[j][0]+1,u[j][1]+1) = r(u[j][0],u[j][1]);
       retval(u[j][1]+1,u[j][0]+1) = i(u[j][0],u[j][1]);
    }
+   // Diagonal elements
+   for (int j=0; j<tmp.nr(); j++)
+      retval(j+1,j+1) = r(j,j);
    outmat = retval;
 }
 

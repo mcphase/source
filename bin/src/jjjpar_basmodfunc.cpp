@@ -626,6 +626,8 @@ void jjjpar::print_eigenstates(FILE *fout)
  Vector ev(Real(est.Row(0))(1,est.Chi())); myPrintVector(fout,ev);
  fprintf(fout,"#Eigenvectors [as colunmns]\n");
  ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
+ if(strstr(modulefilename,"ic1ion.so")!=NULL) {
+    es=es.Transpose(); }
  myPrintComplexMatrix(fout,es);
 //----------------------------------------------------------------------------//
 // Submatrix extraction 
@@ -681,6 +683,8 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
  } else //n<0 ... matrix within eigenstates
  { // get eigenstates to matrix
   ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
+  if(strstr(modulefilename,"ic1ion.so")!=NULL) {
+    es=es.Transpose(); }
   Matrix I(this->opmat(-n,Hxc,Hext)); 
   ComplexMatrix In(1,est.Rhi(),1,est.Chi());
   Matrix mat1(1,est.Rhi(),1,est.Chi());
