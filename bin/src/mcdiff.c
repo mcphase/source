@@ -620,11 +620,14 @@ fprintf(fout,"\n");
 fprintf(fout,"                    corresponding exchange fields gjmbHxc [meV]-->");
 for(k=1;k<=j;++k){fprintf(fout," %+8.5f",gjmbHxc(k));}
 fprintf(fout,"\n");
- 			      }}
+ 			      }else{fprintf(stderr,"WARNING mcdiff: exchange fields given in mcdiff.in (probably to go beyond dipole approximation) but MQ function not implemented for ion in file %s - switching to dipole approximation\n",sipffilename);}
+                              }
+
                              if((*jjjpars[i]).SLR==0){fprintf(stderr,"WARNING mcdiff: SCATTERINGLENGTHREAL not found or zero in file %s\n",sipffilename);}
 //                             if((*jjjpars[i]).gJ==0){fprintf(stderr,"WARNING mcdiff: GJ not found or zero in file %s - gJ=0 means Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc !\n",sipffilename);}
                              (*jjjpars[i]).checkFFcoeffnonzero(0);
                              (*jjjpars[i]).checkFFcoeffnonzero(2);
+
                            }
   fclose(fin_coq);
   fclose(fout);

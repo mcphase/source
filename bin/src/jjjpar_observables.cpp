@@ -184,7 +184,7 @@ int jjjpar::MQ(ComplexVector & Mq, Vector & Qvec)
       J6=j6(Q);
             complex<double>dummy;
 switch (module_type)
-  {case 0:  if (mq==NULL) {mom=0;return false;} 
+  {case 0:  if (mq==NULL) {return false;} 
             else{getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for external module we must provide th and ph with respect
                                                        // to abc coordinate system
             (*mq)(&Mq,&th,&ph,&J0,&J2,&J4,&J6,&est);
