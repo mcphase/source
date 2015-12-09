@@ -682,14 +682,27 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
   }
  } else //n<0 ... matrix within eigenstates
  { // get eigenstates to matrix
-  ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
-  if(strstr(modulefilename,"ic1ion.so")!=NULL) {
-    es=es.Transpose(); }
+  int i1,j1;
+   ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
+   ComplexMatrix In(1,est.Rhi(),1,est.Chi());
+  if(strstr(modulefilename,"ic1ion.so")!=NULL) { // this is because 
+//ic1ion stores eigenvector in rows instead of columns
+                                                es=es.Transpose(); }
+  
+  if(module_type==1){// this is because kramer module does not use est matrix at all
+                     Matrix Ham(this->opmat(0,Hxc,Hext)); // get Hamiltonian and diagonalise
+                     for (i1=In.Rlo();i1<=In.Rhi();++i1){ 
+                     for (j1=In.Clo();j1<=In.Chi();++j1) { 
+                     if(i1<j1)In(i1,j1)=complex <double> (Ham(j1,i1),-Ham(i1,j1));
+                         else In(i1,j1)=complex <double> (Ham(i1,j1),Ham(j1,i1)); 
+                     }
+                     }
+                     Vector E(1,est.Rhi());int sort,maxiter=1000000;
+                     myEigenSystemHermitean (In,E,es,sort=1,maxiter);
+                    }
   Matrix I(this->opmat(-n,Hxc,Hext)); 
-  ComplexMatrix In(1,est.Rhi(),1,est.Chi());
   Matrix mat1(1,est.Rhi(),1,est.Chi());
   ComplexMatrix M(1,est.Rhi(),1,est.Chi());
-  int i1,j1;
   for (i1=I.Rlo();i1<=I.Rhi();++i1){ 
     for (j1=I.Clo();j1<=I.Chi();++j1) { 
     if(i1<j1)In(i1,j1)=complex <double> (I(j1,i1),-I(i1,j1));else In(i1,j1)=complex <double> (I(i1,j1),I(j1,i1)); 
