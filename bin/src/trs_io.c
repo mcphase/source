@@ -95,17 +95,17 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,doubl
 int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,int  l,int & tc,double & T,Vector & mf,
                      Vector & Hext,ComplexMatrix & est,float & d,double  minE,double  maxE, char observable)    
     {ComplexVector u1(1,mf.Hi());double gamma;
+         if(jjj.transitionnumber>=nt&&nt>0){return 1;}
      ++jjj.transitionnumber;nt=jjj.du1calc(T,mf,Hext,u1,d,est);
     while (minE>=d||d>=maxE) //only consider transition if it is in interval minE/maxE
      {//first and following  transitions out of energy range ... do not consider them
      //fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      ++jjj.transitionnumber;
      //fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
+     if(jjj.transitionnumber>nt){return 1;}
      jjj.du1calc(T,mf,Hext,u1,d,est);
-     if(jjj.transitionnumber>nt){return 1;}
      }
-   // fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
-     if(jjj.transitionnumber>nt){return 1;}
+   //fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
     gamma=Norm2(u1);
      // calculate powder neutron intensities 
      double intensityp=0, intensitym=0; ComplexVector dm1(1,3);

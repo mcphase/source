@@ -60,7 +60,7 @@ void helpexit()
 
 // hauptprogramm
 int main (int argc, char **argv)
-{ int i,j,nt,do_sipf=0;
+{ int i,j,nt=0,do_sipf=0;
   char sipffile[MAXNOFCHARINLINE];char  filename[MAXNOFCHARINLINE];
   double lnz,u; double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10;
   float d=1e10;int nofcomponents=0;FILE * fout,* fout_trs, * fout_opmat;
@@ -163,7 +163,7 @@ if (!do_sipf)
         trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
  
         (*inputpars.jjj[i]).maxE=maxE;(*inputpars.jjj[i]).pinit=pinit;(*inputpars.jjj[i]).ninit=ninit;
-        (*inputpars.jjj[i]).transitionnumber=0;int tc=0;
+        (*inputpars.jjj[i]).transitionnumber=0;int tc=0;nt=0;
         if(trs_write_next_line(fout_trs,(*inputpars.jjj[i]),nt,1,1,1,1,tc,TT,Hxc,Hext,
                                     (*inputpars.jjj[i]).eigenstates(Hxc,Hext,TT),d,-1e100,maxE,observable))
         {fprintf(stderr,"Warning singleion: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
@@ -214,7 +214,7 @@ if (!do_sipf)
         trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
  
         jjj.maxE=maxE;jjj.pinit=pinit;jjj.ninit=ninit;
-        jjj.transitionnumber=0;int tc=0;
+        jjj.transitionnumber=0;int tc=0;nt=0;
         if(trs_write_next_line(fout_trs,jjj,nt,1,1,1,1,tc,TT,Hxc,Hext,jjj.eigenstates(Hxc,Hext,TT),d,-1e100,maxE,observable))
         {fprintf(stderr,"Warning singleion: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
                         " (within first crystallographic unit of magnetic unit cell)\n"
