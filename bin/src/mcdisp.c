@@ -459,7 +459,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
      jmin=(*inputpars.jjj[l]).transitionnumber;    // store number of first valid transition
      
 // now do  other transitions of the same ion:
-   int idummy;  
+   int idummy=0;  
    while(noftransitions(l)<maxlevels&&
          !trs_write_next_line(fout,(*inputpars.jjj[l]),idummy,i,j,k,l,
                               noftransitions(l),ini.T,mf,ini.Hext,md.est(i,j,k,l),d,minE,maxE,'I'));
