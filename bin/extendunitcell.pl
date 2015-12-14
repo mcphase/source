@@ -29,108 +29,14 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n3) = eval 
  my ($l)=printlattice("./mcphas.j",$n1,$n2,$n3,">./results/extend.j");
  printneighbourlist("./mcphas.j",$l,$n1,$n2,$n3,$p,$nofa);   
  close $l;
-   
+   $nofatoms=$nofa*$n1*$n2*$n3;
  # extend lattice
  $p->slice(",0")*=$n1;
  $p->slice(",1")*=$n2;
  $p->slice(",2")*=$n3;
 
  print "new primitive lattice[abc]:".$p."\n";
-if (open ($h, "mcphas.tst")){
- print "reading mcphas.tst ...\n";
- $nofcomponents=0;   
- open ($l,">./results/extend.tst"); 
- while(<$h>)
- {if (/^\s*#/)
-  {$text=$_;
-  if($nofcomponents==0){($nofcomponents)=extract("nofcomponents",$text);}
-  $text=~s/\Qnofatoms=\E\s*[\d.]+/nofatoms=$nofatoms /;
-  print $l ($text);
-  }
-  else
-  { # read configuration
-   my @list =();
-   push(@list,new PDL([split " "]));
-   @dims=$list[0]->dims; $nr1=$dims[0];
-   print @list;
-   print @dims;
-   print "  $nr1\n";
-    for($i=2;$i<=$nofcomponents;++$i)
-     {$_=<$h>;push(@list,new PDL(split " "));}
-   $nr2=1;$nr3=1;
-      while(<$h>)
-   {last if !/^\s*\d/;
-    push(@list,new PDL(split " "));
-    for($i=2;$i<=$nofcomponents;++$i)
-     {$_=<$h>;push(@list,new PDL(split " "));}
-    $nr2++;
-   } 
-   if (!/^\s*#/)
-   {while(<$h>)
-    {last if /^\s*#/;
-     $nr3++;
-     for ($j=1;$j<=$nr2;++$j)
-     {    for($i=1;$i<=$nofcomponents;++$i)
-          {push(@list,new PDL(split " "));$_=<$h>;}
-     }
-     last if /^\s*#/;
-    }
-   }
 
-   $conf=new PDL(cat @list);
-   # extend configuration
-   # write configuration
-   for($ii3=1;$ii3<=$n3;++$ii3){for($i3=1;$i3<=$nr3;++$i3){
-   for($ii2=1;$ii2<=$n2;++$ii2){for($i2=1;$i2<=$nr2;++$i2){
-    for($i=1;$i<=$nofcomponents;++$i){
-     for($ii1=1;$ii1<=$n1;++$ii1){for($i1=1;$i1<=$nr1;++$i1){
-     $j=$i1;$offset=$nofcomponents*(($i3-1)*$nr2+$i2-1);
-     print $l $conf->at($j-1,$offset+$i-1)." ";
-     }} print $l "\n";
-   }}}if($i3<$nr3||$ii3<$n3) {print $l "\n";}}}
-   print $l $_;
-  }
- } 
- close $h,$l;
-}
-else {print "\n unable to open mcphas.tst\n";}   
-
-unless (open ($h,"mcdiff.in")) {print "\nunable to read mcdiff.in\n";exit(0);}
- print "reading mcdiff.in ...\n";
- open ($l,">./results/extend.head"); 
- while(<$h>)
- {$text=$_;
-  if (/^\s*#/)
-  {
-   if (/^.*\Qnat=\E/){($nat)=(/^.*\Qnat=\E\s*([^\s]*)\s/);
-                      $nofatoms=$nat*$n1*$n2*$n3;$text=~s/\Qnat=\E\s*[\d.]+/nat=$nofatoms /;}
-   print $l ($text);
-  }
-  else
-  {@numbers=split(" ");
-   $x=$numbers[2];
-   $y=$numbers[3];
-   $z=$numbers[4];
-   $dr1=$numbers[5];
-   $dr2=$numbers[6];
-   $dr3=$numbers[7];
-
-   for ($i1=0;$i1<=$n1-1;++$i1){
-   for ($i2=0;$i2<=$n2-1;++$i2){
-   for ($i3=0;$i3<=$n3-1;++$i3){
-     $da=$x+$i1*$p->at(0,0)+$i2*$p->at(0,1)+$i3*$p->at(0,2);
-     $db=$y+$i1*$p->at(1,0)+$i2*$p->at(1,1)+$i3*$p->at(1,2);
-     $dc=$z+$i1*$p->at(2,0)+$i2*$p->at(2,1)+$i3*$p->at(2,2);
-     $dr1n=($dr1+$i1)/$n1;
-     $dr2n=($dr2+$i2)/$n2;
-     $dr3n=($dr3+$i3)/$n3;
-   print $l $numbers[0]." ".$numbers[1]." ".$da." ".$db." ".$dc." ".$dr1n." ".$dr2n." ".$dr3n." ".$numbers[8]."\n";
-   }}} 
-  }
-  last if /.*SECTION\s*3/;
- }
- 
- close $h,$l;
  $exit;
   
 #-----------------------------------------------------------------------
@@ -214,31 +120,31 @@ sub printlattice {
      while(<$h>)
      {$text=$_;
       
-      ($r1x)=extract("r1x",$text);if($r1x!=""){$r1x*=$n1;$text=~s/\Qr1x=\E\s*[\d.]+/r1a=$r1x /;}
-      ($r1y)=extract("r1y",$text);if($r1y!=""){$r1y*=$n1;$text=~s/\Qr1y=\E\s*[\d.]+/r1b=$r1y /;}
-      ($r1z)=extract("r1z",$text);if($r1z!=""){$r1z*=$n1;$text=~s/\Qr1z=\E\s*[\d.]+/r1c=$r1z /;}
+      ($r1x)=extract("r1x",$text);if($r1x!=""){$r1x*=$n1;$text=~s/\Qr1x=\E\s*[\-\+\d.]+/r1a=$r1x /;}
+      ($r1y)=extract("r1y",$text);if($r1y!=""){$r1y*=$n1;$text=~s/\Qr1y=\E\s*[\-\+\d.]+/r1b=$r1y /;}
+      ($r1z)=extract("r1z",$text);if($r1z!=""){$r1z*=$n1;$text=~s/\Qr1z=\E\s*[\-\+\d.]+/r1c=$r1z /;}
 
-      ($r2x)=extract("r2x",$text);if($r2x!=""){$r2x*=$n2;$text=~s/\Qr2x=\E\s*[\d.]+/r2a=$r2x /;}
-      ($r2y)=extract("r2y",$text);if($r2y!=""){$r2y*=$n2;$text=~s/\Qr2y=\E\s*[\d.]+/r2b=$r2y /;}
-      ($r2z)=extract("r2z",$text);if($r2z!=""){$r2z*=$n2;$text=~s/\Qr2z=\E\s*[\d.]+/r2c=$r2z /;}
+      ($r2x)=extract("r2x",$text);if($r2x!=""){$r2x*=$n2;$text=~s/\Qr2x=\E\s*[\-\+\d.]+/r2a=$r2x /;}
+      ($r2y)=extract("r2y",$text);if($r2y!=""){$r2y*=$n2;$text=~s/\Qr2y=\E\s*[\-\+\d.]+/r2b=$r2y /;}
+      ($r2z)=extract("r2z",$text);if($r2z!=""){$r2z*=$n2;$text=~s/\Qr2z=\E\s*[\-\+\d.]+/r2c=$r2z /;}
 
-      ($r3x)=extract("r3x",$text);if($r3x!=""){$r3x*=$n3;$text=~s/\Qr3x=\E\s*[\d.]+/r3a=$r3x /;}
-      ($r3y)=extract("r3y",$text);if($r3y!=""){$r3y*=$n3;$text=~s/\Qr3y=\E\s*[\d.]+/r3b=$r3y /;}
-      ($r3z)=extract("r3z",$text);if($r3z!=""){$r3z*=$n3;$text=~s/\Qr3z=\E\s*[\d.]+/r3c=$r3z /;}
+      ($r3x)=extract("r3x",$text);if($r3x!=""){$r3x*=$n3;$text=~s/\Qr3x=\E\s*[\-\+\d.]+/r3a=$r3x /;}
+      ($r3y)=extract("r3y",$text);if($r3y!=""){$r3y*=$n3;$text=~s/\Qr3y=\E\s*[\-\+\d.]+/r3b=$r3y /;}
+      ($r3z)=extract("r3z",$text);if($r3z!=""){$r3z*=$n3;$text=~s/\Qr3z=\E\s*[\-\+\d.]+/r3c=$r3z /;}
 
-      ($r1a)=extract("r1a",$text);if($r1a!=""){$r1a*=$n1;$text=~s/\Qr1a=\E\s*[\d.]+/r1a=$r1a /;}
-      ($r1b)=extract("r1b",$text);if($r1b!=""){$r1b*=$n1;$text=~s/\Qr1b=\E\s*[\d.]+/r1b=$r1b /;}
-      ($r1c)=extract("r1c",$text);if($r1c!=""){$r1c*=$n1;$text=~s/\Qr1c=\E\s*[\d.]+/r1c=$r1c /;}
+      ($r1a)=extract("r1a",$text);if($r1a!=""){$r1a*=$n1;$text=~s/\Qr1a=\E\s*[\-\+\d.]+/r1a=$r1a /;}
+      ($r1b)=extract("r1b",$text);if($r1b!=""){$r1b*=$n1;$text=~s/\Qr1b=\E\s*[\-\+\d.]+/r1b=$r1b /;}
+      ($r1c)=extract("r1c",$text);if($r1c!=""){$r1c*=$n1;$text=~s/\Qr1c=\E\s*[\-\+\d.]+/r1c=$r1c /;}
 
-      ($r2a)=extract("r2a",$text);if($r2a!=""){$r2a*=$n2;$text=~s/\Qr2a=\E\s*[\d.]+/r2a=$r2a /;}
-      ($r2b)=extract("r2b",$text);if($r2b!=""){$r2b*=$n2;$text=~s/\Qr2b=\E\s*[\d.]+/r2b=$r2b /;}
-      ($r2c)=extract("r2c",$text);if($r2c!=""){$r2c*=$n2;$text=~s/\Qr2c=\E\s*[\d.]+/r2c=$r2c /;}
+      ($r2a)=extract("r2a",$text);if($r2a!=""){$r2a*=$n2;$text=~s/\Qr2a=\E\s*[\-\+\d.]+/r2a=$r2a /;}
+      ($r2b)=extract("r2b",$text);if($r2b!=""){$r2b*=$n2;$text=~s/\Qr2b=\E\s*[\-\+\d.]+/r2b=$r2b /;}
+      ($r2c)=extract("r2c",$text);if($r2c!=""){$r2c*=$n2;$text=~s/\Qr2c=\E\s*[\-\+\d.]+/r2c=$r2c /;}
 
-      ($r3a)=extract("r3a",$text);if($r3a!=""){$r3a*=$n3;$text=~s/\Qr3a=\E\s*[\d.]+/r3a=$r3a /;}
-      ($r3b)=extract("r3b",$text);if($r3b!=""){$r3b*=$n3;$text=~s/\Qr3b=\E\s*[\d.]+/r3b=$r3b /;}
-      ($r3c)=extract("r3c",$text);if($r3c!=""){$r3c*=$n3;$text=~s/\Qr3c=\E\s*[\d.]+/r3c=$r3c /;}
+      ($r3a)=extract("r3a",$text);if($r3a!=""){$r3a*=$n3;$text=~s/\Qr3a=\E\s*[\-\+\d.]+/r3a=$r3a /;}
+      ($r3b)=extract("r3b",$text);if($r3b!=""){$r3b*=$n3;$text=~s/\Qr3b=\E\s*[\-\+\d.]+/r3b=$r3b /;}
+      ($r3c)=extract("r3c",$text);if($r3c!=""){$r3c*=$n3;$text=~s/\Qr3c=\E\s*[\-\+\d.]+/r3c=$r3c /;}
 
-      ($nofatoms)=extract("nofatoms",$text);if($nofatoms!=""){$nofatoms*=$n1*$n2*$n3;$text=~s/\Qnofatoms=\E\s*[\d.]+/nofatoms=$nofatoms /;}
+      ($nofatoms)=extract("nofatoms",$text);if($nofatoms!=""){$nofatoms*=$n1*$n2*$n3;$text=~s/\Qnofatoms=\E\s*[\-\+\d.]+/nofatoms=$nofatoms /;}
       last if /^(#!|[^#])*nofneighbours\s*=\s*/;
       print $l ($text);      
      }
@@ -274,9 +180,9 @@ sub printneighbourlist {
      # print out neighbor
      for($i=1;$i<=$nn;++$i)
        {
-        $text[$i]=~s!\Qda=\E\s*[\d.]+!da=$da!;
-        $text[$i]=~s!\Qdb=\E\s*[\d.]+!db=$db!;
-        $text[$i]=~s!\Qdc=\E\s*[\d.]+!dc=$dc!;
+        $text[$i]=~s!\Qda=\E\s*[\-\+\d.]+!da=$da!;
+        $text[$i]=~s!\Qdb=\E\s*[\-\+\d.]+!db=$db!;
+        $text[$i]=~s!\Qdc=\E\s*[\-\+\d.]+!dc=$dc!;
         print $l ($text[$i]) 
        }
      print $l ("#*************************************************************************\n");
