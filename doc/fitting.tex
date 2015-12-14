@@ -243,13 +243,24 @@ by the command (in the example you should go to the directory {\prg /mcphas/exam
  {\prg simannfit 10 [-t 1000][-s 100000] [-n 200] mcphas.jjj [and possible other input parameter files]}.
 \end{quote}
 
+\begin{itemize}
+\item
 The ''10'' in the command means that the initial statistical
 ''temperature'' of the algorithm
 is set to 10.  
-Option -t sets time limit until program end (in seconds).
-Option -s gives maximal number of iteration steps to be done.
-Option -n allows to store every 200 steps the parametersets in a table in  {\prg results/simannfit.0}.
-
+\item Option -t sets time limit until program end (in seconds).
+\item Option -s gives maximal number of iteration steps to be done.
+\item Option -n allows to store every 200 steps the parametersets in a table in  {\prg results/simannfit.0}.
+\item Option -p 30 probes solution, i.e. runs simannfit , stepwidths are not decreased during
+                   fitting, if parameter set $parn$ is found with $sta<=sta of initial parameters$
+                   then all sets par in {\prg results/simannfit.1} are scanned and
+                   distance $d=\sum_i^N (par_i-parn_i)^2/stepwidth_i^2$ is calculated. If 
+                   $d>N $(=number of parameters) for
+                   for all sets par, then $parn$ is appended to the list in {\prg results/simannfit.1}
+                   up to 20 parameters are appended to this list, after that the program stops
+                   - in this way a series of equally good solutions can be explored.
+\item option -w 1.4     before starting simannfit, multiply all stepwidths by factor 1.4
+\end{itemize}
 Note that the user written program {\prg calcsta} has to be in the
 directory where {\prg simannfit\index{simannfit}} is started from.
 

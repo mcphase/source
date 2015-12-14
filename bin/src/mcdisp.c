@@ -28,7 +28,8 @@ void errexit() // type info and error exit
     printf (" or as: mcdisp [options] [file]\n");
     printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
     printf ("Options:\n");
-    printf (" -jq                  ... calculate J(Q) (Fourier transform of exchange)\n");
+    printf (" -jq                  ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq largest evalue and eigenvector\n");
+    printf (" -jqe                 ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
     printf (" -max n               ... restrict single ion susceptibility to n lowest\n");
     printf ("                          lying transitions starting from the ground state\n");
     printf (" -minE E              ... an energy range may be given by minE and maxE: only\n");
@@ -634,7 +635,7 @@ if (do_verbose==1){
 //initialize output files
 //************************************************************************************* 
 // initialize file with jq matrix
-if (do_jqfile==1)
+if (do_jqfile)
 {  sprintf(filename,"./results/%smcdisp.jq",ini.prefix);printf("#saving %s\n",filename);
  jqfile = fopen_errchk (filename,filemode);
  writeheader(inputpars,jqfile); printf("#saving mcdisp.jq\n");
@@ -642,7 +643,9 @@ if (do_jqfile==1)
    fprintf (jqfile, "#Fourier Transform of 2 Ion Interaction - sta is calculated by comparing the larges eigenvalue\n# to that of the first q vector of the calculation");
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),jqfile);
   if (do_verbose==1){   fprintf (jqfile, "#q=(hkl)\n #spin s() - spin s'()\n #3x3 matrix jss'(q) real im .... [meV]\n");}
-  else {fprintf(jqfile,"#h  vs  k  vs  l  vs Qincr[1/A] vs largest eigenvalue of J(hkl) matrix vs components of corresponding eigenvector re im re im re im re im\n");}
+  else {if(do_jqfile==1)fprintf(jqfile,"#h  vs  k  vs  l  vs Qincr[1/A] vs largest eigenvalue of J(hkl) matrix (meV) vs components of corresponding eigenvector re im re im re im re im\n");
+        if(do_jqfile==2)fprintf(jqfile,"#h  vs  k  vs  l  vs Qincr[1/A] vs eigenvalues of J(hkl) matrix (meV) \n");       
+       }
 }
 // ************************************************************************************************
 //MAIN LOOP - do calculation of excitation energy for every Q vector     
@@ -769,7 +772,7 @@ int num_threads_started=-1;
 #endif
 
 
-if (do_jqfile==1){qold=qijk;hkl2ijk(qijk,hkl, abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
+if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
                   if (do_verbose==1){fprintf (jqfile, "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
                                      fprintf(jqfile,"nofneighbours= %li\n",nofneighbours);
                                     }
@@ -857,7 +860,7 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
  }}}
 
 // printout Fouriertransform of matrix jq
-if (do_jqfile==1){
+if (do_jqfile){
        if (do_verbose==1)
        {//fprintf (jqfile, "#spin (%i*r1 %i*r2 %i*r3) - spin (%i*r1 %i*r2 %i*r3)\n",i1,j1,k1,i2,j2,k2);
          myPrintComplexMatrix(jqfile,J_Q); 
@@ -875,12 +878,17 @@ if (do_jqfile==1){
          myPrintComplexMatrix(jqfile,eigenvectors); 
        }
        else
-       {
+       {if(do_jqfile==1){// print largest eigenvalue and eigenvector
         fprintf(jqfile," %g ",Tn(i2));
         for (i1=1;i1<=i2;++i1)
         {fprintf(jqfile," %6.3g ",real(eigenvectors(i1,i2)));
          fprintf(jqfile," %6.3g ",imag(eigenvectors(i1,i2)));
         }
+                         }
+        if(do_jqfile==2){// print all eigenvalues
+        for (i1=i2;i1>0;--i1)
+        {fprintf(jqfile," %g ",Tn(i1));}
+                        }
         fprintf(jqfile,"\n");
        }
        if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-1e9;}
@@ -1610,7 +1618,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
 
                                      
 
-    if (do_jqfile==1) 
+    if (do_jqfile) 
      {fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
       fprintf(jqfile,"#the sum of squared differences between the highest eigenvalue\n");
       fprintf(jqfile,"#of a q vector and that of the first q-vector in the list in mcdisp.par.\n");
@@ -1689,51 +1697,53 @@ for (i=1;i<=argc-1;++i){
        else {if(strcmp(argv[i],"-x")==0) {calc_rixs=1;calc_beyond=0;}  // rixs without azimuth dep .. Irixs max only
         else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
          else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
-          else {if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
-           else {if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
-            else {if(strcmp(argv[i],"-a")==0) filemode="a";       
-             else {if(strcmp(argv[i],"-v")==0||strcmp(argv[i],"-verbose")==0) do_verbose=1;       
-              else {if(strcmp(argv[i],"-max")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -max needs argument(s)\n");exit(EXIT_FAILURE);}
-		                                  maxlevels=(int)strtod(argv[i+1],NULL);++i;
+          else {if(strcmp(argv[i],"-jqe")==0) {do_jqfile=2;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
+           else {if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
+            else {if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
+             else {if(strcmp(argv[i],"-a")==0) filemode="a";       
+              else {if(strcmp(argv[i],"-v")==0||strcmp(argv[i],"-verbose")==0) do_verbose=1;       
+               else {if(strcmp(argv[i],"-max")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -max needs argument(s)\n");exit(EXIT_FAILURE);}
+ 		                                  maxlevels=(int)strtod(argv[i+1],NULL);++i; 
 						  fprintf(stdout,"#maximum number of single ion excitations taken into account (starting with lowest energy): %i\n",maxlevels);
-					         }       
-               else {if(strcmp(argv[i],"-maxE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -maxE needs argument(s)\n");exit(EXIT_FAILURE);}
+ 					         }       
+                else {if(strcmp(argv[i],"-maxE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -maxE needs argument(s)\n");exit(EXIT_FAILURE);}
 		                                  maxE=strtod(argv[i+1],NULL);++i;
-						  fprintf(stdout,"#maximum Energy of single ion excitations taken into account: %g\n",maxE);
+ 						  fprintf(stdout,"#maximum Energy of single ion excitations taken into account: %g\n",maxE);
   					         }       
-                else {if(strcmp(argv[i],"-minE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -minE needs argument(s)\n");exit(EXIT_FAILURE);}
+                 else {if(strcmp(argv[i],"-minE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -minE needs argument(s)\n");exit(EXIT_FAILURE);}
  		                                  minE=strtod(argv[i+1],NULL);++i;
 						  fprintf(stdout,"#minimum Energy of single ion excitations taken into account: %g\n",minE);
 					         }
-                 else {if(strcmp(argv[i],"-ninit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -ninit needs argument(s)\n");exit(EXIT_FAILURE);}
+                  else {if(strcmp(argv[i],"-ninit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -ninit needs argument(s)\n");exit(EXIT_FAILURE);}
  		                                  ninit=strtod(argv[i+1],NULL);++i;
 						  fprintf(stdout,"#maximum number of lowest lying initial states to be taken into account in single ion excitations: %g\n",ninit);
 					         }
-                  else {if(strcmp(argv[i],"-pinit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -pinit needs argument(s)\n");exit(EXIT_FAILURE);}
+                   else {if(strcmp(argv[i],"-pinit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -pinit needs argument(s)\n");exit(EXIT_FAILURE);}
  		                                  pinit=strtod(argv[i+1],NULL);++i;
 						  fprintf(stdout,"#minimum population of initial state for single ion excitations to be taken into account: %g\n",pinit);
 					         }
-                   else {if(strcmp(argv[i],"-prefix")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -prefix needs argument(s)\n");exit(EXIT_FAILURE);}
+                    else {if(strcmp(argv[i],"-prefix")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -prefix needs argument(s)\n");exit(EXIT_FAILURE);}
   		                                  strcpy(prefix,argv[i+1]);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
-                    else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
+                     else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
-                     else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
-           	      else{spinfile=argv[i];}
+                      else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
+             	       else{spinfile=argv[i];}
                          } // help
                         } // do_ignore_non_hermitian_matrix_error
                        } // prefi
-		     } // pinit
-		    } // ninit
-		   } // minE
-		  }          
-		 }
-		}
-	      }
-	     }
-	    }
+		      } // pinit
+		     } // ninit
+		    } // minE
+		   } //max          
+		  } // -v
+		 } // -a
+	        } // -c
+	       } // -t
+              } // -jqe
+ 	     } // -jq 
            }	
           }
          }

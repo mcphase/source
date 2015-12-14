@@ -19,12 +19,13 @@ unless ($#ARGV >0)
  print "                   stored in file results/simannfit.0 (appending existing file)\n";
  print " option -p 20      probing parameter space: stepwidths are not decreased during\n";
  print "                   fitting, if parameter set parn is found with sta<=sta of initial parameters\n";
- print "                   then all sets par in results/simannfit.0 are scanned and\n";
- print "                   distance d=sum_i (par_i-parn_i)^2 is calculated. If d>sum_i stepwidht_i^2 for\n";
+ print "                   then all sets par in results/simannfit.1 are scanned and\n";
+ print "                   distance d=sum_i^N (par_i-parn_i)^2/stepwidht_i^2 is calculated. If d>N=nofparameters  for\n";
  print "                   for all sets par, then parn is appended to the list in results/simannfit.1\n";
  print "                   up to 20 parameters are appended to this list, after that the program stops\n";
  print "                   - in this way a series of equally good solutions can be explored.\n";
- print " <Press enter to close>";$in=<STDIN>;
+ print " option -w 1.4     before starting simannfit, multiply all stepwidths by factor 1.4\n"; 
+print " <Press enter to close>";$in=<STDIN>;
  exit 0;}
 
 
@@ -52,13 +53,14 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
   $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;
-  $options=1;$probe=0;$dmin=0;
+  $options=1;$probe=0;$stepfact=1;
   while($options==1)
   {$options=0;
   if ($ARGV[0]=~"-t") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxtim=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-s") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxstep=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-n") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$tablestep=eval $ARGV[0]; shift @ARGV;}  
   if ($ARGV[0]=~"-p") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$probe=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0]=~"-w") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepfact=eval $ARGV[0]; shift @ARGV;}
   }
  while(!open(Fout,">results/simannfit.status")){print "Error opening file results/simannfit.status\n";<STDIN>;}
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
@@ -75,7 +77,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				 ($parmax[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parerr[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parstp[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^\Q]\E]+)/);
-                         $parstp[$#par]=abs($parstp[$#par]);$dmin+=$parstp[$#par]*$parstp[$#par];
+                         $parstp[$#par]=$stepfact*abs($parstp[$#par]);
                                  $i=$#par;write STDOUT;write Fout;
 				 #check if parmin<=parmax
                           if ($parmin[$#par]>$parmax[$#par]) 
@@ -122,30 +124,38 @@ if($sta>0)
  {  $stasave=$sta;
  # modify parameters
  print "\n ...next fitting loop ...\n";
- @parsav=@par;$i=0;
- foreach(@par){$rnd=rand;$thisparstp[$i]=($rnd-0.5)*$parstp[$i]*$stps;$par[$i]+=$thisparstp[$i];
+ @parsav=@par;$dmin=0;
+ while($dmin<$#par+1)
+ {@par=@parsav;$i=0;
+  foreach(@par){$rnd=rand;$thisparstp[$i]=($rnd-0.5)*$parstp[$i]*$stps;$par[$i]+=$thisparstp[$i];
                if ($par[$i]<$parmin[$i]) {$thisparstp[$i]=$parmin[$i]-$par[$i];$par[$i]=$parmin[$i];}
 	       if ($par[$i]>$parmax[$i]) {$thisparstp[$i]=$parmax[$i]-$par[$i];$par[$i]=$parmax[$i];}
-               write STDOUT; 
 	       ++$i;}
+   $dmin=1e10; 
+   if($probe>0)# check distance to other parameter sets
+               {if(open(Fin1,"results/simannfit.1"))
+                {while(($line=<Fin1>)&&($dmin>$#par+1))
+                    {unless ($line=~/^\s*#/)
+                        {$line=~s/D/E/g;@numbers=split(" ",$line);
+                          $d=0;$i=0;foreach(@par){$dd=($par[$i]-$numbers[$i+1])/$parstp[$i];
+                                                 $d+=$dd*$dd; ++$i;}
+                          if($d<$dmin){$dmin=$d;}
+                         }
+               }   
+                close Fin1;
+                } 
+               }
+   if($dmin<$#par+1){$stps*=1.1;}
+  }
+ print " .. calculating sta ..\n";
+
  $rnd=rand;
    ($sta)=sta(); # CALCULATE sta !!!!
    ++$stepnumber;
    if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set($Foutlevel);}
-   if($probe>0&&$sta<=$stastart){# check distance and write set
-                open(Fin1,"results/simannfit.1");$d=$dmin*4+1;
-                while($line=<Fin1>&&$d>4*$dmin)
-                    {if ($line=~/^\s*#/) {;}
-                     else{$line=~s/D/E/g;@numbers=split(" ",$line);
-                          $d=0;$i=0;foreach(@par){
-                          $d+=($par[$i]-$numbers[$i+1])*($par[$i]-$numbers[$i+1]);
-                                             ++$i;}
-                         }
-                    }   
-                close Fin;
-                if($d>4*$dmin){--$probe;open($Fouts,">>results/simannfit.1");write_set($Fouts);close $Fouts;}                       
+   if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in results/simannfit.1 - $probe other sets to be found, continuing ...\n";open($Fouts,">>results/simannfit.1");write_set($Fouts);close $Fouts;}                       
                 last if ($probe==0);
-               }
+               
    print " ...  current sta=$sta, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
    open(Fin,"./results/simannfit.status");$line=<Fin>;
     if ($line=~/exiting simannfit/){$sta=0;close Fin;}
@@ -432,18 +442,19 @@ sub mydel  { my ($file1)=@_;
     
 sub read_write_statusfile {
      open(Fout,">./results/simannfit.status");$i=0;
-     print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
-     if($chisquared){print Fout " Current sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n sta of stored parameters=$stasave\n";}
-              else {print Fout " Current     sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")  \n sta of stored parameters=$stasave\n";}
-     print Fout "----------------------------------------------------------------------------------------\n";
-     print Fout " Statistical Temperature=$stattemp      Step Ratio=$stps\n";
-     print Fout "----------------------------------------------------------------------------------------\n";
+     print Fout "#! NS=".($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+     if($chisquared){print Fout "#! Current sta=chi2=$sta (=sum deviations^2/(".($#ssta+1)."*experrors^2))\n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
+              else {print Fout "#! Current     sta=variance=s2=$s2 (=sum deviations^2/".($#ssta+1).")  \n#! sta_of_stored_parameters=$stasave  initial_sta=$stastart\n";}
+     print Fout "#----------------------------------------------------------------------------------------\n";
+     print Fout "#! Statistical_Temperature=$stattemp      Step_Ratio=$stps\n";
+     print Fout "#----------------------------------------------------------------------------------------\n";
      $est=sprintf("%6.2f",(time-$starttime)/3600);$maxtimest=sprintf("%6.2f",($maxtim)/3600);
-     print Fout " Time since start of simannfit: $est hours (limit:$maxtimest), $stepnumber steps (limit:$maxstep)\n";
-     print Fout "----------------------------------------------------------------------------------------\n";
-     print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
+     print Fout "#! Time_since_start_of_simannfit=$est hours (tlimit=$maxtimest), N=$stepnumber steps (slimit=$maxstep)\n";
+     if($probe>0){print Fout "#! P=$probe sets of different parameters to be found for results/simannfit.1\n";}
+     print Fout "#----------------------------------------------------------------------------------------\n";
+     print Fout "# parameter[value,      min,           max,           variation,     stepwidth]\n";
      foreach(@par){$parcent=int(10*($par[$i]-$parmin[$i])/(1e-10+$parmax[$i]-$parmin[$i]));
-                        print Fout "|";for($jsw=0;$jsw<=9;++$jsw){
+                        print Fout "#|";for($jsw=0;$jsw<=9;++$jsw){
                                        if ($jsw==$parcent){print Fout "*";}else{print Fout "-";}
                                                                  }
                         print Fout "|";print Fout sprintf ("%s [%+e,%+e,%+e,%+e,%+e]\n",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i]);
