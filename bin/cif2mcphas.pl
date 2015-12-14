@@ -225,7 +225,7 @@ while (<>) {
   if ($_ =~ /^;/) { next; } # Ignore comments (generally)
   if ($_ =~ /_cell/) {
     @line = split; 
-    $cellpar{@line[0]} = @line[1];
+    $cellpar{lc(@line[0])} = @line[1];
   }
   if ($_ =~ /loop_/) {      # Check if start of loop structure. We're interested in two loops:
     $isloop = 1;            #   The symmpetry equivalent position loop
@@ -235,22 +235,22 @@ while (<>) {
     $othlp = 0;
     $lpfdct = 0;
     @poscol = ();
-  } elsif($_ =~ /_symmetry_space_group_name_H-M/) { 
+  } elsif($_ =~ /_symmetry_space_group_name_H-M/i) { 
     $spagrp = $_;
-    $spagrp =~ s/_symmetry_space_group_name_H-M//g;
-    $spagrp =~ s/HR/H/; $spagrp =~ s/://g; $spagrp =~ s/['"]//g; $spagrp =~ s/^\s+//g;
-  } elsif($_ =~ /_symmetry_Int_Tables_number/) {
+    $spagrp =~ s/_symmetry_space_group_name_H-M//ig;
+    $spagrp =~ s/HR/H/; $spagrp =~ s/://g; $spagrp =~ s/['"]//g; $spagrp =~ s/^\s+//g; $spagrp =~ s/\n$//g;
+  } elsif($_ =~ /_symmetry_Int_Tables_number/i) {
     @line = split; $spanum = @line[1];
   } else {                  # First we parse the loop column headers in this else{} block
     if($isloop == 1) {
       if($_ =~ /^\s*_/) {
         if($loophd == 1) {
-          if($_ =~ /_symmetry_equiv_pos_as_xyz/ || $_ =~ /_space_group_symop_operation_xyz/)  { 
+          if($_ =~ /_symmetry_equiv_pos_as_xyz/i || $_ =~ /_space_group_symop_operation_xyz/i)  { 
             $symlp = 1; $symcol = $lpfdct; 
           }
           for $ic (0..$#datcol) {
             $_ =~ s/\s*//g;
-            if($_ eq $datcol[$ic]) {
+            if(lc($_) eq $datcol[$ic]) {
               if($ic>1 && $ic<8) { $poslp = 1; $coordseen[$ic] = 1;} else { $othlp = 1; }
               $poscol[$ic] = $lpfdct;
             }

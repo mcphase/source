@@ -167,7 +167,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
                                 }
 
              //magnetic structure factors + polarisation factor===>msf
-             float msf2,msf2dip;
+             double msf2,msf2dip;
              msf2 = norm(msfx)+norm(msfy)+norm(msfz);
              msf2dip = norm(msfdipx)+norm(msfdipy)+norm(msfdipz);
 
@@ -229,7 +229,8 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
             Imagdip = msf2dip * 3.65 / 4 / PI * lorentzf * scale * ovallt;
 
              // output user defined columns 
-            for(int i=1;i<=usrdefoutcols[0];++i)outn[usrdefoutcols[i]] =setcoloutput(colcode[usrdefoutcols[i]],scale,ovallt,lorentzf,nsf,msf2,msf2dip,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec,d,Theta,Q);
+            float msf2fl=msf2,msf2dipfl=msf2dip;
+            for(int i=1;i<=usrdefoutcols[0];++i)outn[usrdefoutcols[i]] =setcoloutput(colcode[usrdefoutcols[i]],scale,ovallt,lorentzf,nsf,msf2fl,msf2dipfl,Pxyz,msfx,msfy,msfz,msfdipx,msfdipy,msfdipz,Qvec,d,Theta,Q);
 
 return true;
 }
