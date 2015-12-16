@@ -260,8 +260,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              #ifndef _THREADS
 	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini))//0 means error in checkspincf/addspincf
 	        {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
-                 testspins.save(filemode);testqs.save(filemode); delete mf;
-		 return 1;}
+                 }
 	     femin=fe; spsmin=sps;	   
             //printout fe
 	    if (verbose==1) printf("fe=%gmeV, struc no %i in struct-table (initial values from struct %i)",fe,physprops.j,j);
@@ -270,8 +269,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,(*thrdat.physprops),ini); //0 means error in checkspincf/addspincf
              MUTEX_UNLOCK(&mutex_tests); 
 	     if (checksret==0) {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
-                 testspins.save(filemode);testqs.save(filemode); delete mf;
-		 goto ret;}
+                 }
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=femin;
              #endif
 	     }
@@ -416,8 +414,7 @@ int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs
     physprops	physical properties at (HT) point (i.e. magnetic structure
 		neutron intensities, thermal expansion ...)	
  // returns 0 if successfull
- // returns 1 if too maxnofspinconfigurations is exceeded 
- // returns 2 if no spinconfiguration has been found at ht point
+  // returns 2 if no spinconfiguration has been found at ht point
  */
  int i,j,k,is;
  Vector momentq0(1,inputpars.nofcomponents*inputpars.nofatoms),phi(1,inputpars.nofcomponents*inputpars.nofatoms);
@@ -583,13 +580,14 @@ else // if yes ... then
 			(*testspins.configurations[physprops.j]).wasstable=sps.wasstable;    
                        }
 	      }
-    else     // ---- or take q vector
+/*    else     // ---- or take q vector 
+            // removed because not necessary MR 15.12.15
             { sps.spinfromq(testqs.na(-physprops.j),testqs.nb(-physprops.j),
 	              testqs.nc(-physprops.j),testqs.q(-physprops.j),
 		      testqs.nettom(-physprops.j),testqs.momentq0(-physprops.j),
 		      testqs.phi(-physprops.j));
 	      }
-
+*/
      #ifndef _THREADS
      sps=spsmin;//take spinconfiguration which gave minimum free energy as starting value
      #else

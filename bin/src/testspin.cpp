@@ -16,7 +16,7 @@ int testspincf::addspincf(spincf & sps)
    return n;
    }
   else
-  {for (i=1;i<maxn;++i)
+  {for (i=maxn-1;i>0;--i)
    {if (configurations[i]->wasstable==0)
      {(*configurations[i])=sps;
       return i;
