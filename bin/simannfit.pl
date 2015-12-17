@@ -153,9 +153,9 @@ if($sta>0)
    ($sta)=sta(); # CALCULATE sta !!!!
    ++$stepnumber;
    if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set($Foutlevel);}
-   if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in results/simannfit.1 - $probe other sets to be found, continuing ...\n";open($Fouts,">>results/simannfit.1");write_set($Fouts);close $Fouts;}                       
+   if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in results/simannfit.1 - $probe other sets to be found, continuing ...\n";open($Fouts,">>results/simannfit.1");write_set($Fouts);close $Fouts;                      
                 last if ($probe==0);
-               
+                                }
    print " ...  current sta=$sta, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
    open(Fin,"./results/simannfit.status");$line=<Fin>;
     if ($line=~/exiting simannfit/){$sta=0;close Fin;}
@@ -166,7 +166,7 @@ if($sta>0)
 
  if (time-$starttime>$maxtim){$sta=0;print "\n maximum time for fitting reached - stopping fit\n";}
  if ($stepnumber>$maxstep){$sta=0;print "\n maximum step number for fitting reached - stopping fit\n";}
- if ($sta==0) {#recover ol pars
+ if ($sta==0) {#recover old pars
       @par=@parsav; 
       }
  last if ($sta==0);
