@@ -190,7 +190,9 @@ if($sta>0)
    $parav[$i]=($parav[$i]*$noofupdates + $p)/($noofupdates+1);
    $parerr[$i]=sqrt($parerr[$i]*$parerr[$i]*$noofupdates+
                    ($p-$parav[$i])*($p-$parav[$i]))/($noofupdates+1);     
-   if($probe==0){$parstp[$i]+=0.1*abs($thisparstp[$i]);} # adapt parstp to be more bold in this direction
+   if($probe==0){if($parstp[$i]<($parmax[$i]-$parmin[$i])/2){$parstp[$i]+=0.1*abs($thisparstp[$i]);}
+                 else{$parstp[$i]=($parmax[$i]-$parmin[$i])/2;}
+                } # adapt parstp to be more bold in this direction
    $hx=int(($p-$parmin[$i])/$parhistostp[$i]);
    ++$parhisto[($hx+$perlhistostart[$i])];
    open(Fout,">./results/".$parnam[$i].".hst");
