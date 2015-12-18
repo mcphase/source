@@ -25,6 +25,9 @@ unless ($#ARGV >0)
  print "                   up to 20 parameters are appended to this list, after that the program stops\n";
  print "                   - in this way a series of equally good solutions can be explored.\n";
  print " option -w 1.4     before starting simannfit, multiply all stepwidths by factor 1.4\n"; 
+ print " option -f 0.2     before starting simannfit, set all stepwidths to parameter value times 0.2,\n"; 
+ print "                   hoever never smaller than parameterrange/1000\n"; 
+
 print " <Press enter to close>";$in=<STDIN>;
  exit 0;}
 
@@ -52,7 +55,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
  @parnam=();@par=();@parmin=();@parmax=();@parerr=();@parstp=();@parav=();@thisparstp=();
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
-  $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;
+  $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;$stepset=0;
   $options=1;$probe=0;$stepfact=1;
   while($options==1)
   {$options=0;
@@ -61,6 +64,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
   if ($ARGV[0]=~"-n") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$tablestep=eval $ARGV[0]; shift @ARGV;}  
   if ($ARGV[0]=~"-p") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$probe=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-w") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepfact=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0]=~"-f") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepset=eval $ARGV[0]; shift @ARGV;}
   }
  while(!open(Fout,">results/simannfit.status")){print "Error opening file results/simannfit.status\n";<STDIN>;}
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
@@ -77,6 +81,10 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				 ($parmax[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parerr[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parstp[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^\Q]\E]+)/);
+                         if($stepset>0){$parstp[$#par]=$par[$#par]*$stepset;
+                                        if($parstp[$#par]<($parmax[$#par]-$parmin[$#par])/1000)
+                                        {$parstp[$#par]=($parmax[$#par]-$parmin[$#par])/1000;}
+                                        }
                          $parstp[$#par]=$stepfact*abs($parstp[$#par]);
                                  $i=$#par;write STDOUT;write Fout;
 				 #check if parmin<=parmax
