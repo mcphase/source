@@ -558,7 +558,7 @@ if (femin>=10000) // did we find a stable structure ??
  {fprintf(stderr,"Warning propcalc: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
                  physprops.T,physprops.H(1),physprops.H(2),physprops.H(3));return 2;}
 else // if yes ... then
- {// calculate physical properties
+ {if(verbose==1){printf("... calculating physical properties ...\n");}
  if (physprops.j>0){ // take spinconfiguration ----
                      sps=(*testspins.configurations[physprops.j]);
                        if (sps.wasstable==0)

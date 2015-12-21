@@ -81,7 +81,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				 ($parmax[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parerr[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parstp[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^\Q]\E]+)/);
-                         if($stepset>0){$parstp[$#par]=$par[$#par]*$stepset;
+                         if($stepset>0){$parstp[$#par]=abs($par[$#par])*$stepset;
                                         if($parstp[$#par]<($parmax[$#par]-$parmin[$#par])/1000)
                                         {$parstp[$#par]=($parmax[$#par]-$parmin[$#par])/1000;}
                                         }

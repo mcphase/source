@@ -97,7 +97,7 @@ while (@ARGV)
         else
        {
         # take care about <img src=""> commands and insert path
-        $line=~s!\<img(.*)src\s*="(.*)"!&lt img\1src="$dir/\2"&gt \n \<img\1src="$dir/\2"!;
+        $line=~s!\<img(.*)src\s*="(.*)"!<p style="width:50%; word-wrap: break-word; " > &lt img\1src="$dir/\2"&gt </p>\n \<img\1src="$dir/\2"!;
         # replace html commands <...> by &aaa& ... &bbb& 
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
                          |dd|del|dfn|div|dl|dt|em|fieldset|form|frame|

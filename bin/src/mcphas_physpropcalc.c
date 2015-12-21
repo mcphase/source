@@ -66,7 +66,6 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       }}}
  }physprops.jj[n]/=sps.n(); // divide by number of basis sets in magnetic unit cell
  }
-
 // neutron intensities (structure factor)
       // check if maxnofhklis was modified by user
   if (ini.maxnofhkls!=physprops.maxnofhkls){physprops.update_maxnofhkls(ini.maxnofhkls);}
@@ -82,6 +81,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
   for(i=0;i<=mf.in(mf.na(),mf.nb(),mf.nc())+1;++i)
   {mq[i]=ComplexVector(1,3*mf.nofatoms);}
   float in;
+
   //sps.FT(mq); //Fourier trafo of momentum configuration
   for(qh=0;qh<mf.na();++qh){for(qk=0;qk<mf.nb();++qk){for(ql=0;ql<mf.nc();++ql)
      {mq[mf.in(qh,qk,ql)]=0;
@@ -97,6 +97,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       }}}
 //      fprintf(stdout,"%g %g %g %g %g \n",qh,qk,ql,imag(mq[in(qh,qk,ql)](1)),real(mq[in(qh,qk,ql)](1)));
      }}}
+//printf(".. calculating (hkl)\n");
  for (qk=1;qk<=mf.nb();++qk)
  {for (ql=1;ql<=mf.nc();++ql) mq[mf.in(mf.na(),qk,ql)]=mq[mf.in(0,qk,ql)];}
  for (qh=1;qh<=mf.na();++qh)
@@ -107,7 +108,20 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 
      // mq[n]=mq[0];
 
-  j=0;for(qh=0;qh<=mf.na();++qh){for(qk=0;qk<=mf.nb();++qk){for(ql=0;ql<=mf.nc();++ql)
+ // inserted 10.5.10 to make comaptible with nonortholattices
+     Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
+     get_abc_in_ijk(abc_in_ijk,abc);
+     p=abc_in_ijk*inputpars.r; // p is the primitive crystal unit cell in ijk coordinates
+     pstar=2*PI*p.Inverse().Transpose();
+     Vector nnmin(1,3),nnmax(1,3);
+     nlimits_calc(nnmin, nnmax, ini.maxQ, pstar);
+     // problem: we want to find all lattice vectors Rn=ni*ai which are within a
+     // sphere of radius r from the origin (ai = column vectors of matrix a)
+     // this routine returns the maximum and minimum values of ni i=1,2,3
+     // by probing the corners of a cube
+  if(Norm(nnmax-nnmin)>10000){fprintf(stderr,"Warning mcphasit: calculation of hkl for %g values - might take long: a smaller maxQ in mcphas.ini or a smaller lattice constant in mcphas.j would help ....\n",Norm(nnmax-nnmin)); }  
+
+ j=0;for(qh=0;qh<=mf.na();++qh){for(qk=0;qk<=mf.nb();++qk){for(ql=0;ql<=mf.nc();++ql)
    {
       Vector q(1,3),hkl(1,3),Q(1,3);
       // this is q- Vector
@@ -115,24 +129,10 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 
       // try different Q vectors corresponding to q !!
      int i1,j1,k1;
+              for (i1=(int)nnmin(1);i1<=nnmax(1);++i1){//for(i2=-1;i2<=1&&i2-i1!=1;i2+=2){
+              for (j1=(int)nnmin(2);j1<=nnmax(2);++j1){//for(j2=-1;j2<=1&&j2-j1!=1;j2+=2){
+              for (k1=(int)nnmin(3);k1<=nnmax(3);++k1){//for(k2=-1;k2<=1&&k2-k1!=1;k2+=2){
 
-// inserted 10.5.10 to make comaptible with nonortholattices
-     Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
-     get_abc_in_ijk(abc_in_ijk,abc);
-     p=abc_in_ijk*inputpars.r; // p is the primitive crystal unit cell in ijk coordinates
-     pstar=2*PI*p.Inverse().Transpose();
-     Vector nmin(1,3),nmax(1,3);
-     nlimits_calc(nmin, nmax, ini.maxQ, pstar);
-     // problem: we want to find all lattice vectors Rn=ni*ai which are within a
-     // sphere of radius r from the origin (ai = column vectors of matrix a)
-     // this routine returns the maximum and minimum values of ni i=1,2,3
-     // by probing the corners of a cube
-
-
-
-              for (i1=(int)nmin(1);i1<=nmax(1);++i1){//for(i2=-1;i2<=1&&i2-i1!=1;i2+=2){
-              for (j1=(int)nmin(2);j1<=nmax(2);++j1){//for(j2=-1;j2<=1&&j2-j1!=1;j2+=2){
-              for (k1=(int)nmin(3);k1<=nmax(3);++k1){//for(k2=-1;k2<=1&&k2-k1!=1;k2+=2){
        Q(1)=q(1)+i1;Q(2)=q(2)+j1;Q(3)=q(3)+k1;
         //project back to big lattice
        hkl=inputpars.rez.Transpose()*Q;
@@ -198,6 +198,8 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       }}}//}}}
 
    }}}physprops.nofhkls=j;
+printf(".. calculating (hkl) finished\n");
+
 //save spinarrangement
       physprops.sps=sps;
 

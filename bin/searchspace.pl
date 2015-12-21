@@ -123,7 +123,7 @@ $jpglog=0;
                                                 print Fout "parameter[value,      min,           max,           (not used)   ,minimum meshwidth]\n";
                                                 $ii=0;foreach(@par){write Fout;++$ii;}
                                                 print Fout "..............................sta=$sta.......\n";
-                                                print Fout "these valueas are stored in parameter files * and *.forfit \n";
+                                                print Fout "these values are stored in parameter files * and *.forfit \n";
                                                 print Fout ".............................................\n";
                                                 close Fout;
                                                 print STDOUT ".......... searchspace stopped...............\n"; 
@@ -133,7 +133,7 @@ $jpglog=0;
                                                 print STDOUT "parameter[value,      min,           max,           (not used)   ,minimum meshwidth]\n";
                                                 $i=0;foreach(@par){write STDOUT;++$i;}
                                                 print STDOUT ".............................................\n";
-                                                print STDOUT "these valueas are stored in parameter files * and *.forfit \n";
+                                                print STDOUT "these values are stored in parameter files * and *.forfit \n";
                                                 print STDOUT ".............................sta=$sta........\n";
                                                 exit 0;
                                                 }
