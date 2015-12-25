@@ -61,6 +61,38 @@ void myPrintComplexMatrix(FILE * file,Matrix & M)
     }
 } 
 
+//  read a complex Hermitian matrix z.The real parts of the elements are
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+int myReadComplexMatrix (FILE * file, Matrix & M)
+{int i1,j1;char instr[MAXNOFCHARINLINE];
+ float *numbers;
+  numbers = new float[M.Rhi()-M.Rlo()+2];
+  numbers[0]=M.Rhi()-M.Rlo()+2;
+ 
+     //read comment line 
+     if(fgets(instr,MAXNOFCHARINLINE,file)==NULL) {fprintf (stderr, "ERROR reading complex matrix - comment line before real part\n");return false;}
+
+    // read real part
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){
+    j1=inputline(file,numbers);if(j1!=M.Chi()-M.Clo()+1) {fprintf (stderr, "ERROR reading complex matrix - number of columns read (%i) does not match matrix dimension (%i)\n",j1,M.Chi()-M.Clo()+1);return false;}
+    for (j1=M.Clo();j1<=M.Chi();++j1)M(i1,j1)=numbers[j1-M.Clo()+1];
+    if(i1>j1&&fabs(M(i1,j1)-M(j1,i1))>VERYSMALL){fprintf (stderr, "ERROR reading complex matrix element real part (%i,%i) =%g not equal to %g- Matrix must be Hermitian \n",i1,j1,M(i1,j1),M(j1,i1));return false;}
+    }
+     //read comment line 
+     if(fgets(instr,MAXNOFCHARINLINE,file)==NULL) {fprintf (stderr, "ERROR reading complex matrix - comment line before imaginary part\n");return false;}
+    // read imaginary part
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){
+    j1=inputline(file,numbers);if(j1!=M.Chi()-M.Clo()+1) {fprintf (stderr, "ERROR reading complex matrix - number of columns read (%i) does not match matrix dimension (%i)\n",j1,M.Chi()-M.Clo()+1);return false;}
+    for (j1=M.Clo();j1<=M.Chi();++j1){if(j1>i1)M(i1,j1)=-numbers[j1-M.Clo()+1];
+                                      if(j1<i1&&fabs(numbers[j1-M.Clo()+1]-M(j1,i1))>VERYSMALL)
+                                          {fprintf (stderr, "ERROR reading complex matrix element imaginary part (%i,%i)=%g not equal to %g- Matrix must be Hermitian \n",i1,j1,numbers[j1-M.Clo()+1],-M(j1,i1));return false;}
+                                     }
+    }
+delete []numbers;
+return true;
+}
 
 int myReadComplexMatrix (FILE * file, ComplexMatrix & M)
 {int i1,j1;char instr[MAXNOFCHARINLINE];

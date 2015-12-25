@@ -32,7 +32,12 @@ printf (" 		    the explicit spinconfigurations\n");
 printf (" 		  * ./results/.sps.eps will be updated not only \n");
 printf (" 		    when a H-T point has been finished but always \n");
 printf (" 		    when a structure with smaller free energy \n");
-printf (" 		    has been stabilized\n\n");
+printf (" 		    has been stabilized\n");
+printf ("          -prefix 001    try to read files starting with 001, e.g.\n");
+printf (" 		    001mcphas.ini, if these exist, otherwise take\n"); 
+printf (" 		    standard input files, check if in mcphas.ini there are\n");
+printf ("                   parameters such as 001xmin and use those. Output goes to files\n");
+printf (" 		    results/001mcphas*.* (option for parallel processes)\n");
 printf (" Note: files which must be in current directory -\n");
 printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
       exit (EXIT_FAILURE);
@@ -53,49 +58,49 @@ int inipar::load ()
   
   while (fgets(instr,MAXNOFCHARINLINE,fin_coq)!=NULL)
   {if(instr[strspn(instr," \t")]!='#'&&instr[strspn(instr," \t")]!='[') // comment lines headed by # or [ are ignored in mcphas.ini
-   {extract(instr,"exit",exit_mcphas);extract(instr,"pause",pause_mcphas);
-    extract(instr,"displayall",displayall);extract(instr,"logfevsQ",logfevsQ); 
+   {extract_with_prefix(instr,prefix,"exit",exit_mcphas);extract_with_prefix(instr,prefix,"pause",pause_mcphas);
+    extract_with_prefix(instr,prefix,"displayall",displayall);extract_with_prefix(instr,prefix,"logfevsQ",logfevsQ); 
      
-    extract(instr,"xT",xv[0]);      extract(instr,"xHa",xv[1]);
-    extract(instr,"xHb",xv[2]);    extract(instr,"xHc",xv[3]);
-    extract(instr,"xmin",xmin);  extract(instr,"xmax",xmax);
-    extract(instr,"xstep",xstep);
+    extract_with_prefix(instr,prefix,"xT",xv[0]);      extract_with_prefix(instr,prefix,"xHa",xv[1]);
+    extract_with_prefix(instr,prefix,"xHb",xv[2]);    extract_with_prefix(instr,prefix,"xHc",xv[3]);
+    extract_with_prefix(instr,prefix,"xmin",xmin);  extract_with_prefix(instr,prefix,"xmax",xmax);
+    extract_with_prefix(instr,prefix,"xstep",xstep);
    
-    extract(instr,"yT",yv[0]);     extract(instr,"yHa",yv[1]);
-    extract(instr,"yHb",yv[2]);   extract(instr,"yHc",yv[3]);
-    extract(instr,"ymin",ymin); extract(instr,"ymax",ymax);
-    extract(instr,"ystep",ystep);   
+    extract_with_prefix(instr,prefix,"yT",yv[0]);     extract_with_prefix(instr,prefix,"yHa",yv[1]);
+    extract_with_prefix(instr,prefix,"yHb",yv[2]);   extract_with_prefix(instr,prefix,"yHc",yv[3]);
+    extract_with_prefix(instr,prefix,"ymin",ymin); extract_with_prefix(instr,prefix,"ymax",ymax);
+    extract_with_prefix(instr,prefix,"ystep",ystep);   
  
-    extract(instr,"T0",zero(0));
-    extract(instr,"Ha0",zero(1));
-    extract(instr,"Hb0",zero(2));
-    extract(instr,"Hc0",zero(3));
+    extract_with_prefix(instr,prefix,"T0",zero(0));
+    extract_with_prefix(instr,prefix,"Ha0",zero(1));
+    extract_with_prefix(instr,prefix,"Hb0",zero(2));
+    extract_with_prefix(instr,prefix,"Hc0",zero(3));
     
    
-    extract(instr,"hmin",qmin[1]); 
-    extract(instr,"kmin",qmin[2]); 
-    extract(instr,"lmin",qmin[3]); 
-    extract(instr,"hmax",qmax[1]); 
-    extract(instr,"kmax",qmax[2]); 
-    extract(instr,"lmax",qmax[3]); 
-    extract(instr,"deltah",deltaq[1]); 
-    extract(instr,"deltak",deltaq[2]); 
-    extract(instr,"deltal",deltaq[3]); 
-    extract(instr,"maxqperiod",maxqperiod);
-    extract(instr,"maxnofspins",maxnofspins);
-    extract(instr,"nofrndtries",nofrndtries);
+    extract_with_prefix(instr,prefix,"hmin",qmin[1]); 
+    extract_with_prefix(instr,prefix,"kmin",qmin[2]); 
+    extract_with_prefix(instr,prefix,"lmin",qmin[3]); 
+    extract_with_prefix(instr,prefix,"hmax",qmax[1]); 
+    extract_with_prefix(instr,prefix,"kmax",qmax[2]); 
+    extract_with_prefix(instr,prefix,"lmax",qmax[3]); 
+    extract_with_prefix(instr,prefix,"deltah",deltaq[1]); 
+    extract_with_prefix(instr,prefix,"deltak",deltaq[2]); 
+    extract_with_prefix(instr,prefix,"deltal",deltaq[3]); 
+    extract_with_prefix(instr,prefix,"maxqperiod",maxqperiod);
+    extract_with_prefix(instr,prefix,"maxnofspins",maxnofspins);
+    extract_with_prefix(instr,prefix,"nofrndtries",nofrndtries);
 
-    extract(instr,"maxnofmfloops",maxnofmfloops);
-    extract(instr,"maxstamf",maxstamf); 
-    extract(instr,"bigstep",bigstep); 
-    extract(instr,"maxspinchange",maxspinchange); 
-    extract(instr,"maxnoftestspincf",maxnoftestspincf);
+    extract_with_prefix(instr,prefix,"maxnofmfloops",maxnofmfloops);
+    extract_with_prefix(instr,prefix,"maxstamf",maxstamf); 
+    extract_with_prefix(instr,prefix,"bigstep",bigstep); 
+    extract_with_prefix(instr,prefix,"maxspinchange",maxspinchange); 
+    extract_with_prefix(instr,prefix,"maxnoftestspincf",maxnoftestspincf);
 
-    extract(instr,"nofthreads",nofthreads);
+    extract_with_prefix(instr,prefix,"nofthreads",nofthreads);
 
-    extract(instr,"nofspincorrs",nofspincorrs); 
-    extract(instr,"maxnofhkls",maxnofhkls); 
-    extract(instr,"maxQ",maxQ); 
+    extract_with_prefix(instr,prefix,"nofspincorrs",nofspincorrs); 
+    extract_with_prefix(instr,prefix,"maxnofhkls",maxnofhkls); 
+    extract_with_prefix(instr,prefix,"maxQ",maxQ); 
     }
    }
   fclose (fin_coq);
@@ -235,20 +240,29 @@ void inipar::print (const char * filename)
 }
 
 //constructor ... load initial parameters from file
-inipar::inipar (const char * file)
-{ savfilename= new char [strlen(file)+1];
-  strcpy(savfilename,file);
+inipar::inipar (const char * file,char * pref)
+{ savfilename= new char [strlen(file)+strlen(pref)+1];
+  if(pref[0]!='\0')strcpy(savfilename,pref);
+  strcpy(savfilename+strlen(pref),file);
+  prefix = new char[strlen(pref)+1];
+  strcpy(prefix,pref);
   xv=Vector(0,3);yv=Vector(0,3);zero=Vector(0,3);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
-  printf("reading file %s\n",file);
-  if(load()!=0){fprintf(stderr,"ERROR loading file %s\n",savfilename);errexit();}
+  printf("reading file %s\n",savfilename);
+  if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
+                strcpy(savfilename,file);}
+                if(load()!=0){fprintf(stderr,"ERROR loading file %s\n",savfilename);
+                              errexit();}
+                }
 }
 
 //kopier-konstruktor 
 inipar::inipar (const inipar & p)
 { savfilename= new char [strlen(p.savfilename)+1];
   strcpy(savfilename,p.savfilename);
-
+  prefix = new char[strlen(p.prefix)+1];
+  strcpy(prefix,p.prefix);
+  
   exit_mcphas=p.exit_mcphas;pause_mcphas=p.pause_mcphas;
   displayall=p.displayall;logfevsQ=p.logfevsQ;
   
@@ -281,5 +295,6 @@ inipar::~inipar ()
 {//printf("hello destruktor inipar\n");  
  
 delete []savfilename;
+delete []prefix;
 //printf("hello destruktor inipar\n");  
  }

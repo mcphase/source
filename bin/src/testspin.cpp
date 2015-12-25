@@ -114,10 +114,7 @@ if (nofatoms!=na||nofcomponents!=nm)
 	}
       printf("n1=%i n2=%i n3=%i\n",(*configurations[i]).na(),(*configurations[i]).nb(),(*configurations[i]).nc());
       configurations[i]->reduce();
-      fout = fopen_errchk ("./results/.spins.eps", "w");
-      sprintf(text,"Testspinconfiguration No %i",i);
-      configurations[i]->eps(fout,text);
-    fclose (fout);
+      
       }
  fclose (fin_coq);
  n=i-1;ninitial=i-1;

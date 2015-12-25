@@ -36,6 +36,7 @@ extern   int extract(char * instr,const char * parameter,char * var, size_t n);
 
 // extract a variable which is there also if it is preceded by a prefix
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var);
+extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var, size_t n);
 
@@ -164,8 +165,8 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
  //  corresponding to the lower triangle) in the positions
  //  of the upper triangle of z[lo..hi,lo..hi].
 Matrix herm_dirprod(Matrix  A, Matrix  B); // direct product
-double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);            // transition matrix element
-double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib);            // <a|M|b>  a,b are columns ia and ib
+double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // transition matrix element
+double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // <a|M|b>  a,b are columns ia and ib
 complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int ia,int ib);  // of zr+izc
 double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib);
 double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);

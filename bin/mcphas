@@ -2,7 +2,7 @@
 # main program batch of mcphase
 
 
-if [ X"$1" != X"-version" -a  X"$1" != X"-help" -a  X"$1" != X"-h" ]; then
+if [ X"$1" != X"-version" -a  X"$1" != X"-help" -a  X"$1" != X"-h" -a  != X"-prefix"]; then
 # yes do a calculation
  #start displaying results
  java IniConfigurator &
@@ -39,7 +39,7 @@ fi
 
  sleep 2
  #start calculation program
- mcphasit $1 $2 $3 $4 $5 $6
+ mcphasit $@
  sleep 1
  #kill all processes
  # killall gv gnuplot gnuplot_x11 displaymag displayspins inimenu java
@@ -55,5 +55,5 @@ fi
  
 else
 # do not do a calculation - only print version / help screen
- mcphasit $1 $2 $3 $4 $5 $6;
+ mcphasit $@
 fi

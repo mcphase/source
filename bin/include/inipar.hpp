@@ -55,7 +55,7 @@ class inipar
   //  (<sum abs(actual change of m[mb] with respect to
   // initial  configuration)>) >maxspinchange will  end selfconsistency process
   float maxspinchange;
-
+  char * prefix;
 
   // OUTPUT OF PHYSICAL PROPERTIES
   // how many spinspin correlation functions 
@@ -74,7 +74,7 @@ class inipar
    void errexit();
   //load parameters from file
    int load();
-  inipar (const char * file); //constructor
+  inipar (const char * file,char * prefix); //constructor
   inipar (const inipar & p);//kopier-konstruktor
  ~inipar ();//destruktor
 };

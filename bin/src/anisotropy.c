@@ -92,7 +92,8 @@ if(do_sipffile){
 }else{  // !do sipf
 // as class par load  parameters from file
  if(verbose==1){printf("reading parameters from file mcphas.j\n");}
- inipar ini("mcphas.ini"); par inputpars("./mcphas.j"); inputpars.save("./results/_mcphas.j"); 
+ char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
+ inipar ini("mcphas.ini",prefix); par inputpars("./mcphas.j"); inputpars.save("./results/_mcphas.j"); 
  nofthreads = ini.nofthreads;
   Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
   Vector Imom(1,inputpars.nofcomponents);

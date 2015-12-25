@@ -83,6 +83,11 @@ int extract_with_prefix(char * instr,char * prefix, const char * parameter,doubl
  else{char par[MAXNOFCHARINLINE];sprintf(par,"%s%s",prefix,parameter);  if(0==extract(instr,par,var)){return 0;}}
  return 1;
 }
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var)
+{if(0==extract(instr,parameter,var)){return 0;}
+ else{char par[MAXNOFCHARINLINE];sprintf(par,"%s%s",prefix,parameter);  if(0==extract(instr,par,var)){return 0;}}
+ return 1;
+}
 // same for int variable with prefix
 int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var)
 {if(0==extract(instr,parameter,var)){return 0;}

@@ -19,7 +19,7 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  double fe; // free energy
  Vector diff(1,inputpars.nofcomponents*inputpars.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
  Vector meanfield(1,inputpars.nofcomponents),moment(1,inputpars.nofcomponents),d1(1,inputpars.nofcomponents);
- char text[1000]; // some text variable
+ char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
  int i,j,k,i1,j1,k1,di,dj,dk,l,r,s,sdim,m,n,m1;
  div_t result; // some modulo variable
  float    sta=1000000; // initial value of standard deviation
@@ -111,8 +111,9 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
 
 
 if (ini.displayall==1)   // display spincf if button is pressed
- {
-     fin_coq = fopen_errchk ("./results/.spins.eps", "w");
+ {   strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
+     fin_coq = fopen_errchk (outfilename, "w");
      sprintf(text,"fecalc:%i spins, iteration 0",sps.n());
      sps.eps(fin_coq,text);
      fclose (fin_coq);
@@ -211,7 +212,9 @@ for (r=1;sta>ini.maxstamf;++r)
   #endif
 if (ini.displayall==1)  // if all should be displayed - write sps picture to file .spins.eps
  {
-      fin_coq = fopen_errchk ("./results/.spins.eps", "w");
+     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
+     fin_coq = fopen_errchk (outfilename, "w");
      sprintf(text,"fecalc:%i spins, iteration %i sta=%g",sps.n(),r,sta);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
@@ -221,8 +224,10 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
  if (verbose==1)
  {if (time(0)-time_of_last_output>2)
   {time_of_last_output=time(0);
-   fin_coq= fopen_errchk ("./results/.fe_status.dat","a");
-   #ifndef _THREADS
+   strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+     strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
+     fin_coq = fopen_errchk (outfilename, "a");
+  #ifndef _THREADS
    fprintf(fin_coq,"%i %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),spinchange,stepratio,100*(double)successrate/nofcalls);
    #else
    htcalc_input *tin; int thrid;
@@ -260,7 +265,9 @@ u/=(double)sps.n()*sps.nofatoms;
 
 if (ini.displayall==1)
  {
-      fin_coq = fopen_errchk ("./results/.spins.eps", "w");
+     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
+      fin_coq = fopen_errchk (outfilename, "w");
        sprintf(text,"fecalc:%i spins, iteration %i, fe=%gmeV",sps.n(),i,fe);
        sps.eps(fin_coq,text);
       fclose (fin_coq);

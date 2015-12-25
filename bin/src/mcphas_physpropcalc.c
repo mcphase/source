@@ -1,6 +1,6 @@
 /************************************************************************/
 void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars)
-{ int i,j,k,l,n,m1;div_t result; char text[100];FILE * fin_coq;
+{ int i,j,k,l,n,m1;div_t result; char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];FILE * fin_coq;
  //save fe and u
  // calculate nettomoment from spinstructure
     Vector mom(1,3),d1(1,inputpars.nofcomponents);physprops.m=0;
@@ -222,17 +222,22 @@ printf(".. calculating (hkl) finished\n");
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
     sprintf(text,"physpropclc:T=%gK, |H|=%gT, Ha=%gT, Hb=%gT, Hc=%gT  %i spins",myround(T),myround(Norm(H)),myround(physprops.H(1)),myround(physprops.H(2)),myround(physprops.H(3)),sps.n());
-                    fin_coq = fopen_errchk ("./results/.spins3dab.eps", "w");
+                    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-                    fin_coq = fopen_errchk ("./results/.spins3dac.eps", "w");
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-                    fin_coq = fopen_errchk ("./results/.spins3dbc.eps", "w");
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-   fin_coq = fopen_errchk ("./results/.spins.eps", "w");
-    sps.eps(fin_coq,text);
+   strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
+                     sps.eps(fin_coq,text);
    fclose (fin_coq);
 delete[]x;delete []y; delete []z;
   //sps.display(text);

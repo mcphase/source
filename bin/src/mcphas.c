@@ -25,10 +25,11 @@ const char * filemode="w";
 int main (int argc, char **argv)
 { std::clock_t startcputime = std::clock();
   FILE * fin=NULL; 
-  //char instr[MAXNOFCHARINLINE];
+  char outfilename[MAXNOFCHARINLINE];
   int im,j,l;
   int nofstapoints=0,noffailedpoints=0;
-  int options=1; // this integer indicates how many command strings belong to options (=1+number of option-strings)
+  int options=1; // this integer indicates how many command strings belong to 
+                 //options (=1+number of option-strings)
   float x,y,dumm;
   double z,u;
   double T;
@@ -45,26 +46,38 @@ fprintf(stderr,"* mcphas - program to calculate static magnetic properties (phas
 fprintf(stderr,"*\n");
 fprintf(stderr,"* reference: M. Rotter JMMM 272-276 (2004) 481\n");
 fprintf(stderr,"**************************************************************************\n\n");
-inipar ini("mcphas.ini");
   
 // check command line
-  for (im=1;im<=argc-1;++im)
+int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
+  for (im=0;im<=argc-1;++im)
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
-   if (strcmp(argv[im],"-h")==0) ini.errexit(); // display help message
-   if (strcmp(argv[im],"-a")==0) filemode="a"; // append output files
+   if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
+   if (strcmp(argv[im],"-a")==0) {filemode="a";if (options<im)options=im;} // append output files
    if (strcmp(argv[im],"-stamax")==0&&im+1<=argc-1)
                                  {stamax=strtod (argv[im+1], NULL); // read stamax
-                                  if (options<im)options=im+1;}
+                                  if (options<im+1)options=im+1;}
+   if (strcmp(argv[im],"-prefix")==0&&im+1<=argc-1)
+                                 {strcpy(prefix,argv[im+1]); // read prefix
+                                  fprintf(stdout,"#prefix for input/ouput filenames: %s\n",prefix);
+ 				 if (options<im+1)options=im+1;}
   }
+    inipar ini("mcphas.ini",prefix);
+    if(errexit==1)ini.errexit();
 
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;ini.print();} // if exit was 1 - save parameters and set exit=0
-   ini.print("./results/_mcphas.ini");  // copy mcphas.ini to results directory
+   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini"); 
+   ini.print(prefix);  // copy mcphas.ini to results directory
 
 
 // as class par load  parameters from file
- if(verbose==1){printf("reading parameters from file mcphas.j\n");}
- par inputpars("./mcphas.j"); inputpars.save("./results/_mcphas.j"); 
+ strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.j");
+  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.j");
+ if(verbose==1){printf("reading parameters from file %s\n",prefix);}
+ par inputpars(prefix); 
+// here save single ion property files to results
+  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
+  strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix);
 
   Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
   Vector Imom(1,inputpars.nofcomponents);
@@ -72,8 +85,6 @@ inipar ini("mcphas.ini");
   Vector mmom(1,3);
   Vector h1(1,inputpars.nofcomponents),h1ext(1,3);h1ext=0;
  
-// here save single ion property files to results
-inputpars.save_sipfs("./results/_");
 
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
 T=1.0;for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
@@ -89,21 +100,30 @@ T=1.0;for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_paramete
 			   }
                                   }
 
-
 T=0.0;h=0;
 // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
-   testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.nofatoms,inputpars.nofcomponents);
-   testspins.save("./results/_mcphas.tst","w");
-   qvectors testqs (ini,inputpars.rez,Imax,"./results/mcphas.qvc",inputpars.nofatoms,inputpars.nofcomponents,verbose);
+    strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.tst");
+    if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.tst");
+    strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
+    testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.nofatoms,inputpars.nofcomponents);
+      
+    strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
+    strcpy(prefix+11+strlen(ini.prefix),"mcphas.tst");
+    testspins.save(prefix,"w");
+
+    strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.qvc");
+    qvectors testqs (ini,inputpars.rez,Imax,outfilename,inputpars.nofatoms,inputpars.nofcomponents,verbose);
 
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
                         
-if (argc>options&&strncmp(argv[argc-1],"-",1)!=0){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
+if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
  { //begin initialize display file
-   FILE * fout;fout = fopen_errchk ("./results/.mcphas.fum","w");
+   strcpy(prefix,"./results/.");strcpy(prefix+11,ini.prefix);
+   strcpy(prefix+11+strlen(ini.prefix),"mcphas.fum");
+   FILE * fout;fout = fopen_errchk (prefix,"w");
    fprintf (fout, " %4.4g %6.6g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g\n",
             0.0,ini.ymin,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-Max(mmax),0.0,0.0);
    fprintf (fout, " %4.4g %6.6g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g\n",
@@ -117,7 +137,7 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
    if (ini.xmin>ini.xmax){dumm=ini.xmin;ini.xmin=ini.xmax;ini.xmax=dumm;}
    if (ini.ymin>ini.ymax){dumm=ini.ymin;ini.ymin=ini.ymax;ini.ymax=dumm;}
    
-   if(argc>1&&strncmp(argv[argc-1],"-",1)!=0)  //should T-H values be read from file ?
+   if(argc>options+1)  //should T-H values be read from file ?
    {while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
     if (feof(fin)!=0) goto endproper;
     x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
@@ -147,14 +167,14 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
             //save physical properties of HT-point
 	    //sta=(sta*nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
-          sta+=physprop.save (verbose,filemode,j,inputpars);
+          sta+=physprop.save (verbose,filemode,j,inputpars,ini.prefix);
    	    ++nofstapoints;
-          if (sta>stamax){fprintf(stdout,"stamax=%g exceeded - exiting\n",stamax);goto endproper;}
+          if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 
 	 case 1: goto endproper;
 	      break;
          case 2: //ht calculation leads to no results- save dummy line
-	         physprop.save (verbose,filemode,j,inputpars);
+	         physprop.save (verbose,filemode,j,inputpars,ini.prefix);
 		 sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
      	      ++noffailedpoints;
 	      break;	 
@@ -166,18 +186,18 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
  }  
 endproper:
   testspins.save(filemode);testqs.save(filemode);
-   if(argc>options&&strncmp(argv[argc-1],"-",1)!=0) fclose(fin);
+   if(argc>options+1) fclose(fin);
    printf("#RESULTS saved in directory ./results/  - files:\n");
-   printf("#  mcphas.fum  - total magnetic moment, energy at different T,H\n");
-   printf("#  mcphas.sps  - stable configurations at different T,H\n");
-   printf("#  mcphas.mf   - mean fields at different T,H\n");
-   printf("#  mcphas.hkl  - strong magnetic satellites, neutron diffraction intensity\n");
-   printf("#  mcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n");
-   printf("#  mcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n");
-   printf("#  mcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n");
-   printf("#!  mcphas.qvc  - ...corresponding table of all nqvc=%i qvector generated test configs\n",testqs.nofqs ());
-   printf("#!  mcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",testspins.n);
-   printf("#  _mcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n");
+   printf("#  %smcphas.fum  - total magnetic moment, energy at different T,H\n",ini.prefix);
+   printf("#  %smcphas.sps  - stable configurations at different T,H\n",ini.prefix);
+   printf("#  %smcphas.mf   - mean fields at different T,H\n",ini.prefix);
+   printf("#  %smcphas.hkl  - strong magnetic satellites, neutron diffraction intensity\n",ini.prefix);
+   printf("#  %smcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n",ini.prefix);
+   printf("#  %smcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n",ini.prefix);
+   printf("#  %smcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n",ini.prefix);
+   printf("#!  %smcphas.qvc  - ...corresponding table of all nqvc=%i qvector generated test configs\n",ini.prefix,testqs.nofqs ());
+   printf("#!  %smcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",ini.prefix,testspins.n);
+   printf("#  _%smcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n",ini.prefix);
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
    double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
    std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;

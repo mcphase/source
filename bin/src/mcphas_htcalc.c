@@ -161,7 +161,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  Vector mmom(1,inputpars.nofcomponents);
  Vector h1(1,inputpars.nofcomponents),h1ext(1,3),hkl(1,3);
  h1ext=0;
- char text[10000];
+ char text[MAXNOFCHARINLINE];
+ char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  mfcf * mf;
  mfcf * mf1;
@@ -240,17 +241,22 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
                      sprintf(text,"fe=%g,fered=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,fered,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
-                    fin_coq = fopen_errchk ("./results/.spins3dab.eps", "w");
+                    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-                    fin_coq = fopen_errchk ("./results/.spins3dac.eps", "w");
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-                    fin_coq = fopen_errchk ("./results/.spins3dbc.eps", "w");
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
 		   
-                    fin_coq = fopen_errchk ("./results/.spins.eps", "w");
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      (*magmom).eps(fin_coq,text);
                     fclose (fin_coq);
 		delete[]x;delete []y; delete []z;
@@ -369,7 +375,9 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  }}}
 //------------------- end if insert 26.11.2015 -->> output is hkls with smallest |Q|
 
-                   felog=fopen_errchk("./results/mcphas.log","a");
+                   strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
+                   strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
+                   felog=fopen_errchk(outfilename,"a");
                    if (verbose==1||fe>10000){fprintf(felog,"#");}
                    fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i \n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc());
                    if (verbose==1&&fe<20000){sps.print(felog);}
@@ -425,7 +433,7 @@ int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
  dadbdc2ijk(H,Habc,abc); // transform Habc to ijk coordinates ... this is H
                   abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
- double femin=10000;char text[1000];
+ double femin=10000;char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  spincf  spsmin(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  mfcf * mf;
@@ -437,12 +445,16 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 
  srand(time(0)); // initialize random number generator
  checkini(testspins,testqs,ini); // check if user pressed a button
- if (ini.logfevsQ==1) {felog=fopen_errchk("./results/mcphas.log","a");
+ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
+                       strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
+                       felog=fopen_errchk(outfilename,"a");
                fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 at T=%g Ha=%g Hb=%g Hc=%g\n",T,Habc(1),Habc(2),Habc(3));
                fclose(felog);
 	      }
  if (verbose==1)
- { fin_coq= fopen_errchk ("./results/.fe_status.dat","w");
+ { strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+   strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
+   fin_coq= fopen_errchk (outfilename,"w");
    #ifndef _THREADS
    fprintf(fin_coq,"#displayxtext=time(s)\n#displaytitle=2:log(iterations) 3:log(sta) 4:spinchange 5:stepratio 6:successrate(%%)\n#time(s) log(iteration) log(sta) spinchange stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs)\n");
    #else
@@ -615,16 +627,21 @@ else // if yes ... then
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
                      sprintf(text,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(H),physprops.H(1),physprops.H(2),physprops.H(3),sps.n());
-                    fin_coq = fopen_errchk ("./results/.spins3dab.eps", "w");
+                    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
+                     fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-                    fin_coq = fopen_errchk ("./results/.spins3dac.eps", "w");
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-                    fin_coq = fopen_errchk ("./results/.spins3dbc.eps", "w");
+                    strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
                     fclose (fin_coq);
-		 fin_coq = fopen_errchk ("./results/.spins.eps", "w");
+		    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
+                    fin_coq = fopen_errchk (outfilename, "w");
                      (*magmom).eps(fin_coq,text);
                     fclose (fin_coq);
                 delete[]x;delete []y; delete []z;

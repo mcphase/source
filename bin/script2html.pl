@@ -97,13 +97,13 @@ while (@ARGV)
         else
        {
         # take care about <img src=""> commands and insert path
-        $line=~s!\<img(.*)src\s*="(.*)"!<p style="width:50%; word-wrap: break-word; " > &lt img\1src="$dir/\2"&gt </p>\n \<img\1src="$dir/\2"!;
+        $line=~s!(\s*#?\s*)\<img(.*)src\s*="(.*)"!<p style="width:50%;word-wrap: break-word; "> \1 &lt img\2src="$dir/\3"&gt </p> \<img\2src="$dir/\3"!;
         # replace html commands <...> by &aaa& ... &bbb& 
         $line=~s/\<(\/?)(a|b|q|caption|center|cite|code|col|
                          |dd|del|dfn|div|dl|dt|em|fieldset|form|frame|
                          |h1|h2|h3|h4|h5|h6|head|hr|html|img|iframe|input|ins|label|legend|li|
                          |map|meta|noframes|noscript|object|ol|optgroup|option|
-                         |p|pre|sub|sup|table|tbody|textarea|tfoot|th|title|td|tr|tt|u|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
+                         |p|pre|small|span|sub|sup|table|tbody|textarea|tfoot|th|title|td|tr|tt|u|ul|var)([^\>]*?)\>/&aaa&\1\2\3&bbb&/g; 
         $line=~s/\<(\/?)([i])(\s*?)\>/&aaa&\1\2\3&bbb&/g;# html tag <i>
 
        # substitute all remaining < and > signs by the html code &gt and &lt

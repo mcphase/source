@@ -37,7 +37,7 @@ physproperties (const physproperties & props);	// kopier-konstruktor
 ~physproperties ();		//destruktor
 
 void update_maxnofhkls(int mxnofhkli);
-double save(int verbose,const char * filemode, int j,par & inputpars);
+double save(int verbose,const char * filemode, int j,par & inputpars,char * prefix);
 
 };
 

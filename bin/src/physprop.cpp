@@ -96,7 +96,7 @@ void physproperties::update_maxnofhkls(int maxnofhkli)
 
 
 // methode save
-double physproperties::save (int verbose, const char * filemode, int htfailed, par & inputpars)
+double physproperties::save (int verbose, const char * filemode, int htfailed, par & inputpars,char * prefix)
 { FILE *fout;
   char filename[50];
   time_t curtime;
@@ -119,10 +119,12 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
   printf("saving properties for T=%g K  Ha= %g Hb= %g Hc= %g T\n", T,H(1),H(2),H(3));
 
 //-----------------------------------------------------------------------------------------  
-  errno = 0;
-  if (verbose==1) printf("saving mcphas.fum\n");
+  errno = 0;char outfilename[MAXNOFCHARINLINE];
+  strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+  strcpy(outfilename+10+strlen(prefix),"mcphas.fum");
+  if (verbose==1) printf("saving %s \n",outfilename);
   if (washere==0)
-  {fout = fopen_errchk ("./results/mcphas.fum",filemode);
+  {fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphas.fum-->\n");
@@ -139,13 +141,13 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
    fclose(fout);
       }
    if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;}
-   fout = fopen_errchk ("./results/mcphas.fum","a");
+   fout = fopen_errchk (outfilename,"a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
    if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
    fprintf(fout,"\n");
    fclose(fout);
-   fout = fopen_errchk ("./results/.mcphas.fum","a");
+   fout = fopen_errchk (outfilename,"a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g %4.4g\n",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),
             myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
@@ -166,9 +168,11 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
     }else{errno=0;}
 //-----------------------------------------------------------------------------------------  
   errno = 0; Vector totalJ(1,nofcomponents);
-  if (verbose==1)printf("saving mcphas.xyt\n");
+  strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+  strcpy(outfilename+10+strlen(prefix),"mcphas.xyt");
+    if (verbose==1)printf("saving %s\n",outfilename);
   if (washere==0)
-  {fout = fopen_errchk ("./results/mcphas.xyt",filemode);
+  {fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphas.xyt-->\n");
@@ -182,7 +186,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
 	      fprintf(fout,"\n");
    fclose(fout);    
      }
-  fout = fopen_errchk ("./results/mcphas.xyt","a");
+  fout = fopen_errchk (outfilename,"a");
   totalJ=0; 
   if (htfailed!=0){j=0;}else{totalJ=sps.totalJ();}
    if(j<0){sps.wasstable=j;}
@@ -214,7 +218,9 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
  for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms;++l){
   errno = 0;
   if (verbose==1)printf("saving mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
-  sprintf(filename,"./results/mcphas%i.j%i",l,i);
+  strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+  strcpy(outfilename+10+strlen(prefix),"mcphas");
+  sprintf(filename,"%s%i.j%i",outfilename,l,i);
   if (washere==0)  //printout file header
   {  fout = fopen_errchk (filename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
@@ -256,10 +262,13 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
 
 //-----------------------------------------------------------------------------------------  
  errno = 0;
-  if (verbose==1)printf("saving mcphas*.hkl - neutrons and xrays\n");
+  strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
+  strcpy(outfilename+10+strlen(prefix),"mcphas*.hkl");
+  if (verbose==1)printf("saving %s - neutrons and xrays\n",outfilename);
   if (washere==0)
   {//neutrons
-   fout = fopen_errchk ("./results/mcphas.hkl",filemode);
+   strcpy(outfilename+10+strlen(prefix),"mcphas.hkl");
+  fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphas.hkl-->\n");
@@ -271,8 +280,9 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  int       h   k   l   int       h   k   l   int ...}\n");
    fclose(fout);
    //xray a component
-   if(ortho==0){   fout = fopen_errchk ("./results/mcphasi.hkl",filemode);
-               } else {fout = fopen_errchk ("./results/mcphasa.hkl",filemode);}
+   if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphasi.hkl");
+                } else {strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl");  }
+   fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphasa.hkl-->\n");
@@ -290,9 +300,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    }
    fclose(fout);
    //xray b component
-   if(ortho==0){   fout = fopen_errchk ("./results/mcphasj.hkl",filemode);
-               } else {fout = fopen_errchk ("./results/mcphasb.hkl",filemode);}
-   fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
+   if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphasj.hkl");
+                } else {strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl");  }
+   fout = fopen_errchk (outfilename,filemode);
+    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphasb.hkl-->\n");
    fprintf(fout,"#*********************************************************\n");
@@ -309,8 +320,9 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    }
    fclose(fout);
    //xray c component
-      if(ortho==0){   fout = fopen_errchk ("./results/mcphask.hkl",filemode);
-               } else {fout = fopen_errchk ("./results/mcphasc.hkl",filemode);}
+   if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphask.hkl");
+                } else {strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl");  }
+   fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphasc.hkl-->\n");
@@ -336,35 +348,42 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    for (i=1;i<=nofhkls;++i) {intensity[i]=hkli[i](4);}
   if (verbose==1)printf(" .... sorting hkl according to neutron intensities\n");
    sort(intensity,1,nofhkls,inew); // sort according to ascending intensity
-  if (verbose==1)printf(" .... saving mcphas.hkl\n");
   //neutrons
-  fout = fopen_errchk ("./results/mcphas.hkl","a");fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+   strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); 
+   fout = fopen_errchk (outfilename,"a");
+   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
     {if (htfailed!=0){hkli[inew[i]](1)=0;hkli[inew[i]](2)=0;hkli[inew[i]](3)=0;hkli[inew[i]](4)=0;}
     fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](4)));
     } fprintf(fout,"\n");
    fclose(fout);
-  if (verbose==1)printf(" .... saving mcphas*.hkl\n");
   //xray a component
-      if(ortho==0){fout = fopen_errchk ("./results/mcphasi.hkl","a");
-   }else{
-  fout = fopen_errchk ("./results/mcphasa.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+  if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphasi.hkl");
+                } else {strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl");  }
+   fout = fopen_errchk (outfilename,"a");
+   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray b component
-      if(ortho==0){fout = fopen_errchk ("./results/mcphasj.hkl","a");
-   }else{
-  fout = fopen_errchk ("./results/mcphasb.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+   if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphasj.hkl");
+                } else {strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl");  }
+   fout = fopen_errchk (outfilename,"a");
+   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray c component
-      if(ortho==0){fout = fopen_errchk ("./results/mcphask.hkl","a");
-   }else{
-  fout = fopen_errchk ("./results/mcphasc.hkl","a");}fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+   if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphask.hkl");
+                } else {strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl");  }
+   fout = fopen_errchk (outfilename,"a");
+   if (verbose==1)printf(" .... saving %s\n",outfilename);
+   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
     } fprintf(fout,"\n");
@@ -379,9 +398,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    delete []inew;delete []intensity;
 //-----------------------------------------------------------------------------------------  
  errno = 0;
-  if (verbose==1)printf("saving mcphas.sps - spinconfiguration\n");
+ strcpy(outfilename+10+strlen(prefix),"mcphas.sps");
+   if (verbose==1)printf("saving %s- spinconfiguration\n",outfilename);
   if (washere==0)
-  {  fout = fopen_errchk ("./results/mcphas.sps",filemode);
+  {  fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphas.sps-->\n");
@@ -404,7 +424,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "    #<Jc(1)> <Jc(2)> ....}\n");
     fclose(fout);
    }  
-  fout = fopen_errchk ("./results/mcphas.sps","a");
+  fout = fopen_errchk (outfilename,"a");
    fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i \n",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
    if (htfailed!=0){sps.spinfromq(1,1,1,null1,null,null,null);}
@@ -418,9 +438,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
  
 //-----------------------------------------------------------------------------------------  
  errno = 0;
-  if (verbose==1)printf("saving mcphas.mf - mean field configuration\n");
+  strcpy(outfilename+10+strlen(prefix),"mcphas.mf");
+  if (verbose==1)printf("saving %s - mean field configuration\n",outfilename);
   if (washere==0)
-  {  fout = fopen_errchk ("./results/mcphas.mf",filemode);
+  {  fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphas.mf-->\n");
@@ -444,7 +465,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "    #mfc(1) mfc(2) ....         (i.e. divide by gJ and mu_B=0.05788meV/T to get exchange field[T]}\n");
     fclose(fout);
    }  
-     fout = fopen_errchk ("./results/mcphas.mf","a");
+     fout = fopen_errchk (outfilename,"a");
 fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i\n",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
    if (htfailed!=0){sps.print(fout);fprintf(fout,"\n");}else
