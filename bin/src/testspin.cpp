@@ -114,7 +114,7 @@ if (nofatoms!=na||nofcomponents!=nm)
 	}
       printf("n1=%i n2=%i n3=%i\n",(*configurations[i]).na(),(*configurations[i]).nb(),(*configurations[i]).nc());
       configurations[i]->reduce();
-      
+      configurations[i]->wasstable=1; // inserted 25.12.15. MR to prevent overwriting of primary table
       }
  fclose (fin_coq);
  n=i-1;ninitial=i-1;
