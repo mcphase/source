@@ -253,6 +253,13 @@ void jjjpar::save_sipf(const char * path)
  savfilename= new char[strlen(sipffilename)+strlen(path)+2];
  strcpy(savfilename,path);
  strcpy(savfilename+strlen(path),sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+char * pchr; pchr=strstr(savfilename+strlen(path),"/");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"/");}
+pchr=strstr(savfilename+strlen(path),"\\");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"\\");}
+
  FILE * fout; 
  fout = fopen_errchk (savfilename, "w");
  save_sipf(fout);
