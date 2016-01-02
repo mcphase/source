@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 use Getopt::Long;
 
-GetOptions("help"=>\$helpflag);
+GetOptions("help"=>\$helpflag,
+           "prefix|p=s"=>\$prefix);
 usage() if $helpflag||$#ARGV<1;
 $ARGV[0]=~s/x/*/g;$ARGV[0]=eval $ARGV[0];
 $ARGV[1]=~s/x/*/g;$ARGV[1]=eval $ARGV[1];
@@ -15,13 +16,15 @@ setting up mcdisp.mf to be used by mcdisp
 EOF
 if ($#ARGV>2) { 
 print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
-system ("spins -f results/mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > mcdisp.mf");
+$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > mcdisp.mf");
              }
 else
             {
 print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
-system ("spins -f results/mcphas.mf $ARGV[0] $ARGV[1]  > mcdisp.mf");
+$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1]  > mcdisp.mf");
              }
+if($err){exit(1);}
+
 print STDOUT << "EOF";
 *******************************************************
 reading results/mcphas.mf
@@ -78,6 +81,10 @@ sub usage() {
 
     - after running this program you can start mcdisp to do the calculation
       of dispersion of excitations or diffuse scattering
+
+    options:
+
+    -prefix 001  :  instead of results/mcphas.mf read results/001mcphas.mf
 EOF
 
   exit;

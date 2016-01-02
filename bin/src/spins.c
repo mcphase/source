@@ -17,8 +17,8 @@ program spins - popout spin/exchange field configuration\n"
 use as: spins -f mcphas.sps T Ha Hb Hc\n\
     or: spins -f mcphas.sps x y\n\
     or: spins -f mcphas.tst n\n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] T Ha Hb Hc [h k l E]\n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] x y\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] T Ha Hb Hc [h k l E]\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] x y\n\
                     \n\
 1) if used with -f file T Ha Hb Hc,  this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
@@ -49,6 +49,7 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
          -M  ... show arrow indicating magnetic moment (for cluster show total moment)\n\
          -Mi ... show arrow indicating magnetic moment (for cluster show individual moments)\n\
          -P  ... calculate phononic displacement\n\
+         -prefix 001 ... use input file(s) results/001mc* instead of results/mc*\n\
          note, that in order to animate changes in the above quantities, the corresponding\n\
          switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion\n\
          modules have to be capable of calculating the corresponding observables. \n\
@@ -93,6 +94,9 @@ double T=0; Vector Hext(1,3);
  //float numbers[13];numbers[9]=1;numbers[10]=3;
  //numbers[0]=13;
  char outstr[MAXNOFCHARINLINE];
+ char infilename[MAXNOFCHARINLINE];
+ char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
+ 
   int dim=28;
  char text[1000];
  int os=0; int doijk=0,arrow=0,density=0;//,arrowdim=3;
@@ -115,8 +119,7 @@ sprintf(gp.title,"output of program spins");
  if (strcmp(argv[1],"-f")==0)
  { fin = fopen_errchk (argv[2], "rb");os=2;printf("# reading from file %s\n",argv[2]);}
  else  // second ... other options with graphics !!
- { fin = fopen_errchk ("./results/mcphas.mf", "rb");printf("# reading from file ./results/mcphas.mf\n");
-  if(strcmp(argv[1],"-c")==0){os=1;}
+ {if(strcmp(argv[1],"-c")==0){os=1;}
   if(strcmp(argv[1],"-s")==0){os=1;}
   if(strcmp(argv[1],"-o")==0){os=1;} 
   if(strcmp(argv[1],"-m")==0){os=1;}
@@ -205,7 +208,14 @@ else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins
                                    }
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;}
-
+if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
+                                   fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
+ 				   os+=2;}
+ strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
+ strcpy(infilename+10+strlen(prefix),"mcphas.mf");fin = fopen(infilename, "rb");
+ if(fin==NULL){strcpy(infilename+10,"mcphas.mf");fin = fopen_errchk (infilename, "rb");}
+ printf("# reading from file %s\n",infilename);
+  
  }
 
    fout = fopen_errchk ("./results/spins.out", "w");
@@ -523,12 +533,21 @@ if (argc-os>=6){
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
 //----------------------------------------------------------------------------------------------------------
             if(arrow>0){double checkdd=1e7;
+             strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
              switch(arrow)
-             {case 1:  fin = fopen_errchk ("./results/mcdisp.qes", "rb");break;
-              case 2:  fin = fopen_errchk ("./results/mcdisp.qeo", "rb");break;
-              case 3:  fin = fopen_errchk ("./results/mcdisp.qem", "rb");break;
-              case 4:  fprintf(stderr,"mcdisp: output of individual moment oscillation in eigenvector file mcdisp.qemi not yet implemented - thus exiting program spins\n");
-                       fin = fopen_errchk ("./results/mcdisp.qemi", "rb");break;
+             {case 1: strcpy(infilename+10+strlen(prefix),"mcdisp.qes");fin = fopen(infilename, "rb");
+                      if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qes", "rb");
+                      break;
+              case 2: strcpy(infilename+10+strlen(prefix),"mcdisp.qeo");fin = fopen(infilename, "rb");
+                      if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qeo", "rb");
+                      break;
+              case 3: strcpy(infilename+10+strlen(prefix),"mcdisp.qem");fin = fopen(infilename, "rb");
+                      if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qem", "rb");
+                      break;
+              case 4: fprintf(stderr,"mcdisp: output of individual moment oscillation in eigenvector file mcdisp.qemi not yet implemented - thus exiting program spins\n");
+                      strcpy(infilename+10+strlen(prefix),"mcdisp.qemi");fin = fopen(infilename, "rb");
+                      if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qemi", "rb");
+                      break;                      
              }
              // input file header ------------------------------------------------------------------
              instr[0]='#';
@@ -594,13 +613,22 @@ if (argc-os>=6){
      
 //----------------------------------------------------------------------------------------------------------
             if(density){double checkdd=1e7;
+             strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
              switch(argv[1][1]) // dimension definition from jjjpar.hpp
-                {case 'c':fin = fopen_errchk ("./results/mcdisp.qee", "rb");break;
-                 case 's':fin = fopen_errchk ("./results/mcdisp.qsd", "rb");break;
-                 case 'o':fin = fopen_errchk ("./results/mcdisp.qod", "rb");break;
-                 case 'm':fprintf(stderr,"Error spins: magnetic moment density oscillation not yet implemented\n");exit(1);break;
+                {case 'c': strcpy(infilename+10+strlen(prefix),"mcdisp.qee");fin = fopen(infilename, "rb");
+                           if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qee", "rb");
+                           break;
+                 case 's': strcpy(infilename+10+strlen(prefix),"mcdisp.qsd");fin = fopen(infilename, "rb");
+                           if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qsd", "rb");
+                           break;
+                 case 'o': strcpy(infilename+10+strlen(prefix),"mcdisp.qod");fin = fopen(infilename, "rb");
+                           if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qod", "rb");
+                           break;
+                 case 'm': fprintf(stderr,"Error spins: magnetic moment density oscillation not yet implemented\n");exit(1);break;
                              // would have to look into qsd and qod files !!
-                 case 'j':fin = fopen_errchk ("./results/mcdisp.qod", "rb");break;
+                 case 'j': strcpy(infilename+10+strlen(prefix),"mcdisp.qod");fin = fopen(infilename, "rb");
+                           if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qod", "rb");
+                           break;
                 }
              // input file header ------------------------------------------------------------------
              instr[0]='#';

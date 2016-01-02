@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 use Getopt::Long;
 
-GetOptions("help"=>\$helpflag);
+GetOptions("help"=>\$helpflag,
+           "prefix|p=s"=>\$prefix);
 usage() if $helpflag||$#ARGV<1;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ARGV[0]=eval $ARGV[0];
 $ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$ARGV[1]=eval $ARGV[1];
@@ -13,14 +14,15 @@ print STDOUT << "EOF";
 *******************************************************
 setting up mcdisp.mf to be used by mcdisp
 EOF
+if ($prefix){$pp="-prefix ".$prefix;}
 if ($#ARGV>2) { 
 print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
-system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
+system ("spins $pp $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
              }
 else
             {
 print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
-system ("spins $ARGV[0] $ARGV[1]");
+system ("spins $pp $ARGV[0] $ARGV[1]");
              }
 print STDOUT << "EOF";
 *******************************************************
@@ -64,9 +66,9 @@ sub usage() {
                     from results/mcphas.sps and results/mcphas.mf generates an
                     input file mcdiff.in
 
-    usage: setup_mcdiff_in T Ha Hb Hc
+    usage: setup_mcdiff_in [option] T Ha Hb Hc
               or
-           setup_mcdiff_in x y
+           setup_mcdiff_in [option] x y
 
      -h          : this (help) message
       T          : Temperature (K)
@@ -75,7 +77,7 @@ sub usage() {
 
     required input files:
 
-    results/mcphas.sps
+    results/mcphas.mf
                  :  result of a mcphas calculation
 
     output files:
@@ -84,6 +86,10 @@ sub usage() {
 
     - after running this program you can start mcdiff to do the calculation
       magnetic diffraction pattern
+
+    options:
+
+    -prefix 001  :  instead of results/mcphas.mf read results/001mcphas.mf
 EOF
 
   exit;
