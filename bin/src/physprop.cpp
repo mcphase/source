@@ -425,10 +425,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
     fclose(fout);
    }  
   fout = fopen_errchk (outfilename,"a");
-   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i \n",
+   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
-   if (htfailed!=0){sps.spinfromq(1,1,1,null1,null,null,null);}
-    sps.print(fout);fprintf(fout,"\n");
+   if (htfailed!=0){fprintf(fout,"1 = failed");sps.spinfromq(1,1,1,null1,null,null,null);}
+    fprintf(fout,"0 = ok\n");sps.print(fout);fprintf(fout,"\n");
    fclose(fout);
     if((fout=fopen("./fit/mcphas.sps","rb"))!=NULL)
     {// some measured data should be fitted
@@ -466,10 +466,11 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
     fclose(fout);
    }  
      fout = fopen_errchk (outfilename,"a");
-fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i\n",
-            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
-   if (htfailed!=0){sps.print(fout);fprintf(fout,"\n");}else
-    {mf.print(fout);fprintf(fout,"\n");}
+fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
+            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),
+           myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+   if (htfailed!=0){fprintf(fout,"1 = failed\n");sps.print(fout);fprintf(fout,"\n");}else
+    {fprintf(fout,"0 = ok\n");mf.print(fout);fprintf(fout,"\n");}
    fclose(fout);
     if((fout=fopen("./fit/mcphas.mf","rb"))!=NULL)
     {// some measured data should be fitted

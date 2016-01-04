@@ -126,20 +126,19 @@ fprintf(fout,"\
 # -----------------------------------------------------------------------------\n");
 
 }
-void check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hcin, spincf & savmf, double & T,Vector & Hext,char*outstr)
+int check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hcin, spincf & savmf, double & T,Vector & Hext,char*outstr)
 {// load mfconfigurations and check which one is nearest -------------------------------
-
+// returns 0 if ok, 1 if no stable configuration was found
 int n;
    double ddT,ddHa,ddHb,ddHc,dd,delta;
- float numbers[13];numbers[9]=1;numbers[10]=3;
- numbers[0]=13;char instr[MAXNOFCHARINLINE];
+ float numbers[20];numbers[9]=1;numbers[10]=3;
+ numbers[0]=20;char instr[MAXNOFCHARINLINE];
  long int pos=0;
  if(Tin>=0)
 {
  for (delta=1000.0;feof(fin_coq)==0                      //end of file
                     &&(n=inputline(fin_coq,numbers))>=8   //error in line reading (8 old format, 9 new format)
 		    ;)
-
     { spincf spins(1,1,1,(int)numbers[9],(int)numbers[10]);
       spins.load(fin_coq);
      if(Tin==0){ddT=0; // here hain and hbin correspond to x and y in phasediagram
@@ -153,6 +152,7 @@ int n;
       ddHc=hcin-numbers[7];ddHc*=ddHc;
       }
       dd=sqrt(ddT+ddHa+ddHb+ddHc+0.000001);
+      if(n>11){if((int)numbers[11]!=0)dd=delta+10;} // if mcphase failed do not use this structure
       if (dd<delta)
        {delta=dd;
         sprintf(outstr,"x=%g y=%g T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[1]),myround(numbers[2]),myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
@@ -163,7 +163,7 @@ int n;
                  while (instr[strspn(instr," \t")]=='#'&&feof(fin_coq)==0) // pointer to 'ltrimstring' 
                   {pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
        fseek(fin_coq,pos,SEEK_SET);
-    }
+    } if(delta==1000.0)return 1; // no stable structure found
  } 
    else
  {// look for config number -Tin
@@ -171,6 +171,7 @@ int n;
   {if(savmf.load(fin_coq)==0){fprintf(stderr,"Error program spins: loading configuration number %i\n",n);exit(1); }
   }
  }
+ return 0; // ok structure found
 }
    
 int headerinput(FILE * fin_coq,FILE* fout,graphic_parameters & gp,cryststruct & cs)

@@ -17,13 +17,14 @@ EOF
 if ($prefix){$pp="-prefix ".$prefix;}
 if ($#ARGV>2) { 
 print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
-system ("spins $pp $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
+$err=system ("spins $pp $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
              }
 else
             {
 print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
-system ("spins $pp $ARGV[0] $ARGV[1]");
+$err=system ("spins $pp $ARGV[0] $ARGV[1]");
              }
+if($err){exit(EXIT_FAILURE);}
 print STDOUT << "EOF";
 *******************************************************
 reading results/mcphas.mf

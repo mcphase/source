@@ -232,7 +232,8 @@ else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
      else
      {HHx=strtod(argv[2+os],NULL);HHy=strtod(argv[3+os],NULL);HHz=strtod(argv[4+os],NULL);}
      }
-check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr);
+if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr))
+  {fclose (fin);fprintf(stderr,"#!!! Error program spins - no stable structure found !!!\n");exit(1);}
 fclose (fin);
 
   printf("#! %s - configuration\n",outstr);
