@@ -4,7 +4,7 @@ use File::Copy;
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >0)
 {
-print STDOUT << "EOF";
+print STDERR << "EOF";
 
  program to get the y-value of a function by averaging
  over an interval xvalue+-dx,
@@ -19,8 +19,8 @@ print STDOUT << "EOF";
          standarddeviation to stdaout and MCPHASE_STA
 EOF
 # clean bat files
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
 }
 $ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
@@ -31,25 +31,43 @@ foreach(@ARGV)
 {$filename=$_;
 ($yvalue,$sta)=getvalue_by_averaging_over_intervaldE($xvalue,$colx,$coly,$dE,$filename);
 if (abs($yvalue)>1e-300){$yinv=1/$yvalue;}else{$yinv=" ";}
-print "#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dx=$dE corresponds\n";
-print "#! to the yvalue=$yvalue  (1/yvalue=$yinv)";if($sta>0){print "deviations sta=$sta\n";}else{print"\n";}
+print "echo '#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dx=$dE corresponds'\n";
+print "echo '#! to the yvalue=$yvalue  (1/yvalue=$yinv)";if($sta>0){print "deviations sta=$sta'\n";}else{print"'\n";}
 } 
 # for setting environment variables
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
-print Fout "set MCPHASE_YVALUE=$yvalue\n";
-print Fout sprintf("set MCPHASE_YVALUE_ROUNDED_INT=%.0f\n",$yvalue);
-print Fout "set MCPHASE_YVALUE_INVERSE=$yinv\n";
-print Fout sprintf("set MCPHASE_YVALUE_INVERSE_ROUNDED_INT=%.0f\n",$yinv);
-print Fout "set MCPHASE_STA=$sta\n";
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+#print Fout "set MCPHASE_YVALUE=$yvalue\n";
+#print Fout sprintf("set MCPHASE_YVALUE_ROUNDED_INT=%.0f\n",$yvalue);
+#print Fout "set MCPHASE_YVALUE_INVERSE=$yinv\n";
+#print Fout sprintf("set MCPHASE_YVALUE_INVERSE_ROUNDED_INT=%.0f\n",$yinv);
+#print Fout "set MCPHASE_STA=$sta\n";
+#close Fout;
 
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
-print Fout "export MCPHASE_YVALUE=$yvalue\n";
-print Fout sprintf("export MCPHASE_YVALUE_ROUNDED_INT=%.0f\n",$yvalue);
-print Fout "export MCPHASE_YVALUE_INVERSE=$yinv\n";
-print Fout sprintf("export MCPHASE_YVALUE_INVERSE_ROUNDED_INT=%.0f\n",$yinv);
-print Fout "export MCPHASE_STA=$sta\n";
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+#print Fout "export MCPHASE_YVALUE=$yvalue\n";
+#print Fout sprintf("export MCPHASE_YVALUE_ROUNDED_INT=%.0f\n",$yvalue);
+#print Fout "export MCPHASE_YVALUE_INVERSE=$yinv\n";
+#print Fout sprintf("export MCPHASE_YVALUE_INVERSE_ROUNDED_INT=%.0f\n",$yinv);
+#print Fout "export MCPHASE_STA=$sta\n";
+#printclose Fout;
+
+ if ($^O=~/MSWin/){
+print  "set MCPHASE_YVALUE=$yvalue\n";
+print  sprintf("set MCPHASE_YVALUE_ROUNDED_INT=%.0f\n",$yvalue);
+print  "set MCPHASE_YVALUE_INVERSE=$yinv\n";
+print  sprintf("set MCPHASE_YVALUE_INVERSE_ROUNDED_INT=%.0f\n",$yinv);
+print  "set MCPHASE_STA=$sta\n";
+                  }
+                 else
+                  {
+print "export MCPHASE_YVALUE=$yvalue\n";
+print sprintf("export MCPHASE_YVALUE_ROUNDED_INT=%.0f\n",$yvalue);
+print "export MCPHASE_YVALUE_INVERSE=$yinv\n";
+print sprintf("export MCPHASE_YVALUE_INVERSE_ROUNDED_INT=%.0f\n",$yinv);
+print "export MCPHASE_STA=$sta\n";
+                  }
+
+
 
 exit(0);
 
@@ -101,7 +119,7 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
   if($j==1&&$numbers[$colx]==$constx){# only one point in file and specified, special ...
             $esum=1;$Iav=$numbers[$coly];
            }
-  if (abs($esum)<1e-10){print "\n first xvalue sum on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of x values\n";<stdin>;}
+  if (abs($esum)<1e-10){print STDERR " first xvalue sum on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of x values\n";<stdin>;}
   $Iav/=$esum;
   my $sta=0; # here calculate sta (scattering of data in interval dE)
   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
@@ -120,7 +138,7 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
 #print "$constx $dE ".$numbers[$colx]." ".$numbers1[$colx]."\n";
    @numbers1=@numbers;
    }} 
-  if (abs($esum)<1e-300){print "\n# getvalue: xvalues variance on averaging is too small ($esum) for $file\n";$sta=-1;}
+  if (abs($esum)<1e-300){print "echo '# getvalue: xvalues variance on averaging is too small ($esum) for $file'\n";$sta=-1;}
   else{$sta/=$esum;}
   close Fin;
   return ($Iav,$sta);

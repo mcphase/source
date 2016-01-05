@@ -15,7 +15,7 @@ use PDL;
 
 if ($#ARGV<1)
 
-{print "program linreg: calculates linear regression of n columns in file
+{print STDERR "program linreg: calculates linear regression of n columns in file
 
     use as linreg col n filename
 
@@ -46,7 +46,7 @@ $ARGV[0]=~s/x/*/g;$col=eval $ARGV[0]; shift @ARGV;--$col;
 $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;
 
  foreach (@ARGV)
-  { $file=$_;print "<".$file;
+  { $file=$_;print "echo '<".$file."'\n";
 #     sum_k x_jk y_k = sum_i a_i (sum_k x_ik * x_jk)
 #     rewritten as b_j= sum_i a_i c_ij
 # read data file 2D reads b_j and c_ij as PDL piddles
@@ -81,10 +81,10 @@ $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;
  { print Fout "#! a".($col+$i+1)."=".$a->at($i-1)."\n"; }
   print Fout "#! sta=$sta\n";
 
-  print  "# Result of linear regression col".($col+1)." ~ sum_i=".($col+2)."...".($col+$n+1)." ai coli \n";
+  print  "echo '# Result of linear regression col".($col+1)." ~ sum_i=".($col+2)."...".($col+$n+1)." ai coli '\n";
   for($i=1;$i<=$n;++$i)
- { print "#! a".($col+$i+1)."=".$a->at($i-1)."\n"; }
-  print "#! sta=$sta\n";
+ { print "echo '#! a".($col+$i+1)."=".$a->at($i-1)."'\n"; }
+  print "echo '#! sta=$sta'\n";
     
       close Fout;
      unless (rename "range.out",$file)
@@ -96,17 +96,26 @@ $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;
       close Fout;
       system "del range.out";
      }
-      print ">\n";
+      print "echo '>'\n";
   }
 
 # for setting environment variables
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
-print Fout "set MCPHASE_STA=$sta\n";
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+#print Fout "set MCPHASE_STA=$sta\n";
+#close Fout;
 
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
-print Fout "export MCPHASE_STA=$sta\n";
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+#print Fout "export MCPHASE_STA=$sta\n";
+#close Fout;
+ 
+if ($^O=~/MSWin/){
+print "set MCPHASE_STA=$sta\n";
+                 }
+                 else
+                  {
+print "export MCPHASE_STA=$sta\n";
+                  }
+
 
 # Read 2D numeric data, skipping comment lines.
 #     sum_k x_jk y_k = sum_i a_i (sum_k x_ik * x_jk)

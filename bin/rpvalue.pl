@@ -7,10 +7,10 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >1) 
 
-{print " program rpvalue  used to calculate the rpvalue from 2 columns in a file\n";
- print " usage: rpvalue col1 col2  *.*   \n col=columns \n *.* .. filenname\n";
- print " the rpvalue is defined as\n 100*[sum_{allpoints} abs(col2-col1)]/[sum_{allpoints}abs(col1)]\n";
- print " the result ist printed to stdout and stored in environment variabele MCPHASE_RP\n";
+{print STDERR " program rpvalue  used to calculate the rpvalue from 2 columns in a file\n";
+ print STDERR " usage: rpvalue col1 col2  *.*   \n col=columns \n *.* .. filenname\n";
+ print STDERR " the rpvalue is defined as\n 100*[sum_{allpoints} abs(col2-col1)]/[sum_{allpoints}abs(col1)]\n";
+ print STDERR " the result ist printed to stdout and stored in environment variabele MCPHASE_RP\n";
 
  exit 0;}
 
@@ -28,7 +28,7 @@ $ARGV[0]=~s/x/*/g;$col2=eval $ARGV[0];shift @ARGV;
    $file=$_;
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "<".$file;
+   print "echo '<".$file;
 
    while($line=<Fin>)
 
@@ -52,17 +52,26 @@ $ARGV[0]=~s/x/*/g;$col2=eval $ARGV[0];shift @ARGV;
 
       close Fin;
 
-   print ">\n";
+   print ">'\n";
 
    }
 # for setting environment variables
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
-print Fout "set MCPHASE_RP=$rpvalue\n";
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+#print Fout "set MCPHASE_RP=$rpvalue\n";
+#close Fout;
 
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
-print Fout "export MCPHASE_RP=$rpvalue\n";
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+#print Fout "export MCPHASE_RP=$rpvalue\n";
+#close Fout;
+
+ if ($^O=~/MSWin/){
+print "set MCPHASE_RP=$rpvalue\n";
+                  }
+                 else
+                  {
+print "export MCPHASE_RP=$rpvalue\n";
+                  }
+
 
 
 #\end{verbatim} 

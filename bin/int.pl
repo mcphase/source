@@ -7,7 +7,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >1) 
 
-{print STDOUT <<"EOF";
+{print STDERR <<"EOF";
 
 
 program int  used to integrate columnx vs columny=f(x) in data file
@@ -49,7 +49,7 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
   foreach (@ARGV)
   {$file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "#!<".$file;
+   print "echo '#!<".$file;
 
   $integral=0;$j=0;$mu[1]=0;$muerr2[1]=0;$err2=0;
     open (Fout, ">range.out");
@@ -80,7 +80,7 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
       close Fout;$nmax=1;
    if($calcm==1){ # here calculate mth moments 1- $nmax
                   $nmax=6;
-                 unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
+                 unless (open (Fin, $file)){die "\n error:unable to open $file'\n";}
                  $center=$mu[1]/$integral;@mu= (0) x ($nmax+1);            # (0,0,0,0,0)
                  $j=0;
                   while($line=<Fin>)
@@ -103,7 +103,7 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
    print " x=col".$colx." y=f(x)=col".$coly." INT=".$integral;
   if($colyerr>0){$err=sqrt($err2);print " INT_ERROR=".$err;}
    for($i=1;$i<=$nmax;++$i){print " mu_$i=".$mu[$i];}
-   print ">\n";
+   print "> '\n";
        unless (rename "range.out",$file)
       {unless(open (Fout, ">$file"))     
       {die "\n error:unable to write to $file\n";}
@@ -117,16 +117,29 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
    }
 
 # for setting environment variables
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
-print Fout "set MCPHASE_INT=$integral\n";
-if($colyerr>0){print Fout "set MCPHASE_INT_ERR=".$err."\n";}
-for($i=1;$i<=$nmax;++$i){print Fout "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
+#print Fout "set MCPHASE_INT=$integral\n";
+#if($colyerr>0){print Fout "set MCPHASE_INT_ERR=".$err."\n";}
+#for($i=1;$i<=$nmax;++$i){print Fout "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
+#close Fout;
 
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
-print Fout "export MCPHASE_INT=$integral\n";
-if($colyerr>0){print Fout "export MCPHASE_INT_ERR=".$err."\n";}
-for($i=1;$i<=$nmax;++$i){print Fout "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
-close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
+#print Fout "export MCPHASE_INT=$integral\n";
+#if($colyerr>0){print Fout "export MCPHASE_INT_ERR=".$err."\n";}
+#for($i=1;$i<=$nmax;++$i){print Fout "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
+#close Fout;
+
+ if ($^O=~/MSWin/){
+print  "set MCPHASE_INT=$integral\n";
+if($colyerr>0){print  "set MCPHASE_INT_ERR=".$err."\n";}
+for($i=1;$i<=$nmax;++$i){print  "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
+                  }
+                 else
+                  {
+print  "export MCPHASE_INT=$integral\n";
+if($colyerr>0){print  "export MCPHASE_INT_ERR=".$err."\n";}
+for($i=1;$i<=$nmax;++$i){print  "set MCPHASE_INT_MU_$i=".$mu[$i]."\n";}
+                  }
+
 
 #\end{verbatim} 
