@@ -566,11 +566,33 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a)
   }
 }
 
+
 // some matrix functions for hermitian matrices in
 // real notation: The real parts of the elements must be
  //  stored in the lower triangle of z,the imaginary parts (of the elements
  //  corresponding to the lower triangle) in the positions
  //  of the upper triangle of z[lo..hi,lo..hi].
+ComplexMatrix toStandard(Matrix M) // transform to conventional matrix notation
+{if(M.Rhi()!=M.Chi()){fprintf(stderr,"Error martin.c toStandard: Matrix A not square\n");exit(EXIT_FAILURE);}
+ ComplexMatrix P(1,M.Rhi(),1,M.Rhi());
+ int i1,j1;
+   double va;// real part
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){ 
+    for (j1=M.Clo();j1<=M.Chi();++j1) { 
+    if(i1<j1)va=myround(M(j1,i1));else va=myround(M(i1,j1)); 
+    P(i1,j1)=complex<double>(va,0);    
+    }
+    } //imag part
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){
+    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(imag(M(i1,j1)));
+        if(i1<j1)va=-myround(M(i1,j1));else va=myround(M(j1,i1)); 
+        if(i1==j1)va=0;
+        P(i1,j1)+=complex<double>(0,va);    
+         }
+       }
+ return P;
+}
+
 Matrix herm_dirprod(Matrix  R, Matrix  T) // direct product
 {if(R.Rhi()!=R.Chi()){fprintf(stderr,"Error martin.c herm_dirproduct: Matrix A not square\n");exit(EXIT_FAILURE);}
  if(T.Rhi()!=T.Chi()){fprintf(stderr,"Error martin.c herm_dirproduct: Matrix B not square\n");exit(EXIT_FAILURE);}
@@ -629,6 +651,39 @@ Matrix herm_dirprod(Matrix  R, Matrix  T) // direct product
 
 //myPrintMatrix(stdout,P);
 return P;
+}
+
+// some matrix functions for hermitian matrices in
+// real notation: The real parts of the elements must be
+ //  stored in the lower triangle of z,the imaginary parts (of the elements
+ //  corresponding to the lower triangle) in the positions
+ //  of the upper triangle of z[lo..hi,lo..hi].
+Matrix herm_prod(Matrix  A, Matrix  B) // normal product
+{int i,j,k;
+ if(A.Rhi()!=A.Chi()){fprintf(stderr,"Error martin.c A.B: Matrix A not square\n");exit(EXIT_FAILURE);}
+ if(B.Rhi()!=B.Chi()){fprintf(stderr,"Error martin.c A.B: Matrix A not square\n");exit(EXIT_FAILURE);}
+ if(A.Rhi()!=B.Chi()){fprintf(stderr,"Error martin.c A.B: Matrix A and B not same dimension\n");exit(EXIT_FAILURE);}
+ Matrix P(1,A.Rhi(),1,A.Rhi());
+ for (i=1;i<=A.Rhi();++i){
+   for(k=1;k<=i;++k) // here do real part
+   {P(i,k)=0;
+    for(j=1;j<k;++j)P(i,k)+=A(i,j)*B(k,j)+A(j,i)*B(j,k);
+    P(i,k)+=A(i,k)*B(k,k);
+    if(k<i){for(j=k+1;j<i;++j)P(i,k)+=A(i,j)*B(j,k)-A(j,i)*B(k,j);
+            P(i,k)+=A(i,i)*B(i,k);
+           }
+    for(j=i+1;j<=A.Rhi();++j)P(i,k)+=A(j,i)*B(j,k)+A(i,j)*B(k,j);
+   }
+   for(k=1;k<i;++k) // here do the imaginary part
+   {P(k,i)=0;
+    for(j=1;j<k;++j) P(k,i)+=A(j,i)*B(k,j)-A(i,j)*B(j,k);
+    P(k,i)+=A(k,i)*B(k,k);
+    for(j=k+1;j<i;++j) P(k,i)+=A(j,i)*B(j,k)+A(i,j)*B(k,j);
+    P(k,i)+=A(i,i)*B(k,i);    
+    for(j=i+1;j<=A.Rhi();++j) P(k,i)+=-A(i,j)*B(j,k)+A(j,i)*B(k,j);
+   }
+                        }
+ return P;
 }
 
 double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib  // transition matrix element

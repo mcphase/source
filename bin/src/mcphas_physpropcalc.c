@@ -198,7 +198,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
       }}}//}}}
 
    }}}physprops.nofhkls=j;
-printf(".. calculating (hkl) finished\n");
+if(verbose==1){printf(".. calculating (hkl) finished\n");}
 
 //save spinarrangement
       physprops.sps=sps;

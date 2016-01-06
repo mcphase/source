@@ -8,15 +8,15 @@ print STDERR << "EOF";
 
  program to get the y-value of a function by averaging
  over an interval xvalue+-dx,
- note: colx has to be sorted
-
+ 
  usage: perl getvalue.pl colx coly xvalue dx filename
 
- note: if colx=0 then the x axis is assumed to be the line number (not considering
-       comment lines)
- output: the y-value is written to stdout and to env. varaibale MCPHASE_YVALUE
-         1/y-value is written to stdout MCPHASE_YVALUE_INVERSE
-         standarddeviation to stdaout and MCPHASE_STA
+ note:  colx has to be sorted
+        if colx=0 then the x axis is assumed to be the line number (not considering
+        comment lines)
+ output: y-value           to stdout and stored in env. variable MCPHASE_YVALUE
+         1/y-value         to stdout and stored in MCPHASE_YVALUE_INVERSE
+         standarddeviation to stdout and stored in MCPHASE_STA
 EOF
 # clean bat files
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
@@ -31,8 +31,8 @@ foreach(@ARGV)
 {$filename=$_;
 ($yvalue,$sta)=getvalue_by_averaging_over_intervaldE($xvalue,$colx,$coly,$dE,$filename);
 if (abs($yvalue)>1e-300){$yinv=1/$yvalue;}else{$yinv=" ";}
-print "echo '#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dx=$dE corresponds'\n";
-print "echo '#! to the yvalue=$yvalue  (1/yvalue=$yinv)";if($sta>0){print "deviations sta=$sta'\n";}else{print"'\n";}
+print "echo \"#! in colx= $colx  coly = $coly of  $filename the xvalue=$xvalue +- dx=$dE corresponds\"\n";
+print "echo \"#! to the yvalue=$yvalue  (1/yvalue=$yinv)";if($sta>0){print "deviations sta=$sta\"\n";}else{print"\"\n";}
 } 
 # for setting environment variables
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
@@ -138,7 +138,7 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
 #print "$constx $dE ".$numbers[$colx]." ".$numbers1[$colx]."\n";
    @numbers1=@numbers;
    }} 
-  if (abs($esum)<1e-300){print "echo '# getvalue: xvalues variance on averaging is too small ($esum) for $file'\n";$sta=-1;}
+  if (abs($esum)<1e-300){print "echo \"# getvalue: xvalues variance on averaging is too small ($esum) for $file\"\n";$sta=-1;}
   else{$sta/=$esum;}
   close Fin;
   return ($Iav,$sta);

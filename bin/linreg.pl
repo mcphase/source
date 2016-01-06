@@ -46,7 +46,7 @@ $ARGV[0]=~s/x/*/g;$col=eval $ARGV[0]; shift @ARGV;--$col;
 $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;
 
  foreach (@ARGV)
-  { $file=$_;print "echo '<".$file."'\n";
+  { $file=$_;print "echo \"<".$file."\"\n";
 #     sum_k x_jk y_k = sum_i a_i (sum_k x_ik * x_jk)
 #     rewritten as b_j= sum_i a_i c_ij
 # read data file 2D reads b_j and c_ij as PDL piddles
@@ -81,10 +81,10 @@ $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;
  { print Fout "#! a".($col+$i+1)."=".$a->at($i-1)."\n"; }
   print Fout "#! sta=$sta\n";
 
-  print  "echo '# Result of linear regression col".($col+1)." ~ sum_i=".($col+2)."...".($col+$n+1)." ai coli '\n";
+  print  "echo \"# Result of linear regression col".($col+1)." ~ sum_i=".($col+2)."...".($col+$n+1)." ai coli \"\n";
   for($i=1;$i<=$n;++$i)
- { print "echo '#! a".($col+$i+1)."=".$a->at($i-1)."'\n"; }
-  print "echo '#! sta=$sta'\n";
+ { print "echo \"#! a".($col+$i+1)."=".$a->at($i-1)."\"\n"; }
+  print "echo \"#! sta=$sta\"\n";
     
       close Fout;
      unless (rename "range.out",$file)
@@ -96,7 +96,7 @@ $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;
       close Fout;
       system "del range.out";
      }
-      print "echo '>'\n";
+      print "echo \">\"\n";
   }
 
 # for setting environment variables

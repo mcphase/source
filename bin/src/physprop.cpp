@@ -147,6 +147,8 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
    if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
    fprintf(fout,"\n");
    fclose(fout);
+   strcpy(outfilename,"./results/.");strcpy(outfilename+11,prefix);
+  strcpy(outfilename+11+strlen(prefix),"mcphas.fum");
    fout = fopen_errchk (outfilename,"a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g %4.4g\n",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),

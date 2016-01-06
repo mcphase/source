@@ -164,7 +164,9 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
  //  stored in the lower triangle of z,the imaginary parts (of the elements
  //  corresponding to the lower triangle) in the positions
  //  of the upper triangle of z[lo..hi,lo..hi].
+ComplexMatrix toStandard(Matrix A); // transform to conventional matrix notation
 Matrix herm_dirprod(Matrix  A, Matrix  B); // direct product
+Matrix herm_prod(Matrix  A, Matrix  B); // normal product
 double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // transition matrix element
 double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // <a|M|b>  a,b are columns ia and ib
 complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int ia,int ib);  // of zr+izc

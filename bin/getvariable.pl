@@ -19,8 +19,8 @@ print STDERR << "EOF";
 #
 EOF
 # clean bat files
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
-open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
+#open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
 }
 

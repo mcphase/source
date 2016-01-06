@@ -136,7 +136,7 @@ for($x=$min;$x<$max;$x+=$delta)
      }
 #     close Fin1;
         	     
-    print "echo '".sprintf("%+10.9e %10.9e'\n",$x,$y);
+    print "echo \"".sprintf("%+10.9e %10.9e\"\n",$x,$y);
    }
 }
 else
@@ -207,7 +207,7 @@ else
  open (Fin3, $file3);
  while($line3=<Fin3>)
  {
-  if ($line3=~/^\s*#/) {$line3=~s/\n//;print "echo '".$line3."'\n";}
+  if ($line3=~/^\s*#/) {$line3=~s/\n//;print "echo \"".$line3."\"\n";}
   else
   {# get x-values from file 3 
              $line3=~s/D/E/g;@numbers3=split(" ",$line3);
@@ -218,36 +218,36 @@ else
   $stanorm+=($ydata[$ii]*$scale-$ycalc[$ii])*($ydata[$ii]*$scale-$ycalc[$ii]); 
   $yorig=$numbers3[$d2-1];
    $numbers3[$d2-1]*=$scale;
-            	  $i=0;print "echo '";
+            	  $i=0;print "echo \"";
 		  foreach (@numbers3)
 		  {++$i;print $numbers3[$i-1]." ";}     
-    print sprintf(" %+10.9e %10.9e'\n",$ycalc[$ii],$yorig);
+    print sprintf(" %+10.9e %10.9e\"\n",$ycalc[$ii],$yorig);
   }
  } 
 print STDOUT << "EOF";
-echo '# ***************************************************************'
-echo '# result of: convolute $c1 $c2 $file1 $cx $cy $file2 $d1 $d2 $file3 $d3'
-echo '#convolution of data in $file1 (x column is $c1 y column is $c2)'
-echo '#with resolution function from $file2 (x column is $cx y column is $cy)'
-echo '#evaluated at data point from $file3 (x column $d1 y column $d2)'
+echo \"# ***************************************************************\"
+echo \"# result of: convolute $c1 $c2 $file1 $cx $cy $file2 $d1 $d2 $file3 $d3\"
+echo \"#convolution of data in $file1 (x column is $c1 y column is $c2)\"
+echo \"#with resolution function from $file2 (x column is $cx y column is $cy)\"
+echo \"#evaluated at data point from $file3 (x column $d1 y column $d2)\"
 EOF
 if ($d3)
 {
 print STDOUT << "EOF";
-echo '#using stretching factor for resolution function in column $d3 in $file3'
+echo \"#using stretching factor for resolution function in column $d3 in $file3\"
 EOF
 }
 print STDOUT << "EOF";
-echo '#                 the above output contains data from $file3 as given, however'
-echo '#                 with a scaled column $d2. Two additional columns are added '
-echo '#                 containing the calculated results of the convolution and the' 
-echo '#                 original unscaled data.'
+echo \"#                 the above output contains data from $file3 as given, however\"
+echo \"#                 with a scaled column $d2. Two additional columns are added \"
+echo \"#                 containing the calculated results of the convolution and the\" 
+echo \"#                 original unscaled data.\"
 EOF
- print sprintf("echo '#\n#!sta=%+10.9e'\n",$sta);
- print  sprintf("echo '#!areadata=%+10.9e'\n",$areadata);
- print sprintf( "echo '#!areacalc=%+10.9e'\n",$areacalc);
- print  sprintf("echo '#!column %i scaled by'\necho '#!scale_factor=%+10.9e'\n",$d2,$scale);
- print  sprintf("echo '#!sta_of_normalized_curves=%+10.9e'\n",$stanorm);
+ print sprintf("echo \"#\n#!sta=%+10.9e\"\n",$sta);
+ print  sprintf("echo \"#!areadata=%+10.9e\"\n",$areadata);
+ print sprintf( "echo \"#!areacalc=%+10.9e\"\n",$areacalc);
+ print  sprintf("echo \"#!column %i scaled by\"\necho \"#!scale_factor=%+10.9e\"\n",$d2,$scale);
+ print  sprintf("echo \"#!sta_of_normalized_curves=%+10.9e\"\n",$stanorm);
 }
 
 # for setting environment variables
@@ -285,12 +285,12 @@ print "export MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
 
 
 print STDOUT << "EOF";
-echo '#'
-echo '#                     McPhase Software'
-echo '#'
-echo '#                     please reference'
-echo '#'
-echo '# M. Rotter and A. Boothroyd Phys. Rev. B 79 (2009) 140405R'
-echo '#'
-echo '# ***************************************************************'
+echo \"#\"
+echo \"#                     McPhase Software\"
+echo \"#\"
+echo \"#                     please reference\"
+echo \"#\"
+echo \"# M. Rotter and A. Boothroyd Phys. Rev. B 79 (2009) 140405R\"
+echo \"#\"
+echo \"# ***************************************************************\"
 EOF

@@ -49,7 +49,7 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
   foreach (@ARGV)
   {$file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "echo '#!<".$file;
+   print "echo \"#!<".$file;
 
   $integral=0;$j=0;$mu[1]=0;$muerr2[1]=0;$err2=0;
     open (Fout, ">range.out");
@@ -80,7 +80,7 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
       close Fout;$nmax=1;
    if($calcm==1){ # here calculate mth moments 1- $nmax
                   $nmax=6;
-                 unless (open (Fin, $file)){die "\n error:unable to open $file'\n";}
+                 unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
                  $center=$mu[1]/$integral;@mu= (0) x ($nmax+1);            # (0,0,0,0,0)
                  $j=0;
                   while($line=<Fin>)
@@ -103,7 +103,7 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
    print " x=col".$colx." y=f(x)=col".$coly." INT=".$integral;
   if($colyerr>0){$err=sqrt($err2);print " INT_ERROR=".$err;}
    for($i=1;$i<=$nmax;++$i){print " mu_$i=".$mu[$i];}
-   print "> '\n";
+   print "> \"\n";
        unless (rename "range.out",$file)
       {unless(open (Fout, ">$file"))     
       {die "\n error:unable to write to $file\n";}

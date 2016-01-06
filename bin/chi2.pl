@@ -31,7 +31,7 @@ $nofpoints=0;$chi2=0;
    $file=$_;
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "echo '<".$file.">'\n";
+   print "echo \"<".$file.">\"\n";
    open (Fout, ">range.out");
    while($line=<Fin>)
 
@@ -44,7 +44,7 @@ $nofpoints=0;$chi2=0;
             $e=$numbers[$col3-1];
             $s2=$s*$s;$e2=$e*$e;
             $chi2+=$s2/$e2;
-            print "echo '#! sta= $s2 $e2'\n";
+            print "echo \"#! sta= $s2 $e2\"\n";
             $nofpoints+=1;
             $i=0;
              foreach (@numbers)
@@ -73,7 +73,7 @@ $nofpoints=0;$chi2=0;
    }
       $chi2/=$nofpoints;
 
-      print "echo '#! chi2=".$chi2."'\n";
+      print "echo \"#! chi2=".$chi2."\"\n";
 # for setting environment variables
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");
 #print Fout "set MCPHASE_CHI2=$chi2\n";

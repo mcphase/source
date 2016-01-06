@@ -29,7 +29,7 @@ $ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
    $file=$_;
 
     unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "echo '<".$file;
+   print "echo \"<".$file;
 
                   $i=0;$sum=0;$sta=0;$abs=0;
    open (Fout, ">range.out");
@@ -77,22 +77,22 @@ close Fout;
 
      }
 
-   print ">'\n";
+   print ">\"\n";
 
 
-   print "echo '#! sum of values sum=".$sum."'\n";
+   print "echo \"#! sum of values sum=".$sum."\"\n";
 
-   print "echo '#! number of points n=".$i."'\n";
+   print "echo \"#! number of points n=".$i."\"\n";
    if($i<1){$i=1;}
    $stappoint=$sta/$i;
    $absppoint=$abs/$i;
-   print "echo '#! standard deviation sum_i (value_i*value_i) sta=".$sta."'\n";
+   print "echo \"#! standard deviation sum_i (value_i*value_i) sta=".$sta."\"\n";
 
-   print "echo '#! standard deviation'/necho '#! stappoint=".$stappoint."'\n";
+   print "echo \"#! standard deviation\"\necho \"#! stappoint=".$stappoint."\"\n";
 
-   print "echo '#! sum of absolute values sumabs=".$abs."'\n";
+   print "echo \"#! sum of absolute values sumabs=".$abs."\"\n";
 
-   print "echo '#! sum of absolute values'/necho '#! sumabsppoint=".$absppoint."'\n";
+   print "echo \"#! sum of absolute values\"\necho \"#! sumabsppoint=".$absppoint."\"\n";
 
    }
 
