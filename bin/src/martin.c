@@ -593,7 +593,7 @@ ComplexMatrix toStandard(Matrix M) // transform to conventional matrix notation
  return P;
 }
 
-Matrix herm_dirprod(Matrix  R, Matrix  T) // direct product
+Matrix herm_dirprod(Matrix  R, Matrix  T) // direct product R x T
 {if(R.Rhi()!=R.Chi()){fprintf(stderr,"Error martin.c herm_dirproduct: Matrix A not square\n");exit(EXIT_FAILURE);}
  if(T.Rhi()!=T.Chi()){fprintf(stderr,"Error martin.c herm_dirproduct: Matrix B not square\n");exit(EXIT_FAILURE);}
 //myPrintMatrix(stdout,R);
@@ -658,12 +658,13 @@ return P;
  //  stored in the lower triangle of z,the imaginary parts (of the elements
  //  corresponding to the lower triangle) in the positions
  //  of the upper triangle of z[lo..hi,lo..hi].
-Matrix herm_prod(Matrix  A, Matrix  B) // normal product
+Matrix herm_prod(Matrix  A, Matrix  B) // normal herm product (AB+BA)/2
 {int i,j,k;
  if(A.Rhi()!=A.Chi()){fprintf(stderr,"Error martin.c A.B: Matrix A not square\n");exit(EXIT_FAILURE);}
  if(B.Rhi()!=B.Chi()){fprintf(stderr,"Error martin.c A.B: Matrix A not square\n");exit(EXIT_FAILURE);}
  if(A.Rhi()!=B.Chi()){fprintf(stderr,"Error martin.c A.B: Matrix A and B not same dimension\n");exit(EXIT_FAILURE);}
  Matrix P(1,A.Rhi(),1,A.Rhi());
+ // Do A.B
  for (i=1;i<=A.Rhi();++i){
    for(k=1;k<=i;++k) // here do real part
    {P(i,k)=0;
@@ -683,6 +684,28 @@ Matrix herm_prod(Matrix  A, Matrix  B) // normal product
     for(j=i+1;j<=A.Rhi();++j) P(k,i)+=-A(i,j)*B(j,k)+A(j,i)*B(k,j);
    }
                         }
+ // add B.A
+for (i=1;i<=A.Rhi();++i){
+   for(k=1;k<=i;++k) // here do real part
+   {for(j=1;j<k;++j)P(i,k)+=B(i,j)*A(k,j)+B(j,i)*A(j,k);
+    P(i,k)+=B(i,k)*A(k,k);
+    if(k<i){for(j=k+1;j<i;++j)P(i,k)+=B(i,j)*A(j,k)-B(j,i)*A(k,j);
+            P(i,k)+=B(i,i)*A(i,k);
+           }
+    for(j=i+1;j<=A.Rhi();++j)P(i,k)+=B(j,i)*A(j,k)+B(i,j)*A(k,j);
+    P(i,k)/=2.0;
+   }
+   for(k=1;k<i;++k) // here do the imaginary part
+   {for(j=1;j<k;++j) P(k,i)+=B(j,i)*A(k,j)-B(i,j)*A(j,k);
+    P(k,i)+=B(k,i)*A(k,k);
+    for(j=k+1;j<i;++j) P(k,i)+=B(j,i)*A(j,k)+B(i,j)*A(k,j);
+    P(k,i)+=B(i,i)*A(k,i);    
+    for(j=i+1;j<=A.Rhi();++j) P(k,i)+=-B(i,j)*A(j,k)+B(j,i)*A(k,j);
+    P(k,i)/=2.0;
+   }
+                        }
+
+
  return P;
 }
 

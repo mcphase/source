@@ -126,6 +126,24 @@ double mateli (int i,int j,Matrix & zr, Matrix & zi, Matrix & op);
 void  opZcol(int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi);
 
 
+// some matrix functions for hermitian matrices in
+// real notation: The real parts of the elements must be
+ //  stored in the lower triangle of z,the imaginary parts (of the elements
+ //  corresponding to the lower triangle) in the positions
+ //  of the upper triangle of z[lo..hi,lo..hi].
+ComplexMatrix toStandard(Matrix A); // transform to conventional matrix notation
+Matrix herm_dirprod(Matrix  A, Matrix  B); // direct product
+Matrix herm_prod(Matrix  A, Matrix  B); // normal herm product (AB+BA)/2
+double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // transition matrix element
+double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // <a|M|b>  a,b are columns ia and ib
+complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int ia,int ib);  // of zr+izc
+double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib);
+double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
+complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
+
+
+Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3);
+
 // calculate reciprocal lattice rezi from real lattice ri
 void rezcalc(Vector r1,Vector  r2,Vector  r3,Vector  rez1,Vector  rez2,Vector  rez3);
 
@@ -159,23 +177,7 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
  // this routine returns the maximum and minimum values of ni i=1,2,3
  // by probing the corners of a cube
 
-// some matrix functions for hermitian matrices in
-// real notation: The real parts of the elements must be
- //  stored in the lower triangle of z,the imaginary parts (of the elements
- //  corresponding to the lower triangle) in the positions
- //  of the upper triangle of z[lo..hi,lo..hi].
-ComplexMatrix toStandard(Matrix A); // transform to conventional matrix notation
-Matrix herm_dirprod(Matrix  A, Matrix  B); // direct product
-Matrix herm_prod(Matrix  A, Matrix  B); // normal product
-double aMb_real(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // transition matrix element
-double aMb_imag(Matrix & M, Matrix & zr,Matrix & zc, int ia, int ib,Matrix*V);            // <a|M|b>  a,b are columns ia and ib
-complex<double> aMb_complex(zsMat<double>&M,Matrix&zr,Matrix&zc,int ia,int ib);  // of zr+izc
-double aMb_real(zsMat<double> & M, Matrix & zr,Matrix & zc, int ia, int ib);
-double aMb_real(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
-complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int ia, int ib);
 
-
-Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3);
 
 void set_zlm_constants(Matrix & cnst);
 #endif

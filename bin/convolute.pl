@@ -3,6 +3,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 #\begin{verbatim}
 
+ unless ($^O=~/MSWin/){$ds="\"";}
 
 
 unless ($#ARGV >4) 
@@ -39,7 +40,7 @@ unless ($#ARGV >4)
  exit 0;}
 
 
-print "# $0 @ARGV\n";
+print "echo $ds# $0 @ARGV$ds\n";
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$c1=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$c2=eval $ARGV[0];shift @ARGV;
 $file1=$ARGV[0];shift @ARGV;
@@ -136,7 +137,7 @@ for($x=$min;$x<$max;$x+=$delta)
      }
 #     close Fin1;
         	     
-    print "echo \"".sprintf("%+10.9e %10.9e\"\n",$x,$y);
+    print "echo $ds".sprintf("%+10.9e %10.9e$ds\n",$x,$y);
    }
 }
 else
@@ -162,7 +163,7 @@ else
 #       else{# take one point of data file one
 #             $line1=~s/D/E/g;@numbers1=split(" ",$line1);
 #	     $xi=$numbers1[$c1-1];
-#	     $yi=$numbers1[$c2-1];
+#	     $yi=$numbers1[$c2-1];}
              # calculate c(x-xi)
 	     $dd=$x-$xvalues[$i1];
 	     if (($dd<$maxr*$stretch)&&($dd>$minr*$stretch))
@@ -199,7 +200,6 @@ else
    }
   } 
  close Fin3;
-
   $stanorm=0;
   if ($areadata==0) {print STDERR "Error reading data points or area below data points zero\n";}
   $scale=$areacalc/$areadata;
@@ -207,7 +207,7 @@ else
  open (Fin3, $file3);
  while($line3=<Fin3>)
  {
-  if ($line3=~/^\s*#/) {$line3=~s/\n//;print "echo \"".$line3."\"\n";}
+  if ($line3=~/^\s*#/) {$line3=~s/\n//;print "echo $ds".$line3."$ds\n";}
   else
   {# get x-values from file 3 
              $line3=~s/D/E/g;@numbers3=split(" ",$line3);
@@ -218,36 +218,36 @@ else
   $stanorm+=($ydata[$ii]*$scale-$ycalc[$ii])*($ydata[$ii]*$scale-$ycalc[$ii]); 
   $yorig=$numbers3[$d2-1];
    $numbers3[$d2-1]*=$scale;
-            	  $i=0;print "echo \"";
+            	  $i=0;print "echo $ds";
 		  foreach (@numbers3)
 		  {++$i;print $numbers3[$i-1]." ";}     
-    print sprintf(" %+10.9e %10.9e\"\n",$ycalc[$ii],$yorig);
+    print sprintf(" %+10.9e %10.9e$ds\n",$ycalc[$ii],$yorig);
   }
  } 
 print STDOUT << "EOF";
-echo \"# ***************************************************************\"
-echo \"# result of: convolute $c1 $c2 $file1 $cx $cy $file2 $d1 $d2 $file3 $d3\"
-echo \"#convolution of data in $file1 (x column is $c1 y column is $c2)\"
-echo \"#with resolution function from $file2 (x column is $cx y column is $cy)\"
-echo \"#evaluated at data point from $file3 (x column $d1 y column $d2)\"
+echo $ds# ***************************************************************$ds
+echo $ds# result of: convolute $c1 $c2 $file1 $cx $cy $file2 $d1 $d2 $file3 $d3$ds
+echo $ds#convolution of data in $file1 (x column is $c1 y column is $c2)$ds
+echo $ds#with resolution function from $file2 (x column is $cx y column is $cy)$ds
+echo $ds#evaluated at data point from $file3 (x column $d1 y column $d2)$ds
 EOF
 if ($d3)
 {
 print STDOUT << "EOF";
-echo \"#using stretching factor for resolution function in column $d3 in $file3\"
+echo $ds#using stretching factor for resolution function in column $d3 in $file3$ds
 EOF
 }
 print STDOUT << "EOF";
-echo \"#                 the above output contains data from $file3 as given, however\"
-echo \"#                 with a scaled column $d2. Two additional columns are added \"
-echo \"#                 containing the calculated results of the convolution and the\" 
-echo \"#                 original unscaled data.\"
+echo $ds#                 the above output contains data from $file3 as given, however$ds
+echo $ds#                 with a scaled column $d2. Two additional columns are added $ds
+echo $ds#                 containing the calculated results of the convolution and the$ds 
+echo $ds#                 original unscaled data.$ds
 EOF
- print sprintf("echo \"#\n#!sta=%+10.9e\"\n",$sta);
- print  sprintf("echo \"#!areadata=%+10.9e\"\n",$areadata);
- print sprintf( "echo \"#!areacalc=%+10.9e\"\n",$areacalc);
- print  sprintf("echo \"#!column %i scaled by\"\necho \"#!scale_factor=%+10.9e\"\n",$d2,$scale);
- print  sprintf("echo \"#!sta_of_normalized_curves=%+10.9e\"\n",$stanorm);
+ print sprintf("echo $ds#$ds\necho $ds#!sta=%+10.9e$ds\n",$sta);
+ print  sprintf("echo $ds#!areadata=%+10.9e$ds\n",$areadata);
+ print sprintf( "echo $ds#!areacalc=%+10.9e$ds\n",$areacalc);
+ print  sprintf("echo $ds#!column %i scaled by$ds\necho $ds#!scale_factor=%+10.9e$ds\n",$d2,$scale);
+ print  sprintf("echo $ds#!sta_of_normalized_curves=%+10.9e$ds\n",$stanorm);
 }
 
 # for setting environment variables
@@ -285,12 +285,12 @@ print "export MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
 
 
 print STDOUT << "EOF";
-echo \"#\"
-echo \"#                     McPhase Software\"
-echo \"#\"
-echo \"#                     please reference\"
-echo \"#\"
-echo \"# M. Rotter and A. Boothroyd Phys. Rev. B 79 (2009) 140405R\"
-echo \"#\"
-echo \"# ***************************************************************\"
+echo $ds#$ds
+echo $ds#                     McPhase Software$ds
+echo $ds#$ds
+echo $ds#                     please reference$ds
+echo $ds#$ds
+echo $ds# M. Rotter and A. Boothroyd Phys. Rev. B 79 (2009) 140405R$ds
+echo $ds#$ds
+echo $ds# ***************************************************************$ds
 EOF
