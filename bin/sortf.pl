@@ -34,14 +34,10 @@ $ARGV[0]=~s/x/*/g;$col=eval $ARGV[0]; shift @ARGV;--$col;
   { $file=$_;print "<".$file;
     open (Fout, ">range.out");
    my ($data) = read_data_file_2D($_);
-    $srt=$data->slice("($col),");
-    $ix = qsorti $srt;
+   $ix = qsorti $data;
     for($i=0;$i<$ix->getdim(0);++$i)
     {$row=$ix->at($i);
-     $line=$data->slice(",($row)");
-     for(list $line){print Fout $_." ";}
-#     print list $line;
-     print Fout "\n";
+     print Fout $lines[$row];
     }
       close Fout;
      unless (rename "range.out",$file)
@@ -61,18 +57,22 @@ sub read_data_file_2D {
     my ($file) = @_;
     my $hh = new FileHandle;
      my @xlist = ();
+     @lines= ();
   # input data int piddle
   if(open($hh,$file))
   {      while(<$hh>)
      {if (/^\s*#/){print Fout $_;}
       else
-      {$x=new PDL(split " ");
+      {$line=$_;
+       @numbers=split(" ",$line);      
+       $x=new PDL($numbers[$col]);
        push(@xlist,$x);
+       push(@lines,$line);
       }
      }
   
    close $hh;
-   return (cat @xlist);
+    return (cat @xlist);
    } else {
 	print STDOUT "Warning: failed to read data file \"$file\"\n";
 	return undef;

@@ -87,7 +87,7 @@ printf("#*****************************************************\n");
     nettom3(3+(i-1)*inputpars.nofcomponents)*=factors(3);                                          
   }
 
-  printf("#! n1=%i n2=%i n3=%i\n",n1,n2,n3);
+  printf("#! n1=%i n2=%i n3=%i nofspins=%i\n",n1,n2,n3,n1*n2*n3*inputpars.nofatoms);
   printf("#! q: hkl=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
   // transform hkl to primitive reciprocal lattice
   qvector=qvector*inputpars.rez.Inverse();

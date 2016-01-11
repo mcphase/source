@@ -3,38 +3,25 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 #\begin{verbatim}
 
-
-
 unless ($#ARGV >1) 
 
-{print " program delline  used to delete lines from line1 to line2  \n";
+{print " program delline  used to delete lines  with line1<=linenumber<line2  \n";
 
- print " usage: comment line1 line2  *.*   \n  *.* .. filenname\n";
+ print " usage: delline line1 line2  *.*   \n  *.* .. filenname\n";
 
  exit 0;}
-
- 
 
 $ARGV[0]=~s/x/*/g;$col1=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/x/*/g;$col2=eval $ARGV[0];shift @ARGV;
 
-
-
   foreach (@ARGV)
-
   {
-
    $file=$_;
-
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file;
-
    open (Fout, ">range.out");
-
    $i=0;
-
    while($line=<Fin>)
-
      {++$i;
 
        if ($i<$col1||$i>=$col2) {print Fout $line;}
