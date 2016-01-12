@@ -87,12 +87,14 @@ while (@ARGV)
                        } $arguments=join(' ',@arg);
         # print "script2html $arguments > ".$arg[$#arg].".htm\n";
          system("script2html $arguments > ".$arg[$#arg].".htm");
-         open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
+        if(-e  $arg[$#arg].".htm") {open(Fin1,$arg[$#arg].".htm");$line1=<Fin1>;
             until($line1=~/.*<!--This is a comment. Comments are not displayed in the browser END OF LINKS-->/){$line1=<Fin1>;}
             while($line1=<Fin1>){unless($line1=~/.*\<\/body\>\<\/html\>/){
                                  $line1=~s/\<hr\>Source File\s*/\<hr\>Source File $i\./;
                                  print $line1;}}
         close Fin1;unlink($arg[$#arg].".htm");
+                                    }
+                       else { print stderr "Error script2html: unable to open ".$arg[$#arg].".htm\n";}
        }
         else
        {
