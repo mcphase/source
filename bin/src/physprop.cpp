@@ -191,7 +191,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
   fout = fopen_errchk (outfilename,"a");
   totalJ=0; 
   if (htfailed!=0){j=0;}else{totalJ=sps.totalJ();}
-   if(j<0){sps.wasstable=j;}
+   if(j<0){sps.wasstable=j;}// if qvector generated structure is stable, then take period key = number of qvector
    fprintf (fout, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip      ",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),j,sps.wasstable);
            for(i1=1;i1<=nofcomponents;++i1)

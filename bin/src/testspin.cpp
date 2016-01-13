@@ -9,15 +9,16 @@
 
 // add spinconfiguration sps to list
 int testspincf::addspincf(spincf & sps)
-{int i;
+{int ic;static int i=1;
  if (n<maxn)
   {++n;configurations[n]= new spincf(1,1,1,nofatoms,nofcomponents);
    (*configurations[n])=sps; // store configuration n 
    return n;
    }
   else
-  {for (i=maxn-1;i>0;--i)
-   {if (configurations[i]->wasstable==0)
+  {for (ic=maxn-1;ic>0;--ic)
+   {--i;if(i==0){i=maxn-1;}
+    if (configurations[i]->wasstable==0)
      {(*configurations[i])=sps;
       return i;
       }

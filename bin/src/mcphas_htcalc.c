@@ -389,7 +389,6 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
       #ifndef _THREADS
       return 1;
       #else
-      ret:;
       MUTEX_LOCK(&mutex_loop);
       thrdat.thread_id = thread_id;
       EVENT_SIG(checkfinish);
@@ -712,7 +711,9 @@ for (i=testspins.ninitial+1;i<=testspins.n;++i)
 	 physprops.j=i;return 1;} //ok
    }
 // if it gets here, the spins sps configuration has not been found
-// -. add configuration to testspins
+// -. add configuration to testspins 
+//- first make sure that wasstable is 0 [might be nonzero from initialisation](MR 13.1.2015)
+sps.wasstable=0;
 return (physprops.j=testspins.addspincf(sps));  //ok=1
 }
 
