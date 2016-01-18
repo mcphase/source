@@ -222,7 +222,7 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
 
    print_mcdiff_in_header(fout);
 // input file header and conf------------------------------------------------------------------
-   n=headerinput(fin,fout,gp,cs);cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
+   n=headerinput(fin,fout,gp,cs);
 // load spinsconfigurations and check which one is nearest -------------------------------   
 double TT=0; TT=strtod(argv[1+os],NULL);
 double HHx=0,HHy=0,HHz=0;
@@ -249,7 +249,12 @@ if (inputpars.c!=cs.abc[3]){cs.abc[3]=inputpars.c;}
 if (inputpars.alpha!=cs.abc[4]){cs.abc[4]=inputpars.alpha;}
 if (inputpars.beta!=cs.abc[5]){cs.abc[5]=inputpars.beta;}
 if (inputpars.gamma!=cs.abc[6]){cs.abc[6]=inputpars.gamma;}
-
+// check sipffilenames
+for(ii=1;ii<=inputpars.nofatoms;++ii)
+{if(cs.sipffilenames[ii]==NULL)cs.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
+ if (strcmp((*inputpars.jjj[ii]).sipffilename,cs.sipffilenames[ii])!=0){strcpy(cs.sipffilenames[ii],(*inputpars.jjj[ii]).sipffilename);}
+}
+cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
   if (strcmp(argv[1],"-f")==0) 
@@ -471,6 +476,8 @@ printf("# **********************************************************************
 // here the 3d file should be created
     fin = fopen_errchk ("./results/spinsab.eps", "w");
 Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
+
+
      spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,1,gJJ,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spinsac.eps", "w");
