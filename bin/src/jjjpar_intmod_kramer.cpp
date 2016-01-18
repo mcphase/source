@@ -16,7 +16,10 @@ void jjjpar::kramer (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, doub
   double nennerp, nennerm, jap, jam, jbp, jbm, jcp, jcm,Z;
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
   Vector gjmbH(1,3);
-  gjmbH=Hxc+gJ*MU_B*Hext;
+  if(Jret.Hi()>3)Jret=0;
+  gjmbH[1]=Hxc[1]+gJ*MU_B*Hext[1];
+  gjmbH[2]=Hxc[2]+gJ*MU_B*Hext[2];
+  gjmbH[3]=Hxc[3]+gJ*MU_B*Hext[3];
 
   alpha = ABC[2] * gjmbH[2];
   betar = -ABC[1] * gjmbH[1];
@@ -110,8 +113,11 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & He
   double Z;
   double lnz,u;
   Vector gjmbH(1,3);
-  gjmbH=Hxc+gJ*MU_B*Hext;
-
+  gjmbH[1]=Hxc[1]+gJ*MU_B*Hext[1];
+  gjmbH[2]=Hxc[2]+gJ*MU_B*Hext[2];
+  gjmbH[3]=Hxc[3]+gJ*MU_B*Hext[3];
+  if(u1.Hi()>3)u1=0;
+  
   static Vector Jret(1,3);
   Jret=0;
   // clalculate thermal expectation values (needed for quasielastic scattering)
@@ -275,8 +281,7 @@ Matrix jjjpar::krameropmat (int & n ,Vector &  Hxc,Vector & Hext)
   
 Matrix opmat(1,2,1,2);
 switch(n)
-{case 0: if(Hxc.Hi()>3){fprintf(stderr,"Error module kramer opmat: Hxc dimension must be <= 3\n");exit(EXIT_FAILURE);}
-         gjmbH=gJ*MU_B*Hext;for(int i=1;i<=Hxc.Hi();++i)gjmbH(i)+=Hxc(i);
+{case 0: gjmbH=gJ*MU_B*Hext;for(int i=1;(i<=Hxc.Hi())&&(i<=3);++i)gjmbH(i)+=Hxc(i);
          opmat(1,1)= ABC[3]*gjmbH[3];      opmat(1,2)=ABC[2]*gjmbH[2];
          opmat(2,1)= -ABC[1]*gjmbH[1];     opmat(2,2)=-ABC[3]*gjmbH[3];break;
  case 1: opmat(1,1)= 0      ;opmat(1,2)=0;

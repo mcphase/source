@@ -500,9 +500,12 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
              if(diagonalexchange==1){nofcomponents=j-3;}else if(diagonalexchange==0){nofcomponents=(int)sqrt((double)(j-3));}
              if(module_type==1)
 	     {// check dimensions of vector if internal kramers is used
-              if(nofcomponents!=3)
-              {fprintf(stderr,"Error reading mcphas.j: number of dimensions (not equal 3) not compatible with internal single ion module kramer - check number of columns in file mcphas.j\n");
+              if(nofcomponents<3)
+              {fprintf(stderr,"Error reading mcphas.j: reading first set of exchange parameters - nofcolumns gives nofcomponents=%i (< 3) not compatible with internal single ion module kramer - check number of columns in file mcphas.j\n",nofcomponents);
                exit(EXIT_FAILURE);}
+            if(nofcomponents>3)
+              {fprintf(stderr,"Warning reading mcphas.j: reading first set of exchange parameters - nofcolumns gives nofcomponents=%i (>3) internal single ion module kramer ignores exchange field components > 3 - check number of columns in file mcphas.j\n",nofcomponents);
+               }
              }
              // dimension arrays
              for(i1=0;i1<=paranz;++i1){jij[i1]=Matrix(1,nofcomponents,1,nofcomponents);}
