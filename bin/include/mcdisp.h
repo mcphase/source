@@ -16,6 +16,7 @@
 #define SMALLEDIF 1e-5 // small difference in calculation of transition energy
                        // used to give error if recalculation of mcdisp.trs
 		       // energies gives different results than file
+#define SMALL_HKL_DIFF 1e-3 // small difference between hkl read from mcdisp.qom and generated hkl list fomr mcdisp.par
 
 
 

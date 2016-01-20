@@ -28,31 +28,33 @@ void errexit() // type info and error exit
     printf (" or as: mcdisp [options] [file]\n");
     printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
     printf ("Options:\n");
-    printf (" -jq                  ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq largest evalue and eigenvector\n");
-    printf (" -jqe                 ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
-    printf (" -max n               ... restrict single ion susceptibility to n lowest\n");
-    printf ("                          lying transitions starting from the ground state\n");
-    printf (" -minE E              ... an energy range may be given by minE and maxE: only\n");
-    printf (" -maxE E                  single ion transitions within this energy range will \n");
-    printf ("                          be considered\n");
-    printf (" -r                   ... refine energies\n");
-    printf (" -x                   ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
-    printf (" -xa   stp            ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection (stp in deg)\n");
-    printf (" -xaf  az             ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n");
-    printf (" -d                   ... calculate intensities in dipole approximation only\n");
-    printf (" -v                   ... verbose\n");
-    printf (" -a                   ... do not overwrite output files in results - append new results\n");
-    printf (" -c                   ... only create single ion transition file ./results/mcdisp.trs and exit\n");
-    printf (" -t                   ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
-    printf (" -ninit n             ... maximum number n of (low energy) initial states (single ion transitions)\n");
-    printf ("                          (not functional with all single ion modules)\n");
-    printf (" -pinit p             ... minimum populationnumber p of initial state (single ion transitions)\n");
-    printf ("                          in order to be considered (not functional with all single ion modules)\n");
-    printf (" -prefix 001          ... prefix for parameters to be read from mcdisp.par and used for creation of output files\n"
-            "                          (usful for running in parallel calculations for different zones: e.g. put in\n"
-            "                           mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
-            "                          and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
-            "                          output files, e.g. *mcdisp.qei  with appendfile)\n");
+    printf (" -jq           ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq largest evalue and eigenvector\n");
+    printf (" -jqe          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
+    printf (" -max n        ... restrict single ion susceptibility to n lowest\n");
+    printf ("                   lying transitions starting from the ground state\n");
+    printf (" -minE E       ... an energy range may be given by minE and maxE: only\n");
+    printf (" -maxE E           single ion transitions within this energy range will \n");
+    printf ("                   be considered\n");
+    printf (" -r            ... refine energies\n");
+    printf (" -x            ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
+    printf (" -xa   stp     ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection (stp in deg)\n");
+    printf (" -xaf  az      ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n");
+    printf (" -d            ... calculate intensities in dipole approximation only\n");
+    printf (" -v            ... verbose\n");
+    printf (" -a            ... do not overwrite output files in results - append results\n");
+    printf (" -A            ... do not overwrite output files - compare hkl's to be calculated with existing list in mcdisp.qom and\n");
+    printf ("                   continue calculation at last matching q vector\n");
+    printf (" -c            ... only create single ion transition file ./results/mcdisp.trs and exit\n");
+    printf (" -t            ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
+    printf (" -ninit n      ... maximum number n of (low energy) initial states (single ion transitions)\n");
+    printf ("                   (not functional with all single ion modules)\n");
+    printf (" -pinit p      ... minimum populationnumber p of initial state (single ion transitions)\n");
+    printf ("                   in order to be considered (not functional with all single ion modules)\n");
+    printf (" -prefix 001   ... prefix for parameters to be read from mcdisp.par and used for creation of output files\n"
+            "                   (useful for running in parallel calculations for different zones: e.g. put in\n"
+            "                   mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
+            "                   and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
+            "                   output files, e.g. *mcdisp.qei  with appendfile)\n");
     printf (" -ignore_non_hermitian_matrix_error   ... ignores error when energies get complex due to unphysical mf groundstate\n");
     printf ("\n");
     printf ("Note: files which must be in current directory -\n");
@@ -376,6 +378,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
               int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int do_ignore_non_hermitian_matrix_error,
               int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,n,tn;
+ std::clock_t lastcputime = std::clock();
   FILE * fin;
   FILE * fout;
   FILE * foutqom=NULL;
@@ -637,6 +640,7 @@ if (do_verbose==1){
 // initialize file with jq matrix
 if (do_jqfile)
 {  sprintf(filename,"./results/%smcdisp.jq",ini.prefix);printf("#saving %s\n",filename);
+ if(strcmp(filemode,"A")==0)filemode="a";
  jqfile = fopen_errchk (filename,filemode);
  writeheader(inputpars,jqfile); printf("#saving mcdisp.jq\n");
    fprintf(jqfile,"#!<--mcphas.mcdisp.dsigma.jq-->\n");
@@ -674,9 +678,25 @@ if (do_jqfile)
      thrdat.inputpars[ithread] = new par(inputpars);
    } 
 #endif
-int counter;qijk=0;double qincr=-1;
- 
-for(counter=1;counter<=ini.nofhkls;++counter){
+int counter,firstcounter=1;qijk=0;double qincr=-1;
+if(strcmp(filemode,"A")==0){// check if some q values have already been calculated in a previous run !
+                  // ... if hkl values match do not recalculate ... set firstcounter accordingly
+                  filemode="a";float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE; 
+                 sprintf(filename,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen(filename,"r");
+                 if(foutqom!=NULL){// read file and compare hkls
+                                   while (feof(foutqom)==0&&firstcounter<=ini.nofhkls)
+                                   {if (inputline(foutqom,nn)>=7)
+                                      {if(fabs(ini.hkls[firstcounter][1]-nn[5])<SMALL_HKL_DIFF&&
+                                          fabs(ini.hkls[firstcounter][2]-nn[6])<SMALL_HKL_DIFF&&
+                                          fabs(ini.hkls[firstcounter][3]-nn[7])<SMALL_HKL_DIFF) 
+                                          {++firstcounter;}
+                                         else{break;}
+                                      }
+                                   }
+                                   fclose(foutqom);
+                                  }               
+                 }
+for(counter=firstcounter;counter<=ini.nofhkls;++counter){
 		     hkl(1)=ini.hkls[counter][1];
 		     hkl(2)=ini.hkls[counter][2];
 		     hkl(3)=ini.hkls[counter][3];
@@ -1059,7 +1079,33 @@ if (do_jqfile){
                if(ini.calculate_spinmoment_oscillation)   {sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
                if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
                //-----------------------------------------------------------
-              }
+               lastcputime=std::clock();
+              } else
+             {// close and reopen files to prevent data loss if process ends 
+               if ((std::clock() - lastcputime) / (double)CLOCKS_PER_SEC >60)
+              {lastcputime=std::clock();
+              fclose(foutqom);sprintf(filename,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,"a");
+              fclose(foutqei);
+              if(calc_rixs){sprintf(filename,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,"a");}
+                     else {sprintf(filename,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,"a");
+                           fclose(foutdstot);sprintf(filename,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,"a");
+                          if(do_Erefine==1){
+                           fclose(foutds);sprintf(filename,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,"a");               
+                                            }
+                           }
+                                
+               //------------observables-----------------------------------
+               if(ini.calculate_chargedensity_oscillation){fclose(foutqee);sprintf(filename,"./results/%smcdisp.qee",ini.prefix);foutqee=fopen_errchk (filename,"a");}
+               if(ini.calculate_spindensity_oscillation)  {fclose(foutqsd);sprintf(filename,"./results/%smcdisp.qsd",ini.prefix);foutqsd=fopen_errchk (filename,"a");}
+               if(ini.calculate_orbmomdensity_oscillation){fclose(foutqod);sprintf(filename,"./results/%smcdisp.qod",ini.prefix);foutqod=fopen_errchk (filename,"a");}
+               if(ini.calculate_phonon_oscillation)       {fclose(foutqep);sprintf(filename,"./results/%smcdisp.qep",ini.prefix);foutqep=fopen_errchk (filename,"a");}
+               if(ini.calculate_magmoment_oscillation)    {fclose(foutqem);sprintf(filename,"./results/%smcdisp.qem",ini.prefix);foutqem=fopen_errchk (filename,"a");}
+               if(ini.calculate_spinmoment_oscillation)   {fclose(foutqes);sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=fopen_errchk (filename,"a");}
+               if(ini.calculate_orbmoment_oscillation)    {fclose(foutqel);sprintf(filename,"./results/%smcdisp.qel",ini.prefix);foutqel=fopen_errchk (filename,"a");}
+               //-----------------------------------------------------------
+               }
+
+             }
          qincr+=Norm(qijk-qold); 
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
                              ini,calc_rixs,do_Erefine,counter);
@@ -1700,46 +1746,48 @@ for (i=1;i<=argc-1;++i){
           else {if(strcmp(argv[i],"-jqe")==0) {do_jqfile=2;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
            else {if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
             else {if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
-             else {if(strcmp(argv[i],"-a")==0) filemode="a";       
-              else {if(strcmp(argv[i],"-v")==0||strcmp(argv[i],"-verbose")==0) do_verbose=1;       
-               else {if(strcmp(argv[i],"-max")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -max needs argument(s)\n");exit(EXIT_FAILURE);}
- 		                                  maxlevels=(int)strtod(argv[i+1],NULL);++i; 
+             else {if(strcmp(argv[i],"-A")==0) filemode="A";       
+              else {if(strcmp(argv[i],"-a")==0) filemode="a";       
+               else {if(strcmp(argv[i],"-v")==0||strcmp(argv[i],"-verbose")==0) do_verbose=1;       
+                else {if(strcmp(argv[i],"-max")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -max needs argument(s)\n");exit(EXIT_FAILURE);}
+  		                                  maxlevels=(int)strtod(argv[i+1],NULL);++i;  
 						  fprintf(stdout,"#maximum number of single ion excitations taken into account (starting with lowest energy): %i\n",maxlevels);
- 					         }       
-                else {if(strcmp(argv[i],"-maxE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -maxE needs argument(s)\n");exit(EXIT_FAILURE);}
+  					         }       
+                 else {if(strcmp(argv[i],"-maxE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -maxE needs argument(s)\n");exit(EXIT_FAILURE);}
 		                                  maxE=strtod(argv[i+1],NULL);++i;
  						  fprintf(stdout,"#maximum Energy of single ion excitations taken into account: %g\n",maxE);
   					         }       
-                 else {if(strcmp(argv[i],"-minE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -minE needs argument(s)\n");exit(EXIT_FAILURE);}
+                  else {if(strcmp(argv[i],"-minE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -minE needs argument(s)\n");exit(EXIT_FAILURE);}
  		                                  minE=strtod(argv[i+1],NULL);++i;
 						  fprintf(stdout,"#minimum Energy of single ion excitations taken into account: %g\n",minE);
 					         }
-                  else {if(strcmp(argv[i],"-ninit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -ninit needs argument(s)\n");exit(EXIT_FAILURE);}
+                   else {if(strcmp(argv[i],"-ninit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -ninit needs argument(s)\n");exit(EXIT_FAILURE);}
  		                                  ninit=strtod(argv[i+1],NULL);++i;
 						  fprintf(stdout,"#maximum number of lowest lying initial states to be taken into account in single ion excitations: %g\n",ninit);
 					         }
-                   else {if(strcmp(argv[i],"-pinit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -pinit needs argument(s)\n");exit(EXIT_FAILURE);}
+                    else {if(strcmp(argv[i],"-pinit")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -pinit needs argument(s)\n");exit(EXIT_FAILURE);}
  		                                  pinit=strtod(argv[i+1],NULL);++i;
 						  fprintf(stdout,"#minimum population of initial state for single ion excitations to be taken into account: %g\n",pinit);
 					         }
-                    else {if(strcmp(argv[i],"-prefix")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -prefix needs argument(s)\n");exit(EXIT_FAILURE);}
+                     else {if(strcmp(argv[i],"-prefix")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -prefix needs argument(s)\n");exit(EXIT_FAILURE);}
   		                                  strcpy(prefix,argv[i+1]);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
-                     else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
+                      else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
-                      else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
-             	       else{spinfile=argv[i];}
-                         } // help
-                        } // do_ignore_non_hermitian_matrix_error
-                       } // prefi
-		      } // pinit
-		     } // ninit
-		    } // minE
-		   } //max          
-		  } // -v
-		 } // -a
+                       else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
+              	       else{spinfile=argv[i];}
+                          } // help
+                         } // do_ignore_non_hermitian_matrix_error
+                        } // prefi
+	 	       } // pinit
+	 	      } // ninit
+	 	     } // minE
+	 	    } //max          
+	 	   } // -v
+	  	  } // -a
+	         } // -A
 	        } // -c
 	       } // -t
               } // -jqe

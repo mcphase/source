@@ -2,7 +2,12 @@
 //libraries, classes and  functions in mcdiff
 //********************************************
 
+#if defined  (__linux__) || defined (__APPLE__)
+#define MAXNOFREFLECTIONS 30000
+#else
 #define MAXNOFREFLECTIONS 6000
+#endif
+
 #define SMALL 1e-3
 #define SMALLINT 1e-4
 #define NOFOUTPUTCOLUMNS 12
