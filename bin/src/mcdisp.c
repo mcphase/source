@@ -696,6 +696,7 @@ if(strcmp(filemode,"A")==0){// check if some q values have already been calculat
                                    fclose(foutqom);
                                   }               
                  }
+if(firstcounter>ini.nofhkls){printf("# mcdisp: all hkl already calculated in previous run - nothing to do - exiting\n");exit(0);}
 for(counter=firstcounter;counter<=ini.nofhkls;++counter){
 		     hkl(1)=ini.hkls[counter][1];
 		     hkl(2)=ini.hkls[counter][2];
