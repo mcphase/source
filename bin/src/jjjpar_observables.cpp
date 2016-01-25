@@ -214,10 +214,13 @@ switch (module_type)
             Mq=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
              dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
             double QR=Qvec*rijk;
-            complex<double> exponent(cos(QR),sin(QR)); 
+            complex<double> exponent(cos(QR),-sin(QR)); 
+
             for(int n=1;n<=3;++n)
             {Mq(n)+=exponent*mom(3*(a-1)+n)*(*(*clusterpars).jjj[a]).F(Q)*(*(*clusterpars).jjj[a]).debyewallerfactor(Q);
-            }}}
+            }
+//printf ("                   Mx=%g My=%g Mz=%g qr=%g Mqx=%g Mqy=%g Mqz=%g\n",mom(3*(a-1)+1),mom(3*(a-1)+2),mom(3*(a-1)+3),QR,Mq(1),Mq(2),Mq(3));
+             }}
             return true;break;
    default: return false; // all other internal modules do not currently provide mq
   }

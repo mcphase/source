@@ -79,7 +79,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
                                 //magnetic structure factors
                              //J[i]         1   0    -1   -2   -3
                              //FF_type      1  -2    +2   +3   -3
-                               // if(J[i]<=0){   // i.e. atom is magnetic
+                               // if(J[i]<=0)   // i.e. atom is magnetic
                              if((*jjjpars[i]).FF_type!=1){
 
                                              // formfactor F(Q)
@@ -89,7 +89,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
                                                                                                         // so that we get spin only formfactor
                                              FQ = (*jjjpars[i]).F(Q); //rare earth
 
-                                             //if(J[i]==0){ // go beyond dipole approximation for rare earth
+                                             //if(J[i]==0) // go beyond dipole approximation for rare earth
                                                if((*jjjpars[i]).FF_type==-2){
                                                          ComplexVector MQ(1,3);(*jjjpars[i]).MQ(MQ,Qvec);
 					               msfx+=0.5*MQ(1)*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);//MQ(123)=MQ(xyz)
@@ -99,7 +99,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					               msfdipy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               msfdipz+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                }
- 					      //if(J[i]==-1){// dipole approximation - use magnetic moments and rare earth formfactor
+ 					      //if(J[i]==-1)// dipole approximation - use magnetic moments and rare earth formfactor
                                                if((*jjjpars[i]).FF_type==+2){
                                                            //                        for transition metals always set gJ=2 (spin only moment)
                                                         msfx+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
@@ -108,8 +108,9 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
                                                         msfdipx+=(*jjjpars[i]).mom(1)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                msfdipy+=(*jjjpars[i]).mom(2)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                msfdipz+=(*jjjpars[i]).mom(3)*FQ/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
+//printf (" hi=%i ki=%i li=%i Mx=%g My=%g Mz=%g qr=%g msfx=%g msfy=%g msfz=%g\n",hi,ki,li,(*jjjpars[i]).mom(1),(*jjjpars[i]).mom(2),(*jjjpars[i]).mom(3),qr,msfx,msfy,msfz);
 					               }
-					      //if(J[i]==-2){// dipole approximation - use S and L moments (only if gJ=0)
+					      //if(J[i]==-2)// dipole approximation - use S and L moments (only if gJ=0)
                                                if((*jjjpars[i]).FF_type==+3){
                                                         FQL = (*jjjpars[i]).F(-Q); // orbital formfactor
                                                         msfx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
@@ -125,7 +126,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					                msfdipy+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                msfdipz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					               }
-                                     //if(J[i]==-3){ // go beyond dipole approximation for gJ=0 (intermediate coupling)
+                                     //if(J[i]==-3) // go beyond dipole approximation for gJ=0 (intermediate coupling)
                                      if((*jjjpars[i]).FF_type==-3){
                                                        ComplexVector MQ(1,3);(*jjjpars[i]).MQ(MQ,Qvec);
                                              FQL = (*jjjpars[i]).F(-Q); // orbital formfactor
