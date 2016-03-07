@@ -101,7 +101,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
       // try if going beyond dip approximation for formfactor works
      if(do_gobeyond){
         if((*inputpars.jjj[l]).dMQ1calc(qijk,ini.T,mq1,nn[6],md.est(i,j,k,l))!=0)// calculate <-|M(Q)|+>
-        {if(do_verbose)printf("#going beyond dipole approx for ion %s\n",(*inputpars.jjj[l]).sipffilename);
+        {if(do_verbose)printf("#going beyond dipole approx for ion %s Nu=%g\n",(*inputpars.jjj[l]).sipffilename,Norm2(mq1));
          (*inputpars.jjj[l]).FF_type*=-1; // put FFTYPE negative to indicate that going beyond works
         }
         else{ if(do_verbose)printf("#warning mcdisp - function dmq1 not implemented for single ion module of ion %s, only doing dipolar intensity\n",(*inputpars.jjj[l]).sipffilename);
