@@ -49,13 +49,14 @@ sub usage() {
   print STDERR << "EOF";
     $0:
     Rotates a set of  crystal field  parameters for  Stevens equivalent
-    operators by an azimuthal angle fi about the original z axis and
-    a polar angle theta about the new y axis. A right hand axis system is 
-    assumed and a positive rotation is one which advances a right-hand 
-    screw in a positive direction along the axis.
+    operators. The coordinate system is rotated by an azimuthal angle fi
+    about the original z axis and a polar angle theta about the new y axis
+    and crystal field parameters are transformed to the new coordinate system.
+    A right hand axis system is assumed and a positive rotation is one which
+    advances a right-hand screw in a positive direction along the axis.
     The calculations are  done by means of matrix  multiplication based on
     the method of Buckmaster (phys. stat. sol. a, vol 13,  pp 9, 1972) and
-    Rudowicz (J. Phys: Solid State Phys., vol 18, pp 1415, 1985).   
+    Rudowicz (J. Phys: Solid State Phys., vol 18, pp 1415, 1985). 
     usage: $0 [-h] [--help] 
               [-i input_file] [--input input_file]
 	      [-o output_file] [--output output_file]
@@ -100,20 +101,25 @@ if (!$input && !$ARGV[0]) {
   exit;
 }
 
+# 160426 - MR and Thomas Stoeter (TU Dresden) found that the sense of rotation of theta is opposite to the
+# usual convention (right-handed axis, anticlockwise is positive). For details see emails "re: rotateBlm problem"
+# So, we change the sign here:
+$theta = -$theta;
+
 my %B=();
 if ($input) {
   open (input_file, $input) or die "$0: cannot open $input for input CF parameters";
   while(<input_file>) {                                   # Selects out lines with crystal field parameters
   if ($_=~/^\s*#/) {}
   else{  
-   if ($_ =~ s/(B[0-9\ CcSs]+)\s*[=:]\s*([-\.\de]*)// ) { # () are groups which may be access with $1, $2 etc.
+   if ($_ =~ s/(B[0-9\ CcSs]+)\s*[=:]\s*([-+\.\de]*)// ) {# () are groups which may be access with $1, $2 etc.
                                                           # * means match previous char any number of times.
       $ky = $1; $vl = $2;                                 # Parameters are of form Bkq = x.xx or Bkq : x.xx
       if ($vl != "") {                                    # \s matches whitespace characters.
         $ky =~ s/[cC ]//g;
         $B{$ky}=$vl;                                      # Assigns values of CF parameters to a hash.
       }
-      if ($_ =~ s/(B[0-9\ CcSs]*)\s*[=:]\s*([-\.\de]*)// ) {
+      if ($_ =~ s/(B[0-9\ CcSs]*)\s*[=:]\s*([-+\.\de]*)// ) {
         $ky = $1; $vl = $2;                               # Second loop to get sine (-q) params in cfield
         if ($vl != "") {                                  #   input files.
           $ky =~ s/[ ]//g; $ky =~ s/s/S/g;
