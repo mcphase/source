@@ -106,14 +106,14 @@ if ($input) {
   while(<input_file>) {                                   # Selects out lines with crystal field parameters
   if ($_=~/^\s*#/) {}
   else{  
-   if ($_ =~ s/(B[0-9\ CcSs]+)\s*[=:]\s*([-\.\de]*)// ) { # () are groups which may be access with $1, $2 etc.
+   if ($_ =~ s/(B[0-9\ CcSs]+)\s*[=:]\s*([-+\.\de]*)// ) { # () are groups which may be access with $1, $2 etc.
                                                           # * means match previous char any number of times.
       $ky = $1; $vl = $2;                                 # Parameters are of form Bkq = x.xx or Bkq : x.xx
       if ($vl != "") {                                    # \s matches whitespace characters.
         $ky =~ s/[cC ]//g;
         $B{$ky}=$vl;                                      # Assigns values of CF parameters to a hash.
       }
-      if ($_ =~ s/(B[0-9\ CcSs]*)\s*[=:]\s*([-\.\de]*)// ) {
+      if ($_ =~ s/(B[0-9\ CcSs]*)\s*[=:]\s*([-+\.\de]*)// ) {
         $ky = $1; $vl = $2;                               # Second loop to get sine (-q) params in cfield
         if ($vl != "") {                                  #   input files.
           $ky =~ s/[ ]//g; $ky =~ s/s/S/g;
