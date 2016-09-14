@@ -18,7 +18,8 @@
 #define MAXNOFCHARINLINE 7024
 #define MAGFF_NOF_COEFF 9
 
-#define SMALL 1e-6   
+#define SMALL 1e-6  // for module kramer - to trigger numerical limited calculation 
+                    // for adding jjpar sets to see what is difference in position or what is equal
 
 #include "jjjpar_basmodfunc.cpp" // basic sipf module functions
 #include "jjjpar_observables.cpp" // function for physical observables
@@ -186,6 +187,14 @@ void jjjpar::addpars (int number, jjjpar & addjjj)
   {jij[i]=jijn[i-addjjj.paranz];dn[i]=dnn[i-addjjj.paranz];}
   delete []jijn;
   delete []dnn;
+}
+
+// scale all interaction parameters
+void jjjpar::scalepars (double scalefactor)
+{int i;for (i=1;i<=paranz;++i)
+  {jij[i]*=scalefactor;
+  }
+
 }
 
 // remove neighbour from list

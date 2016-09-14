@@ -207,6 +207,13 @@ void par::add (par & p1)
  }
 }
 
+void par::scale(double scalefactor) // scale all interaction parameters by scalefactor
+{int i;
+ for(i=1;i<=nofatoms;++i)
+ {
+    (*jjj[i]).scalepars(scalefactor);
+ }
+}
 
 void par::increase_nofcomponents (int n)
 {//increases the number of components in the interaction vector

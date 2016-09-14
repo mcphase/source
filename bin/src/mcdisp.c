@@ -400,7 +400,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   char filename[MAXNOFCHARINLINE];
   double sta=0,sta_int=0,sta_without_antipeaks=0,sta_int_without_antipeaks=0;
   double sta_without_weights=0,sta_int_without_weights=0,sta_without_antipeaks_weights=0,sta_int_without_antipeaks_weights=0;
-  double jqsta=-1.0e10;  double jqsta_int=0;
+  double jqsta=-1.0e10;  double jqsta_int=0;double jqsta_int_scaled=0; double jqsta_scaled=-1.0e10;double scalefactor=1;
   double jq0=0;
   Vector hkl(1,3),q(1,3),qold(1,3),qijk(1,3);                 
   Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
@@ -794,6 +794,8 @@ int num_threads_started=-1;
 
 
 if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
+              writehklblocknumber(jqfile,ini,counter);
+         
                   if (do_verbose==1){fprintf (jqfile, "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
                                      fprintf(jqfile,"nofneighbours= %li\n",nofneighbours);
                                     }
@@ -912,17 +914,25 @@ if (do_jqfile){
                         }
         fprintf(jqfile,"\n");
        }
-       if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-1e9;}
+       if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-0.1e10;jqsta_scaled=jqsta;scalefactor=1;
+                          // here the first hkl vectors eigenvalue has been determined
+                          // ... look in table, if there is a value, to which is might be scaled
+                          if(ini.hkls[counter][0]>3&&jq0!=0.0){scalefactor=ini.hkls[counter][4]/jq0;}
+                         }
        else           {if(Tn(i2)>jq0)
-                         {if(jqsta<0){jqsta=0;}
-                          jqsta+=(Tn(i2)-jq0)*(Tn(i2)-jq0);}
-                       else{if((jqsta<0)&(Tn(i2)-jq0>jqsta)){jqsta=Tn(i2)-jq0;}}
+                         {if(jqsta<0){jqsta=0;jqsta_scaled=0;}
+                          jqsta+=(Tn(i2)-jq0)*(Tn(i2)-jq0);jqsta_scaled+=(Tn(i2)-jq0)*(Tn(i2)-jq0)*scalefactor*scalefactor;}
+                       else{if((jqsta<0)&(Tn(i2)-jq0>jqsta)){jqsta=Tn(i2)-jq0;jqsta_scaled=(Tn(i2)-jq0)*scalefactor;}}
+                       
                       }
                       double test;
                      for(int kk=NOFHKLCOLUMNS;kk<=ini.hkls[counter][0];kk+=NOFHKLCOLUMNS-3){
                       for (j1=1;j1<=ini.hkls[counter][kk-NOFHKLCOLUMNS+7];++j1)
 	              {test=fabs(Tn(i2+1-j1)-ini.hkls[counter][kk-NOFHKLCOLUMNS+j1+3]);
-                      jqsta_int+=test*test;//fprintf(stdout,"%i %g test=%g\n",counter,ini.hkls[counter][0],test);
+                       jqsta_int+=test*test;
+                       test=fabs(Tn(i2+1-j1)*scalefactor-ini.hkls[counter][kk-NOFHKLCOLUMNS+j1+3]);
+                       jqsta_int_scaled+=test*test;
+                       //fprintf(stdout,"%i %g test=%g\n",counter,ini.hkls[counter][0],test);                       
                       }
     	                                                                  }
  }
@@ -1679,7 +1689,24 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr);
       fprintf(jqfile,"#another standard deviation is given below: calculated as squared sum of differences between\n");
       fprintf(jqfile,"#the highest eigenvalue of J(Q) and energies in column 4 of mcdisp.par, if column 5 and 6  \n");
       fprintf(jqfile,"#in mcdisp.par contain values, then these are compared to the other eigenvalues of J(Q)\n");
-      fprintf(jqfile,"#!sta4=%g\n",jqsta_int);fclose(jqfile);}
+      fprintf(jqfile,"#!sta4=%g\n",jqsta_int);
+      fprintf(jqfile,"#if in mcdisp.par after the hkl of the first q vector a number is given, then\n");
+      fprintf(jqfile,"#scaled interaction parameters are computed such that their highest eigenvalue\n");
+      fprintf(jqfile,"#agrees with this number. Scaled parameters are saved in results/mcdisp_scaled.j\n");
+      fprintf(jqfile,"#and here follow standard deviations computed with the scaled parameters\n");
+      if(scalefactor!=1.0){fprintf(jqfile,"#!sta_scaled=%g\n",jqsta_scaled);
+                           fprintf(jqfile,"#!sta4_scaled=%g\n",jqsta_int_scaled);
+                           fprintf(jqfile,"#!scalefactor=%g\n",scalefactor);
+                           }
+       fclose(jqfile);
+      if(scalefactor!=1.0){inputpars.scale(scalefactor);
+                           sprintf(filename,"./results/%smcdisp_scaled.j",ini.prefix);
+                          printf("# saving  %s\n",filename);
+                          jqfile = fopen_errchk (filename,"w");
+                           inputpars.save(jqfile);
+                           fclose(jqfile);
+                           }
+     }
     else
      {
       if(!calc_rixs){staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
@@ -1817,6 +1844,9 @@ int do_phonon=1;
 dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,do_ignore_non_hermitian_matrix_error,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
   
  printf("#RESULTS saved in directory ./results/  - files:\n");
+  if(do_jqfile){
+   printf("#  %smcdisp.jq  - Fourier Transfor J(Q) of the Interaction Parmeters\n",ini.prefix);
+  }else{
   if(calc_rixs){printf("#  %smcdisp.qex  - T,H,qvector vs energies and resonant inelastic X-ray (RIXS) intensities\n",ini.prefix);}
   else{ printf("#  %smcdisp.qei  - T,H,qvector vs energies and neutron intensities\n",ini.prefix);
    printf("#  %smcdisp.dsigma.tot  - T,H,qvector vs total intensity (sum of all modes)\n",ini.prefix);
@@ -1825,6 +1855,7 @@ dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_c
    printf("#  %smcdisp.qom  - T,H,qvector vs all mode energies in one line\n",ini.prefix);
    printf("#  %smcdisp.qee,qsd,qod,qep,qem,qes,qel  - T,H,qvector,E vs extended eigenvectors (more components to plot observables.)\n",ini.prefix);
    printf("#  %smcdisp.trs  - single ion transitions used\n",ini.prefix);
+   }
    printf("#  _%smcdisp.par - input parameters read from mcdisp.par\n",ini.prefix);
    printf("#  _%smcdisp.mf  - input parameters read from mcdisp.mf\n",ini.prefix);
    printf("#  _%smcdisp.j   - input parameters read from mcphas.j\n",ini.prefix);

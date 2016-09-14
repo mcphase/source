@@ -632,11 +632,12 @@ sub printlattice {
      {#next if /^\s*#/;
       $text=$_;
       if ($nofatoms==0){($nofatoms)=extract("nofatoms",$_);}
-if ($nofatoms!=0){
-        print $l "#-------------------------------------------------------------------------------------\n";
-        print $l "# output of program makenn $rmax - table with neighbors and interactions\n";
-        print $l "# Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
-                 }
+# removed because iterative call of makenn will make fileheader longer
+#if ($nofatoms!=0){
+#        print $l "#-------------------------------------------------------------------------------------\n";
+#        print $l "# output of program makenn $rmax - table with neighbors and interactions\n";
+#        print $l "# Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
+#                 }
       print $l ($text);
       last if ($nofatoms!=0); # the line nofatoms= must be the last line of the file header !!!!
      }

@@ -138,6 +138,12 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
 
 
 //****************************************************************************************************************************
+void writehklblocknumber(FILE * jqfile,inimcdis & ini,int & counter)
+ {  if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
+                       {fprintf(jqfile,"#!hklblock_number=%i\n",is);
+                        }
+ }                    
+//****************************************************************************************************************************
 void writehklblocknumber(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
                     FILE * foutqee,FILE * foutqsd,FILE * foutqod,FILE * foutqep,FILE * foutqem,FILE * foutqes,FILE * foutqel,
                     inimcdis & ini,int & calc_rixs,int & do_Erefine,int & counter)

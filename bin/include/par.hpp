@@ -39,6 +39,7 @@ int delatom(int n); //removes atom n and returns new nofatoms
 void reduce_unitcell();//checks every atom in the unit cell and removes
                        // any atom, which is connected to another by a lattice vector
 void add(par & b); // add exchange parameters
+void scale(double scalefactor); // scale all interaction parameters by scalefactor
 void save(FILE * fout); // save lattice, atoms and exchange parameters to file
 void save(const char * filename); // save lattice, atoms and exchange parameters to file
 void savelattice(FILE *fout);// save lattice to file
