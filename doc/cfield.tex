@@ -306,9 +306,9 @@ In order to calculate a spectrum these results
 have to be convolute\index{convolute}d with the resolution function of a neutron spectrometer. This can be 
 done by the program {\prg convolute\index{convolute}}. For example, the commands
  
- {\bf gauss 0.5 0.05 -4 4 > res.dat}
+ {\bf gauss 0.5 0.05 -4 4 $>$ res.dat}
 
- {\bf convolute 6 8 results/Nd3p.sipf.trs 1 2 res.dat > results/Nd3p.sipf.cvt} 
+ {\bf convolute 6 8 results/Nd3p.sipf.trs 1 2 res.dat $>$ results/Nd3p.sipf.cvt} 
 
 create a Gaussian resolution function (of 0.5~meV full width half maximum stored in
 stepsize 0.5 meV from -4 to 4 meV) and convolute the calculated neutron 
@@ -346,9 +346,9 @@ numbers denote a temperature (10~K) and  a field 1 Tesla along the z-axis.
  By default the results are written directly to the screen, however they can be piped into
 a file by 
 
-{\bf so1ion -M -r Nd3p.sipf 10 0 0 1 0 0 0 >> results/moment.rtplot}
+{\bf so1ion -M -r Nd3p.sipf 10 0 0 1 0 0 0 $>>$ results/moment.rtplot}
 
-Here the ''>>'' sign appends the ouput of each command, thus iterating the 
+Here the ''$>>$'' sign appends the ouput of each command, thus iterating the 
 command for several different magnetic fields allows to calculate a 
 magnetisation curve -  fig.~\ref{moment} shows the result.
 

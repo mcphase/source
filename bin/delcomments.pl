@@ -14,7 +14,7 @@ unless ($#ARGV >=0)
  print " -s ... option to remove comments beginning with \"token\" instead.\n";
  print "        e.g. delcomments -s \"#:\" to remove lines commented by the range command.\n";
  print " -k ... option to keep comments beginning with \"token\" .\n";
- print "        e.g. delcomments -s \"#!\" to keep comments starting with '#!' \n";
+ print "        e.g. delcomments -k \"#!\" to keep comments starting with '#!' \n";
  print " -c ... option to remove comments and replace by empty line instead of deleteing the line\n";
  print " -fromline 10 ... option to remove comments only after line number 10\n";
  print " -toline 100  ... option to remove comments only until line number 100\n";

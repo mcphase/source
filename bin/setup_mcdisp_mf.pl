@@ -61,9 +61,9 @@ sub usage() {
                     from results/mcphas.mf and puts the meanfields into
                     mcdisp.mf
 
-    usage: setup_mcdisp_mf T Ha Hb Hc
+    usage: setup_mcdisp_mf [options] T Ha Hb Hc
              or
-           setup_mcdisp_mf x y
+           setup_mcdisp_mf [options] x y
 
      -h          : this (help) message
       T          : Temperature (K)

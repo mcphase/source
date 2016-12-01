@@ -477,7 +477,7 @@ for $sipf (keys %sipfseen) {
         if(!($sipf eq ${$atoms{"sipffilename"}}[$ii]) && !($sipf eq ${$atoms{"cffilename"}}[$ii])) { next; }
         $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
         if($p1>=$ijkmin[0] && $p1<=$ijkmax[0] && $p2>=$ijkmin[1] && $p2<=$ijkmax[1] && $p3>=$ijkmin[2] && $p3<=$ijkmax[2]) {
-          $fpos = pdl [ $p1, $p2, $p3 ];
+          $fpos = pdl [ $p1, $p2, $p3 ]; # rowvektor ...  rmat contains prim latt as colvect
           $cpos = $fpos x $rtoijk;
           printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
           push @colours, join(":",@{$atcol{${$atoms{"sipffilename"}}[$ii]}});

@@ -4,7 +4,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless($#ARGV>=3)
 
-  {print "Program cpsingleion - calculates specific heat from output file *.levels.cef of singleion program \n";
+  {print "Program cpsingleion - calculates specific heat c=du/dT from output file *.levels.cef of singleion program \n";
 
    print "             use as :  cpsingleion tmin tmax deltat file.levels.cef [-option]\n";
 
@@ -20,13 +20,13 @@ unless($#ARGV>=3)
 
    print "     temperatures tmin tmax deltat in Kelvin\n";
 
-   print "     Options: -s   .... calculate entropy  (J/molK) instead of cp\n";
+   print "     Options: -s   .... calculate entropy  s=integral c dT/T   (J/molK) instead of cp\n";
 
-   print "              -f   .... calculate free energy (J/mol) instead of cp\n";
+   print "              -f   .... calculate free energy f=-kT ln(z) (J/mol) instead of cp\n";
 
-   print "              -u   .... calculate magnetic energy (J/mol) instead of cp\n";
+   print "              -u   .... calculate magnetic energy u= sum_i Ei exp(-Ei/kT)/z (J/mol) instead of cp\n";
 
-   print "              -z   .... calculate partition sum instead of cp\n";
+   print "              -z   .... calculate partition sum z= sum_i exp(-Ei/kT) instead of cp\n";
 
    exit(1);
 
@@ -37,15 +37,15 @@ $ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$Tmax=eval $ARGV
 $ARGV[2]=~s/exp/essp/g;$ARGV[2]=~s/x/*/g;$ARGV[2]=~s/essp/exp/g;$deltaT=eval $ARGV[2];
 $filename=$ARGV[3];
 
-      $cptext="cp(J/molK)";
+      $cptext="c=du/dT(J/molK)";
 
-      if($ARGV[4]=~/-f/){$cptext="f(J/mol)";}
+      if($ARGV[4]=~/-f/){$cptext="f=-kT ln(z)(J/mol)";}
 
-       if($ARGV[4]=~/-z/){$cptext="z";}
+       if($ARGV[4]=~/-z/){$cptext="z=sum_i exp(-Ei/kT)";}
 
-       if($ARGV[4]=~/-u/){$cptext="u(J/mol)";}
+       if($ARGV[4]=~/-u/){$cptext="u=sum_i Ei exp(-Ei/kT)/z (J/mol)";}
 
-       if($ARGV[4]=~/-s/){$cptext="s(J/molK)";}
+       if($ARGV[4]=~/-s/){$cptext="s=integral c dT/T(J/molK)";}
 
 
 

@@ -1,9 +1,12 @@
 #!/usr/bin/perl
-use Getopt::Long;
+#use Getopt::Long;
 
-GetOptions("help"=>\$helpflag,
-           "prefix|p=s"=>\$prefix);
-usage() if $helpflag||$#ARGV<1;
+#GetOptions("help"=>\$helpflag,
+#           "prefix|p=s"=>\$prefix);
+#usage() if $helpflag||$#ARGV<1;
+usage() if $ARGV[0]=~/-h/||$#ARGV<1;
+if($ARGV[0]=~/-prefix/)
+{$prefix=$ARGV[1];shift @ARGV;shift @ARGV;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ARGV[0]=eval $ARGV[0];
 $ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$ARGV[1]=eval $ARGV[1];
 if ($#ARGV>2) { 
