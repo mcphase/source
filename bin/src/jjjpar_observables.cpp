@@ -240,7 +240,7 @@ switch (module_type)
 //    delta             transition energy
 //  on output
 //    int   	total number of transitions
-//    dMQ	<-|M(Q)|+> sqrt(n- - n+),  n+,n- population numbers
+//    dMQ	<-|M(Q)-<M(Q)>|+> sqrt(n- - n+),  n+,n- population numbers
 //    with Q the scattering operator according to Lovesey 11.4, p 222, eq 6.87b
 //     (note that  <M(Q)>=-2x<Q>_TH in units of mb)
 //    .... occupation number of states (- to + transition chosen according to transitionnumber)

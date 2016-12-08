@@ -454,7 +454,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
       (*inputpars.jjj[l]).maxE=maxE;(*inputpars.jjj[l]).pinit=pinit;(*inputpars.jjj[l]).ninit=ninit;
      noftransitions(l)=0;int noft=0;
      if(trs_write_next_line(fout,(*inputpars.jjj[l]),noft,i,j,k,l,noftransitions(l),ini.T,mf,ini.Hext,
-                    md.est(i,j,k,l),d,minE,maxE,'I'))
+                    md.est(i,j,k,l),d,minE,maxE,'I',q))
        {fprintf(stderr,"ERROR mcdisp.par: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
                         " (within first crystallographic unit of magnetic unit cell)\n"
                         " please increase energy range in option -maxE and -minE\n",minE,maxE);
@@ -466,7 +466,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
    int idummy=0;  
    while(noftransitions(l)<maxlevels&&
          !trs_write_next_line(fout,(*inputpars.jjj[l]),idummy,i,j,k,l,
-                              noftransitions(l),ini.T,mf,ini.Hext,md.est(i,j,k,l),d,minE,maxE,'I'));
+                              noftransitions(l),ini.T,mf,ini.Hext,md.est(i,j,k,l),d,minE,maxE,'I',q));
  
    (*inputpars.jjj[l]).transitionnumber=jmin; // put back transition number for 1st transition
   }}}}

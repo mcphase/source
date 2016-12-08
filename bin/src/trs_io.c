@@ -1,7 +1,7 @@
 // used in mcdisp.c and singleion.c for in/out of .trs files
 
 void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,double & T,Vector & Hext,char observable)
-{time_t curtime;
+{time_t curtime;char cc=0;if(observable=='Q')cc='M';
  struct tm *loctime;
    fprintf(fout, "#output file of program %s",MCDISPVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
@@ -85,15 +85,15 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,doubl
    fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",T,Hext(1),Hext(2),Hext(3));
    fprintf(fout,"#*********************************************************************\n");
    fprintf (fout, "#i j k ionnr transnr energy |gamma_s| sigma_mag_dip[barn/sr](*) "
-                   "   wnn'|<n|%c1-<%c1>|n'>|^2 wnn'|<n|%c2-<%c2>|n'>|^2 ... "
-                   "with wnn'=wn-wn' for n!=n'  and wnn=wn/k_B T \n",observable,observable,observable,observable);
+                   "   wnn'|<n|%c%c1-<%c%c1>|n'>|^2 wnn'|<n|%c%c2-<%c%c2>|n'>|^2 ... "
+                   "with wnn'=wn-wn' for n!=n'  and wnn=wn/k_B T \n",cc,observable,cc,observable,cc,observable,cc,observable);
 }
 
 //****************************************************************************************
 // probes transitions and returns 0 if transition is found, transitionnumber is stored in jjj.transitionnumber
 //                        returns 1 if no further transition is found within limit minE maxE
 int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,int  l,int & tc,double & T,Vector & mf,
-                     Vector & Hext,ComplexMatrix & est,float & d,double  minE,double  maxE, char observable)    
+                     Vector & Hext,ComplexMatrix & est,float & d,double  minE,double  maxE, char observable, Vector & Q)    
     {ComplexVector u1(1,mf.Hi());double gamma;
          if(jjj.transitionnumber>=nt&&nt>0){return 1;}
      ++jjj.transitionnumber;nt=jjj.du1calc(T,mf,Hext,u1,d,est);
@@ -121,6 +121,7 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
      {case 'M': break; // leave it, it was calulated above 
       case 'S': jjj.dS1calc(T,mf,Hext,dm1,est);break;
       case 'L': jjj.dL1calc(T,mf,Hext,dm1,est);break;
+      case 'Q': jjj.dMQ1calc(Q,T,dm1,d,est);break;
      }    
      if(minE<d&&d<maxE)
     { fprintf(fout,"%i %i %i  %i     %i     %9.6g  %9.6g  %10.6g   ",i,j,k,l,jjj.transitionnumber,myround(d),myround(gamma),myround(intensityp));

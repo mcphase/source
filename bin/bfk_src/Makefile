@@ -7,21 +7,26 @@ OSTYPE=$(shell uname)
 ifneq (,$(findstring $(OSTYPE),Linux))
  LINUX = linux
 else
+ifneq (,$(findstring $(OSTYPE),Darwin))
+ DARWIN = darwin
+else
  WINDOWS = windows
 ifneq (,$(findstring CYGWIN,$(shell uname)))
  CYGWIN=1
 endif
 endif
+endif
 
 ifdef WINDOWS
 EXE=.exe
+STATIC=-static
 endif
 
 all :  clean ../bfk$(EXE) 
 #../chibfk$(EXE) 
 
 ../bfk$(EXE): bfk.f95
-	gfortran  -lgfortran -o ../bfk $^ 
+	gfortran $(STATIC) -lgfortran -o ../bfk $^ 
 
 #../chibfk$(EXE): chibfk.f95
 #	gfortran -static -lgfortran -o ../chibfk $^ 
