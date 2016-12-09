@@ -14,6 +14,8 @@ print STDERR << "EOF";
  note:  colx has to be sorted
         if colx=0 then the x axis is assumed to be the line number (not considering
         comment lines)
+        if you do not want any integration at interval boundaries to happen, 
+        remember to put dx to a very small but nonzero value.
  output: y-value           to stdout and stored in env. variable MCPHASE_YVALUE
          1/y-value         to stdout and stored in MCPHASE_YVALUE_INVERSE
          standarddeviation to stdout and stored in MCPHASE_STA
@@ -84,35 +86,38 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
                   {++$nofpoints;
   $Iav+=$order*($numbers[$coly]+$numbers1[$coly])/2*($numbers[$colx]-$numbers1[$colx]);
   $esum+=$order*($numbers[$colx]-$numbers1[$colx]);
-       	          } # now treat a boundary point correctly
-                 if(($order*($constx-$dE)>$order*($numbers[$colx]))&($order*($constx-$dE)<$order*($numbers1[$colx])))
-                  {++$nofpoints;#print "hello1";
+       	          } 
+                 # now treat a boundary point correctly
+                 unless(0==($numbers[$colx]-$numbers1[$colx]))
+                { if(($order*($constx-$dE)>$order*($numbers[$colx]))&($order*($constx-$dE)<$order*($numbers1[$colx])))
+                  {++$nofpoints;print STDERR "#hello1";
                    $bx=$constx-$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=-($by+$numbers1[$coly])/2*($bx-$numbers1[$colx]);
                    $esum+=-$order*($bx-$numbers1[$colx]);
                   }
                  if(($order*($constx-$dE)>$order*($numbers1[$colx]))&($order*($constx-$dE)<$order*($numbers[$colx])))
-                  {++$nofpoints;#print "hello2";
+                  {++$nofpoints;print STDERR "#hello2";
                    $bx=$constx-$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=-($by+$numbers[$coly])/2*($bx-$numbers[$colx]);
                    $esum+=-$order*($bx-$numbers[$colx]);
                   }
                  if(($order*($constx+$dE)>$order*($numbers[$colx]))&($order*($constx+$dE)<$order*($numbers1[$colx])))
-                  {++$nofpoints;#print "hello3";
+                  {++$nofpoints;print STDERR "#hello3";
                    $bx=$constx+$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=($by+$numbers[$coly])/2*($bx-$numbers[$colx]);
                    $esum+=$order*($bx-$numbers[$colx]);
                   }
                  if(($order*($constx+$dE)>$order*($numbers1[$colx]))&($order*($constx+$dE)<$order*($numbers[$colx])))
-                  {++$nofpoints;#print "hello4";
+                  {++$nofpoints;print STDERR "#hello4";
                    $bx=$constx+$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=($by+$numbers1[$coly])/2*($bx-$numbers1[$colx]);
                    $esum+=$order*($bx-$numbers1[$colx]);
                   }
+                 }
    @numbers1=@numbers;
    }}
   close Fin;
@@ -120,7 +125,8 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
             $esum=1;$Iav=$numbers[$coly];
            }
   if (abs($esum)<1e-10){print STDERR " first xvalue sum on averaging is zero for $file nofpoints=$nofpoints- maybe $constx out of range of x values\n";<stdin>;}
-  $Iav/=$esum;
+ #print STDERR "# j=$j Iav=$Iav esum=$esum\n";  
+ $Iav/=$esum; 
   my $sta=0; # here calculate sta (scattering of data in interval dE)
   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
   $j=0;$esum=0;

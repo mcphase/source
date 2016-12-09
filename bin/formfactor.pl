@@ -26,7 +26,7 @@ unless ($#ARGV >=0)
    $file=$_;
 
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "<".$file;
+   print "#<".$file;
    $FFj0A=1; $FFj0a=0;
    $FFj0B=0; $FFj0b=0;
    $FFj0C=0; $FFj0c=0;
@@ -107,7 +107,7 @@ unless ($#ARGV >=0)
 
    print ">\n";
 
-   print "IONTYPE=$IONTYPE\n";
+   print "#IONTYPE=$IONTYPE\n";
 
    if($gJ==0){ print "Lande factor GJ not found in single ion property file - trying to deduce GJ from IONTYPE ...\n";
 
@@ -186,6 +186,8 @@ unless ($#ARGV >=0)
    print "#FRE(Q)= <j0(Q)>+<j2(Q)> (2/GJ - 1)\n";
 
    print "#FTM(Q)= <j0(Q)>-<j2(Q)> (2/GJ - 1)\n";
+
+   print "#GJ=$gJ\n";
 
    print "#|Q|(1/A)  FRE(Q) |FRE(Q)|^2 FTM(Q) |FTM(Q)|^2   <j0(Q)>   <j2(Q)>  <j4(Q)> <j6(Q)> \n";
 

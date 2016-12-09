@@ -766,6 +766,22 @@ __declspec(dllexport)
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
       #endif
+      if(i==j)                               //subtract thermal expectation value from zij=zii
+      {                                      //MR120120 ... reintroduced
+         complexdouble expQ;double thexp=0;
+         for(iJ=1;iJ<=Hsz;++iJ)
+         {
+            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
+            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
+            #ifdef _G77
+            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+            #else
+            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+            #endif
+            thexp += expQ.r * therm / Z;
+         }
+         zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
+      }
       free(zQmat); free(zt);
 
       zQmat = zmat2f(Qq[q][4],Qq[q][5]);     // orbital part
