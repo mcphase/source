@@ -1,7 +1,7 @@
 // used in mcdisp.c and singleion.c for in/out of .trs files
 
 void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,double & T,Vector & Hext,char observable)
-{time_t curtime;char cc=0;if(observable=='Q')cc='M';
+{time_t curtime;char cc=' ';if(observable=='Q')cc='M';
  struct tm *loctime;
    fprintf(fout, "#output file of program %s",MCDISPVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);

@@ -29,6 +29,8 @@ void errexit() // type info and error exit
     printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
     printf ("Options:\n");
     printf (" -jq           ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq largest evalue and eigenvector\n");
+    printf ("                   if energies are given for hkls in mcdisp.par, output file mcdisp_scaled.jq contains scaled parameters\n");
+    printf ("                   such that energy of first hkl set corresponds to highest eigenvalue of J(Q)\n");
     printf (" -jqe          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
     printf (" -max n        ... restrict single ion susceptibility to n lowest\n");
     printf ("                   lying transitions starting from the ground state\n");
