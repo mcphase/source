@@ -101,6 +101,8 @@ if (!$input && !$ARGV[0]) {
   exit;
 }
 
+print "theta=".$theta." deg  fi=".$fi." deg\n\n";
+
 # 160426 - MR and Thomas Stoeter (TU Dresden) found that the sense of rotation of theta is opposite to the
 # usual convention (right-handed axis, anticlockwise is positive). For details see emails "re: rotateBlm problem"
 # So, we change the sign here:
@@ -112,14 +114,14 @@ if ($input) {
   while(<input_file>) {                                   # Selects out lines with crystal field parameters
   if ($_=~/^\s*#/) {}
   else{  
-   if ($_ =~ s/(B[0-9\ CcSs]+)\s*[=:]\s*([-+\.\de]*)// ) {# () are groups which may be access with $1, $2 etc.
+   if ($_ =~ s/(B[0-9\ CcSs]+)\s*[=:]\s*([-+\.\deE]*)[\t\s\n]// ) {# () are groups which may be access with $1, $2 etc.
                                                           # * means match previous char any number of times.
       $ky = $1; $vl = $2;                                 # Parameters are of form Bkq = x.xx or Bkq : x.xx
       if ($vl != "") {                                    # \s matches whitespace characters.
         $ky =~ s/[cC ]//g;
         $B{$ky}=$vl;                                      # Assigns values of CF parameters to a hash.
       }
-      if ($_ =~ s/(B[0-9\ CcSs]*)\s*[=:]\s*([-+\.\de]*)// ) {
+      if ($_ =~ s/(B[0-9\ CcSs]*)\s*[=:]\s*([-+\.\dE]*)[\t\s\n]// ) {
         $ky = $1; $vl = $2;                               # Second loop to get sine (-q) params in cfield
         if ($vl != "") {                                  #   input files.
           $ky =~ s/[ ]//g; $ky =~ s/s/S/g;
@@ -142,7 +144,6 @@ else {
   if ($ARGV[1]) { $Ion = $ARGV[1]; }
 }
 
-print "theta=".$theta." deg  fi=".$fi." deg\n\n";
 $PI=3.14159265;
 
 # Defines the rotation matrices 
