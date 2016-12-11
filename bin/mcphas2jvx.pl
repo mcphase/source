@@ -153,16 +153,16 @@ if($debug==1) {
 }
 
 # calc_minmax_scale_relabc() function from spincf_out.cpp
-@abc=($a,$b,$c);
+@abc=($a,$b,$c); # loop primitive unit cell and determine  minimum/maximum of na nb nc
 for $ii (0..2) {
-  $ddd = pdl [ $rmat->at(0,ii), $rmat->at(1,ii), $rmat->at(2,ii), 
-           $rmat->at(0,ii)+$rmat->at(1,ii),  
-           $rmat->at(0,ii)+$rmat->at(2,ii),  
-           $rmat->at(1,ii)+$rmat->at(2,ii), 0, sum($rmat->slice(":,0")) ]; 
+  $ddd = pdl [ $primcell->at(0,ii), $primcell->at(1,ii), $primcell->at(2,ii), 
+           $primcell->at(0,ii)+$primcell->at(1,ii),  
+           $primcell->at(0,ii)+$primcell->at(2,ii),  
+           $primcell->at(1,ii)+$primcell->at(2,ii), 0, sum($primcell->slice(":,0")) ]; 
   $t = min($ddd)/$abc[$ii]; if (abs($t-int($t))>0.0001) { push @minv, (int($t)-1.)*$abc[$ii]; } else { push @minv, min($ddd); }
   $t = max($ddd)/$abc[$ii]; if (abs($t-int($t))>0.0001) { push @maxv, (int($t)+1.)*$abc[$ii]; } else { push @maxv, max($ddd); }
 }
-for $ii (0..2) {
+for $ii (0..2) { # loop cube around primitive unit cell and determine ijkmin max 
   @ddd = ();
   $dd0 = pdl @minv;                        $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @minv; $dd0->set(0,$maxv[0]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
@@ -172,8 +172,8 @@ for $ii (0..2) {
   $dd0 = pdl @maxv; $dd0->set(0,$minv[0]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @maxv; $dd0->set(0,$minv[2]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
   $dd0 = pdl @maxv; $dd0->set(0,$minv[3]); $dd = $invprim x transpose($dd0); push @ddd, $dd->at(0,$ii);
-  push @ijkmin, min($ddd);
-  push @ijkmax, max($ddd);
+  push @ijkmin, int(min($ddd))-1.;
+  push @ijkmax, int(max($ddd))+1.;
 }
 for $ii (0..2) { $minv[$ii]/=$abc[$ii]; $maxv[$ii]/=$abc[$ii]; }
 
@@ -344,9 +344,21 @@ if ($primflag) {
   @r2 = (0);
   @r3 = (0);
 } else {
-  @r1 = (min($rmat->slice("0,:")), max($rmat->slice("0,:")));
-  @r2 = (min($rmat->slice("1,:")), max($rmat->slice("1,:")));
-  @r3 = (min($rmat->slice("2,:")), max($rmat->slice("2,:")));
+#  @r1 = (min($rmat->slice("0,:")), max($rmat->slice("0,:")));
+#  @r2 = (min($rmat->slice("1,:")), max($rmat->slice("1,:")));
+#  @r3 = (min($rmat->slice("2,:")), max($rmat->slice("2,:")));
+# loop corners of supercell and determine corresponding linear combination
+# of integer n1 n2 n3 of primitive lattice (rmat)
+# then take r1 r2 r3 ranges of integers by min and max of n1 n2 n3 respectively
+@r1 = ($ijkmin[0] .. $ijkmax[0]);
+@r2 = ($ijkmin[1] .. $ijkmax[1]);
+@r3 = ($ijkmin[2] .. $ijkmax[2]);
+#print @r1;
+#print @r2;
+#print @r3;
+#print "\n";
+#print "$minv[0] $maxv[0] \n";
+
 }
 
 # Draws each type of *sipf as an individual geometry - so user and make each visible or not separately
@@ -357,8 +369,11 @@ for $sipf (keys %sipfseen) {
       for $ii (0..$#{$atoms{"da"}}) {
         if(!($sipf eq ${$atoms{"sipffilename"}}[$ii]) && !($sipf eq ${$atoms{"cffilename"}}[$ii])) { next; }
         @colours = (); @thicknesses = ();
-        $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
-        if($p1>=$ijkmin[0] && $p1<=$ijkmax[0] && $p2>=$ijkmin[1] && $p2<=$ijkmax[1] && $p3>=$ijkmin[2] && $p3<=$ijkmax[2]) {
+        $i1r=$i1*$rmat->at(0,0)+$i2*$rmat->at(1,0)+$i3*$rmat->at(2,0);
+        $i2r=$i1*$rmat->at(0,1)+$i2*$rmat->at(1,1)+$i3*$rmat->at(2,1);
+        $i3r=$i1*$rmat->at(0,2)+$i2*$rmat->at(1,2)+$i3*$rmat->at(2,2);
+        $p1 = ${$atoms{"da"}}[$ii]+$i1r; $p2 = ${$atoms{"db"}}[$ii]+$i2r; $p3 = ${$atoms{"dc"}}[$ii]+$i3r;
+        if($p1>=$minv[0] && $p1<=$maxv[0] && $p2>=$minv[1] && $p2<=$maxv[1] && $p3>=$minv[2] && $p3<=$maxv[2]) {
           $fpos = pdl [ $p1, $p2, $p3 ];
           $cpos = $fpos x $rtoijk;
           # Plots a cube at the centre of the cluster
@@ -472,11 +487,16 @@ for $sipf (keys %sipfseen) {
     printf FOUT "    <geometry name=\"%s\">\n", $sipf;
     print FOUT "      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n";
     print FOUT "        <points>\n";
+
     for $i1(@r1) { for $i2(@r2) { for $i3(@r3) {
       for $ii (0..$#{$atoms{"da"}}) {
         if(!($sipf eq ${$atoms{"sipffilename"}}[$ii]) && !($sipf eq ${$atoms{"cffilename"}}[$ii])) { next; }
-        $p1 = ${$atoms{"da"}}[$ii]+$i1; $p2 = ${$atoms{"db"}}[$ii]+$i2; $p3 = ${$atoms{"dc"}}[$ii]+$i3;
-        if($p1>=$ijkmin[0] && $p1<=$ijkmax[0] && $p2>=$ijkmin[1] && $p2<=$ijkmax[1] && $p3>=$ijkmin[2] && $p3<=$ijkmax[2]) {
+        $i1r=$i1*$rmat->at(0,0)+$i2*$rmat->at(1,0)+$i3*$rmat->at(2,0);
+        $i2r=$i1*$rmat->at(0,1)+$i2*$rmat->at(1,1)+$i3*$rmat->at(2,1);
+        $i3r=$i1*$rmat->at(0,2)+$i2*$rmat->at(1,2)+$i3*$rmat->at(2,2);
+        $p1 = ${$atoms{"da"}}[$ii]+$i1r; $p2 = ${$atoms{"db"}}[$ii]+$i2r; $p3 = ${$atoms{"dc"}}[$ii]+$i3r;
+#print "$p1 $p2 $p3 |";
+        if($p1>=$minv[0] && $p1<=$maxv[0] && $p2>=$minv[1] && $p2<=$maxv[1] && $p3>=$minv[2] && $p3<=$maxv[2]) {
           $fpos = pdl [ $p1, $p2, $p3 ]; # rowvektor ...  rmat contains prim latt as colvect
           $cpos = $fpos x $rtoijk;
           printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
@@ -513,6 +533,7 @@ for $ii (0..$#{$atoms{"da"}}) {
       if(abs($pos[-1]-${$uniqneig[$ii]}[$kk])>0.01) { next; }
       $fpos = pdl [ ${$atoms{"da"}}[$ii]+$pos[0], ${$atoms{"db"}}[$ii]+$pos[1], ${$atoms{"dc"}}[$ii]+$pos[2] ];
       $cpos = $fpos x $rtoijk;
+
       printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n", $cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);
       $nneigh++;
     }
