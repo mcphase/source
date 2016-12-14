@@ -1129,11 +1129,16 @@ if (do_jqfile){
 
                   int dim=3;
                   dim=(int)((ini.hkls[counter][0]-3)/4);
-                  Vector dd(1,dim),dd_int(1,dim);  dd+=100000.0;dd_int+=100000.0;
-                  Vector dd1(1,dim),dd1_int(1,dim);  dd1+=100000.0;dd1_int+=100000.0;
-                  Vector dd_without_antipeaks(1,dim),dd_int_without_antipeaks(1,dim);  dd_without_antipeaks+=100000.0;dd_int_without_antipeaks+=100000.0;
-                  Vector dd_without_weights(1,dim),dd_int_without_weights(1,dim);  dd_without_weights+=100000.0;dd_int_without_weights+=100000.0;
-                  Vector dd_without_antipeaks_weights(1,dim),dd_int_without_antipeaks_weights(1,dim);  dd_without_antipeaks_weights+=100000.0;dd_int_without_antipeaks_weights+=100000.0;
+      Vector dd(1,dim);dd=0;dd+=100000.0;
+      Vector dd_int(1,dim);dd_int=0;  dd_int+=100000.0;
+      Vector dd1(1,dim);dd1=0;  dd1+=100000.0;
+      Vector dd1_int(1,dim);dd1_int=0;  dd1_int+=100000.0;
+      Vector dd_without_antipeaks(1,dim);dd_without_antipeaks=0;dd_without_antipeaks+=100000.0;
+      Vector dd_int_without_antipeaks(1,dim);  dd_int_without_antipeaks=0; dd_int_without_antipeaks+=100000.0;
+      Vector dd_without_weights(1,dim);dd_without_weights=0;dd_without_weights+=100000.0;
+      Vector dd_int_without_weights(1,dim); dd_int_without_weights=0; dd_int_without_weights+=100000.0;
+      Vector dd_without_antipeaks_weights(1,dim);dd_without_antipeaks_weights=0;dd_without_antipeaks_weights+=100000.0;
+      Vector dd_int_without_antipeaks_weights(1,dim); dd_int_without_antipeaks_weights=0; dd_int_without_antipeaks_weights+=100000.0;
 #ifndef _THREADS
                      int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
                      ComplexMatrix chiPhon(1,1,1,1);

@@ -80,6 +80,29 @@ community this program would not have come into existence.
 
 \section*{What is New ?}
 
+\subsection*{ \dots in version 5.3 \dots}
+\begin{itemize}
+\item  Ce3p.sipf database: formfactor for Ce3+ ion coefficients FF improved 
+\item {\prg singleion} extended to ouput optional M(Q)
+\item {\prg setup\_mcdiff\_in}  options were blocking negative x y, therefore modified code
+           thus it can accept negative x y in phasediagram
+\item {\prg mcdisp.jq } contains now hklblocknumber= lines 
+ moreover mcdisp calculates scaled interation parameters to enable better fitting keeping TN constant
+if in mcdisp.par after the hkl of the first q vector a number is given, then
+scaled interaction parameters are computed such that their highest eigenvalue
+agrees with this number. Scaled parameters are saved in results/mcdisp\_scaled.j
+and here follow standard deviations computed with the scaled parameters
+ sta\_scaled sta4\_scaled
+\item {\prg makenn} comments in output file removed to smooth iterative usage
+\item {\prg splitfile} option -c introduced to split at columns value changes
+\item {\prg  ic1ion bug for quasielastic beyond dipolar scattering fixed (spin exp value was not
+          subtracted from matrix elements)}
+\item {\prg rotateBLm} bug reading Blm with sign  fixed
+\item {\prg mcphas2jvx} bug for nonortho primitive lattices fixed
+\item {\prg getvalue} linux bug fixed
+\end{itemize}
+
+
 \subsection*{ \dots in version 5.2 \dots}
 \begin{itemize}
 \item recommended program for single ion properties is now {\prg singleion}\index{singleion} (works for all modules)
@@ -153,39 +176,6 @@ specified the programs attempt to determine the available number of cores automa
 \item
 - {\prg delcomments} option -c introduced
 \end{itemize}
-
-\subsection*{... in version 4.8...}
-
-- mcdiff output file neutron intensities in absolute units. lorentzf=0 option added (allows calculation without lorentzfactor, i.e. the used value for the calculation of the intensities is lorentzfactor=1.0)
-
-- range got an option -u to undo range
-
-- delcomments got an option -s to be able to specify what is the comment string starting a comment line
-
-- mcphas.xyt output of phase index changed: the index referred in earlier versions to the structure list in the mcphas.phs file. There, similar structures have different indices. Now the program mcphas has been changed and the phase index is determined by comparing the stabilised structure with the structures in mcphas.tst inputfile and if one of these fits (is equivalent), then the index of this structure is stored. This gives a more clean phasediagram.
-
-- bugs removed from script2html, average, getvalue, mcphaseexplorer, mcphas.j last line read
-
-
-\subsection*{... in version 4.7...}
-
-- some bugs corrected in quasielastic scattering beyond dipole approx 
-  (not very likely to be of any relevance for practical applications)
-
-- program display redesigned to be able to handle error bars and 
-  different symbol size
-
-- program {\prg anisotropy} added to be able to calculate anisotropy loops
-  for single ion property files
-
-- many column manipulation programs extended to be able to manipulate
-  error columns containing errorbars for experimental data
-
-- program {\prg script2html} allows to create html documentation from
-  several scripts. This makes documentation of calculations easier
-  (see tutorial)
-
-
 
 
 \newpage
