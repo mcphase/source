@@ -181,5 +181,5 @@ endif
 #  LIBFLEX
 LIBL= /usr/lib/libfl.a
 
-
-CCOPTS+= -std=c++11
+#CCOPTS+= -std=c++11   ... this is how it should be, but will not work with old compilers !
+CCOPTS+= -std=c++0x

@@ -80,6 +80,7 @@ public class displaytext extends JPanel implements FileListener {
 		numberArea.setMargin(new Insets(0, 4, 0, 4));
         numberArea.setBackground(new Color(240, 240, 255));
         numberArea.setForeground(new Color(180, 180, 180));
+        numberArea.setFont(new Font("Courier New",0,12));
         numberArea.setEditable(false);
 		scrollPane.setRowHeaderView(numberArea);
 		

@@ -27,8 +27,9 @@ unless ($#ARGV >0)
  print " option -w 1.4     before starting simannfit, multiply all stepwidths by factor 1.4\n"; 
  print " option -f 0.2     before starting simannfit, set all stepwidths to parameter value times 0.2,\n"; 
  print "                   hoever never smaller than parameterrange/1000\n"; 
+ print " option -c         continue at end of program - do not ask for pressing enter\n"; 
 
-print " <Press enter to close>";$in=<STDIN>;
+#print " <Press enter to close>";$in=<STDIN>;
  exit 0;}
 
 
@@ -56,7 +57,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
   $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;$stepset=0;
-  $options=1;$probe=0;$stepfact=1;
+  $options=1;$probe=0;$stepfact=1;$cont=0;
   while($options==1)
   {$options=0;
   if ($ARGV[0]=~"-t") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxtim=eval $ARGV[0]; shift @ARGV;}
@@ -65,6 +66,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
   if ($ARGV[0]=~"-p") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$probe=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-w") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepfact=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-f") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepset=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0]=~"-c") {$options=1;shift @ARGV; $cont=1;}
   }
  while(!open(Fout,">results/simannfit.status")){print "Error opening file results/simannfit.status\n";<STDIN>;}
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
@@ -303,8 +305,9 @@ $Fij=$delta x matinv($V);
                                    print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
                                    ++$i;}
      }
-     close Fout;if($tablestep!=0){close $Foutlevel;}
-print " <Press enter to close>";$in=<STDIN>;exit 0;
+     close Fout;if($tablestep!=0){write_set($Foutlevel);close $Foutlevel;}
+print " <Press enter to close>";if($cont==0){$in=<STDIN>;}
+exit 0;
 # END OF MAIN PROGRAM
 #****************************************************************************** 
 
@@ -474,7 +477,8 @@ sub read_write_statusfile {
                           }
 
 sub writeini()
-   {my ($filename)=@_;local *FH;
+   {my ($filename)=@_;
+    #local *FH; removed 28.1.2017 becuse FH was not returned correctly 
     if(open(FH,$filename)){print "Appending table to $filename ...\n";
        while($line=<FH>){unless ($line=~/^\s*#/)
                                 {$line=~s/D/E/g;@numbers=split(" ",$line);}
@@ -492,5 +496,4 @@ sub write_set()
      my $dd=sprintf("%i ",$stepnumber+$tableoffset);print $Foutl $dd;
         my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print $Foutl $dd;++$ii} 
         print $Foutl $sta." ".$s2." ".$chisquared."\n";
-        
 }

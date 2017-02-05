@@ -54,11 +54,11 @@ EOF
 #parameter   [ value,     min,      max,     err,       stp     ]   
 #.
 format STDOUT =
-@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 sprintf("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i])
 .
 format Fout =
-@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[$ii],$parerr[$ii],$parstp[$ii])
 .
 
@@ -403,7 +403,7 @@ sub writefiles {
 }
 
 sub write_set()
-{       my $dd=sprintf("%g ",($pointcounter+1)+$searchlevel/100);print Foutlevel $dd;
+{       my $dd=sprintf("%.2f ",($pointcounter+1)+$searchlevel/100);print Foutlevel $dd;
         my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print Foutlevel $dd;++$ii} print Foutlevel $sta." ".$s2." ".$chisquared."\n";
         if($jpglog>$sta){$dd=sprintf("%g.jpg",($pointcounter+1)+$searchlevel/100);
                          print Foutlevel '#<img src="'.$dd.'">'."\n";

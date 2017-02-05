@@ -13,7 +13,7 @@ $PI=3.141592654;
 
 unless ($#ARGV>=2) 
 
-{print " program to create mcdisp.ini from mcphas.j for the calculation of neutron powder spectra\n\n";
+{print " program to create mcdisp.par from mcphas.j for the calculation of neutron powder spectra\n\n";
 
 print " usage: powdermagnon 0.3 2 0.1 10 0.5 30\n\n";
 
