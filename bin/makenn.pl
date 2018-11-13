@@ -8,7 +8,7 @@ use PDL;
 use PDL::Slatec;
 
 print "#********************************************************\n";
-print "# makenn - create table with neighbors and interactions\n";
+print "# makenn 181025 - create table with neighbors and interactions\n";
 print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "#********************************************************\n";
 $PI=3.141592654;
@@ -377,9 +377,10 @@ print "number of atoms = $nofatoms\n calculating ...\n";
                                    $yn->index($n)->at($n2)*$yn->index($n)->at($n2)+
                                    $zn->index($n)->at($n2)*$zn->index($n)->at($n2);
                                   
-                                if(abs($innr*$innr-$rrn1*$rrn2)<0.0001)
+                                if(abs($innr*$innr-$rrn1*$rrn2)<0.0001&&$innr>0)
                                   {# remove neighbour n1
                                    set $rn->index($n),$n1,0;--$nofneighbours[$nnn];
+                                   $n2=$n1;
                                   } 
                                }
      }
@@ -434,7 +435,7 @@ my $i,$j;$i=0;
        	     }
              else
              {
-             print STDERR "Warning: failed to read data file \"$filename\"\n";
+             print STDERR "Warning: failed to read/write MODPARS from/to data file \"$filename\"\n";
              }
 
 
@@ -615,7 +616,7 @@ sub getlattice {
      return ([$a,$b,$c,$alpha,$beta,$gamma,$nofatoms,$nofcomponents],pdl [[$r1x,$r1y,$r1z],[$r2x,$r2y,$r2z],[$r3x,$r3y,$r3z]]);
 
     } else {
-	print STDOUT "Warning: failed to read data file \"$file\"\n";
+	print STDOUT "Warning: failed to read lattice from file \"$file\"\n";
 	return undef;
     }
 }
@@ -853,7 +854,7 @@ sub extractfromfile {
        	     }
              else
              {
-             print STDERR "Warning: failed to read data file \"$filename\"\n";
+             print STDERR "Warning: failed to read data file \"$filename\" to extract variable $variable\n";
              }
              return $value;
             }

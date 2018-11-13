@@ -19,7 +19,7 @@ class physproperties
 float x,y; // phasediagramm labels  
 int j;  // index of spinstructure
 double T; // temperature
-Vector m,H; // moment and H feld
+Vector m,H; // moment and H field
 double fe;
 double u; // free energy and mag energy per ion
 int nofatoms;
@@ -37,8 +37,12 @@ physproperties (const physproperties & props);	// kopier-konstruktor
 ~physproperties ();		//destruktor
 
 void update_maxnofhkls(int mxnofhkli);
+// save physical properties to output files
 double save(int verbose,const char * filemode, int j,par & inputpars,char * prefix);
-
+// scroll output files and read physical properties from these if possible,
+// on success return 0, otherwise
+// returns 1
+int read(int verbose, par & inputpars,char * readprefix);
 };
 
 

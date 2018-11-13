@@ -484,3 +484,277 @@ fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
  washere=1;
 return sta;
  }
+
+// scroll output files and read physical properties from these if possible,
+// on success return 0, otherwise
+// return 1
+int physproperties::read(int verbose, par & inputpars,char * readprefix)
+{ FILE *fin;
+  char filename[50];
+  int i,j2,l,i1,j1,nmax;
+  float nn[200];nn[0]=199;
+  int ortho=1,found=0;
+  if (inputpars.alpha!=90||inputpars.beta!=90||inputpars.gamma!=90){ortho=0;}
+      Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
+                       abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+
+   Vector mabc(1,3),Hijk(1,3);
+   dadbdc2ijk(Hijk,H,abc);
+   ijk2dadbdc(mabc,m,abc);
+
+  printf("reading properties for T=%g K  Ha= %g Hb= %g Hc= %g T\n", T,H(1),H(2),H(3));
+
+//-----------------------------------------------------------------------------------------  
+  errno = 0;char infilename[MAXNOFCHARINLINE];
+  strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
+  strcpy(infilename+10+strlen(readprefix),"mcphas.fum");
+  if (verbose==1) printf("reading %s \n",infilename);
+   fin = fopen_errchk (infilename,"r");
+// here read free energy etc if possible ... otherwise return 1
+// check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+// then read fe, u, 
+// read mabc[1-3] convert to ijk
+
+found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+   fclose(fin);
+   // check if stable, i.e. if free energy nn[8] is nonzero
+   if(nn[8]==0) return 1; // 
+   fe=nn[8];u=nn[9];mabc[1]=nn[11];mabc[2]=nn[12];mabc[3]=nn[13];
+   dadbdc2ijk(m,mabc,abc);
+//fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
+ //           myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),
+//myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),
+//myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
+ //  if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
+  
+//-----------------------------------------------------------------------------------------  
+  errno = 0; Vector totalJ(1,nofcomponents);
+  strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
+  strcpy(infilename+10+strlen(readprefix),"mcphas.xyt");
+    if (verbose==1)printf("reading %s\n",infilename);
+  fin = fopen_errchk (infilename,"r");
+// check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+//then read j ... not necessary
+   //fprintf (fin, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip      ",
+     //       myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),j,sps.wasstable);
+        // then read totalJ ... not necessary if sps is read !!
+//   for(i1=1;i1<=nofcomponents;++i1)
+//	      {fprintf(fin,"%4.4g ",myround(totalJ(i1)));}
+//	      fprintf(fin,"\n");
+found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+   fclose(fin);
+   
+//-----------------------------------------------------------------------------------------  
+ nmax=nofspincorr; // look how many spincorrelationfunction we have indeed calculated - the 
+                   // user wanted nofspincorr, but maybe it was fewer ...
+ for (l=1;l<=inputpars.nofatoms;++l)
+      {if(nmax>(*inputpars.jjj[l]).paranz)
+       {nmax=(*inputpars.jjj[l]).paranz;
+        fprintf(stderr,"Warning: reading of nofspincorr=%i correlation functions not possible, \n",nofspincorr);
+fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are given.\n",l,(*inputpars.jjj[l]).paranz);
+       }
+      }
+       
+
+  // only read nmax correlation functions ...
+ for(i=1;i<=nmax;++i){for(l=1;l<=nofatoms;++l){
+  errno = 0;
+  if (verbose==1)printf("reading mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
+  strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
+  strcpy(infilename+10+strlen(readprefix),"mcphas");
+  sprintf(filename,"%s%i.j%i",infilename,l,i);
+  fin = fopen_errchk (filename,"r");
+   // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+//then read jj[] 
+
+ // fprintf (fin, "%4.4g %4.4g   %4.4g %4.4g   %4.4g %4.4g %4.4g     ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+  //      for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
+   //         {fprintf (fin, "%4.4g ",myround(jj[i](j2+nofcomponents*nofcomponents*(l-1))));
+//	    }
+ //  fprintf (fin,"\n");
+  found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+ fclose(fin);
+ for(j2=1;j2<=nofcomponents*nofcomponents;++j2)jj[i](j2+nofcomponents*nofcomponents*(l-1))=nn[j2+7];
+
+  }}
+
+//-----------------------------------------------------------------------------------------  
+ errno = 0;
+  strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
+  strcpy(infilename+10+strlen(readprefix),"mcphas*.hkl");
+  if (verbose==1)printf("reading %s - neutrons and xrays\n",infilename);
+
+  //neutrons
+   strcpy(infilename+10+strlen(readprefix),"mcphas.hkl"); 
+   fin = fopen_errchk (infilename,"r");
+   if (verbose==1)printf(" .... reading %s\n",infilename);
+   // check x y T H[1] H[2] H[3] agrees and
+  //then read hkli[1-4]
+
+    //fprintf (fin, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+//   for (i=nofhkls;i>=1;--i)
+//    {fprintf (fin, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[i](1)),myround(hkli[i](2)),
+//myround(hkli[i](3)),myround(hkli[i](4)));
+//    } fprintf(fin,"\n");
+found=0;while(found==0){ i=0;
+ while (feof(fin)==0&&0==i)i=inputline(fin,nn);  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;nofhkls=(i-7)/4;
+               } 
+   fclose(fin);
+   for (i=nofhkls;i>=1;--i){hkli[i](1)=nn[7+(i-1)*4+1];
+                            hkli[i](2)=nn[7+(i-1)*4+2];
+                            hkli[i](3)=nn[7+(i-1)*4+3];
+                            hkli[i](4)=nn[7+(i-1)*4+4];}
+ 
+  //xray a component
+  if(ortho==0){strcpy(infilename+10+strlen(readprefix),"mcphasi.hkl");
+                } else {strcpy(infilename+10+strlen(readprefix),"mcphasa.hkl");  }
+   fin = fopen_errchk (infilename,"r");
+   if (verbose==1)printf(" .... reading %s\n",infilename);
+   // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+//then read hkli[5,6]
+//    for (i=nofhkls;i>=1;--i)
+//    {fprintf (fin, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
+//    } fprintf(fin,"\n");
+found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+   fclose(fin);
+  for (i=nofhkls;i>=1;--i){hkli[i](5)=nn[7+(i-1)*4+4];
+                           hkli[i](6)=nn[7+(i-1)*4+5];
+                            }
+//xray b component
+   if(ortho==0){strcpy(infilename+10+strlen(readprefix),"mcphasj.hkl");
+                } else {strcpy(infilename+10+strlen(readprefix),"mcphasb.hkl");  }
+   fin = fopen_errchk (infilename,"r");
+   if (verbose==1)printf(" .... reading %s\n",infilename);
+    // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+//then read hkli[7,8]
+//fprintf (fin, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+//   for (i=nofhkls;i>=1;--i)
+//    {fprintf (fin, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
+//    } fprintf(fin,"\n");
+found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+   fclose(fin);
+  for (i=nofhkls;i>=1;--i){hkli[i](7)=nn[7+(i-1)*4+4];
+                           hkli[i](8)=nn[7+(i-1)*4+5];
+                            }
+  //xray c component
+   if(ortho==0){strcpy(infilename+10+strlen(readprefix),"mcphask.hkl");
+                } else {strcpy(infilename+10+strlen(readprefix),"mcphasc.hkl");  }
+   fin = fopen_errchk (infilename,"r");
+   if (verbose==1)printf(" .... reading %s\n",infilename);
+   // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+//then read hkli[9,10]
+//fprintf (fin, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+ //  for (i=nofhkls;i>=1;--i)
+  //  {fprintf (fin, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
+   // } fprintf(fin,"\n");
+found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+   fclose(fin);
+  for (i=nofhkls;i>=1;--i){hkli[i](9)=nn[7+(i-1)*4+4];
+                           hkli[i](10)=nn[7+(i-1)*4+5];
+                            }
+
+//-----------------------------------------------------------------------------------------  
+ errno = 0;
+ strcpy(infilename+10+strlen(readprefix),"mcphas.sps");
+   if (verbose==1)printf("reasding %s- spinconfiguration\n",infilename);
+  fin = fopen_errchk (infilename,"r");
+   // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+//then read sps  ... probably sps.read ...??
+
+  // fprintf (fin, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
+   //         myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
+//    fprintf(fin,"0 = ok\n");sps.print(fin);fprintf(fin,"\n");
+found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   sps.load(fin);
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+   fclose(fin);
+  
+ 
+//-----------------------------------------------------------------------------------------  
+ errno = 0;
+  strcpy(infilename+10+strlen(readprefix),"mcphas.mf");
+  if (verbose==1)printf("reading %s - mean field configuration\n",infilename);
+     fin = fopen_errchk (infilename,"r");
+// check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+//then read mf
+
+//fprintf (fin, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
+ //           myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),
+  //         myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+//   fprintf(fin,"0 = ok\n");mf.print(fin);fprintf(fin,"\n");
+found=0;while(found==0){ 
+ while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   if (feof(fin)!=0) {fclose(fin);return 1;}
+    //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+   mf.load(fin);
+   if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
+             (nn[3]-T)*(nn[3]-T)+
+             (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
+             found=1;
+               } 
+   fclose(fin);
+   //-----------------------------------------------------------------------------------------  
+
+return 0; 
+ }

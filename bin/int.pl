@@ -76,6 +76,8 @@ $colyerr=~s/x/*/g;$colyerr=eval $colyerr;
             print Fout "\n";
            }
       }
+# check if only one number has been read
+      if ($j==1) {$integral=$numbers1[$coly-1];}
       close Fin;
       close Fout;$nmax=1;
    if($calcm==1){ # here calculate mth moments 1- $nmax

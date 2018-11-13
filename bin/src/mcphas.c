@@ -49,6 +49,7 @@ fprintf(stderr,"****************************************************************
   
 // check command line
 int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
+              char readprefix [MAXNOFCHARINLINE];readprefix[0]='\0';
   for (im=0;im<=argc-1;++im)
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
@@ -59,6 +60,10 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
    if (strcmp(argv[im],"-prefix")==0&&im+1<=argc-1)
                                  {strcpy(prefix,argv[im+1]); // read prefix
                                   fprintf(stdout,"#prefix for input/ouput filenames: %s\n",prefix);
+ 				 if (options<im+1)options=im+1;}
+  if (strcmp(argv[im],"-read")==0&&im+1<=argc-1)
+                                 {strcpy(readprefix,argv[im+1]); // read prefix
+                                  fprintf(stdout,"#reading stable points from mcphas ouput files: results/%s*\n",readprefix);
  				 if (options<im+1)options=im+1;}
   }
     inipar ini("mcphas.ini",prefix);
@@ -160,8 +165,11 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
       physprop.T=T;
       physprop.H=h;
 
-//calculate physical properties at HT- point
-   j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);
+// check if calculation results should and can be read (returns j=0)
+j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix);}
+
+// if not (j=1) then calculate physical properties at HT- point
+if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
        switch (j)
        {case 0:
             //save physical properties of HT-point

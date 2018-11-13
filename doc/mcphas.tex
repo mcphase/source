@@ -570,6 +570,17 @@ the verbose mode enables the following features:
 				    when a structure with smaller free energy 
 				    has been stabilised
   \end{itemize}
+ \item[\prg mcphas\index{mcphas}  -prefix 001  ]  try to read files starting with 001, e.g.
+ 		    001mcphas.ini, if these exist, otherwise take
+ 		    standard input files, check if in mcphas.ini there are
+                   parameters such as 001xmin and use those. Output goes to files
+ 		    results/001mcphas*.* (option for parallel processes)
+ \item[\prg mcphas\index{mcphas}         -read  001 ]   try to read output files of previous calculation starting
+ 		     with 001, e.g. results/001mcphas.fum, if these exist, and if 
+ 		    the x-y-T-Ha-Hb-Hc point is found and the calculation was stable 
+                   (i.e. free energy in results/001mcphas.fum not zero do not 
+                   recalculate it but take results from this previous calculation
+ 		     and store those. Option to recalculate nonstable points only.
 \item[\prg mcphasit\index{mcphas}] to start mcphase in commandline mode without opening any window
 \end{description}
 
