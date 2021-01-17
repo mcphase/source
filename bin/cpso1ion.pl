@@ -84,9 +84,9 @@ $noflevels=1; # initialize noflevels
 
    for($i=1;$i<=$noflevels;++$i)
 
-     {if($line=~/^.*\QE( \E$i\Q)\E\s*=/) 
+     {if($line=~/^.*\QE(\E *$i\Q)\E\s*=/) 
 
-      {($E[$i])=($line=~m|\QE( \E$i\Q)\E\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);
+      {($E[$i])=($line=~m|\QE(\E *$i\Q)\E\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)|);
 
        ($deg[$i])=extract("Degeneracy",$line);#($line=~m|.*\QDegeneracy\E\s*:\s*([\d.eEdD]+)|);
 
@@ -94,7 +94,7 @@ $noflevels=1; # initialize noflevels
 
       } 
 
-     }
+     } 
 
   }     
 
