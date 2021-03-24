@@ -57,6 +57,7 @@ GetOptions("help"=>\$helpflag,
            "pointcharge|pc=f"=>\$pointcharge,
            "savepcfile|sp"=>\$savepcfile,
            "readpcfile|rp"=>\$readpcfile,
+           "charges|ch=s"=>\$inputcharges,
            "so1ion"=>\$so1ion,
            "ic1ion"=>\$ic1ion,
            "outpos"=>\$checkpos);
@@ -75,6 +76,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "                           up to # Angstrom away from magnetic ions (e.g. -p 3.5)\n";
    print "    --savepcfile  or -sp : write *.pc coordinate files to results folder\n";
    print "    --readpcfile  or -rp : read from *.pc coordinate files in results folder\n";
+   print "    --charges     or -ch : input charges to override defaults\n";
    print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";
    print "    --ic1ion      or -ic : force use of ic1ion for single ion modules.\n";
    print "\n";
@@ -88,7 +90,9 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print " For the -pc pointcharge option, the -sp option can be used to generate files\n";
    print "   containing table of neighbouring charges named results/<sipfname>.pc\n";
    print "   You can then edit the values of the charges in this and rerun $0 with the -rp\n";
-   print "   option to re-read this table with new charges to generate CF parameters in the sipf\n\n";
+   print "   option to re-read this table with new charges to generate CF parameters in the sipf\n";
+   print " You can also input the charges for each element using the -ch option with the syntax:\n";
+   print "   $0 -pc <n> -ch O=-2,Ce=+3,Pd=+2\n\n";
    print " Finally, by default $0 will use so1ion for f-electron ions and ic1ion for d-electron\n";
    print "   ions, but this can be overridden using the -so or -ic flags.\n";
    exit(0);
@@ -155,9 +159,15 @@ sub multigcf {
   return $x;
 }
 
+sub trim {
+  my $s = shift;
+  $s =~ s/^\s+|\s+$//g;
+  return $s;
+}
+
 # Lifted from makenn.pl - finds nearest neighbours of an ion within some supercell defined by limits in nmx
 sub getneighbours {
-  my ($i,$posref,$nmxref,$rtoijk) = @_;
+  my ($i,$posref,$nmxref,$rtoijk,$inputcharges) = @_;
   my @retval = ();
   @pos = @{$posref};
   @nmx = @{$nmxref};
@@ -167,6 +177,9 @@ sub getneighbours {
   @rlist = ();
   @alist = ();
   @charg = ();
+  if ($inputcharges) {
+    %chhash = split(/,|=/, $inputcharges);
+  }
   if ($debug) { print "----------------\n".join("|",@p0)."\n----------------\n"; }
   for $i1 ($nmx[0]..$nmx[3]) {
     for $i2 ($nmx[1]..$nmx[4]) {
@@ -182,7 +195,12 @@ sub getneighbours {
             push @dlist, $dabc;              # Relative coordinates
             push @rlist, $rvec;              # Cartesian coordinates
             push @alist, $_;                 # Atom number
-            push @charg, $ps[6];             # Oxidation state (valence / charge)
+            if ($inputcharges) {
+              $ps[0] =~ s/^\s+|\s+$//g;      # Trim whitespaces
+              push @charg, $chhash{$ps[0]};  # Uses user input charges
+            } else {
+              push @charg, $ps[6];           # Oxidation state (valence / charge)
+            }
             $rn = $rn->append( pdl([$r]) );  # Distance (Angstrom)
           }
         }
@@ -191,6 +209,7 @@ sub getneighbours {
   }
   $n = qsorti($rn);
   if($savepcfile) {
+    if (! -d "results") { mkdir "results"; }
     print "atom ".($i+1)." ...\n";
     if(!$debug) { open (FOUT, ">results/$p0[7].pc"); } else { *FOUT = *STDOUT; }
     print FOUT "#-------------------------------------------------------------------------------------\n";
@@ -336,6 +355,10 @@ $PI=3.141592654;
 $a = $cellpar{"_cell_length_a"};
 $b = $cellpar{"_cell_length_b"};
 $c = $cellpar{"_cell_length_c"};
+# Removes uncertainties in cell parameters
+$a =~ s/\([0-9]*\)//;
+$b =~ s/\([0-9]*\)//;
+$c =~ s/\([0-9]*\)//;
 $alpha = $cellpar{"_cell_angle_alpha"}*$PI/180;
 $beta  = $cellpar{"_cell_angle_beta"}*$PI/180;
 $gamma = $cellpar{"_cell_angle_gamma"}*$PI/180;
@@ -599,6 +622,10 @@ foreach $ii(0..$#same) {
   $dat[$same[$ii]][0] = -1;
 }
 
+if ($inputcharges) {
+  %chhash = split(/,|=/, $inputcharges);
+}
+
 # Loops over each inequivalent atom and apply each symmetry equivalent operator
 for $j(0..$nofatom-1) {
   if($dat[$j][0] eq -1) { push @atoms, -1; next; }
@@ -671,6 +698,12 @@ for $j(0..$nofatom-1) {
     if($checkpos) { printf "%-4s% 10.5f% 10.5f% 10.5f\n",$atom,@seps; }
    $mults[$j]++;
   }
+  if ($inputcharges) {    # Replace formal valence by user inputted charges
+    $atom =~ s/^\s+|\s+$//g;
+    if ($chhash{$atom} ne "") {
+      $oxy[$j] = $chhash{$atom};
+    }
+  }
 }
 #print "$_ $htp{$_}\n" for (keys %htp);
 if($debug==1) { foreach (@pos) { print STDERR "$_\n"; } }
@@ -739,7 +772,7 @@ if ($pointcharge) {
         }
         close(FIN);
       } else {
-        @neighbours = @{getneighbours($j,\@pos,\@nmx,$rtoijkmc)};
+        @neighbours = @{getneighbours($j,\@pos,\@nmx,$rtoijkmc,$inputcharges)};
       }
       $pointcstr = join("\n",@neighbours);
       $pointcstr = "$so1ionname\nnof_electrons=$nofelectrons\nR2=${$eltab}[5]\nR4=${$eltab}[6]\nR6=${$eltab}[7]\n".$pointcstr;
@@ -755,6 +788,7 @@ if ($pointcharge) {
       $part_id = 0;
       while (<PCOUT>) { 
         if($_ =~ /^#\-/) { $part_id+=0.5; }
+        $_ =~ s/([LB]00)/#$1/;
            if($part_id==0)  { push @pc_head, $_; }
         elsif($part_id<1.5) { push @blm_par, $_; }
         elsif($part_id<2.5) { push @llm_par, $_; }
@@ -1216,6 +1250,9 @@ print FOUT << "EOF";
 EOF
 if($debug==0) { close FOUT; }
 
+# Creates a results folder for users
+if (! -d "results") { mkdir "results"; }
+
 #print "END OF PROGRAM $0\n";
 print "\n";
 print "Created files:\n";
@@ -1237,4 +1274,3 @@ print "   running javaview results/spins.jvx displays the corresponding\n";
 print "   spinstructure (collinear), !! mind to edit formfactor information\n";
 print "   in the magnetic ions .sipf files before running mcdiff !!\n";
 print "\n";
-

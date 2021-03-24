@@ -101,7 +101,7 @@ int myReadComplexMatrix (FILE * file, ComplexMatrix & M)
   numbers[0]=M.Rhi()-M.Rlo()+2;
  
      //read comment line 
-     if(fgets(instr,MAXNOFCHARINLINE,file)==NULL) {fprintf (stderr, "ERROR reading complex matrix - comment line before real part\n");return false;}
+     if(fgets(instr,MAXNOFCHARINLINE,file)==NULL) {fprintf (stderr, "Warning:  reading complex matrix - not possible to read comment line before real part\n");return false;}
 
     // read real part
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
