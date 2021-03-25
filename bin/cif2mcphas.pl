@@ -239,7 +239,7 @@ sub getneighbours {
 # Reads CIF and parses it to get the structure parameters and atomic coordinates.
 # ------------------------------------------------------------------------------------------------------------------------ #
 while (<>) {
-  $_ =~ s/\R//g;            # safe chomp
+  $_ =~ s/^\s+|\s+$//g;     # safe chomp
   if ($_ =~ /#/) { next; }  # Ignore comments (for ICSD Karlsruhe data)
   if ($_ =~ /^;/) { next; } # Ignore comments (generally)
   if ($_ =~ /_cell/) {
