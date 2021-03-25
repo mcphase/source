@@ -1199,7 +1199,7 @@ print FOUT << "EOF";
 #              ~sum_n ()n exp(-2 DWFn sin^2(theta) / lambda^2)=EXP (-Wn),
 #              relation to other notations: 2*DWF = B = 8 pi^2 <u^2>, units DWF (A^2)
 #
-#! use_dadbdc=1
+#! use_dadbdc=0
 #
 # Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
 EOF
