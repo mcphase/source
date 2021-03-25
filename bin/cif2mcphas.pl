@@ -1211,9 +1211,8 @@ for $si (0..$sa-1) {
         if($ismag[$ions{$ps[7]}]==0) {
           $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
           $fpos = pdl [ ($ps[1]+$si), ($ps[2]+$sj), ($ps[3]+$sk) ];
-          $cpos = $rtoijk x transpose($fpos);
           printf FOUT "%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f%10.5f 0  # %s.sipf\n",
-             $realb[$ions{$ps[7]}], $imagb[$ions{$ps[4]}], $pa, $pb, $pc, $cpos->at(0,0), $cpos->at(0,1), $cpos->at(0,2), $ps[7];
+              $realb[$ions{$ps[7]}], $imagb[$ions{$ps[4]}], $pa, $pb, $pc, $fpos->at(0), $fpos->at(1), $fpos->at(2), $ps[7];
         }
       }
     } 
