@@ -164,7 +164,7 @@ void inimcdis::save()
   fprintf(fout,"#\n");
   fprintf(fout,"#hklplane=h0=0 k0=1 l0=0 to hN=1 kN=1 lN=0 Nstp=21 to hM=1 kM=0 lM=3 Mstp=21  \n"); 
   fprintf(fout,"# or\n");
-  fprintf(fout,"#QxyQzplane=Qx0=0 Qy0=1 Qz0=0 to QxN=1 QyN=1 QzN=0 Nstp=21 to QxM=1 QyM=0 QzM=3 Mstp=21  \n"); 
+  fprintf(fout,"#QxQyQzplane=Qx0=0 Qy0=1 Qz0=0 to QxN=1 QyN=1 QzN=0 Nstp=21 to QxM=1 QyM=0 QzM=3 Mstp=21  \n"); 
   fprintf(fout,"# or\n");
   fprintf(fout,"# - a list of Q vectors with (optional) energies of observed excitations to be fitted\n");
   fprintf(fout,"# h k l [E(meV) [statistical_weight  [intensity [fwhm ]]]]\n");

@@ -66,13 +66,24 @@ print "              transversal spring constants from file - file format:\n";
 print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(n/M)\n";
 print STDOUT << "EOF";
  option -f [filename]
-              read interaction constants from table in file. To get an sample
-              file use option -f without a filename.      
+ option -dm [filename]
+              read interaction constants from table in file. 
+              Use -f for isotropic interactions between momentum Ji and Jj
+              at positions i and j
+                               ( J   0   0 )
+              J Ji.Jj  =    Ji.( 0   J   0 ).Jj
+                               ( 0   0   J ) 
+              and -dm for Dzyaloshinski Moriya interactions:
+                               ( 0   Dz  -Dy )
+              D.(Ji x Jj) = Ji.(-Dz  0    Dx ).Jj
+                               ( Dy  -Dx  0  )
+
+              To get an sample file use option -f or -dm without a filename.      
 EOF
 print "        -d puts to the last column the distance of the neighbors (A)\n\n";
 print " The neigbours of each atom are also stored in separate files\n";
 print " results\/makenn.a*.pc, which can be used with the program pointc to evaluate\n";
-print " the pointcharge model and calculate crystal field paramaters.\n\n";
+print " the pointcharge model and calculate crystal field parameters.\n\n";
  exit 0;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];
@@ -140,29 +151,43 @@ elsif(/-bvk/)
               close Fin;
        	     }
   }
-elsif(/-f/)
-  {$readtable=1;shift @ARGV;
+elsif(/-f/||/-dm/)
+  {$readtable=$_;shift @ARGV;
    unless ($#ARGV>=0) # if no filename is given print help
-   {
-    print STDOUT << "EOF";
+   {    print STDOUT << "EOF";
 # Sample table of interaction constants for program makenn
 #
-# primitive unit cell range to probe for neighbours:
+# primitive unit cell range to probe for neighbours (optional):
 #! nr1min=-1  nr2min=-1  nr3min=0 
 #! nr1max=+1  nr2max=+1  nr3max=0
 #
 #! ignore_neihgbours_behind=0   # if set to 1 then only nearest neighbour in each 
 #                               # direction is taken
 #  
+EOF
+if(/-f/)
+{print STDOUT << "EOF";
 # Table of exchange interaction constants J - assumed to be isotropic
 # da [a] db [b] dc [c] J [meV]
   1      0      0      -5.8
   0      1      0      -5.8
 EOF
+}
+else
+{print STDOUT << "EOF";
+# Table of Dzyaloshinska Moriya exchange interaction constants DM - assumed to be isotropic
+# da [a] db [b] dc [c] Dmx [meV] Dmy [meV] Dmz [meV]
+  1      0      0      -5.8      -3.1      -2.5
+  0      1      0      -5.8      -3.1      -2.5
+EOF
+}
+
    exit(0); }
    $table_file=$ARGV[0];shift @ARGV;
    $ignore_neihgbours_behind=0;
-   print "reading isotropic interactions from table in file $table_file\n";
+   print "reading "; if ($readtable=~/-f/) {print " isotropic ";$DM=0;} else {print " DM ";$DM=1;}
+   $readtable=1;
+   print" interactions from table in file $table_file\n";
    # read interaction constants from file
    unless(open(Fin,$table_file)){ die "could not open $table_file\n";}
              $n_table=0;
@@ -182,6 +207,10 @@ EOF
                                   $db[$n_table]=$numbers[1];
                                   $dc[$n_table]=$numbers[2];
                                   $Jex[$n_table]=$numbers[3];
+                                  if($#numbers>=5){
+                                  $Jey[$n_table]=$numbers[4];
+                                  $Jez[$n_table]=$numbers[5];
+                                                  }
                                  }
                                 }
               close Fin;
@@ -348,6 +377,7 @@ print "number of atoms = $nofatoms\n calculating ...\n";
     $in=$in->append( pdl ([$rvec->at(0)]));
     $jn=$jn->append( pdl ([$rvec->at(1)]));
     $kn=$kn->append( pdl ([$rvec->at(2)]));
+unless($DM>0){
     $Jaa=$Jaa->append( pdl ([$Jex[$ntbl]]));
     $Jab=$Jab->append( pdl ([0.0]));
     $Jac=$Jac->append( pdl ([0.0]));
@@ -357,6 +387,18 @@ print "number of atoms = $nofatoms\n calculating ...\n";
     $Jca=$Jca->append( pdl ([0.0]));
     $Jcb=$Jcb->append( pdl ([0.0]));
     $Jcc=$Jcc->append( pdl ([$Jex[$ntbl]]));
+              } else
+              {
+    $Jaa=$Jaa->append( pdl ([0.0]));
+    $Jab=$Jab->append( pdl ([$Jez[$ntbl]]));
+    $Jac=$Jac->append( pdl ([-$Jey[$ntbl]]));
+    $Jba=$Jba->append( pdl ([-$Jez[$ntbl]]));
+    $Jbb=$Jbb->append( pdl ([0.0]));
+    $Jbc=$Jbc->append( pdl ([$Jex[$ntbl]]));
+    $Jca=$Jca->append( pdl ([$Jey[$ntbl]]));
+    $Jcb=$Jcb->append( pdl ([-$Jex[$ntbl]]));
+    $Jcc=$Jcc->append( pdl ([0.0]));
+              }
                                   }                             } 
                                }
                       }
@@ -658,8 +700,8 @@ sub printneighbourlist {
      if (/^(#!|[^#])*nofneighbours\s*=\s*/){($nn0)=extract("nofneighbours",$text);
                                             $text=~s!nofneighbours\s*=\s*\d+!nofneighbours=$nofn!;}
      if (/^(#!|[^#])*diagonalexchange\s*=\s*/){
-
-      if ($rkky>=1||$readtable>0)
+print $DM;
+      if ($rkky>=1||($readtable>0&&$DM<1))
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=1!;}
       else
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=0!;}
@@ -725,7 +767,7 @@ print $l1 "#--------------------------------------------------------------------
   print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
 
   if (($gJ!=0&&$gJ[$ddd]==0)||($gJ==0&&$gJ[$ddd]!=0)){ die "error makenn. mixing of atoms with gJ=0 (intermediate coupling) and gJ>0 not implemented\n";}
-  if (($rkky==0&&$readtable==0)||$bvk==1) # here anisotropic interaction comes in
+  if (($rkky==0&&$readtable==0)||$bvk==1||($readtable>0&&$DM>0)) # here anisotropic interaction comes in
    { 
        if($bvk==1||($gJ!=0&&$gJ[$ddd]!=0))
          {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
