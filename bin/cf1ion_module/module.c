@@ -400,10 +400,10 @@ extern "C" void mcalc(Vector & mom,double & T, Vector & gjmbHxc,Vector & Hext,do
 // for mcdisp this routine is needed
 #ifdef __declspec
 extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbHxc, Vector & Hext,double * gJ,Vector & ABC, char ** sipffile,
-                       ComplexVector & u1,float & delta,ComplexMatrix &est)
+                       ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix &est)
 #else
 extern "C" int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * gJ,Vector & ABC, char ** sipffile,
-                       ComplexVector & u1,float & delta,ComplexMatrix &est)
+                       ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix &est)
 #endif
 {//ABC not used !!!
     /*on input
@@ -509,7 +509,7 @@ k=0;
 for(i=1;i<=dj;++i){for(j=i;j<=dj;++j)
 {++k;if(k==tn)break;
 }if(k==tn)break;}
-
+n=i;nd=j;
 // 2. set delta
 delta=En(j)-En(i);
 

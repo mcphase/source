@@ -26,7 +26,7 @@
 #include "../include/vector.h"
 extern "C" void Icalc(Vector &J, double *T, Vector &gjmbHxc, Vector & Hext, double *gJ, Vector &ABC, char **sipffilename, double *lnZ, double *U, ComplexMatrix &est);
 extern "C" int estates(ComplexMatrix &est, Vector &gjmbHxc, Vector & Hext, double *gJ, double *T, Vector &ABC, char **sipffilename);
-extern "C" int du1calc(int &tn, double &T, Vector &gjmbHxc, Vector & Hext, double &g_J, Vector &ABC, char **sipffilename, ComplexMatrix &mat, float &delta, ComplexMatrix &est);
+extern "C" int du1calc(int &tn, double &T, Vector &gjmbHxc, Vector & Hext, double &g_J, Vector &ABC, char **sipffilename, ComplexMatrix &mat, float &delta, int &n, int & nd, ComplexMatrix &est);
 extern "C" int mq(ComplexVector &Mq, double &th, double &ph, double &J0, double &J2, double &J4, double &J6, ComplexMatrix &est);
 extern "C" int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2, double &J4, double &J6, ComplexMatrix &est, double &T, ComplexMatrix &mat);
 extern "C" void Icalc_parameter_storage_matrix_init(ComplexMatrix *est, Vector &gjmbheff, double *g_J, double *T, Vector &ABC, char **sipffilename);
@@ -448,8 +448,8 @@ int main(int argc, char *argv[])
    estates(est,gmbHxc,Hext,&gJ,&T,ABC,filearray);
    end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
    
-   int imq, tn = 2; float delta=0.; ComplexMatrix mat6(1,6,1,6);
-   imq = du1calc(tn,T,gmbHxc,Hext,gJ,ABC,filearray,mat6,delta,est);
+   int imq, tn = 2,n,nd; float delta=0.; ComplexMatrix mat6(1,6,1,6);
+   imq = du1calc(tn,T,gmbHxc,Hext,gJ,ABC,filearray,mat6,delta,n,nd,est);
    start = clock(); std::cerr << "Time to calculate du1calc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 
    ComplexVector Mq;
