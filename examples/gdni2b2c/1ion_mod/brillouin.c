@@ -120,10 +120,10 @@ extern "C" void mcalc(Vector & J,double * T, Vector & gjmbHxc,Vector & Hext,doub
 // for mcdisp this routine is needed
 #ifdef __MINGW32
 extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
-                       ComplexVector & u1,float & delta,ComplexMatrix & est)
+                       ComplexVector & u1,float & delta,int & n, int & nd,ComplexMatrix & est)
 #else
 extern "C" int du1calc(int & tn,double & T,Vector & gjmbHxc,Vector & Hext,double * g_J,Vector & ABC, char ** sipffile,
-                       ComplexVector & u1,float & delta,ComplexMatrix & est)
+                       ComplexVector & u1,float & delta,int & n , int & nd, ComplexMatrix & est)
 #endif
 { 
   /*on input

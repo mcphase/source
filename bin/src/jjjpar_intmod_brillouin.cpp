@@ -76,7 +76,7 @@ if (gmh>0)
 // for mcdisp this routine is needed
 /**************************************************************************/
 
-int jjjpar::brillouindm(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta)
+int jjjpar::brillouindm(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd)
 { 
   /*on input
     tn          transition-number
@@ -87,6 +87,7 @@ int jjjpar::brillouindm(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexV
   on output    
     delta	splittings [meV] 
     u1(i)	transition matrix first eigenvector elements ...
+    n,nd        initial and final level
 */
 
 static Vector Jret(1,3);
@@ -135,11 +136,12 @@ else
   {bx=-0.5*i;}
  }
   bz=-i*sinth*0.5;
+ n=1;nd=1;
 // -----------------------------------------
 //printf("module brillouin -du1calc: bx=%g by=%g bz=%g\n",bx,by,bz);
 if (tn==2) // transition to finite energy
  {delta=gmh; //set delta !!!
-
+  n=1;nd=2;
  if (delta>SMALL_QUASIELASTIC_ENERGY)
   {// now lets calculate mat
   u1(1)=bx*sqrt(-R/Z);

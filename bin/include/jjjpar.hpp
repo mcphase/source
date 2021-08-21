@@ -115,7 +115,7 @@ public:
    void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage);
 
    // returns transition element matrix M  and transition energy delta (to calculate chi0 in mcdisp,see manual)
-   int  du1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,ComplexMatrix & ests);
+   int  du1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & ests);
    int transitionnumber; // the transition associated with the ion (important if there are more in the single ion spectrum)
 
    // calculates series of single ion susceptibility matrices for different energies 
@@ -144,7 +144,7 @@ private:
   // external module functions, intern_Icalc=0
  
   void (*I)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*);
-  int  (*du)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+  int  (*du)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,int*,int*,ComplexMatrix*);
 
   void (*estates)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
   void (*Icalc_parameter_storage)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
@@ -360,7 +360,7 @@ void *handle;
 
   // kramers internal module functions, module_type=1
   void kramer (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
-  int  kramerdm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
+  int  kramerdm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd);
   Matrix krameropmat (int & n ,Vector &  Hxc,Vector & Hext);
 
   // realisation of class iops - cfield internal module functions, intern_Icalc=2
@@ -372,12 +372,12 @@ public:
 private:
   // brillouin internal module functions,module_type=3
   void brillouin (Vector &mom, double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
-  int  brillouindm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta);
+  int  brillouindm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd);
 
   // cluster internal module functions, module_type=5
   void cluster_Icalc_mcalc_Micalc (int code,Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
   void cluster_Micalc (Vector &mom,ComplexMatrix & ests);
-  int  cluster_dm (int code,int & tn,double & T, ComplexVector & u1,float & delta,ComplexMatrix & ests);
+  int  cluster_dm (int code,int & tn,double & T, ComplexVector & u1,float & delta,int & n, int & nd,ComplexMatrix & ests);
   void cluster_est(ComplexMatrix * est,Vector &Hxc,Vector &Hext,double & T);
   void cluster_calcH_and_diagonalize(Vector & En,ComplexMatrix &zc,Vector & Hxc,Vector & Hext);
   void cluster_ini_Imat();

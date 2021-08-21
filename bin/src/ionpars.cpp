@@ -697,7 +697,7 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
 
 /**************************************************************************/
 // for mcdisp this routine is needed
-int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
+int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd,ComplexMatrix & ests)
 {  /*on input
     tn      ... number of transition to be computed 
     sign(tn)... 1... without printout, -1 with extensive printout
@@ -718,6 +718,7 @@ int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVect
   // calculate mat and delta for transition number tn
   // 1. get i and j  delta=En(j)-En(i) from tn
   getijdelta_from_transitionnumber(i,j,delta,dj,tn,pr,ests);
+  n=i;nd=j;
   char optype[5];
   for(int l=1;l<=Hxc.Hi();++l){sprintf(optype,"I%i",l);
   u1(l)=observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*In[l]));}

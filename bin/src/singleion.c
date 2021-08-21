@@ -277,8 +277,7 @@ if (!do_sipf)
         jjj.maxE=maxE;jjj.pinit=pinit;jjj.ninit=ninit;
         jjj.transitionnumber=0;int tc=0;nt=0;
         if(trs_write_next_line(fout_trs,jjj,nt,1,1,1,1,tc,TT,Hxc,Hext,jjj.eigenstates(Hxc,Hext,TT),d,-1e100,maxE,observable,Q))
-        {fprintf(stderr,"Warning singleion: no transition found within energy in range [minE,maxE]=[%g,%g] found\n"
-                        " (within first crystallographic unit of magnetic unit cell)\n"
+        {fprintf(stderr,"Warning singleion: no transition found within energy in range [minE,maxE]=[%g,%g]\n"
                         " please increase energy range in option -maxE \n",0.0,maxE);
         }
         else

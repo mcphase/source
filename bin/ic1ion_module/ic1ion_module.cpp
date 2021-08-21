@@ -6,7 +6,7 @@
  *   void Icalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
  *                 char **sipffile, double *lnZ, double *U, ComplexMatrix &est)  
  *   int du1calc(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,      // Calculates the transition
- *                 char **sipffilename, ComplexVector & u1, float &delta,                    //   matrix elements
+ *                 char **sipffilename, ComplexVector & u1, float &delta,int &n, int &nd,                    //   matrix elements
  *                 ComplexMatrix &est)
  *   void mcalcVector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
  *                 char **sipffile,  ComplexMatrix &est)
@@ -304,6 +304,7 @@ __declspec(dllexport)
                       char **sipffilename,// Single ion properties filename
                       ComplexVector & u1, // Output u1 vector
                       float &delta,       // Output transition energy
+                      int &n, int &nd,    // Output state numbers of initial and final state
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 {  // sum exchange field and external field
@@ -327,7 +328,7 @@ __declspec(dllexport)
    if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
    int Hsz = est.Rows()-1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
-   double maxE=delta;
+   double maxE=delta;n=i;nd=j;
    if((delta=(est[0][j+1].real()-est[0][i+1].real()))<=maxE)
    {
       double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
@@ -388,9 +389,9 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,6);
+   ComplexVector u1(1,6);int n,nd;
    u1(1) = m1(1);
-   int nt = du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
+   int nt = du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
    m1(1)=GS*u1(1)+u1(2);
    m1(2)=GS*u1(3)+u1(4);
    m1(3)=GS*u1(5)+u1(6);
@@ -416,9 +417,9 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,6);
+   ComplexVector u1(1,6);int n,nd;
    u1(1) = L1(1);
-   int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
+   int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
    L1(1)=u1(2);
    L1(2)=u1(4);
    L1(3)=u1(6);
@@ -444,9 +445,9 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,6);
+   ComplexVector u1(1,6);int n,nd;
    u1(1) = S1(1);
-   int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,est);
+   int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
    S1(1)=u1(1);
    S1(2)=u1(3);
    S1(3)=u1(5);
@@ -1017,14 +1018,14 @@ int dchargedensity_coeff1(int &tn,        // Input transition number; if tn<0, p
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   ComplexVector u1(1,51);
+   ComplexVector u1(1,51);int n,nd;
    Vector ABC; 
    double gJ=0.;
    u1(1) = dc1(1);
    Vector Hxce(1,51);
    Hxce = 0;
    for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   int nt = du1calc(tn,T,Hxce,Hext, gJ,ABC,sipffilename,u1,delta,est);
+   int nt = du1calc(tn,T,Hxce,Hext, gJ,ABC,sipffilename,u1,delta,n,nd,est);
    dc1(1)=0;
    for(int i=2; i<=6; ++i) dc1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); dc1(4) *=sqrt(2);
    for(int i=7; i<=15;++i) dc1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); dc1(11)*=sqrt(2);

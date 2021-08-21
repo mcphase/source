@@ -440,7 +440,7 @@ cluster_calcH_and_diagonalize(En,zc,Hxc,Hext);
 //routine ducalc for cluster
 //------------------------------------------------------------------------------------------------
 
-int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & delta,ComplexMatrix & ests)
+int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & delta,int & ni, int & nf,ComplexMatrix & ests)
 { 
   /*on input
    delta        maxE
@@ -454,6 +454,7 @@ int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & d
   on output    
     delta	splitting of kramers doublet [meV]
     u1(i)	<-|(Ji-<Ji>)|+> sqrt(tanh(delta/2kT))
+    ni,nf        numer of level |-> and |+>
 */
   int pr=0,subtractexpvalue=1;if(T<0){subtractexpvalue=0;T=-T;}
   if (tn<0) {pr=1;tn*=-1;}
@@ -463,6 +464,7 @@ int jjjpar::cluster_dm(int code,int & tn,double & T,ComplexVector & u1,float & d
 // 1. get i and j from tn
 int k=0,ii=1,jj=1;
 for(ii=1;ii<=dim;++ii){for(jj=ii;jj<=dim;++jj){++k;if(k==tn)break;}if(k==tn)break;}
+ni=ii;nf=jj;
 if((delta=real(ests(0,jj))-real(ests(0,ii)))<=maxE)
  {
     Vector En(1,dim);

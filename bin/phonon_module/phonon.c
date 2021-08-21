@@ -118,11 +118,11 @@ return;
 #ifdef __MINGW32__
 extern "C" __declspec(dllexport) int du1calc(int & tn,double & T,Vector & Fxc, Vector & Hext,
                        double * g_J,Vector & MODPAR, char ** sipffilename,
-                       ComplexVector & u1,float & delta,ComplexMatrix & est)
+                       ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & est)
 #else
 extern "C" int du1calc(int & tn,double & T,Vector & Fxc, Vector & Hext,
                        double * g_J,Vector & MODPAR, char ** sipffilename,
-                       ComplexVector & u1,float & delta,ComplexMatrix & est)
+                       ComplexVector & u1,float & delta,int & n , int & nd, ComplexMatrix & est)
 #endif
 { 
   /*on input
@@ -194,7 +194,8 @@ extern "C" int dP1(int & tn,double & T,Vector & Fxc, Vector & Hext,
                        double * g_J,Vector & MODPAR, char ** sipffilename,
                        ComplexVector & P1,float & maxE,ComplexMatrix & est)
 #endif
-{int noft=du1calc(tn,T,Fxc,Hext,g_J,MODPAR,sipffilename,P1,maxE,est);
+{int n,nd;
+ int noft=du1calc(tn,T,Fxc,Hext,g_J,MODPAR,sipffilename,P1,maxE,n,nd,est);
  double a0=0.5219; // Bohr radius in A
  P1*=a0;
  return noft;

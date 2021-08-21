@@ -28,7 +28,7 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,doubl
    fprintf(fout,"#                                                              |\n");
    fprintf(fout,"#                      - E /T                                  |\n");
    fprintf(fout,"#                     e   i                                    |\n");
-   fprintf(fout,"# wi    = const --------------                                 |\n");
+   fprintf(fout,"# wi    =       --------------                                 |\n");
    fprintf(fout,"#               ----    - E /T                                 |\n");
    fprintf(fout,"#               >    n e   i                                   |\n");
    fprintf(fout,"#               ----  i                                        |\n");
@@ -85,7 +85,7 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,doubl
    fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",T,Hext(1),Hext(2),Hext(3));
    fprintf(fout,"#*********************************************************************\n");
    fprintf (fout, "#i j k ionnr transnr energy |gamma_s| sigma_mag_dip[barn/sr](*) "
-                   "   wnn'|<n|%c%c1-<%c%c1>|n'>|^2 wnn'|<n|%c%c2-<%c%c2>|n'>|^2 ... "
+                   " n  n'  wnn'|<n|%c%c1-<%c%c1>|n'>|^2 wnn'|<n|%c%c2-<%c%c2>|n'>|^2 ... "
                    "with wnn'=wn-wn' for n!=n'  and wnn=wn/k_B T \n",cc,observable,cc,observable,cc,observable,cc,observable);
 }
 
@@ -94,16 +94,16 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,doubl
 //                        returns 1 if no further transition is found within limit minE maxE
 int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,int  l,int & tc,double & T,Vector & mf,
                      Vector & Hext,ComplexMatrix & est,float & d,double  minE,double  maxE, char observable, Vector & Q)    
-    {ComplexVector u1(1,mf.Hi());double gamma;
+    {ComplexVector u1(1,mf.Hi());double gamma;int n=0,nd=0;
          if(jjj.transitionnumber>=nt&&nt>0){return 1;}
-     ++jjj.transitionnumber;nt=jjj.du1calc(T,mf,Hext,u1,d,est);
+     ++jjj.transitionnumber;nt=jjj.du1calc(T,mf,Hext,u1,d,n,nd,est);
     while (minE>=d||d>=maxE) //only consider transition if it is in interval minE/maxE
      {//first and following  transitions out of energy range ... do not consider them
      //fprintf(stdout," .... transition not stored because out of interval [minE,maxE]=[%g,%g]meV\n",minE,maxE);
      ++jjj.transitionnumber;
      //fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
      if(jjj.transitionnumber>nt){return 1;}
-     jjj.du1calc(T,mf,Hext,u1,d,est);
+     jjj.du1calc(T,mf,Hext,u1,d,n,nd,est);
      }
    //fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
     gamma=Norm2(u1);
@@ -124,14 +124,14 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
       case 'Q': jjj.dMQ1calc(Q,T,dm1,d,est);break;
      }    
      if(minE<d&&d<maxE)
-    { fprintf(fout,"%i %i %i  %i     %i     %9.6g  %9.6g  %10.6g   ",i,j,k,l,jjj.transitionnumber,myround(d),myround(gamma),myround(intensityp));
+    { fprintf(fout,"%i %i %i  %i     %i     %9.6g  %9.6g  %10.6g  %i %i ",i,j,k,l,jjj.transitionnumber,myround(d),myround(gamma),myround(intensityp),n,nd);
        switch(observable)
      {case 'I':for(int i=1;i<=u1.Hi();++i)fprintf(fout," %9.6g",real(conj(u1(i))*u1(i)));break;
       default: for(int i=1;i<=dm1.Hi();++i)fprintf(fout," %9.6g",real(conj(dm1(i))*dm1(i)));
       }fprintf(fout,"\n");
      ++tc;}
     if(d>=0&&minE<-d&&-d<maxE) // do not print negative energy transition if d<0 (d<0 means transiton to the same level)
-    { fprintf(fout,"%i %i %i  %i     %i     %9.6g  %9.6g  %10.6g   ",i,j,k,l,jjj.transitionnumber,myround(-d),myround(gamma),myround(intensitym));
+    { fprintf(fout,"%i %i %i  %i     %i     %9.6g  %9.6g  %10.6g  %i %i ",i,j,k,l,jjj.transitionnumber,myround(-d),myround(gamma),myround(intensitym),nd,n);
        switch(observable)
      {case 'I':for(int i=1;i<=u1.Hi();++i)fprintf(fout," %9.6g",real(conj(u1(i))*u1(i)));break;
       default: for(int i=1;i<=dm1.Hi();++i)fprintf(fout," %9.6g",real(conj(dm1(i))*dm1(i)));

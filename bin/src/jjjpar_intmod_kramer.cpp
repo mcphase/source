@@ -94,7 +94,7 @@ void jjjpar::kramer (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, doub
 //     gjmbH[1]/MU_B/gjJ, gjmbH[2]/MU_B/gjJ, gjmbH[3]/MU_B/gjJ, J[1], J[2], J[3]);
 }
 
-int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta)
+int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd)
 { 
   /*on input
     transitionnumber ... number of transition to be computed - meaningless for kramers doublet, because there is only 1 transition
@@ -105,6 +105,7 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & He
   on output    
     delta	splitting of kramers doublet [meV]
     u1(i)	<-|(Ji-<Ji>)|+> sqrt(tanh(delta/2kT))
+    n,nd        - and + fir this transition
 */
   double alpha, betar, betai, lambdap,lambdap_KBT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, nenner;
@@ -152,7 +153,7 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & He
 
 if (transitionnumber==2)
 { delta=2*lambdap; //set delta !!!
-
+ n=1;nd=2;
 
     nenner=sqrt(nennerp*nennerm);
 
@@ -232,10 +233,12 @@ else
     }
  if (transitionnumber==1)
  {// now lets calculate mat
+ n=1;nd=1;
  u1(1)=(jam-Jret(1))*sqrt(nm/KB/T);
  u1(2)=(jbm-Jret(2))*sqrt(nm/KB/T);
  u1(3)=(jcm-Jret(3))*sqrt(nm/KB/T);
  }else{
+ n=2;nd=2;
  // now lets calculate mat
  u1(1)=(jap-Jret(1))*sqrt(np/KB/T);
  u1(2)=(jbp-Jret(2))*sqrt(np/KB/T);

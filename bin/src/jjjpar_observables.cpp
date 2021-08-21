@@ -73,18 +73,18 @@ int jjjpar::micalc (Vector &momi, double & T, Vector &  Hxc,Vector & Hext ,Compl
 
 int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1,ComplexMatrix & ests)
 {float delta=maxE;m1(1)=complex <double> (ninit,pinit);
- ComplexVector uu1(1,m1.Hi());int nnt,i;
+ ComplexVector uu1(1,m1.Hi());int nnt,i,n,nd;
  switch (module_type)
   {case 0: if(dm1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&m1,&delta,&ests);}
            break;
-   case 1: nnt=kramerdm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
+   case 1: nnt=kramerdm(transitionnumber,T,Hxc,Hext,m1,delta,n,nd);m1*=gJ;return nnt;break;
    case 2:
    case 4: uu1(1)=m1(1);
            nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
            for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
-   case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta);m1*=gJ;return nnt;break;
-   case 5: nnt=cluster_dm(2,transitionnumber,T,m1,delta,ests);return nnt;break;
+   case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta,n,nd);m1*=gJ;return nnt;break;
+   case 5: nnt=cluster_dm(2,transitionnumber,T,m1,delta, n, nd,ests);return nnt;break;
   default:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module ... not implemented, continuing ... \n");
           break;
    }
@@ -92,10 +92,10 @@ return 0;
 }
 
 int  jjjpar::dmi1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & mi1,ComplexMatrix & ests)
-{float delta=maxE;mi1(1)=complex <double> (ninit,pinit);
+{float delta=maxE;mi1(1)=complex <double> (ninit,pinit); int n,nd;
  ComplexVector uu1(1,mi1.Hi());int nnt;
  switch (module_type)
-  {case 5: nnt=cluster_dm(3,transitionnumber,T,mi1,delta,ests);return nnt;break;
+  {case 5: nnt=cluster_dm(3,transitionnumber,T,mi1,delta, n,  nd,ests);return nnt;break;
    default:return dm1calc(T,Hxc,Hext,mi1,ests);break;
    }
  return 0;
@@ -250,7 +250,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
 {double ddelta=maxE;dMQ(1)=complex <double> (ninit,pinit);
  double J0,J2,J4,J6;
  double Q,th,ph;
- int i;     complex<double>dummy; // introduced 3.4.10 MR
+ int i,n,nd;     complex<double>dummy; // introduced 3.4.10 MR
             Q = Norm(Qvec); //dspacing
       //      d = 2.0 * PI / Q; s=0.5 / d;
       J0=j0(Q);
@@ -274,7 +274,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
    case 5:  int nnt;
             {ComplexVector m1(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
              m1(1)=dMQ(1);float dd=ddelta;
-            nnt=cluster_dm(3,transitionnumber,T,m1,dd,ests);
+            nnt=cluster_dm(3,transitionnumber,T,m1,dd,n,nd,ests);
             // now we have all magnetic moments in m1 vector and we have to do the
             // (magnetic structure factor) = sum_i Mi exp(+iQri) Fi(Q) DWF            
             // dmq1=<-|(magnetic structure factor)*|+> = sum_i <-|Mi|+> exp(-iQri) Fi(Q) DWF

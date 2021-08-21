@@ -173,10 +173,10 @@ extern "C" void mcalc(Vector & Jr,double * T, Vector & Hxc,Vector & Hext,double 
 // for mcdisp this routine is needed
 #ifdef __MINGW32__
 extern "C" __declspec(dllexport) int du1calc(int & tn,double & T, Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR, char ** sipffile,
-                       ComplexVector & u1r,float & delta,ComplexMatrix & est)
+                       ComplexVector & u1r,float & delta,int & n, int & nd,ComplexMatrix & est)
 #else
 extern "C" int du1calc(int & tn,double & T, Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR, char ** sipffile,
-                       ComplexVector & u1r,float & delta,ComplexMatrix & est)
+                       ComplexVector & u1r,float & delta,int & n, int & nd,ComplexMatrix & est)
 #endif
 { 
   /*on input
@@ -356,7 +356,7 @@ extern "C" __declspec(dllexport) int dm1(int & tn,double & T, Vector & Hxc,Vecto
 extern "C" int dm1(int & tn,double & T, Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR, char ** sipffile,
                        ComplexVector & m1,float & maxE,ComplexMatrix & est)
 #endif
-{int nnt;
-nnt=du1calc(tn,T,Hxc,Hext,g_J,MODPAR,sipffile,m1,maxE,est);m1*=(*g_J);return nnt; 
+{int nnt,n,nd;
+nnt=du1calc(tn,T,Hxc,Hext,g_J,MODPAR,sipffile,m1,maxE,n,nd,est);m1*=(*g_J);return nnt; 
 }
 //\end{verbatim}}

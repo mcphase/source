@@ -681,7 +681,7 @@ The format to be used is:
 {\footnotesize
 \begin{verbatim}
 extern "C" int du1calc(int & tn,double & T,Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR,
-char ** sipffilename,ComplexVector & u1,float & delta, ComplexMatrix & est)
+char ** sipffilename,ComplexVector & u1,float & delta, int & n, int & nd, ComplexMatrix & est)
 \end{verbatim}
 
 The meaning of the symbols is as follows:
@@ -707,6 +707,7 @@ on input
 on output
    int             total number of transitions
    delta           transition energy [meV]
+   n,nd            initial and final level
    u1             vector u1=<-|Ialpha-<Ialpha>|+>sqrt((p- - p+))                          
                 note that as in Icalc the single ion momentum vector <-|I|+> 
 				(n- dimensional with n>=1)

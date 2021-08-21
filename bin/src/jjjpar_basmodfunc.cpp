@@ -490,17 +490,17 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
 // the transition matrix mat first eigenvector u1 corresponding to jjjpar.transitionnumber and delta
 // for effective field heff and temperature given on input
 /****************************************************************************/
-int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,ComplexMatrix & ests)
+int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & ests)
 {delta=maxE;u1(1)=complex <double> (ninit,pinit);
   switch (module_type)
-  {case 0: if (du!=NULL){return (*du)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&ests);}
+  {case 0: if (du!=NULL){return (*du)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&n,&nd,&ests);}
            else return 0;
            break;
-   case 1: return kramerdm(transitionnumber,T,Hxc,Hext,u1,delta);break;
+   case 1: return kramerdm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
    case 2:
-   case 4: return (*iops).du1calc(transitionnumber,T,Hxc,Hext,u1,delta,ests);break;
-   case 3: return brillouindm(transitionnumber,T,Hxc,Hext,u1,delta);break;
-   case 5: return cluster_dm(1,transitionnumber,T,u1,delta,ests);break;
+   case 4: return (*iops).du1calc(transitionnumber,T,Hxc,Hext,u1,delta,n,nd,ests);break;
+   case 3: return brillouindm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
+   case 5: return cluster_dm(1,transitionnumber,T,u1,delta,n,nd,ests);break;
    default: return 0;
   }
 }
@@ -576,9 +576,9 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
    }
   } else {
   if(epsilon>0){ // use internal chi0
-  ComplexVector u1(1,nofcomponents);float dd;
+  ComplexVector u1(1,nofcomponents);float dd; int n,nd;
   ComplexMatrix M(1,nofcomponents,1,nofcomponents);
-  du1calc(T,Hxc,Hext,u1,dd,ests);  
+  du1calc(T,Hxc,Hext,u1,dd,n,nd,ests);  
   complex<double> eps(epsilon*3,0),cc,imag(0,1),d(dd,0);
   if(dd>SMALL_QUASIELASTIC_ENERGY)
   { if(delta<0){ //treat correctly energy gain of neutron
