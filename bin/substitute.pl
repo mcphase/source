@@ -7,12 +7,17 @@ unless ($#ARGV >1)
 
 {print " program substitute used to replace text in files \n"; 
 
-print " usage: substitute oldtext newtext *.* \n"; 
+print " usage: substitute [option] oldtext newtext *.* 
+      
+       Option:  -f    only replace the first occurance of oldtext
+\n"; 
 
 exit 0;} 
-
-
-
+$first=0;
+$_=$ARGV[0];
+if(/-f/)
+  {$first=1;shift @ARGV; 
+  }
 $colx=$ARGV[0];shift @ARGV; 
 
 $coly=$ARGV[0];shift @ARGV; 
@@ -25,7 +30,7 @@ print "substituting '".$colx."' with '".$coly."' in \n";
 
 foreach (@ARGV) 
 
-{ 
+{ $found=0;
 
 $file=$_; 
 
@@ -40,7 +45,12 @@ while($line=<Fin>)
 
 #       if ($line=~/^\s*#/) 
 
-$line=~s/\Q$colx\E/$coly/g; 
+if ($first==0)
+{$line=~s/\Q$colx\E/$coly/g; 
+}else
+{if ($line=~/\Q$colx\E/&&$found==0){$found=1;$line=~s/\Q$colx\E/$coly/;}
+}
+
 
 print Fout $line; 
 

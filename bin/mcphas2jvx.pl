@@ -5,7 +5,7 @@
 #
 
 use PDL;
-use PDL::Slatec;
+# use PDL::Slatec;
 use Getopt::Long;
 
 # Loads the tables of element information (ionic size and colours)
@@ -138,12 +138,12 @@ if(abs($r13)>$c || $r33<=0) { die "Error: alpha, beta, gamma are geometrically i
 $rtoijk = pdl [ [ $a*$sc, $a*$cc, 0 ],
                 [      0,     $b, 0 ],
                 [   $r13,   $r23, sqrt($r33) ] ];
-$invrtoijk = matinv($rtoijk);
+$invrtoijk = inv($rtoijk);
 $rmat = pdl [ [ $rmath{"r1a"}[0], $rmath{"r2a"}[0], $rmath{"r3a"}[0] ],
               [ $rmath{"r1b"}[0], $rmath{"r2b"}[0], $rmath{"r3b"}[0] ],
               [ $rmath{"r1c"}[0], $rmath{"r2c"}[0], $rmath{"r3c"}[0] ] ];
 $primcell = $rtoijk x $rmat;
-$invprim  = matinv($primcell);
+$invprim  = inv($primcell);
 
 if($debug==1) {
   print STDERR $rtoijk;

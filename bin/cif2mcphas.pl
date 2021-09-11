@@ -12,7 +12,7 @@
 # Fri Sep 26 12:00:53 KST 2014 - Duc Le - mducle@snu.ac.kr
 
 use PDL;
-use PDL::Slatec;
+#use PDL::Slatec;
 use File::Copy;
 use Getopt::Long;
 use IPC::Open3;
@@ -370,7 +370,8 @@ $v=sqrt($v);
 $rtoijk = pdl [ [ $a, $b*cos($gamma), $c*cos($beta) ],
                 [  0, $b*sin($gamma), $c*(cos($alpha)-cos($beta)*cos($gamma))/sin($gamma) ],
                 [  0,              0, $c*$v/sin($gamma) ] ];
-$invrtoijk = matinv($rtoijk);
+#$invrtoijk = matinv($rtoijk);
+$invrtoijk = inv($rtoijk);
 
 if($debug==1) {
   print STDERR $rtoijk;

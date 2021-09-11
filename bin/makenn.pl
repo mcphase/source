@@ -5,7 +5,7 @@ use FileHandle;
 #use Math::Trig;
 use PDL;
 
-use PDL::Slatec;
+# use PDL::Slatec;
 
 print "#********************************************************\n";
 print "# makenn 181025 - create table with neighbors and interactions\n";
@@ -241,7 +241,8 @@ if ($rtoijk->at(2,2)<=0){die "ERROR makenn: alpha beta and gamma geometrically i
 $t.=sqrt($t);
 #print $t;
 #print $rtoijk;
-$invrtoijk=matinv($rtoijk); #invert this matrix for use later
+#$invrtoijk=matinv($rtoijk); #invert this matrix for use later
+$invrtoijk=inv($rtoijk); #invert this matrix for use later
 #print $invrtoijk;
 #'x' is hijacked as the matrix multiplication operator. e.g. $c = $a x $b;#
 #
@@ -276,7 +277,8 @@ $p= $p x $rtoijk;
   unless($readtable>1)
  {
 # determine $nmin,$nmax by looking at a cube with side 3rmax
-     $inv=matinv(transpose($p)); #invert primitive lattice
+#     $inv=matinv(transpose($p)); #invert primitive lattice
+     $inv=inv(transpose($p)); #invert primitive lattice
 # print "inverted primitive lattice[A]:".$inv."\n";
      #loop all corner points
   for ($i1=-1;$i1<=1;$i1+=2){

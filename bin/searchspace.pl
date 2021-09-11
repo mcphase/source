@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 use PDL;
-use PDL::Slatec;
+# use PDL::Slatec;
 use File::Copy;
 
 # copy parameter files to specific locations

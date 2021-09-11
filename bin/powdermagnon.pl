@@ -4,7 +4,7 @@ use FileHandle;
 
 use PDL;
 
-use PDL::Slatec;
+# use PDL::Slatec;
 
 
 

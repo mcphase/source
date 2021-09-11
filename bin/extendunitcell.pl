@@ -3,15 +3,15 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 use FileHandle;
 use PDL;
-use PDL::Slatec;
+#use PDL::Slatec;
 
 
 
 unless ($#ARGV>=2) 
 {print " program to extend crystallographic unit cell n times in r1 (or r2,r3) direction\n\n";
 print " usage: extendunitcell 3 1 4\n\n";
-print " meaning take mcphas.j, mcphas.tst and mcdiff.in and generate an extended description of the unit cell 3xr1,1xr2,4xr3\n";
-print " put result into results/extend.j, results/extend.tst and results/extend.head (only header without magnetic atoms is generated from mcdiff.in)\n";
+print " meaning take mcphas.j and generate an extended description of the unit cell 3xr1,1xr2,4xr3\n";
+print " put result into results/extend.j\n";
  exit 0;}
 
 
@@ -25,7 +25,7 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n3) = eval 
  print "a=".$a." b=".$b." c=".$c."\n";
  print "original primitive lattice[abc]:".$p."\n";
 
- #initialize output file extendj.j
+ #initialize output file extend.j
  my ($l)=printlattice("./mcphas.j",$n1,$n2,$n3,">./results/extend.j");
  printneighbourlist("./mcphas.j",$l,$n1,$n2,$n3,$p,$nofa);   
  close $l;

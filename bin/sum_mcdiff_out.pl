@@ -2,7 +2,7 @@
 use Getopt::Long;
 #use Math::ElFun;
 use PDL;
-use PDL::Slatec;
+#use PDL::Slatec;
 #use Switch;
 use File::Copy;
 $fileout="./results/mcdiffsummed.out";

@@ -3,7 +3,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 use PDL;
 
-use PDL::Slatec;
+# use PDL::Slatec;
 
 unless ($#ARGV >0) 
 {print " program simannfit used to perform simulating annealing\n";
@@ -297,9 +297,9 @@ print $delta;
                    ++$i;}
   if($chisquared){
      print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens restart and try again):\n";
-$Fij=$delta x matinv($V);
+$Fij=$delta x inv($V);
  $FtF=$Fij->xchg(0,1) x $Fij;
- $cov=$sta*matinv($FtF);  # multiply by sta=chi2 in order to get covariance matrix
+ $cov=$sta*inv($FtF);  # multiply by sta=chi2 in order to get covariance matrix
      print $cov; print Fout $cov;
                 $i=0;foreach(@par){print $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
                                    print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";

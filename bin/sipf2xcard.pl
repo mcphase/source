@@ -5,7 +5,6 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 use Getopt::Long;
 use Math::Trig;
 #use PDL;
-#use PDL::Slatec;
 #use Switch;
 use File::Copy;
 
