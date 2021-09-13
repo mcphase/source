@@ -79,6 +79,18 @@ Without the enthusiastic support of the neutron scattering
 community this program would not have come into existence. 
 
 \section*{What is New ?}
+\subsection*{ \dots in version 5.4 \dots}
+\begin{itemize}
+\item    {\prg bfkp} and {\prg ga} - CF-phonon interaction program created and example CeCu2Ge2 
+\item  {\prg makenn} option for dzyalosinsky moriya interaction created
+\item .trs file format changed to include number of initial and final level
+\item   {\prg powdermagnon} sampling q dependence improved
+\item option -read introduced to {\prg mcphas}
+\item   program {\prg substitute} option -f introduced
+\item   Slatec removed from PDL routines to make installation easier
+\item {\prg cpso1ion} bug (for more than 10 levels) found and removed
+\item bug in {\prg makenn} option ignore\_neihgbours\_behind=1 found and removed
+\end{itemize}
 
 \subsection*{ \dots in version 5.3 \dots}
 \begin{itemize}
@@ -156,25 +168,6 @@ specified the programs attempt to determine the available number of cores automa
         (i.e. they are based on the observable magnetic moment)
 \item some bugs removed: spin/density animations of osciallations, icf1ion, threading, rhoso1ion
         rotateBlm
-\end{itemize}
-
-\subsection*{... in version 4.9..}
-\begin{itemize}
-\item
-- maxnoftestspincf added to mcphas.ini
-\item
-- sumcol changed to write summing in data file
-\item
-- pointc creates results/pointc.out with contribution of individiual pointc to cef pars
-\item
-- in perl programs such as factcol the columns can be addressed by expressions
-           such as  {\prg factcol 3-1x15 2.3 file.dat}
-\item
-- two dimensional convolution {\prg convolute2d}and gaussian creation {\prg gauss2d}
-\item
-- bug in parallelized mcdisp remove,  mcdisp.qev only print out eigenvectors, if intensity is calculated 
-\item
-- {\prg delcomments} option -c introduced
 \end{itemize}
 
 
