@@ -984,11 +984,17 @@ __declspec(dllexport)
    }
 
    if (ninit>Hsz)ninit=Hsz;
-   if (pinit<SMALL)pinit=SMALL;
-   double zsum=0,zi;
+   //if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zi,x;
    // determine number of thermally reachable states
    int noft = 0;
-   for(i=0; (i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum)); ++i) { noft += Hsz-i-1; zsum += zi; }
+   for(i=0; (i<ninit)&(((x=((est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   {
+      noft += Hsz-i; 
+      zsum += zi;
+   }
+
+//   for(i=0; (i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum)); ++i) { noft += Hsz-i+1; zsum += zi; }
 // int noft=0;for(i=0;(i<Hsz)&(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))>SMALL);++i)noft+=Hsz-i-1; // removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit   return noft;
 
    return noft;
@@ -1544,14 +1550,14 @@ __declspec(dllexport)
    }
    mq1 *= sqrt(therm / Z);
 
-   if (ninit>Hsz) ninit = Hsz;
-   if (pinit<SMALL) pinit = SMALL;
-   double zsum=0,zi;
-   // determine number of thermally reachable states
-   int noft = 0;
-   for(i=0; (i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum)); ++i)
+    // determine number of thermally reachable states
+   if (ninit>Hsz)ninit=Hsz;
+   //if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zi,x;
+   int noft=0; 
+   for(i=0; (i<ninit)&(((x=((est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
    {
-      noft += Hsz-i-1; 
+      noft += Hsz-i; 
       zsum += zi;
    }
 // removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit
@@ -2300,13 +2306,16 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
       delete[]en;
    }
 
+    // determine number of thermally reachable states
    if (ninit>Hsz)ninit=Hsz;
-   if (pinit<SMALL)pinit=SMALL;
-   double zsum=0,zi;
-   // determine number of thermally reachable states
-   int noft = 0;
-   for(i=0; (i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum)); ++i) { noft += Hsz-i-1; zsum += zi; }
-
+   //if (pinit<SMALL)pinit=SMALL;
+   double zsum=0,zi,x;
+   int noft=0; 
+   for(i=0; (i<ninit)&(((x=((est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   {
+      noft += Hsz-i; 
+      zsum += zi;
+   }
    return noft;
 }                 
 
