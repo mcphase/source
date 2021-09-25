@@ -15,7 +15,7 @@ unless ($#ARGV>=2)
 
 {print " program to create mcdisp.par from mcphas.j for the calculation of neutron powder spectra\n\n";
 
-print " usage: powdermagnon 0.3 2 0.1 5 0.5 30\n\n";
+print " usage: powdermagnon 0.3 2 0.1 10 0.5 30\n\n";
 
 print " meaning take mcphas.j, generate a reflection list and put it to mcdisp.par \n";
 
@@ -26,7 +26,7 @@ print " 2   ....qmax   [1/A] maximal q vector\n";
 print " 0.1 ....deltaq [1/A] stepwidth in q\n";
 
 print " 10  ....number of steps in polar coordinate theta \n";
-print "         (will be decreased by (qmin/q)^2) \n";
+print "    (in case of negative sign dtheta will be decreased by (qmin/q)^2) \n";
 
 print " 0.5 ....Emin   [meV] minimal energy\n";
 
@@ -130,7 +130,7 @@ my ($Emin) = $ARGV[4];
 my ($Emax) = $ARGV[5];
 
 
-$dtheta0=$PI/$nn+0.000001;
+$dtheta0=$PI/abs($nn)+0.000001;
 
 
 
@@ -220,7 +220,7 @@ close Fout;
 #loop q
 
 for ($q=$qmin;$q<=$qmax;$q+=$deltaq){ 
-$dtheta=$dtheta0*$qmin*$qmin/$q/$q;
+if($nn<0){$dtheta=$dtheta0*$qmin*$qmin/$q/$q;}else{$dtheta=$dtheta0;}
 
 #loop sphere
  $qvec=pdl[0,0,$q];
