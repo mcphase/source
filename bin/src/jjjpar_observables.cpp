@@ -320,7 +320,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
         if(!(iq--)) iq=MAXSAVEQ-1;
      }
      double Fval;
-     if(gJ) {                                       // gJ!=0
+     if(gJ&&FF_type!=3&&FF_type!=-3) {   // gJ!=0
         Fval = (j0(Q) + j2(Q) * (2 / gJ - 1)); }
      else {
         if(Q>0) Fval = j0(Q);

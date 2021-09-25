@@ -87,7 +87,8 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
       // dipole approx: <M(Q)>=<L>*FL(Q)+2*<S>*FS(Q) with FL(Q)=(j0+j2) and FS(Q)=j0
       if((*inputpars.jjj[l]).dL1calc(ini.T,mf,ini.Hext,L1,md.est(i,j,k,l))!=0&&
          (*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,S1,md.est(i,j,k,l))!=0)
-         {mq1_dip=(*inputpars.jjj[l]).F(-QQ)*L1+2.0*(*inputpars.jjj[l]).F(QQ)*S1;(*inputpars.jjj[l]).FF_type=3;}
+         {(*inputpars.jjj[l]).FF_type=3;mq1_dip=(*inputpars.jjj[l]).F(-QQ)*L1+2.0*(*inputpars.jjj[l]).F(QQ)*S1;
+         if(do_verbose)printf("#L1=%g FL(Q)=%g S1=%g FS(Q)=%g\n",Norm2(L1),(*inputpars.jjj[l]).F(-QQ),Norm2(S1),(*inputpars.jjj[l]).F(QQ));}
       else  {ComplexVector m1(1,3); // try dipole approximation using dm1calc
                                     // gJ=0 dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0  
                                     // gJ>0 dipole approx: <M(Q)>=<M>*F(Q) with F(Q)=j0-(1-2/gJ)j2                
@@ -101,7 +102,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
       // try if going beyond dip approximation for formfactor works
      if(do_gobeyond){
         if((*inputpars.jjj[l]).dMQ1calc(qijk,ini.T,mq1,nn[6],md.est(i,j,k,l))!=0)// calculate <-|M(Q)|+>
-        {if(do_verbose)printf("#going beyond dipole approx for ion %s Nu=%g\n",(*inputpars.jjj[l]).sipffilename,Norm2(mq1));
+        {if(do_verbose)printf("#going beyond dipole approx for ion %s Nu=%g Nu_dip=%g \n",(*inputpars.jjj[l]).sipffilename,Norm2(mq1),Norm2(mq1_dip));
          (*inputpars.jjj[l]).FF_type*=-1; // put FFTYPE negative to indicate that going beyond works
         }
         else{ if(do_verbose)printf("#warning mcdisp - function dmq1 not implemented for single ion module of ion %s, only doing dipolar intensity\n",(*inputpars.jjj[l]).sipffilename);
