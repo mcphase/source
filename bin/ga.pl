@@ -7,7 +7,7 @@ use PDL;
 
 
 print "#********************************************************\n";
-print "# program  ga 210921 \n";
+print "# program  ga 210930 \n";
 print "#********************************************************\n";
 $PI=3.141592654;
 
@@ -18,7 +18,7 @@ print STDOUT << "EOF";
 
 #   use as:
 #    
-#     ga  rmax atomnr qh qk ql n
+#     ga  rmax atomnr qh qk ql n 
 #
 #     rmax  .... maximum distance rmax [Angstroem] of neighbour to take into account neighbour
 #     atomnr .... crystal field parameters of this atom will be considered (atomnr refers to
@@ -26,7 +26,7 @@ print STDOUT << "EOF";
 #     (qh qk ql) ... components of the phonon q-vector in terms of reciprocal lattice
 #                    
 #     n     ... n frames of the phonon oscillation will be considered
-#
+#     
 #     The eigenvector of the phonon should be stored in the sipf files
 #     with the components 
 #     PHONEVRX PHONEVRY PHONEVRZ PHONEVIX PHONEVIY PHONEVIZ
@@ -37,7 +37,8 @@ print STDOUT << "EOF";
 #      MIND: actually PHONEVRX etc should contain the normalized eigenvector 
 #            components divided by the sqrt(M), where M is the mass-number of the nucleus
 #  2) calculates for one magnetic ion the pointcharge positions and outputs ga0.pc which
-#     resembles makenn.a1 (positions and point charges)
+#     resembles makenn.a1 (positions and point charges), but has in addition also
+#     additional columns with unit cell vector 
 #  3) calculate also ga1.pc, in such a way: take from command line the q-vector (qh qk ql) and calculate
 #     from this and eigenvector components the oscillation of all atoms 
 #     (for n different phases, n read from the command line), divide charge of each atom by n
@@ -48,6 +49,40 @@ print STDOUT << "EOF";
 #     i.e. using this file with pointc will give the CF-phonon coupling energy for a phonon 
 #     with amplitude  corresponding to the eigenvector components taken in Angstroem
 
+#  Theory:
+# Sj ... deviation Vector of atom position from equilibrium position 
+#       (due to phononic vibration)
+#
+# Hcf_phon= sum_ijalpha  dBalpha(i)/dSj Sj Oalpha(i)      (1) 
+#
+# from Nowotny Festkoerperphysik p. 138 
+# 
+# Sj= 1/sqrt(N) sum_q,s  
+#
+#  with j lattice site, N number of atoms, s phonon branch, q vector, Mj nuclear mass, omega_qs phonon frequency
+#
+# inserting in (1) yields
+#
+# Hcf_phon= 1/sqrt(N) sum_ijalphaqs  dBalpha(i)/dSj sqrt[hbar/(2 Mj omega_q,s)] exp(i q(Rj-Ri)) x
+#                        x ej_q,s ( a^cross_-qs  + a_qs ) Oalpha(i) exp(i qRi)
+#               
+# compare with Becker 2021  
+#
+# Hcf_phon= -1/sqrt(N) sum_iqsalpha  g_alpha(qs) ( a^cross_-qs  + a_qs ) Oalpha(i) exp(i qRi)
+#
+# we identify
+#
+#  g_alpha(qs)= - sum_j  dBalpha(i)/dSj ej_q,s  sqrt[hbar/(2 Mj omega_q,s)] exp(i q(Rj-Ri))
+#
+#
+# for the file g_alpha.s we need the absolute value |g_alpha(qs)|
+# because only this enters into the phononic cross section
+#
+# in order to evaluate dBalpha(i)/dSj the program pointc can be used with the
+# option -d, creating the file results/pointc.dBlm with
+# position and dBalpha/duj  where duj=dSj/a0 
+#
+# 
 EOF
  exit 0;}
 
@@ -69,6 +104,7 @@ shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($nfi) = eval $ARGV[0];
 
+
 my ($latt,$p) = getlattice("./mcphas.j"); # gets lattice and atomic positions
 my ($a,$b,$c,$alpha,$beta,$gamma,$nofatoms,$nofcomponents) = @{$latt};
  print "# cf- phonon coupling calculated for atom atomnr=".$atomnr."with sipffile ".$sipf_file[$atomnr]."\n";
@@ -86,7 +122,7 @@ $rtoijk = pdl [ [$a*sin($gamma*$PI/180),$a*cos($gamma*$PI/180),0],   # vector a 
 if (abs($rtoijk->at(2,0))>$c){die "ERROR makenn: alpha beta and gamma geometrically inconsistent\n";}
 $t=$rtoijk->slice("2:2,2:2");
 $t.=pdl[[$c*$c-$rtoijk->at(0,2)*$rtoijk->at(0,2)-$rtoijk->at(1,2)*$rtoijk->at(1,2)]];
-if ($rtoijk->at(2,2)<=0){die "ERROR makenn: alpha beta and gamma geometrically inconsistent\n";}
+if ($rtoijk->at(2,2)<=0){die "ERROR ga: alpha beta and gamma geometrically inconsistent\n";}
 $t.=sqrt($t);
 #print $t;
 #print $rtoijk;
@@ -165,6 +201,9 @@ print "number of atoms = $nofatoms\n calculating ...\n";
      my ($jnp)=new PDL();
      my ($knp)=new PDL();
       
+     my ($NNA)=new PDL();
+     my ($NNB)=new PDL();
+     my ($NNC)=new PDL();
 
   for ($n1=$n1min;$n1<=$n1max;++$n1){ 
   for ($n2=$n2min;$n2<=$n2max;++$n2){ 
@@ -173,12 +212,18 @@ print "number of atoms = $nofatoms\n calculating ...\n";
    $dabc=pdl [($x[$nz]-$x[$nnn]),($y[$nz]-$y[$nnn]),($z[$nz]-$z[$nnn])];
    $rvec= $dabc x $rtoijk;$rvec=$rvec->slice(":,(0)");
    $rvec+=$n1*$p->slice(",(0)")+$n2*$p->slice(",(1)")+$n3*$p->slice(",(2)");
+   $Rnvec=$n1*$p->slice(",(0)")+$n2*$p->slice(",(1)")+$n3*$p->slice(",(2)");
+
    $rr=inner($rvec, $rvec);
    $r=sqrt($rr->at());
    $aabbcc=$rvec x $invrtoijk;$aabbcc=$aabbcc->slice(":,(0)");
    $xx=$aabbcc->at(0);
    $yy=$aabbcc->at(1);
    $zz=$aabbcc->at(2);
+   $NABC=$Rnvec x $invrtoijk;$NABC=$NABC->slice(":,(0)");
+   $NA=$NABC->at(0);
+   $NB=$NABC->at(1);
+   $NC=$NABC->at(2);
 
    if ($r<=$rmax && $r>0){#save neighbour j format
           
@@ -190,6 +235,10 @@ print "number of atoms = $nofatoms\n calculating ...\n";
     $in=$in->append( pdl ([$rvec->at(0)]));
     $jn=$jn->append( pdl ([$rvec->at(1)]));
     $kn=$kn->append( pdl ([$rvec->at(2)]));
+    $NNA=$NNA->append( pdl ([$NA]));
+    $NNB=$NNB->append( pdl ([$NB]));
+    $NNC=$NNC->append( pdl ([$NC]));
+
                     
 for ($nn1=0;$nn1<$nfi;++$nn1){  
 $fi=$nn1*2*$PI/$nfi;
@@ -211,11 +260,11 @@ $fi=$nn1*2*$PI/$nfi;
    $n= qsorti($rn); 
    $nofneighbours[$nnn]=(($rn->dims)[0]-1);
   
-   printneighbourlist(">./results/ga0.pc","for equilibrium position",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn);
-   printneighbourlistp(">./results/ga1.pc","for excited phonon with q=($qh,$qk,$ql)",$nofneighbours[$nnn],$n,$an,$rn,$inp,$jnp,$knp);
-   printneighbourlistp(">./results/ga.pc","for excited phonon with q=($qh,$qk,$ql)",$nofneighbours[$nnn],$n,$an,$rn,$inp,$jnp,$knp);
+   printneighbourlist(">./results/ga0.pc","for equilibrium position",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC);
+   printneighbourlistp(">./results/ga1.pc","for excited phonon with q=($qh,$qk,$ql)",$nofneighbours[$nnn],$n,$an,$rn,$inp,$jnp,$knp,$NNA,$NNB,$NNC);
+   printneighbourlistp(">./results/ga.pc","for excited phonon with q=($qh,$qk,$ql)",$nofneighbours[$nnn],$n,$an,$rn,$inp,$jnp,$knp,$NNA,$NNB,$NNC);
 for ($n1=1;$n1<=$nofatoms;++$n1){$charge[$n1]=-1.0*$charge[$n1];}
-   printneighbourlist(">>./results/ga.pc","for coupling parameters to phonon q=($qh,$qk,$ql)",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn);
+   printneighbourlist(">>./results/ga.pc","for coupling parameters to phonon q=($qh,$qk,$ql)",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC);
 
  }
 
@@ -231,7 +280,7 @@ print "********************************************************\n";
 
 #-----------------------------------------------------------------------
 sub printneighbourlistp {
-  my ($file,$comment,$nofn,$n,$an,$rn,$in,$jn,$kn)=@_;
+  my ($file,$comment,$nofn,$n,$an,$rn,$in,$jn,$kn,$NNA,$NNB,$NNC)=@_;
      if ($nofn=="-1"){$nofn="0";}
 
 my $pcout="$file";
@@ -262,8 +311,8 @@ print $l1 "#--------------------------------------------------------------------
 
 
 
-sub printneighbourlist {
-  my ($file,$comment,$nofn,$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn)=@_;
+sub printneighbourlist {   
+  my ($file,$comment,$nofn,$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC)=@_;
      if ($nofn=="-1"){$nofn="0";}
 
 my $pcout="$file";
@@ -275,7 +324,7 @@ print $l1 "#--------------------------------------------------------------------
     if($alpha!=90||$beta!=90||$gamma!=90)
      {print $l1 "#orthonormal coordinate system ijk is defined with respect to abc as j||b, k||(a x b) and i normal to k and j\n#charge[|e|]  di[A]   dj[A]   dk[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";}
      else
-     {print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n";}
+     {print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr na nb nc\n";}
 
  for ($n1=1;$n1<(($rn->dims)[0]);++$n1)
  {next if($rn->index($n)->at($n1)==0);
@@ -284,7 +333,8 @@ print $l1 "#--------------------------------------------------------------------
  $ddd=$an->index($n)->at($n1);
   print $l1 sprintf("%8s   %+10.6f %+10.6f %+10.6f     ",$charge[$ddd],$in->index($n)->at($n1),$jn->index($n)->at($n1),$kn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
-  print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
+  print $l1 sprintf("%+10.6f     %s %+10.6f %+10.6f %+10.6f  \n",$rn->index($n)->at($n1),$ddd,$NNA->index($n)->at($n1),$NNB->index($n)->at($n1),$NNC->index($n)->at($n1));
+ 
 
    
  }
@@ -375,9 +425,9 @@ sub getlattice {
      if ($n!=$nofatoms) {print STDOUT "Failed to read data file \"$file\": wrong number of atoms\n";
 
                          return undef;}
-     if ($alpha<=0) { die "ERROR makenn: reading unit cell angle alpha=$alpha <=0\n";}
-     if ($beta<=0) { die "ERROR makenn: reading unit cell angle beta=$beta <=0\n";}
-     if ($gamma<=0) { die "ERROR makenn: reading unit cell angle gamma=$gamma <=0\n";}
+     if ($alpha<=0) { die "ERROR ga: reading unit cell angle alpha=$alpha <=0\n";}
+     if ($beta<=0) { die "ERROR ga: reading unit cell angle beta=$beta <=0\n";}
+     if ($gamma<=0) { die "ERROR ga: reading unit cell angle gamma=$gamma <=0\n";}
 
      if($nofcomponents==0) {$nofcomponents=3;}
 

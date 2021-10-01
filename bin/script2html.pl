@@ -63,7 +63,7 @@ while (@ARGV)
    $lnr=0;
    while(($line=<Fin>)&&$lnr<$toline)
    {++$lnr;if($lnr>=$fromline){
-    if ($line=~/^\s*#/||$line=~/^\s*rem/)
+    if ($line=~/^\s*#/||$line=~/^\s*[rR][eE][mM]/)
      { # if the line starts with a comment
 
        # take care for verbatim \ pre commands
