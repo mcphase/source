@@ -11,12 +11,12 @@
 #define K_B  0.0862
 /**********************************************************************/
 void helpexit()
-{ printf (" program bfkq \n "
-          " use as:  bfkq T Emin Emax deltaE eta \n"
+{ printf (" program bfkp \n "
+          " use as:  bfkp T Emin Emax deltaE eta \n"
           "   T    .... Temprature (K)\n"
           "   Emin .... minimal Energy (meV)\n "
           "   Emax .... maximal Energy (meV)\n "
-          "   deltaE .... Energy stepwidht (meV)\n "
+          "   deltaE .... Energy stepwidth (meV)\n "
           "   eta .... imaginary small number for linewidth (meV)\n "   
           "   required: ./results/op.mat for Operator matrices \n  "
           "             ./phonon.int for Frequencies and Intensities of Phonon\n"
@@ -136,7 +136,7 @@ Z+=exp(-En*beta);
 }
 double p[1000];
 for(n=1;n<=d;++n){En=real((*opmatM[0])(n,n));p[n]=exp(-En*beta)/Z;}
-fprintf (stdout, "# omega[meV]   Imag(Dqs) [1/meV] for s=1,2,3,...\n");
+fprintf (stdout, "# omega[meV]   Iphon=dyn structfact for coherent neutron scattering x Imag(Dqs) [1/meV] for s=1,2,3,...\n");
 double dsigma=0;
 
 for(omega=Emin;omega<=Emax;omega+=deltaE)
@@ -153,7 +153,7 @@ for(omega=Emin;omega<=Emax;omega+=deltaE)
  En=real((*opmatM[0])(n,n));
  Em=real((*opmatM[0])(m,m));
  if(fabs(En-Em)>0.0000001){quot=(p[m]-p[n])/(En-Em);}
- else {quot=beta/Z;}
+ else {quot=p[m]*beta;quot=0;} // quasielastic cf transitions excluded !!!
  OOcef+=rr*rr*quot;
  OOcef/=beta;
  sum=complex <double> (En-Em-omega,-eta);
@@ -176,6 +176,7 @@ dsigma+=imag(Dqs)*intensity[S];
  
 }
 fprintf (stdout,"%+9.6f ",dsigma);
+//fprintf (stdout,"%+9.6f + i %+9.6f ",real(Mqs),imag(Mqs));
 fprintf(stdout,"\n");
 
 }
