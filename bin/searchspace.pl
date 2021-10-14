@@ -263,7 +263,7 @@ else
        if ($minimum==1&&$sta!=0)
         {#the input parameters are probably a (local) minimum - so save a file
           ($sta)=sta();if ($sta>$staorigin*1.00000001){$warning="#WARNING - calculation of sta gave another result at some point than stored in file searchspace.".($searchlevel-1)."\n";}
-       if ($sta<$stamin&&$sta!=0){$stamin=$sta;# foreach (@ARGV)
+       if ($sta<$stamin&&$sta!=0){# $stamin=$sta;# foreach (@ARGV)
                                        #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
                                        # mycopy ($file.".forfit",$file.".forfit.min.$searchlevel");}
                                           $pointcountermin=$pointcounter+1;
@@ -286,8 +286,8 @@ print Foutlevel "#".($#ssta+1)." contributions to sta found in output of calcsta
    if($chisquared){print Foutlevel "#sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
                else{print Foutlevel "#sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
 print Foutlevel "#Mininimal found sta minsta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)."\n";
-print Foutlevel "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
-print Foutlocalmin "#noflocalminima=".($minnumber-1)." local minima found (see results\searchspace.$searchlevel.localminima)\n";
+print Foutlevel "#noflocalminima=".($minnumber-1)." local minima found (see results/searchspace.$searchlevel.localminima)\n";
+print Foutlocalmin "#noflocalminima=".($minnumber-1)." local minima found (see results/searchspace.$searchlevel.localminima)\n";
 close Foutlevel;close Foutlocalmin;
 # foreach (@ARGV) {$file=$_; mycopy($file.".min.$searchlevel",$file);}
      open(Fout,">results/searchspace.status");

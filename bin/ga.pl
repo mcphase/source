@@ -23,7 +23,7 @@ print STDOUT << "EOF";
 #     rmax  .... maximum distance rmax [Angstroem] of neighbour to take into account neighbour
 #     atomnr .... crystal field parameters of this atom will be considered (atomnr refers to
 #                 the list in mcphas.j)
-#     (qh qk ql) ... components of the phonon q-vector in terms of reciprocal lattice
+#     (qh qk ql) ... components of the phonon q-vector in terms of primitive reciprocal lattice
 #                    
 #     n     ... n frames of the phonon oscillation will be considered
 #     
@@ -257,7 +257,7 @@ $fi=$nn1*2*$PI/$nfi;
 #  =exr cos(QR+ fi) - exi sin (QR+ fi)
 #
 # QR= (qh, qk, ql) . (Ra,Rb,Rc)=2pi (h da + k db + l dc)
-    $QR=2*$PI*($qh*$xx+$qk*$yy+$ql*$zz);
+    $QR=2*$PI*($qh*$n1+$qk*$n2+$ql*$n3);
     $inp=$inp->append( pdl ([$rvec->at(0)+($evrx[$n]-$evrx[$nnn])*cos($QR+$fi)-($evix[$n]-$evix[$nnn])*sin($QR+$fi)]));
     $jnp=$jnp->append( pdl ([$rvec->at(1)+($evry[$n]-$evry[$nnn])*cos($QR+$fi)-($eviy[$n]-$eviy[$nnn])*sin($QR+$fi)]));
     $knp=$knp->append( pdl ([$rvec->at(2)+($evrz[$n]-$evrz[$nnn])*cos($QR+$fi)-($eviz[$n]-$eviz[$nnn])*sin($QR+$fi)]));

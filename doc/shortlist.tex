@@ -1,0 +1,65 @@
+\section{Shortlist of important Commands and Input Files}\label{shortlist}
+\small
+
+\begin{table}
+%\caption{}
+\label{tab:shortlist}
+\begin{tabular}{lll}
+\hline
+Program	&	Input File	&	Input File Created by \\
+\hline
+anisotropy & 	[mcphas.j]	&	cif2mcphas and makenn \\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\	
+bfk		&	*.cef		&     singleion \\
+		&      *.par           &    editor, copy from example and edit \\	
+bfkp          &  results/op.mat  & singleion wit option  -opmat  \\
+                &   phonon.int     &     parlinsky program for phonons *.d51 \\
+                &  g\_alpha.s      &  adapt makegalphas.pl from examples cecu2ge2\_cf\_phonon\_int \\  
+cpsingleion	&	results/*.sipf.levels &	singleion \\
+display\_densities &	results/mcphas.mf &	mcphas \\	
+		&	mcphas.j	&	cif2mcphas and makenn \\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\		
+display\_density &	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\
+formfactor	&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\	
+ic1ion		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\
+makenn		&	mcphas.j	&	cif2mcphas\\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\		
+mcdiff		&	mcdiff.in	&  	mcphas and setup\_mcdiff\_in \\		
+		&			&	cif2mcphas \\
+mcdisp		&	mcdisp.par	&	Editor, copy from existing example \\
+	&		mcdisp.mf	&	mcphas and setup\_mcdisp\_mf \\
+		&	mcphas.j	&	cif2mcphas \\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\		
+mcphas		&	mcphas.ini	&	copy from existing example and edit \\
+		&	mcphas.j	&	cif2mcphas and makenn \\
+		&	[mcphas.tst] 	&	copy from existing example and edit inserting \\
+		&			&  spinconfigurations from results/mcphas.sps \\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\	
+powdermagnon & mcphas.j	&	cif2mcphas \\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\		
+		&   results/mcdisp.qei (option -r) & mcdisp \\	
+searchspace	&	*.forfit	&	editor, copy of file * with fitting parameter starting value range\\
+		&	calcsta	&	editor, batch file for calculation of sta \\
+setup\_mcdiff\_in & results/mcphas.mf & mcphas \\
+setup\_mcdisp\_mf & results/mcphas.mf & mcphas \\
+setup\_mcphasjforfit &   mcphas.j	&	cif2mcphas \\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+setup\_jqfit &   mcphas.j	&	cif2mcphas \\
+		&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+singleion	&	*.sipf		&	copy from existing example and edit with mcphaseexplorer mpe \\
+		&			&	cif2mcphas and edit with mpe \\		
+simannfit	&	*.forfit	&	editor, copy of file * with fitting parameter starting value range\\
+		&	calcsta (linux)	&	editor, batch file for calculation of sta \\
+		& 	calcsta.bat (windows)	&	editor, batch file for calculation of sta \\
+\end{tabular}
+\end{table}
+
