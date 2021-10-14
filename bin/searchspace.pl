@@ -266,7 +266,7 @@ else
        if ($sta<$stamin&&$sta!=0){# $stamin=$sta;# foreach (@ARGV)
                                        #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
                                        # mycopy ($file.".forfit",$file.".forfit.min.$searchlevel");}
-                                          $pointcountermin=$pointcounter+1;
+                                       #   $pointcountermin=$pointcounter+1;
 			}
 #          foreach (@ARGV){$file=$_; mycopy ($file.".forfit",$file.".$searchlevel.$minnumber");}
           print Foutlocalmin $pointcounterorigin." ";
@@ -285,7 +285,7 @@ print Foutlevel "#$pointcounter points calculated in  $hours h.\n# Time estimate
 print Foutlevel "#".($#ssta+1)." contributions to sta found in output of calcsta ...\n";
    if($chisquared){print Foutlevel "#sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
                else{print Foutlevel "#sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
-print Foutlevel "#Mininimal found sta minsta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)."\n";
+print Foutlevel "#Mininimal found sta minsta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)." in file  results/searchspace.$searchlevel \n";
 print Foutlevel "#noflocalminima=".($minnumber-1)." local minima found (see results/searchspace.$searchlevel.localminima)\n";
 print Foutlocalmin "#noflocalminima=".($minnumber-1)." local minima found (see results/searchspace.$searchlevel.localminima)\n";
 close Foutlevel;close Foutlocalmin;
@@ -298,7 +298,7 @@ print Fout ".............................................\n";
 print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
 if($chisquared){print Fout "sta=chisquared(=1/".($#ssta+1)."sum deviations^2/experrors^2)\n";}
                else{print Fout "sta=variance s^2(=1/".($#ssta+1)."sum deviations^2)\n";}
-print Fout "Mininimal found sta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)."\n";
+print Fout "Mininimal found sta=$stamin for parameter set nr ".($pointcountermin+$searchlevel/100)." in file  results/searchspace.$searchlevel \n";
 print Fout "noflocalminima=".($minnumber-1)." local minima found (see results/searchspace.$searchlevel.localminima)\n";
 print Fout ".............................................\n";
 print Fout "Time estimate for next level ".($searchlevel+1).": $estimate h\n";
