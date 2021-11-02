@@ -152,8 +152,8 @@ for(omega=Emin;omega<=Emax;omega+=deltaE)
  {rr=abs((*opmatM[alpha[k]])(n,m));
  En=real((*opmatM[0])(n,n));
  Em=real((*opmatM[0])(m,m));
- if(fabs(En-Em)>0.0000001){quot=(p[m]-p[n])/(En-Em);}
- else {quot=p[m]*beta;quot=0;} // quasielastic cf transitions excluded !!!
+ if(fabs(En-Em)>0.00001){quot=(p[m]-p[n])/(En-Em);}
+ else {quot=p[m]*beta;} 
  OOcef+=rr*rr*quot;
  OOcef/=beta;
  sum=complex <double> (En-Em-omega,-eta);
