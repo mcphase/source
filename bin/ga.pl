@@ -211,6 +211,10 @@ print "number of atoms = $nofatoms\n calculating ...\n";
      my ($Nr2)=new PDL();
      my ($Nr3)=new PDL();
 
+     my ($dr1)=new PDL();
+     my ($dr2)=new PDL();
+     my ($dr3)=new PDL();
+
   for ($n1=$n1min;$n1<=$n1max;++$n1){ 
   for ($n2=$n2min;$n2<=$n2max;++$n2){ 
   for ($n3=$n3min;$n3<=$n3max;++$n3){  
@@ -222,7 +226,9 @@ print "number of atoms = $nofatoms\n calculating ...\n";
 
    $rr=inner($rvec, $rvec);
    $r=sqrt($rr->at());
-   $aabbcc=$rvec x $invrtoijk;$aabbcc=$aabbcc->slice(":,(0)");
+   $aabbcc=$rvec x $invrtoijk;
+
+   $aabbcc=$aabbcc->slice(":,(0)");
    $xx=$aabbcc->at(0);
    $yy=$aabbcc->at(1);
    $zz=$aabbcc->at(2);
@@ -230,6 +236,12 @@ print "number of atoms = $nofatoms\n calculating ...\n";
    $NA=$NABC->at(0);
    $NB=$NABC->at(1);
    $NC=$NABC->at(2);
+   # p x dr = dr1 r1 + dr2 r2 + dr3 r3  = da a + db b + dc c = rvec
+   # --> dr = $inv x rvec
+   $dr= $inv x transpose($rvec);$dr=transpose($dr)->slice(":,(0)");
+   $drr1=$dr->at(0);
+   $drr2=$dr->at(1);
+   $drr3=$dr->at(2);
 
    if ($r<=$rmax && $r>0){#save neighbour j format
           
@@ -247,7 +259,10 @@ print "number of atoms = $nofatoms\n calculating ...\n";
     $Nr1=$Nr1->append( pdl ([$n1]));
     $Nr2=$Nr2->append( pdl ([$n2]));
     $Nr3=$Nr3->append( pdl ([$n3]));
-
+    $dr1=$dr1->append( pdl ([$drr1]));
+    $dr2=$dr2->append( pdl ([$drr2]));
+    $dr3=$dr3->append( pdl ([$drr3]));
+    
                     
 for ($nn1=0;$nn1<$nfi;++$nn1){  
 $fi=$nn1*2*$PI/$nfi;
@@ -269,11 +284,11 @@ $fi=$nn1*2*$PI/$nfi;
    $n= qsorti($rn); 
    $nofneighbours[$nnn]=(($rn->dims)[0]-1);
   
-   printneighbourlist(">./results/ga0.pc","for equilibrium position",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC,$Nr1,$Nr2,$Nr3);
+   printneighbourlist(">./results/ga0.pc","for equilibrium position",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC,$Nr1,$Nr2,$Nr3,$dr1,$dr2,$dr3);
    printneighbourlistp(">./results/ga1.pc","for excited phonon with q=($qh,$qk,$ql)",$nofneighbours[$nnn],$n,$an,$rn,$inp,$jnp,$knp,$NNA,$NNB,$NNC);
    printneighbourlistp(">./results/ga.pc","for excited phonon with q=($qh,$qk,$ql)",$nofneighbours[$nnn],$n,$an,$rn,$inp,$jnp,$knp,$NNA,$NNB,$NNC);
 for ($n1=1;$n1<=$nofatoms;++$n1){$charge[$n1]=-1.0*$charge[$n1];}
-   printneighbourlist(">>./results/ga.pc","for coupling parameters to phonon q=($qh,$qk,$ql)",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC,$Nr1,$Nr2,$Nr3);
+   printneighbourlist(">>./results/ga.pc","for coupling parameters to phonon q=($qh,$qk,$ql)",$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC,$Nr1,$Nr2,$Nr3,$dr1,$dr2,$dr3);
 
  }
 
@@ -321,7 +336,7 @@ print $l1 "#--------------------------------------------------------------------
 
 
 sub printneighbourlist {   
-  my ($file,$comment,$nofn,$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC,$Nr1,$Nr2,$Nr3)=@_;
+  my ($file,$comment,$nofn,$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$NNA,$NNB,$NNC,$Nr1,$Nr2,$Nr3,$dr1,$dr2,$dr3)=@_;
      if ($nofn=="-1"){$nofn="0";}
 
 my $pcout="$file";
@@ -333,7 +348,7 @@ print $l1 "#--------------------------------------------------------------------
     if($alpha!=90||$beta!=90||$gamma!=90)
      {print $l1 "#orthonormal coordinate system ijk is defined with respect to abc as j||b, k||(a x b) and i normal to k and j\n#charge[|e|]  di[A]   dj[A]   dk[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";}
      else
-     {print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr na nb nc nr1 nr2 nr3\n";}
+     {print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr na nb nc nr1 nr2 nr3 dr1[r1] dr2[r2] dr3[r3]\n";}
 
  for ($n1=1;$n1<(($rn->dims)[0]);++$n1)
  {next if($rn->index($n)->at($n1)==0);
@@ -343,7 +358,8 @@ print $l1 "#--------------------------------------------------------------------
   print $l1 sprintf("%8s   %+10.6f %+10.6f %+10.6f     ",$charge[$ddd],$in->index($n)->at($n1),$jn->index($n)->at($n1),$kn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f     %s %+10.6f %+10.6f %+10.6f  ",$rn->index($n)->at($n1),$ddd,$NNA->index($n)->at($n1),$NNB->index($n)->at($n1),$NNC->index($n)->at($n1));
-  print $l1 sprintf("%+10.6f %+10.6f %+10.6f  \n",$Nr1->index($n)->at($n1),$Nr2->index($n)->at($n1),$Nr3->index($n)->at($n1));
+  print $l1 sprintf("%+10.6f %+10.6f %+10.6f  ",$Nr1->index($n)->at($n1),$Nr2->index($n)->at($n1),$Nr3->index($n)->at($n1));
+  print $l1 sprintf("%+10.6f %+10.6f %+10.6f  \n",$dr1->index($n)->at($n1),$dr2->index($n)->at($n1),$dr3->index($n)->at($n1));
  
 
    

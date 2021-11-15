@@ -9,6 +9,8 @@
 #include "myev.h"
 
 #define K_B  0.0862
+#define PI   3.141592654
+
 /**********************************************************************/
 void helpexit()
 { printf (" program bfkp \n "
@@ -170,9 +172,9 @@ Dqs=-2.0*omegaphon[S]/(omegeta*omegeta-omegaphon[S]*omegaphon[S]+omegeta*Mqs);
 // note: delta(x)=1/pi Im (1/(x-i eps) ) = 1/pi  eps/(eps^2+x^2) 
 // https://en.wikipedia.org/wiki/Dirac_delta_function
 //
-// note already from dimension it is clear, that Dqs corresponds to the 
+// note already from dimension it is clear, that Dqs/PI corresponds to the 
 // sum of delta functions - it follows that:
-dsigma+=imag(Dqs)*intensity[S];  
+dsigma+=imag(Dqs)*intensity[S]/PI;  
  
 }
 fprintf (stdout,"%+9.6f ",dsigma);
