@@ -63,7 +63,7 @@ print "              the exponential alpha is conveniently put to  about 1\n";
 print " option -bvk filename\n";
 print "              for phonon take Born van Karman model with longitudinal and\n";
 print "              transversal spring constants from file - file format:\n";
-print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(n/M)\n";
+print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(N/m)\n";
 print STDOUT << "EOF";
  option -f [filename]
  option -dm [filename]

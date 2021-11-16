@@ -196,17 +196,17 @@ FILE * evfileinit(const char * filemode,const char*filename,par & inputpars,cons
           fprintf (fout, "#!spins_show_static_moment_direction=1.0\n");
           fprintf (fout, "#!extended_eigenvector_dimension=%i\n",ev_dim); 
           writeheader(inputpars,fout);
-          fprintf (fout, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+          fprintf (fout, "#!dispersion displayytext=E(meV)\n#Ha[T] Hb[T] Hc[T] T[K] h k l Q[A^-1] energy[meV] int_dipapprFF) [barn/sr/f.u.] int_beyonddipappr [barn/sr/f.u.]  Inuc [barn/sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
   return fout;
   }
 
 //****************************************************************************************************
 // print eigenvector of observable to file
 //****************************************************************************************************
-void print_ev(FILE * fout,int i,inimcdis & ini,Vector & hkl,double QQ,Vector & En,Vector & ints,Vector & intsbey,mfcf & qee_real,mfcf & qee_imag)
+void print_ev(FILE * fout,int i,inimcdis & ini,Vector & hkl,double QQ,Vector & En,Vector & ints,Vector & intsbey,Vector & intsP,mfcf & qee_real,mfcf & qee_imag)
                                {
-                     fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g\n",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                              myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)));
+                     fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g\n",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                              myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)));
                      fprintf (fout, "#eigenvector real part\n");
                      qee_real.print(fout); // here we printout the eigenvector of the excitation
                      fprintf (fout, "#eigenvector imaginary part\n");
