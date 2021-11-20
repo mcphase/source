@@ -21,7 +21,7 @@ class inimcdis
   char * savfilename;
   Vector qmin,qmax,deltaq;
   void read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_jqfile,Vector & abc);   
-  double setcolvalue(int i,Vector & Qvec, double & Qincr);
+  double setcolvalue(int i,Vector & Qvec, double & Qincr, Vector & qprim);
 
   public:
   int * hklfile_start_index;
@@ -49,7 +49,7 @@ class inimcdis
   mfcf mf;
    void save(); // save parameters to results/_mcdisp.ini results/_mcdisp.mf
    void print_usrdefcolhead(FILE *fout);
-   void print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr);
+   void print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim);
   inimcdis (const char * file,const char * spinfile, char * prefix,int do_jqfile,Vector & abc); //constructor
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor

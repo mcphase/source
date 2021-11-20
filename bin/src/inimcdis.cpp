@@ -18,7 +18,7 @@ int usrdefcols[]={4, 1,2,3,4}; // user defined output columns (first number is n
 int colcod[]=    {-1,5,6,7,4}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
                                            // using the out11 command in mcdiff.in these codes can be modified
-#define COLHEADDIM 8
+#define COLHEADDIM 11
 // different output data for columns 10 and 11
 const char * colhead []= {  "Qinc[1/A] ", //  0
                             "Qx[1/A]   ",  //   1
@@ -28,11 +28,14 @@ const char * colhead []= {  "Qinc[1/A] ", //  0
                             "Ha[T]     ", //    5                                                  
                             "Hb[T]     ", //    6                                                  
                             "Hc[T]     ", //    7 
-                            "|Q|[1/A]  "  //    8                                                                  
+                            "|Q|[1/A]  ",  //    8                                                                  
+                            "hprim  ",  //    9                                                                  
+                            "kprim  ",  //    10                                                                  
+                            "lprim  "  //    11                                                                 
                            };
 
 // different output data for user defined columns ...
-double inimcdis::setcolvalue(int i,Vector & Qvec, double & Qincr)
+double inimcdis::setcolvalue(int i,Vector & Qvec, double & Qincr,Vector & qprim)
 {
          switch (i) {
 case 0:  return Qincr;break;
@@ -44,6 +47,9 @@ case 5:  return Hext(1);break;
 case 6:  return Hext(2);break;
 case 7:  return Hext(3);break;
 case 8:  return Norm(Qvec);break;
+case 9:  return qprim(1);break;
+case 10:  return qprim(2);break;
+case 11:  return qprim(3);break;
 default: fprintf(stderr,"Error mcdisp: unknown column code\n");exit(EXIT_FAILURE);
                     }
 
@@ -64,9 +70,9 @@ void inimcdis::print_usrdefcolhead(FILE *fout)
 }
 
 // print user defined column headers
-void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr)
+void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim)
 {
- for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr)));
+ for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim)));
 }
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save()
@@ -374,7 +380,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
 #if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
        nofthreads = get_nprocs();
 #elif defined(__FreeBSD__) || defined(__APPLE__)
-       int m[2], count; size_t len;
+       int m[2]; size_t len;
        m[0] = CTL_HW; m[1] = HW_NCPU; len = sizeof(int);
        sysctl(m, 2, &nofthreads, &len, NULL, 0);
 #else

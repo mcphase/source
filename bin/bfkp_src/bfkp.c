@@ -15,14 +15,14 @@
 void helpexit()
 { printf (" program bfkp \n "
           " use as:  bfkp T Emin Emax deltaE eta \n"
-          "   T    .... Temprature (K)\n"
+          "   T    .... Temperature (K)\n"
           "   Emin .... minimal Energy (meV)\n "
           "   Emax .... maximal Energy (meV)\n "
           "   deltaE .... Energy stepwidth (meV)\n "
           "   eta .... imaginary small number for linewidth (meV)\n "   
           "   required: ./results/op.mat for Operator matrices \n  "
           "             ./phonon.int for Frequencies and Intensities of Phonon\n"
-          "             ./g_alpha.s for cf-phonon coupling constnats\n"
+          "             ./g_alpha.s for cf-phonon coupling constants\n"
           "  Output to stdout: nuclear coherent inelastic spectrum (equ. 68 ff) \n"
           
           );
@@ -38,6 +38,7 @@ printf("#**************************************************************\n");
 printf("# * bfkq.c - calculate CF-Phonon Interaction neutron spectra\n");
 printf("# * Author: Martin Rotter %s\n",MCPHASVERSION);
 printf("# **************************************************************\n");
+if(argc<4) {helpexit();}
 for (i=1;i<argc;++i)
  {if(strncmp(argv[i],"-h",2)==0) {helpexit();}
  else{T=strtod(argv[i],NULL);++i; if(T<=0){fprintf(stderr,"Error: T<=0\n");exit(EXIT_FAILURE);}

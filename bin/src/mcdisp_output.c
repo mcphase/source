@@ -203,10 +203,14 @@ FILE * evfileinit(const char * filemode,const char*filename,par & inputpars,cons
 //****************************************************************************************************
 // print eigenvector of observable to file
 //****************************************************************************************************
-void print_ev(FILE * fout,int i,inimcdis & ini,Vector & hkl,double QQ,Vector & En,Vector & ints,Vector & intsbey,Vector & intsP,mfcf & qee_real,mfcf & qee_imag)
+void print_ev(FILE * fout,int i,inimcdis & ini,Vector & hkl,double QQ,Vector & En,Vector & ints,Vector & intsbey,Vector & intsP,mfcf & qee_real,mfcf & qee_imag, Vector & qprim)
                                {
-                     fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g\n",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                              myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)));
+                     fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g %4.4g  %4.4g %4.4g\n",
+                              myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),
+                              myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+                              myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)),
+                              myround(qprim(1)),myround(qprim(2)),myround(qprim(3))
+                              );
                      fprintf (fout, "#eigenvector real part\n");
                      qee_real.print(fout); // here we printout the eigenvector of the excitation
                      fprintf (fout, "#eigenvector imaginary part\n");
