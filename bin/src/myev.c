@@ -53,7 +53,7 @@ void myPrintComplexMatrix(FILE * file,Matrix & M)
     }
     fprintf (file,"#Imaginary Part\n");
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
-    for (j1=M.Clo();j1<=M.Chi();++j1) { va=myround(imag(M(i1,j1)));
+    for (j1=M.Clo();j1<=M.Chi();++j1) { 
         if(i1<j1)va=-myround(M(i1,j1));else va=myround(M(j1,i1)); 
         if(i1==j1)va=0;
     if(fabs(va)>1e-8) fprintf (file,"%+9.6f ",va); else fprintf(file,"0         "); }

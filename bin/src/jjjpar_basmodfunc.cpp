@@ -706,15 +706,20 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
   for (i1=I.Rlo();i1<=I.Rhi();++i1){ 
     for (j1=I.Clo();j1<=I.Chi();++j1) { 
     if(i1<j1)In(i1,j1)=complex <double> (I(j1,i1),-I(i1,j1));else In(i1,j1)=complex <double> (I(i1,j1),I(j1,i1)); 
+    if(i1==j1)In(i1,j1)=complex <double> (I(i1,i1),0);
     }
     }
     
   M=es.Transpose().Conjugate() * In * es;
-  for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=M.Chi();++j1){
+  // transform to real notation of a hermitian matrix:The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+  for(i1=M.Rlo();i1<=M.Rhi();++i1){for(j1=M.Clo();j1<=i1;++j1){
     mat1(j1,i1)=imag(M(i1,j1)); 
     mat1(i1,j1)=real(M(i1,j1));
    }}
- //myPrintComplexMatrix(stdout,mat1);
+ //myPrintComplexMatrix(stdout,In);
   return mat1;
  }
 }
