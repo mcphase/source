@@ -10,7 +10,7 @@
 
 #define K_B  0.0862
 #define PI   3.141592654
-#define GMAX 10000
+#define GMAX 300000
 /**********************************************************************/
 void helpexit()
 { printf (" program bfkp \n "
@@ -40,9 +40,13 @@ printf("#**************************************************************\n");
 printf("# * bfkq.c - calculate CF-Phonon Interaction neutron spectra\n");
 printf("# * Author: Martin Rotter %s\n",MCPHASVERSION);
 printf("# **************************************************************\n");
+printf("# Command: bfkp ");
+for (i=1;i<argc;++i)printf(" %s",argv[i]);
+printf("\n");
 if(argc<4) {helpexit();}
 for (i=1;i<argc;++i)
- {if(strncmp(argv[i],"-h",2)==0) {helpexit();}
+ {
+ if(strncmp(argv[i],"-h",2)==0) {helpexit();}
  else{T=strtod(argv[i],NULL);++i; 
                                  // now read T
       Emin=strtod(argv[i],NULL);++i;  // now read Emin
@@ -100,8 +104,15 @@ fprintf(stdout,"# Read smax=%i phonons ./phonon.ev \n",smax+1);
 
 // read coupling
 float nn[1000];nn[0]=1000;
-float galphas[GMAX],galphasr[GMAX],galphasi[GMAX],omegaks[GMAX]; 
-int alpha[GMAX],s[GMAX],Ng=-1,N;
+float * galphas,*galphasr,*galphasi,*omegaks;
+galphas = new float[GMAX];
+galphasr = new float[GMAX];
+galphasi = new float[GMAX];
+omegaks = new float[GMAX];
+ 
+int * s; s=new int[GMAX];
+int Ng=-1,N; 
+int * alpha; alpha=new int[GMAX];
 long int pos=0,posold=1;
 fin_opmat = fopen_errchk ("./g_alpha.s", "rb");
 while(feof(fin_opmat)==false){
@@ -116,14 +127,15 @@ if((n=inputline(fin_opmat,nn))>=3)
  pos=ftell(fin_opmat);
 }else{if(pos!=posold){posold=pos;
       fseek(fin_opmat,pos,SEEK_SET);
-      fgets_errchk(instr,MAXNOFCHARINLINE,fin_opmat);
+      fgets(instr,MAXNOFCHARINLINE,fin_opmat);
       instr[0]=' ';
       extract(instr,"N",N);
-   } 
+                     }
 }
 
 }
 fclose(fin_opmat);
+if(N==0)N=1;
 fprintf(stdout,"# Read Ng+1=%i CF-Phonon coupling constants g_alpha(s) from ./g_alpha.s number of k points N=%i \n",Ng+1,N);
 
 double OOcef,rr,quot,En,Em,beta,Z,omega;
@@ -176,24 +188,62 @@ for(n=1;n<=d;++n)for(m=1;m<=d;++m)
             }
  }
 
-
+complex <double> M,gbetaks,bmudnunm[52],A,B,factor; 
+int i,ms; double nks,omeganm,omegamud,Ems,bo,omegaksold=0;
 for(omega=Emin;omega<=Emax;omega+=deltaE)
 {fprintf (stdout,"%+9.6f ",omega);
- chi=0;//omegeta=complex <double> (omega,eta);
+ chi=0;omegeta=complex <double> (omega,eta);
  for(nu=1;nu<=mumax;++nu){ // sum  in (27) is sufficient over nu (because OM is diagonal, i.e. prop delta_munu)
  OM=0;
 for(alp=1;alp<=3;++alp){
  
  OM(alp,alp)=complex <double> (-omega+omegamu[nu],-eta);
-           
+  // evaluate (47) to get M(omega) ---------------------------------------------------------------
+  M=0;
 
-  // here should be added to O the interation term M(omega)/P equation (28)
-  //  ....
+     for(n=1;n<=d;++n)for(m=1;m<=d;++m){ // sum over nm
+           En=real((*opmatM[0])(n,n));
+           Em=real((*opmatM[0])(m,m));
+           omeganm=En-Em;
+           omegamud=omeganm-omegamu[nu]; 
+                    for(bet=1;bet<=imax;++bet){ //++++ calulate b^betalp_mudnunm (42)(39) +++++++++++++++++++++++++++++
+                      bmudnunm[bet]=0;
+                     for(ms=1;ms<=d;++ms){Ems=real((*opmatM[0])(ms,ms));
+                                          if(fabs(Ems-Em-omegamu[nu])<0.00001&&fabs(En-Ems-omegamud)<0.00001)bmudnunm[bet]+=(*opmatM[bet])(n,ms)*(*opmatM[alp])(ms,m);
+                                          if(fabs(En-Ems-omegamu[nu])<0.00001&&fabs(Ems-En-omegamud)<0.00001)bmudnunm[bet]-=(*opmatM[bet])(ms,m)*(*opmatM[alp])(n,ms);
+                                         }
+                                        }
+                                       //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                // sum all gbeta(s) in (48) ||||||||||||||||||||||||||||||||
+                omegaksold=0;
+                    for(i=1;i<=Ng;++i)if((bo=fabs(beta*omegaks[i]))>0){ // sum over "ksbeta"=i where beta=alpha[i], s=s[i], k not needed, but omegaks[i]
+                          
+                if(fabs(omegaks[i]-omegaksold)>0.00001){ // calculate factor only if omegaks[i] changed since last time
+                          if(bo>0.001)nks=1/(exp(bo)-1);
+                          else nks=1/bo;
+                
+                A= complex <double> (omeganm-omegaks[i],-eta); // to avoid divergencies also add finite width to A and B
+                A=(nks*p[m]-(1+nks)*p[n])/beta/A;
+                B=complex <double> (omeganm+omegaks[i],-eta);
+                B=((1+nks)*p[m]-nks*p[n])/beta/B;
+                factor=(A/(omeganm-omegaks[i]-omegeta)+B/(omeganm-omegaks[i]-omegeta));
+                omegaksold=omegaks[i];
+                                                                }
+                gbetaks=complex <double> (galphasr[i],galphasi[i]);
+                M+=abs(bmudnunm[alpha[i]]*gbetaks)*factor;
+                 //fprintf(stderr,"%g %g %g %g %g \n",A,B,abs(bmudnunm*gbetaks),real(M),imag(M));
+                //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+                                                                      }
+                    }
+  M/=N;
+  // here should be subtracte from O the interation term M(omega)/P equation (28) ----------------
+//fprintf(stderr,"%g %g %g %g  %g %g \n",real(M),imag(M),real(OM(alp,alp)),imag(OM(alp,alp)),real((*P[nu])(alp,alp)),imag((*P[nu])(alp,alp))); 
+ if(abs(M)>0.000001)OM(alp,alp)=OM(alp,alp)-M/(*P[nu])(alp,alp);  
     }
+// myPrintComplexMatrix(stderr,OM);
  
    chi+=(*P[nu])*OM.Inverse(); //equ (27)
    } 
-
 dsigma=0.66666*imag(chi(1,1)+chi(2,2)+chi(3,3));  //equ(18)
 if(fabs(omega*beta)>0.001){dsigma*=(beta*omega)/(1-exp(-beta*omega));}
 
@@ -287,6 +337,12 @@ fprintf(stdout,"\n");
 }
 
 // free memory
+delete alpha;
+delete galphas;
+delete galphasr;
+delete galphasi;
+delete omegaks;
+
 for(d=0;d<=imax;++d)delete opmatM[d];
 //for(d=0;d<=smax;++d) delete eq[d];
 }
