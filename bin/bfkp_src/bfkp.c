@@ -10,7 +10,7 @@
 
 #define K_B  0.0862
 #define PI   3.141592654
-#define GMAX 300000
+
 /**********************************************************************/
 void helpexit()
 { printf (" program bfkp \n "
@@ -105,15 +105,21 @@ fprintf(stdout,"# Read smax=%i phonons ./phonon.ev \n",smax+1);
 // read coupling
 float nn[1000];nn[0]=1000;
 float * galphas,*galphasr,*galphasi,*omegaks;
+int Ng=-1,N=0,GMAX=1; 
+fprintf(stdout,"# reading coupling from g_alpha.s ...\n");
+fin_opmat = fopen_errchk ("./g_alpha.s", "rb");
+while(feof(fin_opmat)==false){fgets(instr,MAXNOFCHARINLINE,fin_opmat);++GMAX;}
+fclose(fin_opmat);
+fprintf(stdout,"# ...found %i lines - reserving memory for storage of coupling parameters\n",GMAX); 
 galphas = new float[GMAX];
 galphasr = new float[GMAX];
 galphasi = new float[GMAX];
 omegaks = new float[GMAX];
  
 int * s; s=new int[GMAX];
-int Ng=-1,N; 
 int * alpha; alpha=new int[GMAX];
 long int pos=0,posold=1;
+fprintf(stdout,"# storing coupling paramters\n");
 fin_opmat = fopen_errchk ("./g_alpha.s", "rb");
 while(feof(fin_opmat)==false){
 if((n=inputline(fin_opmat,nn))>=3)
@@ -154,10 +160,8 @@ if(T<=0){//*********************************************************************
 // do the calculations of magnetic crystal field cross section 
 //**********************************************************************************
 T=-T;
-fprintf (stdout, "# Note: Imagpolycrystal [barn/srmeV]= (r0 gJ/2)^2 1/pi  (1-exp(-hbar omega/kT))^(-1) 2/3Trace{Im(chi(omega))} \n "
-                 "#        with  r0 =  -0.53908 * 10^-12 cm  , 1 barn=10^-24 cm \n"
-                 "# Here follows output:\n"
-                 "# omega[meV]  vs   (1-exp(-hbar omega/kT))^(-1) 2/3Trace{Im(chi(omega))}  [1/meV]\n");
+fprintf (stdout, "# Calculating CF transition energies and matrix elements  gamma (see manual, output of singleion *.trs) \n"
+                 "# E[meV]   vs  gamma \n");
 
 // sort transitions into groups belonging to the same transition energy
 double fr,dsigma,omegamu[GMAX];int mu,nu,mumax=0,ok,alp,bet;
@@ -187,6 +191,10 @@ for(n=1;n<=d;++n)for(m=1;m<=d;++m)
 
             }
  }
+fprintf (stdout, "# Note: Imagpolycrystal [barn/srmeV]= (r0 gJ/2)^2 1/pi  (1-exp(-hbar omega/kT))^(-1) 2/3Trace{Im(chi(omega))} \n"
+                 "#        with  r0 =  -0.53908 * 10^-12 cm  , 1 barn=10^-24 cm \n"
+                 "# Here follows output:\n"
+                 "# omega[meV]  vs   (1-exp(-hbar omega/kT))^(-1) 2/3Trace{Im(chi(omega))}  [1/meV]\n");
 
 complex <double> M,gbetaks,bmudnunm[52],A,B,factor; 
 int i,ms; double nks,omeganm,omegamud,Ems,bo,omegaksold=0;
@@ -271,7 +279,8 @@ for(mu=0;mu<=mumax;++mu)delete P[mu];
 } else { //**********************************************************************************
 // do the calculations of nuclear coherent phonon cross section 
 //**********************************************************************************
-
+if(N>1){fprintf(stderr,"Error bfkp: N=%i k points found in g_alpha.s - please use g_alpha.s with only one k point\n"
+                       " - you can generate this by qep2bfkp.pl or makegalphas.pl\n",N);exit(EXIT_FAILURE);}
  fin_opmat = fopen_errchk ("./phonon.int", "rb");
 while(feof(fin_opmat)==false)
 if((n=inputline(fin_opmat,nn))!=0)
