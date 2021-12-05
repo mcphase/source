@@ -10,7 +10,7 @@
 
 #define K_B  0.0862
 #define PI   3.141592654
-
+#define TRMAX 10000 /* maximum number of crystal field transitions */
 /**********************************************************************/
 void helpexit()
 { printf (" program bfkp \n "
@@ -164,9 +164,9 @@ fprintf (stdout, "# Calculating CF transition energies and matrix elements  gamm
                  "# E[meV]   vs  gamma \n");
 
 // sort transitions into groups belonging to the same transition energy
-double fr,dsigma,omegamu[GMAX];int mu,nu,mumax=0,ok,alp,bet;
+double fr,dsigma,omegamu[TRMAX];int mu,nu,mumax=0,ok,alp,bet;
 ComplexMatrix chi(1,3,1,3),OM(1,3,1,3);
-ComplexMatrix *P[GMAX];
+ComplexMatrix *P[TRMAX];
 for(n=1;n<=d;++n)for(m=1;m<=d;++m)
  {En=real((*opmatM[0])(n,n));
   Em=real((*opmatM[0])(m,m));
@@ -179,7 +179,7 @@ for(n=1;n<=d;++n)for(m=1;m<=d;++m)
             if(fabs(omegamu[mu])<0.0001){gamma*=beta;}else{gamma*=beta*omegamu[mu];}
             fprintf(stdout,"# %+9.6f %+9.6f \n",omegamu[mu],gamma);
              }
-  if(ok==0){++mumax;if(mumax>GMAX-1){fprintf (stderr,"#Error:too many transitions - increase GMAX and recompile\n");exit (EXIT_FAILURE);}
+  if(ok==0){++mumax;if(mumax>TRMAX-1){fprintf (stderr,"#Error:too many transitions - increase TRMAX and recompile\n");exit (EXIT_FAILURE);}
             omegamu[mumax]=En-Em;
             P[mumax]= new ComplexMatrix(1,3,1,3);
             if (fabs(omegamu[mumax])>0.0001){ fr=(p[m]-p[n])/(beta*omegamu[mumax]);}
