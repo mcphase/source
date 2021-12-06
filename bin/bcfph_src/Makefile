@@ -2,9 +2,9 @@
 #
 # File:          Makefile
 #
-# Project:       McPhase - CF Phonon Module bfkp
+# Project:       McPhase - CF Phonon Module bcfph
 #
-# Description:   Makefile for bfkp  - compiles and links all c++ code
+# Description:   Makefile for bcfph  - compiles and links all c++ code
 #
 # Author(s):     M. Rotter
 #
@@ -114,15 +114,15 @@ VOBS = ivector.o imatrix.o dvector.o dmatrix.o dmatmul.o cvector.o cmatrix.o cma
 
 
 #---------------------------------------------------------------------
-# Build bfkp
+# Build bcfph
 
-all :   ../bfkp$(EXE)
+all :   ../bcfph$(EXE)
 
 # ****************************************************
 # compile sources 
 
 
-bfkp.o: bfkp.c martin.h myev.h
+bcfph.o: bcfph.c martin.h myev.h
 	$(CCC) $(CFLAGS) $< 
 
 
@@ -130,9 +130,9 @@ bfkp.o: bfkp.c martin.h myev.h
 # make  binaries (link .o files)
 
 
-../bfkp$(EXE):  bfkp.o martin.o  myev.o  $(VOBS)
-	@echo Linking ../../bin/bfkp
-	@$(LINKER)  -Wall  -o ../../bin/bfkp $^  $(LFLAGS)
+../bcfph$(EXE):  bcfph.o martin.o  myev.o  $(VOBS)
+	@echo Linking ../../bin/bcfph
+	@$(LINKER)  -Wall  -o ../../bin/bcfph $^  $(LFLAGS)
 
 clean: 
 	rm -vf ./*.o

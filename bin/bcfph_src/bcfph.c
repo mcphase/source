@@ -13,8 +13,8 @@
 #define TRMAX 10000 /* maximum number of crystal field transitions */
 /**********************************************************************/
 void helpexit()
-{ printf (" program bfkp \n "
-          " use as:  bfkp T Emin Emax deltaE eta \n"
+{ printf (" program bcfph \n "
+          " use as:  bcfph T Emin Emax deltaE eta \n"
           "   T    .... Temperature (K)\n"
           "   Emin .... minimal Energy (meV)\n "
           "   Emax .... maximal Energy (meV)\n "
