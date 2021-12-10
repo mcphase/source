@@ -3080,7 +3080,7 @@ ITERATION *auswahlregel(iter,symmetrienr)
     INT zwei_j;
     zwei_j = DIMJ(iter) - 1;
  
-    switch( zwei_j >=2 ){  /* changed from > to >= because S=1 should also give nonzero CEF MR 28.7.2010 */
+    switch( (int)(zwei_j >=2) ){  /* changed from > to >= because S=1 should also give nonzero CEF MR 28.7.2010 */
        case JA : switch( symmetrienr ){
                     case 8 : RT( V20(iter) ) = 0.0;
  
@@ -3109,7 +3109,7 @@ ITERATION *auswahlregel(iter,symmetrienr)
     }
  
  
-    switch( zwei_j >4 ){
+    switch((int)( zwei_j >4) ){
        case JA : switch( symmetrienr ){
  
                     case 7 :
@@ -3152,7 +3152,7 @@ ITERATION *auswahlregel(iter,symmetrienr)
     }
  
  
-    switch( zwei_j >6 ){
+    switch((int)( zwei_j >6) ){
        case JA : switch( symmetrienr ){
  
                     case 7 :
@@ -3927,7 +3927,7 @@ void info_Vlm(filename,symmetrienr,einheit)
  
  
     if(VALUE(einheit,0)=='1') renorm *= 1e+26 / _h / _c ;
-    kf = init_iteration( filename,symmetrienr );
+    kf = init_iteration( filename,symmetrienr,"VKQ" );
  
     switch( symmetrienr ){
          case 0 : /* iteration = */ Vkq0( ITERATION(kf)  );

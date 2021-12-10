@@ -295,7 +295,7 @@ template <class T> zsMat<T> zsMat<T>::_cs_multiply(const zsMat<T> &B)
    _wi.assign(_m,0); _wx.assign(_m,0);
    for(int j=0; j<B._n; j++)
    {
-      if((nz+_m)>(C._x.size())) { C._i.resize(C._i.size()*2+_m,0); C._x.resize(C._x.size()*2+_m,0); }
+      if((nz+_m)>(int)(C._x.size())) { C._i.resize(C._i.size()*2+_m,0); C._x.resize(C._x.size()*2+_m,0); }
       C._p[j] = nz;                                     // column j of C starts here
       for(int p=B._p[j]; p<B._p[j+1]; p++)
       {
@@ -459,7 +459,7 @@ template <class T> void zsMat<T>::_genhash()
 template <class T> bool zsMat<T>::is_subset(const zsMat<T> &B)
 {
    if(_nnz==B._nnz) return true;
-   for(int i=0; i<_subset.size(); i++) { if(B._nnz==_subset[i]) return true; }
+   for(int i=0; i<(int)_subset.size(); i++) { if(B._nnz==_subset[i]) return true; }
    return false;
 }
 template <class T> std::vector< std::vector<int> > zsMat<T>::find() const
@@ -574,7 +574,7 @@ template <class T> std::complex<T>* zsMat<T>::f_array() const   // Returns matri
    }
    else
    {
-      for(int i=0; i<_x.size(); i++) retval[_m*_p[i]+_i[i]] += _x[i]; 
+      for(int i=0; i<(int)_x.size(); i++) retval[_m*_p[i]+_i[i]] += _x[i]; 
    }
 
    return retval;
@@ -689,7 +689,7 @@ template <class T> Matrix zsMat<T>::fp_matrix() const           // Returns Hermi
    }
    else 
    {
-      for(int i=0; i<_x.size(); i++) {
+      for(int i=0; i<(int)_x.size(); i++) {
          if(_i[i]>=_p[i]) {
             retval(_i[i]+1,_p[i]+1) += real(_x[i]); if(_i[i]!=_p[i]) retval(_p[i]+1,_i[i]+1) += imag(_x[i]); }
       }
@@ -743,7 +743,7 @@ template <class T> void zsMat<T>::MultMv(std::complex<T> *v, std::complex<T> *w)
    }
    else 
    {
-      for(int c=0; c<_x.size(); c++) {
+      for(int c=0; c<(int)_x.size(); c++) {
          if(_i[c]<_p[c]) w[_p[c]] += conj(_x[c]) * v[_i[c]];
          if(_i[c]<=_p[c]) w[_i[c]] += _x[c] * v[_p[c]];  }
    }
@@ -795,7 +795,7 @@ template <class T> void zsMat<T>::MultMMH(std::complex<T>*A, std::complex<T>*B, 
    else 
    {
       for(int j=0; j<c; j++) {
-         for(int n=0; n<_x.size(); n++) {
+         for(int n=0; n<(int)_x.size(); n++) {
             if(_i[n]>=_p[n]) {
                A[_m*j+_i[n]] += _x[n] * B[_n*j+_p[n]]; if(_i[n]!=_p[n]) A[_m*j+_p[n]] += conj(_x[n]) * B[_n*j+_i[n]]; }
          }
@@ -916,7 +916,7 @@ template <class T> std::complex<T> zsMat<T>::operator [] (std::pair<int,int> rc)
    else
    {
       std::complex<T> rv(0,0); 
-      for(int i=0; i<_x.size(); i++)
+      for(int i=0; i<(int)_x.size(); i++)
          if(_p[i]==c && _i[i]==r) rv += _x[i];
       return rv;
    }
@@ -1012,7 +1012,7 @@ template <class T> zsMat<T> zsMat<T>::operator -= (const zsMat<T> &m)   // Subtr
       _p.insert(_p.end(),m._p.begin(),m._p.end());
       _i.insert(_i.end(),m._i.begin(),m._i.end());
       _x.insert(_x.end(),m._x.begin(),m._x.end()); 
-      for(; l<_x.size(); l++) { _x[l] = -_x[l]; }
+      for(; l<(int)_x.size(); l++) { _x[l] = -_x[l]; }
       return *this;
    }
 }
@@ -1034,7 +1034,7 @@ template <class T> zsMat<T> operator - (const T val, const zsMat<T> & m) {
 
 template <class T> zsMat<T> zsMat<T>::operator *= (const T & c)         // Matrix scalar multiplication
 {
-   for(int i=0; i<_x.size(); i++) _x[i] *= c;
+   for(int i=0; i<(int)_x.size(); i++) _x[i] *= c;
    return *this;
 }
 template <class T> zsMat<T> zsMat<T>::operator *= (const std::complex<T> & c)

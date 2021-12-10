@@ -8,6 +8,17 @@
 #include "martin.h"
 #include "myev.h"
 
+
+#if defined(__linux__)
+#include <sys/sysinfo.h>
+#elif defined(__FreeBSD__) || defined(__APPLE__)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#else
+#include <windows.h>
+#endif
+
+
 #define K_B  0.0862
 #define PI   3.141592654
 #define TRMAX 10000 /* maximum number of crystal field transitions */
@@ -31,16 +42,247 @@ void helpexit()
       exit (1);
 }
 
+
+#ifdef _THREADS
+#if defined  (__linux__) || defined (__APPLE__)
+#include <pthread.h>
+#define MUTEX_LOCK     pthread_mutex_lock
+#define MUTEX_UNLOCK   pthread_mutex_unlock
+#define MUTEX_TYPE     pthread_mutex_t
+#define MUTEX_INIT(mm)  pthread_mutex_init (&mm, NULL)
+#define EVENT_TYPE     pthread_cond_t
+#define EVENT_INIT(e)  pthread_cond_init (&e, NULL)    
+#define EVENT_SIG(e)   pthread_cond_signal (&e)
+#define THRLC_TYPE     pthread_key_t
+#define THRLC_INIT(k)  pthread_key_create(&k, dataDestructor)
+#define THRLC_FREE(k)  pthread_key_delete(k)
+#define THRLC_SET(k,v) pthread_setspecific (k,v)
+#define THRLC_GET(v)   pthread_getspecific (v)
+#define THRLC_GET_FAIL NULL
+void dataDestructor(void *data) { }
+#else
+#include <windows.h>
+#define MUTEX_LOCK     EnterCriticalSection
+#define MUTEX_UNLOCK   LeaveCriticalSection
+#define MUTEX_TYPE     CRITICAL_SECTION
+#define MUTEX_INIT(mm)  InitializeCriticalSection (&mm)
+#define EVENT_TYPE     HANDLE
+#define EVENT_INIT(e)  e = CreateEvent (NULL, TRUE, FALSE, NULL)
+#define EVENT_SIG(e)   SetEvent(e)
+#define THRLC_TYPE     DWORD
+#define THRLC_INIT(k)  k = TlsAlloc()
+#define THRLC_FREE(k)  TlsFree(k)
+#define THRLC_SET(k,v) TlsSetValue (k,v)
+#define THRLC_GET(v)   TlsGetValue (v)
+#define THRLC_GET_FAIL 0
+#endif
+#define NUM_THREADS nofthreads
+// ----------------------------------------------------------------------------------- //
+// Declares a struct to store all the information needed for each omcalc iteration
+// ----------------------------------------------------------------------------------- //
+typedef struct{
+  double eta;
+   double * omegamu;
+   int  mumax;
+   int  d;
+   ComplexMatrix ** opmatM;
+   int  N;
+   int  imax; 
+   int Ng;
+   float * omegaks;
+   double  beta;
+   double * p;
+   float * galphasr; 
+   float * galphasi; 
+   int * alpha;
+   ComplexMatrix **P;
+   int thread_id;
+} omcalc_thread_data;
+class omcalc_input { public:
+   int j; 
+   int thread_id;
+   int level;
+   double dsigma;
+   double omega;
+   omcalc_input(int _j, int _tid, double _dsigma, int _level, double _omega) 
+   { 
+      thread_id = _tid; j = _j; dsigma = _dsigma; level= _level; omega= _omega;
+   }
+   ~omcalc_input(){}
+};
+// ----------------------------------------------------------------------------------- //
+// Declares these variables global, so all threads can see them
+// ----------------------------------------------------------------------------------- //
+omcalc_thread_data thrdat;
+omcalc_input *tin[256];  // Max number of threads - hard coded because global variable.
+MUTEX_TYPE mutex_loop;
+MUTEX_TYPE mutex_tests;
+MUTEX_TYPE mutex_min;
+MUTEX_TYPE mutex_index;
+EVENT_TYPE checkfinish;
+THRLC_TYPE threadSpecificKey;
+
+#endif // def _THREADS
+
+
+#ifdef _THREADS
+#if defined  (__linux__) || defined (__APPLE__)
+void *omcalc(void *input)
+#else
+DWORD WINAPI omcalc(void *input)
+#endif
+#else
+double omcalc(double & dsigma, double & omega, double & eta,double * omegamu,int & mumax,int & d,
+           ComplexMatrix ** opmatM,int& N,int & imax, int&Ng,float * omegaks,double & beta,double * p,
+           float * galphasr, float * galphasi, int * alpha,ComplexMatrix **P)
+#endif
+{
+
+
+#ifdef _THREADS
+   omcalc_input *myinput; myinput = (omcalc_input *)input;
+   int thread_id = myinput->thread_id;
+   double omega = myinput->omega;
+   #define eta thrdat.eta
+   #define omegamu thrdat.omegamu
+   #define mumax thrdat.mumax
+   #define d thrdat.d
+   #define opmatM thrdat.opmatM
+   #define N thrdat.N
+   #define imax thrdat.imax
+   #define Ng thrdat.Ng
+   #define omegaks thrdat.omegaks
+   #define beta thrdat.beta
+   #define p thrdat.p
+   #define galphasr thrdat.galphasr
+   #define galphasi thrdat.galphasi
+   #define alpha thrdat.alpha
+   #define P thrdat.P
+   double dsigma;
+#endif
+
+
+ ComplexMatrix chi(1,3,1,3),OM(1,3,1,3);
+ complex <double> M,gbetaks,bmudnunm[52],A,B,factor; 
+ complex <double> omegeta;
+ double nks,omeganm,omegamud,Ems,bo,omegaksold=0;
+ double En,Em;
+ chi=0;omegeta=complex <double> (omega,eta);
+ for(int nu=1;nu<=mumax;++nu){ // sum  in (27) is sufficient over nu (because OM is diagonal, i.e. prop delta_munu)
+ OM=0;
+for(int alp=1;alp<=3;++alp){
+ 
+ OM(alp,alp)=complex <double> (-omega+omegamu[nu],-eta);
+  // evaluate (47) to get M(omega) ---------------------------------------------------------------
+  M=0;
+
+     for(int n=1;n<=d;++n)for(int m=1;m<=d;++m){ // sum over nm
+           En=real((*opmatM[0])(n,n));
+           Em=real((*opmatM[0])(m,m));
+           omeganm=En-Em;
+           omegamud=omeganm-omegamu[nu]; 
+                    for(int bet=1;bet<=imax;++bet){ //++++ calulate b^betalp_mudnunm (42)(39) +++++++++++++++++++++++++++++
+                      bmudnunm[bet]=0;
+                     for(int ms=1;ms<=d;++ms){Ems=real((*opmatM[0])(ms,ms));
+                                          if(fabs(Ems-Em-omegamu[nu])<0.00001&&fabs(En-Ems-omegamud)<0.00001)bmudnunm[bet]+=(*opmatM[bet])(n,ms)*(*opmatM[alp])(ms,m);
+                                          if(fabs(En-Ems-omegamu[nu])<0.00001&&fabs(Ems-En-omegamud)<0.00001)bmudnunm[bet]-=(*opmatM[bet])(ms,m)*(*opmatM[alp])(n,ms);
+                                         }
+                                        }
+                                       //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                // sum all gbeta(s) in (48) ||||||||||||||||||||||||||||||||
+                omegaksold=0;
+                    for(int i=1;i<=Ng;++i)if((bo=fabs(beta*omegaks[i]))>0){ // sum over "ksbeta"=i where beta=alpha[i], s=s[i], k not needed, but omegaks[i]
+                          
+                if(fabs(omegaks[i]-omegaksold)>0.00001){ // calculate factor only if omegaks[i] changed since last time
+                          if(bo>0.001)nks=1/(exp(bo)-1);
+                          else nks=1/bo;
+                
+                A= complex <double> (omeganm-omegaks[i],-eta); // to avoid divergencies also add finite width to A and B
+                A=(nks*p[m]-(1+nks)*p[n])/beta/A;
+                B=complex <double> (omeganm+omegaks[i],-eta);
+                B=((1+nks)*p[m]-nks*p[n])/beta/B;
+                factor=(A/(omeganm-omegaks[i]-omegeta)+B/(omeganm-omegaks[i]-omegeta));
+                omegaksold=omegaks[i];
+                                                                }
+                gbetaks=complex <double> (galphasr[i],galphasi[i]);
+                M+=abs(bmudnunm[alpha[i]]*gbetaks)*factor;
+                 //fprintf(stderr,"%g %g %g %g %g \n",A,B,abs(bmudnunm*gbetaks),real(M),imag(M));
+                //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+                                                                      }
+                    }
+  M/=N;
+  // here should be subtracte from O the interation term M(omega)/P equation (28) ----------------
+//fprintf(stderr,"%g %g %g %g  %g %g \n",real(M),imag(M),real(OM(alp,alp)),imag(OM(alp,alp)),real((*P[nu])(alp,alp)),imag((*P[nu])(alp,alp))); 
+ if(abs(M)>0.000001)OM(alp,alp)=OM(alp,alp)-M/(*P[nu])(alp,alp);  
+    }
+// myPrintComplexMatrix(stderr,OM);
+ 
+   chi+=(*P[nu])*OM.Inverse(); //equ (27)
+   } 
+dsigma=0.66666*imag(chi(1,1)+chi(2,2)+chi(3,3));  //equ(18)
+if(fabs(omega*beta)>0.001){dsigma*=(beta*omega)/(1-exp(-beta*omega));}
+//fprintf(stdout,"# omega=%g dsigma=%g\n",omega,dsigma);
+
+#ifdef _THREADS
+myinput->dsigma=dsigma;
+#undef eta
+#undef omegamu
+#undef mumax
+#undef d
+#undef opmatM
+#undef N
+#undef imax
+#undef Ng
+#undef omegaks
+#undef beta
+#undef p
+#undef galphasr
+#undef galphasi
+#undef alpha
+#undef P
+MUTEX_LOCK(&mutex_loop);
+thrdat.thread_id = thread_id;
+EVENT_SIG(checkfinish);
+MUTEX_UNLOCK(&mutex_loop);
+#if defined  (__linux__) || defined (__APPLE__)
+pthread_exit(NULL);
+#else
+return 0;
+#endif
+#else
+return dsigma;	
+#endif
+}
+
 // hauptprogramm
 int main (int argc, char **argv)
-{int i,imax,k,d=0,n,m,smax=0; double T,Emin, Emax, deltaE, eta;
+{
+#ifdef _THREADS
+int nofthreads=1;
+#if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
+       nofthreads = get_nprocs();
+#elif defined(__FreeBSD__) || defined(__APPLE__)
+       int mm[2]; size_t len;
+       mm[0] = CTL_HW; mm[1] = HW_NCPU; len = sizeof(int);
+       sysctl(mm, 2, &nofthreads, &len, NULL, 0);
+#else
+       SYSTEM_INFO sysinfo; GetSystemInfo(&sysinfo);
+       nofthreads = sysinfo.dwNumberOfProcessors;
+#endif
+if(nofthreads<1||nofthreads>255) nofthreads=1; 
+int num_threads_started=-1;
+#endif
+
+
+
+int i,imax,k,d=0,n,m,smax=0; double T,Emin, Emax, deltaE, eta;
  FILE * fin_opmat;
  ComplexMatrix *opmatM[52]; double omegaphon[1000],intensity[1000];
 printf("#**************************************************************\n");
 printf("# * bfkq.c - calculate CF-Phonon Interaction neutron spectra\n");
 printf("# * Author: Martin Rotter %s\n",MCPHASVERSION);
 printf("# **************************************************************\n");
-printf("# Command: bfkp ");
+printf("# Command: bcfph ");
 for (i=1;i<argc;++i)printf(" %s",argv[i]);
 printf("\n");
 if(argc<4) {helpexit();}
@@ -159,13 +401,13 @@ for(n=1;n<=d;++n){En=real((*opmatM[0])(n,n));p[n]=exp(-En*beta)/Z;}
 if(T<=0){//**********************************************************************************
 // do the calculations of magnetic crystal field cross section 
 //**********************************************************************************
+
 T=-T;
 fprintf (stdout, "# Calculating CF transition energies and matrix elements  gamma (see manual, output of singleion *.trs) \n"
                  "# E[meV]   vs  gamma \n");
 
 // sort transitions into groups belonging to the same transition energy
 double fr,dsigma,omegamu[TRMAX];int mu,nu,mumax=0,ok,alp,bet;
-ComplexMatrix chi(1,3,1,3),OM(1,3,1,3);
 ComplexMatrix *P[TRMAX];
 for(n=1;n<=d;++n)for(m=1;m<=d;++m)
  {En=real((*opmatM[0])(n,n));
@@ -196,91 +438,139 @@ fprintf (stdout, "# Note: Imagpolycrystal [barn/srmeV]= (r0 gJ/2)^2 1/pi  (1-exp
                  "# Here follows output:\n"
                  "# omega[meV]  vs   (1-exp(-hbar omega/kT))^(-1) 2/3Trace{Im(chi(omega))}  [1/meV]\n");
 
-complex <double> M,gbetaks,bmudnunm[52],A,B,factor; 
-int i,ms; double nks,omeganm,omegamud,Ems,bo,omegaksold=0;
-for(omega=Emin;omega<=Emax;omega+=deltaE)
-{fprintf (stdout,"%+9.6f ",omega);
- chi=0;omegeta=complex <double> (omega,eta);
- for(nu=1;nu<=mumax;++nu){ // sum  in (27) is sufficient over nu (because OM is diagonal, i.e. prop delta_munu)
- OM=0;
-for(alp=1;alp<=3;++alp){
- 
- OM(alp,alp)=complex <double> (-omega+omegamu[nu],-eta);
-  // evaluate (47) to get M(omega) ---------------------------------------------------------------
-  M=0;
-
-     for(n=1;n<=d;++n)for(m=1;m<=d;++m){ // sum over nm
-           En=real((*opmatM[0])(n,n));
-           Em=real((*opmatM[0])(m,m));
-           omeganm=En-Em;
-           omegamud=omeganm-omegamu[nu]; 
-                    for(bet=1;bet<=imax;++bet){ //++++ calulate b^betalp_mudnunm (42)(39) +++++++++++++++++++++++++++++
-                      bmudnunm[bet]=0;
-                     for(ms=1;ms<=d;++ms){Ems=real((*opmatM[0])(ms,ms));
-                                          if(fabs(Ems-Em-omegamu[nu])<0.00001&&fabs(En-Ems-omegamud)<0.00001)bmudnunm[bet]+=(*opmatM[bet])(n,ms)*(*opmatM[alp])(ms,m);
-                                          if(fabs(En-Ems-omegamu[nu])<0.00001&&fabs(Ems-En-omegamud)<0.00001)bmudnunm[bet]-=(*opmatM[bet])(ms,m)*(*opmatM[alp])(n,ms);
-                                         }
-                                        }
-                                       //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                // sum all gbeta(s) in (48) ||||||||||||||||||||||||||||||||
-                omegaksold=0;
-                    for(i=1;i<=Ng;++i)if((bo=fabs(beta*omegaks[i]))>0){ // sum over "ksbeta"=i where beta=alpha[i], s=s[i], k not needed, but omegaks[i]
-                          
-                if(fabs(omegaks[i]-omegaksold)>0.00001){ // calculate factor only if omegaks[i] changed since last time
-                          if(bo>0.001)nks=1/(exp(bo)-1);
-                          else nks=1/bo;
-                
-                A= complex <double> (omeganm-omegaks[i],-eta); // to avoid divergencies also add finite width to A and B
-                A=(nks*p[m]-(1+nks)*p[n])/beta/A;
-                B=complex <double> (omeganm+omegaks[i],-eta);
-                B=((1+nks)*p[m]-nks*p[n])/beta/B;
-                factor=(A/(omeganm-omegaks[i]-omegeta)+B/(omeganm-omegaks[i]-omegeta));
-                omegaksold=omegaks[i];
-                                                                }
-                gbetaks=complex <double> (galphasr[i],galphasi[i]);
-                M+=abs(bmudnunm[alpha[i]]*gbetaks)*factor;
-                 //fprintf(stderr,"%g %g %g %g %g \n",A,B,abs(bmudnunm*gbetaks),real(M),imag(M));
-                //||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-                                                                      }
-                    }
-  M/=N;
-  // here should be subtracte from O the interation term M(omega)/P equation (28) ----------------
-//fprintf(stderr,"%g %g %g %g  %g %g \n",real(M),imag(M),real(OM(alp,alp)),imag(OM(alp,alp)),real((*P[nu])(alp,alp)),imag((*P[nu])(alp,alp))); 
- if(abs(M)>0.000001)OM(alp,alp)=OM(alp,alp)-M/(*P[nu])(alp,alp);  
-    }
-// myPrintComplexMatrix(stderr,OM);
- 
-   chi+=(*P[nu])*OM.Inverse(); //equ (27)
+#ifdef _THREADS  // Populates the thread data structure
+   thrdat.eta=eta;
+   thrdat.omegamu=omegamu;
+   thrdat.mumax=mumax;
+   thrdat.d=d;
+   thrdat.opmatM=opmatM;
+   thrdat.N=N;
+   thrdat.imax=imax;
+   thrdat.Ng=Ng;
+   thrdat.omegaks=omegaks;
+   thrdat.beta=beta;
+   thrdat.p=p;
+   thrdat.galphasr=galphasr;
+   thrdat.galphasi=galphasi;
+   thrdat.alpha=alpha;
+   thrdat.P=P;
+   // Initialises mutual exclusions and threads
+   MUTEX_INIT(mutex_loop);
+   MUTEX_INIT(mutex_index);
+   EVENT_INIT(checkfinish);
+   #if defined  (__linux__) || defined (__APPLE__)
+   pthread_t threads[NUM_THREADS]; int rc; void *status;
+   pthread_attr_t attr;
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+   #else
+   HANDLE threads[NUM_THREADS];
+   DWORD tid[NUM_THREADS], dwError;
+   int retval;
+   #endif
+   int ithread;
+   omcalc_input *tin[NUM_THREADS];     
+   for (ithread=0; ithread<NUM_THREADS; ithread++) 
+   { tin[ithread] = new omcalc_input(ithread,1,0.0,0,0);    
    } 
-dsigma=0.66666*imag(chi(1,1)+chi(2,2)+chi(3,3));  //equ(18)
-if(fabs(omega*beta)>0.001){dsigma*=(beta*omega)/(1-exp(-beta*omega));}
+    ithread=0; num_threads_started=0; int oldi=-1;
+#endif
+                     int ct,ctmax=(int)(Emax-Emin)/deltaE;
+double * om; om = new double [ctmax+1];
+double * ds; ds = new double [ctmax+1]; 
 
-fprintf (stdout,"%+9.6f ",dsigma);
-fprintf(stdout,"\n");
+#ifdef _THREADS  
+                  for (ct=0;ct<=ctmax;ct+=NUM_THREADS)
+#else
+                  
+                  for (ct=0;ct<=ctmax;++ct)
+#endif
+                  {
+#ifdef _THREADS  
+                     oldi=ct;
+                     // Runs threads until all are running - but wait until they are completed in order before printing output.
+                     //  This is to ensure that the output is exactly the same as for a single thread (otherwise it would be out of order).
+                     for(int th=0; th<NUM_THREADS; th++)
+                     { 
+                        ct=oldi+th; if(ct>ctmax) break;
+                       //printf("calling thread %i ",num_threads_started);
+                       tin[num_threads_started]->dsigma=ds[ct]; 
+                       tin[num_threads_started]->level = ct;
+                       tin[num_threads_started]->omega = Emin+ct*deltaE;
 
-}
+                        #if defined  (__linux__) || defined (__APPLE__)
+                        rc = pthread_create(&threads[num_threads_started], &attr, omcalc, (void *) tin[num_threads_started]);
+                        if(rc) { printf("Error return code %i from omcalc thread %i\n",rc,num_threads_started+1); exit(EXIT_FAILURE); }
+                        #else
+                        threads[num_threads_started] = CreateThread(NULL, 0, omcalc, (void *) tin[num_threads_started], 0, &tid[num_threads_started]);
+                        if(threads[num_threads_started]==NULL) { dwError=GetLastError(); printf("Error code %lu from omcalc thread %i\n",dwError,num_threads_started+1); exit(EXIT_FAILURE); }
+                        #endif  
+                        ++num_threads_started;
+                       }
+                     #if defined  (__linux__) || defined (__APPLE__)
+                     for(int th=0; th<num_threads_started; th++)rc = pthread_join(threads[th], &status);
+                     #else
+                     if(num_threads_started>0){retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
+                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects=%i num_threads_started=%i\n",retval,num_threads_started); exit(EXIT_FAILURE); }
+                      for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);}         
+                     #endif
+                     num_threads_started=0; 
+                       ithread=-1;
+                     for(int th=0; th<NUM_THREADS; th++)
+                     {
+                         ct=oldi+th; if(ct>ctmax) break;
+                        ++ithread;
+                       ds[tin[ithread]->level] = tin[ithread]->dsigma; 
+                       om[tin[ithread]->level] = tin[ithread]->omega; 
+                       printf("%i %i %g %g\n",ithread,tin[ithread]->level,om[tin[ithread]->level],ds[tin[ithread]->level]);
+                            
+#else
+                     omega=Emin+ct*deltaE;om[ct]=omega;
+
+ omcalc( dsigma,  omega, eta,omegamu,mumax,d,opmatM,N,imax,Ng,omegaks,beta,p,galphasr,galphasi,alpha,P);
+
+ds[ct]=dsigma;
+#endif
+
+
+#ifdef _THREADS
+                     }
+                   i=oldi;
+#endif
+		   }
+
+// print results
+for (ct=0;ct<ctmax;++ct){ fprintf (stdout,"%+9.6f %+9.6f\n",om[ct],ds[ct]);}
+
 
 // print transition energies and intensities
-fprintf(stdout,"# Transition Intensities without CF-Phonon Interaction\n");
-fprintf(stdout,"# E[meV]  gamma  I[barn/sr]\n");
+fprintf(stdout,"# CF Transition Matrix Elements\n");
+fprintf(stdout,"# E[meV]  gamma\n");
  for(nu=1;nu<=mumax;++nu){
 gamma=real((*P[nu])(1,1)+(*P[nu])(2,2)+(*P[nu])(3,3));
 dsigma=0.66666*gamma;
 if(fabs(omegamu[nu])<0.0001){gamma*=beta;}else{gamma*=beta*omegamu[nu];}
 if(fabs(omegamu[nu]*beta)>0.001){dsigma*=(beta*omegamu[nu])/(1-exp(-beta*omegamu[nu]));}
-fprintf(stdout,"# %+9.6f %+9.6f %+9.6f \n",omegamu[nu],gamma, 0.8571*0.8571*0.54*0.54/4*dsigma);
-}
+fprintf(stdout,"# %+9.6f %+9.6f\n",omegamu[nu],gamma);
 
+} 
+#ifdef _THREADS
+std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;
+for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
+#else
+std::cout << "# bcfph was compiled without parallel processing option " << std::endl;
+#endif
 //myPrintComplexMatrix(stdout,(*P[nu]));
 
 // free memory
 for(mu=0;mu<=mumax;++mu)delete P[mu];
-
+delete om;
+delete ds;
 } else { //**********************************************************************************
 // do the calculations of nuclear coherent phonon cross section 
 //**********************************************************************************
-if(N>1){fprintf(stderr,"Error bfkp: N=%i k points found in g_alpha.s - please use g_alpha.s with only one k point\n"
-                       " - you can generate this by qep2bfkp.pl or makegalphas.pl\n",N);exit(EXIT_FAILURE);}
+if(N>1){fprintf(stderr,"Error bcfph: N=%i k points found in g_alpha.s - please use g_alpha.s with only one k point\n"
+                       " - you can generate this by qep2bcfph.pl or makegalphas.pl\n",N);exit(EXIT_FAILURE);}
  fin_opmat = fopen_errchk ("./phonon.int", "rb");
 while(feof(fin_opmat)==false)
 if((n=inputline(fin_opmat,nn))!=0)

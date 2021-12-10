@@ -74,7 +74,17 @@ else
 LFLAGS +=          $(XLIBS) $(EZLIB) -lstdc++ -lm ${LBLAS}
 endif
 
-
+# uncomment next line and set NUM_THREADS in mcphas_htcalc.c and mcdisp.c
+# according to your machine if you want to use multiple processing to speed up
+# calculations
+threads=1
+# 
+#ifdef threads
+THREADFLAG=-D_THREADS
+ifdef LINUX
+THREADLINK=-lpthread
+endif
+#endif
 #---------------------------------------------------------------------
 # RCS options
 #
@@ -123,7 +133,7 @@ all :   ../bcfph$(EXE)
 
 
 bcfph.o: bcfph.c martin.h myev.h
-	$(CCC) $(CFLAGS) $< 
+	$(CCC) $(CFLAGS) $(THREADFLAG) $< 
 
 
 # ************************************************
@@ -132,7 +142,7 @@ bcfph.o: bcfph.c martin.h myev.h
 
 ../bcfph$(EXE):  bcfph.o martin.o  myev.o  $(VOBS)
 	@echo Linking ../../bin/bcfph
-	@$(LINKER)  -Wall  -o ../../bin/bcfph $^  $(LFLAGS)
+	$(LINKER)  -Wall  -o ../../bin/bcfph $^  $(LFLAGS) $(THREADLINK)	
 
 clean: 
 	rm -vf ./*.o

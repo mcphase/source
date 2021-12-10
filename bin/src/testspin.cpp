@@ -67,10 +67,8 @@ testspincf::testspincf (int nofconf, const char * file,const char * savfile,int 
 { savfilename= new char [strlen(savfile)+1];
   strcpy(savfilename,savfile);
   FILE *fin_coq;
-  FILE *fout;
   long int pos=0,j;
   char instr[MAXNOFCHARINLINE];
-  char text[MAXNOFCHARINLINE];
   int i;
   maxn=nofconf;
   configurations = new  spincf *  [nofconf+1];

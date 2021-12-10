@@ -33,8 +33,18 @@ endif
 ifneq ($(shell gcc --version|grep " 5."),)
 GCC42=1
 GCC5=1
+OSTYPE=$(shell uname)
+#  (linux windows)
+ifneq (,$(findstring $(OSTYPE),Linux))
+ LINUX = linux
+else
+ifneq (,$(findstring $(OSTYPE),Darwin))
+ LINUX = linux
+else
 # for windows  it turned out -static switch is necessary for linking
 LFLAGS=-static -static-libgcc -static-libgfortran 
+endif
+endif
 endif
 
 ifdef icc
@@ -78,7 +88,7 @@ endif
 endif
 else
 ifeq ($(shell uname),Darwin)
-LINOPTS = -fPIC -fpermissive
+LINOPTS = -fPIC -fpermissive 
 LINKER=g++
 else
 LINOPTS =-D_WINDOWS
@@ -182,4 +192,4 @@ endif
 LIBL= /usr/lib/libfl.a
 
 #CCOPTS+= -std=c++11   ... this is how it should be, but will not work with old compilers !
-CCOPTS+= -std=c++0x
+CCOPTS+= -std=c++0x 

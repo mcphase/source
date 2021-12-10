@@ -491,7 +491,7 @@ return sta;
 int physproperties::read(int verbose, par & inputpars,char * readprefix)
 { FILE *fin;
   char filename[50];
-  int i,j2,l,i1,j1,nmax;
+  int i,j2,l,nmax;
   float nn[200];nn[0]=199;
   int ortho=1,found=0;
   if (inputpars.alpha!=90||inputpars.beta!=90||inputpars.gamma!=90){ortho=0;}
