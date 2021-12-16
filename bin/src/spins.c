@@ -87,7 +87,7 @@ printf("# * %s                                     *\n",MCPHASVERSION);
 printf("# **********************************************************\n");
 
  FILE * fin, * fout;
-double T=0; Vector Hext(1,3);
+double T=0; Vector Hext(1,3),Hextijk(1,3);
  int i,n=0;//,dophon=0;
  cryststruct cs,cs4;
  spincf savmf;
@@ -327,9 +327,13 @@ fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to m
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
 // 1.b: Icalc has to be used to calculate all the <Olm>.
+ Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1; // trick to get Habc as components along a,b,c
+                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+ dadbdc2ijk(Hextijk,Hext,abc); // transform Habc=Hext to ijk coordinates ... this is Hextijk
+ 
 Vector h(1,inputpars.nofcomponents);
 h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
-{(*inputpars.jjj[ii]).Icalc_parameter_storage_init(h,Hext,T);} // initialize Icalc module parameter storage
+{(*inputpars.jjj[ii]).Icalc_parameter_storage_init(h,Hextijk,T);} // initialize Icalc module parameter storage
 
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
@@ -353,10 +357,11 @@ h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
    for(nt=1;nt<=inputpars.nofcomponents;++nt){h(nt)=hh(nt+inputpars.nofcomponents*(ii-1));}
 
 switch(arrow)
-{case 1: (*inputpars.jjj[ii]).Scalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
- case 2: (*inputpars.jjj[ii]).Lcalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
- case 3: (*inputpars.jjj[ii]).mcalc(mom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);break;
+{case 1: (*inputpars.jjj[ii]).Scalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
+ case 2: (*inputpars.jjj[ii]).Lcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
+ case 3: (*inputpars.jjj[ii]).mcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
 }
+
 switch(arrow)
 {case 1:
  case 2:
@@ -368,7 +373,7 @@ switch(arrow)
          dim4=3;if((*inputpars.jjj[ii]).module_type==5)
                            dim4=(*(*inputpars.jjj[ii]).clusterpars).nofatoms*3;
          Vector momi(1,dim4);
-         (*inputpars.jjj[ii]).micalc(momi,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage);
+         (*inputpars.jjj[ii]).micalc(momi,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);
          // now put the components of momi to the spinconf                                               
          for(nt=1;nt<=dim4;++nt){spinconf.m(i,j,k)(nt+i4-1)=momi(nt);};i4+=dim4;
          break;
@@ -395,11 +400,11 @@ else{++ii4;
     fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
             cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
     //ouput the magnetic moment if possible
-    if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
+    if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
    {           for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
      // and output the orbital and spin momentum if possible 
-     if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage)&&
-        (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
+     if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage)&&
+        (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
       {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f %4.4f",myround(1e-5,Smom(nt)),myround(1e-5,Lmom(nt)));}
       }
    }
@@ -414,28 +419,28 @@ else{++ii4;
 
 if(density){
 switch(argv[1][1]) // dimension definition from jjjpar.hpp
-{case 'c':  (*inputpars.jjj[ii]).chargedensity_coeff (moments, T, h, Hext, (*inputpars.jjj[ii]).Icalc_parstorage); break;
- case 's':  if(xx!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsx,1, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsy,2, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsz,3, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
+{case 'c':  (*inputpars.jjj[ii]).chargedensity_coeff (moments, T, h, Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage); break;
+ case 's':  if(xx!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsx,1, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsy,2, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsz,3, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
             if(doijk==3){ moments=xx*momentsx+yy*momentsy+zz*momentsz;}
             else{for(int i=1;i<=SPINDENS_EV_DIM;++i){moments(i)=momentsx(i);moments(i+SPINDENS_EV_DIM)=momentsy(i);moments(i+2*SPINDENS_EV_DIM)=momentsz(i);}
                 }
             break;
- case 'o':  if(xx!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsx,1, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsy,2, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsz,3, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
+ case 'o':  if(xx!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsx,1, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsy,2, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentsz,3, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
             if(doijk==3){ moments=xx*momentsx+yy*momentsy+zz*momentsz;}
             else{for(int i=1;i<=ORBMOMDENS_EV_DIM;++i){moments(i)=momentsx(i);moments(i+ORBMOMDENS_EV_DIM)=momentsy(i);moments(i+2*ORBMOMDENS_EV_DIM)=momentsz(i);}
                 }
             break;
- case 'm':  if(xx!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsx,1, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsy,2, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsz,3, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
+ case 'm':  if(xx!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsx,1, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsy,2, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).spindensity_coeff (momentsz,3, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
             momS=xx*momentsx+yy*momentsy+zz*momentsz;
-            if(xx!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentlx,1, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momently,2, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentlz,3, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(xx!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentlx,1, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(yy!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momently,2, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            if(zz!=0||doijk<3)(*inputpars.jjj[ii]).orbmomdensity_coeff (momentlz,3, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
             momL=xx*momentlx+yy*momently+zz*momentlz;
             for(int i=1;i<=SPINDENS_EV_DIM;++i){
             if(doijk==3){moments(i)=momS(i);moments(i+SPINDENS_EV_DIM)=momL(i);}
@@ -444,9 +449,9 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
                 }
                                                }
             break;
- case 'j':  (*inputpars.jjj[ii]).orbmomdensity_coeff (momentlx,1, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            (*inputpars.jjj[ii]).orbmomdensity_coeff (momently,2, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
-            (*inputpars.jjj[ii]).orbmomdensity_coeff (momentlz,3, T, h,Hext, (*inputpars.jjj[ii]).Icalc_parstorage);
+ case 'j':  (*inputpars.jjj[ii]).orbmomdensity_coeff (momentlx,1, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            (*inputpars.jjj[ii]).orbmomdensity_coeff (momently,2, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
+            (*inputpars.jjj[ii]).orbmomdensity_coeff (momentlz,3, T, h,Hextijk, (*inputpars.jjj[ii]).Icalc_parstorage);
             for(int i=1;i<=ORBMOMDENS_EV_DIM;++i){
              moments(i)=momentlx(i);moments(i+ORBMOMDENS_EV_DIM)=momently(i);moments(i+2*ORBMOMDENS_EV_DIM)=momentlz(i);
              }
@@ -515,13 +520,13 @@ Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins.jvx", "w");
     gp.showprim=0;gp.spins_wave_amplitude=0;
-     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
     fclose (fin);
 
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins_prim.jvx", "w");
      gp.showprim=1;
-     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
     fclose (fin);
 
 //***************************************************************************************************************
@@ -732,12 +737,12 @@ if (argc-os>=6){
                sprintf(filename,"./results/spins.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=0;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
                fclose (fin);
                sprintf(filename,"./results/spins_prim.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=1;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
                fclose (fin);
               }
           printf("# %s\n",outstr);
