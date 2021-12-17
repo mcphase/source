@@ -62,6 +62,7 @@ CFLAGS  = -c $(CCOPTS) $(INCLDIRS) $(CYGFLAGS) -U_FORTIFY_SOURCE
 # PGPLLIBS =       -L$(PGPLOT_DIR)  -lcpgplot -lpgplot
 ifdef LINUX
 XLIBS= -ldl
+LFLAGS +=   -lpthread
 #XLIBS=           -L/usr/X11/lib -lX11 -lXext -lc -lXpm -ldl
 #EZLIB=           -ljpeg -ldl
 else
