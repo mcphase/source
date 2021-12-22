@@ -522,25 +522,27 @@ double * ds; ds = new double [ctmax+1];
                         ++ithread;
                        ds[tin[ithread]->level] = tin[ithread]->dsigma; 
                        om[tin[ithread]->level] = tin[ithread]->omega; 
-                       printf("%i %i %g %g\n",ithread,tin[ithread]->level,om[tin[ithread]->level],ds[tin[ithread]->level]);
-                            
+                       //printf("%i %i %g %g\n",ithread,tin[ithread]->level,om[tin[ithread]->level],ds[tin[ithread]->level]);
+                           
 #else
                      omega=Emin+ct*deltaE;om[ct]=omega;
 
  omcalc( dsigma,  omega, eta,omegamu,mumax,d,opmatM,N,imax,Ng,omegaks,beta,p,galphasr,galphasi,alpha,P);
 
 ds[ct]=dsigma;
+fprintf (stdout,"%+9.6f %+9.6f\n",om[ct],ds[ct]);
 #endif
 
 
 #ifdef _THREADS
                      }
-                   i=oldi;
+ for(int th=0; th<NUM_THREADS; th++)fprintf (stdout,"%+9.6f %+9.6f\n",om[oldi+th],ds[oldi+th]);
+                   ct=oldi;
 #endif
 		   }
 
 // print results
-for (ct=0;ct<ctmax;++ct){ fprintf (stdout,"%+9.6f %+9.6f\n",om[ct],ds[ct]);}
+//for (ct=0;ct<ctmax;++ct){ fprintf (stdout,"%+9.6f %+9.6f\n",om[ct],ds[ct]);}
 
 
 // print transition energies and intensities
@@ -606,7 +608,9 @@ for(omega=Emin;omega<=Emax;omega+=deltaE)
  En=real((*opmatM[0])(n,n));
  Em=real((*opmatM[0])(m,m));
  if(fabs(En-Em)>0.00001){quot=(p[m]-p[n])/(En-Em);}
- else {quot=p[m]*beta;} 
+ else {if(n!=m)quot=p[m]*beta;else quot=0;} // it is a matter of debate if for n=m quot=0 or if 
+// transitions to the same state should be included. Better agreement to DMD is achieved if these
+// transitions are not included, thus we set quot=0 for n=m.
  OOcef+=rr*rr*quot;
  OOcef/=beta;
  sum=complex <double> (En-Em-omega,-eta);

@@ -4,7 +4,7 @@ use FileHandle;
 
 #use Math::Trig;
 use PDL;
-
+use File::Copy;
 # use PDL::Slatec;
 
 print "#********************************************************\n";
@@ -65,6 +65,18 @@ print "              for phonon take Born van Karman model with longitudinal and
 print "              transversal spring constants from file - file format:\n";
 print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(N/m)\n";
 print STDOUT << "EOF";
+ option -cfph 
+              calculate crystal field phonon interaction: mcphas.j lists magnetic and
+              non magnetic atoms. For magnetic atoms a new site is created and shifted
+              0.1 A along c in order to not overlap with the original site. It is assumed, that
+              the original site is using an sipf file with the MODULE=phonon as well as
+              all the other sites. For the newly created site it is assumed that the 
+              MODULE=so1ion and the program pointc is used with option -d to calculate
+              derivatives dBlm/du which are inserted as interaction parameters between
+              MODULE=phonon and MODULE=so1ion sites.
+              In order to use the resulting file results/makenn.j a phonon model has to
+              be set up and added to makenn.j e.g. by program addj, moreover
+              magnetic sites sipf files are required, e.g. such as created in results/makenn.a*.sipf. 
  option -f [filename]
  option -dm [filename]
               read interaction constants from table in file. 
@@ -151,6 +163,10 @@ elsif(/-bvk/)
               close Fin;
        	     }
   }
+elsif(/-cfph/)
+{$cfph=1; shift @ARGV;
+ print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
+}
 elsif(/-f/||/-dm/)
   {$readtable=$_;shift @ARGV;
    unless ($#ARGV>=0) # if no filename is given print help
@@ -300,8 +316,9 @@ print "$n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
      #initialize output file results/makenn.j
  my ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
 print "number of atoms = $nofatoms\n calculating ...\n";
- for ($nnn=1;$nnn<=$nofatoms;++$nnn)    
- { print "atom $nnn ...\n";
+ for ($nnn=1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)    
+ { if($nnn>$nofatoms){print "new magnetic ";}
+   print "atom $nnn ...";
      my $gJ=$gJ[$nnn];
      my $sipffilename=$sipf_file[$nnn];
      my ($rn)=new PDL ();
@@ -325,8 +342,9 @@ print "number of atoms = $nofatoms\n calculating ...\n";
 
      my ($Jca)=new PDL();    
      my ($Jcb)=new PDL();    
-     my ($Jcc)=new PDL();    
-
+     my ($Jcc)=new PDL(); 
+     
+    
   for ($n1=$n1min;$n1<=$n1max;++$n1){ 
   for ($n2=$n2min;$n2<=$n2max;++$n2){ 
   for ($n3=$n3min;$n3<=$n3max;++$n3){  
@@ -407,7 +425,7 @@ unless($DM>0){
     }}}}  
 
    $n= qsorti($rn); 
-   $nofneighbours[$nnn]=(($rn->dims)[0]-1);
+   $nofneighbours[$nnn]=(($rn->dims)[0]-1); 
    if ($readtable>0&&$ignore_neihgbours_behind==1)
    {# check if there is a closer neighbour and if there is delete neighbour
     for ($n1=2;$n1<(($rn->dims)[0]);++$n1)
@@ -429,6 +447,8 @@ unless($DM>0){
                                }
      }
    }
+   if($nofneighbours[$nnn]==-1){$nofneighbours[$nnn]=0;}
+   print $nofneighbours[$nnn]." neighbours found\n";
    $n= qsorti($rn); 
    printneighbourlist($h,$l,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);
  }
@@ -436,6 +456,100 @@ unless($DM>0){
 
 
  endprint($h,$l);   
+if($cfph==1){
+# for cf phonon interaction recreate makenn.j
+my ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
+for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
+ { # run pointc to create derivatives of Blm from pointcharge model for magnetic atoms
+  system("pointc -d ".$sipf_file[$nnn]." results/makenn.a$nnn.pc > results/makenn.a$nnn.sipf");
+  $sipf_file[$nnn]="results/makenn.a$nnn.sipf";
+  copy("results/pointc.dBlm","results/makenn.a$nnn.dBlm");
+ }
+for($nnn=1;$nnn<=$nofatoms;++$nnn){$nofneighbours[$nnn]=0;}
+for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
+ {
+
+# $nph[$nnn] contains the index of the PHONON atom corresponing to the magnetic atom $nnn
+# - load the indices of the neighbours from makenn.a$nnn.pc and combine these into a field
+# ... using this information push outstring in the next loop into a piddle
+# such that it can be output subsequently 
+unless (open(Fin,"results/makenn.a$nnn.pc")){die "cannot open file results/makenn.a$nnn.pc\n";}
+  $nofn=0;
+  while(<Fin>){next if /^\s*#/;
+                   my @numbers=split(" ",$_); 
+                   if($#numbers>=4)
+                    {++$nofn; $ni[$nofn]=$numbers[8];
+   }}
+close Fin;
+  ++$nofn;$ni[$nofn]=$nph[$nnn];$ni[0]=$nofn;
+  $nofn=0;
+  unless (open(Fin,"results/makenn.a$nnn.dBlm")){die "cannot open file results/makenn.a$nnn.dBlm\n";}
+  while(<Fin>){next if /^\s*#/;
+                   my @numbers=split(" ",$_); 
+                   if($#numbers>=4)
+                    {++$nofn;
+
+   $rvec=pdl [$numbers[0],$numbers[1],$numbers[2]];
+   $aabbcc=$rvec x $invrtoijk;$aabbcc=$aabbcc->slice(":,(0)");
+   $da=$aabbcc->at(0);
+   $db=$aabbcc->at(1);
+   $dc=$aabbcc->at(2);
+  $outstring=sprintf("%+10.6f %+10.6f %+10.6f ",$da, $db ,($dc-0.1/$c));
+  $outstringp=sprintf("%+10.6f %+10.6f %+10.6f ",-$da, -$db ,-$dc+0.1/$c);
+  # now the off diagonal Elements: Jab Jba Jac Jca Jad Jda .. Jbc Jcb Jbd Jdb ... Jcd Jdc ... etc.
+  # a b c d e ... = 11/x 11s/y 10/z  22s 21s 20 21 22  33s 32s ...
+  #                 I1    I2    I3    I4  I5
+  # for PHONON      ux    uy    uz    dum dum dum ...
+  # for so1ion      O11  O11s   O10   O22s O21s ...
+  # Hamiltonian Hcfph= - sum_i<j,lmgamma u_gamma(i) (-)dBlm/du_gamma  Olm(j) = 
+  #                  =-sumi<j_alphabeta  Ialpha Jalphabeta Ibeta
+  #                  =-1/2sumij_alphabeta  Ialpha Jalphabeta Ibeta
+  # note: the factor 1/2 comes from the fact, that the pairs are counted twice in the last expression 
+  # i.e. J12=0 J13=0 J41=-2 dB22s/dux J14=0 J51=-2 dB21s/dux J15=0 ...
+  # 5+9+13=27 ... 27x3=81  5+81=86
+  for($i=6;$i<=86;++$i){$outstring.= " ".(-$numbers[$i]);$outstringp.= " ".(-$numbers[$i]);}
+  $outstring.= "\n";
+  $outstringp.= "\n";
+   $ph[$nnn].=$outstring;
+  # push the outstring to the appropriate PHONON ions neighbour list
+  $ph[$ni[$nofn]].=$outstringp;
+  ++$nofneighbours[$ni[$nofn]];
+                    }
+                   }
+  close Fin;
+ }
+for($nnn=1;$nnn<=$nofatoms;++$nnn)
+ {print $l ("#*************************************************************************\n");
+  print $l ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".$z[$nnn]." nofneighbours=".$nofneighbours[$nnn]." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
+  print $l ("# crystal field phonon interaction parameters from pointcharge calculation\n");
+  print $l ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
+  print $l ("#! symmetricexchange=0 indexexchange= 1,4 2,4 3,4 1,5 2,5 3,5 1,6 2,6 3,6 1,7 2,7 3,7 1,8 2,8 3,8 ");
+  #O4m
+  print $l (" 1,16 2,16 3,16 1,17 2,17 3,17 1,18 2,18 3,18 1,19 2,19 3,19 1,20 2,20 3,20 1,21 2,21 3,21 1,22 2,22 3,22 1,23 2,23 3,23 1,24 2,24 3,24 ");
+  #O6m
+  print $l (" 1,36 2,36 3,36 1,37 2,37 3,37 1,38 2,38 3,38 1,39 2,39 3,39 1,40 2,40 3,40 1,41 2,41 3,41 1,42 2,42 3,42 1,43 2,43 3,43 1,44 2,44 3,44 1,45 2,45 3,45 1,46 2,46 3,46 1,47 2,47 3,47 1,48 2,48 3,48 \n");
+# here we should enter the cf- phonon interactions for the MODULE=phonon oscillators   
+#  1) calculate  number of neighbours (only the magnetic atoms) 
+#  2) fill values from results/makenn.a$nnn.dBlm  [all done above for magnetic atoms and filled in here]
+  print $l $ph[$nnn];
+ }
+for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
+ {print $l ("#*************************************************************************\n");
+  print $l ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".($z[$nnn]+0.1/$c)." nofneighbours=".($nofneighbours[$nnn]+1)." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
+  print $l ("# crystal field phonon interaction parameters from pointcharge calculation\n");
+  print $l ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
+  print $l ("#! symmetricexchange=0 indexexchange= 4,1 4,2 4,3 5,1 5,2 5,3 6,1 6,2 6,3 7,1 7,2 7,3 8,1 8,2 8,3 ");
+  # O4m
+  print $l (" 16,1 16,2 16,3 17,1 17,2 17,3 18,1 18,2 18,3 19,1 19,2 19,3 20,1 20,2 20,3 21,1 21,2 21,3 22,1 22,2 22,3 23,1 23,2 23,3 24,1 24,2 24,3 ");
+  # O6m
+  print $l (" 36,1 36,2 36,3 37,1 37,2 37,3 38,1 38,2 38,3 39,1 39,2 39,3 40,1 40,2 40,3 41,1 41,2 41,3 42,1 42,2 42,3 43,1 43,2 43,3 44,1 44,2 44,3 45,1 45,2 45,3 46,1 46,2 46,3 47,1 47,2 47,3 48,1 48,2 48,3 \n"); 
+  # here come the cf-phonon interactions for the MODULE=so1ion magnetic ions 
+  # open pointcharge file 
+  print $l $ph[$nnn];
+}
+endprint($h,$l);
+}
+
 
  print "created files: results/makenn.j     (interaction parameters)\n";
  print "               results/makenn.a*.pc (pointcharge environment files)\n";
@@ -492,7 +606,7 @@ sub getinteraction {
  if($bvk==1)
  { # here do the Born von Karman calculation using spring constants
   $a0 = .5292e-10;#(m)
-  $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 � 10-22 joules
+  $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 . 10-22 joules
   $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
   for($n=1;$n<=$nof_springs;++$n){
          if(abs($r-$bondlength[$n])<0.01
@@ -588,7 +702,7 @@ sub getlattice {
     my ($file) = @_;
     my $h = new FileHandle;
     my $n = 0;
-    $nofcomponents=0;
+    $nofcomponents=0;$nofmagneticatoms=0;
   # input data int piddle
   if(open($h,$file))
   {      while(<$h>)
@@ -640,7 +754,17 @@ sub getlattice {
                                      ($charge[$n])=extractfromfile("CHARGE",$sipffilename);
                                      if($charge[$n]==""){$charge[$n]=$sipffilename;}                                 
                                              #               print "$sipffilename  charge=".$charge[$n]."\n";
-                                    ($gJ[$n])=extractfromfile("GJ",$sipffilename);                       
+                                    ($gJ[$n])=extractfromfile("GJ",$sipffilename); 
+                                    if($cfph!=0){($magnetic)=extractfromfile("MAGNETIC",$sipffilename); 
+                                     
+                                     if($magnetic!=0){++$nofmagneticatoms;$nph[$nofmagneticatoms+$nofatoms]=$n;
+                                                      $sipf_file[$nofmagneticatoms+$nofatoms]=$sipffilename;
+                                                      $gJ[$nofmagneticatoms+$nofatoms]=$gJ[$n];
+                                                      $x[$nofmagneticatoms+$nofatoms]=$x[$n];
+                                                      $y[$nofmagneticatoms+$nofatoms]=$y[$n];
+                                                      $z[$nofmagneticatoms+$nofatoms]=$z[$n];
+                                                      $charge[$nofmagneticatoms+$nofatoms]=$charge[$n];
+                                                     }  }                    
                                      $sipf_file[$n]=$sipffilename;
 				  }
 
@@ -676,7 +800,12 @@ sub printlattice {
      while(<$h>)
      {#next if /^\s*#/;
       $text=$_;
-      if ($nofatoms==0){($nofatoms)=extract("nofatoms",$_);}
+      if ($nofatoms==0){($nofatoms)=extract("nofatoms",$_);
+          
+            if($cfph==1&&$nofatoms!=0){$nofatomsnew=$nofatoms+$nofmagneticatoms;
+            $text="#! nofatoms= $nofatomsnew  nofcomponents=48  number of atoms in primitive unit cell/number of components of each spin\n";
+                        }
+            }
 # removed because iterative call of makenn will make fileheader longer
 #if ($nofatoms!=0){
 #        print $l "#-------------------------------------------------------------------------------------\n";
@@ -687,6 +816,7 @@ sub printlattice {
       last if ($nofatoms!=0); # the line nofatoms= must be the last line of the file header !!!!
      }
      if ($nofatoms==0){die "ERROR makenn: unable to find 'nofatoms=' in file $filein\n";}
+     
  return ($h,$l);
 }
 
@@ -694,8 +824,7 @@ sub printlattice {
 
 sub printneighbourlist {
   my ($h,$l,$nofn,$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb)=@_;
-     if ($nofn=="-1"){$nofn="0";}
-
+     
      print $l ("#*************************************************************************\n");
      while(<$h>)
      {$text=$_;
@@ -751,7 +880,7 @@ else
 my $pcout=">./results/makenn.a".$nnn.".pc";
 unless (open($l1,$pcout)){die "cannot open file $pcout\n";}
 print $l1 "#-------------------------------------------------------------------------------------\n";
-print $l1 "#  table with neighbors and charges for atom $nnn\n";
+print $l1 "#!  table with neighbors and charges for atom n=$nnn at da=".$x[$nnn]." db=".$y[$nnn]." dc=".$z[$nnn]." sipffilename=".$sipf_file[$nnn]."\n";
 print $l1 "# output of program makenn:, Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
 print $l1 "#-------------------------------------------------------------------------------------\n";
     if($alpha!=90||$beta!=90||$gamma!=90)

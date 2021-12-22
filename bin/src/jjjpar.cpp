@@ -473,12 +473,13 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
  if(diagonalexchange==2) { 
     i=1; while(i>0) { 
       if(instr[strspn(instr," \t")]!='#') { 
-         fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2, but not indexexchange parameters found\n"); exit (EXIT_FAILURE);}
+         fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2, but not indexexchange parameter line 9a - see manual found\n"); exit (EXIT_FAILURE);}
       fgets_errchk (instr, MAXNOFCHARINLINE, file); 
       extract(instr,"symmetricexchange",symmetricexchange);
       if(extract(instr,"indexexchange",exchangeindicesstr,MAXNOFCHARINLINE)==0) { strcpy(exchangeindicesstr,instr); break; }
     }
     indexexchangenum=get_exchange_indices(exchangeindicesstr,&exchangeindices);
+    if(indexexchangenum<1){fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2, but no indexexchange parameters found in line 9a - see manual\n"); exit (EXIT_FAILURE);}
  }
 
  // fgets_errchk (instr, MAXNOFCHARINLINE, file); //removed by MR 30.4.2010
@@ -559,6 +560,9 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
            if(dt!=0) { jij[i](j1,i1)=dt; jij[i](i1,j1)=dt; }
      }}}
   }
+  if(paranz==0){diagonalexchange=1;}
+  if(diagonalexchange==2){fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2 still at \n"); exit (EXIT_FAILURE);}
+
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 }

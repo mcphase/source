@@ -225,6 +225,7 @@ void par::increase_nofcomponents (int n)
  {
     (*jjj[i]).increase_nofcomponents(n);
  }
+ nofcomponents+=n;
 }
 
 
