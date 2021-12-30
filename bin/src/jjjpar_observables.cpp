@@ -23,7 +23,7 @@ int jjjpar::pcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
    case 4: 
    case 3: 
    case 5: fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
-          return 0;break;
+          return false;break;
    default: if (p==NULL) {mom=0;return false;} 
             else{(*p)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }

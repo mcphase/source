@@ -118,7 +118,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
                   {dP1=0;gammaP=SMALL_GAMMA;}
                   else
                   {dP1=0;for(int pp1=1;pp1<=3;++pp1)dP1+=DBWF[l]*SL[l]*(P1(pp1)*qijk(pp1));
-                   gammaP=real(dP1*conj(dP1));dP1/=sqrt(gammaP);
+                   gammaP=real(dP1*conj(dP1));if(gammaP>SMALL_NORM)dP1/=sqrt(gammaP);
                   }
                    }
      } // if calc_rixs
@@ -163,6 +163,7 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
 	    }	                   
         if(do_gobeyond)for(m=1;m<=mqdim;++m){md.dMQs(i,j,k)(mqdim*(j1-1)+m)=mq1(m);}
         if(do_phonon)md.dPs(i,j,k)(1*(j1-1)+1)=dP1;
+    
         for(m=1;m<=mqdim;++m){md.dMQ_dips(i,j,k)(mqdim*(j1-1)+m)=mq1_dip(m);}       
     }}}
     fclose(fin);
@@ -305,7 +306,7 @@ int ssm1,in1,in2;
         if((*md.PUg[in2])(1,bb)==defval) (*md.PUg[in2])(1,bb) = conj(md.dPs(i2,j2,k2)(bb))
                                                                  * md.sqrt_GammaP(i2,j2,k2)(bb);
          chiPhon(1,1)+= PI * (*md.PgU[in1])(1,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.PUg[in2])(1,bb);          
-      } // i,j,do_phonon
+          } // i,j,do_phonon
 
       if(intensitybey>0)
       {for(j=1;j<=mqdim;++j){
@@ -411,7 +412,7 @@ if (calc_rixs){// use 1-9 components of chi to store result !!! (other component
                                intensitybey=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                               }
-            if(do_phonon){sumS=chiPhon(1,1)/PI/2.0/(double)ini.mf.n();sumS*=bose;
+            if(do_phonon){sumS=chiPhon(1,1)/PI/2.0/(double)ini.mf.n();sumS*=bose;// printf("chiPhon= %g i %g ",real(chiPhon(1,1)),imag(chiPhon(1,1)));
                           intensityP=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                          }                              

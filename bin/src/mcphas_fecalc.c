@@ -257,7 +257,7 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
   // add correction term
   fe+=0.5*(meanfield*d1);
   u+=0.5*(meanfield*d1);
-//  printf ("Ha=%g Hb=%g Hc=%g ma=%g mb=%g mc=%g \n", H[1], H[2], H[3], m[1], m[2], m[3]);
+ // printf ("Ha=%g Hb=%g Hc=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
  }
 }}}
 fe/=(double)sps.n()*sps.nofatoms; //normalise to formula unit

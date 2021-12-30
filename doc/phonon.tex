@@ -97,7 +97,9 @@ transitions (=number of transitions).
 \subsection{Using Single Ion Module {\prg phonon}}
 
 The module {\prg phonon} allows to consider the phononic degrees of freedom in McPhas.
-The single ion input file for an oscillating atom has to have the following format:
+The single ion input file for an oscillating atom (with amplitude 
+up to a maximum displacement $u_{max}$, which is relevant for the function {\prg Icalc} of the
+module) has to have the following format:
 
 \begin{verbatim}
 #!MODULE=phonon
@@ -114,6 +116,7 @@ MODPAR4=8   # Kzz
 MODPAR5=0   # Kxy  in (meV)
 MODPAR6=0   # Kxz
 MODPAR7=0   # Kyz
+MODPAR8=1   # umax          maximum (cutoff) for displacement [a0=0.5219 A]
 
 #-------------------------------------------------------
 # Neutron Scattering Length (10^-12 cm) (can be complex)
@@ -152,13 +155,15 @@ look like:
 
 It is planned that these files should be created automatically from the 
 output of DFT programs. [to be done]
+For an example of phonons in tungsten see {\prg examples/tungsten\_phonons }
 
 If crystal field - phonon coupling is to be input, magnetic ions may be added to {\prg mcphas.j}.
 They should not be placed at exactly the same position as the phonon atoms - i.e. da db dc should be chosen
 (slightly) different to enable the mcphas.j loader to identify which  is which.
 
-The coupling between phononic and crystal field degrees of freedom should be derived from
-$\hat H_{cf-phon}=(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$. This could be done
-using the program {\prg pointc} and {\prg makenn} applying small differential changes to
+The coupling between phononic and crystal field degrees of freedom can be derived from
+$\hat H_{cf-phon}=(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$.
+ This can be done
+using the program  {\prg makenn} with option {\prg -cfph}  applying small differential changes to
 the atomic positions in the unit cell in order to evaluate the gradient of the crystal field
-parameters. [efficient program to do this task is to be written]
+parameters. For an example see {\prg examples/cecu2ge2\_cf\_phonon\_int }.

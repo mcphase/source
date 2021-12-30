@@ -187,7 +187,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	        {iii=inputpars.nofcomponents*(i-1)+ii;h1=0;h1(ii)=10*MU_B;
                  (*inputpars.jjj[i]).Icalc(mmom,T,h1,h1ext,lnz,u,(*inputpars.jjj[i]).Icalc_parstorage);
 		 nettom(iii)=mmom(ii)*rnd(1);
-	         momentq0(iii)=rnd(1);
+	         momentq0(iii)=rnd(1)*mmom(ii);
 	         phi(iii)=rnd(1)*3.1415;
 		}
 	      }
@@ -204,7 +204,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                       {rr=(int)rint(rnd(1.0)*(sps.n()-1))+1;
 		       ri=inputpars.nofcomponents*(int)rint(rnd(1.0)*(inputpars.nofatoms-1));
 	               for(ii=1;ii<=inputpars.nofcomponents;++ii)
-		       {sps.mi(rr)(ri+ii)=rnd(1.0) ;}
+		       {sps.mi(rr)(ri+ii)*=(2*rnd(1.0)-1) ;}
 		       } // randomize spin rr
                     }
  
@@ -569,7 +569,7 @@ if (femin>=10000) // did we find a stable structure ??
  {fprintf(stderr,"Warning propcalc: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
                  physprops.T,physprops.H(1),physprops.H(2),physprops.H(3));return 2;}
 else // if yes ... then
- {if(verbose==1){printf("... calculating physical properties ...\n");}
+ {if(verbose==1){printf("... calculating physical properties ");}
  if (physprops.j>0){ // take spinconfiguration ----
                      sps=(*testspins.configurations[physprops.j]);
                        if (sps.wasstable==0)
@@ -591,6 +591,7 @@ else // if yes ... then
 			(*testspins.configurations[physprops.j]).wasstable=sps.wasstable;    
                        }
 	      }
+ if(verbose==1){printf(".");}
 /*    else     // ---- or take q vector 
             // removed because not necessary MR 15.12.15
             { sps.spinfromq(testqs.na(-physprops.j),testqs.nb(-physprops.j),
@@ -619,7 +620,7 @@ else // if yes ... then
                     }}}}
              // display spinstructure
                 if (verbose==1)
-                {
+                {printf(".");
 		 float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
 		 for (is=1;is<=inputpars.nofatoms;++is)
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
@@ -645,10 +646,11 @@ else // if yes ... then
                     fclose (fin_coq);
                 delete[]x;delete []y; delete []z;
 		}
-  delete magmom;
+  delete magmom;if(verbose==1){printf(".");}
  //check if fecalculation gives again correct result
    if (physprops.fe>femin+(0.00001*fabs(femin))){fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
                             T,Norm(H),femin,physprops.j,physprops.fe);delete mf;return 2;}
+ if(verbose==1){printf(".\n");}
  physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
       delete mf;
  }

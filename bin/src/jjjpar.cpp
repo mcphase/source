@@ -381,7 +381,9 @@ void jjjpar::save_sipf(FILE * fout)
    }
 
   if(module_type>0&&module_type!=5) // in case of internal modules save common information
-   {fprintf(fout,"#----------------\n# number of electrons in unfilled shell gJ\n#----------------\nnof_electrons=%i\n\n",nof_electrons);
+   {fprintf(fout,"CHARGE=%g\n",charge);
+
+    fprintf(fout,"#----------------\n# number of electrons in unfilled shell gJ\n#----------------\nnof_electrons=%i\n\n",nof_electrons);
     fprintf(fout,"#----------------\n# Lande factor gJ\n#----------------\nGJ=%g\n\n",gJ);
     fprintf(fout,"#-------------------------------------------------------\n");
     fprintf(fout,"# Neutron Scattering Length (10^-12 cm) (can be complex)\n");
@@ -587,6 +589,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
  mom=Vector(1,9); mom=0; FF_type=0;
  DWF=dwf;SLR=slr;SLI=sli;
+ charge=0;
   magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=0;  magFFj0[1]=1;
   magFFj2=Vector(1,MAGFF_NOF_COEFF);magFFj2=0;
   magFFj4=Vector(1,MAGFF_NOF_COEFF);magFFj4=0;
@@ -651,6 +654,7 @@ jjjpar::jjjpar (const jjjpar & pp)
   xyz=pp.xyz;paranz=pp.paranz;
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   SLR=pp.SLR;SLI=pp.SLI;
+  charge=pp.charge;
   FF_type=pp.FF_type;
   nof_electrons=pp.nof_electrons;
   modulefilename=new char[MAXNOFCHARINLINE];

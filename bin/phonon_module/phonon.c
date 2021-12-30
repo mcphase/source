@@ -30,7 +30,7 @@ extern "C" __declspec(dllexport) void Icalc(Vector & u0,double * T, Vector &Fxc,
                       double * lnZ,double * U,ComplexMatrix & Icalc_parstorage)
 #else
 extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffile,
-                      double * lnZ,double * U,ComplexMatrix & est)
+                      double * lnZ,double * U,ComplexMatrix & Icalc_parstorage)
 #endif
 {   
     /*on input
@@ -46,13 +46,19 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
                 MODPAR[5]   Kxy            of the potential energy with respect
                 MODPAR[6]   Kxz             to nuclear displacements [meV]
                 MODPAR[7]   Kyz
+                MODPAR[8]   umax        maximum displacement  [a0=0.5219 A]
+                MODPAR[9]   to easy convegergence of mcphasit the linearity of the 
+                            einstein Oscillator is damped 
+                            i.e. instead of  u=StOS*F we use  u=StOS * F * exp(-MODPAR[9]*|F|)
 
+ 
   on output    
     u0		position vector [a0] , a0=0.5219 A
     Z		single ion partition function
     U		single ion energy (meV)
 */
-    
+
+
 //  Driver routine to compute the  eigenvalues and normalized eigenvectors 
 //  of a complex Hermitian matrix z.The real parts of the elements must be
 //  stored in the lower triangle of z,the imaginary parts (of the elements
@@ -89,12 +95,15 @@ double Delta1,Delta2,Delta3,K_BT,X,Y,Z;
 Delta1=sqrt(-Omega(1)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
 Delta2=sqrt(-Omega(2)*1.6022e-22/m/a0/a0)*6582e-16;
 Delta3=sqrt(-Omega(3)*1.6022e-22/m/a0/a0)*6582e-16;
+
+
 K_BT=(*T)*K_B;
 X=exp(-Delta1/K_BT);
 Y=exp(-Delta2/K_BT);
 Z=exp(-Delta3/K_BT);
 // calculate phonon function and partition sum Z
 (*lnZ)=-Delta1/2/K_BT-Delta2/2/K_BT-Delta3/2/K_BT-log(1-X)-log(1-Y)-log(1-Z);
+
 // the energy U is sum_i Ei exp(-Ei/(kT))/Z
 // with Ei=w0(0.5+i)
 (*U)=Delta1*(0.5+X/(1-X))+Delta2*(0.5+Y/(1-Y))+Delta3*(0.5+Z/(1-Z));
@@ -104,8 +113,17 @@ Z=exp(-Delta3/K_BT);
 // SrT Om Sr F + SiT Om Si F + i (must be zero)
 Matrix Om(1,3,1,3);Om=0;Om(1,1)=-1/Omega(1);Om(2,2)=-1/Omega(2);Om(3,3)=-1/Omega(3);
 Vector uu(1,3);
-uu=Sr.Transpose()*Om*Sr*Fxc+Si.Transpose()*Om*Si*Fxc;
+Vector F(1,3);F(1)=Fxc(1);F(2)=Fxc(2);F(3)=Fxc(3);
+uu=Sr.Transpose()*Om*Sr*F+Si.Transpose()*Om*Si*F;
 
+ // to easy convegergence of mcphasit the linearity of the einstein Oscillator is damped 
+double factor;
+factor=Norm(F);
+factor=exp(-MODPAR[9]*factor);
+uu*=factor;
+
+double u=Norm(uu);
+if(uu>MODPAR[8])uu*=MODPAR[8]/u;
   u0=0;
   u0[1] = uu(1);
   u0[2] = uu(2); // should in principle be F/m w0^2, but we set it zero to keep atoms in equilibrium position
@@ -113,6 +131,22 @@ uu=Sr.Transpose()*Om*Sr*Fxc+Si.Transpose()*Om*Si*Fxc;
 
 return;
 }
+/**************************************************************************/
+// for spins display positions and mcdiff this routine is needed
+#ifdef __MINGW32__
+extern "C" __declspec(dllexport) void pcalc(Vector & u0,double * T, Vector &Fxc, Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffilename,
+                     ComplexMatrix & Icalc_parstorage)
+#else
+extern "C" void pcalc(Vector & u0,double * T, Vector &Fxc, Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffilename,
+                     ComplexMatrix & Icalc_parstorage)
+#endif
+{double lnZ,U;
+ Icalc(u0,T,Fxc,Hext,g_J,MODPAR,sipffilename,&lnZ,&U,Icalc_parstorage);
+ double a0=0.5219; // Bohr radius in A
+ u0*=a0;
+ return;
+}
+
 /**************************************************************************/
 // for mcdisp this routine is needed
 #ifdef __MINGW32__

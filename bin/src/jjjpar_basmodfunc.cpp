@@ -18,30 +18,13 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 // get parameters from sipf file
 /************************************************************************************/
 void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
-{FILE * cf_file;
- int i,j;
+{int i,j;
  float nn[MAXNOFNUMBERSINLINE];
  nn[0]=MAXNOFNUMBERSINLINE;
  modulefilename=new char[MAXNOFCHARINLINE];
-
  char instr[MAXNOFCHARINLINE];
-  cf_file = fopen_errchk (sipf_filename, "rb");
-  fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
-  if(extract(instr,"MODULE=",modulefilename,(size_t)MAXNOFCHARINLINE))
-   {if(extract(instr,"#!",modulefilename,(size_t)MAXNOFCHARINLINE))
-    {fprintf(stderr,"Error: single ion property file %s does not start with '#!' or 'MODULE='\n",sipf_filename);
-     exit(EXIT_FAILURE);}
-   }
-   //ic1ion entered without path ?
-      if (strncmp(modulefilename,"ic1ion",6)==0)
-      {strcpy(modulefilename,getenv("MCPHASE_DIR"));strcat(modulefilename,"/bin/ic1ion_module/ic1ion.so");}
-      if (strncmp(modulefilename,"icf1ion",7)==0)
-      {strcpy(modulefilename,getenv("MCPHASE_DIR")); strcat(modulefilename,"/bin/ic1ion_module/icf1ion.so"); }
-      if (strncmp(modulefilename,"phonon",6)==0)
-      {strcpy(modulefilename,getenv("MCPHASE_DIR")); strcat(modulefilename,"/bin/phonon_module/phonon.so"); }
-
-  fprintf (stderr,"#parsing single ion property file: %s - loading module %s\n",sipf_filename,modulefilename);
-
+ FILE * cf_file; 
+ cf_file=open_sipf(sipf_filename,modulefilename);
   if(strcmp(modulefilename,"kramer")==0)
     {module_type=1;fprintf (stderr,"[internal]\n");
       ABC=Vector(1,3);i=3;
@@ -339,6 +322,7 @@ module_type=0;
    if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
     extract(instr,"SCATTERINGLENGTHREAL",SLR);
     extract(instr,"SCATTERINGLENGTHIMAG",SLI);
+    extract(instr,"CHARGE",charge);
     extract(instr,"GJ",gJ);
     extract(instr,"gJ",gJ);
     // read formfactor if given

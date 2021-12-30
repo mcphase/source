@@ -20,7 +20,7 @@ public class graphic_parameters_configurator extends JPanel
   String CONST_UNIT_CELL_VIEW = "UNIT CELL VIEW";
   String CONST_SPINS_MOMENTS = "SPINS MOMENTS";
   String CONST_DENSITY = "DENSITY";
-	
+  String CONST_PHONON = "PHONON";	
   // Member variables		
   String strWorkingDir;					// contains the working directory of the program
   String strFileSeparator;
@@ -117,6 +117,16 @@ public class graphic_parameters_configurator extends JPanel
 	JTextField txdensity_gridj = new JTextField();
 	JTextField txdensity_gridk = new JTextField();
 
+  // 5. Tab		
+  JPanel panPhonon = new JPanel();	// DENSITY
+	// Labels
+	JLabel labphonon_show_oscillation = new JLabel();
+	JLabel labphonon_wave_amplitude = new JLabel();
+	// textfields
+	JTextField txphonon_show_oscillation = new JTextField();
+	JTextField txphonon_wave_amplitude = new JTextField();
+
+
   // Helper Panels for display on the Tab-panles
   JPanel jPanel1 = new JPanel();
   JPanel jPanel2 = new JPanel();
@@ -145,6 +155,8 @@ public class graphic_parameters_configurator extends JPanel
   JPanel jPanel17b = new JPanel();
   JPanel jPanel18a = new JPanel();
   JPanel jPanel18b = new JPanel();
+  JPanel jPanel19 = new JPanel();
+  JPanel jPanel20 = new JPanel();
   
   // Layouts
   FlowLayout flowLayout1 = new FlowLayout();
@@ -172,6 +184,9 @@ public class graphic_parameters_configurator extends JPanel
   VerticalFlowLayout verticalFlowLayout16 = new VerticalFlowLayout();
   VerticalFlowLayout verticalFlowLayout17 = new VerticalFlowLayout();
   VerticalFlowLayout verticalFlowLayout18 = new VerticalFlowLayout();
+  FlowLayout flowLayout6 = new FlowLayout();
+  VerticalFlowLayout verticalFlowLayout19 = new VerticalFlowLayout();
+  VerticalFlowLayout verticalFlowLayout20 = new VerticalFlowLayout();
 
 
   /***************************************************************
@@ -302,6 +317,17 @@ public class graphic_parameters_configurator extends JPanel
 	InitTextfield(txdensity_gridj, "number of gridpoints in j direction for file *.grid", 50, 19);
 	InitTextfield(txdensity_gridk, "number of gridpoints in k direction for file *.grid", 50, 19);
 
+	/***********************************
+	 * Fifth tab-panel
+	 ***********************************/
+	// Labels
+	InitLabel(labphonon_show_oscillation, "show oscillation:", 170, 19);
+	InitLabel(labphonon_wave_amplitude, "wave amplitude:", 170, 19);
+	// textfields
+	InitTextfield(txphonon_show_oscillation, "show oscillation", 50, 19);
+	InitTextfield(txphonon_wave_amplitude, "wave amplitude", 50, 19);
+
+
 	this.add(panMain, BorderLayout.NORTH);
 		panMain.setPreferredSize(new Dimension(790,120));
 		panMain.addTab("POINTCHARGES", panPointcharges);
@@ -414,6 +440,18 @@ public class graphic_parameters_configurator extends JPanel
 					jPanel18b.add(txdensity_gridi, null);
 					jPanel18b.add(txdensity_gridj, null);
 					jPanel18b.add(txdensity_gridk, null);
+
+			panMain.addTab("PHONON", panPhonon);
+		    panPhonon.setLayout(flowLayout6);
+			panPhonon.add(jPanel19, null);
+				jPanel19.setLayout(verticalFlowLayout19);
+					jPanel19.add(labphonon_show_oscillation, null);
+					jPanel19.add(labphonon_wave_amplitude, null);
+			panPhonon.add(jPanel20, null);
+				jPanel20.setLayout(verticalFlowLayout20);
+					jPanel20.add(txphonon_show_oscillation, null);
+					jPanel20.add(txphonon_wave_amplitude, null);
+
 
 			
 	//this.add(txStatus, BorderLayout.CENTER);
@@ -557,6 +595,10 @@ public class graphic_parameters_configurator extends JPanel
     txdensity_gridi.setText(m_IniFile.GetValue(CONST_DENSITY, "gridi"));
     txdensity_gridj.setText(m_IniFile.GetValue(CONST_DENSITY, "gridj"));
     txdensity_gridk.setText(m_IniFile.GetValue(CONST_DENSITY, "gridk"));
+
+    txphonon_wave_amplitude.setText(m_IniFile.GetValue(CONST_PHONON, "phonon_wave_amplitude"));
+    txphonon_show_oscillation.setText(m_IniFile.GetValue(CONST_PHONON, "phonon_show_oscillation"));
+
   }
 
   void WriteCommand()
@@ -626,6 +668,9 @@ public class graphic_parameters_configurator extends JPanel
     m_IniFile.SetValue(CONST_DENSITY, "gridi", txdensity_gridi.getText(), " ");
     m_IniFile.SetValue(CONST_DENSITY, "gridj", txdensity_gridj.getText(), " ");
     m_IniFile.SetValue(CONST_DENSITY, "gridk", txdensity_gridk.getText(), " ");
+
+    m_IniFile.SetValue(CONST_PHONON, "phonon_wave_amplitude", txphonon_wave_amplitude.getText(), " ");
+    m_IniFile.SetValue(CONST_PHONON, "phonon_show_oscillation", txphonon_show_oscillation.getText(), " ");
 
 	m_IniFile.Write();
         System.exit(0);

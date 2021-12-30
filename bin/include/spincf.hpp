@@ -34,6 +34,9 @@ public:
     void jvx_cd(FILE * fout,char * text,cryststruct & cs,
               graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
               Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag);
+    void jvx_cd(FILE * fout,char * text,cryststruct & cs,
+              graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
+              Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag,spincf & pev_real, spincf & pev_imag);
 
     void cd(FILE * fout,cryststruct & cs,graphic_parameters & gp,
                 spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T,Vector &  gjmbHxc,Vector & Hext);

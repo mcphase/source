@@ -411,19 +411,30 @@ int check_atom_in_big_unitcell(Vector & dd,Vector & maxv1,Vector & minv1,Matrix 
 
 //output for javaview (old)
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
-                    double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
+                    double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
                     Vector & Hext,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag)
-{jvx_cd(fout,text,cs,gp,phase,savev_real,savev_imag,hkl,T,gjmbHxc,Hext,cs,magmom,magmomev_real,magmomev_imag);}
+{spincf pev_r(magmomev_real);pev_r=pev_r * 0.0;
+ spincf pev_i(magmomev_imag);pev_i=pev_i * 0.0;
+ jvx_cd(fout,text,cs,gp,phase,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs,magmom,magmomev_real,magmomev_imag,pev_r,pev_i);}
 
 //output for javaview
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
-                    double phase,spincf & savev_real,spincf & savev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
+                    double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
                     Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag)
+{spincf pev_r(magmomev_real);pev_r=pev_r * 0.0;
+ spincf pev_i(magmomev_imag);pev_i=pev_i * 0.0;
+ jvx_cd(fout,text,cs,gp,phase,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs4,magmom,magmomev_real,magmomev_imag,pev_r,pev_i);}
+
+
+//output for javaview
+void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
+                    double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
+                    Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag,spincf & pev_real, spincf & pev_imag)
 { int i,j,k,l,ctr=0;int i1,j1,k1;
  // some checks
- if(nofatoms!=savev_real.nofatoms||nofa!=savev_real.na()||nofb!=savev_real.nb()||nofc!=savev_real.nc()||
-    nofatoms!=savev_imag.nofatoms||nofa!=savev_imag.na()||nofb!=savev_imag.nb()||nofc!=savev_imag.nc()||
-    nofcomponents<savev_real.nofcomponents||savev_real.nofcomponents!=savev_imag.nofcomponents)
+ if(nofatoms!=densityev_real.nofatoms||nofa!=densityev_real.na()||nofb!=densityev_real.nb()||nofc!=densityev_real.nc()||
+    nofatoms!=densityev_imag.nofatoms||nofa!=densityev_imag.na()||nofb!=densityev_imag.nb()||nofc!=densityev_imag.nc()||
+    nofcomponents<densityev_real.nofcomponents||densityev_real.nofcomponents!=densityev_imag.nofcomponents)
     {fprintf(stderr,"Error creating jvx movie files: eigenvector read from .qev file does not match dimension of spins structure read from sps file\n");exit(1);}
 
   Vector maxv(1,3),minv(1,3),ijkmax(1,3),ijkmin(1,3),max_min(1,3),dd(1,3),dd0(1,3),c(1,3),xyz(1,3);
@@ -561,7 +572,7 @@ fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
-if(1==0) // plot atoms removed by MR 30.8.2011 - probably not needed
+if(gp.show_atoms>0) // plot atoms removed by MR 30.8.2011 - inserted again for phonons 25.12.21
  { // plot atoms in region xmin to xmax (quader)
 fprintf(fout,"    <geometry name=\"ions\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
@@ -570,12 +581,41 @@ fprintf(fout,"        <points>\n");
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
          for(l=1;l<=nofatoms;++l)
-	 {dd=pos(i,j,k,l,cs);
+	 {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
+            // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
+            // and refer to the same atom
+         for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
+            if(Norm(dd-ddd)<0.2&&ll!=l){
+                                        // here we decide what to do with two ions at the same position
+                                        // static: magmom(1..3) can be moment (arrow)
+                                        //                      or displacement (shift of position)
+                                        // dynamic: pev_real,imag contains nuclear movement
+                                        //          magmomev_real,imag   moment oscillation eigenvector
+                                        //          densityev_real,imag  chargedensity oscillation eigenvector
+
+                                        // if neighbour ll is displacement (radius!=0) and  l is moment - 
+                                       // do not show point and set oscillation of l  equal to ll
+                                         double radius=0;extract(cs.sipffilenames[ll],"radius",radius);
+                                         if(radius!=0){radius=0;
+                                         extract(cs.sipffilenames[l],"radius",radius);
+                                         if(radius==0){
+                                                   pev_real.moment(i,j,k,l)=pev_real.moment(i,j,k,ll);
+                                                   pev_imag.moment(i,j,k,l)=pev_imag.moment(i,j,k,ll);
+                                                   showdd=0;}}
+                                       }
+
+            }
          dd+=dd0;
-            if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
+            if(showdd==1)if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
             (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
-            {
-fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
+            {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
+             QR=(hkl*abc_in_ijk_Inverse)*dd;
+             QR*=2*PI;
+             Vector p(1,3);p=0;
+             double radius=0;extract(cs.sipffilenames[l],"radius",radius);if(radius!=0){p=magmom.moment(i,j,k,l);}
+             xyz=p+gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
+fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),myround(dd(2)+xyz(2)),myround(dd(3)+xyz(3)));
      ++ctr;
 	     }
 	  }
@@ -588,10 +628,22 @@ fprintf(fout,"        <colors type=\"rgb\">\n");
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
          for(l=1;l<=nofatoms;++l)
-	 {dd=pos(i,j,k,l, cs);
-          dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
+	   {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
+            // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
+            // and refer to the same atom
+         for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
+            if(Norm(dd-ddd)<0.15&&ll!=l){ double radius=0;extract(cs.sipffilenames[ll],"radius",radius);
+                                         if(radius!=0){radius=0;
+                                         extract(cs.sipffilenames[l],"radius",radius);
+                                         if(radius==0){
+                                          showdd=0;}}
+        }
+            }
+         dd+=dd0;
+            if(showdd==1)if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
              (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {
+fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atoms),(int)(gp.show_atoms*((l*97)%256)),0);
 fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atoms),(int)(gp.show_atoms*((l*97)%256)),0);
 	     }
 	  }
@@ -599,6 +651,13 @@ fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atom
   }}}
 fprintf(fout,"        </colors>\n");
 fprintf(fout,"      </pointSet>\n");
+fprintf(fout,"      <lineSet  arrow=\"hide\" line=\"show\" color=\"show\">\n");
+fprintf(fout,"        <lines>\n");
+  for(i=0;i<ctr;++i)fprintf(fout,"          <l>%i %i</l>\n",2*i,2*i+1);
+fprintf(fout,"          <thickness>1.0</thickness>\n");
+fprintf(fout,"          <colorTag type=\"rgb\">255 255 0</colorTag>\n");
+fprintf(fout,"        </lines>\n");
+fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
 
@@ -621,6 +680,7 @@ fprintf(fout,"        <points>\n");
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
              xyz=magmom.moment(i,j,k,l)+gp.spins_wave_amplitude*(cos(-phase+QR)*magmomev_real.moment(i,j,k,l)+sin(phase-QR)*magmomev_imag.moment(i,j,k,l));
+             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
               //printf("gJ=%g magmom=%g %g %g %g %g %g %g %g %g\n",cs.gJ[l],mom[in(i,j,k)](1),mom[in(i,j,k)](2),mom[in(i,j,k)](3),mom[in(i,j,k)](4),mom[in(i,j,k)](5),mom[in(i,j,k)](6),xyz(1),xyz(2),xyz(3));
               //if(l==170||l==171){fprintf(stderr,"l=%i\n %4.4f + i %4.4f\n %4.4f + i %4.4f\n %4.4f + i %4.4f\n",
               //                    l,magmomev_real.moment(i,j,k,l)(1),magmomev_imag.moment(i,j,k,l)(1),
@@ -630,7 +690,7 @@ fprintf(fout,"        <points>\n");
                                 
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
-              //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
+              //spins=savspins+(densityev_real*cos(-phase) + densityev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
 //fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)-xyz(1)*gp.spins_scale_moment),myround(dd(2)-xyz(2)*gp.spins_scale_moment),myround(dd(3)-xyz(3)*gp.spins_scale_moment));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
@@ -678,6 +738,8 @@ fprintf(fout,"        <points>\n");
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
                           xyz=magmom.moment(i,j,k,l);
+             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+             
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
 	     ++ctr;
@@ -716,13 +778,14 @@ fprintf(fout,"        <points>\n");
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
-             int phi;
+             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+                          int phi;
              for(phi=0;phi<=16;phi++)
              {
              xyz=magmom.moment(i,j,k,l)+gp.spins_wave_amplitude*(cos(-(double)phi*2*3.1415/16+QR)*magmomev_real.moment(i,j,k,l)+sin((double)phi*2*3.1415/16-QR)*magmomev_imag.moment(i,j,k,l));
               // <Jalpha>(i)=<Jalpha>0(i)+gp.spins_wave_amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
-              //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*gp.spins_wave_amplitude; // Q ri not considered for test !!!
+              //spins=savspins+(densityev_real*cos(-phase) + densityev_imag*sin(phase))*gp.spins_wave_amplitude; // Q ri not considered for test !!!
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
 	     }++ctr;
 
@@ -764,11 +827,12 @@ for(l=1;l<=nofatoms;++l)
    double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
    QR=(hkl*abc_in_ijk_Inverse)*dd;
    QR*=2*PI;
-                for(ndd=1;ndd<=savev_real.nofcomponents;++ndd)
-   {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*savev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*savev_imag.moment(i,j,k,l)(ndd));}
+   dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+                             for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
+   {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));}
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
-              //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
+              //spins=savspins+(densityev_real*cos(-phase) + densityev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
  // here we calculate the chargedensity of ion
    cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,gjmbHxc,Hext);
    for(ii=1;ii<=cd.nofpoints();++ii)
@@ -811,16 +875,19 @@ if(gp.show_density>0)
   double dfi=gp.density_dfi;
 
 for(l=1;l<=nofatoms;++l)
- {fprintf(fout,"    <geometry name=\"densities in primitive magnetic unit cell - atom %i\">\n",l);
-  fprintf(fout,"<pointSet color=\"hide\" point=\"show\" dim=\"1\">\n");
-  fprintf(fout,"<points >\n");
-  double radius=0;double dx,dy,dz,R,fi,theta;
+ {double radius=0;double dx,dy,dz,R,fi,theta;
   extract(cs.sipffilenames[l],"radius",radius);
   if(radius!=0) // this is a trick: if radius is given as sipffilename then a sphere with this is radius is generated (pointcharge)
   {   if(gp.show_pointcharges>0)
-      {  double rp=abs(radius);
+      { fprintf(fout,"    <geometry name=\"densities in primitive magnetic unit cell - atom %i\">\n",l);
+  fprintf(fout,"<pointSet color=\"hide\" point=\"show\" dim=\"1\">\n");
+  fprintf(fout,"<points >\n");
+   double rp=abs(radius);
         for (i=1;i<=(1+(nofa-1)*gp.scale_view_1);++i){for(j=1;j<=(1+(nofb-1)*gp.scale_view_2);++j){for(k=1;k<=(1+(nofc-1)*gp.scale_view_3);++k){
-        dd=pos(i,j,k,l, cs);
+        dd=pos(i,j,k,l, cs); double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
+   QR=(hkl*abc_in_ijk_Inverse)*dd;
+   QR*=2*PI;
+        dd+=magmom.moment(i,j,k,l)+gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));             
         for(tt=0;tt<=3.1415/dtheta;++tt){for(ff=0;ff<=2*3.1415/dfi;++ff){
              theta=(double)tt*dtheta;fi=(double)ff*dfi;
              dx=rp*sin(theta)*cos(fi)+dd(1);dy=rp*sin(theta)*sin(fi)+dd(2);dz=rp*cos(theta)+dd(3);
@@ -830,19 +897,23 @@ for(l=1;l<=nofatoms;++l)
         }}}
   } }
   else
-  {jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l],1);
+  {fprintf(fout,"    <geometry name=\"densities in primitive magnetic unit cell - atom %i\">\n",l);
+  fprintf(fout,"<pointSet color=\"hide\" point=\"show\" dim=\"1\">\n");
+  fprintf(fout,"<points >\n");
+  jjjpar ionpar(cs.x[l],cs.y[l],cs.z[l],cs.sipffilenames[l],1);
    density cd(gp.title,dtheta,dfi);int ndd;
    for (i=1;i<=1+(nofa-1)*gp.scale_view_1;++i){for(j=1;j<=1+(nofb-1)*gp.scale_view_2;++j){for(k=1;k<=1+(nofc-1)*gp.scale_view_2;++k){
-   dd=pos(i,j,k,l, cs);
+   dd=pos(i,j,k,l, cs); 
    Vector moments(1,nofcomponents);
    double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
    QR=(hkl*abc_in_ijk_Inverse)*dd;
    QR*=2*PI;
-                for(ndd=1;ndd<=savev_real.nofcomponents;++ndd)
-   {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*savev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*savev_imag.moment(i,j,k,l)(ndd));}
+   dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+                          for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
+   {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));}
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
-              //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
+              //spins=savspins+(densityev_real*cos(-phase) + densityev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
  // here we calculate the chargedensity of ion
    cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,  gjmbHxc,Hext);
    for(ii=1;ii<=cd.nofpoints();++ii)
@@ -915,11 +986,11 @@ fprintf(fout,"</jvx-model>\n");
 // output of chargedensity on grid as ascii file points are equally spaced as specified
 // nofpoints*
 void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
-                spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext)
+                spincf & densityev_real,spincf & densityev_imag,double phase,Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext)
 {// some checks
- if(nofatoms!=savev_real.nofatoms||nofa!=savev_real.na()||nofb!=savev_real.nb()||nofc!=savev_real.nc()||
-    nofatoms!=savev_imag.nofatoms||nofa!=savev_imag.na()||nofb!=savev_imag.nb()||nofc!=savev_imag.nc()||
-    nofcomponents<savev_real.nofcomponents||savev_real.nofcomponents!=savev_imag.nofcomponents)
+ if(nofatoms!=densityev_real.nofatoms||nofa!=densityev_real.na()||nofb!=densityev_real.nb()||nofc!=densityev_real.nc()||
+    nofatoms!=densityev_imag.nofatoms||nofa!=densityev_imag.na()||nofb!=densityev_imag.nb()||nofc!=densityev_imag.nc()||
+    nofcomponents<densityev_real.nofcomponents||densityev_real.nofcomponents!=densityev_imag.nofcomponents)
     {fprintf(stderr,"Error creating density grid: eigenvector read from .qev file does not match dimension of spins structure read from sps file\n");exit(1);}
   int nofpointsi=gp.gridi;int nofpointsj=gp.gridj; int nofpointsk=gp.gridk;
 
@@ -987,8 +1058,8 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
    QR=(hkl*abc_in_ijk_Inverse)*dd0;
    QR*=2*PI;int i1r=i1,j1r=j1,k1r=k1;
 
-                for(ndd=1;ndd<=savev_real.nofcomponents;++ndd)
-   {moments(ndd)=moment(i1r,j1r,k1r,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*savev_real.moment(i1r,j1r,k1r,l)(ndd)+sin(phase-QR)*savev_imag.moment(i1r,j1r,k1r,l)(ndd));}
+                for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
+   {moments(ndd)=moment(i1r,j1r,k1r,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i1r,j1r,k1r,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i1r,j1r,k1r,l)(ndd));}
     cd.moments_init(moments);
 //   if(strncmp(gp.title+14,"momdensity",10)==0){if(nofcomponents>=3*49)
 //                                            {int i1i;for(i1i=1;i1i<=49;++i1i){momSx(i1i)=moments(i1i);momSy(i1i)=moments(i1i+49);momSz(i1i)=moments(i1i+2*49);momLx(i1i)=moments(i1i+3*49);momLy(i1i)=moments(i1i+4*49);momLz(i1i)=moments(i1i+5*49);}}
@@ -1005,7 +1076,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
 
           // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
-              //spins=savspins+(savev_real*cos(-phase) + savev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
+              //spins=savspins+(densityev_real*cos(-phase) + densityev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
         // here the ijk range should be more special according to the maximum sphere radius 3A - to get speed up!!!!
         // dd0 is the center of the atom ...
         radius=3.0;// only pixels nearer maxR (A) to the center of an atom will be considered

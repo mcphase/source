@@ -51,7 +51,8 @@
 #                                   create win-setup mcphX_Y.exe using
 #                                   inno setup compiler: innosetup.iss in this directory
 #                                     (rename file setup found in mcphas/output/setup.exe into mcphX_Y.exe)
-#                                  - install windows&linux and test demo + examples
+#                                  - install windows&linux and test demo + examples, attention: remove
+#                                       HOME/appdat/roaming/.mcphaseexplorer directory before installation
 #                                 make unreleased_restore
 #               . update WEB PAGES: - check all information and add new, update list of papers on mcphas, references
 #                                   - put .tgz and .exe and if available additional software on web
@@ -83,7 +84,7 @@ gitdir = Output/mcphase~mcphase
 
 
 
-all: vector functions cfield mcphase examples tutorial bfk bfkp
+all: vector functions cfield mcphase examples tutorial bfk bcfph cowan
 
 git: $(gitdir)/*
 	cp Makefile Makefile.sav
@@ -109,8 +110,11 @@ phonon: vector
 bfk:   
 	cd bin/bfk_src && $(MAKE)
 
-bfkp:   
-	cd bin/bfkp_src && $(MAKE)
+bcfph:   
+	cd bin/bcfph_src && $(MAKE)
+
+cowan:   
+	cd bin/cowan && $(MAKE)
 
 mcphase: vector cfield phonon 
 	cd bin/src && $(MAKE)
@@ -138,6 +142,7 @@ tgz :
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
 	dos2unix ./examples/cecu2a/fit/watch*.bat
+	dos2unix ./examples/cecu2ge2_cf_phonon_int/*.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
 	dos2unix ./examples/coo/calc.bat
 	dos2unix ./examples/dycu2iwata/calc.bat
 	dos2unix ./examples/gd3gao6/calc.bat
@@ -157,6 +162,7 @@ tgz :
 	dos2unix ./examples/prni2b2c/powder_magnon.bat
 	dos2unix ./examples/prni2si2/calc.bat
 	dos2unix ./examples/pupd3/calc.bat
+        dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
 	dos2unix ./examples/testic1ion/test*.bat
 	dos2unix ./examples/tungsten_phonons/calc.bat
 	dos2unix ./examples/upd3/calc.bat
@@ -168,6 +174,7 @@ tgz :
 	cd ./Output;gzip mcph.tar
 	unix2dos ./bin/*.pl ./demo/*.bat
 	unix2dos ./examples/cecu2a/fit/watch*.bat
+	unix2dos ./examples/cecu2ge2_cf_phonon_int/*.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
 	unix2dos ./examples/coo/calc.bat
 	unix2dos ./examples/dycu2iwata/calc.bat
 	unix2dos ./examples/gd3gao6/calc.bat
@@ -187,6 +194,7 @@ tgz :
 	unix2dos ./examples/prni2b2c/powder_magnon.bat
 	unix2dos ./examples/prni2si2/calc.bat
 	unix2dos ./examples/pupd3/calc.bat
+        unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
 	unix2dos ./examples/testic1ion/test.bat
 	unix2dos ./examples/tungsten_phonons/calc.bat
 	unix2dos ./examples/upd3/calc.bat
@@ -203,6 +211,9 @@ clean:
 	cd ./bin/cf1ion_module && $(MAKE) clean
 	cd ./bin/ic1ion_module && $(MAKE) cleanall
 	cd ./bin/src && $(MAKE) clean
+	cd ./bin/bfk_src && $(MAKE) clean
+	cd ./bin/bcfph_src && $(MAKE) clean
+	cd ./bin/cowan && $(MAKE) clean
 
 cleanexe:
 	rm -vf bin/addj.exe bin/charges.exe bin/coq2jjj.exe \
@@ -213,7 +224,9 @@ cleanexe:
                 bin/mcdiff.exe  \
                 bin/ic1ion.exe bin/so1ion.exe \
                 bin/fediff.exe bin/mf2fe.exe \
-                bin/formfactor.exe bin/radwavfunc.exe bin/clusterize.exe
+                bin/formfactor.exe bin/radwavfunc.exe bin/clusterize.exe bin/bfk.exe
+                bin/RCN2K.exe bin/RCN36K.exe bin/RCG11K.exe \
+                bin/bcfph.exe
 	rm -vf bin/addj bin/charges bin/coq2jjj \
 		bin/mcdispit bin/singleion bin/cfield \
 		bin/cond bin/jjj2j bin/mcphasit bin/spins \
@@ -223,5 +236,7 @@ cleanexe:
                 bin/ic1ion bin/so1ion \
                 bin/ic1ion_module/ic1ion.so \
                 bin/fediff bin/mf2fe \
-                bin/formfactor bin/radwavfunc bin/clusterize
+                bin/formfactor bin/radwavfunc bin/clusterize bin/bfk \
+                bin/RCN2K bin/RCN36K bin/RCG11K \
+                bin/bcfph 
                 

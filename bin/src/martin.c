@@ -1092,3 +1092,26 @@ cnst(6,6)=  0.6831942;
 int l,m;
 for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 }
+
+ FILE * open_sipf(char * sipf_filename,char * modulename){
+ // opens sipf file and returns filehandle and modulename 
+ FILE * cf_file;
+ char instr[MAXNOFCHARINLINE];
+  cf_file = fopen_errchk (sipf_filename, "rb");
+  fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
+  if(extract(instr,"MODULE=",modulename,(size_t)MAXNOFCHARINLINE))
+   {if(extract(instr,"#!",modulename,(size_t)MAXNOFCHARINLINE))
+    {fprintf(stderr,"Error: single ion property file %s does not start with '#!' or 'MODULE='\n",sipf_filename);
+     exit(EXIT_FAILURE);}
+   }
+   //ic1ion entered without path ?
+      if (strncmp(modulename,"ic1ion",6)==0)
+      {strcpy(modulename,getenv("MCPHASE_DIR"));strcat(modulename,"/bin/ic1ion_module/ic1ion.so");}
+      if (strncmp(modulename,"icf1ion",7)==0)
+      {strcpy(modulename,getenv("MCPHASE_DIR")); strcat(modulename,"/bin/ic1ion_module/icf1ion.so"); }
+      if (strncmp(modulename,"phonon",6)==0)
+      {strcpy(modulename,getenv("MCPHASE_DIR")); strcat(modulename,"/bin/phonon_module/phonon.so"); }
+
+  fprintf (stderr,"#parsing single ion property file: %s - loading module %s\n",sipf_filename,modulename);
+   return cf_file; }
+

@@ -20,7 +20,7 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] T Ha Hb Hc [h k l E]\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] x y\n\
                     \n\
-1) if used with -f file T Ha Hb Hc,  this file has to be a mcphas.mf or mcphas.sps file,\n \
+1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
    is read and extracted from this file and printed on screen (stdout),\n \
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>), nothing else is done\n\
@@ -99,7 +99,7 @@ double T=0; Vector Hext(1,3),Hextijk(1,3);
  
   int dim=28;
  char text[1000];
- int os=0; int doijk=0,arrow=0,density=0;//,arrowdim=3;
+ int os=0; int doijk=0,arrow=0,density=0,phonon=0;//,arrowdim=3;
  double xx=0,yy=0,zz=0;
 graphic_parameters gp;
 gp.show_abc_unitcell=1.0;
@@ -207,13 +207,13 @@ else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins
                                    if(strcmp(argv[os],"-Mi")==0){arrow=4;}
                                    }
 
-if(strcmp(argv[1+os],"-P")==0){os+=1;}
+if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
 if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
  				   os+=2;}
  strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
  strcpy(infilename+10+strlen(prefix),"mcphas.mf");fin = fopen(infilename, "rb");
- if(fin==NULL){strcpy(infilename+10,"mcphas.mf");fin = fopen_errchk (infilename, "rb");}
+ if(fin==NULL){strcpy(infilename+10,"mcphas.mf");fin = fopen_errchk(infilename, "rb");}
  printf("# reading from file %s\n",infilename);
   
  }
@@ -356,6 +356,7 @@ h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
     h=0;
    for(nt=1;nt<=inputpars.nofcomponents;++nt){h(nt)=hh(nt+inputpars.nofcomponents*(ii-1));}
 
+
 switch(arrow)
 {case 1: (*inputpars.jjj[ii]).Scalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
  case 2: (*inputpars.jjj[ii]).Lcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
@@ -367,7 +368,7 @@ switch(arrow)
  case 2:
  case 3:
          for(nt=1;nt<=3;++nt)
-		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt);
+		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt); // here we set moment to be output as arrow
                     };break;
  case 4: int dim4;
          dim4=3;if((*inputpars.jjj[ii]).module_type==5)
@@ -396,6 +397,11 @@ if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
 else{++ii4;
     // output the positions
     dd3=savmf.pos(i,j,k,ii, cs);
+      // if module allows to calculate position shift of an atom - use this for output 
+    if(true==(*inputpars.jjj[ii]).pcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
+     {dd3+=mom; fprintf(stderr,"# Attention: atom %i shifted from equilibrium position by (%g %g %g) A \n",ii,mom(1),mom(2),mom(3));
+     }
+
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
     fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
             cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
@@ -414,6 +420,8 @@ else{++ii4;
                         {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
                          fprintf(fout,"\n");
   }
+
+
 // -----------------------------------------------------------------------------------------------
 
 
@@ -462,6 +470,15 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
 		        {densitycf.m(i,j,k)(nt+dim*(ii-1))=moments(nt);
                     }
 } // gp.show_density
+
+
+if(phonon==1)  // if module allows to calculate position  - use this for graphics ...
+{if(true==(*inputpars.jjj[ii]).pcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
+{for(nt=1;nt<=3;++nt)
+		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt); // here we set moment to be output as arrow
+                    };
+}
+}
 
   }}
 }}
@@ -515,7 +532,20 @@ Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
              spincf densityev_imag(densitycf*0.0);
              spincf spinconfev_real(spinconf*0.0);
              spincf spinconfev_imag(spinconf*0.0);
+             spincf spinconfpev_real(spinconf*0.0);
+             spincf spinconfpev_imag(spinconf*0.0);
             // to do jvx output of static structure put zeros into these spinconfigurations
+
+// check sipffilenames and put radius= ... in case single ion module is
+//  capable of calculating position 
+for(ii=1;ii<=inputpars.nofatoms;++ii)
+{Vector pos(1,3);
+  if(true==(*inputpars.jjj[ii]).pcalc(pos,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
+ {double charge;charge=(*inputpars.jjj[ii]).charge;if(charge==0)charge=0.01;
+  sprintf(cs.sipffilenames[ii],"pointcharge %g |e| radius=%g",charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333));
+ printf("#! atom %i %s\n",ii,cs.sipffilenames[ii]);
+ }
+}
 
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins.jvx", "w");
@@ -535,15 +565,15 @@ Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
 // try a spinwave picture !!!  ... include phonons and spindensity changes ...
 //***************************************************************************************************************
 //***************************************************************************************************************
-
 if (argc-os>=6){
               // double E;
              long int pos=0;
              int extended_eigenvector_dimension;
               char instr[MAXNOFCHARINLINE];
-              float numbers[13];numbers[9]=1;numbers[10]=3;
-              numbers[0]=13;
+              float numbers[20];numbers[9]=1;numbers[10]=3;
+              numbers[0]=20;
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
+             gp.phonon_wave_amplitude=1.0;gp.phonon_show_oscillation=1.0;
 //----------------------------------------------------------------------------------------------------------
             if(arrow>0){double checkdd=1e7;
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
@@ -582,7 +612,7 @@ if (argc-os>=6){
    
                double delta,dd,ddT,ddHa,ddHb,ddHc,ddh,ddk,ddl,ddE;
                for (delta=1000.0;feof(fin)==0                      //end of file
-                    &&(n=inputline(fin,numbers))>=8   //error in line reading (8 old format, 9 new format)
+                     &&(n=inputline(fin,numbers))>=8   //error in line reading (8 old format, 9 new format)
 		    ;)
 
                { fgets(instr,MAXNOFCHARINLINE,fin); 
@@ -624,6 +654,70 @@ if (argc-os>=6){
               spinconfev_imag.print(stdout);
              }//arrow
      
+//----------------------------------------------------------------------------------------------------------
+            if(phonon>0){double checkdd=1e7;
+             strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
+             strcpy(infilename+10+strlen(prefix),"mcdisp.qep");fin = fopen(infilename, "rb");
+                      if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qep", "rb");
+             // input file header ------------------------------------------------------------------
+             instr[0]='#';
+              while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring' 
+              { pos=ftell(fin); 
+                if (pos==-1) 
+                {fprintf(stderr,"Error: wrong qev file format\n");exit (EXIT_FAILURE);}
+                fgets(instr,MAXNOFCHARINLINE,fin); 
+                // inserted 4.4.08 in order to format output correctly (characterstring 13 spoiled output string)
+                for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
+               // load evs and check which one is nearest -------------------------------   
+               extract(instr,"phonon_wave_amplitude",gp.phonon_wave_amplitude);
+               extract(instr,"phonon_show_oscillation",gp.phonon_show_oscillation);
+              }
+               j=fseek(fin,pos,SEEK_SET); 
+               if (j!=0){fprintf(stderr,"Error: wrong qep file format\n");exit (EXIT_FAILURE);}
+   
+               double delta,dd,ddT,ddHa,ddHb,ddHc,ddh,ddk,ddl,ddE;
+               for (delta=1000.0;feof(fin)==0                      //end of file
+                     &&(n=inputline(fin,numbers))>=8   //error in line reading (8 old format, 9 new format)
+		    ;)
+
+               { fgets(instr,MAXNOFCHARINLINE,fin); 
+                 spincf ev_real(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
+                 spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
+                 ev_real.load(fin);ev_imag.load(fin);
+                 ddT=T-numbers[4];ddT*=ddT;
+                 ddHa=Hext(1)-numbers[1];ddHa*=ddHa;
+                 ddHb=Hext(2)-numbers[2];ddHb*=ddHb;
+                 ddHc=Hext(3)-numbers[3];ddHc*=ddHc;
+                 ddh=strtod(argv[5+os],NULL)-numbers[5];ddh*=ddh;
+                 ddk=strtod(argv[6+os],NULL)-numbers[6];ddk*=ddk;
+                 ddl=strtod(argv[7+os],NULL)-numbers[7];ddl*=ddl;
+                 ddE=strtod(argv[8+os],NULL)-numbers[9];ddE*=ddE;
+                 
+                 dd=sqrt(ddT+ddHa+ddHb+ddHc+ddh+ddk+ddl+ddE+0.000001);
+                 if (dd<delta)
+                 {delta=dd;checkdd=fabs(T-numbers[4])+fabs(Hext(1)-numbers[1])+fabs(Hext(2)-numbers[2])+fabs(Hext(3)-numbers[3]);
+                  sprintf(outstr,"T=%g Ha=%g Hb=%g Hc=%g h=%g k=%g l=%g E=%g",numbers[4],numbers[1],numbers[2],numbers[3],numbers[5],numbers[6],numbers[7],numbers[9]);
+                  hkl(1)=numbers[5];hkl(2)=numbers[6];hkl(3)=numbers[7];//E=numbers[9]; 
+                  spinconfpev_real=ev_real;
+                  spinconfpev_imag=ev_imag;                  
+                 }
+                 pos=ftell(fin); 
+                 fgets(instr,MAXNOFCHARINLINE,fin); 
+                 while (instr[strspn(instr," \t")]=='#'&&feof(fin)==0) // pointer to 'ltrimstring' 
+                  {pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
+                 j=fseek(fin,pos,SEEK_SET);
+               }
+              fclose (fin);
+             if(checkdd>1e-7)
+               {fprintf(stderr,"Error program spins - inconsistent output files mcphas.mf and mcdisp.*:  temperature/magnetic field in static configuration\n" 
+                               "(from results/mcphas.mf) is different from mcdisp output files results/mcdisp.qep:\n %s\n"
+                               "... probably you need to rerun setup_mcdisp_mf and mcdisp with T=%g Ha=%g Hb=%g Hc=%g",outstr,T,Hext(1),Hext(2),Hext(3));exit(EXIT_FAILURE);}
+               fprintf(stdout,"#%s - phonon oscillation - eigenvector\n",outstr);
+              fprintf(stdout,"#real\n");
+              spinconfpev_real.print(stdout);
+              fprintf(stdout,"#imag\n");
+              spinconfpev_imag.print(stdout);
+             }//phonon
 //----------------------------------------------------------------------------------------------------------
             if(density){double checkdd=1e7;
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
@@ -737,12 +831,12 @@ if (argc-os>=6){
                sprintf(filename,"./results/spins.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=0;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,spinconfpev_real,spinconfpev_imag);
                fclose (fin);
                sprintf(filename,"./results/spins_prim.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=1;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,spinconfpev_real,spinconfpev_imag);
                fclose (fin);
               }
           printf("# %s\n",outstr);

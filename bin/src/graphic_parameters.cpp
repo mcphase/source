@@ -24,6 +24,8 @@ spins_colour=1;
 spins_show_static_moment_direction=1;
 spins_wave_amplitude=0;
 spins_show_oscillation=0;
+phonon_show_oscillation=0;
+phonon_wave_amplitude=0;
 threshhold=0.05;
 density_dtheta=0.2;
 density_dfi=0.2;
@@ -72,6 +74,8 @@ extract(instr,"spins_show_ellipses",spins_show_ellipses);
 extract(instr,"spins_show_static_moment_direction",spins_show_static_moment_direction);
 extract(instr,"spins_wave_amplitude",spins_wave_amplitude);
 extract(instr,"spins_show_oscillation",spins_show_oscillation);
+extract(instr,"phonon_wave_amplitude",phonon_wave_amplitude);
+extract(instr,"phonon_show_oscillation",phonon_show_oscillation);
 extract(instr,"density_threshhold",threshhold);
 }
 else

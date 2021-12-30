@@ -11,7 +11,7 @@ print "#********************************************************\n";
 print "# makenn 181025 - create table with neighbors and interactions\n";
 print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "#********************************************************\n";
-$PI=3.141592654;
+$PI=3.14159265358979323846;
 
 unless ($#ARGV>=0) 
 
@@ -352,6 +352,7 @@ print "number of atoms = $nofatoms\n calculating ...\n";
    $dabc=pdl [($x[$nz]-$x[$nnn]),($y[$nz]-$y[$nnn]),($z[$nz]-$z[$nnn])];
    $rvec= $dabc x $rtoijk;$rvec=$rvec->slice(":,(0)");
    $rvec+=$n1*$p->slice(",(0)")+$n2*$p->slice(",(1)")+$n3*$p->slice(",(2)");
+
    $rr=inner($rvec, $rvec);
    $r=sqrt($rr->at());
    $aabbcc=$rvec x $invrtoijk;$aabbcc=$aabbcc->slice(":,(0)");
@@ -623,7 +624,7 @@ sub getinteraction {
 
   $Kxy= -($cL-$cT) * ( $rx * $ry) /$r /$r ;$jab-=$Kxy;
   $Kyz= -($cL-$cT) * ( $ry * $rz) /$r /$r ;$jbc-=$Kyz;
-  $Kxz= -($cL-$cT) * ( $rx * $rz) /$r /$r ;$Jac-=$Kxz;
+  $Kxz= -($cL-$cT) * ( $rx * $rz) /$r /$r ;$jac-=$Kxz;
    # add also something to the Knn and Kmm in $sipffilethis and $sipffile !!! 
    addK($sipffilethis);
    addK($sipffile);

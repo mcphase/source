@@ -23,6 +23,11 @@ double spins_show_static_moment_direction;
 double spins_show_oscillation;
 double spins_colour;
 
+//PHONONS
+double phonon_show_oscillation;
+double phonon_wave_amplitude;
+
+
 //DENSITY
 double show_density,scale_density_vectors;
 double density_dtheta,density_dfi;
