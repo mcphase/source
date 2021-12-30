@@ -162,7 +162,7 @@ tgz :
 	dos2unix ./examples/prni2b2c/powder_magnon.bat
 	dos2unix ./examples/prni2si2/calc.bat
 	dos2unix ./examples/pupd3/calc.bat
-        dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
+	dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
 	dos2unix ./examples/testic1ion/test*.bat
 	dos2unix ./examples/tungsten_phonons/calc.bat
 	dos2unix ./examples/upd3/calc.bat
@@ -194,7 +194,7 @@ tgz :
 	unix2dos ./examples/prni2b2c/powder_magnon.bat
 	unix2dos ./examples/prni2si2/calc.bat
 	unix2dos ./examples/pupd3/calc.bat
-        unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
+	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
 	unix2dos ./examples/testic1ion/test.bat
 	unix2dos ./examples/tungsten_phonons/calc.bat
 	unix2dos ./examples/upd3/calc.bat
@@ -224,7 +224,7 @@ cleanexe:
                 bin/mcdiff.exe  \
                 bin/ic1ion.exe bin/so1ion.exe \
                 bin/fediff.exe bin/mf2fe.exe \
-                bin/formfactor.exe bin/radwavfunc.exe bin/clusterize.exe bin/bfk.exe
+                bin/formfactor.exe bin/radwavfunc.exe bin/clusterize.exe bin/bfk.exe \
                 bin/RCN2K.exe bin/RCN36K.exe bin/RCG11K.exe \
                 bin/bcfph.exe
 	rm -vf bin/addj bin/charges bin/coq2jjj \
