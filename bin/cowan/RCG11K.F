@@ -1315,8 +1315,8 @@ C
 C
 C------------------------------------
 C          USE THIS CODE FOR A VAX OR MACINTOSH
-      T1=SECNDS(0.0)
-      T=DBLE(T1)
+C     T1=SECNDS(0.0)
+C     T=DBLE(T1)
 C------------------------------------
 C          USE THIS CODE FOR A CRAY
 C     T=SECOND(T)
@@ -1330,20 +1330,28 @@ C     T=IT
 C     T=T/100.D0
 C-------------------------------------
 C          USE THIS CODE FOR IBM-PC LAHEY FORTRAN COMPILER
-C     REAL*8 TINIT,T3
-C     COMMON/TIMING/TINIT,ITINIT
-C     CHARACTER TIMESTR*11
-C     INTEGER HH,MM,SS,HS
-C     CALL TIME(TIMESTR)
-C     READ (TIMESTR,10) HH,MM,SS,HS
-C  10 FORMAT (3(I2,1X),I2)
-C     T3=DFLOAT(3600*HH+60*MM+SS)+HS*1.D-2
-C     IF (ITINIT.EQ.0) THEN
-C       TINIT=T3
-C       ITINIT=1
-C     ENDIF
-C     T=T3-TINIT
+C      REAL*8 TINIT,T3
+C      COMMON/TIMING/TINIT,ITINIT
+C      CHARACTER TIMESTR*11
+C      INTEGER HH,MM,SS,HS
+C      CALL TIME(TIMESTR)
+C      READ (TIMESTR,10) HH,MM,SS,HS
+C   10 FORMAT (3(I2,1X),I2)
+C      T3=DFLOAT(3600*HH+60*MM+SS)+HS*1.D-2
+C      IF (ITINIT.EQ.0) THEN
+C        TINIT=T3
+C        ITINIT=1
+C      ENDIF
+C      T=T3-TINIT
 C-------------------------------------
+C          USE THIS CODE FOR UNKNOWN COMPILER
+C      T=0.0
+C-----------------------------------
+C          LINUX F77 COMPILER
+      REAL*4 T3(2), DUM
+      DUM=ETIME(T3)
+      T=DBLE(T3(1))
+C----------------------------------
       RETURN
       END
 C

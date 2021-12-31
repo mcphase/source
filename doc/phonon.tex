@@ -44,20 +44,20 @@ it to normal coordinates (main axis of the Einstein oscillator) using the transf
 matrix $\m{S}$, which diagonalises $\m{K}=\m{S}^T\m{\Omega}\m{S}$:
 
 \begin{equation}
- \hat \mbf u'=\m{S} \hat \mbf u -\m{\Omega}^{-1} \m{S} \mbf F
+ \hat \mbf u'=\m{S} \hat \mbf u +\m{\Omega}^{-1} \m{S} \mbf F
 \end{equation}
 
 \begin{equation}\label{phonsihamdiag}
-\hat H_E=\frac{a_0^2{\hat \mbf p}^{'2}}{2m}+\frac{1}{2} {\hat \mbf u}^{'T} \m{\Omega} {\hat \mbf u'} 
--\frac{1}{2}\mbf F^T \m{S}^T \m{\Omega}^{-1} \m{S} \mbf F
+\hat H_E=\frac{a_0^2{\hat \mbf p}^{'2}}{2m}-\frac{1}{2} {\hat \mbf u}^{'T} \m{\Omega} {\hat \mbf u'} 
+-\frac{1}{2}\mbf F^T  \mbf u_0
 \end{equation}
 
 Due to the action of the force $\mbf F$ the equilibrium position of the oscillator
-is $\mbf u_0=\m{S}^T\m{\Omega}^{-1}\m{S}\mbf F$ (it is the task of the function
+is $\mbf u_0=-\m{S}^T\m{\Omega}^{-1}\m{S}\mbf F$ (it is the task of the function
 {\prg Icalc} to return this equilibrium position), the energies correspond to the three elements
-of the diagonal matrix $\m{\Omega}$, i.e. $\Omega_{11}=m a_0^2 (\Delta_1 /\hbar)^2$,
-$\Omega_{22}=m a_0^2 (\Delta_2 /\hbar)^2$,
-$\Omega_{33}=m a_0^2 (\Delta_3 /\hbar)^2$. In order to run {\prg mcdisp} we
+of the diagonal matrix $\m{\Omega}$, i.e. $\Omega_{11}=-m a_0^2 (\Delta_1 /\hbar)^2$,
+$\Omega_{22}=-m a_0^2 (\Delta_2 /\hbar)^2$,
+$\Omega_{33}=-m a_0^2 (\Delta_3 /\hbar)^2$. In order to run {\prg mcdisp} we
 have to calculate the transition matrix elements:
 
 The single ion susceptibility for such a transition, e.g. $\Delta_1$ - corresponds to
@@ -110,13 +110,15 @@ module) has to have the following format:
 #
 #-----------
 MODPAR1=57  # mass in(m0)
-MODPAR2=7   # Kxx
-MODPAR3=7   # Kyy
-MODPAR4=8   # Kzz
+MODPAR2=-1.2   # Kxx
+MODPAR3=-1.2   # Kyy
+MODPAR4=-1.2   # Kzz
 MODPAR5=0   # Kxy  in (meV)
 MODPAR6=0   # Kxz
 MODPAR7=0   # Kyz
 MODPAR8=1   # umax          maximum (cutoff) for displacement [a0=0.5219 A]
+MODPAR9=3 #  to easy convegergence of mcphasit the linearity of the einstein Oscillator is damped 
+            #  i.e. instead of  u0=-StOS*F we use  u0=-StOS * F * exp(-MODPAR9*|F|)
 
 #-------------------------------------------------------
 # Neutron Scattering Length (10^-12 cm) (can be complex)

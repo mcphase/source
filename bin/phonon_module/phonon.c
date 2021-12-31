@@ -36,7 +36,7 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
     /*on input
     T		temperature[K]
     Hext	vector of external magnetic field [T] [not used]
-    Fxc         exchange Force in [meV]
+    Fxc         exchange Force on the oscillator in [meV]
     gJ          Lande factor [not used]
     MODPAR      Einstein oscillator parameters
                 MODPAR[1]   mass (m0)  m0=atomic mass unit=1.660539e-27 kg
@@ -53,7 +53,7 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
 
  
   on output    
-    u0		position vector [a0] , a0=0.5219 A
+    u0		equilibrium position vector [a0] , a0=0.5219 A
     Z		single ion partition function
     U		single ion energy (meV)
 */
@@ -105,17 +105,18 @@ Z=exp(-Delta3/K_BT);
 (*lnZ)=-Delta1/2/K_BT-Delta2/2/K_BT-Delta3/2/K_BT-log(1-X)-log(1-Y)-log(1-Z);
 
 // the energy U is sum_i Ei exp(-Ei/(kT))/Z
-// with Ei=w0(0.5+i)
+// with Ei=w0(0.5+i)-1/2 FT.u0 (the last term is added to (*U) at the end of Icalc
 (*U)=Delta1*(0.5+X/(1-X))+Delta2*(0.5+Y/(1-Y))+Delta3*(0.5+Z/(1-Z));
 
-// u0=ST Omega^-1 S Fxc= (SrT-iSiT)*Om*(Sr+iSi)*F
+// u0=-ST Omega^-1 S Fxc= (SrT-iSiT)*Om*(Sr+iSi)*F
 // =(SrT-iSiT) (Om Sr F + i Om Si F)= 
 // SrT Om Sr F + SiT Om Si F + i (must be zero)
+// with Om=-Omega^-1
 Matrix Om(1,3,1,3);Om=0;Om(1,1)=-1/Omega(1);Om(2,2)=-1/Omega(2);Om(3,3)=-1/Omega(3);
 Vector uu(1,3);
 Vector F(1,3);F(1)=Fxc(1);F(2)=Fxc(2);F(3)=Fxc(3);
 uu=Sr.Transpose()*Om*Sr*F+Si.Transpose()*Om*Si*F;
-
+(*U)-=0.5*uu*F; // last term  to correct energy
  // to easy convegergence of mcphasit the linearity of the einstein Oscillator is damped 
 double factor;
 factor=Norm(F);
