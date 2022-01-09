@@ -43,8 +43,7 @@
  \vspace{2cm}
  \\ \today}
 
-\author{M. Rotter\thanks{Independent Scientific Consultant, Dresden, 
-Germany, email: martin\_rotter@mcphase.de}, \and
+\author{M. Rotter\thanks{Independent international Scientific Consultant, email: martin\_rotter@mcphase.de}, \and
 Duc Manh Le \thanks{Dept. Physics and Astronomy, Seoul National University, Seoul 151-742, Korea}
 \and Joachim Keller \thanks{Universit\"at Regensburg}
 \and Lucian G Pascut,~Till Hoffmann 
@@ -81,15 +80,15 @@ community this program would not have come into existence.
 \section*{What is New ?}
 \subsection*{ \dots in version 5.4 \dots}
 \begin{itemize}
-\item    {\prg bfkp} and {\prg ga} - CF-phonon interaction program created and example CeCu2Ge2 
-\item  {\prg makenn} option for dzyalosinsky moriya interaction created
+\item    {\prg bcfph} and a DMD method for Crystal Field - Phonon interaction, see example CeCu2Ge2 
+\item  {\prg makenn} option for Dzyalosinsky Moriya interaction created
 \item .trs file format changed to include number of initial and final level
 \item   {\prg powdermagnon} sampling q dependence improved
 \item option -read introduced to {\prg mcphas}
 \item   program {\prg substitute} option -f introduced
 \item   Slatec removed from PDL routines to make installation easier
 \item {\prg cpso1ion} bug (for more than 10 levels) found and removed
-\item bug in {\prg makenn} option ignore\_neihgbours\_behind=1 found and removed
+\item bug in {\prg makenn} options ignore\_neihgbours\_behind=1 and bvk found and removed
 \end{itemize}
 
 \subsection*{ \dots in version 5.3 \dots}
@@ -323,34 +322,49 @@ examples}:}
 name /       & problem & single ion & references \\ 
 compound     &          & module  &             \\
 \hline
-{\prg bfk }    & Becker Fulde Keller Theorie for CF-conduction electron interaction & {\prg so1ion }\index{bfk} &  \cite{becker77-9}, App.~\ref{bfktheory} \\
-CeCu$_2$  & mag phase diagram, fit of dispersive mag. excitations to neutron data & {\prg kramer}\index{kramer} & \cite{loewenhaupt06-775,schedler03-1313} \\
+{\prg bfk }    & Becker Fulde Keller Theorie for & {\prg so1ion }\index{bfk} &  \cite{becker77-9}, \\
+               &  CF-conduction electron interaction & &  App.~\ref{bfktheory}\\
+Ce3p\_chain\_cfphonon & Crystal Field Phonon int. on linear chain, & {\prg phonon } & \\
+                      &   CF striction, theory paper & {\prg so1ion } & \\
+Ce3p\_tetragonal\_prim & Crystal Field Phonon interaction & {\prg phonon} &  \\
+                     &  on primitive lattice, CF magnetostriction & {\prg so1ion } & \\
+CeAl2\_cfphonon\_cfstr &  CeAl$_2$ - Crystal Field phonon int., & {\prg phonon}, &  \\
+                       &   CEF magnetostriction &   {\prg so1ion } &  \\
+CeCu$_2$       & mag phase diagram, fit of dispersive  & {\prg kramer}\index{kramer} & \cite{loewenhaupt06-775,schedler03-1313} \\
+               & mag. excitations to neutron data      &               & \\
 CeCu$_2$Ge$_2$ & crystal field - phonon interaction & {\prg phonon, bcfph }  & \\
-CePd$_2$Si$_2$ & neutron diffraction going beyond dipolar approx for mag. formfactor & {\prg %%@
+CePd$_2$Si$_2$ & neutron diffraction going beyond  & {\prg %%@
 so1ion}&\cite{rotter09-140405} \\
-CoO & magnetic formfactor - flipping ratios, highly inelastic neutron scattering  &{\prg  ic1ion} & \\
-DyCu$_2$ & quadrupolar order and phase diagram & {\prg cfield}\index{cfield}&\cite{yoshida98-1421} \\
-DyNi$_2$B$_2$C & magnetic phase diagram, special single ion module (quasiquartet) & {\prg %%@
+               & dipolar approx for mag. formfactor & &\\     
+CoO            & magnetic formfactor - flipping ratios,   &{\prg  ic1ion} & \\
+               & highly inelastic neutron scattering      &               & \\
+DyCu$_2$       & quadrupolar order and phase diagram & {\prg cfield}\index{cfield}&\cite{yoshida98-1421} \\
+DyNi$_2$B$_2$C & magnetic phase diagram, special single  & {\prg %%@
 quartett.so}\index{quartett.so}& \\
+               & ion module (quasiquartet) &&\\
 ErNi$_2$B$_2$C & magnetostriction and phase diagram & {\prg cfield}&\cite{doerr02-5609}\\
-Gd$_3$GaO$_6$  & pointcharge model calculation of crystal field parameters & & \\ 
-GdNi$_2$B$_2$C & magnetostriction and phase diagram, spin only (L=0) & {\prg brillouin}\index{brillouin}& \cite{doerr02-5609}\\
-GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, magnetic structure & {\prg cfield} & \\
+Gd$_3$GaO$_6$  & pointcharge model for crystal field parameters & {\prg pointc} & \\ 
+GdNi$_2$B$_2$C & double-q magnetic structure, spin only (L=0) & {\prg brillouin}\index{brillouin}& \cite{doerr02-5609,jensen08-134408}\\
+GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, mag. structure & {\prg cfield} & \\
 helix\_spinwave & spinwave calculation for a helical magnetic structure & {\prg so1ion} & \\
 Ho$_2$Ti$_2$O$_7$ & diffuse magnetic scattering & {\prg so1ion} & \cite{bramwell01-1495}\\
 LaCoO$_3$ & spin polarons quasielastic scattering & {\prg cluster}\index{cluster} & \cite{podlesnyak11-134430,podlesnyak08-247603} \\
 La$_2$CoO$_4$ & dispersive magnetic excitations / spinwaves &{\prg  ic1ion} & \cite{lewtas10-184420}\\
 LuMnO$_3$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
-NdBa$_2$Cu$_3$O$_7$ & fit of magnetic neutron diffraction data going beyond dipapprox & {\prg cfield}\index{cfield} & \cite{rotter09-140405} \\
-NdCu$_2$  & crystal field, magnetic structure, phase diagrams, excitations & {\prg cfield}& %%@
+NdBa$_2$Cu$_3$O$_7$ & fit of magnetic neutron diffraction  & {\prg cfield}\index{cfield} & \cite{rotter09-140405} \\
+                    & data going beyond dipapprox && \\
+NdCu$_2$  & crystal field, magnetic structure,  & {\prg cfield}& %%@
 \cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29,rotter02-751,rotter02-8885} \\
+                    & phase diagrams, excitations && \\
 NiO            & INS and RIXS on NiO & {\prg so1ion}\index{so1ion} & \\
 PrNi$_2$B$_2$C & crystal field - fit to neutrons,cp, susc & {\prg cfield}&\cite{mazumdar08-144422}\\
 PrNi$_2$Si$_2$ & excitons in an amplitude modulated mag structure & {\prg so1ion}\index{so1ion} & \cite{blanco13-104411} \\
 Pr$_3$Pd$_{20}$Si$_6$ & hyperfine interactions & {\prg cluster}\index{cluster} & \\
 PuPd$_3$ & susceptibility, heat capacity & {\prg ic1ion}\index{ic1ion} & \cite{le10-155136} \\
+Ru3p\_create\_sipf & how to create paramters for a sipf file from  & {\prg simannfit,cowan} & \cite{cowan81-1} \\
+                   & a Hartree Fock Calculation & {\prg RCN36K,RCN2K} & \\
 TbCu$_2$ & magnetic phases with field parallel $a$ & {\prg cfield} \\
-test\_cluster & test of a b inary cluster of two spins & {\prg cluster} & \\
+test\_cluster & test of a binary cluster of two spins & {\prg cluster} & \\
 testic1ion & Pr$^{3+}$ chargedensity in IC and LS coupling & {\prg ic1ion,cfield} &\\
 tungsten& phonons in tungsten & {\prg phonon} & \\
 UPd$_3$ & dispersive CEF excitations, quadrupolar interactions  & {\prg so1ion}\index{so1ion} & \cite{le12-036002} \\

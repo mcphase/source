@@ -403,7 +403,7 @@ else{++ii4;
      }
 
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
-    fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
+    fprintf(fout,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
             cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
     //ouput the magnetic moment if possible
     if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
@@ -539,11 +539,12 @@ Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
 // check sipffilenames and put radius= ... in case single ion module is
 //  capable of calculating position 
 for(ii=1;ii<=inputpars.nofatoms;++ii)
-{Vector pos(1,3);
+{Vector pos(1,3);   
+  for(nt=1;nt<=inputpars.nofcomponents;++nt){h(nt)=hh(nt+inputpars.nofcomponents*(ii-1));}
   if(true==(*inputpars.jjj[ii]).pcalc(pos,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
  {double charge;charge=(*inputpars.jjj[ii]).charge;if(charge==0)charge=0.01;
   sprintf(cs.sipffilenames[ii],"pointcharge %g |e| radius=%g",charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333));
- printf("#! atom %i %s\n",ii,cs.sipffilenames[ii]);
+ printf("#! atom %i %s displacement u%ix=%g u%iy=%g u%iz=%g A\n",ii,cs.sipffilenames[ii],ii,pos(1),ii,pos(2),ii,pos(3));
  }
 }
 

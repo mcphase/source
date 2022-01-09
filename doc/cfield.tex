@@ -339,14 +339,14 @@ in barns per meV and Nd atom and sr.
  the magnetic field has to be given in the command line and
 program {\prg singleion\index{singleion}} has to be started with the option {\prg -M}, i.e. 
 
-{\bf so1ion -M -r Nd3p.sipf 10 0 0 1 0 0 0}
+{\bf singleion -M -r Nd3p.sipf 10 0 0 1 0 0 0}
 
  The
 numbers denote a temperature (10~K) and  a field 1 Tesla along the z-axis.
  By default the results are written directly to the screen, however they can be piped into
 a file by 
 
-{\bf so1ion -M -r Nd3p.sipf 10 0 0 1 0 0 0 $>>$ results/moment.rtplot}
+{\bf singleion -M -r Nd3p.sipf 10 0 0 1 0 0 0 $>>$ results/moment.rtplot}
 
 Here the ''$>>$'' sign appends the ouput of each command, thus iterating the 
 command for several different magnetic fields allows to calculate a 
@@ -391,7 +391,7 @@ Calculated specific heat of NdCu$_2$ in zero magnetic field as calculated
 by {\prg cpsingleion} (crystal field contribution) in comparison with experimental
 data~\cite{gratz91-9297}. The dashed line shows the results of a calculation,
 which in addition to the crystal field takes into account the two ion interaction
-and using {\prg singleion\index{singleion}} as a module in {\prg mcphas} - see below and chapter~\ref{runmcphas}.
+ in {\prg mcphas} - see below and chapter~\ref{runmcphas}.
 [plot created by program {\prg gnuplot}]}
 \end{center}
 \end{figure}
@@ -436,13 +436,13 @@ Use the parameters given in section~\ref{cf1ion}.
 
 
 
-\subsection{Using {\prg so1ion\index{so1ion}} as a module in {\prg McPhase} and {\prg McDisp}}
+\subsection{Using the {\prg so1ion\index{so1ion}}  module in {\prg McPhase} and {\prg McDisp}}
 \label{cf1ion}
 
 
 The use 
- of {\prg so1ion\index{so1ion}} as a module in {\prg mcphas} is necessary in order to 
- go beyond the capabilities of {\prg so1ion\index{so1ion}} (for instance the calculation
+ of the {\prg so1ion\index{so1ion}} module in {\prg mcphas} is necessary in order to 
+ go beyond the capabilities of {\prg singleion\index{so1ion}} (for instance the calculation
  of magnetisation or specific heat or if the exchange interaction
  given in equations~(\ref{hamilton}) and (\ref{multipolehamilton})
   shall be taken into account).  
@@ -450,7 +450,7 @@ The use
 \subsubsection{Module Tasks:}
 
 
-As a single ion module, {\prg so1ion\index{so1ion}} provides to {\prg mcphas} the magnetic properties
+The single ion module {\prg so1ion\index{so1ion}} provides to {\prg mcphas} the magnetic properties
 of a single rare earth ion subject to the crystal field. Its main duty is
 to calculate the magnetic moment given an external magnetic field $\mbf H$  and an exchange field $\mbf H^s$. 
 To be more explicit - given the external magnetic  and the exchange field  by {\prg mcphas}
@@ -507,7 +507,7 @@ directory {\prg examples/ndcu2b\_new}):
 
 \begin{verbatim}
 #!MODULE=so1ion
-#<!--mcphas.cf-->
+#<!--mcphas.sipf-->
 # comment followed by
 # the ion type and the crystal field parameters [meV]
  IONTYPE=Nd3+
@@ -526,7 +526,7 @@ directory {\prg examples/ndcu2b\_new}):
 
 \begin{description}
 \item [Note:] 
-In order to use {\prg so1ion\index{so1ion}} as a module in {\prg McPhase} a convention for
+In order to use the {\prg so1ion\index{so1ion}}  module in {\prg McPhase} a convention for
 the orientation of the $xyz$ coordinate system (of the crystal field) relative
 to the crystal axis $abc$ has to be made:
  The axes convention adopted in module {\prg so1ion} for the crystal field parameters

@@ -591,27 +591,27 @@ for(k=0;k<=Ng;++k)if(s[k]>smax+1){fprintf (stderr,"#Error: s = %i > smax = %i in
 
 
 fprintf (stdout, "# omega[meV]   Iphon=dyn structfact for coherent neutron scattering x Imag(Dqs) [1/meV] for s=1,2,3,...\n");
-double dsigma=0;
+double dsigma=0,omMrest,dsigmarest=0;
 
 
 for(omega=Emin;omega<=Emax;omega+=deltaE)
 {fprintf (stdout,"%+9.6f ",omega);
- dsigma=0;
+ dsigma=0;dsigmarest=0;
   for(int S=0;S<=smax;++S)
 {// evaluate equation (80/81)
- Mqs=0;
+ Mqs=0;omMrest=0;
  for(k=0;k<=Ng;++k)if(S==s[k]-1)
  {
- OOcef=0;
  for(n=1;n<=d;++n)for(m=1;m<=d;++m)
  {rr=abs((*opmatM[alpha[k]])(n,m));
  En=real((*opmatM[0])(n,n));
  Em=real((*opmatM[0])(m,m));
  if(fabs(En-Em)>0.00001){quot=(p[m]-p[n])/(En-Em);}
- else {if(n!=m)quot=p[m]*beta;else quot=0;} // it is a matter of debate if for n=m quot=0 or if 
-// transitions to the same state should be included. Better agreement to DMD is achieved if these
-// transitions are not included, thus we set quot=0 for n=m.
- OOcef+=rr*rr*quot;
+ else {quot=0;
+if(n!=m){omMrest+=2.0*beta*omegaphon[s[k]-1]*p[m]*rr*rr*fabs(galphas[k])*fabs(galphas[k]);}}
+// it is a matter of debate if for omega_nm=0 the quot=0 or if 
+// else {if(n!=m)quot=p[m]*beta;else quot=0;      } //   only for n=m quot=0
+ OOcef=rr*rr*quot;
  OOcef/=beta;
  sum=complex <double> (En-Em-omega,-eta);
  sum=OOcef/sum;
@@ -630,9 +630,12 @@ Dqs=-2.0*omegaphon[S]/(omegeta*omegeta-omegaphon[S]*omegaphon[S]+omegeta*Mqs);
 // note already from dimension it is clear, that Dqs/PI corresponds to the 
 // sum of delta functions - it follows that:
 dsigma+=imag(Dqs)*intensity[S]/PI;  
- 
+Dqs=-2.0*omegaphon[S]/(omegeta*omegeta-omegaphon[S]*omegaphon[S]+omegeta*Mqs+omMrest);
+dsigmarest+=imag(Dqs)*intensity[S]/PI; 
 }
-fprintf (stdout,"%+9.6f ",dsigma);
+fprintf (stdout,"%+9.6f %+9.6f",dsigma,dsigmarest);
+if(fabs(dsigma-dsigmarest)>0.00001)
+{fprintf(stderr,"# Error bcfph: quasielastic CF contribution in Phonon Specgtral Function inconsistent\n - see discussion in source code line 600. paper equ (84)\n");exit (EXIT_FAILURE);}
 //fprintf (stdout,"%+9.6f + i %+9.6f ",real(Mqs),imag(Mqs));
 fprintf(stdout,"\n");
 

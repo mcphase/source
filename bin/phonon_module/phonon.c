@@ -46,12 +46,13 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
                 MODPAR[5]   Kxy            of the potential energy with respect
                 MODPAR[6]   Kxz             to nuclear displacements [meV]
                 MODPAR[7]   Kyz
-                MODPAR[8]   umax        maximum displacement  [a0=0.5219 A]
-                MODPAR[9]   to easy convegergence of mcphasit the linearity of the 
-                            einstein Oscillator is damped 
-                            i.e. instead of  u=StOS*F we use  u=StOS * F * exp(-MODPAR[9]*|F|)
+                MODPAR[8]   umax    maximum displacement  [a0=0.5219 A]
+                MODPAR[9]   0       umax restriction in all directions
+                            1,2,3   umax restriction in x y z direction only
+                            4       umax restriction in x and y direction
+                            5       umax restriction in x and z direction
+                            6       umax restriction in y and z direction
 
- 
   on output    
     u0		equilibrium position vector [a0] , a0=0.5219 A
     Z		single ion partition function
@@ -72,6 +73,8 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
 //  They are checked for conformance !
 // void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
 // 			   int sort, int maxiter)
+Vector F(1,3);
+F(1)=Fxc(1);F(2)=Fxc(2);F(3)=Fxc(3);
 
  double m=MODPAR[1]*1.660539e-27; // mass of einstein oscillator in kg
  double a0=0.5219e-10; // Bohr radius in meter
@@ -83,8 +86,10 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
  K(2,1)=MODPAR[5];
  K(3,1)=MODPAR[6];
  K(3,2)=MODPAR[7];
+// printf("Icalc phonon Kij= %g %g %g %g %g %g %g %g %g\n",K(1,1),K(2,2),K(3,3),K(2,1),K(3,1),K(3,2),K(1,2),K(1,3),K(2,3));
+
  int sort=1,maxiter=1000000;
- EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter);
+ EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter); // K is destroyed by this
  
 // hbar=1.054572e-34 Js=6582e-16meVs
 // 1meV=1.6022e-22 J
@@ -112,24 +117,52 @@ Z=exp(-Delta3/K_BT);
 // =(SrT-iSiT) (Om Sr F + i Om Si F)= 
 // SrT Om Sr F + SiT Om Si F + i (must be zero)
 // with Om=-Omega^-1
-Matrix Om(1,3,1,3);Om=0;Om(1,1)=-1/Omega(1);Om(2,2)=-1/Omega(2);Om(3,3)=-1/Omega(3);
+//Matrix Om(1,3,1,3);Om=0;Om(1,1)=-1/Omega(1);Om(2,2)=-1/Omega(2);Om(3,3)=-1/Omega(3);
 Vector uu(1,3);
-Vector F(1,3);F(1)=Fxc(1);F(2)=Fxc(2);F(3)=Fxc(3);
-uu=Sr.Transpose()*Om*Sr*F+Si.Transpose()*Om*Si*F;
+//printf("Icalc phonon Om= %g %g %g\n",Omega[1],Omega[2],Omega[3]);
+ K(1,1)=MODPAR[2];
+ K(2,2)=MODPAR[3];
+ K(3,3)=MODPAR[4];
+ K(2,1)=MODPAR[5];
+ K(3,1)=MODPAR[6];
+ K(3,2)=MODPAR[7];
+ K(1,2)=K(2,1);K(1,3)=K(3,1);K(2,3)=K(3,2);
+//printf("Icalc phonon Kij= %g %g %g %g %g %g %g %g %g\n",K(1,1),K(2,2),K(3,3),K(2,1),K(3,1),K(3,2),K(1,2),K(1,3),K(2,3));
+
+//uu=Sr.Transpose()*Om*Sr*F+Si.Transpose()*Om*Si*F;
+Matrix Ki(1,3,1,3);Ki=K.Inverse();
+//printf("Icalc phonon Kijinverse= %g %g %g %g %g %g %g %g %g\n",Ki(1,1),Ki(2,2),Ki(3,3),Ki(2,1),Ki(3,1),Ki(3,2),Ki(1,2),Ki(1,3),Ki(2,3));
+
+uu=-Ki*F;
 (*U)-=0.5*uu*F; // last term  to correct energy
  // to easy convegergence of mcphasit the linearity of the einstein Oscillator is damped 
-double factor;
-factor=Norm(F);
-factor=exp(-MODPAR[9]*factor);
-uu*=factor;
 
-double u=Norm(uu);
-if(uu>MODPAR[8])uu*=MODPAR[8]/u;
+int i=(int)MODPAR[9];
+switch(i)
+{case 0: if(uu(1)>MODPAR[8])uu(1)=MODPAR[8];
+         if(uu(2)>MODPAR[8])uu(2)=MODPAR[8];
+         if(uu(3)>MODPAR[8])uu(3)=MODPAR[8];
+         if(uu(1)<MODPAR[8])uu(1)=-MODPAR[8];
+         if(uu(2)<MODPAR[8])uu(2)=-MODPAR[8];
+         if(uu(3)<MODPAR[8])uu(3)=-MODPAR[8];
+         break;
+case 1 : if(uu(1)>MODPAR[8])uu(1)=MODPAR[8];if(uu(1)<MODPAR[8])uu(1)=-MODPAR[8];break;
+case 2 : if(uu(2)>MODPAR[8])uu(2)=MODPAR[8];if(uu(2)<MODPAR[8])uu(2)=-MODPAR[8];break;
+case 3 : if(uu(3)>MODPAR[8])uu(3)=MODPAR[8];if(uu(3)<MODPAR[8])uu(3)=-MODPAR[8];break;
+case 4 : if(uu(1)>MODPAR[8])uu(1)=MODPAR[8];if(uu(1)<MODPAR[8])uu(1)=-MODPAR[8];
+         if(uu(2)>MODPAR[8])uu(2)=MODPAR[8];if(uu(2)<MODPAR[8])uu(2)=-MODPAR[8];break;
+case 5 : if(uu(1)>MODPAR[8])uu(1)=MODPAR[8];if(uu(1)<MODPAR[8])uu(1)=-MODPAR[8];
+         if(uu(3)>MODPAR[8])uu(3)=MODPAR[8];if(uu(3)<MODPAR[8])uu(3)=-MODPAR[8];break;
+case 6 : if(uu(3)>MODPAR[8])uu(3)=MODPAR[8];if(uu(3)<MODPAR[8])uu(3)=-MODPAR[8];
+         if(uu(2)>MODPAR[8])uu(2)=MODPAR[8];if(uu(2)<MODPAR[8])uu(2)=-MODPAR[8];break;
+default: break;
+}
+
   u0=0;
   u0[1] = uu(1);
   u0[2] = uu(2); // should in principle be F/m w0^2, but we set it zero to keep atoms in equilibrium position
   u0[3] = uu(3);
-
+//printf("Icalc phonon u= %g %g %g\n",u0[1],u0[2],u0[3]);
 return;
 }
 /**************************************************************************/

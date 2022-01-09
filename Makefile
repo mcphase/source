@@ -149,6 +149,9 @@ tgz :
 	dos2unix ./examples/helix_spinwave/calc.bat
 	dos2unix ./examples/ho2ti2o7/calc.bat
 	dos2unix ./examples/la2coo4/calc.bat
+	dos2unix ./examples/Ce3p_chain_cfphonon/calc.bat
+	dos2unix ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
+	dos2unix ./examples/CeAl2_cfphonon_cfstrict/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
@@ -181,6 +184,9 @@ tgz :
 	unix2dos ./examples/helix_spinwave/calc.bat
 	unix2dos ./examples/ho2ti2o7/calc.bat
 	unix2dos ./examples/la2coo4/calc.bat
+	unix2dos ./examples/Ce3p_chain_cfphonon/calc.bat
+	unix2dos ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
+	unix2dos ./examples/CeAl2_cfphonon_cfstrict/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat

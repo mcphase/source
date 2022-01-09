@@ -135,8 +135,8 @@ By runnning {\prg singleion} some file.levels.cef is created in folder results.
 The {\prg cpsingleion} program may then be used. It
 calculates the specific heat in the temperature 
 interval 10-100 K with a step width
-of 1 K. Alternatively a comparison to experimental data can be made by {\bf cpso1ion 1 2 
-cpexp.dat},
+of 1 K. Alternatively a comparison to experimental data can be made by {\prg cpsingleion 1 2 
+cpexp.dat file.levels.cef},
 where the temperatures are given in column 1 and the experimental specific heat in column
 2 of file cpexp.dat. The calculated specific heat is compared to the experimental data and
 a standard deviation {\em sta} is calculated and output is written to stdout.
@@ -246,12 +246,72 @@ corresponding
 parametrisation for the Bethe-Slater
                                curve: $J(R)= A [-\rho^2+\rho^4]exp[-\alpha \rho^2]$  with %%@
 $\rho^2=R_a^2/D_a^2+R_b^2/D_b^2+R_c^2/D_c^2$
+\item[option {\prg option -bvk filename}]
+              for phonon take Born van Karman model with longitudinal and
+              transversal spring constants from file - file format:
+             \begin{verbatim}  #  atom_i_sipf atom_j_sipf bondlength(A) long(N/m) trans(N/m) 
+Ce1.sipf  Ce1.sipf  +4.0 200.9 100.0
+Ce1.sipf  Ce1.sipf  +4.7 70.9 0.0
+             \end{verbatim}
+              Longitudinal/Transversal springs are described by $c_L$/$c_T$, respectively and
+              the energy is given by
+\begin{eqnarray}
+ H &=& \sum_{ij} \frac{c_L(ij)-c_T(ij)}{2|\mbf \mbf R_{ij}|^2} (\mbf P_i . \mbf R_{ij}- \mbf P_j . \mbf R_{ij})^2 
+       + \frac{c_T(ij)}{2} (\mbf P_i - \mbf P_j )^2 
+\end{eqnarray}
+
+
+\item[option {\prg  option -cfph }]
+              calculate crystal field phonon interaction: {\prg mcphas.j} lists 
+              magnetic and non magnetic atoms with charges defined in the 
+              sipf files by {\prg CHARGE= variable}. For magnetic atoms the sipf 
+              file the variable {\prg MAGNETIC=1} has to be set and information 
+              about the ion has to be present ({\prg IONTYPE} etc.). 
+              For each magnetic ion a new site is created and shifted
+              0.1 \AA \ along $c$ in order to not overlap with the original site.
+              It is assumed, that the original site will be using an sipf
+              file with the {\prg MODULE=phonon} as well as all the other
+              non magnetic sites. For the new magnetic site the program
+              {\prg pointc} is used by {\prg makenn} with option -d to calculate derivatives
+              $\partial B_{lm}/\partial u$ which are inserted as interaction 
+              parameters between {\prg MODULE=phonon} and {\prg MODULE=so1ion} sites.
+              In order to use the resulting file {\prg results\/makenn.j} a phonon
+              model has to be set up, the original magnetic atom sites 
+              {\prg sipffilename} has to be changed to the phonon model filename 
+              and the phonon model has to be added to {\prg makenn.j},  e.g. by
+              program {\prg addj}, moreover magnetic sites sipf files are required, 
+              e.g. such as created in {\prg results\//makenn.a*.sipf}. 
+\item[option {\prg  option -f [filename]}]
+\item[option {\prg  option -dm [filename]}]
+              read interaction constants from table in file. 
+              Use -f for isotropic interactions between momentum $\mbf J_i$ and $\mbf J_j$
+              at positions $i$ and $j$
+\begin{eqnarray}
+              \mathcal J \mbf J_i . \mbf J_j &  = & \mbf   J_i.
+\left( \begin{array}{ccc}
+ \mathcal J &  0 & 0\\
+0 &   \mathcal J & 0 \\
+0 &  0 &  \mathcal J \\
+\end{array}
+\right) .\mbf J_j
+\end{eqnarray}
+              and -dm for Dzyaloshinski Moriya interactions:
+\begin{eqnarray}
+              \mathcal D (\mbf J_i \times \mbf J_j )&  = & \mbf   J_i.
+\left( \begin{array}{ccc}
+ 0 &  \mathcal D_z & -\mathcal D_y\\
+-\mathcal D_z &   0 &\mathcal D_x \\
+\mathcal D_y &  -\mathcal D_x &  0 \\
+\end{array}
+\right) .\mbf J_j
+\end{eqnarray}
+              To get an sample file use option -f or -dm without a filename.      
 \item[option {\prg -d}] puts to the last column the distance of the neighbours (A)
 \end{description}
-The neigbours of each atom are also stored in seperate files
-{\prg results\/makenn.a*.pc}, which can be used with the program {\prg pointc} to evaluate
-the pointcharge model and calculate crystal field paramaters.
 
+The neigbours of each atom are also stored in seperate files
+{\prg results\//makenn.a*.pc}, which can be used with the program {\prg pointc} to evaluate
+the pointcharge model and calculate crystal field paramaters.
 \item [\prg mcphas2jvx mcphas.j] 
 Creates a JavaView input file (by default {\prg results/mcphas.jvx}) which shows the atomic positions 
 and exchange interactions in 3D graphics. It requires a {\prg mcphas.j} type file as input. JavaView can

@@ -49,6 +49,7 @@ the program automatically looks up F2 F4 F6 and XI in an internal table.
 However, if you are not happy with the values from the table, you can explicitely enter
 these constants. 
 However for some ions these parameters are not available in standard tables, then
-you have to enter them. Please always run ic1ion and check ic1ion.out to see if output 
-is correct.
+you have to enter them, it is shown in example/Ru3p\_create\_sipf how to create an
+sipf file by a Hartree Fock calculation for an ion which is not in the standard table.
+ Please always run ic1ion and check ic1ion.out to see if output  is correct.
 \end{verbatim}

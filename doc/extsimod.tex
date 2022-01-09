@@ -478,11 +478,12 @@ int dmq1		& & {\prg mcdisp} &  $\langle-|\hat \mbf M(\mbf Q)|+\rangle\sqrt{(p_--
 \hline
 int drixs1 & & {\prg mcdisp} & RIXS transition operator $\hat \mbf R$,eq. (\ref{rixsop})\\
 \hline
-int dP1 & & {\prg mcdisp} & phonon displacement (\AA) $\langle-|\hat \mbf P|+\rangle\sqrt{(p_--p_+)}$\\
+void pcalc      	& & {\prg mcphas} & phononic displacement $\langle \hat \mbf P\rangle$\\
+nt dP1 & & {\prg mcdisp} & phonon displacement (\AA) $\langle-|\hat \mbf P|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
 void chargedensity\_coeff  & {\prg densplt -c}&&coeff of $-|e|Z_l^m(\Omega)R^2(r)$ in equ.(\ref{chargedensity2})\\
 &{\prg spins -c} & & i.e. $\langle\sum_i Z_l^m(\Omega_i)\rangle$\\
-                        &{\prg display\_density -c}&&\\
+                        &{\prg display\_density c}&&\\
                         &{\prg display\_densities -c}&&\\
 int dchargedensity\_coeff1 & & {\prg mcdisp} &  $\langle-|\sum_i Z_l^m(\Omega_i)|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
@@ -494,7 +495,7 @@ int dorbmomdensity\_coeff1 & & {\prg mcdisp} & \\
 \hline
 double ro\_calc && {\prg densplt -c}& chargedensity (instead of expansion coeff)\\			
                  &       &{\prg spins -c}& - will always be used if present\\
-                 &       &{\prg display\_density -c}&\\
+                 &       &{\prg display\_density c}&\\
                  &       &{\prg display\_densities -c}&\\
  \end{tabular}
 \end{center}   
@@ -1269,6 +1270,23 @@ In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--
  are zero except for the state number $n=(-T)$, for which the probability $p_n=1$.
 \end{enumerate}
 
+%*************************************************************************************
+
+\subsubsection{External module function {\prg pcalc} - used by {\prg mcdiff\index{mcdiff}}
+and {\prg mcphas}\index{mcphas}  }
+
+In order to calculate the position  $\langle \hat \mbf P \rangle$
+ the following function has to be present in the module file {\prg *.so}:
+
+\begin{verbatim}
+extern "C" void pcalc(Vector & P,double * T, Vector & Fxc, Vector & Hext,
+                      double * gJ, Vector & MODPAR,
+                      char ** sipffilename, ComplexMatrix & Icalc_parstorage);
+\end{verbatim}
+
+It returns the position vector {\prg P} of an Einstein oscillator in units of
+\AA \ under the action of a Force {\prg Fxc} in units of meV.
+For the rest it works exactly as {\prg mcalc}, therefore we do not give more details here.
 
 %*************************************************************************************
 

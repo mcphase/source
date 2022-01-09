@@ -212,7 +212,7 @@ static public void windowclose(){
   public static void main(String[] args) {
       xmin=1e30;xmax=-1e30;detymin=true;detymax=true;doexit=false;
       ymin=1e30;ymax=-1e30;detxmin=true;detxmax=true;
-      detxText=true;detyText=true;
+      detxText=true;detyText=true;detTitle=true;
            String ss; String s;
       if (args.length<1)
       {System.out.println("- too few arguments...\n");
@@ -221,7 +221,7 @@ static public void windowclose(){
        System.out.println("         xcol,ycol ... column to be taken as x-, y- axis\n in a lineplot");
        System.out.println("        when using option -o file.jpg the application creates a jpg file on exiting\n");
        System.out.println("        when using option -xmin 23.3 the application sets the minimum of the display xaxis to 23.3\n");
-       System.out.println("        similar are options -xmax -ymin -ymax -xtext -ytext....\n");
+       System.out.println("        similar are options -xmax -ymin -ymax -xtext -ytext -title....\n");
        System.out.println("        when using option -c file.jpg the application only creates a jpg file and exits immediatly\n");
        System.out.println("        if optional errorcolumns are added then instead of lines symbols and errorbars are shown\n");
        System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to\n");
@@ -291,6 +291,11 @@ static public void windowclose(){
              detxText=false;ss=SF.FirstWord(s);yText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-title")) // option "-title meV"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detTitle=false;ss=SF.FirstWord(s);Title=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
             else {System.out.println("ERROR: option,"+SF.TrimString(s)+" not implemented !\n\n");System.exit(0);}
           }
        for(int i=k;s.length()>0;	i+=0)
@@ -340,7 +345,7 @@ static public void windowclose(){
  static int[] colyerr;
  static double scale;
  static double xmin,xmax,ymin,ymax;
- static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,doexit;
+ static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,doexit;
  static String [] legend; 
  static String xText = "";
  static String yText = "";

@@ -3,21 +3,33 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 use FileHandle;
 use PDL;
+use Getopt::Long;
 #use PDL::Slatec;
 
 
 
 unless ($#ARGV>=2) 
 {print " program to extend crystallographic unit cell n times in r1 (or r2,r3) direction\n\n";
-print " usage: extendunitcell 3 1 4\n\n";
+print " usage:  extendunitcell 3 1 4 [options]\n\n";
 print " meaning take mcphas.j and generate an extended description of the unit cell 3xr1,1xr2,4xr3\n";
-print " put result into results/extend.j\n";
+print " put result into results/extend.j\n
+options for creating quantum dots, quantum chains and quantum planes: \n
+     -r1    remove interactions beyond the extended unit cell in r1 direction\n
+     -r2    remove interactions beyond the extended unit cell in r2 direction\n
+     -r3    remove interactions beyond the extended unit cell in r3 direction\n
+";
  exit 0;}
 
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n1) = eval $ARGV[0];shift @ARGV; 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n2) = eval $ARGV[0];shift @ARGV; 
-$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n3) = eval $ARGV[0]; 
+$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n3) = eval $ARGV[0];shift @ARGV;
+
+# -------------------------------------------------------------------------------------- #
+# Options and declarations sets mri to 1 if option is present in command line
+# -------------------------------------------------------------------------------------- #
+GetOptions("r2"=>\$mr2,"r1"=>\$mr1,
+	   "r3"=>\$mr3);
 
  print "reading mcphas.j ....\n";
  my ($latt,$p) = getlattice("./mcphas.j");
@@ -156,6 +168,7 @@ sub printlattice {
 
 sub printneighbourlist {
   my ($filein,$l,$n1,$n2,$n3,$p,$nofatoms)=@_;   
+  $inv=inv(transpose($p));
   open($h,$filein);
      while(<$h>)
      {last if /^(#!|[^#])*nofatoms\s*=\s*/;}
@@ -168,7 +181,9 @@ sub printneighbourlist {
      while(<$h>)
      {last if /^#.*\Q**********\E/;
       ++$nn;
-      $text[$nn]=$_;
+      $tt[$nn]=$_;
+      ($dd)=extract("nofneighbours",$tt[$nn]);
+      if($dd!=""){$nofnorig=$dd;}
       }
     
    for ($i1=0;$i1<=$n1-1;++$i1){
@@ -177,13 +192,34 @@ sub printneighbourlist {
      $da=$x[$n]+$i1*$p->at(0,0)+$i2*$p->at(0,1)+$i3*$p->at(0,2);
      $db=$y[$n]+$i1*$p->at(1,0)+$i2*$p->at(1,1)+$i3*$p->at(1,2);
      $dc=$z[$n]+$i1*$p->at(2,0)+$i2*$p->at(2,1)+$i3*$p->at(2,2);
-     # print out neighbor
+     # check options -ri if interactions go outside extended unit cell
+     $nofn=$nofnorig;
      for($i=1;$i<=$nn;++$i)
+     {$text[$i]=$tt[$i];
+      unless($text[$i]=~/^#/)
+      {@numm=split(" ",$text[$i]);
+          $dabc=pdl [$numm[0],$numm[1],$numm[2]];
+          $dr123=($dabc x $inv)->slice(":,(0)");
+       if($mr1){if($dr123->at(0)<-$i1){$text[$i]="";--$nofn;}
+               if($dr123->at(0)>$n1-1-$i1){$text[$i]="";--$nofn;}
+               }
+       if($mr2&&$text[$i]){if($dr123->at(1)<-$i2){$text[$i]="";--$nofn;}
+               if($dr123->at(1)>$n2-1-$i2){$text[$i]="";--$nofn;}
+               }
+     #  print $dr123->at(2)." ".(-$i3)." ".($n3-1-$i3)."\n";
+       if($mr3&&$text[$i]){if($dr123->at(2)<-$i3){$text[$i]="";--$nofn;}
+               if($dr123->at(2)>$n3-1-$i3){$text[$i]="";--$nofn;}
+               }
+     }
+     }
+      # print out atom and neighbor list
+      for($i=1;$i<=$nn;++$i)
        {
+        $text[$i]=~s!\Qnofneighbours=\E\s*[\-\+\d.]+!nofneighbours=$nofn!;
         $text[$i]=~s!\Qda=\E\s*[\-\+\d.]+!da=$da!;
         $text[$i]=~s!\Qdb=\E\s*[\-\+\d.]+!db=$db!;
         $text[$i]=~s!\Qdc=\E\s*[\-\+\d.]+!dc=$dc!;
-        print $l ($text[$i]) 
+        print $l ($text[$i]);
        }
      print $l ("#*************************************************************************\n");
    }}}

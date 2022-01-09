@@ -114,12 +114,16 @@ if (ini.displayall==1)   // display spincf if button is pressed
  {   strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
      fin_coq = fopen_errchk (outfilename, "w");
-     sprintf(text,"fecalc:%i spins, iteration 0",sps.n());
+     sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
-     sleep(2);
-
-// sps.display(text);
+      fprintf(stdout,"%s\n",text);
+      sps.print(stdout);
+     sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+      fprintf(stdout,"%s\n",text);
+      mf.print(stdout);
+  
+     sleep(200);
  }
 
 
@@ -215,10 +219,16 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
      strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
      fin_coq = fopen_errchk (outfilename, "w");
-     sprintf(text,"fecalc:%i spins, iteration %i sta=%g",sps.n(),r,sta);
+     sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
-     sleep(2);
+      fprintf(stdout,"%s\n",text);
+      sps.print(stdout);
+   sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+      fprintf(stdout,"%s\n",text);
+      mf.print(stdout);
+  
+     sleep(200);
  }
    //for verbose mode do some outputs
  if (verbose==1)
@@ -268,11 +278,15 @@ if (ini.displayall==1)
      strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
       fin_coq = fopen_errchk (outfilename, "w");
-       sprintf(text,"fecalc:%i spins, iteration %i, fe=%gmeV",sps.n(),i,fe);
-       sps.eps(fin_coq,text);
+        sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+      sps.eps(fin_coq,text);
       fclose (fin_coq);
-      sleep(2);
-// sps.display(text);
+      fprintf(stdout,"%s\n",text);
+      sps.print(stdout);
+       sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+      fprintf(stdout,"%s\n",text);
+      mf.print(stdout);
+      sleep(200);
   }
 
  delete []jj;delete []lnzi;delete []ui;

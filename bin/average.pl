@@ -66,7 +66,6 @@ else {print "taking $n lines\n";}
    while($line=<Fin>)
      {if ($line=~/^\s*#/) {print Fout $line;}
       else{$line=~s/D/E/g;@numbers=split(" ",$line);
-
                        if($dmin){
                                       
                                  if($ii==-1||(abs($field[0][$n]-$numbers[$n])<$dmin)){++$ii;
@@ -135,7 +134,7 @@ sub emptyblock()
                                                  $numout[$k]=$field[$i][$k];
                                                  }
                                  }
-                  $ii=0;$i=0;for($k=0;$k<=$#numbers;++$k){$field[$ii][$k]=$numbers[$k];} # put new line to field
+                  $ii=-1; $i=0;#for($k=0;$k<=$#numbers;++$k){$field[$ii][$k]=$numbers[$k];} # put new line to field
 		   foreach (@numout)
 		   {print Fout $numout[$i]." ";++$i;}
                     print Fout "\n";

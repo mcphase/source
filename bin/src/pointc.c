@@ -9,7 +9,7 @@
 #include "jjjpar.hpp"
 #include "../../version"
 #include "martin.h"
-#define SMALL_DISPLACEMENT  0.01
+#define SMALL_DISPLACEMENT  0.001
 
 void calcCEFpar(double & q,double & x ,double & y, double & z, double & r,Vector & Blm, Vector & Llm,ionpars * iops)
 {

@@ -117,8 +117,11 @@ MODPAR5=0   # Kxy  in (meV)
 MODPAR6=0   # Kxz
 MODPAR7=0   # Kyz
 MODPAR8=1   # umax          maximum (cutoff) for displacement [a0=0.5219 A]
-MODPAR9=3 #  to easy convegergence of mcphasit the linearity of the einstein Oscillator is damped 
-            #  i.e. instead of  u0=-StOS*F we use  u0=-StOS * F * exp(-MODPAR9*|F|)
+MODPAR9=4   # 0       umax restriction in all directions
+            #                1,2,3   umax restriction in x y z direction only
+            #                4       umax restriction in x and y direction
+            #                5       umax restriction in x and z direction
+            #                6       umax restriction in y and z direction
 
 #-------------------------------------------------------
 # Neutron Scattering Length (10^-12 cm) (can be complex)
@@ -156,7 +159,9 @@ look like:
 \end{verbatim}
 
 It is planned that these files should be created automatically from the 
-output of DFT programs. [to be done]
+output of DFT programs. [to be done]. Currently it is possible to create 
+the input parameters from Born v Karman longitudinal and transversal springs
+by the program {\prg makenn} with option {\prg -bvk}.
 For an example of phonons in tungsten see {\prg examples/tungsten\_phonons }
 
 If crystal field - phonon coupling is to be input, magnetic ions may be added to {\prg mcphas.j}.
@@ -164,8 +169,10 @@ They should not be placed at exactly the same position as the phonon atoms - i.e
 (slightly) different to enable the mcphas.j loader to identify which  is which.
 
 The coupling between phononic and crystal field degrees of freedom can be derived from
-$\hat H_{cf-phon}=(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$.
+$\hat H_{cf-phon}=\sum_{nn'}(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$.
  This can be done
 using the program  {\prg makenn} with option {\prg -cfph}  applying small differential changes to
 the atomic positions in the unit cell in order to evaluate the gradient of the crystal field
-parameters. For an example see {\prg examples/cecu2ge2\_cf\_phonon\_int }.
+parameters. For examples see  several models on crystal field phonon interaction 
+in {\prg examples}, for starting a linear chain of Ce$^{3+}$ ions including a
+theory manuscript can be found in {\prg examples/Ce3p\_chain\_cfphonon}.

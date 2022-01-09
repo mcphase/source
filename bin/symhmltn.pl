@@ -30,7 +30,7 @@
 $debug=1;
 $SMALL=1e-3;
 
-push @INC, $ENV{'MCPHASE_DIR'}.'bin/';
+push @INC, $ENV{'MCPHASE_DIR'}.'/bin/';
 require 'ptgptabs.pl';
 require 'rotstev.pl';
 use Math::Trig;

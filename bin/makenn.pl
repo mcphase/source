@@ -66,17 +66,25 @@ print "              transversal spring constants from file - file format:\n";
 print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(N/m)\n";
 print STDOUT << "EOF";
  option -cfph 
-              calculate crystal field phonon interaction: mcphas.j lists magnetic and
-              non magnetic atoms. For magnetic atoms a new site is created and shifted
-              0.1 A along c in order to not overlap with the original site. It is assumed, that
-              the original site is using an sipf file with the MODULE=phonon as well as
-              all the other sites. For the newly created site it is assumed that the 
-              MODULE=so1ion and the program pointc is used with option -d to calculate
-              derivatives dBlm/du which are inserted as interaction parameters between
-              MODULE=phonon and MODULE=so1ion sites.
-              In order to use the resulting file results/makenn.j a phonon model has to
-              be set up and added to makenn.j e.g. by program addj, moreover
-              magnetic sites sipf files are required, e.g. such as created in results/makenn.a*.sipf. 
+              calculate crystal field phonon interaction: mcphas.j lists 
+              magnetic and non magnetic atoms with charges defined in the 
+              sipf files by CHARGE= variable. For magnetic atoms the sipf 
+              file the variable MAGNETIC=1 has to be set and information 
+              about the ion has to be present (IONTYPE etc.). 
+              Foreach magnetic ion a new site is created and shifted
+              0.1 A along c in order to not overlap with the original site.
+              It is assumed, that the original site will be using an sipf
+              file with the MODULE=phonon as well as all the other
+              nonmagnetic sites. For the new magnetic site the program
+              pointc is used by makenn with option -d to calculate derivatives
+              dBlm/du which are inserted as interaction 
+              parameters between MODULE=phonon and MODULE=so1ion sites.
+              In order to use the resulting file results/makenn.j a phonon
+              model has to be set up, the original magnetic atom sites 
+              sipffilename has to be changed to the phonon model filename 
+              and the phonon model has to be added to makenn.j,  e.g. by
+              program addj, moreover magnetic sites sipf files are required, 
+              e.g. such as created in results/makenn.a*.sipf. 
  option -f [filename]
  option -dm [filename]
               read interaction constants from table in file. 
@@ -618,9 +626,9 @@ sub getinteraction {
              {# bond found - do something
   $cL=$long_spring[$n]*$a0*$a0*$J2meV;
   $cT=$trans_spring[$n]*$a0*$a0*$J2meV; 
-  $Kxx= -(( $cL-$cT)* $rx * $rx - $cT* $r *$r)  /$r /$r;$jaa-=$Kxx;
-  $Kyy= -(( $cL-$cT)* $ry * $ry - $cT* $r *$r)  /$r /$r;$jbb-=$Kyy;
-  $Kzz= -(( $cL-$cT)* $rz * $rz - $cT* $r *$r)  /$r /$r;$jcc-=$Kzz;
+  $Kxx= -(( $cL-$cT)* $rx * $rx + $cT* $r *$r)  /$r /$r;$jaa-=$Kxx;
+  $Kyy= -(( $cL-$cT)* $ry * $ry + $cT* $r *$r)  /$r /$r;$jbb-=$Kyy;
+  $Kzz= -(( $cL-$cT)* $rz * $rz + $cT* $r *$r)  /$r /$r;$jcc-=$Kzz;
 
   $Kxy= -($cL-$cT) * ( $rx * $ry) /$r /$r ;$jab-=$Kxy;
   $Kyz= -($cL-$cT) * ( $ry * $rz) /$r /$r ;$jbc-=$Kyz;
@@ -758,7 +766,8 @@ sub getlattice {
                                     ($gJ[$n])=extractfromfile("GJ",$sipffilename); 
                                     if($cfph!=0){($magnetic)=extractfromfile("MAGNETIC",$sipffilename); 
                                      
-                                     if($magnetic!=0){++$nofmagneticatoms;$nph[$nofmagneticatoms+$nofatoms]=$n;
+                                     if($magnetic!=0){if($gJ[$n]==0){die "Error makenn: gJ=0 for ion $n in mcphas.j sipf=$sipffilename for option -cfph MODULE must be so1ion\n"; }
+                                                      ++$nofmagneticatoms;$nph[$nofmagneticatoms+$nofatoms]=$n;
                                                       $sipf_file[$nofmagneticatoms+$nofatoms]=$sipffilename;
                                                       $gJ[$nofmagneticatoms+$nofatoms]=$gJ[$n];
                                                       $x[$nofmagneticatoms+$nofatoms]=$x[$n];
@@ -898,7 +907,7 @@ print $l1 "#--------------------------------------------------------------------
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
 
-  if (($gJ!=0&&$gJ[$ddd]==0)||($gJ==0&&$gJ[$ddd]!=0)){ die "error makenn. mixing of atoms with gJ=0 (intermediate coupling) and gJ>0 not implemented\n";}
+  if (($gJ!=0&&$gJ[$ddd]==0)||($gJ==0&&$gJ[$ddd]!=0)){unless($cfph==1){ die "error makenn. mixing of atoms with gJ=0 (intermediate coupling) and gJ>0 not implemented\n";}}
   if (($rkky==0&&$readtable==0)||$bvk==1||($readtable>0&&$DM>0)) # here anisotropic interaction comes in
    { 
        if($bvk==1||($gJ!=0&&$gJ[$ddd]!=0))
