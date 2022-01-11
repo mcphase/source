@@ -1,6 +1,8 @@
 // routines for mcphas for calculation of magnetic phases
 // htcalc.c
 
+#define FEMIN_INI     1e6
+
 #ifdef _THREADS
 #if defined  (__linux__) || defined (__APPLE__)
 #include <pthread.h>
@@ -378,9 +380,9 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                    strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                    strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                    felog=fopen_errchk(outfilename,"a");
-                   if (verbose==1||fe>10000){fprintf(felog,"#");}
+                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#");}
                    fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i \n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc());
-                   if (verbose==1&&fe<20000){sps.print(felog);}
+                   if (verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
 	           fclose(felog);
                   delete []mq;
                  }
@@ -432,7 +434,7 @@ int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
  dadbdc2ijk(H,Habc,abc); // transform Habc to ijk coordinates ... this is H
                   abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
- double femin=10000;char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];
+ double femin=FEMIN_INI;char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  spincf  spsmin(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  mfcf * mf;
@@ -565,7 +567,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  THRLC_FREE(threadSpecificKey);
 #endif
 
-if (femin>=10000) // did we find a stable structure ??
+if (femin>=FEMIN_INI) // did we find a stable structure ??
  {fprintf(stderr,"Warning propcalc: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
                  physprops.T,physprops.H(1),physprops.H(2),physprops.H(3));return 2;}
 else // if yes ... then

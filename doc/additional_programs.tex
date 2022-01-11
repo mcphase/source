@@ -260,6 +260,59 @@ Ce1.sipf  Ce1.sipf  +4.7 70.9 0.0
        + \frac{c_T(ij)}{2} (\mbf P_i - \mbf P_j )^2 
 \end{eqnarray}
 
+\begin{figure}[th]
+\setlength{\unitlength}{0.14in} % selecting unit length
+\centering % used for centering Figure
+\begin{picture}(32,15) % picture environment with the size (dimensions)
+% 32 length units wide, and 15 units high.
+% Declares a diamond shape
+\newsavebox{\diamondshap}
+\savebox{\diamondshap}(0,0)
+{
+   \put(-1,0){\line(3,1){1}}
+   \put(-1,0){\line(3,-1){1}}
+   \put(1,0){\line(-3,1){1}}
+   \put(1,0){\line(-3,-1){1}}
+}
+% Declares a parallelogram
+\newsavebox{\parallelogramshap}
+\savebox{\parallelogramshap}
+{
+   \put(0,0){\line(2,0){10}}
+   \put(1.5,2.5){\line(2,0){10}}
+   \put(0,0){\line(3,5){1.5}}
+   \put(10,0){\line(3,5){1.5}}
+}
+\put(12,7){\vector(1,0){14}}
+\put(12,7){\vector(-1,-2){2}}
+\put(26,7){\vector(1,1){3}}
+   \put(12,7){\line(-1,0){2}}
+   \put(10,7){\line(0,-1){4}}
+   \put(26,7){\line(1,0){3}}
+   \put(29,7){\line(0,1){3}}
+
+\put(27,6) {$L_2$}
+\put(30,8) {$T_2$}
+\put(8.5,5) {$T_1$}
+\put(10.5,8) {$L_1$}
+
+\put(19,7.5) {$\mbf R_{12}$}
+\put(11.5,4.5) {$\mbf P_1$}
+\put(26.3,8.5) {$\mbf P_2$}
+
+\put(15,2){$E=\frac{c_L}{2}(L_1+L_2)^2+\frac{c_T}{2}(T_1+T_2)^2$}
+%\put(10,28){\usebox{\parallelogramshape}}
+\put(12,7){\usebox{\diamondshap}}
+\put(26,7){\usebox{\diamondshap}}
+%\put(29,6.2){\line(0,1){18}}
+%\put(30,15) {$\langle\hat \mathcal I^{s'}_{\beta}\rangle$}
+%\put(29,24){\vector(-1,0){3}}
+%\put(6,-0.6){\framebox(20,3){\begin{tabular}{c}compute free energy and \\ compare to other solutions \end{tabular} }}
+\end{picture}
+\caption{Illustration of the transversal and longitudinal BvK springs} % title of the Figure
+\label{figbvk} % label to refer figure in text
+\end{figure}
+
 
 \item[option {\prg  option -cfph }]
               calculate crystal field phonon interaction: {\prg mcphas.j} lists 
@@ -583,6 +636,11 @@ note: for calculating T or H dependencies you can put single ion in a loop
           set B=!w!.!f!
           @echo on && singleion 2 0 0 !B! 0 0 0 && @echo off )
           endlocal && @echo on 
+...  LOOP linux using perl:
+perl -e 'for($T=1;$T<90;$T+=2){system("singleion ".$T." 1 0 0   0 0 0");}' > results/sus1Tesla.clc
+ ... LOOP for windows using perl:
+perl -e "for($T=1;$T<90;$T+=2){system('singleion '.$T.' 1 0 0   0 0 0');}" > results\sus1Tesla.clc'
+
 \end{verbatim}      
 
 \item [\prg symhmltn:] Calculates via group theory, the allowed two-ion multipolar exchange terms

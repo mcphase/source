@@ -114,12 +114,12 @@ if (ini.displayall==1)   // display spincf if button is pressed
  {   strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
      fin_coq = fopen_errchk (outfilename, "w");
-     sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+     sprintf(text,"fecalc:%i spins, iteration %i initial values sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
       fprintf(stdout,"%s\n",text);
       sps.print(stdout);
-     sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+     sprintf(text,"fecalc:%i meanfields, iteration %i initial values sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
   
@@ -137,7 +137,7 @@ for (r=1;sta>ini.maxstamf;++r)
      }}}} delete []Icalcpars;
 
      if (verbose==1) fprintf(stderr,"feDIV!MAXlooP");++nofmaxloopDIV;
-     return 20000;}
+     return 2*FEMIN_INI;}
  if (spinchange>ini.maxspinchange)
     {delete []jj;delete []lnzi;delete []ui;
           for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
@@ -145,7 +145,7 @@ for (r=1;sta>ini.maxstamf;++r)
       delete Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
      if (verbose==1) fprintf(stderr,"feDIV!MAXspinchangE");++nofmaxspinchangeDIV;
-     return 20001;}
+     return 2*FEMIN_INI+1;}
 
  //1. calculate mf from sps (and calculate sta)
  sta=0;
@@ -164,7 +164,7 @@ for (r=1;sta>ini.maxstamf;++r)
                        // and index a difference between crystal unit cell positions in the
                        // magnetic supercell
 
-//      if(r==1){fprintf(stdout,"l=%i di=%i dj=%i dk=%i\n",l,di,dj,dk);    myPrintMatrix(stdout,jj[l]);getchar();}
+////      if(r==1){fprintf(stdout,"l=%i di=%i dj=%i dk=%i\n",l,di,dj,dk);    myPrintMatrix(stdout,jj[l]);getchar();}
 
      // here the contribution of the crystal unit cell i1 j1 k1 (i1,j1,k1 indicate the
      // position of the crystal unit cell in the magnetic supercell) to the mean field
@@ -222,9 +222,10 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
      sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
+
       fprintf(stdout,"%s\n",text);
       sps.print(stdout);
-   sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+   sprintf(text,"... as calculated from %i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
   

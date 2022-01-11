@@ -413,8 +413,8 @@ if (calc_rixs){// use 1-9 components of chi to store result !!! (other component
                                                    if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                               }
             if(do_phonon){sumS=chiPhon(1,1)/PI/2.0/(double)ini.mf.n();sumS*=bose;// printf("chiPhon= %g i %g ",real(chiPhon(1,1)),imag(chiPhon(1,1)));
-                          intensityP=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: intensity in beyond dipolar approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
-                                                   if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: intensity  in beyond dipolar approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
+                          intensityP=fabs(real(sumS)); if (real(sumS)<-0.1){fprintf(stderr,"ERROR mcdisp: phonon intensity in approx formalism %g negative,E=%g, bose=%g\n\n",real(sumS),en,bose);exit(1);}
+                                                   if (fabs(imag(sumS))>0.1){fprintf(stderr,"ERROR mcdisp: phonon  intensity  in  approx formalism %g %+g iimaginary\n",real(sumS),imag(sumS));exit(1);}
                          }                              
 // here should be entered factor  k/k' 
 if (ini.ki==0)

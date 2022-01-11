@@ -48,16 +48,13 @@ void helpexit()
           "                     n=-1,..,-nofomponents: operator Matrix In for Hamiltonian eigenstates basis\n"
           "                     n>nofomponents: all operator Matrices (n=0 to n=nofcomponents) in standard basis\n"
           "                     n<-nofomponents: all operator Matrices (n=0 to n=-nofcomponents) in Hamiltonain eigenstates basis\n"
-          "Note: for calculating T or H dependencies you can put single ion in a loop\n"
+          "Note: for calculating T or H dependencies you can put single ion in a LOOP\n"
           "      and pipe the result into a file\n"
-          "  .... linux:   for B in $(seq 0 0.1 14); do singleion 2 $B 0 0 0 0 0; done > results/fielddep.dat\n"
-          "  .... windows command line: for /L %%B in (0,1,14)  do singleion 2 %%B 0 0 0 0 0 >> results\\fielddep.dat\n\n"
-          "  .... windows batch file (needed for noninteger numbers):\n"     
-          "          @echo off && setlocal ENABLEDELAYEDEXPANSION\n"
-          "          for /L %%%%I in (0,2,140) do ( set /A W=%%%%I/10 && set /A \"f = %%%%I %%%% 10\"\n"
-          "          set B=!w!.!f!\n"
-          "          @echo on && singleion 2 0 0 !B! 0 0 0 && @echo off )\n"
-          "          endlocal && @echo on\n"
+          "  .... LOOP linux:   for B in $(seq 0 0.1 14); do singleion 2 $B 0 0 0 0 0; done > results/fielddep.dat\n"
+          " ...  LOOP linux using perl:\n"
+          "perl -e 'for($T=1;$T<90;$T+=20){system(\"singleion \".$T.\" 1 0 0  0 0 0\");}' > results/sus1Tesla.clc \n"
+          " ... LOOP for windows using perl:\n"
+          "perl -e \"for($T=1;$T<90;$T+=20){system('singleion '.$T.' 1 0 0 0 0 0');}\" > results\\sus1Tesla.clc\n"
           );
       exit (1);
 }
