@@ -598,9 +598,11 @@ fprintf(fout,"        <points>\n");
                                          double radius=0;extract(cs.sipffilenames[ll],"radius",radius);
                                          if(radius!=0){radius=0;
                                          extract(cs.sipffilenames[l],"radius",radius);
-                                         if(radius==0){
-                                                   pev_real.moment(i,j,k,l)=pev_real.moment(i,j,k,ll);
-                                                   pev_imag.moment(i,j,k,l)=pev_imag.moment(i,j,k,ll);
+                                         if(radius==0){//printf("%i %i %i taking for magnetic atom nr %i position from atom nr %i\n",i,j,k,l,ll);
+                                                  for(int m=1;m<=3;++m){ 
+                                                   pev_real.m(i,j,k)(pev_real.nofcomponents*(l-1)+m)=pev_real.moment(i,j,k,ll)(m);
+                                                   pev_imag.m(i,j,k)(pev_imag.nofcomponents*(l-1)+m)=pev_imag.moment(i,j,k,ll)(m);
+                                                                        }
                                                    showdd=0;}}
                                        }
 
@@ -907,9 +909,9 @@ for(l=1;l<=nofatoms;++l)
    Vector moments(1,nofcomponents);
    double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
    QR=(hkl*abc_in_ijk_Inverse)*dd;
-   QR*=2*PI;
+   QR*=2*PI;//printf("dd=%g",Norm(dd));
    dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
-                          for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
+    for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
    {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));}
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
