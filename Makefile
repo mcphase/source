@@ -44,7 +44,9 @@
 #                                   to c:\msys64/home/rotter/  
 #                                    mingw win32 shell  (from startup menu) 
 #                                    cd mcphas
-#                                    . lin.bat                                                                     
+#                                    . lin.bat 
+#				   find . -name  '.DS_Store' -delete
+#				   find . -name  '._*' -delete                                                                   
 #                                    make clean 
 #                                    make 
 #                                    make clean

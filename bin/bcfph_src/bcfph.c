@@ -32,7 +32,7 @@ void helpexit()
           "   deltaE .... Energy stepwidth (meV)\n "
           "   eta .... imaginary small number for linewidth (meV)\n "   
           "   required: ./results/op.mat for Operator matrices \n  "
-          "             ./g_alpha.s for cf-phonon coupling constants\n"
+          "             ./results/g_alpha.s for cf-phonon coupling constants\n"
           "  T>0         ./phonon.int for Frequencies and Intensities of Phonon\n"
           "  Output to stdout: nuclear coherent inelastic spectrum (equ. 68 ff) \n"
           "  T<0  \n "       
@@ -349,7 +349,7 @@ float nn[1000];nn[0]=1000;
 float * galphas,*galphasr,*galphasi,*omegaks;
 int Ng=-1,N=0,GMAX=1; 
 fprintf(stdout,"# reading coupling from g_alpha.s ...\n");
-fin_opmat = fopen_errchk ("./g_alpha.s", "rb");
+fin_opmat = fopen_errchk ("./results/g_alpha.s", "rb");
 while(feof(fin_opmat)==false){fgets(instr,MAXNOFCHARINLINE,fin_opmat);++GMAX;}
 fclose(fin_opmat);
 fprintf(stdout,"# ...found %i lines - reserving memory for storage of coupling parameters\n",GMAX); 
@@ -362,12 +362,12 @@ int * s; s=new int[GMAX];
 int * alpha; alpha=new int[GMAX];
 long int pos=0,posold=1;
 fprintf(stdout,"# storing coupling paramters\n");
-fin_opmat = fopen_errchk ("./g_alpha.s", "rb");
+fin_opmat = fopen_errchk ("./results/g_alpha.s", "rb");
 while(feof(fin_opmat)==false){
 if((n=inputline(fin_opmat,nn))>=3)
 { // g_alpha(s)
- ++Ng;if(Ng>GMAX-1){fprintf (stderr,"#Error:too many lines in ./g_alpha.s\n");exit (EXIT_FAILURE);}
- alpha[Ng]=nn[1];if(alpha[Ng]>imax){fprintf (stderr,"#Error: alpha=%i too large  in ./g_alpha.s - file opmat does not contains so many operators\n",alpha[Ng]);exit (EXIT_FAILURE);}
+ ++Ng;if(Ng>GMAX-1){fprintf (stderr,"#Error:too many lines in ./results/g_alpha.s\n");exit (EXIT_FAILURE);}
+ alpha[Ng]=nn[1];if(alpha[Ng]>imax){fprintf (stderr,"#Error: alpha=%i too large  in ./results/g_alpha.s - file opmat does not contains so many operators\n",alpha[Ng]);exit (EXIT_FAILURE);}
  s[Ng]=nn[2]; galphas[Ng]=nn[3]; 
  galphasr[Ng]=nn[4]; 
  galphasi[Ng]=nn[5]; 
@@ -384,7 +384,7 @@ if((n=inputline(fin_opmat,nn))>=3)
 }
 fclose(fin_opmat);
 if(N==0)N=1;
-fprintf(stdout,"# Read Ng+1=%i CF-Phonon coupling constants g_alpha(s) from ./g_alpha.s number of k points N=%i \n",Ng+1,N);
+fprintf(stdout,"# Read Ng+1=%i CF-Phonon coupling constants g_alpha(s) from ./results/g_alpha.s number of k points N=%i \n",Ng+1,N);
 
 double OOcef,rr,quot,En,Em,beta,Z,omega;
 complex <double> sum,Mqs,E0,Dqs,omegeta;
@@ -571,8 +571,8 @@ delete ds;
 } else { //**********************************************************************************
 // do the calculations of nuclear coherent phonon cross section 
 //**********************************************************************************
-if(N>1){fprintf(stderr,"Error bcfph: N=%i k points found in g_alpha.s - please use g_alpha.s with only one k point\n"
-                       " - you can generate this by qep2bcfph.pl or makegalphas.pl\n",N);exit(EXIT_FAILURE);}
+if(N>1){fprintf(stderr,"Error bcfph: N=%i k points found in results/g_alpha.s - please use results/g_alpha.s with only one k point\n"
+                       " - you can generate this by qep2bcfph_nuc or makegalphas\n",N);exit(EXIT_FAILURE);}
  fin_opmat = fopen_errchk ("./phonon.int", "rb");
 while(feof(fin_opmat)==false)
 if((n=inputline(fin_opmat,nn))!=0)
@@ -586,7 +586,7 @@ if((n=inputline(fin_opmat,nn))!=0)
 --smax;
 fclose(fin_opmat);
 fprintf(stdout,"# Read smax=%i phonons ./phonon.int \n",smax+1);
-for(k=0;k<=Ng;++k)if(s[k]>smax+1){fprintf (stderr,"#Error: s = %i > smax = %i in ./g_alpha.s\n",s[k],smax+1);exit (EXIT_FAILURE);}
+for(k=0;k<=Ng;++k)if(s[k]>smax+1){fprintf (stderr,"#Error: s = %i > smax = %i in ./results/g_alpha.s\n",s[k],smax+1);exit (EXIT_FAILURE);}
 
 
 
