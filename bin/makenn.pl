@@ -8,7 +8,7 @@ use File::Copy;
 # use PDL::Slatec;
 
 print "#********************************************************\n";
-print "# makenn 181025 - create table with neighbors and interactions\n";
+print "# makenn 220126 - create table with neighbors and interactions\n";
 print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "#********************************************************\n";
 $PI=3.14159265358979323846;
@@ -61,9 +61,11 @@ print "              curve: J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2]\n";
 print "              with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2)\n";
 print "              the exponential alpha is conveniently put to  about 1\n";
 print " option -bvk filename\n";
-print "              for phonon take Born van Karman model with longitudinal and\n";
-print "              transversal spring constants from file - file format:\n";
-print "                 atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(N/m)\n";
+print "              for phonons: take Born van Karman model with longitudinal and\n";
+print "              transversal spring constants from file - file format, columns:\n";
+print "              #   atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(N/m)\n";
+print "              mind: into MODPAR2-6 in *.sipf the Einstein-oscillator paramters\n"; 
+print "              are written, too\n";
 print STDOUT << "EOF";
  option -cfph 
               calculate crystal field phonon interaction: mcphas.j lists 
@@ -153,7 +155,7 @@ elsif(/-rkkz/)
 elsif(/-bvk/)
   {$bvk=1;shift @ARGV;
    $bfk_file=$ARGV[0];shift @ARGV;
-   print "creating phononic interactions from Born van Karman modelin file $bfk_file\n";
+   print "creating phononic interactions from Born van Karman model in file $bfk_file\n";
    # read interaction constants from file
    unless(open(Fin,$bfk_file)){ die "could not open $bfk_file\n";}
              $nof_springs=0;
@@ -570,6 +572,43 @@ print "********************************************************\n";
    exit;
 
 #-----------------------------------------------------------------------
+sub clearMP{
+my ($file)=@_;
+my $i,$j;$i=0;
+             if(open (Fin,$file))
+             {while($line=<Fin>){
+                if($line=~/^(#!|[^#])*\bMODPAR2\s*=\s*/) {($Kxxread)=($line=~m/^(?:#!|[^#])*\bMODPAR2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kxxread=0;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR2\s*=\s*[^\s\;\n\t\*]+/$1MODPAR2=$Kxxread/g;}
+                if($line=~/^(#!|[^#])*\bMODPAR3\s*=\s*/) {($Kyyread)=($line=~m/^(?:#!|[^#])*\bMODPAR3\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kyyread=0;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR3\s*=\s*[^\s\;\n\t\*]+/$1MODPAR3=$Kyyread/g;}
+                if($line=~/^(#!|[^#])*\bMODPAR4\s*=\s*/) {($Kzzread)=($line=~m/^(?:#!|[^#])*\bMODPAR4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kzzread=0;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR4\s*=\s*[^\s\;\n\t\*]+/$1MODPAR4=$Kzzread/g;}
+                if($line=~/^(#!|[^#])*\bMODPAR5\s*=\s*/) {($Kxyread)=($line=~m/^(?:#!|[^#])*\bMODPAR5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kxyread=0;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR5\s*=\s*[^\s\;\n\t\*]+/$1MODPAR5=$Kxyread/g;}
+                if($line=~/^(#!|[^#])*\bMODPAR6\s*=\s*/) {($Kyzread)=($line=~m/^(?:#!|[^#])*\bMODPAR6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kyzread=0;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR6\s*=\s*[^\s\;\n\t\*]+/$1MODPAR6=$Kyzread/g;}
+                if($line=~/^(#!|[^#])*\bMODPAR7\s*=\s*/) {($Kxzread)=($line=~m/^(?:#!|[^#])*\bMODPAR7\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kxzread=0;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR7\s*=\s*[^\s\;\n\t\*]+/$1MODPAR7=$Kxzread/g;}
+               $line_store[$i]=$line;++$i;}
+              close Fin;
+              open(Fout,">$file");
+              for($j=0;$j<=$i;++$j){print Fout $line_store[$j];}
+              close Fout;              
+       	     }
+             else
+             {
+             print STDERR "Warning: failed to read/write MODPARS from/to data file \"$filename\"\n";
+             }
+
+
+}
+
 
 sub addK{
 my ($file)=@_;
@@ -760,6 +799,7 @@ sub getlattice {
 				   if (/^.*\Qy=\E/){($y[$n])=extract("y",$_);}
 				   if (/^.*\Qz=\E/){($z[$n])=extract("z",$_);}
 				     ($sipffilename)=extractstring("sipffilename",$_);
+                                   if ($bvk){clearMP($sipffilename);}
                                      ($charge[$n])=extractfromfile("CHARGE",$sipffilename);
                                      if($charge[$n]==""){$charge[$n]=$sipffilename;}                                 
                                              #               print "$sipffilename  charge=".$charge[$n]."\n";
