@@ -446,8 +446,8 @@ void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters 
    if(gp.showprim==1){ijkmin(1)=1;ijkmin(2)=1;ijkmin(3)=1;ijkmax(1)=-1;ijkmax(2)=-1;ijkmax(3)=-1;} // show only primitive magnetic unit cell
   max_min=maxv-minv;
   calc_prim_mag_unitcell(p,cs.abc,cs.r);
-
-  
+  int * pl;  pl=new int[nofatoms+1];
+  for(l=1;l<=nofatoms;++l)pl[l]=l;
 
 fprintf(fout,"<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?>\n");
 fprintf(fout,"<jvx-model>\n");
@@ -599,10 +599,11 @@ fprintf(fout,"        <points>\n");
                                          if(radius!=0){radius=0;
                                          extract(cs.sipffilenames[l],"radius",radius);
                                          if(radius==0){//printf("%i %i %i taking for magnetic atom nr %i position from atom nr %i\n",i,j,k,l,ll);
-                                                  for(int m=1;m<=3;++m){ 
-                                                   pev_real.m(i,j,k)(pev_real.nofcomponents*(l-1)+m)=pev_real.moment(i,j,k,ll)(m);
-                                                   pev_imag.m(i,j,k)(pev_imag.nofcomponents*(l-1)+m)=pev_imag.moment(i,j,k,ll)(m);
-                                                                        }
+                                                   pl[l]=ll;
+//                                                  for(int m=1;m<=3;++m){ 
+//                                                   pev_real.m(i,j,k)(pev_real.nofcomponents*(l-1)+m)=pev_real.moment(i,j,k,ll)(m);
+//                                                   pev_imag.m(i,j,k)(pev_imag.nofcomponents*(l-1)+m)=pev_imag.moment(i,j,k,ll)(m);
+//                                                                        }
                                                    showdd=0;}}
                                        }
 
@@ -615,6 +616,7 @@ fprintf(fout,"        <points>\n");
              QR*=2*PI;
              Vector p(1,3);p=0;
              double radius=0;extract(cs.sipffilenames[l],"radius",radius);if(radius!=0){p=magmom.moment(i,j,k,l);}
+             if(pl[l]!=l)p=magmom.moment(i,j,k,pl[l]);   
              xyz=p+gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),myround(dd(2)+xyz(2)),myround(dd(3)+xyz(3)));
@@ -645,7 +647,7 @@ fprintf(fout,"        <colors type=\"rgb\">\n");
             if(showdd==1)if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
              (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {
-fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atoms),(int)(gp.show_atoms*((l*97)%256)),0);
+fprintf(fout,"          <c>  %i       %i       %i </c>\n",255,255,255);
 fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atoms),(int)(gp.show_atoms*((l*97)%256)),0);
 	     }
 	  }
@@ -682,7 +684,8 @@ fprintf(fout,"        <points>\n");
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
              xyz=magmom.moment(i,j,k,l)+gp.spins_wave_amplitude*(cos(-phase+QR)*magmomev_real.moment(i,j,k,l)+sin(phase-QR)*magmomev_imag.moment(i,j,k,l));
-             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+             if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]);
+              dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
               //printf("gJ=%g magmom=%g %g %g %g %g %g %g %g %g\n",cs.gJ[l],mom[in(i,j,k)](1),mom[in(i,j,k)](2),mom[in(i,j,k)](3),mom[in(i,j,k)](4),mom[in(i,j,k)](5),mom[in(i,j,k)](6),xyz(1),xyz(2),xyz(3));
               //if(l==170||l==171){fprintf(stderr,"l=%i\n %4.4f + i %4.4f\n %4.4f + i %4.4f\n %4.4f + i %4.4f\n",
               //                    l,magmomev_real.moment(i,j,k,l)(1),magmomev_imag.moment(i,j,k,l)(1),
@@ -740,7 +743,8 @@ fprintf(fout,"        <points>\n");
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
                           xyz=magmom.moment(i,j,k,l);
-             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+            if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]); 
+            dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
              
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
@@ -780,6 +784,7 @@ fprintf(fout,"        <points>\n");
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
              QR=(hkl*abc_in_ijk_Inverse)*dd;
              QR*=2*PI;
+             if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]);
              dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
                           int phi;
              for(phi=0;phi<=16;phi++)
@@ -829,7 +834,8 @@ for(l=1;l<=nofatoms;++l)
    double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
    QR=(hkl*abc_in_ijk_Inverse)*dd;
    QR*=2*PI;
-   dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+      if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]);
+      dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
                              for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
    {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));}
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
@@ -910,7 +916,8 @@ for(l=1;l<=nofatoms;++l)
    double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
    QR=(hkl*abc_in_ijk_Inverse)*dd;
    QR*=2*PI;//printf("dd=%g",Norm(dd));
-   dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+   if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]);
+   dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));
     for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
    {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));}
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
@@ -983,6 +990,7 @@ for(l=1;l<=nofatoms;++l)
 
 fprintf(fout,"  </geometries>\n");
 fprintf(fout,"</jvx-model>\n");
+delete []pl;
 }
 //***********************************************************************************************************************************
 // output of chargedensity on grid as ascii file points are equally spaced as specified
