@@ -22,14 +22,14 @@ EXE=.exe
 STATIC=-static
 endif
 
-all :  clean  ../RCN36K$(EXE) ../RCN2K$(EXE)
+all :  clean  RCN36K.o RCN2K.o
 # ../RCG11K$(EXE)   not needed
 #../chibfk$(EXE) 
 
- ../RCN2K$(EXE): RCN2K.F
+RCN2K.o: RCN2K.F
 	gfortran $(STATIC) -lgfortran -o ../RCN2K $^ 
 
-../RCN36K$(EXE): RCN36K.F
+RCN36K.o: RCN36K.F
 	gfortran $(STATIC) -lgfortran -o ../RCN36K $^ 
 
 #../RCG11K$(EXE): RCG11K.F

@@ -843,6 +843,7 @@ int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
    
    if(T<0)for(int i=1;i<=n;++i)
    {noft+=dj-i+1;}
+//printf("dj=%i  ninit=%g pinit=%g T=%g noft=%i\n",dj,ninit,pinit,T,noft);
    return noft;
 }
 

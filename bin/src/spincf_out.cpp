@@ -537,6 +537,7 @@ fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
+
 if(gp.show_magnetic_unitcell>0)
  {
   // plot frame around primitive magnetic unit cell
@@ -572,6 +573,8 @@ fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
+
+
 if(gp.show_atoms>0) // plot atoms removed by MR 30.8.2011 - inserted again for phonons 25.12.21
  { // plot atoms in region xmin to xmax (quader)
 fprintf(fout,"    <geometry name=\"ions\">\n");

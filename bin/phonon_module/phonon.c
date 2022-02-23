@@ -139,8 +139,6 @@ Matrix Ki(1,3,1,3);Ki=K.Inverse();
 uu=-Ki*F;
 //printf("Icalc phonon uu= %g %g %g F= %g %g %g\n",uu(1),uu(2),uu(3),F(1),F(2),F(3));
 
-(*U)-=0.5*uu*F; // last term  to correct energy
- // to easy convegergence of mcphasit the linearity of the einstein Oscillator is damped 
 
 int i=(int)MODPAR[9];
 switch(i)
@@ -162,6 +160,9 @@ case 6 : if(uu(3)>MODPAR[8])uu(3)=MODPAR[8];if(uu(3)<-MODPAR[8])uu(3)=-MODPAR[8]
          if(uu(2)>MODPAR[8])uu(2)=MODPAR[8];if(uu(2)<-MODPAR[8])uu(2)=-MODPAR[8];break;
 default: break;
 }
+(*U)-=0.5*uu*F; // last term  to correct energy
+(*lnZ)+=0.5*uu*F/K_BT; // last term  to correct energy
+ // to easy convergence of mcphasit the linearity of the einstein Oscillator is damped 
 
   u0=0;
   u0[1] = uu(1);

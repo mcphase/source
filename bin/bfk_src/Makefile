@@ -22,10 +22,10 @@ EXE=.exe
 STATIC=-static
 endif
 
-all :  clean ../bfk$(EXE) 
+all :  clean bfk.o 
 #../chibfk$(EXE) 
 
-../bfk$(EXE): bfk.f95
+bfk.o: bfk.f95
 	gfortran $(STATIC) -lgfortran -o ../bfk $^ 
 
 #../chibfk$(EXE): chibfk.f95

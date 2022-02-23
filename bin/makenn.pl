@@ -87,20 +87,25 @@ print STDOUT << "EOF";
               and the phonon model has to be added to makenn.j,  e.g. by
               program addj, moreover magnetic sites sipf files are required, 
               e.g. such as created in results/makenn.a*.sipf. 
+ option -e [filename]
  option -f [filename]
  option -dm [filename]
               read interaction constants from table in file. 
+              Use -e for isotropic interactions between momentum Ji and Jj 
+                         which only depend on distanc (distance vs coupling J)
               Use -f for isotropic interactions between momentum Ji and Jj
+                         (neighbour position vs coupling J)
               at positions i and j
                                ( J   0   0 )
               J Ji.Jj  =    Ji.( 0   J   0 ).Jj
                                ( 0   0   J ) 
-              and -dm for Dzyaloshinski Moriya interactions:
+              Use -dm for Dzyaloshinski Moriya interactions:
+                         (neighbour position vs Dx Dy Dz)
                                ( 0   Dz  -Dy )
               D.(Ji x Jj) = Ji.(-Dz  0    Dx ).Jj
                                ( Dy  -Dx  0  )
 
-              To get an sample file use option -f or -dm without a filename.      
+              To get an sample file use option -e -f or -dm without a filename.      
 EOF
 print "        -d puts to the last column the distance of the neighbors (A)\n\n";
 print " The neigbours of each atom are also stored in separate files\n";
@@ -177,47 +182,24 @@ elsif(/-cfph/)
 {$cfph=1; shift @ARGV;
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
 }
-elsif(/-f/||/-dm/)
+elsif(/-e/||/-f/||/-dm/)
   {$readtable=$_;shift @ARGV;
    unless ($#ARGV>=0) # if no filename is given print help
-   {    print STDOUT << "EOF";
-# Sample table of interaction constants for program makenn
-#
-# primitive unit cell range to probe for neighbours (optional):
-#! nr1min=-1  nr2min=-1  nr3min=0 
-#! nr1max=+1  nr2max=+1  nr3max=0
-#
-#! ignore_neihgbours_behind=0   # if set to 1 then only nearest neighbour in each 
-#                               # direction is taken
-#  
-EOF
-if(/-f/)
-{print STDOUT << "EOF";
-# Table of exchange interaction constants J - assumed to be isotropic
-# da [a] db [b] dc [c] J [meV]
-  1      0      0      -5.8
-  0      1      0      -5.8
-EOF
-}
-else
-{print STDOUT << "EOF";
-# Table of Dzyaloshinska Moriya exchange interaction constants DM - assumed to be isotropic
-# da [a] db [b] dc [c] Dmx [meV] Dmy [meV] Dmz [meV]
-  1      0      0      -5.8      -3.1      -2.5
-  0      1      0      -5.8      -3.1      -2.5
-EOF
-}
-
-   exit(0); }
+   {
+ $tabout=1; }
+  else
+ {
    $table_file=$ARGV[0];shift @ARGV;
-   $ignore_neihgbours_behind=0;
-   print "reading "; if ($readtable=~/-f/) {print " isotropic ";$DM=0;} else {print " DM ";$DM=1;}
+   $ignore_neihgbours_behind=0;$rtab=$readtable;
+   print "reading "; if ($readtable=~/-e/) {print " isotropic ";$DM=0;} 
+                  elsif ($readtable=~/-f/) {print " isotropic ";$DM=0;} 
+                   else {print " DM ";$DM=1;}
    $readtable=1;
    print" interactions from table in file $table_file\n";
    # read interaction constants from file
    unless(open(Fin,$table_file)){ die "could not open $table_file\n";}
              $n_table=0;
-             {while(<Fin>){      
+             while(<Fin>){      
                if (/^(#!|[^#])*nr1min\s*=\s*/){$readtable=2;($n1min)=extract("nr1min",$_);}
                if (/^(#!|[^#])*nr2min\s*=\s*/){$readtable=2;($n2min)=extract("nr2min",$_);}
                if (/^(#!|[^#])*nr3min\s*=\s*/){$readtable=2;($n3min)=extract("nr3min",$_);}
@@ -227,31 +209,38 @@ EOF
                if (/^(#!|[^#])*ignore_neihgbours_behind\s*=\s*/){($ignore_neihgbours_behind)=extract("ignore_neihgbours_behind",$_);}
                                  next if /^\s*#/;$line=$_;
                                  my @numbers=split(" ",$line);
-                                 if($#numbers>=3)
+                                 if($rtab=~/-e/)
+                                 {++$n_table;
+                                  $da[$n_table]=$numbers[0];
+                                  $Jex[$n_table]=$numbers[1];
+                                 }
+                                 if($rtab=~/-f/||$rtab=~/-dm/)
                                  {++$n_table;
                                   $da[$n_table]=$numbers[0];
                                   $db[$n_table]=$numbers[1];
                                   $dc[$n_table]=$numbers[2];
                                   $Jex[$n_table]=$numbers[3];
-                                  if($#numbers>=5){
+                                  if($DM==1){
                                   $Jey[$n_table]=$numbers[4];
                                   $Jez[$n_table]=$numbers[5];
-                                                  }
+                                            }
                                  }
                                 }
               close Fin;
        	     }
   }
+ 
 $_=$ARGV[0];
 if(/-d/)
   {$calcdist=1;print "putting distance of neighbors (A) to last column of makenn.j\n";}
 
 my ($latt,$p) = getlattice("./mcphas.j"); # gets lattice and atomic positions
 my ($a,$b,$c,$alpha,$beta,$gamma,$nofatoms,$nofcomponents) = @{$latt};
+unless($tabout) {
  print "rmax=".$rmax." A\n";
  print "a=".$a." b=".$b." c=".$c." alpha=".$alpha." beta=".$beta." gamma=".$gamma."\n";
  print "primitive lattice[abc]:".$p."\n";
-
+}
 # define transformation matrix to calculate components of
 # r1 r2 and r3 with respect to the ijk coordinate system
 # defined by j||b, k||(a x b) and i normal to k and j
@@ -288,7 +277,7 @@ $invrtoijk=inv($rtoijk); #invert this matrix for use later
 #            ]Note: transpose() does what it says and is a convenient way to turn row vectors into column vectors.
 
 $p= $p x $rtoijk;
- print "primitive lattice[A]:".$p."\n";
+unless($tabout){ print "primitive lattice[A]:".$p."\n";}
     $r=0;
 
 # first determine maximum distance of a basis atom to origin of unit cell
@@ -321,14 +310,53 @@ $p= $p x $rtoijk;
 #   print "$n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
   }}}
   }
-print "$n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
+if($tabout)
+{    print STDOUT << "EOF";
+# Sample table of interaction constants for program makenn
+#
+# primitive unit cell range to probe for neighbours (optional):
+#! nr1min=$n1min  nr2min=$n2min  nr3min=$n3min 
+#! nr1max=$n1max  nr2max=$n2max  nr3max=$n3max
+#
+#! ignore_neihgbours_behind=0   # if set to 1 then only nearest neighbour in each 
+#                               # direction is taken
+#  
+EOF
+$_=$readtable;
+if(/-e/)
+{print STDOUT << "EOF";
+# Table of exchange interaction constants J - assumed to be isotropic
+# |Rij| [A]  J [meV]  atom_i  atom_j 
+EOF
 
-     #initialize output file results/makenn.j
- my ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
-print "number of atoms = $nofatoms\n calculating ...\n";
+}
+elsif(/-f/)
+{print STDOUT << "EOF";
+# Table of exchange interaction constants J - assumed to be isotropic
+# da [a]    db [b]    dc [c]    J [meV]   atom_i  atom_j  |Rij| [A] 
+EOF
+
+}
+else
+{print STDOUT << "EOF";
+# Table of Dzyaloshinska Moriya exchange interaction constants DM 
+#  (default values are neighbour pos in [A]- please modify)
+# da [a]    db [b]    dc [c]    Dmx [meV] Dmy [meV] Dmz [meV] atom_i  atom_j  |Rij| [A] 
+EOF
+
+}
+}
+else
+{
+print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
+
+     # initialize output file results/makenn.j
+  ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
+print "# number of atoms = $nofatoms\n calculating ...\n";
+}               
  for ($nnn=1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)    
- { if($nnn>$nofatoms){print "new magnetic ";}
-   print "atom $nnn ...";
+ {unless($tabout){ if($nnn>$nofatoms){print "# new magnetic ";}
+   print "# atom $nnn ...";}
      my $gJ=$gJ[$nnn];
      my $sipffilename=$sipf_file[$nnn];
      my ($rn)=new PDL ();
@@ -371,6 +399,34 @@ print "number of atoms = $nofatoms\n calculating ...\n";
    $zz=$aabbcc->at(2);
 
    if ($r<=$rmax && $r>0){#save neighbour j format
+   if($tabout){
+# check if neighbour is already in table
+$ff=0;
+ for($ntbl=1;$ntbl<=$n_table;++$ntbl){$_=$readtable;
+if(/-e/&&abs($da[$ntbl]-$r)<0.001){$ff=1;}
+elsif((/-f/||/-dm/)&&
+      abs($da[$ntbl]-$xx)<0.001&&
+      abs($db[$ntbl]-$yy)<0.001&&
+      abs($dc[$ntbl]-$zz)<0.001){$ff=1;}
+                                  }
+
+if($ff==0){++$n_table;
+          $_=$readtable;
+if(/-e/)
+{$da[$ntbl]=$r;
+ print sprintf("%+10.6f     0       a%i a%i \n",$r,$nnn,$nz);
+}
+elsif(/-f/)
+{$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
+ print sprintf("%+10.6f %+10.6f %+10.6f 0        a%i a%i %+10.6f\n",$xx, $yy ,$zz,$nnn,$nz,$r);
+}
+else
+{$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
+  print sprintf("%+10.6f %+10.6f %+10.6f    %+10.6f %+10.6f %+10.6f     a%i a%i %+10.6f\n",$xx, $yy ,$zz,$rvec->at(0),$rvec->at(1),$rvec->at(2),$nnn,$nz,$r);
+}
+          }
+              }
+
           unless($readtable>0){
     $an=$an->append( pdl ([$nz]));
     $rn=$rn->append( pdl ([$r]));
@@ -395,10 +451,22 @@ print "number of atoms = $nofatoms\n calculating ...\n";
                                } else
                                {# check if neighbour is in readtable - if yes, save it
                                for($ntbl=1;$ntbl<=$n_table;++$ntbl){
-                                 if(abs($da[$ntbl]-$xx)<0.001&&
+                                 if(($rtab=~/-f/&&
+                                    abs($da[$ntbl]-$xx)<0.001&&
                                     abs($db[$ntbl]-$yy)<0.001&&
                                     abs($dc[$ntbl]-$zz)<0.001&&
-                                    $Jex[$ntbl]!=0.0)
+                                    $Jex[$ntbl]!=0.0)||
+                                    ($rtab=~/-e/&&
+                                     abs($da[$ntbl]-$r)<0.001&&
+                                     $Jex[$ntbl]!=0.0)||
+                                   ($rtab=~/-dm/&&
+                                    abs($da[$ntbl]-$xx)<0.001&&
+                                    abs($db[$ntbl]-$yy)<0.001&&
+                                    abs($dc[$ntbl]-$zz)<0.001&&
+                                    ($Jex[$ntbl]!=0.0||
+                                    $Jey[$ntbl]!=0.0)||
+                                    $Jez[$ntbl]!=0.0)
+                                   ) 
                                   {# ok save it
     $an=$an->append( pdl ([$nz]));
     $rn=$rn->append( pdl ([$r]));
@@ -430,7 +498,9 @@ unless($DM>0){
     $Jcb=$Jcb->append( pdl ([-$Jex[$ntbl]]));
     $Jcc=$Jcc->append( pdl ([0.0]));
               }
-                                  }                             } 
+                                  }    
+
+                         } 
                                }
                       }
     }}}}  
@@ -459,9 +529,9 @@ unless($DM>0){
      }
    }
    if($nofneighbours[$nnn]==-1){$nofneighbours[$nnn]=0;}
-   print $nofneighbours[$nnn]." neighbours found\n";
+   unless($tabout){print $nofneighbours[$nnn]." neighbours found\n";}
    $n= qsorti($rn); 
-   printneighbourlist($h,$l,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);
+unless($tabout){printneighbourlist($h,$l,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);}
  }
 
 
@@ -561,7 +631,7 @@ for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
 endprint($h,$l);
 }
 
-
+if($tabout){exit;}
  print "created files: results/makenn.j     (interaction parameters)\n";
  print "               results/makenn.a*.pc (pointcharge environment files)\n";
 print "********************************************************\n";
@@ -822,7 +892,7 @@ sub getlattice {
 
      close $h; 
 
-     if ($n!=$nofatoms) {print STDOUT "Failed to read data file \"$file\": wrong number of atoms\n";
+     if ($n!=$nofatoms) {print STDOUT "# Failed to read data file \"$file\": wrong number of atoms\n";
 
                          return undef;}
      if ($alpha<=0) { die "ERROR makenn: reading unit cell angle alpha=$alpha <=0\n";}
@@ -881,7 +951,7 @@ sub printneighbourlist {
      if (/^(#!|[^#])*nofneighbours\s*=\s*/){($nn0)=extract("nofneighbours",$text);
                                             $text=~s!nofneighbours\s*=\s*\d+!nofneighbours=$nofn!;}
      if (/^(#!|[^#])*diagonalexchange\s*=\s*/){
-print $DM;
+
       if ($rkky>=1||($readtable>0&&$DM<1))
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=1!;}
       else
