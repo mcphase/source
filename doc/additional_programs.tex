@@ -18,6 +18,7 @@ by doing a mcphas or
 \begin{verbatim}
      usage: anisotropy -h
            anisotropy  T H xn yn zn nofsteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
+           anisotropy  T H -p nofthetasteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
 
      -h           : this (help) message
       T           : temperature in Kelvin
@@ -27,6 +28,8 @@ by doing a mcphas or
                     calculate the anisotropy in the xy plane, then
                     enter xn yn zn = 0 0 1
       nofsteps    : number of steps to be calculated 
+     -p           : calculate polycystal average
+      nofthetastepssteps    : number of theta steps to be calculated for polycrystasl average
 
     option:
     -r sipffilename: filename of single ion parameter file

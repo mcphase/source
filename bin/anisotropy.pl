@@ -9,22 +9,22 @@ use File::Copy;
 usage() if $#ARGV<2;
 $PI=3.141592654;
 print STDOUT << "EOF";
-*******************************************************
-               program anisotropy
-        M Rotter 2013 - calculating magnetic anistropy 
-*******************************************************
+#*******************************************************
+#               program anisotropy
+#        M Rotter 2013 - calculating magnetic anistropy 
+#*******************************************************
 EOF
 
 system("anisotropyit @ARGV");
 print STDOUT << "EOF";
-*******************************************************
-you may now view an anisotropy plot by command
-
-    display 8 13 results/anisotropy.out
-
-              end of program anisotropy
-Reference: M. Rotter et al. PRB 68 (2003) 144418
-*******************************************************
+#*******************************************************
+#you may now view an anisotropy plot by command
+#
+#    display 8 13 results/anisotropy.out
+#
+#              end of program anisotropy
+# Reference: M. Rotter et al. PRB 68 (2003) 144418
+#*******************************************************
 EOF
 system("display 8 13 results/anisotropy.out");
 exit;
@@ -40,6 +40,7 @@ sub usage() {
 
     usage: anisotropy -h
            anisotropy  T H xn yn zn nofsteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
+           anisotropy  T H -p nofthetasteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
 
      -h           : this (help) message
       T           : temperature in Kelvin
@@ -49,6 +50,8 @@ sub usage() {
                     calculate the anisotropy in the xy plane, then
                     enter xn yn zn = 0 0 1
       nofsteps    : number of steps to be calculated 
+     -p           : calculate polycystal average
+      nofthetastepssteps    : number of theta steps to be calculated for polycrystasl average
 
     option:
     -r sipffilename: filename of single ion parameter file

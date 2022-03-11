@@ -84,7 +84,7 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,doubl
    fprintf(fout,"#! maxE= %g meV(maximum value of transition energy)-do not modify: needed to count transitions\n",maxE);
    fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",T,Hext(1),Hext(2),Hext(3));
    fprintf(fout,"#*********************************************************************\n");
-   fprintf (fout, "#i j k ionnr transnr energy |gamma_s| sigma_mag_dip[barn/sr](*) "
+   fprintf (fout, "#i j k ionnr transnr energy(meV) |gamma_s| sigma_mag_dip[barn/sr](*) "
                    " n  n'  wnn'|<n|%c%c1-<%c%c1>|n'>|^2 wnn'|<n|%c%c2-<%c%c2>|n'>|^2 ... "
                    "with wnn'=wn-wn' for n!=n'  and wnn=wn/k_B T \n",cc,observable,cc,observable,cc,observable,cc,observable);
 }
