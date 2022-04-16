@@ -50,8 +50,8 @@ sub usage() {
                     calculate the anisotropy in the xy plane, then
                     enter xn yn zn = 0 0 1
       nofsteps    : number of steps to be calculated 
-     -p           : calculate polycystal average
-      nofthetastepssteps    : number of theta steps to be calculated for polycrystasl average
+     -p           : calculate polycrystal average
+      nofthetastepssteps    : number of theta steps to be calculated for polycrystal average
 
     option:
     -r sipffilename: filename of single ion parameter file

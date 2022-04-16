@@ -59,9 +59,9 @@
 #               . update WEB PAGES: - check all information and add new, update list of papers on mcphas, references
 #                                   - put .tgz and .exe and if available additional software on web
 #                                   - test if mcphase can be installed on different computer systems
-#               . set GIT MASETER  ... after the next commit we should create a new branch by
-#                              git checkout -b master5_3
-#                              git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_3
+#               . set GIT MASTER  ... after the next commit we should create a new branch by
+#                              git checkout -b master5_5
+#                              git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_5
 #
 #    Screen Saver
 #

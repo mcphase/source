@@ -24,7 +24,7 @@ void _init(void)
 void _fini(void)
 {  fprintf(stdout,"phonon.so: is removed\n");}
 
-//routine mcalc for phonon
+//routine Icalc for phonon
 #ifdef __MINGW32__
 extern "C" __declspec(dllexport) void Icalc(Vector & u0,double * T, Vector &Fxc, Vector & Hext,double * g_J, Vector & MODPAR,char ** sipffilename,
                       double * lnZ,double * U,ComplexMatrix & Icalc_parstorage)
@@ -273,4 +273,23 @@ extern "C" int dP1(int & tn,double & T,Vector & Fxc, Vector & Hext,
  double a0=0.5219; // Bohr radius in A
  P1*=a0;
  return noft;
+}
+
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           void mcalc(Vector &mom,        // Output magnetic moment (mub)
+                      double *T,          // Input scalar temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
+{
+   
+   mom(1)=0;
+   mom(2)=0;
+   mom(3)=0;
 }

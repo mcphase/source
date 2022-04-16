@@ -366,16 +366,16 @@ if( (Bx2!=0.0 || By2!=0.0 || Bz2!=0.0) && (symmetrienr == 10 || symmetrienr == 0
 t02="#-------------------------------------------------------------- \n";
 t03="#                Anisotropy parameters in meV.                  \n";
 t04="#-------------------------------------------------------------- \n";
-t05="#         H= + Dx2 Jx ^ 2+ Dy2 Jy ^ 2+ Dz2 Jz ^ 2               \n";
-t06="#! Dx2 =   %11.2f                                     \n";
-t07="#! Dy2 =   %11.2f                                     \n";
-t08="#! Dz2 =   %11.2f                                     \n";
+t05="# H=Dx2 Jx^2+ Dy2 Jy^2+ Dz2 Jz^2 +Dx4 Jx^4+ Dy4 Jy^4+ Dz4 Jz^4  \n";
+t06="#! Dx2 =   %11.2f       Dx4 =   %11.2f                          \n";
+t07="#! Dy2 =   %11.2f       Dy4 =   %11.2f                          \n";
+t08="#! Dz2 =   %11.2f       Dz4 =   %11.2f                           \n";
 t09="#                                                              \n";
 t10="#-------------------------------------------------------------- \n";
     fprintf(fp,"%s",t02);fprintf(fp,"%s",t03);fprintf(fp,"%s",t04); fprintf(fp,"%s",t05);
-    fprintf(fp,t06,is_null(B1S(iteration),0.001 ));
-    fprintf(fp,t07,is_null(B2S(iteration),0.001 ));
-    fprintf(fp,t08,is_null(B3S(iteration),0.001 ));
+    fprintf(fp,t06,is_null(B1S(iteration),0.001 ),is_null(B1SS(iteration),0.001 ));
+    fprintf(fp,t07,is_null(B2S(iteration),0.001 ),is_null(B2SS(iteration),0.001 ));
+    fprintf(fp,t08,is_null(B3S(iteration),0.001 ),is_null(B3SS(iteration),0.001 ));
     fprintf(fp,"%s",t09);fprintf(fp,"%s",t10);fprintf(fp,"%s",t29);
 }
  
@@ -1366,9 +1366,12 @@ DOUBLE magnetm(mat_Ji,setup,ewproblem,kristallfeld,Bx,By,Bz,t)
     Dx2        = B1S(iteration);
     Dy2        = B2S(iteration);
     Dz2        = B3S(iteration);
+    Dx4        = B1SS(iteration);
+    Dy4        = B2SS(iteration);
+    Dz4        = B3SS(iteration);
  
   
-    HMAG(iteration) = calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2);
+    HMAG(iteration) = calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4);
 
     ewproblem       = solve(setup,ewproblem,NEIN,kristallfeld,art);
 /* here changed to NOSPACE to NEIN MR okt 2002 - because NOSPACE leads

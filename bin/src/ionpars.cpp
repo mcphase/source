@@ -603,7 +603,7 @@ void ionpars::save(FILE * file) // save ion parameters to file
                       fprintf(file,"#---------------------------------------------------------------------------\n");
                       savLlm(file);fprintf(file,"\n");
                      }
-   if(alpha*alpha+beta*beta+gamma*gamma>1e-10){fprintf(file,"#----------------\n# Stevens Factors\n#----------------\nALPHA=%g\nBETA=%g\nGAMMA=%g\n\n",alpha,beta,gamma);}
+  if(alpha*alpha+beta*beta+gamma*gamma>1e-10){   fprintf(file,"#----------------\n# Stevens Factors\n#----------------\nALPHA=%g\nBETA=%g\nGAMMA=%g\n\n",alpha,beta,gamma); }
    if(r2+r4+r6>1e-10){fprintf(file,"#---------------------------------------------------------\n");
                       fprintf(file,"# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)\n");
                       fprintf(file,"#---------------------------------------------------------\n");

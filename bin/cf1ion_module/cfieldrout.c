@@ -2797,13 +2797,13 @@ MATRIX *calc_Bmag( dimj,gj,myB,Bx,By,Bz ) /*magnetischen Hamiltonian */
 /*------------------------------------------------------------------------------
                                     calc_Bmag_D()
 ------------------------------------------------------------------------------*/
-MATRIX *calc_Bmag_D( dimj,gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2 ) /*magnetischen Hamiltonian */
-    INT    dimj;                                     /* Hmag = - gJ muB J.B + simple anisotropy  H= + Dx2 Jx ^ 2+ Dy2 Jy ^ 2+ Dz2 Jz ^ 2      */
-    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2;
+MATRIX *calc_Bmag_D( dimj,gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4 ) /*magnetischen Hamiltonian */
+    INT    dimj;                                     /* Hmag = - gJ muB J.B + simple anisotropy  H= + Dx2 Jx ^ 2+ Dy2 Jy ^ 2+ Dz2 Jz ^ 2 + Dx4 Jx ^ 4+ Dy4 Jy ^ 4+ Dz4 Jz ^ 4      */
+    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4;
 {
     INT    m,n;
     MATRIX *bmag,*mx_alloc();
-    DOUBLE jm,jp,jx2,jy2;
+    DOUBLE jm,jp,jx2,jy2,jx4,jy4;
 
     #include "define_j.c"          /* mj,J2,J+,... definieren */
     bmag = mx_alloc( dimj,dimj );  /* Speicher fuer (J nj| Hmag |mj J)*/
@@ -2812,12 +2812,16 @@ MATRIX *calc_Bmag_D( dimj,gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2 ) /*magnetischen Hamiltoni
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-              jx2=0.25*(JM(mj)*JP(mj-1)*D(nj,mj)+JM(mj+1)*JP(mj)*D(nj,mj));
+              jx2=0.25*(JPM(mj)*D(nj,mj));
               jy2=jx2;
-              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM(mj)*JM(mj-1);jy2-=0.25*JM(mj)*JM(mj-1);}
-              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP(mj+1)*JP(mj);jy2-=0.25*JP(mj+1)*JP(mj);}
+              jx4=jx2*jx2+0.0625*(JP2(mj-2)*JM2(mj)+JM2(mj+2)*JP2(mj));
+              jy4=jx4;
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPM(mj);jy4-=0.0625*JM2(mj)*JPM(mj);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPM(mj);jy4-=0.0625*JP2(mj)*JPM(mj);}
+              if (D(nj,mj-4)>0.5) {jx4+=0.0625*JM2(mj-2)*JM2(mj);jy4+=0.0625*JM2(mj-2)*JM2(mj);}
+              if (D(nj,mj+4)>0.5) {jx4+=0.0625*JP2(mj+2)*JP2(mj);jy4+=0.0625*JP2(mj+2)*JP2(mj);}
 /* sign changed 24.9.08 because zeeman term has negative sign */
-              R(bmag,n,m) = -gj*myB*(  0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  )+Dz2*mj*mj*D(nj,mj)+Dx2*jx2+Dy2*jy2;
+              R(bmag,n,m) = -gj*myB*(  0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  )+Dz2*mj*mj*D(nj,mj)+Dx2*jx2+Dy2*jy2+Dz4*mj*mj*mj*mj*D(nj,mj)+Dx4*jx4+Dy4*jy4;
               I(bmag,n,m) = -gj*myB*   0.5*By*( jm-jp );
     }
 
@@ -2852,13 +2856,13 @@ MATRIX *calcBmol( dimj,bmag,gjs,myB,Bx,By,Bz )   /* gjs = 2(gJ-1) */
 /*------------------------------------------------------------------------------
                                     calc_iBmag()
 ------------------------------------------------------------------------------*/
-MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 )
+MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4 )
     MATRIX *bmag;
-    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2;
+    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4;
     DOUBLE Bxmol,Bymol,Bzmol;
 {
     INT    m,n,dimj;
-    DOUBLE jm,jp,jx2,jy2;
+    DOUBLE jm,jp,jx2,jy2,jx4,jy4;
  
     #include "define_j.c"          /* mj,J2,J+,... definieren */
                                    /* <nj| A |mj>             */
@@ -2873,18 +2877,23 @@ MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 )
                             + mj*Bzmol*D(nj,mj)  );
               I(bmag,n,m) = -2.0*(gj-1.0)*myB* 0.5*Bymol*( jm-jp );
          }
-    for( n=dimj ; n>=1 ; --n)
+for( n=dimj ; n>=1 ; --n)
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-              jx2=0.25*(JM(mj)*JP(mj-1)*D(nj,mj)+JM(mj+1)*JP(mj)*D(nj,mj));
+              jx2=0.25*(JPM(mj)*D(nj,mj));
               jy2=jx2;
-              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM(mj)*JM(mj-1);jy2-=0.25*JM(mj)*JM(mj-1);}
-              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP(mj+1)*JP(mj);jy2-=0.25*JP(mj+1)*JP(mj);}
- /* sign changed 24.9.08 because zeeman term has negative sign */
-             R(bmag,n,m) += -gj*myB*(0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  )+Dz2*mj*mj*D(nj,mj)+Dx2*jx2+Dy2*jy2;
-              I(bmag,n,m) += -gj*myB* 0.5*By*( jm-jp );
-         }
+              jx4=jx2*jx2+0.0625*(JP2(mj-2)*JM2(mj)+JM2(mj+2)*JP2(mj));
+              jy4=jx4;
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPM(mj);jy4-=0.0625*JM2(mj)*JPM(mj);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPM(mj);jy4-=0.0625*JP2(mj)*JPM(mj);}
+              if (D(nj,mj-4)>0.5) {jx4+=0.0625*JM2(mj-2)*JM2(mj);jy4+=0.0625*JM2(mj-2)*JM2(mj);}
+              if (D(nj,mj+4)>0.5) {jx4+=0.0625*JP2(mj+2)*JP2(mj);jy4+=0.0625*JP2(mj+2)*JP2(mj);}
+/* sign changed 24.9.08 because zeeman term has negative sign */
+              R(bmag,n,m) += -gj*myB*(  0.5*Bx*( jm+jp ) + mj*Bz*D(nj,mj)  )+Dz2*mj*mj*D(nj,mj)+Dx2*jx2+Dy2*jy2+Dz4*mj*mj*mj*mj*D(nj,mj)+Dx4*jx4+Dy4*jy4;
+              I(bmag,n,m) += -gj*myB*   0.5*By*( jm-jp );
+    }
+
     return( bmag );
 }
 /*------------------------------------------------------------------------------
@@ -3111,36 +3120,36 @@ void info_symmetrien(name)  /* Info ueber implementierte Symmetrien ausgeben */
     fp = fopen_errchk(name,"w");
  
     fprintf(fp,"===========================================================\n");
-    fprintf(fp,"º Table of implemented Symmetries                         º\n");
+    fprintf(fp,"ï¿½ Table of implemented Symmetries                         ï¿½\n");
     fprintf(fp,"===========================================================\n");
-    fprintf(fp,"º +-Symmetrynr. º Point groups of the crystal field       º\n");
+    fprintf(fp,"ï¿½ +-Symmetrynr. ï¿½ Point groups of the crystal field       ï¿½\n");
     fprintf(fp,"- V -------------+-----------------------------------------\n");
-    fprintf(fp,"º   º            º  C    C                                º\n");
-    fprintf(fp,"º 0 º triclinic    º   i    1                               º\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  C    C                                ï¿½\n");
+    fprintf(fp,"ï¿½ 0 ï¿½ triclinic    ï¿½   i    1                               ï¿½\n");
     fprintf(fp,"----+------------+-----------------------------------------\n");
-    fprintf(fp,"º   º            º  C    C    C                           º\n");
-    fprintf(fp,"º 1 º monoclinic   º   2    s    2h                         º\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  C    C    C                           ï¿½\n");
+    fprintf(fp,"ï¿½ 1 ï¿½ monoclinic   ï¿½   2    s    2h                         ï¿½\n");
     fprintf(fp,"----+------------+-----------------------------------------\n");
-    fprintf(fp,"º   º            º  C    D    D                           º\n");
-    fprintf(fp,"º 2 º rhombich  º   2v   2    2h                         º\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  C    D    D                           ï¿½\n");
+    fprintf(fp,"ï¿½ 2 ï¿½ rhombich  ï¿½   2v   2    2h                         ï¿½\n");
     fprintf(fp,"----+------------+-----------------------------------------\n");
-    fprintf(fp,"º   º            º  C    S    C                           º\n");
-    fprintf(fp,"º 3 º            º   4    4    4h                         º\n");
-    fprintf(fp,"º---º tetragonal º-----------------------------------------\n");
-    fprintf(fp,"º   º            º  D    C    D    D                      º\n");
-    fprintf(fp,"º 4 º            º   4    4v   2d   4h                    º\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  C    S    C                           ï¿½\n");
+    fprintf(fp,"ï¿½ 3 ï¿½            ï¿½   4    4    4h                         ï¿½\n");
+    fprintf(fp,"ï¿½---ï¿½ tetragonal ï¿½-----------------------------------------\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  D    C    D    D                      ï¿½\n");
+    fprintf(fp,"ï¿½ 4 ï¿½            ï¿½   4    4v   2d   4h                    ï¿½\n");
     fprintf(fp,"----+------------+-----------------------------------------\n");
-    fprintf(fp,"º   º            º  C    S                                º\n");
-    fprintf(fp,"º 5 º            º   3    6                               º\n");
-    fprintf(fp,"----º trigonal   º-----------------------------------------\n");
-    fprintf(fp,"º   º            º  D    C    D                           º\n");
-    fprintf(fp,"º 6 º            º   3    3v   3d                         º\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  C    S                                ï¿½\n");
+    fprintf(fp,"ï¿½ 5 ï¿½            ï¿½   3    6                               ï¿½\n");
+    fprintf(fp,"----ï¿½ trigonal   ï¿½-----------------------------------------\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  D    C    D                           ï¿½\n");
+    fprintf(fp,"ï¿½ 6 ï¿½            ï¿½   3    3v   3d                         ï¿½\n");
     fprintf(fp,"----+------------+-----------------------------------------\n");
-    fprintf(fp,"º   º            º  C    C    C    D    C    D    D       º\n");
-    fprintf(fp,"º 7 º hexagonal  º   6    3h   6h   6    6v   3h   6h     º\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  C    C    C    D    C    D    D       ï¿½\n");
+    fprintf(fp,"ï¿½ 7 ï¿½ hexagonal  ï¿½   6    3h   6h   6    6v   3h   6h     ï¿½\n");
     fprintf(fp,"----+------------+-----------------------------------------\n");
-    fprintf(fp,"º   º            º  T    T    T    O    O                 º\n");
-    fprintf(fp,"º 8 º Cubic    º        d    h         h                º\n");
+    fprintf(fp,"ï¿½   ï¿½            ï¿½  T    T    T    O    O                 ï¿½\n");
+    fprintf(fp,"ï¿½ 8 ï¿½ Cubic    ï¿½        d    h         h                ï¿½\n");
     fprintf(fp,"-----------------------------------------------------------\n");
     fprintf(fp,"\n");
  
@@ -3491,11 +3500,11 @@ void info_epsilonkq()   /* Liste der Faktoren epsilonkq */
  
  
      s01 = "======================== \n";
-    s02 = "º        º             º \n";
-    s03 = "º  k   q º epsilon     º \n";
-    s04 = "º        º        kq   º \n";
+    s02 = "ï¿½        ï¿½             ï¿½ \n";
+    s03 = "ï¿½  k   q ï¿½ epsilon     ï¿½ \n";
+    s04 = "ï¿½        ï¿½        kq   ï¿½ \n";
     s05 = "======================== \n";
-    s06 = "º %2d %2d º %12.9f º    \n";
+    s06 = "ï¿½ %2d %2d ï¿½ %12.9f ï¿½    \n";
     s07 = "------------------------ \n";
 
 
@@ -3830,11 +3839,11 @@ INT k,q;
     fprintf(fp,"%s\n",t55);
  
     s01 = "======================= \n";
-    s02 = "º       º             º \n";
-    s03 = "º  k  q º   omega     º \n";
-    s04 = "º       º        kq   º \n";
+    s02 = "ï¿½       ï¿½             ï¿½ \n";
+    s03 = "ï¿½  k  q ï¿½   omega     ï¿½ \n";
+    s04 = "ï¿½       ï¿½        kq   ï¿½ \n";
     s05 = "======================= \n";
-    s06 = "º %2d %2d º    %3.0f      º  \n";
+    s06 = "ï¿½ %2d %2d ï¿½    %3.0f      ï¿½  \n";
     s07 = "----------------------- \n";
  
  

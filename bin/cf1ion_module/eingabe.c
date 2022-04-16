@@ -2213,6 +2213,10 @@ ITERATION *iteration;
      extract(line,"Dx2", &B1S(iteration),"meV");
      extract(line,"Dy2", &B2S(iteration),"meV");
      extract(line,"Dz2", &B3S(iteration),"meV"); 
+     
+     extract(line,"Dx4", &B1SS(iteration),"meV");
+     extract(line,"Dy4", &B2SS(iteration),"meV");
+     extract(line,"Dz4", &B3SS(iteration),"meV"); 
      }
     }
     printf("V21i=%g\n",IT(V21(iteration)));

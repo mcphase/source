@@ -350,13 +350,13 @@ typedef struct _comrl2{
 typedef struct _stevens{
     INT    dimj;             /* Gesamtdrehimpuls J ,dimj := 2J+1*/
  
-    MATRIX *p0p0;            /* Matrix (JM'º P0+0(J) ºJM) */
+    MATRIX *p0p0;            /* Matrix (JM'ï¿½ P0+0(J) ï¿½JM) */
  
-    MATRIX *p2p2;            /* Matrix (JM'º P2+2(J) ºJM) */
-    MATRIX *p2p1;            /* Matrix (JM'º P2+1(J) ºJM) */
-    MATRIX *p2p0;            /* Matrix (JM'º P2+0(J) ºJM) */
-    MATRIX *p2m1;            /* Matrix (JM'º P2-1(J) ºJM) */
-    MATRIX *p2m2;            /* Matrix (JM'º P2-2(J) ºJM) */
+    MATRIX *p2p2;            /* Matrix (JM'ï¿½ P2+2(J) ï¿½JM) */
+    MATRIX *p2p1;            /* Matrix (JM'ï¿½ P2+1(J) ï¿½JM) */
+    MATRIX *p2p0;            /* Matrix (JM'ï¿½ P2+0(J) ï¿½JM) */
+    MATRIX *p2m1;            /* Matrix (JM'ï¿½ P2-1(J) ï¿½JM) */
+    MATRIX *p2m2;            /* Matrix (JM'ï¿½ P2-2(J) ï¿½JM) */
  
     MATRIX *p3p3;            /* Matrix (JM'| P3+3(J) |JM) */
     MATRIX *p3p2;            /* Matrix (JM'| P3+2(J) |JM) */
@@ -367,15 +367,15 @@ typedef struct _stevens{
     MATRIX *p3m3;            /* Matrix (JM'| P3-3(J) |JM) */
 
  
-    MATRIX *p4p4;            /* Matrix (JM'º P4+4(J) ºJM) */
-    MATRIX *p4p3;            /* Matrix (JM'º P4+3(J) ºJM) */
-    MATRIX *p4p2;            /* Matrix (JM'º P4+2(J) ºJM) */
-    MATRIX *p4p1;            /* Matrix (JM'º P4+1(J) ºJM) */
-    MATRIX *p4p0;            /* Matrix (JM'º P4+0(J) ºJM) */
-    MATRIX *p4m1;            /* Matrix (JM'º P4-1(J) ºJM) */
-    MATRIX *p4m2;            /* Matrix (JM'º P4-2(J) ºJM) */
-    MATRIX *p4m3;            /* Matrix (JM'º P4-3(J) ºJM) */
-    MATRIX *p4m4;            /* Matrix (JM'º P4-4(J) ºJM) */
+    MATRIX *p4p4;            /* Matrix (JM'ï¿½ P4+4(J) ï¿½JM) */
+    MATRIX *p4p3;            /* Matrix (JM'ï¿½ P4+3(J) ï¿½JM) */
+    MATRIX *p4p2;            /* Matrix (JM'ï¿½ P4+2(J) ï¿½JM) */
+    MATRIX *p4p1;            /* Matrix (JM'ï¿½ P4+1(J) ï¿½JM) */
+    MATRIX *p4p0;            /* Matrix (JM'ï¿½ P4+0(J) ï¿½JM) */
+    MATRIX *p4m1;            /* Matrix (JM'ï¿½ P4-1(J) ï¿½JM) */
+    MATRIX *p4m2;            /* Matrix (JM'ï¿½ P4-2(J) ï¿½JM) */
+    MATRIX *p4m3;            /* Matrix (JM'ï¿½ P4-3(J) ï¿½JM) */
+    MATRIX *p4m4;            /* Matrix (JM'ï¿½ P4-4(J) ï¿½JM) */
  
     MATRIX *p5p5;            /* Matrix (JM'| P5+5(J) |JM) */
     MATRIX *p5p4;            /* Matrix (JM'| P5+4(J) |JM) */
@@ -390,31 +390,31 @@ typedef struct _stevens{
     MATRIX *p5m5;            /* Matrix (JM'| P5-5(J) |JM) */
 
  
-    MATRIX *p6p6;            /* Matrix (JM'º P6+6(J) ºJM) */
-    MATRIX *p6p5;            /* Matrix (JM'º P6+5(J) ºJM) */
-    MATRIX *p6p4;            /* Matrix (JM'º P6+4(J) ºJM) */
-    MATRIX *p6p3;            /* Matrix (JM'º P6+3(J) ºJM) */
-    MATRIX *p6p2;            /* Matrix (JM'º P6+2(J) ºJM) */
-    MATRIX *p6p1;            /* Matrix (JM'º P6+1(J) ºJM) */
-    MATRIX *p6p0;            /* Matrix (JM'º P6+0(J) ºJM) */
-    MATRIX *p6m1;            /* Matrix (JM'º P6-1(J) ºJM) */
-    MATRIX *p6m2;            /* Matrix (JM'º P6-2(J) ºJM) */
-    MATRIX *p6m3;            /* Matrix (JM'º P6-3(J) ºJM) */
-    MATRIX *p6m4;            /* Matrix (JM'º P6-4(J) ºJM) */
-    MATRIX *p6m5;            /* Matrix (JM'º P6-5(J) ºJM) */
-    MATRIX *p6m6;            /* Matrix (JM'º P6-6(J) ºJM) */
+    MATRIX *p6p6;            /* Matrix (JM'ï¿½ P6+6(J) ï¿½JM) */
+    MATRIX *p6p5;            /* Matrix (JM'ï¿½ P6+5(J) ï¿½JM) */
+    MATRIX *p6p4;            /* Matrix (JM'ï¿½ P6+4(J) ï¿½JM) */
+    MATRIX *p6p3;            /* Matrix (JM'ï¿½ P6+3(J) ï¿½JM) */
+    MATRIX *p6p2;            /* Matrix (JM'ï¿½ P6+2(J) ï¿½JM) */
+    MATRIX *p6p1;            /* Matrix (JM'ï¿½ P6+1(J) ï¿½JM) */
+    MATRIX *p6p0;            /* Matrix (JM'ï¿½ P6+0(J) ï¿½JM) */
+    MATRIX *p6m1;            /* Matrix (JM'ï¿½ P6-1(J) ï¿½JM) */
+    MATRIX *p6m2;            /* Matrix (JM'ï¿½ P6-2(J) ï¿½JM) */
+    MATRIX *p6m3;            /* Matrix (JM'ï¿½ P6-3(J) ï¿½JM) */
+    MATRIX *p6m4;            /* Matrix (JM'ï¿½ P6-4(J) ï¿½JM) */
+    MATRIX *p6m5;            /* Matrix (JM'ï¿½ P6-5(J) ï¿½JM) */
+    MATRIX *p6m6;            /* Matrix (JM'ï¿½ P6-6(J) ï¿½JM) */
  
-    MATRIX *o2p0;            /* Matrix (JM'º O20(J)  ºJM) */
-    MATRIX *o2p2;            /* Matrix (JM'º O22(J)  ºJM) */
-    MATRIX *o4p2;            /* Matrix (JM'º O42(J)  ºJM) */
-    MATRIX *o6p2;            /* Matrix (JM'º O62(J)  ºJM) */
-    MATRIX *o6p6;            /* Matrix (JM'º O66(J)  ºJM) */
+    MATRIX *o2p0;            /* Matrix (JM'ï¿½ O20(J)  ï¿½JM) */
+    MATRIX *o2p2;            /* Matrix (JM'ï¿½ O22(J)  ï¿½JM) */
+    MATRIX *o4p2;            /* Matrix (JM'ï¿½ O42(J)  ï¿½JM) */
+    MATRIX *o6p2;            /* Matrix (JM'ï¿½ O62(J)  ï¿½JM) */
+    MATRIX *o6p6;            /* Matrix (JM'ï¿½ O66(J)  ï¿½JM) */
  
-    MATRIX *o4p05;           /* Matrix (JM'º O40(J)+ 5O44(J)ºJM) */
-    MATRIX *o4m05;           /* Matrix (JM'º O40(J)- 5O44(J)ºJM) */
+    MATRIX *o4p05;           /* Matrix (JM'ï¿½ O40(J)+ 5O44(J)ï¿½JM) */
+    MATRIX *o4m05;           /* Matrix (JM'ï¿½ O40(J)- 5O44(J)ï¿½JM) */
  
-    MATRIX *o6p21;           /* Matrix (JM'º O60(J)+21O64(J)ºJM) */
-    MATRIX *o6m21;           /* Matrix (JM'º O60(J)-21O64(J)ºJM) */
+    MATRIX *o6p21;           /* Matrix (JM'ï¿½ O60(J)+21O64(J)ï¿½JM) */
+    MATRIX *o6m21;           /* Matrix (JM'ï¿½ O60(J)-21O64(J)ï¿½JM) */
  
     DOUBLE n_o2p0;           /*  || O20(J) || */
     DOUBLE n_o2p2;
@@ -422,8 +422,8 @@ typedef struct _stevens{
     DOUBLE n_o6p2;
     DOUBLE n_o6p6;
  
-    DOUBLE n_o4p05;          /* ºº O40(J) + 05*O44(J) ºº */
-    DOUBLE n_o4m05;          /* ºº O40(J) - 05*O44(J) ºº */
+    DOUBLE n_o4p05;          /* ï¿½ï¿½ O40(J) + 05*O44(J) ï¿½ï¿½ */
+    DOUBLE n_o4m05;          /* ï¿½ï¿½ O40(J) - 05*O44(J) ï¿½ï¿½ */
  
     DOUBLE n_o6p21;
     DOUBLE n_o6m21;
@@ -606,7 +606,8 @@ typedef struct _umgebung{
     DOUBLE *x3;
  
     DOUBLE b1s,b2s,b3s; /* Anisotropieparameter Sx^2, Sy^2, Sz^2 */
-
+    DOUBLE b1ss,b2ss,b3ss; /* Anisotropieparameter Sx^4, Sy^4, Sz^4 */
+ 
     DOUBLE b1;     /* b = ( b1,b2,b3 ) angelegtes Magnetfeld */
     DOUBLE b2;     /*                                        */
     DOUBLE b3;     /*  H = H  + H    mit  H  = -g my J*b     */
@@ -659,6 +660,7 @@ typedef struct _iteration{
     DOUBLE  *r6_7;      /*                     */
  
     DOUBLE b1s,b2s,b3s; /* Anisotropieparameter fuer Sx^2, Sy^2, Sz^2 operatoren */
+    DOUBLE b1ss,b2ss,b3ss; /* Anisotropieparameter fuer Sx^4, Sy^4, Sz^4 operatoren */
 
     DOUBLE b1;     /* b = ( b1,b2,b3 ) externes   Magnetfeld */
     DOUBLE b2;     /*                                        */
@@ -1175,6 +1177,9 @@ benutzte Defines definieren
 #define X1(i,nr)              VALUE(X1_P(i) ,nr)
 #define X2(i,nr)              VALUE(X2_P(i) ,nr)
 #define X3(i,nr)              VALUE(X3_P(i) ,nr)
+#define B1SS(i)                 (  (i) -> b1ss  )
+#define B2SS(i)                 (  (i) -> b2ss  )
+#define B3SS(i)                 (  (i) -> b3ss  )
 #define B1S(i)                 (  (i) -> b1s  )
 #define B2S(i)                 (  (i) -> b2s  )
 #define B3S(i)                 (  (i) -> b3s  )
