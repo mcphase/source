@@ -1340,7 +1340,7 @@ DOUBLE magnetm(mat_Ji,setup,ewproblem,kristallfeld,Bx,By,Bz,t)
     DOUBLE    Bx,By,Bz; /* angelegetes aeusseres feld*/
     DOUBLE    t; /* angelegete  Temperatur    */
 {
-    DOUBLE    Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2; /* Molekularfeld   */
+    DOUBLE    Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4; /* Molekularfeld   */
     ITERATION *iteration;
     INT    i/*,k*/,r/*,s*/,anz_niveaus,*gi;
     VEKTOR *ev_ir;

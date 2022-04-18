@@ -1997,6 +1997,28 @@ ITERATION *hamltn1(i)
               R(h,n,m) += ( s1*R(dx,n,l)*R(dx,l,m) - s2*I(dy,n,l)*I(dy,l,m) + s3*R(dz,n,l)*R(dz,l,m) ); }
        free(dx); free(dy); free(dz);
     }
+    if( B1SS(i)!=0.0 || B2SS(i)!=0.0 || B3SS(i)!=0.0 ) {
+       #include "define_j.c"          /* mj,J2,J+,... definieren */
+       MATRIX  *dx,*dy,*dz;
+       MATRIX  *dxdx,*dydy,*dzdz;
+       DOUBLE d1=sqrt(sqrt(fabs(B1SS(i)))),d2=sqrt(sqrt(fabs(B2SS(i)))),d3=sqrt(sqrt(fabs(B3SS(i)))),jm,jp,s1=1.,s2=1.,s3=1.;
+       INT dimj=DIMJ(i),l; 
+       if(B1SS(i)<0) s1=-1.; if(B2SS(i)<0) s2=-1.; if(B3SS(i)<0) s3=-1.;
+       dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
+       dxdx = mx_alloc( dimj,dimj ); dydy = mx_alloc( dimj,dimj ); dzdz = mx_alloc( dimj,dimj );
+       for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
+              jm=JM(mj)*D(nj,mj-1); jp=JP(mj)*D(nj,mj+1);
+              R(dx,n,m) = d1*0.5*( jm+jp ); I(dy,n,m) = d2*0.5*( jm-jp ); R(dz,n,m) = d3*mj*D(nj,mj); }
+       for( n=DIMJ(i) ; n>=1 ; --n ) for( m=DIMJ(i) ; m>=1 ; --m ) for( l=DIMJ(i) ; l>=1 ; --l){
+              R(dxdx,n,m) += R(dx,n,l)*R(dx,l,m);
+              R(dydy,n,m) -= I(dy,n,l)*I(dy,l,m); 
+              R(dzdz,n,m) += R(dz,n,l)*R(dz,l,m); }
+
+       for( n=DIMJ(i) ; n>=1 ; --n ) for( m=DIMJ(i) ; m>=1 ; --m ) for( l=DIMJ(i) ; l>=1 ; --l){
+              R(h,n,m) += ( s1*R(dxdx,n,l)*R(dxdx,l,m) + s2*R(dydy,n,l)*R(dydy,l,m) + s3*R(dzdz,n,l)*R(dzdz,l,m) ); }
+       free(dx); free(dy); free(dz);
+       free(dxdx); free(dydy); free(dzdz);
+    }
  
     return( i );
 }
@@ -3501,7 +3523,7 @@ MATRIX *calc_Bmag_D( dimj,gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4 ) /*magnetisch
 {
     INT    m,n;
     MATRIX *bmag,*mx_alloc();
-    DOUBLE jm,jp,jx2,jy2;
+    DOUBLE jm,jp,jx2,jy2,jx4,jy4;
 
     #include "define_j.c"          /* mj,J2,J+,... definieren */
     bmag = mx_alloc( dimj,dimj );  /* Speicher fuer (J nj| Hmag |mj J)*/
@@ -3510,12 +3532,12 @@ for( n=dimj ; n>=1 ; --n)
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-              jx2=0.25*(JPM(mj)*D(nj,mj));
+              jx2=0.25*(JPMMP(mj)*D(nj,mj));
               jy2=jx2;
               jx4=jx2*jx2+0.0625*(JP2(mj-2)*JM2(mj)+JM2(mj+2)*JP2(mj));
               jy4=jx4;
-              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPM(mj);jy4-=0.0625*JM2(mj)*JPM(mj);}
-              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPM(mj);jy4-=0.0625*JP2(mj)*JPM(mj);}
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPMMP(mj);jy4-=0.0625*JM2(mj)*JPMMP(mj);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPMMP(mj);jy4-=0.0625*JP2(mj)*JPMMP(mj);}
               if (D(nj,mj-4)>0.5) {jx4+=0.0625*JM2(mj-2)*JM2(mj);jy4+=0.0625*JM2(mj-2)*JM2(mj);}
               if (D(nj,mj+4)>0.5) {jx4+=0.0625*JP2(mj+2)*JP2(mj);jy4+=0.0625*JP2(mj+2)*JP2(mj);}
 /* sign changed 24.9.08 because zeeman term has negative sign */
@@ -3559,7 +3581,7 @@ MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 ,Dx4,Dy4,
     DOUBLE Bxmol,Bymol,Bzmol;
 {
     INT    m,n,dimj;
-    DOUBLE jm,jp,jx2,jy2;
+    DOUBLE jm,jp,jx2,jy2,jx4,jy4;
  
     #include "define_j.c"          /* mj,J2,J+,... definieren */
                                    /* <nj| A |mj>             */
@@ -3578,12 +3600,12 @@ MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 ,Dx4,Dy4,
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-              jx2=0.25*(JPM(mj)*D(nj,mj));
+              jx2=0.25*(JPMMP(mj)*D(nj,mj));
               jy2=jx2;
               jx4=jx2*jx2+0.0625*(JP2(mj-2)*JM2(mj)+JM2(mj+2)*JP2(mj));
               jy4=jx4;
-              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPM(mj);jy4-=0.0625*JM2(mj)*JPM(mj);}
-              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPM(mj);jy4-=0.0625*JP2(mj)*JPM(mj);}
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPMMP(mj);jy4-=0.0625*JM2(mj)*JPMMP(mj);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPMMP(mj);jy4-=0.0625*JP2(mj)*JPMMP(mj);}
               if (D(nj,mj-4)>0.5) {jx4+=0.0625*JM2(mj-2)*JM2(mj);jy4+=0.0625*JM2(mj-2)*JM2(mj);}
               if (D(nj,mj+4)>0.5) {jx4+=0.0625*JP2(mj+2)*JP2(mj);jy4+=0.0625*JP2(mj+2)*JP2(mj);}
 /* sign changed 24.9.08 because zeeman term has negative sign */

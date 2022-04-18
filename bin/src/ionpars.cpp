@@ -46,7 +46,7 @@ ionpars::ionpars (int dimj) // constructor from dimj
 // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
    cnst=Matrix(0,6,-6,6);set_zlm_constants(cnst);
    iontype = new char [MAXNOFCHARINLINE];
-   Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
+   Blm=Vector(0,NOF_OLM_MATRICES);Blm=0; // vector of crystal field parameters
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
  int i;   
    Ri = new ComplexMatrix * [1+NOF_RIXS_MATRICES];
@@ -105,7 +105,7 @@ ionpars::ionpars(FILE * cf_file, char * cffilename)
   char instr[MAXNOFCHARINLINE];
   iontype= new char[MAXNOFCHARINLINE];
   char  moduletype[MAXNOFCHARINLINE];
-   Blm=Vector(0,48);Blm=0; // vector of crystal field parameters
+   Blm=Vector(0,NOF_OLM_MATRICES);Blm=0; // vector of crystal field parameters
    Llm=Vector(0,45);Llm=0; // vector of crystal field parameters
    // cnst is the Zlm constants - put them into the matrix ... (same code is reused in jjjpar.cpp, pointc.c)
    cnst=Matrix(0,6,-6,6);set_zlm_constants(cnst);
@@ -127,7 +127,7 @@ ionpars::ionpars(FILE * cf_file, char * cffilename)
          fprintf(stderr,"ERROR class ionpars - file does not start with #!MODULE=cfield or #!MODULE=so1ion\n");exit(EXIT_FAILURE);
          }
         }
-const char kq[]="00 22S21S20 21 22 33S32S31S30 31 32 33 44S43S42S41S40 41 42 43 44 55S54S53S52S51S50 51 52 53 54 55 66S65S64S63S62S61S60 61 62 63 64 65 66 x2 y2 z2";
+const char kq[]="00 22S21S20 21 22 33S32S31S30 31 32 33 44S43S42S41S40 41 42 43 44 55S54S53S52S51S50 51 52 53 54 55 66S65S64S63S62S61S60 61 62 63 64 65 66 x2 y2 z2 x4 y4 z4";
 char kq3[5];kq3[4]='\0';kq3[3]='\0';
 int perlp=1;//by default try perlparse  
 // read in lines and get IONTYPE=  and CF parameters Blm
@@ -141,6 +141,9 @@ int perlp=1;//by default try perlparse
         extract(instr,"Dx2",Blm(46));
         extract(instr,"Dy2",Blm(47));
         extract(instr,"Dz2",Blm(48));
+        extract(instr,"Dx4",Blm(49));
+        extract(instr,"Dy4",Blm(50));
+        extract(instr,"Dz4",Blm(51));
         kq3[0]='L';for(int i=0;i<=45;++i){strncpy(kq3+1,kq+i*3,3);if(kq3[3]==' ')kq3[3]='\0';        
                                           extract(instr,kq3,Llm(i));}
         ialpha+=1-extract(instr,"ALPHA",alpha);
@@ -213,6 +216,10 @@ int perlp=1;//by default try perlparse
   double  modxcr[31*31],modxci[31*31];
   double  modycr[31*31],modyci[31*31];
   double  modzcr[31*31],modzci[31*31];
+
+  double  modxdxcr[31*31],modxdxci[31*31];
+  double  modydycr[31*31],modydyci[31*31];
+  double  modzdzcr[31*31],modzdzci[31*31];
     
 if (pr==1) {printf("#using %s ...\n",moduletype);}
   fprintf(stderr,"# module %s ... for ion %s\n",moduletype,iontype);
@@ -270,6 +277,10 @@ if (pr==1) {printf("#using %s ...\n",moduletype);}
   modxcr,modxci,
   modycr,modyci,
   modzcr,modzci,
+
+  modxdxcr,modxdxci,
+  modydycr,modydyci,
+  modzdzcr,modzdzci,
 
   &dimj,&alphar,&betar,&gammar,&gJr,&r2r,&r4r,&r6r, &nof_electronsr);
 
@@ -377,6 +388,10 @@ if(i<j){(*Olm[45])(i,j)=mo66ci[30*(j-1)+i-1];}else{(*Olm[45])(i,j)=mo66cr[30*(i-
 if(i<j){(*Olm[46])(i,j)=modxci[30*(j-1)+i-1];}else{(*Olm[46])(i,j)=modxcr[30*(i-1)+j-1];}
 if(i<j){(*Olm[47])(i,j)=modyci[30*(j-1)+i-1];}else{(*Olm[47])(i,j)=modycr[30*(i-1)+j-1];}
 if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-1)+j-1];}
+
+if(i<j){(*Olm[49])(i,j)=modxdxci[30*(j-1)+i-1];}else{(*Olm[49])(i,j)=modxdxcr[30*(i-1)+j-1];}
+if(i<j){(*Olm[50])(i,j)=modydyci[30*(j-1)+i-1];}else{(*Olm[50])(i,j)=modydycr[30*(i-1)+j-1];}
+if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30*(i-1)+j-1];}
    }}
  pr=0;
 //---------------------------------------------------------------------------
@@ -398,7 +413,7 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
    ComplexMatrix * IIn [1+IONPARS_MAXNOFCOMPONENTS+NOF_OLM_MATRICES+NOF_RIXS_MATRICES+3];
    for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i)IIn[i]= new ComplexMatrix(1,dimj,1,dimj);
    // standard operator sequence I1,....,I51
-   // module so1ion: Jx Jy Jz O22S O21S O20 O21 O22 O33S O32S .... O66 Jx^2 Jy^2 Jz^2
+   // module so1ion: Jx Jy Jz O22S O21S O20 O21 O22 O33S O32S .... O66 Jx^2 Jy^2 Jz^2 Jx^4 Jy^4 Jz^4
    (*IIn[0])=1;(*IIn[1])=Jaa;(*IIn[2])=Jbb;(*IIn[3])=Jcc;
    for(i=4;i<=IONPARS_MAXNOFCOMPONENTS;++i)(*IIn[i])=(*OOlm[i-3]);
    for(i=1;i<=NOF_OLM_MATRICES;++i)IIn[i+IONPARS_MAXNOFCOMPONENTS]=OOlm[i]; // only give pointer 
@@ -413,7 +428,7 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
                                              }
     for (i=1;i<=NOF_OLM_MATRICES;++i){operatornames[IONPARS_MAXNOFCOMPONENTS+i]=new char[5];
                                       operatornames[IONPARS_MAXNOFCOMPONENTS+i][0]='O';operatornames[IONPARS_MAXNOFCOMPONENTS+i][4]='\0';
-                                      if(i>45)operatornames[IONPARS_MAXNOFCOMPONENTS+i][0]='J'; // Jx2 Jy2 Jz2
+                                      if(i>45)operatornames[IONPARS_MAXNOFCOMPONENTS+i][0]='J'; // Jx2 Jy2 Jz2 Jx4 Jy4 Jz4
                               strncpy(operatornames[IONPARS_MAXNOFCOMPONENTS+i]+1,kq+i*3,3);
                                    if(operatornames[IONPARS_MAXNOFCOMPONENTS+i][3]==' ')
                                       operatornames[IONPARS_MAXNOFCOMPONENTS+i][3]='\0';
@@ -433,23 +448,24 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
                                "SIGMA0r\0SIGMA1r\0SIGMA2r\0"
                                "SIGMA0i\0SIGMA1i\0SIGMA2i\0"
                                "Dx2    \0Dy2    \0Dz2    \0"
+                               "Dx4    \0Dy4    \0Dz4    \0"
                                  ;
-                 char * numbernames[110];
-                 for (i=0;i<16;++i)numbernames[i]=numnam+8*i;
-                 for (i=0;i<=45;++i){ numbernames[16+i]=new char[5];
-                                      numbernames[16+i][0]='B';numbernames[16+i][4]='\0';
-                              strncpy(numbernames[16+i]+1,kq+i*3,3);
-                                   if(numbernames[16+i][3]==' ')
-                                      numbernames[16+i][3]='\0';
+                 char * numbernames[113];
+                 for (i=0;i<19;++i)numbernames[i]=numnam+8*i;
+                 for (i=0;i<=45;++i){ numbernames[19+i]=new char[5];
+                                      numbernames[19+i][0]='B';numbernames[19+i][4]='\0';
+                              strncpy(numbernames[19+i]+1,kq+i*3,3);
+                                   if(numbernames[19+i][3]==' ')
+                                      numbernames[19+i][3]='\0';
                                         }
-                 for (i=0;i<=45;++i){ numbernames[62+i]=new char[5];
-                                      numbernames[62+i][0]='L';numbernames[62+i][4]='\0';
-                              strncpy(numbernames[62+i]+1,kq+i*3,3);
-                                   if(numbernames[62+i][3]==' ')
-                                      numbernames[62+i][3]='\0';
+                 for (i=0;i<=45;++i){ numbernames[65+i]=new char[5];
+                                      numbernames[65+i][0]='L';numbernames[65+i][4]='\0';
+                              strncpy(numbernames[65+i]+1,kq+i*3,3);
+                                   if(numbernames[65+i][3]==' ')
+                                      numbernames[65+i][3]='\0';
                                         }
-                 numbernames[108]=NULL;
-                 double *numbers[108];
+                 numbernames[111]=NULL;
+                 double *numbers[111];
                  numbers[0]=&gJ;
                  numbers[1]=&alpha;
                  numbers[2]=&beta;
@@ -466,7 +482,10 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
                  numbers[13]=&Blm[46];
                  numbers[14]=&Blm[47];
                  numbers[15]=&Blm[48];
-                 for(i=0;i<=45;++i){numbers[16+i]=&Blm[i];numbers[62+i]=&Llm[i];}
+                 numbers[16]=&Blm[49];
+                 numbers[17]=&Blm[50];
+                 numbers[18]=&Blm[51];
+                 for(i=0;i<=45;++i){numbers[19+i]=&Blm[i];numbers[65+i]=&Llm[i];}
 
                  char * strings[3];char * stringnames[3];
                  char strnam[]="IONTYPE\0";   
@@ -510,6 +529,7 @@ if(i<j){(*Olm[48])(i,j)=modzci[30*(j-1)+i-1];}else{(*Olm[48])(i,j)=modzcr[30*(i-
     (*In[3])=Jc;
     for(i=1;i<=NOF_OLM_MATRICES;++i){(*In[i+3])=(*Olm[i]);}
   }
+//myPrintMatrix(stdout,(*In[51]));
 if(ialpha&&fabs(alphar-alpha)/fabs(alphar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using value from input file\n",moduletype,alphar,alpha);}
 else{alpha=alphar;}
 if(ibeta&&fabs(betar-beta)/fabs(betar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (beta=%g) different from input file (beta=%g), using value from input file\n",moduletype,betar,beta);}
@@ -555,9 +575,9 @@ if(fabs(s0r)+fabs(s1r)+fabs(s2r)+fabs(s0i)+fabs(s1i)+fabs(s2i)>SMALL_DEVIATION)
   Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
 
    fprintf(stderr,"#crystal field parameters:\n");  
-   const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 ";
+   const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 Dx4 Dy4 Dz4";
    char lm4[5];lm4[4]='\0';
-   for(i=0;i<=48;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
+   for(i=0;i<=NOF_OLM_MATRICES;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"#Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
                                   double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
@@ -624,6 +644,10 @@ void ionpars::savBlm(FILE * outfile)
    if(Blm(46)!=0){fprintf(outfile,"Dx2=%g\n",myround(Blm(46)));}
    if(Blm(47)!=0){fprintf(outfile,"Dy2=%g\n",myround(Blm(47)));}
    if(Blm(48)!=0){fprintf(outfile,"Dz2=%g\n",myround(Blm(48)));}
+
+   if(Blm(49)!=0){fprintf(outfile,"Dx4=%g\n",myround(Blm(49)));}
+   if(Blm(50)!=0){fprintf(outfile,"Dy4=%g\n",myround(Blm(50)));}
+   if(Blm(51)!=0){fprintf(outfile,"Dz4=%g\n",myround(Blm(51)));}
 }
 
 void ionpars::savLlm(FILE * outfile)
@@ -741,14 +765,14 @@ gjmbH(1)+=gJ*MU_B*Hext(1);
 gjmbH(2)+=gJ*MU_B*Hext(2);
 gjmbH(3)+=gJ*MU_B*Hext(3);
 // check dimensions of vector
-if(gjmbH.Hi()>NOF_OLM_MATRICES)
-   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > 48 - check number of columns in file mcphas.j\n",gjmbH.Hi());
+if(gjmbH.Hi()>NOF_OLM_MATRICES+3)
+   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > %i - check number of columns in file mcphas.j\n",gjmbH.Hi(),NOF_OLM_MATRICES+3);
     exit(EXIT_FAILURE);}
    (*In[n])=Hcf;for(int j=1;j<=gjmbH.Hi();++j){(*In[n])-=gjmbH(j)*(*In[j]);}
   }
 else
- {if(n>NOF_OLM_MATRICES)
-   {fprintf(stderr,"Error module so1ion/cfield: operatormatrix index=%i > 48 - check number of columns in file mcphas.j\n",n);
+ {if(n>NOF_OLM_MATRICES+3)
+   {fprintf(stderr,"Error module so1ion/cfield: operatormatrix index=%i > %i - check number of columns in file mcphas.j\n",n,NOF_OLM_MATRICES+3);
     exit(EXIT_FAILURE);}
  }
 return (*In[n]);
@@ -767,8 +791,8 @@ gjmbH(2)+=gJ*MU_B*Hext(2);
 gjmbH(3)+=gJ*MU_B*Hext(3);
 
 // check dimensions of vector
-if(gjmbH.Hi()>48)
-   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > 48 - check number of columns in file mcphas.j\n",gjmbH.Hi());
+if(gjmbH.Hi()>NOF_OLM_MATRICES+3)
+   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > %i - check number of columns in file mcphas.j\n",gjmbH.Hi(),NOF_OLM_MATRICES+3);
     exit(EXIT_FAILURE);}
 
 //  Driver routine to compute the  eigenvalues and normalized eigenvectors 

@@ -505,9 +505,14 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
                               double * mo64cr, double * mo64ci,
                               double * mo65cr, double * mo65ci,
                               double * mo66cr, double * mo66ci,
+
                               double * modxcr, double * modxci,
                               double * modycr, double * modyci,
                               double * modzcr, double * modzci,
+
+                              double * modxdxcr, double * modxdxci,
+                              double * modydycr, double * modydyci,
+                              double * modzdzcr, double * modzdzci,
                               int * dj, 
                               double * alpha, double * beta, double * gamma, 
                               double * lande,
@@ -579,6 +584,15 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
               modxcr[30*(n-1)+m-1] += Jxr[30*(n-1)+i-1]*Jxr[30*(i-1)+m-1];
               modycr[30*(n-1)+m-1] -= Jyi[30*(n-1)+i-1]*Jyi[30*(i-1)+m-1];
               modzcr[30*(n-1)+m-1] += Jzr[30*(n-1)+i-1]*Jzr[30*(i-1)+m-1]; }
+      }
+    for( n= DIMJ(iteration); n>=1 ; --n) for( m=DIMJ(iteration) ; m>=1 ; --m) {
+      modxdxcr[30*(n-1)+m-1]=0.; modxdxci[30*(n-1)+m-1]=0.;
+      modydycr[30*(n-1)+m-1]=0.; modydyci[30*(n-1)+m-1]=0.;
+      modzdzcr[30*(n-1)+m-1]=0.; modzdzci[30*(n-1)+m-1]=0.;
+      for( i=DIMJ(iteration) ; i>=1 ; --i){
+              modxdxcr[30*(n-1)+m-1] += modxcr[30*(n-1)+i-1]*modxcr[30*(i-1)+m-1];
+              modydycr[30*(n-1)+m-1] += modycr[30*(n-1)+i-1]*modycr[30*(i-1)+m-1];
+              modzdzcr[30*(n-1)+m-1] += modzcr[30*(n-1)+i-1]*modzcr[30*(i-1)+m-1]; }
       }
 
 /*sets up hamiltonian using olms and solves ev problem (necessary step although CF is zero in this routine)*/
@@ -1213,6 +1227,29 @@ ITERATION *hamltn0(i)
               R(h,n,m) += ( s1*R(dx,n,l)*R(dx,l,m) - s2*I(dy,n,l)*I(dy,l,m) + s3*R(dz,n,l)*R(dz,l,m) ); }
        free(dx); free(dy); free(dz);
     }
+if( B1SS(i)!=0.0 || B2SS(i)!=0.0 || B3SS(i)!=0.0 ) {
+       #include "define_j.c"          /* mj,J2,J+,... definieren */
+       MATRIX  *dx,*dy,*dz;
+       MATRIX  *dxdx,*dydy,*dzdz;
+       DOUBLE d1=sqrt(sqrt(fabs(B1SS(i)))),d2=sqrt(sqrt(fabs(B2SS(i)))),d3=sqrt(sqrt(fabs(B3SS(i)))),jm,jp,s1=1.,s2=1.,s3=1.;
+       INT dimj=DIMJ(i),l; 
+       if(B1SS(i)<0) s1=-1.; if(B2SS(i)<0) s2=-1.; if(B3SS(i)<0) s3=-1.;
+       dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
+       dxdx = mx_alloc( dimj,dimj ); dydy = mx_alloc( dimj,dimj ); dzdz = mx_alloc( dimj,dimj );
+       for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
+              jm=JM(mj)*D(nj,mj-1); jp=JP(mj)*D(nj,mj+1);
+              R(dx,n,m) = d1*0.5*( jm+jp ); I(dy,n,m) = d2*0.5*( jm-jp ); R(dz,n,m) = d3*mj*D(nj,mj); }
+       for( n=DIMJ(i) ; n>=1 ; --n ) for( m=DIMJ(i) ; m>=1 ; --m ) for( l=DIMJ(i) ; l>=1 ; --l){
+              R(dxdx,n,m) += R(dx,n,l)*R(dx,l,m);
+              R(dydy,n,m) -= I(dy,n,l)*I(dy,l,m); 
+              R(dzdz,n,m) += R(dz,n,l)*R(dz,l,m); }
+
+       for( n=DIMJ(i) ; n>=1 ; --n ) for( m=DIMJ(i) ; m>=1 ; --m ) for( l=DIMJ(i) ; l>=1 ; --l){
+              R(h,n,m) += ( s1*R(dxdx,n,l)*R(dxdx,l,m) + s2*R(dydy,n,l)*R(dydy,l,m) + s3*R(dzdz,n,l)*R(dzdz,l,m) ); }
+       free(dx); free(dy); free(dz);
+       free(dxdx); free(dydy); free(dzdz);
+    }
+ 
  
     return( i );
 }
@@ -2812,12 +2849,12 @@ MATRIX *calc_Bmag_D( dimj,gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4 ) /*magnetisch
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-              jx2=0.25*(JPM(mj)*D(nj,mj));
+              jx2=0.25*(JPMMP(mj)*D(nj,mj));
               jy2=jx2;
               jx4=jx2*jx2+0.0625*(JP2(mj-2)*JM2(mj)+JM2(mj+2)*JP2(mj));
               jy4=jx4;
-              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPM(mj);jy4-=0.0625*JM2(mj)*JPM(mj);}
-              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPM(mj);jy4-=0.0625*JP2(mj)*JPM(mj);}
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPMMP(mj);jy4-=0.0625*JM2(mj)*JPMMP(mj);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPMMP(mj);jy4-=0.0625*JP2(mj)*JPMMP(mj);}
               if (D(nj,mj-4)>0.5) {jx4+=0.0625*JM2(mj-2)*JM2(mj);jy4+=0.0625*JM2(mj-2)*JM2(mj);}
               if (D(nj,mj+4)>0.5) {jx4+=0.0625*JP2(mj+2)*JP2(mj);jy4+=0.0625*JP2(mj+2)*JP2(mj);}
 /* sign changed 24.9.08 because zeeman term has negative sign */
@@ -2881,12 +2918,12 @@ for( n=dimj ; n>=1 ; --n)
          for( m=dimj ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1);
               jp=JP(mj)*D(nj,mj+1);
-              jx2=0.25*(JPM(mj)*D(nj,mj));
+              jx2=0.25*(JPMMP(mj)*D(nj,mj));
               jy2=jx2;
               jx4=jx2*jx2+0.0625*(JP2(mj-2)*JM2(mj)+JM2(mj+2)*JP2(mj));
               jy4=jx4;
-              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPM(mj);jy4-=0.0625*JM2(mj)*JPM(mj);}
-              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPM(mj);jy4-=0.0625*JP2(mj)*JPM(mj);}
+              if (D(nj,mj-2)>0.5) {jx2+=0.25*JM2(mj);jy2-=0.25*JM2(mj);jx4+=0.0625*JM2(mj)*JPMMP(mj);jy4-=0.0625*JM2(mj)*JPMMP(mj);}
+              if (D(nj,mj+2)>0.5) {jx2+=0.25*JP2(mj);jy2-=0.25*JP2(mj);jx4+=0.0625*JP2(mj)*JPMMP(mj);jy4-=0.0625*JP2(mj)*JPMMP(mj);}
               if (D(nj,mj-4)>0.5) {jx4+=0.0625*JM2(mj-2)*JM2(mj);jy4+=0.0625*JM2(mj-2)*JM2(mj);}
               if (D(nj,mj+4)>0.5) {jx4+=0.0625*JP2(mj+2)*JP2(mj);jy4+=0.0625*JP2(mj+2)*JP2(mj);}
 /* sign changed 24.9.08 because zeeman term has negative sign */

@@ -6,12 +6,13 @@
 #include <mpspecfunp.h>
 #include <mcdisp.h>
 
-#define IONPARS_MAXNOFCOMPONENTS 51
-// standard operator sequence I1,....,I51
-// module so1ion: Jx Jy Jz O22S O21S O20 O21 O22 O33S O32S .... O66 Jx^2 Jy^2 Jz^2
+#define IONPARS_MAXNOFCOMPONENTS 54
+// standard operator sequence I1,....,I54
+//                1  2  3  4    5    6   7   8   9    10        48  49   50   51   52   53   54
+// module so1ion: Jx Jy Jz O22S O21S O20 O21 O22 O33S O32S .... O66 Jx^2 Jy^2 Jz^2 Jx^4 Jy^4 Jz^4
 
 
-#define NOF_OLM_MATRICES 48
+#define NOF_OLM_MATRICES 51
 #define NOF_RIXS_MATRICES 9
 
 #define SMALL_PROBABILITY 1e-6

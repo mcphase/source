@@ -52,9 +52,15 @@ extern "C" void cfield_mcphasnew(char * iontype,double *Jxr,double * Jxi,  doubl
                               double * mo64cr, double * mo64ci,
                               double * mo65cr, double * mo65ci,
                               double * mo66cr, double * mo66ci,
+
                               double * modxcr, double * modxci,
                               double * modycr, double * modyci,
-                              double * modzcr, double * modzci,int * dimj,
+                              double * modzcr, double * modzci,
+
+                              double * modxdxcr, double * modxdxci,
+                              double * modydycr, double * modydyci,
+                              double * modzdzcr, double * modzdzci,
+                              int * dimj,
                               double * alpha,double * beta, double * gamma, double * gJ,
                               double * rh2, double * rh4,double * rh6, int * nof_electrons);
 
