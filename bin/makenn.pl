@@ -164,10 +164,10 @@ elsif(/-bvk/)
    # read interaction constants from file
    unless(open(Fin,$bfk_file)){ die "could not open $bfk_file\n";}
              $nof_springs=0;
-             {while($line=<Fin>){next if /^\s*#/;
+             {while($line=<Fin>){next if $line=~/^\s*#/;
                                  my @numbers=split(" ",$line);
                                  if($#numbers>=4)
-                                 {++$nof_springs;
+                                 {++$nof_springs;print $line;
                                   $atom_n[$nof_springs]=$numbers[0];
                                   $atom_m[$nof_springs]=$numbers[1];
                                   $bondlength[$nof_springs]=$numbers[2];
@@ -726,10 +726,10 @@ sub getinteraction {
   $a0 = .5292e-10;#(m)
   $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 . 10-22 joules
   $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
-  for($n=1;$n<=$nof_springs;++$n){
+  for($n=1;$n<=$nof_springs;++$n){$am=$atom_m[$n];$an=$atom_n[$n];
          if(abs($r-$bondlength[$n])<0.01
-            &&(($atom_n[$n]=~/$sipffilethis/&&$atom_m[$n]=~/$sipffile/)
-              ||($atom_m[$n]=~/$sipffilethis/&&$atom_n[$n]=~/$sipffile/)
+            &&(($sipffilethis=~/(results\/)?$an/&&$sipffile=~/(results\/)?$am/)
+             ||($sipffilethis=~/(results\/)?$am/&&$sipffile=~/(results\/)?$an/)
               )
             )
              {# bond found - do something
@@ -869,7 +869,6 @@ sub getlattice {
 				   if (/^.*\Qy=\E/){($y[$n])=extract("y",$_);}
 				   if (/^.*\Qz=\E/){($z[$n])=extract("z",$_);}
 				     ($sipffilename)=extractstring("sipffilename",$_);
-                                   if ($bvk){clearMP($sipffilename);}
                                      ($charge[$n])=extractfromfile("CHARGE",$sipffilename);
                                      if($charge[$n]==""){$charge[$n]=$sipffilename;}                                 
                                              #               print "$sipffilename  charge=".$charge[$n]."\n";
@@ -884,7 +883,14 @@ sub getlattice {
                                                       $y[$nofmagneticatoms+$nofatoms]=$y[$n];
                                                       $z[$nofmagneticatoms+$nofatoms]=$z[$n];
                                                       $charge[$nofmagneticatoms+$nofatoms]=$charge[$n];
-                                                     }  }                    
+                                                     }  }   
+                                   if ($bvk){clearMP($sipffilename);
+                                             foreach(@sipf_file) {if(/$sipffilename/){print "$sipffilename found twice or more in mcphas.j - storing bvk parameters for ion $n in results/$sipffilename.$n \n";
+                                                                                      copy($sipffilename,"results/$sipffilename.$n");
+                                                                                      $sipffilename="results/".$sipffilename.".".$n;
+                                                                                     }
+                                                                 } 
+                                            }                 
                                      $sipf_file[$n]=$sipffilename;
 				  }
 
