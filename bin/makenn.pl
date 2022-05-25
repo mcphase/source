@@ -1,17 +1,17 @@
 #!/usr/bin/perl
 
 use FileHandle;
-
-#use Math::Trig;
 use PDL;
 use File::Copy;
-# use PDL::Slatec;
 
 print "#********************************************************\n";
-print "# makenn 220126 - create table with neighbors and interactions\n";
+print "# makenn 220526 - create table with neighbors and interactions\n";
 print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "#********************************************************\n";
 $PI=3.14159265358979323846;
+ $bvkA=25;
+ $bvkalpha=0.1;
+ # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
 
 unless ($#ARGV>=0) 
 
@@ -63,9 +63,11 @@ print "              the exponential alpha is conveniently put to  about 1\n";
 print " option -bvk filename\n";
 print "              for phonons: take Born van Karman model with longitudinal and\n";
 print "              transversal spring constants from file - file format, columns:\n";
-print "              #   atom_n_sipf atom_n'_sipf bondlength(A) long(N/m) trans(N/m)\n";
+print "              #   atom_n_sipf atom_n'_sipf bondlength(A) Clong(N/m) Ctrans(N/m)\n";
 print "              mind: into MODPAR2-6 in *.sipf the Einstein-oscillator paramters\n"; 
-print "              are written, too\n";
+print "              are written, too. Omit filename to create a sample file with\n";
+print "              longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m\n";
+
 print STDOUT << "EOF";
  option -cfph 
               calculate crystal field phonon interaction: mcphas.j lists 
@@ -159,6 +161,10 @@ elsif(/-rkkz/)
    print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV and kf=$kf A^-1\n";}
 elsif(/-bvk/)
   {$bvk=1;shift @ARGV;
+   unless ($#ARGV>=0) # if no filename is given print help
+   { $tabout=1; $readtable=$_;}
+  else
+   {
    $bfk_file=$ARGV[0];shift @ARGV;
    print "creating phononic interactions from Born van Karman model in file $bfk_file\n";
    # read interaction constants from file
@@ -177,6 +183,7 @@ elsif(/-bvk/)
                                 }
               close Fin;
        	     }
+  }
   }
 elsif(/-cfph/)
 {$cfph=1; shift @ARGV;
@@ -311,7 +318,12 @@ unless($tabout){ print "primitive lattice[A]:".$p."\n";}
   }}}
   }
 if($tabout)
-{    print STDOUT << "EOF";
+ {if($bvk)
+  {print STDOUT << "EOF";
+#  atom_n_sipf atom_n'_sipf bondlength(A) Clong(N/m) Ctrans(N/m)  generated with Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m                 
+EOF
+  }
+else {    print STDOUT << "EOF";
 # Sample table of interaction constants for program makenn
 #
 # primitive unit cell range to probe for neighbours (optional):
@@ -345,7 +357,7 @@ else
 EOF
 
 }
-}
+}}
 else
 {
 print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
@@ -408,9 +420,13 @@ elsif((/-f/||/-dm/)&&
       abs($da[$ntbl]-$xx)<0.001&&
       abs($db[$ntbl]-$yy)<0.001&&
       abs($dc[$ntbl]-$zz)<0.001){$ff=1;}
+elsif((/-bvk/)&&(abs($da[$ntbl]-$r)<0.001)){
+       $a1=$sipf_file[$nnn];$a2=$sipf_file[$nz];
+       if(($db[$ntbl]=~/$a1/&&$dc[$ntbl]=~/$a2/)
+       ||($db[$ntbl]=~/$a2/&&$dc[$ntbl]=~/$a1/)){$ff=1;}}
                                   }
 
-if($ff==0){++$n_table;
+if($ff==0){++$n_table;$ntbl=$n_table;
           $_=$readtable;
 if(/-e/)
 {$da[$ntbl]=$r;
@@ -420,10 +436,16 @@ elsif(/-f/)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
  print sprintf("%+10.6f %+10.6f %+10.6f 0        a%i a%i %+10.6f\n",$xx, $yy ,$zz,$nnn,$nz,$r);
 }
-else
+elsif(/-dm/)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
   print sprintf("%+10.6f %+10.6f %+10.6f    %+10.6f %+10.6f %+10.6f     a%i a%i %+10.6f\n",$xx, $yy ,$zz,$rvec->at(0),$rvec->at(1),$rvec->at(2),$nnn,$nz,$r);
 }
+elsif(/-bvk/)
+{$da[$ntbl]=$r; $db[$ntbl]=$sipf_file[$nnn];$dc[$ntbl]=$sipf_file[$nz];
+ $spring= $bvkA*exp(-$bvkalpha*$r*$r);
+ print sprintf("%s   %s    %+10.6f   %+10.6f   0 \n",$sipf_file[$nnn],$sipf_file[$nz],$r,$spring);
+}   
+else{die "Error makenn - creating table for option $_ \n";}
           }
               }
 
@@ -632,8 +654,34 @@ endprint($h,$l);
 }
 
 if($tabout){exit;}
- print "created files: results/makenn.j     (interaction parameters)\n";
- print "               results/makenn.a*.pc (pointcharge environment files)\n";
+if($bvk){ # check consistency of files
+foreach(@sipf_file) {
+unless(/results/){$sf=$_;
+ foreach(@sipf_file) {
+   if(/results\/$sf\.\d/){ # compare MODPAR1-7
+$sfc=$_;
+$M[2]=extractfromfile("MODPAR2",$sf);
+$M[3]=extractfromfile("MODPAR3",$sf);
+$M[4]=extractfromfile("MODPAR4",$sf);
+$M[5]=extractfromfile("MODPAR5",$sf);
+$M[6]=extractfromfile("MODPAR6",$sf);
+$M[7]=extractfromfile("MODPAR7",$sf);
+
+$Mc[2]=extractfromfile("MODPAR2",$sfc);
+$Mc[3]=extractfromfile("MODPAR3",$sfc);
+$Mc[4]=extractfromfile("MODPAR4",$sfc);
+$Mc[5]=extractfromfile("MODPAR5",$sfc);
+$Mc[6]=extractfromfile("MODPAR6",$sfc);
+$Mc[7]=extractfromfile("MODPAR7",$sfc);
+for($i=2;$i<=7;++$i){ if(abs($Mc[$i]-$M[$i])>1e-4){die("ERROR makenn: input file mcphas.j inconsistent ! MODPAR$i in $sfc (".$Mc[$i].")  does not match $sf (".$M[$i].") - sites with same sipf file $sf are not equivalent \n");}
+                     }          }
+                 }
+                        } 
+                     }
+}
+
+print "created files: results/makenn.j     (interaction parameters)\n";
+print "               results/makenn.a*.pc (pointcharge environment files)\n";
 print "********************************************************\n";
 print "               end of program makenn\n";
 print " Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
@@ -656,8 +704,7 @@ my $i,$j;$i=0;
                 if($line=~/^(#!|[^#])*\bMODPAR4\s*=\s*/) {($Kzzread)=($line=~m/^(?:#!|[^#])*\bMODPAR4\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
                                                            $Kzzread=0;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR4\s*=\s*[^\s\;\n\t\*]+/$1MODPAR4=$Kzzread/g;}
-                if($line=~/^(#!|[^#])*\bMODPAR5\s*=\s*/) {($Kxyread)=($line=~m/^(?:#!|[^#])*\bMODPAR5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kxyread=0;
+                if($line=~/^(#!|[^#])*\bMODPAR5\s*=\s*/) {($Kxyread)=($line=~m/^(?:#!|[^#])*\bMODPAR5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);                                                           $Kxyread=0;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR5\s*=\s*[^\s\;\n\t\*]+/$1MODPAR5=$Kxyread/g;}
                 if($line=~/^(#!|[^#])*\bMODPAR6\s*=\s*/) {($Kyzread)=($line=~m/^(?:#!|[^#])*\bMODPAR6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
                                                            $Kyzread=0;
@@ -726,10 +773,10 @@ sub getinteraction {
   $a0 = .5292e-10;#(m)
   $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 . 10-22 joules
   $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
-  for($n=1;$n<=$nof_springs;++$n){$am=$atom_m[$n];$an=$atom_n[$n];
+  for($n=1;$n<=$nof_springs;++$n){$a1=$atom_m[$n];$a2=$atom_n[$n];
          if(abs($r-$bondlength[$n])<0.01
-            &&(($sipffilethis=~/(results\/)?$an/&&$sipffile=~/(results\/)?$am/)
-             ||($sipffilethis=~/(results\/)?$am/&&$sipffile=~/(results\/)?$an/)
+            &&(($sipffilethis=~/(results\/)?$a2/&&$sipffile=~/(results\/)?$a1/)
+             ||($sipffilethis=~/(results\/)?$a1/&&$sipffile=~/(results\/)?$a2/)
               )
             )
              {# bond found - do something
@@ -885,7 +932,7 @@ sub getlattice {
                                                       $charge[$nofmagneticatoms+$nofatoms]=$charge[$n];
                                                      }  }   
                                    if ($bvk){clearMP($sipffilename);
-                                             foreach(@sipf_file) {if(/$sipffilename/){print "$sipffilename found twice or more in mcphas.j - storing bvk parameters for ion $n in results/$sipffilename.$n \n";
+                                             foreach(@sipf_file) {if(/$sipffilename/&&!$tabout){print "# $sipffilename found twice or more in mcphas.j - storing bvk parameters for ion $n in results/$sipffilename.$n \n";
                                                                                       copy($sipffilename,"results/$sipffilename.$n");
                                                                                       $sipffilename="results/".$sipffilename.".".$n;
                                                                                      }
