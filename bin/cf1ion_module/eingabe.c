@@ -2142,6 +2142,7 @@ ITERATION *iteration;
         if(extract(line,"ALPHA",&alpha," "))ia=1;
         if(extract(line,"BETA",&beta," "))ib=1;
         if(extract(line,"GAMMA",&gamma," "))ic=1;
+
         if(extract(line,"nof_electrons",&d," "))IONENIMP[ ionennr ].elektronen_in_vier_f=(INT)d; 
    switch(type)
    {case 'L':     

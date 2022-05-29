@@ -23,7 +23,10 @@ else
 print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
 $err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1]  > mcdisp.mf");
              }
+
 if($err){unlink "mcdisp.mf";exit(1);}
+
+
 
 print STDOUT << "EOF";
 *******************************************************

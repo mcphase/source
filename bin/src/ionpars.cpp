@@ -530,22 +530,22 @@ if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30
     for(i=1;i<=NOF_OLM_MATRICES;++i){(*In[i+3])=(*Olm[i]);}
   }
 //myPrintMatrix(stdout,(*In[51]));
-if(ialpha&&fabs(alphar-alpha)/fabs(alphar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using value from input file\n",moduletype,alphar,alpha);}
-else{alpha=alphar;}
-if(ibeta&&fabs(betar-beta)/fabs(betar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (beta=%g) different from input file (beta=%g), using value from input file\n",moduletype,betar,beta);}
-else{beta=betar;}
-if(igamma&&fabs(gammar-gamma)/fabs(gammar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (gamma=%g) different from input file (gamma=%g), using value from input file\n",moduletype,gammar,gamma);}
-else{gamma=gammar;}
-if(igj&&fabs(gJr-gJ)/fabs(gJr+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Lande Factor (gJ=%g) different from input file (gJ=%g), using value from input file\n",moduletype,gJr,gJ);}
-else{gJ=gJr;}
-if(ir2&&fabs(r2r-r2)/fabs(r2r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r2>=%g) different from input file (<r2>=%g), using value from input file\n",moduletype,r2r,r2);}
-else{r2=r2r;}
-if(ir4&&fabs(r4r-r4)/fabs(r4r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r4>=%g) different from input file (<r4>=%g), using value from input file\n",moduletype,r4r,r4);}
-else{r4=r4r;}
-if(ir6&&fabs(r6r-r6)/fabs(r6r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r6>=%g) different from input file (<r6>=%g), using value from input file\n",moduletype,r6r,r6);}
-else{r6=r6r;}
-if(inof&&nof_electronsr-nof_electrons!=0){fprintf(stderr,"#Warning module %s internal value for nr of electrons (=%i) different from input file (=%i), using value from input file\n",moduletype,nof_electronsr,nof_electrons);}
-else{nof_electrons=nof_electronsr;}
+if(ialpha){if(fabs(alphar-alpha)/fabs(alphar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using value from input file\n",moduletype,alphar,alpha);}
+}else{alpha=alphar;}
+if(ibeta){if(fabs(betar-beta)/fabs(betar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (beta=%g) different from input file (beta=%g), using value from input file\n",moduletype,betar,beta);}
+}else{beta=betar;}
+if(igamma){if(fabs(gammar-gamma)/fabs(gammar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (gamma=%g) different from input file (gamma=%g), using value from input file\n",moduletype,gammar,gamma);}
+}else{gamma=gammar;}
+if(igj){if(fabs(gJr-gJ)/fabs(gJr+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Lande Factor (gJ=%g) different from input file (gJ=%g), using value from input file\n",moduletype,gJr,gJ);}
+}else{gJ=gJr;}
+if(ir2){if(fabs(r2r-r2)/fabs(r2r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r2>=%g) different from input file (<r2>=%g), using value from input file\n",moduletype,r2r,r2);}
+}else{r2=r2r;}
+if(ir4){if(fabs(r4r-r4)/fabs(r4r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r4>=%g) different from input file (<r4>=%g), using value from input file\n",moduletype,r4r,r4);}
+}else{r4=r4r;}
+if(ir6){if(fabs(r6r-r6)/fabs(r6r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r6>=%g) different from input file (<r6>=%g), using value from input file\n",moduletype,r6r,r6);}
+}else{r6=r6r;}
+if(inof){if(nof_electronsr-nof_electrons!=0){fprintf(stderr,"#Warning module %s internal value for nr of electrons (=%i) different from input file (=%i), using value from input file\n",moduletype,nof_electronsr,nof_electrons);}
+}else{nof_electrons=nof_electronsr;}
 //---------------------------------------------------------------------------
       // here fill the matrices Ri[1...9] with the 11 12 13 21 22 23 31 32 33
       // matrices of the RIXS scattering operator R using spherical symmetry (M Haverkort PRL)

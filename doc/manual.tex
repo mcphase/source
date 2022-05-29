@@ -80,6 +80,7 @@ community this program would not have come into existence.
 \section*{What is New ?}
 \subsection*{ \dots in version 5.5 \dots}
 \begin{itemize}
+\item {\prg makenn} option -bvk extended to generate a sample bvk constants table 
 \item anisotropy $H=D_{x4} S_x^4 +D_{y4} S_y^4 +D_{z4} S_x^4$ introduced in module {\prg so1ion}
 \end{itemize}
 
@@ -669,6 +670,40 @@ neighbours, which
  the results may be inspected in file {\prg ./results/mcdisp.qom}, graphically using the program {\prg disp}.
  It turns out the the soft mode (gap at (2/3\,1\,0) shows the largest intensity.
 \end{description}
+
+
+\clearpage
+\section{Unit Conventions in McPhase}
+
+In most cases units of input parameters and output properties in {\prg McPhase} cannot be modified and 
+are fixed in the program code. In output files usually the unit is given in the column header.
+In table (\ref{units}) the unit conventions are listed.
+
+\begin{table}[thb] 
+\begin{center}  
+\caption {Units in the program package 
+{\prg McPhase}:}   
+\label{units}   
+\begin{tabular} 
+{l|l|l|l}
+Physical Quantity  & symbol                                         & unit      & typical file(s)     \\
+\hline
+Charge             &  CHARGE                                        & $|e|$       & *.sipf \\
+Debye Waller Factor & DWF, $B_{iso}/2$                              & \AA$^2$   & *.sipf, mcdiff.in \\ 
+Energy             & cf-parameters Blm Llm, free energy u           & meV       & *.sipf, mcphas.fum ...  \\
+Lattice Constant   & a,b,c                                          & \AA        & mcdiff.in, mcphas.j \\
+Magnetic Field     & H, Ha, Hb, Hc                                  & Tesla     & mcphas.ini, mcdisp.mf ...    \\
+Magnetic Moment    &  mu, $\mu$                                     & $\mu_B$   & mcphas.fum \\
+Neutron Cross Section &  sigma ,$\sigma$                            & barn      & mcdisp.qei \\
+Neutron Scattering Length & SCATTERINGLENGTHREAL & $10^{-12}$~cm & *.sipf, mcdiff.in \\
+  & SCATTERINGLENGTHIMAG & & \\
+Radial Integrals   & R2,R4,R6 , $\langle r^l \rangle$               & $a_0^2$, $a0=0.5292$~\AA \\ 
+Temperature        & T                                              & Kelvin    & mcphas.ini, mcdisp.mf ... \\
+Wave length        & lambda, $\lambda$                              & \AA       & mcdiff.in \\
+Wave vector        & k, ki, kf, Q, Qx, Qy, Qz                       & 1/\AA    & mcdisp.par \\
+\end{tabular}
+\end{center}
+\end{table}
 
 \clearpage
 \section{Installation of the program package}
