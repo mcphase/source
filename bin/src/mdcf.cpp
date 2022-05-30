@@ -37,7 +37,7 @@ ComplexVector & mdcf::dMQ_dips(int na, int nb, int nc) const
 { return (*dmq_dips[in(na,nb,nc)]);
 }
 ComplexMatrix & mdcf::M(int na, int nb, int nc)
-{ return (*m[in(na,nb,nc)]);
+{ if(mr)return (*m[in(na,nb,nc)]);else errexit();
 }
 
 ComplexVector & mdcf::sqrt_gamma(int na, int nb, int nc) const
@@ -63,7 +63,7 @@ ComplexMatrix & mdcf::Vi(int i)
 { return (*sb[i]);
 }
 ComplexMatrix & mdcf::Mi(int i)
-{ return (*m[i]);
+{ if(mr)return (*m[i]);else errexit();
 }
 
 ComplexVector & mdcf::sqrt_gammai(int i)
@@ -143,7 +143,7 @@ void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
        int sumnt=sum((*nt[in(i,j,k)]));
       if (sumnt<1){sumnt=1;} // MR 2011.08.09. in case there is no transition for this subsystem then initialize all matrices/Vector to 1...
      s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);if(s[in(i,j,k)]==NULL)errexit();
-     m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);if(m[in(i,j,k)]==NULL)errexit();
+  if(mr){m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);if(m[in(i,j,k)]==NULL)errexit();}
      l[in(i,j,k)]= new ComplexVector(1,sumnt);if(l[in(i,j,k)]==NULL)errexit();
      sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);if(sb[in(i,j,k)]==NULL)errexit();// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
      dps[in(i,j,k)]= new ComplexVector(1,1*sumnt);if(dps[in(i,j,k)]==NULL)errexit();
@@ -181,8 +181,8 @@ void mdcf::errexit()
 { fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
 //constructors
-mdcf::mdcf (int n1,int n2,int n3,int n,int nc,int stps)
-{  int i;
+mdcf::mdcf (int n1,int n2,int n3,int n,int nc,int stps,int do_Erefine)
+{  int i; mr=do_Erefine;
    nofa=n1;nofb=n2;nofc=n3;
    mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
    nofatoms=n;nofcomponents=nc;
@@ -214,7 +214,7 @@ mdcf::mdcf (int n1,int n2,int n3,int n,int nc,int stps)
 
 //kopier-konstruktor
 mdcf::mdcf (const mdcf & p,int store)
-{ int i,j,k;
+{ int i,j,k;mr=p.mr;
   nofa=p.nofa;nofb=p.nofb;nofc=p.nofc;
   mxa=p.mxa; mxb=p.mxb; mxc=p.mxc;
   mqdim=p.mqdim;
@@ -254,7 +254,7 @@ mdcf::mdcf (const mdcf & p,int store)
  for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k)
      {int id=in(i,j,k);       
       s[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*s[id]=*p.s[id];
-      m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*m[id]=*p.m[id];
+      if(mr){m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*m[id]=*p.m[id];}
       l[id]= new ComplexVector(1,sum((*nt[id])));*l[id]=*p.l[id];
       sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*sb[id]=*p.sb[id];// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
       dps[id]= new ComplexVector(1,1*sum((*nt[id])));*dps[id]=*p.dps[id];
@@ -278,7 +278,7 @@ mdcf::~mdcf ()
  if(storage)
  { for(i=0;i<=mxa*mxb*mxc;++i){
  if(s[i]!=NULL)delete s[i];
- if(m[i]!=NULL)delete m[i];
+ if(mr){if(m[i]!=NULL)delete m[i];}
  if(l[i]!=NULL)delete l[i];
  if(sb[i]!=NULL)delete sb[i];
  if(dps[i]!=NULL)delete dps[i];

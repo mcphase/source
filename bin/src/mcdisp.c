@@ -436,7 +436,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
 
   //calculate single ion properties of every atom in magnetic unit cell
   int nofEstps=0;if(do_Erefine)nofEstps=(int)((ini.emax-ini.emin)/(fabs(epsilon)/2)+1);
-  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents,nofEstps);
+  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents,nofEstps,do_Erefine);
 
   
  if (do_readtrs==0)
@@ -1175,27 +1175,27 @@ if (do_jqfile){
                      thrdat.pol[ithread] = new Matrix(1,3,1,3);
                      thrdat.md[ithread] = new mdcf(md,1);
 
-                     thrdat.qee_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
+                     if(ini.calculate_chargedensity_oscillation){thrdat.qee_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
                      thrdat.qee_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,CHARGEDENS_EV_DIM);
-                     thrdat.Echargedensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Echargedensity[ithread]=Echargedensity;
-                     thrdat.qsd_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
+                     thrdat.Echargedensity[ithread] = new ComplexMatrix(1,dimA,1,CHARGEDENS_EV_DIM); *thrdat.Echargedensity[ithread]=Echargedensity;}
+                     if(ini.calculate_spindensity_oscillation){thrdat.qsd_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
                      thrdat.qsd_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*SPINDENS_EV_DIM);
-                     thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,3*SPINDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;
-                     thrdat.qod_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
+                     thrdat.Espindensity[ithread] = new ComplexMatrix(1,dimA,1,3*SPINDENS_EV_DIM); *thrdat.Espindensity[ithread]=Espindensity;}
+                     if(ini.calculate_orbmomdensity_oscillation){thrdat.qod_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
                      thrdat.qod_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,3*ORBMOMDENS_EV_DIM);
-                     thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,3*ORBMOMDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;
-                     thrdat.qep_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
+                     thrdat.Eorbmomdensity[ithread] = new ComplexMatrix(1,dimA,1,3*ORBMOMDENS_EV_DIM); *thrdat.Eorbmomdensity[ithread]=Eorbmomdensity;}
+                     if(ini.calculate_phonon_oscillation){thrdat.qep_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
                      thrdat.qep_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
-                     thrdat.Ephonon[ithread] = new ComplexMatrix(1,dimA,1,PHONON_EV_DIM); *thrdat.Ephonon[ithread]=Ephonon;
-                     thrdat.qem_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
+                     thrdat.Ephonon[ithread] = new ComplexMatrix(1,dimA,1,PHONON_EV_DIM); *thrdat.Ephonon[ithread]=Ephonon;}
+                     if(ini.calculate_magmoment_oscillation){thrdat.qem_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
                      thrdat.qem_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
-                     thrdat.Emagmom[ithread] = new ComplexMatrix(1,dimA,1,MAGMOM_EV_DIM); *thrdat.Emagmom[ithread]=Emagmom;
-                     thrdat.qes_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
+                     thrdat.Emagmom[ithread] = new ComplexMatrix(1,dimA,1,MAGMOM_EV_DIM); *thrdat.Emagmom[ithread]=Emagmom;}
+                     if(ini.calculate_spinmoment_oscillation){thrdat.qes_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
                      thrdat.qes_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
-                     thrdat.Espin[ithread] = new ComplexMatrix(1,dimA,1,SPIN_EV_DIM); *thrdat.Espin[ithread]=Espin;
-                     thrdat.qel_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
+                     thrdat.Espin[ithread] = new ComplexMatrix(1,dimA,1,SPIN_EV_DIM); *thrdat.Espin[ithread]=Espin;}
+                     if(ini.calculate_orbmoment_oscillation){thrdat.qel_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
                      thrdat.qel_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
-                     thrdat.Eorbmom[ithread] = new ComplexMatrix(1,dimA,1,ORBMOM_EV_DIM); *thrdat.Eorbmom[ithread]=Eorbmom;
+                     thrdat.Eorbmom[ithread] = new ComplexMatrix(1,dimA,1,ORBMOM_EV_DIM); *thrdat.Eorbmom[ithread]=Eorbmom;}
 
                      thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
                   }
@@ -1442,13 +1442,13 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   {
                      delete thrdat.chi[ithread]; delete thrdat.chibey[ithread];delete thrdat.chiPhon[ithread]; 
                      delete thrdat.pol[ithread]; delete thrdat.md[ithread]; 
-                     delete thrdat.qee_real[ithread]; delete thrdat.qee_imag[ithread];delete thrdat.Echargedensity[ithread]; 
-                     delete thrdat.qsd_real[ithread]; delete thrdat.qsd_imag[ithread];delete thrdat.Espindensity[ithread]; 
-                     delete thrdat.qod_real[ithread]; delete thrdat.qod_imag[ithread];delete thrdat.Eorbmomdensity[ithread]; 
-                     delete thrdat.qep_real[ithread]; delete thrdat.qep_imag[ithread];delete thrdat.Ephonon[ithread]; 
-                     delete thrdat.qem_real[ithread]; delete thrdat.qem_imag[ithread];delete thrdat.Emagmom[ithread]; 
-                     delete thrdat.qes_real[ithread]; delete thrdat.qes_imag[ithread];delete thrdat.Espin[ithread]; 
-                     delete thrdat.qel_real[ithread]; delete thrdat.qel_imag[ithread];delete thrdat.Eorbmom[ithread]; 
+                     if(ini.calculate_chargedensity_oscillation){delete thrdat.qee_real[ithread]; delete thrdat.qee_imag[ithread];delete thrdat.Echargedensity[ithread]; }
+                     if(ini.calculate_spindensity_oscillation){delete thrdat.qsd_real[ithread]; delete thrdat.qsd_imag[ithread];delete thrdat.Espindensity[ithread]; }
+                     if(ini.calculate_orbmomdensity_oscillation){delete thrdat.qod_real[ithread]; delete thrdat.qod_imag[ithread];delete thrdat.Eorbmomdensity[ithread];} 
+                     if(ini.calculate_phonon_oscillation){delete thrdat.qep_real[ithread]; delete thrdat.qep_imag[ithread];delete thrdat.Ephonon[ithread]; }
+                     if(ini.calculate_magmoment_oscillation){delete thrdat.qem_real[ithread]; delete thrdat.qem_imag[ithread];delete thrdat.Emagmom[ithread];} 
+                     if(ini.calculate_spinmoment_oscillation){delete thrdat.qes_real[ithread]; delete thrdat.qes_imag[ithread];delete thrdat.Espin[ithread]; }
+                     if(ini.calculate_orbmoment_oscillation){delete thrdat.qel_real[ithread]; delete thrdat.qel_imag[ithread];delete thrdat.Eorbmom[ithread]; }
                      delete thrdat.Tau[ithread]; delete tin[ithread]; 
                   }
                   delete[] thrdat.Echargedensity;  

@@ -1,4 +1,4 @@
-// klasse testmdcf zum speichern der single ion - crystal field uebergangsmatrixelemente
+// class mdcf to store single ion transition matrix elements etc. - for use in mcdisp
 
 #include<cstdlib>
 #include<cerrno>
@@ -11,6 +11,9 @@
 class mdcf 
 {
   private:
+ // mode -r switch to determine if Matrix m needs to be initalised or not 
+ // (in case -r option is not set memory can be saved by not using memory for this matrices)
+   int mr;
  // number of spins  
    int nofa,nofb,nofc;
    int mxa,mxb,mxc;
@@ -77,7 +80,7 @@ class mdcf
     int baseindex_max(int i, int j, int k) const;
     int noft(int i, int j, int k, int l) const; // returns number of transitions of ion l in cryst unit ijk
    
-mdcf (int n1,int n2,int n3,int n,int nc,int nstps);	//konstruktor
+mdcf (int n1,int n2,int n3,int n,int nc,int nstps,int do_Erefine);	//konstruktor
 
 // initialisierung 
     void set_noftransitions (int i, int j, int k, IntVector & notr,int mqd);

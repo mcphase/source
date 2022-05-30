@@ -254,13 +254,13 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
 //    qijk(3)=hkl(3)*2*PI/inputpars.c;
     QQ=Norm(qijk);
  // init eigenvector to zero
-  qee_real.clear();qee_imag.clear();
-  qsd_real.clear();qsd_imag.clear();
-  qod_real.clear();qod_imag.clear();
-  qep_real.clear();qep_imag.clear();
-  qem_real.clear();qem_imag.clear(); 
-  qes_real.clear();qes_imag.clear();
-  qel_real.clear();qel_imag.clear();
+  if(ini.calculate_chargedensity_oscillation){qee_real.clear();qee_imag.clear();}
+  if(ini.calculate_spindensity_oscillation){qsd_real.clear();qsd_imag.clear();}
+  if(ini.calculate_orbmomdensity_oscillation){qod_real.clear();qod_imag.clear();}
+  if(ini.calculate_phonon_oscillation){qep_real.clear();qep_imag.clear();}
+  if(ini.calculate_magmoment_oscillation){qem_real.clear();qem_imag.clear();} 
+  if(ini.calculate_spinmoment_oscillation){qes_real.clear();qes_imag.clear();}
+  if(ini.calculate_orbmoment_oscillation){qel_real.clear();qel_imag.clear();}
 
 
  // Added code to re-use previously calculated values of sqrt(gamma)*U and conj(U)*conj(sqrt(gamma)). mdl 110705
