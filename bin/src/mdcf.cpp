@@ -24,9 +24,10 @@ int sum(IntVector & v)
 ComplexMatrix & mdcf::U(int na, int nb, int nc) const
 { return (*s[in(na,nb,nc)]);
 }
-ComplexMatrix & mdcf::V(int na, int nb, int nc) const
-{ return (*sb[in(na,nb,nc)]);
-}
+
+//ComplexMatrix & mdcf::V(int na, int nb, int nc) const
+//{ return (*sb[in(na,nb,nc)]);}
+
 ComplexVector & mdcf::dPs(int na, int nb, int nc) const
 { return (*dps[in(na,nb,nc)]);
 }
@@ -59,9 +60,9 @@ Vector & mdcf::delta(int na, int nb, int nc)
 ComplexMatrix & mdcf::Ui(int i)
 { return (*s[i]);
 }
-ComplexMatrix & mdcf::Vi(int i)
-{ return (*sb[i]);
-}
+//ComplexMatrix & mdcf::Vi(int i)
+//{ return (*sb[i]);}
+
 ComplexMatrix & mdcf::Mi(int i)
 { if(mr)return (*m[i]);else errexit();
 }
@@ -145,7 +146,7 @@ void mdcf::set_noftransitions(int i, int j, int k, IntVector & notr,int mqd)
      s[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);if(s[in(i,j,k)]==NULL)errexit();
   if(mr){m[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,nofcomponents*sumnt);if(m[in(i,j,k)]==NULL)errexit();}
      l[in(i,j,k)]= new ComplexVector(1,sumnt);if(l[in(i,j,k)]==NULL)errexit();
-     sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);if(sb[in(i,j,k)]==NULL)errexit();// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
+  //   sb[in(i,j,k)]= new ComplexMatrix(1,nofcomponents*sumnt,1,sumnt);if(sb[in(i,j,k)]==NULL)errexit();// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
      dps[in(i,j,k)]= new ComplexVector(1,1*sumnt);if(dps[in(i,j,k)]==NULL)errexit();
      dmqs[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);if(dmqs[in(i,j,k)]==NULL)errexit();
      dmq_dips[in(i,j,k)]= new ComplexVector(1,mqdim*sumnt);if(dmq_dips[in(i,j,k)]==NULL)errexit();
@@ -192,7 +193,7 @@ mdcf::mdcf (int n1,int n2,int n3,int n,int nc,int stps,int do_Erefine)
   s = new ComplexMatrix * [mxa*mxb*mxc+1];if(s==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)s[i]=NULL;
   m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
   l = new ComplexVector * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
-  sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
+ // sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
   dps = new ComplexVector * [mxa*mxb*mxc+1];if(dps==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dps[i]=NULL;
   dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
   dmq_dips = new ComplexVector * [mxa*mxb*mxc+1];if(dmq_dips==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmq_dips[i]=NULL;
@@ -230,7 +231,7 @@ mdcf::mdcf (const mdcf & p,int store)
   s = new ComplexMatrix * [mxa*mxb*mxc+1];if(s==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)s[i]=NULL;
   m = new ComplexMatrix * [mxa*mxb*mxc+1];if(m==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)m[i]=NULL;
   l = new ComplexVector * [mxa*mxb*mxc+1];if(l==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)l[i]=NULL;
-  sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
+ // sb = new ComplexMatrix * [mxa*mxb*mxc+1];if(sb==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)sb[i]=NULL;
   dps = new ComplexVector * [mxa*mxb*mxc+1];if(dps==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dps[i]=NULL;
   dmqs = new ComplexVector * [mxa*mxb*mxc+1];if(dmqs==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmqs[i]=NULL;
   dmq_dips = new ComplexVector * [mxa*mxb*mxc+1];if(dmq_dips==NULL)errexit();for(i=0;i<=mxa*mxb*mxc;++i)dmq_dips[i]=NULL;
@@ -256,7 +257,7 @@ mdcf::mdcf (const mdcf & p,int store)
       s[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*s[id]=*p.s[id];
       if(mr){m[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,nofcomponents*sum((*nt[id])));*m[id]=*p.m[id];}
       l[id]= new ComplexVector(1,sum((*nt[id])));*l[id]=*p.l[id];
-      sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*sb[id]=*p.sb[id];// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
+    //  sb[id]= new ComplexMatrix(1,nofcomponents*sum((*nt[id])),1,sum((*nt[id])));*sb[id]=*p.sb[id];// second index only integer nofcomponents needed, so runs from 1-sumnt MR 14.9.2011
       dps[id]= new ComplexVector(1,1*sum((*nt[id])));*dps[id]=*p.dps[id];
       dmqs[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmqs[id]=*p.dmqs[id];
       dmq_dips[id]= new ComplexVector(1,mqdim*sum((*nt[id])));*dmq_dips[id]=*p.dmq_dips[id];
@@ -280,7 +281,7 @@ mdcf::~mdcf ()
  if(s[i]!=NULL)delete s[i];
  if(mr){if(m[i]!=NULL)delete m[i];}
  if(l[i]!=NULL)delete l[i];
- if(sb[i]!=NULL)delete sb[i];
+ // if(sb[i]!=NULL)delete sb[i];
  if(dps[i]!=NULL)delete dps[i];
  if(dmqs[i]!=NULL)delete dmqs[i];
  if(dmq_dips[i]!=NULL)delete dmq_dips[i];
@@ -292,7 +293,7 @@ mdcf::~mdcf ()
  delete []s;
  delete []m;
  delete []l;
- delete []sb;
+ // delete []sb;
  delete []dps;
  delete []dmqs;
  delete []dmq_dips;

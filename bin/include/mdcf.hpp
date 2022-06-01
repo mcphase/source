@@ -21,7 +21,7 @@ class mdcf
    ComplexMatrix ** m; //matrix to store M
    ComplexMatrix ** s; //matrix to store U
    ComplexVector ** l; //matrix to store eigenvalues sqrt_gamma
-   ComplexMatrix ** sb; //matrix to store V
+   // ComplexMatrix ** sb; //matrix to store V
    ComplexVector ** dps; // big vector to store all dmq1 
    ComplexVector ** dmqs; // big vector to store all dmq1 
    ComplexVector ** dmq_dips; // big vector to store all dmq_dip1 
@@ -52,8 +52,8 @@ class mdcf
     ComplexMatrix & Ui(int in); // returns pointer to eigenvector matrix i
     ComplexVector & sqrt_gamma(int i,int j,int k) const; // returns pointer to eigenvaluematrix (ijk) 
     ComplexVector & sqrt_gammai(int in); // returns pointer to eigenvalue matrix i
-    ComplexMatrix & V(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
-    ComplexMatrix & Vi(int in); // returns pointer to eigenvector matrix i
+  //  ComplexMatrix & V(int i,int j,int k) const; // returns pointer to eigenvector matrix (ijk) 
+  //  ComplexMatrix & Vi(int in); // returns pointer to eigenvector matrix i
     ComplexVector & dPs(int i,int j,int k) const; // returns pointer to vector P (ijk) 
     ComplexVector & dMQs(int i,int j,int k) const; // returns pointer to vector MQ (ijk) 
     ComplexVector & dMQ_dips(int i,int j,int k) const; // returns pointer to vector MQ_dip (ijk) 
