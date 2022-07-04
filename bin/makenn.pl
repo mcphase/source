@@ -23,7 +23,7 @@ print STDOUT << "EOF";
  meaning take mcphas.j, generate all neighbors within sphere of 23.3A 
  and put them into makenn.j,the output values are sorted by ascending distance
 
- in interaction columns put the classical dipole interaction (meV): this is 
+ in interaction columns put by default the classical dipole interaction (meV): this is 
  done assuming the operator sequence 
   I1=Sa I2=La I3=Sb I4=Lb I5=Sc I6=Lc   for sipf files with gJ=0
   I1=Ja I2=Jb I3=Jc    for sipf files with gJ<>0
@@ -31,8 +31,12 @@ print STDOUT << "EOF";
 
  formula for classical dipole interaction tensor:
  
- Jalphabeta(R)=(mu0/4pi)(gJ muB)^2 (3 Ralpha Rbeta- delte_alphabeta R^2)/R^5
- 
+ Jalphabeta(R)=(mu0/4pi)(gJ muB)^2 (3 Ralpha Rbeta- delta_alphabeta R^2)/R^5
+
+ in the Hamiltonian 
+
+ H= -1/2 sum_ij,alphabeta Jialpha Jalphabeta(Rij) Jjbeta
+
   Note that in order to use makenn you have to set up a 
  working  mcphas.j file with the crystal structure. 
 
@@ -92,22 +96,31 @@ print STDOUT << "EOF";
  option -e [filename]
  option -f [filename]
  option -dm [filename]
+ option -jp [filename]
               read interaction constants from table in file. 
               Use -e for isotropic interactions between momentum Ji and Jj 
-                         which only depend on distanc (distance vs coupling J)
+                         which only depend on distance (distance vs coupling J)
               Use -f for isotropic interactions between momentum Ji and Jj
                          (neighbour position vs coupling J)
-              at positions i and j
+              at positions i and j  
                                ( J   0   0 )
-              J Ji.Jj  =    Ji.( 0   J   0 ).Jj
+              J Ji.Jj  =    Ji.( 0   J   0 ).Jj  with  H= -1/2 sum_ij J Ji.Jj 
                                ( 0   0   J ) 
               Use -dm for Dzyaloshinski Moriya interactions:
                          (neighbour position vs Dx Dy Dz)
                                ( 0   Dz  -Dy )
-              D.(Ji x Jj) = Ji.(-Dz  0    Dx ).Jj
+              D.(Ji x Jj) = Ji.(-Dz  0    Dx ).Jj  with H= -1/2 sum_ij D.(Ji x Jj) 
                                ( Dy  -Dx  0  )
 
-              To get an sample file use option -e -f or -dm without a filename.      
+              Use -jp for jparallel interaction:
+                          (neighbour position vs Jp)
+                                               ( Rx.Rx   Rx.Ry  Rx.Rz)
+              Jp (Ji.R)(Jj.R)/R^2 = Jp/R^2  Ji ( Ry.Rx   Ry.Ry  Ry.Rz) Jj  
+                                               ( Rz.Rx   Rz.Ry  Rz.Rz)
+ 
+                           with H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2
+
+              To get a sample file use option -e -f or -dm -jp without a filename.      
 EOF
 print "        -d puts to the last column the distance of the neighbors (A)\n\n";
 print " The neigbours of each atom are also stored in separate files\n";
@@ -189,7 +202,7 @@ elsif(/-cfph/)
 {$cfph=1; shift @ARGV;
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
 }
-elsif(/-e/||/-f/||/-dm/)
+elsif(/-e/||/-f/||/-dm/||/-jp/)
   {$readtable=$_;shift @ARGV;
    unless ($#ARGV>=0) # if no filename is given print help
    {
@@ -198,9 +211,10 @@ elsif(/-e/||/-f/||/-dm/)
  {
    $table_file=$ARGV[0];shift @ARGV;
    $ignore_neihgbours_behind=0;$rtab=$readtable;
-   print "reading "; if ($readtable=~/-e/) {print " isotropic ";$DM=0;} 
-                  elsif ($readtable=~/-f/) {print " isotropic ";$DM=0;} 
-                   else {print " DM ";$DM=1;}
+   print "reading "; if ($readtable=~/-e/) {print " isotropic ";$DM=0;$Jp=0;} 
+                  elsif ($readtable=~/-f/) {print " isotropic ";$DM=0;$Jp=0;} 
+                  elsif ($readtable=~/-jp/) {print " Jp ";$DM=0;$Jp=1;} 
+                   else {print " DM ";$DM=1;$Jp=0;}
    $readtable=1;
    print" interactions from table in file $table_file\n";
    # read interaction constants from file
@@ -216,7 +230,7 @@ elsif(/-e/||/-f/||/-dm/)
                if (/^(#!|[^#])*ignore_neihgbours_behind\s*=\s*/){($ignore_neihgbours_behind)=extract("ignore_neihgbours_behind",$_);}
                                  next if /^\s*#/;$line=$_;
                                  my @numbers=split(" ",$line);
-                                 if($rtab=~/-e/)
+                                 if($rtab=~/-e/||$rtab=~/-jp/)
                                  {++$n_table;
                                   $da[$n_table]=$numbers[0];
                                   $Jex[$n_table]=$numbers[1];
@@ -337,23 +351,30 @@ EOF
 $_=$readtable;
 if(/-e/)
 {print STDOUT << "EOF";
-# Table of exchange interaction constants J - assumed to be isotropic
+# Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # |Rij| [A]  J [meV]  atom_i  atom_j 
+EOF
+
+}
+elsif(/-jp/)
+{print STDOUT << "EOF";
+# Table of exchange interaction constants Jp  in H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2 
+# |Rij| [A]  Jp [meV]  atom_i  atom_j 
 EOF
 
 }
 elsif(/-f/)
 {print STDOUT << "EOF";
-# Table of exchange interaction constants J - assumed to be isotropic
+# Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # da [a]    db [b]    dc [c]    J [meV]   atom_i  atom_j  |Rij| [A] 
 EOF
 
 }
 else
 {print STDOUT << "EOF";
-# Table of Dzyaloshinska Moriya exchange interaction constants DM 
+# Table of Dzyaloshinska Moriya exchange interaction constants DM  in H= -1/2 sum_ij D.(Ji x Jj) 
 #  (default values are neighbour pos in [A]- please modify)
-# da [a]    db [b]    dc [c]    Dmx [meV] Dmy [meV] Dmz [meV] atom_i  atom_j  |Rij| [A] 
+# da [a]    db [b]    dc [c]    Dx [meV] Dy [meV] Dz [meV] atom_i  atom_j  |Rij| [A] 
 EOF
 
 }
@@ -415,7 +436,7 @@ print "# number of atoms = $nofatoms\n calculating ...\n";
 # check if neighbour is already in table
 $ff=0;
  for($ntbl=1;$ntbl<=$n_table;++$ntbl){$_=$readtable;
-if(/-e/&&abs($da[$ntbl]-$r)<0.001){$ff=1;}
+if((/-e/||/-jp/)&&abs($da[$ntbl]-$r)<0.001){$ff=1;}
 elsif((/-f/||/-dm/)&&
       abs($da[$ntbl]-$xx)<0.001&&
       abs($db[$ntbl]-$yy)<0.001&&
@@ -428,7 +449,7 @@ elsif((/-bvk/)&&(abs($da[$ntbl]-$r)<0.001)){
 
 if($ff==0){++$n_table;$ntbl=$n_table;
           $_=$readtable;
-if(/-e/)
+if(/-e/||/-jp/)
 {$da[$ntbl]=$r;
  print sprintf("%+10.6f     0       a%i a%i \n",$r,$nnn,$nz);
 }
@@ -478,7 +499,7 @@ else{die "Error makenn - creating table for option $_ \n";}
                                     abs($db[$ntbl]-$yy)<0.001&&
                                     abs($dc[$ntbl]-$zz)<0.001&&
                                     $Jex[$ntbl]!=0.0)||
-                                    ($rtab=~/-e/&&
+                                    (($rtab=~/-e/||$rtab=~/-jp/)&&
                                      abs($da[$ntbl]-$r)<0.001&&
                                      $Jex[$ntbl]!=0.0)||
                                    ($rtab=~/-dm/&&
@@ -499,6 +520,7 @@ else{die "Error makenn - creating table for option $_ \n";}
     $jn=$jn->append( pdl ([$rvec->at(1)]));
     $kn=$kn->append( pdl ([$rvec->at(2)]));
 unless($DM>0){
+ unless($Jp>0){
     $Jaa=$Jaa->append( pdl ([$Jex[$ntbl]]));
     $Jab=$Jab->append( pdl ([0.0]));
     $Jac=$Jac->append( pdl ([0.0]));
@@ -507,7 +529,22 @@ unless($DM>0){
     $Jbc=$Jbc->append( pdl ([0.0]));
     $Jca=$Jca->append( pdl ([0.0]));
     $Jcb=$Jcb->append( pdl ([0.0]));
-    $Jcc=$Jcc->append( pdl ([$Jex[$ntbl]]));
+    $Jcc=$Jcc->append( pdl ([$Jex[$ntbl]]));              
+              }
+               else  # option $Jp=1
+               {$rhx=$rvec->at(0)/$r;$rhy=$rvec->at(1)/$r;$rhz=$rvec->at(2)/$r;
+    $Jaa=$Jaa->append( pdl ([$Jex[$ntbl]*$rhx*$rhx]));
+    $Jab=$Jab->append( pdl ([$Jex[$ntbl]*$rhx*$rhy]));
+    $Jac=$Jac->append( pdl ([$Jex[$ntbl]*$rhx*$rhz]));
+    $Jba=$Jba->append( pdl ([$Jex[$ntbl]*$rhy*$rhx]));
+    $Jbb=$Jbb->append( pdl ([$Jex[$ntbl]*$rhy*$rhy]));
+    $Jbc=$Jbc->append( pdl ([$Jex[$ntbl]*$rhy*$rhz]));
+    $Jca=$Jca->append( pdl ([$Jex[$ntbl]*$rhz*$rhx]));
+    $Jcb=$Jcb->append( pdl ([$Jex[$ntbl]*$rhz*$rhy]));
+    $Jcc=$Jcc->append( pdl ([$Jex[$ntbl]*$rhz*$rhz]));
+   
+
+               }
               } else
               {
     $Jaa=$Jaa->append( pdl ([0.0]));
@@ -1005,7 +1042,7 @@ sub printneighbourlist {
                                             $text=~s!nofneighbours\s*=\s*\d+!nofneighbours=$nofn!;}
      if (/^(#!|[^#])*diagonalexchange\s*=\s*/){
 
-      if ($rkky>=1||($readtable>0&&$DM<1))
+      if ($rkky>=1||($readtable>0&&$DM<1&&$Jp<1))
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=1!;}
       else
        {$text=~s!diagonalexchange\s*=\s*\d+!diagonalexchange=0!;}
@@ -1071,7 +1108,7 @@ print $l1 "#--------------------------------------------------------------------
   print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
 
   if (($gJ!=0&&$gJ[$ddd]==0)||($gJ==0&&$gJ[$ddd]!=0)){unless($cfph==1){ die "error makenn. mixing of atoms with gJ=0 (intermediate coupling) and gJ>0 not implemented\n";}}
-  if (($rkky==0&&$readtable==0)||$bvk==1||($readtable>0&&$DM>0)) # here anisotropic interaction comes in
+  if (($rkky==0&&$readtable==0)||$bvk==1||($readtable>0&&$DM>0)||($readtable>0&&$Jp>0)) # here anisotropic interaction comes in
    { 
        if($bvk==1||($gJ!=0&&$gJ[$ddd]!=0))
          {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
