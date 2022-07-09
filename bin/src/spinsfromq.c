@@ -77,7 +77,7 @@ printf("#*****************************************************\n");
     nettom2(2+(i-1)*inputpars.nofcomponents)=moment(2);
     nettom3(3+(i-1)*inputpars.nofcomponents)=moment(3);                                          
   }
-  h*=2;
+  h*=2; // multiply field h by two until moment netoom gets large enough to have some sizable numbers
   }
   for(i=1;i<=inputpars.nofatoms;++i)
   {for(j=1;j<=inputpars.nofcomponents;++j){nettom(j+(i-1)*inputpars.nofcomponents)*=factors(j);
@@ -119,10 +119,10 @@ printf("#*****************************************************\n");
    savspin=savspin1+savspin2;
    if (argc>10+a)
    {savspin1=savspin;
-    qvector(1)=strtod(argv[a+7],NULL);
-    qvector(2)=strtod(argv[a+8],NULL);
-    qvector(3)=strtod(argv[a+9],NULL);
-   printf("#! q3: hkl2=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
+    qvector(1)=strtod(argv[a+10],NULL);
+    qvector(2)=strtod(argv[a+11],NULL);
+    qvector(3)=strtod(argv[a+12],NULL);
+   printf("#! q3: hkl3=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
    qvector=qvector*inputpars.rez.Inverse();
    printf("# Miller indices of q3 with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
    savspin2.spinfromq (n1,n2,n3,qvector,nettom3, momentq0, phi);

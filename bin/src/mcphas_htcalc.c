@@ -175,7 +175,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
   for (tryrandom=0;tryrandom<=ini.nofrndtries&&j!=0;++tryrandom)
    {if (j>0){sps=(*testspins.configurations[j]);// take test-spinconfiguration
              #ifndef _THREADS
-	     if (tryrandom==0&&verbose==1) { printf ( "conf. no %i (%ix%ix%i spins)"  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
+	     if (tryrandom==0&&verbose==1) { printf ( "str %i (%ix%ix%i)"  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #endif 
             }
     else     // take q vector and choose phase and mom dir randomly
@@ -198,7 +198,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	                   q,nettom,momentq0,phi);
              hkl=inputpars.rez.Transpose()*q;  
              #ifndef _THREADS
-   	     if (tryrandom==0&&verbose==1) { printf ( "(hkl)=(%g %g %g)..(%ix%ix%i primitive unit cells) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
+   	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #endif 
 	    }	 
     if (tryrandom>0){nr=(int)(rint(rnd(1.0)*(sps.n()*inputpars.nofatoms-1)))+1;
@@ -213,11 +213,15 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
       //!!!calculate free energy - this is the heart of this loop !!!!
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
       fe=fecalc(H ,T,ini,inputpars,sps,(*mf),u,testspins,testqs);
+          if (fe>=2*FEMIN_INI && verbose==1) {
+	       if(j>0) printf ( " for str %i(%ix%ix%i). "  ,j,sps.na(),sps.nb(),sps.nc());
+               else    printf ( " for (%g %g %g)(%ix%ix%i). ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
+                                                        }
           
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
             {               // first - reduce the spinconfiguration if possible
-               if (verbose==1){fprintf(stdout,"fe(tryrandom=%i)= %f meV\n",tryrandom,fe); fflush(stdout);}
+               if (verbose==1){fprintf(stdout,"fe(%i)= %f meV",tryrandom,fe); fflush(stdout);}
 	       sps1=sps;sps1.reduce(); 
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.nofatoms,inputpars.nofcomponents);
                if ((fered=fecalc(H ,T,ini,inputpars,sps1,(*mf1),u,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
@@ -267,11 +271,11 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                            // see if spinconfiguration is already stored
              #ifndef _THREADS
 	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini))//0 means error in checkspincf/addspincf
-	        {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
+	        {fprintf(stderr,"Warning htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.");
                  }
 	     femin=fe; spsmin=sps;	   
             //printout fe
-	    if (verbose==1) printf("fe=%gmeV, struc no %i in struct-table (initial values from struct %i)",fe,physprops.j,j);
+	    if (verbose==1) printf("fe=%gmeV, str %i (%i)",fe,physprops.j,j);
              #else
              MUTEX_LOCK(&mutex_tests); 
              int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,(*thrdat.physprops),ini); //0 means error in checkspincf/addspincf
@@ -285,9 +289,10 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
             //printout fe
             #ifdef _THREADS
 	    if (tryrandom==ini.nofrndtries && verbose==1) {
-	       if(j>0) printf ( "conf. no %i (%ix%ix%i spins)"  ,j,sps.na(),sps.nb(),sps.nc());
-               else    printf ( "(hkl)=(%g %g %g)..(%ix%ix%i primitive unit cells) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
-               if(tlsfemin==femin) printf("fe=%gmeV, struc no %i in struct-table (initial values from struct %i)",fe,(*thrdat.physprops).j,j); }
+               if(tlsfemin==femin) printf("femin=%gmeV str %i(%i)-",fe,(*thrdat.physprops).j,j); 
+	       if(j>0) printf ( "str %i(%ix%ix%i)done "  ,j,sps.na(),sps.nb(),sps.nc());
+               else    printf ( "(%g %g %g)(%ix%ix%i)done ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
+                                                          }
             #endif
             if (tryrandom==ini.nofrndtries&&verbose==1){printf("\n");}
  
@@ -463,6 +468,10 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    #endif
    fclose(fin_coq);	      
    printf("\n starting T=%g Ha=%g Hb=%g Hc=%g with \n %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",T,Habc(1),Habc(2),Habc(3),testspins.n,testqs.nofqs());
+   printf("Notation: fe(n)          ...free energy for random try n\n");
+   printf("          (hkl)          ...Miller indizes (for abc unit cell)\n");
+   printf("          (n1 x n2 x n3) ...supercell of primitive unit cell \n");   
+   printf("          str s(r)       ...structure nr. s, initial values from nr. r\n"); 
  }
 
  j=-testqs.nofqs()+(int)rint(rnd(testspins.n+testqs.nofqs())); 

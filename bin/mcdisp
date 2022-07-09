@@ -1,5 +1,5 @@
 #!/bin/sh
-# main program batch of mcphase
+# main program batch of mcdisp
 
 
 if [ X"$1" != X"-version" -a  X"$1" != X"-help" -a  X"$1" != X"-h" ]; then

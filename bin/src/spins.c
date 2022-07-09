@@ -23,7 +23,8 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
 1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
    is read and extracted from this file and printed on screen (stdout),\n \
-   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>), nothing else is done\n\
+   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>),\n\
+   a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
   \n\
 2) if used with -f file x y, then this file has to be a mcphas.mf or mcphas.sps file,\n\
    the spin configuration at a given x,y point is read and extracted from this file ,\n\
@@ -31,7 +32,8 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
 3) if used with -f filen n,  this file has to be a mcphas.tst file,\n \
    the spin configuration number n\n \
    is read and extracted from this file and printed on screen (stdout),\n \
-   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>), nothing else is done\n\
+   results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>)\n\
+   a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
   \n\
 4) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
    output files and 3d graphical animations are created.\n\
@@ -90,7 +92,6 @@ printf("# **********************************************************\n");
 double T=0; Vector Hext(1,3),Hextijk(1,3);
  int i,n=0;//,dophon=0;
  cryststruct cs,cs4;
- spincf savmf;
  //float numbers[13];numbers[9]=1;numbers[10]=3;
  //numbers[0]=13;
  char outstr[MAXNOFCHARINLINE];
@@ -223,6 +224,8 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
    print_mcdiff_in_header(fout);
 // input file header and conf------------------------------------------------------------------
    n=headerinput(fin,fout,gp,cs);
+   spincf savmf(1,1,1,cs.nofatoms,cs.nofcomponents);
+
 // load spinsconfigurations and check which one is nearest -------------------------------   
 double TT=0; TT=strtod(argv[1+os],NULL);
 double HHx=0,HHy=0,HHz=0;
@@ -277,7 +280,17 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   }}}
   
 
-  fclose(fout);exit(0);
+  fclose(fout);
+    gp.spins_scale_moment=1;
+    gp.read();
+    fin = fopen_errchk ("./results/spins_prim.jvx", "w");
+     gp.showprim=1;
+             Vector hkl1(1,3);hkl1=0;
+             Vector gjmbHxc1(1,3);gjmbHxc1=0;
+     savmf.jvx_cd(fin,outstr,cs,gp,0.0,savmf*0.0,savmf*0.0,hkl1,T,gjmbHxc1,Hextijk,cs,savmf,savmf*0.0,savmf*0.0);
+    fclose (fin);
+
+  exit(0);
 }
 
 // FROM HERE ON IT IS ONLY EXECUTED IF GRAPHICS ARE DESIRED ... 
