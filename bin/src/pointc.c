@@ -166,9 +166,29 @@ void calcCEFpar(double & q,double & x ,double & y, double & z, double & r,Vector
 /**********************************************************************/
 // main program
 int main (int argc, char **argv)
-{// check command line
+{
+FILE * table_file;
+FILE * conv_file;
+FILE * sipf_file;
+FILE * dBlm_file;
+FILE * dLlm_file;
+//char instr[MAXNOFCHARINLINE];
+int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0;
+float invalues[100];invalues[0]=99;
+  double q,x,y,z;int do_deriv=0;
 
-  if (argc < 3 && !(argc==2 && strcmp(argv[1],"-b")==0))
+// treat options
+if(argc>1+ac)
+ {while(acold!=ac&&argc>1+ac){acold=ac;
+if(strcmp(argv[1+ac],"-d")==0) {ac++;do_deriv=1;dBlm_file=fopen_errchk("results/pointc.dBlm","w");
+                                        dLlm_file=fopen_errchk("results/pointc.dLlm","w");} // calculate derivatives of Blm Llm
+else if(strcmp(argv[1+ac],"-o")==0) {ac++;omit_pc=1;} 
+else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
+                                }
+ }
+
+// check command line
+  if (argc - ac < 3 && batchmode==0)
     { printf (
 "\n Program to calculate Crystal field Parameters from Point Charges \n\n"
 " Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos\n\n"
@@ -213,6 +233,7 @@ int main (int argc, char **argv)
 " # is output to file results\\radwavfun.dat\n\n"
 "OUTPUT:  stdout ... sipf file with CEF pars(including radial matrix elements\n"
 "                    and Stevens factors)\n"
+"                ... pointcharges and positions (omit with option -o)\n"
 "         results\\pointc.out ...contains results of convergence when summing up\n"
 "                 contributions of different neighbours one by one...\n"
 "         results\\pointc.Blm ... Crystal field parameters Blm in Stevens Notation\n" 
@@ -224,19 +245,7 @@ int main (int argc, char **argv)
       exit (1);
     }
 
-FILE * table_file;
-FILE * conv_file;
-FILE * sipf_file;
-FILE * dBlm_file;
-FILE * dLlm_file;
-//char instr[MAXNOFCHARINLINE];
-int i,n=0,ac=0,batchmode=0;
-float invalues[100];invalues[0]=99;
-  double q,x,y,z;int do_deriv=0;
 // set stevens parameters and landefactor, J and <r^l> of ion
-if(strcmp(argv[1],"-d")==0) {ac=1;do_deriv=1;dBlm_file=fopen_errchk("results/pointc.dBlm","w");
-                                        dLlm_file=fopen_errchk("results/pointc.dLlm","w");} // calculate derivatives of Blm Llm
-
 // read create class object ionpars from iontype - sets J, gJ, Stevens factors from the
 // routine getpar in cfieldrout.c, thus takes the single ion parameters from
 // the same source as the cfield program ...
@@ -304,7 +313,7 @@ if(strcmp(argv[1],"-d")==0) {ac=1;do_deriv=1;dBlm_file=fopen_errchk("results/poi
 (*iops).Llm=0;
 (*jjjps).save_sipf(stdout);
  }
- else if(strcmp(argv[1],"-b")==0)  // Batch mode - do not write any files; read sipf,pcfile from stdin, prints to stdout
+ else if(batchmode==1)  // Batch mode - do not write any files; read sipf,pcfile from stdin, prints to stdout
  {
     char ionname[100];
     batchmode = 1;
@@ -371,11 +380,11 @@ if (argc<5) // read pointcharges from file
 }
 }
  // print information about pointcharges to file and calculate Blms and Llms
-  printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
+  if(!omit_pc)printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
 while(n>0)
 {
 
-  printf ("pointcharge= %4g         %4g %4g %4g\n",q,x,y,z);
+ if(!omit_pc)printf ("pointcharge= %4g         %4g %4g %4g\n",q,x,y,z);
  // calculate Blm's and Llm's
  double r;
  Vector Blm(0,45),Llm(0,45);

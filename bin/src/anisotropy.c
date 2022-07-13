@@ -12,6 +12,7 @@ const char * filemode="w";
 int nofmaxloopDIV=0,nofmaxspinchangeDIV=0;
 int successrate=0;
 int nofcalls=0;
+int isfull=0;
 
 #include "myev.h"
 #include "mcphas_htcalc.c"

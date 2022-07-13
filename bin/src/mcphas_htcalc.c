@@ -271,7 +271,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                            // see if spinconfiguration is already stored
              #ifndef _THREADS
 	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini))//0 means error in checkspincf/addspincf
-	        {fprintf(stderr,"Warning htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.");
+	        {if(isfull==0){fprintf(stderr,"Warning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.");
+                 isfull=1;}else{fprintf(stderr,"!FT!");}
                  }
 	     femin=fe; spsmin=sps;	   
             //printout fe
@@ -280,8 +281,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              MUTEX_LOCK(&mutex_tests); 
              int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,(*thrdat.physprops),ini); //0 means error in checkspincf/addspincf
              MUTEX_UNLOCK(&mutex_tests); 
-	     if (checksret==0) {fprintf(stderr,"Error htcalc: too many spinconfigurations created");
-                 }
+	     if (checksret==0) {if(isfull==0){fprintf(stderr,"Warning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.");
+                 isfull=1;}else{fprintf(stderr,"!FT!");}}
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=femin;
              #endif
 	     }
@@ -385,7 +386,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                    strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                    strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                    felog=fopen_errchk(outfilename,"a");
-                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#");}
+                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i\n#",inputpars.nofatoms,inputpars.nofcomponents);}
                    fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i \n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc());
                    if (verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
 	           fclose(felog);

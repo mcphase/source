@@ -182,7 +182,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
    fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
-   fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] phasnumber-j   period-key ");
+   fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] phasnumber-j   period-key supercell-nr1 x nr2 x nr3 ");
            for(i1=1;i1<=nofcomponents;++i1)
 	      {fprintf(fout,"<I%c> ",'a'-1+i1);}
 	      fprintf(fout,"\n");
@@ -192,8 +192,8 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
   totalJ=0; 
   if (htfailed!=0){j=0;}else{totalJ=sps.totalJ();}
    if(j<0){sps.wasstable=j;}// if qvector generated structure is stable, then take period key = number of qvector
-   fprintf (fout, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip      ",
-            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),j,sps.wasstable);
+   fprintf (fout, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip                %i x %i x %i ",
+            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),j,sps.wasstable,sps.na(),sps.nb(),sps.nc());
            for(i1=1;i1<=nofcomponents;++i1)
 	      {fprintf(fout,"%4.4g ",myround(totalJ(i1)));}
 	      fprintf(fout,"\n");

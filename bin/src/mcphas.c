@@ -13,6 +13,7 @@ int verbose=0;
 int nofmaxloopDIV=0,nofmaxspinchangeDIV=0;
 int successrate=0;
 int nofcalls=0;
+int isfull=0;
 
 const char * filemode="w";
 

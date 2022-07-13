@@ -780,7 +780,7 @@ if ($pointcharge) {
       $pointcstr =~ s/:/\ /g;
       if($debug) { print $pointcstr."\n"; }
       # Now pipe list of neighbours to pointc and get its reply.
-      $pcpid = open3(\*PCIN,\*PCOUT,\*PCERR,'pointc -b') || die "Cannot run pointc.\n";
+      $pcpid = open3(\*PCIN,\*PCOUT,\*PCERR,'pointc -o -b') || die "Cannot run pointc.\n";
       print PCIN $pointcstr."\n\n";
       # Read pointc results from stdout.
       @pc_head = ();
