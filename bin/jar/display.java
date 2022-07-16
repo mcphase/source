@@ -223,6 +223,7 @@ static public void windowclose(){
        System.out.println("        when using option -xmin 23.3 the application sets the minimum of the display xaxis to 23.3\n");
        System.out.println("        similar are options -xmax -ymin -ymax -xtext -ytext -title....\n");
        System.out.println("        when using option -c file.jpg the application only creates a jpg file and exits immediatly\n");
+       System.out.println("        option -g shows gridlines\n");
        System.out.println("        if optional errorcolumns are added then instead of lines symbols and errorbars are shown\n");
        System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to\n");
        System.out.println("	  bubblecolumn are shown (toggle bubblesize with 's' and 'b')\n");
@@ -245,7 +246,7 @@ static public void windowclose(){
        //      System.out.println(sx+" "+sy);
        //      p.valueOf(strLine);
        //    double[] myDatax = {};
-       int j=0;int k=0; jpgfilename="";
+       int j=0;int k=0; jpgfilename="";showgrid=false;
        String title="display";
        s=args[0];s=SF.TrimString(s); // command line arguments are treated here
        //look if options are present
@@ -260,6 +261,10 @@ static public void windowclose(){
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              jpgfilename=SF.FirstWord(s);doexit=true;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-g")) // option "-g"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             showgrid=true;
             }
             else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-xmin")) // option "-xmin 23"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
@@ -345,7 +350,7 @@ static public void windowclose(){
  static int[] colyerr;
  static double scale;
  static double xmin,xmax,ymin,ymax;
- static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,doexit;
+ static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,doexit,showgrid;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
@@ -443,7 +448,11 @@ static public void windowclose(){
         XYPlot plot = (XYPlot) chart.getPlot();
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
-      //  plot.setDomainGridlinesVisible(true);
+plot.setRangeGridlinesVisible(showgrid);
+plot.setRangeGridlinePaint(Color.BLACK);
+
+plot.setDomainGridlinesVisible(showgrid);
+plot.setDomainGridlinePaint(Color.BLACK);
        //default to not include zero
         
 
