@@ -60,6 +60,7 @@ GetOptions("help"=>\$helpflag,
            "charges|ch=s"=>\$inputcharges,
            "so1ion"=>\$so1ion,
            "ic1ion"=>\$ic1ion,
+           "phonon"=>\$phonon,
            "outpos"=>\$checkpos);
 
 if (!$create && ($#ARGV<0 || $helpflag)) {
@@ -79,6 +80,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "    --charges     or -ch : input charges to override defaults\n";
    print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";
    print "    --ic1ion      or -ic : force use of ic1ion for single ion modules.\n";
+   print "    --phonon      or -ph : force use of phonon for single ion modules.\n";
    print "\n";
    print " By default, this script is automatic, so if the oxidation (valence) states are not\n";
    print "   given in the CIF, it will be guessed at based on the element, as is whether the ion\n";
@@ -94,7 +96,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print " You can also input the charges for each element using the -ch option with the syntax:\n";
    print "   $0 -pc <n> -ch O=-2,Ce=+3,Pd=+2\n\n";
    print " Finally, by default $0 will use so1ion for f-electron ions and ic1ion for d-electron\n";
-   print "   ions, but this can be overridden using the -so or -ic flags.\n";
+   print "   ions, and phonon for others but this can be overridden using the -so or -ic pr -ph flags.\n";
    exit(0);
 }
 
@@ -518,6 +520,8 @@ for $j(0..$nofatom-1) {
   $at = $dat[$j][0]; $at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
   $at = lc $at; $at = ucfirst $at;
   $attab = $element{$at}; 
+  $atmas = $mass{$at}; 
+
   if(!$attab) { die "Error, unknown element: ".$dat[$j][0]."\n"; }
   if($oxy[$j] eq "" || $oxy[$j]==0) {
     $oxyref = ${$attab}[3];
@@ -525,6 +529,7 @@ for $j(0..$nofatom-1) {
       @a_oxyref = split(",",$oxyref); $oxy[$j] = $a_oxyref[0];
     } else { $oxy[$j] = $oxyref; }
   }
+  push @atomicmass, ${$atmas}[0]; 
   push @ismag, ${$attab}[2]; 
   push @realb, ${$attab}[0]/10;  # convert from femtometres to 10^-12cm
   push @imagb, ${$attab}[1]/10;  
@@ -595,9 +600,9 @@ if($debug==1) {
     }
     print STDERR "\n";
   }
-  print STDERR "     oxidation\tismag\tRe[b]\tIm[b]:\n";
+  print STDERR "        mass\toxidation\tismag\tRe[b]\tIm[b]:\n";
   for $j(0..$nofatom-1) {
-    print STDERR "$dat[$j][0]\t$oxy[$j]\t$ismag[$j]\t$realb[$j]\t$imagb[$j]\n"; 
+    print STDERR "$dat[$j][0]\t$atomicmass[$j]\t$oxy[$j]\t$ismag[$j]\t$realb[$j]\t$imagb[$j]\n"; 
   }
 }
 
@@ -817,12 +822,12 @@ if($spagrp eq "") {
   foreach $so (@sympos) { print "$so\n"; }
 } else { print "spacegroup is $spagrp".(defined $maybematch?" (possibly)":"")."\n"; }
 print "--------------------------------------------------------------------------------\n";
-print "Label\tElement\tValence\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
+print "Label\tElement\tMass\tValence\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
 print "--------------------------------------------------------------------------------\n";
 @magornot = ( "NonMagnetic", "Magnetic" );
 for $j(0..$nofatom-1) {
   if(!($dat[$j][0] eq -1)) {
-    print "$dat[$j][0]\t$atoms[$j]\t$oxy[$j]\t$mults[$j]\t$magornot[$ismag[$j]]\t$dat[$j][2]\t$dat[$j][3]\t$dat[$j][4]\n";
+    print "$dat[$j][0]\t$atoms[$j]\t$atomicmass[$j]\t$oxy[$j]\t$mults[$j]\t$magornot[$ismag[$j]]\t$dat[$j][2]\t$dat[$j][3]\t$dat[$j][4]\n";
   }
 }
 print "--------------------------------------------------------------------------------\n";
@@ -948,20 +953,17 @@ copy("mcphas_magnetic_atoms.j","mcphas.j");
 $sipfheader = 
   "#<!--mcphase.sipf-->\n".
   "#***************************************************************\n".
-  "# Single Ion Parameter File for Module Kramer for\n".
-  "# mcphas version 5.2\n".
-  "# - program to calculate static magnetic properties\n".
+  "# Single Ion Parameter File \n".
+  "# mcphas  - program to calculate static magnetic properties\n".
   "# reference: M. Rotter JMMM 272-276 (2004) 481\n".
-  "# mcdisp version 5.2\n".
-  "# - program to calculate the dispersion of magnetic excitations\n".
+  "# mcdisp  - program to calculate the dispersion of magnetic excitations\n".
   "# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n".
-  "# mcdiff version 5.2\n".
-  "# - program to calculate neutron and magnetic xray diffraction\n".
+  "# mcdiff - program to calculate neutron and magnetic xray diffraction\n".
   "# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n".
   "#***************************************************************\n";
 for (keys %ions) {
   if($debug==0) { open (FOUT, ">$_.sipf"); }
-  if($ismag[$ions{$_}]) {
+  if($ismag[$ions{$_}]&&!$phonon) {
     $ionname = $ionnames{$_}; 
     $ionname =~ s/p/\+/g;
     $eltab = $magions{$ionname};             # Looks up information about the magnetic ions
@@ -977,7 +979,8 @@ for (keys %ions) {
     } elsif ($ic1ion) {
       $modulename = "ic1ion";
       $iontype = $ionname;
-    } else {
+    } 
+    else {
       if ($nofelectrons =~ /f/) {
         $modulename = "so1ion";
         $iontype = $so1ionname;
@@ -1063,25 +1066,27 @@ for (keys %ions) {
     }
   }
   else {
-    print FOUT "#!MODULE=kramer\n";
+    print FOUT "#!MODULE=phonon\n";
     print FOUT $sipfheader;
     print FOUT "#IONTYPE=$_".abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-")."\n";
     print FOUT "CHARGE=$oxy[$ions{$_}]\n";
     print FOUT "MAGNETIC=$ismag[$ions{$_}]\n";
     print FOUT "\n";
-    print FOUT "# this is a crystal field ground state doublet\n";
-    print FOUT "# module, parameters are the following 3 matrix\n";
-    print FOUT "# elements\n";
-    print FOUT "#\n";
-    print FOUT "# A=|<+-|Ja|-+>| B=|<+-|Jb|-+>| C=|<+-|Jc|+->|\n";
-    print FOUT "A = 2.000000\n";
-    print FOUT "B = 2.543750\n";
-    print FOUT "C = 1.600000\n";
-    print FOUT "#----------------\n";
-    print FOUT "# Lande factor gJ\n";
-    print FOUT "#----------------\n";
-    print FOUT "GJ=2\n";
-    print FOUT "\n";
+print FOUT << "EOF";
+MODPAR1=$atomicmass[$ions{$_}]  #mass in(m0)
+MODPAR2=0   # Kxx
+MODPAR3=0   # Kyy
+MODPAR4=0   # Kzz
+MODPAR5=0  # Kxy  in (meV)
+MODPAR6=0  # Kxz
+MODPAR7=0  # Kyz
+MODPAR8=0.4 # umax          maximum (cutoff) for displacement [a0=0.5219 A]
+MODPAR9=0   #                0       umax restriction in all directions
+            #                1,2,3   umax restriction in x y z direction only
+            #                4       umax restriction in x and y direction
+            #                5       umax restriction in x and z direction
+            #                6       umax restriction in y and z direction
+EOF
     print FOUT "#-------------------------------------------------------\n";
     print FOUT "# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)\n";
     print FOUT "#                      with s=sin(theta)/lambda=Q/4pi\n";
