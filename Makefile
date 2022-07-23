@@ -23,6 +23,14 @@
 #               . under linux: type make clean
 #                              make unreleased_remove
 #               .              make java [usually not required because java needs recompile only when changes are made]
+#                              mcphaseexplorer compiled using netbeans if modified, in order 
+#                               to use it: click on project right click package as zip. look in 
+#                               Output/Netbeans_mpe/dist/ and unzip mcphaseexplorer.zip
+#                               unzip it and insert in etc/mcphaseexplorer.conf additional command
+#                               line arguments such as -J--add-opens=java.base/java.net=ALL-UNNAMED ...
+#                               (take these from prvious version, ensures that mpe works with jdk 17)
+#                               move ions directory from old version to new and replace old version
+#                               in mcphas/bin/mcphaseexplorer* with new version.
 #                              cd doc and delete directory manual
 #                              latex2html -local_icons manual.tex  
 #                                         [maybe necessary to adapt manual.tex style, usepackage
@@ -40,9 +48,15 @@
 #	           (does automatically make unreleased_remove clean and tgz and converts all *.pl files dos2unix 
 #                   in bin, perhaps in examples and unreleased_restore, -k keep going even if errors occur)
 #               .  rename linux distribution file  Output/mcph.tar.gz to e.g. mcph5_2.tgz
+#               .  compile for windows on McOS ?? to be done : make sure MacPorts is installed from https://www.macports.org/install.php 
+#                                       and update it with : sudo port -v selfupdate
+#                                       using this the windows gnu compilers can be installed on Mac: 
+#                                                            sudo port install mingw-w64
+#                                       ... ?? maybe this can be used for creating 
+#                                              windows distribution on McOS system in future ... ??
 #	        . change to dos:   make unreleased_remove and copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
-#                                    mingw win32 shell  (from startup menu) 
+#                                    mingw win64 shell  (from startup menu) 
 #                                    cd mcphas
 #                                    . lin.bat 
 #				   find . -name  '.DS_Store' -delete
@@ -75,7 +89,7 @@
 #Then select "Create" and the screen saver should be magically created for you.
 # Author(s):     M. Rotter
 #
-#  Last Update:	  15.11.2015
+#  Last Update:	  15.07.2022
 #
 #**********************************************************************
 
@@ -210,6 +224,7 @@ tgz :
 
 clean:
 	rm -f ./Makefile.sav
+	cd ./doc ; make clean
 	cd ./tutorial ; make clean
 	cd ./examples ; make clean
 	cd ./bin/jar ; make clean

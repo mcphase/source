@@ -56,6 +56,7 @@ GetOptions("help"=>\$helpflag,
            "supercell|s=s"=>\$supersize,
            "pointcharge|pc=f"=>\$pointcharge,
            "savepcfile|sp"=>\$savepcfile,
+           "savecharges|sc"=>\$savecharges,
            "readpcfile|rp"=>\$readpcfile,
            "charges|ch=s"=>\$inputcharges,
            "so1ion"=>\$so1ion,
@@ -76,6 +77,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "    --pointcharge or -pc : calculates the crystal field parameters from point charges\n";
    print "                           up to # Angstrom away from magnetic ions (e.g. -p 3.5)\n";
    print "    --savepcfile  or -sp : write *.pc coordinate files to results folder\n";
+   print "    --savecharges or -sc : store pointcharge coordinates in sipf file\n";
    print "    --readpcfile  or -rp : read from *.pc coordinate files in results folder\n";
    print "    --charges     or -ch : input charges to override defaults\n";
    print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";
@@ -785,7 +787,8 @@ if ($pointcharge) {
       $pointcstr =~ s/:/\ /g;
       if($debug) { print $pointcstr."\n"; }
       # Now pipe list of neighbours to pointc and get its reply.
-      $pcpid = open3(\*PCIN,\*PCOUT,\*PCERR,'pointc -o -b') || die "Cannot run pointc.\n";
+      unless($savecharges){$omit="-o";}
+      $pcpid = open3(\*PCIN,\*PCOUT,\*PCERR,'pointc '.$omit.' -b') || die "Cannot run pointc.\n";
       print PCIN $pointcstr."\n\n";
       # Read pointc results from stdout.
       @pc_head = ();

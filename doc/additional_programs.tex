@@ -115,9 +115,11 @@ from the new charges. (You don't have to specify -pc with this option).
 
 \item[-so       ]  force all ions to use so1ion
 \item[-ic        ] force all ions to use ic1ion
+\item[-ph        ] force all ions to use phonon
 \end{description}
 
-Default is to create sipf files with so1ion module for f-electrons and ic1ion module for d-electrons.
+Default is to create sipf files with so1ion module for f-electrons and ic1ion module for d-electrons
+and phonon module for nonmagnetic ions.
  The {\prg -so} and {\prg -ic} options have no effect unless either {\prg -pc}
  or {\prg -rp} is specified.
 {\prg -so} takes precedent over {\prg -ic} (e.g. 

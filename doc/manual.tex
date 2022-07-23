@@ -82,6 +82,13 @@ community this program would not have come into existence.
 \begin{itemize}
 \item {\prg makenn} option -bvk extended to generate a sample bvk constants table 
 \item anisotropy $H=D_{x4} S_x^4 +D_{y4} S_y^4 +D_{z4} S_x^4$ introduced in module {\prg so1ion}
+\item made {\prg mcphaseexplorer} compatible with java 1.8.0 and java 17 at the 
+           same time (see batch mpe for linux for options) 
+\item {\prg cif2mcphas} changed to put phonon module for sipf files which are nonmagnetic
+\item           tb2ti2o7 example for cf-phonon interaction
+\item  mcphas.xyt outputs periodicity of supercell
+\item {\prg spins} changed to produce for option -f spins\_prim.jvx graphics output
+\item  {\prg spinsfromq} phases correctly introduced for double and triple q structure
 \end{itemize}
 
 \subsection*{ \dots in version 5.4 \dots}
@@ -140,39 +147,6 @@ and here follow standard deviations computed with the scaled parameters
 MCPHASE\_NOFTHREADS , or setting in mcdisp.par and mcphas.ini nofthreads=2, or if nothing is 
 specified the programs attempt to determine the available number of cores automatically
 \item powdermagnon extended to nonortholattices 
-\end{itemize}
-
-\subsection*{ ... in version 5.0 ...}
-\begin{itemize}
-\item programs mcdiff, mcdisp, ansitropy make use of parallel processing (compiled for 2 
-        processor machines, if you want to recompile for more threads see install.txt) 
-\item cluster module for calculation of clusters of ions and/or hyperfine interactions 
-\item bfk program added (J Keller) - Becker-Fulde-Keller model for conduction electron interactions
-\item singleion program extended to be able to read sipf files directly, cpsingleion to calculate specific
-        heat, entropy etc.
-\item perl parse option added to so1ion to be able to redefine operators $\hat I_{\alpha}$
-\item resonant inelastic x-ray scattering cross section calculation possible with mcdisp option -x
-\item the many programs  for displaying movies and densities (display\_spindensity, display\_chargedensities ...) are substituted by two programs: {\prg display\_density} and {\prg display\_densities}, which have options to enable all kind of graphics-movies-calculations.
-\item mcdiff/mcdisp: new and more complete logic for taking various possible 
-       formfactors explained in manual and implemented in program mcdiff, parallelizing option -prefix for mcdisp
-\item mcphas.j:  {\prg cffilename} in mcphas.j replaced by {\prg sipffilename} !!
-       removed gJ from mcphas.j input files (not read any more)
-\item change of concept: in mcphas.mf, mcdisp.mf, mcdiff.in we store/input now the exchange      
-        field and not the effective field ! Thus program singleion will be started by:
-        singleion [option] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1Hxc2 Hxc3 ...   
-         Hxcnofcomponents [meV] 
-\item   a clear and complete distinction between interaction
-         operators $\hat I_{\alpha}$ and observables $\hat \mathcal O$ is made. Therefore the
-         user programmed c-module functions had to be redefined - thus loadable modules     
-         programmed by users, which conforming to the old module function
-         names (such as dmcalc du1calc etc ...) and definitions will not work in mcphas 5.0.   
-          e. g. external module function {\prg mcalc} is replaced by {\prg Icalc} (interaction 
-        operators) and  
-        { \prg mcalc} (magnetic moment).
-\item in output of mcphas:  *.hkl files are created using mcalc function of sipf module
-        (i.e. they are based on the observable magnetic moment)
-\item some bugs removed: spin/density animations of osciallations, icf1ion, threading, rhoso1ion
-        rotateBlm
 \end{itemize}
 
 
