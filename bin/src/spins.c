@@ -283,11 +283,19 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   fclose(fout);
     gp.spins_scale_moment=1;
     gp.read();
-    fin = fopen_errchk ("./results/spins_prim.jvx", "w");
+    fin = fopen_errchk ("./results/spins_prim.jvx", "w"); // here draw some graphics for the spinconfiguration
+                       // with option -f. Yet this is very limited, because we do not know what is the magnetic
+                       // moment, i.e. a guess is made using the components 1 2 3 of the savmf 
      gp.showprim=1;
+     gp.scale_density_vectors=0;gp.show_density=0; // do not show charge densities
              Vector hkl1(1,3);hkl1=0;
              Vector gjmbHxc1(1,3);gjmbHxc1=0;
-     savmf.jvx_cd(fin,outstr,cs,gp,0.0,savmf*0.0,savmf*0.0,hkl1,T,gjmbHxc1,Hextijk,cs,savmf,savmf*0.0,savmf*0.0);
+     spincf magmom(savmf.na(),savmf.nb(),savmf.nb(),savmf.nofatoms,3); // the magnetc moment guess 
+     int i,j,k,l;for (i=1;i<=savmf.na();++i){for (j=1;j<=savmf.nb();++j){for (k=1;k<=savmf.nc();++k){for(l=1;l<=magmom.nofatoms;++l)  
+         for(int momdim=1;momdim<=3&&momdim<=savmf.nofcomponents;++momdim)
+               {magmom.moment(i,j,k,l)(momdim)=savmf.moment(i,j,k,l)(momdim);}
+        }}}
+     savmf.jvx_cd(fin,outstr,cs,gp,0.0,savmf*0.0,savmf*0.0,hkl1,T,gjmbHxc1,Hextijk,cs,magmom,magmom * 0.0,magmom* 0.0);
     fclose (fin);
 
   exit(0);

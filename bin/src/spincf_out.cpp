@@ -413,16 +413,16 @@ int check_atom_in_big_unitcell(Vector & dd,Vector & maxv1,Vector & minv1,Matrix 
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
                     double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
                     Vector & Hext,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag)
-{spincf pev_r(magmomev_real);pev_r=pev_r * 0.0;
- spincf pev_i(magmomev_imag);pev_i=pev_i * 0.0;
+{spincf pev_r(magmomev_real.na(),magmomev_real.nb(),magmomev_real.nc(),magmomev_real.nofatoms,3);pev_r=pev_r * 0.0;
+ spincf pev_i(magmomev_imag.na(),magmomev_imag.nb(),magmomev_imag.nc(),magmomev_imag.nofatoms,3);pev_i=pev_i * 0.0;
  jvx_cd(fout,text,cs,gp,phase,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs,magmom,magmomev_real,magmomev_imag,pev_r,pev_i);}
 
 //output for javaview
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
                     double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
                     Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag)
-{spincf pev_r(magmomev_real);pev_r=pev_r * 0.0;
- spincf pev_i(magmomev_imag);pev_i=pev_i * 0.0;
+{spincf pev_r(magmomev_real.na(),magmomev_real.nb(),magmomev_real.nc(),magmomev_real.nofatoms,3);pev_r=pev_r * 0.0;
+ spincf pev_i(magmomev_imag.na(),magmomev_imag.nb(),magmomev_imag.nc(),magmomev_imag.nofatoms,3);pev_i=pev_i * 0.0;
  jvx_cd(fout,text,cs,gp,phase,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs4,magmom,magmomev_real,magmomev_imag,pev_r,pev_i);}
 
 
@@ -580,6 +580,7 @@ if(gp.show_atoms>0) // plot atoms removed by MR 30.8.2011 - inserted again for p
 fprintf(fout,"    <geometry name=\"ions\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
+
   for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1);++i1){for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1);++j1){for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
@@ -611,6 +612,7 @@ fprintf(fout,"        <points>\n");
                                        }
 
             }
+
          dd+=dd0;
             if(showdd==1)if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
             (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
@@ -619,7 +621,7 @@ fprintf(fout,"        <points>\n");
              QR*=2*PI;
              Vector p(1,3);p=0;
              double radius=0;extract(cs.sipffilenames[l],"radius",radius);if(radius!=0){p=magmom.moment(i,j,k,l);}
-             if(pl[l]!=l)p=magmom.moment(i,j,k,pl[l]);   
+             if(pl[l]!=l)p=magmom.moment(i,j,k,pl[l]); 
              xyz=p+gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),myround(dd(2)+xyz(2)),myround(dd(3)+xyz(3)));
@@ -744,9 +746,9 @@ fprintf(fout,"        <points>\n");
                      (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
              QR=(hkl*abc_in_ijk_Inverse)*dd;
-             QR*=2*PI;
+             QR*=2*PI; 
                           xyz=magmom.moment(i,j,k,l);
-            if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]); 
+            if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]);
             dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
              
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));

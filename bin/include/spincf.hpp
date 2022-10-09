@@ -65,8 +65,8 @@ private:
      
    // take vector dd and calculate distance nearest atom in spinconfiguration
    double nndist(float * x, float * y, float * z,Vector & abc,Matrix & p,Vector &dd);
-    Vector moment(int i,int j,int k,int l); // returns moment of atom l (1,nofcomponents)
  public:
+    Vector moment(int i,int j,int k,int l); // returns moment of atom l (1,nofcomponents)
 
     Vector pos(int i, int j, int k, int l,Vector & abc,Matrix & r,float * x,float *y,float*z);
     Vector pos(int i, int j, int k, int l,cryststruct & cs);

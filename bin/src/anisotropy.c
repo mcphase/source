@@ -85,7 +85,7 @@ fprintf(fout,
 "#! displayxtext=theta(deg)\n"
 "#! displayytext=M||H(mub)\n"
 "#! displaytitle= Polycrystal Calculation Results - dependence on polar angle theta\n"
-"# phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[mb] Mx[mb] My[mb] Mz[mb] MparallelH[mb]\n",direction(1),direction(2),direction(3),r1(1),r1(2),r1(3));
+"# phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[mb] Mx[mb] My[mb] Mz[mb] MparallelH[mb]\n");
 }
 
 if(do_sipffile){
