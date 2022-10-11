@@ -12,7 +12,7 @@ unless ($#ARGV >1)
  print " usage: newcols col n [options] *.*   \n col=existing column \n n=number of new columns\n";
 print " *.* .. filenname\noptions: -c 12.3  ... all the new columns will be filled with  the constant 12.3\n";
 print "-n ... all the new columns will be filled with the line number\n";
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -83,10 +83,10 @@ $dn=0;if ($ARGV[0]=~m/-n/){$dn=1;shift @ARGV;}
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

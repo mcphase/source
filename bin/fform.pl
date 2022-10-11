@@ -11,7 +11,7 @@ unless ($#ARGV >1)
 
  print " usage: fform col1 col2 format *.*   \n\n col1=1st column,\n col2=last column to be formatted\n format=output format such as 4.4g \n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -87,10 +87,10 @@ $format=$ARGV[0];shift @ARGV;
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

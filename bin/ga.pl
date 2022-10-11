@@ -86,7 +86,7 @@ print STDOUT << "EOF";
 #
 # 
 EOF
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];

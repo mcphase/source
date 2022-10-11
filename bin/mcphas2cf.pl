@@ -188,7 +188,7 @@ GetOptions("help"=>\$helpflag,
 	   
 
 usage() if $helpflag;
-
+print STDERR "#* $0 *\n";
 
 
 if (!$input && !$ARGV[0]) { 

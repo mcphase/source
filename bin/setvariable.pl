@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
-unless ($#ARGV >1) {usage();}
+unless ($#ARGV >1) {usage();}else{print STDERR "#* $0 *";}
 
 sub usage() {
 
@@ -55,7 +55,7 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$value=eval $ARG
       close Fout;
       system "del range.out"; 
      }
-      print ">\n";
+      print ">";
  }   
-
+print"\n";
  

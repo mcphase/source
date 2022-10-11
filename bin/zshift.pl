@@ -11,7 +11,7 @@ unless ($#ARGV >2)
 
  print " usage: zshift  constx colx coly  *.*   \n  constx=x-value, colx,coly= columns \n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
@@ -106,10 +106,10 @@ $delta=1e22;
 
 
 
-   print "> shifted by $const\n";
+   print "> shifted by $const ";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

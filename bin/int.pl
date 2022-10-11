@@ -33,7 +33,7 @@ the results go to stdout and environment variables MCPHASE_INT_MU_1,
 MCPHASE_INT_MU_2,MCPHASE_INT_MU_3 ... are set
 
 EOF
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
  
 

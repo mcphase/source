@@ -2,6 +2,7 @@
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >2) {usage();}
+else{print STDERR "#* $0 *";}
 
 sub usage() {
 
@@ -63,7 +64,7 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$const=eval $ARG
       close Fout;
       system "del range.out"; 
      }
-      print ">\n";
+      print ">";
  }   
-
+print "\n";
  

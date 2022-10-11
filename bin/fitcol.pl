@@ -59,7 +59,7 @@ if ($#ARGV<1)
 
 \n";
 exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 
 mkdir ("./results");
 $ARGV[0]=~s/x/*/g;$coldata=eval $ARGV[0]; shift @ARGV;

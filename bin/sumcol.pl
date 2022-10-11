@@ -12,7 +12,7 @@ unless ($#ARGV >0)
  print STDERR " MCPHASE_STA,MCPHASE_STAPPOINT,MCPHASE_SUMABS,MCPHASE_SUMABSPPOINT\n";
  print STDERR " usage: sumcol colx *.*   \n colx=columnx \n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
  
 

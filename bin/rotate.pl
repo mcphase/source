@@ -20,7 +20,7 @@ unless ($#ARGV >1)
  y'=-sin(angle)*x+cos(angle)*y
 
 EOF
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -94,10 +94,10 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$angle=eval{$ARG
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

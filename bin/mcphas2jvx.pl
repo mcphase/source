@@ -51,7 +51,7 @@ if ($#ARGV<0 || $helpflag) {
    print " E.g. to plot individual atoms and output to a different file:\n";
    print "   $0 mcphas.j -i -o results/cluster.jvx\n";
    exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 
 $jfile = $ARGV[0];
 

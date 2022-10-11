@@ -4,6 +4,7 @@ use Getopt::Long;
 GetOptions("help"=>\$helpflag,
            "prefix|p=s"=>\$prefix);
 usage() if $helpflag||$#ARGV<1;
+print STDERR "#* $0 *\n";
 $ARGV[0]=~s/x/*/g;$ARGV[0]=eval $ARGV[0];
 $ARGV[1]=~s/x/*/g;$ARGV[1]=eval $ARGV[1];
 if ($#ARGV>2) { 
@@ -11,8 +12,8 @@ $ARGV[2]=~s/x/*/g;$ARGV[2]=eval $ARGV[2];
 $ARGV[3]=~s/x/*/g;$ARGV[3]=eval $ARGV[3];
             }
 print STDOUT << "EOF";
-*******************************************************
-setting up mcdisp.mf to be used by mcdisp
+******************************************************************
+* setup_mcdisp_mf 221011 setting up mcdisp.mf to be used by mcdisp
 EOF
 if ($#ARGV>2) { 
 print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
@@ -23,7 +24,6 @@ else
 print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
 $err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1]  > mcdisp.mf");
              }
-
 if($err){unlink "mcdisp.mf";exit(1);}
 
 
@@ -48,7 +48,7 @@ print STDOUT << "EOF";
     You can view the magnetic structure in postscriptfiles
     results/spins*.eps, by fp_studio results/spins.fst and
     by javaview results/spins.jvx
-
+*********** end setup_mcdisp_mf ***************************
 EOF
 exit;
 

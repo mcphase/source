@@ -10,6 +10,7 @@ $fileout="./results/mcdiffsummed.out";
 GetOptions("help"=>\$helpflag,
            "average"=>\$avflag);
 usage() if $helpflag;
+print STDERR "#* $0 *\n";
 if ($avflag) {$text="averaged";}else{$text="summed";}
 $n=0;
 $numbersold[6]=0;

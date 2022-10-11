@@ -28,6 +28,8 @@ EOF
 
   usage() if ($#ARGV<1);
 
+print"#* average *";
+
 @p = @ARGV;
 @pars = @ARGV;
 if (join('',@pars) =~/\-/) {

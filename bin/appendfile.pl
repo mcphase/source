@@ -8,7 +8,7 @@ unless ($#ARGV >0)
  exit 0;}
 
 $file1=$ARGV[0];shift @ARGV;
-print "appending to $file1:\n";
+print "#* append * appending to $file1:\n";
 
   foreach (@ARGV)
   {

@@ -12,7 +12,7 @@ unless ($#ARGV >1)
  print " comment all lines containing the text string\n";
  print " or alternatively: comment -n string *.*\n";
  print " comment all lines which do not contain the text string\n";
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
 
 
@@ -83,10 +83,10 @@ print $col2;
 
 
 
-   print ">\n";
+   print ">";
 
    }
 
-
+print "\n";
 
 #\end{verbatim} 

@@ -40,7 +40,7 @@ if ($#ARGV<1)
 
 exit(0);
 
-}
+}else{print STDERR "#* $0 *\n";}
 
 $ARGV[0]=~s/x/*/g;$col=eval $ARGV[0]; shift @ARGV;--$col;
 $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0]; shift @ARGV;

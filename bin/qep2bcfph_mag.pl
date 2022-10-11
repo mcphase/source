@@ -11,7 +11,7 @@ unless ($#ARGV>3) {die "
 #                 all q-vectors stored in this file will be used and averaged
 #                 in the calculation
 #  nofatoms ..... number of atoms in primitive basis
-#  MASS* ........ masses of atoms\n";}
+#  MASS* ........ masses of atoms\n";}else{print STDERR "#* $0 *\n";}
 #
 # read paramters from command line
 

@@ -16,7 +16,7 @@ unless ($#ARGV >1)
  *.*       ....   filenname
  
 EOF
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
 $ARGV[0]=~s/x/*/g;$col=$ARGV[0];shift @ARGV;
 $col=eval $col;
@@ -51,8 +51,9 @@ $exp =~s/c(\d+)/\$numbers[\1-1]/g; print $exp."\n";
       close Fout;
       system "del range.out";
      }
-   print ">\n";
+   print ">";
    }
+print "\n";
 
 
 

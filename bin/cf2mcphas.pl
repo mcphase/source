@@ -97,6 +97,8 @@ GetOptions("help"=>\$helpflag,
 	   
 usage() if $helpflag;
 
+print STDERR "#* $0 *\n";
+
 if (!$input && !$ARGV[0]) { 
   print STDERR "$0: requires at least input file or CF parameters on command line.\n";
   usage();

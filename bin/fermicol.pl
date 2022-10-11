@@ -14,7 +14,7 @@ if ($#ARGV<1)
 	  filename... filename
 \n";
 exit(0);
-}
+}else{print STDERR "#* $0 *";}
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$col=eval $ARGV[0]; shift @ARGV;--$col;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$T=eval $ARGV[0]; shift @ARGV;
@@ -53,6 +53,6 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$T=eval $ARGV[0]
       close Fout;
       system "del range.out";
      }
-      print ">\n";
+      print ">";
   }
-
+print "\n";

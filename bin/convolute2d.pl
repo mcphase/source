@@ -39,7 +39,7 @@ unless ($#ARGV >11)
 #          displaycontour 1 2 3 results/mcdisp.clc
 EOF
 exit(1);
-}
+}else{print STDERR "#* $0 *\n";}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$cx =eval $ARGV[0];
 $ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$cy =eval $ARGV[1]; 
 $ARGV[2]=~s/exp/essp/g;$ARGV[2]=~s/x/*/g;$ARGV[2]=~s/essp/exp/g;$cz =eval $ARGV[2]; 

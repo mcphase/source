@@ -30,7 +30,7 @@ unless ($#ARGV >4)
   note:            colx2 has to be sorted in file2
 
 EOF
- exit 0;}
+ exit 0;}else{print"#* add *\n";}
 
 
 $ARGV[0]=~s/x/*/g;$colx1=eval $ARGV[0];shift @ARGV;

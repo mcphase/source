@@ -11,7 +11,7 @@ unless ($#ARGV >0)
 
  print " usage: delcol col  *.*   \n col=column \n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -80,10 +80,10 @@ $ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

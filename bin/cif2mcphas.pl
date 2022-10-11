@@ -100,7 +100,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print " Finally, by default $0 will use so1ion for f-electron ions and ic1ion for d-electron\n";
    print "   ions, and phonon for others but this can be overridden using the -so or -ic pr -ph flags.\n";
    exit(0);
-}
+} else { print "* cif2mcphas 221011 *\n";}
 
 if ($#ARGV<0) { $cif = "new.cif"; } else { $cif = $ARGV[0]; }
 

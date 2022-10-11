@@ -24,7 +24,7 @@ EOF
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
-}
+}else{print STDERR "#* $0 *\n";}
 $ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$xvalue=eval $ARGV[0];shift @ARGV;

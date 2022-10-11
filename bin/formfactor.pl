@@ -15,7 +15,7 @@ unless ($#ARGV >=0)
 
    print "FTM(Q)= <j0(Q)>-<j2(Q)> (2/GJ - 1)\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
  
 

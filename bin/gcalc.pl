@@ -156,7 +156,7 @@ if (join('',@pars) =~ /\-[\-cbri]/) {
 	   
 
   usage() if $helpflag;
-
+print STDERR "#* $0 *\n";
 
 
   if (!$inputfile && !$ARGV[0]) { 

@@ -37,7 +37,7 @@ unless ($#ARGV >4)
                  Option: a column d3 of the data file may contain 
                          a stretching factor for the convolution function in 
                          order to allow for x dependent resolution \n";
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 
 print "echo $ds# $0 @ARGV$ds\n";

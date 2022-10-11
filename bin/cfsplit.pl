@@ -5,7 +5,7 @@
 # This program is part of the McPhase package, licensed under the GNU GPL v2. Please see the COPYING
 # file
 #
-# Thu Dec 16 15:23:01 WEST 2010 - Duc Le and Martin Rotter
+# Thu Dec 16 15:23:01 WEST 2010 - Duc Le 
 
 $debug=1;
 $SMALL=1e-3;
@@ -32,7 +32,7 @@ if ($#ARGV<1 || $helpflag) {
    print "              Both Hermman-Maguin and Schoenflies symbols are allowed.\n";
    print "       <J> is the total angular momentum number of the ground multiplet\n";
    exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 
 # Determines if the input point group is in HM or Schoenflies notation, and converts to Schoenflies
 $ptgpsym=$ARGV[0]; $J=$ARGV[1];
@@ -102,6 +102,8 @@ print "\nAllowed CF levels are: (number paretheses is multiplicity)\n";
 foreach (0..$#m_irrep) { 
   if(abs($m_irrep[$_])>1e-3) { push(@outstr,$m_irrep[$_],"*",$irreps[$_],"(",$dims[$_],") + "); } }
   $outstr = join("",@outstr); $outstr =~ s/\+\ $//; print $outstr,"\n";
+
+print "\n !! ATTENTION - there is a bug in cfsplit for half integer values of J: there should be Kramer's degeneracy !! \n";
 
 if((2*$J)%2==1) { exit(0); }
 

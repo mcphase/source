@@ -556,10 +556,11 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
        {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);    //mf ... mean field vector of atom s
         }
      int  n,nd;
-      fprintf(stdout,"#transition %i of ion %i of cryst. unit cell at pos  %i %i %i in mag unit cell:\n",tn,l,i,j,k);
-      if(nn[6]<SMALL_QUASIELASTIC_ENERGY){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");}      
+      if (do_verbose==1){fprintf(stdout,"#transition %i of ion %i of cryst. unit cell at pos  %i %i %i in mag unit cell:\n",tn,l,i,j,k);
+                         if(nn[6]<SMALL_QUASIELASTIC_ENERGY){fprintf(stdout,"#-");}else{fprintf(stdout,"#+");} }     
         j1=(*inputpars.jjj[l]).transitionnumber; // try calculation for transition  j
-        (*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  tn with printout
+        if (do_verbose==1){(*inputpars.jjj[l]).transitionnumber=-tn; // try calculation for transition  tn with printout
+                          }else{(*inputpars.jjj[l]).transitionnumber=tn;} // no printout
         (*inputpars.jjj[l]).du1calc(ini.T,mf,ini.Hext,u1,d,n,nd,md.est(i,j,k,l));
         if(do_Erefine)Mijkl = u1^u1;
         gamman=Norm2(u1);if(gamman==0)gamman=SMALL_GAMMA;

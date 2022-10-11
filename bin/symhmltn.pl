@@ -57,7 +57,7 @@ if ($#ARGV<1 || $helpflag) {
    print " operators (transforming like spherical harmonics, rather than tesseral\n";
    print " harmonics like the Stevens operators) are used instead.\n";
    exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 
 # Determines if the input point group is in HM or Schoenflies notation, and converts to Schoenflies
 $ptgpsym=$ARGV[0]; $J=$ARGV[1];

@@ -13,7 +13,7 @@ unless ($#ARGV >1)
 
  print " usage: addf col1 file1 col2 file2   \n col1=column 1, col2 =column2 \n file1, file2 .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print"#* addf *\n";}
 
  
 

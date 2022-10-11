@@ -94,7 +94,7 @@ GetOptions("help"=>\$helpflag,
 $theta=~s/x/*/g;$theta= eval $theta;
 $fi=~s/x/*/g;$fi=eval $fi;
 usage() if $helpflag;
-
+print STDERR "#* $0 *\n";
 if (!$input && !$ARGV[0]) { 
   print STDERR "$0: requires at least input file or CF parameters on command line.\n";
   usage();

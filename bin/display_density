@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "--------------------------------------"
-echo "graphic package to display ionic density"
-echo "--------------------------------------"
+echo "#---------------------------------------------------------"
+echo "#display_density: graphic package to display ionic density"
+echo "#---------------------------------------------------------"
 echo "arguments as for densplt:"
 if test -f results/densplt.jvx
  then

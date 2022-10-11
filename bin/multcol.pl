@@ -11,7 +11,7 @@ unless ($#ARGV >1)
 
  print " usage: multcol colx coly  *.*   \n colx=columnx, coly=columny \n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -75,10 +75,10 @@ $ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

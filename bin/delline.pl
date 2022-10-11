@@ -9,7 +9,7 @@ unless ($#ARGV >1)
 
  print " usage: delline line1 line2  *.*   \n  *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
 $ARGV[0]=~s/x/*/g;$col1=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/x/*/g;$col2=eval $ARGV[0];shift @ARGV;
@@ -54,10 +54,10 @@ $ARGV[0]=~s/x/*/g;$col2=eval $ARGV[0];shift @ARGV;
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

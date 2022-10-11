@@ -11,7 +11,7 @@ unless ($#ARGV >0)
 
  print " usage: newline n text -f *.*   \n n=linennumber \n text= text in new line \n *.* .. filenname(s)\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
 $ARGV[0]=~s/x/*/g;$n=eval $ARGV[0];shift @ARGV;
 $commandstring=join(" ",@ARGV);
@@ -72,10 +72,10 @@ else
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

@@ -5,6 +5,8 @@
 #           "prefix|p=s"=>\$prefix);
 #usage() if $helpflag||$#ARGV<1;
 usage() if $ARGV[0]=~/-h/||$#ARGV<1;
+
+print STDERR "#* $0 *\n";
 if($ARGV[0]=~/-prefix/)
 {$prefix=$ARGV[1];shift @ARGV;shift @ARGV;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ARGV[0]=eval $ARGV[0];

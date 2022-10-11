@@ -49,7 +49,7 @@ print " 30  ....Emax   [meV] maximal energy\n";
 print " 0.2 ....deltaE [meV] energy stepwidth\n";
 print " The powder average is generated - output is printed to the console (STDOUT)\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;

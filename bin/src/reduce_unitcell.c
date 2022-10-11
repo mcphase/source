@@ -21,7 +21,7 @@ int main (int argc, char **argv)
                 any atom, which is connected to another by a lattice vector.\n \
                 \n");
       exit (1);
-    }
+    } else { fprintf (stderr,"#* reduce_unitcell 221011 *\n"); }
 
  par a(argv[1]);
 

@@ -243,7 +243,7 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
 "                 ... derivatives are with respect to u=neighborposition(A)/a0\n"
 );
       exit (1);
-    }
+    } else {if(batchmode==0){fprintf(stderr,"#* pointc 221011 *\n");}}
 
 // set stevens parameters and landefactor, J and <r^l> of ion
 // read create class object ionpars from iontype - sets J, gJ, Stevens factors from the

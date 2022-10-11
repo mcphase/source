@@ -5,7 +5,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >1) 
 {print " program factcol  used to multiply a  column with a constant\n";
  print " usage: factcol col[ecolerr] const  *.*   \n col=column, const=constant \n optional colerr= corresponding error column, e.g. 3e4 means argumentvalues are in column 3 and error in column 4\n *.* .. filenname\n";
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
 $ARGV[0]=~s/x/*/g;$column=$ARGV[0];shift @ARGV;
 if ($column=~/e/){$_=$column;($columnerr)=/e(\d*)/;($column)=/(\d*)e/;}else{$columnerr=0;}
@@ -44,6 +44,6 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$const=eval $ARG
       close Fout;
       system "del range.out";
      }
-   print ">\n";
+   print ">";
    }
-
+print "\n";

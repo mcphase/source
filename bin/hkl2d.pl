@@ -30,7 +30,7 @@ if ($file&&$file=~/-.*h/)
 
  If no file is given the program uses file mcphas.hkl.\n";exit;
 
-}
+}else{print STDERR "#* $0 *\n";}
 
 if ($file&&$file=~/-/)
 

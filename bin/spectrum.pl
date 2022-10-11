@@ -27,7 +27,7 @@ if ($#ARGV<2)
 
 \n";
 exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 
 
 

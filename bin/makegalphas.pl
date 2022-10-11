@@ -38,7 +38,7 @@ unless ($#ARGV>5) {die "
 # hbar ......... Planck Constant h/2pi
 # Mj ........... mass of nucleus at site j
 # omega_q,s .... phonon frequency at wave vector q, branch s
-# Rj ........... position vector of site j\n";}
+# Rj ........... position vector of site j\n";}else{print STDERR "#* $0 *\n";}
 
 # read paramters from command line
 

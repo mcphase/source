@@ -13,7 +13,7 @@ unless ($#ARGV >0)
 
  print " usage: asincol col *.*   \n col=column\n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print"#* asincol *";}
 
  
 

@@ -13,6 +13,7 @@ use File::Copy;
 @AARGV=@ARGV;
 GetOptions("help"=>\$helpflag);
 usage() if $helpflag||$#AARGV<0;
+print STDERR "#* $0 *\n";
 $file=$AARGV[0];shift @AARGV;
 
 $PI=3.141592654;

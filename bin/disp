@@ -20,7 +20,7 @@ if ($ARGV[0]=~m|-h.*|)
 \n";
 
 exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 
 if(($in)=($ARGV[0]=~m|\A(\d)\Z|)){shift @ARGV;}
 my (@file) = @ARGV;

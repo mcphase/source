@@ -10,7 +10,7 @@ unless ($#ARGV>4) {die "
 #  (h k l) ...... q-Vector in  nonprimitive basis, to be retrieved from qepfilename
 #  qepfilename .. filename of output file of mcdisp, e.g. results/mcdisp.qep
 #  nofatoms ..... number of atoms in primitive basis
-#  MASS* ........ masses of atoms in sequence as in mcphas.j\n";}
+#  MASS* ........ masses of atoms in sequence as in mcphas.j\n";}else{print STDERR "#* $0 *\n";}
 #
 # read paramters from command line
 

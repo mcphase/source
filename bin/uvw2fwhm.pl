@@ -24,7 +24,7 @@ unless ($#ARGV >0)
  fwhm = sqr(u tan^2(theta) + v tan(theta) + w)
 
 EOF
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$u=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$v=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$w=eval $ARGV[0];shift @ARGV;
@@ -96,10 +96,10 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$column=eval $AR
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

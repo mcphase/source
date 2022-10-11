@@ -12,7 +12,7 @@ unless ($#ARGV >1)
  print STDERR " the rpvalue is defined as\n 100*[sum_{allpoints} abs(col2-col1)]/[sum_{allpoints}abs(col1)]\n";
  print STDERR " the result ist printed to stdout and stored in environment variabele MCPHASE_RP\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
  
 

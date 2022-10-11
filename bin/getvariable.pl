@@ -22,7 +22,7 @@ EOF
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
-}
+}else{print STDERR "#* $0 *\n";}
 
 $name=$ARGV[0];shift @ARGV;
 foreach(@ARGV)

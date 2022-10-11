@@ -15,7 +15,7 @@ unless ($#ARGV >0)
 
  print " usage: plotbook *.ps\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 
 

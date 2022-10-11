@@ -31,7 +31,7 @@ unless ($#ARGV >=0)
 
 EOF
  exit 0;
-}
+}else{print STDERR "#* $0 *\n";}
 
   if($ARGV[1])
   {# read .cel file if given
@@ -259,7 +259,7 @@ print Fout2 << "EOF";
 #            9....|MSFdip.P|
 #            10....Re(MSFdip.P)
 #            11....Im(MSFdip.P)
-#            12....angl(Q,P)[°]
+#            12....angl(Q,P)[ï¿½]
 #            13....i(MSFxMSF*).P
 #            14....I+
 #            15....I-

@@ -12,7 +12,7 @@ print " usage: substitute [option] oldtext newtext *.*
        Option:  -f    only replace the first occurance of oldtext
 \n"; 
 
-exit 0;} 
+exit 0;} else{print STDERR "#* $0 *";}
 $first=0;
 $_=$ARGV[0];
 if(/-f/)
@@ -80,7 +80,7 @@ system "del range.out";
 
 
 
-print ">\n"; 
+print ">"; 
 
 
 
@@ -91,6 +91,8 @@ print ">\n";
 
 
 } 
+
+print "\n";
 
 
 

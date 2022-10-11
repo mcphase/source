@@ -18,7 +18,7 @@ options for creating quantum dots, quantum chains and quantum planes: \n
      -r2    remove interactions beyond the extended unit cell in r2 direction\n
      -r3    remove interactions beyond the extended unit cell in r3 direction\n
 ";
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;my ($n1) = eval $ARGV[0];shift @ARGV; 

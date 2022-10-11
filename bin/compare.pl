@@ -17,7 +17,7 @@ unless ($#ARGV ==1)
 
  print " usage: compare file1 file2   \n\n file1, file2 .. filennames\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
  
 

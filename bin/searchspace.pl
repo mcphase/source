@@ -39,7 +39,7 @@ EOF
  print " and *.forfit\n\n";
  print "***************************************************\n";
  print " <Press enter to close>";$in=<STDIN>;
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 #in dos version
 # mv -> rename

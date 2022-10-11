@@ -30,7 +30,7 @@ unless($#ARGV>=3)
 
    exit(1);
 
-  }
+  }else{print STDERR "#* $0 *\n";}
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Tmin=eval $ARGV[0];
 $ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$Tmax=eval $ARGV[1];

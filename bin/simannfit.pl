@@ -30,7 +30,7 @@ unless ($#ARGV >0)
  print " option -c         continue at end of program - do not ask for pressing enter\n"; 
 
 #print " <Press enter to close>";$in=<STDIN>;
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 
 # extra version for dos because operating system commands are present:

@@ -41,7 +41,7 @@ if ($#ARGV<0 || $helpflag) {
    print " This script will also open a previously downloaded html file of the ICSD record if given that\n";
    print " instead of an ICSD ID number. (E.g. if the input is a valid file name and not a number)\n";
    exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 
 # Checks whether to read from a file or download from website
 if(-e $ARGV[0]) {

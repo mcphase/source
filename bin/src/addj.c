@@ -18,7 +18,7 @@ int main (int argc, char **argv)
     { printf (" program addj - add exchange parameter file2 to file1, output is written to stdout\n \
                 use as: addj file1.j file2.j\n");
       exit (1);
-    }
+    } else {fprintf(stderr, "#* addj 221011 *\n");}
 
  par a(argv[1]);
  par b(argv[2]);

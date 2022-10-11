@@ -3,6 +3,7 @@ use Getopt::Long;
 
 GetOptions("help"=>\$helpflag);
 usage() if $helpflag;
+print STDERR "#* $0 *\n";
 print STDOUT << "EOF";
 *******************************************************
 setting up exchange paramter fit 

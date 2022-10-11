@@ -16,7 +16,7 @@ unless ($#ARGV >0)
 sigma=fwhm/2/sqrt(2*log(2))
 gauss(x)=area/sqrt(2*3.14159265359)/sigma* exp(-(x-position)^2/2sigma^2)\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -74,10 +74,10 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$area=eval $ARGV
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

@@ -23,7 +23,7 @@ with u1 = x cos(rotangle) - y sin(rotangle)
 
 
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 print "# $0 @ARGV\n";
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;

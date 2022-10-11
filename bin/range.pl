@@ -11,7 +11,7 @@ unless ($#ARGV >2)
 
  print " -u option to undo the previous range command on the same file before reapplying the new range.\n";
  print " if max<min then data inside [max:min] is deleted (commented out)\n";
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
 $column=$ARGV[0];shift @ARGV;
 
@@ -61,8 +61,8 @@ foreach (@ARGV)
 
    close Fout;
 
-   print ">\n";
+   print ">";
 
 }
-
+print "\n";
 #\end{verbatim} 

@@ -6,7 +6,7 @@ unless ($#ARGV >1)
  print " usage: addcol colx[ecolxerr] coly[ecolyerr]  *.*  \n colx=columnx,colxerr= error corresponding to column x,
  coly=columny, colyerr= error corresponding to column y \n *.* .. filenname\n";
  print " Error addition is done by colyerr=sqrt(colxerr^2+colyerr^2)\n";
- exit 0;}
+ exit 0;}else{print"#* addcol *";}
 
 $ARGV[0]=~s/x/*/g;$colx=$ARGV[0];shift @ARGV;
 if ($colx=~/e/){$_=$colx;($colxerr)=/e(\d*)/;($colx)=/(\d*)e/;}else{$colxerr=0;}

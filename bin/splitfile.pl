@@ -20,7 +20,7 @@ unless ($#ARGV >0)
                    a new output file is started)
            *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 $option=$ARGV[0];shift @ARGV;
 $string=$ARGV[0];shift @ARGV;

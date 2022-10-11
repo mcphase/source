@@ -13,7 +13,7 @@
            -h .... help
            -FT ... extract value of Fourietransform from e.g. mcphasa.hkl,... file
   If no file is given the program uses file results/mcphas.hkl. and plots the neutron intensity\n";exit;
- }
+ }else{print STDERR "#* $0 *\n";}
  $xcol=0;$ycol=7;$n=0;  # set default axes
  $FT=0;
  if ($file&&$file=~/-FT/) # look if user gives reflection number (option -n)

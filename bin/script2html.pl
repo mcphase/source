@@ -25,7 +25,7 @@ unless ($#ARGV >=0)
  [creates the html file report.html from files calc.bat and notes.txt]
 
 EOF
-exit 0;}
+exit 0;}else{print STDERR "#* $0 *\n";}
  $date=localtime( time);$dir=getcwd;
 print STDOUT << "EOF";
 <html>

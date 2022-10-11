@@ -13,7 +13,7 @@ unless ($#ARGV >2)
 
  print " usage: dif colx coly  n *.*   \n colx=columnx, coly=columny, n=number of points to average \n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -68,6 +68,7 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$n=eval $ARGV[0]
       close Fout;
       system "del range.out"; 
      }
-   print ">\n";
+   print ">";
    }
+print "\n";
 #\end{verbatim} 

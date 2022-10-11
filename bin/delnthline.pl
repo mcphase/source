@@ -13,7 +13,7 @@ unless ($#ARGV >0)
 
  print " usage: delnthline n *.*\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 # first~step
 

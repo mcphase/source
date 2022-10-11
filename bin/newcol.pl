@@ -11,7 +11,7 @@ unless ($#ARGV >0)
 
  print " usage: newcol col [option] *.*   \n col=column \n *.* .. filenname\noptions: -c 12.3  ... the new column will be filled with the constant 12.3\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 $dc=0;
@@ -87,10 +87,10 @@ if ($ARGV[0]=~m/-c/){$dc=1;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

@@ -15,7 +15,7 @@ unless ($#ARGV >0)
 the formula for a lorentz curve is:
 lorentz(x)=area/3.1415/fwhm/(1.0+(x-position)^2/fwhm^2)\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -69,10 +69,10 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$area=eval $ARGV
 
 
 
-   print ">\n";
+   print ">";
 
    }
-
+print "\n";
 
 
 #\end{verbatim} 

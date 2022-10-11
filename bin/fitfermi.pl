@@ -26,7 +26,7 @@ if ($#ARGV<1)
 
 \n";
 exit(0);
-}
+}else{print STDERR "#* $0 *\n";}
 unless ($^O=~/MSWin/){print "program fitfermi currently runs only under Windows operating systm\n";exit(1);}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$T=eval $ARGV[0]; shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$EF=eval $ARGV[0]; shift @ARGV;

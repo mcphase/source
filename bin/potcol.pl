@@ -11,7 +11,7 @@ unless ($#ARGV >1)
 
  print " usage: potcol col const  *.*   \n col=column, const=constant \n *.* .. filenname\n";
 
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *";}
 
  
 
@@ -79,10 +79,10 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$const=eval $ARG
 
 
 
-   print ">\n";
+   print ">";
 
    }
 
-
+print "\n";
 
 #\end{verbatim} 

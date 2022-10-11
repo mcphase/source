@@ -5,7 +5,7 @@ unless ($#ARGV >1)
 
 {print " program insertfile  used to insert file2 [and file 3 ..] to file1\n";
  print " usage: insertfile linenumber file1 file2 [file3 ...] \n";
- exit 0;}
+ exit 0;}else{print STDERR "#* $0 *\n";}
 
 $ARGV[0]=~s/x/*/g;$linenr=eval $ARGV[0];shift @ARGV;
 $file1=$ARGV[0];shift @ARGV;
