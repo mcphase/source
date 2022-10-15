@@ -32,8 +32,8 @@ public:
               graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
               Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag);
     void jvx_cd(FILE * fout,char * text,cryststruct & cs,
-              graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
-              Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag);
+              graphic_parameters & gp, double phase, spincf  savev_real, spincf  savev_imag,
+              Vector & hkl, double & T, Vector &  gjmbHxc, Vector & Hext, cryststruct & cs4, spincf  magmom, spincf magmomev_real, spincf  magmomev_imag);
     void jvx_cd(FILE * fout,char * text,cryststruct & cs,
               graphic_parameters & gp,double phase,spincf & savev_real,spincf & savev_imag,
               Vector & hkl,double & T, Vector &  gjmbHxc,Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag,spincf & pev_real, spincf & pev_imag);
@@ -62,6 +62,9 @@ private:
    Vector * mom; // momentums <J>
    int iv[4];
    int spequal(Vector a,Vector b);// routine to compare spins
+
+   static void multiply(spincf& op1, const double factor);
+   static void add(spincf& op1, const spincf & op2);
      
    // take vector dd and calculate distance nearest atom in spinconfiguration
    double nndist(float * x, float * y, float * z,Vector & abc,Matrix & p,Vector &dd);
@@ -96,7 +99,9 @@ private:
 
 
     spincf & operator + (const spincf & op2); // addition    
-    spincf & operator * (const double factor); // multiplication with constant
+    spincf & operator += (const spincf & op2); // addition    
+    spincf operator * (const double factor); // multiplication with constant
+    spincf & operator *= (const double factor); 
     spincf & operator= (const spincf & op2); // zuweisung
     int operator== (spincf & op2); // vergleich
 

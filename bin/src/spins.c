@@ -81,12 +81,12 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
 // hauptprogramm
 int main (int argc, char **argv)
 { 
-printf("# **********************************************************\n");
-printf("# * spins - display 3d graphics of spins,moments,densities,*\n");
-printf("# * at given H and T                                       *\n");
-printf("# * Reference: M. Rotter PRB 79 (2009) 140405R             *\n");
-printf("# * %s                                     *\n",MCPHASVERSION);
-printf("# **********************************************************\n");
+fprintf(stderr,"# **********************************************************\n");
+fprintf(stderr,"# * spins - display 3d graphics of spins,moments,densities,*\n");
+fprintf(stderr,"# * at given H and T                                       *\n");
+fprintf(stderr,"# * Reference: M. Rotter PRB 79 (2009) 140405R             *\n");
+fprintf(stderr,"# * %s                                     *\n",MCPHASVERSION);
+fprintf(stderr,"# **********************************************************\n");
 
  FILE * fin, * fout;
 double T=0; Vector Hext(1,3),Hextijk(1,3);
@@ -118,7 +118,7 @@ sprintf(gp.title,"output of program spins");
  if (argc < 2){help_and_exit();}
 // first: option without graphics just screendump <I> or exchange field configuration at given HT
  if (strcmp(argv[1],"-f")==0)
- { fin = fopen_errchk (argv[2], "rb");os=2;printf("# reading from file %s\n",argv[2]);}
+ { fin = fopen_errchk (argv[2], "rb");os=2;printf("#* program spins ... reading from file %s\n",argv[2]);}
  else  // second ... other options with graphics !!
  {if(strcmp(argv[1],"-c")==0){os=1;}
   if(strcmp(argv[1],"-s")==0){os=1;}
@@ -290,12 +290,16 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
      gp.scale_density_vectors=0;gp.show_density=0; // do not show charge densities
              Vector hkl1(1,3);hkl1=0;
              Vector gjmbHxc1(1,3);gjmbHxc1=0;
-     spincf magmom(savmf.na(),savmf.nb(),savmf.nb(),savmf.nofatoms,3); // the magnetc moment guess 
+     spincf magmom(savmf.na(),savmf.nb(),savmf.nb(),savmf.nofatoms,3); // the magnetic moment guess 
      int i,j,k,l;for (i=1;i<=savmf.na();++i){for (j=1;j<=savmf.nb();++j){for (k=1;k<=savmf.nc();++k){for(l=1;l<=magmom.nofatoms;++l)  
          for(int momdim=1;momdim<=3&&momdim<=savmf.nofcomponents;++momdim)
                {magmom.moment(i,j,k,l)(momdim)=savmf.moment(i,j,k,l)(momdim);}
         }}}
-     savmf.jvx_cd(fin,outstr,cs,gp,0.0,savmf*0.0,savmf*0.0,hkl1,T,gjmbHxc1,Hextijk,cs,magmom,magmom * 0.0,magmom* 0.0);
+ //fprintf(stderr,"savmf.nofcomponents=%i\n",savmf.nofcomponents);
+
+     savmf.jvx_cd(fin,outstr,cs,
+                  gp,0.0,savmf*0.0,savmf*0.0,
+                  hkl1,T,gjmbHxc1,Hextijk,cs,magmom,magmom * 0.0,magmom* 0.0);
     fclose (fin);
 
   exit(0);

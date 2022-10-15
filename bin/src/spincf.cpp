@@ -391,36 +391,54 @@ spincf & spincf::operator= (const spincf & op2)
 }
 
 //addition
-spincf & spincf::operator + (const spincf & op2)
+void spincf::add (spincf & op1, const spincf & op2)
 {int i,j,k;
- if (nofa!=op2.nofa||nofb!=op2.nofb||nofc!=op2.nofc||nofatoms!=op2.nofatoms||nofcomponents!=op2.nofcomponents)
+ if (op1.nofa!=op2.nofa||op1.nofb!=op2.nofb||op1.nofc!=op2.nofc||op1.nofatoms!=op2.nofatoms||op1.nofcomponents!=op2.nofcomponents)
  {fprintf (stderr,"Error in adding spincfonfigurations - not equal dimension\n");
  exit (EXIT_FAILURE);}
- static spincf op1((*this)); 
- op1=(*this);
- for (i=1;i<=nofa;++i)
-  {for (j=1;j<=nofb;++j)
-    {for (k=1;k<=nofc;++k)
-     {op1.mom[in(i,j,k)]=mom[in(i,j,k)]+op2.mom[in(i,j,k)];} 
+ for (i=1;i<=op1.nofa;++i)
+  {for (j=1;j<=op1.nofb;++j)
+    {for (k=1;k<=op1.nofc;++k)
+     {op1.mom[op1.in(i,j,k)]+=op2.mom[op1.in(i,j,k)];} 
     }
   }           
-  return op1;
+}
+
+spincf & spincf::operator + (const spincf & op2)
+{
+    spincf copy = *this;
+    add(copy, op2);
+    return copy;
+}
+
+spincf & spincf::operator += (const spincf & op2) {
+     add(*this, op2); 
 }
 
 // multiplication of spinconfiguration with constant
-spincf & spincf::operator * (const double factor)
+void spincf::multiply (spincf& op1, const double factor)
 {int i,j,k;
- static spincf op1((*this)); 
- op1=(*this);
-  for (i=1;i<=nofa;++i)
-  {for (j=1;j<=nofb;++j)
-    {for (k=1;k<=nofc;++k)
-     {op1.mom[in(i,j,k)]=mom[in(i,j,k)]*factor;
+  for (i=1;i<=op1.nofa;++i)
+  {for (j=1;j<=op1.nofb;++j)
+    {for (k=1;k<=op1.nofc;++k)
+     {op1.mom[op1.in(i,j,k)] *= factor;
       } 
     }
   }  
-  return op1;
 }
+
+spincf spincf::operator * (const double factor)
+{
+    spincf copy = *this;
+    multiply(copy, factor);
+    return copy;
+}
+
+spincf & spincf::operator *= (const double factor) {
+     multiply(*this, factor); 
+}
+
+
 
 //vergleichsoperator
 int spincf::operator==(spincf & op1)

@@ -419,10 +419,11 @@ void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters 
 
 //output for javaview
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
-                    double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
-                    Vector & Hext,cryststruct & cs4,spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag)
-{spincf pev_r(magmomev_real.na(),magmomev_real.nb(),magmomev_real.nc(),magmomev_real.nofatoms,3);pev_r=pev_r * 0.0;
- spincf pev_i(magmomev_imag.na(),magmomev_imag.nb(),magmomev_imag.nc(),magmomev_imag.nofatoms,3);pev_i=pev_i * 0.0;
+                    double phase,spincf  densityev_real,spincf  densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
+                    Vector & Hext,cryststruct & cs4,spincf  magmom,spincf  magmomev_real, spincf  magmomev_imag)
+{spincf pev_r(magmomev_real.na(),magmomev_real.nb(),magmomev_real.nc(),magmomev_real.nofatoms,3);//pev_r=pev_r * 0.0;
+ spincf pev_i(magmomev_imag.na(),magmomev_imag.nb(),magmomev_imag.nc(),magmomev_imag.nofatoms,3);//pev_i=pev_i * 0.0;
+// fprintf(stderr,"densityev_real.nofcomponents=%i\n",densityev_real.nofcomponents);
  jvx_cd(fout,text,cs,gp,phase,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hext,cs4,magmom,magmomev_real,magmomev_imag,pev_r,pev_i);}
 
 
@@ -435,7 +436,7 @@ void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters 
  if(nofatoms!=densityev_real.nofatoms||nofa!=densityev_real.na()||nofb!=densityev_real.nb()||nofc!=densityev_real.nc()||
     nofatoms!=densityev_imag.nofatoms||nofa!=densityev_imag.na()||nofb!=densityev_imag.nb()||nofc!=densityev_imag.nc()||
     nofcomponents<densityev_real.nofcomponents||densityev_real.nofcomponents!=densityev_imag.nofcomponents)
-    {fprintf(stderr,"Error creating jvx movie files: eigenvector read from .qev file does not match dimension of spins structure read from sps file\n");exit(1);}
+    {fprintf(stderr,"Error creating jvx movie files: eigenvector read from .qev file dim %i does not match  dimension %i of spins structure read from sps file\n",nofcomponents,densityev_real.nofcomponents);exit(1);}
 
   Vector maxv(1,3),minv(1,3),ijkmax(1,3),ijkmin(1,3),max_min(1,3),dd(1,3),dd0(1,3),c(1,3),xyz(1,3);
   Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
@@ -886,7 +887,6 @@ if(gp.show_density>0)
 {int ii,tt,ff;
   double dtheta=gp.density_dtheta; //stepwidth to step surface
   double dfi=gp.density_dfi;
-
 for(l=1;l<=nofatoms;++l)
  {double radius=0;double dx,dy,dz,R,fi,theta;
   extract(cs.sipffilenames[l],"radius",radius);
@@ -924,7 +924,8 @@ for(l=1;l<=nofatoms;++l)
    if(pl[l]!=l)dd+=magmom.moment(i,j,k,pl[l]);
    dd+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,pl[l])+sin(phase-QR)*pev_imag.moment(i,j,k,pl[l]));
     for(ndd=1;ndd<=densityev_real.nofcomponents;++ndd)
-   {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));}
+   {moments(ndd)=moment(i,j,k,l)(ndd)+gp.spins_wave_amplitude*(cos(-phase+QR)*densityev_real.moment(i,j,k,l)(ndd)+sin(phase-QR)*densityev_imag.moment(i,j,k,l)(ndd));
+   }
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
               //spins=savspins+(densityev_real*cos(-phase) + densityev_imag*sin(phase))*amplitude; // Q ri not considered for test !!!
