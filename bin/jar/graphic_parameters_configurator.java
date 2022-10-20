@@ -120,10 +120,10 @@ public class graphic_parameters_configurator extends JPanel
   // 5. Tab		
   JPanel panPhonon = new JPanel();	// DENSITY
 	// Labels
-	JLabel labphonon_show_oscillation = new JLabel();
+	JLabel labphonon_scale_static_displacements = new JLabel();
 	JLabel labphonon_wave_amplitude = new JLabel();
 	// textfields
-	JTextField txphonon_show_oscillation = new JTextField();
+	JTextField txphonon_scale_static_displacements = new JTextField();
 	JTextField txphonon_wave_amplitude = new JTextField();
 
 
@@ -249,70 +249,70 @@ public class graphic_parameters_configurator extends JPanel
 	 * First tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labShow_Pointcharges, "Show_Pointcharges:", 170, 19);
-	InitLabel(labScale_Pointcharges, "Scale_Pointcharges:", 170, 19);
+	InitLabel(labShow_Pointcharges, "Show_Pointcharges (1=yes,0=no):", 400, 19);
+	InitLabel(labScale_Pointcharges, "Scale_Pointcharges (common radius scale factor):", 400, 19);
 
 	// textfields
-	InitTextfield(txShow_Pointcharges, "Show Pointcharges as Spheres", 50, 19);
-	InitTextfield(txScale_Pointcharges, "Scale Pointcharge Sphere Radius", 50, 19);
+	InitTextfield(txShow_Pointcharges, "Show Pointcharges as Spheres (1=yes,0=no)", 50, 19);
+	InitTextfield(txScale_Pointcharges, "Common Scale factor for Pointcharge Sphere Radius", 50, 19);
     
 	
 	/***********************************
 	 * Second tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labshow_abc_unitcell, "show_abc_unitcell:", 170, 19);
+	InitLabel(labshow_abc_unitcell, "show_abc_unitcell (1=yes,0=no):", 220, 19);
 	InitLabel(labshow_primitive_crystal_unitcell, "show_primitive_crystal_unitcell:", 200, 19);
 	InitLabel(labshow_magnetic_unitcell, "show_magnetic_unitcell:", 170, 19);
-	InitLabel(labshow_atoms, "show_atoms:", 100, 19);
+	InitLabel(labshow_atoms, "show_atoms (1=yes,0=no):", 100, 19);
 	InitLabel(labscale_view_1, "scale_view_1:", 100, 19);
 	InitLabel(labscale_view_2, "scale_view_2:", 100, 19);
 	InitLabel(labscale_view_3, "scale_view_3:", 100, 19);
-	InitLabel(labshowprim, "show_primitive_unit_cell:", 170, 19);
+	InitLabel(labshowprim, "showprim (atoms in prim unit):", 170, 19);
 	// textfields
-	InitTextfield(txshow_abc_unitcell, "show abc unitcell", 50, 19);
- 	InitTextfield(txshow_primitive_crystal_unitcell, "show prim crystal unitcell", 50, 19);
- 	InitTextfield(txshow_magnetic_unitcell, "show magnetic unit cell", 50, 19);
-	InitTextfield(txshowprim, "show atoms in primitive unit cell", 50, 19);
-	InitTextfield(txshow_atoms, "show atoms", 50, 19);
-	InitTextfield(txscale_view_1, "scale view in 1 direction", 50, 19);
-	InitTextfield(txscale_view_2, "scale view in 2 direction", 50, 19);
-	InitTextfield(txscale_view_3, "scale view in 3 direction", 50, 19);
+	InitTextfield(txshow_abc_unitcell, "show abc unitcell (1=yes,0=no)", 50, 19);
+ 	InitTextfield(txshow_primitive_crystal_unitcell, "show prim crystal unitcell (1=yes,0=no)", 50, 19);
+ 	InitTextfield(txshow_magnetic_unitcell, "show magnetic unit cell (1=yes,0=no)", 50, 19);
+	InitTextfield(txshowprim, "show atoms nuclei in primitive unit cell (1=yes,0=no)", 50, 19);
+	InitTextfield(txshow_atoms, "show atoms nuclei (1=yes,0=no)", 50, 19);
+	InitTextfield(txscale_view_1, "scale view of crystal in 1 direction (default=1)", 50, 19);
+	InitTextfield(txscale_view_2, "scale view of crystal in 2 direction (default=1)", 50, 19);
+	InitTextfield(txscale_view_3, "scale view of crystal in 3 direction (default=1)", 50, 19);
  	
 	/***********************************
 	 * Third tab-panel
 	 ***********************************/
 	// Labels
 	InitLabel(labspins_scale_moment, "scale moment:", 190, 19);
-	InitLabel(labspins_show_oscillation, "show oscillation:", 150, 19);
-	InitLabel(labspins_wave_amplitude, "wave amplitude:", 190, 19);
-	InitLabel(labspins_show_ellipses, "show ellipses:", 190, 19);
+	InitLabel(labspins_show_oscillation, "spins_show_oscillation  (1=yes,0=no):", 210, 19);
+	InitLabel(labspins_wave_amplitude, "densitywave&spins_wave_amplitude:", 190, 19);
+	InitLabel(labspins_show_ellipses, "show ellipses (1=yes,0=no):", 190, 19);
 	InitLabel(labspins_show_static_moment_direction, "show static moment direction:", 190, 19);
 	// textfields
 	InitTextfield(txspins_scale_moment, "scale moments by common scale factor", 50, 19);
-	InitTextfield(txspins_show_oscillation, "show oscillation", 50, 19);
-	InitTextfield(txspins_wave_amplitude, "wave amplitude", 50, 19);
-	InitTextfield(txspins_show_ellipses, "show ellipses", 50, 19);
-	InitTextfield(txspins_show_static_moment_direction, "show static moment direction", 50, 19);
+	InitTextfield(txspins_show_oscillation, "show oscillation of spins (1=yes,0=no)", 50, 19);
+	InitTextfield(txspins_wave_amplitude, "spin&charge density wave amplitude common scale factor", 50, 19);
+	InitTextfield(txspins_show_ellipses, "show ellipses indicating precession of the magnetic moment (1=yes,0=no)", 50, 19);
+	InitTextfield(txspins_show_static_moment_direction, "show static moment direction (1=yes,0=no)", 50, 19);
 
 	/***********************************
 	 * Fourth tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labscale_density_vectors, "scale density vectors:", 150, 19);
-	InitLabel(labshow_density, "show density:", 150, 19);
-	InitLabel(labdensity_dtheta, "dtheta:", 70, 19);
-	InitLabel(labdensity_dfi, "dfi:", 70, 19);
-	InitLabel(labdensity_threshhold, "threshhold:", 70, 19);
+	InitLabel(labscale_density_vectors, "scale_density_vectors:", 150, 19);
+	InitLabel(labshow_density, "show_density (1=yes,0=no):", 150, 19);
+	InitLabel(labdensity_dtheta, "dtheta (rad):", 70, 19);
+	InitLabel(labdensity_dfi, "dfi (rad):", 70, 19);
+	InitLabel(labdensity_threshhold, "threshhold (in |e|/A^3,<0 for electrons):", 300, 19);
 	InitLabel(labdensity_gridi, "gridi:", 50, 19);
 	InitLabel(labdensity_gridj, "gridj:", 50, 19);
 	InitLabel(labdensity_gridk, "gridk:", 50, 19);
 	// textfields
-	InitTextfield(txscale_density_vectors, "scale the density vector size", 50, 19);
+	InitTextfield(txscale_density_vectors, "common scale factor for vector density plots e.g. current density", 50, 19);
 	InitTextfield(txshow_density, "show the density", 50, 19);
 	InitTextfield(txdensity_dtheta, "dtheta for const density surface", 50, 19);
 	InitTextfield(txdensity_dfi, "dfi for const density surface", 50, 19);
-	InitTextfield(txdensity_threshhold, "threshhold", 50, 19);
+	InitTextfield(txdensity_threshhold, "threshhold=constant for calculation of constant density surface", 50, 19);
 	InitTextfield(txdensity_gridi, "number of gridpoints in i direction for file *.grid", 50, 19);
 	InitTextfield(txdensity_gridj, "number of gridpoints in j direction for file *.grid", 50, 19);
 	InitTextfield(txdensity_gridk, "number of gridpoints in k direction for file *.grid", 50, 19);
@@ -321,11 +321,11 @@ public class graphic_parameters_configurator extends JPanel
 	 * Fifth tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labphonon_show_oscillation, "show oscillation:", 170, 19);
-	InitLabel(labphonon_wave_amplitude, "wave amplitude:", 170, 19);
+	InitLabel(labphonon_scale_static_displacements, "scale_static_displacements:", 170, 19);
+	InitLabel(labphonon_wave_amplitude, "phonon_wave_amplitude:", 170, 19);
 	// textfields
-	InitTextfield(txphonon_show_oscillation, "show oscillation", 50, 19);
-	InitTextfield(txphonon_wave_amplitude, "wave amplitude", 50, 19);
+	InitTextfield(txphonon_scale_static_displacements, "scale factor for static lattice displacements (by mean fields)", 50, 19);
+	InitTextfield(txphonon_wave_amplitude, "scale factor for oscillation of lattice positions", 50, 19);
 
 
 	this.add(panMain, BorderLayout.NORTH);
@@ -445,11 +445,11 @@ public class graphic_parameters_configurator extends JPanel
 		    panPhonon.setLayout(flowLayout6);
 			panPhonon.add(jPanel19, null);
 				jPanel19.setLayout(verticalFlowLayout19);
-					jPanel19.add(labphonon_show_oscillation, null);
+					jPanel19.add(labphonon_scale_static_displacements, null);
 					jPanel19.add(labphonon_wave_amplitude, null);
 			panPhonon.add(jPanel20, null);
 				jPanel20.setLayout(verticalFlowLayout20);
-					jPanel20.add(txphonon_show_oscillation, null);
+					jPanel20.add(txphonon_scale_static_displacements, null);
 					jPanel20.add(txphonon_wave_amplitude, null);
 
 
@@ -597,7 +597,7 @@ public class graphic_parameters_configurator extends JPanel
     txdensity_gridk.setText(m_IniFile.GetValue(CONST_DENSITY, "gridk"));
 
     txphonon_wave_amplitude.setText(m_IniFile.GetValue(CONST_PHONON, "phonon_wave_amplitude"));
-    txphonon_show_oscillation.setText(m_IniFile.GetValue(CONST_PHONON, "phonon_show_oscillation"));
+    txphonon_scale_static_displacements.setText(m_IniFile.GetValue(CONST_PHONON, "phonon_scale_static_displacements"));
 
   }
 
@@ -670,7 +670,7 @@ public class graphic_parameters_configurator extends JPanel
     m_IniFile.SetValue(CONST_DENSITY, "gridk", txdensity_gridk.getText(), " ");
 
     m_IniFile.SetValue(CONST_PHONON, "phonon_wave_amplitude", txphonon_wave_amplitude.getText(), " ");
-    m_IniFile.SetValue(CONST_PHONON, "phonon_show_oscillation", txphonon_show_oscillation.getText(), " ");
+    m_IniFile.SetValue(CONST_PHONON, "phonon_scale_static_displacements", txphonon_scale_static_displacements.getText(), " ");
 
 	m_IniFile.Write();
         System.exit(0);

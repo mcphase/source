@@ -599,7 +599,7 @@ if (argc-os>=6){
               float numbers[20];numbers[9]=1;numbers[10]=3;
               numbers[0]=20;
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
-             gp.phonon_wave_amplitude=1.0;gp.phonon_show_oscillation=1.0;
+             gp.phonon_wave_amplitude=1.0;gp.phonon_scale_static_displacements=1.0;
 //----------------------------------------------------------------------------------------------------------
             if(arrow>0){double checkdd=1e7;
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
@@ -696,7 +696,7 @@ if (argc-os>=6){
                 for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
                // load evs and check which one is nearest -------------------------------   
                extract(instr,"phonon_wave_amplitude",gp.phonon_wave_amplitude);
-               extract(instr,"phonon_show_oscillation",gp.phonon_show_oscillation);
+               extract(instr,"phonon_scale_static_displacements",gp.phonon_scale_static_displacements);
               }
                j=fseek(fin,pos,SEEK_SET); 
                if (j!=0){fprintf(stderr,"Error: wrong qep file format\n");exit (EXIT_FAILURE);}

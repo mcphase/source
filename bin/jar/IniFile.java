@@ -104,6 +104,7 @@ private int iMaxKeys;
 
     }
 	iMaxKeys = iSequKey;
+    inStream.close();
     iRet = 0;
     }
     catch(EOFException e)
@@ -128,6 +129,7 @@ private int iMaxKeys;
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
 
+    
     return(iRet);
 
   }

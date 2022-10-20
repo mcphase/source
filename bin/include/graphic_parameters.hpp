@@ -24,7 +24,7 @@ double spins_show_oscillation;
 double spins_colour;
 
 //PHONONS
-double phonon_show_oscillation;
+double phonon_scale_static_displacements;
 double phonon_wave_amplitude;
 
 

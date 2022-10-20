@@ -988,7 +988,7 @@ __declspec(dllexport)
    double zsum=0,zi,x;
    // determine number of thermally reachable states
    int noft = 0;
-   for(i=0; (i<ninit)&(((x=((est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
    {
       noft += Hsz-i; 
       zsum += zi;
@@ -1555,7 +1555,7 @@ __declspec(dllexport)
    //if (pinit<SMALL)pinit=SMALL;
    double zsum=0,zi,x;
    int noft=0; 
-   for(i=0; (i<ninit)&(((x=((est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
    {
       noft += Hsz-i; 
       zsum += zi;
@@ -2311,7 +2311,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
    //if (pinit<SMALL)pinit=SMALL;
    double zsum=0,zi,x;
    int noft=0; 
-   for(i=0; (i<ninit)&(((x=((est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
    {
       noft += Hsz-i; 
       zsum += zi;

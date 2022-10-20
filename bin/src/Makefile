@@ -239,9 +239,8 @@ spinsfromq.o: spinsfromq.c spincf.hpp  par.hpp martin.h vector.h
 singleion.o: singleion.c par.hpp myev.h martin.h vector.h trs_io.c
 	$(CCC) $(CFLAGS) $<
 
-densplt.o:  densplt.c plt_func.c density.hpp martin.h vector.h jjjpar.hpp graphic_parameters.hpp cryststruct.hpp
+densplt.o:  densplt.c plt_func.c density.hpp martin.h vector.h jjjpar.hpp graphic_parameters.hpp cryststruct.hpp spincf.hpp
 	$(CCC) $(CFLAGS) $<
-
 
 pointc.o:  pointc.c  martin.h vector.h ionpars.hpp jjjpar.hpp
 	$(CCC) $(CFLAGS) $<
