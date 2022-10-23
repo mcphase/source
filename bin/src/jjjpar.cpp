@@ -370,7 +370,7 @@ void jjjpar::save_sipf(FILE * fout)
            (*clusterpars).save(clustsavfile);
            (*clusterpars).save_sipfs("results/_");}
    default: // in case of external single ion module just save a copy of the input file 
-           char *token;
+             char *token;double dummy;
            cfin=fopen_errchk(sipffilename,"rb");
            while(feof(cfin)==false){fgets(instr, MAXNOFCHARINLINE, cfin);
                       // strip /r (dos line feed) from line if necessary

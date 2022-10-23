@@ -172,7 +172,8 @@ FILE * conv_file;
 FILE * sipf_file;
 FILE * dBlm_file;
 FILE * dLlm_file;
-//char instr[MAXNOFCHARINLINE];
+char instr[MAXNOFCHARINLINE];
+char module[MAXNOFCHARINLINE];
 int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0;
 float invalues[100];invalues[0]=99;
   double q,x,y,z;int do_deriv=0;
@@ -217,7 +218,7 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
 " R2=1.309\n"
 " R4=3.964\n"
 " R6=23.31\n"
-" #radial wave function parameters, for transition metal ions the the values\n"
+" #optional radial wave function parameters, for transition metal ions the the values\n"
 " #are tabulated in Clementi & Roetti Atomic data and nuclear data tables 14 \n"
 " #(1974) 177-478, the radial wave function is expanded as\n"
 " # R(r)=sum_p Cp r^(Np-1) exp(-XIp r)(2 XIp)^(Np+0.5)/sqrt(2Np!)\n"
@@ -229,8 +230,6 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
 " N3=3 XI3=7.03565 C3=0.14777\n"
 " N4=3 XI4=2.74850 C4=0.49771 \n"
 " N5=3 XI5=1.69027 C5=0.11388 \n"
-" # if the above parameters are given the radial wave function\n"
-" # is output to file results\\radwavfun.dat\n\n"
 "OUTPUT:  stdout ... sipf file with CEF pars(including radial matrix elements\n"
 "                    and Stevens factors)\n"
 "                ... pointcharges and positions (omit with option -o)\n"
@@ -245,61 +244,48 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
       exit (1);
     } else {if(batchmode==0){fprintf(stderr,"#* pointc 221011 *\n");}}
 
-// set stevens parameters and landefactor, J and <r^l> of ion
+// set Stevens parameters and Lande factor, J and <r^l> of ion
 // read create class object ionpars from iontype - sets J, gJ, Stevens factors from the
 // routine getpar in cfieldrout.c, thus takes the single ion parameters from
 // the same source as the cfield program ...
  ionpars * iops;
  jjjpar * jjjps;
- //char *token;
+ char *token;
+ int sipf_read_module=-1; // 0 no sipf read  1 module ic1ion  4 module so1ion
  if((sipf_file=fopen(argv[1+ac],"r"))) //read ion parameters from file
- {
-
- /*  iops=new ionpars(2);
-   jjjps=new jjjpar(1,1,1);
+ { fclose(sipf_file);sipf_file=open_sipf(argv[1+ac],module);
+ if(extract(module,"so1ion",instr,(size_t)MAXNOFCHARINLINE)==0){sipf_read_module=4;
+   printf("#!MODULE=so1ion\n");}
+ if(extract(module,"ic1ion",instr,(size_t)MAXNOFCHARINLINE)==0){sipf_read_module=0;
+   printf("#!MODULE=ic1ion\n");
+   iops=new ionpars(2);
    while(feof(sipf_file)==false)
-  {if(fgets(instr, MAXNOFCHARINLINE, sipf_file)){// strip /r (dos line feed) from line if necessary
+   {if(fgets(instr, MAXNOFCHARINLINE, sipf_file)){// strip /r (dos line feed) from line if necessary
                                       while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
-                                      printf("%s",instr);
+                                     // printf("%s",instr);
                                     }
    
-//   if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
+   if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
         extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE);
-        
-        extract(instr,"N1",(*jjjps).Np(1));extract(instr,"XI1",(*jjjps).Xip(1));extract(instr,"C1",(*jjjps).Cp(1));
-        extract(instr,"N2",(*jjjps).Np(2));extract(instr,"XI2",(*jjjps).Xip(2));extract(instr,"C2",(*jjjps).Cp(2));
-        extract(instr,"N3",(*jjjps).Np(3));extract(instr,"XI3",(*jjjps).Xip(3));extract(instr,"C3",(*jjjps).Cp(3));
-        extract(instr,"N4",(*jjjps).Np(4));extract(instr,"XI4",(*jjjps).Xip(4));extract(instr,"C4",(*jjjps).Cp(4));
-        extract(instr,"N5",(*jjjps).Np(5));extract(instr,"XI5",(*jjjps).Xip(5));extract(instr,"C5",(*jjjps).Cp(5));
-        extract(instr,"N6",(*jjjps).Np(6));extract(instr,"XI6",(*jjjps).Xip(6));extract(instr,"C6",(*jjjps).Cp(6));
-        extract(instr,"N7",(*jjjps).Np(7));extract(instr,"XI7",(*jjjps).Xip(7));extract(instr,"C7",(*jjjps).Cp(7));
-        extract(instr,"N8",(*jjjps).Np(8));extract(instr,"XI8",(*jjjps).Xip(8));extract(instr,"C8",(*jjjps).Cp(8));
-        extract(instr,"N9",(*jjjps).Np(9));extract(instr,"XI9",(*jjjps).Xip(9));extract(instr,"C9",(*jjjps).Cp(9));
 
         extract(instr,"nof_electrons",(*iops).nof_electrons);
         extract(instr,"ALPHA",(*iops).alpha);
         extract(instr,"BETA",(*iops).beta);
         extract(instr,"GAMMA",(*iops).gamma);
 
-        extract(instr,"R2",  (*jjjps).r2);
-        extract(instr,"R4",  (*jjjps).r4);
-        extract(instr,"R6",  (*jjjps).r6);
-//        }
+        extract(instr,"R2",  (*iops).r2);
+        extract(instr,"R4",  (*iops).r4);
+        extract(instr,"R6",  (*iops).r6);
+ 
+        }
   }
-      if((*jjjps).r2==0){(*jjjps).r2_from_radial_wavefunction();printf("#<r^2>  from radial wavefunction in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);}
-      if((*jjjps).r4==0){(*jjjps).r4_from_radial_wavefunction();printf("#<r^4>  from radial wavefunction in units of a0^4 a0=0.5292 Angstroem\nR4=%g\n",(*jjjps).r4);}
-      if((*jjjps).r6==0){(*jjjps).r6_from_radial_wavefunction();printf("#<r^6>  from radial wavefunction in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);}
-     
-      (*iops).r2=(*jjjps).r2;
-      (*iops).r4=(*jjjps).r4;
-      (*iops).r6=(*jjjps).r6;
-*/
-  
+  }  // fi module is ic1ion
   fclose(sipf_file);
-  printf("#!MODULE=so1ion\n");
   jjjps=new jjjpar(0,0,0,argv[1+ac],1);
-  if((*jjjps).module_type!=4){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' !\n",argv[1+ac]);exit(1);}  
-  iops=(*jjjps).iops;
+  if((*jjjps).module_type!=sipf_read_module){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' or '#!MODULE=ic1ion' !\n",argv[1+ac]);exit(1);}  
+  
+  if(sipf_read_module==4){iops=(*jjjps).iops;}
+
       if((*iops).r2==1e300||(*iops).r2==0){(*jjjps).r2_from_radial_wavefunction();
                         printf("#<r^2>  from radial wavefunction in units of a0^2 a0=0.5292 Angstroem\nR2=%g\n",(*jjjps).r2);
                         (*iops).r2=(*jjjps).r2;}
@@ -311,7 +297,30 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
                         (*iops).r6=(*jjjps).r6;}
 (*iops).Blm=0;
 (*iops).Llm=0;
-(*jjjps).save_sipf(stdout);
+if(sipf_read_module==4){(*jjjps).save_sipf(stdout);}
+else
+{sipf_file=fopen_errchk(argv[1+ac],"rb");double dummy;
+           while(feof(sipf_file)==false){fgets(instr, MAXNOFCHARINLINE,sipf_file);
+                      // strip /r (dos line feed) from line if necessary
+                      while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
+                      if(extract(instr,"R2",dummy)==0){sprintf(instr,"R2=%g\n",(*jjjps).r2);}
+                      if(extract(instr,"R4",dummy)==0){sprintf(instr,"R4=%g\n",(*jjjps).r4);}
+                      if(extract(instr,"R6",dummy)==0){sprintf(instr,"R6=%g\n",(*jjjps).r6);}
+
+                      // remove Blm and Llm and pointcharges from input file 
+                      const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 ";
+                      char lm4[5];
+                      for(i=0;i<=45;++i){strncpy(lm4,lm+i*4,4);if(lm4[3]!='S')lm4[3]='\0';
+                                        if(extract(instr,lm4,dummy)==0)sprintf(instr,"");
+                                        lm4[0]='L';if(extract(instr,lm4,dummy)==0)sprintf(instr,"");
+                                        }
+                     if(extract(instr,"pointcharge",dummy)==0){sprintf(instr,"");}
+
+                      printf("%s",instr);
+                                    }
+           fclose(sipf_file);
+
+}
  }
  else if(batchmode==1)  // Batch mode - do not write any files; read sipf,pcfile from stdin, prints to stdout
  {

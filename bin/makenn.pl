@@ -129,7 +129,7 @@ print " the pointcharge model and calculate crystal field parameters.\n\n";
  exit 0;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];
-$rkky=0;$calcdist=0;$bvk=0;$readtable=0;
+$rkky=0;$calcdist=0;$bvk=0;$readtable=0;$classdip=0;
 shift @ARGV; 
 $_=$ARGV[0];
 if(/-rkky3d/)
@@ -250,6 +250,7 @@ elsif(/-e/||/-f/||/-dm/||/-jp/)
               close Fin;
        	     }
   }
+ else {$classdip=1;}
  
 $_=$ARGV[0];
 if(/-d/)
@@ -883,7 +884,7 @@ sub getinteraction {
 # 1meV= 16.0218e-23 J
 #
 #c=(mu0/4pi)(gJ muB)^2=0.92740^2  Angstroem^3 meV/16.0218
-
+  
   my $c = $gJthis * $gJ * .927405 * .927405 / 16.02183;  #[meV A^3]
   $jaa = $c * (3 * $rx * $rx -$r *$r) /$r /$r /$r /$r /$r;
   $jbb = $c * (3 * $ry * $ry -$r *$r) /$r /$r /$r /$r /$r;
@@ -959,6 +960,10 @@ sub getlattice {
                                     ($gJ[$n])=extractfromfile("GJ",$sipffilename); 
                                       unless(open(Fin,$sipffilename)) {die"Error opening $sipffilename\n";}
                                      $line=<Fin>;close Fin;($module[$n])=extractstring("MODULE",$line);
+                                    if($module[$n]=~/ic1ion/&&$classdip){die "Error makenn: for ic1ion module the classical dipole interaction is not implemented - you can use rkky or kaneyoshi\n";}
+                                    if($module[$n]=~/icf1ion/&&$classdip){die "Error makenn: for icf1ion module the classical dipole interaction is not implemented - you can use rkky or kaneyoshi\n";}
+                                    if($module[$n]=~/phonon/&&$classdip){die "Error makenn: for phonon module the classical dipole cannot be calculated - use option -bvk\n";}
+
                                     if($cfph!=0){($magnetic)=extractfromfile("MAGNETIC",$sipffilename); 
                                      if($magnetic!=0){unless($module[$n]=~/so1ion/){die "Error makenn:  ion $n in mcphas.j sipf=$sipffilename for option -cfph MODULE must be so1ion\n"; }
                                                       ++$nofmagneticatoms;$nph[$nofmagneticatoms+$nofatoms]=$n;
@@ -1108,54 +1113,20 @@ print $l1 "#--------------------------------------------------------------------
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
 
-  if (($gJ!=0&&$gJ[$ddd]==0)||($gJ==0&&$gJ[$ddd]!=0)){unless($cfph==1){ die "error makenn. mixing of atoms with gJ=0 (intermediate coupling) and gJ>0 not implemented\n";}}
-  if (($rkky==0&&$readtable==0)||$bvk==1||($readtable>0&&$DM>0)||($readtable>0&&$Jp>0)) # here anisotropic interaction comes in
-   { 
-       if($bvk==1||($gJ!=0&&$gJ[$ddd]!=0))
-         {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
+  # if (($gJ[$ddd]==0)||($gJ==0)){unless($cfph==1){ die "error makenn. atoms with gJ=0 (intermediate coupling) not implemented\n";}}
+  if (($classdip==1)||$bvk==1||($readtable>0&&$DM>0)||($readtable>0&&$Jp>0)) # here anisotropic interaction comes in
+   {      print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
           print $l sprintf("%+10.9e %+10.9e ",$Jab->index($n)->at($n1),$Jba->index($n)->at($n1));
           print $l sprintf("%+10.9e %+10.9e ",$Jac->index($n)->at($n1),$Jca->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
           print $l sprintf("%+10.9e %+10.9e ",$Jbc->index($n)->at($n1),$Jcb->index($n)->at($n1));
-          for($i=4;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){print $l "0 0 ";}} # add other components
-         }
-       elsif ($gJ==0&&$gJ[$ddd]==0)
-         {print $l sprintf("%+10.9e %+10.9e %+10.9e %+10.9e %+10.9e %+10.9e ",4*$Jaa->index($n)->at($n1),$Jaa->index($n)->at($n1),4*$Jbb->index($n)->at($n1),$Jbb->index($n)->at($n1),4*$Jcc->index($n)->at($n1),$Jcc->index($n)->at($n1));
-          for($i=7;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jaa->index($n)->at($n1)),(2*$Jaa->index($n)->at($n1))); #SaLa LaSa
-          print $l sprintf("%+10.9e %+10.9e ",(4*$Jab->index($n)->at($n1)),(4*$Jba->index($n)->at($n1))); #SaSb SbSa
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jab->index($n)->at($n1)),(2*$Jba->index($n)->at($n1))); #SaLb LbSa
-          print $l sprintf("%+10.9e %+10.9e ",(4*$Jac->index($n)->at($n1)),(4*$Jca->index($n)->at($n1))); #SaSc ScSa
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jac->index($n)->at($n1)),(2*$Jca->index($n)->at($n1))); #SaLc LcSa
-          for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jab->index($n)->at($n1)),(2*$Jba->index($n)->at($n1))); #LaSb SbLa
-          print $l sprintf("%+10.9e %+10.9e ",$Jab->index($n)->at($n1),$Jba->index($n)->at($n1));         #LaLb LbLa
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jac->index($n)->at($n1)),(2*$Jca->index($n)->at($n1))); #LaSc ScLa
-          print $l sprintf("%+10.9e %+10.9e ",$Jac->index($n)->at($n1),$Jca->index($n)->at($n1));         #LaLc LcLa
-          for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jbb->index($n)->at($n1)),(2*$Jbb->index($n)->at($n1))); #SbLb LbSb
-          print $l sprintf("%+10.9e %+10.9e ",(4*$Jbc->index($n)->at($n1)),(4*$Jbc->index($n)->at($n1))); #SbSc ScSb
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jbc->index($n)->at($n1)),(2*$Jcb->index($n)->at($n1))); #SbLc LcSb
-          for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jbc->index($n)->at($n1)),(2*$Jcb->index($n)->at($n1))); #LbSc ScLb
-          print $l sprintf("%+10.9e %+10.9e ",$Jbc->index($n)->at($n1),$Jcb->index($n)->at($n1));         #LbLc LcLb
-          for($i=7;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l sprintf("%+10.9e %+10.9e ",(2*$Jcc->index($n)->at($n1)),(2*$Jcc->index($n)->at($n1))); #ScLc LcSc
-          for($i=7;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){print $l "0 0 ";}} # add other components
-         }
+          for($i=4;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){print $l "0 0 ";}} # add other components         
    }
    else  #here the isotropic interaction is written
-   {
-    if($gJ!=0&&$gJ[$ddd]!=0) 
-    {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
-     for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
-    }
-  
-    if ($gJ==0&&$gJ[$ddd]==0) # spin - spin interactions only
-    {print $l sprintf("%+10.9e 0.0 %+10.9e 0.0 %+10.9e 0.0 ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
-     for($i=7;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
-    }
+   {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
+    for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
+    
    }
 
  if ($calcdist==1) {print $l sprintf("%+10.9e a%s",$rn->index($n)->at($n1),$ddd);}

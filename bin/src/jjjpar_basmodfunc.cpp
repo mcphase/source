@@ -367,7 +367,7 @@ module_type=0;
   magFFj4=Vector(1,MAGFF_NOF_COEFF);magFFj4=0;
   magFFj6=Vector(1,MAGFF_NOF_COEFF);magFFj6=0;
   Zc=Vector(1,7);Zc=0;
-
+   r2=0;r4=0;r6=0;
    Np=Vector(1,9);Np=0; // vectors of radial wave function parameters
    Xip=Vector(1,9);Xip=0;
    Cp=Vector(1,9);Cp=0;
@@ -383,6 +383,11 @@ module_type=0;
     extract(instr,"CHARGE",charge);
     extract(instr,"GJ",gJ);
     extract(instr,"gJ",gJ);
+
+        extract(instr,"R2",  r2);
+        extract(instr,"R4",  r4);
+        extract(instr,"R6",  r6);
+
     // read formfactor if given
     extract(instr,"FFj0A",magFFj0[1]);
     extract(instr,"FFj0a",magFFj0[2]);
