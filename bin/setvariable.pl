@@ -39,8 +39,9 @@ $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$value=eval $ARG
   while($line=<Fin>)
      { if ($line=~/^(#!|[^#])*?\b$varnam\s*=/) {
                                             #here write modified parameter set to line
-                                             $line=~s/(^(#!|[^#])*?\b)$varnam\s*=\s*[^\s\;\n\t\*]+/$1$varnam=$value/g;
-                                           }
+       # $line=~s/(^(#!|[^#])*?\b)$varnam[ \t]*=[ \t]*([^ \;\n\r\t\*]*)([ \;\n\r\t\*])/$1$varnam=$value$4/g;
+       $line=~s/$varnam[ \t]*=[ \t]*([^ \;\n\r\t\*]*)([ \;\n\r\t\*])/$varnam=$value$2/g;
+                                               }
        print Fout $line;
       }
       close Fin;
