@@ -194,7 +194,7 @@ void myEigenSystemHermitean (ComplexMatrix & M,Vector & lambda,ComplexMatrix & l
   Matrix mat1(M.Rlo(),M.Rhi(),M.Clo(),M.Chi());
   Matrix lr(l.Rlo(),l.Rhi(),l.Clo(),l.Chi());
   Matrix li(l.Rlo(),l.Rhi(),l.Clo(),l.Chi());
-  complex<double> ii(0,1);  
+  //complex<double> ii(0,1);  
   int i1,j1;
   //check if M it is hermitean
    checkHerm(M);

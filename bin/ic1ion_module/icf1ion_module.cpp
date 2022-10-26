@@ -518,7 +518,7 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           void Icalc(Vector &J,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+           void Icalc(Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
                       double *T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (meV) 
@@ -532,6 +532,11 @@ __declspec(dllexport)
    // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   Vector J(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); J=0;
+   // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -644,6 +649,13 @@ __declspec(dllexport)
    if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
 
    icf_expJ(pars,est,zV,vE,T,J,lnZ,U); delete[]vE; delete[]zV;
+
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   dum=J(2);J(2)=J(3);J(3)=J(5);J(5)=J(4);J(4)=dum;
+   for(i=Jret.Lo(); i<=Jret.Hi(); i++) Jret[i] = J[i];
+   // --------------------------------------------------------------------
+
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -665,9 +677,14 @@ __declspec(dllexport)
    Vector J(1,6);
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
-   mom(1)=GS*J(1)+J(2);
-   mom(2)=GS*J(3)+J(4);
-   mom(3)=GS*J(5)+J(6);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //mom(1)=GS*J(1)+J(2);
+   //mom(2)=GS*J(3)+J(4);
+   //mom(3)=GS*J(5)+J(6);
+   mom(1)=GS*J(1)+J(4);
+   mom(2)=GS*J(2)+J(5);
+   mom(3)=GS*J(3)+J(6);
 }
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the <L> at a particular temperature and field
@@ -688,8 +705,13 @@ __declspec(dllexport)
    Vector J(1,6); 
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
-   L(1)=J(2);
-   L(2)=J(4);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //L(1)=J(2);
+   //L(2)=J(4);
+   //L(3)=J(6);
+   L(1)=J(4);
+   L(2)=J(5);
    L(3)=J(6);
 }
 // --------------------------------------------------------------------------------------------------------------- //
@@ -711,9 +733,14 @@ __declspec(dllexport)
    Vector J(1,6); 
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //S(1)=J(1);
+   //S(2)=J(3);
+   //S(3)=J(5);
    S(1)=J(1);
-   S(2)=J(3);
-   S(3)=J(5);
+   S(2)=J(2);
+   S(3)=J(3);
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -733,8 +760,13 @@ __declspec(dllexport)
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   // --------------------------------------------------------------------------
+
+   // Calculates the Zeeman term if magnetic field is not zero 
+  if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
       if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
       if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
@@ -823,7 +855,7 @@ __declspec(dllexport)
  /* Not Used */       double & /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
-                      ComplexVector &u1,  // Output eigenvector u1
+                      ComplexVector &u1ret,  // Output eigenvector u1
                       float &delta,       // Output transition energy
                       int &n, int &nd,
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
@@ -831,6 +863,12 @@ __declspec(dllexport)
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   ComplexVector u1(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); u1=0; u1(1)=u1ret(1);
+   // --------------------------------------------------------------------------
+
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -979,6 +1017,10 @@ __declspec(dllexport)
       // multiply matrix Mab by occupation factor
       for(iJ=1; iJ<=u1.Hi(); iJ++)
 	    u1(iJ) = complex<double> ( u[iJ]*sqrt(therm/Z), iu[iJ]*sqrt(therm/Z) );
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   complex<double>dum1;dum1=u1(2);u1(2)=u1(3);u1(3)=u1(5);u1(5)=u1(4);u1(4)=dum1;
+   for(iJ=1; iJ<=u1ret.Hi(); iJ++) u1ret[iJ] = u1[iJ];
 
       delete[]en;
    }
@@ -1023,9 +1065,14 @@ __declspec(dllexport)
    ComplexVector u1(1,6);int n,nd;
    u1(1) = m1(1);
    int nt = du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-   m1(1)=GS*u1(1)+u1(2);
-   m1(2)=GS*u1(3)+u1(4);
-   m1(3)=GS*u1(5)+u1(6);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+  // m1(1)=GS*u1(1)+u1(2);
+  // m1(2)=GS*u1(3)+u1(4);
+  // m1(3)=GS*u1(5)+u1(6);
+   m1(1)=GS*u1(1)+u1(4);
+   m1(2)=GS*u1(2)+u1(5);
+   m1(3)=GS*u1(3)+u1(6);
    return nt;
 }
 
@@ -1051,8 +1098,13 @@ __declspec(dllexport)
    ComplexVector u1(1,6);int n,nd;
    u1(1) = L1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-   L1(1)=u1(2);
-   L1(2)=u1(4);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //L1(1)=u1(2);
+   //L1(2)=u1(4);
+   //L1(3)=u1(6);
+   L1(1)=u1(4);
+   L1(2)=u1(5);
    L1(3)=u1(6);
    return nt;
 }
@@ -1079,9 +1131,14 @@ __declspec(dllexport)
    ComplexVector u1(1,6);int n,nd;
    u1(1) = S1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
+    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //S1(1)=u1(1);
+   //S1(2)=u1(3);
+   //S1(3)=u1(5);
    S1(1)=u1(1);
-   S1(2)=u1(3);
-   S1(3)=u1(5);
+   S1(2)=u1(2);
+   S1(3)=u1(3);
    return nt;
 }
 
@@ -2119,6 +2176,11 @@ void spindensity_coeff(Vector &J,          // Output single ion moments =expecta
 {  // sum exchange field and external field
    Vector gjmbH(1,Hxc.Hi());
    gjmbH=Hxc;
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   // --------------------------------------------------------------------
+
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -2150,6 +2212,10 @@ void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expecta
 {  // sum exchange field and external field
    Vector gjmbH(1,Hxc.Hi());
    gjmbH=Hxc;
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
@@ -2340,8 +2406,12 @@ int dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, p
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   int nt = sdod_du1calc(xyz,tn,T,Hxce,sipffilename,Slm1,delta,est);
+   Vector gjmbH(1,49); gjmbH = 0; for(int i=1; i<=Hxc.Hi(); ++i) { gjmbH(i)=Hxc(i); }
+  //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   // --------------------------------------------------------------------
+   int nt = sdod_du1calc(xyz,tn,T,gjmbH,sipffilename,Slm1,delta,est);
 // Slm1(1)=0;
 // for(int i=2; i<=6; ++i) Slm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Slm1(4) *=sqrt(2);
 // for(int i=7; i<=15;++i) Slm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Slm1(11)*=sqrt(2);
@@ -2370,8 +2440,12 @@ int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, p
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
 { 
-   Vector Hxce(1,49); Hxce = 0; for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   int nt = sdod_du1calc(-xyz,tn,T,Hxce,sipffilename,Llm1,delta,est);
+   Vector gjmbH(1,49); gjmbH = 0; for(int i=1; i<=Hxc.Hi(); ++i) { gjmbH(i)=Hxc(i); }
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   // --------------------------------------------------------------------
+   int nt = sdod_du1calc(-xyz,tn,T,gjmbH,sipffilename,Llm1,delta,est);
 // Llm1(1)=0;
 // for(int i=2; i<=6; ++i) Llm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Llm1(4) *=sqrt(2);
 // for(int i=7; i<=15;++i) Llm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Llm1(11)*=sqrt(2);
@@ -2386,13 +2460,24 @@ extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif                                    // on input
-int    opmat(int &n,                      // n     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
+int    opmat(int &ni,                      // ni     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
              char **sipffilename,         // Single ion properties filename
              Vector &Hxc,                 // Hext  vector of external field [meV]
              Vector &Hext,                // Hxc   vector of exchange field [meV]
                                           // on output   
              Matrix &outmat)              // operator matrix of Hamiltonian, I1, I2, I3 depending on n
-{
+{  //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   int n=ni;
+   if(ni==2){n=3;}
+   if(ni==3){n=5;}
+   if(ni==4){n=2;}
+   if(ni==5){n=4;}
+   if(ni==-2){n=-3;}
+   if(ni==-3){n=-5;}
+   if(ni==-4){n=-2;}
+   if(ni==-5){n=-4;}
+
    // Parses the input file for parameters
    const char *filename = sipffilename[0];
    icpars pars; ic_parseinput(filename,pars);
@@ -2405,6 +2490,10 @@ int    opmat(int &n,                      // n     which operator 0=Hamiltonian,
    if(n==0)                               // return Hamiltonian
    {
       std::vector<double> gjmbH(max(6,Hxc.Hi()),0.); for(int i=1; i<=Hxc.Hi(); i++) gjmbH[i-1]=-Hxc(i);
+      //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   double dum; dum=gjmbH[2];gjmbH[2]=gjmbH[4];gjmbH[4]=gjmbH[5];gjmbH[5]=gjmbH[3];gjmbH[3]=dum;
+   // --------------------------------------------------------------------
       if(fabs(Hext(1))>DBL_EPSILON) { gjmbH[1]-=MUB*Hext(1); gjmbH[0]-=GS*MUB*Hext(1); }
       if(fabs(Hext(2))>DBL_EPSILON) { gjmbH[3]-=MUB*Hext(2); gjmbH[2]-=GS*MUB*Hext(2); }
       if(fabs(Hext(3))>DBL_EPSILON) { gjmbH[5]-=MUB*Hext(3); gjmbH[4]-=GS*MUB*Hext(3); }

@@ -140,7 +140,7 @@ int n;
                     &&(n=inputline(fin_coq,numbers))>=8   //error in line reading (8 old format, 9 new format)
 		    ;)
     { spincf spins(1,1,1,(int)numbers[9],(int)numbers[10]);
-      spins.load(fin_coq);
+      if(spins.load(fin_coq)==1){
      if(Tin==0){ddT=0; // here hain and hbin correspond to x and y in phasediagram
                 ddHa=hain-numbers[1];ddHa*=ddHa;
                 ddHb=hbin-numbers[2];ddHb*=ddHb;
@@ -163,7 +163,7 @@ int n;
                  while (instr[strspn(instr," \t")]=='#'&&feof(fin_coq)==0) // pointer to 'ltrimstring' 
                   {pos=ftell(fin_coq);fgets(instr,MAXNOFCHARINLINE,fin_coq);}
        fseek(fin_coq,pos,SEEK_SET);
-    } if(delta==1000.0)return 1; // no stable structure found
+    } }if(delta==1000.0)return 1; // no stable structure found
  } 
    else
  {// look for config number -Tin

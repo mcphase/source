@@ -489,11 +489,17 @@ fprintf(fout,"# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr mag
 fprintf(fout,"#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mx My Mz\n");
 fprintf(fout,"#                have to be given, which refer to an right handed orthogonal coordinate system \n");
 fprintf(fout,"#                defined by y||b, z||(a x b) and x normal to y and z\n");
-fprintf(fout,"#  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components \n");
+//MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+//                                        to Sa Sb Sc La Lb Lc
+//fprintf(fout,"#  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components \n");
+fprintf(fout,"#  <Sa> <Sb> <Sc>  <La> <Lb > <Lc>  (optional) denote the spin and orbital angular momentum components \n");
 fprintf(fout,"# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)\n");
 fprintf(fout,"#                                     denote the corresponding exchange fields in meV\n");
 fprintf(fout,"#\n");
-fprintf(fout,"#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc> ]\n");
+//MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+//fprintf(fout,"#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc> ]\n");
+fprintf(fout,"#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> ]\n");
 fprintf(fout,"#{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}\n");
 
 mfcf mfields(1,1,1,natmagnetic,MAX_NOF_MF_COMPONENTS); // MAX_NOF_MF_COMPONENTS is maximum of nofmfcomponents - we take it here !
@@ -520,6 +526,11 @@ for(i=1;i<=natmagnetic;++i){
                              // read the rest of the line and split into numbers
                             fseek(fin_coq,pos+strchr(instr,'}')-instr+1,SEEK_SET); 
                             j=inputline(fin_coq,numbers);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //                                           
+   double dum; dum=numbers[9+2];numbers[9+2]=numbers[9+4];numbers[9+4]=numbers[9+5];numbers[9+5]=numbers[9+3];numbers[9+3]=dum;
+  
 if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1(2)+numbers[3]*rez1(3))/2/PI;
                                  numbers[5]= (numbers[1]*rez2(1)+numbers[2]*rez2(2)+numbers[3]*rez2(3))/2/PI;
                                  numbers[6]= (numbers[1]*rez3(1)+numbers[2]*rez3(2)+numbers[3]*rez3(3))/2/PI;
@@ -557,6 +568,10 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
 fprintf(fout,"{%s} %8.5f %8.5f %8.5f  ",sipffilename,numbers[4]*r1s(1)+numbers[5]*r2s(1)+numbers[6]*r3s(1),numbers[4]*r1s(2)+numbers[5]*r2s(2)+numbers[6]*r3s(2),numbers[4]*r1s(3)+numbers[5]*r2s(3)+numbers[6]*r3s(3));
 fprintf(fout,"%8.5f %8.5f %8.5f  ",numbers[4],numbers[5],numbers[6]); // positions
 fprintf(fout," %+8.5f %+8.5f %+8.5f ",(*jjjpars[i]).mom(1),(*jjjpars[i]).mom(2),(*jjjpars[i]).mom(3)); // magmoments
+//MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+//                                        to Sa Sb Sc La Lb Lc
+// change back numbers field to what was input and print out
+dum=numbers[9+2];numbers[9+2]=numbers[9+3];numbers[9+3]=numbers[9+5];numbers[9+5]=numbers[9+4];numbers[9+4]=dum;
 for(k=10;k<=j;++k){fprintf(fout," %+8.5f",numbers[k]);}
 fprintf(fout,"\n");
                             instr[0]='#';

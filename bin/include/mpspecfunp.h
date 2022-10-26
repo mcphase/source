@@ -33,11 +33,17 @@
 // d(5)=0.3010299956639812       log10(basis)
 // double d_int(double*) rounds towards zero
 
-#ifndef _FLOAT_H___
+//#ifndef _FLOAT_H___
+#ifndef DBL_EPSILON
 #define DBL_EPSILON  2.220446049250313e-16
+#endif
+#ifndef  DBL_MIN
 #define   DBL_MIN  2.225073858507201e-258
+#endif
+#ifndef  DBL_MAX
 #define   DBL_MAX  1.797693134862316e+258
 #endif
+//#endif
 
 #ifndef M_1_PI
 #define M_1_PI 0.318309886183790671538

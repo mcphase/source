@@ -44,7 +44,7 @@ manual.pdf: manual.ps
 	ps2pdf  $<
 
 clean :
-	rm -vf manual.dvi manual.aux manual.log manual.bbl manual.blg manual.toc version.tex manual.idx manual.ind 
+	rm -vf manual.ps manual.dvi manual.aux manual.log manual.bbl manual.blg manual.toc version.tex manual.idx manual.ind 
 
 
 

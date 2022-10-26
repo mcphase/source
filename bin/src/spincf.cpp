@@ -261,7 +261,7 @@ void spincf::spinfromq (int n1,int n2, int n3,Vector & qvector,Vector & nettom,
 
 
 
-// load spinconfiguration from file
+// load spinconfiguration from file returns 1 on success and 0 on failure
 int spincf::load(FILE * fin_coq)	
 { int i,j,k,l,nn1,nn2;  
   char * s;
@@ -404,7 +404,7 @@ void spincf::add (spincf & op1, const spincf & op2)
   }           
 }
 
-spincf & spincf::operator + (const spincf & op2)
+spincf spincf::operator + (const spincf & op2)
 {
     spincf copy = *this;
     add(copy, op2);
@@ -413,6 +413,7 @@ spincf & spincf::operator + (const spincf & op2)
 
 spincf & spincf::operator += (const spincf & op2) {
      add(*this, op2); 
+     return (*this);
 }
 
 // multiplication of spinconfiguration with constant
@@ -436,6 +437,7 @@ spincf spincf::operator * (const double factor)
 
 spincf & spincf::operator *= (const double factor) {
      multiply(*this, factor); 
+     return (*this);
 }
 
 

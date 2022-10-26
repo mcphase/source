@@ -224,6 +224,9 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
    print_mcdiff_in_header(fout);
 // input file header and conf------------------------------------------------------------------
    n=headerinput(fin,fout,gp,cs);
+   if(cs.nofatoms<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofatoms=%i - must be >0 !!!\n",cs.nofatoms);exit(1);}
+   if(cs.nofcomponents<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofcomponents=%i - must be >0 !!!\n",cs.nofcomponents);exit(1);}
+
    spincf savmf(1,1,1,cs.nofatoms,cs.nofcomponents);
 
 // load spinsconfigurations and check which one is nearest -------------------------------   
@@ -345,7 +348,10 @@ gp.read();
 // the following is for the printout of spins.out ...........................
 fprintf(fout,"#! %s \n",outstr);
 fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
-fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc>\n");
+//MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+//                                        to Sa Sb Sc La Lb Lc
+//fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc>\n");
+fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc>\n");
 fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
 // .............................................................................                                
 	       
@@ -419,7 +425,7 @@ if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
       ++ii4;
      }
     }
-else{++ii4;
+else{   ++ii4;
     // output the positions
     dd3=savmf.pos(i,j,k,ii, cs);
       // if module allows to calculate position shift of an atom - use this for output 
@@ -436,7 +442,11 @@ else{++ii4;
      // and output the orbital and spin momentum if possible 
      if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage)&&
         (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
-      {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f %4.4f",myround(1e-5,Smom(nt)),myround(1e-5,Lmom(nt)));}
+      //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+      //                                        to Sa Sb Sc La Lb Lc
+      //{        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f %4.4f",myround(1e-5,Smom(nt)),myround(1e-5,Lmom(nt)));}
+      {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,Smom(nt)));}
+               for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,Lmom(nt)));}
       }
    }
     // finally output a line with the exchange fields 
@@ -847,7 +857,7 @@ if (argc-os>=6){
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
               double phase;
-              complex <double> im(0,1);
+             // complex <double> im(0,1);
               for(i=0;i<16;++i)
               {phase=2*3.1415*i/15;
                printf("\n********************************************\n");

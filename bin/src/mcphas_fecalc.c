@@ -20,7 +20,7 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  Vector diff(1,inputpars.nofcomponents*inputpars.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
  Vector meanfield(1,inputpars.nofcomponents),moment(1,inputpars.nofcomponents),d1(1,inputpars.nofcomponents);
  char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
- int i,j,k,i1,j1,k1,di,dj,dk,l,r,s,sdim,m,n,m1;
+ int i,j,k,i1,j1,k1,di,dj,dk,l,r=0,s,sdim,m,n,m1;
  div_t result; // some modulo variable
  float    sta=1000000; // initial value of standard deviation
  float staold=2000000;
@@ -151,11 +151,6 @@ for (r=1;sta>ini.maxstamf;++r)
  sta=0;
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {mf.mf(i,j,k)=0;
-//  for (i1=1;i1<=sps.na();++i1){if (i<i1){di=i-i1+sps.na();}else{di=i-i1;}
-//                               for (j1=1;j1<=sps.nb();++j1){if (j<j1){dj=j-j1+sps.nb();}else{dj=j-j1;}
-//			                                    for (k1=1;k1<=sps.nc();++k1){if (k<k1){dk=k-k1+sps.nc();}else{dk=k-k1;}
-//  MR 27.7.2011: the above 3 lines seem wrong to me after checking: we want to calculate the influence of sublattices i1,j1,k1 onto
-// sublattice i j k, thus if i1>=i then di=i1-i otherwise di=sps.na()-|i1-i|=sps.na()-(i-i1)
   for (i1=1;i1<=sps.na();++i1){if (i1>=i){di=i1-i;}else{di=sps.na()-i+i1;}
                                for (j1=1;j1<=sps.nb();++j1){if (j1>=j){dj=j1-j;}else{dj=sps.nb()-j+j1;}
 			                                    for (k1=1;k1<=sps.nc();++k1){if (k1>=k){dk=k1-k;}else{dk=sps.nc()-k+k1;}
@@ -219,7 +214,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
      strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
      fin_coq = fopen_errchk (outfilename, "w");
-     sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+     sprintf(text,"fecalc:%i spins, iteration %i sta=%g ini.maxstamf=%g spinchange=%g",sps.n(),r,sta,ini.maxstamf,spinchange);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
 
@@ -251,7 +246,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
 
 }
 
-//printf ("hello end of mf procedure");
+//printf ("hello end of mf procedure\n");
 
 
 // calculate free energy fe and energy u

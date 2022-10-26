@@ -75,7 +75,7 @@ private:
     Vector pos(int i, int j, int k, int l,cryststruct & cs);
                       //returns position of atom l at lattice site (i j k) (Angstrom)
 
-    int  load(FILE * fin_coq);	// load spincf from file
+    int  load(FILE * fin_coq);	// load spincf from file returns 1 on success and 0 on failure
  // array of spins 
    int in(int i,int j, int k); 
     int wasstable; // index to remember if it was stable: if a sinconfiguration is set stable, its periodicity key is stored in wasstable
@@ -98,7 +98,7 @@ private:
     void spinfromq (int n1,int n2, int n3,Vector & qvector, Vector & nettom,Vector & momentq0, Vector & phi);
 
 
-    spincf & operator + (const spincf & op2); // addition    
+    spincf operator + (const spincf & op2); // addition    
     spincf & operator += (const spincf & op2); // addition    
     spincf operator * (const double factor); // multiplication with constant
     spincf & operator *= (const double factor); 

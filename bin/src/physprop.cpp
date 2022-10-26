@@ -516,7 +516,7 @@ int physproperties::read(int verbose, par & inputpars,char * readprefix)
 // read mabc[1-3] convert to ijk
 
 found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
@@ -550,7 +550,7 @@ found=0;while(found==0){
 //	      {fprintf(fin,"%4.4g ",myround(totalJ(i1)));}
 //	      fprintf(fin,"\n");
 found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
@@ -589,7 +589,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
 //	    }
  //  fprintf (fin,"\n");
   found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
@@ -646,7 +646,7 @@ found=0;while(found==0){ i=0;
 //    {fprintf (fin, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
 //    } fprintf(fin,"\n");
 found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
@@ -670,7 +670,7 @@ found=0;while(found==0){
 //    {fprintf (fin, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
 //    } fprintf(fin,"\n");
 found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
@@ -694,7 +694,7 @@ found=0;while(found==0){
   //  {fprintf (fin, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
    // } fprintf(fin,"\n");
 found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
@@ -719,7 +719,7 @@ found=0;while(found==0){
    //         myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
 //    fprintf(fin,"0 = ok\n");sps.print(fin);fprintf(fin,"\n");
 found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    sps.load(fin);
@@ -744,7 +744,7 @@ found=0;while(found==0){
   //         myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
 //   fprintf(fin,"0 = ok\n");mf.print(fin);fprintf(fin,"\n");
 found=0;while(found==0){ 
- while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+ while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
    if (feof(fin)!=0) {fclose(fin);return 1;}
     //x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
    mf.load(fin);

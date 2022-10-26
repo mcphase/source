@@ -428,15 +428,22 @@ EOF
 print STDOUT "press enter to generate mcdiff.in file, too\n";
 <STDIN>;
 print " Please enter the magnetic supercell dimension na nb nc and the propagation vector (h,k,l):\n";
-print " na (>=1)?\n";$na=<STDIN>;$na=~s/\n//;
-print " nb (>=1) ?\n";$nb=<STDIN>;$nb=~s/\n//;
-print " nc (>=1) ?\n";$nc=<STDIN>;$nc=~s/\n//;
-print " h ?\n";$h=<STDIN>;$h=~s/\n//;
-print " k ?\n";$k=<STDIN>;$k=~s/\n//;
-print " l ?\n";$l=<STDIN>;$l=~s/\n//;
+print " na (>=1)? (1)\n";$ans = <STDIN>; $ans =~ s/[\R\n\r]*//g;  
+        if($ans=~/[yYtT]?/) {  $na = 1;        } else { $na = $ans;}
+print " nb (>=1) ? (1)\n";$ans = <STDIN>; $ans =~ s/[\R\n\r]*//g;  
+         if($ans=~/[yYtT]?/) {  $nb = 1;        } else { $nb = $ans;}
+print " nc (>=1) ? (1) \n";$ans = <STDIN>; $ans =~ s/[\R\n\r]*//g;  
+         if($ans=~/[yYtT]?/) {  $nc = 1;        } else { $nc = $ans;}
+print " h ? (0)\n";$ans = <STDIN>; $ans =~ s/[\R\n\r]*//g;  
+         if($ans=~/[yYtT]?/) {  $h = 0;        } else { $h = $ans;}
+print " k ? (0)\n";$ans = <STDIN>; $ans =~ s/[\R\n\r]*//g;  
+         if($ans=~/[yYtT]?/) {  $k = 0;        } else { $k = $ans;}
+print " l ? (0)\n";$ans = <STDIN>; $ans =~ s/[\R\n\r]*//g;  
+         if($ans=~/[yYtT]?/) {  $l = 0;        } else { $l = $ans;}
 
 copy("mcphas_magnetic_atoms.j","mcphas.j");
 system ("spinsfromq $na $nb $nc $h $k $l > results/mcphas.mf");
+#print "spinsfromq $na $nb $nc $h $k $l > results/mcphas.mf\n";
 #system ("fact 1 0 powdercell2j.sps");
 #system ("spins 0 0 0 0 powdercell2j.sps > powdercell2j.spo");
 #system ("javaview results/spins.jvx");

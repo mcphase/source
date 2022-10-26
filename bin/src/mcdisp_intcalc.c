@@ -241,8 +241,8 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
  double intensity=1.2; 
  double ki,kf;
  complex <double> sumS;
- complex <double> chileft;
- complex <double> chileftbey;
+ //complex <double> chileft;
+ //complex <double> chileftbey;
  Vector qijk(1,3);
  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
@@ -264,7 +264,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
 
 
  // Added code to re-use previously calculated values of sqrt(gamma)*U and conj(U)*conj(sqrt(gamma)). mdl 110705
- int maxb=-1,bval,/*ncel=-1,*/nval; complex<double> defval(-0.1,0.), tval; md.ncel=-1;
+ int maxb=-1,bval,/*ncel=-1,*/nval; complex<double> defval(-0.1,0.); md.ncel=-1;// int tval;
  for(i2=1;i2<=ini.mf.na();++i2) for(j2=1;j2<=ini.mf.nb();++j2) for(k2=1;k2<=ini.mf.nc();++k2) { 
    bval=md.baseindex_max(i2,j2,k2); if(bval>maxb) maxb=bval; 
    nval=md.in(i2,j2,k2); if(nval>md.ncel) md.ncel=nval; } md.ncel++;
@@ -368,7 +368,7 @@ int ssm1,in1,in2;
  }}}
 
 
-  complex<double> im(0,1.0);
+  //complex<double> im(0,1.0);
 
  // determine dsigma in barns per cryst unit cell !
  //divide by number of crystallographic unit cells  (ini.mf.n()) in magnetic unit cell

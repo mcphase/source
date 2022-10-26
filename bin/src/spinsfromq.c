@@ -20,17 +20,17 @@ printf("#*****************************************************\n");
 
 // check command line
   if (argc < 6)
-    { printf (" program spinsfromq - create spinconfiguration from q vector\n \
-                use as: spinsfromq [-m f1 f2 f3 ...] n1 n2 n3 h k l [h2 k2 l2 [h3 k3 l3]]\n \
-		n1 n2 n3 .... periodicity of supercell\n \
-		h k l ....... components of qvector\n \
-                options:\n \
-                -m f1 f2 f3 ...fnofcomponents: multiply spin components by f1 f2 f3 ... fnofcomponents\n \
-      formulas: M(r)=(f1*M1,f2*M2,f3*M3,..., fnofcomponents * Mnofcomponents)*cos(Q.r)    ...for single q\n \
-                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2*(0 1 0)*cos(Q2.r) ...for double q\n \
-                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2* (0 1 0)*cos(Q2.r)+f3*M3*(0 0 1)*cos(Q3.r) ...for triple q\n \
-      M1,M2,M3 are determined by applying an molecular field with equal components and increasing this \n \
-      field until the total length of the moment exceeds a treshold value. \n \
+    { printf ("# program spinsfromq - create spinconfiguration from q vector\n \
+#                use as: spinsfromq [-m f1 f2 f3 ...] n1 n2 n3 h k l [h2 k2 l2 [h3 k3 l3]]\n \
+#		n1 n2 n3 .... periodicity of supercell\n \
+#		h k l ....... components of qvector\n \
+#                options:\n \
+#                -m f1 f2 f3 ...fnofcomponents: multiply spin components by f1 f2 f3 ... fnofcomponents\n \
+#      formulas: M(r)=(f1*M1,f2*M2,f3*M3,..., fnofcomponents * Mnofcomponents)*cos(Q.r)    ...for single q\n \
+#                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2*(0 1 0)*cos(Q2.r) ...for double q\n \
+#                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2* (0 1 0)*cos(Q2.r)+f3*M3*(0 0 1)*cos(Q3.r) ...for triple q\n \
+#      M1,M2,M3 are determined by applying an molecular field with equal components and increasing this \n \
+#      field until the total length of the moment exceeds a treshold value. \n \
 ");
       exit (1);
     }
@@ -148,6 +148,8 @@ printf("#*****************************************************\n");
  
   inputpars.savelattice(stdout);
   inputpars.saveatoms(stdout);
+  fprintf(stdout,"0 0   0    0 0 0  %i %i  %i #created by ",savspin.n(),savspin.nofatoms,savspin.nofcomponents);
+  for(i=0;i<argc;++i)fprintf(stdout,"%s ",argv[i]);fprintf(stdout,"\n");
   savspin.print(stdout);
   printf("\n");
 
