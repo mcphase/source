@@ -145,7 +145,7 @@ inline char *gconvert (double value,int ndigit,int,char *buf)
 //-----------------------------------------------------------------------------//
 
 // absolute value for long
-#inline long abs (long x){return(x<0)?-x:x;}
+// inline long abs (long x){return(x<0)?-x:x;}
 #else 
 #include <cfloat>
 #include <climits>

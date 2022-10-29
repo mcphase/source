@@ -597,14 +597,15 @@ unless($tabout){printneighbourlist($h,$l,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn
 
 
  endprint($h,$l);   
-if($cfph==1){
+if($cfph!=0){
 # for cf phonon interaction recreate makenn.j
 my ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
  { # run pointc to create derivatives of Blm from pointcharge model for magnetic atoms
   system("pointc -d ".$sipf_file[$nnn]." results/makenn.a$nnn.pc > results/makenn.a$nnn.sipf");
   $sipf_file[$nnn]="results/makenn.a$nnn.sipf";
-  copy("results/pointc.dBlm","results/makenn.a$nnn.dBlm");
+  if($cfph==2){copy("results/pointc.dLlm","results/makenn.a$nnn.dLlm");}
+  if($cfph==3){copy("results/pointc.dBlm","results/makenn.a$nnn.dBlm");}
  }
 for($nnn=1;$nnn<=$nofatoms;++$nnn){$nofneighbours[$nnn]=0;}
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
@@ -624,7 +625,8 @@ unless (open(Fin,"results/makenn.a$nnn.pc")){die "cannot open file results/maken
 close Fin;
   ++$nofn;$ni[$nofn]=$nph[$nnn];$ni[0]=$nofn;
   $nofn=0;
-  unless (open(Fin,"results/makenn.a$nnn.dBlm")){die "cannot open file results/makenn.a$nnn.dBlm\n";}
+  if($cfph==2){unless (open(Fin,"results/makenn.a$nnn.dLlm")){die "cannot open file results/makenn.a$nnn.dLlm\n";}}
+  if($cfph==3){unless (open(Fin,"results/makenn.a$nnn.dBlm")){die "cannot open file results/makenn.a$nnn.dBlm\n";}}
   while(<Fin>){next if /^\s*#/;
                    my @numbers=split(" ",$_); 
                    if($#numbers>=4)
@@ -647,8 +649,10 @@ close Fin;
   #                  =-1/2sumij_alphabeta  Ialpha Jalphabeta Ibeta
   # note: the factor 1/2 comes from the fact, that the pairs are counted twice in the last expression 
   # i.e. J12=0 J13=0 J41=-2 dB22s/dux J14=0 J51=-2 dB21s/dux J15=0 ...
-  # 5+9+13=27 ... 27x3=81  5+81=86
-  for($i=6;$i<=86;++$i){$outstring.= " ".(-$numbers[$i]);$outstringp.= " ".(-$numbers[$i]);}
+  # so1ion 5+9+13=27 ... 27x3=81  5+81=86
+  # ic1ion 8+9+13=30 ... 27x3=81  8+81=89
+  $soff=0;if($cfph==2){$off=3;}
+  for($i=6+$soff;$i<=86+$soff;++$i){$outstring.= " ".(-$numbers[$i]);$outstringp.= " ".(-$numbers[$i]);}
   $outstring.= "\n";
   $outstringp.= "\n";
    $ph[$nnn].=$outstring;
@@ -664,11 +668,20 @@ for($nnn=1;$nnn<=$nofatoms;++$nnn)
   print $l ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".$z[$nnn]." nofneighbours=".$nofneighbours[$nnn]." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
   print $l ("# crystal field phonon interaction parameters from pointcharge calculation\n");
   print $l ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
+  if($cfph==2){
+  print $l ("#! symmetricexchange=0 indexexchange= 1,7 2,7 3,7 1,8 2,8 3,8 1,9 2,9 3,9 1,10 2,10 3,10 1,11 2,11 3,11 ");
+  #O4m
+  print $l (" 1,19 2,19 3,19 1,20 2,20 3,20 1,21 2,21 3,21 1,22 2,22 3,22 1,23 2,23 3,23 1,24 2,24 3,24 1,25 2,25 3,25 1,26 2,26 3,26 1,27 2,27 3,27 ");
+  #O6m
+  print $l (" 1,39 2,39 3,39 1,40 2,40 3,40 1,41 2,41 3,41 1,42 2,42 3,42 1,43 2,43 3,43 1,44 2,44 3,44 1,45 2,45 3,45 1,46 2,46 3,46 1,47 2,47 3,47 1,48 2,48 3,48 1,49 2,49 3,49 1,50 2,50 3,50 1,51 2,51 3,51 \n");
+              }
+  if($cfph==3){
   print $l ("#! symmetricexchange=0 indexexchange= 1,4 2,4 3,4 1,5 2,5 3,5 1,6 2,6 3,6 1,7 2,7 3,7 1,8 2,8 3,8 ");
   #O4m
   print $l (" 1,16 2,16 3,16 1,17 2,17 3,17 1,18 2,18 3,18 1,19 2,19 3,19 1,20 2,20 3,20 1,21 2,21 3,21 1,22 2,22 3,22 1,23 2,23 3,23 1,24 2,24 3,24 ");
   #O6m
   print $l (" 1,36 2,36 3,36 1,37 2,37 3,37 1,38 2,38 3,38 1,39 2,39 3,39 1,40 2,40 3,40 1,41 2,41 3,41 1,42 2,42 3,42 1,43 2,43 3,43 1,44 2,44 3,44 1,45 2,45 3,45 1,46 2,46 3,46 1,47 2,47 3,47 1,48 2,48 3,48 \n");
+              }
 # here we should enter the cf- phonon interactions for the MODULE=phonon oscillators   
 #  1) calculate  number of neighbours (only the magnetic atoms) 
 #  2) fill values from results/makenn.a$nnn.dBlm  [all done above for magnetic atoms and filled in here]
@@ -679,11 +692,20 @@ for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
   print $l ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".($z[$nnn]+0.1/$c)." nofneighbours=".($nofneighbours[$nnn]+1)." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
   print $l ("# crystal field phonon interaction parameters from pointcharge calculation\n");
   print $l ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
+  if($cfph==2){
+  print $l ("#! symmetricexchange=0 indexexchange= 7,1 7,2 7,3 8,1 8,2 8,3 9,1 9,2 9,3 10,1 10,2 10,3 11,1 11,2 11,3 ");
+  # O4m
+  print $l (" 19,1 19,2 19,3 20,1 20,2 20,3 21,1 21,2 21,3 22,1 22,2 22,3 23,1 23,2 23,3 24,1 24,2 24,3 25,1 25,2 25,3 26,1 26,2 26,3 27,1 27,2 27,3 ");
+  # O6m
+  print $l (" 39,1 39,2 39,3 40,1 40,2 40,3 41,1 41,2 41,3 42,1 42,2 42,3 43,1 43,2 43,3 44,1 44,2 44,3 45,1 45,2 45,3 46,1 46,2 46,3 47,1 47,2 47,3 48,1 48,2 48,3 49,1 49,2 49,3 50,1 50,2 50,3 51,1 51,2 51,3 \n"); 
+               }
+  if($cfph==3){
   print $l ("#! symmetricexchange=0 indexexchange= 4,1 4,2 4,3 5,1 5,2 5,3 6,1 6,2 6,3 7,1 7,2 7,3 8,1 8,2 8,3 ");
   # O4m
   print $l (" 16,1 16,2 16,3 17,1 17,2 17,3 18,1 18,2 18,3 19,1 19,2 19,3 20,1 20,2 20,3 21,1 21,2 21,3 22,1 22,2 22,3 23,1 23,2 23,3 24,1 24,2 24,3 ");
   # O6m
   print $l (" 36,1 36,2 36,3 37,1 37,2 37,3 38,1 38,2 38,3 39,1 39,2 39,3 40,1 40,2 40,3 41,1 41,2 41,3 42,1 42,2 42,3 43,1 43,2 43,3 44,1 44,2 44,3 45,1 45,2 45,3 46,1 46,2 46,3 47,1 47,2 47,3 48,1 48,2 48,3 \n"); 
+               }
   # here come the cf-phonon interactions for the MODULE=so1ion magnetic ions 
   # open pointcharge file 
   print $l $ph[$nnn];
@@ -960,12 +982,16 @@ sub getlattice {
                                     ($gJ[$n])=extractfromfile("GJ",$sipffilename); 
                                       unless(open(Fin,$sipffilename)) {die"Error opening $sipffilename\n";}
                                      $line=<Fin>;close Fin;($module[$n])=extractstring("MODULE",$line);
-                                    if($module[$n]=~/ic1ion/&&$classdip){die "Error makenn: for ic1ion module the classical dipole interaction is not implemented - you can use rkky or kaneyoshi\n";}
-                                    if($module[$n]=~/icf1ion/&&$classdip){die "Error makenn: for icf1ion module the classical dipole interaction is not implemented - you can use rkky or kaneyoshi\n";}
-                                    if($module[$n]=~/phonon/&&$classdip){die "Error makenn: for phonon module the classical dipole cannot be calculated - use option -bvk\n";}
+                                    if($module[$n]=~/ic1ion/&&$classdip){die "Error makenn in $sipffilename: for ic1ion module the classical dipole interaction is not implemented - you can use rkky or kaneyoshi\n";}
+                                    if($module[$n]=~/icf1ion/&&$classdip){die "Error makenn in $sipffilename: for icf1ion module the classical dipole interaction is not implemented - you can use rkky or kaneyoshi\n";}
+                                    if($module[$n]=~/phonon/&&$classdip){die "Error makenn in $sipffilename: for phonon module the classical dipole cannot be calculated - use option -bvk\n";}
 
                                     if($cfph!=0){($magnetic)=extractfromfile("MAGNETIC",$sipffilename); 
-                                     if($magnetic!=0){unless($module[$n]=~/so1ion/){die "Error makenn:  ion $n in mcphas.j sipf=$sipffilename for option -cfph MODULE must be so1ion\n"; }
+                                     if($magnetic!=0){unless($module[$n]=~/so1ion/||$module[$n]=~/ic1ion/){die "Error makenn:  ion $n in mcphas.j sipf=$sipffilename for option -cfph magnetic MODULES must be so1ion or ic1ion\n"; }
+                                                      if($module[$n]=~/ic1ion/){unless($cfph==1||$cfph==2){die"Error makenn: for option -cfph mixing so1ion and ic1ion modules is not possible\n";}
+                                                                                $cfph=2;} # for ic1ion module set it to 2 
+                                                      if($module[$n]=~/so1ion/){unless($cfph==1||$cfph==3){die"Error makenn: for option -cfph mixing so1ion and ic1ion modules is not possible\n";}
+                                                                                $cfph=3;} # for so1ion module set it to 3 
                                                       ++$nofmagneticatoms;$nph[$nofmagneticatoms+$nofatoms]=$n;
                                                       $sipf_file[$nofmagneticatoms+$nofatoms]=$sipffilename;
                                                       $gJ[$nofmagneticatoms+$nofatoms]=$gJ[$n];
@@ -974,7 +1000,8 @@ sub getlattice {
                                                       $z[$nofmagneticatoms+$nofatoms]=$z[$n];
                                                       $charge[$nofmagneticatoms+$nofatoms]=$charge[$n];
                                                      }  }   
-                                   if ($bvk){clearMP($sipffilename);
+                                   if ($bvk){unless($module[$n]=~/phonon/){die "Error makenn in $sipffilename: option -bvk makes only sense for phonon module \n";}
+                                             clearMP($sipffilename);
                                              foreach(@sipf_file) {if(/$sipffilename/&&!$tabout){print "# $sipffilename found twice or more in mcphas.j - storing bvk parameters for ion $n in results/$sipffilename.$n \n";
                                                                                       copy($sipffilename,"results/$sipffilename.$n");
                                                                                       $sipffilename="results/".$sipffilename.".".$n;
@@ -1018,8 +1045,9 @@ sub printlattice {
       $text=$_;
       if ($nofatoms==0){($nofatoms)=extract("nofatoms",$_);
           
-            if($cfph==1&&$nofatoms!=0){$nofatomsnew=$nofatoms+$nofmagneticatoms;
-            $text="#! nofatoms= $nofatomsnew  nofcomponents=48  number of atoms in primitive unit cell/number of components of each spin\n";
+            if($cfph!=0&&$nofatoms!=0){$nofatomsnew=$nofatoms+$nofmagneticatoms;
+            if($cfph==2){$text="#! nofatoms= $nofatomsnew  nofcomponents=51  number of atoms in primitive unit cell/number of components of each spin\n";}
+            if($cfph==3){$text="#! nofatoms= $nofatomsnew  nofcomponents=48  number of atoms in primitive unit cell/number of components of each spin\n";}
                         }
             }
 # removed because iterative call of makenn will make fileheader longer
@@ -1113,7 +1141,6 @@ print $l1 "#--------------------------------------------------------------------
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
 
-  # if (($gJ[$ddd]==0)||($gJ==0)){unless($cfph==1){ die "error makenn. atoms with gJ=0 (intermediate coupling) not implemented\n";}}
   if (($classdip==1)||$bvk==1||($readtable>0&&$DM>0)||($readtable>0&&$Jp>0)) # here anisotropic interaction comes in
    {      print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components

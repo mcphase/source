@@ -14,7 +14,7 @@
 #include<ctime>
 #include "mcdisp.h"
 
-#define MAXNOFNUMBERSINLINE 2500
+#define MAXNOFNUMBERSINLINE 2700
 #define MAXNOFCHARINLINE 7024
 #define MAGFF_NOF_COEFF 9
 

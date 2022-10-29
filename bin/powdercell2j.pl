@@ -116,9 +116,38 @@ $i=0;
      print "For $_ atom the oxidation state is? \nPlease give the charge in units of elementary charge |e|; e.g. -2 or +1 or +3:\n";
      $charge=<STDIN>;$charge=~s/\n//;
      print " ... is it magnetic (1) or nonmagnetic (0) ? "; $magnetic=<STDIN>;$magnetic=~s/\n//;
-     if ($magnetic==0){$nofmagatoms[$i]=0;}
-     ++$i;
+     if ($magnetic==0){$nofmagatoms[$i]=0;
      print Fout1 << "EOF";
+#!MODULE=PHONON
+#<!--mcphase.sipf-->
+#IONTYPE=$_
+CHARGE=$charge
+MAGNETIC=$magnetic
+
+MODPAR1=1  #mass in(m0) !powdercell defaults to hydrogen mass=1 please insert correct value !!
+MODPAR2=0   # Kxx
+MODPAR3=0   # Kyy
+MODPAR4=0   # Kzz
+MODPAR5=0  # Kxy  in (meV)
+MODPAR6=0  # Kxz
+MODPAR7=0  # Kyz
+MODPAR8=0.4 # umax          maximum (cutoff) for displacement [a0=0.5219 A]
+MODPAR9=0   #                0       umax restriction in all directions
+            #                1,2,3   umax restriction in x y z direction only
+            #                4       umax restriction in x and y direction
+            #                5       umax restriction in x and z direction
+            #                6       umax restriction in y and z direction#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+
+EOF
+}
+else
+{print Fout1 << "EOF";
 #!MODULE=kramer
 #<!--mcphase.sipf-->
 #***************************************************************
@@ -159,6 +188,9 @@ GJ=2
 DWF=0
 
 EOF
+}
+     ++$i;
+
   unless (open (Fin, "scatteringlengths.txt")){die "\n error:unable to open $file\n";}
 
 $element=$_;
