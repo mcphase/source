@@ -92,19 +92,20 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   Vector h1(1,inputpars.nofcomponents),h1ext(1,3);h1ext=0;
  
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
+if(verbose==1){printf("determine saturation momentum running singleion calculations for different fields");}
 T=1.0;for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
       for (im=1;im<=inputpars.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
                             (*inputpars.jjj[l]).Icalc(Imom,T,h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
                             Imax(inputpars.nofcomponents*(l-1)+im)=Imom(im);
-                           //printf("Imax(%i)=%g\n",inputpars.nofcomponents*(l-1)+im,Imax(inputpars.nofcomponents*(l-1)+im));
+                           //if(verbose==1)printf("Imax(%i)=%g\n",inputpars.nofcomponents*(l-1)+im,Imax(inputpars.nofcomponents*(l-1)+im));
 			   }
       for (im=1;im<=3;++im){h1=0;h1ext=0;h1ext(im)=20; //just put some high field
                           (*inputpars.jjj[l]).mcalc(mmom,T,h1,h1ext,(*inputpars.jjj[l]).Icalc_parstorage);
                             mmax(3*(l-1)+im)=mmom(im);
-                           //printf("mmax(%i)=%g\n",3*(l-1)+im,mmax(3*(l-1)+im));
-			   }
-                                  }
-
+                           //if(verbose==1)printf("mmax(%i)=%g ",3*(l-1)+im,mmax(3*(l-1)+im));
+			   }      }
+if(verbose==1)printf("... done\n");
+                            
 
 T=0.0;h=0;
 // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)

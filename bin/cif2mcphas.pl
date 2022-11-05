@@ -883,7 +883,7 @@ print FOUT "#! r1b=   0 r2b= 1 r3b=  0   primitive lattice vectors [a][b][c]\n";
 print FOUT "#! r1c=   0 r2c= 0 r3c=  1\n";
 print FOUT "#\n";
 print FOUT "#! nofatoms= $nall  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
-$aid = 1;
+$aid = 1;$nmag=0;
 for $si (0..$sa-1) { 
   for $sj (0..$sb-1) { 
     for $sk (0..$sc-1) {
@@ -928,7 +928,7 @@ print FOUT "#! r1b=   0 r2b= 1 r3b=  0   primitive lattice vectors [a][b][c]\n";
 print FOUT "#! r1c=   0 r2c= 0 r3c=  1\n";
 print FOUT "#\n";
 print FOUT "#! nofatoms= $nmag  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin\n";
-$aid = 1;
+$aid = 1;$nnonmag = 0;
 for $si (0..$sa-1) { 
   for $sj (0..$sb-1) { 
     for $sk (0..$sc-1) {
@@ -1227,25 +1227,6 @@ for $si (0..$sa-1) {
     } 
   } 
 }
-# print STDOUT "press enter to generate mcdiff.in file, too\n";
-# <STDIN>;
-# print " Please enter the magnetic supercell dimension na nb nc and the propagation vector (h,k,l):\n";
-# print " na (>=1)?\n";$na=<STDIN>;$na=~s/\n//;
-# print " nb (>=1) ?\n";$nb=<STDIN>;$nb=~s/\n//;
-# print " nc (>=1) ?\n";$nc=<STDIN>;$nc=~s/\n//;
-# print " h ?\n";$h=<STDIN>;$h=~s/\n//;
-# print " k ?\n";$k=<STDIN>;$k=~s/\n//;
-# print " l ?\n";$l=<STDIN>;$l=~s/\n//;
-# 
-# copy("mcphas_magnetic_atoms.j","mcphas.j");
-# system ("spinsfromq $na $nb $nc $h $k $l > results/mcphas.mf");
-# #system ("fact 1 0 powdercell2j.sps");
-# #system ("spins 0 0 0 0 powdercell2j.sps > powdercell2j.spo");
-# #system ("javaview results/spins.jvx");
-# system("display_densities -M 1 0 0 0 > results/powdercell2j.spo");
-# mydel  ("results/powdercell2j.spo");
-# mydel  ("results/mcphas.mf");
-# mydel ("scatteringlengths.txt");
 print FOUT << "EOF";
 #
 #
@@ -1256,6 +1237,39 @@ print FOUT << "EOF";
 #       (file spins.out) or charges (file charges.out)
 # -----------------------------------------------------------------------------
 EOF
+if($nmag>0){
+$na=1;$nb=1;$nc=1;$h=0;$k=0;$l=0;
+if($interact){
+ print STDOUT "Generating mcdiff.in file with possible magnetic structure -\n";
+ print " Please enter the magnetic supercell dimension na nb nc and the propagation vector (h,k,l):\n";
+ print " na (>=1) ? (1)\n";$ans = <>; $ans =~ s/[\R\n\r]*//g;if(!($ans eq "")) { $na=$ans;}
+ print " nb (>=1) ? (1)\n";$ans = <>; $ans =~ s/[\R\n\r]*//g;if(!($ans eq "")) { $nb=$ans;}
+ print " nc (>=1) ? (1)\n";$ans = <>; $ans =~ s/[\R\n\r]*//g;if(!($ans eq "")) { $nc=$ans;}
+ print " h ? (0)\n";$ans = <>; $ans =~ s/[\R\n\r]*//g;if(!($ans eq "")) { $h=$ans;}
+ print " k ? (0)\n";$ans = <>; $ans =~ s/[\R\n\r]*//g;if(!($ans eq "")) { $k=$ans;}
+ print " l ? (0)\n";$ans = <>; $ans =~ s/[\R\n\r]*//g;if(!($ans eq "")) { $l=$ans;}
+ }
+ copy("mcphas_magnetic_atoms.j","mcphas.j");
+ system ("spinsfromq $na $nb $nc $h $k $l > results/mcphas.tst");
+ system ("spins -f results/mcphas.tst 0");
+
+unless(open(FIN, "results/spins.out")){die "Error cif2mcphas reading results/spins.out\n";}
+while (<FIN>) { last if ($_ =~/%SECTION 3/)   
+              }
+while(<FIN>){print FOUT $_;}
+close FIN;
+}else
+{
+print FOUT << "EOF";
+# Lattice Constants (A)
+#! a= $a b= $b c= $c  alpha= $alpha beta= $beta gamma= $gamma
+#! r1a=   1 r2a=   0 r3a=   0
+#! r1b=   0 r2b=   1 r3b=   0   primitive lattice vectors [a][b][c]
+#! r1c=   0 r2c=   0 r3c=   1
+#*****************
+#!T=1 K Ha=0 T Hb= 0 T Hc= 1 T: nr1=1 nr2=1 nr3=1 nat=0 atoms in primitive magnetic unit cell:
+EOF
+}
 if($debug==0) { close FOUT; }
 
 # Creates a results folder for users

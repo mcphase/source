@@ -370,7 +370,7 @@ void jjjpar::save_sipf(FILE * fout)
            (*clusterpars).save(clustsavfile);
            (*clusterpars).save_sipfs("results/_");}
    default: // in case of external single ion module just save a copy of the input file 
-             char *token;double dummy;
+             char *token;//double dummy;
            cfin=fopen_errchk(sipffilename,"rb");
            while(feof(cfin)==false){fgets(instr, MAXNOFCHARINLINE, cfin);
                       // strip /r (dos line feed) from line if necessary
@@ -554,8 +554,13 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   if (diagonalexchange==2 && indexexchangenum>0)  {
      double dt=0.; int ii,jj;
      for(i1=1; i1<=indexexchangenum; i1++) {
-        ii=(int)exchangeindices(i1,1); jj=(int)exchangeindices(i1,2); jij[i](ii,jj) = nn[i1+3]; 
-        if(i==paranz) { if(ii!=jj) diagonalexchange=0; }} if(i==paranz&&diagonalexchange!=0) diagonalexchange=1;
+        ii=(int)exchangeindices(i1,1); jj=(int)exchangeindices(i1,2); 
+        if(ii<1||ii>nofcomponents||jj>nofcomponents||jj<1)
+{fprintf(stderr,"Warning atom %i indexchange index %i,%i > nofcomponents=%i - ignoring interaction col %i = %g meV\n ",i,ii,jj,nofcomponents,i1,nn[i1+3]);}
+else
+{
+         jij[i](ii,jj) = nn[i1+3]; 
+        if(i==paranz) { if(ii!=jj) diagonalexchange=0; }}} if(i==paranz&&diagonalexchange!=0) diagonalexchange=1;
      if (symmetricexchange==1) {
         for(i1=1; i1<=nofcomponents; i1++) for(j1=i1+1; j1<=nofcomponents; j1++) if(i1!=j1) {
            dt=0.; if(jij[i](j1,i1)!=0) dt=jij[i](j1,i1); else if(jij[i](i1,j1)!=0) dt=jij[i](i1,j1);
