@@ -68,12 +68,26 @@ private:
      
    // take vector dd and calculate distance nearest atom in spinconfiguration
    double nndist(float * x, float * y, float * z,Vector & abc,Matrix & p,Vector &dd);
+    Vector pos(int i, int j, int k, int l,Vector & abc,Matrix & r,float * x,float *y,float*z);
+                      //returns position of atom l at lattice site (i j k) (Angstrom)
+                      // as vector components in Euclidean ijk coordinate system
+                      // defined by  j||b, k||(a x b) and i normal to k and j
+  
  public:
     Vector moment(int i,int j,int k,int l); // returns moment of atom l (1,nofcomponents)
 
-    Vector pos(int i, int j, int k, int l,Vector & abc,Matrix & r,float * x,float *y,float*z);
     Vector pos(int i, int j, int k, int l,cryststruct & cs);
                       //returns position of atom l at lattice site (i j k) (Angstrom)
+                      // as vector components in Euclidean ijk coordinate system
+                      // defined by  j||b, k||(a x b) and i normal to k and j
+
+    Vector pos_dabc(int i, int j, int k, int l,cryststruct & cs);
+                      //returns position of atom l at lattice site (i j k) 
+                      // as vector components  refering to lattice vectors abc
+    Vector pos_dr123 (int i, int j, int k, int l,cryststruct & cs);
+                      //returns position of atom l at lattice site (i j k) as
+                      // vector components refering to primitive lattice vectors r1 r2 r3
+
 
     int  load(FILE * fin_coq);	// load spincf from file returns 1 on success and 0 on failure
  // array of spins 

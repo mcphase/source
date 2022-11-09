@@ -265,17 +265,20 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
   if (strcmp(argv[1],"-f")==0) 
  { inputpars.savelattice(fout);
-   if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
   fprintf(fout,"#! %s \n",outstr);
+   if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
   fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
   fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ia> <Ib> <Ic> [created by program spins]\n");
   for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
   {for(ii=1;ii<=inputpars.nofatoms;++ii)
    {// output the positions
-    dd3=savmf.pos(i,j,k,ii, cs);
-    dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
+    dd3=savmf.pos_dabc(i,j,k,ii, cs);
+   //returns position dd3 as components with respect to lattice a b c
+   
+   // dd0 is position as components with respect to primitive crystallographic unit cell
+    dd0=savmf.pos_dr123(i,j,k,ii, cs);
     fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
-            (*inputpars.jjj[ii]).sipffilename,dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
+            (*inputpars.jjj[ii]).sipffilename,dd3(1),dd3(2),dd3(3),dd0(1),dd0(2),dd0(3));
     //output the "magnetic" moment if possible ... actually it outputs Ia Ib Ic 
     for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,savmf.m(i,j,k)(inputpars.nofcomponents*(ii-1)+nt)));}      
     fprintf(fout,"\n");
@@ -414,10 +417,10 @@ switch(arrow)
 // output atoms and moments in primitive unit cell to fout  ------------------------------------
 if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
     for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).nofatoms;++nt)
-     {dd3=spinconf.pos(i,j,k,ii4, cs4);
-      dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
+     {dd3=spinconf.pos_dabc(i,j,k,ii4, cs4);
+      dd0=spinconf.pos_dr123(i,j,k,ii4, cs4);
       fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
-            cs4.sipffilenames[ii4],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
+            cs4.sipffilenames[ii4],dd3(1),dd3(2),dd3(3),dd0(1),dd0(2),dd0(3));
             fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(1+3*(ii4-1))));
             fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(2+3*(ii4-1))));
             fprintf(fout," %4.4f\n",myround(1e-5,spinconf.m(i,j,k)(3+3*(ii4-1))));
@@ -434,8 +437,11 @@ else{   ++ii4;
      }
 
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
+    Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
+    dd3=abc_in_ijk.Inverse()*dd0;       
+
     fprintf(fout,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
-            cs.sipffilenames[ii],dd3(1)/cs.abc(1),dd3(2)/cs.abc(2),dd3(3)/cs.abc(3),dd0(1),dd0(2),dd0(3));
+            cs.sipffilenames[ii],dd3(1),dd3(2),dd3(3),dd0(1),dd0(2),dd0(3));
     //ouput the magnetic moment if possible
     if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
    {           for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}

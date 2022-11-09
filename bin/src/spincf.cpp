@@ -346,12 +346,12 @@ double spincf::nndist(float * x, float * y, float * z,Vector & abc,Matrix & p,Ve
 return mindist;
 }
 
-Vector spincf::pos(int i, int j, int k, int l,cryststruct & cs)
-{return pos(i,j,k,l,cs.abc,cs.r,cs.x,cs.y,cs.z);
-}
 Vector spincf::pos(int i, int j, int k, int l,Vector & abc,Matrix & r,float * x,float *y,float*z)
-{//returns position of atom l at lattice site (i j k) (Angstrom)
+{//returns position 
+ // of atom l at lattice site (i j k) (Angstrom) as vector components in Euclidean ijk coordinate system
+ // where i j k are defined by  j||b, k||(a x b) and i normal to k and j
 Vector dd(1,3),dd0(1,3);
+if(l>nofatoms){fprintf(stderr,"Error spincf.cpp::pos - index l > nofatoms\n");exit(1);}
   Matrix p(1,3,1,3);
   calc_prim_mag_unitcell(p,abc,r);
   Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,abc);
@@ -362,7 +362,40 @@ Vector dd(1,3),dd0(1,3);
          dd+=p.Column(1)*((double)(i-1)/nofa)+p.Column(2)*((double)(j-1)/nofb)+p.Column(3)*((double)(k-1)/nofc);
 return dd;
 }
+Vector spincf::pos(int i, int j, int k, int l,cryststruct & cs)
+{if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos nofatoms not equal to cs.nofatoms\n");exit(1);}
+return pos(i,j,k,l,cs.abc,cs.r,cs.x,cs.y,cs.z);
 
+}
+    
+Vector spincf::pos_dabc(int i, int j, int k, int l,cryststruct & cs)
+                      //returns position of atom l at lattice site (i j k) 
+                      // as vector components  refering to lattice vectors abc
+{Vector dd(1,3),dd0(1,3);
+ if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos_dabc nofatoms not equal to cs.nofatoms\n");exit(1);}
+        dd0=pos(i,j,k,l,cs.abc,cs.r,cs.x,cs.y,cs.z);
+         Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
+         dd=abc_in_ijk.Inverse()*dd0;
+ return dd;
+}    
+Vector spincf::pos_dr123 (int i, int j, int k, int l,cryststruct & cs)
+                      //returns position of atom l at lattice site (i j k) as
+                      // vector components refering to primitive lattice vectors r1 r2 r3
+{Vector dd(1,3),dd0(1,3);
+  Matrix p(1,3,1,3);
+if(l>nofatoms){fprintf(stderr,"Error spincf.cpp::pos - index l > nofatoms\n");exit(1);}
+if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos_dr123 nofatoms not equal to cs.nofatoms\n");exit(1);}
+
+  calc_prim_mag_unitcell(p,cs.abc,cs.r);
+  Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
+         dd0(1)=cs.x[l];
+         dd0(2)=cs.y[l];
+         dd0(3)=cs.z[l];
+         dd=abc_in_ijk*dd0;
+         dd+=p.Column(1)*((double)(i-1)/nofa)+p.Column(2)*((double)(j-1)/nofb)+p.Column(3)*((double)(k-1)/nofc);
+         dd0=p.Inverse()*dd;dd0(1)*=nofa;dd0(2)*=nofb;dd0(3)*=nofc;
+return dd0;
+}
 /**************************************************************************/
 
 //zuweisung
