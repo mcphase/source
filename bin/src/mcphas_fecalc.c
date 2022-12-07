@@ -16,7 +16,7 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
     u		mangetic energy[meV]
 
  */
- double fe; // free energy
+ double fe,dE; // free energy
  Vector diff(1,inputpars.nofcomponents*inputpars.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
  Vector meanfield(1,inputpars.nofcomponents),moment(1,inputpars.nofcomponents),d1(1,inputpars.nofcomponents);
  char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
@@ -126,7 +126,6 @@ if (ini.displayall==1)   // display spincf if button is pressed
      sleep(200);
  }
 
-
 // loop for selfconsistency
 for (r=1;sta>ini.maxstamf;++r)
 {if (r>ini.maxnofmfloops)
@@ -148,7 +147,7 @@ for (r=1;sta>ini.maxstamf;++r)
      return 2*FEMIN_INI+1;}
 
  //1. calculate mf from sps (and calculate sta)
- sta=0;
+ sta=0;dE=0;
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {mf.mf(i,j,k)=0;
   for (i1=1;i1<=sps.na();++i1){if (i1>=i){di=i1-i;}else{di=sps.na()-i+i1;}
@@ -173,17 +172,21 @@ for (r=1;sta>ini.maxstamf;++r)
      }
     }}}
   diff=mf.mf(i,j,k)-mfold.mf(i,j,k);sta+=diff*diff;
+ // dE-=0.5*diff*(const Vector&)sps.m(i,j,k); // here we tried to calculate dE - energy difference for the step
   diff*=stepratio;mf.mf(i,j,k)=mfold.mf(i,j,k)+diff;//step gently ... i.e. scale change of MF with stepratio
   }}}
   mfold=mf;
   sta=sqrt(sta/sps.n()/inputpars.nofatoms);
-  //printf("sta=%g\n",sta);
   bigstep=fmodf(ini.bigstep-0.0001,1.0);
   if (ini.bigstep>1.0){smallstep=bigstep/(ini.bigstep-bigstep);}else{smallstep=bigstep/5;}
-  if (r==1) {stepratio=smallstep;} //in first loop initialize stepratio to smallstep
+  if (r==1) {stepratio=smallstep;dE=0;} //in first loop initialize stepratio to smallstep
   if (staold<sta&&stepratio==bigstep){stepratio=smallstep;slowct=10;}//if sta increases then set stepratio to bigstep
   if (staold>sta&&stepratio<bigstep){--slowct;if (slowct<=0)stepratio=bigstep;} // at least for 10 cycles
   staold=sta;
+// dE/=(double)sps.n()*sps.nofatoms; //normalise to formula unit the energy difference for this step
+// if (dE>KB*T&&r>10&&stepratio<bigstep)printf("sta=%g dE=%g r=%i stepratio=%g spinschange=%g\n",sta,dE,r,stepratio,spinchange);
+// ---> printing this dE  yields the result, that dE is > KB*T always when the strucuture
+// is oscillating and finally diverges because of MAXSPINCHANGE reached.
 
 //2. calculate sps from mf
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)

@@ -44,7 +44,7 @@ $sta=0;
    while($line=<Fin>)
      {if ($line=~/^\s*#/) {}
        else{$line=~s/D/E/g;@numbers=split(" ",$line);$sta+=($average-$numbers[$col-1])*($average-$numbers[$col-1]);
-		$hx=int(($numbers[$col-1]-$min)/$step);
+		$hx=int(($numbers[$col-1]-$min-0.5*$step)/$step);
                 ++$histo[$hx];
             }
       }
@@ -56,8 +56,8 @@ $sta=0;
    print Fout "#{Histogram of column $col in file(s) @ARGV\n";
    print STDOUT "#{Histogram of column $col in file(s) @ARGV\n";
    for($hx=0;$hx<=int(($max-$min)/$step)+1;++$hx)
-   {print Fout (($hx+0.5)*$step+$min)."   ".($histo[$hx])."\n";
-    print STDOUT (($hx+0.5)*$step+$min)."   ".($histo[$hx])."\n";
+   {print Fout (($hx)*$step+$min)."   ".($histo[$hx])."\n";
+    print STDOUT (($hx)*$step+$min)."   ".($histo[$hx])."\n";
    } 
    print Fout "#! AVERAGE=$average (sum of squared deviations)/(number of points) STAPP=$sta\n";
    print STDOUT "#! AVERAGE=$average (sum of squared deviations)/(number of points) STAPP=$sta\n";
