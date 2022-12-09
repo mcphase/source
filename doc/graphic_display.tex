@@ -82,7 +82,7 @@ densities can be displayed.
 
 
 \begin{description} 
-\item [ display\_density\index{display\_density}  c$|$s$|$o$|$m$|$j [-p i j k$|$-div] [-S$|$-L$|$-M] mcphas.sipf
+\item [ display\_density\index{display\_density}  c$|$s$|$o$|$m$|$j \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack mcphas.sipf
  T Ha Hb Hc]
 \end{description} 
 \begin{verbatim}
@@ -173,8 +173,18 @@ the spin configuration
     is read and extracted from this file and printed on screen (stdout), nothing
  else is done. Insterad of temperature and magnetic field also the x y point coordinates
 in the phasediagram can be given.
-\item[display\_densities [-c$|$-s$|$-o$|$-m$|$-j] [-p i j k$|$-div] [-S$|$-L$|$-M] [-P] T Ha Hb Hc [h k l E]]
-\item[display\_densities [-c$|$-s$|$-o$|$-m$|$-j] [-p i j k$|$-div] [-S$|$-L$|$-M] [-P] x y]
+\item[ display\_densities -tMSL \lbrack -prefix 001 \rbrack\, T Ha Hb Hc]
+\item[ display\_densities -tHex \lbrack-prefix 001\rbrack T Ha Hb Hc]
+\item[ display\_densities -tI \lbrack-prefix 001\rbrack T Ha Hb Hc]
+ if used with -t... output to stdout a table with T Ha Hb Hc atom positions and
+for -tMSL 
+              magnetic moments $\langle Mx \rangle \langle My \rangle \langle Mz \rangle$, orbital moments and spin 
+              of each atom in the magnetic unitc cell , for 
+       -tHex  exchange fields and for 
+       -tI    with expectation values of interaction operators $\langle I \rangle$.
+
+\item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack T Ha Hb Hc [h k l E]]
+\item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack  x y]
  if used without a filename, the information is read from results/mcphas.* res
 ults/mcdisp.*
    output files and 3d graphical animations are created.
@@ -196,10 +206,14 @@ ults/mcdisp.*
          note, that in order to animate changes in the above quantities, the corresponding
          switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion
          modules have to be capable of calculating the corresponding observables.
-
-     example:
+ 
+         -prefix 001 ... use input file(s) results/001mc* instead of results/mc*
+ 
+   examples:
         display_densities -c 2 0 0 1
         ...calculates the charge density at T=2K and H=(0,0,1) Tesla
+        display_densities  -tI 2 0 0 1 
+        ... outputs a table with atomic positions and expectations values <I> 
 \end{verbatim}
 
 \begin{figure}[hb]%h=here, t=top, b=bottom, p=separate figure page

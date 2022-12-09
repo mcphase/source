@@ -3,7 +3,7 @@
 echo "#--------------------------------------------------------------"
 echo "# display_densities: graphic package to display chargedensities"
 echo "#--------------------------------------------------------------"
-echo "arguments as for spins:"
+echo "#arguments as for spins:"
 if test -f results/spins.jvx
  then
   rm results/spins.jvx

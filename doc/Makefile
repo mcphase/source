@@ -14,7 +14,7 @@
 
 all: manual.pdf  
 
-manual.aux: manual.tex $(wildcard *.bib) $(wildcard *.tex) ../bin/src/dos_fileman/readme.txt
+manual.aux: manual.tex $(wildcard *.bib) $(wildcard *.tex) 
 	sed -e 's/#define.*VERSION *"//;s/"//' ../version > version.tex
 	latex manual.tex
 	makeindex manual.idx

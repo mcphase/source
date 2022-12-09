@@ -153,12 +153,12 @@ of cp),
 
 \item [\prg cpso1ion 10 100 1 {[options]}: ] same as {\prg cpsingleion} but for output of program
 so1ion (no file.levels.cef required, takes values from so1ion.out) .
-\item[\prg cpic1ion 10 100 1 [options]:] same as {\prg cpsingleion} but for output of program
+\item[\prg cpic1ion 10 100 1 {[options]}:] same as {\prg cpsingleion} but for output of program
 ic1ion (no file.levels.cef required, takes values from ic1ion.out) .
-\item[\prg cpicf1ion 10 100 1 [options]:] same as {\prg cpsingleion} but for output of program
+\item[\prg cpicf1ion 10 100 1 {[options]}:] same as {\prg cpsingleion} but for output of program
 icf1ion (no file.levels.cef required, takes values from icf1ion.out) .
 					  
-\item [\prg epsdebye\index{epsdebye} Tmax dT Tdebye scale [d1 d2 datafile]:]	        
+\item [\prg epsdebye\index{epsdebye} Tmax dT Tdebye scale {[d1 d2 datafile]}:]	        
 		    calculates the phonon induced strain $\epsilon$ using the debye model
 		    according to the following formula:
 		    $   \epsilon=S*T*D(\Theta_{D}/T) $
@@ -490,7 +490,7 @@ given by th parametrisation in file.sipf.
           the CF parameters: e.g. $0 B20=0.21,B40=0.5 Pr3+
     if -o is omitted, the program prints the parameters to standard output.
   \end{verbatim}
-\item[\prg   setup\_jqfit\index{setup\_jqfit}[-h] [--help] h k l:] program to setup a fit of exchange parameters in order to reproduce an experimental propagation vector.
+\item[\prg   setup\_jqfit\index{setup\_jqfit}{[-h]} {[--help]} h k l:] program to setup a fit of exchange parameters in order to reproduce an experimental propagation vector.
 \begin{verbatim}
      -h          : print help message
       hkl        : Miller indices of propagation vector
@@ -578,7 +578,7 @@ program to setup{\prg mcdisp.mf} with information on meanfields
     - after running this program you can start mcdisp to do the calculation
       of dispersion of excitations or diffuse scattering
 \end{verbatim}
-\item[\prg   setup\_mcphasjforfit\index{setup\_mcphasjforfit}  [-h]:] program to setup a fit of exchange parameters by   creating mcphas.j.forfit from mcphas.j
+\item[\prg   setup\_mcphasjforfit\index{setup\_mcphasjforfit}  {[-h]}:] program to setup a fit of exchange parameters by   creating mcphas.j.forfit from mcphas.j
                     
 \begin{verbatim}
      -h          : print help message
@@ -719,7 +719,7 @@ by colyerr=sqrt(colxerr*colxerr+colyerr*colyerr)
 \item [\prg asincol\index{asincol} col const file:] calculates arcsine of a column arcsine(col) 
 \item [\prg atancol\index{atancol} col const file:] calculates arctangens of a column %%@
 arctan(col) 
-\item [\prg average\index{average} [option] n file:] program average  used  to 
+\item [\prg average\index{average} {[option]} n file:] program average  used  to 
  reduce the amount of data in a datafile by deleting close data points.
  The program takes sets of n lines in file and  outputs one line instead
 of the n lines. By default the the data line in the middle of the n line
@@ -752,7 +752,7 @@ used directly for generating useful input for fitting in {\prg simannfit}\index{
                 all columns and rows are compared and a standard deviation
                 is calculated according to sum\_i (file1\_i - file2\_i)\^2
                 this standard deviation is output to stdout, e.g. as sta=143.3
-\item [\prg convolute\index{convolute} c1 c2 file cx cy convfuncfile [d1 d2 datafile]:] %%@
+\item [\prg convolute\index{convolute} c1 c2 file cx cy convfuncfile {[d1 d2 datafile]}:] %%@
 convolutes data given as column c1 vs column
                        c2 in file (data pairs $x_i,y_i$) with the convolution function given in %%@
 column cx vs cy
@@ -786,7 +786,7 @@ prints the removed lines to screen
 \item [\prg delnthline n file]  remove every nth line (n$>$2) in file
 \item [\prg dif\index{dif} colx coly n *.*:] used to calculate d(coly)/d(colx) with %%@
 differentiation averaging n points
-\item [\prg display\index{display} 5[e7] 6[e8]  ./results/mcdisp.qei {[colx coly file2]}] displays a graphic on screen as xy %%@
+\item [\prg display\index{display} 5{[e7]} 6{[e8]}  ./results/mcdisp.qei {[colx coly file2]}] displays a graphic on screen as xy %%@
 graph
 with column 5 as x axis and columns 6 as y axis. By default graphic is a line graph.
 However, if error columns (in the example x error column is 7 and y error column is 8)

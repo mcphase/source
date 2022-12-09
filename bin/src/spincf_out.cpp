@@ -438,6 +438,7 @@ void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters 
     nofcomponents<densityev_real.nofcomponents||densityev_real.nofcomponents!=densityev_imag.nofcomponents)
     {fprintf(stderr,"Error creating jvx movie files: eigenvector read from .qev file dim %i does not match  dimension %i of spins structure read from sps file\n",nofcomponents,densityev_real.nofcomponents);exit(1);}
 
+  int nomore=100,n=0; // limits the  number of atoms to be plotted 
   Vector maxv(1,3),minv(1,3),ijkmax(1,3),ijkmin(1,3),max_min(1,3),dd(1,3),dd0(1,3),c(1,3),xyz(1,3);
   Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
   Matrix abc_in_ijk_Inverse(1,3,1,3); abc_in_ijk_Inverse=abc_in_ijk.Inverse();
@@ -575,18 +576,18 @@ fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
 
-
+//printf("hello\n");
 if(gp.show_atoms>0) // plot atoms removed by MR 30.8.2011 - inserted again for phonons 25.12.21
  { // plot atoms in region xmin to xmax (quader)
 fprintf(fout,"    <geometry name=\"ions\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
-
-  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1);++i1){for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1);++j1){for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
+ n=0;
+  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=nofatoms;++l)
-	 {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
+      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
+         for(l=1;l<=nofatoms&n<nomore;++l)
+	 {++n;dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
             // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
             // and refer to the same atom
          for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
@@ -634,12 +635,14 @@ fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),
   }}}
 fprintf(fout,"          <thickness>3.0</thickness>\n");
 fprintf(fout,"        </points>\n");
-fprintf(fout,"        <colors type=\"rgb\">\n");
-  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1);++i1){for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1);++j1){for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
+fprintf(fout,"        <colors type=\"rgb\">\n");n=0;
+  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
+   for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
+    for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=nofatoms;++l)
-	   {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
+      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
+         for(l=1;l<=nofatoms&n<nomore;++l)
+	   {++n;dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
             // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
             // and refer to the same atom
          for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
@@ -672,19 +675,20 @@ fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
 
+//printf("hello1\n");
 
 if(gp.spins_scale_moment>0){
 fprintf(fout,"    <geometry name=\"magnetic moments\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"hide\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
- ctr=0;
- for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1);++i1){
- for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1);++j1){
- for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
+ ctr=0;n=0;
+ for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
+ for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
+ for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=magmom.nofatoms;++l)
-	 {dd=magmom.pos(i,j,k,l, cs4);
+      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
+         for(l=1;l<=magmom.nofatoms&n<nomore;++l)
+	 {++n;dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                    (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -730,6 +734,7 @@ fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
                      }
+//printf("hello2\n");
 
 if(gp.spins_show_static_moment_direction>0)
  {
@@ -737,14 +742,14 @@ if(gp.spins_show_static_moment_direction>0)
 fprintf(fout,"    <geometry name=\"static magnetic moments\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"hide\" color=\"hide\">\n");
 fprintf(fout,"        <points>\n");
- ctr=0;
- for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1);++i1){
- for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1);++j1){
- for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
+ ctr=0;n=0;
+ for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
+ for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
+ for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=magmom.nofatoms;++l)
-	 {dd=magmom.pos(i,j,k,l, cs4);
+      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
+         for(l=1;l<=magmom.nofatoms&n<nomore;++l)
+	 {++n;dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                      (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -779,14 +784,14 @@ if(gp.spins_show_ellipses>0)
 fprintf(fout,"    <geometry name=\"ellipses\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"hide\" color=\"hide\">\n");
 fprintf(fout,"        <points>\n");
- ctr=0;
- for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1);++i1){
- for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1);++j1){
- for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1);++k1){
+ ctr=0;n=0;
+ for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
+ for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
+ for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa;++i){for (j=1;j<=nofb;++j){for (k=1;k<=nofc;++k){
-         for(l=1;l<=magmom.nofatoms;++l)
-	 {dd=magmom.pos(i,j,k,l, cs4);
+      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
+         for(l=1;l<=magmom.nofatoms&n<nomore;++l)
+	 {++n;dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                     (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -820,6 +825,7 @@ fprintf(fout,"        </lines>\n");
 fprintf(fout,"      </lineSet>\n");
 fprintf(fout,"    </geometry>\n");
 }
+//printf("hello3\n");
 
 if(gp.scale_density_vectors>0)
 {int ii;
@@ -884,6 +890,7 @@ fprintf(fout,"    </geometry>\n");
 
  }
 }
+//printf("hello4\n");
 
 if(gp.show_density>0)
 {int ii,tt,ff;
@@ -994,7 +1001,9 @@ for(l=1;l<=nofatoms;++l)
  }
 }
 
+//printf("hello5\n");
 
+if(n>=nomore){fprintf(stderr,"# Warning - jvx output truncated because maximum number of atoms %i reached - continuing\n",nomore);}
 
 fprintf(fout,"  </geometries>\n");
 fprintf(fout,"</jvx-model>\n");

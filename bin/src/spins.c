@@ -1,5 +1,5 @@
 /****************************************************
- * spins - display spinconfiguration at given htpoint
+ * spins - abalyse and display spinconfiguration at given htpoint
  * Author: Martin Rotter
  ****************************************************/
 #include "../../version"
@@ -17,6 +17,9 @@ program spins - popout spin/exchange field configuration\n"
 use as: spins -f mcphas.sps T Ha Hb Hc\n\
     or: spins -f mcphas.sps x y\n\
     or: spins -f mcphas.tst n\n\
+    or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
+    or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
+    or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] T Ha Hb Hc [h k l E]\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] x y\n\
                     \n\
@@ -36,8 +39,14 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
   \n\
 4) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
-   output files and 3d graphical animations are created.\n\
-   options are:\n\
+   output files and tables or 3d graphical animations are created.\n\
+   for table the options are:\n\
+       -tMSL ... output to stdout a table with T Ha Hb Hc atom positions and with \n\
+              magnetic moments <Mx> <My> <Mz>, orbital moments and spin \n\
+              of each atom in the magnetic unitc cell \n\
+       -tHex ...  output to stdout table with T Ha Hb Hc atom positions and exchange fields Hex\n\
+       -tI   ... a similar table with expectation values of interaction operators <I>\n\
+   for graphical animations the options are: \n\
          -c ... calculate chargedensity\n\
          -s ... calculate spindensity\n\
          -o ... calculate angular orbital momentum density\n\
@@ -51,14 +60,18 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
          -M  ... show arrow indicating magnetic moment (for cluster show total moment)\n\
          -Mi ... show arrow indicating magnetic moment (for cluster show individual moments)\n\
          -P  ... calculate phononic displacement\n\
-         -prefix 001 ... use input file(s) results/001mc* instead of results/mc*\n\
+\n\
          note, that in order to animate changes in the above quantities, the corresponding\n\
          switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion\n\
          modules have to be capable of calculating the corresponding observables. \n\
+\n\
+         -prefix 001 ... use input file(s) results/001mc* instead of results/mc*\n\
  \n\
      example:\n\
         spins -c 2 0 0 1\n\
-        ...calculates the charge density at T=2K and H=(0,0,1) Tesla\n \
+        ...calculates the charge density at T=2K and H=(0,0,1) Tesla\n\
+        spins -tI 2 0 0 1 \n\
+        ... outputs a table with atomic positions and expectations values <I> \n\
 \n\
  This program outputs a magnetic structure (and magnetic excitation)\n \
  graphic/movie in the output files of different format:\n \
@@ -81,12 +94,12 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
 // hauptprogramm
 int main (int argc, char **argv)
 { 
-fprintf(stderr,"# **********************************************************\n");
-fprintf(stderr,"# * spins - display 3d graphics of spins,moments,densities,*\n");
-fprintf(stderr,"# * at given H and T                                       *\n");
-fprintf(stderr,"# * Reference: M. Rotter PRB 79 (2009) 140405R             *\n");
-fprintf(stderr,"# * %s                                     *\n",MCPHASVERSION);
-fprintf(stderr,"# **********************************************************\n");
+fprintf(stderr,"# ***********************************************************\n");
+fprintf(stderr,"# * spins - analyse mcphas output and display 3d graphics of*\n");
+fprintf(stderr,"# *  spins,moments,densities, etc at given H and T          *\n");
+fprintf(stderr,"# * Reference: M. Rotter PRB 79 (2009) 140405R              *\n");
+fprintf(stderr,"# * %s                                      *\n",MCPHASVERSION);
+fprintf(stderr,"# ***********************************************************\n");
 
  FILE * fin, * fout;
 double T=0; Vector Hext(1,3),Hextijk(1,3);
@@ -116,10 +129,13 @@ sprintf(gp.title,"output of program spins");
 
  // check command line
  if (argc < 2){help_and_exit();}
-// first: option without graphics just screendump <I> or exchange field configuration at given HT
+// first: options without graphics just screendump <I> or exchange field configuration at given HT
  if (strcmp(argv[1],"-f")==0)
- { fin = fopen_errchk (argv[2], "rb");os=2;printf("#* program spins ... reading from file %s\n",argv[2]);}
- else  // second ... other options with graphics !!
+ { fin = fopen_errchk (argv[2], "rb");os=2;printf("#* program spins ... reading from file %s\n",argv[2]);
+
+ }
+ else { if (strncmp(argv[1],"-t",2)==0){os=1;fout=stdout;}
+       else  // second ... other options with graphics !!
  {if(strcmp(argv[1],"-c")==0){os=1;}
   if(strcmp(argv[1],"-s")==0){os=1;}
   if(strcmp(argv[1],"-o")==0){os=1;} 
@@ -212,18 +228,23 @@ if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
 if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
  				   os+=2;}
+}
  strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
  strcpy(infilename+10+strlen(prefix),"mcphas.mf");fin = fopen(infilename, "rb");
  if(fin==NULL){strcpy(infilename+10,"mcphas.mf");fin = fopen_errchk(infilename, "rb");}
  printf("# reading from file %s\n",infilename);
   
  }
-
-   fout = fopen_errchk ("./results/spins.out", "w");
-
+ if (strncmp(argv[1],"-t",2)!=0){
+  fout = fopen_errchk ("./results/spins.out", "w"); // unless it is table option
    print_mcdiff_in_header(fout);
 // input file header and conf------------------------------------------------------------------
-   n=headerinput(fin,fout,gp,cs);
+   n=headerinput(fin,fout,gp,cs);}
+else
+  {
+// input file header and conf------------------------------------------------------------------
+   n=headerinput(fin,stderr,gp,cs);
+  }
    if(cs.nofatoms<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofatoms=%i - must be >0 !!!\n",cs.nofatoms);exit(1);}
    if(cs.nofcomponents<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofcomponents=%i - must be >0 !!!\n",cs.nofcomponents);exit(1);}
 
@@ -231,7 +252,7 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
 
 // load spinsconfigurations and check which one is nearest -------------------------------   
 double TT=0; TT=strtod(argv[1+os],NULL);
-double HHx=0,HHy=0,HHz=0;
+double HHx=0,HHy=0,HHz=0,lnZ,U;
 if (strcmp(argv[1],"-f")==0&&argc<5){TT=-TT;} // here TT becomes a number of a spinconfig in a file
 else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
                }// here Hx and Hy become x and y in the phasediagram and TT=0 indicates this fact
@@ -243,11 +264,11 @@ if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr))
 fclose (fin);
 
   printf("#! %s - configuration\n",outstr);
-  savmf.print(stdout);
+  if (strncmp(argv[1],"-t",2)!=0){savmf.print(stdout);}
   par inputpars("./mcphas.j");
   int ii,nt,k,j;
 // determine primitive magnetic unit cell
-Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3),dd3(1,3);
+Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3),dd3(1,3),dd(1,3);
 if (inputpars.r!=cs.r){cs.r=inputpars.r;}
 if (inputpars.a!=cs.abc[1]){cs.abc[1]=inputpars.a;}
 if (inputpars.b!=cs.abc[2]){cs.abc[2]=inputpars.b;}
@@ -310,7 +331,6 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
 
   exit(0);
 }
-
 // FROM HERE ON IT IS ONLY EXECUTED IF GRAPHICS ARE DESIRED ... 
 
 gp.read();
@@ -347,17 +367,24 @@ gp.read();
 
   spincf spinconf(savmf.na(),savmf.nb(),savmf.nc(),ii,3);
 
-
+if (strncmp(argv[1],"-t",2)!=0){
 // the following is for the printout of spins.out ...........................
 fprintf(fout,"#! %s \n",outstr);
 fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
 //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
 //                                        to Sa Sb Sc La Lb Lc
-//fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc>\n");
-fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc>\n");
+//fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc> (hbar)\n");
+fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)\n");
 fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
 // .............................................................................                                
-	       
+	}
+else  //now table options
+ { fprintf(fout,"#! nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
+  fprintf(fout,"# T Ha Hb Hc {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3]");
+ if (strcmp(argv[1],"-tMSL")==0) fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)\n");
+ if (strcmp(argv[1],"-tI")==0) fprintf(fout,"<I1> <I2> <I3> ... <Inofcomponents>\n");
+ if (strcmp(argv[1],"-tHex")==0) fprintf(fout,"<Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n");
+ }       
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
 // 1.b: Icalc has to be used to calculate all the <Olm>.
@@ -366,6 +393,7 @@ fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to m
  dadbdc2ijk(Hextijk,Hext,abc); // transform Habc=Hext to ijk coordinates ... this is Hextijk
  
 Vector h(1,inputpars.nofcomponents);
+Vector I(1,inputpars.nofcomponents);
 h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
 {(*inputpars.jjj[ii]).Icalc_parameter_storage_init(h,Hextijk,T);} // initialize Icalc module parameter storage
 
@@ -419,11 +447,14 @@ if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
     for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).nofatoms;++nt)
      {dd3=spinconf.pos_dabc(i,j,k,ii4, cs4);
       dd0=spinconf.pos_dr123(i,j,k,ii4, cs4);
+      if (strncmp(argv[1],"-t",2)==0){fprintf(fout,"%4.4f %4.4f %4.4f %4.4f ",T,Hext(1),Hext(2),Hext(3));}
       fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
             cs4.sipffilenames[ii4],dd3(1),dd3(2),dd3(3),dd0(1),dd0(2),dd0(3));
+      if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tMSL")==0){
             fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(1+3*(ii4-1))));
             fprintf(fout," %4.4f",myround(1e-5,spinconf.m(i,j,k)(2+3*(ii4-1))));
             fprintf(fout," %4.4f\n",myround(1e-5,spinconf.m(i,j,k)(3+3*(ii4-1))));
+                                                                     } 
        // do not print out L S or exchange fields for cluster module
       ++ii4;
      }
@@ -438,13 +469,14 @@ else{   ++ii4;
 
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
     Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
-    dd3=abc_in_ijk.Inverse()*dd0;       
-
+    dd=abc_in_ijk.Inverse()*dd3;       
+    if (strncmp(argv[1],"-t",2)==0){fprintf(fout,"%4.4f %4.4f %4.4f %4.4f ",T,Hext(1),Hext(2),Hext(3));}
     fprintf(fout,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
-            cs.sipffilenames[ii],dd3(1),dd3(2),dd3(3),dd0(1),dd0(2),dd0(3));
+            cs.sipffilenames[ii],dd(1),dd(2),dd(3),dd0(1),dd0(2),dd0(3));
+    if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tMSL")==0){
     //ouput the magnetic moment if possible
     if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
-   {           for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
+    {           for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
      // and output the orbital and spin momentum if possible 
      if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage)&&
         (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
@@ -454,14 +486,22 @@ else{   ++ii4;
       {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,Smom(nt)));}
                for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,Lmom(nt)));}
       }
-   }
+   }}}
+if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tHex")==0)
+  {
     // finally output a line with the exchange fields 
-  fprintf(fout,"\n                 corresponding exchange fields hxc [meV]-->          ");
+    if (strncmp(argv[1],"-t",2)!=0)fprintf(fout,"\n                 corresponding exchange fields hxc [meV]-->          ");
                       for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout exchangefields
                         {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
-                         fprintf(fout,"\n");
+                        
   }
-
+if (strcmp(argv[1],"-tI")==0)
+  {(*inputpars.jjj[ii]).Icalc(I,T,h,Hextijk,lnZ,U,(*inputpars.jjj[ii]).Icalc_parstorage);
+                         for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout I operator expectation values
+                        {fprintf(fout," %4.4f",myround(1e-5,I(nt)));}
+                         
+  }
+fprintf(fout,"\n");
 
 // -----------------------------------------------------------------------------------------------
 
@@ -523,8 +563,10 @@ if(phonon==1)  // if module allows to calculate position  - use this for graphic
 
   }}
 }}
+
+if (strncmp(argv[1],"-t",2)==0){exit(0);}
   fclose (fout);
-  
+   
 // create plot of spinconfiguration -----------------------------------------------------------
 printf("# ************************************************************************\n");
 printf("#%s\n",gp.title);
