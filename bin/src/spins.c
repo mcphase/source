@@ -14,9 +14,9 @@ void help_and_exit()
     { printf ("\n\
 program spins - popout spin/exchange field configuration\n"
 "              - and/or display 3d animation of spin/moment/densities and animations\n\n\
-use as: spins -f mcphas.sps T Ha Hb Hc\n\
-    or: spins -f mcphas.sps x y\n\
-    or: spins -f mcphas.tst n\n\
+use as: spins -f[c 13 0.1] mcphas.sps T Ha Hb Hc\n\
+    or: spins -f[c 13 0.2] mcphas.sps x y\n\
+    or: spins -f[c 14 0.1] mcphas.tst n\n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
@@ -38,6 +38,11 @@ use as: spins -f mcphas.sps T Ha Hb Hc\n\
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>)\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
   \n\
+1&2&3) if used with -fc min max n lim a human readable format is output for spin components with index \n\
+   from min to max, only n numbers exceeding  \n\
+   absolute value of lim, e.g. -fc 1 3 13 0.1 outputs at maximum 13 components which are all larger \n\
+   (absolute value) than 0.1 \n\
+ \n\
 4) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
    output files and tables or 3d graphical animations are created.\n\
    for table the options are:\n\
@@ -103,7 +108,7 @@ fprintf(stderr,"# ***********************************************************\n"
 
  FILE * fin, * fout;
 double T=0; Vector Hext(1,3),Hextijk(1,3);
- int i,n=0;//,dophon=0;
+ int i,n=0,minl=1,maxl=1;//,dophon=0;
  cryststruct cs,cs4;
  //float numbers[13];numbers[9]=1;numbers[10]=3;
  //numbers[0]=13;
@@ -113,8 +118,8 @@ double T=0; Vector Hext(1,3),Hextijk(1,3);
  
   int dim=28;
  char text[1000];
- int os=0; int doijk=0,arrow=0,density=0,phonon=0;//,arrowdim=3;
- double xx=0,yy=0,zz=0;
+ int os=0,maxn=0; int doijk=0,arrow=0,density=0,phonon=0;//,arrowdim=3;
+ double xx=0,yy=0,zz=0,limit=0;
 graphic_parameters gp;
 gp.show_abc_unitcell=1.0;
 gp.show_primitive_crystal_unitcell=1.0;
@@ -130,9 +135,11 @@ sprintf(gp.title,"output of program spins");
  // check command line
  if (argc < 2){help_and_exit();}
 // first: options without graphics just screendump <I> or exchange field configuration at given HT
- if (strcmp(argv[1],"-f")==0)
- { fin = fopen_errchk (argv[2], "rb");os=2;printf("#* program spins ... reading from file %s\n",argv[2]);
-
+ if (strncmp(argv[1],"-f",2)==0)
+ { os=2;if (strcmp(argv[1],"-fc")==0){os=6;minl=(int)strtod(argv[2],NULL);maxl=(int)strtod(argv[3],NULL);
+ maxn=(int)strtod(argv[4],NULL);limit=strtod(argv[5],NULL);
+   }
+   fin = fopen_errchk (argv[os], "rb");printf("#* program spins ... reading from file %s\n",argv[os]);   
  }
  else { if (strncmp(argv[1],"-t",2)==0){os=1;fout=stdout;}
        else  // second ... other options with graphics !!
@@ -235,7 +242,7 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
  printf("# reading from file %s\n",infilename);
   
  }
- if (strncmp(argv[1],"-t",2)!=0){
+ if (strncmp(argv[1],"-t",2)!=0&&strcmp(argv[1],"-fc")!=0){
   fout = fopen_errchk ("./results/spins.out", "w"); // unless it is table option
    print_mcdiff_in_header(fout);
 // input file header and conf------------------------------------------------------------------
@@ -253,7 +260,7 @@ else
 // load spinsconfigurations and check which one is nearest -------------------------------   
 double TT=0; TT=strtod(argv[1+os],NULL);
 double HHx=0,HHy=0,HHz=0,lnZ,U;
-if (strcmp(argv[1],"-f")==0&&argc<5){TT=-TT;} // here TT becomes a number of a spinconfig in a file
+if (strncmp(argv[1],"-f",2)==0&&argc-os<3){TT=-TT;} // here TT becomes a number of a spinconfig in a file
 else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
                }// here Hx and Hy become x and y in the phasediagram and TT=0 indicates this fact
      else
@@ -264,7 +271,14 @@ if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr))
 fclose (fin);
 
   printf("#! %s - configuration\n",outstr);
-  if (strncmp(argv[1],"-t",2)!=0){savmf.print(stdout);}
+  if (strncmp(argv[1],"-t",2)!=0){
+  if(strcmp(argv[1],"-fc")==0){
+if(strcmp(argv[os]+strlen(argv[os])-3,".mf")==0)
+{savmf.print_commented(stdout,"Hex",minl,maxl,maxn,limit);}
+else{savmf.print_commented(stdout,"I",minl,maxl,maxn,limit);}
+
+exit(0);}
+  else {savmf.print(stdout);}}
   par inputpars("./mcphas.j");
   int ii,nt,k,j;
 // determine primitive magnetic unit cell
@@ -284,7 +298,7 @@ for(ii=1;ii<=inputpars.nofatoms;++ii)
 cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
-  if (strcmp(argv[1],"-f")==0) 
+  if (strncmp(argv[1],"-f",2)==0) 
  { inputpars.savelattice(fout);
   fprintf(fout,"#! %s \n",outstr);
    if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
@@ -464,7 +478,8 @@ else{   ++ii4;
     dd3=savmf.pos(i,j,k,ii, cs);
       // if module allows to calculate position shift of an atom - use this for output 
     if(true==(*inputpars.jjj[ii]).pcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
-     {dd3+=mom; fprintf(stderr,"# Attention: atom %i shifted from equilibrium position by (%g %g %g) A \n",ii,mom(1),mom(2),mom(3));
+     {dd3+=mom; 
+      // fprintf(stderr,"# Attention: atom %i shifted from equilibrium position by (%g %g %g) A \n",ii,mom(1),mom(2),mom(3));
      }
 
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();

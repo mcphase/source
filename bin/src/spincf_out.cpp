@@ -582,12 +582,14 @@ if(gp.show_atoms>0) // plot atoms removed by MR 30.8.2011 - inserted again for p
 fprintf(fout,"    <geometry name=\"ions\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
- n=0;
-  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
+ 
+  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
+   for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
+    for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
          for(l=1;l<=nofatoms&n<nomore;++l)
-	 {++n;dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
+	 {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
             // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
             // and refer to the same atom
          for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
@@ -628,7 +630,7 @@ fprintf(fout,"        <points>\n");
              xyz+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),myround(dd(2)+xyz(2)),myround(dd(3)+xyz(3)));
-     ++ctr;
+     ++ctr;++n;
 	     }
 	  }
        }}}
@@ -642,7 +644,7 @@ fprintf(fout,"        <colors type=\"rgb\">\n");n=0;
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
          for(l=1;l<=nofatoms&n<nomore;++l)
-	   {++n;dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
+	   {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
             // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
             // and refer to the same atom
          for(int ll=1;ll<=nofatoms;++ll){Vector ddd(1,3);ddd=pos(i,j,k,ll,cs);
@@ -659,7 +661,7 @@ fprintf(fout,"        <colors type=\"rgb\">\n");n=0;
             {
 fprintf(fout,"          <c>  %i       %i       %i </c>\n",255,255,255);
 fprintf(fout,"          <c>  %i       %i       %i </c>\n",(int)(255*gp.show_atoms),(int)(gp.show_atoms*((l*97)%256)),0);
-	     }
+	    ++n; }
 	  }
        }}}
   }}}
@@ -688,7 +690,7 @@ fprintf(fout,"        <points>\n");
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
          for(l=1;l<=magmom.nofatoms&n<nomore;++l)
-	 {++n;dd=magmom.pos(i,j,k,l, cs4);
+	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                    (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -711,7 +713,7 @@ fprintf(fout,"        <points>\n");
 //fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)-xyz(1)*gp.spins_scale_moment),myround(dd(2)-xyz(2)*gp.spins_scale_moment),myround(dd(3)-xyz(3)*gp.spins_scale_moment));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
-	     ++ctr;
+	     ++ctr;++n;
               //                  }
 	     }
 	  }
@@ -749,7 +751,7 @@ fprintf(fout,"        <points>\n");
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
          for(l=1;l<=magmom.nofatoms&n<nomore;++l)
-	 {++n;dd=magmom.pos(i,j,k,l, cs4);
+	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                      (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -761,7 +763,7 @@ fprintf(fout,"        <points>\n");
              
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
-	     ++ctr;
+	     ++ctr;++n;
 
 	     }
 	  }
@@ -791,7 +793,7 @@ fprintf(fout,"        <points>\n");
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
       for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
          for(l=1;l<=magmom.nofatoms&n<nomore;++l)
-	 {++n;dd=magmom.pos(i,j,k,l, cs4);
+	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                     (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
             {double QR; // old: QR=hkl(1)*dd(1)/cs.abc(1)+hkl(2)*dd(2)/cs.abc(2)+hkl(3)*dd(3)/cs.abc(3);
@@ -807,7 +809,7 @@ fprintf(fout,"        <points>\n");
               // omega t= phase
               //spins=savspins+(densityev_real*cos(-phase) + densityev_imag*sin(phase))*gp.spins_wave_amplitude; // Q ri not considered for test !!!
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)*gp.spins_scale_moment),myround(dd(2)+xyz(2)*gp.spins_scale_moment),myround(dd(3)+xyz(3)*gp.spins_scale_moment));
-	     }++ctr;
+	     }++ctr;++n;
 
 	     }
 	  }
@@ -1359,4 +1361,47 @@ void spincf::print(FILE * fout) //print spinconfiguration to stream
  fprintf(fout,"\n"); //new line to separate ab planes
  }
 // fprintf(fout,"\n"); //new line to end spinconfiguration - removed aug 07
+}
+//-----------------------------------------------------------------------
+//  numeric output of spinconfiguration to file with comments and only large spin-coponents
+// components in interval [min,max] are shown
+
+void spincf::print_commented(FILE * fout,const char * string,int min, int max, int maxnofpars, double & absvallimit)
+{int i,j,k,l;div_t result;
+ if (maxnofpars<1){fprintf(stderr,"Error spincf print_commented: maxnofpars <1\n");exit(1);}
+ else
+ {   if(min<1||max>nofcomponents){
+  fprintf(stderr,"Error spincf::print_commmented: index interval is [%i,%i] -  must be in range [%i,%i]\n",min,max,1,nofcomponents);exit(1);}
+
+  fprintf(fout,"# Output of  %s[%i-%i], at maximum %i numbers (in primitive unit cell) larger than %4.4f:\n",string,min,max,maxnofpars, absvallimit);
+  for (i=1;i<=nofa;++i)
+  for (j=1;j<=nofb;++j)
+  for (k=1;k<=nofc;++k)
+  {Vector ml(1,maxnofpars);ml=0;
+   Vector mmom(1,maxnofpars);mmom=0;
+   int pout=0;fprintf(fout,"#supercell-index %i %i %i:\n",i,j,k);
+      for (l=1;l<=nofcomponents*nofatoms;++l)
+      {result=div(l-1,nofcomponents);
+       if(fabs(mom[in(i,j,k)](l))>absvallimit&&min<=(result.rem+1)&&(result.rem+1)<=max){if(pout<maxnofpars){ ++pout;
+                                                                     mmom(pout)=mom[in(i,j,k)](l);
+                                                                     ml(pout)=l;
+                                                                  }
+                                               else { int ii; Min(mmom%mmom,ii);
+                                                      mmom(ii)=mom[in(i,j,k)](l);
+                                                      ml(ii)=l;
+                                                    }
+                                              }
+       }
+       //myPrintVector(stdout,mmom);
+       Sort(ml,mmom);
+       //myPrintVector(stdout,mmom);
+    for (int p=maxnofpars-pout+1;p<=maxnofpars;++p)
+    {result=div((int)ml(p)-1,nofcomponents); 
+     fprintf(fout,"#    atom %i: %s%i=%4.4f\n",result.quot+1,string,result.rem+1,myround(1e-5,mmom(p)));
+    }
+      
+// fprintf(fout,"\n"); //new line to separate ab planes
+}
+// fprintf(fout,"\n"); //new line to end spinconfiguration - removed aug 07
+ }
 }

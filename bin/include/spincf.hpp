@@ -19,6 +19,7 @@ class spincf
 public:
 
     void print(FILE * fout);
+    void print_commented(FILE * fout,const char * string,int min, int max, int maxnofpars, double & absvallimit);
 //print list of atoms + positions + moments
     void eps(FILE * fout);
     void eps(FILE * fout,const char * text);

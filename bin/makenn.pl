@@ -11,6 +11,7 @@ print "#********************************************************\n";
 $PI=3.14159265358979323846;
  $bvkA=25;
  $bvkalpha=0.1;
+ $Cel= zeroes (6,6); # for storage of elastic constants if needed
  # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
 
 unless ($#ARGV>=0) 
@@ -830,6 +831,7 @@ sub getinteraction {
 
  if($bvk==1)
  { # here do the Born von Karman calculation using spring constants
+   # $long_spring and $trans_spring are the spring constants in N/m
   $a0 = .5292e-10;#(m)
   $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 . 10-22 joules
   $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
@@ -840,18 +842,51 @@ sub getinteraction {
               )
             )
              {# bond found - do something
-  $cL=$long_spring[$n]*$a0*$a0*$J2meV;
-  $cT=$trans_spring[$n]*$a0*$a0*$J2meV; 
-  $Kxx= -(( $cL-$cT)* $rx * $rx + $cT* $r *$r)  /$r /$r;$jaa-=$Kxx;
-  $Kyy= -(( $cL-$cT)* $ry * $ry + $cT* $r *$r)  /$r /$r;$jbb-=$Kyy;
-  $Kzz= -(( $cL-$cT)* $rz * $rz + $cT* $r *$r)  /$r /$r;$jcc-=$Kzz;
+  $kL=$long_spring[$n]*$a0*$a0*$J2meV; 
+  $kT=$trans_spring[$n]*$a0*$a0*$J2meV; 
+  $Kxx= -(( $kL-$kT)* $rx * $rx + $kT* $r *$r)  /$r /$r;$jaa-=$Kxx;
+  $Kyy= -(( $kL-$kT)* $ry * $ry + $kT* $r *$r)  /$r /$r;$jbb-=$Kyy;
+  $Kzz= -(( $kL-$kT)* $rz * $rz + $kT* $r *$r)  /$r /$r;$jcc-=$Kzz;
 
-  $Kxy= -($cL-$cT) * ( $rx * $ry) /$r /$r ;$jab-=$Kxy;
-  $Kyz= -($cL-$cT) * ( $ry * $rz) /$r /$r ;$jbc-=$Kyz;
-  $Kxz= -($cL-$cT) * ( $rx * $rz) /$r /$r ;$jac-=$Kxz;
+  $Kxy= -($kL-$kT) * ( $rx * $ry) /$r /$r ;$jab-=$Kxy;
+  $Kyz= -($kL-$kT) * ( $ry * $rz) /$r /$r ;$jbc-=$Kyz;
+  $Kxz= -($kL-$kT) * ( $rx * $rz) /$r /$r ;$jac-=$Kxz;
    # add also something to the Knn and Kmm in $sipffilethis and $sipffile !!! 
    addK($sipffilethis);
    addK($sipffile);
+   # increase elastic constant $cel according to this bond
+   # convert N/m in  meV/A^2: Nm=Joule  m=10^10A meV=1.60217646 . 10-22 joules
+   # 1 N/m= 1 J/m^2 = meV /1.60217646e-2 A 
+   $cL=$long_spring[$n]/1.60217646e-2;
+   $cT=$trans_spring[$n]/1.60217646e-2;
+   $Cel->at(1,1)+=($cL-$cT)*$rx*$rx*$rx*$rx/$r/$r+$cT*$rx*$rx;
+   $Cel->at(2,2)+=($cL-$cT)*$ry*$ry*$ry*$ry/$r/$r+$cT*$ry*$ry;
+   $Cel->at(3,3)+=($cL-$cT)*$rz*$rz*$rz*$rz/$r/$r+$cT*$rz*$rz;
+   $Cel->at(4,4)+=($cL-$cT)*$ry*$rz*$ry*$rz/$r/$r;
+   $Cel->at(5,5)+=($cL-$cT)*$rx*$rz*$rx*$rz/$r/$r;
+   $Cel->at(6,6)+=($cL-$cT)*$rx*$ry*$rx*$ry/$r/$r;
+
+   $Cel->at(1,2)+=($cL-$cT)*$rx*$rx*$ry*$ry/$r/$r;
+
+   $Cel->at(1,3)+=($cL-$cT)*$rx*$rx*$rz*$rz/$r/$r;
+   $Cel->at(2,3)+=($cL-$cT)*$ry*$ry*$rz*$rz/$r/$r;
+
+   $Cel->at(1,4)+=($cL-$cT)*$rx*$rx*$ry*$rz/$r/$r;
+   $Cel->at(2,4)+=($cL-$cT)*$ry*$ry*$ry*$rz/$r/$r+$cT*$ry*$rz;
+   $Cel->at(3,4)+=($cL-$cT)*$rz*$rz*$ry*$rz/$r/$r;
+
+   $Cel->at(1,5)+=($cL-$cT)*$rx*$rx*$rx*$rz/$r/$r+$cT*$rx*$rz;
+   $Cel->at(2,5)+=($cL-$cT)*$ry*$ry*$rx*$rz/$r/$r;
+   $Cel->at(3,5)+=($cL-$cT)*$rz*$rz*$rx*$rz/$r/$r;
+   $Cel->at(4,5)+=($cL-$cT)*$ry*$rz*$rx*$rz/$r/$r;
+
+   $Cel->at(1,6)+=($cL-$cT)*$rx*$rx*$rx*$ry/$r/$r+$cT*$rx*$ry;
+   $Cel->at(2,6)+=($cL-$cT)*$ry*$ry*$rx*$ry/$r/$r;
+   $Cel->at(3,6)+=($cL-$cT)*$rz*$rz*$rx*$ry/$r/$r;
+   $Cel->at(4,6)+=($cL-$cT)*$ry*$rz*$rx*$ry/$r/$r;
+   $Cel->at(5,6)+=($cL-$cT)*$rx*$rz*$rx*$ry/$r/$r;
+
+
              }
                                  }
    $jba=$jab;   $jcb=$jbc;   $jca=$jac;

@@ -183,7 +183,7 @@ char *token;cs.abc=0;
  while (instr[strspn(instr," \t")]=='#') // pointer to 'ltrimstring'
   { pos=ftell(fin_coq);
    if (pos==-1)
-       {fprintf(stderr,"Error: wrong mf/sps file format\n");exit (EXIT_FAILURE);}
+       {fprintf(stderr,"Error: wrong mf/sps/tst file format\n");exit (EXIT_FAILURE);}
    fgets_errchk(instr,MAXNOFCHARINLINE,fin_coq);
    // inserted 4.4.08 in order to format output correctly (characterstring 13 spoiled output string)
    int i;

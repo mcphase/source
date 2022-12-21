@@ -165,14 +165,18 @@ excitations.
 
 
 \begin{description} 
-\item[ display\_densities -f mcphas.sps T Ha Hb Hc]
+\item[ display\_densities -f{[c 12 0.1]} mcphas.sps T Ha Hb Hc]
 \item[ display\_densities -f mcphas.sps x y]
- if used with -f filename this file has to be a mcphas.mf or mcphas.sps file,
+\item[ display\_densities -f mcphas.sps n]
+ if used with -f filename this file has to be a mcphas.mf or mcphas.sps or mcphas.tst file,
 the spin configuration
    at given temperature T[K] and magnetic effective field H[T]
     is read and extracted from this file and printed on screen (stdout), nothing
  else is done. Insterad of temperature and magnetic field also the x y point coordinates
-in the phasediagram can be given.
+in the phasediagram or the index n (from the sequence of spin configuartions) can be given.
+the option -fc 12 0.1 displays a commented user readable information about the 12 largerst
+spin components in the primitive unit cell with absolute values larger than 0.1 (useful for
+inspection of numbers).
 \item[ display\_densities -tMSL \lbrack -prefix 001 \rbrack\, T Ha Hb Hc]
 \item[ display\_densities -tHex \lbrack-prefix 001\rbrack T Ha Hb Hc]
 \item[ display\_densities -tI \lbrack-prefix 001\rbrack T Ha Hb Hc]
