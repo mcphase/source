@@ -129,6 +129,7 @@ sub printlattice {
     my $l = new FileHandle;
     open($l,$fileout);
     open($h,$filein);
+
      while(<$h>)
      {$text=$_;
       
@@ -155,6 +156,28 @@ sub printlattice {
       ($r3a)=extract("r3a",$text);if($r3a!=""){$r3a*=$n3;$text=~s/\Qr3a=\E\s*[\-\+\d.]+/r3a=$r3a /;}
       ($r3b)=extract("r3b",$text);if($r3b!=""){$r3b*=$n3;$text=~s/\Qr3b=\E\s*[\-\+\d.]+/r3b=$r3b /;}
       ($r3c)=extract("r3c",$text);if($r3c!=""){$r3c*=$n3;$text=~s/\Qr3c=\E\s*[\-\+\d.]+/r3c=$r3c /;}
+
+($Cel11)=extract("Cel11",$text);if($Cel11!=""){$Cel11*=$n1*$n2*$n3;$text=~s/\QCel11=\E\s*[\-\+\d.]+/Cel11=$Cel11 /;}
+($Cel12)=extract("Cel12",$text);if($Cel12!=""){$Cel12*=$n1*$n2*$n3;$text=~s/\QCel12=\E\s*[\-\+\d.]+/Cel12=$Cel12 /;}
+($Cel13)=extract("Cel13",$text);if($Cel13!=""){$Cel13*=$n1*$n2*$n3;$text=~s/\QCel13=\E\s*[\-\+\d.]+/Cel13=$Cel13 /;}
+($Cel14)=extract("Cel14",$text);if($Cel14!=""){$Cel14*=$n1*$n2*$n3;$text=~s/\QCel14=\E\s*[\-\+\d.]+/Cel14=$Cel14 /;}
+($Cel15)=extract("Cel15",$text);if($Cel15!=""){$Cel15*=$n1*$n2*$n3;$text=~s/\QCel15=\E\s*[\-\+\d.]+/Cel15=$Cel15 /;}
+($Cel16)=extract("Cel16",$text);if($Cel16!=""){$Cel16*=$n1*$n2*$n3;$text=~s/\QCel16=\E\s*[\-\+\d.]+/Cel16=$Cel16 /;}
+($Cel22)=extract("Cel22",$text);if($Cel22!=""){$Cel22*=$n1*$n2*$n3;$text=~s/\QCel22=\E\s*[\-\+\d.]+/Cel22=$Cel22 /;}
+($Cel23)=extract("Cel23",$text);if($Cel23!=""){$Cel23*=$n1*$n2*$n3;$text=~s/\QCel23=\E\s*[\-\+\d.]+/Cel23=$Cel23 /;}
+($Cel24)=extract("Cel24",$text);if($Cel24!=""){$Cel24*=$n1*$n2*$n3;$text=~s/\QCel24=\E\s*[\-\+\d.]+/Cel24=$Cel24 /;}
+($Cel25)=extract("Cel25",$text);if($Cel25!=""){$Cel25*=$n1*$n2*$n3;$text=~s/\QCel25=\E\s*[\-\+\d.]+/Cel25=$Cel25 /;}
+($Cel26)=extract("Cel26",$text);if($Cel26!=""){$Cel26*=$n1*$n2*$n3;$text=~s/\QCel26=\E\s*[\-\+\d.]+/Cel26=$Cel26 /;}
+($Cel33)=extract("Cel33",$text);if($Cel33!=""){$Cel33*=$n1*$n2*$n3;$text=~s/\QCel33=\E\s*[\-\+\d.]+/Cel33=$Cel33 /;}
+($Cel34)=extract("Cel34",$text);if($Cel34!=""){$Cel34*=$n1*$n2*$n3;$text=~s/\QCel34=\E\s*[\-\+\d.]+/Cel34=$Cel34 /;}
+($Cel35)=extract("Cel35",$text);if($Cel35!=""){$Cel35*=$n1*$n2*$n3;$text=~s/\QCel35=\E\s*[\-\+\d.]+/Cel35=$Cel35 /;}
+($Cel36)=extract("Cel36",$text);if($Cel36!=""){$Cel36*=$n1*$n2*$n3;$text=~s/\QCel36=\E\s*[\-\+\d.]+/Cel36=$Cel36 /;}
+($Cel44)=extract("Cel44",$text);if($Cel44!=""){$Cel44*=$n1*$n2*$n3;$text=~s/\QCel44=\E\s*[\-\+\d.]+/Cel44=$Cel44 /;}
+($Cel45)=extract("Cel45",$text);if($Cel45!=""){$Cel45*=$n1*$n2*$n3;$text=~s/\QCel45=\E\s*[\-\+\d.]+/Cel45=$Cel45 /;}
+($Cel46)=extract("Cel46",$text);if($Cel46!=""){$Cel46*=$n1*$n2*$n3;$text=~s/\QCel46=\E\s*[\-\+\d.]+/Cel46=$Cel46 /;}
+($Cel55)=extract("Cel55",$text);if($Cel55!=""){$Cel55*=$n1*$n2*$n3;$text=~s/\QCel55=\E\s*[\-\+\d.]+/Cel55=$Cel55 /;}
+($Cel56)=extract("Cel56",$text);if($Cel56!=""){$Cel56*=$n1*$n2*$n3;$text=~s/\QCel56=\E\s*[\-\+\d.]+/Cel56=$Cel56 /;}
+($Cel66)=extract("Cel66",$text);if($Cel66!=""){$Cel66*=$n1*$n2*$n3;$text=~s/\QCel66=\E\s*[\-\+\d.]+/Cel66=$Cel66 /;}
 
       ($nofatoms)=extract("nofatoms",$text);if($nofatoms!=""){$nofatoms*=$n1*$n2*$n3;$text=~s/\Qnofatoms=\E\s*[\-\+\d.]+/nofatoms=$nofatoms /;}
       last if /^(#!|[^#])*nofneighbours\s*=\s*/;
@@ -186,6 +209,7 @@ sub printneighbourlist {
       if($dd!=""){$nofnorig=$dd;}
       }
     
+
    for ($i1=0;$i1<=$n1-1;++$i1){
    for ($i2=0;$i2<=$n2-1;++$i2){
    for ($i3=0;$i3<=$n3-1;++$i3){
@@ -224,6 +248,8 @@ sub printneighbourlist {
      print $l ("#*************************************************************************\n");
    }}}
   } 
+
+ 
 }
 
 # **********************************************************************************************

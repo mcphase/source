@@ -25,6 +25,7 @@ printf (" (format as output file mcphas.xyt)\n\n");
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
 printf ("          -a     append output files (do not overwrite) \n");
+printf ("          -doeps refine strain epsilon using elastic,magnetoelastic constants \n");
 printf ("          -v     verbose mode: \n");
 printf ("                 * more information is printed to stdout, \n");
 printf (" 		  * the qvectors file mcphas.qom will contain \n");
@@ -254,6 +255,7 @@ inipar::inipar (const char * file,char * pref)
   strcpy(prefix,pref);
   xv=Vector(0,3);yv=Vector(0,3);zero=Vector(0,3);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
+  doeps=0;
   printf("reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
                 strcpy(savfilename,file);}
@@ -268,7 +270,7 @@ inipar::inipar (const inipar & p)
   strcpy(savfilename,p.savfilename);
   prefix = new char[strlen(p.prefix)+1];
   strcpy(prefix,p.prefix);
-  
+  doeps=p.doeps;
   exit_mcphas=p.exit_mcphas;pause_mcphas=p.pause_mcphas;
   displayall=p.displayall;logfevsQ=p.logfevsQ;
   

@@ -17,6 +17,8 @@ class inipar
   
   public:
   char * savfilename;
+  int doeps;
+
   //MCPHASE RUNTIME CONTROL
   int exit_mcphas,pause_mcphas,displayall,logfevsQ;
   

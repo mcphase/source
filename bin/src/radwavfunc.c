@@ -47,7 +47,7 @@ char instr[MAXNOFCHARINLINE];
                                     }
    
 //   if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-        extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE);
+        extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE,1);
         
         extract(instr,"N1",(*jjjps).Np(1));extract(instr,"XI1",(*jjjps).Xip(1));extract(instr,"C1",(*jjjps).Cp(1));
         extract(instr,"N2",(*jjjps).Np(2));extract(instr,"XI2",(*jjjps).Xip(2));extract(instr,"C2",(*jjjps).Cp(2));

@@ -17,14 +17,14 @@ class spincf
 {
   // OUTPUT to FILE ... in spincf_out.cpp --------------------------------
 public:
-
+    Vector epsilon; // strain
     void print(FILE * fout);
     void print_commented(FILE * fout,const char * string,int min, int max, int maxnofpars, double & absvallimit);
 //print list of atoms + positions + moments
     void eps(FILE * fout);
     void eps(FILE * fout,const char * text);
-    void eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation, Vector & gJ,spincf & magmom);
-    void fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ,spincf & magmom);
+    void eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation,spincf & magmom);
+    void fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,spincf & magmom);
 
               // <Jalpha>(i)=<Jalpha>0(i)+amplitude * real( exp(-i omega t+ Q ri) <ev_alpha>(i) )
               // omega t= phase
@@ -42,7 +42,7 @@ public:
     void cd(FILE * fout,cryststruct & cs,graphic_parameters & gp,
                 spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T,Vector &  gjmbHxc,Vector & Hext);
 
-    void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ,spincf & magmom);
+    void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, spincf & magmom);
     void calc_prim_mag_unitcell(Matrix & p,Vector & abc, Matrix & r);
 private:
  // frame of display

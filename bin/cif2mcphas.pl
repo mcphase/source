@@ -55,10 +55,12 @@ GetOptions("help"=>\$helpflag,
            "create"=>\$create,
            "supercell|s=s"=>\$supersize,
            "pointcharge|pc=f"=>\$pointcharge,
+           "screenfile|sf=s"=>\$screeningfile,
            "savepcfile|sp"=>\$savepcfile,
            "savecharges|sc"=>\$savecharges,
            "readpcfile|rp"=>\$readpcfile,
            "charges|ch=s"=>\$inputcharges,
+           "nonmagnetic|nm=s"=>\$nonmagnetic,
            "so1ion"=>\$so1ion,
            "ic1ion"=>\$ic1ion,
            "phonon"=>\$phonon,
@@ -76,13 +78,16 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "    --interactive or -i  : prompts user for information such as valence states\n";
    print "    --pointcharge or -pc : calculates the crystal field parameters from point charges\n";
    print "                           up to # Angstrom away from magnetic ions (e.g. -p 3.5)\n";
-   print "    --savepcfile  or -sp : write *.pc coordinate files to results folder\n";
+   print "    --savepcfile  or -sp : keep *.pc coordinate files in results folder\n";
    print "    --savecharges or -sc : store pointcharge coordinates in sipf file\n";
    print "    --readpcfile  or -rp : read from *.pc coordinate files in results folder\n";
    print "    --charges     or -ch : input charges to override defaults\n";
+   print "    --nonmagnetic or -nm : set nonmagnetic ion overrideing default\n";
    print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";
    print "    --ic1ion      or -ic : force use of ic1ion for single ion modules.\n";
    print "    --phonon      or -ph : force use of phonon for single ion modules.\n";
+   print "    --screenfile  or -sf : apply screening function to charges for calc of CF pars\n";
+   print "                           e.g. -sf sf.r reads sf.r col 1 r(A) col2 sf(B2m) col3 sf(B4m) col4 sf(B6m)\n";
    print "\n";
    print " By default, this script is automatic, so if the oxidation (valence) states are not\n";
    print "   given in the CIF, it will be guessed at based on the element, as is whether the ion\n";
@@ -91,7 +96,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print " If you don't have a CIF of the structure you're studying, you can create a blank CIF\n";
    print "   using the -c option, then fill in the required information (lattice parameters and\n";
    print "   inequivalent site positions, and then rerun $0 on this CIF.\n\n";
-   print " For the -pc pointcharge option, the -sp option can be used to generate files\n";
+   print " For the -pc pointcharge option, the -sp option can be used to keep generated files\n";
    print "   containing table of neighbouring charges named results/<sipfname>.pc\n";
    print "   You can then edit the values of the charges in this and rerun $0 with the -rp\n";
    print "   option to re-read this table with new charges to generate CF parameters in the sipf\n";
@@ -180,7 +185,9 @@ sub getneighbours {
   @dlist = ();
   @rlist = ();
   @alist = ();
-  @charg = ();
+  @charg2 = ();
+  @charg4 = ();
+  @charg6 = ();
   if ($inputcharges) {
     %chhash = split(/,|=/, $inputcharges);
   }
@@ -201,9 +208,13 @@ sub getneighbours {
             push @alist, $_;                 # Atom number
             if ($inputcharges) {
               $ps[0] =~ s/^\s+|\s+$//g;      # Trim whitespaces
-              push @charg, $chhash{$ps[0]};  # Uses user input charges
+              push @charg2, $chhash{$ps[0]};  # Uses user input charges
+              push @charg4, $chhash{$ps[0]};  # Uses user input charges
+              push @charg6, $chhash{$ps[0]};  # Uses user input charges
             } else {
-              push @charg, $ps[6];           # Oxidation state (valence / charge)
+              push @charg2, $ps[6];           # Oxidation state (valence / charge)
+              push @charg4, $ps[6];           # Oxidation state (valence / charge)
+              push @charg6, $ps[6];           # Oxidation state (valence / charge)
             }
             $rn = $rn->append( pdl([$r]) );  # Distance (Angstrom)
           }
@@ -212,30 +223,29 @@ sub getneighbours {
     }
   }
   $n = qsorti($rn);
-  if($savepcfile) {
     if (! -d "results") { mkdir "results"; }
-    print "atom ".($i+1)." ...\n";
+    print "atom ".($i+1)." ... results/$p0[7].pc\n";
     if(!$debug) { open (FOUT, ">results/$p0[7].pc"); } else { *FOUT = *STDOUT; }
     print FOUT "#-------------------------------------------------------------------------------------\n";
     print FOUT "#  table with neighbors and charges for atom ".($i+1)."\n";
-    print FOUT "# output of program makenn:, Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
+    print FOUT "# output of program cif2mcphas, Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
     print FOUT "#-------------------------------------------------------------------------------------\n";
     if ( (abs($rtoijk->at(1,0))+abs($rtoijk->at(2,0))+abs($rtoijk->at(2,1))) > 0.001 ) {
       print FOUT "#orthonormal coordinate system ijk is defined with respect to abc as j||b, k||(a x b) and i normal to k and j\n";
-      print FOUT "#charge[|e|]  di[A]   dj[A]   dk[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";
+      print FOUT "#c2[|e|]  di[A]   dj[A]   dk[A]  c4[|e|] c6[|e|]      da[a]    db[b]    dc[c]   distance[A] atomnr\n";
     } else {
-      print FOUT "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n"; }
-  }
+      print FOUT "#c2[|e|]  da[A]     db[A]     dc[A] c4[|e|] c6[|e|]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n"; }
+  
   for (0..$#rlist) {
     $id = $n->at($_+1)-1;
     $da = $dlist[$id];
     $xn = $rlist[$id];
-    $outstr = sprintf("%8.4g   %+10.6f %+10.6f %+10.6f     %+10.6f %+10.6f %+10.6f %+10.6f     %i\n",
-      $charg[$id],$xn->at(0,0),$xn->at(1,0),$xn->at(2,0),$da->at(0),$da->at(1),$da->at(2),$rn->index($n)->at($_+1),$alist[$id]+1);
-    if($savepcfile) { print FOUT $outstr; }
+    $outstr = sprintf("%8.4g   %+10.6f %+10.6f %+10.6f   %8.4g %8.4g      %+10.6f %+10.6f %+10.6f %+10.6f     %i\n",
+      $charg2[$id],$xn->at(0,0),$xn->at(1,0),$xn->at(2,0),$charg4[$id],$charg6[$id],$da->at(0),$da->at(1),$da->at(2),$rn->index($n)->at($_+1),$alist[$id]+1);
+     print FOUT $outstr; 
     push @retval, join(":",split(" ",$outstr));
-  }
-  if($savepcfile && !$debug) { close FOUT; }
+  } 
+  if(!$debug) { close FOUT; }
   return \@retval;
 }
 
@@ -538,6 +548,7 @@ for $j(0..$nofatom-1) {
   if($ismag[$j]) {
     $eltab = $magions{$at.$oxy[$j]."+"}; 
     if(${$eltab}[0] eq "") { $ismag[$j] = 0; }
+    if($nonmagnetic eq $dat[$j][0]){ $ismag[$j] = 0; }
   }
 }
 
@@ -564,6 +575,8 @@ if($interact) {
             $oxy[$j] = $ans;
             $eltab = $magions{$at.$oxy[$j]."+"};
             if(${$eltab}[0] eq "") { $ismag[$j] = 0; } else { $ismag[$j] = 1; }
+print $dat[$j][0]."\n";
+            if($nonmagnetic eq $dat[$j][0]){ $ismag[$j] = 0; }
           }
         }
       }
@@ -765,23 +778,30 @@ if ($pointcharge) {
   } 
 
   for $j (0..$#pos) {
-    @ps = split(":",$pos[$j]);
-    if($ismag[$ps[5]]) {
+    my @ps = split(":",$pos[$j]);
+    if($ismag[$ps[5]]) { 
       $ionname = $ps[4]; $ionname=~s/\s*//g; $ionname =~ s/p/\+/g; $eltab = $magions{$ionname};   # Looks up <r^k> values
       $nofelectrons = ${$eltab}[0]; $nofelectrons =~ s/^[0-9][a-z]//;                             # Looks up nof_electrons
       $so1ionname = ${$eltab}[3]; if ($so1ionname eq "") { $so1ionname = "J=1"; }                 # And ionname for pointc
       $ionkey = $ps[7];
-      if ($readpcfile) {
+      if (!$readpcfile) {getneighbours($j,\@pos,\@nmx,$rtoijkmc,$inputcharges);
+if(defined $screeningfile){
+  print "# Applying screening of pointcharges from file $screeningfile.\n";
+  system("mult 10 1 results/$ps[7].pc 1 2 ".$screeningfile);
+  system("mult 10 5 results/$ps[7].pc 1 3 ".$screeningfile);
+  system("mult 10 6 results/$ps[7].pc 1 4 ".$screeningfile);  
+                  }
+           }
         @neighbours = ();
         open(FIN, "results/$ps[7].pc");
         while (<FIN>) {
-          $_ =~ s/\R//g; if ($_ =~ /#/) { next; }                                                 # chomp and ignore comments
+          $_ =~ s/\R//g; if ($_ =~ /#/) { next; } 
+                                                # chomp and ignore comments
+ 
           @line = split; push @neighbours, join(":",@line);
-        }
+        } 
         close(FIN);
-      } else {
-        @neighbours = @{getneighbours($j,\@pos,\@nmx,$rtoijkmc,$inputcharges)};
-      }
+     if(!$savepcfile&&!$readpcfile){unlink "results/$ps[7].pc";}
       $pointcstr = join("\n",@neighbours);
       $pointcstr = "$so1ionname\nnof_electrons=$nofelectrons\nR2=${$eltab}[5]\nR4=${$eltab}[6]\nR6=${$eltab}[7]\n".$pointcstr;
       $pointcstr =~ s/:/\ /g;
@@ -1251,7 +1271,7 @@ if($interact){
  }
  copy("mcphas_magnetic_atoms.j","mcphas.j");
  system ("spinsfromq $na $nb $nc $h $k $l > results/mcphas.tst");
- system ("spins -f results/mcphas.tst 0");
+ system ("spins -f results/mcphas.tst 1");
 
 unless(open(FIN, "results/spins.out")){die "Error cif2mcphas reading results/spins.out\n";}
 while (<FIN>) { last if ($_ =~/%SECTION 3/)   

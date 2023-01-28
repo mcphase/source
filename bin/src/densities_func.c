@@ -169,7 +169,7 @@ int n;
  {// look for config number -Tin
   for(n=1;n<=-Tin;++n)
   {if(savmf.load(fin_coq)==0){fprintf(stderr,"Error program spins: loading configuration number %i\n",n);exit(1); }
-  }
+  }sprintf(outstr,"n=%i spins nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.nofatoms,savmf.nofcomponents);
  }
  return 0; // ok structure found
 }
@@ -222,7 +222,7 @@ char *token;cs.abc=0;
 		  {++n;if(n>cs.nofatoms||cs.nofatoms>cs.maxnofatoms)
                     {fprintf(stderr,"ERROR reading file:maximum number of atoms in unit cell exceeded\n");exit(EXIT_FAILURE);}
                    cs.sipffilenames[n]=new char[MAXNOFCHARINLINE];
-                   extract(instr,"sipffilename",cs.sipffilenames[n],(size_t)MAXNOFCHARINLINE);
+                   extract(instr,"sipffilename",cs.sipffilenames[n],(size_t)MAXNOFCHARINLINE,1);
 //		   printf("%s\n",cs.sipffilenames[n]);
                   }
   }

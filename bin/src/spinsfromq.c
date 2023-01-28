@@ -69,7 +69,7 @@ printf("#*****************************************************\n");
      
    T=1;hext=0;nettom=0;
    h=0;for(i=1;i<=inputpars.nofcomponents;++i)h(i)=0.1;
-  while(Norm(nettom)<0.1){
+  while(Norm(nettom)<0.1&&Norm(h)<1e10){
   for(i=1;i<=inputpars.nofatoms;++i)
   {(*inputpars.jjj[i]).Icalc(moment,T,h,hext,lnz,u,(*inputpars.jjj[i]).Icalc_parameter_storage_init(h,hext,T));
    for(j=1;j<=inputpars.nofcomponents;++j){nettom(j+(i-1)*inputpars.nofcomponents)=moment(j);
@@ -80,6 +80,12 @@ printf("#*****************************************************\n");
   }
   h*=2; // multiply field h by two until moment netoom gets large enough to have some sizable numbers
   }
+  // treat case of zero moment loop ended at high h ...
+  if(Norm(h)>=1e10)for(i=1;i<=inputpars.nofcomponents;++i)
+           for(j=1;j<=inputpars.nofcomponents;++j)nettom(j+(i-1)*inputpars.nofcomponents)=1;
+                                         
+    
+
   printf("#! Moment components: ");
   for(i=1;i<=inputpars.nofatoms;++i)
   {for(j=1;j<=inputpars.nofcomponents;++j){if(i==1)printf("M%i=%6.4f ",j,nettom(j+(i-1)*inputpars.nofcomponents));
@@ -148,7 +154,7 @@ printf("#*****************************************************\n");
  
   inputpars.savelattice(stdout);
   inputpars.saveatoms(stdout);
-  fprintf(stdout,"0 0   0    0 0 0  %i %i  %i #created by ",savspin.n(),savspin.nofatoms,savspin.nofcomponents);
+  fprintf(stdout,"#! 0 0   0    0 0 0  %i %i  %i #created by ",savspin.n(),savspin.nofatoms,savspin.nofcomponents);
   for(i=0;i<argc;++i)fprintf(stdout,"%s ",argv[i]);fprintf(stdout,"\n");
   savspin.print(stdout);
   printf("\n");

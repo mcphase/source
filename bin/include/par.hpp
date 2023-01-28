@@ -8,6 +8,9 @@
 #include "jjjpar.hpp"
 
 #define MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL 4000
+#define SMALL 1e-6  // for module kramer - to trigger numerical limited calculation 
+                    // for adding jjpar sets to see what is difference in position or what is equal
+                    // for checking jjj parameters if values are equal 
 
 class par
 { 
@@ -18,13 +21,19 @@ class par
   
   char *rems[MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL];
   jjjpar **jjj; // pointer of field of exchange parameter sets
-  Vector gJ;
+  //Vector gJ;
      
   //lattice
   float a,b,c,alpha,beta,gamma;
   Matrix r,rez;
   int nofatoms;
   int nofcomponents;
+
+   //elastic constants in Voigt notation in meV/atom, i.e. multiply by nofatoms to get 
+   // elastic energy for a crystallographic primitive unit cell as described by
+   // mcphas.j
+   Matrix Cel,CelInv;
+   
 
   //jjjpar 
    
@@ -40,11 +49,13 @@ void reduce_unitcell();//checks every atom in the unit cell and removes
                        // any atom, which is connected to another by a lattice vector
 void add(par & b); // add exchange parameters
 void scale(double scalefactor); // scale all interaction parameters by scalefactor
-void save(FILE * fout); // save lattice, atoms and exchange parameters to file
-void save(const char * filename); // save lattice, atoms and exchange parameters to file
+void save(FILE * fout,int noindexchange); // save lattice, atoms and exchange parameters to file
+void save(const char * filename,int noindexchange); // save lattice, atoms and exchange parameters to file
 void savelattice(FILE *fout);// save lattice to file
 void saveatoms(FILE *fout);// save atom positions and properties  to file
+void set_nofcomponents (int n); //sets the number of components in the interaction vector
 void increase_nofcomponents (int n); //increases the number of components in the interaction vector
+void decrease_nofcomponents (int n); //decreases the number of components in the interaction vector
 
 void save_sipfs(const char *path);   //save single ion parameter files filename to path*
 };

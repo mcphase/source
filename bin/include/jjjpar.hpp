@@ -60,7 +60,7 @@ public:
   char * clusterfilename;
     double J(); // returns total angular momentum if possible
    Vector &  tetan(); //returns stevens parameters if possible
-
+  Matrix * G; // magnetoelastic coupling constants for the ion (in meV)
   Vector xyz,mom; // atom position, moment
   int paranz;   // number of exchange parameters
   int nofcomponents; // number of moments (components of moment vector)
@@ -70,6 +70,7 @@ public:
   int *sublattice; // sublattice of neighbours
   int diagonalexchange;  // switch 1=exchange is diagonal, 0=exchange is not diagonal
    void increase_nofcomponents(int n); // increase nofcomponents by n
+   void decrease_nofcomponents(int n); // decrease nofcomponents by n
    void add(jjjpar & b, Vector & abc); // add parameters b to this
    void addpars (int number, jjjpar & addjjj); // enlarge the set of parameters by
                                                         // inserting a new exchange parameters addjjj
@@ -77,8 +78,9 @@ public:
    void scalepars (double scalefactor); // multiply all exchange parameters with scale factor
    void delpar (int number); // remove a neighbour from list
 
-   void save (FILE *file); // to save the parameters to a filehandle
+   void save (FILE *file,int noindexchange); // to save the parameters to a filehandle
    void saveatom (FILE *file); // to save the atom coordinates and properties to a filehandle
+   void saveG(FILE * file); // save coupling constants G
    void save_sipf(const char * path); //save single ion parameter file filename to path*
    void save_sipf(FILE *file); //save single ion parameter file filename to path*
 
@@ -107,7 +109,7 @@ private:
   Vector ABC;   // storage for single ion module paramters
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
   void get_parameters_from_sipfile(char * sipffilename); // function to read single ion parameter files
-  int  get_exchange_indices(char *instr, Matrix *exchangeindices);
+  int  get_exchange_indices(char *instr, Matrix *exchangeindices,const char * ie);
 
 public:
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents

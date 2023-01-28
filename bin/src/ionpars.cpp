@@ -98,7 +98,7 @@ ionpars::ionpars(FILE * cf_file, char * cffilename)
 // MIND: this code has to be kept consistent with the code in cf1ion_module/eingabe.c (function read_new_format())
 // ( reason: the stand alone c-progams so1ion, cfield should be consistent with the c++ programs
 // mcphas, mcdisp etc (using this input routine)
-{ static int pr=1;
+{ static int pr=1; // for output verbose
   int dimj;complex<double> im(0,1);
   int i,j,l,m,nof_electronsr,inof=0,ir2=0,ir4=0,ir6=0,ialpha=0,ibeta=0,igamma=0,igj=0; 
   double alphar,betar,gammar,r2r,r4r,r6r,gJr;
@@ -134,7 +134,7 @@ int perlp=1;//by default try perlparse
    while(feof(cf_file)==false)
   {fgets(instr, MAXNOFCHARINLINE, cf_file);
           // in IONTYPE line there is no #!perl ... do not perlparse
-        if(!extract(instr,"IONTYPE",iontype,(size_t)MAXNOFCHARINLINE)&&strstr (instr,"#!perl")==NULL)perlp=0;
+        if(!extract(instr,"IONTYPE",iontype,(size_t)MAXNOFCHARINLINE,1)&&strstr (instr,"#!perl")==NULL)perlp=0;
         inof+=1-extract(instr,"nof_electrons",nof_electrons); //MR 120127
         kq3[0]='B';for(int i=0;i<=45;++i){strncpy(kq3+1,kq+i*3,3);if(kq3[3]==' ')kq3[3]='\0';
                                           extract(instr,kq3,Blm(i));}
@@ -221,8 +221,8 @@ int perlp=1;//by default try perlparse
   double  modydycr[31*31],modydyci[31*31];
   double  modzdzcr[31*31],modzdzci[31*31];
     
-if (pr==1) {printf("#using %s ...\n",moduletype);}
-  fprintf(stderr,"# module %s ... for ion %s\n",moduletype,iontype);
+//if (pr==1) {printf("#using %s ...\n",moduletype);}
+//  fprintf(stderr,"# module %s ... for ion %s\n",moduletype,iontype);
   cfield_mcphasnew(iontype,Jxr,Jxi,  Jyr, Jyi, Jzr, Jzi,
   mo22sr,mo22si,
   mo21sr,mo21si,
@@ -285,10 +285,9 @@ if (pr==1) {printf("#using %s ...\n",moduletype);}
   &dimj,&alphar,&betar,&gammar,&gJr,&r2r,&r4r,&r6r, &nof_electronsr);
 
 
-if (pr==1) printf("#end using %s\n",moduletype);
+//if (pr==1) printf("#end using %s\n",moduletype);
 
    J=((double)dimj-1)/2; //momentum quantum number
-if (pr==1) printf("#J=%g\n",J);
    Ja = Matrix(1,dimj,1,dimj); 
    ComplexMatrix Jaa(1,dimj,1,dimj); 
    for(i=1;i<=dimj;++i)for(j=1;j<=dimj;++j)
@@ -573,8 +572,7 @@ if(fabs(s0r)+fabs(s1r)+fabs(s2r)+fabs(s0i)+fabs(s1i)+fabs(s2i)>SMALL_DEVIATION)
   // ------------------------------------------------------------
   // here transform the Llm (if present) to Blm ...
   Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
-
-   fprintf(stderr,"#crystal field parameters:\n");  
+   fprintf(stderr,"#! IONTYPE=%s J=%g crystal field parameters:\n",iontype,J);  
    const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 Dx4 Dy4 Dz4";
    char lm4[5];lm4[4]='\0';
    for(i=0;i<=NOF_OLM_MATRICES;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}

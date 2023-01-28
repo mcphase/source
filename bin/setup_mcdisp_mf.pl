@@ -12,31 +12,45 @@ $ARGV[2]=~s/x/*/g;$ARGV[2]=eval $ARGV[2];
 $ARGV[3]=~s/x/*/g;$ARGV[3]=eval $ARGV[3];
             }
 print STDOUT << "EOF";
-******************************************************************
-* setup_mcdisp_mf 221011 setting up mcdisp.mf to be used by mcdisp
+#******************************************************************
+#* setup_mcdisp_mf 221011 setting up mcdisp.mf to be used by mcdisp
 EOF
+print STDOUT "# reading results/".$prefix."mcphas.mf\n";
+print STDOUT "# writing mcdisp.mf\n";
 if ($#ARGV>2) { 
-print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
+print STDOUT "#T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
 $err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > mcdisp.mf");
              }
 else
             {
-print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
+print STDOUT "# x=$ARGV[0]  y=$ARGV[1] \n";
 $err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1]  > mcdisp.mf");
              }
 if($err){unlink "mcdisp.mf";exit(1);}
 
 
-
+if($prefix){
 print STDOUT << "EOF";
-*******************************************************
-reading results/mcphas.mf
-....writing mcdisp.mf
-reading results/mcphas.sps
-....writing results/spins.*
+# file mcdisp.mf created
+# *******************************************************
+# create some graphical eps and jvx files, too ...
+# reading results/$prefixmcphas.mf
+# reading results/$prefixmcphas.sps
+# ....writing results/spins.*
 EOF
-
+system ("spins -prefix $prefix $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
+}else{
+print STDOUT << "EOF";
+# file mcdisp.mf created
+# *******************************************************
+# create some graphical files, too ...
+# reading results/mcphas.mf
+# reading results/mcphas.sps
+# ....writing mcdisp.mf
+# ....writing results/spins.*
+EOF
 system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
+}
 
 
 print STDOUT << "EOF";

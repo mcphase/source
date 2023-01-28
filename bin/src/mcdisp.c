@@ -1711,7 +1711,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                            sprintf(filename,"./results/%smcdisp_scaled.j",ini.prefix);
                           printf("# saving  %s\n",filename);
                           jqfile = fopen_errchk (filename,"w");
-                           inputpars.save(jqfile);
+                           inputpars.save(jqfile,0);
                            fclose(jqfile);
                            }
      }
@@ -1845,7 +1845,7 @@ for (i=1;i<=argc-1;++i){
   if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}
   if(ini.nofatoms!=inputpars.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.nofatoms);exit(EXIT_FAILURE);}
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
-  strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix);
+  strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix,0);
 
 int do_phonon=1;
 //calculate dispersion and save to files

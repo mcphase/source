@@ -340,24 +340,24 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
      QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQz",deltaq[3]); 
      if(QxQyQzblock==9){++nofhkllists;QxQyQzblock=0;i+=(int)ceil(fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1));}
 
-     if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1))
+     if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;
                   fclose(finhkl);++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1))
+     if(!extract_with_prefix(instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;
                   fclose(finhkl);++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
+     if(!extract_with_prefix(instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
                  {if(!extract(instr,"Nstp",N))i+=N;++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
+     if(!extract_with_prefix(instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
                  {if(!extract(instr,"Nstp",N))i+=N;++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1))  
+     if(!extract_with_prefix(instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1,1))  
                  {if(!extract(instr,"Nstp",N)&&!extract(instr,"Mstp",M))i+=N*M;++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1))  
+     if(!extract_with_prefix(instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1,1))  
                  {if(!extract(instr,"Nstp",N)&&!extract(instr,"Mstp",M))i+=N*M;++nofhkllists;
                  }
   }
@@ -444,7 +444,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
                                     }
                     }
                 // treat hklplane statements
-                if(!extract_with_prefix(instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1)) //#hklplane=h0=0 k0=1 l0=0 to hN=1 kN=1 lN=0 Nstp=21 to hM=1 kM=0 lM=3 Mstp=21  
+                if(!extract_with_prefix(instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1,1)) //#hklplane=h0=0 k0=1 l0=0 to hN=1 kN=1 lN=0 Nstp=21 to hM=1 kM=0 lM=3 Mstp=21  
                  { if(extract(instr,"h0",h0)){printf("error mcdisp reading mcdisp.par: in hklplane - h0 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"k0",k0)){printf("error mcdisp reading mcdisp.par: in hklplane - k0 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"l0",l0)){printf("error mcdisp reading mcdisp.par: in hklplane - l0 not found");exit (EXIT_FAILURE);}
@@ -467,7 +467,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
                  }
 
                 // treat QxQyQzplane statements
-                if(!extract_with_prefix(instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1)) //#QxyQzplane=Qx0=0 Qy0=1 Qz0=0 to QxN=1 QyN=1 QzN=0 Nstp=21 to QxM=1 QyM=0 QzM=3 Mstp=21
+                if(!extract_with_prefix(instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1,1)) //#QxyQzplane=Qx0=0 Qy0=1 Qz0=0 to QxN=1 QyN=1 QzN=0 Nstp=21 to QxM=1 QyM=0 QzM=3 Mstp=21
                  { if(extract(instr,"Qx0",h0)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Qx0 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"Qy0",k0)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Qy0 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"Qz0",l0)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Qz0 not found");exit (EXIT_FAILURE);}
@@ -495,7 +495,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
 
 
                 // treat hklline statements
-                if(!extract_with_prefix(instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
+                if(!extract_with_prefix(instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
                  { if(extract(instr,"h1",h1)){printf("error mcdisp reading mcdisp.par: in hklline - h1 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"k1",k1)){printf("error mcdisp reading mcdisp.par: in hklline - k1 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"l1",l1)){printf("error mcdisp reading mcdisp.par: in hklline - l1 not found");exit (EXIT_FAILURE);}
@@ -513,7 +513,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
                                     }
                  }
                 // treat QxQyQzline statements
-                if(!extract_with_prefix(instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
+                if(!extract_with_prefix(instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
                  { if(extract(instr,"Qx1",h1)){printf("error mcdisp reading mcdisp.par: in hklline - h1 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"Qy1",k1)){printf("error mcdisp reading mcdisp.par: in hklline - k1 not found");exit (EXIT_FAILURE);}
                    if(extract(instr,"Qz1",l1)){printf("error mcdisp reading mcdisp.par: in hklline - l1 not found");exit (EXIT_FAILURE);}
@@ -535,13 +535,13 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
                                     }
                  }
                  // treat hklfile statements
-                if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1))
+                if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                   read_hkl_list(finhkl,hkls,0,do_jqfile,abc);
                   fclose(finhkl);
                  }
                  // treat QxQyQzfile statements
-                if(!extract_with_prefix(instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1))
+                if(!extract_with_prefix(instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                   read_hkl_list(finhkl,hkls,1,do_jqfile,abc);
                   fclose(finhkl);

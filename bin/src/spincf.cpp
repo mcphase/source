@@ -9,7 +9,7 @@
 #include "jjjpar.hpp"
 
 #define MAXNOFSPINS  200
-#define SMALL 0.03
+#define SMALLSPINDIFF 0.03
 // output functions
 #include "spincf_out.cpp"
 
@@ -21,7 +21,7 @@ int spincf::spequal(Vector a,Vector b)
  //this is by looking if any of the components of the 2 spins have different signs
  int i;
  for (i=a.Lo();i<=a.Hi();++i)
- {if (fabs(a(i))>SMALL||fabs(b(i))>SMALL)
+ {if (fabs(a(i))>SMALLSPINDIFF||fabs(b(i))>SMALLSPINDIFF)
   {if(signum(a(i))!=signum(b(i))){return false;}
   }
  }
@@ -407,6 +407,8 @@ spincf & spincf::operator= (const spincf & op2)
  nofatoms=op2.nofatoms;
  wasstable=op2.wasstable;
  nofcomponents=op2.nofcomponents;
+  epsilon=Vector(1,6);
+  epsilon=op2.epsilon;
   delete []mom;
 //dimension arrays
   mom = new Vector[mxa*mxb*mxc+1];for(k=0;k<=mxa*mxb*mxc;++k){mom[k]=Vector(1,nofcomponents*nofatoms);}
@@ -509,7 +511,7 @@ return 0; //not equal
 //from n1xn2xn3 unit cells with na number in the cryst. basis and nc number of components of the spin of each atom
 spincf::spincf (int n1,int n2,int n3,int na,int nc)
 { wasstable=0;
-  int l;
+  int l;epsilon=Vector(1,6);
   nofa=n1;nofb=n2;nofc=n3;
    mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
   nofatoms=na;
@@ -530,7 +532,8 @@ spincf::spincf (const spincf & p)
   wasstable=p.wasstable;
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
-  
+  epsilon=Vector(1,6);
+  epsilon=p.epsilon;
 //dimension arrays
   mom = new Vector[mxa*mxb*mxc+1];for(k=0;k<=mxa*mxb*mxc;++k){mom[k]=Vector(1,nofcomponents*nofatoms);}
   if (mom == NULL)

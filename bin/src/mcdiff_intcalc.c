@@ -136,7 +136,7 @@ int getint(jjjpar ** jjjpars,int hi,int ki,int li,float thetamax,Vector rez1,Vec
 					                msfdipx+=(*jjjpars[i]).mom(5)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // orbital FF
 					                msfdipy+=(*jjjpars[i]).mom(7)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                msfdipz+=(*jjjpars[i]).mom(9)*FQL/2*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
-                                                       if (Q<SMALL){// for Q=0 put dipole results, because M(Q) givs NaN
+                                                       if (Q<SMALLPOSITIONDEVIATION){// for Q=0 put dipole results, because M(Q) givs NaN
                                                                  msfx+=(*jjjpars[i]).mom(4)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q); // spin FF
 					                         msfy+=(*jjjpars[i]).mom(6)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
 					                         msfz+=(*jjjpars[i]).mom(8)*FQ*exp(-2*PI*qr*im)*(*jjjpars[i]).debyewallerfactor(Q);
@@ -386,7 +386,7 @@ else
                 complex <double> mqx=0,mqx2=0,mqxy=0;
                 complex <double> mqy=0,mqy2=0,mqxz=0;
                 complex <double> mqz=0,mqz2=0,mqyz=0;
-          if(fabs(rint(hkl[i](1))-hkl[i](1))>SMALL||fabs(rint(hkl[i](2))-hkl[i](2))>SMALL||fabs(rint(hkl[i](3))-hkl[i](3))>SMALL)
+          if(fabs(rint(hkl[i](1))-hkl[i](1))>SMALLPOSITIONDEVIATION||fabs(rint(hkl[i](2))-hkl[i](2))>SMALLPOSITIONDEVIATION||fabs(rint(hkl[i](3))-hkl[i](3))>SMALLPOSITIONDEVIATION)
           {Imag=0;inuc=0;Imagdip=0;
           Vector Qvec(1,3);
             //calculate d spacing  ************

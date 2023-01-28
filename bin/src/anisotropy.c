@@ -37,14 +37,15 @@ fprintf(stderr,"#*\n");
 fprintf(stderr,"#* anisotropy - program to calculate magnetic anisotropy \n");
 fprintf(stderr,"#*\n");
 fprintf(stderr,"#**************************************************************************\n\n");
-int p=6;
+int poly=0,P=6,doeps=0;//single crystal
 // check command line
 //T H xn yn zn nofsteps 
   if(argc<4){fprintf(stderr,"ERROR anisotropy: too few parameters\n");exit(EXIT_FAILURE);}
   T=strtod (argv[1], NULL); 
   H=strtod (argv[2], NULL); 
 Vector direction(1,3);
-if (strcmp(argv[3],"-p")==0){p=4;//polycrystal
+if (strcmp(argv[3],"-p")==0){P=4;poly=1;//polycrystal
+                    
                             }
 else{
   direction(1)=strtod (argv[3], NULL); 
@@ -52,16 +53,17 @@ else{
   direction(3)=strtod (argv[5], NULL); 
 }  
 
-nofsteps=(int)strtod (argv[p], NULL); 
+nofsteps=(int)strtod (argv[P], NULL); 
   double dtheta=PI/abs(nofsteps)+0.000001;
 
-if (argc>=8)if (strcmp(argv[p+1],"-r")==0)
-                 {do_sipffile=1;strcpy(sipffilename,argv[p+2]);
+if (argc>=8){if (strcmp(argv[P+1],"-doeps")==0){doeps=1;}
+             if (strcmp(argv[P+1],"-r")==0)
+                 {do_sipffile=1;strcpy(sipffilename,argv[P+2]);
                  }
-
+            }
 Vector x(1,3),r1(1,3),r2(1,3);x=0;x(1)=1;
 
-if(p==6){
+if(poly==0){
  direction/=Norm(direction); // normalize
 // now get r1 and r2 which are the basis vectors of the plane of rotation
   if (fabs(direction*x)>0.95){x=0;x(2)=1;}
@@ -71,7 +73,7 @@ if(p==6){
         }
 
  FILE * fout;fout=fopen_errchk("./results/anisotropy.out","w");
-if(p==6){
+if(poly==0){
 fprintf(fout,
 "# output file of program: anisotropy @command\n"
 "#! displayxtext=azimuth(deg) in plane perpendicular to [%g %g %g] direction\n"
@@ -92,10 +94,10 @@ if(do_sipffile){
  jjjpar jjj(0,0,0,sipffilename,argc-9);jjj.save_sipf("./results/_");
  int nofcomponents=argc-9;
  Vector Hxc(1,nofcomponents);
- for(int j=1;j<=nofcomponents;++j)Hxc=(int)strtod (argv[j+2+p], NULL); 
+ for(int j=1;j<=nofcomponents;++j)Hxc=(int)strtod (argv[j+2+P], NULL); 
  Hxc=0;h=0;Vector m(1,3);
  jjj.Icalc_parameter_storage_init(Hxc,h,T);
-if(p==6){
+if(poly==0){
  // loop different H 
  for(double az=0;az<2*PI-0.00001;az+=2*PI/nofsteps)
  {h=H*(cos(az)*r1+sin(az)*r2);
@@ -109,7 +111,7 @@ if(p==6){
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T,H,h(1),h(2),h(3),az*180/PI,Norm(m),m(1),m(2),m(3),m*h/Norm(h));  
  }      
-       } // p==6
+       } // poly==0
 else
  {// loop sphere
 
@@ -131,12 +133,13 @@ else
  fprintf(stdout,"# T(K) H(Tesla) Mpolycrystal (mB) \n %6.3f %6.3f %6.3f \n",T,H,mpoly);
  fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T,H,mpoly);
 
- }      // p==6
+ }      // poly==0
 }else{  // !do sipf
 // as class par load  parameters from file
  if(verbose==1){printf("reading parameters from file mcphas.j\n");}
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
- inipar ini("mcphas.ini",prefix); par inputpars("./mcphas.j"); inputpars.save("./results/_mcphas.j"); 
+ inipar ini("mcphas.ini",prefix);ini.doeps=doeps;
+ par inputpars("./mcphas.j"); inputpars.save("./results/_mcphas.j",0); 
  nofthreads = ini.nofthreads;
   Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
   Vector Imom(1,inputpars.nofcomponents);
@@ -158,7 +161,7 @@ else
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
    	int nofstapoints=0,noffailedpoints=0,s=0;
 
-if(p==6){
+if(poly==0){
  // loop different H /T points in phase diagram
  for(double az=0;az<2*PI-0.00001;az+=2*PI/nofsteps)
  {h=H*(cos(az)*r1+sin(az)*r2);

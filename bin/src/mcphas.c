@@ -27,7 +27,7 @@ int main (int argc, char **argv)
 { std::clock_t startcputime = std::clock();
   FILE * fin=NULL; 
   char outfilename[MAXNOFCHARINLINE];
-  int im,j,l;
+  int im,j,l,doeps=0;
   int nofstapoints=0,noffailedpoints=0;
   int options=1; // this integer indicates how many command strings belong to 
                  //options (=1+number of option-strings)
@@ -54,6 +54,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   for (im=0;im<=argc-1;++im)
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
+   if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-a")==0) {filemode="a";if (options<im)options=im;} // append output files
    if (strcmp(argv[im],"-stamax")==0&&im+1<=argc-1)
                                  {stamax=strtod (argv[im+1], NULL); // read stamax
@@ -67,7 +68,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
                                   fprintf(stdout,"#reading stable points from mcphas ouput files: results/%s*\n",readprefix);
  				 if (options<im+1)options=im+1;}
   }
-    inipar ini("mcphas.ini",prefix);
+    inipar ini("mcphas.ini",prefix);    ini.doeps=doeps;
     if(errexit==1)ini.errexit();
 
   if (ini.exit_mcphas!=0)
@@ -83,14 +84,16 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
  par inputpars(prefix); 
 // here save single ion property files to results
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
-  strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix);
+  strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
 
   Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
   Vector Imom(1,inputpars.nofcomponents);
   Vector mmax(1,3*inputpars.nofatoms);
   Vector mmom(1,3);
   Vector h1(1,inputpars.nofcomponents),h1ext(1,3);h1ext=0;
- 
+ if(doeps){printf("#Inverting Elastic Constants Matrix\n");
+  inputpars.Cel.Inverse();
+           }
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
 if(verbose==1){printf("determine saturation momentum running singleion calculations for different fields");}
 T=1.0;for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
@@ -177,14 +180,14 @@ if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
             //save physical properties of HT-point
 	    //sta=(sta*nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
-          sta+=physprop.save (verbose,filemode,j,inputpars,ini.prefix);
+          sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
    	    ++nofstapoints;
           if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 
 	 case 1: goto endproper;
 	      break;
          case 2: //ht calculation leads to no results- save dummy line
-	         physprop.save (verbose,filemode,j,inputpars,ini.prefix);
+	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
 		 sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
      	      ++noffailedpoints;
 	      break;	 

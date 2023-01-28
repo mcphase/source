@@ -31,13 +31,13 @@ cat << EOF > results/.fe_status.dat
 0 0 0 0 0 0 0 0 0 0 0 0 0
 1 1 1 1 1 1 1 1 1 1 1 1 1
 EOF
-java display 1 2 ./results/.fe_status.dat 1 3 ./results/.fe_status.dat 1 5 ./results/.fe_status.dat 2> /dev/null &
+java display -title "blue:log(iteration)red:log(sta)green:stepratio" 1 2 ./results/.fe_status.dat 1 3 ./results/.fe_status.dat 1 5 ./results/.fe_status.dat 2> /dev/null &
 status1id=$!
-java display 1 4 ./results/.fe_status.dat 1 5 ./results/.fe_status.dat 2> /dev/null  &
+java display -title "blue:log(spinchange)red:free-energygreen:stepratio" 1 4 ./results/.fe_status.dat 1 7 ./results/.fe_status.dat 1 5 ./results/.fe_status.dat 2> /dev/null  &
 status2id=$!
 fi
 
- sleep 2
+ sleep 4
  #start calculation program
  mcphasit $@
  sleep 1

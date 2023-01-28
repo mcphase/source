@@ -11,8 +11,8 @@ print "#********************************************************\n";
 $PI=3.14159265358979323846;
  $bvkA=25;
  $bvkalpha=0.1;
- $Cel= zeroes (6,6); # for storage of elastic constants if needed
- # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
+ $Cel= zeroes (7,7); # for storage of elastic constants if needed
+  # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
 
 unless ($#ARGV>=0) 
 
@@ -74,7 +74,7 @@ print "              are written, too. Omit filename to create a sample file wit
 print "              longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m\n";
 
 print STDOUT << "EOF";
- option -cfph 
+ option -cfph [screeningfile.r]
               calculate crystal field phonon interaction: mcphas.j lists 
               magnetic and non magnetic atoms with charges defined in the 
               sipf files by CHARGE= variable. For magnetic atoms the sipf 
@@ -94,6 +94,10 @@ print STDOUT << "EOF";
               and the phonon model has to be added to makenn.j,  e.g. by
               program addj, moreover magnetic sites sipf files are required, 
               e.g. such as created in results/makenn.a*.sipf. 
+              a screening file can be used to define distance dependent 
+              screening of charges for the pointcharge model calculation
+              format: col1 distance r (Angstroem) col 2 screening factor 
+              for B2m, col 3 for B4m and col 4 for B6m
  option -e [filename]
  option -f [filename]
  option -dm [filename]
@@ -187,7 +191,7 @@ elsif(/-bvk/)
              {while($line=<Fin>){next if $line=~/^\s*#/;
                                  my @numbers=split(" ",$line);
                                  if($#numbers>=4)
-                                 {++$nof_springs;print $line;
+                                 {++$nof_springs;#print $line;
                                   $atom_n[$nof_springs]=$numbers[0];
                                   $atom_m[$nof_springs]=$numbers[1];
                                   $bondlength[$nof_springs]=$numbers[2];
@@ -202,6 +206,7 @@ elsif(/-bvk/)
 elsif(/-cfph/)
 {$cfph=1; shift @ARGV;
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
+ $screeningfile=$ARGV[0];
 }
 elsif(/-e/||/-f/||/-dm/||/-jp/)
   {$readtable=$_;shift @ARGV;
@@ -388,7 +393,8 @@ print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
      # initialize output file results/makenn.j
   ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
 print "# number of atoms = $nofatoms\n calculating ...\n";
-}               
+}            
+@atoms=();   
  for ($nnn=1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)    
  {unless($tabout){ if($nnn>$nofatoms){print "# new magnetic ";}
    print "# atom $nnn ...";}
@@ -416,7 +422,8 @@ print "# number of atoms = $nofatoms\n calculating ...\n";
      my ($Jca)=new PDL();    
      my ($Jcb)=new PDL();    
      my ($Jcc)=new PDL(); 
-     
+     my $Gmix= zeroes (7,4); # for storage of mixing term phonon strain interaction constants
+
     
   for ($n1=$n1min;$n1<=$n1max;++$n1){ 
   for ($n2=$n2min;$n2<=$n2max;++$n2){ 
@@ -482,8 +489,9 @@ else{die "Error makenn - creating table for option $_ \n";}
     $jn=$jn->append( pdl ([$rvec->at(1)]));
     $kn=$kn->append( pdl ([$rvec->at(2)]));
 
-    my ($interaction) = getinteraction($gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$r,$rvec->at(0),$rvec->at(1),$rvec->at(2));
-    my ($jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
+    my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$r,$rvec->at(0),$rvec->at(1),$rvec->at(2));
+    my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
+
     $Jaa=$Jaa->append( pdl ([$jaa]));
     $Jab=$Jab->append( pdl ([$jab]));
     $Jac=$Jac->append( pdl ([$jac]));
@@ -592,25 +600,37 @@ unless($DM>0){
    if($nofneighbours[$nnn]==-1){$nofneighbours[$nnn]=0;}
    unless($tabout){print $nofneighbours[$nnn]." neighbours found\n";}
    $n= qsorti($rn); 
-unless($tabout){printneighbourlist($h,$l,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);}
+
+unless($tabout){printneighbourlist($Gmix,$h,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);}
  }
 
-
-
- endprint($h,$l);   
+unless($tabout){ endprint($h,$l);  }
+ 
 if($cfph!=0){
 # for cf phonon interaction recreate makenn.j
 my ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
+@atoms=();
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
- { # run pointc to create derivatives of Blm from pointcharge model for magnetic atoms
+ { # if screeningfile is given - use it and screen charges 
+  if($screeningfile){
+  system("fillcol 5 c1 results/makenn.a$nnn.pc");
+  system("fillcol 6 c1 results/makenn.a$nnn.pc");
+  system("mult 8 1 results/makenn.a$nnn.pc 1 2 ".$screeningfile);
+  system("mult 8 5 results/makenn.a$nnn.pc 1 3 ".$screeningfile);
+  system("mult 8 6 results/makenn.a$nnn.pc 1 4 ".$screeningfile);  
+   # run pointc to create derivatives of Blm from pointcharge model for magnetic atoms
+  system("pointc -d ".$sipf_file[$nnn]." results/makenn.a$nnn.pc 5 6 > results/makenn.a$nnn.sipf");
+   } else {
+   # run pointc to create derivatives of Blm from pointcharge model for magnetic atoms
   system("pointc -d ".$sipf_file[$nnn]." results/makenn.a$nnn.pc > results/makenn.a$nnn.sipf");
+          }
   $sipf_file[$nnn]="results/makenn.a$nnn.sipf";
   if($cfph==2){copy("results/pointc.dLlm","results/makenn.a$nnn.dLlm");}
   if($cfph==3){copy("results/pointc.dBlm","results/makenn.a$nnn.dBlm");}
  }
 for($nnn=1;$nnn<=$nofatoms;++$nnn){$nofneighbours[$nnn]=0;}
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
- {
+ {my $GG= zeroes(7,28); # to be filled with Gcfph
 
 # $nph[$nnn] contains the index of the PHONON atom corresponing to the magnetic atom $nnn
 # - load the indices of the neighbours from makenn.a$nnn.pc and combine these into a field
@@ -633,11 +653,19 @@ close Fin;
                    if($#numbers>=4)
                     {++$nofn;
 
-   $rvec=pdl [$numbers[0],$numbers[1],$numbers[2]];
+   $rvec=pdl [$numbers[0],$numbers[1],$numbers[2]]; # relative position
+ #  of charged nucleus with respect to magnetic ion in eucliedean coordinates [Angstroem]
    $aabbcc=$rvec x $invrtoijk;$aabbcc=$aabbcc->slice(":,(0)");
    $da=$aabbcc->at(0);
    $db=$aabbcc->at(1);
-   $dc=$aabbcc->at(2);
+   $dc=$aabbcc->at(2); # ... transformed to lattice
+  
+   $abc=pdl [$x[$nnn],$y[$nnn],$z[$nnn]]; # positio vector of magnetic ion in lattice coordinates
+   $Rnnn= $dabc x $rtoijk;$Rnnn=$Rnnn->slice(":,(0)"); # ... transformed to euclidean system [Angstroem]
+  $Rx=$numbers[0]+$Rnnn->at(0);  # position vector of charged nucleus in euclidean syste [Angstroem]
+  $Ry=$numbers[1]+$Rnnn->at(1);
+  $Rz=$numbers[2]+$Rnnn->at(2);  # ... needed to calculate Gcfph
+
   $outstring=sprintf("%+10.6f %+10.6f %+10.6f ",$da, $db ,($dc-0.1/$c));
   $outstringp=sprintf("%+10.6f %+10.6f %+10.6f ",-$da, -$db ,-$dc+0.1/$c);
   # now the off diagonal Elements: Jab Jba Jac Jca Jad Jda .. Jbc Jcb Jbd Jdb ... Jcd Jdc ... etc.
@@ -645,15 +673,41 @@ close Fin;
   #                 I1    I2    I3    I4  I5
   # for PHONON      ux    uy    uz    dum dum dum ...
   # for so1ion      O11  O11s   O10   O22s O21s ...
-  # Hamiltonian Hcfph= - sum_i<j,lmgamma u_gamma(i) (-)dBlm/du_gamma  Olm(j) = 
+  # Hamiltonian Hcfph= - sum_i<j,lmgamma u_gamma(i) (-)dBlm(j)/du_gamma(i)  Olm(j) = 
   #                  =-sumi<j_alphabeta  Ialpha Jalphabeta Ibeta
   #                  =-1/2sumij_alphabeta  Ialpha Jalphabeta Ibeta
-  # note: the factor 1/2 comes from the fact, that the pairs are counted twice in the last expression 
-  # i.e. J12=0 J13=0 J41=-2 dB22s/dux J14=0 J51=-2 dB21s/dux J15=0 ...
+  # note: the factor 1/2 comes from the fact, that the pairs are counted twice
+  # in the last line. The interaction Jalphabeta is the same as in the lines above.
+  # i.e. J12=0 J13=0 J41=- dB22s/dux J14=0 J51=- dB21s/dux J15=0 ...
   # so1ion 5+9+13=27 ... 27x3=81  5+81=86
   # ic1ion 8+9+13=30 ... 27x3=81  8+81=89
   $soff=0;if($cfph==2){$off=3;}
-  for($i=6+$soff;$i<=86+$soff;++$i){$outstring.= " ".(-$numbers[$i]);$outstringp.= " ".(-$numbers[$i]);}
+  for($i=6+$soff;$i<=86+$soff;++$i){$outstring.= " ".(-$numbers[$i]);
+                                    $outstringp.= " ".(-$numbers[$i]);
+                                    }
+  for($lm=1;$lm<=27;++$lm){
+   $ix=($lm-1)*3+$off+6; # $numbers[$ix]=dBlm/dux
+   $iy=($lm-1)*3+$off+6+1; # $numbers[$ix]=dBlm/duy
+   $iz=($lm-1)*3+$off+6+2; # $numbers[$ix]=dBlm/duz
+   # $i ... dBlm/dux  $i+1  ... dBlm/duy  $i+2 ... dBlm/duz
+   
+   # voigt component 11 $lm
+   $GG->slice("1,$lm")+=-$Rx*$numbers[$ix]/0.5292;  
+ # a0=0.5292 Angstroem (needed because $Rx is in Angstroem and 
+ # cf parameter derivative is in units of a0 as delivered by pointc program
+   # voigt component 22 $lm
+   $GG->slice("2,$lm")+=-$Ry*$numbers[$iy]/0.5292;  
+   # voigt component 22 $lm
+   $GG->slice("3,$lm")+=-$Rz*$numbers[$iz]/0.5292;  
+   # voigt component 4=(23) $lm
+   $GG->slice("4,$lm")+=-0.5*($Ry*$numbers[$iz]+$Rz*$numbers[$iy])/0.5292;  
+   # voigt component 5=(13) $lm
+   $GG->slice("5,$lm")+=-0.5*($Rx*$numbers[$iz]+$Rz*$numbers[$ix])/0.5292;  
+   # voigt component 6=(12) $lm
+   $GG->slice("6,$lm")+=-0.5*($Rx*$numbers[$iy]+$Ry*$numbers[$ix])/0.5292;  
+
+   }
+
   $outstring.= "\n";
   $outstringp.= "\n";
    $ph[$nnn].=$outstring;
@@ -663,53 +717,79 @@ close Fin;
                     }
                    }
   close Fin;
+  for($j=1;$j<=27;++$j){for($i=1;$i<=6;++$i){
+  $Gcfph[$nnn].=" ".$GG->at($i,$j);}}
  }
+# here output the phononic atoms with module phonon first
 for($nnn=1;$nnn<=$nofatoms;++$nnn)
- {print $l ("#*************************************************************************\n");
-  print $l ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".$z[$nnn]." nofneighbours=".$nofneighbours[$nnn]." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
-  print $l ("# crystal field phonon interaction parameters from pointcharge calculation\n");
-  print $l ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
+ {push @atoms, ("#*************************************************************************\n");
+  push @atoms, ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".$z[$nnn]." nofneighbours=".$nofneighbours[$nnn]." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
+  push @atoms, ("# crystal field phonon interaction parameters from pointcharge calculation\n");
+  push @atoms, ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
   if($cfph==2){
-  print $l ("#! symmetricexchange=0 indexexchange= 1,7 2,7 3,7 1,8 2,8 3,8 1,9 2,9 3,9 1,10 2,10 3,10 1,11 2,11 3,11 ");
+  push @atoms, ("#! symmetricexchange=0 indexexchange= 1,7 2,7 3,7 1,8 2,8 3,8 1,9 2,9 3,9 1,10 2,10 3,10 1,11 2,11 3,11 ");
   #O4m
-  print $l (" 1,19 2,19 3,19 1,20 2,20 3,20 1,21 2,21 3,21 1,22 2,22 3,22 1,23 2,23 3,23 1,24 2,24 3,24 1,25 2,25 3,25 1,26 2,26 3,26 1,27 2,27 3,27 ");
+  push @atoms, (" 1,19 2,19 3,19 1,20 2,20 3,20 1,21 2,21 3,21 1,22 2,22 3,22 1,23 2,23 3,23 1,24 2,24 3,24 1,25 2,25 3,25 1,26 2,26 3,26 1,27 2,27 3,27 ");
   #O6m
-  print $l (" 1,39 2,39 3,39 1,40 2,40 3,40 1,41 2,41 3,41 1,42 2,42 3,42 1,43 2,43 3,43 1,44 2,44 3,44 1,45 2,45 3,45 1,46 2,46 3,46 1,47 2,47 3,47 1,48 2,48 3,48 1,49 2,49 3,49 1,50 2,50 3,50 1,51 2,51 3,51 \n");
+  push @atoms, (" 1,39 2,39 3,39 1,40 2,40 3,40 1,41 2,41 3,41 1,42 2,42 3,42 1,43 2,43 3,43 1,44 2,44 3,44 1,45 2,45 3,45 1,46 2,46 3,46 1,47 2,47 3,47 1,48 2,48 3,48 1,49 2,49 3,49 1,50 2,50 3,50 1,51 2,51 3,51 \n");
               }
   if($cfph==3){
-  print $l ("#! symmetricexchange=0 indexexchange= 1,4 2,4 3,4 1,5 2,5 3,5 1,6 2,6 3,6 1,7 2,7 3,7 1,8 2,8 3,8 ");
+  push @atoms, ("#! symmetricexchange=0 indexexchange= 1,4 2,4 3,4 1,5 2,5 3,5 1,6 2,6 3,6 1,7 2,7 3,7 1,8 2,8 3,8 ");
   #O4m
-  print $l (" 1,16 2,16 3,16 1,17 2,17 3,17 1,18 2,18 3,18 1,19 2,19 3,19 1,20 2,20 3,20 1,21 2,21 3,21 1,22 2,22 3,22 1,23 2,23 3,23 1,24 2,24 3,24 ");
+  push @atoms, (" 1,16 2,16 3,16 1,17 2,17 3,17 1,18 2,18 3,18 1,19 2,19 3,19 1,20 2,20 3,20 1,21 2,21 3,21 1,22 2,22 3,22 1,23 2,23 3,23 1,24 2,24 3,24 ");
   #O6m
-  print $l (" 1,36 2,36 3,36 1,37 2,37 3,37 1,38 2,38 3,38 1,39 2,39 3,39 1,40 2,40 3,40 1,41 2,41 3,41 1,42 2,42 3,42 1,43 2,43 3,43 1,44 2,44 3,44 1,45 2,45 3,45 1,46 2,46 3,46 1,47 2,47 3,47 1,48 2,48 3,48 \n");
+  push @atoms, (" 1,36 2,36 3,36 1,37 2,37 3,37 1,38 2,38 3,38 1,39 2,39 3,39 1,40 2,40 3,40 1,41 2,41 3,41 1,42 2,42 3,42 1,43 2,43 3,43 1,44 2,44 3,44 1,45 2,45 3,45 1,46 2,46 3,46 1,47 2,47 3,47 1,48 2,48 3,48 \n");
               }
 # here we should enter the cf- phonon interactions for the MODULE=phonon oscillators   
 #  1) calculate  number of neighbours (only the magnetic atoms) 
 #  2) fill values from results/makenn.a$nnn.dBlm  [all done above for magnetic atoms and filled in here]
-  print $l $ph[$nnn];
+  push @atoms, $ph[$nnn];
  }
+
+# now output the magnetic ions ...
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
- {print $l ("#*************************************************************************\n");
-  print $l ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".($z[$nnn]+0.1/$c)." nofneighbours=".($nofneighbours[$nnn]+1)." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
-  print $l ("# crystal field phonon interaction parameters from pointcharge calculation\n");
-  print $l ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
-  if($cfph==2){
-  print $l ("#! symmetricexchange=0 indexexchange= 7,1 7,2 7,3 8,1 8,2 8,3 9,1 9,2 9,3 10,1 10,2 10,3 11,1 11,2 11,3 ");
+ {push @atoms, ("#*************************************************************************\n");
+  push @atoms, ("#! da=".$x[$nnn]." [a] db=".$y[$nnn]." [b] dc=".($z[$nnn]+0.1/$c)." nofneighbours=".($nofneighbours[$nnn]+1)." diagonalexchange=2  sipffilename=".$sipf_file[$nnn]."\n");
+  push @atoms, ("# crystal field phonon interaction parameters from pointcharge calculation\n");
+ 
+ push @atoms, ("# the mixing terms Gcfph in meV\n");
+ push @atoms, ("#! Gindices=");
+ my $Gind=pdl[7,8,9,10,11,19,20,21,22,23,24,25,26,27,39,40,41,42,43,44,45,46,47,48,49,50,51];
+
+if($cfph==2){ for($i=1;$i<=27;++$i){
+for($j=1;$j<=6;++$j){
+push @atoms, sprintf(" %i,%i",$j,$Gind->at($i-1));
+}}
+}
+
+if($cfph==3){ for($i=1;$i<=27;++$i){
+for($j=1;$j<=6;++$j){
+push @atoms, sprintf(" %i,%i",$j,$Gind->at($i-1)-3);
+}}
+}
+push @atoms, "\n";
+ push @atoms, ("#! G=");
+ push @atoms, $Gcfph[$nnn];
+push @atoms, "\n";
+
+  push @atoms, ("# da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
+    if($cfph==2){
+  push @atoms, ("#! symmetricexchange=0 indexexchange= 7,1 7,2 7,3 8,1 8,2 8,3 9,1 9,2 9,3 10,1 10,2 10,3 11,1 11,2 11,3 ");
   # O4m
-  print $l (" 19,1 19,2 19,3 20,1 20,2 20,3 21,1 21,2 21,3 22,1 22,2 22,3 23,1 23,2 23,3 24,1 24,2 24,3 25,1 25,2 25,3 26,1 26,2 26,3 27,1 27,2 27,3 ");
+  push @atoms, (" 19,1 19,2 19,3 20,1 20,2 20,3 21,1 21,2 21,3 22,1 22,2 22,3 23,1 23,2 23,3 24,1 24,2 24,3 25,1 25,2 25,3 26,1 26,2 26,3 27,1 27,2 27,3 ");
   # O6m
-  print $l (" 39,1 39,2 39,3 40,1 40,2 40,3 41,1 41,2 41,3 42,1 42,2 42,3 43,1 43,2 43,3 44,1 44,2 44,3 45,1 45,2 45,3 46,1 46,2 46,3 47,1 47,2 47,3 48,1 48,2 48,3 49,1 49,2 49,3 50,1 50,2 50,3 51,1 51,2 51,3 \n"); 
+  push @atoms, (" 39,1 39,2 39,3 40,1 40,2 40,3 41,1 41,2 41,3 42,1 42,2 42,3 43,1 43,2 43,3 44,1 44,2 44,3 45,1 45,2 45,3 46,1 46,2 46,3 47,1 47,2 47,3 48,1 48,2 48,3 49,1 49,2 49,3 50,1 50,2 50,3 51,1 51,2 51,3 \n"); 
                }
   if($cfph==3){
-  print $l ("#! symmetricexchange=0 indexexchange= 4,1 4,2 4,3 5,1 5,2 5,3 6,1 6,2 6,3 7,1 7,2 7,3 8,1 8,2 8,3 ");
+  push @atoms, ("#! symmetricexchange=0 indexexchange= 4,1 4,2 4,3 5,1 5,2 5,3 6,1 6,2 6,3 7,1 7,2 7,3 8,1 8,2 8,3 ");
   # O4m
-  print $l (" 16,1 16,2 16,3 17,1 17,2 17,3 18,1 18,2 18,3 19,1 19,2 19,3 20,1 20,2 20,3 21,1 21,2 21,3 22,1 22,2 22,3 23,1 23,2 23,3 24,1 24,2 24,3 ");
+  push @atoms, (" 16,1 16,2 16,3 17,1 17,2 17,3 18,1 18,2 18,3 19,1 19,2 19,3 20,1 20,2 20,3 21,1 21,2 21,3 22,1 22,2 22,3 23,1 23,2 23,3 24,1 24,2 24,3 ");
   # O6m
-  print $l (" 36,1 36,2 36,3 37,1 37,2 37,3 38,1 38,2 38,3 39,1 39,2 39,3 40,1 40,2 40,3 41,1 41,2 41,3 42,1 42,2 42,3 43,1 43,2 43,3 44,1 44,2 44,3 45,1 45,2 45,3 46,1 46,2 46,3 47,1 47,2 47,3 48,1 48,2 48,3 \n"); 
+  push @atoms, (" 36,1 36,2 36,3 37,1 37,2 37,3 38,1 38,2 38,3 39,1 39,2 39,3 40,1 40,2 40,3 41,1 41,2 41,3 42,1 42,2 42,3 43,1 43,2 43,3 44,1 44,2 44,3 45,1 45,2 45,3 46,1 46,2 46,3 47,1 47,2 47,3 48,1 48,2 48,3 \n"); 
                }
   # here come the cf-phonon interactions for the MODULE=so1ion magnetic ions 
   # open pointcharge file 
-  print $l $ph[$nnn];
+  push @atoms, $ph[$nnn];
 }
 endprint($h,$l);
 }
@@ -826,7 +906,7 @@ my $i,$j;$i=0;
 }
 
 sub getinteraction {
-   my ($gJthis,$gJ,$sipffilethis,$sipffile,$r,$rx,$ry,$rz)=@_;
+   my ($Gmix,$gJthis,$gJ,$sipffilethis,$sipffile,$r,$rx,$ry,$rz)=@_;
    my $n;
 
  if($bvk==1)
@@ -859,36 +939,84 @@ sub getinteraction {
    # 1 N/m= 1 J/m^2 = meV /1.60217646e-2 A 
    $cL=$long_spring[$n]/1.60217646e-2;
    $cT=$trans_spring[$n]/1.60217646e-2;
-   $Cel->at(1,1)+=($cL-$cT)*$rx*$rx*$rx*$rx/$r/$r+$cT*$rx*$rx;
-   $Cel->at(2,2)+=($cL-$cT)*$ry*$ry*$ry*$ry/$r/$r+$cT*$ry*$ry;
-   $Cel->at(3,3)+=($cL-$cT)*$rz*$rz*$rz*$rz/$r/$r+$cT*$rz*$rz;
-   $Cel->at(4,4)+=($cL-$cT)*$ry*$rz*$ry*$rz/$r/$r;
-   $Cel->at(5,5)+=($cL-$cT)*$rx*$rz*$rx*$rz/$r/$r;
-   $Cel->at(6,6)+=($cL-$cT)*$rx*$ry*$rx*$ry/$r/$r;
+# factor of 0.5 inserted, because each bond is called twice
+# here when running makenn
+   $Cel->slice('1,1')+=0.5*(($cL-$cT)*$rx*$rx*$rx*$rx/$r/$r+$cT*$rx*$rx);
+   $Cel->slice('2,2')+=0.5*(($cL-$cT)*$ry*$ry*$ry*$ry/$r/$r+$cT*$ry*$ry);
+   $Cel->slice('3,3')+=0.5*(($cL-$cT)*$rz*$rz*$rz*$rz/$r/$r+$cT*$rz*$rz);
+   $Cel->slice('4,4')+=0.5*(4*($cL-$cT)*$ry*$rz*$ry*$rz/$r/$r+$cT*($ry*$ry+$rz*$rz));
+   $Cel->slice('5,5')+=0.5*(4*($cL-$cT)*$rx*$rz*$rx*$rz/$r/$r+$cT*($rx*$rx+$rz*$rz));
+   $Cel->slice('6,6')+=0.5*(4*($cL-$cT)*$rx*$ry*$rx*$ry/$r/$r+$cT*($rx*$rx+$ry*$ry));
 
-   $Cel->at(1,2)+=($cL-$cT)*$rx*$rx*$ry*$ry/$r/$r;
+   $Cel->slice('1,2')+=0.5*(($cL-$cT)*$rx*$rx*$ry*$ry/$r/$r);
 
-   $Cel->at(1,3)+=($cL-$cT)*$rx*$rx*$rz*$rz/$r/$r;
-   $Cel->at(2,3)+=($cL-$cT)*$ry*$ry*$rz*$rz/$r/$r;
+   $Cel->slice('1,3')+=0.5*(($cL-$cT)*$rx*$rx*$rz*$rz/$r/$r);
+   $Cel->slice('2,3')+=0.5*(($cL-$cT)*$ry*$ry*$rz*$rz/$r/$r);
 
-   $Cel->at(1,4)+=($cL-$cT)*$rx*$rx*$ry*$rz/$r/$r;
-   $Cel->at(2,4)+=($cL-$cT)*$ry*$ry*$ry*$rz/$r/$r+$cT*$ry*$rz;
-   $Cel->at(3,4)+=($cL-$cT)*$rz*$rz*$ry*$rz/$r/$r;
+   $Cel->slice('1,4')+=0.5*(2*($cL-$cT)*$rx*$rx*$ry*$rz/$r/$r);
+   $Cel->slice('2,5')+=0.5*(2*($cL-$cT)*$ry*$ry*$rx*$rz/$r/$r);
+   $Cel->slice('3,6')+=0.5*(2*($cL-$cT)*$rz*$rz*$rx*$ry/$r/$r);
+   
+   $Cel->slice('1,5')+=0.5*(2*($cL-$cT)*$rx*$rx*$rx*$rz/$r/$r+$cT*$rx*$rz);
+   $Cel->slice('1,6')+=0.5*(2*($cL-$cT)*$rx*$rx*$rx*$ry/$r/$r+$cT*$rx*$ry);
 
-   $Cel->at(1,5)+=($cL-$cT)*$rx*$rx*$rx*$rz/$r/$r+$cT*$rx*$rz;
-   $Cel->at(2,5)+=($cL-$cT)*$ry*$ry*$rx*$rz/$r/$r;
-   $Cel->at(3,5)+=($cL-$cT)*$rz*$rz*$rx*$rz/$r/$r;
-   $Cel->at(4,5)+=($cL-$cT)*$ry*$rz*$rx*$rz/$r/$r;
+   $Cel->slice('2,4')+=0.5*(2*($cL-$cT)*$ry*$ry*$ry*$rz/$r/$r+$cT*$ry*$rz);
+   $Cel->slice('2,6')+=0.5*(2*($cL-$cT)*$ry*$ry*$rx*$ry/$r/$r+$cT*$ry*$rx);
 
-   $Cel->at(1,6)+=($cL-$cT)*$rx*$rx*$rx*$ry/$r/$r+$cT*$rx*$ry;
-   $Cel->at(2,6)+=($cL-$cT)*$ry*$ry*$rx*$ry/$r/$r;
-   $Cel->at(3,6)+=($cL-$cT)*$rz*$rz*$rx*$ry/$r/$r;
-   $Cel->at(4,6)+=($cL-$cT)*$ry*$rz*$rx*$ry/$r/$r;
-   $Cel->at(5,6)+=($cL-$cT)*$rx*$rz*$rx*$ry/$r/$r;
+   $Cel->slice('3,4')+=0.5*(2*($cL-$cT)*$rz*$rz*$ry*$rz/$r/$r+$cT*$rz*$ry);
+   $Cel->slice('3,5')+=0.5*(2*($cL-$cT)*$rz*$rz*$rx*$rz/$r/$r+$cT*$rz*$rx);
 
+   $Cel->slice('4,5')+=0.5*(4*($cL-$cT)*$ry*$rz*$rx*$rz/$r/$r+$cT*$rx*$ry);
+   $Cel->slice('4,6')+=0.5*(4*($cL-$cT)*$ry*$rz*$rx*$ry/$r/$r+$cT*$rx*$rz);
+   $Cel->slice('5,6')+=0.5*(4*($cL-$cT)*$rx*$rz*$rx*$ry/$r/$r+$cT*$rz*$ry);
+             
+ # now deal with the mixing term phonon-strain interaction constants Gmix
+ # units should be meV (because in the phonon module the interaction operators 
+ # I1=P1/a0 I2=P2/a0 I3=P3/a0 with a0=.5292e-10m=0.5292A
+ # $cL and $cT above have units mev/A^2, i.e. we add a factor of 0.5292
+   $cL=$long_spring[$n]*0.5292/1.60217646e-2;
+   $cT=$trans_spring[$n]*0.5292/1.60217646e-2;
+   # Voigt notation in first slot Gmix(11)1 
+   $Gmix->slice('1,1')+=0.5*(-2*($cL-$cT)*$rx*$rx*$rx/$r/$r-$cT*($rx+$rx));
+   # Gmix(11)2
+   $Gmix->slice('1,2')+=0.5*(-2*($cL-$cT)*$rx*$rx*$ry/$r/$r);
+   # Gmix(11)3
+   $Gmix->slice('1,3')+=0.5*(-2*($cL-$cT)*$rx*$rx*$rz/$r/$r);
+   # Gmix(22)1
+   $Gmix->slice('2,1')+=0.5*(-2*($cL-$cT)*$ry*$ry*$rx/$r/$r);
+   # Gmix(22)2
+   $Gmix->slice('2,2')+=0.5*(-2*($cL-$cT)*$ry*$ry*$ry/$r/$r-$cT*($ry+$ry));
+   # Gmix(22)3
+   $Gmix->slice('2,3')+=0.5*(-2*($cL-$cT)*$ry*$ry*$rz/$r/$r);
+   # Gmix(33)1
+   $Gmix->slice('3,1')+=0.5*(-2*($cL-$cT)*$rz*$rz*$rx/$r/$r);
+   # Gmix(33)2
+   $Gmix->slice('3,2')+=0.5*(-2*($cL-$cT)*$rz*$rz*$ry/$r/$r);
+   # Gmix(33)3
+   $Gmix->slice('3,3')+=0.5*(-2*($cL-$cT)*$rz*$rz*$rz/$r/$r-$cT*($rz+$rz));
 
-             }
-                                 }
+   # Gmix(23)1
+   $Gmix->slice('4,1')+=0.5*(-2*($cL-$cT)*$ry*$rz*$rx/$r/$r);
+   # Gmix(23)2
+   $Gmix->slice('4,2')+=0.5*(-2*($cL-$cT)*$ry*$rz*$ry/$r/$r-$cT*$rz);
+   # Gmix(23)3
+   $Gmix->slice('4,3')+=0.5*(-2*($cL-$cT)*$ry*$rz*$rz/$r/$r-$cT*$ry);
+
+   # Gmix(13)1
+   $Gmix->slice('5,1')+=0.5*(-2*($cL-$cT)*$rx*$rz*$rx/$r/$r-$cT*$rz);
+   # Gmix(13)2
+   $Gmix->slice('5,2')+=0.5*(-2*($cL-$cT)*$rx*$rz*$ry/$r/$r);
+   # Gmix(13)3
+   $Gmix->slice('5,3')+=0.5*(-2*($cL-$cT)*$rx*$rz*$rz/$r/$r-$cT*$rx);
+
+   # Gmix(12)1
+   $Gmix->slice('6,1')+=0.5*(-2*($cL-$cT)*$rx*$ry*$rx/$r/$r-$cT*$ry);
+   # Gmix(12)2
+   $Gmix->slice('6,2')+=0.5*(-2*($cL-$cT)*$rx*$ry*$ry/$r/$r-$cT*$rx);
+   # Gmix(12)3
+   $Gmix->slice('6,3')+=0.5*(-2*($cL-$cT)*$rx*$ry*$rz/$r/$r);
+     }
+                               }
    $jba=$jab;   $jcb=$jbc;   $jca=$jac;
  } else{
    if ($gJthis==0){$gJthis=1;} # set gJ=1 for ions with intermediate coupling
@@ -953,7 +1081,9 @@ sub getinteraction {
    $jba=$jab;   $jcb=$jbc;   $jca=$jac;
   }     
  }
- return ([$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc]);  
+
+
+ return ([$Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc]);  
 }
 
 # Get lattic data, reading it from file 
@@ -963,6 +1093,7 @@ sub getlattice {
     my $h = new FileHandle;
     my $n = 0;
     $nofcomponents=0;$nofmagneticatoms=0;
+
   # input data int piddle
   if(open($h,$file))
   {      while(<$h>)
@@ -975,25 +1106,25 @@ sub getlattice {
       if ($beta==0){($beta)=extract("beta",$_);}
       if ($gamma==0){($gamma)=extract("gamma",$_);}
 
-      if ($r1x==0){($r1x)=extract("r1a",$_);}
-      if ($r1y==0){($r1y)=extract("r1b",$_);}
-      if ($r1z==0){($r1z)=extract("r1c",$_);}
-      if ($r2x==0){($r2x)=extract("r2a",$_);}
-      if ($r2y==0){($r2y)=extract("r2b",$_);}
-      if ($r2z==0){($r2z)=extract("r2c",$_);}
-      if ($r3x==0){($r3x)=extract("r3a",$_);}
-      if ($r3y==0){($r3y)=extract("r3b",$_);}
-      if ($r3z==0){($r3z)=extract("r3c",$_);}
+      if ($r1x==0&&/^(#!|[^#])*r1a\s*=\s*/){($r1x)=extract("r1a",$_);}
+      if ($r1y==0&&/^(#!|[^#])*r1b\s*=\s*/){($r1y)=extract("r1b",$_);}
+      if ($r1z==0&&/^(#!|[^#])*r1c\s*=\s*/){($r1z)=extract("r1c",$_);}
+      if ($r2x==0&&/^(#!|[^#])*r2a\s*=\s*/){($r2x)=extract("r2a",$_);}
+      if ($r2y==0&&/^(#!|[^#])*r2b\s*=\s*/){($r2y)=extract("r2b",$_);}
+      if ($r2z==0&&/^(#!|[^#])*r2c\s*=\s*/){($r2z)=extract("r2c",$_);}
+      if ($r3x==0&&/^(#!|[^#])*r3a\s*=\s*/){($r3x)=extract("r3a",$_);}
+      if ($r3y==0&&/^(#!|[^#])*r3b\s*=\s*/){($r3y)=extract("r3b",$_);}
+      if ($r3z==0&&/^(#!|[^#])*r3c\s*=\s*/){($r3z)=extract("r3c",$_);}
 
-      if ($r1x==0){($r1x)=extract("r1x",$_);}
-      if ($r1y==0){($r1y)=extract("r1y",$_);}
-      if ($r1z==0){($r1z)=extract("r1z",$_);}
-      if ($r2x==0){($r2x)=extract("r2x",$_);}
-      if ($r2y==0){($r2y)=extract("r2y",$_);}
-      if ($r2z==0){($r2z)=extract("r2z",$_);}
-      if ($r3x==0){($r3x)=extract("r3x",$_);}
-      if ($r3y==0){($r3y)=extract("r3y",$_);}
-      if ($r3z==0){($r3z)=extract("r3z",$_);}
+      if ($r1x==0&&/^(#!|[^#])*r1x\s*=\s*/){($r1x)=extract("r1x",$_);}
+      if ($r1y==0&&/^(#!|[^#])*r1y\s*=\s*/){($r1y)=extract("r1y",$_);}
+      if ($r1z==0&&/^(#!|[^#])*r1z\s*=\s*/){($r1z)=extract("r1z",$_);}
+      if ($r2x==0&&/^(#!|[^#])*r2x\s*=\s*/){($r2x)=extract("r2x",$_);}
+      if ($r2y==0&&/^(#!|[^#])*r2y\s*=\s*/){($r2y)=extract("r2y",$_);}
+      if ($r2z==0&&/^(#!|[^#])*r2z\s*=\s*/){($r2z)=extract("r2z",$_);}
+      if ($r3x==0&&/^(#!|[^#])*r3x\s*=\s*/){($r3x)=extract("r3x",$_);}
+      if ($r3y==0&&/^(#!|[^#])*r3y\s*=\s*/){($r3y)=extract("r3y",$_);}
+      if ($r3z==0&&/^(#!|[^#])*r3z\s*=\s*/){($r3z)=extract("r3z",$_);}
 
       if ($nofatoms==0){($nofatoms)=extract("nofatoms",$_);}
       if ($nofcomponents==0){($nofcomponents)=extract("nofcomponents",$_);}
@@ -1003,7 +1134,7 @@ sub getlattice {
 
                                    ($nofneighbours[$n])=extract("nofneighbours",$_);
                                    ($diagonalexchange)=extract("diagonalexchange",$_);
-                                   if($diagonalexchange>1){print "Warning program makenn: diagonalexchange=$diagonalexchange not implemented setting diagonalexchange=0\n";$diagonalexchange=0;}
+                                   if($diagonalexchange>1){print "# Warning program makenn: diagonalexchange=$diagonalexchange not implemented setting diagonalexchange=0\n";$diagonalexchange=0;}
                                    ($x[$n])=extract("da",$_);
                                    ($y[$n])=extract("db",$_);
                                    ($z[$n])=extract("dc",$_);
@@ -1058,7 +1189,6 @@ sub getlattice {
      if ($gamma<=0) { die "ERROR makenn: reading unit cell angle gamma=$gamma <=0\n";}
 
      if($nofcomponents==0) {$nofcomponents=3;}
-
      return ([$a,$b,$c,$alpha,$beta,$gamma,$nofatoms,$nofcomponents],pdl [[$r1x,$r1y,$r1z],[$r2x,$r2y,$r2z],[$r3x,$r3y,$r3z]]);
 
     } else {
@@ -1072,29 +1202,22 @@ sub printlattice {
     my $h = new FileHandle;
     my $l = new FileHandle;
     unless (open($l,$fileout)){die "cannot open file $fileout\n";}
-    unless (open($h,$filein)) {die "cannot open file $fileout\n";}
-
-     $nofatoms=0;
+    unless (open($h,$filein)) {die "cannot open file $filein\n";}
+#get comment lines from input file
+     $aa=0;
      while(<$h>)
      {#next if /^\s*#/;
       $text=$_;
-      if ($nofatoms==0){($nofatoms)=extract("nofatoms",$_);
-          
-            if($cfph!=0&&$nofatoms!=0){$nofatomsnew=$nofatoms+$nofmagneticatoms;
-            if($cfph==2){$text="#! nofatoms= $nofatomsnew  nofcomponents=51  number of atoms in primitive unit cell/number of components of each spin\n";}
-            if($cfph==3){$text="#! nofatoms= $nofatomsnew  nofcomponents=48  number of atoms in primitive unit cell/number of components of each spin\n";}
-                        }
-            }
-# removed because iterative call of makenn will make fileheader longer
-#if ($nofatoms!=0){
-#        print $l "#-------------------------------------------------------------------------------------\n";
-#        print $l "# output of program makenn $rmax - table with neighbors and interactions\n";
-#        print $l "# Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
-#                 }
+      if ($aa==0){($aa)=extract("a",$_);}
+      last if($aa!=0); # stop printing comments when crystallographic information starts
       print $l ($text);
-      last if ($nofatoms!=0); # the line nofatoms= must be the last line of the file header !!!!
      }
-     if ($nofatoms==0){die "ERROR makenn: unable to find 'nofatoms=' in file $filein\n";}
+     print $l "#! a=".$a." b=".$b." c=".$c." alpha=".$alpha." beta=".$beta." gamma=".$gamma."\n";
+     print $l "#! r1a=".$r1x." r2a=".$r2x." r3a=".$r3x."\n";
+     print $l "#! r1b=".$r1y." r2b=".$r2y." r3b=".$r3y." primitive lattice vectors [a][b][c]\n";
+     print $l "#! r1c=".$r1z." r2c=".$r2z." r3c=".$r3z."\n#\n";
+
+     if ($aa==0){die "ERROR makenn: unable to find 'a=' in file $filein\n";}
      
  return ($h,$l);
 }
@@ -1102,9 +1225,9 @@ sub printlattice {
 
 
 sub printneighbourlist {
-  my ($h,$l,$nofn,$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb)=@_;
+  my ($Gmix,$h,$nofn,$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb)=@_;
      
-     print $l ("#*************************************************************************\n");
+     push @atoms,"#*************************************************************************\n";
      while(<$h>)
      {$text=$_;
      if (/^(#!|[^#])*nofneighbours\s*=\s*/){($nn0)=extract("nofneighbours",$text);
@@ -1118,7 +1241,7 @@ sub printneighbourlist {
       }
       last if (/^(#!|[^#])*diagonalexchange\s*=\s*/);
      }
-      print $l ($text);
+      push @atoms,$text;
 # the next lines are to advance $h to the end of the numeric table
 
       while(<$h>)
@@ -1129,32 +1252,38 @@ sub printneighbourlist {
 
 
 if ($bvk==1)
-{print $l ("# it follows the Born von Karman model according to  springs read from file $bvk_file\n");}
+{push @atoms, "# it follows the Born von Karman model according to  springs read from file $bvk_file\n";
+ push @atoms, "# the mixing terms Gmix in meV m\n";
+ push @atoms, "#! Gindices=";for($i=1;$i<=6;++$i){for($j=1;$j<=3;++$j){push @atoms, " ".$i.",".$j;}}
+ push @atoms, "\n";
+ push @atoms, "#! G=";for($i=1;$i<=6;++$i){for($j=1;$j<=3;++$j){push @atoms, sprintf(" %+10.9e",$Gmix->at($i,$j));}}
+ push @atoms, "\n";
+}
 elsif ($rkky==1)
-{print $l ("# it follows output of RKKY interaction according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3 with A=$scale meV and kf=$kf A^-1 generated by makenn\n");}
+{push @atoms, ("# it follows output of RKKY interaction according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3 with A=$scale meV and kf=$kf A^-1 generated by makenn\n");}
 elsif ($rkky==3)
-{print $l ("# it follows output of RKKY interaction according to J(R)=A.[sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 with A=$scale meV and kf=$kf A^-1 generated by makenn\n");}
+{push @atoms, ("# it follows output of RKKY interaction according to J(R)=A.[sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 with A=$scale meV and kf=$kf A^-1 generated by makenn\n");}
 elsif ($rkky==2)
-{print $l ("# kaneyoshi parametrization for the Bethe-Slater curve J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n");}
+{push @atoms, ("# kaneyoshi parametrization for the Bethe-Slater curve J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n");}
 elsif ($rkky==4)
-{print $l ("# it follows output of RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n");
- print $l ("# kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n");}
+{push @atoms, ("# it follows output of RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n");
+ push @atoms, ("# kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n");}
 elsif($rkky==5)
-{print $l ("# kaneyoshi parametrization for the Bethe-Slater curve J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV\n");
- print $l ("# with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A and alpha=$aa\n");}
+{push @atoms, ("# kaneyoshi parametrization for the Bethe-Slater curve J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV\n");
+ push @atoms, ("# with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A and alpha=$aa\n");}
 elsif($rkky==6)
- {print $l ("# it follows output of RKKY interaction  J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4 for scale A=$scale meV\n");
-  print $l ("# kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n");}
+ {push @atoms, ("# it follows output of RKKY interaction  J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4 for scale A=$scale meV\n");
+  push @atoms, ("# kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n");}
 elsif($readtable>0)
-  {print $l ("# it follows output generated from interactions read from table $table_file\n");
+  {push @atoms, ("# it follows output generated from interactions read from table $table_file\n");
   }
 else
-{print $l ("# it follows output of classical DD interaction generated by makenn\n");}
+{push @atoms, ("# it follows output of classical DD interaction generated by makenn\n");}
 
     if($alpha!=90||$beta!=90||$gamma!=90)
-     {print $l ("#da[a]    db[b]     dc[c]       Jii[meV]  Jjj[meV]  Jkk[meV]  Jij[meV]  Jji[meV]  Jik[meV]  Jki[meV]  Jjk[meV]  Jkj[meV] with j||b, k||(a x b) and i normal to k and j\n");}
+     {push @atoms, ("#da[a]    db[b]     dc[c]       Jii[meV]  Jjj[meV]  Jkk[meV]  Jij[meV]  Jji[meV]  Jik[meV]  Jki[meV]  Jjk[meV]  Jkj[meV] with j||b, k||(a x b) and i normal to k and j\n");}
     else
-     {print $l ("#da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");}
+     {push @atoms, ("#da[a]    db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");}
 
 my $pcout=">./results/makenn.a".$nnn.".pc";
 unless (open($l1,$pcout)){die "cannot open file $pcout\n";}
@@ -1170,30 +1299,30 @@ print $l1 "#--------------------------------------------------------------------
  for ($n1=1;$n1<(($rn->dims)[0]);++$n1)
  {next if($rn->index($n)->at($n1)==0);
   # the position xyz is relative position (not absolute coordinate of neighbour)
- print $l sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
+ push @atoms, sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
  $ddd=$an->index($n)->at($n1);
   print $l1 sprintf("%8s   %+10.6f %+10.6f %+10.6f     ",$charge[$ddd],$in->index($n)->at($n1),$jn->index($n)->at($n1),$kn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f %+10.6f %+10.6f ",$xn->index($n)->at($n1),$yn->index($n)->at($n1),$zn->index($n)->at($n1));
   print $l1 sprintf("%+10.6f     %s\n",$rn->index($n)->at($n1),$ddd);
 
   if (($classdip==1)||$bvk==1||($readtable>0&&$DM>0)||($readtable>0&&$Jp>0)) # here anisotropic interaction comes in
-   {      print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
-          for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
-          print $l sprintf("%+10.9e %+10.9e ",$Jab->index($n)->at($n1),$Jba->index($n)->at($n1));
-          print $l sprintf("%+10.9e %+10.9e ",$Jac->index($n)->at($n1),$Jca->index($n)->at($n1));
-          for($i=4;$i<=$nofcomponents;++$i){print $l "0 0 ";} # add other components
-          print $l sprintf("%+10.9e %+10.9e ",$Jbc->index($n)->at($n1),$Jcb->index($n)->at($n1));
-          for($i=4;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){print $l "0 0 ";}} # add other components         
+   {      push @atoms, sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
+          for($i=4;$i<=$nofcomponents;++$i){push @atoms, "0 ";} # add other components
+          push @atoms, sprintf("%+10.9e %+10.9e ",$Jab->index($n)->at($n1),$Jba->index($n)->at($n1));
+          push @atoms, sprintf("%+10.9e %+10.9e ",$Jac->index($n)->at($n1),$Jca->index($n)->at($n1));
+          for($i=4;$i<=$nofcomponents;++$i){push @atoms, "0 0 ";} # add other components
+          push @atoms, sprintf("%+10.9e %+10.9e ",$Jbc->index($n)->at($n1),$Jcb->index($n)->at($n1));
+          for($i=4;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){push @atoms, "0 0 ";}} # add other components         
    }
    else  #here the isotropic interaction is written
-   {print $l sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
-    for($i=4;$i<=$nofcomponents;++$i){print $l "0 ";} # add other components
+   {push @atoms, sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));
+    for($i=4;$i<=$nofcomponents;++$i){push @atoms, "0 ";} # add other components
     
    }
 
- if ($calcdist==1) {print $l sprintf("%+10.9e a%s",$rn->index($n)->at($n1),$ddd);}
+ if ($calcdist==1) {push @atoms, sprintf("%+10.9e a%s",$rn->index($n)->at($n1),$ddd);}
 
-  print $l "\n";
+  push @atoms, "\n";
 
  }
 
@@ -1203,12 +1332,35 @@ print $l1 "#--------------------------------------------------------------------
 
 
 sub endprint {
-
-  my ($h,$l)=@_;   
+  my ($h,$l)=@_;  
 
      close $h; 
 
+# print $l ("#*************************************************************************\n");
+
+print $l "# Nonzero Elastic constants in meV per primitive crystal unit cell \n";
+print $l "# in Voigt notation only first index<=second index has to be given\n";
+print $l "# because the constants are symmetric Celij=Celji\n";
+print $l "# Elastic constants refer to the Euclidean coordinate system ijk defined\n";
+print $l "# with respect to abc as j||b, k||(a x b) and i normal to k and j\n";
+
+# here output the elastic constants table
+$i1=0;print $l "#! ";
+for($i=1;$i<=6;++$i){ if($i1>0){print $l "#! ";}
+for($j=$i;$j<=6;++$j){
+if(abs($Cel->at($i,$j))>1e-6){++$i1;print $l sprintf(" Cel%i%i=%+10.9g",$i,$j,$Cel->at($i,$j));}
+                     }if($i1>0){print $l "\n";}}
+if($i1==0){print $l "\n";}
+
+$text="#! nofatoms= $nofatoms  nofcomponents=$nofcomponents  number of atoms in primitive unit cell/number of components of each spin\n";
+ if($cfph!=0){$nofatomsnew=$nofatoms+$nofmagneticatoms;}
+ if($cfph==2){$text="#! nofatoms= $nofatomsnew  nofcomponents=51  number of atoms in primitive unit cell/number of components of each spin\n";}
+ if($cfph==3){$text="#! nofatoms= $nofatomsnew  nofcomponents=48  number of atoms in primitive unit cell/number of components of each spin\n";}
+ print $l ($text);
+
+     print $l @atoms;
      close $l;
+
 
 }
 

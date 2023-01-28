@@ -192,13 +192,13 @@ jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 inipar.o: inipar.cpp inipar.hpp martin.h vector.h 
 	$(CCC) $(CFLAGS) $< 
 
-ionpars.o: ionpars.cpp ionpars.hpp perlparse.h
+ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h
 	$(CCC) $(CFLAGS) $<
 
 inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp 
 	$(CCC) $(CFLAGS) $< 
 
-physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp
+physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp inipar.hpp
 	$(CCC) $(CFLAGS) $< 
 
 qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp myev.c
@@ -221,7 +221,7 @@ mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_
 cond.o: cond.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<
 
-clusterize.o: clusterize.c 
+clusterize.o: clusterize.c par.hpp martin.h
 	$(CCC) $(CFLAGS) $<
 
 coq2jjj.o: coq2jjj.c paramete.hpp martin.h
@@ -352,7 +352,7 @@ ip.o: ionpars.cpp
 	@echo Linking ../radwavfunc
 	@$(LINKER)  -Wall  -o ../radwavfunc $^  $(LFLAGS)
 
-../addj$(EXE): addj.o par.o martin.o myev.o jjjpar.o perlparse.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
+../addj$(EXE): addj.o par.o martin.o myev.o jjjpar.o perlparse.o par.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)  ionpars.o density.o
 	@echo Linking ../addj
 	@$(LINKER)  -Wall  -o ../addj $^  $(LFLAGS)
 

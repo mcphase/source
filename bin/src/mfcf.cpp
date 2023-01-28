@@ -158,7 +158,7 @@ mfcf & mfcf::operator= (const mfcf & op2)
  mxa=op2.mxa; mxb=op2.mxb; mxc=op2.mxc;
  nofatoms=op2.nofatoms;
  nofcomponents=op2.nofcomponents;
- 
+ epsmf=Vector(1,6);epsmf=op2.epsmf;
  wasstable=op2.wasstable;
   delete []mfi;
 //dimension arrays
@@ -183,7 +183,7 @@ mfcf & mfcf::operator= (const Vector & vec)
     {for (k=1;k<=nofc;++k)
      {mfi[in(i,j,k)]=vec;} 
     }
-  }           
+  }         
   return *this;
 }
 
@@ -206,6 +206,7 @@ mfcf::mfcf (int n1,int n2,int n3,int na,int nc)
    mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
   nofatoms=na;
   nofcomponents=nc;
+  epsmf=Vector(1,6);
   int i;
 //dimension arrays
   mfi = new Vector[mxa*mxb*mxc+1];for(i=0;i<=mxa*mxb*mxc;++i){mfi[i]=Vector(1,nofcomponents*nofatoms);}
@@ -240,7 +241,7 @@ mfcf::mfcf (const mfcf & p)
   wasstable=p.wasstable;
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
-  
+  epsmf=Vector(1,6);epsmf=p.epsmf;
 //dimension arrays
   mfi = new Vector[mxa*mxb*mxc+1];for(i=0;i<=mxa*mxb*mxc;++i){mfi[i]=Vector(1,nofcomponents*nofatoms);}
   if (mfi == NULL)

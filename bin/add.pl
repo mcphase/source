@@ -3,23 +3,38 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 #\begin{verbatim}
 
+$operator=$ARGV[0];shift @ARGV;
+
+
 
 
 unless ($#ARGV >4)
 {print STDOUT <<"EOF";
 
-  add: program to add functions y1(x1) (with optional y1err) and y2(x2) (with optional y2err)
+  $operator: program to $operator functions y1(x1) (with optional y1err) and y2(x2) (with optional y2err)
        taken from data file1 and data file2
 
-  usage: add colx1 coly1[ecoly1err] file1 colx2 coly2[ecoly2err] file2
+  usage: $operator colx1 coly1[ecoly1err] file1 colx2 coly2[ecoly2err] file2
 
   input:
   file1, file2         filennames
   colx, coly, colyerr  columns containing x and y=f(x) and yerror values
 
   output:
-  file1            contains in coly1=coly1+f2(colx1)
+EOF
+if($operator=~/mult/){
+print STDOUT <<"EOF";
+  file1            contains in coly1'=coly1 * f2(colx1)
+                   and in   coly1err'=coly1' *sqrt[(coly1err/coly1)^2+(f2err(colx1)/f2(colx1))^2]
+EOF
+}
+if($operator=~/add/){
+print STDOUT <<"EOF";
+  file1            contains in coly1=coly1 + f2(colx1)
                    and in   coly1err=sqrt[coly1err^2+f2err(colx1)^2]
+EOF
+}
+print STDOUT <<"EOF";
                    f2(colx1) is calculated by linear
                    interpolation
                    f2(colx1)=
@@ -30,7 +45,7 @@ unless ($#ARGV >4)
   note:            colx2 has to be sorted in file2
 
 EOF
- exit 0;}else{print"#* add *\n";}
+ exit 0;}else{print"#* $operator *\n";}
 
 
 $ARGV[0]=~s/x/*/g;$colx1=eval $ARGV[0];shift @ARGV;
@@ -74,11 +89,26 @@ unless($n<0||$n>$nn-1) # do not extrapolate
            unless($n<0||$n>$nn-1) # do not extrapolate
              { #print $n;
               # do addition using linear interpolation
-              $numout[$coly1-1]=$y1+$y[$n]+($x1-$x[$n])*($y[$n+1]-$y[$n])/($x[$n+1]-$x[$n]);
+$y2=$y[$n]+($x1-$x[$n])*($y[$n+1]-$y[$n])/($x[$n+1]-$x[$n]);
+if($operator=~/add/){
+              $numout[$coly1-1]=$y1+$y2;
               if($coly1err>0&&$coly2err>0)
               {     $y2err=$yerr[$n]+($x1-$x[$n])*($yerr[$n+1]-$yerr[$n])/($x[$n+1]-$x[$n]);
               $numout[$coly1err-1]=sqrt($y1err*$y1err+$y2err*$y2err);
               }
+                     }
+# do multiplication using linear interpolation
+if($operator=~/mult/){
+              $numout[$coly1-1]=$y1*$y2;
+              if($coly1err>0&&$coly2err>0)
+              {     $y2err=$yerr[$n]+($x1-$x[$n])*($yerr[$n+1]-$yerr[$n])/($x[$n+1]-$x[$n]);
+if($y2*$y2>1e-100&&$y1*$y1>1e-100){
+                    $y2err/=$y2;$y2err/=$y1;
+              $numout[$coly1err-1]=$numout[$coly1-1]*sqrt($y1err*$y1err+$y2err*$y2err);
+              } 
+ else {$numout[$coly1err-1]=0;}
+              }
+                     }
 		 $i=0;
 		   foreach (@numout)
 		   {print Fout $numout[$i]." ";++$i;}

@@ -26,7 +26,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
  FILE * cf_file; 
  cf_file=open_sipf(sipf_filename,modulefilename);
   if(strcmp(modulefilename,"kramer")==0)
-    {module_type=1;fprintf (stderr,"[internal]");
+    {module_type=1;fprintf (stderr,"[internal]\n");
       ABC=Vector(1,3);i=3;
       nof_electrons=0; // not to be used in module kramer !!
       while(feof(cf_file)==false)
@@ -47,7 +47,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
     }
   else
     {if(strcmp(modulefilename,"brillouin")==0)
-     {module_type=3;fprintf (stderr,"[internal]");
+     {module_type=3;fprintf (stderr,"[internal]\n");
       ABC=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module brillouin !!
       while(feof(cf_file)==false)
@@ -65,7 +65,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      }
      else
      {if(strcmp(modulefilename,"cfield")==0)
-     {module_type=2;fprintf (stderr,"#[internal]");
+     {module_type=2;fprintf (stderr,"#[internal]\n");
       //fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
        fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename);
@@ -79,7 +79,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      }
      else
      {if(strcmp(modulefilename,"so1ion")==0)
-     {module_type=4;fprintf (stderr,"#[internal]");
+     {module_type=4;fprintf (stderr,"#[internal]\n");
      // fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
       fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename);
@@ -91,12 +91,12 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
 
      }
      else if (strcmp(modulefilename,"cluster")==0)
-     {module_type=5;fprintf (stderr,"#[internal]");
+     {module_type=5;fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
-       i+=extract(instr,"structurefile",clusterfilename,MAXNOFCHARINLINE)-1;
+       i+=extract(instr,"structurefile",clusterfilename,MAXNOFCHARINLINE,1)-1;
       }// input all  lines starting with comments
       if(i!=0){fprintf(stderr,"Error reading structurefile from file %s\ncorrect file format is:\n",sipf_filename);
               fprintf(stderr,"\n#!MODULE=cluster\n#comment lines ..\n# next line contains cluster structure filename\n"
@@ -107,7 +107,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
       Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors      
      }
      else
-      {fprintf (stderr,"#[external]");
+      {fprintf (stderr,"#[external]\n");
       i=0;nof_electrons=0;
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
@@ -127,7 +127,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
        // input all  lines starting with comments
     //while((i=inputparline ("params",cf_file, nn))==0&&feof(cf_file)==false);
     // now we have the numbers corresponding to vector ABC() in nn[] - these are the module parameters !
-    fprintf(stderr,"MODPARs: ");
+    fprintf(stderr,"#MODPARs: ");
     if(i>0){
              ABC=Vector(1,i);for(j=1;j<=i;++j){ABC(j)=nn[j];fprintf(stderr,"%g ",nn[j]);}
             }else{
@@ -467,20 +467,21 @@ if(module_type==4&&fabs(gJ-(*iops).gJ)>0.00001)
 /****************************************************************************/
 // get list of indices of exchange parameters
 /************************************************************************************/
-int jjjpar::get_exchange_indices(char *instr, Matrix *exchangeindices)
+int jjjpar::get_exchange_indices(char *instrptr, Matrix *exchangeindices,const char * ie)
 {
    bool charflag=false;
-   char *tk,*tkp,*instrptr,sep[]=" \t\n",allowedch[]="abcdefghijklmnopqrstuvwxyz";
+   char *tk,*tkp,sep[]=" \t\n",allowedch[]="abcdefghijklmnopqrstuvwxyz";
    int num_indices=0,ii,i,j;
 
    // Checks if using "JaJb" or "1,2" syntax
-   if(strstr(instr,"J")!=NULL) charflag=true; else if(strstr(instr,",")==NULL) {
-      fprintf(stderr,"Error in indexexchange: Syntax neither of the form JaJb or 1,2\n"); exit(EXIT_FAILURE); }
+   if(strstr(instrptr,"J")!=NULL) charflag=true; else if(strstr(instrptr,",")==NULL) {
+      fprintf(stderr,"Error in %s: Syntax neither of the form JaJb or 1,2 reading string ' %s '\n",ie,instrptr); exit(EXIT_FAILURE); }
 
-   // Moves to start of index list in the string
-   instrptr = strstr(instr,"indexexchange")+13; instrptr = strstr(instrptr,"=")+1; instrptr+=strspn(instrptr,sep);
+   // Moves to start of index list in the string (obsolete, because it is already there)
+   //instrptr = strstr(instr,ie)+strlen(ie); instrptr = strstr(instrptr,"=")+1;
+   instrptr+=strspn(instrptr,sep);
    // Clears all whitespaces at the end of the list
-   tkp = strrchr(instr,0)-1; while(tkp>instrptr) { if(tkp[0]!=' '&&tkp[0]!='\t'&&tkp[0]!='\n') break; tkp--; } tkp++;
+   tkp = strrchr(instrptr,0)-1; while(tkp>instrptr) { if(tkp[0]!=' '&&tkp[0]!='\t'&&tkp[0]!='\n') break; tkp--; } tkp++;
    // Goes through string finding whitespaces to get number of indices
    tk = strpbrk(instrptr,sep); if(strncmp(sep,tk,1)==0) tk += strspn(tk,sep);
    if(tk!=NULL) { num_indices=1; 

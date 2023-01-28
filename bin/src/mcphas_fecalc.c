@@ -1,8 +1,42 @@
 /*****************************************************************************/
 // here the free energy is calculated for a given (initial) spinconfiguration
 // using the meanfield algorithm
+
+double evalfe(physproperties & physprop,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
+// calculate free energy fe and energy u
+{ Vector d1(1,inputpars.nofcomponents),meanfield(1,inputpars.nofcomponents);
+  int i,j,k,l,m1,s;
+ physprop.fe=0;physprop.u=0; // initialize fe and u
+for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
+{s=sps.in(i,j,k);
+ for(l=1;l<=inputpars.nofatoms;++l)
+ {physprop.fe-=KB*T*lnzi[s][l];// sum up contributions from each ion
+  physprop.u+=ui[s][l];
+// correction term
+  for(m1=1;m1<=inputpars.nofcomponents;++m1)
+   {d1[m1]=sps.m(i,j,k)[inputpars.nofcomponents*(l-1)+m1];
+  meanfield[m1]=mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+m1];}
+  // add correction term
+  physprop.fe+=0.5*(meanfield*d1);
+  physprop.u+=0.5*(meanfield*d1);
+ // printf ("Ha=%g Hb=%g Hc=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
+ }
+}}}
+physprop.fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
+physprop.u/=(double)sps.n();
+
+if(ini.doeps){physprop.Eel=sps.epsilon*inputpars.Cel*sps.epsilon;
+              physprop.fe+=physprop.Eel;physprop.u+=physprop.Eel;
+} // add elastic energy
+
+physprop.fe/=sps.nofatoms; //normalise to formula unit
+physprop.u/=sps.nofatoms;
+physprop.Eel/=sps.nofatoms;
+return physprop.fe;
+ }
+
 double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
-             spincf & sps,mfcf & mf,double & u,testspincf & testspins, qvectors & testqs)
+             spincf & sps,mfcf & mf,physproperties & physprop,testspincf & testspins, qvectors & testqs)
 {/*on input:
     T		Temperature[K]
     Hex		Vector of external magnetic field [T]
@@ -17,8 +51,9 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
 
  */
  double fe,dE; // free energy
+ Matrix GG(1,6,1,inputpars.nofcomponents*inputpars.nofatoms);
  Vector diff(1,inputpars.nofcomponents*inputpars.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
- Vector meanfield(1,inputpars.nofcomponents),moment(1,inputpars.nofcomponents),d1(1,inputpars.nofcomponents);
+ Vector moment(1,inputpars.nofcomponents), d1(1,inputpars.nofcomponents),meanfield(1,inputpars.nofcomponents);
  char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
  int i,j,k,i1,j1,k1,di,dj,dk,l,r=0,s,sdim,m,n,m1;
  div_t result; // some modulo variable
@@ -48,9 +83,22 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  mfcf  mfold(mf.na(),mf.nb(),mf.nc(),inputpars.nofatoms,inputpars.nofcomponents); // spinconf variable to store old mf
  spsold=sps;
 
+if(ini.doeps){ // set coupling matrix 
+for(i=1;i<=6;++i)
+ for(l=1;l<=inputpars.nofatoms;++l)
+  for(m=1;m<=inputpars.nofcomponents;++m)
+   GG(i,(l-1)*inputpars.nofcomponents+m)=(*(*inputpars.jjj[l]).G)(i,m);
+// invert elastic constants multiplied by number of atoms in magnetic unitcell - exit if not possible
+ // printf("#Inverting Elastic Constants Matrix\n");
+  inputpars.CelInv=(1.0/(sps.na()*sps.nb()*sps.nc()))*inputpars.Cel.Inverse();
+            //
+// initialize epsilon to zero
+  sps.epsilon=0;mf.epsmf=0;
+}
+
 // coupling coefficients jj[](a-c) berechnen
 // for (r=0;r<=sdim;++r)
-
+ 
  Matrix * jj; jj= new Matrix [(sdim+1)+1];
  for(i=0;i<=sdim+1;++i){jj[i]=Matrix(1,inputpars.nofcomponents*inputpars.nofatoms,1,inputpars.nofcomponents*inputpars.nofatoms);} // coupling coeff.variable
    if (jj == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
@@ -147,9 +195,9 @@ for (r=1;sta>ini.maxstamf;++r)
      return 2*FEMIN_INI+1;}
 
  //1. calculate mf from sps (and calculate sta)
- sta=0;dE=0;
+ sta=0;dE=0; if(ini.doeps)mf.epsmf=0;
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
- {mf.mf(i,j,k)=0;
+ {mf.mf(i,j,k)=0;  if(ini.doeps)mf.epsmf+=GG*sps.m(i,j,k);
   for (i1=1;i1<=sps.na();++i1){if (i1>=i){di=i1-i;}else{di=sps.na()-i+i1;}
                                for (j1=1;j1<=sps.nb();++j1){if (j1>=j){dj=j1-j;}else{dj=sps.nb()-j+j1;}
 			                                    for (k1=1;k1<=sps.nc();++k1){if (k1>=k){dk=k1-k;}else{dk=sps.nc()-k+k1;}
@@ -171,6 +219,7 @@ for (r=1;sta>ini.maxstamf;++r)
          {mf.mf(i,j,k)(m1)+=sps.m(i1,j1,k1)(m1)*jj[l](m1,m1);}
      }
     }}}
+  if(ini.doeps){mf.mf(i,j,k)+=sps.epsilon*GG;}
   diff=mf.mf(i,j,k)-mfold.mf(i,j,k);sta+=diff*diff;
  // dE-=0.5*diff*(const Vector&)sps.m(i,j,k); // here we tried to calculate dE - energy difference for the step
   diff*=stepratio;mf.mf(i,j,k)=mfold.mf(i,j,k)+diff;//step gently ... i.e. scale change of MF with stepratio
@@ -203,6 +252,8 @@ for (r=1;sta>ini.maxstamf;++r)
   diff-=sps.m(i,j,k);
   spinchange+=sqrt(diff*diff)/sps.n();
   }}}
+  if(ini.doeps){sps.epsilon=inputpars.CelInv*mf.epsmf;
+               }
 
   //treat program interrupts
   #ifdef _THREADS
@@ -236,12 +287,14 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
      fin_coq = fopen_errchk (outfilename, "a");
+     fe=evalfe(physprop,sps,mf,ini,inputpars, T,lnzi,ui);
+
   #ifndef _THREADS
-   fprintf(fin_coq,"%i %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),spinchange,stepratio,100*(double)successrate/nofcalls);
+   fprintf(fin_coq,"%i %g %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)successrate/nofcalls,fe);
    #else
    htcalc_input *tin; int thrid;
    if ((tin=(htcalc_input*)THRLC_GET(threadSpecificKey))==THRLC_GET_FAIL) thrid = 0; else thrid = tin->thread_id+1;
-   fprintf(fin_coq,"%i %g %g %g %g %g %i\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),spinchange,stepratio,100*(double)successrate/nofcalls,thrid);
+   fprintf(fin_coq,"%i %g %g %g %g %g %g %i\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)successrate/nofcalls,fe,thrid);
    #endif
    fclose(fin_coq);
   }
@@ -249,28 +302,9 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
 
 }
 
-//printf ("hello end of mf procedure\n");
+//printf ("hello end of selfconsistency loop after %i iterations\n",r);
+fe=evalfe(physprop,sps,mf,ini,inputpars, T,lnzi,ui);
 
-
-// calculate free energy fe and energy u
-fe=0;u=0; // initialize fe and u
-for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
-{s=sps.in(i,j,k);
- for(l=1;l<=inputpars.nofatoms;++l)
- {fe-=KB*T*lnzi[s][l];// sum up contributions from each ion
-  u+=ui[s][l];
-// correction term
-  for(m1=1;m1<=inputpars.nofcomponents;++m1)
-   {d1[m1]=sps.m(i,j,k)[inputpars.nofcomponents*(l-1)+m1];
-  meanfield[m1]=mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+m1];}
-  // add correction term
-  fe+=0.5*(meanfield*d1);
-  u+=0.5*(meanfield*d1);
- // printf ("Ha=%g Hb=%g Hc=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
- }
-}}}
-fe/=(double)sps.n()*sps.nofatoms; //normalise to formula unit
-u/=(double)sps.n()*sps.nofatoms;
 
 if (ini.displayall==1)
  {

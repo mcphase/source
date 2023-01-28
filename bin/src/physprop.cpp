@@ -57,7 +57,7 @@ physproperties::physproperties (const physproperties & p)
   H=p.H;
   m=p.m;
   nofhkls=p.nofhkls;
-  u=p.u;fe=p.fe;
+  u=p.u;fe=p.fe;Eel=p.Eel;
   sps=p.sps;
   mf=p.mf;
   washere=p.washere;
@@ -96,7 +96,7 @@ void physproperties::update_maxnofhkls(int maxnofhkli)
 
 
 // methode save
-double physproperties::save (int verbose, const char * filemode, int htfailed, par & inputpars,char * prefix)
+double physproperties::save (int verbose, const char * filemode, int htfailed,inipar & ini, par & inputpars,char * prefix)
 { FILE *fout;
   char filename[50];
   time_t curtime;
@@ -132,19 +132,22 @@ double physproperties::save (int verbose, const char * filemode, int htfailed, p
    fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
-   fprintf (fout, "#note: - for specific heat calculation use unit conversion 1mev/ion=96.48J/mol\n");
-   fprintf (fout, "#      - moments and energies are given per ion - not per formula unit !\n");
+   fprintf (fout, "#note: - for specific heat calculation use unit conversion 1mev/f.u.=96.48J/mol\n");
+   fprintf (fout, "#      - below moments and energies are given per ion - not per formula unit !\n");
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
    fprintf (fout, "#   x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] free energy f[meV/ion] energy u[meV/ion] total moment |m|     ma mb mc m||(projection along H) [mb/ion]");
    if(ortho==0){fprintf (fout, "mi   mj   mk[muB/f.u.]   Hi  Hj  Hk[T]");}
+   if(ini.doeps&&ortho==0){fprintf (fout, " Eel [meV/f.u.] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij");}
+   if(ini.doeps&&ortho!=0){fprintf (fout, " Eel [meV/f.u.] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab");}
    fprintf (fout,"}\n");
    fclose(fout);
       }
-   if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;}
+   if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eel=0;}
    fout = fopen_errchk (outfilename,"a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
    if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
+    if(ini.doeps){fprintf (fout, "  %4.4g  %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(Eel),myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));}
    fprintf(fout,"\n");
    fclose(fout);
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,prefix);

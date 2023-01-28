@@ -225,15 +225,15 @@ if(verbose==1){printf(".. calculating (hkl) finished\n");}
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fin_coq = fopen_errchk (outfilename, "w");

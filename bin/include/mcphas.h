@@ -61,7 +61,7 @@ void physpropclc(Vector H,double T,
 
  */
 double fecalc(Vector H,double T,inipar & ini,par & inputpars,
-            spincf & sps,mfcf & mf,double & u,testspincf & testspins,qvectors & testqs);
+            spincf & sps,mfcf & mf,physproperties & physprops,testspincf & testspins,qvectors & testqs);
 
 
 

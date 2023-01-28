@@ -318,7 +318,7 @@ printf("                 r3= %5.3ga + %5.3gb + %5.3gc\n", r3(1), r3(2), r3(3));
                                  db1=y1[i]- (da[i]*rez2(1)+db[i]*rez2(2)+dc[i]*rez2(3))/2/PI;
                                  dc1=z1[i]- (da[i]*rez3(1)+db[i]*rez3(2)+dc[i]*rez3(3))/2/PI;
        dd+=sqrt(da1*da1+db1*db1+dc1*dc1);
-       if(dd>SMALL){fprintf (stderr,"Warning: atomic positions da db dc and dr1 dr2 dr3 inconsistent !\n");
+       if(dd>SMALLPOSITIONDEVIATION){fprintf (stderr,"Warning: atomic positions da db dc and dr1 dr2 dr3 inconsistent !\n");
                     fprintf (stderr,"         use_dadbdc=%i\n",use_dadbdc);
                     if(use_dadbdc==0){ fprintf (stderr,"using dr1 dr2 dr3 and recalculating da db dc...\n");}
                     else {fprintf (stderr,"using da db dc and recalculating dr1 dr2 dr3...\n");}
@@ -517,7 +517,7 @@ for(i=1;i<=natmagnetic;++i){
 			    if (strchr(instr,'}')==NULL){fprintf(stderr,"ERROR mcdiff: no '}' found after filename for magnetic atom %s\n",instr);exit (EXIT_FAILURE);}
 
                             instr[strspn(instr," \t")]='=';
-			    extract(instr,"",sipffilename,(size_t)MAXNOFCHARINLINE);
+			    extract(instr,"",sipffilename,(size_t)MAXNOFCHARINLINE,1);
                             if(strchr(sipffilename,'}')!=NULL){*strchr(sipffilename,'}')='\0';}
                             if(strchr(sipffilename,' ')!=NULL){*strchr(sipffilename,' ')='\0';}
                             if(strchr(sipffilename,'\t')!=NULL){*strchr(sipffilename,'\t')='\0';}
@@ -717,7 +717,7 @@ if (argc>1){int nr;
                                   hkl[m](2)=rint(nn[2]);
                                   hkl[m](3)=rint(nn[3]);
                                  // check if magnetic reflection is indeed on magnetic reciprocal lattice
-                              if(fabs(nn[1]-hkl[m](1))>SMALL||fabs(nn[2]-hkl[m](2))>SMALL||fabs(nn[3]-hkl[m](3))>SMALL)
+                              if(fabs(nn[1]-hkl[m](1))>SMALLPOSITIONDEVIATION||fabs(nn[2]-hkl[m](2))>SMALLPOSITIONDEVIATION||fabs(nn[3]-hkl[m](3))>SMALLPOSITIONDEVIATION)
                                 {fprintf(stderr,"Warning mcdiff - reading hkl=(%g %g %g): calculation impossible, because this corresponds to ", hhkkll(1),hhkkll(2),hhkkll(3));
                                  fprintf(stderr,"non integer supercell reciprocal lattice point (%g %g %g)", nn[1], nn[2], nn[3]);
                                  if(zeronotmatchinghkl==1)

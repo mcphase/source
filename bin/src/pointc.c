@@ -11,7 +11,7 @@
 #include "martin.h"
 #define SMALL_DISPLACEMENT  0.001
 
-void calcCEFpar(double & q,double & x ,double & y, double & z, double & r,Vector & Blm, Vector & Llm,ionpars * iops)
+void calcCEFpar(double & q0,double & q2,double & q4,double & q6,double & x ,double & y, double & z, double & r,Vector & Blm, Vector & Llm,ionpars * iops)
 {
  Vector B(0,45); B=0;
  Vector gamma(0,45); gamma=0; 
@@ -108,13 +108,13 @@ void calcCEFpar(double & q,double & x ,double & y, double & z, double & r,Vector
  double eps0=8.854187817e-12; //units C^2/Nm^2
  double echarge=1.60217646e-19;  // units C
  //gamma00   
- B(0)*=q/r*4*PI; gamma(0)*=q*echarge*1e10/r/eps0;
+ B(0)*=q0/r*4*PI; gamma(0)*=q0*echarge*1e10/r/eps0;
  //gamma2M   
- for (i=1;i<=5;++i){B(i)*=q/r/r/r*4*PI/5; gamma(i)*=q*echarge*1e30/r/r/r/5/eps0;}
+ for (i=1;i<=5;++i){B(i)*=q2/r/r/r*4*PI/5; gamma(i)*=q2*echarge*1e30/r/r/r/5/eps0;}
  //gamma4M
- for (i=13;i<=21;++i){B(i)*=q/r/r/r/r/r*4*PI/9; gamma(i)*=q*echarge*1e50/r/r/r/r/r/9/eps0;}
+ for (i=13;i<=21;++i){B(i)*=q4/r/r/r/r/r*4*PI/9; gamma(i)*=q4*echarge*1e50/r/r/r/r/r/9/eps0;}
  //gamma6M
- for (i=33;i<=45;++i){B(i)*=q/r/r/r/r/r/r/r*4*PI/13; gamma(i)*=q*echarge*1e70/r/r/r/r/r/r/r/13/eps0; }
+ for (i=33;i<=45;++i){B(i)*=q6/r/r/r/r/r/r/r*4*PI/13; gamma(i)*=q6*echarge*1e70/r/r/r/r/r/r/r/13/eps0; }
 
  // ... gammas are calculated gamma()=q*Zlm(Omegai)/[r^(l+1)eps0(2l+1)] in SI units [N m^(2-L-1) /C]
  // ... Blm    are calculated B()=4pi*q*plm*Zlm(Omegai)/[r^(l+1)(2l+1)] in |e|A^(-L-1)
@@ -176,7 +176,7 @@ char instr[MAXNOFCHARINLINE];
 char module[MAXNOFCHARINLINE];
 int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0;
 float invalues[100];invalues[0]=99;
-  double q,x,y,z;int do_deriv=0;
+  double q2,q4,q6,x,y,z;int do_deriv=0;
 
 // treat options
 if(argc>1+ac)
@@ -193,31 +193,27 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
     { printf (
 "\n Program to calculate Crystal field Parameters from Point Charges \n\n"
 " Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos\n\n"
-"example 1: pointc  Ce3+ 0.2 4 1 5.3\n\n"
-"           ... meaning calculate Blm (Stevens Parameters) \n"
-"               and   Llm (Wybourne Parameters) \n"
-"               for one pointcharge of +0.2|e| in distance\n"
-"               x=4 A y=1 A z=5.3 A from a Ce3+ ion.\n\n"
+"example 1: pointc  Ce3+ 0.2 4 1 5.3\n"
+" ... calculate Blm (Stevens Parameters) and Llm (Wybourne Parameters) for one\n"
+"     pointcharge of +0.2|e| in distance x=4 A y=1 A z=5.3 A from a Ce3+ ion.\n"
 "example 2: pointc Ce3+ file.pos\n"
-"          ... meaning read several charges+coordinates from file.pos,\n"
-"              file format: column 1=charge, column 2-4 = x y z coordinate.\n"
-"              (note,progam makenn creates useful files for this option from \n"
-"              the crystal structure).\n\n"
-"example 3: pointc file.sipf 0.2 4 1 5.3\n"
-"          ... the single ion property file.sipf must contain in the first line\n"
-" #!MODULE=so1ion \n"
-" # and should conatin the following information (# denotes comments):\n"
-" #the name of the ion\n"
+" ... read several charges+coordinates from file.pos,file format:\n"
+"      column 1=charge, column 2-4 = x y z coordinate. (note,progam makenn\n"
+"      creates useful files for this option from the crystal structure).\n"
+"example 3: pointc Ce3+ C2.pos 5 6\n"
+" ... same as example 2 but reduced charge model,i.e. B2m calculated, with\n"
+"     charges in col 1 of C2.pos,B4m and B6m with charges in col 5 and 6, respectively.\n"
+"example 4: pointc file.sipf 0.2 4 1 5.3 0.1 0.3\n"
+" ... read ion from file.sipf,use 0.2|e| for B2m, 0.1|e| for B4m, 0.3|e| for B6m\n"
+" ... the first line of the single ion property file.sipf must be\n"
+" #!MODULE=so1ion\n"
+" # file.sipf should contain the following information (# denotes comments):\n"
+" # the name of the ion\n"
 " IONTYPE=Ce3+\n"
-" #stevens parameters(optional,necessary for output of Blm)\n"
-" ALPHA=-0.0571429\n"
-" BETA=0.00634921\n"
-" GAMMA=0\n"
-" # the radial matrix elements RN=<r^N> \n"
-" # in units of a0^N (a0=0.5292 A)\n"
-" R2=1.309\n"
-" R4=3.964\n"
-" R6=23.31\n"
+" #Stevens parameters (optional, necessary for output of Blm)\n"
+" ALPHA=-0.0571429 BETA=0.00634921 GAMMA=0\n"
+" # the radial matrix elements RN=<r^N> in units of a0^N (a0=0.5292 A)\n"
+" R2=1.309 R4=3.964 R6=23.31\n"
 " #optional radial wave function parameters, for transition metal ions the the values\n"
 " #are tabulated in Clementi & Roetti Atomic data and nuclear data tables 14 \n"
 " #(1974) 177-478, the radial wave function is expanded as\n"
@@ -228,10 +224,8 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
 " N1=3 XI1=4.95296 C1=0.36301 \n"
 " N2=3 XI2=12.2963 C2=0.02707 \n"
 " N3=3 XI3=7.03565 C3=0.14777\n"
-" N4=3 XI4=2.74850 C4=0.49771 \n"
-" N5=3 XI5=1.69027 C5=0.11388 \n"
-"OUTPUT:  stdout ... sipf file with CEF pars(including radial matrix elements\n"
-"                    and Stevens factors)\n"
+" \n"
+"OUTPUT:  stdout ... sipf file with CEF pars,radial matrix elements,Stevens factors\n"
 "                ... pointcharges and positions (omit with option -o)\n"
 "         results\\pointc.out ...contains results of convergence when summing up\n"
 "                 contributions of different neighbours one by one...\n"
@@ -251,12 +245,12 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
  ionpars * iops;
  jjjpar * jjjps;
  char *token;
- int sipf_read_module=-1; // 0 no sipf read  1 module ic1ion  4 module so1ion
+ int sipf_read_module=-1; // -1 no sipf read,  0 module ic1ion,  4 module so1ion
  if((sipf_file=fopen(argv[1+ac],"r"))) //read ion parameters from file
- { fclose(sipf_file);sipf_file=open_sipf(argv[1+ac],module);
- if(extract(module,"so1ion",instr,(size_t)MAXNOFCHARINLINE)==0){sipf_read_module=4;
+ { fclose(sipf_file);sipf_file=open_sipf(argv[1+ac],module);fprintf(stderr,"\n");
+ if(strstr(module,"so1ion")!=NULL){sipf_read_module=4;
    printf("#!MODULE=so1ion\n");}
- if(extract(module,"ic1ion",instr,(size_t)MAXNOFCHARINLINE)==0){sipf_read_module=0;
+ if(strstr(module,"ic1ion")!=NULL){sipf_read_module=0;
    printf("#!MODULE=ic1ion\n");
    iops=new ionpars(2);
    while(feof(sipf_file)==false)
@@ -266,7 +260,7 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
                                     }
    
    if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-        extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE);
+        extract(instr,"IONTYPE",(*iops).iontype,(size_t)MAXNOFCHARINLINE,1);
 
         extract(instr,"nof_electrons",(*iops).nof_electrons);
         extract(instr,"ALPHA",(*iops).alpha);
@@ -335,10 +329,12 @@ else
     while (n==0 && feof(stdin)==false) n=inputparline("R4", stdin, invalues);            (*iops).r4 = invalues[1]; n=0;
     while (n==0 && feof(stdin)==false) n=inputparline("R6", stdin, invalues);            (*iops).r6 = invalues[1]; n=0;
     while (n==0 && feof(stdin)==false) n=inputline(stdin, invalues);
-    q=invalues[1];
+    q2=invalues[1];q4=q2;q6=q2;
     x=invalues[2];
     y=invalues[3];
     z=invalues[4]; 
+    if(n>4)q4=invalues[5];
+    if(n>5)q6=invalues[6];
     table_file = stdin; 
  }
  else
@@ -365,43 +361,54 @@ else
 if(!batchmode) {
 // zero parameters in case initialisation put some values to the parameters ...
 conv_file=fopen_errchk("results/pointc.out","w");
-fprintf(conv_file,"#charge(|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B66 L66\n");
+fprintf(conv_file,"#c0=c2 c4 c6 (|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B66 L66\n");
 }
 if (do_deriv){fprintf(dBlm_file,"#x y z(A) dB00/dux dB00/duy dB00/duz dB22S/dux dB22S/duy dB22S/duz dB21S/du ... dB20/du... dB22/du... dB66/duz\n");
               fprintf(dLlm_file,"#x y z(A) dL00/dux dL00/duy dL00/duz dL22S/dux dL22S/duy dL22S/duz dL21S/du ... dL20/du... dL22/du... dL66/duz\n");}
 Vector dBlm0x(0,45),dLlm0x(0,45);dBlm0x=0;dLlm0x=0;
 Vector dBlm0y(0,45),dLlm0y(0,45);dBlm0y=0;dLlm0y=0;
 Vector dBlm0z(0,45),dLlm0z(0,45);dBlm0z=0;dLlm0z=0;
+int q4col=1,q6col=1;
+ 
 if(!batchmode) {
-if (argc<5) // read pointcharges from file
-{table_file=fopen_errchk(argv[2+ac],"r");
+if (argc<6+ac) // read pointcharges from file
+{if(argc>3+ac)q4col=(int)strtod(argv[3+ac],NULL);
+ if(argc>4+ac)q6col=(int)strtod(argv[4+ac],NULL);
+ table_file=fopen_errchk(argv[2+ac],"r");
  while(n==0&&feof(table_file)==false)n=inputline(table_file, invalues);
-  q=invalues[1];
-  x=invalues[2];
-  y=invalues[3];
-  z=invalues[4]; 
+  q2=invalues[1];q4=q2;q6=q2;
+    x=invalues[2];
+    y=invalues[3];
+    z=invalues[4]; 
+    if(q4col>1&&n>=q4col)q4=invalues[q4col];
+    if(q6col>1&&n>=q6col)q6=invalues[q6col];
 } else 
 { n=4;
-  q=strtod(argv[2+ac],NULL);
+  q2=strtod(argv[2+ac],NULL);q4=q2;q6=q2;
   x=strtod(argv[3+ac],NULL);
   y=strtod(argv[4+ac],NULL);
   z=strtod(argv[5+ac],NULL);
+  if(argc>6+ac){n=5;q4=strtod(argv[6+ac],NULL);}
+  if(argc>7+ac){n=6;q6=strtod(argv[7+ac],NULL);}
 }
 }
  // print information about pointcharges to file and calculate Blms and Llms
-  if(!omit_pc)printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
+  if(!omit_pc){if(n==4)printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
+               else printf ("\n#pointcharges c2[|e|]  x[A] y[A] z[A] c4[|e|] c6[|e|] c0=c2\n");
+              }
 while(n>0)
 {
 
- if(!omit_pc)printf ("pointcharge= %4g         %4g %4g %4g\n",q,x,y,z);
+ if(!omit_pc){if(n==4)printf ("pointcharge= %4g         %4g %4g %4g\n",q2,x,y,z);
+               else printf ("pointcharge= %4g         %4g %4g %4g   %4g  %4g\n",q2,x,y,z,q4,q6);
+              }
  // calculate Blm's and Llm's
  double r;
  Vector Blm(0,45),Llm(0,45);
  r = sqrt(x * x + y * y + z * z);
- if(!batchmode) 
- fprintf (conv_file," %4g  %4g %4g %4g  %4g  ",q,x,y,z,r);
+ if(!batchmode)fprintf (conv_file," %4g %4g %4g   %4g %4g %4g  %4g  ",q2,q4,q6,x,y,z,r);
  // calculate Blm Llm for this neighbour
- calcCEFpar(q,x,y,z,r,Blm,Llm,iops);
+ calcCEFpar(q2,q2,q4,q6,x,y,z,r,Blm,Llm,iops);
 
  // sum to iops.Blm and iops.Lllm
                     (*iops).Blm(0)+=Blm(0); if(!batchmode) fprintf (conv_file,"%g ",Blm(0));
@@ -415,8 +422,7 @@ while(n>0)
  for (i=33;i<=45;++i){(*iops).Blm(i)+=Blm(i); if(!batchmode) fprintf (conv_file,"%g ",Blm(i));
                     (*iops).Llm(i)+=Llm(i); if(!batchmode) fprintf (conv_file,"%g ",Llm(i));
                    }
- if(!batchmode) 
- fprintf(conv_file,"\n");
+ if(!batchmode)fprintf(conv_file,"\n");
 
  if(do_deriv){Vector dBlmx(0,45),dLlmx(0,45);
               Vector dBlmy(0,45),dLlmy(0,45);
@@ -425,13 +431,13 @@ while(n>0)
               double y1=y+SMALL_DISPLACEMENT;              
               double z1=z+SMALL_DISPLACEMENT;  
               double a0 = .5292;//(Angstroem)            
-               r = sqrt(x1 * x1 + y * y + z * z);calcCEFpar(q,x1,y,z,r,dBlmx,dLlmx,iops);
+               r = sqrt(x1 * x1 + y * y + z * z);calcCEFpar(q2,q2,q4,q6,x1,y,z,r,dBlmx,dLlmx,iops);
                dBlmx-=Blm;dLlmx-=Llm;
                dBlmx*=a0/SMALL_DISPLACEMENT;dLlmx*=a0/SMALL_DISPLACEMENT;
-               r = sqrt(x * x + y1 * y1 + z * z);calcCEFpar(q,x,y1,z,r,dBlmy,dLlmy,iops);
+               r = sqrt(x * x + y1 * y1 + z * z);calcCEFpar(q2,q2,q4,q6,x,y1,z,r,dBlmy,dLlmy,iops);
                dBlmy-=Blm;dLlmy-=Llm;
                dBlmy*=a0/SMALL_DISPLACEMENT;dLlmy*=a0/SMALL_DISPLACEMENT;
-               r = sqrt(x * x + y * y + z1 * z1);calcCEFpar(q,x,y,z1,r,dBlmz,dLlmz,iops);
+               r = sqrt(x * x + y * y + z1 * z1);calcCEFpar(q2,q2,q4,q6,x,y,z1,r,dBlmz,dLlmz,iops);
                dBlmz-=Blm;dLlmz-=Llm;
                dBlmz*=a0/SMALL_DISPLACEMENT;dLlmz*=a0/SMALL_DISPLACEMENT;
                dBlm0x-=dBlmx;dBlm0y-=dBlmy;dBlm0z-=dBlmz;
@@ -458,20 +464,28 @@ while(n>0)
 
  n=0;
  if(!batchmode) {
- if (argc<5)
+ if (argc<6+ac)
  { while((n==0)&(feof(table_file)==false))n=inputline(table_file, invalues);
-  q=invalues[1];
-  x=invalues[2];
-  y=invalues[3];
-  z=invalues[4]; 
+  q2=invalues[1];q4=q2;q6=q2;
+    x=invalues[2];
+    y=invalues[3];
+    z=invalues[4]; 
+    if(q4col>1&&n>=q4col)q4=invalues[q4col];
+    if(q6col>1&&n>=q6col)q6=invalues[q6col];
  }
  } else {
-   n=inputline(table_file, invalues); q=invalues[1]; x=invalues[2]; y=invalues[3]; z=invalues[4]; 
+   n=inputline(table_file, invalues);
+    q2=invalues[1];q4=q2;q6=q2;
+    x=invalues[2];
+    y=invalues[3];
+    z=invalues[4]; 
+    if(n>4)q4=invalues[5];
+    if(n>5)q6=invalues[6];
  }
 } // next pointcharge
 
 if(!batchmode) {
-if (argc<5){fclose(table_file);}
+if (argc<6+ac){fclose(table_file);}
 fclose(conv_file);
 }
 if(do_deriv){

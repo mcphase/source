@@ -26,9 +26,7 @@
 #                              mcphaseexplorer compiled using netbeans if modified, in order 
 #                               to use it: click on project right click package as zip. look in 
 #                               Output/Netbeans_mpe/dist/ and unzip mcphaseexplorer.zip
-#                               unzip it and insert in etc/mcphaseexplorer.conf additional command
-#                               line arguments such as -J--add-opens=java.base/java.net=ALL-UNNAMED ...
-#                               (take these from prvious version, ensures that mpe works with jdk 17)
+#                               unzip it 
 #                               move ions directory from old version to new and replace old version
 #                               in mcphas/bin/mcphaseexplorer* with new version.
 #                              cd doc and delete directory manual
@@ -105,7 +103,7 @@ all: vector functions cfield mcphase examples tutorial bfk bcfph cowan
 git: $(gitdir)/*
 	cp Makefile Makefile.sav
 #	cp -ru $(gitdir)/* ./
-	rsync -avu $(gitdir)/ ./
+	rsync -avu --filter='exclude .git'  $(gitdir)/ ./
 	cp Makefile.sav Makefile
 
 vector: 
@@ -167,7 +165,8 @@ tgz :
 	dos2unix ./examples/la2coo4/calc.bat
 	dos2unix ./examples/Ce3p_chain_cfphonon/calc.bat
 	dos2unix ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
-	dos2unix ./examples/CeAl2_cfphonon_cfstrict/calc.bat
+	dos2unix ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
+	dos2unix ./examples/CeAl2_cfphonon_cfstrict/DMD_method/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
@@ -182,7 +181,12 @@ tgz :
 	dos2unix ./examples/prni2si2/calc.bat
 	dos2unix ./examples/pupd3/calc.bat
 	dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
+	dos2unix ./examples/tb2ti2o7_cfphonon_simple/DMD_method/calc.bat
+	dos2unix ./examples/tb2ti2o7_cfphonon_simple/phonons/calc.bat
+	dos2unix ./examples/test_cluster/calc.bat
 	dos2unix ./examples/testic1ion/test*.bat
+	dos2unix ./examples/tmcu2_cf_phonon/DMD_method/calc.bat
+	dos2unix ./examples/tmcu2_cf_phonon/phonons/calc.bat
 	dos2unix ./examples/tungsten_phonons/calc.bat
 	dos2unix ./examples/upd3/calc.bat
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
@@ -202,7 +206,8 @@ tgz :
 	unix2dos ./examples/la2coo4/calc.bat
 	unix2dos ./examples/Ce3p_chain_cfphonon/calc.bat
 	unix2dos ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
-	unix2dos ./examples/CeAl2_cfphonon_cfstrict/calc.bat
+	unix2dos ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
+	unix2dos ./examples/CeAl2_cfphonon_cfstrict/DMD_method/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
@@ -217,7 +222,12 @@ tgz :
 	unix2dos ./examples/prni2si2/calc.bat
 	unix2dos ./examples/pupd3/calc.bat
 	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
+	unix2dos ./examples/tb2ti2o7_cfphonon_simple/DMD_method/calc.bat
+	unix2dos ./examples/tb2ti2o7_cfphonon_simple/phonons/calc.bat
+	unix2dos ./examples/test_cluster/calc.bat
 	unix2dos ./examples/testic1ion/test.bat
+	unix2dos ./examples/tmcu2_cf_phonon/DMD_method/calc.bat
+	unix2dos ./examples/tmcu2_cf_phonon/phonons/calc.bat
 	unix2dos ./examples/tungsten_phonons/calc.bat
 	unix2dos ./examples/upd3/calc.bat
 	unix2dos ./tutorial/07documentation_logbooks/calc.bat

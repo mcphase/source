@@ -136,6 +136,7 @@ void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
 
 #ifdef _THREADS
 #define ini (*thrdat.ini)
+#define physprops (*thrdat.physprops)
 #define inputpars (*myinput->inputpars)
 #define testqs (*thrdat.testqs)
 #define testspins (*thrdat.testspins)
@@ -212,7 +213,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  
       //!!!calculate free energy - this is the heart of this loop !!!!
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
-      fe=fecalc(H ,T,ini,inputpars,sps,(*mf),u,testspins,testqs);
+      fe=fecalc(H ,T,ini,inputpars,sps,(*mf),physprops,testspins,testqs);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( " for str %i(%ix%ix%i). "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( " for (%g %g %g)(%ix%ix%i). ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
@@ -224,7 +225,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                if (verbose==1){fprintf(stdout,"fe(%i)= %f meV",tryrandom,fe); fflush(stdout);}
 	       sps1=sps;sps1.reduce(); 
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.nofatoms,inputpars.nofcomponents);
-               if ((fered=fecalc(H ,T,ini,inputpars,sps1,(*mf1),u,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
+               if ((fered=fecalc(H ,T,ini,inputpars,sps1,(*mf1),physprops,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
                    magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
                    for (l1=1;l1<=inputpars.nofatoms;++l1){
@@ -250,15 +251,15 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
 		   
                     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
@@ -279,7 +280,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	    if (verbose==1) printf("fe=%gmeV, str %i (%i)",fe,physprops.j,j);
              #else
              MUTEX_LOCK(&mutex_tests); 
-             int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,(*thrdat.physprops),ini); //0 means error in checkspincf/addspincf
+             int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini); //0 means error in checkspincf/addspincf
              MUTEX_UNLOCK(&mutex_tests); 
 	     if (checksret==0) {if(isfull==0){fprintf(stderr,"Warning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.");
                  isfull=1;}else{fprintf(stderr,"!FT!");}}
@@ -290,7 +291,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
             //printout fe
             #ifdef _THREADS
 	    if (tryrandom==ini.nofrndtries && verbose==1) {
-               if(tlsfemin==femin) printf("femin=%gmeV str %i(%i)-",fe,(*thrdat.physprops).j,j); 
+               if(tlsfemin==femin) printf("femin=%gmeV str %i(%i)-",fe,physprops.j,j); 
 	       if(j>0) printf ( "str %i(%ix%ix%i)done "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( "(%g %g %g)(%ix%ix%i)done ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                                                           }
@@ -402,6 +403,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
       EVENT_SIG(checkfinish);
       MUTEX_UNLOCK(&mutex_loop);
       #undef ini
+      #undef physprops
       #undef inputpars
       #undef testqs
       #undef testspins
@@ -463,9 +465,17 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
    fin_coq= fopen_errchk (outfilename,"w");
    #ifndef _THREADS
-   fprintf(fin_coq,"#displayxtext=time(s)\n#displaytitle=2:log(iterations) 3:log(sta) 4:spinchange 5:stepratio 6:successrate(%%)\n#time(s) log(iteration) log(sta) spinchange stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs)\n");
+   fprintf(fin_coq,"#displayxtext=time(s)\n");
+   fprintf(fin_coq,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy(%%)\n");
+   fprintf(fin_coq,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)\n");
+   fprintf(fin_coq,"%i 0 0 0 0 0 0\n",(int)time(0));
+   fprintf(fin_coq,"%i 1 1 1 1 1 1\n",(int)time(0)+1);
    #else
-   fprintf(fin_coq,"#displayxtext=time(s)\n#displaytitle=2:log(iterations) 3:log(sta) 4:spinchange 5:stepratio 6:successrate 7:threadID(%%)\n#time(s) log(iteration) log(sta) spinchange stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs)  thread_id \n");
+   fprintf(fin_coq,"#displayxtext=time(s)\n");
+   fprintf(fin_coq,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy 8:threadID(%%)\n");
+   fprintf(fin_coq,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)  thread_id \n");
+   fprintf(fin_coq,"%i 0 0 0 0 0 0 0\n",(int)time(0));
+   fprintf(fin_coq,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
    #endif
    fclose(fin_coq);	      
    printf("\n starting T=%g Ha=%g Hb=%g Hc=%g with \n %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",T,Habc(1),Habc(2),Habc(3),testspins.n,testqs.nofqs());
@@ -498,7 +508,9 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 //   htcalc_input *tin[NUM_THREADS];
    static int washere=0;
    if(washere==0){washere=1;
-                  for (int ithread=0; ithread<NUM_THREADS; ithread++) tin[ithread] = new htcalc_input(0,ithread,&inputpars);}
+                  for (int ithread=0; ithread<NUM_THREADS; ithread++) 
+                    tin[ithread] = new htcalc_input(0,ithread,&inputpars);
+                  }
    
  MUTEX_INIT(mutex_loop);
  MUTEX_INIT(mutex_tests);
@@ -620,7 +632,8 @@ else // if yes ... then
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
-      physprops.fe=fecalc(H ,T,ini,inputpars,sps,(*mf),physprops.u,testspins,testqs); 
+      physprops.fe=fecalc(H ,T,ini,inputpars,sps,(*mf),physprops,testspins,testqs); 
+
       magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
                    for (l1=1;l1<=inputpars.nofatoms;++l1){
@@ -642,15 +655,15 @@ else // if yes ... then
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                      fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,inputpars.gJ,(*magmom));
+                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
 		    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
@@ -661,7 +674,9 @@ else // if yes ... then
   delete magmom;if(verbose==1){printf(".");}
  //check if fecalculation gives again correct result
    if (physprops.fe>femin+(0.00001*fabs(femin))){fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
-                            T,Norm(H),femin,physprops.j,physprops.fe);delete mf;return 2;}
+                            T,Norm(H),femin,physprops.j,physprops.fe);
+                             physprops.sps.epsilon=0;physprops.Eel=0;
+                             physprops.m=0;delete mf;return 2;}
  if(verbose==1){printf(".\n");}
  physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
       delete mf;

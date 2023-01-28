@@ -6,6 +6,7 @@
 
 
 #include<par.hpp>
+#include<inipar.hpp>
 #include<martin.h>
 #include<spincf.hpp>
 #include<mfcf.hpp>
@@ -22,6 +23,7 @@ double T; // temperature
 Vector m,H; // moment and H field
 double fe;
 double u; // free energy and mag energy per ion
+double Eel; // elastic energy per ion
 int nofatoms;
 int nofcomponents;
 
@@ -38,7 +40,7 @@ physproperties (const physproperties & props);	// kopier-konstruktor
 
 void update_maxnofhkls(int mxnofhkli);
 // save physical properties to output files
-double save(int verbose,const char * filemode, int j,par & inputpars,char * prefix);
+double save(int verbose,const char * filemode, int j,inipar & ini,par & inputpars,char * prefix);
 // scroll output files and read physical properties from these if possible,
 // on success return 0, otherwise
 // returns 1

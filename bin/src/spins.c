@@ -260,7 +260,7 @@ else
 // load spinsconfigurations and check which one is nearest -------------------------------   
 double TT=0; TT=strtod(argv[1+os],NULL);
 double HHx=0,HHy=0,HHz=0,lnZ,U;
-if (strncmp(argv[1],"-f",2)==0&&argc-os<3){TT=-TT;} // here TT becomes a number of a spinconfig in a file
+if (strncmp(argv[1],"-f",2)==0&&argc-os<3){TT=-TT;printf("# the configuration number %g\n",-TT);} // here TT becomes a number of a spinconfig in a file
 else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
                }// here Hx and Hy become x and y in the phasediagram and TT=0 indicates this fact
      else
@@ -595,34 +595,33 @@ printf("# **********************************************************************
 
 // here the 3d file should be created
     fin = fopen_errchk ("./results/spinsab.eps", "w");
-Vector gJJ(1,spinconf.nofatoms); for (i=1;i<=spinconf.nofatoms;++i){gJJ(i)=1;}
 
 
-     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,1,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,1,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spinsac.eps", "w");
-     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,2,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,2,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spinsbc.eps", "w");
-     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,3,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,3,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spins3dab.eps", "w");
-     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,4,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,4,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spins3dac.eps", "w");
-     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,5,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,5,spinconf);
     fclose (fin);
     fin = fopen_errchk ("./results/spins3dbc.eps", "w");
-     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,6,gJJ,spinconf);
+     spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,6,spinconf);
     fclose (fin);
 
     fin = fopen_errchk ("./results/spins.fst", "w");
-     spinconf.fst(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,gJJ,spinconf);
+     spinconf.fst(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,spinconf);
     fclose (fin);
 
     
    fin = fopen_errchk ("./results/spins_prim.fst", "w");
-     spinconf.fstprim(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,gJJ,spinconf);
+     spinconf.fstprim(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,spinconf);
     fclose (fin);
              Vector hkl(1,3);hkl=0;
              Vector gjmbHxc(1,3);gjmbHxc=0;

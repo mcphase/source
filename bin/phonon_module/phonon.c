@@ -87,6 +87,9 @@ F(1)=Fxc(1);F(2)=Fxc(2);F(3)=Fxc(3);
  K(3,1)=MODPAR[6];
  K(3,2)=MODPAR[7];
 // printf("Icalc phonon Kij= %g %g %g %g %g %g %g %g %g\n",K(1,1),K(2,2),K(3,3),K(2,1),K(3,1),K(3,2),K(1,2),K(1,3),K(2,3));
+if(Norm(K)==0){(*U)=0; // last term  to correct energy
+(*lnZ)=0; // last term  to correct energy
+  u0=0;return;}
 
  int sort=1,maxiter=1000000;double factor=1e-3;
 K*=factor;
@@ -141,6 +144,8 @@ uu=-Ki*F;
 
 
 int i=(int)MODPAR[9];
+
+/*
 switch(i)
 {case 0: if(uu(1)>MODPAR[8])uu(1)=MODPAR[8];
          if(uu(2)>MODPAR[8])uu(2)=MODPAR[8];
@@ -160,6 +165,27 @@ case 6 : if(uu(3)>MODPAR[8])uu(3)=MODPAR[8];if(uu(3)<-MODPAR[8])uu(3)=-MODPAR[8]
          if(uu(2)>MODPAR[8])uu(2)=MODPAR[8];if(uu(2)<-MODPAR[8])uu(2)=-MODPAR[8];break;
 default: break;
 }
+*/
+
+// try tanh restriction
+double sat;sat=MODPAR[8];
+switch(i)
+{case 0: uu(1)=sat*tanh(uu(1)/sat);
+         uu(2)=sat*tanh(uu(2)/sat);
+         uu(3)=sat*tanh(uu(3)/sat);
+         break;
+case 1 : uu(1)=sat*tanh(uu(1)/sat);break;
+case 2 : uu(2)=sat*tanh(uu(2)/sat);break;
+case 3 : uu(3)=sat*tanh(uu(3)/sat);break;
+case 4 : uu(1)=sat*tanh(uu(1)/sat);
+         uu(2)=sat*tanh(uu(2)/sat);break;
+case 5 : uu(1)=sat*tanh(uu(1)/sat);
+         uu(3)=sat*tanh(uu(3)/sat);break;
+case 6 : uu(3)=sat*tanh(uu(3)/sat);
+         uu(2)=sat*tanh(uu(2)/sat);break;
+default: break;
+}
+
 (*U)-=0.5*uu*F; // last term  to correct energy
 (*lnZ)+=0.5*uu*F/K_BT; // last term  to correct energy
  // to easy convergence of mcphasit the linearity of the einstein Oscillator is damped 

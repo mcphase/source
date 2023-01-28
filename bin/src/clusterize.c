@@ -79,7 +79,7 @@ PRB 2008 \n\
 
   // store cluster'cnr'.j
   sprintf(filename,"cluster%i.j",cnr);
-  clust.save(filename);
+  clust.save(filename,0);
   sprintf(filename,"cluster%i.sipf",cnr);
   FILE * fout;
   fout =fopen_errchk (filename, "w");
@@ -266,5 +266,5 @@ $M3=$M3+$M%i_3;\n",n,n,n);
                   (*out.jjj[nt]).add((*inp.jjj[nn]),abc);
                  }
  }
- out.save("mcphas.j");
+ out.save("mcphas.j",0);
 }

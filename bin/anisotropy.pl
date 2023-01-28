@@ -39,8 +39,8 @@ sub usage() {
                moment.
 
     usage: anisotropy -h
-           anisotropy  T H xn yn zn nofsteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
-           anisotropy  T H -p nofthetasteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
+           anisotropy  T H xn yn zn nofsteps [-doeps |-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
+           anisotropy  T H -p nofthetasteps [-doeps |-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
 
      -h           : this (help) message
       T           : temperature in Kelvin
@@ -53,7 +53,8 @@ sub usage() {
      -p           : calculate numerical polycrystal average of the magnetic moment (is isotropic)
       nofthetasteps    : number of theta steps to be calculated for polycrystal average
 
-    option:
+    options:
+    -doeps         : refine strain epsilon using elastic and magnetoelastic constants
     -r sipffilename: filename of single ion parameter file
                       Hxc1,Hxc2,... are the exchange field components (meV)
                      (exchange field is kept constant, external magnetic

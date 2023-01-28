@@ -15,7 +15,7 @@
 
 //constructor 
 par::par(float ai,float bi,float ci,float alphai,float betai,float gammai,int nofci)
-{r=Matrix(1,3,1,3);rez=Matrix(1,3,1,3);
+{r=Matrix(1,3,1,3);rez=Matrix(1,3,1,3);Cel=Matrix(1,6,1,6);CelInv=Matrix(1,6,1,6);CelInv=0;
  a=ai;b=bi;c=ci;alpha=alphai;beta=betai;gamma=gammai;nofcomponents=nofci;
   rems[1]=new char[40];rems[1][0]='\0';
   rems[2]=new char[40];rems[2][0]='\0';
@@ -30,7 +30,7 @@ par::par (const char *filejjj)
   char instr[MAXNOFCHARINLINE];
   Vector hkl(1,3),hkl_rint(1,3);
   r=Matrix(1,3,1,3);rez=Matrix(1,3,1,3);
-    
+    Cel=Matrix(1,6,1,6);Cel=0;CelInv=Matrix(1,6,1,6);CelInv=0;
   fin_coq = fopen_errchk (filejjj, "rb");
 
  // input file header ------------------------------------------------------------------
@@ -55,6 +55,13 @@ par::par (const char *filejjj)
    extract(instr,"r1a",r[1][1]);extract(instr,"r2a",r[1][2]); extract(instr,"r3a",r[1][3]); 
    extract(instr,"r1b",r[2][1]); extract(instr,"r2b",r[2][2]); extract(instr,"r3b",r[2][3]);
    extract(instr,"r1c",r[3][1]); extract(instr,"r2c",r[3][2]); extract(instr,"r3c",r[3][3]);
+
+    // read optional elastic constants        
+  char Celstr[6];
+   for(i=1;i<=6;++i)for(j=1;j<=6;++j){
+  sprintf(Celstr,"Cel%i%i",i,j);// printf("%s\n",Celstr);
+  extract(instr,Celstr,Cel(i,j));Cel(j,i)=Cel(i,j);}
+
    extract(instr,"nofatoms",nofatoms);extract(instr,"nofcomponents",nofcomponents); 
 		  if(feof(fin_coq)!=0)
                     {fprintf(stderr,"ERROR reading header of file %s: line '#! nofatoms=...' not found\n",filejjj);exit(EXIT_FAILURE);}
@@ -62,18 +69,18 @@ par::par (const char *filejjj)
   if(nofatoms>MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL)
   {fprintf(stderr,"ERROR reading mcphas.j: maximum number of atoms in unit cell exceeded - enlarge it in par.hpp and recompile\n");exit(EXIT_FAILURE);}
   
-  
+
   rez=r.Inverse();
   rems[3]=new char[strlen(instr)+2];strcpy(rems[3],instr);
   
   //read parameter sets for every atom 
   jjj=new jjjpar * [nofatoms+1];
-  gJ=Vector(1,nofatoms);
+  //gJ=Vector(1,nofatoms);
   for(i=1;i<=nofatoms;++i)  
   {//printf("creating atom %i (of %i)...\n",i,nofatoms);
    jjj[i]=new jjjpar(fin_coq,nofcomponents);
    if(jjj[i]==NULL){ fprintf (stderr, "Out of memory creating atoms jjjpar by constructor\n");exit (EXIT_FAILURE);}
-   gJ(i)=(*jjj[i]).gJ;
+   //gJ(i)=(*jjj[i]).gJ;
    
    if(nofcomponents!=(*jjj[i]).nofcomponents)
    {fprintf(stderr,"ERROR reading mcphas.j: nofcomponents (%i) not consistent for atom %i (%i read in fileheader)\n",(*jjj[i]).nofcomponents,i,nofcomponents);exit(EXIT_FAILURE);}
@@ -99,11 +106,12 @@ par::par (const char *filejjj)
    }
   
   }
-
-  if  (ferror(fin_coq)==1)
+ if  (ferror(fin_coq)==1)
   {fprintf(stderr,"ERROR Reading file %s\n",filejjj);exit(1);}
   fclose (fin_coq);
   fprintf(stderr,"#Finished Reading file %s\n",filejjj);
+//myPrintMatrix(stdout,(*(*jjj[1]).G));
+
 }
 
 //kopier-konstruktor
@@ -113,8 +121,7 @@ par::par(const par & p)
   r=p.r;rez=p.rez;
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
-  gJ=p.gJ;
-  
+  Cel=p.Cel;CelInv=p.CelInv;
 //dimension arrays
   for (i=1;i<=3;++i)
   {rems[i] = new char[strlen(p.rems[i])+2];
@@ -146,7 +153,7 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
                   for (j=1;j<nofatoms;++j){nnn[j]=jjj[j];} 
                   nnn[nofatoms]=new jjjpar((*p));// use copy constructor to create new atom parameter set    
 		  delete []jjj;
-		  jjj=nnn;                        
+		  jjj=nnn;  
 return nofatoms;                 
 }
 
@@ -159,14 +166,14 @@ int par::delatom(int n) // removes atom number n
  for (j=1;j<n;++j){nnn[j]=jjj[j];} 
  for (j=n+1;j<=nofatoms+1;++j){nnn[j-1]=jjj[j];} 
  delete []jjj;
- jjj=nnn;                        
+ jjj=nnn;           
 return nofatoms; 
 }
 
 void par::reduce_unitcell()
 {//checks every atom in the unit cell and removes
 // any atom, which is connected to another by a lattice vector
- int i,j;
+ int i,j,nold=nofatoms;
  Vector d(1,3),n(1,3);
  for(i=1;i<nofatoms;++i){
   for(j=i+1;j<=nofatoms;++j){//printf("nofatoms=%i %i %i\n",nofatoms,i,j);
@@ -178,6 +185,7 @@ void par::reduce_unitcell()
                                                       delatom(j);--j;
                                                       }
  }}
+ Cel*=(double)nofatoms/nold; // renormalise elastic constants to reduced unit cell dimension
 }
 
 void par::add (par & p1)
@@ -191,20 +199,25 @@ void par::add (par & p1)
     if (nofcomponents>p1.nofcomponents)
 {p1.increase_nofcomponents(nofcomponents-p1.nofcomponents);}
     if (nofcomponents<p1.nofcomponents)
-{(*this).increase_nofcomponents(p1.nofcomponents-nofcomponents);}
+{increase_nofcomponents(p1.nofcomponents-nofcomponents);}
 
 
-    if (gJ!=p1.gJ){fprintf(stderr,"ERROR adding parameter sets: Landefactors gJ of atoms not equal\n");exit(EXIT_FAILURE);}
 
  for(i=1;i<=p1.nofatoms;++i)
  {if (i>nofatoms)
-   {newatom(p1.jjj[i]);}
+   {newatom(p1.jjj[i]);
+   fprintf(stderr,"# Warning program addj: nofatoms not equal in adding parameter sets  - adding atom number %i with sipffilename=%s\n",i,(*jjj[i]).sipffilename);
+
+   }
    else
-   {// add the parameters of p1 to the parameters of this
+   {if (strcmp((*jjj[i]).sipffilename,(*p1.jjj[i]).sipffilename)!=0){
+    fprintf(stderr,"# Warning program addj: adding parameter sets atom %i sipffilename %s does not match %s - taking %s for output\n",i,(*jjj[i]).sipffilename,(*p1.jjj[i]).sipffilename,(*jjj[i]).sipffilename);}
+     // add the parameters of p1 to the parameters of this
     (*jjj[i]).add((*p1.jjj[i]),abc);
    }
 
  }
+ Cel+=p1.Cel; // add elastic constants
 }
 
 void par::scale(double scalefactor) // scale all interaction parameters by scalefactor
@@ -215,11 +228,17 @@ void par::scale(double scalefactor) // scale all interaction parameters by scale
  }
 }
 
+void par::set_nofcomponents (int n)
+{// sets the numberofcomponents to n
+ if(n<nofcomponents){decrease_nofcomponents(nofcomponents-n);}
+ if(n>nofcomponents){increase_nofcomponents(n-nofcomponents);}
+}
 void par::increase_nofcomponents (int n)
-{//increases the number of components in the interaction vector
+{//increases the number of components in the interaction vector by n
 
  int i;
  if (n<1) {fprintf(stderr,"ERROR increasing number of compoments in parameter set: n negative - number cannot be decreased\n");exit(EXIT_FAILURE);}
+  fprintf(stderr,"Warning: increasing nofcomponents not tested  yet ... addition of parameter sets may be erroneous\n");
 
  for(i=1;i<=nofatoms;++i)
  {
@@ -228,10 +247,23 @@ void par::increase_nofcomponents (int n)
  nofcomponents+=n;
 }
 
+void par::decrease_nofcomponents (int n)
+{//decreases the number of components in the interaction vector by n
 
+ int i;
+ if (n<1) {fprintf(stderr,"ERROR decreasing number of compoments in parameter set: n negative - number cannot be decreased\n");exit(EXIT_FAILURE);}
+ if (nofcomponents-1<n) {fprintf(stderr,"ERROR decreasing number of compoments in parameter set: n = %i must be smaller than nofcomponents = %i\n",n,nofcomponents);exit(EXIT_FAILURE);}
+  fprintf(stderr,"Warning: decreasing nofcomponents not tested  yet ... addition of parameter sets may be erroneous\n");
+
+ for(i=1;i<=nofatoms;++i)
+ {
+    (*jjj[i]).decrease_nofcomponents(n);
+ }
+ nofcomponents-=n;
+}
 
 //save to file
-void par::save (const char * filename)
+void par::save (const char * filename,int noindexchange)
 { FILE * fout;
   fout = fopen_errchk (filename, "w");
   fprintf(fout,"%s",rems[1]);
@@ -245,22 +277,22 @@ void par::save (const char * filename)
   fprintf(fout,"# - program to calculate the dispersion of magnetic excitations\n");
   fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
   fprintf(fout,"#***************************************************************\n");
-  save (fout);
+  save (fout,noindexchange);
   fclose(fout);
 }
 
-void par::save (FILE * file)
+void par::save (FILE * file,int noindexchange)
 { int i;
   errno = 0;
   savelattice(file);
   for (i=1;i<=nofatoms;++i)
   {
-  (*jjj[i]).save(file);
+  (*jjj[i]).save(file,noindexchange);
 //  fprintf(file,"%s",rems[3+i]); // changed 3.03 - I believe here should be only line with stars
     fprintf(file,"#*********************************************************************\n");
   }
+ 
 }
-
 void par::savelattice (FILE *file)
 { 
   errno = 0;
@@ -269,7 +301,19 @@ void par::savelattice (FILE *file)
   fprintf(file,"#! r1a=%4.6g r2a=%4.6g r3a=%4.6g\n",r[1][1],r[1][2],r[1][3]);
   fprintf(file,"#! r1b=%4.6g r2b=%4.6g r3b=%4.6g   primitive lattice vectors [a][b][c]\n",r[2][1],r[2][2],r[2][3]);
   fprintf(file,"#! r1c=%4.6g r2c=%4.6g r3c=%4.6g\n",r[3][1],r[3][2],r[3][3]);
-  fprintf(file,"#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",nofatoms,nofcomponents);
+
+ // save elastic constants
+fprintf(file,"#\n# Nonzero Elastic constants   in meV per primitive unit cell in Voigt notation only first index<=second index has to be given\n");
+fprintf(file,"# because the constants are symmetric Celij=Celji\n");
+fprintf(file,"# Elastic constants refer to the Euclidean coordinate system ijk defined\n");
+fprintf(file,"# with respect to abc as j||b, k||(a x b) and i normal to k and j\n");
+int i1=0,i,j;fprintf(file,"#! ");
+ for(i=1;i<=6;++i){if(i1>0){i1=0;fprintf(file,"#! ");}
+  for(j=i;j<=6;++j){if(fabs(Cel(i,j))>SMALL){++i1;fprintf(file," Cel%i%i=%+10.9g",i,j,Cel(i,j));}}
+if(i1>0)fprintf(file,"\n"); }
+if(i1==0)fprintf(file,"\n");
+
+  fprintf(file,"#\n#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",nofatoms,nofcomponents);
 //  fprintf(file,"%s",rems[3]);// changed 8.09 - I believe here should be only line with stars
   fprintf(file,"#*********************************************************************\n");
 }

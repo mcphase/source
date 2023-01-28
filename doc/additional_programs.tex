@@ -7,9 +7,14 @@ in magnetism, ...
 
 \item [\prg addj\index{addj} file1.j file2.j:] adds exchange parameters of file2.j to the %%@
 parameters in
-file1.j - output is written to stdout
+file1.j - output is written to stdout, if file2.j is not given, a copy of the input file is saved 
 
-
+\begin{description}
+\item[Option: -nofcomponents 23] fixes the nofcomponents to 23 by 
+                         reducing (removing entries) or increasing (by filling with zeroes) 
+                         the exchange parameter tables
+\item[Option:            -ni]  forces output without indexchange 
+\end{description}
 \item [\prg anisotropy:] program to calculate the magnetic anistropy
 by doing a mcphas or
                single ion calculation for different external magnetic field
@@ -116,6 +121,10 @@ from the new charges. (You don't have to specify -pc with this option).
 \item[-so       ]  force all ions to use so1ion
 \item[-ic        ] force all ions to use ic1ion
 \item[-ph        ] force all ions to use phonon
+\item[-sf ] apply screening function to charges for calculation of crystal field parameters,
+                           e.g. {\prg -sf sf.r} reads file {\prg sf.r}, with column 1 r(\AA),
+ column 2  screeningfactor for $B_2^m$, column 3 screeningfactor for$ B_4^m$, and column 4
+screeningfactor for $B_6^m$.
 \end{description}
 
 Default is to create sipf files with so1ion module for f-electrons and ic1ion module for d-electrons
@@ -321,7 +330,7 @@ Ce1.sipf  Ce1.sipf  +4.7 70.9 0.0
 \end{figure}
 
 
-\item[option {\prg  option -cfph }]
+\item[option {\prg  option -cfph [screeningfile.r]}]
               calculate crystal field phonon interaction: {\prg mcphas.j} lists 
               magnetic and non magnetic atoms with charges defined in the 
               sipf files by {\prg CHARGE= variable}. For magnetic atoms the sipf 
@@ -341,6 +350,10 @@ Ce1.sipf  Ce1.sipf  +4.7 70.9 0.0
               and the phonon model has to be added to {\prg makenn.j},  e.g. by
               program {\prg addj}, moreover magnetic sites sipf files are required, 
               e.g. such as created in {\prg results\//makenn.a*.sipf}. 
+              A screening file can be used to define distance dependent 
+              screening of charges for the pointcharge model calculation
+              format: col1 distance r (\AA), col 2 screening factor 
+              for $B_2^m$, col 3 for $B_4^m$ and col 4 for $B_6^m$
 \item[option {\prg  option -f [filename]}]
 \item[option {\prg  option -dm [filename]}]
               read interaction constants from table in file. 
@@ -400,20 +413,26 @@ interactions between the linked atoms or clusters.}
                                   and Wybourne Parameters Llms
                  for one point charge of +0.2$|e|$ in distance
                  x=4 \AA y=1 \AA z=5.3 \AA from a Ce$^{3+}$ ion.
-                Alternative Usage: pointc\index{pointc} Ce3+ filename
+                Alternative Usage: {\prg pointc\index{pointc} Ce3+ filename}
                  ... meaning read several charges+coordinates from file,
                  file format: column 1=charge, column 2-4 = x y z coordinate  (note,
 				 ({\prg makenn} creates useful files for this option from the crystal %%@
 structure).
                 results are written to stdout (including radial matrix elements and Stevens %%@
 factors)
-
+Moreover, if started as 
+{\prg pointc\index{pointc} Ce3+ C2.pos 5 6 }
+ ...  the reduced charge model is used,i.e. B2m is calculated with
+     charges in col 1 of C2.pos,B4m and B6m with charges in col 5 and 6, respectively. Similar,
+{\prg pointc\index{pointc}  Ce3+ 0.2 4 1 5.3 0.1 0.3 }
+ ... will use $0.2|e|$ for $B_2^m$, $0.1|e|$ for $B_4^m$, $0.3|e|$ for $B_6^m$.
+ 
                 Note: if an ion is not implemented, it's parameters can be 
-                      entered in a single ion property file and pointc\index{pointc} is
+                      entered in a single ion property file and {\prg pointc\index{pointc}} is
                       started as 
-                        pointc\index{pointc} file.sipf 0.2 4 1 5.3
+                       {\prg pointc\index{pointc} file.sipf 0.2 4 1 5.3}
 
-                      the single ion property file must then contain the following
+                      The single ion property file must then contain the following
                       information (\# denotes comments):
 \begin{verbatim}
       #the name of the ion
@@ -440,7 +459,7 @@ sqrt(2Np!)
       N5=3 XI5=1.69027 C5=0.11388
       # if the above parameters are given the radial wave function is output to file %%@
 radwavfun.dat                 
-\end{verbatim}                      
+\end{verbatim}  
 \item [\prg powdercell2j\index{powdercell2j} file:]     used to create mcphas.j type file from %%@
 output of powdercell,output is written to mcphas.j.  Example of input file:
 \begin{verbatim}
@@ -456,6 +475,12 @@ given by th parametrisation in file.sipf.
                 This program checks every atom in the unit cell in file mcphas.j and removes
                 any atom, which is connected to another by a lattice vector. Useful for
                 going from a description in an extended unit cell to the primitive unit cell.
+\begin{description}
+\item[Option: -nofcomponents 23] fixes the nofcomponents to 23 by 
+                         reducing (removing entries) or increasing (by filling with zeroes) 
+                         the exchange parameter tables
+\item[Option:  -ni ] forces output without indexchange 
+\end{description}
 \item [\prg rotateBlm\index{rotateBlm}]
   \begin{verbatim}
     Rotates a set of  crystal field  parameters for  Stevens equivalent

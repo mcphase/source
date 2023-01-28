@@ -18,8 +18,6 @@
 #define MAXNOFCHARINLINE 7024
 #define MAGFF_NOF_COEFF 9
 
-#define SMALL 1e-6  // for module kramer - to trigger numerical limited calculation 
-                    // for adding jjpar sets to see what is difference in position or what is equal
 
 #include "jjjpar_basmodfunc.cpp" // basic sipf module functions
 #include "jjjpar_observables.cpp" // function for physical observables
@@ -80,9 +78,18 @@ int strncomp(const char * s1,const char * s2, size_t n)
 
 void jjjpar::increase_nofcomponents(int n) // increase nofcomponents by n
 {int i,j,k,nold;
+  Matrix Gsav(1,6,1,nofcomponents);
+  Gsav=(*G);
   nold=nofcomponents;
   nofcomponents+=n;
-  mom.Resize(1,nofcomponents); 
+  if(n<1){fprintf (stderr, "jjjpar::increase_nofcomponents n=%i<0\n",n);exit (EXIT_FAILURE);}
+  mom.Resize(1,nofcomponents);
+  delete G; 
+  G=new Matrix(1,6,1,nofcomponents);if (G == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} 
+  
+  for(i=1;i<=6;++i)
+   for(j=1;j<=nofcomponents;++j)
+    if(j<=nold){(*G)(i,j)=Gsav(i,j);}else{(*G)(i,j)=0;}
 
   Matrix * jijstore;
   jijstore = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jijstore[i]=Matrix(1,nofcomponents,1,nofcomponents);}
@@ -104,7 +111,41 @@ void jjjpar::increase_nofcomponents(int n) // increase nofcomponents by n
   {jij[i]=jijstore[i];}
 
   delete[] jijstore;
-  fprintf(stderr,"Warning: increasing nofcomponents not tested  yet ... addition of parameter sets may be erroneous\n");
+}
+
+void jjjpar::decrease_nofcomponents(int n) // decrease nofcomponents by n
+{int i,j,k,nold;
+  nold=nofcomponents;
+  nofcomponents-=n;
+  if(nofcomponents<1){fprintf (stderr, "Error decreasing Nofcomponents=%i gets less than 1\n",nofcomponents);exit (EXIT_FAILURE);}
+  mom.Resize(1,nofcomponents); 
+  Matrix Gsav(1,6,1,nold);
+  Gsav=(*G);
+  delete G;
+  G=new Matrix(1,6,1,nofcomponents);
+  for(i=1;i<=6;++i)for(j=1;j<=nofcomponents;++j)(*G)(i,j)=Gsav(i,j);
+
+
+  Matrix * jijstore;
+  jijstore = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jijstore[i]=Matrix(1,nofcomponents,1,nofcomponents);}
+  if (jijstore == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+
+  for (i=1;i<=paranz;++i)
+   {jijstore[i]=0;
+    for (j=1;j<=nofcomponents;++j)
+    {for (k=1;k<=nofcomponents;++k)
+     {jijstore[i](j,k)=jij[i](j,k);
+   }}}
+ 
+
+ delete []jij;
+  jij = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
+  if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+
+  for (i=1;i<=paranz;++i)
+  {jij[i]=jijstore[i];}
+
+  delete[] jijstore;
 //  exit(0);
 
 }
@@ -116,6 +157,7 @@ void jjjpar::add(jjjpar & b,Vector & abc) // add set b to this (abc: lattice con
   if (nofcomponents!=b.nofcomponents)
   { fprintf (stderr, "class jjjpar: function add - nofcomponents does not match (check number of columns)\n"); 
     exit (EXIT_FAILURE);}
+  (*G)+=(*b.G);
 
  for(i=1;i<=b.paranz;++i)
  {int found=0;
@@ -227,11 +269,59 @@ void jjjpar::delpar (int number)
 /************************************************************************************/
 
 //saving parameters to file
-void jjjpar::save(FILE * file) 
-{ int i,i1,j1;
+void jjjpar::save(FILE * file,int noindexchange) 
+{ int i,i1,j1,npairs=0,symmetric=1;
+  int *n1,*n2; 
+  n1= new int[nofcomponents*nofcomponents+2];if (n1 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
+           
+  n2= new int[nofcomponents*nofcomponents+2];if (n2 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
+           
+ // MR 22.12.22 - Added to check if exchange parameters indexed should be saved (e.g. a lot of zeroes)
+// check how many zeroes, if the exchange is symmetric and which pairs need to be saved
+   for(i1=1;i1<=nofcomponents;++i1)
+   for(j1=i1;j1<=nofcomponents;++j1)
+   {int savpair1=0,savpair2=0;
+   for  (i=1;i<=paranz;++i){// check if it is really diagonal
+   if(diagonalexchange==1&&j1>i1&&jij[i](i1,j1)!=0){fprintf(stderr,"Error saving parameters jjjpar.cpp: diagonalexchange=0 but jij[%i](%i,%i)=%-+8.6e\n",i,i1,j1,jij[i](i1,j1));exit(1);}
+   if(fabs(jij[i](i1,j1)-jij[i](j1,i1))>SMALL)symmetric=0;   // see if all is symmetric or not
+   if(fabs(jij[i](i1,j1))!=0){savpair1=1;} // save pair i1 j1 - upper triangle of matrix
+   if(j1>i1&&fabs(jij[i](j1,i1))!=0){savpair2=1;} // save pair j1 i1 - lower triangle of matrix
+                          }
+   if(savpair1==1){++npairs;n1[npairs]=i1;n2[npairs]=j1;}
+   if(savpair2==1){++npairs;n1[npairs]=-j1;n2[npairs]=-i1;} // to mark lower triangle indices, store negative
+
+   } 
+ if(npairs==0){++npairs;n1[npairs]=1;n2[npairs]=1;} // in case all exchange constants are zero ...
+
+ // if there are less columns to be saved than  nofcomponentsxnofcomponents-2 -- > use indexchange format
+  if(npairs<nofcomponents*nofcomponents-2&&noindexchange==0){
+  int diagsav=diagonalexchange;diagonalexchange=2;
   saveatom(file);
-  fprintf(file,"#da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");
-// save the exchange parameters to file (exactly paranz parameters!)
+  saveG(file);
+  diagonalexchange=diagsav;
+ //   - Used: set diagonalexchange=2. The add a line:
+ //        #! symmetricexchange=0  indexexchange= 1,2 2,1 2,3 3,2
+ //     Where symmetricexchange is 1 or 0 depending on whether you want the non-diagonal elements of the exchange
+ //     matrix to be symmetric or not. The column index is a list of coordinates (indices)
+ //     Note that you if you don't specify symmetricexchange, it is assumed to be 0 (nonsymmetric)
+  fprintf(file,"#! symmetricexchange=%i indexexchange=",symmetric);
+  for(i1=1;i1<=npairs;++i1){
+   if(n1[i1]<0){if(symmetric==0){fprintf(file," %i,%i",-n1[i1],-n2[i1]);}} // print lower triangle only if nonsymmetric exchange
+   else{  fprintf(file," %i,%i",n1[i1],n2[i1]);}
+  }  fprintf(file,"\n");
+  fprintf(file,"#da[a]   db[b]     dc[c]       J%i%i[meV]  ... \n",abs(n1[1]),abs(n2[1]));  
+  for  (i=1;i<=paranz;++i)
+  {fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",myround(dn[i](1)),myround(dn[i](2)),myround(dn[i](3)));
+   for(i1=1;i1<=npairs;++i1){
+   if(n1[i1]<0){if(symmetric==0){fprintf(file," %-+8.6e",jij[i](-n1[i1],-n2[i1]));}} // print lower triangle only if nonsymmetric exchange
+   else{  fprintf(file," %-+8.6e",jij[i](n1[i1],n2[i1]));}
+  }  fprintf(file,"\n");
+  }
+}
+else
+{ saveatom(file);saveG(file);
+// save the exchange parameters to file in traditional method(exactly paranz parameters!)
+  fprintf(file,"#da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");  
   for  (i=1;i<=paranz;++i)
   {fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",myround(dn[i](1)),myround(dn[i](2)),myround(dn[i](3)));
     // format of matrix 
@@ -240,20 +330,34 @@ void jjjpar::save(FILE * file)
   // 11 22 33 44 55 12 21 13 31 14 41 15 51 23 32 24 42 25 52 34 43 35 53 45 54 (5x5 matrix)
   // etc ...
   //save diagonal components of exchange matrix
-  for(i1=1;i1<=nofcomponents;++i1){fprintf(file,"%-+8.6e ",jij[i](i1,i1));}
+  for(i1=1;i1<=nofcomponents;++i1){fprintf(file," %-+8.6e",jij[i](i1,i1));}
   //save off-diagonal components of exchange matrix (if required)
   if (diagonalexchange==0){for(i1=1;i1<=nofcomponents-1;++i1)
                               {for(j1=i1+1;j1<=nofcomponents;++j1)
-                               {fprintf(file,"%-+8.6e %-+8.6e ",jij[i](i1,j1),jij[i](j1,i1));
+                               {fprintf(file," %-+8.6e %-+8.6e",jij[i](i1,j1),jij[i](j1,i1));
 			       }
 			      }
                           }
    fprintf(file,"\n");  
   }
+ }
+ delete n1; delete n2;
 }
 
 void jjjpar::saveatom(FILE * file) 
 {   fprintf(file,"#! da=%4.6g [a] db=%4.6g [b] dc=%4.6g [c] nofneighbours=%i diagonalexchange=%i sipffilename=%s\n",xyz(1),xyz(2),xyz(3),paranz,diagonalexchange,sipffilename);
+}
+
+void jjjpar::saveG(FILE * file)
+{int i1,i,j;
+fprintf(file,"#! Gindices= ");i1=0;
+ for(i=1;i<=6;++i)for(j=1;j<=nofcomponents;++j)if(fabs((*G)(i,j))>SMALL){fprintf(file," %i,%i",i,j);++i1;}
+ if(i1==0){fprintf(file," 1,1");}
+fprintf(file,"\n");
+ fprintf(file,"#! G= ");
+ for(i=1;i<=6;++i)for(j=1;j<=nofcomponents;++j)if(fabs((*G)(i,j))>SMALL){fprintf(file," %+4.9g",(*G)(i,j));++i1;}
+ if(i1==0){fprintf(file," 0.0");}
+fprintf(file,"\n");
 }
 
 //save single ion parameter file filename to path*
@@ -367,7 +471,7 @@ void jjjpar::save_sipf(FILE * fout)
            //fprintf(fout,"#!structurefile = %s\n\n",clusterfile);
            //break;
            {char clustsavfile[MAXNOFCHARINLINE];sprintf(clustsavfile,"results/_%s",clusterfilename);
-           (*clusterpars).save(clustsavfile);
+           (*clusterpars).save(clustsavfile,0);
            (*clusterpars).save_sipfs("results/_");}
    default: // in case of external single ion module just save a copy of the input file 
              char *token;//double dummy;
@@ -437,13 +541,13 @@ void jjjpar::save_sipf(FILE * fout)
 //constructor with file handle of mcphas.j
 jjjpar::jjjpar(FILE * file,int nofcomps) 
 { jl_lmax=6;
-  char instr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE];
+  char instr[MAXNOFCHARINLINE],Gstr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE],Gindicesstr[MAXNOFCHARINLINE];
   sipffilename= new char [MAXNOFCHARINLINE];
   clusterfilename=new char [MAXNOFCHARINLINE];
   int i,j,i1,j1,k1;
-  int symmetricexchange=0,indexexchangenum=0;
-  Matrix exchangeindices;
-  float nn[MAXNOFNUMBERSINLINE];
+  int symmetricexchange=0,indexexchangenum=0,Gindexexchangenum=0;
+  Matrix exchangeindices,Gindices;
+  float nn[MAXNOFNUMBERSINLINE+1];
   nn[0]=MAXNOFNUMBERSINLINE;
   xyz=Vector(1,3);
   cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
@@ -459,8 +563,8 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
              i+=extract(instr,"dc",xyz[3])-1;
              i+=extract(instr,"nofneighbours",paranz)-1;
              i+=extract(instr,"diagonalexchange",diagonalexchange)-1;
-             i+=extract(instr,"cffilename",sipffilename,(size_t)MAXNOFCHARINLINE)-1;
-             i+=extract(instr,"sipffilename",sipffilename,(size_t)MAXNOFCHARINLINE)-1;
+             i+=extract(instr,"cffilename",sipffilename,(size_t)MAXNOFCHARINLINE,1)-1;
+             i+=extract(instr,"sipffilename",sipffilename,(size_t)MAXNOFCHARINLINE,1)-1;
             }
 
  // MDL 29.08.10 - Added to check if exchange parameters are indexed.
@@ -472,15 +576,16 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
  //     matrix to be symmetric or not. The column index can be either a string or a list of coordinates (indices)
  //     Note that you if you don't specify symmetricexchange, it is assumed to be 0 (nonsymmetric)
  //     Note also that the JaJb syntax is case sensitive - J must be upper case so that Jj is allowed. Index must be lower case
- if(diagonalexchange==2) { 
+ long int pos=0,jpos;pos=ftell(file); // remember position in file after #! da= ... line
+if(diagonalexchange==2) {  
     i=1; while(i>0) { 
-      if(instr[strspn(instr," \t")]!='#') { 
+      if(instr[strspn(instr," \t")]!='#'||feof(file)!=0) { 
          fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2, but not indexexchange parameter line 9a - see manual found\n"); exit (EXIT_FAILURE);}
       fgets_errchk (instr, MAXNOFCHARINLINE, file); 
       extract(instr,"symmetricexchange",symmetricexchange);
-      if(extract(instr,"indexexchange",exchangeindicesstr,MAXNOFCHARINLINE)==0) { strcpy(exchangeindicesstr,instr); break; }
+      if(extract(instr,"indexexchange",exchangeindicesstr,MAXNOFCHARINLINE,2000000)==0) { break; }
     }
-    indexexchangenum=get_exchange_indices(exchangeindicesstr,&exchangeindices);
+    indexexchangenum=get_exchange_indices(exchangeindicesstr,&exchangeindices,"indexexchange");
     if(indexexchangenum<1){fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2, but no indexexchange parameters found in line 9a - see manual\n"); exit (EXIT_FAILURE);}
  }
 
@@ -492,14 +597,52 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
   // must be set before getting pars from sipffile (cluster module needs it)
   nofcomponents=nofcomps; // default value for nofcomponents - (important in case nofparameters=0)
 
+
   //start reading again at the beginning of the file to get formfactors, debye waller factor
   get_parameters_from_sipfile(sipffilename);
+// go back to previous position just after da=... line
+// and look for comment lines with magnetoelastic interaction
+ jpos=fseek(file,pos,SEEK_SET); 
+if (jpos!=0){fprintf(stderr,"Error: wrong file format of file mcphas.j\n");exit (EXIT_FAILURE);}
+
+ G= new Matrix(1,6,1,nofcomponents);
+ for(i=1;i<=6;++i)for(j=1;j<=nofcomponents;++j)(*G)(i,j)=0; // clear matrix
+ i=0;j=0;
+
+ while((i==0||j==0)&&feof(file)==false) { fgets_errchk (instr, MAXNOFCHARINLINE, file);
+      if(instr[strspn(instr," \t")]!='#'||strncmp(instr,"#*********",10)==0) { break;}       
+      if(extract(instr,"Gindices",Gindicesstr,MAXNOFCHARINLINE,2000000)==0) {j=1;}
+      if(extract(instr,"G",Gstr,MAXNOFCHARINLINE,200000)==0) { i=1;}        
+   }
+if(i==1&&j==1){Gindexexchangenum=get_exchange_indices(Gindicesstr,&Gindices,"Gindices");
+// here fill G with values !!!
+//printf("%s\n",Gstr);
+j=splitstring(Gstr,nn);
+
+int ii,jj;
+if(j<Gindexexchangenum){
+fprintf(stderr,"Error atom %s reading G coupling number of Gindices (%i) in line #! Gindices= ... not equal to number of values (%i) in line #! G=...\n ",sipffilename,Gindexexchangenum,j);
+                      exit (EXIT_FAILURE);
+}
+for(i1=1; i1<=Gindexexchangenum; i1++) {
+        ii=(int)Gindices(i1,1); jj=(int)Gindices(i1,2); 
+        if(ii<1||ii>6||jj>nofcomponents||jj<1)
+{fprintf(stderr,"Warning atom %s Gindex %i,%i > nofcomponents=%i - ignoring value number %i = %g meV\n ",sipffilename,ii,jj,nofcomponents,i1,nn[i1]);}
+else
+{(*G)(ii,jj) = nn[i1];
+} 
+// printf("%i %i %s\n",i,j,Gstr);
+} // Gindices string found
+}
+//myPrintMatrix(stdout,(*G));
 
              dn = new Vector[paranz+1];if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
              for(i1=0;i1<=paranz;++i1){dn[i1]=Vector(1,3);}
              sublattice = new int[paranz+1];if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
              jij = new Matrix[paranz+1];if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 // read the exchange parameters from file (exactly paranz parameters!)
+// go back to previous position and look for exchange parameters
+  jpos=fseek(file,pos,SEEK_SET); 
   for  (i=1;i<=paranz;++i)
   {while((j=inputline(file, nn))==0&&feof(file)==0){}; // returns 0 if comment line or eof, exits with error, if input string too long
    // Additional check to see if we are on the last neighbour, as McPhaseExplorer generates bad files without EOL at the end unless you add an empty line
@@ -528,7 +671,7 @@ jjjpar::jjjpar(FILE * file,int nofcomps)
                exit(EXIT_FAILURE);}
 
   mom=Vector(1,nofcomponents); 
-
+  
    //(1-3) give the absolute coordinates of the neighbour and are transformed here to relative
    // coordinates !!
    dn[i](1) = nn[1];dn[i](2) = nn[2];dn[i](3) = nn[3];
@@ -579,6 +722,8 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
   jij=0; dn=0; sublattice=0;paranz=0;diagonalexchange=1;
   mom=Vector(1,9); mom=0; nofcomponents=n;
+  G=new Matrix(1,6,1,nofcomponents);
+  for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
   sipffilename= new char [MAXNOFCHARINLINE];
   clusterfilename=new char [MAXNOFCHARINLINE];
   strcpy(sipffilename,sipffile);
@@ -593,6 +738,10 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n)
 jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
  mom=Vector(1,9); mom=0; FF_type=0;
+ nofcomponents=9;
+  G=new Matrix(1,6,1,nofcomponents);
+  for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
+  
  DWF=dwf;SLR=slr;SLI=sli;
  charge=0;
   magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=0;  magFFj0[1]=1;
@@ -627,6 +776,9 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   transitionnumber=1;
   nofcomponents=nofmom;
   mom=Vector(1,nofcomponents);
+   G=new Matrix(1,6,1,nofcomponents);
+  for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
+  
   mom=0; FF_type=0;
   nof_electrons=0;// no electorns by default
   modulefilename=new char[MAXNOFCHARINLINE];
@@ -655,6 +807,8 @@ jjjpar::jjjpar (const jjjpar & pp)
 { int i;jl_lmax=pp.jl_lmax;
   xyz=Vector(1,3);
   nofcomponents=pp.nofcomponents;
+  G=new Matrix(1,6,1,nofcomponents);
+  (*G)=(*pp.G);
   mom=Vector(1,nofcomponents); 
   xyz=pp.xyz;paranz=pp.paranz;
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
@@ -781,6 +935,7 @@ int i1;
 //destruktor
 jjjpar::~jjjpar ()
 {// printf("hello destruktor jjjpar\n");  
+  delete G;
    if(jij!=0)        delete []jij; //will not work in linux
    if(dn!=0)         delete []dn;  // will not work in linux
    if(sublattice!=0) delete []sublattice;

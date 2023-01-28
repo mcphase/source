@@ -50,10 +50,16 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
 
 
 //the same for a string ... maximal n characters are copied
-int extract(char * instr,const char * parameter,char * var,size_t n)
+// and m >0 is the maximum number of space separations in the extracted string 
+// (e.g. m=1 will read from instr "G= one two three four" the parameter "G"
+// to var as "one",  putting m=2 will set var to "one two", m=3 will yield "one two three"
+
+int extract(char * instr,const char * parameter,char * var,size_t n,int m)
 { const char delimiters[] = " \n";
-  char *token,*td,*te;
-  
+  char *token,*td,*te; size_t n0;
+
+  if(m<1){fprintf(stderr,"Error martin.h function extract -  m <1\n");exit(EXIT_FAILURE);}
+
 // check if line is comment line -> if yes return 1
 if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1; //removed 26.5.02 in order to be able to place parameters in comment lines
                                  // inserted again 27.8.09 to be able to have real comment lines ignored
@@ -69,11 +75,24 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
 
   //extract parameter  
   token+=strlen(parameter);
-  token+=strspn(token, " \t=");// look for '=' but continue if not present
+  if (strstr (token, "=")==NULL) return 1;  // no '=' found after parameter string
+  while(strstr(token," ")==token||strstr(token,"\t")==token)++token;
+  if (strstr(token,"=")!=token) return 1; // there are other characters than tab or spaces between parameter and =
+  ++token;
+
+  token+=strspn(token, " \t");// look for ' ' and tab and advance after them
                                 // remove starting spaces
+
   strncpy (var,token, n);
-  //remove from string var all characters after delimiters
-  strtok(var,delimiters);
+ int i=1;
+  for(te=strtok(var,delimiters);te;te=strtok(NULL,delimiters))
+ {++i;if(i>m)break;}
+if(te==NULL){n0=n;}else{n0=te-var;}
+
+  strncpy (var,token, n0);
+  
+  //remove from string var all characters after delimiters (replace delimiter by NULL)
+  //strtok(var,delimiters);
   return 0;
 }
 
@@ -95,9 +114,9 @@ int extract_with_prefix(char * instr,char * prefix, const char * parameter,int &
  return 1;
 }
 // same for char variable with prefix
-int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var,size_t n)
-{if(0==extract(instr,parameter,var,n)){return 0;}
- else{char par[MAXNOFCHARINLINE];sprintf(par,"%s%s",prefix,parameter);  if(0==extract(instr,par,var,n)){return 0;}}
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var,size_t n,int m)
+{if(0==extract(instr,parameter,var,n,m)){return 0;}
+ else{char par[MAXNOFCHARINLINE];sprintf(par,"%s%s",prefix,parameter);  if(0==extract(instr,par,var,n,m)){return 0;}}
  return 1;
 }
 
@@ -119,10 +138,13 @@ FILE * fopen_errchk (const char * filename,const char * mode)
 //input file from string with error check
 char * fgets_errchk (char * instr,int size, FILE * file)
 {char * s;
- errno=0;
+ errno=0; 
+ if(feof(file)!=false){fprintf (stderr,"ERROR fgets_errchk: end of file\n"); 
+  exit(EXIT_FAILURE);} // inserted 17.1.23  
+ 
  s=fgets(instr,size,file);
- if (s==NULL)
- {fprintf (stderr,"ERROR fgets_errchk: end of file\n"); 
+ if (s==NULL&&feof(file)==false) //  feof==false inserted 17.1.23: will proceed if feof=true and only stop on other errors 
+ {fprintf (stderr,"ERROR fgets_errchk: %i\n",ferror(file)); 
   exit(EXIT_FAILURE);}
  return s;
 }
@@ -145,27 +167,18 @@ char * mystrtok (char * s, char * delimiters)
 return pointer;
 }
 
-// function to input a line of numbers separated by delimiters
+//function to split a string with numbers separated by delimitrs into an array
 // example:
 // 3 23 542 23
 // returns:0 .... it is a comment line (starting with #) or empty line
 //         n .... number of numbers read
-int inputline (FILE * fin_coq, float *nn)
-{
-  char instr[maxnofcharinline];
-  char delimiters[] = " \n\t";
+
+int splitstring (char * instr, float*nn)
+{char delimiters[] = " \n\t";
   char *token;
   int i;
   errno=0;
 
-  if (fgets (instr, sizeof (instr), fin_coq) == NULL)
-    { return 0;}
-
- 
-  if (feof(fin_coq)==0&&strchr(instr,'\n')==NULL)
-    { fprintf (stderr, "Error in function inputline: input string too long");
-      exit (EXIT_FAILURE);
-     }
 
 // strip /r (dos line feed) from line if necessary
   while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
@@ -194,6 +207,26 @@ if(i>=(int)nn[0])
 
   if (i<1) {return 0;}
   return i-1;
+}
+
+
+// function to input a line of numbers separated by delimiters
+// example:
+// 3 23 542 23
+// returns:0 .... it is a comment line (starting with #) or empty line
+//         n .... number of numbers read
+int inputline (FILE * fin_coq, float *nn)
+{
+  char instr[maxnofcharinline];
+  
+  if (fgets (instr, sizeof (instr), fin_coq) == NULL)
+    { return 0;}
+ 
+  if (feof(fin_coq)==0&&strchr(instr,'\n')==NULL)
+    { fprintf (stderr, "Error in function inputline: input string too long");
+      exit (EXIT_FAILURE);
+     }
+ return splitstring(instr,nn);
 }
 
 // function to input a line of numbers separated by delimiters
@@ -1099,8 +1132,11 @@ for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
  char instr[MAXNOFCHARINLINE];
   cf_file = fopen_errchk (sipf_filename, "rb");
   fgets_errchk (instr, MAXNOFCHARINLINE, cf_file);
-  if(extract(instr,"MODULE=",modulename,(size_t)MAXNOFCHARINLINE))
-   {if(extract(instr,"#!",modulename,(size_t)MAXNOFCHARINLINE))
+  if(extract(instr,"MODULE",modulename,(size_t)MAXNOFCHARINLINE,1))
+   {if(strncmp(instr,"#!",2)==0)
+    {instr[0]='M';instr[1]='=';
+     extract(instr,"M",modulename,(size_t)MAXNOFCHARINLINE,1);}
+    else
     {fprintf(stderr,"Error: single ion property file %s does not start with '#!' or 'MODULE='\n",sipf_filename);
      exit(EXIT_FAILURE);}
    }
@@ -1112,6 +1148,6 @@ for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
       if (strncmp(modulename,"phonon",6)==0)
       {strcpy(modulename,getenv("MCPHASE_DIR")); strcat(modulename,"/bin/phonon_module/phonon.so"); }
 
-  fprintf (stderr,"#parsing single ion property file: %s - loading module %s\n",sipf_filename,modulename);
+  fprintf (stderr,"#parsing single ion property file: %s - loading module %s",sipf_filename,modulename);
    return cf_file; }
 

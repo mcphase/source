@@ -23,6 +23,7 @@ class mfcf
   public:
    int nofatoms;
    int nofcomponents;
+    Vector epsmf;
    void resetnofc(int n);
  // array of spins 
    int in(int i,int j, int k); 

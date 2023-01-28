@@ -77,7 +77,7 @@ for (i=1;i<=inputpars.nofatoms;++i)
  }
 
 // save parameters
-   inputpars.save(stdout);
+   inputpars.save(stdout,0);
 
    return 0;
 }

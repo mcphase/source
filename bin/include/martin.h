@@ -32,13 +32,18 @@ extern  int extract(char * instr,const char * parameter,double & var);
 // extract a variable named [parmeter] into var out of a string [instr]
 extern   int extract(char * instr,const char * parameter,int & var);
 extern   int extract(char * instr,const char * parameter,float & var);
-extern   int extract(char * instr,const char * parameter,char * var, size_t n);
+// for a string variable maxium size n has to be given
+// and m >0 is the maximum number of space separations in the extracted string 
+// (e.g. m=1 will read from instr "G= one two three four" the parameter "G"
+// to var as "one",  putting m=2 will set var to "one two", m=3 will yield "one two three"
+
+extern   int extract(char * instr,const char * parameter,char * var, size_t n,int m);
 
 // extract a variable which is there also if it is preceded by a prefix
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var);
-extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var, size_t n);
+extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var, size_t n,int m);
 
 // open file: like fopen but with error check 
 extern  FILE * fopen_errchk (const char * filename, const char * mode);
@@ -51,6 +56,7 @@ extern  char * fgets_errchk (char * instr,int size, FILE * file);
 //           fin_coq..filepointer
 // returns nof numbers read and
 // 0 if end of file or no numbers have been read 
+extern  int splitstring (char * instr, float *nn);
 extern  int inputline (FILE * fin_coq, float *nn);
 
 // function to input a line of numbers separated by delimiters

@@ -217,7 +217,7 @@ Vector spincf::xy(Vector xyz,int orientation,Vector minv,Vector maxv,float bbwid
  }
 
 
-void spincf::eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation, Vector & gJ,spincf & magmom)
+void spincf::eps3d(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,int orientation, spincf & magmom)
  {// function to plot spins in a 3d manner
   // orientation:1 ab 2 ac 3 bc projection
   //             4 ab 5 ac 6 bc side view
@@ -1201,7 +1201,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
 //***********************************************************************************************************************************
 
 // output for fullprof studio
-void spincf::fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ,spincf & magmom) //print std file to stream
+void spincf::fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, spincf & magmom) //print std file to stream
 {int i,j,k,l,ctr=1;
 
 
@@ -1286,7 +1286,7 @@ fprintf(fout,"}\n");
 }
 
 
-void spincf::fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, Vector & gJ,spincf & magmom) //print std file to stream
+void spincf::fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, spincf & magmom) //print std file to stream
 {int i,j,k,l,ctr=1;
 
 double alpha,beta,gamma;
