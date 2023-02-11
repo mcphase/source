@@ -674,7 +674,8 @@ for $j(0..$nofatom-1) {
     @seps=split(";",$eps); 
     for (0..2) { if($seps[$_]<0)  { $seps[$_]+=ceil(abs($seps[$_])); } }
     for (0..2) { if($seps[$_]>=1) { $seps[$_]-=floor(abs($seps[$_])); } }
-    $st = "$seps[0];$seps[1];$seps[2]"; $st =~ s/6667/6666/g; $st =~ s/3334/3333/g;
+    $st = "$seps[0];$seps[1];$seps[2]"; 
+# $st =~ s/6667/6666/g; $st =~ s/3334/3333/g;  # removed by MR 5.2.2023
     push @epos, $st;
   }
   %seen = (); @uepos = grep { ! $seen{$_}++ } @epos; @epos = ();
@@ -706,7 +707,8 @@ for $j(0..$nofatom-1) {
     if ($pointcharge) {
       $label .= "_".$ioncount; $ioncount++;
     }
-    push @pos, sprintf "%-4s:% 10.5f:% 10.5f:% 10.5f:%-5s:%d:% 10.5f:%s",$atom,@seps,$ion,$j,$oxy[$j],$label;
+# increased position accuracy to 12 digits MR 5.2.2023
+    push @pos, sprintf "%-4s:% 17.12f:% 17.12f:% 17.12f:%-5s:%d:% 10.5f:%s",$atom,@seps,$ion,$j,$oxy[$j],$label;
     $seen=0; foreach(@atp) { if($_=~/$atom/) { $seen=1; } }
     if(!$seen || !defined($atp[-1])) { push @atp, $atom; } $htp{$atom}++;
    #printf $atom."% 14.5f% 14.5f% 14.5f\n",@seps;

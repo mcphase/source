@@ -241,13 +241,14 @@ int i,nofpc=0;
 
 
  cs.sipffilenames[1]=new char[MAXNOFCHARINLINE];
- cs.abc(1)=6.0;cs.abc(2)=6.0;cs.abc(3)=6.0;cs.nofatoms=nofpc+1;
+ cs.abc(1)=6.0;cs.abc(2)=6.0;cs.abc(3)=6.0;
  cs.r=0;cs.r(1,1)=1.0;cs.r(2,2)=1.0;cs.r(3,3)=1.0;
  strcpy(cs.sipffilenames[1],argv[2+os]);
  cs.x[1]=0.5*gp.scale_view_1;cs.y[1]=0.5*gp.scale_view_2;cs.z[1]=0.5*gp.scale_view_3; // put atom in middle of cell
 
 // read pointcharge-parameters
 if(gp.show_pointcharges>0) nofpc=read_pointcharge_parameters(gp,cs.sipffilenames,argv[2+os],cs.x,cs.y,cs.z,jjjps,cs.abc);
+  cs.nofatoms=nofpc+1;
   spincf s(1,1,1,nofpc+1,dim);
   spincf magmom(1,1,1,nofpc+1,3);
   Vector hkl(1,3);hkl=0;s=s*0;magmom=magmom*0;

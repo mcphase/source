@@ -640,6 +640,17 @@ and it finds elastic constants in the input file {\em mcphas.j}, it
 phase diagrams, magnetostriction, thermal expansion (magnetic part) and dynamics consistently based
 only on point charges and Born von Karman springs. 
 
+The length change $\Delta L/L$ of a sample in a dilatometer experiment
+can be calculated from the strain tensor components
+ using~\footnote{S. Bluegel, Juelich, private communication}
+
+\begin{equation}
+\frac{\Delta L}{L}=\sum_{\alpha\beta} \epsilon_{\alpha\beta} \hat L_{\alpha} \hat L_{\beta}
+\end{equation}
+
+where $\hat \mbf  L$ denotes the unit vector in the direction of
+measurement.
+
 
 Utopia: in a further step stress tensor components could be envisaged 
 to act similar as an external magnetic field in {\em McPhase}, these will only act on the

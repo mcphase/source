@@ -345,7 +345,7 @@ else
 }
 
 void jjjpar::saveatom(FILE * file) 
-{   fprintf(file,"#! da=%4.6g [a] db=%4.6g [b] dc=%4.6g [c] nofneighbours=%i diagonalexchange=%i sipffilename=%s\n",xyz(1),xyz(2),xyz(3),paranz,diagonalexchange,sipffilename);
+{   fprintf(file,"#! da=%4.12g [a] db=%4.12g [b] dc=%4.12g [c] nofneighbours=%i diagonalexchange=%i sipffilename=%s\n",xyz(1),xyz(2),xyz(3),paranz,diagonalexchange,sipffilename);
 }
 
 void jjjpar::saveG(FILE * file)

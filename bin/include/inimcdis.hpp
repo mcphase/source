@@ -48,9 +48,10 @@ class inimcdis
   double kf; // constant ki/kf
   mfcf mf;
    void save(); // save parameters to results/_mcdisp.ini results/_mcdisp.mf
+   void save(const char * filename); // save parameters to results/_mcdisp.ini results/_mcdisp.mf
    void print_usrdefcolhead(FILE *fout);
    void print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim);
-  inimcdis (const char * file,const char * spinfile, char * prefix,int do_jqfile,Vector & abc); //constructor
+  inimcdis (const char * file,char * spinfile, char * prefix,int do_jqfile,Vector & abc); //constructor
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor
 };

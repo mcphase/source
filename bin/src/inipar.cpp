@@ -12,6 +12,27 @@
 #include <windows.h>
 #endif
 
+void getnofthread(int & nofthreads){
+  if(nofthreads<1) { // User has not set number of threads in mcphas.ini file
+    char* c_nofthreads=getenv("MCPHASE_NOFTHREADS");  // Check if system environment variable set from dos.bat/lin.bat
+    if (c_nofthreads)
+       nofthreads = atoi(c_nofthreads);
+    else {
+#if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
+       nofthreads = get_nprocs();
+#elif defined(__FreeBSD__) || defined(__APPLE__)
+       int m[2], count; size_t len;
+       m[0] = CTL_HW; m[1] = HW_NCPU; len = sizeof(int);
+       sysctl(m, 2, &nofthreads, &len, NULL, 0);
+#else
+       SYSTEM_INFO sysinfo; GetSystemInfo(&sysinfo);
+       nofthreads = sysinfo.dwNumberOfProcessors;
+#endif
+    }
+    if(nofthreads<1||nofthreads>255) nofthreads=1;   // All else fails: use only 1 thread
+  }
+}
+
  // *************************************************************************
  // ************************ inipar *************************************
  // *************************************************************************
@@ -58,7 +79,7 @@ int inipar::load ()
   errno = 0;
   fin_coq = fopen(savfilename, "rb");
   if (fin_coq==NULL) return 1;
-  xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;
+  xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;zero=0;
   qmin(1)=1;qmin(2)=1;qmin(3)=1;qmax=0;deltaq=0;maxqperiod=0;maxnofspins=0;nofrndtries=0;
   maxnofmfloops=0;maxstamf=0;bigstep=0;maxspinchange=0;nofthreads=0;
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
@@ -131,26 +152,8 @@ int inipar::load ()
   if (maxnofspins==0){maxnofspins=maxqperiod*maxqperiod*maxqperiod;
                       fprintf(stderr,"warning ... reading maxnofspins=0: putting it to %i\n",maxnofspins);}
   if (maxnoftestspincf<1){fprintf(stderr,"ERROR maxnoftestspincf<1 not possible\n");return 1;}
-
-  if(nofthreads<1) { // User has not set number of threads in mcphas.ini file
-    char* c_nofthreads=getenv("MCPHASE_NOFTHREADS");  // Check if system environment variable set from dos.bat/lin.bat
-    if (c_nofthreads)
-       nofthreads = atoi(c_nofthreads);
-    else {
-#if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
-       nofthreads = get_nprocs();
-#elif defined(__FreeBSD__) || defined(__APPLE__)
-       int m[2], count; size_t len;
-       m[0] = CTL_HW; m[1] = HW_NCPU; len = sizeof(int);
-       sysctl(m, 2, &nofthreads, &len, NULL, 0);
-#else
-       SYSTEM_INFO sysinfo; GetSystemInfo(&sysinfo);
-       nofthreads = sysinfo.dwNumberOfProcessors;
-#endif
-    }
-    if(nofthreads<1||nofthreads>255) nofthreads=1;   // All else fails: use only 1 thread
-  }
-
+  getnofthread(nofthreads);
+  
   if(maxnofmfloops==0){fprintf(stderr,"Error reading maxnofmfloops\n");return 1;}
   if(maxstamf==0){fprintf(stderr,"Error reading maxstamf\n");return 1;}
   if(bigstep==0){fprintf(stderr,"Error reading bigstep\n");return 1;}
@@ -259,8 +262,15 @@ inipar::inipar (const char * file,char * pref)
   printf("reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
                 strcpy(savfilename,file);}
-                if(load()!=0){fprintf(stderr,"ERROR loading file %s\n",savfilename);
-                              errexit();}
+                if(load()!=0){fprintf(stderr,"# Warning: Cannot load file %s - using default values ! \n",savfilename); 
+  // set default values
+  xv=0;xv(0)=1;yv=0;yv(3)=1;xmin=1;xmax=1;ymin=0;ymax=0;xstep=1;ystep=1;
+  qmin=0;qmax=0;deltaq(1)=0.1;deltaq(2)=0.1;deltaq(3)=0.1;maxqperiod=1;maxnofspins=10;nofrndtries=0;
+  maxnofmfloops=100;maxstamf=1e-3;bigstep=1;maxspinchange=100;zero=0;
+nofthreads=0;getnofthread(nofthreads);
+  nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;
+  print();
+                              }
                 }
 }
 

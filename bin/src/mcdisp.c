@@ -1744,7 +1744,8 @@ int main (int argc, char **argv)
  int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
  int do_ignore_non_hermitian_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0;
- const char * spinfile="mcdisp.mf"; //default spin-configuration-input file
+ char spinfile [MAXNOFCHARINLINE]; //default spin-configuration-input file
+  sprintf(spinfile,"mcdisp.mf");
  const char * filemode="w";
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
  double epsilon=0.05; //imaginary part of omega to avoid divergence
@@ -1806,14 +1807,14 @@ for (i=1;i<=argc-1;++i){
 						  fprintf(stdout,"#minimum population of initial state for single ion excitations to be taken into account: %g\n",pinit);
 					         }
                      else {if(strcmp(argv[i],"-prefix")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -prefix needs argument(s)\n");exit(EXIT_FAILURE);}
-  		                                  strcpy(prefix,argv[i+1]);++i;
+  		                                  strcpy(prefix,argv[i+1]);sprintf(spinfile,"%smcdisp.mf",prefix);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
                       else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
                        else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
-              	       else{spinfile=argv[i];}
+              	       else{strcpy(spinfile,argv[i]);}
                           } // help
                          } // do_ignore_non_hermitian_matrix_error
                         } // prefi
@@ -1865,7 +1866,7 @@ dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_c
    printf("#  %smcdisp.trs  - single ion transitions used\n",ini.prefix);
    }
    printf("#  _%smcdisp.par - input parameters read from mcdisp.par\n",ini.prefix);
-   printf("#  _%smcdisp.mf  - input parameters read from mcdisp.mf\n",ini.prefix);
+   printf("#  _%smcdisp.mf  - input parameters read from %s\n",ini.prefix,spinfile);
    printf("#  _%smcdisp.j   - input parameters read from mcphas.j\n",ini.prefix);
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
    double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;

@@ -83,12 +83,16 @@ community this program would not have come into existence.
 \item {\prg ic1ion \& icf1ion \& mcdiff.in file format for} $\langle \mbf S \rangle$
 and  $\langle \mbf L \rangle$ - !!  Operator sequence changed to Sa Sb Sc La Lb Lc !! 
 (was Sa La Sb Lb Sc Lc)
+\item   mcphas got an option -doeps for magnetostrictive strain calculation using parameters
+calculated e.g. by makenn -cfph 
+\item  there are more examples using cf-phonon interaction
+\item module phonon: umax restrictino in module phonon done by 
+u= umax * tanh (u/umax) ... this avoids uniform shifts of the crystal 
 \item {\prg makenn} option -bvk extended to generate a sample bvk constants table 
 \item anisotropy $H=D_{x4} S_x^4 +D_{y4} S_y^4 +D_{z4} S_x^4$ introduced in module {\prg so1ion}
 \item made {\prg mcphaseexplorer} compatible with java 1.8.0 and java 17 at the 
            same time (see batch mpe for linux for options) 
 \item {\prg cif2mcphas} changed to put phonon module for sipf files which are nonmagnetic
-\item           tb2ti2o7 example for cf-phonon interaction
 \item  mcphas.xyt outputs periodicity of supercell
 \item {\prg spins} changed to produce for option -f spins\_prim.jvx graphics output
 \item  {\prg spinsfromq} phases correctly introduced for double and triple q structure

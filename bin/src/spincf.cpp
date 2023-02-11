@@ -363,7 +363,7 @@ if(l>nofatoms){fprintf(stderr,"Error spincf.cpp::pos - index l > nofatoms\n");ex
 return dd;
 }
 Vector spincf::pos(int i, int j, int k, int l,cryststruct & cs)
-{if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos nofatoms not equal to cs.nofatoms\n");exit(1);}
+{if(cs.nofatoms!=nofatoms){fprintf(stderr,"Error spincf.cpp::pos nofatoms=%i not equal to cs.nofatoms=%i\n",nofatoms,cs.nofatoms);exit(1);}
 return pos(i,j,k,l,cs.abc,cs.r,cs.x,cs.y,cs.z);
 
 }

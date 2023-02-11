@@ -11,6 +11,9 @@ print "#********************************************************\n";
 $PI=3.14159265358979323846;
  $bvkA=25;
  $bvkalpha=0.1;
+ $SMALLdabc=0.00001; # small difference in da , db or dc ...
+ $SMALLdr=0.00001; # small difference in distance so that program believes when
+                #  comparing table values that this is the same bond
  $Cel= zeroes (7,7); # for storage of elastic constants if needed
   # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
 
@@ -445,12 +448,12 @@ print "# number of atoms = $nofatoms\n calculating ...\n";
 # check if neighbour is already in table
 $ff=0;
  for($ntbl=1;$ntbl<=$n_table;++$ntbl){$_=$readtable;
-if((/-e/||/-jp/)&&abs($da[$ntbl]-$r)<0.001){$ff=1;}
+if((/-e/||/-jp/)&&abs($da[$ntbl]-$r)<$SMALLdr){$ff=1;}
 elsif((/-f/||/-dm/)&&
-      abs($da[$ntbl]-$xx)<0.001&&
-      abs($db[$ntbl]-$yy)<0.001&&
-      abs($dc[$ntbl]-$zz)<0.001){$ff=1;}
-elsif((/-bvk/)&&(abs($da[$ntbl]-$r)<0.001)){
+      abs($da[$ntbl]-$xx)<$SMALLdabc&&
+      abs($db[$ntbl]-$yy)<$SMALLdabc&&
+      abs($dc[$ntbl]-$zz)<$SMALLdabc){$ff=1;}
+elsif((/-bvk/)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
        $a1=$sipf_file[$nnn];$a2=$sipf_file[$nz];
        if(($db[$ntbl]=~/$a1/&&$dc[$ntbl]=~/$a2/)
        ||($db[$ntbl]=~/$a2/&&$dc[$ntbl]=~/$a1/)){$ff=1;}}
@@ -505,17 +508,17 @@ else{die "Error makenn - creating table for option $_ \n";}
                                {# check if neighbour is in readtable - if yes, save it
                                for($ntbl=1;$ntbl<=$n_table;++$ntbl){
                                  if(($rtab=~/-f/&&
-                                    abs($da[$ntbl]-$xx)<0.001&&
-                                    abs($db[$ntbl]-$yy)<0.001&&
-                                    abs($dc[$ntbl]-$zz)<0.001&&
+                                    abs($da[$ntbl]-$xx)<$SMALLdabc&&
+                                    abs($db[$ntbl]-$yy)<$SMALLdabc&&
+                                    abs($dc[$ntbl]-$zz)<$SMALLdabc&&
                                     $Jex[$ntbl]!=0.0)||
                                     (($rtab=~/-e/||$rtab=~/-jp/)&&
-                                     abs($da[$ntbl]-$r)<0.001&&
+                                     abs($da[$ntbl]-$r)<$SMALLdr&&
                                      $Jex[$ntbl]!=0.0)||
                                    ($rtab=~/-dm/&&
-                                    abs($da[$ntbl]-$xx)<0.001&&
-                                    abs($db[$ntbl]-$yy)<0.001&&
-                                    abs($dc[$ntbl]-$zz)<0.001&&
+                                    abs($da[$ntbl]-$xx)<$SMALLdabc&&
+                                    abs($db[$ntbl]-$yy)<$SMALLdabc&&
+                                    abs($dc[$ntbl]-$zz)<$SMALLdabc&&
                                     ($Jex[$ntbl]!=0.0||
                                     $Jey[$ntbl]!=0.0)||
                                     $Jez[$ntbl]!=0.0)
@@ -846,13 +849,14 @@ my $i,$j;$i=0;
                                                            $Kzzread=0;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR4\s*=\s*[^\s\;\n\t\*]+/$1MODPAR4=$Kzzread/g;}
                 if($line=~/^(#!|[^#])*\bMODPAR5\s*=\s*/) {($Kxyread)=($line=~m/^(?:#!|[^#])*\bMODPAR5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);                                                           $Kxyread=0;
+                                                           $Kxyread=0;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR5\s*=\s*[^\s\;\n\t\*]+/$1MODPAR5=$Kxyread/g;}
-                if($line=~/^(#!|[^#])*\bMODPAR6\s*=\s*/) {($Kyzread)=($line=~m/^(?:#!|[^#])*\bMODPAR6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kyzread=0;
-                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR6\s*=\s*[^\s\;\n\t\*]+/$1MODPAR6=$Kyzread/g;}
-                if($line=~/^(#!|[^#])*\bMODPAR7\s*=\s*/) {($Kxzread)=($line=~m/^(?:#!|[^#])*\bMODPAR7\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                if($line=~/^(#!|[^#])*\bMODPAR6\s*=\s*/) {($Kxzread)=($line=~m/^(?:#!|[^#])*\bMODPAR6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
                                                            $Kxzread=0;
-                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR7\s*=\s*[^\s\;\n\t\*]+/$1MODPAR7=$Kxzread/g;}
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR6\s*=\s*[^\s\;\n\t\*]+/$1MODPAR6=$Kxzread/g;}
+                if($line=~/^(#!|[^#])*\bMODPAR7\s*=\s*/) {($Kyzread)=($line=~m/^(?:#!|[^#])*\bMODPAR7\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kyzread=0;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR7\s*=\s*[^\s\;\n\t\*]+/$1MODPAR7=$Kyzread/g;}
                $line_store[$i]=$line;++$i;}
               close Fin;
               open(Fout,">$file");
@@ -873,6 +877,7 @@ my ($file)=@_;
 my $i,$j;$i=0;
              if(open (Fin,$file))
              {while($line=<Fin>){
+
                 if($line=~/^(#!|[^#])*\bMODPAR2\s*=\s*/) {($Kxxread)=($line=~m/^(?:#!|[^#])*\bMODPAR2\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
                                                            $Kxxread+=$Kxx/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR2\s*=\s*[^\s\;\n\t\*]+/$1MODPAR2=$Kxxread/g;}
@@ -885,12 +890,12 @@ my $i,$j;$i=0;
                 if($line=~/^(#!|[^#])*\bMODPAR5\s*=\s*/) {($Kxyread)=($line=~m/^(?:#!|[^#])*\bMODPAR5\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
                                                            $Kxyread+=$Kxy/2;
                                                           $line=~s/(^(#!|[^#])*?\b)MODPAR5\s*=\s*[^\s\;\n\t\*]+/$1MODPAR5=$Kxyread/g;}
-                if($line=~/^(#!|[^#])*\bMODPAR6\s*=\s*/) {($Kyzread)=($line=~m/^(?:#!|[^#])*\bMODPAR6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
-                                                           $Kyzread+=$Kyz/2;
-                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR6\s*=\s*[^\s\;\n\t\*]+/$1MODPAR6=$Kyzread/g;}
-                if($line=~/^(#!|[^#])*\bMODPAR7\s*=\s*/) {($Kxzread)=($line=~m/^(?:#!|[^#])*\bMODPAR7\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                if($line=~/^(#!|[^#])*\bMODPAR6\s*=\s*/) {($Kxzread)=($line=~m/^(?:#!|[^#])*\bMODPAR6\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
                                                            $Kxzread+=$Kxz/2;
-                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR7\s*=\s*[^\s\;\n\t\*]+/$1MODPAR7=$Kxzread/g;}
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR6\s*=\s*[^\s\;\n\t\*]+/$1MODPAR6=$Kxzread/g;}
+                if($line=~/^(#!|[^#])*\bMODPAR7\s*=\s*/) {($Kyzread)=($line=~m/^(?:#!|[^#])*\bMODPAR7\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);
+                                                           $Kyzread+=$Kyz/2;
+                                                          $line=~s/(^(#!|[^#])*?\b)MODPAR7\s*=\s*[^\s\;\n\t\*]+/$1MODPAR7=$Kyzread/g;}
                $line_store[$i]=$line;++$i;}
               close Fin;
               open(Fout,">$file");
@@ -916,7 +921,7 @@ sub getinteraction {
   $J2meV=1/1.60217646e-22; #1 millielectron volt = 1.60217646 . 10-22 joules
   $jaa=0;$jbb=0;$jcc=0;$jab=0;$jbc=0;$jac=0;
   for($n=1;$n<=$nof_springs;++$n){$a1=$atom_m[$n];$a2=$atom_n[$n];
-         if(abs($r-$bondlength[$n])<0.01
+         if(abs($r-$bondlength[$n])<$SMALLdr
             &&(($sipffilethis=~/(results\/)?$a2/&&$sipffile=~/(results\/)?$a1/)
              ||($sipffilethis=~/(results\/)?$a1/&&$sipffile=~/(results\/)?$a2/)
               )
@@ -931,6 +936,8 @@ sub getinteraction {
   $Kxy= -($kL-$kT) * ( $rx * $ry) /$r /$r ;$jab-=$Kxy;
   $Kyz= -($kL-$kT) * ( $ry * $rz) /$r /$r ;$jbc-=$Kyz;
   $Kxz= -($kL-$kT) * ( $rx * $rz) /$r /$r ;$jac-=$Kxz;
+
+  #if(abs($r*$r-$rx*$rx-$ry*$ry-$rz*$rz)>0.00001){die "inconsistent r\n";}
    # add also something to the Knn and Kmm in $sipffilethis and $sipffile !!! 
    addK($sipffilethis);
    addK($sipffile);

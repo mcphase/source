@@ -19,12 +19,12 @@ print STDOUT "# reading results/".$prefix."mcphas.mf\n";
 print STDOUT "# writing mcdisp.mf\n";
 if ($#ARGV>2) { 
 print STDOUT "#T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
-$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > mcdisp.mf");
+$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > ".$prefix."mcdisp.mf");
              }
 else
             {
 print STDOUT "# x=$ARGV[0]  y=$ARGV[1] \n";
-$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1]  > mcdisp.mf");
+$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1]  > ".$prefix."mcdisp.mf");
              }
 if($err){unlink "mcdisp.mf";exit(1);}
 
@@ -56,7 +56,7 @@ system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
 print STDOUT << "EOF";
 
     You can start now mcdisp - required input files
-    are mcdisp.mf (just created), mcdisp.par, mcphas.j
+    are $prefixmcdisp.mf (just created), mcdisp.par, mcphas.j
     and corresponding single ion property files *sipf.
 
     You can view the magnetic structure in postscriptfiles

@@ -76,8 +76,12 @@ void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector 
 }
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save()
+{save(savfilename);
+}
+// save parameters (which were read from mcdisp.par)
+void inimcdis::save(const char * filename)
 {  FILE * fout;int i,j;
-  fout=fopen(savfilename,"w");if (fout==NULL) {fprintf(stderr,"ERROR - file %s cannot be opened \n",savfilename);exit(EXIT_FAILURE);} 
+  fout=fopen(filename,"w");if (fout==NULL) {fprintf(stderr,"ERROR - file %s cannot be opened \n",filename);exit(EXIT_FAILURE);} 
   fprintf(fout,"# Parameter file  mcdisp.par - read by %s\n",MCDISPVERSION);
   fprintf(fout,"#<!--mcdisp.mcdisp.par>\n");
   fprintf(fout,"#*********************************************************************\n");
@@ -254,14 +258,18 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
 }
 // *************************************************************************
 //constructor ... load initial parameters from file
-inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_jqfile,Vector & abc)
+inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,Vector & abc)
 { errno=1;do_jqf=do_jqfile;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
   int nofhkllists=1;Hext=Vector(1,3);
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
   prefix= new char [strlen(pref)+1]; strcpy(prefix,pref); // set prefix
  // ****************************** read mf configuration from spinfile *****************************************  
-  fin=fopen(spinfile,"rb");if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);exit(EXIT_FAILURE);}
+  fin=fopen(spinfile,"rb");
+   if (fin==NULL) {fprintf(stderr,"#Warning - file %s not found - trying to read mcdisp.mf\n",spinfile);
+   sprintf(spinfile,"mcdisp.mf");fin=fopen(spinfile,"rb");
+    if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);exit(EXIT_FAILURE);}
+   }
   instr[0]='#';  
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
   extract(instr,"T",T); 
@@ -297,7 +305,12 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
  // ******************************** reading parameters  from mcdisp.par ****************************************************
   int i=0,hklblock=0,QxQyQzblock=0,j;
   printf("reading file %s\n",file);
-  fin = fopen(file, "rb"); if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",file);exit(EXIT_FAILURE);}   
+  fin = fopen(file, "rb"); 
+if (fin==NULL) {fprintf(stderr,"# Warning - file %s not found - using default values ! \n",file);
+ emin=-100;emax=100;ki=0;kf=100;colcod[1]=5;colcod[2]=6;colcod[3]=7;colcod[4]=4;
+nofhkls=0;save(file); 
+}else
+{   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
   {++i; // i is used to estimate an upper boundary for the number of hkls in the hkl list 
      extract_with_prefix(instr,prefix,"emin",emin); 
@@ -362,6 +375,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
                  }
   }
   fclose (fin);
+ }
  // ************************************ end reading parameters *****************************************
  // check parameters
   if (ki==0) {if (kf==0) kf=100;
@@ -553,7 +567,7 @@ inimcdis::inimcdis (const char * file,const char * spinfile,char * pref,int do_j
       ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
       fin = fopen(file, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
   save();
-      if(nofhkls==0){fprintf(stderr,"ERROR mcdisp: no hkl's found in mcdisp.par\n");exit(EXIT_FAILURE);}      
+      if(nofhkls==0){fprintf(stderr,"ERROR mcdisp: no hkl's found in mcdisp.par - please edit and insert\n");exit(EXIT_FAILURE);}      
 }
 
 //kopier-konstruktor 

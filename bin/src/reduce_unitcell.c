@@ -19,6 +19,7 @@ int main (int argc, char **argv)
                 use as: reduce_unitcell [option] mcphas.j\n\n \
                 This program checks every atom in the unit cell in file mcphas.j and removes\n \
                 any atom, which is connected to another by a lattice vector.\n \
+                a list of superfluous sipf file is stored in reduce_unitcell_sipf.del \n \
                 Options: -nofcomponents 23 fixes the nofcomponents to 23 by \n \
                         reducing (removing entries) or increasing (by filling with zeroes) \n \
                         the exchange parameter tables\n \
@@ -42,6 +43,10 @@ int ow=1; int n=0,noindexchange=0;
  a.reduce_unitcell();  
 
  a.save(stdout,noindexchange);
+
+fprintf(stderr,"# end of reduce_unitcell - created list of redundant sipf files\n");
+fprintf(stderr,"# in file reduce_unitcell_sipf.del, to delete these files use:\n");
+fprintf(stderr,"# perl -l -n -e \"unlink\" reduce_unitcell_sipf.del\n");
 }
 
 

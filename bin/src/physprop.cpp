@@ -187,7 +187,8 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] phasnumber-j   period-key supercell-nr1 x nr2 x nr3 ");
            for(i1=1;i1<=nofcomponents;++i1)
-	      {fprintf(fout,"<I%c> ",'a'-1+i1);}
+	      {//fprintf(fout,"<I%c> ",'a'-1+i1);}
+	      fprintf(fout,"<I%i> ",i1);}
 	      fprintf(fout,"\n");
    fclose(fout);    
      }

@@ -5,7 +5,7 @@
 
 #define MAXNOFNUMBERSINLINE 20
 #define MAXNOFCHARINLINE 7024
-#define SMALL_MATCH_LATTICEVECTOR 1e-5
+#define SMALL_MATCH_LATTICEVECTOR 1e-4
 
 
  // *************************************************************************
@@ -159,12 +159,18 @@ return nofatoms;
 
 int par::delatom(int n) // removes atom number n 
 {jjjpar ** nnn;
- int j;
+ int j,again=0;
+ FILE * out;
  if(n<1||n>nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,nofatoms);exit(EXIT_FAILURE);}
   --nofatoms; // the number of atoms has to be decreased
  nnn=new jjjpar * [nofatoms+1];
- for (j=1;j<n;++j){nnn[j]=jjj[j];} 
- for (j=n+1;j<=nofatoms+1;++j){nnn[j-1]=jjj[j];} 
+ for (j=1;j<n;++j){nnn[j]=jjj[j];
+if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}} 
+ for (j=n+1;j<=nofatoms+1;++j){nnn[j-1]=jjj[j];
+if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}}
+
+if(again==0){out=fopen("reduce_unitcell_sipf.del","a");
+fprintf(out,"%s\n",(*jjj[n]).sipffilename);fclose(out);} 
  delete []jjj;
  jjj=nnn;           
 return nofatoms; 
@@ -175,6 +181,8 @@ void par::reduce_unitcell()
 // any atom, which is connected to another by a lattice vector
  int i,j,nold=nofatoms;
  Vector d(1,3),n(1,3);
+FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
+
  for(i=1;i<nofatoms;++i){
   for(j=i+1;j<=nofatoms;++j){//printf("nofatoms=%i %i %i\n",nofatoms,i,j);
   d=(*jjj[j]).xyz-(*jjj[i]).xyz;
@@ -201,12 +209,13 @@ void par::add (par & p1)
     if (nofcomponents<p1.nofcomponents)
 {increase_nofcomponents(p1.nofcomponents-nofcomponents);}
 
-
-
+if(p1.nofatoms<nofatoms)
+{fprintf(stderr,"# Warning program addj: nofatoms=%i of 1. parameter set greater than %i - continuing, check result with care ! \n",nofatoms,p1.nofatoms);
+}
  for(i=1;i<=p1.nofatoms;++i)
  {if (i>nofatoms)
    {newatom(p1.jjj[i]);
-   fprintf(stderr,"# Warning program addj: nofatoms not equal in adding parameter sets  - adding atom number %i with sipffilename=%s\n",i,(*jjj[i]).sipffilename);
+   fprintf(stderr,"# Warning program addj: nofatoms=%i not equal %i - adding atom number %i with sipffilename=%s\n",nofatoms,p1.nofatoms,i,(*jjj[i]).sipffilename);
 
    }
    else
@@ -298,9 +307,9 @@ void par::savelattice (FILE *file)
   errno = 0;
   fprintf(file,"#\n# Lattice Constants (A)\n");
   fprintf(file,"#! a=%4.6g b=%4.6g c=%4.6g alpha=%4.6g beta=%4.6g gamma=%4.6g\n",a,b,c,alpha,beta,gamma);
-  fprintf(file,"#! r1a=%4.6g r2a=%4.6g r3a=%4.6g\n",r[1][1],r[1][2],r[1][3]);
-  fprintf(file,"#! r1b=%4.6g r2b=%4.6g r3b=%4.6g   primitive lattice vectors [a][b][c]\n",r[2][1],r[2][2],r[2][3]);
-  fprintf(file,"#! r1c=%4.6g r2c=%4.6g r3c=%4.6g\n",r[3][1],r[3][2],r[3][3]);
+  fprintf(file,"#! r1a=%4.12g r2a=%4.12g r3a=%4.12g\n",r[1][1],r[1][2],r[1][3]);
+  fprintf(file,"#! r1b=%4.12g r2b=%4.12g r3b=%4.12g   primitive lattice vectors [a][b][c]\n",r[2][1],r[2][2],r[2][3]);
+  fprintf(file,"#! r1c=%4.12g r2c=%4.12g r3c=%4.12g\n",r[3][1],r[3][2],r[3][3]);
 
  // save elastic constants
 fprintf(file,"#\n# Nonzero Elastic constants   in meV per primitive unit cell in Voigt notation only first index<=second index has to be given\n");

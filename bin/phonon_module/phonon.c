@@ -262,6 +262,7 @@ int pr;
  K(3,2)=MODPAR[7];
  int sort=1,maxiter=1000000;
  EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter);
+//printf("du1calc phonon Om= %g %g %g\n",Omega[1],Omega[2],Omega[3]);
 
  
 // hbar=1.054572e-34 Js=6582e-16meVs

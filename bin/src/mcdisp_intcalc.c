@@ -306,7 +306,7 @@ int ssm1,in1,in2;
         if((*md.PUg[in2])(1,bb)==defval) (*md.PUg[in2])(1,bb) = conj(md.dPs(i2,j2,k2)(bb))
                                                                  * md.sqrt_GammaP(i2,j2,k2)(bb);
          chiPhon(1,1)+= PI * (*md.PgU[in1])(1,b) * Tau(s,level) * en * conj(Tau(ss,level)) * (*md.PUg[in2])(1,bb);          
-          } // i,j,do_phonon
+              } // i,j,do_phonon
 
       if(intensitybey>0)
       {for(j=1;j<=mqdim;++j){

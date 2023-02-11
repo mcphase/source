@@ -116,17 +116,20 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,Comple
 
 int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1,ComplexMatrix & ests)
 {float delta=maxE;L1(1)=complex <double> (ninit,pinit);
-  switch (module_type)
+  ComplexVector uu1(1,L1.Hi());int nnt,i,n,nd;
+switch (module_type)
   {static int washere=0;
    case 0: if(dL1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dL1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&L1,&delta,&ests);}
            break;
-   case 1:
+   case 1: nnt=kramerdm(transitionnumber,T,Hxc,Hext,L1,delta,n,nd);L1*=(2.0-gJ);return nnt;break;
    case 2:
-   case 3:
-   case 4:
+   case 4: uu1(1)=L1(1);
+           nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
+           for (i=1;i<=L1.Hi();++i)L1(i)=(2.0-gJ)*uu1(i);return nnt;break;
+   case 3: 
    case 5: 
-   default: if(transitionnumber<0&& washere==0){washere=1;fprintf(stderr,"Problem: dL1calc in internal modules not implemented, continuing ... \n");}
+   default: if(transitionnumber<0&& washere==0){washere=1;fprintf(stderr,"Problem: dL1calc in  modules cluster and brillouin not implemented, continuing ... \n");}
           return 0;break;
    }
 }
@@ -147,16 +150,19 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,Comple
 
 int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1,ComplexMatrix & ests)
 {float delta=maxE;S1(1)=complex <double> (ninit,pinit);
+ ComplexVector uu1(1,S1.Hi());int nnt,i,n,nd;
  switch (module_type)
   {case 0: if(dS1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dS1 calc  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return (*dS1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&S1,&delta,&ests);}
            break;
-   case 1:
+   case 1: nnt=kramerdm(transitionnumber,T,Hxc,Hext,S1,delta,n,nd);S1*=(gJ-1.0);return nnt;break;
    case 2:
-   case 3:
-   case 4:
+   case 4: uu1(1)=S1(1);
+           nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
+           for (i=1;i<=S1.Hi();++i)S1(i)=(gJ-1.0)*uu1(i);return nnt;break;
+   case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,S1,delta,n,nd);S1*=(gJ-1.0);return nnt;break;
    case 5: 
-   default:if(transitionnumber<0)fprintf(stderr,"Problem: dS1calc in internal modules not implemented, continuing ... \n");
+   default:if(transitionnumber<0)fprintf(stderr,"Problem: dS1calc in module cluster not implemented, continuing ... \n");
           return 0;break;
    }
 }
