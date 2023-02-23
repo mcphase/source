@@ -111,6 +111,13 @@ CCC+= $(ARCHFLAG)
 #CCC= g++ 
 
 FC+= $(ARCHFLAG)
+ifdef cross64
+CC=x86_64-w64-mingw32-gcc -pipe $(ARCHFLAG)
+CCC=x86_64-w64-mingw32-g++ -pipe $(ARCHFLAG)
+FC=x86_64-w64-mingw32-gfortran -pipe $(ARCHFLAG)
+LINKER=x86_64-w64-mingw32-g++ -m64
+LFLAGS=-static -static-libgcc -static-libgfortran 
+endif
 
 # Check for cygwin
 ifneq (,$(findstring CYGWIN,$(shell uname)))
@@ -168,7 +175,11 @@ ifdef MKLROOT
 LFLAGS+= -L../ic1ion_module/libs -larpack -fopenmp -m64 -I$(MKLROOT)/include -L$(MKLROOT)/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
 CCOPTS+= -D_G77
 else
+ifdef cross64
+LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas  -lgfortran -lquadmath
+else
 LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
+endif
 #LFLAGS+= -llapack -lf77blas -latlas
 ifdef GCC5
 LFLAGS+= -lquadmath

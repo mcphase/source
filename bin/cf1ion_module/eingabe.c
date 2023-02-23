@@ -2136,9 +2136,9 @@ ITERATION *iteration;
         if(extract(line,"GJ",&GJ(iteration)," "))if(fabs(IONENIMP[ ionennr ].gj-GJ(iteration))>1e-4)
            fprintf(stderr,"# Warning: taking Lande factor from sipf file which does not correspond to "
                            "internal tabulated value GJinternal=%g\n",IONENIMP[ ionennr ].gj);
-        if(extract(line,"R2",&IONENIMP[ ionennr ].r2,"a0^2 a0=0.5292 A"));
-        if(extract(line,"R4",&IONENIMP[ ionennr ].r4,"a0^4 a0=0.5292 A"));
-        if(extract(line,"R6",&IONENIMP[ ionennr ].r6,"a0^6 a0=0.5292 A"));
+        extract(line,"R2",&IONENIMP[ ionennr ].r2,"a0^2 a0=0.5292 A");
+        extract(line,"R4",&IONENIMP[ ionennr ].r4,"a0^4 a0=0.5292 A");
+        extract(line,"R6",&IONENIMP[ ionennr ].r6,"a0^6 a0=0.5292 A");
         if(extract(line,"ALPHA",&alpha," "))ia=1;
         if(extract(line,"BETA",&beta," "))ib=1;
         if(extract(line,"GAMMA",&gamma," "))ic=1;
@@ -2220,7 +2220,6 @@ ITERATION *iteration;
      extract(line,"Dz4", &B3SS(iteration),"meV"); 
      }
     }
-    printf("V21i=%g\n",IT(V21(iteration)));
     e_4f = E4f( ionennr );
     if(ia)alpha_J[ e_4f ]=alpha;
     if(ib)beta_J[ e_4f ]=beta;

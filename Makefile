@@ -6,53 +6,71 @@
 #
 # Description:   Makefile for the program package
 #
-# Checklist - how to make a new distribution of McPhase:
-#               .  compile mcphaseexplorer under windows and test
-#               .  get newest version from repository
-#                  git pull ssh://martin_rotter@git.kenai.com/mcphase~mcphase master
-#               .  update version information in version, version.tex
-#               .  update innosetup (version information)
-#               .  update manual and latex -> manual.pdf
-#               .   -> edit always in mcphase~mcphase, then
+# CHECKLIST - how to make a new distribution of McPhase:
+#   -> edit always in mcphase~mcphase, then
 #                                 make git
 #                                 make
-#               .   push all changes to Kenai, e.g.
-#                   git add bin/src/formfactor.c (to add new source files in case this is needed)
-#                   git commit -a -m 'some changes in charges.c singleion.c'
-#                   git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_2
-#               . under linux: type make clean
-#                              make unreleased_remove
-#               .              make java [usually not required because java needs recompile only when changes are made]
+#               
+#               IF NECESSARY: *********************************
+#               .  get newest version from repository
+#                  git pull ssh://martin_rotter@git.kenai.com/mcphase~mcphase master
+#               .  compile mcphaseexplorer under windows and test
 #                              mcphaseexplorer compiled using netbeans if modified, in order 
 #                               to use it: click on project right click package as zip. look in 
 #                               Output/Netbeans_mpe/dist/ and unzip mcphaseexplorer.zip
 #                               unzip it 
 #                               move ions directory from old version to new and replace old version
 #                               in mcphas/bin/mcphaseexplorer* with new version.
+#               .   make java [ compile java in bin/jar,usually not required because java needs recompile only when changes are made]
+#               .  update manual and latex -> manual.pdf
 #                              cd doc and delete directory manual
 #                              latex2html -local_icons manual.tex  
 #                                         [maybe necessary to adapt manual.tex style, usepackage
 #                                          so that latex can run without problems on it]
 #                                   --> this will create online manual in directory manual
 #                                       copy this manual to the webpage: mkdir manual  |   put -r manual     (puts all files recursively)
-#		.              compile linux (see install: make all)
-#		.              make clean
-#               . linux testing:
+#               .   outdated: push all changes to Kenai, e.g.
+#                   git add bin/src/formfactor.c (to add new source files in case this is needed)
+#                   git commit -a -m 'some changes in charges.c singleion.c'
+#                   git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_2
+#               OBLIGATORY: *********************************************
+#               .  update version information in version, version.tex
+#               .  update innosetup (version information) // izpack.xl
+#		.      start docker and type:  make  package
+#                               or make windows (for windows) and make tgz (for linux)
+#	           (does automatically make unreleased_remove clean, mcph.exe and mcph.tgz 
+#                   and converts all *.pl files dos2unix 
+#                   in bin, perhaps in examples and unreleased_restore,
+#                    -k keep going even if errors occur)
+#               .  rename linux distribution file  $HOME/mcph.tgz to e.g. mcph5_2.tgz
+#               .  rename windows distribution file  $HOME/mcph.exe to e.g. mcph5_2.exe
+#               TESTING: *************************************************
+#                     run demo in linux and windows
 #                      - test demo and use stored examples to compare outputfiles using 
 #                        perl important_scripts\compare_mcphase_results.pl examplesold examplesnew
 #                      - (test examples) - test testic1ion
-#		. linux create mcphas*_*.tgz:
-#		.        make -k package
-#	           (does automatically make unreleased_remove clean and tgz and converts all *.pl files dos2unix 
-#                   in bin, perhaps in examples and unreleased_restore, -k keep going even if errors occur)
-#               .  rename linux distribution file  Output/mcph.tar.gz to e.g. mcph5_2.tgz
-#               .  compile for windows on McOS ?? to be done : make sure MacPorts is installed from https://www.macports.org/install.php 
+#               update WEB PAGES: ****************************************
+#                                   - check all information and add new, update list of papers on mcphas, references
+#                                   - put .tgz and .exe and if available additional software on web
+#                                   - test if mcphase can be installed on different computer systems
+#               set GIT MASTER ******************************************* 
+#                              ... after the next commit we should create a new branch by
+#                              git checkout -b master5_5
+#                              git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_5
+#
+#
+#
+#               Note on compiling for windows on McOS: make sure MacPorts is installed from https://www.macports.org/install.php 
 #                                       and update it with : sudo port -v selfupdate
 #                                       using this the windows gnu compilers can be installed on Mac: 
 #                                                            sudo port install mingw-w64
-#                                       ... ?? maybe this can be used for creating 
-#                                              windows distribution on McOS system in future ... ??
-#	        . change to dos:   make unreleased_remove and copy mcphas (except Output)
+#
+#
+#                                       [ alternative: install izpack and izpack utils - izpack2exe
+#                                       search careful for 7zS.sxf ... in https://github.com/github/ghfw-build-extra/blob/master/7-Zip/7zSD.sfx
+#                                          and substitute the file in utils/wrapper/izpack2exe/ with that
+#                                           correct bugs in izpack2exe.py (format of config.txt errors)]
+#	        Note on compiling with dos:   make unreleased_remove and copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
 #                                    mingw win64 shell  (from startup menu) 
 #                                    cd mcphas
@@ -68,12 +86,6 @@
 #                                  - install windows&linux and test demo + examples, attention: remove
 #                                       HOME/appdat/roaming/.mcphaseexplorer directory before installation
 #                                 make unreleased_restore
-#               . update WEB PAGES: - check all information and add new, update list of papers on mcphas, references
-#                                   - put .tgz and .exe and if available additional software on web
-#                                   - test if mcphase can be installed on different computer systems
-#               . set GIT MASTER  ... after the next commit we should create a new branch by
-#                              git checkout -b master5_5
-#                              git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_5
 #
 #    Screen Saver
 #
@@ -87,7 +99,7 @@
 #Then select "Create" and the screen saver should be magically created for you.
 # Author(s):     M. Rotter
 #
-#  Last Update:	  15.07.2022
+#  Last Update:	  22.02.2023
 #
 #**********************************************************************
 
@@ -99,6 +111,8 @@ gitdir = Output/mcphase~mcphase
 
 
 all: vector functions cfield mcphase examples tutorial bfk bcfph cowan
+allwin: vectorwin functionswin cfieldwin mcphasewin exampleswin tutorial bfkwin bcfphwin cowanwin
+
 
 git: $(gitdir)/*
 	cp Makefile Makefile.sav
@@ -109,32 +123,62 @@ git: $(gitdir)/*
 vector: 
 	cd bin/src/vector && $(MAKE)
 
+vectorwin: 
+	cd bin/src/vector && $(MAKE) cross64=1
+
 functions: 
 	cd bin/src/functions && $(MAKE)
+
+functionswin: 
+	cd bin/src/functions && $(MAKE) cross64=1
 
 cfield: vector ic1ion
 	cd bin/cf1ion_module && $(MAKE)
 
+cfieldwin: vectorwin ic1ionwin
+	cd bin/cf1ion_module && $(MAKE) cross64=1
+
 ic1ion: vector 
 	cd bin/ic1ion_module && $(MAKE)
+
+ic1ionwin: vectorwin
+	cd bin/ic1ion_module && $(MAKE) cross64=1
 
 phonon: vector 
 	cd bin/phonon_module && $(MAKE)
 
+phononwin: vectorwin
+	cd bin/phonon_module && $(MAKE) cross64=1
+
 bfk:   
 	cd bin/bfk_src && $(MAKE)
 
-bcfph:   
+bfkwin:   
+	cd bin/bfk_src && $(MAKE) cross64=1
+
+bcfph:   mcphase
 	cd bin/bcfph_src && $(MAKE)
+
+bcfphwin:  mcphasewin
+	cd bin/bcfph_src && $(MAKE) cross64=1
 
 cowan:   
 	cd bin/cowan && $(MAKE)
 
+cowanwin:   
+	cd bin/cowan && $(MAKE) cross64=1
+
 mcphase: vector cfield phonon 
 	cd bin/src && $(MAKE)
 
+mcphasewin: vectorwin cfieldwin phononwin 
+	cd bin/src && $(MAKE) cross64=1
+
 examples  : vector 
 	cd ./examples ; make
+
+exampleswin  : vectorwin 
+	cd ./examples ; make cross64=1
 
 tutorial : vector
 	cd ./tutorial ; make
@@ -150,9 +194,22 @@ unreleased_remove :
 unreleased_restore : 
 	mv ./Output/clusterize_notreleased.c ./bin/src/clusterize.c 
 
-package : unreleased_remove all clean tgz unreleased_restore
+package :  
+	make windows  tgz  
 
-tgz :
+windows: 
+	make unreleased_remove clean cleanexe allwin 
+	make clean 
+#	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
+#	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/jre1.8.0_121 --output=$(HOME)/mcph.exe
+#	rm $(HOME)/windows.jar
+	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
+	mv Output/mysetup.exe $(HOME)/mcph.exe
+	make unreleased_restore
+
+tgz : 
+	make unreleased_remove cleanexe clean all 
+	make clean 
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
 	dos2unix ./examples/cecu2a/fit/watch*.bat
@@ -192,9 +249,9 @@ tgz :
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
 	cd ../;tar --exclude=mcphas/bin/jre1.8.0_121/* --exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
-		-cvf ./mcphas/Output/mcph.tar mcphas/* \
+		-cvf $(HOME)/mcph.tar mcphas/* \
 		;cd ./mcphas  
-	cd ./Output;gzip mcph.tar
+	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz mcph.tgz
 	unix2dos ./bin/*.pl ./demo/*.bat
 	unix2dos ./examples/cecu2a/fit/watch*.bat
 	unix2dos ./examples/cecu2ge2_cf_phonon_int/*.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
@@ -231,6 +288,7 @@ tgz :
 	unix2dos ./examples/tungsten_phonons/calc.bat
 	unix2dos ./examples/upd3/calc.bat
 	unix2dos ./tutorial/07documentation_logbooks/calc.bat
+	make unreleased_restore
 
 clean:
 	rm -f ./Makefile.sav

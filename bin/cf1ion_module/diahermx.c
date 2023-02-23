@@ -103,10 +103,10 @@ EWPROBLEM  *diagonalisiere(ewproblem,matrix,overwrite,setup)
     EWPROBLEM *set_ewproblem();
  
 /*[1]*/  macheps = (MACHEPSFACT*accuracy());
- 
 /*[0]*/  if(test_nullmatrix(matrix)==NEIN){
 /*[2]*/     hessenbergform = hermhes( ewproblem, matrix ,overwrite);
 /*[3]*/     dia_hessenberg = hermlr2( ewproblem,hessenbergform,macheps );
+
          }
          else{
           ewproblem = set_ewproblem( setup,ewproblem,matrix,macheps,
@@ -931,6 +931,7 @@ COMHES *comhes(ewproblem,k,l,mx,overwrite)  /* transformiert eine komplexe */
                    }
               }
     }
+
     if( overwrite == NOSPACE ) comhes = ewproblem -> comhes;
     else                       comhes = COMHES_ALLOC(1);
     comhes -> overwrite= overwrite;

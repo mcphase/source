@@ -22,6 +22,10 @@ vpath %.o  ./ ../../bin/src ../../bin/src/vector ../../bin/cf1ion_module ../../b
 #---------------------------------------------------------------------
 #  Operating system
 OSTYPE=$(shell uname)
+ifdef cross64
+OSTYPE=MINGW
+endif
+
 #  (linux windows)
 ifneq (,$(findstring $(OSTYPE),Linux))
  LINUX = linux

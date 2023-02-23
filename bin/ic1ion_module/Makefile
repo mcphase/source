@@ -1,3 +1,5 @@
+OSTYPE=$(shell uname)
+
 ifdef icc
 CC = icpc
 LINKER = icpc
@@ -6,6 +8,7 @@ CC = g++
 LINKER = g++
 PEDANT = --pedantic
 endif
+
 
 # Determines if we have a gcc4.x.x compiler
 ifeq ($(findstring false,$(shell ./checkgcc.sh -4 $(CC))),false)
@@ -20,8 +23,15 @@ GCC42=1
 GCC5=1
 endif
 
+ifdef cross64
+OSTYPE=MINGW
+CC=x86_64-w64-mingw32-g++ -m64 $(ARCHFLAG)
+LINKER=x86_64-w64-mingw32-g++ -m64
+endif
+
+
 # Figures operating system
-ifneq (,$(findstring MINGW,$(shell uname)))
+ifneq (,$(findstring MINGW,$(OSTYPE)))
 MSYS=1
 WINDOWS=1
 EXE=.exe
@@ -30,7 +40,7 @@ ifeq ($(shell uname),Linux)
 LINUX = LINUX
 LIBFORTRAN=-lgfortran
 else
-ifneq (,$(findstring CYGWIN,$(shell uname)))
+ifneq (,$(findstring CYGWIN,$(OSTYPE)))
 CYGWIN=1
 WINDOWS=1
 EXE=.exe
@@ -115,7 +125,7 @@ endif
 else    # if matlab
 ifdef gotoblas
 LDFLAGS = -Llibs -Llibs/GotoBLAS $(LIBARPACK) -llapack -lgoto $(LIBFORTRAN)
-ifeq (,$(findstring CYGWIN,$(shell uname)))
+ifeq (,$(findstring CYGWIN,$(OSTYPE)))
 LDFLAGS += -lpthread
 endif
 else    # if gotoblas
@@ -124,7 +134,11 @@ LDFLAGS+= -L../ic1ion_module/libs -larpack $(LIBFORTRAN) -fopenmp -m64 -I$(MKLRO
 CFLAGS+= -D_G77
 else    # if mkl
 #LDFLAGS = $(LIBARPACK) -llapack -lf77blas -latlas
+ifdef cross64
+LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas  $(LIBFORTRAN) -lquadmath
+else
 LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas -L/usr/local/gfortran/lib $(LIBFORTRAN)
+endif
 #LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
 #LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/mingw64_penryn/lib -lf77blas -latlas -lgfortran
 ifdef MSYS
@@ -186,11 +200,11 @@ libs/liblapack.a:
 ifdef integral
 ../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+	$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 else
 ../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
 	@echo Linking $@
-	@$(LINKER) -o ../ic1ion ic1ion.o states.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+	$(LINKER) -o ../ic1ion ic1ion.o states.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp

@@ -18,13 +18,18 @@ PLAT = _LINUX
 #  selected.  Define LOADER and LOADOPTS to refer to the loader and 
 #  desired load options for your machine.
 #
-ifeq ($(shell uname),Linux)
+OSTYPE=$(shell uname)
+ifdef cross64
+OSTYPE=MINGW
+endif
+
+ifeq ($(OSTYPE),Linux)
  LINUX = LINUX
  PLAT = _LINUX
  FORTRAN=gfortran --std=legacy
  LIBFORTRAN=-lgfortran
 else
-ifeq ($(shell uname),Darwin)
+ifeq ($(OSTYPE),Darwin)
  LINUX = LINUX
  PLAT = _LINUX
  FORTRAN=gfortran --std=legacy
@@ -37,7 +42,7 @@ else
 endif
 endif
 
-ifneq ($(shell uname),Darwin)
+ifneq ($(OSTYPE),Darwin)
 ifneq ($(shell gcc --version|grep " 3."),)
  FORTRAN=g77
  LIBFORTRAN=-lg2c
@@ -58,7 +63,14 @@ ifdef icc
 FORTRAN  = ifort
 endif
 
-ifneq (,$(findstring CYGWIN,$(shell uname)))
+ifdef cross64
+FORTRAN  = x86_64-w64-mingw32-gfortran --std=legacy
+ARCH     = x86_64-w64-mingw32-ar
+ARCHFLAGS= cr
+RANLIB   = x86_64-w64-mingw32-ranlib
+endif
+
+ifneq (,$(findstring CYGWIN,$(OSTYPE)))
 ifneq ($(shell gcc --version|grep " 3."),)
 FLAGS+=-mno-cygwin
 endif

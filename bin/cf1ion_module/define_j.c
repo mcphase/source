@@ -31,8 +31,8 @@ Aufgabe               : Drehimpulsoperatoren definieren
 #define nj4  nj2*nj2
 #define nj6  nj4*nj2
  
-#define JP(mj)   sqrt( J2 - (mj)*((mj)+1) )
-#define JM(mj)   sqrt( J2 - (mj)*((mj)-1) )
+#define JP(mj)   ( ((mj)<  J && (mj)>=-J)? (sqrt( J2 - (mj)*((mj)+1))) : 0.0 )
+#define JM(mj)   ( ((mj)> -J && (mj)<=J)? (sqrt( J2 - (mj)*((mj)-1))) : 0.0)
 
 #define JPMMP(mj)  JP(mj-1)*JM(mj)+JM(mj+1)*JP(mj)
  

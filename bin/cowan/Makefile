@@ -1,4 +1,13 @@
 #makefile for program cowan
+FC=gfortran
+LINKER=gfortran
+ifdef cross64
+OSTYPE=MINGW
+CC=x86_64-w64-mingw32-gcc -pipe $(ARCHFLAG)
+CCC=x86_64-w64-mingw32-g++ -pipe $(ARCHFLAG)
+FC=x86_64-w64-mingw32-gfortran -pipe $(ARCHFLAG)
+LINKER=x86_64-w64-mingw32-gfortran -m64
+endif
 
 
 #  Operating system
@@ -11,7 +20,7 @@ ifneq (,$(findstring $(OSTYPE),Darwin))
  DARWIN = darwin
 else
  WINDOWS = windows
-ifneq (,$(findstring CYGWIN,$(shell uname)))
+ifneq (,$(findstring CYGWIN,$(OSTYPE)))
  CYGWIN=1
 endif
 endif
@@ -27,16 +36,16 @@ all :  clean  RCN36K.o RCN2K.o
 #../chibfk$(EXE) 
 
 RCN2K.o: RCN2K.F
-	gfortran $(STATIC) -lgfortran -o ../RCN2K $^ 
+	$(FC) $(STATIC) -lgfortran -o ../RCN2K $^ 
 
 RCN36K.o: RCN36K.F
-	gfortran $(STATIC) -lgfortran -o ../RCN36K $^ 
+	$(FC) $(STATIC) -lgfortran -o ../RCN36K $^ 
 
 #../RCG11K$(EXE): RCG11K.F
-#	gfortran $(STATIC) -lgfortran -o ../RCG11K $^ 
+#	$(LINKER) $(STATIC) -lgfortran -o ../RCG11K $^ 
 
 #../chibfk$(EXE): chibfk.f95
-#	gfortran -static -lgfortran -o ../chibfk $^ 
+#	$(LINKER) -static -lgfortran -o ../chibfk $^ 
 
 clean:
 	rm -vf ./*.o

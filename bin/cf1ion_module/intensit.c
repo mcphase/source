@@ -127,7 +127,7 @@ void output( setup,ewproblem,kristallfeld,modus )
     DOUBLE    gj,shift,j,mj,zu_summe,zustandssumme(),faktor;
     DOUBLE    Bx,By,Bz/*,anf_temp,end_temp,lambda*/;
     DOUBLE    macheps/*,Bx_ex,By_ex,Bz_ex,Bx_mol,By_mol,Bz_mol*/;
-    DOUBLE    Bx2,By2,Bz2;
+    DOUBLE    Bx2,By2,Bz2,Bx4,By4,Bz4;
     DOUBLE /* aJxb_2,aJyb_2,aJzb_2,*/sumx,sumy,sumz;
     DOUBLE    mat_Jx2(),mat_Jy2(),mat_Jz2();
     DOUBLE    anf_feld,end_feld,temp;
@@ -218,6 +218,10 @@ t21="#\n";
     Bx2=  B1S(iteration);
     By2=  B2S(iteration);
     Bz2=  B3S(iteration);
+ 
+    Bx4=  B1SS(iteration);
+    By4=  B2SS(iteration);
+    Bz4=  B3SS(iteration);
  
    Bx += B1MOL(iteration);
     By += B2MOL(iteration);
@@ -362,7 +366,7 @@ t21="# external Field B_ex in direction of  [ %5d, %5d, %5d].   \n";
     fprintf(fp,"%s",t27);fprintf(fp,"%s",t28);
     if( *(FILENAME(kristallfeld)+16) != *(ORTHO+16) ) fprintf(fp,"%s",t29);
 }
-if( (Bx2!=0.0 || By2!=0.0 || Bz2!=0.0) && (symmetrienr == 10 || symmetrienr == 0) ){
+if( (Bx2!=0.0 || By2!=0.0 || Bz2!=0.0||Bx4!=0.0 || By4!=0.0 || Bz4!=0.0) && (symmetrienr == 10 || symmetrienr == 0) ){
 t02="#-------------------------------------------------------------- \n";
 t03="#                Anisotropy parameters in meV.                  \n";
 t04="#-------------------------------------------------------------- \n";
@@ -373,12 +377,12 @@ t08="#! Dz2 =   %11.2f       Dz4 =   %11.2f                           \n";
 t09="#                                                              \n";
 t10="#-------------------------------------------------------------- \n";
     fprintf(fp,"%s",t02);fprintf(fp,"%s",t03);fprintf(fp,"%s",t04); fprintf(fp,"%s",t05);
+ 
     fprintf(fp,t06,is_null(B1S(iteration),0.001 ),is_null(B1SS(iteration),0.001 ));
     fprintf(fp,t07,is_null(B2S(iteration),0.001 ),is_null(B2SS(iteration),0.001 ));
     fprintf(fp,t08,is_null(B3S(iteration),0.001 ),is_null(B3SS(iteration),0.001 ));
-    fprintf(fp,"%s",t09);fprintf(fp,"%s",t10);fprintf(fp,"%s",t29);
+    fprintf(fp,"%s",t09);fprintf(fp,"%s",t10);
 }
- 
 t01="#-------------------------------------------------------------- \n";
 t02="# Energy Eigenvalues are in  %6s.          	            \n";
 t03="#--------------------------------------------------------------\n";
@@ -1369,9 +1373,10 @@ DOUBLE magnetm(mat_Ji,setup,ewproblem,kristallfeld,Bx,By,Bz,t)
     Dx4        = B1SS(iteration);
     Dy4        = B2SS(iteration);
     Dz4        = B3SS(iteration);
- 
+
   
     HMAG(iteration) = calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4);
+
 
     ewproblem       = solve(setup,ewproblem,NEIN,kristallfeld,art);
 /* here changed to NOSPACE to NEIN MR okt 2002 - because NOSPACE leads
@@ -1390,7 +1395,8 @@ modus) with repeated calls leading to different entartungen */
     anz_niveaus   = ANZ_ZE(entartung);
  
     for( i=1 ; i<=VRDIM(ew) ; ++i )
-        zusumme += exp_( - faktor*RV(ew,i) / t );
+       zusumme += exp_( - faktor*RV(ew,i) / t );
+
  
     for( i=1 ; i<= anz_niveaus ; ++i )
                 for( r=1 ; r<= VALUE(gi,i); ++r ){
@@ -1400,6 +1406,7 @@ modus) with repeated calls leading to different entartungen */
                    mat   = (*mat_Ji)(ev_ir,ev_ir);
                      sumr += is_null(wi*RT(mat),macheps);
                      sumi += is_null(wi*IT(mat),macheps);
+ 
                    free_(mat);
                 }
  

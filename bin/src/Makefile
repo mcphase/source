@@ -22,6 +22,10 @@ vpath %.o  ./ ./vector ../cf1ion_module ./functions
 #---------------------------------------------------------------------
 #  Operating system
 OSTYPE=$(shell uname)
+ifdef cross64
+OSTYPE=WIN
+endif
+
 #  (linux windows)
 ifneq (,$(findstring $(OSTYPE),Linux))
  LINUX = linux
@@ -30,7 +34,7 @@ ifneq (,$(findstring $(OSTYPE),Darwin))
  LINUX = linux
 else
  WINDOWS = windows
-ifneq (,$(findstring CYGWIN,$(shell uname)))
+ifneq (,$(findstring CYGWIN,$(OSTYPE)))
  CYGWIN=1
 endif
 endif
