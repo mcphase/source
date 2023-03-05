@@ -122,7 +122,7 @@ T=0.0;h=0;
     testspins.save(prefix,"w");
 
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.qvc");
-    qvectors testqs (ini,inputpars.rez,Imax,outfilename,inputpars.nofatoms,inputpars.nofcomponents,verbose);
+    qvectors testqs (ini,inputpars,Imax,outfilename,verbose);
 
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);

@@ -73,7 +73,21 @@ int qvectors::nc (int i) // returns period for i.th qvector
 {return (int)(*n[i])(3);
 }
 
- 
+bool qvectors::is_in_1stBZ(Vector & hkl, Vector & abc,Matrix & rezijk)
+ {int n=3;Vector qijk(1,3),R(1,3); 
+  // rezijk is the primitive reciprocal lattice in ijk coordinate system
+  hkl2ijk(qijk, hkl, abc); // qijk is Vector hkl in ijk coordinate system
+  
+   for(int n1=-n;n1<=n;++n1)
+    for(int n2=-n;n2<=n;++n2)
+     for(int n3=-n;n3<=n;++n3)
+      {R=(double)n1*rezijk.Column(1)+(double)n2*rezijk.Column(2)+(double)n3*rezijk.Column(3);
+//myPrintVector(stdout,qijk);myPrintVector(stdout,R);
+//fprintf(stdout,"---\n");
+       if(2*(qijk*R)>(R*R)+0.00001)return false;
+      }
+  return true;
+ }
 //constructor - generate set of qvectors
 /* input 
        	filename	file to save q vector values on
@@ -81,8 +95,8 @@ int qvectors::nc (int i) // returns period for i.th qvector
 	nmm             nofcomponents of moment vector
         v               verbose switch
 */
-qvectors::qvectors (inipar & ini,Matrix & rz,
-                    Vector & mmax,const char * savfile, int na,int nmm,int v)
+qvectors::qvectors (inipar & ini,par & inputpars,
+                    Vector & mmax,const char * savfile, int v)
 { savfilename= new char [strlen(savfile)+1];
   strcpy(savfilename,savfile);
   verbose=v;
@@ -91,11 +105,17 @@ qvectors::qvectors (inipar & ini,Matrix & rz,
   int i,j,maxdim[4],k,i1,i2,i3;
   hkl=Vector(1,3); 
   rez=Matrix(1,3,1,3);r=Matrix(1,3,1,3);
-  rez=rz;r=rez.Inverse();
-  Matrix rt(1,3,1,3);
+  rez=inputpars.rez;r=rez.Inverse();
+  Matrix rt(1,3,1,3),rijk(1,3,1,3),rezijk(1,3,1,3);
+ // calculate rezprim (primitive reciprocal basis in euclidean ijk coordinates)
+ Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
+                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+  dadbdc2ijk(rijk,r,abc); // rijk is the primitive unit cell in ijk coordinates
+  rezijk=2*PI*rijk.Inverse().Transpose();
   
-  nofatoms=na;
-  nofcomponents=nmm;
+  
+  nofatoms=inputpars.nofatoms;
+  nofcomponents=inputpars.nofcomponents;
 
 if (verbose){printf ("\n");
 printf ("  initialize qvector range: - min and maximum of components are calculated by\n");
@@ -211,7 +231,7 @@ printf ("vector	min     max    delta \n");
  ph = new Vector * [maxnofqs()+2];        
  // see what qvectors we can use (whether they lie in the specified region)
  // and store them
- nofq=0;if (verbose){printf("#nr1 nr2 nr3 (h k l) \t (hprim kprim lprim)\n");}
+ nofq=0;if (verbose){printf("#Generating hkl in 1st Brillouin Zone\n#nr1 nr2 nr3 (h k l) \t (hprim kprim lprim)\n");}
  for (k=1;k<=maxnofqs();++k)
  {dd(1)=hchk[1][ia(k)];dd(2)=hchk[2][ib(k)];dd(3)=hchk[3][ic(k)];
 //  printf("iaibic(%i %i %i)\n",ia(k),ib(k),ic(k));
@@ -220,7 +240,10 @@ printf ("vector	min     max    delta \n");
       ini.qmin(1)-0.00001<=hkl(1)&&hkl(1)<=ini.qmax(1)+0.00001&&
       ini.qmin(2)-0.00001<=hkl(2)&&hkl(2)<=ini.qmax(2)+0.00001&&
       ini.qmin(3)-0.00001<=hkl(3)&&hkl(3)<=ini.qmax(3)+0.00001) //yes they are in the region-> increment nofq and store 
-   {++nofq;
+   { // !! here we could check if the qvector is in the 1st BZ and only
+     // use it if it is ...!!
+    if(is_in_1stBZ(hkl,abc,rezijk)){
+    ++nofq;
     q0[nofq]=new Vector (1,3); (*q0[nofq])=dd;
     if (verbose){printf("# %2i  %2i  %2i (%g %g %g) \t (%g %g %g)\n",hchkn[1][ia(k)],hchkn[2][ib(k)],hchkn[3][ic(k)],hkl(1),hkl(2),hkl(3),dd(1),dd(2),dd(3));}
     
@@ -238,7 +261,7 @@ printf ("vector	min     max    delta \n");
    for(l=1;l<=nofatoms;++l)for(m=1;m<=nofcomponents;++m)
     {ddd(m+nofcomponents*(l-1))=rnd(1);}
     ph[nofq]=new Vector (1,nofcomponents*nofatoms); (*ph[nofq])=ddd;
-
+       }
    }
   }
 

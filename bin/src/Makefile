@@ -205,7 +205,7 @@ inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp
 physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp inipar.hpp
 	$(CCC) $(CFLAGS) $< 
 
-qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp myev.c
+qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp par.hpp myev.c
 	$(CCC) $(CFLAGS) $<
 
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c

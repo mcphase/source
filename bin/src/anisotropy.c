@@ -156,7 +156,7 @@ else
  // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
    testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.nofatoms,inputpars.nofcomponents);
    testspins.save("./results/_mcphas.tst","w");
-   qvectors testqs (ini,inputpars.rez,Imax,"./results/mcphas.qvc",inputpars.nofatoms,inputpars.nofcomponents,verbose);
+   qvectors testqs (ini,inputpars,Imax,"./results/mcphas.qvc",verbose);
  // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
    	int nofstapoints=0,noffailedpoints=0,s=0;

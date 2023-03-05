@@ -15,6 +15,7 @@
 #include<spincf.hpp>
 #include<vector.h>
 #include<inipar.hpp>
+#include<par.hpp>
 
 class qvectors
 {
@@ -26,7 +27,7 @@ class qvectors
     int *hchkn[4];
     Vector hkl; //variable to return vector
     int nofq; // number of qvectors
-    Matrix rez,r;
+    Matrix rez,r,rezprim;
     
     int ia(int j); //index functions
     int ib(int j);
@@ -54,7 +55,8 @@ class qvectors
     Vector & nettom(int i); // nettomoment
     Vector & momentq0(int i); // moment amplitude
     Vector & phi(int i); // phase
-       
+    
+   bool is_in_1stBZ(Vector & hkl, Vector & abc, Matrix & rezijk);
     //save table of all qvectors on file
     void save(const char * filemode);
     
@@ -70,8 +72,8 @@ class qvectors
 			magnetic structures corresponding to qvector)
     */
    
- qvectors (inipar & ini,Matrix & rz,
-              Vector & mmax,const char * filename,int nofatoms,int nofcomponents,int v);	//konstruktor
+ qvectors (inipar & ini,par & inputpars,
+              Vector & mmax,const char * filename,int v);	//konstruktor
 
     qvectors (const qvectors & qs);	// kopier-konstruktor
 

@@ -30,7 +30,7 @@ void help_and_exit()
                  - crystal field  parameters Blm should be read from a \n\
 	           standard mcphas single ion property file mcphas.sipf \n\
                  - given is temperature T[K] and magnetic effective field H[T]\n \
-		options: if T<0 then no thermal boltzmann distribution is taken\n\
+		options: if T=0 then no thermal boltzmann distribution is taken\n\
 		the statistical probability of each CF state has to be entered\n\
                 by hand.\n\
      example:\n\
