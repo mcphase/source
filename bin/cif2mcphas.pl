@@ -1093,7 +1093,7 @@ for (keys %ions) {
   else {
     print FOUT "#!MODULE=phonon\n";
     print FOUT $sipfheader;
-    print FOUT "#IONTYPE=$_".abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-")."\n";
+    print FOUT "IONTYPE=$_".abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-")."\n";
     print FOUT "CHARGE=$oxy[$ions{$_}]\n";
     print FOUT "MAGNETIC=$ismag[$ions{$_}]\n";
     print FOUT "\n";
