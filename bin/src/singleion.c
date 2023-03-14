@@ -63,6 +63,7 @@ void helpexit()
 int main (int argc, char **argv)
 { int i,j,nt=0,do_sipf=0;
   char sipffile[MAXNOFCHARINLINE];char  filename[MAXNOFCHARINLINE];
+ char * pchr;
   double lnz,u; double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10;
   float d=1e10;int nofcomponents=0;FILE * fout,* fout_trs, * fout_opmat;
   double T;Vector Hext(1,3),Q(1,3),Hxc_in(1,HXCMAXDIM);
@@ -165,6 +166,13 @@ if (!do_sipf)
       }  
               
       sprintf(filename,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+ pchr=strstr(filename+10,"/");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+pchr=strstr(filename+10,"\\");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+
       fout=fopen_errchk(filename,"w"); 
      fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",(*inputpars.jjj[i]).est.Chi(),(*inputpars.jjj[i]).sipffilename,T);
                                    for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
@@ -183,6 +191,12 @@ if (!do_sipf)
         default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j));  // printout corresponding moments      
        } if(nmax>0)
       { sprintf(filename,"./results/%s.trs",(*inputpars.jjj[i]).sipffilename);
+       // if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+ pchr=strstr(filename+10,"/");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+pchr=strstr(filename+10,"\\");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
         fout_trs = fopen_errchk (filename,"w");
         trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
  
@@ -249,6 +263,13 @@ if (!do_sipf)
                                    }
                                    printf("transition-energies(meV)...\n");
       sprintf(filename,"./results/%s.levels.cef",jjj.sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+ pchr=strstr(filename+10,"/");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+pchr=strstr(filename+10,"\\");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+
       fout=fopen_errchk(filename,"w");  
     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,T);
                                    for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
@@ -268,6 +289,13 @@ if (!do_sipf)
         default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j));  // printout corresponding moments      
        }if(nmax>0)
       { sprintf(filename,"./results/%s.trs",jjj.sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+ pchr=strstr(filename+10,"/");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+pchr=strstr(filename+10,"\\");
+ while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+
         fout_trs = fopen_errchk (filename,"w");
         trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
  

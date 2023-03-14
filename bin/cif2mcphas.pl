@@ -52,7 +52,7 @@ $nofatom= 0;
 GetOptions("help"=>\$helpflag,
            "interactive|i"=>\$interact,
            "debug"=>\$debug,
-           "create"=>\$create,
+           "create|c"=>\$create,
            "supercell|s=s"=>\$supersize,
            "pointcharge|pc=f"=>\$pointcharge,
            "screenfile|sf=s"=>\$screeningfile,
@@ -120,7 +120,7 @@ if ($create) {
 ; Please replace text in square brackets [] with your data
 _cell_length_a                     [a_in_Angstrom]
 _cell_length_b                     [b_in_Angstrom]
-_cell_length_c                     [b_in_Angstrom]
+_cell_length_c                     [c_in_Angstrom]
 _cell_angle_alpha                  [alpha_in_degrees]
 _cell_angle_beta                   [beta_in_degrees]
 _cell_angle_gamma                  [gamma_in_degrees]
