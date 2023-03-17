@@ -307,7 +307,7 @@ clean:
 	cd ./bin/cowan && $(MAKE) clean
 
 cleanexe:
-	rm -vf bin/addj.exe bin/charges.exe bin/coq2jjj.exe \
+	rm -vf bin/addj.exe bin/anisotropyit.exe bin/charges.exe bin/coq2jjj.exe \
 		bin/mcdispit.exe bin/singleion.exe bin/cfield.exe \
 		bin/cond.exe bin/jjj2j.exe bin/mcphasit.exe bin/spins.exe \
                 bin/chrgplt.exe bin/pointc.exe bin/spinsfromq.exe \

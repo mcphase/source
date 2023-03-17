@@ -61,6 +61,7 @@ GetOptions("help"=>\$helpflag,
            "readpcfile|rp"=>\$readpcfile,
            "charges|ch=s"=>\$inputcharges,
            "nonmagnetic|nm=s"=>\$nonmagnetic,
+           "magnetic|m=s"=>\$magnetic,
            "so1ion"=>\$so1ion,
            "ic1ion"=>\$ic1ion,
            "phonon"=>\$phonon,
@@ -82,7 +83,8 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "    --savecharges or -sc : store pointcharge coordinates in sipf file\n";
    print "    --readpcfile  or -rp : read from *.pc coordinate files in results folder\n";
    print "    --charges     or -ch : input charges to override defaults\n";
-   print "    --nonmagnetic or -nm : set nonmagnetic ion overrideing default\n";
+   print "    --nonmagnetic or -nm : set nonmagnetic ion overrideing default, e.g. -nm Cu\n";
+   print "    --magnetic    or -m : set magnetic ion overrideing default, e.g. -m Cu\n";
    print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";
    print "    --ic1ion      or -ic : force use of ic1ion for single ion modules.\n";
    print "    --phonon      or -ph : force use of phonon for single ion modules.\n";
@@ -530,7 +532,7 @@ for $j(0..$nofatom-1) {
 # If the oxidation state is undefined, look it up in the table
 for $j(0..$nofatom-1) {
   $at = $dat[$j][0]; $at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
-  $at = lc $at; $at = ucfirst $at;
+  $at = lc $at; $at = ucfirst $at; 
   $attab = $element{$at}; 
   $atmas = $mass{$at}; 
 
@@ -549,6 +551,9 @@ for $j(0..$nofatom-1) {
     $eltab = $magions{$at.$oxy[$j]."+"}; 
     if(${$eltab}[0] eq "") { $ismag[$j] = 0; }
     if($nonmagnetic eq $dat[$j][0]){ $ismag[$j] = 0; }
+      }else
+  {  if($magnetic eq $at){ $ismag[$j] = 1; }
+     if($magnetic eq $dat[$j][0]){ $ismag[$j] = 1; }
   }
 }
 
@@ -576,9 +581,13 @@ if($interact) {
             $eltab = $magions{$at.$oxy[$j]."+"};
             if(${$eltab}[0] eq "") { $ismag[$j] = 0; } else { $ismag[$j] = 1; }
 print $dat[$j][0]."\n";
+          }}
+            if($nonmagnetic eq $at){ $ismag[$j] = 0; }
+            if($magnetic eq $at){ $ismag[$j] = 1; }
             if($nonmagnetic eq $dat[$j][0]){ $ismag[$j] = 0; }
-          }
-        }
+            if($magnetic eq $dat[$j][0]){ $ismag[$j] = 1; }
+           
+        
       }
    #}
     print "Are the ions on site $dat[$j][0] ($at".abs($oxy[$j]).($oxy[$j]>0?"+":"-").") magnetic? (".($ismag[$j]?"true":"false").")\n";

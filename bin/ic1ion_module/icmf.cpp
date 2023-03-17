@@ -423,7 +423,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0 || VE.E(Esz+1)==-DBL_MAX) break; }
 
-   if (T<0){Esz=(int)(-T);printf ("Temperature T<0: please choose probability distribution of states by hand\n");
+   if (T<0){Esz=(int)(-T);printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
                          printf ("Number   Excitation Energy\n");
      for (ind_j=0;ind_j<Esz;++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
      } // MR 10.9.2010
@@ -756,8 +756,8 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
    char uplo = 'U';
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
-   if (T<0){Esz=(int)(-T);printf ("Temperature T<0: please choose probability distribution of states by hand\n");
-                          printf ("Number   Excitation Energy\n");
+   if (T<0){Esz=(int)(-T);printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
+                         printf ("Number   Excitation Energy\n");
    for (ind_j=0;ind_j<Esz;++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
    } // MR 17.9.2010
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++)

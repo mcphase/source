@@ -421,8 +421,8 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
    if (*T<0)
    {
       Esz = (int)(-*T);
-      printf("Temperature T<0: please choose probability distribution of states by hand\n");
-      printf("Number   Excitation Energy\n");
+      printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",*T,(int)(-*T));
+                        printf("Number   Excitation Energy\n");
       for (ind_j=0; ind_j<Esz; ++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
    }  // MR 10.9.2010
 
@@ -1888,8 +1888,8 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
    if (*T<0)
    {
       Esz = (int)(-*T);
-      printf("Temperature T<0: please choose probability distribution of states by hand\n");
-      printf("Number   Excitation Energy\n");
+      printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",*T,(int)(-*T));
+                        printf("Number   Excitation Energy\n");
       for (ind_j=0; ind_j<Esz; ++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
    }  // MR 10.9.2010
 

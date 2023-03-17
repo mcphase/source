@@ -192,9 +192,15 @@ void ic_showoutput(const char *filename,                        // Output file n
    ic_printheader(filename,pars);
    std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out | std::fstream::app); // Opens file for appending
    FILEOUT << "# Energy offset, E0=" << VE.E(0)*conv << pars.e_units << "\n";
+   std::string basis; basis.assign(pars.basis); strtolower(basis);
+   if(basis.find("msml")!=std::string::npos)
+   {
+   if(!VE.iscomplex()) FILEOUT << "# Energy(" << pars.e_units << ")\tWavefunctions(^{2S+1}L,mL,mS) }\n"; else
+   FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L,mL,mS) }\n";
+   }else{
    if(!VE.iscomplex()) FILEOUT << "# Energy(" << pars.e_units << ")\tWavefunctions(^{2S+1}L_J,mJ) }\n"; else
    FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L_J,mJ) }\n";
-
+   }
    bool istrunc = !ikeepJ.empty(); if(istrunc) num_states=ikeepJ.size();
    std::vector<int> isV(num_states,0), _isV; _isV.reserve(num_states);
    if(istrunc) _isV = ikeepJ; else for(ii=0; ii<(int)num_states; ii++) _isV.push_back(ii);

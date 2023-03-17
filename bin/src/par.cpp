@@ -215,7 +215,7 @@ if(p1.nofatoms<nofatoms)
  for(i=1;i<=p1.nofatoms;++i)
  {if (i>nofatoms)
    {newatom(p1.jjj[i]);
-   fprintf(stderr,"# Warning program addj: nofatoms=%i not equal %i - adding atom number %i with sipffilename=%s\n",nofatoms,p1.nofatoms,i,(*jjj[i]).sipffilename);
+   fprintf(stderr,"# Warning program addj: nofatoms=%i not equal %i - adding atom number %i with sipffilename=%s\n",nofatoms-1,p1.nofatoms,i,(*jjj[i]).sipffilename);
 
    }
    else

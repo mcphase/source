@@ -13,6 +13,7 @@ unless ($#ARGV >0)
  print " at every iteration step and  the standard sta deviation is minimzed\n";
  print " simannfit gives as a parameter a maximum number for sta - if during the\n";
  print " calculation of sta in calcsta.bat this number is exceeded calcsta.bat can exit (saves time)\n";
+ print " option -l 0.2 ... sets limit - program will end if sta < 0.2\n";
  print " option -t 100 ... sets time limit until program end to 100 seconds\n";
  print " option -s 132 ... gives maximal number of iteration steps 132 to be done\n";
  print " option -n 50  ... specifies that every 50 steps the parameters should be\n";
@@ -56,10 +57,11 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
  @parnam=();@par=();@parmin=();@parmax=();@parerr=();@parstp=();@parav=();@thisparstp=();
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
-  $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;$stepset=0;
+  $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;$stepset=0;$limsta=-1e100;
   $options=1;$probe=0;$stepfact=1;$cont=0;
   while($options==1)
   {$options=0;
+  if ($ARGV[0]=~"-l") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$limsta=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-t") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxtim=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-s") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$maxstep=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-n") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$tablestep=eval $ARGV[0]; shift @ARGV;}  
@@ -179,7 +181,7 @@ if($sta>0)
  if ($sta==0) {#recover old pars
       @par=@parsav; 
       }
- last if ($sta==0);
+ last if ($sta<$limsta);
  if ($sta>$stasave)
   {if($rnd>exp(-($sta-$stasave)/$stattemp))
      {#recover ol pars and adapt parstep to step not so big in this direction

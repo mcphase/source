@@ -1211,12 +1211,12 @@ sub printlattice {
     unless (open($l,$fileout)){die "cannot open file $fileout\n";}
     unless (open($h,$filein)) {die "cannot open file $filein\n";}
 #get comment lines from input file
-     $aa=0;
+    my $aaa=0;
      while(<$h>)
      {#next if /^\s*#/;
       $text=$_;
-      if ($aa==0){($aa)=extract("a",$_);}
-      last if($aa!=0); # stop printing comments when crystallographic information starts
+      if ($aaa==0){($aaa)=extract("a",$_);}
+      last if($aaa!=0); # stop printing comments when crystallographic information starts
       print $l ($text);
      }
      print $l "#! a=".$a." b=".$b." c=".$c." alpha=".$alpha." beta=".$beta." gamma=".$gamma."\n";
@@ -1224,7 +1224,7 @@ sub printlattice {
      print $l "#! r1b=".$r1y." r2b=".$r2y." r3b=".$r3y." primitive lattice vectors [a][b][c]\n";
      print $l "#! r1c=".$r1z." r2c=".$r2z." r3c=".$r3z."\n#\n";
 
-     if ($aa==0){die "ERROR makenn: unable to find 'a=' in file $filein\n";}
+     if ($aaa==0){die "ERROR makenn: unable to find 'a=' in file $filein\n";}
      
  return ($h,$l);
 }

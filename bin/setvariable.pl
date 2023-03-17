@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
+use Scalar::Util qw(looks_like_number);
+
 unless ($#ARGV >1) {usage();}else{print STDERR "#* $0 *";}
 
 sub usage() {
@@ -27,7 +29,7 @@ EOF
 
 $varnam=$ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$value=eval $ARGV[0];
-unless ($value) {$value=$ARGV[0];}
+unless(looks_like_number($value)){$value=$ARGV[0];}
 shift @ARGV;
 
   foreach (@ARGV)
