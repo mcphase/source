@@ -568,6 +568,8 @@ protected static void reload_data(int i){    try{
              String strLine;
              String sx;
              String sy;
+             String sxe;
+             String sye;
              String sxerr;
              String syerr;
              int clx = colx[i];
@@ -600,30 +602,39 @@ protected static void reload_data(int i){    try{
       strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
                  sx=SF.NthWord(strLine,clx);
                  sy=SF.NthWord(strLine,cly);
-                 sxerr=SF.NthWord(strLine,clxerr);
-                 syerr=SF.NthWord(strLine,Math.abs(clyerr));
-             // System.out.println(sx+" "+sy+" "+sxerr+" "+syerr);
+                 sxe=SF.NthWord(strLine,clxerr);
+                 sye=SF.NthWord(strLine,Math.abs(clyerr));
+             // System.out.println(sx+" "+sy+" "+sxe+" "+sye);
 
                Double p = new Double(0.0);
-   if(sx.length()!=0&&sy.length()!=0&&sxerr.length()!=0&&syerr.length()!=0){
-               try{
+   if(sx.length()!=0&&sy.length()!=0&&sxe.length()!=0&&sye.length()!=0){
+               try{sx=sx.replace("+-"," ");sx=SF.NthWord(sx,1);
+                   sy=sy.replace("+-"," ");sy=SF.NthWord(sy,1);
                     sx=sx.replace('D','E');
                     sy=sy.replace('D','E');
+                   sxe=sxe.replace("+-"," "); // if possible take number after +- as error bar
+                   sxerr=SF.NthWord(sxe,2);if(sxerr.length()==0){sxerr=SF.NthWord(sxe,1);}
+                   sye=sye.replace("+-"," ");
+                   syerr=SF.NthWord(sye,2);if(syerr.length()==0){syerr=SF.NthWord(sye,1);}
                     sxerr=sxerr.replace('D','E');
                     syerr=syerr.replace('D','E');
-                   if(clyerr>=0)
+                    if(clyerr>=0)
                    { if(clxerr==0){sxerr="0";}
                      if(clyerr==0){syerr="0";}
                      data[0][j]=p.parseDouble(sy);
-                     if (detymin&data[0][j]<ymin){ymin=data[0][j];}
-                     if (detymax&data[0][j]>ymax){ymax=data[0][j];}
+                      if (detymin&data[0][j]<ymin){ymin=data[0][j];}
+                      if (detymax&data[0][j]>ymax){ymax=data[0][j];}
                      data[1][j]=p.parseDouble(sy)+p.parseDouble(syerr);
+                      if (detymax&data[1][j]>ymax){ymax=data[1][j];}
                      data[2][j]=p.parseDouble(sy)-p.parseDouble(syerr);
+                      if (detymin&data[2][j]<ymin){ymin=data[2][j];}
                      data[3][j]=p.parseDouble(sx);
-                     if (detxmin&data[3][j]<xmin){xmin=data[3][j];}
-                     if (detxmax&data[3][j]>xmax){xmax=data[3][j];}
+                      if (detxmin&data[3][j]<xmin){xmin=data[3][j];}
+                      if (detxmax&data[3][j]>xmax){xmax=data[3][j];}
                      data[4][j]=p.parseDouble(sx)+p.parseDouble(sxerr);;
+                      if (detxmax&data[4][j]>xmax){xmax=data[4][j];}
                      data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
+                      if (detxmin&data[5][j]<xmin){xmin=data[5][j];}
                    //System.out.println(data[0][j]+" "+data[3][j]+" "+j);
                    }
                    else
@@ -639,7 +650,7 @@ protected static void reload_data(int i){    try{
                   }
                     ++j;
                    }
-                   catch(NumberFormatException e){--j;//System.exit(1);
+                   catch(NumberFormatException e){if(j>0){--j;}//System.exit(1);
                                                   }
                                                           }
                }

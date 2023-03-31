@@ -524,11 +524,13 @@ In order that {\prg McPhase} can calculate the standard deviation between
 What measurement data can be used to calculate a standard deviation ?
 
 \begin{description}
-\item[{\prg mcphas.fum}] if given in column 11, 12, 13 in {\prg ./fit/mcphas.fum} the
-            magnetisation in the $a$, $b$ and $c$ direction is used for calculation
+\item[{\prg mcphas.fum}] if given in column 8,9,10,.. in {\prg ./fit/mcphas.fum} the
+            free energy $f$, the energy $u$, the magnetisation and the strain is used for calculation
 	    of the standard deviation sta. The standard deviation is calculated
-	    as ${\rm sta}=\sum_{\rm data points i} ({\mbf m}_i^{calc}-{\mbf m}_i^{meas})^2$.
-	    All three components of the magnetic moment have to be given and are used.
+	    as ${\rm sta}=\sum_{\rm data points i} ({m}_i^{calc}-{m}_i^{meas})^2/({\Delta m}_i^{meas})^2$.
+	    A measured quantity is used for fitting only, if the experimental error ${\Delta m}_i^{meas}$ is given
+            after the number ${m}_i^{meas}$ in the file {\prg ./fit/mcphas.fum} 
+            using the notation: \begin{verbatim} 3.24+-0.2 \end{verbatim}
 
 \end{description}
 

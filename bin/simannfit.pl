@@ -26,6 +26,7 @@ unless ($#ARGV >0)
  print "                   up to 20 parameters are appended to this list, after that the program stops\n";
  print "                   - in this way a series of equally good solutions can be explored.\n";
  print " option -w 1.4     before starting simannfit, multiply all stepwidths by factor 1.4\n"; 
+ print " option -r 0.2     before starting simannfit, set all stepwidths to parameter range=max-min times 0.2,\n"; 
  print " option -f 0.2     before starting simannfit, set all stepwidths to parameter value times 0.2,\n"; 
  print "                   hoever never smaller than parameterrange/1000\n"; 
  print " option -c         continue at end of program - do not ask for pressing enter\n"; 
@@ -67,6 +68,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
   if ($ARGV[0]=~"-n") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$tablestep=eval $ARGV[0]; shift @ARGV;}  
   if ($ARGV[0]=~"-p") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$probe=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-w") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepfact=eval $ARGV[0]; shift @ARGV;}
+  if ($ARGV[0]=~"-r") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$rangfact=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-f") {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stepset=eval $ARGV[0]; shift @ARGV;}
   if ($ARGV[0]=~"-c") {$options=1;shift @ARGV; $cont=1;}
   }
@@ -78,7 +80,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
     while($line=<Fin>)
  {while ($line=~/^(#!|[^#])*?\bpar\w+\s*\Q[\E/) {++$#par;#load another parameter
 				 ($parname)=($line=~m/(?:#!|[^#])*?\b(par\w+)\s*\Q[\E/);
-                                 foreach(@parnam){if (/$parname/){print "ERROR simannfit: parameter $parname occurs more than one time in input files\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}}
+                                 foreach(@parnam){if ($_ eq $parname){print "ERROR simannfit: parameter $parname occurs more than one time in input files\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}}
                                  $parnam[$#par]=$parname;
 				 ($par[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*([^,]+)/);
 				 ($parmin[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*([^,]+)/);
@@ -89,6 +91,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
                                         if($parstp[$#par]<($parmax[$#par]-$parmin[$#par])/1000)
                                         {$parstp[$#par]=($parmax[$#par]-$parmin[$#par])/1000;}
                                         }
+                         if($rangfact){$parstp[$#par]=$rangfact*($parmax[$#par]-$parmin[$#par]);}
                          $parstp[$#par]=$stepfact*abs($parstp[$#par]);
                                  $i=$#par;write STDOUT;write Fout;
 				 #check if parmin<=parmax

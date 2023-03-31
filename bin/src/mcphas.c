@@ -188,7 +188,7 @@ if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
 	      break;
          case 2: //ht calculation leads to no results- save dummy line
 	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
-		 sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
+		 //sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
      	      ++noffailedpoints;
 	      break;	 
 	 default:  ;
@@ -221,7 +221,8 @@ endproper:
    std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
    std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
 
-   fprintf(stdout,"#! sta=%g\n",sta);
+if(nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",sta/nofstapoints);}
+else { fprintf(stdout,"#! sta=1e10\n");}
 #ifdef _THREADS
 std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;
 for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];

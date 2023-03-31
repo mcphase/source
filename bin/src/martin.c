@@ -167,18 +167,23 @@ char * mystrtok (char * s, char * delimiters)
 return pointer;
 }
 
-//function to split a string with numbers separated by delimitrs into an array
+//function to split a string with numbers separated by delimiters into an array
 // example:
 // 3 23 542 23
 // returns:0 .... it is a comment line (starting with #) or empty line
 //         n .... number of numbers read
+// if called with nnerr the function looks for expressions such as 3.5+-0.2 indicating a
+// number with an experimental error and stores the error in nnerr
 
 int splitstring (char * instr, float*nn)
+{return splitstring(instr,nn,NULL);}
+
+int splitstring (char * instr, float*nn, float *nnerr)
 {char delimiters[] = " \n\t";
-  char *token;
+  char *token,*ebar;
   int i;
   errno=0;
-
+ 
 
 // strip /r (dos line feed) from line if necessary
   while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
@@ -194,17 +199,28 @@ int splitstring (char * instr, float*nn)
   for (i = 1; token != NULL&&(*token!='#') ; ++i)
     {
 if(i>=(int)nn[0])
-        { fprintf (stderr, "Error in function inputline: maximum value of numbers in line exceeded,more numbers in line (>%i) to be read.\n",i);
+        { fprintf (stderr, "Error in function inputline/splitstring: maximum value of numbers in line exceeded,more numbers in line (>%i) to be read.\n",i);
            exit (EXIT_FAILURE);
         }
     
       nn[i] = strtod (token, NULL);
+if(nnerr!=NULL)
+  {if(i>=(int)nnerr[0])
+        { fprintf (stderr, "Error in function inputline/splitstring: maximum value of numbers in line exceeded,more numbers in line (>%i) to be read.\n",i);
+           exit (EXIT_FAILURE);
+        }
+ // try to catch errorbar if it exists
+  nnerr[i]=0;
+
+  ebar=strnstr(token,"+-",strcspn(token,delimiters));
+  if (ebar!=NULL){nnerr[i] = strtod (ebar+2, NULL);}
+  } 
       token = mystrtok (token, delimiters);
  // printf("i=%i token=%g\n",i,nn[i]);
     }
   }        
 //  printf("i=%i token=%g\n",i,nn[i]);
-
+ 
   if (i<1) {return 0;}
   return i-1;
 }
@@ -215,9 +231,13 @@ if(i>=(int)nn[0])
 // 3 23 542 23
 // returns:0 .... it is a comment line (starting with #) or empty line
 //         n .... number of numbers read
+// if called with nnerr the function looks for expressions such as 3.5+-0.2 indicating a
+// number with an experimental error and stores the error in nnerr
 int inputline (FILE * fin_coq, float *nn)
-{
-  char instr[maxnofcharinline];
+{return inputline(fin_coq,nn,NULL);
+}
+int inputline (FILE * fin_coq, float *nn, float *nnerr)
+{ char instr[maxnofcharinline];
   
   if (fgets (instr, sizeof (instr), fin_coq) == NULL)
     { return 0;}
@@ -226,7 +246,8 @@ int inputline (FILE * fin_coq, float *nn)
     { fprintf (stderr, "Error in function inputline: input string too long");
       exit (EXIT_FAILURE);
      }
- return splitstring(instr,nn);
+ 
+ return splitstring(instr,nn, nnerr);
 }
 
 // function to input a line of numbers separated by delimiters

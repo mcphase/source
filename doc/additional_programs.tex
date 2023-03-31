@@ -183,7 +183,6 @@ icf1ion (no file.levels.cef required, takes values from icf1ion.out) .
 		 containing the calculated strain epsilon. The datafile has to
 		 be sorted according to descending T values !!!
                  output is written to stdout.
-
 \item [\prg extendunitcell\index{extendunitcell} n1 n2 n3]program to extend crystallographic %%@
 unit cell n 
                 times in r1 (or r2,r3) direction, meaning take mcphas.j, mcphas.tst 
@@ -1025,6 +1024,9 @@ is zero at a specified value constx of colx.
 
 \begin{description}
 \item [\prg beep\index{beep}:] just make a beep\index{beep} to signal attention 
+\item [\prg export\index{export} A=23.5-7/2.6e-23*\%B\%] program for windows to allow for
+simple math operations. Linux users can use some linux syntax such as 
+{\prg \begin{verbatim}export A= $(echo 23.5-7/2.6e-23*$B | bc -l )\end{verbatim}}.
 \item [\prg gauss\index{gauss} fwhm stp min max:] calculate a gaussian, output goes to console %%@
 (stdout), the formula for a gaussian is:
 $\sigma={\rm fwhm}/\sqrt{8*log(2)}$,

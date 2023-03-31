@@ -203,6 +203,7 @@ windows:
 #	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
 #	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/jre1.8.0_121 --output=$(HOME)/mcph.exe
 #	rm $(HOME)/windows.jar
+	dot_clean -mv ./
 	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
 	mv Output/mysetup.exe $(HOME)/mcph.exe
 	make unreleased_restore
@@ -213,7 +214,7 @@ tgz :
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
 	dos2unix ./examples/cecu2a/fit/watch*.bat
-	dos2unix ./examples/cecu2ge2_cf_phonon_int/*.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
+	dos2unix ./examples/cecu2ge2_cf_phonon_int/phonons/calc.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
 	dos2unix ./examples/coo/calc.bat
 	dos2unix ./examples/dycu2iwata/calc.bat
 	dos2unix ./examples/gd3gao6/calc.bat
@@ -242,11 +243,11 @@ tgz :
 	dos2unix ./examples/tb2ti2o7_cfphonon_simple/phonons/calc.bat
 	dos2unix ./examples/test_cluster/calc.bat
 	dos2unix ./examples/testic1ion/test*.bat
-	dos2unix ./examples/tmcu2_cf_phonon/DMD_method/calc.bat
-	dos2unix ./examples/tmcu2_cf_phonon/phonons/calc.bat
+	dos2unix ./examples/tmcu2_cf_phonon/calc.bat
 	dos2unix ./examples/tungsten_phonons/calc.bat
 	dos2unix ./examples/upd3/calc.bat
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
+	dot_clean -mv ./
 	cd ../;tar --exclude=mcphas/bin/jre1.8.0_121/* --exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
 		-cvf $(HOME)/mcph.tar mcphas/* \
@@ -254,7 +255,7 @@ tgz :
 	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz mcph.tgz
 	unix2dos ./bin/*.pl ./demo/*.bat
 	unix2dos ./examples/cecu2a/fit/watch*.bat
-	unix2dos ./examples/cecu2ge2_cf_phonon_int/*.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
+	unix2dos ./examples/cecu2ge2_cf_phonon_int/phonons/calc.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
 	unix2dos ./examples/coo/calc.bat
 	unix2dos ./examples/dycu2iwata/calc.bat
 	unix2dos ./examples/gd3gao6/calc.bat
@@ -283,8 +284,7 @@ tgz :
 	unix2dos ./examples/tb2ti2o7_cfphonon_simple/phonons/calc.bat
 	unix2dos ./examples/test_cluster/calc.bat
 	unix2dos ./examples/testic1ion/test.bat
-	unix2dos ./examples/tmcu2_cf_phonon/DMD_method/calc.bat
-	unix2dos ./examples/tmcu2_cf_phonon/phonons/calc.bat
+	unix2dos ./examples/tmcu2_cf_phonon/calc.bat
 	unix2dos ./examples/tungsten_phonons/calc.bat
 	unix2dos ./examples/upd3/calc.bat
 	unix2dos ./tutorial/07documentation_logbooks/calc.bat

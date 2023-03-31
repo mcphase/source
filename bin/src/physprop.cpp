@@ -107,6 +107,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   double sta;
   sta=0; 
   float nn[200];nn[0]=199;
+  float nnerr[200];nnerr[0]=199;
   int ortho=1;
   if (inputpars.alpha!=90||inputpars.beta!=90||inputpars.gamma!=90){ortho=0;}
       Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
@@ -159,13 +160,56 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fclose(fout);
    if((fout=fopen("./fit/mcphas.fum","rb"))!=NULL)
     {// some measured data should be fitted
+     j2=0;
      if(washere==0){fprintf(stdout,"#Mcphas- calculating standard deviation to ./fit/mcphas.fum - magnetisation ma mb mc (col 11,12,13)\n");}
      while(feof(fout)==0)
-     {
-      if (inputline(fout,nn)!=0)
+     {++j2;
+      if ((l=inputline(fout,nn,nnerr))!=0)
       {if(0.0001>(nn[3]-T)*(nn[3]-T)+(nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
-         {sta+=(nn[11]-m[1])*(nn[11]-m[1])+(nn[12]-m[2])*(nn[12]-m[2])+(nn[13]-m[3])*(nn[13]-m[3]);
-	 if(verbose==1){fprintf(stdout,"sta_mcphas.fum=%g\n",sta);}
+         { for(i=8;i<=l;++i){double clc=0;if(ortho==0){
+                         switch(i) { case 8: clc=fe;break;
+                                     case 9: clc=u;break;
+                                     case 10: clc=Norm(m);break;
+                                     case 11: clc=mabc(1);break;
+                                     case 12: clc=mabc(2);break;
+                                     case 13: clc=mabc(3);break;
+                                     case 14: clc=m*Hijk/Norm(Hijk);break;
+                                     case 15: clc=m[1];break;
+                                     case 16: clc=m[2];break;
+                                     case 17: clc=m[3];break;                                    
+
+                                     case 21: clc=Eel;break;
+                                     case 22: sps.epsilon(1);break;
+                                     case 23: sps.epsilon(2);break;
+                                     case 24: sps.epsilon(3);break;
+                                     case 25: sps.epsilon(4);break;
+                                     case 26: sps.epsilon(5);break;
+                                     case 27: sps.epsilon(6);break;
+                                     default: clc=0;
+                                   } } else
+{switch(i) { case 8: clc=fe;break;
+                                     case 9: clc=u;break;
+                                     case 10: clc=Norm(m);break;
+                                     case 11: clc=mabc(1);break;
+                                     case 12: clc=mabc(2);break;
+                                     case 13: clc=mabc(3);break;
+                                     case 14: clc=m*Hijk/Norm(Hijk);break;
+                                     case 15: clc=Eel;break;
+                                     case 16: sps.epsilon(1);break;
+                                     case 17: sps.epsilon(2);break;
+                                     case 18: sps.epsilon(3);break;
+                                     case 19: sps.epsilon(4);break;
+                                     case 20: sps.epsilon(5);break;
+                                     case 21: sps.epsilon(6);break;
+                                     default: clc=0;
+                                   }
+}
+
+                         if(nnerr[i]>0){if(verbose==1&&clc==0){fprintf(stdout,"sta_mcphas.fum warning: exp value cannot be fitted in line %i column %i in file ./fit/mcphas.fum\n",j2,i);}
+//fprintf(stdout,"stacalc_mphas.fum: col %i line %i value %g err %g - calcvalue %g\n",i,j2,nn[i],nnerr[i],clc);
+                                       sta+=(nn[i]-clc)*(nn[11]-clc)/nnerr[i]/nnerr[i];}
+                        }
+            if(verbose==1){fprintf(stdout,"sta_mcphas.fum=%g\n",sta);}
 	 }
       }
      }

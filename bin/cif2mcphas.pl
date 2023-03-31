@@ -550,6 +550,7 @@ for $j(0..$nofatom-1) {
   if($ismag[$j]) {
     $eltab = $magions{$at.$oxy[$j]."+"}; 
     if(${$eltab}[0] eq "") { $ismag[$j] = 0; }
+    if($nonmagnetic eq $at){ $ismag[$j] = 0; }
     if($nonmagnetic eq $dat[$j][0]){ $ismag[$j] = 0; }
       }else
   {  if($magnetic eq $at){ $ismag[$j] = 1; }

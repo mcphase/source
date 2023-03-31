@@ -83,7 +83,7 @@ $jpglog=0;
    while($line=<Fin>)
 {while ($line=~/^(#!|[^#])*?\bpar\w+\s*\Q[\E/) {++$#par;#load another parameter
 				 ($parname)=($line=~m/(?:#!|[^#])*?\b(par\w+)\s*\Q[\E/);
-                                 foreach(@parnam){if (/$parname/){print "ERROR searchspace: parameter $parname occurs more than one time in input files\n"; print " <Press enter to close>";$in=<STDIN>;exit 1;}}
+                                 foreach(@parnam){if ($_ eq $parname){print "ERROR searchspace: parameter $parname occurs more than one time in input files\n"; print " <Press enter to close>";$in=<STDIN>;exit 1;}}
                                  $parnam[$#par]=$parname;
 				 ($par[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*([^,]+)/);
 				 ($parmin[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*([^,]+)/);

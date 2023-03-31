@@ -57,7 +57,9 @@ extern  char * fgets_errchk (char * instr,int size, FILE * file);
 // returns nof numbers read and
 // 0 if end of file or no numbers have been read 
 extern  int splitstring (char * instr, float *nn);
+extern  int splitstring (char * instr, float *nn, float *nnerr );
 extern  int inputline (FILE * fin_coq, float *nn);
+extern  int inputline (FILE * fin_coq, float *nn, float *nnerr);
 
 // function to input a line of numbers separated by delimiters
 // example:
