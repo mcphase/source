@@ -207,7 +207,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
 
                          if(nnerr[i]>0){if(verbose==1&&clc==0){fprintf(stdout,"sta_mcphas.fum warning: exp value cannot be fitted in line %i column %i in file ./fit/mcphas.fum\n",j2,i);}
 //fprintf(stdout,"stacalc_mphas.fum: col %i line %i value %g err %g - calcvalue %g\n",i,j2,nn[i],nnerr[i],clc);
-                                       sta+=(nn[i]-clc)*(nn[11]-clc)/nnerr[i]/nnerr[i];}
+                                       sta+=(nn[i]-clc)*(nn[i]-clc)/nnerr[i]/nnerr[i];}
                         }
             if(verbose==1){fprintf(stdout,"sta_mcphas.fum=%g\n",sta);}
 	 }

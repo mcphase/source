@@ -3,9 +3,10 @@
 use FileHandle;
 use PDL;
 use File::Copy;
+use Getopt::Long;
 
 print "#********************************************************\n";
-print "# makenn 220526 - create table with neighbors and interactions\n";
+print "# makenn 230406 - create table with neighbors and interactions\n";
 print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "#********************************************************\n";
 $PI=3.14159265358979323846;
@@ -16,9 +17,7 @@ $PI=3.14159265358979323846;
                 #  comparing table values that this is the same bond
  $Cel= zeroes (7,7); # for storage of elastic constants if needed
   # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
-
-unless ($#ARGV>=0) 
-
+if ($#ARGV<0) 
 {
 print STDOUT << "EOF";
 
@@ -44,39 +43,38 @@ print STDOUT << "EOF";
   Note that in order to use makenn you have to set up a 
  working  mcphas.j file with the crystal structure. 
 
-EOF
-print " option -rkky A(meV) kf(1/A) calculates the rkky interaction\n";
-print "              according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3\n";
-print "              scaling A<0, kf should be the Fermi wavevector (usually\n";
-print "              between 0.3-2.5 A^-1 depending on the electrondensity^0.333)\n";
-print " option -rkky3d A(meV) ka(1/A) kb(1/A) kc(1/A) calculates the rkky interaction\n";
-print "              according to J(R)=A.cos(2.kfR)/(2.kfR)^3\n";
-print "              scaling A<0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)\n";
-print " option -rkkz A(meV) kf(1/A) calculates the rkky interaction\n";
-print "              according to J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4\n";
-print "              scaling A>0, kf should be the Fermi wavevector\n";
-print " option -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)  calculates the rkky interaction\n";
-print "              according to J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4\n";
-print "              scaling A>0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)\n";
-print " option -kaneyoshi A(meV) D(A) alpha  calculates the kaneyoshi\n";
-print  "             parametrization for the Bethe-Slater\n";
-print "              curve: J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2]\n";
-print "              with D corresponding to the orbital radius\n";
-print "              the exponential alpha is conveniently put to  about 1\n";
-print " option -kaneyoshi3d A(meV) Da(A) Db(A) Dc(A) alpha  calculates the 3d-kaneyoshi\n";
-print  "             parametrization for the Bethe-Slater\n";
-print "              curve: J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2]\n";
-print "              with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2)\n";
-print "              the exponential alpha is conveniently put to  about 1\n";
-print " option -bvk filename\n";
-print "              for phonons: take Born van Karman model with longitudinal and\n";
-print "              transversal spring constants from file - file format, columns:\n";
-print "              #   atom_n_sipf atom_n'_sipf bondlength(A) Clong(N/m) Ctrans(N/m)\n";
-print "              mind: into MODPAR2-6 in *.sipf the Einstein-oscillator paramters\n"; 
-print "              are written, too. Omit filename to create a sample file with\n";
-print "              longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m\n";
 
-print STDOUT << "EOF";
+ option -rkky A(meV) kf(1/A) calculates the rkky interaction
+              according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3
+              scaling A<0, kf should be the Fermi wavevector (usually
+              between 0.3-2.5 A^-1 depending on the electrondensity^0.333)
+ option -rkky3d A(meV) ka(1/A) kb(1/A) kc(1/A) calculates the rkky interaction
+              according to J(R)=A.cos(2.kfR)/(2.kfR)^3
+              scaling A<0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
+ option -rkkz A(meV) kf(1/A) calculates the rkky interaction
+              according to J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4
+              scaling A>0, kf should be the Fermi wavevector
+ option -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)  calculates the rkky interaction
+              according to J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4
+              scaling A>0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
+ option -kaneyoshi A(meV) D(A) alpha  calculates the kaneyoshi
+             parametrization for the Bethe-Slater
+              curve: J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2]
+              with D corresponding to the orbital radius
+              the exponential alpha is conveniently put to  about 1
+ option -kaneyoshi3d A(meV) Da(A) Db(A) Dc(A) alpha  calculates the 3d-kaneyoshi
+             parametrization for the Bethe-Slater
+              curve: J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2]
+              with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2)
+              the exponential alpha is conveniently put to  about 1
+ option -bvk filename
+              for phonons: take Born van Karman model with longitudinal and
+              transversal spring constants from file - file format, columns:
+              #   atom_n_sipf atom_n'_sipf bondlength(A) Clong(N/m) Ctrans(N/m)
+              mind: into MODPAR2-6 in *.sipf the Einstein-oscillator paramters 
+              are written, too. Omit filename to create a sample file with
+              longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m
+
  option -cfph [screeningfile.r]
               calculate crystal field phonon interaction: mcphas.j lists 
               magnetic and non magnetic atoms with charges defined in the 
@@ -129,64 +127,71 @@ print STDOUT << "EOF";
                            with H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2
 
               To get a sample file use option -e -f or -dm -jp without a filename.      
+
+        -d puts to the last column the distance of the neighbors (A)\n
+ The neigbours of each atom are also stored in separate files
+ results\/makenn.a*.pc, which can be used with the program pointc to evaluate
+ the pointcharge model and calculate crystal field parameters.\n
 EOF
-print "        -d puts to the last column the distance of the neighbors (A)\n\n";
-print " The neigbours of each atom are also stored in separate files\n";
-print " results\/makenn.a*.pc, which can be used with the program pointc to evaluate\n";
-print " the pointcharge model and calculate crystal field parameters.\n\n";
- exit 0;}
+exit 0;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];
 $rkky=0;$calcdist=0;$bvk=0;$readtable=0;$classdip=0;
 shift @ARGV; 
+
+# Parses command line options
+GetOptions("rkky3d=s{4}"=>\@rkky3d,
+           "kaneyoshi3d=s{5}"=>\@kaneyoshi3d,
+           "rkkz3d=s{3}"=>\@rkkz3d,
+           "rkky=s{2}"=>\@rkky,
+           "kaneyoshi=s{2}"=>\@kaneyoshi,
+           "rkkz=s{2}"=>\@rkkz,
+           "bvk:s"=>\@bvk,
+           "cfph:s"=>\@cfph,
+           "e:s"=>\@e,
+           "f:s"=>\@f,
+           "jp:s"=>\@jp,
+           "dm:s"=>\@dm,
+           "d"=>\$d);
+
+
 $_=$ARGV[0];
-if(/-rkky3d/)
-  {$rkky=4;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;
+if(@rkky3d)
+  {$rkky=4;foreach(@rkky3d){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
+   $scale=$rkky3d[0];$ka=$rkky3d[1];$kb=$rkky3d[2];$kc=$rkky3d[3];
    print "calculating RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
    print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
-elsif(/-kaneyoshi3d/)
-  {$rkky=5;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Da=eval $ARGV[0];shift @ARGV;   
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Db=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Dc=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
+elsif(@kaneyoshi3d)
+  {$rkky=5;foreach(@kaneyoshi3d){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
+   $scale=$kaneyoshi3d[0];$Da=$kaneyoshi3d[1];$Db=$kaneyoshi3d[2];$Dc=$kaneyoshi3d[3];$aa=$kaneyoshi3d[4];
    print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
    print "J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
    print "with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A  and alpha=$aa\n";}
-elsif(/-rkkz3d/)
-  {$rkky=6;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;   
+elsif(@rkkz3d)
+  {$rkky=6;foreach(@rkkz3d){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
+   $scale=$rkkz3d[0];$ka=$rkkz3d[1];$kb=$rkkz3d[2];$kc=$rkkz3d[3];
    print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
    print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
-elsif(/-rkky/)
-  {$rkky=1;shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
+elsif(@rkky)
+  {$rkky=1;foreach(@rkky){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
+   $scale=$rkky[0];$kf=$rkky[1];
    print "calculating RKKY interaction J(R)=A.cos(2.kf.R)/(2.kf.R)^3 for scale A=$scale meV and kf=$kf A^-1\n";}
-elsif(/-kaneyoshi/)
-  {$rkky=2;shift @ARGV; 
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$D=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
+elsif(@kaneyoshi)
+  {$rkky=2;foreach(@kaneyoshi){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
+   $scale=$kaneyoshi[0];$D=$kaneyoshi[1];$aa=$kaneyoshi[2];
    print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
    print "J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n";}
-elsif(/-rkkz/)
-  {$rkky=3;shift @ARGV; 
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
+elsif(@rkkz)
+  {$rkky=3;foreach(@rkkz){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
+   $scale=$rkkz[0];$kf=$rkkz[1];
    print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV and kf=$kf A^-1\n";}
-elsif(/-bvk/)
-  {$bvk=1;shift @ARGV;
-   unless ($#ARGV>=0) # if no filename is given print help
-   { $tabout=1; $readtable=$_;}
+elsif(@bvk)
+  {$bvk=1;
+   unless ($bvk[0]) # if no filename is given print help
+   { $tabout=1;}
   else
    {
-   $bfk_file=$ARGV[0];shift @ARGV;
+   $bfk_file=$bvk[0];
    print "creating phononic interactions from Born van Karman model in file $bfk_file\n";
    # read interaction constants from file
    unless(open(Fin,$bfk_file)){ die "could not open $bfk_file\n";}
@@ -206,23 +211,23 @@ elsif(/-bvk/)
        	     }
   }
   }
-elsif(/-cfph/)
-{$cfph=1; shift @ARGV;
+elsif(@cfph)
+{$cfph=1; 
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
- $screeningfile=$ARGV[0];
+ $screeningfile=$cfph[0]; 
 }
-elsif(/-e/||/-f/||/-dm/||/-jp/)
-  {$readtable=$_;shift @ARGV;
-   unless ($#ARGV>=0) # if no filename is given print help
+elsif(@e||@f||@dm||@jp)
+  {
+   unless ($e[0]||$f[0]||$dm[0]||$jp[0]) # if no filename is given print help
    {
  $tabout=1; }
   else
  {
    $table_file=$ARGV[0];shift @ARGV;
-   $ignore_neihgbours_behind=0;$rtab=$readtable;
-   print "reading "; if ($readtable=~/-e/) {print " isotropic ";$DM=0;$Jp=0;} 
-                  elsif ($readtable=~/-f/) {print " isotropic ";$DM=0;$Jp=0;} 
-                  elsif ($readtable=~/-jp/) {print " Jp ";$DM=0;$Jp=1;} 
+   $ignore_neihgbours_behind=0;
+   print "reading "; if (@e) {print " isotropic ";$DM=0;$Jp=0;} 
+                  elsif (@f) {print " isotropic ";$DM=0;$Jp=0;} 
+                  elsif (@jp) {print " Jp ";$DM=0;$Jp=1;} 
                    else {print " DM ";$DM=1;$Jp=0;}
    $readtable=1;
    print" interactions from table in file $table_file\n";
@@ -239,12 +244,12 @@ elsif(/-e/||/-f/||/-dm/||/-jp/)
                if (/^(#!|[^#])*ignore_neihgbours_behind\s*=\s*/){($ignore_neihgbours_behind)=extract("ignore_neihgbours_behind",$_);}
                                  next if /^\s*#/;$line=$_;
                                  my @numbers=split(" ",$line);
-                                 if($rtab=~/-e/||$rtab=~/-jp/)
+                                 if(@e||@jp)
                                  {++$n_table;
                                   $da[$n_table]=$numbers[0];
                                   $Jex[$n_table]=$numbers[1];
                                  }
-                                 if($rtab=~/-f/||$rtab=~/-dm/)
+                                 if(@f||@dm)
                                  {++$n_table;
                                   $da[$n_table]=$numbers[0];
                                   $db[$n_table]=$numbers[1];
@@ -261,8 +266,7 @@ elsif(/-e/||/-f/||/-dm/||/-jp/)
   }
  else {$classdip=1;}
  
-$_=$ARGV[0];
-if(/-d/)
+if($d)
   {$calcdist=1;print "putting distance of neighbors (A) to last column of makenn.j\n";}
 
 my ($latt,$p) = getlattice("./mcphas.j"); # gets lattice and atomic positions
@@ -358,22 +362,22 @@ else {    print STDOUT << "EOF";
 #                               # direction is taken
 #  
 EOF
-$_=$readtable;
-if(/-e/)
+
+if(@e)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # |Rij| [A]  J [meV]  atom_i  atom_j 
 EOF
 
 }
-elsif(/-jp/)
+elsif(@jp)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants Jp  in H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2 
 # |Rij| [A]  Jp [meV]  atom_i  atom_j 
 EOF
 
 }
-elsif(/-f/)
+elsif(@f)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # da [a]    db [b]    dc [c]    J [meV]   atom_i  atom_j  |Rij| [A] 
@@ -447,33 +451,33 @@ print "# number of atoms = $nofatoms\n calculating ...\n";
    if($tabout){
 # check if neighbour is already in table
 $ff=0;
- for($ntbl=1;$ntbl<=$n_table;++$ntbl){$_=$readtable;
-if((/-e/||/-jp/)&&abs($da[$ntbl]-$r)<$SMALLdr){$ff=1;}
-elsif((/-f/||/-dm/)&&
+ for($ntbl=1;$ntbl<=$n_table;++$ntbl){
+if((@e||@jp)&&abs($da[$ntbl]-$r)<$SMALLdr){$ff=1;}
+elsif((@f||@dm)&&
       abs($da[$ntbl]-$xx)<$SMALLdabc&&
       abs($db[$ntbl]-$yy)<$SMALLdabc&&
       abs($dc[$ntbl]-$zz)<$SMALLdabc){$ff=1;}
-elsif((/-bvk/)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
+elsif((@bvk)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
        $a1=$sipf_file[$nnn];$a2=$sipf_file[$nz];
        if(($db[$ntbl]=~/$a1/&&$dc[$ntbl]=~/$a2/)
        ||($db[$ntbl]=~/$a2/&&$dc[$ntbl]=~/$a1/)){$ff=1;}}
                                   }
 
 if($ff==0){++$n_table;$ntbl=$n_table;
-          $_=$readtable;
-if(/-e/||/-jp/)
+        
+if(@e||@jp)
 {$da[$ntbl]=$r;
  print sprintf("%+10.6f     0       a%i a%i \n",$r,$nnn,$nz);
 }
-elsif(/-f/)
+elsif(@f)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
  print sprintf("%+10.6f %+10.6f %+10.6f 0        a%i a%i %+10.6f\n",$xx, $yy ,$zz,$nnn,$nz,$r);
 }
-elsif(/-dm/)
+elsif(@dm)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
   print sprintf("%+10.6f %+10.6f %+10.6f    %+10.6f %+10.6f %+10.6f     a%i a%i %+10.6f\n",$xx, $yy ,$zz,$rvec->at(0),$rvec->at(1),$rvec->at(2),$nnn,$nz,$r);
 }
-elsif(/-bvk/)
+elsif(@bvk)
 {$da[$ntbl]=$r; $db[$ntbl]=$sipf_file[$nnn];$dc[$ntbl]=$sipf_file[$nz];
  $spring= $bvkA*exp(-$bvkalpha*$r*$r);
  print sprintf("%s   %s    %+10.6f   %+10.6f   0 \n",$sipf_file[$nnn],$sipf_file[$nz],$r,$spring);
@@ -507,15 +511,15 @@ else{die "Error makenn - creating table for option $_ \n";}
                                } else
                                {# check if neighbour is in readtable - if yes, save it
                                for($ntbl=1;$ntbl<=$n_table;++$ntbl){
-                                 if(($rtab=~/-f/&&
+                                 if(((@f)&&
                                     abs($da[$ntbl]-$xx)<$SMALLdabc&&
                                     abs($db[$ntbl]-$yy)<$SMALLdabc&&
                                     abs($dc[$ntbl]-$zz)<$SMALLdabc&&
                                     $Jex[$ntbl]!=0.0)||
-                                    (($rtab=~/-e/||$rtab=~/-jp/)&&
+                                    ((@e||@jp)&&
                                      abs($da[$ntbl]-$r)<$SMALLdr&&
                                      $Jex[$ntbl]!=0.0)||
-                                   ($rtab=~/-dm/&&
+                                   ((@dm)&&
                                     abs($da[$ntbl]-$xx)<$SMALLdabc&&
                                     abs($db[$ntbl]-$yy)<$SMALLdabc&&
                                     abs($dc[$ntbl]-$zz)<$SMALLdabc&&

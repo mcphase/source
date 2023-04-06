@@ -313,6 +313,256 @@ and under windows:
 
 start display\index{display} 1 2 data.dat
 
+\subsection{Crystal Field  Example: Fitting Point Charges to Inverse Susceptibility Data}
+
+A frequent wish is to fit crystal field parameters to experimental data. This task can
+be simple in high symmetry compounds and  very complex due to large number of parameters
+and complex experimental data. Here we demonstrate on an example, how a fit can take into account
+the high temperature expansion of magnetic susceptibility in order to reduce the
+number of free parameters in an orthorhombic system. It is well known, that the 
+crystal field parameters $B_2^0$ and $B_2^2$ can be determined from the high
+ temperature expansion of susceptiblity. Thus there is no need to fit these parameter, this
+is simple. 
+
+If it is desirable to determine point charges and not the crystal field parameters, the
+number of point charges can be reduced if $B_2^0$ and $B_2^2$ are fixed. For example
+in a ternary system TmNiC$_2$ it is sufficient to fit the point charge on Tm. We quote here
+the correponding {\prg calcsta.forfit}  for linux users, which can be used by a command
+such as {\prg simannfit 0.1 calcsta}:
+
+\begin{verbatim}
+# <h1> TmNiC2 </h1>
+# fitting point charges using standard model with CF-coupling trying to model chi 
+
+# we do not vary charge on Ni and C - these can be obtained from the
+# B20 and B22 (PRB Roman) as determined by high temperature expansion of 
+# the single crystal susceptibility
+# we vary point charge on Tm
+export CTm=parTm [3.000000e+00,-3.000000e+00,3.000000e+00,3.086877e-04,1.901175e-01] 
+
+# a cutoff radius
+export RR=parR [3.599614e+00,3.000000e+00,6.000000e+00,2.497474e-04,4.472897e-02] 
+
+# screening factors for l=2,4,6 dependent linear on the distance 
+# e.g. SF20 is screening factor for l=2 at NN distance r=+2.5978 A
+# and SF2 is screening factor for l=2 at r=R, the cutoff radius
+export SF20=parSF20 [5.727796e-01,4.000000e-01,1.000000e+00,3.727098e-04,3.432656e-02]
+export SF2=parSF2 [1.000000e+00,0.000000e+00,1.000000e+00,3.105923e-04,7.189467e-02]
+export SF40=parSF40 [5.787451e-01,4.000000e-01,1.000000e+00,2.256921e-04,5.359141e-02]
+export SF4=parSF4 [8.647244e-01,0.000000e+00,1.000000e+00,2.185745e-04,8.422583e-02]
+export SF60=parSF60 [9.401158e-01,4.000000e-01,1.000000e+00,5.031542e-04,3.946531e-02]
+export SF6=parSF6 [9.348959e-01,0.000000e+00,1.000000e+00,7.718764e-04,8.030474e-02]
+
+setvalue 1 2 $SF20 sf.r
+setvalue 1 3 $SF40 sf.r
+setvalue 1 4 $SF60 sf.r
+setvalue 2 2 $SF2 sf.r
+setvalue 2 3 $SF4 sf.r
+setvalue 2 4 $SF6 sf.r
+setvalue 2 1 $RR sf.r
+
+# determine coefficient of pointcharge
+#  to yield correct B20 und B22
+# Hint: the CF parameters are linear in the point charges $CTm,$CC,$CNi
+# (compare CF theory slide in tutorial)
+# B20=NI20*$CNi+C20*$CC+TM20*$CTm=0.2199 meV Roman etal PRB 107, 125137 (2023) 
+# B22=NI22*$CNi+C22*$CC+TM22*$CTm=-0.328 meV
+
+cif2mcphas -pc $RR -sp -nm Ni -ch Tm=0,Ni=0,C=1 TmNiC2_400K.cif -sf sf.r
+. getvariable B20 Tm1_1.sipf
+export C20=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+. getvariable B22 Tm1_1.sipf
+export C22=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+
+
+cif2mcphas -pc $RR -sp -nm Ni -ch Tm=0,Ni=1,C=0 TmNiC2_400K.cif -sf sf.r
+. getvariable B20 Tm1_1.sipf
+export NI20=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+. getvariable B22 Tm1_1.sipf
+export NI22=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+
+cif2mcphas -pc $RR -sp -nm Ni -ch Tm=1,Ni=0,C=0 TmNiC2_400K.cif -sf sf.r
+. getvariable B20 Tm1_1.sipf
+export TM20=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+. getvariable B22 Tm1_1.sipf
+export TM22=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+
+# now we have to solve the equations for the CF paramters B20 and B22
+# B20=NI20*$CNi+C20*$CC+TM20*$CTm=0.2199 meV Roman etal PRB 107, 125137 (2023) 
+# B22=NI22*$CNi+C22*$CC+TM22*$CTm=-0.328 meV
+
+# resolve the system of 2 linear equations to get $CC and $CNi 
+# the sed command is to get rid of exponential expressions such as 3e-4
+# which the in line calculator of linux, bc does not understand 
+export A=$(echo "(0.2199-($TM20)*($CTm))/($NI20)" | sed s/e[+]*/*10^/g | bc -l)
+export B=$(echo "(-0.328-($TM22)*($CTm))/($NI22)" | sed s/e[+]*/*10^/g | bc -l)
+
+# $Cni=A-C20*$CC/NI20
+# $Cni+C22*$CC/NI22=B
+
+# A-B=C20*$CC/NI20-C22*$CC/NI22=$CC*(C20/NI20-C22/NI22)=$CC*C
+export C=$(echo "($C20)/($NI20)-($C22)/($NI22)" | sed s/e[+]*/*10^/g | bc -l)
+export CC=$(echo "(($A)-($B))/($C)" | sed s/e[+]*/*10^/g | bc -l)
+export CNi=$(echo "$A-($C20)*($CC)/($NI20)" | sed s/e[+]*/*10^/g | bc -l)
+
+# use cif2mcphas to calculate point charge model
+cif2mcphas -pc $RR -sp -nm Ni -ch Tm=$CTm,Ni=$CNi,C=$CC ../TmNiC2_400K.cif -sf sf.r
+
+# now the point charge determined crystal field parameters are in
+# Tm1_1.sipf  and this can be used to calculate chi and fit it to data ...
+
+for T in $(seq 1 30 400); do singleion -M  -r Tm1_1.sipf $T 1 0 0 0 0 0; done > results/chianew.clc 2>/dev/null
+for T in $(seq 1 30 400); do singleion -M  -r Tm1_1.sipf $T 0 1 0 0 0 0; done > results/chibnew.clc 2>/dev/null
+for T in $(seq 1 30 400); do singleion -M  -r Tm1_1.sipf $T 0 0 1 0 0 0; done > results/chicnew.clc 2>/dev/null
+
+delcomments -fromline 20 results/chianew.clc results/chibnew.clc results/chicnew.clc >/dev/null
+fillcol 6 1/c9 results/chianew.clc
+fillcol 7 1/c10 results/chibnew.clc
+fillcol 8 1/c11 results/chicnew.clc
+factcol 1 0 results/chianew.clc results/chibnew.clc results/chicnew.clc
+# put susceptibility how it should be to column 1 in chi*new.clc
+add 2 1 results/chianew.clc 1 2 exp/chia.dat
+add 2 1 results/chibnew.clc 1 2 exp/chib.dat
+add 2 1 results/chicnew.clc 1 2 exp/chic.dat
+
+# chi2 is used to calculate sta 
+chi2 6 1 3 results/chianew.clc
+chi2 7 1 4 results/chibnew.clc
+chi2 8 1 5 results/chicnew.clc
+
+# this is just to print out what parameters have been used
+echo cif2mcphas -pc $RR -sp -nm Ni -ch Tm=$CTm,Ni=$CNi,C=$CC TmNiC2_400K.cif -sf sf.r
+
+\end{verbatim}
+
+For windows users the following file {\prg calcsta.bat.forfit} will do a similar job using
+a fitting command such as {\prg simannfit 0.1 calcsta.bat }:
+
+\begin{verbatim}
+REM <h1> TmNiC2 </h1>
+REM fitting point charges using standard model with CF-coupling trying to model chi 
+
+REM we do not vary charge on Ni and C - these can be obtained from the
+REM B20 and B22 (PRB Roman) as determined by high temperature expansion of 
+REM the single crystal susceptibility
+REM we vary point charge on Tm
+call set CTm=parTm [3.000000e+00,-3.000000e+00,3.000000e+00,3.086877e-04,1.901175e-01] 
+
+REM a cutoff radius
+call set RR=parR [3.599614e+00,3.000000e+00,6.000000e+00,2.497474e-04,4.472897e-02] 
+
+REM screening factors for l=2,4,6 dependent linear on the distance 
+REM e.g. SF20 is screening factor for l=2 at NN distance r=+2.5978 A
+REM and SF2 is screening factor for l=2 at r=R, the cutoff radius
+call set SF20=parSF20 [5.727796e-01,4.000000e-01,1.000000e+00,3.727098e-04,3.432656e-02]
+call set SF2=parSF2 [1.000000e+00,0.000000e+00,1.000000e+00,3.105923e-04,7.189467e-02]
+call set SF40=parSF40 [5.787451e-01,4.000000e-01,1.000000e+00,2.256921e-04,5.359141e-02]
+call set SF4=parSF4 [8.647244e-01,0.000000e+00,1.000000e+00,2.185745e-04,8.422583e-02]
+call set SF60=parSF60 [9.401158e-01,4.000000e-01,1.000000e+00,5.031542e-04,3.946531e-02]
+call set SF6=parSF6 [9.348959e-01,0.000000e+00,1.000000e+00,7.718764e-04,8.030474e-02]
+
+call setvalue 1 2 %SF20% sf.r
+call setvalue 1 3 %SF40% sf.r
+call setvalue 1 4 %SF60% sf.r
+call setvalue 2 2 %SF2% sf.r
+call setvalue 2 3 %SF4% sf.r
+call setvalue 2 4 %SF6% sf.r
+call setvalue 2 1 %RR% sf.r
+
+REM determine coefficient of pointcharge
+REM  to yield correct B20 und B22
+REM Hint: the CF parameters are linear in the point charges $CTm,$CC,$CNi
+REM (compare CF theory slide in tutorial)
+REM B20=NI20*CNi+C20*CC+TM20*CTm=0.2199 meV Roman etal PRB 107, 125137 (2023) 
+REM B22=NI22*CNi+C22*CC+TM22*CTm=-0.328 meV
+
+call cif2mcphas -pc %RR% -sp -nm Ni -ch Tm=0,Ni=0,C=1 TmNiC2_400K.cif -sf sf.r
+call getvariable B20 Tm1_1.sipf
+call export C20=%MCPHASE_GETVARIABLE_VALUE%
+if C20=="not" set C20=0
+call getvariable B22 Tm1_1.sipf
+call export C22=%MCPHASE_GETVARIABLE_VALUE%
+if C22=="not" set C22=0
+
+
+call cif2mcphas -pc %RR% -sp -nm Ni -ch Tm=0,Ni=1,C=0 TmNiC2_400K.cif -sf sf.r
+call getvariable B20 Tm1_1.sipf
+call export NI20=%MCPHASE_GETVARIABLE_VALUE%
+if NI20=="not" set NI20=0
+call getvariable B22 Tm1_1.sipf
+call export NI22=%MCPHASE_GETVARIABLE_VALUE%
+if NI22=="not" set NI22=0
+
+call cif2mcphas -pc %RR% -sp -nm Ni -ch Tm=1,Ni=0,C=0 TmNiC2_400K.cif -sf sf.r
+call getvariable B20 Tm1_1.sipf
+call export TM20=%MCPHASE_GETVARIABLE_VALUE%
+if TM20=="not" set TM20=0
+call getvariable B22 Tm1_1.sipf
+call export TM22=%MCPHASE_GETVARIABLE_VALUE%
+if TM22=="not" set TM22=0
+
+REM now we have to solve the equations for the CF paramters B20 and B22
+REM B20=NI20*$CNi+C20*$CC+TM20*$CTm=0.2199 meV Roman etal PRB 107, 125137 (2023) 
+REM B22=NI22*$CNi+C22*$CC+TM22*$CTm=-0.328 meV
+
+REM resolve the system of 2 linear equations to get $CC and $CNi 
+call export A=(0.2199-(%TM20%)*(%CTm%))/(%NI20%)
+call export B=(-0.328-(%TM22%)*(%CTm%))/(%NI22%)
+
+REM Cni=A-C20*CC/NI20
+REM Cni+C22*CC/NI22=B
+
+REM A-B=C20*CC/NI20-C22*CC/NI22=CC*(C20/NI20-C22/NI22)=CC*C
+call export C=(%C20%)/(%NI20%)-(%C22%)/(%NI22%)
+call export CC=((%A%)-(%B%))/(%C%)
+call export CNi=%A%-(%C20%)*(%CC%)/(%NI20%)
+
+REM use cif2mcphas to calculate point charge model
+call cif2mcphas -pc %RR% -sp -nm Ni -ch Tm=%CTm%,Ni=%CNi%,C=%CC% ../TmNiC2_400K.cif -sf sf.r
+
+REM now the point charge determined crystal field parameters are in
+REM Tm1_1.sipf  and this can be used to calculate chi and fit it to data ...
+
+call perl -e "for($T=1;$T<400;$T+=30){system('singleion '.$T.' 1 0 0 0 0 0');}" > results\chianew.clc
+call perl -e "for($T=1;$T<400;$T+=30){system('singleion '.$T.' 0 1 0 0 0 0');}" > results\chibnew.clc
+call perl -e "for($T=1;$T<400;$T+=30){system('singleion '.$T.' 0 0 1 0 0 0');}" > results\chicnew.clc
+
+call delcomments -fromline 20 results/chianew.clc results/chibnew.clc results/chicnew.clc 
+call fillcol 6 1/c9 results/chianew.clc
+call fillcol 7 1/c10 results/chibnew.clc
+call fillcol 8 1/c11 results/chicnew.clc
+call factcol 1 0 results/chianew.clc results/chibnew.clc results/chicnew.clc
+REM put susceptibility how it should be to column 1 in chi*new.clc
+call add 2 1 results/chianew.clc 1 2 exp/chia.dat
+call add 2 1 results/chibnew.clc 1 2 exp/chib.dat
+call add 2 1 results/chicnew.clc 1 2 exp/chic.dat
+
+REM chi2 is used to calculate sta 
+call chi2 6 1 3 results/chianew.clc
+call chi2 7 1 4 results/chibnew.clc
+call chi2 8 1 5 results/chicnew.clc
+
+REM this is just to print out what parameters have been used
+echo cif2mcphas -pc %RR% -sp -nm Ni -ch Tm=%CTm%,Ni=%CNi%,C=%CC% TmNiC2_400K.cif -sf sf.r
+
+\end{verbatim}
+
+
+
+The screening file {\prg sf.r} is:
+
+\begin{verbatim}
+# screeningfile 
+# r[A]   sf(l=2)   sf(l=4)  sf(l=6)
++2.5978 0.56 0.53 0.48 
+3.589 0.6747 0.44 0.677
+\end{verbatim}
+
+
+
+
+
+
 
 \vspace{1cm}
 {\em Exercises:}

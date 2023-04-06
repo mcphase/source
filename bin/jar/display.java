@@ -635,7 +635,6 @@ protected static void reload_data(int i){    try{
                       if (detxmax&data[4][j]>xmax){xmax=data[4][j];}
                      data[5][j]=p.parseDouble(sx)-p.parseDouble(sxerr);;
                       if (detxmin&data[5][j]<xmin){xmin=data[5][j];}
-                   //System.out.println(data[0][j]+" "+data[3][j]+" "+j);
                    }
                    else
                    {bdata[1][j]=p.parseDouble(sx);
@@ -653,7 +652,8 @@ protected static void reload_data(int i){    try{
                    catch(NumberFormatException e){if(j>0){--j;}//System.exit(1);
                                                   }
                                                           }
-               }
+               }          //         System.out.println(ymin+" "+ymax);
+
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                  else {
                if (j>0)
