@@ -281,7 +281,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "# sublattice %i (da=%g a db=%g b dc=%g c)\n",l,(*inputpars.jjj[l]).xyz(1),(*inputpars.jjj[l]).xyz(2),(*inputpars.jjj[l]).xyz(3));
-   fprintf (fout, "# correlation fuction <JJ(%g %g %g)>\n",myround((*inputpars.jjj[l]).dn[i](1)),myround((*inputpars.jjj[l]).dn[i](2)),myround((*inputpars.jjj[l]).dn[i](3)));
+   fprintf (fout, "# correlation function <JJ(%g %g %g)>\n",myround((*inputpars.jjj[l]).dn[i](1)),myround((*inputpars.jjj[l]).dn[i](2)),myround((*inputpars.jjj[l]).dn[i](3)));
    fprintf (fout, "#x     y     T[K]  H[T]   Ha[T] Hb[T] Hc[T]  ");
            for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents;++i1)
 	      {fprintf(fout,"<J%cJ%c> ",'a'-1+i1,'a'-1+i1);}

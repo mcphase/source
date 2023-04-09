@@ -1057,8 +1057,9 @@ booklet (needs: latex, pstops,ghostscript, perl)
 \item [\prg setvariable\index{setvariable} varname value *.*:]
 sets a variable in a file, e.g. {\prg setvariable T 20 Co.sipf} replaces
 T=15 by T=20 in file {\prg Co.sipf}.
-\item [\prg substitute\index{substitute} oldtext newtext *.*:] replaces every instance of %%@
-oldtext with newtext in file(s) *.*
+\item [\prg substitute\index{substitute} {[option]} oldtext newtext *.*:] replaces every instance of %%@
+oldtext with newtext in file(s) *.*. Option {\prg -f} substitutes only the first occurence, 
+{\prg -n 13} substitutes only the 13th occurence of the oldtext.
 \end{description}
 
 

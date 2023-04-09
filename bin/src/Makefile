@@ -171,7 +171,7 @@ paramete.o: paramete.cpp paramete.hpp martin.h vector.h
 par.o: par.cpp par.hpp jjjpar.hpp martin.h vector.h ionpars.hpp
 	$(CCC) $(CFLAGS) $< 
 
-jjjpar.o: jjjpar.cpp ionpars.hpp perlparse.h jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
+jjjpar.o: jjjpar.cpp par.hpp ionpars.hpp perlparse.h jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
 	$(CCC) $(CFLAGS) $< 
 
 testspin.o: testspin.cpp testspin.hpp spincf.hpp martin.h
@@ -193,7 +193,7 @@ mdcf.o: mdcf.cpp mdcf.hpp vector.h
 jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 	$(CCC) $(CFLAGS) $< 
 
-inipar.o: inipar.cpp inipar.hpp martin.h vector.h 
+inipar.o: inipar.cpp inipar.hpp martin.h vector.h par.hpp
 	$(CCC) $(CFLAGS) $< 
 
 ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h
@@ -225,7 +225,7 @@ mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_
 cond.o: cond.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<
 
-clusterize.o: clusterize.c par.hpp martin.h
+clusterize.o: clusterize.c par.hpp martin.h jjjpar.hpp 
 	$(CCC) $(CFLAGS) $<
 
 coq2jjj.o: coq2jjj.c paramete.hpp martin.h
@@ -240,7 +240,7 @@ spins.o: spins.c densities_func.c spincf.hpp  martin.h vector.h graphic_paramete
 spinsfromq.o: spinsfromq.c spincf.hpp  par.hpp martin.h vector.h 
 	$(CCC) $(CFLAGS) $<
 
-singleion.o: singleion.c par.hpp myev.h martin.h vector.h trs_io.c
+singleion.o: singleion.c par.hpp jjjpar.hpp myev.h martin.h vector.h trs_io.c
 	$(CCC) $(CFLAGS) $<
 
 densplt.o:  densplt.c plt_func.c density.hpp martin.h vector.h jjjpar.hpp graphic_parameters.hpp cryststruct.hpp spincf.hpp
@@ -304,7 +304,7 @@ ip.o: ionpars.cpp
 	@echo Linking ../cond
 	@$(LINKER)  -Wall  -o ../cond $^ $(LFLAGS)
 
-../clusterize$(EXE): clusterize.o $(VOBS) martin.o par.o jjjpar.o ionpars.o $(FUNCTIONOBJS) myev.o  $(CFIELDOBJS) perlparse.o
+../clusterize$(EXE): clusterize.o $(VOBS) martin.o par.o jjjpar.o ionpars.o $(FUNCTIONOBJS) myev.o  $(CFIELDOBJS)   perlparse.o
 	@echo Linking ../clusterize
 	@$(LINKER)  -Wall  -o ../clusterize $^ $(LFLAGS)
 

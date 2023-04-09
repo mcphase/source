@@ -10,6 +10,7 @@ unless ($#ARGV >1)
 print " usage: substitute [option] oldtext newtext *.* 
       
        Option:  -f    only replace the first occurance of oldtext
+                -n 21    only replace the 21st occurance of oldtext
 \n"; 
 
 exit 0;} else{print STDERR "#* $0 *";}
@@ -17,6 +18,9 @@ $first=0;
 $_=$ARGV[0];
 if(/-f/)
   {$first=1;shift @ARGV; 
+  }
+if(/-n/)
+  {shift @ARGV; $first=$ARGV[0];shift @ARGV; 
   }
 $colx=$ARGV[0];shift @ARGV; 
 

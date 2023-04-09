@@ -238,9 +238,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                    delete mf1; 
                  // display spinstructure
                 if (verbose==1)
-                {Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
-                 float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
+                {float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
 		 
 		 for (is=1;is<=inputpars.nofatoms;++is)
 		   {
@@ -251,15 +249,15 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
 		   
                     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
@@ -360,9 +358,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
     double QQmin=1e10,QQ;
 // inserted 10.5.10 to make comaptible with nonortholattices
      Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
-     Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                      abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma; 
-     get_abc_in_ijk(abc_in_ijk,abc);
+        get_abc_in_ijk(abc_in_ijk,inputpars.abc);
      p=abc_in_ijk*inputpars.r; // p is the primitive crystal unit cell in ijk coordinates
      pstar=2*PI*p.Inverse().Transpose();
      Vector nmin(1,3),nmax(1,3),hkl(1,3),hkls(1,3),Q(1,3),qeuklid(1,3);
@@ -379,7 +375,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
        hkl=inputpars.rez.Transpose()*Q;
 
       // qeuklid is Q in ijk coordinate system !
-      hkl2ijk(qeuklid,hkl,abc);//qeuklid=ri;//qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
+      hkl2ijk(qeuklid,hkl,inputpars.abc);//qeuklid=ri;//qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
       QQ=Norm(qeuklid);if(QQ<QQmin){QQmin=QQ;hkls=hkl;}
  }}}
 //------------------- end if insert 26.11.2015 -->> output is hkls with smallest |Q|
@@ -441,7 +437,7 @@ int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs
  Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1; // trick to get Habc as components along a,b,c
                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
  dadbdc2ijk(H,Habc,abc); // transform Habc to ijk coordinates ... this is H
-                  abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
+                
  double femin=FEMIN_INI;char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
  spincf  spsmin(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
@@ -655,15 +651,15 @@ else // if yes ... then
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                      fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
 		    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fin_coq = fopen_errchk (outfilename, "w");

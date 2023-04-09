@@ -7,9 +7,7 @@
 //***********************************************************************
 void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double & epsilon,int do_verbose,int do_gobeyond,int calc_rixs,int do_phonon,Vector & hkl,int qcounter)
 {int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);double QQ;
- Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
- hkl2ijk(qijk,hkl, abc);
+  hkl2ijk(qijk,hkl, inputpars.abc);
     QQ=Norm(qijk);
 
 // polarisation factor
@@ -244,9 +242,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
  //complex <double> chileft;
  //complex <double> chileftbey;
  Vector qijk(1,3);
- Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
- hkl2ijk(qijk,hkl, abc);
+  hkl2ijk(qijk,hkl, inputpars.abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
 //   qijk(1)=hkl(1)*2*PI/inputpars.a; // only correct for ortholattices !!!!
@@ -578,9 +574,7 @@ if(do_verbose){printf("diagonalising matrix A for Estep %i\n",Estp);//myPrintCom
 // higher components in the polarization factor !!!
  Matrix pol(1,md.nofcomponents,1,md.nofcomponents);
  Vector qijk(1,3);
- Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
- hkl2ijk(qijk,hkl, abc);
+  hkl2ijk(qijk,hkl, inputpars.abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
  pol=0; double qsqr=qijk*qijk;
@@ -984,9 +978,7 @@ double intcalc(ComplexMatrix & ch,int dimA, double en,inimcdis & ini,par & input
 // higher components in the polarization factor !!!
  Matrix pol(1,md.nofcomponents,1,md.nofcomponents);
  Vector qijk(1,3);
- Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
- hkl2ijk(qijk,hkl, abc);
+  hkl2ijk(qijk,hkl, inputpars.abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
  pol=0; double qsqr=qijk*qijk;

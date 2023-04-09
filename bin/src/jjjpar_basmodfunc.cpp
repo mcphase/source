@@ -17,7 +17,7 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 /************************************************************************************/
 // get parameters from sipf file
 /************************************************************************************/
-void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
+void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
 {int i,j;
  float nn[MAXNOFNUMBERSINLINE];
  nn[0]=MAXNOFNUMBERSINLINE;
@@ -68,7 +68,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      {module_type=2;fprintf (stderr,"#[internal]\n");
       //fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
        fseek(cf_file,0,SEEK_SET);
-      iops=new ionpars(cf_file,sipf_filename);
+      iops=new ionpars(cf_file,sipf_filename,verbose);
 
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -82,7 +82,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
      {module_type=4;fprintf (stderr,"#[internal]\n");
      // fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
       fseek(cf_file,0,SEEK_SET);
-      iops=new ionpars(cf_file,sipf_filename);
+      iops=new ionpars(cf_file,sipf_filename,verbose);
       nof_electrons=(*iops).nof_electrons;
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -103,7 +103,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename)
                             "#!structurefile=cluster.j\n"
                             "\n");exit(EXIT_FAILURE);}
       fprintf(stderr," ... reading cluster structure from %s\n",clusterfilename);
-      clusterpars =new par(clusterfilename);
+      clusterpars =new par(clusterfilename,verbose);
       Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors      
      }
      else

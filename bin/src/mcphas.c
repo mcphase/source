@@ -81,10 +81,59 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.j");
   if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.j");
  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
- par inputpars(prefix); 
+ par inputpars(prefix,verbose); 
 // here save single ion property files to results
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
+
+if(doeps) {
+// as class par load  parameters derivatives from file
+ strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdx");
+  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.djdx");
+ if(fopen(prefix,"rb")!=NULL){
+ if(verbose==1){printf("reading parameters from file %s\n",prefix);}
+ ini.ipx= new par(prefix,verbose);  
+
+// here save single ion property files to results
+  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
+  strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdx");inputpars.save(prefix,0);
+                             
+ strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdy");
+  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.djdy");
+if(fopen(prefix,"rb")!=NULL){
+  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
+ ini.ipy= new par(prefix,verbose); 
+// here save single ion property files to results
+  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
+  strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdy");inputpars.save(prefix,0);
+                             
+ strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdz");
+  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.djdz");
+if(fopen(prefix,"rb")!=NULL){
+  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
+ ini.ipz= new par(prefix,verbose);  
+// here save single ion property files to results
+  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
+  strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdz");inputpars.save(prefix,0);
+                             }else {fprintf(stderr,"# Error - could not open mcphas.djdz \n");exit(1); }
+ 
+ } else {fprintf(stderr,"# Error - could not open mcphas.djdy \n");exit(1); }
+ 
+  // check if inputpars abc nofatoms  atomic positions sipffilenames nofcomponents  agree with
+  // ini.ipx y z
+ // check if ini ipx and ipy and ipz have the same paranz for each neighbour
+ // operator ~ returns 8 7 6 5 4 3 2 1 0depending on agreement of
+ //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement
+ //  2 neighbour position 1 interaction parmeter disagreement i.e. 0 is perfect match
+ if((inputpars!=(*ini.ipx))>3){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n");exit(1);}
+ if((inputpars!=(*ini.ipy))>3){fprintf(stderr,"# Error - mcphas.djdy does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n");exit(1);}
+ if((inputpars!=(*ini.ipz))>3){fprintf(stderr,"# Error - mcphas.djdz does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n");exit(1);}
+
+  if(((*ini.ipx)!=(*ini.ipy))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdy in nofneighbours or neighbour positions\n");exit(1);}
+  if(((*ini.ipx)!=(*ini.ipz))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdz in nofneighbours or neighbour positions\n");exit(1);}
+  }
+          }
+
 
   Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
   Vector Imom(1,inputpars.nofcomponents);
@@ -229,6 +278,9 @@ for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
 #else
 std::cout << "# mcphas was compiled without parallel processing option " << std::endl;
 #endif
+if(ini.ipx!=NULL)delete ini.ipx;
+if(ini.ipy!=NULL)delete ini.ipy;
+if(ini.ipz!=NULL)delete ini.ipz;
 
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program mcphas\n");

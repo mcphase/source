@@ -405,8 +405,6 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   double jqsta=-1.0e10;  double jqsta_int=0;double jqsta_int_scaled=0; double jqsta_scaled=-1.0e10;double scalefactor=1;
   double jq0=0;
   Vector hkl(1,3),q(1,3),qold(1,3),qijk(1,3);                 
-  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
   Vector mf(1,ini.nofcomponents);
   int jmin;
   IntVector noftransitions(1,inputpars.nofatoms); // vector to remember how many transitions are on each atom
@@ -796,7 +794,7 @@ int num_threads_started=-1;
 #endif
 
 
-if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
+if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, inputpars.abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
               writehklblocknumber(jqfile,ini,counter);
          
                   if (do_verbose==1){fprintf (jqfile, "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
@@ -981,7 +979,7 @@ if (do_jqfile){
             // Skips q-point, but make sure qincr is correct.
             fprintf(stderr,"# Skipping this q-point.\n");
             if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
-               qold=qijk; hkl2ijk(qijk,hkl, abc); qincr+=Norm(qijk-qold);
+               qold=qijk; hkl2ijk(qijk,hkl, inputpars.abc); qincr+=Norm(qijk-qold);
                ini.print_usrdefcols(foutqei,qijk,qincr,q);
                fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
                fprintf(foutqei, "-1    -1   -1\n");
@@ -1011,7 +1009,7 @@ if (do_jqfile){
       if(eigrval!=0) { 
          fprintf(stderr,"# The non-symmetric eigensolver failed. This Q point will be skipped.\n");
          if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
-            qold=qijk; hkl2ijk(qijk,hkl, abc); qincr+=Norm(qijk-qold);
+            qold=qijk; hkl2ijk(qijk,hkl, inputpars.abc); qincr+=Norm(qijk-qold);
             ini.print_usrdefcols(foutqei,qijk,qincr,q);
             fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
             fprintf(foutqei, "-1    -1   -1\n");
@@ -1071,7 +1069,7 @@ if (do_jqfile){
   ComplexMatrix chitot(1,3,1,3),chitotbey(1,3,1,3); chitot=0;chitotbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
   intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl,counter);
-  qold=qijk;hkl2ijk(qijk,hkl, abc);QQ=Norm(qijk);
+  qold=qijk;hkl2ijk(qijk,hkl, inputpars.abc);QQ=Norm(qijk);
 
   if(qincr==-1){qincr=0;qold=qijk;
               // for the first q vector in the loop we have to initialize files ...
@@ -1305,7 +1303,7 @@ if (do_jqfile){
                        if (En(i)!=-DBL_MAX && // Matrix Ac is not +ve definite, and this eigenvalue is not real - don't do intensity
                            En(i)<=ini.emax&&En(i)>=ini.emin){
                          for(double azimuth=azmin;azimuth<=azmax&&ints(i)>-1;azimuth+=daz)                             
-                              { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, abc,QQ,En(i));
+                              { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, inputpars.abc,QQ,En(i));
                                 // eis,p and eos,p are polarisation vectors for sigma/pi plarisation in terms of
                                 // eir,l and eor,l are polarisation vectors for righ/left circular plarisation in terms of
                                 // the ijk coordinate system ijk form an euclidian righthanded 
@@ -1398,10 +1396,10 @@ if (do_jqfile){
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                           case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
-                          case 3: rottouvw(chi,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
-                          case 4: rottouvw(chibey,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
+                          case 3: rottouvw(chi,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 4: rottouvw(chibey,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
                           case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
-                          case 6: rottouvw(chi,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 6: rottouvw(chi,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                          } }
                        fprintf(foutqei,"\n");
                        if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
@@ -1476,10 +1474,10 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
                           case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
-                          case 3: rottouvw(chitot,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
-                          case 4: rottouvw(chitotbey,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
+                          case 3: rottouvw(chitot,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 4: rottouvw(chitotbey,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
                           case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
-                          case 6: rottouvw(chitot,ini,abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 6: rottouvw(chitot,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
                          } 
                       
     sta+=dd*dd;sta_int+=dd_int*dd_int;
@@ -1836,11 +1834,9 @@ for (i=1;i<=argc-1;++i){
       } // xaf
     }
   // as class load  parameters from file
-  par inputpars("./mcphas.j");
-  Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                                       abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
-
-  inimcdis ini("mcdisp.par",spinfile,prefix,do_jqfile,abc);
+  par inputpars("./mcphas.j",do_verbose);
+  
+  inimcdis ini("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.abc);
   if(ini.nofcomponents!=inputpars.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.nofcomponents);exit(EXIT_FAILURE);}
   if(do_Erefine&&calc_rixs){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf\n");exit(EXIT_FAILURE);}
   if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}

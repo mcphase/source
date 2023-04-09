@@ -190,13 +190,16 @@ void jjjpar::add(jjjpar & b,Vector & abc) // add set b to this (abc: lattice con
 void jjjpar::addpars (int number, jjjpar & addjjj)
 { Matrix * jijn;
   Vector * dnn;
+  Vector * drr;
   int i;
   jijn = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jijn[i]=Matrix(1,nofcomponents,1,nofcomponents);}
   dnn = new Vector[paranz+1];for(i=0;i<=paranz;++i){dnn[i]=Vector(1,3);}
+  drr = new Vector[paranz+1];for(i=0;i<=paranz;++i){drr[i]=Vector(1,3);}
   
   for (i=1;i<=paranz;++i)
   {jijn[i]=jij[i];
    dnn[i]=dn[i];
+   drr[i]=dr[i];
   }
   
   if (diagonalexchange!=addjjj.diagonalexchange)
@@ -210,9 +213,12 @@ void jjjpar::addpars (int number, jjjpar & addjjj)
   
   delete []jij;
   delete []dn;
+  delete []dr;
   delete []sublattice;
   dn = new Vector[paranz+1];for(i=0;i<=paranz;++i){dn[i]=Vector(1,3);}
   if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
+  dr = new Vector[paranz+1];for(i=0;i<=paranz;++i){dr[i]=Vector(1,3);}
+  if (dr == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   sublattice = new int[paranz+1];
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   jij = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
@@ -220,15 +226,16 @@ void jjjpar::addpars (int number, jjjpar & addjjj)
 
 // setup new field jij, dn
   for (i=1;i<number;++i)
-  {jij[i]=jijn[i];dn[i]=dnn[i];}
+  {jij[i]=jijn[i];dn[i]=dnn[i];dr[i]=drr[i];}
   
   for (i=number;i<number+addjjj.paranz;++i)
-  {jij[i]=addjjj.jij[i-number+1];dn[i]=addjjj.dn[i-number+1];}
+  {jij[i]=addjjj.jij[i-number+1];dn[i]=addjjj.dn[i-number+1];dr[i]=addjjj.dr[i-number+1];}
   
   for (i=number+addjjj.paranz;i<=paranz;++i)
-  {jij[i]=jijn[i-addjjj.paranz];dn[i]=dnn[i-addjjj.paranz];}
+  {jij[i]=jijn[i-addjjj.paranz];dn[i]=dnn[i-addjjj.paranz];dr[i]=drr[i-addjjj.paranz];}
   delete []jijn;
   delete []dnn;
+  delete []drr;
 }
 
 // scale all interaction parameters
@@ -243,24 +250,28 @@ void jjjpar::scalepars (double scalefactor)
 void jjjpar::delpar (int number)
 { Matrix * jijn;
   Vector * dnn;
+  Vector * drr;
   int * sublatticen;
   int i;
   --paranz;
   jijn = new Matrix[paranz+1];
   dnn = new Vector[paranz+1];
+  drr = new Vector[paranz+1];
   sublatticen = new int[paranz+1];
   int offset=0;
   for (i=1;i<=paranz;++i)
   {if(i==number)offset=1;
    jijn[i]=jij[i+offset];
    dnn[i]=dn[i+offset];
+   drr[i]=dr[i+offset];
    sublatticen[i]=sublattice[i+offset];
   }
 
   delete []jij;
   delete []dn;
+  delete []dr;
   delete []sublattice;
-  dn=dnn;jij=jijn;sublattice=sublatticen;
+  dn=dnn;dr=drr;jij=jijn;sublattice=sublatticen;
 }
 
 
@@ -539,7 +550,7 @@ void jjjpar::save_sipf(FILE * fout)
 
 /*****************************************************************************************/
 //constructor with file handle of mcphas.j
-jjjpar::jjjpar(FILE * file,int nofcomps) 
+jjjpar::jjjpar(FILE * file,int nofcomps,int verbose) 
 { jl_lmax=6;
   char instr[MAXNOFCHARINLINE],Gstr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE],Gindicesstr[MAXNOFCHARINLINE];
   sipffilename= new char [MAXNOFCHARINLINE];
@@ -599,7 +610,7 @@ if(diagonalexchange==2) {
 
 
   //start reading again at the beginning of the file to get formfactors, debye waller factor
-  get_parameters_from_sipfile(sipffilename);
+  get_parameters_from_sipfile(sipffilename,verbose);
 // go back to previous position just after da=... line
 // and look for comment lines with magnetoelastic interaction
  jpos=fseek(file,pos,SEEK_SET); 
@@ -638,6 +649,8 @@ else
 
              dn = new Vector[paranz+1];if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
              for(i1=0;i1<=paranz;++i1){dn[i1]=Vector(1,3);}
+             dr = new Vector[paranz+1];if (dr == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
+             for(i1=0;i1<=paranz;++i1){dr[i1]=Vector(1,3);}
              sublattice = new int[paranz+1];if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
              jij = new Matrix[paranz+1];if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 // read the exchange parameters from file (exactly paranz parameters!)
@@ -672,8 +685,7 @@ else
 
   mom=Vector(1,nofcomponents); 
   
-   //(1-3) give the absolute coordinates of the neighbour and are transformed here to relative
-   // coordinates !!
+   //(1-3) give the da db dc coordinates of the neighbour 
    dn[i](1) = nn[1];dn[i](2) = nn[2];dn[i](3) = nn[3];
    jij[i]=0;
 
@@ -718,16 +730,16 @@ else
 }
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot
-jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n)
+jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n,int verbose)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
-  jij=0; dn=0; sublattice=0;paranz=0;diagonalexchange=1;
+  jij=0; dn=0;dr=0; sublattice=0;paranz=0;diagonalexchange=1;
   mom=Vector(1,9); mom=0; nofcomponents=n;
   G=new Matrix(1,6,1,nofcomponents);
   for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
   sipffilename= new char [MAXNOFCHARINLINE];
   clusterfilename=new char [MAXNOFCHARINLINE];
   strcpy(sipffilename,sipffile);
-  get_parameters_from_sipfile(sipffilename);
+  get_parameters_from_sipfile(sipffilename,verbose);
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
@@ -784,6 +796,8 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   modulefilename=new char[MAXNOFCHARINLINE];
   dn = new Vector[n+1];for(i1=0;i1<=n;++i1){dn[i1]=Vector(1,3);}
   if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
+  dr = new Vector[n+1];for(i1=0;i1<=n;++i1){dr[i1]=Vector(1,3);}
+  if (dr == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   sublattice = new int[paranz+1];
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   jij = new Matrix[n+1];for(i1=0;i1<=n;++i1){jij[i1]=Matrix(1,nofcomponents,1,nofcomponents);}
@@ -903,10 +917,12 @@ int i1;
   if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
   dn = new Vector[paranz+1];for(i1=0;i1<=paranz;++i1){dn[i1]=Vector(1,3);}
   if (dn == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+  dr = new Vector[paranz+1];for(i1=0;i1<=paranz;++i1){dr[i1]=Vector(1,3);}
+  if (dr == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
   sublattice = new int[paranz+1];
   if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
   for (i=1;i<=paranz;++i)
-  {jij[i]=pp.jij[i];dn[i]=pp.dn[i];sublattice[i]=pp.sublattice[i];}
+  {jij[i]=pp.jij[i];dn[i]=pp.dn[i];dr[i]=pp.dr[i];sublattice[i]=pp.sublattice[i];}
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   
   for(i1=0; i1<52; i1++) { 
@@ -938,6 +954,7 @@ jjjpar::~jjjpar ()
   delete G;
    if(jij!=0)        delete []jij; //will not work in linux
    if(dn!=0)         delete []dn;  // will not work in linux
+   if(dr!=0)         delete []dr;  // will not work in linux
    if(sublattice!=0) delete []sublattice;
    delete []sipffilename;// will not work in linux
   delete []clusterfilename;

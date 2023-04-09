@@ -244,7 +244,7 @@ pchr=strstr(filename+10,"\\");
       printf("\n");
      } if(opmat<1e10)fclose(fout_opmat);
    } else { // option -r sipffile
-   jjjpar jjj(0,0,0,sipffile,nofcomponents);jjj.save_sipf("./results/_");
+   jjjpar jjj(0,0,0,sipffile,nofcomponents,1);jjj.save_sipf("./results/_");
       switch(observable)
       {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
        case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;

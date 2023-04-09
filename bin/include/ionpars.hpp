@@ -94,7 +94,7 @@ class ionpars
    void save(FILE * file); // save ion parameters to file 
 
    ionpars(int dimj);
-   ionpars(FILE * cf_file, char * cffilename);
+   ionpars(FILE * cf_file, char * cffilename,int verbose);
    ionpars (char * iontype); // constructor from iontype (mind:no matrices filled with values !)
    ~ionpars();
    ionpars(const ionpars & p);

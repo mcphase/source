@@ -258,7 +258,7 @@ inipar::inipar (const char * file,char * pref)
   strcpy(prefix,pref);
   xv=Vector(0,3);yv=Vector(0,3);zero=Vector(0,3);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
-  doeps=0;
+  doeps=0;ipx=NULL;ipy=NULL;ipz=NULL;
   printf("reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
                 strcpy(savfilename,file);}
@@ -281,6 +281,10 @@ inipar::inipar (const inipar & p)
   prefix = new char[strlen(p.prefix)+1];
   strcpy(prefix,p.prefix);
   doeps=p.doeps;
+  ipx=p.ipx;
+  ipy=p.ipy;
+  ipz=p.ipz;
+
   exit_mcphas=p.exit_mcphas;pause_mcphas=p.pause_mcphas;
   displayall=p.displayall;logfevsQ=p.logfevsQ;
   

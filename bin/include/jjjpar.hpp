@@ -66,7 +66,8 @@ public:
   int nofcomponents; // number of moments (components of moment vector)
   double gJ,ninit,pinit,maxE;
   Matrix *jij; // exchange constants 
-  Vector *dn; // exchange - coordinates of neighbors 
+  Vector *dn; // exchange - coordinates of neighbors da db dc
+  Vector *dr; // exchange - coordinates of neighbours in Angstrom in Euclidean ijk system
   int *sublattice; // sublattice of neighbours
   int diagonalexchange;  // switch 1=exchange is diagonal, 0=exchange is not diagonal
    void increase_nofcomponents(int n); // increase nofcomponents by n
@@ -85,8 +86,8 @@ public:
    void save_sipf(FILE *file); //save single ion parameter file filename to path*
 
 
-   jjjpar (FILE * fin, int nofcomp); //constructor with filehandle of mcphas.j file
-   jjjpar (double x, double y, double z,char * sipffile,int n); // constructor with filename of single ion parameter file
+   jjjpar (FILE * fin, int nofcomp,int verbose=0); //constructor with filehandle of mcphas.j file
+   jjjpar (double x, double y, double z,char * sipffile,int n,int verbose=0); // constructor with filename of single ion parameter file
                // constructor with positions scattering length dwf
    jjjpar(double x,double y,double z, double slr,double sli, double dwf);
    jjjpar (int n=1,int diag=0,int nofmom=3); // constructor without file
@@ -108,7 +109,7 @@ public:
 private:
   Vector ABC;   // storage for single ion module paramters
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
-  void get_parameters_from_sipfile(char * sipffilename); // function to read single ion parameter files
+  void get_parameters_from_sipfile(char * sipffilename,int verbose); // function to read single ion parameter files
   int  get_exchange_indices(char *instr, Matrix *exchangeindices,const char * ie);
 
 public:

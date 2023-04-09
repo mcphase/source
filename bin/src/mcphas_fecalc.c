@@ -1,6 +1,66 @@
-/*****************************************************************************/
+ /*****************************************************************************/
 // here the free energy is calculated for a given (initial) spinconfiguration
 // using the meanfield algorithm
+
+
+void corrfunc(Matrix & jj,int n, int l,par & inputpars,spincf & sps)
+// jj a nofcomponents x nofcomponents Matrix
+// l ... sublattic (atom) index
+// n ... neighbour number in neighbour list
+{int i,j,k,i1,j1,k1,l1,i2,j2; Vector xyz(1,3);Vector d(1,3);Vector d_rint(1,3);div_t result;
+      //calculate spincorrelation function of neighbour n of sublattice l
+    // 1. transform dn(n) to primitive lattice
+     xyz=(*inputpars.jjj[l]).dn[n]-(*inputpars.jjj[l]).xyz;
+     d=inputpars.rez*(const Vector&)xyz;
+jj=0;
+     for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); //round relative position to integer numbers (to do
+                                             // something sensible if not integer, i.e. if sublattice
+					     // of neighbour has not been identified by par.cpp)
+
+     // go through magnetic unit cell and sum up the contribution of every atom
+      for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
+         // now we are at atom ijk of sublattice l: the spin is  sps.m(i,j,k)(1..3+3*(l-1))
+	 // which i1 j1 k1 l1 is the neighbour in distance d ?
+	l1=(*inputpars.jjj[l]).sublattice[n];  // ... yes, this is the sublattice of the neighbour
+
+	i1=i+(int)(d_rint(1));
+	j1=j+(int)(d_rint(2));
+	k1=k+(int)(d_rint(3));
+        while (i1<=0) i1+=sps.na();result=div(i1,sps.na());i1=result.rem;
+        while (j1<=0) j1+=sps.nb();result=div(j1,sps.nb());j1=result.rem;
+        while (k1<=0) k1+=sps.nc();result=div(k1,sps.nc());k1=result.rem;
+        result=div(i1,sps.na());i1=result.rem; if(i1==0)i1=sps.na();
+        result=div(j1,sps.nb());j1=result.rem; if(j1==0)j1=sps.nb();
+        result=div(k1,sps.nc());k1=result.rem; if(k1==0)k1=sps.nc();
+
+	// sum up correlation function
+           for(i2=1;i2<=inputpars.nofcomponents;++i2)
+               {
+//jj(i2+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))+=
+jj(i2,i2)+=
+	        (sps.m(i,j,k)(i2+inputpars.nofcomponents*(l-1)))*
+		(sps.m(i1,j1,k1)(i2+inputpars.nofcomponents*(l1-1))); //<JaJa>,<JbJb> ...
+               }
+           //    k2=inputpars.nofcomponents;
+           for(i2=1;i2<=inputpars.nofcomponents-1;++i2)
+              {for(j2=i2+1;j2<=inputpars.nofcomponents;++j2)
+                        {//++k2;
+//jj(k2+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))+=
+jj(i2,j2)+=
+			 (sps.m(i,j,k)(i2+inputpars.nofcomponents*(l-1)))*
+			 (sps.m(i1,j1,k1)(j2+inputpars.nofcomponents*(l1-1))); //<JaJb>
+			//++k2;
+//jj(k2+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))+=
+jj(j2,i2)+=
+			 (sps.m(i,j,k)(j2+inputpars.nofcomponents*(l-1)))*
+			 (sps.m(i1,j1,k1)(i2+inputpars.nofcomponents*(l1-1))); //<JbJa>
+			}
+	      }
+      }}} // divide by number of basis sets in magnetic unit cell
+jj/=sps.n();
+ }
+
+
 
 double evalfe(physproperties & physprop,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
 // calculate free energy fe and energy u
@@ -26,8 +86,8 @@ physprop.fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
 physprop.u/=(double)sps.n();
 
 if(ini.doeps){physprop.Eel=sps.epsilon*inputpars.Cel*sps.epsilon;
-              physprop.fe+=physprop.Eel;physprop.u+=physprop.Eel;
-} // add elastic energy
+              physprop.fe+=physprop.Eel;physprop.u+=physprop.Eel;              
+} // add elastic energy 
 
 physprop.fe/=sps.nofatoms; //normalise to formula unit
 physprop.u/=sps.nofatoms;
@@ -54,6 +114,7 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  Matrix GG(1,6,1,inputpars.nofcomponents*inputpars.nofatoms);
  Vector diff(1,inputpars.nofcomponents*inputpars.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
  Vector moment(1,inputpars.nofcomponents), d1(1,inputpars.nofcomponents),meanfield(1,inputpars.nofcomponents);
+                 Matrix II(1,inputpars.nofcomponents,1,inputpars.nofcomponents);
  char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
  int i,j,k,i1,j1,k1,di,dj,dk,l,r=0,s,sdim,m,n,m1;
  div_t result; // some modulo variable
@@ -252,7 +313,32 @@ for (r=1;sta>ini.maxstamf;++r)
   diff-=sps.m(i,j,k);
   spinchange+=sqrt(diff*diff)/sps.n();
   }}}
-  if(ini.doeps){sps.epsilon=inputpars.CelInv*mf.epsmf;
+  if(ini.doeps){// here should come the exchange striction: calculate correlation function
+                // and multiply with  corresponding derivative of two ion interaction
+                // --> and add to mf.epsmf
+                // corrfunc(Matrix & jj,int n, int l,par & inputpars,spincf & sps)
+                // jj a nofcomponents x nofcomponents Matrix
+                // l ... sublattic (atom) index
+                // n ... neighbour number in neighbour list
+if(ini.ipx!=NULL){
+                for(l=1;l<=inputpars.nofatoms;++l)for(n=1;n<=(*(*ini.ipx).jjj[l]).paranz;++n)
+                {//calculate spincorrelation function of neighbour n of sublattice l
+                   corrfunc(II,n,l,inputpars,sps);double dldlssum=0;
+                   for(int dl=1;dl<=inputpars.nofcomponents;++dl)
+                    for(int dls=1;dls<=inputpars.nofcomponents;++dls){
+                        dldlssum+=(*(*ini.ipx).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+mf.epsmf(1)+=0.5*(*(*ini.ipx).jjj[l]).dr[n](1)*dldlssum;
+mf.epsmf(2)+=0.5*(*(*ini.ipy).jjj[l]).dr[n](2)*dldlssum;
+mf.epsmf(3)+=0.5*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssum;
+mf.epsmf(4)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssum;
+mf.epsmf(4)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](2)*dldlssum;
+mf.epsmf(5)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](3)*dldlssum;
+mf.epsmf(5)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](1)*dldlssum;
+mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssum;
+mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssum;                    
+                }}
+
+                sps.epsilon=inputpars.CelInv*mf.epsmf;
                }
 
   //treat program interrupts

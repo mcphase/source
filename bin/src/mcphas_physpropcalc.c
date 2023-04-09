@@ -1,6 +1,8 @@
+
+
 /************************************************************************/
 void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars)
-{ int i,j,k,l,n,m1;div_t result; char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];FILE * fin_coq;
+{ int i,j,k,l,n,m1; char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];FILE * fin_coq;
  //save fe and u
  // calculate nettomoment from spinstructure
     Vector mom(1,3),d1(1,inputpars.nofcomponents);physprops.m=0;
@@ -17,55 +19,31 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // thermal expansion - magnetostricton correlation-functions
 // according to each neighbour given in mcphas.j a correlation
 // function is calculated - up to ini.nofspincorrs neighbours
- int nmax,i1,j1,k1,l1,i2,j2,k2,is;Vector xyz(1,3),d(1,3),d_rint(1,3);
+ int nmax,i1,j1,k1,l1,is;Vector xyz(1,3),d(1,3),d_rint(1,3);
  nmax=ini.nofspincorrs;
- for (l=1;l<=inputpars.nofatoms;++l){if(nmax>(*inputpars.jjj[l]).paranz){nmax=(*inputpars.jjj[l]).paranz;}}
-
+for (l=1;l<=inputpars.nofatoms;++l){if(nmax>(*inputpars.jjj[l]).paranz){nmax=(*inputpars.jjj[l]).paranz;}}
  for(n=1;n<=nmax;++n){physprops.jj[n]=0;for(l=1;l<=inputpars.nofatoms;++l){
-    //calculate spincorrelation function of neighbour n of sublattice l
-    // 1. transform dn(n) to primitive lattice
-     xyz=(*inputpars.jjj[l]).dn[n]-(*inputpars.jjj[l]).xyz;
-     d=inputpars.rez*(const Vector&)xyz;
-     for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); //round relative position to integer numbers (to do
-                                             // something sensible if not integer, i.e. if sublattice
-					     // of neighbour has not been identified by par.cpp)
-
-     // go through magnetic unit cell and sum up the contribution of every atom
-      for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
-         // now we are at atom ijk of sublattice l: the spin is  sps.m(i,j,k)(1..3+3*(l-1))
-	 // which i1 j1 k1 l1 is the neighbour in distance d ?
-	l1=(*inputpars.jjj[l]).sublattice[n];  // ... yes, this is the sublattice of the neighbour
-
-	i1=i+(int)(d_rint(1));
-	j1=j+(int)(d_rint(2));
-	k1=k+(int)(d_rint(3));
-        while (i1<=0) i1+=sps.na();result=div(i1,sps.na());i1=result.rem;
-        while (j1<=0) j1+=sps.nb();result=div(j1,sps.nb());j1=result.rem;
-        while (k1<=0) k1+=sps.nc();result=div(k1,sps.nc());k1=result.rem;
-        result=div(i1,sps.na());i1=result.rem; if(i1==0)i1=sps.na();
-        result=div(j1,sps.nb());j1=result.rem; if(j1==0)j1=sps.nb();
-        result=div(k1,sps.nc());k1=result.rem; if(k1==0)k1=sps.nc();
-
-	// sum up correlation function
-           for(i2=1;i2<=inputpars.nofcomponents;++i2)
-               {physprops.jj[n](i2+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))+=
-	        (sps.m(i,j,k)(i2+inputpars.nofcomponents*(l-1)))*
-		(sps.m(i1,j1,k1)(i2+inputpars.nofcomponents*(l1-1))); //<JaJa>,<JbJb> ...
+Matrix jj(1,inputpars.nofcomponents,1,inputpars.nofcomponents);
+//calculate spincorrelation function of neighbour n of sublattice l
+    corrfunc(jj,n,l,inputpars,sps);
+  
+for(i1=1;i1<=inputpars.nofcomponents;++i1)
+               {physprops.jj[n](i1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(i1,i1);
                }
-               k2=inputpars.nofcomponents;
-           for(i2=1;i2<=inputpars.nofcomponents-1;++i2)
-              {for(j2=i2+1;j2<=inputpars.nofcomponents;++j2)
-                        {++k2;physprops.jj[n](k2+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))+=
-			 (sps.m(i,j,k)(i2+inputpars.nofcomponents*(l-1)))*
-			 (sps.m(i1,j1,k1)(j2+inputpars.nofcomponents*(l1-1))); //<JaJb>
-			++k2;physprops.jj[n](k2+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))+=
-			 (sps.m(i,j,k)(j2+inputpars.nofcomponents*(l-1)))*
-			 (sps.m(i1,j1,k1)(i2+inputpars.nofcomponents*(l1-1))); //<JbJa>
+              k1=inputpars.nofcomponents;
+           for(i1=1;i1<=inputpars.nofcomponents-1;++i1)
+              {for(j1=i1+1;j1<=inputpars.nofcomponents;++j1)
+                        {++k1;
+physprops.jj[n](k1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(i1,j1); //<JaJb>
+			++k1;
+physprops.jj[n](k1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(j1,i1); //<JbJa>
 			}
 	      }
-      }}}
- }physprops.jj[n]/=sps.n(); // divide by number of basis sets in magnetic unit cell
+
+
  }
+}
+
 // neutron intensities (structure factor)
       // check if maxnofhklis was modified by user
   if (ini.maxnofhkls!=physprops.maxnofhkls){physprops.update_maxnofhkls(ini.maxnofhkls);}
@@ -74,9 +52,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
     complex<double> piq(0,2*3.1415926535),g,gFT;
   ComplexVector * mq;
   Vector ri(1,3);
-      Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                       abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
-  double QQ;
+        double QQ;
   mq = new ComplexVector [mf.in(mf.na(),mf.nb(),mf.nc())+2];
   for(i=0;i<=mf.in(mf.na(),mf.nb(),mf.nc())+1;++i)
   {mq[i]=ComplexVector(1,3*mf.nofatoms);}
@@ -110,7 +86,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 
  // inserted 10.5.10 to make comaptible with nonortholattices
      Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
-     get_abc_in_ijk(abc_in_ijk,abc);
+     get_abc_in_ijk(abc_in_ijk,inputpars.abc);
      p=abc_in_ijk*inputpars.r; // p is the primitive crystal unit cell in ijk coordinates
      pstar=2*PI*p.Inverse().Transpose();
      Vector nnmin(1,3),nnmax(1,3);
@@ -138,7 +114,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
        hkl=inputpars.rez.Transpose()*Q;
 
       // qeuklid is Q in ijk coordinate system !
-      hkl2ijk(ri,hkl,abc);qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
+      hkl2ijk(ri,hkl,inputpars.abc);qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
       QQ=Norm(qeuklid);
 
      a=0;aFT=0;
@@ -225,15 +201,15 @@ if(verbose==1){printf(".. calculating (hkl) finished\n");}
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,abc,inputpars.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fin_coq = fopen_errchk (outfilename, "w");

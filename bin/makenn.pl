@@ -15,125 +15,11 @@ $PI=3.14159265358979323846;
  $SMALLdabc=0.00001; # small difference in da , db or dc ...
  $SMALLdr=0.00001; # small difference in distance so that program believes when
                 #  comparing table values that this is the same bond
+ $delta=0.0001; # for numerical derivative djdx djdy djdz displacement in Angstroem
  $Cel= zeroes (7,7); # for storage of elastic constants if needed
   # born van karman longitudinal springs:$bvkA*exp(-$bvkalpha*$r*$r);*$r*$r);
-if ($#ARGV<0) 
-{
-print STDOUT << "EOF";
-
- usage: makenn 23.3 [options] [-d]
-
- meaning take mcphas.j, generate all neighbors within sphere of 23.3A 
- and put them into makenn.j,the output values are sorted by ascending distance
-
- in interaction columns put by default the classical dipole interaction (meV): this is 
- done assuming the operator sequence 
-  I1=Sa I2=La I3=Sb I4=Lb I5=Sc I6=Lc   for sipf files with gJ=0
-  I1=Ja I2=Jb I3=Jc    for sipf files with gJ<>0
- (S=spin,L=orbital momentum, J=total angular momentum)
-
- formula for classical dipole interaction tensor:
+exit usage() if ($#ARGV<0);
  
- Jalphabeta(R)=(mu0/4pi)(gJ muB)^2 (3 Ralpha Rbeta- delta_alphabeta R^2)/R^5
-
- in the Hamiltonian 
-
- H= -1/2 sum_ij,alphabeta Jialpha Jalphabeta(Rij) Jjbeta
-
-  Note that in order to use makenn you have to set up a 
- working  mcphas.j file with the crystal structure. 
-
-
- option -rkky A(meV) kf(1/A) calculates the rkky interaction
-              according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3
-              scaling A<0, kf should be the Fermi wavevector (usually
-              between 0.3-2.5 A^-1 depending on the electrondensity^0.333)
- option -rkky3d A(meV) ka(1/A) kb(1/A) kc(1/A) calculates the rkky interaction
-              according to J(R)=A.cos(2.kfR)/(2.kfR)^3
-              scaling A<0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
- option -rkkz A(meV) kf(1/A) calculates the rkky interaction
-              according to J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4
-              scaling A>0, kf should be the Fermi wavevector
- option -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)  calculates the rkky interaction
-              according to J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4
-              scaling A>0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
- option -kaneyoshi A(meV) D(A) alpha  calculates the kaneyoshi
-             parametrization for the Bethe-Slater
-              curve: J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2]
-              with D corresponding to the orbital radius
-              the exponential alpha is conveniently put to  about 1
- option -kaneyoshi3d A(meV) Da(A) Db(A) Dc(A) alpha  calculates the 3d-kaneyoshi
-             parametrization for the Bethe-Slater
-              curve: J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2]
-              with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2)
-              the exponential alpha is conveniently put to  about 1
- option -bvk filename
-              for phonons: take Born van Karman model with longitudinal and
-              transversal spring constants from file - file format, columns:
-              #   atom_n_sipf atom_n'_sipf bondlength(A) Clong(N/m) Ctrans(N/m)
-              mind: into MODPAR2-6 in *.sipf the Einstein-oscillator paramters 
-              are written, too. Omit filename to create a sample file with
-              longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m
-
- option -cfph [screeningfile.r]
-              calculate crystal field phonon interaction: mcphas.j lists 
-              magnetic and non magnetic atoms with charges defined in the 
-              sipf files by CHARGE= variable. For magnetic atoms the sipf 
-              file the variable MAGNETIC=1 has to be set and information 
-              about the ion has to be present (IONTYPE etc.). 
-              Foreach magnetic ion a new site is created and shifted
-              0.1 A along c in order to not overlap with the original site.
-              It is assumed, that the original site will be using an sipf
-              file with the MODULE=phonon as well as all the other
-              nonmagnetic sites. For the new magnetic site the program
-              pointc is used by makenn with option -d to calculate derivatives
-              dBlm/du which are inserted as interaction 
-              parameters between MODULE=phonon and MODULE=so1ion sites.
-              In order to use the resulting file results/makenn.j a phonon
-              model has to be set up, the original magnetic atom sites 
-              sipffilename has to be changed to the phonon model filename 
-              and the phonon model has to be added to makenn.j,  e.g. by
-              program addj, moreover magnetic sites sipf files are required, 
-              e.g. such as created in results/makenn.a*.sipf. 
-              a screening file can be used to define distance dependent 
-              screening of charges for the pointcharge model calculation
-              format: col1 distance r (Angstroem) col 2 screening factor 
-              for B2m, col 3 for B4m and col 4 for B6m
- option -e [filename]
- option -f [filename]
- option -dm [filename]
- option -jp [filename]
-              read interaction constants from table in file. 
-              Use -e for isotropic interactions between momentum Ji and Jj 
-                         which only depend on distance (distance vs coupling J)
-              Use -f for isotropic interactions between momentum Ji and Jj
-                         (neighbour position vs coupling J)
-              at positions i and j  
-                               ( J   0   0 )
-              J Ji.Jj  =    Ji.( 0   J   0 ).Jj  with  H= -1/2 sum_ij J Ji.Jj 
-                               ( 0   0   J ) 
-              Use -dm for Dzyaloshinski Moriya interactions:
-                         (neighbour position vs Dx Dy Dz)
-                               ( 0   Dz  -Dy )
-              D.(Ji x Jj) = Ji.(-Dz  0    Dx ).Jj  with H= -1/2 sum_ij D.(Ji x Jj) 
-                               ( Dy  -Dx  0  )
-
-              Use -jp for jparallel interaction:
-                          (neighbour position vs Jp)
-                                               ( Rx.Rx   Rx.Ry  Rx.Rz)
-              Jp (Ji.R)(Jj.R)/R^2 = Jp/R^2  Ji ( Ry.Rx   Ry.Ry  Ry.Rz) Jj  
-                                               ( Rz.Rx   Rz.Ry  Rz.Rz)
- 
-                           with H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2
-
-              To get a sample file use option -e -f or -dm -jp without a filename.      
-
-        -d puts to the last column the distance of the neighbors (A)\n
- The neigbours of each atom are also stored in separate files
- results\/makenn.a*.pc, which can be used with the program pointc to evaluate
- the pointcharge model and calculate crystal field parameters.\n
-EOF
-exit 0;}
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];
 $rkky=0;$calcdist=0;$bvk=0;$readtable=0;$classdip=0;
@@ -144,7 +30,7 @@ GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "kaneyoshi3d=s{5}"=>\@kaneyoshi3d,
            "rkkz3d=s{3}"=>\@rkkz3d,
            "rkky=s{2}"=>\@rkky,
-           "kaneyoshi=s{2}"=>\@kaneyoshi,
+           "kaneyoshi=s{3}"=>\@kaneyoshi,
            "rkkz=s{2}"=>\@rkkz,
            "bvk:s"=>\@bvk,
            "cfph:s"=>\@cfph,
@@ -152,8 +38,18 @@ GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "f:s"=>\@f,
            "jp:s"=>\@jp,
            "dm:s"=>\@dm,
-           "d"=>\$d);
+           "d"=>\$d,
+           "djdx"=>\$djdx,
+           "djdy"=>\$djdy,
+           "djdz"=>\$djdz);
 
+die "djdx djdy djdz exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
+if (@bvk||@cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
+
+$ext=".j"; 
+if ($djdx) {$ext=".djdx"; }
+if ($djdy) {$ext=".djdy"; }
+if ($djdz) {$ext=".djdz"; }
 
 $_=$ARGV[0];
 if(@rkky3d)
@@ -397,8 +293,8 @@ else
 {
 print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
 
-     # initialize output file results/makenn.j
-  ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
+     # initialize output file results/makenn$ext
+  ($h,$l)=printlattice("./mcphas.j",">./results/makenn$ext");
 print "# number of atoms = $nofatoms\n calculating ...\n";
 }            
 @atoms=();   
@@ -496,8 +392,29 @@ else{die "Error makenn - creating table for option $_ \n";}
     $jn=$jn->append( pdl ([$rvec->at(1)]));
     $kn=$kn->append( pdl ([$rvec->at(2)]));
 
+
+
     my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$r,$rvec->at(0),$rvec->at(1),$rvec->at(2));
     my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
+    if($djdx||$djdy||$djdz){my $dx=0; my $dy=0; my $dz=0;
+              if($djdx){$dx=$delta;}
+              if($djdy){$dy=$delta;}
+              if($djdz){$dz=$delta;}
+              my $rr=sqrt(($rvec->at(0)+$dx)*($rvec->at(0)+$dx)+($rvec->at(1)+$dy)*($rvec->at(1)+$dy)+($rvec->at(2)+$dz)*($rvec->at(2)+$dz));
+              my ($intd) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$rr,$rvec->at(0)+$dx,$rvec->at(1)+$dy,$rvec->at(2)+$dz);
+              my ($Gmix,$djaa,$djab,$djac,$djba,$djbb,$djbc,$djca,$djcb,$djcc) = @{$intd};
+               $jaa=($djaa-$jaa)/$delta;
+               $jab=($djab-$jab)/$delta;
+               $jac=($djac-$jac)/$delta;
+
+               $jba=($djba-$jba)/$delta;
+               $jbb=($djbb-$jbb)/$delta;
+               $jbc=($djbc-$jbc)/$delta;
+
+               $jca=($djca-$jca)/$delta;
+               $jcb=($djcb-$jcb)/$delta;
+               $jcc=($djcc-$jcc)/$delta;
+}
 
     $Jaa=$Jaa->append( pdl ([$jaa]));
     $Jab=$Jab->append( pdl ([$jab]));
@@ -614,8 +531,8 @@ unless($tabout){printneighbourlist($Gmix,$h,$nofneighbours[$nnn],$gJ,$n,$an,$rn,
 unless($tabout){ endprint($h,$l);  }
  
 if($cfph!=0){
-# for cf phonon interaction recreate makenn.j
-my ($h,$l)=printlattice("./mcphas.j",">./results/makenn.j");
+# for cf phonon interaction recreate makenn$ext
+my ($h,$l)=printlattice("./mcphas.j",">./results/makenn$ext");
 @atoms=();
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
  { # if screeningfile is given - use it and screen charges 
@@ -828,7 +745,7 @@ for($i=2;$i<=7;++$i){ if(abs($Mc[$i]-$M[$i])>1e-4){die("ERROR makenn: input file
                      }
 }
 
-print "created files: results/makenn.j     (interaction parameters)\n";
+print "created files: results/makenn$ext     (interaction parameters)\n";
 print "               results/makenn.a*.pc (pointcharge environment files)\n";
 print "********************************************************\n";
 print "               end of program makenn\n";
@@ -1291,6 +1208,11 @@ elsif($readtable>0)
 else
 {push @atoms, ("# it follows output of classical DD interaction generated by makenn\n");}
 
+if ($djdx) {push @atoms, ("# - derivative with respect to x\n");}
+if ($djdy) {push @atoms, ("# - derivative with respect to y\n");}
+if ($djdz) {push @atoms, ("# - derivative with respect to z\n");}
+
+
     if($alpha!=90||$beta!=90||$gamma!=90)
      {push @atoms, ("#da[a]    db[b]     dc[c]       Jii[meV]  Jjj[meV]  Jkk[meV]  Jij[meV]  Jji[meV]  Jik[meV]  Jki[meV]  Jjk[meV]  Jkj[meV] with j||b, k||(a x b) and i normal to k and j\n");}
     else
@@ -1439,3 +1361,131 @@ sub extractfromfile {
              return $value;
             }
 # **********************************************************************************************
+sub usage ()
+{
+print STDOUT << "EOF";
+
+ usage: makenn 23.3 [options] 
+
+ meaning take mcphas.j, generate all neighbors within sphere of 23.3A 
+ and put them into makenn.j,the output values are sorted by ascending distance
+
+ in interaction columns put by default the classical dipole interaction (meV): this is 
+ done assuming the operator sequence 
+  I1=Sa I2=La I3=Sb I4=Lb I5=Sc I6=Lc   for sipf files with gJ=0
+  I1=Ja I2=Jb I3=Jc    for sipf files with gJ<>0
+ (S=spin,L=orbital momentum, J=total angular momentum)
+
+ formula for classical dipole interaction tensor:
+ 
+ Jalphabeta(R)=(mu0/4pi)(gJ muB)^2 (3 Ralpha Rbeta- delta_alphabeta R^2)/R^5
+
+ in the Hamiltonian 
+
+ H= -1/2 sum_ij,alphabeta Jialpha Jalphabeta(Rij) Jjbeta
+
+  Note that in order to use makenn you have to set up a 
+ working  mcphas.j file with the crystal structure. 
+
+
+ option -rkky A(meV) kf(1/A) calculates the rkky interaction
+              according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3
+              scaling A<0, kf should be the Fermi wavevector (usually
+              between 0.3-2.5 A^-1 depending on the electrondensity^0.333)
+ option -rkky3d A(meV) ka(1/A) kb(1/A) kc(1/A) calculates the rkky interaction
+              according to J(R)=A.cos(2.kfR)/(2.kfR)^3
+              scaling A<0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
+ option -rkkz A(meV) kf(1/A) calculates the rkky interaction
+              according to J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4
+              scaling A>0, kf should be the Fermi wavevector
+ option -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)  calculates the rkky interaction
+              according to J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4
+              scaling A>0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
+ option -kaneyoshi A(meV) D(A) alpha  calculates the kaneyoshi
+             parametrization for the Bethe-Slater
+              curve: J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2]
+              with D corresponding to the orbital radius
+              the exponential alpha is conveniently put to  about 1
+ option -kaneyoshi3d A(meV) Da(A) Db(A) Dc(A) alpha  calculates the 3d-kaneyoshi
+             parametrization for the Bethe-Slater
+              curve: J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2]
+              with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2)
+              the exponential alpha is conveniently put to  about 1
+ option -bvk filename
+              for phonons: take Born van Karman model with longitudinal and
+              transversal spring constants from file - file format, columns:
+              #   atom_n_sipf atom_n'_sipf bondlength(A) Clong(N/m) Ctrans(N/m)
+              mind: into MODPAR2-6 in *.sipf the Einstein-oscillator paramters 
+              are written, too. Omit filename to create a sample file with
+              longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m
+
+ option -cfph [screeningfile.r]
+              calculate crystal field phonon interaction: mcphas.j lists 
+              magnetic and non magnetic atoms with charges defined in the 
+              sipf files by CHARGE= variable. For magnetic atoms the sipf 
+              file the variable MAGNETIC=1 has to be set and information 
+              about the ion has to be present (IONTYPE etc.). 
+              Foreach magnetic ion a new site is created and shifted
+              0.1 A along c in order to not overlap with the original site.
+              It is assumed, that the original site will be using an sipf
+              file with the MODULE=phonon as well as all the other
+              nonmagnetic sites. For the new magnetic site the program
+              pointc is used by makenn with option -d to calculate derivatives
+              dBlm/du which are inserted as interaction 
+              parameters between MODULE=phonon and MODULE=so1ion sites.
+              In order to use the resulting file results/makenn.j a phonon
+              model has to be set up, the original magnetic atom sites 
+              sipffilename has to be changed to the phonon model filename 
+              and the phonon model has to be added to makenn.j,  e.g. by
+              program addj, moreover magnetic sites sipf files are required, 
+              e.g. such as created in results/makenn.a*.sipf. 
+              a screening file can be used to define distance dependent 
+              screening of charges for the pointcharge model calculation
+              format: col1 distance r (Angstroem) col 2 screening factor 
+              for B2m, col 3 for B4m and col 4 for B6m
+ option -e [filename]
+ option -f [filename]
+ option -dm [filename]
+ option -jp [filename]
+              read interaction constants from table in file. 
+              Use -e for isotropic interactions between momentum Ji and Jj 
+                         which only depend on distance (distance vs coupling J)
+              Use -f for isotropic interactions between momentum Ji and Jj
+                         (neighbour position vs coupling J)
+              at positions i and j  
+                               ( J   0   0 )
+              J Ji.Jj  =    Ji.( 0   J   0 ).Jj  with  H= -1/2 sum_ij J Ji.Jj 
+                               ( 0   0   J ) 
+              Use -dm for Dzyaloshinski Moriya interactions:
+                         (neighbour position vs Dx Dy Dz)
+                               ( 0   Dz  -Dy )
+              D.(Ji x Jj) = Ji.(-Dz  0    Dx ).Jj  with H= -1/2 sum_ij D.(Ji x Jj) 
+                               ( Dy  -Dx  0  )
+
+              Use -jp for jparallel interaction:
+                          (neighbour position vs Jp)
+                                               ( Rx.Rx   Rx.Ry  Rx.Rz)
+              Jp (Ji.R)(Jj.R)/R^2 = Jp/R^2  Ji ( Ry.Rx   Ry.Ry  Ry.Rz) Jj  
+                                               ( Rz.Rx   Rz.Ry  Rz.Rz)
+ 
+                           with H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2
+
+              To get a sample file use option -e -f or -dm -jp without a filename.      
+
+        -d puts to the last column the distance of the neighbors (A)
+ The neigbours of each atom are also stored in separate files
+ results\/makenn.a*.pc, which can be used with the program pointc to evaluate
+ the pointcharge model and calculate crystal field parameters.
+
+        -djdx
+        -djdy
+        -djdz   create files makenn.djdx .djdy .djdz instead of makenn.j, respectively
+ these contain the derivatives of the interaction paramters with respect to
+ displacement of the neighbor in x,y and z direction respectively. These derivatives
+ are useful for the calculation of exchange striction effects. 
+
+ xyz refers to a right handed Euclidean coordinate system with 
+ y||b, z||(a x b) and x perpendicular to y and z.
+
+EOF
+}

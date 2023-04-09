@@ -507,7 +507,7 @@ the charge producing the crystal field $i=1,...,N_{\rm nuclei}$,
 the $j$ index runs over magnetic ions in a crystal $j=N_{\rm nuclei}+1,... N_{\rm nuclei}+N_{\rm magnetic ions}$)
 
 \begin{eqnarray}\label{Hamiltonian}
-H & = & H_{\rm ph} +\sum_{j,\gamma} B_{\gamma}(j,\vec U_1,...,\vec U_N) O_{\gamma}(\vec J_i) \\
+H_{\rm tot} & = & H_{\rm ph} +\sum_{j,\gamma} B_{\gamma}(j,\vec U_1,...,\vec U_N) O_{\gamma}(\vec J_i) \\
 &=& H_{\rm ph} +\sum_{j,\gamma} B_{\gamma}(j,0,\dots,0) O_{\gamma}(\vec J_j) + H_{\rm cfph}\nonumber 
  \end{eqnarray}
 
@@ -546,8 +546,8 @@ and therefore substituted $\bar a$ with the strain $\bar \epsilon$.
 Summarizing, and remembering the dimensionless phonon displacement operators
 $\mbf u = \mbf P / a_0$, we can write the total Hamiltonian as
 
-\begin{eqnarray}\label{H}
-H & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\vec J_i) + \sum_{i} H_{\rm E}(i) + \\
+\begin{eqnarray}\label{Htot}
+H_{\rm tot} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\vec J_i) + \sum_{i} H_{\rm E}(i) + \\
 &+&\frac{1}{2}\sum_{\alpha\gamma=1-6} c^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} - \nonumber \\
 &-&\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) u_{i}^{\alpha}u_{j}^{\beta} 
 -\sum_{i<j,\alpha=1-6,\gamma}\Gamma^{\alpha\gamma}(ij) u^{\alpha}_i O_{\gamma}(\vec J_j)
@@ -558,7 +558,7 @@ H & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\vec J_i) + \sum_{i} 
 
 
 
-The first line in (\ref{H}) contains the single ion Hamiltonian (crystal field, phonon), 
+The first line in (\ref{Htot}) contains the single ion Hamiltonian (crystal field, phonon), 
 and the second line the elastic energy (also a ''single ion'' term),
 the third line the interaction terms (phonon, crystal field phonon), 
 the forth line the mixing term and 
@@ -595,8 +595,8 @@ we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can 
 
 
 \begin{eqnarray}\label{zeroeps}
-\sum_{\gamma=1,..6}  c^{\alpha\gamma} \epsilon_{\gamma} &=&
- \sum_{i,\gamma=1,2,3}  G_{mix}^{\alpha\gamma}(i)\langle u_{i}^{\gamma} \rangle  \\
+\sum_{\beta=1,..6}  c^{\alpha\beta} \epsilon_{\beta} &=&
+ \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle u_{i}^{\delta} \rangle  \\
  &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\vec J_i) \rangle \nonumber
 \end{eqnarray}
 
@@ -604,7 +604,7 @@ we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can 
 
 \subsection{Progam Workflow}
 
-Technically the Hamiltonian (\ref{H}) is of the general form for 
+Technically the Hamiltonian (\ref{Htot}) is of the general form for 
 McPhase~\cite{rotter12-213201}, with single
 ion and interaction terms. The corresponding  mean field procedure can be done by an internal single ion module 
 ''epsilon'', which represents not an ion, but the
@@ -657,3 +657,54 @@ to act similar as an external magnetic field in {\em McPhase}, these will only a
 ''espilon'' module and on no other module. The equations given above have to be adapted accordingly 
 and then it should be possible to calculate in addition to magnetic phase diagrams also stress dependence
 of Jahn Teller transitions and excitations. 
+
+
+\subsection{Exchange Striction}
+
+If the two ion interactions are strain dependent, an additional contribution to the
+strain tensor has to be considered in the equations (\ref{Htot}) to (\ref{{zeroeps}}).
+The resulting contribution is commonly called {\em exchange striction}, because
+predominantly the magnetic exchange interactions will contribute.
+
+We therefore extend the model by the exchange striction writing the 
+Hamiltonian
+
+\begin{equation}\label{Hwithexstric}
+H=H_{\rm tot} -\frac{1}{2} \sum_{n,n',\alpha,\beta}
+ {\mathcal J}_{\alpha\beta}((1+\bar a)(\vec R_{j} - \vec R_i)) \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
+\end{equation}
+
+and expand the two ion interaction ${\mathcal J}_{\alpha\beta}(\mbf R_{ij}) $
+in a Taylor expansion for small strain:
+
+\begin{eqnarray}\label{jjtaylor}
+{\mathcal J}_{\alpha\beta}(\vec R=(1+\bar a)\vec R_{ij})&=&{\mathcal J}_{\alpha\beta}(\vec R_{ij})
++ \frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha}} \frac{\partial (\bar a\vec R_{ij})^{\alpha}}{\partial \epsilon_{\beta}} \epsilon_{\beta} + \dots \nonumber \\
+&=& {\mathcal J}_{\alpha\beta}(\vec R_{ij})+ 
+\sum_{\alpha\gamma=1,2,3,\beta=1,..,6}
+\frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha}}
+\frac{\partial \epsilon_{\alpha\gamma}\vec R_{ij}^{\gamma}}{\partial \epsilon_{\beta}} \epsilon_{\beta}
+\end{eqnarray}
+
+and equation (\ref{zeroeps}) is extended 
+
+\begin{eqnarray}\label{zeroepsex}
+\sum_{\beta=1,..,6}  c^{\alpha\beta} \epsilon_{\beta} &=&
+ \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle u_{i}^{\delta} \rangle  \\
+ &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\vec J_i) \rangle \nonumber \\
+ &+& \frac{1}{2}\sum_{ii',\delta,\delta'\alpha',\gamma=1,..,3}
+\frac{\partial {\mathcal J}_{\delta\delta'}}{\partial R^{\alpha'}}
+\frac{\partial \epsilon_{\alpha'\gamma}\vec R_{ij}^{\gamma}}{\partial \epsilon_{\alpha}}
+\langle \hat \mathcal I_{\delta}^i \hat \mathcal I_{\delta'}^{i'}\rangle \nonumber
+\end{eqnarray}
+
+If {\prg mcphas} is used with option {\prg -doeps} and it finds files {\prg mcphas.djdx}, {\prg mcphas.djdy}, {\prg mcphas.djdz} with
+derivatives of the two ion interaction parameters with respect to
+spatial coordinates $x,y,z$ respectively, it performs a calculation of
+the corresponding correlation functions and computes the strain using
+equation (\ref{zeroepsex}). Note, that the contribution of the exchange
+striction (i.e. the contribution to (\ref{Hwithexstric})coming from the
+second term in the expansion (\ref{jjtaylor}) ) to the Hamiltonian is not taken into account in the calculation
+of the free energy in the current version of McPhase assuming that
+these are small.
+

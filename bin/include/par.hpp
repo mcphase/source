@@ -25,6 +25,7 @@ class par
      
   //lattice
   float a,b,c,alpha,beta,gamma;
+  Vector abc;
   Matrix r,rez;
   int nofatoms;
   int nofcomponents;
@@ -37,7 +38,7 @@ class par
 
   //jjjpar 
    
-   par (const char *filejjj);	//konstruktor
+   par (const char *filejjj,int verbose=0);	//konstruktor
    par (float ai,float bi,float ci,float alphai,float betai,float gammai,int nofcompi);
    par (const par & pars);	// kopier-konstruktor
    
@@ -58,5 +59,11 @@ void increase_nofcomponents (int n); //increases the number of components in the
 void decrease_nofcomponents (int n); //decreases the number of components in the interaction vector
 
 void save_sipfs(const char *path);   //save single ion parameter files filename to path*
+
+// operator!= returns 8 7 6 5 4 3 2 1 0depending on agreement of
+ //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement
+ //  2 neighbour position 1 interaction parmeter disagreement i.e. 0 is perfect match
+ int operator!=(par & op2); // match
+
 };
 #endif

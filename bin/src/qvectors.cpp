@@ -108,9 +108,7 @@ qvectors::qvectors (inipar & ini,par & inputpars,
   rez=inputpars.rez;r=rez.Inverse();
   Matrix rt(1,3,1,3),rijk(1,3,1,3),rezijk(1,3,1,3);
  // calculate rezprim (primitive reciprocal basis in euclidean ijk coordinates)
- Vector abc(1,6); abc(1)=inputpars.a; abc(2)=inputpars.b; abc(3)=inputpars.c;
-                   abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
-  dadbdc2ijk(rijk,r,abc); // rijk is the primitive unit cell in ijk coordinates
+  dadbdc2ijk(rijk,r,inputpars.abc); // rijk is the primitive unit cell in ijk coordinates
   rezijk=2*PI*rijk.Inverse().Transpose();
   
   
@@ -242,7 +240,7 @@ printf ("vector	min     max    delta \n");
       ini.qmin(3)-0.00001<=hkl(3)&&hkl(3)<=ini.qmax(3)+0.00001) //yes they are in the region-> increment nofq and store 
    { // !! here we could check if the qvector is in the 1st BZ and only
      // use it if it is ...!!
-    if(is_in_1stBZ(hkl,abc,rezijk)){
+    if(is_in_1stBZ(hkl,inputpars.abc,rezijk)){
     ++nofq;
     q0[nofq]=new Vector (1,3); (*q0[nofq])=dd;
     if (verbose){printf("# %2i  %2i  %2i (%g %g %g) \t (%g %g %g)\n",hchkn[1][ia(k)],hchkn[2][ib(k)],hchkn[3][ic(k)],hkl(1),hkl(2),hkl(3),dd(1),dd(2),dd(3));}

@@ -15,8 +15,11 @@
 
 //constructor 
 par::par(float ai,float bi,float ci,float alphai,float betai,float gammai,int nofci)
-{r=Matrix(1,3,1,3);rez=Matrix(1,3,1,3);Cel=Matrix(1,6,1,6);CelInv=Matrix(1,6,1,6);CelInv=0;
+{r=Matrix(1,3,1,3);rez=Matrix(1,3,1,3);
+ Cel=Matrix(1,6,1,6);CelInv=Matrix(1,6,1,6);CelInv=0;
  a=ai;b=bi;c=ci;alpha=alphai;beta=betai;gamma=gammai;nofcomponents=nofci;
+ abc=Vector(1,6); abc(1)=a; abc(2)=b; abc(3)=c;
+         abc(4)=alpha; abc(5)=beta; abc(6)=gamma;
   rems[1]=new char[40];rems[1][0]='\0';
   rems[2]=new char[40];rems[2][0]='\0';
   rems[3]=new char[40];rems[3][0]='\0';
@@ -24,7 +27,7 @@ par::par(float ai,float bi,float ci,float alphai,float betai,float gammai,int no
   jjj=new jjjpar * [nofatoms+1];
 }
 
-par::par (const char *filejjj)
+par::par (const char *filejjj,int verbose)
 { int i,j,n,l;
   FILE *fin_coq;
   char instr[MAXNOFCHARINLINE];
@@ -68,8 +71,9 @@ par::par (const char *filejjj)
   }
   if(nofatoms>MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL)
   {fprintf(stderr,"ERROR reading mcphas.j: maximum number of atoms in unit cell exceeded - enlarge it in par.hpp and recompile\n");exit(EXIT_FAILURE);}
-  
-
+   abc=Vector(1,6);
+         abc(1)=a; abc(2)=b; abc(3)=c;
+         abc(4)=alpha; abc(5)=beta; abc(6)=gamma;
   rez=r.Inverse();
   rems[3]=new char[strlen(instr)+2];strcpy(rems[3],instr);
   
@@ -78,14 +82,14 @@ par::par (const char *filejjj)
   //gJ=Vector(1,nofatoms);
   for(i=1;i<=nofatoms;++i)  
   {//printf("creating atom %i (of %i)...\n",i,nofatoms);
-   jjj[i]=new jjjpar(fin_coq,nofcomponents);
+   jjj[i]=new jjjpar(fin_coq,nofcomponents,verbose);
    if(jjj[i]==NULL){ fprintf (stderr, "Out of memory creating atoms jjjpar by constructor\n");exit (EXIT_FAILURE);}
    //gJ(i)=(*jjj[i]).gJ;
    
    if(nofcomponents!=(*jjj[i]).nofcomponents)
    {fprintf(stderr,"ERROR reading mcphas.j: nofcomponents (%i) not consistent for atom %i (%i read in fileheader)\n",(*jjj[i]).nofcomponents,i,nofcomponents);exit(EXIT_FAILURE);}
   }
-  //determine sublattices
+  //determine sublattices and rij 
   for(i=1;i<=nofatoms;++i)
   {for(n=1;n<=(*jjj[i]).paranz;++n)
    {(*jjj[i]).sublattice[n]=0;
@@ -98,6 +102,9 @@ par::par (const char *filejjj)
     }
     if((*jjj[i]).sublattice[n]==0){fprintf(stderr,"Warning mcphas - par.cpp: file %s inconsistent:  neighbour %i of atom %i at %g %g %g is not on any sublattice. Continuing putting it onto sublattice 1 ...\n",filejjj,n,i,(*jjj[i]).dn[n](1),(*jjj[i]).dn[n](2),(*jjj[i]).dn[n](3));
                                    (*jjj[i]).sublattice[n]=1;}
+   // transform (*jjj[i]).dn[n] to Euclidean frame and store in dr[n]
+  dadbdc2ijk((*jjj[i]).dr[n],(*jjj[i]).dn[n], abc);
+
    }
   //check consistency of mcphas.j
   if(nofcomponents!=(*jjj[i]).nofcomponents)
@@ -106,6 +113,7 @@ par::par (const char *filejjj)
    }
   
   }
+ 
  if  (ferror(fin_coq)==1)
   {fprintf(stderr,"ERROR Reading file %s\n",filejjj);exit(1);}
   fclose (fin_coq);
@@ -118,6 +126,7 @@ par::par (const char *filejjj)
 par::par(const par & p)
 { int i;
   a=p.a;b=p.b;c=p.c;alpha=p.alpha;beta=p.beta;gamma=p.gamma;
+  abc=p.abc;
   r=p.r;rez=p.rez;
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
@@ -197,11 +206,8 @@ FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
 }
 
 void par::add (par & p1)
-{int i;
-    Vector abc(1,3),abc1(1,3);
-    abc(1)=a;abc(2)=b;abc(3)=c;
-    abc1(1)=p1.a;abc1(2)=p1.b;abc1(3)=p1.c;
-    if (Norm(abc-abc1)>0.0001){fprintf(stderr,"ERROR adding parameter sets: lattice parameters abc not equal\n");exit(EXIT_FAILURE);}
+{int i,i1;
+    if (Norm(abc-p1.abc)>0.0001){fprintf(stderr,"ERROR adding parameter sets: lattice parameters abc not equal\n");exit(EXIT_FAILURE);}
 //    if (nofcomponents!=p1.nofcomponents)
 //    {fprintf(stderr,"ERROR adding parameter sets: number of spin components not equal\n");exit(EXIT_FAILURE);}
     if (nofcomponents>p1.nofcomponents)
@@ -219,11 +225,24 @@ if(p1.nofatoms<nofatoms)
 
    }
    else
-   {if (strcmp((*jjj[i]).sipffilename,(*p1.jjj[i]).sipffilename)!=0){
-    fprintf(stderr,"# Warning program addj: adding parameter sets atom %i sipffilename %s does not match %s - taking %s for output\n",i,(*jjj[i]).sipffilename,(*p1.jjj[i]).sipffilename,(*jjj[i]).sipffilename);}
+   {
+i1=i;
+while(Norm((*jjj[i1]).xyz-(*p1.jjj[i]).xyz)>0.0001)
+{if(i1==i)fprintf(stderr,"# Problem program addj: atomic positions da db dc of atom number %i  at %g %g %g do not match atom %i at %g %g %g \n# ... trying to find a matching atom\n",
+i1,(*jjj[i1]).xyz(1),(*jjj[i1]).xyz(2),(*jjj[i1]).xyz(3),i,(*p1.jjj[i]).xyz(1),(*p1.jjj[i]).xyz(2),(*p1.jjj[i]).xyz(3));
+if(i1==nofatoms)i1=0;
+++i1;
+if(i1==i){fprintf(stderr,"# ... no matching atom found: adding new atom number %i with sipffilename=%s\n",nofatoms+1,(*p1.jjj[i]).sipffilename);
+newatom(p1.jjj[i]);i1=nofatoms;(*jjj[i1]).scalepars(0.0); // set jjjpars to zero - because there comes the add command in line 242
+ }
+}
+    if (strcmp((*jjj[i1]).sipffilename,(*p1.jjj[i]).sipffilename)!=0){
+    fprintf(stderr,"# Warning program addj: adding parameter sets atom %i sipffilename %s does not match %s - taking %s for output\n",
+i,(*jjj[i]).sipffilename,(*p1.jjj[i]).sipffilename,(*jjj[i]).sipffilename);}
      // add the parameters of p1 to the parameters of this
-    (*jjj[i]).add((*p1.jjj[i]),abc);
-   }
+    (*jjj[i1]).add((*p1.jjj[i]),abc);
+     }
+  
 
  }
  Cel+=p1.Cel; // add elastic constants
@@ -339,4 +358,36 @@ void par::save_sipfs(const char *path)   //save single ion parameter files filen
  {
     (*jjj[i]).save_sipf(path);
  }
+}
+
+// operator !=  returns 8 7 6 5 4 3 2 1 0depending on agreement of
+ //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement
+ //  2 neighbour position 1 interaction parmeter disagreement i.e. 0 is perfect match
+int par::operator!= (par & op2) // match
+{if(Norm(abc-op2.abc)>0.0001){fprintf(stderr,"# Lattice does not match\n");return 8;}
+ if(nofatoms!=op2.nofatoms){fprintf(stderr,"# Number of atoms nofatoms do not match\n");return 7;}
+ for(int i=1;i<=nofatoms;++i)
+  {if(Norm((*op2.jjj[i]).xyz-(*jjj[i]).xyz)>0.0001){fprintf(stderr,"# Atomic position of atom %i do not match\n",i);return 6;}
+ }
+for(int i=1;i<=nofatoms;++i)
+{
+if (strcmp((*jjj[i]).sipffilename,(*op2.jjj[i]).sipffilename)!=0)
+  {fprintf(stderr,"# Sipffilename %s and %s of atom %i do not match\n",(*jjj[i]).sipffilename,(*op2.jjj[i]).sipffilename,i);return 5;}
+
+  }
+ if(nofcomponents!=op2.nofcomponents){fprintf(stderr,"# nofcomponents do not match\n");return 4;}
+
+for(int i=1;i<=nofatoms;++i)
+  {if((*op2.jjj[i]).paranz!=(*jjj[i]).paranz){fprintf(stderr,"# nofneighbours of atom %i do not match\n",i);return 3;}
+ }
+
+for(int i=1;i<=nofatoms;++i)
+ {for(int n=1;n<=(*op2.jjj[i]).paranz;++n)
+  if(Norm((*jjj[i]).dn[n]-(*op2.jjj[i]).dn[n])>0.001){fprintf(stderr,"# neighbour position %i of atom %i do not match\n",n,i);return 2;}
+ }
+for(int i=1;i<=nofatoms;++i)
+ {for(int n=1;n<=(*op2.jjj[i]).paranz;++n)
+  if(NormFro((*jjj[i]).jij[n]-(*op2.jjj[i]).jij[n])>0.001){fprintf(stderr,"# interactions %i of atom %i do not match\n",n,i);return 1;}
+ }
+return 0;
 }

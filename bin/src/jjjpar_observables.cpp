@@ -215,10 +215,8 @@ switch (module_type)
              cluster_Micalc (mom,est);
             // now we have all magnetic moments in m1 vector and we have to do the
             // magnetic structure factor = sum_i Mi exp(iQri) Fi(Q) * DWF
-            Vector abc(1,6); abc(1)=(*clusterpars).a; abc(2)=(*clusterpars).b; abc(3)=(*clusterpars).c;
-                   abc(4)=(*clusterpars).alpha; abc(5)=(*clusterpars).beta; abc(6)=(*clusterpars).gamma;
-            Mq=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
-             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
+               Mq=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
+             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,(*clusterpars).abc);
             double QR=Qvec*rijk;
             complex<double> exponent(cos(QR),-sin(QR)); 
 
@@ -284,10 +282,8 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
             // now we have all magnetic moments in m1 vector and we have to do the
             // (magnetic structure factor) = sum_i Mi exp(+iQri) Fi(Q) DWF            
             // dmq1=<-|(magnetic structure factor)*|+> = sum_i <-|Mi|+> exp(-iQri) Fi(Q) DWF
-            Vector abc(1,6); abc(1)=(*clusterpars).a; abc(2)=(*clusterpars).b; abc(3)=(*clusterpars).c;
-                   abc(4)=(*clusterpars).alpha; abc(5)=(*clusterpars).beta; abc(6)=(*clusterpars).gamma;
             dMQ=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
-             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,abc);
+             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,(*clusterpars).abc);
             //printf("Qvec=(%g %g %g)   rijk=(%g %g %g)\n",Qvec(1),Qvec(2),Qvec(3),rijk(1),rijk(2),rijk(3));
             double QR=Qvec*rijk;
             if (delta<0){ QR=-QR;}  // in case of negative delta we must take <-|Mi|+> exp(+iQRi) Fi(Q) DWF  in order 

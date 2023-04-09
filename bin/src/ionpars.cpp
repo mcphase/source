@@ -93,12 +93,13 @@ ionpars::~ionpars(){
    delete[] In; 
  } //destructor
 
-ionpars::ionpars(FILE * cf_file, char * cffilename) 
+ionpars::ionpars(FILE * cf_file, char * cffilename,int verbose) 
 //constructor with commands from file handle (filename of cf parameters etc)
 // MIND: this code has to be kept consistent with the code in cf1ion_module/eingabe.c (function read_new_format())
 // ( reason: the stand alone c-progams so1ion, cfield should be consistent with the c++ programs
 // mcphas, mcdisp etc (using this input routine)
 { static int pr=1; // for output verbose
+  if(verbose==0)pr=0;
   int dimj;complex<double> im(0,1);
   int i,j,l,m,nof_electronsr,inof=0,ir2=0,ir4=0,ir6=0,ialpha=0,ibeta=0,igamma=0,igj=0; 
   double alphar,betar,gammar,r2r,r4r,r6r,gJr;
@@ -572,22 +573,23 @@ if(fabs(s0r)+fabs(s1r)+fabs(s2r)+fabs(s0i)+fabs(s1i)+fabs(s2i)>SMALL_DEVIATION)
   // ------------------------------------------------------------
   // here transform the Llm (if present) to Blm ...
   Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
-   fprintf(stderr,"#! IONTYPE=%s J=%g crystal field parameters:\n",iontype,J);  
+   fprintf(stderr,"#! IONTYPE=%s J=%g",iontype,J);  if(verbose)fprintf(stderr," crystal field parameters:");
+   fprintf(stderr,"\n");
    const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 Dx4 Dy4 Dz4";
    char lm4[5];lm4[4]='\0';
    for(i=0;i<=NOF_OLM_MATRICES;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"#Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
                                   double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
-                                  if((Blm(i)!=0)&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-14)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond !\n Will use Blm=%12.6g calculated from Llm.\npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i),Blmcalc);getchar();}
+                                  if((Blm(i)!=0)&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-12)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond !\n Will use Blm=%12.6g calculated from Llm.\npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i),Blmcalc);getchar();}
                                   Blm(i)=Blmcalc;// here set the Blm as calculated from the Llm
                                   }
-                     if(Blm(i)!=0){fprintf(stderr,"#! %s=%12.6g meV ",lm4,Blm(i));
+                     if(Blm(i)!=0){if(verbose)fprintf(stderr,"#! %s=%12.6g meV ",lm4,Blm(i));
                                    if(i<=45){if((l!=3)&(l!=5)){Llm(i)=Blm(i)/thetaJ(l)/cnst(l,m)/sqrt(4.0*PI/(2*l+1));if(m!=0){Llm(i)/=sqrt(2.0);}
-                                                 lm4[0]='L';fprintf(stderr,"<-> %s=%12.6g meV",lm4,Llm(i));}
+                                                 lm4[0]='L';if(verbose)fprintf(stderr,"<-> %s=%12.6g meV",lm4,Llm(i));}
                                                 else
                                                 {lm4[0]='L';fprintf(stderr,"<-> %s=Wybourne parameter not implemented, ",lm4);}}
-                                   fprintf(stderr,"\n");  
+                                   if(verbose)fprintf(stderr,"\n");  
                                   }
                      }
   // ------------------------------------------------------------

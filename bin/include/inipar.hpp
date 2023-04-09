@@ -10,14 +10,15 @@
 #include<cerrno>
 #include<martin.h>
 #include<vector.h>
-
+#include<par.hpp>
 
 class inipar
 { private:
   
   public:
   char * savfilename;
-  int doeps;
+  int doeps;\
+  par * ipx;par * ipy;par * ipz;
 
   //MCPHASE RUNTIME CONTROL
   int exit_mcphas,pause_mcphas,displayall,logfevsQ;
