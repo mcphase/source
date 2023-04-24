@@ -89,7 +89,7 @@ if(ini.doeps){physprop.Eel=sps.epsilon*inputpars.Cel*sps.epsilon;
               physprop.fe+=physprop.Eel;physprop.u+=physprop.Eel;              
 } // add elastic energy 
 
-physprop.fe/=sps.nofatoms; //normalise to formula unit
+physprop.fe/=sps.nofatoms; //normalise to meV/ion (ion=subsystem)
 physprop.u/=sps.nofatoms;
 physprop.Eel/=sps.nofatoms;
 return physprop.fe;

@@ -138,8 +138,8 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
    fprintf (fout, "#   x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] free energy f[meV/ion] energy u[meV/ion] total moment |m|     ma mb mc m||(projection along H) [mb/ion]");
    if(ortho==0){fprintf (fout, "mi   mj   mk[muB/f.u.]   Hi  Hj  Hk[T]");}
-   if(ini.doeps&&ortho==0){fprintf (fout, " Eel [meV/f.u.] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij");}
-   if(ini.doeps&&ortho!=0){fprintf (fout, " Eel [meV/f.u.] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab");}
+   if(ini.doeps&&ortho==0){fprintf (fout, " Eel [meV/ion] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij");}
+   if(ini.doeps&&ortho!=0){fprintf (fout, " Eel [meV/ion] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab");}
    fprintf (fout,"}\n");
    fclose(fout);
       }

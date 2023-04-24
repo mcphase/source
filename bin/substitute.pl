@@ -52,7 +52,7 @@ while($line=<Fin>)
 if ($first==0)
 {$line=~s/\Q$colx\E/$coly/g; 
 }else
-{if ($line=~/\Q$colx\E/&&$found==0){$found=1;$line=~s/\Q$colx\E/$coly/;}
+{if ($line=~/\Q$colx\E/&&$found<$first){++$found;if($found==$first){$line=~s/\Q$colx\E/$coly/;}}
 }
 
 

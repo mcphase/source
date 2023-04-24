@@ -8,6 +8,21 @@
 #ifndef __linux__
 #include<cfloat>
 #endif
+#ifdef __MINGW32__
+char *strnstr(char *s1, char *s2, int length) {
+    if(s1 == NULL || s2 == NULL) return NULL;
+    printf("searching \n\n\"%s\"\n for %.*s\n", s1, length, s2);
+    char *ss1 = malloc(strlen(s1) + 1);
+    strcpy(ss1, s1);
+    char *ss2 = malloc(length + 1);
+    strncpy(ss2, s2, length);
+    char *result = strstr(ss1, ss2);
+    free(ss1);
+    free(ss2);
+    return result;
+}
+
+#endif
 
 
 // ********************************************************************************************************

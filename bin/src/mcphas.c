@@ -119,6 +119,8 @@ if(fopen(prefix,"rb")!=NULL){
  
  } else {fprintf(stderr,"# Error - could not open mcphas.djdy \n");exit(1); }
  
+if(verbose)fprintf(stdout,"# strain due to derivatives of 2ion interactions in mcphas.djdx .djdy .djdz will be calculated\n");
+fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
   // check if inputpars abc nofatoms  atomic positions sipffilenames nofcomponents  agree with
   // ini.ipx y z
  // check if ini ipx and ipy and ipz have the same paranz for each neighbour
@@ -131,6 +133,8 @@ if(fopen(prefix,"rb")!=NULL){
 
   if(((*ini.ipx)!=(*ini.ipy))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdy in nofneighbours or neighbour positions\n");exit(1);}
   if(((*ini.ipx)!=(*ini.ipz))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdz in nofneighbours or neighbour positions\n");exit(1);}
+ fprintf(stderr,"# ... these are no problems, continuing\n");
+ 
   }
           }
 

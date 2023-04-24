@@ -22,72 +22,86 @@ exit usage() if ($#ARGV<0);
  
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($rmax) = eval $ARGV[0];
-$rkky=0;$calcdist=0;$bvk=0;$readtable=0;$classdip=0;
+$rkky=0;$calcdist=0;$readtable=0;$classdip=0;
 shift @ARGV; 
-
+@storeargv=@ARGV;
 # Parses command line options
-GetOptions("rkky3d=s{4}"=>\@rkky3d,
-           "kaneyoshi3d=s{5}"=>\@kaneyoshi3d,
-           "rkkz3d=s{3}"=>\@rkkz3d,
-           "rkky=s{2}"=>\@rkky,
-           "kaneyoshi=s{3}"=>\@kaneyoshi,
-           "rkkz=s{2}"=>\@rkkz,
-           "bvk:s"=>\@bvk,
-           "cfph:s"=>\@cfph,
-           "e:s"=>\@e,
-           "f:s"=>\@f,
-           "jp:s"=>\@jp,
-           "dm:s"=>\@dm,
+GetOptions("rkky3d"=>\$rkky3d,
+           "kaneyoshi3d"=>\$kaneyoshi3d,
+           "rkkz3d"=>\$rkkz3d,
+           "rkky"=>\$rkky,
+           "kaneyoshi"=>\$kaneyoshi,
+           "rkkz"=>\$rkkz,
+           "bvk"=>\$bvk,
+           "cfph"=>\$cfph,
+           "e"=>\$e,
+           "f"=>\$f,
+           "jp"=>\$jp,
+           "dm"=>\$dm,
            "d"=>\$d,
            "djdx"=>\$djdx,
            "djdy"=>\$djdy,
            "djdz"=>\$djdz);
 
+
+@ARGV=@storeargv;
 die "djdx djdy djdz exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
-if (@bvk||@cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
+if ($bvk||$cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
 
 $ext=".j"; 
 if ($djdx) {$ext=".djdx"; }
 if ($djdy) {$ext=".djdy"; }
 if ($djdz) {$ext=".djdz"; }
 
+
 $_=$ARGV[0];
-if(@rkky3d)
-  {$rkky=4;foreach(@rkky3d){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
-   $scale=$rkky3d[0];$ka=$rkky3d[1];$kb=$rkky3d[2];$kc=$rkky3d[3];
+if(/-rkky3d/)
+  {$rkky=4;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;
    print "calculating RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
    print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
-elsif(@kaneyoshi3d)
-  {$rkky=5;foreach(@kaneyoshi3d){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
-   $scale=$kaneyoshi3d[0];$Da=$kaneyoshi3d[1];$Db=$kaneyoshi3d[2];$Dc=$kaneyoshi3d[3];$aa=$kaneyoshi3d[4];
+elsif(/-kaneyoshi3d/)
+  {$rkky=5;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Da=eval $ARGV[0];shift @ARGV;   
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Db=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Dc=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
    print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
    print "J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
    print "with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A  and alpha=$aa\n";}
-elsif(@rkkz3d)
-  {$rkky=6;foreach(@rkkz3d){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
-   $scale=$rkkz3d[0];$ka=$rkkz3d[1];$kb=$rkkz3d[2];$kc=$rkkz3d[3];
+elsif(/-rkkz3d/)
+  {$rkky=6;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;   
    print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
    print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
-elsif(@rkky)
-  {$rkky=1;foreach(@rkky){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
-   $scale=$rkky[0];$kf=$rkky[1];
+elsif(/-rkky/)
+  {$rkky=1;shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
    print "calculating RKKY interaction J(R)=A.cos(2.kf.R)/(2.kf.R)^3 for scale A=$scale meV and kf=$kf A^-1\n";}
-elsif(@kaneyoshi)
-  {$rkky=2;foreach(@kaneyoshi){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
-   $scale=$kaneyoshi[0];$D=$kaneyoshi[1];$aa=$kaneyoshi[2];
+elsif(/-kaneyoshi/)
+  {$rkky=2;shift @ARGV; 
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$D=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
    print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
    print "J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n";}
-elsif(@rkkz)
-  {$rkky=3;foreach(@rkkz){$_=~s/exp/essp/g;$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;}
-   $scale=$rkkz[0];$kf=$rkkz[1];
+elsif(/-rkkz/)
+  {$rkky=3;shift @ARGV; 
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
+   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
    print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV and kf=$kf A^-1\n";}
-elsif(@bvk)
-  {$bvk=1;
-   unless ($bvk[0]) # if no filename is given print help
+elsif(/-bvk/)
+  {$bvk=1;shift @ARGV;
+   unless ($#ARGV>=0) # if no filename is given print help
    { $tabout=1;}
   else
    {
-   $bfk_file=$bvk[0];
+   $bfk_file=$ARGV[0];shift @ARGV;
    print "creating phononic interactions from Born van Karman model in file $bfk_file\n";
    # read interaction constants from file
    unless(open(Fin,$bfk_file)){ die "could not open $bfk_file\n";}
@@ -107,23 +121,24 @@ elsif(@bvk)
        	     }
   }
   }
-elsif(@cfph)
-{$cfph=1; 
+elsif(/-cfph/)
+{$cfph=1; shift @ARGV;
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
- $screeningfile=$cfph[0]; 
+ $screeningfile=$ARGV[0];
 }
-elsif(@e||@f||@dm||@jp)
+elsif(/-e/||/-f/||/-dm/||/-jp/)
   {
-   unless ($e[0]||$f[0]||$dm[0]||$jp[0]) # if no filename is given print help
+   shift @ARGV;
+   unless ($#ARGV>=0) # if no filename is given print help
    {
  $tabout=1; }
   else
  {
    $table_file=$ARGV[0];shift @ARGV;
    $ignore_neihgbours_behind=0;
-   print "reading "; if (@e) {print " isotropic ";$DM=0;$Jp=0;} 
-                  elsif (@f) {print " isotropic ";$DM=0;$Jp=0;} 
-                  elsif (@jp) {print " Jp ";$DM=0;$Jp=1;} 
+   print "reading "; if ($e) {print " isotropic ";$DM=0;$Jp=0;} 
+                  elsif ($f) {print " isotropic ";$DM=0;$Jp=0;} 
+                  elsif ($jp) {print " Jp ";$DM=0;$Jp=1;} 
                    else {print " DM ";$DM=1;$Jp=0;}
    $readtable=1;
    print" interactions from table in file $table_file\n";
@@ -140,12 +155,12 @@ elsif(@e||@f||@dm||@jp)
                if (/^(#!|[^#])*ignore_neihgbours_behind\s*=\s*/){($ignore_neihgbours_behind)=extract("ignore_neihgbours_behind",$_);}
                                  next if /^\s*#/;$line=$_;
                                  my @numbers=split(" ",$line);
-                                 if(@e||@jp)
+                                 if($e||$jp)
                                  {++$n_table;
                                   $da[$n_table]=$numbers[0];
                                   $Jex[$n_table]=$numbers[1];
                                  }
-                                 if(@f||@dm)
+                                 if($f||$dm)
                                  {++$n_table;
                                   $da[$n_table]=$numbers[0];
                                   $db[$n_table]=$numbers[1];
@@ -259,21 +274,21 @@ else {    print STDOUT << "EOF";
 #  
 EOF
 
-if(@e)
+if($e)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # |Rij| [A]  J [meV]  atom_i  atom_j 
 EOF
 
 }
-elsif(@jp)
+elsif($jp)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants Jp  in H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2 
 # |Rij| [A]  Jp [meV]  atom_i  atom_j 
 EOF
 
 }
-elsif(@f)
+elsif($f)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # da [a]    db [b]    dc [c]    J [meV]   atom_i  atom_j  |Rij| [A] 
@@ -348,12 +363,12 @@ print "# number of atoms = $nofatoms\n calculating ...\n";
 # check if neighbour is already in table
 $ff=0;
  for($ntbl=1;$ntbl<=$n_table;++$ntbl){
-if((@e||@jp)&&abs($da[$ntbl]-$r)<$SMALLdr){$ff=1;}
-elsif((@f||@dm)&&
+if(($e||$jp)&&abs($da[$ntbl]-$r)<$SMALLdr){$ff=1;}
+elsif(($f||$dm)&&
       abs($da[$ntbl]-$xx)<$SMALLdabc&&
       abs($db[$ntbl]-$yy)<$SMALLdabc&&
       abs($dc[$ntbl]-$zz)<$SMALLdabc){$ff=1;}
-elsif((@bvk)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
+elsif(($bvk)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
        $a1=$sipf_file[$nnn];$a2=$sipf_file[$nz];
        if(($db[$ntbl]=~/$a1/&&$dc[$ntbl]=~/$a2/)
        ||($db[$ntbl]=~/$a2/&&$dc[$ntbl]=~/$a1/)){$ff=1;}}
@@ -361,19 +376,19 @@ elsif((@bvk)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
 
 if($ff==0){++$n_table;$ntbl=$n_table;
         
-if(@e||@jp)
+if($e||$jp)
 {$da[$ntbl]=$r;
  print sprintf("%+10.6f     0       a%i a%i \n",$r,$nnn,$nz);
 }
-elsif(@f)
+elsif($f)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
  print sprintf("%+10.6f %+10.6f %+10.6f 0        a%i a%i %+10.6f\n",$xx, $yy ,$zz,$nnn,$nz,$r);
 }
-elsif(@dm)
+elsif($dm)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
   print sprintf("%+10.6f %+10.6f %+10.6f    %+10.6f %+10.6f %+10.6f     a%i a%i %+10.6f\n",$xx, $yy ,$zz,$rvec->at(0),$rvec->at(1),$rvec->at(2),$nnn,$nz,$r);
 }
-elsif(@bvk)
+elsif($bvk)
 {$da[$ntbl]=$r; $db[$ntbl]=$sipf_file[$nnn];$dc[$ntbl]=$sipf_file[$nz];
  $spring= $bvkA*exp(-$bvkalpha*$r*$r);
  print sprintf("%s   %s    %+10.6f   %+10.6f   0 \n",$sipf_file[$nnn],$sipf_file[$nz],$r,$spring);
@@ -428,15 +443,15 @@ else{die "Error makenn - creating table for option $_ \n";}
                                } else
                                {# check if neighbour is in readtable - if yes, save it
                                for($ntbl=1;$ntbl<=$n_table;++$ntbl){
-                                 if(((@f)&&
+                                 if((($f)&&
                                     abs($da[$ntbl]-$xx)<$SMALLdabc&&
                                     abs($db[$ntbl]-$yy)<$SMALLdabc&&
                                     abs($dc[$ntbl]-$zz)<$SMALLdabc&&
                                     $Jex[$ntbl]!=0.0)||
-                                    ((@e||@jp)&&
+                                    (($e||$jp)&&
                                      abs($da[$ntbl]-$r)<$SMALLdr&&
                                      $Jex[$ntbl]!=0.0)||
-                                   ((@dm)&&
+                                   (($dm)&&
                                     abs($da[$ntbl]-$xx)<$SMALLdabc&&
                                     abs($db[$ntbl]-$yy)<$SMALLdabc&&
                                     abs($dc[$ntbl]-$zz)<$SMALLdabc&&
