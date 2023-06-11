@@ -178,7 +178,7 @@ else
 ifdef cross64
 LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas  -lgfortran -lquadmath
 else
-LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
+LFLAGS+= -L../ic1ion_module/libs -larpack -llapack -lblas -L/usr/local/gfortran/lib $(GFORTRANLIB) -lgfortran
 endif
 #LFLAGS+= -llapack -lf77blas -latlas
 ifdef GCC5

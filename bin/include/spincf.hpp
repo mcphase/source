@@ -102,10 +102,10 @@ private:
     void  FT(ComplexVector * mq); // returns Fourier transform mq of spins (for use see htcalc.c)
     int * ijk(int in);  // returns spin indizes (ijk)(in): in=0,...,n(=na*nb*nc)
     
-    int n(); // returns total number of spins
-    int na(); // returns number of spinsl
-    int nb(); // returns number of spins
-    int nc(); // returns number of spins
+    int n(); // returns total number of primitive crystal basis in supercell
+    int na(); // returns number of primitive crystal basis in supercell along a
+    int nb(); // returns number of  primitive crystal basis in supercell along b
+    int nc(); // returns number of  primitive crystal basis in supercell along c
  
     Vector totalJ (); // returns nettomoment <J>
     void invert();// inverts all spins (AND higher order moments)

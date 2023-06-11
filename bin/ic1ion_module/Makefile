@@ -70,6 +70,7 @@ endif
 ifdef GCC4
  LIBFORTRAN=-lgfortran
  LDFLAGS=-L/usr/local/gfortran/lib/ 
+# LDFLAGS=-L/opt/homebrew/Cellar/gcc/11.3.0_1/lib/gcc/11/
 else
  LIBFORTRAN=-lg2c
  CFLAGS+=-D_G77
@@ -137,7 +138,8 @@ else    # if mkl
 ifdef cross64
 LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas  $(LIBFORTRAN) -lquadmath
 else
-LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas -L/usr/local/gfortran/lib $(LIBFORTRAN)
+LDFLAGS =  -Llibs $(LIBARPACK) -llapack -lblas -L/usr/local/gfortran/lib $(GFORTRANLIB) $(LIBFORTRAN)
+à LDFLAGS= -Llibs $(LIBARPACK) -llapack -lblas -L/opt/homebrew/Cellar/gcc/11.3.0_1/lib/gcc/11/  $(LIBFORTRAN)
 endif
 #LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/cygwin32_penryn/lib -lf77blas -latlas -lgfortran
 #LDFLAGS = -Llibs $(LIBARPACK) -llapack -L/home/eqr/src/ATLAS-3.8.3/mingw64_penryn/lib -lf77blas -latlas -lgfortran

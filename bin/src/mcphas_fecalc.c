@@ -115,6 +115,8 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
  Vector diff(1,inputpars.nofcomponents*inputpars.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
  Vector moment(1,inputpars.nofcomponents), d1(1,inputpars.nofcomponents),meanfield(1,inputpars.nofcomponents);
                  Matrix II(1,inputpars.nofcomponents,1,inputpars.nofcomponents);
+//Matrix III(1,3,1,3);Vector dn(1,3);int sl;
+
  char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
  int i,j,k,i1,j1,k1,di,dj,dk,l,r=0,s,sdim,m,n,m1;
  div_t result; // some modulo variable
@@ -159,17 +161,21 @@ for(i=1;i<=6;++i)
 
 // coupling coefficients jj[](a-c) berechnen
 // for (r=0;r<=sdim;++r)
- 
- Matrix * jj; jj= new Matrix [(sdim+1)+1];
- for(i=0;i<=sdim+1;++i){jj[i]=Matrix(1,inputpars.nofcomponents*inputpars.nofatoms,1,inputpars.nofcomponents*inputpars.nofatoms);} // coupling coeff.variable
+int exstr=0;if(ini.ipx!=NULL){exstr=6;}
+ Matrix * jj; jj= new Matrix [(sdim+2)*(1+exstr)];
+ for(i=0;i<=(sdim+2)*(1+exstr)-1;++i){jj[i]=Matrix(1,inputpars.nofcomponents*inputpars.nofatoms,1,inputpars.nofcomponents*inputpars.nofatoms);} // coupling coeff.variable
    if (jj == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
    // initialize mfold with zeros
    for(s=0;s<=mfold.in(mfold.na(),mfold.nb(),mfold.nc());++s){mfold.mi(s)=1000;}
-   for(s=0;s<=sdim;++s){jj[s]=0;} //clear jj(j,...)
+   for(s=0;s<=(sdim+2)*(1+exstr)-1;++s){jj[s]=0;} //clear jj(j,...)
 
    for(m=1;m<=inputpars.nofatoms;++m)
    {if ((*inputpars.jjj[m]).diagonalexchange==0){diagonalexchange=0;} // if any ion has anisotropic exchange - calculate anisotropic
+    if(exstr>0){if ((*(*ini.ipx).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                if ((*(*ini.ipy).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                if ((*(*ini.ipz).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+               }
     for(l=1;l<=(*inputpars.jjj[m]).paranz;++l)
     {//sum up l.th neighbour interaction of atom m
                                              // atom m = sublattice m
@@ -210,13 +216,89 @@ for(i=1;i<=6;++i)
         // used in the meanfield calculation below
 	for(i=1;i<=inputpars.nofcomponents;++i){for(j=1;j<=inputpars.nofcomponents;++j){
 	  jj[s](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=(*inputpars.jjj[m]).jij[l](i,j);
-          
-	//remark: function par:jij(l) returns exchange constants (*inputpars.jjj[1]).jij[l](1-9)
+
+//remark: function par:jij(l) returns exchange constants (*inputpars.jjj[1]).jij[l](1-9)
         }}
 
     }
-   }
 
+if(exstr>0){
+
+for(l=1;l<=(*(*ini.ipx).jjj[m]).paranz;++l)
+    {//sum up l.th neighbour interaction of atom m
+                                             // atom m = sublattice m
+	n=(*(*ini.ipx).jjj[m]).sublattice[l]; // n set to sublattice of neighbor l
+
+    // determine s (index of difference between crystal unit cells in the magnetic supercell)
+    // start with calculating the difference vector xyz of origins of crystal unit cells
+                   // bugfix GdVO3: sign of 2nd term changed and last term added 12.12.07
+     xyz=(*(*ini.ipx).jjj[m]).dn[l]+(*(*ini.ipx).jjj[m]).xyz-(*(*ini.ipx).jjj[n]).xyz;
+         // distance of neighbour l
+                                    // xyz of sublattice m
+                                                            // xyz of sublattice n
+
+    // transform distance vector xyz to primitive lattice
+     d=inputpars.rez*(const Vector&)xyz;
+
+     for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); //round relative position to integer numbers (to do
+                                             // something sensible if not integer, i.e. if sublattice
+					     // of neighbour has not been identified by par.cpp)
+
+        i=(int)(d_rint(1));
+	j=(int)(d_rint(2));
+	k=(int)(d_rint(3));
+        // here we have the difference between crystal unitc cells ijk in the magnetic
+        // supercell given by the indices i j k: if they point out of the magnetic supercell
+        // they are folded back into it in the next 3 lines: this is allowed  because it is
+        // irrelevant for the mean field summation
+        // where the neighbor actually sits, but only on which sublattice it sits...
+        while (i<=0) i+=sps.na();result=div(i,sps.na());i=result.rem; // only distance is important ...
+        while (j<=0) j+=sps.nb();result=div(j,sps.nb());j=result.rem;
+        while (k<=0) k+=sps.nc();result=div(k,sps.nc());k=result.rem;
+      // s is determined from a vector ijk connecting the different crystal unit cells
+	s=sps.in(i,j,k); //ijk range here from 0 to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
+
+        //     myPrintMatrix(stdout,(*inputpars.jjj[m]).jij[l]);
+
+	// sum up the contribution of the interaction parameter to the interaction matrix jj[s] to be
+        // used in the meanfield calculation below
+	for(i=1;i<=inputpars.nofcomponents;++i){for(j=1;j<=inputpars.nofcomponents;++j){
+
+// sum up exchange striction part dJalphabeta(ij)/dRalpha depsalphagamma Rijgamma/depsbeta
+// distance vector xyz (fractional lattice coordinates) transform to ijk system
+Vector Rij(1,3);dadbdc2ijk(Rij,xyz,inputpars.abc);
+
+// beta = 1  (xx)
+jj[s+(sdim+2)*1](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(1);
+// beta =2 (yy)
+jj[s+(sdim+2)*2](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(2);
+// beta =3 (zz)
+jj[s+(sdim+2)*3](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(3);
+// beta =4 (2yz=2zy)
+jj[s+(sdim+2)*4](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(3);
+jj[s+(sdim+2)*4](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(2);
+// beta =5 (2xz=2zx)
+jj[s+(sdim+2)*5](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(3);
+jj[s+(sdim+2)*5](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(1);
+// beta =6 (2xy=2yx)
+jj[s+(sdim+2)*6](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(2);
+jj[s+(sdim+2)*6](inputpars.nofcomponents*(m-1)+i,inputpars.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(1);
+
+       
+//remark: function par:jij(l) returns exchange constants (*inputpars.jjj[1]).jij[l](1-9)
+        }}
+
+    }  
+
+
+
+
+
+
+
+  }          
+
+   }
 
 
 if (ini.displayall==1)   // display spincf if button is pressed
@@ -274,13 +356,20 @@ for (r=1;sta>ini.maxstamf;++r)
      // of the crystal unit cell i j k is calculated by one matrix multiplication
      if (diagonalexchange==0||inputpars.nofatoms>1)
      {mf.mf(i,j,k)+=jj[l]*(const Vector&)sps.m(i1,j1,k1);
+if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
+            mf.mf(i,j,k)+=jj[l+(sdim+2)*bb]*sps.epsilon(bb)*(const Vector&)sps.m(i1,j1,k1);
+            }
      }else
      {//do the diagonal elements separately to accellerate the sum
       for(m1=1;m1<=inputpars.nofatoms*inputpars.nofcomponents;++m1)
-         {mf.mf(i,j,k)(m1)+=sps.m(i1,j1,k1)(m1)*jj[l](m1,m1);}
+         {mf.mf(i,j,k)(m1)+=sps.m(i1,j1,k1)(m1)*jj[l](m1,m1);
+if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
+            mf.mf(i,j,k)(m1)+=jj[l+(sdim+2)*bb](m1,m1)*sps.epsilon(bb)*sps.m(i1,j1,k1)(m1);
+            }
+         }
      }
     }}}
-  if(ini.doeps){mf.mf(i,j,k)+=sps.epsilon*GG;}
+  if(ini.doeps&&ini.linepscf==0){mf.mf(i,j,k)+=sps.epsilon*GG;}
   diff=mf.mf(i,j,k)-mfold.mf(i,j,k);sta+=diff*diff;
  // dE-=0.5*diff*(const Vector&)sps.m(i,j,k); // here we tried to calculate dE - energy difference for the step
   diff*=stepratio;mf.mf(i,j,k)=mfold.mf(i,j,k)+diff;//step gently ... i.e. scale change of MF with stepratio
@@ -323,19 +412,22 @@ for (r=1;sta>ini.maxstamf;++r)
 if(ini.ipx!=NULL){
                 for(l=1;l<=inputpars.nofatoms;++l)for(n=1;n<=(*(*ini.ipx).jjj[l]).paranz;++n)
                 {//calculate spincorrelation function of neighbour n of sublattice l
-                   corrfunc(II,n,l,inputpars,sps);double dldlssum=0;
+                   corrfunc(II,n,l,(*ini.ipx),sps);double dldlssumx=0,dldlssumy=0,dldlssumz=0;
                    for(int dl=1;dl<=inputpars.nofcomponents;++dl)
                     for(int dls=1;dls<=inputpars.nofcomponents;++dls){
-                        dldlssum+=(*(*ini.ipx).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
-mf.epsmf(1)+=0.5*(*(*ini.ipx).jjj[l]).dr[n](1)*dldlssum;
-mf.epsmf(2)+=0.5*(*(*ini.ipy).jjj[l]).dr[n](2)*dldlssum;
-mf.epsmf(3)+=0.5*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssum;
-mf.epsmf(4)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssum;
-mf.epsmf(4)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](2)*dldlssum;
-mf.epsmf(5)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](3)*dldlssum;
-mf.epsmf(5)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](1)*dldlssum;
-mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssum;
-mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssum;                    
+                        dldlssumx+=(*(*ini.ipx).jjj[l]).jij[n](dl,dls)*II(dl,dls);
+                        dldlssumy+=(*(*ini.ipy).jjj[l]).jij[n](dl,dls)*II(dl,dls);
+                        dldlssumz+=(*(*ini.ipz).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+mf.epsmf(1)+=0.5*(*(*ini.ipx).jjj[l]).dr[n](1)*dldlssumx;
+mf.epsmf(2)+=0.5*(*(*ini.ipy).jjj[l]).dr[n](2)*dldlssumy;
+mf.epsmf(3)+=0.5*(*(*ini.ipz).jjj[l]).dr[n](3)*dldlssumz;
+//if((*(*ini.ipx).jjj[l]).dn[n](3)==0){III=II(1,3,1,3);dn=(*(*ini.ipx).jjj[l]).dn[n];sl=(*inputpars.jjj[l]).sublattice[n];}
+mf.epsmf(4)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssumz;
+mf.epsmf(4)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](2)*dldlssumy;
+mf.epsmf(5)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](3)*dldlssumz;
+mf.epsmf(5)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](1)*dldlssumx;
+mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumy;
+mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssumx;                    
                 }}
 
                 sps.epsilon=inputpars.CelInv*mf.epsmf;
@@ -390,7 +482,9 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
 
 //printf ("hello end of selfconsistency loop after %i iterations\n",r);
 fe=evalfe(physprop,sps,mf,ini,inputpars, T,lnzi,ui);
-
+//for(int ec=1;ec<=6;++ec)printf("mf.eps(%i)=%g ",ec,mf.epsmf(ec));printf("\nsl=%i\n",sl);
+//myPrintMatrix(stdout,III);
+// myPrintVector(stdout,dn);
 
 if (ini.displayall==1)
  {

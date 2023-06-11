@@ -27,7 +27,7 @@ int main (int argc, char **argv)
 { std::clock_t startcputime = std::clock();
   FILE * fin=NULL; 
   char outfilename[MAXNOFCHARINLINE];
-  int im,j,l,doeps=0;
+  int im,j,l,doeps=0,linepscf=0,linepsjj=0;
   int nofstapoints=0,noffailedpoints=0;
   int options=1; // this integer indicates how many command strings belong to 
                  //options (=1+number of option-strings)
@@ -55,6 +55,8 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
+   if (strcmp(argv[im],"-linepscf")==0) {linepscf=1;if (options<im)options=im;} // do cf strain epsilon calculation linear 
+   if (strcmp(argv[im],"-linepsjj")==0) {linepsjj=1;if (options<im)options=im;} // do exchange strain epsilon calculation linear
    if (strcmp(argv[im],"-a")==0) {filemode="a";if (options<im)options=im;} // append output files
    if (strcmp(argv[im],"-stamax")==0&&im+1<=argc-1)
                                  {stamax=strtod (argv[im+1], NULL); // read stamax
@@ -68,7 +70,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
                                   fprintf(stdout,"#reading stable points from mcphas ouput files: results/%s*\n",readprefix);
  				 if (options<im+1)options=im+1;}
   }
-    inipar ini("mcphas.ini",prefix);    ini.doeps=doeps;
+    inipar ini("mcphas.ini",prefix);    ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;
     if(errexit==1)ini.errexit();
 
   if (ini.exit_mcphas!=0)
@@ -87,6 +89,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
 
 if(doeps) {
+if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
 // as class par load  parameters derivatives from file
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdx");
   if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.djdx");
@@ -134,7 +137,7 @@ fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
   if(((*ini.ipx)!=(*ini.ipy))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdy in nofneighbours or neighbour positions\n");exit(1);}
   if(((*ini.ipx)!=(*ini.ipz))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdz in nofneighbours or neighbour positions\n");exit(1);}
  fprintf(stderr,"# ... these are no problems, continuing\n");
- 
+ if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
   }
           }
 

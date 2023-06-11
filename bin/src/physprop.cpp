@@ -135,6 +135,18 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "#note: - for specific heat calculation use unit conversion 1mev/f.u.=96.48J/mol\n");
    fprintf (fout, "#      - below moments and energies are given per ion - not per formula unit !\n");
+   if(ini.doeps){
+    fprintf (fout, "#      - strain tensor eps is calculated selfconsistently.\n");
+    if(ini.linepscf)
+    {
+      fprintf (fout, "#      ... however, singleion ion Hamiltonian is always diagonalised with eps=0 (option -linepscf).\n");
+    }
+    if(ini.linepsjj)
+    {
+      fprintf (fout, "#      ... however, two ion interaction is always evaluated for eps=0 (option -linepsjj).\n");
+    }
+   }
+
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
    fprintf (fout, "#   x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] free energy f[meV/ion] energy u[meV/ion] total moment |m|     ma mb mc m||(projection along H) [mb/ion]");
    if(ortho==0){fprintf (fout, "mi   mj   mk[muB/f.u.]   Hi  Hj  Hk[T]");}

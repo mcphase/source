@@ -1,4 +1,4 @@
-// methods for class inipar 
+// methods for class inipar to store parameters for mcphasit 
 #include "inipar.hpp"
 #include "../../version"
 #include <martin.h>
@@ -46,15 +46,10 @@ printf (" (format as output file mcphas.xyt)\n\n");
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
 printf ("          -a     append output files (do not overwrite) \n");
-printf ("          -doeps refine strain epsilon using elastic,magnetoelastic constants \n");
-printf ("          -v     verbose mode: \n");
-printf ("                 * more information is printed to stdout, \n");
-printf (" 		  * the qvectors file mcphas.qom will contain \n");
-printf (" 		    the explicit spinconfigurations\n");
-printf (" 		  * ./results/.sps.eps will be updated not only \n");
-printf (" 		    when a H-T point has been finished but always \n");
-printf (" 		    when a structure with smaller free energy \n");
-printf (" 		    has been stabilized\n");
+printf ("          -doeps refine strain epsilon selfconsistently using elastic,magnetoelastic constants \n");
+printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz \n");
+printf ("          -linepscf with -doeps use zero strain single ion Hamiltoanian for every mean field iteration\n");
+printf ("          -linepsjj with -doeps use zero strain two ion interaction Hamiltoanian for every mean field iteration\n");
 printf ("          -prefix 001    try to read files starting with 001, e.g.\n");
 printf (" 		    001mcphas.ini, if these exist, otherwise take\n"); 
 printf (" 		    standard input files, check if in mcphas.ini there are\n");
@@ -66,6 +61,14 @@ printf (" 		    the x-y-T-Ha-Hb-Hc point is found and the calculation was stable
 printf ("                   (i.e. free energy in results/001mcphas.fum not zero do not \n");
 printf ("                   recalculate it but take results from this previous calculation\n");
 printf (" 		     and store those. Option to recalculate nonstable points only.\n");
+printf ("          -v     verbose mode: \n");
+printf ("                 * more information is printed to stdout, \n");
+printf (" 		  * the qvectors file mcphas.qom will contain \n");
+printf (" 		    the explicit spinconfigurations\n");
+printf (" 		  * ./results/.sps.eps will be updated not only \n");
+printf (" 		    when a H-T point has been finished but always \n");
+printf (" 		    when a structure with smaller free energy \n");
+printf (" 		    has been stabilized\n");
 printf (" Note: files which must be in current directory -\n");
 printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
       exit (EXIT_FAILURE);
@@ -258,7 +261,7 @@ inipar::inipar (const char * file,char * pref)
   strcpy(prefix,pref);
   xv=Vector(0,3);yv=Vector(0,3);zero=Vector(0,3);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
-  doeps=0;ipx=NULL;ipy=NULL;ipz=NULL;
+  doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;
   printf("reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
                 strcpy(savfilename,file);}
@@ -281,6 +284,8 @@ inipar::inipar (const inipar & p)
   prefix = new char[strlen(p.prefix)+1];
   strcpy(prefix,p.prefix);
   doeps=p.doeps;
+  linepscf=p.linepscf;
+  linepsjj=p.linepsjj;
   ipx=p.ipx;
   ipy=p.ipy;
   ipz=p.ipz;
