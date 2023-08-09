@@ -563,9 +563,9 @@ and the second line the elastic energy (also a ''single ion'' term),
 the third line the interaction terms (phonon, crystal field phonon), 
 the forth line the mixing term and 
 the last line  the magnetoelastic term. 
-In a selfconsistent solution it should be possible to 
+In a selfconsistent solution it is possible to 
 determine (i) $\epsilon$, (ii) $\langle O_l^m(i) \rangle $ and (iii)
-$\langle \vec u_i \rangle$. This should be able to produce multipolar phase diagrams including the
+$\langle \vec u_i \rangle$. This will produce multipolar phase diagrams including the
 magnetostrictive properties without the need of a detailed investigation of the symmetry adapted Hamiltonian.
 
 Setting zero the derivative of the expectation value of the Hamiltonian (\ref{Hamiltonian}) with respect to
@@ -602,62 +602,6 @@ we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can 
 
 
 
-\subsection{Progam Workflow}
-
-Technically the Hamiltonian (\ref{Htot}) is of the general form for 
-McPhase~\cite{rotter12-213201}, with single
-ion and interaction terms. The corresponding  mean field procedure can be done by an internal single ion module 
-''epsilon'', which represents not an ion, but the
-strain. Given $\langle u_{j}^{\alpha} \rangle$ and $\langle O_{\gamma}(\vec J_i) \rangle$ and
-appropriate interaction constants to the ''epsilon'' from (\ref{Hmix}) and (\ref{Hcfph}), respectively,
-the right side in (\ref{zeroeps}) can be evaluated in each mean field loop 
-in module ''epsilon'' function {\em Icalc}. Then elastic constants in (\ref{zeroeps}) can be used to calculate
-a new strain $\bar \epsilon$, a six component vector. Via the aforementioned appropriate
-interaction constants (from (\ref{Gmix}) and (\ref{Gcfph})) the strain will produce mean
-fields on lattice displacements and magnetic charge density (crystal field) and so on ...
-The free energy returned by the module ''epsilon'' should correspond to the elastic energy
-per unit cell given by equation (\ref{Eelconstvoigt}). 
-
-For the dynamics the ''epsilon'' module should not
-yield any single ion excitations. The excitations can be calculated without taking into account the
-term $H_{mix}$, because this is linear in the displacement operators and in the harmonic
-approximation the spectrum of the harmonic Einstein oscillator will not change with such an
-internal force. The strain has only to be taken into account as a linear modification of the crystal field
-parameters in the first term of equation (\ref{Hcfph}). This is done automatically by creating the
-file {\em mcdisp.mf} with the ''epsilon'' module.
-
-Elastic constants and mixing term parameters $G_{mix}$ should be created with the
-option {\em -bvk} of the program {\em makenn} and stored in the 
-file {\em mcphas.j}. Using {\em makenn} with the option {\em -cfph} will create
-the magnetoelastic parameters $G_{\rm cfph}$ and $\Gamma_{\rm cfph}$.
-
-If the program {\em mcphas} is started with option {\prg -doeps}
-and it finds elastic constants in the input file {\em mcphas.j}, it
- will use these and determine selfconsistently the strain $\epsilon$ by solving equations
-(\ref{zeroeps}). Elastic energy and strain tensor are stored in {\em results/mcphas.fum}.
-
- In this way it should be possible to model Jahn Teller transitions,
-phase diagrams, magnetostriction, thermal expansion (magnetic part) and dynamics consistently based
-only on point charges and Born von Karman springs. 
-
-The length change $\Delta L/L$ of a sample in a dilatometer experiment
-can be calculated from the strain tensor components
- using~\footnote{S. Bluegel, Juelich, private communication}
-
-\begin{equation}
-\frac{\Delta L}{L}=\sum_{\alpha\beta} \epsilon_{\alpha\beta} \hat L_{\alpha} \hat L_{\beta}
-\end{equation}
-
-where $\hat \mbf  L$ denotes the unit vector in the direction of
-measurement.
-
-
-Utopia: in a further step stress tensor components could be envisaged 
-to act similar as an external magnetic field in {\em McPhase}, these will only act on the
-''espilon'' module and on no other module. The equations given above have to be adapted accordingly 
-and then it should be possible to calculate in addition to magnetic phase diagrams also stress dependence
-of Jahn Teller transitions and excitations. 
-
 
 \subsection{Exchange Striction}
 
@@ -693,18 +637,101 @@ and equation (\ref{zeroeps}) is extended
  \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle u_{i}^{\delta} \rangle  \\
  &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\vec J_i) \rangle \nonumber \\
  &+& \frac{1}{2}\sum_{ii',\delta,\delta'\alpha',\gamma=1,..,3}
-\frac{\partial {\mathcal J}_{\delta\delta'}}{\partial R^{\alpha'}}
-\frac{\partial \epsilon_{\alpha'\gamma}\vec R_{ij}^{\gamma}}{\partial \epsilon_{\alpha}}
+\frac{\partial {\mathcal J}_{\delta\delta'}(\vec R_{ii'})}{\partial R^{\alpha'}}
+\frac{\partial \epsilon_{\alpha'\gamma} R_{ii'}^{\gamma}}{\partial \epsilon_{\alpha}}
 \langle \hat \mathcal I_{\delta}^i \hat \mathcal I_{\delta'}^{i'}\rangle \nonumber
 \end{eqnarray}
 
+
+\subsection{Progam Workflow}
+
+Technically the Hamiltonian (\ref{Htot}) is of the general form for 
+McPhase~\cite{rotter12-213201}, with single
+ion and interaction terms. The corresponding  mean field procedure can be done by an internal single ion module 
+''epsilon'', which represents not an ion, but the
+strain. Given $\langle u_{j}^{\alpha} \rangle$ and $\langle O_{\gamma}(\vec J_i) \rangle$ and
+appropriate interaction constants to the ''epsilon'' from (\ref{Hmix}) and (\ref{Hcfph}), respectively,
+the right side in (\ref{zeroeps}) can be evaluated in each mean field loop 
+in module ''epsilon'' function {\em Icalc}. Then elastic constants in (\ref{zeroeps}) can be used to calculate
+a new strain $\bar \epsilon$, a six component vector. Via the aforementioned appropriate
+interaction constants (from (\ref{Gmix}) and (\ref{Gcfph})) the strain will produce mean
+fields on lattice displacements and magnetic charge density (crystal field) and so on ...
+The free energy returned by the module ''epsilon''  correspond to the elastic energy
+per unit cell given by equation (\ref{Eelconstvoigt}). 
+
+For the dynamics the ''epsilon'' module does not
+yield any single ion excitations. The excitations can be calculated without taking into account the
+term $H_{mix}$, because this is linear in the displacement operators and in the harmonic
+approximation the spectrum of the harmonic Einstein oscillator will not change with such an
+internal force. The strain has only to be taken into account as a linear modification of the crystal field
+parameters in the first term of equation (\ref{Hcfph}). This is done automatically by creating the
+file {\em mcdisp.mf} with the ''epsilon'' module.
+
+Elastic constants and mixing term parameters $G_{mix}$ should be created with the
+option {\em -bvk} of the program {\em makenn} and stored in the 
+file {\em mcphas.j}. Using {\em makenn} with the option {\em -cfph} will create
+the magnetoelastic parameters $G_{\rm cfph}$ and $\Gamma_{\rm cfph}$.
+
+\subsubsection{Magnetoelastic Options to {\prg mcphas}}
+
+\begin{itemize}
+\item[{\prg -doeps}]
+If the program {\em mcphas} is started with option {\prg -doeps}
+and it finds elastic constants in the input file {\em mcphas.j}, it
+ will use these and determine selfconsistently the strain $\epsilon$ by solving equations
+(\ref{zeroeps}) and (\ref{Htot}). Elastic energy and strain tensor are stored in {\em results/mcphas.fum}.
+ In this way it is be possible to model Jahn Teller transitions,
+phase diagrams, magnetostriction, thermal expansion (magnetic part) and dynamics consistently based
+only on point charges and Born von Karman springs. 
 If {\prg mcphas} is used with option {\prg -doeps} and it finds files {\prg mcphas.djdx}, {\prg mcphas.djdy}, {\prg mcphas.djdz} with
 derivatives of the two ion interaction parameters with respect to
 spatial coordinates $x,y,z$ respectively, it performs a calculation of
-the corresponding correlation functions and computes the strain using
-equation (\ref{zeroepsex}). Note, that the contribution of the exchange
-striction (i.e. the contribution to (\ref{Hwithexstric})coming from the
-second term in the expansion (\ref{jjtaylor}) ) to the Hamiltonian is not taken into account in the calculation
-of the free energy in the current version of McPhase assuming that
-these are small.
+the corresponding correlation functions and computes the strain  using
+equation (\ref{zeroepsex}) at each iteration and 
+using  (\ref{jjtaylor}) the strain is used in the next iteration in
+ (\ref{Hwithexstric}) and in (\ref{Htot}). At the end of the iteration loop
+a selfconsistent strain is obtained.
+ 
+\item[{\prg -linepscf}]
+The option {\prg -linepscf} together with {\prg -doeps} will trigger 
+a calculation where equation (\ref{zeroeps}) (and in case
+of exchange striction terms (\ref{zeroepsex}))
+is used to calculate the strain $\epsilon$, (\ref{Htot}) is evaluated
+for zero strain, i.e. the crystal field striction is not calculated
+selfconsistently, but only in the linear approximation assuming that the 
+strain leads only to a negligible perturbation of the crystal field
+Hamiltonian.
+
+\item[{\prg -linepsjj}]
+The option {\prg -linepsjj} together with {\prg -doeps} will trigger 
+a calculation where equation (\ref{zeroepsex})
+is used to calculate the strain $\epsilon$, yet the modification of
+the two ion interaction by the strain is assumed to be small
+and two ion interaction parameters (\ref{jjtaylor}) are used
+in the mean field loop always for zero strain, i.e. the exchange striction is not calculated
+selfconsistently, but only in the linear approximation assuming that the 
+strain leads only to a negligible perturbation of the two ion interaction
+Hamiltonian.
+
+
+\end{itemize}
+
+
+The length change $\Delta L/L$ of a sample in a dilatometer experiment
+can be calculated from the strain tensor components
+ using~\footnote{S. Bluegel, Juelich, private communication}
+
+\begin{equation}
+\frac{\Delta L}{L}=\sum_{\alpha\beta} \epsilon_{\alpha\beta} \hat L_{\alpha} \hat L_{\beta}
+\end{equation}
+
+where $\hat \mbf  L$ denotes the unit vector in the direction of
+measurement.
+
+
+Utopia: in a further step stress tensor components could be envisaged 
+to act similar as an external magnetic field in {\em McPhase}, these will only act on the
+''espilon'' module and on no other module. The equations given above have to be adapted accordingly 
+and then it should be possible to calculate in addition to magnetic phase diagrams also stress dependence
+of Jahn Teller transitions and excitations. 
 

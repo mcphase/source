@@ -70,6 +70,9 @@
 #                                       search careful for 7zS.sxf ... in https://github.com/github/ghfw-build-extra/blob/master/7-Zip/7zSD.sfx
 #                                          and substitute the file in utils/wrapper/izpack2exe/ with that
 #                                           correct bugs in izpack2exe.py (format of config.txt errors)]
+#	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
+#				and then do: 
+#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/13.1.0/lib/gcc/current/
 #	        Note on compiling with dos:   make unreleased_remove and copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
 #                                    mingw win64 shell  (from startup menu) 

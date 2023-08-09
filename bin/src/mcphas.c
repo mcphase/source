@@ -34,7 +34,7 @@ int main (int argc, char **argv)
   float x,y,dumm;
   double z,u;
   double T;
-  float nn[20];nn[0]=19;
+  float nn[100];nn[0]=99;
   double sta=0;
   double stamax=1e33;
   Vector xv(1,3);

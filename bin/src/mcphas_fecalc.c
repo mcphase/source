@@ -71,7 +71,7 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
 {s=sps.in(i,j,k);
  for(l=1;l<=inputpars.nofatoms;++l)
  {physprop.fe-=KB*T*lnzi[s][l];// sum up contributions from each ion
-  physprop.u+=ui[s][l];
+  physprop.u+=ui[s][l];//fprintf(stdout,"lnzi(%i,%i)=%g ",s,l,lnzi[s][l]);
 // correction term
   for(m1=1;m1<=inputpars.nofcomponents;++m1)
    {d1[m1]=sps.m(i,j,k)[inputpars.nofcomponents*(l-1)+m1];
@@ -83,7 +83,7 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
  }
 }}}
 physprop.fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
-physprop.u/=(double)sps.n();
+physprop.u/=(double)sps.n();//fprintf(stdout,"fe=%g\n",physprop.fe);
 
 if(ini.doeps){physprop.Eel=sps.epsilon*inputpars.Cel*sps.epsilon;
               physprop.fe+=physprop.Eel;physprop.u+=physprop.Eel;              
@@ -155,8 +155,8 @@ for(i=1;i<=6;++i)
  // printf("#Inverting Elastic Constants Matrix\n");
   inputpars.CelInv=(1.0/(sps.na()*sps.nb()*sps.nc()))*inputpars.Cel.Inverse();
             //
-// initialize epsilon to zero
-  sps.epsilon=0;mf.epsmf=0;
+// initialize epsilon mean field to zero
+  mf.epsmf=0;
 }
 
 // coupling coefficients jj[](a-c) berechnen
@@ -396,6 +396,8 @@ if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
    for(m1=1;m1<=inputpars.nofcomponents;++m1)
    {d1[m1]=mf.mf(i,j,k)[lm1m3+m1];}
    (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+   if(isnan(lnzi[s][l])){fprintf (stderr, "Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   if(isnan(ui[s][l])){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    for(m1=1;m1<=inputpars.nofcomponents;++m1)
    {sps.m(i,j,k)(lm1m3+m1)=moment[m1];}
   }
@@ -418,17 +420,17 @@ if(ini.ipx!=NULL){
                         dldlssumx+=(*(*ini.ipx).jjj[l]).jij[n](dl,dls)*II(dl,dls);
                         dldlssumy+=(*(*ini.ipy).jjj[l]).jij[n](dl,dls)*II(dl,dls);
                         dldlssumz+=(*(*ini.ipz).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
-mf.epsmf(1)+=0.5*(*(*ini.ipx).jjj[l]).dr[n](1)*dldlssumx;
+mf.epsmf(1)+=0.5*(*(*ini.ipx).jjj[l]).dr[n](1)*dldlssumx;  // we can take dr from ipx because ipy ipz have all the same dr !
 mf.epsmf(2)+=0.5*(*(*ini.ipy).jjj[l]).dr[n](2)*dldlssumy;
 mf.epsmf(3)+=0.5*(*(*ini.ipz).jjj[l]).dr[n](3)*dldlssumz;
 //if((*(*ini.ipx).jjj[l]).dn[n](3)==0){III=II(1,3,1,3);dn=(*(*ini.ipx).jjj[l]).dn[n];sl=(*inputpars.jjj[l]).sublattice[n];}
-mf.epsmf(4)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssumz;
-mf.epsmf(4)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](2)*dldlssumy;
-mf.epsmf(5)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](3)*dldlssumz;
-mf.epsmf(5)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](1)*dldlssumx;
-mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumy;
-mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssumx;                    
-                }}
+mf.epsmf(4)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](2)*dldlssumz;
+mf.epsmf(4)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssumy;
+mf.epsmf(5)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](1)*dldlssumz;
+mf.epsmf(5)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](3)*dldlssumx;
+mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssumy;
+mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumx;                    
+               }}
 
                 sps.epsilon=inputpars.CelInv*mf.epsmf;
                }
@@ -491,12 +493,12 @@ if (ini.displayall==1)
      strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
       fin_coq = fopen_errchk (outfilename, "w");
-        sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+        sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g fe=%g",sps.n(),r,sta,spinchange,fe);
       sps.eps(fin_coq,text);
       fclose (fin_coq);
       fprintf(stdout,"%s\n",text);
       sps.print(stdout);
-       sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+       sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g fe=%g",sps.n(),r,sta,spinchange,fe);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
       sleep(200);

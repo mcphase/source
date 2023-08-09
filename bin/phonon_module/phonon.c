@@ -91,7 +91,7 @@ if(Norm(K)==0){(*U)=0; // last term  to correct energy
 (*lnZ)=0; // last term  to correct energy
   u0=0;return;}
 
- int sort=1,maxiter=1000000;double factor=1e-3;
+ int sort=1,maxiter=1000000;double factor=1e-5;
 K*=factor;
  EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter); // K is destroyed by this
 Omega/=factor; 
@@ -118,6 +118,7 @@ Z=exp(-Delta3/K_BT);
 // the energy U is sum_i Ei exp(-Ei/(kT))/Z
 // with Ei=w0(0.5+i)-1/2 FT.u0 (the last term is added to (*U) at the end of Icalc
 (*U)=Delta1*(0.5+X/(1-X))+Delta2*(0.5+Y/(1-Y))+Delta3*(0.5+Z/(1-Z));
+//printf("Icalc phonon initial u=%g lnz=%g \n"(*U),(*lnZ));
 
 // u0=-ST Omega^-1 S Fxc= (SrT-iSiT)*Om*(Sr+iSi)*F
 // =(SrT-iSiT) (Om Sr F + i Om Si F)= 

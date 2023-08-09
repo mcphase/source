@@ -231,6 +231,7 @@ void spincf::spinfromq (int n1,int n2, int n3,Vector & qvector,Vector & nettom,
   qv=1; // evtl koennte hier noch ein vorzeichen uebergeben werden (sodass nettom positiv)
   Vector rr(1,3);
   delete []mom;
+  epsilon=0;
   nofa=n1; nofb=n2; nofc=n3;
   mxa=n1+1; mxb=n2+1; mxc=n3+1;
   int l;
