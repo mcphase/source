@@ -222,9 +222,13 @@ $invrtoijk=inv($rtoijk); #invert this matrix for use later
 #             [ 2  2]
 #            ]Note: transpose() does what it says and is a convenient way to turn row vectors into column vectors.
 
+
 $p= $p x $rtoijk;
-unless($tabout){ print "primitive lattice[A]:".$p."\n";}
+$pVolume=inner($p->slice(":,(0)"),crossp($p->slice(":,(1)"),$p->slice(":,(2)")));
+unless($tabout){ print "primitive lattice[A]:".$p."\nPrimitive Unit Cell Volume [A^3]: ".$pVolume."\n";}
     $r=0;
+# select a Vector from primitive lattice print $p->slice(":,(0)");
+# calculate Volume of primitive unit cell in A^3
 
 # first determine maximum distance of a basis atom to origin of unit cell
     $distmax=0;
@@ -1286,7 +1290,8 @@ sub endprint {
 
 # print $l ("#*************************************************************************\n");
 
-print $l "# Nonzero Elastic constants in meV per primitive crystal unit cell \n";
+print $l "#! Primitive Unit Cell Volume [A^3]: pVol=".$pVolume."\n";
+print $l "# Nonzero Elastic constants [meV per primitive crystal unit cell] \n";
 print $l "# in Voigt notation only first index<=second index has to be given\n";
 print $l "# because the constants are symmetric Celij=Celji\n";
 print $l "# Elastic constants refer to the Euclidean coordinate system ijk defined\n";
@@ -1299,6 +1304,12 @@ for($j=$i;$j<=6;++$j){
 if(abs($Cel->at($i,$j))>1e-6){++$i1;print $l sprintf(" Cel%i%i=%+10.9g",$i,$j,$Cel->at($i,$j));}
                      }if($i1>0){print $l "\n";}}
 if($i1==0){print $l "\n";}
+
+# 1meV= 1.60218e-22 J
+# 1 A= 1e-10 m
+$confact=0.1*1.60218/$pVolume;
+print $l "#! unit conversion:  1 meV/Primitive Unit Cell Volume =".$confact." GPa\n";
+
 
 $text="#! nofatoms= $nofatoms  nofcomponents=$nofcomponents  number of atoms in primitive unit cell/number of components of each spin\n";
  if($cfph!=0){$nofatomsnew=$nofatoms+$nofmagneticatoms;}

@@ -687,20 +687,24 @@ If {\prg mcphas} is used with option {\prg -doeps} and it finds files {\prg mcph
 derivatives of the two ion interaction parameters with respect to
 spatial coordinates $x,y,z$ respectively, it performs a calculation of
 the corresponding correlation functions and computes the strain  using
-equation (\ref{zeroepsex}) at each iteration and 
-using  (\ref{jjtaylor}) the strain is used in the next iteration in
- (\ref{Hwithexstric}) and in (\ref{Htot}). At the end of the iteration loop
-a selfconsistent strain is obtained.
+equation (\ref{zeroepsex}) at each iteration. Subsequently, making use of the Taylor expansion
+of the interaction constants (\ref{jjtaylor}) the computed strain is used 
+in the next iteration for the the mean field Hamiltonian 
+(mean field theory is used by {\em McPhase}
+to solve the Hamiltonian (\ref{Hwithexstric}) and (\ref{Htot})). 
+At the end of the iteration loop mean fields, moments $\langle I \rangle$ and 
+a selfconsistent strain tensor $\epsilon$ is obtained.
  
 \item[{\prg -linepscf}]
 The option {\prg -linepscf} together with {\prg -doeps} will trigger 
 a calculation where equation (\ref{zeroeps}) (and in case
 of exchange striction terms (\ref{zeroepsex}))
-is used to calculate the strain $\epsilon$, (\ref{Htot}) is evaluated
+is used to calculate the strain $\epsilon$, however the last two terms in
+(\ref{Htot}) are always evaluated
 for zero strain, i.e. the crystal field striction is not calculated
 selfconsistently, but only in the linear approximation assuming that the 
 strain leads only to a negligible perturbation of the crystal field
-Hamiltonian.
+Hamiltonian. 
 
 \item[{\prg -linepsjj}]
 The option {\prg -linepsjj} together with {\prg -doeps} will trigger 
