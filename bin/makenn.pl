@@ -629,9 +629,9 @@ close Fin;
                                     $outstringp.= " ".(-$numbers[$i]);
                                     }
   for($lm=1;$lm<=27;++$lm){
-   $ix=($lm-1)*3+$off+6; # $numbers[$ix]=dBlm/dux
-   $iy=($lm-1)*3+$off+6+1; # $numbers[$ix]=dBlm/duy
-   $iz=($lm-1)*3+$off+6+2; # $numbers[$ix]=dBlm/duz
+   $ix=($lm-1)*3+6; # $numbers[$ix]=dBlm/dux
+   $iy=($lm-1)*3+6+1; # $numbers[$iy]=dBlm/duy
+   $iz=($lm-1)*3+6+2; # $numbers[$iz]=dBlm/duz
    # $i ... dBlm/dux  $i+1  ... dBlm/duy  $i+2 ... dBlm/duz
    
    # voigt component 11 $lm
@@ -640,7 +640,7 @@ close Fin;
  # cf parameter derivative is in units of a0 as delivered by pointc program
    # voigt component 22 $lm
    $GG->slice("2,$lm")+=-$Ry*$numbers[$iy]/0.5292;  
-   # voigt component 22 $lm
+   # voigt component 33 $lm
    $GG->slice("3,$lm")+=-$Rz*$numbers[$iz]/0.5292;  
    # voigt component 4=(23) $lm
    $GG->slice("4,$lm")+=-0.5*($Ry*$numbers[$iz]+$Rz*$numbers[$iy])/0.5292;  
