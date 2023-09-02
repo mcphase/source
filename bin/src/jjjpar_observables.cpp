@@ -211,12 +211,12 @@ switch (module_type)
             if(Norm(Zc)<SMALL){fprintf(stderr,"WARNING mcdiff: Z(K) coefficients not found or zero in file %s\n",sipffilename);return false;}
             Mq=(*iops).MQ(th,ph,J0,J2,J4,J6,Zc,est);return true;break;
    case 5: 
-            {Vector mom(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
+            {Vector mom(1,(*clusterpars).cs.nofatoms*3);Vector rijk(1,3);
              cluster_Micalc (mom,est);
             // now we have all magnetic moments in m1 vector and we have to do the
             // magnetic structure factor = sum_i Mi exp(iQri) Fi(Q) * DWF
-               Mq=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
-             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,(*clusterpars).abc);
+               Mq=0;for(int a=1;a<=(*clusterpars).cs.nofatoms;++a){
+             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,(*clusterpars).cs.abc);
             double QR=Qvec*rijk;
             complex<double> exponent(cos(QR),-sin(QR)); 
 
@@ -276,14 +276,14 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
    case 4:  getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph); // for internal module so1ion xyz||abc and we have to give dMQ1 polar angles with respect to xyz
             return (*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);break;
    case 5:  int nnt;
-            {ComplexVector m1(1,(*clusterpars).nofatoms*3);Vector rijk(1,3);
+            {ComplexVector m1(1,(*clusterpars).cs.nofatoms*3);Vector rijk(1,3);
              m1(1)=dMQ(1);float dd=ddelta;
             nnt=cluster_dm(3,transitionnumber,T,m1,dd,n,nd,ests);
             // now we have all magnetic moments in m1 vector and we have to do the
             // (magnetic structure factor) = sum_i Mi exp(+iQri) Fi(Q) DWF            
             // dmq1=<-|(magnetic structure factor)*|+> = sum_i <-|Mi|+> exp(-iQri) Fi(Q) DWF
-            dMQ=0;for(int a=1;a<=(*clusterpars).nofatoms;++a){
-             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,(*clusterpars).abc);
+            dMQ=0;for(int a=1;a<=(*clusterpars).cs.nofatoms;++a){
+             dadbdc2ijk(rijk,(*(*clusterpars).jjj[a]).xyz,(*clusterpars).cs.abc);
             //printf("Qvec=(%g %g %g)   rijk=(%g %g %g)\n",Qvec(1),Qvec(2),Qvec(3),rijk(1),rijk(2),rijk(3));
             double QR=Qvec*rijk;
             if (delta<0){ QR=-QR;}  // in case of negative delta we must take <-|Mi|+> exp(+iQRi) Fi(Q) DWF  in order 

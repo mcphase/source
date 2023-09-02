@@ -1234,13 +1234,13 @@ print FOUT << "EOF";
 # it follows a list of nat lines with nonmagnetic atoms
 # ... notes: - if an occupancy other than 1.0 is needed, just reduce
 #              the scattering length linear accordingly
-#            - da db and dc are not used by the program, dr1,dr2 and dr3
-#              refer to the primitive lattice given below
 #            - Debye Waller Factor notation: sqr(Intensity) ~ structure factor ~
 #              ~sum_n ()n exp(-2 DWFn sin^2(theta) / lambda^2)=EXP (-Wn),
 #              relation to other notations: 2*DWF = B = 8 pi^2 <u^2>, units DWF (A^2)
 #
-#! use_dadbdc=0
+#! use_dadbdc=1
+#            - 0 means: da db and dc are not used by the program (unless you enter a line #! use_dadbdc=1),
+#               dr1,dr2 and dr3 refer to the primitive lattice given below
 #
 # Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
 EOF

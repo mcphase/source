@@ -141,24 +141,24 @@ else
  inipar ini("mcphas.ini",prefix);ini.doeps=doeps;
  par inputpars("./mcphas.j",verbose ); inputpars.save("./results/_mcphas.j",0); 
  nofthreads = ini.nofthreads;
-  Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
-  Vector Imom(1,inputpars.nofcomponents);
-  Vector h1(1,inputpars.nofcomponents),h1ext(1,3);h1ext=0; 
+  Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
+  Vector Imom(1,inputpars.cs.nofcomponents);
+  Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,3);h1ext=0; 
   // here save single ion property files to results
   inputpars.save_sipfs("./results/_");
   //determine saturation momentum (used for scaling the plots, generation of qvectors)
-  for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
-  for (im=1;im<=inputpars.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
+  for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
+  for (im=1;im<=inputpars.cs.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
                             (*inputpars.jjj[l]).Icalc(Imom,T,h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
-                            Imax(inputpars.nofcomponents*(l-1)+im)=Imom(im);
+                            Imax(inputpars.cs.nofcomponents*(l-1)+im)=Imom(im);
                                               }
                                   }
  // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
-   testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.nofatoms,inputpars.nofcomponents);
+   testspincf testspins (ini.maxnoftestspincf,"./mcphas.tst","./results/mcphas.phs",inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
    testspins.save("./results/_mcphas.tst","w");
    qvectors testqs (ini,inputpars,Imax,"./results/mcphas.qvc",verbose);
  // declare variable physprop (typa class physproperties)
-   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
+   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
    	int nofstapoints=0,noffailedpoints=0,s=0;
 
 if(poly==0){

@@ -568,6 +568,10 @@ for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
   system("pointc -d ".$sipf_file[$nnn]." results/makenn.a$nnn.pc > results/makenn.a$nnn.sipf");
           }
   $sipf_file[$nnn]="results/makenn.a$nnn.sipf";
+  # set nuclear scattering lengths in this purely magnetic atom zero (for mcdiff)
+  setvariable("SCATTERINGLENGTHREAL",0,$sipf_file[$nnn]);
+  setvariable("SCATTERINGLENGTHIMAG",0,$sipf_file[$nnn]);
+
   if($cfph==2){copy("results/pointc.dLlm","results/makenn.a$nnn.dLlm");}
   if($cfph==3){copy("results/pointc.dBlm","results/makenn.a$nnn.dBlm");}
  }
@@ -1359,7 +1363,42 @@ sub extractstring {
             }
 # **********************************************************************************************
 
+# **********************************************************************************************
+# sets variable in file
+# 
+# for example somewhere in a file data.dat is written the text "sta=0.24"
+# to set this number  to 0.20 in this file just use:         
+#
+# setvariable("sta",0.20,"data.dat");
+# 
+# 
+#
+sub setvariable {
+my ($varnam,$value,$file)=@_;
+my $line;   
+unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
+   open ( Fout, ">range.out");$ri=0;
+  while($line=<Fin>)
+     { if ($line=~/^(#!|[^#])*?\b$varnam\s*=/) {
+                                            #here write modified parameter set to line
+       # $line=~s/(^(#!|[^#])*?\b)$varnam[ \t]*=[ \t]*([^ \;\n\r\t\*]*)([ \;\n\r\t\*])/$1$varnam=$value$4/g;
+       $line=~s/$varnam[ \t]*=[ \t]*([^ \;\n\r\t\*]*)([ \;\n\r\t\*])/$varnam=$value$2/g;
+                                               }
+       print Fout $line;
+      }
+      close Fin;
+      close Fout;
 
+     unless (rename "range.out",$file)
+     {unless(open (Fout, ">$file"))     
+      {die "\n error:unable to write to $file\n";}
+      open (Fin, "range.out");
+      while($line=<Fin>){ print Fout $line;}
+      close Fin;
+      close Fout;
+      system "del range.out"; 
+     }
+}
 
 
 # **********************************************************************************************

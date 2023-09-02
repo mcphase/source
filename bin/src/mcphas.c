@@ -142,21 +142,21 @@ fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
           }
 
 
-  Vector Imax(1,inputpars.nofatoms*inputpars.nofcomponents);
-  Vector Imom(1,inputpars.nofcomponents);
-  Vector mmax(1,3*inputpars.nofatoms);
+  Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
+  Vector Imom(1,inputpars.cs.nofcomponents);
+  Vector mmax(1,3*inputpars.cs.nofatoms);
   Vector mmom(1,3);
-  Vector h1(1,inputpars.nofcomponents),h1ext(1,3);h1ext=0;
+  Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,3);h1ext=0;
  if(doeps){printf("#Inverting Elastic Constants Matrix\n");
   inputpars.Cel.Inverse();
            }
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
 if(verbose==1){printf("determine saturation momentum running singleion calculations for different fields");}
-T=1.0;for(l=1;l<=inputpars.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
-      for (im=1;im<=inputpars.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
+T=1.0;for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
+      for (im=1;im<=inputpars.cs.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
                             (*inputpars.jjj[l]).Icalc(Imom,T,h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
-                            Imax(inputpars.nofcomponents*(l-1)+im)=Imom(im);
-                           //if(verbose==1)printf("Imax(%i)=%g\n",inputpars.nofcomponents*(l-1)+im,Imax(inputpars.nofcomponents*(l-1)+im));
+                            Imax(inputpars.cs.nofcomponents*(l-1)+im)=Imom(im);
+                           //if(verbose==1)printf("Imax(%i)=%g\n",inputpars.cs.nofcomponents*(l-1)+im,Imax(inputpars.cs.nofcomponents*(l-1)+im));
 			   }
       for (im=1;im<=3;++im){h1=0;h1ext=0;h1ext(im)=20; //just put some high field
                           (*inputpars.jjj[l]).mcalc(mmom,T,h1,h1ext,(*inputpars.jjj[l]).Icalc_parstorage);
@@ -171,7 +171,7 @@ T=0.0;h=0;
     strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.tst");
     if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.tst");
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
-    testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.nofatoms,inputpars.nofcomponents);
+    testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
       
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
     strcpy(prefix+11+strlen(ini.prefix),"mcphas.tst");
@@ -181,7 +181,7 @@ T=0.0;h=0;
     qvectors testqs (ini,inputpars,Imax,outfilename,verbose);
 
 // declare variable physprop (typa class physproperties)
-   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.nofatoms,inputpars.nofcomponents);
+   physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                         
 if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
@@ -301,7 +301,7 @@ int normalizedadbdc(Vector & dadbdc,double n,par & inputpars)
    {if(Norm(dadbdc)>0.00001){ // normalize Vector dadbdc to length n
     Vector Hijk(1,3);
     Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
-                     abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+                     abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
     dadbdc2ijk(Hijk,dadbdc,abc);
     Hijk*=n/Norm(Hijk);
     ijk2dadbdc(dadbdc,Hijk,abc);

@@ -497,6 +497,7 @@ void jjjpar::save_sipf(FILE * fout)
 
   if(module_type>0&&module_type!=5) // in case of internal modules save common information
    {fprintf(fout,"CHARGE=%g\n",charge);
+    fprintf(fout,"MAGNETIC=%i\n",magnetic);
 
     fprintf(fout,"#----------------\n# number of electrons in unfilled shell gJ\n#----------------\nnof_electrons=%i\n\n",nof_electrons);
     fprintf(fout,"#----------------\n# Lande factor gJ\n#----------------\nGJ=%g\n\n",gJ);
@@ -755,7 +756,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
   
  DWF=dwf;SLR=slr;SLI=sli;
- charge=0;
+ charge=0;magnetic=0;
   magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=0;  magFFj0[1]=1;
   magFFj2=Vector(1,MAGFF_NOF_COEFF);magFFj2=0;
   magFFj4=Vector(1,MAGFF_NOF_COEFF);magFFj4=0;
@@ -828,6 +829,7 @@ jjjpar::jjjpar (const jjjpar & pp)
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   SLR=pp.SLR;SLI=pp.SLI;
   charge=pp.charge;
+  magnetic=pp.magnetic;
   FF_type=pp.FF_type;
   nof_electrons=pp.nof_electrons;
   modulefilename=new char[MAXNOFCHARINLINE];
@@ -858,18 +860,18 @@ jjjpar::jjjpar (const jjjpar & pp)
                           // est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());est=pp.est;
                           // Ia
                           // cluster_ini_Imat(); 
-                          dim=1; Vector Hxc(1,(*clusterpars).nofcomponents);Vector Hext(1,3);
-                          dnn= new int [(*clusterpars).nofatoms+1];
+                          dim=1; Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1,3);
+                          dnn= new int [(*clusterpars).cs.nofatoms+1];
                           // determine dimension of H matrix
-                          for (int n=1;n<=(*clusterpars).nofatoms;++n)
+                          for (int n=1;n<=(*clusterpars).cs.nofatoms;++n)
                           {dnn[n]=(*(*clusterpars).jjj[n]).opmat(1,Hxc,Hext).Rhi();
                            dim*=dnn[n];
                           }
                           Ia= new zsMat<double> * [nofcomponents+1];
                           for(int n = 1;n<=nofcomponents;++n){Ia[n]=new zsMat<double>(dim,dim);(*Ia[n])=(*pp.Ia[n]);}
                           // cluster_M
-                          cluster_M= new zsMat<double> * [3+3*(*clusterpars).nofatoms+1];
-                          for(int a=0;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+                          cluster_M= new zsMat<double> * [3+3*(*clusterpars).cs.nofatoms+1];
+                          for(int a=0;a<=(*clusterpars).cs.nofatoms;++a)for(int n=1;n<=3;++n)
                            {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
                             cluster_M[index_M]=new zsMat<double>(dim,dim);
                             (*cluster_M[index_M])=(*pp.cluster_M[index_M]);
@@ -961,7 +963,7 @@ jjjpar::~jjjpar ()
   delete []modulefilename;// will not work in linux
    if (module_type==5) {for(int i=1;i<=nofcomponents;++i)
                             { delete Ia[i];}
-                       for(int a=0;a<=(*clusterpars).nofatoms;++a)for(int n=1;n<=3;++n)
+                       for(int a=0;a<=(*clusterpars).cs.nofatoms;++a)for(int n=1;n<=3;++n)
                         {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
                          delete cluster_M[index_M];}
                         delete[]Ia;delete[]cluster_M; delete []dnn;

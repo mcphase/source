@@ -33,28 +33,28 @@ PRB 2008 \n\
  par inp(argv[1]);
  printf("# program clusterize: finished reading input file\n");
  // determine the number of components (=orig nofcomp x number of atoms in biggest cluster)
- int i=2,cnr,noc=inp.nofcomponents;
+ int i=2,cnr,noc=inp.cs.nofcomponents;
  while(i<argc)
   {int n=0;
    while(i<argc&&argv[i][0]!='0')
-   {n+=inp.nofcomponents;++i;
+   {n+=inp.cs.nofcomponents;++i;
    }++i;
    if(n>noc)noc=n;
   }
  printf("# ... clusterizing and testing output\n");
- par out(inp.a,inp.b,inp.c,inp.alpha,inp.beta,inp.gamma,noc);
- out.r=inp.r;out.rez=inp.rez;
+ par out(inp.cs.abc,noc);
+ out.cs.r=inp.cs.r;out.rez=inp.rez;
  char filename[1000];
  // create cluster.j files
  i=2;cnr=0;
  while(i<argc)
  {// for each cluster create a par and store it to cluster.j
-  par clust(inp.a,inp.b,inp.c,inp.alpha,inp.beta,inp.gamma,inp.nofcomponents);
-  clust.r=2.0*inp.r;clust.rez=0.5*inp.rez;
+  par clust(inp.cs.abc,inp.cs.nofcomponents);
+  clust.cs.r=2.0*inp.cs.r;clust.rez=0.5*inp.rez;
   ++cnr;int iatom1=i,nofcat=0;Vector cog(1,3);cog=0;
   while(i<argc&&argv[i][0]!='0')
   {int n=(int)strtod(argv[i],NULL);
-   if(n>inp.nofatoms||n<1){fprintf(stderr,"Error clusterize: atom number out of range 1-%i\n",inp.nofatoms);exit(1);}
+   if(n>inp.cs.nofatoms||n<1){fprintf(stderr,"Error clusterize: atom number out of range 1-%i\n",inp.cs.nofatoms);exit(1);}
    int newat=clust.newatom(inp.jjj[n]);cog+=(*inp.jjj[n]).xyz;++nofcat;
    ++i;
    // here delete neighbours which do not belong to cluster
@@ -75,7 +75,7 @@ PRB 2008 \n\
    }
   }++i;
   cog/=nofcat; // now center of gravity of cluster is determined
-  for(int n=1;n<=clust.nofatoms;++n)(*clust.jjj[n]).xyz-=cog;
+  for(int n=1;n<=clust.cs.nofatoms;++n)(*clust.jjj[n]).xyz-=cog;
 
   // store cluster'cnr'.j
   sprintf(filename,"cluster%i.j",cnr);
@@ -92,7 +92,7 @@ PRB 2008 \n\
 #     but saves a lot of memory ...\n\
 #!noperl\n\
 # the individual moments\n");
-  for(int n=1;n<=clust.nofatoms;++n)
+  for(int n=1;n<=clust.cs.nofatoms;++n)
   {fprintf(fout,"\
 $M%i_1=2.0*$I%i_1;\n\
 $M%i_2=2.0*$I%i_2;\n\
@@ -103,7 +103,7 @@ $M%i_3=2.0*$I%i_3;\n",n,n,n,n,n,n);
 $M1=$M1_1;\n\
 $M2=$M1_2;\n\
 $M3=$M1_3;\n");
-  for(int n=2;n<=clust.nofatoms;++n)
+  for(int n=2;n<=clust.cs.nofatoms;++n)
   {fprintf(fout,"\
 $M1=$M1+$M%i_1;\n\
 $M2=$M2+$M%i_2;\n\
@@ -111,9 +111,9 @@ $M3=$M3+$M%i_3;\n",n,n,n);
    }
    fprintf(fout,"\
 # for running mcdisp it is needed to define a interaction operator\n");
-   for(int n=1;n<=clust.nofatoms;++n)for(int nn=1;nn<=inp.nofcomponents;++nn)
-   {fprintf(fout,"$I%i=$I%i_%i;\n",(n-1)*inp.nofcomponents+nn,n,nn);}
-   for(int n=clust.nofatoms*inp.nofcomponents+1;n<=noc;++n)
+   for(int n=1;n<=clust.cs.nofatoms;++n)for(int nn=1;nn<=inp.cs.nofcomponents;++nn)
+   {fprintf(fout,"$I%i=$I%i_%i;\n",(n-1)*inp.cs.nofcomponents+nn,n,nn);}
+   for(int n=clust.cs.nofatoms*inp.cs.nofcomponents+1;n<=noc;++n)
    {fprintf(fout,"$I%i=$I1_1;\n",n);}    
   fclose(fout);
   jjjpar jjjnew(cog(1),cog(2),cog(3),filename,noc);
@@ -123,7 +123,7 @@ $M3=$M3+$M%i_3;\n",n,n,n);
 
     // first: increase the number of components in the in file so that we can store
      // these atoms correctly
-     int nofcomponents=inp.nofcomponents;
+     int nofcomponents=inp.cs.nofcomponents;
      inp.increase_nofcomponents(noc-nofcomponents);
  
 
@@ -208,14 +208,14 @@ $M3=$M3+$M%i_3;\n",n,n,n);
      {(*inp.jjj[n]).delpar(nnn);--nnn;}
     }
     Vector abc(1,3);
-    abc(1)=out.a;abc(2)=out.b;abc(3)=out.c;
+    abc(1)=out.cs.abc(1);abc(2)=out.cs.abc(2);abc(3)=out.cs.abc(3);
     (*out.jjj[cnr]).add((*inp.jjj[n]),abc);
    }++i;
   }
   
    
  // here add the remaining atoms (which are not in clusters) to out !
- for(int nn=1;nn<=inp.nofatoms;++nn)
+ for(int nn=1;nn<=inp.cs.nofatoms;++nn)
  {// check if atom is in cluster
   int inclust=0;
   i=2;while(i<argc)
@@ -262,7 +262,7 @@ $M3=$M3+$M%i_3;\n",n,n,n);
                                    }
                    }
                   Vector abc(1,3);
-                  abc(1)=out.a;abc(2)=out.b;abc(3)=out.c;
+                  abc(1)=out.cs.abc(1);abc(2)=out.cs.abc(2);abc(3)=out.cs.abc(3);
                   (*out.jjj[nt]).add((*inp.jjj[nn]),abc);
                  }
  }

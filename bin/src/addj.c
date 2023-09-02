@@ -5,7 +5,6 @@
  ***********************************************************************/
 
 
-#define MAXNOFATOMS 100
 #include "par.hpp"
 #include "martin.h"
 

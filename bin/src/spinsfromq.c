@@ -41,24 +41,24 @@ printf("#*****************************************************\n");
   double lnz,u;
   int a;
   double T;
-  Vector h(1,inputpars.nofcomponents),hext(1,3);
-  Vector moment(1,inputpars.nofcomponents);
-  Vector factors(1,inputpars.nofcomponents);
+  Vector h(1,inputpars.cs.nofcomponents),hext(1,3);
+  Vector moment(1,inputpars.cs.nofcomponents);
+  Vector factors(1,inputpars.cs.nofcomponents);
   Vector qvector (1,3);
-  Vector nettom(1,inputpars.nofcomponents*inputpars.nofatoms);
-  Vector nettom1(1,inputpars.nofcomponents*inputpars.nofatoms);
-  Vector nettom2(1,inputpars.nofcomponents*inputpars.nofatoms);
-  Vector nettom3(1,inputpars.nofcomponents*inputpars.nofatoms);
+  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+  Vector nettom1(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+  Vector nettom2(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+  Vector nettom3(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
   nettom1=0;nettom2=0;nettom3=0;
-  Vector phi(1,inputpars.nofcomponents*inputpars.nofatoms);
+  Vector phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
   phi=0;
-  Vector momentq0(1,inputpars.nofcomponents*inputpars.nofatoms);
-  momentq0=0;a=0;for(i=1;i<=inputpars.nofcomponents;++i)factors(i)=1.0;
+  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+  momentq0=0;a=0;for(i=1;i<=inputpars.cs.nofcomponents;++i)factors(i)=1.0;
   if(argv[1][0]=='-'){// treat options
-                   if(argv[1][1]=='m'){for(i=1;i<=inputpars.nofcomponents;++i)factors(i)=strtod(argv[1+i],NULL);
+                   if(argv[1][1]=='m'){for(i=1;i<=inputpars.cs.nofcomponents;++i)factors(i)=strtod(argv[1+i],NULL);
                                    }
                    else {fprintf(stderr,"Error spinsfromq: option -%c not known\n",argv[1][1]);exit(1);}
-                   a=1+inputpars.nofcomponents;
+                   a=1+inputpars.cs.nofcomponents;
                   }
   n1=strtol(argv[a+1],NULL,10);  
   n2=strtol(argv[a+2],NULL,10);  
@@ -68,38 +68,38 @@ printf("#*****************************************************\n");
   qvector(3)=strtod(argv[a+6],NULL);
      
    T=1;hext=0;nettom=0;
-   h=0;for(i=1;i<=inputpars.nofcomponents;++i)h(i)=0.1;
+   h=0;for(i=1;i<=inputpars.cs.nofcomponents;++i)h(i)=0.1;
   while(Norm(nettom)<0.1&&Norm(h)<1e10){
-  for(i=1;i<=inputpars.nofatoms;++i)
+  for(i=1;i<=inputpars.cs.nofatoms;++i)
   {(*inputpars.jjj[i]).Icalc(moment,T,h,hext,lnz,u,(*inputpars.jjj[i]).Icalc_parameter_storage_init(h,hext,T));
-   for(j=1;j<=inputpars.nofcomponents;++j){nettom(j+(i-1)*inputpars.nofcomponents)=moment(j);
+   for(j=1;j<=inputpars.cs.nofcomponents;++j){nettom(j+(i-1)*inputpars.cs.nofcomponents)=moment(j);
                                           }
-    nettom1(1+(i-1)*inputpars.nofcomponents)=moment(1);
-    nettom2(2+(i-1)*inputpars.nofcomponents)=moment(2);
-    nettom3(3+(i-1)*inputpars.nofcomponents)=moment(3);                                          
+    nettom1(1+(i-1)*inputpars.cs.nofcomponents)=moment(1);
+    nettom2(2+(i-1)*inputpars.cs.nofcomponents)=moment(2);
+    nettom3(3+(i-1)*inputpars.cs.nofcomponents)=moment(3);                                          
   }
   h*=2; // multiply field h by two until moment netoom gets large enough to have some sizable numbers
   }
   // treat case of zero moment loop ended at high h ...
-  if(Norm(h)>=1e10)for(i=1;i<=inputpars.nofcomponents;++i)
-           for(j=1;j<=inputpars.nofcomponents;++j)nettom(j+(i-1)*inputpars.nofcomponents)=1;
+  if(Norm(h)>=1e10)for(i=1;i<=inputpars.cs.nofcomponents;++i)
+           for(j=1;j<=inputpars.cs.nofcomponents;++j)nettom(j+(i-1)*inputpars.cs.nofcomponents)=1;
                                          
     
 
   printf("#! Moment components: ");
-  for(i=1;i<=inputpars.nofatoms;++i)
-  {for(j=1;j<=inputpars.nofcomponents;++j){if(i==1)printf("M%i=%6.4f ",j,nettom(j+(i-1)*inputpars.nofcomponents));
-                                           nettom(j+(i-1)*inputpars.nofcomponents)*=factors(j);
+  for(i=1;i<=inputpars.cs.nofatoms;++i)
+  {for(j=1;j<=inputpars.cs.nofcomponents;++j){if(i==1)printf("M%i=%6.4f ",j,nettom(j+(i-1)*inputpars.cs.nofcomponents));
+                                           nettom(j+(i-1)*inputpars.cs.nofcomponents)*=factors(j);
                                           }
-    nettom1(1+(i-1)*inputpars.nofcomponents)*=factors(1);
-    nettom2(2+(i-1)*inputpars.nofcomponents)*=factors(2);
-    nettom3(3+(i-1)*inputpars.nofcomponents)*=factors(3);                                          
+    nettom1(1+(i-1)*inputpars.cs.nofcomponents)*=factors(1);
+    nettom2(2+(i-1)*inputpars.cs.nofcomponents)*=factors(2);
+    nettom3(3+(i-1)*inputpars.cs.nofcomponents)*=factors(3);                                          
   }
 
-  printf("\n#! n1=%i n2=%i n3=%i nofspins=%i\n",n1,n2,n3,n1*n2*n3*inputpars.nofatoms);
+  printf("\n#! n1=%i n2=%i n3=%i nofspins=%i\n",n1,n2,n3,n1*n2*n3*inputpars.cs.nofatoms);
   printf("#! q: hkl=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
-  for(i=1;i<=inputpars.nofatoms;++i)for(j=1;j<=inputpars.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
-                                           phi(j+(i-1)*inputpars.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
+  for(i=1;i<=inputpars.cs.nofatoms;++i)for(j=1;j<=inputpars.cs.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
+                                           phi(j+(i-1)*inputpars.cs.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
   
   // transform hkl to primitive reciprocal lattice
@@ -107,9 +107,9 @@ printf("#*****************************************************\n");
   printf("# Miller indices of q vector with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
   
  
-  spincf savspin (n1,n2,n3,inputpars.nofcomponents,inputpars.nofatoms);
-  spincf savspin1 (n1,n2,n3,inputpars.nofcomponents,inputpars.nofatoms);
-  spincf savspin2 (n1,n2,n3,inputpars.nofcomponents,inputpars.nofatoms);
+  spincf savspin (n1,n2,n3,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
+  spincf savspin1 (n1,n2,n3,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
+  spincf savspin2 (n1,n2,n3,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
   // n1 n2 n3 .. periodicity of supercell
 // nettom .... saturation moment (positive)
 // qvector ... wave vector in units of reciprocal lattice
@@ -124,8 +124,8 @@ printf("#*****************************************************\n");
    qvector(2)=strtod(argv[a+8],NULL);
    qvector(3)=strtod(argv[a+9],NULL);
    printf("#! q2: hkl2=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
-   for(i=1;i<=inputpars.nofatoms;++i)for(j=1;j<=inputpars.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
-                                           phi(j+(i-1)*inputpars.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
+   for(i=1;i<=inputpars.cs.nofatoms;++i)for(j=1;j<=inputpars.cs.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
+                                           phi(j+(i-1)*inputpars.cs.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
    qvector=qvector*inputpars.rez.Inverse();
    printf("# Miller indices of q2 with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
@@ -138,8 +138,8 @@ printf("#*****************************************************\n");
     qvector(2)=strtod(argv[a+11],NULL);
     qvector(3)=strtod(argv[a+12],NULL);
    printf("#! q3: hkl3=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
-   for(i=1;i<=inputpars.nofatoms;++i)for(j=1;j<=inputpars.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
-                                           phi(j+(i-1)*inputpars.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
+   for(i=1;i<=inputpars.cs.nofatoms;++i)for(j=1;j<=inputpars.cs.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
+                                           phi(j+(i-1)*inputpars.cs.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
    qvector=qvector*inputpars.rez.Inverse();
    printf("# Miller indices of q3 with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));

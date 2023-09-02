@@ -159,14 +159,14 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  int i,ii,iii,tryrandom,nr,rr,ri,is;
  double fe,fered;
  double u,lnz; // free- and magnetic energy per ion [meV]
- Vector momentq0(1,inputpars.nofcomponents*inputpars.nofatoms),phi(1,inputpars.nofcomponents*inputpars.nofatoms);
- Vector nettom(1,inputpars.nofcomponents*inputpars.nofatoms),q(1,3);
- Vector mmom(1,inputpars.nofcomponents);
- Vector h1(1,inputpars.nofcomponents),h1ext(1,3),hkl(1,3);
+ Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+ Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
+ Vector mmom(1,inputpars.cs.nofcomponents);
+ Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,3),hkl(1,3);
  h1ext=0;
  char text[MAXNOFCHARINLINE];
  char outfilename[MAXNOFCHARINLINE];
- spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
+ spincf  sps(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents),sps1(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
  mfcf * mf;
  mfcf * mf1;
  spincf * magmom;
@@ -185,9 +185,9 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	     {nettom=testqs.nettom(-j);momentq0=testqs.momentq0(-j);phi=testqs.phi(-j);
 	     }
 	     else
-	     {for(i=1;i<=inputpars.nofatoms;++i)
-	      {for(ii=1;ii<=inputpars.nofcomponents;++ii)
-	        {iii=inputpars.nofcomponents*(i-1)+ii;h1=0;h1(ii)=10*MU_B;
+	     {for(i=1;i<=inputpars.cs.nofatoms;++i)
+	      {for(ii=1;ii<=inputpars.cs.nofcomponents;++ii)
+	        {iii=inputpars.cs.nofcomponents*(i-1)+ii;h1=0;h1(ii)=10*MU_B;
                  (*inputpars.jjj[i]).Icalc(mmom,T,h1,h1ext,lnz,u,(*inputpars.jjj[i]).Icalc_parstorage);
 		 nettom(iii)=mmom(ii)*rnd(1);
 	         momentq0(iii)=rnd(1)*mmom(ii);
@@ -202,17 +202,17 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
    	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #endif 
 	    }	 
-    if (tryrandom>0){nr=(int)(rint(rnd(1.0)*(sps.n()*inputpars.nofatoms-1)))+1;
+    if (tryrandom>0){nr=(int)(rint(rnd(1.0)*(sps.n()*inputpars.cs.nofatoms-1)))+1;
 	             for (i=1;i<=nr;++i) //MonteCarlo randomize nr spins
                       {rr=(int)rint(rnd(1.0)*(sps.n()-1))+1;
-		       ri=inputpars.nofcomponents*(int)rint(rnd(1.0)*(inputpars.nofatoms-1));
-	               for(ii=1;ii<=inputpars.nofcomponents;++ii)
+		       ri=inputpars.cs.nofcomponents*(int)rint(rnd(1.0)*(inputpars.cs.nofatoms-1));
+	               for(ii=1;ii<=inputpars.cs.nofcomponents;++ii)
 		       {sps.mi(rr)(ri+ii)*=(2*rnd(1.0)-1) ;}
 		       } // randomize spin rr
                     }
  
       //!!!calculate free energy - this is the heart of this loop !!!!
-      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
+      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
       fe=fecalc(H ,T,ini,inputpars,sps,(*mf),physprops,testspins,testqs);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( " for str %i(%ix%ix%i). "  ,j,sps.na(),sps.nb(),sps.nc());
@@ -224,23 +224,23 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
             {               // first - reduce the spinconfiguration if possible
                if (verbose==1){fprintf(stdout,"fe(%i)= %f meV",tryrandom,fe); fflush(stdout);}
 	       sps1=sps;sps1.reduce(); 
-                   mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.nofatoms,inputpars.nofcomponents);
+                   mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                if ((fered=fecalc(H ,T,ini,inputpars,sps1,(*mf1),physprops,testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
-                   magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
-                   int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
-                   for (l1=1;l1<=inputpars.nofatoms;++l1){
+                   magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
+                   int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
+                   for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                   for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.nofcomponents*(l1-1)+m1];}
+                   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                    for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}} 
                    delete mf1; 
                  // display spinstructure
                 if (verbose==1)
-                {float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
+                {float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
 		 
-		 for (is=1;is<=inputpars.nofatoms;++is)
+		 for (is=1;is<=inputpars.cs.nofatoms;++is)
 		   {
                     x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
@@ -249,15 +249,15 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
 		   
                     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
@@ -299,12 +299,12 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	    
   // log fe if required
    if (ini.logfevsQ==1) {
-                 ComplexVector a(1,3*inputpars.nofatoms),b(1,3*inputpars.nofatoms);
-                 ComplexVector b1(1,inputpars.nofcomponents*inputpars.nofatoms);
+                 ComplexVector a(1,3*inputpars.cs.nofatoms),b(1,3*inputpars.cs.nofatoms);
+                 ComplexVector b1(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
                  float inmax=0;int qh,qk,ql,l,nk=0;
                  ComplexVector * mq;  
-                 mq = new ComplexVector [sps.in(sps.na(),sps.nb(),sps.nc())+2];for(l=0;l<=sps.in(sps.na(),sps.nb(),sps.nc())+1;++l){mq[l]=ComplexVector(1,inputpars.nofcomponents*inputpars.nofatoms);}
-                 Vector sq2(1,3*inputpars.nofatoms),qs(1,3),qt(1,3);float in;qs(1)=1000;
+                 mq = new ComplexVector [sps.in(sps.na(),sps.nb(),sps.nc())+2];for(l=0;l<=sps.in(sps.na(),sps.nb(),sps.nc())+1;++l){mq[l]=ComplexVector(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);}
+                 Vector sq2(1,3*inputpars.cs.nofatoms),qs(1,3),qt(1,3);float in;qs(1)=1000;
                  sps.FT(mq); //Fourier trafo of spincf
 		 // get the main propagation vector by looking for the
 		 // biggest Fourier component of the magnetic moment arrangement 
@@ -312,35 +312,35 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                   {// get magnetic moment from momentum fouriercomponent into b 
 		   b=0;
 		   b1 = mq[sps.in(sps.na()-qh,sps.nb()-qk,sps.nc()-ql)];
-                   for(l=1;l<=inputpars.nofatoms;++l)
+                   for(l=1;l<=inputpars.cs.nofatoms;++l)
 		   {int m1,m1max=3; if ((*inputpars.jjj[l]).gJ==0){m1max=6;}
 		    for (m1=1;m1<=m1max;++m1)
 		     {if((*inputpars.jjj[l]).gJ==0)
-		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.nofcomponents*(l-1)+m1);}
-		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.nofcomponents*(l-1)+m1);}
+		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.cs.nofcomponents*(l-1)+m1);}
+		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.cs.nofcomponents*(l-1)+m1);}
 		      }
 		      else
-		      {b(3*(l-1)+m1)=b1(inputpars.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
+		      {b(3*(l-1)+m1)=b1(inputpars.cs.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
 		      }
 		     }    
 		    }
 		   a = b.Conjugate();
 		   b1 = mq[sps.in(qh,qk,ql)];
 		   b=0;
-                   for(l=1;l<=inputpars.nofatoms;++l)
+                   for(l=1;l<=inputpars.cs.nofatoms;++l)
 		   {int m1,m1max=3; if ((*inputpars.jjj[l]).gJ==0){m1max=6;}
 		    for (m1=1;m1<=m1max;++m1)
 		     {if((*inputpars.jjj[l]).gJ==0)
-		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.nofcomponents*(l-1)+m1);}
-		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.nofcomponents*(l-1)+m1);}
+		      {if(m1==2||m1==4||m1==6){b(3*(l-1)+(m1+1)/2)+=b1(inputpars.cs.nofcomponents*(l-1)+m1);}
+		       else                   {b(3*(l-1)+(m1+1)/2)+=2.0*b1(inputpars.cs.nofcomponents*(l-1)+m1);}
 		      }
 		      else
-		      {b(3*(l-1)+m1)=b1(inputpars.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
+		      {b(3*(l-1)+m1)=b1(inputpars.cs.nofcomponents*(l-1)+m1)*(*inputpars.jjj[l]).gJ;
 		      }
 		     }    
 		    }                   
 		   // inner product
-                   sq2=Abs(b+a)/(double)sps.n()/(double)inputpars.nofatoms;
+                   sq2=Abs(b+a)/(double)sps.n()/(double)inputpars.cs.nofatoms;
                    Vector q(1,3);
 		   q(1)=1.0*qh/sps.na();
 	           q(2)=1.0*qk/sps.nb();
@@ -358,8 +358,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
     double QQmin=1e10,QQ;
 // inserted 10.5.10 to make comaptible with nonortholattices
      Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
-        get_abc_in_ijk(abc_in_ijk,inputpars.abc);
-     p=abc_in_ijk*inputpars.r; // p is the primitive crystal unit cell in ijk coordinates
+        get_abc_in_ijk(abc_in_ijk,inputpars.cs.abc);
+     p=abc_in_ijk*inputpars.cs.r; // p is the primitive crystal unit cell in ijk coordinates
      pstar=2*PI*p.Inverse().Transpose();
      Vector nmin(1,3),nmax(1,3),hkl(1,3),hkls(1,3),Q(1,3),qeuklid(1,3);
      nlimits_calc(nmin, nmax, ini.maxQ, pstar);
@@ -375,7 +375,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
        hkl=inputpars.rez.Transpose()*Q;
 
       // qeuklid is Q in ijk coordinate system !
-      hkl2ijk(qeuklid,hkl,inputpars.abc);//qeuklid=ri;//qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
+      hkl2ijk(qeuklid,hkl,inputpars.cs.abc);//qeuklid=ri;//qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
       QQ=Norm(qeuklid);if(QQ<QQmin){QQmin=QQ;hkls=hkl;}
  }}}
 //------------------- end if insert 26.11.2015 -->> output is hkls with smallest |Q|
@@ -383,7 +383,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                    strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                    strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                    felog=fopen_errchk(outfilename,"a");
-                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i\n#",inputpars.nofatoms,inputpars.nofcomponents);}
+                   if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i\n#",inputpars.cs.nofatoms,inputpars.cs.nofcomponents);}
                    fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i \n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc());
                    if (verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
 	           fclose(felog);
@@ -430,17 +430,17 @@ int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs
   // returns 2 if no spinconfiguration has been found at ht point
  */
  int i,j,k,is;
- Vector momentq0(1,inputpars.nofcomponents*inputpars.nofatoms),phi(1,inputpars.nofcomponents*inputpars.nofatoms);
- Vector nettom(1,inputpars.nofcomponents*inputpars.nofatoms),q(1,3);
- Vector h1(1,inputpars.nofcomponents),hkl(1,3);
+ Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+ Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
+ Vector h1(1,inputpars.cs.nofcomponents),hkl(1,3);
  Vector H(1,3); // magnetic field in ijk coordinate system
  Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1; // trick to get Habc as components along a,b,c
-                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+                  abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
  dadbdc2ijk(H,Habc,abc); // transform Habc to ijk coordinates ... this is H
                 
  double femin=FEMIN_INI;char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];
- spincf  sps(1,1,1,inputpars.nofatoms,inputpars.nofcomponents),sps1(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
- spincf  spsmin(1,1,1,inputpars.nofatoms,inputpars.nofcomponents);
+ spincf  sps(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents),sps1(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
+ spincf  spsmin(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
  mfcf * mf;
  spincf * magmom;
  FILE * felog; // logfile for q dependence of fe
@@ -627,23 +627,23 @@ else // if yes ... then
      #endif
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
-      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,inputpars.nofcomponents);
+      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
       physprops.fe=fecalc(H ,T,ini,inputpars,sps,(*mf),physprops,testspins,testqs); 
 
-      magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
-                   int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.nofcomponents);
-                   for (l1=1;l1<=inputpars.nofatoms;++l1){
+      magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
+                   int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
+                   for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                  for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.nofcomponents*(l1-1)+m1];}                  
+                  for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=(*mf).mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}                  
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                     for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
              // display spinstructure
                 if (verbose==1)
                 {printf(".");
-		 float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
-		 for (is=1;is<=inputpars.nofatoms;++is)
+		 float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
+		 for (is=1;is<=inputpars.cs.nofatoms;++is)
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
@@ -651,15 +651,15 @@ else // if yes ... then
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                      fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
 		    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fin_coq = fopen_errchk (outfilename, "w");

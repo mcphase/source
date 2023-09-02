@@ -7,7 +7,7 @@
 //***********************************************************************
 void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double & epsilon,int do_verbose,int do_gobeyond,int calc_rixs,int do_phonon,Vector & hkl,int qcounter)
 {int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);double QQ;
-  hkl2ijk(qijk,hkl, inputpars.abc);
+  hkl2ijk(qijk,hkl, inputpars.cs.abc);
     QQ=Norm(qijk);
 
 // polarisation factor
@@ -29,16 +29,16 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
       ComplexVector L1(1,3),S1(1,3),P1(1,3),mq1_dip(1,mqdim),mq1(1,mqdim);
 
   // Precalculate values of Debye-Waller and Form Factors for this Q-vector to save calls to (*inputpars.jjj[ion]).* functions
-  double DBWF[inputpars.nofatoms+1];
-  complex <double> * SL;SL=new complex<double>[inputpars.nofatoms+1];
-  for(l=1;l<=inputpars.nofatoms;++l) {
+  double DBWF[inputpars.cs.nofatoms+1];
+  complex <double> * SL;SL=new complex<double>[inputpars.cs.nofatoms+1];
+  for(l=1;l<=inputpars.cs.nofatoms;++l) {
      DBWF[l] = (*inputpars.jjj[l]).debyewallerfactor(QQ);
      SL[l] = complex <double> ((*inputpars.jjj[l]).SLR,(*inputpars.jjj[l]).SLI);
   }
 
   sprintf(filename,"./results/%smcdisp.trs",ini.prefix);  
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
-  for(l=1;l<=inputpars.nofatoms;++l){
+  for(l=1;l<=inputpars.cs.nofatoms;++l){
   if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
                   fin = fopen_errchk(filename,"rb");}
 
@@ -242,7 +242,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
  //complex <double> chileft;
  //complex <double> chileftbey;
  Vector qijk(1,3);
-  hkl2ijk(qijk,hkl, inputpars.abc);
+  hkl2ijk(qijk,hkl, inputpars.cs.abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
 //   qijk(1)=hkl(1)*2*PI/inputpars.a; // only correct for ortholattices !!!!
@@ -574,7 +574,7 @@ if(do_verbose){printf("diagonalising matrix A for Estep %i\n",Estp);//myPrintCom
 // higher components in the polarization factor !!!
  Matrix pol(1,md.nofcomponents,1,md.nofcomponents);
  Vector qijk(1,3);
-  hkl2ijk(qijk,hkl, inputpars.abc);
+  hkl2ijk(qijk,hkl, inputpars.cs.abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
  pol=0; double qsqr=qijk*qijk;
@@ -978,7 +978,7 @@ double intcalc(ComplexMatrix & ch,int dimA, double en,inimcdis & ini,par & input
 // higher components in the polarization factor !!!
  Matrix pol(1,md.nofcomponents,1,md.nofcomponents);
  Vector qijk(1,3);
-  hkl2ijk(qijk,hkl, inputpars.abc);
+  hkl2ijk(qijk,hkl, inputpars.cs.abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
  pol=0; double qsqr=qijk*qijk;

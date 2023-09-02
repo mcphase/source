@@ -118,10 +118,10 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
  fprintf(fout,"#* reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n");
  fprintf(fout,"#***********************************************************************\n");
 
- fprintf(fout,"# unit cell:%s",unitcell);
- fprintf(fout,"#                   / %6.3f A \\     / %6.3f A \\     / %6.3f A \\ \n", r1(1), r2(1), r3(1));
- fprintf(fout,"#                b1=| %6.3f A |  b2=| %6.3f A |  b3=| %6.3f A |\n", r1(2), r2(2), r3(2));
- fprintf(fout,"#                   \\ %6.3f A /     \\ %6.3f A /     \\ %6.3f A /\n", r1(3), r2(3), r3(3));
+ fprintf(fout,"# lattice parameters:%s",unitcell);
+ fprintf(fout,"# prim. unit cell   / %10.7f A \\     / %10.7f A \\     / %10.7f A \\ \n", r1(1), r2(1), r3(1));
+ fprintf(fout,"#                b1=| %10.7f A |  b2=| %10.7f A |  b3=| %10.7f A |\n", r1(2), r2(2), r3(2));
+ fprintf(fout,"#                   \\ %10.7f A /     \\ %10.7f A /     \\ %10.7f A /\n", r1(3), r2(3), r3(3));
  fprintf(fout, "#! Wavelength=%g A   number of atoms: %i\n",lambda, n);
  fprintf(fout, "#! T= %g K Ha= %g T Hb= %g T Hc= %g T\n",T,H(1),H(2),H(3));
  fprintf(fout, "#! Overall temperature factor B=%g A^2: Intensity is proportional to exp(-2*B*(sin(theta)/lambda)^2)\n",ovalltemp);

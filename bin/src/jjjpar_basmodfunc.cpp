@@ -381,6 +381,7 @@ module_type=0;
     extract(instr,"SCATTERINGLENGTHREAL",SLR);
     extract(instr,"SCATTERINGLENGTHIMAG",SLI);
     extract(instr,"CHARGE",charge);
+    extract(instr,"MAGNETIC",magnetic);
     extract(instr,"GJ",gJ);
     extract(instr,"gJ",gJ);
 

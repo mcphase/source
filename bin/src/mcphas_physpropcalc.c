@@ -5,11 +5,11 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 { int i,j,k,l,n,m1; char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];FILE * fin_coq;
  //save fe and u
  // calculate nettomoment from spinstructure
-    Vector mom(1,3),d1(1,inputpars.nofcomponents);physprops.m=0;
-    for (l=1;l<=inputpars.nofatoms;++l){
+    Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);physprops.m=0;
+    for (l=1;l<=inputpars.cs.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
-      for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=mf.mf(i,j,k)[inputpars.nofcomponents*(l-1)+m1];}                  
+      for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
      (*inputpars.jjj[l]).mcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
      physprops.m+=mom;
     }}}}
@@ -21,22 +21,22 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // function is calculated - up to ini.nofspincorrs neighbours
  int nmax,i1,j1,k1,l1,is;Vector xyz(1,3),d(1,3),d_rint(1,3);
  nmax=ini.nofspincorrs;
-for (l=1;l<=inputpars.nofatoms;++l){if(nmax>(*inputpars.jjj[l]).paranz){nmax=(*inputpars.jjj[l]).paranz;}}
- for(n=1;n<=nmax;++n){physprops.jj[n]=0;for(l=1;l<=inputpars.nofatoms;++l){
-Matrix jj(1,inputpars.nofcomponents,1,inputpars.nofcomponents);
+for (l=1;l<=inputpars.cs.nofatoms;++l){if(nmax>(*inputpars.jjj[l]).paranz){nmax=(*inputpars.jjj[l]).paranz;}}
+ for(n=1;n<=nmax;++n){physprops.jj[n]=0;for(l=1;l<=inputpars.cs.nofatoms;++l){
+Matrix jj(1,inputpars.cs.nofcomponents,1,inputpars.cs.nofcomponents);
 //calculate spincorrelation function of neighbour n of sublattice l
     corrfunc(jj,n,l,inputpars,sps);
   
-for(i1=1;i1<=inputpars.nofcomponents;++i1)
-               {physprops.jj[n](i1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(i1,i1);
+for(i1=1;i1<=inputpars.cs.nofcomponents;++i1)
+               {physprops.jj[n](i1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=jj(i1,i1);
                }
-              k1=inputpars.nofcomponents;
-           for(i1=1;i1<=inputpars.nofcomponents-1;++i1)
-              {for(j1=i1+1;j1<=inputpars.nofcomponents;++j1)
+              k1=inputpars.cs.nofcomponents;
+           for(i1=1;i1<=inputpars.cs.nofcomponents-1;++i1)
+              {for(j1=i1+1;j1<=inputpars.cs.nofcomponents;++j1)
                         {++k1;
-physprops.jj[n](k1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(i1,j1); //<JaJb>
+physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=jj(i1,j1); //<JaJb>
 			++k1;
-physprops.jj[n](k1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(j1,i1); //<JbJa>
+physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=jj(j1,i1); //<JbJa>
 			}
 	      }
 
@@ -64,7 +64,7 @@ physprops.jj[n](k1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(j1,
      for(i=0;i<mf.na();++i){for(j=0;j<mf.nb();++j){for(k=0;k<mf.nc();++k)
       { g=exp(piq*((double)qh*i/mf.na()+(double)qk*j/mf.nb()+(double)ql*k/mf.nc()));
 	for (l=1;l<=mf.nofatoms;++l) {
-                                    for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=mf.mf(i+1,j+1,k+1)[inputpars.nofcomponents*(l-1)+m1];}                  
+                                    for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i+1,j+1,k+1)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
                                     (*inputpars.jjj[l]).mcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
                                     mq[mf.in(qh,qk,ql)](3*(l-1)+1)+=g*mom(1);
                                     mq[mf.in(qh,qk,ql)](3*(l-1)+2)+=g*mom(2);
@@ -86,8 +86,8 @@ physprops.jj[n](k1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(j1,
 
  // inserted 10.5.10 to make comaptible with nonortholattices
      Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
-     get_abc_in_ijk(abc_in_ijk,inputpars.abc);
-     p=abc_in_ijk*inputpars.r; // p is the primitive crystal unit cell in ijk coordinates
+     get_abc_in_ijk(abc_in_ijk,inputpars.cs.abc);
+     p=abc_in_ijk*inputpars.cs.r; // p is the primitive crystal unit cell in ijk coordinates
      pstar=2*PI*p.Inverse().Transpose();
      Vector nnmin(1,3),nnmax(1,3);
      nlimits_calc(nnmin, nnmax, ini.maxQ, pstar);
@@ -114,11 +114,11 @@ physprops.jj[n](k1+inputpars.nofcomponents*inputpars.nofcomponents*(l-1))=jj(j1,
        hkl=inputpars.rez.Transpose()*Q;
 
       // qeuklid is Q in ijk coordinate system !
-      hkl2ijk(ri,hkl,inputpars.abc);qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
+      hkl2ijk(ri,hkl,inputpars.cs.abc);qeuklid(1)=ri(1);qeuklid(2)=ri(2);qeuklid(3)=ri(3);
       QQ=Norm(qeuklid);
 
      a=0;aFT=0;
-     for(l=1;l<=inputpars.nofatoms;++l)
+     for(l=1;l<=inputpars.cs.nofatoms;++l)
       {//multiply mq by lattice positions exp(iqr_i) and sum into a
        ri=inputpars.rez*(const Vector&)(*inputpars.jjj[l]).xyz; // ri ... atom position with respect to primitive lattice
        gFT=exp(piq*(Q*ri));
@@ -182,18 +182,18 @@ if(verbose==1){printf(".. calculating (hkl) finished\n");}
 //save mfarrangement
       physprops.mf=mf;
    spincf * magmom;
-    magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.nofatoms,3);
-                   for (l1=1;l1<=inputpars.nofatoms;++l1){
+    magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
+                   for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
                     // go through magnetic unit cell and sum up the contribution of every atom
                   for(i1=1;i1<=sps.na();++i1){for(j1=1;j1<=sps.nb();++j1){for(k1=1;k1<=sps.nc();++k1){
-                   for(m1=1;m1<=inputpars.nofcomponents;++m1){d1[m1]=mf.mf(i1,j1,k1)[inputpars.nofcomponents*(l1-1)+m1];}                  
+                   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i1,j1,k1)[inputpars.cs.nofcomponents*(l1-1)+m1];}                  
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                     for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
   
 // display spinstructure
-  float * x;x=new float[inputpars.nofatoms+1];float *y;y=new float[inputpars.nofatoms+1];float*z;z=new float[inputpars.nofatoms+1];
-		 for (is=1;is<=inputpars.nofatoms;++is)
+  float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
+		 for (is=1;is<=inputpars.cs.nofatoms;++is)
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
@@ -201,15 +201,15 @@ if(verbose==1){printf(".. calculating (hkl) finished\n");}
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,4,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,5,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
                     fclose (fin_coq);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.abc,inputpars.r,x,y,z,6,(*magmom));
+                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
                     fclose (fin_coq);
    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
                     fin_coq = fopen_errchk (outfilename, "w");

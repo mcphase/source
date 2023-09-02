@@ -6,6 +6,7 @@
 
 #include<martin.h>
 #include "jjjpar.hpp"
+#include "cryststruct.hpp"
 
 #define MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL 4000
 #define SMALL 1e-6  // for module kramer - to trigger numerical limited calculation 
@@ -24,11 +25,8 @@ class par
   //Vector gJ;
      
   //lattice
-  float a,b,c,alpha,beta,gamma;
-  Vector abc;
-  Matrix r,rez;
-  int nofatoms;
-  int nofcomponents;
+  Matrix rez;
+  cryststruct cs;
 
    //elastic constants in Voigt notation in meV/atom, i.e. multiply by nofatoms to get 
    // elastic energy for a crystallographic primitive unit cell as described by
@@ -39,7 +37,7 @@ class par
   //jjjpar 
    
    par (const char *filejjj,int verbose=0);	//konstruktor
-   par (float ai,float bi,float ci,float alphai,float betai,float gammai,int nofcompi);
+   par (Vector abc,int nofcompi);
    par (const par & pars);	// kopier-konstruktor
    
 ~par ();		//destruktor
@@ -54,11 +52,11 @@ void save(FILE * fout,int noindexchange); // save lattice, atoms and exchange pa
 void save(const char * filename,int noindexchange); // save lattice, atoms and exchange parameters to file
 void savelattice(FILE *fout);// save lattice to file
 void saveatoms(FILE *fout);// save atom positions and properties  to file
+void save_sipfs(const char *path);   //save single ion parameter files filename to path*
+void save_mcdiff_in (const char * program); // save structure in mcdiff.in program is program name calling this
 void set_nofcomponents (int n); //sets the number of components in the interaction vector
 void increase_nofcomponents (int n); //increases the number of components in the interaction vector
 void decrease_nofcomponents (int n); //decreases the number of components in the interaction vector
-
-void save_sipfs(const char *path);   //save single ion parameter files filename to path*
 
 // operator!= returns 8 7 6 5 4 3 2 1 0depending on agreement of
  //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement

@@ -5,7 +5,6 @@
  ***********************************************************************/
 
 
-#define MAXNOFATOMS 100
 #include "par.hpp"
 #include "martin.h"
 
@@ -43,8 +42,9 @@ int ow=1; int n=0,noindexchange=0;
  a.reduce_unitcell();  
 
  a.save(stdout,noindexchange);
+ a.save_mcdiff_in("reduce_unitcell");
 
-fprintf(stderr,"# end of reduce_unitcell - created list of redundant sipf files\n");
+fprintf(stderr,"# end of reduce_unitcell - created mcdiff.in and list of redundant sipf files\n");
 fprintf(stderr,"# in file reduce_unitcell_sipf.del, to delete these files use:\n");
 fprintf(stderr,"# perl -l -n -e \"unlink\" reduce_unitcell_sipf.del\n");
 }

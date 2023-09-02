@@ -143,6 +143,11 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #! r1b= 0.500000 r2b= 1.000000 r3b= 0.000000   primitive lattice vectors (a)(b)(c)
 #! r1c= 0.500000 r2c= 0.000000 r3c= 1.000000
 #
+#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j
+#! strain tensor (optional): eps1=0.002219=epsii eps2=0.002219=epsjj eps3=-0.004525=epskk eps4=   0=2epsjk eps5=   0=2epsik eps6=7e-10=2epsij
+# .... if the strain tensor is given in Voigt notation the mcdiff will
+#      use it and distort the primitive unit cell accordingly and calculate 
+#      reflections from a crystal with this distorted primitve unit cell
 #
 #
 # %SECTION 4% DESCRIPTION OF MAGNETIC UNIT CELL AND LIST OF MAGNETIC ATOMS
@@ -215,8 +220,8 @@ the program calculates the following output file {\prg results/mcdiff\index{mcdi
 #*
 #* reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
 #***********************************************************************
-#! unit cell: a= 4.3843 A  b= 4.3843 A c= 2.4194 A  alpha=90  beta=90 gamma=90
-#                   /  4.384 A \     /  0.000 A \     /  0.000 A \ 
+#! lattice parameters : a= 4.3843 A  b= 4.3843 A c= 2.4194 A  alpha=90  beta=90 gamma=90
+# prim. unit cell   /  4.384 A \     /  0.000 A \     /  0.000 A \ 
 #                b1=|  0.000 A |  b2=|  4.384 A |  b3=| -0.000 A |
 #                   \ -0.000 A /     \  0.000 A /     \  4.839 A /
 #! Wavelength=0.9 A   number of atoms: 4

@@ -143,7 +143,7 @@ double TT=T;
 if (!do_sipf)
   {par inputpars("./mcphas.j");
    inputpars.save_sipfs("./results/_");
-   if(nofcomponents!=inputpars.nofcomponents)fprintf(stderr,"#Warning: number of exchange field components read from command line not equal to that in mcphas.j - continuing...\n");
+   if(nofcomponents!=inputpars.cs.nofcomponents)fprintf(stderr,"#Warning: number of exchange field components read from command line not equal to that in mcphas.j - continuing...\n");
     printf("#\n#atom-number T[K] ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    switch(observable)
@@ -154,7 +154,7 @@ if (!do_sipf)
                                    printf("transition-energies(meV)...\n");
    if(opmat<1e10){fout_opmat=fopen_errchk("./results/op.mat","w");}
                    
-     for(i=1;i<=inputpars.nofatoms;++i)
+     for(i=1;i<=inputpars.cs.nofatoms;++i)
      {switch(observable)
       {case 'L': (*inputpars.jjj[i]).Lcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;
        case 'S': (*inputpars.jjj[i]).Scalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;

@@ -109,9 +109,9 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   float nn[200];nn[0]=199;
   float nnerr[200];nnerr[0]=199;
   int ortho=1;
-  if (inputpars.alpha!=90||inputpars.beta!=90||inputpars.gamma!=90){ortho=0;}
+  if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
       Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
-                       abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+                       abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
 
    Vector mabc(1,3),Hijk(1,3);
    dadbdc2ijk(Hijk,H,abc);
@@ -267,7 +267,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
 //-----------------------------------------------------------------------------------------  
  nmax=nofspincorr; // look how many spincorrelationfunction we have indeed calculated - the 
                    // user wanted nofspincorr, but maybe it was fewer ...
- for (l=1;l<=inputpars.nofatoms;++l)
+ for (l=1;l<=inputpars.cs.nofatoms;++l)
       {if(nmax>(*inputpars.jjj[l]).paranz)
        {nmax=(*inputpars.jjj[l]).paranz;
         fprintf(stderr,"Warning: calculation of nofspincorr=%i correlation functions not possible, \n",nofspincorr);
@@ -480,7 +480,9 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "#!show_atoms=1.0\n");
    fprintf (fout, "#!spins_scale_moment=1.0\n");
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
-   fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmomentum-components\n");
+   if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
+   
+   fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmomentum-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");
    fprintf (fout, "    #<Ja(1)> <Ja(2)> .... selfconsistent Spinconfiguration  \n");
    fprintf (fout, "    #<Jb(1)> <Jb(2)> .... UNITS:  multiply by gJ to get moment [muB]\n");
    fprintf (fout, "    #<Jc(1)> <Jc(2)> ....}\n");
@@ -489,8 +491,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
   fout = fopen_errchk (outfilename,"a");
    fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
-   if (htfailed!=0){fprintf(fout,"1 = failed");sps.spinfromq(1,1,1,null1,null,null,null);}
-    fprintf(fout,"0 = ok\n");sps.print(fout);fprintf(fout,"\n");
+   if (htfailed!=0){fprintf(fout,"1 ");sps.spinfromq(1,1,1,null1,null,null,null);} // failed
+    else {fprintf(fout,"0 ");}
+   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
+    sps.print(fout);fprintf(fout,"\n");
    fclose(fout);
     if((fout=fopen("./fit/mcphas.sps","rb"))!=NULL)
     {// some measured data should be fitted
@@ -521,7 +525,8 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "#!show_chargedensity=1.0\n");
    fprintf (fout, "#!spins_scale_moment=1.0\n");
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
-   fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components\n");
+   if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
+   fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");
    fprintf (fout, "    #mfa(1) mfa(2) .... selfconsistent Mean field configuration \n"); 
    fprintf (fout, "    #mfb(1) mfb(2) .... UNITS: mf(i)=gJ*mu_B*hxc(i)[meV] \n"); 
    fprintf (fout, "    #mfc(1) mfc(2) ....         (i.e. divide by gJ and mu_B=0.05788meV/T to get exchange field[T]}\n");
@@ -531,8 +536,11 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
 fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),
            myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
-   if (htfailed!=0){fprintf(fout,"1 = failed\n");sps.print(fout);fprintf(fout,"\n");}else
-    {fprintf(fout,"0 = ok\n");mf.print(fout);fprintf(fout,"\n");}
+   if (htfailed!=0){fprintf(fout,"1 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
+                    sps.print(fout);fprintf(fout,"\n");}
+   else
+    {fprintf(fout,"0 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
+     mf.print(fout);fprintf(fout,"\n");}
    fclose(fout);
     if((fout=fopen("./fit/mcphas.mf","rb"))!=NULL)
     {// some measured data should be fitted
@@ -554,9 +562,9 @@ int physproperties::read(int verbose, par & inputpars,char * readprefix)
   int i,j2,l,nmax;
   float nn[200];nn[0]=199;
   int ortho=1,found=0;
-  if (inputpars.alpha!=90||inputpars.beta!=90||inputpars.gamma!=90){ortho=0;}
+  if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
       Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
-                       abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+                       abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
 
    Vector mabc(1,3),Hijk(1,3);
    dadbdc2ijk(Hijk,H,abc);
@@ -623,7 +631,7 @@ found=0;while(found==0){
 //-----------------------------------------------------------------------------------------  
  nmax=nofspincorr; // look how many spincorrelationfunction we have indeed calculated - the 
                    // user wanted nofspincorr, but maybe it was fewer ...
- for (l=1;l<=inputpars.nofatoms;++l)
+ for (l=1;l<=inputpars.cs.nofatoms;++l)
       {if(nmax>(*inputpars.jjj[l]).paranz)
        {nmax=(*inputpars.jjj[l]).paranz;
         fprintf(stderr,"Warning: reading of nofspincorr=%i correlation functions not possible, \n",nofspincorr);

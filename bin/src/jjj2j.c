@@ -22,11 +22,11 @@ int main (int argc, char **argv)
 
 // load  parameters from file  (as object of class parameters)
    par inputpars (argv[1]);
-  if (inputpars.nofcomponents!=3)
+  if (inputpars.cs.nofcomponents!=3)
   {fprintf(stderr,"ERROR jjj2j: more than 3 moment components not supported\n");exit(EXIT_FAILURE);}
   
 int i,ii;
-for (i=1;i<=inputpars.nofatoms;++i)
+for (i=1;i<=inputpars.cs.nofatoms;++i)
  {// calculate additional neighbours for atom number i
   jjjpar addjjj(1,(*inputpars.jjj[i]).diagonalexchange);
   //go throug the list of neighbours of atom number i
@@ -41,7 +41,7 @@ for (i=1;i<=inputpars.nofatoms;++i)
     d=inputpars.rez*(const Vector&)xyz;
     for (ii=1;ii<=3;++ii)d_rint(ii)=rint(d(ii));
         
-       xyz_rint=inputpars.r*(const Vector&)d_rint;
+       xyz_rint=inputpars.cs.r*(const Vector&)d_rint;
        signa=1;signb=1;signc=1;
        // determination of multiplicity of parameter l
        if (fabs(xyz(1))>0.001&&fabs(fabs(xyz(1))-fabs(xyz_rint(1)))<0.001) 

@@ -93,7 +93,38 @@ use as: spins -f[c 13 0.1] mcphas.sps T Ha Hb Hc\n\
 " convert  -delay 1 -size 100x100 -loop 1 geomAnim.*.gif output.gif\n");
  exit (1);
     }
-
+void section4header (FILE * fout)
+{
+fprintf(fout,"\
+#\n\
+# %%SECTION 4%% DESCRIPTION OF MAGNETIC UNIT CELL AND LIST OF MAGNETIC ATOMS\n\
+#\n\
+#\n\
+# here follows the description of the magnetic unit cell with respect\n\
+# to the primitive crystallographic unit cell:\n\
+# 'nr1', 'nr2', 'nr3' ...the crystallographic unit cell has to be taken\n\
+#                        nr1 nr2 and nr3 times along r1 r2 and r3,\n\
+#                        respectively to get magnetic unit cell\n\
+# 'nat' denotes the number of magnetic atoms in magnetic unit cell\n\
+#\n\
+# It follows a list of nat lines with to describe the magnetic moment configuration\n\
+# Notes:\n\
+# 'atom-filename' means the single ion property filename of this magnetic atom:\n\
+#                 -it must contain the Formfactor Coefficients (e.g. see international tables)\n\
+#                                      Lande factor\n\
+#                                      Neutron Scattering Length (10^-12 cm) \n\
+#                 -it may contain a    Debey Waller Factor\n\
+# 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1)\n\
+# 'dr1','dr2' and 'dr3' refer to the primitive lattice given below\n\
+# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons\n\
+#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mx My Mz\n\
+#                have to be given, which refer to an right handed orthogonal coordinate system \n\
+#                defined by y||b, z||(a x b) and x normal to y and z\n\
+#  <Sa> <Sb> <Sc>  <La> <Lb > <Lc>  (optional) denote the spin and orbital angular momentum components \n\
+# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)\n\
+#                                     denote the corresponding exchange fields in meV\n\
+#\n");
+}
 
 /**********************************************************************/
 // hauptprogramm
@@ -244,7 +275,17 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
  }
  if (strncmp(argv[1],"-t",2)!=0&&strcmp(argv[1],"-fc")!=0){
   fout = fopen_errchk ("./results/spins.out", "w"); // unless it is table option
-   print_mcdiff_in_header(fout);
+   cs.print_mcdiff_in_header(fout,"spins",0);
+fprintf(fout,"\
+#   0.73250   0.00000                       -1.43200 -1.43200  0.71600  0.00000 -0.71600  1.43200  0.00000\n\
+#   0.73250   0.00000                       -2.56800 -2.56800  1.28400  0.00000 -1.28400  2.56800  0.00000\n\
+#\n\
+#\n\
+# %%SECTION 3%% DESCRIPTION OF THE LATTICE\n\
+#\n\
+# -----------------------------------------------------------------------------\n");
+
+
 // input file header and conf------------------------------------------------------------------
    n=headerinput(fin,fout,gp,cs);}
 else
@@ -283,15 +324,11 @@ exit(0);}
   int ii,nt,k,j;
 // determine primitive magnetic unit cell
 Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3),dd3(1,3),dd(1,3);
-if (inputpars.r!=cs.r){cs.r=inputpars.r;}
-if (inputpars.a!=cs.abc[1]){cs.abc[1]=inputpars.a;}
-if (inputpars.b!=cs.abc[2]){cs.abc[2]=inputpars.b;}
-if (inputpars.c!=cs.abc[3]){cs.abc[3]=inputpars.c;}
-if (inputpars.alpha!=cs.abc[4]){cs.abc[4]=inputpars.alpha;}
-if (inputpars.beta!=cs.abc[5]){cs.abc[5]=inputpars.beta;}
-if (inputpars.gamma!=cs.abc[6]){cs.abc[6]=inputpars.gamma;}
+if (inputpars.cs.r!=cs.r){cs.r=inputpars.cs.r;}
+if (inputpars.cs.abc!=cs.abc){cs.abc=inputpars.cs.abc;}
+
 // check sipffilenames
-for(ii=1;ii<=inputpars.nofatoms;++ii)
+for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 {if(cs.sipffilenames[ii]==NULL)cs.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
  if (strcmp((*inputpars.jjj[ii]).sipffilename,cs.sipffilenames[ii])!=0){strcpy(cs.sipffilenames[ii],(*inputpars.jjj[ii]).sipffilename);}
 }
@@ -300,12 +337,16 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
   if (strncmp(argv[1],"-f",2)==0) 
  { inputpars.savelattice(fout);
+   fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+   fprintf(fout,"#! strain tensor: eps1=%4.4g=epsii eps2=%4.4g=epsjj eps3=%4.4g=epskk eps4=%4.4g=2epsjk eps5=%4.4g=2epsik eps6=%4.4g=2epsij\n",
+    myround(savmf.epsilon(1)),myround(savmf.epsilon(2)),myround(savmf.epsilon(3)),myround(savmf.epsilon(4)),myround(savmf.epsilon(5)),myround(savmf.epsilon(6)));
+
   fprintf(fout,"#! %s \n",outstr);
    if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
   fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
   fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ia> <Ib> <Ic> [created by program spins]\n");
   for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
-  {for(ii=1;ii<=inputpars.nofatoms;++ii)
+  {for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
    {// output the positions
     dd3=savmf.pos_dabc(i,j,k,ii, cs);
    //returns position dd3 as components with respect to lattice a b c
@@ -315,7 +356,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
     fprintf(fout,"{%s} %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f ",
             (*inputpars.jjj[ii]).sipffilename,dd3(1),dd3(2),dd3(3),dd0(1),dd0(2),dd0(3));
     //output the "magnetic" moment if possible ... actually it outputs Ia Ib Ic 
-    for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,savmf.m(i,j,k)(inputpars.nofcomponents*(ii-1)+nt)));}      
+    for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,savmf.m(i,j,k)(inputpars.cs.nofcomponents*(ii-1)+nt)));}      
     fprintf(fout,"\n");
    }
   }}}
@@ -353,26 +394,26 @@ gp.read();
   spincf densitycf(savmf.na(),savmf.nb(),savmf.nc(),savmf.nofatoms,dim);
   ii=0; 
   // if individual ions of the cluster are to be shown make nofatoms in spincf larger !
-  for (j=1;j<=inputpars.nofatoms;++j){
-         if(arrow==4&&(*inputpars.jjj[j]).module_type==5){for(k=1;k<=(*(*inputpars.jjj[j]).clusterpars).nofatoms;++k)
+  for (j=1;j<=inputpars.cs.nofatoms;++j){
+         if(arrow==4&&(*inputpars.jjj[j]).module_type==5){for(k=1;k<=(*(*inputpars.jjj[j]).clusterpars).cs.nofatoms;++k)
                                                  {++ii;par inputpars4((*(*inputpars.jjj[j]).clusterpars));
                                                  cs4.x[ii]=cs.x[j]+(*inputpars4.jjj[k]).xyz(1);
                                                  cs4.y[ii]=cs.y[j]+(*inputpars4.jjj[k]).xyz(2);
                                                  cs4.z[ii]=cs.z[j]+(*inputpars4.jjj[k]).xyz(3);cs4.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
                                                  strcpy(cs4.sipffilenames[ii],(*inputpars4.jjj[k]).sipffilename);
                                                  //check if cluster abc  are the same as inputpars
-           if(fabs(cs4.abc(1)-inputpars4.a)>1e-5)
-              {fprintf(stderr,"Error program spins - a=%g in cluster %s not the same as a=%g in mcphas.j\n",cs4.abc(1),(*inputpars.jjj[j]).sipffilename,inputpars4.a);exit(1);}
-           if(fabs(cs4.abc(2)-inputpars4.b)>1e-5)
-              {fprintf(stderr,"Error program spins - b=%g in cluster %s not the same as b=%g in mcphas.j\n",cs4.abc(2),(*inputpars.jjj[j]).sipffilename,inputpars4.b);exit(1);}
-           if(fabs(cs4.abc(3)-inputpars4.c)>1e-5)
-              {fprintf(stderr,"Error program spins - c=%g in cluster %s not the same as c=%g in mcphas.j\n",cs4.abc(3),(*inputpars.jjj[j]).sipffilename,inputpars4.c);exit(1);}
-           if(fabs(cs4.abc(4)-inputpars4.alpha)>1e-5)
-              {fprintf(stderr,"Error program spins - alpha=%g in cluster %s not the same as alpha=%g in mcphas.j\n",cs4.abc(4),(*inputpars.jjj[j]).sipffilename,inputpars4.alpha);exit(1);}
-           if(fabs(cs4.abc(5)-inputpars4.beta)>1e-5)
-              {fprintf(stderr,"Error program spins - beta=%g in cluster %s not the same as beta=%g in mcphas.j\n",cs4.abc(5),(*inputpars.jjj[j]).sipffilename,inputpars4.beta);exit(1);}
-           if(fabs(cs4.abc(6)-inputpars4.gamma)>1e-5)
-              {fprintf(stderr,"Error program spins - gamma=%g in cluster %s not the same as gamma=%g in mcphas.j\n",cs4.abc(6),(*inputpars.jjj[j]).sipffilename,inputpars4.gamma);exit(1);}                                                 
+           if(fabs(cs4.abc(1)-inputpars4.cs.abc(1))>1e-5)
+              {fprintf(stderr,"Error program spins - a=%g in cluster %s not the same as a=%g in mcphas.j\n",cs4.abc(1),(*inputpars.jjj[j]).sipffilename,inputpars4.cs.abc(1));exit(1);}
+           if(fabs(cs4.abc(2)-inputpars4.cs.abc(2))>1e-5)
+              {fprintf(stderr,"Error program spins - b=%g in cluster %s not the same as b=%g in mcphas.j\n",cs4.abc(2),(*inputpars.jjj[j]).sipffilename,inputpars4.cs.abc(2));exit(1);}
+           if(fabs(cs4.abc(3)-inputpars4.cs.abc(3))>1e-5)
+              {fprintf(stderr,"Error program spins - c=%g in cluster %s not the same as c=%g in mcphas.j\n",cs4.abc(3),(*inputpars.jjj[j]).sipffilename,inputpars4.cs.abc(3));exit(1);}
+           if(fabs(cs4.abc(4)-inputpars4.cs.abc(4))>1e-5)
+              {fprintf(stderr,"Error program spins - alpha=%g in cluster %s not the same as alpha=%g in mcphas.j\n",cs4.abc(4),(*inputpars.jjj[j]).sipffilename,inputpars4.cs.abc(4));exit(1);}
+           if(fabs(cs4.abc(5)-inputpars4.cs.abc(5))>1e-5)
+              {fprintf(stderr,"Error program spins - beta=%g in cluster %s not the same as beta=%g in mcphas.j\n",cs4.abc(5),(*inputpars.jjj[j]).sipffilename,inputpars4.cs.abc(5));exit(1);}
+           if(fabs(cs4.abc(6)-inputpars4.cs.abc(6))>1e-5)
+              {fprintf(stderr,"Error program spins - gamma=%g in cluster %s not the same as gamma=%g in mcphas.j\n",cs4.abc(6),(*inputpars.jjj[j]).sipffilename,inputpars4.cs.abc(6));exit(1);}                                                 
                                                  }
                                                }
                                                else
@@ -381,8 +422,13 @@ gp.read();
 
   spincf spinconf(savmf.na(),savmf.nb(),savmf.nc(),ii,3);
 
+fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+   fprintf(fout,"#! strain tensor: eps1=%4.4g=epsii eps2=%4.4g=epsjj eps3=%4.4g=epskk eps4=%4.4g=2epsjk eps5=%4.4g=2epsik eps6=%4.4g=2epsij\n",
+    myround(savmf.epsilon(1)),myround(savmf.epsilon(2)),myround(savmf.epsilon(3)),myround(savmf.epsilon(4)),myround(savmf.epsilon(5)),myround(savmf.epsilon(6)));
+
 if (strncmp(argv[1],"-t",2)!=0){
 // the following is for the printout of spins.out ...........................
+section4header(fout);
 fprintf(fout,"#! %s \n",outstr);
 fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
 //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
@@ -403,19 +449,19 @@ else  //now table options
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
 // 1.b: Icalc has to be used to calculate all the <Olm>.
  Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1; // trick to get Habc as components along a,b,c
-                  abc(4)=inputpars.alpha; abc(5)=inputpars.beta; abc(6)=inputpars.gamma;
+                  abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
  dadbdc2ijk(Hextijk,Hext,abc); // transform Habc=Hext to ijk coordinates ... this is Hextijk
  
-Vector h(1,inputpars.nofcomponents);
-Vector I(1,inputpars.nofcomponents);
-h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
+Vector h(1,inputpars.cs.nofcomponents);
+Vector I(1,inputpars.cs.nofcomponents);
+h=0;for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 {(*inputpars.jjj[ii]).Icalc_parameter_storage_init(h,Hextijk,T);} // initialize Icalc module parameter storage
 
  for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
  {
     hh=savmf.m(i,j,k);
   densitycf.m(i,j,k)=0;int i4=1,ii4=1;
-  for(ii=1;ii<=inputpars.nofatoms;++ii)
+  for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
  {  
     Vector magmom(1,3),mom(1,3);
     Vector Lmom(1,3);
@@ -430,7 +476,7 @@ h=0;for(ii=1;ii<=inputpars.nofatoms;++ii)
   Vector momently(1,ORBMOMDENS_EV_DIM);
   Vector momentlz(1,ORBMOMDENS_EV_DIM);
     h=0;
-   for(nt=1;nt<=inputpars.nofcomponents;++nt){h(nt)=hh(nt+inputpars.nofcomponents*(ii-1));}
+   for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){h(nt)=hh(nt+inputpars.cs.nofcomponents*(ii-1));}
 
 
 switch(arrow)
@@ -448,7 +494,7 @@ switch(arrow)
                     };break;
  case 4: int dim4;
          dim4=3;if((*inputpars.jjj[ii]).module_type==5)
-                           dim4=(*(*inputpars.jjj[ii]).clusterpars).nofatoms*3;
+                           dim4=(*(*inputpars.jjj[ii]).clusterpars).cs.nofatoms*3;
          Vector momi(1,dim4);
          (*inputpars.jjj[ii]).micalc(momi,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);
          // now put the components of momi to the spinconf                                               
@@ -458,7 +504,7 @@ switch(arrow)
 
 // output atoms and moments in primitive unit cell to fout  ------------------------------------
 if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
-    for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).nofatoms;++nt)
+    for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).cs.nofatoms;++nt)
      {dd3=spinconf.pos_dabc(i,j,k,ii4, cs4);
       dd0=spinconf.pos_dr123(i,j,k,ii4, cs4);
       if (strncmp(argv[1],"-t",2)==0){fprintf(fout,"%4.4f %4.4f %4.4f %4.4f ",T,Hext(1),Hext(2),Hext(3));}
@@ -479,7 +525,26 @@ else{   ++ii4;
       // if module allows to calculate position shift of an atom - use this for output 
     if(true==(*inputpars.jjj[ii]).pcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
      {dd3+=mom; 
-      // fprintf(stderr,"# Attention: atom %i shifted from equilibrium position by (%g %g %g) A \n",ii,mom(1),mom(2),mom(3));
+     //  fprintf(stderr,"# Attention: atom %i shifted from equilibrium position by (%g %g %g) A \n",ii,mom(1),mom(2),mom(3));
+     }
+     // if module cannot calculate position shift of an atom - check if the atom 
+     // is actually a charge cloud on top of another atom and if yes take position shift
+     // from this other atom
+      else
+     {for(int iii=1;iii<=inputpars.cs.nofatoms;++iii)
+      {if(ii!=iii)
+       {Vector ddc(1,3); ddc=savmf.pos(i,j,k,iii, cs);
+        if(abs(ddc-dd3)<0.01){
+Vector hhh(1,inputpars.cs.nofcomponents); hhh=0;
+for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){hhh(nt)=hh(nt+inputpars.cs.nofcomponents*(iii-1));}
+
+ if(true==(*inputpars.jjj[iii]).pcalc(mom,T,hhh,Hextijk,(*inputpars.jjj[iii]).Icalc_parstorage))
+    {dd3+=mom;
+ //printf(stderr,"# Attention: atom %i shifted from equilibrium position by (%g %g %g) A taken from atom %i\n",ii,mom(1),mom(2),mom(3),iii);
+ }
+                               }
+       }
+      } 
      }
 
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
@@ -635,9 +700,9 @@ printf("# **********************************************************************
 
 // check sipffilenames and put radius= ... in case single ion module is
 //  capable of calculating position 
-for(ii=1;ii<=inputpars.nofatoms;++ii)
+for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 {Vector pos(1,3);   
-  for(nt=1;nt<=inputpars.nofcomponents;++nt){h(nt)=hh(nt+inputpars.nofcomponents*(ii-1));}
+  for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){h(nt)=hh(nt+inputpars.cs.nofcomponents*(ii-1));}
   if(true==(*inputpars.jjj[ii]).pcalc(pos,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
  {double charge;charge=(*inputpars.jjj[ii]).charge;if(charge==0)charge=0.01;
   sprintf(cs.sipffilenames[ii],"pointcharge %g |e| radius=%g",charge,gp.scale_pointcharges*0.529177*signum(charge)*pow((double)fabs(charge),0.3333));
@@ -883,7 +948,7 @@ if (argc-os>=6){
             {case 's': 
              case 'o': 
                       if(doijk==3){// moments=xx*momentsx+yy*momentsy+zz*momentsz;
-                   for(ii=1;ii<=inputpars.nofatoms;++ii)
+                   for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
                    for (i=1;i<=savmf.na();++i)for(j=1;j<=savmf.nb();++j)for(k=1;k<=savmf.nc();++k)
                   for(nt=1;nt<=dim;++nt){densityev_real.m(i,j,k)(nt+dim*(ii-1))=xx*ev_real.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_real.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_real.m(i,j,k)(nt+2*dim+3*dim*(ii-1));
                                          densityev_imag.m(i,j,k)(nt+dim*(ii-1))=xx*ev_imag.m(i,j,k)(nt+3*dim*(ii-1))+yy*ev_imag.m(i,j,k)(nt+dim+3*dim*(ii-1))+zz*ev_imag.m(i,j,k)(nt+2*dim+3*dim*(ii-1));

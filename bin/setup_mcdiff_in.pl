@@ -17,7 +17,7 @@ $ARGV[3]=~s/exp/essp/g;$ARGV[3]=~s/x/*/g;$ARGV[3]=~s/essp/exp/g;$ARGV[3]=eval $A
              }
 print STDOUT << "EOF";
 *******************************************************
-setting up mcdisp.mf to be used by mcdisp
+setting up mcdiff.in to be used by mcdiff
 EOF
 if ($prefix){$pp="-prefix ".$prefix;}
 if ($#ARGV>2) { 
@@ -38,12 +38,21 @@ reading results/mcphas.mf by program spins ...
 writing results/spins.* ...
 EOF
 
+if(open (Fin, "mcdiff.in"))
+{print "\n\n Reading Section 1 and Section 2 from mcdiff.in ...\n";
+ @lines = <Fin>; until($ss=~/SECTION\s*3/||!@lines){$ss=pop @lines;}
+close Fin;}
 
 print "\n\nSetting up mcdiff.in ...\n";
 
 open (Fout,">mcdiff.in");
 {open (Fin,"results/spins.out");
-while(<Fin>) {print Fout $_;}
+if(@lines){print Fout @lines;
+}else{$S3=1;}
+while(<Fin>) {if(/SECTION\s*3/){$S3=2;}
+if($S3){ print Fout $_;}
+}
+
 close Fout,Fin;
 }
 
@@ -52,6 +61,10 @@ print STDOUT << "EOF";
     mcdiff.in generated: you can start now mcdiff
     However, please remember to set wavelength, lorentzfactor etc.
     in input file mcdiff.in
+
+    WARNINGS: if you used option -doeps with mcphas you need
+    to correct the lattice parameters with the corresponding strain
+    - this is not done automatically by setup_mcdiff_in
 
     You can view the magnetic structure in postscriptfiles
     results/spins*.eps, by fp_studio results/spins.fst and
@@ -71,6 +84,8 @@ sub usage() {
                     setup_mcdiff_in reads the results of this calculation
                     from results/mcphas.sps and results/mcphas.mf generates an
                     input file mcdiff.in
+                    If a file mcdiff.in exists, SECTION 1 (instrumental parameters)
+                    and SECTION 2 (nonmagnetic atoms) will be taken from this file.
 
     usage: setup_mcdiff_in [option] T Ha Hb Hc
               or

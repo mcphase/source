@@ -53,7 +53,7 @@ void writeheader(par & inputpars,FILE * fout)
   fprintf(fout, "#  and  Lande factors total angular momentum J, <j0> and <j2> formfactor\n# coefficients\n");
   fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");
   
- for (int i = 1;i<=inputpars.nofatoms;++i)
+ for (int i = 1;i<=inputpars.cs.nofatoms;++i)
  {if((double)(i)/50==(double)(i/50))
   {
   fprintf(fout, "#  dr1[r1]dr2[r2]dr3[r3] DWF[A^2] gJ     <j0>:A a      B      b      C      c      D      <j2>A  a      B      b      C      c      D\n");

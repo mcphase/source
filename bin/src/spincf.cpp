@@ -512,7 +512,7 @@ return 0; //not equal
 //from n1xn2xn3 unit cells with na number in the cryst. basis and nc number of components of the spin of each atom
 spincf::spincf (int n1,int n2,int n3,int na,int nc)
 { wasstable=0;
-  int l;epsilon=Vector(1,6);
+  int l;epsilon=Vector(1,6);epsilon=0;
   nofa=n1;nofb=n2;nofc=n3;
    mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
   nofatoms=na;

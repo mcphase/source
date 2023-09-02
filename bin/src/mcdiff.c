@@ -26,6 +26,7 @@ int main (int argc, char **argv)
   float numbers1[70];numbers1[0]=70;
   Vector r1(1,3),r2(1,3),r3(1,3),H(1,3),P(1,3);
   Vector rez1(1,3),rez2(1,3),rez3(1,3);
+  Matrix eps(1,3,1,3); // strain tensor
 fprintf(stderr,"***********************************************************************\n");
 fprintf(stderr,"*\n");
 fprintf(stderr,"* mcdiff - program to calculate neutron and magnetic xray diffraction\n");
@@ -265,6 +266,13 @@ fprintf(fout,"# Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)
    if(alpha==0)extract(instr, "alpha", alpha);
    if(beta==0)extract(instr, "beta", beta);
    if(gamma==0)extract(instr, "gamma", gamma);
+    extract(instr,"eps1",eps(1,1));
+    extract(instr,"eps2",eps(2,2));
+    extract(instr,"eps3",eps(3,3));
+    extract(instr,"eps4",eps(2,3));
+    extract(instr,"eps5",eps(1,3));
+    extract(instr,"eps6",eps(1,2));
+
     extract(instr, "r1x", r1(1));
     extract(instr, "r1y", r1(2));
     extract(instr, "r1z", r1(3));
@@ -326,6 +334,15 @@ printf("                 r3= %5.3ga + %5.3gb + %5.3gc\n", r3(1), r3(2), r3(3));
                                    }
 
                for(i=1;i<=nat;++i) {
+if(
+    fabs(x1[i]*r1(1)+y1[i]*r2(1)+z1[i]*r3(1)-da[i])>SMALLPOSITIONDEVIATION
+||  fabs(x1[i]*r1(2)+y1[i]*r2(2)+z1[i]*r3(2)-db[i])>SMALLPOSITIONDEVIATION
+||  fabs(x1[i]*r1(3)+y1[i]*r2(3)+z1[i]*r3(3)-dc[i])>SMALLPOSITIONDEVIATION
+  )
+{fprintf(stderr,"Warning mcdiff: da db dc and dr1 dr2 dr3 inconsistent for nonmagnetic ion number %i \n",i);
+ if(use_dadbdc==0){ fprintf (stderr,"using dr1 dr2 dr3 and recalculating da db dc...\n");}
+             else {fprintf (stderr,"using da db dc and recalculating dr1 dr2 dr3...\n");}                
+ }
         if(use_dadbdc==0){       da[i]= x1[i]*r1(1)+y1[i]*r2(1)+z1[i]*r3(1);
                                  db[i]= x1[i]*r1(2)+y1[i]*r2(2)+z1[i]*r3(2);
                                  dc[i]= x1[i]*r1(3)+y1[i]*r2(3)+z1[i]*r3(3);
@@ -355,9 +372,16 @@ fprintf(fout,"#! r1a= %7f r2a= %7f r3a= %7f\n",r1(1),r2(1),r3(1));
 fprintf(fout,"#! r1b= %7f r2b= %7f r3b= %7f   primitive lattice vectors (a)(b)(c)\n",r1(2),r2(2),r3(2));
 fprintf(fout,"#! r1c= %7f r2c= %7f r3c= %7f\n",r1(3),r2(3),r3(3));
 fprintf(fout,"#\n");
+fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+fprintf(fout,"#! strain tensor (optional): eps1=%4.4g=epsii eps2=%4.4g=epsjj eps3=%4.4g=epskk eps4=%4.4g=2epsjk eps5=%4.4g=2epsik eps6=%4.4g=2epsij\n",
+        eps(1,1),eps(2,2),eps(3,3),eps(2,3),eps(1,3),eps(1,2));
 fprintf(fout,"#\n");
 fprintf(fout,"#\n");
 
+eps=0.5*(eps+eps.Transpose());
+
+printf("  Strain Tensor epsilon (coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+myPrintMatrix(stdout,eps);   
 
 Vector r1s(1,3),r2s(1,3),r3s(1,3);
 r1s=r1;r2s=r2;r3s=r3;
@@ -410,25 +434,16 @@ rtoijk(3,3)=c*c-rtoijk(1,3)*rtoijk(1,3)-rtoijk(2,3)*rtoijk(2,3);
 if (rtoijk(3,3)<=0){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
 rtoijk(3,3)=sqrt(rtoijk(3,3));
 
-// --------------------- old internal coordinates - removed and changed to the above 30.10.2011 MR
-/* rtoijk(1,1)=0;
-rtoijk(2,1)=a*sin(gamma*PI/180);
-rtoijk(3,1)=a*cos(gamma*PI/180);
-
-rtoijk(1,2)=0;
-rtoijk(2,2)=0;
-rtoijk(3,2)=b;
-
-rtoijk(3,3)=c*cos(alpha*PI/180);
-rtoijk(2,3)=c*(cos(beta*PI/180)-cos(alpha*PI/180)*cos(gamma*PI/180))/sin(gamma*PI/180);
-if (fabs(rtoijk(2,3))>c){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
-rtoijk(1,3)=c*c-rtoijk(2,3)*rtoijk(2,3)-rtoijk(3,3)*rtoijk(3,3);
-if (rtoijk(1,3)<=0){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
-rtoijk(1,3)=sqrt(rtoijk(1,3));
-*/
+// finally compute the components of r1 r2 r3 (magnetic unit cell) in terms of ijk coordinate system
 r1=(rtoijk*r1)*(double)nr1;
 r2=(rtoijk*r2)*(double)nr2;
 r3=(rtoijk*r3)*(double)nr3;
+
+// consider the strain tensor
+r1+=eps*r1;
+r2+=eps*r2;
+r3+=eps*r3;
+
 
 // transform also Projection vector
 Vector Pxyz (1,3);
@@ -530,7 +545,18 @@ for(i=1;i<=natmagnetic;++i){
    //                                        to Sa Sb Sc La Lb Lc
    //                                           
    double dum; dum=numbers[9+2];numbers[9+2]=numbers[9+4];numbers[9+4]=numbers[9+5];numbers[9+5]=numbers[9+3];numbers[9+3]=dum;
-  
+
+if(
+ fabs( numbers[4]- (numbers[1]*rez1(1)+numbers[2]*rez1(2)+numbers[3]*rez1(3))/2/PI)>SMALLPOSITIONDEVIATION
+||  fabs(numbers[5]- (numbers[1]*rez2(1)+numbers[2]*rez2(2)+numbers[3]*rez2(3))/2/PI)>SMALLPOSITIONDEVIATION
+||  fabs(numbers[6]- (numbers[1]*rez3(1)+numbers[2]*rez3(2)+numbers[3]*rez3(3))/2/PI)>SMALLPOSITIONDEVIATION
+  )
+{fprintf(stderr,"Warning mcdiff: da db dc and dr1 dr2 dr3 inconsistent for magnetic ion number %i \n",i);
+ if(use_dadbdc==0){ fprintf (stderr,"using dr1 dr2 dr3 and recalculating da db dc...\n");}
+                    else {fprintf (stderr,"using da db dc and recalculating dr1 dr2 dr3...\n");}                
+ }
+
+                      
 if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1(2)+numbers[3]*rez1(3))/2/PI;
                                  numbers[5]= (numbers[1]*rez2(1)+numbers[2]*rez2(2)+numbers[3]*rez2(3))/2/PI;
                                  numbers[6]= (numbers[1]*rez3(1)+numbers[2]*rez3(2)+numbers[3]*rez3(3))/2/PI;

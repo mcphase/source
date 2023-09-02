@@ -268,6 +268,7 @@ public:
    double r6;
 
    double charge; // charge in units of |e|
+   int magnetic;
 
 private:
   double rk_from_radial_wavefunction(int k); // needed for public radial wave function <r^n> calculation

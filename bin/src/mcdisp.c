@@ -407,8 +407,8 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   Vector hkl(1,3),q(1,3),qold(1,3),qijk(1,3);                 
   Vector mf(1,ini.nofcomponents);
   int jmin;
-  IntVector noftransitions(1,inputpars.nofatoms); // vector to remember how many transitions are on each atom
-  //int offset[inputpars.nofatoms+1]; // vector to remember where higher  transitions are stored
+  IntVector noftransitions(1,inputpars.cs.nofatoms); // vector to remember how many transitions are on each atom
+  //int offset[inputpars.cs.nofatoms+1]; // vector to remember where higher  transitions are stored
                                     // (as "separate ions on the same unit cell position")
   mf=0;
    int sort=0;int maxiter=1000000;
@@ -434,7 +434,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
 
   //calculate single ion properties of every atom in magnetic unit cell
   int nofEstps=0;if(do_Erefine)nofEstps=(int)((ini.emax-ini.emin)/(fabs(epsilon)/2)+1);
-  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.nofatoms,ini.nofcomponents,nofEstps,do_Erefine);
+  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.cs.nofatoms,ini.nofcomponents,nofEstps,do_Erefine);
 
   
  if (do_readtrs==0)
@@ -444,7 +444,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   fout = fopen_errchk (filename,"w");
    trs_header_out(fout,pinit,ninit,maxE,ini.T,ini.Hext,'I');
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
-  for(l=1;l<=inputpars.nofatoms;++l){
+  for(l=1;l<=inputpars.cs.nofatoms;++l){
    fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
     for(ll=1;ll<=ini.nofcomponents;++ll)
      {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s in first 
@@ -505,7 +505,7 @@ noftransitions=0;
     int mqdim=3;if(calc_rixs)mqdim=9;
     md.set_noftransitions(i,j,k,noftransitions,mqdim);
   // for later use:
-    for(l=1;l<=inputpars.nofatoms;++l){ //save eigenstates of ions (if possible)
+    for(l=1;l<=inputpars.cs.nofatoms;++l){ //save eigenstates of ions (if possible)
       for(ll=1;ll<=ini.nofcomponents;++ll)
        {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s in first 
                                                               //crystallographic unit of magnetic unit cell
@@ -538,7 +538,7 @@ ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
 
   sprintf(filename,"./results/%smcdisp.trs",ini.prefix);  
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
-  for(l=1;l<=inputpars.nofatoms;++l){
+  for(l=1;l<=inputpars.cs.nofatoms;++l){
   if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
                   fin = fopen_errchk(filename,"rb");}
   jmin=0;
@@ -704,7 +704,7 @@ for(counter=firstcounter;counter<=ini.nofhkls;++counter){
 		     hkl(3)=ini.hkls[counter][3];
 
  // transform hkl to primitive lattice
- q=inputpars.r.Transpose()*hkl;
+ q=inputpars.cs.r.Transpose()*hkl;
 
 fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
  if(do_verbose==1){fprintf(stdout,"#Setting up J(q) matrix .... \n");}
@@ -739,7 +739,7 @@ int num_threads_started=-1;
 #endif
  // calculate Js,ss(Q) summing up contributions from the l=1-paranz parameters
    
-   for(ll=1;ll<=inputpars.nofatoms;++ll)
+   for(ll=1;ll<=inputpars.cs.nofatoms;++ll)
    { //sum up l.th neighbour interaction of crystallographic atom ll
      // 1. transform dn(l) to primitive lattice and round it to integer value
   #ifndef _THREADS_JSSS
@@ -794,7 +794,7 @@ int num_threads_started=-1;
 #endif
 
 
-if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, inputpars.abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
+if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
               writehklblocknumber(jqfile,ini,counter);
          
                   if (do_verbose==1){fprintf (jqfile, "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
@@ -847,7 +847,7 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
    Ac=0;J_Q=0;Lambda=0;
    for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
 
-    for(l1=1;l1<=inputpars.nofatoms;++l1){
+    for(l1=1;l1<=inputpars.cs.nofatoms;++l1){
      for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
       s=index_s(i1,j1,k1,l1,t1,md,ini);
       b=md.baseindex(i1,j1,k1,l1,t1);
@@ -861,9 +861,9 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
                        }
       }} 
    for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
-    for(l1=1;l1<=inputpars.nofatoms;++l1){ 
+    for(l1=1;l1<=inputpars.cs.nofatoms;++l1){ 
      for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
-    for(l2=1;l2<=inputpars.nofatoms;++l2){ 
+    for(l2=1;l2<=inputpars.cs.nofatoms;++l2){ 
      for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
       s=index_s(i1,j1,k1,l1,t1,md,ini);
       ss=index_s(i2,j2,k2,l2,t2,md,ini);
@@ -891,10 +891,10 @@ if (do_jqfile){
        }
 
 	// diagonalize JQ to get eigenvalues (biggest corresponds to Tn) !!!
-         Vector Tn(1,ini.nofcomponents*ini.mf.n()*inputpars.nofatoms);
-         ComplexMatrix eigenvectors(1,ini.nofcomponents*ini.mf.n()*inputpars.nofatoms,1,ini.nofcomponents*ini.mf.n()*inputpars.nofatoms);
+         Vector Tn(1,ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms);
+         ComplexMatrix eigenvectors(1,ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms,1,ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms);
          myEigenSystemHermitean (J_Q,Tn,eigenvectors,sort=1,maxiter);
-         i2=ini.nofcomponents*ini.mf.n()*inputpars.nofatoms;
+         i2=ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms;
        if(do_verbose==1)
        {fprintf(jqfile,"#eigenvalues(highest corresponds to Tn, predicted magstructure)\n");
          myPrintVector(jqfile,Tn); 
@@ -979,7 +979,7 @@ if (do_jqfile){
             // Skips q-point, but make sure qincr is correct.
             fprintf(stderr,"# Skipping this q-point.\n");
             if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
-               qold=qijk; hkl2ijk(qijk,hkl, inputpars.abc); qincr+=Norm(qijk-qold);
+               qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
                ini.print_usrdefcols(foutqei,qijk,qincr,q);
                fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
                fprintf(foutqei, "-1    -1   -1\n");
@@ -1009,7 +1009,7 @@ if (do_jqfile){
       if(eigrval!=0) { 
          fprintf(stderr,"# The non-symmetric eigensolver failed. This Q point will be skipped.\n");
          if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
-            qold=qijk; hkl2ijk(qijk,hkl, inputpars.abc); qincr+=Norm(qijk-qold);
+            qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
             ini.print_usrdefcols(foutqei,qijk,qincr,q);
             fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
             fprintf(foutqei, "-1    -1   -1\n");
@@ -1069,7 +1069,7 @@ if (do_jqfile){
   ComplexMatrix chitot(1,3,1,3),chitotbey(1,3,1,3); chitot=0;chitotbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
   intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl,counter);
-  qold=qijk;hkl2ijk(qijk,hkl, inputpars.abc);QQ=Norm(qijk);
+  qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);QQ=Norm(qijk);
 
   if(qincr==-1){qincr=0;qold=qijk;
               // for the first q vector in the loop we have to initialize files ...
@@ -1303,7 +1303,7 @@ if (do_jqfile){
                        if (En(i)!=-DBL_MAX && // Matrix Ac is not +ve definite, and this eigenvalue is not real - don't do intensity
                            En(i)<=ini.emax&&En(i)>=ini.emin){
                          for(double azimuth=azmin;azimuth<=azmax&&ints(i)>-1;azimuth+=daz)                             
-                              { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, inputpars.abc,QQ,En(i));
+                              { calc_eps(eis,eip,eir,eil,eos,eop,eor,eol,ini,azimuth,qijk,hkl, inputpars.cs.abc,QQ,En(i));
                                 // eis,p and eos,p are polarisation vectors for sigma/pi plarisation in terms of
                                 // eir,l and eor,l are polarisation vectors for righ/left circular plarisation in terms of
                                 // the ijk coordinate system ijk form an euclidian righthanded 
@@ -1396,10 +1396,10 @@ if (do_jqfile){
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                           case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
-                          case 3: rottouvw(chi,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
-                          case 4: rottouvw(chibey,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
+                          case 3: rottouvw(chi,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 4: rottouvw(chibey,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chibey(i1,j1)),imag(chibey(i1,j1)));break;     
                           case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
-                          case 6: rottouvw(chi,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
+                          case 6: rottouvw(chi,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));break;
                          } }
                        fprintf(foutqei,"\n");
                        if(do_verbose==1){fprintf(stdout, "#level %i IdipFF= %4.4g Ibeyonddip=%4.4g Iphonon=%4.4g\n",i,ints(i),intsbey(i),intsP(i));}
@@ -1474,10 +1474,10 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
                           case 2: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
-                          case 3: rottouvw(chitot,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
-                          case 4: rottouvw(chitotbey,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
+                          case 3: rottouvw(chitot,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 4: rottouvw(chitotbey,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitotbey(i1,j1)),imag(chitotbey(i1,j1)));break;     
                           case 5: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
-                          case 6: rottouvw(chitot,ini,inputpars.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
+                          case 6: rottouvw(chitot,ini,inputpars.cs.abc,counter);for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
                          } 
                       
     sta+=dd*dd;sta_int+=dd_int*dd_int;
@@ -1836,11 +1836,11 @@ for (i=1;i<=argc-1;++i){
   // as class load  parameters from file
   par inputpars("./mcphas.j",do_verbose);
   
-  inimcdis ini("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.abc);
-  if(ini.nofcomponents!=inputpars.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.nofcomponents);exit(EXIT_FAILURE);}
+  inimcdis ini("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc);
+  if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
   if(do_Erefine&&calc_rixs){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf\n");exit(EXIT_FAILURE);}
   if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}
-  if(ini.nofatoms!=inputpars.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.nofatoms);exit(EXIT_FAILURE);}
+  if(ini.nofatoms!=inputpars.cs.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.cs.nofatoms);exit(EXIT_FAILURE);}
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcdisp.j");            inputpars.save(prefix,0);
 
