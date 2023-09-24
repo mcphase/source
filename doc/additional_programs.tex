@@ -233,7 +233,8 @@ Note that in order to use {\prg makenn\index{makenn}} you have to set up a
 working {\prg mcphas.j\index{mcphas.j}} file with the crystal structure. 
 The program {\prg makenn\index{makenn}} takes {\prg mcphas.j\index{mcphas.j}} and
 creates all neighbours within a sphere of distance 23.3\AA, for every neighbour the classical
-dipole interaction is calculated and is stored in file {\prg makenn.j}. If the exchange %%@
+dipole interaction $J_{\alpha\beta}(\vec R)=\frac{\mu_0}{4\pi} (g_J \mu_B)^2 \frac{3R_{\alpha}R_{\beta}-\delta_{\alpha\beta}R^2}{R^5}$
+ is calculated and is stored in file {\prg makenn.j}. If the exchange %%@
 parameters 
 (and neighbour positions) are not known for your system, you can use this module 
 to generate a list of nearest neighbours and exchange parameters. Currently implemented 
@@ -564,6 +565,13 @@ program
 
     results/mcphas.sps
                  :  result of a mcphas calculation
+
+    optional input files:
+
+    mcdiff.in
+                 :  if present experimental parameters (section 1)
+                    and nonmagnetic atoms (section 2) are taken from
+                    this file
 
     output files:
 

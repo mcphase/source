@@ -315,8 +315,8 @@ cleanexe:
 		bin/cond.exe bin/jjj2j.exe bin/mcphasit.exe bin/spins.exe \
                 bin/chrgplt.exe bin/pointc.exe bin/spinsfromq.exe \
                 bin/densplt.exe \
-                bin/mcdiff.exe  \
-                bin/ic1ion.exe bin/so1ion.exe \
+                bin/mcdiff.exe bin/reduce_unitcell.exe  \
+                bin/ic1ion.exe bin/icf1ion.exe bin/so1ion.exe \
                 bin/fediff.exe bin/mf2fe.exe \
                 bin/formfactor.exe bin/radwavfunc.exe bin/clusterize.exe bin/bfk.exe \
                 bin/RCN2K.exe bin/RCN36K.exe bin/RCG11K.exe \
@@ -325,8 +325,8 @@ cleanexe:
 		bin/mcdispit bin/singleion bin/cfield \
 		bin/cond bin/jjj2j bin/mcphasit bin/spins \
                 bin/chrgplt bin/pointc bin/spinsfromq \
-                bin/densplt \
-                bin/mcdiff bin/cf1ion_module/cfield.so \
+                bin/densplt bin/icf1ion \
+                bin/mcdiff bin/reduce_unitcell bin/cf1ion_module/cfield.so \
                 bin/ic1ion bin/so1ion \
                 bin/ic1ion_module/ic1ion.so \
                 bin/fediff bin/mf2fe \

@@ -261,11 +261,20 @@ the excitation energies at these reflections and (if measured
 energies are given) computes a standard deviation
 and prints
 this deviation to stdout as ''sta=3120.31'' [this can directly
-be used by fitting program such as {\prg simannfit\index{simannfit}}].
+be used by fitting program such as {\prg simannfit\index{simannfit}}]. Note that
+several experimental energies and intensities may be entered in separate lines. 
+{\prg mcdisp\index{mcdisp}} will check the list and if subsequent lines contain
+the same values of h,k and l it will do the calculation for this scattering vector
+only one time.
 
 The standard deviation is calculated by taking for a set of measured energies (at a 
 given q-vector) the squared sum of differences to the nearest
-calculated energy. Statistical weighting as given by the user in {\prg mcdisp.par}
+calculated energy. Thus only the calculated energies which are close to a 
+measured energy contribute to the standard deviation. 
+If an experimental intensity is provided with the set of measured energies, 
+then calculated energies will be considered only if they have intensity (magnetic+nuclear)
+larger than this experimental intensity (for standard deviation sta\_int)
+Statistical weighting as given by the user in {\prg mcdisp.par}
 for each q-vector is applied. If the weighting is less than zero, the 
 inverse squared sum of differences to the nearest
 calculated energy is taken (''antipeak'', this is useful in order to 
@@ -276,16 +285,16 @@ may be used in fitting experimental data:
 \begin{eqnarray}
 {\rm sta}                              & =& \sum_i |weight(i)|*[Eexp(i) - nearestEcalc(i)]^{[2*sign(weight(i))]}\\
 {\rm sta\_int   }                       & = &\sum_i |weight(i)|*[Eexp(i) - nearestEcalc_{\rm with %%@
-Int>0.1mb/srf.u.}]^{[2*sign(weight(i))]}\\
+Int>Iexp(i)>0.1mb/srf.u.}]^{[2*sign(weight(i))]}\\
 {\rm sta\_without\_antipeaks }           & =& \sum_{i, weight(i)>0}  weight(i)*[Eexp(i) - nearestEcalc(i)]^2\\
 {\rm sta\_int\_without\_antipeaks }       & =&\sum_{i,weight(i)>0}  weight(i)*[Eexp(i) - nearestEcalc_{\rm with %%@
-Int>0.1mb/srf.u.}]^2\\
+Int>Iexp(i)>0.1mb/srf.u.}]^2\\
 {\rm sta\_without\_weights }              &=& \sum_i [Eexp(i) - nearestEcalc(i)]^{[2*sign(weight(i))]}\\
 {\rm sta\_int\_without\_weights}          & =&\sum_i [Eexp(i) - nearestEcalc_{\rm with %%@
-Int>0.1mb/srf.u.}]^{[2*sign(weight(i))]}\\
+Int>Iexp(i)>0.1mb/srf.u.}]^{[2*sign(weight(i))]}\\
 {\rm sta\_without\_antipeaks\_weights}    & = &\sum_{i, weight(i)>0}[Eexp(i) - nearestEcalc(i)]^2\\
 {\rm sta\_int\_without\_antipeaks\_weights}& =& \sum_{i, weight(i)>0} [Eexp(i) - nearestEcalc_{\rm with %%@
-Int>0.1mb/srf.u.}]^2\\
+Int>Iexp(i)>0.1mb/srf.u.}]^2\\
 \end{eqnarray}
 
 

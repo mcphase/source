@@ -1360,7 +1360,8 @@ if (do_jqfile){
                                                                                             dd_without_weights(j1)=1/test;
                                                                                             dd_without_antipeaks_weights(j1)=0;}
                                                                                }
-                       if ((test=fabs(En(i)-ini.hkls[counter][4*j1]))<dd1_int(j1)&&ints(i)>SMALLINT){dd1_int(j1)=test;
+                       double inten;if(inten=ini.hkls[counter][4*j1+2]==0.0)inten=SMALLINT;
+                       if ((test=fabs(En(i)-ini.hkls[counter][4*j1]))<dd1_int(j1)&&ints(i)+intsP(i)>inten){dd1_int(j1)=test;
                                                                                double weight=ini.hkls[counter][4*j1+1];
                                                                                if(weight>0){dd_int(j1)=sqrt(weight)*test;  // weight>0
                                                                                             dd_int_without_antipeaks(j1)=sqrt(weight)*test;

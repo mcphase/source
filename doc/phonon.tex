@@ -606,7 +606,7 @@ we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can 
 \subsection{Exchange Striction}
 
 If the two ion interactions are strain dependent, an additional contribution to the
-strain tensor has to be considered in the equations (\ref{Htot}) to (\ref{{zeroeps}}).
+strain tensor has to be considered in the equations (\ref{Htot}) to (\ref{zeroeps}).
 The resulting contribution is commonly called {\em exchange striction}, because
 predominantly the magnetic exchange interactions will contribute.
 
@@ -677,7 +677,9 @@ the magnetoelastic parameters $G_{\rm cfph}$ and $\Gamma_{\rm cfph}$.
 \begin{itemize}
 \item[{\prg -doeps}]
 If the program {\em mcphas} is started with option {\prg -doeps}
-and it finds elastic constants in the input file {\em mcphas.j}, it
+and it finds elastic constants in the input file {\em mcphas.j} (note, that the elastic constants
+in the input file are normalised to the primitive crystallographic unit cell, units are 
+meV / primitive crystallographic unit cell), it
  will use these and determine selfconsistently the strain $\epsilon$ by solving equations
 (\ref{zeroeps}) and (\ref{Htot}). Elastic energy and strain tensor are stored in {\em results/mcphas.fum}.
  In this way it is be possible to model Jahn Teller transitions,

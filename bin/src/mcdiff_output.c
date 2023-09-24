@@ -18,7 +18,7 @@ time_t curtime;
   fprintf(fout,"#! a=%8.5f b=%8.5f c=%8.5f alpha=%8.5f beta=%8.5f gamma=%8.5f\n",a,b,c,alpha,beta,gamma);
   fprintf(fout,"#! r1a=%8.5f r2a=%8.5f r3a=%8.5f\n",nr1*r1s[1],nr2*r2s[1],nr3*r3s[1]);
   fprintf(fout,"#! r1b=%8.5f r2b=%8.5f r3b=%8.5f   primitive lattice vectors [a][b][c]\n",nr1*r1s[2],nr2*r2s[2],nr3*r3s[2]);
-  fprintf(fout,"#! r1c=%8.5f r2c=%8.5f r3c=%8.5f\n",nr1*r1s[3],nr2*r2s[3],nr3*r3s[3]);
+  fprintf(fout,"#! r1c=%8.5f r2c=%8.5f r3c=%8.5f   (strained using strain tensor)\n",nr1*r1s[3],nr2*r2s[3],nr3*r3s[3]);
   fprintf(fout,"#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",natmagnetic,spins.nofcomponents);
   fprintf(fout,"#*********************************************************************\n");
 

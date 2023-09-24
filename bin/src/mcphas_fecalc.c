@@ -153,10 +153,10 @@ for(i=1;i<=6;++i)
  for(l=1;l<=inputpars.cs.nofatoms;++l)
   for(m=1;m<=inputpars.cs.nofcomponents;++m)
    GG(i,(l-1)*inputpars.cs.nofcomponents+m)=(*(*inputpars.jjj[l]).G)(i,m);
-// invert elastic constants multiplied by number of atoms in magnetic unitcell - exit if not possible
+// invert elastic constants 
  // printf("#Inverting Elastic Constants Matrix\n");
-  inputpars.CelInv=(1.0/(sps.na()*sps.nb()*sps.nc()))*inputpars.Cel.Inverse();
-            //
+  inputpars.CelInv=inputpars.Cel.Inverse();
+            
 // initialize epsilon mean field to zero
   mf.epsmf=0;
 }
@@ -376,6 +376,8 @@ if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
  // dE-=0.5*diff*(const Vector&)sps.m(i,j,k); // here we tried to calculate dE - energy difference for the step
   diff*=stepratio;mf.mf(i,j,k)=mfold.mf(i,j,k)+diff;//step gently ... i.e. scale change of MF with stepratio
   }}}
+  // normalize mf.epsmf to crystallographic primitive unit cell (in accordance with elastic constants!)
+  mf.epsmf/=sps.n();
   mfold=mf;
   sta=sqrt(sta/sps.n()/inputpars.cs.nofatoms);
   bigstep=fmodf(ini.bigstep-0.0001,1.0);

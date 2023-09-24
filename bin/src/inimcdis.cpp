@@ -226,20 +226,20 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
                                       nn[1]=hkl(1);nn[2]=hkl(2);nn[3]=hkl(3);
                                      }
                        // here check if hkl already in list and if yes, extend its energies
-                     if(nofhkls>1&&fabs(hkls[nofhkls][1]-nn[1])+fabs(hkls[nofhkls][2]-nn[2])+fabs(hkls[nofhkls][3]-nn[3])<1e-9)
+                     if(nofhkls>0&&fabs(hkls[nofhkls][1]-nn[1])+fabs(hkls[nofhkls][2]-nn[2])+fabs(hkls[nofhkls][3]-nn[3])<1e-9)
                        {if(i>3) // only do the energy field extension if energies are given ...
-                        {int nold=hkls[nofhkls][0];
-                         hkls[nofhkls+1]=new double [nold+1];
+                        {int nold=hkls[nofhkls][0]; // remember old number of hkl
+                         hkls[nofhkls+1]=new double [nold+1]; // remember old hkl and energies in appended hkls
                          for(j=0;j<=nold;++j){hkls[nofhkls+1][j]=hkls[nofhkls][j];}
-                         delete []hkls[nofhkls];
+                         delete []hkls[nofhkls]; // free old hkls and claim memory with more storage 
                          hkls[nofhkls]=new double [nold+NOFHKLCOLUMNS-3+1];hkls[nofhkls][0]=nold+NOFHKLCOLUMNS-3;
-                         for(j=1;j<=nold;++j){hkls[nofhkls][j]=hkls[nofhkls+1][j];}
-                         for(j=4;j<=i&&j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][nold+j-3]=nn[j];}
+                         for(j=1;j<=nold;++j){hkls[nofhkls][j]=hkls[nofhkls+1][j];} // fill storage with old values
+                         for(j=4;j<=i&&j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][nold+j-3]=nn[j];} // add new values
                          for(j=i+1;j<=NOFHKLCOLUMNS;++j){hkls[nofhkls][nold+j-3]=0.0;} // put weight,int,fwhm ... to zero unless entered
                          if(i==4){hkls[nofhkls][nold+2]=1.0;} // put weight to 1 if not entered
                          if(do_jqfile){if(i>6){hkls[nofhkls][nold+4]=3;}
                                        else{hkls[nofhkls][nold+4]=i-3;}}//store number of J(Q) eigenvalues in fwhm column
-                         delete []hkls[nofhkls+1];
+                         delete []hkls[nofhkls+1]; // free memory for remembering old hkl and energies
                         }
                        }
                        else 
