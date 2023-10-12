@@ -210,9 +210,26 @@ sub getneighbours {
             push @alist, $_;                 # Atom number
             if ($inputcharges) {
               $ps[0] =~ s/^\s+|\s+$//g;      # Trim whitespaces
+                 if ($chhash{$ps[7]} ne "") { # if file index is given in charge list - use this changed MR 10.10.2023
+              push @charg2, $chhash{$ps[7]};  # Uses user input charges
+              push @charg4, $chhash{$ps[7]};  # Uses user input charges
+              push @charg6, $chhash{$ps[7]};  # Uses user input charges
+                                            } else { 
+                 if ($chhash{$ps[8]} ne "") { # ... ifnot - > if atom label is given in charege list - use it
+              push @charg2, $chhash{$ps[8]};  # Uses user input charges
+              push @charg4, $chhash{$ps[8]};  # Uses user input charges
+              push @charg6, $chhash{$ps[8]};  # Uses user input charges
+                                            } else {
+                if ($chhash{$ps[0]} ne "") { # ... ifnot - > if atom type is given in charge list - use it
               push @charg2, $chhash{$ps[0]};  # Uses user input charges
               push @charg4, $chhash{$ps[0]};  # Uses user input charges
               push @charg6, $chhash{$ps[0]};  # Uses user input charges
+                                            } else { # no charge is given in charge list - > use oxydation state
+              push @charg2, $ps[6];           # Oxidation state (valence / charge)
+              push @charg4, $ps[6];           # Oxidation state (valence / charge)
+              push @charg6, $ps[6];           # Oxidation state (valence / charge)
+                                                   }
+ }}
             } else {
               push @charg2, $ps[6];           # Oxidation state (valence / charge)
               push @charg4, $ps[6];           # Oxidation state (valence / charge)
@@ -713,15 +730,15 @@ for $j(0..$nofatom-1) {
   $ioncount = 1;
   foreach $eps (@uepos) {
     @seps=split(";",$eps); 
-    $label = $dat[$j][0]; $label =~ s/\s*//g;
+    $label = $dat[$j][0]; $label =~ s/\s*//g;$lab=$label;
     if ($pointcharge) {
       $label .= "_".$ioncount; $ioncount++;
     }
 # increased position accuracy to 12 digits MR 5.2.2023
-    push @pos, sprintf "%-4s:% 17.12f:% 17.12f:% 17.12f:%-5s:%d:% 10.5f:%s",$atom,@seps,$ion,$j,$oxy[$j],$label;
+    push @pos, sprintf "%-4s:% 17.12f:% 17.12f:% 17.12f:%-5s:%d:% 10.5f:%s:%s",$atom,@seps,$ion,$j,$oxy[$j],$label,$lab;
     $seen=0; foreach(@atp) { if($_=~/$atom/) { $seen=1; } }
     if(!$seen || !defined($atp[-1])) { push @atp, $atom; } $htp{$atom}++;
-   #printf $atom."% 14.5f% 14.5f% 14.5f\n",@seps;
+   #printf $label."% 14.5f% 14.5f% 14.5f\n",@seps;
    #$cpos = pdl [ $seps[0], $seps[1], $seps[2] ];
    #$fpos = $rtoijk x transpose($cpos);
    #$ceps[0] = sprintf "% 14.5f",$fpos->at(0,0); #$ceps[0]*=1;
@@ -736,6 +753,11 @@ for $j(0..$nofatom-1) {
     if ($chhash{$atom} ne "") {
       $oxy[$j] = $chhash{$atom};
     }
+# inserted MR 9.10.23 to be able to set charges for different atom_labels
+    if ($chhash{$lab} ne "") {
+      $oxy[$j] = $chhash{$lab};
+    }
+
   }
 }
 #print "$_ $htp{$_}\n" for (keys %htp);
