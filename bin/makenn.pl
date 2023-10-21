@@ -612,7 +612,7 @@ close Fin;
   $Rx=$numbers[0]+$Rnnn->at(0);  # position vector of charged nucleus in euclidean syste [Angstroem]
   $Ry=$numbers[1]+$Rnnn->at(1);
   $Rz=$numbers[2]+$Rnnn->at(2);  # ... needed to calculate Gcfph
-
+# $R=$Rx*$Rx+$Ry*$Ry+$Rz*$Rz; $R=sqrt($R);print $R." ";
   $outstring=sprintf("%+10.6f %+10.6f %+10.6f ",$da, $db ,($dc-0.1/$c));
   $outstringp=sprintf("%+10.6f %+10.6f %+10.6f ",-$da, -$db ,-$dc+0.1/$c);
   # now the off diagonal Elements: Jab Jba Jac Jca Jad Jda .. Jbc Jcb Jbd Jdb ... Jcd Jdc ... etc.
@@ -1498,6 +1498,9 @@ print STDOUT << "EOF";
               pointc is used by makenn with option -d to calculate derivatives
               dBlm/du which are inserted as interaction 
               parameters between MODULE=phonon and MODULE=so1ion sites.
+              The new magnetic sites single ion property files are named
+              results/makenn.a*.sipf and contain crystal field paramters Blm 
+              calculated by pointc.
               In order to use the resulting file results/makenn.j a phonon
               model has to be set up, the original magnetic atom sites 
               sipffilename has to be changed to the phonon model filename 

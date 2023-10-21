@@ -73,12 +73,29 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
 //  They are checked for conformance !
 // void  EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
 // 			   int sort, int maxiter)
+
+//
+//  Driver routine to compute  the eigenvalues  and normalized
+//  eigenvectors of  the real symmetric matrix z, given by the
+//  lower triangle in z[lo..hi,lo..hi]. The eigenvalues are re-
+//  turned in d[lo..hi] in ascending sequence if sort = True,
+//  otherwise not ordered for  sort = False. The associated
+//  eigenvectors overwrite the given matrix z. The storage re-
+//  quirement is n*n + 2*n double.
+//  The vector d must already be allocated by the user.
+//
+//  Reference:
+//  B.T.Smith et al: Matrix Eigensystem Routines
+//  EISPACK Guide,Springer,Heidelberg,New York 1976.
+//  void EigenSystemSymmetric (Matrix& z, Vector& d, int sort, int maxiter)
+
 Vector F(1,3);
 F(1)=Fxc(1);F(2)=Fxc(2);F(3)=Fxc(3);
 
  double m=MODPAR[1]*1.660539e-27; // mass of einstein oscillator in kg
  double a0=0.5219e-10; // Bohr radius in meter
- Matrix K(1,3,1,3),Sr(1,3,1,3),Si(1,3,1,3);K=0;
+ Matrix K(1,3,1,3);K=0;
+ //Matrix Sr(1,3,1,3),Si(1,3,1,3);
  Vector Omega(1,3);
  K(1,1)=MODPAR[2];
  K(2,2)=MODPAR[3];
@@ -91,9 +108,10 @@ if(Norm(K)==0){(*U)=0; // last term  to correct energy
 (*lnZ)=0; // last term  to correct energy
   u0=0;return;}
 
- int sort=1,maxiter=1000000;double factor=1e-5;
+ int sort=1,maxiter=1000000;double factor=1e-4;
 K*=factor;
- EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter); // K is destroyed by this
+// EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter); // K is destroyed by this
+ EigenSystemSymmetric (K,Omega,sort,maxiter); // K is destroyed by this and will contain eigenvectors
 Omega/=factor; 
 // hbar=1.054572e-34 Js=6582e-16meVs
 // 1meV=1.6022e-22 J
@@ -106,6 +124,9 @@ Delta2=sqrt(-Omega(2)*1.6022e-22/m/a0/a0)*6582e-16;
 Delta3=sqrt(-Omega(3)*1.6022e-22/m/a0/a0)*6582e-16;
 //printf("Icalc phonon Om= %g %g %g\n",Omega[1],Omega[2],Omega[3]);
 //printf("Icalc phonon Delta= %g %g %g\n",Delta1,Delta2,Delta3);
+if(isnan((Delta1))){fprintf (stderr, "phonon: Delta1=nan Omega(1)=%g m=%g\n",Omega(1),m);exit (EXIT_FAILURE);}
+if(isnan((Delta2))){fprintf (stderr, "phonon: Delta2=nan Omega(2)=%g m=%g\n",Omega(2),m);exit (EXIT_FAILURE);}
+if(isnan((Delta3))){fprintf (stderr, "phonon: Delta3=nan Omega(3)=%g m=%g\n",Omega(3),m);exit (EXIT_FAILURE);}
 
 
 K_BT=(*T)*K_B;
@@ -190,6 +211,7 @@ default: break;
 (*U)-=0.5*uu*F; // last term  to correct energy
 (*lnZ)+=0.5*uu*F/K_BT; // last term  to correct energy
  // to easy convergence of mcphasit the linearity of the einstein Oscillator is damped 
+//if(isnan((*lnZ))){fprintf (stderr, "lnzi=nan %g %g %g %g %g %g  %g %g\n",uu(1),uu(2),uu(3),F(1),F(2),F(3),uu*F,K_BT);exit (EXIT_FAILURE);}
 
   u0=0;
   u0[1] = uu(1);
@@ -253,7 +275,8 @@ int pr;
 
  double m=MODPAR[1]*1.660539e-27; // mass of einstein oscillator in kg
  double a0=0.5219e-10; // Bohr radius in meter
- Matrix K(1,3,1,3),Sr(1,3,1,3),Si(1,3,1,3);K=0;
+ Matrix K(1,3,1,3);K=0;
+ //Matric Sr(1,3,1,3),Si(1,3,1,3);
  Vector Omega(1,3);
  K(1,1)=MODPAR[2];
  K(2,2)=MODPAR[3];
@@ -262,7 +285,8 @@ int pr;
  K(3,1)=MODPAR[6];
  K(3,2)=MODPAR[7];
  int sort=1,maxiter=1000000;
- EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter);
+ //EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter);
+EigenSystemSymmetric (K,Omega,sort,maxiter);
 //printf("du1calc phonon Om= %g %g %g\n",Omega[1],Omega[2],Omega[3]);
 
  
@@ -276,7 +300,8 @@ delta=sqrt(-Omega(tn)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequenci
 
 u1=0;
 for(int i=1;i<=3;++i)
-{u1(i)=complex <double> (Sr(i,tn),Si(i,tn));
+{//u1(i)=complex <double> (Sr(i,tn),Si(i,tn));
+u1(i)=complex <double> (K(i,tn),0.0);
 }
 u1*=sqrt(mev2J*hbar*hbar/2/m/a0/a0/delta); // multiply by factor and convert into 1/meV units
 if (pr==1) printf ("delta=%4.6g meV\n",delta);

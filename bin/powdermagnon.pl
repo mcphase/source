@@ -96,7 +96,7 @@ while(<$h>)
      print $qold." ".$E." ".$ints[$i]." ".$intsbey[$i]." ".$intsnuc[$i]."\n";}
      $counter=0;@ints=0;@intsbey=0;@intsnuc=0;
                }
-  if($numbers[8]<=$Emax&&$numbers[8]>=$Emin)
+  if($numbers[8]<$Emax&&$numbers[8]>$Emin)
   {  $i=int(($numbers[8]-$Emin)/$deltaE);
      $ints[$i]+=$numbers[9];
      $intsbey[$i]+=$numbers[10];
@@ -112,8 +112,16 @@ while(<$h>)
   $qlold=$ql;
   @numbers1=@numbers;
  }
-
 close $h;
+
+for($i=0;$i<=$n&&$counter>0;++$i){
+     $E=$Emin+($i-0.5)*$deltaE;
+     $ints[$i]/=$counter;
+     $intsbey[$i]/=$counter;
+     $intsnuc[$i]/=$counter;
+     print $numbers1[0]." ".$numbers1[1]." ".$numbers1[2]." ".$numbers1[3]." ";
+     print $qold." ".$E." ".$ints[$i]." ".$intsbey[$i]." ".$intsnuc[$i]."\n";}
+
 
 exit;
 

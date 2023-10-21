@@ -338,7 +338,7 @@ sub sta {#local $SIG{INT}='IGNORE';
 				   foreach (@parnam)
 				    {$pnam=$_;
 				     if ($line=~/^(#!|[^#])*?\b$pnam\s*\Q[\E/)
-                                        {$line=~s|$pnam\s*\Q[\E[^\Q]\E]*\Q]\E|$par[$i] |;
+                                        {$line=~s|$pnam\s*\Q[\E[^\Q]\E]*\Q]\E|$par[$i]|;
                                    $dd=sprintf("%s [%e,%e,%e,%e,%e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i]);
                                    $modline=~s|$pnam\s*\Q[\E[^\Q]\E]+\Q]\E|$dd|;
 					}
@@ -370,7 +370,7 @@ sub sta {#local $SIG{INT}='IGNORE';
                                     #mydel ("./results/cccccc1.ccc");
 				    $data=eval $expression;
                                     # $data contains now the result of the mathematical expression
-                                    $line=~s|function\s*\Q[\E.*?\Q]\E|$data |;
+                                    $line=~s|function\s*\Q[\E.*?\Q]\E|$data|;
 				   }
 
 

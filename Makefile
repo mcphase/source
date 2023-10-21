@@ -113,8 +113,8 @@ gitdir = Output/mcphase~mcphase
 
 
 
-all: vector functions cfield mcphase examples tutorial bfk bcfph cowan
-allwin: vectorwin functionswin cfieldwin mcphasewin exampleswin tutorial bfkwin bcfphwin cowanwin
+all: vector functions cfield mcphase phonon examples tutorial bfk bcfph cowan
+allwin: vectorwin functionswin cfieldwin mcphasewin phononwin exampleswin tutorial bfkwin bcfphwin cowanwin
 
 
 git: $(gitdir)/*
