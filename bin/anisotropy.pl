@@ -26,7 +26,7 @@ print STDOUT << "EOF";
 # Reference: M. Rotter et al. PRB 68 (2003) 144418
 #*******************************************************
 EOF
-system("display 8 13 results/anisotropy.out");
+system("display  8 13 results/anisotropy.out");
 exit;
 
 sub usage() {
@@ -63,6 +63,7 @@ sub usage() {
     output files:
 
     ./results/anisotropy.out  contains anisotropy information
+    ./results/anisotropy.jpg  contains anisotropy plot
 
 EOF
 

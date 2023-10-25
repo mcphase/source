@@ -241,13 +241,15 @@ print STDOUT << "EOF";
 echo $ds#                 the above output contains data from $file3 as given, however$ds
 echo $ds#                 with a scaled column $d2. Two additional columns are added $ds
 echo $ds#                 containing the calculated results of the convolution and the$ds 
-echo $ds#                 original unscaled data.$ds
+echo $ds#                 original unscaled data. The following environment variables are set:$ds
 EOF
- print sprintf("echo $ds#$ds\necho $ds#!sta=%+10.9e$ds\n",$sta);
- print  sprintf("echo $ds#!areadata=%+10.9e$ds\n",$areadata);
- print sprintf( "echo $ds#!areacalc=%+10.9e$ds\n",$areacalc);
- print  sprintf("echo $ds#!column %i scaled by$ds\necho $ds#!scale_factor=%+10.9e$ds\n",$d2,$scale);
- print  sprintf("echo $ds#!sta_of_normalized_curves=%+10.9e$ds\n",$stanorm);
+ print sprintf("echo $ds#$ds\necho $ds#!sta=%+10.9e MCPHASE_STA ... sum of squared deviations (data - convolution result)^2$ds\n",$sta);
+ print  sprintf("echo $ds#!areadata=%+10.9e MCPHASE_AREADATA$ds\n",$areadata);
+ print sprintf( "echo $ds#!areacalc=%+10.9e MCPHASE_AREACALC$ds\n",$areacalc);
+ print  sprintf("echo $ds#!column %i scaled by$ds\necho $ds#!scale_factor=%+10.9e MCPHASE_SCALEFACTOR ... areacalc/areadata$ds\n",$d2,$scale);
+ print  sprintf("echo $ds#!sta_of_normalized_curves=%+10.9e MCPHASE_STA_OF_NORMALIZED_CURVES ... sum of squared deviations (data*scale_factor-convolution result)^2$ds\n",$stanorm);
+if ($scale==0){$stacalc=1e100;}else{$stacalc=$stanorm/$scale/$scale;}
+ print  sprintf("echo $ds#!sta_of_normalized_calc=%+10.9e MCPHASE_STA_OF_NORMALIZED_CALC ... sum of squared deviations (data-convolution result/scale_factor)^2$ds\n",$stacalc);
 }
 
 # for setting environment variables
@@ -257,6 +259,7 @@ EOF
 #print Fout "set MCPHASE_AREACALC=$areacalc\n";
 #print Fout "set MCPHASE_SCALEFACTOR=$scale\n";
 #print Fout "set MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
+#print Fout "set MCPHASE_STA_OF_NORMALIZED_CALC=$stacalc\n";
 #close Fout;
 
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");
@@ -265,6 +268,7 @@ EOF
 #print Fout "export MCPHASE_AREACALC=$areacalc\n";
 #print Fout "export MCPHASE_SCALEFACTOR=$scale\n";
 #print Fout "export MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
+#print Fout "export MCPHASE_STA_OF_NORMALIZED_CALC=$stacalc\n";
 #close Fout;
  if ($^O=~/MSWin/){
 print "set MCPHASE_STA=$sta\n";
@@ -272,6 +276,7 @@ print "set MCPHASE_AREADATA=$areadata\n";
 print "set MCPHASE_AREACALC=$areacalc\n";
 print "set MCPHASE_SCALEFACTOR=$scale\n";
 print "set MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
+print "set MCPHASE_STA_OF_NORMALIZED_CALC=$stacalc\n";
                   }
                  else
                   {
@@ -280,6 +285,7 @@ print "export MCPHASE_AREADATA=$areadata\n";
 print "export MCPHASE_AREACALC=$areacalc\n";
 print "export MCPHASE_SCALEFACTOR=$scale\n";
 print "export MCPHASE_STA_OF_NORMALIZED_CURVES=$stanorm\n";
+print "export MCPHASE_STA_OF_NORMALIZED_CALC=$stacalc\n";
                   }
 
 
