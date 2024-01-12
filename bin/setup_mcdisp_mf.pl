@@ -16,7 +16,7 @@ print STDOUT << "EOF";
 #* setup_mcdisp_mf 221011 setting up mcdisp.mf to be used by mcdisp
 EOF
 print STDOUT "# reading results/".$prefix."mcphas.mf\n";
-print STDOUT "# writing mcdisp.mf\n";
+print STDOUT "# writing ".$prefix."mcdisp.mf\n";
 if ($#ARGV>2) { 
 print STDOUT "#T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
 $err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > ".$prefix."mcdisp.mf");
@@ -31,11 +31,11 @@ if($err){unlink "mcdisp.mf";exit(1);}
 
 if($prefix){
 print STDOUT << "EOF";
-# file mcdisp.mf created
+# file $prefix mcdisp.mf created
 # *******************************************************
 # create some graphical eps and jvx files, too ...
-# reading results/$prefixmcphas.mf
-# reading results/$prefixmcphas.sps
+# reading results/$prefix mcphas.mf
+# reading results/$prefix mcphas.sps
 # ....writing results/spins.*
 EOF
 system ("spins -prefix $prefix $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
@@ -56,7 +56,7 @@ system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
 print STDOUT << "EOF";
 
     You can start now mcdisp - required input files
-    are $prefixmcdisp.mf (just created), mcdisp.par, mcphas.j
+    are $prefix mcdisp.mf (just created), mcdisp.par, mcphas.j
     and corresponding single ion property files *sipf.
 
     You can view the magnetic structure in postscriptfiles

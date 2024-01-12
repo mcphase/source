@@ -581,7 +581,7 @@ if(fabs(s0r)+fabs(s1r)+fabs(s2r)+fabs(s0i)+fabs(s1i)+fabs(s2i)>SMALL_DEVIATION)
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"#Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
                                   double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
-                                  if((Blm(i)!=0)&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-12)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond !\n Will use Blm=%12.6g calculated from Llm.\npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i),Blmcalc);getchar();}
+                                  if((fabs(Blm(i))>1e-12)&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-12)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond !\n Will use Blm=%12.6g calculated from Llm.\npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i),Blmcalc);getchar();}
                                   Blm(i)=Blmcalc;// here set the Blm as calculated from the Llm
                                   }
                      if(Blm(i)!=0){if(verbose)fprintf(stderr,"#! %s=%12.6g meV ",lm4,Blm(i));

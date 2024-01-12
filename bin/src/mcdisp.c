@@ -1196,7 +1196,8 @@ if (do_jqfile){
                      thrdat.qel_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
                      thrdat.Eorbmom[ithread] = new ComplexMatrix(1,dimA,1,ORBMOM_EV_DIM); *thrdat.Eorbmom[ithread]=Eorbmom;}
 
-                     thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
+//                     thrdat.Tau[ithread] = new ComplexMatrix(1,dimA,1,dimA); *thrdat.Tau[ithread]=Tau;
+                  thrdat.Tau[ithread]=&Tau; // try to save memory by not copying Tau for every thread !
                   }
                   ithread=0; num_threads_started=0; int oldi=-1;// Vector vQQ(1,dimA); removed MR 14.1.2013
 #endif
@@ -1449,7 +1450,8 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                      if(ini.calculate_magmoment_oscillation){delete thrdat.qem_real[ithread]; delete thrdat.qem_imag[ithread];delete thrdat.Emagmom[ithread];} 
                      if(ini.calculate_spinmoment_oscillation){delete thrdat.qes_real[ithread]; delete thrdat.qes_imag[ithread];delete thrdat.Espin[ithread]; }
                      if(ini.calculate_orbmoment_oscillation){delete thrdat.qel_real[ithread]; delete thrdat.qel_imag[ithread];delete thrdat.Eorbmom[ithread]; }
-                     delete thrdat.Tau[ithread]; delete tin[ithread]; 
+                    // delete thrdat.Tau[ithread];
+                     delete tin[ithread]; 
                   }
                   delete[] thrdat.Echargedensity;  
                   delete[] thrdat.Espindensity;  

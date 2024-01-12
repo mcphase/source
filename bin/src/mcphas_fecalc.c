@@ -62,43 +62,43 @@ jj/=sps.n();
 
 
 
-double evalfe(physproperties & physprop,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
+double evalfe(double & U,double & Eel,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
 // calculate free energy fe and energy u
 { Vector d1(1,inputpars.cs.nofcomponents),meanfield(1,inputpars.cs.nofcomponents);
-  int i,j,k,l,m1,s;
- physprop.fe=0;physprop.u=0; // initialize fe and u
+int i,j,k,l,m1,s;double fe;
+ fe=0;U=0; // initialize fe and u
 for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
 {s=sps.in(i,j,k);
  for(l=1;l<=inputpars.cs.nofatoms;++l)
- {physprop.fe-=KB*T*lnzi[s][l];// sum up contributions from each ion
-  physprop.u+=ui[s][l];//fprintf(stdout,"lnzi(%i,%i)=%g ",s,l,lnzi[s][l]);
+ {fe-=KB*T*lnzi[s][l];// sum up contributions from each ion
+  U+=ui[s][l];//fprintf(stdout,"lnzi(%i,%i)=%g ",s,l,lnzi[s][l]);
 // correction term
   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
    {d1[m1]=sps.m(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];
   meanfield[m1]=mf.mf(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];}
   // add correction term
-  physprop.fe+=0.5*(meanfield*d1);
-  physprop.u+=0.5*(meanfield*d1);
+  fe+=0.5*(meanfield*d1);
+  U+=0.5*(meanfield*d1);
  // printf ("Ha=%g Hb=%g Hc=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
  }
 }}}
-physprop.fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
-physprop.u/=(double)sps.n();//fprintf(stdout,"fe=%g\n",physprop.fe);
+fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
+U/=(double)sps.n();//fprintf(stdout,"fe=%g\n",fe);
 
-if(ini.doeps){physprop.Eel=sps.epsilon*inputpars.Cel*sps.epsilon;
-              physprop.fe+=physprop.Eel;physprop.u+=physprop.Eel;              
-              physprop.fe-=sps.epsilon*mf.epsmf;
-              physprop.u-=sps.epsilon*mf.epsmf;
+if(ini.doeps){Eel=sps.epsilon*inputpars.Cel*sps.epsilon;
+              fe+=Eel;U+=Eel;              
+              fe-=sps.epsilon*mf.epsmf;
+              U-=sps.epsilon*mf.epsmf;
 } // add elastic energy and magnetoelastic energy
 
-physprop.fe/=sps.nofatoms; //normalise to meV/ion (ion=subsystem)
-physprop.u/=sps.nofatoms;
-physprop.Eel/=sps.nofatoms;
-return physprop.fe;
+fe/=sps.nofatoms; //normalise to meV/ion (ion=subsystem)
+U/=sps.nofatoms;
+Eel/=sps.nofatoms;
+return fe;
  }
 
-double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
-             spincf & sps,mfcf & mf,physproperties & physprop,testspincf & testspins, qvectors & testqs)
+double fecalc(double & U, double & Eel, int & r,Vector Hex,double T,inipar & ini,par & inputpars,
+             spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs)
 {/*on input:
     T		Temperature[K]
     Hex		Vector of external magnetic field [T]
@@ -120,7 +120,8 @@ double fecalc(Vector  Hex,double T,inipar & ini,par & inputpars,
 //Matrix III(1,3,1,3);Vector dn(1,3);int sl;
 
  char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
- int i,j,k,i1,j1,k1,di,dj,dk,l,r=0,s,sdim,m,n,m1;
+ int i,j,k,i1,j1,k1,di,dj,dk,l,s,sdim,m,n,m1;
+ r=0;
  div_t result; // some modulo variable
  float    sta=1000000; // initial value of standard deviation
  float staold=2000000;
@@ -471,7 +472,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
      fin_coq = fopen_errchk (outfilename, "a");
-     fe=evalfe(physprop,sps,mf,ini,inputpars, T,lnzi,ui);
+     fe=evalfe(U,Eel,sps,mf,ini,inputpars, T,lnzi,ui);
 
   #ifndef _THREADS
    fprintf(fin_coq,"%i %g %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)successrate/nofcalls,fe);
@@ -487,7 +488,8 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
 }
 
 //printf ("hello end of selfconsistency loop after %i iterations\n",r);
-fe=evalfe(physprop,sps,mf,ini,inputpars, T,lnzi,ui);
+fe=evalfe(U,Eel,sps,mf,ini,inputpars, T,lnzi,ui);
+
 //for(int ec=1;ec<=6;++ec)printf("mf.eps(%i)=%g ",ec,mf.epsmf(ec));printf("\nsl=%i\n",sl);
 //myPrintMatrix(stdout,III);
 // myPrintVector(stdout,dn);

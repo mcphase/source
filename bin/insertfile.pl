@@ -13,8 +13,8 @@ print "inserting to $file1 at line $linenr:\n";
 
    unless (open (Fin, $file1)){die "\n error:unable to open $file1\n";}
   $i=1;open (Fout, ">range.out");
-   while(($line=<Fin>)&&$i<$linenr)
-     {print Fout $line;++$i}
+   while(($l=<Fin>)&&$i<$linenr)
+     {print Fout $l;++$i}
 
   foreach (@ARGV)
   {
@@ -26,7 +26,7 @@ print "inserting to $file1 at line $linenr:\n";
       close Fin1;
    print ">\n";
  }
-
+  print Fout $l;
    while($line=<Fin>)
      {print Fout $line;++$i}
 

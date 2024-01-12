@@ -10,7 +10,7 @@ if ($#ARGV<1)
                []=[and prog col parprog1 parprog2 ... [and ...]]
 
           coldata ...... column number of data column to be fitted
-          prog    ...... program name, e.g. shiftcol
+          prog    ...... program name, e.g. shiftcol (program name must not contain a "." sign)
           col     ...... column to which prog should be applied
           parprog1 ..... parameter of the program prog, which should be fitted
           filename... filename
@@ -88,6 +88,12 @@ $i++;system("addcol ".$prog[1]." $i range0.out");
 
 # for linux prepare calcsta instead of calcsta.bat
 open (Fout, ">calcsta");
+print Fout "./calcsta.bat \$*";
+close Fout;
+
+#prepare calcsta.bat.forfit
+open (Fout, ">calcsta.bat.forfit");
+unless ($^O=~/MSWin/){
 print Fout << "EOF";
 shopt -s expand_aliases
 alias del='rm'
@@ -99,11 +105,7 @@ alias start='. ./do'
 alias taskkill='#'
 alias wait='sleep'
 EOF
-print Fout "./calcsta.bat \$*";
-close Fout;
-
-#prepare calcsta.bat.forfit
-open (Fout, ">calcsta.bat.forfit");
+}
 print Fout << "EOF";
 copy range0.out range1.out
 EOF
@@ -111,17 +113,21 @@ EOF
 $i=1;
 foreach(@progs)
 {@prog=split;
- $program=$prog[0];shift @prog;shift @prog;
+ $program=$prog[0];
+ if(/\.\//){$programpar=/\.\/(.*)/;}
+ shift @prog;shift @prog;
+ 
  # here create parameter table
  $j=0;
  foreach(@prog)
   {$old=$prog[$j];
    # check if stepwidth is given
    $step=$old/10;
-   if (/s/){($old)=/(.*)s/;$step=/.*s(.*)/;}
+   if (/s/){($old)=/(.*)s/;($step)=/.*s(.*)/;}
+print $step." ".$old."\n";
    # check if parameter needs to be varied
    if (/f/){($prog[$j])=/(.*)f/;}
-      else {$prog[$j]="par".$i.$program.$j."[".$old.",-1e20,+1e20,0,$step]";}
+      else {$prog[$j]="par".$i.$programpar.$j."[".$old.",-1e20,+1e20,0,$step]";}
   ++$j;
   }
  $pars=join(' ',@prog);
@@ -135,17 +141,34 @@ copy range1.out $file.fit
 EOF
 close Fout;
 
+copy ("calcsta.bat.forfit", "calcsta.bat");
+
+if ($^O=~/MSWin/){
    system ("echo e | perl %MCPHASE_DIR%/bin/simannfit.pl 1e-9 -s 1 calcsta.bat ");
+
+            }
+                 else
+              {
+   system ("chmod +x calcsta calcsta.bat; echo e | perl $ENV{'MCPHASE_DIR'}/bin/simannfit.pl 1e-9 -s 1 calcsta.bat ");
+
+          }
+
+
 $i=0;
 foreach(@progs)
 {@prog=split;
 if($prog[1]>$coldata){$prog[1]+=$#progs+2;}
 $i++;system ("display ".$prog[1]." $coldata $file.fit ".$prog[1]." ".($coldata+$#progs+2)." $file.fit");
  }
+if ($^O=~/MSWin/){
    system ("start /B java simannfitstatus");
    system ("echo e | perl %MCPHASE_DIR%/bin//simannfit.pl 1e-9 calcsta.bat ");
    system ("calcsta.bat > calcsta.out");
-
+} else {
+  system ("java simannfitstatus &");
+   system ("echo e | perl $ENV{'MCPHASE_DIR'}/bin//simannfit.pl 1e-9 calcsta.bat ");
+   system ("./calcsta > calcsta.out");
+      }
 open (Fout,">>results/simannfit.status");
 $i=$coldata;
 foreach(@progs)

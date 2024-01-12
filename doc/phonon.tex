@@ -293,72 +293,76 @@ a_{\gamma\delta} \delta_{\delta\alpha}
 \end{eqnarray}
 
 
+%derivatives with respect to the strain component $\epsilon_{\alpha\beta}$ 
+%with  $\alpha,\beta=1,2,3,\alpha \le \beta$ can be written as
+
+%\begin{eqnarray}
+%\frac{\partial}{\partial \epsilon_{\alpha\beta}}&=&
+%\sum_{\gamma\delta=1,2,3}\frac{\partial a_{\gamma\delta}}{\partial \epsilon_{\alpha\beta}}
+%\frac{\partial}{\partial a_{\gamma\delta}} \\
+%&=&
+%\frac{\partial}{\partial a_{\alpha\beta}} + (1-\delta_{\alpha\beta})
+%\frac{\partial}{\partial a_{\beta\alpha}}  
+%\end{eqnarray}
+
+%We calculate the derivative of the elastic energy with respect to the strain:
+
+
+%\begin{eqnarray}\label{Eelderiv}
+%\frac{\partial E_{el}}{\partial \epsilon_{\alpha\beta}}&=&
+%\frac{\partial E_{el}}{\partial a_{\alpha\beta}} + \frac{\partial E_{el}}{\partial a_{\beta\alpha}}-\delta_{\alpha\beta}
+%\frac{\partial E_{el}}{\partial a_{\alpha\alpha}}  \\ 
+%&=&\frac{1}{2}\sum_{ij,\gamma\delta} (2-\delta_{\alpha\beta})\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+%R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta} 
+%a_{\gamma\delta} \nonumber \\
+%& & +    \frac{c_T(ij)}{2} a_{\gamma\delta} ( R_{ij}^{\alpha}R_{ij}^{\delta}
+% \delta_{\beta\gamma}  +   R_{ij}^{\gamma} R_{ij}^{\beta}
+%\delta_{\delta\alpha}  \nonumber \\
+%&& +    R_{ij}^{\beta} R_{ij}^{\delta}
+% \delta_{\alpha\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\alpha}
+% \delta_{\delta\beta} \nonumber \\
+%& & -    R_{ij}^{\alpha}R_{ij}^{\delta}
+% \delta_{\alpha\beta}\delta_{\beta\gamma}    -  R_{ij}^{\gamma} R_{ij}^{\beta}
+% \delta_{\delta\alpha} \delta_{\alpha\beta} ) \nonumber
+%\end{eqnarray}
+
+
+
+An we make also use of the definition of elastic constants:
+
+\begin{eqnarray}\label{elconst}
+c^{\alpha\beta\gamma\delta} &= &
+\frac{\partial^2E_{el}}{\partial a_{\alpha\beta} \partial a_{\gamma\delta}} \\
+&=& \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
+ \nonumber \\
+&& +    \frac{c_T(ij)}{2} R_{ij}^{\alpha}R_{ij}^{\delta}
+ \delta_{\beta\gamma}  + \nonumber \\
+&& \frac{c_T(ij)}{2} R_{ij}^{\gamma} R_{ij}^{\beta}
+ \delta_{\delta\alpha} 
+\end{eqnarray}
+%& & +    c_T(ij)  ( R_{ij}^{\alpha}R_{ij}^{\delta}
+% \delta_{\beta\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\beta}
+%\delta_{\delta\alpha}  \nonumber \\
+%&& +    R_{ij}^{\beta}R_{ij}^{\delta}
+% \delta_{\alpha\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\alpha}
+% \delta_{\delta\beta} \nonumber \\
+%& & -    R_{ij}^{\alpha}R_{ij}^{\delta}
+% \delta_{\alpha\beta}\delta_{\beta\gamma}    -  R_{ij}^{\gamma}R_{ij}^{\alpha}
+% \delta_{\delta\alpha} \delta_{\alpha\beta} + \nonumber \\
+%&& -    R_{ij}^{\beta}R_{ij}^{\alpha}
+% \delta_{\alpha\gamma} \delta_{\gamma\delta}  -   R_{ij}^{\gamma}R_{ij}^{\alpha}
+% \delta_{\delta\beta}\delta_{\gamma\delta}  \nonumber \\
+%& & +    R_{ij}^{\alpha}R_{ij}^{\alpha}
+% \delta_{\alpha\beta}\delta_{\beta\gamma} \delta_{\gamma\delta}   ) \nonumber
+
+
+
 we make use of the fact that the strain $\bar \epsilon$ is a symmetric 
 tensor ($\epsilon_{\alpha\beta}=\epsilon_{\beta\alpha}$) and a rotation
 is antisymmetric ($\omega_{\alpha\beta}=-\omega_{\beta\alpha}$) and 
 the linear transformation $\bar a$ can be written as $\bar a=\bar \epsilon + \bar \omega$. Thus
-derivatives with respect to the strain component $\epsilon_{\alpha\beta}$ 
-with  $\alpha,\beta=1,2,3,\alpha \le \beta$ can be written as
-
-\begin{eqnarray}
-\frac{\partial}{\partial \epsilon_{\alpha\beta}}&=&
-\sum_{\gamma\delta=1,2,3}\frac{\partial a_{\gamma\delta}}{\partial \epsilon_{\alpha\beta}}
-\frac{\partial}{\partial a_{\gamma\delta}} \\
-&=&
-\frac{\partial}{\partial a_{\alpha\beta}} + (1-\delta_{\alpha\beta})
-\frac{\partial}{\partial a_{\beta\alpha}}  
-\end{eqnarray}
-
-We calculate the derivative of the elastic energy with respect to the strain:
-
-
-\begin{eqnarray}\label{Eelderiv}
-\frac{\partial E_{el}}{\partial \epsilon_{\alpha\beta}}&=&
-\frac{\partial E_{el}}{\partial a_{\alpha\beta}} + \frac{\partial E_{el}}{\partial a_{\beta\alpha}}-\delta_{\alpha\beta}
-\frac{\partial E_{el}}{\partial a_{\alpha\alpha}}  \\ 
-&=&\frac{1}{2}\sum_{ij,\gamma\delta} (2-\delta_{\alpha\beta})\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
-R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta} 
-a_{\gamma\delta} \nonumber \\
-& & +    \frac{c_T(ij)}{2} a_{\gamma\delta} ( R_{ij}^{\alpha}R_{ij}^{\delta}
- \delta_{\beta\gamma}  +   R_{ij}^{\gamma} R_{ij}^{\beta}
-\delta_{\delta\alpha}  \nonumber \\
-&& +    R_{ij}^{\beta} R_{ij}^{\delta}
- \delta_{\alpha\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\alpha}
- \delta_{\delta\beta} \nonumber \\
-& & -    R_{ij}^{\alpha}R_{ij}^{\delta}
- \delta_{\alpha\beta}\delta_{\beta\gamma}    -  R_{ij}^{\gamma} R_{ij}^{\beta}
- \delta_{\delta\alpha} \delta_{\alpha\beta} ) \nonumber
-\end{eqnarray}
-
-
-
-An we make also use of the definition of elastic constants to find
-
-\begin{eqnarray}\label{elconst}
-c^{\alpha\beta\gamma\delta} &= &
-\frac{\partial^2E_{el}}{\partial \epsilon_{\alpha\beta} \partial \epsilon_{\gamma\delta}} \\
-&=& \frac{1}{2}\sum_{ij}(2-\delta_{\alpha\beta})(2-\delta_{\gamma\delta}) \frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
-R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
- \nonumber \\
-& & +    c_T(ij)  ( R_{ij}^{\alpha}R_{ij}^{\delta}
- \delta_{\beta\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\beta}
-\delta_{\delta\alpha}  \nonumber \\
-&& +    R_{ij}^{\beta}R_{ij}^{\delta}
- \delta_{\alpha\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\alpha}
- \delta_{\delta\beta} \nonumber \\
-& & -    R_{ij}^{\alpha}R_{ij}^{\delta}
- \delta_{\alpha\beta}\delta_{\beta\gamma}    -  R_{ij}^{\gamma}R_{ij}^{\alpha}
- \delta_{\delta\alpha} \delta_{\alpha\beta} + \nonumber \\
-&& -    R_{ij}^{\beta}R_{ij}^{\alpha}
- \delta_{\alpha\gamma} \delta_{\gamma\delta}  -   R_{ij}^{\gamma}R_{ij}^{\alpha}
- \delta_{\delta\beta}\delta_{\gamma\delta}  \nonumber \\
-& & +    R_{ij}^{\alpha}R_{ij}^{\alpha}
- \delta_{\alpha\beta}\delta_{\beta\gamma} \delta_{\gamma\delta}   ) \nonumber
-\end{eqnarray}
-
-
-
-and rewrite the elastic energy in the well known fashion
+it is possible to rewrite the elastic energy in the well known fashion
 
 \begin{eqnarray}\label{Eelconst}
 E_{el} &=& \frac{1}{2}\sum_{\alpha\beta\gamma\delta} c^{\alpha\beta\gamma\delta} \epsilon_{\alpha\beta}\epsilon_{\gamma\delta}
@@ -382,12 +386,33 @@ will depend on rotation angle if transversal springs are  introduced.
 Therefore transversal springs have to be used with caution
  in the description of a phonon spectrum.
 
+Note that the transversal spring part in the elastic constants as defined in (\ref{elconst}) 
+is not symmetric upon exchange of indices. It is convenient to use a symmetrized version
+of the elastic constants, which will yield the same elastic energy, because the
+strain tensor is symmetric:
+
+\begin{eqnarray}\label{elconstsymm}
+c^{\alpha\beta\gamma\delta} &= &
+ \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
+ \nonumber \\
+&& +    \frac{c_T(ij)}{4} ( R_{ij}^{\alpha}R_{ij}^{\delta}
+ \delta_{\beta\gamma}  + \nonumber \\
+&&  R_{ij}^{\gamma} R_{ij}^{\beta}
+ \delta_{\delta\alpha}  \nonumber \\
+&& +    R_{ij}^{\beta}R_{ij}^{\delta}
+ \delta_{\alpha\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\alpha}
+ \delta_{\delta\beta} ) \nonumber \\
+\end{eqnarray}
+
+
+
 With the help of elastic constants we can rewrite the derivative of the elastic energy
-(\ref{Eelderiv}), again ignoring the rotation dependence:
+(\ref{Eelconst}), again ignoring the rotation dependence:
 
 \begin{eqnarray}\label{Eelderivelconst}
 \frac{\partial E_{el}}{\partial \epsilon_{\alpha\beta}}&=&
-\sum_{\gamma\delta=1,2,3,\gamma \le \delta} c^{\alpha\beta\gamma\delta} \epsilon_{\gamma\delta}
+\sum_{\gamma\delta=1,2,3} c^{\alpha\beta\gamma\delta} \epsilon_{\gamma\delta}
 \end{eqnarray}
 
 

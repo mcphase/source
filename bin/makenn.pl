@@ -895,31 +895,31 @@ sub getinteraction {
    $Cel->slice('1,1')+=0.5*(($cL-$cT)*$rx*$rx*$rx*$rx/$r/$r+$cT*$rx*$rx);
    $Cel->slice('2,2')+=0.5*(($cL-$cT)*$ry*$ry*$ry*$ry/$r/$r+$cT*$ry*$ry);
    $Cel->slice('3,3')+=0.5*(($cL-$cT)*$rz*$rz*$rz*$rz/$r/$r+$cT*$rz*$rz);
-   $Cel->slice('4,4')+=0.5*(4*($cL-$cT)*$ry*$rz*$ry*$rz/$r/$r+$cT*($ry*$ry+$rz*$rz));
-   $Cel->slice('5,5')+=0.5*(4*($cL-$cT)*$rx*$rz*$rx*$rz/$r/$r+$cT*($rx*$rx+$rz*$rz));
-   $Cel->slice('6,6')+=0.5*(4*($cL-$cT)*$rx*$ry*$rx*$ry/$r/$r+$cT*($rx*$rx+$ry*$ry));
+   $Cel->slice('4,4')+=0.5*(($cL-$cT)*$ry*$rz*$ry*$rz/$r/$r+0.25*$cT*($ry*$ry+$rz*$rz));
+   $Cel->slice('5,5')+=0.5*(($cL-$cT)*$rx*$rz*$rx*$rz/$r/$r+0.25*$cT*($rx*$rx+$rz*$rz));
+   $Cel->slice('6,6')+=0.5*(($cL-$cT)*$rx*$ry*$rx*$ry/$r/$r+0.25*$cT*($ry*$ry+$rx*$rx));
 
    $Cel->slice('1,2')+=0.5*(($cL-$cT)*$rx*$rx*$ry*$ry/$r/$r);
 
    $Cel->slice('1,3')+=0.5*(($cL-$cT)*$rx*$rx*$rz*$rz/$r/$r);
    $Cel->slice('2,3')+=0.5*(($cL-$cT)*$ry*$ry*$rz*$rz/$r/$r);
 
-   $Cel->slice('1,4')+=0.5*(2*($cL-$cT)*$rx*$rx*$ry*$rz/$r/$r);
-   $Cel->slice('2,5')+=0.5*(2*($cL-$cT)*$ry*$ry*$rx*$rz/$r/$r);
-   $Cel->slice('3,6')+=0.5*(2*($cL-$cT)*$rz*$rz*$rx*$ry/$r/$r);
+   $Cel->slice('1,4')+=0.5*(($cL-$cT)*$rx*$rx*$ry*$rz/$r/$r);
+   $Cel->slice('2,5')+=0.5*(($cL-$cT)*$ry*$ry*$rx*$rz/$r/$r);
+   $Cel->slice('3,6')+=0.5*(($cL-$cT)*$rz*$rz*$rx*$ry/$r/$r);
    
-   $Cel->slice('1,5')+=0.5*(2*($cL-$cT)*$rx*$rx*$rx*$rz/$r/$r+$cT*$rx*$rz);
-   $Cel->slice('1,6')+=0.5*(2*($cL-$cT)*$rx*$rx*$rx*$ry/$r/$r+$cT*$rx*$ry);
+   $Cel->slice('1,5')+=0.5*(($cL-$cT)*$rx*$rx*$rx*$rz/$r/$r+0.5*$cT*$rx*$rz);
+   $Cel->slice('1,6')+=0.5*(($cL-$cT)*$rx*$rx*$rx*$ry/$r/$r+0.5*$cT*$rx*$ry);
 
-   $Cel->slice('2,4')+=0.5*(2*($cL-$cT)*$ry*$ry*$ry*$rz/$r/$r+$cT*$ry*$rz);
-   $Cel->slice('2,6')+=0.5*(2*($cL-$cT)*$ry*$ry*$rx*$ry/$r/$r+$cT*$ry*$rx);
+   $Cel->slice('2,4')+=0.5*(($cL-$cT)*$ry*$ry*$ry*$rz/$r/$r+0.5*$cT*$ry*$rz);
+   $Cel->slice('2,6')+=0.5*(($cL-$cT)*$ry*$ry*$rx*$ry/$r/$r+0.5*$cT*$ry*$rx);
 
-   $Cel->slice('3,4')+=0.5*(2*($cL-$cT)*$rz*$rz*$ry*$rz/$r/$r+$cT*$rz*$ry);
-   $Cel->slice('3,5')+=0.5*(2*($cL-$cT)*$rz*$rz*$rx*$rz/$r/$r+$cT*$rz*$rx);
+   $Cel->slice('3,4')+=0.5*(($cL-$cT)*$rz*$rz*$ry*$rz/$r/$r+0.5*$cT*$rz*$ry);
+   $Cel->slice('3,5')+=0.5*(($cL-$cT)*$rz*$rz*$rx*$rz/$r/$r+0.5*$cT*$rz*$rx);
 
-   $Cel->slice('4,5')+=0.5*(4*($cL-$cT)*$ry*$rz*$rx*$rz/$r/$r+$cT*$rx*$ry);
-   $Cel->slice('4,6')+=0.5*(4*($cL-$cT)*$ry*$rz*$rx*$ry/$r/$r+$cT*$rx*$rz);
-   $Cel->slice('5,6')+=0.5*(4*($cL-$cT)*$rx*$rz*$rx*$ry/$r/$r+$cT*$rz*$ry);
+   $Cel->slice('4,5')+=0.5*(($cL-$cT)*$ry*$rz*$rx*$rz/$r/$r+0.25*$cT*$rx*$ry);
+   $Cel->slice('4,6')+=0.5*(($cL-$cT)*$ry*$rz*$rx*$ry/$r/$r+0.25*$cT*$rx*$rz);
+   $Cel->slice('5,6')+=0.5*(($cL-$cT)*$rx*$rz*$rx*$ry/$r/$r+0.25*$cT*$rz*$ry);
              
  # now deal with the mixing term phonon-strain interaction constants Gmix
  # units should be meV (because in the phonon module the interaction operators 

@@ -19,10 +19,11 @@ unless ($#ARGV >0)
  print " option -n 50  ... specifies that every 50 steps the parameters should be\n";
  print "                   stored in file results/simannfit.0 (appending existing file)\n";
  print " option -p 20      probing parameter space: stepwidths are not decreased during\n";
- print "                   fitting, if parameter set parn is found with sta<=sta of initial parameters\n";
- print "                   then all sets par in results/simannfit.1 are scanned and\n";
- print "                   distance d=sum_i^N (par_i-parn_i)^2/stepwidht_i^2 is calculated. If d>N=nofparameters  for\n";
- print "                   for all sets par, then parn is appended to the list in results/simannfit.1\n";
+ print "                   fitting, new set of pars parn are generated and for all sets par in \n";
+ print "                   results/simannfit.1 and results/simannfit.0 are scanned and\n";
+ print "                   distance d=sum_i^N (par_i-parn_i)^2/stepwidht_i^2 is calculated. If d>N=nofparameters\n";
+ print "                   for all sets par, then sta is calculated. if  sta<=sta of initial parameters\n";
+ print "                   then parn is appended to the list in results/simannfit.1\n";
  print "                   up to 20 parameters are appended to this list, after that the program stops\n";
  print "                   - in this way a series of equally good solutions can be explored.\n";
  print " option -w 1.4     before starting simannfit, multiply all stepwidths by factor 1.4\n"; 
@@ -117,8 +118,8 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
     if ($#par<0) {print "Error simannfit: no parameters found in input files @ARGV\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
    close Fout;
 
-  if($tablestep!=0){$Foutlevel=writeini("results/simannfit.0");}
-  if($probe!=0){$Foutprobe=writeini("results/simannfit.1");close $Foutprobe;}
+  if($tablestep!=0){writeini("results/simannfit.0");}
+  if($probe!=0){writeini("results/simannfit.1");}
 
 
 print "initialize parameter storage\n";
@@ -130,7 +131,7 @@ $nof_calcsta_calls=0;
  print ($#par+1);print " parameters found - testing calculation of sta\n";
 $rnd=1;$stasave=1e20;
  ($sta)=sta();$stps=1;$noofupdates=0;$stepnumber=0;$stastart=$sta;
-if($tablestep!=0){ write_set($Foutlevel);}
+if($tablestep!=0){ write_set(">>results/simannfit.0");}
 
 if($sta>0)
 {print "starting fit\n";
@@ -140,8 +141,8 @@ if($sta>0)
  # modify parameters
  print "\n ...next fitting loop ...\n";
  @parsav=@par;$dmin=0;
- while($dmin<$#par+1)
- {@par=@parsav;$i=0;
+ while($dmin<$#par+1&&$stps<11.0)
+ {$i=0;
   foreach(@par){$rnd=rand;$thisparstp[$i]=($rnd-0.5)*$parstp[$i]*$stps;$par[$i]+=$thisparstp[$i];
                if ($par[$i]<$parmin[$i]) {$thisparstp[$i]=$parmin[$i]-$par[$i];$par[$i]=$parmin[$i];}
 	       if ($par[$i]>$parmax[$i]) {$thisparstp[$i]=$parmax[$i]-$par[$i];$par[$i]=$parmax[$i];}
@@ -152,23 +153,33 @@ if($sta>0)
                 {while(($line=<Fin1>)&&($dmin>$#par+1))
                     {unless ($line=~/^\s*#/)
                         {$line=~s/D/E/g;@numbers=split(" ",$line);
-                          $d=0;$i=0;foreach(@par){$dd=($par[$i]-$numbers[$i+1])/$parstp[$i];
-                                                 $d+=$dd*$dd; ++$i;}
+                          $d=0;$i=0;foreach(@par){$dd=($par[$i]-$numbers[$i+1])/$parstp[$i];$d+=$dd*$dd; ++$i;}
                           if($d<$dmin){$dmin=$d;}
                          }
-               }   
+                     }   
+                close Fin1;
+                } 
+               if(open(Fin1,"results/simannfit.0"))
+                {while(($line=<Fin1>)&&($dmin>$#par+1))
+                    {unless ($line=~/^\s*#/)
+                        {$line=~s/D/E/g;@numbers=split(" ",$line);
+                          $d=0;$i=0;foreach(@par){$dd=($par[$i]-$numbers[$i+1])/$parstp[$i];$d+=$dd*$dd; ++$i;}
+                          if($d<$dmin){$dmin=$d;}
+                         }
+                     }   
                 close Fin1;
                 } 
                }
-   if($dmin<$#par+1){$stps*=1.1;}
+   if($dmin<$#par+1){$stps*=1.05;if($stps<2){@par=@parsav;}}
   }
+if($stps<11){
  print " .. calculating sta ..\n";
 
  $rnd=rand;
    ($sta)=sta(); # CALCULATE sta !!!!
    ++$stepnumber;
-   if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set($Foutlevel);}
-   if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in results/simannfit.1 - $probe other sets to be found, continuing ...\n";open($Fouts,">>results/simannfit.1");write_set($Fouts);close $Fouts;                      
+   if($tablestep!=0&&$stepnumber%$tablestep==0){ write_set(">>results/simannfit.0");}
+   if($probe>0&&$sta<=$stastart){--$probe;print "#dmin=$dmin>Npar=".($#par+1)." parset stored in results/simannfit.1 - $probe other sets to be found, continuing ...\n";write_set(">>results/simannfit.1");                      
                 last if ($probe==0);
                                 }
    print " ...  current sta=$sta, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
@@ -178,7 +189,7 @@ if($sta>0)
     {close Fin;
      read_write_statusfile();
     }
-
+          } else {$sta=0;print "\n stepsize = $stps > 11.0 - stopping fit\n";}
  if (time-$starttime>$maxtim){$sta=0;print "\n maximum time for fitting reached - stopping fit\n";}
  if ($stepnumber>$maxstep){$sta=0;print "\n maximum step number for fitting reached - stopping fit\n";}
  if ($sta==0) {#recover old pars
@@ -187,7 +198,7 @@ if($sta>0)
  last if ($sta<$limsta);
  if ($sta>$stasave)
   {if($rnd>exp(-($sta-$stasave)/$stattemp))
-     {#recover ol pars and adapt parstep to step not so big in this direction
+     {#recover old pars and adapt parstep to step not so big in this direction
       @par=@parsav;$i=0;if($probe==0){foreach(@parstp){if($parstp[$i]>$parhistostp[$i]/1000){$parstp[$i]-=0.1*abs($thisparstp[$i]);}++$i;}}
       $stps*=0.999;$sta=$stasave; 
       if ($stps<0.01){$stps=10;}# if stepwidth decreased too much make large steps again to get out of side minimum !!!
@@ -310,7 +321,7 @@ $Fij=$delta x inv($V);
                                    print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
                                    ++$i;}
      }
-     close Fout;if($tablestep!=0){write_set($Foutlevel);close $Foutlevel;}
+     close Fout;if($tablestep!=0){write_set(">>results/simannfit.0");}
 print " <Press enter to close>";if($cont==0){$in=<STDIN>;}
 exit 0;
 # END OF MAIN PROGRAM
@@ -483,7 +494,7 @@ sub read_write_statusfile {
 
 sub writeini()
    {my ($filename)=@_;
-    #local *FH; removed 28.1.2017 becuse FH was not returned correctly 
+    #local *FH; removed 28.1.2017 because FH was not returned correctly 
     if(open(FH,$filename)){print "Appending table to $filename ...\n";
        while($line=<FH>){unless ($line=~/^\s*#/)
                                 {$line=~s/D/E/g;@numbers=split(" ",$line);}
@@ -493,12 +504,14 @@ sub writeini()
     while(!open(FH,">>$filename")){print "Error opening file $filename\n";<STDIN>;}
    print "storing points in file $filename\n";
    print FH "#IterationNr ";foreach(@parnam){print FH $_." ";}print FH "sta variance chisquared\n";
-   return FH;
+   close FH;
    }
 
 sub write_set()
-{ my ($Foutl)=@_; 
-     my $dd=sprintf("%i ",$stepnumber+$tableoffset);print $Foutl $dd;
-        my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print $Foutl $dd;++$ii} 
-        print $Foutl $sta." ".$s2." ".$chisquared."\n";
+{ my ($filename)=@_;
+  unless(open(FH,$filename)){die "Error openening $filename\n";}
+     my $dd=sprintf("%i ",$stepnumber+$tableoffset);print FH $dd;
+        my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print FH $dd;++$ii} 
+        print FH $sta." ".$s2." ".$chisquared."\n";
+  close FH;
 }

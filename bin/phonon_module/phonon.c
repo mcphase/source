@@ -91,6 +91,9 @@ extern "C" void Icalc(Vector & u0,double * T,Vector &Fxc, Vector & Hext,double *
 
 Vector F(1,3);
 F(1)=Fxc(1);F(2)=Fxc(2);F(3)=Fxc(3);
+ if(MODPAR.Hi()<9)
+   {fprintf(stderr,"Error loadable module phonon.so:  MODPAR1 .. MODPAR9 all have to be set in sipf file\n");
+    exit(EXIT_FAILURE);}
 
  double m=MODPAR[1]*1.660539e-27; // mass of einstein oscillator in kg
  double a0=0.5219e-10; // Bohr radius in meter
@@ -261,6 +264,12 @@ extern "C" int du1calc(int & tn,double & T,Vector & Fxc, Vector & Hext,
                 MODPAR[5]   Kxy
                 MODPAR[6]   Kxz
                 MODPAR[7]   Kyz
+                MODPAR[8]   umax    maximum displacement  [a0=0.5219 A]
+                MODPAR[9]   0       umax restriction in all directions
+                            1,2,3   umax restriction in x y z direction only
+                            4       umax restriction in x and y direction
+                            5       umax restriction in x and z direction
+                            6       umax restriction in y and z direction
   on output    
     delta	splittings [meV] 
     u1(i)	transition vector elements ...
@@ -269,9 +278,9 @@ int pr;
 
   pr=0;if (tn<0) {pr=1;tn*=-1;}
   if (T<0){T=-T;} 
-//if(gjmbH.Hi()<6||MODPAR.Hi()<1)
-//   {fprintf(stderr,"Error loadable module phonon.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
-//    exit(EXIT_FAILURE);}
+ if(MODPAR.Hi()<9)
+   {fprintf(stderr,"Error loadable module phonon.so:  MODPAR1 .. MODPAR9 all have to be set in sipf file\n");
+    exit(EXIT_FAILURE);}
 
  double m=MODPAR[1]*1.660539e-27; // mass of einstein oscillator in kg
  double a0=0.5219e-10; // Bohr radius in meter

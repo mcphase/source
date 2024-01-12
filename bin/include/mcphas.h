@@ -60,8 +60,8 @@ void physpropclc(Vector H,double T,
     u		mangetic energy[meV]
 
  */
-double fecalc(Vector H,double T,inipar & ini,par & inputpars,
-            spincf & sps,mfcf & mf,physproperties & physprops,testspincf & testspins,qvectors & testqs);
+double fecalc(double & U, double & Eel,int & r,Vector H,double T,inipar & ini,par & inputpars,
+            spincf & sps,mfcf & mf,testspincf & testspins,qvectors & testqs);
 
 
 
