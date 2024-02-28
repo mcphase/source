@@ -126,12 +126,12 @@ void printheader(jjjpar ** jjjpars,int code,const char * filename,const char* in
  fprintf(fout, "#! T= %g K Ha= %g T Hb= %g T Hc= %g T\n",T,H(1),H(2),H(3));
  fprintf(fout, "#! Overall temperature factor B=%g A^2: Intensity is proportional to exp(-2*B*(sin(theta)/lambda)^2)\n",ovalltemp);
 
- if(lorenz == 0){sprintf(l,"1.0 no lorentz factor calculated");}
- if(lorenz == 1){sprintf(l,"1 / sin^2(2theta)   neutron powder flat sample");}
- if(lorenz == 2){sprintf(l,"1 / sin(2theta) / sin(theta)    neutron powder cyl. sample");}
- if(lorenz == 3){sprintf(l,"1 / sin(2theta)     neutron single crystal");}
- if(lorenz == 4){sprintf(l,"d^3  neutron TOF powder cyl sample... log scaled d-pattern");}
- if(lorenz == 5){sprintf(l,"d^4  neutron TOF powder cyl sample... d-pattern");}
+ if(lorenz == 0){snprintf(l,MAXNOFCHARINLINE,"1.0 no lorentz factor calculated");}
+ if(lorenz == 1){snprintf(l,MAXNOFCHARINLINE,"1 / sin^2(2theta)   neutron powder flat sample");}
+ if(lorenz == 2){snprintf(l,MAXNOFCHARINLINE,"1 / sin(2theta) / sin(theta)    neutron powder cyl. sample");}
+ if(lorenz == 3){snprintf(l,MAXNOFCHARINLINE,"1 / sin(2theta)     neutron single crystal");}
+ if(lorenz == 4){snprintf(l,MAXNOFCHARINLINE,"d^3  neutron TOF powder cyl sample... log scaled d-pattern");}
+ if(lorenz == 5){snprintf(l,MAXNOFCHARINLINE,"d^4  neutron TOF powder cyl sample... d-pattern");}
  fprintf(fout, "# Lorentz Factor: %s\n#\n",l);
  if(code<2)
  {fprintf(fout, "# Lorentz Factor not considered for resonant magnetic xray scattering - F1 and F2 transition intensities calculated\n");

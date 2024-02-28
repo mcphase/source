@@ -424,7 +424,7 @@ if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30
     char * operatornames[2+IONPARS_MAXNOFCOMPONENTS+NOF_OLM_MATRICES+NOF_RIXS_MATRICES+3];
     char opnam[]="one\0";   
     operatornames[0]=opnam;
-    for (i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i){operatornames[i]=new char[4];sprintf(operatornames[i],"I%i",i);
+    for (i=1;i<=IONPARS_MAXNOFCOMPONENTS;++i){operatornames[i]=new char[4];snprintf(operatornames[i],MAXNOFCHARINLINE,"I%i",i);
                                              }
     for (i=1;i<=NOF_OLM_MATRICES;++i){operatornames[IONPARS_MAXNOFCOMPONENTS+i]=new char[5];
                                       operatornames[IONPARS_MAXNOFCOMPONENTS+i][0]='O';operatornames[IONPARS_MAXNOFCOMPONENTS+i][4]='\0';
@@ -581,7 +581,7 @@ if(fabs(s0r)+fabs(s1r)+fabs(s2r)+fabs(s0i)+fabs(s1i)+fabs(s2i)>SMALL_DEVIATION)
                      if(i<=45&&Llm(i)!=0){if(l==3||l==5){lm4[0]='L';fprintf(stderr,"#Error internal module %s: wybourne parameter %s is not implemented\n",moduletype,lm4);
                                                   exit(EXIT_FAILURE);}
                                   double Blmcalc=Llm(i)*cnst(l,m)*sqrt(4.0*PI/(2*l+1))*thetaJ(l);if(m!=0){Blmcalc*=sqrt(2.0);}
-                                  if((fabs(Blm(i))>1e-12)&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-12)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond !\n Will use Blm=%12.6g calculated from Llm.\npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i),Blmcalc);getchar();}
+                                  if((fabs(Blm(i))>1e-12)&&(fabs(Blm(i)-Blmcalc)/(fabs(Blmcalc)+1e-12)>0.001)){fprintf(stderr,"#Warning internal module %s - reading %s=%12.6g meV is ignored, because Wybourne Parameter Llm=%12.6g meV does not correspond !\n Will use Blm=%12.6g calculated from Llm.\npresse enter to continue\n",moduletype,lm4,Blm(i),Llm(i),Blmcalc);getchar();}
                                   Blm(i)=Blmcalc;// here set the Blm as calculated from the Llm
                                   }
                      if(Blm(i)!=0){if(verbose)fprintf(stderr,"#! %s=%12.6g meV ",lm4,Blm(i));
@@ -744,7 +744,7 @@ int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVect
   getijdelta_from_transitionnumber(i,j,delta,dj,tn,pr,ests);
   n=i;nd=j;
   char optype[5];
-  for(int l=1;l<=Hxc.Hi();++l){sprintf(optype,"I%i",l);
+  for(int l=1;l<=Hxc.Hi();++l){snprintf(optype,sizeof(optype),"I%i",l);
   u1(l)=observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*In[l]));}
 
 // return number of all transitions     
@@ -1142,11 +1142,11 @@ int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,
 
 char optype[12];
 cd1(1)=0;if(i==j){cd1(1)=-nof_electrons / sqrt(4.0 * 3.1415);}
-for(l=2;l<=6;++l){sprintf(optype,"cd_coeff%i",l);
+for(l=2;l<=6;++l){snprintf(optype,sizeof(optype),"cd_coeff%i",l);
                   cd1(l)=alpha*cnst(k[l],q[l])*observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*Olm[l-1]));}
-for(l=7;l<=15;++l){sprintf(optype,"cd_coeff%i",l);
+for(l=7;l<=15;++l){snprintf(optype,sizeof(optype),"cd_coeff%i",l);
                    cd1(l)=beta*cnst(k[l],q[l])*observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*Olm[l-1+7]));}
-for(l=16;l<=28;++l){sprintf(optype,"cd_coeff%i",l);
+for(l=16;l<=28;++l){snprintf(optype,sizeof(optype),"cd_coeff%i",l);
                     cd1(l)=gamma*cnst(k[l],q[l])*observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*Olm[l-1+7+11]));}
      // theta_J*cnst(l,m)  are prefactors to get coefficients of Zlm*R(r)^2 
     //in case of module cfield and so1ion(stevens parameters tetan and zlm prefactors)

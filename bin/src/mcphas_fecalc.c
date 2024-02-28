@@ -308,12 +308,12 @@ if (ini.displayall==1)   // display spincf if button is pressed
  {   strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
      fin_coq = fopen_errchk (outfilename, "w");
-     sprintf(text,"fecalc:%i spins, iteration %i initial values sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+     snprintf(text,MAXNOFCHARINLINE,"fecalc:%i spins, iteration %i initial values sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
       fprintf(stdout,"%s\n",text);
       sps.print(stdout);
-     sprintf(text,"fecalc:%i meanfields, iteration %i initial values sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+     snprintf(text,MAXNOFCHARINLINE,"fecalc:%i meanfields, iteration %i initial values sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
   
@@ -453,13 +453,13 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
      strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
      fin_coq = fopen_errchk (outfilename, "w");
-     sprintf(text,"fecalc:%i spins, iteration %i sta=%g ini.maxstamf=%g spinchange=%g",sps.n(),r,sta,ini.maxstamf,spinchange);
+     snprintf(text,MAXNOFCHARINLINE,"fecalc:%i spins, iteration %i sta=%g ini.maxstamf=%g spinchange=%g",sps.n(),r,sta,ini.maxstamf,spinchange);
      sps.eps(fin_coq,text);
      fclose (fin_coq);
 
       fprintf(stdout,"%s\n",text);
       sps.print(stdout);
-   sprintf(text,"... as calculated from %i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+   snprintf(text,MAXNOFCHARINLINE,"... as calculated from %i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
   
@@ -499,12 +499,12 @@ if (ini.displayall==1)
      strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
       fin_coq = fopen_errchk (outfilename, "w");
-        sprintf(text,"fecalc:%i spins, iteration %i sta=%g spinchange=%g fe=%g",sps.n(),r,sta,spinchange,fe);
+        snprintf(text,MAXNOFCHARINLINE,"fecalc:%i spins, iteration %i sta=%g spinchange=%g fe=%g",sps.n(),r,sta,spinchange,fe);
       sps.eps(fin_coq,text);
       fclose (fin_coq);
       fprintf(stdout,"%s\n",text);
       sps.print(stdout);
-       sprintf(text,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g fe=%g",sps.n(),r,sta,spinchange,fe);
+       snprintf(text,MAXNOFCHARINLINE,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g fe=%g",sps.n(),r,sta,spinchange,fe);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
       sleep(200);

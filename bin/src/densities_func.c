@@ -33,7 +33,7 @@ int n;
       if(n>=17){for(int ii=1;ii<=6;++ii)spins.epsilon(ii)=numbers[11+ii];}
       if (dd<delta)
        {delta=dd;
-        sprintf(outstr,"x=%g y=%g T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[1]),myround(numbers[2]),myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
+        snprintf(outstr,MAXNOFCHARINLINE,"x=%g y=%g T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[1]),myround(numbers[2]),myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
         savmf=spins;T=numbers[3];Hext(1)=numbers[5];Hext(2)=numbers[6];Hext(3)=numbers[7];
        }
       pos=ftell(fin_coq); 
@@ -47,7 +47,7 @@ int n;
  {// look for config number -Tin
   for(n=1;n<=-Tin;++n)
   {if(savmf.load(fin_coq)==0){fprintf(stderr,"Error program spins: loading configuration number %i\n",n);exit(1); }
-  }sprintf(outstr,"n=%i spins nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.nofatoms,savmf.nofcomponents);
+  }snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.nofatoms,savmf.nofcomponents);
  }
  return 0; // ok structure found
 }

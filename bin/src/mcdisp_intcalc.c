@@ -36,10 +36,10 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
      SL[l] = complex <double> ((*inputpars.jjj[l]).SLR,(*inputpars.jjj[l]).SLI);
   }
 
-  sprintf(filename,"./results/%smcdisp.trs",ini.prefix);  
+  snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.trs",ini.prefix);  
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.cs.nofatoms;++l){
-  if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
+  if((fin = fopen(filename,"rb"))==NULL){snprintf(filename,MAXNOFCHARINLINE,"./results/mcdisp.trs");
                   fin = fopen_errchk(filename,"rb");}
 
       // do calculation for atom s=(ijkl)

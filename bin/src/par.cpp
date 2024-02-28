@@ -61,7 +61,7 @@ par::par (const char *filejjj,int verbose)
     // read optional elastic constants        
   char Celstr[6];
    for(i=1;i<=6;++i)for(j=1;j<=6;++j){
-  sprintf(Celstr,"Cel%i%i",i,j);// printf("%s\n",Celstr);
+  snprintf(Celstr,sizeof(Celstr),"Cel%i%i",i,j);// printf("%s\n",Celstr);
   extract(instr,Celstr,Cel(i,j));Cel(j,i)=Cel(i,j);}
 
    extract(instr,"nofatoms",cs.nofatoms);extract(instr,"nofcomponents",cs.nofcomponents); 
@@ -175,16 +175,35 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
 return cs.nofatoms;                 
 }
 
-int par::delatom(int n) // removes atom number n 
+int par::delatom(int nn) // removes atom number n 
+// if n<0 then atom number |n| is removed and also all interactions of other atoms
+// with this atom are removed from the interaction table 
 {jjjpar ** nnn;
- int j,again=0;
+ int j,s,again=0,n=nn; if(nn<0)n=-nn;
  FILE * out;
  if(n<1||n>cs.nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,cs.nofatoms);exit(EXIT_FAILURE);}
   --cs.nofatoms; // the number of atoms has to be decreased
  nnn=new jjjpar * [cs.nofatoms+1];
+
  for (j=1;j<n;++j){nnn[j]=jjj[j];
+
+if(nn<0){
+// take care of interactions to be removed because atom is removed
+ for(s=1;s<=(*nnn[j]).paranz;++s){if((*nnn[j]).sublattice[s]==n){(*nnn[j]).delpar(s);--s;}
+          //fprintf(stderr,"%i neighbour of ion %i paranz=%i sublattice=%i \n",s,j,(*nnn[j]).paranz,(*nnn[j]).sublattice[s]);
+          }
+ for(s=1;s<=(*nnn[j]).paranz;++s){if((*nnn[j]).sublattice[s]>n)--(*nnn[j]).sublattice[s];}
+         }
 if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}} 
  for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];
+
+if(nn<0){
+// take care of interactions to be removed because atom is removed
+ for(s=1;s<=(*nnn[j-1]).paranz;++s){if((*nnn[j-1]).sublattice[s]==n){(*nnn[j-1]).delpar(s);--s;}
+    //fprintf(stderr,"%i neighbour of ion %i paranz=%i sublattice = %i\n",s,j-1,(*nnn[j-1]).paranz,(*nnn[j-1]).sublattice[s]);
+                                   }
+ for(s=1;s<=(*nnn[j-1]).paranz;++s){if((*nnn[j-1]).sublattice[s]>n)--(*nnn[j-1]).sublattice[s];}
+        }
  cs.sipffilenames[j-1]=(*jjj[j]).sipffilename;
  cs.x[j-1]=(*jjj[j]).xyz[1];
  cs.y[j-1]=(*jjj[j]).xyz[2];
@@ -198,6 +217,7 @@ fprintf(out,"%s\n",(*jjj[n]).sipffilename);fclose(out);}
  jjj=nnn;           
 return cs.nofatoms; 
 }
+
 
 void par::reduce_unitcell()
 {//checks every atom in the unit cell and removes

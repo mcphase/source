@@ -1061,7 +1061,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
         // set position vector
         rijk=minv; rijk(1)+=(2*i-1)*max_min(1)/nofpointsi/2;rijk(2)+=(2*j-1)*max_min(2)/nofpointsj/2;rijk(3)+=(2*k-1)*max_min(3)/nofpointsk/2;
         dd=p_inverse*rijk;
-        if((dd(1)>0)&(dd(1)<1)&(dd(2)>0)&(dd(2)<1)&(dd(3)>0)&(dd(3)<1))
+        if((dd(1)>0)&&(dd(1)<1)&&(dd(2)>0)&&(dd(2)<1)&&(dd(3)>0)&&(dd(3)<1))
         {dd=dd0-rijk;
         if(Norm(dd)<rp)ro[((i-1)*nofpointsj+(j-1))*nofpointsk+k-1]+= copysign(1.6110481,radius);
         // this is the chargedensity of a homogeneous sphere with 1 electron/(4pi a0^3/3) with a0=0.529177 A
@@ -1121,7 +1121,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
         rijk=minv; rijk(1)+=(2*i-1)*max_min(1)/nofpointsi/2;rijk(2)+=(2*j-1)*max_min(2)/nofpointsj/2;rijk(3)+=(2*k-1)*max_min(3)/nofpointsk/2;
         // we should check here if rijk is in primitive unitcell otherwise take next rijk
         dd=p_inverse*rijk;
-        if((dd(1)>0)&(dd(1)<1)&(dd(2)>0)&(dd(2)<1)&(dd(3)>0)&(dd(3)<1))
+        if((dd(1)>0)&&(dd(1)<1)&&(dd(2)>0)&&(dd(2)<1)&&(dd(3)>0)&&(dd(3)<1))
         {
         dd=dd0-rijk;
         // get theta phi R from dd

@@ -481,7 +481,7 @@ void jjjpar::save_sipf(FILE * fout)
            //fprintf(fout,"# cluster structure is desribed in file\n#\n");
            //fprintf(fout,"#!structurefile = %s\n\n",clusterfile);
            //break;
-           {char clustsavfile[MAXNOFCHARINLINE];sprintf(clustsavfile,"results/_%s",clusterfilename);
+           {char clustsavfile[MAXNOFCHARINLINE];snprintf(clustsavfile,MAXNOFCHARINLINE,"results/_%s",clusterfilename);
            (*clusterpars).save(clustsavfile,0);
            (*clusterpars).save_sipfs("results/_");}
    default: // in case of external single ion module just save a copy of the input file 

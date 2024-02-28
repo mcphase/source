@@ -267,7 +267,7 @@ inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,
  // ****************************** read mf configuration from spinfile *****************************************  
   fin=fopen(spinfile,"rb");
    if (fin==NULL) {fprintf(stderr,"#Warning - file %s not found - trying to read mcdisp.mf\n",spinfile);
-   sprintf(spinfile,"mcdisp.mf");fin=fopen(spinfile,"rb");
+   snprintf(spinfile,MAXNOFCHARINLINE,"mcdisp.mf");fin=fopen(spinfile,"rb");
     if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);exit(EXIT_FAILURE);}
    }
   instr[0]='#';  
@@ -287,7 +287,7 @@ inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,
   fclose(fin);
  //********************************  
   savfilename= new char [strlen(file)+strlen(prefix)+11];
-  sprintf(savfilename,"results/_%s%s",prefix,file);
+  snprintf(savfilename,MAXNOFCHARINLINE,"results/_%s%s",prefix,file);
   errno = 0;
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   // **************** initialize parameters to default values ********************************************
@@ -327,7 +327,7 @@ nofhkls=0;save(file);
      extract_with_prefix(instr,prefix,"outS",outS);
      extract_with_prefix(instr,prefix,"nofthreads",nofthreads);
      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
-     {sprintf(somestring,"out%i",usrdefcols[j]);
+     {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
       extract(instr, somestring,colcod[usrdefcols[j]]);
      }
 

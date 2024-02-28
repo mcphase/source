@@ -152,6 +152,9 @@ class intcalcapr_input { public:
 intcalcapr_thread_data thrdat;
 MUTEX_TYPE mutex_loop;
 MUTEX_TYPE mutex_index;
+//MUTEX_TYPE mutex_Jlock_write0;
+//MUTEX_TYPE mutex_Jlock_write1;
+EVENT_TYPE JQfree;
 EVENT_TYPE checkfinish;
 
 // ----------------------------------------------------------------------------------- //
@@ -208,7 +211,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
    //   to many different components of Js,ss(q) ... note s,ss runs over all the atoms
    //   in the magnetic supercell
          for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
-         s=J.in(i1,j1,k1); 
+         s=md.in(i1,j1,k1); 
 
          //calc ss (check in which crystallographic unit ss of the magnetic cell the neighbour l-ll lies)	 
          i=(int)(i1+d_rint(1)-1); // calculate 
@@ -224,7 +227,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
          i=i-(int)ij(1)+1;
 	 j=j-(int)ij(2)+1;
 	 k=k-(int)ij(3)+1;
-	 ss=J.in(i,j,k);
+	 ss=md.in(i,j,k);
 //          if (do_verbose==1) {printf("#s=%i %i %i  s'=%i %i %i\n",i,j,k,i1,j1,k1);}
           // sum up 
 
@@ -238,18 +241,31 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 	  sl=(*inputpars.jjj[ll]).sublattice[l]; // the whole loop has also to be done 
                                                  // for all the other transitions of sublattice sl
 
+//#ifdef _THREADS_JSSS   ... not needed becaues each thread has different ll !! thus writes to a different 
+// region of memory (jsi)
+//	  MUTEX_LOCK(&mutex_Jlock_write1); 
+//           while(Jlock[si]){pthread_cond_wait(&JQfree, &mutex_Jlock_write);}
+//           Jlock[si]=1;
+//          MUTEX_UNLOCK(&mutex_Jlock_write1);
+// #endif
            
           // therefore calculate offset of the set of transitions
           for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
 	  for(tll=1;tll<=md.noft(i,j,k,sl);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,sl,tll)-1);
-	  
-         
+
 	     for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){ //this should also be ok for nofcomponents > 3 !!! (components 1-3 denote the magnetic moment)
          jjval = (*inputpars.jjj[ll]).jij[l](m,n);  
          jsss[jsi+m][jsj+n] += complex<double>(jjval*REexpqd, jjval*IMexpqd);
 //         jsss(jsi+m,jsj+n) += complex<double>(jjval*REexpqd, jjval*IMexpqd);
                                               }                                 } // but orbitons should be treated correctly by extending 3 to n !!
+
 	                                         }} 
+//#ifdef _THREADS_JSSS
+//         MUTEX_LOCK(&mutex_Jlock_write0);
+//          Jlock[si]=0;
+//         MUTEX_UNLOCK(&mutex_Jlock_write0);
+//          pthread_cond_signal(&JQfree);
+//#endif
 //       J.mati(s,ss)+=jsss;
 
           ++nofneighbours; // count neighbours summed up
@@ -440,7 +456,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
  if (do_readtrs==0)
  {
  // ********************************************** write mcdisp.trs *******************************************************
- sprintf(filename,"./results/%smcdisp.trs",ini.prefix);printf("# saving  %s\n",filename);
+ snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.trs",ini.prefix);printf("# saving  %s\n",filename);
   fout = fopen_errchk (filename,"w");
    trs_header_out(fout,pinit,ninit,maxE,ini.T,ini.Hext,'I');
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
@@ -475,11 +491,11 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
  } // do_readtrs==0
 
   if (do_createtrs==1){fprintf(stdout,"single ion transition file ./results/mcdisp.trs created - please comment transitions which should not enter the calculation and restart with option -t\n");exit(0);}
-  sprintf(filename,"./results/%smcdisp.trs",ini.prefix);
+  snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.trs",ini.prefix);
   printf("\n#reading %s\n\n",filename);
 // read transitions to be considered from file
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
-    if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
+    if((fin = fopen(filename,"rb"))==NULL){snprintf(filename,MAXNOFCHARINLINE,"./results/mcdisp.trs");
                   fin = fopen_errchk(filename,"rb");printf("\n#... not possible, therefore reading %s\n\n",filename);}
 noftransitions=0;
  int nparread=0;double Tr,Har,Hbr,Hcr;
@@ -536,10 +552,10 @@ ComplexMatrix Emagmom(1,dimA,1,MAGMOM_EV_DIM);Emagmom=0;
 ComplexMatrix Espin(1,dimA,1,SPIN_EV_DIM);Espin=0;
 ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
 
-  sprintf(filename,"./results/%smcdisp.trs",ini.prefix);  
+  snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.trs",ini.prefix);  
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.cs.nofatoms;++l){
-  if((fin = fopen(filename,"rb"))==NULL){sprintf(filename,"./results/mcdisp.trs");
+  if((fin = fopen(filename,"rb"))==NULL){snprintf(filename,MAXNOFCHARINLINE,"./results/mcdisp.trs");
                   fin = fopen_errchk(filename,"rb");}
   jmin=0;
   while (feof(fin)==0)
@@ -640,7 +656,7 @@ if (do_verbose==1){
 //************************************************************************************* 
 // initialize file with jq matrix
 if (do_jqfile)
-{  sprintf(filename,"./results/%smcdisp.jq",ini.prefix);printf("#saving %s\n",filename);
+{  snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.jq",ini.prefix);printf("#saving %s\n",filename);
  if(strcmp(filemode,"A")==0)filemode="a";
  jqfile = fopen_errchk (filename,filemode);
  writeheader(inputpars,jqfile); printf("#saving mcdisp.jq\n");
@@ -659,6 +675,8 @@ if (do_jqfile)
    // Initialises mutual exclusions and threads
    MUTEX_INIT(mutex_loop);
    MUTEX_INIT(mutex_index);
+//   MUTEX_INIT(mutex_Jlock_write0);
+//   MUTEX_INIT(mutex_Jlock_write1);
    EVENT_INIT(checkfinish);
    #if defined  (__linux__) || defined (__APPLE__)
    pthread_t threads[NUM_THREADS]; int rc; void *status;
@@ -683,7 +701,7 @@ int counter,firstcounter=1;qijk=0;double qincr=-1;
 if(strcmp(filemode,"A")==0){// check if some q values have already been calculated in a previous run !
                   // ... if hkl values match do not recalculate ... set firstcounter accordingly
                   filemode="a";float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE; 
-                 sprintf(filename,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen(filename,"r");
+                 snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen(filename,"r");
                  if(foutqom!=NULL){// read file and compare hkls
                                    while (feof(foutqom)==0&&firstcounter<=ini.nofhkls)
                                    {if (inputline(foutqom,nn)>=7)
@@ -729,7 +747,9 @@ fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
    {
       tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
-      thrdat.J[ithread] = new jq(J); tin[ithread]->dimA=0; 
+      thrdat.J[ithread] = &J;
+     // thrdat.J[ithread] = new jq(J);
+      tin[ithread]->dimA=0; 
       thrdat.md[ithread] = new mdcf(md,0);      
    } 
    int thrcount=0, ithread=0;
@@ -780,16 +800,17 @@ int num_threads_started=-1;
     for(int th=0; th<ithread; th++)CloseHandle(threads[th]);}
     #endif
 
-    for(int th=0; th<NUM_THREADS; th++) 
-    {
-       nofneighbours += tin[th]->dimA;
-       for(int i1=1;i1<=ini.mf.na();++i1) for(int j1=1;j1<=ini.mf.nb();++j1) for(int k1=1;k1<=ini.mf.nc();++k1)
-          for(int i2=1;i2<=ini.mf.na();++i2) for(int j2=1;j2<=ini.mf.nb();++j2) for(int k2=1;k2<=ini.mf.nc();++k2)
-             J.mat(i1,j1,k1,i2,j2,k2)+=(*thrdat.J[th]).mat(i1,j1,k1,i2,j2,k2); 
-    }
+    //for(int th=0; th<NUM_THREADS; th++) 
+   // {
+   //    nofneighbours += tin[th]->dimA;
+   //    for(int i1=1;i1<=ini.mf.na();++i1) for(int j1=1;j1<=ini.mf.nb();++j1) for(int k1=1;k1<=ini.mf.nc();++k1)
+   //       for(int i2=1;i2<=ini.mf.na();++i2) for(int j2=1;j2<=ini.mf.nb();++j2) for(int k2=1;k2<=ini.mf.nc();++k2)
+   //          J.mat(i1,j1,k1,i2,j2,k2)+=(*thrdat.J[th]).mat(i1,j1,k1,i2,j2,k2); 
+   // }
 
     for (ithread=0; ithread<NUM_THREADS; ithread++) {
-       delete thrdat.J[ithread];delete thrdat.md[ithread];delete tin[ithread]; }
+       //delete thrdat.J[ithread];
+       delete thrdat.md[ithread];delete tin[ithread]; }
     
 #endif
 
@@ -1073,47 +1094,47 @@ if (do_jqfile){
 
   if(qincr==-1){qincr=0;qold=qijk;
               // for the first q vector in the loop we have to initialize files ...
-              sprintf(filename,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
-              if(calc_rixs){sprintf(filename,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
-                     else {sprintf(filename,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
-                           sprintf(filename,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+              snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+              if(calc_rixs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
+                     else {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
+                           snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
                            if(do_Erefine==1){
-                           sprintf(filename,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);                    
+                           snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);                    
                                             }
                            }
                writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,do_Erefine);                  
                //------------observables-----------------------------------
-               if(ini.calculate_chargedensity_oscillation){sprintf(filename,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);}
-               if(ini.calculate_spindensity_oscillation)  {sprintf(filename,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);}
-               if(ini.calculate_orbmomdensity_oscillation){sprintf(filename,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);}
-               if(ini.calculate_phonon_oscillation)       {sprintf(filename,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);}
-               if(ini.calculate_magmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);}
-               if(ini.calculate_spinmoment_oscillation)   {sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
-               if(ini.calculate_orbmoment_oscillation)    {sprintf(filename,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
+               if(ini.calculate_chargedensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);}
+               if(ini.calculate_spindensity_oscillation)  {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);}
+               if(ini.calculate_orbmomdensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);}
+               if(ini.calculate_phonon_oscillation)       {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);}
+               if(ini.calculate_magmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);}
+               if(ini.calculate_spinmoment_oscillation)   {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
+               if(ini.calculate_orbmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
                //-----------------------------------------------------------
                lastcputime=std::clock();
               } else
              {// close and reopen files to prevent data loss if process ends 
                if ((std::clock() - lastcputime) / (double)CLOCKS_PER_SEC >60)
               {lastcputime=std::clock();
-              fclose(foutqom);sprintf(filename,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,"a");
+              fclose(foutqom);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,"a");
               fclose(foutqei);
-              if(calc_rixs){sprintf(filename,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,"a");}
-                     else {sprintf(filename,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,"a");
-                           fclose(foutdstot);sprintf(filename,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,"a");
+              if(calc_rixs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,"a");}
+                     else {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,"a");
+                           fclose(foutdstot);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,"a");
                           if(do_Erefine==1){
-                           fclose(foutds);sprintf(filename,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,"a");               
+                           fclose(foutds);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,"a");               
                                             }
                            }
                                 
                //------------observables-----------------------------------
-               if(ini.calculate_chargedensity_oscillation){fclose(foutqee);sprintf(filename,"./results/%smcdisp.qee",ini.prefix);foutqee=fopen_errchk (filename,"a");}
-               if(ini.calculate_spindensity_oscillation)  {fclose(foutqsd);sprintf(filename,"./results/%smcdisp.qsd",ini.prefix);foutqsd=fopen_errchk (filename,"a");}
-               if(ini.calculate_orbmomdensity_oscillation){fclose(foutqod);sprintf(filename,"./results/%smcdisp.qod",ini.prefix);foutqod=fopen_errchk (filename,"a");}
-               if(ini.calculate_phonon_oscillation)       {fclose(foutqep);sprintf(filename,"./results/%smcdisp.qep",ini.prefix);foutqep=fopen_errchk (filename,"a");}
-               if(ini.calculate_magmoment_oscillation)    {fclose(foutqem);sprintf(filename,"./results/%smcdisp.qem",ini.prefix);foutqem=fopen_errchk (filename,"a");}
-               if(ini.calculate_spinmoment_oscillation)   {fclose(foutqes);sprintf(filename,"./results/%smcdisp.qes",ini.prefix);foutqes=fopen_errchk (filename,"a");}
-               if(ini.calculate_orbmoment_oscillation)    {fclose(foutqel);sprintf(filename,"./results/%smcdisp.qel",ini.prefix);foutqel=fopen_errchk (filename,"a");}
+               if(ini.calculate_chargedensity_oscillation){fclose(foutqee);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qee",ini.prefix);foutqee=fopen_errchk (filename,"a");}
+               if(ini.calculate_spindensity_oscillation)  {fclose(foutqsd);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qsd",ini.prefix);foutqsd=fopen_errchk (filename,"a");}
+               if(ini.calculate_orbmomdensity_oscillation){fclose(foutqod);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=fopen_errchk (filename,"a");}
+               if(ini.calculate_phonon_oscillation)       {fclose(foutqep);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=fopen_errchk (filename,"a");}
+               if(ini.calculate_magmoment_oscillation)    {fclose(foutqem);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=fopen_errchk (filename,"a");}
+               if(ini.calculate_spinmoment_oscillation)   {fclose(foutqes);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=fopen_errchk (filename,"a");}
+               if(ini.calculate_orbmoment_oscillation)    {fclose(foutqel);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=fopen_errchk (filename,"a");}
                //-----------------------------------------------------------
                }
 
@@ -1361,7 +1382,7 @@ if (do_jqfile){
                                                                                             dd_without_weights(j1)=1/test;
                                                                                             dd_without_antipeaks_weights(j1)=0;}
                                                                                }
-                       double inten;if(inten=ini.hkls[counter][4*j1+2]==0.0)inten=SMALLINT;
+                       double inten;if((inten=ini.hkls[counter][4*j1+2])==0.0)inten=SMALLINT;
                        if ((test=fabs(En(i)-ini.hkls[counter][4*j1]))<dd1_int(j1)&&ints(i)+intsP(i)>inten){dd1_int(j1)=test;
                                                                                double weight=ini.hkls[counter][4*j1+1];
                                                                                if(weight>0){dd_int(j1)=sqrt(weight)*test;  // weight>0
@@ -1492,7 +1513,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
     sta_int_without_antipeaks_weights+=dd_int_without_antipeaks_weights*dd_int_without_antipeaks_weights;
               }
               //initialize output file for display
-            sprintf(filename,"./results/.%smcdisp.qom",ini.prefix);fout1 = fopen_errchk (filename,"w");
+            snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.qom",ini.prefix);fout1 = fopen_errchk (filename,"w");
             fprintf (fout1, "#%s ",MCDISPVERSION);
             curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout1);
             fprintf (fout1, "#displayytext=I(barns/meV/sr/f.u.)\n");
@@ -1535,7 +1556,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
    // do refinement of energies by output of scattering cross section vs enrgy transfer if required
   if (do_Erefine==1&&!calc_rixs){double totint=0;
                 if(do_verbose==1){fprintf(stdout, "#refining calculation with exact calculation of energy dependence of scattering cross section\n");}
-          sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"w");
+          snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"w");
           fprintf (foutds1, "#{%s ",MCDISPVERSION);
           curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),foutds1);
           fprintf (foutds1, "#Scattering Cross Section \n#Ha[T] Hb[T] Hc[T] T[K] h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixri chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
@@ -1608,7 +1629,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
 //		    intensity=intcalc(ch,dimA,E,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
 		    intensity=intcalc_Erefine(ch,Estp,ini,inputpars,J,q,hkl,md,do_verbose,fabs(epsilon));   
 		     totint+=intensity*fabs(epsilon)/2;
-          sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
+          snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
                      fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
 	             fprintf (foutds1, " %4.4g %4.4g ",myround(E),myround(intensity));
                      for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds1,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
@@ -1637,7 +1658,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                      if(retval<WAIT_OBJECT_0||retval>(int)WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects erfine\n"); exit(EXIT_FAILURE); }
                      for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);}
                         #endif
-                     sprintf(filename,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
+                     snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"a");
                       for(ithread=0; ithread<NUM_THREADS; ithread++) {vIntensity(tin[ithread]->iE) = tin[ithread]->intensity;
                                                                      (*chpointer[tin[ithread]->iE-1])  =(*thrdat.ch[ithread]); 
                       fprintf (foutds1, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g ",myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
@@ -1709,7 +1730,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                            }
        fclose(jqfile);
       if(scalefactor!=1.0){inputpars.scale(scalefactor);
-                           sprintf(filename,"./results/%smcdisp_scaled.j",ini.prefix);
+                           snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp_scaled.j",ini.prefix);
                           printf("# saving  %s\n",filename);
                           jqfile = fopen_errchk (filename,"w");
                            inputpars.save(jqfile,0);
@@ -1746,7 +1767,7 @@ int main (int argc, char **argv)
  int do_ignore_non_hermitian_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0;
  char spinfile [MAXNOFCHARINLINE]; //default spin-configuration-input file
-  sprintf(spinfile,"mcdisp.mf");
+  snprintf(spinfile,MAXNOFCHARINLINE,"mcdisp.mf");
  const char * filemode="w";
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
  double epsilon=0.05; //imaginary part of omega to avoid divergence
@@ -1808,7 +1829,7 @@ for (i=1;i<=argc-1;++i){
 						  fprintf(stdout,"#minimum population of initial state for single ion excitations to be taken into account: %g\n",pinit);
 					         }
                      else {if(strcmp(argv[i],"-prefix")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -prefix needs argument(s)\n");exit(EXIT_FAILURE);}
-  		                                  strcpy(prefix,argv[i+1]);sprintf(spinfile,"%smcdisp.mf",prefix);++i;
+  		                                  strcpy(prefix,argv[i+1]);snprintf(spinfile,MAXNOFCHARINLINE,"%smcdisp.mf",prefix);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
                       else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;

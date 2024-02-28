@@ -297,18 +297,18 @@ else
            while(feof(sipf_file)==false){fgets(instr, MAXNOFCHARINLINE,sipf_file);
                       // strip /r (dos line feed) from line if necessary
                       while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
-                      if(extract(instr,"R2",dummy)==0){sprintf(instr,"R2=%g\n",(*jjjps).r2);}
-                      if(extract(instr,"R4",dummy)==0){sprintf(instr,"R4=%g\n",(*jjjps).r4);}
-                      if(extract(instr,"R6",dummy)==0){sprintf(instr,"R6=%g\n",(*jjjps).r6);}
+                      if(extract(instr,"R2",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"R2=%g\n",(*jjjps).r2);}
+                      if(extract(instr,"R4",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"R4=%g\n",(*jjjps).r4);}
+                      if(extract(instr,"R6",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"R6=%g\n",(*jjjps).r6);}
 
                       // remove Blm and Llm and pointcharges from input file 
                       const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 ";
                       char lm4[5];
                       for(i=0;i<=45;++i){strncpy(lm4,lm+i*4,4);if(lm4[3]!='S')lm4[3]='\0';
-                                        if(extract(instr,lm4,dummy)==0)sprintf(instr,"");
-                                        lm4[0]='L';if(extract(instr,lm4,dummy)==0)sprintf(instr,"");
+                                        if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"");
+                                        lm4[0]='L';if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"");
                                         }
-                     if(extract(instr,"pointcharge",dummy)==0){sprintf(instr,"");}
+                     if(extract(instr,"pointcharge",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"");}
 
                       printf("%s",instr);
                                     }

@@ -93,9 +93,10 @@ fprintf(fout,
 if(do_sipffile){
  jjjpar jjj(0,0,0,sipffilename,argc-9);jjj.save_sipf("./results/_");
  int nofcomponents=argc-9;
- Vector Hxc(1,nofcomponents);
- for(int j=1;j<=nofcomponents;++j)Hxc=(int)strtod (argv[j+2+P], NULL); 
- Hxc=0;h=0;Vector m(1,3);
+ Vector Hxc(1,nofcomponents);Hxc=0;fprintf(stdout,"# exchange fields:");
+ for(int j=1;j<=nofcomponents;++j){Hxc(j)=strtod (argv[j+2+P], NULL); 
+ fprintf(stdout," %6.4g",Hxc(j));}fprintf(stdout,"\n");
+ h=0;Vector m(1,3);
  jjj.Icalc_parameter_storage_init(Hxc,h,T);
 if(poly==0){
  // loop different H 

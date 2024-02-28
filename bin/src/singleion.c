@@ -165,7 +165,7 @@ if (!do_sipf)
        default: (*inputpars.jjj[i]).Icalc(I,T,Hxc,Hext,lnz,u,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));
       }  
               
-      sprintf(filename,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
+      snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
  pchr=strstr(filename+10,"/");
@@ -190,7 +190,7 @@ pchr=strstr(filename+10,"\\");
        {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(Mq(j)),real(Mq(j)),imag(Mq(j)),I(j)*(*inputpars.jjj[i]).F(Norm(Q)));break;
         default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j));  // printout corresponding moments      
        } if(nmax>0)
-      { sprintf(filename,"./results/%s.trs",(*inputpars.jjj[i]).sipffilename);
+      { snprintf(filename,MAXNOFCHARINLINE,"./results/%s.trs",(*inputpars.jjj[i]).sipffilename);
        // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
  pchr=strstr(filename+10,"/");
@@ -262,7 +262,7 @@ pchr=strstr(filename+10,"\\");
                                     default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
                                    printf("transition-energies(meV)...\n");
-      sprintf(filename,"./results/%s.levels.cef",jjj.sipffilename);
+      snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
  pchr=strstr(filename+10,"/");
@@ -288,7 +288,7 @@ pchr=strstr(filename+10,"\\");
        {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(Mq(j)),real(Mq(j)),imag(Mq(j)),I(j)*jjj.F(Norm(Q)));break;
         default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j));  // printout corresponding moments      
        }if(nmax>0)
-      { sprintf(filename,"./results/%s.trs",jjj.sipffilename);
+      { snprintf(filename,MAXNOFCHARINLINE,"./results/%s.trs",jjj.sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
  pchr=strstr(filename+10,"/");

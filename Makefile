@@ -72,7 +72,7 @@
 #                                           correct bugs in izpack2exe.py (format of config.txt errors)]
 #	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
 #				and then do: 
-#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/13.1.0/lib/gcc/current/
+#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/13.2.0/lib/gcc/current/
 #	        Note on compiling with dos:   make unreleased_remove and copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
 #                                    mingw win64 shell  (from startup menu) 

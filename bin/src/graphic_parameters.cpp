@@ -5,7 +5,7 @@ graphic_parameters::~graphic_parameters(){}
 
 graphic_parameters::graphic_parameters()
 {
-sprintf(title,"chargedensity");
+snprintf(title,MAXNOFCHARINLINE,"chargedensity");
 show_pointcharges=0;scale_pointcharges=1;
 showprim=0;
 show_abc_unitcell=1.0;
@@ -46,10 +46,10 @@ if (fin==NULL) return 0;
 
 char instr[MAXNOFCHARINLINE];
 while(feof(fin)==false)
-{fgets(instr,sizeof(instr),fin);
+{
 //while(!FILEIN.eof())
 //{getline(FILEIN,strline);
-if(instr!=NULL){
+if(fgets(instr,sizeof(instr),fin)!=NULL){
 extract(instr,"show_pointcharges",show_pointcharges);
 extract(instr,"scale_pointcharges",scale_pointcharges);
 extract(instr,"showprim",showprim);

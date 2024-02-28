@@ -3287,23 +3287,23 @@ void info_Vlm(filename,symmetrienr,einheit)
     kf = init_iteration( filename,symmetrienr,"VKQ" );
  
     switch( symmetrienr ){
-         case 0 : /* iteration = */ Vkq0( ITERATION(kf)  );
+         case 0 : /* iteration = */ Vkq0( ITERATION(kf),symmetrienr  );
                   break;
-         case 1 : /* iteration = */ Vkq1( ITERATION(kf)  );
+         case 1 : /* iteration = */ Vkq1( ITERATION(kf),symmetrienr  );
                   break;
-         case 2 : /* iteration = */ Vkq2( ITERATION(kf)  );
+         case 2 : /* iteration = */ Vkq2( ITERATION(kf),symmetrienr  );
                   break;
-         case 3 : /* iteration = */ Vkq3( ITERATION(kf)  );
+         case 3 : /* iteration = */ Vkq3( ITERATION(kf),symmetrienr  );
                   break;
-         case 4 : /* iteration = */ Vkq4( ITERATION(kf)  );
+         case 4 : /* iteration = */ Vkq4( ITERATION(kf),symmetrienr  );
                   break;
-         case 5 : /* iteration = */ Vkq5( ITERATION(kf)  );
+         case 5 : /* iteration = */ Vkq5( ITERATION(kf),symmetrienr  );
                   break;
-         case 6 : /* iteration = */ Vkq6( ITERATION(kf)  );
+         case 6 : /* iteration = */ Vkq6( ITERATION(kf),symmetrienr  );
                   break;
-         case 7 : /* iteration = */ Vkq7( ITERATION(kf)  );
+         case 7 : /* iteration = */ Vkq7( ITERATION(kf),symmetrienr  );
                   break;
-         case 8 : /* iteration = */ Vkq8( ITERATION(kf)  );
+         case 8 : /* iteration = */ Vkq8( ITERATION(kf),symmetrienr  );
                   break;
     }
  

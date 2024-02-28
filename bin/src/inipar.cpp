@@ -21,7 +21,7 @@ void getnofthread(int & nofthreads){
 #if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
        nofthreads = get_nprocs();
 #elif defined(__FreeBSD__) || defined(__APPLE__)
-       int m[2], count; size_t len;
+       int m[2]; size_t len;
        m[0] = CTL_HW; m[1] = HW_NCPU; len = sizeof(int);
        sysctl(m, 2, &nofthreads, &len, NULL, 0);
 #else

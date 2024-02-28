@@ -73,7 +73,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  for(int a=1;a<=(*clusterpars).cs.nofatoms;++a)
  for(int i=1;i<=(*clusterpars).cs.nofcomponents;++i)
  {operatornames[(a-1)*(*clusterpars).cs.nofcomponents+i]=new char[10];
-  sprintf(operatornames[(a-1)*(*clusterpars).cs.nofcomponents+i],"I%i_%i",a,i);
+  snprintf(operatornames[(a-1)*(*clusterpars).cs.nofcomponents+i],MAXNOFCHARINLINE,"I%i_%i",a,i);
  }     
 
  int **cluster_seq, *cluster_seqconstInd, *cluster_opassignflags, cluster_nlines=0; double **cluster_seqconst; char **cluster_statements;
@@ -87,14 +87,14 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
     int Ia0=(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+1; cluster_M_ind0=Ia0+nofcomponents;
     for(int i=1;i<=nofcomponents;++i) { 
        operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+i]=new char[5];
-       sprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+i],"I%i",i); }
+       snprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+i],MAXNOFCHARINLINE,"I%i",i); }
     for(int i=1;i<=3;++i) { 
        operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+i]=new char[5];
-       sprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+i],"M%i",i); }
+       snprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+i],MAXNOFCHARINLINE,"M%i",i); }
     int index=0; cluster_Ia_ind0=(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+1;
     for(int a=1;a<=(*clusterpars).cs.nofatoms;++a) for(int n=1;n<=3;++n) { index=(a-1)*3+n;
        operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index]=new char[5];
-       sprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index],"M%i_%i",a,n); }
+       snprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index],MAXNOFCHARINLINE,"M%i_%i",a,n); }
     int nop = (*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index;
     operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+3*(*clusterpars).cs.nofatoms+1]=NULL;
 
@@ -155,7 +155,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
     delete dum;
 
     if(dim<200) {
-    char ploutname[MAXNOFCHARINLINE];  sprintf(ploutname,"results/_%s.pl.out",sipffilename);
+    char ploutname[MAXNOFCHARINLINE];  snprintf(ploutname,MAXNOFCHARINLINE,"results/_%s.pl.out",sipffilename);
     FILE *PLOUT = fopen(ploutname,"w");
     for(int a=0; a<=nop; a++)
     {
@@ -187,13 +187,13 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  // now initialize the interaction operators
  for(int i=1;i<=nofcomponents;++i)
  {operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+i]=new char[5];
-  sprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+i],"I%i",i);
+  snprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+i],MAXNOFCHARINLINE,"I%i",i);
   Iaa[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+i]=new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim);                     
  }
  // now initialize the cluster total magnetic moment operators
  for(int i=1;i<=3;++i) 
  {operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+i]=new char[5];
-  sprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+i],"M%i",i);
+  snprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+i],MAXNOFCHARINLINE,"M%i",i);
   Iaa[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+ i]=new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim);                     
  }
 
@@ -202,7 +202,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  for(int a=1;a<=(*clusterpars).cs.nofatoms;++a)for(int n=1;n<=3;++n)
  {int index=(a-1)*3+n;
   operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index]=new char[5];
-  sprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index],"M%i_%i",a,n);
+  snprintf(operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index],MAXNOFCHARINLINE,"M%i_%i",a,n);
   Iaa[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+index]=new zsMat<double>(dim,dim);//ComplexMatrix(1,dim,1,dim);                     
  } 
   operatornames[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+3*(*clusterpars).cs.nofatoms+1]=NULL;

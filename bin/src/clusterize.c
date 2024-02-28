@@ -78,9 +78,9 @@ PRB 2008 \n\
   for(int n=1;n<=clust.cs.nofatoms;++n)(*clust.jjj[n]).xyz-=cog;
 
   // store cluster'cnr'.j
-  sprintf(filename,"cluster%i.j",cnr);
+  snprintf(filename,1000,"cluster%i.j",cnr);
   clust.save(filename,0);
-  sprintf(filename,"cluster%i.sipf",cnr);
+  snprintf(filename,1000,"cluster%i.sipf",cnr);
   FILE * fout;
   fout =fopen_errchk (filename, "w");
   fprintf(fout,"\

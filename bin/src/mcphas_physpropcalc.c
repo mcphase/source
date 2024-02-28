@@ -197,7 +197,7 @@ if(verbose==1){printf(".. calculating (hkl) finished\n");}
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-    sprintf(text,"physpropclc:T=%gK, |H|=%gT, Ha=%gT, Hb=%gT, Hc=%gT  %i spins",myround(T),myround(Norm(H)),myround(physprops.H(1)),myround(physprops.H(2)),myround(physprops.H(3)),sps.n());
+    snprintf(text,MAXNOFCHARINLINE,"physpropclc:T=%gK, |H|=%gT, Ha=%gT, Hb=%gT, Hc=%gT  %i spins",myround(T),myround(Norm(H)),myround(physprops.H(1)),myround(physprops.H(2)),myround(physprops.H(3)),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");

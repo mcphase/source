@@ -582,7 +582,7 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
    printf("running singleion and bfk and loading chi0 from bfk0.res\n");
    // 1. output levels.cef
    char command[MAXNOFCHARINLINE],instr[MAXNOFCHARINLINE];
-   sprintf(command,"singleion -r %s %g %g %g %g  %g %g %g",sipffilename,T,Hext(1),Hext(2),Hext(3),Hxc(1),Hxc(2),Hxc(3));
+   snprintf(command,MAXNOFCHARINLINE,"singleion -r %s %g %g %g %g  %g %g %g",sipffilename,T,Hext(1),Hext(2),Hext(3),Hxc(1),Hxc(2),Hxc(3));
    system(command);
    // 2. create bfk.par
    FILE *file;
@@ -606,7 +606,7 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
       while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,file);}
       extract(instr,"g",g); 
     fclose(file);
-   sprintf(command,"bfk %g %g 0 1 results/%s.levels.cef results/bfk.par",g,T,sipffilename);
+   snprintf(command,MAXNOFCHARINLINE,"bfk %g %g 0 1 results/%s.levels.cef results/bfk.par",g,T,sipffilename);
    printf("command: %s\n",command);
    system(command);
    // 4. read in chi0 from bfk0.res

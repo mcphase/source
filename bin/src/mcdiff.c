@@ -139,7 +139,7 @@ fprintf(fout,"#\n");
    extract(instr, "ovalltemp", ovalltemp);
    extract(instr, "lorentz", lorenz);
    for(int i=1;i<=usrdefoutcols[0];++i) // extract user defined output columns
-   {sprintf(somestring,"out%i",usrdefoutcols[i]);
+   {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefoutcols[i]);
     extract(instr, somestring,colcode[usrdefoutcols[i]]);
    }
    extract(instr, "Pa",P(1));
@@ -305,7 +305,7 @@ if (a == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant a given in sectio
 if (b == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant b given in section 3 or line does not start with #: \n%s\n",instr);exit (EXIT_FAILURE);}
 if (c == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant c given in section 3 or line does not start with #: \n%s\n",instr);exit (EXIT_FAILURE);}
 printf("     section 3 - a=%g A  b=%g A c=%g A alpha=%g  beta=%g gamma=%g\n",a,b,c,alpha,beta,gamma);
-sprintf(unitcellstr," a= %g A  b= %g A c= %g A  alpha=%g  beta=%g gamma=%g\n",a,b,c,alpha,beta,gamma);
+snprintf(unitcellstr,sizeof(unitcellstr)," a= %g A  b= %g A c= %g A  alpha=%g  beta=%g gamma=%g\n",a,b,c,alpha,beta,gamma);
 printf("                 r1= %5.3ga + %5.3gb + %5.3gc\n", r1(1), r1(2), r1(3));
 printf("                 r2= %5.3ga + %5.3gb + %5.3gc\n", r2(1), r2(2), r2(3));
 printf("                 r3= %5.3ga + %5.3gb + %5.3gc\n", r3(1), r3(2), r3(3));

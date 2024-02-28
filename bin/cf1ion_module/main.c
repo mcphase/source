@@ -3081,7 +3081,7 @@ ITERATION *Vkq8(iter,sym)
 KRISTALLFELD *init_iteration(filename,symmetrienr,modus) /* [1] */
     CHAR *filename;
     INT  symmetrienr;
-    char modus;
+    char  modus;
 {
  
     UMGEBUNG     *umgebung ,   *read_nn();
@@ -3564,7 +3564,8 @@ MATRIX *calc_Bmag_D( dimj,gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4 ) /*magnetisch
 {
     INT    m,n;
     MATRIX *bmag,*mx_alloc();
-    DOUBLE jm,jp,jx2,jy2,jx4,jy4;
+    DOUBLE jm,jp;
+   /* DOUBLE jx2,jy2,jx4,jy4;*/
 
     #include "define_j.c"          /* mj,J2,J+,... definieren */
     bmag = mx_alloc( dimj,dimj );  /* Speicher fuer (J nj| Hmag |mj J)*/
@@ -3623,7 +3624,8 @@ MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 ,Dx4,Dy4,
     DOUBLE Bxmol,Bymol,Bzmol;
 {
     INT    m,n,dimj;
-    DOUBLE jm,jp,jx2,jy2,jx4,jy4;
+    DOUBLE jm,jp;
+   /* DOUBLE jx2,jy2,jx4,jy4;*/
  
     #include "define_j.c"          /* mj,J2,J+,... definieren */
                                    /* <nj| A |mj>             */
@@ -4010,23 +4012,23 @@ void info_Vlm(filename,symmetrienr,einheit)
     kf = init_iteration( filename,symmetrienr,"VKQ" );
  
     switch( symmetrienr ){
-         case 0 : /* iteration = */ Vkq0( ITERATION(kf)  );
+         case 0 : /* iteration = */ Vkq0( ITERATION(kf),symmetrienr  );
                   break;
-         case 1 : /* iteration = */ Vkq1( ITERATION(kf)  );
+         case 1 : /* iteration = */ Vkq1( ITERATION(kf),symmetrienr  );
                   break;
-         case 2 : /* iteration = */ Vkq2( ITERATION(kf)  );
+         case 2 : /* iteration = */ Vkq2( ITERATION(kf),symmetrienr  );
                   break;
-         case 3 : /* iteration = */ Vkq3( ITERATION(kf)  );
+         case 3 : /* iteration = */ Vkq3( ITERATION(kf),symmetrienr  );
                   break;
-         case 4 : /* iteration = */ Vkq4( ITERATION(kf)  );
+         case 4 : /* iteration = */ Vkq4( ITERATION(kf),symmetrienr  );
                   break;
-         case 5 : /* iteration = */ Vkq5( ITERATION(kf)  );
+         case 5 : /* iteration = */ Vkq5( ITERATION(kf),symmetrienr  );
                   break;
-         case 6 : /* iteration = */ Vkq6( ITERATION(kf)  );
+         case 6 : /* iteration = */ Vkq6( ITERATION(kf) ,symmetrienr );
                   break;
-         case 7 : /* iteration = */ Vkq7( ITERATION(kf)  );
+         case 7 : /* iteration = */ Vkq7( ITERATION(kf),symmetrienr  );
                   break;
-         case 8 : /* iteration = */ Vkq8( ITERATION(kf)  );
+         case 8 : /* iteration = */ Vkq8( ITERATION(kf) ,symmetrienr );
                   break;
     }
  

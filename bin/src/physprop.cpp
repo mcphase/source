@@ -282,7 +282,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
   if (verbose==1)printf("saving mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas");
-  sprintf(filename,"%s%i.j%i",outfilename,l,i);
+  snprintf(filename,sizeof(filename),"%s%i.j%i",outfilename,l,i);
   if (washere==0)  //printout file header
   {  fout = fopen_errchk (filename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
@@ -314,7 +314,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
 	    }
    fprintf (fout,"\n");
    fclose(fout);
-   sprintf(filename,"./fit/mcphas%i.j%i",l,i);
+   snprintf(filename,sizeof(filename),"./fit/mcphas%i.j%i",l,i);
    if((fout=fopen(filename,"rb"))!=NULL)
     {// some measured data should be fitted
      if (washere==0){fprintf(stderr,"Warning: Calculation of standard deviation using %s  not implemented\n",filename);}
@@ -646,7 +646,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
   if (verbose==1)printf("reading mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas");
-  sprintf(filename,"%s%i.j%i",infilename,l,i);
+  snprintf(filename,sizeof(filename),"%s%i.j%i",infilename,l,i);
   fin = fopen_errchk (filename,"r");
    // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
 //then read jj[] 

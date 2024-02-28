@@ -3779,40 +3779,39 @@ TABELLE *stern_setzen(tabelle,symmetrienr,dimj)
  
     switch(symmetrienr){
  
-       case  0  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  0  :  if( zwei_j - 2 >= 0 ){
+                         T20 = T20r;
                                   T21 = T21c;
                                   T22 = T22c;
-                                  break;
-                        default : T20 = T20n;
+                              } else {
+                        T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                   if( zwei_j - 4 >= 0 ){
+                         T40 = T40r;
                                   T41 = T41c;
                                   T42 = T42c;
                                   T43 = T43c;
                                   T44 = T44c;
-                                  break;
-                        default : T40 = T40n;
+                                  } else {
+                         T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
+                                  
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                   if( zwei_j - 6 >= 0 ){
+                         T60 = T60r;
                                   T61 = T61c;
                                   T62 = T62c;
                                   T63 = T63c;
                                   T64 = T64c;
                                   T65 = T65c;
                                   T66 = T66c;
-                                  break;
-                        default : T60 = T60n;
+                                  } else {
+                        T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
@@ -3823,355 +3822,309 @@ TABELLE *stern_setzen(tabelle,symmetrienr,dimj)
                    }
                    break;
  
-       case  1  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  1  :  if( zwei_j - 2 >= 0 ){
+                         T20 = T20r;
                                   T21 = T21n;
                                   T22 = T22c;
-                                  break;
-                        default : T20 = T20n;
+                                  } else {
+                         T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
+                                  
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                   if( zwei_j - 4 >= 0 ){
+                         T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42c;
                                   T43 = T43n;
                                   T44 = T44c;
-                                  break;
-                        default : T40 = T40n;
+                                  } else {
+                        T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                   if( zwei_j - 6 >= 0 ){
+                         T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62c;
                                   T63 = T63n;
                                   T64 = T64c;
                                   T65 = T65n;
                                   T66 = T66c;
-                                  break;
-                        default : T60 = T60n;
+                                 } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
-       case  2  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  2  :  if( zwei_j - 2 >= 0 ){
+                         T20 = T20r;
                                   T21 = T21n;
                                   T22 = T22c;
-                                  break;
-                        default : T20 = T20n;
+                                } else {T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                   if( zwei_j - 4 >= 0 ){ T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42c;
                                   T43 = T43n;
                                   T44 = T44c;
-                                  break;
-                        default : T40 = T40n;
+                                 } else { T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                   if( zwei_j - 6 >= 0 ){
+                       T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62c;
                                   T63 = T63n;
                                   T64 = T64c;
                                   T65 = T65n;
                                   T66 = T66c;
-                                  break;
-                        default : T60 = T60n;
+                                 } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
-       case  3  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  3  :  if( zwei_j - 2 >= 0 ){
+                       T20 = T20r;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
-                        default : T20 = T20n;
+                                 } else { T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                  if( zwei_j - 4 >= 0 ){
+                         T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44c;
-                                  break;
-                        default : T40 = T40n;
+                                 } else {T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                   if( zwei_j - 6 >= 0 ){
+                        T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64c;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
-                        default : T60 = T60n;
+                                 } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
-       case  4  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  4  :  if( zwei_j - 2 >= 0 ){
+                        T20 = T20r;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
-                        default : T20 = T20n;
+                                } else { T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                  if( zwei_j - 4 >= 0 ){
+                         T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44c;
-                                  break;
-                        default : T40 = T40n;
+                                 } else { T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                  if( zwei_j - 6 >= 0 ){
+                        T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64c;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
-                        default : T60 = T60n;
+                                } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
-       case  5  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  5  : if( zwei_j - 2 >= 0 ){
+                         T20 = T20r;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
-                        default : T20 = T20n;
+                                 } else { T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                   if( zwei_j - 4 >= 0 ){
+                        T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43c;
                                   T44 = T44n;
-                                  break;
-                        default : T40 = T40n;
+                                 } else {T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                   if( zwei_j - 6 >= 0 ){
+                         T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63c;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66c;
-                                  break;
-                        default : T60 = T60n;
+                                 } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
-       case  6  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  6  :  if( zwei_j - 2 >= 0 ){
+                        T20 = T20r;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
-                        default : T20 = T20n;
+                                 } else { T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                  if( zwei_j - 4 >= 0 ){
+                         T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43c;
                                   T44 = T44n;
-                                  break;
-                        default : T40 = T40n;
+                                 } else { T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                  if( zwei_j - 6 >= 0 ){
+                         T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63c;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66c;
-                                  break;
-                        default : T60 = T60n;
+                                 } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
-       case  7  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20r;
+       case  7  :  if( zwei_j - 2 >= 0 ){
+                        T20 = T20r;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
-                        default : T20 = T20n;
+                                 } else {T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                   if( zwei_j - 4 >= 0 ){
+                         T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
-                        default : T40 = T40n;
+                                 } else { T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                   if( zwei_j - 6 >= 0 ){
+                         T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66c;
-                                  break;
-                        default : T60 = T60n;
+                                } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
-       case  8  :  switch( zwei_j - 2 >= 0 ){
-                        case JA : T20 = T20n;
+       case  8  : if( zwei_j - 2 >= 0 ){
+                         T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
-                        default : T20 = T20n;
+                                 } else { T20 = T20n;
                                   T21 = T21n;
                                   T22 = T22n;
-                                  break;
                    }
-                   switch( zwei_j - 4 >= 0 ){
-                        case JA : T40 = T40r;
+                   if( zwei_j - 4 >= 0 ){
+                        T40 = T40r;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44r;
-                                  break;
-                        default : T40 = T40n;
+                                 } else { T40 = T40n;
                                   T41 = T41n;
                                   T42 = T42n;
                                   T43 = T43n;
                                   T44 = T44n;
-                                  break;
                    }
-                   switch( zwei_j - 6 >= 0 ){
-                        case JA : T60 = T60r;
+                   if( zwei_j - 6 >= 0 ){
+                         T60 = T60r;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64r;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
-                        default : T60 = T60n;
+                                 } else { T60 = T60n;
                                   T61 = T61n;
                                   T62 = T62n;
                                   T63 = T63n;
                                   T64 = T64n;
                                   T65 = T65n;
                                   T66 = T66n;
-                                  break;
                    }
                    break;
  
@@ -5861,7 +5814,8 @@ if( IS_MAGFIT(iteration)==JA &&
     fix = vr_alloc(12);
  
     for(k=1; k<=9; ++k){
-      while(  *(line=fgets( string , buffer_size , fp )) != '|');/* 1.|*/
+      while(  *(line=fgets( string , buffer_size , fp )) != '|')
+        {;}/* 1.|*/
        c    = VALUE(line,2);
        RV(fix,k) = 1.0;    /* != bedeutet Parameter wird festgehalten */
        if( c=='O' ){
@@ -5871,7 +5825,8 @@ if( IS_MAGFIT(iteration)==JA &&
        }
     }
     for(k=10; k<=12; ++k){
-      while(  *(line=fgets( string , buffer_size , fp )) != '|');/* 1.|*/
+      while(  *(line=fgets( string , buffer_size , fp )) != '|')
+       {;}/* 1.|*/
        c    = VALUE(line,2);
        RV(fix,k) = 1.0;    /* != bedeutet Parameter wird festgehalten */
        if( c=='J' ){

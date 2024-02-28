@@ -245,7 +245,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                     x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-                     sprintf(text,"fe=%g,fered=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,fered,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
+                     snprintf(text,MAXNOFCHARINLINE,"fe=%g,fered=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,fered,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
@@ -651,7 +651,7 @@ else // if yes ... then
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-                     sprintf(text,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(H),physprops.H(1),physprops.H(2),physprops.H(3),sps.n());
+                     snprintf(text,MAXNOFCHARINLINE,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(H),physprops.H(1),physprops.H(2),physprops.H(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                      fin_coq = fopen_errchk (outfilename, "w");
@@ -687,8 +687,8 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
                fprintf(felog,"#Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n# but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
-                T,Norm(H),femin,physprops.j,physprops.fe,femin);fprintf(felog,"#recalculation converged after %i loops and initial and final spin structures are ",r);
-   if(eq==1){fprintf(felog,"equal\n");}else{fprintf(stderr,"not equal\n#initial values as converged from femin=%4.9g meV calculation:\n");
+                T,Norm(H),femin,physprops.j,physprops.fe);fprintf(felog,"#recalculation converged after %i loops and initial and final spin structures are ",r);
+   if(eq==1){fprintf(felog,"equal\n");}else{fprintf(stderr,"not equal\n#initial values as converged from femin=%4.9g meV calculation:\n",femin);
 #ifndef _THREADS
      spsmin.print(felog);//take spinconfiguration which gave minimum free energy as starting value
      #else

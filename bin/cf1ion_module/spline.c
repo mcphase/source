@@ -196,7 +196,7 @@ DOUBLE *UU,*SSS,*DD,X,EPS;
       #define D(I) (*(DD+I))
  
       INT /* I,*/IFLG=0,J=0;
-      DOUBLE H,Q1,Q2,SS,B,A,Z;
+      DOUBLE H=0.0,Q1=0.0,Q2,SS,B=0.0,A=0.0,Z;
 /*
  C
  C**********************************************************************
