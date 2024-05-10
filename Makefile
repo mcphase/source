@@ -217,7 +217,7 @@ tgz :
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
 	dos2unix ./examples/cecu2a/fit/watch*.bat
-	dos2unix ./examples/cecu2ge2_cf_phonon_int/phonons/calc.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
+	dos2unix ./examples/tmnic2/calc.bat
 	dos2unix ./examples/coo/calc.bat
 	dos2unix ./examples/dycu2iwata/calc.bat
 	dos2unix ./examples/gd3gao6/calc.bat
@@ -227,7 +227,7 @@ tgz :
 	dos2unix ./examples/Ce3p_chain_cfphonon/calc.bat
 	dos2unix ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
 	dos2unix ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
-	dos2unix ./examples/CeAl2_cfphonon_cfstrict/DMD_method/calc.bat
+	dos2unix ./examples/CeAl2_cfphonon_cfstrict/CF/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
@@ -258,7 +258,7 @@ tgz :
 	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz mcph.tgz
 	unix2dos ./bin/*.pl ./demo/*.bat
 	unix2dos ./examples/cecu2a/fit/watch*.bat
-	unix2dos ./examples/cecu2ge2_cf_phonon_int/phonons/calc.bat ./examples/cecu2ge2_cf_phonon_int/DMD_method/calc.bat
+	unix2dos ./examples/tmnic2/calc.bat
 	unix2dos ./examples/coo/calc.bat
 	unix2dos ./examples/dycu2iwata/calc.bat
 	unix2dos ./examples/gd3gao6/calc.bat
@@ -268,7 +268,7 @@ tgz :
 	unix2dos ./examples/Ce3p_chain_cfphonon/calc.bat
 	unix2dos ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
 	unix2dos ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
-	unix2dos ./examples/CeAl2_cfphonon_cfstrict/DMD_method/calc.bat
+	unix2dos ./examples/CeAl2_cfphonon_cfstrict/CF/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat

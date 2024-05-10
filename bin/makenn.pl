@@ -39,12 +39,14 @@ GetOptions("rkky3d"=>\$rkky3d,
            "jp"=>\$jp,
            "dm"=>\$dm,
            "d"=>\$d,
-           "djdx"=>\$djdx,
+           "nm"=>\$nm,
+            "djdx"=>\$djdx,
            "djdy"=>\$djdy,
            "djdz"=>\$djdz);
 
 
 @ARGV=@storeargv;
+
 die "djdx djdy djdz exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
 if ($bvk||$cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
 
@@ -55,6 +57,7 @@ if ($djdz) {$ext=".djdz"; }
 
 
 $_=$ARGV[0];
+if(/-nm/){shift @ARGV;$_=$ARGV[0];}
 if(/-rkky3d/)
   {$rkky=4;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
    $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
@@ -187,6 +190,7 @@ unless($tabout) {
  print "a=".$a." b=".$b." c=".$c." alpha=".$alpha." beta=".$beta." gamma=".$gamma."\n";
  print "primitive lattice[abc]:".$p."\n";
 }
+
 # define transformation matrix to calculate components of
 # r1 r2 and r3 with respect to the ijk coordinate system
 # defined by j||b, k||(a x b) and i normal to k and j
@@ -223,7 +227,8 @@ $invrtoijk=inv($rtoijk); #invert this matrix for use later
 #            ]Note: transpose() does what it says and is a convenient way to turn row vectors into column vectors.
 
 
-$p= $p x $rtoijk;
+$p= $p x $rtoijk; # primitive lattice in Euclidean ijk coordinates
+$pinv=inv($p); #invert this matrix for use later
 $pVolume=inner($p->slice(":,(0)"),crossp($p->slice(":,(1)"),$p->slice(":,(2)")));
 unless($tabout){ print "primitive lattice[A]:".$p."\nPrimitive Unit Cell Volume [A^3]: ".$pVolume."\n";}
     $r=0;
@@ -231,17 +236,37 @@ unless($tabout){ print "primitive lattice[A]:".$p."\nPrimitive Unit Cell Volume 
 # calculate Volume of primitive unit cell in A^3
 
 # first determine maximum distance of a basis atom to origin of unit cell
+# and check if atoms are in primitive unit cell
     $distmax=0;
   for ($nz=1;$nz<=$nofatoms;++$nz){
-   $dabc=pdl [($x[$nz]),($y[$nz]),($z[$nz])];
+   $dabc=pdl [($x[$nz]),($y[$nz]),($z[$nz])];	
    $rvec= $dabc x $rtoijk;$rvec=$rvec->slice(":,(0)");
    $rr=inner($rvec, $rvec);
    $r=sqrt($rr->at());
    if($r>$distmax){$distmax=$r;}
+  # check if atom is in primitive unit cell
+  # determine atomic coordinates
+    $dr1r2r3=$rvec x $pinv; $dr1r2r3=$dr1r2r3->slice(":,(0)");
+  # if not translate it into primitive unit cell
+  $moved=0;
+    while(($dr1r2r3->at(0))>=1){--$dr1r2r3->slice("(0)");$moved=1;}
+    while(($dr1r2r3->at(1))>=1){--$dr1r2r3->slice("(1)");$moved=1;}
+    while(($dr1r2r3->at(2))>=1){--$dr1r2r3->slice("(2)");$moved=1;}
+    while(($dr1r2r3->at(0))<-$SMALLdabc){++$dr1r2r3->slice("(0)");$moved=1;}
+    while(($dr1r2r3->at(1))<-$SMALLdabc){++$dr1r2r3->slice("(1)");$moved=1;}
+    while(($dr1r2r3->at(2))<-$SMALLdabc){++$dr1r2r3->slice("(2)");$moved=1;}
+   $rvec=$dr1r2r3 x $p; $rvec=$rvec->slice(":,(0)");
+   $dabc=$rvec x $invrtoijk; $dabc=$dabc->slice(":,(0)");
+  if($moved==1){print STDERR "Warning: atom $nz at da=$x[$nz] db=$y[$nz] dc=$z[$nz] not in primitive unit cell - translating"; 
+  $x[$nz]=$dabc->at(0);
+  $y[$nz]=$dabc->at(1);
+  $z[$nz]=$dabc->at(2);
+                print STDERR " it to da=$x[$nz] db=$y[$nz] dc=$z[$nz]\n";
+               }
   }
   unless($readtable>1)
- {
-# determine $nmin,$nmax by looking at a cube with side 3rmax
+ {if($nm){
+# OLD : determine $nmin,$nmax by looking at a cube with side 3rmax
 #     $inv=matinv(transpose($p)); #invert primitive lattice
      $inv=inv(transpose($p)); #invert primitive lattice
 # print "inverted primitive lattice[A]:".$inv."\n";
@@ -259,6 +284,30 @@ unless($tabout){ print "primitive lattice[A]:".$p."\nPrimitive Unit Cell Volume 
 #   print"corner $i1 $i2 $i3 coordinates in prim bases:$n\n";
 #   print "$n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
   }}}
+}else{
+# NEW 8.4.2024 FASTER: determine $nmin,$nmax by looking at condition that
+# plane of parallelepiped must be more distant than radius of sphere given in command line
+# e.g.
+$rvec=crossp($p->slice(":,(1)"),$p->slice(":,(2)")); # $rvec = $r2 x $r3
+$rr=inner($rvec, $rvec);
+$rvec/=sqrt($rr);
+
+# (n1max-1) * $r1 . $rvec )> $rmax  ... i.e. n1max > 1.0 + $rmax / ($r1 . $rvec)
+# (n1min+1) * $r1. $rvec) < -$rmax           n1min < -1.0 - $rmax / ($r1 . $rvec)
+$n1max=my_ceil(1.0+$rmax / inner($p->slice(":,(0)"),$rvec));
+$n1min=my_floor(-1.0-$rmax / inner($p->slice(":,(0)"),$rvec));
+# similar ...
+$rvec=crossp($p->slice(":,(2)"),$p->slice(":,(0)")); # $rvec = $r3 x $r1
+$rr=inner($rvec, $rvec);
+$rvec/=sqrt($rr);
+$n2max=my_ceil(1.0+$rmax / inner($p->slice(":,(1)"),$rvec));
+$n2min=my_floor(-1.0-$rmax / inner($p->slice(":,(1)"),$rvec));
+$rvec=crossp($p->slice(":,(0)"),$p->slice(":,(1)")); # $rvec = $r1 x $r2
+$rr=inner($rvec, $rvec);
+$rvec/=sqrt($rr);
+$n3max=my_ceil(1.0+$rmax / inner($p->slice(":,(2)"),$rvec));
+$n3min=my_floor(-1.0-$rmax / inner($p->slice(":,(2)"),$rvec));
+}
   }
 if($tabout)
  {if($bvk)
@@ -1246,9 +1295,14 @@ unless (open($l1,$pcout)){die "cannot open file $pcout\n";}
 print $l1 "#-------------------------------------------------------------------------------------\n";
 print $l1 "#!  table with neighbors and charges for atom n=$nnn at da=".$x[$nnn]." db=".$y[$nnn]." dc=".$z[$nnn]." sipffilename=".$sipf_file[$nnn]."\n";
 print $l1 "# output of program makenn:, Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
-print $l1 "#-------------------------------------------------------------------------------------\n";
+print $l1 "# lattice [A]:\n";
+# print $l1 "# $rtoijk\n";
+print $l1 sprintf("#! ax= %+10.6f  ay=%+10.6f az=%+10.6f\n",$rtoijk->index(0)->at(0),$rtoijk->index(1)->at(0),$rtoijk->index(2)->at(0)); 
+print $l1 sprintf("#! bx= %+10.6f  by=%+10.6f bz=%+10.6f\n",$rtoijk->index(0)->at(1),$rtoijk->index(1)->at(1),$rtoijk->index(2)->at(1)); 
+print $l1 sprintf("#! cx= %+10.6f  cy=%+10.6f cz=%+10.6f\n",$rtoijk->index(0)->at(2),$rtoijk->index(1)->at(2),$rtoijk->index(2)->at(2)); 
+print $l1 "#------------------------------------------------------------------------------------\n";
     if($alpha!=90||$beta!=90||$gamma!=90)
-     {print $l1 "#orthonormal coordinate system ijk is defined with respect to abc as j||b, k||(a x b) and i normal to k and j\n#charge[|e|]  di[A]   dj[A]   dk[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";}
+     {print $l1 "#orthonormal coordinate system xyz is defined with respect to abc as y||b, z||(a x b) and x normal to k and j\n#charge[|e|]  dx[A]   dy[A]   dz[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";}
      else
      {print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n";}
 
@@ -1556,4 +1610,17 @@ print STDOUT << "EOF";
  y||b, z||(a x b) and x perpendicular to y and z.
 
 EOF
+}
+
+# Rounds up a value, using int() function
+sub my_ceil
+{
+    my $t = int($_[0]);
+    return ($t != $_[0]) ? ($_[0] < 0) ? $t : $t + 1 : $_[0];
+}
+
+# Rounds down a value, using int() function
+sub my_floor
+{
+    return ($_[0] < 0) ? int($_[0]) - 1 : int($_[0]);
 }

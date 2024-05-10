@@ -154,7 +154,9 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  fflush(stderr); fflush(stdout);
  #ifdef _THREADS
  htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector H(1,3); H = thrdat.H;
- THRLC_SET(threadSpecificKey, myinput); double tlsfemin=1e10;  // Thread local variable to judge whether to print output
+ THRLC_SET(threadSpecificKey, myinput); int tlsfemin=0;  // Thread local variable to judge whether to print output
+ #else
+ int thread_id=1;
  #endif 
  int i,ii,iii,tryrandom,nr,rr,ri,is,r;
  double fe,fered,Eel,U;
@@ -217,15 +219,23 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( " for str %i(%ix%ix%i). "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( " for (%g %g %g)(%ix%ix%i). ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
-                                                        }
+                                             }
           
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
             {               // first - reduce the spinconfiguration if possible
-               if (verbose==1){fprintf(stdout,"fe(%i)= %f meV",tryrandom,fe); fflush(stdout);}
-	       sps1=sps;sps1.reduce(); 
+               sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-               if ((fered=fecalc(U,Eel,r,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe+1e-141){(*mf)=(*mf1);sps=sps1;}
+               if ((fered=fecalc(U,Eel,r,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
+                                 if (verbose==1){fprintf(stdout,"%i(%ix%ix%i)%i->(%ix%ix%i)fe=%f->%fmeV",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
+                                                                                     sps=sps1;fe=fered;}
+                                                                                                  else {
+                                 if (verbose==1){fprintf(stdout,"%i(%ix%ix%i)%ife=%.15gmeV<(%ix%ix%i)fered=%.15g",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,fe,sps1.na(),sps1.nb(),sps1.nc(),fered);fflush(stdout);}
+                                                                                                       }
+                               delete mf1;  }
+                                       else {
+                                 if (verbose==1){fprintf(stdout,"%i(%ix%ix%i)%ife=%fmeV ",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,fe);fflush(stdout);}
+                                            }
                    magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
                    for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
@@ -235,7 +245,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                    for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}} 
-                   delete mf1; 
+                  
                  // display spinstructure
                 if (verbose==1)
                 {float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
@@ -245,7 +255,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                     x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-                     snprintf(text,MAXNOFCHARINLINE,"fe=%g,fered=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,fered,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
+                     snprintf(text,MAXNOFCHARINLINE,"fe=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");
@@ -280,16 +290,16 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              MUTEX_LOCK(&mutex_tests); 
              int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini); //0 means error in checkspincf/addspincf
              MUTEX_UNLOCK(&mutex_tests); 
-	     if (checksret==0) {if(isfull==0){fprintf(stderr,"Warning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.");
-                 isfull=1;}else{fprintf(stderr,"!FT!");}}
-             MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=femin;
-             #endif
+	     if (checksret==0) {if(isfull==0){fprintf(stderr,"%iWarning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.",thread_id);
+                 isfull=1;}else{fprintf(stderr,"%i!FT!",thread_id);}}
+             MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
+             #endif 
 	     }
             delete mf;
             //printout fe
             #ifdef _THREADS
 	    if (tryrandom==ini.nofrndtries && verbose==1) {
-               if(tlsfemin==femin) printf("femin=%gmeV str %i(%i)-",fe,physprops.j,j); 
+               if(tlsfemin) printf("%ifemin=%gmeV str %i(%i)-",thread_id,fe,physprops.j,j); 
 	       if(j>0) printf ( "str %i(%ix%ix%i)done "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( "(%g %g %g)(%ix%ix%i)done ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                                                           }

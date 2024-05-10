@@ -107,7 +107,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print " Finally, by default $0 will use so1ion for f-electron ions and ic1ion for d-electron\n";
    print "   ions, and phonon for others but this can be overridden using the -so or -ic pr -ph flags.\n";
    exit(0);
-} else { print "* cif2mcphas 221011 *\n";}
+} else { print "* cif2mcphas 240328 *\n";}
 
 if ($#ARGV<0) { $cif = "new.cif"; } else { $cif = $ARGV[0]; }
 
@@ -243,15 +243,18 @@ sub getneighbours {
   }
   $n = qsorti($rn);
     if (! -d "results") { mkdir "results"; }
-    print "atom ".($i+1)." ... results/$p0[7].pc\n";
+    print "atom ".($i+1)." ... results/$p0[7].pc running pointc ... \n";
     if(!$debug) { open (FOUT, ">results/$p0[7].pc"); } else { *FOUT = *STDOUT; }
     print FOUT "#-------------------------------------------------------------------------------------\n";
     print FOUT "#  table with neighbors and charges for atom ".($i+1)."\n";
     print FOUT "# output of program cif2mcphas, Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
+    print FOUT sprintf("#! ax= %+10.6f  ay=%+10.6f az=%+10.6f\n",$rtoijk->index(0)->at(0),$rtoijk->index(1)->at(0),$rtoijk->index(2)->at(0)); 
+    print FOUT sprintf("#! bx= %+10.6f  by=%+10.6f bz=%+10.6f\n",$rtoijk->index(0)->at(1),$rtoijk->index(1)->at(1),$rtoijk->index(2)->at(1)); 
+    print FOUT sprintf("#! cx= %+10.6f  cy=%+10.6f cz=%+10.6f\n",$rtoijk->index(0)->at(2),$rtoijk->index(1)->at(2),$rtoijk->index(2)->at(2)); 
     print FOUT "#-------------------------------------------------------------------------------------\n";
     if ( (abs($rtoijk->at(1,0))+abs($rtoijk->at(2,0))+abs($rtoijk->at(2,1))) > 0.001 ) {
-      print FOUT "#orthonormal coordinate system ijk is defined with respect to abc as j||b, k||(a x b) and i normal to k and j\n";
-      print FOUT "#c2[|e|]  di[A]   dj[A]   dk[A]  c4[|e|] c6[|e|]      da[a]    db[b]    dc[c]   distance[A] atomnr\n";
+      print FOUT "#orthonormal coordinate system xyz is defined with respect to abc as y||b, z||(a x b) and x normal to y and z\n";
+      print FOUT "#c2[|e|]  dx[A]   dy[A]   dz[A]  c4[|e|] c6[|e|]      da[a]    db[b]    dc[c]   distance[A] atomnr\n";
     } else {
       print FOUT "#c2[|e|]  da[A]     db[A]     dc[A] c4[|e|] c6[|e|]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n"; }
   
@@ -332,7 +335,20 @@ while (<>) {
             next;
           }
           for $ic (0..$#datcol) {
-            if(!($poscol[$ic]eq"")) { $dat[$nofatom][$ic] = $line[$poscol[$ic]]; }
+            if(!($poscol[$ic]eq"")) { $sub= $line[$poscol[$ic]];
+				    # if there are nonnumeric symbols refering to other atomic positions
+				    # try to substitute those with numbers
+				    if($ic>1&&$ic<8){for $j (0..$nofatom-1) {
+                                      if($sub=~/.*$dat[$j][0]/){ #print "found $dat[$j][0] in $sub ... ";
+                                                                 $sub=~s/$dat[$j][0]/\($dat[$j][$ic]\)/g; # substitute symbol with atomic coordinate
+                                                                 #print "substituting to $sub\n";
+                                                                              }
+                                      } 
+					# if there are errors given 0.4564(12) remove (12) else evaluate expression
+                                     if($sub=~/\d+\(\d+\)/){$sub=sprintf "%.5f",$sub; }else{$sub=eval($sub);}
+                                                    }
+                                     $dat[$nofatom][$ic]=$sub;
+                                    }
           }
           $nofatom++;
         }
@@ -736,7 +752,7 @@ for $j(0..$nofatom-1) {
     }
 # increased position accuracy to 12 digits MR 5.2.2023
     push @pos, sprintf "%-4s:% 17.12f:% 17.12f:% 17.12f:%-5s:%d:% 10.5f:%s:%s",$atom,@seps,$ion,$j,$oxy[$j],$label,$lab;
-    $seen=0; foreach(@atp) { if($_=~/$atom/) { $seen=1; } }
+    $seen=0; foreach(@atp) { if($_=~/$atom/) { $seen=1; } } 
     if(!$seen || !defined($atp[-1])) { push @atp, $atom; } $htp{$atom}++;
    #printf $label."% 14.5f% 14.5f% 14.5f\n",@seps;
    #$cpos = pdl [ $seps[0], $seps[1], $seps[2] ];
@@ -779,15 +795,30 @@ if ($pointcharge) {
     $distmax = 0;
     for (0..$#pos) {
       @ps = split(":",$pos[$_]);
+    
+     # check if atom is in unit cell
+     # if not translate it into primitive unit cell
+     $moved=0;
+    while($ps[1]>=1){--$ps[1];$moved=1;}
+    while($ps[2]>=1){--$ps[2];$moved=1;}
+    while($ps[3]>=1){--$ps[3];$moved=1;}
+    while($ps[1]<0){++$ps[1];$moved=1;}
+    while($ps[2]<0){++$ps[2];$moved=1;}
+    while($ps[3]<0){++$ps[3];$moved=1;}
+    if($moved==1){print STDERR "Warning: atom at da=$ps[1] db=$ps[2] dc=$ps[3] was not in primitive unit cell - translated\n"; 
+                 }
+  # OLD limits nmin nmax
       $dabc = pdl [ ($ps[1]), ($ps[2]), ($ps[3]) ];
       $rvec = transpose( $rtoijk x transpose($dabc) ); 
       $r = sqrt( inner($rvec, $rvec)->at(0) );
       if ($r>$distmax) { 
         $distmax = $r; }
+     
     }
+    
     if ($debug) { print "distmax = $distmax \n"; }
     $distmax += $pointcharge;
-    # Determine $nmin,$nmax by looking at a cube with side 3rmax
+    # Determine $nmin,$nmax by looking at a cube with side 3distmax
     for $i1 (-1,1) {
       for $i2 (-1,1) {
         for $i3 (-1,1) {
@@ -801,7 +832,32 @@ if ($pointcharge) {
         }
       }
     }
-    if ($debug) { print "$nmx[0] to $nmx[3], $nmx[1] to $nmx[4], $nmx[2] to $nmx[5]\n"; }
+   # NEW 8.4.2024 FASTER: new tighter $nmin$nmax box using cross products
+# determine $nmin,$nmax by looking at condition that
+# plane of parallelepiped must be more distant than radius of sphere given in command line
+# e.g.
+$rvec=crossp($rtoijk->slice(":,(1)"),$rtoijk->slice(":,(2)")); # $rvec = $r2 x $r3
+$rr=inner($rvec, $rvec);
+$rvec/=sqrt($rr);
+# (n1max-1) * $r1 . $rvec )> $distmax  ... i.e. n1max > 1.0 + $distmax / ($r1 . $rvec)
+# (n1min+1) * $r1. $rvec) < -$distmax           n1min < -1.0 - $distmax / ($r1 . $rvec)
+$nmx[3]=my_ceil(1.0+$distmax  / inner($rtoijk->slice(":,(0)"),$rvec));
+$nmx[0]=my_floor(-1.0-$distmax  / inner($rtoijk->slice(":,(0)"),$rvec));
+# similar ...
+$rvec=crossp($rtoijk->slice(":,(2)"),$rtoijk->slice(":,(0)")); # $rvec = $r3 x $r1
+$rr=inner($rvec, $rvec);
+$rvec/=sqrt($rr);
+$nmx[4]=my_ceil(1.0+$distmax  / inner($rtoijk->slice(":,(1)"),$rvec));
+$nmx[1]=my_floor(-1.0-$distmax  / inner($rtoijk->slice(":,(1)"),$rvec));
+$rvec=crossp($rtoijk->slice(":,(0)"),$rtoijk->slice(":,(1)")); # $rvec = $r1 x $r2
+$rr=inner($rvec, $rvec);
+$rvec/=sqrt($rr);
+$nmx[5]=my_ceil(1.0+$distmax  / inner($rtoijk->slice(":,(2)"),$rvec));
+$nmx[2]=my_floor(-1.0-$distmax  / inner($rtoijk->slice(":,(2)"),$rvec));
+
+
+
+    if ($debug) {    print "$nmx[0] to $nmx[3], $nmx[1] to $nmx[4], $nmx[2] to $nmx[5]\n"; }
     # Redefine B transformation matrix to follow McPhase convention (y||b)
     $ca = cos($alpha); $cb = cos($beta); $cc = cos($gamma);
     $v = sqrt(1-$ca*$ca-$cb*$cb-$cc*$cc+2*$ca*$cb*$cc);
@@ -846,7 +902,7 @@ if(defined $screeningfile){
       print PCIN $pointcstr."\n\n";
       # Read pointc results from stdout.
       @pc_head = ();
-      @blm_par = ();
+      @blm_par = ();		
       @llm_par = ();
       $part_id = 0;
       while (<PCOUT>) { 
@@ -855,7 +911,8 @@ if(defined $screeningfile){
            if($part_id==0)  { push @pc_head, $_; }
         elsif($part_id<1.5) { push @blm_par, $_; }
         elsif($part_id<2.5) { push @llm_par, $_; }
-      }
+          }
+      while(<PCERR>){print STDERR $_;}
       # Wait for pointc to finish so we don't leave zombie processes.
       waitpid($pcpid,0);
       @pc_head[0]="";  # Remove first blank line.
@@ -894,7 +951,7 @@ print "   assumes full occupation of all sites. If this is wrong, please check\n
 print "   the CIF and file a bug.\n";
 print "If the ionic valence or whether the ion is magnetic or not is incorrect,\n";
 print "   please use the interactive option to specify it.\n";
-print "If positions or structure parameters are correct, please check the CIF file,\n";
+print "If positions or structure parameters are not correct, please check the CIF file,\n";
 print "   and file a bug.\n";
 
 # Do we want a supercell? If so change a,b,c, lattice parameters to reflect bigger cell
@@ -1103,6 +1160,8 @@ for (keys %ions) {
       print FOUT "# v90, p3443 (1989) and v96, p8713 (1992).\n";
       print FOUT "#-----------------------------------------------------------------------\n";
       print FOUT "units=meV\n";
+      $conf=${$eltab}[0]; $conf=~ s/^[0-9]//;
+      print FOUT "conf=$conf\n";
       print FOUT "zeta=${$eltab}[8]\n";
       print FOUT "F2=${$eltab}[9]\n";
       print FOUT "F4=${$eltab}[10]\n";
@@ -1350,3 +1409,17 @@ print "   running javaview results/spins.jvx displays the corresponding\n";
 print "   spinstructure (collinear), !! mind to edit formfactor information\n";
 print "   in the magnetic ions .sipf files before running mcdiff !!\n";
 print "\n";
+
+
+# Rounds up a value, using int() function
+sub my_ceil
+{
+    my $t = int($_[0]);
+    return ($t != $_[0]) ? ($_[0] < 0) ? $t : $t + 1 : $_[0];
+}
+
+# Rounds down a value, using int() function
+sub my_floor
+{
+    return ($_[0] < 0) ? int($_[0]) - 1 : int($_[0]);
+}

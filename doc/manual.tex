@@ -95,7 +95,7 @@ u= umax * tanh (u/umax) ... this avoids uniform shifts of the crystal
 
 \subsection*{ \dots in version 5.4 \dots}
 \begin{itemize}
-\item    {\prg bcfph} and a DMD method for Crystal Field - Phonon interaction, see example CeCu2Ge2 
+\item    {\prg bcfph} and a DMD method for Crystal Field - Phonon interaction
 \item  {\prg makenn} option for Dzyalosinsky Moriya interaction created
 \item .trs file format changed to include number of initial and final level
 \item   {\prg powdermagnon} sampling q dependence improved
@@ -314,7 +314,6 @@ CeAl2\_cfphonon\_cfstr &  CeAl$_2$ - Crystal Field phonon int., & {\prg phonon},
                        &   CEF magnetostriction &   {\prg so1ion } &  \\
 CeCu$_2$       & mag phase diagram, fit of dispersive  & {\prg kramer}\index{kramer} & \cite{loewenhaupt06-775,schedler03-1313} \\
                & mag. excitations to neutron data      &               & \\
-CeCu$_2$Ge$_2$ & crystal field - phonon int., Becker \& DMD method & {\prg phonon, bcfph }  & \\
 CePd$_2$Si$_2$ & neutron diffraction going beyond  & {\prg %%@
 so1ion}&\cite{rotter09-140405} \\
                & dipolar approx for mag. formfactor & &\\     
@@ -346,6 +345,8 @@ PuPd$_3$ & susceptibility, heat capacity & {\prg ic1ion}\index{ic1ion} & \cite{l
 Ru3p\_create\_sipf & how to create paramters for a sipf file from  & {\prg simannfit,cowan} & \cite{cowan81-1} \\
                    & a Hartree Fock Calculation & {\prg RCN36K,RCN2K} & \\
 TbCu$_2$ & magnetic phases with field parallel $a$ & {\prg cfield} \\
+Tb2Ti2O7\_cfphonon\_simple & cf-phonon interaction, INS & {\prg phonon} & \\
+TmNiC$_2$ & determines point charge set to obey high-T exp. B20 B22 & {\prg so1ion}  & \\
 test\_cluster & test of a binary cluster of two spins & {\prg cluster} & \\
 testic1ion & Pr$^{3+}$ chargedensity in IC and LS coupling & {\prg ic1ion,cfield} &\\
 tungsten& phonons in tungsten & {\prg phonon} & \\

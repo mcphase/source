@@ -90,28 +90,28 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
                  # now treat a boundary point correctly
                  unless(0==($numbers[$colx]-$numbers1[$colx]))
                 { if(($order*($constx-$dE)>$order*($numbers[$colx]))&($order*($constx-$dE)<$order*($numbers1[$colx])))
-                  {++$nofpoints;print STDERR "#hello1";
+                  {++$nofpoints;# print STDERR "#hello1";
                    $bx=$constx-$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=-($by+$numbers1[$coly])/2*($bx-$numbers1[$colx]);
                    $esum+=-$order*($bx-$numbers1[$colx]);
                   }
                  if(($order*($constx-$dE)>$order*($numbers1[$colx]))&($order*($constx-$dE)<$order*($numbers[$colx])))
-                  {++$nofpoints;print STDERR "#hello2";
+                  {++$nofpoints;# print STDERR "#hello2";
                    $bx=$constx-$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=-($by+$numbers[$coly])/2*($bx-$numbers[$colx]);
                    $esum+=-$order*($bx-$numbers[$colx]);
                   }
                  if(($order*($constx+$dE)>$order*($numbers[$colx]))&($order*($constx+$dE)<$order*($numbers1[$colx])))
-                  {++$nofpoints;print STDERR "#hello3";
+                  {++$nofpoints;# print STDERR "#hello3";
                    $bx=$constx+$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=($by+$numbers[$coly])/2*($bx-$numbers[$colx]);
                    $esum+=$order*($bx-$numbers[$colx]);
                   }
                  if(($order*($constx+$dE)>$order*($numbers1[$colx]))&($order*($constx+$dE)<$order*($numbers[$colx])))
-                  {++$nofpoints;print STDERR "#hello4";
+                  {++$nofpoints;# print STDERR "#hello4";
                    $bx=$constx+$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
                    $Iav+=($by+$numbers1[$coly])/2*($bx-$numbers1[$colx]);

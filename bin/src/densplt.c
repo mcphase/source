@@ -16,7 +16,7 @@
 
 void help_and_exit()
     { printf ("\nprogram densplt - calculate density of a single ion\n\n\
-                use as: densplt c|s|o|m|j [-p i j k|-div] [-S|-L|-M] mcphas.sipf T Ha Hb Hc\n\n\
+                use as: densplt c|s|o|m|j [-p i j k|-div] [-S|-L|-M] mcphas.sipf T Ha Hb Hc [Hex ]\n\n\
                  c ... calculate chargedensity\n\
                  s ... calculate spindensity\n\
                  o ... calculate angular orbital momentum density\n\
@@ -94,7 +94,10 @@ if(strcmp(argv[2+os],"-L")==0){os+=1;arrow=2;arrowdim=ORBMOM_EV_DIM;gp.spins_col
 if(strcmp(argv[2+os],"-M")==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_colour=1;}
 
   // read cf-parameters into class object jjjpar
-  jjjpar jjjps(0.0,0.0,0.0,argv[2+os],1);
+  int nofc=argc-6-os-1;
+  if(nofc<0){fprintf(stderr,"ERROR densplt: too few arguments - nofcomponents=%i negative\n",nofc);exit(EXIT_FAILURE);}
+  if(nofc==0){nofc=1;}
+  jjjpar jjjps(0.0,0.0,0.0,argv[2+os],nofc);
   Vector Hext(1,3);
   T=strtod(argv[3+os],NULL);
   Hext(1)=strtod(argv[4+os],NULL);
@@ -185,7 +188,8 @@ if(gp.read())printf("#reading graphic parameters from results/graphic_parameters
   Vector momently(1,ORBMOMDENS_EV_DIM);
   Vector momentlz(1,ORBMOMDENS_EV_DIM);
   Vector h(1,jjjps.nofcomponents);h=0; // exchange field =0 ... dimension 6 ok for every module ?
-
+  printf("#Exchange field components (meV):");
+  for(int i=1;i<=argc-6-os-1;++i){h(i)=strtod(argv[6+os+i],NULL);printf("%4g% ",h(i));}printf("\n");
   jjjps.Icalc_parameter_storage_init(h,Hext,T);
 
   printf("calculating expectation values of density coefficients ....\n");

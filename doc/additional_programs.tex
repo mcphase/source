@@ -102,30 +102,73 @@ replacing instances of e.g. [AtomSite] or [x\_coord] with the site name and frac
 This template can also be generated using the command "{\prg cif2mcphas -c}" or "{\prg cif2mcphas --create}".
 See also: {\prg icsdread} which downloads and creates a CIF from an entry of the (free) Korean ICSD mirror.
 
+For example, this template may be filled with the following information
+\begin{verbatim}
+_cell_length_a                     3.4891(4)
+_cell_length_b                     4.4898(6)
+_cell_length_c                     6.0033(8)
+_cell_angle_alpha                  90
+_cell_angle_beta                   90
+_cell_angle_gamma                  90
+_space_group_crystal_system        'orthorhombic'
+_symmetry_Int_Tables_number        38
+_symmetry_space_group_name_H-M     'A m m 2'
+loop_
+  _atom_site_label
+  _atom_site_type_symbol
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+ Tm1 Tm 0.5000 0.0000   0.3850(2)     
+ Ni1 Ni 0.0000 0.0000  -0.0034(3)      
+ C1 C   0.0000 0.349(2) 0.1851(18)     
+; C-C bond charge as 0 0.5 z as C1
+ E1 E 0.0000 0.500(2) C1
+; atomic radii  Tm 227 pm C 170pm  Ni 163pm
+; C-Ni bonds at Ni+(C1-Ni)*163/(163+170)
+ E2 E Ni+(C1-Ni)*163/(163+170) Ni+(C1-Ni)*163/(163+170)  Ni+(C1-Ni)*163/(163+170) 
+\end{verbatim}
+
+Note that atomic coordinates may also be expressed as formulas, with positions
+from previous lines as variables. In the above example the bond charge of bonding 
+electrons is denoted by the symbol E. The position coordinate is defined relative
+to the position of C1 and Ni. 
+
 {\em Options:}
 \begin{description}
-\item[-c]
-\item[- - create]  create cif template
+\item[ -h ]
+ \item[--help] prints help message
+ \item[-c]
+\item[- - create]  create cif template without any structure information
 \item[-i]
 \item[- - interactive] no automatic guess of pointcharges, magnetic configurations etc. 
 \item[-pc 3.6] do point charge calculation including charges up to 3.6 Angstroms.
-
-\item[-sp       ] save the .pc files with list of neighbouring ions in results/ (default is to not save these but to use coordinates internally only). If -pc is not specified, this option has no effect.
-
-\item[-rp        ] don't regenerate point charge coordinates but reread them from 
+\item[-ch]
+\item[- - charges] input charges to override defaults, e.g. -pc 5.6 -ch O=-2,Ce=+3,Pd=+2
+\item[-sp       ] 
+\item[- - savepcfile] save the .pc files with list of neighbouring ions in results/ (default is to not save these but to use coordinates internally only). If -pc is not specified, this option has no effect.
+\item[-sc       ] 
+\item[- - savecharges ]store pointcharge coordinates in sipf file
+\item[-s       ] 
+\item[- - supercell] creates a super-cell of size \#x\#x\#. (e.g. -s 2x3x4).
+\item[-rp        ] 
+\item[- - readpcfile] don't regenerate point charge coordinates but reread them from 
 the saved .pc files in results/ - this option is intended so that users can 
 modify the charges in the .pc file (e.g. by the program {\prg setvariable}\index{setvariable})
  and regenerate the CF parameters 
 from the new charges. (You don't have to specify -pc with this option).
-
-\item[-so       ]  force all ions to use so1ion
-\item[-ic        ] force all ions to use ic1ion
-\item[-ph        ] force all ions to use phonon
-\item[-sf ] apply screening function to charges for calculation of crystal field parameters,
+\item[-nm]\item[- - nonmagnetic]  set nonmagnetic ion overrideing default, e.g. -nm Cu
+   \item[-m] \item[- - magnetic]  set magnetic ion overrideing default, e.g. -m Cu
+    
+\item[-so       ] \item[- - so1ion]  force all ions to use so1ion
+\item[-ic        ]\item[- - ic1ion]  force all ions to use ic1ion
+\item[-ph        ] \item[- - phonon] force all ions to use phonon
+\item[-sf ]\item[- - screenfile]  apply screening function to charges for calculation of crystal field parameters,
                            e.g. {\prg -sf sf.r} reads file {\prg sf.r}, with column 1 r(\AA),
  column 2  screeningfactor for $B_2^m$, column 3 screeningfactor for$ B_4^m$, and column 4
 screeningfactor for $B_6^m$.
 \end{description}
+
 
 Default is to create sipf files with so1ion module for f-electrons and ic1ion module for d-electrons
 and phonon module for nonmagnetic ions.
@@ -482,6 +525,10 @@ given by th parametrisation in file.sipf.
 \item[Option:  -ni ] forces output without indexchange 
 \item[Option: -delatoms 1,2,5,7 ]  instead of removing atoms connected by a lattice vector 
  			remove atoms number 1,2,5 and 7 from the list and also all interactions with those 
+\item[Option: -delatoms 1:3+-0.75:4+-0.25,2,5,7]  removes atoms number 1,2,5,7 for atom 1 the interactions
+ 			 are transferred to 75\% to atom 3 and 25\% to atom 4 and interactions to atoms 3 and 4 are
+ 			 removed, for 2 5 7 all the interactions with other atoms are removed
+\item[Option: -v ] verbose mode
 \end{description}
 \item [\prg rotateBlm\index{rotateBlm}]
   \begin{verbatim}
@@ -792,14 +839,22 @@ convolutes data given as column c1 vs column
 column cx vs cy
 		        of convfuncfile (function $c(x)$)
 		       Range and step width of output file is determined from range and step 
-		        of convfuncfile  unless a datafile is given. If a datafile is given, 
-		     with data column d1 and d2, the result of the convolution is
-		     calculated for x-values of data column d1 and $f(x)$ is compared to
-		     data in column d2 - a standard deviation sta is calculated as
-		     sum of squared deviations.Values out of range of convfile are assumed to be zero,
+		        of convfuncfile  unless a datafile is given.  Values out of range of convfile are assumed to be zero,
 			convfile has to be sorted according to ascending x.
 			Formula: $f(x)=\sum_i y_i c(x-x_i)$ , 
 		       output is written to stdout. 
+
+                       If a datafile is given, 
+		     with data column d1 and d2, the result of the convolution is
+		     calculated for x-values of data column d1 and $f(x)$ is compared to
+		     data in column d2 - a standard deviation sta is calculated as
+		     sum of squared deviations. As output the datafile is given, however with a scaled column
+                 d2 and 2 additional columns are added containing the calculated
+                 results of the convolution and the original unscaled data.
+                 standard deviation, area of curves etc are output to
+                 stdout and to environment variables MCPHASE\_STA etc.
+
+                       
 \item [\prg convolute2d\index{convolute2d} c1 c2 c3 file cx cy cz convfuncfile minx maxx Nx miny maxy Ny:] 
 convolutes a 2 dimensional function data given as column c3(c1,c2) in file (data tripls $x_i,y_i, z_i$) with the convolution function given in column cx vs cy vs cz
 		        of convfuncfile (function $c(x,y)$)

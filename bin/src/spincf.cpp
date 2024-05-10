@@ -139,8 +139,9 @@ void spincf::invert()
 }
 
 // reduce spinconfiguration if it is periodic
-void spincf::reduce()
-{int perprob,nn,pp,j,k;
+// returns 1 if successful, 0 if no reduction is possible
+int spincf::reduce()
+{int perprob,nn,pp,j,k,success=0;
  div_t result;
 
 //reduce nofa
@@ -157,6 +158,7 @@ for (perprob=1;perprob<=pp;++perprob)
         	{this->nofa=perprob;
 	// here we could reduce the memory of this confuration
 	// however for the moment we leave it for it does not disturb
+                 success=1;
 	         goto reduceda;
 	        }  
 	}
@@ -182,6 +184,7 @@ for (perprob=1;perprob<=pp;++perprob)
         	{this->nofb=perprob;
 	// here we could reduce the memory of this confuration
 	// however for the moment we leave it for it does not disturb
+                 success=1;
 	         goto reducedb;
 	        }  
 	}
@@ -205,7 +208,8 @@ for (perprob=1;perprob<=pp;++perprob)
         	{this->nofc=perprob;
 	// here we could reduce the memory of this confuration
 	// however for the moment we leave it for it does not disturb
-	         return;
+                 success=1;
+	         return success;
 	        }  
 	}
        }
@@ -214,7 +218,7 @@ for (perprob=1;perprob<=pp;++perprob)
 nextc:;
   }
 
-return;
+return success;
 }
 
 

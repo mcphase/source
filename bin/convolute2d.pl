@@ -2,7 +2,35 @@
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 
-use POSIX qw(ceil floor);
+#use POSIX qw(ceil floor);
+
+# Rounds up a value, using int() function
+sub my_ceil
+{
+    my $t = int($_[0]);
+    return ($t != $_[0]) ? ($_[0] < 0) ? $t : $t + 1 : $_[0];
+}
+
+# Rounds down a value, using int() function
+sub my_floor
+{
+    return ($_[0] < 0) ? int($_[0]) - 1 : int($_[0]);
+}
+
+# Rounds a value, using int() function
+sub my_round
+{
+    return ($_[0] < 0) ? int($_[0] - 0.5) : int($_[0] + 0.5);
+}
+
+
+# test
+#for $i ( qw/3 5.5 -3.5 0.0005 -1.4 4.00005 -4.0005 -0.0005/) {
+#     local $,="\t"; local $\="\n";
+#      print "ceil:  ", $i, my_ceil($i);
+#     print "floor: ", $i, my_floor($i);
+#}
+
 
 unless ($#ARGV >11) 
 { print STDOUT << "EOF";
@@ -117,12 +145,12 @@ for($i=0;$i<$ii;++$i) # take data points
    {#determine which piddle it should go into
     $x=$cxvalues[$i]+$c1values[$j];
     $ix=($x-$lx)/$dx;
-    $ixf=floor($ix);
-    $ixc=ceil($ix);
+    $ixf=my_floor($ix);
+    $ixc=my_ceil($ix);
     $y=$cyvalues[$i]+$c2values[$j];
     $iy=($y-$ly)/$dy;
-    $iyf=floor($iy);
-    $iyc=ceil($iy);
+    $iyf=my_floor($iy);
+    $iyc=my_ceil($iy);
   if($ixf>=-1&&$iyf>=-1&&$ixc<=$Nx&&$iyc<=$Ny)
     {$wxc=$ix-$ixf;#if($wxc<0){print "error: $ix $ixf";exit(1);}
       #if($wxc>1){print "error: $ix $ixf";exit(1);}

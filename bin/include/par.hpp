@@ -43,8 +43,18 @@ class par
 ~par ();		//destruktor
 
 int newatom(jjjpar * p); //creates new atom from an existing and returns its index
-int delatom(int n); //removes atom n and returns new nofatoms
-void reduce_unitcell();//checks every atom in the unit cell and removes
+int delatom(int n, Matrix & distribute,int verbose); //removes atom n and returns new nofatoms
+// if n<0 then atom number |n| is removed and also all interactions of other atoms
+// with this atom are removed from the interaction table 
+// if n>0 interactions with the other atoms are kept and transferred to 
+// a group of atoms (numbers given in column 1 of distribute) with 
+// coefficients given in col 2 of distribute. Only interactions
+// with atoms given in column 1 of distribute are removed completely.
+// Attention: sublattice index is not changed by this function !
+//            -- thus after running it sublattice[s] refers still to
+//            original numbering with all atoms in the parameters set !
+
+void reduce_unitcell(int verbose);//checks every atom in the unit cell and removes
                        // any atom, which is connected to another by a lattice vector
 void add(par & b); // add exchange parameters
 void scale(double scalefactor); // scale all interaction parameters by scalefactor

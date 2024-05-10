@@ -109,7 +109,7 @@ private:
  
     Vector totalJ (); // returns nettomoment <J>
     void invert();// inverts all spins (AND higher order moments)
-    void reduce();// reduces spinconfiguration
+    int reduce();// reduces spinconfiguration, if reduction is possible returns 1, otherwise 0
     void spinfromq (int n1,int n2, int n3,Vector & qvector, Vector & nettom,Vector & momentq0, Vector & phi);
 
 

@@ -198,7 +198,7 @@ They should not be placed at exactly the same position as the phonon atoms - i.e
 (slightly) different to enable the mcphas.j loader to identify which  is which.
 
 The coupling between phononic and crystal field degrees of freedom can be derived from
-$\hat H_{cf-phon}=\sum_{nn'}(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$.
+$\hat H_{cf-phon}=\sum_{nn'}(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \hat \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$.
  This can be done
 using the program  {\prg makenn} with option {\prg -cfph}  applying small differential changes to
 the atomic positions in the unit cell in order to evaluate the gradient of the crystal field
@@ -216,53 +216,53 @@ Here some formulas are listed. Starting point is the phonon part,
 
 
  The index $i$ now denotes all atomic
-positions in a crystal, the momentum vector is $a_0 \vec p_i$ and  the
-displacement vector is $\vec U_i$. Fig.~\ref{figbvk} shows the Born-van-Karman
+positions in a crystal, the momentum vector is $a_0 \mbf p_i$ and  the
+displacement vector is $\hat \mbf U_i$. Fig.~\ref{figbvk} shows the Born-van-Karman
 model definition of longitudinal springs $c_L$ and transversal
 springs $c_T$ used in the following derivation.
 
 \begin{eqnarray}\label{Hphonon}
-H_{\rm ph}& =&\sum_{i} \frac{a_0^2 \vec p_i^2}{2 m_i} + 
-\frac{1}{2}\sum_{ij} \frac{c_L(ij)-c_T(ij)}{2|\vec R_{ij}|^2} 
-(\vec U_j . \vec R_{ij}- \vec U_i . \vec R_{ij})^2 \nonumber \\
-      && + \frac{c_T(ij)}{2} (\vec U_j - \vec U_i )^2 \\
+\hat H_{\rm phon}& =&\sum_{i} \frac{a_0^2\hat  \mbf p_i^2}{2 m_i} + 
+\frac{1}{2}\sum_{ij} \frac{c_L(ij)-c_T(ij)}{2|\mbf R_{ij}|^2} 
+(\hat \mbf U_j . \mbf R_{ij}-\hat  \mbf U_i . \mbf R_{ij})^2 \nonumber \\
+      && + \frac{c_T(ij)}{2} (\hat \mbf U_j - \hat \mbf U_i )^2 \\
  \end{eqnarray}
 
 Note that the sum over indices $i,j$ counts each spring twice, thus a factor of $1/2$
 has been added to the  Hamiltonian before the sum.
 
-Note that the difference in undisplaced lattice positions is denoted by $\vec R_{ij}=\vec R_{j}-\vec R_{i}$.
-The displacement vector $\vec U_i$  is split into 
-a strain component $\bar \epsilon \vec R_i$ a rotational component
-$\bar \omega \vec R_i$ and a dynamic component $\vec P_i$
+Note that the difference in undisplaced lattice positions is denoted by $\mbf R_{ij}=\mbf R_{j}-\mbf R_{i}$.
+The displacement vector $\hat \mbf U_i$  is split into 
+a strain component $\bar \epsilon \mbf R_i$ a rotational component
+$\bar \omega \mbf R_i$ and a dynamic component $\hat \mbf P_i$ (displacement operator)
 obeying periodic boundary conditions 
-$\vec U_i = \bar \epsilon \vec R_i + \bar \omega \vec R_i+ \vec P_i= \bar a \vec R_i+ \vec P_i$.
+$\hat \mbf U_i = \bar \epsilon \mbf R_i + \bar \omega \mbf R_i+\hat  \mbf P_i= \bar a \mbf R_i+\hat  \mbf P_i$.
 
 
 
 
 \begin{eqnarray}\label{Ur2}
-(\vec U_j . \vec R_{ij}- \vec U_i . \vec R_{ij})^2 &=&
- (\vec R_{ij}^T\bar a \vec R_{ij}+ \vec R_{ij}^T \vec P_{ij})^2 \nonumber \\
-&=& (\vec R_{ij}^T\bar a \vec R_{ij})^2 + 2 \vec R_{ij}^T\bar a \vec R_{ij}\vec R_{ij}^T \vec P_{ij} \nonumber \\
-&&+ (\vec R_{ij}^T \vec P_{ij})^2
+(\hat \mbf U_j . \mbf R_{ij}-\hat  \mbf U_i . \mbf R_{ij})^2 &=&
+ (\mbf R_{ij}^T\bar a \mbf R_{ij}+ \mbf R_{ij}^T \mbf P_{ij})^2 \nonumber \\
+&=& (\mbf R_{ij}^T\bar a \mbf R_{ij})^2 + 2 \mbf R_{ij}^T\bar a \mbf R_{ij}\mbf R_{ij}^T \hat \mbf P_{ij} \nonumber \\
+&&+ (\mbf R_{ij}^T \hat \mbf P_{ij})^2
 \end{eqnarray}
 
 \begin{eqnarray}\label{U2}
-(\vec U_j - \vec U_i )^2 &=& \vec  R_{ij}^T\bar a^T\bar a \vec R_{ij} \nonumber \\
-&&2 \vec  R_{ij}^T\bar a^T\vec P_{ij} + \vec P_{ij}^T \vec P_{ij}
+(\hat \mbf U_j - \hat \mbf U_i )^2 &=& \mbf  R_{ij}^T\bar a^T\bar a \mbf R_{ij} \nonumber \\
+&&2 \mbf  R_{ij}^T\bar a^T\hat \mbf P_{ij} +\hat  \mbf P_{ij}^T \hat \mbf P_{ij}
 \end{eqnarray}
 
 Equations (\ref{Ur2}) and (\ref{U2}) contain terms quadratic in $\bar a$, which will be
-considered as elastic energy contributions. The terms quadratic in $\vec P$ will contribute
+considered as elastic energy contributions. The terms quadratic in $\hat \mbf P$ will contribute
 to the lattice dynamics. In addition there are also 
-terms linear in $\bar a$ and $\vec P$. 
+terms linear in $\bar a$ and $\hat \mbf P$. 
 Thus the phonon Hamiltonian (\ref{Hphonon}) can be separated into the elastic Energy $E_{el}$, the
 Einstein single ion oscillation term $H_{\rm E}$, the bilinear interaction term $H_{\rm int}$
 and the mixing term $H_{mix}$ 
 
 \begin{eqnarray}
-H_{\rm ph}& =&E_{el} + H_{mix}+ H_{\rm E}+H_{\rm int}
+\hat H_{\rm phon}& =&E_{el} +\hat  H_{mix}+\hat  H_{\rm E}+\hat H_{\rm int}
 \end{eqnarray}
 
 \subsection{Elastic Energy $E_{el}$}
@@ -270,10 +270,10 @@ H_{\rm ph}& =&E_{el} + H_{mix}+ H_{\rm E}+H_{\rm int}
 The elastic energy $E_{el}$ is bilinear in  $a$
 
 \begin{eqnarray}\label{Eel}
-E_{el} &=& \frac{1}{2}\sum_{ij} \frac{c_L(ij)-c_T(ij)}{2|\vec R_{ij}|^2} 
-(\vec R_{ij}^T\bar a \vec R_{ij})^2  \\
-      && + \frac{c_T(ij)}{2} \vec  R_{ij}^T\bar a^T\bar a \vec R_{ij} \nonumber \\
-&=& \frac{1}{2} \sum_{ij,\alpha\beta\gamma\delta} \frac{c_L(ij)-c_T(ij)}{2|\vec R_{ij}|^2} 
+E_{el} &=& \frac{1}{2}\sum_{ij} \frac{c_L(ij)-c_T(ij)}{2|\mbf R_{ij}|^2} 
+(\mbf R_{ij}^T\bar a \mbf R_{ij})^2  \\
+      && + \frac{c_T(ij)}{2} \mbf  R_{ij}^T\bar a^T\bar a \mbf R_{ij} \nonumber \\
+&=& \frac{1}{2} \sum_{ij,\alpha\beta\gamma\delta} \frac{c_L(ij)-c_T(ij)}{2|\mbf R_{ij}|^2} 
 R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
 a_{\alpha\beta}a_{\gamma\delta} \nonumber \\
 && + \frac{c_T(ij)}{2} R_{ij}^{\alpha} R_{ij}^{\delta}
@@ -283,7 +283,7 @@ a_{\alpha\beta} \delta_{\beta\gamma} a_{\gamma\delta}  \nonumber
 We calculate it's derivative with respect to $a_{\alpha\beta}$:
 
 \begin{eqnarray}
-\frac{\partial E_{el}}{\partial a_{\alpha\beta}}&=& \frac{1}{2}\sum_{ij,\gamma\delta} \frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+\frac{\partial E_{el}}{\partial a_{\alpha\beta}}&=& \frac{1}{2}\sum_{ij,\gamma\delta} \frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
 R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
 a_{\gamma\delta} \nonumber \\
 && +    \frac{c_T(ij)}{2} R_{ij}^{\alpha}R_{ij}^{\delta}
@@ -312,7 +312,7 @@ a_{\gamma\delta} \delta_{\delta\alpha}
 %\frac{\partial E_{el}}{\partial \epsilon_{\alpha\beta}}&=&
 %\frac{\partial E_{el}}{\partial a_{\alpha\beta}} + \frac{\partial E_{el}}{\partial a_{\beta\alpha}}-\delta_{\alpha\beta}
 %\frac{\partial E_{el}}{\partial a_{\alpha\alpha}}  \\ 
-%&=&\frac{1}{2}\sum_{ij,\gamma\delta} (2-\delta_{\alpha\beta})\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+%&=&\frac{1}{2}\sum_{ij,\gamma\delta} (2-\delta_{\alpha\beta})\frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
 %R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta} 
 %a_{\gamma\delta} \nonumber \\
 %& & +    \frac{c_T(ij)}{2} a_{\gamma\delta} ( R_{ij}^{\alpha}R_{ij}^{\delta}
@@ -333,7 +333,7 @@ An we make also use of the definition of elastic constants:
 \begin{eqnarray}\label{elconst}
 c^{\alpha\beta\gamma\delta} &= &
 \frac{\partial^2E_{el}}{\partial a_{\alpha\beta} \partial a_{\gamma\delta}} \\
-&=& \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+&=& \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
 R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
  \nonumber \\
 && +    \frac{c_T(ij)}{2} R_{ij}^{\alpha}R_{ij}^{\delta}
@@ -379,8 +379,8 @@ R^{\alpha}R^{\delta}\omega_{\sigma} \omega_{\eta}
 \epsilon_{\sigma\alpha\beta}\epsilon_{\eta\beta\delta}=
 R^{\alpha}R^{\delta}\omega_{\sigma} \omega_{\eta}
 (\delta_{\sigma\delta}\delta_{\alpha\eta}-\delta_{\sigma\eta}\delta_{\alpha\delta})=
-(\vec R . \vec \omega)^2-R^2\omega^2 \neq 0$,
-if $\vec R$ is not parallel to the rotation axis. Thus for some rotation the elastic energy
+(\mbf R . \mbf \omega)^2-R^2\omega^2 \neq 0$,
+if $\mbf R$ is not parallel to the rotation axis. Thus for some rotation the elastic energy
 will depend on rotation angle if transversal springs are  introduced.
 }
 Therefore transversal springs have to be used with caution
@@ -393,7 +393,7 @@ strain tensor is symmetric:
 
 \begin{eqnarray}\label{elconstsymm}
 c^{\alpha\beta\gamma\delta} &= &
- \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+ \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
 R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
  \nonumber \\
 && +    \frac{c_T(ij)}{4} ( R_{ij}^{\alpha}R_{ij}^{\delta}
@@ -450,21 +450,21 @@ E_{el} &=& \frac{1}{2}\sum_{\alpha\gamma=1,..,6} c^{\alpha\gamma} \epsilon_{\alp
 The mixing term $H_{mix}$ is 
 
 \begin{eqnarray}\label{Hmix}
-H_{mix}&=&\frac{1}{2} \sum_{ij} \frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
-\vec R_{ij}^T\bar a \vec R_{ij}\vec R_{ij}^T \vec P_{ij}  \nonumber \\
-      && + c_T(ij) \vec  R_{ij}^T\bar a^T\vec P_{ij} \nonumber \\
-&=& \frac{1}{2}\sum_{ij} 2\frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
-\vec R_{ij}^T\bar a \vec R_{ij}\vec R_{ij}^T \vec P_{i}  \nonumber \\
-      && + 2 c_T(ij) \vec  R_{ij}^T\bar a^T\vec P_{i} \nonumber \\
-&=& \sum_{ij,\alpha\beta} \frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
-R_{ij}^{\alpha} a_{\alpha\beta} R_{ij}^{\beta} R_{ij}^{\gamma}  P_{i}^{\gamma}  \nonumber \\
-      && +  c_T(ij)   R_{ij}^{\beta} a_{\alpha\beta} \delta_{\alpha\gamma} P_{i}^{\gamma}  \\
-&=&-\sum_{\stackrel{i,\alpha=1,..,6}{ \gamma=1,2,3}} G_{mix}^{\alpha\gamma}(i) \epsilon_{\alpha} P_{i}^{\gamma}/a_0 +
- \sum_{ij,\alpha\beta}  c_T(ij)   R_{ij}^{\beta} \omega_{\alpha\beta} P_{i}^{\alpha} \nonumber
+\hat H_{mix}&=&\frac{1}{2} \sum_{ij} \frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
+\mbf R_{ij}^T\bar a \mbf R_{ij}\mbf R_{ij}^T \hat \mbf P_{ij}  \nonumber \\
+      && + c_T(ij) \mbf  R_{ij}^T\bar a^T\mbf P_{ij} \nonumber \\
+&=& \frac{1}{2}\sum_{ij} 2\frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
+\mbf R_{ij}^T\bar a \mbf R_{ij}\mbf R_{ij}^T \hat \mbf P_{i}  \nonumber \\
+      && + 2 c_T(ij) \mbf  R_{ij}^T\bar a^T\hat \mbf P_{i} \nonumber \\
+&=& \sum_{ij,\alpha\beta} \frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
+R_{ij}^{\alpha} a_{\alpha\beta} R_{ij}^{\beta} R_{ij}^{\gamma}\hat   P_{i}^{\gamma}  \nonumber \\
+      && +  c_T(ij)   R_{ij}^{\beta} a_{\alpha\beta} \delta_{\alpha\gamma}\hat  P_{i}^{\gamma}  \\
+&=&-\sum_{\stackrel{i,\alpha=1,..,6}{ \gamma=1,2,3}} G_{mix}^{\alpha\gamma}(i) \epsilon_{\alpha}\hat  P_{i}^{\gamma}/a_0 +
+ \sum_{ij,\alpha\beta}  c_T(ij)   R_{ij}^{\beta} \omega_{\alpha\beta}\hat  P_{i}^{\alpha} \nonumber
 \end{eqnarray}
 
-Note that without crystal field phonon interaction the mixing term $H_{mix}$ is zero, because
-the expectation values $\langle P_i \rangle$ are zero in this case. The last term reflects
+Note that without crystal field phonon interaction the mixing term $\hat H_{mix}$ is zero, because
+the expectation values $\langle \hat \mbf P_i \rangle$ are zero in this case. The last term reflects
 the fact, that the energy is not invariant under rotations in case of transversal springs.
 
 In (\ref{Hmix}) we made use of the phonon-strain interaction constants $G_{mix}^{\alpha\gamma}(i)$
@@ -472,7 +472,7 @@ defined writing explicitely the Voigt notation $\alpha=(\alpha\beta)$ by
 
 \begin{eqnarray}\label{Gmix}
 G_{mix}^{(\alpha\beta)\gamma}(i)&=&
--a_0\sum_{j} \frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
+-a_0\sum_{j} \frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
 R_{ij}^{\alpha} R_{ij}^{\beta} R_{ij}^{\gamma} -   \nonumber \\
       && -a_0\frac{1}{2}\sum_{j}  c_T(ij)   (R_{ij}^{\beta}  \delta_{\alpha\gamma}+
 R_{ij}^{\alpha}  \delta_{\beta\gamma}) 
@@ -489,12 +489,12 @@ the terms quadratic in the phonon displacement operators
 
 
 \begin{eqnarray}
-(\vec R_{ij}^T \vec P_{ij})^2&=&\sum_{\alpha,\beta=1,2,3} R_{ij}^{\alpha}R_{ij}^{\beta}(P_{j}^{\alpha}-P_{i}^{\alpha})(P_{j}^{\beta}-P_{i}^{\beta})  
+(\mbf R_{ij}^T \hat \mbf P_{ij})^2&=&\sum_{\alpha,\beta=1,2,3} R_{ij}^{\alpha}R_{ij}^{\beta}(\hat P_{j}^{\alpha}-\hat P_{i}^{\alpha})(\hat P_{j}^{\beta}-\hat P_{i}^{\beta})  
 \end{eqnarray}
 
 \begin{eqnarray}
-\vec P_{ij}^T \vec P_{ij}&=&\sum_{\alpha=1,2,3} (P_{j}^{\alpha}-P_{i}^{\alpha})^2 \nonumber \\
-&=& \sum_{\alpha=1,2,3} (P_{j}^{\alpha})^2 +(P_{i}^{\alpha})^2- 2 P_{i}^{\alpha} P_{j}^{\alpha}
+\hat \mbf P_{ij}^T \hat \mbf P_{ij}&=&\sum_{\alpha=1,2,3} (\hat P_{j}^{\alpha}-\hat P_{i}^{\alpha})^2 \nonumber \\
+&=& \sum_{\alpha=1,2,3} (\hat P_{j}^{\alpha})^2 +(\hat P_{i}^{\alpha})^2- 2 \hat P_{i}^{\alpha} \hat P_{j}^{\alpha}
 \end{eqnarray}
 
 
@@ -502,10 +502,10 @@ the terms quadratic in the phonon displacement operators
 The single ion Hamiltonian $H_{\rm E}$ is similar to the linear chain, in general
 
 \begin{eqnarray}
-H_{\rm E}&=& \sum_{i} H_{\rm E}(i) \nonumber \\
- H_{\rm E}(i)&\equiv&\frac{a_0^2 \vec p_i^2}{2 m_i} -\frac{1}{2} 
-\sum_{\alpha} K_{\alpha\beta}(ii) P_{i}^{\alpha}P_{i}^{\beta}a_0^{-2}   \\
-K_{\alpha\beta}(ii)&\equiv& -a_0^2\sum_{j} \frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{|\vec R_{ij}|^2} 
+\hat H_{\rm E}&=& \sum_{i} \hat H_{\rm E}(i) \nonumber \\
+ \hat H_{\rm E}(i)&\equiv&\frac{a_0^2 \hat \mbf p_i^2}{2 m_i} -\frac{1}{2} 
+\sum_{\alpha} K_{\alpha\beta}(ii) \hat P_{i}^{\alpha}\hat P_{i}^{\beta}a_0^{-2}   \\
+K_{\alpha\beta}(ii)&\equiv& -a_0^2\sum_{j} \frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{|\mbf R_{ij}|^2} 
 [c_L(ij)-c_T(ij)] + \nonumber \\
 & & +  \delta_{\alpha\beta} c_T(ij)
 \end{eqnarray}
@@ -513,8 +513,8 @@ K_{\alpha\beta}(ii)&\equiv& -a_0^2\sum_{j} \frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{
 and the interaction Hamiltonian  $H_{\rm int}$
 
 \begin{eqnarray}
-H_{\rm int}&=&-\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) P_{i}^{\alpha}P_{j}^{\beta}a_0^{-2}  \\
-K_{\alpha\beta}(ij)&\equiv&a_0^2\frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{|\vec R_{ij}|^2}[c_L(ij)-c_T(ij)]
+\hat H_{\rm int}&=&-\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) \hat P_{i}^{\alpha}\hat P_{j}^{\beta}a_0^{-2}  \\
+K_{\alpha\beta}(ij)&\equiv&a_0^2\frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{|\mbf R_{ij}|^2}[c_L(ij)-c_T(ij)]
 +a_0^2\delta_{\alpha\beta}c_T(ij) \nonumber
 \end{eqnarray}
 
@@ -522,7 +522,7 @@ K_{\alpha\beta}(ij)&\equiv&a_0^2\frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{|\vec R_{ij
 \subsection{The total Crystal field Phonon Interaction Hamiltonian}
 
 Also the crystal field may be written and expanded in terms of the strain $\epsilon$ and the 
-$\vec P_i$ leading to the crystal field phonon interaction. Minimizing the Energy with respect to
+$\hat \mbf P_i$ leading to the crystal field phonon interaction. Minimizing the Energy with respect to
 the strain tensor $\epsilon$ leads to expressions for the strain $\epsilon$ in terms of expectation values
 of Stevens Operators and displacement operators. 
 
@@ -532,18 +532,18 @@ the charge producing the crystal field $i=1,...,N_{\rm nuclei}$,
 the $j$ index runs over magnetic ions in a crystal $j=N_{\rm nuclei}+1,... N_{\rm nuclei}+N_{\rm magnetic ions}$)
 
 \begin{eqnarray}\label{Hamiltonian}
-H_{\rm tot} & = & H_{\rm ph} +\sum_{j,\gamma} B_{\gamma}(j,\vec U_1,...,\vec U_N) O_{\gamma}(\vec J_i) \\
-&=& H_{\rm ph} +\sum_{j,\gamma} B_{\gamma}(j,0,\dots,0) O_{\gamma}(\vec J_j) + H_{\rm cfph}\nonumber 
+\hat H_{\rm tot} & = & \hat H_{\rm ph} +\sum_{j,\gamma} B_{\gamma}(j,\hat \mbf U_1,...,\hat \mbf U_N) O_{\gamma}(\hat \mbf J_i) \\
+&=& H_{\rm phon} +\sum_{j,\gamma} B_{\gamma}(j,0,\dots,0) O_{\gamma}(\hat \mbf J_j) + \hat H_{\rm cfph}\nonumber 
  \end{eqnarray}
 
 \begin{eqnarray}\label{Hcfph}
-H_{\rm cfph}&=&\sum_{i<j,\gamma}\nabla_{\vec U_i} B_{\gamma}(j) \vec U_i O_{\gamma}(\vec J_j) \nonumber \\
-&=& \sum_{i<j,\gamma}\nabla_{\vec U_i} B_{\gamma}(j) (\bar a \vec R_i + \vec P_i)O_{\gamma}(\vec J_j) \nonumber \\
-&=& \sum_{i<j,\alpha\beta=1,2,3,\gamma=1,...} R_i^{\beta}  \frac{\partial B_{\gamma}(j)}{\partial U_i^{\alpha}}  
-  \epsilon_{\alpha\beta} O_{\gamma}(\vec J_j) \nonumber \\
- &&+\sum_{i<j,\gamma}\nabla_{\vec U_j} B_{\gamma}(j) \vec P_i O_{\gamma}(\vec J_j) \nonumber \\
-&=& -\sum_{j,\alpha=1,..,6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(j) \epsilon_{\alpha} O_{\gamma}(\vec J_j) \nonumber \\
- &&-\sum_{i<j,\alpha=1,2,3,\gamma=1,...} \Gamma^{\alpha\gamma}(ij) P_i^{\alpha}a_0^{-1} O_{\gamma}(\vec J_j)
+\hat H_{\rm cfph}&=&\sum_{i<j,\gamma}\nabla_{\hat \mbf U_i} B_{\gamma}(j) \hat \mbf U_i O_{\gamma}(\hat \mbf J_j) \nonumber \\
+&=& \sum_{i<j,\gamma}\nabla_{\hat \mbf U_i} B_{\gamma}(j) (\bar a \mbf R_i + \hat \mbf P_i)O_{\gamma}(\hat \mbf J_j) \nonumber \\
+&=& \sum_{i<j,\alpha\beta=1,2,3,\gamma=1,...} R_i^{\beta}  \frac{\partial B_{\gamma}(j)}{\partial \hat U_i^{\alpha}}  
+  \epsilon_{\alpha\beta} O_{\gamma}(\hat \mbf J_j) \nonumber \\
+ &&+\sum_{i<j,\gamma}\nabla_{\hat \mbf U_j} B_{\gamma}(j) \hat \mbf P_i O_{\gamma}(\hat \mbf J_j) \nonumber \\
+&=& -\sum_{j,\alpha=1,..,6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(j) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_j) \nonumber \\
+ &&-\sum_{i<j,\alpha=1,2,3,\gamma=1,...} \Gamma^{\alpha\gamma}(ij) \hat P_i^{\alpha}a_0^{-1} O_{\gamma}(\hat \mbf J_j)
  \end{eqnarray}
 
 The definition of the static magnetoelastic constants writing explicitely the Voigt notation of the first index $\alpha=(\alpha\beta)$
@@ -551,14 +551,14 @@ The definition of the static magnetoelastic constants writing explicitely the Vo
 
 \begin{eqnarray}\label{Gcfph}
  G_{\rm cfph}^{(\alpha\beta)\gamma}(j) &=&
--\frac{1}{2}\sum_{i}( R_i^{\beta}  \frac{\partial B_{\gamma}(j)}{\partial U_i^{\alpha}} 
-+ R_i^{\alpha} \frac{\partial B_{\gamma}(j)}{\partial U_i^{\beta}} ) 
+-\frac{1}{2}\sum_{i}( R_i^{\beta}  \frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\alpha}} 
++ R_i^{\alpha} \frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\beta}} ) 
  \end{eqnarray}
 
 The dynamic magnetoelastic constants (the crystal field phonon coupling constants) are
 
 \begin{eqnarray}\label{Gammacfph}
-\Gamma^{\alpha\gamma}(ij)&=& -a_0\frac{\partial B_{\gamma}(j)}{\partial U_i^{\alpha}}
+\Gamma^{\alpha\gamma}(ij)&=& -a_0\frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\alpha}}
  \end{eqnarray}
 
 Note, that equation (\ref{Hcfph}) makes use of the displacement derivatives of the 
@@ -569,16 +569,16 @@ total crystal field energy under rotations
 and therefore substituted $\bar a$ with the strain $\bar \epsilon$.
 
 Summarizing, and remembering the dimensionless phonon displacement operators
-$\mbf u = \mbf P / a_0$, we can write the total Hamiltonian as
+$\hat \mbf u = \hat \mbf P / a_0$, we can write the total Hamiltonian as
 
 \begin{eqnarray}\label{Htot}
-H_{\rm tot} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\vec J_i) + \sum_{i} H_{\rm E}(i) + \\
+\hat H_{\rm tot} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) + \sum_{i} \hat H_{\rm E}(i) + \\
 &+&\frac{1}{2}\sum_{\alpha\gamma=1-6} c^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} - \nonumber \\
-&-&\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) u_{i}^{\alpha}u_{j}^{\beta} 
--\sum_{i<j,\alpha=1-6,\gamma}\Gamma^{\alpha\gamma}(ij) u^{\alpha}_i O_{\gamma}(\vec J_j)
+&-&\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) \hat u_{i}^{\alpha}\hat u_{j}^{\beta} 
+-\sum_{i<j,\alpha=1-6,\gamma}\Gamma^{\alpha\gamma}(ij) \hat u^{\alpha}_i O_{\gamma}(\hat \mbf J_j)
 \nonumber \\
-&-&\sum_{i,\alpha=1-6,\gamma=1,2,3} G_{mix}^{\alpha\gamma}(i) \epsilon_{\alpha} u_{i}^{\gamma} - \nonumber \\
-&-&\sum_{i,\alpha=1-6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \epsilon_{\alpha} O_{\gamma}(\vec J_i) \nonumber
+&-&\sum_{i,\alpha=1-6,\gamma=1,2,3} G_{mix}^{\alpha\gamma}(i) \epsilon_{\alpha} \hat u_{i}^{\gamma} - \nonumber \\
+&-&\sum_{i,\alpha=1-6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_i) \nonumber
  \end{eqnarray}
 
 
@@ -589,8 +589,8 @@ the third line the interaction terms (phonon, crystal field phonon),
 the forth line the mixing term and 
 the last line  the magnetoelastic term. 
 In a selfconsistent solution it is possible to 
-determine (i) $\epsilon$, (ii) $\langle O_l^m(i) \rangle $ and (iii)
-$\langle \vec u_i \rangle$. This will produce multipolar phase diagrams including the
+determine (i) $\epsilon$, (ii) $\langle \hat O_l^m(i) \rangle $ and (iii)
+$\langle \hat \mbf u_i \rangle$. This will produce multipolar phase diagrams including the
 magnetostrictive properties without the need of a detailed investigation of the symmetry adapted Hamiltonian.
 
 Setting zero the derivative of the expectation value of the Hamiltonian (\ref{Hamiltonian}) with respect to
@@ -598,13 +598,13 @@ Setting zero the derivative of the expectation value of the Hamiltonian (\ref{Ha
 yields the following relations 
 
 \begin{eqnarray}\label{zeroa}
-0&=& \sum_{ij} \frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
-(\vec R_{ij}^T\bar \epsilon \vec R_{ij})R_{ij}^{\alpha}R_{ij}^{\beta}   \\
-      && + \frac{c_T(ij)}{2} (R_{ij}^{\alpha} (\bar \epsilon \vec R_{ij})^{\beta}+R_{ij}^{\beta} (\bar \epsilon R_{ij})^{\alpha}) \nonumber \\
-&& +2\sum_{ij} \frac{c_L(ij)-c_T(ij)}{|\vec R_{ij}|^2} 
-R_{ij}^{\alpha}R_{ij}^{\beta} \vec R_{ij}^T \langle \vec P_{i} \rangle  \nonumber \\
-      && +2 c_T(ij) \vec  R_{ij}^{\beta} \langle P_{i}^{\alpha} \rangle
-+ \sum_{ij,\gamma}\frac{\partial B_{\gamma}(i)}{\partial U_j^{\alpha}}   R_j^{\beta}  \langle O_{\gamma}(\vec J_i) \rangle \nonumber
+0&=& \sum_{ij} \frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
+(\mbf R_{ij}^T\bar \epsilon \mbf R_{ij})R_{ij}^{\alpha}R_{ij}^{\beta}   \\
+      && + \frac{c_T(ij)}{2} (R_{ij}^{\alpha} (\bar \epsilon \mbf R_{ij})^{\beta}+R_{ij}^{\beta} (\bar \epsilon R_{ij})^{\alpha}) \nonumber \\
+&& +2\sum_{ij} \frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
+R_{ij}^{\alpha}R_{ij}^{\beta} \mbf R_{ij}^T \langle \mbf P_{i} \rangle  \nonumber \\
+      && +2 c_T(ij) \mbf  R_{ij}^{\beta} \langle \hat P_{i}^{\alpha} \rangle
++ \sum_{ij,\gamma}\frac{\partial B_{\gamma}(i)}{\partial \hat U_j^{\alpha}}   R_j^{\beta}  \langle O_{\gamma}(\hat \mbf J_i) \rangle \nonumber
  \end{eqnarray}
 
 The index $i$ needs only to go over the atoms in the unit cell, because the crystal structure
@@ -621,8 +621,8 @@ we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can 
 
 \begin{eqnarray}\label{zeroeps}
 \sum_{\beta=1,..6}  c^{\alpha\beta} \epsilon_{\beta} &=&
- \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle u_{i}^{\delta} \rangle  \\
- &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\vec J_i) \rangle \nonumber
+ \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle \hat u_{i}^{\delta} \rangle  \\
+ &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\hat \mbf J_i) \rangle \nonumber
 \end{eqnarray}
 
 
@@ -640,19 +640,19 @@ Hamiltonian
 
 \begin{equation}\label{Hwithexstric}
 H=H_{\rm tot} -\frac{1}{2} \sum_{n,n',\alpha,\beta}
- {\mathcal J}_{\alpha\beta}((1+\bar a)(\vec R_{j} - \vec R_i)) \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
+ {\mathcal J}_{\alpha\beta}((1+\bar a)(\mbf R_{j} - \mbf R_i)) \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
 \end{equation}
 
 and expand the two ion interaction ${\mathcal J}_{\alpha\beta}(\mbf R_{ij}) $
 in a Taylor expansion for small strain:
 
 \begin{eqnarray}\label{jjtaylor}
-{\mathcal J}_{\alpha\beta}(\vec R=(1+\bar a)\vec R_{ij})&=&{\mathcal J}_{\alpha\beta}(\vec R_{ij})
-+ \frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha}} \frac{\partial (\bar a\vec R_{ij})^{\alpha}}{\partial \epsilon_{\beta}} \epsilon_{\beta} + \dots \nonumber \\
-&=& {\mathcal J}_{\alpha\beta}(\vec R_{ij})+ 
+{\mathcal J}_{\alpha\beta}(\mbf R=(1+\bar a)\mbf R_{ij})&=&{\mathcal J}_{\alpha\beta}(\mbf R_{ij})
++ \frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha}} \frac{\partial (\bar a\mbf R_{ij})^{\alpha}}{\partial \epsilon_{\beta}} \epsilon_{\beta} + \dots \nonumber \\
+&=& {\mathcal J}_{\alpha\beta}(\mbf R_{ij})+ 
 \sum_{\alpha\gamma=1,2,3,\beta=1,..,6}
 \frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha}}
-\frac{\partial \epsilon_{\alpha\gamma}\vec R_{ij}^{\gamma}}{\partial \epsilon_{\beta}} \epsilon_{\beta}
+\frac{\partial \epsilon_{\alpha\gamma}\mbf R_{ij}^{\gamma}}{\partial \epsilon_{\beta}} \epsilon_{\beta}
 \end{eqnarray}
 
 and equation (\ref{zeroeps}) is extended 
@@ -660,9 +660,9 @@ and equation (\ref{zeroeps}) is extended
 \begin{eqnarray}\label{zeroepsex}
 \sum_{\beta=1,..,6}  c^{\alpha\beta} \epsilon_{\beta} &=&
  \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle u_{i}^{\delta} \rangle  \\
- &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\vec J_i) \rangle \nonumber \\
+ &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\hat \mbf J_i) \rangle \nonumber \\
  &+& \frac{1}{2}\sum_{ii',\delta,\delta'\alpha',\gamma=1,..,3}
-\frac{\partial {\mathcal J}_{\delta\delta'}(\vec R_{ii'})}{\partial R^{\alpha'}}
+\frac{\partial {\mathcal J}_{\delta\delta'}(\mbf R_{ii'})}{\partial R^{\alpha'}}
 \frac{\partial \epsilon_{\alpha'\gamma} R_{ii'}^{\gamma}}{\partial \epsilon_{\alpha}}
 \langle \hat \mathcal I_{\delta}^i \hat \mathcal I_{\delta'}^{i'}\rangle \nonumber
 \end{eqnarray}
@@ -674,7 +674,7 @@ Technically the Hamiltonian (\ref{Htot}) is of the general form for
 McPhase~\cite{rotter12-213201}, with single
 ion and interaction terms. The corresponding  mean field procedure can be done by an internal single ion module 
 ''epsilon'', which represents not an ion, but the
-strain. Given $\langle u_{j}^{\alpha} \rangle$ and $\langle O_{\gamma}(\vec J_i) \rangle$ and
+strain. Given $\langle \hat  u_{j}^{\alpha} \rangle$ and $\langle O_{\gamma}(\hat \mbf J_i) \rangle$ and
 appropriate interaction constants to the ''epsilon'' from (\ref{Hmix}) and (\ref{Hcfph}), respectively,
 the right side in (\ref{zeroeps}) can be evaluated in each mean field loop 
 in module ''epsilon'' function {\em Icalc}. Then elastic constants in (\ref{zeroeps}) can be used to calculate

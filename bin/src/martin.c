@@ -221,7 +221,7 @@ if(i>=(int)nn[0])
       nn[i] = strtod (token, NULL);
 if(nnerr!=NULL)
   {if(i>=(int)nnerr[0])
-        { fprintf (stderr, "Error in function inputline/splitstring: maximum value of numbers in line exceeded,more numbers in line (>%i) to be read.\n",i);
+        { fprintf (stderr, "Error in function inputline/splitstring: maximum value of errornumbers in line exceeded,more numbers in line (>%i) to be read.\n",i);
            exit (EXIT_FAILURE);
         }
  // try to catch errorbar if it exists

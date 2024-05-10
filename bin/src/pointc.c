@@ -2,14 +2,14 @@
  *
  * pointc - calculates crystal field parameters by the pointcharge model
  * Reference: Martin Rotter and Ernst Bauer - Crystal field effects 
- * in Rare Earth Compounds, in print
+ * in Rare Earth Compounds
  ***********************************************************************/
 
 
 #include "jjjpar.hpp"
 #include "../../version"
 #include "martin.h"
-#define SMALL_DISPLACEMENT  0.001
+#define SMALL_DISPLACEMENT  0.0001
 
 void calcCEFpar(double & q0,double & q2,double & q4,double & q6,double & x ,double & y, double & z, double & r,Vector & Blm, Vector & Llm,ionpars * iops)
 {
@@ -176,7 +176,7 @@ char instr[MAXNOFCHARINLINE];
 char module[MAXNOFCHARINLINE];
 int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0;
 float invalues[100];invalues[0]=99;
-  double q2,q4,q6,x,y,z;int do_deriv=0;
+  double q2,q4,q6,x,y,z,q2sum=0.0,q4sum=0.0,q6sum=0.0;int do_deriv=0,nofcharges=0;
 
 // treat options
 if(argc>1+ac)
@@ -409,7 +409,10 @@ while(n>0)
  if(!batchmode)fprintf (conv_file," %4g %4g %4g   %4g %4g %4g  %4g  ",q2,q4,q6,x,y,z,r);
  // calculate Blm Llm for this neighbour
  calcCEFpar(q2,q2,q4,q6,x,y,z,r,Blm,Llm,iops);
-
+ ++nofcharges;
+ q2sum+=q2;
+ q4sum+=q4;
+ q6sum+=q6;
  // sum to iops.Blm and iops.Lllm
                     (*iops).Blm(0)+=Blm(0); if(!batchmode) fprintf (conv_file,"%g ",Blm(0));
                     (*iops).Llm(0)+=Llm(0); if(!batchmode) fprintf (conv_file,"%g ",Llm(0));
@@ -427,18 +430,27 @@ while(n>0)
  if(do_deriv){Vector dBlmx(0,45),dLlmx(0,45);
               Vector dBlmy(0,45),dLlmy(0,45);
               Vector dBlmz(0,45),dLlmz(0,45);
-              double x1=x+SMALL_DISPLACEMENT;              
-              double y1=y+SMALL_DISPLACEMENT;              
-              double z1=z+SMALL_DISPLACEMENT;  
+              double x1=x+0.5*SMALL_DISPLACEMENT;              
+              double y1=y+0.5*SMALL_DISPLACEMENT;              
+              double z1=z+0.5*SMALL_DISPLACEMENT;  
+              Vector mBlmx(0,45),mLlmx(0,45);
+              Vector mBlmy(0,45),mLlmy(0,45);
+              Vector mBlmz(0,45),mLlmz(0,45);
+              double x2=x-0.5*SMALL_DISPLACEMENT;              
+              double y2=y-0.5*SMALL_DISPLACEMENT;              
+              double z2=z-0.5*SMALL_DISPLACEMENT;  
               double a0 = .5292;//(Angstroem)            
                r = sqrt(x1 * x1 + y * y + z * z);calcCEFpar(q2,q2,q4,q6,x1,y,z,r,dBlmx,dLlmx,iops);
-               dBlmx-=Blm;dLlmx-=Llm;
+               r = sqrt(x2 * x2 + y * y + z * z);calcCEFpar(q2,q2,q4,q6,x2,y,z,r,mBlmx,mLlmx,iops);
+               dBlmx-=mBlmx;dLlmx-=mLlmx;
                dBlmx*=a0/SMALL_DISPLACEMENT;dLlmx*=a0/SMALL_DISPLACEMENT;
                r = sqrt(x * x + y1 * y1 + z * z);calcCEFpar(q2,q2,q4,q6,x,y1,z,r,dBlmy,dLlmy,iops);
-               dBlmy-=Blm;dLlmy-=Llm;
+               r = sqrt(x * x + y2 * y2 + z * z);calcCEFpar(q2,q2,q4,q6,x,y2,z,r,mBlmy,mLlmy,iops);
+               dBlmy-=mBlmy;dLlmy-=mLlmy;
                dBlmy*=a0/SMALL_DISPLACEMENT;dLlmy*=a0/SMALL_DISPLACEMENT;
                r = sqrt(x * x + y * y + z1 * z1);calcCEFpar(q2,q2,q4,q6,x,y,z1,r,dBlmz,dLlmz,iops);
-               dBlmz-=Blm;dLlmz-=Llm;
+               r = sqrt(x * x + y * y + z2 * z2);calcCEFpar(q2,q2,q4,q6,x,y,z2,r,mBlmz,mLlmz,iops);
+               dBlmz-=mBlmz;dLlmz-=mLlmz;
                dBlmz*=a0/SMALL_DISPLACEMENT;dLlmz*=a0/SMALL_DISPLACEMENT;
                dBlm0x-=dBlmx;dBlm0y-=dBlmy;dBlm0z-=dBlmz;
                dLlm0x-=dLlmx;dLlm0y-=dLlmy;dLlm0z-=dLlmz;
@@ -519,6 +531,8 @@ printf("# Crystal Field parameters Llm in Wybourne Notation (meV)\n");
 printf("#--------------------------------------------------------\n");
 (*iops).savLlm(stdout);
 
+fprintf(stderr,"#! nofcharges=%i charge sum q2sum=%4g q4sum=%4g q6sum=%4g\n",nofcharges,q2sum,q4sum,q6sum);  
+
  if(batchmode) return 0;
 
 table_file=fopen_errchk("./results/pointc.Blm","w");
@@ -539,7 +553,7 @@ fclose(table_file);
   fprintf(stderr,"# Reference: Ernst Bauer and Martin Rotter - Magnetism of Complex\n");
   fprintf(stderr,"#            Metallic Alloys: Crystalline Electric Field Effects \n");
   fprintf(stderr,"#            Book Series on Complex Metallic Alloys - Vol. 2, edited\n");
-  fprintf(stderr,"#            by Esther Belin-Ferr�, World Scientific, 2009\n");
+  fprintf(stderr,"#            by Esther Belin-Ferr, World Scientific, 2009\n");
   fprintf(stderr,"#***********************************************************************\n");
 
 }

@@ -226,7 +226,7 @@ close Fout;
     open(Fout,">./powdermagnon.hkl");
 
 #loop q
-
+$nofpoints=0;
 for ($q=$qmin;$q<=$qmax;$q+=$deltaq){ 
 if($nn<0){$dtheta=$dtheta0*$qmin*$qmin/$q/$q;}else{$dtheta=$dtheta0;}
 
@@ -244,11 +244,11 @@ if($nn<0){$dtheta=$dtheta0*$qmin*$qmin/$q/$q;}else{$dtheta=$dtheta0;}
 
  $qvec=pdl[0,0,-$q];
  $hkl=($qvec/(2*$PI)) x $rtoijk;$hkl=$hkl->slice(":,(0)");
- print Fout $hkl->at(0)." ".$hkl->at(1)." ".$hkl->at(2)."\n";
+ print Fout $hkl->at(0)." ".$hkl->at(1)." ".$hkl->at(2)."\n";++$nofpoints;
 }
 
     close Fout; 
-
+ print " ... number of hkl's generated: ".$nofpoints."\n";
  print "please edit mcdisp.par, mcdisp.mf and run mcdisp\n";
 
  print "then restart powdermagnon by: powdermagnon -r results\mcdisp.qei Emin Emax deltaE\n";

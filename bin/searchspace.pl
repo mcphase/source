@@ -11,34 +11,47 @@ use File::Copy;
 # chdir('../.');
 
 unless ($#ARGV >0) 
-{print "***************************************************\n";
- print " program searchspace used to search parameter space\n\n";
- print " usage: searchspace i [-jpglog 3.5e-1 file.jpg] * \n\n";
- print " i ... level of parameter search (i=0 for first scan, for i>0 a\n";
- print " file searchspace.i with parameter sets must exist)\n\n";
- print " * .. filename(s) of paramter file(s)\n";
- print " \n... there must exist a program calcsta, the output of which\n";
- print " contains 'sta = 249' - this program is called from this output\n";
- print " at every iteration step and  the standard sta deviation is \n";
- print " recorded in filesearchspace.i  i=1,2,3, ....\n\n";
- print " localminima are also recorded (searchspace.i.localminima)\n\n";
- print STDOUT << "EOF";
- option -jpglog: if sta is less then 3.5e-1, then the image file.jpg 
+{print STDOUT << "EOF";
+  program searchspace used to search parameter space
+  
+  usage: searchspace i [options] * 
+  
+  i ... level of parameter search (i=0 for first scan, for i>0 a
+  file results/searchspace.i with parameter sets must exist)
+  
+  * .. filename(s) of paramter file(s)
+  
+  ... there must exist a program calcsta, the output of which
+  contains 'sta = 249' - this program is called from this output
+  at every iteration step (with  argument 2 the
+  index of the parameter set, which can be used as linux \$2 or in windows \%2
+  to design useful calcsta programs) and  the standard sta deviation is 
+  recorded in file results/searchspace.i  i=1,2,3, ....
+  localminima are also recorded (results/searchspace.i.localminima)
+ 
+ options
+   -jpglog 3.5e-1 file.jpg: if sta is less then 3.5e-1, then the image file.jpg 
  (which should be created by calcsta) is copied to results/parsetnr.jpg
+   -setlimits 0.2 : before start, sets parameter ranges, i.e. 
+     min=parametervalue-0.2*parameterstep, max=parametervalue+0.2*parameterstep
 
 
+
+  Note: at each level searchspace covers parameterspace
+        with a more dense net of points. The minimum distance
+        of these points is taken from the parameter-stepwidths
+ ***************************************************
+  
+ alternative usage:  searchspace -27.03 results/searchspace.3 * 
+ 
+  If used with a negative index, e.g.  -27.03, the program reads a parameter set 
+  nr 27.03 from the searchspace file (e.g. results/searchspace.3)
+  and puts this parameter set to the parameter files *
+  and *.forfit
+ ***************************************************
+  <Press enter to close>
 EOF
- print " Note: at each level searchspace covers parameterspace\n";
- print "       with a more dense net of points. The minimum distance\n";
- print "       of these points is taken from the parameter-stepwidths\n\n";
- print "***************************************************\n";
- print " alternative usage:  searchspace -27.03 results/searchspace.3 * \n\n";
- print " If used with option -n, the program reads a parameter set \n";
- print " nr 27.03 from the searchspace file (e.g. results/searchspace.3)\n";
- print " and puts this parameter set to the parameter files *\n";
- print " and *.forfit\n\n";
- print "***************************************************\n";
- print " <Press enter to close>";$in=<STDIN>;
+$in=<STDIN>;
  exit 0;}else{print STDERR "#* $0 *\n";}
 
 #in dos version
@@ -69,11 +82,15 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
                     }
 # treat option -jpglog
 $jpglog=0;
+while($ARGV[0]=~/-[^\d]/){
  if($ARGV[0]=~/-jpglog/)
 {shift @ARGV;$ARGV[0]=~s/x/*/g; $jpglog=eval $ARGV[0];shift @ARGV;
  $jpgimagefile=$ARGV[0];shift @ARGV;
 }
-
+ if($ARGV[0]=~/-setlimits/)
+{shift @ARGV;$ARGV[0]=~s/x/*/g; $setlimits=eval $ARGV[0];shift @ARGV;
+}
+}
 
  while(!open(Fout,">results/searchspace.status")){print "Error opening file results/searchspace.status\n";<STDIN>;}
   print Fout "parameter[value,      min,           max,           (not used)   ,minimum meshwidth]\n";
@@ -90,6 +107,8 @@ $jpglog=0;
 				 ($parmax[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parerr[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parstp[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^\Q]\E]+)/);
+        if($setlimits){$parmin[$#par]=$par[$#par]-$setlimits*$parstp[$#par];
+                       $parmax[$#par]=$par[$#par]+$setlimits*$parstp[$#par];}
                                  $i=$#par;write STDOUT;$ii=$i;write Fout;
 				  #check if parmin<=parmax
                           if ($parmin[$#par]>$parmax[$#par]) 
@@ -314,11 +333,11 @@ sub sta {local $SIG{INT}='IGNORE';
  writefiles();
  # print "#call routine calcsta to calculate standard deviation\n";
  if ($^O=~/MSWin/){
-                   if(system ("calcsta.bat 1e10 > results\\searchspace.sta")){print "\n error executing calcsta.bat\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
+                   if(system ("calcsta.bat 1e10 ".$par[0]." > results\\searchspace.sta")){print "\n error executing calcsta.bat\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
                   }
  else
                   {
-                   if(system ("./calcsta 1e10 > results/searchspace.sta")){print "\n error executing calcsta.bat\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
+                   if(system ("./calcsta 1e10 ".$par[0]." > results/searchspace.sta")){print "\n error executing calcsta.bat\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
                   }
 
  open (Fin,"./results/searchspace.sta"); $i6=0;$errc=1;

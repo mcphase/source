@@ -175,41 +175,79 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
 return cs.nofatoms;                 
 }
 
-int par::delatom(int nn) // removes atom number n 
+int par::delatom(int nn, Matrix & distribute,int verbose) // removes atom number n 
 // if n<0 then atom number |n| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
+// if n>0 interactions with the other atoms are kept and transferred to 
+// a group of atoms (numbers given in column 1 of distribute) with 
+// coefficients given in col 2 of distribute. Only interactions
+// with atoms given in column 1 of distribute are removed completely.
+// Attention: sublattice index is not changed by this function !
+//            -- thus after running it sublattice[s] refers still to
+//            original numbering with all atoms in the parameters set !
 {jjjpar ** nnn;
  int j,s,again=0,n=nn; if(nn<0)n=-nn;
  FILE * out;
  if(n<1||n>cs.nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,cs.nofatoms);exit(EXIT_FAILURE);}
   --cs.nofatoms; // the number of atoms has to be decreased
  nnn=new jjjpar * [cs.nofatoms+1];
+if(verbose)fprintf(stderr,"Deleting atom %i\n",n);
+ for (j=1;j<=cs.nofatoms+1;++j){if(j==n)++j;
+if(verbose)fprintf(stderr,"caring about interactions of atom %i\n",j);
+// take care of all interactions to be removed because atom is removed
+ for(s=1;s<=(*jjj[j]).paranz;++s){
+     if((*jjj[j]).sublattice[s]==n){if(nn>0){// transfer interactions to the remaining atoms
+                                             // unless atom j is to be distributed on
+                                             int j_in_distribute=0;
+                                             for(int i=1;i<=distribute.Rhi();++i)
+                                               {if(j==(int)distribute(i,1))j_in_distribute=1;
+                                               }
+                                             if(j_in_distribute==0){// ok j is not in list .. transfer interaction to those in the list
+                                                   for(int i=1;i<=distribute.Rhi();++i)
+                                               {int sl=(int)distribute(i,1);int mult=0;double Rmax=1e10;
+                                                double coeff=distribute(i,2);
+						for(int ss=1;ss<=(*jjj[j]).paranz;++ss){
+                                                if((*jjj[j]).sublattice[ss]==sl){double R=Norm((*jjj[j]).dr[ss]-(*jjj[j]).dr[s]);
+                                                         if(R<Rmax+SMALL_MATCH_LATTICEVECTOR){++mult;}
+                                                         if(R<Rmax-SMALL_MATCH_LATTICEVECTOR){mult=1;Rmax=R;}
+                                                                                 }
+                                                                                       }
+if(mult==0){fprintf(stderr,"Error reduce_unitcell on distributing interaction %i of atom %i onto atom %i: atom %i has no neighbour on sublattice %i\n",s,j,sl,j,sl);exit(1);}
+if(verbose)fprintf(stderr,"distributing interaction %i of atom %i onto %i atoms on sublattice %i with coefficient %g \n",s,j,mult,sl,coeff);
+						for(int ss=1;ss<=(*jjj[j]).paranz;++ss){
+                                                if((*jjj[j]).sublattice[ss]==sl){double R=Norm((*jjj[j]).dr[ss]-(*jjj[j]).dr[s]);
+                                                    if(R<Rmax+SMALL_MATCH_LATTICEVECTOR){
+                                                       (*jjj[j]).jij[ss]+=(*jjj[j]).jij[s]*(coeff/mult);int found=0;
+for(int si=1;si<=(*jjj[sl]).paranz;++si){// look for corresponding neighbour in the interaction sl and also change to preserve Symmetry of interaction table
+if(Norm((*jjj[sl]).dr[si]+(*jjj[j]).dr[ss])<SMALL_MATCH_LATTICEVECTOR){(*jjj[sl]).jij[si]+=(*jjj[j]).jij[s].Transpose()*(coeff/mult);
+++found;}                                       }
+if(found!=1){fprintf(stderr,"Error reduce_unitcell on distributing interaction %i of atom %i onto atom %i: no corresponding bond found from atom %i \n",s,j,sl,sl);exit(1);}
 
- for (j=1;j<n;++j){nnn[j]=jjj[j];
+                                                                                        }
+                                                                                 }
+                                                                                       }
 
-if(nn<0){
-// take care of interactions to be removed because atom is removed
- for(s=1;s<=(*nnn[j]).paranz;++s){if((*nnn[j]).sublattice[s]==n){(*nnn[j]).delpar(s);--s;}
+                                               }
+                                                                   }
+                                            }
+                                    (*jjj[j]).delpar(s);--s;}
           //fprintf(stderr,"%i neighbour of ion %i paranz=%i sublattice=%i \n",s,j,(*nnn[j]).paranz,(*nnn[j]).sublattice[s]);
           }
- for(s=1;s<=(*nnn[j]).paranz;++s){if((*nnn[j]).sublattice[s]>n)--(*nnn[j]).sublattice[s];}
-         }
-if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}} 
- for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];
-
-if(nn<0){
-// take care of interactions to be removed because atom is removed
- for(s=1;s<=(*nnn[j-1]).paranz;++s){if((*nnn[j-1]).sublattice[s]==n){(*nnn[j-1]).delpar(s);--s;}
-    //fprintf(stderr,"%i neighbour of ion %i paranz=%i sublattice = %i\n",s,j-1,(*nnn[j-1]).paranz,(*nnn[j-1]).sublattice[s]);
-                                   }
- for(s=1;s<=(*nnn[j-1]).paranz;++s){if((*nnn[j-1]).sublattice[s]>n)--(*nnn[j-1]).sublattice[s];}
-        }
+   if(j>n){                
  cs.sipffilenames[j-1]=(*jjj[j]).sipffilename;
  cs.x[j-1]=(*jjj[j]).xyz[1];
  cs.y[j-1]=(*jjj[j]).xyz[2];
  cs.z[j-1]=(*jjj[j]).xyz[3];
+          }
+if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
+              if(j+1==n)++j;}
 
-if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}}
+for (j=1;j<n;++j){nnn[j]=jjj[j];}
+for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];}
+// correct the sublattice numbering 
+for (j=1;j<=cs.nofatoms;++j){
+for(s=1;s<=(*nnn[j]).paranz;++s){if((*nnn[j]).sublattice[s]>n)--(*nnn[j]).sublattice[s];}
+                             }
 
 if(again==0){out=fopen("reduce_unitcell_sipf.del","a");
 fprintf(out,"%s\n",(*jjj[n]).sipffilename);fclose(out);} 
@@ -219,23 +257,34 @@ return cs.nofatoms;
 }
 
 
-void par::reduce_unitcell()
+void par::reduce_unitcell(int verbose)
 {//checks every atom in the unit cell and removes
 // any atom, which is connected to another by a lattice vector
  int i,j,nold=cs.nofatoms;
- Vector d(1,3),n(1,3);
+ Vector d(1,3),n(1,3);Matrix dis(1,1,1,1);dis=0;
 FILE * out;out=fopen("reduce_unitcell_sipf.del","w");fclose(out);
 
- for(i=1;i<cs.nofatoms;++i){
+ for(i=1;i<cs.nofatoms;++i){int ct=0;
   for(j=i+1;j<=cs.nofatoms;++j){//printf("nofatoms=%i %i %i\n",cs.nofatoms,i,j);
   d=(*jjj[j]).xyz-(*jjj[i]).xyz;
   n=rez*d;
   if(fabs(rint(n(1))-n(1))<SMALL_MATCH_LATTICEVECTOR&&
      fabs(rint(n(2))-n(2))<SMALL_MATCH_LATTICEVECTOR&&
      fabs(rint(n(3))-n(3))<SMALL_MATCH_LATTICEVECTOR){//printf("del %i\n",j);
-                                                      delatom(j);--j;
+                                                      delatom(-j,dis,verbose);--j;++ct;
                                                       }
- }}
+    }
+  if(verbose){fprintf(stderr,"For atom %i there have been deleted %i equivalent atoms\n",i,ct);}
+    // check if atom is indeed in primitive unit cell - if not move it there
+   n=rez*(*jjj[i]).xyz;
+   while(n(1)>=1.0)--n(1);
+   while(n(2)>=1.0)--n(2);
+   while(n(3)>=1.0)--n(3);
+   while(n(1)<0.0)++n(1);
+   while(n(2)<0.0)++n(2);
+   while(n(3)<0.0)++n(3);
+   (*jjj[i]).xyz=cs.r*n;
+ }
  Cel*=(double)cs.nofatoms/nold; // renormalise elastic constants to reduced unit cell dimension
 }
 
