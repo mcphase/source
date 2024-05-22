@@ -215,7 +215,7 @@ sub getneighbours {
               push @charg4, $chhash{$ps[7]};  # Uses user input charges
               push @charg6, $chhash{$ps[7]};  # Uses user input charges
                                             } else { 
-                 if ($chhash{$ps[8]} ne "") { # ... ifnot - > if atom label is given in charege list - use it
+                 if ($chhash{$ps[8]} ne "") { # ... ifnot - > if atom label is given in charge list - use it
               push @charg2, $chhash{$ps[8]};  # Uses user input charges
               push @charg4, $chhash{$ps[8]};  # Uses user input charges
               push @charg6, $chhash{$ps[8]};  # Uses user input charges
@@ -243,7 +243,6 @@ sub getneighbours {
   }
   $n = qsorti($rn);
     if (! -d "results") { mkdir "results"; }
-    print "atom ".($i+1)." ... results/$p0[7].pc running pointc ... \n";
     if(!$debug) { open (FOUT, ">results/$p0[7].pc"); } else { *FOUT = *STDOUT; }
     print FOUT "#-------------------------------------------------------------------------------------\n";
     print FOUT "#  table with neighbors and charges for atom ".($i+1)."\n";
@@ -896,6 +895,7 @@ if(defined $screeningfile){
       $pointcstr = "$so1ionname\nnof_electrons=$nofelectrons\nR2=${$eltab}[5]\nR4=${$eltab}[6]\nR6=${$eltab}[7]\n".$pointcstr;
       $pointcstr =~ s/:/\ /g;
       if($debug) { print $pointcstr."\n"; }
+print "running pointc for atom ".($j+1)." with ionname  $so1ionname\tnof_electrons=$nofelectrons\tR2=${$eltab}[5]\tR4=${$eltab}[6]\tR6=${$eltab}[7]\t and pointcharge file results/$ps[7].pc \n";    
       # Now pipe list of neighbours to pointc and get its reply.
       unless($savecharges){$omit="-o";}
       $pcpid = open3(\*PCIN,\*PCOUT,\*PCERR,'pointc '.$omit.' -b') || die "Cannot run pointc.\n";

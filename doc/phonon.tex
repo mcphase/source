@@ -7,34 +7,36 @@ by setting up a {\prg sipf} file with the module {\prg phonon}. Coupling has
 to be done in {\prg mcdisp.j}. Rephrasing lattice dynamics in this way allows 
 to couple phonons to the crystal field.
 
-A three dimensional Einstein oscillator (for atom $n$) in a solid can be described by 
+A three dimensional Einstein oscillator (for atom $i$) in a solid can be described by 
 the following Hamiltonian
 
+{\color{blue}
 \begin{equation}\label{einstein}
-\hat H_E(n)=\frac{a_0^2{\hat \mbf p_n}^2}{2m_n} - \frac{1}{2} {\hat \mbf u}^T_n \m{K}(nn) {\hat \mbf u}_n
+\hat H_E(i)=\frac{a_0^2{\hat \mbf w_i}^2}{2m_i} - \frac{1}{2} {\hat \mbf u}^T_i \m{K}(ii) {\hat \mbf u}_i
 \end{equation}
+}
 
 Here $\hat \mbf u$ is the dimensionless displacement vector 
-($\hat \mbf u_n={\hat \mbf P}_n/a_0=\Delta {\hat \mbf r}_n/a_0$, 
-with the Bohr radius $a_0=0.5219$~\AA), $m_n$ the
-mass of the atom $n$, $\hat \mbf p_n=d\hat \mbf u_n/dt$ the conjugate momentum to $\hat \mbf u_n$ and
-$\m{K}(nn)$ the Matrix describing the restoring force.
+($\hat \mbf u_i={\hat \mbf P}_i/a_0=\Delta {\hat \mbf r}_i/a_0$, 
+with the Bohr radius $a_0=0.5219$~\AA), $m_i$ the
+mass of the atom $i$, $\hat \mbf w_i=d\hat \mbf u_i/dt= \mbf p_i/a_0$ the conjugate momentum to $\hat \mbf u_i$ and
+$\m{K}(ii)$ the Matrix describing the restoring force.
 
 Coupling such oscillators leads to the Hamiltonian
 
 \begin{equation}
-\hat H_{phon}=\sum_n \hat H_E(n) -\frac{1}{2} \sum_{n\neq n'} {\hat \mbf u}_n^T \m{K}(nn')  {\hat \mbf u}_{n'}
+\hat H_{phon}=\sum_i \hat H_E(i) -\frac{1}{2} \sum_{i\neq i'} {\hat \mbf u}_i^T \m{K}(ii')  {\hat \mbf u}_{i'}
 \end{equation}
 
-Note that our coupling constants $K_{\alpha\beta}(nn')=-A_{\alpha\beta}(nn')$, where
- $A_{\alpha\beta}$ are the second-order derivatives of the potenatial energy
+Note that our coupling constants $K_{\alpha\beta}(ii')=-A_{\alpha\beta}(ii')$, where
+ $A_{\alpha\beta}$ are the second-order derivatives of the potential energy
 as defined e.g. in \cite[page 99]{lovesey84-1}.
 
 In a mean field type of theory 
 the phonon single ion module has thus to solve the Hamiltonian
 
 \begin{equation}\label{phonsiham}
-\hat H_E=\frac{a_0^2{\hat \mbf p}^2}{2m} - \frac{1}{2} {\hat \mbf u}^T \m{K} {\hat \mbf u} - {\mbf F}^T {\hat \mbf u}
+\hat H_E=\frac{a_0^2{\hat \mbf w}^2}{2m} - \frac{1}{2} {\hat \mbf u}^T \m{K} {\hat \mbf u} - {\mbf F}^T {\hat \mbf u}
 \end{equation}
 
 Here the force $\mbf F$ corresponds to the exchange field $\mbf H_{xc}$ and $\hat \mbf u$ to
@@ -48,7 +50,7 @@ matrix $\m{S}$, which diagonalises $\m{K}=\m{S}^T\m{\Omega}\m{S}$:
 \end{equation}
 
 \begin{equation}\label{phonsihamdiag}
-\hat H_E=\frac{a_0^2{\hat \mbf p}^{'2}}{2m}-\frac{1}{2} {\hat \mbf u}^{'T} \m{\Omega} {\hat \mbf u'} 
+\hat H_E=\frac{a_0^2{\hat \mbf w}^{'2}}{2m}-\frac{1}{2} {\hat \mbf u}^{'T} \m{\Omega} {\hat \mbf u'} 
 -\frac{1}{2}\mbf F^T  \mbf u_0
 \end{equation}
 
@@ -87,8 +89,8 @@ susceptibility)
 
 \begin{eqnarray}
 \chi^0_{\alpha\beta}
-&=& \sum_{i=1,2,3} S^T_{\alpha i}S_{i\beta}\frac{\hbar^2}{2ma_0^2\Delta_i}
-\left(\frac{1}{\Delta_i-\hbar\omega}+\frac{1}{\Delta_i+\hbar\omega}\right )
+&=& \sum_{n=1,2,3} S^T_{\alpha n}S_{n\beta}\frac{\hbar^2}{2ma_0^2\Delta_n}
+\left(\frac{1}{\Delta_n-\hbar\omega}+\frac{1}{\Delta_n+\hbar\omega}\right )
 \end{eqnarray}
 
 Thus the module {\prg phonon} has to provide in it's function {\prg du1calc} these three
@@ -146,9 +148,9 @@ components $u_x,u_y,u_z$ is oriented with respect to the crystal axes $\mbf a,\m
 such that $\mbf y || \mbf b$, $\mbf z || \mbf a \times \mbf b $ and $\mbf x$ perpendicular
 to $\mbf y$ and $\mbf z$.
 
-The single ion property file contains the matrix $\m{K}(nn)$, the matrix $\m{K}(nn')$ decribing the
+The single ion property file contains the matrix $\m{K}(ii)$, the matrix $\m{K}(ii')$ decribing the
 forces between
-different ions $n$ and $n'$ have to be given in the file {\prg mcphas.j}, which could
+different ions $i$ and $i'$ have to be given in the file {\prg mcphas.j}, which could
 look like:
 
 \begin{verbatim}
@@ -193,18 +195,6 @@ the input parameters from Born v Karman longitudinal and transversal springs
 by the program {\prg makenn} with option {\prg -bvk}.
 For an example of phonons in tungsten see {\prg examples/tungsten\_phonons }
 
-If crystal field - phonon coupling is to be input, magnetic ions may be added to {\prg mcphas.j}.
-They should not be placed at exactly the same position as the phonon atoms - i.e. da db dc should be chosen
-(slightly) different to enable the mcphas.j loader to identify which  is which.
-
-The coupling between phononic and crystal field degrees of freedom can be derived from
-$\hat H_{cf-phon}=\sum_{nn'}(\mbf \nabla_{\hat \mbf u(n')} B_l^m(n))   \hat \mbf u(n')  \hat O_{lm}(\hat \mbf J_n)$.
- This can be done
-using the program  {\prg makenn} with option {\prg -cfph}  applying small differential changes to
-the atomic positions in the unit cell in order to evaluate the gradient of the crystal field
-parameters. For examples see  several models on crystal field phonon interaction 
-in {\prg examples}, for starting a linear chain of Ce$^{3+}$ ions including a
-theory manuscript can be found in {\prg examples/Ce3p\_chain\_cfphonon}.
 
 
 
@@ -214,15 +204,67 @@ theory manuscript can be found in {\prg examples/Ce3p\_chain\_cfphonon}.
 Here some formulas are listed. Starting point is the phonon part,
  written in more general terms. 
 
+\begin{figure}[th]
+\setlength{\unitlength}{0.14in} % selecting unit length
+\centering % used for centering Figure
+\begin{picture}(32,15) % picture environment with the size (dimensions)
+% 32 length units wide, and 15 units high.
+% Declares a diamond shape
+\newsavebox{\diamondshap}
+\savebox{\diamondshap}(0,0)
+{
+   \put(-1,0){\line(3,1){1}}
+   \put(-1,0){\line(3,-1){1}}
+   \put(1,0){\line(-3,1){1}}
+   \put(1,0){\line(-3,-1){1}}
+}
+% Declares a parallelogram
+\newsavebox{\parallelogramshap}
+\savebox{\parallelogramshap}
+{
+   \put(0,0){\line(2,0){10}}
+   \put(1.5,2.5){\line(2,0){10}}
+   \put(0,0){\line(3,5){1.5}}
+   \put(10,0){\line(3,5){1.5}}
+}
+\put(12,7){\vector(1,0){14}}
+\put(12,7){\vector(-1,-2){2}}
+\put(26,7){\vector(1,1){3}}
+   \put(12,7){\line(-1,0){2}}
+   \put(10,7){\line(0,-1){4}}
+   \put(26,7){\line(1,0){3}}
+   \put(29,7){\line(0,1){3}}
+
+\put(27,6) {$L_2$}
+\put(30,8) {$T_2$}
+\put(8.5,5) {$T_1$}
+\put(10.5,8) {$L_1$}
+
+\put(19,7.5) {$\mbf R_{12}$}
+\put(11.5,4.5) {$\mbf P_1$}
+\put(26.3,8.5) {$\mbf P_2$}
+
+\put(15,2){$E=\frac{c_L}{2}(L_1+L_2)^2+\frac{c_T}{2}(T_1+T_2)^2$}
+%\put(10,28){\usebox{\parallelogramshape}}
+\put(12,7){\usebox{\diamondshap}}
+\put(26,7){\usebox{\diamondshap}}
+%\put(29,6.2){\line(0,1){18}}
+%\put(30,15) {$\langle\hat \mathcal I^{s'}_{\beta}\rangle$}
+%\put(29,24){\vector(-1,0){3}}
+%\put(6,-0.6){\framebox(20,3){\begin{tabular}{c}compute free energy and \\ compare to other solutions \end{tabular} }}
+\end{picture}
+\caption{Illustration of the transversal and longitudinal BvK springs} % title of the Figure
+\label{figbvk} % label to refer figure in text
+\end{figure}
 
  The index $i$ now denotes all atomic
-positions in a crystal, the momentum vector is $a_0 \mbf p_i$ and  the
+positions in a crystal, the momentum vector is $\mbf p_i=a_0 \mbf w_i$ and  the
 displacement vector is $\hat \mbf U_i$. Fig.~\ref{figbvk} shows the Born-van-Karman
 model definition of longitudinal springs $c_L$ and transversal
 springs $c_T$ used in the following derivation.
 
 \begin{eqnarray}\label{Hphonon}
-\hat H_{\rm phon}& =&\sum_{i} \frac{a_0^2\hat  \mbf p_i^2}{2 m_i} + 
+\hat H_{\rm phon}& =&\sum_{i} \frac{a_0^2\hat  \mbf w_i^2}{2 m_i} + 
 \frac{1}{2}\sum_{ij} \frac{c_L(ij)-c_T(ij)}{2|\mbf R_{ij}|^2} 
 (\hat \mbf U_j . \mbf R_{ij}-\hat  \mbf U_i . \mbf R_{ij})^2 \nonumber \\
       && + \frac{c_T(ij)}{2} (\hat \mbf U_j - \hat \mbf U_i )^2 \\
@@ -391,6 +433,7 @@ is not symmetric upon exchange of indices. It is convenient to use a symmetrized
 of the elastic constants, which will yield the same elastic energy, because the
 strain tensor is symmetric:
 
+{\color{blue}
 \begin{eqnarray}\label{elconstsymm}
 c^{\alpha\beta\gamma\delta} &= &
  \frac{1}{2}\sum_{ij}\frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
@@ -404,7 +447,7 @@ R_{ij}^{\alpha}R_{ij}^{\beta}R_{ij}^{\gamma}R_{ij}^{\delta}
  \delta_{\alpha\gamma}  +   R_{ij}^{\gamma}R_{ij}^{\alpha}
  \delta_{\delta\beta} ) \nonumber \\
 \end{eqnarray}
-
+}
 
 
 With the help of elastic constants we can rewrite the derivative of the elastic energy
@@ -503,25 +546,54 @@ The single ion Hamiltonian $H_{\rm E}$ is similar to the linear chain, in genera
 
 \begin{eqnarray}
 \hat H_{\rm E}&=& \sum_{i} \hat H_{\rm E}(i) \nonumber \\
- \hat H_{\rm E}(i)&\equiv&\frac{a_0^2 \hat \mbf p_i^2}{2 m_i} -\frac{1}{2} 
-\sum_{\alpha} K_{\alpha\beta}(ii) \hat P_{i}^{\alpha}\hat P_{i}^{\beta}a_0^{-2}   \\
+ \hat H_{\rm E}(i)&\equiv&\frac{a_0^2 \hat \mbf w_i^2}{2 m_i} -\frac{1}{2} 
+\sum_{\alpha} K_{\alpha\beta}(ii) \hat P_{i}^{\alpha}\hat P_{i}^{\beta}a_0^{-2}   
+\end{eqnarray}
+
+{\color{blue}
+\begin{eqnarray}
 K_{\alpha\beta}(ii)&\equiv& -a_0^2\sum_{j} \frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{|\mbf R_{ij}|^2} 
 [c_L(ij)-c_T(ij)] + \nonumber \\
 & & +  \delta_{\alpha\beta} c_T(ij)
 \end{eqnarray}
-
+}
 and the interaction Hamiltonian  $H_{\rm int}$
 
 \begin{eqnarray}
 \hat H_{\rm int}&=&-\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) \hat P_{i}^{\alpha}\hat P_{j}^{\beta}a_0^{-2}  \\
+\end{eqnarray}
+{\color{blue}
+\begin{eqnarray}
 K_{\alpha\beta}(ij)&\equiv&a_0^2\frac{R_{ij}^{\alpha}R_{ij}^{\beta}}{|\mbf R_{ij}|^2}[c_L(ij)-c_T(ij)]
 +a_0^2\delta_{\alpha\beta}c_T(ij) \nonumber
 \end{eqnarray}
-
+}
 
 \subsection{The total Crystal field Phonon Interaction Hamiltonian}
 
-Also the crystal field may be written and expanded in terms of the strain $\epsilon$ and the 
+
+To calculate  crystal field parameters $B_{\gamma}(i)=B_l^m$ ($\gamma$ is a short hand
+notation for $lm$) for the 
+ion at site $i$ in the crystal with Stevens convention 
+we use the well known expressions of the point charge model:
+
+\begin{equation}\label{pcmodelclc}
+B_{\gamma}(i)=B_l^m=-|e|\theta_l^i\langle r^l \rangle \gamma_{lm}(i) p_{lm}
+\end{equation}
+
+Here, the $\gamma_{lm}(i)$ are computed from the relative position $R_{ji},\Omega_{ji}$
+ (in spherical coordinates)
+of the point charges $q_j$ using
+
+
+\begin{equation}\label{pcmodelgamma}
+\gamma_{lm}(i) = \sum_j  \frac{q_j}{2l+1}\frac{Z_{lm}(\Omega_{ji})}{\epsilon_0R_{ji}^{l+1}}
+\end{equation}
+
+Equation (\ref{pcmodelgamma}) is based on the adiabatic approximation and 
+the dependence of the crystal field parameters on the displacements $\hat \mbf U_i$ is not considered.
+Going beyond the adiabatic approximation this dependence may be considered and 
+the crystal field parameters may be expanded in terms of the strain $\epsilon$ and the 
 $\hat \mbf P_i$ leading to the crystal field phonon interaction. Minimizing the Energy with respect to
 the strain tensor $\epsilon$ leads to expressions for the strain $\epsilon$ in terms of expectation values
 of Stevens Operators and displacement operators. 
@@ -532,8 +604,8 @@ the charge producing the crystal field $i=1,...,N_{\rm nuclei}$,
 the $j$ index runs over magnetic ions in a crystal $j=N_{\rm nuclei}+1,... N_{\rm nuclei}+N_{\rm magnetic ions}$)
 
 \begin{eqnarray}\label{Hamiltonian}
-\hat H_{\rm tot} & = & \hat H_{\rm ph} +\sum_{j,\gamma} B_{\gamma}(j,\hat \mbf U_1,...,\hat \mbf U_N) O_{\gamma}(\hat \mbf J_i) \\
-&=& H_{\rm phon} +\sum_{j,\gamma} B_{\gamma}(j,0,\dots,0) O_{\gamma}(\hat \mbf J_j) + \hat H_{\rm cfph}\nonumber 
+\hat H_{\rm tot} & = & \hat H_{\rm phon} +\sum_{i,\gamma} B_{\gamma}(j,\hat \mbf U_1,...,\hat \mbf U_N) O_{\gamma}(\hat \mbf J_i) \\
+&=& H_{\rm phon} +\sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) + \hat H_{\rm cfph}\nonumber 
  \end{eqnarray}
 
 \begin{eqnarray}\label{Hcfph}
@@ -542,35 +614,48 @@ the $j$ index runs over magnetic ions in a crystal $j=N_{\rm nuclei}+1,... N_{\r
 &=& \sum_{i<j,\alpha\beta=1,2,3,\gamma=1,...} R_i^{\beta}  \frac{\partial B_{\gamma}(j)}{\partial \hat U_i^{\alpha}}  
   \epsilon_{\alpha\beta} O_{\gamma}(\hat \mbf J_j) \nonumber \\
  &&+\sum_{i<j,\gamma}\nabla_{\hat \mbf U_j} B_{\gamma}(j) \hat \mbf P_i O_{\gamma}(\hat \mbf J_j) \nonumber \\
-&=& -\sum_{j,\alpha=1,..,6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(j) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_j) \nonumber \\
- &&-\sum_{i<j,\alpha=1,2,3,\gamma=1,...} \Gamma^{\alpha\gamma}(ij) \hat P_i^{\alpha}a_0^{-1} O_{\gamma}(\hat \mbf J_j)
  \end{eqnarray}
 
-The definition of the static magnetoelastic constants writing explicitely the Voigt notation of the first index $\alpha=(\alpha\beta)$
- is
-
-\begin{eqnarray}\label{Gcfph}
- G_{\rm cfph}^{(\alpha\beta)\gamma}(j) &=&
--\frac{1}{2}\sum_{i}( R_i^{\beta}  \frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\alpha}} 
-+ R_i^{\alpha} \frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\beta}} ) 
- \end{eqnarray}
-
-The dynamic magnetoelastic constants (the crystal field phonon coupling constants) are
-
-\begin{eqnarray}\label{Gammacfph}
-\Gamma^{\alpha\gamma}(ij)&=& -a_0\frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\alpha}}
- \end{eqnarray}
-
-Note, that equation (\ref{Hcfph}) makes use of the displacement derivatives of the 
-crystal field parameters and not the strain derivatives found in literature
- \cite{palmer78-2465,jensen75-320,mcewen91-3298}.
 In the last line of this equation we have made use of the invariance of the
 total crystal field energy under rotations
 and therefore substituted $\bar a$ with the strain $\bar \epsilon$.
+Abbreviating notation we arrive at the final result for the crystal field phonon interaction:
+
+\begin{eqnarray}\label{Hcfphsub}
+\hat H_{\rm cfph}&=& -\sum_{j,\alpha=1,..,6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(j) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_j) \nonumber \\
+ &&-\sum_{i<j,\alpha=1,2,3,\gamma=1,...} \Gamma^{\alpha\gamma}(ij) \hat P_i^{\alpha}a_0^{-1} O_{\gamma}(\hat \mbf J_j)
+ \end{eqnarray}
+
+Note, that the first part of this equation denotes the coupling of the strain to the crystal field
+and is commonly known as magnetoelastic interaction~\cite{morin90-1}.
+The definition of the static magnetoelastic constants writing explicitely the Voigt notation of the first index $\alpha=(\alpha\beta)$
+ is
+
+{\color{blue}
+\begin{equation}\label{Gcfph}
+ G_{\rm cfph}^{(\alpha\beta)\gamma}(j) =
+-\frac{1}{2}\sum_{i}( R_i^{\beta}  \frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\alpha}} 
++ R_i^{\alpha} \frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\beta}} ) 
+\end{equation}
+}
+
+The dynamic magnetoelastic constants (the crystal field phonon coupling constants) are
+
+{\color{blue}
+\begin{equation}\label{Gammacfph}
+\Gamma^{\alpha\gamma}(ij)= -a_0\frac{\partial B_{\gamma}(j)}{\partial \hat  U_i^{\alpha}}
+ \end{equation}
+}
+
+Note, that equation (\ref{Gcfph}) makes use of the displacement derivatives of the 
+crystal field parameters and not the strain derivatives found in literature
+ \cite{palmer78-2465,jensen75-320,mcewen91-3298}. In section~\ref{determinePcmodel} a procedure
+to calculate these derivatives is described.
 
 Summarizing, and remembering the dimensionless phonon displacement operators
 $\hat \mbf u = \hat \mbf P / a_0$, we can write the total Hamiltonian as
 
+{\color{blue}
 \begin{eqnarray}\label{Htot}
 \hat H_{\rm tot} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) + \sum_{i} \hat H_{\rm E}(i) + \\
 &+&\frac{1}{2}\sum_{\alpha\gamma=1-6} c^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} - \nonumber \\
@@ -580,7 +665,7 @@ $\hat \mbf u = \hat \mbf P / a_0$, we can write the total Hamiltonian as
 &-&\sum_{i,\alpha=1-6,\gamma=1,2,3} G_{mix}^{\alpha\gamma}(i) \epsilon_{\alpha} \hat u_{i}^{\gamma} - \nonumber \\
 &-&\sum_{i,\alpha=1-6,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \epsilon_{\alpha} O_{\gamma}(\hat \mbf J_i) \nonumber
  \end{eqnarray}
-
+}
 
 
 The first line in (\ref{Htot}) contains the single ion Hamiltonian (crystal field, phonon), 
@@ -596,6 +681,7 @@ magnetostrictive properties without the need of a detailed investigation of the 
 Setting zero the derivative of the expectation value of the Hamiltonian (\ref{Hamiltonian}) with respect to
  $\bar a$  (i.e. minimizing the energy with respect to strain and  rotation) 
 yields the following relations 
+
 
 \begin{eqnarray}\label{zeroa}
 0&=& \sum_{ij} \frac{c_L(ij)-c_T(ij)}{|\mbf R_{ij}|^2} 
@@ -619,13 +705,12 @@ in forming the derivative of the Hamiltonian,
 we get 6 equations for $\alpha=1,...,6$, from which the 6 strain components can be determined.
 
 
+
 \begin{eqnarray}\label{zeroeps}
 \sum_{\beta=1,..6}  c^{\alpha\beta} \epsilon_{\beta} &=&
  \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle \hat u_{i}^{\delta} \rangle  \\
  &+& \sum_{i,\gamma=1,...} G_{\rm cfph}^{\alpha\gamma}(i) \langle O_{\gamma}(\hat \mbf J_i) \rangle \nonumber
 \end{eqnarray}
-
-
 
 
 \subsection{Exchange Striction}
@@ -638,25 +723,45 @@ predominantly the magnetic exchange interactions will contribute.
 We therefore extend the model by the exchange striction writing the 
 Hamiltonian
 
+
 \begin{equation}\label{Hwithexstric}
-H=H_{\rm tot} -\frac{1}{2} \sum_{n,n',\alpha,\beta}
+H=H_{\rm tot} -\frac{1}{2} \sum_{ij,\alpha\beta}
  {\mathcal J}_{\alpha\beta}((1+\bar a)(\mbf R_{j} - \mbf R_i)) \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
 \end{equation}
 
 and expand the two ion interaction ${\mathcal J}_{\alpha\beta}(\mbf R_{ij}) $
 in a Taylor expansion for small strain:
 
+
 \begin{eqnarray}\label{jjtaylor}
 {\mathcal J}_{\alpha\beta}(\mbf R=(1+\bar a)\mbf R_{ij})&=&{\mathcal J}_{\alpha\beta}(\mbf R_{ij})
 + \frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha}} \frac{\partial (\bar a\mbf R_{ij})^{\alpha}}{\partial \epsilon_{\beta}} \epsilon_{\beta} + \dots \nonumber \\
 &=& {\mathcal J}_{\alpha\beta}(\mbf R_{ij})+ 
-\sum_{\alpha\gamma=1,2,3,\beta=1,..,6}
-\frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha}}
-\frac{\partial \epsilon_{\alpha\gamma}\mbf R_{ij}^{\gamma}}{\partial \epsilon_{\beta}} \epsilon_{\beta}
+\sum_{\alpha'\gamma=1,2,3,\beta'=1,..,6}
+\frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha'}}
+\frac{\partial \epsilon_{\alpha'\gamma}\mbf R_{ij}^{\gamma}}{\partial \epsilon_{\beta'}} \epsilon_{\beta'}
 \end{eqnarray}
 
-and equation (\ref{zeroeps}) is extended 
+Note that the second part of equation~(\ref{jjtaylor}) describes the exchange striction Hamiltonian, if
+inserted in equation~(\ref{Hwithexstric}). 
 
+{\color{blue}
+\begin{equation}\label{Hwexstric}
+H=H_{\rm tot} -\frac{1}{2} \sum_{ij,\alpha\beta}
+ {\mathcal J}_{\alpha\beta}(\mbf R_{ij}) \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
+ -\frac{1}{2} \sum_{ \stackrel{ij,\alpha\beta\alpha'\gamma=1,2,3}{\beta'=1,..,6}}
+\frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha'}}
+\frac{\partial \epsilon_{\alpha'\gamma}\mbf R_{ij}^{\gamma}}{\partial \epsilon_{\beta'}} \epsilon_{\beta'}
+ \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
+\end{equation}
+}
+
+In section~\ref{determineExstricpar} we show, how  
+the position derivatives of the exchange parameters can be calculated.
+
+Equation (\ref{zeroeps}) is extended for the case of exchange striction:
+
+{\color{blue}
 \begin{eqnarray}\label{zeroepsex}
 \sum_{\beta=1,..,6}  c^{\alpha\beta} \epsilon_{\beta} &=&
  \sum_{i,\delta=1,2,3}  G_{mix}^{\alpha\delta}(i)\langle u_{i}^{\delta} \rangle  \\
@@ -666,9 +771,11 @@ and equation (\ref{zeroeps}) is extended
 \frac{\partial \epsilon_{\alpha'\gamma} R_{ii'}^{\gamma}}{\partial \epsilon_{\alpha}}
 \langle \hat \mathcal I_{\delta}^i \hat \mathcal I_{\delta'}^{i'}\rangle \nonumber
 \end{eqnarray}
+}
 
 
-\subsection{Progam Workflow}
+
+\subsection{Progam Workflow for calculating Magnetoelastic Effects and the Static Jahn Teller Effect}
 
 Technically the Hamiltonian (\ref{Htot}) is of the general form for 
 McPhase~\cite{rotter12-213201}, with single
@@ -680,7 +787,7 @@ the right side in (\ref{zeroeps}) can be evaluated in each mean field loop
 in module ''epsilon'' function {\em Icalc}. Then elastic constants in (\ref{zeroeps}) can be used to calculate
 a new strain $\bar \epsilon$, a six component vector. Via the aforementioned appropriate
 interaction constants (from (\ref{Gmix}) and (\ref{Gcfph})) the strain will produce mean
-fields on lattice displacements and magnetic charge density (crystal field) and so on ...
+fields on lattice displacements and magnetic ions charge density (crystal field) and so on ...
 The free energy returned by the module ''epsilon''  correspond to the elastic energy
 per unit cell given by equation (\ref{Eelconstvoigt}). 
 
@@ -690,14 +797,253 @@ term $H_{mix}$, because this is linear in the displacement operators and in the 
 approximation the spectrum of the harmonic Einstein oscillator will not change with such an
 internal force. The strain has only to be taken into account as a linear modification of the crystal field
 parameters in the first term of equation (\ref{Hcfph}). This is done automatically by creating the
-file {\em mcdisp.mf} with the ''epsilon'' module.
+file {\em mcphas.mf} with the ''epsilon'' module, i.e. the option ''-doeps'' of {\prg mcphas}, see
+section~\ref{magelastmcphasoptions}.
+
+\subsection{Calculation of the Elastic Constants using {\prg makenn}}\label{determineElconst}
 
 Elastic constants and mixing term parameters $G_{mix}$ should be created with the
 option {\em -bvk} of the program {\em makenn} and stored in the 
 file {\em mcphas.j}. Using {\em makenn} with the option {\em -cfph} will create
 the magnetoelastic parameters $G_{\rm cfph}$ and $\Gamma_{\rm cfph}$.
 
-\subsubsection{Magnetoelastic Options to {\prg mcphas}}
+\subsection{Calculation of the Crystal Field Phonon Interaction using a Point Charge Model}\label{determineBlmfromPC}
+
+If crystal field - phonon coupling is to be applied in running {\prg mcphas} and {\prg mcdisp},
+ magnetic ions may be added to a phonon set-up of {\prg mcphas.j}.
+These magnetic ions should not be placed at exactly the same position as the phonon atoms - i.e. da db dc should be chosen
+(slightly) different to enable the mcphas.j loader to identify which is which.
+
+The coupling between phononic and crystal field degrees of freedom can be calculated from equations
+(\ref{Gcfph}) and (\ref{Gammacfph}).
+ This can be done
+using the program  {\prg makenn} with option {\prg -cfph}  applying small differential changes to
+the atomic positions in the unit cell in order to evaluate the gradient of the crystal field
+parameters. {\prg makenn} will do this calculation for every magnetic ion in the unit cell,
+i.e. for all ions which have the {\prg so1ion} or {\prg ic1ion} module in the {\prg sipf} file.
+It will create for these ions a new position in makenn.j with the required
+shift and also store a designated sipf file. After running {\prg makenn} with option {\prg -cfph} 
+the user should only take care to change the module {\prg so1ion}  or {\prg ic1ion} to  or {\prg phonon}
+in the original sipf files of the magnetic ions so that there is always one phononic and one magnetic
+sipf file for each magnetic atom in the unit cell.
+
+For examples see  several models on crystal field phonon interaction 
+in {\prg examples}, for starting a linear chain of Ce$^{3+}$ ions including a
+theory manuscript can be found in {\prg examples/Ce3p\_chain\_cfphonon}.
+
+Note {\prg makenn}  makes use of the program {\prg pointc}\index{pointc} to calculate 
+crystal field parameters $B_{\gamma}(i)=B_l^m$ ($\gamma$ is a short hand
+notation for $lm$) at site $i$  with Stevens convention (or alternatively also $L_l^m$ with
+Wybourne normalisation, see appendix~\ref{cfparconventions} for details and definition of symbols) 
+using the well known expressions of the point charge model (\ref{pcmodelclc}).
+
+
+
+\subsection{Setting up a Point Charge Model which yields given Crystal Field Parameters}\label{determinePcmodel}
+
+Sometimes some or all crystal field parameters are available, either from literature or determined from
+the high temperature expansion of inverse susceptibility etc.  In these cases the point charge model
+should reproduce these crystal field parameters and we describe here a procedure which has been tested
+with some success on a number of cases.
+
+As an example we consider the ternary compound TmNiC$_2$, denoting point charges on
+Tm, Ni and C by $C_{Tm}$, $C_{Ni}$ and $C_{C}$, respectively.
+The full calculation with all input files and logbook {\prg calc.html} is available in {\prg examples/tmcni2 }.
+
+From the high temperature expansion of the inverse susceptibility the second order crystal field
+parameters of this orthorhombic phase have been determined by~\cite{roman23-125137}
+to be $B_2^0=0.22$~meV and $B_2^2=-0.33$~meV. 
+We make now use of the fact, that every crystal field parameter is linear dependent on
+the point charge, compare equations~(\ref{pcmodelclc}) and (\ref{pcmodelgamma}).
+Thus we get the following set of linear equations:
+
+\begin{eqnarray}\label{pclinredproblem}
+B_2^0 &=& {\rm Ni}_{20} C_{Ni}+{\rm C}_{20} C_{C}+{\rm Tm}_{20} C_{Tm} \nonumber \\
+B_2^2 &=& {\rm Ni}_{22} C_{Ni}+{\rm C}_{22} C_{C}+{\rm Tm}_{22} C_{Tm} \nonumber \\
+0 &=& C_{Ni}+2 {\rm C}_{C}+ C_{Tm} 
+\end{eqnarray}
+
+The last equation ensures the charge neutrality and should also be taken into account.
+The coefficients ${\rm Ni}_{lm}$, ${\rm C}_{lm}$ and ${\rm Tm}_{lm}$ can be obtained by
+a point charge calculation with setting all charges zero except one (which is set to $1|e|$) and
+evaluating the computed crystal field parameter $B_l^m$. 
+
+The following code snippet shows how to calculate the coefficients
+C ${\rm C}_{20}$ and ${\rm C}_{22}$ using {\prg cif2mcphas} in linux:
+
+\begin{verbatim}
+cif2mcphas -pc 20 -sp -nm Ni -ch Tm=0,Ni=0,C=1 TmNiC2.cif
+#  extract coefficient 
+. getvariable B20 Tm1_1.sipf
+# stream editor sed is used to ensure if it is zero ("not found") a 0.0 is stored in C20 instead of "not"
+export C20=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+. getvariable B22 Tm1_1.sipf
+export C22=$(echo $MCPHASE_GETVARIABLE_VALUE | sed s/not/0.0/ )
+\end{verbatim}
+
+\dots and in windows:
+
+\begin{verbatim}
+call cif2mcphas -pc 20 -sp -nm Ni -ch Tm=0,Ni=0,C=1  TmNiC2.cif 
+echo B20=0.0 > dd
+echo B22=0.0 >> dd
+REM then push the sipf file onto dd - if it contains B20 or B22 these will be read
+type Tm1_1.sipf >> dd
+call getvariable B20 dd
+set C20=%MCPHASE_GETVARIABLE_VALUE%
+call getvariable B22 dd
+set C22=%MCPHASE_GETVARIABLE_VALUE%
+\end{verbatim}
+
+
+\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{center}\leavevmode
+\includegraphics[bb=0 0 300 300,angle=0, width=0.4\textwidth]{../examples/tmnic2/B20convergence.jpg}
+\end{center}
+\caption{Convergence of the point charge calculation of the crystal field parameter $B_2^0$ in TmNiC$_2$.}
+\label{B20convergence}
+\end{figure}
+
+Convergence is reached in the current
+system when point charges up to a distance of $r_{max}=20$~\AA\  are taken into account, see fig.~\ref{B20convergence}. For the
+radial integrals $\langle r^l \rangle$ of Tm$^{3+}$ we used the valus given by~\cite{edvardsson98-230} including
+the shielding factors $\sigma$.
+Thus we arrived at a system of 3 equations (\ref{pclinredproblem}) with 3 unknown charges. This system may be readily solved. However,
+it turns out, that the computed charges are unreasonable large and have unreasonable signs.
+
+\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{center}\leavevmode
+\includegraphics[bb=0 0 500 500, angle=0, width=0.4\textwidth]{../examples/tmnic2/model.jpg}
+\end{center}
+\caption{Point charge model for TmNiC$_2$, large spheres correspond to atomic positions, small spheres to
+electronic bond charges $E^1, \dots, E^6$.}
+\label{modelTmNiC2}
+\end{figure}
+
+Therefore, we introduced some additional point charges and placed these on the lines connecting
+a pair of atoms. This choice was motivated by the intuition, that the covalent bonding between
+the elements will lead to some anisotropic electronic charge density. We had to introduce 
+six such point charges, these are indicated by $E^1, \dots, E^6$ and refer to electronic bond
+charges for  C-C, C-Ni, C-Ni, Tm-C, Tm-Ni and Tm-Tm pairs, respectively (see fig~\ref{modelTmNiC2}) 
+ Here we show the corresponding part of the input cif file:
+
+\begin{verbatim}
+loop_
+  _atom_site_label
+  _atom_site_type_symbol
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_U_iso_or_equiv
+  _atom_site_adp_type
+  _atom_site_occupancy
+  _atom_site_site_symmetry_order
+  _atom_site_calc_flag
+  _atom_site_refinement_flags_posn
+  _atom_site_refinement_flags_adp
+  _atom_site_refinement_flags_occupancy
+  _atom_site_disorder_assembly
+  _atom_site_disorder_group
+ Tm1 Tm 0.5000 0.0000 0.3850(2) 0.0078(2) Uani 1 4 d S T P . .
+ Ni1 Ni 0.0000 0.0000 -0.0034(3) 0.0089(3) Uani 1 4 d S T P . .
+ C1 C 0.0000 0.349(2) 0.1851(18) 0.0105(16) Uani 1 2 d S T P . .
+; E1 C-C bond charge as 0 0.5 z as C1
+ E1 E 0.0000 0.500(2) C1        0.0105(16) Uani 1 2 d S T P . .
+; atomic radii  Tm 227 pm C 170pm  Ni 163pm
+; E2 E3 C-Ni bonds at 
+E2 E Ni1+(C1-Ni1)*163/(163+170) Ni1+(C1-Ni1)*163/(163+170) Ni1+(C1-Ni1)*163/(163+170)   0.0105(16) Uani 1 2 d S T P . .
+;  ... and
+E3 E Ni1+(C1-Ni1)*163/(163+170) Ni1+0.5+(C1-Ni1-0.5)*163/(163+170) Ni1+0.5+(C1-Ni1-0.5)*163/(163+170)	  0.0105(16) Uani 1 2 d S T P . .
+; E4 Tm - C bond charge at
+ E4 E C1+(Tm1-C1)*170/(227+170)  C1+(Tm1-C1)*170/(227+170)   C1+(Tm1-C1)*170/(227+170)    0.0105(16) Uani 1 2 d S T P . .
+; E5 Tm - Ni bond charge at
+ E5 E N1+(Tm1-Ni1)*163/(227+163) N1+(Tm1-Ni1)*163/(227+163) N1+(Tm1-Ni1)*163/(227+163)   0.0105(16) Uani 1 2 d S T P . .
+; Tm - Tm bond charge at
+E6 E  Tm1 Tm1+0.25  Tm1+0.25 0.0105(16) Uani 1 2 d S T P . .
+\end{verbatim}
+
+
+
+The set of equations (\ref{pclinredproblem}) has to be extended for these bond electron point charges and
+we get
+
+\begin{eqnarray}\label{pclinproblem}
+B_2^0 &=& {\rm Ni}_{20} C_{Ni}+{\rm C}_{20} C_{C}+{\rm Tm}_{20} C_{Tm}+\sum_{i=1}^6 E^i_{20} C_{E^i} \nonumber \\
+B_2^2 &=& {\rm Ni}_{22} C_{Ni}+{\rm C}_{22} C_{C}+{\rm Tm}_{22} C_{Tm} +\sum_{i=1}^6 E^i_{22} C_{E^i} \nonumber \\
+0 &=& C_{Ni}+2 {\rm C}_{C}+ C_{Tm} +C_{E^1}+2C_{E^2}+2C_{E^3}+4C_{E^4}+2C_{E^5}+2C_{E^6}
+\end{eqnarray}
+
+
+By variation of the charges $C_{E^i}$ a set of point charges and crystal field parameters
+could be found, which reproduces closely the crystal field effects reported in~\cite{roman23-125137}, see
+table~\ref{pcmodel}.
+
+\begin{table}[thb] 
+\begin{center}  
+\caption {Point Charge Model for TmNiC$_2$}  
+\label{pcmodel} 
+\begin{tabular} 
+{l|l|l|l|l|l}
+atom	& bond	& charge($|e|$) & da  & db    & dc \\
+\hline
+Tm	&	& 2.159	    & 0.5   &	0   &	0.385 \\
+Ni	&	& -0.339    & 0	    &	0   &	-0.0034 \\
+C	&	& 3.230	    & 0	    & 0.349 &	0.1851  \\
+$E^1$	& C-C	& -2.6945   & 0	    &	0.5 &	0.1851  \\
+$E^2$	& C-Ni  & -1.5506   & 0	    &	0.17083&0.08887  \\
+$E^3$	& C-Ni  & -0.3955   & 0	    &	0.42609&0.34412  \\
+$E^4$	& Tm-C  & -0.2008   & 0.21411&	0.19955&0.2707  \\
+$E^5$	& Tm-Ni & -0.2084   & 0.20897&	0   &	0.16233  \\
+$E^6$	& Tm-Tm & -0.2369   & 0.5   &	0.25&	0.635  \\
+\hline
+$B_2^0$ & 0.22 meV &&&\\
+$B_2^2$ &-0.328 meV &&&\\
+$B_4^0$ &-0.00105 meV &&&\\
+$B_4^2$ & 0.00296 meV &&&\\
+$B_4^4$ &-0.00994 meV &&&\\
+$B_6^0$ &-3.604e-06 meV &&&\\
+$B_6^2$ & 7.969e-06 meV &&&\\
+$B_6^4$ & 1.574e-05 meV &&&\\
+$B_6^6$ & 2.11e-05 meV &&&\\
+\end{tabular}
+\end{center}   
+\end{table}
+
+This set of parameters was used to calculate the thermodynamic and spectroscopic physical properties
+using {\prg mcphasit} and {\prg mcdispit}, respectively. Note that in such calculations the
+bonding charges $E^1, \dots, E^6$ have to be removed, because electrons are correlated and 
+cannot move freely in a solid (compare Pauli principle, failure of the Drude model).
+Technically we have to remove the E charges from the list of atoms in 
+{\prg mcphas.j} to prevent {\prg mcphas} from calculating too large ernergy u and {\prg mcdisp} 
+from calculating optical modes due to vibrations of electronic bonding charges E.
+This can be done with {\prg reduce\_unitcell} with option {\prg -delatom}.
+In {\prg examples/tmnic2/calc.bat } the procedure is described in detail.
+
+
+\subsection{Calculation of the Exchange Striction Parameters using {\prg makenn}}\label{determineExstricpar}
+
+The positional derivatives of the two ion interactions in equation~(\ref{Hwexstric})
+has to be evaluated in order to calculate the exchange striction. Within the McPhase 
+package the program {\prg makenn}  may perform this task and it will use analytical formulas.
+Here comes a typical code example:
+
+\begin{verbatim}
+REM create exchange interaction
+call makenn 7 -kaneyoshi 6 4.5 4
+call copy results/makenn.j mcphas.j
+REM ... and its position derivatives using the -djd... option of makenn
+call makenn 7 -kaneyoshi 6 4.5 4 -djdx
+call makenn 7 -kaneyoshi 6 4.5 4 -djdy
+call makenn 7 -kaneyoshi 6 4.5 4 -djdz
+call copy results/makenn.djdx mcphas.djdx
+call copy results/makenn.djdy mcphas.djdy
+call copy results/makenn.djdz mcphas.djdz
+
+REM start mcphase with option -doeps to calculate strain
+call mcphasit -doeps 
+\end{verbatim}
+
+\subsection{Magnetoelastic Options to {\prg mcphas}}\label{magelastmcphasoptions}
 
 \begin{itemize}
 \item[{\prg -doeps}]
@@ -759,10 +1105,76 @@ can be calculated from the strain tensor components
 where $\hat \mbf  L$ denotes the unit vector in the direction of
 measurement.
 
+\subsection{TmCu$_2$ - magnetoelastic effects and Neutron Spectra calculated with CF-phonon interaction}
 
-Utopia: in a further step stress tensor components could be envisaged 
+As an example for static and dynamic calculations including the crystal-field phonon interaction
+we present a ''simple'' calculation on TmCu$_2$, all input files ({\prg calc.bat}
+and logbook {\prg calc.pdf} with all commands can be found in {\prg examples/tmcu2\_cf\_phonon}.
+''Simple'' in this context means, that the input parameters are quite basic and not fine
+tuned to match the experiment. As input we used for this orthorhombic system the
+crystal structure (see {\prg TmCu2.cif}), point charges $C_{Tm}=0.8|e|$ $C_{Cu}=-0.4|e|$
+with a cutoff radius of 15~\AA\ and
+a  distance dependent Born von Karman longitudinal spring model as output by default
+from {\prg makenn -bvk}.
+
+\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{center}\leavevmode
+\includegraphics[bb=0 0 300 300,angle=0, width=0.4\textwidth]{../examples/tmcu2_cf_phonon/thecf.jpg}
+\end{center}
+\caption{Crystal field striction, i.e. the crystal field influence on the thermal expansion
+in TmCu$_2$.  - calculation results}
+\label{tmcu2thecfclc}
+\end{figure}
+
+\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{center}\leavevmode
+\includegraphics[bb=0 0 900 900,angle=0, width=0.4\textwidth]{../examples/tmcu2_cf_phonon/expdat/thecf_tmcu2_exp.jpg}
+\end{center}
+\caption{Crystal field striction, i.e. the crystal field influence on the thermal expansion
+in TmCu$_2$. - experimental results~\cite{gratz93-7955}}
+\label{tmcu2thecfexp}
+\end{figure}
+
+With {\prg mcphas -doeps} the static thermodynamic properties have been calculated, in particular
+the strain tensor. The computed crystal field contribution to the thermal expansion (fig.~\ref{tmcu2thecfclc}) is 
+in good agreement with the experimental data from powder X-ray diffraction (fig.~\ref{tmcu2thecfexp}).
+
+
+\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{center}\leavevmode
+\includegraphics[bb=0 0 700 700,angle=0, width=0.6\textwidth]{../examples/tmcu2_cf_phonon/mag20K.jpg}
+\end{center}
+\caption{Dispersive modes in TmCu$_2$ along (11L) at $T=20$~K, symbol size corresponds to the 
+magnetic scattering cross section, red: calculation without crystal field phonon interaction, blue:
+calculation with crystal field phonon interaction.}
+\label{tmcu2mag20k}
+\end{figure}
+
+By using {\prg mcdisp} at the temperature of 20~K the magnetic and nuclear inelastic neutron
+scattering cross section can be calculated. We show in fig.~\ref{tmcu2mag20k} the magnetic scattering along
+the (11L) direction. Including the crystal field phonon inteaction clearly leads to a dynamic
+Jahn Teller effect: the flat modes  split, shift and get
+dispersive and there is considerable magnetic intensity transfer to phonons.
+Thus the double peak feature in unpublished experimental data on powder can possibly
+be interpreted, see fig.~\ref{tmcu2mag20kexp}
+
+\begin{figure}[htb]%h=here, t=top, b=bottom, p=separate figure page
+\begin{center}\leavevmode
+\includegraphics[bb=100 100 700 700,angle=0, width=0.6\textwidth]{../examples/tmcu2_cf_phonon/expdat/TmCu2 20K.jpg}
+\end{center}
+\caption{TmCu$_2$ neutron powder spectrum at $T=20$~K as measured on IN6 (Institute Laue Langevin) and
+SV22 (FZ-Juelich), M. Loewenhaupt, private communication.}
+\label{tmcu2mag20kexp}
+\end{figure}
+
+\clearpage
+
+\subsection{Project - Extending McPhase to include Stress tensor}
+
+ In a further step stress tensor components could be envisaged 
 to act similar as an external magnetic field in {\em McPhase}, these will only act on the
 ''espilon'' module and on no other module. The equations given above have to be adapted accordingly 
 and then it should be possible to calculate in addition to magnetic phase diagrams also stress dependence
 of Jahn Teller transitions and excitations. 
+
 

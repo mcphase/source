@@ -40,8 +40,8 @@ manual.ps: manual.dvi $(wildcard ./*.eps)  $(wildcard ./figsrc/*.ps)
 #	pstops  "2:0" $<  > dodd.ps
 
 
-manual.pdf: manual.ps
-	ps2pdf  $<
+manual.pdf: manual.tex manual.aux manual.bbl manual.toc
+	pdflatex  manual
 
 clean :
 	rm -vf manual.ps manual.dvi manual.aux manual.log manual.bbl manual.blg manual.toc version.tex manual.idx manual.ind 

@@ -309,7 +309,7 @@ enum {
 #define Pi M_PI
 
 // polygons, circles and arcs
-#define Fill 1
+// #define Fill 1
 #define Outline 2
 
 // these are the only predefined colors (long)

@@ -419,7 +419,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   double sta=0,sta_int=0,sta_without_antipeaks=0,sta_int_without_antipeaks=0;
   double sta_without_weights=0,sta_int_without_weights=0,sta_without_antipeaks_weights=0,sta_int_without_antipeaks_weights=0;
   double jqsta=-1.0e10;  double jqsta_int=0;double jqsta_int_scaled=0; double jqsta_scaled=-1.0e10;double scalefactor=1;
-  double jq0=0;
+  double jq0=0,jqmax=-1e10,hmax,kmax,lmax;
   Vector hkl(1,3),q(1,3),qold(1,3),qijk(1,3);                 
   Vector mf(1,ini.nofcomponents);
   int jmin;
@@ -936,12 +936,13 @@ if (do_jqfile){
                         }
         fprintf(jqfile,"\n");
        }
-       if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-0.1e10;jqsta_scaled=jqsta;scalefactor=1;
+       if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-0.1e10;jqsta_scaled=jqsta;scalefactor=1;jqmax=jq0;hmax=hkl(1);kmax=hkl(2);lmax=hkl(3);
                           // here the first hkl vectors eigenvalue has been determined
                           // ... look in table, if there is a value, to which is might be scaled
                           if(ini.hkls[counter][0]>3&&jq0!=0.0){scalefactor=ini.hkls[counter][4]/jq0;}
                          }
-       else           {if(Tn(i2)>jq0)
+       else           {if(Tn(i2)>jqmax){jqmax=Tn(i2);hmax=hkl(1);kmax=hkl(2);lmax=hkl(3);}
+                       if(Tn(i2)>jq0)
                          {if(jqsta<0){jqsta=0;jqsta_scaled=0;}
                           jqsta+=(Tn(i2)-jq0)*(Tn(i2)-jq0);jqsta_scaled+=(Tn(i2)-jq0)*(Tn(i2)-jq0)*scalefactor*scalefactor;}
                        else{if((jqsta<0)&(Tn(i2)-jq0>jqsta)){jqsta=Tn(i2)-jq0;jqsta_scaled=(Tn(i2)-jq0)*scalefactor;}}
@@ -1706,7 +1707,8 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                                      
 
     if (do_jqfile) 
-     {fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
+     {fprintf(jqfile,"#!the largest eigenvalue of J(q) is jqmax=%g at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
+     fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
       fprintf(jqfile,"#the sum of squared differences between the highest eigenvalue\n");
       fprintf(jqfile,"#of a q vector and that of the first q-vector in the list in mcdisp.par.\n");
       fprintf(jqfile,"#only those eigenvalues are taken into account in the sum, which are larger\n");

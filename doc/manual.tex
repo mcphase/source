@@ -10,9 +10,14 @@
 \usepackage{lscape}
 \usepackage{amssymb}
 \usepackage{amsbsy}
+\usepackage{xcolor}
+%\usepackage[utf8]{inputenc}
+%\usepackage{amsmath}
+%\usepackage{empheq}
 %\usepackage{bbm}
 %\usepackage{dsfont}
 \makeindex
+\newcommand{\highlight}[1]{\colorbox{red!10}{$\displaystyle#1$}}
 \newcommand{\m}[1]{\overline{#1}}
 \newcommand{\M}[1]{\underline{#1}}
 \newcommand{\mbf}[1]{\mathbf #1}
@@ -43,7 +48,7 @@
  \vspace{2cm}
  \\ \today}
 
-\author{M. Rotter\thanks{Independent international Scientific Consultant, email: martin\_rotter@mcphase.de}, 
+\author{M. Rotter\thanks{Independent international Scientific Consultant, email: mcphase@icloud.com}, 
 \and Duc Manh Le \thanks{Dept. Physics and Astronomy, Seoul National University, Seoul 151-742, Korea}
 \and Joachim Keller \thanks{Universit\"at Regensburg}
 \and Till Hoffmann  \thanks{University of Oxford, Physics Department, Clarendon Laboratory, Parks Road, Oxford, UK},
@@ -335,8 +340,8 @@ LuMnO$_3$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & 
 NdBa$_2$Cu$_3$O$_7$ & fit of magnetic neutron diffraction  & {\prg cfield}\index{cfield} & \cite{rotter09-140405} \\
                     & data going beyond dipapprox && \\
 NdCu$_2$  & crystal field, magnetic structure,  & {\prg cfield}& %%@
-\cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29,rotter02-751,rotter02-8885} \\
-                    & phase diagrams, excitations && \\
+\cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29} \\
+                    & phase diagrams, excitations &&\cite{rotter02-751,rotter02-8885} \\
 NiO            & INS and RIXS on NiO & {\prg so1ion}\index{so1ion} & \\
 PrNi$_2$B$_2$C & crystal field - fit to neutrons,cp, susc & {\prg cfield}&\cite{mazumdar08-144422}\\
 PrNi$_2$Si$_2$ & excitons in an amplitude modulated mag structure & {\prg so1ion}\index{so1ion} & \cite{blanco13-104411} \\
@@ -345,8 +350,9 @@ PuPd$_3$ & susceptibility, heat capacity & {\prg ic1ion}\index{ic1ion} & \cite{l
 Ru3p\_create\_sipf & how to create paramters for a sipf file from  & {\prg simannfit,cowan} & \cite{cowan81-1} \\
                    & a Hartree Fock Calculation & {\prg RCN36K,RCN2K} & \\
 TbCu$_2$ & magnetic phases with field parallel $a$ & {\prg cfield} \\
-Tb2Ti2O7\_cfphonon\_simple & cf-phonon interaction, INS & {\prg phonon} & \\
-TmNiC$_2$ & determines point charge set to obey high-T exp. B20 B22 & {\prg so1ion}  & \\
+Tb2Ti2O7\_cfphonon\_simple & cf-phonon interaction, INS & {\prg so1ion,phonon} & \\
+TmNiC$_2$ & determine point charge set to obey high-T exp. $B_2^0$,$B_2^2$ & {\prg so1ion,phonon}  & \\
+          & with bonding e-charges.Strain,INS with cf-phonon int. &  & chap.\ref{determinePcmodel}\\
 test\_cluster & test of a binary cluster of two spins & {\prg cluster} & \\
 testic1ion & Pr$^{3+}$ chargedensity in IC and LS coupling & {\prg ic1ion,cfield} &\\
 tungsten& phonons in tungsten & {\prg phonon} & \\

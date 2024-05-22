@@ -33,8 +33,9 @@ $exp =~s/c(\d+)/\$numbers[\1-1]/g; print $exp."\n";
    while($line=<Fin>)
    {
       if ($line=~/^\s*#/) {print Fout $line;}
-       else{$line=~s/D/E/g;@numbers=split(" ",$line);                       
-                       $numbers[$col-1]=eval $exp;
+       else{$l=$line;$line=~s/D/E/g;@numbers=split(" ",$line); $e= eval $exp;
+                     @numbers=split(" ",$l);
+                       $numbers[$col-1]=$e;
            	  $i=0;foreach (@numbers)
 		  {++$i;print Fout $numbers[$i-1]." ";}
                   print Fout "\n";

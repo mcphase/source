@@ -4009,7 +4009,7 @@ void info_Vlm(filename,symmetrienr,einheit)
  
  
     if(VALUE(einheit,0)=='1') renorm *= 1e+26 / _h / _c ;
-    kf = init_iteration( filename,symmetrienr,"VKQ" );
+    kf = init_iteration( filename,symmetrienr,VKQ );
  
     switch( symmetrienr ){
          case 0 : /* iteration = */ Vkq0( ITERATION(kf),symmetrienr  );

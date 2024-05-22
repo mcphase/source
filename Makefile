@@ -27,6 +27,14 @@
 #                              latex2html -local_icons manual.tex  
 #                                         [maybe necessary to adapt manual.tex style, usepackage
 #                                          so that latex can run without problems on it]
+#					on MAC latex2html needs edit vi /opt/homebrew/Cellar/latex2html/2024/l2hconf.pm
+#                                               and insert 
+#$LATEX = '/Library/TeX/texbin/pdflatex';        # LaTeX $PDFLATEX = '/Library/TeX/texbin/pdflatex';     # pdfLaTeX
+#$LUALATEX = '/Library/TeX/texbin/luatex';       # LuaLaTeX $DVILUALATEX = '/Library/TeX/texbin/dviluatex'; # dviLuaLaTeX
+#$DVIPS = '/Library/TeX/texbin/dvips';   # dvips $DVIPNG = '/Library/TeX/texbin/dvipng'; # dvipng
+#$PDFTOCAIRO = '/opt/homebrew/bin/pdftocairo';   # pdf to svg converter $PS2PDF = '/opt/homebrew/bin/ps2pdf';   # ps to pdf converter
+#$PDFCROP = '/Library/TeX/texbin/pdfcrop';       # pdfcrop $GS = '/opt/homebrew/opt/ghostscript/bin/gs';   # GhostScript
+#
 #                                   --> this will create online manual in directory manual
 #                                       copy this manual to the webpage: mkdir manual  |   put -r manual     (puts all files recursively)
 #               .   outdated: push all changes to Kenai, e.g.
@@ -72,7 +80,7 @@
 #                                           correct bugs in izpack2exe.py (format of config.txt errors)]
 #	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
 #				and then do: 
-#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/13.2.0/lib/gcc/current/
+#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/14.1.0/lib/gcc/current/
 #	        Note on compiling with dos:   make unreleased_remove and copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
 #                                    mingw win64 shell  (from startup menu) 
@@ -321,16 +329,16 @@ cleanexe:
                 bin/formfactor.exe bin/radwavfunc.exe bin/clusterize.exe bin/bfk.exe \
                 bin/RCN2K.exe bin/RCN36K.exe bin/RCG11K.exe \
                 bin/bcfph.exe
-	rm -vf bin/addj bin/charges bin/coq2jjj \
-		bin/mcdispit bin/singleion bin/cfield \
-		bin/cond bin/jjj2j bin/mcphasit bin/spins \
-                bin/chrgplt bin/pointc bin/spinsfromq \
-                bin/densplt bin/icf1ion \
-                bin/mcdiff bin/reduce_unitcell bin/cf1ion_module/cfield.so \
-                bin/ic1ion bin/so1ion \
+	rm -vf bin/cond bin/clusterize bin/charges bin/coq2jjj \
+		bin/jjj2j bin/mcdispit bin/mcphasit bin/anisotropyit bin/singleion bin/cfield \
+		bin/spins  bin/spinsfromq  bin/sinlgeion \
+                bin/densplt bin/pointc bin/formfactor\
+                bin/radwavfunc bin/addj bin/reduce_unitcell \
+                bin/mcdiff   bin/mf2fe bin/fediff bin/inimenu \
+                bin/cf1ion_module/cfield.so \
+                bin/ic1ion  bin/icf1ion bin/so1ion \
                 bin/ic1ion_module/ic1ion.so \
-                bin/fediff bin/mf2fe \
-                bin/formfactor bin/radwavfunc bin/clusterize bin/bfk \
+                bin/bfk \
                 bin/RCN2K bin/RCN36K bin/RCG11K \
                 bin/bcfph 
                 

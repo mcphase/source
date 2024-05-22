@@ -5,118 +5,115 @@
 *************************************************************************************
 HOW TO CREATE ....
 -------------------------------------------------------------------------------------
-.... INPUT FILES FOR A NEW COMPOUND ?     - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
-                                                     00howto_quickly_create_input_files
-                                          - programs cif2mcphas, makenn
-                                                     setup_jqfit, setup_mcphasjforfit
+.... INPUT FILES FOR A NEW COMPOUND ?  - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
+                                                  00howto_quickly_create_input_files
+                                       - programs cif2mcphas, makenn
+                                                  setup_jqfit, setup_mcphasjforfit
 *************************************************************************************
 HOW TO CALCULATE ...
 -------------------------------------------------------------------------------------
-.... CRYSTAL FIELD PARAMETERS             - tutorial 03crystal_fields_singleion
-                                          - examples Gd3GaO6
-                                          - manual   chapter programs for specific
-                                                     tasks ... pointc
-                                          - programs pointc, mpe (editor of sipf files)
+.... CRYSTAL FIELD PARAMETERS          - tutorial 03crystal_fields_singleion
+                                       - examples Gd3GaO6
+                                       - manual   chapter programs for specific
+                                                  tasks ... pointc
+                                       - programs pointc, mpe (editor of sipf files)
 -------------------------------------------------------------------------------------
-.... CRYSTAL FIELD SPECTRA ?              - tutorial 03crystal_fields_singleion
-                                          - examples PrNi2B2C, NdCu2
-                                          - manual   chapters singleion
-                                          - programs single1ion, convolute, gauss,ic1ion, 
-                                                     display, pointc
+.... CRYSTAL FIELD SPECTRA ?           - tutorial 03crystal_fields_singleion
+                                       - examples PrNi2B2C, TmCu2_cfphonon, TmNiC2, NdCu2
+                                       - manual   chapters singleion,Cf-Phonon-Int.
+                                       - programs single1ion, convolute, gauss,ic1ion, 
+                                                  display, pointc
 -------------------------------------------------------------------------------------
-.... NEUTRON DIFFRACTION PATTERN ?        - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
-                                                     04magnetic_phases_mcphas
-                                          - examples NdBa2Cu3O7, NdCu2b_new
-                                          - manual   chapter mcdiff
-                                          - programs mcdiff, convolute, gauss,lorentz
-                                                     [mcphas,spins]
+.... NEUTRON DIFFRACTION PATTERN ?     - tutorial 07Handouts_D_E_PhaseDiagram_vs2.pdf
+                                                  04magnetic_phases_mcphas
+                                       - examples NdBa2Cu3O7, NdCu2b_new
+                                       - manual   chapter mcdiff
+                                       - programs mcdiff, convolute, gauss,lorentz
+                                                  [mcphas,spins]
 -------------------------------------------------------------------------------------
-.... MAGNETIC PHASE DIAGRAMS ?            - tutorial 04magnetic_phases_mcphas
-                                          - examples NdCu2*
-                                          - manual   chapter mcphas
-                                          - programs mcphas, displaycontour
+.... MAGNETIC PHASE DIAGRAMS ?         - tutorial 04magnetic_phases_mcphas
+                                       - examples NdCu2*
+                                       - manual   chapter mcphas
+                                       - programs mcphas, displaycontour
 -------------------------------------------------------------------------------------
-.... SUSCEPTIBILITY AND MAGNETIZATION ?   - tutorial 03crystal_fields_singleion
-                                                     04magnetic_phases_mcphas
-                                          - examples PrNi2B2C, NdCU2 
-                                          - manual   chapter mcphas
-                                          - programs singleion, mcphas, display
+.... SUSCEPTIBILITY, MAGNETIZATION ?   - tutorial 03crystal_fields_singleion
+                                                  04magnetic_phases_mcphas
+                                       - examples PrNi2B2C, NdCU2 
+                                       - manual   chapter mcphas
+                                       - programs singleion, mcphas, display
 -------------------------------------------------------------------------------------
-.... SPECIFIC HEAT ?                      - tutorial 03crystal_fields_singleion
-                                                     04magnetic_phases_mcphas
-                                          - examples PrNi2B2C, NdCu2
-                                          - manual   chapter mcphas
-                                          - programs cpsingleion, mcphas, dif
+.... SPECIFIC HEAT ?                   - tutorial 03crystal_fields_singleion
+                                                  04magnetic_phases_mcphas
+                                       - examples PrNi2B2C, NdCu2
+                                       - manual   chapter mcphas
+                                       - programs cpsingleion, mcphas, dif
 -------------------------------------------------------------------------------------
 *************************************************************************************
 HOW TO DISPLAY ....
 -------------------------------------------------------------------------------------
-.... SIMPLE XY GRAPHS ?                   - tutorial 01some_programs
-                                          - manual   chapter Programs f. graph. display
-                                          - programs display
+.... SIMPLE XY GRAPHS ?                - tutorial 01some_programs
+                                       - manual   chapter Programs f. graph. display
+                                       - programs display
 -------------------------------------------------------------------------------------
-.... MAGNETIC STRUCTURE ?                 - tutorial 04magnetic_phases_mcphas
-                                          - examples NdCu2
-                                          - manual   chapter Programs f. graph. display
-                                          - programs display_density,display_densities,javaview
+.... MAGNETIC STRUCTURE ?              - tutorial 04magnetic_phases_mcphas
+                                       - examples NdCu2
+                                       - manual   chapter Programs f. graph. display
+                                       - programs display_density,display_densities,javaview
 -------------------------------------------------------------------------------------
-.... CHARGE DENSITIES ?                   - tutorial 03crystal_fields_singleion
-                                          - examples NdCu2, PrNi2Si2, PrNi2B2C,testic1ion
-                                          - manual   chapter Programs f. graph. display
-                                          - programs display_density,display_densities,javaview
+.... CHARGE DENSITIES ?                - tutorial 03crystal_fields_singleion
+                                       - examples NdCu2, PrNi2Si2, PrNi2B2C,testic1ion
+                                       - manual   chapter Programs f. graph. display
+                                       - programs display_density,display_densities,javaview
 -------------------------------------------------------------------------------------
-.... SPIN AND ORBITAL WAVES ?             - tutorial 05excitations_mcdisp
-                                          - examples NdCu2, PrNi2Si2 
-                                          - manual   chapter Programs f. graph. display
-                                          - programs display_density,display_densities,javaview
-
+.... SPIN AND ORBITAL WAVES ?          - tutorial 05excitations_mcdisp
+                                       - examples NdCu2, PrNi2Si2 
+                                       - manual   chapter Programs f. graph. display
+                                       - programs display_density,display_densities,javaview
 *************************************************************************************
 HOW TO FIT ...
 -------------------------------------------------------------------------------------
-.... DIFFRACTION DATA ?                   - tutorial 02fitting
-                                          - examples NdBa2Cu3O7
-                                          - manual   chapters  on fitting and on mcdiff
-                                          - programs mcdiff, simannfit, display,
-                                                     displaytext, rpvalue, chi2,
-                                                     substitute, factcol, ...
+.... DIFFRACTION DATA ?                - tutorial 02fitting
+                                       - examples NdBa2Cu3O7
+                                       - manual   chapters  on fitting and on mcdiff
+                                       - programs mcdiff, simannfit, display,
+                                                  displaytext, rpvalue, chi2,
+                                                  substitute, factcol, ...
 -------------------------------------------------------------------------------------
-.... INTERACTION PARAMETERS ?             - tutorial 02fitting
-                                          - examples CeCu2a, PrNi2B2C
-                                          - manual   chapter Searchspace and Simannfit
-                                          - programs simannfit, searchspace, singleion
-                                                     mcphas, mcdisp, mcdiff ...
-                                                     substitute, factcol, addcol, ... 
-                                                     display, displaytext, ... 
+.... INTERACTION PARAMETERS ?          - tutorial 02fitting
+                                       - examples CeCu2a, PrNi2B2C
+                                       - manual   chapter Searchspace and Simannfit
+                                       - programs simannfit, searchspace, singleion
+                                                  mcphas, mcdisp, mcdiff ...
+                                                  substitute, factcol, addcol, ... 
+                                                  display, displaytext, ... 
 -------------------------------------------------------------------------------------
-.... CRYSTAL FIELD SPECTRA ?             - tutorial 02fitting
-                                                     06fitting_crystal_field_spectra
-                                          - examples PrNi2B2C
-                                          - manual   chapters on singleion and on fitting
-                                          - programs simannfit, searchspace, 
-                                                     singleion, pointc
+.... CRYSTAL FIELD SPECTRA ?          - tutorial 02fitting
+		                                 06fitting_crystal_field_spectra
+                                       - examples PrNi2B2C
+                                       - manual   chapters on singleion and on fitting
+                                       - programs simannfit, searchspace, 
+                                                  singleion, pointc
 -------------------------------------------------------------------------------------
-.... SPIN WAVE DISPERSION ?               - tutorial 02fitting
-                                          - examples CeCu2a
-                                          - manual   chapter mcphas, mcdiff,fitting
-                                          - programs simannfit, searchspace, 
-                                                     mcphas, mcdisp, 
+.... SPIN WAVE DISPERSION ?            - tutorial 02fitting
+                                       - examples CeCu2a
+                                       - manual   chapter mcphas, mcdiff,fitting
+                                       - programs simannfit, searchspace, 
+                                                  mcphas, mcdisp, 
 *************************************************************************************
 HOW TO TREAT/INCLUDE ...
 -------------------------------------------------------------------------------------
-.... RARE EARTH IONS ?
-                                          - examples NdCu2, any rare earth based 
-                                          - manual   chapter singleion
-                                          - programs singlein, so1ion
+.... RARE EARTH IONS ?                 - examples NdCu2, any rare earth based 
+                                       - manual   chapter singleion
+                                       - programs singlein, so1ion
 -------------------------------------------------------------------------------------
-.... TRANSITION METAL and ACTINIDE IONS
-                                          - examples testic1ion
-                                          - manual   chapter  ic1ion
-                                          - programs singleion, ic1ion
+.... TRANSITION METAL, ACTINIDE IONS   - examples testic1ion
+                                       - manual   chapter  ic1ion
+                                       - programs singleion, ic1ion
 -------------------------------------------------------------------------------------
 .... BIQUADRATIC/QUADRUPOLAR ORBITAL INTERACTIONS ? 
-                                          - examples GdRu2Si2, DyCu2
-                                          - manual   chapter Including Quadrupolar and 
-                                                     Higher Order Interactions
-                                          - programs mcphas, mcdisp
+                                       - examples GdRu2Si2, DyCu2
+                                       - manual   chapter Including Quadrupolar and 
+                                                  Higher Order Interactions
+                                       - programs mcphas, mcdisp
 *************************************************************************************
 \end{verbatim}
