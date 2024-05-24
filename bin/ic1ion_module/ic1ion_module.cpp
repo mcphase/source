@@ -1378,7 +1378,8 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
       if(nn>51) {
          fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
 
-      // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
+      // Indices n 7-11 are k=2 quadrupoles; 12-18:k=3; 19-27:k=4; 28-38:k=5; 39-51:k=6
+      //         nn=abs(n)-1
       int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
       int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
       int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
@@ -1414,21 +1415,21 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
          sMat<double> Umq,Upq,Jmat,iJmat;
          NSTR(k[nn],abs(q[nn])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
          Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(pars.n,k[nn],abs(q[nn]),pars.l); rmzeros(Upq); mm_gout(Upq,filename); }
-         if(q[nn]==0) { 
-            Jmat += Upq * redmat; iJmat.zero(Hsz,Hsz); }
+          if(q[nn]==0) { 
+            Jmat = Upq * redmat; iJmat.zero(Hsz,Hsz); }
          else {
             MSTR(k[nn],abs(q[nn])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
             Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[nn],-abs(q[nn]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
-            if(q[nn]<0) {
+            if(q[nn]<0) {Jmat.zero(Hsz,Hsz);
                if((q[nn]%2)==0) iJmat = (Umq - Upq) * redmat; else iJmat = (Umq + Upq) * redmat; }
-            else {
+            else {iJmat.zero(Hsz,Hsz);
                if((q[nn]%2)==0)  Jmat = (Umq + Upq) * redmat; else  Jmat = (Umq - Upq) * redmat; }
          }
 
          if(pars.truncate_level!=1 || n<6) {
             truncate_hmltn_packed(pars,Jmat,iJmat,outmat,sipffile); return 0; }
          else {
-            zmat2pack(Jmat,iJmat,outmat); return 0; }
+            zmat2pack(Jmat,iJmat,outmat);return 0; }
       }
       else
       {
