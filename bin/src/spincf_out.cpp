@@ -628,6 +628,7 @@ fprintf(fout,"        <points>\n");
              if(pl[l]!=l)p=magmom.moment(i,j,k,pl[l]); 
              xyz=gp.phonon_scale_static_displacements*p;
              xyz+=gp.phonon_wave_amplitude*(cos(-phase+QR)*pev_real.moment(i,j,k,l)+sin(phase-QR)*pev_imag.moment(i,j,k,l));
+//printf("i1=%i j1=%i k1=%i i=%i j=%i k=%i l=%i pl=%i dd=%g %g %g xyz = %g %g %g \n ",i1,j1,k1,i,j,k,l,pl[l],dd(1),dd(2),dd(3),xyz(1),xyz(2),xyz(3));
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)),myround(dd(2)),myround(dd(3)));             
 fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),myround(dd(2)+xyz(2)),myround(dd(3)+xyz(3)));
      ++ctr;++n;
@@ -1397,7 +1398,7 @@ void spincf::print_commented(FILE * fout,const char * string,int min, int max, i
        //myPrintVector(stdout,mmom);
     for (int p=maxnofpars-pout+1;p<=maxnofpars;++p)
     {result=div((int)ml(p)-1,nofcomponents); 
-     fprintf(fout,"#    atom %i: %s%i=%4.4f\n",result.quot+1,string,result.rem+1,myround(1e-5,mmom(p)));
+     fprintf(fout,"#!    atom %i: %s%i=%s_%i_%i_%i_%i_%i=%4.4f\n",result.quot+1,string,result.rem+1,string,i,j,k,result.quot+1,result.rem+1,myround(1e-5,mmom(p)));
     }
       
 // fprintf(fout,"\n"); //new line to separate ab planes

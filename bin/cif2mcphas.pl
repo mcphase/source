@@ -939,11 +939,17 @@ print "-------------------------------------------------------------------------
 print "Label\tElement\tMass\tValence\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
 print "--------------------------------------------------------------------------------\n";
 @magornot = ( "NonMagnetic", "Magnetic" );
+$totalcharge=0;
 for $j(0..$nofatom-1) {
   if(!($dat[$j][0] eq -1)) {
     print "$dat[$j][0]\t$atoms[$j]\t$atomicmass[$j]\t$oxy[$j]\t$mults[$j]\t$magornot[$ismag[$j]]\t$dat[$j][2]\t$dat[$j][3]\t$dat[$j][4]\n";
+    # sum up total charge to print information 
+    $totalcharge+=$oxy[$j]*$mults[$j]
   }
 }
+if(abs($totalcharge)>0.01){ print STDERR "Cif2mcphas Warning: Charge neutrality violated: totalcharge = $totalcharge |e|\n";}
+else { print "Charge neutrality: totalcharge=$totalcharge |e|\n";}
+
 print "--------------------------------------------------------------------------------\n";
 print "Mult. is the multiplicity and is calculated by applying all the symmetry\n";
 print "   equivalent positions to the coordinates found in the CIF. Note this\n";

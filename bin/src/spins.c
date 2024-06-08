@@ -14,9 +14,9 @@ void help_and_exit()
     { printf ("\n\
 program spins - popout spin/exchange field configuration\n"
 "              - and/or display 3d animation of spin/moment/densities and animations\n\n\
-use as: spins -f[c 13 0.1] mcphas.sps T Ha Hb Hc\n\
-    or: spins -f[c 13 0.2] mcphas.sps x y\n\
-    or: spins -f[c 14 0.1] mcphas.tst n\n\
+use as: spins -f[c 1 13 3 0.1] mcphas.sps T Ha Hb Hc\n\
+    or: spins -f[c 1 13 3 0.2] mcphas.sps x y\n\
+    or: spins -f[c 1 13 3 0.1] mcphas.tst n\n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
@@ -40,8 +40,8 @@ use as: spins -f[c 13 0.1] mcphas.sps T Ha Hb Hc\n\
   \n\
 1&2&3) if used with -fc min max n lim a human readable format is output for spin components with index \n\
    from min to max, only n numbers exceeding  \n\
-   absolute value of lim, e.g. -fc 1 3 13 0.1 outputs at maximum 13 components which are all larger \n\
-   (absolute value) than 0.1 \n\
+   absolute value of lim, e.g. -fc 1 13 3 0.1 outputs I1,I2,...,I13, however only at maximum 3 numbers \n\
+   for each atom which are all larger (absolute value) than 0.1 \n\
  \n\
 4) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
    output files and tables or 3d graphical animations are created.\n\
@@ -327,10 +327,32 @@ Matrix p(1,3,1,3);Vector xyz(1,3),dd0(1,3),dd3(1,3),dd(1,3);
 if (inputpars.cs.r!=cs.r){cs.r=inputpars.cs.r;}
 if (inputpars.cs.abc!=cs.abc){cs.abc=inputpars.cs.abc;}
 
-// check sipffilenames
+// check sipffilenames -> if these are not present in cs (from headerinput), put also atomic positions from inputpars
 for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 {if(cs.sipffilenames[ii]==NULL)cs.sipffilenames[ii]=new char[MAXNOFCHARINLINE];
- if (strcmp((*inputpars.jjj[ii]).sipffilename,cs.sipffilenames[ii])!=0){strcpy(cs.sipffilenames[ii],(*inputpars.jjj[ii]).sipffilename);}
+ if (strcmp((*inputpars.jjj[ii]).sipffilename,cs.sipffilenames[ii])!=0)
+             {strcpy(cs.sipffilenames[ii],(*inputpars.jjj[ii]).sipffilename);
+              cs.x[ii]=inputpars.cs.x[ii];
+              cs.y[ii]=inputpars.cs.y[ii];
+              cs.z[ii]=inputpars.cs.z[ii];
+// HERE take care about atoms sitting at nearly the same position (a nucleus and a mangetic shell
+// from makenn -cfph ... and put the positions exactly at the same correct value 
+// (makenn had shifted the magnetic charge cloud by 0.01 A along c in order to enable 
+// the correct evaluation of cf-phonon interactions by mcphas and mcdisp. here we correct for
+// this shift in order to get the right output of charge densities and in spins.out the
+// right positions for doing mcdiff !!
+                   for(int i=1;i<ii;++i){//loop all atoms which have been read
+                                        if ( fabs((cs.x[ii]-cs.x[i])*cs.abc[1])<0.2 &&
+                                             fabs((cs.y[ii]-cs.y[i])*cs.abc[2])<0.2 &&
+                                             fabs((cs.z[ii]-cs.z[i])*cs.abc[3])<0.2 )
+                                            { // atom i and ii are the same atom therefore check if they
+                                              // are displaced along c and move magnetic atom back to nuclear position
+                                              if(fabs((cs.x[ii]-cs.x[i])*cs.abc[1])>0.001 ||
+                                                 fabs((cs.y[ii]-cs.y[i])*cs.abc[2])>0.001){fprintf(stderr,"Error spins.c: atoms %i (%g %g %g) and %i (%g %g %g) too close\n",i,cs.x[i],cs.y[i],cs.z[i],ii,cs.x[ii],cs.y[ii],cs.z[ii]);exit(EXIT_FAILURE);}
+                                              if(cs.z[ii]>cs.z[i]){cs.z[ii]=cs.z[i];}else{cs.z[i]=cs.z[ii];}
+                                            }
+                                       }
+             }
 }
 cs4.abc=cs.abc;cs4.r=cs.r;cs4.nofatoms=cs.nofatoms;cs4.nofcomponents=cs.nofcomponents;
 savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
@@ -363,7 +385,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   
 
   fclose(fout);
-    gp.spins_scale_moment=1;
+    gp.spins_scale_moment=1;gp.phonon_scale_static_displacements=1;
     gp.read();
     fin = fopen_errchk ("./results/spins_prim.jvx", "w"); // here draw some graphics for the spinconfiguration
                        // with option -f. Yet this is very limited, because we do not know what is the magnetic

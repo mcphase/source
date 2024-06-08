@@ -2549,11 +2549,11 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
    }
    else
    {  
-      if(n<51) {
-         fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
+      if(n<-51) {
+         fprintf(stderr,"Error module ic1ion: operatormatrix index=%i < -51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
 
       // Calculates the single-ion (without external field) Hamiltonian and operator matrix in LS-basis
-      sMat<double> Jmat; if(n>=6) Jmat = icf_mumat(pars.n, abs(n)-1, pars.l); else Jmat = icf_ukq(pars.n,K[abs(n)],Q[abs(n)],pars.l);
+      sMat<double> Jmat; if(abs(n)>=6) Jmat = icf_mumat(pars.n, abs(n)-1, pars.l); else Jmat = icf_ukq(pars.n,K[abs(n)],Q[abs(n)],pars.l);
       sMat<double> Hcfi, Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM;
       int Hsz=Hcf.nr(); sMat<double> zeros(Hsz,Hsz);
       Matrix retval(1,Hsz,1,Hsz); retval=0;
@@ -2564,7 +2564,7 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
       delete[]Ef;
       for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) {
          if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) Vf[ii*Hsz+jj].r=0.; if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) Vf[ii*Hsz+jj].i=0.; }
-      complexdouble *zJmat; if(im[n]==1) zJmat=zmat2f(zeros,Jmat); else zJmat=zmat2f(Jmat,zeros);
+      complexdouble *zJmat; if(im[(int)abs(n)]==1) zJmat=zmat2f(zeros,Jmat); else zJmat=zmat2f(Jmat,zeros);
 
       // Rotates the operator matrix into basis where H_singleion is diagonal using calculated eigenvectors with BLAS routines.
       complexdouble *Hrot,*zmt; zmt = new complexdouble[Hsz*Hsz]; Hrot = new complexdouble[Hsz*Hsz];
@@ -2574,10 +2574,11 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
 
       // Populates the output matrix and frees temporary dense matrices (arrays).
       for(int ii=0; ii<Hsz; ii++) for(int jj=ii; jj<Hsz; jj++) {
-         if(fabs(Hrot[ii*Hsz+jj].r)>DBL_EPSILON) outmat(ii+1,jj+1)=Hrot[ii*Hsz+jj].r;
-         if(fabs(Hrot[ii*Hsz+jj].i)<DBL_EPSILON) outmat(jj+1,ii+1)=Hrot[ii*Hsz+jj].i;
+         if(fabs(Hrot[ii*Hsz+jj].r)>DBL_EPSILON) retval(ii+1,jj+1)=Hrot[ii*Hsz+jj].r;
+         if(fabs(Hrot[ii*Hsz+jj].i)<DBL_EPSILON) retval(jj+1,ii+1)=Hrot[ii*Hsz+jj].i;
       }
       delete[]Vf; delete[]Hrot; delete[]zmt;
+     outmat=retval;return 0;
    }
    std::cerr << "icf1ion::opmat - failed to calculate operator matrices\n"; return 1; //exit(EXIT_FAILURE);
 }

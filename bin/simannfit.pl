@@ -20,14 +20,17 @@ unless ($#ARGV >0)
   at every iteration step and  the standard sta deviation is minimzed
   simannfit gives as a parameter a maximum number for sta - if during the
   calculation of sta in calcsta.bat this number is exceeded calcsta.bat can exit (saves time)
-
-  options:
-   -l 0.2 ... sets limit - program will end if sta < 0.2
-   -t 100 ... sets time limit until program end to 100 seconds
-   -s 132 ... gives maximal number of iteration steps 132 to be done
-   -n 50  ... specifies that every 50 steps the parameters should be
-            stored in file results/simannfit.0 (appending existing file)
-   -p 20  ... probing parameter space: stepwidths are not decreased during
+  
+  
+  OPTIONS for ...
+  
+  ... STEPWIDTHS
+    -w 1.4  ... before starting simannfit, multiply all stepwidths by factor 1.4 
+    -r 0.2  ... before starting simannfit, set all stepwidths to parameter 
+            range=max-min times 0.2, 
+    -f 0.2  ... before starting simannfit, set all stepwidths to parameter value 
+            times 0.2, however never smaller than parameterrange/1000 
+    -p 20  ... probing parameter space: stepwidths are not decreased during
 	    fitting, new set of pars parn are generated and for all sets par in 
 	    results/simannfit.1 and results/simannfit.0 are scanned and
 	    distance d=sum_i^N (par_i-parn_i)^2/stepwidht_i^2 is calculated. If d>N=nofparameters
@@ -43,19 +46,33 @@ unless ($#ARGV >0)
 	    probe only the vicinity of a optimum in every direction of parameter
 	    space a small statistical inital temperature is necessary
 	    - in this way a series of equally good solutions can be explored.
-    -s0 filename ... instead of results/simannfit.0 use filename to store/read (good for parallel running simannfit)
-    -s1 filename ... instead of results/simannfit.1 use filename to store/read (good for parallel running simannfit)
-    -i 23 ... for storing in results/simannfit.* use index .23 instead of .0 as suffix (good for parallel running simannfit)
-    -w 1.4  ... before starting simannfit, multiply all stepwidths by factor 1.4 
-    -r 0.2  ... before starting simannfit, set all stepwidths to parameter 
-            range=max-min times 0.2, 
-    -f 0.2  ... before starting simannfit, set all stepwidths to parameter value 
-            times 0.2, however never smaller than parameterrange/1000 
-    -c      ... continue at end of program - do not ask for pressing enter 
-    -jpglog 3.5e-1 file.jpg    ... if sta is less then 3.5e-1, then the image file.jpg 
+
+ ... PARALLEL PROCESSING
+    -s0 filename ... instead of results/simannfit.0 use filename to store/read 
+    -s1 filename ... instead of results/simannfit.1 use filename to store/read 
+    -i 23 ... for storing in results/simannfit.* use index .23 instead of .0 as suffix 
+
+ ... LOGGING 
+     -n 50  ... specifies that every 50 steps the parameters should be
+            stored in file results/simannfit.0 (appending existing file)
+     -jpglog 3.5e-1 file.jpg    ... works only if option -p is present:
+             if sta is less then 3.5e-1, then the image file.jpg 
             (which should be created by calcsta) is copied to results/parsetnr.jpg
             a html tag is added to results/simannfit.0 or results/simannfit.1 if 
 	    stored
+    -log 1.3 batchfile.bat   ... works only if option -p is present:
+             if sta is less then 3.5e-1, then execute the file 
+             batchfile, with sta as argument, which can be adressed in the batch
+	     file with $1 (linux) or  \%1 (windows)
+    -h       Histograms are store in results/par*.hst for review of the variation 
+             of parameters during the run of simannfit. 
+    -d       store percentage of different contributions to sta in file results/simannfit.dst 
+
+... TERMINATION 
+   -l 0.2 ... sets limit - program will end if sta < 0.2
+   -t 100 ... sets time limit until program end to 100 seconds
+   -s 132 ... gives maximal number of iteration steps 132 to be done
+   -c     ... continue at end of program - do not ask for pressing enter 
 
 EOF
 #print " <Press enter to close>";$in=<STDIN>;
@@ -82,11 +99,11 @@ format Fout =
 sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i])
 .
 
- @parnam=();@par=();@parmin=();@parmax=();@parerr=();@parstp=();@parav=();@thisparstp=();
+ @parnam=();@par=();@parmin=();@parminini=();@parmax=();@parmaxini=();@parerr=();@parstp=();@parav=();@thisparstp=();
 				 @parhisto=();@parhistostp=();@perlhistostart=();$hh=0;
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
   $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;$stepset=0;$limsta=-1e100;$tableoffset=0;
-  $options=1;$probe=0;$stepfact=1;$cont=0;$jpglog=0;$index=0;
+  $options=1;$probe=0;$stepfact=1;$cont=0;$jpglog=0;$index=0;$log=0;$hist=0;$dist=0;
   $s0file="results/simannfit.0";
   $s1file="results/simannfit.1";
   while($options==1)
@@ -103,8 +120,12 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
   if ($ARGV[0] eq '-s0') {$options=1;shift @ARGV;$s0file=$ARGV[0]; shift @ARGV;}
   if ($ARGV[0] eq '-s1') {$options=1;shift @ARGV;$s1file=$ARGV[0]; shift @ARGV;}
   if ($ARGV[0] eq '-jpglog') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$jpglog=eval $ARGV[0]; shift @ARGV;$jpgimagefile=$ARGV[0]; shift @ARGV;}
+  if ($ARGV[0] eq '-log') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$log=eval $ARGV[0]; shift @ARGV;$logbatchfile=$ARGV[0]; shift @ARGV;}
   if ($ARGV[0] eq '-c') {$options=1;shift @ARGV; $cont=1;}
+  if ($ARGV[0] eq '-h') {$options=1;shift @ARGV; $hist=1;}
+  if ($ARGV[0] eq '-d') {$options=1;shift @ARGV; $dist=1;}
   }
+
  while(!open(Fout,">results/simannfit.status")){print "Error opening file results/simannfit.status\n";<STDIN>;}
    print Fout "simannfit running in ".cwd()."\n";
    print Fout "parameter[value,      min,           max,           variation,     stepwidth]\n";
@@ -117,8 +138,8 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
                                  foreach(@parnam){if ($_ eq $parname){print "ERROR simannfit: parameter $parname occurs more than one time in input files\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}}
                                  $parnam[$#par]=$parname;
 				 ($par[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*([^,]+)/);
-				 ($parmin[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*([^,]+)/);
-				 ($parmax[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
+				 ($parmin[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*([^,]+)/);$parminini[$#par]=$parmin[$#par];
+				 ($parmax[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);$parmaxini[$#par]=$parmax[$#par];
 				 ($parerr[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
 				 ($parstp[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*([^\Q]\E]+)/);
                          if($stepset>0){$parstp[$#par]=abs($par[$#par])*$stepset;
@@ -144,7 +165,7 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
 				  for($hx=0;$hx<=int(($parmax[$i]-$parmin[$i])/$parhistostp[$i])+1;++$hx)
                                    {$parhisto[($hx+$perlhistostart[$i])]=0;}
                                   $hh+=int(($parmax[$i]-$parmin[$i])/$parhistostp[$i])+2;
-
+				   
                                  }
      } close Fin;
  }  
@@ -164,6 +185,15 @@ $nof_calcsta_calls=0;
  print ($#par+1);print " parameters found - testing calculation of sta\n";
 $rnd=1;$stasave=1e20;
  ($sta)=sta();$stps=1;$noofupdates=0;$stepnumber=0;$stastart=$sta;
+  if($maxstep==1){open(Fout,">results/simannfit.status");
+                  print Fout " maxstep=1 ... simannfit stopped after initial run of calcsta\n";
+                  print Fout ($#ssta+1)." contributions to sta found in output of calcsta ...\n";
+                  print Fout "sta=$sta\n";
+                  close Fout;
+                  print " maxstep=1 ... simannfit stopped after initial run of calcsta\n";
+                  print "sta=$sta\n";
+                  print " <Press enter to close>";if($cont==0){$in=<STDIN>;}
+                 exit 0;}
 if($tablestep!=0){ write_set(">>$s0file");}
 if($sta>0)
 {print "starting fit\n";
@@ -253,13 +283,14 @@ if($stps<11){
    if($probe==0){if($parstp[$i]<($parmax[$i]-$parmin[$i])/2){$parstp[$i]+=0.1*abs($thisparstp[$i]);}
                  else{$parstp[$i]=($parmax[$i]-$parmin[$i])/2;}
                 } # adapt parstp to be more bold in this direction
-   $hx=int(($p-$parmin[$i])/$parhistostp[$i]);
+   $hx=int(($p-$parminin[$i])/$parhistostp[$i]);
    ++$parhisto[($hx+$perlhistostart[$i])];
-   open(Fout,">./results/".$parnam[$i].".hst");
-   print Fout "#{Histogram of parameter ".$parnam[$i]."\n# value vs. number of  occurrences in good solutions (sta decreased)}\n";
-   for($hx=0;$hx<=int(($parmax[$i]-$parmin[$i])/$parhistostp[$i])+1;++$hx)
-   {print Fout (($hx+0.5)*$parhistostp[$i]+$parmin[$i])."   ".($parhisto[($hx+$perlhistostart[$i])])."\n";
-   } close Fout;
+   if($hist>0){open(Fout,">./results/".$parnam[$i].".hst");
+              print Fout "#{Histogram of parameter ".$parnam[$i]."\n# value vs. number of  occurrences in good solutions (sta decreased)}\n";
+              for($hx=0;$hx<=int(($parmaxini[$i]-$parminini[$i])/$parhistostp[$i])+1;++$hx)
+              {print Fout (($hx+0.5)*$parhistostp[$i]+$parminini[$i])."   ".($parhisto[($hx+$perlhistostart[$i])])."\n";
+              } close Fout;
+              }
 
    ++$i;} ++$noofupdates;
    #printout current parameters
@@ -383,7 +414,14 @@ sub sta {#local $SIG{INT}='IGNORE';
 				   foreach (@parnam)
 				    {$pnam=$_;
 				     if ($line=~/^(#!|[^#])*?\b$pnam\s*\Q[\E/)
-                                        {$line=~s|$pnam\s*\Q[\E[^\Q]\E]*\Q]\E|$par[$i]|;
+                                        {# check if parmin or parmax have been changed by user and update
+                                 ($parminnew)=($line=~m/(?:#!|[^#])*?\b$pnam\s*\Q[\E\s*[^,]+\s*,\s*([^,]+)/);
+                                 ($parmaxnew)=($line=~m/(?:#!|[^#])*?\b$pnam\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
+                                 unless($parminnew>=$parmaxnew||$par[$i]>$parmaxnew||$par[$i]<$paminnew){  
+                                  if($parminnew!=$parmin[$i]){print "parmin of parameter $pnam changed from ".$parmin[$i]." to $parminnew \n";$parmin[$i]=$parminnew;}
+				  if($parmaxnew!=$parmax[$i]){print "parmax of parameter $pnam changed from ".$parmax[$i]." to $parmaxnew \n";$parmax[$i]=$parmaxnew;}
+								}
+				          $line=~s|$pnam\s*\Q[\E[^\Q]\E]*\Q]\E|$par[$i]|;
                                    $dd=sprintf("%s [%e,%e,%e,%e,%e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i]);
                                    $modline=~s|$pnam\s*\Q[\E[^\Q]\E]+\Q]\E|$dd|;
 					}
@@ -451,6 +489,14 @@ $staboundary=$stasave-log($rnd+1e-10)*$stattemp;
  $c=PDL->new(@par);
 # print $delta;
  $s2=inner($delta,$delta)/($#ssta+1); # this is s^2
+ if($dist>0){open(Fout1, ">results/simannfit.dst");
+            print Fout1 "# ".($#ssta+1). " contributions to sta\n";
+            print Fout1 "# number  vs percentage vs sta \n";$i6=0;
+            foreach(@ssta){++$i6;
+                           print Fout1 sprintf("%i %6.2f %g\n",$i6,(100*$_/(($#ssta+1)*$s2)),$_);
+                          }
+            close Fout1;
+            }
  $sta=$s2;
  if($errc>0) #if errors are given we can minimize chisquared and calculate covariance matrix
  {my  $err=   sqrt PDL->new(@eerr);
@@ -554,6 +600,8 @@ sub write_set()
         if($sta<$jpglog){$dfile=sprintf("%i.%i.jpg",$stepnumber+$tableoffset,$index);                         
                          mycopy($jpgimagefile,"./results/".$dfile);
                          print FH '#<img src="'.$dfile.'">'."\n";
+                         }
+        if($sta<$log){system("$logbatchfile $sta");
                          }
   close FH;
 }

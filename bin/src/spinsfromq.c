@@ -21,14 +21,15 @@ printf("#*****************************************************\n");
 // check command line
   if (argc < 6)
     { printf ("# program spinsfromq - create spinconfiguration from q vector\n \
-#                use as: spinsfromq [-m f1 f2 f3 ...] n1 n2 n3 h k l [h2 k2 l2 [h3 k3 l3]]\n \
+#                use as: spinsfromq [-m f1 f2 f3 ...] n1 n2 n3 h k l [fi][h2 k2 l2 [fi2] [h3 k3 l3 [fi3]]]\n \
 #		n1 n2 n3 .... periodicity of supercell\n \
-#		h k l ....... components of qvector\n \
+#		h k l [fi]....... components of qvector and optional phase fi (in degree)\n \
+#                                 (if fi is given it has to be given for all q vectors)\n \
 #                options:\n \
 #                -m f1 f2 f3 ...fnofcomponents: multiply spin components by f1 f2 f3 ... fnofcomponents\n \
-#      formulas: M(r)=(f1*M1,f2*M2,f3*M3,..., fnofcomponents * Mnofcomponents)*cos(Q.r)    ...for single q\n \
-#                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2*(0 1 0)*cos(Q2.r) ...for double q\n \
-#                M(r)=f1*M1*(1 0 0)*cos(Q1.r)+f2*M2* (0 1 0)*cos(Q2.r)+f3*M3*(0 0 1)*cos(Q3.r) ...for triple q\n \
+#      formulas: M(r)=(f1*M1,f2*M2,f3*M3,..., fnofcomponents * Mnofcomponents)*cos(Q.r+fi)    ...for single q\n \
+#                M(r)=f1*M1*(1 0 0)*cos(Q1.r+fi)+f2*M2*(0 1 0)*cos(Q2.r+fi2) ...for double q\n \
+#                M(r)=f1*M1*(1 0 0)*cos(Q1.r+fi)+f2*M2* (0 1 0)*cos(Q2.r+fi2)+f3*M3*(0 0 1)*cos(Q3.r+fi3) ...for triple q\n \
 #      M1,M2,M3 are determined by applying an molecular field with equal components and increasing this \n \
 #      field until the total length of the moment exceeds a treshold value. \n \
 ");
@@ -38,7 +39,7 @@ printf("#*****************************************************\n");
   par inputpars("./mcphas.j");
  
   int i,j,n1,n2,n3;
-  double lnz,u;
+  double lnz,u,fi1=0,fi2=0,fi3=0;
   int a;
   double T;
   Vector h(1,inputpars.cs.nofcomponents),hext(1,3);
@@ -97,14 +98,11 @@ printf("#*****************************************************\n");
   }
 
   printf("\n#! n1=%i n2=%i n3=%i nofspins=%i\n",n1,n2,n3,n1*n2*n3*inputpars.cs.nofatoms);
-  printf("#! q: hkl=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
-  for(i=1;i<=inputpars.cs.nofatoms;++i)for(j=1;j<=inputpars.cs.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
+    for(i=1;i<=inputpars.cs.nofatoms;++i)for(j=1;j<=inputpars.cs.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
                                            phi(j+(i-1)*inputpars.cs.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
   
   // transform hkl to primitive reciprocal lattice
-  qvector=qvector*inputpars.rez.Inverse();
-  printf("# Miller indices of q vector with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
   
  
   spincf savspin (n1,n2,n3,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
@@ -115,6 +113,15 @@ printf("#*****************************************************\n");
 // qvector ... wave vector in units of reciprocal lattice
 // momentq0 .. ferromagnetic component (between 0 and 1)
 // phi ....... phase (for each component)
+int fis_given=0;
+if ((argc-a-4)%4==0){//fi  is given in command line
+                     fi1=strtod(argv[a+7],NULL);
+                     phi+=PI*fi1/180;++a;fis_given=1;
+                    }
+   printf("#! q: hkl=%g %g %g  phase fi=%6.4f deg:\n",qvector(1),qvector(2),qvector(3),fi1);
+  qvector=qvector*inputpars.rez.Inverse();
+  printf("# Miller indices of q vector with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
+
   savspin.spinfromq (n1,n2,n3,qvector,nettom, momentq0, phi);
  if (argc>7+a)
   {savspin1.spinfromq (n1,n2,n3,qvector,nettom1, momentq0, phi);
@@ -123,10 +130,12 @@ printf("#*****************************************************\n");
    qvector(1)=strtod(argv[a+7],NULL);
    qvector(2)=strtod(argv[a+8],NULL);
    qvector(3)=strtod(argv[a+9],NULL);
-   printf("#! q2: hkl2=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
    for(i=1;i<=inputpars.cs.nofatoms;++i)for(j=1;j<=inputpars.cs.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
                                            phi(j+(i-1)*inputpars.cs.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
+   if(fis_given>0){fi2=strtod(argv[a+10],NULL);
+                     phi+=PI*fi2/180;++a;}
+   printf("#! q2: hkl2=%g %g %g phase fi2=%6.4f deg:\n",qvector(1),qvector(2),qvector(3),fi2);
    qvector=qvector*inputpars.rez.Inverse();
    printf("# Miller indices of q2 with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
    savspin2.spinfromq (n1,n2,n3,qvector,nettom2, momentq0, phi);
@@ -137,10 +146,12 @@ printf("#*****************************************************\n");
     qvector(1)=strtod(argv[a+10],NULL);
     qvector(2)=strtod(argv[a+11],NULL);
     qvector(3)=strtod(argv[a+12],NULL);
-   printf("#! q3: hkl3=%g %g %g:\n",qvector(1),qvector(2),qvector(3));
    for(i=1;i<=inputpars.cs.nofatoms;++i)for(j=1;j<=inputpars.cs.nofcomponents;++j){// set phases according to atomic position phi=2*pi*q*r
                                            phi(j+(i-1)*inputpars.cs.nofcomponents)=qvector*(*inputpars.jjj[i]).xyz*2.0*PI;                                        
                                           }
+   if(fis_given>0){fi3=strtod(argv[a+13],NULL);
+                     phi+=PI*fi3/180;++a;}
+ printf("#! q3: hkl3=%g %g %g phase fi3=%6.4f deg:\n",qvector(1),qvector(2),qvector(3),fi3);
    qvector=qvector*inputpars.rez.Inverse();
    printf("# Miller indices of q3 with respect to primitive reciprocal lattice: (%6.4f %6.4f %6.4f)\n",qvector(1),qvector(2),qvector(3));
    savspin2.spinfromq (n1,n2,n3,qvector,nettom3, momentq0, phi);

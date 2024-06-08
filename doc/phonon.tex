@@ -98,7 +98,7 @@ transitions (=number of transitions).
 
 \subsection{Using Single Ion Module {\prg phonon}}
 
-The module {\prg phonon} allows to consider the phononic degrees of freedom in McPhas.
+The module {\prg phonon} allows to consider the phononic degrees of freedom in {\prg McPhase}.
 The single ion input file for an oscillating atom (with amplitude 
 up to a maximum displacement $u_{max}$, which is relevant for the function {\prg Icalc} of the
 module) has to have the following format:
@@ -511,7 +511,7 @@ the expectation values $\langle \hat \mbf P_i \rangle$ are zero in this case. Th
 the fact, that the energy is not invariant under rotations in case of transversal springs.
 
 In (\ref{Hmix}) we made use of the phonon-strain interaction constants $G_{mix}^{\alpha\gamma}(i)$
-defined writing explicitely the Voigt notation $\alpha=(\alpha\beta)$ by
+defined writing explicitly the Voigt notation $\alpha=(\alpha\beta)$ by
 
 \begin{eqnarray}\label{Gmix}
 G_{mix}^{(\alpha\beta)\gamma}(i)&=&
@@ -628,7 +628,7 @@ Abbreviating notation we arrive at the final result for the crystal field phonon
 
 Note, that the first part of this equation denotes the coupling of the strain to the crystal field
 and is commonly known as magnetoelastic interaction~\cite{morin90-1}.
-The definition of the static magnetoelastic constants writing explicitely the Voigt notation of the first index $\alpha=(\alpha\beta)$
+The definition of the static magnetoelastic constants writing explicitly the Voigt notation of the first index $\alpha=(\alpha\beta)$
  is
 
 {\color{blue}
@@ -1014,7 +1014,7 @@ using {\prg mcphasit} and {\prg mcdispit}, respectively. Note that in such calcu
 bonding charges $E^1, \dots, E^6$ have to be removed, because electrons are correlated and 
 cannot move freely in a solid (compare Pauli principle, failure of the Drude model).
 Technically we have to remove the E charges from the list of atoms in 
-{\prg mcphas.j} to prevent {\prg mcphas} from calculating too large ernergy u and {\prg mcdisp} 
+{\prg mcphas.j} to prevent {\prg mcphas} from calculating too large energy u and {\prg mcdisp} 
 from calculating optical modes due to vibrations of electronic bonding charges E.
 This can be done with {\prg reduce\_unitcell} with option {\prg -delatom}.
 In {\prg examples/tmnic2/calc.bat } the procedure is described in detail.
@@ -1152,8 +1152,8 @@ calculation with crystal field phonon interaction.}
 
 By using {\prg mcdisp} at the temperature of 20~K the magnetic and nuclear inelastic neutron
 scattering cross section can be calculated. We show in fig.~\ref{tmcu2mag20k} the magnetic scattering along
-the (11L) direction. Including the crystal field phonon inteaction clearly leads to a dynamic
-Jahn Teller effect: the flat modes  split, shift and get
+the (11L) direction. Including the crystal field phonon interaction clearly leads to a dynamic
+Jahn-Teller effect: the flat modes  split, shift and get
 dispersive and there is considerable magnetic intensity transfer to phonons.
 Thus the double peak feature in unpublished experimental data on powder can possibly
 be interpreted, see fig.~\ref{tmcu2mag20kexp}
@@ -1175,6 +1175,6 @@ SV22 (FZ-Juelich), M. Loewenhaupt, private communication.}
 to act similar as an external magnetic field in {\em McPhase}, these will only act on the
 ''espilon'' module and on no other module. The equations given above have to be adapted accordingly 
 and then it should be possible to calculate in addition to magnetic phase diagrams also stress dependence
-of Jahn Teller transitions and excitations. 
+of Jahn-Teller transitions and excitations. 
 
 

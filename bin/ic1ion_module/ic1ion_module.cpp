@@ -1375,7 +1375,7 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
    }
    else
    {  
-      if(nn>51) {
+      if(nn>50) {
          fprintf(stderr,"Error module ic1ion: operatormatrix index=%i > 51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
 
       // Indices n 7-11 are k=2 quadrupoles; 12-18:k=3; 19-27:k=4; 28-38:k=5; 39-51:k=6
@@ -1387,7 +1387,7 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
 
       // Checks if the reduced matrix element is zero, if so, return zero without calculating matrix elements.
       double redmat = pow(-1.,(double)abs(pars.l)) * (2*pars.l+1) * threej(2*pars.l,2*k[nn],2*pars.l,0,0,0);
-      if(n>6 && fabs(redmat)<DBL_EPSILON*100)
+      if(nn>5 && fabs(redmat)<DBL_EPSILON*100)
       {
          if(pars.truncate_level!=1) { int cb = (int)(pars.truncate_level*(double)Hsz); zeroes.zero(cb,cb); }
          zmat2pack(zeroes,zeroes,outmat); return 0;

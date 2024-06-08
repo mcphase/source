@@ -1153,9 +1153,9 @@ sub getlattice {
                                     if($module[$n]=~/phonon/&&$classdip){die "Error makenn in $sipffilename: for phonon module the classical dipole cannot be calculated - use option -bvk\n";}
 
                                     if($cfph!=0){($magnetic)=extractfromfile("MAGNETIC",$sipffilename); 
-                                     if($magnetic!=0){unless($module[$n]=~/so1ion/||$module[$n]=~/ic1ion/){die "Error makenn:  ion $n in mcphas.j sipf=$sipffilename for option -cfph magnetic MODULES must be so1ion or ic1ion\n"; }
-                                                      if($module[$n]=~/ic1ion/){unless($cfph==1||$cfph==2){die"Error makenn: for option -cfph mixing so1ion and ic1ion modules is not possible\n";}
-                                                                                $cfph=2;} # for ic1ion module set it to 2 
+                                     if($magnetic!=0){unless($module[$n]=~/so1ion/||$module[$n]=~/ic1ion/||$module[$n]=~/icf1ion/){die "Error makenn:  ion $n in mcphas.j sipf=$sipffilename for option -cfph magnetic MODULES must be so1ion or ic1ion or icf1ion\n"; }
+                                                      if($module[$n]=~/ic1ion/||$module[$n]=~/icf1ion/){unless($cfph==1||$cfph==2){die"Error makenn: for option -cfph mixing so1ion and ic1ion/icf1ion modules is not possible\n";}
+                                                                                $cfph=2;} # for ic1ion and icf1ion module set it to 2 
                                                       if($module[$n]=~/so1ion/){unless($cfph==1||$cfph==3){die"Error makenn: for option -cfph mixing so1ion and ic1ion modules is not possible\n";}
                                                                                 $cfph=3;} # for so1ion module set it to 3 
                                                       ++$nofmagneticatoms;$nph[$nofmagneticatoms+$nofatoms]=$n;
