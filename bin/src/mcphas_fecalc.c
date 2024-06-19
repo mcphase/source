@@ -97,7 +97,7 @@ Eel/=sps.nofatoms;
 return fe;
  }
 
-double fecalc(double & U, double & Eel, int & r,Vector Hex,double T,inipar & ini,par & inputpars,
+double fecalc(double & U, double & Eel, int & r,double & spinchange,Vector Hex,double T,inipar & ini,par & inputpars,
              spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs)
 {/*on input:
     T		Temperature[K]
@@ -130,7 +130,7 @@ double fecalc(double & U, double & Eel, int & r,Vector Hex,double T,inipar & ini
  int slowct=10;
  float stepratio=1.0;
  ++nofcalls;
- float spinchange=0; // initial value of spinchange
+ spinchange=0; // initial value of spinchange
  sdim=sps.in(sps.na(),sps.nb(),sps.nc()); // dimension of spinconfigurations
  Vector  * lnzi; lnzi=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){lnzi[i]=Vector(1,inputpars.cs.nofatoms);} // partition sum for every atom
  Vector  * ui; ui=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){ui[i]=Vector(1,inputpars.cs.nofatoms);} // magnetic energy for every atom
@@ -322,16 +322,7 @@ if (ini.displayall==1)   // display spincf if button is pressed
 
 // loop for selfconsistency
 for (r=1;sta>ini.maxstamf;++r)
-{if (r>ini.maxnofmfloops)
-    {delete []jj;delete []lnzi;delete []ui;
-     for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
-     {for (l=1;l<=inputpars.cs.nofatoms;++l){
-      delete Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
-     }}}} delete []Icalcpars;
-
-     if (verbose==1) fprintf(stderr,"feDIV!MAXlooP");++nofmaxloopDIV;
-     return 2*FEMIN_INI;}
- if (spinchange>ini.maxspinchange)
+{if (spinchange>ini.maxspinchange)
     {delete []jj;delete []lnzi;delete []ui;
           for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){
@@ -391,6 +382,9 @@ if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
 // if (dE>KB*T&&r>10&&stepratio<bigstep)printf("sta=%g dE=%g r=%i stepratio=%g spinschange=%g\n",sta,dE,r,stepratio,spinchange);
 // ---> printing this dE  yields the result, that dE is > KB*T always when the strucuture
 // is oscillating and finally diverges because of MAXSPINCHANGE reached.
+ if ((ini.maxnofmfloops==1&&r==1)||(r==2&&ini.maxnofmfloops==2)){sta=0;} // end loop on first calculation of MF from sps if no MF looping required
+else
+{
 
 //2. calculate sps from mf
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
@@ -484,7 +478,16 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
    fclose(fin_coq);
   }
  }
+if (r>ini.maxnofmfloops) 
+    {delete []jj;delete []lnzi;delete []ui;
+     for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
+     {for (l=1;l<=inputpars.cs.nofatoms;++l){
+      delete Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
+     }}}} delete []Icalcpars;
 
+     if (verbose==1) fprintf(stderr,"feDIV!MAXlooP");++nofmaxloopDIV;
+     return 2*FEMIN_INI;}
+}
 }
 
 //printf ("hello end of selfconsistency loop after %i iterations\n",r);

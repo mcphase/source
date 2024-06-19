@@ -230,6 +230,7 @@ $invrtoijk=inv($rtoijk); #invert this matrix for use later
 $p= $p x $rtoijk; # primitive lattice in Euclidean ijk coordinates
 $pinv=inv($p); #invert this matrix for use later
 $pVolume=inner($p->slice(":,(0)"),crossp($p->slice(":,(1)"),$p->slice(":,(2)")));
+if($pVolume<0){die "Error makenn - primitive lattice not right handed \n";}
 unless($tabout){ print "primitive lattice[A]:".$p."\nPrimitive Unit Cell Volume [A^3]: ".$pVolume."\n";}
     $r=0;
 # select a Vector from primitive lattice print $p->slice(":,(0)");

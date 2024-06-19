@@ -1349,10 +1349,16 @@ fprintf(fout,"}\n");
 //-----------------------------------------------------------------------
 //  numeric output of spinconfiguration to file
 void spincf::print(FILE * fout) //print spinconfiguration to stream
+{print(fout,nofcomponents);}
+
+void spincf::print(FILE * fout,int nofcomp) //print spinconfiguration to stream
 {int i,j,k,l;
+ if(nofcomp>nofcomponents){fprintf(stderr,"Error spincf::print: nofcomp=%i > nofcomponents=%i\n",nofcomp,nofcomponents);exit(1);}
+ if(nofcomp<1){fprintf(stderr,"Error spincf::print: nofcomp=%i <1 \n",nofcomp);exit(1);}
+
  for (k=1;k<=nofc;++k)
  {for (j=1;j<=nofb;++j)
-  {for (l=1;l<=nofcomponents*nofatoms;++l)
+  {for (l=1;l<=nofcomponents*nofatoms;++l)if((l-1)%nofcomponents<nofcomp)
    {for (i=1;i<=nofa;++i)
       {fprintf(fout," %4.4f",myround(1e-5,mom[in(i,j,k)](l)));
        }

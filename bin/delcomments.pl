@@ -37,7 +37,7 @@ while($ARGV[0]=~/^-/)
   {
    $file=$_;
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
-   print "<".$file;
+   print STDERR "<".$file;
 
    open (Fout, ">range.out");
    $i=0;
@@ -61,7 +61,7 @@ while($ARGV[0]=~/^-/)
       close Fout;
       system "del range.out"; 
      }
-print ">";
+print STDERR ">";
    }
 
-print "\n";
+print STDERR "\n";

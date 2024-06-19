@@ -19,6 +19,7 @@ class spincf
 public:
     Vector epsilon; // strain
     void print(FILE * fout);
+    void print(FILE * fout, int nofcomp);
     void print_commented(FILE * fout,const char * string,int min, int max, int maxnofpars, double & absvallimit);
 //print list of atoms + positions + moments
     void eps(FILE * fout);

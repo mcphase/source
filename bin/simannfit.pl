@@ -61,7 +61,7 @@ unless ($#ARGV >0)
             a html tag is added to results/simannfit.0 or results/simannfit.1 if 
 	    stored
     -log 1.3 batchfile.bat   ... works only if option -p is present:
-             if sta is less then 3.5e-1, then execute the file 
+             if sta is less then 1.3, then execute the file 
              batchfile, with sta as argument, which can be adressed in the batch
 	     file with $1 (linux) or  \%1 (windows)
     -h       Histograms are store in results/par*.hst for review of the variation 
@@ -417,7 +417,7 @@ sub sta {#local $SIG{INT}='IGNORE';
                                         {# check if parmin or parmax have been changed by user and update
                                  ($parminnew)=($line=~m/(?:#!|[^#])*?\b$pnam\s*\Q[\E\s*[^,]+\s*,\s*([^,]+)/);
                                  ($parmaxnew)=($line=~m/(?:#!|[^#])*?\b$pnam\s*\Q[\E\s*[^,]+\s*,\s*[^,]+\s*,\s*([^,]+)/);
-                                 unless($parminnew>=$parmaxnew||$par[$i]>$parmaxnew||$par[$i]<$paminnew){  
+                                 unless($parminnew>=$parmaxnew||$par[$i]>$parmaxnew||$par[$i]<$parminnew){  
                                   if($parminnew!=$parmin[$i]){print "parmin of parameter $pnam changed from ".$parmin[$i]." to $parminnew \n";$parmin[$i]=$parminnew;}
 				  if($parmaxnew!=$parmax[$i]){print "parmax of parameter $pnam changed from ".$parmax[$i]." to $parmaxnew \n";$parmax[$i]=$parmaxnew;}
 								}

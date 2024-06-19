@@ -158,6 +158,8 @@ int inipar::load ()
   getnofthread(nofthreads);
   
   if(maxnofmfloops==0){fprintf(stderr,"Error reading maxnofmfloops\n");return 1;}
+  if(maxnofmfloops==1){fprintf(stderr,"#! Reading maxnofmfloops=1 - mean fields will be calculated from initial spins and free energy will be evaluated using initial spins\n");}
+  if(maxnofmfloops==2){fprintf(stderr,"#! Reading maxnofmfloops=2 - mean fields will be calculated from initial spins, new spins will be calculated  and using these the free energy will be evaluated\n");}
   if(maxstamf==0){fprintf(stderr,"Error reading maxstamf\n");return 1;}
   if(bigstep==0){fprintf(stderr,"Error reading bigstep\n");return 1;}
   if(maxspinchange==0){fprintf(stderr,"Error reading maxspinschange\n");return 1;}

@@ -159,7 +159,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  int thread_id=1;
  #endif 
  int i,ii,iii,tryrandom,nr,rr,ri,is,r;
- double fe,fered,Eel,U;
+ double fe,fered,Eel,U,sc;
  double u,lnz; // free- and magnetic energy per ion [meV]
  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
@@ -215,7 +215,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  
       //!!!calculate free energy - this is the heart of this loop !!!!
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-      fe=fecalc(U,Eel,r,H ,T,ini,inputpars,sps,(*mf),testspins,testqs);
+      fe=fecalc(U,Eel,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( " for str %i(%ix%ix%i). "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( " for (%g %g %g)(%ix%ix%i). ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
@@ -226,7 +226,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
             {               // first - reduce the spinconfiguration if possible
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-               if ((fered=fecalc(U,Eel,r,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
+               if ((fered=fecalc(U,Eel,r,sc,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
                                  if (verbose==1){fprintf(stdout,"%i(%ix%ix%i)%i->(%ix%ix%i)fe=%f->%fmeV",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
@@ -282,7 +282,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	     if (0==checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini))//0 means error in checkspincf/addspincf
 	        {if(isfull==0){fprintf(stderr,"Warning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.");
                  isfull=1;}else{fprintf(stderr,"!FT!");}
-                 }
+                physprops.j=j; 
+                }
 	     femin=fe; spsmin=sps;	   
             //printout fe
 	    if (verbose==1) printf("fe=%gmeV, str %i (%i)",fe,physprops.j,j);
@@ -290,7 +291,8 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              MUTEX_LOCK(&mutex_tests); 
              int checksret = checkspincf(j,sps,testqs,nettom,momentq0,phi,testspins,physprops,ini); //0 means error in checkspincf/addspincf
              MUTEX_UNLOCK(&mutex_tests); 
-	     if (checksret==0) {if(isfull==0){fprintf(stderr,"%iWarning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.",thread_id);
+	     if (checksret==0) {physprops.j=j;
+                 if(isfull==0){fprintf(stderr,"%iWarning !FT! htcalc: table of spinconfigurations full - cannot add a new configuration, which has been found.",thread_id);
                  isfull=1;}else{fprintf(stderr,"%i!FT!",thread_id);}}
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
              #endif 
@@ -395,9 +397,9 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                    felog=fopen_errchk(outfilename,"a");
                    if (verbose==1||fe>FEMIN_INI){fprintf(felog,"#! nofatoms=%i nofcomponents=%i fe=%10.6g\n#",inputpars.cs.nofatoms,inputpars.cs.nofcomponents,fe);}
       #ifndef _THREADS
-                   fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i %i 1\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r);
+                   fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i %i %10.6g 1\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r,sc);
       #else
-                   fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i %i %i\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r,thread_id);
+                   fprintf(felog,"%10.6g %10.6g %10.6g %3i %10.6g %3i %3i %3i %3i %i %10.6g %i\n",hkls(1),hkls(2),hkls(3),nk,fe,j,sps.na(),sps.nb(),sps.nc(),r,sc,thread_id);
       #endif	     
                    if (verbose==1&&fe<2*FEMIN_INI){sps.print(felog);}
 	           fclose(felog);
@@ -467,7 +469,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
-               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops threadid at T=%g Ha=%g Hb=%g Hc=%g\n",T,Habc(1),Habc(2),Habc(3));
+               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Ha=%g Hb=%g Hc=%g\n",T,Habc(1),Habc(2),Habc(3));
                fclose(felog);
 	      }
  if (verbose==1)
@@ -641,8 +643,8 @@ else // if yes ... then
      #endif
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
-      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;
-      physprops.fe=fecalc(physprops.u,physprops.Eel,r,H ,T,ini,inputpars,sps,(*mf),testspins,testqs); 
+      mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
+      physprops.fe=fecalc(physprops.u,physprops.Eel,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs); 
 
       magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
@@ -683,7 +685,7 @@ else // if yes ... then
 		}
   delete magmom;if(verbose==1){printf(".");}
  //check if fecalculation gives again correct result
-   if (physprops.fe>femin+(0.00001*fabs(femin))){int eq=0;
+   if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2){int eq=0;
    #ifndef _THREADS
    if(spsmin==sps){eq=1;};//take spinconfiguration which gave minimum free energy as starting value
      #else
@@ -691,7 +693,8 @@ else // if yes ... then
      #endif
    
    fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
-                            T,Norm(H),femin,physprops.j,physprops.fe);fprintf(stderr,"recalculation converged after %i loops and initial and final spin structures are ",r);
+                            T,Norm(H),femin,physprops.j,physprops.fe);
+   fprintf(stderr,"recalculation converged after %i loops and initial and final spin structures are ",r);
    if(eq==1){fprintf(stderr,"equal\n");}else{fprintf(stderr,"not equal\n");}
 if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");

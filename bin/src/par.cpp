@@ -70,7 +70,9 @@ par::par (const char *filejjj,int verbose)
   }
   if(cs.nofatoms>MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL)
   {fprintf(stderr,"ERROR reading mcphas.j: maximum number of atoms in unit cell exceeded - enlarge it in par.hpp and recompile\n");exit(EXIT_FAILURE);}
-         
+  // check if primitive lattice is right handed
+ if(Det(cs.r)<0){fprintf(stderr,"ERROR reading mcphas.j: primitive lattice r1 r2 r3 not right handed\n");exit(EXIT_FAILURE);}
+ 
   rez=cs.r.Inverse();
   rems[3]=new char[strlen(instr)+2];strcpy(rems[3],instr);
   

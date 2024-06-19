@@ -14,9 +14,9 @@ void help_and_exit()
     { printf ("\n\
 program spins - popout spin/exchange field configuration\n"
 "              - and/or display 3d animation of spin/moment/densities and animations\n\n\
-use as: spins -f[c 1 13 3 0.1] mcphas.sps T Ha Hb Hc\n\
-    or: spins -f[c 1 13 3 0.2] mcphas.sps x y\n\
-    or: spins -f[c 1 13 3 0.1] mcphas.tst n\n\
+use as: spins -f[c 1 13 3 0.1] [-n 2]mcphas.sps T Ha Hb Hc\n\
+    or: spins -f[c 1 13 3 0.2] [-n 2] mcphas.sps x y\n\
+    or: spins -f[c 1 13 3 0.1] [-n 2] mcphas.tst n\n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
@@ -38,10 +38,11 @@ use as: spins -f[c 1 13 3 0.1] mcphas.sps T Ha Hb Hc\n\
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>)\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
   \n\
-1&2&3) if used with -fc min max n lim a human readable format is output for spin components with index \n\
+1&2&3) - if used with -fc min max n lim a human readable format is output for spin components with index \n\
    from min to max, only n numbers exceeding  \n\
    absolute value of lim, e.g. -fc 1 13 3 0.1 outputs I1,I2,...,I13, however only at maximum 3 numbers \n\
-   for each atom which are all larger (absolute value) than 0.1 \n\
+   for each atom which are all larger (absolute value) than 0.1. \n\
+      - if option -n 5 ist present only I1,..,I5 are output (mind 5<=nofcomponents)\n\
  \n\
 4) if used without a filename, the information is read from results/mcphas.* results/mcdisp.*\n\
    output files and tables or 3d graphical animations are created.\n\
@@ -147,7 +148,7 @@ double T=0; Vector Hext(1,3),Hextijk(1,3);
  char infilename[MAXNOFCHARINLINE];
  char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
  
-  int dim=28;
+  int dim=28,nofcomp=1000000000;
  char text[1000];
  int os=0,maxn=0; int doijk=0,arrow=0,density=0,phonon=0;//,arrowdim=3;
  double xx=0,yy=0,zz=0,limit=0;
@@ -170,6 +171,7 @@ snprintf(gp.title,sizeof(gp.title),"output of program spins");
  { os=2;if (strcmp(argv[1],"-fc")==0){os=6;minl=(int)strtod(argv[2],NULL);maxl=(int)strtod(argv[3],NULL);
  maxn=(int)strtod(argv[4],NULL);limit=strtod(argv[5],NULL);
    }
+   if (strncmp(argv[os],"-n",2)==0){nofcomp=(int)strtod(argv[os+1],NULL);os+=2;}
    fin = fopen_errchk (argv[os], "rb");printf("#* program spins ... reading from file %s\n",argv[os]);   
  }
  else { if (strncmp(argv[1],"-t",2)==0){os=1;fout=stdout;}
@@ -310,8 +312,9 @@ else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
 if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr))
   {fclose (fin);fprintf(stderr,"#!!! Error program spins - no stable structure found !!!\n");exit(1);}
 fclose (fin);
-
   printf("#! %s - configuration\n",outstr);
+if(nofcomp>savmf.nofcomponents){nofcomp=savmf.nofcomponents;}
+if(nofcomp<savmf.nofcomponents){printf("#! printing only nofcomponents=%i components\n",nofcomp);}
   if (strncmp(argv[1],"-t",2)!=0){
   if(strcmp(argv[1],"-fc")==0){
 if(strcmp(argv[os]+strlen(argv[os])-3,".mf")==0)
@@ -319,7 +322,7 @@ if(strcmp(argv[os]+strlen(argv[os])-3,".mf")==0)
 else{savmf.print_commented(stdout,"I",minl,maxl,maxn,limit);}
 
 exit(0);}
-  else {savmf.print(stdout);}}
+  else {savmf.print(stdout,nofcomp);}}
   par inputpars("./mcphas.j");
   int ii,nt,k,j;
 // determine primitive magnetic unit cell

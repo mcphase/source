@@ -110,9 +110,9 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   float nnerr[200];nnerr[0]=199;
   int ortho=1;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
-      Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
+      Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1; // Trick: put a=b=c=1 to have unit vectors in a b and c directions
                        abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
-
+        // ... then use dadadc2ijk and ijk2dadbdc with this unit length "lattice"
    Vector mabc(1,3),Hijk(1,3);
    dadbdc2ijk(Hijk,H,abc);
    ijk2dadbdc(mabc,m,abc);
@@ -149,7 +149,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
 
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
    fprintf (fout, "#   x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] free energy f[meV/ion] energy u[meV/ion] total moment |m|     ma mb mc m||(projection along H) [mb/ion]");
-   if(ortho==0){fprintf (fout, "mi   mj   mk[muB/f.u.]   Hi  Hj  Hk[T]");}
+   if(ortho==0){fprintf (fout, "mi   mj   mk[muB/ion]   Hi  Hj  Hk[T]");}
    if(ini.doeps&&ortho==0){fprintf (fout, " Eel [meV/ion] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij");}
    if(ini.doeps&&ortho!=0){fprintf (fout, " Eel [meV/ion] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab");}
    fprintf (fout,"}\n");
