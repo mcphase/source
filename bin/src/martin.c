@@ -1162,7 +1162,7 @@ int l,m;
 for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
 }
 
- FILE * open_sipf(char * sipf_filename,char * modulename){
+ FILE * open_sipf(char * sipf_filename,char * modulename, int verbose){
  // opens sipf file and returns filehandle and modulename 
  FILE * cf_file;
  char instr[MAXNOFCHARINLINE];
@@ -1184,6 +1184,6 @@ for(l=1;l<=6;l+=1){for(m=0;m<=l;++m)cnst(l,-m)=cnst(l,m);}
       if (strncmp(modulename,"phonon",6)==0)
       {strcpy(modulename,getenv("MCPHASE_DIR")); strcat(modulename,"/bin/phonon_module/phonon.so"); }
 
-  fprintf (stderr,"#parsing single ion property file: %s - loading module %s",sipf_filename,modulename);
+  if(verbose)fprintf (stderr,"#parsing single ion property file: %s - loading module %s",sipf_filename,modulename);
    return cf_file; }
 

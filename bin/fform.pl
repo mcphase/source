@@ -1,15 +1,23 @@
 #!/usr/bin/perl
 BEGIN{@ARGV=map{glob($_)}@ARGV}
-
+use Time::Local;
 #\begin{verbatim}
 
 
 
 unless ($#ARGV >1) 
 
-{print " program form used to reformat numbers in columns using a special number format\n\n";
+{print " program form used to reformat numbers in columns using a special number format
 
- print " usage: fform col1 col2 format *.*   \n\n col1=1st column,\n col2=last column to be formatted\n format=output format such as 4.4g \n *.* .. filenname\n";
+ usage: fform col1 col2 format *.*   
+
+ col1=1st column,
+ col2=last column to be formatted
+ format=output format such as 4.4g or -t, -t means that col1 to col2 are taken to be
+        year month day hour min second  and the column with 
+        second is replaced by a timestamp in seconds
+   
+ *.* .. filenname\n";
 
  exit 0;}else{print STDERR "#* $0 *";}
 
@@ -42,15 +50,27 @@ $format=$ARGV[0];shift @ARGV;
        else{$line=~s/D/E/g;@numbers=split(" ",$line);
 
            	  $i=0;++$j;
-
+             
 		  foreach (@numbers)
 
 		  {++$i;
 
 		  if ($i>=$col1&&$i<=$col2) 
 
-                {print Fout sprintf("%".$format." ",$numbers[$i-1]);}
+                {unless($format=~/-t/){print Fout sprintf("%".$format." ",$numbers[$i-1]);}
+                       else
+                      {if($i!=$col1+5){print Fout $numbers[$i-1]." ";}
+                       else
+                      {$sec=$numbers[$col1+5-1];
+                       $min=$numbers[$col1+4-1];
+                       $hour=$numbers[$col1+3-1];
+                       $mday=$numbers[$col1+2-1];
+                       $mon=$numbers[$col1+1-1];
+                       $year=$numbers[$col1+0-1];
+                       print Fout timelocal($sec,$min,$hour,$mday,$mon-1,$year)." ";}
+                      }
 
+                }
 		  else
 
                 {print Fout $numbers[$i-1]." ";}     

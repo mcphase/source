@@ -174,7 +174,7 @@ FILE * dBlm_file;
 FILE * dLlm_file;
 char instr[MAXNOFCHARINLINE];
 char module[MAXNOFCHARINLINE];
-int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0;
+int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0,verbose=0;
 float invalues[100];invalues[0]=99;
   double q2,q4,q6,x,y,z,q2sum=0.0,q4sum=0.0,q6sum=0.0;int do_deriv=0,nofcharges=0;
 
@@ -184,6 +184,7 @@ if(argc>1+ac)
 if(strcmp(argv[1+ac],"-d")==0) {ac++;do_deriv=1;dBlm_file=fopen_errchk("results/pointc.dBlm","w");
                                         dLlm_file=fopen_errchk("results/pointc.dLlm","w");} // calculate derivatives of Blm Llm
 else if(strcmp(argv[1+ac],"-o")==0) {ac++;omit_pc=1;} 
+else if(strcmp(argv[1+ac],"-v")==0) {ac++;verbose=1;} 
 else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
                                 }
  }
@@ -247,7 +248,7 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
  char *token;
  int sipf_read_module=-1; // -1 no sipf read,  0 module ic1ion,  4 module so1ion
  if((sipf_file=fopen(argv[1+ac],"r"))) //read ion parameters from file
- { fclose(sipf_file);sipf_file=open_sipf(argv[1+ac],module);fprintf(stderr,"\n");
+ { fclose(sipf_file);sipf_file=open_sipf(argv[1+ac],module,verbose);fprintf(stderr,"\n");
  if(strstr(module,"so1ion")!=NULL){sipf_read_module=4;
    printf("#!MODULE=so1ion\n");}
  if(strstr(module,"ic1ion")!=NULL){sipf_read_module=0;
@@ -396,6 +397,8 @@ if (argc<6+ac) // read pointcharges from file
   if(!omit_pc){if(n==4)printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
                else printf ("\n#pointcharges c2[|e|]  x[A] y[A] z[A] c4[|e|] c6[|e|] c0=c2\n");
               }
+double zp=0,rmin,rmax,rold=0,weight,stamax=1e30,sta;
+Vector Blmav(0,45),Llmav(0,45);
 while(n>0)
 {
 
@@ -409,6 +412,12 @@ while(n>0)
  if(!batchmode)fprintf (conv_file," %4g %4g %4g   %4g %4g %4g  %4g  ",q2,q4,q6,x,y,z,r);
  // calculate Blm Llm for this neighbour
  calcCEFpar(q2,q2,q4,q6,x,y,z,r,Blm,Llm,iops);
+ if(fabs(r-rold)>SMALL_DISPLACEMENT){// new shell ... i.e. check if old shell is in good agreement with average
+ sta=Norm((*iops).Llm-Llmav/zp);// Norm=sqrt(sum of all squares)
+ if(sta<stamax){rmin=rold;rmax=r;stamax=sta;}
+ }
+ weight=exp(r/4);rold=r;
+ Blmav+=Blm*weight;Llmav+=Llm*weight;zp+=weight;
  ++nofcharges;
  q2sum+=q2;
  q4sum+=q4;
@@ -532,7 +541,7 @@ printf("#--------------------------------------------------------\n");
 (*iops).savLlm(stdout);
 
 fprintf(stderr,"#! nofcharges=%i charge sum q2sum=%4g q4sum=%4g q6sum=%4g\n",nofcharges,q2sum,q4sum,q6sum);  
-
+fprintf(stderr,"# checking convergence of CF parameters: putting Rmax betwen %4g A and %4g A recommended \n to obtain CF parameters close to convergent values for large Rmax\n",rmin,rmax);
  if(batchmode) return 0;
 
 table_file=fopen_errchk("./results/pointc.Blm","w");

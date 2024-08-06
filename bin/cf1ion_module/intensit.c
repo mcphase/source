@@ -774,7 +774,7 @@ t02="#!Temperature of the sample               T= %7.2f Kelvin         \n";
  gesamte_intensitaet = 2.0/3.0*const*gj*gj* ((DOUBLE)(dimj*dimj-1)/4);
  
 t01="#-------------------------------------------------------------- \n";
-t02="#!parition function            Z  = %6.2f                 \n";
+t02="#!partition function            Z  = %6.2f                 \n";
 t03="#-------------------------------------------------------------- \n";
 t04="#!Total_magnetic_scattering_intensity = %6.2f barn            \n";
 t05="#-------------------------------------------------------------- \n";
@@ -798,9 +798,10 @@ fprintf(fp,"%s",t01);fprintf(fp,"%s",t02);fprintf(fp,"%s",t03);
         }
     }
     tabelle(fp,anz_niveaus,aJtb2);
-    if( anz_niveaus > 1)
+   if( anz_niveaus > 1)
         mittlung(fp,anz_niveaus,aJtb2,ew,entartung,einheitnr_in,
                     einheitnr_out,einheit_out);
+
 t01="#-------------------------------------------------------------- \n";
 t02="# Transition Energy (%6s) vs Intensity (barn)                  \n";
 t03="#-------------------------------------------------------------- }\n";
@@ -2394,8 +2395,8 @@ void mittlung(fp,anz_niveaus,inten,ew,entartung,
     DOUBLE  int_sum_v,int_sum_g;
     DOUBLE  rel_err_v,rel_err_g;
     DOUBLE  ew_mittel_v,ew_mittel_g;
-    DOUBLE  delta_ew_v[17],int_ew_v[17];
-    DOUBLE                 int_ew_g[17];
+    DOUBLE  delta_ew_v[18],int_ew_v[18];
+    DOUBLE                 int_ew_g[18];
  
     t01="#-----------------------------------------------------------\n" ;
     t02="#!Total_quasielastic_intensity =      %11.2f barn           \n";
@@ -2416,13 +2417,12 @@ void mittlung(fp,anz_niveaus,inten,ew,entartung,
        int_qe += R(inten,zeile,zeile);
  
 /* energiedifferenzen der leiter berechnen */
-    faktor = EINHEITIMP[einheitnr_in].fek*EINHEITIMP[einheitnr_out].fke;
+   faktor = EINHEITIMP[einheitnr_in].fek*EINHEITIMP[einheitnr_out].fke;
     for( zeile=2 ; zeile<=anz_niveaus ; ++zeile){
-       ew_zeile   = RV(ew,(INT)R(entartung,zeile  ,1))*faktor;
+      ew_zeile   = RV(ew,(INT)R(entartung,zeile  ,1))*faktor;
        ew_zeilem1 = RV(ew,(INT)R(entartung,zeile-1,1))*faktor;
        delta_ew_v[zeile] = ew_zeile - ew_zeilem1;
     }
- 
 /* Uebergangsintensitaeten berechnen */
     int_sum_v = 0.0;
     int_sum_g = 0.0;
@@ -2473,7 +2473,9 @@ void mittlung(fp,anz_niveaus,inten,ew,entartung,
     fprintf(fp,t11,is_null(int_sum_g,0.001));
     fprintf(fp,"%s",t12);
     fprintf(fp,"\n");
- 
+
+
+
  
 }
 /*----------------------------------------------------------------------------

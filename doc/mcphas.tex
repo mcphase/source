@@ -207,7 +207,12 @@ is stable in thermal  equilibrium.
 
 It may happen that this process does
 not converge due to bad choice of the initial configuration, therefore a maximum number
-of mean field loops has to be given by the user.
+of mean field loops has to be given by the user (MAXNOFMFLOOPS). \footnote{Note two
+special cases:If MAXNOFMFLOOPS=1, then the mean fields are calculated from the initial values
+of the spin configuration and free energy is evaluated immediately without checking convergence.
+If MAXNOFMFLOOPS=2, then from calculated mean fields the spins are calculated and 
+free energy is evaluated, without checking convergence. For  MAXNOFMFLOOPS$>$2 free energy is
+only evaluated if the iteration reached the convergence limit specified by MAXSTAMF.}
 The results of a calculation may be significantly influenced by
 changing parameters such as the maximum number of iteration loops 
 in this section. 

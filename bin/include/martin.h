@@ -189,7 +189,7 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
 
 void set_zlm_constants(Matrix & cnst);
 
-FILE * open_sipf(char * sipf_filename,char * modulename);
+FILE * open_sipf(char * sipf_filename,char * modulename,int verbose);
 // opens sipf file and returns filehandle and modulename 
 
 

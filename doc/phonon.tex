@@ -598,14 +598,17 @@ $\hat \mbf P_i$ leading to the crystal field phonon interaction. Minimizing the 
 the strain tensor $\epsilon$ leads to expressions for the strain $\epsilon$ in terms of expectation values
 of Stevens Operators and displacement operators. 
 
-The Hamiltonian can be written as a sum  (writing $\gamma$ instead of $lm$ for the crystal field parameter
+The Hamiltonian can be written as a sum of phonon, crystal field and Zeeman contributions
+ (writing $\gamma$ instead of $lm$ for the crystal field parameter
 indices, the $i$ index counts nuclei carrying with them
 the charge producing the crystal field $i=1,...,N_{\rm nuclei}$, 
-the $j$ index runs over magnetic ions in a crystal $j=N_{\rm nuclei}+1,... N_{\rm nuclei}+N_{\rm magnetic ions}$)
+the $j$ index runs over magnetic ions,i.e. the only partially filled
+f or d electron shells  in a crystal $j=N_{\rm nuclei}+1,... N_{\rm nuclei}+N_{\rm magnetic ions}$,
+this is why we writ $i<j$ in the following sums)
 
 \begin{eqnarray}\label{Hamiltonian}
-\hat H_{\rm tot} & = & \hat H_{\rm phon} +\sum_{i,\gamma} B_{\gamma}(j,\hat \mbf U_1,...,\hat \mbf U_N) O_{\gamma}(\hat \mbf J_i) \\
-&=& H_{\rm phon} +\sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) + \hat H_{\rm cfph}\nonumber 
+\hat H_{\rm tot} & = & \hat H_{\rm phon} +\sum_{i,\gamma} B_{\gamma}(i,\hat \mbf U_1,...,\hat \mbf U_N) O_{\gamma}(\hat \mbf J_i) - \sum_i g_{J_i} \mu_B \hat \mbf J_i \mbf H \\
+&=& \hat H_{\rm phon} +\sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) + \hat H_{\rm cfph}\nonumber 
  \end{eqnarray}
 
 \begin{eqnarray}\label{Hcfph}
@@ -657,8 +660,8 @@ $\hat \mbf u = \hat \mbf P / a_0$, we can write the total Hamiltonian as
 
 {\color{blue}
 \begin{eqnarray}\label{Htot}
-\hat H_{\rm tot} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) + \sum_{i} \hat H_{\rm E}(i) + \\
-&+&\frac{1}{2}\sum_{\alpha\gamma=1-6} c^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} - \nonumber \\
+\hat H_{\rm tot} & = & \sum_{i,\gamma} B_{\gamma}(i,0,\dots,0) O_{\gamma}(\hat \mbf J_i) - \sum_i g_{J_i} \mu_B \hat \mbf J_i \mbf H+ \\
+&+&\sum_{i} \hat H_{\rm E}(i) + \frac{1}{2}\sum_{\alpha\gamma=1-6} c^{\alpha\gamma} \epsilon_{\alpha}\epsilon_{\gamma} - \nonumber \\
 &-&\frac{1}{2}\sum_{i\ne j,\alpha\beta} K_{\alpha\beta}(ij) \hat u_{i}^{\alpha}\hat u_{j}^{\beta} 
 -\sum_{i<j,\alpha=1-6,\gamma}\Gamma^{\alpha\gamma}(ij) \hat u^{\alpha}_i O_{\gamma}(\hat \mbf J_j)
 \nonumber \\
@@ -668,8 +671,9 @@ $\hat \mbf u = \hat \mbf P / a_0$, we can write the total Hamiltonian as
 }
 
 
-The first line in (\ref{Htot}) contains the single ion Hamiltonian (crystal field, phonon), 
-and the second line the elastic energy (also a ''single ion'' term),
+The first line in (\ref{Htot}) contains the single ion Hamiltonian (crystal field, Zeeman)
+ 
+and the second line the phonon Einstein oscillator and elastic energy (also a ''single ion'' terms),
 the third line the interaction terms (phonon, crystal field phonon), 
 the forth line the mixing term and 
 the last line  the magnetoelastic term. 
@@ -725,7 +729,7 @@ Hamiltonian
 
 
 \begin{equation}\label{Hwithexstric}
-H=H_{\rm tot} -\frac{1}{2} \sum_{ij,\alpha\beta}
+\hat H=\hat H_{\rm tot} -\frac{1}{2} \sum_{ij,\alpha\beta}
  {\mathcal J}_{\alpha\beta}((1+\bar a)(\mbf R_{j} - \mbf R_i)) \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
 \end{equation}
 
@@ -747,7 +751,7 @@ inserted in equation~(\ref{Hwithexstric}).
 
 {\color{blue}
 \begin{equation}\label{Hwexstric}
-H=H_{\rm tot} -\frac{1}{2} \sum_{ij,\alpha\beta}
+\hat H=\hat H_{\rm tot} -\frac{1}{2} \sum_{ij,\alpha\beta}
  {\mathcal J}_{\alpha\beta}(\mbf R_{ij}) \hat \mathcal I_{\alpha}^i \hat \mathcal I_{\beta}^{j}
  -\frac{1}{2} \sum_{ \stackrel{ij,\alpha\beta\alpha'\gamma=1,2,3}{\beta'=1,..,6}}
 \frac{\partial {\mathcal J}_{\alpha\beta}}{\partial R^{\alpha'}}

@@ -461,7 +461,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
    trs_header_out(fout,pinit,ninit,maxE,ini.T,ini.Hext,'I');
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.cs.nofatoms;++l){
-   fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
+   if(do_verbose==1)fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
     for(ll=1;ll<=ini.nofcomponents;++ll)
      {mf(ll)=ini.mf.mf(i,j,k)(ini.nofcomponents*(l-1)+ll);} //mf ... mean field vector of atom s in first 
                                                             //crystallographic unit of magnetic unit cell

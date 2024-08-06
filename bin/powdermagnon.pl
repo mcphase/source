@@ -54,8 +54,6 @@ print " The powder average is generated - output is printed to the console (STDO
 
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;
 my ($qmin) = eval $ARGV[0];
-$ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;
-my ($qmax) =eval $ARGV[1];
 
 
 
@@ -128,6 +126,8 @@ exit;
 }
 
 
+$ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;
+my ($qmax) =eval $ARGV[1];
 
 my ($deltaq) = $ARGV[2];
 
@@ -239,7 +239,7 @@ if($nn<0){$dtheta=$dtheta0*$qmin*$qmin/$q/$q;}else{$dtheta=$dtheta0;}
   for ($fi=0;$fi<2*$PI;$fi+=$dfi){ 
  $qvec=pdl[$q*sin($theta)*cos($fi),$q*sin($theta)*sin($fi),$q*cos($theta)];
  $hkl=($qvec/(2*$PI)) x $rtoijk;$hkl=$hkl->slice(":,(0)");
- print Fout $hkl->at(0)." ".$hkl->at(1)." ".$hkl->at(2)."\n";
+ print Fout $hkl->at(0)." ".$hkl->at(1)." ".$hkl->at(2)."\n";++$nofpoints;
  }}
 
  $qvec=pdl[0,0,-$q];

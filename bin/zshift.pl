@@ -7,9 +7,13 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 unless ($#ARGV >2) 
 
-{print " program zshift  used to shift coly  by  a constant such that it is zero at a specified value of colx \n";
+{print " program zshift  used to shift coly  by  a constant such that it is zero at 
+         a specified value of colx 
 
- print " usage: zshift  constx colx coly  *.*   \n  constx=x-value, colx,coly= columns \n *.* .. filenname\n";
+ usage: zshift  constx colx coly  *.*   
+  constx=x-value,
+  colx,coly= columns (colx=0 means line number)
+  *.* .. filenname\n";
 
  exit 0;}else{print STDERR "#* $0 *";}
 
@@ -29,25 +33,26 @@ $ARGV[0]=~s/x/*/g;$column=eval $ARGV[0];shift @ARGV;
 
    $file=$_;
 $delta=1e22;
+# determine constant to shift column
    unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
    print "<".$file;
-
+$j=0;
    while($line=<Fin>)
 
    {$line=~s/D/E/g;@numbers=split(" ",$line);
-
-        if (($d=abs($numbers[$colx-1]-$constx))<$delta)
+    unless($line=~/^\s*#/) {++$j;unshift(@numbers,$j);
+        if (($d=abs($numbers[$colx]-$constx))<$delta)
 
 	{$delta=$d;
 
-	 $const=-$numbers[$column-1];
+	 $const=-$numbers[$column];
 
-       # print $numbers[$colx-1]." $const\n";
+       # print $numbers[$colx]." $const\n";
 
         }    
 
          
-
+   }
    }
 
  

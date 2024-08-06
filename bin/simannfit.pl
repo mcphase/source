@@ -64,7 +64,7 @@ unless ($#ARGV >0)
              if sta is less then 1.3, then execute the file 
              batchfile, with sta as argument, which can be adressed in the batch
 	     file with $1 (linux) or  \%1 (windows)
-    -h       Histograms are store in results/par*.hst for review of the variation 
+    -h       Histograms are stored in results/par*.hst for review of the variation 
              of parameters during the run of simannfit. 
     -d       store percentage of different contributions to sta in file results/simannfit.dst 
 
@@ -377,13 +377,16 @@ print $delta;
                         print Fout "|";print Fout sprintf ("%s [%+e,%+e,%+e,%+e,%+e]\n",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i],$parerr[$i],$parstp[$i]);
                    ++$i;}
   if($chisquared){
-     print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens restart and try again):\n";
+     print Fout "Covariance matrix( may be not successfull because last n steps of simulated annealing may be not necessarily\n orthogonal in parameter space - if this happens  (you will get error=0) restart and try again):\n";
 $Fij=$delta x inv($V);
  $FtF=$Fij->xchg(0,1) x $Fij;
  $cov=$sta*inv($FtF);  # multiply by sta=chi2 in order to get covariance matrix
      print $cov; print Fout $cov;
-                $i=0;foreach(@par){print $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
-                                   print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
+                $i=0;foreach(@par){if($cov->at($i,$i)>0){print $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";
+                                   print Fout $parnam[$i]." error=".(sqrt($cov->at($i,$i)))."\n";}
+                                   else {print $parnam[$i]." covariance matrix not successful error=0\n";
+                                         print Fout $parnam[$i]." covariance matrix not successful error=0\n";
+                                         }
                                    ++$i;}
      }
      close Fout;if($tablestep!=0){++$stepnumber;write_set(">>$s0file");}

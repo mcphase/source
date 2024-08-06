@@ -6,7 +6,7 @@ unless ($#ARGV >0)
 {
 print STDERR << "EOF";
 
- program to get the y-value of a function by averaging
+ program to extract the y-value of a function y(x) by averaging
  over an interval xvalue+-dx,
  
  usage: perl getvalue.pl colx coly xvalue dx filename
@@ -15,7 +15,28 @@ print STDERR << "EOF";
         if colx=0 then the x axis is assumed to be the line number (not considering
         comment lines)
         if you do not want any integration at interval boundaries to happen, 
-        remember to put dx to a very small but nonzero value.
+        remember to put dx to zero.
+
+ examples:
+
+ 1) from a spectrum in file spectrum.dat with Energy in column 1 and Intensity 
+    in column 2 get Intensity at 
+    35 meV averaging datapoint over +-1.5meV
+
+. getvalue 1 2 35 1.5 spectrum.dat
+
+
+ 2) in a function stored in column 2 (x values) vs column 5 (yvalues) of file function.dat
+    get y value at x=23.4 by linear interpolation
+
+. getvalue 2 5 23.4 0 function.dat
+
+ 3) in datafile f.dat get value of 46th datapoint in column 3 
+
+. getvalue 0 3 46 0 f.dat
+
+ 
+
  output: y-value           to stdout and stored in env. variable MCPHASE_YVALUE
          1/y-value         to stdout and stored in MCPHASE_YVALUE_INVERSE
          standarddeviation to stdout and stored in MCPHASE_STA
@@ -73,23 +94,36 @@ print "export MCPHASE_STA=$sta\n";
 
 exit(0);
 
-sub getvalue_by_averaging_over_intervaldE { #integrates intensity between $constx+-$dE
+sub getvalue_by_averaging_over_intervaldE { 
+#integrates intensity between $constx+-$dE
 my ($constx,$colx,$coly,$dE,$file)=@_;
   unless (open (Fin, $file)){die "\n error:unable to open $file\n";}
   $Iav=0;$j=0;$esum=0;$nofpoints=0;$order=1;
   while($line=<Fin>){
-   unless($line=~/^\s*#/||$line=~/^\s*\n/){$line=~s/D/E/g;@numbers=split(" ",$line);unshift(@numbers,$j+1);
-         if ($j==0){@numbers1=@numbers;}else{$order=1;if($numbers[$colx]<$numbers1[$colx]){$order=-1;}}
-            ++$j;
-                 unless(0==($numbers[$colx]-$numbers1[$colx])||$constx-$dE>$numbers[$colx]||$constx-$dE>$numbers1[$colx]
-                                                                 ||$constx+$dE<$numbers[$colx]||$constx+$dE<$numbers1[$colx])
-                  {++$nofpoints;
+   unless($line=~/^\s*#/||$line=~/^\s*\n/)
+   {$line=~s/D/E/g;@numbers=split(" ",$line);
+    unshift(@numbers,$j+1); # put into first column the line number 
+    if ($j==0){@numbers1=@numbers;}else{if($order==-1&&$numbers[$colx]>$numbers1[$colx]){die "Error getvalue: column $colx not sorted\n";}
+             $order=1;if($numbers[$colx]<$numbers1[$colx]){$order=-1;}} # determine if ascending or descending data in colx
+            ++$j; # read dataline
+   unless(0==($numbers[$colx]-$numbers1[$colx])||
+              $constx-$dE>$numbers[$colx]||
+              $constx-$dE>$numbers1[$colx]||
+              $constx+$dE<$numbers[$colx]||
+              $constx+$dE<$numbers1[$colx])  # check if dataline and previous dataline are in range constx +- dE
+             {++$nofpoints;
   $Iav+=$order*($numbers[$coly]+$numbers1[$coly])/2*($numbers[$colx]-$numbers1[$colx]);
   $esum+=$order*($numbers[$colx]-$numbers1[$colx]);
-       	          } 
-                 # now treat a boundary point correctly
-                 unless(0==($numbers[$colx]-$numbers1[$colx]))
-                { if(($order*($constx-$dE)>$order*($numbers[$colx]))&($order*($constx-$dE)<$order*($numbers1[$colx])))
+       	     } 
+# now treat a boundary point correctly (i.e. either dataline or previous datalin is not in range constx+- dE)
+unless(0==($numbers[$colx]-$numbers1[$colx]))
+   { if($dE==0) # dE=0 means interpolate between points in datafile
+     {if(($order*$numbers[$colx]>=$order*$constx)&($order*$constx>=$numbers1[$colx]*$order)) # interpolate if constx in interval
+      {$esum=1;$Iav=$numbers1[$coly]+($numbers[$coly]-$numbers1[$coly])*($constx-$numbers1[$colx])/($numbers[$colx]-$numbers1[$colx]);
+      }# print $esum.$Iav.$numbers[$colx].$numbers1[$colx].$constx."\n";
+     }
+     else { 
+    if(($order*($constx-$dE)>$order*($numbers[$colx]))&($order*($constx-$dE)<$order*($numbers1[$colx])))
                   {++$nofpoints;# print STDERR "#hello1";
                    $bx=$constx-$dE;
                    $by=$numbers[$coly]+($bx-$numbers[$colx])*($numbers1[$coly]-$numbers[$coly])/($numbers1[$colx]-$numbers[$colx]);
@@ -117,7 +151,7 @@ my ($constx,$colx,$coly,$dE,$file)=@_;
                    $Iav+=($by+$numbers1[$coly])/2*($bx-$numbers1[$colx]);
                    $esum+=$order*($bx-$numbers1[$colx]);
                   }
-                 }
+                 }}
    @numbers1=@numbers;
    }}
   close Fin;
