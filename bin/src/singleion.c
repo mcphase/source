@@ -44,35 +44,40 @@ void helpexit()
           "         -L  ......... calculate expectation values and transition matrix\n"
           "                       elements for orbital momentum L\n" 
           "         -opmat 2 .... output operator matrix number 2 to results/op.mat\n"
+          "         -v       .... verbose, output more information on ongoing calculation\n"
+          "         -Tsteps 10 27 in addition to initial temperature calculate 10 further temperatures\n"
+          "                       until 27K has been reached\n"
+          "         -Hsteps 20 0 0 10 in addition to initial field calculate 20 further external fields\n"
+          "                       until (0 0 10) Tesla has been reached\n"
           "    n=0 Hamiltonian, n=1,...,nofcomponents: operator Matrix In in standard basis\n"
           "                     n=-1,..,-nofomponents: operator Matrix In for Hamiltonian eigenstates basis\n"
           "                     n>nofomponents: all operator Matrices (n=0 to n=nofcomponents) in standard basis\n"
           "                     n<-nofomponents: all operator Matrices (n=0 to n=-nofcomponents) in Hamiltonain eigenstates basis\n"
-          "Note: for calculating T or H dependencies you can put single ion in a LOOP\n"
+          "Note: for calculating H dependencies you can put single ion in a LOOP\n"
           "      and pipe the result into a file\n"
           "  .... LOOP linux:   for B in $(seq 0 0.1 14); do singleion 2 $B 0 0 0 0 0; done > results/fielddep.dat\n"
           " ...  LOOP linux using perl:\n"
-          "perl -e 'for($T=1;$T<90;$T+=20){system(\"singleion \".$T.\" 1 0 0  0 0 0\");}' > results/sus1Tesla.clc \n"
+          "perl -e 'for($B=1;$B<14;$B+=0.1){system(\"singleion 2 \".$B.\" 0 0  0 0 0\");}' > results/sus1Tesla.clc \n"
           " ... LOOP for windows using perl:\n"
-          "perl -e \"for($T=1;$T<90;$T+=20){system('singleion '.$T.' 1 0 0 0 0 0');}\" > results\\sus1Tesla.clc\n"
+          "perl -e \"for($B=1;$B<14;$B+=0.1){system('singleion 2 '.$B.' 0 0  0 0 0');}\" > results\\sus1Tesla.clc\n"
           );
       exit (1);
 }
 
 // hauptprogramm
 int main (int argc, char **argv)
-{ int i,j,nt=0,do_sipf=0;
+{ int i,j,nt=0,do_sipf=0,verbose=0;
   char sipffile[MAXNOFCHARINLINE];char  filename[MAXNOFCHARINLINE];
  char * pchr;
-  double lnz,u; double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10;
+   double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10;
+   int Tsteps=0,Hsteps=0;
+   double Tend=0,Tstart=0;
+   Vector Hend(1,3),Hstart(1,3);
   float d=1e10;int nofcomponents=0;FILE * fout,* fout_trs, * fout_opmat;
-  double T;Vector Hext(1,3),Q(1,3),Hxc_in(1,HXCMAXDIM);
+  Vector Hext(1,3),Q(1,3),Hxc_in(1,HXCMAXDIM);
   int nmax=5;// default number of transitions to  be output
   char observable='I'; // default is operators I
-printf("#**************************************************************\n");
-printf("# * singleion.c - calculate single ion properties\n");
-printf("# * Author: Martin Rotter %s\n",MCPHASVERSION);
-printf("# **************************************************************\n");
+printf("#***singleion.c - calculate single ion properties - M. Rotter %s*****\n",MCPHASVERSION);
 //***************************************************************************************
 // check command line parameters 
 //***************************************************************************************
@@ -107,10 +112,28 @@ for (i=1;i<argc;++i)
   else {if(strcmp(argv[i],"-opmat")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -opmat needs argument(s)\n");exit(EXIT_FAILURE);}
 	                              opmat=strtod(argv[i+1],NULL);++i;
     			             }       
-  else{T=strtod(argv[i],NULL);++i;  // now read T
+  else {if(strcmp(argv[i],"-Tsteps")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -Tstep needs argument(s)\n");exit(EXIT_FAILURE);}
+	                              Tsteps=(int)fabs(strtod(argv[i+1],NULL));++i;
+	                              if(i==argc-1){fprintf(stderr,"Error in command: singleion -Tstep needs 2 argument(s)\n");exit(EXIT_FAILURE);}
+	                              Tend=strtod(argv[i+1],NULL);++i;
+    			             }       
+  else {if(strcmp(argv[i],"-Hsteps")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hstep needs argument(s)\n");exit(EXIT_FAILURE);}
+	                              Hsteps=(int)fabs(strtod(argv[i+1],NULL));++i;
+	                              if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hstep needs 4 argument(s)\n");exit(EXIT_FAILURE);}
+	                              Hend(1)=strtod(argv[i+1],NULL);++i;
+    			             if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hstep needs 4 argument(s)\n");exit(EXIT_FAILURE);}
+	                              Hend(2)=strtod(argv[i+1],NULL);++i;
+    			             if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hstep needs 4 argument(s)\n");exit(EXIT_FAILURE);}
+	                              Hend(3)=strtod(argv[i+1],NULL);++i;
+    			             }       
+  else {if(strcmp(argv[i],"-v")==0)verbose=1;      
+  else{Tstart=strtod(argv[i],NULL);++i; if(!Tsteps){Tend=Tstart;} // now read T
        Hext=0;for(j=1;j<=3;++j){if(i<argc){Hext(j)=strtod(argv[i],NULL);}++i;} // read Hexta Hextb Hextc
        Hxc_in=0;for(j=1;i<argc&&j<HXCMAXDIM;++j){++nofcomponents;Hxc_in(j)=strtod(argv[i],NULL);++i;} //read Hxc1 Hxc2 ... Hxcn
       } // T Hext Hxc
+    } // verbose
+    } // -Hstep
+    } // -Tstep
     } // -opmat
     } // -r
     } //maxE         
@@ -134,17 +157,24 @@ for (i=1;i<argc;++i)
     case 'L': observable_nofcomponents=3;break;
     default: observable_nofcomponents=nofcomponents; // I
    }
-  Vector I(1,observable_nofcomponents);
   // transition matrix Mij
+double TT=Tstart;
+if(Tstart>Tend){Tstart=Tend;Tend=TT;}
+++Tsteps;Vector T(1,Tsteps); // Tsteps= number of temperatures to calculate
+T(1)=Tstart;for(int Ti=1;Ti<Tsteps;++Ti){T(Ti+1)=T(Ti)+(Tend-Tstart)/(Tsteps-1);} //set T's
+Vector dH(1,3);dH=0;
+Hstart=Hext;if(Hsteps){dH=Hend-Hstart;dH*=(1.0/Hsteps);}
+//myPrintVector(stdout,dH);printf("%i\n",Hsteps);exit(0);
+  Matrix I(1,observable_nofcomponents,1,Tsteps);
+  Vector lnz(1,Tsteps),u(1,Tsteps);
   ComplexVector Mq(1,observable_nofcomponents),u1(1,nofcomponents);
- 
-double TT=T;
+  ComplexMatrix MMq(1,observable_nofcomponents,1,Tsteps);
 
 if (!do_sipf)
-  {par inputpars("./mcphas.j");
+  {par inputpars("./mcphas.j",verbose);
    inputpars.save_sipfs("./results/_");
    if(nofcomponents!=inputpars.cs.nofcomponents)fprintf(stderr,"#Warning: number of exchange field components read from command line not equal to that in mcphas.j - continuing...\n");
-    printf("#\n#atom-number T[K] ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
+    printf("#atom-number T[K] ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    switch(observable)
                                    {case 'Q': printf("Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
@@ -153,18 +183,25 @@ if (!do_sipf)
                                    }
                                    printf("transition-energies(meV)...\n");
    if(opmat<1e10){fout_opmat=fopen_errchk("./results/op.mat","w");}
-                   
-     for(i=1;i<=inputpars.cs.nofatoms;++i)
-     {switch(observable)
-      {case 'L': (*inputpars.jjj[i]).Lcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;
-       case 'S': (*inputpars.jjj[i]).Scalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;
-       case 'M': (*inputpars.jjj[i]).mcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));break;
-       case 'Q': (*inputpars.jjj[i]).mcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));
-                 (*inputpars.jjj[i]).eigenstates(Hxc,Hext,T);(*inputpars.jjj[i]).MQ(Mq, Q);
+     for(i=1;i<=inputpars.cs.nofatoms;++i)(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,Tstart);
+     for(i=1;i<=inputpars.cs.nofatoms;++i){
+     for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
+      switch(observable)
+      {case 'L': (*inputpars.jjj[i]).Lcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parstorage);break;
+       case 'S': (*inputpars.jjj[i]).Scalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parstorage);break;
+       case 'M': (*inputpars.jjj[i]).mcalc(I,T,Hxc,Hext,(*inputpars.jjj[i]).Icalc_parstorage);break;
+       case 'Q': for(int Ti=1;Ti<=Tsteps;++Ti)
+                 {Vector II(I.Column(Ti));
+                 (*inputpars.jjj[i]).mcalc(II,T(Ti),Hxc,Hext,(*inputpars.jjj[i]).Icalc_parstorage);
+                 I.Column(Ti)=II;
+                 (*inputpars.jjj[i]).eigenstates(Hxc,Hext,T(Ti));
+                 (*inputpars.jjj[i]).MQ(Mq, Q);
+                 for(int ii=1;ii<=observable_nofcomponents;++ii){MMq(ii,Ti)=Mq(ii);}
+                 }
                  break;       
-       default: (*inputpars.jjj[i]).Icalc(I,T,Hxc,Hext,lnz,u,(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,T));
+       default: (*inputpars.jjj[i]).Icalc(I,T,Hxc,Hext,lnz,u,(*inputpars.jjj[i]).Icalc_parstorage);
       }  
-              
+if(!Hi){
       snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
@@ -174,22 +211,26 @@ pchr=strstr(filename+10,"\\");
  while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
 
       fout=fopen_errchk(filename,"w"); 
-     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",(*inputpars.jjj[i]).est.Chi(),(*inputpars.jjj[i]).sipffilename,T);
+     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",(*inputpars.jjj[i]).est.Chi(),(*inputpars.jjj[i]).sipffilename,TT);
                                    for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
                                    for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
                                    switch(observable)
                                    {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(Mq(j)),imag(Mq(j)));break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j));
+                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
                                    }
                                    fprintf(fout,"\n");
-      printf("%3i %8g ",i,T); // printout ion number and temperature
+       }     
+for(int Ti=1;Ti<=Tsteps;++Ti){
+      printf("%3i %8g ",i,T(Ti)); // printout ion number and temperature
       for(j=1;j<=3;++j)printf(" %8g ",Hext(j)); // printout external field as requested
       for(j=1;j<=nofcomponents;++j)printf("%8g ",Hxc(j)); // printoutexchangefield as requested
       switch(observable)
-       {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(Mq(j)),real(Mq(j)),imag(Mq(j)),I(j)*(*inputpars.jjj[i]).F(Norm(Q)));break;
-        default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j));  // printout corresponding moments      
-       } if(nmax>0)
+       {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(MMq(j,Ti)),real(MMq(j,Ti)),imag(MMq(j,Ti)),I(j,Ti)*(*inputpars.jjj[i]).F(Norm(Q)));break;
+        default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j,Ti));  // printout corresponding moments      
+       } 
+
+    if(nmax>0&&Ti==1&&!Hi)
       { snprintf(filename,MAXNOFCHARINLINE,"./results/%s.trs",(*inputpars.jjj[i]).sipffilename);
        // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
@@ -216,7 +257,8 @@ pchr=strstr(filename+10,"\\");
         (*inputpars.jjj[i]).print_eigenstates(fout);fclose(fout);
         fclose(fout_trs);
         if(nmax<nt){printf("...");}
-      }
+      }printf("\n");}} // Ti,Hi
+
      if(opmat<1e10){fprintf(fout_opmat,"#! d=%i  ",(*inputpars.jjj[i]).est.Chi());
                     if(opmat>nofcomponents){ for(int opmati=0;opmati<=nofcomponents;++opmati)
                                              {Matrix op((*inputpars.jjj[i]).opmat(opmati,Hxc,Hext));
@@ -240,21 +282,13 @@ pchr=strstr(filename+10,"\\");
                       myPrintComplexMatrix(fout_opmat,op);
                      }
                     }
-                   }     
-      printf("\n");
-     } if(opmat<1e10)fclose(fout_opmat);
+                        
+      
+     }}// fi i
+    if(opmat<1e10)fclose(fout_opmat);
    } else { // option -r sipffile
-   jjjpar jjj(0,0,0,sipffile,nofcomponents,1);jjj.save_sipf("./results/_");
-      switch(observable)
-      {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
-       case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
-       case 'M': jjj.mcalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));break;
-       case 'Q': jjj.mcalc(I,T,Hxc,Hext,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));
-                 jjj.eigenstates(Hxc,Hext,T);jjj.MQ(Mq, Q);
-                 break;       
-      default: jjj.Icalc(I,T,Hxc,Hext,lnz,u,jjj.Icalc_parameter_storage_init(Hxc,Hext,T));
-      }          
-   printf("#\n#atom-nr T[K] ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
+   jjjpar jjj(0,0,0,sipffile,nofcomponents,verbose);jjj.save_sipf("./results/_");
+   printf("#atom-nr T[K] ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    switch(observable)
                                    {case 'Q': printf("Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
@@ -262,7 +296,23 @@ pchr=strstr(filename+10,"\\");
                                     default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
                                    printf("transition-energies(meV)...\n");
-      snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
+    jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
+   for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
+        switch(observable)
+      {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
+       case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
+       case 'M': jjj.mcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
+       case 'Q': for(int Ti=1;Ti<=Tsteps;++Ti)
+                 {Vector II(I.Column(Ti));jjj.mcalc(II,T(Ti),Hxc,Hext,jjj.Icalc_parstorage);I.Column(Ti)=II;
+                 jjj.eigenstates(Hxc,Hext,T(Ti));
+                 jjj.MQ(Mq, Q);
+                 for(int ii=1;ii<=observable_nofcomponents;++ii){MMq(ii,Ti)=Mq(ii);}
+                 }
+                 break;       
+      default: jjj.Icalc(I,T,Hxc,Hext,lnz,u,jjj.Icalc_parstorage);
+      }          
+if(!Hi){  
+    snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
  pchr=strstr(filename+10,"/");
@@ -271,23 +321,24 @@ pchr=strstr(filename+10,"\\");
  while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
 
       fout=fopen_errchk(filename,"w");  
-    fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,T);
+    fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,TT);
                                    for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
                                    for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
                                    switch(observable)
                                    {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(Mq(j)),imag(Mq(j)));break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j));
+                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
                                    }
                                    fprintf(fout,"\n");
-
-   printf("%3i %8g ",1,T); // printout ion number and temperature
+   }
+for(int Ti=1;Ti<=Tsteps;++Ti){
+   printf("%3i %8g ",1,T(Ti)); // printout ion number and temperature
       for(j=1;j<=3;++j)printf(" %10g ",Hext(j)); // printout external field as requested
       for(j=1;j<=nofcomponents;++j)printf("%8g ",Hxc(j)); // printoutexchangefield as requested
       switch(observable)
-       {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(Mq(j)),real(Mq(j)),imag(Mq(j)),I(j)*jjj.F(Norm(Q)));break;
-        default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j));  // printout corresponding moments      
-       }if(nmax>0)
+       {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(MMq(j,Ti)),real(MMq(j,Ti)),imag(MMq(j,Ti)),I(j,Ti)*jjj.F(Norm(Q)));break;
+        default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j,Ti));  // printout corresponding moments      
+       }if(nmax>0&&Ti==1&&!Hi)
       { snprintf(filename,MAXNOFCHARINLINE,"./results/%s.trs",jjj.sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
@@ -313,7 +364,9 @@ pchr=strstr(filename+10,"\\");
         jjj.print_eigenstates(fout);fclose(fout);
         fclose(fout_trs);
         if(nmax<nt){printf("...");}
-      } if(opmat<1e10){fout_opmat=fopen_errchk("results/op.mat","w");
+      } 
+  printf("\n");}} // Hi
+if(opmat<1e10){fout_opmat=fopen_errchk("results/op.mat","w");
                        fprintf(fout_opmat,"#! d=%i  ",jjj.est.Chi());
 if(opmat>nofcomponents){ for(int opmati=0;opmati<=nofcomponents;++opmati)
                                              {Matrix op(jjj.opmat(opmati,Hxc,Hext));
@@ -336,11 +389,10 @@ if(opmat>nofcomponents){ for(int opmati=0;opmati<=nofcomponents;++opmati)
                     }
 fclose(fout_opmat);}
  
-      printf("\n");
+      
    }
-printf("# **********************************************************************\n"
-       "# end of program singleion\n"
-       "# ... you can now use 'cpsingleion' to calculate specific heat,\n"
+printf("# **********************end of program singleion************************\n");
+if(verbose)printf("# ... you can now use 'cpsingleion' to calculate specific heat,\n"
        "#      entropy etc from results/*.levels.cef\n"
        "# **********************************************************************\n");
 }

@@ -6,7 +6,7 @@
 #define MARTIN_FOPEN_ERRCHK
 
 #define PI 3.141592654
-#define KB 0.0862     // Boltzmanns constant in mev/K
+#define KB 0.086173528     // Boltzmanns constant in mev/K
 #define MU_B  5.788378E-02 // Bohrmagneton in meV/tesla
 #define MAXNOFCHARINLINE 7024
 
@@ -151,6 +151,7 @@ complex<double> aMb_complex(zsMat<double> & M, ComplexMatrix & zc, int ia, int i
 
 
 Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3);
+void SetColumn(int i,Matrix M,Vector &v); // fills column i in Matrix M with vector v
 
 // calculate reciprocal lattice rezi from real lattice ri
 void rezcalc(Vector r1,Vector  r2,Vector  r3,Vector  rez1,Vector  rez2,Vector  rez3);

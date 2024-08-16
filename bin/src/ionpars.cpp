@@ -530,21 +530,21 @@ if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30
     for(i=1;i<=NOF_OLM_MATRICES;++i){(*In[i+3])=(*Olm[i]);}
   }
 //myPrintMatrix(stdout,(*In[51]));
-if(ialpha){if(fabs(alphar-alpha)/fabs(alphar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using value from input file\n",moduletype,alphar,alpha);}
+if(ialpha){if(fabs(alphar-alpha)/fabs(alphar+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using value from input file\n",moduletype,alphar,alpha);}
 }else{alpha=alphar;}
-if(ibeta){if(fabs(betar-beta)/fabs(betar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (beta=%g) different from input file (beta=%g), using value from input file\n",moduletype,betar,beta);}
+if(ibeta){if(fabs(betar-beta)/fabs(betar+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (beta=%g) different from input file (beta=%g), using value from input file\n",moduletype,betar,beta);}
 }else{beta=betar;}
-if(igamma){if(fabs(gammar-gamma)/fabs(gammar+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (gamma=%g) different from input file (gamma=%g), using value from input file\n",moduletype,gammar,gamma);}
+if(igamma){if(fabs(gammar-gamma)/fabs(gammar+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (gamma=%g) different from input file (gamma=%g), using value from input file\n",moduletype,gammar,gamma);}
 }else{gamma=gammar;}
-if(igj){if(fabs(gJr-gJ)/fabs(gJr+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for Lande Factor (gJ=%g) different from input file (gJ=%g), using value from input file\n",moduletype,gJr,gJ);}
+if(igj){if(fabs(gJr-gJ)/fabs(gJr+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for Lande Factor (gJ=%g) different from input file (gJ=%g), using value from input file\n",moduletype,gJr,gJ);}
 }else{gJ=gJr;}
-if(ir2){if(fabs(r2r-r2)/fabs(r2r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r2>=%g) different from input file (<r2>=%g), using value from input file\n",moduletype,r2r,r2);}
+if(ir2){if(fabs(r2r-r2)/fabs(r2r+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r2>=%g) different from input file (<r2>=%g), using value from input file\n",moduletype,r2r,r2);}
 }else{r2=r2r;}
-if(ir4){if(fabs(r4r-r4)/fabs(r4r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r4>=%g) different from input file (<r4>=%g), using value from input file\n",moduletype,r4r,r4);}
+if(ir4){if(fabs(r4r-r4)/fabs(r4r+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r4>=%g) different from input file (<r4>=%g), using value from input file\n",moduletype,r4r,r4);}
 }else{r4=r4r;}
-if(ir6){if(fabs(r6r-r6)/fabs(r6r+1)>SMALL_DEVIATION) {fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r6>=%g) different from input file (<r6>=%g), using value from input file\n",moduletype,r6r,r6);}
+if(ir6){if(fabs(r6r-r6)/fabs(r6r+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for radial Matrix element (<r6>=%g) different from input file (<r6>=%g), using value from input file\n",moduletype,r6r,r6);}
 }else{r6=r6r;}
-if(inof){if(nof_electronsr-nof_electrons!=0){fprintf(stderr,"#Warning module %s internal value for nr of electrons (=%i) different from input file (=%i), using value from input file\n",moduletype,nof_electronsr,nof_electrons);}
+if(inof){if(nof_electronsr-nof_electrons!=0){if(verbose)fprintf(stderr,"#Warning module %s internal value for nr of electrons (=%i) different from input file (=%i), using value from input file\n",moduletype,nof_electronsr,nof_electrons);}
 }else{nof_electrons=nof_electronsr;}
 //---------------------------------------------------------------------------
       // here fill the matrices Ri[1...9] with the 11 12 13 21 22 23 31 32 33
@@ -573,8 +573,8 @@ if(fabs(s0r)+fabs(s1r)+fabs(s2r)+fabs(s0i)+fabs(s1i)+fabs(s2i)>SMALL_DEVIATION)
   // ------------------------------------------------------------
   // here transform the Llm (if present) to Blm ...
   Vector thetaJ(0,6);thetaJ(0)=nof_electrons;thetaJ(2)=alpha;thetaJ(4)=beta;thetaJ(6)=gamma;
-   fprintf(stderr,"#! IONTYPE=%s J=%g",iontype,J);  if(verbose)fprintf(stderr," crystal field parameters:");
-   fprintf(stderr,"\n");
+   if(verbose){fprintf(stderr,"#! IONTYPE=%s J=%g",iontype,J);  fprintf(stderr," crystal field parameters:");
+   fprintf(stderr,"\n");}
    const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 Dx2 Dy2 Dz2 Dx4 Dy4 Dz4";
    char lm4[5];lm4[4]='\0';
    for(i=0;i<=NOF_OLM_MATRICES;++i){strncpy(lm4,lm+i*4,4);l=lm4[1]-48;m=lm4[2]-48;if(lm4[3]=='S'){m=-m;}
@@ -650,12 +650,12 @@ void ionpars::savBlm(FILE * outfile)
    if(Blm(51)!=0){fprintf(outfile,"Dz4=%g\n",myround(Blm(51)));}
 }
 
-void ionpars::savLlm(FILE * outfile)
-{fprintf(outfile,"units=meV\n");
+void ionpars::savLlm(FILE * outfile,const char * commentstring)
+{fprintf(outfile,"%sunits=meV\n",commentstring);
    char lm3[4];lm3[3]='\0';
    const char lm[]="00 22S21S20 21 22 33S32S31S30 31 32 33 44S43S42S41S40 41 42 43 44 55S54S53S52S51S50 51 52 53 54 55 66S65S64S63S62S61S60 61 62 63 64 65 66 ";
    for(int i=0;i<=45;++i){strncpy(lm3,lm+i*3,3);
-   if(Llm(i)!=0){fprintf(outfile,"L%s=%g\n",lm3,Llm(i));}
+   if(Llm(i)!=0){fprintf(outfile,"%sL%s=%g\n",commentstring,lm3,Llm(i));}
                          }
 }
  // -------------------------------------------------------------------------------------
@@ -718,7 +718,42 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
     } //printf("%g %g\n",I[1],I[2]);
 }
 
-
+void ionpars::Icalc(Matrix & I,Vector & T, Vector &  Hxc,Vector & Hext, Vector & lnZs, Vector & U, ComplexMatrix & /*ests*/)
+{   /*on input
+    T		temperature[K]
+    Hxc	        vector of exchange field [meV]
+    Hext        external magnetic field [T]
+  on output    
+    I		single ion momentum vector <I> (if T>0 thermal exp value <J>T 
+                                                if T<0 the program asks for w_n and calculates
+						       exp value <J>=sum_n w_n <n|I|n>
+    Z		single ion partition function
+    U		single ion magnetic energy
+    */
+   int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
+   Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
+   setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
+   // calculate Z and wn (occupation probability)
+   Vector wn(1,dj); double Zs;
+   Matrix IIn(1,dj,1,I.Rhi()); // to store <i|Ij|i> to save calculation time
+   
+ for(int Ti=T.Hi();Ti>0;--Ti)
+ {for(int j=1;j<=I.Rhi();++j)I(j,Ti)=0;
+  calculate_Z_wn(En,T(Ti),Zs,lnZs(Ti),wn);
+   // calculate U
+   U(Ti)=En*wn;
+   // calculate <I1>,<I2>,<I3>
+   
+ for (int i=1;i<=dj;++i)
+ { if(wn(i)>SMALL_PROBABILITY){
+  // here the expectation values of the multipolar moments are calculated
+  if(Ti==T.Hi())for(int j=1;j<=I.Rhi();++j)IIn(i,j)=matelr(i,i,zr,zi,(*In[j])); 
+                                          // on first run (highest T) set <i|Ij|i>
+  for(int j=1;j<=I.Rhi();++j)I(j,Ti)+=wn(i)*IIn(i,j);
+                              } //printf("%g %g\n",I[1],I[2]);
+  }
+ }
+}
 /**************************************************************************/
 // for mcdisp this routine is needed
 int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd,ComplexMatrix & ests)
@@ -940,7 +975,7 @@ void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, Complex
    int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
    setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
-   // calculate Z and wn (occupation probability)
+// calculate Z and wn (occupation probability)
    Vector wn(1,dj); double Zs,lnZs;
    calculate_Z_wn(En,T,Zs,lnZs,wn);
    // calculate <Ja>,<Jb>,<Jc>
@@ -952,6 +987,44 @@ void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, Complex
      JJ(3)+=wn(i)*matelr(i,i,zr,zi,Jc);   
                                    }
     }
+}   
+
+
+
+
+void ionpars::Jcalc(Matrix & JJ,Vector & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & /*ests*/)
+{   /*on input
+    T		temperature[K]
+    Hxc	vector of exchange field [meV]
+    Hext        external magnetic field [T]
+  on output    
+    JJ		single ion momentum vector <J> (if T>0 thermal exp value <J>T 
+                                                if T<0 the program asks for w_n and calculates
+						       exp value <J>=sum_n w_n <n|J|n>
+    */
+   int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
+   Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
+   setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
+   // calculate Z and wn (occupation probability)
+   Vector wn(1,dj); double Zs,lnZs;
+   Vector Jai(1,dj),Jbi(1,dj),Jci(1,dj); // <i|J|i> storage to save compuatatoin time
+   
+   for(int Ti=T.Hi();Ti>0;++Ti){
+   JJ(1,Ti)=0;JJ(2,Ti)=0;JJ(3,Ti)=0;
+   calculate_Z_wn(En,T(Ti),Zs,lnZs,wn);
+   // calculate <Ja>,<Jb>,<Jc>
+    for (int i=1;i<=dj;++i)
+    { if(wn(i)>SMALL_PROBABILITY){
+      if(Ti==T.Hi()){Jai(i)=matelr(i,i,zr,zi,Ja);
+                     Jbi(i)=matelr(i,i,zr,zi,Jb);
+                     Jci(i)=matelr(i,i,zr,zi,Jc); 
+                    }
+     JJ(1,Ti)+=wn(i)*Jai;
+     JJ(2,Ti)+=wn(i)*Jbi;
+     JJ(3,Ti)+=wn(i)*Jci;  
+                                   }
+    }
+   }
 }
 //**********************************************************************/
 // routine to calculate the charge density coefficients of Zlm() R(r)^2

@@ -62,6 +62,33 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
             else{(*m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
+int jjjpar::mcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{double lnZ,U;
+ switch (module_type)
+  {case 1: for(int i=1;i<=T.Hi();++i){
+           Vector m(mom.Column(i));
+           kramer(m,T(i),Hxc,Hext,lnZ,U);m*=gJ;
+           SetColumn(i,mom,m);}
+           return true;break;
+   case 2:
+   case 4: (*iops).Jcalc(mom,T,Hxc,Hext,parstorage);mom*=gJ;return true;break;
+   case 3: for(int i=1;i<=T.Hi();++i){
+           Vector m(mom.Column(i));
+           brillouin(m,T(i),Hxc,Hext,lnZ,U);m*=gJ;
+           SetColumn(i,mom,m);}
+           return true;break;
+   case 5: return false;break; 
+   default:if(mM==NULL){ 
+           if (m==NULL) {mom=0;return false;} 
+            else{for(int i=1;i<=T.Hi();++i){
+           Vector m1(mom.Column(i));
+           (*m)(&m1,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           SetColumn(i,mom,m1);}
+           return true;}}else{
+           (*mM)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           return true;}
+  }
+}
 
 int jjjpar::micalc (Vector &momi, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
 {double lnZ,U;
@@ -113,6 +140,33 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,Comple
             else{(*L)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
+int jjjpar::Lcalc (Matrix &Lmom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{double lnZ,U;
+ switch (module_type)
+  {case 1: for(int i=1;i<=T.Hi();++i){
+           Vector m(Lmom.Column(i));
+           kramer(m,T(i),Hxc,Hext,lnZ,U);m*=(2.0-gJ);
+           SetColumn(i,Lmom,m);}
+           return true;break;
+   case 2:
+   case 4: (*iops).Jcalc(Lmom,T,Hxc,Hext,parstorage);Lmom*=(2.0-gJ);return true;break;
+   case 3: for(int i=1;i<=T.Hi();++i){
+           Vector m(Lmom.Column(i));
+           brillouin(m,T(i),Hxc,Hext,lnZ,U);m*=(2.0-gJ);
+           SetColumn(i,Lmom,m);}
+           return true;break;
+   case 5: return false;break; 
+   default:if(LM==NULL){ 
+           if (L==NULL) {Lmom=0;return false;} 
+            else{for(int i=1;i<=T.Hi();++i){
+           Vector m(Lmom.Column(i));
+           (*L)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           SetColumn(i,Lmom,m);}
+           return true;}
+           } else {(*LM)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           return true;}
+  }
+}
 
 int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1,ComplexMatrix & ests)
 {float delta=maxE;L1(1)=complex <double> (ninit,pinit);
@@ -147,6 +201,35 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,Comple
             else{(*S)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
+
+int jjjpar::Scalc (Matrix &Smom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{double lnZ,U;
+ switch (module_type)
+  {case 1: for(int i=1;i<=T.Hi();++i){
+           Vector m(Smom.Column(i));
+           kramer(m,T(i),Hxc,Hext,lnZ,U);m*=(gJ-1.0);
+           SetColumn(i,Smom,m);}
+           return true;break;
+   case 2:
+   case 4: (*iops).Jcalc(Smom,T,Hxc,Hext,parstorage);Smom*=(gJ-1.0);return true;break;
+   case 3: for(int i=1;i<=T.Hi();++i){
+           Vector m(Smom.Column(i));
+           brillouin(m,T(i),Hxc,Hext,lnZ,U);m*=(gJ-1.0);
+           SetColumn(i,Smom,m);}
+           return true;break;
+   case 5: return false;break; 
+   default: if(SM==NULL){ 
+           if (S==NULL) {Smom=0;return false;} 
+            else{for(int i=1;i<=T.Hi();++i){
+           Vector m(Smom.Column(i));
+           (*S)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           SetColumn(i,Smom,m);}
+           return true;}} else {
+           (*SM)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           return true;}
+  }
+}
+
 
 int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1,ComplexMatrix & ests)
 {float delta=maxE;S1(1)=complex <double> (ninit,pinit);

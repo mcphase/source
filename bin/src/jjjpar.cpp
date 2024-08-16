@@ -730,7 +730,7 @@ else
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 }
 
-// constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot
+// constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot and pointc
 jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n,int verbose)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
   jij=0; dn=0;dr=0; sublattice=0;paranz=0;diagonalexchange=1;

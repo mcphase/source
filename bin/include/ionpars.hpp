@@ -63,7 +63,8 @@ class ionpars
 
    // functions needed to calculate thermal expectation value of observables 
    void cfeigenstates (ComplexMatrix *est, Vector &  gjmbHxc,Vector & Hext, double & T);
-   void Icalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & ests);
+   void Icalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & parstorage);
+   void Icalc(Matrix & JJ,Vector & T, Vector &  gjmbHxc,Vector & Hext, Vector & lnZs, Vector & U, ComplexMatrix & parstorage);
 
    Matrix opmat (int & n ,Vector &  Hxc,Vector & Hext);
    // on input
@@ -73,6 +74,7 @@ class ionpars
    // operator matrix of Hamiltonian, I1, I2, I3 depending on n
 
    void Jcalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & ests);
+   void Jcalc(Matrix & JJ,Vector & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & ests);
    // charge density coefficients
    void chargedensity_coeffcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
    // calculate scattering operator <M(Q)>=-2x<Q>_TH in units of mb
@@ -90,7 +92,8 @@ class ionpars
    int cfielddrixs1(int & tn,double & th,double & ph,double & J0,double & J2,double & J4,double & J6,Vector & Zc,ComplexMatrix & est,double & T,ComplexVector & drixs);
    
    void savBlm(FILE * file); // saving Blm to file 
-   void savLlm(FILE * file); // saving Blm to file 
+   
+   void savLlm(FILE * file,const char * prefix = ""); // saving Llm to file 
    void save(FILE * file); // save ion parameters to file 
 
    ionpars(int dimj);

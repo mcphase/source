@@ -11,6 +11,37 @@
 #include "martin.h"
 #define SMALL_DISPLACEMENT  0.0001
 
+double stacalc(Vector & L1,Vector & Lav)
+{double sta=0;
+
+for(int i=1;i<=45;++i)
+ {double diff,sum;
+  diff=L1(i)-Lav(i);
+  sum=fabs(L1(i))+fabs(Lav(i))+SMALL_DISPLACEMENT;
+  sta+=4*diff*diff/(sum*sum);
+ }
+
+return sqrt(sta/44);
+
+}
+
+void writeline(FILE * outfile,double q2,double q4,double q6,double x,double y,double z,double r,Vector & Blm,Vector & Llm,double sta)
+{int i;
+ fprintf (outfile," %4g %4g %4g   %4g %4g %4g  %4g  ",q2,q4,q6,x,y,z,r);
+                   fprintf (outfile,"%g ",Blm(0)); fprintf (outfile,"%g ",Llm(0));
+ for (i=1;i<=5;++i){fprintf (outfile,"%g ",Blm(i));
+                   fprintf (outfile,"%g ",Llm(i));
+                   }
+ for (i=13;i<=21;++i){ fprintf (outfile,"%g ",Blm(i));
+                       fprintf (outfile,"%g ",Llm(i));
+                   }
+ for (i=33;i<=45;++i){fprintf (outfile,"%g ",Blm(i));
+                     fprintf (outfile,"%g ",Llm(i));
+                   }
+ if(sta>=0)fprintf(outfile,"%g",sta);
+   fprintf(outfile,"\n");
+}
+
 void calcCEFpar(double & q0,double & q2,double & q4,double & q6,double & x ,double & y, double & z, double & r,Vector & Blm, Vector & Llm,ionpars * iops)
 {
  Vector B(0,45); B=0;
@@ -169,12 +200,12 @@ int main (int argc, char **argv)
 {
 FILE * table_file;
 FILE * conv_file;
-FILE * sipf_file;
+FILE * sipf_file;Vector Llm_in(0,45);Llm_in=0;
 FILE * dBlm_file;
 FILE * dLlm_file;
 char instr[MAXNOFCHARINLINE];
 char module[MAXNOFCHARINLINE];
-int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0,verbose=0;
+int i,n=0,ac=0,acold=-1,batchmode=0,omit_pc=0,verbose=0,conv=0,stcalc=0;
 float invalues[100];invalues[0]=99;
   double q2,q4,q6,x,y,z,q2sum=0.0,q4sum=0.0,q6sum=0.0;int do_deriv=0,nofcharges=0;
 
@@ -186,59 +217,86 @@ if(strcmp(argv[1+ac],"-d")==0) {ac++;do_deriv=1;dBlm_file=fopen_errchk("results/
 else if(strcmp(argv[1+ac],"-o")==0) {ac++;omit_pc=1;} 
 else if(strcmp(argv[1+ac],"-v")==0) {ac++;verbose=1;} 
 else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
+else if(strcmp(argv[1+ac],"-c")==0) {ac++;conv=1;}
+else if(strcmp(argv[1+ac],"-s")==0) {ac++;conv=1;stcalc=1;}
                                 }
  }
 
 // check command line
   if (argc - ac < 3 && batchmode==0)
     { printf (
-"\n Program to calculate Crystal field Parameters from Point Charges \n\n"
-" Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos\n\n"
-"example 1: pointc  Ce3+ 0.2 4 1 5.3\n"
-" ... calculate Blm (Stevens Parameters) and Llm (Wybourne Parameters) for one\n"
-"     pointcharge of +0.2|e| in distance x=4 A y=1 A z=5.3 A from a Ce3+ ion.\n"
-"example 2: pointc Ce3+ file.pos\n"
-" ... read several charges+coordinates from file.pos,file format:\n"
-"      column 1=charge, column 2-4 = x y z coordinate. (note,progam makenn\n"
-"      creates useful files for this option from the crystal structure).\n"
-"example 3: pointc Ce3+ C2.pos 5 6\n"
-" ... same as example 2 but reduced charge model,i.e. B2m calculated, with\n"
-"     charges in col 1 of C2.pos,B4m and B6m with charges in col 5 and 6, respectively.\n"
-"example 4: pointc file.sipf 0.2 4 1 5.3 0.1 0.3\n"
-" ... read ion from file.sipf,use 0.2|e| for B2m, 0.1|e| for B4m, 0.3|e| for B6m\n"
-" ... the first line of the single ion property file.sipf must be\n"
-" #!MODULE=so1ion\n"
-" # file.sipf should contain the following information (# denotes comments):\n"
-" # the name of the ion\n"
-" IONTYPE=Ce3+\n"
-" #Stevens parameters (optional, necessary for output of Blm)\n"
-" ALPHA=-0.0571429 BETA=0.00634921 GAMMA=0\n"
-" # the radial matrix elements RN=<r^N> in units of a0^N (a0=0.5292 A)\n"
-" R2=1.309 R4=3.964 R6=23.31\n"
-" #optional radial wave function parameters, for transition metal ions the the values\n"
-" #are tabulated in Clementi & Roetti Atomic data and nuclear data tables 14 \n"
-" #(1974) 177-478, the radial wave function is expanded as\n"
-" # R(r)=sum_p Cp r^(Np-1) exp(-XIp r)(2 XIp)^(Np+0.5)/sqrt(2Np!)\n"
-" #rare earth:Freeman&Watson PR127(1962)2058,Sovers J.Phys.Chem.Sol.28(1966)1073\n"
-" #e.g. Co2+ is isoelectronic to Fe+, looking at page 422\n"
-" #of Clemente & Roetti the parameters are \n"
-" N1=3 XI1=4.95296 C1=0.36301 \n"
-" N2=3 XI2=12.2963 C2=0.02707 \n"
-" N3=3 XI3=7.03565 C3=0.14777\n"
-" \n"
-"OUTPUT:  stdout ... sipf file with CEF pars,radial matrix elements,Stevens factors\n"
-"                ... pointcharges and positions (omit with option -o)\n"
-"         results\\pointc.out ...contains results of convergence when summing up\n"
-"                 contributions of different neighbours one by one...\n"
-"         results\\pointc.Blm ... Crystal field parameters Blm in Stevens Notation\n" 
-"         results\\pointc.Llm ... Crystal field parameters Llm in Wybourne Notation\n" 
-"         results\\pointc.dBlm .. for option -d ... derivatives dBlm/du\n" 
-"         results\\pointc.dLlm .. for option -d ... derivatives dLlm/du\n" 
-"                 ... derivatives are with respect to u=neighborposition(A)/a0\n"
+"\n Program to calculate Crystal field Parameters from Point Charges \n \
+  Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos\n \
+\n \
+OPTIONS:\n \
+-b ....  batchmode - do not write any files; read sipf,pcfile from stdin, prints to stdout \n \
+-c ....  output convergence file pointc.out when summing up point charges contribution \n \
+         for every charge on input a line with it`s particular contribution to the Blm and Llm`s\n \
+         is written to pointc.out\n \
+-d ....  calculate derivates with respect to pointcharge position u, i.e. dBlm/du and dLlm/du\n \
+-o ....  omit point charges and positions from output stdout\n \
+-s ....  calculate standard deviation of parameters with respect CF parameters Llm from sipffile\n \
+         and store in pointc.out column 64, ouput a line with CF parameters as calculated summing\n \
+         contributions for all charges up to a closed shell of point charges\n \
+\n \
+OUTPUT:  stdout ... sipf file with CEF pars,radial matrix elements,Stevens factors\n \
+                ... pointcharges and positions (omit with option -o)\n \
+         results\\pointc.Blm ... Crystal field parameters Blm in Stevens Notation\n \
+         results\\pointc.Llm ... Crystal field parameters Llm in Wybourne Notation\n \
+         results\\pointc.dBlm .. for option -d, derivatives dBlm/du\n \
+         results\\pointc.dLlm .. for option -d, derivatives dLlm/du\n \
+                 ... derivatives are with respect to u=neighborposition(A)/a0\n \
+         results\\pointc.out ... for option -c, results of convergence when summing up\n \
+                                 contributions of different neighbours one by one\n \
+EXAMPLES:\n \
+\n \
+example 1: pointc  Ce3+ 0.2 4 1 5.3\n \
+ ... calculate Blm (Stevens Parameters) and Llm (Wybourne Parameters) for one\n \
+     pointcharge of +0.2|e| in distance x=4 A y=1 A z=5.3 A from a Ce3+ ion.\n \
+example 2: pointc Ce3+ file.pos\n \
+ ... read several charges+coordinates from file.pos,file format:\n \
+      column 1=charge, column 2-4 = x y z coordinate. (note,progam makenn\n \
+      creates useful files for this option from the crystal structure).\n \
+example 3: pointc Ce3+ C2.pos 5 6\n \
+ ... same as example 2 but reduced charge model,i.e. B2m calculated, with\n \
+     charges in col 1 of C2.pos,B4m and B6m with charges in col 5 and 6, respectively.\n \
+example 4: pointc file.sipf 0.2 4 1 5.3 0.1 0.3\n \
+ ... read ion from file.sipf,use 0.2|e| for B2m, 0.1|e| for B4m, 0.3|e| for B6m\n \
+ ... the first line of the single ion property file.sipf must be\n \
+ #!MODULE=so1ion\n \
+ # file.sipf should contain the following information (# denotes comments):\n \
+ # the name of the ion\n \
+ IONTYPE=Ce3+\n \
+ #Stevens parameters (optional, necessary for output of Blm)\n \
+ ALPHA=-0.0571429 BETA=0.00634921 GAMMA=0\n \
+ # the radial matrix elements RN=<r^N> in units of a0^N (a0=0.5292 A)\n \
+ R2=1.309 R4=3.964 R6=23.31\n \
+ #optional radial wave function parameters, for transition metal ions the the values\n \
+ #are tabulated in Clementi & Roetti Atomic data and nuclear data tables 14 \n \
+ #(1974) 177-478, the radial wave function is expanded as\n \
+ # R(r)=sum_p Cp r^(Np-1) exp(-XIp r)(2 XIp)^(Np+0.5)/sqrt(2Np!)\n \
+ #rare earth:Freeman&Watson PR127(1962)2058,Sovers J.Phys.Chem.Sol.28(1966)1073\n \
+ #e.g. Co2+ is isoelectronic to Fe+, looking at page 422\n \
+ #of Clemente & Roetti the parameters are \n \
+ N1=3 XI1=4.95296 C1=0.36301 \n \
+ N2=3 XI2=12.2963 C2=0.02707 \n \
+ N3=3 XI3=7.03565 C3=0.14777\n"
 );
       exit (1);
     } else {if(batchmode==0){fprintf(stderr,"#* pointc 221011 *\n");}}
+if(conv) {
+// zero parameters in case initialisation put some values to the parameters ...
+conv_file=fopen_errchk("results/pointc.out","w");
+if(stcalc){
+fprintf(conv_file,"# pointc option -s - it follows an output of Blm and Llm as calculated summing up all contributions \n\
+# up to a closed shell with radius r. In column 64 is given the standard deviation with respect to the input parameters\n\
+# set Llm: \n");
 
+}else{
+fprintf(conv_file,"# pointc option -c - it follows an output of the contribution of each individual point charge\n\
+# to the Llm and Blm parameters\n");
+}
+}
 // set Stevens parameters and Lande factor, J and <r^l> of ion
 // read create class object ionpars from iontype - sets J, gJ, Stevens factors from the
 // routine getpar in cfieldrout.c, thus takes the single ion parameters from
@@ -248,7 +306,8 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
  char *token;
  int sipf_read_module=-1; // -1 no sipf read,  0 module ic1ion,  4 module so1ion
  if((sipf_file=fopen(argv[1+ac],"r"))) //read ion parameters from file
- { fclose(sipf_file);sipf_file=open_sipf(argv[1+ac],module,verbose);fprintf(stderr,"\n");
+ { fclose(sipf_file);
+  sipf_file=open_sipf(argv[1+ac],module,verbose);fprintf(stderr,"\n");
  if(strstr(module,"so1ion")!=NULL){sipf_read_module=4;
    printf("#!MODULE=so1ion\n");}
  if(strstr(module,"ic1ion")!=NULL){sipf_read_module=0;
@@ -276,7 +335,7 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
   }
   }  // fi module is ic1ion
   fclose(sipf_file);
-  jjjps=new jjjpar(0,0,0,argv[1+ac],1);
+  jjjps=new jjjpar(0,0,0,argv[1+ac],1); // try to read sipf file using constructor for jjjpar exchange parameter table
   if((*jjjps).module_type!=sipf_read_module){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' or '#!MODULE=ic1ion' !\n",argv[1+ac]);exit(1);}  
   
   if(sipf_read_module==4){iops=(*jjjps).iops;}
@@ -290,6 +349,8 @@ else if(strcmp(argv[1+ac],"-b")==0) {ac++;batchmode=1;}
       if((*iops).r6==1e300||(*iops).r6==0){(*jjjps).r6_from_radial_wavefunction();
                         printf("#<r^6>  from radial wavefunction in units of a0^6 a0=0.5292 Angstroem\nR6=%g\n",(*jjjps).r6);
                         (*iops).r6=(*jjjps).r6;}
+Llm_in=(*iops).Llm; // if Blm or Llm present in input store them to have convergence 
+if(stcalc)(*iops).savLlm(conv_file,"#");
 (*iops).Blm=0;
 (*iops).Llm=0;
 if(sipf_read_module==4){(*jjjps).save_sipf(stdout);}
@@ -307,7 +368,7 @@ else
                       char lm4[5];
                       for(i=0;i<=45;++i){strncpy(lm4,lm+i*4,4);if(lm4[3]!='S')lm4[3]='\0';
                                         if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"");
-                                        lm4[0]='L';if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"");
+                                        lm4[0]='L';if(extract(instr,lm4,Llm_in(i))==0){fprintf(conv_file,"# %s\n",instr);snprintf(instr,MAXNOFCHARINLINE,"");}
                                         }
                      if(extract(instr,"pointcharge",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"");}
 
@@ -358,12 +419,13 @@ else
  printf("#J=%4g\n",(*iops).J);
  printf("#Lande Factor gJ\n GJ = %4g\n",(*iops).gJ);
  }
-
-if(!batchmode) {
-// zero parameters in case initialisation put some values to the parameters ...
-conv_file=fopen_errchk("results/pointc.out","w");
-fprintf(conv_file,"#c0=c2 c4 c6 (|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B66 L66\n");
+if(conv){
+fprintf(conv_file,"#col1  2  3        4 5 6 7     8   9   10   11   12   13   14  15  16  17  18  19  20   21   ... 28  29  ... 36  37  38   39   ... 50  51  ... 62  63 ");
+if(stcalc)fprintf(conv_file," 64");fprintf(conv_file,"\n");
+fprintf(conv_file,"#c0=c2 c4 c6 (|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B40 L40 ... B44 L44 B66S L66S ... B60 L60 ... B66 L66");
+if(stcalc)fprintf(conv_file," sta");fprintf(conv_file,"\n");
 }
+
 if (do_deriv){fprintf(dBlm_file,"#x y z(A) dB00/dux dB00/duy dB00/duz dB22S/dux dB22S/duy dB22S/duz dB21S/du ... dB20/du... dB22/du... dB66/duz\n");
               fprintf(dLlm_file,"#x y z(A) dL00/dux dL00/duy dL00/duz dL22S/dux dL22S/duy dL22S/duz dL21S/du ... dL20/du... dL22/du... dL66/duz\n");}
 Vector dBlm0x(0,45),dLlm0x(0,45);dBlm0x=0;dLlm0x=0;
@@ -397,8 +459,7 @@ if (argc<6+ac) // read pointcharges from file
   if(!omit_pc){if(n==4)printf ("\n#pointcharges charge[|e|]  x[A] y[A] z[A]\n");
                else printf ("\n#pointcharges c2[|e|]  x[A] y[A] z[A] c4[|e|] c6[|e|] c0=c2\n");
               }
-double zp=0,rmin,rmax,rold=0,weight,stamax=1e30,sta;
-Vector Blmav(0,45),Llmav(0,45);
+double rmin,rmax,rold=0,stabest=1e30,sta;
 while(n>0)
 {
 
@@ -409,32 +470,29 @@ while(n>0)
  double r;
  Vector Blm(0,45),Llm(0,45);
  r = sqrt(x * x + y * y + z * z);
- if(!batchmode)fprintf (conv_file," %4g %4g %4g   %4g %4g %4g  %4g  ",q2,q4,q6,x,y,z,r);
  // calculate Blm Llm for this neighbour
  calcCEFpar(q2,q2,q4,q6,x,y,z,r,Blm,Llm,iops);
+ if(stcalc){
  if(fabs(r-rold)>SMALL_DISPLACEMENT){// new shell ... i.e. check if old shell is in good agreement with average
- sta=Norm((*iops).Llm-Llmav/zp);// Norm=sqrt(sum of all squares)
- if(sta<stamax){rmin=rold;rmax=r;stamax=sta;}
+ sta=stacalc((*iops).Llm,Llm_in);// sta ... deviation of current Llm from current average
+   //  save r if current Llm Pars match best to input parameters Llm_in
+ if(sta<stabest){rmin=rold;rmax=r;stabest=sta;}
+writeline(conv_file,q2,q4,q6,0,0,0,rold,(*iops).Blm,(*iops).Llm,sta);
  }
- weight=exp(r/4);rold=r;
- Blmav+=Blm*weight;Llmav+=Llm*weight;zp+=weight;
+ }
+
+ rold=r;
  ++nofcharges;
  q2sum+=q2;
  q4sum+=q4;
  q6sum+=q6;
  // sum to iops.Blm and iops.Lllm
-                    (*iops).Blm(0)+=Blm(0); if(!batchmode) fprintf (conv_file,"%g ",Blm(0));
-                    (*iops).Llm(0)+=Llm(0); if(!batchmode) fprintf (conv_file,"%g ",Llm(0));
- for (i=1;i<=5;++i){(*iops).Blm(i)+=Blm(i); if(!batchmode) fprintf (conv_file,"%g ",Blm(i));
-                    (*iops).Llm(i)+=Llm(i); if(!batchmode) fprintf (conv_file,"%g ",Llm(i));
-                   }
- for (i=13;i<=21;++i){(*iops).Blm(i)+=Blm(i); if(!batchmode) fprintf (conv_file,"%g ",Blm(i));
-                    (*iops).Llm(i)+=Llm(i); if(!batchmode) fprintf (conv_file,"%g ",Llm(i));
-                   }
- for (i=33;i<=45;++i){(*iops).Blm(i)+=Blm(i); if(!batchmode) fprintf (conv_file,"%g ",Blm(i));
-                    (*iops).Llm(i)+=Llm(i); if(!batchmode) fprintf (conv_file,"%g ",Llm(i));
-                   }
- if(!batchmode)fprintf(conv_file,"\n");
+                    (*iops).Blm(0)+=Blm(0);  (*iops).Llm(0)+=Llm(0); 
+ for (i=1;i<=5;++i){(*iops).Blm(i)+=Blm(i);  (*iops).Llm(i)+=Llm(i); }
+ for (i=13;i<=21;++i){(*iops).Blm(i)+=Blm(i); (*iops).Llm(i)+=Llm(i);}
+ for (i=33;i<=45;++i){(*iops).Blm(i)+=Blm(i);  (*iops).Llm(i)+=Llm(i); }
+
+ if(!stcalc&&conv){writeline(conv_file,q2,q4,q6,x,y,z,r,Blm,Llm,-1);}
 
  if(do_deriv){Vector dBlmx(0,45),dLlmx(0,45);
               Vector dBlmy(0,45),dLlmy(0,45);
@@ -507,8 +565,8 @@ while(n>0)
 
 if(!batchmode) {
 if (argc<6+ac){fclose(table_file);}
-fclose(conv_file);
 }
+if(conv)fclose(conv_file);
 if(do_deriv){
               fprintf (dBlm_file,"0.0 0.0 0.0   ");
               fprintf (dLlm_file,"0.0 0.0 0.0   ");
@@ -541,7 +599,8 @@ printf("#--------------------------------------------------------\n");
 (*iops).savLlm(stdout);
 
 fprintf(stderr,"#! nofcharges=%i charge sum q2sum=%4g q4sum=%4g q6sum=%4g\n",nofcharges,q2sum,q4sum,q6sum);  
-fprintf(stderr,"# checking convergence of CF parameters: putting Rmax betwen %4g A and %4g A recommended \n to obtain CF parameters close to convergent values for large Rmax\n",rmin,rmax);
+if(stcalc)fprintf(stderr,"#  putting Rmax between %4g A and %4g A recommended \n \
+#to obtain CF parameters close to Llm parameters in input.\n",rmin,rmax);
  if(batchmode) return 0;
 
 table_file=fopen_errchk("./results/pointc.Blm","w");

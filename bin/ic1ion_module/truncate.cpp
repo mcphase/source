@@ -6,7 +6,7 @@
  *
  * Functions:
  *   void truncate_hmltn(&pars, &est, &Hic, &iHic, JHi, JLo)       // Calc. a rotated/truncated Hamiltonian
- *   void truncate_expJ(&pars, &est, &gjmbH, &J, T, *lnZ, *U, *Jm) // Calc. its expectation values
+ *   void truncate_expJ(&pars, &est, &gjmbH, &J, T, lnZ, U, *Jm) // Calc. its expectation values
  *
  * This file is part of the ic1ionmodule of the McPhase package, calculating the single-ion properties of a rare
  * earth or actinide ion in intermediate coupling.
@@ -161,7 +161,7 @@ void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, 
 // --------------------------------------------------------------------------------------------------------------- //
 // Uses the stored eigenvectors of the single ion Hamiltonian to truncate the matrix. Calc. expectation values.
 // --------------------------------------------------------------------------------------------------------------- //
-void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, double *lnZ, double *U)
+void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, Vector &T, Vector &lnZ, Vector &U)
 {
    int Hsz=getdim(pars.n,pars.l);
    char uplo='U'; complexdouble zme;
@@ -191,10 +191,10 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, d
       if(fabs(VE.zV(ii,jj).r)<DBL_EPSILON && fabs(VE.zV(ii,jj).i)<DBL_EPSILON) VE.zV(ii,jj) = 0.; } 
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<cb; Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
+   for(Esz=0; Esz<cb; Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
 
    // Does initialisations in case we need to recalculate the higher order multipolar matrices (e.g. for spins)
-   int memloc=cb*cb, oldJhi=J.Hi();
+   int memloc=cb*cb, oldJhi=J.Rhi();
    complexdouble *opmat=0, *zmt=0;
    sMat<double> zeroes; zeroes.zero(Hsz,Hsz); sMat<double> Upq,Umq; complexdouble *zJmat;
    char nstr[6]; char filename[255]; char basename[255];
@@ -216,7 +216,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, d
 
    // Checks that this time we require expectation values of higher order multipoles even though these were not used in mcphasit
    clock_t start,end; start = clock();
-   if((J.Hi()*cb*cb+Hsz*Hsz)>est.Rows()) 
+   if((J.Rhi()*cb*cb+Hsz*Hsz)>est.Rows()) 
    {
       std::cerr << "ic1ion truncate: Multipolar operators not precalculated. Calculating now..." << std::flush;
       oldJhi = (est.Rows()-offset)/cb/cb-1;
@@ -225,11 +225,11 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, d
    }
 
    // Calculates the rotated operators for the mean field terms
-   complexdouble *zt; double Z=0.; eb.assign(Esz,0.); *U=0.;
-   for(int iJ=(J.Lo()-1); iJ<J.Hi(); iJ++)
+   complexdouble *zt; Vector Z(1,T.Hi());Z=0.; eb.assign(Esz,0.); U=0;
+   for(int iJ=(J.Rlo()-1); iJ<J.Rhi(); iJ++)
    {
       me.assign(Esz,0.);
-      zt = (complexdouble*)malloc(cb*sizeof(complexdouble)); J[iJ+1]=0.; 
+      zt = (complexdouble*)malloc(cb*sizeof(complexdouble));for(int Ti=1;Ti<=J.Chi();++Ti)J[iJ+1][Ti]=0.; 
       if(iJ>=oldJhi) 
       {
          if(iJ<6) 
@@ -264,20 +264,20 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, d
          #else
          zme = F77NAME(zdotc)(&cb, VE.zV(ind_j), &incx, zt, &incx);
          #endif
-         me[ind_j] = zme.r;
-         if(iJ==(J.Lo()-1)) { eb[ind_j] = exp(-E[ind_j]/(KB*T)); Z+=eb[ind_j]; *U+=(E[ind_j]+VE.E(0))*eb[ind_j]; }
-         J[iJ+1]+=me[ind_j]*eb[ind_j];
+         me[ind_j] = zme.r;for(int Ti=1;Ti<=T.Hi();++Ti){
+         if(iJ==(J.Rlo()-1)) { eb[ind_j] = exp(-E[ind_j]/(KB*T(Ti))); Z(Ti)+=eb[ind_j]; U(Ti)+=(E[ind_j]+VE.E(0))*eb[ind_j]; }
+         J[iJ+1][Ti]+=me[ind_j]*eb[ind_j];}
       }
-      free(zt); J[iJ+1]/=Z; if(iJ==(J.Lo()-1)) *U/=Z; 
+      free(zt); for(int Ti=1;Ti<=T.Hi();++Ti){J[iJ+1][Ti]/=Z(Ti); if(iJ==(J.Rlo()-1)) U(Ti)/=Z; }
       memloc+=cb*cb;
    }
-   if((J.Hi()*cb*cb+Hsz*Hsz)>est.Rows()) 
+   if((J.Rhi()*cb*cb+Hsz*Hsz)>est.Rows()) 
    {
       end = clock(); std::cout << " Done. Elapsed time = " << (double)(end-start)/CLOCKS_PER_SEC << "s." << std::endl;
 //    if(!opmat) { delete[]opmat; *opmat=0; } if(!zmt) { delete[]zmt; *zmt=0; }
       delete[]opmat; delete[]zmt;
    }
-   *lnZ = log(Z)-VE.E(0)/(KB*T);
+   for(int Ti=1;Ti<=T.Hi();++Ti)lnZ(Ti) = log(Z(Ti))-VE.E(0)/(KB*T(Ti));
 }
 
 // --------------------------------------------------------------------------------------------------------------- //

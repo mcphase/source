@@ -34,7 +34,6 @@
 #$DVIPS = '/Library/TeX/texbin/dvips';   # dvips $DVIPNG = '/Library/TeX/texbin/dvipng'; # dvipng
 #$PDFTOCAIRO = '/opt/homebrew/bin/pdftocairo';   # pdf to svg converter $PS2PDF = '/opt/homebrew/bin/ps2pdf';   # ps to pdf converter
 #$PDFCROP = '/Library/TeX/texbin/pdfcrop';       # pdfcrop $GS = '/opt/homebrew/opt/ghostscript/bin/gs';   # GhostScript
-#
 #                                   --> this will create online manual in directory manual
 #                                       copy this manual to the webpage: mkdir manual  |   put -r manual     (puts all files recursively)
 #               .   outdated: push all changes to Kenai, e.g.
@@ -80,7 +79,10 @@
 #                                           correct bugs in izpack2exe.py (format of config.txt errors)]
 #	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
 #				and then do: 
-#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/14.1.0/lib/gcc/current/
+#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/14.1.0_2/lib/gcc/current/
+#           gfortran lSystem not found - then do:
+#                               export LIBRARY_PATH="$LIBRARY_PATH:/Library/Developer/CommandLineTools/SDKs/MacOSX11.sdk/usr/lib"
+#
 #	        Note on compiling with dos:   make unreleased_remove and copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
 #                                    mingw win64 shell  (from startup menu) 

@@ -189,7 +189,7 @@ if(gp.read())printf("#reading graphic parameters from results/graphic_parameters
   Vector momentlz(1,ORBMOMDENS_EV_DIM);
   Vector h(1,jjjps.nofcomponents);h=0; // exchange field =0 ... dimension 6 ok for every module ?
   printf("#Exchange field components (meV):");
-  for(int i=1;i<=argc-6-os-1;++i){h(i)=strtod(argv[6+os+i],NULL);printf("%4g% ",h(i));}printf("\n");
+  for(int i=1;i<=argc-6-os-1;++i){h(i)=strtod(argv[6+os+i],NULL);printf("%4g ",h(i));}printf("\n");
   jjjps.Icalc_parameter_storage_init(h,Hext,T);
 
   printf("calculating expectation values of density coefficients ....\n");

@@ -116,6 +116,7 @@ public:
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents
    // from exchange field Hxc [meV] and external field Hext
    void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage);
+   void  Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext, Vector & lnZ,Vector & U,ComplexMatrix & parstorage);
 
    // returns transition element matrix M  and transition energy delta (to calculate chi0 in mcdisp,see manual)
    int  du1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & ests);
@@ -147,6 +148,7 @@ private:
   // external module functions, intern_Icalc=0
  
   void (*I)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*);
+  void (*IM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,Vector*,Vector*,ComplexMatrix*);
   int  (*du)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,int*,int*,ComplexMatrix*);
 
   void (*estates)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
@@ -169,10 +171,13 @@ int  (*dP1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,f
 public:
 //1. MAGNETIC MOMENT
    // returns magnetic moment
-   int mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
-   int micalc(Vector &momi,  double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
-   int Lcalc(Vector &L, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
-   int Scalc(Vector &S, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
+   int mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+   int mcalc(Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+   int micalc(Vector &momi,  double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+   int Lcalc(Vector &L, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+   int Lcalc(Matrix &L, Vector & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+   int Scalc(Vector &S, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+   int Scalc(Matrix &S, Vector & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
    int  dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dm1,ComplexMatrix & ests);
    int  dmi1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dmi1,ComplexMatrix & ests);
    int  dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dL1,ComplexMatrix & ests);
@@ -180,8 +185,11 @@ public:
 
 private:  // handle for mcalc in loadable modules
   void (*m)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+  void (*mM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   void (*L)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+  void (*LM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   void (*S)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+  void (*SM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   int  (*dm1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
   int  (*dL1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
   int  (*dS1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);

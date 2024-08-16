@@ -26,7 +26,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
  FILE * cf_file; 
  cf_file=open_sipf(sipf_filename,modulefilename,verbose);
   if(strcmp(modulefilename,"kramer")==0)
-    {module_type=1;fprintf (stderr,"[internal]\n");
+    {module_type=1;if(verbose)fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,3);i=3;
       nof_electrons=0; // not to be used in module kramer !!
       while(feof(cf_file)==false)
@@ -47,7 +47,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
     }
   else
     {if(strcmp(modulefilename,"brillouin")==0)
-     {module_type=3;fprintf (stderr,"[internal]\n");
+     {module_type=3;if(verbose)fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module brillouin !!
       while(feof(cf_file)==false)
@@ -65,7 +65,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
      }
      else
      {if(strcmp(modulefilename,"cfield")==0)
-     {module_type=2;fprintf (stderr,"#[internal]\n");
+     {module_type=2;if(verbose)fprintf (stderr,"#[internal]\n");
       //fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
        fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename,verbose);
@@ -79,7 +79,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
      }
      else
      {if(strcmp(modulefilename,"so1ion")==0)
-     {module_type=4;fprintf (stderr,"#[internal]\n");
+     {module_type=4;if(verbose)fprintf (stderr,"#[internal]\n");
      // fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
       fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename,verbose);
@@ -91,7 +91,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
 
      }
      else if (strcmp(modulefilename,"cluster")==0)
-     {module_type=5;fprintf (stderr,"#[internal]\n");
+     {module_type=5;if(verbose)fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
@@ -145,7 +145,11 @@ module_type=0;
     //*(int **)(&m)=GetProcAddress(handle,"Icalc");
      if (I==NULL) {fprintf (stderr," error %d loading function Icalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
                   else {if(verbose)fprintf (stderr,"Icalc ");}
-    du=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,int*,int*,ComplexMatrix*))GetProcAddress(handle,"du1calc");
+    IM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,Vector*,Vector*,ComplexMatrix*))GetProcAddress(handle,"IMcalc");
+    //*(int **)(&m)=GetProcAddress(handle,"IMcalc");
+    if (IM==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  IMcalc -continuing ",(int)GetLastError(),modulefilename);}
+                    }else {if(verbose)fprintf (stderr,"IMcalc ");}
+     du=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,int*,int*,ComplexMatrix*))GetProcAddress(handle,"du1calc");
     //*(void **)(&du)=GetProcAddress(handle,"du1calc");
      if (du==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  du1calc -continuing ",(int)GetLastError(),modulefilename);}
                    }else {if(verbose)fprintf (stderr,"du1calc ");}
@@ -164,6 +168,10 @@ module_type=0;
     //*(int **)(&m)=GetProcAddress(handle,"mcalc");
      if (m==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  mcalc -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"mcalc ");}
+    mM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"mMcalc");
+    //*(int **)(&m)=GetProcAddress(handle,"mMcalc");
+     if (mM==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  mMcalc -continuing ",(int)GetLastError(),modulefilename);}
+                    }else {if(verbose)fprintf (stderr,"mMcalc ");}
  
    dm1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dm1");
     //*(void **)(&dm1)=GetProcAddress(handle,"dm1");
@@ -174,6 +182,10 @@ module_type=0;
     //*(int **)(&L)=GetProcAddress(handle,"Lcalc");
      if (L==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  Lcalc -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)if(verbose)fprintf (stderr,"Lcalc ");}
+    LM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"LMcalc");
+    //*(int **)(&L)=GetProcAddress(handle,"Lcalc");
+     if (LM==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  LMcalc -continuing ",(int)GetLastError(),modulefilename);}
+                    }else {if(verbose)if(verbose)fprintf (stderr,"LMcalc ");}
  
    dL1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dL1");
     //*(void **)(&dL1)=GetProcAddress(handle,"dL1");
@@ -184,6 +196,10 @@ module_type=0;
     //*(int **)(&S)=GetProcAddress(handle,"Scalc");
      if (S==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  Scalc -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"Scalc ");}
+  SM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"SMcalc");
+    //*(int **)(&S)=GetProcAddress(handle,"SMcalc");
+     if (SM==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  SMcalc -continuing ",(int)GetLastError(),modulefilename);}
+                    }else {if(verbose)fprintf (stderr,"SMcalc ");}
 
     dS1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dS1");
     //*(void **)(&dS1)=GetProcAddress(handle,"dS1");
@@ -271,14 +287,17 @@ module_type=0;
  *(void **)(&I)=dlsym(handle,"Icalc");
   if ((error=dlerror())!=NULL) {fprintf (stderr," %s\n",error);exit (EXIT_FAILURE);}
                           else {if(verbose)fprintf (stderr,"Icalc ");}
-  *(void **)(&du)=dlsym(handle,"du1calc");
+ *(void **)(&IM)=dlsym(handle,"IMcalc");
+  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} IM=NULL;}
+                               else {if(verbose)fprintf (stderr,"IMcalc ");}
+ *(void **)(&du)=dlsym(handle,"du1calc");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);}du=NULL;}
                                else {if(verbose)fprintf (stderr,"du1calc ");}
 
  *(void **)(&p)=dlsym(handle,"pcalc");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} p=NULL;}
                                 else {if(verbose)fprintf (stderr,"pcalc ");}
-*(void **)(&dP1)=dlsym(handle,"dP1");
+ *(void **)(&dP1)=dlsym(handle,"dP1");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dP1=NULL;}
                                else {if(verbose)fprintf (stderr,"dP1 ");}
 
@@ -286,18 +305,27 @@ module_type=0;
  *(void **)(&m)=dlsym(handle,"mcalc");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} m=NULL;}
                                else {if(verbose)fprintf (stderr,"mcalc ");}
+ *(void **)(&mM)=dlsym(handle,"mMcalc");
+  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} mM=NULL;}
+                               else {if(verbose)fprintf (stderr,"mMcalc ");}
  *(void **)(&dm1)=dlsym(handle,"dm1");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dm1=NULL;}
                                else {if(verbose)fprintf (stderr,"dm1 ");}
  *(void **)(&L)=dlsym(handle,"Lcalc");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} L=NULL;}
                                else {if(verbose)fprintf (stderr,"Lcalc ");}
+ *(void **)(&LM)=dlsym(handle,"LMcalc");
+  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} LM=NULL;}
+                               else {if(verbose)fprintf (stderr,"LMcalc ");}
  *(void **)(&dL1)=dlsym(handle,"dL1");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dL1=NULL;}
                                else {if(verbose)fprintf (stderr,"dL1 ");}
  *(void **)(&S)=dlsym(handle,"Scalc");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} S=NULL;}
                                else {if(verbose)fprintf (stderr,"Scalc ");}
+ *(void **)(&SM)=dlsym(handle,"SMcalc");
+  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} SM=NULL;}
+                               else {if(verbose)fprintf (stderr,"SMcalc ");}
  *(void **)(&dS1)=dlsym(handle,"dS1");
   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dS1=NULL;}
                                else {if(verbose)fprintf (stderr,"dS1 ");}
@@ -531,6 +559,33 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
    case 3: brillouin(mom,T,Hxc,Hext,lnZ,U);break;
    case 5: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
    default: (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
+  }
+}
+void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector & lnZ,Vector & U,ComplexMatrix & parstorage)
+{
+ switch (module_type)
+  {case 1: for(int i=1;i<=T.Hi();++i){
+           Vector m(mom.Column(i));
+           kramer(m,T(i),Hxc,Hext,lnZ(i),U(i));
+           SetColumn(i,mom,m);}
+           break;
+   case 2:
+   case 4: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
+   case 3: for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
+           brillouin(m,T(i),Hxc,Hext,lnZ(i),U(i));
+           SetColumn(i,mom,m);}
+           break;
+   case 5: for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
+          cluster_Icalc_mcalc_Micalc (1,m,T(i),Hxc,Hext,lnZ(i),U(i));
+          SetColumn(i,mom,m);}
+          break;
+   default:if(IM==NULL){ for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
+          (*I)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ(i),&U(i),&parstorage);
+          SetColumn(i,mom,m);}
+                      } // if exists IM (Matrix function for Icalc) use this
+           else
+          {(*IM)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);}
+            
   }
 }
 

@@ -1119,6 +1119,11 @@ Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3)
 return m;
 }
 
+void SetColumn(int j,Matrix M,Vector &v) // fills column i in Matrix M with vector v
+{for(int i=v.Lo();i<=v.Hi();++i){M(i,j)=v(i);}
+
+}
+
 void set_zlm_constants(Matrix & cnst)
 {// cnst is the Zlm constants - put them into the matrix ... (same code is reused in ionpars.cpp)
 if(cnst.Rlo()!=0||cnst.Rhi()!=6||cnst.Clo()!=-6||cnst.Chi()!=6){fprintf(stderr,"Error matrix in Zlm constants wrong dimension");exit(EXIT_FAILURE);}
