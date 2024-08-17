@@ -36,10 +36,10 @@ all :  clean  RCN36K.o RCN2K.o
 #../chibfk$(EXE) 
 
 RCN2K.o: RCN2K.F
-	$(FC) $(STATIC) -lgfortran -o ../RCN2K $^ 
+	$(FC) $(STATIC) -lgfortran -std=legacy -o ../RCN2K $^ 
 
 RCN36K.o: RCN36K.F
-	$(FC) $(STATIC) -lgfortran -o ../RCN36K $^ 
+	$(FC) $(STATIC) -lgfortran -std=legacy -o ../RCN36K $^ 
 
 #../RCG11K$(EXE): RCG11K.F
 #	$(LINKER) $(STATIC) -lgfortran -o ../RCG11K $^ 

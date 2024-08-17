@@ -35,7 +35,7 @@ all :  clean bfk.o
 #../chibfk$(EXE) 
 
 bfk.o: bfk.f95
-	$(FC) $(STATIC) -lgfortran -o ../bfk $^ 
+	$(FC) $(STATIC) -lgfortran -std=legacy -o ../bfk $^ 
 
 #../chibfk$(EXE): chibfk.f95
 #	gfortran -static -lgfortran -o ../chibfk $^ 

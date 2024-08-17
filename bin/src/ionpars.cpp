@@ -754,6 +754,7 @@ void ionpars::Icalc(Matrix & I,Vector & T, Vector &  Hxc,Vector & Hext, Vector &
   }
  }
 }
+
 /**************************************************************************/
 // for mcdisp this routine is needed
 int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd,ComplexMatrix & ests)
@@ -1007,9 +1008,9 @@ void ionpars::Jcalc(Matrix & JJ,Vector & T, Vector &  Hxc,Vector & Hext, Complex
    setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
    // calculate Z and wn (occupation probability)
    Vector wn(1,dj); double Zs,lnZs;
-   Vector Jai(1,dj),Jbi(1,dj),Jci(1,dj); // <i|J|i> storage to save compuatatoin time
+   Vector Jai(1,dj),Jbi(1,dj),Jci(1,dj); // <i|J|i> storage to save computation time
    
-   for(int Ti=T.Hi();Ti>0;++Ti){
+   for(int Ti=T.Hi();Ti>0;--Ti){
    JJ(1,Ti)=0;JJ(2,Ti)=0;JJ(3,Ti)=0;
    calculate_Z_wn(En,T(Ti),Zs,lnZs,wn);
    // calculate <Ja>,<Jb>,<Jc>
@@ -1019,13 +1020,14 @@ void ionpars::Jcalc(Matrix & JJ,Vector & T, Vector &  Hxc,Vector & Hext, Complex
                      Jbi(i)=matelr(i,i,zr,zi,Jb);
                      Jci(i)=matelr(i,i,zr,zi,Jc); 
                     }
-     JJ(1,Ti)+=wn(i)*Jai;
-     JJ(2,Ti)+=wn(i)*Jbi;
-     JJ(3,Ti)+=wn(i)*Jci;  
+     JJ(1,Ti)+=wn(i)*Jai(i);
+     JJ(2,Ti)+=wn(i)*Jbi(i);
+     JJ(3,Ti)+=wn(i)*Jci(i);  
                                    }
     }
    }
 }
+
 //**********************************************************************/
 // routine to calculate the charge density coefficients of Zlm() R(r)^2
 // *********************************************************************

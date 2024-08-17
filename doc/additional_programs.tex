@@ -630,14 +630,16 @@ program to setup{\prg mcdisp.mf} with information on meanfields
       to calculate the standard deviation and then you can start
       a fit by simannfit or searchspace
 \end{verbatim}\index{simannfit}\index{searchspace}
-\item [\prg singleion\index{singleion} [option] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents]
- single ion  - display single ion expectations values $<Ia>, <Ib> $... and transition energies.
+\item [\prg singleion\index{singleion} [options] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents]
+ single ion  - calculate single ion expectations values $<Ia>, <Ib> $... and transition energies.
+ Options may be used to trigger calculation of magnetic Moment and other Quantities.
 \begin{verbatim} 
+           T    ..... temperature in Kelvin
            Hext ..... external field in Tesla 
            Hxc... exchange (molecular) field in meV   
 \end{verbatim}
 {\prg singleion} reads {\prg mcphas.j} and the singleion parameter files quoted therein
-and calculatesenergies, eigenstates, expectation values $<I>$ for the given
+and calculates energies, eigenstates, expectation values $<I>$ for the given
 temperature, external magnetic field Hext and exchange field Hxc (the
 interaction constants given in mcphas.j are ignored).
 
@@ -646,7 +648,7 @@ for each single ion property file the following files are generated:
    results/file.sipf.levels.cef .. energy levels and eigenstates and <I>
    results/file.sipf.trs ......... transition energies,matrix elements
                                    and (powder) neutron intensities
-   results/_file.sipf    ......... parameters as read by singleion
+   results/_file.sipf    ......... input parameter files as read and used by singleion 
 
 options: -nt ......... by default only 5 transition energies are output,
                        if you want more, start e.g. with 
@@ -658,10 +660,24 @@ options: -nt ......... by default only 5 transition energies are output,
                        parameter file ion.sipf
          -M  ......... calculate expectation values and transition matrix
                        elements for magnetic moment M instead of I
+         -MQ 0 0 1 ... instead of <I> calculate expectation values, transition matrix elements
+                       for M(Q=(0 0 1)/A), the Fourier Transform  of magnetic moment density M(r)
          -S  ......... calculate expectation values and transition matrix
                        elements for spin S
          -L  ......... calculate expectation values and transition matrix
                        elements for orbital momentum L
+         -v       .... verbose, output more information on ongoing calculation
+         -Tsteps 10 27 in addition to initial temperature calculate 10 further temperatures
+                       until 27K has been reached
+         -Hsteps 20 0 0 10 in addition to initial field calculate 20 further external fields
+                       until (0 0 10) Tesla has been reached
+         -opmat 2 .... output operator matrix number n=2 to results/op.mat
+                Operators in output results/op.mat for different values of n:
+                n=0                    Hamiltonian
+                n=1,...,nofcomponents  operator Matrix In in standard basis
+                n=-1,..,-nofomponents  operator Matrix In for Hamiltonian eigenstates basis
+                n>nofomponents: all operator Matrices (n=0 to n=nofcomponents) in standard basis
+                n<-nofomponents: all operator Matrices (n=0 to n=-nofcomponents) in Hamiltonian eigenstates basis
 
 note: for calculating T or H dependencies you can put single ion in a loop
        and pipe the result into a file
