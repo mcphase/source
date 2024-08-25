@@ -5,8 +5,31 @@
  *   bool checkmat(ComplexMatrix &cmat, complexdouble *fmat,int r, int c)                     // Compares Matpack and fortran matrices
  *   void Icalc(Vector &J, double *T,Vector &gjmbHxc,Vector&Hext, double *gJ, Vector &ABC,    // Calculates the meanfield moment
  *                 char **sipffile, double *lnZ, double *U, ComplexMatrix &est)
+ *   void IMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
+ *                 char **sipffile, Vector &lnZ, Vector &U, ComplexMatrix &est)  
  *   int du1calc(int &tn, double &T, Vector &gjmbHxc,Vector&Hext, double &g_J, Vector &ABC,   // Calculates the transition
  *                 char **sipffilename, ComplexVector &u1, float &delta,int & n, int & nd, ComplexMatrix &est)  //   matrix elements
+ *   void mcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)
+ *   void mMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)
+ *   int dm1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,          // Calculates the transition
+ *                 char **sipffilename, ComplexVector & m1, float &delta,                    //   matrix elements of the magnetic moment operator
+ *                 ComplexMatrix &est)
+ *   void Lcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)
+ *   void LMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)
+ *   int dL1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,          // Calculates the transition
+ *                 char **sipffilename, ComplexVector & L1, float &delta,                    //   matrix elements of the angular momentum  operator
+ *                 ComplexMatrix &est)
+ *   void Scalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)    //
+ *   void SMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
+ *                 char **sipffile,  ComplexMatrix &est)    //
+ *   int dS1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,          // Calculates the transition
+ *                 char **sipffilename, ComplexVector & S1, float &delta,                    //   matrix elements of the spin operator
+ *                 ComplexMatrix &est)
  *   void Icalc_parameter_storage_matrix_init(ComplexMatrix *est,Vector &gjmbHxc,Vector&Hext  // initialises parameter storage matrix 
  *                 double *g_J,double &T,Vector &ABC,char **sipffilename)                     // for Icalc
  *   void estates(ComplexMatrix *est, Vector &gjmbHxc,Vector&Hext, double *g_J, double &T,    // Calculates the energy and wavefunctions
@@ -514,19 +537,21 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the magnetic moment at a particular temperature and field
 // --------------------------------------------------------------------------------------------------------------- //
+
+
 extern "C"
 #ifdef _WINDOWS
 __declspec(dllexport)
 #endif
-           void Icalc(Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
-                      double *T,          // Input scalar temperature
+           void IMcalc(Matrix &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+                      Vector&T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
-                      Vector &Hext,       // Input vector of external field (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
  /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
                       char **sipffilename,// Single ion properties filename
-                      double *lnZ,        // Output scalar logarithm of partition function
-                      double *U,          // Output scalar internal energy 
+                      Vector &lnZ,        // Output scalar logarithm of partition function
+                      Vector &U,          // Output scalar internal energy 
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {
    // sum exchange field and external field
@@ -648,14 +673,42 @@ __declspec(dllexport)
    int info = ic_diag(Hsz,H,zV,vE); free(H);
    if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
 
-   icf_expJ(pars,est,zV,vE,T,J,lnZ,U); delete[]vE; delete[]zV;
 
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+for(int Ti=1;Ti<=T.Hi();++Ti){
+         icf_expJ(pars,est,zV,vE,&T(Ti),J,&lnZ(Ti),&U(Ti));
+    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    dum=J(2);J(2)=J(3);J(3)=J(5);J(5)=J(4);J(4)=dum;
-   for(i=Jret.Lo(); i<=Jret.Hi(); i++) Jret[i] = J[i];
-   // --------------------------------------------------------------------
+   for(i=Jret.Rlo(); i<=Jret.Rhi(); i++) Jret(i,Ti) = J(i);
+                          }
+         delete[]vE; delete[]zV;
+     
+     // --------------------------------------------------------------------
 
+}
+
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           void Icalc(Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+                      double *T,          // Input scalar temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      double *lnZ,        // Output scalar logarithm of partition function
+                      double *U,          // Output scalar internal energy 
+                      ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
+{Matrix JM(1,Jret.Hi(),1,1);double * d=NULL;Vector dd;
+ for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
+ Vector TT(1,1);TT(1)=*T;
+ Vector lnZZ(1,1);lnZZ(1)=*lnZ;
+ Vector UU(1,1);UU(1)=*U;
+ IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU,est);
+ *U=UU(1);*lnZ=lnZZ(1);*T=TT(1);
+ for(int i=1;i<=Jret.Hi();++i)Jret(i)=JM(i,1);
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -686,6 +739,32 @@ __declspec(dllexport)
    mom(2)=GS*J(2)+J(5);
    mom(3)=GS*J(3)+J(6);
 }
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           void mMcalc(Matrix &mom,        // Output magnetic moment (mub)
+                      Vector &T,          // Input scalar temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
+{
+   Matrix J(1,6,1,T.Hi()); Vector ABC; 
+   double gJ=0.;Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   IMcalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,lnZ,U,est);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //mom(1)=GS*J(1)+J(2);
+   //mom(2)=GS*J(3)+J(4);
+   //mom(3)=GS*J(5)+J(6);
+   for(int Ti=1;Ti<=T.Hi();++Ti){
+   mom(1,Ti)=GS*J(1,Ti)+J(4,Ti);
+   mom(2,Ti)=GS*J(2,Ti)+J(5,Ti);
+   mom(3,Ti)=GS*J(3,Ti)+J(6,Ti); }
+}
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the <L> at a particular temperature and field
 // --------------------------------------------------------------------------------------------------------------- //
@@ -713,6 +792,32 @@ __declspec(dllexport)
    L(1)=J(4);
    L(2)=J(5);
    L(3)=J(6);
+}
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           void LMcalc(Matrix &L,          // Output magnetic moment (mub)
+                      Vector &T,          // Input scalar temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
+{
+   Matrix J(1,6,1,T.Hi());Vector ABC; 
+   double gJ=0.; Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   IMcalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,lnZ,U,est);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //L(1)=J(2);
+   //L(2)=J(4);
+   //L(3)=J(6);
+   for(int Ti=1;Ti<=T.Hi();++Ti){
+   L(1,Ti)=J(4,Ti);
+   L(2,Ti)=J(5,Ti);
+   L(3,Ti)=J(6,Ti);}
 }
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the <S> at a particular temperature and field
@@ -742,7 +847,33 @@ __declspec(dllexport)
    S(2)=J(2);
    S(3)=J(3);
 }
+extern "C"
+#ifdef _WINDOWS
+__declspec(dllexport)
+#endif
+           void SMcalc(Matrix &S,          // Output magnetic moment (mub)
+                      Vector &T,          // Input scalar temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
+ /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
+                      char **sipffilename,// Single ion properties filename
+                      ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
+{
+   Matrix J(1,6,1,T.Hi());Vector  ABC; 
+   double gJ=0.;Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   IMcalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,lnZ,U,est);
+   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   //                                        to Sa Sb Sc La Lb Lc
+   //S(1)=J(1);
+   //S(2)=J(3);
+   //S(3)=J(5);
 
+for(int Ti=1;Ti<=T.Hi();++Ti){
+   S(1,Ti)=J(1,Ti);
+   S(2,Ti)=J(2,Ti);
+   S(3,Ti)=J(3,Ti);}
+}
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the eigenstates of Hic+effective_mean_fields
 // --------------------------------------------------------------------------------------------------------------- //

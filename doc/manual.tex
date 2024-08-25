@@ -78,6 +78,37 @@ Without the enthusiastic support of the neutron scattering
 community this program would not have come into existence. 
 
 \section*{What is New ?}
+
+\subsection*{ ... in version 5.6 ...}
+\begin{itemize}
+\item {\prg mcphas}
+\begin{itemize}\item introduced self consistent treatment of exchange striction, see section \ref{JT}
+ \item bug removed fecalc evalfe was not full multithreading
+ \item introduced experimental error in {\prg fit/mcphas.fum} for calculation of sta
+            and allow for fitting of any quantity in {\prg mcphas.fum}
+\end{itemize}
+\item {\prg singleion} option -Tsteps -Hsteps -v introduced to allow simple loops with high speed 
+\item {\prg pointc}: a standard deviation sta of calculated  to input cf parameters can be calculated (option -s)
+\item {\prg fform} extended, option -t to format year month day hour min second into timestamp in seconds
+\item {\prg getvalue} improved to do interpolation, too (dx=0)
+\item  check of righthandedness of primitive lattice in reading {\prg mcphas.j} introduced
+\item {\prg display\_density, densplt} enabled to read exchange field components from command line
+\item {\prg cif2mcphas} reading of atomic positions extended to be able to put something such as
+         \begin{verbatim}(C1+Tm2)/2 (C1+Tm2)/2 (C1+Tm2)/2\end{verbatim} for a position instead of 0.253(23) 0.423  0.5, 
+option -nm (nonmagnetic) introduced to force nonmagnetic atoms
+\item {\prg reduce\_unitcell}: check if atoms are in primitive unit cell, if not
+         move them there, option -delatoms introduced to allow to delete atoms from {\prg mcphas.j}
+\item TmNiC$_2$ example created, using electron point charges on bondings
+         and solving linear equation system to calculate some point charges
+         given $B_2^0$ and $B_2^2$ from high T expansion of inverse magnetic susceptibility
+\item {\prg makenn} 
+revised to make possible exchange striction calculations using option -djdx -djdy -djdz,
+bug in elastic constants formula found and corrected 
+\item           {\prg  display }: adapted to enable display of error bars 
+\item            option -r in {\prg simannfit}
+\end{itemize}
+
+
 \subsection*{ \dots in version 5.5 \dots}
 \begin{itemize}
 \item {\prg ic1ion \& icf1ion \& mcdiff.in file format for} $\langle \mbf S \rangle$
@@ -132,30 +163,6 @@ and here follow standard deviations computed with the scaled parameters
 \item {\prg mcphas2jvx} bug for nonortho primitive lattices fixed
 \item {\prg getvalue} linux bug fixed
 \end{itemize}
-
-
-\subsection*{ \dots in version 5.2 \dots}
-\begin{itemize}
-\item recommended program for single ion properties is now {\prg singleion}\index{singleion} (works for all modules)
-\item {\prg spinsfromq}\index{spinsfromq} new: triple q option, piping to mcphas.tst, scale moments 
- \item {\prg   spins}\index{spins}: -f option enabled to read mcphas.tst, always output spins.out 
-                 ready to be used for {\prg mcdiff}\index{mcdiff}
-\item {\prg pointc}\index{pointc} output creates automaticalle files results/pointc.Blm and results/pointc.Lllm with just the CF parameters
-\item {\prg mcdisp}\index{mcdisp} option -ignore\_non\_hermitian\_matrix\_error introduced , eigensolvers updated, option -jqe introduced to output all eigenvalues of J(q) to file mcdisp.jq
-\item {\prg simannfit}\index{simannfit} options -n, -p  introduced, for storage of parametersets and probing parspace during fitting.
-\item {\prg cif2mcphas}\index{cif2mcphas} program to create mcphase input files from crystallographic information in cif files
-\item mcdisp.jq has now a col 4 with qincr for plotting purposes
-\item bugs fixed in {\prg convolute2d, rhoso1ion, module brillouin, so1ion} Blm input for m odd, getvalue
-\end{itemize}
-
-\subsection*{ ... in version 5.1 ...}
-\begin{itemize}
-\item parallel processing: the number of parallel threads can be chosen either in a system variable
-MCPHASE\_NOFTHREADS , or setting in mcdisp.par and mcphas.ini nofthreads=2, or if nothing is 
-specified the programs attempt to determine the available number of cores automatically
-\item powdermagnon extended to nonortholattices 
-\end{itemize}
-
 
 \newpage
 

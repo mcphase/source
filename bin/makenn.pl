@@ -612,10 +612,10 @@ for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
   system("mult 8 5 results/makenn.a$nnn.pc 1 3 ".$screeningfile);
   system("mult 8 6 results/makenn.a$nnn.pc 1 4 ".$screeningfile);  
    # run pointc to create derivatives of Blm from pointcharge model for magnetic atoms
-  system("pointc -d ".$sipf_file[$nnn]." results/makenn.a$nnn.pc 5 6 > results/makenn.a$nnn.sipf");
+  system("pointc -d -o ".$sipf_file[$nnn]." results/makenn.a$nnn.pc 5 6 > results/makenn.a$nnn.sipf");
    } else {
    # run pointc to create derivatives of Blm from pointcharge model for magnetic atoms
-  system("pointc -d ".$sipf_file[$nnn]." results/makenn.a$nnn.pc > results/makenn.a$nnn.sipf");
+  system("pointc -d -o ".$sipf_file[$nnn]." results/makenn.a$nnn.pc > results/makenn.a$nnn.sipf");
           }
   $sipf_file[$nnn]="results/makenn.a$nnn.sipf";
   # set nuclear scattering lengths in this purely magnetic atom zero (for mcdiff)

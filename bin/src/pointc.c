@@ -226,7 +226,7 @@ else if(strcmp(argv[1+ac],"-s")==0) {ac++;conv=1;stcalc=1;}
   if (argc - ac < 3 && batchmode==0)
     { printf (
 "\n Program to calculate Crystal field Parameters from Point Charges \n \
-  Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos\n \
+  Usage: pointc [options] ionname|sipffile  charge_and_position|file.pos  [c4-col c6-col]\n \
 \n \
 OPTIONS:\n \
 -b ....  batchmode - do not write any files; read sipf,pcfile from stdin, prints to stdout \n \
@@ -368,7 +368,7 @@ else
                       char lm4[5];
                       for(i=0;i<=45;++i){strncpy(lm4,lm+i*4,4);if(lm4[3]!='S')lm4[3]='\0';
                                         if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"");
-                                        lm4[0]='L';if(extract(instr,lm4,Llm_in(i))==0){fprintf(conv_file,"# %s\n",instr);snprintf(instr,MAXNOFCHARINLINE,"");}
+                                        lm4[0]='L';if(extract(instr,lm4,Llm_in(i))==0){if(conv)fprintf(conv_file,"# %s\n",instr);snprintf(instr,MAXNOFCHARINLINE,"");}
                                         }
                      if(extract(instr,"pointcharge",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"");}
 

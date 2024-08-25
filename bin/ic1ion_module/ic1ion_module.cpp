@@ -259,11 +259,11 @@ __declspec(dllexport)
                       ComplexMatrix &est) // Input/output eigenstate matrix (initialized in estates)                                          
 {Matrix JM(1,Jret.Hi(),1,1);double * d=NULL;Vector dd;
  for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
- Vector TT(1,1);TT(1,1)=*T;
- Vector lnZZ(1,1);lnZZ(1,1)=*lnZ;
- Vector UU(1,1);UU(1,1)=*U;
+ Vector TT(1,1);TT(1)=*T;
+ Vector lnZZ(1,1);lnZZ(1)=*lnZ;
+ Vector UU(1,1);UU(1)=*U;
  IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU,est);
- *U=UU(1,1);*lnZ=lnZZ(1,1);*T=TT(1,1);
+ *U=UU(1);*lnZ=lnZZ(1);*T=TT(1);
  for(int i=1;i<=Jret.Hi();++i)Jret(i)=JM(i,1);
 }
 
