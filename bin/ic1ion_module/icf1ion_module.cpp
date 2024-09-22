@@ -2903,7 +2903,7 @@ int main(int argc, char *argv[])
          for(int iT=0; iT<nT; iT++)
          {
             Icalc(J,&vT[iT],gjmbHxc,Hext,&vT[iT],gjmbHxc,&infile,&lnZ,&U,est); for(int iJ=1; iJ<=6; iJ++) if(fabs(J(iJ))<SMALL) J(iJ)=0.;
-            ma[iT]=GS*J(1)+J(2); mb[iT]=GS*J(3)+J(4); mc[iT]=GS*J(5)+J(6); mag[iT] = sqrt(ma[iT]*ma[iT]+mb[iT]*mb[iT]+mc[iT]*mc[iT]);
+            ma[iT]=GS*J(1)+J(4); mb[iT]=GS*J(2)+J(5); mc[iT]=GS*J(3)+J(6); mag[iT] = sqrt(ma[iT]*ma[iT]+mb[iT]*mb[iT]+mc[iT]*mc[iT]);
          }
          if(pars.xT!=0.)
          {

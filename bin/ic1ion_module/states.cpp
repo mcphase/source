@@ -120,16 +120,22 @@ bool qR7::operator != (const qR7 & wp) const
 }
 
 bool qR7::isequal (const char * Wstr)
-{
-   char ws=0;
-   int  w1n=0,w2n=1,w3n=2;
+{// changed by MR 9.9.24 to avoid bug on new MAc 
+//(probably due to missing trailing \0 in call of atoi for some calls)
+return (w1 == Wstr[0]-48) && (w2 == Wstr[1]-48) && (w3 == Wstr[2]-48);
 
-   ws = Wstr[0]; w1n = atoi(&ws);
-   ws = Wstr[1]; w2n = atoi(&ws);
-   ws = Wstr[2]; w3n = atoi(&ws);
+// char u[5];u[0]=w1+48;u[1]=w2+48;u[2]=w3+48;u[3]=0; 
+//   if(strncmp(u,Wstr,3)==0){ return true; }
+//   else { return false; }
+  // char ws=0;
+  // int  w1n=0,w2n=1,w3n=2;
+//   ws = Wstr[0]; w1n = atoi(&ws);
+//   ws = Wstr[1]; w2n = atoi(&ws);
+//   ws = Wstr[2]; w3n = atoi(&ws);
+  
 
-   if (w1==w1n && w2==w2n && w3==w3n) { return true; }
-   else { return false; }
+  // if (w1==w1n && w2==w2n && w3==w3n) { return true; }
+  // else { return false; }
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -153,15 +159,22 @@ bool qG2::operator != (const qG2 & up) const
 }
 
 bool qG2::isequal (const char * Ustr)
-{
-   char us=0;
-   int  u1n=0,u2n=1;
+{// changed by MR 9.9.24 to avoid bug on new MAc 
+//(proibably due to missing trailing \0 in call of atoi for some calls)
+ return (u1 == Ustr[0]-48) && (u2 == Ustr[1]-48);
+ //char u[4];u[0]=u1+48;u[1]=u2+48;u[2]=0; 
+ //  if(strncmp(u,Ustr,2)==0){ return true; }
+ //  else { return false; }
 
-   us = Ustr[0]; u1n = atoi(&us);
-   us = Ustr[1]; u2n = atoi(&us);
+//   char us=0;
+//   int  u1n=0,u2n=1;
 
-   if (u1==u1n && u2==u2n) { return true; }
-   else { return false; }
+//   us = Ustr[0]; u1n = atoi(&us);
+//   us = Ustr[1]; u2n = atoi(&us);
+
+//   if (u1==u1n && u2==u2n) { return true; }
+//   else { return false; }
+
 }
 
 // --------------------------------------------------------------------------------------------------------------- //

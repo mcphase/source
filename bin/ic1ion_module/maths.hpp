@@ -82,6 +82,7 @@ template <class T> class sMat {
      void resize(int rs, int rn, int cs, int cn);                       // Resizes a matrix and deletes extra elements
      void reshape(int r, int c) { _r = r; _c = c; };                    // Changes shape without changing entries!
      std::string display_full() const;                                  // Outputs a string of the full matrix
+     std::string display_nonzero() const;                               // Outputs a string of nonzero elements of the  matrix
      T *f_array() const;                                                // Returns matrix as a Fortran style 2D array
    //std::map<_ind,T> ls() { return _ls; }
      void mcol(int c, T val);                                           // Multiplies a given column by a constant
@@ -428,13 +429,13 @@ template <class T> std::string sMat<T>::display_full() const            // Print
       for (c=0; c<(_c-1); c++)
       {
          if(_ls.find(_ind(r,c))==_ls.end())
-            retval << "0\t";
+            retval << "0 \t";
          else
          {
             mr = _ls.find(_ind(r,c))->first.r;
             mc = _ls.find(_ind(r,c))->first.c;
             if( (mr>_r || mr<0) || (mc>_c || mc<0) )
-               retval << "0\t";
+               retval << "0 \t";
             else
                retval << std::setprecision(16) << _ls.find(_ind(r,c))->second << "\t";
          }
@@ -454,13 +455,13 @@ template <class T> std::string sMat<T>::display_full() const            // Print
    for (c=0; c<(_c-1); c++)
    {
       if(_ls.find(_ind(r,c))==_ls.end())
-         retval << "0\t";
+         retval << "0 \t";
       else
       {
          mr = _ls.find(_ind(r,c))->first.r;
          mc = _ls.find(_ind(r,c))->first.c;
          if( (mr>_r || mr<0) || (mc>_c || mc<0) )
-            retval << "0\t";
+            retval << "0 \t";
          else
             retval << std::setprecision(16) << _ls.find(_ind(r,c))->second << "\t";
       }
@@ -476,6 +477,56 @@ template <class T> std::string sMat<T>::display_full() const            // Print
       else
          retval << std::setprecision(16) << _ls.find(_ind(r,c))->second << "];\n";
    }
+//  retval << _r;  retval << " x ";  retval << _c;  retval << "\n";
+
+   return retval.str();
+}
+
+template <class T> std::string sMat<T>::display_nonzero() const            // Prints the full matrix to a string.
+{
+   int r,c,mr,mc;
+   std::stringstream retval;
+
+   retval << "[";
+   for (r=0; r<(_r-1); r++)
+   {
+      for (c=0; c<(_c-1); c++)
+      {
+         if(_ls.find(_ind(r,c))!=_ls.end())
+         {
+            mr = _ls.find(_ind(r,c))->first.r;
+            mc = _ls.find(_ind(r,c))->first.c;
+            if( ((mr<=_r || mr>=0) || (mc<=_c || mc>=0))&& fabs(_ls.find(_ind(r,c))->second)>1e-15)
+               retval << std::setprecision(16) << _ls.find(_ind(r,c))->second << "\t";
+         }
+      }
+      if(_ls.find(_ind(r,c))!=_ls.end())
+      {
+         mr = _ls.find(_ind(r,c))->first.r;
+         mc = _ls.find(_ind(r,c))->first.c;
+         if( ((mr<=_r || mr>=0) || (mc<=_c || mc>=0)) && fabs(_ls.find(_ind(r,c))->second)>1e-15)
+             retval << std::setprecision(16) << _ls.find(_ind(r,c))->second << ";\n";
+      }
+   }
+   for (c=0; c<(_c-1); c++)
+   {
+      if(_ls.find(_ind(r,c))!=_ls.end())
+       {
+         mr = _ls.find(_ind(r,c))->first.r;
+         mc = _ls.find(_ind(r,c))->first.c;
+         if( ((mr<=_r || mr>=0) || (mc<=_c || mc>=0))&& fabs(_ls.find(_ind(r,c))->second)>1e-15)
+            retval << std::setprecision(16) << _ls.find(_ind(r,c))->second << "\t";
+      }
+   }
+   if(_ls.find(_ind(r,c))!=_ls.end())
+       {
+      mr = _ls.find(_ind(r,c))->first.r;
+      mc = _ls.find(_ind(r,c))->first.c;
+      if( ((mr<=_r || mr>=0) || (mc<=_c || mc>=0))&& fabs(_ls.find(_ind(r,c))->second)>1e-15)
+                retval << std::setprecision(16) << _ls.find(_ind(r,c))->second << "];\n";
+   }
+ retval << _r;  retval << " x ";  retval << _c;  retval << "\n";
+
    return retval.str();
 }
 

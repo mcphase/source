@@ -17,6 +17,7 @@
 %\usepackage{bbm}
 %\usepackage{dsfont}
 \makeindex
+\newcommand\mybar[1][black]{\begingroup\color{#1}\kern1pt\rule[-\dp\strutbox]{1pt}{\baselineskip}\kern1pt\endgroup}
 \newcommand{\highlight}[1]{\colorbox{red!10}{$\displaystyle#1$}}
 \newcommand{\m}[1]{\overline{#1}}
 \newcommand{\M}[1]{\underline{#1}}
@@ -83,7 +84,7 @@ community this program would not have come into existence.
 \begin{itemize}
 \item {\prg mcphas}
 \begin{itemize}\item introduced self consistent treatment of exchange striction, see section \ref{JT}
- \item bug removed fecalc evalfe was not full multithreading
+ \item bugs removed: fecalc evalfe was not full multithreading, ic1ion and icf1ion cfp were buggy
  \item introduced experimental error in {\prg fit/mcphas.fum} for calculation of sta
             and allow for fitting of any quantity in {\prg mcphas.fum}
 \end{itemize}

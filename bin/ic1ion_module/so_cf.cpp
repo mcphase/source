@@ -131,6 +131,7 @@ sMat<double> racah_Umat(int n, int k, orbital e_l)
 //          noncfpprod = pow(-1.,-(double)e_l-abs(conf.states[j].L)) * sqrt( (2.*abs(conf.states[i].L)+1.)*(2.*abs(conf.states[j].L)+1.) );
             noncfpprod =                                               sqrt( (2.*abs(conf.states[i].L)+1.)*(2.*abs(conf.states[j].L)+1.) );
             isz = (int)cfpsi.size(); jsz = (int)cfpsj.size();
+//if(k==2&&i==0&&j==1)std::cout << conf.states[j].L ;
             for(ii=0; ii<isz; ii++)
                for(jj=0; jj<jsz; jj++)
                   if(cfpsi[ii].ind==cfpsj[jj].ind)
@@ -185,23 +186,26 @@ sMat<double> racah_ukq(int n, int k, int q, orbital e_l)
    }
 
    sMat<double> Ukq(ns,ns);
-
-   for(i=0; i<ns; i++)
-      for(j=0; j<ns; j++)
+double rm1;
+   for(i=0; i<ns; i++){
+      for(j=0; j<ns; j++){
          if(S2[i]==S2[j])
-         {
+         { rm1= redmat(irm[i],irm[j]);
 //          rm = pow(-1.,(S2[i]-L2[i]-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2[i],J2[i],L2[j],J2[j],S2[i],2*k) * redmat(irm[i],irm[j]);
-            rm = pow(-1.,(S2[i]+L2[j]+J2[i])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) *   sixj(J2[j],2*k,J2[i],L2[i],S2[i],L2[j]) * redmat(irm[i],irm[j]); // changed MR 26.1.10
+            rm = pow(-1.,(S2[i]+L2[j]+J2[i])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) *sixj(J2[j],2*k,J2[i],L2[i],S2[i],L2[j]) *  rm1; // changed MR 26.1.10
 //          rm = pow(-1.,(S2[i]-L2[i]-J2[j])/2.+k) * sqrt((J2[i]+1.)*(J2[j]+1.)) * racahW(L2[i],J2[i],L2[j],J2[j],S2[i],2*k) * redmat(irm[i],irm[j]);
           //if(nn>(2*e_l+1)) rm = -rm;
 //          Ukq(i,j) = pow(-1.,(J2[i]+Jz2[i])/2.+k+q) * rm * wigner(J2[i],J2[j],0-Jz2[i],Jz2[j],2*k,-2*q) / sqrt(2.*k+1.);
 //          Ukq(i,j) = pow(-1.,(J2[i]-Jz2[i])/2.) * threej(J2[j],2*k,J2[i],-Jz2[j],2*q,Jz2[i]) * rm; // changed MR 26.1.10
 //          Ukq(i,j) = pow(-1.,(J2[i]+Jz2[i])/2.+k  ) * rm * wigner(J2[i],J2[j],0-Jz2[i],Jz2[j],2*k,-2*q) / sqrt(2.*k+1.);
-            Ukq(i,j) = pow(-1.,(J2[i]-Jz2[i])/2.) * threej(J2[i],2*k,J2[j],-Jz2[i],2*q,Jz2[j]) * rm; // changed MR 26.1.10
-
+           Ukq(i,j)= pow(-1.,(J2[i]-Jz2[i])/2.) * threej(J2[i],2*k,J2[j],-Jz2[i],2*q,Jz2[j]) * rm; // changed MR 26.1.10
           //if(i!=j) Ukq(j,i) = Ukq(i,j) * pow(-1.,(L2[i]-S2[i]-L2[j]+S2[j])/2.);
          }
+      }
+   }
 
+
+//if(k==2&&q==0)printf("U%i%i ns=%i",k,q,ns);
    return Ukq;
 }
 

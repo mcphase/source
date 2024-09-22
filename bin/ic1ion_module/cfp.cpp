@@ -630,6 +630,7 @@ double racah_ulf(qG2 U, orbital L, qG2 Up, orbital Lp)
 // --------------------------------------------------------------------------------------------------------------- //
 double racah_wupf(qR7 W, qG2 U, qR7 Wp, qG2 Up)
 {
+
    double wupf = 0;
    int id = -1;
                                                                                                                  /*
@@ -665,14 +666,17 @@ t=[0   1    0    0   0    0    0    0    0     0     0     0     0     0    0   
 % Table continues below, reconstructed from tabulated cfp and also from the code of Allison and McNulty CPC 8 (1974) 246
 % And also using the reciprocity relations (Judd, Op. Techniques in At. Spectr., p.181, eq 7-36). */
 
+
+
    if(Wp.isequal("000") && Up.isequal("00") && W.isequal("100") && U.isequal("10")) { wupf = 1.; }
 #define EQ(uw,v) uw.isequal(v)
    else if((EQ(Wp,"100")&&EQ(Up,"10"))&&((EQ(W,"000")&&EQ(U,"00"))||(EQ(W,"110")&&(EQ(U,"10")||EQ(U,"11")))||
-           (EQ(W,"200")&&EQ(U,"20")))) { wupf=1.; }
+           (EQ(W,"200")&&EQ(U,"20")))) { wupf=1.;}
    else if((EQ(Wp,"200")&&EQ(Up,"20"))&&((EQ(W,"100")&&EQ(U,"10"))||(EQ(W,"210")&&(EQ(U,"11")||EQ(U,"20")||EQ(U,"21"))))) 
      { wupf = 1.; }
    else if(Wp.isequal("110"))
-   {
+   {//if(W.isequal("111")&&Wp.isequal("110"))std::cout << wupf; //????? warum kommt modul nicht hierher in die if bedingung ???
+
 #define UW(w,u,i) else if(W.isequal(w)&&U.isequal(u)) id=i
       if(W.isequal("000")&&U.isequal("00")) id=0; UW("100","10",1); UW("110","10",2); UW("110","11",3); UW("200","20",4);
          UW("111","00",5); UW("111","10",6); UW("111","20",7); UW("210","11",8); UW("210","20",9); UW("210","21",10); 
@@ -689,6 +693,7 @@ t=[0   1    0    0   0    0    0    0    0     0     0     0     0     0    0   
       double t[] = { 3./35,    0,    0,    0, -1./7,    0,    0,    0,    0, 27./35,    0,    0,    0,    0,   // (00)
                       2./5, -1./10,  0,  -1., -3./8,   1./8,  0,    0,    0, -9./40,  9./10, 7./8,  0,    0,   // (10)
                     18./35, -9./10,  0,    0, 27./56, -7./8,  0,    0,    0, 1./280, -1./10, 1./8,  1.,   1.}; // (20)
+
       if(Up.isequal("00")) { wupf = t[id]; }
       else if(Up.isequal("10")) { wupf = t[id+14]; }
       else if(Up.isequal("20")) { wupf = t[id+28]; }
@@ -797,6 +802,9 @@ t=[0   1    0    0   0    0    0    0    0     0     0     0     0     0    0   
       else if(Up.isequal("40")) { wupf = t[id*5+4]; }
    }
    if(wupf!=0) wupf = sqrt(fabs(wupf))*(wupf/fabs(wupf)); 
+
+
+
    return wupf;
 }
 
@@ -813,7 +821,7 @@ double racah_cfp(int n, qG2 U, int v, int S2, orbital L, qG2 Up, int vp, int S2p
    qR7 Wp = racah_vtow(S2p,vp);
    double ulf = racah_ulf(U,L,Up,Lp); if(ulf==0) return cfp;
    double wupf = racah_wupf(W,U,Wp,Up); if(wupf==0) return cfp;
-   
+
    if(n==v)
    {
       if(S2p==(S2-1))

@@ -444,16 +444,15 @@ Module - Function       & obligatory for & optional for & description \\
 Basic Functions         && & \\
 \hline
 \hline
-void Icalc              & {\prg mcphas}         & &calculates $\langle \hat \mbf I \rangle$\\
-						& {\prg singleion}      &&\\
+void Icalc              & {\prg mcphas,singleion}         & &calculates $\langle \hat \mbf I \rangle$\\
+void IMcalc              &         & {\prg singleion}&the same with vectorized Temperature\\
 {\tiny Icalc\_parameter\_storage\_matrix\_init}  && {\prg mcphas}       &parameter storage for Icalc,mcalc etc\\
    {\tiny (void)}                     && {\prg mcdiff}         &\\
 						&& {\prg singleion}     &\\
 						&& {\prg spins}        &\\
 						&& {\prg densplt}        &\\
 \hline
-int du1calc				& {\prg mcdisp} &&calculates $\langle -|\hat \mbf I|+\rangle\sqrt{(p_--p_+)}$\\
-						&& {\prg singleion}     &\\	
+int du1calc				& {\prg mcdisp} &{\prg singleion}&calculates $\langle -|\hat \mbf I|+\rangle\sqrt{(p_--p_+)}$\\
 void estates            &&	{\prg mcdiff}         & parameter storage for du1calc,dm1,dS1,...\\
 						&& {\prg singleion}     &\\	
 						&& {\prg mcdisp} &\\
@@ -461,16 +460,19 @@ void estates            &&	{\prg mcdiff}         & parameter storage for du1calc
 Observables & &&\\
 \hline
 \hline
-void mcalc      	& & {\prg mcdiff} & magnetic moment $\langle\hat \mbf M\rangle$\\
+void mcalc      	& & {\prg mcdiff,singleion} & magnetic moment $\langle\hat \mbf M\rangle$\\
 	                & & {\prg mcphase} &\\
+void mMcalc      	& & {\prg singleion} & the same with vectorized T\\
 int dm1		& & {\prg mcdisp} & $\langle-| \hat\mbf M|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
-void Lcalc      	& & {\prg mcdiff} & orbital ang. momentum $\langle \hat \mbf L\rangle$\\
+void Lcalc      	& & {\prg mcdiff,singleion} & orbital ang. momentum $\langle \hat \mbf L\rangle$\\
 	                & & {\prg mcphase} &\\
+void LMcalc      	& & {\prg singleion} & the same with vectorized T\\
 int dL1		& & {\prg mcdisp} & $\langle-| \hat\mbf L|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
-void Scalc      	& & {\prg mcdiff} & spin $\langle \hat\mbf S\rangle$\\
+void Scalc      	& & {\prg mcdiff,singleion} & spin $\langle \hat\mbf S\rangle$\\
 	                & & {\prg mcphase} &\\
+void SMcalc      	& & {\prg singleion} & the same with vectorized T\\
 int dS1		& & {\prg mcdisp} &  $\langle-|\hat \mbf S|+\rangle\sqrt{(p_--p_+)}$\\
 \hline
 void mqcalc      	& & {\prg mcdiff} & FT of magnetic moment $\langle\hat \mbf M(\mbf Q)\rangle$\\
@@ -594,6 +596,28 @@ module is compiled (for details see appendix~\ref{kramers}).
 
 Another more complicated example, the calculation of the magnetisation
 in a tetragonal quasi-quartet system is given in Appendix~\ref{dyni2b2c}.
+%*************************************************************************************
+\subsubsection{External module function {\prg IMcalc} - used by 
+{\prg singleion\index{singleion}} }
+
+This function is optional and intended to accellerate {\prg singleion} by vectorizing the temperature and
+thus save computation resources when using the option {\prg -Tsteps}. It has the same parameters as 
+{\prg Icalc} with the following modifications:
+
+\begin{enumerate}
+\item  {\prg double $\ast$ T} is replaced by {\prg Vector \& T} containing the temperatures for which 
+the calculation is to be done.
+\item {\prg Vector \& I } is replaced by {\prg Matrix \& I} which should be filled with column
+vectors containing the vector $\mbf I$. Each column corresponds to a temperature given as input{\prg Vector \& T}.
+\item {\prg double $\ast$ U} is replaced by {\prg Vector \& U} which should be filled with
+ the energies corresponding
+to the temperatures in {\prg Vector \& T}
+\item {\prg double $\ast$ lnZ} is replaced by {\prg Vector \& lnZ} which shoul be filled with the partition sums corresponding
+to the temperatures in {\prg Vector \& T}
+ 
+\end{enumerate}
+
+
 
 %*************************************************************************************
 \subsubsection{External module function {\prg Icalc\_parameter\_storage\_matrix\_init} - used by {\prg %%@
@@ -879,7 +903,22 @@ is usually assumed to be of the general form
 \end{enumerate}
 
 Thus the function resembles closely Icalc, however no U and lnZ are calculated and
-the magnetic moment vector m, which is returned, has always exactly 3 components.
+the magnetic moment vector $\mbf m$, which is returned, has always exactly 3 components.
+%*************************************************************************************
+\subsubsection{External module function {\prg mMcalc} - used by 
+{\prg singleion\index{singleion}} }
+
+This function is optional and intended to accellerate {\prg singleion} by vectorizing the temperature and
+thus save computation resources when using the option {\prg -Tsteps}. It has the same parameters as 
+{\prg mcalc} with the following modifications:
+
+\begin{enumerate}
+\item  {\prg double $\ast$ T} is replaced by {\prg Vector \& T} containing the temperatures for which 
+the calculation is to be done.
+\item {\prg Vector \& m } is replaced by {\prg Matrix \& m} which should be filled with column
+vectors containing the  magnetic moments $\mbf m$. Each column corresponds to a temperature given as input{\prg Vector \& T}.
+ \end{enumerate}
+
 
 
 %*************************************************************************************
@@ -965,6 +1004,22 @@ extern "C" void Lcalc(Vector & L,double * T, Vector & Hxc, Vector & Hext,
 
 it works exactly as {\prg mcalc}, therefore we do not give more details here.
 
+%*************************************************************************************
+\subsubsection{External module function {\prg LMcalc} - used by 
+{\prg singleion\index{singleion}} }
+
+This function is optional and intended to accellerate {\prg singleion} by vectorizing the temperature and
+thus save computation resources when using the option {\prg -Tsteps}. It has the same parameters as 
+{\prg Lcalc} with the following modifications:
+
+\begin{enumerate}
+\item  {\prg double $\ast$ T} is replaced by {\prg Vector \& T} containing the temperatures for which 
+the calculation is to be done.
+\item {\prg Vector \& m } is replaced by {\prg Matrix \& L} which should be filled with column
+vectors containing the  angular momentum $\mbf L$. Each column corresponds to a temperature given as input{\prg Vector \& T}.
+ \end{enumerate}
+
+
 
 %*************************************************************************************
 \subsubsection{External module function {\prg dL1} - used by {\prg mcdisp\index{mcdisp}}}
@@ -999,6 +1054,21 @@ extern "C" void Scalc(Vector & S,double * T, Vector & Hxc, Vector & Hext,
 \end{verbatim}
 
 it works exactly as {\prg mcalc}, therefore we do not give more details here.
+
+%*************************************************************************************
+\subsubsection{External module function {\prg SMcalc} - used by 
+{\prg singleion\index{singleion}} }
+
+This function is optional and intended to accellerate {\prg singleion} by vectorizing the temperature and
+thus save computation resources when using the option {\prg -Tsteps}. It has the same parameters as 
+{\prg Scalc} with the following modifications:
+
+\begin{enumerate}
+\item  {\prg double $\ast$ T} is replaced by {\prg Vector \& T} containing the temperatures for which 
+the calculation is to be done.
+\item {\prg Vector \& m } is replaced by {\prg Matrix \& L} which should be filled with column
+vectors containing the  spin moment $\mbf S$. Each column corresponds to a temperature given as input{\prg Vector \& T}.
+ \end{enumerate}
 
 
 %*************************************************************************************

@@ -304,14 +304,15 @@ fprintf(conv_file,"# pointc option -c - it follows an output of the contribution
  ionpars * iops;
  jjjpar * jjjps;
  char *token;
- int sipf_read_module=-1; // -1 no sipf read,  0 module ic1ion,  4 module so1ion
+ int sipf_read_module=-1; // -1 no sipf read,  0 module ic1ion/icf1ion,  4 module so1ion
  if((sipf_file=fopen(argv[1+ac],"r"))) //read ion parameters from file
  { fclose(sipf_file);
   sipf_file=open_sipf(argv[1+ac],module,verbose);fprintf(stderr,"\n");
  if(strstr(module,"so1ion")!=NULL){sipf_read_module=4;
    printf("#!MODULE=so1ion\n");}
- if(strstr(module,"ic1ion")!=NULL){sipf_read_module=0;
-   printf("#!MODULE=ic1ion\n");
+ if(strstr(module,"ic1ion")!=NULL||strstr(module,"icf1ion")!=NULL){sipf_read_module=0;
+   if(strstr(module,"ic1ion.so")!=NULL)printf("#!MODULE=ic1ion\n");
+   if(strstr(module,"icf1ion.so")!=NULL)printf("#!MODULE=icf1ion\n");
    iops=new ionpars(2);
    while(feof(sipf_file)==false)
    {if(fgets(instr, MAXNOFCHARINLINE, sipf_file)){// strip /r (dos line feed) from line if necessary
@@ -336,7 +337,7 @@ fprintf(conv_file,"# pointc option -c - it follows an output of the contribution
   }  // fi module is ic1ion
   fclose(sipf_file);
   jjjps=new jjjpar(0,0,0,argv[1+ac],1); // try to read sipf file using constructor for jjjpar exchange parameter table
-  if((*jjjps).module_type!=sipf_read_module){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' or '#!MODULE=ic1ion' !\n",argv[1+ac]);exit(1);}  
+  if((*jjjps).module_type!=sipf_read_module){fprintf(stderr,"ERROR pointc: sipf file %s does not start with '#!MODULE=so1ion' or '#!MODULE=ic1ion' or '#!MODULE=icf1ion' !\n",argv[1+ac]);exit(1);}  
   
   if(sipf_read_module==4){iops=(*jjjps).iops;}
 

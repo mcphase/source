@@ -350,7 +350,7 @@ a file by
 
 Here the ''$>>$'' sign appends the ouput of each command, thus iterating the 
 command for several different magnetic fields allows to calculate a 
-magnetisation curve -  fig.~\ref{moment} shows the result.
+magnetisation curve -  fig.~\ref{moment} shows the result. 
 
 \begin{figure}[ht]
 \begin{center}
@@ -365,7 +365,17 @@ $xyz||cab$ in our example)
 \end{figure}
 
 \item In a similar way the temperature dependence of the susceptibility can be calculated, actually
-one calculates the magnetisation at variable temperature.
+one calculates the magnetisation at variable temperature. A more elegant way to
+calculate a temperature or field dependence is by using the options {\prg -Tsteps}
+and {-Hsteps}. For example:
+
+\begin{verbatim}
+-Tsteps 10 27 in addition to initial temperature calculate 10 further temperatures
+                       until 27K has been reached
+-Hsteps 20 0 0 10 in addition to initial field calculate 20 further external fields
+                       until (0 0 10) Tesla has been reached
+\end{verbatim}        
+
 
 \item The crystal field contribution to the specific heat may be calculated 
 from the output file {\prg results/Nd3p.sipf.levels.cf} using the  program {\prg cpsingleion}\index{cpsingleion},

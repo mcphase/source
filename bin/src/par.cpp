@@ -379,17 +379,6 @@ void par::decrease_nofcomponents (int n)
 void par::save (const char * filename,int noindexchange)
 { FILE * fout;
   fout = fopen_errchk (filename, "w");
-  fprintf(fout,"%s",rems[1]);
-  fprintf(fout,"#<!--mcphase.mcphas.j-->\n");
-  fprintf(fout,"#***************************************************************\n");
-  fprintf(fout,"# Lattice and Exchange Parameter file for\n");
-  fprintf(fout,"# %s\n",MCPHASVERSION);
-  fprintf(fout,"# - program to calculate static magnetic properties\n");
-  fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
-  fprintf(fout,"# %s\n",MCDISPVERSION);
-  fprintf(fout,"# - program to calculate the dispersion of magnetic excitations\n");
-  fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
-  fprintf(fout,"#***************************************************************\n");
   save (fout,noindexchange);
   fclose(fout);
 }
@@ -399,6 +388,17 @@ void par::save (const char * filename,int noindexchange)
 void par::save (FILE * file,int noindexchange)
 { int i;
   errno = 0;
+  fprintf(file,"%s",rems[1]);
+//  fprintf(file,"#<!--mcphase.mcphas.j-->\n");
+  fprintf(file,"#***************************************************************\n");
+  fprintf(file,"# Lattice and Exchange Parameter file for\n");
+  fprintf(file,"# %s\n",MCPHASVERSION);
+  fprintf(file,"# - program to calculate static magnetic properties\n");
+  fprintf(file,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
+  fprintf(file,"# %s\n",MCDISPVERSION);
+  fprintf(file,"# - program to calculate the dispersion of magnetic excitations\n");
+  fprintf(file,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
+  fprintf(file,"#***************************************************************\n");
   savelattice(file);
   for (i=1;i<=cs.nofatoms;++i)
   {

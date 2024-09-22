@@ -2,10 +2,10 @@
 
 This section  contains some further programs which do some important manipulations
 in magnetism, ...
-
 \begin{description} 
 
-\item [\prg addj\index{addj} file1.j file2.j:] adds exchange parameters of file2.j to the %%@
+\item [\prg addj\index{addj} \addcontentsline{toc}{subsubsection}{\prg addj}
+file1.j file2.j:]adds exchange parameters of file2.j to the %%@
 parameters in
 file1.j - output is written to stdout, if file2.j is not given, a copy of the input file is saved 
 
@@ -15,7 +15,7 @@ file1.j - output is written to stdout, if file2.j is not given, a copy of the in
                          the exchange parameter tables
 \item[Option:            -ni]  forces output without indexchange 
 \end{description}
-\item [\prg anisotropy:] program to calculate the magnetic anistropy
+\item [\prg anisotropy:]\addcontentsline{toc}{subsubsection}{\prg anisotropy} program to calculate the magnetic anistropy
 by doing a mcphas or
                single ion calculation for different external magnetic field
                directions and evaluating the expectation value of the magnetic 
@@ -48,7 +48,7 @@ by doing a mcphas or
 
 \end{verbatim}
 
-\item [\prg cfsplit:] Calculates via group theory, the multiplicity of crystal field split levels 
+\item [\prg cfsplit:]\addcontentsline{toc}{subsubsection}{\prg cfsplit} Calculates via group theory, the multiplicity of crystal field split levels 
 for particular point symmetries. The command is: "{\prg cfsplit $\langle$PTGP$\rangle$ $\langle$J$\rangle$}"
 where {\prg $\langle$PTGP$\rangle$} is the name of the point group (both Hermman-Maguin and 
 Schoenflies notation are understood), and {\prg $\langle$J$\rangle$} is the half-integer value 
@@ -56,7 +56,7 @@ of the total angular momentum J of the lowest multiplet. E.g. "{\prg cfsplit Oh 
 familiar cubic Eg/T2g splitting (last line of output).
 See also: {\prg symhmltn} which calculates the allowed two-ion exchange terms for a point group.
 
-\item [\prg cif2mcphas {[options]} $\langle$INPUT.CIF$\rangle$:] 
+\item [\prg cif2mcphas {[options]} $\langle$INPUT.CIF$\rangle$:] \addcontentsline{toc}{subsubsection}{\prg cif2mcphas}
 Creates a set of McPhase input files (mcphas.j, sipfs) from the crystal structure given in a CIF 
 (Crystallographic Information File), with or without user interaction. CIF input files may be obtained 
 from online repositories such as the Inorganic Crystal Structures Database (ICSD), the Crystallography 
@@ -187,7 +187,7 @@ cif2mcphas -pc 3.5 -so ermno3.cif
 cif2mcphas -rp -ic ermno3.cif
 \end{verbatim}
 
-\item [\prg cpsingleion 10 100 1 file.levels.cef {[options]}: ] 
+\item [\prg cpsingleion 10 100 1 file.levels.cef {[options]}: ]\addcontentsline{toc}{subsubsection}{\prg cpsingleion} 
 By runnning {\prg singleion} some file.levels.cef is created in folder results.
 The {\prg cpsingleion} program may then be used. It
 calculates the specific heat in the temperature 
@@ -210,7 +210,7 @@ ic1ion (no file.levels.cef required, takes values from ic1ion.out) .
 \item[\prg cpicf1ion 10 100 1 {[options]}:] same as {\prg cpsingleion} but for output of program
 icf1ion (no file.levels.cef required, takes values from icf1ion.out) .
 					  
-\item [\prg epsdebye\index{epsdebye} Tmax dT Tdebye scale {[d1 d2 datafile]}:]	        
+\item [\prg epsdebye\index{epsdebye} Tmax dT Tdebye scale {[d1 d2 datafile]}:]\addcontentsline{toc}{subsubsection}{\prg epsdebye}	        
 		    calculates the phonon induced strain $\epsilon$ using the debye model
 		    according to the following formula:
 		    $   \epsilon=S*T*D(\Theta_{D}/T) $
@@ -233,7 +233,7 @@ unit cell n
 cell 
                 n1xr1,n2xr2,n3xr3 put result into extend.j, extend.tst and extend.in
 
-\item [\prg fermicol\index{fermicol} col T filename] calculates the Fermifunction from energy in column col.
+\item [\prg fermicol\index{fermicol} col T filename]\addcontentsline{toc}{subsubsection}{\prg fermicol} calculates the Fermifunction from energy in column col.
 \begin{description}
 \item[col] column containing energy values (eV) relative to EF
  \item[T] temperature (K)
@@ -254,12 +254,12 @@ The fermifunction is defined as
             and the  result is compared to experimental data.
 
  output:  files can be found in directory results, filename.fit is created with fitted function and parameter values
-\item[\prg formfactor\index{formfactor} *.sipf] program to calculate the neutron magnetic formfactor
+\item[\prg formfactor\index{formfactor} *.sipf]\addcontentsline{toc}{subsubsection}{\prg formfactor} program to calculate the neutron magnetic formfactor
 from the formfactor coefficients in the single ion parameter file *.sipf. If a radial wave function is given in *.sipf
 then the formfactorand the expectation values of the spherical Bessel functions  are evaluated by integration
 with this radial wave function (see appendix \ref{ffacts}).
 
-\item[\prg icsdread $\langle$ICSD\_ID$\rangle$ $>$ INPUT.CIF] 
+\item[\prg icsdread $\langle$ICSD\_ID$\rangle$ $>$ INPUT.CIF] \addcontentsline{toc}{subsubsection}{\prg icsdread}
 Program to create a CIF (Crystallographic Information File) from the contents of a webpage on the (free)
 Korean Inorganic Crystal Structures Database (ICSD) mirror (http://icsd.kisti.re.kr/) which is automatically 
 downloaded when the corresponding ICSD ID is given as input. This requires an internet connection. If the 
@@ -271,7 +271,7 @@ using the {\prg $>$} operator for futher use, for example to set up McPhase inpu
 mcphas.j\index{mcphas.j}} format
 - output is written to stdout
 
-\item[\prg makenn 23.3:] Program to calculate neighbors of atoms given a crystal structure.
+\item[\prg makenn 23.3{[options]}:]\addcontentsline{toc}{subsubsection}{\prg makenn} Program to calculate neighbors of atoms given a crystal structure.
 Note that in order to use {\prg makenn\index{makenn}} you have to set up a 
 working {\prg mcphas.j\index{mcphas.j}} file with the crystal structure. 
 The program {\prg makenn\index{makenn}} takes {\prg mcphas.j\index{mcphas.j}} and
@@ -400,62 +400,66 @@ interactions between the linked atoms or clusters.}
 \label{mcphas2jvx}
 \end{figure}
 
-\item [\prg pointc\index{pointc} Ce3+ 0.2 4 1 5.3]
-              calculates Crystal field Parameters from Point Charges  
-                 ... meaning calculate Stevens Parameters Blms 
-                                  and Wybourne Parameters Llms
-                 for one point charge of +0.2$|e|$ in distance
+\item [\prg pointc\index{pointc}{[options]} {ionname$|$sipffile charge\_and\_position$|$file.pos}:]\addcontentsline{toc}{subsubsection}{\prg pointc}
+Program to calculate Crystal field Parameters from Point Charges 
+\begin{description}
+\item [example 1: pointc  Ce3+ 0.2 4 1 5.3]
+ ... calculate Blm (Stevens Parameters) and Llm (Wybourne Parameters) for one point 
+    charge of +0.2$|e|$ in distance
                  x=4 \AA y=1 \AA z=5.3 \AA from a Ce$^{3+}$ ion. See equation~(\ref{pcmodel}) and
 appendix~\ref{cfparconventions} for formulas.
-               
-                Alternative Usage: {\prg pointc\index{pointc} Ce3+ filename}
-                 ... meaning read several charges+coordinates from file,
-                 file format: column 1=charge, column 2-4 = x y z coordinate  (note,
-				 ({\prg makenn} creates useful files for this option from the crystal %%@
-structure).
-                results are written to stdout (including radial matrix elements and Stevens %%@
-factors)
-Moreover, if started as 
-{\prg pointc\index{pointc} Ce3+ C2.pos 5 6 }
- ...  the reduced charge model is used,i.e. B2m is calculated with
-     charges in col 1 of C2.pos,B4m and B6m with charges in col 5 and 6, respectively. Similar,
-{\prg pointc\index{pointc}  Ce3+ 0.2 4 1 5.3 0.1 0.3 }
- ... will use $0.2|e|$ for $B_2^m$, $0.1|e|$ for $B_4^m$, $0.3|e|$ for $B_6^m$.
- 
-                Note: if an ion is not implemented, it's parameters can be 
+\item [example 2: pointc Ce3+ file.pos]
+ ... read several charges+coordinates from file.pos,file format:
+      column 1=charge, column 2-4 = x y z coordinate. (note,program {\prg makenn}
+      creates useful files for this option from the crystal structure).
+\item [example 3: pointc Ce3+ C2.pos 5 6]
+ ... same as example 2 but reduced charge model,i.e. B2m calculated, with
+     charges in col 1 of C2.pos,B4m and B6m with charges in col 5 and 6, respectively.
+Note: if an ion is not implemented, it's parameters can be 
                       entered in a single ion property file and {\prg pointc\index{pointc}} is
                       started as 
-                       {\prg pointc\index{pointc} file.sipf 0.2 4 1 5.3}
-
-                      The single ion property file must then contain the following
+\item [example 4: pointc file.sipf 0.2 4 1 5.3 0.1 0.3]
+... will use $0.2|e|$ for $B_2^m$, $0.1|e|$ for $B_4^m$, $0.3|e|$ for $B_6^m$.
+ ... the first line of the single ion property file.sipf must be
+\begin{verbatim}
+ #!MODULE=so1ion
+\end{verbatim}
+The single ion property file must then contain the following
                       information (\# denotes comments):
 \begin{verbatim}
-      #the name of the ion
-      IONTYPE=Ce3+
-      #stevens parameters (optional, necessary for output of Blm)
-      ALPHA=-0.0571429
-      BETA=0.00634921
-      GAMMA=0
-      # the radial matrix elements RN=<r^N> in units of a0^N (a0=0.5292 A)
-      R2=1.309
-      R4=3.964
-      R6=23.31
-      # alternatively the radial wave function can be given:
-      # radial wave function parameters R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / %%@
-sqrt(2Np!)  
-      # values tabulated in clementi & roetti Atomic data and nuclear data tables 14 (1974) %%@
-177-478
-      # Co2+ is isoelectronic to Fe+, looking at page  422 of Clemente & Roetti 
-      # the 3D radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
-      N1=3 XI1=4.95296 C1=0.36301 
-      N2=3 XI2=12.2963 C2=0.02707 
-      N3=3 XI3=7.03565 C3=0.14777
-      N4=3 XI4=2.74850 C4=0.49771 
-      N5=3 XI5=1.69027 C5=0.11388
-      # if the above parameters are given the radial wave function is output to file %%@
-radwavfun.dat                 
-\end{verbatim}  
-\item [\prg powdercell2j\index{powdercell2j} file:]     used to create mcphas.j type file from %%@
+ # file.sipf should contain the following information (# denotes comments):
+ # the name of the ion
+ IONTYPE=Ce3+
+ #Stevens parameters (optional, necessary for output of Blm)
+ ALPHA=-0.0571429 BETA=0.00634921 GAMMA=0
+ # the radial matrix elements RN=<r^N> in units of a0^N (a0=0.5292 A)
+ R2=1.309 R4=3.964 R6=23.31
+ #optional radial wave function parameters, for transition metal ions the the values
+ #are tabulated in Clementi & Roetti Atomic data and nuclear data tables 14 
+ #(1974) 177-478, the radial wave function is expanded as
+ # R(r)=sum_p Cp r^(Np-1) exp(-XIp r)(2 XIp)^(Np+0.5)/sqrt(2Np!)
+ #rare earth:Freeman&Watson PR127(1962)2058,Sovers J.Phys.Chem.Sol.28(1966)1073
+ #e.g. Co2+ is isoelectronic to Fe+, looking at page 422
+ #of Clemente & Roetti the parameters are 
+ N1=3 XI1=4.95296 C1=0.36301 
+ N2=3 XI2=12.2963 C2=0.02707 
+ N3=3 XI3=7.03565 C3=0.14777
+\end{verbatim}
+\end{description}
+
+OUTPUT:
+\begin{itemize}
+\item         {\prg stdout} ... sipf file with CEF pars,radial matrix elements,Stevens factors,
+                pointcharges and positions (omit with option -o)
+\item         {\prg results\textbackslash pointc.out} ...contains results of convergence when summing up
+                 contributions of different neighbours one by one...
+\item         {\prg results\textbackslash pointc.Blm} ... Crystal field parameters $B_l^m$ in Stevens Notation
+\item         {\prg results\textbackslash pointc.Llm} ... Crystal field parameters $L_l^m$ in Wybourne Notation
+\item         {\prg results\textbackslash pointc.dBlm} .. for option -d derivatives $dB_l^m/du$
+\item         {\prg results\textbackslash pointc.dLlm} .. for option -d  derivatives $dL_l^m/du$,
+                  derivatives are with respect to $u=$neighborposition$(\AA)/a_0$            
+\end{itemize}
+\item [\prg powdercell2j\index{powdercell2j} file:]\addcontentsline{toc}{subsubsection}{\prg powdercell2j}     used to create mcphas.j type file from %%@
 output of powdercell,output is written to mcphas.j.  Example of input file:
 \begin{verbatim}
   No   name       crystal coordinates          cartesian coordinates
@@ -464,9 +468,9 @@ output of powdercell,output is written to mcphas.j.  Example of input file:
   1     Sr1    0.3644   0.0000   0.2500     1.0962  -4.1497  -2.7991
   ...
   \end{verbatim}
-\item[\prg radwavfunc\index{radwavfunc} file.sipf:] program to evaluate the radial wave function
+\item[\prg radwavfunc\index{radwavfunc} file.sipf:]\addcontentsline{toc}{subsubsection}{\prg radwavfunc} program to evaluate the radial wave function
 given by th parametrisation in file.sipf.
-\item[\prg reduce\_unitcell\index{reduce\_unitcell} mcphas.j:] 
+\item[\prg reduce\_unitcell\index{reduce\_unitcell} mcphas.j:] \addcontentsline{toc}{subsubsection}{\prg reduce\_unitcell}
                 This program checks every atom in the unit cell in file mcphas.j and removes
                 any atom, which is connected to another by a lattice vector. Useful for
                 going from a description in an extended unit cell to the primitive unit cell.
@@ -482,7 +486,7 @@ given by th parametrisation in file.sipf.
  			 removed, for 2 5 7 all the interactions with other atoms are removed
 \item[Option: -v ] verbose mode
 \end{description}
-\item [\prg rotateBlm\index{rotateBlm}]
+\item [\prg rotateBlm\index{rotateBlm}]\addcontentsline{toc}{subsubsection}{\prg rotateBlm}
   \begin{verbatim}
     Rotates a set of  crystal field  parameters for  Stevens equivalent
     operators by an azimuthal angle fi about the original z axis and
@@ -516,7 +520,7 @@ given by th parametrisation in file.sipf.
           the CF parameters: e.g. $0 B20=0.21,B40=0.5 Pr3+
     if -o is omitted, the program prints the parameters to standard output.
   \end{verbatim}
-\item[\prg   setup\_jqfit\index{setup\_jqfit}{[-h]} {[--help]} h k l:] program to setup a fit of exchange parameters in order to reproduce an experimental propagation vector.
+\item[\prg   setup\_jqfit\index{setup\_jqfit}{[-h]} {[--help]} h k l:]\addcontentsline{toc}{subsubsection}{\prg setupo\_jqfit} program to setup a fit of exchange parameters in order to reproduce an experimental propagation vector.
 \begin{verbatim}
      -h          : print help message
       hkl        : Miller indices of propagation vector
@@ -545,7 +549,7 @@ given by th parametrisation in file.sipf.
     at the propagation vector tau. How much it is below one depends on the
     magnitude of $J(Q)$ for the competing wavevectors in the list in{\prg  mcdisp.par}.
 
-\item [\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}  T Ha Hb Hc:] 
+\item [\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}  T Ha Hb Hc:] \addcontentsline{toc}{subsubsection}{\prg setup\_mcdiff\_in}
 \item [\prg setup\_mcdiff\_in\index{setup\_mcdiff\_in}  x y:] 
 program
  to setup {\prg mcdiff.in} with information on spinconfiguration
@@ -581,7 +585,7 @@ program
     - after running this program you can start mcdiff to do the calculation
       magnetic diffraction pattern
 \end{verbatim}
-\item [ \prg   setup\_mcdisp\_mf \index{setup\_mcdisp\_mf} T Ha Hb Hc:] 
+\item [ \prg   setup\_mcdisp\_mf \index{setup\_mcdisp\_mf} T Ha Hb Hc:]\addcontentsline{toc}{subsubsection}{\prg setup\_mcdisp\_mf} 
 \item [ \prg   setup\_mcdisp\_mf \index{setup\_mcdisp\_mf} x y:] 
 
 program to setup{\prg mcdisp.mf} with information on meanfields
@@ -611,7 +615,7 @@ program to setup{\prg mcdisp.mf} with information on meanfields
     - after running this program you can start mcdisp to do the calculation
       of dispersion of excitations or diffuse scattering
 \end{verbatim}
-\item[\prg   setup\_mcphasjforfit\index{setup\_mcphasjforfit}  {[-h]}:] program to setup a fit of exchange parameters by   creating mcphas.j.forfit from mcphas.j
+\item[\prg   setup\_mcphasjforfit\index{setup\_mcphasjforfit}  {[-h]}:]\addcontentsline{toc}{subsubsection}{\prg setup\_mcphasjforfit} program to setup a fit of exchange parameters by   creating mcphas.j.forfit from mcphas.j
                     
 \begin{verbatim}
      -h          : print help message
@@ -631,6 +635,7 @@ program to setup{\prg mcdisp.mf} with information on meanfields
       a fit by simannfit or searchspace
 \end{verbatim}\index{simannfit}\index{searchspace}
 \item [\prg singleion\index{singleion} [options] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents]
+\addcontentsline{toc}{subsubsection}{\prg singleion}
  single ion  - calculate single ion expectations values $<Ia>, <Ib> $... and transition energies.
  Options may be used to trigger calculation of magnetic Moment and other Quantities.
 \begin{verbatim} 
@@ -699,7 +704,7 @@ perl -e "for($T=1;$T<90;$T+=2){system('singleion '.$T.' 1 0 0   0 0 0');}" > res
 
 \end{verbatim}      
 
-\item [\prg symhmltn:] Calculates via group theory, the allowed two-ion multipolar exchange terms
+\item [\prg symhmltn:]\addcontentsline{toc}{subsubsection}{\prg symhmltn} Calculates via group theory, the allowed two-ion multipolar exchange terms
 between two ions whose center has some particular point symmetry. Syntax is: 
 "{\prg symhmltn $\langle$PTGP$\rangle$ $\langle$l$\rangle$}" where {\prg $\langle$PTGP$\rangle$} is 
 the name of the point group (both Hermman-Maguin and Schoenflies notation are understood), and 
@@ -734,15 +739,15 @@ in all
 files ending with .dat
 \item arguments may contain mathematical expressions, e.g. 
 \begin{description}
-\item{\prg shifttcol 3x2+27 2xx4 data.dat} \dots adds to each number in column 33 in file data.dat the number $2^4=8$. 
-\item{\prg factcol 2 sin(3.1415/2) data.dat} \dots multiplies column 2 in file data.dat with   sin(3.1415/2)
+\item{\prg shifttcol 3x2+27 2xx4 data.dat}\addcontentsline{toc}{subsubsection}{\prg shiftcol} \dots adds to each number in column 33 in file data.dat the number $2^4=8$. 
+\item{\prg factcol 2 sin(3.1415/2) data.dat}\addcontentsline{toc}{subsubsection}{\prg factcol} \dots multiplies column 2 in file data.dat with   sin(3.1415/2)
 ,i.e. with 0.999999989
 \end{description}
 \end{itemize}
 
 \begin{description}
-\item [\prg acoscol\index{acoscol} col{[ecolerr]} file:] calculates arccosine of a column arccos(col) 
-\item [\prg add\index{add} colx1 coly1{[ecoly1err]} file1 colx2 coly2{[ecoly1err]} file2:] 
+\item [\prg acoscol\index{acoscol} col{[ecolerr]} file:]\addcontentsline{toc}{subsubsection}{\prg acoscol} calculates arccosine of a column arccos(col) 
+\item [\prg add\index{add} colx1 coly1{[ecoly1err]} file1 colx2 coly2{[ecoly1err]} file2:] \addcontentsline{toc}{subsubsection}{\prg add}
    program to add functions y1(x1) with (optional) y1err and y2(x2) with (optional y2err)
        taken from data file1 and data file2
 
@@ -761,14 +766,14 @@ files ending with .dat
                    (colx1-colx2(n)*(coly2err(n+1)-coly2err(n))/(colx2(n+1)-colx2(n))
 \end{description}
   note:            colx2 has to be sorted in file2
-\item [\prg addcol\index{addcol}  colx{[ecolxerr]} coly{[ecolyerr]} file:] adds column x and column y of file, result is %%@
+\item [\prg addcol\index{addcol}  colx{[ecolxerr]} coly{[ecolyerr]} file:]\addcontentsline{toc}{subsubsection}{\prg addcol} adds column x and column y of file, result is %%@
 stored in col y
 Optional - error is added using the error columns colxerr and colyerr
 by colyerr=sqrt(colxerr*colxerr+colyerr*colyerr)
-\item [\prg asincol\index{asincol} col const file:] calculates arcsine of a column arcsine(col) 
-\item [\prg atancol\index{atancol} col const file:] calculates arctangens of a column %%@
+\item [\prg asincol\index{asincol} col const file:]\addcontentsline{toc}{subsubsection}{\prg asincol} calculates arcsine of a column arcsine(col) 
+\item [\prg atancol\index{atancol} col const file:]\addcontentsline{toc}{subsubsection}{\prg atancol} calculates arctangens of a column %%@
 arctan(col) 
-\item [\prg average\index{average} {[option]} n file:] program average  used  to 
+\item [\prg average\index{average} {[option]} n file:]\addcontentsline{toc}{subsubsection}{\prg average} program average  used  to 
  reduce the amount of data in a datafile by deleting close data points.
  The program takes sets of n lines in file and  outputs one line instead
 of the n lines. By default the the data line in the middle of the n line
@@ -789,19 +794,19 @@ block is output.
                          data in column n is closer than dmin 
 \end{description}       
 
-\item [\prg chi2\index{chi2} col1 col2 col3 *.*] is used to calculate the 
+\item [\prg chi2\index{chi2} col1 col2 col3 *.*]\addcontentsline{toc}{subsubsection}{\prg chi2} is used to calculate the 
  chi-squared from 3 columns in a file: if col1, col2 and col3 are calculation, 
  experiment and experimental error, respectively, then
   chisquared is defined as $\chi^2=\frac{1}{n}\sum_{i=1}^n \frac{({\rm col2}_i-{\rm %%@
 col1}_i)^2}{{\rm col3_i}^2}$. For each datapoint the program outputs a line
 {\em sta=} deviation$^2$  (experimental error)$^2$ to stdout. This may be 
 used directly for generating useful input for fitting in {\prg simannfit}\index{simannfit}.
-\item [\prg comment l1 l2 file:] comments all lines from l1 and l2  (with \#) in a file
-\item [\prg compare file1 file2:] used to compare data file1 and data file2
+\item [\prg comment l1 l2 file:]\addcontentsline{toc}{subsubsection}{\prg comment} comments all lines from l1 and l2  (with \#) in a file
+\item [\prg compare file1 file2:]\addcontentsline{toc}{subsubsection}{\prg compare} used to compare data file1 and data file2
                 all columns and rows are compared and a standard deviation
                 is calculated according to sum\_i (file1\_i - file2\_i)\^2
                 this standard deviation is output to stdout, e.g. as sta=143.3
-\item [\prg convolute\index{convolute} c1 c2 file cx cy convfuncfile {[d1 d2 datafile]}:] %%@
+\item [\prg convolute\index{convolute} c1 c2 file cx cy convfuncfile {[d1 d2 datafile]}:]\addcontentsline{toc}{subsubsection}{\prg convolute} %%@
 convolutes data given as column c1 vs column
                        c2 in file (data pairs $x_i,y_i$) with the convolution function given in %%@
 column cx vs cy
@@ -823,7 +828,7 @@ column cx vs cy
                  stdout and to environment variables MCPHASE\_STA etc.
 
                        
-\item [\prg convolute2d\index{convolute2d} c1 c2 c3 file cx cy cz convfuncfile minx maxx Nx miny maxy Ny:] 
+\item [\prg convolute2d\index{convolute2d} c1 c2 c3 file cx cy cz convfuncfile minx maxx Nx miny maxy Ny:]\addcontentsline{toc}{subsubsection}{\prg convolute2d} 
 convolutes a 2 dimensional function data given as column c3(c1,c2) in file (data tripls $x_i,y_i, z_i$) with the convolution function given in column cx vs cy vs cz
 		        of convfuncfile (function $c(x,y)$)
 		       Range and number of points of output file is determined from minx maxx Nx and 
@@ -834,43 +839,45 @@ convolutes a 2 dimensional function data given as column c3(c1,c2) in file (data
                         therefore the contribution is distributed (according to distance) onto the neighbouring grid
                        points.
 		       output is written to stdout. 
-\item [\prg coscol\index{coscol} col const file:] calculates cosinus of a column cos(col) 
-\item [\prg delcol\index{delcol} col file:] deletes column col in file
-\item [\prg delcols\index{delcols} col n file:] deletes column col several (n) times in file
-\item [\prg delcomments *.*] removes every comment line (starting with \#) from a file and %%@
+\item [\prg coscol\index{coscol} col const file:]\addcontentsline{toc}{subsubsection}{\prg coscol} calculates cosinus of a column cos(col) 
+\item [\prg delcol\index{delcol} col file:]\addcontentsline{toc}{subsubsection}{\prg delcol} deletes column col in file
+\item [\prg delcols\index{delcols} col n file:]\addcontentsline{toc}{subsubsection}{\prg delcols} deletes column col several (n) times in file
+\item [\prg delcomments *.*]\addcontentsline{toc}{subsubsection}{\prg delcomments} removes every comment line (starting with \#) from a file and %%@
 prints the removed lines to screen
-\item [\prg delline\index{delline} l1 l2 file:] deletes lines l1 to l2  in file
-\item [\prg delnthline n file]  remove every nth line (n$>$2) in file
-\item [\prg dif\index{dif} colx coly n *.*:] used to calculate d(coly)/d(colx) with %%@
+\item [\prg delline\index{delline} l1 l2 file:]\addcontentsline{toc}{subsubsection}{\prg delline} deletes lines l1 to l2  in file
+\item [\prg delnthline n file]\addcontentsline{toc}{subsubsection}{\prg delnthline}  remove every nth line (n$>$2) in file
+\item [\prg dif\index{dif} colx coly n *.*:]\addcontentsline{toc}{subsubsection}{\prg dif} used to calculate d(coly)/d(colx) with %%@
 differentiation averaging n points
-\item [\prg display\index{display} 5{[e7]} 6{[e8]}  ./results/mcdisp.qei {[colx coly file2]}] displays a graphic on screen as xy %%@
+\item [\prg display\index{display} 5{[e7]} 6{[e8]}  ./results/mcdisp.qei {[colx coly file2]}]\addcontentsline{toc}{subsubsection}{\prg display} displays a graphic on screen as xy %%@
 graph
 with column 5 as x axis and columns 6 as y axis. By default graphic is a line graph.
 However, if error columns (in the example x error column is 7 and y error column is 8)
 are given, then symbols with x and y error bars are shown. Several files
 can be plotted in the same graph by extending the commandline. If the contents of a file
 changes, the plot is automatically updated.
-\item [\prg displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei] works similar as %%@
+\item [\prg displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei]\addcontentsline{toc}{subsubsection}{\prg displaybubbles} works similar as %%@
 display, however
 a third column is given and the radius of the symbols varied according to the data in 
 this column.
-\item [\prg displaycontour\index{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot] produces a %%@
+\item [\prg displaycontour\index{displaycontour} 5 6 8 ./results/mcdisp.dsigma.tot]\addcontentsline{toc}{subsubsection}{\prg displaycontour} produces a %%@
 graphical
 display\index{display} of a 3 dimensional dataset as a colour and/or contour plot. Here '5 6 8' 
 denote the x,y and z column in file {\prg ./results/mcdisp.dsigma.tot}, which should
 be plotted. Figure~\ref{ho2ti2o7diffuse} shows an sample output of this program.
-\item [\prg displaytext\index{displaytext} ./results/mcphas.hkl] monitors the file mcphas.hkl in %%@
+\item [\prg displaytext\index{displaytext} ./results/mcphas.hkl]\addcontentsline{toc}{subsubsection}{\prg displaytext} monitors the file mcphas.hkl in %%@
 a text window on screen.
-\item [\prg displayhtml\index{displayhtml} calc.bat.html] monitors the file calc.bat.html in 
+\item [\prg displayhtml\index{displayhtml} calc.bat.html]\addcontentsline{toc}{subsubsection}{\prg displayhtml} monitors the file calc.bat.html in 
 a text window on screen.
-\item [\prg expcol\index{expcol} col const file:] calculates exponent of a column exp(col) 
-\item [\prg factcol\index{factcol} col{[ecolerr]} const file:] multiplies col with a constant in file,
+\item [\prg expcol\index{expcol} col const file:]\addcontentsline{toc}{subsubsection}{\prg expcol} calculates exponent of a column exp(col) 
+\item [\prg factcol\index{factcol} col{[ecolerr]} const file:]\item [\prg expcol\index{expcol} col const file:]\addcontentsline{toc}{subsubsection}{\prg factcol}
+ multiplies col with a constant in file,
 a error colmn may be given and is also multiplied by the absvalue of the constant.
-\item [\prg fform\index{fform} col1 col2 format file:] reformats numbers in col1 to col2 in file %%@
+\item [\prg fform\index{fform} col1 col2 format file:]\item [\prg expcol\index{expcol} col const file:]\addcontentsline{toc}{subsubsection}{\prg fform }
+ reformats numbers in col1 to col2 in file %%@
 with
              a number format given by format. Format is a number format string according
              to c conventions, for example 8.4f or 4.4g  ...             
-\item [\prg fillcol  col expression *.*\index{fillcol}]  used to fill column with numbers in data file
+\item [\prg fillcol  col expression *.*\index{fillcol}] \addcontentsline{toc}{subsubsection}{\prg fillcol} used to fill column with numbers in data file
 \begin{verbatim}
  col       ....   column
  expression ...   e.g. 'tan(c1x7.52)+c2'
@@ -881,7 +888,7 @@ with
                   exp,(natural) log
  *.*       ....   filenname
 \end{verbatim}
-\item [\prg fitcol coldata prog col parprog1 parprog2 ... {[]} in filename:]
+\item [\prg fitcol coldata prog col parprog1 parprog2 ... {[]} in filename:]\addcontentsline{toc}{subsubsection}{\prg fitcol}
 simple fitting program for data in coldata.
 \begin{verbatim}
                []=[and prog col parprog1 parprog2 ... [and ...]]
@@ -931,14 +938,14 @@ simple fitting program for data in coldata.
    fitcol 2 gausscol 1 132.3s0.1 0.5f 10 and  gausscol 1 100.3s0.1 0.5f 10 and rem 3 and rem 4 in exp.dat
 \end{verbatim}
 
-\item[\prg gausscol\index{gausscol} col position fwhm area *.*:] calculate a
+\item[\prg gausscol\index{gausscol} col position fwhm area *.*:] \addcontentsline{toc}{subsubsection}{\prg gausscol} calculate a
 gaussian from the x values given in column col.
 
 The formula for a gaussian is:
 $\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
 ${\rm gauss}(x)=\frac{{\rm area} exp(-(x-{\rm position})^2/2 \sigma^2)}{\sqrt{2*\pi}\sigma}$
 
-\item[\prg getvalue\index{getvalue} colx coly xvalue dx filename]
+\item[\prg getvalue\index{getvalue} colx coly xvalue dx filename]\addcontentsline{toc}{subsubsection}{\prg getvalue}
 program to get the y-value of a function by averaging
  over an interval xvalue+-dx,
  note: colx has to be sorted
@@ -947,7 +954,7 @@ program to get the y-value of a function by averaging
          1/y-value is written to stdout MCPHASE_YVALUE_INVERSE
          standarddeviation to stdaout and MCPHASE_STA
 \end{verbatim}
-\item[\prg getvariable\index{getvariable} variablename filename]
+\item[\prg getvariable\index{getvariable} variablename filename]\addcontentsline{toc}{subsubsection}{\prg getvariable}
  program to get the value of a variable from a file 
   (e.g. somewhere in a file there is 
    a statement T=4.3 and you want to get out this 4.3)
@@ -957,11 +964,11 @@ program to get the y-value of a function by averaging
          MCPHASE_GETVARIABLE_NAME
         mind lines starting with # are ignored (unless these start with #!)
 \end{verbatim}
-\item[\prg histcol\index{histcol} col {[stepwidth|-n steps]} *.*:] generates a histogram of
+\item[\prg histcol\index{histcol} col {[stepwidth|-n steps]} *.*:]\addcontentsline{toc}{subsubsection}{\prg histcol} generates a histogram of
 a column in a data file and stores it in histcol.out. stepwidth is the 
 stepwidth of the histogram points. Alternatively the number of
 steps in the histogram may be given by e.g. {\prg -n 100}.
-\item[\prg int\index{int} {[-m] }colx coly *.*:]
+\item[\prg int\index{int} {[-m] }colx coly *.*:]\addcontentsline{toc}{subsubsection}{\prg int}
  program  to integrate columnx vs columny=f(x), integration is done 
 point by point, the result goes to the data file, the total integral 
 INT=$\int f(x)dx$ is printed to stdout and set to the 
@@ -970,7 +977,7 @@ INT=$\int f(x)dx$ is printed to stdout and set to the
 The results go to stdout and environment variables MCPHASE\_INT\_MU\_1,
   MCPHASE\_INT\_MU\_2,MCPHASE\_INT\_MU\_3 ... are set.
 
-\item [\prg linreg\index{linreg} col n file:] calculates linear regression of n columns in file
+\item [\prg linreg\index{linreg} col n file:]\addcontentsline{toc}{subsubsection}{\prg linreg} calculates linear regression of n columns in file
 \begin{verbatim}
           col     ...... column containing y_k values followed by
           n       ...... n columns containing x_ik (i=1 to n)
@@ -988,23 +995,23 @@ The results go to stdout and environment variables MCPHASE\_INT\_MU\_1,
            - file: new column col+n+1 contining sum_i a_i*x_ik
 \end{verbatim}
 
-\item [\prg lorentzcol\index{lorentzcol} col position fwhm area:] calculate a lorentzian from
+\item [\prg lorentzcol\index{lorentzcol} col position fwhm area:] \addcontentsline{toc}{subsubsection}{\prg lorentzcol}calculate a lorentzian from
 a column with x values, the formula for a Lorentz curve is: 
 ${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+(x-{\rm position})^2/fwhm^2)}$
-\item [\prg multcol\index{multcol}  colx coly file:] multiplies column x and column y of file, %%@
+\item [\prg multcol\index{multcol}  colx coly file:]\addcontentsline{toc}{subsubsection}{\prg multcol} multiplies column x and column y of file, %%@
 result is stored in col y
-\item [\prg newcol\index{newcol} col {[options]} file:] creates a new column col in file containing the line numbe. option: -c 12.3  ... instead of line number put constant 12.3 into the new column
-\item [\prg newcols\index{newcols} col n {[options]} file:] creates n new columns from column col
+\item [\prg newcol\index{newcol} col {[options]} file:]\addcontentsline{toc}{subsubsection}{\prg newcol} creates a new column col in file containing the line numbe. option: -c 12.3  ... instead of line number put constant 12.3 into the new column
+\item [\prg newcols\index{newcols} col n {[options]} file:]\addcontentsline{toc}{subsubsection}{\prg newcols} creates n new columns from column col
  in file. New columns are inserted after column col and contain the same data as column col.
  options: -c 12.3 ...  put constant 12.3 into the new columns, -n ... put line number into the new column.
-\item [\prg newline\index{newline} n text file:] creates a new line number n  in file containing %%@
+\item [\prg newline\index{newline} n text file:]\addcontentsline{toc}{subsubsection}{\prg newline} creates a new line number n  in file containing %%@
 the text 
-\item [\prg potcol\index{potcol} col const file:]  col=col$^{\rm const}$ in file
-\item [\prg range\index{range} col min max file:] deletes (comments out) all data points outside %%@
+\item [\prg potcol\index{potcol} col const file:]\addcontentsline{toc}{subsubsection}{\prg potcol}  col=col$^{\rm const}$ in file
+\item [\prg range\index{range} col min max file:]\addcontentsline{toc}{subsubsection}{\prg range} deletes (comments out) all data points outside %%@
 min max in column  col of
                        file file (remember to store your full data set in some other
 		       file before using this command), \# is used to comment lines
-\item[\prg rotate\index{rotate} xcol ycol angle file:]
+\item[\prg rotate\index{rotate} xcol ycol angle file:]\addcontentsline{toc}{subsubsection}{\prg rotate}
 program rotate  used to rotate coordinate axes,
  xcol,yxol=columns containing x and y , 
  angle=angle $\alpha$ of rotation around z.
@@ -1014,7 +1021,7 @@ program rotate  used to rotate coordinate axes,
  x'&= &\cos(\alpha)*x+\sin(\alpha)*y \nonumber \\
  y'&=&-\sin(\alpha)*x+\cos(\alpha)*y
 \end{eqnarray}
-\item [\prg rpvalue\index{rpvalue} colx coly  *.*:]  program rpvalue\index{rpvalue}  used to %%@
+\item [\prg rpvalue\index{rpvalue} colx coly  *.*:]\addcontentsline{toc}{subsubsection}{\prg rpvalue}  program rpvalue\index{rpvalue}  used to %%@
 calculate 
                        the $R_p$-value from columns number colx and coly 
 		       in a file *.*. The $R_p$-value is defined as
@@ -1022,7 +1029,7 @@ calculate
 		       R_p= 100*\frac{\sum_{i=1}^{N} |(x(i)-y(i)|}{\sum_{i=1}^{N}|x(i)|}
 		       \end{equation}
                        $N$ denotes the number of data points in the file.
-\item [\prg setvalue\index{setvalue} row column text files:] sets the numerical value in a specified position of a data file.
+\item [\prg setvalue\index{setvalue} row column text files:]\addcontentsline{toc}{subsubsection}{\prg setvalue} sets the numerical value in a specified position of a data file.
 
 \begin{verbatim}
      row         : row number
@@ -1033,15 +1040,15 @@ calculate
     example: $0 4 5 3.142 data.dat
              replaces the number in row 4 and column 5 by 3.142 in file data.dat
 \end{verbatim}
-\item [\prg shiftcol\index{shiftcol} col const *.*:] used to add a constant (const) to a column %%@
+\item [\prg shiftcol\index{shiftcol} col const *.*:]\addcontentsline{toc}{subsubsection}{\prg shiftcol} used to add a constant (const) to a column %%@
 (number col) in file(s) *.*
-\item [\prg sincol\index{sincol} col const file:] calculates sinus of a column sin(col) 
-\item [\prg sumcol\index{sumcol} col *.*] prints to stdout number of lines, sum of squares, sum %%@
+\item [\prg sincol\index{sincol} col const file:]\addcontentsline{toc}{subsubsection}{\prg sincol} calculates sinus of a column sin(col) 
+\item [\prg sumcol\index{sumcol} col *.*]\addcontentsline{toc}{subsubsection}{\prg sumcol} prints to stdout number of lines, sum of squares, sum %%@
 of absolute values of column col in file *.*
-\item [\prg swapcol\index{swapcol} colx coly file:] swaps column x and column y of file
-\item [\prg tancol\index{tancol} col file:] calculates tangens of a column tan(col)
-\item [\prg tanhcol\index{tanhcol} col file:] calculates tangens-hyperbolicus of a column tanh(col)
-\item [\prg uvw2fwhm\index{uvw2fwhm} u v w col *.*:] used to calculate the full
+\item [\prg swapcol\index{swapcol} colx coly file:]\addcontentsline{toc}{subsubsection}{\prg swapcol} swaps column x and column y of file
+\item [\prg tancol\index{tancol} col file:]\addcontentsline{toc}{subsubsection}{\prg tancol} calculates tangens of a column tan(col)
+\item [\prg tanhcol\index{tanhcol} col file:]\addcontentsline{toc}{subsubsection}{\prg tanhcol} calculates tangens-hyperbolicus of a column tanh(col)
+\item [\prg uvw2fwhm\index{uvw2fwhm} u v w col *.*:]\addcontentsline{toc}{subsubsection}{\prg uvw2fwhm} used to calculate the full
                    width half maximum from
                    2theta in degree according to fullprofs u,v,w parameters ...
                   The column col in file *.* must contain 2theta scattering angle
@@ -1049,32 +1056,32 @@ of absolute values of column col in file *.*
                   \begin{equation}
                      {\rm  fwhm }= \sqrt {u \tan^2(\theta) + v \tan(\theta) + w}
                 \end{equation}
-\item [\prg zshift\index{zshift} constx colx coly *.*:] shifts colx by a constant such that it %%@
+\item [\prg zshift\index{zshift} constx colx coly *.*:]\addcontentsline{toc}{subsubsection}{\prg zshift} shifts colx by a constant such that it %%@
 is zero at a specified value constx of colx. 
 \end{description}
 
 \section{Programs of General Interest}
 
 \begin{description}
-\item [\prg beep\index{beep}:] just make a beep\index{beep} to signal attention 
-\item [\prg export\index{export} A=23.5-7/2.6e-23*\%B\%] program for windows to allow for
+\item [\prg beep\index{beep}:]\addcontentsline{toc}{subsubsection}{\prg beep} just make a beep\index{beep} to signal attention 
+\item [\prg export\index{export} A=23.5-7/2.6e-23*\%B\%]\addcontentsline{toc}{subsubsection}{\prg export} program for windows to allow for
 simple math operations. Linux users can use some linux syntax such as 
 {\prg \begin{verbatim}export A= $(echo 23.5-7/2.6e-23*$B | bc -l )\end{verbatim}}.
-\item [\prg gauss\index{gauss} fwhm stp min max:] calculate a gaussian, output goes to console %%@
+\item [\prg gauss\index{gauss} fwhm stp min max:]\addcontentsline{toc}{subsubsection}{\prg gauss} calculate a gaussian, output goes to console %%@
 (stdout), the formula for a gaussian is:
 $\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
 ${\rm gauss}(x)=\frac{exp(-x^2/2 \sigma^2)}{\sqrt{2*\pi}\sigma}$
-\item [\prg gauss2d\index{gauss2d} fwhm1 fwhm2 theta  stpx minx maxx stpy miny maxy:] calculate a 2 dimensional gaussian, output goes to console %%@
+\item [\prg gauss2d\index{gauss2d} fwhm1 fwhm2 theta  stpx minx maxx stpy miny maxy:]\addcontentsline{toc}{subsubsection}{\prg gauss2d} calculate a 2 dimensional gaussian, output goes to console %%@
 (stdout), the formula for a two dimensional gaussian is:
 $\sigma={\rm fwhm}/\sqrt{8*log(2)}$,
 ${\rm gauss}(x,y)=\frac{exp(-u_1^2/2 \sigma_1^2)}{\sqrt{2*\pi}\sigma_1}\frac{exp(-u_2^2/2 \sigma_2^2)}{\sqrt{2*\pi}\sigma_2}$ with $u_1=x cos(\theta)-ysin(\theta)$ and $u_2=y cos(\theta)+xsin(\theta)$,
 $\theta$ is the rotation angle in degree.
-\item [\prg lorentz\index{lorentz} fwhm stp min max:] calculate a lorentzian, output goes to %%@
+\item [\prg lorentz\index{lorentz} fwhm stp min max:]\addcontentsline{toc}{subsubsection}{\prg lorentz} calculate a lorentzian, output goes to %%@
 console (stdout)the formula for a Lorentz curve is: 
 ${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+x^2/fwhm^2)}$
-\item [\prg plotbook *.ps:] program plotbook to arrange many (single side) ps-images to one %%@
+\item [\prg plotbook *.ps:]\addcontentsline{toc}{subsubsection}{\prg plotbook} program plotbook to arrange many (single side) ps-images to one %%@
 booklet (needs: latex, pstops,ghostscript, perl)
-\item [\prg script2html\index{script2html} calc1.bat calc2.bat ...] This program creates a html file from scripts containing just the text
+\item [\prg script2html\index{script2html} calc1.bat calc2.bat ...]\addcontentsline{toc}{subsubsection}{\prg script2html} This program creates a html file from scripts containing just the text
  in the scripts.
 \begin{verbatim}
  input: calc1.bat, calc2.bat ...    scripts (bat files)
@@ -1087,10 +1094,10 @@ booklet (needs: latex, pstops,ghostscript, perl)
 
  [creates the html file report.html from files calc.bat and notes.txt]
 \end{verbatim}
-\item [\prg setvariable\index{setvariable} varname value *.*:]
+\item [\prg setvariable\index{setvariable} varname value *.*:]\addcontentsline{toc}{subsubsection}{\prg setvariable}
 sets a variable in a file, e.g. {\prg setvariable T 20 Co.sipf} replaces
 T=15 by T=20 in file {\prg Co.sipf}.
-\item [\prg substitute\index{substitute} {[option]} oldtext newtext *.*:] replaces every instance of %%@
+\item [\prg substitute\index{substitute} {[option]} oldtext newtext *.*:]\addcontentsline{toc}{subsubsection}{\prg substitute} replaces every instance of %%@
 oldtext with newtext in file(s) *.*. Option {\prg -f} substitutes only the first occurence, 
 {\prg -n 13} substitutes only the 13th occurence of the oldtext.
 \end{description}

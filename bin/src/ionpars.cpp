@@ -639,7 +639,8 @@ void ionpars::savBlm(FILE * outfile)
     char lm3[4];lm3[3]='\0';
    const char lm[]="00 22S21S20 21 22 33S32S31S30 31 32 33 44S43S42S41S40 41 42 43 44 55S54S53S52S51S50 51 52 53 54 55 66S65S64S63S62S61S60 61 62 63 64 65 66 ";
    for(int i=0;i<=45;++i){strncpy(lm3,lm+i*3,3);
-   if(Blm(i)!=0){fprintf(outfile,"B%s=%g\n",lm3,Blm(i));}
+   if(Blm(i)!=0){if(i==0)fprintf(outfile,"#!");
+                 fprintf(outfile,"B%s=%g\n",lm3,Blm(i));}
                   }
    if(Blm(46)!=0){fprintf(outfile,"Dx2=%g\n",myround(Blm(46)));}
    if(Blm(47)!=0){fprintf(outfile,"Dy2=%g\n",myround(Blm(47)));}
@@ -655,7 +656,8 @@ void ionpars::savLlm(FILE * outfile,const char * commentstring)
    char lm3[4];lm3[3]='\0';
    const char lm[]="00 22S21S20 21 22 33S32S31S30 31 32 33 44S43S42S41S40 41 42 43 44 55S54S53S52S51S50 51 52 53 54 55 66S65S64S63S62S61S60 61 62 63 64 65 66 ";
    for(int i=0;i<=45;++i){strncpy(lm3,lm+i*3,3);
-   if(Llm(i)!=0){fprintf(outfile,"%sL%s=%g\n",commentstring,lm3,Llm(i));}
+   if(Llm(i)!=0){if(i==0)fprintf(outfile,"#!");
+                 fprintf(outfile,"%sL%s=%g\n",commentstring,lm3,Llm(i));}
                          }
 }
  // -------------------------------------------------------------------------------------

@@ -6,8 +6,8 @@
 #define MARTIN_FOPEN_ERRCHK
 
 #define PI 3.141592654
-#define KB 0.086173528     // Boltzmanns constant in mev/K
-#define MU_B  5.788378E-02 // Bohrmagneton in meV/tesla
+#define KB 0.08617343183   // Boltzmanns constant in mev/K
+#define MU_B  0.0578838263 // Bohrmagneton in meV/tesla
 #define MAXNOFCHARINLINE 7024
 
 #if __GNUC__ > 2

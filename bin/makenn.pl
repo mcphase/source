@@ -26,12 +26,12 @@ $rkky=0;$calcdist=0;$readtable=0;$classdip=0;
 shift @ARGV; 
 @storeargv=@ARGV;
 # Parses command line options
-GetOptions("rkky3d"=>\$rkky3d,
-           "kaneyoshi3d"=>\$kaneyoshi3d,
-           "rkkz3d"=>\$rkkz3d,
-           "rkky"=>\$rkky,
-           "kaneyoshi"=>\$kaneyoshi,
-           "rkkz"=>\$rkkz,
+GetOptions("rkky3d=f{4}"=>\@rkky3d,
+           "kaneyoshi3d=f{5}"=>\@kaneyoshi3d,
+           "rkkz3d=f{4}"=>\@rkkz3d,
+           "rkky=f{2}"=>\@rkkydummy,
+           "kaneyoshi=f{3}"=>\@kaneyoshi,
+           "rkkz=f{2}"=>\@rkkz,
            "bvk"=>\$bvk,
            "cfph"=>\$cfph,
            "e"=>\$e,
@@ -39,6 +39,7 @@ GetOptions("rkky3d"=>\$rkky3d,
            "jp"=>\$jp,
            "dm"=>\$dm,
            "d"=>\$d,
+	   "npc"=>\$npc,
            "nm"=>\$nm,
             "djdx"=>\$djdx,
            "djdy"=>\$djdy,
@@ -58,6 +59,7 @@ if ($djdz) {$ext=".djdz"; }
 
 $_=$ARGV[0];
 if(/-nm/){shift @ARGV;$_=$ARGV[0];}
+if(/-npc/){shift @ARGV;$_=$ARGV[0];}
 if(/-rkky3d/)
   {$rkky=4;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
    $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
@@ -188,7 +190,7 @@ my ($a,$b,$c,$alpha,$beta,$gamma,$nofatoms,$nofcomponents) = @{$latt};
 unless($tabout) {
  print "rmax=".$rmax." A\n";
  print "a=".$a." b=".$b." c=".$c." alpha=".$alpha." beta=".$beta." gamma=".$gamma."\n";
- print "primitive lattice[abc]:".$p."\n";
+ print "Primitive Lattice Vectors (rows) in units of lattice vectors [abc] :".$p."\n";
 }
 
 # define transformation matrix to calculate components of
@@ -231,7 +233,7 @@ $p= $p x $rtoijk; # primitive lattice in Euclidean ijk coordinates
 $pinv=inv($p); #invert this matrix for use later
 $pVolume=inner($p->slice(":,(0)"),crossp($p->slice(":,(1)"),$p->slice(":,(2)")));
 if($pVolume<0){die "Error makenn - primitive lattice not right handed \n";}
-unless($tabout){ print "primitive lattice[A]:".$p."\nPrimitive Unit Cell Volume [A^3]: ".$pVolume."\n";}
+unless($tabout){ print "Primitive Lattice Vectors (rows) in Euclidean Coordinates [A]:".$p."\nPrimitive Unit Cell Volume [A^3]: ".$pVolume."\n";}
     $r=0;
 # select a Vector from primitive lattice print $p->slice(":,(0)");
 # calculate Volume of primitive unit cell in A^3
@@ -622,8 +624,8 @@ for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
   setvariable("SCATTERINGLENGTHREAL",0,$sipf_file[$nnn]);
   setvariable("SCATTERINGLENGTHIMAG",0,$sipf_file[$nnn]);
 
-  if($cfph==2){copy("results/pointc.dLlm","results/makenn.a$nnn.dLlm");}
-  if($cfph==3){copy("results/pointc.dBlm","results/makenn.a$nnn.dBlm");}
+  if($cfph==2){my_rename("results/pointc.dLlm","results/makenn.a$nnn.dLlm");}
+  if($cfph==3){my_rename("results/pointc.dBlm","results/makenn.a$nnn.dBlm");}
  }
 for($nnn=1;$nnn<=$nofatoms;++$nnn){$nofneighbours[$nnn]=0;}
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
@@ -824,7 +826,7 @@ print "********************************************************\n";
 print "               end of program makenn\n";
 print " Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "********************************************************\n";
-
+if($npc){unlink("results/makenn.a*.pc");}
    exit;
 
 #-----------------------------------------------------------------------
@@ -1381,6 +1383,20 @@ $text="#! nofatoms= $nofatoms  nofcomponents=$nofcomponents  number of atoms in 
 
 
 }
+# rename file
+sub my_rename {
+my ($s,$d)=@_;
+unless (rename $s,$d)
+          {unless(open (Fout, ">$d"))     
+      {die "\n error:unable to write to $d\n";}
+      open (Fin, $s);
+      while($line=<Fin>){ print Fout $line;}
+      close Fin;
+      close Fout;
+      system "del $s"; 
+     }
+
+}
 
 # **********************************************************************************************
 # extracts number from string
@@ -1595,11 +1611,11 @@ print STDOUT << "EOF";
 
               To get a sample file use option -e -f or -dm -jp without a filename.      
 
-        -d puts to the last column the distance of the neighbors (A)
- The neigbours of each atom are also stored in separate files
+        -d      puts to the last column the distance of the neighbors (A)
+     The neigbours of each atom are stored in separate files
  results\/makenn.a*.pc, which can be used with the program pointc to evaluate
  the pointcharge model and calculate crystal field parameters.
-
+	-npc   do not keep results/makenn.a*.pc files
         -djdx
         -djdy
         -djdz   create files makenn.djdx .djdy .djdz instead of makenn.j, respectively

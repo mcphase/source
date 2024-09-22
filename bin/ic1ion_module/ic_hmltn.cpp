@@ -258,11 +258,11 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
 #define NSTR(K,Q) nstr[1] = K+48; nstr[2] = Q+48; nstr[3] = 0
 #define MSTR(K,Q) nstr[1] = K+48; nstr[2] = 109;  nstr[3] = Q+48; nstr[4] = 0
    for(k=2; k<=6; k+=2)
-      for(iq=0; iq<(2*k+1); iq++)           //  racah_ukq is slightly faster as it involves less operations. However,
+     for(iq=0; iq<(2*k+1); iq++)           //  racah_ukq is slightly faster as it involves less operations. However,
       {                                     //     it needs more memory as it stores zero-value entries as well.
          q = iq-k;                          //  For n=5, it needs around 1G, or it hits cache (slow!), for n=6,7 it
          if(pars.B(k,q)!=0)                 //     needs around 3G. 
-         {                                  //  fast_ukq does slightly more operations, uses less memory as it only
+         {  				    //  fast_ukq does slightly more operations, uses less memory as it only
             if(q==0)                        //     calculates for nonzero reduced matrix elements. It needs around
             {                               //     300Mb for n=5 and about 1.8G for n=6,7
                NSTR(k,0); 
@@ -277,6 +277,7 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
                   rmzeros(Upq); mm_gout(Upq,filename);
                }
              /*if(nn>(2*e_l+1)) H_cf -= Upq * (pars.B(k,q)/icfact[k]); else*/ H_cf += Upq * (pars.B(k,q)*icfact[k]);
+
             }
             else
             {
@@ -313,7 +314,6 @@ sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars)
 
  //ic_printheader(rmat,pars); mm_gout(H_cf,rmat);
  //ic_printheader(imat,pars); mm_gout(H_cfi,imat);
-
    return H_cf;
 }
 // --------------------------------------------------------------------------------------------------------------- //

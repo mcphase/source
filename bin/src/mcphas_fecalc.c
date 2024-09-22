@@ -9,20 +9,21 @@ void corrfunc(Matrix & jj,int n, int l,par & inputpars,spincf & sps)
 // n ... neighbour number in neighbour list
 {int i,j,k,i1,j1,k1,l1,i2,j2; Vector xyz(1,3);Vector d(1,3);Vector d_rint(1,3);div_t result;
       //calculate spincorrelation function of neighbour n of sublattice l
-    // 1. transform dn(n) to primitive lattice
-     xyz=(*inputpars.jjj[l]).dn[n]-(*inputpars.jjj[l]).xyz;
+     l1=(*inputpars.jjj[l]).sublattice[n];  // ... yes, this is the sublattice of the neighbour
+xyz=(*inputpars.jjj[l]).dn[n]+(*inputpars.jjj[l]).xyz-(*inputpars.jjj[l1]).xyz; 
+							// ---> xyz is then integer denoting
+							// difference vector of abc lattice unit cells
+                                                        // changed 22.9.2024 MR !!!
+    // 1. transform xyz to primitive lattice
      d=inputpars.rez*(const Vector&)xyz;
 jj=0;
-     for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); //round relative position to integer numbers (to do
-                                             // something sensible if not integer, i.e. if sublattice
-					     // of neighbour has not been identified by par.cpp)
+     for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); //round relative position to integer numbers to correct small numerical errors
 
      // go through magnetic unit cell and sum up the contribution of every atom
       for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
          // now we are at atom ijk of sublattice l: the spin is  sps.m(i,j,k)(1..3+3*(l-1))
 	 // which i1 j1 k1 l1 is the neighbour in distance d ?
-	l1=(*inputpars.jjj[l]).sublattice[n];  // ... yes, this is the sublattice of the neighbour
-
+	
 	i1=i+(int)(d_rint(1));
 	j1=j+(int)(d_rint(2));
 	k1=k+(int)(d_rint(3));
@@ -35,7 +36,7 @@ jj=0;
 
 	// sum up correlation function
            for(i2=1;i2<=inputpars.cs.nofcomponents;++i2)
-               {
+                {
 //jj(i2+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))+=
 jj(i2,i2)+=
 	        (sps.m(i,j,k)(i2+inputpars.cs.nofcomponents*(l-1)))*
