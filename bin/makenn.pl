@@ -45,6 +45,7 @@ GetOptions("rkky3d=f{4}"=>\@rkky3d,
            "d"=>\$d,
 	   "npc"=>\$npc,
            "nm"=>\$nm,
+           "r"=>\$cfphr,
             "djdx"=>\$djdx,
            "djdy"=>\$djdy,
            "djdz"=>\$djdz);
@@ -805,7 +806,7 @@ push @atoms, "\n";
   push @atoms, $ph[$nnn];
 
 # and finally recreate corresponding phononic atoms sipf file to be a MODULE=PHONON file
-store_phonon_file($sipf_file[$nph[$nnn]]);
+if($cfphr){store_phonon_file($sipf_file[$nph[$nnn]]);}
 
 }
 endprint($h,$l);
@@ -1574,7 +1575,7 @@ print STDOUT << "EOF";
               are written, too. Omit filename to create a sample file with
               longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m
 
- option -cfph [screeningfile.r]
+ option -cfph [-r] [screeningfile.r]
               calculate crystal field phonon interaction: mcphas.j lists 
               magnetic and non magnetic atoms with charges defined in the 
               sipf files by CHARGE= variable. For magnetic atoms the sipf 
@@ -1583,8 +1584,8 @@ print STDOUT << "EOF";
               Foreach magnetic ion a new site is created resembling the magnetic 
 	      electron charge cloud and this new site is shifted
               0.1 A along c in order to not overlap with the original site.
-              The original magnetic site sipf is changed to use an sipf
-              file with the MODULE=phonon  similar to all the other
+              For option -r the original magnetic site sipf is replaced automatically
+	      to use an sipf file with the MODULE=phonon  similar to all the other
               nonmagnetic sites (which should have a PHONON module). 
 	      For the new magnetic site the program
               pointc is used by makenn with option -d to calculate derivatives

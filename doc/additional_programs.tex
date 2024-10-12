@@ -323,7 +323,7 @@ model definition of longitudinal springs $c_L$ and transversal
 springs $c_T$.
 
 
-\item[option {\prg  option -cfph [screeningfile.r]}]
+\item[option {\prg  option -cfph [-r] [screeningfile.r]}]
               calculate crystal field phonon interaction: {\prg mcphas.j} lists 
               magnetic and non magnetic atoms with charges defined in the 
               sipf files by {\prg CHARGE= variable}. For magnetic atoms the sipf 
@@ -332,8 +332,8 @@ springs $c_T$.
               For each magnetic ion a new site is created resembling the magnetic 
 	      electron charge cloud and this new site is shifted
               0.1 \AA \ along $c$ in order to not overlap with the original site.
-              The original site sipf file is changed to us an sipf file  
-              with the {\prg MODULE=phonon} similar to all the other
+              For option [-r] the original site sipf file is replaced automatically
+	      to use an sipf file with the {\prg MODULE=phonon} similar to all the other
               non magnetic sites (which should have a {\prg MODULE=phonon}). 
               For the new magnetic site the program
               {\prg pointc} is used by {\prg makenn} with option -d to calculate derivatives
