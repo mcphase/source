@@ -274,6 +274,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 #ifdef _THREADS_JSSS
    myinput->dimA=nofneighbours;
 #if defined  (__linux__) || defined (__APPLE__)
+    pthread_exit(NULL);
 #else
 return true;
 #endif

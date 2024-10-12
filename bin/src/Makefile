@@ -83,12 +83,12 @@ endif
 # calculations
  threads=1
 # 
-#ifdef threads
+ifdef threads
 THREADFLAG=-D_THREADS
 ifdef LINUX
 THREADLINK=-lpthread
 endif
-#endif
+endif
 
 #---------------------------------------------------------------------
 # RCS options

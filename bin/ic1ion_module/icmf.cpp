@@ -747,7 +747,8 @@ std::vector<double> icmfmat::orbmomdensity_expJ(iceig &VE,int xyz, double T, std
 //--------------------------------------------------------------------------------------------------------------
 std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::vector< std::vector<double> > &matel, bool save_matrices)
 {
-   double *vt=0, Z=0., U=0.; complexdouble *zt=0, zme;
+   double *vt=0, Z=0., U=0.;
+   complexdouble *zt=0, zme;
    std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; matel.clear();
    int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1;
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }

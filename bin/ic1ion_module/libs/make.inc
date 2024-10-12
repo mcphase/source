@@ -32,7 +32,7 @@ else
 ifeq ($(OSTYPE),Darwin)
  LINUX = LINUX
  PLAT = _LINUX
- FORTRAN=gfortran --std=legacy
+ FORTRAN=gfortran --std=legacy -fallow-argument-mismatch
  LIBFORTRAN=-lgfortran
 else
  MSYS=1
@@ -94,7 +94,7 @@ else
 ifdef MSYS
 FLAGS   += -pipe -g
 else
-FLAGS   += -pipe -g -fPIC
+FLAGS   += -g -fPIC
 endif
 endif
 ifdef fast

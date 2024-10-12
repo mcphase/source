@@ -9,6 +9,7 @@
 # element{} - Has basic information including: scattering lenghts, if it is magnetic, and possible valence states
 # magions{} - Has information for each magnetic ions: spin S (High/Low spin) or total "J", radial integral <R^k> k=2,4,6
 # magff{}   - Magnetic form factors for each magnetic ions
+# mass{}   -  atomic mass of the element
 #
 # This program is part of the McPhase package, licensed under the GNU GPL v2. Please see the COPYING file
 #

@@ -53,8 +53,8 @@ void ic_conv_basis(icpars &pars, iceig &VE, fconf &conf)
             {
                conf.states[ns] = confLS.states[ii]; conf.states[ns].J2 = mL2; conf.states[ns].mJ2 = mS2; 
                conf.states[ns].id.assign(confLS.states[ii].id);
-               if(mL2%2==0) sprintf(Jlabel,",mL=%i",mL2/2); else sprintf(Jlabel,",mL=%i/2",mL2); conf.states[ns].id.append(Jlabel);
-               if(mS2%2==0) sprintf(Jlabel,",mS=%i",mS2/2); else sprintf(Jlabel,",mS=%i/2",mS2); conf.states[ns].id.append(Jlabel);
+               if(mL2%2==0) snprintf(Jlabel,sizeof(Jlabel),",mL=%i",mL2/2); else snprintf(Jlabel,sizeof(Jlabel),",mL=%i/2",mL2); conf.states[ns].id.append(Jlabel);
+               if(mS2%2==0) snprintf(Jlabel,sizeof(Jlabel),",mS=%i",mS2/2); else snprintf(Jlabel,sizeof(Jlabel),",mS=%i/2",mS2); conf.states[ns].id.append(Jlabel);
 //std::cout << "State: " << ns+1 << "\t";
 //std::cout << "U=" << CFS[ns].U << ",v=" << CFS[ns].v << ",L=" << CFS[ns].L << ",S2=" << CFS[ns].S2 << ",mL=" << CFS[ns].J2/2. << ",mS=" << CFS[ns].mJ2/2. << "  \tid=" << CFS[ns].id << "\t";
 //std::cout << "U=" << CJS[ns].U << ",v=" << CJS[ns].v << ",L=" << CJS[ns].L << ",S2=" << CJS[ns].S2 << ",J="  << CJS[ns].J2/2. << ",mJ=" << CFS[ns].mJ2/2. << "\tid=" << CJS[ns].id << "\n";

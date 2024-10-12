@@ -242,7 +242,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
  //complex <double> chileft;
  //complex <double> chileftbey;
  Vector qijk(1,3);
-  hkl2ijk(qijk,hkl, inputpars.cs.abc);
+  hkl2ijk(qijk,hkl, (Vector&)inputpars.cs.abc);
  // transforms Miller indices (in terms of reciprocal lattice abc*)
  // to Q vector in ijk coordinate system
 //   qijk(1)=hkl(1)*2*PI/inputpars.a; // only correct for ortholattices !!!!

@@ -250,7 +250,7 @@ template <class T> void sMat<T>::mset(const char *m)                    // Const
    std::string m_str(m);
    std::string entry;
    int c=0,r=0;                                                         // Column and Row indices
-   size_t wspc,stmk,enmk,mathop,sqrtop,semicol;                         // Indices in constructor string
+   size_t wspc,stmk,enmk,mathop,sqrtop; //,semicol;                         // Indices in constructor string
    //double el,el2;
    T el,el2;
 

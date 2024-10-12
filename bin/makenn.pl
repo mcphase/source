@@ -5,6 +5,10 @@ use PDL;
 use File::Copy;
 use Getopt::Long;
 
+# Loads the tables of symmetry equivalent positions, and atomic/ionic information
+push @INC, $ENV{'MCPHASE_DIR'}.'/bin/';
+require 'elements.pl';
+
 print "#********************************************************\n";
 print "# makenn 230406 - create table with neighbors and interactions\n";
 print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
@@ -48,7 +52,7 @@ GetOptions("rkky3d=f{4}"=>\@rkky3d,
 
 @ARGV=@storeargv;
 
-die "djdx djdy djdz exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
+die "djdx djdy djdz are exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
 if ($bvk||$cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
 
 $ext=".j"; 
@@ -56,10 +60,10 @@ if ($djdx) {$ext=".djdx"; }
 if ($djdy) {$ext=".djdy"; }
 if ($djdz) {$ext=".djdz"; }
 
-
+#******************************************************** treat options 
 $_=$ARGV[0];
-if(/-nm/){shift @ARGV;$_=$ARGV[0];}
-if(/-npc/){shift @ARGV;$_=$ARGV[0];}
+if(/-nm/){shift @ARGV;$_=$ARGV[0];}   # no new method of finding neighbours
+if(/-npc/){shift @ARGV;$_=$ARGV[0];}  # do not keep pointcharge files makenn.a*.pc
 if(/-rkky3d/)
   {$rkky=4;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
    $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
@@ -105,7 +109,7 @@ elsif(/-bvk/)
    unless ($#ARGV>=0) # if no filename is given print help
    { $tabout=1;}
   else
-   {
+   { # if filename is given read file ...
    $bfk_file=$ARGV[0];shift @ARGV;
    print "creating phononic interactions from Born van Karman model in file $bfk_file\n";
    # read interaction constants from file
@@ -180,11 +184,12 @@ elsif(/-e/||/-f/||/-dm/||/-jp/)
               close Fin;
        	     }
   }
- else {$classdip=1;}
+ else {$classdip=1;} # without options calculate classical dipole interactions
  
-if($d)
+if($d) # for option -d
   {$calcdist=1;print "putting distance of neighbors (A) to last column of makenn.j\n";}
 
+#******************************************************** get crystal structure 
 my ($latt,$p) = getlattice("./mcphas.j"); # gets lattice and atomic positions
 my ($a,$b,$c,$alpha,$beta,$gamma,$nofatoms,$nofcomponents) = @{$latt};
 unless($tabout) {
@@ -238,8 +243,9 @@ unless($tabout){ print "Primitive Lattice Vectors (rows) in Euclidean Coordinate
 # select a Vector from primitive lattice print $p->slice(":,(0)");
 # calculate Volume of primitive unit cell in A^3
 
+#********************************************************
 # first determine maximum distance of a basis atom to origin of unit cell
-# and check if atoms are in primitive unit cell
+# and check if atoms are in primitive unit cell - if no - move them there
     $distmax=0;
   for ($nz=1;$nz<=$nofatoms;++$nz){
    $dabc=pdl [($x[$nz]),($y[$nz]),($z[$nz])];	
@@ -267,6 +273,10 @@ unless($tabout){ print "Primitive Lattice Vectors (rows) in Euclidean Coordinate
                 print STDERR " it to da=$x[$nz] db=$y[$nz] dc=$z[$nz]\n";
                }
   }
+
+#********************************************************
+# Determine the nmin and nmax values in order to cover with the lattice vectors
+# the desired sphere including all neighbours up to rmax Angstroem
   unless($readtable>1)
  {if($nm){
 # OLD : determine $nmin,$nmax by looking at a cube with side 3rmax
@@ -312,6 +322,8 @@ $n3max=my_ceil(1.0+$rmax / inner($p->slice(":,(2)"),$rvec));
 $n3min=my_floor(-1.0-$rmax / inner($p->slice(":,(2)"),$rvec));
 }
   }
+
+#******************************************************** put out a sample table if desired
 if($tabout)
  {if($bvk)
   {print STDOUT << "EOF";
@@ -359,7 +371,7 @@ else
 EOF
 
 }
-}}
+}} #fi tabout 
 else
 {
 print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
@@ -367,11 +379,14 @@ print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
      # initialize output file results/makenn$ext
   ($h,$l)=printlattice("./mcphas.j",">./results/makenn$ext");
 print "# number of atoms = $nofatoms\n calculating ...\n";
-}            
-@atoms=();   
+}     
+
+#********************************************************        
+@atoms=();   # initialize array to push output into ...
  for ($nnn=1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)    
- {unless($tabout){ if($nnn>$nofatoms){print "# new magnetic ";}
-   print "# atom $nnn ...";}
+ {unless($tabout){ if($nnn>$nofatoms){print "# splitting atom ".$nph[$nnn]." into nucleus and magnetic electron shell creating a new magnetic \n";}
+   print "# atom $nnn ...";} 
+  if($nnn>$nofatoms){print "with shifted dc=".($z[$nnn]+0.1/$c)." to distinguish it from the nucleus at dc=".$z[$nnn]."...";}
      my $gJ=$gJ[$nnn];
      my $sipffilename=$sipf_file[$nnn];
      my ($rn)=new PDL ();
@@ -398,7 +413,7 @@ print "# number of atoms = $nofatoms\n calculating ...\n";
      my ($Jcc)=new PDL(); 
      my $Gmix= zeroes (7,4); # for storage of mixing term phonon strain interaction constants
 
-    
+    # go through neighbours and determine interaction
   for ($n1=$n1min;$n1<=$n1max;++$n1){ 
   for ($n2=$n2min;$n2<=$n2max;++$n2){ 
   for ($n3=$n3min;$n3<=$n3max;++$n3){  
@@ -451,7 +466,7 @@ elsif($bvk)
 }   
 else{die "Error makenn - creating table for option $_ \n";}
           }
-              }
+              } #tabout
 
           unless($readtable>0){
     $an=$an->append( pdl ([$nz]));
@@ -464,7 +479,7 @@ else{die "Error makenn - creating table for option $_ \n";}
     $kn=$kn->append( pdl ([$rvec->at(2)]));
 
 
-
+# calculate the interaction
     my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$r,$rvec->at(0),$rvec->at(1),$rvec->at(2));
     my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
     if($djdx||$djdy||$djdz){my $dx=0; my $dy=0; my $dz=0;
@@ -485,7 +500,7 @@ else{die "Error makenn - creating table for option $_ \n";}
                $jca=($djca-$jca)/$delta;
                $jcb=($djcb-$jcb)/$delta;
                $jcc=($djcc-$jcc)/$delta;
-}
+} # djdx djdy djdz
 
     $Jaa=$Jaa->append( pdl ([$jaa]));
     $Jab=$Jab->append( pdl ([$jab]));
@@ -561,15 +576,15 @@ unless($DM>0){
     $Jca=$Jca->append( pdl ([$Jey[$ntbl]]));
     $Jcb=$Jcb->append( pdl ([-$Jex[$ntbl]]));
     $Jcc=$Jcc->append( pdl ([0.0]));
-              }
-                                  }    
+              } #DM
+                                  } # save neighbour   
 
-                         } 
-                               }
-                      }
-    }}}}  
+                         } # neighbour in readtable  
+                               } #readtable
+                      } # 0<r<rmax
+    }}}} # n1  n2 n3 nz
 
-   $n= qsorti($rn); 
+   $n= qsorti($rn); # sort neighbors according to r
    $nofneighbours[$nnn]=(($rn->dims)[0]-1); 
    if ($readtable>0&&$ignore_neihgbours_behind==1)
    {# check if there is a closer neighbour and if there is delete neighbour
@@ -597,12 +612,11 @@ unless($DM>0){
    $n= qsorti($rn); 
 
 unless($tabout){printneighbourlist($Gmix,$h,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);}
- }
+ } # next atom nnn
 
 unless($tabout){ endprint($h,$l);  }
  
-if($cfph!=0){
-# for cf phonon interaction recreate makenn$ext
+if($cfph!=0){ # for cf phonon interaction recreate makenn$ext
 my ($h,$l)=printlattice("./mcphas.j",">./results/makenn$ext");
 @atoms=();
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
@@ -789,9 +803,13 @@ push @atoms, "\n";
   # here come the cf-phonon interactions for the MODULE=so1ion magnetic ions 
   # open pointcharge file 
   push @atoms, $ph[$nnn];
+
+# and finally recreate corresponding phononic atoms sipf file to be a MODULE=PHONON file
+store_phonon_file($sipf_file[$nph[$nnn]]);
+
 }
 endprint($h,$l);
-}
+} # fi cfph recreate makenn.j
 
 if($tabout){exit;}
 if($bvk){ # check consistency of files
@@ -818,7 +836,7 @@ for($i=2;$i<=7;++$i){ if(abs($Mc[$i]-$M[$i])>1e-4){die("ERROR makenn: input file
                  }
                         } 
                      }
-}
+} # fi bvk consistency check
 
 print "created files: results/makenn$ext     (interaction parameters)\n";
 print "               results/makenn.a*.pc (pointcharge environment files)\n";
@@ -829,8 +847,8 @@ print "********************************************************\n";
 if($npc){unlink("results/makenn.a*.pc");}
    exit;
 
-#-----------------------------------------------------------------------
-sub clearMP{
+#----------------clear MODPAR in sipf files -------------------------------
+sub clearMP{ 
 my ($file)=@_;
 my $i,$j;$i=0;
              if(open (Fin,$file))
@@ -867,7 +885,7 @@ my $i,$j;$i=0;
 
 }
 
-
+# ---------------------- add K to to MODPARS in sipf files ----------------------------
 sub addK{
 my ($file)=@_;
 my $i,$j;$i=0;
@@ -905,6 +923,7 @@ my $i,$j;$i=0;
 
 
 }
+
 
 sub getinteraction {
    my ($Gmix,$gJthis,$gJ,$sipffilethis,$sipffile,$r,$rx,$ry,$rz)=@_;
@@ -1487,7 +1506,7 @@ sub extractfromfile {
              $var="\Q$variable\E";$value="";
              if(open (Fin,$filename))
              {while($line=<Fin>){
-                if($line=~/^(#!|[^#])*\b$var\s*=\s*/) {($value)=($line=~m/^(?:#!|[^#])*\b$var\s*=\s*([\d.eEdD\Q-\E\Q+\E]+)/);}}
+                if($line=~/^(#!|[^#])*\b$var\s*=\s*/) {($value)=($line=~m/^(?:#!|[^#])*\b$var\s*=\s*([\d.eEdD\Q-\E\Q+\EA-Za-z]+)/);}}
               close Fin;
        	     }
              else
@@ -1561,11 +1580,13 @@ print STDOUT << "EOF";
               sipf files by CHARGE= variable. For magnetic atoms the sipf 
               file the variable MAGNETIC=1 has to be set and information 
               about the ion has to be present (IONTYPE etc.). 
-              Foreach magnetic ion a new site is created and shifted
+              Foreach magnetic ion a new site is created resembling the magnetic 
+	      electron charge cloud and this new site is shifted
               0.1 A along c in order to not overlap with the original site.
-              It is assumed, that the original site will be using an sipf
-              file with the MODULE=phonon as well as all the other
-              nonmagnetic sites. For the new magnetic site the program
+              The original magnetic site sipf is changed to use an sipf
+              file with the MODULE=phonon  similar to all the other
+              nonmagnetic sites (which should have a PHONON module). 
+	      For the new magnetic site the program
               pointc is used by makenn with option -d to calculate derivatives
               dBlm/du which are inserted as interaction 
               parameters between MODULE=phonon and MODULE=so1ion sites.
@@ -1573,12 +1594,11 @@ print STDOUT << "EOF";
               results/makenn.a*.sipf and contain crystal field paramters Blm 
               calculated by pointc.
               In order to use the resulting file results/makenn.j a phonon
-              model has to be set up, the original magnetic atom sites 
-              sipffilename has to be changed to the phonon model filename 
+              model has to be set up, 
               and the phonon model has to be added to makenn.j,  e.g. by
-              program addj, moreover magnetic sites sipf files are required, 
-              e.g. such as created in results/makenn.a*.sipf. 
-              a screening file can be used to define distance dependent 
+              program addj. Moreover magnetic electron sites sipf files are required, 
+              which are created in results/makenn.a*.sipf. 
+              Note: a screening file can be used to define distance dependent 
               screening of charges for the pointcharge model calculation
               format: col1 distance r (Angstroem) col 2 screening factor 
               for B2m, col 3 for B4m and col 4 for B6m
@@ -1641,3 +1661,58 @@ sub my_floor
 {
     return ($_[0] < 0) ? int($_[0]) - 1 : int($_[0]);
 }
+
+
+
+sub store_phonon_file
+{my ($filename)=@_;
+ ($IONTYPE)=extractfromfile("IONTYPE",$filename);
+ ($CHARGE)=extractfromfile("CHARGE",$filename);
+ ($MAGNETIC)=extractfromfile("MAGNETIC",$filename);
+ ($SCATTERINGLENGTHREAL)=extractfromfile("SCATTERINGLENGTHREAL",$filename);
+ ($SCATTERINGLENGTHIMAG)=extractfromfile("SCATTERINGLENGTHIMAG",$filename);
+my $at=$IONTYPE;$at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
+ $at = lc $at; $at = ucfirst $at; 
+ unless($MASS=${$mass{$at}}[0]){print "WARNING: $at mass not found in internal table for new file $filename - please edit and set mass by hand \n"; }
+print "Recreating $filename and making it a sipf file with phonon module with mass $at $MASS\n";
+ 
+ open (FOUT, ">$filename");
+ print FOUT "#!MODULE=phonon\n";
+    print FOUT $sipfheader;
+    print FOUT "IONTYPE=$IONTYPE\n";
+    print FOUT "CHARGE=$CHARGE\n";
+    print FOUT "MAGNETIC=$MAGNETIC\n";
+    print FOUT "\n";
+print FOUT << "EOF";
+MODPAR1=$MASS  #mass in(m0)
+MODPAR2=0   # Kxx
+MODPAR3=0   # Kyy
+MODPAR4=0   # Kzz
+MODPAR5=0  # Kxy  in (meV)
+MODPAR6=0  # Kxz
+MODPAR7=0  # Kyz
+MODPAR8=0.4 # umax          maximum (cutoff) for displacement [a0=0.5219 A]
+MODPAR9=0   #                0       umax restriction in all directions
+            #                1,2,3   umax restriction in x y z direction only
+            #                4       umax restriction in x and y direction
+            #                5       umax restriction in x and z direction
+            #                6       umax restriction in y and z direction
+EOF
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)\n";
+    print FOUT "#                      with s=sin(theta)/lambda=Q/4pi\n";
+    print FOUT "# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>\n";
+    print FOUT "# unit of DWF is [A^2]\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "DWF=0\n";
+    print FOUT "\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "# Neutron Scattering Length (10^-12 cm) (can be complex)\n";
+    print FOUT "#-------------------------------------------------------\n";
+    print FOUT "SCATTERINGLENGTHREAL=$SCATTERINGLENGTHREAL\n";
+    print FOUT "SCATTERINGLENGTHIMAG=$SCATTERINGLENGTHIMAG\n";
+    print FOUT "#  ... note: - if an occupancy other than 1.0 is needed, just reduce \n";
+    print FOUT "#              the scattering length linear accordingly\n";
+close FOUT;
+}
+ 

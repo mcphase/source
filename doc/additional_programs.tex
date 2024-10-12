@@ -329,21 +329,22 @@ springs $c_T$.
               sipf files by {\prg CHARGE= variable}. For magnetic atoms the sipf 
               file the variable {\prg MAGNETIC=1} has to be set and information 
               about the ion has to be present ({\prg IONTYPE} etc.). 
-              For each magnetic ion a new site is created and shifted
+              For each magnetic ion a new site is created resembling the magnetic 
+	      electron charge cloud and this new site is shifted
               0.1 \AA \ along $c$ in order to not overlap with the original site.
-              It is assumed, that the original site will be using an sipf
-              file with the {\prg MODULE=phonon} as well as all the other
-              non magnetic sites. For the new magnetic site the program
+              The original site sipf file is changed to us an sipf file  
+              with the {\prg MODULE=phonon} similar to all the other
+              non magnetic sites (which should have a {\prg MODULE=phonon}). 
+              For the new magnetic site the program
               {\prg pointc} is used by {\prg makenn} with option -d to calculate derivatives
               $\partial B_{lm}/\partial u$ which are inserted as interaction 
               parameters between {\prg MODULE=phonon} and {\prg MODULE=so1ion} sites.
               In order to use the resulting file {\prg results\/makenn.j} a phonon
-              model has to be set up, the original magnetic atom sites 
-              {\prg sipffilename} has to be changed to the phonon model filename 
+              model has to be set up,  
               and the phonon model has to be added to {\prg makenn.j},  e.g. by
-              program {\prg addj}, moreover magnetic sites sipf files are required, 
-              e.g. such as created in {\prg results\//makenn.a*.sipf}. 
-              A screening file can be used to define distance dependent 
+              program {\prg addj}. Moreover, magnetic sites sipf files are required, 
+              which are created in {\prg results\//makenn.a*.sipf}. 
+              Note: A screening file can be used to define distance dependent 
               screening of charges for the pointcharge model calculation
               format: col1 distance r (\AA), col 2 screening factor 
               for $B_2^m$, col 3 for $B_4^m$ and col 4 for $B_6^m$

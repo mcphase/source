@@ -12,7 +12,7 @@
 #                                 make
 #               
 #               IF NECESSARY: *********************************
-#               .  get newest version from repository
+#               .  oputdated: get newest version from repository
 #                  git pull ssh://martin_rotter@git.kenai.com/mcphase~mcphase master
 #               .  compile mcphaseexplorer under windows and test
 #                              mcphaseexplorer compiled using netbeans if modified, in order 
@@ -63,7 +63,7 @@
 #               set GIT MASTER ******************************************* 
 #                              ... after the next commit we should create a new branch by
 #                              git checkout -b master5_5
-#                              git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_5
+#                              outdated: git push ssh://martin_rotter@git.kenai.com/mcphase~mcphase master5_5
 #
 #
 #
@@ -81,7 +81,7 @@
 #				and then do: 
 #				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/14.1.0_2/lib/gcc/current/
 #           gfortran lSystem not found - then do:
-#                               export LIBRARY_PATH="$LIBRARY_PATH:/Library/Developer/CommandLineTools/SDKs/MacOSX11.sdk/usr/lib"
+#                               export LIBRARY_PATH="$LIBRARY_PATH:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
 #
 #	        Note on compiling with dos:   make unreleased_remove and copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
@@ -112,7 +112,7 @@
 #Then select "Create" and the screen saver should be magically created for you.
 # Author(s):     M. Rotter
 #
-#  Last Update:	  22.02.2023
+#  Last Update:	  22.09.2024
 #
 #**********************************************************************
 
@@ -191,7 +191,7 @@ examples  : vector
 	cd ./examples ; make
 
 exampleswin  : vectorwin 
-	cd ./examples ; make cross64=1
+	cd ./examples ; $(MAKE) cross64=1
 
 tutorial : vector
 	cd ./tutorial ; make

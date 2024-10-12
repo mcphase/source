@@ -181,7 +181,8 @@ if (!do_sipf)
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    switch(observable)
                                    {case 'Q': printf("Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);break;
+                                              for(j=1;j<=observable_nofcomponents;++j)printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);printf("(muB)");break;
+                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
                                     default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
                                    printf("transition-energies(meV)...\n");
@@ -219,7 +220,8 @@ pchr=strstr(filename+10,"\\");
                                    for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
                                    switch(observable)
                                    {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));break;
+                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));fprintf(fout,"(muB) ");break;
+                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB) ");break;
                                     default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
                                    }
                                    fprintf(fout,"\n");
@@ -295,7 +297,8 @@ pchr=strstr(filename+10,"\\");
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    switch(observable)
                                    {case 'Q': printf("Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);break;
+                                              for(j=1;j<=observable_nofcomponents;++j)printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);printf("(muB)");break;
+                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
                                     default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
                                    printf("transition-energies(meV)...\n");
@@ -329,7 +332,8 @@ pchr=strstr(filename+10,"\\");
                                    for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
                                    switch(observable)
                                    {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));break;
+                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));fprintf(fout,"(muB)");break;
+                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB)");break;
                                     default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
                                    }
                                    fprintf(fout,"\n");

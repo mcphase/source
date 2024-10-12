@@ -137,13 +137,13 @@ void Mat::Error (int err, const char* msg, ...)
     va_list argptr;
 
     if (err > 0)
-	sprintf(message,"Error %d: ", err);
+	snprintf(message,sizeof(message),"Error %d: ", err);
     else
-	sprintf(message,"Error: ");
+	snprintf(message,sizeof(message),"Error: ");
 
     va_start(argptr,msg);
     int l = message ? strlen(message) : 0;
-    vsprintf(message+l,msg,argptr);
+    vsnprintf(message+l,sizeof(message+l),msg,argptr);
     va_end(argptr);
 
     // don't bother about error any more
@@ -190,13 +190,13 @@ void Mat::Error (const char* msg, ...)
     va_list argptr;
 
     if (err > 0)
-	sprintf(message,"Error %d: ", err);
+	snprintf(message,sizeof(message),"Error %d: ", err);
     else
-	sprintf(message,"Error: ");
+	snprintf(message,sizeof(message),"Error: ");
 
     va_start(argptr,msg);
     int l = message ? strlen(message) : 0;
-    vsprintf(message+l,msg,argptr);
+    vsnprintf(message+l,sizeof(message+l),msg,argptr);
     va_end(argptr);
 
     // don't bother about error any more
@@ -248,13 +248,13 @@ void Mat::Warning (int err, const char* msg, ...)
     va_list argptr;
 
     if (err > 0)
-	sprintf(message,"Warning %d: ", err);
+	snprintf(message,sizeof(message),"Warning %d: ", err);
     else
-	sprintf(message,"Warning: ");
+	snprintf(message,sizeof(message),"Warning: ");
 
     va_start(argptr,msg);
     int l = message ? strlen(message) : 0;
-    vsprintf(message+l,msg,argptr);
+    vsnprintf(message+l,sizeof(message+l),msg,argptr);
     va_end(argptr);
 
     // don't bother about warning any more
