@@ -39,7 +39,7 @@ int getdim(int n, orbital l)                                    // Number of sta
    int i,j=1,nn=(n>(2*abs(l)+1))?(4*abs(l)+2-n):n;              // Use n<2l+1 equivalents only to avoid overflow
    long int ns=1;
    for(i=(4*abs(l)+2-nn+1); i<=(4*abs(l)+2); i++) ns*=i;        // Computes (4l+2-n+1).(4l+2-n+1)...(4l+2)
-   for(i=nn; i>1; i--) j*=i; ns/=j;                             // Computes n.(n-1)...1
+   for(i=nn; i>1; i--) {j*=i;} ns/=j;                             // Computes n.(n-1)...1
    return ns;
 /* // Wikipedia Algorithm
    int k=4*abs(l)+2;
@@ -108,12 +108,12 @@ void conv_e_units(icpars &pars, std::string &newunit)
       if(newunit.find("cm")!=std::string::npos || newunit.find("wave")!=std::string::npos) { pars._econv=1.; }
       else if(newunit.find("meV")!=std::string::npos)  // Convert cm^{-1} to meV
       {  
-         LOOP(4) pars.F[k]/=MEV2CM; pars.xi/=MEV2CM; pars.e_units="meV"; LOOP(3) pars.alpha[k]/=MEV2CM;     pars._econv=MEV2CM;
+         LOOP(4) {pars.F[k]/=MEV2CM;} pars.xi/=MEV2CM; pars.e_units="meV"; LOOP(3) pars.alpha[k]/=MEV2CM;     pars._econv=MEV2CM;
          pars.Dx2/=MEV2CM; pars.Dy2/=MEV2CM; pars.Dz2/=MEV2CM;
       }
       else if(newunit.find("K")!=std::string::npos)    // Convert cm^{-1} to K
       {  
-         LOOP(4) pars.F[k]*=CM2K;   pars.xi*=CM2K;   pars.e_units="Kelvin"; LOOP(3) pars.alpha[k]*=CM2K;    pars._econv=1/CM2K;
+         LOOP(4) {pars.F[k]*=CM2K;}   pars.xi*=CM2K;   pars.e_units="Kelvin"; LOOP(3) pars.alpha[k]*=CM2K;    pars._econv=1/CM2K;
          pars.Dx2*=CM2K; pars.Dy2*=CM2K; pars.Dz2*=CM2K;
       }
       else std::cerr << "conv_e_units(): Energy units " << newunit << " not recognised. Accepted units are cm^{-1}, meV, K.\n";
@@ -122,13 +122,13 @@ void conv_e_units(icpars &pars, std::string &newunit)
    { 
       if(newunit.find("cm")!=std::string::npos || newunit.find("wave")!=std::string::npos) // Convert meV to cm^{-1}
       {  
-         LOOP(4) pars.F[k]*=MEV2CM; pars.xi*=MEV2CM; pars.e_units="cm^{-1}"; LOOP(3) pars.alpha[k]*=MEV2CM; pars._econv=1.;
+         LOOP(4) {pars.F[k]*=MEV2CM;} pars.xi*=MEV2CM; pars.e_units="cm^{-1}"; LOOP(3) pars.alpha[k]*=MEV2CM; pars._econv=1.;
          pars.Dx2*=MEV2CM; pars.Dy2*=MEV2CM; pars.Dz2*=MEV2CM;
       }
       else if(newunit.find("meV")!=std::string::npos) { pars._econv=MEV2CM; }
       else if(newunit.find("K")!=std::string::npos)    // Convert meV to K
       {  
-         LOOP(4) pars.F[k]*=MEV2K;  pars.xi*=MEV2K;  pars.e_units="Kelvin"; LOOP(3) pars.alpha[k]*=MEV2K;   pars._econv=1/CM2K;
+         LOOP(4) {pars.F[k]*=MEV2K;}  pars.xi*=MEV2K;  pars.e_units="Kelvin"; LOOP(3) pars.alpha[k]*=MEV2K;   pars._econv=1/CM2K;
          pars.Dx2*=MEV2K; pars.Dy2*=MEV2K; pars.Dz2*=MEV2K;
       }
       else std::cerr << "conv_e_units(): Energy units " << newunit << " not recognised. Accepted units are cm^{-1}, meV, K.\n";
@@ -137,12 +137,12 @@ void conv_e_units(icpars &pars, std::string &newunit)
    { 
       if(newunit.find("cm")!=std::string::npos || newunit.find("wave")!=std::string::npos) // Convert K to cm^{-1}
       {  
-         LOOP(4) pars.F[k]/=CM2K;   pars.xi/=CM2K;   pars.e_units="cm^{-1}"; LOOP(3) pars.alpha[k]/=CM2K;   pars._econv=1.;
+         LOOP(4) {pars.F[k]/=CM2K;}   pars.xi/=CM2K;   pars.e_units="cm^{-1}"; LOOP(3) pars.alpha[k]/=CM2K;   pars._econv=1.;
          pars.Dx2/=CM2K; pars.Dy2/=CM2K; pars.Dz2/=CM2K;
       }
       else if(newunit.find("meV")!=std::string::npos)  // Convert K to meV
       {  
-         LOOP(4) pars.F[k]/=MEV2K;  pars.xi/=MEV2K;  pars.e_units="meV"; LOOP(3) pars.alpha[k]/=MEV2K;      pars._econv=MEV2CM;
+         LOOP(4) {pars.F[k]/=MEV2K;}  pars.xi/=MEV2K;  pars.e_units="meV"; LOOP(3) pars.alpha[k]/=MEV2K;      pars._econv=MEV2CM;
          pars.Dx2/=MEV2K; pars.Dy2/=MEV2K; pars.Dz2/=MEV2K;
       }
       else if(newunit.find("K")!=std::string::npos) { pars._econv=1/CM2K; }
@@ -287,7 +287,7 @@ bool icpars::isreal()
 // --------------------------------------------------------------------------------------------------------------- //
 bool icpars::operator ==(icpars c) const
 {
-   if(c.n!=n) return false; if(c.l!=l) return false;
+   if(c.n!=n) {return false;} if(c.l!=l) {return false;}
    if(fabs(c._xi-_xi)>1e-5) return false;
    if(c.B!=B) return false;
    int i; 
@@ -297,7 +297,7 @@ bool icpars::operator ==(icpars c) const
 }
 bool icpars::operator !=(icpars c) const
 {
-   if(c.n!=n) return true; if(c.l!=l) return true;
+   if(c.n!=n) {return true;} if(c.l!=l) {return true;}
    if(fabs(c._xi-_xi)>1e-5) return true;
    if(c.B!=B) return true;
    int i; 
@@ -352,27 +352,27 @@ void cfpars::assign(std::string &S, int &k, int &q, double v) // Assign a partic
 
    if(S.compare("A")==0)
    {
-      if(_cfname.compare("A")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_rk[k/2-1]/l[i]; /*if(q<0) _Bi[i] = -_Bi[i];*/ MTP 0;
+      if(_cfname.compare("A")!=0) {conv(S);} _Bo[i] = v; _Bi[i] = val*_rk[k/2-1]/l[i]; /*if(q<0) _Bi[i] = -_Bi[i];*/ MTP 0;
    } 
    else if(S.compare("W")==0)
    {
-      if(_cfname.compare("W")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_rk[k/2-1]/l[i]; if(q!=0) _Bi[i] /= 2; MTP 1;
+      if(_cfname.compare("W")!=0) {conv(S);} _Bo[i] = v; _Bi[i] = val*_rk[k/2-1]/l[i]; if(q!=0) _Bi[i] /= 2; MTP 1;
    }
    else if(S.compare("B")==0)
    {
-      if(_cfname.compare("B")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_istevfact[k/2-1]/l[i]; /*if(q<0) _Bi[i] = -_Bi[i];*/ MTP 0;
+      if(_cfname.compare("B")!=0) {conv(S);} _Bo[i] = v; _Bi[i] = val*_istevfact[k/2-1]/l[i]; /*if(q<0) _Bi[i] = -_Bi[i];*/ MTP 0;
    }
    else if(S.compare("V")==0)
    {
-      if(_cfname.compare("V")!=0) conv(S); _Bo[i] = v; _Bi[i] = val*_istevfact[k/2-1]/l[i]; if(q!=0) _Bi[i] /= 2; MTP 1;
+      if(_cfname.compare("V")!=0) {conv(S);} _Bo[i] = v; _Bi[i] = val*_istevfact[k/2-1]/l[i]; if(q!=0) _Bi[i] /= 2; MTP 1;
    }
    else if(S.compare("L")==0 || S.compare("D")==0)
    {
-      if(_cfname.compare("L")!=0 && _cfname.compare("D")!=0) conv(S); _cfname.assign(S); _Bo[i] = v; _Bi[i] = val; MTP 1;
+      if(_cfname.compare("L")!=0 && _cfname.compare("D")!=0) {conv(S);} _cfname.assign(S); _Bo[i] = v; _Bi[i] = val; MTP 1;
    }
    else if(S.compare("AR")==0)
    {
-      if(_cfname.compare("AR")!=0) conv(S); _Bo[i] = v; _Bi[i] = val/l[i]; MTP 0;
+      if(_cfname.compare("AR")!=0) {conv(S);} _Bo[i] = v; _Bi[i] = val/l[i]; MTP 0;
    }
    else { std::cerr << "cfpars::assign() parameter type " << S << " not recognised. Must be either A,W,B,V,L,D,AR\n"; }
 }
@@ -557,10 +557,10 @@ bool cfpars::check()                                          // Checks internal
    double half[] = {.5,.5,1.,.5,.5, .5,.5,.5,.5,1.,.5,.5,.5,.5, .5,.5,.5,.5,.5,.5,1.,.5,.5,.5,.5,.5,.5};
 // double imin[] = {-1.,-1.,1.,1.,1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,-1.,-1.,-1.,-1.,-1.,-1.,1.,1.,1.,1.,1.,1.,1.};
    double cB[27];
-        if(_units.find("K")!=std::string::npos)   for(i=0; i<27; i++) cB[i]=_Bi[i]*CM2K;
-   else if(_units.find("meV")!=std::string::npos) for(i=0; i<27; i++) cB[i]=_Bi[i]/MEV2CM; else for(i=0; i<27; i++) cB[i]=_Bi[i];
+   if     (_units.find("K")!=std::string::npos)   {for(i=0; i<27; i++) {cB[i]=_Bi[i]*CM2K;}}
+   else if(_units.find("meV")!=std::string::npos) {for(i=0; i<27; i++) {cB[i]=_Bi[i]/MEV2CM;}} else {for(i=0; i<27; i++) {cB[i]=_Bi[i];}}
 
-        if(_cfname.compare("A")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]/*imin[i]*/))>SMALL) return false; ) }
+   if     (_cfname.compare("A")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]/*imin[i]*/))>SMALL) return false; ) }
    else if(_cfname.compare("W")==0) { CFLOOP( if(abs(cB[i]-(_Bo[i]/l[i]*_rk[k]/half[i]))>SMALL) return false; ) }
    else if(_cfname.compare("B")==0) { CFLOOP( if(_stevfact[k]!=0 && abs(cB[i]-(_Bo[i]/l[i]/_stevfact[k]/*imin[i]*/))>SMALL) return false; ) }
    else if(_cfname.compare("V")==0) { CFLOOP( if(_stevfact[k]!=0 && abs(cB[i]-(_Bo[i]/l[i]/_stevfact[k]/half[i]))>SMALL) return false; ) }

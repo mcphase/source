@@ -28,17 +28,17 @@ extern MINIMUM   *frprmn();          /* definiert in  MINIMA.C */
 extern MINIMUM   *va05a_();          /* definiert in  MINIMA.C */
 extern MINIMUM   *fitnr5();          /* definiert in  MINIMA.C */
  
-extern EWPROBLEM *diagonalisiere();  /* definiert in DIAHERMX.C*/
-extern INT       is_equal();         /* definiert in DIAHERMX.C */
+extern EWPROBLEM *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);  /* definiert in DIAHERMX.C*/
+extern INT       is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);         /* definiert in DIAHERMX.C */
 extern DOUBLE    accuracy();         /* definiert in DIAHERMX.C */
-extern DOUBLE    is_null();          /* definiert in DIAHERMX.C */
-extern INT       null();             /* definiert in DIAHERMX.C */
-extern INT       write_title();      /* definiert in DIAHERMX.C */
+extern DOUBLE    is_null(DOUBLE a,DOUBLE macheps);          /* definiert in DIAHERMX.C */
+extern INT       null(DOUBLE a,DOUBLE macheps);             /* definiert in DIAHERMX.C */
+extern INT       write_title(FILE *fp);      /* definiert in DIAHERMX.C */
 extern INT       *sort();            /* definiert in DIAHERMX.C */
  
 extern INT       output();           /* definiert in INTENSIT.C */
-extern MATRIX    *aJtb_2();          /* definiert in INTENSIT.C */
-extern DOUBLE    zustandssumme();    /* definiert in INTENSIT.C */
+extern MATRIX    *aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps);          /* definiert in INTENSIT.C */
+extern DOUBLE    zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur);    /* definiert in INTENSIT.C */
 extern DOUBLE    suszept();          /* definiert in INTENSIT.C */
 extern DOUBLE    mat_Jx2();          /* definiert in INTENSIT.C */
 extern DOUBLE    mat_Jy2();          /* definiert in INTENSIT.C */
@@ -48,10 +48,10 @@ extern KOMPLEX   *mat_Jx();          /* definiert in INTENSIT.C */
 extern KOMPLEX   *mat_Jy();          /* definiert in INTENSIT.C */
 extern KOMPLEX   *mat_Jz();          /* definiert in INTENSIT.C */
  
-extern VEKTOR    *vr_alloc();        /* definiert in MATRIX.C */
-extern INT       free_vr();          /* definiert in MATRIX.C */
-extern INT       free_mx();          /* definiert in MATRIX.C */
-extern MATRIX    *mx_alloc();        /* definiert in MATRIX.C  */
+extern VEKTOR    *vr_alloc(INT n);        /* definiert in MATRIX.C */
+extern INT       free_vr(VEKTOR *v);          /* definiert in MATRIX.C */
+extern INT       free_mx(MATRIX *mx);          /* definiert in MATRIX.C */
+extern MATRIX    *mx_alloc(INT anz_ze,INT anz_sp);        /* definiert in MATRIX.C  */
  
 extern DOUBLE    norm_operator();    /* definiert in STEVENS.C */
 extern DOUBLE    pow_();             /* definiert in STEVENS.C */
@@ -64,7 +64,7 @@ extern STEVENS   *calc_Pkq();        /* definiert in STEVENS.C */
 extern EINHEIT   EINHEITIMP[];       /* definiert in CFIELD.C*/
 extern IONEN     IONENIMP[];         /* definiert in CFIELD.C*/
 extern ITERATION *auswahlregel();    /* definiert in CFIELD.C */
-extern INT       isimplementiert();  /* definiert in CFIELD.C.*/
+extern INT       isimplementiert(CHAR *ion);  /* definiert in CFIELD.C.*/
 extern IONEN     IONENIMP[];         /* definiert in CFIELD.C*/
 extern DOUBLE    omegan0n();         /* definiert in CFIELD.C  */
 extern DOUBLE    omegan1n();         /* definiert in CFIELD.C  */
@@ -135,8 +135,8 @@ void fit_ortho(setup,ewproblem,kristallfeld)
     DOUBLE    no4p05,no4m05,no6p21,no6m21,fret;
     DOUBLE /* bmolx,bmoly,bmolz,*/b_r,b_theta,b_phi;
  
-    VEKTOR    *vr_alloc(), *Vkq,*Bkq/*,*xW*/,*v0,*q0,*p0/*,*fix*/;
-    VEKTOR    *Vkq_Bkq(),*Bkq_v(),*v_xW();
+    VEKTOR    *vr_alloc(INT n), *Vkq,*Bkq/*,*xW*/,*v0,*q0,*p0/*,*fix*/;
+    VEKTOR    *Vkq_Bkq(),*Bkq_v(),*v_xW(VEKTOR    *v,STEVENS   *stev,INT ionennr,DOUBLE macheps);
     VEKTOR    *Bkq_Vkq(),*v_Bkq(),*rphi_v();
     VEKTOR    *y,*v1_v2(),*v2_v1(),*pv, *grad;
  
@@ -456,7 +456,7 @@ VEKTOR *v1_v2(iter,v)  /* den Vektor v auf Dimension vom Vektor v0   */
     VEKTOR    *v;
 {
     NEBENBEDINGUNG *neben;
-    VEKTOR         *fix,*vr_alloc(),*p0,*v0;
+    VEKTOR         *fix,*vr_alloc(INT n),*p0,*v0;
     INT            i,k;
  
     neben = NEBENBEDINGUNG( iter );
@@ -488,7 +488,7 @@ VEKTOR *v2_v1(iter,v,macheps)
     DOUBLE    macheps;
 {
     NEBENBEDINGUNG *neben;
-    VEKTOR         *fix,*vr_alloc(),*p0/*,*v0*/;
+    VEKTOR         *fix,*vr_alloc(INT n),*p0/*,*v0*/;
     INT            i,k;
  
     neben = NEBENBEDINGUNG( iter );
@@ -529,7 +529,7 @@ void par_uebersicht(ewproblem,fp,y,p,iter,ionennr)
    INT            exp_Bx,exp_By,exp_Bz;
    INT         /* exp_Bmol,*/is_feld;
    INT            exp_x,exp_W,exp_chi2;
-   VEKTOR         *p0,*ps,*Bkq,*v_Bkq(),*xW,*v_xW(),*vr_alloc();
+   VEKTOR         *p0,*ps,*Bkq,*v_Bkq(),*xW,*v_xW(VEKTOR    *v,STEVENS   *stev,INT ionennr,DOUBLE macheps),*vr_alloc(INT n);
    STEVENS        *stevens;
    CHAR           *einheit_in,*ionname;
    DOUBLE         chi2/*,x,W*/,pow__(),c;
@@ -696,7 +696,7 @@ void xi_uebersicht(ewproblem,fp,xi,iter,ionennr)
 
    CHAR      *t01,*t02,*t03,*t04,*t05,*t06,*t07;
    CHAR      *t08,*t09,*t10,*t11/*,*t12*/;
-   VEKTOR    *v,*vr_alloc(),*v0_old,*v0/*,*fix*/,*v1_v2(),*w;
+   VEKTOR    *v,*vr_alloc(INT n),*v0_old,*v0/*,*fix*/,*v1_v2(),*w;
    INT       ze,sp;
  
 t01=" ----------------------------------------------------------------------------\n";
@@ -755,7 +755,7 @@ void grad_uebersicht(ewproblem,fp,grad,iter,ionennr)
 
    CHAR      *t01,*t02,*t03,*t04,*t05,*t06,*t07;
    CHAR      *t08,*t09,*t10,*t11,*t12;
-   VEKTOR /* *v,*/*vr_alloc(),*v0_old,*v0/*,*fix*/,*v1_v2(),*w;
+   VEKTOR /* *v,*/*vr_alloc(INT n),*v0_old,*v0/*,*fix*/,*v1_v2(),*w;
 /* INT       ze,sp; */
    EXPONENT  *exp;
    INT            exp_B20,exp_B22;
@@ -1012,7 +1012,7 @@ void par_tab( is_feld,fp,exp,Bkq,chi2,xW,zeile,max_zeile)
   INT    zeile,max_zeile;
 {
   CHAR *t01,*t02;
-  DOUBLE is_null();
+  DOUBLE is_null(DOUBLE a,DOUBLE macheps);
  
 t02="|%2d|%5.0f|%5.0f|%5.0f|%5.0f|%5.0f|%5.0f|%5.0f|%5.0f|%5.0f|%5.0f|%6.0f|%6.0f|\n";
 fprintf(fp,t02,zeile,is_null((RV(Bkq,1)*exp->facB2i ),0.5),
@@ -1048,7 +1048,7 @@ void mpar_tab( fp,exp,p,zeile,max_zeile)
   INT    zeile,max_zeile;
 {
   CHAR *t01,*t02;
-  DOUBLE is_null(),c;
+  DOUBLE is_null(DOUBLE a,DOUBLE macheps),c;
  
 c = 180.0/pi;
 t02="|%2d|%8.0f|%8.0f|%8.0f|                          |\n";
@@ -1150,18 +1150,18 @@ DOUBLE   Chi2(setup,ewproblem,iteration,v)/*ist funk in amoeba() in Minima.c */
   VEKTOR    *v;
 {
    INT  /* *gi,*/anz_niveaus,einheitnr_in,einheitnr_out;
-   MATRIX  *entartung/*,*ev*/,*aJtb_2(),*aJtb2,*intensit_exp,*d_intensit_exp;
-   MATRIX  *ueber, *mx_alloc();
+   MATRIX  *entartung/*,*ev*/,*aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps),*aJtb2,*intensit_exp,*d_intensit_exp;
+   MATRIX  *ueber, *mx_alloc(INT anz_ze,INT anz_sp);
    DOUBLE/*shift,*/macheps,temperatur,e_calc,e_exp,gj,deltae;
-   DOUBLE  zu_summe,zustandssumme(),faktor,energie,i_calc,i_exp;
+   DOUBLE  zu_summe,zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur),faktor,energie,i_calc,i_exp;
    INT     anz_k,anz_n;
  
    CHAR           *ionname;
-   VEKTOR      /* *fix,*v0,*/*w,*vr_alloc(),*ew,*ew_exp,*d_ew_exp;
+   VEKTOR      /* *fix,*v0,*/*w,*vr_alloc(INT n),*ew,*ew_exp,*d_ew_exp;
    VEKTOR         *v1_v2();
    KOMPLEX        *mat_Jx(),*mat_Jy(),*mat_Jz();
    NEBENBEDINGUNG *neben;
-   INT            free_vr(),i,k,ii,ionennr/*,diff*/;
+   INT            free_vr(VEKTOR *v),i,k,ii,ionennr/*,diff*/;
    INT            datnr,anz_dat,ipos,*nummer,posanzahl,*sort(),*numcomp;
    DOUBLE         pos_icin,pos_icqe,*pos_e,*pos_i,dummy,*werte,*werti;
    DOUBLE         mat_Jx2(),mat_Jy2(),mat_Jz2();
@@ -1172,7 +1172,7 @@ DOUBLE   Chi2(setup,ewproblem,iteration,v)/*ist funk in amoeba() in Minima.c */
    DOUBLE         chi2_an,chi2_bn,chi2_cn,chi2_pn; */
    DOUBLE         dumx,dumy,dumz,dump,b1,b2,b3,b_norm,sqrt();
    DOUBLE         mag(),e_dummy,i_dummy;
-   EWPROBLEM      *diagonalisiere();
+   EWPROBLEM      *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);
    ITERATION      *hamilton();
    DOUBLE         ttheta;
  
@@ -1331,8 +1331,8 @@ if( IS_POSFIT(iteration) ){
  
       /* Uebergangsmatrixelemente auf Matrix ueber  uebertragen */
       for(i=1; i<=anz_niveaus; ++i)
-         for(k=1; k<=anz_niveaus; ++k)
-             R(ueber,i,k) = R(aJtb2,i,k);
+         {for(k=1; k<=anz_niveaus; ++k)
+             {R(ueber,i,k) = R(aJtb2,i,k);}}
  
          /* Uebergangsintensitaeten berechnen */
          for(i=1; i<=anz_niveaus; ++i){
@@ -1997,7 +1997,7 @@ VEKTOR *Bkq_v(Bkq,stev,ionennr,macheps)
    UNUSED_PARAMETER(ionennr);
    UNUSED_PARAMETER(macheps);
 
-   VEKTOR *v,*vr_alloc();
+   VEKTOR *v,*vr_alloc(INT n);
    DOUBLE B20,B22,B40,B42,B44,B60,B62,B64,B66;
    DOUBLE B1mol,B2mol,B3mol;
  
@@ -2051,7 +2051,7 @@ VEKTOR *Bkq_Vkq(Bkq,stev,ionennr,macheps)
    UNUSED_PARAMETER(ionennr);
    UNUSED_PARAMETER(macheps);
 
-   VEKTOR *Vkq,*vr_alloc();
+   VEKTOR *Vkq,*vr_alloc(INT n);
  
    Vkq =  vr_alloc( VRDIM(Bkq) );
  
@@ -2099,7 +2099,7 @@ VEKTOR *Vkq_Bkq(Vkq,stev,ionennr,macheps)
    UNUSED_PARAMETER(ionennr);
    UNUSED_PARAMETER(macheps);
 
-   VEKTOR *Bkq,*vr_alloc();
+   VEKTOR *Bkq,*vr_alloc(INT n);
  
    Bkq =  vr_alloc( VRDIM(Vkq) );
  
@@ -2145,7 +2145,7 @@ VEKTOR *v_Bkq(v,stev,ionennr,macheps)
    UNUSED_PARAMETER(ionennr);
    UNUSED_PARAMETER(macheps);
 
-   VEKTOR *Bkq,*vr_alloc();
+   VEKTOR *Bkq,*vr_alloc(INT n);
    DOUBLE B20,B22,B40,B42,B44,B60,B62,B64,B66;
  
  
@@ -2195,7 +2195,7 @@ VEKTOR *rphi_v(rphi,stev,ionennr,macheps)
     UNUSED_PARAMETER(ionennr);
     UNUSED_PARAMETER(macheps);
 
-    VEKTOR *v,*vr_alloc();
+    VEKTOR *v,*vr_alloc(INT n);
     INT    zeile,j,n;
  
     n      = VRDIM(rphi);
@@ -2265,7 +2265,7 @@ VEKTOR *v_rphi(v,stev,ionennr,macheps)
     UNUSED_PARAMETER(ionennr);
  
     QUADRANT *q,*abfrage();
-    VEKTOR   *rphi,*vr_alloc();
+    VEKTOR   *rphi,*vr_alloc(INT n);
     DOUBLE   r;
     INT      zeile,n;
  
@@ -2304,7 +2304,7 @@ VEKTOR *xW_v(xW,stev,ionennr,macheps)
 {
     UNUSED_PARAMETER(macheps);
 
-    VEKTOR  *v,*vr_alloc();
+    VEKTOR  *v,*vr_alloc(INT n);
     DOUBLE  x,W;
  
     v = vr_alloc( VRDIM(xW) );
@@ -2318,19 +2318,15 @@ VEKTOR *xW_v(xW,stev,ionennr,macheps)
 }
  
 /*----------------------------------------------------------------------------
-                                 v_xW()
+                                 v_xW(VEKTOR    *v,STEVENS   *stev,INT ionennr,DOUBLE macheps)
 ------------------------------------------------------------------------------
 *******************                t             t
 * Transformation: *  v =( v_1,v_2 ) -> xW = (x,W)
 *******************
 -----------------------------------------------------------------------------*/
-VEKTOR *v_xW(v,stev,ionennr,macheps)
-    VEKTOR    *v;
-    STEVENS   *stev;
-    INT       ionennr;
-    DOUBLE    macheps;
+VEKTOR *v_xW(VEKTOR    *v,STEVENS   *stev,INT ionennr,DOUBLE macheps)
 {
-    VEKTOR  *xW,*vr_alloc();
+    VEKTOR  *xW,*vr_alloc(INT n);
     DOUBLE  x,W,v1,v2,f4,f6,d;
     INT     isv1null,isv2null;
  
@@ -2369,12 +2365,9 @@ VEKTOR *v_xW(v,stev,ionennr,macheps)
 }
  
 /*------------------------------------------------------------------------------
-                               strategie()
+                               strategie(EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *p0)
 ------------------------------------------------------------------------------*/
-void strategie(ewproblem,iteration,p0)
-    EWPROBLEM *ewproblem;
-    ITERATION *iteration;
-    VEKTOR    *p0;
+void strategie(EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *p0)
 {
     UNUSED_PARAMETER(ewproblem);
     UNUSED_PARAMETER(iteration);
@@ -2386,20 +2379,17 @@ void strategie(ewproblem,iteration,p0)
  */
 }
 /*------------------------------------------------------------------------------
-                               vertausche_niveaus()
+                               vertausche_niveaus(EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *p0)
 ------------------------------------------------------------------------------*/
-INT vertausche_niveaus(ewproblem,iteration,p0)
-    EWPROBLEM *ewproblem;
-    ITERATION *iteration;
-    VEKTOR    *p0;
+INT vertausche_niveaus(EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *p0)
 {
   UNUSED_PARAMETER(p0);
 
   NEBENBEDINGUNG *neben;
-  MATRIX  *entartung/*, *ev*/,*aJtb_2(), *aJtb2, *exp;
-  MATRIX  *mx_alloc(), *mx_Chi2;
-  VEKTOR/**ew, *fix, *v0, *neu,*/ *vr_alloc()/*,*v*/, *v1_v2();
-  DOUBLE  macheps/*, shift, temperatur,chi2_e,chi2_t*/,mat_Chi2();
+  MATRIX  *entartung/*, *ev*/,*aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps), *aJtb2, *exp;
+  MATRIX  *mx_alloc(INT anz_ze,INT anz_sp), *mx_Chi2;
+  VEKTOR/**ew, *fix, *v0, *neu,*/ *vr_alloc(INT n)/*,*v*/, *v1_v2();
+  DOUBLE  macheps/*, shift, temperatur,chi2_e,chi2_t*/,mat_Chi2(EWPROBLEM *ewproblem,ITERATION *iteration,MATRIX    *aJtb2,MATRIX    *intensit_exp,INT i_t,INT i_e);
 /*CHAR    *ionname;
   INT     ionennr, einheitnr_in, einheitnr_out, dum; */
   INT /*  *gi,*/ anz_niveaus, i_e, i_t, flag/*, i*/, ndim;
@@ -2451,18 +2441,14 @@ INT vertausche_niveaus(ewproblem,iteration,p0)
   else          return( JA   );
 }
 /*----------------------------------------------------------------------------
-                                  mat_Chi2()
+                                  mat_Chi2(EWPROBLEM *ewproblem,ITERATION *iteration,MATRIX    *aJtb2,MATRIX    *intensit_exp,INT i_t,INT i_e)
 ----------------------------------------------------------------------------*/
-DOUBLE   mat_Chi2(ewproblem,iteration,aJtb2,intensit_exp,i_t,i_e)
-  EWPROBLEM *ewproblem;
-  ITERATION *iteration;
-  MATRIX    *aJtb2, *intensit_exp;
-  INT       i_t,i_e;
+DOUBLE   mat_Chi2(EWPROBLEM *ewproblem,ITERATION *iteration,MATRIX    *aJtb2,MATRIX    *intensit_exp,INT i_t,INT i_e)
 {
    INT  /* *gi,*/anz_niveaus,einheitnr_in/*,einheitnr_out*/;
-   MATRIX  *entartung/*,*ev*/,*aJtb_2()/*,*d_intensit_exp*/;
+   MATRIX  *entartung/*,*ev*/,*aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps)/*,*d_intensit_exp*/;
    DOUBLE/*shift,*/macheps,temperatur/*,e_calc,e_exp*/,gj;
-   DOUBLE  zu_summe,zustandssumme(),faktor,energie,i_calc,i_exp/*,chi2_1*/;
+   DOUBLE  zu_summe,zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur),faktor,energie,i_calc,i_exp/*,chi2_1*/;
    VEKTOR  *ew;
  
    CHAR           *ionname;
@@ -2519,16 +2505,9 @@ else if( IS_MATRIXELEMENT(iteration) ){
    return(chi2);
 }
 /*------------------------------------------------------------------------------
-                               menue()
+                               menue(MINIMUM *amoeba,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2)
 ------------------------------------------------------------------------------*/
-INT menue(amoeba,setup,ewproblem,iteration,w,iter_steps,chi2)
-    MINIMUM   *amoeba;
-    SETUP     *setup;
-    EWPROBLEM *ewproblem;
-    ITERATION *iteration;
-    VEKTOR    *w;
-    INT       iter_steps;
-    DOUBLE    chi2;
+INT menue(MINIMUM *amoeba,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2)
 {
   UNUSED_PARAMETER(amoeba); 
   #define DIMFIX 12   /* VRDIM(fix) */
@@ -2546,11 +2525,11 @@ INT menue(amoeba,setup,ewproblem,iteration,w,iter_steps,chi2)
   CHAR    c[DIMFIX+1];
   INT     g[18],i/*,ze*/,sp/*,i_v,i_v0,flag*/;
   INT     *gi,anz_niveaus;
-  MATRIX  *entartung/*,*ev*/,*aJtb_2(),*aJtb2;
+  MATRIX  *entartung/*,*ev*/,*aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps),*aJtb2;
   VEKTOR  *ew/*,*v0*/,*fix,*v1_v2(),*v;
   CHAR    *einheit;
   NEBENBEDINGUNG *neben;
-  VEKTOR  *ew_exp,*rphi,*xW,*v_rphi(),*v_xW();
+  VEKTOR  *ew_exp,*rphi,*xW,*v_rphi(),*v_xW(VEKTOR    *v,STEVENS   *stev,INT ionennr,DOUBLE macheps);
   MATRIX  *intensit_exp;
   STEVENS *stevens;
   DOUBLE  b1,b2,b3;
@@ -2916,7 +2895,7 @@ VALUE(bild,25) =
  
 clearscreen;
 for(zeile=1; zeile<= 2; ++zeile)
-  printf(VALUE(bild,zeile),temperatur);
+  {printf(VALUE(bild,zeile),temperatur);}
  
   printf(VALUE(bild, 3),iter_steps,einheit);
   printf("%s",VALUE(bild, 4));
@@ -2951,9 +2930,9 @@ else
  
 for(i=17; i<=17; ++i)
 if( i <= anz_niveaus )
-  printf(VALUE(bild,i+4),x,      g[i],e[i],pe[i],i01[i],p1[i],i02[i],p2[i]);
+  {printf(VALUE(bild,i+4),x,      g[i],e[i],pe[i],i01[i],p1[i],i02[i],p2[i]);}
 else
-  printf(VALUE(bild,i+4),x );
+  {printf(VALUE(bild,i+4),x );}
  
   printf(VALUE(bild,22),W );
   printf(VALUE(bild,23),(IS_SUSA(iteration)? '*':' '),
@@ -2980,15 +2959,9 @@ else
   return 0;
 }
 /*------------------------------------------------------------------------------
-                               if_stabil()
+                               if_stabil(MINIMUM *amoeba,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2)
 ------------------------------------------------------------------------------*/
-void if_stabil(amoeba,ewproblem,iteration,w,iter_steps,chi2)
-    MINIMUM   *amoeba;
-    EWPROBLEM *ewproblem;
-    ITERATION *iteration;
-    VEKTOR    *w;
-    INT       iter_steps;
-    DOUBLE    chi2;
+void if_stabil(MINIMUM *amoeba,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2)
 {
   UNUSED_PARAMETER(iter_steps); 
  

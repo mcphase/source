@@ -31,18 +31,17 @@ Includedateien holen
 #define pi (4.0*atan(1.0))  /* atan() braucht <math.h>                 */
 #include "types.c"          /* benutze Datentypen laden                */
 /*----------------------------------------------------------------------------
-Extern definierte Funktionen
+Extern definierte Funktionen 
 -----------------------------------------------------------------------------*/
-extern INT    free_vr();       /* definiert in MATRIX.C   */
-extern VEKTOR *vr_alloc();     /* definiert in MATRIX.C   */
-extern VEKTOR *_vr_copy();     /* definiert in MATRIX.C   */
+extern INT    free_vr(VEKTOR *v);       /* definiert in MATRIX.C   */
+extern VEKTOR *vr_alloc(INT n);     /* definiert in MATRIX.C   */
+extern VEKTOR *_vr_copy(VEKTOR *a,VEKTOR *b);     /* definiert in MATRIX.C   */
  
 /*----------------------------------------------------------------------------
                                      ckon()
 ------------------------------------------------------------------------------*/
                   /*                 *                   */
-KOMPLEX *ckon(a)  /* Konjugation :  a   gespeichert in c */
-   KOMPLEX *a;
+KOMPLEX *ckon(KOMPLEX *a)  /* Konjugation :  a   gespeichert in c */
 {
    KOMPLEX *c;
  
@@ -56,9 +55,7 @@ KOMPLEX *ckon(a)  /* Konjugation :  a   gespeichert in c */
 /*----------------------------------------------------------------------------
                                      cadd()
 ------------------------------------------------------------------------------*/
-KOMPLEX *cadd(a,b)  /* komplexe Addition : a+b gespeichert in c */
-   KOMPLEX *a;
-   KOMPLEX *b;
+KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b)  /* komplexe Addition : a+b gespeichert in c */
 {
    KOMPLEX *c;
  
@@ -72,9 +69,7 @@ KOMPLEX *cadd(a,b)  /* komplexe Addition : a+b gespeichert in c */
 /*----------------------------------------------------------------------------
                                      csub()
 ------------------------------------------------------------------------------*/
-KOMPLEX *csub(a,b)  /* komplexe Addition : a-b gespeichert in c */
-   KOMPLEX *a;
-   KOMPLEX *b;
+KOMPLEX *csub(KOMPLEX *a,KOMPLEX *b)  /* komplexe Addition : a-b gespeichert in c */
 {
    KOMPLEX *c;
  
@@ -88,9 +83,7 @@ KOMPLEX *csub(a,b)  /* komplexe Addition : a-b gespeichert in c */
 /*----------------------------------------------------------------------------
                                      cmult()
 ------------------------------------------------------------------------------*/
-KOMPLEX *cmult(a,b)  /* komplexe Muliplikation: a*b gespeichert in c */
-   KOMPLEX *a;
-   KOMPLEX *b;
+KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b)  /* komplexe Muliplikation: a*b gespeichert in c */
 {
    KOMPLEX *c;
  
@@ -104,11 +97,7 @@ KOMPLEX *cmult(a,b)  /* komplexe Muliplikation: a*b gespeichert in c */
 /*----------------------------------------------------------------------------
                                      cdiv()
 ------------------------------------------------------------------------------*/
-KOMPLEX *cdiv(xr,xi,yr,yi)    /* komplexe Division : x/y gespeichert in z */
-    DOUBLE   xr;
-    DOUBLE   xi;
-    DOUBLE   yr;
-    DOUBLE   yi;
+KOMPLEX *cdiv(DOUBLE xr,DOUBLE xi,DOUBLE yr,DOUBLE yi)    /* komplexe Division : x/y gespeichert in z */
 {
     KOMPLEX *z;
     DOUBLE   h,nenner;
@@ -133,9 +122,7 @@ KOMPLEX *cdiv(xr,xi,yr,yi)    /* komplexe Division : x/y gespeichert in z */
 /*----------------------------------------------------------------------------
                                      cabs()
 ------------------------------------------------------------------------------*/
-DOUBLE cabs1(xr,xi)   /* cabs = +sqrt( xi*xi + xr*xr ) */
-    DOUBLE   xr;
-    DOUBLE   xi;
+DOUBLE cabs1(DOUBLE xr,DOUBLE xi)   /* cabs = +sqrt( xi*xi + xr*xr ) */
 {
     DOUBLE h;
  
@@ -153,11 +140,9 @@ DOUBLE cabs1(xr,xi)   /* cabs = +sqrt( xi*xi + xr*xr ) */
 /*----------------------------------------------------------------------------
                                     csqroot()
 ------------------------------------------------------------------------------*/
-KOMPLEX *csqroot(xr,xi)
-    DOUBLE   xr;
-    DOUBLE   xi;
+KOMPLEX *csqroot(DOUBLE xr,DOUBLE xi)
 {
-    DOUBLE h,cabs1();
+    DOUBLE h,cabs1(DOUBLE xr,DOUBLE xi);
     KOMPLEX *y;
  
     y =  KX_ALLOC(1);  /* Platz fuer die komplexe Zahl y holen */
@@ -184,12 +169,12 @@ KOMPLEX *csqroot(xr,xi)
 /*----------------------------------------------------------------------------
                               vskalar()
 -----------------------------------------------------------------------------*/
-KOMPLEX *vskalar(a,b)  /* Multiplikation zweier komplexer */
-    VEKTOR *a,*b;      /* Vektoren <a| und |b> : <a|b>    */
+KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b)  /* Multiplikation zweier komplexer */
+     /* Vektoren <a| und |b> : <a|b>    */
 {                      /*              +                  */
     KOMPLEX *c;        /* mit <a| = |a>                   */
     INT dim,n;         /* uebergeben werden 2 Spaltenvektoren */
-                       /* a,b  = ºa>,ºb>                      */
+                       /* a,b  = ï¿½a>,ï¿½b>                      */
                        /*                                     */
                        /*            2                        */
     dim = VRDIM(b);    /* mit || a ||  := <a|a>;              */
@@ -207,12 +192,12 @@ KOMPLEX *vskalar(a,b)  /* Multiplikation zweier komplexer */
 /*----------------------------------------------------------------------------
                               cnorm()
 -----------------------------------------------------------------------------*/
-DOUBLE cnorm(a)        /* Euklidnorm eines komplexen      */
-    VEKTOR *a;         /* Vektors |a>                     */
+DOUBLE cnorm(VEKTOR *a)        /* Euklidnorm eines komplexen      */
+        /* Vektors |a>                     */
 {
     KOMPLEX *c;
-    KOMPLEX *vskalar();
-    DOUBLE  norm,sqrt();
+    KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b);
+    DOUBLE  norm,sqrt(DOUBLE f);
  
     c     = vskalar(a,a);   /*  <a|a> */
     norm = RT(c);
@@ -224,14 +209,12 @@ DOUBLE cnorm(a)        /* Euklidnorm eines komplexen      */
 /*----------------------------------------------------------------------------
                               cv_mult()
 -----------------------------------------------------------------------------*/
-VEKTOR *cv_mult(c,v)   /*  |w> := c * |v> */
-       KOMPLEX *c;
-       VEKTOR  *v;
+VEKTOR *cv_mult( KOMPLEX *c,VEKTOR  *v)   /*  |w> := c * |v> */
 {
        INT     zeile;
        KOMPLEX *d;
-       KOMPLEX *cmult();
-       VEKTOR  *vr_alloc(),*w;
+       KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);
+       VEKTOR  *vr_alloc(INT n),*w;
  
        w = vr_alloc( VRDIM(v) );
  
@@ -247,13 +230,12 @@ VEKTOR *cv_mult(c,v)   /*  |w> := c * |v> */
 /*----------------------------------------------------------------------------
                               vr_normalisieren()
 -----------------------------------------------------------------------------*/
-VEKTOR *vr_normalisieren(v)
-       VEKTOR *v;
+VEKTOR *vr_normalisieren(VEKTOR *v)
 {
-    DOUBLE  cnorm(),norm;
+    DOUBLE  cnorm(VEKTOR *a),norm;
     KOMPLEX *c;
-    VEKTOR  *cv_mult();
-    VEKTOR  *_vr_copy();
+    VEKTOR  *cv_mult(KOMPLEX *c,VEKTOR  *v);
+    VEKTOR  *_vr_copy(VEKTOR *a,VEKTOR *b);
     VEKTOR  *w;
 /*  INT     i; */
  

@@ -466,7 +466,7 @@ fprintf (stdout, "# Note: Imagpolycrystal [barn/srmeV]= (r0 gJ/2)^2 1/pi  (1-exp
    #else
    HANDLE threads[NUM_THREADS];
    DWORD tid[NUM_THREADS], dwError;
-   int retval;
+   long unsigned int retval;
    #endif
    int ithread;
    omcalc_input *tin[NUM_THREADS];     
@@ -566,8 +566,8 @@ std::cout << "# bcfph was compiled without parallel processing option " << std::
 
 // free memory
 for(mu=0;mu<=mumax;++mu)delete P[mu];
-delete om;
-delete ds;
+delete []om;
+delete []ds;
 } else { //**********************************************************************************
 // do the calculations of nuclear coherent phonon cross section 
 //**********************************************************************************
@@ -643,11 +643,11 @@ fprintf(stdout,"\n");
 }
 
 // free memory
-delete alpha;
-delete galphas;
-delete galphasr;
-delete galphasi;
-delete omegaks;
+delete []alpha;
+delete []galphas;
+delete []galphasr;
+delete []galphasi;
+delete []omegaks;
 
 for(d=0;d<=imax;++d)delete opmatM[d];
 //for(d=0;d<=smax;++d) delete eq[d];

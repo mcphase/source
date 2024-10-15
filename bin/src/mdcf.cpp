@@ -38,7 +38,8 @@ ComplexVector & mdcf::dMQ_dips(int na, int nb, int nc) const
 { return (*dmq_dips[in(na,nb,nc)]);
 }
 ComplexMatrix & mdcf::M(int na, int nb, int nc)
-{ if(mr)return (*m[in(na,nb,nc)]);else errexit();
+{ if(!mr){errexit();}
+return (*m[in(na,nb,nc)]);
 }
 
 ComplexVector & mdcf::sqrt_gamma(int na, int nb, int nc) const
@@ -64,7 +65,8 @@ ComplexMatrix & mdcf::Ui(int i)
 //{ return (*sb[i]);}
 
 ComplexMatrix & mdcf::Mi(int i)
-{ if(mr)return (*m[i]);else errexit();
+{ if(!mr){ errexit();}
+return (*m[i]);
 }
 
 ComplexVector & mdcf::sqrt_gammai(int i)

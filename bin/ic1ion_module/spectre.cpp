@@ -79,7 +79,7 @@ void spectre_vrot(icpars &pars, double &elim, bool isreal=true, double *dVrot=0,
       int isz = JsortM[i].size();
       VEs.calc(isz,submats[i]); delete[]submats[i];
       for(ii=0; ii<isz; ii++) { 
-         for(int jj=0; jj<isz; jj++) Vunrot[(jj+idx)*num_states+ii+idx] = VEs.V(ii,jj); Eunrot[ii+idx] = VEs.E(ii); } 
+         for(int jj=0; jj<isz; jj++) {Vunrot[(jj+idx)*num_states+ii+idx] = VEs.V(ii,jj);} Eunrot[ii+idx] = VEs.E(ii); } 
       idx+=isz; 
    }
    delete[]submats;
@@ -93,7 +93,7 @@ void spectre_vrot(icpars &pars, double &elim, bool isreal=true, double *dVrot=0,
       if(Eunrot[Esort[i-1]]<=Eunrot[Esort[i]]) { i=j; j++; }
       else { ii=Esort[i-1]; Esort[i-1]=Esort[i]; Esort[i]=ii; i--; if(i==0) i=1; }
    }
-   if(elim>=0) for(imax=0; imax<num_states; imax++) if((Eunrot[Esort[imax]]-Eunrot[Esort[0]])>elim) break; imax--;
+   if(elim>=0) {for(imax=0; imax<num_states; imax++) {if((Eunrot[Esort[imax]]-Eunrot[Esort[0]])>elim) {break;} imax--;}}
    delete[]Eunrot;
 
    // Construct the rotation matrix from the full eigenvector matrix, but putting the columns in Energy-order
@@ -172,7 +172,7 @@ iceig spectre_eig(sMat<double> Hic, sMat<double> iHic, complexdouble *Vrot, int 
    F77NAME(zgemm)(&notranspose,&transpose,&cb,&ns,&cb,&zalpha,Vr,&cb,Vrot,&ns,&zbeta,zmt,&cb);  // (Vr*Vrot')'
    delete[]Vr;
    double *En = VE.E(); complexdouble *zV = VE.zV(0); 
-   for(i=0; i<cb; i++) En[i] = VEr.E(i); for(i=cb; i<ns; i++) En[i] = -DBL_MAX;
+   for(i=0; i<cb; i++) {En[i] = VEr.E(i);} for(i=cb; i<ns; i++) {En[i] = -DBL_MAX;}
    for(i=0; i<ns; i++) for(j=0; j<cb; j++) { zV[j*ns+i].r = zmt[i*cb+j].r; zV[j*ns+i].i = -zmt[i*cb+j].i; }
    delete[]zmt; 
 

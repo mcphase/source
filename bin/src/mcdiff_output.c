@@ -190,7 +190,8 @@ fprintf(fout, "#    REFLECTION LIST\n");
  {if(code<2)
    {
     if((double)(i-imin)/50==(double)((i-imin)/50))
-    {if (ortho==1)
+    {fprintf(fout,  "# 1    2    3   4           5             6             7        8       9                 10         11             12           13    ...\n");
+     if (ortho==1)
      {fprintf(fout, "#{h    k    l %s %s %s Inuc(2t) Imag(2t) Itot(2t)[b/Nat^2] %s %s Imag_dip(2t) " 
                     "F1:max-Isigpi azim Ipisig azim Ipipig azim F2:max-Isigpi azim Ipisig azim Ipipig azim " 
                     " |^ma_q| |^mb_q| |^mc_q| |^ma^2_q||^mb^2_q||^mc^2_q||(^ma*^mb)_q||(^ma*^mc)_q||(^mb*^mc)_q|}\n",

@@ -44,7 +44,7 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
    info = ic_diag(Hic,iHic,Vf,Ef); if(info!=0) { std::cerr << "truncate_hmltn: Error diagonalising, info==" << info << "\n"; }
    delete[]Ef; 
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) { 
-      if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) Vf[ii*Hsz+jj].r=0.; if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) Vf[ii*Hsz+jj].i=0.; } 
+      if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) {Vf[ii*Hsz+jj].r=0.;} if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) {Vf[ii*Hsz+jj].i=0.;} } 
    std::cout << "Finished.";
    int offset=EST_OFFSET; memcpy(&est[offset][0],Vf,Hsz*Hsz*sizeof(complexdouble)); offset+=Hsz*Hsz;
 
@@ -80,7 +80,7 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
    F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,Vf,&Hsz,&zbeta,zmt,&Hsz);
    F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&cb); free(zJmat);
    for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-      if(fabs(Hrot[ii*cb+jj].r)<DBL_EPSILON) Hrot[ii*cb+jj].r=0.; if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) Hrot[ii*cb+jj].i=0.; } 
+      if(fabs(Hrot[ii*cb+jj].r)<DBL_EPSILON) {Hrot[ii*cb+jj].r=0.;} if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON){ Hrot[ii*cb+jj].i=0.;} } 
    memcpy(&est[memloc+offset][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
    // Calculates the rotated multipolar operators for the mean field terms
    std::cout << " Using " << cb << " levels of " << Hsz << ".\nIcalc(): Starting calculation of rotated mean field operators... " << std::flush;
@@ -107,7 +107,7 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
       F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,Vf,&Hsz,&zbeta,zmt,&Hsz);
       F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&cb); free(zJmat);
       for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-         if(fabs(Hrot[ii*cb+jj].r)<DBL_EPSILON) Hrot[ii*cb+jj].r=0.; if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) Hrot[ii*cb+jj].i=0.; } 
+         if(fabs(Hrot[ii*cb+jj].r)<DBL_EPSILON) {Hrot[ii*cb+jj].r=0.;} if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) {Hrot[ii*cb+jj].i=0.;} } 
       memcpy(&est[memloc+offset][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
    }
    delete[]Vf; delete[]Hrot; delete[]zmt;
@@ -185,7 +185,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
 
    // Diagonalises the rotated mean field Hamiltonian
    for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-      if(fabs(Hrot[ii+jj*cb].r)<DBL_EPSILON) Hrot[ii+jj*cb].r=0.; if(fabs(Hrot[ii+jj*cb].i)<DBL_EPSILON) Hrot[ii+jj*cb].i=0.; } 
+      if(fabs(Hrot[ii+jj*cb].r)<DBL_EPSILON) {Hrot[ii+jj*cb].r=0.;} if(fabs(Hrot[ii+jj*cb].i)<DBL_EPSILON) {Hrot[ii+jj*cb].i=0.;} } 
    iceig VE; VE.calc(cb,Hrot); delete[]Hrot;
    for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
       if(fabs(VE.zV(ii,jj).r)<DBL_EPSILON && fabs(VE.zV(ii,jj).i)<DBL_EPSILON) VE.zV(ii,jj) = 0.; } 
@@ -253,7 +253,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
          F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&est[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
          F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&est[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
          for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-            if(fabs(opmat[ii*cb+jj].r)<DBL_EPSILON) opmat[ii*cb+jj].r=0.; if(fabs(opmat[ii*cb+jj].i)<DBL_EPSILON) opmat[ii*cb+jj].i=0.; } 
+            if(fabs(opmat[ii*cb+jj].r)<DBL_EPSILON) {opmat[ii*cb+jj].r=0.;} if(fabs(opmat[ii*cb+jj].i)<DBL_EPSILON) {opmat[ii*cb+jj].i=0.;} } 
       }
       for(int ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|J.H|Vi>
@@ -306,7 +306,7 @@ void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, 
 
    // Diagonalises the rotated mean field Hamiltonian
    for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-      if(fabs(Hrot[ii+jj*cb].r)<DBL_EPSILON) Hrot[ii+jj*cb].r=0.; if(fabs(Hrot[ii+jj*cb].i)<DBL_EPSILON) Hrot[ii+jj*cb].i=0.; } 
+      if(fabs(Hrot[ii+jj*cb].r)<DBL_EPSILON) {Hrot[ii+jj*cb].r=0.;} if(fabs(Hrot[ii+jj*cb].i)<DBL_EPSILON) {Hrot[ii+jj*cb].i=0.;} } 
    iceig VE; VE.calc(cb,Hrot); delete[]Hrot;
    for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
       if(fabs(VE.zV(ii,jj).r)<DBL_EPSILON && fabs(VE.zV(ii,jj).i)<DBL_EPSILON) VE.zV(ii,jj) = 0.; } 
@@ -338,7 +338,7 @@ void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, 
       F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&est[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
       F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&est[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
       for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-         if(fabs(opmat[ii*cb+jj].r)<DBL_EPSILON) opmat[ii*cb+jj].r=0.; if(fabs(opmat[ii*cb+jj].i)<DBL_EPSILON) opmat[ii*cb+jj].i=0.; } 
+         if(fabs(opmat[ii*cb+jj].r)<DBL_EPSILON) {opmat[ii*cb+jj].r=0.;} if(fabs(opmat[ii*cb+jj].i)<DBL_EPSILON) {opmat[ii*cb+jj].i=0.;} } 
 
       for(int ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|M(q)|Vi>

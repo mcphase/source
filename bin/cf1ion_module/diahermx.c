@@ -34,8 +34,8 @@ combak()   :  die so diagonalisierte Matrix zuruecktransformieren
 hermhes()  :  hermitesche Matrix auf Hessenbergform transformieren
 hermlr2()  :  transformierte Matrix diagonalisieren
  
-diagonalisiere() : hermhes() + hermlr2()
-info_ewproblem() : Informationen ueber die Diagonalisierung ausgeben
+diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup) : hermhes() + hermlr2()
+info_ewproblem(EWPROBLEM * ewproblem) : Informationen ueber die Diagonalisierung ausgeben
  
 -----------------------------------------------------------------------------*/
  
@@ -57,49 +57,45 @@ Extern definierte Funktionen
 extern MATRIX  *mx_copy(); /* Matrix kopieren */
 extern MATRIX  *mx_mult(); /* Matrizen multiplizieren */
 extern MATRIX  *mx_ewev();
-extern MATRIX  *mx_sub() ; /* Matrizen subtrahieren   */
-extern MATRIX  *mx_alloc();/* Speicher fuer Matrix holen */
-extern KOMPLEX *cdiv();    /* komplexe Zahlen dividieren */
-extern KOMPLEX *csqroot();   /* Quadratwurzel komplexer Zahlen */
-extern KOMPLEX *vskalar(); /*         <a|b>                  */
-extern DOUBLE  cnorm();    /* Euklidnorm eines komplexen Vektors */
+extern MATRIX  *mx_sub(DOUBLE z, MATRIX*a,MATRIX*b) ; /* Matrizen subtrahieren   */
+extern MATRIX  *mx_alloc(INT anz_ze,INT anz_sp);/* Speicher fuer Matrix holen */
+extern KOMPLEX *cdiv(DOUBLE xr,DOUBLE xi,DOUBLE yr,DOUBLE yi);    /* komplexe Zahlen dividieren */
+extern KOMPLEX *csqroot(DOUBLE xr,DOUBLE xi);   /* Quadratwurzel komplexer Zahlen */
+extern KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b); /*         <a|b>                  */
+extern DOUBLE  cnorm(VEKTOR *a);    /* Euklidnorm eines komplexen Vektors */
  
-extern VEKTOR  *vr_normalisieren(); /* Vektor  normalisieren */
-extern VEKTOR  *cv_mult();          /* |b> = c * |a>        */
-extern VEKTOR  *vr_copy();          /* |b> =     |a>        */
-extern VEKTOR  *_vr_copy();         /* |c> =     |a>        */
-extern VEKTOR  *vr_sub();           /* |a> = |a>- |b>       */
+extern VEKTOR  *vr_normalisieren(VEKTOR *v); /* Vektor  normalisieren */
+extern VEKTOR  *cv_mult(KOMPLEX *c,VEKTOR  *v);          /* |b> = c * |a>        */
+extern VEKTOR  *vr_copy(VEKTOR *a);          /* |b> =     |a>        */
+extern VEKTOR  *_vr_copy(VEKTOR *a,VEKTOR *b);         /* |c> =     |a>        */
+extern VEKTOR  *vr_sub(VEKTOR *a,VEKTOR *b);           /* |a> = |a>- |b>       */
  
-extern VEKTOR  *vr_alloc();/* Speicher fuer komplexen Vektor holen */
-extern DOUBLE  sqrt();     /* Quadratwurzel  */
+extern VEKTOR  *vr_alloc(INT n);/* Speicher fuer komplexen Vektor holen */
+extern DOUBLE  sqrt(DOUBLE f);     /* Quadratwurzel  */
 extern DOUBLE  pow_();
 extern INT     a_toi();
 extern DOUBLE  a_tof();
-extern INT     free_vr();  /* Vektor-Speicher wieder freigeben */
-extern DOUBLE  log();      /* Logarithmus               */
+extern INT     free_vr(VEKTOR *v);  /* Vektor-Speicher wieder freigeben */
+extern DOUBLE  log(DOUBLE f);      /* Logarithmus               */
 
-extern FILE *fopen_errchk();         /* definiert in EINGABE.C*/
+extern FILE *fopen_errchk(const char * filename,const char * mode);         /* definiert in EINGABE.C*/
  
-INT test_nullmatrix();
-void write_title();
-INT gi_entartung();
+INT test_nullmatrix(MATRIX *matrix);
+void write_title(FILE *fp);
+INT gi_entartung( MATRIX *entartung ,INT  zeile,INT   anz_sp);
 /*----------------------------------------------------------------------------
-                               diagonalisiere()
+                               diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup)
 ------------------------------------------------------------------------------*/
 /* hermitesche Matrix diagonalisieren   */
-EWPROBLEM  *diagonalisiere(ewproblem,matrix,overwrite,setup)
-    EWPROBLEM *ewproblem;
-    MATRIX    *matrix;
-    INT       overwrite;
-    SETUP     *setup;
+EWPROBLEM  *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup)
 {
     DOUBLE    macheps,accuracy();
-    COMHES    *hessenbergform , *hermhes();
-    EWPROBLEM *dia_hessenberg , *hermlr2();
-    EWPROBLEM *number_ev();
-    EWPROBLEM *orthonormalisieren();
-    EWPROBLEM *entartung();
-    EWPROBLEM *ordnen_ew();
+    COMHES    *hessenbergform , *hermhes(EWPROBLEM *ewproblem,MATRIX *a,INT overwrite);
+    EWPROBLEM *dia_hessenberg , *hermlr2(EWPROBLEM *ewproblem,COMHES *hermhes,DOUBLE macheps);
+    EWPROBLEM *number_ev(EWPROBLEM *ewproblem);
+    EWPROBLEM *orthonormalisieren(EWPROBLEM * ewproblem);
+    EWPROBLEM *entartung(EWPROBLEM *ewproblem, INT overwrite );
+    EWPROBLEM *ordnen_ew(EWPROBLEM *ewproblem, INT overwrite );
     EWPROBLEM *set_ewproblem();
  
 /*[1]*/  macheps = (MACHEPSFACT*accuracy());
@@ -143,8 +139,8 @@ EWPROBLEM *set_ewproblem(setup,ewproblem,matrix,macheps,overwrite)
   INT       overwrite;
 {
   INT n,i,j;
-  MATRIX *mx_alloc(),*ev;
-  VEKTOR *vr_alloc(),*ew;
+  MATRIX *mx_alloc(INT anz_ze,INT anz_sp),*ev;
+  VEKTOR *vr_alloc(INT n),*ew;
   COMHES *comhes;
  
   n = MXDIM(matrix);
@@ -197,9 +193,9 @@ EWPROBLEM *set_ewproblem(setup,ewproblem,matrix,macheps,overwrite)
 ------------------------------------------------------------------------------*/
 SETUP *cfield_setup() /* Setupfile lesen falls vorhanden sonst erzeugen*/
 {
-   FILE  *fopen(),*fp;
+   FILE  *fopen(const char * filename,const char * mode),*fp;
    SETUP *read_setup();
-   SETUP *create_setup();
+   SETUP *create_setup(SETUP *setup);
    SETUP *setup;
  
    setup = SETUP_ALLOC(1);
@@ -221,7 +217,7 @@ SETUP *read_setup(fp,setup)  /* setupfile lesen    */
    INT    a_toi();
    CHAR   *string,*line,*fgets(),c;
    DOUBLE a_tof(),pow_(),versionsnr,dummy;
-   SETUP  *create_setup();
+   SETUP  *create_setup(SETUP *setup);
    DOUBLE accuracy();
  
    string = STRING_ALLOC( buffer_size );
@@ -287,12 +283,11 @@ SETUP *read_setup(fp,setup)  /* setupfile lesen    */
    return(setup);
 }
 /*----------------------------------------------------------------------------
-                               create_setup()
+                               create_setup(SETUP *setup)
 ------------------------------------------------------------------------------*/
-SETUP *create_setup(setup)  /* setupfile erzeugen */
-   SETUP *setup;
+SETUP *create_setup(SETUP *setup)  /* setupfile erzeugen */
 {
-   FILE *fopen(),*fp;
+   FILE *fopen(const char * filename,const char * mode),*fp;
    CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
    CHAR *t11,*t12,*t13;/*,*t14,*t15,*t16,*t17,*t18,*t19,*t20;*/
    DOUBLE accuracy(),log();
@@ -384,10 +379,9 @@ fclose(fp);
 return(setup);
 }
 /*----------------------------------------------------------------------------
-                               write_title()
+                               write_title(FILE *fp)
 ------------------------------------------------------------------------------*/
-void write_title(fp)  /* setupfile erzeugen */
-   FILE *fp;
+void write_title(FILE *fp)  /* setupfile erzeugen */
 {
    CHAR *t01,*t02,*t03,*t04,*t05/*,*t06,*t07*/,*t08/*,*t09,*t10*/;
    CHAR/* *t11,*/*t12,*t13,*t14/*,*t15*/,*t16;/*,*t17,*t18,*t19,*t20;*/
@@ -463,34 +457,31 @@ fprintf(fp,"%s",t01);/*fprintf(fp,"%s",t02);*/fprintf(fp,t03,VERSION);/*fprintf(
 /*fprintf(fp,"%s",t11);*/fprintf(fp,"%s",t12);fprintf(fp,"%s",t13);fprintf(fp,"%s",t14);/*fprintf(fp,"%s",t15);*/
 fprintf(fp,"%s",t16);
  
- 
+  
 }
 
 /*----------------------------------------------------------------------------
-                               is_equal()
+                               is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps)
 ------------------------------------------------------------------------------*/
-INT is_equal(a,b,macheps) /* ist |a-b|< macheps ? */
-   DOUBLE a,b,macheps;
+INT is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps) /* ist |a-b|< macheps ? */
 {
    if( ABSD( a-b ) < macheps ) return( JA );
  
    return( NEIN );
 }
 /*----------------------------------------------------------------------------
-                               is_null()
+                               is_null(DOUBLE a,DOUBLE macheps)
 ------------------------------------------------------------------------------*/
-DOUBLE is_null(a,macheps) /* ist |a|< macheps ? */
-   DOUBLE a,macheps;
+DOUBLE is_null(DOUBLE a,DOUBLE macheps) /* ist |a|< macheps ? */
 {
    if( is_equal(a,0.0,macheps ) == JA  )  return( 0.0 );
  
    return( a );
 }
 /*----------------------------------------------------------------------------
-                                 null()
+                                 null(DOUBLE a,DOUBLE macheps)
 ------------------------------------------------------------------------------*/
-INT    null(a,macheps) /* ist |a|< macheps ? */
-   DOUBLE a,macheps;
+INT    null(DOUBLE a,DOUBLE macheps) /* ist |a|< macheps ? */
 {
  
    return( is_equal(a,0.0,macheps )  );
@@ -510,8 +501,7 @@ void null_mx_error()
 /*----------------------------------------------------------------------------
                                test_nullmatrix();
 ------------------------------------------------------------------------------*/
-INT test_nullmatrix(matrix)  /* Ist die Matrix matrix eine Nullmatrix? */
-     MATRIX *matrix;
+INT test_nullmatrix(MATRIX *matrix)  /* Ist die Matrix matrix eine Nullmatrix? */
 {
  
    INT zeile,spalte,anz_nullen;
@@ -532,7 +522,7 @@ INT test_nullmatrix(matrix)  /* Ist die Matrix matrix eine Nullmatrix? */
 ------------------------------------------------------------------------------*/
 DOUBLE accuracy() /* Rechnergenauigkeit bestimmen */
 {
-    DOUBLE work();
+    DOUBLE work(DOUBLE zahl);
     DOUBLE accuracy;
     DOUBLE digit = 9.0;
  
@@ -548,22 +538,20 @@ DOUBLE accuracy() /* Rechnergenauigkeit bestimmen */
 /*                                -------------
                                      work()
                                   -------------                               */
-DOUBLE work(zahl)
-    DOUBLE zahl;
+DOUBLE work(DOUBLE zahl)
 {
     return( (1.0+1/zahl==1.0) ? 1/zahl : work(10*zahl) );
 }
 /*----------------------------------------------------------------------------
                                    hermhes()
 ------------------------------------------------------------------------------*/
-COMHES *hermhes(ewproblem,a,overwrite)/*transformiert die hermitesche */
+COMHES *hermhes(EWPROBLEM *ewproblem,MATRIX *a,INT overwrite)/*transformiert die hermitesche */
                                       /* Matrix a auf Hessenbergform  */
-    EWPROBLEM *ewproblem;
-    MATRIX *a;         /* Pointer auf die Matrix a */
-    INT    overwrite;  /* soll a ueberschrieben werden ?    */
+ /* Pointer auf die Matrix a */
+    /* soll a ueberschrieben werden ?    */
 {
     INT    low,upp;
-    COMHES *comhes();
+    COMHES *comhes(EWPROBLEM *ewproblem,INT k,INT l,MATRIX *mx,INT overwrite);
  
     low = 1;       /* bei hermiteschen Matrizen ist kein "balance" noetig*/
     upp = MXDIM(a);/* daher sind low und upp so zu setzen */
@@ -575,13 +563,10 @@ COMHES *hermhes(ewproblem,a,overwrite)/*transformiert die hermitesche */
                                  /* diagonalisert HESSENBERGFORM einer       */
                                  /* hermiteschen Matrix innerhalb der        */
                                  /* Rechnergenauigkeit macheps               */
-COMLR2 *hermlr2(ewproblem,hermhes,macheps)
-    EWPROBLEM *ewproblem;
-    COMHES *hermhes;
-    DOUBLE macheps;
+COMLR2 *hermlr2(EWPROBLEM *ewproblem,COMHES *hermhes,DOUBLE macheps)
 {
     INT    low,upp;
-    COMLR2 *comlr2();
+    COMLR2 *comlr2(EWPROBLEM *ewproblem,INT low,INT upp, COMHES  *comhes,DOUBLE macheps);
  
     low = 1 ;
     upp = MXDIM(hermhes->hesse);
@@ -591,8 +576,7 @@ COMLR2 *hermlr2(ewproblem,hermhes,macheps)
 /*----------------------------------------------------------------------------
                                   number_ev()
 ------------------------------------------------------------------------------*/
-EWPROBLEM *number_ev(ewproblem)   /* Anzahl der Eigenvektoren bestimmen */
-    EWPROBLEM *ewproblem;
+EWPROBLEM *number_ev(EWPROBLEM *ewproblem)   /* Anzahl der Eigenvektoren bestimmen */
 {
     INT    nullvektor=0;
     INT    anz_sp,sp,ze;
@@ -627,11 +611,9 @@ EWPROBLEM *number_ev(ewproblem)   /* Anzahl der Eigenvektoren bestimmen */
 ------------------------------------------------------------------------------*/
 /* Energieeigenwerte aufsteigend sortieren */
 /* nach Shell's Algorithmus */
-EWPROBLEM *ordnen_ew( ewproblem,overwrite )
-      EWPROBLEM *ewproblem;
-      INT       overwrite;
+EWPROBLEM *ordnen_ew( EWPROBLEM *ewproblem, INT overwrite )
 {
-   INT *nummer,level,i,*sort();
+   INT *nummer,level,i,*sort(DOUBLE *werte,INT    *nummer,INT anz);
    VEKTOR *ew;
    DOUBLE *werte;
    COMHES *comhes;
@@ -663,9 +645,7 @@ EWPROBLEM *ordnen_ew( ewproblem,overwrite )
 /*----------------------------------------------------------------------------
                                sort()
 ------------------------------------------------------------------------------*/
-INT *sort(werte,nummer,anz)
-   DOUBLE *werte;
-   INT    *nummer,anz;
+INT *sort(DOUBLE *werte,INT    *nummer,INT anz)
 {
    INT level,i,j,gap,temp;
  
@@ -697,11 +677,9 @@ INT *sort(werte,nummer,anz)
 /* Energienievaus shiften ,sodass kleinster*/
 /* Eigenwert Null ist */
  
-EWPROBLEM *entartung( ewproblem,overwrite )
-    EWPROBLEM *ewproblem;
-    INT       overwrite;
+EWPROBLEM *entartung( EWPROBLEM *ewproblem, INT overwrite )
 {
-    MATRIX    *entartung,*eintragen();
+    MATRIX    *entartung,*eintragen( MATRIX *matrix,INT   zeile ,INT  energieniveau_nr);
     VEKTOR    *ew;
     INT       *nummer,*gi,level,i,zeile,spalte;
     DOUBLE    eps,shift;
@@ -722,14 +700,14 @@ EWPROBLEM *entartung( ewproblem,overwrite )
  
     zeile = 1; /* verschiedene Energieniveaus bestimmen*/
     for( level=1 ; level<=VRDIM(ew) ; ++level )
-     if(level==1) entartung = eintragen(entartung ,zeile,VALUE(nummer,level));
+     {if(level==1) {entartung = eintragen(entartung ,zeile,VALUE(nummer,level));}
      else{
        if(is_equal(RV(ew,VALUE(nummer,level)),RV(ew,VALUE(nummer,level-1)),eps))
-            entartung = eintragen( entartung ,zeile,VALUE(nummer,level));
+            {entartung = eintragen( entartung ,zeile,VALUE(nummer,level));}
        else
-            entartung = eintragen( entartung ,++zeile,VALUE(nummer,level));
-           }
- 
+            {entartung = eintragen( entartung ,++zeile,VALUE(nummer,level));}
+         }
+      }
      /* die Anzahl der verschiedenen Energieniveaus merken */
      ANZ_ZE(entartung) = zeile;
  
@@ -757,10 +735,10 @@ EWPROBLEM *entartung( ewproblem,overwrite )
 /*----------------------------------------------------------------------------
                                gi_entartung()
 ------------------------------------------------------------------------------*/
-INT gi_entartung( entartung ,zeile, anz_sp) /* Entartung eines Energieniveaus*/
-   MATRIX *entartung;                       /* gleich Anzahl der von Null    */
-   INT     zeile; /* von Matrix entartung *//* verschiedenen Eintraege in der*/
-   INT    anz_sp; /* von Matrix entartung *//* Zeile von entartung */
+INT gi_entartung( MATRIX *entartung ,INT  zeile,INT   anz_sp) /* Entartung eines Energieniveaus*/
+                        /* gleich Anzahl der von Null    */
+ /* von Matrix entartung *//* verschiedenen Eintraege in der*/
+  /* von Matrix entartung *//* Zeile von entartung */
 {
   INT spalte;
  
@@ -774,9 +752,9 @@ INT gi_entartung( entartung ,zeile, anz_sp) /* Entartung eines Energieniveaus*/
 /*----------------------------------------------------------------------------
                                eintragen()
 ------------------------------------------------------------------------------*/
-MATRIX *eintragen( matrix, zeile ,energieniveau_nr ) /* Energieniveau_nr in  */
-     MATRIX *matrix;                                 /* die Zeile der Matrix */
-     INT    zeile,energieniveau_nr;                  /* matrix eintragen und */
+MATRIX *eintragen( MATRIX *matrix,INT   zeile ,INT  energieniveau_nr ) /* Energieniveau_nr in  */
+                               /* die Zeile der Matrix */
+                      /* matrix eintragen und */
 {                                                    /* zwar in die Spalte   */
      INT spalte;                                     /* wo noch keine Nummer */
                                                      /* steht.               */
@@ -795,13 +773,13 @@ MATRIX *eintragen( matrix, zeile ,energieniveau_nr ) /* Energieniveau_nr in  */
 /*----------------------------------------------------------------------------
                           orthonormalisieren()
 ------------------------------------------------------------------------------*/
-EWPROBLEM *orthonormalisieren( ewproblem )/* Eigenvektoren */
-    EWPROBLEM *ewproblem;                 /* orthonormalisieren */
+EWPROBLEM *orthonormalisieren(EWPROBLEM * ewproblem )/* Eigenvektoren */
+           /* orthonormalisieren */
 {                                         /* nach Kram-Schmidt */
     MATRIX *ev;
 /*  MATRIX *entartung; */
     VEKTOR *v,*w,*c,*d,*ortho;
-    VEKTOR *vr_normalisieren();
+    VEKTOR *vr_normalisieren(VEKTOR *v);
     KOMPLEX *vw;
     INT    spalte,k/*,*gi*/;
     COMHES *comhes;
@@ -847,22 +825,18 @@ EWPROBLEM *orthonormalisieren( ewproblem )/* Eigenvektoren */
 /*----------------------------------------------------------------------------
                                     comhes()
 ------------------------------------------------------------------------------*/
-COMHES *comhes(ewproblem,k,l,mx,overwrite)  /* transformiert eine komplexe */
+COMHES *comhes(EWPROBLEM *ewproblem,INT k,INT l,MATRIX *mx,INT overwrite)  /* transformiert eine komplexe */
                                             /* Matrix auf Hessenbergform   */
-    EWPROBLEM *ewproblem;
-    INT k;
-    INT l;
-    MATRIX *mx;   /* Pointer auf die Matrix mx */
-    INT overwrite;
+  /* Pointer auf die Matrix mx */
 {
     INT    i,j,la,m,n;
     DOUBLE xr,xi,yr,yi;
  
     INT     *swap,swap_dim;
-    KOMPLEX *cdiv();
+    KOMPLEX *cdiv(DOUBLE xr,DOUBLE xi,DOUBLE yr,DOUBLE yi);
     KOMPLEX *z;
     COMHES  *comhes;
-    MATRIX  *mx_copy(),*alt;
+    MATRIX  *mx_copy(MATRIX *),*alt;
  
     swap_dim = l;
     if( overwrite == NOSPACE){
@@ -944,11 +918,9 @@ COMHES *comhes(ewproblem,k,l,mx,overwrite)  /* transformiert eine komplexe */
 /*----------------------------------------------------------------------------
                                     comlr2()
 ------------------------------------------------------------------------------*/
-COMLR2 *comlr2(ewproblem,low,upp,comhes,macheps)/*diagonalisiertHESSENBERGFORM*/
-    EWPROBLEM *ewproblem;
-    INT     low,upp;                      /* einer komplexen Matrix innerhalb */
-    COMHES  *comhes;
-    DOUBLE  macheps;                    /* der Rechnergenauigkeit macheps   */
+COMLR2 *comlr2(EWPROBLEM *ewproblem,INT low,INT upp, COMHES  *comhes,DOUBLE macheps)/*diagonalisiertHESSENBERGFORM*/
+                     /* einer komplexen Matrix innerhalb */
+                  /* der Rechnergenauigkeit macheps   */
 {
     INT overwrite;
     INT    *swap,n;
@@ -956,7 +928,7 @@ COMLR2 *comlr2(ewproblem,low,upp,comhes,macheps)/*diagonalisiertHESSENBERGFORM*/
     INT    its=0;
     INT    i,j,k,m,en;
     DOUBLE sr,si,tr,ti,xr,xi,yr,yi,zr,zi,norm,e1,e2;
-    KOMPLEX *dummy,*cdiv(),*csqroot();
+    KOMPLEX *dummy,*cdiv(DOUBLE xr,DOUBLE xi,DOUBLE yr,DOUBLE yi),*csqroot(DOUBLE xr,DOUBLE xi);
     MATRIX *ev;                                /* Eigenvektoren */
     VEKTOR *ew;                                /* Eigenwerte    */
     MATRIX *mx;
@@ -1289,20 +1261,19 @@ fail:
     return( comlr2 );
 }
 /*----------------------------------------------------------------------------
-                                 info_ewproblem()
+                                 info_ewproblem(EWPROBLEM * ewproblem)
 ------------------------------------------------------------------------------*/
-void info_ewproblem( ewproblem ) /* Diagonalisierungsroutine testen */
-    EWPROBLEM *ewproblem;
+void info_ewproblem(EWPROBLEM * ewproblem ) /* Diagonalisierungsroutine testen */
 {
     KOMPLEX *dummy;
-    KOMPLEX *vskalar();
+    KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b);
     COMHES *comhes;
     MATRIX *mx,*ev,*c,*d,*e;
-    MATRIX *mx_mult(),*mx_sub(),*mx_ewev();
+    MATRIX *mx_mult(MATRIX *a,MATRIX *b),*mx_sub(DOUBLE z, MATRIX*a,MATRIX*b),*mx_ewev(VEKTOR *ew,MATRIX *ev,DOUBLE shift);
     MATRIX *entartung;
     VEKTOR *ew,*v,*vir,*vis;
     DOUBLE re,im,macheps,shift;
-    DOUBLE is_null();
+    DOUBLE is_null(DOUBLE a,DOUBLE macheps);
     INT    z,s,dim,its,ze,sp,*nummer;
     INT    *gi,zeile,spalte1,spalte2;
     CHAR   *text;
@@ -1312,7 +1283,7 @@ void info_ewproblem( ewproblem ) /* Diagonalisierungsroutine testen */
     CHAR   *textdf1 = "R(df(%2d) %2d) = %20.12e  I(df(%2d) %2d) = %20.12e\n";
     CHAR   *textew  = "R( ew(%2d) ) = %20.12e     I( ew(%2d) ) = %20.12e\n";
     CHAR   *tdelta  = "< %2d , %2d | %2d , %2d > =  %20.12e + i * %20.12e\n";
-    FILE   *fopen(),*out;
+    FILE   *fopen(const char * filename,const char * mode),*out;
  
     out    = fopen_errchk("results/eignwert.info","w");
  

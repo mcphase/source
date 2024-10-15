@@ -62,47 +62,47 @@ Includedateien holen
 /*----------------------------------------------------------------------------
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
-extern EWPROBLEM *diagonalisiere();  /* definiert in DIAHERMX.C*/
-extern INT       neben_create();     /* definiert in EINGABE.C */
+extern EWPROBLEM *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);  /* definiert in DIAHERMX.C*/
+extern INT       neben_create(CHAR modus,CHAR *name_chi2);     /* definiert in EINGABE.C */
  
-extern STEVENS   *calc_Pkq();        /* definiert in STEVENS.C */
-extern KOMPLEX   *Clm();             /* definiert in STEVENS.C */
-extern MATRIX    *mx_alloc();        /* definiert in MATRIX.C  */
-extern DOUBLE    pow_();             /* definiert in STEVENS.C */
+extern STEVENS   *calc_Pkq(INT dimj);        /* definiert in STEVENS.C */
+extern KOMPLEX   *Clm(INT l,INT m,DOUBLE theta,DOUBLE phi);             /* definiert in STEVENS.C */
+extern MATRIX    *mx_alloc(INT anz_ze,INT anz_sp);        /* definiert in MATRIX.C  */
+extern DOUBLE    pow_(DOUBLE x,INT n) ;             /* definiert in STEVENS.C */
 extern SETUP     *cfield_setup();    /* definiert in DIAHERMX.C*/
-extern INT info_ewproblem();         /* definiert in DIAHERMX.C*/
-extern INT info_Pkq();               /* definiert in STEVENS.C */
-extern INT info_Fkq();               /* definiert in STEVENS.C */
-extern INT info_Gkq();               /* definiert in STEVENS.C */
-extern INT info_STEVkq();            /* definiert in STEVENS.C */
-extern INT info_tensor_Clm();        /* definiert in STEVENS.C */
-extern INT fkq_tabelle();            /* definiert in STEVENS.C */
-extern INT gkq_tabelle();            /* definiert in STEVENS.C */
+extern INT info_ewproblem(EWPROBLEM * ewproblem);         /* definiert in DIAHERMX.C*/
+extern INT info_Pkq(INT k,INT q,INT dimj,CHAR modus);               /* definiert in STEVENS.C */
+extern INT info_Fkq(INT k,INT q,INT dimj);               /* definiert in STEVENS.C */
+extern INT info_Gkq(INT k,INT q,INT dimj);               /* definiert in STEVENS.C */
+extern INT info_STEVkq(INT k,INT q,INT dimj,CHAR modus);            /* definiert in STEVENS.C */
+extern INT info_tensor_Clm(INT l,INT m,DOUBLE theta,DOUBLE phi);        /* definiert in STEVENS.C */
+extern INT fkq_tabelle(INT anz_ionen);            /* definiert in STEVENS.C */
+extern INT gkq_tabelle(INT anz_ionen);            /* definiert in STEVENS.C */
 extern INT info_thetakq();           /* definiert in THETA.C   */
 extern INT info_rn();                /* definiert in THETA.C   */
-extern INT atoi();                   /* definiert in <stdlib.h>*/
-extern INT output();                 /* definiert in INTENSITY.C*/
-extern INT write_title();            /* definiert in DIAHERMX.C*/
+extern INT atoi(const char *);                   /* definiert in <stdlib.h>*/
+extern INT output(SETUP *setup,EWPROBLEM *ewproblem,KRISTALLFELD *kristallfeld,CHAR  modus);                 /* definiert in INTENSITY.C*/
+extern INT write_title(FILE *fp);            /* definiert in DIAHERMX.C*/
  
-extern INT create_Akq();             /* definiert in EINGABE.C*/
-extern INT create_Bkq();             /* definiert in EINGABE.C*/
-extern INT create_Dkq();             /* definiert in EINGABE.C*/
-extern INT create_Lkq();             /* definiert in EINGABE.C*/
-extern INT create_Vkq();             /* definiert in EINGABE.C*/
-extern INT create_Wkq();             /* definiert in EINGABE.C*/
-extern INT create_xW();              /* definiert in EINGABE.C*/
-extern INT create_nn();              /* definiert in EINGABE.C*/
+extern INT create_Akq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Bkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Dkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Lkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Vkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Wkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_xW(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);              /* definiert in EINGABE.C*/
+extern INT create_nn(CHAR   *name,CHAR modus,INT nn,CHAR   *ion,DOUBLE temp);              /* definiert in EINGABE.C*/
  
-extern ITERATION *read_Akq();        /* definiert in EINGABE.C*/
-extern ITERATION *read_Bkq();        /* definiert in EINGABE.C*/
-extern ITERATION *read_Bkqnew();        /* definiert in EINGABE.C*/
-extern ITERATION *read_Dkq();        /* definiert in EINGABE.C*/
-extern ITERATION *read_Lkq();        /* definiert in EINGABE.C*/
-extern ITERATION *read_Vkq();        /* definiert in EINGABE.C*/
-extern ITERATION *read_Wkq();        /* definiert in EINGABE.C*/
-extern ITERATION *read_xW();         /* definiert in EINGABE.C*/
-extern UMGEBUNG  *read_nn();         /* definiert in EINGABE.C*/
-extern FILE *fopen_errchk();         /* definiert in EINGABE.C*/
+extern ITERATION *read_Akq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Bkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Bkqnew(CHAR *ion);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Dkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Lkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Vkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Wkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_xW(CHAR *name, INT vsymmetrienr_vor);         /* definiert in EINGABE.C*/
+extern UMGEBUNG  *read_nn(CHAR *name);         /* definiert in EINGABE.C*/
+extern FILE *fopen_errchk(const char * filename,const char * mode);         /* definiert in EINGABE.C*/
 
 extern DOUBLE alpha_J[]; /* definiert in theta.c */
 extern DOUBLE beta_J[];  /* definiert in theta.c */
@@ -110,31 +110,31 @@ extern DOUBLE gamma_J[]; /* definiert in theta.c */
  
 extern IONEN IONENIMP[]; /* definiert in theta.c*/ 
 
-INT coor_error();
-INT equal();
-void  r_error();
-void  read_error();
+INT coor_error(FILE *fp,CHAR *filename,INT nrion,INT errornr);
+INT equal(CHAR * s ,CHAR * t);
+void  r_error(CHAR c);
+void  read_error(INT nr,FILE *fp,CHAR *name);
 void  info_epsilonkq();
 void  info_info();
-INT a_toi();
-void  i_kq_error();
+INT a_toi(CHAR *string,INT anfang,INT ende);
+void  i_kq_error(CHAR c);
 void  i_error();
-void  show_();
+void  show_(EWPROBLEM *ew);
 void  info_hamilton();
 void  info_konstanten();
-void  info_magnetfeld();
-void  info_symmetrien();
-void info_omegakq();
+void  info_magnetfeld(INT  dimj,DOUBLE Bx,DOUBLE By,DOUBLE Bz);
+void  info_symmetrien(CHAR *name);
+void info_omegakq(INT k,INT q);
 void create_error();
 void c_single_error();
-INT isimplementiert();
-void c_kq_error();
-INT isreell();
-void Bkq_tip();
-void Bkq_error();
-void r_kq_error();
+INT isimplementiert(CHAR *ion);
+void c_kq_error(CHAR c);
+INT isreell(INT  symmetrienr ,CHAR * ion );
+void Bkq_tip(CHAR * ion,INT symmetrienr);
+void Bkq_error(CHAR * filename,CHAR *ion,INT  symmetrienr);
+void r_kq_error(CHAR c,CHAR cs);
 void info_befehle();
-INT strlen_own();
+INT strlen_own(CHAR *s);
 /*----------------------------------------------------------------------------
 Globale Arrays und deren defines
 -----------------------------------------------------------------------------*/
@@ -262,8 +262,7 @@ INFO INFO_EINHEIT[]={
 /*-------------------------------*/
  
  
-INT is_einheit_imp( c ) /* Bestimme Einheit anhand des Erkennugszeichens c */
-    CHAR c;
+INT is_einheit_imp(CHAR  c ) /* Bestimme Einheit anhand des Erkennugszeichens c */
 {
    INT i;
  
@@ -278,8 +277,7 @@ INT is_einheit_imp( c ) /* Bestimme Einheit anhand des Erkennugszeichens c */
                                                  kq
  
 -----------------------------------------------------------------------------*/
-DOUBLE fak(n)   /*   n!   */
-   INT n;
+DOUBLE fak(INT n)   /*   n!   */
 {
    if( n==0 )
       return( 1.0 );
@@ -287,9 +285,7 @@ DOUBLE fak(n)   /*   n!   */
 }
  
  
-DOUBLE powi(x,n)  /* x**n */
-    DOUBLE x;
-    INT n;
+DOUBLE powi(DOUBLE x,INT n)  /* x**n */
 {
    if( n==0 ) return( 1.0 );
    return( x*powi(x,n-1) );
@@ -307,37 +303,25 @@ DOUBLE powi(x,n)  /* x**n */
 #define dummy2(k,q) (1.0/sqrt((DOUBLE)(fak(k+ABS(q))*fak(k-ABS(q)))))
 #define dummy(k,q)  dummy1(k,q)*dummy2(k,q)
  
-DOUBLE  epn0n(n) INT n; {return( dummy(ABS(n)  ,n)*gn0n(ABS(n)) );}
-DOUBLE  epn1n(n) INT n; {return( dummy(ABS(n)+1,n)*gn1n(ABS(n)) );}
-DOUBLE  epn2n(n) INT n; {return( dummy(ABS(n)+2,n)*gn2n(ABS(n)) );}
-DOUBLE  epn3n(n) INT n; {return( dummy(ABS(n)+3,n)*gn3n(ABS(n)) );}
-DOUBLE  epn4n(n) INT n; {return( dummy(ABS(n)+4,n)*gn4n(ABS(n)) );}
-DOUBLE  epn5n(n) INT n; {return( dummy(ABS(n)+5,n)*gn5n(ABS(n)) );}
-DOUBLE  epn6n(n) INT n; {return( dummy(ABS(n)+6,n)*gn6n(ABS(n)) );}
+DOUBLE  epn0n(INT n) {return( dummy(ABS(n)  ,n)*gn0n(ABS(n)) );}
+DOUBLE  epn1n(INT n) {return( dummy(ABS(n)+1,n)*gn1n(ABS(n)) );}
+DOUBLE  epn2n(INT n) {return( dummy(ABS(n)+2,n)*gn2n(ABS(n)) );}
+DOUBLE  epn3n(INT n) {return( dummy(ABS(n)+3,n)*gn3n(ABS(n)) );}
+DOUBLE  epn4n(INT n) {return( dummy(ABS(n)+4,n)*gn4n(ABS(n)) );}
+DOUBLE  epn5n(INT n) {return( dummy(ABS(n)+5,n)*gn5n(ABS(n)) );}
+DOUBLE  epn6n(INT n) {return( dummy(ABS(n)+6,n)*gn6n(ABS(n)) );}
  
  
 /*------------------------*/
  
-DOUBLE omegan0n(n)
-  INT n;
+DOUBLE omegan0n(INT n)
 {
    UNUSED_PARAMETER(n);
    return( 1.0 );
 }
  
 /*------------------------*/
-DOUBLE omegan1n(n)
- 
-  INT n;
-{
-   UNUSED_PARAMETER(n);
-   return( 1.0 );
-}
- 
-/*------------------------*/
- 
-DOUBLE omegan2n(n)
-  INT n;
+DOUBLE omegan1n(INT n)
 {
    UNUSED_PARAMETER(n);
    return( 1.0 );
@@ -345,8 +329,15 @@ DOUBLE omegan2n(n)
  
 /*------------------------*/
  
-DOUBLE omegan3n(n)
-  INT n;
+DOUBLE omegan2n(INT n)
+{
+   UNUSED_PARAMETER(n);
+   return( 1.0 );
+}
+ 
+/*------------------------*/
+ 
+DOUBLE omegan3n(INT n)
 {
   INT k=0;
   INT z;
@@ -363,8 +354,7 @@ DOUBLE omegan3n(n)
  
 /*------------------------*/
  
-DOUBLE omegan4n(n)
-  INT n;
+DOUBLE omegan4n(INT n)
 {
   INT k=0;
   INT z1;
@@ -383,8 +373,7 @@ DOUBLE omegan4n(n)
  
 /*------------------------*/
  
-DOUBLE omegan5n(n)
-  INT n;
+DOUBLE omegan5n(INT n)
 {
   INT k=0;
   INT z1;
@@ -415,8 +404,7 @@ DOUBLE omegan5n(n)
  
 /*------------------------*/
  
-DOUBLE omegan6n(n)
-  INT n;
+DOUBLE omegan6n(INT n)
 {
   INT k=0;
   INT z1;
@@ -465,14 +453,14 @@ void cfield0_mcphas(double ** hcfr,double ** hcfi, double ** Jxr,double ** Jxi, 
                               double ** mo64r, double ** mo64i,
                               double ** mo66r, double ** mo66i,int * dj)
 {
-    KRISTALLFELD *kristallfeld,*init_iteration();
-    EWPROBLEM /* *ewproblem,*/ *setuphcf();
+    KRISTALLFELD *kristallfeld,*init_iteration(CHAR *filename,INT symmetrienr,char modus);
+    EWPROBLEM /* *ewproblem,*/ *setuphcf(SETUP *setup,EWPROBLEM *ewproblem,INT overwrite,KRISTALLFELD *kristallfeld,CHAR modus);
     SETUP        *setup;
     INT          m,n,symmetrienr;
     INT          i,j;
     DOUBLE       Bx,By,Bz,myB;
     ITERATION    *iteration;
-    MATRIX       *calc_Bmag();
+    MATRIX       *calc_Bmag(INT dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz );
 
 
     init_einheit();
@@ -606,17 +594,15 @@ kristallfeld,BKQ);
 /*----------------------------------------------------------------------------
                                   M A I N
 -----------------------------------------------------------------------------*/
-int main(argc,argv)
-    INT argc;
-    CHAR *argv[];
+int main(INT argc,CHAR **argv)
 {
-    KRISTALLFELD *kristallfeld,*init_iteration();
-    EWPROBLEM    *ewproblem,   *solve();
+    KRISTALLFELD *kristallfeld,*init_iteration(CHAR *filename,INT symmetrienr,char modus);
+    EWPROBLEM    *ewproblem,   *solve(SETUP *setup,EWPROBLEM *ewproblem,INT overwrite,KRISTALLFELD *kristallfeld,CHAR modus);
     SETUP        *setup;
     CHAR         c,cc,cs,input_modus=0,*filename,*name,*ion,*filenameB=NULL;
     INT          naechste_nachbarn,symmetrienr=-1,l,m,dimj,k,q,i;
     INT          einheitnr_in,einheitnr_out,ionennr;
-    DOUBLE       theta=-1,phi,Bx,By,Bz,temperatur,anf_temp=-1,end_temp=-1,a_tof();
+    DOUBLE       theta=-1,phi,Bx,By,Bz,temperatur,anf_temp=-1,end_temp=-1,a_tof(CHAR *string,INT anfang,INT ende);
     DOUBLE       dummy,lambda=-1,anf_feld=-1,end_feld=-1,temp=-1;
     INT          lesetheta=NEIN;
     FILE         *fptheta;
@@ -1194,7 +1180,7 @@ if( c=='r'||c=='R'||c=='s'||c=='S'||c=='M'||c=='m' ||c=='k'||c=='K'||
                                            SIN);
                             ewproblem    = solve(setup,(EWPROBLEM*)0,NEIN,
                                                  kristallfeld,SINGLEION);
-                            output(ewproblem,kristallfeld,SIN);
+                            output(setup,ewproblem,kristallfeld,SIN);
                             exit(0);
                             break;
  
@@ -1458,13 +1444,11 @@ if( c=='r'||c=='R'||c=='s'||c=='S'||c=='M'||c=='m' ||c=='k'||c=='K'||
  
  
 /*------------------------------------------------------------------------------
-                                 isreell()
+                                 isreell(INT  symmetrienr ,CHAR * ion )
 ------------------------------------------------------------------------------*/
-INT isreell( symmetrienr , ion ) /* testet ob alle Kristallfeldparameter     */
+INT isreell(INT  symmetrienr ,CHAR * ion ) /* testet ob alle Kristallfeldparameter     */
                                  /* fuer das Ion ion bei der  Symmetrienummer*/
                                  /* symmetrienr i.a. reell sind              */
-   INT  symmetrienr;
-   CHAR *ion;
 {
    INT ionennr,dimj,zwei_j;
  
@@ -1517,38 +1501,33 @@ INT isreell( symmetrienr , ion ) /* testet ob alle Kristallfeldparameter     */
 return (NEIN);
 }
 /*------------------------------------------------------------------------------
-                                 solve()
+                                 solve(SETUP *setup,EWPROBLEM *ewproblem,INT overwrite,KRISTALLFELD *kristallfeld,CHAR modus)
 ------------------------------------------------------------------------------*/
 /* Kristallfeldhamiltonian loesen */
-EWPROBLEM *solve(setup,ewproblem,overwrite,kristallfeld,modus)
-    SETUP        *setup;
-    EWPROBLEM    *ewproblem;
-    INT          overwrite;
-    KRISTALLFELD *kristallfeld;
-    CHAR modus;
+EWPROBLEM *solve(SETUP *setup,EWPROBLEM *ewproblem,INT overwrite,KRISTALLFELD *kristallfeld,CHAR modus)
 {
-    EWPROBLEM *diagonalisiere();
+    EWPROBLEM *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);
  
     ITERATION *iteration;
-    ITERATION *Vkq0();
-    ITERATION *Vkq1();
-    ITERATION *Vkq2();
-    ITERATION *Vkq3();
-    ITERATION *Vkq4();
-    ITERATION *Vkq5();
-    ITERATION *Vkq6();
-    ITERATION *Vkq7();
-    ITERATION *Vkq8();
+    ITERATION *Vkq0(ITERATION *iter,INT sym);
+    ITERATION *Vkq1(ITERATION *iter,INT sym);
+    ITERATION *Vkq2(ITERATION *iter,INT sym);
+    ITERATION *Vkq3(ITERATION *iter,INT sym);
+    ITERATION *Vkq4(ITERATION *iter,INT sym);
+    ITERATION *Vkq5(ITERATION *iter,INT sym);
+    ITERATION *Vkq6(ITERATION *iter,INT sym);
+    ITERATION *Vkq7(ITERATION *iter,INT sym);
+    ITERATION *Vkq8(ITERATION *iter,INT sym);
  
-    ITERATION *hamltn0();
-    ITERATION *hamltn1();
-    ITERATION *hamltn2();
-    ITERATION *hamltn3();
-    ITERATION *hamltn4();
-    ITERATION *hamltn5();
-    ITERATION *hamltn6();
-    ITERATION *hamltn7();
-    ITERATION *hamltn8();
+    ITERATION *hamltn0(ITERATION *i);
+    ITERATION *hamltn1(ITERATION *i);
+    ITERATION *hamltn2(ITERATION *i);
+    ITERATION *hamltn3(ITERATION *i);
+    ITERATION *hamltn4(ITERATION *i);
+    ITERATION *hamltn5(ITERATION *i);
+    ITERATION *hamltn6(ITERATION *i);
+    ITERATION *hamltn7(ITERATION *i);
+    ITERATION *hamltn8(ITERATION *i);
  
     int sym;
 /* printf("# symmetry: %i\n",sym);*/
@@ -1673,41 +1652,36 @@ EWPROBLEM *solve(setup,ewproblem,overwrite,kristallfeld,modus)
     return(  diagonalisiere( (EWPROBLEM*)0,HAMILTONIAN(iteration),NEIN,setup ));
 }
 /*------------------------------------------------------------------------------
-                                 setuphcf()
+                                 setuphcf(SETUP *setup,EWPROBLEM *ewproblem,INT overwrite,KRISTALLFELD *kristallfeld,CHAR modus)
 ------------------------------------------------------------------------------*/
 /* Kristallfeldhamiltonian loesen */
-EWPROBLEM *setuphcf(setup,ewproblem,overwrite,kristallfeld,modus)
-    SETUP        *setup;
-    EWPROBLEM    *ewproblem;
-    INT          overwrite;
-    KRISTALLFELD *kristallfeld;
-    CHAR modus;
+EWPROBLEM *setuphcf(SETUP *setup,EWPROBLEM *ewproblem,INT overwrite,KRISTALLFELD *kristallfeld,CHAR modus)
 {
     UNUSED_PARAMETER(setup);
     UNUSED_PARAMETER(overwrite);
 
-    EWPROBLEM *diagonalisiere();
+    EWPROBLEM *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);
  
     ITERATION *iteration;
-    ITERATION *Vkq0();
-    ITERATION *Vkq1();
-    ITERATION *Vkq2();
-    ITERATION *Vkq3();
-    ITERATION *Vkq4();
-    ITERATION *Vkq5();
-    ITERATION *Vkq6();
-    ITERATION *Vkq7();
-    ITERATION *Vkq8();
+    ITERATION *Vkq0(ITERATION *iter,INT sym);
+    ITERATION *Vkq1(ITERATION *iter,INT sym);
+    ITERATION *Vkq2(ITERATION *iter,INT sym);
+    ITERATION *Vkq3(ITERATION *iter,INT sym);
+    ITERATION *Vkq4(ITERATION *iter,INT sym);
+    ITERATION *Vkq5(ITERATION *iter,INT sym);
+    ITERATION *Vkq6(ITERATION *iter,INT sym);
+    ITERATION *Vkq7(ITERATION *iter,INT sym);
+    ITERATION *Vkq8(ITERATION *iter,INT sym);
  
-    ITERATION *hamltn0();
-    ITERATION *hamltn1();
-    ITERATION *hamltn2();
-    ITERATION *hamltn3();
-    ITERATION *hamltn4();
-    ITERATION *hamltn5();
-    ITERATION *hamltn6();
-    ITERATION *hamltn7();
-    ITERATION *hamltn8();
+    ITERATION *hamltn0(ITERATION *i);
+    ITERATION *hamltn1(ITERATION *i);
+    ITERATION *hamltn2(ITERATION *i);
+    ITERATION *hamltn3(ITERATION *i);
+    ITERATION *hamltn4(ITERATION *i);
+    ITERATION *hamltn5(ITERATION *i);
+    ITERATION *hamltn6(ITERATION *i);
+    ITERATION *hamltn7(ITERATION *i);
+    ITERATION *hamltn8(ITERATION *i);
  
     int sym;
  
@@ -1825,19 +1799,17 @@ EWPROBLEM *setuphcf(setup,ewproblem,overwrite,kristallfeld,modus)
 return ewproblem;
 }
 /*------------------------------------------------------------------------------
-                                 show_()
+                                 show_(EWPROBLEM *ew)
 ------------------------------------------------------------------------------*/
-void show_(ew)
-    EWPROBLEM *ew;
+void show_(EWPROBLEM *ew)
 {
     info_ewproblem( ew );
 }
  
 /*------------------------------------------------------------------------------
-                               hamltn0()
+                               hamltn0(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn0(i)
-    ITERATION *i;
+ITERATION *hamltn0(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -1922,7 +1894,7 @@ ITERATION *hamltn0(i)
        MATRIX  *dx,*dy,*dz;
        DOUBLE d1=sqrt(fabs(B1S(i))),d2=sqrt(fabs(B2S(i))),d3=sqrt(fabs(B3S(i))),jm,jp,s1=1.,s2=1.,s3=1.;
        INT dimj=DIMJ(i),l; 
-       if(B1S(i)<0) s1=-1.; if(B2S(i)<0) s2=-1.; if(B3S(i)<0) s3=-1.;
+       if(B1S(i)<0) {s1=-1.;} if(B2S(i)<0) {s2=-1.;} if(B3S(i)<0) {s3=-1.;}
        dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
        for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1); jp=JP(mj)*D(nj,mj+1);
@@ -1939,7 +1911,7 @@ ITERATION *hamltn0(i)
        MATRIX  *dxdx,*dydy,*dzdz;
        DOUBLE d1=sqrt(sqrt(fabs(B1SS(i)))),d2=sqrt(sqrt(fabs(B2SS(i)))),d3=sqrt(sqrt(fabs(B3SS(i)))),jm,jp,s1=1.,s2=1.,s3=1.;
        INT dimj=DIMJ(i),l; 
-       if(B1SS(i)<0) s1=-1.; if(B2SS(i)<0) s2=-1.; if(B3SS(i)<0) s3=-1.;
+       if(B1SS(i)<0) {s1=-1.;} if(B2SS(i)<0) {s2=-1.;} if(B3SS(i)<0) {s3=-1.;}
        dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
        dxdx = mx_alloc( dimj,dimj ); dydy = mx_alloc( dimj,dimj ); dzdz = mx_alloc( dimj,dimj );
        for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
@@ -1961,10 +1933,9 @@ ITERATION *hamltn0(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn1()
+                               hamltn1(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn1(i)
-    ITERATION *i;
+ITERATION *hamltn1(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2028,7 +1999,7 @@ ITERATION *hamltn1(i)
        MATRIX  *dx,*dy,*dz;
        DOUBLE d1=sqrt(fabs(B1S(i))),d2=sqrt(fabs(B2S(i))),d3=sqrt(fabs(B3S(i))),jm,jp,s1=1.,s2=1.,s3=1.;
        INT dimj=DIMJ(i),l; 
-       if(B1S(i)<0) s1=-1.; if(B2S(i)<0) s2=-1.; if(B3S(i)<0) s3=-1.;
+       if(B1S(i)<0) {s1=-1.;} if(B2S(i)<0) {s2=-1.;} if(B3S(i)<0) {s3=-1.;}
        dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
        for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1); jp=JP(mj)*D(nj,mj+1);
@@ -2044,7 +2015,7 @@ ITERATION *hamltn1(i)
        MATRIX  *dxdx,*dydy,*dzdz;
        DOUBLE d1=sqrt(sqrt(fabs(B1SS(i)))),d2=sqrt(sqrt(fabs(B2SS(i)))),d3=sqrt(sqrt(fabs(B3SS(i)))),jm,jp,s1=1.,s2=1.,s3=1.;
        INT dimj=DIMJ(i),l; 
-       if(B1SS(i)<0) s1=-1.; if(B2SS(i)<0) s2=-1.; if(B3SS(i)<0) s3=-1.;
+       if(B1SS(i)<0) {s1=-1.;} if(B2SS(i)<0) {s2=-1.;} if(B3SS(i)<0) {s3=-1.;}
        dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
        dxdx = mx_alloc( dimj,dimj ); dydy = mx_alloc( dimj,dimj ); dzdz = mx_alloc( dimj,dimj );
        for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
@@ -2064,10 +2035,9 @@ ITERATION *hamltn1(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn2()
+                               hamltn2(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn2(i)
-    ITERATION *i;
+ITERATION *hamltn2(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2150,10 +2120,9 @@ ITERATION *hamltn2(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn3()
+                               hamltn3(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn3(i)
-    ITERATION *i;
+ITERATION *hamltn3(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2208,10 +2177,9 @@ ITERATION *hamltn3(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn4()
+                               hamltn4(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn4(i)
-    ITERATION *i;
+ITERATION *hamltn4(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2268,10 +2236,9 @@ ITERATION *hamltn4(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn5()
+                               hamltn5(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn5(i)
-    ITERATION *i;
+ITERATION *hamltn5(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2327,10 +2294,9 @@ ITERATION *hamltn5(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn6()
+                               hamltn6(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn6(i)
-    ITERATION *i;
+ITERATION *hamltn6(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2392,10 +2358,9 @@ ITERATION *hamltn6(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn7()
+                               hamltn7(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn7(i)
-    ITERATION *i;
+ITERATION *hamltn7(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2444,10 +2409,9 @@ ITERATION *hamltn7(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                               hamltn8()
+                               hamltn8(ITERATION *i)
 ------------------------------------------------------------------------------*/
-ITERATION *hamltn8(i)
-    ITERATION *i;
+ITERATION *hamltn8(ITERATION *i)
 {
     STEVENS *s;
     MATRIX  *h,*mag;
@@ -2492,14 +2456,12 @@ ITERATION *hamltn8(i)
     return( i );
 }
 /*------------------------------------------------------------------------------
-                                 Vkq0()
+                                 Vkq0(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq0(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq0(ITERATION *iter,INT sym)
 {
     INT i ;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -2576,14 +2538,12 @@ ITERATION *Vkq0(iter,sym)
 }
  
 /*------------------------------------------------------------------------------
-                                 Vkq1()
+                                 Vkq1(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq1(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq1(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -2645,14 +2605,12 @@ ITERATION *Vkq1(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                                 Vkq2()
+                                 Vkq2(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq2(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq2(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -2709,14 +2667,12 @@ ITERATION *Vkq2(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                                 Vkq3()
+                                 Vkq3(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq3(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq3(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -2770,14 +2726,12 @@ ITERATION *Vkq3(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                                 Vkq4()
+                                 Vkq4(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq4(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq4(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -2830,14 +2784,12 @@ ITERATION *Vkq4(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                                 Vkq5()
+                                 Vkq5(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq5(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq5(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -2894,14 +2846,12 @@ ITERATION *Vkq5(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                                 Vkq6()
+                                 Vkq6(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq6(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq6(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -2954,14 +2904,12 @@ ITERATION *Vkq6(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                                Vkq7()
+                                Vkq7(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq7(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq7(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -3012,14 +2960,12 @@ ITERATION *Vkq7(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                                 Vkq8()
+                                 Vkq8(ITERATION *iter,INT sym)
 ------------------------------------------------------------------------------*/
-ITERATION *Vkq8(iter,sym)
-    ITERATION *iter;
-    INT       sym;
+ITERATION *Vkq8(ITERATION *iter,INT sym)
 {
     INT i;
-    ITERATION *auswahlregel();
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
  
     /*                                  */
     /*  Q_R   = Q(R)                    */
@@ -3076,19 +3022,16 @@ ITERATION *Vkq8(iter,sym)
     return( auswahlregel(iter,sym) );
 }
 /*------------------------------------------------------------------------------
-                             init_iteration()
+                             init_iteration(CHAR *filename,INT symmetrienr,char modus)
 ------------------------------------------------------------------------------*/
-KRISTALLFELD *init_iteration(filename,symmetrienr,modus) /* [1] */
-    CHAR *filename;
-    INT  symmetrienr;
-    char  modus;
+KRISTALLFELD *init_iteration(CHAR *filename,INT symmetrienr,char modus) /* [1] */
 {
  
-    UMGEBUNG     *umgebung ,   *read_nn();
-    ITERATION    *iteration,   *init_umgebung();
-    ITERATION    *read_Vkq(),  *read_Bkq() ,*read_Akq();
-    ITERATION    *read_Wkq(),  *read_xW();
-    ITERATION    *read_Dkq(),  *read_Lkq();
+    UMGEBUNG     *umgebung ,   *read_nn(CHAR *name);
+    ITERATION    *iteration,   *init_umgebung(CHAR     *name,UMGEBUNG *umgebung);
+    ITERATION    *read_Vkq(CHAR *name, INT vsymmetrienr_vor),  *read_Bkq(CHAR *name, INT vsymmetrienr_vor) ,*read_Akq(CHAR *name, INT vsymmetrienr_vor);
+    ITERATION    *read_Wkq(CHAR *name, INT vsymmetrienr_vor),  *read_xW(CHAR *name, INT vsymmetrienr_vor);
+    ITERATION    *read_Dkq(CHAR *name, INT vsymmetrienr_vor),  *read_Lkq(CHAR *name, INT vsymmetrienr_vor);
     KRISTALLFELD *kristallfeld;
  
     switch(modus){
@@ -3134,11 +3077,9 @@ KRISTALLFELD *init_iteration(filename,symmetrienr,modus) /* [1] */
  
 }
 /*------------------------------------------------------------------------------
-                          auswahlregel()
+                          auswahlregel(ITERATION *iter,INT symmetrienr)
 ------------------------------------------------------------------------------*/
-ITERATION *auswahlregel(iter,symmetrienr)
-        ITERATION *iter;
-        INT       symmetrienr;
+ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr)
 {
     INT zwei_j;
     zwei_j = DIMJ(iter) - 1;
@@ -3276,21 +3217,21 @@ ITERATION *auswahlregel(iter,symmetrienr)
     return( iter );
 }
 /*------------------------------------------------------------------------------
-                          init_umgebung()
+                          init_umgebung(CHAR     *name,UMGEBUNG *umgebung)
 ------------------------------------------------------------------------------*/
-ITERATION *init_umgebung(name,umgebung )  /* Umgebungsionen fuer Iteration    */
-    CHAR     *name;                       /* vorbereiten                      */
-    UMGEBUNG *umgebung;                   /* Stevensoperatoren initialisieren */
+ITERATION *init_umgebung(CHAR     *name,UMGEBUNG *umgebung )  /* Umgebungsionen fuer Iteration    */
+         /* vorbereiten                      */
+                 /* Stevensoperatoren initialisieren */
 {
  
-    ITERATION *iteration,*iter_alloc();
-    UMGEBUNG  *trans_R_sphaerisch();
-    UMGEBUNG  *trans_B_kartesisch();
-    UMGEBUNG  *normiere_laengen();
-    STEVENS   *calc_Pkq();
-    MATRIX    *calc_Bmag();
-    KOMPLEX   *Clm();
-    DOUBLE    pow_(),R,theta_R,phi_R,Bx,By,Bz,gj,myB;
+    ITERATION *iteration,*iter_alloc(INT dimj,INT anz_nn);
+    UMGEBUNG  *trans_R_sphaerisch(CHAR     *name,UMGEBUNG *umgebung);
+    UMGEBUNG  *trans_B_kartesisch(CHAR     *name,UMGEBUNG *umgebung);
+    UMGEBUNG  *normiere_laengen(UMGEBUNG *umgebung);
+    STEVENS   *calc_Pkq(INT dimj);
+    MATRIX    *calc_Bmag(INT dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz );
+    KOMPLEX   *Clm(INT l,INT m,DOUBLE theta,DOUBLE phi);
+    DOUBLE    pow_(DOUBLE x,INT n) ,R,theta_R,phi_R,Bx,By,Bz,gj,myB;
     INT       anz_nn,i,_e4f,dimj;
  
  
@@ -3426,13 +3367,13 @@ ITERATION *init_umgebung(name,umgebung )  /* Umgebungsionen fuer Iteration    */
     return( iteration );
 }
 /*------------------------------------------------------------------------------
-                                iter_alloc()
+                                iter_alloc(INT dimj,INT anz_nn)
 ------------------------------------------------------------------------------*/
-ITERATION *iter_alloc(dimj,anz_nn) /* Speicher fuer Struktur  ITERATION*/
-    INT dimj,anz_nn;               /* holen                            */
+ITERATION *iter_alloc(INT dimj,INT anz_nn) /* Speicher fuer Struktur  ITERATION*/
+               /* holen                            */
 {
     ITERATION  *iteration_i;
-    MATRIX     *mx_alloc();
+    MATRIX     *mx_alloc(INT anz_ze,INT anz_sp);
 
  
     iteration_i = ITERATION_ALLOC(1);
@@ -3532,14 +3473,13 @@ ITERATION *iter_alloc(dimj,anz_nn) /* Speicher fuer Struktur  ITERATION*/
     return( iteration_i );
 }
 /*------------------------------------------------------------------------------
-                                    calc_Bmag()
+                                    calc_Bmag(INT dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz )
 ------------------------------------------------------------------------------*/
-MATRIX *calc_Bmag( dimj,gj,myB,Bx,By,Bz ) /*magnetischen Hamiltonian */
-    INT    dimj;                          /* Hmag ausrechnen         */
-    DOUBLE gj,myB,Bx,By,Bz;
+MATRIX *calc_Bmag(INT dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz ) /*magnetischen Hamiltonian */
+                              /* Hmag ausrechnen         */
 {
     INT    m,n;
-    MATRIX *bmag,*mx_alloc();
+    MATRIX *bmag,*mx_alloc(INT anz_ze,INT anz_sp);
     DOUBLE jm,jp;
  
     #include "define_j.c"          /* mj,J2,J+,... definieren */
@@ -3556,14 +3496,13 @@ MATRIX *calc_Bmag( dimj,gj,myB,Bx,By,Bz ) /*magnetischen Hamiltonian */
     return( bmag );
 }
 /*------------------------------------------------------------------------------
-                                    calc_Bmag_D()
+                                    calc_Bmag_D(INT   dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE Dx2,DOUBLE Dy2,DOUBLE Dz2,DOUBLE Dx4,DOUBLE Dy4,DOUBLE Dz4 )
 ------------------------------------------------------------------------------*/
-MATRIX *calc_Bmag_D( dimj,gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4 ) /*magnetischen Hamiltonian */
-    INT    dimj;                                     /* Hmag = - gJ muB J.B + simple anisotropy  H= + Dx2 Jx ^ 2+ Dy2 Jy ^ 2+ Dz2 Jz ^ 2      */
-    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4;
+MATRIX *calc_Bmag_D(INT   dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE Dx2,DOUBLE Dy2,DOUBLE Dz2,DOUBLE Dx4,DOUBLE Dy4,DOUBLE Dz4 ) /*magnetischen Hamiltonian */
+                                           /* Hmag = - gJ muB J.B + simple anisotropy  H= + Dx2 Jx ^ 2+ Dy2 Jy ^ 2+ Dz2 Jz ^ 2      */
 {
     INT    m,n;
-    MATRIX *bmag,*mx_alloc();
+    MATRIX *bmag,*mx_alloc(INT anz_ze,INT anz_sp);
     DOUBLE jm,jp;
    /* DOUBLE jx2,jy2,jx4,jy4;*/
 
@@ -3593,12 +3532,9 @@ for( n=dimj ; n>=1 ; --n)
 }
 
 /*------------------------------------------------------------------------------
-                                    calcBmol()
+                                    calcBmol(INT  dimj,MATRIX *bmag,DOUBLE gjs,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz)
 ------------------------------------------------------------------------------*/
-MATRIX *calcBmol( dimj,bmag,gjs,myB,Bx,By,Bz )   /* gjs = 2(gJ-1) */
-    INT    dimj;
-    MATRIX *bmag;
-    DOUBLE gjs,myB,Bx,By,Bz;
+MATRIX *calcBmol(INT  dimj,MATRIX *bmag,DOUBLE gjs,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz )   /* gjs = 2(gJ-1) */
 {
     INT    m,n;
     DOUBLE jm,jp;
@@ -3616,12 +3552,9 @@ MATRIX *calcBmol( dimj,bmag,gjs,myB,Bx,By,Bz )   /* gjs = 2(gJ-1) */
     return( bmag );
 }
 /*------------------------------------------------------------------------------
-                                    calc_iBmag()
+                                    calc_iBmag(MATRIX * bmag,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE Bxmol,DOUBLE Bymol,DOUBLE Bzmol,DOUBLE Dx2,DOUBLE Dy2,DOUBLE Dz2 ,DOUBLE Dx4,DOUBLE Dy4,DOUBLE Dz4)
 ------------------------------------------------------------------------------*/
-MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 ,Dx4,Dy4,Dz4)
-    MATRIX *bmag;
-    DOUBLE gj,myB,Bx,By,Bz,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4;
-    DOUBLE Bxmol,Bymol,Bzmol;
+MATRIX *calc_iBmag(MATRIX * bmag,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE Bxmol,DOUBLE Bymol,DOUBLE Bzmol,DOUBLE Dx2,DOUBLE Dy2,DOUBLE Dz2 ,DOUBLE Dx4,DOUBLE Dy4,DOUBLE Dz4)
 {
     INT    m,n,dimj;
     DOUBLE jm,jp;
@@ -3667,10 +3600,9 @@ MATRIX *calc_iBmag( bmag,gj,myB,Bx,By,Bz,Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2 ,Dx4,Dy4,
     return( bmag );     
 }
 /*------------------------------------------------------------------------------
-                            normiere_laengen()
+                            normiere_laengen(UMGEBUNG *umgebung)
 ------------------------------------------------------------------------------*/
-UMGEBUNG *normiere_laengen(umgebung) /* Laengen auf Bohrschen Radius normieren*/
-    UMGEBUNG *umgebung;
+UMGEBUNG *normiere_laengen(UMGEBUNG *umgebung) /* Laengen auf Bohrschen Radius normieren*/
 {
     INT i;
  
@@ -3680,14 +3612,14 @@ UMGEBUNG *normiere_laengen(umgebung) /* Laengen auf Bohrschen Radius normieren*/
     return( umgebung );
 }
 /*------------------------------------------------------------------------------
-                            trans_R_sphaerisch()
+                            trans_R_sphaerisch(CHAR     *name,UMGEBUNG *umgebung)
 ------------------------------------------------------------------------------*/
-UMGEBUNG*trans_R_sphaerisch(name,umgebung)/*Ortskoordinaten der Umgebungsionen*/
-    CHAR     *name;                      /* ins sphaerische Koordinatensystem */
-    UMGEBUNG *umgebung;                  /* transformieren                    */
+UMGEBUNG*trans_R_sphaerisch(CHAR     *name,UMGEBUNG *umgebung)/*Ortskoordinaten der Umgebungsionen*/
+                     /* ins sphaerische Koordinatensystem */
+                 /* transformieren                    */
 {
     INT anz_nn,i;
-    SPHAERE *sphaere,*sphaerisch();
+    SPHAERE *sphaere,*sphaerisch(CHAR   *name,INT ionnr,DOUBLE x,DOUBLE y,DOUBLE z);
     DOUBLE  x,y,z;
  
     if( MODUS(umgebung)!= 'r' )   return( umgebung );
@@ -3709,16 +3641,15 @@ UMGEBUNG*trans_R_sphaerisch(name,umgebung)/*Ortskoordinaten der Umgebungsionen*/
     return( umgebung );
 }
 /*------------------------------------------------------------------------------
-                            trans_B_kartesisch()
+                            trans_B_kartesisch(CHAR     *name,UMGEBUNG *umgebung)
 ------------------------------------------------------------------------------*/
-UMGEBUNG*trans_B_kartesisch(name,umgebung)/*Magnetfeld ins kartesische       */
-    CHAR     *name;                      /* Koordinatensystem transformieren */
-    UMGEBUNG *umgebung;
+UMGEBUNG*trans_B_kartesisch(CHAR     *name,UMGEBUNG *umgebung)/*Magnetfeld ins kartesische       */
+                         /* Koordinatensystem transformieren */
 {
     UNUSED_PARAMETER(name);
     
     DOUBLE  h,theta,phi;
-    DOUBLE  sin(),cos();
+    DOUBLE  sin(double x),cos(double x);
  
     if( MODUS(umgebung) == 'r' )   return( umgebung );
  
@@ -3735,17 +3666,15 @@ UMGEBUNG*trans_B_kartesisch(name,umgebung)/*Magnetfeld ins kartesische       */
     return( umgebung );
 }
 /*------------------------------------------------------------------------------
-                               sphaerisch()
+                               sphaerisch(CHAR   *name,INT ionnr,DOUBLE x,DOUBLE y,DOUBLE z)
 ------------------------------------------------------------------------------*/
-SPHAERE *sphaerisch(name,ionnr,x,y,z)  /* ins sphaerische Koordinatensystem */
-    CHAR   *name;                      /* transformieren                    */
-    INT    ionnr;
-    DOUBLE x,y,z;
+SPHAERE *sphaerisch(CHAR   *name,INT ionnr,DOUBLE x,DOUBLE y,DOUBLE z)  /* ins sphaerische Koordinatensystem */
+                     /* transformieren                    */
 {
     SPHAERE *sphaere;
     DOUBLE  r,theta,phi;
     DOUBLE  sinphi,cosphi;
-    DOUBLE  sqrt(),acos(),atan();
+    DOUBLE  sqrt(double x),acos(double x),atan(double x);
  
  
     r     = sqrt( x*x + y*y + z*z );
@@ -3809,16 +3738,15 @@ void info_befehle()     /* informationen ueber moegliche Befehle  ausgeben */
  
 }
 /*------------------------------------------------------------------------------
-                              info_magnetfeld()
+                              info_magnetfeld(INT  dimj,DOUBLE Bx,DOUBLE By,DOUBLE Bz)
 ------------------------------------------------------------------------------*/
-void info_magnetfeld( dimj,Bx,By,Bz)  /* informiere ueber (Jn|Hmag|mJ)   */
-    INT    dimj;                 /* Hmag in Einheiten von gJ*myB    */
-    DOUBLE Bx,By,Bz;
+void info_magnetfeld(INT  dimj,DOUBLE Bx,DOUBLE By,DOUBLE Bz)  /* informiere ueber (Jn|Hmag|mJ)   */
+                 /* Hmag in Einheiten von gJ*myB    */
 {
     CHAR *name = "results/magnfeld.info";
  
-    FILE   *fp,*fopen();
-    MATRIX *bmag,*calc_Bmag();
+    FILE   *fp,*fopen(const char * filename,const char * mode);
+    MATRIX *bmag,*calc_Bmag(INT dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz );
     DOUBLE gj,myB;
     INT   m,n;
     CHAR *t01,*t02,*t03,*t04,*t05,*t06;
@@ -3870,13 +3798,12 @@ void info_magnetfeld( dimj,Bx,By,Bz)  /* informiere ueber (Jn|Hmag|mJ)   */
     fclose(fp);
 }
 /*------------------------------------------------------------------------------
-                               info_symmetrien()
+                               info_symmetrien(CHAR *name)
 ------------------------------------------------------------------------------*/
-void info_symmetrien(name)  /* Info ueber implementierte Symmetrien ausgeben */
-    CHAR *name;
+void info_symmetrien(CHAR *name)  /* Info ueber implementierte Symmetrien ausgeben */
 {
  
-    FILE *fp,*fopen();
+    FILE *fp,*fopen(const char * filename,const char * mode);
  
     clearscreen;
     printf("Information given in the File %s.\n",name);
@@ -3924,7 +3851,7 @@ void info_symmetrien(name)  /* Info ueber implementierte Symmetrien ausgeben */
 void info_konstanten()   /* Liste der benutzten Naturkonstanten */
 {
     CHAR *name = "results/konstntn.info";
-    FILE *fp,*fopen();
+    FILE *fp,*fopen(const char * filename,const char * mode);
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
     CHAR *t11,*t12,*t13,*t14,*t15;
     CHAR *s01,*s02,*s03,*s04,*s05,*s06,*s07;
@@ -3985,17 +3912,14 @@ void info_konstanten()   /* Liste der benutzten Naturkonstanten */
     fclose(fp);
 }
 /*----------------------------------------------------------------------------
-                               info_Vlm()
+                               info_Vlm(CHAR *filename,INT symmetrienr,CHAR *einheit)
 -----------------------------------------------------------------------------*/
-void info_Vlm(filename,symmetrienr,einheit)
-    CHAR *filename;
-    INT  symmetrienr;
-    CHAR *einheit;
+void info_Vlm(CHAR *filename,INT symmetrienr,CHAR *einheit)
 {
     CHAR *name = "results/Vlm.info";
-    FILE *fp,*fopen();
+    FILE *fp,*fopen(const char * filename,const char * mode);
     KOMPLEX      *z;
-    KRISTALLFELD *kf,*init_iteration();
+    KRISTALLFELD *kf,*init_iteration(CHAR *filename,INT symmetrienr,char modus);
 /*  ITERATION    *iteration; */
     DOUBLE       renorm = E0_EINHEIT;
     INT          s;
@@ -4141,7 +4065,7 @@ void info_Vlm(filename,symmetrienr,einheit)
 void info_epsilonkq()   /* Liste der Faktoren epsilonkq */
 {
     CHAR *name = "results/epsilonkq.info";
-    FILE *fp,*fopen();
+    FILE *fp,*fopen(const char * filename,const char * mode);
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
     CHAR *t11,*t12,*t13,*t14,*t15,*t16,*t17,*t18,*t19,*t20;
     CHAR *t21,*t22,*t23,*t24,*t25,*t26,*t27,*t28,*t29,*t30;
@@ -4350,7 +4274,7 @@ void info_epsilonkq()   /* Liste der Faktoren epsilonkq */
 void info_hamilton() /* Liste der Auswahlregeln fuer die Vkq im Hamiltonian*/
 {
     CHAR *name = "results/hamilton.info";
-    FILE *fp,*fopen();
+    FILE *fp,*fopen(const char * filename,const char * mode);
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
     CHAR *t11,*t12,*t13,*t14,*t15,*t16,*t17,*t18,*t19,*t20;
     CHAR *t21,*t22,*t23,*t24,*t25,*t26,*t27,*t28,*t29,*t30;
@@ -4433,13 +4357,12 @@ t32 = "-----------------------------------------------------------------------";
 }
  
 /*----------------------------------------------------------------------------
-                               info_omegakq()
+                               info_omegakq(INT k,INT q)
 -----------------------------------------------------------------------------*/
-void info_omegakq(k,q)   /* Liste der Faktoren omegakq */
-INT k,q;
+void info_omegakq(INT k,INT q)   /* Liste der Faktoren omegakq */
 {
     CHAR *name = "results/omegakq.info";
-    FILE *fp,*fopen();
+    FILE *fp,*fopen(const char * filename,const char * mode);
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
     CHAR *t11,*t12,*t13,*t14,*t15,*t16,*t17,*t18,*t19,*t20;
     CHAR *t21,*t22,*t23,*t24,*t25,*t26,*t27,*t28,*t29,*t30;
@@ -4447,13 +4370,13 @@ INT k,q;
     CHAR *t41,*t42,*t43,*t44,*t45,*t46,*t47,*t48,*t49,*t50;
     CHAR *t51,*t52,*t53,*t54,*t55;
     CHAR *s01,*s02,*s03,*s04,*s05,*s06,*s07;
-    DOUBLE omegan0n();
-    DOUBLE omegan1n();
-    DOUBLE omegan2n();
-    DOUBLE omegan3n();
-    DOUBLE omegan4n();
-    DOUBLE omegan5n();
-    DOUBLE omegan6n(),z;
+    DOUBLE omegan0n(INT n);
+    DOUBLE omegan1n(INT n);
+    DOUBLE omegan2n(INT n);
+    DOUBLE omegan3n(INT n);
+    DOUBLE omegan4n(INT n);
+    DOUBLE omegan5n(INT n);
+    DOUBLE omegan6n(INT n),z;
  
    switch( ABS( k-ABS(q) ) ){
        case 0 : z=omegan0n(ABS(q));break;
@@ -4707,10 +4630,9 @@ void c_single_error()   /* Eingabefehler beim Versuch von  -c -s */
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                           i_kq_error()
+                           i_kq_error(CHAR c)
 ------------------------------------------------------------------------------*/
-void i_kq_error(c)   /* Eingabefehler beim Versuch von  -i e 'c' */
-  CHAR c;
+void i_kq_error(CHAR c)   /* Eingabefehler beim Versuch von  -i e 'c' */
 {
    clearscreen;
    printf("\n");
@@ -4725,10 +4647,9 @@ void i_kq_error(c)   /* Eingabefehler beim Versuch von  -i e 'c' */
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                           r_kq_error()
+                           r_kq_error(CHAR c,CHAR cs)
 ------------------------------------------------------------------------------*/
-void r_kq_error(c,cs)   /* Eingabefehler beim Versuch von  -r -'c', -s -'c' */
-  CHAR c,cs;
+void r_kq_error(CHAR c,CHAR cs)   /* Eingabefehler beim Versuch von  -r -'c', -s -'c' */
 {
     CHAR *s;
  
@@ -4785,10 +4706,9 @@ printf("%s -m[oment] -%c[W ] anf_feld end_feld temp\n",s,cs);
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                           c_kq_error()
+                           c_kq_error(CHAR c)
 ------------------------------------------------------------------------------*/
-void c_kq_error(c)   /* Eingabefehler beim Versuch von  -c -'c' */
-   CHAR c;
+void c_kq_error(CHAR c)   /* Eingabefehler beim Versuch von  -c -'c' */
 {
     INT  i;
 /*    CHAR *s="-c[reate] -c[kq]";*/
@@ -4831,7 +4751,7 @@ void c_kq_error(c)   /* Eingabefehler beim Versuch von  -c -'c' */
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                           create_error()
+			    create_error()
 ------------------------------------------------------------------------------*/
 void create_error()   /* Eingabefehler beim Versuch von  -c */
 {
@@ -4852,11 +4772,9 @@ void create_error()   /* Eingabefehler beim Versuch von  -c */
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                                 leftcopy()
+                                 leftcopy(CHAR *string,INT bufferlen)
 ------------------------------------------------------------------------------*/
-CHAR *leftcopy(string,bufferlen)
-    CHAR *string;
-    INT  bufferlen;
+CHAR *leftcopy(CHAR *string,INT bufferlen)
 {
     CHAR *buffer;
     INT  i,len;
@@ -4873,22 +4791,18 @@ CHAR *leftcopy(string,bufferlen)
     return( buffer );
 }
 /*------------------------------------------------------------------------------
-                                  strlen_own()
+                                  strlen_own(CHAR *s)
 ------------------------------------------------------------------------------*/
-INT strlen_own(s)
-    CHAR *s;
+INT strlen_own(CHAR *s)
 {
     INT len=0;
     while(    *(s+len++) !='\0'    );
     return(--len);
 }
 /*------------------------------------------------------------------------------
-                               read_error()
+                               read_error(INT nr,FILE *fp,CHAR *name)
 ------------------------------------------------------------------------------*/
-void read_error(nr,fp,name) /* Eingabefehler beim Versuch von  -r -s*/
-    INT nr;
-    FILE *fp;
-    CHAR *name;
+void read_error(INT nr,FILE *fp,CHAR *name) /* Eingabefehler beim Versuch von  -r -s*/
 {
     printf("\n");
     clearscreen;
@@ -5175,12 +5089,9 @@ exit(1);
  
 }
 /*------------------------------------------------------------------------------
-                               Bkq_error()
+                               Bkq_error(CHAR * filename,CHAR *ion,INT  symmetrienr)
 ------------------------------------------------------------------------------*/
-void Bkq_error( filename,ion,symmetrienr )
-   CHAR *filename;
-   CHAR *ion;
-   INT  symmetrienr;
+void Bkq_error(CHAR * filename,CHAR *ion,INT  symmetrienr )
 {
   clearscreen;
   printf("Error in %s !\n",filename);
@@ -5194,11 +5105,9 @@ void Bkq_error( filename,ion,symmetrienr )
   exit(1);
 }
 /*------------------------------------------------------------------------------
-                               Bkq_tip()
+                               Bkq_tip(CHAR * ion,INT symmetrienr)
 ------------------------------------------------------------------------------*/
-void Bkq_tip( ion,symmetrienr )
-   CHAR *ion;
-   INT  symmetrienr;
+void Bkq_tip(CHAR * ion,INT symmetrienr )
 {
   clearscreen;
   printf("The Ion %s is in gerneral for the ",ion);
@@ -5237,10 +5146,9 @@ void i_error() /* Eingabefehler beim Versuch von  -i */
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                               r_error()
+                               r_error(CHAR c)
 ------------------------------------------------------------------------------*/
-void r_error(c) /* Eingabefehler beim Versuch von  -r,-s */
-CHAR c;
+void r_error(CHAR c) /* Eingabefehler beim Versuch von  -r,-s */
 {
  CHAR *s;
     clearscreen;
@@ -5350,14 +5258,9 @@ if(c=='k'||c=='K'){
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                              isinlimits()
+                              isinlimits(FILE *fp,CHAR *filename,INT  nrion,DOUBLE x1,DOUBLE x2,DOUBLE x3,CHAR modus)
 ------------------------------------------------------------------------------*/
-void isinlimits(fp,filename,nrion,x1,x2,x3,modus) /* x1,x2,x3 in seinen Grenzen ? */
-    FILE *fp;
-    CHAR *filename;
-    INT  nrion;
-    DOUBLE x1,x2,x3;
-    CHAR modus;
+void isinlimits(FILE *fp,CHAR *filename,INT  nrion,DOUBLE x1,DOUBLE x2,DOUBLE x3,CHAR modus) /* x1,x2,x3 in seinen Grenzen ? */
 {
     INT i=0;
  
@@ -5375,12 +5278,9 @@ void isinlimits(fp,filename,nrion,x1,x2,x3,modus) /* x1,x2,x3 in seinen Grenzen 
     if( i!=0 ) { fclose(fp);exit(1);}
 }
 /*------------------------------------------------------------------------------
-                              coor_error()
+                              coor_error(FILE *fp,CHAR *filename,INT nrion,INT errornr)
 ------------------------------------------------------------------------------*/
-INT coor_error(fp,filename,nrion,errornr)
-    FILE *fp;
-    CHAR *filename;
-    INT  nrion,errornr;
+INT coor_error(FILE *fp,CHAR *filename,INT nrion,INT errornr)
 {
     UNUSED_PARAMETER(fp);
  
@@ -5433,10 +5333,10 @@ INT coor_error(fp,filename,nrion,errornr)
     return(1);
 }
 /*------------------------------------------------------------------------------
-                              isimplementiert()
+                              isimplementiert(CHAR *ion)
 ------------------------------------------------------------------------------*/
-INT isimplementiert(ion)/* fragt,ob ion implementiert ,falls nein exit*/
-    CHAR *ion;           /* falls ja : nummer des implementierten ions */
+INT isimplementiert(CHAR *ion)/* fragt,ob ion implementiert ,falls nein exit*/
+             /* falls ja : nummer des implementierten ions */
 {
     INT i;
  
@@ -5455,13 +5355,11 @@ INT isimplementiert(ion)/* fragt,ob ion implementiert ,falls nein exit*/
     exit(1);
 }
 /*------------------------------------------------------------------------------
-                                  a_toi()
+                                  a_toi(CHAR *string,INT anfang,INT ende)
 ------------------------------------------------------------------------------*/
-INT a_toi(string,anfang,ende) /* Integer aus String bestimmen */
-    CHAR *string;
-    INT  anfang,ende;
+INT a_toi(CHAR *string,INT anfang,INT ende) /* Integer aus String bestimmen */
 {
-    CHAR *buffer,*a_tos();
+    CHAR *buffer,*a_tos(CHAR *string,INT anfang,INT ende);
     INT  zahl;
  
     buffer = a_tos( string,anfang,ende);
@@ -5471,29 +5369,25 @@ INT a_toi(string,anfang,ende) /* Integer aus String bestimmen */
     return( zahl );
 }
 /*------------------------------------------------------------------------------
-                                  a_tof()
+                                  a_tof(CHAR *string,INT anfang,INT ende)
 ------------------------------------------------------------------------------*/
-DOUBLE a_tof(string,anfang,ende) /* Reelle Zahl im String bestimmen */
-    CHAR *string;
-    INT  anfang,ende;
+DOUBLE a_tof(CHAR *string,INT anfang,INT ende) /* Reelle Zahl im String bestimmen */
 {
-    CHAR   *buffer,*a_tos();
+    CHAR   *buffer,*a_tos(CHAR *string,INT anfang,INT ende);
     
     DOUBLE zahl;
  
  
-    buffer = a_tos( string,anfang,ende);
+    buffer = a_tos(string,anfang,ende);
     zahl   = atof( buffer );
     free_( buffer );
  
     return( zahl );
 }
 /*------------------------------------------------------------------------------
-                                  a_tos()
+                                  a_tos(CHAR *string,INT anfang,INT ende)
 ------------------------------------------------------------------------------*/
-CHAR  *a_tos(string,anfang,ende)
-    CHAR *string;
-    INT  anfang,ende;
+CHAR  *a_tos(CHAR *string,INT anfang,INT ende)
 {
     CHAR   *buffer;
     INT    i;
@@ -5506,14 +5400,12 @@ CHAR  *a_tos(string,anfang,ende)
     return( buffer );
 }
 /*------------------------------------------------------------------------------
-                                  equal()
+                                  equal(CHAR * s ,CHAR * t)
 ------------------------------------------------------------------------------*/
-INT equal( s , t ) /* enthaelt String t den String s ?*/
-    CHAR *s;
-    CHAR *t;
+INT equal(CHAR * s ,CHAR * t ) /* enthaelt String t den String s ?*/
 {
     INT  i,len;
-    CHAR up();
+    CHAR up(CHAR c);
  
  
     len = strlen_own(s);
@@ -5527,10 +5419,9 @@ INT equal( s , t ) /* enthaelt String t den String s ?*/
     return(1);
 }
 /*------------------------------------------------------------------------------
-                                    up()
+                                    up(CHAR c)
 ------------------------------------------------------------------------------*/
-CHAR up( c )
-    CHAR c;
+CHAR up(CHAR c )
 {
     if(isupper(c) || isdigit(c) || c=='+'|| c=='-' )  return(c);
  

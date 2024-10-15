@@ -66,6 +66,11 @@ return 0;
 // print user defined column headers
 void inimcdis::print_usrdefcolhead(FILE *fout)
 {fprintf(fout,"#");
+ for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%i%*s",i,(int)strlen(colhead[colcod[usrdefcols[i]]])-1,"");
+ for(int i=usrdefcols[0]+1;i<=usrdefcols[0]+3;++i)fprintf(fout,"%i ",i);
+ for(int i=usrdefcols[0]+4;i<=usrdefcols[0]+5;++i)fprintf(fout,"   %i   ",i);
+ for(int i=usrdefcols[0]+6;i<=usrdefcols[0]+8;++i)fprintf(fout,"               %i   ",i);
+fprintf(fout,"\n#");
  for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s",colhead[colcod[usrdefcols[i]]]);
 }
 

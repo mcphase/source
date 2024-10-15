@@ -583,12 +583,12 @@ fprintf(fout,"    <geometry name=\"ions\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"show\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
  
-  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
-   for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
-    for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
+  for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<nomore);++i1){
+   for (j1=int(ijkmin(2)-1.0);(j1<=int(ijkmax(2)+1))&(n<nomore);++j1){
+    for (k1=int(ijkmin(3)-1.0);(k1<=int(ijkmax(3)+1))&(n<nomore);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
-         for(l=1;l<=nofatoms&n<nomore;++l)
+      for (i=1;(i<=nofa)&(n<nomore);++i){for (j=1;(j<=nofb)&(n<nomore);++j){for (k=1;(k<=nofc)&(n<nomore);++k){
+         for(l=1;(l<=nofatoms)&(n<nomore);++l)
 	 {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
             // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
             // and refer to the same atom
@@ -639,12 +639,12 @@ fprintf(fout,"          <p>  %g       %g       %g </p>\n",myround(dd(1)+xyz(1)),
 fprintf(fout,"          <thickness>3.0</thickness>\n");
 fprintf(fout,"        </points>\n");
 fprintf(fout,"        <colors type=\"rgb\">\n");n=0;
-  for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
-   for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
-    for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
+  for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<nomore);++i1){
+   for (j1=int(ijkmin(2)-1.0);(j1<=int(ijkmax(2)+1))&(n<nomore);++j1){
+    for (k1=int(ijkmin(3)-1.0);(k1<=int(ijkmax(3)+1))&(n<nomore);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
-         for(l=1;l<=nofatoms&n<nomore;++l)
+      for (i=1;(i<=nofa)&(n<nomore);++i){for (j=1;(j<=nofb)&(n<nomore);++j){for (k=1;(k<=nofc)&(n<nomore);++k){
+         for(l=1;(l<=nofatoms)&(n<nomore);++l)
 	   {dd=pos(i,j,k,l,cs); int showdd=1;// the following is to remove atoms too close to
             // each other (because e.g. phonon and so1ion modules 'sit' at nearly the same position 
             // and refer to the same atom
@@ -685,12 +685,12 @@ fprintf(fout,"    <geometry name=\"magnetic moments\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"hide\" color=\"show\">\n");
 fprintf(fout,"        <points>\n");
  ctr=0;n=0;
- for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
- for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
- for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
+ for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<nomore);++i1){
+ for (j1=int(ijkmin(2)-1.0);(j1<=int(ijkmax(2)+1))&(n<nomore);++j1){
+ for (k1=int(ijkmin(3)-1.0);(k1<=int(ijkmax(3)+1))&(n<nomore);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
-         for(l=1;l<=magmom.nofatoms&n<nomore;++l)
+      for (i=1;(i<=nofa)&(n<nomore);++i){for (j=1;(j<=nofb)&(n<nomore);++j){for (k=1;(k<=nofc)&(n<nomore);++k){
+         for(l=1;(l<=magmom.nofatoms)&(n<nomore);++l)
 	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                    (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
@@ -746,12 +746,12 @@ fprintf(fout,"    <geometry name=\"static magnetic moments\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"hide\" color=\"hide\">\n");
 fprintf(fout,"        <points>\n");
  ctr=0;n=0;
- for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
- for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
- for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
+ for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<nomore);++i1){
+ for (j1=int(ijkmin(2)-1.0);(j1<=int(ijkmax(2)+1))&(n<nomore);++j1){
+ for (k1=int(ijkmin(3)-1.0);(k1<=int(ijkmax(3)+1))&(n<nomore);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
-         for(l=1;l<=magmom.nofatoms&n<nomore;++l)
+      for (i=1;(i<=nofa)&(n<nomore);++i){for (j=1;(j<=nofb)&(n<nomore);++j){for (k=1;(k<=nofc)&(n<nomore);++k){
+         for(l=1;(l<=magmom.nofatoms)&(n<nomore);++l)
 	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                      (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
@@ -788,12 +788,12 @@ fprintf(fout,"    <geometry name=\"ellipses\">\n");
 fprintf(fout,"      <pointSet dim=\"3\" point=\"hide\" color=\"hide\">\n");
 fprintf(fout,"        <points>\n");
  ctr=0;n=0;
- for (i1=int(ijkmin(1)-1.0);i1<=int(ijkmax(1)+1)&n<nomore;++i1){
- for (j1=int(ijkmin(2)-1.0);j1<=int(ijkmax(2)+1)&n<nomore;++j1){
- for (k1=int(ijkmin(3)-1.0);k1<=int(ijkmax(3)+1)&n<nomore;++k1){
+ for (i1=int(ijkmin(1)-1.0);(i1<=int(ijkmax(1)+1))&(n<nomore);++i1){
+ for (j1=int(ijkmin(2)-1.0);(j1<=int(ijkmax(2)+1))&(n<nomore);++j1){
+ for (k1=int(ijkmin(3)-1.0);(k1<=int(ijkmax(3)+1))&(n<nomore);++k1){
    dd0=p.Column(1)*(double)(i1)+p.Column(2)*(double)(j1)+p.Column(3)*(double)(k1);
-      for (i=1;i<=nofa&n<nomore;++i){for (j=1;j<=nofb&n<nomore;++j){for (k=1;k<=nofc&n<nomore;++k){
-         for(l=1;l<=magmom.nofatoms&n<nomore;++l)
+      for (i=1;(i<=nofa)&(n<nomore);++i){for (j=1;(j<=nofb)&(n<nomore);++j){for (k=1;(k<=nofc)&(n<nomore);++k){
+         for(l=1;(l<=magmom.nofatoms)&(n<nomore);++l)
 	 {dd=magmom.pos(i,j,k,l, cs4);
           dd+=dd0;if(check_atom_in_big_unitcell(dd,maxv,minv,abc_in_ijk_Inverse)||
                     (gp.showprim==1&&i<=1+(nofa-1)*gp.scale_view_1&&j<=1+(nofb-1)*gp.scale_view_2&&k<=1+(nofc-1)*gp.scale_view_3))
@@ -1057,7 +1057,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
         jmin=-1+(int)((dd0(2)-rp-minv(2))*nofpointsj/max_min(2)+0.5);
         kmax=1+(int)((dd0(3)+rp-minv(3))*nofpointsk/max_min(3)+0.5);
         kmin=-1+(int)((dd0(3)-rp-minv(3))*nofpointsk/max_min(3)+0.5);
-        if (imin<1)imin=1;if (jmin<1)jmin=1;if (kmin<1)kmin=1;if (imax>nofpointsi)imax=nofpointsi;if (jmax>nofpointsj)jmax=nofpointsj;if (kmax>nofpointsk)kmax=nofpointsk;
+        if (imin<1){imin=1;}if (jmin<1){jmin=1;}if (kmin<1){kmin=1;}if (imax>nofpointsi){imax=nofpointsi;}if (jmax>nofpointsj){jmax=nofpointsj;}if (kmax>nofpointsk){kmax=nofpointsk;}
         for (i=imin;i<=imax;++i){for (j=jmin;j<=jmax;++j){for (k=kmin;k<=kmax;++k){
         // set position vector
         rijk=minv; rijk(1)+=(2*i-1)*max_min(1)/nofpointsi/2;rijk(2)+=(2*j-1)*max_min(2)/nofpointsj/2;rijk(3)+=(2*k-1)*max_min(3)/nofpointsk/2;
@@ -1116,7 +1116,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
         jmin=-1+(int)((dd0(2)-radius-minv(2))*nofpointsj/max_min(2)+0.5);
         kmax=1+(int)((dd0(3)+radius-minv(3))*nofpointsk/max_min(3)+0.5);
         kmin=-1+(int)((dd0(3)-radius-minv(3))*nofpointsk/max_min(3)+0.5);
-        if (imin<1)imin=1;if (jmin<1)jmin=1;if (kmin<1)kmin=1;if (imax>nofpointsi)imax=nofpointsi;if (jmax>nofpointsj)jmax=nofpointsj;if (kmax>nofpointsk)kmax=nofpointsk;
+        if (imin<1){imin=1;}if (jmin<1){jmin=1;}if (kmin<1){kmin=1;}if (imax>nofpointsi){imax=nofpointsi;}if (jmax>nofpointsj){jmax=nofpointsj;}if (kmax>nofpointsk){kmax=nofpointsk;}
         for (i=imin;i<=imax;++i){for (j=jmin;j<=jmax;++j){for (k=kmin;k<=kmax;++k){
         // set position vector
         rijk=minv; rijk(1)+=(2*i-1)*max_min(1)/nofpointsi/2;rijk(2)+=(2*j-1)*max_min(2)/nofpointsj/2;rijk(3)+=(2*k-1)*max_min(3)/nofpointsk/2;

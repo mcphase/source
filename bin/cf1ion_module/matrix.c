@@ -17,14 +17,14 @@ Definierte Funktionen :
  
 c_alloc()     : Kontroliert Speicherplatz holen
 error()       : Fehlerbehandlung
-mx_alloc()    : Reserviert Speicherplatz fuer eine komplexe Matrix
+mx_alloc(INT anz_ze,INT anz_sp)    : Reserviert Speicherplatz fuer eine komplexe Matrix
 mx_copy()     : Dubliziert eine komplexe Matrix
 testij()      : Testet Spalten- und Zeilenindex
 show_mij()    : Zeigt kontrolliert ij-tes Element der Matrix m
                 unkontrolliert :    MX(...)  bzw    MX(...)
 set_mij()     : Setzt kontrolliert ij-tes Element der Matrix m
                 unkontrolliert : RT(MX(...)) bzw IT(MX(...))
-vr_alloc()    : Reserviert Speicher fuer komplexen Vektor
+vr_alloc(INT n)    : Reserviert Speicher fuer komplexen Vektor
 warning()     : Warnung ausgeben
  
  
@@ -47,18 +47,16 @@ Includedateien holen
 /*----------------------------------------------------------------------------
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
-extern DOUBLE is_equal();
+extern DOUBLE is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);
 extern DOUBLE accuracy();
-extern SPEICHER *calloc();
+extern SPEICHER *calloc(size_t count, size_t size);
 /*----------------------------------------------------------------------------
                                    c_alloc()
 ------------------------------------------------------------------------------*/
-CHAR* c_alloc( anzahl,laenge )
-    INT anzahl;
-    INT laenge;
+CHAR* c_alloc(INT  anzahl,INT laenge )
 {
     CHAR* cp;
-    INT error();
+    INT error(CHAR *s);
  
     if( (cp=(CHAR*)calloc((TYPUS)anzahl,(TYPUS)laenge)) == (CHAR*)0 )
          error("No more space avaliable on disk - Programm aborted !");
@@ -68,8 +66,7 @@ CHAR* c_alloc( anzahl,laenge )
 /*----------------------------------------------------------------------------
                                    warning()
 ------------------------------------------------------------------------------*/
-void warning(s)  /* Warnung ausgeben */
-    CHAR *s;
+void warning(CHAR *s)  /* Warnung ausgeben */
 {
     printf("\nWarning : ");
     printf("%s,",s);
@@ -78,8 +75,7 @@ void warning(s)  /* Warnung ausgeben */
 /*----------------------------------------------------------------------------
                                     error()
 ------------------------------------------------------------------------------*/
-INT error(s)  /* Ausstieg beim Auftreten eines Fehlers */
-    CHAR *s;
+INT error(CHAR *s)  /* Ausstieg beim Auftreten eines Fehlers */
 {
     printf("\nError : ");
     printf("%s",s);
@@ -89,11 +85,10 @@ INT error(s)  /* Ausstieg beim Auftreten eines Fehlers */
 /*----------------------------------------------------------------------------
                                    mx_copy()
 ------------------------------------------------------------------------------*/
-MATRIX *mx_copy(a)      /* kopiert Matrix a in neue Matrix m */
-    MATRIX *a;
+MATRIX *mx_copy(MATRIX *a)      /* kopiert Matrix a in neue Matrix m */
 {
     MATRIX *m;          /* neue Matrix m */
-    MATRIX *mx_alloc(); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
+    MATRIX *mx_alloc(INT anz_ze,INT anz_sp); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
     INT    ze,sp;
     INT    anz_ze;
     INT    anz_sp;
@@ -113,13 +108,10 @@ MATRIX *mx_copy(a)      /* kopiert Matrix a in neue Matrix m */
 /*----------------------------------------------------------------------------
                                    mx_add()
 ------------------------------------------------------------------------------*/
-MATRIX *mx_add(fac,a,b)      /* c :=  fac*(a + b)  */
-    DOUBLE fac;
-    MATRIX *a;
-    MATRIX *b;
+MATRIX *mx_add(DOUBLE fac,MATRIX *a,MATRIX *b)      /* c :=  fac*(a + b)  */
 {
     MATRIX *c;          /* neue Matrix c */
-    MATRIX *mx_alloc(); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
+    MATRIX *mx_alloc(INT anz_ze,INT anz_sp); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
     INT    ze,sp;
     INT    anz_ze ;
     INT    anz_sp ;
@@ -142,13 +134,10 @@ MATRIX *mx_add(fac,a,b)      /* c :=  fac*(a + b)  */
 /*----------------------------------------------------------------------------
                                    mx_sub()
 ------------------------------------------------------------------------------*/
-MATRIX *mx_sub(fac,a,b)      /* c :=  fac*(a - b)  */
-    DOUBLE fac;
-    MATRIX *a;
-    MATRIX *b;
+MATRIX *mx_sub( DOUBLE fac,MATRIX *a,MATRIX *b)      /* c :=  fac*(a - b)  */
 {
     MATRIX *c;          /* neue Matrix c */
-    MATRIX *mx_alloc(); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
+    MATRIX *mx_alloc(INT anz_ze,INT anz_sp); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
     INT    ze,sp;
     INT    anz_ze ;
     INT    anz_sp ;
@@ -171,13 +160,10 @@ MATRIX *mx_sub(fac,a,b)      /* c :=  fac*(a - b)  */
 /*----------------------------------------------------------------------------
                                    mx_addf()
 ------------------------------------------------------------------------------*/
-MATRIX *mx_addf(f1,f2,a,b)      /* c := f1*a + f2*b  */
-    DOUBLE f1,f2;
-    MATRIX *a;
-    MATRIX *b;
+MATRIX *mx_addf(DOUBLE f1,DOUBLE f2,MATRIX *a,MATRIX *b)      /* c := f1*a + f2*b  */
 {
     MATRIX *c;          /* neue Matrix c */
-    MATRIX *mx_alloc(); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
+    MATRIX *mx_alloc(INT anz_ze,INT anz_sp); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
     INT    ze,sp;
     INT    anz_ze ;
     INT    anz_sp ;
@@ -200,12 +186,10 @@ MATRIX *mx_addf(f1,f2,a,b)      /* c := f1*a + f2*b  */
 /*----------------------------------------------------------------------------
                                    mx_mult()
 ------------------------------------------------------------------------------*/
-MATRIX *mx_mult(a,b)      /* c := a * b  */
-    MATRIX *a;
-    MATRIX *b;
+MATRIX *mx_mult(MATRIX *a,MATRIX *b)      /* c := a * b  */
 {
     MATRIX *c;          /* neue Matrix c */
-    MATRIX *mx_alloc(); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
+    MATRIX *mx_alloc(INT anz_ze,INT anz_sp); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
     INT    ze,sp,k;
     INT    dim;
  
@@ -231,13 +215,12 @@ MATRIX *mx_mult(a,b)      /* c := a * b  */
 /*----------------------------------------------------------------------------
                                    mx_ewev()
 ------------------------------------------------------------------------------*/
-MATRIX *mx_ewev(ew,ev,shift)/*       |         º                º   | */
-    VEKTOR *ew;             /*  c := | ew(1)*ev(1)  ... ew(n)*ev(n) | */
-    MATRIX *ev;             /*       |         º                º   | */
-    DOUBLE shift;
+MATRIX *mx_ewev(VEKTOR *ew,MATRIX *ev,DOUBLE shift)/*       |         ï¿½                ï¿½   | */
+           /*  c := | ew(1)*ev(1)  ... ew(n)*ev(n) | */
+             /*       |         ï¿½                ï¿½   | */
 {
     MATRIX *c;          /* neue Matrix c */
-    MATRIX *mx_alloc(); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
+    MATRIX *mx_alloc(INT anz_ze,INT anz_sp); /* Funktion,welche Speicherplatz fuer eine Matrix holt*/
     INT    ze,sp;
     INT    dim;
  
@@ -257,12 +240,12 @@ MATRIX *mx_ewev(ew,ev,shift)/*       |         º                º   | */
     return( c );        /* neue Matrix c zurueckgeben */
 }
 /*----------------------------------------------------------------------------
-                                  mx_alloc()
+                                  mx_alloc(INT anz_ze,INT anz_sp)
 ------------------------------------------------------------------------------*/
-MATRIX *mx_alloc(anz_ze,anz_sp)   /* Holt Speicherplatz fuer eine komplexe */
+MATRIX *mx_alloc(INT anz_ze,INT anz_sp)   /* Holt Speicherplatz fuer eine komplexe */
                                   /* Matrix der Dimension anz_ze x anz_sp  */
-    INT anz_ze;         /* Anzahl der Zeilen  der benoetigten Matrix */
-    INT anz_sp;         /* Anzahl der Spalten der benoetigten Matrix */
+      /* Anzahl der Zeilen  der benoetigten Matrix */
+         /* Anzahl der Spalten der benoetigten Matrix */
 {
     MATRIX *m;          /* neue Matrix m */
     INT    ze,sp;
@@ -292,10 +275,9 @@ MATRIX *mx_alloc(anz_ze,anz_sp)   /* Holt Speicherplatz fuer eine komplexe */
     return( m );   /* die komplexe Nullmatrix m zurueckgeben */
 }
 /*----------------------------------------------------------------------------
-                                  free_mx()
+                                  free_mx(MATRIX *mx)
 ------------------------------------------------------------------------------*/
-void free_mx(mx)  /* Speicherplatz der Matrix mx freigeben */
-  MATRIX *mx;
+void free_mx(MATRIX *mx)  /* Speicherplatz der Matrix mx freigeben */
 {
     INT    sp;
  
@@ -306,10 +288,10 @@ void free_mx(mx)  /* Speicherplatz der Matrix mx freigeben */
     free_(mx);
 }
 /*----------------------------------------------------------------------------
-                                  vr_alloc()
+                                  vr_alloc(INT n)
 ------------------------------------------------------------------------------*/
-VEKTOR *vr_alloc(n) /* holt Platz fuer einen n-dimensionalen komplexen */
-    INT n;          /* Spaltenvektor */
+VEKTOR *vr_alloc(INT n) /* holt Platz fuer einen n-dimensionalen komplexen */
+        /* Spaltenvektor */
 {
     INT    zeile;
     VEKTOR *v;
@@ -326,11 +308,9 @@ VEKTOR *vr_alloc(n) /* holt Platz fuer einen n-dimensionalen komplexen */
     return( v );
 }
 /*----------------------------------------------------------------------------
-                                 _vr_copy();
+                                 _vr_copy(VEKTOR *a,VEKTOR *b);
 ------------------------------------------------------------------------------*/
-VEKTOR *_vr_copy(a,b)  /*  b nach a kopieren    */
-       VEKTOR *a;
-       VEKTOR *b;
+VEKTOR *_vr_copy(VEKTOR *a,VEKTOR *b)  /*  b nach a kopieren    */
 {
    INT    zeile/*,i*/;
  
@@ -343,12 +323,11 @@ VEKTOR *_vr_copy(a,b)  /*  b nach a kopieren    */
     return( a );
 }
 /*----------------------------------------------------------------------------
-                                  vr_copy();
+                                  vr_copy(VEKTOR *a);
 ------------------------------------------------------------------------------*/
-VEKTOR *vr_copy(a)  /*  a duplizieren */
-       VEKTOR *a;
+VEKTOR *vr_copy(VEKTOR *a)  /*  a duplizieren */
 {
-   VEKTOR *vr_alloc();
+   VEKTOR *vr_alloc(INT n);
    VEKTOR *c;
    INT    zeile;
  
@@ -361,12 +340,11 @@ VEKTOR *vr_copy(a)  /*  a duplizieren */
     return( c );
 }
 /*----------------------------------------------------------------------------
-                                  vr_sub();
+                                  vr_sub(VEKTOR *a,VEKTOR *b);
 ------------------------------------------------------------------------------*/
-VEKTOR *vr_sub(a,b)  /*  c = a-b */
-       VEKTOR *a,*b;
+VEKTOR *vr_sub(VEKTOR *a,VEKTOR *b)  /*  c = a-b */
 {
-   VEKTOR *vr_alloc();
+   VEKTOR *vr_alloc(INT n);
    VEKTOR *c;
    INT    zeile;
  
@@ -379,10 +357,9 @@ VEKTOR *vr_sub(a,b)  /*  c = a-b */
     return( c );
 }
 /*----------------------------------------------------------------------------
-                                  free_vr()
+                                  free_vr(VEKTOR *v)
 ------------------------------------------------------------------------------*/
-void free_vr(v)        /* Speicherplatz von v freigeben */
- VEKTOR *v;
+void free_vr(VEKTOR *v)        /* Speicherplatz von v freigeben */
 {
    free_(v->_zeile );
    free_( v );
@@ -391,17 +368,16 @@ void free_vr(v)        /* Speicherplatz von v freigeben */
                                    ludcmp()
 aus numerical recipes, seite 35-36
 ------------------------------------------------------------------------------*/
-LUDCMP *ludcmp(mx)
-    MATRIX *mx;
+LUDCMP *ludcmp( MATRIX *mx)
 {
    LUDCMP *ludcmp;
  
-   MATRIX *a, *mx_copy();
-   VEKTOR *vr_alloc(), *vr_copy(), *index, *vv;
+   MATRIX *a, *mx_copy(MATRIX *a);
+   VEKTOR *vr_alloc(INT n), *vr_copy(VEKTOR *a), *index, *vv;
    INT    n,i,j,k,invers,imax=-INT_MAX;
    DOUBLE accuracy(), tiny;
    DOUBLE aamax;
-   DOUBLE d,sum,dum,is_equal();
+   DOUBLE d,sum,dum,is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);
  
 /* INT    nmax = 100; / * maximale  Iterationsschritte */
  
@@ -476,14 +452,12 @@ ende:
                                    lubksb()
 aus numerical recipes, seite 37
 ------------------------------------------------------------------------------*/
-VEKTOR *lubksb(ludcmp,v)
-   LUDCMP *ludcmp;
-   VEKTOR *v;
+VEKTOR *lubksb(LUDCMP *ludcmp,VEKTOR *v)
 {
-   VEKTOR *b, *vr_alloc(), *index;
+   VEKTOR *b, *vr_alloc(INT n), *index;
    MATRIX *a;
    INT    n,i,j,ii,ll;
-   DOUBLE /*d,*/sum,macheps,accuracy(),is_equal();
+   DOUBLE /*d,*/sum,macheps,accuracy(),is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);
  
  
    a      = ludcmp->matrix;
@@ -522,16 +496,14 @@ VEKTOR *lubksb(ludcmp,v)
                                    lubksb()
 aus numerical recipes, seite 37
 ------------------------------------------------------------------------------*/
-VEKTOR *loese(a,b)      /* loese  Ax = b */
-   MATRIX a;
-   VEKTOR b;
+VEKTOR *loese(MATRIX* a,VEKTOR *b)      /* loese  Ax = b */
 {
-   LUDCMP *_ludcmp, *ludcmp();
-   VEKTOR *x,       *lubksb();
+   LUDCMP *_ludcmp, *ludcmp(MATRIX *mx);
+   VEKTOR *x,       *lubksb(LUDCMP *ludcmp,VEKTOR *v);
  
    _ludcmp = ludcmp(a);
    x       = (VEKTOR*)0;
-   if( _ludcmp->invers == JA ){  /* inverse matrix exestiert */
+   if( _ludcmp->invers == JA ){  /* inverse matrix existiert */
        x = lubksb(_ludcmp,b);
    }
  

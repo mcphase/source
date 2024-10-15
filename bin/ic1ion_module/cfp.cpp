@@ -945,7 +945,7 @@ double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp)
          }
          break;
       case 4:
-         if(S2==4 && L==D) { if(S2p==3) { if(Lp==P) cfp = sqrt(3./10); else if(Lp==F) cfp = sqrt(7./10); } }
+    if     (S2==4 && L==D) { if(S2p==3) { if(Lp==P) cfp = sqrt(3./10); else if(Lp==F) cfp = sqrt(7./10); } }
                                  // 5D  4P   1   -1 1 -1            // 5D  4F   1  -1 0 -1 1
                                  //     4P       4F       2P      2D1       2D2        2F       2G       2H
     else if(S2==2) { double t[] = {-8./45., -7./45., -7./180.,  3./8.,  -7./72.,  -7./45.,      0,         0,  // 3P1
@@ -955,14 +955,14 @@ double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp)
                                    -4./15., -1./15., -5./42.,      0,    1./14.,  -5./48., -27./112., 11./84., // 3F2
                                         0,  -1./3.,       0,       0,    5./42.,   3./16.,  99./560., 11./60., // 3G
                                         0,   1./3.,       0,       0,        0,    1./12.,  -3./20.,  13./30.};// 3H
-            if(S2p==3) { if(Lp==P) id = 0; else if(Lp==F) id = 1; }
+       if     (S2p==3) { if(Lp==P) id = 0; else if(Lp==F) id = 1; }
        else if(S2p==1) { if(Lp==D) { if(vp==1) id=3; else if(vp==3) id=4; } else { switch(Lp) { CD(P,2); CD(F,5); CD(G,6); CD(H,7); default: return cfp; } } }
-	    if(id!=-1) { if(L==P) { if(v==2) cfp = t[id];    else if(v==4) cfp = t[id+8]; } 
+       if     (id!=-1) { if(L==P) { if(v==2) cfp = t[id];    else if(v==4) cfp = t[id+8]; } 
 	            else if(L==F) { if(v==2) cfp = t[id+24]; else if(v==4) cfp = t[id+32]; } 
 	            else { switch(L) { case D: cfp = t[id+16]; break; case G: cfp = t[id+40]; break; case H: cfp = t[id+48]; break; default: return cfp; } }
                cfp = sqrt(fabs(cfp))*sign(cfp); }
-         }                       //     2P      2D1      2D2       2F        2G        2H
-    else if(S2==0) { double t[] = {     0,     1.,       0,        0,        0,         0,    // 1S1
+                   }            //     2P      2D1      2D2       2F        2G        2H
+    else{if(S2==0) { double t[] = {     0,     1.,       0,        0,        0,         0,    // 1S1
                                         0,      0,      1.,        0,        0,         0,    // 1S2
                                    -3./20.,  3./8.,   9./56.,   1./10.,   -3./14.,      0,    // 1D1
                                     3./10.,     0,    1./7.,    9./20.,    3./28.,      0,    // 1D2
@@ -975,7 +975,7 @@ double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp)
 	            else if(L==D)  { if(v==2) cfp = t[id+12]; else if(v==4) cfp = t[id+18]; } else if(L==F)  cfp = t[id+24];
 	            else if(L==G)  { if(v==2) cfp = t[id+30]; else if(v==4) cfp = t[id+36]; } else if(L==I)  cfp = t[id+42];
                cfp = sqrt(fabs(cfp))*sign(cfp); }
-         }
+         }} 
          break;
       case 5:
          if(S2==5 && L==S && S2p==4 && Lp==D) cfp = 1.; // 6S  5D  1
@@ -990,7 +990,7 @@ double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp)
 	  else if(Lp==F) { if(vp==2) cfp = t[id*8+4]; else if(vp==4) cfp = t[id*8+5]; } else if(Lp==G) cfp = t[id*8+6]; else if(Lp==H) cfp = t[id*8+7]; }
                cfp = sqrt(fabs(cfp))*sign(cfp);
          }                       //    3P1      3P2       3D      3F1       3F2        3G       3H    1S1     1S2      1D1      1D2       1F      1G1      1G2       1I
-    else if(S2==1) { double t[] = {     0,       0,   3./5.,       0,        0,        0,       0,      0,      0,       0,  -2./5.,       0,       0,       0,       0,   // 2S
+    else {if(S2==1) { double t[] = {     0,       0,   3./5.,       0,        0,        0,       0,      0,      0,       0,  -2./5.,       0,       0,       0,       0,   // 2S
                                     7./75.,  1./6.,   1./15.,  -8./75., -1./6.,        0,       0,      0,      0,   1./5.,   1./10., -1./10.,      0,       0,       0,   // 2P
                                    -9./50.,      0,        0, -21./50.,      0,        0,       0,  3./25.,     0,  -1./10.,      0,       0,  -9./50.,      0,       0,   // 2D1
                                    -7./50., -1./25.,  6./35.,   3./50., -3./50.,   9./70.,      0,      0, -1./25.,  9./70., -1./35.,  1./10., -1./14., -11./350.,    0,   // 2D2
@@ -1011,7 +1011,7 @@ double racah_cfp(int n, int v, int S2, orbital L, int vp, int S2p, orbital Lp)
           else if(Lp==D) { if(vp==2) cfp = t[id*15+9]; else if(vp==4) cfp = t[id*15+10];} else if(Lp==F) cfp = t[id*15+11];
           else if(Lp==G) { if(vp==2) cfp = t[id*15+12];else if(vp==4) cfp = t[id*15+13];} else if(Lp==I) cfp = t[id*15+14]; }
                cfp = sqrt(fabs(cfp))*sign(cfp); }
-         }
+         }}
          break;
       default:
          return cfp;

@@ -211,7 +211,7 @@ template <class T> void zsMat<T>::tridupl()             // Sums duplicated entri
 {
    if(_iscsc) return;
    // Do the gnome sort of the entries
-   int i=1,j=2,vp,vi;
+   long long unsigned int i=1,j=2; int vp,vi;
    std::complex<T> vx;
    while(i<_p.size())
    {
@@ -623,7 +623,7 @@ template <class T> void zsMat<T>::h_array(std::complex<T>* retval) const   // As
    }
    else 
    {
-      for(int i=0; i<_x.size(); i++) {
+      for(long long unsigned int i=0; i<_x.size(); i++) {
          // Need to use += here because triplet forms have duplicate elements that should be summed together.
          if(_i[i]>=_p[i]) {
             retval[_m*_i[i]+_p[i]] += conj(_x[i]); if(_i[i]!=_p[i]) retval[_n*_p[i]+_i[i]] += _x[i]; } }
@@ -788,7 +788,7 @@ template <class T> void zsMat<T>::MultMMH(std::complex<T>*A, std::complex<T>*B, 
       {
          for(int j=0; j<_n; j++)
             for(int n=_p[j]; n<_p[j+1]; n++) {
-               if(_i[n]>=j) A[_m*k+_i[n]] += _x[n] * B[_n*k+j]; if(_i[n]!=j) A[_m*k+j] += conj(_x[n]) * B[_n*k+_i[n]];
+               if(_i[n]>=j){ A[_m*k+_i[n]] += _x[n] * B[_n*k+j];} if(_i[n]!=j) {A[_m*k+j] += conj(_x[n]) * B[_n*k+_i[n]];}
             }
       }
    }
@@ -808,7 +808,7 @@ template <class T> void zsMat<T>::MultMMH(std::complex<T>*A, std::complex<T>*B, 
 // --------------------------------------------------------------------------------------------------------------- //
 template <class T> std::complex<T>& zsMat<T>::operator () (int r, int c)
 { 
-   if(r>_m) _m = r; if(c>_n) _n = c;
+   if(r>_m) {_m = r;} if(c>_n) {_n = c;}
    r--; c--;
    if(_iscsc)
    {

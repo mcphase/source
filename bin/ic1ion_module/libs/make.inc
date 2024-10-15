@@ -26,18 +26,18 @@ endif
 ifeq ($(OSTYPE),Linux)
  LINUX = LINUX
  PLAT = _LINUX
- FORTRAN=gfortran --std=legacy
+ FORTRAN=gfortran --std=legacy  
  LIBFORTRAN=-lgfortran
 else
 ifeq ($(OSTYPE),Darwin)
  LINUX = LINUX
  PLAT = _LINUX
- FORTRAN=gfortran --std=legacy -fallow-argument-mismatch
+ FORTRAN=gfortran --std=legacy 
  LIBFORTRAN=-lgfortran
 else
  MSYS=1
  PLAT = _WINDOWS
- FORTRAN= g77
+ FORTRAN= g77  
  LIBFORTRAN=-lg2c
 endif
 endif
@@ -75,13 +75,13 @@ ifneq ($(shell gcc --version|grep " 3."),)
 FLAGS+=-mno-cygwin
 endif
 ifdef cross64
-FORTRAN  = x86_64-w64-mingw32-gfortran --std=legacy
+FORTRAN  = x86_64-w64-mingw32-gfortran --std=legacy  
 ARCH     = x86_64-w64-mingw32-ar
 ARCHFLAGS= cr
 RANLIB   = x86_64-w64-mingw32-ranlib
 endif
 ifdef cross32
-FORTRAN  = i686-w64-mingw32-gfortran --std=legacy
+FORTRAN  = i686-w64-mingw32-gfortran --std=legacy  
 ARCH     = i686-w64-mingw32-ar
 ARCHFLAGS= cr
 RANLIB   = i686-w64-mingw32-ranlib

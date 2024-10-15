@@ -52,7 +52,7 @@ typedef float  REAL;
 extern definierte Funktionen
 -----------------------------------------------------------------------------*/
 extern CHAR *c_alloc(INT,INT);
-extern FREE free();
+/* extern FREE free(); */
 #define free_(cp) free((SPEICHER*)(cp))
  
 /*****************************************************************************/

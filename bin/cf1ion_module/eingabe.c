@@ -32,7 +32,7 @@ extern DOUBLE gamma_J[]; /* definiert in theta.c */
  
  
 extern QUADRANT *abfrage();      /* definiert in ORTHO.C    */
-extern INT       null();         /* definiert in DIAHERMX.C */
+extern INT       null(DOUBLE a,DOUBLE macheps);         /* definiert in DIAHERMX.C */
 extern INT      *sort();         /* definiert in DIAHERMX.C */
 extern DOUBLE  accuracy();       /* definiert in DIAHERMX.c */
 extern BRUCH     *is_rational(); /* definiert in STEVENS.C*/
@@ -41,7 +41,7 @@ extern INT       is_equal();     /* definiert in DIAHERMX.C */
 extern DOUBLE    exp_();             /* definiert in ORTHO.C */
  
 extern VEKTOR *vr_alloc();    /* definiert in MATRIX.C */
-extern MATRIX *mx_alloc();    /* definiert in MATRIX.C */
+extern MATRIX *mx_alloc(INT anz_ze,INT anz_sp);    /* definiert in MATRIX.C */
  
 extern DOUBLE omegan0n();     /* definiert in MAIN.C  */
 extern DOUBLE omegan1n();     /* definiert in MAIN.C  */
@@ -67,7 +67,7 @@ extern INT    a_toi();           /* definiert in MAIN.C */
 extern CHAR  *a_tos();           /* definiert in MAIN.C */
 extern INT    read_error();      /* definiert in MAIN.C */
 extern INT    Bkq_error();       /* definiert in MAIN.C */
-extern INT    write_title();     /* definiert in DIAHERMX.C*/
+extern INT    write_title(FILE *fp);     /* definiert in DIAHERMX.C*/
   
 extern CHAR  *leftcopy();        /* definiert in MAIN.C */
  
@@ -117,14 +117,10 @@ FILE * fopen_errchk(const char * filename,const char * mode)
 *******************************************************************************/
  
 /*------------------------------------------------------------------------------
-                                create_Vkq()
+                                create_Vkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_Vkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
-    INT    einheitnr_in,einheitnr_out;
-    CHAR   *ion;
-    INT    symmetrienr;
-    CHAR   modus;
-    DOUBLE temp; /* Temperatur der Probe */
+void create_Vkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
+ /* Temperatur der Probe */
 {
  
     CHAR *name=VKQNAME;
@@ -136,7 +132,7 @@ void create_Vkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
     CHAR *t26,*t27,*t28,*t29,*t30,*t31;
     CHAR *leftcopy();
  
-    FILE    *fopen(), *fp;
+    FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
     INT     dimj,ionennr;
  
@@ -270,14 +266,10 @@ void create_Vkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
  
 }
 /*------------------------------------------------------------------------------
-                                create_Dkq()
+                                create_Dkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_Dkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
-    INT    einheitnr_in,einheitnr_out;
-    CHAR   *ion;
-    INT    symmetrienr;
-    CHAR   modus;
-    DOUBLE temp; /* Temperatur der Probe */
+void create_Dkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
+ /* Temperatur der Probe */
 {
  
     CHAR *name=DKQNAME;
@@ -289,7 +281,7 @@ void create_Dkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
     CHAR *t26,*t27,*t28,*t29,*t30,*t31;
     CHAR *leftcopy();
  
-    FILE    *fopen(), *fp;
+    FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
     INT     dimj,ionennr;
  
@@ -423,14 +415,10 @@ void create_Dkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
  
 }
 /*------------------------------------------------------------------------------
-                                create_Lkq()
+                                create_Lkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_Lkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
-    INT    einheitnr_in,einheitnr_out;
-    CHAR   *ion;
-    INT    symmetrienr;
-    CHAR   modus;
-    DOUBLE temp; /* Temperatur der Probe */
+void create_Lkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
+ /* Temperatur der Probe */
 {
  
     CHAR *name=LKQNAME;
@@ -444,7 +432,7 @@ void create_Lkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
     CHAR *t51,*t52,*t53,*t54;
     CHAR *leftcopy();
  
-    FILE    *fopen(), *fp;
+    FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
     INT     dimj,ionennr;
  
@@ -614,14 +602,10 @@ void create_Lkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
  
 }
 /*------------------------------------------------------------------------------
-                                create_Wkq()
+                                create_Wkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_Wkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
-    INT    einheitnr_in,einheitnr_out;
-    CHAR   *ion;
-    INT    symmetrienr;
-    CHAR   modus;
-    DOUBLE temp; /* Temperatur der Probe */
+void create_Wkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
+ /* Temperatur der Probe */
 {
  
     CHAR *name=WKQNAME;
@@ -633,7 +617,7 @@ void create_Wkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
     CHAR *t11;
     CHAR *leftcopy();
  
-    FILE    *fopen(), *fp;
+    FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
     INT     ionennr,dimj;
  
@@ -768,14 +752,10 @@ void create_Wkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
  
 }
 /*------------------------------------------------------------------------------
-                                create_Akq()
+                                create_Akq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_Akq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
-    INT    einheitnr_in,einheitnr_out;
-    CHAR   *ion;
-    INT    symmetrienr;
-    CHAR   modus;
-    DOUBLE temp; /* Temperatur der Probe */
+void create_Akq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
+ /* Temperatur der Probe */
 {
  
     CHAR *name=AKQNAME;
@@ -788,7 +768,7 @@ void create_Akq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
     CHAR *t11;
     CHAR *leftcopy();
  
-    FILE    *fopen(), *fp;
+    FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
     INT     ionennr,dimj;
  
@@ -931,14 +911,10 @@ void create_Akq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
  
 }
 /*------------------------------------------------------------------------------
-                                create_Bkq()
+                                create_Bkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_Bkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
-    INT    einheitnr_in,einheitnr_out;
-    CHAR   *ion;
-    INT    symmetrienr;
-    CHAR   modus;
-    DOUBLE temp; /* Temperatur der Probe */
+void create_Bkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
+/* Temperatur der Probe */
 {
  
     CHAR *name=BKQNAME;
@@ -950,7 +926,7 @@ void create_Bkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
     CHAR *t11;
     CHAR *leftcopy();
  
-    FILE    *fopen(), *fp;
+    FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
     INT     ionennr,dimj;
  
@@ -1084,14 +1060,10 @@ void create_Bkq(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
  
 }
 /*------------------------------------------------------------------------------
-                                create_xW()
+                                create_xW(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_xW(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
-    INT    einheitnr_in,einheitnr_out;
-    CHAR   *ion;
-    INT    symmetrienr;
-    CHAR   modus;
-    DOUBLE temp; /* Temperatur der Probe */
+void create_xW(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp)
+ /* Temperatur der Probe */
 {
  
     CHAR *name=XWNAME;
@@ -1106,7 +1078,7 @@ void create_xW(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
     CHAR *tx,*tW,*str,*tss;
     CHAR *leftcopy();
  
-    FILE *fopen(), *fp;
+    FILE *fopen(const char * filename,const char * mode), *fp;
     INT  ionennr,dimj;
  
  
@@ -1236,16 +1208,11 @@ void create_xW(einheitnr_in,einheitnr_out,ion,symmetrienr,modus,temp)
 }
  
 /*------------------------------------------------------------------------------
-                                create_nn()
+                                create_nn(CHAR   *name,CHAR modus,INT nnCHAR   *,ion,DOUBLE temp)
 ------------------------------------------------------------------------------*/
-void create_nn(name,modus,nn,ion,temp) /* Erzeuge Eingabefile fuer Umgebungsatome */
-    CHAR   *name;
-    CHAR   modus;
-    INT    nn;
-    CHAR   *ion;
-    DOUBLE temp;
+void create_nn(CHAR   *name,CHAR modus,INT nn,CHAR   *ion,DOUBLE temp) /* Erzeuge Eingabefile fuer Umgebungsatome */
 {
-    FILE *fopen(), *fp;
+    FILE *fopen(const char * filename,const char * mode), *fp;
     CHAR *s_modus,*x1,*x2,*x3,*y1,*y2,*y3,*z1,*z2,*z3;
     CHAR *leftcopy();
     CHAR *rs,*rsnn1,*rsn,*rstk,*rsk,*rstl,*rstu;
@@ -1428,14 +1395,13 @@ pomtu= "---------------------------------------";
  
  
 /*------------------------------------------------------------------------------
-                          read_Vkq()
+                          read_Vkq(CHAR *name, INT vsymmetrienr_vor)
 ------------------------------------------------------------------------------*/
-ITERATION *read_Vkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_Vkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lesen */
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -1771,14 +1737,13 @@ MATRIX *readBmag(fp,name,modus,myB,iteration,buffer_size,string)
    return ( HMAG(iteration) );
 }
 /*------------------------------------------------------------------------------
-                          read_Dkq()
+                          read_Dkq(CHAR *name, INT vsymmetrienr_vor)
 ------------------------------------------------------------------------------*/
-ITERATION *read_Dkq(name,vsymmetrienr_vor)  /* Dkq aus file name lesen */
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_Dkq(CHAR *name, INT vsymmetrienr_vor)  /* Dkq aus file name lesen */
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -2040,7 +2005,7 @@ ITERATION *iteration;
     CHAR *name;
     INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
-{   FILE      *fp=0,*fopen();
+{   FILE      *fp=0,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out,ia=0,ib=0,ic=0;
     DOUBLE    versionsnummer;
@@ -2372,14 +2337,13 @@ ITERATION *iteration;
  return (iteration);
 }
 /*------------------------------------------------------------------------------
-                          read_Lkq()
+                          read_Lkq(CHAR *name, INT vsymmetrienr_vor)
 ------------------------------------------------------------------------------*/
-ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_Lkq(CHAR *name, INT vsymmetrienr_vor)  /* Lkq aus file name lesen */
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -2644,14 +2608,13 @@ ITERATION *read_Lkq(name,vsymmetrienr_vor)  /* Lkq aus file name lesen */
     return( iteration );
 }
 /*------------------------------------------------------------------------------
-                          read_Wkq()
+                          read_Wkq(CHAR *name, INT vsymmetrienr_vor)
 ------------------------------------------------------------------------------*/
-ITERATION *read_Wkq(name,vsymmetrienr_vor)  /* Wkq aus file name lesen */
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_Wkq(CHAR *name, INT vsymmetrienr_vor)  /* Wkq aus file name lesen */
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -2885,14 +2848,13 @@ ITERATION *read_Wkq(name,vsymmetrienr_vor)  /* Wkq aus file name lesen */
     return( iteration );
 }
 /*------------------------------------------------------------------------------
-                          read_Akq()
+                          read_Akq(CHAR *name, INT vsymmetrienr_vor)
 ------------------------------------------------------------------------------*/
-ITERATION *read_Akq(name,vsymmetrienr_vor)  /* Akq aus file name lesen */
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_Akq(CHAR *name, INT vsymmetrienr_vor)  /* Akq aus file name lesen */
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -3151,13 +3113,12 @@ ITERATION *read_Akq(name,vsymmetrienr_vor)  /* Akq aus file name lesen */
     return( iteration );
 }
 /*------------------------------------------------------------------------------
-                          read_Bkqnew()
+                          read_Bkqnew(CHAR *ion)
  ... routine without file reading
 ------------------------------------------------------------------------------*/
-ITERATION *read_Bkqnew(ion)  /* Vkq aus file name lesen */
-    CHAR *ion;
+ITERATION *read_Bkqnew(CHAR *ion)  /* Vkq aus file name lesen */
 {
-    FILE      *fopen();
+    FILE      *fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT    /* buffer_size=381,*/einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -3270,15 +3231,14 @@ ITERATION *read_Bkqnew(ion)  /* Vkq aus file name lesen */
     return( iteration );
 }
 /*------------------------------------------------------------------------------
-                          read_Bkq()
+                          read_Bkq(CHAR *name, INT vsymmetrienr_vor)
 ------------------------------------------------------------------------------*/
 
-ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_Bkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lesen */
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -3529,16 +3489,15 @@ ITERATION *read_Bkq(name,vsymmetrienr_vor)  /* Vkq aus file name lesen */
     return( iteration );
 }
 /*------------------------------------------------------------------------------
-                          read_xW()
+                          read_xW(CHAR *name, INT vsymmetrienr_vor)
 ------------------------------------------------------------------------------*/
-ITERATION *read_xW(name,vsymmetrienr_vor)  /* x,W aus file name lesen */
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_xW(CHAR *name, INT vsymmetrienr_vor)  /* x,W aus file name lesen */
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {
     UNUSED_PARAMETER(vsymmetrienr_vor);
 
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr;
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
@@ -3681,14 +3640,13 @@ ITERATION *read_xW(name,vsymmetrienr_vor)  /* x,W aus file name lesen */
 }
  
 /*------------------------------------------------------------------------------
-                                  read_nn()
+                                  read_nn(CHAR *name)
 ------------------------------------------------------------------------------*/
-UMGEBUNG *read_nn(name) /* Lese Eingabefile name der Umgebungsatome */
-    CHAR *name;
+UMGEBUNG *read_nn(CHAR *name) /* Lese Eingabefile name der Umgebungsatome */
 {
     UMGEBUNG *umgebung;
     DOUBLE   a_tof(),x1,x2,x3=0.,temperatur;
-    FILE     *fp,*fopen();
+    FILE     *fp,*fopen(const char * filename,const char * mode);
     INT      buffer_size = 81;
     INT      i,anz_nn,nummer;
     CHAR     c,*string,*line,*fgets(),*ion,*a_tos();
@@ -4303,14 +4261,13 @@ void drucke_mag( fp,modus ) /* Tabelle fuer Magnetfeld ausgeben */
  
  
 /*------------------------------------------------------------------------------
-                                neben_create()
+                                neben_create(CHAR modus,CHAR *name_chi2)
 ------------------------------------------------------------------------------*/
-void neben_create( modus,name_chi2 ) /* Eingabefile Chi2 erzeugen  */
-  CHAR modus,*name_chi2;
+void neben_create(CHAR modus,CHAR *name_chi2 ) /* Eingabefile Chi2 erzeugen  */
 {
    READ *read_einheit(),*read;
    CHAR *einheit_out,*einheit_in,*name_par;
-   FILE    *fopen(), *fp;
+   FILE    *fopen(const char * filename,const char * mode), *fp;
    CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10,*t11,*t12;
    CHAR *t13,*t14,*t15,*t16,*t17,*t18,*t19,*t20,*t21,*t22;
    CHAR *t23,*t24,*t25,*t26,*t27,*t28,*t29,*t30,*t31,*t32;
@@ -4786,7 +4743,7 @@ READ *read_einheit(name,art)
     CHAR art;
 {
     READ      *read;
-    FILE      *fp,*fopen();
+    FILE      *fp,*fopen(const char * filename,const char * mode);
     INT   /*  anz_nn,*/dimj,zwei_j,ionennr/*,symmetrienr*/;
     INT       buffer_size=381,i,einheitnr_in,einheitnr_out;
 /*  DOUBLE    versionsnummer; */
@@ -5017,7 +4974,7 @@ void lesedaten(fp,x,f,n,name,nummerierung,ip,imax,bekannt,pdatnr,
     INT      anz_dat,a_toi(),datnr;
     INT      fpa,fpzl,fna,fnzl,loopmax;
     CHAR     *string,*line,*fgets();
-    FILE     *fopen();
+    FILE     *fopen(const char * filename,const char * mode);
  
     string   = STRING_ALLOC(buffer_size);
  
@@ -5116,9 +5073,9 @@ NEBENBEDINGUNG *neben_read(setup,name,kristallfeld,einheitnr_out,macheps)
 {
     ITERATION *iteration;
     NEBENBEDINGUNG *neben;
-    MATRIX    *intensit,*d_intensit,*mx_alloc();
+    MATRIX    *intensit,*d_intensit,*mx_alloc(INT anz_ze,INT anz_sp);
     VEKTOR    *ew      ,*d_ew      ,*vr_alloc(), *fix;
-    FILE      *fp,*fopen(),*fp_sus=0,*fp_theta;
+    FILE      *fp,*fopen(const char * filename,const char * mode),*fp_sus=0,*fp_theta;
     INT       buffer_size=381,i,k,einheitnr_in,a_toi(),zeile,anzahl=0,j;
     INT       anz_lines,anz_par=0,anz_var=0,spalte,datnr,anz_dat;
     INT       fpzl, fnzl, fpa, fna, z, flag,imax,ipos;

@@ -368,10 +368,10 @@ else
                       const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 ";
                       char lm4[5];
                       for(i=0;i<=45;++i){strncpy(lm4,lm+i*4,4);if(lm4[3]!='S')lm4[3]='\0';
-                                        if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"");
-                                        lm4[0]='L';if(extract(instr,lm4,Llm_in(i))==0){if(conv)fprintf(conv_file,"# %s\n",instr);snprintf(instr,MAXNOFCHARINLINE,"");}
+                                        if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"\0");
+                                        lm4[0]='L';if(extract(instr,lm4,Llm_in(i))==0){if(conv){fprintf(conv_file,"# %s\n",instr);}snprintf(instr,MAXNOFCHARINLINE,"\0");}
                                         }
-                     if(extract(instr,"pointcharge",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"");}
+                     if(extract(instr,"pointcharge",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"\0");}
 
                       printf("%s",instr);
                                     }
@@ -387,10 +387,10 @@ else
     iops=new ionpars(ionname);
     (*iops).Blm=0;
     (*iops).Llm=0;
-    while (n==0 && feof(stdin)==false) n=inputparline("nof_electrons", stdin, invalues); (*iops).nof_electrons = invalues[1]; n=0;
-    while (n==0 && feof(stdin)==false) n=inputparline("R2", stdin, invalues);            (*iops).r2 = invalues[1]; n=0;
-    while (n==0 && feof(stdin)==false) n=inputparline("R4", stdin, invalues);            (*iops).r4 = invalues[1]; n=0;
-    while (n==0 && feof(stdin)==false) n=inputparline("R6", stdin, invalues);            (*iops).r6 = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) {n=inputparline("nof_electrons", stdin, invalues);} (*iops).nof_electrons = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) {n=inputparline("R2", stdin, invalues);}            (*iops).r2 = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) {n=inputparline("R4", stdin, invalues);}            (*iops).r4 = invalues[1]; n=0;
+    while (n==0 && feof(stdin)==false) {n=inputparline("R6", stdin, invalues);}            (*iops).r6 = invalues[1]; n=0;
     while (n==0 && feof(stdin)==false) n=inputline(stdin, invalues);
     q2=invalues[1];q4=q2;q6=q2;
     x=invalues[2];
@@ -422,9 +422,9 @@ else
  }
 if(conv){
 fprintf(conv_file,"#col1  2  3        4 5 6 7     8   9   10   11   12   13   14  15  16  17  18  19  20   21   ... 28  29  ... 36  37  38   39   ... 50  51  ... 62  63 ");
-if(stcalc)fprintf(conv_file," 64");fprintf(conv_file,"\n");
+if(stcalc){fprintf(conv_file," 64");}fprintf(conv_file,"\n");
 fprintf(conv_file,"#c0=c2 c4 c6 (|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B40 L40 ... B44 L44 B66S L66S ... B60 L60 ... B66 L66");
-if(stcalc)fprintf(conv_file," sta");fprintf(conv_file,"\n");
+if(stcalc){fprintf(conv_file," sta");}fprintf(conv_file,"\n");
 }
 
 if (do_deriv){fprintf(dBlm_file,"#x y z(A) dB00/dux dB00/duy dB00/duz dB22S/dux dB22S/duy dB22S/duz dB21S/du ... dB20/du... dB22/du... dB66/duz\n");

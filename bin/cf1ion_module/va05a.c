@@ -51,9 +51,7 @@ extern INT CALFUN();   /*definiert in minima.c*/
 extern INT MB11A();    /*definiert in mb11a.c */
  
 /*    SUBROUTINE VA05A (M,N,F,   X,DSTEP,DMAX,ACC,MAXFUN,IPRINT, W) */
-      INT        VA05A (PM,PN,FF,XX,PDSTEP,PDMAX,PACC,PMAXFUN,PIPRINT,WW)
-      INT               *PM,*PN,             *PMAXFUN,*PIPRINT;
-      DOUBLE               *FF,*XX,*PDSTEP,*PDMAX,*PACC,       *WW;
+      INT        VA05A (INT *PM,INT *PN,DOUBLE *FF,DOUBLE *XX,DOUBLE *PDSTEP,DOUBLE *PDMAX,DOUBLE *PACC,INT *PMAXFUN,INT *PIPRINT,DOUBLE *WW)
 {
       #define X(I) (*(XX+(I)))
       #define F(I) (*(FF+(I)))

@@ -61,48 +61,49 @@ Includedateien holen
 /*----------------------------------------------------------------------------
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
-extern EWPROBLEM *diagonalisiere();  /* definiert in DIAHERMX.C*/
-extern INT       neben_create();     /* definiert in EINGABE.C */
+extern EWPROBLEM *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);  /* definiert in DIAHERMX.C*/
+extern INT       neben_create(CHAR modus,CHAR *name_chi2);     /* definiert in EINGABE.C */
  
-extern STEVENS   *calc_Pkq(INT);        /* definiert in STEVENS.C */
-extern KOMPLEX   *Clm(INT,INT,DOUBLE,DOUBLE);             /* definiert in STEVENS.C */
-extern MATRIX    *mx_alloc(INT,INT);        /* definiert in MATRIX.C  */
-extern DOUBLE    pow_(DOUBLE,INT);             /* definiert in STEVENS.C */
+extern STEVENS   *calc_Pkq(INT dimj);        /* definiert in STEVENS.C */
+extern KOMPLEX   *Clm(INT l,INT m,DOUBLE theta,DOUBLE phi);             /* definiert in STEVENS.C */
+extern MATRIX    *mx_alloc(INT anz_ze,INT anz_sp);        /* definiert in MATRIX.C  */
+extern DOUBLE    pow_(DOUBLE x,INT n) ;             /* definiert in STEVENS.C */
 extern SETUP     *cfield_setup();    /* definiert in DIAHERMX.C*/
-extern INT info_ewproblem();         /* definiert in DIAHERMX.C*/
-extern INT info_Pkq();               /* definiert in STEVENS.C */
-extern INT info_Fkq();               /* definiert in STEVENS.C */
-extern INT info_Gkq();               /* definiert in STEVENS.C */
-extern INT info_STEVkq();            /* definiert in STEVENS.C */
-extern INT info_tensor_Clm();        /* definiert in STEVENS.C */
-extern INT fkq_tabelle();            /* definiert in STEVENS.C */
-extern INT gkq_tabelle();            /* definiert in STEVENS.C */
+extern INT info_ewproblem(EWPROBLEM * ewproblem);         /* definiert in DIAHERMX.C*/
+extern INT info_Pkq(INT k,INT q,INT dimj,CHAR modus);               /* definiert in STEVENS.C */
+extern INT info_Fkq(INT k,INT q,INT dimj);               /* definiert in STEVENS.C */
+extern INT info_Gkq(INT k,INT q,INT dimj);               /* definiert in STEVENS.C */
+extern INT info_STEVkq(INT k,INT q,INT dimj,CHAR modus);            /* definiert in STEVENS.C */
+extern INT info_tensor_Clm(INT l,INT m,DOUBLE theta,DOUBLE phi);        /* definiert in STEVENS.C */
+extern INT fkq_tabelle(INT anz_ionen);            /* definiert in STEVENS.C */
+extern INT gkq_tabelle(INT anz_ionen);            /* definiert in STEVENS.C */
 extern INT info_thetakq();           /* definiert in THETA.C   */
 extern INT info_rn();                /* definiert in THETA.C   */
-extern INT atoi();                   /* definiert in <stdlib.h>*/
-extern INT output();                 /* definiert in INTENSITY.C*/
-extern INT write_title();            /* definiert in DIAHERMX.C*/
+extern INT atoi(const char *);                   /* definiert in <stdlib.h>*/
+extern INT output(SETUP *setup,EWPROBLEM *ewproblem,KRISTALLFELD *kristallfeld,CHAR  modus);                 /* definiert in INTENSITY.C*/
+extern INT write_title(FILE *fp);            /* definiert in DIAHERMX.C*/
  
-extern INT create_Akq();             /* definiert in EINGABE.C*/
-extern INT create_Bkq();             /* definiert in EINGABE.C*/
-extern INT create_Dkq();             /* definiert in EINGABE.C*/
-extern INT create_Lkq();             /* definiert in EINGABE.C*/
-extern INT create_Vkq();             /* definiert in EINGABE.C*/
-extern INT create_Wkq();             /* definiert in EINGABE.C*/
-extern INT create_xW();              /* definiert in EINGABE.C*/
-extern INT create_nn();              /* definiert in EINGABE.C*/
-extern FILE *fopen_errchk(const char*,const char*);         /* definiert in EINGABE.C*/
+extern INT create_Akq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Bkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Dkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Lkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Vkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_Wkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);             /* definiert in EINGABE.C*/
+extern INT create_xW(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR modus,DOUBLE temp);              /* definiert in EINGABE.C*/
+extern INT create_nn(CHAR   *name,CHAR modus,INT nn,CHAR   *ion,DOUBLE temp);              /* definiert in EINGABE.C*/
  
-extern ITERATION *read_Akq(CHAR*,INT);        /* definiert in EINGABE.C*/
-extern ITERATION *read_Bkq(CHAR*,INT);        /* definiert in EINGABE.C*/
-extern ITERATION *read_Bkqnew(CHAR*);        /* definiert in EINGABE.C*/
-extern ITERATION *read_Dkq(CHAR*,INT);        /* definiert in EINGABE.C*/
-extern ITERATION *read_Lkq(CHAR*,INT);        /* definiert in EINGABE.C*/
-extern ITERATION *read_Vkq(CHAR*,INT);        /* definiert in EINGABE.C*/
-extern ITERATION *read_Wkq(CHAR*,INT);        /* definiert in EINGABE.C*/
-extern ITERATION *read_xW(CHAR*,INT);         /* definiert in EINGABE.C*/
-extern UMGEBUNG  *read_nn();         /* definiert in EINGABE.C*/
- 
+extern ITERATION *read_Akq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Bkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Bkqnew(CHAR *ion);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Dkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Lkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Vkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_Wkq(CHAR *name, INT vsymmetrienr_vor);        /* definiert in EINGABE.C*/
+extern ITERATION *read_xW(CHAR *name, INT vsymmetrienr_vor);         /* definiert in EINGABE.C*/
+extern UMGEBUNG  *read_nn(CHAR *name);         /* definiert in EINGABE.C*/
+
+extern FILE *fopen_errchk(const char * filename,const char * mode);         /* definiert in EINGABE.C*/
+  
 extern DOUBLE alpha_J[]; /* definiert in theta.c */
 extern DOUBLE beta_J[];  /* definiert in theta.c */
 extern DOUBLE gamma_J[]; /* definiert in theta.c */
@@ -289,13 +290,13 @@ DOUBLE powi(DOUBLE x,INT n)  /* x**n */
 #define dummy2(k,q) (1.0/sqrt((DOUBLE)(fak(k+ABS(q))*fak(k-ABS(q)))))
 #define dummy(k,q)  dummy1(k,q)*dummy2(k,q)
  
-DOUBLE  epn0n(n) INT n; {return( dummy(ABS(n)  ,n)*gn0n(ABS(n)) );}
-DOUBLE  epn1n(n) INT n; {return( dummy(ABS(n)+1,n)*gn1n(ABS(n)) );}
-DOUBLE  epn2n(n) INT n; {return( dummy(ABS(n)+2,n)*gn2n(ABS(n)) );}
-DOUBLE  epn3n(n) INT n; {return( dummy(ABS(n)+3,n)*gn3n(ABS(n)) );}
-DOUBLE  epn4n(n) INT n; {return( dummy(ABS(n)+4,n)*gn4n(ABS(n)) );}
-DOUBLE  epn5n(n) INT n; {return( dummy(ABS(n)+5,n)*gn5n(ABS(n)) );}
-DOUBLE  epn6n(n) INT n; {return( dummy(ABS(n)+6,n)*gn6n(ABS(n)) );}
+DOUBLE  epn0n(INT n) {return( dummy(ABS(n)  ,n)*gn0n(ABS(n)) );}
+DOUBLE  epn1n(INT n) {return( dummy(ABS(n)+1,n)*gn1n(ABS(n)) );}
+DOUBLE  epn2n(INT n) {return( dummy(ABS(n)+2,n)*gn2n(ABS(n)) );}
+DOUBLE  epn3n(INT n) {return( dummy(ABS(n)+3,n)*gn3n(ABS(n)) );}
+DOUBLE  epn4n(INT n) {return( dummy(ABS(n)+4,n)*gn4n(ABS(n)) );}
+DOUBLE  epn5n(INT n) {return( dummy(ABS(n)+5,n)*gn5n(ABS(n)) );}
+DOUBLE  epn6n(INT n) {return( dummy(ABS(n)+6,n)*gn6n(ABS(n)) );}
  
  
 /*------------------------*/
@@ -506,7 +507,7 @@ void cfield_mcphasnew(char * iontype, double * Jxr,double * Jxi,  double * Jyr, 
                               double * lande,
                               double * rh2,double * rh4,double * rh6, int * nof_electrons)
 {
-    KRISTALLFELD *kristallfeld,*init_iterationnew();
+    KRISTALLFELD *kristallfeld,*init_iterationnew(CHAR*);
     EWPROBLEM /* *ewproblem,*/ *setuphcf( EWPROBLEM    *,INT, KRISTALLFELD *,CHAR );
     /*SETUP        *setup;*/
     INT          m,n;
@@ -743,11 +744,9 @@ Bisherige Module  :
 /*------------------------------------------------------------------------------
                                  isreell()
 ------------------------------------------------------------------------------*/
-INT isreell( symmetrienr , ion ) /* testet ob alle Kristallfeldparameter     */
+INT isreell(INT  symmetrienr ,CHAR * ion ) /* testet ob alle Kristallfeldparameter     */
                                  /* fuer das Ion ion bei der  Symmetrienummer*/
                                  /* symmetrienr i.a. reell sind              */
-   INT  symmetrienr;
-   CHAR *ion;
 {
    INT ionennr,dimj,zwei_j;
  
@@ -805,7 +804,7 @@ return(NEIN);
 /* Kristallfeldhamiltonian loesen */
 EWPROBLEM *solve(SETUP        *setup,EWPROBLEM    *ewproblem,INT overwrite, KRISTALLFELD *kristallfeld,CHAR modus)
 {
-    EWPROBLEM *diagonalisiere();
+    EWPROBLEM *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);
  
     ITERATION *iteration;
     ITERATION *Vkq0( ITERATION *,INT);
@@ -959,7 +958,7 @@ EWPROBLEM *setuphcf(   EWPROBLEM    *ewproblem,INT overwrite, KRISTALLFELD *kris
 {
     UNUSED_PARAMETER(overwrite);
 
-    EWPROBLEM *diagonalisiere();
+    EWPROBLEM *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);
  
     ITERATION *iteration;
     ITERATION *Vkq0( ITERATION *,INT);
@@ -1194,7 +1193,7 @@ ITERATION *hamltn0( ITERATION *i)
        MATRIX  *dx,*dy,*dz;
        DOUBLE d1=sqrt(fabs(B1S(i))),d2=sqrt(fabs(B2S(i))),d3=sqrt(fabs(B3S(i))),jm,jp,s1=1.,s2=1.,s3=1.;
        INT dimj=DIMJ(i),l; 
-       if(B1S(i)<0) s1=-1.; if(B2S(i)<0) s2=-1.; if(B3S(i)<0) s3=-1.;
+       if(B1S(i)<0) {s1=-1.;} if(B2S(i)<0) {s2=-1.;} if(B3S(i)<0) {s3=-1.;}
        dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
        for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
               jm=JM(mj)*D(nj,mj-1); jp=JP(mj)*D(nj,mj+1);
@@ -1210,7 +1209,7 @@ if( B1SS(i)!=0.0 || B2SS(i)!=0.0 || B3SS(i)!=0.0 ) {
        MATRIX  *dxdx,*dydy,*dzdz;
        DOUBLE d1=sqrt(sqrt(fabs(B1SS(i)))),d2=sqrt(sqrt(fabs(B2SS(i)))),d3=sqrt(sqrt(fabs(B3SS(i)))),jm,jp,s1=1.,s2=1.,s3=1.;
        INT dimj=DIMJ(i),l; 
-       if(B1SS(i)<0) s1=-1.; if(B2SS(i)<0) s2=-1.; if(B3SS(i)<0) s3=-1.;
+       if(B1SS(i)<0) {s1=-1.;} if(B2SS(i)<0) {s2=-1.;} if(B3SS(i)<0) {s3=-1.;}
        dx = mx_alloc( dimj,dimj ); dy = mx_alloc( dimj,dimj ); dz = mx_alloc( dimj,dimj );
        dxdx = mx_alloc( dimj,dimj ); dydy = mx_alloc( dimj,dimj ); dzdz = mx_alloc( dimj,dimj );
        for( n=DIMJ(i) ; n>=1 ; --n) for( m=DIMJ(i) ; m>=1 ; --m){
@@ -2306,7 +2305,7 @@ KRISTALLFELD *init_iterationnew(CHAR *iontype) /* [1] */
 KRISTALLFELD *init_iteration(CHAR *filename,INT symmetrienr,CHAR modus) /* [1] */
 {
  
-    UMGEBUNG     *umgebung ,   *read_nn();
+    UMGEBUNG     *umgebung ,   *read_nn(CHAR *name);
     ITERATION    *iteration,   *init_umgebung(CHAR*,UMGEBUNG*);
     ITERATION    *read_Vkq(CHAR*,INT),  *read_Bkq(CHAR*,INT) ,*read_Akq(CHAR*,INT);
     ITERATION    *read_Wkq(CHAR*,INT),  *read_xW(CHAR*,INT);

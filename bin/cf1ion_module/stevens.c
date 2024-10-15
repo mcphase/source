@@ -42,24 +42,24 @@ Includedateien holen
 /*----------------------------------------------------------------------------
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
-extern MATRIX *mx_alloc();
-extern MATRIX *mx_add();
-extern MATRIX *mx_sub();
-extern MATRIX *mx_addf();
-extern INT    free_mx();
-extern INT    is_equal();
+extern MATRIX *mx_alloc(INT anz_ze,INT anz_sp);
+extern MATRIX *mx_add(DOUBLE z, MATRIX*a,MATRIX*b);
+extern MATRIX *mx_sub(DOUBLE z, MATRIX*a,MATRIX*b);
+extern MATRIX *mx_addf(DOUBLE f1,DOUBLE f2,MATRIX*m1,MATRIX*m2);
+extern INT    free_mx(MATRIX * m);
+extern INT    is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);
  
-extern DOUBLE omegan0n();   /*           */
-extern DOUBLE omegan1n();   /*  omega    */
-extern DOUBLE omegan2n();   /*        kq */
-extern DOUBLE omegan3n();
-extern DOUBLE omegan4n();
-extern DOUBLE omegan5n();
-extern DOUBLE omegan6n();
+extern DOUBLE omegan0n(DOUBLE f);   /*           */
+extern DOUBLE omegan1n(DOUBLE f);   /*  omega    */
+extern DOUBLE omegan2n(DOUBLE f);   /*        kq */
+extern DOUBLE omegan3n(DOUBLE f);
+extern DOUBLE omegan4n(DOUBLE f);
+extern DOUBLE omegan5n(DOUBLE f);
+extern DOUBLE omegan6n(DOUBLE f);
  
 extern IONEN  IONENIMP[];
  
-extern FILE *fopen_errchk();         /* definiert in EINGABE.C*/ 
+extern FILE *fopen_errchk(const char * filename,const char * mode);         /* definiert in EINGABE.C*/ 
 
 /*----------------------------------------------------------------------------
    Internal function declarations
@@ -94,21 +94,20 @@ allgemein fuer einen nicht hermiteschen operator A:
             J                               J
            ---            +       +        ---
       2    \    0.5*<JN| A A + A A |JN>    \    <JN|Re(A)^2+Im(A)^2|JN>
- ººAºº   := >   -----------------------  =  >   -----------------------
+ ï¿½ï¿½Aï¿½ï¿½   := >   -----------------------  =  >   -----------------------
            /           2J+1                /          2J+1
            ---                             ---
            N=-J                            N=-J
  
 --------------------------------------------------------------------------------
 */
-DOUBLE norm_Pkq(k,q,dimj)   /*    || Pkq ||   definieren  */
-   INT k,q,dimj;
+DOUBLE norm_Pkq(INT k,INT q,INT dimj)   /*    || Pkq ||   definieren  */
 {
    MATRIX *pkq_plus;
    MATRIX *pkq_minus;
-   MATRIX *Pkq();
-   DOUBLE sum=0.0,sqrt();
-   DOUBLE exp,exp1,exp2,test_exp,j,pow_();
+   MATRIX *Pkq(INT k,INT q,INT dimj);
+   DOUBLE sum=0.0,sqrt(DOUBLE f);
+   DOUBLE exp,exp1,exp2,test_exp,j,pow_(DOUBLE x,INT n) ;
    INT n,m;
    DOUBLE dummy;
                                /*                       */
@@ -208,12 +207,11 @@ DOUBLE norm_Pkq(k,q,dimj)   /*    || Pkq ||   definieren  */
  
 --------------------------------------------------------------------------------
 */
-DOUBLE norm_Stevkq(k,q,dimj)   /*    || STEVkq ||   definieren  */
-   INT k,q,dimj;
+DOUBLE norm_Stevkq(INT k,INT q,INT dimj)   /*    || STEVkq ||   definieren  */
 {
    MATRIX *stev;
-   MATRIX *stevkq();
-   DOUBLE norm_operator(),norm;
+   MATRIX *stevkq(INT k,INT q,INT dimj);
+   DOUBLE norm_operator(MATRIX *mx),norm;
                                /*                       */
    stev = stevkq(k,q,dimj);    /*  < JN | O (J) | JM >  */
                                /*          kq           */
@@ -225,17 +223,16 @@ DOUBLE norm_Stevkq(k,q,dimj)   /*    || STEVkq ||   definieren  */
    return( norm );
 }
 /*----------------------------------------------------------------------------
-                               norm_operator()
+                               norm_operator(MATRIX *mx)
 ------------------------------------------------------------------------------*/
-DOUBLE norm_operator(mx,macheps)
-   MATRIX *mx;  /* mx ist die Matrixdarstellung des operators dessen */
+DOUBLE norm_operator(MATRIX *mx)
+  /* mx ist die Matrixdarstellung des operators dessen */
                 /* Norm berechnet werden soll                        */
-   DOUBLE macheps;
-{
-   DOUBLE sum=0.0,sqrt();
-   DOUBLE exp,test_exp/*,j*/,pow_();
+{  DOUBLE  macheps=0.0001;
+   DOUBLE sum=0.0,sqrt(DOUBLE f);
+   DOUBLE exp,test_exp/*,j*/,pow_(DOUBLE x,INT n) ;
    DOUBLE expr,expi;
-   INT n,m,dimj,is_equal();
+   INT n,m,dimj,is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);
    DOUBLE dummy;
  
    dimj = MXDIM(mx);
@@ -297,18 +294,17 @@ DOUBLE norm_operator(mx,macheps)
    return( sum );
 }
 /*----------------------------------------------------------------------------
-                               fkq_tabelle()
+                               fkq_tabelle(INT anz_ionen)
 ------------------------------------------------------------------------------*/
-void fkq_tabelle(anz_ionen)/* Fkq Faktoren fuer die implementierten Ionen ausgeben */
-  INT anz_ionen;
+void fkq_tabelle(INT anz_ionen)/* Fkq Faktoren fuer die implementierten Ionen ausgeben */
 {
  INT  ionennr;
  INT  dimj;
  CHAR *ionname;
- FILE    *fopen(),*out;
+ FILE    *fopen(const char * filename,const char * mode),*out;
  CHAR *filename = "Fkq.tabelle";
  CHAR *t01,*t02,*t03,*t04,*t05;
- LONG   fkq();
+ LONG   fkq(INT k,INT q,INT dimj);
  LONG   f20,f21,f22;
  LONG   f40,f41,f42,f43,f44;
  LONG   f60,f61,f62,f63,f64,f65,f66;
@@ -411,18 +407,17 @@ fprintf(out,"%s",t01);fprintf(out,"%s",t02);fprintf(out,"%s",t03);
  fclose(out);
 }
 /*----------------------------------------------------------------------------
-                               gkq_tabelle()
+                               gkq_tabelle(INT anz_ionen)
 ------------------------------------------------------------------------------*/
-void gkq_tabelle(anz_ionen)/* Gkq Faktoren fuer die implementierten Ionen ausgeben */
-  INT anz_ionen;
+void gkq_tabelle(INT anz_ionen)/* Gkq Faktoren fuer die implementierten Ionen ausgeben */
 {
  INT  ionennr;
  INT  dimj;
  CHAR *ionname;
- FILE    *fopen(),*out;
+ FILE    *fopen(const char * filename,const char * mode),*out;
  CHAR *filename = "Gkq.tabelle";
  CHAR *t01,*t02,*t03,*t04,*t05;
- LONG   gkq();
+ LONG   gkq(INT k,INT q,INT dimj);
  LONG   g20,g21,g22;
  LONG   g40,g41,g42,g43,g44;
  LONG   g60,g61,g62,g63,g64,g65,g66;
@@ -560,13 +555,12 @@ fprintf(out,"%s",t01);fprintf(out,"%s",t02);fprintf(out,"%s",t03);
  fclose(out);
 }
 /*----------------------------------------------------------------------------
-                                  Pkq()
+                                  Pkq(INT k,INT q,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *Pkq(k,q,dimj)  /* Matrix <JM'|Pkq(J)|MJ> zurueckgeben */
-   INT k,q,dimj;
+MATRIX *Pkq(INT k,INT q,INT dimj)  /* Matrix <JM'|Pkq(J)|MJ> zurueckgeben */
 {
-   MATRIX  *pn0n(),*pn1n(),*pn2n(),*pn3n(),*a;
-   MATRIX  *pn4n(),*pn5n(),*pn6n();
+   MATRIX  *pn0n(INT k,INT dimj),*pn1n(INT k,INT dimj),*pn2n(INT k,INT dimj),*pn3n(INT k,INT dimj),*a;
+   MATRIX  *pn4n(INT k,INT dimj),*pn5n(INT k,INT dimj),*pn6n(INT k,INT dimj);
  
    switch( ABS( k-ABS(q) ) ){
           case 0 : a=pn0n( q,dimj );
@@ -588,25 +582,24 @@ MATRIX *Pkq(k,q,dimj)  /* Matrix <JM'|Pkq(J)|MJ> zurueckgeben */
    return( a );
 }
 /*----------------------------------------------------------------------------
-                               calc_Pkq()
+                               calc_Pkq(INT dimj)
 ------------------------------------------------------------------------------*/
-STEVENS *calc_Pkq(dimj)        /* Stevensoperatoren initialisieren */
-    INT dimj;                  /* Gesamtdrehimpuls J, dimj := 2J+1 */
+STEVENS *calc_Pkq(INT dimj)        /* Stevensoperatoren initialisieren */             /* Gesamtdrehimpuls J, dimj := 2J+1 */
 {
-    MATRIX  *pn0n(),*pn1n(),*pn2n();
-    MATRIX  *pn3n(),*pn4n(),*pn5n(),*pn6n();
+    MATRIX  *pn0n(INT k,INT dimj),*pn1n(INT k,INT dimj),*pn2n(INT k,INT dimj);
+    MATRIX  *pn3n(INT k,INT dimj),*pn4n(INT k,INT dimj),*pn5n(INT k,INT dimj),*pn6n(INT k,INT dimj);
     STEVENS *stevens;
-    MATRIX *Pkq();
+    MATRIX *Pkq(INT k,INT q,INT dimj);
  
     stevens       = STEVENS_ALLOC(1); /* Speicher fuer die Struktur STEVENS */
     DIMJ(stevens) = dimj;
-    P0P0(stevens) = Pkq(0, 0,dimj);      /* Matrix (JNºP0+0(j)ºJM) */
+    P0P0(stevens) = Pkq(0, 0,dimj);      /* Matrix (JNï¿½P0+0(j)ï¿½JM) */
  
-    P2P2(stevens) = Pkq(2, 2,dimj);      /* Matrix (JNºP2+2(j)ºJM) */
-    P2P1(stevens) = Pkq(2, 1,dimj);      /* Matrix (JNºP2+1(j)ºJM) */
-    P2P0(stevens) = Pkq(2, 0,dimj);      /* Matrix (JNºP2+0(j)ºJM) */
-    P2M1(stevens) = Pkq(2,-1,dimj);      /* Matrix (JNºP2-1(j)ºJM) */
-    P2M2(stevens) = Pkq(2,-2,dimj);      /* Matrix (JNºP2-2(j)ºJM) */
+    P2P2(stevens) = Pkq(2, 2,dimj);      /* Matrix (JNï¿½P2+2(j)ï¿½JM) */
+    P2P1(stevens) = Pkq(2, 1,dimj);      /* Matrix (JNï¿½P2+1(j)ï¿½JM) */
+    P2P0(stevens) = Pkq(2, 0,dimj);      /* Matrix (JNï¿½P2+0(j)ï¿½JM) */
+    P2M1(stevens) = Pkq(2,-1,dimj);      /* Matrix (JNï¿½P2-1(j)ï¿½JM) */
+    P2M2(stevens) = Pkq(2,-2,dimj);      /* Matrix (JNï¿½P2-2(j)ï¿½JM) */
  
     P3P3(stevens) = Pkq(3, 3,dimj);      /* Matrix (JN|P3+3(j)|JM) */
     P3P2(stevens) = Pkq(3, 2,dimj);      /* Matrix (JN|P3+2(j)|JM) */
@@ -616,15 +609,15 @@ STEVENS *calc_Pkq(dimj)        /* Stevensoperatoren initialisieren */
     P3M2(stevens) = Pkq(3,-2,dimj);      /* Matrix (JN|P3-2(j)|JM) */
     P3M3(stevens) = Pkq(3,-3,dimj);      /* Matrix (JN|P3-3(j)|JM) */
 
-    P4P4(stevens) = Pkq(4, 4,dimj);      /* Matrix (JNºP4+4(j)ºJM) */
-    P4P3(stevens) = Pkq(4, 3,dimj);      /* Matrix (JNºP4+3(j)ºJM) */
-    P4P2(stevens) = Pkq(4, 2,dimj);      /* Matrix (JNºP4+2(j)ºJM) */
-    P4P1(stevens) = Pkq(4, 1,dimj);      /* Matrix (JNºP4+1(j)ºJM) */
-    P4P0(stevens) = Pkq(4, 0,dimj);      /* Matrix (JNºP4+0(j)ºJM) */
-    P4M1(stevens) = Pkq(4,-1,dimj);      /* Matrix (JNºP4-1(j)ºJM) */
-    P4M2(stevens) = Pkq(4,-2,dimj);      /* Matrix (JNºP4-2(j)ºJM) */
-    P4M3(stevens) = Pkq(4,-3,dimj);      /* Matrix (JNºP4-3(j)ºJM) */
-    P4M4(stevens) = Pkq(4,-4,dimj);      /* Matrix (JNºP4-4(j)ºJM) */
+    P4P4(stevens) = Pkq(4, 4,dimj);      /* Matrix (JNï¿½P4+4(j)ï¿½JM) */
+    P4P3(stevens) = Pkq(4, 3,dimj);      /* Matrix (JNï¿½P4+3(j)ï¿½JM) */
+    P4P2(stevens) = Pkq(4, 2,dimj);      /* Matrix (JNï¿½P4+2(j)ï¿½JM) */
+    P4P1(stevens) = Pkq(4, 1,dimj);      /* Matrix (JNï¿½P4+1(j)ï¿½JM) */
+    P4P0(stevens) = Pkq(4, 0,dimj);      /* Matrix (JNï¿½P4+0(j)ï¿½JM) */
+    P4M1(stevens) = Pkq(4,-1,dimj);      /* Matrix (JNï¿½P4-1(j)ï¿½JM) */
+    P4M2(stevens) = Pkq(4,-2,dimj);      /* Matrix (JNï¿½P4-2(j)ï¿½JM) */
+    P4M3(stevens) = Pkq(4,-3,dimj);      /* Matrix (JNï¿½P4-3(j)ï¿½JM) */
+    P4M4(stevens) = Pkq(4,-4,dimj);      /* Matrix (JNï¿½P4-4(j)ï¿½JM) */
 
     P5P5(stevens) = Pkq(5, 5,dimj);      /* Matrix (JN|P5+5(j)|JM) */
     P5P4(stevens) = Pkq(5, 4,dimj);      /* Matrix (JN|P5+4(j)|JM) */
@@ -638,28 +631,27 @@ STEVENS *calc_Pkq(dimj)        /* Stevensoperatoren initialisieren */
     P5M4(stevens) = Pkq(5,-4,dimj);      /* Matrix (JN|P5-4(j)|JM) */
     P5M5(stevens) = Pkq(5,-5,dimj);      /* Matrix (JN|P5-5(j)|JM) */
  
-    P6P6(stevens) = Pkq(6, 6,dimj);      /* Matrix (JNºP6+6(j)ºJM) */
-    P6P5(stevens) = Pkq(6, 5,dimj);      /* Matrix (JNºP6+5(j)ºJM) */
-    P6P4(stevens) = Pkq(6, 4,dimj);      /* Matrix (JNºP6+4(j)ºJM) */
-    P6P3(stevens) = Pkq(6, 3,dimj);      /* Matrix (JNºP6+3(j)ºJM) */
-    P6P2(stevens) = Pkq(6, 2,dimj);      /* Matrix (JNºP6+2(j)ºJM) */
-    P6P1(stevens) = Pkq(6, 1,dimj);      /* Matrix (JNºP6+1(j)ºJM) */
-    P6P0(stevens) = Pkq(6, 0,dimj);      /* Matrix (JNºP6+0(j)ºJM) */
-    P6M1(stevens) = Pkq(6,-1,dimj);      /* Matrix (JNºP6-1(j)ºJM) */
-    P6M2(stevens) = Pkq(6,-2,dimj);      /* Matrix (JNºP6-2(j)ºJM) */
-    P6M3(stevens) = Pkq(6,-3,dimj);      /* Matrix (JNºP6-3(j)ºJM) */
-    P6M4(stevens) = Pkq(6,-4,dimj);      /* Matrix (JNºP6-4(j)ºJM) */
-    P6M5(stevens) = Pkq(6,-5,dimj);      /* Matrix (JNºP6-5(j)ºJM) */
-    P6M6(stevens) = Pkq(6,-6,dimj);      /* Matrix (JNºP6-6(j)ºJM) */
+    P6P6(stevens) = Pkq(6, 6,dimj);      /* Matrix (JNï¿½P6+6(j)ï¿½JM) */
+    P6P5(stevens) = Pkq(6, 5,dimj);      /* Matrix (JNï¿½P6+5(j)ï¿½JM) */
+    P6P4(stevens) = Pkq(6, 4,dimj);      /* Matrix (JNï¿½P6+4(j)ï¿½JM) */
+    P6P3(stevens) = Pkq(6, 3,dimj);      /* Matrix (JNï¿½P6+3(j)ï¿½JM) */
+    P6P2(stevens) = Pkq(6, 2,dimj);      /* Matrix (JNï¿½P6+2(j)ï¿½JM) */
+    P6P1(stevens) = Pkq(6, 1,dimj);      /* Matrix (JNï¿½P6+1(j)ï¿½JM) */
+    P6P0(stevens) = Pkq(6, 0,dimj);      /* Matrix (JNï¿½P6+0(j)ï¿½JM) */
+    P6M1(stevens) = Pkq(6,-1,dimj);      /* Matrix (JNï¿½P6-1(j)ï¿½JM) */
+    P6M2(stevens) = Pkq(6,-2,dimj);      /* Matrix (JNï¿½P6-2(j)ï¿½JM) */
+    P6M3(stevens) = Pkq(6,-3,dimj);      /* Matrix (JNï¿½P6-3(j)ï¿½JM) */
+    P6M4(stevens) = Pkq(6,-4,dimj);      /* Matrix (JNï¿½P6-4(j)ï¿½JM) */
+    P6M5(stevens) = Pkq(6,-5,dimj);      /* Matrix (JNï¿½P6-5(j)ï¿½JM) */
+    P6M6(stevens) = Pkq(6,-6,dimj);      /* Matrix (JNï¿½P6-6(j)ï¿½JM) */
  
  
     return(stevens);
 }
 /*----------------------------------------------------------------------------
-                               free_Pkq()
+                               free_Pkq(STEVENS * stevens )
 ------------------------------------------------------------------------------*/
-void free_Pkq( stevens )
-    STEVENS *stevens;
+void free_Pkq( STEVENS * stevens  )
 {
  
     free_mx(P0P0(stevens));
@@ -699,10 +691,9 @@ void free_Pkq( stevens )
   free_(stevens);
 }
 /*----------------------------------------------------------------------------
-                               free_Okq()
+                               free_Okq(STEVENS * stevens )
 ------------------------------------------------------------------------------*/
-void free_Okq( stevens )
-    STEVENS *stevens;
+void free_Okq(STEVENS * stevens )
 {
  
     free_mx(O2P0(stevens));
@@ -723,7 +714,7 @@ void free_Okq( stevens )
 /* STEVkq_tabelle()
 {
     DOUBLE  j;
-    FILE    *fopen(),*out;
+    FILE    *fopen(const char * filename,const char * mode),*out;
     INT dimj,k,q;
     CHAR *name="STEVkq.tabelle";
  
@@ -752,19 +743,17 @@ void free_Okq( stevens )
     fclose(out);
 }*/
 /*----------------------------------------------------------------------------
-                               info_Pkq()
+                               info_Pkq(INT k,INT q,INT dimj,CHAR modus)
 ------------------------------------------------------------------------------*/
 /*Matrixelemente (JM'|Pkq(J)|JM) auf file name ausgeben */
-void info_Pkq(k,q,dimj,modus)
-INT k,q,dimj;
-CHAR modus;
+void info_Pkq(INT k,INT q,INT dimj,CHAR modus)
 {
     CHAR    *name  = "results/Pkq.info";
-    MATRIX  *pn0n(),*pn1n(),*pn2n(),*pn3n(),*mx;
-    MATRIX  *pn4n(),*pn5n(),*pn6n(),*Pkq();
+    MATRIX  *pn0n(INT k,INT dimj),*pn1n(INT k,INT dimj),*pn2n(INT k,INT dimj),*pn3n(INT k,INT dimj),*mx;
+    MATRIX  *pn4n(INT k,INT dimj),*pn5n(INT k,INT dimj),*pn6n(INT k,INT dimj),*Pkq(INT k,INT q,INT dimj);
  
     DOUBLE  j;
-    FILE    *fopen(),*out;
+    FILE    *fopen(const char * filename,const char * mode),*out;
  
     out = fopen_errchk(name,"w");
     clearscreen;
@@ -835,14 +824,12 @@ fprintf(out,"|Matrix element   (JM'|Pkq(J)|MJ) for k=%2d q=%2d J=%5.1f|\n",k
    fclose(out);
 }
 /*----------------------------------------------------------------------------
-                                  showPkq()
+                                  showPkq(FILE   *fp,MATRIX *mx,INT k,INT q,INT dimj,CHAR modus)
 ------------------------------------------------------------------------------*/
-void showPkq(fp,mx,k,q,dimj,modus) /* Matrix  (JM'|Pkq(J)|JM)  zeigen     */
-    FILE   *fp;               /* in Einheiten des GGT's oder der Norm*/
-    MATRIX *mx;
-    INT    k,q;
-    INT    dimj;   /* dimj = 2J+1        als INTeger*/
-    CHAR   modus;
+void showPkq(FILE   *fp,MATRIX *mx,INT k,INT q,INT dimj,CHAR modus) /* Matrix  (JM'|Pkq(J)|JM)  zeigen     */
+              /* in Einheiten des GGT's oder der Norm*/
+    /* dimj = 2J+1        als INTeger*/
+
 {
 CHAR *text1="(%3.1f %4.1f |P%2d%2d| %4.1f %3.1f) = %1d/%1d * %13.8f\n";
 CHAR *text2="(%3.1f %4.1f |P%2d%2d| %4.1f %3.1f) = %1d * %13.8f\n";
@@ -869,8 +856,8 @@ CHAR *tnorm="Die Norm || P%1d%1d(%3.1f) || ist null.\n";
     INT   m,n,flag=0;
  
     DOUBLE rt,j,nj,mj;
-    DOUBLE norm,norm_Stevkq();
-    BRUCH *fkq,*rt_b,*ggt_matrix(),*is_rational();
+    DOUBLE norm,norm_Stevkq(INT k,INT q,INT dimj);
+    BRUCH *fkq,*rt_b,*ggt_matrix( MATRIX *matrix,INT q),*is_rational(DOUBLE zahl);
     LONG  zr,nr,zb,nb;
     LONG  haupt_n;
     CHAR  c;
@@ -1003,18 +990,16 @@ CHAR *tnorm="Die Norm || P%1d%1d(%3.1f) || ist null.\n";
  
 }
 /*----------------------------------------------------------------------------
-                               info_STEVkq()
+                               info_STEVkq(INT k,INT q,INT dimj,CHAR modus)
 ------------------------------------------------------------------------------*/
 /*Matrixelemente (JM'|STEVkq(J)|JM) auf file name ausgeben */
-void info_STEVkq(k,q,dimj,modus)
-INT k,q,dimj;
-CHAR modus;
+void info_STEVkq(INT k,INT q,INT dimj,CHAR modus)
 {
     CHAR    *name  = "results/STEVkq.info";
  
     DOUBLE  j;
-    FILE    *fopen(),*out;
-    MATRIX  *stevkq(),*mx;
+    FILE    *fopen(const char * filename,const char * mode),*out;
+    MATRIX  *stevkq(INT k,INT q,INT dimj),*mx;
  
     out = fopen_errchk(name,"w");
     clearscreen;
@@ -1094,14 +1079,13 @@ fprintf(out,"|Matrix element (JM'|i*STEVkq |MJ) for k=%2d q=%2d J=%5.1f|\n",k
     fclose(out);
 }
 /*----------------------------------------------------------------------------
-                                  stevkq()
+                                  stevkq(INT k,INT q,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *stevkq(k,q,dimj)  /* Matrix <JM'|STEVkq(J)|MJ> zurueckgeben */
-   INT k,q,dimj;
+MATRIX *stevkq(INT k,INT q,INT dimj)  /* Matrix <JM'|STEVkq(J)|MJ> zurueckgeben */
 {
-   MATRIX  *pn0n(),*pn1n(),*pn2n(),*pn3n(),*a,*b,*c;
-   MATRIX  *pn4n(),*pn5n(),*pn6n();
-   MATRIX  *mx_add(),*mx_sub();
+   MATRIX  *pn0n(INT k,INT dimj),*pn1n(INT k,INT dimj),*pn2n(INT k,INT dimj),*pn3n(INT k,INT dimj),*a,*b,*c;
+   MATRIX  *pn4n(INT k,INT dimj),*pn5n(INT k,INT dimj),*pn6n(INT k,INT dimj);
+   MATRIX  *mx_add(DOUBLE z, MATRIX*a,MATRIX*b),*mx_sub(DOUBLE z, MATRIX*a,MATRIX*b);
    DOUBLE  z;
    switch( ABS( k-ABS(q) ) ){
           case 0 : a=pn0n( ABS(q),dimj);
@@ -1154,14 +1138,12 @@ MATRIX *stevkq(k,q,dimj)  /* Matrix <JM'|STEVkq(J)|MJ> zurueckgeben */
    return( c );
 }
 /*----------------------------------------------------------------------------
-                                  stevks()
+                                  stevks(INT k,INT s,INT dimj,ITERATION *iter)
 ------------------------------------------------------------------------------*/
 /* Matrix <JM'|STEVk0(J)+s*STEVk4(J)|MJ>zurueckgeben */
-MATRIX *stevks(k,s,dimj,iter)
-   INT k,s,dimj;
-   ITERATION *iter;
+MATRIX *stevks(INT k,INT s,INT dimj,ITERATION *iter)
 {
-   MATRIX  *mx_addf(),*stevkq();
+   MATRIX  *mx_addf(DOUBLE f1,DOUBLE f2,MATRIX*m1,MATRIX*m2),*stevkq(INT k,INT q,INT dimj);
    MATRIX  *o40,*o44,*o60,*o64,*o;
    DOUBLE  ss;
  
@@ -1190,14 +1172,11 @@ MATRIX *stevks(k,s,dimj,iter)
    return( o );
 }
 /*----------------------------------------------------------------------------
-                                  showSTEVkq()
+                                  showSTEVkq(FILE *fp, MATRIX *mx, INT k, INT q, INT dimj, CHAR modus)
 ------------------------------------------------------------------------------*/
-void showSTEVkq(fp,mx,k,q,dimj,modus) /* Matrix  (JM'|STEVkq(J)|JM)  zeigen   */
-    FILE   *fp;                  /* in Einheiten des GGT's oder der Norm */
-    MATRIX *mx;
-    INT    k,q;
-    INT    dimj;   /* dimj = 2J+1        als INTeger*/
-    CHAR   modus;
+void showSTEVkq(FILE *fp, MATRIX *mx, INT k, INT q, INT dimj, CHAR modus) /* Matrix  (JM'|STEVkq(J)|JM)  zeigen   */
+                  /* in Einheiten des GGT's oder der Norm */
+  /* dimj = 2J+1        als INTeger*/
 {
 CHAR *text1="(%3.1f %4.1f |STEV%2d%2d| %4.1f %3.1f) = %1d/%1d * %13.8f\n";
 CHAR *text2="(%3.1f %4.1f |STEV%2d%2d| %4.1f %3.1f) = %1d * %13.8f\n";
@@ -1223,8 +1202,8 @@ CHAR *tnorm="Die Norm || STEV%1d%1d(%3.1f) || ist null.\n";
  
     INT   m,n,flag=0;
     DOUBLE rt,j,nj,mj;
-    DOUBLE norm,norm_Stevkq();
-    BRUCH *fkq,*rt_b,*ggt_matrix(),*is_rational();
+    DOUBLE norm,norm_Stevkq(INT k,INT q,INT dimj);
+    BRUCH *fkq,*rt_b,*ggt_matrix( MATRIX *matrix,INT q),*is_rational(DOUBLE zahl);
     LONG  zr,nr,zb,nb;
     LONG  haupt_n;
     CHAR  c;
@@ -1356,7 +1335,7 @@ CHAR *tnorm="Die Norm || STEV%1d%1d(%3.1f) || ist null.\n";
  
 }
 /*----------------------------------------------------------------------------
-                               info_Fkq()
+                               info_Fkq(INT k,INT q,INT dimj)
 ------------------------------------------------------------------------------*/
 /*
  
@@ -1372,15 +1351,14 @@ CHAR *tnorm="Die Norm || STEV%1d%1d(%3.1f) || ist null.\n";
  
  
 */
-void info_Fkq(k,q,dimj)
-INT k,q,dimj;
+void info_Fkq(INT k,INT q,INT dimj)
 {
     CHAR    *name  = "results/Fkq.info";
-    LONG    fkq(),_fkq;
+    LONG    fkq(INT k,INT q,INT dimj),_fkq;
 /*  DOUBLE  z; */
     DOUBLE  j;
 /*  INT     n,m; */
-    FILE    *fopen(),*out;
+    FILE    *fopen(const char * filename,const char * mode),*out;
  
     out = fopen_errchk(name,"w");
     clearscreen;
@@ -1415,7 +1393,7 @@ fclose(out);
  
 }
 /*----------------------------------------------------------------------------
-                               info_Gkq()
+                               info_Gkq(INT k,INT q,INT dimj)
 ------------------------------------------------------------------------------*/
 /*
  
@@ -1431,15 +1409,14 @@ fclose(out);
  
  
 */
-void info_Gkq(k,q,dimj)
-INT k,q,dimj;
+void info_Gkq(INT k,INT q,INT dimj)
 {
     CHAR    *name  = "results/Gkq.info";
-    LONG    gkq(),_gkq;
+    LONG    gkq(INT k,INT q,INT dimj),_gkq;
 /*  DOUBLE  z; */
     DOUBLE  j;
 /*  INT     n,m; */
-    FILE    *fopen(),*out;
+    FILE    *fopen(const char * filename,const char * mode),*out;
  
     out = fopen_errchk(name,"w");
     clearscreen;
@@ -1474,13 +1451,12 @@ fclose(out);
  
 }
 /*----------------------------------------------------------------------------
-                             fkq()
+                             fkq(INT k,INT q,INT dimj)
 ------------------------------------------------------------------------------*/
-LONG fkq(k,q,dimj)  /* Fkq fuer stevensoperatoren berechnen */
-  INT k,q,dimj;
+LONG fkq(INT k,INT q,INT dimj)  /* Fkq fuer stevensoperatoren berechnen */
 {
-    MATRIX *stevkq(), *mx;
-    BRUCH  *ggt_matrix(),*fkq;
+    MATRIX *stevkq(INT k,INT q,INT dimj), *mx;
+    BRUCH  *ggt_matrix( MATRIX *matrix,INT q),*fkq;
  
     mx  = stevkq(k,q,dimj);
     fkq = ggt_matrix(mx,q);
@@ -1491,31 +1467,28 @@ LONG fkq(k,q,dimj)  /* Fkq fuer stevensoperatoren berechnen */
     return( ZAEHLER(fkq) );
 }
 /*----------------------------------------------------------------------------
-                             gkq()
+                             gkq(INT k,INT q,INT dimj)
 ------------------------------------------------------------------------------*/
-LONG gkq(k,q,dimj)  /* Gkq fuer stevensoperatoren berechnen */
-  INT k,q,dimj;
+LONG gkq(INT k,INT q,INT dimj)  /* Gkq fuer stevensoperatoren berechnen */
 {
-    MATRIX *Pkq(), *mx;
-    BRUCH  *ggt_matrix(),*gkq;
+    MATRIX *Pkq(INT k,INT q,INT dimj), *mx;
+    BRUCH  *ggt_matrix( MATRIX *matrix,INT q),*gkq;
  
     mx  = Pkq(k,q,dimj);
     gkq = ggt_matrix(mx,q);
     free_mx(mx);
  
-    if( NENNER(gkq) != 1) {printf("denom!=1 in STEVENS.C in gkq()\n");exit(0);}
+    if( NENNER(gkq) != 1) {printf("denom!=1 in STEVENS.C in gkq(INT k,INT q,INT dimj)\n");exit(0);}
  
     return( ZAEHLER(gkq) );
 }
 /*----------------------------------------------------------------------------
-                             ggt_matrix()
+                             ggt_matrix( MATRIX *matrix,INT q)
 ------------------------------------------------------------------------------*/
-BRUCH *ggt_matrix(matrix,q)
-    MATRIX *matrix;
-    INT q;
+BRUCH *ggt_matrix( MATRIX *matrix,INT q)
 {
-    BRUCH   *ggt_r(),*bruch,*dummy,*suche_quadratzahl();
-    LONG    ggt_l();
+    BRUCH   *ggt_r(DOUBLE a,LONG z,LONG n),*bruch,*dummy,*suche_quadratzahl(BRUCH   *bruch);
+    LONG    ggt_l(LONG a,LONG b);
     LONG    ggtl;
     INT     n,m,dimj;
     DOUBLE  rt2;
@@ -1554,16 +1527,15 @@ BRUCH *ggt_matrix(matrix,q)
     return( bruch );
 }
 /*----------------------------------------------------------------------------
-                             pn0n()
+                             pn0n(INT k,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *pn0n(k,dimj)       /* MATRIX  (JN|Pk,k(J)|JM) */
-    INT    k;
-    INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
+MATRIX *pn0n(INT k,INT dimj)       /* MATRIX  (JN|Pk,k(J)|JM) */
+         /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
     DOUBLE jzn,jzm,jpm;
-    DOUBLE fac();
-    MATRIX *okq,*mx_alloc();
+    DOUBLE fac(INT n);
+    MATRIX *okq,*mx_alloc(INT anz_ze,INT anz_sp);
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix (JN|Pk,k(J)|JM) */
@@ -1581,16 +1553,15 @@ MATRIX *pn0n(k,dimj)       /* MATRIX  (JN|Pk,k(J)|JM) */
     return( okq );
 }
 /*----------------------------------------------------------------------------
-                             pn1n()
+                             pn1n(INT k,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *pn1n(k,dimj)       /* MATRIX  (JN|Pk+1,k(J)|JM) */
-    INT    k;
-    INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
+MATRIX *pn1n(INT k,INT dimj)       /* MATRIX  (JN|Pk+1,k(J)|JM) */
+           /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
     DOUBLE jzn,jzm,jpm;
-    DOUBLE fac();
-    MATRIX *okq,*mx_alloc();
+    DOUBLE fac(INT n);
+    MATRIX *okq,*mx_alloc(INT anz_ze,INT anz_sp);
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix(JN|Pk+1,k(J)|JM)*/
@@ -1608,17 +1579,16 @@ MATRIX *pn1n(k,dimj)       /* MATRIX  (JN|Pk+1,k(J)|JM) */
     return( okq );
 }
 /*----------------------------------------------------------------------------
-                             pn2n()
+                             pn2n(INT k,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *pn2n(k,dimj)       /* MATRIX  (JN|Pk+2,k(J)|JM) */
-    INT    k;
-    INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
+MATRIX *pn2n(INT k,INT dimj)       /* MATRIX  (JN|Pk+2,k(J)|JM) */
+           /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
     INT    s;
     DOUBLE jzn,jzm/*,jpn*/,jpm;
-    DOUBLE fac();
-    MATRIX *okq,*mx_alloc();
+    DOUBLE fac(INT n);
+    MATRIX *okq,*mx_alloc(INT anz_ze,INT anz_sp);
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix(JN|Pk+2,k(J)|JM)*/
@@ -1637,17 +1607,16 @@ MATRIX *pn2n(k,dimj)       /* MATRIX  (JN|Pk+2,k(J)|JM) */
     return( okq );
 }
 /*----------------------------------------------------------------------------
-                             pn3n()
+                             pn3n(INT k,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *pn3n(k,dimj)       /* MATRIX  (JN|Pk+3,k(J)|JM) */
-    INT    k;
-    INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
+MATRIX *pn3n(INT k,INT dimj)       /* MATRIX  (JN|Pk+3,k(J)|JM) */
+          /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
     INT    s;
     DOUBLE jzn,jzm/*,jpn*/,jpm;
-    DOUBLE fac();
-    MATRIX *okq,*mx_alloc();
+    DOUBLE fac(INT n);
+    MATRIX *okq,*mx_alloc(INT anz_ze,INT anz_sp);
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix(JN|Pk+3,k(J)|JM)*/
@@ -1674,17 +1643,16 @@ MATRIX *pn3n(k,dimj)       /* MATRIX  (JN|Pk+3,k(J)|JM) */
     return( okq );
 }
 /*----------------------------------------------------------------------------
-                             pn4n()
+                             pn4n(INT k,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *pn4n(k,dimj)       /* MATRIX  (JN|Pk+4,k(J)|JM) */
-    INT    k;
-    INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
+MATRIX *pn4n(INT k,INT dimj)       /* MATRIX  (JN|Pk+4,k(J)|JM) */
+          /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
     INT    s;
     DOUBLE jzn,jzm/*,jpn*/,jpm;
-    DOUBLE fac();
-    MATRIX *okq,*mx_alloc();
+    DOUBLE fac(INT n);
+    MATRIX *okq,*mx_alloc(INT anz_ze,INT anz_sp);
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix(JN|Pk+4,k(J)|JM)*/
@@ -1719,17 +1687,16 @@ MATRIX *pn4n(k,dimj)       /* MATRIX  (JN|Pk+4,k(J)|JM) */
     return( okq );
 }
 /*----------------------------------------------------------------------------
-                             pn5n()
+                             pn5n(INT k,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *pn5n(k,dimj)       /* MATRIX  (JN|Pk+5,k(J)|JM) */
-    INT    k;
-    INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
+MATRIX *pn5n(INT k,INT dimj)       /* MATRIX  (JN|Pk+5,k(J)|JM) */
+          /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
     INT    s;
     DOUBLE jzn,jzm/*,jpn*/,jpm;
-    DOUBLE fac();
-    MATRIX *okq,*mx_alloc();
+    DOUBLE fac(INT n);
+    MATRIX *okq,*mx_alloc(INT anz_ze,INT anz_sp);
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix(JN|Pk+5,k(J)|JM)*/
@@ -1766,17 +1733,15 @@ MATRIX *pn5n(k,dimj)       /* MATRIX  (JN|Pk+5,k(J)|JM) */
     return( okq );
 }
 /*----------------------------------------------------------------------------
-                             pn6n()
+                             pn6n(INT k,INT dimj)
 ------------------------------------------------------------------------------*/
-MATRIX *pn6n(k,dimj)       /* MATRIX  (JN|Pk+6,k(J)|JM) */
-    INT    k;
-    INT    dimj;           /* Gesamtdrehimpuls J , dimj := 2J+1 */
+MATRIX *pn6n(INT k,INT dimj)       /* MATRIX  (JN|Pk+6,k(J)|JM) */           /* Gesamtdrehimpuls J , dimj := 2J+1 */
 {
     INT    m,n;
 /*  INT    s; */
     DOUBLE jzn,jzm/*,jpn*/,jpm;
-    DOUBLE fac();
-    MATRIX *okq,*mx_alloc();
+    DOUBLE fac(INT n);
+    MATRIX *okq,*mx_alloc(INT anz_ze,INT anz_sp);
  
     #include "define_j.c"      /* mj,J2,J4,... definieren */
     okq = mx_alloc(dimj,dimj); /* Speicher fuer Matrix(JN|Pk+6,k(J)|JM)*/
@@ -1805,19 +1770,18 @@ MATRIX *pn6n(k,dimj)       /* MATRIX  (JN|Pk+6,k(J)|JM) */
     return( okq );
 }
 /*----------------------------------------------------------------------------
-                               Clm()
+                               Clm(INT l,INT m,DOUBLE theta,DOUBLE phi)
 ------------------------------------------------------------------------------*/
-KOMPLEX *Clm(l,m,theta,phi) /* Tensor Clm berechnen */
-    INT    l,m;
-    DOUBLE theta,phi;   /* in Grad */
+KOMPLEX *Clm(INT l,INT m,DOUBLE theta,DOUBLE phi) /* Tensor Clm berechnen */
+  /* in Grad */
 {
-    DOUBLE sin();
-    DOUBLE cos();
-    DOUBLE pow_();
-    DOUBLE sqrt();
+    DOUBLE sin(DOUBLE f);
+    DOUBLE cos(DOUBLE f);
+    DOUBLE pow_(DOUBLE x,INT n) ;
+    DOUBLE sqrt(DOUBLE f);
  /* DOUBLE pi;                      extern in <math.h> definiert */
-    DOUBLE alpha_m,beta_lm,sin_m,g_lm,glm();
-    DOUBLE fac();
+    DOUBLE alpha_m,beta_lm,sin_m,g_lm,glm(INT l,INT m,DOUBLE x);
+    DOUBLE fac(INT n);
  
     KOMPLEX *clm;
  
@@ -1839,15 +1803,13 @@ KOMPLEX *Clm(l,m,theta,phi) /* Tensor Clm berechnen */
     return( clm );
 }
 /*----------------------------------------------------------------------------
-                               glm()
+                               glm(INT l,INT m,DOUBLE x)
 ------------------------------------------------------------------------------*/
-DOUBLE glm(l,m,x) /* darf nur fuer positive m kleiner als l aufgerufen werden*/
-    INT    l,m;
-    DOUBLE x;
+DOUBLE glm(INT l,INT m,DOUBLE x) /* darf nur fuer positive m kleiner als l aufgerufen werden*/
 {
     DOUBLE binom1,binom2,glm=0.0;
-    DOUBLE pow_();
-    DOUBLE fac();
+    DOUBLE pow_(DOUBLE x,INT n) ;
+    DOUBLE fac(INT n);
     INT i;
  
     for(i=0 ; i<=l-m ; ++i ){
@@ -1859,25 +1821,22 @@ DOUBLE glm(l,m,x) /* darf nur fuer positive m kleiner als l aufgerufen werden*/
     return( glm );
 }
 /*----------------------------------------------------------------------------
-                               fac()
+                               fac(INT n)
 ------------------------------------------------------------------------------*/
-DOUBLE fac(n)    /* Fakultaet von n berechnen */
-    INT n;
+DOUBLE fac(INT n)    /* Fakultaet von n berechnen */
 {
     return( (n==0) ? 1.0 : (DOUBLE)n*fac(n-1) );
 }
 /*----------------------------------------------------------------------------
-                          info_tensor_Clm()
+                          info_tensor_Clm(INT l,INT m,DOUBLE theta,DOUBLE phi)
 ------------------------------------------------------------------------------*/
-void info_tensor_Clm(l,m,theta,phi) /* Tensor Clm  auf file name ausgeben */
-    INT l,m;
-    DOUBLE theta,phi;
+void info_tensor_Clm(INT l,INT m,DOUBLE theta,DOUBLE phi) /* Tensor Clm  auf file name ausgeben */
 {
     CHAR *name = "results/Clm.info";
  
-    FILE    *fopen(),*out;
-    KOMPLEX *Clm(),*z;
-    DOUBLE  round();
+    FILE    *fopen(const char * filename,const char * mode),*out;
+    KOMPLEX *Clm(INT l,INT m,DOUBLE theta,DOUBLE phi),*z;
+    DOUBLE  round(DOUBLE digit);
     CHAR *textr="Realteil      von C%1d%1d(%6.2f, %6.2f) : %13.6e\n";
     CHAR *texti="Imaginaerteil von C%1d%1d(%6.2f, %6.2f) : %13.6e\n";
  
@@ -1910,34 +1869,30 @@ void info_tensor_Clm(l,m,theta,phi) /* Tensor Clm  auf file name ausgeben */
     fclose(out);
 }
 /*----------------------------------------------------------------------------
-                                  round()
+                                  round(DOUBLE digit)
 ------------------------------------------------------------------------------*/
-DOUBLE round(digit)  /* signifikante Stellen holen */
-    DOUBLE digit;
+DOUBLE round(DOUBLE digit)  /* signifikante Stellen holen */
 {
  return( 1000*((digit/1000 +1.0) - 1.0)  );
 }
 /*----------------------------------------------------------------------------
-                                  pow_()
+                                  pow_(DOUBLE x,INT n) 
 ------------------------------------------------------------------------------*/
-DOUBLE pow_(x,n)   /*    x  hoch  n  , mit n>=0  */
-    DOUBLE x;
-    INT    n;
+DOUBLE pow_(DOUBLE x,INT n)   /*    x  hoch  n  , mit n>=0  */
 {
     return(   (n==0)? 1.0 : (x==0.0)? 0.0 : x*pow_(x,n-1)   );
 }
 /*----------------------------------------------------------------------------
-                                  ggt_r()
+                                  ggt_r(DOUBLE a,LONG z,LONG n)
 ------------------------------------------------------------------------------*/
-BRUCH   *ggt_r(a,z,n)  /* groessten gemeinsamen Teiler von a und b bestimmen */
-  DOUBLE a;            /* a,b=z/n  rational */
-  LONG   z,n;
+BRUCH   *ggt_r(DOUBLE a,LONG z,LONG n)  /* groessten gemeinsamen Teiler von a und b bestimmen */
+              /* a,b=z/n  rational */
 {
-   BRUCH   *ar/*,*br*/,*is_rational(),*bruch;
+   BRUCH   *ar/*,*br*/,*is_rational(DOUBLE zahl),*bruch;
    LONG    a_nenner,a_zaehler;
    LONG    b_nenner,b_zaehler;
    LONG      nenner,  zaehler;
-   LONG    ggt_l();
+   LONG    ggt_l(LONG a,LONG b);
  
    ar = is_rational( a );
    a_zaehler = ZAEHLER( ar );
@@ -1956,12 +1911,11 @@ BRUCH   *ggt_r(a,z,n)  /* groessten gemeinsamen Teiler von a und b bestimmen */
    return( bruch );
 }
 /*----------------------------------------------------------------------------
-                              suche_quadratzahl()
+                              suche_quadratzahl(BRUCH   *bruch)
 ------------------------------------------------------------------------------*/
-BRUCH   *suche_quadratzahl(bruch)
-    BRUCH   *bruch;
+BRUCH   *suche_quadratzahl(BRUCH   *bruch)
 {
-   LONG zaehler,nenner,sucheq();
+   LONG zaehler,nenner,sucheq(LONG zahl);
 /* LONG z =1;
    LONG n =1; */
  
@@ -1977,10 +1931,9 @@ BRUCH   *suche_quadratzahl(bruch)
     return(bruch);
 }
 /*----------------------------------------------------------------------------
-                           is_quadrat()
+                           is_quadrat(LONG zahl)
 ------------------------------------------------------------------------------*/
-LONG is_quadrat(zahl)    /* ist zahl = q * q ? */
-  LONG zahl;
+LONG is_quadrat(LONG zahl)    /* ist zahl = q * q ? */
 {
     LONG q;
  
@@ -1990,10 +1943,9 @@ LONG is_quadrat(zahl)    /* ist zahl = q * q ? */
     return( -(--q) );
 }
 /*----------------------------------------------------------------------------
-                              sucheq()
+                              sucheq(LONG zahl)
 ------------------------------------------------------------------------------*/
-LONG sucheq(zahl)    /* suche maximales q mit :   q*q teilt zahl */
-  LONG zahl;
+LONG sucheq(LONG zahl)    /* suche maximales q mit :   q*q teilt zahl */
 {
     LONG i,q/*,s*/;
  
@@ -2006,10 +1958,9 @@ LONG sucheq(zahl)    /* suche maximales q mit :   q*q teilt zahl */
     return( 1 );
 }
 /*----------------------------------------------------------------------------
-                              is_rational()
+                              is_rational(DOUBLE zahl)
 ------------------------------------------------------------------------------*/
-BRUCH   *is_rational(zahl)
-   DOUBLE zahl;
+BRUCH   *is_rational(DOUBLE zahl)
 {
        LONG    bereich = 1000000;
        LONG    i       = 0 ;
@@ -2041,10 +1992,9 @@ BRUCH   *is_rational(zahl)
        exit(1);
 }
 /*----------------------------------------------------------------------------
-                                  ggt_l()
+                                  ggt_l(LONG a,LONG b)
 ------------------------------------------------------------------------------*/
-LONG ggt_l(a,b) /* groessten gemeinsamen Teiler von a und b bestimmen */
-    LONG a,b;
+LONG ggt_l(LONG a,LONG b) /* groessten gemeinsamen Teiler von a und b bestimmen */
 {
    LONG   c,rest;
 /* LONG   zaehler,nenner; */

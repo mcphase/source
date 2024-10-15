@@ -109,7 +109,7 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
    case 2:
    case 4: uu1(1)=m1(1);
            nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
-           for (i=1;i<=m1.Hi();++i)m1(i)=gJ*uu1(i);return nnt;break;
+           for (i=1;i<=m1.Hi();++i){m1(i)=gJ*uu1(i);}return nnt;break;
    case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,m1,delta,n,nd);m1*=gJ;return nnt;break;
    case 5: nnt=cluster_dm(2,transitionnumber,T,m1,delta, n, nd,ests);return nnt;break;
   default:if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc in internal module ... not implemented, continuing ... \n");
@@ -180,7 +180,7 @@ switch (module_type)
    case 2:
    case 4: uu1(1)=L1(1);
            nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
-           for (i=1;i<=L1.Hi();++i)L1(i)=(2.0-gJ)*uu1(i);return nnt;break;
+           for (i=1;i<=L1.Hi();++i){L1(i)=(2.0-gJ)*uu1(i);}return nnt;break;
    case 3: 
    case 5: 
    default: if(transitionnumber<0&& washere==0){washere=1;fprintf(stderr,"Problem: dL1calc in  modules cluster and brillouin not implemented, continuing ... \n");}
@@ -242,7 +242,7 @@ int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1
    case 2:
    case 4: uu1(1)=S1(1);
            nnt=(*iops).dJ1calc(transitionnumber,T,Hxc,Hext,uu1,delta,ests);
-           for (i=1;i<=S1.Hi();++i)S1(i)=(gJ-1.0)*uu1(i);return nnt;break;
+           for (i=1;i<=S1.Hi();++i){S1(i)=(gJ-1.0)*uu1(i);}return nnt;break;
    case 3: nnt=brillouindm(transitionnumber,T,Hxc,Hext,S1,delta,n,nd);S1*=(gJ-1.0);return nnt;break;
    case 5: 
    default:if(transitionnumber<0)fprintf(stderr,"Problem: dS1calc in module cluster not implemented, continuing ... \n");
@@ -664,7 +664,7 @@ void jjjpar::FFinfo(FILE * fout) // has to be consistent with mcdisp_intcalc set
      if(DWF==0) return 1.;  // Quick exit
      double s; unsigned int iq=DBWnsaved;        // Starts search at last saved value, indexed by DBWnsaved.
      for(unsigned int ic=MAXSAVEQ; ic--;) {
-        if(Q==DBWQsaved[iq]) return DBWsaved[iq]; if(!(iq--)) iq=MAXSAVEQ-1; }
+        if(Q==DBWQsaved[iq]) {return DBWsaved[iq];} if(!(iq--)) {iq=MAXSAVEQ-1;} }
 //  s=Q/4/PI;
     s=Q*DIV4PI;
     double DBW=exp(-2*DWF*s*s);

@@ -142,8 +142,10 @@ void Mat::Error (int err, const char* msg, ...)
 	snprintf(message,sizeof(message),"Error: ");
 
     va_start(argptr,msg);
-    int l = message ? strlen(message) : 0;
-    vsnprintf(message+l,sizeof(message+l),msg,argptr);
+//    int l = message ? strlen(message) : 0;
+    int l = strlen(message);
+
+    vsnprintf(message+l,strlen(message+l),msg,argptr);
     va_end(argptr);
 
     // don't bother about error any more
@@ -195,8 +197,9 @@ void Mat::Error (const char* msg, ...)
 	snprintf(message,sizeof(message),"Error: ");
 
     va_start(argptr,msg);
-    int l = message ? strlen(message) : 0;
-    vsnprintf(message+l,sizeof(message+l),msg,argptr);
+    //int l = message ? strlen(message) : 0;
+    int l =strlen(message);
+    vsnprintf(message+l,strlen(message+l),msg,argptr);
     va_end(argptr);
 
     // don't bother about error any more
@@ -253,8 +256,9 @@ void Mat::Warning (int err, const char* msg, ...)
 	snprintf(message,sizeof(message),"Warning: ");
 
     va_start(argptr,msg);
-    int l = message ? strlen(message) : 0;
-    vsnprintf(message+l,sizeof(message+l),msg,argptr);
+//    int l = message ? strlen(message) : 0;
+    int l=strlen(message);
+    vsnprintf(message+l,strlen(message+l),msg,argptr);
     va_end(argptr);
 
     // don't bother about warning any more

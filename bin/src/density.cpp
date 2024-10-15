@@ -100,7 +100,7 @@ for(tt=0;tt<=3.1415/dtheta;++tt){for(ff=0;ff<=2*3.1415/dfi;++ff){
                      }
      }
      if(delta1<max)
-     {for(iv=1;(iv<=nt)&(fabs(rp(iv)-R)>=0.1);++iv);// check if this minimum was already stored
+     {for(iv=1;(iv<=nt)&(fabs(rp(iv)-R)>=0.1);++iv){;}// check if this minimum was already stored
       if(fabs(rp(iv)-R)>=0.1) // if not store it (up to nt=imax minima will be stored)
        {++nt;rp(nt)=R;
         if (R>rmax)rmax=R;

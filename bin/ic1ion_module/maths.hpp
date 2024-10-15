@@ -391,8 +391,8 @@ template <class T> void sMat<T>::resize(int rs, int rn, int cs, int cn) // Resiz
    int i;
    typename std::map<_ind,T>::iterator it;
 
-   if(rs==-1) rs = 1; if(rn==-1) rn = _r;
-   if(cs==-1) cs = 1; if(cn==-1) cn = _r;
+   if(rs==-1) {rs = 1;} if(rn==-1) {rn = _r;}
+   if(cs==-1) {cs = 1;} if(cn==-1) {cn = _r;}
    
    rs--; cs--; //rn--; cn--;
    _ls.erase(_ls.upper_bound(_ind(rn,cn)),_ls.end());
@@ -572,7 +572,7 @@ template <class T> void sMat<T>::mrow(int r, T val)             // Multiplies a 
 // --------------------------------------------------------------------------------------------------------------- //
 template <class T> T& sMat<T>::operator () (int r, int c)
 { 
-   if(r>_r) _r = r; if(c>_c) _c = c;
+   if(r>_r) {_r = r;} if(c>_c) {_c = c;}
    return _ls[_ind(r,c)]; 
 }
 template <class T> T sMat<T>::operator () (int r, int c) const

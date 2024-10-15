@@ -74,7 +74,7 @@ iceig &iceig::operator = (const iceig &p)
 { 
    if(_Hsz==p._Hsz)
    {
-      if(_E==0) _E = new double[_Hsz]; memcpy(_E,p._E,_Hsz*sizeof(double));
+      if(_E==0) {_E = new double[_Hsz];} memcpy(_E,p._E,_Hsz*sizeof(double));
       if(p._V!=0) { if(_V==0) _V = new double[_Hsz*_Hsz]; memcpy(_V,p._V,_Hsz*_Hsz*sizeof(double)); }
       if(p._zV!=0) { if(_zV==0) _zV = new complexdouble[_Hsz*_Hsz]; memcpy(_zV,p._zV,_Hsz*_Hsz*sizeof(complexdouble)); }
       if(p._V==0 && _V!=0) { delete[]_V; _V=0; } if(p._zV==0 && _zV!=0) { delete[]_zV; _zV=0; } 
@@ -249,7 +249,7 @@ std::string iceig::strout()
 {
    int i,j;
    std::stringstream ss;
-   for(i=0; i<_Hsz; i++) ss << _E[i]; ss << "\n";
+   for(i=0; i<_Hsz; i++) {ss << _E[i];} ss << "\n";
    for(i=0; i<_Hsz; i++) { for(j=0; j<_Hsz; j++) ss << _V[j*_Hsz+i]; ss << "\n"; }
    return ss.str();
 }

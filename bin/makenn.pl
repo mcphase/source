@@ -133,6 +133,7 @@ elsif(/-bvk/)
   }
 elsif(/-cfph/)
 {$cfph=1; shift @ARGV;
+ $_=$ARGV[0];if(/-r/){shift @ARGV;}
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
  $screeningfile=$ARGV[0];
 }

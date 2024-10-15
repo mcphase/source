@@ -204,7 +204,7 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
    if (ini.ymin>ini.ymax){dumm=ini.ymin;ini.ymin=ini.ymax;ini.ymax=dumm;}
    
    if(argc>options+1)  //should T-H values be read from file ?
-   {while (feof(fin)==0&&0==inputline(fin,nn));  // if yes -> input them
+   {while (feof(fin)==0&&0==inputline(fin,nn)){;}  // if yes -> input them
     if (feof(fin)!=0) goto endproper;
     x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
     normalizedadbdc(h,nn[4],inputpars);

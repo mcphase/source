@@ -23,12 +23,12 @@ Includedateien holen
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
  
-extern MATRIX    *mx_alloc();        /* definiert in MATRIX.C   */
-extern VEKTOR    *vr_alloc();        /* definiert in MATRIX.C   */
-extern INT       free_vr();          /* definiert in MATRIX.C   */
-extern INT       menue();            /* definiert in ORTHO.C    */
-extern INT       if_stabil();        /* definiert in ORTHO.C    */
-extern INT       strategie();        /* definiert in ORTHO.C    */
+extern MATRIX    *mx_alloc(INT anz_ze,INT anz_sp);        /* definiert in MATRIX.C   */
+extern VEKTOR    *vr_alloc(INT n);        /* definiert in MATRIX.C   */
+extern INT       free_vr(VEKTOR *v);          /* definiert in MATRIX.C   */
+extern INT       menue(MINIMUM *amoeba,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2);            /* definiert in ORTHO.C    */
+extern INT       if_stabil(MINIMUM *amoeba,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2);        /* definiert in ORTHO.C    */
+extern INT       strategie(EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *p0);        /* definiert in ORTHO.C    */
 extern INT       is_equal();         /* definiert in DIAHERMX.C */
 extern DOUBLE    accuracy();         /* definiert in DIAHERMX.C */
 extern INT       VA05A();            /* definiert in VA05A.C    */
@@ -91,7 +91,7 @@ MINIMUM *va05a_(_fitnr,setup,ewproblem,iteration,p0,funk)
       DOUBLE (*funk)();
 {
 /*    DOUBLE macheps; */
-      VEKTOR *xi,*pp,*vr_alloc();
+      VEKTOR *xi,*pp,*vr_alloc(INT n);
  
       /* variablendefinition fuer VA05A() */
       INT     m,n,maxfun,iprint,i;
@@ -200,8 +200,8 @@ MINIMUM *amoeba(_amoeba,setup,ewproblem,iteration,p0,funk)
       DOUBLE gamma = 2.0;  /*           2.0 */
       INT    itmax;
  
-      MATRIX *p, *mx_alloc();
-      VEKTOR *y, *vr_alloc(), *pr, *prr, *pbar ;
+      MATRIX *p, *mx_alloc(INT anz_ze,INT anz_sp);
+      VEKTOR *y, *vr_alloc(INT n), *pr, *prr, *pbar ;
       INT    ndim,iter,ze,sp,mpts;
       INT    ilo,ihi,inhi,i,j,mw;
       DOUBLE rtol,ypr,yprr,macheps,accuracy(),ftol;
@@ -383,8 +383,8 @@ MINIMUM *powell(_powell,setup,ewproblem,iteration,pv,func)
       DOUBLE    (*func)();
 {
  
-      MATRIX *xi, *mx_alloc();
-      VEKTOR *vr_alloc(),  *pt, *ptt, *xit, *p;
+      MATRIX *xi, *mx_alloc(INT anz_ze,INT anz_sp);
+      VEKTOR *vr_alloc(INT n),  *pt, *ptt, *xit, *p;
       INT    n,iter,i,j,ibig,ze,sp,mw;
       DOUBLE macheps,ftol,fret;
       DOUBLE fp,fptt,del,t;
@@ -518,7 +518,7 @@ MINIMUM *frprmn(_frprmn,setup,ewproblem,iteration,pv,func)
       DOUBLE    (*func)();
 {
  
-      VEKTOR *vr_alloc(),  *xi, *g, *h, *p, *gradient();
+      VEKTOR *vr_alloc(INT n),  *xi, *g, *h, *p, *gradient();
       INT    n,iter/*,i*/,j/*,ze*/,sp,mw;
       DOUBLE macheps,ftol,fret,eps,gg,dgg,gam,fp;
       LINMIN *linmin(),*_linmin;
@@ -663,7 +663,7 @@ VEKTOR *gradient(func,setup,ewproblem,iteration,xt)
       ITERATION *iteration;
       VEKTOR    *xt;
 {
-      VEKTOR *df,*vr_alloc();
+      VEKTOR *df,*vr_alloc(INT n);
       INT i;
       DOUBLE dfx;
       DOUBLE eps;
@@ -693,7 +693,7 @@ DOUBLE f1dim(setup,ewproblem,iteration,func,p,xi,x)
       DOUBLE    x;
 {
       INT     j;
-      VEKTOR  *xt,*vr_alloc();
+      VEKTOR  *xt,*vr_alloc(INT n);
       DOUBLE  fxt;
  
  
@@ -720,7 +720,7 @@ DOUBLE df1dim(setup,ewproblem,iteration,func,p,xi,x)
       DOUBLE    x;
 {
       INT     j;
-      VEKTOR  *xt,*vr_alloc(),*gradient(),*df;
+      VEKTOR  *xt,*vr_alloc(INT n),*gradient(),*df;
       DOUBLE  df1;
  
  
@@ -919,7 +919,7 @@ zwei:
                       w = u; fw = fu;
                   }
                   else if( (fu<=fv) || (v==x) ||(v==w) )
-                       v = u; fv = fu;
+                       {v = u; fv = fu;}
  
                }
  

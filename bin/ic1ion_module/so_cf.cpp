@@ -285,7 +285,7 @@ sMat<double> fast_ukq(int n, int k, int q, orbital e_l)
    for(i=0; i<num_states; i++)
    {
       j2min = abs(abs(conf.states[i].L)*2-conf.states[i].S2); j2max = abs(conf.states[i].L)*2+conf.states[i].S2;
-      if(j2min<minJ2) minJ2 = j2min; if(j2max>maxJ2) maxJ2 = j2max;
+      if(j2min<minJ2) {minJ2 = j2min;} if(j2max>maxJ2) {maxJ2 = j2max;}
       indexJstart.push_back(ns+1);
       for(j=j2min; j<=j2max; j+=2)
          ns += j+1;
@@ -371,7 +371,7 @@ sMat<double> racah_mumat(int n, int q, orbital e_l)
    for(i=0; i<num_states; i++)
    {
       j2min = abs(abs(conf.states[i].L)*2-conf.states[i].S2); j2max = abs(conf.states[i].L)*2+conf.states[i].S2;
-      if(j2min<minJ2) minJ2 = j2min; if(j2max>maxJ2) maxJ2 = j2max;
+      if(j2min<minJ2) {minJ2 = j2min;} if(j2max>maxJ2) {maxJ2 = j2max;}
       indexJstart.push_back(ns+1);
       for(j=j2min; j<=j2max; j+=2)
          ns += j+1;
@@ -462,7 +462,7 @@ void racah_mumat(int n, int q, sMat<double> &L1q, sMat<double> &S1q, orbital e_l
    for(i=0; i<num_states; i++)
    {
       j2min = abs(abs(conf.states[i].L)*2-conf.states[i].S2); j2max = abs(conf.states[i].L)*2+conf.states[i].S2;
-      if(j2min<minJ2) minJ2 = j2min; if(j2max>maxJ2) maxJ2 = j2max;
+      if(j2min<minJ2) {minJ2 = j2min;} if(j2max>maxJ2) {maxJ2 = j2max;}
       indexJstart.push_back(ns+1);
       for(j=j2min; j<=j2max; j+=2)
          ns += j+1;

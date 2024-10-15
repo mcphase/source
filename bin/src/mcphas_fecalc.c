@@ -27,9 +27,9 @@ jj=0;
 	i1=i+(int)(d_rint(1));
 	j1=j+(int)(d_rint(2));
 	k1=k+(int)(d_rint(3));
-        while (i1<=0) i1+=sps.na();result=div(i1,sps.na());i1=result.rem;
-        while (j1<=0) j1+=sps.nb();result=div(j1,sps.nb());j1=result.rem;
-        while (k1<=0) k1+=sps.nc();result=div(k1,sps.nc());k1=result.rem;
+        while (i1<=0) {i1+=sps.na();}result=div(i1,sps.na());i1=result.rem;
+        while (j1<=0) {j1+=sps.nb();}result=div(j1,sps.nb());j1=result.rem;
+        while (k1<=0) {k1+=sps.nc();}result=div(k1,sps.nc());k1=result.rem;
         result=div(i1,sps.na());i1=result.rem; if(i1==0)i1=sps.na();
         result=div(j1,sps.nb());j1=result.rem; if(j1==0)j1=sps.nb();
         result=div(k1,sps.nc());k1=result.rem; if(k1==0)k1=sps.nc();
@@ -208,9 +208,9 @@ int exstr=0;if(ini.ipx!=NULL){exstr=6;}
         // they are folded back into it in the next 3 lines: this is allowed  because it is
         // irrelevant for the mean field summation
         // where the neighbor actually sits, but only on which sublattice it sits...
-        while (i<=0) i+=sps.na();result=div(i,sps.na());i=result.rem; // only distance is important ...
-        while (j<=0) j+=sps.nb();result=div(j,sps.nb());j=result.rem;
-        while (k<=0) k+=sps.nc();result=div(k,sps.nc());k=result.rem;
+        while (i<=0) {i+=sps.na();}result=div(i,sps.na());i=result.rem; // only distance is important ...
+        while (j<=0) {j+=sps.nb();}result=div(j,sps.nb());j=result.rem;
+        while (k<=0) {k+=sps.nc();}result=div(k,sps.nc());k=result.rem;
       // s is determined from a vector ijk connecting the different crystal unit cells
 	s=sps.in(i,j,k); //ijk range here from 0 to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
 
@@ -256,9 +256,9 @@ for(l=1;l<=(*(*ini.ipx).jjj[m]).paranz;++l)
         // they are folded back into it in the next 3 lines: this is allowed  because it is
         // irrelevant for the mean field summation
         // where the neighbor actually sits, but only on which sublattice it sits...
-        while (i<=0) i+=sps.na();result=div(i,sps.na());i=result.rem; // only distance is important ...
-        while (j<=0) j+=sps.nb();result=div(j,sps.nb());j=result.rem;
-        while (k<=0) k+=sps.nc();result=div(k,sps.nc());k=result.rem;
+        while (i<=0) {i+=sps.na();}result=div(i,sps.na());i=result.rem; // only distance is important ...
+        while (j<=0) {j+=sps.nb();}result=div(j,sps.nb());j=result.rem;
+        while (k<=0) {k+=sps.nc();}result=div(k,sps.nc());k=result.rem;
       // s is determined from a vector ijk connecting the different crystal unit cells
 	s=sps.in(i,j,k); //ijk range here from 0 to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
 
@@ -329,7 +329,7 @@ for (r=1;sta>ini.maxstamf;++r)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){
       delete Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
-     if (verbose==1) fprintf(stderr,"feDIV!MAXspinchangE");++nofmaxspinchangeDIV;
+     if (verbose==1) {fprintf(stderr,"feDIV!MAXspinchangE");}++nofmaxspinchangeDIV;
      return 2*FEMIN_INI+1;}
 
  //1. calculate mf from sps (and calculate sta)
@@ -486,7 +486,7 @@ if (r>ini.maxnofmfloops)
       delete Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
 
-     if (verbose==1) fprintf(stderr,"feDIV!MAXlooP");++nofmaxloopDIV;
+     if (verbose==1) {fprintf(stderr,"feDIV!MAXlooP");}++nofmaxloopDIV;
      return 2*FEMIN_INI;}
 }
 }

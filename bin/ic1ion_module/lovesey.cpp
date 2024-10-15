@@ -474,7 +474,7 @@ sMat<double> balcar_MSq(int q, int K, int Q, int n, orbital l)
 
    for(Kp=(K-1); Kp<=(K+1); Kp++)
    {
-      if(Qp<-Kp || Qp>Kp) continue; Qmat.zero(ns,ns);
+      if(Qp<-Kp || Qp>Kp) {continue;} Qmat.zero(ns,ns);
       Tj = -phase * sqrt(3/PI) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q);
       ic = lovesey_cKK(ckk,K,Kp,n,l); if(ic) ckk *= Tj; else { std::cerr << errormsg; return Qmat; }
       
@@ -584,7 +584,7 @@ sMat<double> balcar_MLq(int q, int K, int Q, int n, orbital l)
 
    for(Kp=(K-1); Kp<=(K+1); Kp+=2)       // The 3j symbol in A(K,K') means that K==Kp gives zero... (NB. Does this apply to E(K,K') too?)
    {
-      if(Qp<-Kp || Qp>Kp) continue; Qmat.zero(ns,ns);
+      if(Qp<-Kp || Qp>Kp) {continue;} Qmat.zero(ns,ns);
       if(Kp==(K-1)) Tj = -phase * sqrt(3/PI) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q) * -(2*Kp+1);
       else          Tj = -phase * sqrt(3/PI) * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q) *  (2*Kp+1);
       iA = lovesey_aKK(akk,K,Kp,n,l); if(iA) akk *= Tj; else { std::cerr << errormsg; return Qmat; }

@@ -179,7 +179,7 @@ __declspec(dllexport)
    std::vector<double> parval; parval.reserve(35);
    if(pars.n==1) { parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    else {
-      for(i=0; i<4; i++) parval.push_back(pars.F[i]); parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
+      for(i=0; i<4; i++) {parval.push_back(pars.F[i]);} parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
       for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    if(parval.size()%2==1) parval.push_back(0.);
 
@@ -226,7 +226,7 @@ __declspec(dllexport)
       #ifndef NO_ARPACK
       else if(pars.arnoldi) VE.acalc(pars,Jm); 
       #endif
-      else VE.calc(Hsz,Jm); free(Jm);
+      else {VE.calc(Hsz,Jm);} free(Jm);
       for(int Ti=1;Ti<=T.Hi();++Ti){
       // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
         std::vector< std::vector<double> > matel; std::vector<double> vJ = mfmat.expJ(VE,T(Ti),matel,pars.save_matrices);
@@ -755,7 +755,7 @@ bool get_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std::vecto
    std::fstream FILEIN; FILEIN.open(filename, std::fstream::in);
    if(FILEIN.fail()==true) return false;
    FILEIN >> mn >> ml; for(i=0; i<6; i++) FILEIN >> mJv[i]; FILEIN >> r >> c;
-   if(mn!=n || ml!=(int)l) return false; for(i=0; i<6; i++) if(fabs(mJv[i]-Jvec[i])>1e-4) return false;
+   if(mn!=n || ml!=(int)l) {return false;} for(i=0; i<6; i++) if(fabs(mJv[i]-Jvec[i])>1e-4) return false;
    Qq.clear(); sMat<double> emptymat(r,c); double Qt;
    for(i=0; i<6; i++) 
    {
@@ -1073,7 +1073,7 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
    std::vector<double> parval; parval.reserve(35);
    if(pars.n==1) { parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    else {
-      for(i=0; i<4; i++) parval.push_back(pars.F[i]); parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
+      for(i=0; i<4; i++) {parval.push_back(pars.F[i]);} parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
       for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    if(parval.size()%2==1) parval.push_back(0.);
 
@@ -1118,7 +1118,7 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
       #ifndef NO_ARPACK
       else if(pars.arnoldi) VE.acalc(pars,Jm); 
       #endif
-      else VE.calc(Hsz,Jm); free(Jm);
+      else {VE.calc(Hsz,Jm);} free(Jm);
 
       // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
       std::vector< std::vector<double> > matel;
@@ -1165,9 +1165,9 @@ void chargedensity_coeff(
 // int k[] = {-1,0, 2, 2,2,2,2, 4, 4, 4, 4,4,4,4,4,4, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
 // int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    mom(1) =  pars.n / sqrt(4.0 * 3.1415); // nofelectrons 
-   for(int i=2; i<=6; ++i) mom(i) = moments(5+i) *sqrt((2.0*2+1)/8/PI); mom(4)  *= sqrt(2);
-   for(int i=7; i<=15;++i) mom(i) = moments(12+i)*sqrt((2.0*4+1)/8/PI); mom(11) *= sqrt(2);
-   for(int i=16;i<=28;++i) mom(i) = moments(23+i)*sqrt((2.0*6+1)/8/PI); mom(22) *= sqrt(2);
+   for(int i=2; i<=6; ++i) {mom(i) = moments(5+i) *sqrt((2.0*2+1)/8/PI);} mom(4)  *= sqrt(2);
+   for(int i=7; i<=15;++i) {mom(i) = moments(12+i)*sqrt((2.0*4+1)/8/PI);} mom(11) *= sqrt(2);
+   for(int i=16;i<=28;++i) {mom(i) = moments(23+i)*sqrt((2.0*6+1)/8/PI);} mom(22) *= sqrt(2);
 
 // {for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){if(m!=0){a(l,m)*=sqrt((2.0*l+1)/8/PI);}else{a(l,m)*=sqrt((2.0*l+1)/4/PI);}}}
 // } // in case of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
@@ -1202,9 +1202,9 @@ int dchargedensity_coeff1(int &tn,        // Input transition number; if tn<0, p
    for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
    int nt = du1calc(tn,T,Hxce,Hext, gJ,ABC,sipffilename,u1,delta,n,nd,est);
    dc1(1)=0;
-   for(int i=2; i<=6; ++i) dc1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); dc1(4) *=sqrt(2);
-   for(int i=7; i<=15;++i) dc1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); dc1(11)*=sqrt(2);
-   for(int i=16;i<=28;++i) dc1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); dc1(22)*=sqrt(2);
+   for(int i=2; i<=6; ++i) {dc1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI);} dc1(4) *=sqrt(2);
+   for(int i=7; i<=15;++i) {dc1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI);} dc1(11)*=sqrt(2);
+   for(int i=16;i<=28;++i) {dc1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI);} dc1(22)*=sqrt(2);
    return nt;
 }
 

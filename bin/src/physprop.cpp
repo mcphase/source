@@ -695,8 +695,8 @@ found=0;while(found==0){ i=0;
    if(0.0001>(nn[1]-x)*(nn[1]-x)+(nn[2]-y)*(nn[2]-y)+
              (nn[3]-T)*(nn[3]-T)+
              (nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
-             found=1;nofhkls=(i-7)/4;
-               } 
+             {found=1;nofhkls=(i-7)/4;}
+                       } 
    fclose(fin);
    for (i=nofhkls;i>=1;--i){hkli[i](1)=nn[7+(i-1)*4+1];
                             hkli[i](2)=nn[7+(i-1)*4+2];

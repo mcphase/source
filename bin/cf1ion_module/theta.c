@@ -61,7 +61,7 @@ Includedateien holen
 /*----------------------------------------------------------------------------
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
-extern FILE *fopen_errchk();         /* definiert in EINGABE.C*/ 
+extern FILE *fopen_errchk(const char * filename,const char * mode);         /* definiert in EINGABE.C*/ 
 
 /*ionenanzahl muss mit ANZ_IONEN in cfield.c und cfieldrout.c uebereinstimmen !!!*/
 
@@ -178,7 +178,7 @@ void info_thetakq()/* Liste der Stevensfaktoren alpha_J,beta_J,gamma_J zeigen*/
 {
     CHAR *name = "results/thetakq.info";
  
-    FILE *fopen(),*fp;
+    FILE *fopen(const char * filename,const char * mode),*fp;
     CHAR *s,*text=" %4s  %2i     %10.4f     %10.4f      %10.4f\n";
     DOUBLE a,b,c;
     DOUBLE x=100.0;
@@ -226,7 +226,7 @@ void info_rn()     /* Liste der <r > n=2,4,6 ausgeben */
 {
     CHAR *name = "results/rn.info";
  
-    FILE   *fopen(),*fp;
+    FILE   *fopen(const char * filename,const char * mode),*fp;
     DOUBLE a,b,c,a2,a4,a6;
     INT i;
  

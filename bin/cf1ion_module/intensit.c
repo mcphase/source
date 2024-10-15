@@ -32,15 +32,15 @@ extern DOUBLE  exp_();           /* definiert in ORTHO.C */
 extern void    fit_ortho();      /* definiert in ORTHO.C */
 extern INT     is_equal();       /* definiert in DIAHERMX.C */
 extern INT     isimplementiert();/* definiert in CFIELD.C.*/
-extern DOUBLE  is_null();        /* definiert in DIAHERMX.C */
-extern INT       null();         /* definiert in DIAHERMX.C */
+extern DOUBLE  is_null(DOUBLE a,DOUBLE macheps);        /* definiert in DIAHERMX.C */
+extern INT       null(DOUBLE a,DOUBLE macheps);         /* definiert in DIAHERMX.C */
 extern DOUBLE  einh_Kelvin();    /* definiert in CFIELD.C */
 extern DOUBLE  accuracy();       /* definiert in DIAHERMX.c */
 extern INT     is_einheit_imp(); /* definiert in CFIELD.C */
-extern MATRIX  *mx_alloc();      /* definiert in MATRIX.C */
+extern MATRIX  *mx_alloc(INT anz_ze,INT anz_sp);      /* definiert in MATRIX.C */
 extern VEKTOR  *vr_alloc();      /* definiert in MATRIX.C */
-extern void     free_vr();       /* definiert in MATRIX.C */
-extern void     free_mx();       /* definiert in MATRIX.C */
+extern void     free_vr(VEKTOR *v);       /* definiert in MATRIX.C */
+extern void     free_mx(MATRIX *mx);       /* definiert in MATRIX.C */
 extern KOMPLEX *ckon();          /* definiert in KOMPLEX.C*/
 extern KOMPLEX *cadd();          /* definiert in KOMPLEX.C*/
 extern KOMPLEX *csub();          /* definiert in KOMPLEX.C*/
@@ -101,13 +101,10 @@ void raus_kommentar(FILE*, DOUBLE, DOUBLE, DOUBLE, DOUBLE, INT, CHAR*);
 void kopf(FILE *fp, INT anz_niveaus, INT flag);
 
 /*----------------------------------------------------------------------------
-                              output()
+                              output(SETUP *setup,EWPROBLEM *ewproblem,KRISTALLFELD *kristallfeld,CHAR  modus)
 -----------------------------------------------------------------------------*/
-void output( setup,ewproblem,kristallfeld,modus )
-   SETUP        *setup;
-   EWPROBLEM    *ewproblem;
-   KRISTALLFELD *kristallfeld;
-   CHAR         modus;         /* 'A','a'   'B','b'  'V','v'  */
+void output(SETUP *setup,EWPROBLEM *ewproblem,KRISTALLFELD *kristallfeld,CHAR  modus )
+        /* 'A','a'   'B','b'  'V','v'  */
 {
     CHAR art,*t13s,*dummy;
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
@@ -119,12 +116,12 @@ void output( setup,ewproblem,kristallfeld,modus )
  
     CHAR *t31p,*t31m,*t32p,*t32m,*t32mm,*t38p,*t38m,*t39p,*t39m;
     MATRIX    *entartung,*ev;
-    MATRIX    *aJtb2,*aJtb_2();
+    MATRIX    *aJtb2,*aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps);
     VEKTOR    *ew,*v,*ev_ir,*ev_ks;
     ITERATION *iteration;
     FILE      *fopen(),*fp,*ewev;
     DOUBLE    temperatur,re,im,energie,gesamte_intensitaet;
-    DOUBLE    gj,shift,j,mj,zu_summe,zustandssumme(),faktor;
+    DOUBLE    gj,shift,j,mj,zu_summe,zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur),faktor;
     DOUBLE    Bx,By,Bz/*,anf_temp,end_temp,lambda*/;
     DOUBLE    macheps/*,Bx_ex,By_ex,Bz_ex,Bx_mol,By_mol,Bz_mol*/;
     DOUBLE    Bx2,By2,Bz2,Bx4,By4,Bz4;
@@ -2646,17 +2643,15 @@ CHAR i_toc( i )     /*  3 -> '3'   : integer to character */
     }
 }
 /*----------------------------------------------------------------------------
-                              aJtb_2()
+                              aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps)
 -----------------------------------------------------------------------------*/
      /*                  ---                      2             */
      /* Matrixelememte : >   |<E ;tau� J �E ;mue>|              */
      /*                  ---    i       T  k                    */
      /*                tau,mue                                  */
-MATRIX *aJtb_2( ewproblem,macheps)
-      EWPROBLEM *ewproblem;
-      DOUBLE    macheps;
+MATRIX *aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps)
 {
-     MATRIX *aJtb_2,*mx_alloc();
+     MATRIX *aJtb_2,*mx_alloc(INT anz_ze,INT anz_sp);
      MATRIX *entartung,*ev;
      INT    groesse,*gi;
      INT    sp,ze;
@@ -2685,12 +2680,11 @@ MATRIX *aJtb_2( ewproblem,macheps)
    return( aJtb_2 );
 }
 /*----------------------------------------------------------------------------
-                              zustandssumme()
+                              zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur)
 -----------------------------------------------------------------------------*/
-DOUBLE zustandssumme( einheitnr_in , ew , temperatur )
-     INT    einheitnr_in;
-     VEKTOR *ew;        /* eigenwerte,kleinster auf 0 geshiftet */
-     DOUBLE temperatur; /* in Kelvin */
+DOUBLE zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur )
+  /* eigenwerte,kleinster auf 0 geshiftet */
+ /* in Kelvin */
 {
    DOUBLE zustandssumme = 0.0;
    DOUBLE faktor,exp_();

@@ -282,10 +282,9 @@ void jjjpar::delpar (int number)
 //saving parameters to file
 void jjjpar::save(FILE * file,int noindexchange) 
 { int i,i1,j1,npairs=0,symmetric=1;
-  int *n1,*n2; 
-  n1= new int[nofcomponents*nofcomponents+2];if (n1 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
+  int *n1= new int[nofcomponents*nofcomponents+2];if (n1 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
            
-  n2= new int[nofcomponents*nofcomponents+2];if (n2 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
+  int *n2= new int[nofcomponents*nofcomponents+2];if (n2 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
            
  // MR 22.12.22 - Added to check if exchange parameters indexed should be saved (e.g. a lot of zeroes)
 // check how many zeroes, if the exchange is symmetric and which pairs need to be saved
@@ -352,7 +351,7 @@ else
    fprintf(file,"\n");  
   }
  }
- delete n1; delete n2;
+ delete[] n1; delete[] n2;
 }
 
 void jjjpar::saveatom(FILE * file) 
@@ -380,9 +379,9 @@ void jjjpar::save_sipf(const char * path)
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
 char * pchr; pchr=strstr(savfilename+strlen(path),"/");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"/");}
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"/");}
 pchr=strstr(savfilename+strlen(path),"\\");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"\\");}
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"\\");}
 
  FILE * fout; 
  fout = fopen_errchk (savfilename, "w");
@@ -996,7 +995,7 @@ void iterwork::realloc_d(int ldwork) { if(dsize>0) delete[]dwork; printf("reallo
 void iterwork::realloc_i(int liwork) { if(isize>0) delete[]iwork; printf("reallocating i from %d to %d\n",isize,liwork); iwork = new int[liwork]; isize=liwork; }
 iterwork::~iterwork()
 {
-   if(zsize>0) delete[]zwork; if(dsize>0) delete[]dwork; if(isize>0) delete[]iwork;
+   if(zsize>0) {delete[]zwork;} if(dsize>0) {delete[]dwork;} if(isize>0) {delete[]iwork;}
 }
 
 // for test

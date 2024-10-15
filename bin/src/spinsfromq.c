@@ -166,7 +166,7 @@ if ((argc-a-4)%4==0){//fi  is given in command line
   inputpars.savelattice(stdout);
   inputpars.saveatoms(stdout);
   fprintf(stdout,"#! 0 0   0    0 0 0  %i %i  %i #created by ",savspin.n(),savspin.nofatoms,savspin.nofcomponents);
-  for(i=0;i<argc;++i)fprintf(stdout,"%s ",argv[i]);fprintf(stdout,"\n");
+  for(i=0;i<argc;++i){fprintf(stdout,"%s ",argv[i]);}fprintf(stdout,"\n");
   savspin.print(stdout);
   printf("\n");
 

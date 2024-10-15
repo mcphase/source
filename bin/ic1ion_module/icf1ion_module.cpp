@@ -625,7 +625,7 @@ __declspec(dllexport)
          for(i=0; i<(int)(parval.size()/2); i++) est[0][i+2] = complex<double> (parval[2*i],parval[2*i+1]);
       }
       // Copies Hcf to est
-      for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble)); free(H);
+      for(i=1; i<=Hsz; i++) {memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
       Hcfi.zero(Hsz,Hsz);
       for(int ind=J.Lo(); ind<=J.Hi(); ind++)
       {
@@ -634,14 +634,14 @@ __declspec(dllexport)
             Hcf = icf_mumat(pars.n, ind-1, pars.l);
             if(ind==3 || ind==4) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi); 
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble)); free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
          }
          else               // Calculates multipolar operator matrices and copies them to est. 
          {
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l);
             if(im[ind]==1) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi);
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble)); free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
          }
       }
    }
@@ -664,7 +664,7 @@ __declspec(dllexport)
             Hcf = icf_mumat(pars.n, ind-1, pars.l); if(ind==3 || ind==4) zM = zmat2f(Hcfi,Hcf); else zM = zmat2f(Hcf,Hcfi); }
          else       {       // Calculates multipolar operator matrices and copies them to est. 
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l); if(im[ind]==1)   zM = zmat2f(Hcfi,Hcf); else zM = zmat2f(Hcf,Hcfi); }
-         for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,&zM[(i-1)*Hsz],&incx,&H[(i-1)*Hsz],&incx); free(zM);
+         for(i=1; i<=Hsz; i++) {F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,&zM[(i-1)*Hsz],&incx,&H[(i-1)*Hsz],&incx);} free(zM);
       }
    }
 
@@ -1286,7 +1286,7 @@ bool icf_loveseyAKK(sMat<double> &aKK, int K, int Kp, int n, orbital l)
 
    // Determines number and angular momentum quantum numbers of basis states
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
-   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2){ J2.push_back(iJ2);} ns=(int)J2.size();
 
    aKK.zero(ns,ns);
 
@@ -1366,7 +1366,7 @@ bool icf_loveseyCKK(sMat<double> &cKK, int K, int Kp, int n, orbital l)
 
    // Determines number and angular momentum quantum numbers of basis states
    J2min = abs(2*gs.L-gs.S2); J2max = 2*gs.L+gs.S2;
-   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) J2.push_back(iJ2); ns=(int)J2.size();
+   for (int iJ2=J2min; iJ2<=J2max; iJ2+=2) {J2.push_back(iJ2);} ns=(int)J2.size();
 
    // Eqn. 3.6.11
    //
@@ -1813,7 +1813,7 @@ bool icf_balcarMSq(sMat<double> &MSq, int q, int K, int Q, int n, orbital l)
 
    for(Kp=(K-1); Kp<=(K+1); Kp++)
    {
-      if(Qp<-Kp || Qp>Kp) continue; Qmat.zero(ns,ns);
+      if(Qp<-Kp || Qp>Kp) {continue;} Qmat.zero(ns,ns);
       Tj = prefact * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q);
       ic = icf_loveseyCKK(ckk,K,Kp,n,l); if(ic) ckk *= Tj; else { std::cerr << errormsg; return 1; }
 
@@ -1899,7 +1899,7 @@ bool icf_balcarMLq(sMat<double> &MLq, int q, int K, int Q, int n, orbital l)
 
    for(Kp=(K-1); Kp<=(K+1); Kp+=2)       // The 3j symbol in A(K,K') means that K==Kp gives zero... (NB. Does this apply to E(K,K') too?)
    {
-      if(Qp<-Kp || Qp>Kp) continue; Qmat.zero(ns,ns);
+      if(Qp<-Kp || Qp>Kp) {continue;} Qmat.zero(ns,ns);
       if(Kp==(K-1)) Tj = prefact * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q) * -(2*Kp+1);
       else          Tj = prefact * threej(2*K,2*Kp,2,2*Q,2*Qp,-2*q) *  (2*Kp+1);
       iA = icf_loveseyAKK(akk,K,Kp,n,l); if(iA) akk *= Tj; else { std::cerr << errormsg; return 1; }
@@ -2151,7 +2151,7 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
          for(i=0; i<(int)(parval.size()/2); i++) est[0][i+2] = complex<double> (parval[2*i],parval[2*i+1]);
       }
       // Copies Hcf to est
-      for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble)); free(H);
+      for(i=1; i<=Hsz; i++) {memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
       Hcfi.zero(Hsz,Hsz);
       for(int ind=J.Lo(); ind<=J.Hi(); ind++)
       {
@@ -2160,14 +2160,14 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
             Hcf = icf_mumat(pars.n, ind-1, pars.l);
             if(ind==3 || ind==4) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi); 
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble)); free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
          }
          else               // Calculates multipolar operator matrices and copies them to est. 
          {
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l);
             if(im[ind]==1) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi);
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble)); free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
          }
       }
    }
@@ -2190,7 +2190,7 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
             Hcf = icf_mumat(pars.n, ind-1, pars.l); if(ind==3 || ind==4) zM = zmat2f(Hcfi,Hcf); else zM = zmat2f(Hcf,Hcfi); }
          else       {       // Calculates multipolar operator matrices and copies them to est. 
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l); if(im[ind]==1)   zM = zmat2f(Hcfi,Hcf); else zM = zmat2f(Hcf,Hcfi); }
-         for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,&zM[(i-1)*Hsz],&incx,&H[(i-1)*Hsz],&incx); free(zM);
+         for(i=1; i<=Hsz; i++) {F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,&zM[(i-1)*Hsz],&incx,&H[(i-1)*Hsz],&incx);} free(zM);
       }
    }
 
@@ -2245,9 +2245,9 @@ void chargedensity_coeff(
 // int k[] = {-1,0, 2, 2,2,2,2, 4, 4, 4, 4,4,4,4,4,4, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
 // int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    mom(1) =  pars.n / sqrt(4.0 * 3.1415); // nofelectrons 
-   for(int i=2; i<=6; ++i) mom(i) = moments(5+i) *sqrt((2.0*2+1)/8/PI); mom(4)  *= sqrt(2);
-   for(int i=7; i<=15;++i) mom(i) = moments(12+i)*sqrt((2.0*4+1)/8/PI); mom(11) *= sqrt(2);
-   for(int i=16;i<=28;++i) mom(i) = moments(23+i)*sqrt((2.0*6+1)/8/PI); mom(22) *= sqrt(2);
+   for(int i=2; i<=6; ++i) {mom(i) = moments(5+i) *sqrt((2.0*2+1)/8/PI);} mom(4)  *= sqrt(2);
+   for(int i=7; i<=15;++i) {mom(i) = moments(12+i)*sqrt((2.0*4+1)/8/PI);} mom(11) *= sqrt(2);
+   for(int i=16;i<=28;++i) {mom(i) = moments(23+i)*sqrt((2.0*6+1)/8/PI);} mom(22) *= sqrt(2);
 
 // {for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){if(m!=0){a(l,m)*=sqrt((2.0*l+1)/8/PI);}else{a(l,m)*=sqrt((2.0*l+1)/4/PI);}}}
 // } // in case of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
@@ -2280,9 +2280,9 @@ int dchargedensity_coeff1(int &tn,        // Input transition number; if tn<0, p
    for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
    int nt = du1calc(tn,T,Hxce,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
    dc1(1)=0;
-   for(int i=2; i<=6; ++i) dc1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); dc1(4) *=sqrt(2);
-   for(int i=7; i<=15;++i) dc1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); dc1(11)*=sqrt(2);
-   for(int i=16;i<=28;++i) dc1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); dc1(22)*=sqrt(2);
+   for(int i=2; i<=6; ++i) {dc1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI);} dc1(4) *=sqrt(2);
+   for(int i=7; i<=15;++i) {dc1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI);} dc1(11)*=sqrt(2);
+   for(int i=16;i<=28;++i) {dc1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI);} dc1(22)*=sqrt(2);
    return nt;
 }
 
@@ -2694,7 +2694,7 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
       int info = ic_diag(Hcf,Hcfi,Vf,Ef); if(info!=0) { std::cerr << "icf1ion::opmat(): Error diagonalising, info==" << info << "\n"; }
       delete[]Ef;
       for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) {
-         if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) Vf[ii*Hsz+jj].r=0.; if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) Vf[ii*Hsz+jj].i=0.; }
+         if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON){ Vf[ii*Hsz+jj].r=0.;} if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON){ Vf[ii*Hsz+jj].i=0.;} }
       complexdouble *zJmat; if(im[(int)abs(n)]==1) zJmat=zmat2f(zeros,Jmat); else zJmat=zmat2f(Jmat,zeros);
 
       // Rotates the operator matrix into basis where H_singleion is diagonal using calculated eigenvectors with BLAS routines.
@@ -2732,7 +2732,7 @@ void icf_printheader(const char *outfile, icpars &pars)
       std::string op; if(pars.B.op_equiv==Lt) op.assign("L"); else op.assign("J");
       FILEOUT << "# Stevens Factors: <" << op << "||alpha||" << op << ">=" << pars.B.alpha();
       FILEOUT <<                  ", <" << op << "||beta||" << op << ">=" << pars.B.beta();
-      if(pars.l==F) FILEOUT << ", <" << op << "||gamma||" << op << ">=" << pars.B.gamma(); FILEOUT << "\n";
+      if(pars.l==F) {FILEOUT << ", <" << op << "||gamma||" << op << ">=" << pars.B.gamma();} FILEOUT << "\n";
    }
    FILEOUT << "# Crystal Field parameters (" << pars.B.units() << "): " << pars.B.cfparsout(", ") << "\n";
    if(fabs(pars.Bx)>DBL_EPSILON || fabs(pars.By)>DBL_EPSILON || fabs(pars.Bz)>DBL_EPSILON)

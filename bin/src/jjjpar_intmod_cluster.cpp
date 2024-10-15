@@ -41,7 +41,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
        if(feast!=0 && arpack!=0) { fprintf(stderr,"WARNING: cluster_module cannot use both FEAST and ARPACK together. FEAST will be used.\n"); arpack=0; }
        else if(arpack!=0) { 
           fprintf(stderr,"\n -----------\n WARNING: ARPACK eigensolver selected. Note that this option is buggy. Proceed at you own risk!\n ----------- \n"); fflush(stderr); }
-       if(arpack==DBL_MAX) arpack = 0.1; if(truncate==DBL_MAX) truncate = 0.1;
+       if(arpack==DBL_MAX) {arpack = 0.1;} if(truncate==DBL_MAX) {truncate = 0.1;}
        printf("truncate=%g\tfeast=%g\tarpack=%g\n",truncate,feast,arpack); /*truncate=0;*/ feast=0; /*arpack=0;*/
     }
   //else if(strncmp(instr,"#!truncate",10)==0) { char *valsto = strchr(instr,'=')+1; truncate = atof(valsto); }
@@ -569,9 +569,9 @@ int arpackeig(zsMat<double> &M, Vector &En, complexdouble*zc, int nev, iterwork 
 
    // Check workspace is large enough. 
    int litwk=n*(n+ncv)+n*4+lworkl+nev+2*ncv;
-   if(workspace.zsize<litwk) workspace.realloc_z(litwk); memset(workspace.zwork,0,litwk*sizeof(complexdouble));
-   if(workspace.dsize<ncv)   workspace.realloc_d(ncv);   memset(workspace.dwork,0,ncv*sizeof(double));
-   if(workspace.isize<ncv)   workspace.realloc_i(ncv);   memset(workspace.iwork,0,ncv*sizeof(int));
+   if(workspace.zsize<litwk) {workspace.realloc_z(litwk);} memset(workspace.zwork,0,litwk*sizeof(complexdouble));
+   if(workspace.dsize<ncv)   {workspace.realloc_d(ncv);}   memset(workspace.dwork,0,ncv*sizeof(double));
+   if(workspace.isize<ncv)   {workspace.realloc_i(ncv);}   memset(workspace.iwork,0,ncv*sizeof(int));
 
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; //complexdouble zbeta; zbeta.r=0; zbeta.i=0;
 
@@ -584,7 +584,7 @@ int arpackeig(zsMat<double> &M, Vector &En, complexdouble*zc, int nev, iterwork 
    {
       F77NAME(znaupd)(&ido, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam, ipntr, workd, workl, &lworkl, rwork, &info);
       if(ido==1 || ido==-1)
-         M.MultMv((std::complex<double>*)&workd[ipntr[0]],(std::complex<double>*)&workd[ipntr[1]]);
+        { M.MultMv((std::complex<double>*)&workd[ipntr[0]],(std::complex<double>*)&workd[ipntr[1]]);}
    }
    int rvec=1; char howmny='A';
    F77NAME(zneupd)(&rvec, &howmny, select, d, z, &n, &zalpha, workev, &bmat, &n, whichp, &nev, &tol, resid, &ncv, v, &n, iparam,
@@ -754,8 +754,8 @@ if (truncate>1e-6 && truncate<1)
    char jobz = 'V', uplo = 'U'; int lda=fdim, n=fdim, info=0, lwork=4*n, lrwork = 3*n-2;
    int zsz = lwork + fdim*dim + dim*dim, dsz = lrwork+fdim;
 
-   if(workspace->zsize<zsz) workspace->realloc_z(zsz); memset(workspace->zwork,0,zsz*sizeof(complexdouble));
-   if(workspace->dsize<dsz) workspace->realloc_d(dsz); memset(workspace->dwork,0,dsz*sizeof(double));
+   if(workspace->zsize<zsz) {workspace->realloc_z(zsz);} memset(workspace->zwork,0,zsz*sizeof(complexdouble));
+   if(workspace->dsize<dsz) {workspace->realloc_d(dsz);} memset(workspace->dwork,0,dsz*sizeof(double));
    complexdouble *zwork=&workspace->zwork[0], *zmt=&workspace->zwork[lwork]; 
    complexdouble *opr=&workspace->zwork[lwork+fdim*dim], zv;
    double *rwork=&workspace->dwork[0], *eigv=&workspace->dwork[lrwork];
@@ -847,13 +847,13 @@ else
    char jobz = 'V', uplo = 'U', range = 'A'; int n=dim, lda=n, ldz=n, info=0, lwork=4*n, il, iu, numfnd, lrwork = 24*n, liwork=10*n;
    double vl=-9e9, vu=9e9, abstol = 0.00001;
    int zsz = lwork + dim*dim*2, dsz = lrwork, isz = 2*n + liwork;
-   if(workspace->isize<isz) workspace->realloc_i(isz); memset(workspace->iwork,0,isz*sizeof(int));
-   if(workspace->zsize<zsz) workspace->realloc_z(zsz); memset(workspace->zwork,0,zsz*sizeof(complexdouble));
-   if(workspace->dsize<dsz) workspace->realloc_d(dsz); memset(workspace->dwork,0,dsz*sizeof(double));
+   if(workspace->isize<isz) {workspace->realloc_i(isz);} memset(workspace->iwork,0,isz*sizeof(int));
+   if(workspace->zsize<zsz) {workspace->realloc_z(zsz);} memset(workspace->zwork,0,zsz*sizeof(complexdouble));
+   if(workspace->dsize<dsz) {workspace->realloc_d(dsz);} memset(workspace->dwork,0,dsz*sizeof(double));
    complexdouble *zwork = &workspace->zwork[0], *zmt = &workspace->zwork[lwork], *zmo = &workspace->zwork[lwork+dim*dim];  
    double *rwork = &workspace->dwork[0];
    int *isuppz = &workspace->iwork[0], *iwork = &workspace->iwork[2*n];  
-   for(int i =1;i<=Hxc.Hi();++i)H-=Hxc(i)*(*Ia[i]); H.h_array((std::complex<double>*)zmt);
+   for(int i =1;i<=Hxc.Hi();++i){H-=Hxc(i)*(*Ia[i]);} H.h_array((std::complex<double>*)zmt);
    F77NAME(zheevr)(&jobz, &range, &uplo, &n, zmt, &lda, &vl, &vu, &il, &iu, &abstol, &numfnd, &En[1],
           zmo, &ldz, isuppz, zwork, &lwork, rwork, &lrwork, iwork, &liwork, &info);
    for (int i=0; i<dim; i++) for (int j=0; j<dim; j++) { 

@@ -34,6 +34,7 @@ void helpexit()
           "         -pinit 0.1 .. consider only transitions with population of initial state > 0.1\n"
           "         -ninit 3  ... consider only transitions from the 3 lowest eigenstates\n"
           "         -maxE 30  ... consider only transitions with energy lower than 30 meV\n"
+          "         -E        ... output to stdout energy of cf levels instead of transition energy\n"
           "         -r ion.sipf . do not read mcphas-j but only the single ion\n"
           "                       parameter file ion.sipf\n"
           "         -M  ......... calculate expectation values and transition matrix\n"
@@ -73,7 +74,7 @@ int main (int argc, char **argv)
   char sipffile[MAXNOFCHARINLINE];char  filename[MAXNOFCHARINLINE];
  char * pchr;
    double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10;
-   int Tsteps=0,Hsteps=0;
+   int Tsteps=0,Hsteps=0,elevels=0;
    double Tend=0,Tstart=0;
    Vector Hend(1,3),Hstart(1,3);
   float d=1e10;int nofcomponents=0;FILE * fout,* fout_trs, * fout_opmat;
@@ -95,8 +96,8 @@ for (i=1;i<argc;++i)
 	                              if(i==argc-1){fprintf(stderr,"Error in command: singleion -MQ needs argument(s)\n");exit(EXIT_FAILURE);}
 	                                  Q(3)=strtod(argv[i+1],NULL);++i;
     			             }      
-  else {if(strcmp(argv[i],"-S")==0) observable='S';       
-  else {if(strcmp(argv[i],"-L")==0) observable='L';       
+  else {if(strcmp(argv[i],"-S")==0) {observable='S'; }      
+  else {if(strcmp(argv[i],"-L")==0) {observable='L'; }      
   else {if(strcmp(argv[i],"-nt")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -nt needs argument(s)\n");exit(EXIT_FAILURE);}
 	                                  nmax=(int)strtod(argv[i+1],NULL);++i;
     			             }       
@@ -109,6 +110,7 @@ for (i=1;i<argc;++i)
   else {if(strcmp(argv[i],"-maxE")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -maxE needs argument(s)\n");exit(EXIT_FAILURE);}
 	                                  maxE=strtod(argv[i+1],NULL);++i;
     			             }       
+  else {if(strcmp(argv[i],"-E")==0) {elevels=1;}       
   else {if(strcmp(argv[i],"-r")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -r needs argument(s)\n");exit(EXIT_FAILURE);}
 	                              do_sipf=1;strcpy(sipffile,argv[i+1]);++i;
     			             }       
@@ -139,10 +141,11 @@ for (i=1;i<argc;++i)
     } // -Tstep
     } // -opmat
     } // -r
-    } //maxE         
-    } //ninit         
-    } //pinit         
-    } //nt         
+    } //-maxE         
+    } //-E      
+    } //-ninit         
+    } //-pinit         
+    } //-nt         
     } // -L  
     } // -S 
    } // -MQ  
@@ -177,16 +180,23 @@ if (!do_sipf)
   {par inputpars("./mcphas.j",verbose);
    inputpars.save_sipfs("./results/_");
    if(nofcomponents!=inputpars.cs.nofcomponents)fprintf(stderr,"#Warning: number of exchange field components read from command line not equal to that in mcphas.j - continuing...\n");
-    printf("#atom-number T[K] ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
+   printf("# 1         2     ");for(j=1;j<=3;++j)printf("   %i     ",2+j);
+                                   for(j=1;j<=nofcomponents;++j)printf("  %2i      ",j+5);
+                                   switch(observable)
+                                   {case 'Q': printf("                                 ");
+                                              for(j=1;j<=observable_nofcomponents;++j){printf("   %2i          %2i          %2i       %2i    ",5+nofcomponents+(j-1)*4+1,5+nofcomponents+(j-1)*4+2,5+nofcomponents+(j-1)*4+3,5+nofcomponents+(j-1)*4+4);}printf("    ");break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j){printf("  %i  ",5+nofcomponents+j);}printf("    ");break;
+                                   }printf("\n");
+ printf("#atom-nr   T[K]   ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    switch(observable)
-                                   {case 'Q': printf("Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);printf("(muB)");break;
+                                   {case 'Q': printf("Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
+                                              for(j=1;j<=observable_nofcomponents;++j){printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}printf("(muB)");break;
                                     case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
                                     default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
-                                   printf("transition-energies(meV)...\n");
-   if(opmat<1e10){fout_opmat=fopen_errchk("./results/op.mat","w");}
+   if(!elevels){printf("transition-energies(meV)...\n");}else{printf("energy levels(meV)...\n");}
+    if(opmat<1e10){fout_opmat=fopen_errchk("./results/op.mat","w");}
      for(i=1;i<=inputpars.cs.nofatoms;++i)(*inputpars.jjj[i]).Icalc_parameter_storage_init(Hxc,Hext,Tstart);
      for(i=1;i<=inputpars.cs.nofatoms;++i){
      for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
@@ -205,27 +215,7 @@ if (!do_sipf)
                  break;       
        default: (*inputpars.jjj[i]).Icalc(I,T,Hxc,Hext,lnz,u,(*inputpars.jjj[i]).Icalc_parstorage);
       }  
-if(!Hi){
-      snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
-// if sipffilename contains path (e.g. "./" or "./../")
-// do some substitutions to avoid opening error
- pchr=strstr(filename+10,"/");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
-pchr=strstr(filename+10,"\\");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
-
-      fout=fopen_errchk(filename,"w"); 
-     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",(*inputpars.jjj[i]).est.Chi(),(*inputpars.jjj[i]).sipffilename,TT);
-                                   for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
-                                   for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
-                                   switch(observable)
-                                   {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));fprintf(fout,"(muB) ");break;
-                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB) ");break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
-                                   }
-                                   fprintf(fout,"\n");
-       }     
+     
 for(int Ti=1;Ti<=Tsteps;++Ti){
       printf("%3i %8g ",i,T(Ti)); // printout ion number and temperature
       for(j=1;j<=3;++j)printf(" %8g ",Hext(j)); // printout external field as requested
@@ -235,14 +225,14 @@ for(int Ti=1;Ti<=Tsteps;++Ti){
         default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j,Ti));  // printout corresponding moments      
        } 
 
-    if(nmax>0&&Ti==1&&!Hi)
+    if(nmax>0&&Ti==1)
       { snprintf(filename,MAXNOFCHARINLINE,"./results/%s.trs",(*inputpars.jjj[i]).sipffilename);
        // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
  pchr=strstr(filename+10,"/");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
 pchr=strstr(filename+10,"\\");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
         fout_trs = fopen_errchk (filename,"w");
         trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
  
@@ -255,15 +245,41 @@ pchr=strstr(filename+10,"\\");
                         " please increase energy range in option -maxE \n",0.0,maxE);
         }
         else
-        {printf("%4g ",d);
+        {if(!elevels){printf("%4g ",d);}
          while(tc<nmax&&!trs_write_next_line(fout_trs,(*inputpars.jjj[i]),nt,1,1,1,1,tc,TT,Hxc,Hext,
-                          (*inputpars.jjj[i]).est,d,-1e100,maxE,observable,Q)){printf("%4g ",d);if(d>=0)--tc;}
+                          (*inputpars.jjj[i]).est,d,-1e100,maxE,observable,Q)){if(!elevels){printf("%4g ",d);}if(d>=0)--tc;}
         }
-        (*inputpars.jjj[i]).print_eigenstates(fout);fclose(fout);
+        
         fclose(fout_trs);
-        if(nmax<nt){printf("...");}
+        if(!elevels){if(nmax<nt){printf("...");}}
+        else
+        {for(j=(*inputpars.jjj[i]).est.Clo();j<=(*inputpars.jjj[i]).est.Chi();++j){printf("%4g ",real((*inputpars.jjj[i]).est(0,j)));}
+        }
+
       }printf("\n");}} // Ti,Hi
 
+// create levels.cef file   ******************************************
+      snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",(*inputpars.jjj[i]).sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+ pchr=strstr(filename+10,"/");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+pchr=strstr(filename+10,"\\");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+
+      fout=fopen_errchk(filename,"w"); 
+     fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",(*inputpars.jjj[i]).est.Chi(),(*inputpars.jjj[i]).sipffilename,TT);
+                                   for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
+                                   for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
+                                   switch(observable)
+                                   {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
+                                              for(j=1;j<=observable_nofcomponents;++j){fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));}fprintf(fout,"(muB) ");break;
+                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB) ");break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
+                                   }
+                                   fprintf(fout,"\n");(*inputpars.jjj[i]).print_eigenstates(fout);fclose(fout);
+ 
+// continue writing op.mat file   ******************************************      
      if(opmat<1e10){fprintf(fout_opmat,"#! d=%i  ",(*inputpars.jjj[i]).est.Chi());
                     if(opmat>nofcomponents){ for(int opmati=0;opmati<=nofcomponents;++opmati)
                                              {Matrix op((*inputpars.jjj[i]).opmat(opmati,Hxc,Hext));
@@ -293,15 +309,22 @@ pchr=strstr(filename+10,"\\");
     if(opmat<1e10)fclose(fout_opmat);
    } else { // option -r sipffile
    jjjpar jjj(0,0,0,sipffile,nofcomponents,verbose);jjj.save_sipf("./results/_");
+   printf("# 1      2    ");for(j=1;j<=3;++j)printf("   %i     ",2+j);
+                                   for(j=1;j<=nofcomponents;++j)printf("  %2i      ",j+5);
+                                   switch(observable)
+                                   {case 'Q': printf("                                 ");
+                                              for(j=1;j<=observable_nofcomponents;++j){printf("   %2i          %2i          %2i       %2i    ",5+nofcomponents+(j-1)*4+1,5+nofcomponents+(j-1)*4+2,5+nofcomponents+(j-1)*4+3,5+nofcomponents+(j-1)*4+4);}printf("    ");break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)printf("  %i  ",5+nofcomponents+j);printf("    ");break;
+                                   }printf("\n");
    printf("#atom-nr T[K] ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
                                    switch(observable)
-                                   {case 'Q': printf("Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);printf("(muB)");break;
+                                   {case 'Q': printf("Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
+                                              for(j=1;j<=observable_nofcomponents;++j){printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}printf("(muB)");break;
                                     case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
                                     default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
-                                   printf("transition-energies(meV)...\n");
+                                   if(!elevels){printf("transition-energies(meV)...\n");}else{printf("energy levels(meV)...\n");}
     jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
    for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
         switch(observable)
@@ -317,27 +340,7 @@ pchr=strstr(filename+10,"\\");
                  break;       
       default: jjj.Icalc(I,T,Hxc,Hext,lnz,u,jjj.Icalc_parstorage);
       }          
-if(!Hi){  
-    snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
-// if sipffilename contains path (e.g. "./" or "./../")
-// do some substitutions to avoid opening error
- pchr=strstr(filename+10,"/");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
-pchr=strstr(filename+10,"\\");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
 
-      fout=fopen_errchk(filename,"w");  
-    fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,TT);
-                                   for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
-                                   for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
-                                   switch(observable)
-                                   {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));fprintf(fout,"(muB)");break;
-                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB)");break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
-                                   }
-                                   fprintf(fout,"\n");
-   }
 for(int Ti=1;Ti<=Tsteps;++Ti){
    printf("%3i %8g ",1,T(Ti)); // printout ion number and temperature
       for(j=1;j<=3;++j)printf(" %10g ",Hext(j)); // printout external field as requested
@@ -345,14 +348,14 @@ for(int Ti=1;Ti<=Tsteps;++Ti){
       switch(observable)
        {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(MMq(j,Ti)),real(MMq(j,Ti)),imag(MMq(j,Ti)),I(j,Ti)*jjj.F(Norm(Q)));break;
         default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j,Ti));  // printout corresponding moments      
-       }if(nmax>0&&Ti==1&&!Hi)
+       }if(nmax>0&&Ti==1)
       { snprintf(filename,MAXNOFCHARINLINE,"./results/%s.trs",jjj.sipffilename);
 // if sipffilename contains path (e.g. "./" or "./../")
 // do some substitutions to avoid opening error
  pchr=strstr(filename+10,"/");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
 pchr=strstr(filename+10,"\\");
- while(pchr!=0){strncpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
 
         fout_trs = fopen_errchk (filename,"w");
         trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
@@ -364,15 +367,41 @@ pchr=strstr(filename+10,"\\");
                         " please increase energy range in option -maxE \n",0.0,maxE);
         }
         else
-        {printf("%4g ",d);
+        {if(!elevels){printf("%4g ",d);}
          while(tc<nmax&&!trs_write_next_line(fout_trs,jjj,nt,1,1,1,1,tc,TT,Hxc,Hext,
-                          jjj.est,d,-1e100,maxE,observable,Q)){if(d>=0)--tc;printf("%4g ",d);}
+                          jjj.est,d,-1e100,maxE,observable,Q)){if(d>=0)--tc;if(!elevels){printf("%4g ",d);}}
         }
-        jjj.print_eigenstates(fout);fclose(fout);
+        
         fclose(fout_trs);
-        if(nmax<nt){printf("...");}
+                if(!elevels){if(nmax<nt){printf("...");}}
+        else
+        {for(j=jjj.est.Clo();j<=jjj.est.Chi();++j){printf("%4g ",real(jjj.est(0,j)));}
+        }
       } 
   printf("\n");}} // Hi
+
+ // create levels.cef file   ******************************************
+    snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
+// if sipffilename contains path (e.g. "./" or "./../")
+// do some substitutions to avoid opening error
+ pchr=strstr(filename+10,"/");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
+pchr=strstr(filename+10,"\\");
+ while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
+
+      fout=fopen_errchk(filename,"w");  
+    fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,TT);
+                                   for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
+                                   for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
+                                   switch(observable)
+                                   {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
+                                              for(j=1;j<=observable_nofcomponents;++j){fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));}fprintf(fout,"(muB)");break;
+                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB)");break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
+                                   }
+                                   fprintf(fout,"\n");jjj.print_eigenstates(fout);fclose(fout);
+
+// continue writing op.mat file   ******************************************
 if(opmat<1e10){fout_opmat=fopen_errchk("results/op.mat","w");
                        fprintf(fout_opmat,"#! d=%i  ",jjj.est.Chi());
 if(opmat>nofcomponents){ for(int opmati=0;opmati<=nofcomponents;++opmati)

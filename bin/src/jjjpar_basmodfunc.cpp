@@ -143,7 +143,7 @@ module_type=0;
 
     I=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"Icalc");
     //*(int **)(&m)=GetProcAddress(handle,"Icalc");
-     if (I==NULL) {fprintf (stderr," error %d loading function Icalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
+     if (I==NULL) {fprintf (stderr," error %i module %s loading function Icalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
                   else {if(verbose)fprintf (stderr,"Icalc ");}
     IM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,Vector*,Vector*,ComplexMatrix*))GetProcAddress(handle,"IMcalc");
     //*(int **)(&m)=GetProcAddress(handle,"IMcalc");
