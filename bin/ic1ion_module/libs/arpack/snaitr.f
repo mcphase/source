@@ -135,6 +135,7 @@ c     ivout   ARPACK utility routine that prints integers.
 c     arscnd  ARPACK utility routine for timing.
 c     smout   ARPACK utility routine that prints matrices
 c     svout   ARPACK utility routine that prints vectors.
+c     ssout   ARPACK utility routine that prints scalars.
 c     slabad  LAPACK routine that computes machine constants.
 c     slamch  LAPACK routine that determines machine constants.
 c     slascl  LAPACK routine for careful scaling of a matrix.
@@ -268,7 +269,7 @@ c     | External Subroutines |
 c     %----------------------%
 c
       external   saxpy, scopy, sscal, sgemv, sgetv0, slabad, 
-     &           svout, smout, ivout, arscnd
+     &           svout, ssout, smout, ivout, arscnd
 c
 c     %--------------------%
 c     | External Functions |
@@ -373,7 +374,7 @@ c
          if (msglvl .gt. 1) then
             call ivout (logfil, 1, j, ndigit, 
      &                  '_naitr: generating Arnoldi vector number')
-            call svout (logfil, 1, rnorm, ndigit, 
+            call ssout (logfil, 1, rnorm, ndigit, 
      &                  '_naitr: B-norm of the current residual is')
          end if
 c 

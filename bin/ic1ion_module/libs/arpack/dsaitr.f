@@ -262,7 +262,7 @@ c     | External Subroutines |
 c     %----------------------%
 c
       external   daxpy, dcopy, dscal, dgemv, dgetv0, dvout, dmout,
-     &           dlascl, ivout, arscnd
+     &           dlascl, ivout, arscnd, dsout
 c
 c     %--------------------%
 c     | External Functions |
@@ -366,7 +366,7 @@ c
          if (msglvl .gt. 2) then
             call ivout (logfil, 1, j, ndigit, 
      &                  '_saitr: generating Arnoldi vector no.')
-            call dvout (logfil, 1, rnorm, ndigit, 
+            call dsout (logfil, 1, rnorm, ndigit, 
      &                  '_saitr: B-norm of the current residual =')
          end if
 c 

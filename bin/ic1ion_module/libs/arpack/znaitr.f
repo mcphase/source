@@ -380,7 +380,7 @@ c
          if (msglvl .gt. 1) then
             call ivout (logfil, 1, j, ndigit, 
      &                  '_naitr: generating Arnoldi vector number')
-            call dvout (logfil, 1, rnorm, ndigit, 
+            call dsout (logfil, 1, rnorm, ndigit, 
      &                  '_naitr: B-norm of the current residual is')
          end if
 c 

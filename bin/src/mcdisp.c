@@ -1260,7 +1260,7 @@ if (do_jqfile){
                      for(int th=0; th<num_threads_started; th++)rc = pthread_join(threads[th], &status);
                      #else
                      if(num_threads_started>0){retval=WaitForMultipleObjects(num_threads_started,threads,TRUE,INFINITE);
-                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects=%i num_threads_started=%i\n",retval,num_threads_started); exit(EXIT_FAILURE); }
+                     if(retval<WAIT_OBJECT_0||retval>WAIT_OBJECT_0+num_threads_started-1){printf("Error waitformultipleobjects=%li num_threads_started=%i\n",retval,num_threads_started); exit(EXIT_FAILURE); }
                       for(int th=0; th<num_threads_started; th++)CloseHandle(threads[th]);}         
                      #endif
                      num_threads_started=0; 

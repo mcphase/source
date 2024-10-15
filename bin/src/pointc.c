@@ -368,10 +368,10 @@ else
                       const char lm[]="B00 B22SB21SB20 B21 B22 B33SB32SB31SB30 B31 B32 B33 B44SB43SB42SB41SB40 B41 B42 B43 B44 B55SB54SB53SB52SB51SB50 B51 B52 B53 B54 B55 B66SB65SB64SB63SB62SB61SB60 B61 B62 B63 B64 B65 B66 ";
                       char lm4[5];
                       for(i=0;i<=45;++i){strncpy(lm4,lm+i*4,4);if(lm4[3]!='S')lm4[3]='\0';
-                                        if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"\0");
-                                        lm4[0]='L';if(extract(instr,lm4,Llm_in(i))==0){if(conv){fprintf(conv_file,"# %s\n",instr);}snprintf(instr,MAXNOFCHARINLINE,"\0");}
+                                        if(extract(instr,lm4,dummy)==0)snprintf(instr,MAXNOFCHARINLINE,"%c",'\0');
+                                        lm4[0]='L';if(extract(instr,lm4,Llm_in(i))==0){if(conv){fprintf(conv_file,"# %s\n",instr);}snprintf(instr,MAXNOFCHARINLINE,"%c",'\0');}
                                         }
-                     if(extract(instr,"pointcharge",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"\0");}
+                     if(extract(instr,"pointcharge",dummy)==0){snprintf(instr,MAXNOFCHARINLINE,"%c",'\0');}
 
                       printf("%s",instr);
                                     }

@@ -261,7 +261,7 @@ c     %----------------------%
 c     | External Subroutines |
 c     %----------------------%
 c
-      external   saxpy, scopy, sscal, sgemv, sgetv0, svout, smout,
+      external   saxpy, scopy, sscal, sgemv, sgetv0, svout, ssout, smout,
      &           slascl, ivout, arscnd
 c
 c     %--------------------%
@@ -366,7 +366,7 @@ c
          if (msglvl .gt. 2) then
             call ivout (logfil, 1, j, ndigit, 
      &                  '_saitr: generating Arnoldi vector no.')
-            call svout (logfil, 1, rnorm, ndigit, 
+            call ssout (logfil, 1, rnorm, ndigit, 
      &                  '_saitr: B-norm of the current residual =')
          end if
 c 

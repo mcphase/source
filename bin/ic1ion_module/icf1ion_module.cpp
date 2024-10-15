@@ -2766,8 +2766,8 @@ void icf_showoutput(const char *filename,                       // Output file n
      {
         J2[ins]=iJ2; mJ2[ins]=imJ2; 
         id.assign(gs.id); id.append("_");
-        if(iJ2%2==0) sprintf(Jlabel,"%i",iJ2/2);      else sprintf(Jlabel,"%i/2",iJ2);      id.append(Jlabel);
-        if(imJ2%2==0)sprintf(Jlabel,",mJ=%i",imJ2/2); else sprintf(Jlabel,",mJ=%i/2",imJ2); id.append(Jlabel);
+        if(iJ2%2==0) snprintf(Jlabel,sizeof(Jlabel),"%i",iJ2/2);      else snprintf(Jlabel,sizeof(Jlabel),"%i/2",iJ2);      id.append(Jlabel);
+        if(imJ2%2==0)snprintf(Jlabel,sizeof(Jlabel),",mJ=%i",imJ2/2); else snprintf(Jlabel,sizeof(Jlabel),",mJ=%i/2",imJ2); id.append(Jlabel);
         statesID[ins].assign(id); ins++; 
      }
 
