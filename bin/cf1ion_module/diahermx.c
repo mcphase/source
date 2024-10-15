@@ -54,9 +54,9 @@ Includedateien holen
 /*----------------------------------------------------------------------------
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
-extern MATRIX  *mx_copy(); /* Matrix kopieren */
-extern MATRIX  *mx_mult(); /* Matrizen multiplizieren */
-extern MATRIX  *mx_ewev();
+extern MATRIX  *mx_copy(MATRIX *a); /* Matrix kopieren */
+extern MATRIX  *mx_mult(MATRIX *a,MATRIX *b),*mx_sub(DOUBLE z, MATRIX*a,MATRIX*b),*mx_ewev(VEKTOR *ew,MATRIX *ev,DOUBLE shift); /* Matrizen multiplizieren */
+extern MATRIX  *mx_ewev(VEKTOR *ew,MATRIX *ev,DOUBLE shift);
 extern MATRIX  *mx_sub(DOUBLE z, MATRIX*a,MATRIX*b) ; /* Matrizen subtrahieren   */
 extern MATRIX  *mx_alloc(INT anz_ze,INT anz_sp);/* Speicher fuer Matrix holen */
 extern KOMPLEX *cdiv(DOUBLE xr,DOUBLE xi,DOUBLE yr,DOUBLE yi);    /* komplexe Zahlen dividieren */
@@ -72,9 +72,9 @@ extern VEKTOR  *vr_sub(VEKTOR *a,VEKTOR *b);           /* |a> = |a>- |b>       *
  
 extern VEKTOR  *vr_alloc(INT n);/* Speicher fuer komplexen Vektor holen */
 extern DOUBLE  sqrt(DOUBLE f);     /* Quadratwurzel  */
-extern DOUBLE  pow_();
-extern INT     a_toi();
-extern DOUBLE  a_tof();
+extern DOUBLE  pow_(DOUBLE x,INT n);
+extern INT     a_toi(CHAR *string,INT anfang,INT ende);
+extern DOUBLE  a_tof(CHAR *string,INT anfang,INT ende);
 extern INT     free_vr(VEKTOR *v);  /* Vektor-Speicher wieder freigeben */
 extern DOUBLE  log(DOUBLE f);      /* Logarithmus               */
 
@@ -96,7 +96,7 @@ EWPROBLEM  *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SET
     EWPROBLEM *orthonormalisieren(EWPROBLEM * ewproblem);
     EWPROBLEM *entartung(EWPROBLEM *ewproblem, INT overwrite );
     EWPROBLEM *ordnen_ew(EWPROBLEM *ewproblem, INT overwrite );
-    EWPROBLEM *set_ewproblem();
+    EWPROBLEM *set_ewproblem(SETUP     *setup,EWPROBLEM *ewproblem,MATRIX    *matrix,DOUBLE macheps,INT  overwrite);
  
 /*[1]*/  macheps = (MACHEPSFACT*accuracy());
 /*[0]*/  if(test_nullmatrix(matrix)==NEIN){
@@ -129,14 +129,9 @@ EWPROBLEM  *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SET
 /* [7] die Eigenvektoren orthonormalisieren                         */
 }
 /*----------------------------------------------------------------------------
-                               set_ewproblem()
+                               set_ewproblem(SETUP     *setup,EWPROBLEM *ewproblem,MATRIX    *matrix,DOUBLE macheps,INT  overwrite)
 ------------------------------------------------------------------------------*/
-EWPROBLEM *set_ewproblem(setup,ewproblem,matrix,macheps,overwrite)
-  SETUP     *setup;
-  EWPROBLEM *ewproblem;
-  MATRIX    *matrix;
-  DOUBLE    macheps;
-  INT       overwrite;
+EWPROBLEM *set_ewproblem(SETUP     *setup,EWPROBLEM *ewproblem,MATRIX    *matrix,DOUBLE macheps,INT  overwrite)
 {
   INT n,i,j;
   MATRIX *mx_alloc(INT anz_ze,INT anz_sp),*ev;
@@ -194,7 +189,7 @@ EWPROBLEM *set_ewproblem(setup,ewproblem,matrix,macheps,overwrite)
 SETUP *cfield_setup() /* Setupfile lesen falls vorhanden sonst erzeugen*/
 {
    FILE  *fopen(const char * filename,const char * mode),*fp;
-   SETUP *read_setup();
+   SETUP *read_setup(FILE *fp,SETUP *setup);
    SETUP *create_setup(SETUP *setup);
    SETUP *setup;
  
@@ -209,14 +204,12 @@ SETUP *cfield_setup() /* Setupfile lesen falls vorhanden sonst erzeugen*/
 /*----------------------------------------------------------------------------
                                read_setup()
 ------------------------------------------------------------------------------*/
-SETUP *read_setup(fp,setup)  /* setupfile lesen    */
-    FILE *fp;
-   SETUP *setup;
+SETUP *read_setup(FILE *fp,SETUP *setup)  /* setupfile lesen    */
 {
    INT    buffer_size=81,stelle;
-   INT    a_toi();
-   CHAR   *string,*line,*fgets(),c;
-   DOUBLE a_tof(),pow_(),versionsnr,dummy;
+   INT    a_toi(CHAR *string,INT anfang,INT ende);
+   CHAR   *string,*line,*fgets(char * __restrict, int, FILE *),c;
+   DOUBLE a_tof(CHAR *string,INT anfang,INT ende),pow_(DOUBLE x,INT n),versionsnr,dummy;
    SETUP  *create_setup(SETUP *setup);
    DOUBLE accuracy();
  
@@ -290,7 +283,7 @@ SETUP *create_setup(SETUP *setup)  /* setupfile erzeugen */
    FILE *fopen(const char * filename,const char * mode),*fp;
    CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
    CHAR *t11,*t12,*t13;/*,*t14,*t15,*t16,*t17,*t18,*t19,*t20;*/
-   DOUBLE accuracy(),log();
+   DOUBLE accuracy(),log(DOUBLE z);
    INT stelle;
  
    fp=fopen_errchk(CFIELDSETUP,"w");
@@ -419,10 +412,9 @@ fprintf(fp,"%s",t16);
  
 }
 /*----------------------------------------------------------------------------
-                               write_titlecom()
+                               write_titlecom(FILE *fp)
 ------------------------------------------------------------------------------*/
-void write_titlecom(fp)  /* setupfile erzeugen */
-   FILE *fp;
+void write_titlecom(FILE *fp)  /* setupfile erzeugen */
 {
    CHAR *t01/*,*t02*/,*t03/*,*t04*/,*t05/*,*t06,*t07*/,*t08/*,*t09,*t10*/;
    CHAR/* *t11,*/*t12,*t13,*t14/*,*t15*/,*t16;/*,*t17,*t18,*t19,*t20;

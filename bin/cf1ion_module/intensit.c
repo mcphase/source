@@ -30,9 +30,9 @@ Includedateien holen
 extern definierte Funktionen
 -----------------------------------------------------------------------------*/
 extern DOUBLE  exp_(DOUBLE z);           /* definiert in ORTHO.C */
-extern void    fit_ortho();      /* definiert in ORTHO.C */
+extern void    fit_ortho(SETUP        *setup,EWPROBLEM    *ewproblem,KRISTALLFELD *kristallfeld);      /* definiert in ORTHO.C */
 extern INT     is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);       /* definiert in DIAHERMX.C */
-extern INT     isimplementiert();/* definiert in CFIELD.C.*/
+extern INT     isimplementiert(CHAR *ion);/* definiert in CFIELD.C.*/
 extern DOUBLE  is_null(DOUBLE a,DOUBLE macheps);        /* definiert in DIAHERMX.C */
 extern INT       null(DOUBLE a,DOUBLE macheps);         /* definiert in DIAHERMX.C */
 extern DOUBLE  einh_Kelvin();    /* definiert in CFIELD.C */
@@ -47,15 +47,15 @@ extern KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b);          /* definiert in KOMPLEX.C*
 extern KOMPLEX *csub(KOMPLEX *a,KOMPLEX *b);          /* definiert in KOMPLEX.C*/
 extern KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);         /* definiert in KOMPLEX.C*/
 extern KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b);       /* definiert in KOMPLEX.C*/
-extern INT     write_titlecom(); /* definiert in DIAHERMX.C */
+extern INT     write_titlecom(FILE *fp); /* definiert in DIAHERMX.C */
 extern INT     test_nullmatrix();/* definiert in DIAHERMX.C */
 extern CHAR    up(CHAR c);             /* definiert in CFIELD.C */
-extern INT     isreell();        /* definiert in CFIELD.C */
-extern MATRIX    *calc_iBmag();  /* definiert in CFIELD.C */
-extern EWPROBLEM *solve();       /* definiert in CFIELD.C */
-extern EWPROBLEM *set_ewproblem();/* definiert in DIAHERMX.c */
-extern BRUCH     *is_rational(); /* definiert in STEVENS.C*/
-extern LONG      ggt_l();        /* definiert in STEVENS.C*/
+extern INT     isreell(INT  symmetrienr ,CHAR * ion );        /* definiert in CFIELD.C */
+extern MATRIX    *calc_iBmag(MATRIX * bmag,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE Bxmol,DOUBLE Bymol,DOUBLE Bzmol,DOUBLE Dx2,DOUBLE Dy2,DOUBLE Dz2 ,DOUBLE Dx4,DOUBLE Dy4,DOUBLE Dz4);  /* definiert in CFIELD.C */
+extern EWPROBLEM *solve(SETUP *setup,EWPROBLEM *ewproblem,INT overwrite,KRISTALLFELD *kristallfeld,CHAR modus);       /* definiert in CFIELD.C */
+extern EWPROBLEM *set_ewproblem(SETUP     *setup,EWPROBLEM *ewproblem,MATRIX    *matrix,DOUBLE macheps,INT  overwrite);/* definiert in DIAHERMX.c */
+extern BRUCH     *is_rational(DOUBLE z); /* definiert in STEVENS.C*/
+extern LONG      ggt_l(LONG a,LONG b);        /* definiert in STEVENS.C*/
 extern FILE     *fopen(CONST CHAR * filename,CONST CHAR * mode);        /* definiert in stdio.h  */
  
  
@@ -81,8 +81,10 @@ extern DOUBLE    epn5n(INT n);       /* definiert in CFIELD.C*/
 extern DOUBLE    epn6n(INT n);       /* definiert in CFIELD.C*/
  
 extern DOUBLE    spline(INT n,DOUBLE *xx,DOUBLE *ff,DOUBLE x,DOUBLE macheps);      /* definiert in SPLINE.C*/
-extern INT       lesedaten();   /* definiert in EINGABE.C*/
-extern INT       is_pbekannt(); /* definiert in EINGABE.C*/
+extern INT       lesedaten(FILE *fp,DOUBLE*x,DOUBLE*f,INT*n,CHAR *name,INT nummerierung,INT *ip,INT imax,
+   INT (*bekannt)(INT datnr,ITERATION *iteration),INT *pdatnr,
+            ITERATION *  iteration,INT       *anzdatnr);   /* definiert in EINGABE.C*/
+extern INT       is_pbekannt(INT datnr,ITERATION *iteration); /* definiert in EINGABE.C*/
 extern FILE *fopen_errchk(CONST CHAR * filename,CONST CHAR * mode);         /* definiert in EINGABE.C*/
  
 /*----------------------------------------------------------------------------
@@ -860,18 +862,15 @@ if( *(FILENAME(kristallfeld)+16) != *(&ORTHO[16]) ){
 /*----------------------------------------------------------------------------
                                    raus_suszept()
 -----------------------------------------------------------------------------*/
-void raus_suszept(setup,iteration,ewproblem,kristallfeld)
-    SETUP     *setup;
-    ITERATION *iteration;
-    EWPROBLEM *ewproblem;
-    KRISTALLFELD *kristallfeld;
+void raus_suszept(SETUP     *setup,ITERATION *iteration,EWPROBLEM *ewproblem,KRISTALLFELD *kristallfeld)
 {
   FILE   *fp=0;
   INT    einheitnr_in,datensatz_nr=-1,anz_daten=0/*,dummy*/,i,anz_temp;
   INT    anzdatnr,datnr;
-  INT    lesethetafile,anz,is_pbekannt();
+  INT    lesethetafile,anz,is_pbekannt(INT datnr,ITERATION *iteration);
   DOUBLE gj/*,t*/,macheps;
-  DOUBLE suszept(DOUBLE   (*mat_Ji2)(VEKTOR *ev_ir,VEKTOR *ev_ks,DOUBLE macheps),EWPROBLEM *ewproblem,INT  einheitnr_in,DOUBLE t,DOUBLE gj),mat_Jx2(),mat_Jy2(),mat_Jz2(),zwischen;
+  DOUBLE suszept(DOUBLE   (*mat_Ji2)(VEKTOR *ev_ir,VEKTOR *ev_ks,DOUBLE macheps),EWPROBLEM *ewproblem,INT  einheitnr_in,DOUBLE t,DOUBLE gj);
+  DOUBLE mat_Jx2(VEKTOR *a,VEKTOR *b,DOUBLE macheps),mat_Jy2(VEKTOR *a,VEKTOR *b,DOUBLE macheps),mat_Jz2(VEKTOR *a,VEKTOR *b,DOUBLE macheps),zwischen;
   DOUBLE *x_s,*y_s,*z_s,*temp,temp_step;
   DOUBLE anf_temp,end_temp,lambda,theta,*xx,*ff;
   DOUBLE ttheta;
@@ -1042,29 +1041,26 @@ if( anz_daten != 0 ){
  
 }
 /*----------------------------------------------------------------------------
-                                   raus_kpoly()
+                                   raus_kpoly(SETUP        * setup,EWPROBLEM    *ewproblem,KRISTALLFELD *kristallfeld,
+DOUBLE  anf_feld,DOUBLE  end_feld,DOUBLE temp,CHAR         *ionname)
 -----------------------------------------------------------------------------*/
-void raus_kpoly( setup,ewproblem,kristallfeld,anf_feld,end_feld,
-                  temp,ionname)
-    SETUP        *setup;
-    EWPROBLEM    *ewproblem;
-    KRISTALLFELD *kristallfeld;
-    DOUBLE       anf_feld,end_feld,temp;
-    CHAR         *ionname;
+void raus_kpoly(SETUP        * setup,EWPROBLEM    *ewproblem,KRISTALLFELD *kristallfeld,
+DOUBLE  anf_feld,DOUBLE  end_feld,DOUBLE temp,CHAR         *ionname)
 {
   FILE   *fp;
   INT    datensatz_nr=-1,anz_daten=0/*,dummy*/,i,anz_feld/*,r1,r2,r3*/;
   DOUBLE /*t,*/macheps;
-  DOUBLE magnetm()/*,b_norm*/,sqrt();
+  DOUBLE magnetm(KOMPLEX   *(*mat_Ji)(VEKTOR *ev_ir,VEKTOR *ev_ks),SETUP     *setup,EWPROBLEM *ewproblem,
+KRISTALLFELD *kristallfeld,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE t)/*,b_norm*/,sqrt(DOUBLE z);
   DOUBLE *x_s/*,*y_s,*z_s*/,*feld,feld_step,b1,b2,b3,mx,my,mz;
   CHAR   *t01,*t02/*,*t03,*t04*/,*t05;
   ITERATION *iteration;
   COMHES *comhes;
   MATRIX *matrix;
-  BRUCH  *is_rational()/*,*z1,*z2,*z3*/;
+  BRUCH  *is_rational(DOUBLE z)/*,*z1,*z2,*z3*/;
   KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b),*mat_Jy(VEKTOR *a,VEKTOR *b),*mat_Jz(VEKTOR *a,VEKTOR *b);
-  DOUBLE sqrt();
-  LONG /*hauptnenner,*/ggt_l();
+  DOUBLE sqrt(DOUBLE z);
+  LONG /*hauptnenner,*/ggt_l(LONG a,LONG b);
  
   if(NUMMERIERUNG(setup)==JA)  datensatz_nr = 0;
  
@@ -1144,12 +1140,11 @@ void raus_kpoly( setup,ewproblem,kristallfeld,anf_feld,end_feld,
 /*----------------------------------------------------------------------------
                                    richtung()
 -----------------------------------------------------------------------------*/
-void richtung( iteration )
-  ITERATION *iteration;
+void richtung(ITERATION * iteration )
 {
-  BRUCH  *is_rational(),*z1,*z2,*z3;
-  LONG   hauptnenner,ggt_l();
-  DOUBLE b1,b2,b3,b_norm,sqrt();
+  BRUCH  *is_rational(DOUBLE z),*z1,*z2,*z3;
+  LONG   hauptnenner,ggt_l(LONG a,LONG b);
+  DOUBLE b1,b2,b3,b_norm,sqrt(DOUBLE z);
  
   b1        = B1(iteration);
   b2        = B2(iteration);
@@ -1182,28 +1177,25 @@ void richtung( iteration )
     free_(z1);free_(z2);free_(z3);
 }
 /*----------------------------------------------------------------------------
-                                   raus_magnetm()
+                                   raus_magnetm(SETUP        *setup,EWPROBLEM    *ewproblem,KRISTALLFELD *kristallfeld,
+DOUBLE anf_feld,DOUBLE end_feld,DOUBLE  temp,CHAR         *ionname)
 -----------------------------------------------------------------------------*/
-void raus_magnetm( setup,ewproblem,kristallfeld,anf_feld,end_feld,
-                  temp,ionname)
-    SETUP        *setup;
-    EWPROBLEM    *ewproblem;
-    KRISTALLFELD *kristallfeld;
-    DOUBLE       anf_feld,end_feld,temp;
-    CHAR         *ionname;
+void raus_magnetm( SETUP        *setup,EWPROBLEM    *ewproblem,KRISTALLFELD *kristallfeld,
+DOUBLE anf_feld,DOUBLE end_feld,DOUBLE  temp,CHAR         *ionname)
 {
   FILE   *fp;
   INT    datensatz_nr=-1,anz_daten=0/*,dummy*/,i,anz_feld,r1,r2,r3;
   DOUBLE /*t,*/macheps;
   KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b),*mat_Jy(VEKTOR *a,VEKTOR *b),*mat_Jz(VEKTOR *a,VEKTOR *b);
-  DOUBLE magnetm(),b_norm,sqrt();
+  DOUBLE magnetm(KOMPLEX   *(*mat_Ji)(VEKTOR *ev_ir,VEKTOR *ev_ks),SETUP     *setup,EWPROBLEM *ewproblem,
+KRISTALLFELD *kristallfeld,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE t),b_norm,sqrt(DOUBLE z);
   DOUBLE *x_s,*y_s,*z_s,*feld,feld_step,b1,b2,b3;
   DOUBLE b1mol,b2mol,b3mol,bmol_norm;
   CHAR   *t01,*t02/*,*t03*/,*t04,*t05;
   ITERATION *iteration;
   COMHES *comhes;
   MATRIX *matrix;
-  DOUBLE sqrt();
+  DOUBLE sqrt(DOUBLE z);
  
   if(NUMMERIERUNG(setup)==JA)  datensatz_nr = 0;
  
@@ -1416,14 +1408,11 @@ modus) with repeated calls leading to different entartungen */
  
 }
 /*----------------------------------------------------------------------------
-                                   raus_mkommentar()
+                                   raus_mkommentar(FILE       *fp,ITERATION  *iteration,DOUBLE anf_feld,DOUBLE end_feld,
+DOUBLE temp,INT b1,INT b2,INT b3,CHAR       *ionname)
 -----------------------------------------------------------------------------*/
-void raus_mkommentar(fp,iteration,anf_feld,end_feld,temp,b1,b2,b3,ionname)
-  FILE       *fp;
-  ITERATION  *iteration;
-  DOUBLE     anf_feld,end_feld,temp;
-  INT        b1,b2,b3;
-  CHAR       *ionname;
+void raus_mkommentar(FILE       *fp,ITERATION  *iteration,DOUBLE anf_feld,DOUBLE end_feld,
+DOUBLE temp,INT b1,INT b2,INT b3,CHAR       *ionname)
 {
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
     CHAR *t11,*t12,*t13,*t14,*t15,*t16,*t17,*t18,*t19,*t20;
@@ -1552,13 +1541,9 @@ fprintf(fp,t60,is_null(B3MOL(iteration),1/1000) );
 fprintf(fp,"%s",t61);
 }
 /*----------------------------------------------------------------------------
-                                   raus_kkommentar()
+                                   raus_kkommentar(FILE      *fp,ITERATION *iteration,DOUBLE anf_feld,DOUBLE end_feld,DOUBLE temp,CHAR      *ionname)
 -----------------------------------------------------------------------------*/
-void raus_kkommentar(fp,iteration,anf_feld,end_feld,temp,ionname)
-  FILE      *fp;
-  ITERATION *iteration;
-  DOUBLE    anf_feld,end_feld,temp;
-  CHAR      *ionname;
+void raus_kkommentar(FILE      *fp,ITERATION *iteration,DOUBLE anf_feld,DOUBLE end_feld,DOUBLE temp,CHAR      *ionname)
 {
     UNUSED_PARAMETER(ionname);
 
@@ -1633,14 +1618,11 @@ fprintf(fp,t26,B3MOL(iteration) );
 fprintf(fp,"%s",t27);
 }
 /*----------------------------------------------------------------------------
-                                   raus_kommentar()
+                                   raus_kommentar(FILE   *fp,DOUBLE anf_temp,DOUBLE end_temp,DOUBLE lambda,DOUBLE theta,INT lesethetafile,
+                 CHAR  *namethetafile)
 -----------------------------------------------------------------------------*/
-void raus_kommentar(fp,anf_temp,end_temp,lambda,theta,lesethetafile,
-                 namethetafile)
-  FILE   *fp;
-  DOUBLE anf_temp,end_temp,lambda,theta;
-  INT    lesethetafile;
-  CHAR  *namethetafile;
+void raus_kommentar(FILE   *fp,DOUBLE anf_temp,DOUBLE end_temp,DOUBLE lambda,DOUBLE theta,INT lesethetafile,
+                 CHAR  *namethetafile)
 {
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10;
     CHAR *t11,*t12,*t13,*t14,*t15,*t16,*t17,*t18,*t19,*t20;
@@ -1832,14 +1814,9 @@ fprintf(fp,"%s",t84);
 
 }
 /*----------------------------------------------------------------------------
-                                   printspalte()
+                                   printspalte(INT modus,FILE *fp,CHAR *t05,CHAR *t06,CHAR *t07,CHAR *t46,CHAR *t47,INT k,INT q,DOUBLE re,DOUBLE im)
 -----------------------------------------------------------------------------*/
-INT printspalte(modus,fp,t05,t06,t07,t46,t47,k,q,re,im)
-  INT  modus;
-  FILE *fp;
-  CHAR *t05,*t06,*t07,*t46,*t47;
-  INT k,q;
-  DOUBLE re,im;
+INT printspalte(INT modus,FILE *fp,CHAR *t05,CHAR *t06,CHAR *t07,CHAR *t46,CHAR *t47,INT k,INT q,DOUBLE re,DOUBLE im)
 {CHAR *tc,*ts;
  tc="#!%c%1d%1d  =  %16.6f                                     \n";
  ts="#!%c%1d%1ds =              %16.6f                         \n" ;
@@ -1863,15 +1840,9 @@ INT printspalte(modus,fp,t05,t06,t07,t46,t47,k,q,re,im)
    return(JA);
 }
 /*----------------------------------------------------------------------------
-                                   parametersatz()
+                                   parametersatz(FILE *fp,CHAR modus,KRISTALLFELD *kristallfeld,INT ionennr,CHAR *einheit,CHAR eingabeart)
 -----------------------------------------------------------------------------*/
-void parametersatz(fp,modus,kristallfeld,ionennr,einheit,eingabeart)
-    FILE *fp;
-    CHAR modus;
-    KRISTALLFELD *kristallfeld;
-    INT  ionennr;
-    CHAR *einheit;
-    CHAR eingabeart;
+void parametersatz(FILE *fp,CHAR modus,KRISTALLFELD *kristallfeld,INT ionennr,CHAR *einheit,CHAR eingabeart)
 {
     CHAR    *t01,*t02,*t02a,*t02b,*t02l,*t03,*t04,*t05,*t06,*t07/*,*t08,*t09,*t10*/,*t12,*t12a;
     CHAR    *t16,*t22,*t26/*,*t33,*t34*/,*t36/*,*t45*/,*t46,*t47;

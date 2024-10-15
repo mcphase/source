@@ -33,14 +33,14 @@ extern DOUBLE gamma_J[]; /* definiert in theta.c */
  
 extern QUADRANT *abfrage( DOUBLE  rsin, DOUBLE  rcos, DOUBLE  macheps );      /* definiert in ORTHO.C    */
 extern INT       null(DOUBLE a,DOUBLE macheps);         /* definiert in DIAHERMX.C */
-extern INT      *sort();         /* definiert in DIAHERMX.C */
+extern INT      *sort(DOUBLE *werte,INT    *nummer,INT anz);         /* definiert in DIAHERMX.C */
 extern DOUBLE  accuracy();       /* definiert in DIAHERMX.c */
-extern BRUCH     *is_rational(); /* definiert in STEVENS.C*/
-extern LONG      ggt_l();        /* definiert in STEVENS.C*/
-extern INT       is_equal();     /* definiert in DIAHERMX.C */
-extern DOUBLE    exp_();             /* definiert in ORTHO.C */
+extern BRUCH     *is_rational(DOUBLE z); /* definiert in STEVENS.C*/
+extern LONG      ggt_l(LONG a,LONG b);        /* definiert in STEVENS.C*/
+extern INT       is_equal(DOUBLE a,DOUBLE b,DOUBLE machep);     /* definiert in DIAHERMX.C */
+extern DOUBLE    exp_(DOUBLE z);             /* definiert in ORTHO.C */
  
-extern VEKTOR *vr_alloc();    /* definiert in MATRIX.C */
+extern VEKTOR *vr_alloc(INT n);    /* definiert in MATRIX.C */
 extern MATRIX *mx_alloc(INT anz_ze,INT anz_sp);    /* definiert in MATRIX.C */
  
 extern DOUBLE omegan0n(INT n);     /* definiert in MAIN.C  */
@@ -50,40 +50,41 @@ extern DOUBLE omegan3n(INT n);     /* definiert in MAIN.C  */
 extern DOUBLE omegan4n(INT n);     /* definiert in MAIN.C  */
 extern DOUBLE omegan5n(INT n);     /* definiert in MAIN.C  */
 extern DOUBLE omegan6n(INT n);     /* definiert in MAIN.C  */
-extern DOUBLE epn0n();     /* definiert in MAIN.C  */
-extern DOUBLE epn1n();     /* definiert in MAIN.C  */
-extern DOUBLE epn2n();     /* definiert in MAIN.C  */
-extern DOUBLE epn3n();     /* definiert in MAIN.C  */
-extern DOUBLE epn4n();     /* definiert in MAIN.C  */
-extern DOUBLE epn5n();     /* definiert in MAIN.C  */
-extern DOUBLE epn6n();     /* definiert in MAIN.C  */
+extern DOUBLE epn0n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE epn1n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE epn2n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE epn3n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE epn4n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE epn5n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE epn6n(INT n);     /* definiert in MAIN.C  */
  
-extern INT    is_einheit_imp();  /* definiert in MAIN.C */
-extern INT    isinlimits();      /* definiert in MAIN.C */
-extern INT    isimplementiert(); /* definiert in MAIN.C */
-extern INT    isreell();         /* definiert in MAIN.C */
-extern DOUBLE a_tof();           /* definiert in MAIN.C  */
-extern INT    a_toi();           /* definiert in MAIN.C */
-extern CHAR  *a_tos();           /* definiert in MAIN.C */
-extern INT    read_error();      /* definiert in MAIN.C */
-extern INT    Bkq_error();       /* definiert in MAIN.C */
+extern INT    is_einheit_imp(CHAR  c);  /* definiert in MAIN.C */
+extern INT    isinlimits(FILE *fp,CHAR *filename,INT  nrion,DOUBLE x1,DOUBLE x2,DOUBLE x3,CHAR modus);      /* definiert in MAIN.C */
+extern INT    isimplementiert(CHAR *ion); /* definiert in MAIN.C */
+extern INT    isreell(INT  symmetrienr ,CHAR * ion );         /* definiert in MAIN.C */
+extern DOUBLE a_tof(CHAR *string,INT anfang,INT ende);           /* definiert in MAIN.C  */
+extern INT    a_toi(CHAR *string,INT anfang,INT ende);           /* definiert in MAIN.C */
+extern CHAR  *a_tos(CHAR *string,INT anfang,INT ende);           /* definiert in MAIN.C */
+extern INT    read_error(INT nr,FILE *fp,CHAR *name);      /* definiert in MAIN.C */
+extern INT    Bkq_error(CHAR * filename,CHAR *ion,INT  symmetrienr);       /* definiert in MAIN.C */
 extern INT    write_title(FILE *fp);     /* definiert in DIAHERMX.C*/
   
-extern CHAR  *leftcopy();        /* definiert in MAIN.C */
+extern CHAR  *leftcopy(CHAR *string,INT bufferlen);        /* definiert in MAIN.C */
  
 extern IONEN     IONENIMP[];     /* definiert in MAIN.C  */
 extern EINHEIT   EINHEITIMP[];   /* definiert in MAIN.C  */
 extern SYMMETRIE SYMLISTE[];     /* definiert in MAIN.C  */
  
-extern ITERATION *iter_alloc();  /* definiert in MAIN.C */
-extern ITERATION *auswahlregel();/* definiert in MAIN.C */
-extern MATRIX    *calc_Bmag();   /* definiert in MAIN.C */
-extern MATRIX    *calc_Bmag_D(); /* definiert in MAIN.C */
-extern MATRIX    *calcBmol();    /* definiert in MAIN.C */
-extern STEVENS   *calc_Pkq();    /* definiert in STEVENS.C */
+extern ITERATION *iter_alloc(INT dimj,INT anz_nn);  /* definiert in MAIN.C */
+extern ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);/* definiert in MAIN.C */
+extern MATRIX    *calc_Bmag(INT dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE B);   /* definiert in MAIN.C */
+extern MATRIX    *calc_Bmag_D(INT   dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE Dx2,DOUBLE Dy2,DOUBLE Dz2,DOUBLE Dx4,DOUBLE Dy4,DOUBLE Dz4); /* definiert in MAIN.C */
+extern MATRIX    *calcBmol(INT  dimj,MATRIX *bmag,DOUBLE gjs,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz);    /* definiert in MAIN.C */
+extern STEVENS   *calc_Pkq(INT dimj);    /* definiert in STEVENS.C */
 
-void drucke_par();
-void drucke_mag();
+void drucke_par(FILE    *fp,CHAR modus,INT dimj,TABELLE *tabelle,CHAR    *einheit_out,
+DOUBLE temp,CHAR    *ion,INT  symmetrienr );
+void drucke_mag(FILE *fp,CHAR modus);
 /*INT strstr();
 INT strchr();
 INT strlen();
@@ -130,7 +131,7 @@ void create_Vkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHA
     CHAR *t11;
     CHAR *t20,*t21,*t22,*t23,*t24,*t25;
     CHAR *t26,*t27,*t28,*t29,*t30,*t31;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
  
     FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
@@ -279,7 +280,7 @@ void create_Dkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHA
     CHAR *t11;
     CHAR *t20,*t21,*t22,*t23,*t24,*t25;
     CHAR *t26,*t27,*t28,*t29,*t30,*t31;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
  
     FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
@@ -430,7 +431,7 @@ void create_Lkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHA
     CHAR *t31,*t32,*t33,*t34,*t35,*t36,*t37,*t38,*t39,*t40;
     CHAR *t41,*t42,*t43,*t44,*t45,*t46,*t47,*t48,*t49,*t50;
     CHAR *t51,*t52,*t53,*t54;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
  
     FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
@@ -615,7 +616,7 @@ void create_Wkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHA
     CHAR *t71,*t72,*t73,*t74,*t75,*t76,*t77,*t78,*t79,*t70;
     CHAR *t81,*t82,*t83,*t84,*t85,*t86,*t87,*t88,*t80;
     CHAR *t11;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
  
     FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
@@ -766,7 +767,7 @@ void create_Akq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHA
     CHAR *t51,*t52,*t53,*t54,*t55,*t56,*t50;
     CHAR *t71,*t72,*t73,*t74,*t75,*t76,*t70;
     CHAR *t11;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
  
     FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
@@ -924,7 +925,7 @@ void create_Bkq(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHA
     CHAR *t31,*t32,*t33,*t34,*t35,*t36,*t37,*t38,*t39,*t30;
     CHAR *t51,*t52,*t53,*t54,*t55,*t56,*t50;
     CHAR *t11;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
  
     FILE    *fopen(const char * filename,const char * mode), *fp;
     TABELLE *tabelle;
@@ -1076,7 +1077,7 @@ void create_xW(INT einheitnr_in,INT einheitnr_out,CHAR *ion,INT symmetrienr,CHAR
     CHAR *t41,*t42,*t43,*t44,*t45,*t46,*t47,*t48,*t49,*t50;
     CHAR *t51,*t52,*t53;
     CHAR *tx,*tW,*str,*tss;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
  
     FILE *fopen(const char * filename,const char * mode), *fp;
     INT  ionennr,dimj;
@@ -1214,7 +1215,7 @@ void create_nn(CHAR   *name,CHAR modus,INT nn,CHAR   *ion,DOUBLE temp) /* Erzeug
 {
     FILE *fopen(const char * filename,const char * mode), *fp;
     CHAR *s_modus,*x1,*x2,*x3,*y1,*y2,*y3,*z1,*z2,*z3;
-    CHAR *leftcopy();
+    CHAR *leftcopy(CHAR *string,INT bufferlen);
     CHAR *rs,*rsnn1,*rsn,*rstk,*rsk,*rstl,*rstu;
     CHAR *po,*ponn1,*ponn,*potk,*pok,*potl,*potu;
     CHAR *rsm,*rsmt,*rsmtk,*rsmk,*rsmtu;
@@ -1406,15 +1407,15 @@ ITERATION *read_Vkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lese
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    myB;
-    DOUBLE    sin(),cos();
-    DOUBLE    a_tof(),v40,v44,v60,v64,sqrt(),temperatur;
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),v40,v44,v60,v64,sqrt(DOUBLE z),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
     printf("Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -1582,24 +1583,19 @@ ITERATION *read_Vkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lese
     return( iteration );
 }
 /*------------------------------------------------------------------------------
-                          readBmag()
+                          readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,
+INT buffer_size,CHAR      *string)
 ------------------------------------------------------------------------------*/
-MATRIX *readBmag(fp,name,modus,myB,iteration,buffer_size,string)
-  FILE      *fp;
-  CHAR      *name,modus;
-  DOUBLE    myB;
-  ITERATION *iteration;
-  INT        buffer_size;
-  CHAR      *string;
- 
+MATRIX *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,
+INT buffer_size,CHAR      *string)
 {
-  CHAR    *line,*fgets(),c;
+  CHAR    *line,*fgets(char * __restrict, int, FILE *),c;
   INT     i;
-  DOUBLE  x1,x2,x3,a_tof();
+  DOUBLE  x1,x2,x3,a_tof(CHAR *string,INT anfang,INT ende);
   DOUBLE    h,theta,phi;
-  DOUBLE    sin(),cos();
-  MATRIX    *calc_Bmag();
-  MATRIX    *calcBmol();
+  DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
+  MATRIX    *calc_Bmag(INT dimj,DOUBLE gj,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE B);
+  MATRIX    *calcBmol(INT  dimj,MATRIX *bmag,DOUBLE gjs,DOUBLE myB,DOUBLE Bx,DOUBLE By,DOUBLE Bz);
  
   QUADRANT  *q,*abfrage( DOUBLE  rsin, DOUBLE  rcos, DOUBLE  macheps );
   DOUBLE    macheps,accuracy();
@@ -1750,15 +1746,15 @@ ITERATION *read_Dkq(CHAR *name, INT vsymmetrienr_vor)  /* Dkq aus file name lese
     DOUBLE    myB;
    
  
-    DOUBLE    sin(),cos();
-    DOUBLE    a_tof(),v40,v44,v60,v64,sqrt(),temperatur;
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),v40,v44,v60,v64,sqrt(DOUBLE z),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
     printf("Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -1972,11 +1968,7 @@ ITERATION *read_Dkq(CHAR *name, INT vsymmetrienr_vor)  /* Dkq aus file name lese
     fclose(fp);
     return( iteration );
 }
-INT  extract(line,parnam,var,unit)
-CHAR * line;
-const CHAR * parnam;
-DOUBLE * var;
-const CHAR * unit;
+INT  extract(CHAR *line,const CHAR *parnam,DOUBLE *var,const CHAR *unit)
 {CHAR * token;
  // check if line is true comment line -> if yes return 1
  if (line[strspn(line," \t")]=='#'&&line[strspn(line," \t#")]!='!') return 0;
@@ -1999,11 +1991,8 @@ const CHAR * unit;
 /************************************************************************************/
 /*  for reading in case of opiont -L -B (read_Lkq and read_Bkq) from new file format */
 /************************************************************************************/
-ITERATION *read_new_format(type,iteration,name,vsymmetrienr_vor)
-CHAR type;
-ITERATION *iteration;
-    CHAR *name;
-    INT  vsymmetrienr_vor;/* falls symmetrienr nicht vorgegeben  */
+ITERATION *read_new_format(CHAR type,ITERATION *iteration,CHAR *name,INT vsymmetrienr_vor)
+/* falls symmetrienr nicht vorgegeben  */
                           /* dann vsymmetrienr_vor <  0          */
 {   FILE      *fp=0,*fopen(const char * filename,const char * mode);
     INT       anz_nn,dimj/*,zwei_j*/,ionennr,symmetrienr,e_4f;
@@ -2011,15 +2000,15 @@ ITERATION *iteration;
     DOUBLE    versionsnummer;
     DOUBLE    myB,d,alpha,beta,gamma;
 
-    DOUBLE    sin(),cos();
-    DOUBLE    a_tof(),v40=0,v44=0,v60=0,v64=0,sqrt(),temperatur;
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),v40=0,v44=0,v60=0,v64=0,sqrt(DOUBLE z),temperatur;
     /*CHAR     *einheit_in,*einheit_out,modus;*/
     CHAR      *ion=0,*token;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION  *iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION  *iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
   /* read mcphas single ion input file */
        printf("file format as single ion input module #!MODULE=so1ion or #!MODULE=cfield\n");
     string   = STRING_ALLOC(buffer_size);
@@ -2349,15 +2338,15 @@ ITERATION *read_Lkq(CHAR *name, INT vsymmetrienr_vor)  /* Lkq aus file name lese
     DOUBLE    versionsnummer;
     DOUBLE    myB;
 
-    DOUBLE    sin(),cos();
-    DOUBLE    a_tof(),v40=0,v44=0,v60=0,v64=0,sqrt(),temperatur;
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),v40=0,v44=0,v60=0,v64=0,sqrt(DOUBLE z),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration=0,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration=0,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
     printf("Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -2620,15 +2609,15 @@ ITERATION *read_Wkq(CHAR *name, INT vsymmetrienr_vor)  /* Wkq aus file name lese
     DOUBLE    versionsnummer;
     DOUBLE    myB,f2,f4,f6;
     
-    DOUBLE    sin(),cos();
-    DOUBLE    a_tof(),w40,w44,w60,w64,sqrt(),temperatur;
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),w40,w44,w60,w64,sqrt(DOUBLE z),temperatur;
     CHAR   /* *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
     printf("Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -2860,18 +2849,18 @@ ITERATION *read_Akq(CHAR *name, INT vsymmetrienr_vor)  /* Akq aus file name lese
     DOUBLE    versionsnummer;
     DOUBLE    myB/*,f2,f4,f6*/; 
     
-    DOUBLE    sin(),cos();
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
     DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
     DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
     DOUBLE    omegan6n(INT n);
-    DOUBLE    a_tof(),a40,a44,a60,a64,sqrt(),temperatur;
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),a40,a44,a60,a64,sqrt(DOUBLE z),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
     printf("Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -3124,17 +3113,17 @@ ITERATION *read_Bkqnew(CHAR *ion)  /* Vkq aus file name lesen */
     DOUBLE    versionsnummer;
     DOUBLE    myB;
    
-    DOUBLE    sin(),cos();
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
     DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
     DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
     DOUBLE    omegan6n(INT n);
-    DOUBLE    a_tof(),b40,b44,b60,b64,sqrt();
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),b40,b44,b60,b64,sqrt(DOUBLE z);
 /*  CHAR      *einheit_in,*einheit_out; */
-    CHAR      c/*,*string*/,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c/*,*string*/,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
 /*  string   = STRING_ALLOC(buffer_size); */
     versionsnummer =VERSION;
@@ -3243,18 +3232,18 @@ ITERATION *read_Bkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lese
     INT       buffer_size=381,einheitnr_in,einheitnr_out;
     DOUBLE    versionsnummer;
     DOUBLE    myB;
-    DOUBLE    sin(),cos();
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
     DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
     DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
     DOUBLE    omegan6n(INT n);
-    DOUBLE    a_tof(),b40,b44,b60,b64,sqrt(),temperatur;
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),b40,b44,b60,b64,sqrt(DOUBLE z),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration=0,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration=0,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
     printf("Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -3504,18 +3493,18 @@ ITERATION *read_xW(CHAR *name, INT vsymmetrienr_vor)  /* x,W aus file name lesen
     DOUBLE    myB;
     DOUBLE    x,W,f4,f6;
    
-    DOUBLE    sin(),cos();
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
     DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
     DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
     DOUBLE    omegan6n(INT n);
-    DOUBLE    a_tof(),sqrt(),temperatur;
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),sqrt(DOUBLE z),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
-    ITERATION *iteration,*iter_alloc();
-    ITERATION *auswahlregel();
-    STEVENS   *calc_Pkq();
-    MATRIX    *readBmag();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
+    ITERATION *iteration,*iter_alloc(INT dimj,INT anz_nn);
+    ITERATION *auswahlregel(ITERATION *iter,INT symmetrienr);
+    STEVENS   *calc_Pkq(INT dim);
+    MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
     printf("lese file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -3645,11 +3634,11 @@ ITERATION *read_xW(CHAR *name, INT vsymmetrienr_vor)  /* x,W aus file name lesen
 UMGEBUNG *read_nn(CHAR *name) /* Lese Eingabefile name der Umgebungsatome */
 {
     UMGEBUNG *umgebung;
-    DOUBLE   a_tof(),x1,x2,x3=0.,temperatur;
+    DOUBLE   a_tof(CHAR *string,INT anfang,INT ende),x1,x2,x3=0.,temperatur;
     FILE     *fp,*fopen(const char * filename,const char * mode);
     INT      buffer_size = 81;
     INT      i,anz_nn,nummer;
-    CHAR     c,*string,*line,*fgets(),*ion,*a_tos();
+    CHAR     c,*string,*line,*fgets(char * __restrict, int, FILE *),*ion,*a_tos(CHAR *string,INT anfang,INT ende);
  
     printf("lese file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -3724,12 +3713,9 @@ UMGEBUNG *read_nn(CHAR *name) /* Lese Eingabefile name der Umgebungsatome */
     return( umgebung );
 }
 /*------------------------------------------------------------------------------
-                                stern_setzen()
+                                stern_setzen(TABELLE *tabelle,INT  symmetrienr,INT  dimj)
 ------------------------------------------------------------------------------*/
-TABELLE *stern_setzen(tabelle,symmetrienr,dimj)
-    TABELLE *tabelle;
-    INT     symmetrienr;
-    INT     dimj;
+TABELLE *stern_setzen(TABELLE *tabelle,INT  symmetrienr,INT  dimj)
 {
     INT zwei_j;
  
@@ -4090,19 +4076,13 @@ TABELLE *stern_setzen(tabelle,symmetrienr,dimj)
     return( tabelle );
 }
 /*------------------------------------------------------------------------------
-                                drucke_par();
+                                drucke_par(FILE    *fp,CHAR modus,INT dimj,TABELLE *tabelle,CHAR    *einheit_out,
+DOUBLE temp,CHAR    *ion,INT  symmetrienr);
 ------------------------------------------------------------------------------*/
-void drucke_par( fp,modus,dimj,tabelle,einheit_out,temp,ion,symmetrienr )
-  FILE    *fp;
-  CHAR    modus;
-  INT     dimj;
-  TABELLE *tabelle;
-  CHAR    *einheit_out;
-  DOUBLE  temp;
-  CHAR    *ion;
-  INT     symmetrienr;
+void drucke_par( FILE    *fp,CHAR modus,INT dimj,TABELLE *tabelle,CHAR    *einheit_out,
+DOUBLE temp,CHAR    *ion,INT  symmetrienr )
 {
-    TABELLE *stern_setzen();
+    TABELLE *stern_setzen(TABELLE *tabelle,INT  symmetrienr,INT  dimj);
  
     fprintf(fp,TSS,einheit_out);
     fprintf(fp,T15,temp);
@@ -4142,11 +4122,9 @@ void drucke_par( fp,modus,dimj,tabelle,einheit_out,temp,ion,symmetrienr )
  
 }
 /*------------------------------------------------------------------------------
-                                drucke_mag()
+                                drucke_mag(FILE *fp,CHAR modus)
 ------------------------------------------------------------------------------*/
-void drucke_mag( fp,modus ) /* Tabelle fuer Magnetfeld ausgeben */
-  FILE *fp;
-  CHAR modus;
+void drucke_mag( FILE *fp,CHAR modus ) /* Tabelle fuer Magnetfeld ausgeben */
 {
     CHAR *s_modus,*z1,*z2,*z3;
     CHAR *rsm,*rsmt,*rsmtk,*rsmk,*rsmtu;
@@ -4265,7 +4243,7 @@ void drucke_mag( fp,modus ) /* Tabelle fuer Magnetfeld ausgeben */
 ------------------------------------------------------------------------------*/
 void neben_create(CHAR modus,CHAR *name_chi2 ) /* Eingabefile Chi2 erzeugen  */
 {
-   READ *read_einheit(),*read;
+   READ *read_einheit(CHAR *name,CHAR art),*read;
    CHAR *einheit_out,*einheit_in,*name_par;
    FILE    *fopen(const char * filename,const char * mode), *fp;
    CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10,*t11,*t12;
@@ -4276,9 +4254,9 @@ void neben_create(CHAR modus,CHAR *name_chi2 ) /* Eingabefile Chi2 erzeugen  */
    CHAR *tl,*t[14],*td,*ionname,is_feld;
    INT  i,ionennr;
    DOUBLE zwei_j,temperatur,b1,b2,b3;
-   DOUBLE b_norm,sqrt();
-   BRUCH  *is_rational(),*z1,*z2,*z3;
-   LONG hauptnenner,ggt_l(),r1,r2,r3;
+   DOUBLE b_norm,sqrt(DOUBLE z);
+   BRUCH  *is_rational(DOUBLE z),*z1,*z2,*z3;
+   LONG hauptnenner,ggt_l(LONG a,LONG b),r1,r2,r3;
  
    switch(modus){
      case AKQ  : name_par = AKQNAME; break;
@@ -4736,11 +4714,9 @@ t21 ="----------------------------------------------------------\n";
  
 }
 /*------------------------------------------------------------------------------
-                          read_einheit()
+                          read_einheit(CHAR *name,CHAR art)
 ------------------------------------------------------------------------------*/
-READ *read_einheit(name,art)
-    CHAR *name;
-    CHAR art;
+READ *read_einheit(CHAR *name,CHAR art)
 {
     READ      *read;
     FILE      *fp,*fopen(const char * filename,const char * mode);
@@ -4749,11 +4725,11 @@ READ *read_einheit(name,art)
 /*  DOUBLE    versionsnummer; */
     DOUBLE    x1,x2,x3/*,myB*/;
     DOUBLE    h,theta,phi;
-    DOUBLE    sin(),cos();
-    DOUBLE    a_tof(),sqrt(),temperatur;
+    DOUBLE    sin(DOUBLE z),cos(DOUBLE z);
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),sqrt(DOUBLE z),temperatur;
     CHAR      *einheit_in,*einheit_out,modus;
     CHAR      *ion;
-    CHAR      c,*string,*line,*fgets(),*a_tos();
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
  
     printf("Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
@@ -4903,11 +4879,9 @@ READ *read_einheit(name,art)
 }
  
 /*------------------------------------------------------------------------------
-                          is_sbekannt()
+                          is_sbekannt(INT datnr,ITERATION *iteration)
 ------------------------------------------------------------------------------*/
-INT is_sbekannt(datnr,iteration)
-    INT       datnr;
-    ITERATION *iteration;
+INT is_sbekannt(INT datnr,ITERATION *iteration)
 {
     INT d,a,b,c,p;
  
@@ -4921,11 +4895,9 @@ INT is_sbekannt(datnr,iteration)
     else                                    return(NEIN);
 }
 /*------------------------------------------------------------------------------
-                          is_mbekannt()
+                          is_mbekannt(INT datnr,ITERATION *iteration)
 ------------------------------------------------------------------------------*/
-INT is_mbekannt(datnr,iteration)
-    INT       datnr;
-    ITERATION *iteration;
+INT is_mbekannt(INT datnr,ITERATION *iteration)
 {
     INT d,a,b,c,p;
  
@@ -4940,11 +4912,9 @@ INT is_mbekannt(datnr,iteration)
  
 }
 /*------------------------------------------------------------------------------
-                          is_pbekannt()
+                          is_pbekannt(INT datnr,ITERATION *iteration)
 ------------------------------------------------------------------------------*/
-INT is_pbekannt(datnr,iteration)
-    INT       datnr;
-    ITERATION *iteration;
+INT is_pbekannt(INT datnr,ITERATION *iteration)
 {
     INT d,a,e;
  
@@ -4957,23 +4927,18 @@ INT is_pbekannt(datnr,iteration)
  
 }
 /*------------------------------------------------------------------------------
-                          lesedaten()
+                          lesedaten(FILE *fp,DOUBLE*x,DOUBLE*f,INT*n,CHAR *name,INT nummerierung,INT *ip,INT imax,
+   INT (*bekannt)(INT datnr,ITERATION *iteration),INT *pdatnr,
+            ITERATION *  iteration,INT       *anzdatnr)
 ------------------------------------------------------------------------------*/
-void lesedaten(fp,x,f,n,name,nummerierung,ip,imax,bekannt,pdatnr,
-              iteration,anzdatnr)
-    FILE      *fp;
-    DOUBLE    *x,*f;
-    INT       *n,(*bekannt)(),*pdatnr;
-    INT       nummerierung;
-    INT       *ip,imax;
-    CHAR      *name;
-    ITERATION *iteration;
-    INT       *anzdatnr;
+void lesedaten(FILE *fp,DOUBLE*x,DOUBLE*f,INT*n,CHAR *name,INT nummerierung,INT *ip,INT imax,
+   INT (*bekannt)(INT datnr,ITERATION *iteration),INT *pdatnr,
+            ITERATION *  iteration,INT       *anzdatnr)
 {
     INT      buffer_size=381,i,k,j,z,diff;
-    INT      anz_dat,a_toi(),datnr;
+    INT      anz_dat,a_toi(CHAR *string,INT anfang,INT ende),datnr;
     INT      fpa,fpzl,fna,fnzl,loopmax;
-    CHAR     *string,*line,*fgets();
+    CHAR     *string,*line,*fgets(char * __restrict, int, FILE *);
     FILE     *fopen(const char * filename,const char * mode);
  
     string   = STRING_ALLOC(buffer_size);
@@ -5069,23 +5034,25 @@ NEBENBEDINGUNG *neben_read(SETUP     *setup,CHAR      *name,KRISTALLFELD *krista
     ITERATION *iteration;
     NEBENBEDINGUNG *neben;
     MATRIX    *intensit,*d_intensit,*mx_alloc(INT anz_ze,INT anz_sp);
-    VEKTOR    *ew      ,*d_ew      ,*vr_alloc(), *fix;
+    VEKTOR    *ew      ,*d_ew      ,*vr_alloc(INT n), *fix;
     FILE      *fp,*fopen(const char * filename,const char * mode),*fp_sus=0,*fp_theta;
-    INT       buffer_size=381,i,k,einheitnr_in,a_toi(),zeile,anzahl=0,j;
+    INT       buffer_size=381,i,k,einheitnr_in,a_toi(CHAR *string,INT anfang,INT ende),zeile,anzahl=0,j;
     INT       anz_lines,anz_par=0,anz_var=0,spalte,datnr,anz_dat;
     INT       fpzl, fnzl, fpa, fna, z, flag,imax,ipos;
     INT       anzdatnr=0,loopmax,anz;
     DOUBLE    versionsnummer,*datent,*datensus;
-    DOUBLE    a_tof(),sqrt(),temperatur;
+    DOUBLE    a_tof(CHAR *string,INT anfang,INT ende),sqrt(DOUBLE z),temperatur;
     DOUBLE    wew,wint,wmat,wsus,wmag,wsum,wpos;
     DOUBLE    pos_t,pos_icin,pos_icqe,*datene,*dateni,*xx,*ff;
-    CHAR      c,*string,*line,*fgets(),*susname,*magname,*posname;
+    CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*susname,*magname,*posname;
     CHAR      *thetaname;
-    CHAR      *file_name();
-    INT       *sort(),*nummer;
+    CHAR      *file_name(CHAR *string,INT anfang,INT ende);
+    INT       *sort(DOUBLE *werte,INT    *nummer,INT anz),*nummer;
     DOUBLE    *werte,*werti;
-    INT       is_sbekannt(), is_pbekannt(), is_mbekannt();
-    void       lesedaten();
+    INT       is_sbekannt(INT datnr,ITERATION *iteration), is_pbekannt(INT datnr,ITERATION *iteration), is_mbekannt(INT datnr,ITERATION *iteration);
+    void       lesedaten(FILE *fp,DOUBLE*x,DOUBLE*f,INT*n,CHAR *name,INT nummerierung,INT *ip,INT imax,
+   INT (*bekannt)(INT datnr,ITERATION *iteration),INT *pdatnr,
+            ITERATION *  iteration,INT       *anzdatnr);
  
     iteration  = ITERATION(kristallfeld);
     temperatur = TEMPERATUR(iteration);
@@ -5831,11 +5798,9 @@ if( IS_MAGFIT(iteration)==JA &&
     return( neben );
 }
 /*------------------------------------------------------------------------------
-                                  file_name()
+                                  file_name(CHAR *string,INT anfang,INT ende)
 ------------------------------------------------------------------------------*/
-CHAR  *file_name(string,anfang,ende)
-    CHAR *string;
-    INT  anfang,ende;
+CHAR  *file_name(CHAR *string,INT anfang,INT ende)
 {
     CHAR   *buffer, *neu_buffer;
     INT    i,len,neu_anfang,neu_ende,dummy;
