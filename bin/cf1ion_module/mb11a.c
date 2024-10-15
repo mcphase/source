@@ -49,13 +49,11 @@ INT MB11E(DOUBLE *A, INT ZA, INT SA, INT ZB, INT SB, INT IA, DOUBLE *W, DOUBLE W
 INT MB11F(DOUBLE *A, INT ZA, INT SA, INT ZB, INT SB, INT ZC, INT SC, INT IA, DOUBLE WKK, DOUBLE AKK, INT MKK, INT NKK);
 
 /*----------------------------------------------------------------------------
-                               MB11A()
+                               MB11A(INT M,INT N,DOUBLE *WW,INT PA,INT IA,INT PW)
 -----------------------------------------------------------------------------*/
  
 /*    SUBROUTINE MB11A (M,N,A,IA,W)  */
-      INT        MB11A (M,N,WW,PA,IA,PW)
-      INT    M,N,IA,PA,PW;
-      DOUBLE *WW;
+      INT        MB11A (INT M,INT N,DOUBLE *WW,INT PA,INT IA,INT PW)
 {
       #define A(I,J) (*(WW+PA+(I-1)+(J-1)*IA))
       #define W(I)   (*(WW+PW+(I-1)         ))
@@ -233,9 +231,7 @@ C     APPLY THE FIRST ELEMENTARY TRANSFORMATION  */
 -----------------------------------------------------------------------------*/
 /*    C@PROCESS DIRECTIVE('IBMD')  */
 /*    SUBROUTINE MB11D (A,B,C,IA,WKK,MKK,NKK) */
-      INT        MB11D (A ,ZA,SA,ZB,SB,ZC,SC, IA,WKK,MKK,NKK)
-      DOUBLE *A ,WKK;
-      INT    IA,MKK,NKK,ZA,SA,ZB,SB,ZC,SC;
+      INT        MB11D (DOUBLE *A ,INT ZA,INT SA,INT ZB,INT SB,INT ZC,INT SC,INT  IA,DOUBLE WKK,INT MKK,INT NKK)
 {
 /*    REAL             A(IA,NKK),B(*),C(IA,NKK),SUM,WKK */
       DOUBLE                                    SUM;
@@ -266,9 +262,7 @@ printf("am in mb11d()\n");
 -----------------------------------------------------------------------------*/
 /*    C@PROCESS DIRECTIVE('IBMD')  */
 /*    SUBROUTINE MB11E ( A, B,IA, W,WKK,MKK,NKK)  */
-      INT        MB11E (A ,ZA,SA,ZB,SB,IA,W ,WKK,MKK,NKK)
-      DOUBLE *A ,*W,WKK;
-      INT    IA,MKK,NKK,ZA,SA,ZB,SB;
+      INT        MB11E (DOUBLE *A, INT ZA, INT SA, INT ZB, INT SB, INT IA, DOUBLE *W, DOUBLE WKK, INT MKK, INT NKK)
 {
       #define AAA(I,J) (*(A +(ZA-1+I-1)+(SA-1+J-1)*IA))
       #define BBB(I,J) (*(A +(ZB-1+I-1)+(SB-1+J-1)*IA))
@@ -300,10 +294,7 @@ printf("am in mb11e()\n");
 -----------------------------------------------------------------------------*/
 /*    @PROCESS DIRECTIVE('IBMD')   */
 /*    SUBROUTINE MB11F ( A, B, C,IA,WKK,AKK,MKK,NKK)  */
-      INT        MB11F (A ,ZA,SA,ZB,SB,ZC,SC,IA,WKK,AKK,MKK,NKK)
-      DOUBLE *A ,WKK,AKK;
-      INT    ZA,ZB,ZC,SA,SB,SC;
-      INT    IA,MKK,NKK;
+      INT        MB11F (DOUBLE *A, INT ZA, INT SA, INT ZB, INT SB, INT ZC, INT SC, INT IA, DOUBLE WKK, DOUBLE AKK, INT MKK, INT NKK)
 {
       #define AAA(I,J) (*(A +(ZA-1+I-1)+(SA-1+J-1)*IA))
       #define BBB(I,J) (*(A +(ZB-1+I-1)+(SB-1+J-1)*IA))

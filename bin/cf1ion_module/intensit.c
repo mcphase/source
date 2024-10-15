@@ -23,14 +23,15 @@ Includedateien holen
  
  
 #define r0    (-1.91*_e*_e/_m )/*  * 10**(-12) cm  = -0.54*10(-12)cm */
-#define const (r0*r0*pi)       /* in barn            2   */
+#define CONST const
+#define const1 (r0*r0*pi)       /* in barn            2   */
                                /* spaeter noch mit gj  multiplizieren*/
 /*----------------------------------------------------------------------------
 extern definierte Funktionen
 -----------------------------------------------------------------------------*/
-extern DOUBLE  exp_();           /* definiert in ORTHO.C */
+extern DOUBLE  exp_(DOUBLE z);           /* definiert in ORTHO.C */
 extern void    fit_ortho();      /* definiert in ORTHO.C */
-extern INT     is_equal();       /* definiert in DIAHERMX.C */
+extern INT     is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);       /* definiert in DIAHERMX.C */
 extern INT     isimplementiert();/* definiert in CFIELD.C.*/
 extern DOUBLE  is_null(DOUBLE a,DOUBLE macheps);        /* definiert in DIAHERMX.C */
 extern INT       null(DOUBLE a,DOUBLE macheps);         /* definiert in DIAHERMX.C */
@@ -38,24 +39,24 @@ extern DOUBLE  einh_Kelvin();    /* definiert in CFIELD.C */
 extern DOUBLE  accuracy();       /* definiert in DIAHERMX.c */
 extern INT     is_einheit_imp(); /* definiert in CFIELD.C */
 extern MATRIX  *mx_alloc(INT anz_ze,INT anz_sp);      /* definiert in MATRIX.C */
-extern VEKTOR  *vr_alloc();      /* definiert in MATRIX.C */
+extern VEKTOR  *vr_alloc(INT dimj);      /* definiert in MATRIX.C */
 extern void     free_vr(VEKTOR *v);       /* definiert in MATRIX.C */
 extern void     free_mx(MATRIX *mx);       /* definiert in MATRIX.C */
-extern KOMPLEX *ckon();          /* definiert in KOMPLEX.C*/
-extern KOMPLEX *cadd();          /* definiert in KOMPLEX.C*/
-extern KOMPLEX *csub();          /* definiert in KOMPLEX.C*/
-extern KOMPLEX *cmult();         /* definiert in KOMPLEX.C*/
-extern KOMPLEX *vskalar();       /* definiert in KOMPLEX.C*/
+extern KOMPLEX *ckon(KOMPLEX *a);          /* definiert in KOMPLEX.C*/
+extern KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b);          /* definiert in KOMPLEX.C*/
+extern KOMPLEX *csub(KOMPLEX *a,KOMPLEX *b);          /* definiert in KOMPLEX.C*/
+extern KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);         /* definiert in KOMPLEX.C*/
+extern KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b);       /* definiert in KOMPLEX.C*/
 extern INT     write_titlecom(); /* definiert in DIAHERMX.C */
 extern INT     test_nullmatrix();/* definiert in DIAHERMX.C */
-extern CHAR    up();             /* definiert in CFIELD.C */
+extern CHAR    up(CHAR c);             /* definiert in CFIELD.C */
 extern INT     isreell();        /* definiert in CFIELD.C */
 extern MATRIX    *calc_iBmag();  /* definiert in CFIELD.C */
 extern EWPROBLEM *solve();       /* definiert in CFIELD.C */
 extern EWPROBLEM *set_ewproblem();/* definiert in DIAHERMX.c */
 extern BRUCH     *is_rational(); /* definiert in STEVENS.C*/
 extern LONG      ggt_l();        /* definiert in STEVENS.C*/
-extern FILE     *fopen();        /* definiert in stdio.h  */
+extern FILE     *fopen(CONST CHAR * filename,CONST CHAR * mode);        /* definiert in stdio.h  */
  
  
 extern IONEN     IONENIMP[];     /* definiert in CFIELD.C*/
@@ -64,25 +65,25 @@ extern EINHEIT   EINHEITIMP[];   /* definiert in CFIELD.C*/
 extern DOUBLE    alpha_J[];      /* definiert in THETA.C */
 extern DOUBLE     beta_J[];      /* definiert in THETA.C */
 extern DOUBLE    gamma_J[];      /* definiert in THETA.C */
-extern DOUBLE    omegan0n();      /* definiert in CFIELD.C*/
-extern DOUBLE    omegan1n();      /* definiert in CFIELD.C*/
-extern DOUBLE    omegan2n();      /* definiert in CFIELD.C*/
-extern DOUBLE    omegan3n();      /* definiert in CFIELD.C*/
-extern DOUBLE    omegan4n();      /* definiert in CFIELD.C*/
-extern DOUBLE    omegan5n();      /* definiert in CFIELD.C*/
-extern DOUBLE    omegan6n();      /* definiert in CFIELD.C*/
-extern DOUBLE    epn0n();       /* definiert in CFIELD.C*/
-extern DOUBLE    epn1n();       /* definiert in CFIELD.C*/
-extern DOUBLE    epn2n();       /* definiert in CFIELD.C*/
-extern DOUBLE    epn3n();       /* definiert in CFIELD.C*/
-extern DOUBLE    epn4n();       /* definiert in CFIELD.C*/
-extern DOUBLE    epn5n();       /* definiert in CFIELD.C*/
-extern DOUBLE    epn6n();       /* definiert in CFIELD.C*/
+extern DOUBLE    omegan0n(INT n);      /* definiert in CFIELD.C*/
+extern DOUBLE    omegan1n(INT n);      /* definiert in CFIELD.C*/
+extern DOUBLE    omegan2n(INT n);      /* definiert in CFIELD.C*/
+extern DOUBLE    omegan3n(INT n);      /* definiert in CFIELD.C*/
+extern DOUBLE    omegan4n(INT n);      /* definiert in CFIELD.C*/
+extern DOUBLE    omegan5n(INT n);      /* definiert in CFIELD.C*/
+extern DOUBLE    omegan6n(INT n);      /* definiert in CFIELD.C*/
+extern DOUBLE    epn0n(INT n);       /* definiert in CFIELD.C*/
+extern DOUBLE    epn1n(INT n);       /* definiert in CFIELD.C*/
+extern DOUBLE    epn2n(INT n);       /* definiert in CFIELD.C*/
+extern DOUBLE    epn3n(INT n);       /* definiert in CFIELD.C*/
+extern DOUBLE    epn4n(INT n);       /* definiert in CFIELD.C*/
+extern DOUBLE    epn5n(INT n);       /* definiert in CFIELD.C*/
+extern DOUBLE    epn6n(INT n);       /* definiert in CFIELD.C*/
  
-extern DOUBLE    spline();      /* definiert in SPLINE.C*/
+extern DOUBLE    spline(INT n,DOUBLE *xx,DOUBLE *ff,DOUBLE x,DOUBLE macheps);      /* definiert in SPLINE.C*/
 extern INT       lesedaten();   /* definiert in EINGABE.C*/
 extern INT       is_pbekannt(); /* definiert in EINGABE.C*/
-extern FILE *fopen_errchk();         /* definiert in EINGABE.C*/
+extern FILE *fopen_errchk(CONST CHAR * filename,CONST CHAR * mode);         /* definiert in EINGABE.C*/
  
 /*----------------------------------------------------------------------------
    Internal function declarations
@@ -119,23 +120,24 @@ void output(SETUP *setup,EWPROBLEM *ewproblem,KRISTALLFELD *kristallfeld,CHAR  m
     MATRIX    *aJtb2,*aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps);
     VEKTOR    *ew,*v,*ev_ir,*ev_ks;
     ITERATION *iteration;
-    FILE      *fopen(),*fp,*ewev;
+    FILE      *fopen(CONST CHAR * filename,CONST CHAR * mode),*fp,*ewev;
     DOUBLE    temperatur,re,im,energie,gesamte_intensitaet;
     DOUBLE    gj,shift,j,mj,zu_summe,zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur),faktor;
     DOUBLE    Bx,By,Bz/*,anf_temp,end_temp,lambda*/;
     DOUBLE    macheps/*,Bx_ex,By_ex,Bz_ex,Bx_mol,By_mol,Bz_mol*/;
     DOUBLE    Bx2,By2,Bz2,Bx4,By4,Bz4;
     DOUBLE /* aJxb_2,aJyb_2,aJzb_2,*/sumx,sumy,sumz;
-    DOUBLE    mat_Jx2(),mat_Jy2(),mat_Jz2();
+    DOUBLE    mat_Jx2(VEKTOR *a,VEKTOR *b,DOUBLE macheps),mat_Jy2(VEKTOR *a,VEKTOR *b,DOUBLE macheps),mat_Jz2(VEKTOR *a,VEKTOR *b,DOUBLE macheps);
     DOUBLE    anf_feld,end_feld,temp;
-    CHAR      *ionname/*,*symname*/,*einheit_in,*einheit_out,*f_3s();
+    CHAR      *ionname/*,*symname*/,*einheit_in,*einheit_out,*f_3s(DOUBLE  zahl);
     INT       symmetrienr,*gi/*,gi_ze,f*/;
     INT       einheitnr_in,einheitnr_out;
     INT       ionennr,elektronen4f/*,e_4f*/,anz_niveaus;
     INT       dimj,zeile,spalte,i,k,r,s/*,q*/,ze,sp,first_line,ps_null;
 /*  DOUBLE    theta; */
-    KOMPLEX *mat_Jx(),*mat_Jy(),*mat_Jz();
-    DOUBLE magnetm();
+    KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b),*mat_Jy(VEKTOR *a,VEKTOR *b),*mat_Jz(VEKTOR *a,VEKTOR *b);
+    DOUBLE magnetm(KOMPLEX   *(*mat_Ji)(VEKTOR *ev_ir,VEKTOR *ev_ks),SETUP     *setup,EWPROBLEM *ewproblem,
+KRISTALLFELD *kristallfeld,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE t);
  
     if( *(FILENAME(kristallfeld)+16) != *(&ORTHO[16]) ){
         fp=fopen_errchk(FILENAME(kristallfeld),"w");
@@ -768,7 +770,7 @@ t02="#!Temperature of the sample               T= %7.2f Kelvin         \n";
  
  zu_summe    = zustandssumme( einheitnr_in , ew , temperatur );
  gj          = IONENIMP[ ionennr ].gj;
- gesamte_intensitaet = 2.0/3.0*const*gj*gj* ((DOUBLE)(dimj*dimj-1)/4);
+ gesamte_intensitaet = 2.0/3.0*const1*gj*gj* ((DOUBLE)(dimj*dimj-1)/4);
  
 t01="#-------------------------------------------------------------- \n";
 t02="#!partition function            Z  = %6.2f                 \n";
@@ -785,12 +787,12 @@ t03="#-------------------------------------------------------------- \n";
 fprintf(fp,"%s",t01);fprintf(fp,"%s",t02);fprintf(fp,"%s",t03);
 }
  
- /* Intensitaet noch mit gi_ze*const*gj**2 * exp( -Ei/T)/Z multipizieren */
+ /* Intensitaet noch mit gi_ze*const1*gj**2 * exp( -Ei/T)/Z multipizieren */
     faktor      = EINHEITIMP[ einheitnr_in].fek;
     for( ze=1 ; ze<=anz_niveaus ; ++ze ){
       energie = RV( ew , (INT)R(entartung,ze,1) );
       for( sp=1 ; sp<=anz_niveaus ; ++sp )
-        {R(aJtb2,ze,sp) *= const*gj*gj
+        {R(aJtb2,ze,sp) *= const1*gj*gj
                            *exp_(-energie*faktor/temperatur)/zu_summe;
         }
     }
@@ -869,7 +871,7 @@ void raus_suszept(setup,iteration,ewproblem,kristallfeld)
   INT    anzdatnr,datnr;
   INT    lesethetafile,anz,is_pbekannt();
   DOUBLE gj/*,t*/,macheps;
-  DOUBLE suszept(),mat_Jx2(),mat_Jy2(),mat_Jz2(),zwischen;
+  DOUBLE suszept(DOUBLE   (*mat_Ji2)(VEKTOR *ev_ir,VEKTOR *ev_ks,DOUBLE macheps),EWPROBLEM *ewproblem,INT  einheitnr_in,DOUBLE t,DOUBLE gj),mat_Jx2(),mat_Jy2(),mat_Jz2(),zwischen;
   DOUBLE *x_s,*y_s,*z_s,*temp,temp_step;
   DOUBLE anf_temp,end_temp,lambda,theta,*xx,*ff;
   DOUBLE ttheta;
@@ -1060,7 +1062,7 @@ void raus_kpoly( setup,ewproblem,kristallfeld,anf_feld,end_feld,
   COMHES *comhes;
   MATRIX *matrix;
   BRUCH  *is_rational()/*,*z1,*z2,*z3*/;
-  KOMPLEX *mat_Jx(),*mat_Jy(),*mat_Jz();
+  KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b),*mat_Jy(VEKTOR *a,VEKTOR *b),*mat_Jz(VEKTOR *a,VEKTOR *b);
   DOUBLE sqrt();
   LONG /*hauptnenner,*/ggt_l();
  
@@ -1193,7 +1195,7 @@ void raus_magnetm( setup,ewproblem,kristallfeld,anf_feld,end_feld,
   FILE   *fp;
   INT    datensatz_nr=-1,anz_daten=0/*,dummy*/,i,anz_feld,r1,r2,r3;
   DOUBLE /*t,*/macheps;
-  KOMPLEX *mat_Jx(),*mat_Jy(),*mat_Jz();
+  KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b),*mat_Jy(VEKTOR *a,VEKTOR *b),*mat_Jz(VEKTOR *a,VEKTOR *b);
   DOUBLE magnetm(),b_norm,sqrt();
   DOUBLE *x_s,*y_s,*z_s,*feld,feld_step,b1,b2,b3;
   DOUBLE b1mol,b2mol,b3mol,bmol_norm;
@@ -1334,13 +1336,10 @@ void raus_magnetm( setup,ewproblem,kristallfeld,anf_feld,end_feld,
 /*                                                         */
  
  
-DOUBLE magnetm(mat_Ji,setup,ewproblem,kristallfeld,Bx,By,Bz,t)
-    KOMPLEX   *(*mat_Ji)();
-    SETUP     *setup;
-    EWPROBLEM *ewproblem;
-    KRISTALLFELD *kristallfeld;
-    DOUBLE    Bx,By,Bz; /* angelegetes aeusseres feld*/
-    DOUBLE    t; /* angelegete  Temperatur    */
+DOUBLE magnetm(KOMPLEX   *(*mat_Ji)(VEKTOR *ev_ir,VEKTOR *ev_ks),SETUP     *setup,EWPROBLEM *ewproblem,
+KRISTALLFELD *kristallfeld,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE t)
+ /* angelegetes aeusseres feld*/
+/* angelegete  Temperatur    */
 {
     DOUBLE    Bxmol,Bymol,Bzmol,Dx2,Dy2,Dz2,Dx4,Dy4,Dz4; /* Molekularfeld   */
     ITERATION *iteration;
@@ -1349,7 +1348,7 @@ DOUBLE magnetm(mat_Ji,setup,ewproblem,kristallfeld,Bx,By,Bz,t)
     VEKTOR *ew;
     MATRIX *ev,*bmag;
     MATRIX *entartung;
-    DOUBLE faktor,exp_(),macheps,sumr=0.0,sumi=0.0,zusumme=0.0;
+    DOUBLE faktor,exp_(DOUBLE z),macheps,sumr=0.0,sumi=0.0,zusumme=0.0;
     DOUBLE ew_i,wi,gj,myB;
     KOMPLEX *mat;
     INT     einheitnr_in;
@@ -2318,17 +2317,14 @@ t26="#!   W     =   %16.6f                                \n";
  
 }
 /*----------------------------------------------------------------------------
-                                   tabelle()
+                                   tabelle(FILE *fp,INT anz_niveaus,MATRIX *inten)
 -----------------------------------------------------------------------------*/
-void tabelle(fp,anz_niveaus,inten)
-  FILE *fp;
-  INT  anz_niveaus;
-  MATRIX *inten;
+void tabelle(FILE *fp,INT anz_niveaus,MATRIX *inten)
 {
     CHAR /* *t01,*/*t02,*t03,*t04,*t05,*t06/*,*t07,*t08,*t09,*t10;
     CHAR *t11*/,*t12,*t13/*,*t14*/,*t15,*t16/*,*t17,*t18,*t19,*t20;
     CHAR *t21,*t22,*t23,*t24*/,*t25/*,*t26,*t27,*t28,*t29,*t00*/;
-    CHAR *nf_3s(),*f_3s();
+    CHAR *nf_3s(DOUBLE  zahl),*f_3s(DOUBLE  zahl);
     INT /*i,*/test;
     INT zeile,spalte;
     DOUBLE  sum;
@@ -2373,17 +2369,10 @@ t06="# -----" ;t16="----";
  
 }
 /*----------------------------------------------------------------------------
-                                   mittlung()
+                                   mittlung(FILE*, INT, MATRIX *inten, VEKTOR*, MATRIX*, INT, INT, CHAR*)
 -----------------------------------------------------------------------------*/
-void mittlung(fp,anz_niveaus,inten,ew,entartung,
-            einheitnr_in,einheitnr_out,einheit_out)
-  FILE *fp;
-  INT  anz_niveaus;
-  MATRIX *inten;
-  VEKTOR    *ew;
-  MATRIX    *entartung;
-  INT       einheitnr_in,einheitnr_out;
-  CHAR      *einheit_out;
+void mittlung(FILE *fp,INT anz_niveaus,MATRIX *inten,VEKTOR    *ew,MATRIX    *entartung,
+            INT einheitnr_in,INT einheitnr_out,CHAR      *einheit_out)
 {
     CHAR *t01,*t02,*t03,*t04,*t05,*t06,*t07,*t08,*t09,*t10,*t11,*t12;
 /*  INT i; */
@@ -2476,12 +2465,10 @@ void mittlung(fp,anz_niveaus,inten,ew,entartung,
  
 }
 /*----------------------------------------------------------------------------
-                                   kopf()
+                                   kopf(FILE *fp,INT anz_niveaus,INT flag)
 -----------------------------------------------------------------------------*/
-void kopf(fp,anz_niveaus,flag)  /* tabellenkopf drucken */
-  FILE *fp;
-  INT  anz_niveaus;
-  INT  flag;        /* JA oder NEIN */
+void kopf(FILE *fp,INT anz_niveaus,INT flag)  /* tabellenkopf drucken */
+     /* JA oder NEIN */
 {
     CHAR *t01,*t02,*t03,*t04,*t05/*,*t06,*t07,*t08,*t09,*t10*/;
     CHAR *t11,*t12,*t13,*t14,*t15/*,*t16,*t17,*t18,*t19,*t20*/;
@@ -2536,14 +2523,12 @@ t35="---|";
  
 }
 /*----------------------------------------------------------------------------
-                                   f_3s()
+                                   f_3s(DOUBLE  zahl)
 -----------------------------------------------------------------------------*/
-CHAR *f_3s( zahl )  /*   123.23  ->  "123"    */
-  DOUBLE zahl;
- 
+CHAR *f_3s(DOUBLE  zahl )  /*   123.23  ->  "123"    */
 {
     CHAR *s;
-    CHAR i_toc();
+    CHAR i_toc(INT i);
     INT  z1,z2,z3/*,z99*/;
  
     s = STRING_ALLOC(4);
@@ -2593,14 +2578,13 @@ CHAR *f_3s( zahl )  /*   123.23  ->  "123"    */
  
 }
 /*----------------------------------------------------------------------------
-                                  nf_3s()
+                                  nf_3s(DOUBLE  zahl)
 -----------------------------------------------------------------------------*/
-CHAR *nf_3s( zahl )  /*  1000.23   ->  ".23"    */
-   DOUBLE zahl;
+CHAR *nf_3s(DOUBLE  zahl )  /*  1000.23   ->  ".23"    */
  
 {
     CHAR *s;
-    CHAR i_toc();
+    CHAR i_toc(INT i);
     INT  z1=0,z2=0,z99;
  
     s = STRING_ALLOC(4);
@@ -2624,10 +2608,9 @@ CHAR *nf_3s( zahl )  /*  1000.23   ->  ".23"    */
     return(s);
 }
 /*----------------------------------------------------------------------------
-                              i_toc()
+                              i_toc(INT i)
 -----------------------------------------------------------------------------*/
-CHAR i_toc( i )     /*  3 -> '3'   : integer to character */
-  INT i;
+CHAR i_toc(INT i )     /*  3 -> '3'   : integer to character */
 {
     switch(i){
         case 1 : return( '1' );
@@ -2655,7 +2638,7 @@ MATRIX *aJtb_2(EWPROBLEM * ewproblem,DOUBLE macheps)
      MATRIX *entartung,*ev;
      INT    groesse,*gi;
      INT    sp,ze;
-     DOUBLE sum_mat_Jt2();
+     DOUBLE sum_mat_Jt2(MATRIX *ev,MATRIX *entartung,INT zeile,INT gi_ze,INT spalte,INT gi_sp,DOUBLE macheps);
  
      entartung = ewproblem->entartung;
      groesse   = ANZ_ZE( entartung );  /* =Anzahl der verschiedenen Niveaus*/
@@ -2687,7 +2670,7 @@ DOUBLE zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur )
  /* in Kelvin */
 {
    DOUBLE zustandssumme = 0.0;
-   DOUBLE faktor,exp_();
+   DOUBLE faktor,exp_(DOUBLE z);
    INT    i;
  
    faktor = EINHEITIMP[ einheitnr_in].fek;
@@ -2697,23 +2680,18 @@ DOUBLE zustandssumme(INT  einheitnr_in ,VEKTOR * ew ,DOUBLE  temperatur )
    return( zustandssumme );
 }
 /*----------------------------------------------------------------------------
-                              sum_mat_Jt2()
+                              sum_mat_Jt2(MATRIX *ev,MATRIX *entartung,INT zeile,INT gi_ze,INT spalte,INT gi_sp,DOUBLE macheps)
 -----------------------------------------------------------------------------*/
 /*  ---                     2*/
 /*  >   |<E ,tau�J �E ,mue>| */
 /*  ---    i      T  k       */
  
-DOUBLE sum_mat_Jt2(ev,entartung,zeile,gi_ze,spalte,gi_sp,macheps)
-    MATRIX *ev;
-    MATRIX *entartung;
-    INT    zeile ,gi_ze;
-    INT    spalte,gi_sp;
-    DOUBLE macheps;
+DOUBLE sum_mat_Jt2(MATRIX *ev,MATRIX *entartung,INT zeile,INT gi_ze,INT spalte,INT gi_sp,DOUBLE macheps)
 {
     INT    tau,mue;
     VEKTOR *ev_tau,*ev_mue;
     DOUBLE sum=0.0;
-    DOUBLE mat_Jt2();
+    DOUBLE mat_Jt2(VEKTOR *a,VEKTOR *b,DOUBLE macheps);
  
     for( tau=1 ; tau<= gi_ze ; ++tau )
        for( mue=1 ; mue<= gi_sp ; ++mue ){
@@ -2725,7 +2703,7 @@ DOUBLE sum_mat_Jt2(ev,entartung,zeile,gi_ze,spalte,gi_sp,macheps)
     return(sum);
 }
 /*----------------------------------------------------------------------------
-                                suszept()
+                                suszept(DOUBLE   (*mat_Ji2)(VEKTOR *ev_ir,VEKTOR *ev_ks,DOUBLE macheps),EWPROBLEM *ewproblem,INT  einheitnr_in,DOUBLE t,DOUBLE gj)
 -----------------------------------------------------------------------------*/
 /*  ---                  2                                 */
 /*  >    w   |<ir|J |ks>|          c=x,y,z                 */
@@ -2742,19 +2720,14 @@ DOUBLE sum_mat_Jt2(ev,entartung,zeile,gi_ze,spalte,gi_sp,macheps)
 /*                                                         */
  
  
-DOUBLE suszept(mat_Ji2,ewproblem,einheitnr_in,t,gj)
-    DOUBLE   (*mat_Ji2)();
-    EWPROBLEM *ewproblem;
-    INT       einheitnr_in;
-    DOUBLE    t; /* temperatur in kelvin */
-    DOUBLE    gj;
-{
+DOUBLE suszept(DOUBLE   (*mat_Ji2)(VEKTOR *ev_ir,VEKTOR *ev_ks,DOUBLE macheps),EWPROBLEM *ewproblem,INT  einheitnr_in,DOUBLE t,DOUBLE gj)
+ /* temperatur in kelvin */
+{   VEKTOR *ev_ir, *ev_ks;
     INT    i,k,r,s,anz_niveaus,*gi;
-    VEKTOR *ev_ir,*ev_ks;
     VEKTOR *ew;
     MATRIX *ev;
     MATRIX *entartung;
-    DOUBLE faktor,exp_(),macheps,sum=0.0,zusumme=0.0;
+    DOUBLE faktor,exp_(DOUBLE z),macheps,sum=0.0,zusumme=0.0;
     DOUBLE ew_i,ew_k,wik;
  
  
@@ -2788,20 +2761,20 @@ DOUBLE suszept(mat_Ji2,ewproblem,einheitnr_in,t,gj)
  
 }
 /*----------------------------------------------------------------------------
-                              mat_Jt2()
+                              mat_Jt2(VEKTOR *a,VEKTOR *b,DOUBLE macheps)
 -----------------------------------------------------------------------------*/
                               /*                          2  */
-DOUBLE mat_Jt2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
-    VEKTOR *a,*b;             /*                     T       */
-    DOUBLE macheps;           /*  a,b  = �a>,�b> Spaltenvektoren */
+DOUBLE mat_Jt2(VEKTOR *a,VEKTOR *b,DOUBLE macheps)   /* Matrixelement  |<a�J �b>|   */
+            /*                     T       */
+           /*  a,b  = �a>,�b> Spaltenvektoren */
  
 {
-   KOMPLEX *mat_Jx();
-   KOMPLEX *mat_Jy();
-   KOMPLEX *mat_Jz();
-   KOMPLEX *ckon();
-   KOMPLEX *cmult();
-   KOMPLEX *cadd();
+   KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *mat_Jy(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *mat_Jz(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *ckon(KOMPLEX *a);
+   KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);
+   KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b);
    KOMPLEX *aJxb,*aJyb,*aJzb,*f;
    KOMPLEX *aJxb_star,*aJyb_star,*aJzb_star;
    KOMPLEX *aJxb_norm2,*aJyb_norm2,*aJzb_norm2;
@@ -2858,15 +2831,15 @@ DOUBLE mat_Jt2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
                               mat_Jx2()
 -----------------------------------------------------------------------------*/
                               /*                          2  */
-DOUBLE mat_Jx2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
-    VEKTOR *a,*b;             /*                     x       */
-    DOUBLE macheps;           /*  a,b  = �a>,�b> Spaltenvektoren */
+DOUBLE mat_Jx2(VEKTOR *a,VEKTOR *b,DOUBLE macheps)   /* Matrixelement  |<a�J �b>|   */
+            /*                     x       */
+           /*  a,b  = �a>,�b> Spaltenvektoren */
  
 {
-   KOMPLEX *mat_Jx();
-   KOMPLEX *ckon();
-   KOMPLEX *cmult();
-   KOMPLEX *cadd();
+   KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *ckon(KOMPLEX *a);
+   KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);
+   KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b);
    KOMPLEX *aJxb;
    KOMPLEX *aJxb_star;
    KOMPLEX *aJxb_norm2;
@@ -2895,15 +2868,15 @@ DOUBLE mat_Jx2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
                               mat_Jy2()
 -----------------------------------------------------------------------------*/
                               /*                          2  */
-DOUBLE mat_Jy2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
-    VEKTOR *a,*b;             /*                     y       */
-    DOUBLE macheps;           /*  a,b  = �a>,�b> Spaltenvektoren */
+DOUBLE mat_Jy2(VEKTOR *a,VEKTOR *b,DOUBLE macheps)   /* Matrixelement  |<a�J �b>|   */
+            /*                     y       */
+          /*  a,b  = �a>,�b> Spaltenvektoren */
  
 {
-   KOMPLEX *mat_Jy();
-   KOMPLEX *ckon();
-   KOMPLEX *cmult();
-   KOMPLEX *cadd();
+   KOMPLEX *mat_Jy(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *ckon(KOMPLEX *a);
+   KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);
+   KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b);
    KOMPLEX *aJyb;
    KOMPLEX *aJyb_star;
    KOMPLEX *aJyb_norm2;
@@ -2928,18 +2901,18 @@ DOUBLE mat_Jy2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
  
 }
 /*----------------------------------------------------------------------------
-                              mat_Jz2()
+                              mat_Jz2(VEKTOR *a,VEKTOR *b,DOUBLE macheps)
 -----------------------------------------------------------------------------*/
                               /*                          2  */
-DOUBLE mat_Jz2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
-    VEKTOR *a,*b;             /*                     z       */
-    DOUBLE macheps;           /*  a,b  = �a>,�b> Spaltenvektoren */
+DOUBLE mat_Jz2(VEKTOR *a,VEKTOR *b,DOUBLE macheps)   /* Matrixelement  |<a�J �b>|   */
+            /*                     z       */
+         /*  a,b  = �a>,�b> Spaltenvektoren */
  
 {
-   KOMPLEX *mat_Jz();
-   KOMPLEX *ckon();
-   KOMPLEX *cmult();
-   KOMPLEX *cadd();
+   KOMPLEX *mat_Jz(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *ckon(KOMPLEX *a);
+   KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);
+   KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b);
    KOMPLEX *aJzb;
    KOMPLEX *aJzb_star;
    KOMPLEX *aJzb_norm2;
@@ -2966,14 +2939,14 @@ DOUBLE mat_Jz2(a,b,macheps)   /* Matrixelement  |<a�J �b>|   */
 /*----------------------------------------------------------------------------
                               mat_Jx()
 -----------------------------------------------------------------------------*/
-KOMPLEX *mat_Jx(a,b)  /* Matrixelement  <a�J �b>  */
-    VEKTOR *a,*b;     /*                    x     */
+KOMPLEX *mat_Jx(VEKTOR *a,VEKTOR *b)  /* Matrixelement  <a�J �b>  */
+     /*                    x     */
                       /*  a,b  = �a>,�b> Spaltenvektoren */
 {
-   KOMPLEX *mat_Jp();
-   KOMPLEX *mat_Jm();
-   KOMPLEX *cadd();
-   KOMPLEX *cmult();
+   KOMPLEX *mat_Jp(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *mat_Jm(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *cadd(KOMPLEX *a,KOMPLEX *b);
+   KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);
    KOMPLEX *aJpb,*aJmb,*aJxb,*aJxb05,*f;
  
    f = KX_ALLOC(1);
@@ -2996,14 +2969,14 @@ KOMPLEX *mat_Jx(a,b)  /* Matrixelement  <a�J �b>  */
 /*----------------------------------------------------------------------------
                               mat_Jy()
 -----------------------------------------------------------------------------*/
-KOMPLEX *mat_Jy(a,b)  /* Matrixelement  <a�J �b>  */
-    VEKTOR *a,*b;     /*                    y     */
+KOMPLEX *mat_Jy(VEKTOR *a,VEKTOR *b)  /* Matrixelement  <a�J �b>  */
+         /*                    y     */
                       /*  a,b  = �a>,�b> Spaltenvektoren */
 {
-   KOMPLEX *mat_Jp();
-   KOMPLEX *mat_Jm();
-   KOMPLEX *csub();
-   KOMPLEX *cmult();
+   KOMPLEX *mat_Jp(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *mat_Jm(VEKTOR *a,VEKTOR *b);
+   KOMPLEX *csub(KOMPLEX *a,KOMPLEX *b);
+   KOMPLEX *cmult(KOMPLEX *a,KOMPLEX *b);
    KOMPLEX *aJpb,*aJmb,*aJyb,*aJybi05,*f;
  
    f = KX_ALLOC(1);
@@ -3026,14 +2999,14 @@ KOMPLEX *mat_Jy(a,b)  /* Matrixelement  <a�J �b>  */
 /*----------------------------------------------------------------------------
                               mat_Jp()
 -----------------------------------------------------------------------------*/
-KOMPLEX *mat_Jp(a,b)  /* Matrixelement  <a�J �b>  */
-    VEKTOR *a,*b;     /*                    +     */
+KOMPLEX *mat_Jp(VEKTOR *a,VEKTOR *b)  /* Matrixelement  <a�J �b>  */
+      /*                    +     */
                       /*  a,b  = �a>,�b> Spaltenvektoren */
  
 {
     INT dimj,n;
-    KOMPLEX *vskalar();
-    VEKTOR  *Jpb,*vr_alloc();
+    KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b);
+    VEKTOR  *Jpb,*vr_alloc(INT dimj);
     KOMPLEX *aJpb;
  
     #include "define_j.c"
@@ -3052,16 +3025,15 @@ KOMPLEX *mat_Jp(a,b)  /* Matrixelement  <a�J �b>  */
     return( aJpb );
 }
 /*----------------------------------------------------------------------------
-                              mat_Jm()
+                              mat_Jm(VEKTOR *a,VEKTOR *b)
 -----------------------------------------------------------------------------*/
-KOMPLEX *mat_Jm(a,b)  /* Matrixelement  <a�J �b>  */
-    VEKTOR *a,*b;     /*                    -     */
-                      /*  a,b  = �a>,�b> Spaltenvektoren */
- 
+KOMPLEX *mat_Jm(VEKTOR *a,VEKTOR *b)  /* Matrixelement  <a�J �b>  */
+     /*                    -     */
+                      /*  a,b  = �a>,�b> Spaltenvektoren */ 
 {
     INT dimj,n;
-    KOMPLEX *vskalar();
-    VEKTOR  *Jmb,*vr_alloc();
+    KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b);
+    VEKTOR  *Jmb,*vr_alloc(INT dimj);
     KOMPLEX *aJmb;
  
     #include "define_j.c"
@@ -3082,14 +3054,13 @@ KOMPLEX *mat_Jm(a,b)  /* Matrixelement  <a�J �b>  */
 /*----------------------------------------------------------------------------
                               mat_Jz()
 -----------------------------------------------------------------------------*/
-KOMPLEX *mat_Jz(a,b)  /* Matrixelement  <a�J �b>  */
-    VEKTOR *a,*b;     /*                    z     */
-                      /*  a,b  = �a>,�b> Spaltenvektoren */
- 
+KOMPLEX *mat_Jz(VEKTOR *a,VEKTOR *b)  /* Matrixelement  <a�J �b>  */
+  /*                    z     */
+                      /*  a,b  = �a>,�b> Spaltenvektoren */ 
 {
     INT dimj,n;
-    KOMPLEX *vskalar();
-    VEKTOR  *Jzb,*vr_alloc();
+    KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b);
+    VEKTOR  *Jzb,*vr_alloc(INT dimj);
     KOMPLEX *aJzb;
  
     #include "define_j.c"
@@ -3111,10 +3082,7 @@ KOMPLEX *mat_Jz(a,b)  /* Matrixelement  <a�J �b>  */
 /*----------------------------------------------------------------------------
                          is_parametersatz_null()
 -----------------------------------------------------------------------------*/
-INT is_parametersatz_null(iter,symmetrienr,macheps)
-        ITERATION *iter;
-        INT       symmetrienr;
-        DOUBLE    macheps;
+INT is_parametersatz_null(ITERATION *iter, INT symmetrienr, DOUBLE macheps)
 {
     INT zwei_j;
     INT flag = 0;

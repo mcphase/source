@@ -29,9 +29,9 @@ extern INT       free_vr(VEKTOR *v);          /* definiert in MATRIX.C   */
 extern INT       menue(MINIMUM *amoeba,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2);            /* definiert in ORTHO.C    */
 extern INT       if_stabil(MINIMUM *amoeba,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *w,INT iter_steps,DOUBLE chi2);        /* definiert in ORTHO.C    */
 extern INT       strategie(EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *p0);        /* definiert in ORTHO.C    */
-extern INT       is_equal();         /* definiert in DIAHERMX.C */
+extern INT       is_equal(DOUBLE a,DOUBLE b,DOUBLE macheps);         /* definiert in DIAHERMX.C */
 extern DOUBLE    accuracy();         /* definiert in DIAHERMX.C */
-extern INT       VA05A();            /* definiert in VA05A.C    */
+extern INT       VA05A(INT *PM,INT *PN,DOUBLE *FF,DOUBLE *XX,DOUBLE *PDSTEP,DOUBLE *PDMAX,DOUBLE *PACC,INT *PMAXFUN,INT *PIPRINT,DOUBLE *WW);            /* definiert in VA05A.C    */
  
 /*----------------------------------------------------------------------------
 Globales Arrays
@@ -51,13 +51,12 @@ FIT FITIMP[]={
  
 INT flag=0;
  
-void CALFUN(m,n,f,x)   /* wird spaeter von der C-routine VA05A()  */
- INT     m, n;         /* aufgerufen                              */
- DOUBLE *f, *x;
+void CALFUN(INT m,INT n,DOUBLE *f,DOUBLE *x)   /* wird spaeter von der C-routine VA05A()  */
+         /* aufgerufen                              */
 {
    UNUSED_PARAMETER(m);
 
-   DOUBLE   (*funk)();
+   DOUBLE   (*funk)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01);
    SETUP     *setup;
    EWPROBLEM *ewproblem;
    ITERATION *iteration;
@@ -80,15 +79,9 @@ void CALFUN(m,n,f,x)   /* wird spaeter von der C-routine VA05A()  */
   *(f+1)= sqrt( *(f+1) );
 }
 /*----------------------------------------------------------------------------
-                                va05a_()
+                                va05a_(MINIMUM *_fitnr,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *p0,DOUBLE (*funk)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 -----------------------------------------------------------------------------*/
-MINIMUM *va05a_(_fitnr,setup,ewproblem,iteration,p0,funk)
-      MINIMUM   *_fitnr;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      VEKTOR *p0;
-      DOUBLE (*funk)();
+MINIMUM *va05a_(MINIMUM *_fitnr,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *p0,DOUBLE (*funk)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 {
 /*    DOUBLE macheps; */
       VEKTOR *xi,*pp,*vr_alloc(INT n);
@@ -154,15 +147,9 @@ MINIMUM *va05a_(_fitnr,setup,ewproblem,iteration,p0,funk)
       return(_fitnr);
 }
 /*----------------------------------------------------------------------------
-                                fitnr5()
+                                fitnr5(MINIMUM *_fitnr ,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *p0,DOUBLE (*funk)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 -----------------------------------------------------------------------------*/
-MINIMUM *fitnr5(_fitnr ,setup,ewproblem,iteration,p0,funk)
-      MINIMUM   *_fitnr;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      VEKTOR *p0;
-      DOUBLE (*funk)();
+MINIMUM *fitnr5(MINIMUM *_fitnr ,SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *p0,DOUBLE (*funk)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 {
       DOUBLE chi2/*,macheps*/;
       INT /* itmax,*/iter;
@@ -183,17 +170,11 @@ MINIMUM *fitnr5(_fitnr ,setup,ewproblem,iteration,p0,funk)
       return(_fitnr);
 }
 /*----------------------------------------------------------------------------
-                                amoeba()
+                                amoeba(MINIMUM   *_amoeba,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *p0,DOUBLE    (*funk)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
  
 Siehe "Numerical Recipes", Seite 292-293
 -----------------------------------------------------------------------------*/
-MINIMUM *amoeba(_amoeba,setup,ewproblem,iteration,p0,funk)
-      MINIMUM   *_amoeba;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      VEKTOR *p0;
-      DOUBLE (*funk)();
+MINIMUM *amoeba(MINIMUM   *_amoeba,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *p0,DOUBLE    (*funk)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 {
       DOUBLE alpha = 1.0;  /* nach ref: 1.0 */
       DOUBLE beta  = 0.5;  /*           0.5 */
@@ -370,17 +351,11 @@ ende:
       return( _amoeba );
 }
 /*----------------------------------------------------------------------------
-                                powell()
+                                powell(MINIMUM   *_powell,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *pv,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
  
 Siehe "Numerical Recipes", Seite 299-300
 -----------------------------------------------------------------------------*/
-MINIMUM *powell(_powell,setup,ewproblem,iteration,pv,func)
-      MINIMUM   *_powell;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      VEKTOR    *pv;
-      DOUBLE    (*func)();
+MINIMUM *powell(MINIMUM   *_powell,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *pv,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 {
  
       MATRIX *xi, *mx_alloc(INT anz_ze,INT anz_sp);
@@ -388,8 +363,16 @@ MINIMUM *powell(_powell,setup,ewproblem,iteration,pv,func)
       INT    n,iter,i,j,ibig,ze,sp,mw;
       DOUBLE macheps,ftol,fret;
       DOUBLE fp,fptt,del,t;
-      LINMIN *linmin(),*_linmin;
-      MINIMUM *brent();
+      LINMIN *linmin(LINMIN    *_linmin,
+MINIMUM   *(*brent)(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,
+          ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,
+          DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,
+          ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi),
+SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,
+VEKTOR    *p,VEKTOR    *xi,
+DOUBLE (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01));
+      LINMIN *_linmin;
+      MINIMUM *brent(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi);
  
       INT    itmax;
  
@@ -505,24 +488,26 @@ ende  :
       return( _powell );
 }
 /*----------------------------------------------------------------------------
-                                frprmn()
+                                frprmn(MINIMUM   *_frprmn,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *pv,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
  
 Siehe "Numerical Recipes", Seite 305-306
 -----------------------------------------------------------------------------*/
-MINIMUM *frprmn(_frprmn,setup,ewproblem,iteration,pv,func)
-      MINIMUM   *_frprmn;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      VEKTOR    *pv;
-      DOUBLE    (*func)();
+MINIMUM *frprmn(MINIMUM   *_frprmn,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *pv,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 {
  
-      VEKTOR *vr_alloc(INT n),  *xi, *g, *h, *p, *gradient();
+      VEKTOR *vr_alloc(INT n),  *xi, *g, *h, *p, *gradient(DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *xt);
       INT    n,iter/*,i*/,j/*,ze*/,sp,mw;
       DOUBLE macheps,ftol,fret,eps,gg,dgg,gam,fp;
-      LINMIN *linmin(),*_linmin;
-      MINIMUM *dbrent();
+      LINMIN *linmin(LINMIN    *_linmin,
+MINIMUM   *(*brent)(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,
+          ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,
+          DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,
+          ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi),
+SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,
+VEKTOR    *p,VEKTOR    *xi,
+DOUBLE (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01));
+      LINMIN *_linmin;
+      MINIMUM *dbrent(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi);
  
       INT    itmax,its;
  
@@ -607,28 +592,35 @@ ende:
       return( _frprmn );
 }
 /*----------------------------------------------------------------------------
-                                linmin()
+                                linmin(LINMIN    *_linmin,
+MINIMUM   *(*brent)(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,
+          ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,
+          DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,
+          ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi),
+SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,
+VEKTOR    *p,VEKTOR    *xi,
+DOUBLE (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
  
 Siehe "Numerical Recipes", Seite 300-301
 -----------------------------------------------------------------------------*/
-LINMIN *linmin(_linmin,brent,setup,ewproblem,iteration,p,xi,func)
-      LINMIN    *_linmin;
-      MINIMUM   *(*brent)();
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      VEKTOR    *p,*xi;
-      DOUBLE    (*func)();
+LINMIN *linmin(LINMIN    *_linmin,
+MINIMUM   *(*brent)(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,
+          ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,
+          DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,
+          ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi),
+SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,
+VEKTOR    *p,VEKTOR    *xi,
+DOUBLE (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01))
 {
       INT j;
-      DOUBLE  ax,xx,bx/*,fa,fx,fb*/,fret,xmin;
-      MNBRAK  *_mnbrak,*mnbrak();
+      DOUBLE  ax,xx,bx=0.0/*,fa,fx,fb*/,fret,xmin;
+      MNBRAK  *_mnbrak,*mnbrak(MNBRAK    *_mnbrak,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi);
       MINIMUM *_brent;
  
       ax = 0.0;
       xx = 1.0;
       _mnbrak = MNBRAK_ALLOC(1);
-      _mnbrak = mnbrak(_mnbrak,setup,ewproblem,iteration,ax,xx,func,p,xi );
+      _mnbrak = mnbrak(_mnbrak,setup,ewproblem,iteration,ax,xx,bx,func,p,xi );
            ax = AX(_mnbrak);
            xx = BX(_mnbrak);
            bx = CX(_mnbrak);
@@ -652,16 +644,11 @@ LINMIN *linmin(_linmin,brent,setup,ewproblem,iteration,p,xi,func)
       return(_linmin);
 }
 /*----------------------------------------------------------------------------
-                                gradient()
+                                gradient(DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *xt)
  
  
 -----------------------------------------------------------------------------*/
-VEKTOR *gradient(func,setup,ewproblem,iteration,xt)
-      DOUBLE    (*func)();
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      VEKTOR    *xt;
+VEKTOR *gradient(DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *xt)
 {
       VEKTOR *df,*vr_alloc(INT n);
       INT i;
@@ -680,17 +667,11 @@ VEKTOR *gradient(func,setup,ewproblem,iteration,xt)
       return(df);
 }
 /*----------------------------------------------------------------------------
-                                f1dim()
+                                f1dim(SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE x)
  
 Siehe "Numerical Recipes", Seite 301
 -----------------------------------------------------------------------------*/
-DOUBLE f1dim(setup,ewproblem,iteration,func,p,xi,x)
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      DOUBLE    (*func)();
-      VEKTOR    *p,*xi;
-      DOUBLE    x;
+DOUBLE f1dim( SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE x)
 {
       INT     j;
       VEKTOR  *xt,*vr_alloc(INT n);
@@ -707,20 +688,14 @@ DOUBLE f1dim(setup,ewproblem,iteration,func,p,xi,x)
       return( fxt );
 }
 /*----------------------------------------------------------------------------
-                               df1dim()
+                               df1dim(SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE    x)
  
 Siehe "Numerical Recipes", Seite 306
 -----------------------------------------------------------------------------*/
-DOUBLE df1dim(setup,ewproblem,iteration,func,p,xi,x)
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      DOUBLE    (*func)();
-      VEKTOR    *p,*xi;
-      DOUBLE    x;
+DOUBLE df1dim(SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE    x)
 {
       INT     j;
-      VEKTOR  *xt,*vr_alloc(INT n),*gradient(),*df;
+      VEKTOR  *xt,*vr_alloc(INT n),*gradient(DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *xt),*df;
       DOUBLE  df1;
  
  
@@ -739,24 +714,18 @@ DOUBLE df1dim(setup,ewproblem,iteration,func,p,xi,x)
       return( df1 );
 }
 /*----------------------------------------------------------------------------
-                                mnbrak()
+                                mnbrak(MNBRAK    *_mnbrak,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi)
  
 Siehe "Numerical Recipes", Seite 281-282
 -----------------------------------------------------------------------------*/
-MNBRAK *mnbrak(_mnbrak,setup,ewproblem,iteration,ax,bx,func,p,xi)
-      MNBRAK    *_mnbrak;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      DOUBLE    ax,bx,(*func)();
-      VEKTOR    *p,*xi;
+MNBRAK *mnbrak(MNBRAK    *_mnbrak,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi)
 {
       DOUBLE gold;
       DOUBLE glimit = 100.0;
       DOUBLE tiny;
  
-      DOUBLE ulim,u,q,r,cx,fa,fb,fc,fu,dum;
-      DOUBLE f1dim();
+      DOUBLE ulim,u,q,r,fa,fb,fc,fu,dum;
+      DOUBLE f1dim(SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE x);
  
       gold = 0.5*(1.0 + sqrt(5.0));
       tiny = sqrt(ewproblem->eps_machine);
@@ -824,22 +793,16 @@ anfang:
       return(_mnbrak);
 }
 /*----------------------------------------------------------------------------
-                                brent()
+                                brent(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi)
  
 Siehe "Numerical Recipes", Seite 284-286
 -----------------------------------------------------------------------------*/
-MINIMUM *brent(_brent,setup,ewproblem,iteration,ax,bx,cx,func,pv,xi)
-      MINIMUM   *_brent;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      DOUBLE    ax,bx,cx,(*func)();
-      VEKTOR    *pv,*xi;
+MINIMUM *brent(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi)
 {
       INT    iter,itmax  = 100;
       DOUBLE cgold;
       DOUBLE zeps;
-      DOUBLE f1dim();
+      DOUBLE f1dim(SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE x);
       DOUBLE macheps;
  
       DOUBLE x,p,q,r,v,w,e,a,b,d,xm,tol,tol1,tol2,fx,fv,fw;
@@ -935,24 +898,18 @@ drei:
       return(_brent);
 }
 /*----------------------------------------------------------------------------
-                               dbrent()
+                               dbrent(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi)
  
 Siehe "Numerical Recipes", Seite 287-289
 -----------------------------------------------------------------------------*/
-MINIMUM *dbrent(_brent,setup,ewproblem,iteration,ax,bx,cx,func,pv,xi)
-      MINIMUM   *_brent;
-      SETUP     *setup;
-      EWPROBLEM *ewproblem;
-      ITERATION *iteration;
-      DOUBLE    ax,bx,cx,(*func)();
-      VEKTOR    *pv,*xi;
+MINIMUM *dbrent(MINIMUM   *_brent,SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE ax,DOUBLE bx,DOUBLE cx,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *pv,VEKTOR    *xi)
 {
       INT    iter,itmax  =  100;
       INT    ok1, ok2;
       DOUBLE zeps;
-      DOUBLE f1dim();
+      DOUBLE f1dim(SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE x);
       DOUBLE macheps;
-      DOUBLE df1dim();
+      DOUBLE df1dim(SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,DOUBLE    (*func)(SETUP *setup1,EWPROBLEM *ewproblem1,ITERATION *iteration1,VEKTOR *p01),VEKTOR    *p,VEKTOR    *xi,DOUBLE    x);
  
  
       DOUBLE v,w,x,e,xm,a,b,tol,tol1,tol2,fx,fv,fw,fu,dx,dv,dw,du;

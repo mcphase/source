@@ -39,21 +39,19 @@ Includedateien holen
 #define GOTO3(A,B,M)     {IF((M)==1)GOTO A;IF((M)==2)GOTO B;}
 #define SIGN(a1,a2) ( (a2)>=0. ? ABSD(a1) : (-ABSD(a1)) )
  
-extern INT      *sort();         /* definiert in DIAHERMX.C */
+extern INT      *sort(DOUBLE *werte,INT    *nummer,INT anz);         /* definiert in DIAHERMX.C */
  
 void TB04A(INT N, DOUBLE *XX, DOUBLE *FF, DOUBLE *DD, DOUBLE *AA);
 
 /*----------------------------------------------------------------------------
-                               spline()
+                               spline(INT n,DOUBLE *xx,DOUBLE *ff,DOUBLE x,DOUBLE macheps)
 -----------------------------------------------------------------------------*/
-DOUBLE spline(n,xx,ff,x,macheps)
-INT n;
-DOUBLE *xx,*ff,x,macheps;
+DOUBLE spline(INT n,DOUBLE *xx,DOUBLE *ff,DOUBLE x,DOUBLE macheps)
 {
    #define x(i) (*(xx+i))
    #define f(i) (*(ff+i))
  
-   DOUBLE *dd,*aa,TG01B(),value;
+   DOUBLE *dd,*aa,TG01B(INT IX,INT N,DOUBLE *UU,DOUBLE *SSS,DOUBLE *DD,DOUBLE X,DOUBLE EPS),value;
    DOUBLE x1,x2,x3,f1,f2,f3,a,b,c,det;
    INT    *nummer,i;
  
@@ -102,7 +100,7 @@ DOUBLE *xx,*ff,x,macheps;
    return(value);
 }
 /*----------------------------------------------------------------------------
-                               TB04A()
+                               TB04A(INT N,DOUBLE *XX,DOUBLE *FF,DOUBLE *DD,DOUBLE *AA)
 -----------------------------------------------------------------------------*/
 /* C/     ADD NAME=TB04A   HSL                     SINGLE           */
 /* C######DATE   01 JAN 1984     COPYRIGHT UKAEA, HARWELL.          */
@@ -114,9 +112,7 @@ DOUBLE *xx,*ff,x,macheps;
 /*C THE SPLINE DERIVATIVES D(I) ARE FOUND.  THE DIMENSION OF A MUST */
 /*C NOT BE LESS THAN 3*N. PERIPHERAL NP MUST BE AN OUTPUT MEDIUM.   */
  
-void TB04A(N,XX,FF,DD,AA)
-INT N;
-DOUBLE *XX,*FF,*DD,*AA;
+void TB04A(INT N,DOUBLE *XX,DOUBLE *FF,DOUBLE *DD,DOUBLE *AA)
 {
       #define X(I) (*(XX+I))
       #define F(I) (*(FF+I))
@@ -181,15 +177,13 @@ C50:  CONTINUE
       END
 }
 /*----------------------------------------------------------------------------
-                               TG01B()
+                               TG01B(INT IX,INT N,DOUBLE *UU,DOUBLE *SSS,DOUBLE *DD,DOUBLE X,DOUBLE EPS)
 -----------------------------------------------------------------------------*/
 /* C/     ADD NAME=TG01B   HSL                     SINGLE         */
 /* C######DATE   01 JAN 1984     COPYRIGHT UKAEA, HARWELL.        */
 /* C######ALIAS TG01B                                             */
 /* REAL FUNCTION TG01B(IX,N,U,S,D,X)                              */
-DOUBLE TG01B(IX,N,UU,SSS,DD,X,EPS)
-INT IX,N;
-DOUBLE *UU,*SSS,*DD,X,EPS;
+DOUBLE TG01B(INT IX,INT N,DOUBLE *UU,DOUBLE *SSS,DOUBLE *DD,DOUBLE X,DOUBLE EPS)
 {
       #define U(I) (*(UU+I))
       #define S(I) (*(SSS+I))

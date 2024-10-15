@@ -651,7 +651,7 @@ STEVENS *calc_Pkq(INT dimj)        /* Stevensoperatoren initialisieren */       
 /*----------------------------------------------------------------------------
                                free_Pkq(STEVENS * stevens )
 ------------------------------------------------------------------------------*/
-void free_Pkq( STEVENS * stevens  )
+void free_Pkq( STEVENS * stevens )
 {
  
     free_mx(P0P0(stevens));

@@ -167,7 +167,7 @@ KOMPLEX *csqroot(DOUBLE xr,DOUBLE xi)
     return( y );
 }
 /*----------------------------------------------------------------------------
-                              vskalar()
+                              vskalar(VEKTOR *a,VEKTOR *b)
 -----------------------------------------------------------------------------*/
 KOMPLEX *vskalar(VEKTOR *a,VEKTOR *b)  /* Multiplikation zweier komplexer */
      /* Vektoren <a| und |b> : <a|b>    */

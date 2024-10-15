@@ -47,11 +47,11 @@ Includedateien holen
 Extern definierte Funktionen
 -----------------------------------------------------------------------------*/
  
-extern INT CALFUN();   /*definiert in minima.c*/
-extern INT MB11A();    /*definiert in mb11a.c */
+extern INT CALFUN(INT m,INT n,DOUBLE *f,DOUBLE *x);   /*definiert in minima.c*/
+extern INT MB11A(INT M,INT N,DOUBLE *WW,INT PA,INT IA,INT PW);    /*definiert in mb11a.c */
  
 /*    SUBROUTINE VA05A (M,N,F,   X,DSTEP,DMAX,ACC,MAXFUN,IPRINT, W) */
-      INT        VA05A (INT *PM,INT *PN,DOUBLE *FF,DOUBLE *XX,DOUBLE *PDSTEP,DOUBLE *PDMAX,DOUBLE *PACC,INT *PMAXFUN,INT *PIPRINT,DOUBLE *WW)
+      INT        VA05A(INT *PM,INT *PN,DOUBLE *FF,DOUBLE *XX,DOUBLE *PDSTEP,DOUBLE *PDMAX,DOUBLE *PACC,INT *PMAXFUN,INT *PIPRINT,DOUBLE *WW)
 {
       #define X(I) (*(XX+(I)))
       #define F(I) (*(FF+(I)))

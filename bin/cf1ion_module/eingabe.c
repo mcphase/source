@@ -31,7 +31,7 @@ extern DOUBLE beta_J[];  /* definiert in theta.c */
 extern DOUBLE gamma_J[]; /* definiert in theta.c */
  
  
-extern QUADRANT *abfrage();      /* definiert in ORTHO.C    */
+extern QUADRANT *abfrage( DOUBLE  rsin, DOUBLE  rcos, DOUBLE  macheps );      /* definiert in ORTHO.C    */
 extern INT       null(DOUBLE a,DOUBLE macheps);         /* definiert in DIAHERMX.C */
 extern INT      *sort();         /* definiert in DIAHERMX.C */
 extern DOUBLE  accuracy();       /* definiert in DIAHERMX.c */
@@ -43,13 +43,13 @@ extern DOUBLE    exp_();             /* definiert in ORTHO.C */
 extern VEKTOR *vr_alloc();    /* definiert in MATRIX.C */
 extern MATRIX *mx_alloc(INT anz_ze,INT anz_sp);    /* definiert in MATRIX.C */
  
-extern DOUBLE omegan0n();     /* definiert in MAIN.C  */
-extern DOUBLE omegan1n();     /* definiert in MAIN.C  */
-extern DOUBLE omegan2n();     /* definiert in MAIN.C  */
-extern DOUBLE omegan3n();     /* definiert in MAIN.C  */
-extern DOUBLE omegan4n();     /* definiert in MAIN.C  */
-extern DOUBLE omegan5n();     /* definiert in MAIN.C  */
-extern DOUBLE omegan6n();     /* definiert in MAIN.C  */
+extern DOUBLE omegan0n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE omegan1n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE omegan2n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE omegan3n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE omegan4n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE omegan5n(INT n);     /* definiert in MAIN.C  */
+extern DOUBLE omegan6n(INT n);     /* definiert in MAIN.C  */
 extern DOUBLE epn0n();     /* definiert in MAIN.C  */
 extern DOUBLE epn1n();     /* definiert in MAIN.C  */
 extern DOUBLE epn2n();     /* definiert in MAIN.C  */
@@ -1601,7 +1601,7 @@ MATRIX *readBmag(fp,name,modus,myB,iteration,buffer_size,string)
   MATRIX    *calc_Bmag();
   MATRIX    *calcBmol();
  
-  QUADRANT  *q,*abfrage();
+  QUADRANT  *q,*abfrage( DOUBLE  rsin, DOUBLE  rcos, DOUBLE  macheps );
   DOUBLE    macheps,accuracy();
  
     macheps = MACHEPSFACT*accuracy();
@@ -2861,9 +2861,9 @@ ITERATION *read_Akq(CHAR *name, INT vsymmetrienr_vor)  /* Akq aus file name lese
     DOUBLE    myB/*,f2,f4,f6*/; 
     
     DOUBLE    sin(),cos();
-    DOUBLE    omegan0n(),omegan1n(),omegan2n();
-    DOUBLE    omegan3n(),omegan4n(),omegan5n();
-    DOUBLE    omegan6n();
+    DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
+    DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
+    DOUBLE    omegan6n(INT n);
     DOUBLE    a_tof(),a40,a44,a60,a64,sqrt(),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
@@ -3125,9 +3125,9 @@ ITERATION *read_Bkqnew(CHAR *ion)  /* Vkq aus file name lesen */
     DOUBLE    myB;
    
     DOUBLE    sin(),cos();
-    DOUBLE    omegan0n(),omegan1n(),omegan2n();
-    DOUBLE    omegan3n(),omegan4n(),omegan5n();
-    DOUBLE    omegan6n();
+    DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
+    DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
+    DOUBLE    omegan6n(INT n);
     DOUBLE    a_tof(),b40,b44,b60,b64,sqrt();
 /*  CHAR      *einheit_in,*einheit_out; */
     CHAR      c/*,*string*/,*fgets(),*a_tos();
@@ -3244,9 +3244,9 @@ ITERATION *read_Bkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lese
     DOUBLE    versionsnummer;
     DOUBLE    myB;
     DOUBLE    sin(),cos();
-    DOUBLE    omegan0n(),omegan1n(),omegan2n();
-    DOUBLE    omegan3n(),omegan4n(),omegan5n();
-    DOUBLE    omegan6n();
+    DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
+    DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
+    DOUBLE    omegan6n(INT n);
     DOUBLE    a_tof(),b40,b44,b60,b64,sqrt(),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion=0;
@@ -3505,9 +3505,9 @@ ITERATION *read_xW(CHAR *name, INT vsymmetrienr_vor)  /* x,W aus file name lesen
     DOUBLE    x,W,f4,f6;
    
     DOUBLE    sin(),cos();
-    DOUBLE    omegan0n(),omegan1n(),omegan2n();
-    DOUBLE    omegan3n(),omegan4n(),omegan5n();
-    DOUBLE    omegan6n();
+    DOUBLE    omegan0n(INT n),omegan1n(INT n),omegan2n(INT n);
+    DOUBLE    omegan3n(INT n),omegan4n(INT n),omegan5n(INT n);
+    DOUBLE    omegan6n(INT n);
     DOUBLE    a_tof(),sqrt(),temperatur;
     CHAR  /*  *einheit_in,*einheit_out,*/modus;
     CHAR      *ion;
@@ -5061,15 +5061,10 @@ void lesedaten(fp,x,f,n,name,nummerierung,ip,imax,bekannt,pdatnr,
  
 }
 /*------------------------------------------------------------------------------
-                          neben_read()
+                          neben_read(SETUP     *setup,CHAR      *name,KRISTALLFELD *kristallfeld,INT einheitnr_out,DOUBLE macheps)
 ------------------------------------------------------------------------------*/
  
-NEBENBEDINGUNG *neben_read(setup,name,kristallfeld,einheitnr_out,macheps)
-    SETUP     *setup;
-    CHAR      *name;
-    KRISTALLFELD *kristallfeld;
-    INT       einheitnr_out;
-    DOUBLE    macheps;
+NEBENBEDINGUNG *neben_read(SETUP     *setup,CHAR      *name,KRISTALLFELD *kristallfeld,INT einheitnr_out,DOUBLE macheps)
 {
     ITERATION *iteration;
     NEBENBEDINGUNG *neben;
