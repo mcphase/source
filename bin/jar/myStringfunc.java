@@ -2,6 +2,19 @@ class myStringfunc {
 
 public myStringfunc(){}
 
+public int NofCols (String strLine)
+{String sx;
+ // select N
+      sx=TrimString(strLine);
+      int cx =0;
+      int iPos = sx.indexOf(" ");
+      while (iPos >= 0)
+      {++cx;
+       sx=sx.substring(iPos);
+       sx=TrimString(sx);iPos = sx.indexOf(" ");}
+       return (cx);
+}   
+
 public String NthWord (String strLine,int N)
  {String sx;
  // select N

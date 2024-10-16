@@ -148,11 +148,16 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    }
 
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
-   fprintf (fout, "#   x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] free energy f[meV/ion] energy u[meV/ion] total moment |m|     ma mb mc m||(projection along H) [mb/ion]");
-   if(ortho==0){fprintf (fout, "mi   mj   mk[muB/ion]   Hi  Hj  Hk[T]");}
-   if(ini.doeps&&ortho==0){fprintf (fout, " Eel [meV/ion] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij");}
-   if(ini.doeps&&ortho!=0){fprintf (fout, " Eel [meV/ion] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab");}
-   fprintf (fout,"}\n");
+   fprintf (fout, "#1    2   3    4    5     6     7     8                      9                 10                       11         12         13         14                              ");
+   if(ortho==0){fprintf (fout, "15          16          17          18    19    20   ");}
+   if(ini.doeps&&ortho==0){fprintf (fout, " 21           22         23         24         25           26          27         ");}
+   if(ini.doeps&&ortho!=0){fprintf (fout, " 15           16         17         18         19           20          21         ");}
+   fprintf (fout,"\n");
+   fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] free_energy_f[meV/ion] energy_u[meV/ion] total_moment|m|[mb/ion]  ma[mb/ion] mb[mb/ion] mc[mb/ion] m||(projection along H)[mb/ion] ");
+   if(ortho==0){fprintf (fout, "mi[muB/ion] mj[muB/ion] mk[muB/ion] Hi[T] Hj[T] Hk[T]");}
+   if(ini.doeps&&ortho==0){fprintf (fout, " Eel[meV/ion] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij");}
+   if(ini.doeps&&ortho!=0){fprintf (fout, " Eel[meV/ion] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab");}
+   fprintf (fout,"\n");
    fclose(fout);
       }
    if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eel=0;}
@@ -241,7 +246,12 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
-   fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] phasnumber-j   period-key supercell-nr1 x nr2 x nr3 ");
+   fprintf (fout, "#1    2   3    4    5     6     7     8              9          10              11    12  ");
+  for(i1=1;i1<=nofcomponents;++i1)
+	      {//fprintf(fout,"<I%c> ",'a'-1+i1);}
+	      fprintf(fout,"%i   ",12+i1);}
+	      fprintf(fout,"\n");
+   fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] phasnumber-j   period-key supercell-nr1   nr2   nr3 ");
            for(i1=1;i1<=nofcomponents;++i1)
 	      {//fprintf(fout,"<I%c> ",'a'-1+i1);}
 	      fprintf(fout,"<I%i> ",i1);}
@@ -294,7 +304,17 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "# sublattice %i (da=%g a db=%g b dc=%g c)\n",l,(*inputpars.jjj[l]).xyz(1),(*inputpars.jjj[l]).xyz(2),(*inputpars.jjj[l]).xyz(3));
    fprintf (fout, "# correlation function <JJ(%g %g %g)>\n",myround((*inputpars.jjj[l]).dn[i](1)),myround((*inputpars.jjj[l]).dn[i](2)),myround((*inputpars.jjj[l]).dn[i](3)));
-   fprintf (fout, "#x     y     T[K]  H[T]   Ha[T] Hb[T] Hc[T]  ");
+   fprintf (fout, "#1     2     3     4      5     6     7     ");int k=7;
+           for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents;++i1)
+	      {++k;fprintf(fout,"%i      ",k);}
+           for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents-1;++i1)
+              {for(j1=i1+1;j1<=(*inputpars.jjj[l]).nofcomponents;++j1)
+                        {++k;fprintf(fout,"%i       %i     ",k,k+1);++k;
+			}
+	      }
+                          
+   fprintf (fout,"}\n");
+   fprintf (fout, "#x     y     T[K]  H[T]   Ha[T] Hb[T] Hc[T] ");
            for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents;++i1)
 	      {fprintf(fout,"<J%cJ%c> ",'a'-1+i1,'a'-1+i1);}
            for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents-1;++i1)
@@ -339,6 +359,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "#Neutron Intensity - Mind: only structure+polarizationfactor+formfactor+debeywallerfactor - no lorentzfactor is  taken into account\n");
+   fprintf (fout, "#1   2   3     4     5     6     7           8   9   10 11        12  13  14  15        16  17  18  19      \n");
    fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  int       h   k   l   int       h   k   l   int ...}\n");
    fclose(fout);
    //xray a component
@@ -355,9 +376,11 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       if(ortho==0){
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - i component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+   fprintf (fout, "#1   2   3     4     5     6     7           8   9   10 11          12           13  14  15  16          17           18   19  20  21          22                       \n");
    fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  real(mi(Q)) im(mi(Q))    h   k   l   real(mi(Q)) im(mi(Q))     h   k   l   real(mi(Q)) im(mi(Q))[mu_B/atom] ...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - a component\n"); 
+   fprintf (fout, "#1   2   3     4     5     6     7           8   9   10 11          12             13  14  15  16          17              18  19  20 21          22                       \n");
    fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  real(ma(Q)) im(ma(Q))      h   k   l    real(ma(Q)) im(ma(Q))      h   k   l  real(ma(Q)) im(ma(Q)) [mu_B/atom]...}\n");
    }
    fclose(fout);
@@ -375,10 +398,12 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       if(ortho==0){
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - j component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+   fprintf (fout, "#1   2   3     4     5     6     7           8   9   10 11          12              13  14  15  16          17              18  19  20  21          22                      \n");
    fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))[mu_B/atom]...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - b component\n"); 
-   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  real(mb(Q)) im(mb(Q))        h   k   l  real(mb(Q)) im(mb(Q))     h   k   l  real(mb(Q)) im(mb(Q)) [mu_B/atom] ...}\n");
+   fprintf (fout, "#1   2   3     4     5     6     7           8   9   10 11          12               13  14  15 16          17            18  19  20  21         22                      \n");
+   fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  real(mb(Q)) im(mb(Q))        h   k   l  real(mb(Q)) im(mb(Q))     h   k   l  real(mb(Q)) im(mb(Q))[mu_B/atom] ...}\n");
    }
    fclose(fout);
    //xray c component
@@ -395,9 +420,11 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       if(ortho==0){
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - k component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+   fprintf (fout, "#1   2   3     4     5     6     7           8   9   10 11          12              13  14  15 16          17             18  19  20  21          22                       \n");
    fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  real(mk(Q)) im(mk(Q))       h   k   l  real(mk(Q)) im(mk(Q))      h   k   l   real(mk(Q)) im(mk(Q)) [mu_B/atom]...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - c component\n"); 
+   fprintf (fout, "#1   2   3     4     5     6     7           8   9   10 11          12              13  14  15 16          17              18  19  20 21          22                       \n");
    fprintf (fout, "#x   y   T[K]  H[T]  Ha[T] Hb[T] Hc[T]       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))  [mu_B/atom]...}\n");
    }
    fclose(fout);
@@ -481,7 +508,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "#!spins_scale_moment=1.0\n");
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
-   
+ 
    fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmomentum-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");
    fprintf (fout, "    #<Ja(1)> <Ja(2)> .... selfconsistent Spinconfiguration  \n");
    fprintf (fout, "    #<Jb(1)> <Jb(2)> .... UNITS:  multiply by gJ to get moment [muB]\n");

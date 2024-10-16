@@ -427,8 +427,8 @@ fclose(fout_opmat);}
  
       
    }
-printf("# **********************end of program singleion************************\n");
-if(verbose)printf("# ... you can now use 'cpsingleion' to calculate specific heat,\n"
+fprintf(stderr,"# **********************end of program singleion************************\n");
+if(verbose)fprintf(stderr,"# ... you can now use 'cpsingleion' to calculate specific heat,\n"
        "#      entropy etc from results/*.levels.cef\n"
        "# **********************************************************************\n");
 }

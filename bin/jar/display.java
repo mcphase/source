@@ -584,13 +584,30 @@ protected static void reload_data(int i){    try{
              strLine = inStream.readLine();
              if (strLine==null) break;
              if (strLine.length() == 0) continue;
+      // replace tabs by spaces
+      strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
+
              if(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))
              {
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
-        if(detyText==true&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
-        if(detxText==true&&i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));}}
+        if(detxText==true&&i1<=strLine.length()-13){
+            if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){
+              chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));
+                                                                             }
+               else  // if no data has yet been read  -go through string and try to find automatically column headers
+               {if(j==0&&SF.NofCols(strLine)>1){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,clx));}
+               }
+                                                   }
+        if(detyText==true&&i1<=strLine.length()-13){
+            if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
+              chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));
+                                                                             }
+               else  // if no data has yet been read  -go through string and try to find automatically column headers
+               {if(j==0&&SF.NofCols(strLine)>1){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,cly));}
+               }
+                                                   }
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
         //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
         if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
@@ -598,8 +615,6 @@ protected static void reload_data(int i){    try{
         continue;
              }
              // select colx and coly
-     // replace tabs by spaces
-      strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
                  sx=SF.NthWord(strLine,clx);
                  sy=SF.NthWord(strLine,cly);
                  sxe=SF.NthWord(strLine,clxerr);

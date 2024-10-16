@@ -96,8 +96,8 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
             fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
             writeheader(inputpars,foutqei);
             fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
-            ini.print_usrdefcolhead(foutqei);fprintf(foutqei,"h k l Q[A^-1] energy[meV] Imag_dip [barn/sr/f.u.]"
-                                                          " Imag [barn/sr/f.u.] Inuc [barn/sr/f.u.]");
+            ini.print_usrdefcolhead(foutqei);fprintf(foutqei,"h k l Q[A^-1] energy[meV] Imag_dip[barn/sr/f.u.]"
+                                                          " Imag[barn/sr/f.u.] Inuc[barn/sr/f.u.] ");
             switch(ini.outS)
             {case 0:break;
              case 1:fprintf(foutqei,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
