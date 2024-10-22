@@ -669,6 +669,7 @@ if (do_jqfile)
         if(do_jqfile==2)fprintf(jqfile,"#h  vs  k  vs  l  vs Qincr[1/A] vs eigenvalues of J(hkl) matrix (meV) \n");       
        }
 }
+
 // ************************************************************************************************
 //MAIN LOOP - do calculation of excitation energy for every Q vector     
 // ************************************************************************************************
@@ -937,11 +938,13 @@ if (do_jqfile){
                         }
         fprintf(jqfile,"\n");
        }
+       // if we are calculating initial q-vektor i.e. jqsta=-1e10 ....
        if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-0.1e10;jqsta_scaled=jqsta;scalefactor=1;jqmax=jq0;hmax=hkl(1);kmax=hkl(2);lmax=hkl(3);
                           // here the first hkl vectors eigenvalue has been determined
                           // ... look in table, if there is a value, to which is might be scaled
                           if(ini.hkls[counter][0]>3&&jq0!=0.0){scalefactor=ini.hkls[counter][4]/jq0;}
                          }
+       // ... on subsequent runs 
        else           {if(Tn(i2)>jqmax){jqmax=Tn(i2);hmax=hkl(1);kmax=hkl(2);lmax=hkl(3);}
                        if(Tn(i2)>jq0)
                          {if(jqsta<0){jqsta=0;jqsta_scaled=0;}
@@ -1709,8 +1712,9 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
 
     if (do_jqfile) 
      {fprintf(jqfile,"#!the largest eigenvalue of J(q) is jqmax=%g at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
-     fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
-      fprintf(jqfile,"#the sum of squared differences between the highest eigenvalue\n");
+     fprintf(jqfile,"#!for the first q vector in the list jq0=%g at h0=%g k0=%g l0=%g \n",jq0,ini.hkls[firstcounter][1],ini.hkls[firstcounter][2],ini.hkls[firstcounter][3]);
+      fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
+      fprintf(jqfile,"#A)the sum of squared differences between the highest eigenvalue\n");
       fprintf(jqfile,"#of a q vector and that of the first q-vector in the list in mcdisp.par.\n");
       fprintf(jqfile,"#only those eigenvalues are taken into account in the sum, which are larger\n");
       fprintf(jqfile,"#than that of the first q-vector in the list in mcdisp.par - this is usefule\n");
@@ -1719,16 +1723,25 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
       fprintf(jqfile,"# ... if the first q vector has the largest eigenvalue, then sta is negative and contains the\n");
       fprintf(jqfile,"#distance to the closest eigenvalue\n");
       fprintf(jqfile,"#!sta=%g\n",jqsta);
-      fprintf(jqfile,"#another standard deviation is given below: calculated as squared sum of differences between\n");
+      fprintf(jqfile,"#B)another standard deviation is given below: calculated as squared sum of differences between\n");
       fprintf(jqfile,"#the highest eigenvalue of J(Q) and energies in column 4 of mcdisp.par, if column 5 and 6  \n");
       fprintf(jqfile,"#in mcdisp.par contain values, then these are compared to the other eigenvalues of J(Q)\n");
       fprintf(jqfile,"#!sta4=%g\n",jqsta_int);
-      fprintf(jqfile,"#if in mcdisp.par after the hkl of the first q vector a number is given, then\n");
+      fprintf(jqfile,"#C)another standard deviation is given below: calculated as squared distance of \n");
+      fprintf(jqfile,"#the q-vectors q0 and qmax, i.e. (hmax-h0)^2+(kmax-k0)^2+(lmax-l0)^2 \n");
+double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(kmax-ini.hkls[firstcounter][2])*(kmax-ini.hkls[firstcounter][2])+(lmax-ini.hkls[firstcounter][3])*(lmax-ini.hkls[firstcounter][3]);
+      fprintf(jqfile,"#!staq=%g\n",staq);
+      fprintf(jqfile,"#D)other standard deviations are given below: products of  sta / sta4 and staq \n");
+      fprintf(jqfile,"#!staxstaq=%g\n",jqsta*staq);
+      fprintf(jqfile,"#!sta4xstaq=%g\n",jqsta_int*staq);
+      fprintf(jqfile,"#\n#if in mcdisp.par after the hkl of the first q vector a number is given, then\n");
       fprintf(jqfile,"#scaled interaction parameters are computed such that their highest eigenvalue\n");
       fprintf(jqfile,"#agrees with this number. Scaled parameters are saved in results/mcdisp_scaled.j\n");
       fprintf(jqfile,"#and here follow standard deviations computed with the scaled parameters\n");
       if(scalefactor!=1.0){fprintf(jqfile,"#!sta_scaled=%g\n",jqsta_scaled);
                            fprintf(jqfile,"#!sta4_scaled=%g\n",jqsta_int_scaled);
+                           fprintf(jqfile,"#!sta_scaledxstaq=%g\n",jqsta_scaled*staq);
+                           fprintf(jqfile,"#!sta4_scaledxstaq=%g\n",jqsta_int_scaled*staq);
                            fprintf(jqfile,"#!scalefactor=%g\n",scalefactor);
                            }
        fclose(jqfile);

@@ -72,49 +72,68 @@ fprintf(fout,"\
 #            4.....neutron TOF powder cyl. sample - d-pattern log scaled\n\
 #            5.....neutron TOF powder cyl. sample - d-pattern normal scaled\n\
 #\n\
-#     out* controls the type of output in user defined column * of mcdiff.out\n\
-#! out4=30    (optional)\n\
-#! out5=31    (optional)\n\
-#! out6=32    (optional)\n\
-#! out10=1    (optional)\n\
-#! out11=0    (optional)\n\
-#     ... in out*=n the numbers n have the following meaning:\n\
-#            0....LF          \n\
-#            1....|NSF|[b]    \n\
-#            2....Re(NSF)[b]  \n\
-#            3....Im(NSF)[b]  \n\
-#            4....|MSF|       \n\
-#            5....|MSF.P|     \n\
-#            6....Re(MSF.P)   \n\
-#            7....Im(MSF.P)   \n\
-#            8....|MSFdip|    \n\
-#            9....|MSFdip.P|  \n\
-#            10....Re(MSFdip.P)\n\
-#            11....Im(MSFdip.P)\n\
-#            12....angl(Q,P)[deg]\n\
-#            13....i(MSFxMSF*).P\n\
-#            14....I+          \n\
-#            15....I-          \n\
-#            16....I+/I-       \n\
-#            17....i(MSFxMSF*)dip.P\n\
-#            18....Idip+       \n\
-#            19....Idip-       \n\
-#            20....Idip+/Idip- \n\
-#            21....2*|MSF.P|/sin^2(angl(Q,P))\n\
-#            22....2*|MSFdip.P|/sin^2(angl(Q,P))\n\
-#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)\n\
-#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)\n\
-#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)\n\
-#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)\n\
-#            27....Qx[1/A]     \n\
-#            28....Qy[1/A]     \n\
-#            29....Qz[1/A]     \n\
-#            30....d[A]        \n\
-#            31....|Q|[1/A]    \n\
-#            32....2theta      \n\
+# out*  controls the type of output in  mcdiff.out \n\
+#!out0=1  0..short header, 1...standard header, 2... long header in mcdiff.out\n\
+# (a negative value triggers calculation of magnetic xray scattering)\n\
 #\n\
-#           In the above the intensities I+ and I- are the intensities in apolarised neutron experiment\n\
-#           with incident polarisation up (+) or down (-):\n\
+#!  nofoutputcolumns=12  number of columns in output file mcdiff.out\n\
+# choose out* to set type of desired output in column 1 to 12\n\
+# (default is h k l d Q 2theta Inuc Imag Itot)\n\
+#\n\
+#!out1=31 out2=32 out3=33 out4=37 out5=38 out6=39 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 \n\
+#\n\
+#     ... in out*=n the numbers n have the following meaning:\n\
+#            0....LF #\n\
+#            1....|NSF|[b] #\n\
+#            2....Re(NSF)[b] #\n\
+#            3....Im(NSF)[b] #\n\
+#            4....|MSF| #\n\
+#            5....|MSF.P| #\n\
+#            6....Re(MSF.P) #\n\
+#            7....Im(MSF.P) #\n\
+#            8....|MSFdip| #\n\
+#            9....|MSFdip.P| #\n\
+#            10....Re(MSFdip.P) #\n\
+#            11....Im(MSFdip.P) #\n\
+#            12....angl(Q,P)[°] #\n\
+#            13....i(MSFxMSF*).P #\n\
+#            14....I+ #\n\
+#            15....I- #\n\
+#            16....I+/I- #\n\
+#            17....i(MSFxMSF*)dip.P #\n\
+#            18....Idip+ #\n\
+#            19....Idip- #\n\
+#            20....Idip+/Idip- #\n\
+#            21....2*|MSF.P|/sin^2(angl(Q,P) #\n\
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P) #\n\
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #\n\
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #\n\
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #\n\
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #\n\
+#            27....Inuc(2t)	#\n\
+#            28....Imag(2t)   #\n\
+#            29....Itot(2t)   #\n\
+#            30....Imag_dip(2t) #\n\
+#            31....h     #\n\
+#            32.... k     #\n\
+#            33.... l     #\n\
+#            34....d[A]       #\n\
+#            35....|Q|[1/A]   #\n\
+#            36....2theta     #\n\
+#            37....Qi[1/A]    #\n\
+#            38....Qj[1/A]     Qi Qj Qk are euclidean components of scattering vector#\n\
+#            39....Qk[1/A]     with j||b, k||(a x b) and i normal to k and j#\n\
+#            40....T[K]       #\n\
+#            41....Ha[T]      #\n\
+#            42....Hb[T]      #\n\
+#            43....Hc[T]      #\n\
+#            44....hprim      #\n\
+#            45....kprim      #\n\
+#            46....lprim      #\n\
+#            47....Itotdip(2t) #\n\
+#\n\
+#           In the above the intensities I+ and I- are the intensities in a polarised neutron\n\
+#           experiment with incident polarisation up (+) or down (-):\n\
 #            I+-=LF exp(-OTF Q^2/8pi^2) \n\
 #                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 \n\
 #                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]\n\

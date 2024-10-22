@@ -138,6 +138,7 @@ par::par(const par & p)
    strcpy(rems[i],p.rems[i]);}
 
  jjj=new jjjpar * [cs.nofatoms+1]; for (i=1;i<=cs.nofatoms;++i){ jjj[i] = new jjjpar(*p.jjj[i]);
+
   cs.sipffilenames[i]=(*jjj[i]).sipffilename;
   cs.x[i]=(*jjj[i]).xyz[1];
   cs.y[i]=(*jjj[i]).xyz[2];
@@ -502,11 +503,11 @@ fprintf(fout,"\
 #                have to be given, which refer to an right handed orthogonal coordinate system \n\
 #                defined by y||b, z||(a x b) and x normal to y and z\n\
 #  <Sa> <Sb> <Sc>  <La> <Lb > <Lc>  (optional) denote the spin and orbital angular momentum components \n\
-# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)\n\
+# 'mf1' 'mf2' 'mf3' (optional line, used to go beyond dipole approx for formfactor)\n\
 #                                     denote the corresponding exchange fields in meV\n\
 #\n\
 #{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> ]\n\
-#{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}\n",nat);
+#{corresponding exchange fields [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}\n",nat);
 
 fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [Moment created by program %s]\n",program);
 for(int i=1;i<=cs.nofatoms;++i)

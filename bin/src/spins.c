@@ -122,7 +122,7 @@ fprintf(fout,"\
 #                have to be given, which refer to an right handed orthogonal coordinate system \n\
 #                defined by y||b, z||(a x b) and x normal to y and z\n\
 #  <Sa> <Sb> <Sc>  <La> <Lb > <Lc>  (optional) denote the spin and orbital angular momentum components \n\
-# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)\n\
+# 'mf1' 'mf2' 'mf3' (optional line, used to go beyond dipole approx for formfactor)\n\
 #                                     denote the corresponding exchange fields in meV\n\
 #\n");
 }
@@ -300,7 +300,7 @@ else
 
    spincf savmf(1,1,1,cs.nofatoms,cs.nofcomponents);
 
-// load spinsconfigurations and check which one is nearest -------------------------------   
+// ------------------------load spinsconfigurations and check which one is nearest -------------------------------   
 double TT=0; TT=strtod(argv[1+os],NULL);
 double HHx=0,HHy=0,HHz=0,lnZ,U;
 if (strncmp(argv[1],"-f",2)==0&&argc-os<3){TT=-TT;printf("# the configuration number %g\n",-TT);} // here TT becomes a number of a spinconfig in a file
@@ -312,6 +312,8 @@ else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
 if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr))
   {fclose (fin);fprintf(stderr,"#!!! Error program spins - no stable structure found !!!\n");exit(1);}
 fclose (fin);
+// ----------------------------output configuration ----------------------------------------------------------------
+
   printf("#! %s - configuration\n",outstr);
 if(nofcomp>savmf.nofcomponents){nofcomp=savmf.nofcomponents;}
 if(nofcomp<savmf.nofcomponents){printf("#! printing only nofcomponents=%i components\n",nofcomp);}
@@ -320,9 +322,10 @@ if(nofcomp<savmf.nofcomponents){printf("#! printing only nofcomponents=%i compon
 if(strcmp(argv[os]+strlen(argv[os])-3,".mf")==0)
 {savmf.print_commented(stdout,"Hex",minl,maxl,maxn,limit);}
 else{savmf.print_commented(stdout,"I",minl,maxl,maxn,limit);}
-
-exit(0);}
+                       exit(0);} // exit for -fc option
   else {savmf.print(stdout,nofcomp);}}
+
+// --------------------- load crystal structure information from mcphas.j for further processing  -----------------
   par inputpars("./mcphas.j");
   int ii,nt,k,j;
 // determine primitive magnetic unit cell
@@ -369,6 +372,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   fprintf(fout,"#! %s \n",outstr);
    if(T==0){fprintf(fout,"# program spins: temperature not found in %s - setting T=1 K\n",argv[2]);T=1;}
   fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
+  fprintf(fout,"#1           2     3     4     5       6       7       8    9    10\n");
   fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ia> <Ib> <Ic> [created by program spins]\n");
   for (i=1;i<=savmf.na();++i){for(j=1;j<=savmf.nb();++j){for(k=1;k<=savmf.nc();++k)
   {for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
@@ -458,15 +462,16 @@ fprintf(fout,"#! %s \n",outstr);
 fprintf(fout,"#!T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",T,Hext(1),Hext(2),Hext(3),savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
 //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
 //                                        to Sa Sb Sc La Lb Lc
-//fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc> (hbar)\n");
+fprintf(fout,"#1           2     3     4     5       6       7       8    9    10                  11   12   13   14   15   16\n");
 fprintf(fout,"#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)\n");
-fprintf(fout,"#          corresponding exchange fields hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
+fprintf(fout,"#          corresponding exchange fields [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)\n");
 // .............................................................................                                
 	}
 else  //now table options
  { fprintf(fout,"#! nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
-  fprintf(fout,"# T Ha Hb Hc {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3]");
- if (strcmp(argv[1],"-tMSL")==0) fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)\n");
+ fprintf(fout,"# 1 2  3  4  5           6     7     8     9       10      11      12   13   14                  15   16   17   18   19   20\n");
+ fprintf(fout,"# T Ha Hb Hc {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
+ if (strcmp(argv[1],"-tMSL")==0)                                    fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)\n");
  if (strcmp(argv[1],"-tI")==0) fprintf(fout,"<I1> <I2> <I3> ... <Inofcomponents>\n");
  if (strcmp(argv[1],"-tHex")==0) fprintf(fout,"<Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n");
  }       
@@ -595,7 +600,7 @@ for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){hhh(nt)=hh(nt+inputpars.cs.nofcomp
 if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tHex")==0)
   {
     // finally output a line with the exchange fields 
-    if (strncmp(argv[1],"-t",2)!=0)fprintf(fout,"\n                 corresponding exchange fields hxc [meV]-->          ");
+    if (strncmp(argv[1],"-t",2)!=0)fprintf(fout,"\n                 corresponding exchange fields [meV]-->          ");
                       for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout exchangefields
                         {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
                         

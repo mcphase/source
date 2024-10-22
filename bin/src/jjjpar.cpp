@@ -560,6 +560,8 @@ jjjpar::jjjpar(FILE * file,int nofcomps,int verbose)
   Matrix exchangeindices,Gindices;
   float nn[MAXNOFNUMBERSINLINE+1];
   nn[0]=MAXNOFNUMBERSINLINE;
+  mom=Vector(1,9); mom=0;
+
   xyz=Vector(1,3);
   cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   i=6; FF_type=0;
@@ -683,8 +685,6 @@ else
               {fprintf(stderr,"Error reading mcphas.j line %i: check number of columns\n",i);
                exit(EXIT_FAILURE);}
 
-  mom=Vector(1,nofcomponents); 
-  
    //(1-3) give the da db dc coordinates of the neighbour 
    dn[i](1) = nn[1];dn[i](2) = nn[2];dn[i](3) = nn[3];
    jij[i]=0;
@@ -727,6 +727,8 @@ else
 
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
+  MF=Vector(1,nofcomponents);
+
 }
 
 // constructor with filename of singleion parameter  used by mcdiff and charges-chargeplot and pointc
@@ -734,6 +736,7 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n,int verbose)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
   jij=0; dn=0;dr=0; sublattice=0;paranz=0;diagonalexchange=1;
   mom=Vector(1,9); mom=0; nofcomponents=n;
+  MF=Vector(1,nofcomponents);
   G=new Matrix(1,6,1,nofcomponents);
   for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
   sipffilename= new char [MAXNOFCHARINLINE];
@@ -751,6 +754,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
 {xyz=Vector(1,3);xyz(1)=x;xyz(2)=y;xyz(3)=z;jl_lmax=6;
  mom=Vector(1,9); mom=0; FF_type=0;
  nofcomponents=9;
+ MF=Vector(1,nofcomponents);
   G=new Matrix(1,6,1,nofcomponents);
   for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
   
@@ -787,11 +791,12 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   module_type=1;ABC=Vector(1,3);ABC=0;
   transitionnumber=1;
   nofcomponents=nofmom;
-  mom=Vector(1,nofcomponents);
+  mom=Vector(1,9); mom=0;
+  MF=Vector(1,nofcomponents);
    G=new Matrix(1,6,1,nofcomponents);
   for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
   
-  mom=0; FF_type=0;
+  FF_type=0;
   nof_electrons=0;// no electorns by default
   modulefilename=new char[MAXNOFCHARINLINE];
   dn = new Vector[n+1];for(i1=0;i1<=n;++i1){dn[i1]=Vector(1,3);}
@@ -819,14 +824,17 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
 //copy constructor
 jjjpar::jjjpar (const jjjpar & pp)
 { int i;jl_lmax=pp.jl_lmax;
-  xyz=Vector(1,3);
+xyz=Vector(1,3);
   nofcomponents=pp.nofcomponents;
   G=new Matrix(1,6,1,nofcomponents);
   (*G)=(*pp.G);
-  mom=Vector(1,nofcomponents); 
+  mom=Vector(1,9); 
+  mom=pp.mom;
+  MF=Vector(1,nofcomponents); 
+  MF=pp.MF;
   xyz=pp.xyz;paranz=pp.paranz;
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
-  SLR=pp.SLR;SLI=pp.SLI;
+SLR=pp.SLR;SLI=pp.SLI;
   charge=pp.charge;
   magnetic=pp.magnetic;
   FF_type=pp.FF_type;
@@ -840,7 +848,6 @@ jjjpar::jjjpar (const jjjpar & pp)
   ninit=pp.ninit;maxE=pp.maxE;pinit=pp.pinit;
   Np=pp.Np; Xip=pp.Xip;Cp=pp.Cp;
   r2=pp.r2;r4=pp.r4;r6=pp.r6;
-
   transitionnumber=pp.transitionnumber;
   sipffilename= new char [strlen(pp.sipffilename)+1];
   strcpy(sipffilename,pp.sipffilename);

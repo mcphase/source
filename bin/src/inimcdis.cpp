@@ -17,7 +17,7 @@ int usrdefcols[]={4, 1,2,3,4}; // user defined output columns (first number is n
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
 int colcod[]=    {-1,5,6,7,4}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
-                                           // using the out11 command in mcdiff.in these codes can be modified
+                                           // using the out5 out6  ... commands in mcdisp.par these codes can be modified
 #define COLHEADDIM 11
 // different output data for columns 10 and 11
 const char * colhead []= {  "Qinc[1/A] ", //  0
@@ -58,9 +58,9 @@ return 0;
 
 
  // *************************************************************************
- // ************************ inipar *************************************
+ // ************************ inimcdis *************************************
  // *************************************************************************
- // class of initial parameters for program mcphas
+ // class of initial parameters for program mcdisp
  // *************************************************************************
 
 // print user defined column headers

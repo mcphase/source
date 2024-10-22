@@ -261,11 +261,11 @@ is set to 10.
             times 0.2, however never smaller than parameterrange/1000 
 \item[-p 20] probing parameter space: stepwidths are not decreased during
 	    fitting, new set of pars $parn$ are generated and for all sets par in 
-	    {\prg results/simannfit.1} and {\prg results/simannfit.0} are scanned and
+	    {\prg results/simannfit.p} and {\prg results/simannfit.n} are scanned and
 	    distance $d=\sum_i^N (par_i-parn_i)^2/stepwidth_i^2$ is calculated. If
 $d>N $(=number of parameters)
 	    for all sets par, then $sta$ is calculated. if  $sta<=sta$ of initial parameters
-	    then $parn$ is appended to the list in {\prg results/simannfit.1}
+	    then $parn$ is appended to the list in {\prg results/simannfit.p}
 	    up to 20 parameters are appended to this list, after that the program stops.
 	    the program also stops if step ratio reaches a value $> 11$ (step ratio 
 	    is a factor applied to all (maximum) stepwidths before generating a step in the random walk
@@ -278,17 +278,17 @@ $d>N $(=number of parameters)
 	    - in this way a series of equally good solutions can be explored.
 \end{description}
 \item  PARALLEL PROCESSING
-\begin{description}\item[-s0 filename] instead of results/simannfit.0 use filename to store/read 
-\item[-s1 filename] instead of results/simannfit.1 use filename to store/read 
+\begin{description}\item[-s0 filename] instead of results/simannfit.n use filename to store/read 
+\item[-s1 filename] instead of results/simannfit.p use filename to store/read 
 \item[-i 23] for storing in results/simannfit.* use index .23 instead of .0 as suffix 
 \end{description}
 \item LOGGING 
 \begin{description}
-\item[-n 50]allows to store every 50 steps the parametersets in a table in  {\prg results/simannfit.0}
+\item[-n 50]allows to store every 50 steps the parametersets in a table in  {\prg results/simannfit.n}
  (appending existing file).
 \item[-jpglog 3.5e-1 file.jpg] if sta is less then 3.5e-1, then the image file.jpg 
             (which should be created by calcsta) is copied to results/parsetnr.jpg
-            a html tag is added to results/simannfit.0 or results/simannfit.1 if 
+            a html tag is added to results/simannfit.n or results/simannfit.p if 
 	    stored
 \item[-log 1.3 batchfile.bat] if sta is less then 3.5e-1, then execute the file 
              batchfile, with sta as argument, which can be adressed in the batch

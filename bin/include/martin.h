@@ -114,6 +114,7 @@ extern int sleep(int a);
 
 // some vector functions
 void xproduct(Vector & result,Vector a, Vector b);
+Vector crossp(Vector a,Vector b);
 
 // calculate transition matrix element of eigenvectr <i|op|j> with eigenvectors
 // given as column vectors i and j of Matrix (zr + i zi), the Hermitian operator op is described
@@ -155,6 +156,8 @@ void SetColumn(int i,Matrix M,Vector &v); // fills column i in Matrix M with vec
 
 // calculate reciprocal lattice rezi from real lattice ri
 void rezcalc(Vector r1,Vector  r2,Vector  r3,Vector  rez1,Vector  rez2,Vector  rez3);
+// the same for columns of a matrix
+Matrix rezcalc(Matrix r1r2r3);
 
 void get_abc_in_ijk(Matrix & abc_in_ijk,Vector & abc);
  // get lattice vectors in terms of coordinate system ijk

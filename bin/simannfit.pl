@@ -32,10 +32,10 @@ unless ($#ARGV >0)
             times 0.2, however never smaller than parameterrange/1000 
     -p 20  ... probing parameter space: stepwidths are not decreased during
 	    fitting, new set of pars parn are generated and for all sets par in 
-	    results/simannfit.1 and results/simannfit.0 are scanned and
+	    results/simannfit.p and results/simannfit.n are scanned and
 	    distance d=sum_i^N (par_i-parn_i)^2/stepwidht_i^2 is calculated. If d>N=nofparameters
 	    for all sets par, then sta is calculated. if  sta<=sta of initial parameters
-	    then parn is appended to the list in results/simannfit.1
+	    then parn is appended to the list in results/simannfit.p
 	    up to 20 parameters are appended to this list, after that the program stops.
 	    the program also stops if step ratio reaches a value > 11 (step ratio 
 	    is a factor applied to all (maximum) stepwidths before generating a step in the random walk
@@ -48,22 +48,22 @@ unless ($#ARGV >0)
 	    - in this way a series of equally good solutions can be explored.
 
  ... PARALLEL PROCESSING
-    -s0 filename ... instead of results/simannfit.0 use filename to store/read 
-    -s1 filename ... instead of results/simannfit.1 use filename to store/read 
+    -s0 filename ... instead of results/simannfit.n use filename to store/read 
+    -s1 filename ... instead of results/simannfit.p use filename to store/read 
     -i 23 ... for storing in results/simannfit.* use index .23 instead of .0 as suffix 
 
  ... LOGGING 
      -n 50  ... specifies that every 50 steps the parameters should be
-            stored in file results/simannfit.0 (appending existing file)
-     -jpglog 3.5e-1 file.jpg    ... works only if option -p is present:
+            stored in file results/simannfit.n (appending existing file)
+     -jpglog 3.5e-1 file.jpg    ... works only if option -n is present:
              if sta is less then 3.5e-1, then the image file.jpg 
             (which should be created by calcsta) is copied to results/parsetnr.jpg
-            a html tag is added to results/simannfit.0 or results/simannfit.1 if 
+            a html tag is added to results/simannfit.n or results/simannfit.p if 
 	    stored
-    -log 1.3 batchfile.bat   ... works only if option -p is present:
+    -log 1.3 batchfile.bat   ... works only if option -n is present:
              if sta is less then 1.3, then execute the file 
              batchfile, with sta as argument, which can be adressed in the batch
-	     file with $1 (linux) or  \%1 (windows)
+	     file with \$1 (linux) or  \%1 (windows)
     -h       Histograms are stored in results/par*.hst for review of the variation 
              of parameters during the run of simannfit. 
     -d       store percentage of different contributions to sta in file results/simannfit.dst 
@@ -104,8 +104,8 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$i],$par[$i],$parmin[$i],$parmax[$i]
   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$stattemp=eval $ARGV[0]; shift @ARGV;
   $starttime=time;$maxtim=1e10;$maxstep=1e24;$tablestep=0;$stepset=0;$limsta=-1e100;$tableoffset=0;
   $options=1;$probe=0;$stepfact=1;$cont=0;$jpglog=0;$index=0;$log=0;$hist=0;$dist=0;
-  $s0file="results/simannfit.0";
-  $s1file="results/simannfit.1";
+  $s0file="results/simannfit.n";
+  $s1file="results/simannfit.p";
   while($options==1)
   {$options=0;
   if ($ARGV[0] eq '-l') {$options=1;shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$limsta=eval $ARGV[0]; shift @ARGV;}
@@ -248,6 +248,7 @@ if($stps<11){
                                 }
    print " ...  current sta=$sta, statistical T=$stattemp, step ratio=$stps\nsta of stored parameters=$stasave\n";
    open(Fin,"./results/simannfit.status");$line=<Fin>;
+    if($sta==0){@parsav=@par;} # if sta really got zero... store parameters as parsav 
     if ($line=~/exiting simannfit/){$sta=0;close Fin;}
     else
     {close Fin;
@@ -604,7 +605,7 @@ sub write_set()
                          mycopy($jpgimagefile,"./results/".$dfile);
                          print FH '#<img src="'.$dfile.'">'."\n";
                          }
+  close FH;
         if($sta<$log){system("$logbatchfile $sta");
                          }
-  close FH;
 }

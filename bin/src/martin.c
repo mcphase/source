@@ -442,6 +442,14 @@ void xproduct(Vector & result,Vector a, Vector b)
 
  return ;
 }
+Vector crossp(Vector a, Vector b)
+{Vector result(1,3);
+ result(1)=a(2)*b(3)-a(3)*b(2);
+ result(2)=-a(1)*b(3)+a(3)*b(1);
+ result(3)=a(1)*b(2)-a(2)*b(1);
+
+ return result;
+}
 
 // calculate transition matrix element of eigenvectr <i|op|j> with eigenvectors
 // given as column vectors i and j of Matrix (zr + i zi), the Hermitian operator op is described
@@ -525,6 +533,12 @@ void opZcol (int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi)
  
                   } 
 }
+
+Matrix rezcalc(Matrix r)
+{// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
+ float vol;Matrix rez(1,3,1,3);
+rez=2*PI*r.Inverse().Transpose();
+return rez;}
 
 void rezcalc(Vector r1,Vector  r2,Vector  r3,Vector  rez1,Vector  rez2,Vector  rez3)
 {// calculate reciprocal lattice rezi from real lattice ri
@@ -616,7 +630,8 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a)
  // sphere of radius r from the origin (ai = column vectors of matrix a)
  // this routine returns the maximum and minimum values of ni i=1,2,3
  // by probing the corners of a cube
- Vector ddd(1,8),dd0(1,3),dd(1,3),minv(1,3),maxv(1,3);
+ 
+/*Vector ddd(1,8),dd0(1,3),dd(1,3),minv(1,3),maxv(1,3);
   int i;
  minv(1)=-radius;
  minv(2)=-radius;
@@ -624,7 +639,7 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a)
  maxv(1)=radius;
  maxv(2)=radius;
  maxv(3)=radius;
- // determine ijkmin ijkmax by calculating the 8 corners of the  quader
+ // OLD: determine ijkmin ijkmax by calculating the 8 corners of the  quader
   // in terms of primitive lattice
   // i*p.Column(1)+j*p.Column(2)+k*p.Column(3)=cornerpointvector ... i,j,k =?
   // ijk=p^-1*cornerpointvector
@@ -639,6 +654,42 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a)
    dd0=maxv;dd0(3)=minv(3);dd=a.Inverse()*dd0;ddd(8)=dd(i);
    nmin(i)=Min(ddd)-1;nmax(i)=Max(ddd)+1;
   }
+*/
+// NEW 21.10.2024 FASTER: determine nmin,nmax by looking at condition that
+// plane of parallelepiped must be more distant than radius of sphere
+// e.g.
+Vector rvec(1,3);double rr,ratio;
+//$rvec=crossp($p->slice(":,(1)"),$p->slice(":,(2)")); # $rvec = $r2 x $r3
+//$rr=inner($rvec, $rvec);
+//$rvec/=sqrt($rr);
+//# (n1max-1) * $r1 . $rvec )> $rmax  ... i.e. n1max > 1.0 + $rmax / ($r1 . $rvec)
+//# (n1min+1) * $r1. $rvec) < -$rmax           n1min < -1.0 - $rmax / ($r1 . $rvec)
+//$n1max=my_ceil(1.0+$rmax / inner($p->slice(":,(0)"),$rvec));
+//$n1min=my_floor(-1.0-$rmax / inner($p->slice(":,(0)"),$rvec));
+
+rvec=crossp(a.Column(2),a.Column(3));rr=Norm(rvec);rvec/=rr;
+ratio=radius/(a.Column(1)*rvec);nmax(1)=ceil(1+ratio); nmin(1)=floor(-1-ratio);
+
+//# similar ...
+//$rvec=crossp($p->slice(":,(2)"),$p->slice(":,(0)")); # $rvec = $r3 x $r1
+//$rr=inner($rvec, $rvec);
+//$rvec/=sqrt($rr);
+//$n2max=my_ceil(1.0+$rmax / inner($p->slice(":,(1)"),$rvec));
+//$n2min=my_floor(-1.0-$rmax / inner($p->slice(":,(1)"),$rvec));
+
+rvec=crossp(a.Column(3),a.Column(1));rr=Norm(rvec);rvec/=rr;
+ratio=radius/(a.Column(2)*rvec);nmax(2)=ceil(1+ratio); nmin(2)=floor(-1-ratio);
+
+
+//$rvec=crossp($p->slice(":,(0)"),$p->slice(":,(1)")); # $rvec = $r1 x $r2
+//$rr=inner($rvec, $rvec);
+//$rvec/=sqrt($rr);
+//$n3max=my_ceil(1.0+$rmax / inner($p->slice(":,(2)"),$rvec));
+//$n3min=my_floor(-1.0-$rmax / inner($p->slice(":,(2)"),$rvec));
+
+rvec=crossp(a.Column(1),a.Column(2));rr=Norm(rvec);rvec/=rr;
+ratio=radius/(a.Column(3)*rvec);nmax(3)=ceil(1+ratio); nmin(3)=floor(-1-ratio);
+
 }
 
 

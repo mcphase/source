@@ -277,42 +277,71 @@ print Fout2 << "EOF";
 #            4.....neutron TOF powder cyl. sample - d-pattern log scaled
 #            5.....neutron TOF powder cyl. sample - d-pattern normal scaled
 #
-#! out10=1    type of desired output in column 10 and 11 of mcdiff.out
-#! out11=0    (optional) default is NSF in column 10 and LF in column 11
-#            0....LF
-#            1....|NSF|[b]
-#            2....Re(NSF)[b]
-#            3....Im(NSF)[b]
-#            4....|MSF|
-#            5....|MSF.P|
-#            6....Re(MSF.P)
-#            7....Im(MSF.P)
-#            8....|MSFdip|
-#            9....|MSFdip.P|
-#            10....Re(MSFdip.P)
-#            11....Im(MSFdip.P)
-#            12....angl(Q,P)[�]
-#            13....i(MSFxMSF*).P
-#            14....I+
-#            15....I-
-#            16....I+/I-
-#            17....i(MSFxMSF*)dip.P
-#            18....Idip+
-#            19....Idip-
-#            20....Idip+/Idip-
-#            21....2*|MSF.P|/sin^2(angl(Q,P)
-#            22....2*|MSFdip.P|/sin^2(angl(Q,P)
-#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
-#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
-#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
-#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+# out*  controls the type of output in  mcdiff.out 
+#!out0=1  0..short header, 1...standard header, 2... long header in mcdiff.out
 #
+# type of desired output in column 1 to 12 (default is h k l d Q 2theta Inuc Imag Itot
 #
-#           In the above the intensities I+ and I- are the intensities in a polarised neutron scattering experiment
-#           with incoming polarisation parallel (I+) and antiparallel (I-) to P:
-#            I+-=LF exp(-OTF Q^2/8pi^2)
-#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-i(MSF x MSF*).P)/NB^2
-#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P))]
+#!out1=31 out2=32 out3=33 out4=34 out5=35 out6=36 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 
+#
+#     ... in out*=n the numbers n have the following meaning:
+#            0....LF #
+#            1....|NSF|[b] #
+#            2....Re(NSF)[b] #
+#            3....Im(NSF)[b] #
+#            4....|MSF| #
+#            5....|MSF.P| #
+#            6....Re(MSF.P) #
+#            7....Im(MSF.P) #
+#            8....|MSFdip| #
+#            9....|MSFdip.P| #
+#            10....Re(MSFdip.P) #
+#            11....Im(MSFdip.P) #
+#            12....angl(Q,P)[°] #
+#            13....i(MSFxMSF*).P #
+#            14....I+ #
+#            15....I- #
+#            16....I+/I- #
+#            17....i(MSFxMSF*)dip.P #
+#            18....Idip+ #
+#            19....Idip- #
+#            20....Idip+/Idip- #
+#            21....2*|MSF.P|/sin^2(angl(Q,P) #
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P) #
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #
+#            27....Inuc(2t)	#
+#            28....Imag(2t)   #
+#            29....Itot(2t)   #
+#            30....Imag_dip(2t) #
+#            31....h     #
+#            32.... k     #
+#            33.... l     #
+#            34....d[A]       #
+#            35....|Q|[1/A]   #
+#            36....2theta     #
+#            37....Qi[1/A]    #
+#            38....Qj[1/A]     Qi Qj Qk are euclidean components of scattering vector#
+#            39....Qk[1/A]     with j||b, k||(a x b) and i normal to k and j#
+#            40....T[K]       #
+#            41....Ha[T]      #
+#            42....Hb[T]      #
+#            43....Hc[T]      #
+#            44....hprim      #
+#            45....kprim      #
+#            46....lprim      #
+#            47....Itotdip(2t) #
+#
+#           In the above the intensities I+ and I- are the intensities in a polarised neutron
+#           experiment with incident polarisation up (+) or down (-):
+#            I+-=LF exp(-OTF Q^2/8pi^2) 
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 
+#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
+#           LF  ..... Lorentzfactor
+#           MSF ..... magnetic structure factor
+#           NSF ..... nuclear structure factor
 #
 #
 #             For some of the above options we need the

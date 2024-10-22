@@ -113,6 +113,7 @@ private:
   int  get_exchange_indices(char *instr, Matrix *exchangeindices,const char * ie);
 
 public:
+   Vector MF; // to store exchange fields for mcdiff
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents
    // from exchange field Hxc [meV] and external field Hext
    void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage);

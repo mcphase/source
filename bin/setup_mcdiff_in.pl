@@ -18,25 +18,19 @@ $ARGV[3]=~s/exp/essp/g;$ARGV[3]=~s/x/*/g;$ARGV[3]=~s/essp/exp/g;$ARGV[3]=eval $A
 print STDOUT << "EOF";
 *******************************************************
 setting up mcdiff.in to be used by mcdiff
+using program spins reading results/mcphas.mf
 EOF
-if ($prefix){$pp="-prefix ".$prefix;}
+if ($prefix){$pp="-prefix ".$prefix; print STDOUT "with prefix $prefix\n";}
 if ($#ARGV>2) { 
-print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
+print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T  ... starting spins\n";
 $err=system ("spins $pp $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
              }
 else
             {
-print STDOUT "x=$ARGV[0]  y=$ARGV[1] \n";
+print STDOUT "x=$ARGV[0]  y=$ARGV[1] ... startin spins\n";
 $err=system ("spins $pp $ARGV[0] $ARGV[1]");
              }
 if($err){exit(EXIT_FAILURE);}
-print STDOUT << "EOF";
-*******************************************************
-reading results/mcphas.mf
-.... trying to calculate results/spins.*
-reading results/mcphas.mf by program spins ...
-writing results/spins.* ...
-EOF
 
 if(open (Fin, "mcdiff.in"))
 {print "\n\n Reading Section 1 and Section 2 from mcdiff.in ...\n";
@@ -45,7 +39,7 @@ close Fin;}
 
 print "\n\nSetting up mcdiff.in ...\n";
 
-open (Fout,">mcdiff.in");
+open (Fout,">".$prefix."mcdiff.in");
 {open (Fin,"results/spins.out");
 if(@lines){print Fout @lines;
 }else{$S3=1;}
@@ -58,9 +52,9 @@ close Fout,Fin;
 
 print STDOUT << "EOF";
 
-    mcdiff.in generated: you can start now mcdiff
+    $prefix mcdiff.in generated: you can start now mcdiff $pp
     However, please remember to set wavelength, lorentzfactor etc.
-    in input file mcdiff.in
+    in input file $prefix mcdiff.in
 
     WARNINGS: if you used option -doeps with mcphas you need
     to correct the lattice parameters with the corresponding strain

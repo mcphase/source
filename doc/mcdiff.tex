@@ -17,7 +17,7 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 
 {\footnotesize
 \begin{verbatim}
-#
+# this file is the input file read by program mcdiff version 5.6 Mon Oct 21 18:19:08 2024
 #<!--mcdiff.mcdiff.in>
 #***************************************************************
 #      mcdiff is a program for the calculation of elastic
@@ -36,7 +36,7 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #
 # %SECTION 1%  OVERALL PARAMETERS
 #
-#! lambda   = 2.3587  wavelength (A)
+#! lambda   = 2.4  wavelength (A)
 #
 #! thetamax = 10   maximum bragg angle (deg)
 #
@@ -53,49 +53,68 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #            4.....neutron TOF powder cyl. sample - d-pattern log scaled
 #            5.....neutron TOF powder cyl. sample - d-pattern normal scaled
 #
-#     out* controls the type of output in user defined column * of mcdiff.out
-#! out4=30    (optional)
-#! out5=31    (optional)
-#! out6=32    (optional)
-#! out10=1    (optional)
-#! out11=0    (optional)
-#     ... in out*=n the numbers n have the following meaning:
-#            0....LF          
-#            1....|NSF|[b]    
-#            2....Re(NSF)[b]  
-#            3....Im(NSF)[b]  
-#            4....|MSF|       
-#            5....|MSF.P|     
-#            6....Re(MSF.P)   
-#            7....Im(MSF.P)   
-#            8....|MSFdip|    
-#            9....|MSFdip.P|  
-#            10....Re(MSFdip.P)
-#            11....Im(MSFdip.P)
-#            12....angl(Q,P)[deg]
-#            13....i(MSFxMSF*).P
-#            14....I+          
-#            15....I-          
-#            16....I+/I-       
-#            17....i(MSFxMSF*)dip.P
-#            18....Idip+       
-#            19....Idip-       
-#            20....Idip+/Idip- 
-#            21....2*|MSF.P|/sin^2(angl(Q,P)
-#            22....2*|MSFdip.P|/sin^2(angl(Q,P)
-#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
-#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
-#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
-#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
-#            27....Qx[1/A]     
-#            28....Qy[1/A]     
-#            29....Qz[1/A]     
-#            30....d[A]        
-#            31....|Q|[1/A]    
-#            32....2theta      
+# out*  controls the type of output in  mcdiff.out 
+#!out0=-1  0..short header, 1...standard header, 2... long header in mcdiff.out
+# (a negative value triggers calculation of magnetic xray scattering)
 #
-#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
-#           in a polarised neutron experiment:
+#!  nofoutputcolumns=12  number of columns in output file mcdiff.out
+# choose out* to set type of desired output in column 1 to 12
+# (default is h k l d Q 2theta Inuc Imag Itot)
+#
+#!out1=31 out2=32 out3=33 out4=37 out5=38 out6=39 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 
+#
+#     ... in out*=n the numbers n have the following meaning:
+#            0....LF #
+#            1....|NSF|[b] #
+#            2....Re(NSF)[b] #
+#            3....Im(NSF)[b] #
+#            4....|MSF| #
+#            5....|MSF.P| #
+#            6....Re(MSF.P) #
+#            7....Im(MSF.P) #
+#            8....|MSFdip| #
+#            9....|MSFdip.P| #
+#            10....Re(MSFdip.P) #
+#            11....Im(MSFdip.P) #
+#            12....angl(Q,P)[°] #
+#            13....i(MSFxMSF*).P #
+#            14....I+ #
+#            15....I- #
+#            16....I+/I- #
+#            17....i(MSFxMSF*)dip.P #
+#            18....Idip+ #
+#            19....Idip- #
+#            20....Idip+/Idip- #
+#            21....2*|MSF.P|/sin^2(angl(Q,P) #
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P) #
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #
+#            27....Inuc(2t)	#
+#            28....Imag(2t)   #
+#            29....Itot(2t)   #
+#            30....Imag_dip(2t) #
+#            31....h     #
+#            32.... k     #
+#            33.... l     #
+#            34....d[A]       #
+#            35....|Q|[1/A]   #
+#            36....2theta     #
+#            37....Qi[1/A]    #
+#            38....Qj[1/A]     Qi Qj Qk are euclidean components of scattering vector#
+#            39....Qk[1/A]     with j||b, k||(a x b) and i normal to k and j#
+#            40....T[K]       #
+#            41....Ha[T]      #
+#            42....Hb[T]      #
+#            43....Hc[T]      #
+#            44....hprim      #
+#            45....kprim      #
+#            46....lprim      #
+#            47....Itotdip(2t) #
+#
+#           In the above the intensities I+ and I- are the intensities in a polarised neutron
+#           experiment with incident polarisation up (+) or down (-):
 #            I+-=LF exp(-OTF Q^2/8pi^2) 
 #                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 
 #                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
@@ -107,13 +126,13 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #             For some of the above options we need the
 #! Pa=  0.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
 #! Pb=  0.0000   Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)
-#! Pc=  1.0000
+#! Pc=  0.1045
 #
 #
 # %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
 #
 #
-#! natcryst=0      number of nonmagnetic atoms in primitive crystalographic unit cell
+#! natcryst=32      number of nonmagnetic atoms in primitive crystalographic unit cell
 #
 # it follows a list of natcryst lines with nonmagnetic atoms
 # ... notes: - if an occupancy other than 1.0 is needed, just reduce 
@@ -122,10 +141,42 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #              ~sum_n ()n exp(-2 DWFn sin^2(theta) / lambda^2)=EXP (-Wn),  
 #              relation to other notations: 2*DWF = B = 8 pi^2 <u^2>, units DWF (A^2)
 #
-#! use_dadbdc=0
+#! use_dadbdc=1
 #            - 0 means: da db and dc are not used by the program (unless you enter a line #! use_dadbdc=1),
 #               dr1,dr2 and dr3 refer to the primitive lattice given below
 # Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
+   0.34490   0.00000                        0.16220  0.32440  0.57620  0.16220  0.32440  0.57620  0.00000
+   0.34490   0.00000                        0.67560  0.83780  0.57620  0.67560  0.83780  0.57620  0.00000
+   0.34490   0.00000                        0.16220  0.83780  0.57620  0.16220  0.83780  0.57620  0.00000
+  0.34490   0.00000                        0.83780  0.67560  0.07620  0.83780  0.67560  0.07620  0.00000
+   0.34490   0.00000                        0.32440  0.16220  0.07620  0.32440  0.16220  0.07620  0.00000
+   0.34490   0.00000                        0.83780  0.16220  0.07620  0.83780  0.16220  0.07620  0.00000
+   0.34490   0.00000                        0.32440  0.16220  0.42380  0.32440  0.16220  0.42380  0.00000
+   0.34490   0.00000                        0.83780  0.67560  0.42380  0.83780  0.67560  0.42380  0.00000
+   0.34490   0.00000                        0.83780  0.16220  0.42380  0.83780  0.16220  0.42380  0.00000
+   0.34490   0.00000                        0.67560  0.83780  0.92380  0.67560  0.83780  0.92380  0.00000
+   0.34490   0.00000                        0.16220  0.32440  0.92380  0.16220  0.32440  0.92380  0.00000
+   0.34490   0.00000                        0.16220  0.83780  0.92380  0.16220  0.83780  0.92380  0.00000
+   0.34490   0.00000                        0.56370  0.12740  0.25000  0.56370  0.12740  0.25000  0.00000
+   0.34490   0.00000                        0.87260  0.43630  0.25000  0.87260  0.43630  0.25000  0.00000
+   0.34490   0.00000                        0.56370  0.43630  0.25000  0.56370  0.43630  0.25000  0.00000
+   0.34490   0.00000                        0.43630  0.87260  0.75000  0.43630  0.87260  0.75000  0.00000
+   0.34490   0.00000                        0.12740  0.56370  0.75000  0.12740  0.56370  0.75000  0.00000
+   0.34490   0.00000                        0.43630  0.56370  0.75000  0.43630  0.56370  0.75000  0.00000
+   0.70300   0.00000                        0.50000  0.00000  0.00000  0.50000  0.00000  0.00000  0.00000
+   0.70300   0.00000                        0.00000  0.50000  0.00000  0.00000  0.50000  0.00000  0.00000
+   0.70300   0.00000                        0.50000  0.50000  0.00000  0.50000  0.50000  0.00000  0.00000
+   0.70300   0.00000                        0.50000  0.00000  0.50000  0.50000  0.00000  0.50000  0.00000
+   0.70300   0.00000                        0.00000  0.50000  0.50000  0.00000  0.50000  0.50000  0.00000
+   0.70300   0.00000                        0.50000  0.50000  0.50000  0.50000  0.50000  0.50000  0.00000
+   0.34490   0.00000                        0.33330  0.66670  0.01160  0.33330  0.66670  0.01160  0.00000
+   0.34490   0.00000                        0.66670  0.33330  0.51160  0.66670  0.33330  0.51160  0.00000
+   0.34490   0.00000                        0.66670  0.33330  0.98840  0.66670  0.33330  0.98840  0.00000
+   0.34490   0.00000                        0.33330  0.66670  0.48840  0.33330  0.66670  0.48840  0.00000
+   0.34490   0.00000                        0.00000  0.00000  0.25000  0.00000  0.00000  0.25000  0.00000
+   0.34490   0.00000                        0.00000  0.00000  0.75000  0.00000  0.00000  0.75000  0.00000
+   0.70300   0.00000                        0.00000  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000
+   0.70300   0.00000                        0.00000  0.00000  0.50000  0.00000  0.00000  0.50000  0.00000
 #
 #
 # %SECTION 3% DESCRIPTION OF THE LATTICE
@@ -136,18 +187,15 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 # -----------------------------------------------------------------------------
 #
 # lattice constants (A) and angles 
-#! a=4.3843 b=7.0326 c=7.4194 alpha=  90 beta=  90 gamma=  90
+#! a=8.8142 b=8.8142 c=9.5692 alpha=  90 beta=  90 gamma=  120
 #
 # primitive lattice vectors 
-#! r1a= 0.500000 r2a= 0.000000 r3a= 0.000000
-#! r1b= 0.500000 r2b= 1.000000 r3b= 0.000000   primitive lattice vectors (a)(b)(c)
-#! r1c= 0.500000 r2c= 0.000000 r3c= 1.000000
+#! r1a= 30.533248 r2a= -0.000052 r3a= -0.000000
+#! r1b= -17.628396 r2b= 35.256701 r3b= -0.000000   primitive lattice vectors (a)(b)(c)
+#! r1c= 0.000000 r2c= 0.000000 r3c= 9.569378
 #
 #      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j
-#! strain tensor (optional): eps1=0.002219=epsii eps2=0.002219=epsjj eps3=-0.004525=epskk eps4=   0=2epsjk eps5=   0=2epsik eps6=7e-10=2epsij
-# .... if the strain tensor is given in Voigt notation the mcdiff will
-#      use it and distort the primitive unit cell accordingly and calculate 
-#      reflections from a crystal with this distorted primitve unit cell
+#! strain tensor (optional): eps1=-2.042e-06=epsii eps2=-2.812e-06=epsjj eps3=1.865e-05=epskk eps4=   0=2epsjk eps5=   0=2epsik eps6=-1.487e-06=2epsij
 #
 #
 # %SECTION 4% DESCRIPTION OF MAGNETIC UNIT CELL AND LIST OF MAGNETIC ATOMS
@@ -161,7 +209,7 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 # 'nat' denotes the number of magnetic atoms in magnetic unit cell
 #
 # Temperature,  External Magnetic Field: Magnetic Unit Cell
-#! T=1.5 K Ha=0 T Hb= 0 T Hc= 0 T: nr1=10 nr2=1 nr3=1 nat=20 
+#! T=2 K Ha=0 T Hb= 0 T Hc= 0 T: nr1=4 nr2=4 nr3=1 nat=96 
 #
 #
 # It follows a list of nat lines with to describe the magnetic moment configuration
@@ -177,32 +225,17 @@ Here follows an example input file (see examples/ndcu2b\_new/mcdiff\index{mcdiff
 #                in case of non orthogonal lattices instead of Ma Mb Mc the components Mx My Mz
 #                have to be given, which refer to an right handed orthogonal coordinate system 
 #                defined by y||b, z||(a x b) and x normal to y and z
-#  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components 
-# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)
+#  <Sa> <Sb> <Sc>  <La> <Lb > <Lc>  (optional) denote the spin and orbital angular momentum components 
+# 'mf1' 'mf2' 'mf3' (optional line, used to go beyond dipole approx for formfactor)
 #                                     denote the corresponding exchange fields in meV
 #
-#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <La> <Sb> <Lb> <Sc> <Lc> ]
-#{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}
-{Nd3p.sipf}  0.00000  0.00000  0.00000   0.00000  0.00000  0.00000   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  0.00000  0.50000  0.07660  -0.00000  0.50000  0.07660   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  0.50000  0.50000  0.50000   1.00000  0.00000  0.00000   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  0.50000  1.00000  0.57660   1.00000  0.50000  0.07660   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  1.00000  1.00000  1.00000   2.00000  0.00000  0.00000   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  1.00000  1.50000  1.07660   2.00000  0.50000  0.07660   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  1.50000  1.50000  1.50000   3.00000 -0.00000 -0.00000   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  1.50000  2.00000  1.57660   3.00000  0.50000  0.07660   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  2.00000  2.00000  2.00000   4.00000  0.00000  0.00000   +0.00000 +2.11700 +0.00000  +0.00000 +0.00000 -0.79390 +3.70470 +0.00000 +0.00000
-{Nd3p.sipf}  2.00000  2.50000  2.07660   4.00000  0.50000  0.07660   +0.00000 +2.11700 +0.00000  +0.00000 +0.00000 -0.79390 +3.70470 +0.00000 +0.00000
-{Nd3p.sipf}  2.50000  2.50000  2.50000   5.00000  0.00000 -0.00000   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  2.50000  3.00000  2.57660   5.00000  0.50000  0.07660   +0.00000 -2.09990 +0.00000  +0.00000 +0.00000 +0.78750 -3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  3.00000  3.00000  3.00000   6.00000 -0.00000 -0.00000   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  3.00000  3.50000  3.07660   6.00000  0.50000  0.07660   +0.00000 -2.14380 +0.00000  +0.00000 +0.00000 +0.80390 -3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  3.50000  3.50000  3.50000   7.00000  0.00000  0.00000   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  3.50000  4.00000  3.57660   7.00000  0.50000  0.07660   +0.00000 +2.14380 +0.00000  +0.00000 +0.00000 -0.80390 +3.75160 +0.00000 +0.00000
-{Nd3p.sipf}  4.00000  4.00000  4.00000   8.00000  0.00000  0.00000   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  4.00000  4.50000  4.07660   8.00000  0.50000  0.07660   +0.00000 +2.09990 +0.00000  +0.00000 +0.00000 -0.78750 +3.67490 +0.00000 +0.00000
-{Nd3p.sipf}  4.50000  4.50000  4.50000   9.00000  0.00000  0.00000   +0.00000 -2.11700 +0.00000  +0.00000 +0.00000 +0.79390 -3.70470 +0.00000 +0.00000
-{Nd3p.sipf}  4.50000  5.00000  4.57660   9.00000  0.50000  0.07660   +0.00000 -2.11700 +0.00000  +0.00000 +0.00000 +0.79390 -3.70470 +0.00000 +0.00000
+#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> ]
+#{corresponding exchange fields [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}
+{Gd.sipf}  0.19285  0.38570  0.25000   0.19285  0.38570  0.25000   +5.07780 -4.19680 -1.44390  +2.53890 -2.09840 -0.72190 +0.00000 +0.00000 +0.00000
+{Gd.sipf}  0.61430  0.80715  0.25000   0.61430  0.80715  0.25000   +0.09500 +6.38750 -1.78580  +0.04750 +3.19380 -0.89290 +0.00000 +0.00000 +0.00000
+{Gd.sipf}  0.19285  0.80715  0.25000   0.19285  0.80715  0.25000   -4.78970 -2.67750 +3.62190  -2.39490 -1.33880 +1.81090 +0.00000 +0.00000 +0.00000
+{Gd.sipf}  0.80715  0.61430  0.75000   0.80715  0.61430  0.75000   +5.92820 -2.89990 -0.45460  +2.96410 -1.45000 -0.22730 +0.00000 +0.00000 +0.00000
+...
 \end{verbatim}
 }
 
@@ -429,23 +462,24 @@ vector $\mbf Q=\mbf k-\mbf k'$. The scattering channels for $F^{(1)}$ and $F^(2)
 separately and no interference is considered. 
 
 To determine the azimuthal dependence the $z_i$ are expanded in terms of the components
-$\mu_a,\mu_b$ and $\mu_c$ of the magnetic moment along the orthogonal crystallographic
-unit cell vectors $\mbf a$,$\mbf b$ and $\mbf c$ (for non orthogonal
-crystal lattices currently magnetic xray scattering intensities cannot
-be calculated):
+$\mu_x,\mu_y$ and $\mu_z$ of the magnetic moment along the orthogonal euclidean coordinate
+system defined by  y||b, z||(a x b) and x perpendicular to y and z.
+ 
 
 \begin{eqnarray}
-z_1&=&\mu_a \sin \alpha_1 \cos(\Psi+\delta_1)+\mu_b \sin \alpha_2 \cos(\Psi +\delta_2) \nonumber \\
-&& +\mu_c \sin \alpha_3 \cos (\Psi +\delta_3), \nonumber \\
-z_2 & = & \mu_a \sin \alpha_1 \sin (\Psi +\delta_1)+\mu_b \sin \alpha_2 \sin (\Psi+\delta_2) \nonumber \\
-& & +\mu_c \sin \alpha_3 \sin (\Psi +\delta_3) \nonumber \\
-z_3 & = & \mu_a \cos \alpha_1 + \mu_b \cos \alpha_2 + \mu_c \cos \alpha_3 
+z_1&=&\mu_x \sin \alpha_1 \cos(\Psi+\delta_1)+\mu_y \sin \alpha_2 \cos(\Psi +\delta_2) \nonumber \\
+&& +\mu_z \sin \alpha_3 \cos (\Psi +\delta_3), \nonumber \\
+z_2 & = & \mu_x \sin \alpha_1 \sin (\Psi +\delta_1)+\mu_y \sin \alpha_2 \sin (\Psi+\delta_2) \nonumber \\
+& & +\mu_z \sin \alpha_3 \sin (\Psi +\delta_3) \nonumber \\
+z_3 & = & \mu_x \cos \alpha_1 + \mu_y \cos \alpha_2 + \mu_z \cos \alpha_3 
 \end{eqnarray}
  
-with angles $\alpha_i=\angle(\mbf a_i \cdot \mbf u_3)_{\Psi=0}$ and $\delta_i=\angle(\mbf a_i^{\perp}\cdot %%@
-\mbf u_1)_{\Psi=0}$, where $\mbf a_{1,2,3}=\mbf a,\mbf b,\mbf c$ and $\mbf a_i^{\perp}$ is the projection of
-$\mbf a_i$ onto the plane perpendicular to $\mbf Q$. In the chosen experimental geometry
-$\Psi=0$ when $\mbf a$ points to the x-ray source.
+with angles $\alpha_i=\angle(\mbf \hat x_i \cdot \mbf u_3)_{\Psi=0}$ and $\delta_i=\angle(\mbf x_i^{\perp}\cdot %%@
+\mbf u_1)_{\Psi=0}$, where $\mbf \hat x_{1,2,3}=\mbf \hat x,\mbf \hat y,\mbf \hat z$ 
+and $\mbf x_i^{\perp}$ is the projection of
+$\mbf \hat x_i$ onto the plane perpendicular to $\mbf Q$. In the chosen experimental geometry
+$\Psi=0$ when $\mbf x$ points to the x-ray source (and for the special case
+of $\mbf Q|| \mbf x$ when $\mbf y$ points to the x-ray source).
 
 
 \subsection{Formalism II - Neutron Cross section}

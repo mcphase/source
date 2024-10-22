@@ -226,6 +226,7 @@ tgz :
 	make clean 
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
+	substitute wait sleep ./demo/*.bat 
 	dos2unix ./examples/cecu2a/fit/watch*.bat
 	dos2unix ./examples/tmnic2/calc.bat
 	dos2unix ./examples/coo/calc.bat
@@ -267,6 +268,7 @@ tgz :
 		;cd ./mcphas  
 	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz mcph.tgz
 	unix2dos ./bin/*.pl ./demo/*.bat
+	substitute sleep wait ./demo/*.bat 
 	unix2dos ./examples/cecu2a/fit/watch*.bat
 	unix2dos ./examples/tmnic2/calc.bat
 	unix2dos ./examples/coo/calc.bat

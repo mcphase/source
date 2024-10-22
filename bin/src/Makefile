@@ -118,7 +118,7 @@ RCSCI    =      ci -u -f -s"Rel" -r$(VERSION) -m"$(LOCKMSG)"
 #
 
 INCL = mcphas.h  testspin.hpp qvectors.hpp spincf.hpp par.hpp  jjjpar.hpp inipar.hpp \
-       mfcf.hpp vector.h martin.h graphic_parameters.hpp
+       mfcf.hpp vector.h martin.h graphic_parameters.hpp 
 OBJS = jjjpar.o par.o physprop.o qvectors.o testspin.o spincf.o inipar.o \
         mfcf.o martin.o ionpars.o graphic_parameters.o perlparse.o
 
@@ -202,6 +202,9 @@ ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h
 inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp 
 	$(CCC) $(CFLAGS) $< 
 
+inimcdiff.o: inimcdiff.cpp inimcdiff.hpp martin.h vector.h mcdiff.h mfcf.hpp
+	$(CCC) $(CFLAGS) $< 
+
 physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp inipar.hpp
 	$(CCC) $(CFLAGS) $< 
 
@@ -261,7 +264,7 @@ addj.o: addj.c par.hpp  martin.h vector.h
 reduce_unitcell.o: reduce_unitcell.c par.hpp  martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 
-mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c spincf.hpp mfcf.hpp
+mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c inimcdiff.hpp spincf.hpp mfcf.hpp
 	$(CCC) $(CFLAGS) $<
 
 myev.o: myev.c
@@ -365,7 +368,7 @@ ip.o: ionpars.cpp
 	@$(LINKER)  -Wall  -o ../reduce_unitcell $^  $(LFLAGS)
 
 
-../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o perlparse.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o
+../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o perlparse.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o inimcdiff.o
 	@echo Linking ../mcdiff
 	@$(LINKER)  -Wall  -o ../mcdiff $^  $(LFLAGS)
 

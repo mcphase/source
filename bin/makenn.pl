@@ -30,28 +30,28 @@ $rkky=0;$calcdist=0;$readtable=0;$classdip=0;
 shift @ARGV; 
 @storeargv=@ARGV;
 # Parses command line options
-GetOptions("rkky3d=f{4}"=>\@rkky3d,
-           "kaneyoshi3d=f{5}"=>\@kaneyoshi3d,
-           "rkkz3d=f{4}"=>\@rkkz3d,
-           "rkky=f{2}"=>\@rkkydummy,
-           "kaneyoshi=f{3}"=>\@kaneyoshi,
-           "rkkz=f{2}"=>\@rkkz,
-           "bvk"=>\$bvk,
+GetOptions("rkky3d=s{4}"=>\@rkky3d,
+           "kaneyoshi3d=s{5}"=>\@kaneyoshi3d,
+           "rkkz3d=s{4}"=>\@rkkz3d,
+           "rkky=s{2}"=>\@rkkydummy,
+           "kaneyoshi=s{3}"=>\@kaneyoshi,
+           "rkkz=s{2}"=>\@rkkz,
+           "bvk:s"=>\$bvk,  # : is for optional arguments to follow
            "cfph"=>\$cfph,
-           "e"=>\$e,
-           "f"=>\$f,
-           "jp"=>\$jp,
-           "dm"=>\$dm,
+           "e:s"=>\$e,
+           "f:s"=>\$f,
+           "jp:s"=>\$jp,
+           "dm:s"=>\$dm,
            "d"=>\$d,
 	   "npc"=>\$npc,
            "nm"=>\$nm,
-           "r"=>\$cfphr,
-            "djdx"=>\$djdx,
+           "r=s"=>\$cfphr,
+           "rfunc"=>\$rfunc,
+           "djdx"=>\$djdx,
            "djdy"=>\$djdy,
            "djdz"=>\$djdz);
 
-
-@ARGV=@storeargv;
+# @ARGV=@storeargv;
 
 die "djdx djdy djdz are exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
 if ($bvk||$cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
@@ -62,56 +62,94 @@ if ($djdy) {$ext=".djdy"; }
 if ($djdz) {$ext=".djdz"; }
 
 #******************************************************** treat options 
-$_=$ARGV[0];
-if(/-nm/){shift @ARGV;$_=$ARGV[0];}   # no new method of finding neighbours
-if(/-npc/){shift @ARGV;$_=$ARGV[0];}  # do not keep pointcharge files makenn.a*.pc
-if(/-rkky3d/)
-  {$rkky=4;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;
-   print "calculating RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
-   print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
-elsif(/-kaneyoshi3d/)
-  {$rkky=5;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Da=eval $ARGV[0];shift @ARGV;   
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Db=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Dc=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
-   print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
-   print "J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
-   print "with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A  and alpha=$aa\n";}
-elsif(/-rkkz3d/)
-  {$rkky=6;shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;   
-   print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
-   print "kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
-elsif(/-rkky/)
-  {$rkky=1;shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
-   print "calculating RKKY interaction J(R)=A.cos(2.kf.R)/(2.kf.R)^3 for scale A=$scale meV and kf=$kf A^-1\n";}
-elsif(/-kaneyoshi/)
-  {$rkky=2;shift @ARGV; 
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$D=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
-   print "calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
-   print "J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n";}
-elsif(/-rkkz/)
-  {$rkky=3;shift @ARGV; 
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
-   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
-   print "calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV and kf=$kf A^-1\n";}
-elsif(/-bvk/)
-  {$bvk=1;shift @ARGV;
-   unless ($#ARGV>=0) # if no filename is given print help
-   { $tabout=1;}
+#$_=$ARGV[0];
+#if(/-nm/){shift @ARGV;$_=$ARGV[0];}   # no new method of finding neighbours
+#if(/-rfunc/){shift @ARGV;$_=$ARGV[0];}   # no new method of finding neighbours
+#if(/-npc/){shift @ARGV;$_=$ARGV[0];}  # do not keep pointcharge files makenn.a*.pc
+if(@rkky3d)
+  {$rkky=4;
+   $s=$rkky3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
+   $s=$rkky3d[1];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $ka=eval $s;
+   $s=$rkky3d[2];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $kb=eval $s;
+   $s=$rkky3d[3];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $kc=eval $s;
+ #  shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
+ #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
+ #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
+ #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;
+   print "#calculating RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
+   print "#kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
+elsif(@kaneyoshi3d)
+  {$rkky=5;
+   $s=$kaneyoshi3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
+   $s=$kaneyoshi3d[1];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $Da=eval $s;
+   $s=$kaneyoshi3d[2];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $Db=eval $s;
+   $s=$kaneyoshi3d[3];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $Dc=eval $s;
+   $s=$kaneyoshi3d[4];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $aa=eval $s;
+#shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Da=eval $ARGV[0];shift @ARGV;   
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Db=eval $ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$Dc=eval $ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
+   print "#calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
+   print "# J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
+   print "#with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A  and alpha=$aa\n";}
+elsif(@rkkz3d)
+  {$rkky=6;
+   $s=$rkkz3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
+   $s=$rkkz3d[1];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $ka=eval $s;
+   $s=$rkkz3d[2];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $kb=eval $s;
+   $s=$rkkz3d[3];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $kc=eval $s;
+
+#   shift @ARGV;$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=$ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ka=eval $ARGV[0];shift @ARGV;  
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;   
+   print "#calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
+   print "#kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
+elsif(@rkkydummy)
+  {$rkky=1;
+   $s=$rkkydummy[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
+   $s=$rkkydummy[1];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $kf=eval $s;
+#shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g; $scale=eval $ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
+  $rfuncheader="RKKY interaction J(R)=A.cos(2.kf.R)/(2.kf.R)^3 for scale A=$scale meV and kf=$kf A^-1\n";
+   print "#calculating".$rfuncheader;
+  }
+elsif(@kaneyoshi)
+  {$rkky=2;
+  $s=$kaneyoshi[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
+  $s=$kaneyoshi[1];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $D=eval $s;
+  $s=$kaneyoshi[2];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $aa=eval $s;
+
+#shift @ARGV; 
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$D=eval $ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
+   $rfuncheader="kaneyoshi parametrization for the Bethe-Slater curve\n#J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n";
+   print "#calculating ".$rfuncheader;}
+elsif(@rkkz)
+  {$rkky=3;
+    $s=$rkkz[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
+  $s=$rkkz[1];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $kf=eval $s;
+
+#shift @ARGV; 
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$scale=eval $ARGV[0];shift @ARGV;
+#   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kf=eval $ARGV[0];shift @ARGV;
+$rfuncheader="RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV and kf=$kf A^-1\n";
+   print "#calculating ".$rfuncheader;
+  }
+elsif(defined $bvk)
+  {#$bvk=1;
+  #shift @ARGV;
+ #  unless ($#ARGV>=0) # if no filename is given print help
+   unless ($bvk) # if no filename is given print help
+   { $tabout=1;$bvk=1;}
   else
    { # if filename is given read file ...
-   $bfk_file=$ARGV[0];shift @ARGV;
+     # $bfk_file=$ARGV[0];shift @ARGV;
+   $bfk_file=$bvk; 
+   $bvk=1;
    print "creating phononic interactions from Born van Karman model in file $bfk_file\n";
    # read interaction constants from file
    unless(open(Fin,$bfk_file)){ die "could not open $bfk_file\n";}
@@ -131,21 +169,24 @@ elsif(/-bvk/)
        	     }
   }
   }
-elsif(/-cfph/)
-{$cfph=1; shift @ARGV;
- $_=$ARGV[0];if(/-r/){shift @ARGV;}
+elsif($cfph)
+{ 
+ # shift @ARGV;
+ #$_=$ARGV[0];if(/-r/){shift @ARGV;}
+ if($cfphr){$screeningfile=$cfphr;}
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
- $screeningfile=$ARGV[0];
+ #$screeningfile=$ARGV[0];
+ $cfph=1;
 }
-elsif(/-e/||/-f/||/-dm/||/-jp/)
+elsif(defined $e||defined $f||defined $dm||defined $jp)
   {
-   shift @ARGV;
-   unless ($#ARGV>=0) # if no filename is given print help
+   #shift @ARGV;
+   unless ($e||$f||$dm||$jp) # if no filename is given print help
    {
  $tabout=1; }
   else
- {
-   $table_file=$ARGV[0];shift @ARGV;
+ { $table_file=$e.$f.$dm.$jp;
+   #$table_file=$ARGV[0];shift @ARGV;
    $ignore_neihgbours_behind=0;
    print "reading "; if ($e) {print " isotropic ";$DM=0;$Jp=0;} 
                   elsif ($f) {print " isotropic ";$DM=0;$Jp=0;} 
@@ -344,21 +385,21 @@ else {    print STDOUT << "EOF";
 #  
 EOF
 
-if($e)
+if(defined $e)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # |Rij| [A]  J [meV]  atom_i  atom_j 
 EOF
 
 }
-elsif($jp)
+elsif(defined $jp)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants Jp  in H= -1/2 sum_ij Jp (Ji.R)(Jj.R)/R^2 
 # |Rij| [A]  Jp [meV]  atom_i  atom_j 
 EOF
 
 }
-elsif($f)
+elsif(defined $f)
 {print STDOUT << "EOF";
 # Table of exchange interaction constants J - assumed to be isotropic according to in H= -1/2 sum_ij J Ji.Jj 
 # da [a]    db [b]    dc [c]    J [meV]   atom_i  atom_j  |Rij| [A] 
@@ -449,24 +490,24 @@ elsif(($bvk)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
 
 if($ff==0){++$n_table;$ntbl=$n_table;
         
-if($e||$jp)
+if(defined $e||defined $jp)
 {$da[$ntbl]=$r;
  print sprintf("%+10.6f     0       a%i a%i \n",$r,$nnn,$nz);
 }
-elsif($f)
+elsif(defined $f)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
  print sprintf("%+10.6f %+10.6f %+10.6f 0        a%i a%i %+10.6f\n",$xx, $yy ,$zz,$nnn,$nz,$r);
 }
-elsif($dm)
+elsif(defined $dm)
 {$da[$ntbl]=$xx;$db[$ntbl]=$yy;$dc[$ntbl]=$zz;
   print sprintf("%+10.6f %+10.6f %+10.6f    %+10.6f %+10.6f %+10.6f     a%i a%i %+10.6f\n",$xx, $yy ,$zz,$rvec->at(0),$rvec->at(1),$rvec->at(2),$nnn,$nz,$r);
 }
-elsif($bvk)
+elsif(defined $bvk)
 {$da[$ntbl]=$r; $db[$ntbl]=$sipf_file[$nnn];$dc[$ntbl]=$sipf_file[$nz];
  $spring= $bvkA*exp(-$bvkalpha*$r*$r);
  print sprintf("%s   %s    %+10.6f   %+10.6f   0 \n",$sipf_file[$nnn],$sipf_file[$nz],$r,$spring);
 }   
-else{die "Error makenn - creating table for option $_ \n";}
+else{die "Error makenn - creating sample table for options -e -f -dm -jp \n";}
           }
               } #tabout
 
@@ -480,10 +521,23 @@ else{die "Error makenn - creating table for option $_ \n";}
     $jn=$jn->append( pdl ([$rvec->at(1)]));
     $kn=$kn->append( pdl ([$rvec->at(2)]));
 
-
+if ($rfunc&&$rfuncdone!=1&&$rfuncheader)  
+{
+ open(ff,">results/makenn.func.r");
+ print ff "#".$rfuncheader;
+ print ff "#r[A] J(meV) interaction-present\n";
+ for($myr=0.1;$myr<$rmax;$myr+=0.1){
+ my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$myr,0,0,$myr);
+ my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
+ print ff $myr." ".$jaa."  0.1\n";
+    }
+$rfuncdone=1;
+}
 # calculate the interaction
     my ($interaction) = getinteraction($Gmix,$gJ,$gJ[$nz],$sipffilename,$sipf_file[$nz],$r,$rvec->at(0),$rvec->at(1),$rvec->at(2));
     my ($Gmix,$jaa,$jab,$jac,$jba,$jbb,$jbc,$jca,$jcb,$jcc) = @{$interaction};
+if ($rfunc&&$rfuncheader){print ff $r." ".$jaa." 1\n";}
+
     if($djdx||$djdy||$djdz){my $dx=0; my $dy=0; my $dz=0;
               if($djdx){$dx=$delta;}
               if($djdy){$dy=$delta;}
@@ -585,6 +639,8 @@ unless($DM>0){
                                } #readtable
                       } # 0<r<rmax
     }}}} # n1  n2 n3 nz
+
+if($rfuncdone==1){close ff;}
 
    $n= qsorti($rn); # sort neighbors according to r
    $nofneighbours[$nnn]=(($rn->dims)[0]-1); 
@@ -841,7 +897,13 @@ for($i=2;$i<=7;++$i){ if(abs($Mc[$i]-$M[$i])>1e-4){die("ERROR makenn: input file
 } # fi bvk consistency check
 
 print "created files: results/makenn$ext     (interaction parameters)\n";
-print "               results/makenn.a*.pc (pointcharge environment files)\n";
+print "               results/makenn.a*.pc   (pointcharge environment files)\n";
+if($rfunc){
+print "               results/makenn.func.r  (interaction as function of r)\n";
+}
+if($bvk){
+print "               results/makenn.Cel     (elastic constants)\n";
+}
 print "********************************************************\n";
 print "               end of program makenn\n";
 print " Reference: M. Rotter et al. PRB 68 (2003) 144418\n";
@@ -1364,14 +1426,8 @@ print $l1 "#--------------------------------------------------------------------
 }
 
 
-
-sub endprint {
-  my ($h,$l)=@_;  
-
-     close $h; 
-
-# print $l ("#*************************************************************************\n");
-
+sub outCel {
+my ($l)=@_;
 print $l "#! Primitive Unit Cell Volume [A^3]: pVol=".$pVolume."\n";
 print $l "# Nonzero Elastic constants [meV per primitive crystal unit cell] \n";
 print $l "# in Voigt notation only first index<=second index has to be given\n";
@@ -1391,8 +1447,16 @@ if($i1==0){print $l "\n";}
 # 1 A= 1e-10 m
 $confact=0.1*1.60218/$pVolume;
 print $l "#! unit conversion:  1 meV/Primitive Unit Cell Volume =".$confact." GPa\n";
+}
 
+sub endprint {
+  my ($h,$l)=@_;  
 
+     close $h; 
+
+# print $l ("#*************************************************************************\n");
+ outCel($l);
+if($bvk){my $l1= new FileHandle;open($l1,">results/makenn.Cel"); outCel($l1);close $l1;}
 $text="#! nofatoms= $nofatoms  nofcomponents=$nofcomponents  number of atoms in primitive unit cell/number of components of each spin\n";
  if($cfph!=0){$nofatomsnew=$nofatoms+$nofmagneticatoms;}
  if($cfph==2){$text="#! nofatoms= $nofatomsnew  nofcomponents=51  number of atoms in primitive unit cell/number of components of each spin\n";}
@@ -1575,6 +1639,7 @@ print STDOUT << "EOF";
               mind: into MODPAR2-6 in *.sipf the Einstein-oscillator paramters 
               are written, too. Omit filename to create a sample file with
               longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m
+	      Output: file makenn.Cel is created containing just the elastic constants
 
  option -cfph [-r] [screeningfile.r]
               calculate crystal field phonon interaction: mcphas.j lists 
@@ -1638,6 +1703,8 @@ print STDOUT << "EOF";
  results\/makenn.a*.pc, which can be used with the program pointc to evaluate
  the pointcharge model and calculate crystal field parameters.
 	-npc   do not keep results/makenn.a*.pc files
+	-rfunc  create results/makenn.func.r file with distance dependence of
+                rkky and kaneyoshi functions (only for options rkky* and kaneyoshi*)
         -djdx
         -djdy
         -djdz   create files makenn.djdx .djdy .djdz instead of makenn.j, respectively
