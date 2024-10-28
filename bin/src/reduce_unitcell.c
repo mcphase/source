@@ -58,6 +58,9 @@ if(strcmp(argv[ow],"-delatoms")==0){ow+=1;
 
  par a(argv[ow]);
 
+if(n>0){a.set_nofcomponents(n);if(verbose){fprintf(stderr,"Setting nofcomponents=%i\n",n);}}
+
+
 if(i==0){
  a.reduce_unitcell(verbose);  
 }else{

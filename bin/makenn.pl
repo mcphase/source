@@ -37,7 +37,7 @@ GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "kaneyoshi=s{3}"=>\@kaneyoshi,
            "rkkz=s{2}"=>\@rkkz,
            "bvk:s"=>\$bvk,  # : is for optional arguments to follow
-           "cfph"=>\$cfph,
+           "cfph:s"=>\$cfph,
            "e:s"=>\$e,
            "f:s"=>\$f,
            "jp:s"=>\$jp,
@@ -45,7 +45,7 @@ GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "d"=>\$d,
 	   "npc"=>\$npc,
            "nm"=>\$nm,
-           "r=s"=>\$cfphr,
+           "r"=>\$cfphr,
            "rfunc"=>\$rfunc,
            "djdx"=>\$djdx,
            "djdy"=>\$djdy,
@@ -169,11 +169,11 @@ elsif(defined $bvk)
        	     }
   }
   }
-elsif($cfph)
+elsif(defined $cfph)
 { 
  # shift @ARGV;
  #$_=$ARGV[0];if(/-r/){shift @ARGV;}
- if($cfphr){$screeningfile=$cfphr;}
+ if($cfph){$screeningfile=$cfph;}
  print "creating crystal field phonon interactions from pointcharge model using program pointc\n";
  #$screeningfile=$ARGV[0];
  $cfph=1;
@@ -1390,7 +1390,8 @@ print $l1 "#--------------------------------------------------------------------
     if($alpha!=90||$beta!=90||$gamma!=90)
      {print $l1 "#orthonormal coordinate system xyz is defined with respect to abc as y||b, z||(a x b) and x normal to k and j\n#charge[|e|]  dx[A]   dy[A]   dz[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";}
      else
-     {print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n";}
+     {print $l1 "#1            2         3         4              5          6          7         8             9\n";
+      print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n";}
 
  for ($n1=1;$n1<(($rn->dims)[0]);++$n1)
  {next if($rn->index($n)->at($n1)==0);
@@ -1641,7 +1642,7 @@ print STDOUT << "EOF";
               longitudinal springs:Clong=$bvkA*exp(-$bvkalpha*r/A*r/A) N/m
 	      Output: file makenn.Cel is created containing just the elastic constants
 
- option -cfph [-r] [screeningfile.r]
+ option -cfph [screeningfile.r] [-r]
               calculate crystal field phonon interaction: mcphas.j lists 
               magnetic and non magnetic atoms with charges defined in the 
               sipf files by CHARGE= variable. For magnetic atoms the sipf 

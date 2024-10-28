@@ -153,12 +153,15 @@ if($debug==1) {
 }
 
 # calc_minmax_scale_relabc() function from spincf_out.cpp
+# determine maxv(1,2,3) minv(1,2,3) (vector in units of A direction of abc describing
+# a parallelepiped) for viewing magnetic unit cell
+ 
 @abc=($a,$b,$c); # loop primitive unit cell and determine  minimum/maximum of na nb nc
 for $ii (0..2) {
-  $ddd = pdl [ $primcell->at(0,ii), $primcell->at(1,ii), $primcell->at(2,ii), 
-           $primcell->at(0,ii)+$primcell->at(1,ii),  
-           $primcell->at(0,ii)+$primcell->at(2,ii),  
-           $primcell->at(1,ii)+$primcell->at(2,ii), 0, sum($primcell->slice(":,0")) ]; 
+  $ddd = pdl [ $primcell->at(0,$ii), $primcell->at(1,$ii), $primcell->at(2,$ii), 
+           $primcell->at(0,$ii)+$primcell->at(1,$ii),  
+           $primcell->at(0,$ii)+$primcell->at(2,$ii),  
+           $primcell->at(1,$ii)+$primcell->at(2,$ii), 0, sum($primcell->slice(":,0")) ]; 
   $t = min($ddd)/$abc[$ii]; if (abs($t-int($t))>0.0001) { push @minv, (int($t)-1.)*$abc[$ii]; } else { push @minv, min($ddd); }
   $t = max($ddd)/$abc[$ii]; if (abs($t-int($t))>0.0001) { push @maxv, (int($t)+1.)*$abc[$ii]; } else { push @maxv, max($ddd); }
 }
@@ -373,7 +376,8 @@ for $sipf (keys %sipfseen) {
         $i2r=$i1*$rmat->at(0,1)+$i2*$rmat->at(1,1)+$i3*$rmat->at(2,1);
         $i3r=$i1*$rmat->at(0,2)+$i2*$rmat->at(1,2)+$i3*$rmat->at(2,2);
         $p1 = ${$atoms{"da"}}[$ii]+$i1r; $p2 = ${$atoms{"db"}}[$ii]+$i2r; $p3 = ${$atoms{"dc"}}[$ii]+$i3r;
-        if($p1>=$minv[0] && $p1<=$maxv[0] && $p2>=$minv[1] && $p2<=$maxv[1] && $p3>=$minv[2] && $p3<=$maxv[2]) {
+#        if($p1>=$minv[0] && $p1<=$maxv[0] && $p2>=$minv[1] && $p2<=$maxv[1] && $p3>=$minv[2] && $p3<=$maxv[2]) 
+if($p1>=0 && $p1<=1 && $p2>=0 && $p2<=1 && $p3>=0 && $p3<=1) {
           $fpos = pdl [ $p1, $p2, $p3 ];
           $cpos = $fpos x $rtoijk;
           # Plots a cube at the centre of the cluster
@@ -495,8 +499,9 @@ for $sipf (keys %sipfseen) {
         $i2r=$i1*$rmat->at(0,1)+$i2*$rmat->at(1,1)+$i3*$rmat->at(2,1);
         $i3r=$i1*$rmat->at(0,2)+$i2*$rmat->at(1,2)+$i3*$rmat->at(2,2);
         $p1 = ${$atoms{"da"}}[$ii]+$i1r; $p2 = ${$atoms{"db"}}[$ii]+$i2r; $p3 = ${$atoms{"dc"}}[$ii]+$i3r;
+      #  if($p1>=$minv[0] && $p1<=$maxv[0] && $p2>=$minv[1] && $p2<=$maxv[1] && $p3>=$minv[2] && $p3<=$maxv[2]) {
+if($p1>=0 && $p1<=1 && $p2>=0 && $p2<=1 && $p3>=0 && $p3<=1) {
 #print "$p1 $p2 $p3 |";
-        if($p1>=$minv[0] && $p1<=$maxv[0] && $p2>=$minv[1] && $p2<=$maxv[1] && $p3>=$minv[2] && $p3<=$maxv[2]) {
           $fpos = pdl [ $p1, $p2, $p3 ]; # rowvektor ...  rmat contains prim latt as colvect
           $cpos = $fpos x $rtoijk;
           printf FOUT "          <p> % 10.5f% 10.5f% 10.5f </p>\n",$cpos->at(0,0),$cpos->at(1,0),$cpos->at(2,0);

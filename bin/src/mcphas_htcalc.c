@@ -368,7 +368,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
      // try different Q vectors corresponding to q !!
     int i1,j1,k1;
     double QQmin=1e10,QQ;
-// inserted 10.5.10 to make comaptible with nonortholattices
+// inserted 10.5.10 to make compatible with nonortholattices
      Matrix abc_in_ijk(1,3,1,3),p(1,3,1,3),pstar(1,3,1,3);
         get_abc_in_ijk(abc_in_ijk,inputpars.cs.abc);
      p=abc_in_ijk*inputpars.cs.r; // p is the primitive crystal unit cell in ijk coordinates
@@ -490,7 +490,10 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    fprintf(fin_coq,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
    #endif
    fclose(fin_coq);	      
-   printf("\n starting T=%g Ha=%g Hb=%g Hc=%g with \n %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",T,Habc(1),Habc(2),Habc(3),testspins.n,testqs.nofqs());
+   printf("\n starting T=%g H=%g Ha=%g Hb=%g Hc=%g ",T,Norm(H),Habc(1),Habc(2),Habc(3));
+   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){printf("Hi=%g Hj=%g Hk=%g",H(1),H(2),H(3));}
+   printf("\n");
+   printf("with %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",testspins.n,testqs.nofqs());
    printf("Notation: fe(n)          ...free energy for random try n\n");
    printf("          (hkl)          ...Miller indizes (for abc unit cell)\n");
    printf("          (n1 x n2 x n3) ...supercell of primitive unit cell \n");   

@@ -1,5 +1,5 @@
 C-----------------------------------------------------------------------
-C  Routine:    IVOUT
+C  Routine:    ISOUT
 C
 C  Purpose:    Integer vector output routine.
 C
@@ -15,7 +15,7 @@ C              If IDIGIT .GT. 0, printing is done with 132 columns.
 C
 C-----------------------------------------------------------------------
 C
-      SUBROUTINE IVOUT (LOUT, N, IX, IDIGIT, IFMT)
+      SUBROUTINE ISOUT (LOUT, N, IX, IDIGIT, IFMT)
 C     ...
 C     ... SPECIFICATIONS FOR ARGUMENTS
       INTEGER    IX, N, IDIGIT, LOUT

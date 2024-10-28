@@ -117,7 +117,9 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    dadbdc2ijk(Hijk,H,abc);
    ijk2dadbdc(mabc,m,abc);
 
-  printf("saving properties for T=%g K  Ha= %g Hb= %g Hc= %g T\n", T,H(1),H(2),H(3));
+  printf("saving properties for  T=%g H=%g Ha=%g Hb=%g Hc=%g",T,Norm(Hijk),H(1),H(2),H(3));
+  if(ortho==0){printf(" Hi=%g Hj=%g Hk=%g\n",Hijk(1),Hijk(2),Hijk(3));}
+  printf("\n");
 
 //-----------------------------------------------------------------------------------------  
   errno = 0;char outfilename[MAXNOFCHARINLINE];

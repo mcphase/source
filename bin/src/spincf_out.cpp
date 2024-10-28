@@ -151,7 +151,7 @@ void spincf::calc_minmax_scale(Vector & minv,Vector & maxv,Vector & ijkmin,Vecto
 }
 
 void calc_minmax_scale_relabc(Vector & minv,Vector & maxv,Vector & ijkmin,Vector & ijkmax,Matrix & p,Vector & abc,double scale_view_1,double scale_view_2,double scale_view_3)
-{// determine max(1,2,3) min(1,2,3) (vector in units of A direction of abc describing
+{// determine maxv(1,2,3) minv(1,2,3) (vector in units of A direction of abc describing
  //a parallelepiped) for viewing magnetic unit cell
   Vector ddd(1,8),dd0(1,3),dd(1,3);
   int i;

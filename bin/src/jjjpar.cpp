@@ -83,7 +83,8 @@ void jjjpar::increase_nofcomponents(int n) // increase nofcomponents by n
   nold=nofcomponents;
   nofcomponents+=n;
   if(n<1){fprintf (stderr, "jjjpar::increase_nofcomponents n=%i<0\n",n);exit (EXIT_FAILURE);}
-  mom.Resize(1,nofcomponents);
+//  mom.Resize(1,nofcomponents); // not needed, because mom is always Vector (1,9) !!!
+  MF.Resize(1,nofcomponents); 
   delete G; 
   G=new Matrix(1,6,1,nofcomponents);if (G == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} 
   
@@ -118,8 +119,10 @@ void jjjpar::decrease_nofcomponents(int n) // decrease nofcomponents by n
   nold=nofcomponents;
   nofcomponents-=n;
   if(nofcomponents<1){fprintf (stderr, "Error decreasing Nofcomponents=%i gets less than 1\n",nofcomponents);exit (EXIT_FAILURE);}
-  mom.Resize(1,nofcomponents); 
-  Matrix Gsav(1,6,1,nold);
+  //mom.Resize(1,nofcomponents); // not needed, because mom is always Vector (1,9) !!!
+    MF.Resize(1,nofcomponents); 
+
+   Matrix Gsav(1,6,1,nold);
   Gsav=(*G);
   delete G;
   G=new Matrix(1,6,1,nofcomponents);
@@ -839,6 +842,7 @@ SLR=pp.SLR;SLI=pp.SLI;
   magnetic=pp.magnetic;
   FF_type=pp.FF_type;
   nof_electrons=pp.nof_electrons;
+
   modulefilename=new char[MAXNOFCHARINLINE];
   strncpy (modulefilename,pp.modulefilename, MAXNOFCHARINLINE-1);
   clusterfilename=new char [MAXNOFCHARINLINE];
@@ -851,6 +855,7 @@ SLR=pp.SLR;SLI=pp.SLI;
   transitionnumber=pp.transitionnumber;
   sipffilename= new char [strlen(pp.sipffilename)+1];
   strcpy(sipffilename,pp.sipffilename);
+
   if (pp.module_type==3||pp.module_type==1||pp.module_type==0)  ABC=pp.ABC;
   if ((pp.module_type==5||pp.module_type==3||pp.module_type==1||pp.module_type==0) &&
       (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
@@ -918,7 +923,8 @@ SLR=pp.SLR;SLI=pp.SLI;
   magFFj4=Vector(1,MAGFF_NOF_COEFF);magFFj4=pp.magFFj4;
   magFFj6=Vector(1,MAGFF_NOF_COEFF);magFFj6=pp.magFFj6;
   Zc=Vector(1,7);Zc=pp.Zc;
-  DWF=pp.DWF;  
+  DWF=pp.DWF; 
+ 
 int i1;
 //dimension arrays
   jij = new Matrix[paranz+1];for(i1=0;i1<=paranz;++i1){jij[i1]=Matrix(1,nofcomponents,1,nofcomponents);}

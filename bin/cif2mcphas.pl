@@ -53,6 +53,7 @@ GetOptions("help"=>\$helpflag,
            "interactive|i"=>\$interact,
            "debug"=>\$debug,
            "create|c"=>\$create,
+           "radialmatel|rl=s"=>\$rl,
            "supercell|s=s"=>\$supersize,
            "pointcharge|pc=f"=>\$pointcharge,
            "screenfile|sf=s"=>\$screeningfile,
@@ -76,6 +77,8 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "    --help        or -h  : prints this message\n";
    print "    --create      or -c  : creates a blank CIF file without and structure information.\n";
    print "    --supercell   or -s  : creates a super-cell of size #x#x#. (e.g. -s 2x3x4).\n";
+   print "    --radialmatel or -rl : tries to load ion with specific radial matrix elements, e.g. -rl edvardson\n";
+   print "                           will load <r^l> by edvardsson Journal Alloy Comp 275-277 (1998) 230\n";
    print "    --interactive or -i  : prompts user for information such as valence states\n";
    print "    --pointcharge or -pc : calculates the crystal field parameters from point charges\n";
    print "                           up to # Angstrom away from magnetic ions (e.g. -p 3.5)\n";
@@ -580,7 +583,7 @@ for $j(0..$nofatom-1) {
   push @realb, ${$attab}[0]/10;  # convert from femtometres to 10^-12cm
   push @imagb, ${$attab}[1]/10;  
   if($ismag[$j]) {
-    $eltab = $magions{$at.$oxy[$j]."+"}; 
+    $eltab = $magions{$at.$oxy[$j]."+".$rl}; 
     if(${$eltab}[0] eq "") { $ismag[$j] = 0; }
     if($nonmagnetic eq $at){ $ismag[$j] = 0; }
     if($nonmagnetic eq $dat[$j][0]){ $ismag[$j] = 0; }
@@ -611,7 +614,7 @@ if($interact) {
           } else {
             $ans =~ s/\+//g;
             $oxy[$j] = $ans;
-            $eltab = $magions{$at.$oxy[$j]."+"};
+            $eltab = $magions{$at.$oxy[$j]."+".$rl};
             if(${$eltab}[0] eq "") { $ismag[$j] = 0; } else { $ismag[$j] = 1; }
 print $dat[$j][0]."\n";
           }}
@@ -869,7 +872,7 @@ $nmx[2]=my_floor(-1.0-$distmax  / inner($rtoijk->slice(":,(2)"),$rvec));
   for $j (0..$#pos) {
     my @ps = split(":",$pos[$j]);
     if($ismag[$ps[5]]) { 
-      $ionname = $ps[4]; $ionname=~s/\s*//g; $ionname =~ s/p/\+/g; $eltab = $magions{$ionname};   # Looks up <r^k> values
+      $ionname = $ps[4]; $ionname=~s/\s*//g; $ionname =~ s/p/\+/g; $eltab = $magions{$ionname.$rl};   # Looks up <r^k> values
       $nofelectrons = ${$eltab}[0]; $nofelectrons =~ s/^[0-9][a-z]//;                             # Looks up nof_electrons
       $so1ionname = ${$eltab}[3]; if ($so1ionname eq "") { $so1ionname = "J=1"; }                 # And ionname for pointc
       $ionkey = $ps[7];
@@ -1086,7 +1089,7 @@ for (keys %ions) {
   if($ismag[$ions{$_}]&&!$phonon) {
     $ionname = $ionnames{$_}; 
     $ionname =~ s/p/\+/g;
-    $eltab = $magions{$ionname};             # Looks up information about the magnetic ions
+    $eltab = $magions{$ionname.$rl};             # Looks up information about the magnetic ions
     $fftab = $magff{$ionname};               #   and form factor
     $nofelectrons = ${$eltab}[0];
     if ($nofelectrons =~ /f/) {

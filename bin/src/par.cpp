@@ -319,7 +319,8 @@ i1,(*jjj[i1]).xyz(1),(*jjj[i1]).xyz(2),(*jjj[i1]).xyz(3),i,(*p1.jjj[i]).xyz(1),(
 if(i1==cs.nofatoms)i1=0;
 ++i1;
 if(i1==i){fprintf(stderr,"# ... no matching atom found: adding new atom number %i with sipffilename=%s\n",cs.nofatoms+1,(*p1.jjj[i]).sipffilename);
-newatom(p1.jjj[i]);i1=cs.nofatoms;(*jjj[i1]).scalepars(0.0); // set jjjpars to zero - because there comes the add command in line 242
+newatom(p1.jjj[i]);i1=cs.nofatoms;
+(*jjj[i1]).scalepars(0.0); // set jjjpars to zero - because there comes the add command in line 242
  }
 }
     if (strcmp((*jjj[i1]).sipffilename,(*p1.jjj[i]).sipffilename)!=0){

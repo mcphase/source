@@ -204,10 +204,16 @@ void inipar::print (const char * filename)
     fprintf(fout,"xT=%g\nxHa=%g\nxHb=%g\nxHc=%g\n# range of x\nxmin=%g\nxmax=%g\nxstep=%g\n",
            xv(0), xv(1), xv(2), xv(3), xmin,  xmax,  xstep);
     fprintf(fout,"# vector in (H-T) space corresponding to y axis (yT [K] yHa [T] yHb [T] yHc [T])\n");
+
     fprintf(fout,"yT=%g\nyHa=%g\nyHb=%g\nyHc=%g\n# range of y\nymin=%g\nymax=%g\nystep=%g\n",
            yv(0), yv(1), yv(2), yv(3), ymin,  ymax,  ystep);
     fprintf(fout,"# offset for phase diagram\n");
     fprintf(fout,"T0=%g\nHa0=%g\nHb0=%g\nHc0=%g\n\n",zero(0),zero(1),zero(2),zero(3));       
+
+    fprintf(fout,"input (xHa xHb xHc) (yHa yHb yHc) and (Ha0 Hb0 Hc0) are vectors\n");
+    fprintf(fout,"given in terms of components with respect to unit vectors along the\n");
+    fprintf(fout,"Bravais lattice ^a=a/|a|, ^b=b/|b|, ^c=c/|c|.\n");
+    fprintf(fout,"For the external magnetic field unit is Tesla.\n");
 
     fprintf(fout,"[GENERATION OF SPIN CONFIGURATIONS]\n");
     fprintf(fout,"# test q vector (qmin qmax deltaq)\n");
