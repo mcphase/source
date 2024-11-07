@@ -79,7 +79,7 @@
 #                                           correct bugs in izpack2exe.py (format of config.txt errors)]
 #	    gfortran library not found: try to find it with: find / -name "*libgfortran*" 2>/dev/null
 #				and then do: 
-#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/14.1.0_2/lib/gcc/current/
+#				export GFORTRANLIB=-L/opt/homebrew/Cellar/gcc/14.2.0_1/lib/gcc/current/
 #           gfortran lSystem not found - then do:
 #                               export LIBRARY_PATH="$LIBRARY_PATH:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
 #

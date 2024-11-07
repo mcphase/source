@@ -40,6 +40,7 @@ class mfcf
     void invert();// inverts all spins
 
     void print(FILE * fout);
+    void print_human_readable(FILE * fout);
     int  load(FILE * fin_coq);	
      
     void clear(); // set all meanfields to zero    

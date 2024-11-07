@@ -24,6 +24,10 @@
 #include<vector.h>
 #include "sparsecomplex.hpp"
 
+
+// function to print to stderr estimate of time until program end
+void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
+
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -
 // output: var ... value of parameter
 // returns 1 on error and 0 if successful

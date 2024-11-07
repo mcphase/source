@@ -12,6 +12,15 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 	 if (y<0){ph=2*PI-ph;}
 }
 
+#ifdef __MINGW32__
+#else
+void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int verbose)
+  {char * error;
+   *(void **)(&symbol)=dlsym(handle,func);
+   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s - continuing\n",error);}symbol=NULL;}
+                          else {if(verbose)fprintf (stderr,"%s ",func);}
+  }  
+#endif
 
 
 /************************************************************************************/
@@ -23,7 +32,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
  nn[0]=MAXNOFNUMBERSINLINE;
  modulefilename=new char[MAXNOFCHARINLINE];
  char instr[MAXNOFCHARINLINE];
- FILE * cf_file; 
+ FILE * cf_file;    
  cf_file=open_sipf(sipf_filename,modulefilename,verbose);
   if(strcmp(modulefilename,"kramer")==0)
     {module_type=1;if(verbose)fprintf (stderr,"#[internal]\n");
@@ -105,7 +114,8 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
       fprintf(stderr," ... reading cluster structure from %s\n",clusterfilename);
       clusterpars =new par(clusterfilename,verbose);
       Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors      
-     }
+      est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
+      }
      else
       {if(verbose)fprintf (stderr,"#[external]\n");
       i=0;nof_electrons=0;
@@ -135,6 +145,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
 	    }
     if(verbose)fprintf(stderr," module functions ");
 module_type=0;
+
 #ifdef __MINGW32__
   handle=LoadLibrary(modulefilename);
   if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, " - Could not load dynamic library\n");
@@ -275,6 +286,7 @@ module_type=0;
     dyn_opmat=(int(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
     if (dyn_opmat==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  opmat -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"opmat ");}
+
     if(verbose)fprintf (stderr,"\n");
 #else
   char * error;
@@ -284,103 +296,36 @@ module_type=0;
 	         {fprintf (stderr,"%s\n",error);}
 	       exit (EXIT_FAILURE);
 	      }
- *(void **)(&I)=dlsym(handle,"Icalc");
-  if ((error=dlerror())!=NULL) {fprintf (stderr," %s\n",error);exit (EXIT_FAILURE);}
-                          else {if(verbose)fprintf (stderr,"Icalc ");}
- *(void **)(&IM)=dlsym(handle,"IMcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} IM=NULL;}
-                               else {if(verbose)fprintf (stderr,"IMcalc ");}
- *(void **)(&du)=dlsym(handle,"du1calc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);}du=NULL;}
-                               else {if(verbose)fprintf (stderr,"du1calc ");}
-
- *(void **)(&p)=dlsym(handle,"pcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} p=NULL;}
-                                else {if(verbose)fprintf (stderr,"pcalc ");}
- *(void **)(&dP1)=dlsym(handle,"dP1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dP1=NULL;}
-                               else {if(verbose)fprintf (stderr,"dP1 ");}
-
-
- *(void **)(&m)=dlsym(handle,"mcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} m=NULL;}
-                               else {if(verbose)fprintf (stderr,"mcalc ");}
- *(void **)(&mM)=dlsym(handle,"mMcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} mM=NULL;}
-                               else {if(verbose)fprintf (stderr,"mMcalc ");}
- *(void **)(&dm1)=dlsym(handle,"dm1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dm1=NULL;}
-                               else {if(verbose)fprintf (stderr,"dm1 ");}
- *(void **)(&L)=dlsym(handle,"Lcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} L=NULL;}
-                               else {if(verbose)fprintf (stderr,"Lcalc ");}
- *(void **)(&LM)=dlsym(handle,"LMcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} LM=NULL;}
-                               else {if(verbose)fprintf (stderr,"LMcalc ");}
- *(void **)(&dL1)=dlsym(handle,"dL1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dL1=NULL;}
-                               else {if(verbose)fprintf (stderr,"dL1 ");}
- *(void **)(&S)=dlsym(handle,"Scalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} S=NULL;}
-                               else {if(verbose)fprintf (stderr,"Scalc ");}
- *(void **)(&SM)=dlsym(handle,"SMcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} SM=NULL;}
-                               else {if(verbose)fprintf (stderr,"SMcalc ");}
- *(void **)(&dS1)=dlsym(handle,"dS1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dS1=NULL;}
-                               else {if(verbose)fprintf (stderr,"dS1 ");}
- 
- *(void **)(&mq)=dlsym(handle,"mqcalc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} mq=NULL;}
-                               else {if(verbose)fprintf (stderr,"mqcalc ");}
-  *(void **)(&ddnn)=dlsym(handle,"dmq1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} ddnn=NULL;}
-                               else {if(verbose)fprintf (stderr,"dmq1 ");}
-  *(void **)(&rixs)=dlsym(handle,"drixs1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} rixs=NULL;}
-                               else {if(verbose)fprintf (stderr,"drixs1 ");}
-
-  *(void **)(&estates)=dlsym(handle,"estates");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} estates=NULL;
-                                est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
+  loadfunction(*(void **)(&I),handle,"Icalc",verbose);if(I==NULL){fprintf(stderr,"not possible !");exit (EXIT_FAILURE);}
+  loadfunction(*(void **)(&IM),handle,"IMcalc",verbose);
+  loadfunction(*(void **)(&du),handle,"du1calc",verbose);
+  loadfunction(*(void **)(&p),handle,"pcalc",verbose);
+  loadfunction(*(void **)(&dP1),handle,"dP1",verbose);
+  loadfunction(*(void **)(&m),handle,"mcalc",verbose);
+  loadfunction(*(void **)(&mM),handle,"mMcalc",verbose);
+  loadfunction(*(void **)(&dm1),handle,"dm1",verbose);
+  loadfunction(*(void **)(&L),handle,"Lcalc",verbose);
+  loadfunction(*(void **)(&LM),handle,"LMcalc",verbose);
+  loadfunction(*(void **)(&dL1),handle,"dL1",verbose);
+  loadfunction(*(void **)(&S),handle,"Scalc",verbose);
+  loadfunction(*(void **)(&dS1),handle,"dS1",verbose);
+  loadfunction(*(void **)(&mq),handle,"mqcalc",verbose);
+  loadfunction(*(void **)(&ddnn),handle,"dmq1",verbose);
+  loadfunction(*(void **)(&rixs),handle,"drixs1",verbose);
+  loadfunction(*(void **)(&estates),handle,"estates",verbose);
+         if(estates==NULL){est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
+                          }
+  loadfunction(*(void **)(&Icalc_parameter_storage),handle,"Icalc_parameter_storage_matrix_init",verbose);
+         if(Icalc_parameter_storage==NULL){Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
                                }
-                               else {if(verbose)fprintf (stderr,"estates ");}
-
- *(void **)(&Icalc_parameter_storage)=dlsym(handle,"Icalc_parameter_storage_matrix_init");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} Icalc_parameter_storage=NULL;
-                                Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
-                               }
-                               else {if(verbose)fprintf (stderr,"Icalc_parameter_storage_matrix_init ");}
-
-
-  *(void **)(&cd_m)=dlsym(handle,"chargedensity_coeff");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} cd_m=NULL;}
-                               else {if(verbose)fprintf (stderr,"chargedensity_coeff ");}
-  *(void **)(&cd_dm)=dlsym(handle,"dchargedensity_coeff1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} cd_dm=NULL;}
-                               else {if(verbose)fprintf (stderr,"dchargedensity_coeff1 ");}
-
-  *(void **)(&sd_m)=dlsym(handle,"spindensity_coeff");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} sd_m=NULL;}
-                               else {if(verbose)fprintf (stderr,"spindensity_coeff ");}
-  *(void **)(&sd_dm)=dlsym(handle,"dspindensity_coeff1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} sd_dm=NULL;}
-                               else {if(verbose)fprintf (stderr,"dspindensity_coeff1 ");}
-
-  *(void **)(&od_m)=dlsym(handle,"orbmomdensity_coeff");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} od_m=NULL;}
-                               else {if(verbose)fprintf (stderr,"orbmomdensity_coeff ");}
-  *(void **)(&od_dm)=dlsym(handle,"dorbmomdensity_coeff1");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} od_dm=NULL;}
-                               else {if(verbose)fprintf (stderr,"dorbmomdensity_coeff1 ");}
-
-  *(void **)(&ro_calc)=dlsym(handle,"ro_calc");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} ro_calc=NULL;}
-                               else {if(verbose)fprintf (stderr,"ro_calc ");}
-
-  *(void **)(&dyn_opmat)=dlsym(handle,"opmat");
-  if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s -continuing ",error);} dyn_opmat=NULL;}
-                               else {if(verbose)fprintf (stderr,"opmat ");}
+  loadfunction(*(void **)(&cd_m),handle,"chargedensity_coeff",verbose);
+  loadfunction(*(void **)(&cd_dm),handle,"dchargedensity_coeff1",verbose);
+  loadfunction(*(void **)(&sd_m),handle,"spindensity_coeff",verbose);
+  loadfunction(*(void **)(&sd_dm),handle,"dspindensity_coeff1",verbose);
+  loadfunction(*(void **)(&od_m),handle,"orbmomdensity_coeff",verbose);
+  loadfunction(*(void **)(&od_dm),handle,"dorbmomdensity_coeff1",verbose);
+  loadfunction(*(void **)(&ro_calc),handle,"ro_calc",verbose);
+  loadfunction(*(void **)(&dyn_opmat),handle,"opmat",verbose);
   if(verbose)fprintf (stderr,"\n");
 #endif
      }

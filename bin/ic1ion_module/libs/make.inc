@@ -26,13 +26,13 @@ endif
 ifeq ($(OSTYPE),Linux)
  LINUX = LINUX
  PLAT = _LINUX
- FORTRAN=gfortran --std=legacy  
+ FORTRAN=gfortran --std=legacy  -fopenmp 
  LIBFORTRAN=-lgfortran
 else
 ifeq ($(OSTYPE),Darwin)
  LINUX = LINUX
  PLAT = _LINUX
- FORTRAN=gfortran --std=legacy 
+ FORTRAN=gfortran --std=legacy  -fopenmp 
  LIBFORTRAN=-lgfortran
 else
  MSYS=1
@@ -48,11 +48,11 @@ ifneq ($(shell gcc --version|grep " 3."),)
  LIBFORTRAN=-lg2c
 else
 ifneq ($(shell gcc --version|grep " 4."),)
- FORTRAN=gfortran --std=legacy
+ FORTRAN=gfortran --std=legacy   -fopenmp 
  LIBFORTRAN=-lgfortran
 else
 ifneq ($(shell gcc --version|grep " 5."),)
- FORTRAN=gfortran --std=legacy
+ FORTRAN=gfortran --std=legacy   -fopenmp 
  LIBFORTRAN=-lgfortran
 endif
 endif
@@ -64,7 +64,7 @@ FORTRAN  = ifort
 endif
 
 ifdef cross64
-FORTRAN  = x86_64-w64-mingw32-gfortran --std=legacy
+FORTRAN  = x86_64-w64-mingw32-gfortran --std=legacy -fopenmp 
 ARCH     = x86_64-w64-mingw32-ar
 ARCHFLAGS= cr
 RANLIB   = x86_64-w64-mingw32-ranlib
@@ -75,13 +75,13 @@ ifneq ($(shell gcc --version|grep " 3."),)
 FLAGS+=-mno-cygwin
 endif
 ifdef cross64
-FORTRAN  = x86_64-w64-mingw32-gfortran --std=legacy  
+FORTRAN  = x86_64-w64-mingw32-gfortran --std=legacy -fopenmp  
 ARCH     = x86_64-w64-mingw32-ar
 ARCHFLAGS= cr
 RANLIB   = x86_64-w64-mingw32-ranlib
 endif
 ifdef cross32
-FORTRAN  = i686-w64-mingw32-gfortran --std=legacy  
+FORTRAN  = i686-w64-mingw32-gfortran --std=legacy  -fopenmp 
 ARCH     = i686-w64-mingw32-ar
 ARCHFLAGS= cr
 RANLIB   = i686-w64-mingw32-ranlib

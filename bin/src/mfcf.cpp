@@ -149,6 +149,11 @@ void mfcf::print(FILE * fout) //print mfconfiguration to stream
                
 }
 
+void mfcf::print_human_readable(FILE * fout)
+{fprintf(fout,"n1=%i n2=%i n3=%i nofcomponents=%i nofatoms=%i \n",nofa,nofb,nofc,nofcomponents,nofatoms);
+ print(fout);
+}
+
 /**************************************************************************/
 
 //zuweisung

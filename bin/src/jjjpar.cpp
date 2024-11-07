@@ -896,27 +896,10 @@ SLR=pp.SLR;SLI=pp.SLI;
                              zm = new complexdouble[fdim*dim]; memcpy(zm,pp.zm,fdim*dim*sizeof(complexdouble)); }
                           }
   
-//#ifdef __linux__
-/*  if (module_type==0)
-  {char * error;
-   handle=dlopen (sipffilename,RTLD_NOW | RTLD_GLOBAL);
-   if (!handle){fprintf (stderr, "Could not load dynamic library\n");
-               if ((error=dlerror())!=NULL) 
-	         {fprintf (stderr,"%s\n",error);}
-	       exit (EXIT_FAILURE);
-	      }
-*/
-   I=pp.I;   du=pp.du;
-   estates=pp.estates;    Icalc_parameter_storage=pp.Icalc_parameter_storage;
-   mq=pp.mq;    ddnn=pp.ddnn;
-   p=pp.p;dP1=pp.dP1;
-   m=pp.m;dm1=pp.dm1;
-   L=pp.L;dL1=pp.dL1;
-   S=pp.S;dS1=pp.dS1;
-   cd_m=pp.cd_m;cd_dm=pp.cd_dm;
-   sd_m=pp.sd_m;sd_dm=pp.sd_dm;
-   od_m=pp.od_m;od_dm=pp.od_dm;
-/*  }*/
+
+
+
+  
 //#endif
   magFFj0=Vector(1,MAGFF_NOF_COEFF);magFFj0=pp.magFFj0;
   magFFj2=Vector(1,MAGFF_NOF_COEFF);magFFj2=pp.magFFj2;
@@ -942,23 +925,91 @@ int i1;
   for(i1=0; i1<52; i1++) { 
      if(pp.opmatM[i1]==0) opmatM[i1]=0; 
      else { 
-        opmatM[i1] = new Matrix((*pp.opmatM[i1]).Clo(),(*pp.opmatM[i1]).Chi(),(*pp.opmatM[i1]).Rlo(),(*pp.opmatM[i1]).Rhi()); 
+        opmatM[i1] = new Matrix((*pp.opmatM[i1]).Rlo(),(*pp.opmatM[i1]).Rhi(),(*pp.opmatM[i1]).Clo(),(*pp.opmatM[i1]).Chi()); 
         (*opmatM[i1]) = (*pp.opmatM[i1]); } }
-  if(pp.dyn_opmat!=NULL && module_type==0) {
+
+// copy Matrices 
+if(!pp.est.Empty())
+{    est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());
+    est=pp.est;
+}
+
+if(!pp.Icalc_parstorage.Empty())
+{   Icalc_parstorage=ComplexMatrix(pp.Icalc_parstorage.Rlo(),pp.Icalc_parstorage.Rhi(),pp.Icalc_parstorage.Clo(),pp.Icalc_parstorage.Chi());
+    Icalc_parstorage=pp.Icalc_parstorage;
+} 
+
+// it seems that this following part might be  leading to problems in case of loadable modules !!!
+// the function pointers cannot be assigned simply, but a copy of the whole function
+// needs to be created in a separate memory space so 
+// that in parallel processing the function can be used separately !!
+// for the time being we leave it - just copy function pointers
+   estates=pp.estates;
+   I=pp.I;  du=pp.du;
+   mq=pp.mq;    ddnn=pp.ddnn;
+   p=pp.p;dP1=pp.dP1;
+   m=pp.m;dm1=pp.dm1;
+   L=pp.L;dL1=pp.dL1;
+   S=pp.S;dS1=pp.dS1;
+   cd_m=pp.cd_m;cd_dm=pp.cd_dm;
+   sd_m=pp.sd_m;sd_dm=pp.sd_dm;	
+   od_m=pp.od_m;od_dm=pp.od_dm;
+   dyn_opmat=pp.dyn_opmat;
+
+/*  the following is a failed attempt to make separate copies
+//    of shared libraries using dlmopen(LM_ID_NEWLM,...) 
+if(module_type==0) {
     // For the cluster module, during the MF loop, we need to be able to call the external module to recalculate the Hamiltonian for different Hxc, Hext.
     #ifdef __MINGW32__
       handle=LoadLibrary(pp.modulefilename);
       if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n"); exit (EXIT_FAILURE); } 
-      dyn_opmat=(int(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
+      
+      if(pp.dyn_opmat!=NULL){dyn_opmat=(int(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
       if (dyn_opmat==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function opmat not possible - continuing\n",(int)GetLastError(),modulefilename);}
+                            }
     #else
       char * error;
-      handle=dlopen (pp.modulefilename,RTLD_NOW | RTLD_GLOBAL);
+      handle=dlmopen (LM_ID_NEWLM,pp.modulefilename,RTLD_LOCAL);
       if (!handle){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n"); if ((error=dlerror())!=NULL) {fprintf (stderr,"%s\n",error);} exit (EXIT_FAILURE); } 
-      *(void **)(&dyn_opmat)=dlsym(handle,"opmat");
-      if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dyn_opmat=NULL;}
-    #endif
-  }
+
+
+  if(pp.I!=NULL)loadfunction(*(void **)(&I),handle,"Icalc",0);if(I==NULL){fprintf(stderr,"not possible !");exit (EXIT_FAILURE);}
+  if(pp.IM!=NULL)loadfunction(*(void **)(&IM),handle,"IMcalc",0);
+  if(pp.du!=NULL)loadfunction(*(void **)(&du),handle,"du1calc",0);
+  if(pp.p!=NULL)loadfunction(*(void **)(&p),handle,"pcalc",0);
+  if(pp.dP1!=NULL)loadfunction(*(void **)(&dP1),handle,"dP1",0);
+  if(pp.m!=NULL)loadfunction(*(void **)(&m),handle,"mcalc",0);
+  if(pp.mM!=NULL)loadfunction(*(void **)(&mM),handle,"mMcalc",0);
+  if(pp.dm1!=NULL)loadfunction(*(void **)(&dm1),handle,"dm1",0);
+  if(pp.L!=NULL)loadfunction(*(void **)(&L),handle,"Lcalc",0);
+  if(pp.LM!=NULL)loadfunction(*(void **)(&LM),handle,"LMcalc",0);
+  if(pp.dL1!=NULL)loadfunction(*(void **)(&dL1),handle,"dL1",0);
+  if(pp.S!=NULL)loadfunction(*(void **)(&S),handle,"Scalc",0);
+  if(pp.dS1!=NULL)loadfunction(*(void **)(&dS1),handle,"dS1",0);
+  if(pp.mq!=NULL)loadfunction(*(void **)(&mq),handle,"mqcalc",0);
+  if(pp.ddnn!=NULL)loadfunction(*(void **)(&ddnn),handle,"dmq1",0);
+  if(pp.rixs!=NULL)loadfunction(*(void **)(&rixs),handle,"drixs1",0);
+  if(pp.estates!=NULL)loadfunction(*(void **)(&estates),handle,"estates",0);
+         if(estates==NULL){est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
+                          }
+  if(pp.Icalc_parameter_storage!=NULL)loadfunction(*(void **)(&Icalc_parameter_storage),handle,"Icalc_parameter_storage_matrix_init",0);
+         if(Icalc_parameter_storage==NULL){Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
+                               }
+  if(pp.cd_m!=NULL)loadfunction(*(void **)(&cd_m),handle,"chargedensity_coeff",0);
+  if(pp.cd_dm!=NULL)loadfunction(*(void **)(&cd_dm),handle,"dchargedensity_coeff1",0);
+  if(pp.sd_m!=NULL)loadfunction(*(void **)(&sd_m),handle,"spindensity_coeff",0);
+  if(pp.sd_dm!=NULL)loadfunction(*(void **)(&sd_dm),handle,"dspindensity_coeff1",0);
+  if(pp.od_m!=NULL)loadfunction(*(void **)(&od_m),handle,"orbmomdensity_coeff",0);
+  if(pp.od_dm!=NULL)loadfunction(*(void **)(&od_dm),handle,"dorbmomdensity_coeff1",0);
+  if(pp.ro_calc!=NULL)loadfunction(*(void **)(&ro_calc),handle,"ro_calc",0);
+  if(pp.dyn_opmat!=NULL)loadfunction(*(void **)(&dyn_opmat),handle,"opmat",0);      
+//      if(pp.dyn_opmat!=NULL){*(void **)(&dyn_opmat)=dlsym(handle,"opmat");
+//       if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dyn_opmat=NULL;}
+//                            }
+  #endif
+  }  // module type 0
+*/
+
 }
 
 
@@ -989,7 +1040,7 @@ jjjpar::~jjjpar ()
      if(opmatM[ii]!=0) { delete opmatM[ii]; opmatM[ii]=0; }
  
 //#ifdef __linux__
-// i#ifdef __linux__f (module_type==0)dlclose(handle);
+// if (module_type==0)dlclose(handle);
 //#endif
 // printf("hello end destruktor jjjpar\n");  
  

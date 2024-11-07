@@ -140,14 +140,17 @@ public:
    // returns eigenvalues and eigenstates matrix parameters of ion (if possible)
    ComplexMatrix & eigenstates (Vector &  Hxc,Vector & Hext, double & T);
    void print_eigenstates(FILE *fout);
-   // initialisis parameter storage for Icalc parameters (if possible)
+   // initialises parameter storage for Icalc parameters (if possible)
    ComplexMatrix & Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T);
    // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
    Matrix opmat(int n,Vector &  Hxc,Vector & Hext);
 
-private:
+//private:
   // external module functions, intern_Icalc=0
- 
+#ifdef __MINGW32__
+#else
+  void loadfunction(void  *(&symbol),void *handle,const char * func,int verbose);
+#endif
   void (*I)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*);
   void (*IM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,Vector*,Vector*,ComplexMatrix*);
   int  (*du)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,int*,int*,ComplexMatrix*);
@@ -156,7 +159,7 @@ private:
   void (*Icalc_parameter_storage)(ComplexMatrix*,Vector*,Vector*,double*,double*,Vector*,char**);
 
   int (*dyn_opmat)(int*,char**,Vector*,Vector*,Matrix*);
-  Matrix *opmatM[52];
+    Matrix *opmatM[52];
 
 public:
 // ********************************************************************************

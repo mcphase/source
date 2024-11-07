@@ -65,6 +65,7 @@ GetOptions("help"=>\$helpflag,
            "magnetic|m=s"=>\$magnetic,
            "so1ion"=>\$so1ion,
            "ic1ion"=>\$ic1ion,
+           "icf1ion"=>\$icf1ion,
            "phonon"=>\$phonon,
            "outpos"=>\$checkpos);
 
@@ -90,6 +91,7 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "    --magnetic    or -m : set magnetic ion overrideing default, e.g. -m Cu\n";
    print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";
    print "    --ic1ion      or -ic : force use of ic1ion for single ion modules.\n";
+   print "    --icf1ion            : force use of icf1ion for single ion modules.\n";
    print "    --phonon      or -ph : force use of phonon for single ion modules.\n";
    print "    --screenfile  or -sf : apply screening function to charges for calc of CF pars\n";
    print "                           e.g. -sf sf.r reads sf.r col 1 r(A) col2 sf(B2m) col3 sf(B4m) col4 sf(B6m)\n";
@@ -1102,6 +1104,9 @@ for (keys %ions) {
     } elsif ($ic1ion) {
       $modulename = "ic1ion";
       $iontype = $ionname;
+    } elsif ($icf1ion) {
+      $modulename = "icf1ion";
+      $iontype = $ionname;
     } 
     else {
       if ($nofelectrons =~ /f/) {
@@ -1161,7 +1166,7 @@ for (keys %ions) {
       print FOUT "#----------------------------------------------------------------------\n";
       print FOUT $zk;
     }
-    if ($modulename eq "ic1ion") {
+    if ($modulename eq "ic1ion" || $modulename eq "icf1ion") {
       print FOUT "\n";
       print FOUT "#-----------------------------------------------------------------------\n";
       print FOUT "# Free-ion parameters for on-site spin-orbit and Coulomb interactions\n";

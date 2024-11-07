@@ -726,7 +726,8 @@ for(counter=firstcounter;counter<=ini.nofhkls;++counter){
  // transform hkl to primitive lattice
  q=inputpars.cs.r.Transpose()*hkl;
 
-fprintf(stdout,"#q=(%g,%g,%g)\n",hkl(1),hkl(2),hkl(3));
+fprintf(stdout,"#q=(%g,%g,%g)",hkl(1),hkl(2),hkl(3));print_time_estimate_until_end((double)(ini.nofhkls-counter)/(counter-firstcounter+1));
+fprintf(stdout,"\n");
  if(do_verbose==1){fprintf(stdout,"#Setting up J(q) matrix .... \n");}
  // calculate J(q)
  jq J(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),md.nofcomponents,md);
@@ -1711,8 +1712,8 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                                      
 
     if (do_jqfile) 
-     {fprintf(jqfile,"#!the largest eigenvalue of J(q) is jqmax=%g at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
-     fprintf(jqfile,"#!for the first q vector in the list jq0=%g at h0=%g k0=%g l0=%g \n",jq0,ini.hkls[firstcounter][1],ini.hkls[firstcounter][2],ini.hkls[firstcounter][3]);
+     {fprintf(jqfile,"#!the largest eigenvalue of J(q) is jqmax=%g meV at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
+     fprintf(jqfile,"#!for the first q vector in the list jq0=%g meV at h0=%g k0=%g l0=%g \n",jq0,ini.hkls[firstcounter][1],ini.hkls[firstcounter][2],ini.hkls[firstcounter][3]);
       fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
       fprintf(jqfile,"#A)the sum of squared differences between the highest eigenvalue\n");
       fprintf(jqfile,"#of a q vector and that of the first q-vector in the list in mcdisp.par.\n");

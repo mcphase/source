@@ -30,6 +30,40 @@ char * mystrnstr(const char *s, const char *find, size_t slen)
 	return ((char *)s);
 }
 
+// function to print to stdout estimate of time until program end
+void print_time_estimate_until_end(double ratio) //input :ratio = nofpointstodo / nofpointsdone
+{static std::clock_t last_call_time=0; 
+ static std::clock_t startcputime=0;
+ if(last_call_time==0){last_call_time=std::clock();startcputime=last_call_time;}
+ if ((std::clock()-last_call_time)/(double)CLOCKS_PER_SEC>60) // print only if 2 minutes passed since last print
+   { // estimate time until end 
+    time_t time_since_start=std::clock()-startcputime;
+    // dOmega=sintheta*dtheta*dphi=dthetat*dtheta*PI/4
+    // tss/(tss+tue)=ct*dOmega/4pi  ... 1+tue/tss=4pi/ctdO   ... tue=tss(4pi/ctdO-1) ... ratio = (4pi/ctdO-1)
+    //(16/(ct*dtheta*dtheta)-1);
+    time_t time_until_end=time_since_start*ratio; 
+    //printf("%i  %i HTpoints to do.",nofysteps,pointstodo);
+    time_t curtime;
+    struct tm *loctime;    
+    curtime=time(NULL)+time_until_end/(double)CLOCKS_PER_SEC;loctime=localtime(&curtime);
+    fprintf(stderr,"- end ~at %.*s",(int)strlen(asctime(loctime)) - 1,asctime(loctime));
+    int min=(time_until_end/(double)CLOCKS_PER_SEC)/60;if(min<2){
+    fprintf(stderr," in %i s.",(int)(time_until_end/(double)CLOCKS_PER_SEC));
+    }else
+    {int hours=min/60;if(hours<2) 
+     {fprintf(stderr," in %i min.",min);
+     } else
+     {int days=hours/24;if(days<2)
+      { fprintf(stderr," in %i h.",hours);
+      } else
+      {int months=days/30;if(months<24)
+      {fprintf(stderr," in %i months.",months);}
+      else {fprintf(stderr," in %i years.",(int)months/12);}
+     }}}
+    last_call_time=std::clock();
+   }
+}
+
 
 // ********************************************************************************************************
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -
@@ -536,7 +570,7 @@ void opZcol (int i,ComplexMatrix & opZ, Matrix & op,Matrix & zr, Matrix & zi)
 
 Matrix rezcalc(Matrix r)
 {// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
- float vol;Matrix rez(1,3,1,3);
+ Matrix rez(1,3,1,3);
 rez=2*PI*r.Inverse().Transpose();
 return rez;}
 

@@ -423,7 +423,7 @@ print "# $n1min to $n1max, $n2min to $n2max, $n3min to $n3max\n";
   ($h,$l)=printlattice("./mcphas.j",">./results/makenn$ext");
 print "# number of atoms = $nofatoms\n calculating ...\n";
 }     
-
+print_time_estimate_until_end(0.0);
 #********************************************************        
 @atoms=();   # initialize array to push output into ...
  for ($nnn=1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)    
@@ -670,6 +670,7 @@ if($rfuncdone==1){close ff;}
    $n= qsorti($rn); 
 
 unless($tabout){printneighbourlist($Gmix,$h,$nofneighbours[$nnn],$gJ,$n,$an,$rn,$xn,$yn,$zn,$in,$jn,$kn,$Jaa,$Jbb,$Jcc,$Jab,$Jba,$Jac,$Jca,$Jbc,$Jcb);}
+print_time_estimate_until_end(($nofatoms+$nofmagneticatoms-$nnn)/$nnn);
  } # next atom nnn
 
 unless($tabout){ endprint($h,$l);  }
@@ -1786,3 +1787,34 @@ EOF
 close FOUT;
 }
  
+sub print_time_estimate_until_end #input :ratio = nofpointstodo / nofpointsdone
+{my ($ratio)=@_;
+
+ if(!defined $last_call_time){$last_call_time=time();$startcputime=$last_call_time;}
+ if ((time()-$last_call_time)>60)# print only if 1 minutes passed since last print
+   { # estimate time until end 
+    my $time_since_start=time()-$startcputime;
+    my $time_until_end=$time_since_start*$ratio; 
+       
+    my $curtime=time()+$time_until_end;my $loctime=localtime($curtime);
+    print STDERR "- end ~at $loctime";
+    my $min=int($time_until_end/60);
+    if($min<2){
+    print STDERR " in $time_until_end s";
+    }else
+    {my $hours=int($min/60);
+     if($hours<2) 
+     {print STDERR  " in $min min";
+     } else
+     {my $days=int($hours/24);
+      if($days<2)
+      { print STDERR " in $hours h";
+      } else
+      {my $months=int($days/30);
+      if($months<24)
+      {print STDERR  " in $months months";}
+      else {print STDERR " in ".int($months/12)." years";}
+     }}}
+    $last_call_time=time();print STDERR "\n";
+   }
+}

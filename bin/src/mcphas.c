@@ -10,9 +10,6 @@
 
 int verbose=0;
 // for statistics 
-int nofmaxloopDIV=0,nofmaxspinchangeDIV=0;
-int successrate=0;
-int nofcalls=0;
 int isfull=0;
 
 const char * filemode="w";
@@ -24,11 +21,10 @@ const char * filemode="w";
 
 // main program
 int main (int argc, char **argv)
-{ std::clock_t startcputime = std::clock();
+{ 
   FILE * fin=NULL; 
   char outfilename[MAXNOFCHARINLINE];
   int im,j,l,doeps=0,linepscf=0,linepsjj=0;
-  int nofstapoints=0,noffailedpoints=0;
   int options=1; // this integer indicates how many command strings belong to 
                  //options (=1+number of option-strings)
   float x,y,dumm;
@@ -254,10 +250,10 @@ if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
        switch (j)
        {case 0:
             //save physical properties of HT-point
-	    //sta=(sta*nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(nofstapoints+1);
+	    //sta=(sta*ini.nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(ini.nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
           sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
-   	    ++nofstapoints;
+   	    ++ini.nofstapoints;
           if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 
 	 case 1: goto endproper;
@@ -265,7 +261,7 @@ if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
          case 2: //ht calculation leads to no results- save dummy line
 	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
 		 //sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
-     	      ++noffailedpoints;
+     	      ++ini.noffailedpoints;
 	      break;	 
 	 default:  ;
 	}
@@ -288,16 +284,16 @@ endproper:
    printf("#!  %smcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",ini.prefix,testspins.n);
    printf("#  _%smcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n",ini.prefix);
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
-   double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+   double cpu_duration = (std::clock() - ini.startcputime) / (double)CLOCKS_PER_SEC;
    std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
-   std::cout << "#!nofHTpoints=" << nofstapoints << " H-T points in phasediagram successfully calculated" << std::endl;
-   std::cout << "#!noffailedpoints=" << noffailedpoints << " H-T points in phasediagram failed to converge " << std::endl;
-   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << nofcalls << " times"  << std::endl;
-   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << successrate << " times"  << std::endl;
-   std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
-   std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
+   std::cout << "#!nofHTpoints=" << ini.nofstapoints << " H-T points in phasediagram successfully calculated" << std::endl;
+   std::cout << "#!noffailedpoints=" << ini.noffailedpoints << " H-T points in phasediagram failed to converge " << std::endl;
+   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << ini.nofcalls << " times"  << std::endl;
+   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << ini.successrate << " times"  << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << ini.nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << ini.nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
 
-if(nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",(nofstapoints+noffailedpoints)*sta/nofstapoints);}
+if(ini.nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",(ini.nofstapoints+ini.noffailedpoints)*sta/ini.nofstapoints);}
 else { fprintf(stdout,"#! sta=1e10\n");}
 #ifdef _THREADS
 std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;

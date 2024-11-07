@@ -500,12 +500,16 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    printf("          str s(r)       ...structure nr. s, initial values from nr. r\n"); 
  }
 
- j=-testqs.nofqs()+(int)rint(rnd(testspins.n+testqs.nofqs())); 
+// Here we choose how to begin the scan of different initial configuarions
+    // 1. randomly
+    //j=-testqs.nofqs()+(int)rint(rnd(testspins.n+testqs.nofqs())); 
     //begin with j a random number, j<0 means test spinconfigurations 
     //constructed from q vector set testqs, j>0 means test spinconfigurations from
     //set testspins
-    //j=0;  //uncomment this for debugging purposes
-    j = -testqs.nofqs()-1;
+    // 2. starting with the table loaded from mcphas.tst  into testspins
+    j=0;  //uncomment this for debugging purposes
+    // 3. with the hkl - supercells generated from hmin hmax kmin kmax lmin lmax in mcphas.ini
+    //j = -testqs.nofqs()-1;
 
 #ifdef _THREADS
 // ----------------------------------------------------------------------------------- //
@@ -522,6 +526,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    thrdat.thread_id = -1;
 //   htcalc_input *tin[NUM_THREADS];
    static int washere=0;
+
    if(washere==0){washere=1;
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
@@ -541,7 +546,6 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  HANDLE threads[NUM_THREADS];
  DWORD tid[NUM_THREADS], dwError;
  #endif
- 
  bool all_threads_started = false; int ithread=0;
 #endif
  for (k= -testqs.nofqs();k<=testspins.n;++k)
@@ -571,6 +575,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
           ithread = thrdat.thread_id;
           thrdat.thread_id=-1; 
           pthread_mutex_unlock (&mutex_loop); 
+
           #else
           WaitForSingleObject(checkfinish,INFINITE);
           ithread = thrdat.thread_id;
@@ -592,7 +597,6 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
      CloseHandle(threads[th]);
      #endif
   }
-
   femin = thrdat.femin;
 
  #if defined  (__linux__) || defined (__APPLE__)

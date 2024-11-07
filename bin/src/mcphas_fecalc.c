@@ -130,17 +130,26 @@ double fecalc(double & U, double & Eel, int & r,double & spinchange,Vector Hex,d
  float smallstep;
  int slowct=10;
  float stepratio=1.0;
- ++nofcalls;
+ ++ini.nofcalls;
  spinchange=0; // initial value of spinchange
  sdim=sps.in(sps.na(),sps.nb(),sps.nc()); // dimension of spinconfigurations
  Vector  * lnzi; lnzi=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){lnzi[i]=Vector(1,inputpars.cs.nofatoms);} // partition sum for every atom
  Vector  * ui; ui=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){ui[i]=Vector(1,inputpars.cs.nofatoms);} // magnetic energy for every atom
  ComplexMatrix ** Icalcpars;Icalcpars=new ComplexMatrix*[inputpars.cs.nofatoms*sdim+2];
 
+// for each ion in the supercell make a copy of the parstorage matrix 
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
  {for (l=1;l<=inputpars.cs.nofatoms;++l){
-  Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]=new ComplexMatrix((*inputpars.jjj[l]).Icalc_parstorage.Rlo(),(*inputpars.jjj[l]).Icalc_parstorage.Rhi(),(*inputpars.jjj[l]).Icalc_parstorage.Clo(),(*inputpars.jjj[l]).Icalc_parstorage.Chi());
+  Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]=
+    new ComplexMatrix((*inputpars.jjj[l]).Icalc_parstorage.Rlo(),
+                      (*inputpars.jjj[l]).Icalc_parstorage.Rhi(),
+                      (*inputpars.jjj[l]).Icalc_parstorage.Clo(),
+                      (*inputpars.jjj[l]).Icalc_parstorage.Chi());
   (*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1])=(*inputpars.jjj[l]).Icalc_parstorage;
+
+//if((*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1])!=(*inputpars.jjj[l]).Icalc_parstorage)
+// {printf("error in matrix copy\n");exit(1);}
+
   }}}}
  int diagonalexchange=1;
  FILE * fin_coq;
@@ -329,7 +338,7 @@ for (r=1;sta>ini.maxstamf;++r)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){
       delete Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
-     if (verbose==1) {fprintf(stderr,"feDIV!MAXspinchangE");}++nofmaxspinchangeDIV;
+     if (verbose==1) {fprintf(stderr,"feDIV!MAXspinchangE");}++ini.nofmaxspinchangeDIV;
      return 2*FEMIN_INI+1;}
 
  //1. calculate mf from sps (and calculate sta)
@@ -371,6 +380,8 @@ if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
   }}}
   // normalize mf.epsmf to crystallographic primitive unit cell (in accordance with elastic constants!)
   mf.epsmf/=sps.n();
+// if(r==1){mf.print_human_readable(stdout);}
+
   mfold=mf;
   sta=sqrt(sta/sps.n()/inputpars.cs.nofatoms);
   bigstep=fmodf(ini.bigstep-0.0001,1.0);
@@ -383,9 +394,11 @@ if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
 // if (dE>KB*T&&r>10&&stepratio<bigstep)printf("sta=%g dE=%g r=%i stepratio=%g spinschange=%g\n",sta,dE,r,stepratio,spinchange);
 // ---> printing this dE  yields the result, that dE is > KB*T always when the strucuture
 // is oscillating and finally diverges because of MAXSPINCHANGE reached.
+
  if ((ini.maxnofmfloops==1&&r==1)||(r==2&&ini.maxnofmfloops==2)){sta=0;} // end loop on first calculation of MF from sps if no MF looping required
 else
 {
+
 
 //2. calculate sps from mf
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
@@ -395,7 +408,8 @@ else
    lm1m3=inputpars.cs.nofcomponents*(l-1);
    for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
    {d1[m1]=mf.mf(i,j,k)[lm1m3+m1];}
-   (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+ (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+
    if(isnan(lnzi[s][l])){fprintf (stderr, "Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    if(isnan(ui[s][l])){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
@@ -470,11 +484,11 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
      fe=evalfe(U,Eel,sps,mf,ini,inputpars, T,lnzi,ui);
 
   #ifndef _THREADS
-   fprintf(fin_coq,"%i %g %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)successrate/nofcalls,fe);
+   fprintf(fin_coq,"%i %g %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)ini.successrate/ini.nofcalls,fe);
    #else
    htcalc_input *tin; int thrid;
    if ((tin=(htcalc_input*)THRLC_GET(threadSpecificKey))==THRLC_GET_FAIL) thrid = 0; else thrid = tin->thread_id+1;
-   fprintf(fin_coq,"%i %g %g %g %g %g %g %i\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)successrate/nofcalls,fe,thrid);
+   fprintf(fin_coq,"%i %g %g %g %g %g %g %i\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)ini.successrate/ini.nofcalls,fe,thrid);
    #endif
    fclose(fin_coq);
   }
@@ -486,7 +500,10 @@ if (r>ini.maxnofmfloops)
       delete Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
 
-     if (verbose==1) {fprintf(stderr,"feDIV!MAXlooP");}++nofmaxloopDIV;
+     if (verbose==1) {fprintf(stderr,"feDIV!MAXlooP");
+
+                     }
+     ++ini.nofmaxloopDIV;
      return 2*FEMIN_INI;}
 }
 }
@@ -519,7 +536,7 @@ if (ini.displayall==1)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){
  delete Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1];
      }}}} delete []Icalcpars;
-++successrate;
+++ini.successrate;
 return fe;
 }
 

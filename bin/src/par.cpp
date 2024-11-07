@@ -124,7 +124,7 @@ par::par (const char *filejjj,int verbose)
 
 }
 
-//kopier-konstruktor
+//kopier-konstruktor copy constructor
 par::par(const par & p)
 { int i;
   cs.abc=p.cs.abc;
@@ -136,9 +136,8 @@ par::par(const par & p)
   for (i=1;i<=3;++i)
   {rems[i] = new char[strlen(p.rems[i])+2];
    strcpy(rems[i],p.rems[i]);}
-
  jjj=new jjjpar * [cs.nofatoms+1]; for (i=1;i<=cs.nofatoms;++i){ jjj[i] = new jjjpar(*p.jjj[i]);
-
+ 
   cs.sipffilenames[i]=(*jjj[i]).sipffilename;
   cs.x[i]=(*jjj[i]).xyz[1];
   cs.y[i]=(*jjj[i]).xyz[2];
@@ -147,6 +146,7 @@ par::par(const par & p)
   for(int n=1;n<=(*jjj[i]).paranz;++n)
    {(*jjj[i]).sublattice[n]=(*p.jjj[i]).sublattice[n];
  }}
+
 }
 
 //destruktor

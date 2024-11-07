@@ -74,12 +74,22 @@ printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
       exit (EXIT_FAILURE);
 } 
 
+void inipar::time_estimate_until_end(double x, double y)
+{// estimate time until end 
+    int nofpoints=nofstapoints+noffailedpoints;
+    int nofysteps=(int)((ymax-ymin)/ystep); if(nofysteps==0){nofysteps=1;}
+    int pointstodo=nofysteps*int((xmax-x)/xstep)+int((ymax-y)/ystep);
+    print_time_estimate_until_end(pointstodo/nofpoints);
+    //printf("%i  %i HTpoints to do.",nofysteps,pointstodo);
+
+ 
+}
 
 //load parameters from file
 int inipar::load ()
 { FILE *fin_coq;
   char instr[MAXNOFCHARINLINE];
-  errno = 0;
+  errno = 0;startcputime= std::clock();
   fin_coq = fopen(savfilename, "rb");
   if (fin_coq==NULL) return 1;
   xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;zero=0;
@@ -280,6 +290,11 @@ inipar::inipar (const char * file,char * pref)
   maxnofmfloops=100;maxstamf=1e-3;bigstep=1;maxspinchange=100;zero=0;
 nofthreads=0;getnofthread(nofthreads);
   nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;
+  nofstapoints=0;
+  nofmaxloopDIV=0;nofmaxspinchangeDIV=0;
+  successrate=0;
+  nofcalls=0;
+  noffailedpoints=0;
   print();
                               }
                 }
@@ -297,7 +312,13 @@ inipar::inipar (const inipar & p)
   ipx=p.ipx;
   ipy=p.ipy;
   ipz=p.ipz;
-
+  startcputime=p.startcputime;
+  nofstapoints=p.nofstapoints;
+  nofmaxloopDIV=p.nofmaxloopDIV;
+  nofmaxspinchangeDIV=p.nofmaxspinchangeDIV;
+  successrate=p.successrate; 
+  nofcalls=p.nofcalls;
+  noffailedpoints=p.noffailedpoints;
   exit_mcphas=p.exit_mcphas;pause_mcphas=p.pause_mcphas;
   displayall=p.displayall;logfevsQ=p.logfevsQ;
   

@@ -508,7 +508,9 @@ if(code==0){ m = 0;// reset m
             }
           }
    }}// NEXT li NEXT ki
-   printf("%i %s",100* (hi-(int)nmin(1))/((int)nmax(1)-(int)nmin(1)),"%"); fflush(stdout);
+   printf("%i %s",100* (hi-(int)nmin(1))/((int)nmax(1)-(int)nmin(1)),"%");
+   print_time_estimate_until_end((nmax(1)-hi)/(hi-(int)nmin(1)+1));
+   fflush(stdout);
   }
  printf("\n");
  }

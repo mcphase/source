@@ -68,25 +68,23 @@ else {print "taking $n lines\n";}
    while($line=<Fin>)
      {if ($line=~/^\s*#/) {print Fout $line;}
       else{$line=~s/D/E/g;@numbers=split(" ",$line);
+              # store line 
                        if($dmin){
-                                      
-                                 if($ii==-1||(abs($field[0][$n]-$numbers[$n])<$dmin)){++$ii;
-                                      for($k=0;$k<=$#numbers;++$k){$field[$ii][$k]=$numbers[$k];}
-                                      # for($i=0;$i<=$ii;++$i){for($k=0;$k<=$#numbers;++$k) {print $field[$i][$k]." ";} print "\n";}
-                                      # print "\nhello\n";
-                                      }
-                                 else {emptyblock();}
+                                    # check if block needs to be emptied ( printed  ) before new line can be stored
+                                 if($ii>-1&&(abs($field[0][$n+1]-$numbers[$n])>$dmin)){emptyblock();}
+              ++$ii;$field[$ii][0]=$#numbers;
+              for($k=0;$k<=$#numbers;++$k){$field[$ii][$k+1]=$numbers[$k];}
                                 }
                             else{
+              ++$ii;$field[$ii][0]=$#numbers;
+              for($k=0;$k<=$#numbers;++$k){$field[$ii][$k+1]=$numbers[$k];}
                                     # here we put in the new data line into the field used to calculate the output
-                                    if($ii<$n){++$ii;}
-                                    for($k=0;$k<=$#numbers;++$k){$field[$ii][$k]=$numbers[$k];}
+                                    if($ii>=$n){emptyblock();}
+                                 } 
                                    
-                                    emptyblock() if($ii==$n) ;
-                                 }
            }
       }
-      if($ii>-1){emptyblock();}
+      if($ii>-1){ print "hh $ii\n";emptyblock();}
       close Fin;
       close Fout;
        unless (rename "range.out",$file)
@@ -103,41 +101,40 @@ else {print "taking $n lines\n";}
 
 sub emptyblock()
 {@numout=();
- for($k=0;$k<=$#numbers;++$k) {$avfl=$avflag;$sumfl=$sumflag;$medianfl=$medianflag;$firstfl=$firstflag;$lastfl=$lastflag;
+ for($k=0;$k<=$field[0][0];++$k) {$avfl=$avflag;$sumfl=$sumflag;$medianfl=$medianflag;$firstfl=$firstflag;$lastfl=$lastflag;
                   if ($sumcol){foreach(@scol){if($_==$k+1){$sumfl=1;}}}
                   if ($avfl||$sumfl) {# here  average
-                                                  for($i=0;$i<=$ii;++$i){$numout[$k]+=$field[$i][$k];}
+                                                  for($i=0;$i<=$ii;++$i){$numout[$k]+=$field[$i][$k+1];}
                                                   if($avflag){$numout[$k]/=($ii+1);}
                                           }
                                     elsif ($medianfl) {
                                                   $i=$ii;
                                                   while($i>1){$max=-1e10;$min=1e10;
                                                           for($kk=0;$kk<=$ii;++$kk)
-                                                                {if($field[$kk][$k]<$min&&$field[$kk][$k]>-1e10){$min=$field[$kk][$k];$kkmin=$kk;}
-                                                                 if($field[$kk][$k]>$max&&$field[$kk][$k]<+1e10){$max=$field[$kk][$k];$kkmax=$kk;}
+                                                                {if($field[$kk][$k+1]<$min&&$field[$kk][$k+1]>-1e10){$min=$field[$kk][$k+1];$kkmin=$kk;}
+                                                                 if($field[$kk][$k+1]>$max&&$field[$kk][$k+1]<+1e10){$max=$field[$kk][$k+1];$kkmax=$kk;}
                                                                 }
-                                                              $field[$kkmin][$k]=-1e10;$field[$kkmax][$k]=+1e10;
+                                                              $field[$kkmin][$k+1]=-1e10;$field[$kkmax][$k+1]=+1e10;
                                                               $i-=2;
                                                              }
                                                    for($kk=0;$kk<=$ii;++$kk)
-                                                          {if($field[$kk][$k]>-1e10&&$field[$kk][$k]<+1e10){$numout[$k]=$field[$kk][$k];}
+                                                          {if($field[$kk][$k+1]>-1e10&&$field[$kk][$k+1]<+1e10){$numout[$k]=$field[$kk][$k+1];}
                                                           }
                                                  }
                                     elsif ($firstfl)        {# here take first point
                                                   $i=0;
-                                                 $numout[$k]=$field[$i][$k];
+                                                 $numout[$k]=$field[$i][$k+1];
                                                  }
                                     elsif ($lastfl)        {# here take last point
                                                   $i=$ii;
-                                                 $numout[$k]=$field[$i][$k];
+                                                 $numout[$k]=$field[$i][$k+1];
                                                  }
                                     else         {# here take middle point
-                                                  $i=$ii/2;
-                                                 $numout[$k]=$field[$i][$k];
+                                                  $i=int($ii/2); 
+                                                 $numout[$k]=$field[$i][$k+1];
                                                  }
                                  }
-                  $ii=-1; $i=0;#for($k=0;$k<=$#numbers;++$k){$field[$ii][$k]=$numbers[$k];} # put new line to field
-		   foreach (@numout)
+                  $ii=-1;$i=0;foreach (@numout)
 		   {print Fout $numout[$i]." ";++$i;}
                     print Fout "\n";
-                 }
+}

@@ -20,6 +20,13 @@ class inipar
   int doeps,linepscf,linepsjj;\
   par * ipx;par * ipy;par * ipz;
 
+  std::clock_t startcputime;
+  int nofstapoints; // number of successful calls to htcalc
+  int noffailedpoints; // number of failure calls to htcalc
+  int nofmaxloopDIV,nofmaxspinchangeDIV;
+  int successrate; // number of successful calls to fecalc
+  int nofcalls; // number of calls to fecalc
+
   //MCPHASE RUNTIME CONTROL
   int exit_mcphas,pause_mcphas,displayall,logfevsQ;
   
@@ -72,6 +79,7 @@ class inipar
   // printout initial parameters to file   
    void print();
    void print (const char * file);
+   void time_estimate_until_end(double x, double y);
 
   // exit with error message
    void errexit();

@@ -197,7 +197,7 @@ neutint(ini,code,m,hkl,D,totint, out,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2);
 printreflist(ini,code,m,hkl,totint,D, out,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2);
 
 double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
-std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
+std::cout << "#\n#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
 std::cout << "#! nofhkls=" << m << " different q vectors generated " << std::endl;
 
 fprintf (stderr,"...results written to %s\n",ini.outfilename);
