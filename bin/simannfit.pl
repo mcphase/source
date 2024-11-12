@@ -60,7 +60,7 @@ unless ($#ARGV >0)
             (which should be created by calcsta) is copied to results/parsetnr.jpg
             a html tag is added to results/simannfit.n or results/simannfit.p if 
 	    stored
-    -log 1.3 batchfile.bat   ... works only if option -n is present:
+    -log 1.3 batchfile.bat   
              if sta is less then 1.3, then execute the file 
              batchfile, with sta as argument, which can be adressed in the batch
 	     file with \$1 (linux) or  \%1 (windows)
@@ -201,7 +201,7 @@ if($sta>0)
  while($sta>0)
  {  $stasave=$sta;
  # modify parameters
- print "\n ...next fitting loop ...\n";
+ print "\n..next fitting loop..";
  @parsav=@par;$dmin=0;
  if($probe>0){$stps=1;} # if probing is desired initialize step to 1 and make it larger if no set is found ...
  while($dmin<$#par+1&&$stps<11.0)
@@ -281,8 +281,8 @@ if($stps<11){
    $parav[$i]=($parav[$i]*$noofupdates + $p)/($noofupdates+1);
    $parerr[$i]=sqrt($parerr[$i]*$parerr[$i]*$noofupdates+
                    ($p-$parav[$i])*($p-$parav[$i]))/($noofupdates+1);     
-   if($probe==0){if($parstp[$i]<($parmax[$i]-$parmin[$i])/2){$parstp[$i]+=0.1*abs($thisparstp[$i]);}
-                 else{$parstp[$i]=($parmax[$i]-$parmin[$i])/2;}
+   if($probe==0){if($parstp[$i]<($parmax[$i]-$parmin[$i])){$parstp[$i]+=0.1*abs($thisparstp[$i]);}
+                 else{$parstp[$i]=($parmax[$i]-$parmin[$i]);}
                 } # adapt parstp to be more bold in this direction
    $hx=int(($p-$parminin[$i])/$parhistostp[$i]);
    ++$parhisto[($hx+$perlhistostart[$i])];
@@ -526,7 +526,10 @@ else
 }
 # $parstore= rotate $parstore,1;  this would be good but does not work pdl bug
  for($i6=0;$i6<=$#par;++$i6){set $parstore,$store_counter,$i6,$par[$i6];}
- ++$nof_calcsta_calls;++$store_counter; print $store_counter." ".$#par."\n";
+ ++$nof_calcsta_calls;++$store_counter; 
+# print $store_counter." ".$#par."\n";
+
+if($sta<$log){system("$logbatchfile $sta");  
  return $sta;
 }  
 
@@ -606,6 +609,5 @@ sub write_set()
                          print FH '#<img src="'.$dfile.'">'."\n";
                          }
   close FH;
-        if($sta<$log){system("$logbatchfile $sta");
-                         }
+                               }
 }

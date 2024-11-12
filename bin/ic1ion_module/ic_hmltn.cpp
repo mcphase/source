@@ -19,6 +19,7 @@
  */
 
 #include "ic1ion.hpp"
+#include "martin.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -330,7 +331,7 @@ std::vector<double> ic_mag(sMat<double> &Hic, sMat<double> &iHic, sMat<double> &
    std::vector<int> ind,i_ndegen;
    std::vector<double> E,me_ndegen,Z(T.size(),0.);
    sMat<double> V,Mt,iV,iMt;
-   complexdouble *zt=0,zme;
+  // complexdouble *zt=0,zme;
 
    double *fJmat=0; complexdouble *zJmat=0;
    if(iJmat.isempty() && iHic.isempty()) fJmat = Jmat.f_array(); else zJmat = zmat2f(Jmat,iJmat);
@@ -423,7 +424,9 @@ std::vector<double> ic_mag(sMat<double> &Hic, sMat<double> &iHic, sMat<double> &
 #endif
       }
       else
-      {
+      {// my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+          me = expectation_value(Hsz,zJmat,&z[ind[ind_j]*Hsz]); // defined in martin.c
+/*
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &z[ind[ind_j]*Hsz], &incx, &zbeta, zt, &incx);
 #ifdef _G77 
@@ -431,10 +434,10 @@ std::vector<double> ic_mag(sMat<double> &Hic, sMat<double> &iHic, sMat<double> &
 #else	 
          zme = F77NAME(zdotc)(&Hsz, &z[ind[ind_j]*Hsz], &incx, zt, &incx);
 #endif
-         me = zme.r;                                                  //   me = V(:,ind_j)' * Jmat * V(:,ind_j);
+         me = zme.r;   */                                               //   me = V(:,ind_j)' * Jmat * V(:,ind_j);
       }
 
-      if(iHic.isempty() && iJmat.isempty()) free(vt); else free(zt);
+      if(iHic.isempty() && iJmat.isempty()) free(vt); // else free(zt);
 
       // Calculates the elements of the expectation of J.H: <i|J.H|i> exp(-Ei(H)/kT) and the partition function: exp(-Ei(H)/kT)
       for(i=0; i<(int)T.size(); i++)                                  //   JH(:,ind_j) = (me - sum(me_ndegen)) .* exp(-beta .* E(ind_j));

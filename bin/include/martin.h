@@ -5,7 +5,9 @@
 #ifndef MARTIN_FOPEN_ERRCHK
 #define MARTIN_FOPEN_ERRCHK
 
-#define PI 3.141592654
+#ifndef PI
+#define PI 3.1415926535897932384626433832795
+#endif
 #define KB 0.08617343183   // Boltzmanns constant in mev/K
 #define MU_B  0.0578838263 // Bohrmagneton in meV/tesla
 #define MAXNOFCHARINLINE 7024
@@ -97,11 +99,13 @@ const int facts[13] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 3
 // 39916800, 479001600, 6227020800, 87178291200, 1307674368000, 20922789888000,
 // 355687428096001,  6402373705727994, 121645100408832080, 2432902008176640000};
 inline
-int factorial(int number) {
+int fact(int number) {
    if(number<0||number>13) { fprintf(stderr,"factorial(%i) not handled\n",number); exit(1); }
    return facts[number];
 // return (number>13)?0:facts[number];  // Fast but if number>13 gives wrong results!
 }
+
+
 extern double factorial(double number);
 
 template <typename T> int signum(T val) {
@@ -116,9 +120,23 @@ template <typename T> int signum(T val) {
 extern int sleep(int a);
 #endif
 
+//**********************************************************************************
 // some vector functions
 void xproduct(Vector & result,Vector a, Vector b);
 Vector crossp(Vector a,Vector b);
+
+// calculates expectation value   <ES|OP|ES> of hermitian operator OP given a complex eigenstate vector  ES
+// OP and ES are given as pointers 
+double expectation_value(int & dim,complexdouble * OP,complexdouble * ES );
+
+
+// similar to above, calculates transition matrix element <S1|OP|S2> of hermitian 
+// operator OP given
+// two complex vector S1 and S2  OP and S1,S2 are given as pointers 
+complexdouble transition_matrixelement(int & d,complexdouble * OP,complexdouble * S1,complexdouble * S2);
+
+
+//**********************************************************************************
 
 // calculate transition matrix element of eigenvectr <i|op|j> with eigenvectors
 // given as column vectors i and j of Matrix (zr + i zi), the Hermitian operator op is described

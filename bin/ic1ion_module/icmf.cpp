@@ -18,12 +18,11 @@
  * (c) 2008 Duc Le - duc.le@ucl.ac.uk
  * This program is licensed under the GNU General Purpose License, version 2. Please see the COPYING file
  */
-
 #include "ic1ion.hpp"
+#include "martin.h"
 #include <cctype>                  // For std::tolower
 #include <fstream>
 
-#define MAXNOFCHARINLINE 144
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Member function for complexdouble struct
@@ -392,12 +391,12 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
 // --------------------------------------------------------------------------------------------------------------- //
 std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<double> > &matel, bool save_matrices)
 {
-   double *vt=0, Z=0., U=0.; complexdouble *zt=0, zme;
+   double *vt=0, Z=0., U=0.; complexdouble *zt=0;//, zme;
    std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; matel.clear();
    int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1; 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   double alpha = 1, beta = 0; //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    char uplo = 'U';
    // Checks that the eigenvalues are orthonormal
 /* char transa='C', transb='N'; double summm=0.;
@@ -466,13 +465,17 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       for(ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|J.H|Vi>
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+         // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+          me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
+
+           //   zme.r=0;zme.i=0;              
+               /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
 #ifdef _G77 
          F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
 #else
          zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
-#endif
-         me[ind_j] = zme.r;
+#endif  
+         me[ind_j] = zme.r; */
 //MR 10.9.2010
          if (T<0)
          {  char instr[MAXNOFCHARINLINE];
@@ -584,13 +587,16 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
-            F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+               // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+              me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
+
+           /* F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
 #ifdef _G77 
             F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
 #else
             zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
 #endif
-            me[ind_j] = zme.r;
+            me[ind_j] = zme.r;*/
             ex[iJ]+=me[ind_j]*eb[ind_j];
          }
          free(zJmat); free(zt); matel.push_back(me); ex[iJ]/=Z;
@@ -604,7 +610,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
 // Calculates the matrix M_ab=<i|Ja|j><j|Jb|i>{exp(-beta_i*T)-exp(-beta_j*T)} for some state i,j
 // --------------------------------------------------------------------------------------------------------------- //
 void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta, bool save_matrices)
-{  double *vt=0, Z=0., therm; complexdouble *zt=0, zme; zme.r=0; zme.i=0.;
+{  double *vt=0, Z=0., therm; complexdouble zme; zme.r=0; zme.i=0.;//complexdouble *zt=0; 
    int sz = (_num_op>6?_num_op:6);
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
@@ -671,6 +677,9 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
          zeroes.zero(J[0].nr(),J[0].nc());
          if(iJ>=6) { if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes);   else zJmat = zmat2f(zeroes,Umq); }
          else      { if(im[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]); }
+         
+         zij[iJ]=transition_matrixelement(Hsz,zJmat,VE.zV(i),VE.zV(j));
+        /*
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(j), &incx, &zbeta, zt, &incx);
          #ifdef _G77 
@@ -679,7 +688,9 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
          zij[iJ] = F77NAME(zdotc)(&Hsz, VE.zV(i), &incx, zt, &incx);
          #endif
 //       int k;for(k=0;k<Hsz;++k)printf("%6.3f %+6.3f i  ",VE.zV(j)[k].r,VE.zV(j)[k].i);
-         free(zJmat); free(zt);
+         free(zt);
+         */
+         free(zJmat); 
       }
    }
 
@@ -748,12 +759,12 @@ std::vector<double> icmfmat::orbmomdensity_expJ(iceig &VE,int xyz, double T, std
 std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::vector< std::vector<double> > &matel, bool save_matrices)
 {
    double *vt=0, Z=0., U=0.;
-   complexdouble *zt=0, zme;
+   complexdouble *zt=0; //, zme;
    std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; matel.clear();
    int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1;
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   double alpha = 1, beta = 0;// complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    char uplo = 'U';
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
@@ -800,13 +811,16 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       for(ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|J.H|Vi>
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-         #ifdef _G77
+         // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+          me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
+            //printf(" %g=",zme.r);//DEBUG 
+         //   zme.r=0;zme.i=0;              
+                  /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+#ifdef _G77 
          F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
-         #else
+#else
          zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
-         #endif
-         me[ind_j] = zme.r;
+#endif  me[ind_j] = zme.r;*/
 //       eb[ind_j] = exp(-E[ind_j]/(KB*T)); ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
 //MR 17.9.2010
          if (T<0)
@@ -853,13 +867,16 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
-            F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+             // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+              me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
+
+           /* F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
             #ifdef _G77
             F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
             #else
             zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
             #endif
-            me[ind_j] = zme.r;
+            me[ind_j] = zme.r;*/
             ex[iJ]+=me[ind_j]*eb[ind_j];
          }
          free(zJmat); free(zt); matel.push_back(me); ex[iJ]/=Z;

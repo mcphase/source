@@ -16,6 +16,7 @@
 
 #include "ic1ion.hpp"
 #include "vector.h"          // MatPack vector class
+#include "martin.h"
 #include <fstream>
 #include <ctime>
 
@@ -257,14 +258,18 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
       }
       for(int ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|J.H|Vi>
-         if(iJ>=oldJhi) F77NAME(zhemv)(&uplo, &cb, &zalpha, opmat,                                  &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-         else           F77NAME(zhemv)(&uplo, &cb, &zalpha, (complexdouble*)&est[memloc+offset][0], &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+          // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+            if(iJ>=oldJhi)me[ind_j] = expectation_value(cb,opmat                                 ,VE.zV(ind_j)); // defined in martin.c
+            else          me[ind_j] = expectation_value(cb,(complexdouble*)&est[memloc+offset][0],VE.zV(ind_j));
+
+        /* if(iJ>=oldJhi) F77NAME(zhemv)(&uplo, &cb, &zalpha, opmat,                                  &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+         else             F77NAME(zhemv)(&uplo, &cb, &zalpha, (complexdouble*)&est[memloc+offset][0], &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
          #ifdef _G77 
          F77NAME(zdotc)(&zme, &cb, VE.zV(ind_j), &incx, zt, &incx);
          #else
          zme = F77NAME(zdotc)(&cb, VE.zV(ind_j), &incx, zt, &incx);
          #endif
-         me[ind_j] = zme.r;for(int Ti=1;Ti<=T.Hi();++Ti){
+         me[ind_j] = zme.r;*/for(int Ti=1;Ti<=T.Hi();++Ti){
          if(iJ==(J.Rlo()-1)) { eb[ind_j] = exp(-E[ind_j]/(KB*T(Ti))); Z(Ti)+=eb[ind_j]; U(Ti)+=(E[ind_j]+VE.E(0))*eb[ind_j]; }
          J[iJ+1][Ti]+=me[ind_j]*eb[ind_j];}
       }
@@ -342,13 +347,16 @@ void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, 
 
       for(int ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|M(q)|Vi>
-         F77NAME(zhemv)(&uplo, &cb, &zalpha, opmat, &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+         // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+         me[ind_j] = expectation_value(cb,opmat,VE.zV(ind_j)); // defined in martin.c
+
+         /*F77NAME(zhemv)(&uplo, &cb, &zalpha, opmat, &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
          #ifdef _G77 
          F77NAME(zdotc)(&zme, &cb, VE.zV(ind_j), &incx, zt, &incx);
          #else
          zme = F77NAME(zdotc)(&cb, VE.zV(ind_j), &incx, zt, &incx);
          #endif
-         me[ind_j] = zme.r;
+         me[ind_j] = zme.r;*/
          if(iJ==0) { eb[ind_j] = exp(-E[ind_j]/(KB*T)); Z+=eb[ind_j]; }
          J[iJ+1]+=me[ind_j]*eb[ind_j];
       }

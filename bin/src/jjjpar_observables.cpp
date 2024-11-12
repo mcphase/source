@@ -501,7 +501,7 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
     double Q=QA*0.5292;// convert Q from 1/A into 1/a0
     Vector coeff(1,9);
     for(p=1;p<=9;++p){if(Np(p)!=0){pmax=p;
-                                   coeff(p)=Cp(p)*pow(2.0*Xip(p)/Q,Np(p)+0.5)/sqrt((double)factorial(2*(int)Np(p)));
+                                   coeff(p)=Cp(p)*pow(2.0*Xip(p)/Q,Np(p)+0.5)/sqrt((double)fact(2*(int)Np(p)));
                                    if(Xip(p)<=0){fprintf (stderr,"Warning: calculation of <j%i(Q)> failed due to Xi%i<=0 - continuing with <j%i(Q)>=0\n",l,p,l);return 0;}
                      }            }
     if(pmax==0){fprintf (stderr,"Warning: calculation of <j%i(Q)> failed - continuing with <j%i(Q)>=0\n",l,l);return 0;}
@@ -537,13 +537,13 @@ long double jjjpar::tl(int l,int N,long double x)
 long double jjjpar::sn(int n,int N,long double x)
    {complex <double> c(x,-1.0);
     long double value;
-    value=(double)factorial(N-n)*imag(pow(c,-N+n-1));
+    value=(double)fact(N-n)*imag(pow(c,-N+n-1));
     return value;
    }
 long double jjjpar::cn(int n,int N,long double x)
    {complex <double> c(x,-1.0);
     long double value;
-    value=(double)factorial(N-n)*real(pow(c,-N+n-1));
+    value=(double)fact(N-n)*real(pow(c,-N+n-1));
     return value;
    }
 */
@@ -575,24 +575,24 @@ long double jjjpar::sn(int n,int N,long double x)    // Need imaginary part
     long double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
     switch(-N+n-1) {
       case  0: return 0.; break;
-      case  1: return (long double)factorial(N-n) *  -1.; break;
-      case -1: return (long double)factorial(N-n) * (1. / denom); break;
-      case  2: return (long double)factorial(N-n) *  -2*x; break;
-      case -2: return (long double)factorial(N-n) * ( 2*x / denom); break;
-      case  3: return (long double)factorial(N-n) *   (1-3*x*x); break;
-      case -3: return (long double)factorial(N-n) * (-(1-3*x*x) / denom); break;
-      case  4: return (long double)factorial(N-n) *   4*x * (1-x*x); break;
-      case -4: return (long double)factorial(N-n) * (-4*x * (1-x*x) / denom); break;
-      case  5: return (long double)factorial(N-n) *   (-1 + x*x * (10 - 5*x*x)); break;
-      case -5: return (long double)factorial(N-n) * (-(-1 + x*x * (10 - 5*x*x)) / denom); break;
-      case  6: return (long double)factorial(N-n) *   x * (-6 + x*x * (20 - 6*x*x)); break;
-      case -6: return (long double)factorial(N-n) * (-x * (-6 + x*x * (20 - 6*x*x)) / denom);  break;
-      case  7: return (long double)factorial(N-n) *   ( 1 + x*x * (-21 + x*x * (35 - 7*x*x))); break;
-      case -7: return (long double)factorial(N-n) * (-( 1 + x*x * (-21 + x*x * (35 - 7*x*x))) / denom); break;
-      case  8: return (long double)factorial(N-n) *   x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))); break;
-      case -8: return (long double)factorial(N-n) * (-x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))) / denom); break;
+      case  1: return (long double)fact(N-n) *  -1.; break;
+      case -1: return (long double)fact(N-n) * (1. / denom); break;
+      case  2: return (long double)fact(N-n) *  -2*x; break;
+      case -2: return (long double)fact(N-n) * ( 2*x / denom); break;
+      case  3: return (long double)fact(N-n) *   (1-3*x*x); break;
+      case -3: return (long double)fact(N-n) * (-(1-3*x*x) / denom); break;
+      case  4: return (long double)fact(N-n) *   4*x * (1-x*x); break;
+      case -4: return (long double)fact(N-n) * (-4*x * (1-x*x) / denom); break;
+      case  5: return (long double)fact(N-n) *   (-1 + x*x * (10 - 5*x*x)); break;
+      case -5: return (long double)fact(N-n) * (-(-1 + x*x * (10 - 5*x*x)) / denom); break;
+      case  6: return (long double)fact(N-n) *   x * (-6 + x*x * (20 - 6*x*x)); break;
+      case -6: return (long double)fact(N-n) * (-x * (-6 + x*x * (20 - 6*x*x)) / denom);  break;
+      case  7: return (long double)fact(N-n) *   ( 1 + x*x * (-21 + x*x * (35 - 7*x*x))); break;
+      case -7: return (long double)fact(N-n) * (-( 1 + x*x * (-21 + x*x * (35 - 7*x*x))) / denom); break;
+      case  8: return (long double)fact(N-n) *   x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))); break;
+      case -8: return (long double)fact(N-n) * (-x * (8 + x*x * (-56 + x*x * (56 - 8*x*x))) / denom); break;
       default: //fprintf(stderr,"jjjpar::sn() Bad power %i\n",-N+n-1); exit(-1);
-         complex <double> c(x,-1.0); return (long double)(factorial((double)(N-n))*imag(pow(c,-N+n-1.)));
+         complex <double> c(x,-1.0); return (long double)(fact((double)(N-n))*imag(pow(c,-N+n-1.)));
     }
  }
 long double jjjpar::cn(int n,int N,long double x)    // Need real part
@@ -600,24 +600,24 @@ long double jjjpar::cn(int n,int N,long double x)    // Need real part
     long double denom=1.; if((-N+n-1)<0) denom=pow(1+x*x,-(-N+n-1));
     switch(-N+n-1) {
       case  0: return 1.; break;
-      case  1: return (long double)factorial(N-n) *  x; break;
-      case -1: return (long double)factorial(N-n) * (x / denom); break;
-      case  2: return (long double)factorial(N-n) *  (-1+x*x); break;
-      case -2: return (long double)factorial(N-n) * ((-1+x*x) / denom); break;
-      case  3: return (long double)factorial(N-n) *  x * (-3+x*x); break;
-      case -3: return (long double)factorial(N-n) * (x * (-3+x*x) / denom); break;
-      case  4: return (long double)factorial(N-n) *  (1 + x*x * (-6+x*x)); break;
-      case -4: return (long double)factorial(N-n) * ((1 + x*x * (-6+x*x)) / denom); break;
-      case  5: return (long double)factorial(N-n) *  x * (5 + x*x *(-10+x*x)); break;
-      case -5: return (long double)factorial(N-n) * (x * (5 + x*x *(-10+x*x)) / denom); break;
-      case  6: return (long double)factorial(N-n) *  (-1 + x*x * (15 + x*x * (-15+x*x))); break;
-      case -6: return (long double)factorial(N-n) * ((-1 + x*x * (15 + x*x * (-15+x*x))) / denom); break;
-      case  7: return (long double)factorial(N-n) *  x * (-7 + x*x *(35 + x*x * (-21 + x*x))); break;
-      case -7: return (long double)factorial(N-n) * (x * (-7 + x*x *(35 + x*x * (-21 + x*x))) / denom); break;
-      case  8: return (long double)factorial(N-n) *  ( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))); break;
-      case -8: return (long double)factorial(N-n) * (( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))) / denom); break;
+      case  1: return (long double)fact(N-n) *  x; break;
+      case -1: return (long double)fact(N-n) * (x / denom); break;
+      case  2: return (long double)fact(N-n) *  (-1+x*x); break;
+      case -2: return (long double)fact(N-n) * ((-1+x*x) / denom); break;
+      case  3: return (long double)fact(N-n) *  x * (-3+x*x); break;
+      case -3: return (long double)fact(N-n) * (x * (-3+x*x) / denom); break;
+      case  4: return (long double)fact(N-n) *  (1 + x*x * (-6+x*x)); break;
+      case -4: return (long double)fact(N-n) * ((1 + x*x * (-6+x*x)) / denom); break;
+      case  5: return (long double)fact(N-n) *  x * (5 + x*x *(-10+x*x)); break;
+      case -5: return (long double)fact(N-n) * (x * (5 + x*x *(-10+x*x)) / denom); break;
+      case  6: return (long double)fact(N-n) *  (-1 + x*x * (15 + x*x * (-15+x*x))); break;
+      case -6: return (long double)fact(N-n) * ((-1 + x*x * (15 + x*x * (-15+x*x))) / denom); break;
+      case  7: return (long double)fact(N-n) *  x * (-7 + x*x *(35 + x*x * (-21 + x*x))); break;
+      case -7: return (long double)fact(N-n) * (x * (-7 + x*x *(35 + x*x * (-21 + x*x))) / denom); break;
+      case  8: return (long double)fact(N-n) *  ( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))); break;
+      case -8: return (long double)fact(N-n) * (( 1 + x*x * (-28 + x*x * (70 + x*x * (-28+x*x)))) / denom); break;
       default: //fprintf(stderr,"jjjpar::cn() Bad power %i\n",-N+n-1); exit(-1);
-         complex <double> c(x,-1.0); return (long double)(factorial((double)(N-n))*imag(pow(c,-N+n-1.)));
+         complex <double> c(x,-1.0); return (long double)(fact((double)(N-n))*imag(pow(c,-N+n-1.)));
     }
  }
 
@@ -694,7 +694,7 @@ double jjjpar::radial_wavefunction(double rr) // rr given in Angstroems, returns
     int ok=0;
     double r=rr/a0;// r is the distance in units of a0
     for(p=1;p<=9;++p){if(Np(p)!=0){ok=1;
-                                   R+=exp(-Xip(p)*r)*pow(r,Np(p)-1)*Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)factorial(2*(int)Np(p)));
+                                   R+=exp(-Xip(p)*r)*pow(r,Np(p)-1)*Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)fact(2*(int)Np(p)));
                                    if(Xip(p)<=0){fprintf (stderr,"\n\nWarning: calculation of radial wave function R(r=%g) failed due to Xi%i<=0 - continuing with R(r=%g)=0\n\n\n",r,p,r);return 0;}
                      }            }
     // now we have R in units of 1/a0^1.5
@@ -727,14 +727,14 @@ return R;
     Vector coeff(1,9);
 
     for(p=1;p<=9;++p){if(Np(p)!=0){pmax=p;
-                                   coeff(p)=Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)factorial(2*(int)Np(p)));
+                                   coeff(p)=Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)fact(2*(int)Np(p)));
                                    if(Xip(p)<=0){fprintf (stderr,"Warning: calculation of <r^%i> failed due to Xi%i<=0 - continuing with <r^%i>=0\n",k,p,k);return 0;}
                      }            }
     if(pmax==0){fprintf (stderr,"Warning: calculation of <r^%i> failed - continuing with <r^%i>=0\n",k,k);return 0;}
     double rk=0;
     for(p=1;p<=pmax;++p){
     for(q=1;q<=pmax;++q){// the following does not work because of large factorials and powers
-                        // rk+=coeff(p)*coeff(q)*factorial((int)Np(p)+(int)Np(q)+k)/pow(Xip(p)+Xip(q),Np(p)+Np(q)+k+1);
+                        // rk+=coeff(p)*coeff(q)*fact((int)Np(p)+(int)Np(q)+k)/pow(Xip(p)+Xip(q),Np(p)+Np(q)+k+1);
                         // therefore we have to substitute it by  calculating the product "by hand"
                         double product=1.0;
                         int nnk=(int)Np(p)+(int)Np(q)+k;
@@ -1294,12 +1294,12 @@ double jjjpar::Fr(double rr) // evaluate F(r)=1/r integral_r^inf dx R^2(x)
     double r=rr/a0;// r is the distance in units of a0
     for(p=1;p<=9;++p){if(Np(p)!=0){ok=1;
                                    if(Xip(p)<=0){fprintf (stderr,"\n\nWarning: calculation of radial integral F(r=%g) failed due to Xi%i<=0 - continuing with F(r=%g)=0\n\n\n",r,p,r);return 0;}
-    fp=exp(-Xip(p)*r)*pow(r,Np(p)-1)*Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)factorial(2*(int)Np(p)));
+    fp=exp(-Xip(p)*r)*pow(r,Np(p)-1)*Cp(p)*pow(2.0*Xip(p),Np(p)+0.5)/sqrt((double)fact(2*(int)Np(p)));
 
     for(pp=1;pp<=9;++pp){if(Np(pp)!=0){
-     fpp=exp(-Xip(pp)*r)*pow(r,Np(pp)-1)*Cp(pp)*pow(2.0*Xip(pp),Np(pp)+0.5)/sqrt((double)factorial(2*(int)Np(pp)));
-     sumi=0;for(i=1;i<=Np(p)+Np(pp)-2;++i){sumi+=pow(r,-i)/factorial((int)Np(p)+(int)Np(pp)-2-i)/pow(Xip(p)+Xip(pp),i+1);}
-     sumi*=factorial(Np(p)+Np(pp)-2)/r;
+     fpp=exp(-Xip(pp)*r)*pow(r,Np(pp)-1)*Cp(pp)*pow(2.0*Xip(pp),Np(pp)+0.5)/sqrt((double)fact(2*(int)Np(pp)));
+     sumi=0;for(i=1;i<=Np(p)+Np(pp)-2;++i){sumi+=pow(r,-i)/fact((int)Np(p)+(int)Np(pp)-2-i)/pow(Xip(p)+Xip(pp),i+1);}
+     sumi*=fact(Np(p)+Np(pp)-2)/r;
                    F_R+=fp*fpp*sumi;
                           }             }
                      }            }
@@ -1321,8 +1321,8 @@ double rs;
 rs = rr * exp(-rr);
 fp = 280.4 * rs * rs * rs * rs  * exp(-1.5 * rr);
 
-sumi=0;for(i=1;i<=8;++i){sumi+=pow(r,-i)/factorial(8-i)/pow(11.0,i+1);}
-sumi*=factorial(8)/r;
+sumi=0;for(i=1;i<=8;++i){sumi+=pow(r,-i)/fact(8-i)/pow(11.0,i+1);}
+sumi*=fact(8)/r;
 F_R+=fp*fp*sumi;
 
     // now we have F_R in units of 1/a0^3

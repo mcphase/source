@@ -122,9 +122,8 @@ gitdir = Output/mcphase~mcphase
 
 
 
-
-all: vector functions cfield mcphase phonon examples tutorial bfk bcfph cowan
-allwin: vectorwin functionswin cfieldwin mcphasewin phononwin exampleswin tutorial bfkwin bcfphwin cowanwin
+all: vector larpack functions cfield mcphase ic1ion phonon examples tutorial bfk bcfph cowan
+allwin: vectorwin larpackwin functionswin cfieldwin mcphasewin ic1ionwin phononwin exampleswin tutorial bfkwin bcfphwin cowanwin
 
 
 git: $(gitdir)/*
@@ -139,16 +138,22 @@ vector:
 vectorwin: 
 	cd bin/src/vector && $(MAKE) cross64=1
 
+larpack:
+	cd bin/ic1ion_module/libs ; $(MAKE)
+
+larpackwin:
+	cd bin/ic1ion_module/libs ; $(MAKE) cross64=1
+
 functions: 
 	cd bin/src/functions && $(MAKE)
 
 functionswin: 
 	cd bin/src/functions && $(MAKE) cross64=1
 
-cfield: vector ic1ion
+cfield: vector 
 	cd bin/cf1ion_module && $(MAKE)
 
-cfieldwin: vectorwin ic1ionwin
+cfieldwin: vectorwin 
 	cd bin/cf1ion_module && $(MAKE) cross64=1
 
 ic1ion: vector 
@@ -233,7 +238,7 @@ tgz :
 	dos2unix ./examples/dycu2iwata/calc.bat
 	dos2unix ./examples/gd3gao6/calc.bat
 	dos2unix ./examples/helix_spinwave/calc.bat
-	dos2unix ./examples/ho2ti2o7/calc.bat
+	dos2unix ./examples/ho2ti2o7/*.bat
 	dos2unix ./examples/la2coo4/calc.bat
 	dos2unix ./examples/Ce3p_chain_cfphonon/calc.bat
 	dos2unix ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
@@ -253,8 +258,7 @@ tgz :
 	dos2unix ./examples/prni2si2/calc.bat
 	dos2unix ./examples/pupd3/calc.bat
 	dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
-	dos2unix ./examples/tb2ti2o7_cfphonon_simple/DMD_method/calc.bat
-	dos2unix ./examples/tb2ti2o7_cfphonon_simple/phonons/calc.bat
+	dos2unix ./examples/tb2ti2o7_cfphonon_simple/calc.bat
 	dos2unix ./examples/test_cluster/calc.bat
 	dos2unix ./examples/testic1ion/test*.bat
 	dos2unix ./examples/tmcu2_cf_phonon/calc.bat
@@ -275,7 +279,7 @@ tgz :
 	unix2dos ./examples/dycu2iwata/calc.bat
 	unix2dos ./examples/gd3gao6/calc.bat
 	unix2dos ./examples/helix_spinwave/calc.bat
-	unix2dos ./examples/ho2ti2o7/calc.bat
+	unix2dos ./examples/ho2ti2o7/*.bat
 	unix2dos ./examples/la2coo4/calc.bat
 	unix2dos ./examples/Ce3p_chain_cfphonon/calc.bat
 	unix2dos ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
@@ -295,8 +299,7 @@ tgz :
 	unix2dos ./examples/prni2si2/calc.bat
 	unix2dos ./examples/pupd3/calc.bat
 	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
-	unix2dos ./examples/tb2ti2o7_cfphonon_simple/DMD_method/calc.bat
-	unix2dos ./examples/tb2ti2o7_cfphonon_simple/phonons/calc.bat
+	unix2dos ./examples/tb2ti2o7_cfphonon_simple/calc.bat
 	unix2dos ./examples/test_cluster/calc.bat
 	unix2dos ./examples/testic1ion/test.bat
 	unix2dos ./examples/tmcu2_cf_phonon/calc.bat

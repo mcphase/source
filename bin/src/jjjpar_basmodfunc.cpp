@@ -13,6 +13,15 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 }
 
 #ifdef __MINGW32__
+
+/*void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int verbose)
+{
+*(void **)(&symbol)=GetProcAddress(handle,func);
+    //*(int **)(&p)=GetProcAddress(handle,"pcalc");
+     if (symbol==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  %s -continuing\n",(int)GetLastError(),modulefilename,func);}
+                    }else {if(verbose)fprintf (stderr,"%s ",func);}
+}
+*/
 #else
 void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int verbose)
   {char * error;
@@ -151,7 +160,16 @@ module_type=0;
   if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, " - Could not load dynamic library\n");
 	       exit (EXIT_FAILURE);
 	      }
-
+#else
+  char * error;
+  handle=dlopen (modulefilename,RTLD_NOW | RTLD_GLOBAL);
+  if (!handle){fprintf (stderr, " - Could not load dynamic library\n");
+               if ((error=dlerror())!=NULL)
+	         {fprintf (stderr,"%s\n",error);}
+	       exit (EXIT_FAILURE);
+	      }
+#endif
+#ifdef __MINGW32__
     I=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"Icalc");
     //*(int **)(&m)=GetProcAddress(handle,"Icalc");
      if (I==NULL) {fprintf (stderr," error %i module %s loading function Icalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
@@ -287,15 +305,8 @@ module_type=0;
     if (dyn_opmat==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  opmat -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"opmat ");}
 
-    if(verbose)fprintf (stderr,"\n");
+    
 #else
-  char * error;
-  handle=dlopen (modulefilename,RTLD_NOW | RTLD_GLOBAL);
-  if (!handle){fprintf (stderr, " - Could not load dynamic library\n");
-               if ((error=dlerror())!=NULL)
-	         {fprintf (stderr,"%s\n",error);}
-	       exit (EXIT_FAILURE);
-	      }
   loadfunction(*(void **)(&I),handle,"Icalc",verbose);if(I==NULL){fprintf(stderr,"not possible !");exit (EXIT_FAILURE);}
   loadfunction(*(void **)(&IM),handle,"IMcalc",verbose);
   loadfunction(*(void **)(&du),handle,"du1calc",verbose);
@@ -326,8 +337,8 @@ module_type=0;
   loadfunction(*(void **)(&od_dm),handle,"dorbmomdensity_coeff1",verbose);
   loadfunction(*(void **)(&ro_calc),handle,"ro_calc",verbose);
   loadfunction(*(void **)(&dyn_opmat),handle,"opmat",verbose);
-  if(verbose)fprintf (stderr,"\n");
 #endif
+  if(verbose)fprintf (stderr,"\n");
      }
     }
    }

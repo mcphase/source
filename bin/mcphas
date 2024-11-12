@@ -1,39 +1,71 @@
 #!/bin/sh
 # main program batch of mcphase
 
+export prefix=
 
-if [ X"$1" != X"-version" -a  X"$1" != X"-help" -a  X"$1" != X"-h" -a  X"$1" != X"-prefix" ]; then
+ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -prefix)
+      ARGS+=("$1")
+      prefix="$2"
+      shift # past argument
+      ARGS+=("$1")
+      shift # past value
+      ;;
+    -version)
+      mcphasit -version
+      exit 0
+      ;;
+    -verbose)
+      verbose=1
+      exit 0
+      ;;
+    -h|-help)
+      mcphasit -h
+      exit 0
+     ;;
+    *)
+      ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${ARGS[@]}" # restore positional parameters
+
 # yes do a calculation
  #start displaying results
  java IniConfigurator &
  javaid=$!
  #inimenu  & 
 
-cat << EOF > results/.mcphas.fum
+cat << EOF > results/."$prefix"mcphas.fum
 0 0 0 0 0 0 0 0 0 0 0 0 0
 1 1 1 1 1 1 1 1 1 1 1 1 1
 EOF
  # displaymag   & 
- java displaymag 2 11 ./results/.mcphas.fum 2 12 ./results/.mcphas.fum 2 13 ./results/.mcphas.fum  &
+ java displaymag 2 11 ./results/.'$prefix'mcphas.fum 2 12 ./results/.'$prefix'mcphas.fum 2 13 ./results/.'$prefix'mcphas.fum  &
  magid=$!
 
-cat << EOF > results/.spins.eps
+cat << EOF > results/."$prefix"spins.eps
 0 0 0 0 0 0 0 0 0 0 0 0 0
 1 1 1 1 1 1 1 1 1 1 1 1 1
 EOF
 
-java PostscriptViewer results/.spins.eps results/.spins3dab.eps results/.spins3dac.eps results/.spins3dbc.eps &
+java PostscriptViewer results/."$prefix"spins.eps results/."$prefix"spins3dab.eps results/."$prefix"spins3dac.eps results/."$prefix"spins3dbc.eps &
  #displayspins  &
  spinid=$!
   
-if [ X"$1" = X"-v" ]; then
-cat << EOF > results/.fe_status.dat
+if [ X"$verbose" = X"1" ]; then
+cat << EOF > results/."$prefix"fe_status.dat
 0 0 0 0 0 0 0 0 0 0 0 0 0
 1 1 1 1 1 1 1 1 1 1 1 1 1
 EOF
-java display -title "blue:log(iteration)red:log(sta)green:stepratio" 1 2 ./results/.fe_status.dat 1 3 ./results/.fe_status.dat 1 5 ./results/.fe_status.dat 2> /dev/null &
+java display -title "blue:log(iteration)red:log(sta)green:stepratio" 1 2 ./results/.'$prefix'fe_status.dat 1 3 ./results/.'$prefix'fe_status.dat 1 5 ./results/.'$prefix'fe_status.dat 2> /dev/null &
 status1id=$!
-java display -title "blue:log(spinchange)red:free-energygreen:stepratio" 1 4 ./results/.fe_status.dat 1 7 ./results/.fe_status.dat 1 5 ./results/.fe_status.dat 2> /dev/null  &
+java display -title "blue:log(spinchange)red:free-energygreen:stepratio" 1 4 ./results/.'$prefix'fe_status.dat 1 7 ./results/.'$prefix'fe_status.dat 1 5 ./results/.'$prefix'fe_status.dat 2> /dev/null  &
 status2id=$!
 fi
 
@@ -44,16 +76,12 @@ fi
  #kill all processes
  # killall gv gnuplot gnuplot_x11 displaymag displayspins inimenu java
  kill $javaid $magid $spinid $status1id $status2id
- rm -f ./results/.mcphas.fum
- rm -f ./results/.spins.eps
- rm -f ./results/.spins3dab.eps
- rm -f ./results/.spins3dac.eps
- rm -f ./results/.spins3dbc.eps
+ rm -f ./results/."$prefix"mcphas.fum
+ rm -f ./results/."$prefix"spins.eps
+ rm -f ./results/."$prefix"spins3dab.eps
+ rm -f ./results/."$prefix"spins3dac.eps
+ rm -f ./results/."$prefix"spins3dbc.eps
  rm -f ./results/.mag.gnu
- rm -f ./results/.fe_status.dat
+ rm -f ./results/."$prefix"fe_status.dat
  rm -f ./results/.gv;
  
-else
-# do not do a calculation - only print version / help screen
- mcphasit $@
-fi

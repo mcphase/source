@@ -76,7 +76,7 @@ printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
 
 void inipar::time_estimate_until_end(double x, double y)
 {// estimate time until end 
-    int nofpoints=nofstapoints+noffailedpoints;
+    int nofpoints=nofstapoints+noffailedpoints+1; // add 1 to avoid zero
     int nofysteps=(int)((ymax-ymin)/ystep); if(nofysteps==0){nofysteps=1;}
     int pointstodo=nofysteps*int((xmax-x)/xstep)+int((ymax-y)/ystep);
     print_time_estimate_until_end(pointstodo/nofpoints);

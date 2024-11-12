@@ -57,6 +57,7 @@
 
 #include "ic1ion.hpp"
 #include "vector.h"          // MatPack vector class
+#include "martin.h"          // some functions, i.e. expectation value
 #include <fstream>
 #include <ctime>
 #define SMALL 1e-6           // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
@@ -426,15 +427,13 @@ void Icalc_parameter_storage_matrix_init(
 // Calculates thermal expectation values 
 // --------------------------------------------------------------------------------------------------------------- //
 void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, double *T, Vector &J, double *lnZ, double *U)
-{
-   int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+{  int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int Q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    int im[]= {-1,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
-   int Hsz=icf_getdim(pars), i, ix, iy; //, incx=1;
+   int Hsz=icf_getdim(pars), i, ix, iy;
    int nfact = (int)ceil(sqrt(J.Hi()-J.Lo()+2));
  
-   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   //char uplo = 'U';
+   //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    int Esz, ind_j;
    //std::vector< std::vector<double> > matel;
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
@@ -460,7 +459,7 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
 
    // For first run calculate also the partition function and internal energy
    *U=0.;
-   me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; complexdouble *zt=0, zme;
+   me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; complexdouble *zt=0;
    complexdouble *zJmat = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble));
    zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
    sMat<double> Hcf;
@@ -496,23 +495,20 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
          
 
          for(ind_j=0; ind_j<Esz; ind_j++)
-         {  // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-            zme.r=0;zme.i=0;              
-            for(int i=0;i<Hsz;++i)for(int j=0;j<Hsz;++j){
-            complexdouble x; 
-            x.r=zJmat[Hsz*i+j].r*zV[ind_j*Hsz+j].r-zJmat[Hsz*i+j].i*zV[ind_j*Hsz+j].i;
-            x.i=zJmat[Hsz*i+j].r*zV[ind_j*Hsz+j].i+zJmat[Hsz*i+j].i*zV[ind_j*Hsz+j].r;
-            zme.r+=zV[ind_j*Hsz+i].r*x.r+zV[ind_j*Hsz+i].i*x.i;
-            }
-            //printf(" %g=",zme.r);//DEBUG 
-            // Calculates the matrix elements <Vi|J.H|Vi>
-            /*F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
+         {  // Calculates the matrix elements <Vi|J.H|Vi>
+            // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+            me[ind_j] = expectation_value(Hsz,zJmat,&zV[ind_j*Hsz]); // defined in martin.c
+          
+
+            /*  char uplo = 'U';int incx=1;   
+              complexdouble zme;          zme.r=0;zme.i=0;            
+            F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
             #ifdef _G77 
             F77NAME(zdotc)(&zme, &Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
             #else
             zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-            #endif*/ 
-            me[ind_j] = zme.r; // zhemv and zme seems to be problematic in multithreading
+            #endif 
+            me[ind_j] = zme.r;*/ // zhemv and zme seems to be problematic in multithreading
             //printf("=%g ",zme.r);//DEBUG 
             
             //
@@ -553,6 +549,7 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
 
    free(zJmat); free(zt);
    *lnZ = log(Z)-vE[0]/(KB**T); 
+
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -1015,7 +1012,8 @@ __declspec(dllexport)
                       int &n, int &nd,
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
-{  // sum exchange field and external field
+{ //clock_t start,end; start = clock();
+  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
@@ -1044,7 +1042,7 @@ __declspec(dllexport)
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
    std::vector<double> u(sz+1),iu(sz+1);
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   char uplo = 'U';
+   //char uplo = 'U';
    double Z=0., therm;
 
    // check if printout should be done and make tn positive
@@ -1054,7 +1052,7 @@ __declspec(dllexport)
 
    // Copies the already calculated energy levels / wavefunctions from *est
    if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
-   int Hsz = est.Rows()-1, iJ, incx = 1;
+   int Hsz = est.Rows()-1, iJ;//, incx = 1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    n=i;nd=j;
    double maxE=delta;
@@ -1075,14 +1073,26 @@ __declspec(dllexport)
       {
          if(iJ<6) op = icf_mumat(pars.n, iJ, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
          if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes);
-         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+         
+//        calculates transition matrix element <S1|OP|S2> of hermitian 
+// operator OP given
+// two complex vector S1 and S2  OP and S1,S2 are given as pointers 
+         zij[iJ]=transition_matrixelement(Hsz,zJmat,(complexdouble*)&est[i+1][1],(complexdouble*)&est[j+1][1]);
+        //printf("(%g,%g)=",zij[iJ].r,zij[iJ].i);
+
+/*       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[j+1][1], &incx, &zbeta, zt, &incx);
          #ifdef _G77 
          F77NAME(zdotc)(&zij[iJ], &Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
          #else
          zij[iJ] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
          #endif
-         free(zJmat); free(zt);
+         free(zt);
+ */         //printf("(%g,%g) ",zij[iJ].r,zij[iJ].i);
+
+
+         free(zJmat); 
       }
 
       if(i==j && T>0) // subtract thermal expectation value from zij=zii
@@ -1100,12 +1110,15 @@ __declspec(dllexport)
             zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
             for(int ind_j=0; ind_j<Esz; ind_j++)
             {  // Calculates the matrix elements <Vi|J.H|Vi>
+               // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+               zme.r = expectation_value(Hsz,zJmat,(complexdouble*)&est[ind_j+1][1]); // defined in martin.c
+/*
                F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, &zbeta, zt, &incx);
                #ifdef _G77 
                F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
                #else
                zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
-               #endif
+               #endif */
                // For first run calculate also the partition function and internal energy
                if(iJ==0)
                {
@@ -1193,6 +1206,7 @@ __declspec(dllexport)
 
 //   for(i=0; (i<ninit)&((zi=(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))))>(pinit*zsum)); ++i) { noft += Hsz-i+1; zsum += zi; }
 // int noft=0;for(i=0;(i<Hsz)&(exp(-(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))>SMALL);++i)noft+=Hsz-i-1; // removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit   return noft;
+//end = clock(); std::cerr << "Time to do du1calc() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
 
    return noft;
    //return Hsz*(Hsz-1)/2;
@@ -2026,7 +2040,7 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
 {
    int k[] = {0,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-   int Hsz=icf_getdim(pars), incx=1;
+   int Hsz=icf_getdim(pars); //, incx=1;
 
    char xyzstr[] = "xyz";
    if(xyz>0) { std::cout << "Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
@@ -2035,8 +2049,8 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
    std::vector<double> E, ex((J.Hi()>6?J.Hi():6)+2,0.), me, eb;
    int iJ, ind_j, Esz;
 
-   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   char uplo = 'U';
+   //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   //char uplo = 'U';
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB**T))<DBL_EPSILON || vE[Esz+1]==0) break; }
@@ -2058,7 +2072,7 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
    }
 
    // For first run calculate also the partition function
-   me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; complexdouble *zt=0, zme;
+   me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; complexdouble *zt=0;
    complexdouble *zJmat;// = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble));
    zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
    sMat<double> zeros(Hsz,Hsz),mat;
@@ -2071,15 +2085,21 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
 
       for(ind_j=0; ind_j<Esz; ind_j++)
-      {  // Calculates the matrix elements <Vi|J.H|Vi>
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
-         #ifdef _G77 
-         F77NAME(zdotc)(&zme, &Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-         #else
-         zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-         #endif
-         me[ind_j] = zme.r;
-         // For first run calculate also the partition function and internal energy
+      {   // Calculates the matrix elements <Vi|J.H|Vi>
+           // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+            me[ind_j] = expectation_value(Hsz,zJmat,&zV[ind_j*Hsz]); // defined in martin.c
+            
+            //  zme.r=0;zme.i=0;   
+            /* F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
+            #ifdef _G77 
+            F77NAME(zdotc)(&zme, &Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
+            #else
+            zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
+            #endif */ 
+            //me[ind_j] = zme.r; // zhemv and zme seems to be problematic in multithreading
+            //printf("=%g ",zme.r);//DEBUG
+ 
+            // For first run calculate also the partition function and internal energy
          if(iJ==J.Lo())
          {
 //MR 10.9.2010
@@ -2450,12 +2470,14 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
 
             for(int ind_j=0; ind_j<Esz; ind_j++)
             {  // Calculates the matrix elements <Vi|J.H|Vi>
-               F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, &zbeta, zt, &incx);
+               // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
+               zme.r = expectation_value(Hsz,zJmat,(complexdouble*)&est[ind_j+1][1]); // defined in martin.c
+               /*F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, &zbeta, zt, &incx);
                #ifdef _G77 
                F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
                #else
                zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
-               #endif
+               #endif */
                // For first run calculate also the partition function and internal energy
                if(iJ==0)
                {

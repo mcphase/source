@@ -188,7 +188,15 @@ all: ../ic1ionit$(EXE) ic1ion.so ../icf1ionit$(EXE) icf1ion.so
 OBJ := $(foreach objs,$(OBJECT),$(objs).o)
 HPP := $(foreach head,$(HEADER),$(head).hpp)
 
-VECOBJ = ../src/vector/cheigen.o ../src/vector/chgeigen.o ../src/vector/cludcomp.o ../src/vector/cmatmul.o ../src/vector/cmatrix.o ../src/vector/cvector.o ../src/vector/dludcomp.o ../src/vector/dmatmul.o ../src/vector/dmatrix.o ../src/vector/dortho.o ../src/vector/dsvdcomp.o ../src/vector/dvector.o ../src/vector/imatrix.o ../src/vector/imtql.o ../src/vector/imtql2.o ../src/vector/ivector.o ../src/vector/magicsquare.o ../src/vector/matexph.o ../src/vector/matlapl.o ../src/vector/matpack.o ../src/vector/matsqth.o ../src/vector/moment.o ../src/vector/rseigen.o ../src/vector/sort2dbl.o ../src/vector/sort3dbl.o ../src/vector/sortdbl.o ../src/vector/tred.o
+VECOBJ = ../src/vector/cheigen.o ../src/vector/chgeigen.o ../src/vector/cludcomp.o \
+         ../src/vector/cmatmul.o ../src/vector/cmatrix.o ../src/vector/cvector.o \
+         ../src/vector/dludcomp.o ../src/vector/dmatmul.o ../src/vector/dmatrix.o \
+         ../src/vector/dortho.o ../src/vector/dsvdcomp.o ../src/vector/dvector.o \
+         ../src/vector/imatrix.o ../src/vector/imtql.o ../src/vector/imtql2.o \
+         ../src/vector/ivector.o ../src/vector/magicsquare.o ../src/vector/matexph.o \
+         ../src/vector/matlapl.o ../src/vector/matpack.o ../src/vector/matsqth.o \
+         ../src/vector/moment.o ../src/vector/rseigen.o ../src/vector/sort2dbl.o \
+         ../src/vector/sort3dbl.o ../src/vector/sortdbl.o ../src/vector/tred.o
 
 #ifeq ($(findstring $(shell ./checkgcc.sh -4 $(CC)),"false"),)
 FORCE:
@@ -200,13 +208,13 @@ libs/liblapack.a:
 	cd libs && make
 
 ifdef integral
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
+../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o  ../src/martin.o
 	@echo Linking $@
-	$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+	$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o  ../src/martin.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 else
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o
+../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o  ../src/martin.o
 	@echo Linking $@
-	$(LINKER) -o ../ic1ion ic1ion.o states.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+	$(LINKER) -o ../ic1ion ic1ion.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp
@@ -240,15 +248,15 @@ else
 	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 
-ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o
+ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o  ../src/martin.o
 	@echo Linking $@
 ifdef WINDOWS
-	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
 else
-	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
-ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o  # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
+ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o ../src/martin.o # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
 ../icf1ionit$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o
 	@echo Linking $@
 	@$(LINKER) -o ../icf1ion icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
@@ -260,14 +268,17 @@ else
 	@$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
+icmf.o : icmf.cpp ic1ion.hpp ../include/martin.h 
+	$(CC) $(CFLAGS) -I../include -I. -c $<
+
 # Patern rules
 # Syntax is
 # targets ...: target-pattern: dep-patterns ...
 #	commands
 #	...
 
-$(OBJ): %.o: %.cpp $(HPP)
-	$(CC) $(CFLAGS) -c $<
+$(OBJ): %.o: %.cpp $(HPP) 
+	$(CC) $(CFLAGS) -I../include -I. -c $<
 
 # Implicit rules (suffix rules)
 # NB. $@ = current target, $< = implied source, $* = filename without suffix.
