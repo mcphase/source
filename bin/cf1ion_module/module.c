@@ -391,9 +391,9 @@ extern "C" void mcalc(Vector & mom,double & T, Vector & gjmbHxc,Vector & Hext,do
 {double U,lnZ;
  static Vector J(1,gjmbHxc.Hi());
  Icalc(J,T,gjmbHxc,Hext,g_J,ABC,sipffile,U,lnZ,est);
- mom(1)=J(1);
- mom(2)=J(2);
- mom(3)=J(3);
+ mom(1)=(* g_J)*J(1);
+ mom(2)=(* g_J)*J(2);
+ mom(3)=(* g_J)*J(3);
 }
 
 /**************************************************************************/

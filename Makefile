@@ -258,7 +258,6 @@ tgz :
 	dos2unix ./examples/prni2si2/calc.bat
 	dos2unix ./examples/pupd3/calc.bat
 	dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
-	dos2unix ./examples/tb2ti2o7_cfphonon_simple/calc.bat
 	dos2unix ./examples/test_cluster/calc.bat
 	dos2unix ./examples/testic1ion/test*.bat
 	dos2unix ./examples/tmcu2_cf_phonon/calc.bat
@@ -299,7 +298,6 @@ tgz :
 	unix2dos ./examples/prni2si2/calc.bat
 	unix2dos ./examples/pupd3/calc.bat
 	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
-	unix2dos ./examples/tb2ti2o7_cfphonon_simple/calc.bat
 	unix2dos ./examples/test_cluster/calc.bat
 	unix2dos ./examples/testic1ion/test.bat
 	unix2dos ./examples/tmcu2_cf_phonon/calc.bat

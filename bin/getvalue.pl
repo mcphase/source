@@ -178,7 +178,7 @@ unless(0==($numbers[$colx]-$numbers1[$colx]))
 #print "$constx $dE ".$numbers[$colx]." ".$numbers1[$colx]."\n";
    @numbers1=@numbers;
    }} 
-  if (abs($esum)<1e-300){print "echo \"# getvalue: xvalues variance on averaging is too small ($esum) for $file\"\n";$sta=-1;}
+  if (abs($esum)<1e-300){print "echo \"# getvalue: xvalues variance on averaging is too small ($esum) for $file for calculation of deviations sta\"\n";$sta=-1;}
   else{$sta/=$esum;}
   close Fin;
   return ($Iav,$sta);

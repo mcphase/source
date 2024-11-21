@@ -46,7 +46,7 @@ cat << EOF > results/."$prefix"mcphas.fum
 1 1 1 1 1 1 1 1 1 1 1 1 1
 EOF
  # displaymag   & 
- java displaymag 2 11 ./results/.'$prefix'mcphas.fum 2 12 ./results/.'$prefix'mcphas.fum 2 13 ./results/.'$prefix'mcphas.fum  &
+ java displaymag 2 11 ./results/."$prefix"mcphas.fum 2 12 ./results/."$prefix"mcphas.fum 2 13 ./results/."$prefix"mcphas.fum  &
  magid=$!
 
 cat << EOF > results/."$prefix"spins.eps

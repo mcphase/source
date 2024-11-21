@@ -149,6 +149,9 @@ int code=0;int m=0;
 
 // if hkllist is given, read the file and put hkls to hkl[i], m is number of reflections to be considered
 if (hklfile[0]!='\0'){int nr;
+  if(ini.colcod[0]>=0) {mx= new complex <double> [MAXNOFREFLECTIONS+1]; /// we need some storage for intensities and errors unless initialized already
+                        my= new complex <double> [MAXNOFREFLECTIONS+1];
+                       }
       float nn[20];nn[0]=19;
      // open hkllist file
      fprintf(stdout,"reading hkl list from file %s\n",hklfile);
@@ -189,7 +192,6 @@ if (hklfile[0]!='\0'){int nr;
                               }}
        fclose(fin);      
            }
-
 printheader(ini,code,m);
 
 neutint(ini,code,m,hkl,D,totint, out,mx,my,mz,mxmy,mxmz,mymz,mx2,my2,mz2);
@@ -208,6 +210,9 @@ fprintf (stderr,"***********************************************************\n")
 if(ini.colcod[0]<0){
   delete []mx;delete []my;delete []mz;delete []mxmy;
   delete []mxmz;delete []mymz;delete []mx2;delete []my2;delete []mz2;}
+else
+{if (hklfile[0]!='\0'){delete []mx;delete []my;}
+}
 delete []hkl;delete []D;
   for(int i=1;i<= ini.nofoutputcolumns;++i){delete []out[i]; } 
  return 0;

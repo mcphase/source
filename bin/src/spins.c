@@ -586,7 +586,7 @@ for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){hhh(nt)=hh(nt+inputpars.cs.nofcomp
     if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tMSL")==0){
     //ouput the magnetic moment if possible
     if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
-    {           for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
+    {     for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
      // and output the orbital and spin momentum if possible 
      if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage)&&
         (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))

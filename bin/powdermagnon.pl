@@ -78,9 +78,9 @@ my (@intsnuc)=();$#intsnuc=$n;
 
 $qold=0;$counter=1;
 $qhold=0;$qkold=0;$qlold=0;
-
+$linenr=0;
 while(<$h>)
- {next if /^\s*#/;
+ {++$linenr;next if /^\s*#/;
   $line=$_;
   $line=~s/D/E/g;@numbers=split(" ",$line);
   $q=$numbers[7];
@@ -96,6 +96,9 @@ while(<$h>)
                }
   if($numbers[8]<$Emax&&$numbers[8]>$Emin)
   {  $i=int(($numbers[8]-$Emin)/$deltaE);
+     if($numbers[9]<0){die "Error powdermagnon: Intensity in line $linenr column 8 of ".$ARGV[1]." < 0.\n"; }
+     if($numbers[10]<0){die "Error powdermagnon: Intensity in line $linenr column 9 of ".$ARGV[1]." < 0.\n"; }
+     if($numbers[11]<0){die "Error powdermagnon: Intensity in line $linenr column 10 of ".$ARGV[1]." < 0.\n"; }
      $ints[$i]+=$numbers[9];
      $intsbey[$i]+=$numbers[10];
      $intsnuc[$i]+=$numbers[11];

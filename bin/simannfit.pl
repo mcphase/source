@@ -27,7 +27,7 @@ unless ($#ARGV >0)
   ... STEPWIDTHS
     -w 1.4  ... before starting simannfit, multiply all stepwidths by factor 1.4 
     -r 0.2  ... before starting simannfit, set all stepwidths to parameter 
-            range=max-min times 0.2, 
+            range=max-min times 0.2, mind stepwidths have to be smaller than (max-min)/2 
     -f 0.2  ... before starting simannfit, set all stepwidths to parameter value 
             times 0.2, however never smaller than parameterrange/1000 
     -p 20  ... probing parameter space: stepwidths are not decreased during
@@ -62,8 +62,9 @@ unless ($#ARGV >0)
 	    stored
     -log 1.3 batchfile.bat   
              if sta is less then 1.3, then execute the file 
-             batchfile, with sta as argument, which can be adressed in the batch
-	     file with \$1 (linux) or  \%1 (windows)
+             batchfile, with sta and as argument, which can be adressed in the batch
+	     file with \$1 (linux) or  \%1 (windows). The other parameters current 
+	     values can be adresse by \$2 \$3 ... (linux) or \%2 \%3 ... (windows).
     -h       Histograms are stored in results/par*.hst for review of the variation 
              of parameters during the run of simannfit. 
     -d       store percentage of different contributions to sta in file results/simannfit.dst 
@@ -281,8 +282,8 @@ if($stps<11){
    $parav[$i]=($parav[$i]*$noofupdates + $p)/($noofupdates+1);
    $parerr[$i]=sqrt($parerr[$i]*$parerr[$i]*$noofupdates+
                    ($p-$parav[$i])*($p-$parav[$i]))/($noofupdates+1);     
-   if($probe==0){if($parstp[$i]<($parmax[$i]-$parmin[$i])){$parstp[$i]+=0.1*abs($thisparstp[$i]);}
-                 else{$parstp[$i]=($parmax[$i]-$parmin[$i]);}
+   if($probe==0){if($parstp[$i]<($parmax[$i]-$parmin[$i])/2){$parstp[$i]+=0.1*abs($thisparstp[$i]);}
+                 else{$parstp[$i]=($parmax[$i]-$parmin[$i])/2;}
                 } # adapt parstp to be more bold in this direction
    $hx=int(($p-$parminin[$i])/$parhistostp[$i]);
    ++$parhisto[($hx+$perlhistostart[$i])];
@@ -477,7 +478,12 @@ $staboundary=$stasave-log($rnd+1e-10)*$stattemp;
                   {
                    if(system ("./calcsta $staboundary > ./results/simannfit.sta")){die "\n error executing calcsta\n";}
                   }	
- open (Fin,"./results/simannfit.sta");  $i6=0;$errc=1;
+
+unless(open (Fin,"./results/simannfit.sta")){ # this "unless" is to avoid stop if simannfit.sta is not existing ... 
+                                              # if it does not exist, just take old values and continue ...
+  print STDERR "simannfit filesystem problem accessing simannfit.sta (output from calcsta command) - continugin with next parameter set\n";
+ }else{
+ $i6=0;$errc=1;
  while($line=<Fin>){
            if($line=~/^(#!|[^#])*?\bsta\s*=/) {($staline)=($line=~m/(?:#!|[^#])*?\bsta\s*=\s*([\d.eEdD\Q-\E\Q+\E\s]+)/);
                                                $staline=~s/D/E/g;my @ssn=split(" ",$staline);
@@ -529,7 +535,8 @@ else
  ++$nof_calcsta_calls;++$store_counter; 
 # print $store_counter." ".$#par."\n";
 
-if($sta<$log){system("$logbatchfile $sta");  
+if($sta<$log){system("$logbatchfile $sta ".join(" ",@par)); }
+} 
  return $sta;
 }  
 
@@ -603,11 +610,11 @@ sub write_set()
   unless(open(FH,$filename)){die "Error openening $filename\n";}
      my $dd=sprintf("%i.%i ",$stepnumber+$tableoffset,$index);print FH $dd;
         my $ii=0;foreach(@par){$dd=sprintf("%e ",$par[$ii]);print FH $dd;++$ii} 
-        print FH $sta." ".$s2." ".$chisquared."\n";
+        print FH $sta." ".$s2;if($chisquared){print FH " ".$chisquared;}print FH "\n";
         if($sta<$jpglog){$dfile=sprintf("%i.%i.jpg",$stepnumber+$tableoffset,$index);                         
                          mycopy($jpgimagefile,"./results/".$dfile);
                          print FH '#<img src="'.$dfile.'">'."\n";
                          }
   close FH;
-                               }
+                               
 }

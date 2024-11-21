@@ -391,12 +391,12 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
 // --------------------------------------------------------------------------------------------------------------- //
 std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<double> > &matel, bool save_matrices)
 {
-   double *vt=0, Z=0., U=0.; complexdouble *zt=0;//, zme;
+   double *vt=0, Z=0., U=0.; complexdouble *zt=0; //, zme;
    std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; matel.clear();
    int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1; 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   double alpha = 1, beta = 0; //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    char uplo = 'U';
    // Checks that the eigenvalues are orthonormal
 /* char transa='C', transb='N'; double summm=0.;
@@ -467,7 +467,6 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
       {  // Calculates the matrix elements <Vi|J.H|Vi>
          // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
           me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
-
            //   zme.r=0;zme.i=0;              
                /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
 #ifdef _G77 
@@ -590,7 +589,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
                // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
               me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
 
-           /* F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+          /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
 #ifdef _G77 
             F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
 #else

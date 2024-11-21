@@ -80,7 +80,7 @@ fprintf(fout,"\
 # choose out* to set type of desired output in column 1 to 12\n\
 # (default is h k l d Q 2theta Inuc Imag Itot)\n\
 #\n\
-#!out1=31 out2=32 out3=33 out4=37 out5=38 out6=39 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 \n\
+#!out1=31 out2=32 out3=33 out4=34 out5=35 out6=36 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 \n\
 #\n\
 #     ... in out*=n the numbers n have the following meaning:\n\
 #            0....LF #\n\
