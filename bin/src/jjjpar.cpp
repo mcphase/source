@@ -930,7 +930,7 @@ int i1;
 
 // copy Matrices 
 if(!pp.est.Empty())
-{    est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());
+{   est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());
     est=pp.est;
 }
 

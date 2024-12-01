@@ -28,10 +28,17 @@ unless ($#ARGV >0)
   to design useful calcsta programs) and  the standard sta deviation is 
   recorded in file results/searchspace.i  i=1,2,3, ....
   localminima are also recorded (results/searchspace.i.localminima)
- 
+  Note if there are several lines 'sta= ...' in the output of calcsta, the average
+  of all these numbers is taken.  
+
  options
    -jpglog 3.5e-1 file.jpg: if sta is less then 3.5e-1, then the image file.jpg 
  (which should be created by calcsta) is copied to results/parsetnr.jpg
+   -log 1.3 batchfile.bat   
+             if sta is less then 1.3, then execute the file 
+             batchfile, with sta and as argument, which can be adressed in the batch
+	     file with $1 (linux) or  %1 (windows). The other parameters current 
+	     values can be adresse by $2 $3 ... (linux) or %2 %3 ... (windows).
    -setlimits 0.2 : before start, sets parameter ranges, i.e. 
      min=parametervalue-0.2*parameterstep, max=parametervalue+0.2*parameterstep
 
@@ -80,17 +87,18 @@ sprintf ("%s [%+e,%+e,%+e,%+e,%+e]",$parnam[$ii],$par[$ii],$parmin[$ii],$parmax[
   if($searchlevel<0){# in this case only read line number -$searchlevel from input file and update parameter files
                      $inputfile=$ARGV[0]; shift @ARGV;
                     }
-# treat option -jpglog
-$jpglog=0;
+# treat option -jpglog -log -setlimits
+$jpglog=0;$log=0;
 while($ARGV[0]=~/-[^\d]/){
- if($ARGV[0]=~/-jpglog/)
+ if($ARGV[0] eq '-jpglog')
 {shift @ARGV;$ARGV[0]=~s/x/*/g; $jpglog=eval $ARGV[0];shift @ARGV;
  $jpgimagefile=$ARGV[0];shift @ARGV;
 }
  if($ARGV[0]=~/-setlimits/)
 {shift @ARGV;$ARGV[0]=~s/x/*/g; $setlimits=eval $ARGV[0];shift @ARGV;
 }
-}
+if ($ARGV[0] eq '-log') {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$log=eval $ARGV[0]; shift @ARGV;$logbatchfile=$ARGV[0]; shift @ARGV;}
+  }
 
  while(!open(Fout,">results/searchspace.status")){print "Error opening file results/searchspace.status\n";<STDIN>;}
   print Fout "parameter[value,      min,           max,           (not used)   ,minimum meshwidth]\n";
@@ -352,18 +360,20 @@ sub sta {local $SIG{INT}='IGNORE';
  close Fin;
 
  mydel("./results/searchspace.sta");
- $delta= sqrt PDL->new(@ssta);
+ $delta= PDL->new(@ssta);
  $c=PDL->new(@par);
 # print $delta;
- $s2=inner($delta,$delta)/($#ssta+1); # this is s^2
+ $s2=sum($delta)/($#ssta+1); # this is s^2
  $sta=$s2;
  if($errc>0) #if errors are given we can minimize chisquared and calculate covariance matrix
- {my  $err=   sqrt PDL->new(@eerr);
+ {my  $err=   PDL->new(@eerr);
   $delta=$delta/$err;
-  $chisquared=inner($delta,$delta)/($#ssta+1); # this is chisquared
+  $chisquared=sum($delta)/($#ssta+1); # this is chisquared
   # if we have errors present we rather minimize chi2
   $sta=$chisquared;
  }
+ if($sta<$log){system("$logbatchfile $sta ".join(" ",@par)); }
+
  return $sta;
 }
   

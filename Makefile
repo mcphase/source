@@ -244,6 +244,8 @@ tgz :
 	dos2unix ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
 	dos2unix ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
 	dos2unix ./examples/CeAl2_cfphonon_cfstrict/CF/calc.bat
+	dos2unix ./examples/Cu2OSeO3/4interacting_tetrahedrons_noDM/calc.bat
+	dos2unix ./examples/Cu2OSeO3/nocluster_spinwave_model_noDM/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	dos2unix ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
@@ -258,7 +260,6 @@ tgz :
 	dos2unix ./examples/prni2si2/calc.bat
 	dos2unix ./examples/pupd3/calc.bat
 	dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
-	dos2unix ./examples/test_cluster/calc.bat
 	dos2unix ./examples/testic1ion/test*.bat
 	dos2unix ./examples/tmcu2_cf_phonon/calc.bat
 	dos2unix ./examples/tungsten_phonons/calc.bat
@@ -284,6 +285,8 @@ tgz :
 	unix2dos ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
 	unix2dos ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
 	unix2dos ./examples/CeAl2_cfphonon_cfstrict/CF/calc.bat
+	unix2dos ./examples/Cu2OSeO3/4interacting_tetrahedrons_noDM/calc.bat
+	unix2dos ./examples/Cu2OSeO3/nocluster_spinwave_model_noDM/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
 	unix2dos ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
@@ -298,7 +301,6 @@ tgz :
 	unix2dos ./examples/prni2si2/calc.bat
 	unix2dos ./examples/pupd3/calc.bat
 	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
-	unix2dos ./examples/test_cluster/calc.bat
 	unix2dos ./examples/testic1ion/test.bat
 	unix2dos ./examples/tmcu2_cf_phonon/calc.bat
 	unix2dos ./examples/tungsten_phonons/calc.bat

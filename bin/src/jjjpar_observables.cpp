@@ -77,7 +77,10 @@ int jjjpar::mcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Complex
            brillouin(m,T(i),Hxc,Hext,lnZ,U);m*=gJ;
            SetColumn(i,mom,m);}
            return true;break;
-   case 5: return false;break; 
+   case 5: {Vector lnZZ(T.Lo(),T.Hi());
+           Vector UU(T.Lo(),T.Hi());
+           cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZZ,UU);}
+           return true;break;
    default:if(mM==NULL){ 
            if (m==NULL) {mom=0;return false;} 
             else{for(int i=1;i<=T.Hi();++i){

@@ -415,6 +415,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   FILE * foutds1=NULL;
   FILE * jqfile=NULL;
   float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
+
   double E;
   char filename[MAXNOFCHARINLINE];
   double sta=0,sta_int=0,sta_without_antipeaks=0,sta_int_without_antipeaks=0;
@@ -1712,8 +1713,10 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                                      
 
     if (do_jqfile) 
-     {fprintf(jqfile,"#!the largest eigenvalue of J(q) is jqmax=%g meV at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
-     fprintf(jqfile,"#!for the first q vector in the list jq0=%g meV at h0=%g k0=%g l0=%g \n",jq0,ini.hkls[firstcounter][1],ini.hkls[firstcounter][2],ini.hkls[firstcounter][3]);
+     {fprintf(stdout,"#!the largest eigenvalue of J(q) is jqmax=%g meV at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
+      fprintf(stdout,"#!for the first q vector in the list jq0=%g meV at h0=%g k0=%g l0=%g \n",jq0,ini.hkls[firstcounter][1],ini.hkls[firstcounter][2],ini.hkls[firstcounter][3]);
+      fprintf(jqfile,"#!the largest eigenvalue of J(q) is jqmax=%g meV at hmax=%g kmax=%g lmax=%g \n",jqmax,hmax,kmax,lmax);
+      fprintf(jqfile,"#!for the first q vector in the list jq0=%g meV at h0=%g k0=%g l0=%g \n",jq0,ini.hkls[firstcounter][1],ini.hkls[firstcounter][2],ini.hkls[firstcounter][3]);
       fprintf(jqfile,"#it follows the standard deviation sta defined as:\n");
       fprintf(jqfile,"#A)the sum of squared differences between the highest eigenvalue\n");
       fprintf(jqfile,"#of a q vector and that of the first q-vector in the list in mcdisp.par.\n");
@@ -1876,7 +1879,7 @@ for (i=1;i<=argc-1;++i){
     }
   // as class load  parameters from file
   par inputpars("./mcphas.j",do_verbose);
-  
+
   inimcdis ini("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc);
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
   if(do_Erefine&&calc_rixs){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf\n");exit(EXIT_FAILURE);}

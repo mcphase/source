@@ -321,7 +321,7 @@ unless($tabout){ print "Primitive Lattice Vectors (rows) in Euclidean Coordinate
 # Determine the nmin and nmax values in order to cover with the lattice vectors
 # the desired sphere including all neighbours up to rmax Angstroem
   unless($readtable>1)
- {if($nm){
+ {if(defined $nm){
 # OLD : determine $nmin,$nmax by looking at a cube with side 3rmax
 #     $inv=matinv(transpose($p)); #invert primitive lattice
      $inv=inv(transpose($p)); #invert primitive lattice
@@ -471,23 +471,21 @@ print_time_estimate_until_end(0.0);
    $xx=$aabbcc->at(0);
    $yy=$aabbcc->at(1);
    $zz=$aabbcc->at(2);
-
    if ($r<=$rmax && $r>0){#save neighbour j format
    if($tabout){
 # check if neighbour is already in table
 $ff=0;
  for($ntbl=1;$ntbl<=$n_table;++$ntbl){
-if(($e||$jp)&&abs($da[$ntbl]-$r)<$SMALLdr){$ff=1;}
-elsif(($f||$dm)&&
+if((defined $e||defined $jp)&&abs($da[$ntbl]-$r)<$SMALLdr){$ff=1;}
+elsif((defined $f||defined $dm)&&
       abs($da[$ntbl]-$xx)<$SMALLdabc&&
       abs($db[$ntbl]-$yy)<$SMALLdabc&&
       abs($dc[$ntbl]-$zz)<$SMALLdabc){$ff=1;}
-elsif(($bvk)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
+elsif((defined $bvk)&&(abs($da[$ntbl]-$r)<$SMALLdr)){
        $a1=$sipf_file[$nnn];$a2=$sipf_file[$nz];
        if(($db[$ntbl]=~/$a1/&&$dc[$ntbl]=~/$a2/)
        ||($db[$ntbl]=~/$a2/&&$dc[$ntbl]=~/$a1/)){$ff=1;}}
                                   }
-
 if($ff==0){++$n_table;$ntbl=$n_table;
         
 if(defined $e||defined $jp)
@@ -697,8 +695,8 @@ for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
   setvariable("SCATTERINGLENGTHREAL",0,$sipf_file[$nnn]);
   setvariable("SCATTERINGLENGTHIMAG",0,$sipf_file[$nnn]);
 
-  if($cfph==2){my_rename("results/pointc.dLlm","results/makenn.a$nnn.dLlm");}
-  if($cfph==3){my_rename("results/pointc.dBlm","results/makenn.a$nnn.dBlm");}
+  if($cfph==2){my_rename("results/pointc.dLlm","results/makenn.a$nnn.dLlm");unlink("results/pointc.dBlm");}
+  if($cfph==3){my_rename("results/pointc.dBlm","results/makenn.a$nnn.dBlm");unlink("results/pointc.dLlm");}
  }
 for($nnn=1;$nnn<=$nofatoms;++$nnn){$nofneighbours[$nnn]=0;}
 for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
@@ -789,6 +787,9 @@ close Fin;
                     }
                    }
   close Fin;
+  if($cfph==2){unlink("results/makenn.a$nnn.dLlm");}
+  if($cfph==3){unlink("results/makenn.a$nnn.dBlm");}
+
   for($j=1;$j<=27;++$j){for($i=1;$i<=6;++$i){
   $Gcfph[$nnn].=" ".$GG->at($i,$j);}}
  }

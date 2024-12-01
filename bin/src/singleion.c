@@ -321,8 +321,8 @@ pchr=strstr(filename+10,"\\");
                                    switch(observable)
                                    {case 'Q': printf("Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
                                               for(j=1;j<=observable_nofcomponents;++j){printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}printf("(muB)");break;
-                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
+					case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
+					default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
                                    if(!elevels){printf("transition-energies(meV)...\n");}else{printf("energy levels(meV)...\n");}
     jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);

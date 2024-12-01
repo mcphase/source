@@ -20,8 +20,9 @@ unless ($#ARGV >0)
   at every iteration step and  the standard sta deviation is minimzed
   simannfit gives as a parameter a maximum number for sta - if during the
   calculation of sta in calcsta.bat this number is exceeded calcsta.bat can exit (saves time)
-  
-  
+  Note if there are several lines 'sta= ...' in the output of calcsta, the average
+  of all these numbers is taken.  
+
   OPTIONS for ...
   
   ... STEPWIDTHS
@@ -204,7 +205,7 @@ if($sta>0)
  # modify parameters
  print "\n..next fitting loop..";
  @parsav=@par;$dmin=0;
- if($probe>0){$stps=1;} # if probing is desired initialize step to 1 and make it larger if no set is found ...
+ if($probe>0&&$stps>3){$stps/=2;} # if probing is desired reduce step to 2 and make it larger if no set is found ...
  while($dmin<$#par+1&&$stps<11.0)
  {$i=0;
   foreach(@par){$rnd=rand;$thisparstp[$i]=($rnd-0.5)*$parstp[$i]*$stps;$par[$i]+=$thisparstp[$i];
@@ -234,7 +235,7 @@ if($sta>0)
                 close Fin1;
                 } 
                }
-   if($dmin<$#par+1){$stps*=1.001;if($stps<2){@par=@parsav;}}
+   if($dmin<$#par+1){$stps*=1.00001;if($stps<1.01){@par=@parsav;}}
   }
 if($stps<11){
  print " .. calculating sta ..\n";
@@ -327,7 +328,7 @@ $parstore.=$parstore-$b;
 print $parstore;
 $V=$parstore->slice('1:-1');
 $c=$deltastore->slice(0)->copy;
-$deltastore.=$deltastore-$c;
+$deltastore.=sqrt($deltastore)-sqrt($c);
 $delta=$deltastore->slice('1:-1');
 #print $V; # here we have calculated V
 #print $delta;
@@ -495,10 +496,10 @@ unless(open (Fin,"./results/simannfit.sta")){ # this "unless" is to avoid stop i
  close Fin;
  mydel ("./results/simannfit.sta"); 
 # print @ssta;
- $delta= sqrt PDL->new(@ssta);
+ $delta= PDL->new(@ssta);
  $c=PDL->new(@par);
 # print $delta;
- $s2=inner($delta,$delta)/($#ssta+1); # this is s^2
+ $s2=sum($delta)/($#ssta+1); # this is s^2
  if($dist>0){open(Fout1, ">results/simannfit.dst");
             print Fout1 "# ".($#ssta+1). " contributions to sta\n";
             print Fout1 "# number  vs percentage vs sta \n";$i6=0;
@@ -509,9 +510,9 @@ unless(open (Fin,"./results/simannfit.sta")){ # this "unless" is to avoid stop i
             }
  $sta=$s2;
  if($errc>0) #if errors are given we can minimize chisquared and calculate covariance matrix
- {my  $err=   sqrt PDL->new(@eerr);
+ {my  $err=   PDL->new(@eerr);
   $delta=$delta/$err;
-  $chisquared=inner($delta,$delta)/($#ssta+1); # this is chisquared
+  $chisquared=sum($delta)/($#ssta+1); # this is chisquared
   # if we have errors present we rather minimize chi2
   $sta=$chisquared;
  }

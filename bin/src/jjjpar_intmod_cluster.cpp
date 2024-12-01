@@ -349,17 +349,29 @@ myPrintMatrix(stdout,outmat);printf("\n");*/
 //routine Icalc for cluster
 //------------------------------------------------------------------------------------------------
 void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
+{
+Matrix JM(1,Jret.Hi(),1,1);
+ for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
+ Vector TT(1,1);TT(1)=T;
+ Vector lnZZ(1,1);lnZZ(1)=lnZ;
+ Vector UU(1,1);UU(1)=U;
+ cluster_Icalc_mcalc_Micalc(code,JM,TT,Hxc,Hext,lnZZ,UU);
+ U=UU(1);lnZ=lnZZ(1);T=TT(1);
+ for(int i=1;i<=Jret.Hi();++i)Jret(i)=JM(i,1);
+}
+
+void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Matrix & Jret,Vector & TT, Vector &  Hxc,Vector & Hext, Vector & lnZ, Vector & U)
 { /*on input
    code         defining, what should be calculated
          1....   Ia (interaction operators for Icalc)
          2....    m (total magnetic moment for mcalc), or
          3....    Mi (individual magnetic moments (for MQ)
-    T		temperature[K]
+    T		temperatures[K]
     gjmbH	vector of effective field [meV]
   on output    
-    J		single ion momentum vector <J>
-    Z		single ion partition function
-    U		single ion magnetic energy
+    Jret        single ion momentum vectors <J>
+    Z		single ion partition functions
+    U		single ion magnetic energies
 */
 
 
@@ -368,6 +380,7 @@ Vector En(1,dim);
 ComplexMatrix zc(1,dim,1,dim);
 cluster_calcH_and_diagonalize(En,zc,Hxc,Hext);
 
+for(int ti=TT.Lo();ti<=TT.Hi();++ti){ double T=TT(ti);
 // calculate Z and wn (occupation probability)
      Vector wn(1,dim);double Zs;
      double x,y;
@@ -380,7 +393,7 @@ cluster_calcH_and_diagonalize(En,zc,Hxc,Hext);
 //      printf("%4.4g\n",En(i));
       }
      Zs=Sum(wn);wn/=Zs;
-     lnZ=log(Zs)-x/KB/T;
+     lnZ(ti)=log(Zs)-x/KB/T;
      }
      else
      { printf ("Temperature T<0: please choose probability distribution of states by hand\n");
@@ -395,13 +408,13 @@ cluster_calcH_and_diagonalize(En,zc,Hxc,Hext);
       }
        Zs=Sum(wn);wn/=Zs;
 
-       lnZ=log(Zs);
+       lnZ(ti)=log(Zs);
                          printf ("\n\nNumber   Energy     Excitation Energy   Probability\n");
      for (int i=1;i<=dim;++i) printf ("%i    %4.4g meV   %4.4g meV %4.4g  \n",i,En(i),En(i)-x,wn(i));
      }
 
    // calculate U
-     U=En*wn;
+     U(ti)=En*wn;
 
  switch(code)
 
@@ -410,29 +423,29 @@ cluster_calcH_and_diagonalize(En,zc,Hxc,Hext);
          //printf("Matrix of Operator");
          // myPrintMatrix(stdout,Ja);
          // determine expectation value
-         Jret(a)=0;
+         Jret(a,ti)=0;
          for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-         {Jret(a)+=wn[i]*aMb_real((*Ia[a]),zc,i,i); 
+         {Jret(a,ti)+=wn[i]*aMb_real((*Ia[a]),zc,i,i); 
           // if(fabs(aMb_imag((*Ia[a]),zr,zc,i,i))>SMALL){fprintf(stderr,"ERROR module cluster - Icalc: expectation value imaginary\n");exit(EXIT_FAILURE);}
          }
         }break;
  case 2:for(int n=1;n<=3;++n)
         {// calculate expecation Value of m
-         Jret(n)=0;
+         Jret(n,ti)=0;
          for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-         {Jret(n)+=wn[i]*aMb_real((*cluster_M[n]),zc,i,i); 
+         {Jret(n,ti)+=wn[i]*aMb_real((*cluster_M[n]),zc,i,i); 
          }
         }break;
  case 3:for(int a=1;a<=(*clusterpars).cs.nofatoms;++a)for(int n=1;n<=3;++n)
         {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
          int index=(a-1)*3+n; // calculate expecation Value of m
-         Jret(index)=0;
+         Jret(index,ti)=0;
          for(int i=1;i<=dim&&wn[i]>0.00001;++i)
-         {Jret(index)+=wn[i]*aMb_real((*cluster_M[index_M]),zc,i,i); 
+         {Jret(index,ti)+=wn[i]*aMb_real((*cluster_M[index_M]),zc,i,i); 
          }
         }break;
 }
-
+}
 //  printf ("Ha=%g Hb=%g Hc=%g Ja=%g Jb=%g Jc=%g \n", 
 //     gjmbH[1]/MU_B/gjJ, gjmbH[2]/MU_B/gjJ, gjmbH[3]/MU_B/gjJ, J[1], J[2], J[3]);
 }
@@ -617,6 +630,7 @@ void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,do
 */
  fprintf(stderr,"# calculating eigenstates of cluster ...");
 (*eigenstates) = ComplexMatrix(0,dim,1,dim);
+ 
  Vector En(1,dim);
  //Matrix zr(1,dim,1,dim);
  //ComplexMatrix zc(1,dim,1,dim);
@@ -649,6 +663,7 @@ void jjjpar::cluster_calcH_and_diagonalize(Vector & En,ComplexMatrix &zc,Vector 
     (*clusterH).zero(); (*clusterH).to_tri();
     Vector ZeroHxc(1,1);ZeroHxc=0;
 // fill H matrix with sum over Hi of individual spins
+
 for (int i=1;i<=(*clusterpars).cs.nofatoms;++i)
 {Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,ZeroHxc,Hext)); // here we need ZeroHxc because
                                                             // exchange operators are set by user (Ia)

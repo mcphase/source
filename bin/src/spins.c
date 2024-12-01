@@ -14,14 +14,14 @@ void help_and_exit()
     { printf ("\n\
 program spins - popout spin/exchange field configuration\n"
 "              - and/or display 3d animation of spin/moment/densities and animations\n\n\
-use as: spins -f[c 1 13 3 0.1] [-n 2]mcphas.sps T Ha Hb Hc\n\
+use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
     or: spins -f[c 1 13 3 0.2] [-n 2] mcphas.sps x y\n\
     or: spins -f[c 1 13 3 0.1] [-n 2] mcphas.tst n\n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] T Ha Hb Hc [h k l E]\n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-prefix 001] x y\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [h k l E]\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] x y\n\
                     \n\
 1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
@@ -66,6 +66,8 @@ use as: spins -f[c 1 13 3 0.1] [-n 2]mcphas.sps T Ha Hb Hc\n\
          -M  ... show arrow indicating magnetic moment (for cluster show total moment)\n\
          -Mi ... show arrow indicating magnetic moment (for cluster show individual moments)\n\
          -P  ... calculate phononic displacement\n\
+         -eps ... create eps (postscript) files in addition to jvx (javaview) output\n\
+         -fst ... create fst (fullprof viewer) files in addition to jvx (javaview) output\n\
 \n\
          note, that in order to animate changes in the above quantities, the corresponding\n\
          switch has to be enabled in the mcdisp calculation (mcdisp.par) and the single ion\n\
@@ -140,7 +142,7 @@ fprintf(stderr,"# ***********************************************************\n"
 
  FILE * fin, * fout;
 double T=0; Vector Hext(1,3),Hextijk(1,3);
- int i,n=0,minl=1,maxl=1;//,dophon=0;
+ int i,n=0,minl=1,maxl=1,eps=0,fst=0;//,dophon=0;
  cryststruct cs,cs4;
  //float numbers[13];numbers[9]=1;numbers[10]=3;
  //numbers[0]=13;
@@ -169,8 +171,8 @@ snprintf(gp.title,sizeof(gp.title),"output of program spins");
 // first: options without graphics just screendump <I> or exchange field configuration at given HT
  if (strncmp(argv[1],"-f",2)==0)
  { os=2;if (strcmp(argv[1],"-fc")==0){os=6;minl=(int)strtod(argv[2],NULL);maxl=(int)strtod(argv[3],NULL);
- maxn=(int)strtod(argv[4],NULL);limit=strtod(argv[5],NULL);
-   }
+                                      maxn=(int)strtod(argv[4],NULL);limit=strtod(argv[5],NULL);
+                                     }
    if (strncmp(argv[os],"-n",2)==0){nofcomp=(int)strtod(argv[os+1],NULL);os+=2;}
    fin = fopen_errchk (argv[os], "rb");printf("#* program spins ... reading from file %s\n",argv[os]);   
  }
@@ -265,6 +267,8 @@ else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins
                                    }
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
+if(strcmp(argv[1+os],"-eps")==0){os+=1;eps=1;}
+if(strcmp(argv[1+os],"-fst")==0){os+=1;fst=1;}
 if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
  				   os+=2;}
@@ -683,7 +687,7 @@ printf("#%s\n",gp.title);
 printf("# ************************************************************************\n");
               if(arrow==0)gp.spins_scale_moment=0;
               if(density==0)gp.show_density=0;
-
+if(eps==1){
     fin = fopen_errchk ("./results/spins.eps", "w");
      spinconf.eps(fin,outstr);
     fclose (fin);
@@ -709,7 +713,8 @@ printf("# **********************************************************************
     fin = fopen_errchk ("./results/spins3dbc.eps", "w");
      spinconf.eps3d(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,6,spinconf);
     fclose (fin);
-
+          }
+if(fst==1){
     fin = fopen_errchk ("./results/spins.fst", "w");
      spinconf.fst(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,spinconf);
     fclose (fin);
@@ -718,6 +723,7 @@ printf("# **********************************************************************
    fin = fopen_errchk ("./results/spins_prim.fst", "w");
      spinconf.fstprim(fin,outstr,cs4.abc,cs4.r,cs4.x,cs4.y,cs4.z,spinconf);
     fclose (fin);
+          }
              Vector hkl(1,3);hkl=0;
              Vector gjmbHxc(1,3);gjmbHxc=0;
              spincf densityev_real(densitycf*0.0);

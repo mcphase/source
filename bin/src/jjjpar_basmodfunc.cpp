@@ -123,7 +123,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
       fprintf(stderr," ... reading cluster structure from %s\n",clusterfilename);
       clusterpars =new par(clusterfilename,verbose);
       Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors      
-      est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
+      //est=ComplexMatrix(0,2,1,2);est=0;// initialized in mcdisp, do not initialize to prevent errors
       }
      else
       {if(verbose)fprintf (stderr,"#[external]\n");
@@ -531,9 +531,7 @@ void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector
            brillouin(m,T(i),Hxc,Hext,lnZ(i),U(i));
            SetColumn(i,mom,m);}
            break;
-   case 5: for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
-          cluster_Icalc_mcalc_Micalc (1,m,T(i),Hxc,Hext,lnZ(i),U(i));
-          SetColumn(i,mom,m);}
+   case 5:  cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);
           break;
    default:if(IM==NULL){ for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
           (*I)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ(i),&U(i),&parstorage);
