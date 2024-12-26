@@ -1621,7 +1621,9 @@ print STDOUT << "EOF";
               scaling A<0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
  option -rkkz A(meV) kf(1/A) calculates the rkky interaction
               according to J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4
-              scaling A>0, kf should be the Fermi wavevector
+              scaling A>0, kf should be the Fermi wavevector (see 5.7.35 in 
+	      "Rare Earth Magnetism" by J. Jensen and A. Mackintosh, 1991, 
+              Clarendon. Oxford
  option -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)  calculates the rkky interaction
               according to J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4
               scaling A>0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)

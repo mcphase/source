@@ -87,7 +87,8 @@ fprintf(fout,
 "#! displayxtext=azimuth(deg) in plane perpendicular to [%g %g %g] direction\n"
 "#! displayytext=M||H(mub)\n"
 "#! displaytitle= Anisotropy plot az=0 corresponds to [%g %g %g]\n"
-"# phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[mb] Mx[mb] My[mb] Mz[mb] MparallelH[mb]\n",direction(1),direction(2),direction(3),r1(1),r1(2),r1(3));
+"#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
+"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",direction(1),direction(2),direction(3),r1(1),r1(2),r1(3));
 }else{
 
 fprintf(fout,
@@ -95,7 +96,8 @@ fprintf(fout,
 "#! displayxtext=theta(deg)\n"
 "#! displayytext=M||H(mub)\n"
 "#! displaytitle= Polycrystal Calculation Results - dependence on polar angle theta\n"
-"# phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[mb] Mx[mb] My[mb] Mz[mb] MparallelH[mb]\n");
+"#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
+"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n");
 }
 
 if(do_sipffile){
@@ -143,7 +145,7 @@ print_time_estimate_until_end(16/(ct*dtheta*dtheta)-1);
 
  }} 
  mpoly/=ct;
- fprintf(stdout,"#\n# T(K) H(Tesla) Mpolycrystal (mB) \n %6.3f %6.3f %6.3f \n",T,H,mpoly);
+ fprintf(stdout,"#\n#1    2        3\n#T(K) H(Tesla) Mpolycrystal(muB) \n %6.3f %6.3f %6.3f \n",T,H,mpoly);
  fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T,H,mpoly);
 
  }      // poly==0
@@ -222,7 +224,7 @@ print_time_estimate_until_end(16/(ct*dtheta*dtheta)-1);
 
  }} 
  mpoly/=ct;
-fprintf(stdout,"#\n# T(K) H(Tesla) Mpolycrystal (mB) \n %6.3f %6.3f %6.3f \n",T,H,mpoly);
+fprintf(stdout,"#\n#1      2            3 \n#T(K) H(Tesla) Mpolycrystal(muB) \n %6.3f %6.3f %6.3f \n",T,H,mpoly);
 fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T,H,mpoly);
 
 

@@ -120,7 +120,7 @@ my $win = PDL::Graphics::TriD::get_current_window();
 
 #new
 
-$lb = PDL::Graphics::OpenGL::glpRasterFont("8x16",0,255);
+$lb = $win->glpRasterFont("8x16",0,255);
 
      print "dd\n";
 
@@ -148,6 +148,7 @@ $win->twiddle();
 
  $win =new PDL::Graphics::TriD::GL::Window();
 
+$lb = $win->glpRasterFont("8x16",0,255);
 
 
 }
@@ -368,7 +369,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}{@TOBJ::ISA = qw/PDL::Graphics::TriD::Object/;}
 
 use PDL::Graphics::OpenGLQ;
 
-use PDL::Graphics::OpenGL;
+use OpenGL;
 
 
 
@@ -394,15 +395,15 @@ sub togl {
 
 	glRasterPos3f(0,0.1,1.1);
 
-	PDL::Graphics::OpenGL::glpPrintString($::lb,$header);
+	OpenGL::glpPrintString($::lb,$header);
 
 	glRasterPos3f(0,0.1,0.9);
 
-	PDL::Graphics::OpenGL::glpPrintString($::lb,"fe=".$c0);
+	OpenGL::glpPrintString($::lb,"fe=".$c0);
 
 	glRasterPos3f(0,0.1,0.9);
 
-	PDL::Graphics::OpenGL::glpPrintString($::lb," "x(23)."fe=".$c1."meV");
+	OpenGL::glpPrintString($::lb," "x(23)."fe=".$c1."meV");
 
         for ($i=0;$i<1;$i+=0.1)
 
@@ -412,7 +413,7 @@ sub togl {
 
 	glRasterPos3f(0,0.1,0.9);
 
-	PDL::Graphics::OpenGL::glpPrintString($::lb," "x(12+10*$i)."*");
+	OpenGL::glpPrintString($::lb," "x(12+10*$i)."*");
 
 
 

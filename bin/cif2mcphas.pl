@@ -82,11 +82,11 @@ if (!$create && ($#ARGV<0 || $helpflag)) {
    print "                           will load <r^l> by edvardsson Journal Alloy Comp 275-277 (1998) 230\n";
    print "    --interactive or -i  : prompts user for information such as valence states\n";
    print "    --pointcharge or -pc : calculates the crystal field parameters from point charges\n";
-   print "                           up to # Angstrom away from magnetic ions (e.g. -p 3.5)\n";
+   print "                           up to # Angstrom away from magnetic ions (e.g. -pc 15)\n";
    print "    --savepcfile  or -sp : keep *.pc coordinate files in results folder\n";
    print "    --savecharges or -sc : store pointcharge coordinates in sipf file\n";
    print "    --readpcfile  or -rp : read from *.pc coordinate files in results folder\n";
-   print "    --charges     or -ch : input charges to override defaults\n";
+   print "    --charges     or -ch : input charges to override defaults, e.g. -ch Ni1=+1.7,O2=-1.9\n";
    print "    --nonmagnetic or -nm : set nonmagnetic ion overrideing default, e.g. -nm Cu\n";
    print "    --magnetic    or -m : set magnetic ion overrideing default, e.g. -m Cu\n";
    print "    --so1ion      or -so : force use of so1ion for single ion modules.\n";

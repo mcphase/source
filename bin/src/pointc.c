@@ -421,9 +421,9 @@ else
  printf("#Lande Factor gJ\n GJ = %4g\n",(*iops).gJ);
  }
 if(conv){
-fprintf(conv_file,"#col1  2  3        4 5 6 7     8   9   10   11   12   13   14  15  16  17  18  19  20   21   ... 28  29  ... 36  37  38   39   ... 50  51  ... 62  63 ");
+fprintf(conv_file,"#col1  2  3       4 5 6 7    8   9   10   11   12   13   14  15  16  17  18  19  20   21   ... 28  29  ... 36  37  38   39   ... 50  51  ... 62  63 ");
 if(stcalc){fprintf(conv_file," 64");}fprintf(conv_file,"\n");
-fprintf(conv_file,"#c0=c2 c4 c6 (|e|) x y z r (A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B40 L40 ... B44 L44 B66S L66S ... B60 L60 ... B66 L66");
+fprintf(conv_file,"#c0=c2 c4 c6(|e|) x y z r(A) B00 L00 B22S L22S B21S L21S B20 L20 B21 L21 B22 L22 B44S L44S ... B40 L40 ... B44 L44 B66S L66S ... B60 L60 ... B66 L66");
 if(stcalc){fprintf(conv_file," sta");}fprintf(conv_file,"\n");
 }
 
