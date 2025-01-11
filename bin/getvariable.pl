@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 use File::Copy;
+use Getopt::Long;
 
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >0)
@@ -10,7 +11,11 @@ print STDERR << "EOF";
 #  (e.g. somewhere in a file there is 
 #   a statement T=4.3 and you want to get out this 4.3)
 #
-# usage: perl getvariable variablename filename
+# usage: perl getvariable [options] variablename filename
+#
+# options: -c 24.13   compare the value with 24.13+-0.01 (error corresponds to last 
+#                    digit, and exit with failure message if extracted y-value is
+#                    not corresponding
 #
 # output: the variable value is written to stdout and environment variable 
 #         MCPHASE_GETVARIABLE_VALUE, the name is stored in 
@@ -23,6 +28,9 @@ EOF
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
 }else{print STDERR "#* $0 *\n";}
+
+GetOptions("c=s"=>\$compare);
+
 
 $name=$ARGV[0];shift @ARGV;
 foreach(@ARGV)
@@ -51,6 +59,16 @@ print "export MCPHASE_GETVARIABLE_NAME=$name\n";
 print "export MCPHASE_GETVARIABLE_VALUE=$value\n";
                   }
 
+if(defined $compare)
+{@d=split("e",$compare);
+ $d[0]=~s/\d(?=[\d\.]*?\d)/X/g;
+ $d[0]=~s/\d/1/g;
+ $d[0]=~s/X/0/g;
+ $err=join("e",@d);
+print STDERR "error=".$err."\n";
+ if(abs($compare-$value)>abs($err))
+{die "Error getvalue comparing  $compare to extracted value $name=$value from file $filename \n";}
+}
 
 exit(0);
 

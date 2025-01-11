@@ -493,13 +493,13 @@ Vector crossp(Vector a, Vector b)
 
 double expectation_value(int & d,complexdouble * OP,complexdouble * ES )
 {double ev=0;int di=0;//int nonzero=0; // nonzero for check of how many matrix elements are zero
- for(int i=0;i<d;++i){
+ for(int i=0;i<d;++i){// Note: storage of OP(i,j) is as OP(i,j)=OP[ji]=OP[d*j+i]
   double sum=0;
-  double sumi=0;// (ES.r - i ES.i)[i](OP.r+i OP.i)[ij](ES.r + i ES.i)[j]
-                // +(ES.r - i ES.i)[j](OP.r+i OP.i)[ji](ES.r + i ES.i)[i] (if i!=j) =
+  double sumi=0;// (ES.r - i ES.i)[i](OP.r+i OP.i)[ji](ES.r + i ES.i)[j]
+                // +(ES.r - i ES.i)[j](OP.r+i OP.i)[ij](ES.r + i ES.i)[i] (if i!=j) =
                 // ....
-                //  (ES.r - i ES.i)[i](OP.r+i OP.i)[ij](ES.r + i ES.i)[j]
-                // +(ES.r + i ES.i)[i](OP.r-i OP.i)[ij](ES.r - i ES.i)[j] (if i!=j) 
+                //  (ES.r - i ES.i)[i](OP.r-i OP.i)[ij](ES.r + i ES.i)[j]
+                // +(ES.r + i ES.i)[i](OP.r+i OP.i)[ij](ES.r - i ES.i)[j] (if i!=j) 
 
 if(OP[di+i].r!=0){ev+= ES[i].r*OP[di+i].r*ES[i].r;//++nonzero;
                   ev+= ES[i].i*OP[di+i].r*ES[i].i;} // do diagonal elements separately
@@ -507,7 +507,7 @@ if(OP[di+i].r!=0){ev+= ES[i].r*OP[di+i].r*ES[i].r;//++nonzero;
 if(OP[dij].r!=0){//++nonzero;
                 sum+= OP[dij].r*ES[j].r;sumi+= OP[dij].r*ES[j].i;} // do offdiagonal elements only with
 if(OP[dij].i!=0){//++nonzero;
-                 sum-= OP[dij].i*ES[j].i;sumi+= OP[dij].i*ES[j].r;}  // upper triangle of OP
+                 sum+= OP[dij].i*ES[j].i;sumi-= OP[dij].i*ES[j].r;}  // upper triangle of OP
                        }
     ev+=(ES[i].r+ES[i].r)*sum;
     ev+=(ES[i].i+ES[i].i)*sumi;
@@ -537,12 +537,12 @@ if(OP[di+i].r!=0){tme.r+= S1[i].r*OP[di+i].r*S2[i].r;//++nonzero;// do diagonal 
                   tme.i+= S1[i].r*OP[di+i].r*S2[i].i;//++nonzero;// do diagonal elements separately
                   tme.i-= S1[i].i*OP[di+i].r*S2[i].r;
                    
-                 } 
-//(S1* |OP |S2)=...+(S1.r - i S1.i )[i] (OP.r + i OP.i)[ij] (S2.r + i S2.i)[j] +
-//                 +(S1.r - i S1.i )[j] (OP.r + i OP.i)[ji] (S2.r + i S2.i)[i]+... =
+                 } // Note: storage of OP(i,j) is as OP(i,j)=OP[ji]=OP[d*j+i]
+//(S1* |OP |S2)=...+(S1.r - i S1.i )[i] (OP.r - i OP.i)[ij] (S2.r + i S2.i)[j] +
+//                 +(S1.r - i S1.i )[j] (OP.r - i OP.i)[ji] (S2.r + i S2.i)[i]+... =
 //
-//             =...+(S1.r - i S1.i )[i] (OP.r + i OP.i)[ij] (S2.r + i S2.i)[j] +
-//                 +(S2.r + i S2.i )[i] (OP.r - i OP.i)[ij] (S1.r - i S1.i)[j] if (i!=j) + ...
+//             =...+(S1.r - i S1.i )[i] (OP.r - i OP.i)[ij] (S2.r + i S2.i)[j] +
+//                 +(S2.r + i S2.i )[i] (OP.r + i OP.i)[ij] (S1.r - i S1.i)[j] if (i!=j) + ...
  for(int j=i+1;j<d;++j){int dij=di+j;
 if(OP[dij].r!=0){//++nonzero;
                 sum2+= OP[dij].r*S2[j].r; sum2i+= OP[dij].r*S2[j].i; // do offdiagonal elements only with
@@ -550,10 +550,10 @@ if(OP[dij].r!=0){//++nonzero;
                 sum1+= OP[dij].r*S1[j].r; sum1i+= OP[dij].r*S1[j].i; // do offdiagonal elements only with
                isum1-= OP[dij].r*S1[j].i;isum1i+= OP[dij].r*S1[j].r;} // do offdiagonal elements only with
 if(OP[dij].i!=0){//++nonzero;
-                 sum2-=  OP[dij].i*S2[j].i; sum2i+=  OP[dij].i*S2[j].r;  // upper triangle of OP
-                isum2+=  OP[dij].i*S2[j].r;isum2i+=  OP[dij].i*S2[j].i;  // upper triangle of OP
-                 sum1-=  OP[dij].i*S1[j].i; sum1i+=  OP[dij].i*S1[j].r;  // upper triangle of OP
-                isum1-=  OP[dij].i*S1[j].r;isum1i-=  OP[dij].i*S1[j].i;}  // upper triangle of OP
+                 sum2+=  OP[dij].i*S2[j].i; sum2i-=  OP[dij].i*S2[j].r;  // upper triangle of OP
+                isum2-=  OP[dij].i*S2[j].r;isum2i-=  OP[dij].i*S2[j].i;  // upper triangle of OP
+                 sum1+=  OP[dij].i*S1[j].i; sum1i-=  OP[dij].i*S1[j].r;  // upper triangle of OP
+                isum1+=  OP[dij].i*S1[j].r;isum1i+=  OP[dij].i*S1[j].i;}  // upper triangle of OP
                        }
 
     tme.r+=S1[i].r*sum2+  S2[i].r*sum1;

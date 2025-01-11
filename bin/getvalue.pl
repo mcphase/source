@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 use File::Copy;
+use Getopt::Long;
 
 BEGIN{@ARGV=map{glob($_)}@ARGV}
 unless ($#ARGV >0)
@@ -9,13 +10,17 @@ print STDERR << "EOF";
  program to extract the y-value of a function y(x) by averaging
  over an interval xvalue+-dx,
  
- usage: perl getvalue.pl colx coly xvalue dx filename
+ usage: perl getvalue.pl [options] colx coly xvalue dx filename
 
  note:  colx has to be sorted
         if colx=0 then the x axis is assumed to be the line number (not considering
         comment lines)
         if you do not want any integration at interval boundaries to happen, 
         remember to put dx to zero.
+
+options: -c 24.13   compare the value with 24.13+-0.01 (error corresponds to last 
+                    digit, and exit with failure message if extracted y-value is
+                    not corresponding
 
  examples:
 
@@ -46,6 +51,9 @@ EOF
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat");close Fout;
 exit(1);
 }else{print STDERR "#* $0 *\n";}
+
+GetOptions("c=s"=>\$compare);
+
 $ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$xvalue=eval $ARGV[0];shift @ARGV;
@@ -90,7 +98,16 @@ print sprintf("export MCPHASE_YVALUE_INVERSE_ROUNDED_INT=%.0f\n",$yinv);
 print "export MCPHASE_STA=$sta\n";
                   }
 
-
+if(defined $compare)
+{@d=split("e",$compare);
+ $d[0]=~s/\d(?=[\d\.]*?\d)/X/g;
+ $d[0]=~s/\d/1/g;
+ $d[0]=~s/X/0/g;
+ $err=join("e",@d);
+print STDERR "error=".$err."\n";
+ if(abs($compare-$yvalue)>abs($err))
+{die "Error getvalue comparing  $compare to extracted yvalue $yvalue from file $filename \n";}
+}
 
 exit(0);
 
