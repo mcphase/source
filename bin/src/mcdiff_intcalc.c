@@ -459,7 +459,7 @@ if(code==0){ m = 0;// reset m
             Vector hkl1(1,3);
           if(getint(ini,hi,ki,li,hkl1,scale,d,Imag,Imagdip,inuc,outn,mqx,mqy,mqz,mqxy,mqxz,mqyz,mqx2,mqy2,mqz2))
           {// reflection was found below thetamax....
-
+           //printf("%g %g %g inuc=%g\n",hkl1(1),hkl1(2),hkl1(3),inuc);
             //sort according to descending d spacing
              if((Imag + inuc) > SMALLINTENSITY||Imagdip > SMALLINTENSITY||abs(mqx)*sqrt(scale)>SMALLINTENSITY
               ||abs(mqy)*sqrt(scale)>SMALLINTENSITY||abs(mqz)*sqrt(scale)>SMALLINTENSITY

@@ -30,7 +30,7 @@
 #define SMALL 1e-6           // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
                              // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 
-#define IC1IONMODULE_VERSION	1.0
+#include "../../version"
 #define EST_OFFSET		100
 
 // --------------------------------------------------------------------------------------------------------------- //

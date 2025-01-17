@@ -99,12 +99,12 @@ print "export MCPHASE_STA=$sta\n";
                   }
 
 if(defined $compare)
-{@d=split("e",$compare);
+{@d=split("e|E|d|D",$compare);
  $d[0]=~s/\d(?=[\d\.]*?\d)/X/g;
  $d[0]=~s/\d/1/g;
  $d[0]=~s/X/0/g;
  $err=join("e",@d);
-print STDERR "error=".$err."\n";
+ print STDERR "accuracy=".$err."\n";
  if(abs($compare-$yvalue)>abs($err))
 {die "Error getvalue comparing  $compare to extracted yvalue $yvalue from file $filename \n";}
 }

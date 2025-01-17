@@ -15,7 +15,7 @@ print "# References: M. Rotter et al. PRB 68 (2003) 144418\n";
 print "#********************************************************\n";
 $PI=3.14159265358979323846;
  $bvkA=25;
- $bvkalpha=0.1;
+ $bvkalpha=1/9;
  $SMALLdabc=0.00001; # small difference in da , db or dc ...
  $SMALLdr=0.00001; # small difference in distance so that program believes when
                 #  comparing table values that this is the same bond
