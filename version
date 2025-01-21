@@ -1,4 +1,4 @@
-#define MCPHASVERSION "mcphas version 5.6"
-#define MCDISPVERSION "mcdisp version 5.6"
-#define MCDIFFVERSION "mcdiff version 5.6"
-#define IC1IONMODULE_VERSION	5.6
+#define MCPHASVERSION "mcphas version 5.7"
+#define MCDISPVERSION "mcdisp version 5.7"
+#define MCDIFFVERSION "mcdiff version 5.7"
+#define IC1IONMODULE_VERSION  5.7 

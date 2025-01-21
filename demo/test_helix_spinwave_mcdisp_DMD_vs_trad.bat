@@ -13,7 +13,7 @@ REM soft mode correctly
 call mcdispit -max 6
 
 range 7 0.43 0.45 results/mcdisp.qei
-getvalue.pl -c 0.04562 9 10 2.47221  0 results/mcdisp.qei
+getvalue.pl -c 0.046 9 10 2.47221  0 results/mcdisp.qei
 
 call mcdispit -r 0.5 -max 6
 range -d 7 0.444 0.445 results/mcdisp.dsigma

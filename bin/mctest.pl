@@ -43,30 +43,48 @@ while($line=<Fin>)
 
      {++$linenr;
       # do some substitutions to allow windows and linux batches 
-if ($^O=~/MSWin/){$line=~s/^\s*rem/#/;
-                  $line=~s/^\s*REM/#/;
+if ($^O=~/MSWin/){$line=~s/^\s*rem/#/i; # i ... case insensitive pattern matching
                   $line=~s/^\s*rm\s/del /;
                   $line=~s/^\s*cp\s/copy /;
 
 
                  } else
-                 {$line=~s/^\s*call\s//;
-                  $line=~s/^\s*del\s/rm /;
-                  $line=~s/^\s*copy\s/cp /;
-                  $line=~s/^\s*rem/#/;
-                  $line=~s/^\s*REM/#/;
+                 {$line=~s/^\s*call\s//i;
+                  $line=~s/^\s*del\s/rm /i;
+                  $line=~s/^\s*copy\s/cp /i;
+                  $line=~s/^\s*rem/#/i;
+                  $line=~s|\\|/|ig;
                   
                  }
 
+# treat setting of environmental variables: if windows syntax is used - transform it to 
+# linux syntax
+$line=~s/^\s*set\s/export /i;
+$line=~s/%(\w+)%/\$$1/g;
+
+# substitute variables by values
+
+$i=0;foreach $name (@var)
+{$line=~s/\$$name/$val[$i]/g; 
+++$i;
+}
+
 
      unless ($line=~/^\s*[#\n]/){
-               if($line=~/^\s*cd/){$line=~s/^\s*cd//;$line=~s/\n//;$line=~s/\s*//;
+               if($line=~/^\s*cd/i){$line=~s/^\s*cd//;$line=~s/\n//;$line=~s/\s*//;
                                     unless(chdir($line)){die "\nError  executing command \ncd  $line in $file line number $linenr\n";}
-                                  } # cd
-                                  else
-                                  {
-                                   if(system($line)){die "\nError  executing command \n $line in $file line number $linenr \n";}
-                                  }
+                                   } # cd
+	       elsif($line=~/^\s*export\s/){$line=~s/^\s*export\s*//;
+                                    unless($line=~/\w+=/){die "\nError  executing command \nexport $line in $file line number $linenr\n";}
+                                   @n=split("=",$line);
+               
+                                   unshift @var, $n[0];$n[1]=~s/\n//;
+                                   unshift @val, $n[1];
+                                   } # export
+               else
+                                   {
+                                     if(system($line)){die "\nError  executing command \n $line in $file line number $linenr \n";}
+                                   }
                                 } # no comment line
    } # next line
 close Fin;

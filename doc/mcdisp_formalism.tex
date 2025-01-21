@@ -311,10 +311,14 @@ In order to evaluate
  equations
 (\ref{mfrpasimple})-(\ref{singleionsusceptibility}) without producing a numerical divergence 
 it is necessary to add to $\omega$ a small imaginary constant $\omega \rightarrow \omega+i\epsilon$
-and insert this into equation (\ref{singleionsusceptibility}). 
+and insert this into equation (\ref{singleionsusceptibility}). Technically this is done 
+in the {\prg jjjpar::chi0()} function in source file {bin/src/jjjpar\_basmodfunc.cpp}.
 If the option {\prg -r $\epsilon$} is used,
 the program {\prg McDisp} calculates the above expression for every energy
 and stores the result in {\prg ./results/mcdisp.dsigma}. 
+Also program {\prg singleion} can be used
+to evaluate the magnetic subsystem susceptibility according to (\ref{singleionsusceptibility}),
+see section \ref{addprog}.
 
  If the option {\prg -r} is not used, the
  program {\prg mcdisp\index{mcdisp}} uses only the extremely fast DMD (Dynamical Matrix Diagonalisation) %%@

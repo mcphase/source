@@ -15,7 +15,7 @@ unless ($#ARGV >1)
  print STDERR "# a column containing the value of chisquared during each step of the\n";
  print STDERR "# summation is added to the file\n";
  print STDERR "# usage: chi2 col1 col2 col3  *.*   \n# col=columns \n# *.* .. filenname\n";
- exit 0;}else{print STDERR "#* $0 *\n";}
+ die;}else{print STDERR "#* $0 *\n";}
 
  
 

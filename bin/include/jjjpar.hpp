@@ -123,16 +123,24 @@ public:
    int  du1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & ests);
    int transitionnumber; // the transition associated with the ion (important if there are more in the single ion spectrum)
 
-   // calculates series of single ion susceptibility matrices for different energies 
+   /****************************************************************************/
+// this function calculates series of single ion susceptibility matrices for 
+// different energies
    // output:returns 0 on success
    //        the Matrices chi0pointer[1....nofstps] must exist and will be filled with values
    //        ...... the contribution of transition transitionnumber is added to these matrices
    // input: emin est nofstps define energies, eps is the imaginary part of the energy
    //        Q       the Q vector in 1/A
-   //        qcounter is a counter telling which q vector in the list is calculated
-   //                  sign(qcounter) <0 indicates that chi0c matrices should be cleared and nothing calculated
+   //        |qcounter| is a counter telling which q vector in the list is calculated
+   //                 this sub will only do something if |qcounter|=0,1
+   //        |epsilon| ... imaginary part of Energy for calculation of chi0(omega+i|epsilon|)
+   //        sign(qcounter) <0 & sign(epsilon) >0 ... chi0c matrices should be cleared
+   //        sign(qcounter) <0 & sign(epsilon) <=0  ... try to load chi0 externally (from bfk)
+   //        sign(qcounter) >0 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc
+   //        sign(qcounter) >0 & sign(epsilon) <=0  ... calculate magnetic chi0(1...3,1...3) using dm1calc
    //        delta ... sign determines if energy gain or loss term is added
-   int chi0(ComplexMatrix ** chi0pointer,double & emin, double estp, int & nofstps, double & eps,Vector & Q, 
+/****************************************************************************/
+ int chi0(ComplexMatrix ** chi0pointer,double & emin, double estp, int & nofstps,const double & eps,Vector & Q, 
             int qcounter,float & delta, double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,int i1,int j1,int k1,int l1);
 
    ComplexMatrix est; // eigenstates

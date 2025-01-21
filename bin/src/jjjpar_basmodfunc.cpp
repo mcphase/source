@@ -571,11 +571,16 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
    //        ...... the contribution of transition transitionnumber is added to these matrices
    // input: emin est nofstps define energies, eps is the imaginary part of the energy
    //        Q       the Q vector in 1/A
-   //        qcounter is a counter telling which q vector in the list is calculated
-   //                  sign(qcounter) <0 indicates that chi0c matrices should be cleared
+   //        |qcounter| is a counter telling which q vector in the list is calculated
+   //                 this sub will only do something if |qcounter|=0,1
+   //        |epsilon| ... imaginary part of Energy for calculation of chi0(omega+i|epsilon|)
+   //        sign(qcounter) <0 & sign(epsilon) >0 ... chi0c matrices should be cleared
+   //        sign(qcounter) <0 & sign(epsilon) <=0  ... try to load chi0 externally (from bfk)
+   //        sign(qcounter) >0 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc
+   //        sign(qcounter) >0 & sign(epsilon) <=0  ... calculate magnetic chi0(1...3,1...3) using dm1calc
    //        delta ... sign determines if energy gain or loss term is added
 /****************************************************************************/
-int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int & nofstps, double & epsilon, Vector & Q, 
+int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int & nofstps, const double & epsilon, Vector & Q, 
                   int qcounter,float & delta,double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,
                    int i1,int j1,int k1,int l1)
 { // for the moment do nothing module specific but use existing module function to calculate internal
@@ -632,8 +637,8 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
       }
    fclose(file);
    }
-  } else {
-  if(epsilon>0){ // use internal chi0
+  } else {// use internal chi0
+  if(epsilon>0){ // use du1calc with nofcomponents
   ComplexVector u1(1,nofcomponents);float dd; int n,nd;
   ComplexMatrix M(1,nofcomponents,1,nofcomponents);
   du1calc(T,Hxc,Hext,u1,dd,n,nd,ests);  
@@ -660,7 +665,37 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
      cc=0.5*eps/(eps+z);(*chi0pointer[i])+=cc*M.Transpose();
                             } //i
   } 
-  }  
+  } else  // do purely magnetic susceptibility using dm1calc in muB^2/meV
+  {
+  ComplexVector m1(1,3); 
+  ComplexMatrix M(1,3,1,3);
+  dm1calc(T,Hxc,Hext,m1,ests);  
+ 
+ complex<double> eps(SMALL_QUASIELASTIC_ENERGY-epsilon,0),cc,d(delta,0);
+  if(fabs(delta)>SMALL_QUASIELASTIC_ENERGY)
+  {  if(delta<0){ //treat correctly energy gain of neutron
+                m1=m1.Conjugate();
+                M=-m1^m1;
+               } else {
+                M=m1^m1;
+               }
+  for(int i=0;i<nofstps;++i){
+     complex<double> z(emin+i*estp,-epsilon); 
+     cc=1.0/(d-z);(*chi0pointer[i])+=cc*M;       
+                            } //i
+  }else{
+     //quasielastic intensity ...  artificially we introduce a splitting epsilon !!! compare Jensen 91 p 158
+     // factor 0.5 because every transition is counted as half positive and half negative energy...
+   M=m1^m1;
+   for(int i=0;i<nofstps;++i){
+     complex<double> z(emin+i*estp,epsilon);    
+     //  cc=eps/(eps-z);(*chi0pointer[i])+=cc*M;
+     cc=0.5*eps/(eps-z);(*chi0pointer[i])+=cc*M;
+     cc=0.5*eps/(eps+z);(*chi0pointer[i])+=cc*M.Transpose();
+                            } //i
+ 
+  } 
+ }
  }} //qcounter
  return 0; // success
 }
