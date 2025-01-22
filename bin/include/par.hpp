@@ -12,6 +12,7 @@
 #define SMALL 1e-6  // for module kramer - to trigger numerical limited calculation 
                     // for adding jjpar sets to see what is difference in position or what is equal
                     // for checking jjj parameters if values are equal 
+#define SMALLCHARGE 1e-6  // for checking if totalcharge is small and outpu polarisation P
 
 class par
 { 
@@ -32,12 +33,14 @@ class par
    // elastic energy for a crystallographic primitive unit cell as described by
    // mcphas.j
    Matrix Cel,CelInv;
-   
+
+   // sum of charges 
+   double totalcharge;   
 
   //jjjpar 
    
    par (const char *filejjj,int verbose=0);	//konstruktor
-   par (Vector abc,int nofcompi);
+   par (Vector abc,int nofcompi); // simple contructor: needed in clusterize
    par (const par & pars);	// kopier-konstruktor
    
 ~par ();		//destruktor

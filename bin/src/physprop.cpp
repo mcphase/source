@@ -37,6 +37,7 @@ physproperties::physproperties (int nofspincorrs,int maxnofhkli,int na,int nm)
  
  m=Vector(1,3);
  H=Vector(1,3);
+ P=Vector(1,3);
  jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  hkli= new Vector [maxnofhkli+1];for(i=0;i<=maxnofhkli;++i){hkli[i]=Vector(1,10);}
@@ -55,6 +56,7 @@ physproperties::physproperties (const physproperties & p)
   j=p.j;
   T=p.T;
   H=p.H;
+  P=p.P;
   m=p.m;
   nofhkls=p.nofhkls;
   u=p.u;fe=p.fe;Eel=p.Eel;
@@ -122,7 +124,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   ini.time_estimate_until_end(x,y);
   printf("\n");
 
-//-----------------------------------------------------------------------------------------  
+//-----------------------------------mcphas.fum ----------------------------------------------------  
   errno = 0;char outfilename[MAXNOFCHARINLINE];
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.fum");
@@ -152,23 +154,28 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
 
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
    fprintf (fout, "#1    2   3    4    5     6     7     8                      9                 10                       11         12         13         14                              ");
-   if(ortho==0){fprintf (fout, "15          16          17          18    19    20   ");}
-   if(ini.doeps&&ortho==0){fprintf (fout, " 21           22         23         24         25           26          27         ");}
-   if(ini.doeps&&ortho!=0){fprintf (fout, " 15           16         17         18         19           20          21         ");}
+   int co=14;if(ortho==0){co=20;fprintf (fout, "15          16          17          18    19    20   ");}
+   if(ini.doeps){fprintf (fout, " %i           %i         %i         %i         %i           %i          %i         ",
+                         co+1,co+2,co+3,co+4,co+5,co+6,co+7);co+=7;}
+   if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf (fout, " %i      %i      %i",co+1,co+2,co+3);
    fprintf (fout,"\n");
+
    fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] free_energy_f[meV/ion] energy_u[meV/ion] total_moment|m|[mb/ion]  ma[mb/ion] mb[mb/ion] mc[mb/ion] m||(projection along H)[mb/ion] ");
    if(ortho==0){fprintf (fout, "mi[muB/ion] mj[muB/ion] mk[muB/ion] Hi[T] Hj[T] Hk[T]");}
    if(ini.doeps&&ortho==0){fprintf (fout, " Eel[meV/ion] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij");}
    if(ini.doeps&&ortho!=0){fprintf (fout, " Eel[meV/ion] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab");}
+   if(fabs(inputpars.totalcharge)<SMALLCHARGE&&ortho==0){fprintf (fout, " Pi   Pj   Pk (|e|/A^2) ");}
+   if(fabs(inputpars.totalcharge)<SMALLCHARGE&&ortho!=0){fprintf (fout, " Pa   Pb   Pc (|e|/A^2) ");}
    fprintf (fout,"\n");
    fclose(fout);
       }
-   if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eel=0;}
+   if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eel=0;P=0;}
    fout = fopen_errchk (outfilename,"a");
    fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
             myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
    if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
     if(ini.doeps){fprintf (fout, "  %4.4g  %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(Eel),myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));}
+    if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf (fout, "  %4.4g  %4.4g %4.4g ",myround(P(1)),myround(P(2)),myround(P(3)));
    fprintf(fout,"\n");
    fclose(fout);
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,prefix);
@@ -186,45 +193,47 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
      {++j2;
       if ((l=inputline(fout,nn,nnerr))!=0)
       {if(0.0001>(nn[3]-T)*(nn[3]-T)+(nn[5]-H[1])*(nn[5]-H[1])+(nn[6]-H[2])*(nn[6]-H[2])+(nn[7]-H[3])*(nn[7]-H[3]))
-         { for(i=8;i<=l;++i){double clc=0;if(ortho==0){
-                         switch(i) { case 8: clc=fe;break;
+         { for(i=8;i<=l;++i){double clc=0;
+          if(i<15){switch(i) { case 8: clc=fe;break;
                                      case 9: clc=u;break;
                                      case 10: clc=Norm(m);break;
                                      case 11: clc=mabc(1);break;
                                      case 12: clc=mabc(2);break;
                                      case 13: clc=mabc(3);break;
                                      case 14: clc=m*Hijk/Norm(Hijk);break;
+                                     default: ;
+                              }
+                   } 
+           else   { // i>=15
+                   int co=14;             
+                   if(ortho==0){co=20;
+                         switch(i) { 
                                      case 15: clc=m[1];break;
                                      case 16: clc=m[2];break;
                                      case 17: clc=m[3];break;                                    
-
-                                     case 21: clc=Eel;break;
-                                     case 22: sps.epsilon(1);break;
-                                     case 23: sps.epsilon(2);break;
-                                     case 24: sps.epsilon(3);break;
-                                     case 25: sps.epsilon(4);break;
-                                     case 26: sps.epsilon(5);break;
-                                     case 27: sps.epsilon(6);break;
-                                     default: clc=0;
-                                   } } else
-{switch(i) { case 8: clc=fe;break;
-                                     case 9: clc=u;break;
-                                     case 10: clc=Norm(m);break;
-                                     case 11: clc=mabc(1);break;
-                                     case 12: clc=mabc(2);break;
-                                     case 13: clc=mabc(3);break;
-                                     case 14: clc=m*Hijk/Norm(Hijk);break;
-                                     case 15: clc=Eel;break;
-                                     case 16: sps.epsilon(1);break;
-                                     case 17: sps.epsilon(2);break;
-                                     case 18: sps.epsilon(3);break;
-                                     case 19: sps.epsilon(4);break;
-                                     case 20: sps.epsilon(5);break;
-                                     case 21: sps.epsilon(6);break;
-                                     default: clc=0;
+                                     default: ;
                                    }
-}
-
+                               }
+                  if(ini.doeps){switch(i-co) {
+                                     case 1: clc=Eel;break;
+                                     case 2: clc=sps.epsilon(1);break;
+                                     case 3: clc=sps.epsilon(2);break;
+                                     case 4: clc=sps.epsilon(3);break;
+                                     case 5: clc=sps.epsilon(4);break;
+                                     case 6: clc=sps.epsilon(5);break;
+                                     case 7: clc=sps.epsilon(6);break;
+                                     default: ;
+                                           } co+=7;
+                               }
+                 if(fabs(inputpars.totalcharge)<SMALLCHARGE)
+                              {switch(i-co) {
+                                     case 1: clc=P(1);break;
+                                     case 2: clc=P(2);break;
+                                     case 3: clc=P(3);break;
+                                     default: ;
+                                           }
+                              }
+                 }
                          if(nnerr[i]>0){if(verbose==1&&clc==0){fprintf(stdout,"sta_mcphas.fum warning: exp value cannot be fitted in line %i column %i in file ./fit/mcphas.fum\n",j2,i);}
 //fprintf(stdout,"stacalc_mphas.fum: col %i line %i value %g err %g - calcvalue %g\n",i,j2,nn[i],nnerr[i],clc);
                                        sta+=(nn[i]-clc)*(nn[i]-clc)/nnerr[i]/nnerr[i];}
@@ -235,7 +244,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
      }
      fclose(fout);
     }else{errno=0;}
-//-----------------------------------------------------------------------------------------  
+//--------------------------------------mcphas.xyt---------------------------------------------------  
   errno = 0; Vector totalJ(1,nofcomponents);
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.xyt");
@@ -250,9 +259,9 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "#1    2   3    4    5     6     7     8              9          10              11    12  ");
-  for(i1=1;i1<=nofcomponents;++i1)
+   int coli=12;   for(i1=1;i1<=nofcomponents;++i1)
 	      {//fprintf(fout,"<I%c> ",'a'-1+i1);}
-	      fprintf(fout,"%i   ",12+i1);}
+	      fprintf(fout,"%i   ",coli+i1);}
 	      fprintf(fout,"\n");
    fprintf (fout, "#x    y   T[K] H[T] Ha[T] Hb[T] Hc[T] phasnumber-j   period-key supercell-nr1   nr2   nr3 ");
            for(i1=1;i1<=nofcomponents;++i1)
@@ -277,7 +286,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
      fclose(fout);
     }else{errno=0;}
 
-//-----------------------------------------------------------------------------------------  
+//-----------------------------------mcphasj*.j*------------------------------------------------------  
  nmax=nofspincorr; // look how many spincorrelationfunction we have indeed calculated - the 
                    // user wanted nofspincorr, but maybe it was fewer ...
  for (l=1;l<=inputpars.cs.nofatoms;++l)
@@ -345,7 +354,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
     }else{errno=0;}
   }}
 
-//-----------------------------------------------------------------------------------------  
+//-----------------------------------------mcphas*.hkl------------------------------------------------  
  errno = 0;
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas*.hkl");
@@ -488,7 +497,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
      fclose(fout);
     }else{errno=0;}
    delete []inew;delete []intensity;
-//-----------------------------------------------------------------------------------------  
+//---------------------------------------mcphas.sps--------------------------------------------------  
  errno = 0;
  strcpy(outfilename+10+strlen(prefix),"mcphas.sps");
    if (verbose==1)printf("saving %s- spinconfiguration\n",outfilename);
@@ -533,7 +542,7 @@ else
      fclose(fout);
     }else{errno=0;}
  
-//-----------------------------------------------------------------------------------------  
+//---------------------------------------mcphas.mf--------------------------------------------------  
  errno = 0;
   strcpy(outfilename+10+strlen(prefix),"mcphas.mf");
   if (verbose==1)printf("saving %s - mean field configuration\n",outfilename);
@@ -605,16 +614,17 @@ int physproperties::read(int verbose, par & inputpars,char * readprefix)
 
   printf("reading properties for T=%g K  Ha= %g Hb= %g Hc= %g T\n", T,H(1),H(2),H(3));
 
-//-----------------------------------------------------------------------------------------  
+//-----------------------------------------mcphas.fum------------------------------------------------  
+// here read free energy etc if possible ... otherwise return 1
+// check x y T H[1] H[2] H[3] agrees and fe nonzero ?
+// then read fe, u, 
+// read mabc[1-3] convert to ijk
+// NOT read: strain tensor epsilon
   errno = 0;char infilename[MAXNOFCHARINLINE];
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas.fum");
   if (verbose==1) printf("reading %s \n",infilename);
    fin = fopen_errchk (infilename,"r");
-// here read free energy etc if possible ... otherwise return 1
-// check x y T H[1] H[2] H[3] agrees and fe nonzero ?
-// then read fe, u, 
-// read mabc[1-3] convert to ijk
 
 found=0;while(found==0){ 
  while (feof(fin)==0&&0==inputline(fin,nn)){}  // if yes -> input them
@@ -636,7 +646,7 @@ found=0;while(found==0){
 //myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
  //  if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
   
-//-----------------------------------------------------------------------------------------  
+//-----------------------------------------mcphas.xyt------------------------------------------------  
   errno = 0; Vector totalJ(1,nofcomponents);
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas.xyt");

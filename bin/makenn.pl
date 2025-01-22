@@ -694,6 +694,8 @@ for($nnn=$nofatoms+1;$nnn<=$nofatoms+$nofmagneticatoms;++$nnn)
   # set nuclear scattering lengths in this purely magnetic atom zero (for mcdiff)
   setvariable("SCATTERINGLENGTHREAL",0,$sipf_file[$nnn]);
   setvariable("SCATTERINGLENGTHIMAG",0,$sipf_file[$nnn]);
+  # set charge zero (for mcphas electrical polarisation calculation) 
+  setvariable("CHARGE",0,$sipf_file[$nnn]);
 
   if($cfph==2){my_rename("results/pointc.dLlm","results/makenn.a$nnn.dLlm");unlink("results/pointc.dBlm");}
   if($cfph==3){my_rename("results/pointc.dBlm","results/makenn.a$nnn.dBlm");unlink("results/pointc.dLlm");}

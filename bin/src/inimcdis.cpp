@@ -13,12 +13,12 @@
 #endif
 
 
-int usrdefcols[]={4, 1,2,3,4}; // user defined output columns (first number is number of usr def output columns)
+int usrdefcols[]={8, 1,2,3,4,5,6,7,8}; // user defined output columns (first number is number of usr def output columns)
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
-int colcod[]=    {-1,5,6,7,4}; // field to store code for assigning type of data to columns of output,
+int colcod[]=    {-1,5,6,7,4,12,13,14,15}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
                                            // using the out5 out6  ... commands in mcdisp.par these codes can be modified
-#define COLHEADDIM 11
+#define COLHEADDIM 15
 // different output data for columns 10 and 11
 const char * colhead []= {  "Qinc[1/A] ", //  0
                             "Qx[1/A]   ",  //   1
@@ -31,11 +31,15 @@ const char * colhead []= {  "Qinc[1/A] ", //  0
                             "|Q|[1/A]  ",  //    8                                                                  
                             "hprim  ",  //    9                                                                  
                             "kprim  ",  //    10                                                                  
-                            "lprim  "  //    11                                                                 
+                            "lprim  ",  //    11                                                                 
+                            "h ",  //    12                                                                 
+                            "k ",  //    13                                                                 
+                            "l ",  //    14                                                                 
+                            "Q[A^-1] "  //    15                                                                 
                            };
 
 // different output data for user defined columns ...
-double inimcdis::setcolvalue(int i,Vector & Qvec, double & Qincr,Vector & qprim)
+double inimcdis::setcolvalue(int i,Vector & Qvec, double & Qincr,Vector & qprim,Vector & hkl)
 {
          switch (i) {
 case 0:  return Qincr;break;
@@ -50,6 +54,10 @@ case 8:  return Norm(Qvec);break;
 case 9:  return qprim(1);break;
 case 10:  return qprim(2);break;
 case 11:  return qprim(3);break;
+case 12:  return hkl(1);break;
+case 13:  return hkl(2);break;
+case 14:  return hkl(3);break;
+case 15:  return Norm(Qvec);break;
 default: fprintf(stderr,"Error mcdisp: unknown column code\n");exit(EXIT_FAILURE);
                     }
 
@@ -67,17 +75,16 @@ return 0;
 void inimcdis::print_usrdefcolhead(FILE *fout)
 {fprintf(fout,"#");
  for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%i%*s",i,(int)strlen(colhead[colcod[usrdefcols[i]]])-1,"");
- for(int i=usrdefcols[0]+1;i<=usrdefcols[0]+3;++i)fprintf(fout,"%i ",i);
- for(int i=usrdefcols[0]+4;i<=usrdefcols[0]+5;++i)fprintf(fout,"   %i   ",i);
- for(int i=usrdefcols[0]+6;i<=usrdefcols[0]+8;++i)fprintf(fout,"               %i   ",i);
+ for(int i=usrdefcols[0]+1;i<=usrdefcols[0]+2;++i)fprintf(fout,"    %i    ",i);
+ for(int i=usrdefcols[0]+3;i<=usrdefcols[0]+5;++i)fprintf(fout,"               %i   ",i);
 fprintf(fout,"\n#");
  for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s",colhead[colcod[usrdefcols[i]]]);
 }
 
 // print user defined column headers
-void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim)
+void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim,Vector & hkl)
 {
- for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim)));
+ for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim,hkl)));
 }
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save()

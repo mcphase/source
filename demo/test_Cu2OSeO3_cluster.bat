@@ -55,8 +55,8 @@ getvalue.pl -c 9.35207 0 6 2 0 results/mcdisp.trs
 getvalue.pl -c 0.204099  0 8 2 0 results/mcdisp.trs
 
 call mcdispit -t -prefix 011
-getvalue.pl -c -39.16   5 8 0.6 0 results/011mcdisp.qom
-getvalue.pl -c -35.77   5 12 0.6 0 results/011mcdisp.qom
+getvalue.pl -c -39.16   5 9 0.6 0 results/011mcdisp.qom
+getvalue.pl -c -35.77   5 13 0.6 0 results/011mcdisp.qom
 range 5 0.4 0.55 results/011mcdisp.qei
  average -dmin=0.1 -av  9  results/011mcdisp.qei
 getvalue.pl -c 0.2972018 9 10 9.07597 0  results/011mcdisp.qei

@@ -1008,8 +1008,8 @@ if (do_jqfile){
             fprintf(stderr,"# Skipping this q-point.\n");
             if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
                qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
-               ini.print_usrdefcols(foutqei,qijk,qincr,q);
-               fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
+               ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+               fprintf (foutqei, "%4.4g           ",0.); // print energy zero
                fprintf(foutqei, "-1    -1   -1\n");
             }
             continue;
@@ -1038,8 +1038,8 @@ if (do_jqfile){
          fprintf(stderr,"# The non-symmetric eigensolver failed. This Q point will be skipped.\n");
          if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
             qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
-            ini.print_usrdefcols(foutqei,qijk,qincr,q);
-            fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)), myround(Norm(qijk)),0.);
+            ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+            fprintf (foutqei, "%4.4g           ",0.);
             fprintf(foutqei, "-1    -1   -1\n");
          }
          continue;
@@ -1149,8 +1149,7 @@ if (do_jqfile){
          qincr+=Norm(qijk-qold); 
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
                              ini,calc_rixs,do_Erefine,counter);
-                  ini.print_usrdefcols(foutqom,qijk,qincr,q);
-                  fprintf (foutqom, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
+                  ini.print_usrdefcols(foutqom,qijk,qincr,q,hkl);
                   for (i=1;i<=dimA;++i)fprintf (foutqom, " %4.4g ",myround(En(i)));
                   fprintf (foutqom, " > ");
 
@@ -1346,9 +1345,8 @@ if (do_jqfile){
                                 Irlt=calc_irix(eir,eol,chi);if(Irlt>Irl){Irl=Irlt;azrl=azimuth*180/PI;}
                                 Ilrt=calc_irix(eil,eor,chi);if(Ilrt>Ilr){Ilr=Ilrt;azlr=azimuth*180/PI;}
                                 Illt=calc_irix(eil,eol,chi);if(Illt>Ill){Ill=Illt;azll=azimuth*180/PI;}
-                               if(calc_rixs==2){ini.print_usrdefcols(foutqei,qijk,qincr,q);
-                                                fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                                         myround(QQ),myround(En(i)));
+                               if(calc_rixs==2){ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                                                fprintf (foutqei, "%4.4g           ",myround(En(i)));
                                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Isst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ispt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ipst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ippt),myround(1e-8,azimuth*180/PI));
                                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Irlt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ilrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Illt),myround(1e-8,azimuth*180/PI));
                                                 fprintf (foutqei, "\n");
@@ -1356,13 +1354,11 @@ if (do_jqfile){
                               }}
                               if (En(i)==-DBL_MAX) {
                               fprintf (foutqei, "#| "); 
-                              ini.print_usrdefcols(foutqei,qijk,qincr,q);
-                              fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g%si%-4.4g    ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                                myround(QQ),myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
+                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                              fprintf (foutqei, "%4.4g%si%-4.4g    ",myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
                               } else {
-                              ini.print_usrdefcols(foutqei,qijk,qincr,q);
-                              fprintf (foutqei, "%4.4g %4.4g %4.4g  %4.4g %4.4g           ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                                myround(QQ),myround(En(i)));
+                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                              fprintf (foutqei, "%4.4g           ",myround(En(i)));
                               }
                                 if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){
                                  fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Iss),myround(1e-8,azss),myround(1e-8,Isp),myround(1e-8,azsp),myround(1e-8,Ips),myround(1e-8,azps),myround(1e-8,Ipp),myround(1e-8,azpp));
@@ -1410,14 +1406,12 @@ if (do_jqfile){
 
                      //if(intsbey(i)<0)intsbey(i)=-1.2;
                       fprintf (foutqom, " %6.6g",myround(intsbey(i)));
-                      ini.print_usrdefcols(foutqei,qijk,qincr,q);
-                      fprintf (foutqei, "%6.6g %6.6g %6.6g  %6.6g %6.6g  %6.6g  %6.6g %6.6g  ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)));
+                      ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                      fprintf (foutqei, "%6.6g  %6.6g  %6.6g %6.6g  ",myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)));
 	             } else {
                       fprintf (foutqei, "#| "); 
-                      ini.print_usrdefcols(foutqei,qijk,qincr,q);
-                      fprintf (foutqei, "%6.6g %6.6g %6.6g  %6.6g %6.6g%si%-6.6g  -1     -1    -1     ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
-                                         myround(QQ),myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
+                      ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                      fprintf (foutqei, "%6.6g%si%-6.6g  -1     -1    -1     ",myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
                      } 
                   if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){   
                        DMDtotint+=ints(i);DMDtotintbey+=intsbey(i);
@@ -1499,8 +1493,8 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.qes_real; delete[] thrdat.qes_imag; 
                   delete[] thrdat.qel_real; delete[] thrdat.qel_imag; 
 #endif
-if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
-               fprintf (foutdstot, "%4.4g %4.4g  %4.4g %4.4g %4.4g",hkl(1),hkl(2),hkl(3),DMDtotint,DMDtotintbey);
+if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl);
+               fprintf (foutdstot, "%4.4g %4.4g",DMDtotint,DMDtotintbey);
                switch(ini.outS)
                          {case 0: break;
                           case 1: for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutdstot," %4.4g %4.4g ",real(chitot(i1,j1)),imag(chitot(i1,j1)));break;
@@ -1679,9 +1673,8 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q);
                      ch=(*chpointer[iE-1]);
                      intensity = vIntensity(iE++); totint+=intensity*fabs(epsilon)/2;
 #endif
-                     ini.print_usrdefcols(foutds,qijk,qincr,q);
-                     fprintf (foutds, "%4.4g %4.4g  %4.4g ",myround(hkl(1)),myround(hkl(2)),myround(hkl(3)));
-	             fprintf (foutds, " %4.4g %4.4g ",myround(E),myround(intensity));
+                     ini.print_usrdefcols(foutds,qijk,qincr,q,hkl);
+                     fprintf (foutds, " %4.4g %4.4g ",myround(E),myround(intensity));
                      for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
                      fprintf(foutds,"\n");
 	   }

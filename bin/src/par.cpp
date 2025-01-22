@@ -13,7 +13,7 @@
  // *************************************************************************
 
 
-//constructor 
+//constructor - simple only lattice and nofcomponents are given - needed in clusterize
 par::par(Vector abc,int nofci)
 {rez=Matrix(1,3,1,3);
  Cel=Matrix(1,6,1,6);CelInv=Matrix(1,6,1,6);CelInv=0;
@@ -23,6 +23,7 @@ par::par(Vector abc,int nofci)
   rems[2]=new char[40];rems[2][0]='\0';
   rems[3]=new char[40];rems[3][0]='\0';
   cs.nofatoms=0;
+  totalcharge=1;
   jjj=new jjjpar * [cs.nofatoms+1];
 }
 
@@ -75,7 +76,7 @@ par::par (const char *filejjj,int verbose)
  
   rez=cs.r.Inverse();
   rems[3]=new char[strlen(instr)+2];strcpy(rems[3],instr);
-  
+  totalcharge=0;
   //read parameter sets for every atom 
   jjj=new jjjpar * [cs.nofatoms+1];
   //gJ=Vector(1,cs.nofatoms);
@@ -90,6 +91,7 @@ par::par (const char *filejjj,int verbose)
    cs.z[i]=(*jjj[i]).xyz[3];
    if(cs.nofcomponents!=(*jjj[i]).nofcomponents)
    {fprintf(stderr,"ERROR reading mcphas.j: nofcomponents (%i) not consistent for atom %i (%i read in fileheader)\n",(*jjj[i]).nofcomponents,i,cs.nofcomponents);exit(EXIT_FAILURE);}
+   totalcharge+=(*jjj[i]).charge;
   }
   //determine sublattices and rij 
   for(i=1;i<=cs.nofatoms;++i)
@@ -132,6 +134,7 @@ par::par(const par & p)
   cs.nofatoms=p.cs.nofatoms;
   cs.nofcomponents=p.cs.nofcomponents;
   Cel=p.Cel;CelInv=p.CelInv;
+  totalcharge=p.totalcharge;
 //dimension arrays
   for (i=1;i<=3;++i)
   {rems[i] = new char[strlen(p.rems[i])+2];
@@ -168,6 +171,7 @@ int par::newatom(jjjpar * p) //creates new atom from an existing and returns its
                   nnn=new jjjpar * [cs.nofatoms+1];
                   for (j=1;j<cs.nofatoms;++j){nnn[j]=jjj[j];} 
                   nnn[cs.nofatoms]=new jjjpar((*p));// use copy constructor to create new atom parameter set 
+                  totalcharge+=(*nnn[cs.nofatoms]).charge;
                   cs.sipffilenames[cs.nofatoms]=(*nnn[cs.nofatoms]).sipffilename;
                   cs.x[cs.nofatoms]=(*nnn[cs.nofatoms]).xyz[1];
                   cs.y[cs.nofatoms]=(*nnn[cs.nofatoms]).xyz[2];
@@ -185,9 +189,6 @@ int par::delatom(int nn, Matrix & distribute,int verbose) // removes atom number
 // a group of atoms (numbers given in column 1 of distribute) with 
 // coefficients given in col 2 of distribute. Only interactions
 // with atoms given in column 1 of distribute are removed completely.
-// Attention: sublattice index is not changed by this function !
-//            -- thus after running it sublattice[s] refers still to
-//            original numbering with all atoms in the parameters set !
 {jjjpar ** nnn;
  int j,s,again=0,n=nn; if(nn<0)n=-nn;
  FILE * out;
@@ -244,7 +245,7 @@ if(found!=1){fprintf(stderr,"Error reduce_unitcell on distributing interaction %
           }
 if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
               if(j+1==n)++j;}
-
+totalcharge-=(*jjj[n]).charge;
 for (j=1;j<n;++j){nnn[j]=jjj[j];}
 for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];}
 // correct the sublattice numbering 

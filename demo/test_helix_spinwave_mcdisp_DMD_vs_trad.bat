@@ -18,11 +18,11 @@ getvalue.pl -c 0.046 9 10 2.47221  0 results/mcdisp.qei
 call mcdispit -r 0.5 -max 6
 range -d 7 0.444 0.445 results/mcdisp.dsigma
 
-getvalue.pl -c 0.535 8 9 1.751 0 results/mcdisp.dsigma
-getvalue.pl -c 5.98  8 10 1.751 0 results/mcdisp.dsigma
-getvalue.pl -c 11.9   8 11 1.751 0 results/mcdisp.dsigma
-getvalue.pl -c -7.95 8 12 1.751 0 results/mcdisp.dsigma
-getvalue.pl -c -3.17 8 13 1.751 0 results/mcdisp.dsigma
+getvalue.pl -c 0.535 9 10 1.751 0 results/mcdisp.dsigma
+getvalue.pl -c 5.98  9 11 1.751 0 results/mcdisp.dsigma
+getvalue.pl -c 11.9  9 12 1.751 0 results/mcdisp.dsigma
+getvalue.pl -c -7.95 9 13 1.751 0 results/mcdisp.dsigma
+getvalue.pl -c -3.17 9 14 1.751 0 results/mcdisp.dsigma
 
 
 cd ../../demo

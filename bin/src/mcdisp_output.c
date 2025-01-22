@@ -81,22 +81,22 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
                                "#azimuth=0, when a1=a points to the x-ray source.\n");
              fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
              ini.print_usrdefcolhead(foutqei);
-             fprintf (foutqei,"h   k   l Q[A^-1] energy[meV] " 
+             fprintf (foutqei,"energy[meV] " 
                               "Irix: Isigmasigma azimuthsigmasigma   Isigmapi azsigmapi  "
                               " Ipisigma azpisigma   Ipipi azpipi          Irightright azrightright"
                               " Irightleft azreightleft Ileftright azleftright Ileftleft azlefteft(deg) "
                               "  [a.u./sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
-            fprintf (foutqom, "#dispersion \n");ini.print_usrdefcolhead(foutqom);fprintf(foutqom,"h k l  energies[meV]\n");
+            fprintf (foutqom, "#dispersion \n");ini.print_usrdefcolhead(foutqom);fprintf(foutqom,"energies[meV]\n");
 
        }else{
              writeheader(inputpars,foutqom);
-            fprintf (foutqom, "#dispersion \n");ini.print_usrdefcolhead(foutqom);fprintf(foutqom,"h k l  energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+            fprintf (foutqom, "#dispersion \n");ini.print_usrdefcolhead(foutqom);fprintf(foutqom,"energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
 
             fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
             writeheader(inputpars,foutqei);
             fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
-            ini.print_usrdefcolhead(foutqei);fprintf(foutqei,"h k l Q[A^-1] energy[meV] Imag_dip[barn/sr/f.u.]"
+            ini.print_usrdefcolhead(foutqei);fprintf(foutqei,"energy[meV] Imag_dip[barn/sr/f.u.]"
                                                           " Imag[barn/sr/f.u.] Inuc[barn/sr/f.u.] ");
             switch(ini.outS)
             {case 0:break;
@@ -113,7 +113,7 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
            fprintf (foutdstot, "#!Total Scattering Cross Section Itot in energy range [emin=%g ; emax=%g]\n",ini.emin,ini.emax);
            fprintf(foutdstot,"# ... Itot is given as dsigma_/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.]f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
            ini.print_usrdefcolhead(foutdstot);
-           fprintf(foutdstot,"h k l   Itot-DMDdip Itot-DMDbey ");
+           fprintf(foutdstot,"Itot-DMDdip Itot-DMDbey ");
             switch(ini.outS)
             {case 0:break;
              case 1:fprintf(foutdstot,"Smagperp_dip: Sxxreal(Q,omega) Sxximag Sxyreal Sxyimag Sxzreal Sxzimag ...Szzimag [barn/sr/f.u.]");break;
@@ -131,7 +131,7 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,p
                          writeheader(inputpars,foutds);
                          fprintf (foutds, "#Scattering Cross Section \n");
                          ini.print_usrdefcolhead(foutds);
-                         fprintf (foutds, "h k l  energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixri chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+                         fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixri chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
                            }  
           }
 }

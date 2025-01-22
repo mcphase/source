@@ -530,7 +530,8 @@ What measurement data can be used to calculate a standard deviation ?
 
 \begin{description}
 \item[{\prg mcphas.fum}] if given in column 8,9,10,.. in {\prg ./fit/mcphas.fum} the
-            free energy $f$, the energy $u$, the magnetisation and the strain is used for calculation
+            free energy $f$, the energy $u$, the magnetisation, the strain and electrical polarisation
+             is used for calculation
 	    of the standard deviation sta. The standard deviation is calculated
 	    as ${\rm sta}=\sum_{\rm data points i} ({m}_i^{calc}-{m}_i^{meas})^2/({\Delta m}_i^{meas})^2$.
 	    A measured quantity is used for fitting only, if the experimental error ${\Delta m}_i^{meas}$ is given
@@ -678,7 +679,7 @@ u=f+Ts=f-T\partial f/\partial T=\frac{1}{N_b}\sum_{s,i} \epsilon^s_i \frac{e^{-\
 \end{equation}
                             Note, that form the numerical derivative of $u$ with respect to temperature 
                              the specific heat per site in mean field approximation can be calculated $c_V=\partial u/\partial T$.
-                           Finally, {\prg mcphas.fum} contains the calculated
+                           {\prg mcphas.fum} contains the calculated
                            magnetisation  (only if a {\prg mcalc} function is present in the single ion module).
                             As an example for the information
 			   contained in this file the calculated magnetisation  of NdCu$_2$ is shown in
@@ -686,6 +687,10 @@ u=f+Ts=f-T\partial f/\partial T=\frac{1}{N_b}\sum_{s,i} \epsilon^s_i \frac{e^{-\
                             Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
                             also for the magnetisation components $ma,mb,mc$ in these tables 
                             is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+                           Moreover, in {\prg mcphas.fum} are stored
+                           the calculated strain tensor (for option -doeps) and the 
+                           electrical polarisation (if charges are given in the sipf files and the sum of charges
+                           taken for the crystal is zero).
 
 \item [\prg mcphas1.j1 .j1 .j2 ...] 
                spin-spin correlation functions for sub-lattice 1 neighbour 1 2 ...

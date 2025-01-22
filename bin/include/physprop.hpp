@@ -20,7 +20,7 @@ class physproperties
 float x,y; // phasediagramm labels  
 int j;  // index of spinstructure
 double T; // temperature
-Vector m,H; // moment and H field
+Vector m,H,P; // moment and H field and electrical polarisation
 double fe;
 double u; // free energy and mag energy per ion
 double Eel; // elastic energy per ion

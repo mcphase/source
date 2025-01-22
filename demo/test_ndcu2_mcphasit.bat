@@ -16,7 +16,7 @@ getvalue.pl -c 0.09074942 1 2 0.017958563  0 results/radwavfunc.out
 setup_mcdisp_mf 1.5 0 0 0
 cp mcdispall.par mcdisp.par
 mcdispit -max 2 
-getvalue.pl -c  -1.787 5 10 0.02 0 results/mcdisp.qom
+getvalue.pl -c  -1.787 5 11 0.02 0 results/mcdisp.qom
 range -d 5 0.039 0.041 results/mcdisp.qei
 getvalue.pl -c  0.0408399 9 10 1.24943 0 results/mcdisp.qei
 cd ../../demo
