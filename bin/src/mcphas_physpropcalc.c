@@ -18,7 +18,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // electrical polarisation P (makes only sense if total charge is zero)
 // in units |e|/A^2 ... sum dipole moment |e|A of magnetic unit cell and divide by unit cell volume in A^3
 if(fabs(inputpars.totalcharge)<SMALLCHARGE)
-{Vector rijk(1,3); 
+{Vector rijk(1,3); physprops.P=0;
 for (l=1;l<=inputpars.cs.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
