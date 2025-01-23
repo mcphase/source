@@ -26,7 +26,7 @@
 #include "jjjpar_intmod_cluster.cpp"// some functions for module_type=5
 
 
-
+ 
 
 
 /************************************************************************************/
@@ -385,7 +385,7 @@ char * pchr; pchr=strstr(savfilename+strlen(path),"/");
  while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"/");}
 pchr=strstr(savfilename+strlen(path),"\\");
  while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(savfilename+strlen(path),"\\");}
-
+ 
  FILE * fout; 
  fout = fopen_errchk (savfilename, "w");
  save_sipf(fout);
@@ -487,14 +487,25 @@ void jjjpar::save_sipf(FILE * fout)
            (*clusterpars).save(clustsavfile,0);
            (*clusterpars).save_sipfs("results/_");}
    default: // in case of external single ion module just save a copy of the input file 
+            // however, substitute some variables such as CHARGE nof_electrons ABC magnetic
              char *token;//double dummy;
-           cfin=fopen_errchk(sipffilename,"rb");
-           while(feof(cfin)==false){fgets(instr, MAXNOFCHARINLINE, cfin);
+            for (std::string line; std::getline(ss, line, '\n');)
+            {//const char * instr = line.c_str();//
+             strcpy(instr,line.data());
+             
+           //cfin=fopen_errchk(sipffilename,"rb");
+          //while(feof(cfin)==false){fgets(instr, MAXNOFCHARINLINE, cfin);}
                       // strip /r (dos line feed) from line if necessary
                       while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
-                      fprintf(fout,"%s",instr);
+                      setvar(instr,"CHARGE",charge);
+                      setvar(instr,"MAGNETIC",(double)magnetic);
+                      setvar(instr,"nof_electrons",(double)nof_electrons);
+                      fprintf(fout,"%s\n",instr);
                                     }
-           fclose(cfin);
+           // rewind the stringstream ss for next use..
+           ss.clear(); // clear the `failbit` and `eofbit`
+           ss.seekg(0); // rewind
+           //fclose(cfin);
    }
 
   if(module_type>0&&module_type!=5) // in case of internal modules save common information
@@ -842,20 +853,21 @@ SLR=pp.SLR;SLI=pp.SLI;
   magnetic=pp.magnetic;
   FF_type=pp.FF_type;
   nof_electrons=pp.nof_electrons;
-
   modulefilename=new char[MAXNOFCHARINLINE];
   strncpy (modulefilename,pp.modulefilename, MAXNOFCHARINLINE-1);
   clusterfilename=new char [MAXNOFCHARINLINE];
   strncpy(clusterfilename,pp.clusterfilename, MAXNOFCHARINLINE-1);
   diagonalexchange=pp.diagonalexchange;
-  gJ=pp.gJ;module_type=pp.module_type;
+  gJ=pp.gJ;
+  module_type=pp.module_type;
   ninit=pp.ninit;maxE=pp.maxE;pinit=pp.pinit;
   Np=pp.Np; Xip=pp.Xip;Cp=pp.Cp;
   r2=pp.r2;r4=pp.r4;r6=pp.r6;
   transitionnumber=pp.transitionnumber;
   sipffilename= new char [strlen(pp.sipffilename)+1];
   strcpy(sipffilename,pp.sipffilename);
-
+  if(module_type==0)ss = std::stringstream{slurp(sipffilename)};
+  
   if (pp.module_type==3||pp.module_type==1||pp.module_type==0)  ABC=pp.ABC;
   if ((pp.module_type==5||pp.module_type==3||pp.module_type==1||pp.module_type==0) &&
       (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
@@ -956,59 +968,7 @@ if(!pp.Icalc_parstorage.Empty())
    od_m=pp.od_m;od_dm=pp.od_dm;
    dyn_opmat=pp.dyn_opmat;
 
-/*  the following is a failed attempt to make separate copies
-//    of shared libraries using dlmopen(LM_ID_NEWLM,...) 
-if(module_type==0) {
-    // For the cluster module, during the MF loop, we need to be able to call the external module to recalculate the Hamiltonian for different Hxc, Hext.
-    #ifdef __MINGW32__
-      handle=LoadLibrary(pp.modulefilename);
-      if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n"); exit (EXIT_FAILURE); } 
-      
-      if(pp.dyn_opmat!=NULL){dyn_opmat=(int(*)(int*,char**,Vector*,Vector*,Matrix*))GetProcAddress(handle,"opmat");
-      if (dyn_opmat==NULL) {fprintf (stderr,"jjjpar::jjjpar warning  %d  module %s loading function opmat not possible - continuing\n",(int)GetLastError(),modulefilename);}
-                            }
-    #else
-      char * error;
-      handle=dlmopen (LM_ID_NEWLM,pp.modulefilename,RTLD_LOCAL);
-      if (!handle){fprintf (stderr, "jjjpar::jjjpar - Could not load dynamic library\n"); if ((error=dlerror())!=NULL) {fprintf (stderr,"%s\n",error);} exit (EXIT_FAILURE); } 
 
-
-  if(pp.I!=NULL)loadfunction(*(void **)(&I),handle,"Icalc",0);if(I==NULL){fprintf(stderr,"not possible !");exit (EXIT_FAILURE);}
-  if(pp.IM!=NULL)loadfunction(*(void **)(&IM),handle,"IMcalc",0);
-  if(pp.du!=NULL)loadfunction(*(void **)(&du),handle,"du1calc",0);
-  if(pp.p!=NULL)loadfunction(*(void **)(&p),handle,"pcalc",0);
-  if(pp.dP1!=NULL)loadfunction(*(void **)(&dP1),handle,"dP1",0);
-  if(pp.m!=NULL)loadfunction(*(void **)(&m),handle,"mcalc",0);
-  if(pp.mM!=NULL)loadfunction(*(void **)(&mM),handle,"mMcalc",0);
-  if(pp.dm1!=NULL)loadfunction(*(void **)(&dm1),handle,"dm1",0);
-  if(pp.L!=NULL)loadfunction(*(void **)(&L),handle,"Lcalc",0);
-  if(pp.LM!=NULL)loadfunction(*(void **)(&LM),handle,"LMcalc",0);
-  if(pp.dL1!=NULL)loadfunction(*(void **)(&dL1),handle,"dL1",0);
-  if(pp.S!=NULL)loadfunction(*(void **)(&S),handle,"Scalc",0);
-  if(pp.dS1!=NULL)loadfunction(*(void **)(&dS1),handle,"dS1",0);
-  if(pp.mq!=NULL)loadfunction(*(void **)(&mq),handle,"mqcalc",0);
-  if(pp.ddnn!=NULL)loadfunction(*(void **)(&ddnn),handle,"dmq1",0);
-  if(pp.rixs!=NULL)loadfunction(*(void **)(&rixs),handle,"drixs1",0);
-  if(pp.estates!=NULL)loadfunction(*(void **)(&estates),handle,"estates",0);
-         if(estates==NULL){est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
-                          }
-  if(pp.Icalc_parameter_storage!=NULL)loadfunction(*(void **)(&Icalc_parameter_storage),handle,"Icalc_parameter_storage_matrix_init",0);
-         if(Icalc_parameter_storage==NULL){Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
-                               }
-  if(pp.cd_m!=NULL)loadfunction(*(void **)(&cd_m),handle,"chargedensity_coeff",0);
-  if(pp.cd_dm!=NULL)loadfunction(*(void **)(&cd_dm),handle,"dchargedensity_coeff1",0);
-  if(pp.sd_m!=NULL)loadfunction(*(void **)(&sd_m),handle,"spindensity_coeff",0);
-  if(pp.sd_dm!=NULL)loadfunction(*(void **)(&sd_dm),handle,"dspindensity_coeff1",0);
-  if(pp.od_m!=NULL)loadfunction(*(void **)(&od_m),handle,"orbmomdensity_coeff",0);
-  if(pp.od_dm!=NULL)loadfunction(*(void **)(&od_dm),handle,"dorbmomdensity_coeff1",0);
-  if(pp.ro_calc!=NULL)loadfunction(*(void **)(&ro_calc),handle,"ro_calc",0);
-  if(pp.dyn_opmat!=NULL)loadfunction(*(void **)(&dyn_opmat),handle,"opmat",0);      
-//      if(pp.dyn_opmat!=NULL){*(void **)(&dyn_opmat)=dlsym(handle,"opmat");
-//       if ((error=dlerror())!=NULL) {fprintf (stderr,"jjjpar::jjjpar %s -continuing\n",error);dyn_opmat=NULL;}
-//                            }
-  #endif
-  }  // module type 0
-*/
 
 }
 

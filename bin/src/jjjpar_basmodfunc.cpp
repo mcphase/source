@@ -434,6 +434,9 @@ module_type=0;
  }
 
  fclose (cf_file);
+// load file into buffer ss ...
+if(module_type==0){ss = std::stringstream{slurp(sipffilename)};}
+ 
  if(module_type==5)cluster_ini_Imat();
 // check gJ
 if(module_type==2&&fabs(gJ-(*iops).gJ)>0.00001)

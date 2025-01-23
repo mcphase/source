@@ -66,6 +66,39 @@ void print_time_estimate_until_end(double ratio) //input :ratio = nofpointstodo 
    }
 }
 
+// ********************************************************************************************************
+// set variable 'parameter'  in string instr (z.B. "blabla dmin=0.2 blabla") -
+// output: var ... value of parameter
+// returns 1 on error and 0 if successful
+int setvar(char * instr,const char * parameter,double & var)
+{//const char delimiters[] = " =:\n";
+  char *token,*td,*te;
+  
+// check if line is comment line -> if yes return 1
+if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1; 
+                                 // .... however "#!" will be treated as comment with variable to be read
+ 
+  if ((token = strstr (instr, parameter))==NULL) return 1; // parameter string not found
+
+  if (token>instr&&1!=strspn(token-1," \t!?$%&*()[]{}\"��/><;@:=+-~|"))return 1; // no space etc before parameter
+ td=instr;while ((te=strstr(td,"#!"))!=NULL){td=te+1;} // skip all "#!" signs and
+ if ((td=strchr(td,'#'))!=NULL){if(td<token) return 1;} // check if comment sign "#" appears before parameter - if yes return 1
+ 
+  //set parameter  
+  token+=strlen(parameter);
+  if (strstr (token, "=")==NULL) return 1;  // no '=' found after parameter string
+  while(strstr(token," ")==token||strstr(token,"\t")==token)++token;
+  if (strstr(token,"=")!=token) return 1; // there are other characters than tab or spaces between parameter and =
+   // now token is  at = 
+  (*token)='\0';
+  te=token+1+strspn(token," \t");te+=strcspn(te," \t\n\0");
+  snprintf(instr,MAXNOFCHARINLINE,"%s=%g%s",instr,var,te);
+  return 0;
+}
+// same for int
+int setvar(char * instr,const char * parameter,int  var)
+{double vv=(double)var;return setvar(instr,parameter,vv);
+}
 
 // ********************************************************************************************************
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -

@@ -19,7 +19,17 @@ typedef void fnc_t();
 #include<perlparse.h>
 #include<myev.h>
 #include<stdlib.h>
+#include <string>
+#include <fstream>
+#include <sstream>
 
+inline std::string slurp (const std::string& path) {
+  std::ostringstream buf; 
+  std::ifstream input (path.c_str()); 
+  buf << input.rdbuf();
+  input.close();     
+  return buf.str();
+}
 #include "sparsecomplex.hpp"  // For sparse matrices class for cluster module
 
 #define MAXSAVEQ 5   // Number of Q vector values to save in calculation of F(Q)
@@ -107,6 +117,7 @@ public:
   Matrix cnst;// cnst is the Zlm constants - put them into the matrix
    int nof_electrons; // no of electrons in d or f shell
 private:
+  std::stringstream ss;
   Vector ABC;   // storage for single ion module paramters
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
   void get_parameters_from_sipfile(char * sipffilename,int verbose); // function to read single ion parameter files

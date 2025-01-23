@@ -183,34 +183,43 @@ return cs.nofatoms;
 }
 
 int par::delatom(int nn, Matrix & distribute,int verbose) // removes atom number n 
-// if n<0 then atom number |n| is removed and also all interactions of other atoms
+// 1)if n<0 then atom number |n| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
-// if n>0 interactions with the other atoms are kept and transferred to 
+// 2) if n>0 interactions with the other atoms are kept and transferred to 
 // a group of atoms (numbers given in column 1 of distribute) with 
 // coefficients given in col 2 of distribute. Only interactions
 // with atoms given in column 1 of distribute are removed completely.
+// if the coefficient in col 2 of distribute is negative, the sipf files 
+// are rewritten resetting the charge (distributed similar to the interactions)
 {jjjpar ** nnn;
  int j,s,again=0,n=nn; if(nn<0)n=-nn;
  FILE * out;
  if(n<1||n>cs.nofatoms){fprintf(stderr,"ERROR par.cpp:delatom n=%i out of range [1:nofatoms=%i]\n",n,cs.nofatoms);exit(EXIT_FAILURE);}
   --cs.nofatoms; // the number of atoms has to be decreased
+ if(nn>0)if(fabs(Sum(distribute.Column(2)))-1>SMALL)
+  {fprintf(stderr,"ERROR par.cpp:delatom %i - sum of coefficients is %g (and not 1.00) -coefficient list:\n",n,fabs(Sum(distribute.Column(2))));
+   myPrintMatrix(stderr,distribute);exit(EXIT_FAILURE);}
+
  nnn=new jjjpar * [cs.nofatoms+1];
 if(verbose)fprintf(stderr,"Deleting atom %i\n",n);
  for (j=1;j<=cs.nofatoms+1;++j){if(j==n)++j;
 if(verbose)fprintf(stderr,"caring about interactions of atom %i\n",j);
-// take care of all interactions to be removed because atom is removed
+// take care of all interactions to be removed because atom n is removed
  for(s=1;s<=(*jjj[j]).paranz;++s){
-     if((*jjj[j]).sublattice[s]==n){if(nn>0){// transfer interactions to the remaining atoms
+     if((*jjj[j]).sublattice[s]==n){if(nn>0){// atom j has a interaction with atom n:
+                                             // transfer interactions to the remaining atoms
                                              // unless atom j is to be distributed on
                                              int j_in_distribute=0;
                                              for(int i=1;i<=distribute.Rhi();++i)
-                                               {if(j==(int)distribute(i,1))j_in_distribute=1;
+                                               {if(j==(int)distribute(i,1))j_in_distribute=1;// j is listed in distribute --> do nothing
                                                }
-                                             if(j_in_distribute==0){// ok j is not in list .. transfer interaction to those in the list
-                                                   for(int i=1;i<=distribute.Rhi();++i)
+                                             if(j_in_distribute==0){// ok: j is not in distribute list 
+                                                                    // .. transfer interaction of atom j with atom n
+                                                                    // to those in the distribution list
+                                                   for(int i=1;i<=distribute.Rhi();++i) // go through the distribution list
                                                {int sl=(int)distribute(i,1);int mult=0;double Rmax=1e10;
-                                                double coeff=distribute(i,2);
-						for(int ss=1;ss<=(*jjj[j]).paranz;++ss){
+                                                double coeff=fabs(distribute(i,2));
+                                                for(int ss=1;ss<=(*jjj[j]).paranz;++ss){
                                                 if((*jjj[j]).sublattice[ss]==sl){double R=Norm((*jjj[j]).dr[ss]-(*jjj[j]).dr[s]);
                                                          if(R<Rmax+SMALL_MATCH_LATTICEVECTOR){++mult;}
                                                          if(R<Rmax-SMALL_MATCH_LATTICEVECTOR){mult=1;Rmax=R;}
@@ -245,7 +254,14 @@ if(found!=1){fprintf(stderr,"Error reduce_unitcell on distributing interaction %
           }
 if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
               if(j+1==n)++j;}
-totalcharge-=(*jjj[n]).charge;
+
+if(nn<0){totalcharge-=(*jjj[n]).charge;}
+else{for(int i=1;i<=distribute.Rhi();++i){int sl=(int)distribute(i,1);
+if(distribute(i,2)<0) {(*jjj[sl]).charge+=fabs(distribute(i,2))*(*jjj[n]).charge;
+fprintf(stderr,"charge on atom %i set to %g and overwriting sipf file %s \n",sl,(*jjj[sl]).charge,(*jjj[sl]).sipffilename);
+(*jjj[sl]).save_sipf("./"); }
+       }}
+
 for (j=1;j<n;++j){nnn[j]=jjj[j];}
 for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];}
 // correct the sublattice numbering 

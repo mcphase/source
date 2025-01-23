@@ -27,11 +27,13 @@ int main (int argc, char **argv)
 			remove atoms number 1,2,5 and 7 from the list and also all interactions with those \n \
 			-delatoms 1:3+-0.75:4+-0.25,2,5,7  removes atoms number 1,2,5,7 for atom 1 the interactions\n \
 			 are transferred to 75%% to atom 3 and 25%% to atom 4 and interactions to atoms 3 and 4 are\n \
-			 removed, for 2 5 7 all the interactions with other atoms are removed\n \
-			-v  verbose mode\n \
+			 removed,   for 2 5 7 all the interactions with other atoms are removed\n \
+                         a +-- separator  triggers in the -delatoms mode that charges are transferred resetting\n \
+                          CHARGE variablein sipf files (sipf files are rewritten with modified charge)\n   \
+                        -v  verbose mode\n \
                 \n");
       exit (1);
-    } else { fprintf (stderr,"#* reduce_unitcell 221011 *\n"); }
+    } else { fprintf (stderr,"#* reduce_unitcell 250123 *\n"); }
 
 int ow=1,i=0; int n=0,noindexchange=0,verbose=0;
 char * token;
@@ -65,9 +67,10 @@ if(i==0){
  a.reduce_unitcell(verbose);  
 }else{
 for(n=1;n<=i;++n)
-  {
+  {// substitute all : with ' ' in substr[n]
  while ((token=strchr(substr[n],':'))!=NULL){*token=' ';}
 //fprintf(stderr,"string is %s\n",substr[n]);
+// use splitstring to read atom numbers and as "error+-" the nscoeff
  int nn=splitstring(substr[n],ns,nscoeff);
  int dim=1;if(nn>1){dim=nn-1;}
    Matrix dis(1,dim,1,2);int an=ns[1];

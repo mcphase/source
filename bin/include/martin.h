@@ -35,14 +35,16 @@ void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo
 // returns 1 on error and 0 if successful
 extern  int extract(char * instr,const char * parameter,double & var);
 
-// extract a variable named [parmeter] into var out of a string [instr]
+// extract/set a variable named [parmeter] into var out of a string [instr]
 extern   int extract(char * instr,const char * parameter,int & var);
 extern   int extract(char * instr,const char * parameter,float & var);
+extern   int setvar(char * instr,const char * parameter,double & var);
+extern   int setvar(char * instr,const char * parameter,int var);
+
 // for a string variable maxium size n has to be given
 // and m >0 is the maximum number of space separations in the extracted string 
 // (e.g. m=1 will read from instr "G= one two three four" the parameter "G"
 // to var as "one",  putting m=2 will set var to "one two", m=3 will yield "one two three"
-
 extern   int extract(char * instr,const char * parameter,char * var, size_t n,int m);
 
 // extract a variable which is there also if it is preceded by a prefix

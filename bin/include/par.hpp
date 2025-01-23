@@ -12,7 +12,7 @@
 #define SMALL 1e-6  // for module kramer - to trigger numerical limited calculation 
                     // for adding jjpar sets to see what is difference in position or what is equal
                     // for checking jjj parameters if values are equal 
-#define SMALLCHARGE 1e-6  // for checking if totalcharge is small and outpu polarisation P
+#define SMALLCHARGE 1e-4  // for checking if totalcharge is small and output polarisation P
 
 class par
 { 
