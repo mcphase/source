@@ -42,10 +42,22 @@ ifneq (,$(findstring $(OSTYPE),Darwin))
  LINUX = linux
 else
 # for windows  it turned out -static switch is necessary for linking
+ WINDOWS = windows
 LFLAGS=-static -static-libgcc -static-libgfortran 
 endif
 endif
 endif
+
+ifdef LINUX
+DLLOADER_SRC=../include/DLLoader_Linux/DLLoader.h
+INCLDLL=  -I../include/DLLoader_Linux
+endif
+
+ifdef WINDOWS
+DLLOADER_SRC=../include/DLLoader_Windows/DLLoader.h
+INCLDLL=  -I../include/DLLoader_Windows
+endif
+
 
 ifdef icc
 CC=icc

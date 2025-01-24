@@ -22,6 +22,8 @@ typedef void fnc_t();
 #include <string>
 #include <fstream>
 #include <sstream>
+#include "DLLoader.h"
+#include "singleion_module.hpp"
 
 inline std::string slurp (const std::string& path) {
   std::ostringstream buf; 

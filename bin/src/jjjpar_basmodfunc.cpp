@@ -153,12 +153,12 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
              ABC=Vector(1,1);
 	    }
     if(verbose)fprintf(stderr," module functions ");
-module_type=0;
+module_type=0;int err_load_lib=0;
 
 #ifdef __MINGW32__
   handle=LoadLibrary(modulefilename);
   if ((intptr_t)handle<= HINSTANCE_ERROR){fprintf (stderr, " - Could not load dynamic library\n");
-	       exit (EXIT_FAILURE);
+	       err_load_lib=1;
 	      }
 #else
   char * error;
@@ -166,13 +166,13 @@ module_type=0;
   if (!handle){fprintf (stderr, " - Could not load dynamic library\n");
                if ((error=dlerror())!=NULL)
 	         {fprintf (stderr,"%s\n",error);}
-	       exit (EXIT_FAILURE);
+	       err_load_lib=1;
 	      }
 #endif
 #ifdef __MINGW32__
     I=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"Icalc");
     //*(int **)(&m)=GetProcAddress(handle,"Icalc");
-     if (I==NULL) {fprintf (stderr," error %i module %s loading function Icalc not possible\n",(int)GetLastError(),modulefilename);exit (EXIT_FAILURE);}
+     if (I==NULL) {fprintf (stderr," error %i module %s loading function Icalc not possible\n",(int)GetLastError(),modulefilename);err_load_lib=1;}
                   else {if(verbose)fprintf (stderr,"Icalc ");}
     IM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,Vector*,Vector*,ComplexMatrix*))GetProcAddress(handle,"IMcalc");
     //*(int **)(&m)=GetProcAddress(handle,"IMcalc");
@@ -307,7 +307,7 @@ module_type=0;
 
     
 #else
-  loadfunction(*(void **)(&I),handle,"Icalc",verbose);if(I==NULL){fprintf(stderr,"not possible !");exit (EXIT_FAILURE);}
+  loadfunction(*(void **)(&I),handle,"Icalc",verbose);if(I==NULL){fprintf(stderr,"not possible !");err_load_lib=1;}
   loadfunction(*(void **)(&IM),handle,"IMcalc",verbose);
   loadfunction(*(void **)(&du),handle,"du1calc",verbose);
   loadfunction(*(void **)(&p),handle,"pcalc",verbose);
@@ -338,6 +338,12 @@ module_type=0;
   loadfunction(*(void **)(&ro_calc),handle,"ro_calc",verbose);
   loadfunction(*(void **)(&dyn_opmat),handle,"opmat",verbose);
 #endif
+ if(err_load_lib==1){ // here comes some experimental code for loading a shared library in case loading was not successful ...
+ std::string path=std::string(modulefilename);
+ dlloader::DLLoader <singleion_module> dlloader(path);
+ fprintf(stderr,"-->Loaded singleion_module library %s\n",modulefilename);
+exit(EXIT_FAILURE);
+}
   if(verbose)fprintf (stderr,"\n");
      }
     }

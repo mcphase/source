@@ -61,7 +61,7 @@ endif
 
 include ./Makefile.common
 
-CFLAGS  = -c $(CCOPTS) $(INCLDIRS) $(CYGFLAGS) -U_FORTIFY_SOURCE
+CFLAGS  = -c $(CCOPTS) $(INCLDIRS) $(INCLDLL) $(CYGFLAGS) -U_FORTIFY_SOURCE
 
 # PGPLLIBS =       -L$(PGPLOT_DIR)  -lcpgplot -lpgplot
 ifdef LINUX
