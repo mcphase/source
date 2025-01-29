@@ -7,6 +7,7 @@ template <class T>
 class IDLLoader
 {
 public:
+IDLLoader() = default;
 virtual ~IDLLoader() = default;
 /*
 ** Load the library and map it in memory.

@@ -1,5 +1,4 @@
-
-#pragma once
+#pragma once    //DLLoader.h for Windows
 #include <iostream>
 #include "Windows.h"
 #include "IDLLoader.h"
@@ -20,11 +19,12 @@ std::string const &deleteClassSymbol = "deleter") :
 _handle(nullptr), _pathToLib(pathToLib),
 _allocClassSymbol(allocClassSymbol), _deleteClassSymbol(deleteClassSymbol)
 {}
+DLLoader() = default;
 ~DLLoader() = default;
 void DLOpenLib() override
 {
 if (!(_handle = LoadLibrary(_pathToLib.c_str()))) {
-std::cerr << "Can't open and load " << _pathToLib << std::endl;
+std::cerr << "Can't open and load " << _pathToLib << std::endl;exit(EXIT_FAILURE); 
 }
 }
 std::shared_ptr<T> DLGetInstance() override
@@ -36,8 +36,7 @@ GetProcAddress(_handle, _allocClassSymbol.c_str()));
 auto deleteFunc = reinterpret_cast<nullptr_t(*)()>(
 GetProcAddress(_handle, _deleteClassSymbol.c_str()));
 if (!allocFunc || !deleteFunc) {
-DLCloseLib();
-std::cerr << "Can't find allocator or deleter symbol in " << _pathToLib << std::endl;
+std::cerr << "Can't find allocator or deleter symbol in " << _pathToLib << std::endl;DLCloseLib();exit(EXIT_FAILURE); 
 }
 return std::shared_ptr<T>(allocFunc(),[deleteFunc](T *p) { deleteFunc(); });
 }

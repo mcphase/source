@@ -12,6 +12,7 @@
 #ifndef IC1ION_H
 #define IC1ION_H
 
+#include "constants.h"
 #include "states.hpp"
 #include "maths.hpp"
 #include "icpars.hpp"
@@ -27,8 +28,6 @@
 #include <windows.h>
 #endif
 
-#define SMALL 1e-6           // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-                             // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
 
 #include "../../version"
 #define EST_OFFSET		100

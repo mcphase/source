@@ -428,7 +428,7 @@ gp.read();
   ii=0; 
   // if individual ions of the cluster are to be shown make nofatoms in spincf larger !
   for (j=1;j<=inputpars.cs.nofatoms;++j){
-         if(arrow==4&&(*inputpars.jjj[j]).module_type==5){for(k=1;k<=(*(*inputpars.jjj[j]).clusterpars).cs.nofatoms;++k)
+         if(arrow==4&&(*inputpars.jjj[j]).module_clust==true){for(k=1;k<=(*(*inputpars.jjj[j]).clusterpars).cs.nofatoms;++k)
                                                  {++ii;par inputpars4((*(*inputpars.jjj[j]).clusterpars));
                                                  cs4.x[ii]=cs.x[j]+(*inputpars4.jjj[k]).xyz(1);
                                                  cs4.y[ii]=cs.y[j]+(*inputpars4.jjj[k]).xyz(2);
@@ -527,7 +527,7 @@ switch(arrow)
 		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt); // here we set moment to be output as arrow
                     };break;
  case 4: int dim4;
-         dim4=3;if((*inputpars.jjj[ii]).module_type==5)
+         dim4=3;if((*inputpars.jjj[ii]).module_clust==true)
                            dim4=(*(*inputpars.jjj[ii]).clusterpars).cs.nofatoms*3;
          Vector momi(1,dim4);
          (*inputpars.jjj[ii]).micalc(momi,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);
@@ -537,7 +537,7 @@ switch(arrow)
 }
 
 // output atoms and moments in primitive unit cell to fout  ------------------------------------
-if(arrow==4&&(*inputpars.jjj[ii]).module_type==5){
+if(arrow==4&&(*inputpars.jjj[ii]).module_clust==true){
     for(nt=1;nt<=(*(*inputpars.jjj[ii]).clusterpars).cs.nofatoms;++nt)
      {dd3=spinconf.pos_dabc(i,j,k,ii4, cs4);
       dd0=spinconf.pos_dr123(i,j,k,ii4, cs4);

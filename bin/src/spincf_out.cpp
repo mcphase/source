@@ -863,7 +863,7 @@ for(l=1;l<=nofatoms;++l)
    cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,gjmbHxc,Hext);
    for(ii=1;ii<=cd.nofpoints();++ii)
      {R=cd.rtf(ii)(1);theta=cd.rtf(ii)(2);fi=cd.rtf(ii)(3);
-     if(ionpar.module_type==2){// mind abc||yzx in module cfield
+     if(ionpar.orientation==abc_yzx){// mind abc||yzx in module cfield
      dx=R*sin(theta)*sin(fi)+dd(1);dy=R*cos(theta)+dd(2);dz=R*sin(theta)*cos(fi)+dd(3);
                               }
      else
@@ -946,7 +946,7 @@ for(l=1;l<=nofatoms;++l)
    cd.calc_cd_surface(moments,ionpar,gp.threshhold,T,  gjmbHxc,Hext);
    for(ii=1;ii<=cd.nofpoints();++ii)
      {R=cd.rtf(ii)(1);theta=cd.rtf(ii)(2);fi=cd.rtf(ii)(3);
-     if(ionpar.module_type==2){// mind abc||yzx in module cfield
+     if(ionpar.orientation==abc_yzx){// mind abc||yzx in module cfield
      dx=R*sin(theta)*sin(fi)+dd(1);dy=R*cos(theta)+dd(2);dz=R*sin(theta)*cos(fi)+dd(3);
                               }
      else
@@ -1130,7 +1130,7 @@ void spincf::cd(FILE * fout,cryststruct & cs, graphic_parameters & gp,
     double R,Rxy,theta,fi;
     R=Norm(dd);
     if(R<radius){ // do not consider any pixels further away than maxR
-    if(ionpar.module_type==2){// mind abc||yzx in module cfield
+    if(ionpar.orientation==abc_yzx){// mind abc||yzx in module cfield
      //dx=R*sin(theta)*sin(fi);dy=R*cos(theta);dz=R*sin(theta)*cos(fi);
      theta=acos(dd(2)/R);Rxy=sqrt(dd(1)*dd(1)+dd(3)*dd(3));if(Rxy>SMALL){fi=acos(dd(3)/Rxy);}else{fi=0;}
                          if (dd(1)<0)fi=-fi;

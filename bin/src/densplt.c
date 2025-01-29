@@ -109,7 +109,7 @@ if(strcmp(argv[2+os],"-M")==0){os+=1;arrow=3;arrowdim=MAGMOM_EV_DIM;gp.spins_col
   dim=28;
  char text[1000];
  char coord[]="xyz=abc";
-if(jjjps.module_type==2){strcpy(coord,"xyz=cba");}
+if(jjjps.orientation==abc_yzx){strcpy(coord,"xyz=cba");}
 
 switch(argv[1][0]) // dimension definition from jjjpar.hpp
 {case 'c': dim=CHARGEDENS_EV_DIM;

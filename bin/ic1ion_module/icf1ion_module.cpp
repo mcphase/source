@@ -1,69 +1,44 @@
-/* icf1ion_module.cpp
- *
- * Functions:
- *   void myPrintMatrix(FILE * file,sMat<double> & M,int d)                                   // Prints out full matrix
- *   bool checkmat(ComplexMatrix &cmat, complexdouble *fmat,int r, int c)                     // Compares Matpack and fortran matrices
- *   void Icalc(Vector &J, double *T,Vector &gjmbHxc,Vector&Hext, double *gJ, Vector &ABC,    // Calculates the meanfield moment
- *                 char **sipffile, double *lnZ, double *U, ComplexMatrix &est)
- *   void IMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,      // Calculates the meanfield moment
- *                 char **sipffile, Vector &lnZ, Vector &U, ComplexMatrix &est)  
- *   int du1calc(int &tn, double &T, Vector &gjmbHxc,Vector&Hext, double &g_J, Vector &ABC,   // Calculates the transition
- *                 char **sipffilename, ComplexVector &u1, float &delta,int & n, int & nd, ComplexMatrix &est)  //   matrix elements
- *   void mcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)
- *   void mMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)
- *   int dm1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,          // Calculates the transition
- *                 char **sipffilename, ComplexVector & m1, float &delta,                    //   matrix elements of the magnetic moment operator
- *                 ComplexMatrix &est)
- *   void Lcalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)
- *   void LMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)
- *   int dL1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,          // Calculates the transition
- *                 char **sipffilename, ComplexVector & L1, float &delta,                    //   matrix elements of the angular momentum  operator
- *                 ComplexMatrix &est)
- *   void Scalc(Vector &J, double *T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)    //
- *   void SMcalc(Matrix &J, Vector &T, Vector &Hxc,Vector&Hext, double *gJ, Vector &ABC,       // Calculates the meanfield moment
- *                 char **sipffile,  ComplexMatrix &est)    //
- *   int dS1(int &tn, double &T, Vector &Hxc,Vector&Hext, double &g_J, Vector &ABC,          // Calculates the transition
- *                 char **sipffilename, ComplexVector & S1, float &delta,                    //   matrix elements of the spin operator
- *                 ComplexMatrix &est)
- *   void Icalc_parameter_storage_matrix_init(ComplexMatrix *est,Vector &gjmbHxc,Vector&Hext  // initialises parameter storage matrix 
- *                 double *g_J,double &T,Vector &ABC,char **sipffilename)                     // for Icalc
- *   void estates(ComplexMatrix *est, Vector &gjmbHxc,Vector&Hext, double *g_J, double &T,    // Calculates the energy and wavefunctions
- *                 Vector &ABC, char **sipffilename)                                          //   "estates" matrix
- *   bool get_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l,                    // Calculates/loads the Q_q operators
- *                 std::vector<double> &Jvec)                                                 //   for beyond dipole calculations
- *   void save_Qq(std::vector< sMat<double> > &Qq, int q, int n, orbital l,                   // Saves the Q_q operators to a file
- *                 std::vector<double> &Jvec)                                                 //
- *   void mq(ComplexVector &Mq, double &th, double &ph, double &J0, double &J2,               // Calculates the thermal expectation
- *                 double &J4, double &J6, ComplexMatrix &est)                                //   of the magnetisation density
- *   int dv1calc(int &tn, double &th, double &ph, double &J0, double &J2,                     // Calculates the transition matrix
- *                 double &J4, double &J6, ComplexMatrix &est, double &T,                     //   elements beyond the dipole
- *                 ComplexVecto & v1)                                                         //   approximation.
- *   void spindensity_coeff(Vector & mom, int & xyz,double *T, Vector &gjmbHxc,Vector&Hext,   // Calc. coeffs. of expansion of spindensity 
- *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)               //   in terms of Zlm R^2(r) at given T / H_eff
- *   void orbmomdensity_coeff(Vector & mom,int & xyz, double *T, Vector &gjmbHxc,Vector&Hext, // Calc. coeffs. of expansion of orbital moment density
- *                 double *gJ,Vector &ABC, char **sipffile, ComplexMatrix &est)               //   in terms of Zlm F(r) at given T / H_eff
- *
- * This file is part of the ic1ionmodule of the McPhase package, calculating the single-ion properties of a rare
- * earth or actinide ion in intermediate coupling.
- *
- * (c) 2008-2010 Duc Le, Martin Rotter
- * This program is licensed under the GNU General Purpose License, version 2. Please see the COPYING file
- */
+#include "icf1ion_module.hpp"
+#if defined(__linux__) || defined(__APPLE__)
+extern "C"
+{
+icf1ion_module *allocator()
+ {return new icf1ion_module();
+ }
+void deleter(icf1ion_module *ptr)
+ {delete ptr;
+ }
+}
+#endif
+#ifdef WIN32
+extern "C"
+{
+__declspec (dllexport) icf1ion_module *allocator()
+{
+return new icf1ion_module();
+}
+__declspec (dllexport) void deleter(icf1ion_module *ptr)
+{
+delete ptr;
+}
+}
+#endif
 
-#include "ic1ion.hpp"
-#include "vector.h"          // MatPack vector class
-#include "martin.h"          // some functions, i.e. expectation value
-#include <fstream>
-#include <ctime>
-#define SMALL 1e-6           // must match SMALL in mcdisp.c and ionpars.cpp because it is used to decide wether for small
-                             // transition, energy the matrix Mijkl contains wn-wn' or wn/kT
+icf1ion_module::icf1ion_module()
+{for(int i=0;i<=IOP_DIM;++i)zst[i]=NULL;
+}
 
-#define MAXNOFCHARINLINE 7024
+icf1ion_module::icf1ion_module(const icf1ion_module & pp)
+{for(int i=0;i<=IOP_DIM;++i)zst[i]=pp.zst[i];
+
+}
+icf1ion_module::~icf1ion_module()
+{
+
+ for(int i=0;i<=IOP_DIM;++i)if(zst[i]!=NULL)delete zst[i];
+
+}
+
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Looks up the Hund's Rule ground state to determine L and S for a particular configuration p^n, d^n, f^n
@@ -223,7 +198,7 @@ sMat<double> icf_hmltn(sMat<double> &Hcfi, icpars &pars)
 		   pow(-1.,(double)(pS2+S2+1)/2.)   * sixj(S2,2,S2,1,pS2,1) * cfps[k].cfp * cfps[k].cfp;
          rmU[2] += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,4,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
          rmU[4] += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,8,L2,2*e_l,pL2,2*e_l) * cfps[k].cfp * cfps[k].cfp * (L2+1.);
-         rmU[6] += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.); //}
+         rmU[6] += pow(-1.,(double)(pL2+L2)/2.+e_l) * sixj(L2,12,L2,2*e_l,pL2,2*e_l)* cfps[k].cfp * cfps[k].cfp * (L2+1.); 
       }
     //if(n==(4*e_l+1)) { rmU[2]=1./n; rmU[4]=1./n; rmU[6]=1./n; }
       for(int ik=2; ik<=6; ik+=2) rmU[ik] *= n * threej(2*e_l,2*ik,2*e_l,0,0,0) * p;
@@ -396,37 +371,34 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to initialise the storage matrix "storage" for Icalc
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-void Icalc_parameter_storage_matrix_init(
-                      ComplexMatrix *storage,   // storage matrix 
+bool icf1ion_module::Icalc_parameter_storage_matrix_init(
+                      ComplexMatrix &Pst,   // storage matrix 
                       Vector &gjmbHxc,      // Input  vector of exchange fields (meV) 
                       Vector &Hext,         // Input  vector of external field (meV) 
- /* Not Used */       double * /*g_J*/,     // Input  Lande g-factor
-                      double * /*T*/,       // Input  temperature
- /* Not Used */       Vector & /*MODPAR*/,     // Input  Vector of parameters from single ion property file
-                      char **sipffilename)  // Input  Single ion properties filename
+ /* Not Used */       double & g_J,     // Input  Lande g-factor
+                      double & T,       // Input  temperature
+ /* Not Used */       Vector & MODPAR,     // Input  Vector of parameters from single ion property file
+                      char *sipffilename)  // Input  Single ion properties filename
 {
    // Parses the input file for parameters
    icpars pars;
-   const char *filename = sipffilename[0];
+   const char *filename = sipffilename;
    ic_parseinput(filename,pars);
 
    // If we just want a blank storage matrix for later use (e.g. in Icalc)
    int nelm = (gjmbHxc.Elements()<6) ? 6 : gjmbHxc.Elements();
    int nfact = (int)ceil(sqrt(nelm+1));
    int sz = icf_getdim(pars)*nfact;
-   (*storage) = ComplexMatrix(0,sz,0,sz);
-   (*storage)(0,0) = complex<double> (pars.n, pars.l);
-   (*storage)(0,1) = complex<double> (nfact, nelm);
+   Pst = ComplexMatrix(0,sz,0,sz);
+   Pst(0,0) = complex<double> (pars.n, pars.l);
+   Pst(0,1) = complex<double> (nfact, nelm);
+return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates thermal expectation values 
 // --------------------------------------------------------------------------------------------------------------- //
-void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, double *T, Vector &J, double *lnZ, double *U)
+void icf1ion_module::icf_expJ(icpars &pars, ComplexMatrix &Pst, complexdouble *zV, double *vE, double *T, Vector &J, double *lnZ, double *U)
 {  int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int Q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    int im[]= {-1,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
@@ -460,46 +432,51 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
    // For first run calculate also the partition function and internal energy
    *U=0.;
    me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; complexdouble *zt=0;
-   complexdouble *zJmat = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble));
+   // complexdouble *zJmat = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble));
    zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
    sMat<double> Hcf;
 
    // Checks if have been called from spins, where _par_storage() was set up for just the number of operators 
    //    needed in the MF loop but now we need to calculate expectation values for all multipolar operators
    int oldJhi = J.Hi();
-   if(nfact != (int)real(est[0][1])) {
-      nfact = (int)real(est[0][1]); oldJhi = (int)imag(est[0][1]); }
+   if(nfact != (int)real(Pst[0][1])) {
+      nfact = (int)real(Pst[0][1]); oldJhi = (int)imag(Pst[0][1]); }
+   //clock_t start,end,dexpectation_value=0,dMultvxMv=0;
 
    for(int iJ=J.Lo(); iJ<=J.Hi(); iJ++)
-   {
-      me.assign(Esz,0.); J[iJ]=0.;
+   {  me.assign(Esz,0.); J[iJ]=0.;
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
       if(iJ>6 && (K[iJ]%2==1 || K[iJ]>2*pars.l)) { /*matel.push_back(me);*/ continue; }
       
         if(iJ>oldJhi) //&&1<0)  // DEBUGthe following leads to errors in parallel processing !
-         {
+         { zst[iJ]=new zsMat<double>;
             if(iJ<=6) Hcf = icf_mumat(pars.n, iJ-1, pars.l);     // Calculates Sx,Lx etc
             else      Hcf = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l);  // Calculates multipolar operator matrices 
             std::vector< std::vector<int> > u = Hcf.find();
-            memset(zJmat,0.,Hsz*Hsz*sizeof(complexdouble));
-            complexdouble x;
-            if(im[iJ]==1) for (int j=0; j<(int)u.size(); j++) { x.r=0.; x.i=Hcf(u[j][0],u[j][1]); zJmat[Hcf.nr()*u[j][1]+u[j][0]] = x; }
-            else          for (int j=0; j<(int)u.size(); j++) { x.r=Hcf(u[j][0],u[j][1]); x.i=0.; zJmat[Hcf.nr()*u[j][1]+u[j][0]] = x; }
+            //memset(zJmat,0.,Hsz*Hsz*sizeof(complexdouble));
+            //complexdouble x;
+            if(im[iJ]==1) for (int j=0; j<(int)u.size(); j++) { // x.r=0.; x.i=Hcf(u[j][0],u[j][1]); zJmat[Hcf.nr()*u[j][1]+u[j][0]] = x;
+                                                               std::complex<double> xx(0,Hcf(u[j][0],u[j][1])); (*zst[iJ])(u[j][1]+1,u[j][0]+1)=xx;}
+            else          for (int j=0; j<(int)u.size(); j++) { //x.r=Hcf(u[j][0],u[j][1]); x.i=0.; zJmat[Hcf.nr()*u[j][1]+u[j][0]] = x;
+                                                               std::complex<double> xx(Hcf(u[j][0],u[j][1]),0);(*zst[iJ])(u[j][1]+1,u[j][0]+1)=xx;}
+
          }
-       else
+       /*else  // removed because using sparsematrix now
          { 
             iy = (iJ-J.Lo()+1)/nfact; ix = (iJ-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) memcpy(&zJmat[(i-1)*Hsz],&est[i+ix*Hsz][1+iy*Hsz],Hsz*sizeof(complexdouble));
-         
+            for(i=1; i<=Hsz; i++) memcpy(&zJmat[(i-1)*Hsz],&Pst[i+ix*Hsz][1+iy*Hsz],Hsz*sizeof(complexdouble));
          }
-         
-
+        */ 
          for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
             // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-            me[ind_j] = expectation_value(Hsz,zJmat,&zV[ind_j*Hsz]); // defined in martin.c
-          
-
+//start = clock(); 
+            me[ind_j]= (*zst[iJ]).MultvxMv(&zV[ind_j*Hsz]);
+//end = clock(); dMultvxMv+=end-start;
+// start = clock(); 
+//            double men = expectation_value(Hsz,zJmat,&zV[ind_j*Hsz]); // defined in martin.c
+// end = clock(); dexpectation_value+=end-start;
+//            if(fabs(men-me[ind_j])>SMALL){            printf("%g = %g %i %i \n",me[ind_j],men,ind_j,iJ);            }
             /*  char uplo = 'U';int incx=1;   
               complexdouble zme;          zme.r=0;zme.i=0;            
             F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
@@ -535,6 +512,7 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
             else  // Rest of the runs only calculate the new matrix elements
                J[iJ]+=me[ind_j]*eb[ind_j]; 
          }
+
 	 if(iJ==J.Lo()) *U/=Z;
          /*matel.push_back(me);*/ J[iJ]/=Z;
       
@@ -546,8 +524,12 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
 //                            }
 //                                  } // << DEBUG
    } 
+//std::cout<< "Expectation_value Elapsed time = " << (double)dexpectation_value/CLOCKS_PER_SEC << "s. " ;
+//std::cout << "MultvxMv Done. Elapsed time = " << (double)dMultvxMv/CLOCKS_PER_SEC << "s." << std::endl;
+// tested: MultvxMv  using sparsematrix is 20% faster than Expectation_value
 
-   free(zJmat); free(zt);
+   // free(zJmat); 
+   free(zt);
    *lnZ = log(Z)-vE[0]/(KB**T); 
 
 }
@@ -557,20 +539,16 @@ void icf_expJ(icpars &pars, ComplexMatrix &est, complexdouble *zV, double *vE, d
 // --------------------------------------------------------------------------------------------------------------- //
 
 
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void IMcalc(Matrix &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
                       Vector&T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+ /* Not Used */       double & g_J,   // Input Lande g-factor
+ /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
                       Vector &lnZ,        // Output scalar logarithm of partition function
                       Vector &U,          // Output scalar internal energy 
-                      ComplexMatrix &est) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
 {
    // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
@@ -589,7 +567,7 @@ __declspec(dllexport)
    }
    // Parses the input file for parameters
    icpars pars; 
-   const char *filename = sipffilename[0];
+   const char *filename = sipffilename;
    ic_parseinput(filename,pars);
 
    // Converts the Jij parameters if necessary
@@ -617,48 +595,61 @@ __declspec(dllexport)
    parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q));
    if(parval.size()%2==1) parval.push_back(0.);
 
-// if((est.Cols()!=(esz+1) || est.Rows()!=(esz+1))) Hicnotcalc = true;
-   if(real(est[0][0])==(double)pars.n && imag(est[0][0])==(double)pars.l)  // Hic previously calculated
+// if((Pst.Cols()!=(esz+1) || Pst.Rows()!=(esz+1))) Hicnotcalc = true;
+   if(real(Pst[0][0])==(double)pars.n && imag(Pst[0][0])==(double)pars.l)  // Hic previously calculated
    {
-      for(i=0; i<(int)(parval.size()/2); i++) if(real(est[0][i+2])!=parval[2*i] || imag(est[0][i+2])!=parval[2*i+1]) { 
+      for(i=0; i<(int)(parval.size()/2); i++) if(real(Pst[0][i+2])!=parval[2*i] || imag(Pst[0][i+2])!=parval[2*i+1]) { 
          Hicnotcalc = true; break; }
    }
    else Hicnotcalc = true;
    int oldJhi = J.Hi();
-   if((est.Rhi()!=esz||est.Chi()!=esz))   // Probably from spins: need all multipolar operators, not just those used in MF loop.
+   if((Pst.Rhi()!=esz||Pst.Chi()!=esz))   // Probably from spins: need all multipolar operators, not just those used in MF loop.
    {
-      nfact = (int)real(est[0][1]); esz = Hsz*nfact;
-      oldJhi = (int)imag(est[0][1]);
+      nfact = (int)real(Pst[0][1]); esz = Hsz*nfact;
+      oldJhi = (int)imag(Pst[0][1]);
    }
 
    if(Hicnotcalc || pars.l==S)
    {
       sMat<double> Hcfi, Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM; H = zmat2f(Hcf,Hcfi);
-      if(est.Rhi()!=esz||est.Chi()!=esz) {
+      if(Pst.Rhi()!=esz||Pst.Chi()!=esz) {
          std::cerr << "ERROR module icf1ion - Icalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE); }
       else if(esz>(int)parval.size()/2+1)
       {
-         est[0][0] = complex<double> (pars.n,pars.l);
-         for(i=0; i<(int)(parval.size()/2); i++) est[0][i+2] = complex<double> (parval[2*i],parval[2*i+1]);
+         Pst[0][0] = complex<double> (pars.n,pars.l);
+         for(i=0; i<(int)(parval.size()/2); i++) Pst[0][i+2] = complex<double> (parval[2*i],parval[2*i+1]);
       }
-      // Copies Hcf to est
-      for(i=1; i<=Hsz; i++) {memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
+     if(zst[0]==NULL){zst[0]=new zsMat<double>;}
+      // Copies Hcf to Pst and zst
+      for(i=1; i<=Hsz; i++) {memcpy(&Pst[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} 
+      if(zst[0]==NULL){zst[0]=new zsMat<double>;}
+       (*zst[0]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
+       {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[0])(i+1,j+1)=xx;}
+      free(H);
       Hcfi.zero(Hsz,Hsz);
       for(int ind=J.Lo(); ind<=J.Hi(); ind++)
       {
-         if(ind<=6)         // Calculates Sx,Lx etc and copies them to est too. 
+         if(ind<=6)         // Calculates Sx,Lx etc and copies them to Pst too. 
          {
             Hcf = icf_mumat(pars.n, ind-1, pars.l);
             if(ind==3 || ind==4) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi); 
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&Pst[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} 
+          if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
+           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
+           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
+          free(H);
          }
-         else               // Calculates multipolar operator matrices and copies them to est. 
+         else               // Calculates multipolar operator matrices and copies them to Pst. 
          {
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l);
             if(im[ind]==1) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi);
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&Pst[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));}
+           if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
+           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
+           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
+          free(H);
          }
       }
    }
@@ -666,14 +657,14 @@ __declspec(dllexport)
 
    // Calculates the mean field matrix from stored matrices
    H = (complexdouble*)malloc(esz*esz*sizeof(complexdouble));
-   for(i=1; i<=Hsz; i++) memcpy(&H[(i-1)*Hsz],&est[i][1],Hsz*sizeof(complexdouble));
+   for(i=1; i<=Hsz; i++) memcpy(&H[(i-1)*Hsz],&Pst[i][1],Hsz*sizeof(complexdouble));
    for(int ind=J.Lo(); ind<=J.Hi(); ind++)
    {
       complex<double> a(vgjmbH[ind],0.);
       if(ind<=oldJhi)
       {
          iy = ind/nfact; ix = ind-iy*nfact;
-         for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i+ix*Hsz][1+iy*Hsz],&incx,&H[(i-1)*Hsz],&incx);
+         for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&Pst[i+ix*Hsz][1+iy*Hsz],&incx,&H[(i-1)*Hsz],&incx);
       }
       else
       {
@@ -694,7 +685,7 @@ __declspec(dllexport)
 
 
 for(int Ti=1;Ti<=T.Hi();++Ti){
-         icf_expJ(pars,est,zV,vE,&T(Ti),J,&lnZ(Ti),&U(Ti));
+         icf_expJ(pars,Pst,zV,vE,&T(Ti),J,&lnZ(Ti),&U(Ti));
 
     //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
@@ -705,52 +696,45 @@ free(H);
          delete[]vE; delete[]zV;
      
      // --------------------------------------------------------------------
-
+return true;
 }
 
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void Icalc(Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
-                      double *T,          // Input scalar temperature
+bool icf1ion_module::Icalc(Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+                      double &T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
-                      double *lnZ,        // Output scalar logarithm of partition function
-                      double *U,          // Output scalar internal energy 
-                      ComplexMatrix &est) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
-{Matrix JM(1,Jret.Hi(),1,1);double * d=NULL;Vector dd;
+ /* Not Used */       double &g_J,   // Input Lande g-factor
+ /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
+                      double &lnZ,        // Output scalar logarithm of partition function
+                      double &U,          // Output scalar internal energy 
+                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+{Matrix JM(1,Jret.Hi(),1,1);double  d=NULL;Vector dd;
  for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
- Vector TT(1,1);TT(1)=*T;
- Vector lnZZ(1,1);lnZZ(1)=*lnZ;
- Vector UU(1,1);UU(1)=*U;
- IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU,est);
- *U=UU(1);*lnZ=lnZZ(1);*T=TT(1);
+ Vector TT(1,1);TT(1)=T;
+ Vector lnZZ(1,1);lnZZ(1)=lnZ;
+ Vector UU(1,1);UU(1)=U;
+ IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU,Pst);
+ U=UU(1);lnZ=lnZZ(1);T=TT(1);
  for(int i=1;i<=Jret.Hi();++i)Jret(i)=JM(i,1);
+return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the magnetic moment at a particular temperature and field
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void mcalc(Vector &mom,        // Output magnetic moment (mub)
-                      double *T,          // Input scalar temperature
+bool icf1ion_module::mcalc(Vector &mom,        // Output magnetic moment (mub)
+                      double &T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double *g_J,        // Input Lande g-factor
+ /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
-                      ComplexMatrix &est) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename,// Single ion properties filename
+                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
 {
    Vector J(1,6);
    double lnZ, U;
-   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
+   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    //mom(1)=GS*J(1)+J(2);
@@ -759,23 +743,20 @@ __declspec(dllexport)
    mom(1)=GS*J(1)+J(4);
    mom(2)=GS*J(2)+J(5);
    mom(3)=GS*J(3)+J(6);
+return true;
 }
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void mMcalc(Matrix &mom,        // Output magnetic moment (mub)
+bool icf1ion_module::mMcalc(Matrix &mom,        // Output magnetic moment (mub)
                       Vector &T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
-                      ComplexMatrix &est) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+ /* Not Used */       double & gJ,   // Input Lande g-factor
+ /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
+                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
 {
-   Matrix J(1,6,1,T.Hi()); Vector ABC; 
-   double gJ=0.;Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,lnZ,U,est);
+   Matrix J(1,6,1,T.Hi()); 
+   Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   IMcalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    //mom(1)=GS*J(1)+J(2);
@@ -785,26 +766,23 @@ __declspec(dllexport)
    mom(1,Ti)=GS*J(1,Ti)+J(4,Ti);
    mom(2,Ti)=GS*J(2,Ti)+J(5,Ti);
    mom(3,Ti)=GS*J(3,Ti)+J(6,Ti); }
+return true;
 }
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the <L> at a particular temperature and field
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void Lcalc(Vector &L,          // Output magnetic moment (mub)
-                      double *T,          // Input scalar temperature
+bool icf1ion_module::Lcalc(Vector &L,          // Output magnetic moment (mub)
+                      double &T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double *g_J,        // Input Lande g-factor
+ /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
-                      ComplexMatrix &est) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename,// Single ion properties filename
+                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
 {
    Vector J(1,6); 
    double lnZ, U;
-   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
+   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    //L(1)=J(2);
@@ -813,23 +791,21 @@ __declspec(dllexport)
    L(1)=J(4);
    L(2)=J(5);
    L(3)=J(6);
+return true;
 }
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void LMcalc(Matrix &L,          // Output magnetic moment (mub)
+
+bool icf1ion_module::LMcalc(Matrix &L,          // Output magnetic moment (mub)
                       Vector &T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
-                      ComplexMatrix &est) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+ /* Not Used */       double &g_J,   // Input Lande g-factor
+ /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
+                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
 {
-   Matrix J(1,6,1,T.Hi());Vector ABC; 
-   double gJ=0.; Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,lnZ,U,est);
+   Matrix J(1,6,1,T.Hi());
+   Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    //L(1)=J(2);
@@ -839,26 +815,23 @@ __declspec(dllexport)
    L(1,Ti)=J(4,Ti);
    L(2,Ti)=J(5,Ti);
    L(3,Ti)=J(6,Ti);}
+return true;
 }
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the <S> at a particular temperature and field
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void Scalc(Vector &S,          // Output magnetic moment (mub)
-                      double *T,          // Input scalar temperature
+bool icf1ion_module::Scalc(Vector &S,          // Output magnetic moment (mub)
+                      double &T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double *g_J,        // Input Lande g-factor
+ /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
-                      ComplexMatrix &est) // Storage eigenstate matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename,// Single ion properties filename
+                      ComplexMatrix &Pst) // Storage eigenstate matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
 {
    Vector J(1,6); 
    double lnZ, U;
-   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
+   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    //S(1)=J(1);
@@ -867,23 +840,19 @@ __declspec(dllexport)
    S(1)=J(1);
    S(2)=J(2);
    S(3)=J(3);
+return true;
 }
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-           void SMcalc(Matrix &S,          // Output magnetic moment (mub)
+bool icf1ion_module::SMcalc(Matrix &S,          // Output magnetic moment (mub)
                       Vector &T,          // Input scalar temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double * /*g_J*/,   // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
-                      ComplexMatrix &est) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+ /* Not Used */       double&g_J,   // Input Lande g-factor
+ /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
+                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
 {
-   Matrix J(1,6,1,T.Hi());Vector  ABC; 
-   double gJ=0.;Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,&gJ,ABC,sipffilename,lnZ,U,est);
+   Matrix J(1,6,1,T.Hi());Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    //S(1)=J(1);
@@ -894,21 +863,18 @@ for(int Ti=1;Ti<=T.Hi();++Ti){
    S(1,Ti)=J(1,Ti);
    S(2,Ti)=J(2,Ti);
    S(3,Ti)=J(3,Ti);}
+return true;
 }
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the eigenstates of Hic+effective_mean_fields
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-         void estates(ComplexMatrix *est, // Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
+bool icf1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (row 0: real==Eigenvalues;imag==population)
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (meV) 
- /* Not Used */       double & /*g_J*/,   // Input  Lande g-factor
+ /* Not Used */       double & g_J,   // Input  Lande g-factor
                       double &T,          // Input  temperature
- /* Not Used */       Vector & /*ABC*/,   // Input  Vector of parameters from single ion property file
-                      char **sipffilename)// Input  Single ion properties filename
+ /* Not Used */       Vector & ABC,   // Input  Vector of parameters from single ion property file
+                      char *sipffilename)// Input  Single ion properties filename
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
@@ -928,7 +894,7 @@ __declspec(dllexport)
 
    // Parses the input file for parameters
    icpars pars;
-   const char *filename = sipffilename[0];
+   const char *filename = sipffilename;
    ic_parseinput(filename,pars);
 
    int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
@@ -958,7 +924,7 @@ __declspec(dllexport)
    
    // Initialises the output matrix
    int Hsz = Hcf.nr();
-   (*est) = ComplexMatrix(0,Hsz,0,Hsz);
+   est = ComplexMatrix(0,Hsz,0,Hsz);
 
    // Diagonalises the Hamiltonian H = Hcf + sum_a(gjmbH_a*Ja)
    double *vE = new double[Hsz], *rV=0; complexdouble *zV=0; int info; 
@@ -970,43 +936,40 @@ __declspec(dllexport)
       delete[]vE; vE=0; if(Hcfi.isempty()) delete[]rV; else delete[]zV; exit(EXIT_FAILURE); }
 
    // Stores the number of electrons and the orbital number in element (0,0)
-   (*est)(0,0) = complex<double> (pars.n, pars.l);
+   est(0,0) = complex<double> (pars.n, pars.l);
 
    // Puts eigenvectors/values into the est matrix
-   for(i=0; i<Hsz; i++) (*est)(0,i+1) = complex<double> (vE[i], exp(-(vE[i]-vE[0])/(KB*T)));   // Row 0
+   for(i=0; i<Hsz; i++) est(0,i+1) = complex<double> (vE[i], exp(-(vE[i]-vE[0])/(KB*T)));   // Row 0
 
    if(!Hcfi.isempty()) // {
-      for(i=1; i<=Hsz; i++) memcpy(&(*est)[i][1],&zV[(i-1)*Hsz],Hsz*sizeof(complexdouble)); 
-//    std::cout << "\n\nest==VE.zV = " << checkmat((*est),VE.zV(0),1,1) << endl << endl; }
+      for(i=1; i<=Hsz; i++) memcpy(&est[i][1],&zV[(i-1)*Hsz],Hsz*sizeof(complexdouble)); 
+//    std::cout << "\n\nest==VE.zV = " << checkmat(est,VE.zV(0),1,1) << endl << endl; }
    else
       for(i=0; i<Hsz; i++)
       {  
          //printf("\n");
          for(j=0; j<Hsz; j++) 
          {
-            (*est)(i+1,j+1) = complex<double> (rV[j+i*Hsz], 0.);
+            est(i+1,j+1) = complex<double> (rV[j+i*Hsz], 0.);
 //          printf("%6.3f %+6.3f i  ",rV[i+j*Hsz],0.0);
 //          if(rV[i+j*Hsz] != (*est)[i+1][j+1]) { fprintf(stderr,"compiler problem: bad memory mapping of vectors\n"); exit(EXIT_FAILURE); }
          }
       }
    if(Hcfi.isempty()) delete[]rV; else delete[]zV; delete[]vE;
    end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
+return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate transition matrix elements
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-          int du1calc(int &tn,            // Input transition number; if tn<0, print debug info
+int icf1ion_module::du1calc(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (meV) 
- /* Not Used */       double & /*g_J*/,   // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,   // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+ /* Not Used */       double & g_J,   // Input Lande g-factor
+ /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector &u1ret,  // Output eigenvector u1
                       float &delta,       // Output transition energy
                       int &n, int &nd,
@@ -1063,7 +1026,7 @@ __declspec(dllexport)
 //    for(int ii=1; ii<=Hsz; ii++) memcpy(&zV[(ii-1)*Hsz],&(*est)[ii][1],Hsz*sizeof(complexdouble)); 
 
       // Parses the input file for parameters
-      icpars pars; const char *filename = sipffilename[0];
+      icpars pars; const char *filename = sipffilename;
       ic_parseinput(filename,pars);
 
       // Calculates the transition matrix elements:
@@ -1215,17 +1178,13 @@ __declspec(dllexport)
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate transition matrix elements of magnetic moment operator
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-              int dm1(int &tn,            // Input transition number; if tn<0, print debug info
+int icf1ion_module::dm1(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector & m1, // Output m1 vector (1,3)
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
@@ -1248,17 +1207,13 @@ __declspec(dllexport)
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate transition matrix elements of orbital angular momentum operator
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-              int dL1(int &tn,            // Input transition number; if tn<0, print debug info
+int icf1ion_module::dL1(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector & L1, // Output L1 vector (1,3)
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
@@ -1281,17 +1236,13 @@ __declspec(dllexport)
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate transition matrix elements of spin operator
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-              int dS1(int &tn,            // Input transition number; if tn<0, print debug info
+int icf1ion_module::dS1(int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector & S1, // Output S1 vector (1,3)
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
@@ -1561,11 +1512,7 @@ void icf_loveseyQq(std::vector< sMat<double> > &Qq, int q, int n, orbital l, std
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the thermal expectation value of the FT of the magnetisation density -2Q in Bohr magnetons
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-      void mqcalc(ComplexVector &Mq,      // Output expectation values -2[<Q>_{x} <Q>_y <Q>_z]
+bool icf1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values -2[<Q>_{x} <Q>_y <Q>_z]
                   double &th, double &ph, // Input polar and azimuth angles theta and phi
                   double &J0, double &J2, // Input radial parameters <j_0>, <j_2>
                   double &J4, double &J6, // Input radial parameters <j_4>, <j_6>
@@ -1613,17 +1560,13 @@ __declspec(dllexport)
       free(zQmat); free(zt); Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
    }
 // printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
+return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the transition matrix using the scattering operator of Balcar and Lovesey
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-         int                              // Returns total number of transitions
-             dmq1(int &tn,                // Input transition number |tn|. If tn>0 omit printout. If tn<0 print info.
+int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|. If tn>0 omit printout. If tn<0 print info.
                   double &th,             // Input zenith angle (with the z==b axis) in radians.
                   double &ph,             // Input azimuth angle (with the x==a axis, to projection in x-y plane).
                   double &J0, double &J2, // Input radial parameters <j_0>, <j_2>
@@ -2036,7 +1979,7 @@ complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
 }
 
 //--------------------------------------------------------------------------------------------------------------
-void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, double *T, Vector &J)
+void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, double &T, Vector &J)
 {
    int k[] = {0,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
@@ -2053,11 +1996,11 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
    //char uplo = 'U';
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB**T))<DBL_EPSILON || vE[Esz+1]==0) break; }
-   if (*T<0)
+   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || vE[Esz+1]==0) break; }
+   if (T<0)
    {
-      Esz = (int)(-*T);
-      printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",*T,(int)(-*T));
+      Esz = (int)(-T);
+      printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
                         printf("Number   Excitation Energy\n");
       for (ind_j=0; ind_j<Esz; ++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
    }  // MR 10.9.2010
@@ -2103,7 +2046,7 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
          if(iJ==J.Lo())
          {
 //MR 10.9.2010
-            if (*T<0)
+            if (T<0)
             {
                char instr[MAXNOFCHARINLINE];
                printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
@@ -2112,7 +2055,7 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
             }
             else
             {
-               eb[ind_j] = exp(-E[ind_j]/(KB**T));
+               eb[ind_j] = exp(-E[ind_j]/(KB*T));
             }
             J[iJ] += me[ind_j]*eb[ind_j];
             Z += eb[ind_j];
@@ -2132,16 +2075,16 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
 // Routine to calculate the coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
 // --------------------------------------------------------------------------------------------------------------- //
-void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation values) Zlm R^2(r) at given T, H_eff
+void icf1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments==(expectation values) Zlm R^2(r) at given T, H_eff
                 int xyz,             // direction 1,2,3 = x,y,z
-                double *T,           // Input scalar temperature
+                double &T,           // Input scalar temperature
                 Vector &gjmbH,       // Input vector of mean fields (meV)
-                char **sipffilename, // Single ion properties filename
-                ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
+                char *sipffilename, // Single ion properties filename
+                ComplexMatrix &Pst)  // Parameter Storage matrix (initialized in parstorage)
 {  
    // Parses the input file for parameters
    icpars pars;
-   const char *filename = sipffilename[0];
+   const char *filename = sipffilename;
    ic_parseinput(filename,pars);
 
    int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
@@ -2169,70 +2112,82 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
    parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q));
    if(parval.size()%2==1) parval.push_back(0.);
 
-// if((est.Cols()!=(esz+1) || est.Rows()!=(esz+1))) Hicnotcalc = true;
-   if(real(est[0][0])==(double)pars.n && imag(est[0][0])==(double)pars.l)  // Hic previously calculated
+// if((Pst.Cols()!=(esz+1) || Pst.Rows()!=(esz+1))) Hicnotcalc = true;
+   if(real(Pst[0][0])==(double)pars.n && imag(Pst[0][0])==(double)pars.l)  // Hic previously calculated
    {
-      for(i=0; i<(int)(parval.size()/2); i++) if(real(est[0][i+2])!=parval[2*i] || imag(est[0][i+2])!=parval[2*i+1]) { 
+      for(i=0; i<(int)(parval.size()/2); i++) if(real(Pst[0][i+2])!=parval[2*i] || imag(Pst[0][i+2])!=parval[2*i+1]) { 
          Hicnotcalc = true; break; }
    }
    else Hicnotcalc = true;
 
    int oldJhi = J.Hi();
-   if((est.Rhi()!=esz||est.Chi()!=esz) && !Hicnotcalc) // Called from spins: need all multipolar operators, not just those used in MF loop.
+   if((Pst.Rhi()!=esz||Pst.Chi()!=esz) && !Hicnotcalc) // Called from spins: need all multipolar operators, not just those used in MF loop.
    {
-      nfact = (int)real(est[0][1]); esz = Hsz*nfact;
-      oldJhi = (int)imag(est[0][1]);
+      nfact = (int)real(Pst[0][1]); esz = Hsz*nfact;
+      oldJhi = (int)imag(Pst[0][1]);
    }
 
    if(Hicnotcalc || pars.l==S)
    {
       sMat<double> Hcfi, Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM; H = zmat2f(Hcf,Hcfi);
-      if(est.Rhi()!=esz||est.Chi()!=esz) {
+      if(Pst.Rhi()!=esz||Pst.Chi()!=esz) {
          std::cerr << "ERROR module icf1ion - Icalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE); }
       else if(esz>(int)parval.size()/2+1)
       {
-         est[0][0] = complex<double> (pars.n,pars.l);
-         for(i=0; i<(int)(parval.size()/2); i++) est[0][i+2] = complex<double> (parval[2*i],parval[2*i+1]);
+         Pst[0][0] = complex<double> (pars.n,pars.l);
+         for(i=0; i<(int)(parval.size()/2); i++) Pst[0][i+2] = complex<double> (parval[2*i],parval[2*i+1]);
       }
-      // Copies Hcf to est
-      for(i=1; i<=Hsz; i++) {memcpy(&est[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
+      // Copies Hcf to Pst and zst
+      for(i=1; i<=Hsz; i++) {memcpy(&Pst[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} 
+      if(zst[0]==NULL){zst[0]=new zsMat<double>;}
+      (*zst[0]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
+       {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[0])(i+1,j+1)=xx;}
+      free(H);
       Hcfi.zero(Hsz,Hsz);
       for(int ind=J.Lo(); ind<=J.Hi(); ind++)
       {
-         if(ind<=6)         // Calculates Sx,Lx etc and copies them to est too. 
+         if(ind<=6)         // Calculates Sx,Lx etc and copies them to Pst ,zst too. 
          {
             Hcf = icf_mumat(pars.n, ind-1, pars.l);
             if(ind==3 || ind==4) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi); 
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&Pst[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} 
+           if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
+           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
+           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
+          free(H);
          }
-         else               // Calculates multipolar operator matrices and copies them to est. 
+         else               // Calculates multipolar operator matrices and copies them to Pst zst. 
          {
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l);
             if(im[ind]==1) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi);
             iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
-            for(i=1; i<=Hsz; i++) {memcpy(&est[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} free(H);
+            for(i=1; i<=Hsz; i++) {memcpy(&Pst[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} 
+           if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
+           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
+           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
+           free(H);
          }
       }
    }
 
    // Calculates the mean field matrix from stored matrices
    H = (complexdouble*)malloc(esz*esz*sizeof(complexdouble));
-   for(i=1; i<=Hsz; i++) memcpy(&H[(i-1)*Hsz],&est[i][1],Hsz*sizeof(complexdouble));
+   for(i=1; i<=Hsz; i++) memcpy(&H[(i-1)*Hsz],&Pst[i][1],Hsz*sizeof(complexdouble));
    for(int ind=J.Lo(); ind<=J.Hi(); ind++)
    {
       complex<double> a(vgjmbH[ind],0.);
       if(ind<=oldJhi)
       {
          iy = ind/nfact; ix = ind-iy*nfact;
-         for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&est[i+ix*Hsz][1+iy*Hsz],&incx,&H[(i-1)*Hsz],&incx);
+         for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&Pst[i+ix*Hsz][1+iy*Hsz],&incx,&H[(i-1)*Hsz],&incx);
       }
       else
       {
          sMat<double> Hcf, Hcfi(Hsz,Hsz); complexdouble *zM;
-         if(ind<=6) {       // Calculates Sx,Lx etc and copies them to est too. 
+         if(ind<=6) {       // Calculates Sx,Lx etc and copies them to Pst too. 
             Hcf = icf_mumat(pars.n, ind-1, pars.l); if(ind==3 || ind==4) zM = zmat2f(Hcfi,Hcf); else zM = zmat2f(Hcf,Hcfi); }
-         else       {       // Calculates multipolar operator matrices and copies them to est. 
+         else       {       // Calculates multipolar operator matrices and copies them to Pst. 
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l); if(im[ind]==1)   zM = zmat2f(Hcfi,Hcf); else zM = zmat2f(Hcf,Hcfi); }
          for(i=1; i<=Hsz; i++) {F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,&zM[(i-1)*Hsz],&incx,&H[(i-1)*Hsz],&incx);} free(zM);
       }
@@ -2250,31 +2205,27 @@ void sdod_Icalc(Vector &J,           // Output single ion moments==(expectation 
 // Routine to calculate the coefficients of expansion of chargedensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-void chargedensity_coeff(
+bool icf1ion_module::chargedensity_coeff(
                       Vector &mom,         // Output single ion moments == expectation values of
                                            //    of Zlm R^2(r) at a given temperature T and  effective field H
-                      double *T,           // Input scalar temperature
+                      double &T,           // Input scalar temperature
                       Vector &Hxc,         // Input vector of exchange fields (meV) 
                       Vector &Hext,        // Input vector of external field (T) 
- /* Not Used */       double *g_J,         // Input Lande g-factor
+ /* Not Used */       double &g_J,         // Input Lande g-factor
  /* Not Used */       Vector &ABC,         // Input vector of parameters from single ion property file
-                      char **sipffilename, // Single ion properties filename
-                      ComplexMatrix &est)  // Storage  matrix (initialized in Icalc_parameter_storage_matrix_init)
+                      char *sipffilename, // Single ion properties filename
+                      ComplexMatrix &Pst)  // Storage  matrix (initialized in Icalc_parameter_storage_matrix_init)
 {
    Vector moments(1,51); 
    double lnZ, U;
    Vector Hxce(1,51); 
    Hxce=0;
    for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   Icalc(moments,T,Hxce,Hext,g_J,ABC,sipffilename,&lnZ,&U,est);
+   Icalc(moments,T,Hxce,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
 
    // Parses the input file for parameters
    icpars pars; 
-   const char *filename = sipffilename[0];
+   const char *filename = sipffilename;
    ic_parseinput(filename,pars);
 
 // Definitions in Icalc()
@@ -2296,22 +2247,19 @@ void chargedensity_coeff(
 // {for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){if(m!=0){a(l,m)*=sqrt((2.0*l+1)/8/PI);}else{a(l,m)*=sqrt((2.0*l+1)/4/PI);}}}
 // } // in case of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
 // MR 23.8.2011: if Tkq are define as in our review then the above should be right
+return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate transition matrix elements of chargedensity coefficient operator
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-int dchargedensity_coeff1(int &tn,        // Input transition number; if tn<0, print debug info
+int icf1ion_module::dchargedensity_coeff1(int &tn,        // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector & dc1,// Output m1 vector (1,3)
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
@@ -2334,20 +2282,16 @@ int dchargedensity_coeff1(int &tn,        // Input transition number; if tn<0, p
 // Routine to calculate the coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-void spindensity_coeff(Vector &J,          // Output single ion moments =expectation values of
+bool icf1ion_module::spindensity_coeff(Vector &J,          // Output single ion moments =expectation values of
                                            //    of Zlm R^2(r) at a given temperature T and  effective field H
                       int & xyz,           // direction 1,2,3 = x,y,z
-                      double *T,           // Input scalar temperature
+                      double &T,           // Input scalar temperature
                       Vector &Hxc,         // Input vector of exchange fields (meV) 
                       Vector &Hext,        // Input vector of external field (T) 
- /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
-                      char **sipffilename, // Single ion properties filename
-                      ComplexMatrix &est)  // Input/output eigenstate matrix (initialized in parstorage)
+ /* Not Used */       double &g_J,    // Input Lande g-factor
+ /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
+                      char *sipffilename, // Single ion properties filename
+                      ComplexMatrix &Pst)  // Parameter Storage matrix (initialized in parstorage)
 {  // sum exchange field and external field
    Vector gjmbH(1,Hxc.Hi());
    gjmbH=Hxc;
@@ -2363,27 +2307,24 @@ void spindensity_coeff(Vector &J,          // Output single ion moments =expecta
       if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
       if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
    }
-   sdod_Icalc(J,xyz,T,gjmbH,sipffilename,est);
+   sdod_Icalc(J,xyz,T,gjmbH,sipffilename,Pst);
+return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the coefficients of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expectation values of
+bool icf1ion_module::orbmomdensity_coeff(Vector &J,        // Output single ion moments =expectation values of
                                            //    of Zlm R^2(r) at a given temperature T and  effective field H
                       int & xyz,           // direction 1,2,3 = x,y,z
-                      double *T,           // Input scalar temperature
+                      double &T,           // Input scalar temperature
                       Vector &Hxc,         // Input vector of exchange fields (meV) 
                       Vector &Hext,        // Input vector of external field (T) 
- /* Not Used */       double * /*g_J*/,    // Input Lande g-factor
- /* Not Used */       Vector & /*ABC*/,    // Input vector of parameters from single ion property file
-                      char **sipffilename, // Single ion properties filename
-                      ComplexMatrix &est)  // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)
+ /* Not Used */       double &g_J,    // Input Lande g-factor
+ /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
+                      char *sipffilename, // Single ion properties filename
+                      ComplexMatrix &Pst)  // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)
 {  // sum exchange field and external field
    Vector gjmbH(1,Hxc.Hi());
    gjmbH=Hxc;
@@ -2398,7 +2339,8 @@ void orbmomdensity_coeff(Vector &J,        // Output single ion moments =expecta
       if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
       if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
    }
-   sdod_Icalc(J,-xyz,T,gjmbH,sipffilename,est);
+   sdod_Icalc(J,-xyz,T,gjmbH,sipffilename,Pst);
+return true;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -2409,7 +2351,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
                       int &tn,            // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &gjmbH,      // Input vector of exchange fields + external fields (meV)
-                      char **sipffilename,// Single ion properties filename
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector &u1,  // Output Slm1/Llm1 vector (1,49)
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
@@ -2443,7 +2385,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
       double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
 
       // Parses the input file for parameters
-      icpars pars; const char *filename = sipffilename[0];
+      icpars pars; const char *filename = sipffilename;
       ic_parseinput(filename,pars);
 
       // Calculates the transition matrix elements:
@@ -2565,18 +2507,13 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the matrix elements of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
-// --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-int dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, print debug info
+int icf1ion_module::dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
- /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+ /* Not Used */       double &g_J,    // Input Lande g-factor
+ /* Not Used */       Vector &ABC,    // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector &Slm1,// Output Llm1 vector (1,49)
                       int & xyz,            // Indicating which of x,y,z direction to calculate
                       float &delta,       // Output transition energy
@@ -2600,17 +2537,13 @@ int dspindensity_coeff1(int &tn,          // Input transition number; if tn<0, p
 // Routine to calculate the matrix elements of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif
-int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, print debug info
+int icf1ion_module::dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, print debug info
                       double &T,          // Input temperature
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double &/*g_J*/,    // Input Lande g-factor
- /* Not Used */       Vector &/*ABC*/,    // Input vector of parameters from single ion property file
-                      char **sipffilename,// Single ion properties filename
+ /* Not Used */       double &g_J,    // Input Lande g-factor
+ /* Not Used */       Vector &ABC,    // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
                       ComplexVector &Llm1,// Output Llm1 vector (1,49)
                       int & xyz,            // Indicating which of x,y,z direction to calculate
                       float &delta,       // Output transition energy
@@ -2633,12 +2566,8 @@ int dorbmomdensity_coeff1(int &tn,        // Input transition number; if tn<0, p
 // --------------------------------------------------------------------------------------------------------------- //
 // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
 // --------------------------------------------------------------------------------------------------------------- //
-extern "C"
-#ifdef _WINDOWS
-__declspec(dllexport)
-#endif                                    // on input
-int    opmat(int &ni,                      // ni     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
-             char **sipffilename,         // Single ion properties filename
+bool icf1ion_module::opmat(int &ni,                      // ni     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
+             char *sipffilename,         // Single ion properties filename
              Vector &Hxc,                 // Hext  vector of external field [meV]
              Vector &Hext,                // Hxc   vector of exchange field [meV]
                                           // on output   
@@ -2656,7 +2585,7 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
    if(ni==-5){n=-4;}
 
    // Parses the input file for parameters
-   const char *filename = sipffilename[0];
+   const char *filename = sipffilename;
    icpars pars; ic_parseinput(filename,pars);
 
    //          0 1 2 3 4 5 6  7  8 91011 12 13 1415161718 19 20 21 222324252627 28 29 30 31 32333435363738 39 40 41 42 43 4445464748495051
@@ -2687,9 +2616,9 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
       sMat<double> Hcfi, Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM;
       for(int ind=1; ind<=(int)gjmbH.size(); ind++)
       {
-         if(ind<=6) {       // Calculates Sx,Lx etc and copies them to est too. 
+         if(ind<=6) {       // Calculates Sx,Lx etc  
             if(ind==3 || ind==4) Hcfi += icf_mumat(pars.n, ind-1, pars.l)*gjmbH[ind-1]; else Hcf += icf_mumat(pars.n, ind-1, pars.l)*gjmbH[ind-1]; }
-         else {             // Calculates multipolar operator matrices and copies them to est. 
+         else {             // Calculates multipolar operator matrices  
             if(im[ind]==1) Hcfi += icf_ukq(pars.n,K[ind],Q[ind],pars.l)*gjmbH[ind-1];   else Hcf += icf_ukq(pars.n,K[ind],Q[ind],pars.l)*gjmbH[ind-1]; }
       }
       
@@ -2701,7 +2630,7 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
          retval(u[j][0]+1,u[j][1]+1) = Hcf(u[j][0],u[j][1]);
          retval(u[j][1]+1,u[j][0]+1) = Hcfi(u[j][0],u[j][1]);
       }
-      outmat = retval; return 0;
+      outmat = retval; return true;
    }
    else if(n>0)
    {  
@@ -2722,7 +2651,7 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
          for (int j=0; j<(int)u.size(); j++)
             retval(u[j][0]+1,u[j][1]+1) = Jmat(u[j][0],u[j][1]);
       }
-      outmat = retval; return 0;
+      outmat = retval; return true;
    }
    else
    {  
@@ -2755,9 +2684,10 @@ int    opmat(int &ni,                      // ni     which operator 0=Hamiltonia
          if(fabs(Hrot[ii*Hsz+jj].i)<DBL_EPSILON) retval(jj+1,ii+1)=Hrot[ii*Hsz+jj].i;
       }
       delete[]Vf; delete[]Hrot; delete[]zmt;
-     outmat=retval;return 0;
+     outmat=retval;return true;
    }
    std::cerr << "icf1ion::opmat - failed to calculate operator matrices\n"; return 1; //exit(EXIT_FAILURE);
+return false;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -2768,7 +2698,7 @@ void icf_printheader(const char *outfile, icpars &pars)
    time_t curtime = time(NULL);
    std::fstream FILEOUT; FILEOUT.open(outfile, std::fstream::out);
    std::string Lstr = Lout(pars.l); strtolower(Lstr);
-   FILEOUT << "#{ icf1ionmodule version " << IC1IONMODULE_VERSION << " " << ctime(&curtime);
+   FILEOUT << "# icf1ionmodule version " << IC1IONMODULE_VERSION << " " << ctime(&curtime);
    if(!pars.ionname.empty()) FILEOUT << "# Ion name: " << pars.ionname << "\n";
    FILEOUT << "# Free ion configuration: " << Lstr << "^" << pars.n << "\n";
    FILEOUT << "# Spin orbit parameter (" << pars.e_units << "): zeta=" << pars.xi << "\n";
@@ -2795,7 +2725,7 @@ void icf_printheader(const char *outfile, icpars &pars)
 // --------------------------------------------------------------------------------------------------------------- //
 void icf_showoutput(const char *filename,                       // Output file name - default "results/mcphas.icr"
                     icpars &pars,                               // Input parameters
-                    ComplexMatrix &est)                         // Eigenstates class
+                    ComplexMatrix &est)                         // Eigenstates Matrix 
 {
    fstates_t gs = hunds_gs(pars.n, pars.l);
    char Jlabel[12]; std::string id; 
@@ -2833,8 +2763,8 @@ void icf_showoutput(const char *filename,                       // Output file n
    icf_printheader(filename,pars);
    std::fstream FILEOUT; FILEOUT.open(filename, std::fstream::out | std::fstream::app); // Opens file for appending
    FILEOUT << "# Energy offset, E0=" << real(est(0,1))*conv << pars.e_units << "\n";
-   if(!iscomplex) FILEOUT << "# Energy(" << pars.e_units << ")\tWavefunctions(^{2S+1}L_J,mJ) }\n"; else
-   FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L_J,mJ) }\n";
+   if(!iscomplex) FILEOUT << "# Energy(" << pars.e_units << ")\tWavefunctions(^{2S+1}L_J,mJ) \n"; else
+   FILEOUT << "# Energy(" << pars.e_units << ")\tAmplitude\t|Amplitude|^2\tWavefunctions(^{2S+1}L_J,mJ) \n";
 
    double *V=0; complexdouble *zV=0; if(iscomplex) zV = new complexdouble[ns]; else V = new double[ns];
    for(iE=0; iE<ns; iE++)
@@ -2907,9 +2837,11 @@ int main(int argc, char *argv[])
    ic_parseinput(filename,pars);
 
    // Calculates and diagonalises the Hamiltonian
-   Vector gjmbHxc(1,6,0.); ComplexMatrix est; double T=1.;
+   Vector gjmbHxc(1,6,0.); ComplexMatrix est; ComplexMatrix Pst; double T=1.;
    Vector Hext(1,3);Hext(1)=pars.Bx;Hext(2)=pars.By;Hext(3)=pars.Bz;
-   estates(&est,gjmbHxc,Hext,T,T,gjmbHxc,&infile);
+   // create object of icf1ion_module class
+   icf1ion_module si_mod;
+   si_mod.estates(est,gjmbHxc,Hext,T,T,gjmbHxc,infile);
    icf_showoutput(outfile,pars,est);
 
    // If required calculates some single-ion physical properties and saves to <physfile>
@@ -2940,15 +2872,15 @@ int main(int argc, char *argv[])
       if(pars.xT==0.) gjmbH0(3)=pars.xHc/xnorm; else gjmbH0(3)=pars.yHc/ynorm; 
       double convfact=1; if(pars.mag_units==1) convfact = NAMUB*1e3; else if(pars.mag_units==2) convfact = NAMUB;  // 1==cgs, 2==SI
       
-      // Reinitialises the Parameter storage  matrix est
-      est.Remove(); Icalc_parameter_storage_matrix_init(&est,gjmbHxc,Hext,&T,&T,gjmbHxc,&infile);
+      // Reinitialises the Parameter storage  matrix Pst
+      Pst.Remove(); si_mod.Icalc_parameter_storage_matrix_init(Pst,gjmbHxc,Hext,T,T,gjmbHxc,infile);
 
       for(int iH=0; iH<nH; iH++)
       {
          for(int al=1; al<=3; al++) Hext(al) = gjmbH0(al)*(Hmin+iH*Hstep);
          for(int iT=0; iT<nT; iT++)
          {
-            Icalc(J,&vT[iT],gjmbHxc,Hext,&vT[iT],gjmbHxc,&infile,&lnZ,&U,est); for(int iJ=1; iJ<=6; iJ++) if(fabs(J(iJ))<SMALL) J(iJ)=0.;
+            si_mod.Icalc(J,vT[iT],gjmbHxc,Hext,vT[iT],gjmbHxc,infile,lnZ,U,Pst); for(int iJ=1; iJ<=6; iJ++) if(fabs(J(iJ))<SMALL) J(iJ)=0.;
             ma[iT]=GS*J(1)+J(4); mb[iT]=GS*J(2)+J(5); mc[iT]=GS*J(3)+J(6); mag[iT] = sqrt(ma[iT]*ma[iT]+mb[iT]*mb[iT]+mc[iT]*mc[iT]);
          }
          if(pars.xT!=0.)
@@ -2977,18 +2909,18 @@ int main(int argc, char *argv[])
    double /*T=2.0,*/lnZ=0.,U=0.,gJ=0.; T=2.0;
    char *filearray[1]; 
    filearray[0] = infile;
- /*ComplexMatrix est;*/ est.Remove(); Icalc_parameter_storage_matrix_init(&est,gmbH,&gJ,&T,ABC,filearray);
+ /*ComplexMatrix Pst;*/ Pst.Remove(); Icalc_parameter_storage_matrix_init(&Pst,gmbH,&gJ,&T,ABC,filearray);
  //ComplexMatrix est; int Hsz=getdim(pars.n,pars.l); est = ComplexMatrix(0,Hsz,0,Hsz);
    end = clock();
 
-   Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,est);
+   Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,Pst);
    start = clock(); std::cerr << "Time to do Icalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
    std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
    std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";
 
 //for (int it=0; it<1000; it++) {
 // end = clock();
-// Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,est);
+// Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,Pst);
 // start = clock(); std::cerr << "Time to do Icalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 // std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
 // std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";

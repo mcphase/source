@@ -36,9 +36,9 @@ double jjjpar::J()
 {
  switch (module_type)
   {
-   case 2:
-   case 4: return (*iops).J;break;
-   case 3:  return ABC[1];break;
+   case cfield:
+   case so1ion: return (*iops).J;break;
+   case brillouin:  return ABC[1];break;
    default: fprintf (stderr, "error class jjjpar: single ion module does not allow to calculate quantum number J \n");
             exit (EXIT_FAILURE);
   }
@@ -52,8 +52,8 @@ Vector & jjjpar::tetan ()
  tt=0;
  switch (module_type)
   {
-   case 2:
-   case 4: tt(2)=(*iops).alpha;tt(4)=(*iops).beta;tt(6)=(*iops).gamma;
+   case cfield:
+   case so1ion: tt(2)=(*iops).alpha;tt(4)=(*iops).beta;tt(6)=(*iops).gamma;
             return tt;break;
    default: fprintf (stderr, "error class jjjpar: single ion module does not allow to calculate stevens parameters alpha beta gamma \n"); 
             exit (EXIT_FAILURE);
@@ -398,7 +398,7 @@ void jjjpar::save_sipf(FILE * fout)
 { char  instr[MAXNOFCHARINLINE];
  int i;FILE * cfin;
  switch (module_type)
-  {case 1: fprintf(fout,"#!MODULE=kramer\n#<!--mcphase.sipf-->\n");
+  {case kramer: fprintf(fout,"#!MODULE=kramer\n#<!--mcphase.sipf-->\n");
            fprintf(fout,"#***************************************************************\n");
            fprintf(fout,"# Single Ion Parameter File for Module Kramer for  \n");
            fprintf(fout,"# %s\n",MCPHASVERSION);
@@ -417,7 +417,7 @@ void jjjpar::save_sipf(FILE * fout)
            fprintf(fout,"A=%10f \n B=%10f \n C=%10f\n\n",ABC(1),ABC(2),ABC(3));
             
           break;
-   case 2: fprintf(fout,"#!MODULE=cfield\n#<!--mcphase.sipf-->\n");
+   case cfield: fprintf(fout,"#!MODULE=cfield\n#<!--mcphase.sipf-->\n");
            fprintf(fout,"#***************************************************************\n");
            fprintf(fout,"# Single Ion Parameter File for Module Cfield for  \n");
            fprintf(fout,"# %s\n",MCPHASVERSION);
@@ -433,7 +433,7 @@ void jjjpar::save_sipf(FILE * fout)
            fprintf(fout,"#\n# crystal field paramerized in Stevens formalism\n#\n");
            (*iops).save(fout);
           break;
-   case 3: fprintf(fout,"#!MODULE=brillouin\n#<!--mcphase.sipf-->\n");
+   case brillouin: fprintf(fout,"#!MODULE=brillouin\n#<!--mcphase.sipf-->\n");
            fprintf(fout,"#***************************************************************\n");
            fprintf(fout,"# Single Ion Parameter File for Module Brillouin for\n");
            fprintf(fout,"# %s\n",MCPHASVERSION);
@@ -450,7 +450,7 @@ void jjjpar::save_sipf(FILE * fout)
            fprintf(fout,"# BJ(x) with angular momentum number J=S,\n# no crystal field\n#\n");
            fprintf(fout,"J = %g\n\n",ABC(1));
           break;
-   case 4: fprintf(fout,"#!MODULE=so1ion\n#<!--mcphase.sipf-->\n");
+   case so1ion: fprintf(fout,"#!MODULE=so1ion\n#<!--mcphase.sipf-->\n");
            fprintf(fout,"#***************************************************************\n");
            fprintf(fout,"# Single Ion Parameter File for Module So1ion for  \n");
            fprintf(fout,"# %s\n",MCPHASVERSION);
@@ -466,7 +466,7 @@ void jjjpar::save_sipf(FILE * fout)
            fprintf(fout,"#\n# crystal field paramerized in Stevens formalism\n#\n");
            (*iops).save(fout);
           break;
-   case 5: //fprintf(fout,"#!MODULE=cluster\n#<!--mcphase.sipf-->\n");
+   case cluster: //fprintf(fout,"#!MODULE=cluster\n#<!--mcphase.sipf-->\n");
            //fprintf(fout,"#***************************************************************\n");
            //fprintf(fout,"# Single Ion Parameter File for Module Cluster for\n");
            //fprintf(fout,"# %s\n",MCPHASVERSION);
@@ -508,7 +508,7 @@ void jjjpar::save_sipf(FILE * fout)
            //fclose(cfin);
    }
 
-  if(module_type>0&&module_type!=5) // in case of internal modules save common information
+  if(module_type>0&&module_type!=cluster) // in case of internal modules save common information
    {fprintf(fout,"CHARGE=%g\n",charge);
     fprintf(fout,"MAGNETIC=%i\n",magnetic);
 
@@ -682,7 +682,7 @@ else
                     }
     if(i==1){// determine nofcomponents from number of parameters read in first line of mcphas.j
              if(diagonalexchange==1){nofcomponents=j-3;}else if(diagonalexchange==0){nofcomponents=(int)sqrt((double)(j-3));}
-             if(module_type==1)
+             if(module_type==kramer)
 	     {// check dimensions of vector if internal kramers is used
               if(nofcomponents<3)
               {fprintf(stderr,"Error reading mcphas.j: reading first set of exchange parameters - nofcolumns gives nofcomponents=%i (< 3) not compatible with internal single ion module kramer - check number of columns in file mcphas.j\n",nofcomponents);
@@ -789,7 +789,7 @@ jjjpar::jjjpar(double x,double y,double z, double slr,double sli, double dwf)
   paranz=0;
   sipffilename= new char [MAXNOFCHARINLINE];
   clusterfilename=new char [MAXNOFCHARINLINE];
-  module_type=1;
+  module_type=kramer;orientation=abc_xyz;
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;
 }
@@ -802,7 +802,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   paranz=n;xyz=Vector(1,3);xyz=0; 
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   int i1;r2=0;r4=0;r6=0;
-  module_type=1;ABC=Vector(1,3);ABC=0;
+  module_type=kramer;orientation=abc_xyz;ABC=Vector(1,3);ABC=0;
   transitionnumber=1;
   nofcomponents=nofmom;
   mom=Vector(1,9); mom=0;
@@ -859,27 +859,27 @@ SLR=pp.SLR;SLI=pp.SLI;
   strncpy(clusterfilename,pp.clusterfilename, MAXNOFCHARINLINE-1);
   diagonalexchange=pp.diagonalexchange;
   gJ=pp.gJ;
-  module_type=pp.module_type;
+  module_type=pp.module_type;orientation=pp.orientation;module_clust=pp.module_clust;
   ninit=pp.ninit;maxE=pp.maxE;pinit=pp.pinit;
   Np=pp.Np; Xip=pp.Xip;Cp=pp.Cp;
   r2=pp.r2;r4=pp.r4;r6=pp.r6;
   transitionnumber=pp.transitionnumber;
   sipffilename= new char [strlen(pp.sipffilename)+1];
   strcpy(sipffilename,pp.sipffilename);
-  if(module_type==0)ss = std::stringstream{slurp(sipffilename)};
+  if(module_type<=0)ss = std::stringstream{slurp(sipffilename)};
   
-  if (pp.module_type==3||pp.module_type==1||pp.module_type==0)  ABC=pp.ABC;
-  if ((pp.module_type==5||pp.module_type==3||pp.module_type==1||pp.module_type==0) &&
+  if (pp.module_type==brillouin||pp.module_type==kramer||pp.module_type<=0)  ABC=pp.ABC;
+  if ((pp.module_type==cluster||pp.module_type==brillouin||pp.module_type==kramer||pp.module_type<=0) &&
       (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
   {  Icalc_parstorage = ComplexMatrix(pp.Icalc_parstorage.Rlo(),pp.Icalc_parstorage.Rhi(),pp.Icalc_parstorage.Clo(),pp.Icalc_parstorage.Chi());
      Icalc_parstorage = pp.Icalc_parstorage;
   }
-  if (pp.module_type==2||pp.module_type==4)  {iops=new ionpars(*pp.iops);//((int)(2*(*pp.iops).J+1));iops=pp.iops;
+  if (pp.module_type==cfield||pp.module_type==so1ion)  {iops=new ionpars(*pp.iops);//((int)(2*(*pp.iops).J+1));iops=pp.iops;
                            int dj;dj=(int)(2*J()+1);
                            est=ComplexMatrix(0,dj,1,dj);est=pp.est;
                            Icalc_parstorage=ComplexMatrix(0,dj,1,dj);Icalc_parstorage=pp.Icalc_parstorage;
                            }
-   if (pp.module_type==5) {clusterpars=new par(*pp.clusterpars);dim=pp.dim;
+   if (pp.module_type==cluster) {clusterpars=new par(*pp.clusterpars);dim=pp.dim;
                           // est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());est=pp.est;
                           // Ia
                           // cluster_ini_Imat(); 
@@ -968,12 +968,21 @@ if(!pp.Icalc_parstorage.Empty())
    od_m=pp.od_m;od_dm=pp.od_dm;
    dyn_opmat=pp.dyn_opmat;
 
+  dlloader=pp.dlloader; // this only copies the pointer to the loader of the library: i.e. the shared
+                        // library  handle is copied. The library may be closed (unloaded) only once. 
+                        // Thus it should not be closed by the destructor.
 
+  if(pp.module_type==external_class)
+   { si_mod=pp.si_mod; // I think this copies only the pointer to the si-module object 
+   //(*si_mod)=(*pp.si_mod); // ... thus I rather try this: it should copy the object 
+                         // (functions and other parts class objects) - yet it gives multithreading error
+    //si_mod=dlloader.DLGetInstance();
+   }
 
 }
 
 
-//destruktor
+//destructor
 jjjpar::~jjjpar ()
 {// printf("hello destruktor jjjpar\n");  
   delete G;
@@ -984,7 +993,7 @@ jjjpar::~jjjpar ()
    delete []sipffilename;// will not work in linux
   delete []clusterfilename;
   delete []modulefilename;// will not work in linux
-   if (module_type==5) {for(int i=1;i<=nofcomponents;++i)
+   if (module_type==cluster) {for(int i=1;i<=nofcomponents;++i)
                             { delete Ia[i];}
                        for(int a=0;a<=(*clusterpars).cs.nofatoms;++a)for(int n=1;n<=3;++n)
                         {int index_M=a*3+n; // a .... atom index  n ... xyz components of magnetic moment
@@ -995,15 +1004,23 @@ jjjpar::~jjjpar ()
                         delete workspace;
                         if (truncate>1e-6 && truncate!=1) delete []zm;
                        }
-   if (module_type==2||module_type==4) delete iops;
+   if (module_type==cfield||module_type==so1ion) delete iops;
   for(int ii=0; ii<52; ii++) 
      if(opmatM[ii]!=0) { delete opmatM[ii]; opmatM[ii]=0; }
  
 //#ifdef __linux__
-// if (module_type==0)dlclose(handle);
+// if (module_type==external)dlclose(handle);
 //#endif
 // printf("hello end destruktor jjjpar\n");  
- 
+//  if (module_type==external_class){ std::cout << "Unloading external_class "  << std::endl;
+//dlloader.DLCloseLib(); // this should go to the destructor .. yet copy constructor only copies the 
+                        // pointer to the loader of the library: i.e. the shared
+                        // library  handle is copied. The library may be closed (unloaded) only once. 
+                        // Thus it should not be closed by the destructor, because then it cannot
+                       // be used any more by other copies of the jjjpar object
+
+//  std::cout << "Unloaded external_class"  << std::endl;}
+
  }
 
 // Class to store work matrices for iterative eigensolvers (e.g. ARPACK, FEAST) - since these routines are called many times per

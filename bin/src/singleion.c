@@ -134,7 +134,7 @@ pchr=strstr(filename+10,"\\");
 
         fout_trs = fopen_errchk (filename,"w");
         trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
- 
+
         jjj.maxE=maxE;jjj.pinit=pinit;jjj.ninit=ninit;
         jjj.transitionnumber=0;int tc=0;nt=0;
         if(trs_write_next_line(fout_trs,jjj,nt,1,1,1,i,tc,TT,Hxc,Hext,jjj.eigenstates(Hxc,Hext,TT),d,-1e100,maxE,observable,Q))
@@ -231,7 +231,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
                   default: break;
                   }
    jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
-  
+
  if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i); // write transition trs files
      
       for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;

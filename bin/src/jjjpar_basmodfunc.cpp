@@ -44,7 +44,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
  FILE * cf_file;    
  cf_file=open_sipf(sipf_filename,modulefilename,verbose);
   if(strcmp(modulefilename,"kramer")==0)
-    {module_type=1;if(verbose)fprintf (stderr,"#[internal]\n");
+    {module_type=kramer;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,3);i=3;
       nof_electrons=0; // not to be used in module kramer !!
       while(feof(cf_file)==false)
@@ -65,7 +65,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
     }
   else
     {if(strcmp(modulefilename,"brillouin")==0)
-     {module_type=3;if(verbose)fprintf (stderr,"#[internal]\n");
+     {module_type=brillouin;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module brillouin !!
       while(feof(cf_file)==false)
@@ -83,7 +83,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
      }
      else
      {if(strcmp(modulefilename,"cfield")==0)
-     {module_type=2;if(verbose)fprintf (stderr,"#[internal]\n");
+     {module_type=cfield;orientation=abc_yzx;if(verbose)fprintf (stderr,"#[internal]\n");
       //fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
        fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename,verbose);
@@ -97,7 +97,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
      }
      else
      {if(strcmp(modulefilename,"so1ion")==0)
-     {module_type=4;if(verbose)fprintf (stderr,"#[internal]\n");
+     {module_type=so1ion;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
      // fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
       fseek(cf_file,0,SEEK_SET);
       iops=new ionpars(cf_file,sipf_filename,verbose);
@@ -109,7 +109,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
 
      }
      else if (strcmp(modulefilename,"cluster")==0)
-     {module_type=5;if(verbose)fprintf (stderr,"#[internal]\n");
+     {module_type=cluster;orientation=abc_xyz;module_clust=true;if(verbose)fprintf (stderr,"#[internal]\n");
       ABC=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
@@ -153,7 +153,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
              ABC=Vector(1,1);
 	    }
     if(verbose)fprintf(stderr," module functions ");
-module_type=0;int err_load_lib=0;
+module_type=external;orientation=abc_xyz;int err_load_lib=0;
 
 #ifdef __MINGW32__
   handle=LoadLibrary(modulefilename);
@@ -172,8 +172,11 @@ module_type=0;int err_load_lib=0;
 #ifdef __MINGW32__
     I=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,double*,double*,ComplexMatrix*))GetProcAddress(handle,"Icalc");
     //*(int **)(&m)=GetProcAddress(handle,"Icalc");
-     if (I==NULL) {fprintf (stderr," error %i module %s loading function Icalc not possible\n",(int)GetLastError(),modulefilename);err_load_lib=1;}
-                  else {if(verbose)fprintf (stderr,"Icalc ");}
+ if (I==NULL) 
+ {if(verbose)fprintf (stderr," error %i module %s loading function Icalc not possible ...\n",(int)GetLastError(),modulefilename);
+  err_load_lib=1;}
+ else
+ {if(verbose)fprintf (stderr,"Icalc ");
     IM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,Vector*,Vector*,ComplexMatrix*))GetProcAddress(handle,"IMcalc");
     //*(int **)(&m)=GetProcAddress(handle,"IMcalc");
     if (IM==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  IMcalc -continuing ",(int)GetLastError(),modulefilename);}
@@ -305,9 +308,14 @@ module_type=0;int err_load_lib=0;
     if (dyn_opmat==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  opmat -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"opmat ");}
 
-    
+}    
 #else
-  loadfunction(*(void **)(&I),handle,"Icalc",verbose);if(I==NULL){fprintf(stderr,"not possible !");err_load_lib=1;}
+  loadfunction(*(void **)(&I),handle,"Icalc",verbose);
+if(I==NULL)
+{if(verbose)fprintf(stderr,"loading ICalc from external module directly not possible ...");
+ err_load_lib=1;}
+else
+{
   loadfunction(*(void **)(&IM),handle,"IMcalc",verbose);
   loadfunction(*(void **)(&du),handle,"du1calc",verbose);
   loadfunction(*(void **)(&p),handle,"pcalc",verbose);
@@ -337,12 +345,27 @@ module_type=0;int err_load_lib=0;
   loadfunction(*(void **)(&od_dm),handle,"dorbmomdensity_coeff1",verbose);
   loadfunction(*(void **)(&ro_calc),handle,"ro_calc",verbose);
   loadfunction(*(void **)(&dyn_opmat),handle,"opmat",verbose);
+}
 #endif
- if(err_load_lib==1){ // here comes some experimental code for loading a shared library in case loading was not successful ...
+
+if(err_load_lib==1){ 
+// here comes some experimental code for loading a shared library
+// in case loading was not successful ...
  std::string path=std::string(modulefilename);
- dlloader::DLLoader <singleion_module> dlloader(path);
- fprintf(stderr,"-->Loaded singleion_module library %s\n",modulefilename);
-exit(EXIT_FAILURE);
+if(verbose)std::cout << "#Loading singleion_module class from " << path << std::endl;
+
+dlloader=dlloader::DLLoader <singleion_module>(path);
+
+
+ dlloader.DLOpenLib();
+// fprintf(stderr,"-->Loaded singleion_module library %s\n",modulefilename);
+module_type=external_class;
+si_mod=dlloader.DLGetInstance(); // this should remain here
+
+//fprintf(stderr,"-->got handle si_mod\n");
+
+
+// exit(EXIT_FAILURE);
 }
   if(verbose)fprintf (stderr,"\n");
      }
@@ -441,20 +464,14 @@ exit(EXIT_FAILURE);
 
  fclose (cf_file);
 // load file into buffer ss ...
-if(module_type==0){ss = std::stringstream{slurp(sipffilename)};}
+if(module_type<=0){ss = std::stringstream{slurp(sipffilename)};}
  
- if(module_type==5)cluster_ini_Imat();
+ if(module_type==cluster)cluster_ini_Imat();
 // check gJ
-if(module_type==2&&fabs(gJ-(*iops).gJ)>0.00001)
+if(module_type==cfield&&fabs(gJ-(*iops).gJ)>0.00001)
 {fprintf(stderr,"Error internal module cfield : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipf_filename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
-if(module_type==4&&fabs(gJ-(*iops).gJ)>0.00001)
+if(module_type==so1ion&&fabs(gJ-(*iops).gJ)>0.00001)
 {fprintf(stderr,"Error internal module so1ion : Lande Factor read from %s (gJ=%g) does not conform to internal module value gJ=%g\n",sipf_filename,gJ,(*iops).gJ);exit(EXIT_FAILURE);}
-//if (gJ==0){printf("# reading gJ=0 in single ion property file %s -> entering intermediate coupling mode by assigning Ja=Sa Jb=La Jc=Sb Jd=Lb Je=Sc Jf=Lc (S... Spin, L... angular momentum)\n",sipf_filename);
-//           if (module_type==1){fprintf(stderr,"Error internal module kramers: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-//           if (module_type==2){fprintf(stderr,"Error internal module cfield : intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-//           if (module_type==3){fprintf(stderr,"Error internal module brillouin: intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-//           if (module_type==4){fprintf(stderr,"Error internal module so1ion : intermediate coupling not supported\n");exit(EXIT_FAILURE);}
-//          }
 
 }
 
@@ -518,30 +535,40 @@ int jjjpar::get_exchange_indices(char *instrptr, Matrix *exchangeindices,const c
 /****************************************************************************/
 void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double & lnZ,double & U,ComplexMatrix & parstorage)
 {switch (module_type)
-  {case 1: kramer(mom,T,Hxc,Hext,lnZ,U);break;
-   case 2:
-   case 4: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
-   case 3: brillouin(mom,T,Hxc,Hext,lnZ,U);break;
-   case 5: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
+  {case kramer: kramer_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
+   case cfield:
+   case so1ion: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
+   case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
+   case cluster: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
+   case external_class: if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,parstorage))
+                        {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);};
+                  break;
    default: (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
   }
 }
 void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector & lnZ,Vector & U,ComplexMatrix & parstorage)
 {
  switch (module_type)
-  {case 1: for(int i=1;i<=T.Hi();++i){
+  {case kramer: for(int i=1;i<=T.Hi();++i){
            Vector m(mom.Column(i));
-           kramer(m,T(i),Hxc,Hext,lnZ(i),U(i));
+           kramer_Icalc(m,T(i),Hxc,Hext,lnZ(i),U(i));
            SetColumn(i,mom,m);}
            break;
-   case 2:
-   case 4: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
-   case 3: for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
-           brillouin(m,T(i),Hxc,Hext,lnZ(i),U(i));
+   case cfield:
+   case so1ion: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
+   case brillouin: for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
+           brillouin_Icalc(m,T(i),Hxc,Hext,lnZ(i),U(i));
            SetColumn(i,mom,m);}
            break;
-   case 5:  cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);
+   case cluster:  cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);
           break;
+   case external_class: if(false==si_mod->IMcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,parstorage))
+                        {for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
+                         if(false==si_mod->Icalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename,lnZ(i),U(i),parstorage))
+                  {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);}
+                         SetColumn(i,mom,m);
+                        }}
+                  break;
    default:if(IM==NULL){ for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
           (*I)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ(i),&U(i),&parstorage);
           SetColumn(i,mom,m);}
@@ -560,14 +587,15 @@ void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector
 int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & ests)
 {delta=maxE;u1(1)=complex <double> (ninit,pinit);
   switch (module_type)
-  {case 0: if (du!=NULL){return (*du)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&n,&nd,&ests);}
+  {case external: if (du!=NULL){return (*du)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&n,&nd,&ests);}
            else return 0;
            break;
-   case 1: return kramerdm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
-   case 2:
-   case 4: return (*iops).du1calc(transitionnumber,T,Hxc,Hext,u1,delta,n,nd,ests);break;
-   case 3: return brillouindm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
-   case 5: return cluster_dm(1,transitionnumber,T,u1,delta,n,nd,ests);break;
+   case kramer: return kramerdm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
+   case cfield:
+   case so1ion: return (*iops).du1calc(transitionnumber,T,Hxc,Hext,u1,delta,n,nd,ests);break;
+   case brillouin: return brillouindm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
+   case cluster: return cluster_dm(1,transitionnumber,T,u1,delta,n,nd,ests);break;
+   case external_class: return si_mod->du1calc(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,u1,delta,n,nd,ests);break;
    default: return 0;
   }
 }
@@ -601,7 +629,7 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
  {if(qcounter<0){
   if(epsilon>0){for(int i=0;i<nofstps;++i)(*chi0pointer[i])=0; // clear matrices
   }else{// load externally chi0 from bfk0.res type of file
-   if(module_type!=4||Hxc.Hi()!=3){fprintf(stderr,"Error mcdisp -r <0 cannot load external chi0: not module so1ion or mf dimension !=3\n");exit(EXIT_FAILURE);}
+   if(module_type!=so1ion||Hxc.Hi()!=3){fprintf(stderr,"Error mcdisp -r <0 cannot load external chi0: not module so1ion or mf dimension !=3\n");exit(EXIT_FAILURE);}
    printf("running singleion and bfk and loading chi0 from bfk0.res\n");
    // 1. output levels.cef
    char command[MAXNOFCHARINLINE],instr[MAXNOFCHARINLINE];
@@ -714,11 +742,15 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
 /****************************************************************************/
 ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case 0:  if(estates!=NULL){(*estates)(&est,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
+  {case external:  if(estates!=NULL){(*estates)(&est,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
             return est;break;
-   case 2:
-   case 4: (*iops).cfeigenstates(&est,Hxc,Hext,T);return est;break;
-   case 5: cluster_est(&est,Hxc,Hext,T);return est;break;
+   case cfield:
+   case so1ion: (*iops).cfeigenstates(&est,Hxc,Hext,T);return est;break;
+   case cluster: cluster_est(&est,Hxc,Hext,T);return est;break;
+   case external_class: if(false==si_mod->estates(est,Hxc,Hext,gJ,T,ABC,sipffilename))
+                        {est=ComplexMatrix(0,2,1,2);est=0;}
+                        return est;  
+                        break;
    default: est=ComplexMatrix(0,2,1,2);est=0;return est;
   }
 }
@@ -746,10 +778,14 @@ void jjjpar::print_eigenstates(FILE *fout)
 /****************************************************************************/
 ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case 0:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
+  {case external:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
             return Icalc_parstorage;break;
-   case 2:
-   case 4: (*iops).cfeigenstates(&Icalc_parstorage,Hxc,Hext,T);return Icalc_parstorage;break;
+   case cfield:
+   case so1ion: (*iops).cfeigenstates(&Icalc_parstorage,Hxc,Hext,T);return Icalc_parstorage;break;
+   case external_class: if(false==si_mod->Icalc_parameter_storage_matrix_init(Icalc_parstorage,Hxc,Hext,gJ,T,ABC,sipffilename))
+                        {Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;}
+                        return Icalc_parstorage;  
+                          break;
    default: Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;return Icalc_parstorage;
   }
 }
@@ -762,7 +798,7 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
  if(n>=0){
  switch (module_type)
   {
-   case 0:  if(opmatM[n]==0) {
+   case external:  if(opmatM[n]==0) {
                if(dyn_opmat!=NULL) {
                   opmatM[n] = new Matrix;
                   retval=(*dyn_opmat)(&n, &sipffilename, &Hxc, &Hext, opmatM[n]); 
@@ -778,8 +814,19 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
                return *opmatM[n];
             }
             break;
-   case 1:  return krameropmat(n,Hxc,Hext);break;
-   case 4:  return (*iops).opmat(n,Hxc,Hext);break;
+    case external_class:  if(opmatM[n]==0) {opmatM[n] = new Matrix;
+                if(true==si_mod->opmat(n, sipffilename, Hxc, Hext, *opmatM[n])){ return *opmatM[n]; }
+                  else {delete opmatM[n]; 
+                       fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %s\n",modulefilename); exit(EXIT_FAILURE); } }
+            else {
+               if(n==0) {  // Need to recalculate Hamiltonian since have different Hxc, Hext from initialisation.
+                 if(false==si_mod->opmat(n, sipffilename, Hxc, Hext, *opmatM[n])) { fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat failed in module %s\n",modulefilename); } 
+               } 
+               return *opmatM[n];
+            }
+            break;
+   case kramer:  return krameropmat(n,Hxc,Hext);break;
+   case so1ion:  return (*iops).opmat(n,Hxc,Hext);break;
    default: fprintf(stderr,"ERROR operator calculation in module jjjpar - opmat function not defined for module %i\n",module_type);exit(EXIT_FAILURE);
   }
  } else //n<0 ... matrix within eigenstates
@@ -791,7 +838,7 @@ Matrix jjjpar::opmat(int n,Vector &  Hxc,Vector & Hext)
 //ic1ion stores eigenvector in rows instead of columns
                                                 es=es.Transpose(); }
   
-  if(module_type==1){// this is because kramer module does not use est matrix at all
+  if(module_type==kramer){// this is because kramer module does not use est matrix at all
                      Matrix Ham(this->opmat(0,Hxc,Hext)); // get Hamiltonian and diagonalise
                      for (i1=In.Rlo();i1<=In.Rhi();++i1){ 
                      for (j1=In.Clo();j1<=In.Chi();++j1) { 

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------------------------
 //routine Icalc for kramers doublet
 //------------------------------------------------------------------------------------------------
-void jjjpar::kramer (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
+void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
 { /*on input
     ABC(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     gJ		lande factor
@@ -122,7 +122,7 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & He
   static Vector Jret(1,3);
   Jret=0;
   // clalculate thermal expectation values (needed for quasielastic scattering)
-  if(T>0){kramer(Jret,T,Hxc,Hext,lnz,u);}else{T=-T;}
+  if(T>0){kramer_Icalc(Jret,T,Hxc,Hext,lnz,u);}else{T=-T;}
   int pr;
   pr=0;
   if (transitionnumber<0) {pr=1;transitionnumber*=-1;}

@@ -25,7 +25,6 @@
 #include <cctype>                  // For std::tolower
 #include <fstream>
 
-#define MAXNOFCHARINLINE 144
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the number of allowed states from the number of electrons and l

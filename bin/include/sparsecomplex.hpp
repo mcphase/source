@@ -73,6 +73,9 @@ template <class T> class zsMat {
    public:
      // Constructors and Destructors //
      zsMat(size_t r=1, size_t c=1): _m(r), _n(c), _iscsc(false) {};     // constructs an empty r x c sparse matrix
+     zsMat(const char * filename,bool imag=0);        // constructs an matrix from file filename compar mmio.cpp in ic1ion module
+                                                      // if imag=0 then real numbers are loaded. 
+                                                      //if imag=1 only the imaginary parts are populated with the loaded numbers
      ~zsMat() {};
 
      // Other member functions //
@@ -95,12 +98,16 @@ template <class T> class zsMat {
      T* fp_array() const;                                               // Returns Hermitian matrix as a Fortran packed 2D array
      Matrix fp_matrix() const;                                          // Returns Hermitian matrix as a Fortran packed 2D array
 
+
      // For iterative eigensolvers
      void MultMv(std::complex<T> *v, std::complex<T> *w);               // Calculates the matrix-vector product w = M*v (assume Hermitian)
      void MultMvNH(std::complex<T> *v, std::complex<T> *w);             // Calculates the matrix-vector product w = M*v (non-Hermitian)
      void MultMMH(std::complex<T> *A, std::complex<T> *B, int c);       // Calculates the matrix-matrix product A = M*B (assume Hermitian)
      void MultMM(std::complex<T> *A, std::complex<T> *B, int c);        // Calculates the matrix-matrix product A = M*B (non-Hermitian)
 
+     // For expectation values and transition Matrix elements
+     double MultvxMv(complexdouble *v);                               // Calculates the expectation value <v|M|v> assuming M Hermitian
+     
      // Overloaded operators
      zsMat<T> operator =  (const zsMat & m);                            // Copy assignment - overwrites previous matrix
      zsMat<T> operator =  (const T val);                                // Constant assignment (only diagonal elements)
@@ -139,6 +146,38 @@ template <class T> class zsMat {
 
 };  // End of template <class T> class zsMat
 
+template <class T> zsMat<T>::zsMat(const char * filename,bool imag)
+{char comments[1024];
+   int i,r,c,sz;
+   double elem;
+   bool commentsflag = true;
+
+   std::fstream FILEIN; FILEIN.open(filename, std::fstream::in);
+   if(FILEIN.fail()!=true) { 
+
+   FILEIN.getline(comments,1024);            // Gets the first line %%MatrixMarket matrix coordinate real general
+   while(commentsflag)
+   {
+      FILEIN.getline(comments,1024);         // Gets the comments line
+      if(comments[0]!=35 && comments[0]!=37) // 35==# 37==%
+         commentsflag=false;
+   }
+   std::stringstream commentstream(comments,std::stringstream::in);
+   commentstream >> _m >> _n >> sz;            // Gets the number of rows, columns and non-zero elements
+
+   FILEIN.precision(24);
+   
+
+   for (i=0; i<sz; i++)
+   {
+      FILEIN >> r >> c >> elem; //retval(r-1,c-1) = elem;
+    _p.push_back(c); _i.push_back(r);
+     if(imag) {_x.push_back(std::complex<T>(0,elem));} 
+          else{_x.push_back(std::complex<T>(elem,0)); }
+   }
+
+   FILEIN.close();
+    } }
 // --------------------------------------------------------------------------------------------------------------- //
 // Functions copied from CSparse package. Reference: Direct Methods for Sparse Linear Systems, Timothy A. Davis
 //    (2006) SIAM, Philadephia. https://www.cise.ufl.edu/research/sparse/CSparse/
@@ -724,6 +763,40 @@ template <class T> T* zsMat<T>::cp_array() const                // Returns Hermi
    return retval;
 }
 
+
+template <class T> double zsMat<T>::MultvxMv(complexdouble *v)  // Calculates the expectation Value <v|M|v> assuming M hermitian
+{  // We have to assume that the size of the vector v is equal to _r
+  double e=0,ed=0,s;
+   if(_iscsc) // if is compressed
+   {
+      for(int j=0; j<_n; j++) for(int c=_p[j]; c<_p[j+1]; c++)
+      { //ev += conjugate(v[j])*_x[c] * v[_i[c]];
+       printf("iscs not implemented : %i %i %g |",_i[c],j,real(_x[c]));
+         exit(EXIT_FAILURE);
+      }
+   }
+   else 
+   {
+      for(int c=0; c<(int)_x.size(); c++) {//printf("%i %i %g |",_i[c],_p[c],real(_x[c]));
+      int i=_i[c],p=_p[c];
+       if(i<=p){
+        if(i==p){ed+=real(_x[c])*(v[i].r*v[p].r+v[i].i*v[p].i);
+                      }
+              else{
+                   if(real(_x[c])!=0.0){e+= real(_x[c])*(v[i].r*v[p].r+v[i].i*v[p].i);}
+                   if(imag(_x[c])!=0.0){e+=imag(_x[c])*(v[i].r*v[p].i-v[i].i*v[p].r);}
+                  // if(real(_x[c]==0.0)&&imag(_x[c]!=0.0))printf("error !");
+                                  
+                  }
+                            }    
+          }
+   }
+return 2*e+ed;
+}
+
+
+
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Matrix-Vector multiplication for iterative methods
 // --------------------------------------------------------------------------------------------------------------- //
@@ -748,6 +821,8 @@ template <class T> void zsMat<T>::MultMv(std::complex<T> *v, std::complex<T> *w)
          if(_i[c]<=_p[c]) w[_i[c]] += _x[c] * v[_p[c]];  }
    }
 }
+
+
 template <class T> void zsMat<T>::MultMvNH(std::complex<T>*v, std::complex<T>*w)  // Calculates the matrix-vector product w = M*v
 {                                                                                 // Needed by ARPACK
    // We have to assume that the size of the vector v is equal to _r

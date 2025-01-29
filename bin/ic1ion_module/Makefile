@@ -182,7 +182,7 @@ HEADER = maths states ic1ion icpars icmf
 .PHONY: default all clean
 
 default: all
-all: ../ic1ionit$(EXE) ic1ion.so ../icf1ionit$(EXE) icf1ion.so ic1ion_mod.so
+all: ../ic1ionit$(EXE) ic1ion.so ../icf1ionit$(EXE) icf1ion.so 
 
 # Defines some variables
 OBJ := $(foreach objs,$(OBJECT),$(objs).o)
@@ -219,29 +219,18 @@ endif
 
 ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp
 ifdef integral
-	$(CC) $(CFLAGS) -D_INTEGRAL -c $<
+	$(CC) $(CFLAGS) -I../include -I. -D_INTEGRAL -c $<
 else
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 
-states.o: states.cpp states.hpp
-	$(CC) $(patsubst -O3,   ,${CFLAGS}) -c $<
+states.o: states.cpp states.hpp ../include/constants.h
+	$(CC) $(patsubst -O3,   ,${CFLAGS}) -I../include -c $<
 
 truncate.o: truncate.cpp
 	$(CC) $(CFLAGS) -I../include -I. -c $<
 
-ic1ion_module.o: ic1ion_module.cpp
-ifdef integral
-	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
-else
-ifdef WINDOWS
-	$(CC) $(CFLAGS) -I../include -I. -DBUILD_DLL -c $<
-else
-	$(CC) $(CFLAGS) -I../include -I. -c $<
-endif
-endif
-
-ic1ion_mod.o: ic1ion_mod.cpp
+ic1ion_module.o: ic1ion_module.cpp ic1ion_module.hpp ../include/singleion_module.hpp
 ifdef integral
 	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
@@ -253,7 +242,7 @@ endif
 endif
 
 
-icf1ion_module.o: icf1ion_module.cpp
+icf1ion_module.o: icf1ion_module.cpp icf1ion_module.hpp ../include/sparsecomplex.hpp
 ifdef integral
 	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
@@ -268,18 +257,13 @@ else
 	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
-ic1ion_mod.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_mod.o  ../src/martin.o
-	@echo Linking $@
-ifdef WINDOWS
-	@$(LINKER) -o ic1ion_mod.so ic1ion_mod.o ic1ion.o truncate.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_mod.a
-else
-	@$(LINKER) -o ic1ion_mod.so ic1ion_mod.o ic1ion.o truncate.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
-endif
+
 
 ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o ../src/martin.o # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
 ../icf1ionit$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o
 	@echo Linking $@
 	@$(LINKER) -o ../icf1ion icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+
 icf1ion.so: checkgcc libs/liblapack.a $(ICOBJ) icf1ion_module.o
 	@echo Linking $@
 ifdef WINDOWS
@@ -288,10 +272,10 @@ else
 	@$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
-icmf.o : icmf.cpp ic1ion.hpp ../include/martin.h 
+icmf.o : icmf.cpp ic1ion.hpp ../include/constants.h 
 	$(CC) $(CFLAGS) -I../include -I. -c $<
 
-# Patern rules
+# Pattern rules
 # Syntax is
 # targets ...: target-pattern: dep-patterns ...
 #	commands

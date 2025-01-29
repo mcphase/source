@@ -171,7 +171,7 @@ paramete.o: paramete.cpp paramete.hpp martin.h vector.h
 par.o: par.cpp par.hpp jjjpar.hpp martin.h vector.h ionpars.hpp cryststruct.hpp
 	$(CCC) $(CFLAGS) $< 
 
-jjjpar.o: jjjpar.cpp par.hpp ionpars.hpp perlparse.h jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
+jjjpar.o: jjjpar.cpp par.hpp ionpars.hpp perlparse.h $(DLLOADER_SRC) IDLLoader.h jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
 	$(CCC) $(CFLAGS) $< 
 
 testspin.o: testspin.cpp testspin.hpp spincf.hpp martin.h
@@ -202,7 +202,7 @@ ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h
 inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp 
 	$(CCC) $(CFLAGS) $< 
 
-inimcdiff.o: inimcdiff.cpp inimcdiff.hpp martin.h vector.h mcdiff.h mfcf.hpp
+inimcdiff.o: inimcdiff.cpp inimcdiff.hpp martin.h vector.h mcdiff.h mfcf.hpp jjjpar.hpp
 	$(CCC) $(CFLAGS) $< 
 
 physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp inipar.hpp
@@ -319,6 +319,14 @@ ip.o: ionpars.cpp
 	@echo Linking ../jjj2j
 	@$(LINKER)  -Wall  -o ../jjj2j $^ $(LFLAGS)
 
+../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o perlparse.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o inimcdiff.o
+	@echo Linking ../mcdiff
+	@$(LINKER)  -Wall  -o ../mcdiff $^  $(LFLAGS)
+
+../mf2fe$(EXE): mf2fe.o martin.o jjjpar.o inipar.o par.o ionpars.o density.o spincf.o mfcf.o testspin.o myev.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)
+	@echo Linking ../mf2fe
+	@$(LINKER)  -Wall  -o ../mf2fe $^  $(LFLAGS)
+
 ../mcdispit$(EXE): mcdisp.o martin.o par.o jjjpar.o inimcdis.o jq.o mdcf.o mfcf.o ionpars.o perlparse.o $(VOBS) $(FUNCTIONOBJS)  $(CFIELDOBJS)
 	@echo Linking ../mcdispit
 	@$(LINKER)  -Wall  -o ../mcdispit   $^  $(LFLAGS) $(THREADLINK)
@@ -367,14 +375,6 @@ ip.o: ionpars.cpp
 	@echo Linking ../reduce_unitcell
 	@$(LINKER)  -Wall  -o ../reduce_unitcell $^  $(LFLAGS)
 
-
-../mcdiff$(EXE): mcdiff.o jjjpar.o martin.o myev.o perlparse.o $(VOBS) $(FUNCTIONOBJS) $(CFIELDOBJS) ionpars.o density.o spincf.o mfcf.o par.o inimcdiff.o
-	@echo Linking ../mcdiff
-	@$(LINKER)  -Wall  -o ../mcdiff $^  $(LFLAGS)
-
-../mf2fe$(EXE): mf2fe.o martin.o jjjpar.o inipar.o par.o ionpars.o density.o spincf.o mfcf.o testspin.o myev.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)
-	@echo Linking ../mf2fe
-	@$(LINKER)  -Wall  -o ../mf2fe $^  $(LFLAGS)
 
 ../fediff$(EXE): fediff.o martin.o jjjpar.o inipar.o par.o ionpars.o density.o spincf.o mfcf.o testspin.o myev.o $(VOBS) $(CFIELDOBJS) $(FUNCTIONOBJS)
 	@echo Linking ../fediff

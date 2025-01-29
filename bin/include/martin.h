@@ -5,13 +5,6 @@
 #ifndef MARTIN_FOPEN_ERRCHK
 #define MARTIN_FOPEN_ERRCHK
 
-#ifndef PI
-#define PI 3.1415926535897932384626433832795
-#endif
-#define KB 0.08617343183   // Boltzmanns constant in mev/K
-#define MU_B  0.0578838263 // Bohrmagneton in meV/tesla
-#define MAXNOFCHARINLINE 7024
-
 #if __GNUC__ > 2
 #include <unistd.h>
 #endif

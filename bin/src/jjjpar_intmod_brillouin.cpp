@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------------------------
 //routine Icalc for brillouin function
 //------------------------------------------------------------------------------------------------
-void jjjpar::brillouin (Vector & Jret, double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
+void jjjpar::brillouin_Icalc (Vector & Jret, double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
 { /*on input
     ABC(1)  J=S....Spin quantum number
     gJ		lande factor

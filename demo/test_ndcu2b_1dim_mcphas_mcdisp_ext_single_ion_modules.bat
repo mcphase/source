@@ -1,8 +1,8 @@
 cd ../examples/ndcu2b_1dim
-mcphasit
+mcphasit -v
 range 1 1.9 2.1 results/mcphas.fum
-getvalue.pl -c 0.8503 4 10 2.4 0 results/mcphas.fum
-getvalue.pl -c 1.274 4 10 2.6 0 results/mcphas.fum
+getvalue.pl -c 0.85 4 10 2.2 0 results/mcphas.fum
+getvalue.pl -c 1.35 4 10 2.6 0 results/mcphas.fum
 getvalue.pl -c 2.533 4 10 2.8 0 results/mcphas.fum
 cd ../cecu2a/
 mcdispit

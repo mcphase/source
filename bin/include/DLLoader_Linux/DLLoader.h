@@ -22,11 +22,12 @@ DLLoader(std::string const &pathToLib,
                     _pathToLib(pathToLib),_allocClassSymbol(allocClassSymbol),
                     _deleteClassSymbol(deleteClassSymbol){}
 
+DLLoader() = default;
 ~DLLoader() = default;
 
 void DLOpenLib() override
 {
-if (!(_handle = dlopen(_pathToLib.c_str(), RTLD_NOW | RTLD_LAZY))) {std::cerr << dlerror() << std::endl;}
+if (!(_handle = dlopen(_pathToLib.c_str(), RTLD_NOW | RTLD_LAZY))) {std::cerr << dlerror() << std::endl;exit(EXIT_FAILURE); }
 }
 
 void DLCloseLib() override
@@ -36,8 +37,8 @@ if (dlclose(_handle) != 0) {std::cerr << dlerror() << std::endl;}
 
 std::shared_ptr <T> DLGetInstance() override{
 
-using allocClass = T *(*)();
-using deleteClass = void (*)(T *);
+//using allocClass = T *(*)();
+//using deleteClass = void (*)(T *);
 
 //void(*allocFunc)()  = reinterpret_cast<void(*)()>(dlsym(_handle, _allocClassSymbol.c_str()));
 //void(*deleteFunc)() = reinterpret_cast<void(*)()>(dlsym(_handle, _deleteClassSymbol.c_str()));
@@ -46,12 +47,12 @@ using deleteClass = void (*)(T *);
 //weak_ptr
 // nullptr_t
 // shared_ptr
-auto allocFunc = reinterpret_cast<nullptr_t(*)()>(dlsym(_handle, _allocClassSymbol.c_str()));
-auto deleteFunc = reinterpret_cast<nullptr_t(*)()>(dlsym(_handle, _deleteClassSymbol.c_str()));
-if (!allocFunc || !deleteFunc) {DLCloseLib(); std::cerr << dlerror() << std::endl;}
+auto allocFunc = reinterpret_cast<T *(*)()>(dlsym(_handle, _allocClassSymbol.c_str()));
+auto deleteFunc = reinterpret_cast<void (*)(T *)>(dlsym(_handle, _deleteClassSymbol.c_str()));
+if (!allocFunc || !deleteFunc) { std::cerr << dlerror() << std::endl;DLCloseLib();exit(EXIT_FAILURE);}
 
 //return std::shared_ptr<T>(allocFunc(),[deleteFunc](T *p){ deleteFunc(p); });
-return std::shared_ptr<T>(allocFunc(),[deleteFunc](T *p){ deleteFunc(); });
+return std::shared_ptr<T>(allocFunc(),[deleteFunc](T *p){ deleteFunc(p); });
 
 }
 

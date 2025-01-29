@@ -70,8 +70,8 @@ class icmfmat
       std::string _density;                        // Flag to output expectation values of spin/orbital density operator.
 
    public:
-      std::vector<sMat<double> > J;                // A vector of the matrices [Sx Lx Sy Ly Sz Lz]
-      std::vector<int> iflag;                      // Vector to determine if matrix is imaginery
+      std::vector<sMat<double> > J;                // A vector of the matrices [Sx Lx Sy Ly Sz Lz] 
+      std::vector<int> iflag;                      // Vector to determine if matrix is imaginary
 
       icmfmat();                                   // Blank constructor
       icmfmat(int n, orbital l, int num_op,        // Constructor for l^n configuration

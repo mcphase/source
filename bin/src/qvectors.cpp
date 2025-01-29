@@ -9,7 +9,7 @@
 void qvectors::save(const char * filemode)
 { FILE * fout;
  int k;
- spincf sps(1,1,1,nofatoms,3);
+ spincf sps(1,1,1,nofatoms,nofcomponents);
     
  fout=fopen_errchk (savfilename,filemode);
  fprintf (fout, "#{(h k l) of test-Qvectors (nr1 nr2 nr3) unitcellsize (no) structure number / momentum arrangement <J(i)>}\n");

@@ -44,6 +44,13 @@ inline std::string slurp (const std::string& path) {
 #define SPINDENS_EV_DIM 49  // eigenvector dimension for spindensity oscillation
 #define ORBMOMDENS_EV_DIM 49  // eigenvector dimension for orbmomdensity oscillation
 #define PHONON_EV_DIM 3 // phonon eigenvector dimension ?? check if this is sensible ??
+namespace std
+{
+
+enum module_orientation { abc_xyz = 1 , abc_yzx = 2 };
+enum module { external_class = -1 , external = 0 , kramer = 1 , cfield = 2 , brillouin = 3 , so1ion = 4 , cluster = 5 };
+}
+   // integer to tell which module is loaded (remember to update pointc.c if the convention is changed !)
 
 // Class to store work matrices for iterative eigensolvers (e.g. ARPACK, FEAST) - since these routines are called 
 // often each MF iterations and deleting/allocating them many times seems to give memory errors.
@@ -113,12 +120,13 @@ public:
 // ********************************************************************************
 //                          BASIC SIPF MODULE FUNCTIONS    
 // ********************************************************************************
-
-  // integer to tell which module is loaded 0 - external, 1 - kramer, 2- cfield, 3 - brillouin
-  int module_type;
   Matrix cnst;// cnst is the Zlm constants - put them into the matrix
    int nof_electrons; // no of electrons in d or f shell
+  module_orientation orientation;  // defines orientation of abc: can be xyz or yzx (cfield module)
+  bool module_clust=false; // tells if module contains more atoms (i.e. cluster module)
+ module module_type;
 private:
+
   std::stringstream ss;
   Vector ABC;   // storage for single ion module paramters
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
@@ -398,7 +406,7 @@ void *handle;
 // ********************************************************************************
 
   // kramers internal module functions, module_type=1
-  void kramer (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  void kramer_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
   int  kramerdm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd);
   Matrix krameropmat (int & n ,Vector &  Hxc,Vector & Hext);
 
@@ -409,8 +417,11 @@ public:
   ionpars * iops;
   par * clusterpars;
 private:
+  dlloader::DLLoader <singleion_module> dlloader; // loader for external_class module_type
+  std::shared_ptr<singleion_module> si_mod; // handle for singleion_module external_class
+
   // brillouin internal module functions,module_type=3
-  void brillouin (Vector &mom, double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  void brillouin_Icalc (Vector &mom, double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
   int  brillouindm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd);
 
   // cluster internal module functions, module_type=5

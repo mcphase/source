@@ -2,6 +2,8 @@ cd ../examples/la2coo4
 
 mcphasit
 
+getvalue.pl -c -469460e1 1 8 0.3 0 results/mcphas.fum
+
 call setup_mcdisp_mf 0.3 0 0 0
 
 REM "editing mcdisp.mf and insert additional anisotropy field Ha ..."

@@ -562,15 +562,16 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          else { me.assign(Esz,0.); matel.push_back(me); }
       }
       else
-      {
+      {// here we should to load not zJmat but directly use sparse Matrix zSmat, either set already as Jsparse[0-5]
+        // or loaded from file filename into zSmat ... !! this should accellerate expectation value calculation:-)
+         // ????
          complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
          if(iJ<6) 
          {
             if(iflag[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]);
          }
          else 
-         {
-         // if(!_density.empty()) { zJmat = balcar_Mq(_density,k[iJ],q[iJ],_n,_l); } else {
+         { // if(!_density.empty()) { zJmat = balcar_Mq(_density,k[iJ],q[iJ],_n,_l); } else {
             NSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
             Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(n,k[iJ],abs(q[iJ]),_l); rmzeros(Upq); mm_gout(Upq,filename); }
             MSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
@@ -583,7 +584,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
             #endif
             Umq *= redmat; if(iflag[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq); //}
          }
-         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+         //zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
                // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
@@ -598,7 +599,8 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
             me[ind_j] = zme.r;*/
             ex[iJ]+=me[ind_j]*eb[ind_j];
          }
-         free(zJmat); free(zt); matel.push_back(me); ex[iJ]/=Z;
+         free(zJmat); //free(zt);
+         matel.push_back(me); ex[iJ]/=Z;
       }
       if(fabs(ex[iJ])<DBL_EPSILON) ex[iJ]=0.; 
    }
