@@ -2,6 +2,7 @@ cd ../examples/testic1ion
 call pointc testic1ion.sipf pointcharges_octahedron.dat > octahedronic1ion.sipf
 getvariable.pl -c 91.118 L64 results/pointc.Llm
 call substitute "MODULE=so1ion" "MODULE=ic1ion" octahedronic1ion.sipf
+
 call densplt c octahedronic1ion.sipf 2 0 0 0 
 call ic1ion octahedronic1ion.sipf
 getvalue.pl -c 188.112 0 1 9 0 results/ic1ion.out
@@ -17,8 +18,8 @@ call substitute "MODULE=ic1ion" "MODULE=icf1ion" octahedronic1ion.sipf
 call densplt c octahedronic1ion.sipf 2 0 0 0 
 call icf1ion octahedronic1ion.sipf
 getvalue.pl -c 173.306 0 1 9 0 results/icf1ion.out
-singleion -M -r octahedronic1ion.sipf 2 10 0 0  0 0 0 0 0 0 > m.clc
-getvalue.pl -c 1.9939 3 12 10 0 m.clc
+singleion -M -r octahedronic1ion.sipf -Tsteps 20 400 2 10 0 0  0 0 0 0 0 0 > m.clc
+getvalue.pl -c 0.2384 2 12  81.6 0 m.clc
 singleion -M -r octahedronic1ion.sipf 2 0 10 0  0 0 0 0 0 0 > m.clc
 getvalue.pl -c 1.9939 4 13 10 0 m.clc
 singleion -M -r octahedronic1ion.sipf 2 0 0 10  0 0 0 0 0 0 > m.clc

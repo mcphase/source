@@ -8,7 +8,7 @@ public:
 virtual bool Icalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,double & gJ,Vector & ABC,char * sipffilename ,double & lnZ,double & U,ComplexMatrix & parstorage)
            {return false;};
 virtual bool IMcalc(Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext,double & gJ,Vector & ABC,char * sipffilename ,Vector & lnZ,Vector & U,ComplexMatrix & parstorage)
-           {return false;};
+           {return false;};  // note: T has to be sorted ascending in temperature !
 virtual int du1calc(int &transitionnumber,double &T,Vector&Hxc,Vector&Hext,double&gJ,Vector&ABC,char * sipffilename,ComplexVector&u1,float&delta,int&n,int&nd,ComplexMatrix&ests)
            {return -1;};
 virtual bool estates(ComplexMatrix & est, Vector & Hxc,Vector & Hext, double & g_J, double &T,       // Calculates the energy and wavefunctions

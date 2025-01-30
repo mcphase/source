@@ -16,6 +16,7 @@
 #include<cmath>
 #include<vector>
 #include<iostream>
+#include<fstream>
 #include<sstream>
 #include<iomanip>
 #include<string>
@@ -73,9 +74,6 @@ template <class T> class zsMat {
    public:
      // Constructors and Destructors //
      zsMat(size_t r=1, size_t c=1): _m(r), _n(c), _iscsc(false) {};     // constructs an empty r x c sparse matrix
-     zsMat(const char * filename,bool imag=0);        // constructs an matrix from file filename compar mmio.cpp in ic1ion module
-                                                      // if imag=0 then real numbers are loaded. 
-                                                      //if imag=1 only the imaginary parts are populated with the loaded numbers
      ~zsMat() {};
 
      // Other member functions //
@@ -84,6 +82,13 @@ template <class T> class zsMat {
      std::vector< std::vector<int> > find() const;                      // Returns the indices of the nonzero elements
      zsMat<T> transpose();                                              // Transposes the matrix (without complex conjugation)
      zsMat<T> hermitian();                                              // Hermitian conjugate the matrix
+     bool sm_gin(const char * filename,bool imag=false,bool minus=false);        // pushes elements into the matrix from file filename 
+                                                      // (compare mmio.cpp in ic1ion module) if imag=0 then real numbers are loaded. 
+                                                      //if imag=true the imaginary parts are populated with the loaded numbers
+                                                      //if imag=false the real parts are populated with the loaded numbers
+                                                      //if minus=true the loaded numbers are multiplied with -1
+                                                      //if imag=false  the loaded numbers are multiplied with +1
+                                                      //returns false  if loading is not possible
      void del(int r, int c);                                            // Deletes an element
      void clear() { _p.clear(); _i.clear(); _x.clear(); _m=0; _n=0; };  // Clears the matrix
      void zero() { _p.clear(); _i.clear(); _x.clear(); }                // Zeros all entries
@@ -146,14 +151,14 @@ template <class T> class zsMat {
 
 };  // End of template <class T> class zsMat
 
-template <class T> zsMat<T>::zsMat(const char * filename,bool imag)
+template <class T> bool zsMat<T>::sm_gin(const char * filename,bool imag,bool minus)
 {char comments[1024];
-   int i,r,c,sz;
+   int i,r,c,sz,m,n;
    double elem;
    bool commentsflag = true;
 
    std::fstream FILEIN; FILEIN.open(filename, std::fstream::in);
-   if(FILEIN.fail()!=true) { 
+   if(FILEIN.fail()==true) { return false;}
 
    FILEIN.getline(comments,1024);            // Gets the first line %%MatrixMarket matrix coordinate real general
    while(commentsflag)
@@ -163,8 +168,8 @@ template <class T> zsMat<T>::zsMat(const char * filename,bool imag)
          commentsflag=false;
    }
    std::stringstream commentstream(comments,std::stringstream::in);
-   commentstream >> _m >> _n >> sz;            // Gets the number of rows, columns and non-zero elements
-
+   commentstream >> m >> n >> sz;            // Gets the number of rows, columns and non-zero elements
+ if(m!=_m||n!=_n){fprintf(stderr,"Warning: sparsecomplex sm_gin %s pushing %ix%i  matrix into %ix%i matrix not possible\n",m,n,_m,_n); false;}
    FILEIN.precision(24);
    
 
@@ -172,12 +177,15 @@ template <class T> zsMat<T>::zsMat(const char * filename,bool imag)
    {
       FILEIN >> r >> c >> elem; //retval(r-1,c-1) = elem;
     _p.push_back(c); _i.push_back(r);
-     if(imag) {_x.push_back(std::complex<T>(0,elem));} 
-          else{_x.push_back(std::complex<T>(elem,0)); }
+  if(minus){   if(imag) {_x.push_back(std::complex<T>(0,-elem));} 
+          else{_x.push_back(std::complex<T>(-elem,0));}
+  }else{if(imag) {_x.push_back(std::complex<T>(0,elem));} 
+          else{_x.push_back(std::complex<T>(elem,0));}
+      }
    }
 
    FILEIN.close();
-    } }
+    return true; }
 // --------------------------------------------------------------------------------------------------------------- //
 // Functions copied from CSparse package. Reference: Direct Methods for Sparse Linear Systems, Timothy A. Davis
 //    (2006) SIAM, Philadephia. https://www.cise.ufl.edu/research/sparse/CSparse/

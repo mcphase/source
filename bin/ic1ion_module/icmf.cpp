@@ -285,7 +285,7 @@ icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string d
    } else { strcpy(basename,"nodir/"); }
    nstr[1] = 49; // 49=="1"
 
-   // Calculates the L and S operator matrix for the each directions
+   // Calculates the L and S operator matrix for each direction
    sMat<double> Sp1, Sm1, Lp1, Lm1; 
    nstr[2]=120; nstr[3]=0; strcpy(Lfilestr,basename); strcat(Lfilestr,nstr); strcat(Lfilestr,".mm");   
    nstr[0]=83;             strcpy(Sfilestr,basename); strcat(Sfilestr,nstr); strcat(Sfilestr,".mm");
@@ -545,9 +545,10 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
                #ifdef JIJCONV
                if(jijconv.size()>1) redmat*=jijconv[iJ+1];
                #endif
-               Umq *= redmat; fJmat = Umq.f_array();
+               // Umq *= redmat; // move this to multiplication with redmat downward to the expectation value to gain speed 
+               fJmat = Umq.f_array();
             }
-            for(ind_j=0; ind_j<Esz; ind_j++)
+            if(redmat!=0)for(ind_j=0; ind_j<Esz; ind_j++)
             {  // Calculates the matrix elements <Vi|J.H|Vi>
                F77NAME(dsymv)(&uplo, &Hsz, &alpha, fJmat, &Hsz, VE.V(ind_j), &incx, &beta, vt, &incx);
 #ifdef _G77 
@@ -555,7 +556,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
 #else
                me[ind_j] = F77NAME(ddot)(&Hsz, VE.V(ind_j), &incx, vt, &incx);
 #endif
-               ex[iJ]+=me[ind_j]*eb[ind_j];
+               me[ind_j]*=redmat;ex[iJ]+=me[ind_j]*eb[ind_j];
             }
             free(fJmat); free(vt); matel.push_back(me); ex[iJ]/=Z; 
          } 
@@ -568,7 +569,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
          if(iJ<6) 
          {
-            if(iflag[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]);
+            if(iflag[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]);redmat=1;
          }
          else 
          { // if(!_density.empty()) { zJmat = balcar_Mq(_density,k[iJ],q[iJ],_n,_l); } else {
@@ -582,13 +583,14 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
             #ifdef JIJCONV
             if(jijconv.size()>1) redmat*=jijconv[iJ+1];
             #endif
-            Umq *= redmat; if(iflag[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq); //}
+            // Umq *= redmat; // for speed move this downwards to the expectation values
+            if(iflag[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq); //}
          }
          //zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-         for(ind_j=0; ind_j<Esz; ind_j++)
+         if(redmat!=0)for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
                // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-              me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
+              me[ind_j] = redmat*expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
 
           /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
 #ifdef _G77 
@@ -596,7 +598,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
 #else
             zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
 #endif
-            me[ind_j] = zme.r;*/
+            me[ind_j] = redmat*zme.r;*/
             ex[iJ]+=me[ind_j]*eb[ind_j];
          }
          free(zJmat); //free(zt);

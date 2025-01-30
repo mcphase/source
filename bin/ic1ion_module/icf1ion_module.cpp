@@ -398,24 +398,23 @@ return true;
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates thermal expectation values 
 // --------------------------------------------------------------------------------------------------------------- //
-void icf1ion_module::icf_expJ(icpars &pars, ComplexMatrix &Pst, complexdouble *zV, double *vE, double *T, Vector &J, double *lnZ, double *U)
+void icf1ion_module::icf_expJ(icpars &pars, ComplexMatrix &Pst, complexdouble *zV, double *vE, Vector & T, Matrix &J, Vector & lnZ, Vector & U)
 {  int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int Q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    int im[]= {-1,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
    int Hsz=icf_getdim(pars), i, ix, iy;
-   int nfact = (int)ceil(sqrt(J.Hi()-J.Lo()+2));
+   int nfact = (int)ceil(sqrt(J.Rhi()-J.Rlo()+2));
  
    //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    int Esz, ind_j;
    //std::vector< std::vector<double> > matel;
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   std::vector<double> E, me, eb; /*matel.clear();*/ E.reserve(Hsz);
-   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB**T))<DBL_EPSILON || vE[Esz+1]==0) break; }
+   std::vector<double> E, me; /*matel.clear();*/ E.reserve(Hsz);
+   for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON || vE[Esz+1]==0) break; }
 
-   if (*T<0)
-   {
-      Esz = (int)(-*T);
-      printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",*T,(int)(-*T));
+   if (T(T.Lo())<0)
+   {  Esz = (int)(-T(T.Lo()));
+      printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T(T.Lo()),(int)(-T(T.Lo())));
                         printf("Number   Excitation Energy\n");
       for (ind_j=0; ind_j<Esz; ++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
    }  // MR 10.9.2010
@@ -430,21 +429,22 @@ void icf1ion_module::icf_expJ(icpars &pars, ComplexMatrix &Pst, complexdouble *z
    }
 
    // For first run calculate also the partition function and internal energy
-   *U=0.;
-   me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; complexdouble *zt=0;
+
+   me.assign(Esz,0.);  // complexdouble *zt=0;
    // complexdouble *zJmat = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble));
-   zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+   //zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
    sMat<double> Hcf;
 
    // Checks if have been called from spins, where _par_storage() was set up for just the number of operators 
    //    needed in the MF loop but now we need to calculate expectation values for all multipolar operators
-   int oldJhi = J.Hi();
+   int oldJhi = J.Rhi();
    if(nfact != (int)real(Pst[0][1])) {
       nfact = (int)real(Pst[0][1]); oldJhi = (int)imag(Pst[0][1]); }
    //clock_t start,end,dexpectation_value=0,dMultvxMv=0;
-
-   for(int iJ=J.Lo(); iJ<=J.Hi(); iJ++)
-   {  me.assign(Esz,0.); J[iJ]=0.;
+Vector Z(T.Lo(),T.Hi()); Z=0.;U=0;Matrix eb(0,Esz-1,T.Lo(),T.Hi());
+      
+   for(int iJ=J.Rlo(); iJ<=J.Rhi(); iJ++)
+   {  me.assign(Esz,0.); 
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
       if(iJ>6 && (K[iJ]%2==1 || K[iJ]>2*pars.l)) { /*matel.push_back(me);*/ continue; }
       
@@ -466,7 +466,7 @@ void icf1ion_module::icf_expJ(icpars &pars, ComplexMatrix &Pst, complexdouble *z
             iy = (iJ-J.Lo()+1)/nfact; ix = (iJ-J.Lo()+1)-iy*nfact;
             for(i=1; i<=Hsz; i++) memcpy(&zJmat[(i-1)*Hsz],&Pst[i+ix*Hsz][1+iy*Hsz],Hsz*sizeof(complexdouble));
          }
-        */ 
+        */
          for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
             // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
@@ -486,51 +486,56 @@ void icf1ion_module::icf_expJ(icpars &pars, ComplexMatrix &Pst, complexdouble *z
             zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
             #endif 
             me[ind_j] = zme.r;*/ // zhemv and zme seems to be problematic in multithreading
-            //printf("=%g ",zme.r);//DEBUG 
-            
-            //
-            // For first run calculate also the partition function and internal energy
-            if(iJ==J.Lo()) 
+     //       printf("=%g ",me[ind_j]);//DEBUG 
+          } 
+
+       for(int Ti=T.Lo();Ti<=T.Hi();++Ti)
+      {  J(iJ,Ti)=0.;   
+           for(ind_j=0; ind_j<Esz; ind_j++)
+           {// For first run calculate also the partition function and internal energy
+            if(iJ==J.Rlo()) 
             {
-//MR 10.9.2010
-               if (*T<0)
+              if (T(Ti)<0)
                { 
                   char instr[MAXNOFCHARINLINE];
                   printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
                   if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { fprintf(stderr,"Error reading input\n"); exit(1); }
-                  eb[ind_j]=strtod(instr,NULL);
+                  eb(ind_j,Ti)=strtod(instr,NULL);
                }
                else
                { 
-                  eb[ind_j] = exp(-E[ind_j]/(KB**T)); 
+                  eb(ind_j,Ti) = exp(-E[ind_j]/(KB*T(Ti))); 
                } 
-               J[iJ] += me[ind_j]*eb[ind_j]; 
-               Z += eb[ind_j]; 
-               *U += (E[ind_j]+vE[0])*eb[ind_j];
-//MRend 10.9.2010
+               J(iJ,Ti) += me[ind_j]*eb(ind_j,Ti); 
+               Z(Ti) += eb(ind_j,Ti); 
+               U(Ti) += (E[ind_j]+vE[0])*eb(ind_j,Ti);
             }
             else  // Rest of the runs only calculate the new matrix elements
-               J[iJ]+=me[ind_j]*eb[ind_j]; 
-         }
+               J(iJ,Ti)+=me[ind_j]*eb(ind_j,Ti); 
 
-	 if(iJ==J.Lo()) *U/=Z;
-         /*matel.push_back(me);*/ J[iJ]/=Z;
-      
-      if(fabs(J[iJ])<DBL_EPSILON) J[iJ]=0.;
+            }
 
+	 if(iJ==J.Rlo()){ U(Ti)/=Z(Ti);lnZ(Ti) = log(Z(Ti))-vE[0]/(KB*T(Ti)); }
+         /*matel.push_back(me);*/ J(iJ,Ti)/=Z(Ti);
+         
+      if(fabs(J(iJ,Ti))<DBL_EPSILON) J(iJ,Ti)=0.;
+//printf("=%g ",J(iJ,Ti));//DEBUG 
+         
 //   if(iJ==1&&fabs(J[1]-2.2813)>0.1){printf("\n %g=%g E0=%g \n",J[1],me[0],vE[0]); // DEBUG >>
 //       for(i=0; i<Esz; i++){//for(int j=0; j<Hsz; j++)if(zJmat[i*Hsz+j].r!=0)printf("%g ",zJmat[i*Hsz+j].r);
 //printf("%g ",zV[i].r);
 //                            }
 //                                  } // << DEBUG
    } 
+
+}
 //std::cout<< "Expectation_value Elapsed time = " << (double)dexpectation_value/CLOCKS_PER_SEC << "s. " ;
 //std::cout << "MultvxMv Done. Elapsed time = " << (double)dMultvxMv/CLOCKS_PER_SEC << "s." << std::endl;
 // tested: MultvxMv  using sparsematrix is 20% faster than Expectation_value
 
    // free(zJmat); 
-   free(zt);
-   *lnZ = log(Z)-vE[0]/(KB**T); 
+   //free(zt);
+   
 
 }
 
@@ -556,7 +561,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   Vector J(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); J=0;
+   //Vector J(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); J=0;
    // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
@@ -571,14 +576,14 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
    ic_parseinput(filename,pars);
 
    // Converts the Jij parameters if necessary
-   std::vector<double> vgjmbH(J.Hi()+1,0.); 
+   std::vector<double> vgjmbH(Hxc.Hi()+1,0.); 
    #ifdef JIJCONV
    if(pars.B.norm().find("Stevens")!=std::string::npos) {
       pars.jijconvcalc();
-      for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i] = -gjmbH[i]*pars.jijconv[i]; }
+      for(int i=Hxc.Lo(); i<=Hxc.Hi(); i++) vgjmbH[i] = -gjmbH[i]*pars.jijconv[i]; }
    else
    #endif
-      for(int i=J.Lo(); i<=J.Hi(); i++) vgjmbH[i] = -gjmbH[i];  // Vector of Exchange + External field to be added to matrix in lines 628, 637
+      for(int i=Hxc.Lo(); i<=Hxc.Hi(); i++) vgjmbH[i] = -gjmbH[i];  // Vector of Exchange + External field to be added to matrix in lines 628, 637
 
    //          0 1 2 3 4 5 6  7  8 91011 12 13 1415161718 19 20 21 222324252627 28 29 30 31 32333435363738 39 40 41 42 43 4445464748495051
    int K[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
@@ -586,7 +591,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
    int im[]= {-1,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
 
    // Calculates the IC Hamiltonian matrix
-   int nfact = (int)ceil(sqrt(J.Hi()-J.Lo()+2));
+   int nfact = (int)ceil(sqrt(Hxc.Hi()-Hxc.Lo()+2));
    int i,k,q,Hsz=icf_getdim(pars),esz=Hsz*nfact;
    int ix, iy, incx=1;
    complexdouble *H=0, *zM=0;
@@ -602,7 +607,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
          Hicnotcalc = true; break; }
    }
    else Hicnotcalc = true;
-   int oldJhi = J.Hi();
+   int oldJhi = Hxc.Hi();
    if((Pst.Rhi()!=esz||Pst.Chi()!=esz))   // Probably from spins: need all multipolar operators, not just those used in MF loop.
    {
       nfact = (int)real(Pst[0][1]); esz = Hsz*nfact;
@@ -627,13 +632,13 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
        {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[0])(i+1,j+1)=xx;}
       free(H);
       Hcfi.zero(Hsz,Hsz);
-      for(int ind=J.Lo(); ind<=J.Hi(); ind++)
+      for(int ind=Hxc.Lo(); ind<=Hxc.Hi(); ind++)
       {
          if(ind<=6)         // Calculates Sx,Lx etc and copies them to Pst too. 
          {
             Hcf = icf_mumat(pars.n, ind-1, pars.l);
             if(ind==3 || ind==4) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi); 
-            iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
+            iy = (ind-Hxc.Lo()+1)/nfact; ix = (ind-Hxc.Lo()+1)-iy*nfact;
             for(i=1; i<=Hsz; i++) {memcpy(&Pst[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} 
           if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
            (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
@@ -644,7 +649,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
          {
             Hcf = icf_ukq(pars.n,K[ind],Q[ind],pars.l);
             if(im[ind]==1) H = zmat2f(Hcfi,Hcf); else H = zmat2f(Hcf,Hcfi);
-            iy = (ind-J.Lo()+1)/nfact; ix = (ind-J.Lo()+1)-iy*nfact;
+            iy = (ind-Hxc.Lo()+1)/nfact; ix = (ind-Hxc.Lo()+1)-iy*nfact;
             for(i=1; i<=Hsz; i++) {memcpy(&Pst[i+ix*Hsz][1+iy*Hsz],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));}
            if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
            (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
@@ -658,7 +663,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
    // Calculates the mean field matrix from stored matrices
    H = (complexdouble*)malloc(esz*esz*sizeof(complexdouble));
    for(i=1; i<=Hsz; i++) memcpy(&H[(i-1)*Hsz],&Pst[i][1],Hsz*sizeof(complexdouble));
-   for(int ind=J.Lo(); ind<=J.Hi(); ind++)
+   for(int ind=Hxc.Lo(); ind<=Hxc.Hi(); ind++)
    {
       complex<double> a(vgjmbH[ind],0.);
       if(ind<=oldJhi)
@@ -684,13 +689,13 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
    if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
 
 
-for(int Ti=1;Ti<=T.Hi();++Ti){
-         icf_expJ(pars,Pst,zV,vE,&T(Ti),J,&lnZ(Ti),&U(Ti));
+         icf_expJ(pars,Pst,zV,vE,T,Jret,lnZ,U);
 
     //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
-   dum=J(2);J(2)=J(3);J(3)=J(5);J(5)=J(4);J(4)=dum;
-   for(i=Jret.Rlo(); i<=Jret.Rhi(); i++) Jret(i,Ti) = J(i);
+for(int Ti=1;Ti<=T.Hi();++Ti) {
+   dum=Jret(2,Ti);Jret(2,Ti)=Jret(3,Ti);Jret(3,Ti)=Jret(5,Ti);Jret(5,Ti)=Jret(4,Ti);Jret(4,Ti)=dum;
+   
                           }
 free(H);
          delete[]vE; delete[]zV;
