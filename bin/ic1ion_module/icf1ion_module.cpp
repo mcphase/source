@@ -2,8 +2,8 @@
 #if defined(__linux__) || defined(__APPLE__)
 extern "C"
 {
-icf1ion_module *allocator()
- {return new icf1ion_module();
+icf1ion_module *allocator(const char * filename)
+ {return new icf1ion_module(filename);
  }
 void deleter(icf1ion_module *ptr)
  {delete ptr;
@@ -13,9 +13,9 @@ void deleter(icf1ion_module *ptr)
 #ifdef WIN32
 extern "C"
 {
-__declspec (dllexport) icf1ion_module *allocator()
+__declspec (dllexport) icf1ion_module *allocator(const char * filename)
 {
-return new icf1ion_module();
+return new icf1ion_module(filename);
 }
 __declspec (dllexport) void deleter(icf1ion_module *ptr)
 {
@@ -24,7 +24,7 @@ delete ptr;
 }
 #endif
 
-icf1ion_module::icf1ion_module()
+icf1ion_module::icf1ion_module(const char * filename)
 {for(int i=0;i<=IOP_DIM;++i)zst[i]=NULL;
 }
 

@@ -35,7 +35,7 @@ void DLCloseLib() override
 if (dlclose(_handle) != 0) {std::cerr << dlerror() << std::endl;}
 }
 
-std::shared_ptr <T> DLGetInstance() override{
+std::shared_ptr <T> DLGetInstance(const char * sipffilename) override{
 
 //using allocClass = T *(*)();
 //using deleteClass = void (*)(T *);
@@ -47,12 +47,13 @@ std::shared_ptr <T> DLGetInstance() override{
 //weak_ptr
 // nullptr_t
 // shared_ptr
-auto allocFunc = reinterpret_cast<T *(*)()>(dlsym(_handle, _allocClassSymbol.c_str()));
+//auto allocFunc = reinterpret_cast<T *(*)()>(dlsym(_handle, _allocClassSymbol.c_str()));
+auto allocFunc = reinterpret_cast<T *(*)(const char *)>(dlsym(_handle, _allocClassSymbol.c_str()));
 auto deleteFunc = reinterpret_cast<void (*)(T *)>(dlsym(_handle, _deleteClassSymbol.c_str()));
 if (!allocFunc || !deleteFunc) { std::cerr << dlerror() << std::endl;DLCloseLib();exit(EXIT_FAILURE);}
 
 //return std::shared_ptr<T>(allocFunc(),[deleteFunc](T *p){ deleteFunc(p); });
-return std::shared_ptr<T>(allocFunc(),[deleteFunc](T *p){ deleteFunc(p); });
+return std::shared_ptr<T>(allocFunc(sipffilename),[deleteFunc](T *p){ deleteFunc(p); });
 
 }
 

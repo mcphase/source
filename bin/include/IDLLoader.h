@@ -17,7 +17,7 @@ virtual void DLOpenLib() = 0;
 ** Return a shared pointer on an instance of class loaded through
 ** a dynamic library.
 */
-virtual std::shared_ptr<T>  DLGetInstance() = 0;
+virtual std::shared_ptr<T>  DLGetInstance(const char * sipffilename) = 0;
 /*
 ** Unload the library.
 */

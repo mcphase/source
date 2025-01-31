@@ -774,7 +774,7 @@ template <class T> T* zsMat<T>::cp_array() const                // Returns Hermi
 
 template <class T> double zsMat<T>::MultvxMv(complexdouble *v)  // Calculates the expectation Value <v|M|v> assuming M hermitian
 {  // We have to assume that the size of the vector v is equal to _r
-  double e=0,ed=0,s;
+  double e=0,ed=0;
    if(_iscsc) // if is compressed
    {
       for(int j=0; j<_n; j++) for(int c=_p[j]; c<_p[j+1]; c++)

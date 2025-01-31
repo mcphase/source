@@ -10,7 +10,7 @@
  */
 
 #ifndef ICMF_H
-
+#include "martin.h"
 // --------------------------------------------------------------------------------------------------------------- //
 // Defines a class to hold the eigenvalues and eigenvectors
 // --------------------------------------------------------------------------------------------------------------- //
@@ -74,11 +74,15 @@ class icmfmat
       std::vector<int> iflag;                      // Vector to determine if matrix is imaginary
 
       icmfmat();                                   // Blank constructor
+      ~icmfmat();                                    // Destructor
       icmfmat(int n, orbital l, int num_op,        // Constructor for l^n configuration
         bool save_matrices, std::string density="");
       void Jmat(sMat<double>&J, sMat<double>&iJ,   // Calculates the mean field matrix sum_i (H_i*J_i)
         std::vector<double>&gjmbH, bool save_matrices);
       std::vector<double> expJ(iceig&VE, double T, // Calculates the expectation values <V|J|V>exp(-beta*T)
+        std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Jm|n>
+        bool save_matrices);
+      std::vector<double> expJ(iceig&VE, Vector & T, // Calculates the expectation values <V|J|V>exp(-beta*T)
         std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Jm|n>
         bool save_matrices);
       std::vector<double> spindensity_expJ(iceig&VE,//Calculates the expectation values

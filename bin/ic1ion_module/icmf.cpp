@@ -268,7 +268,7 @@ icmfmat::icmfmat()
 icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string density)
 {
    _n = n; _l = l; _num_op = num_op; _density = density;
-   sMat<double> t; J.assign(6,t); 
+   sMat<double> t; J.assign(num_op>6?num_op:6,t); 
    iflag.assign(num_op>6?num_op:6,0); iflag[2]=1; iflag[3]=1;
    // Determines the filename strings for where the moment operator matrices are stored if previously calculated
    char nstr[6]; char basename[255]; char Lfilestr[255], Sfilestr[255]; strcpy(basename,"results/mms/");
@@ -336,13 +336,14 @@ icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string d
 // Calculates the mean field matrix sum_i (H_i*J_i)
 // --------------------------------------------------------------------------------------------------------------- //
 void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gjmbH, bool save_matrices)
-{
-   int i; Jmat.zero(J[0].nr(),J[0].nc()); iJmat.zero(J[0].nr(),J[0].nc()); 
-   if(_num_op<(int)gjmbH.size()) { iflag.resize(_num_op,0); _num_op = (int)gjmbH.size(); }
-   for(i=0; i<(_num_op>6?6:_num_op); i++)
+{  int i; Jmat.zero(J[0].nr(),J[0].nc()); iJmat.zero(J[0].nr(),J[0].nc()); 
+   if(_num_op<(int)gjmbH.size()) {_num_op = (int)gjmbH.size(); iflag.resize(_num_op,0); 
+                                   sMat<double> t; J.resize(_num_op,t);
+                                 }
+   for(i=0; i<((int)gjmbH.size()>6?6:_num_op); i++)
       if(fabs(gjmbH[i])>DBL_EPSILON*100) { if(iflag[i]==1) iJmat += J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i]; }
    // Higher order than dipole operators needed
-   if(_num_op>6)
+   if((int)gjmbH.size()>6)
    {
       char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
       if(save_matrices) {
@@ -364,35 +365,42 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
     //int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
       sMat<double> Upq,Umq; double redmat; int n = _n; //if(n>(2*_l+1)) n = 4*_l+2-n; 
 
-      for(i=6; i<_num_op; i++)
-      {
-         if(q[i]<0) iflag[i]=1; 
-         if (fabs(gjmbH[i])>DBL_EPSILON) 
-         {
+      for(i=6; i<(int)gjmbH.size(); i++)if(fabs(gjmbH[i])>DBL_EPSILON)
+      { 
+          
+         if(J[i].isempty()){if(q[i]<0) iflag[i]=1;
+         
             redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[i],2*_l,0,0,0);// * wy2stev(i);
             if(k[i]%2==1) continue;   // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
             if(k[i]>4 && _l==D) continue;
             NSTR(k[i],abs(q[i])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
             Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(n,k[i],abs(q[i]),_l); rmzeros(Upq); mm_gout(Upq,filename); }
-            if(q[i]==0) { Jmat += Upq * (gjmbH[i]*redmat); continue; }
+            if(q[i]==0) { J[i]= Upq * (redmat); continue; }
             MSTR(k[i],abs(q[i])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
             Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(n,k[i],-abs(q[i]),_l); rmzeros(Umq); mm_gout(Umq,filename); }
             if(q[i]<0) { 
-            // if((q[i]%2)==0) iJmat += (Upq - Umq) * (gjmbH[i]*redmat); else iJmat += (Upq + Umq) * (gjmbH[i]*redmat); } changed MR 15.12.09
-               if((q[i]%2)==0) iJmat += (Umq - Upq) * (gjmbH[i]*redmat); else iJmat += (Umq + Upq) * (gjmbH[i]*redmat); }
+               if((q[i]%2)==0)  J[i]= (Umq - Upq) * (redmat); else   J[i]= (Umq + Upq) * (redmat); }
             else {
-               if((q[i]%2)==0)  Jmat += (Umq + Upq) * (gjmbH[i]*redmat); else  Jmat += (Umq - Upq) * (gjmbH[i]*redmat); } 
-         } 
+               if((q[i]%2)==0)  J[i]= (Umq + Upq) * (redmat); else  J[i]= (Umq - Upq) * (redmat); } 
+                          }            
+        if(iflag[i]==1) iJmat += J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i];
+
+          
       }
    }
 }
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the expectation values <V|J|V>exp(-beta*T) given a set of eigenstates
 // --------------------------------------------------------------------------------------------------------------- //
-std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<double> > &matel, bool save_matrices)
-{
-   double *vt=0, Z=0., U=0.; complexdouble *zt=0; //, zme;
-   std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; matel.clear();
+std::vector<double> icmfmat::expJ(iceig &VE, double  T, std::vector< std::vector<double> > &matel, bool save_matrices)
+{Vector TT(1,1);TT(1)=T;
+ return expJ(VE,TT,matel,save_matrices);
+}
+
+std::vector<double> icmfmat::expJ(iceig &VE, Vector & T, std::vector< std::vector<double> > &matel, bool save_matrices)
+{  double *vt=0; complexdouble *zt=0; //, zme;
+   int nof_ops=(_num_op>6?_num_op:6); 
+  std::vector<double> E, ex((nof_ops+2)*(T.Hi()-T.Lo()+1),0.), me; matel.clear();
    int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1; 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
@@ -419,75 +427,13 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
       free(dmm); free(vet);
    }*/
 
-   // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0 || VE.E(Esz+1)==-DBL_MAX) break; }
-
-   if (T<0){Esz=(int)(-T);printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
-                         printf ("Number   Excitation Energy\n");
-     for (ind_j=0;ind_j<Esz;++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
-     } // MR 10.9.2010
-
+ 
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) 
       if(fabs(VE.zV(ii,jj).r*VE.zV(ii,jj).r+VE.zV(ii,jj).i*VE.zV(ii,jj).i)<DBL_EPSILON*100000) 
       {
          VE.zV(ii,jj) = 0;
       }  
-   // For first run calculate also the partition function and internal energy
-   me.assign(Esz,0.); eb.assign(Esz,0.); Z=0.;
-   if(!VE.iscomplex()) 
-   {
-      double *fJmat=J[0].f_array(); vt = (double*)malloc(Hsz*sizeof(double)); 
-      for(ind_j=0; ind_j<Esz; ind_j++)
-      {  // Calculates the matrix elements <Vi|J.H|Vi>
-         F77NAME(dsymv)(&uplo, &Hsz, &alpha, fJmat, &Hsz, VE.V(ind_j), &incx, &beta, vt, &incx);
-#ifdef _G77 
-         F77NAME(ddot)(me[ind_j],&Hsz, VE.V(ind_j), &incx, vt, &incx);
-#else
-         me[ind_j] = F77NAME(ddot)(&Hsz, VE.V(ind_j), &incx, vt, &incx);
-#endif
-//MR 10.9.2010
-         if (T<0)
-         {  char instr[MAXNOFCHARINLINE];
-            printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
-            eb[ind_j]=strtod(instr,NULL);
-         }
-        else
-         { eb[ind_j] = exp(-E[ind_j]/(KB*T));} ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MRend 10.9.2010                                                                    !!!!    -----------------!!!!
-      }
-      free(fJmat); free(vt); matel.push_back(me); ex[0]/=Z; U/=Z;
-   }
-   else
-   {
-      complexdouble *zJmat;
-      zeroes.zero(J[0].nr(),J[0].nc()); if(iflag[0]==0) zJmat=zmat2f(J[0],zeroes); else zJmat = zmat2f(zeroes,J[0]);
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      for(ind_j=0; ind_j<Esz; ind_j++)
-      {  // Calculates the matrix elements <Vi|J.H|Vi>
-         // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-          me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
-           //   zme.r=0;zme.i=0;              
-               /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-#ifdef _G77 
-         F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
-#else
-         zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
-#endif  
-         me[ind_j] = zme.r; */
-//MR 10.9.2010
-         if (T<0)
-         {  char instr[MAXNOFCHARINLINE];
-            printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
-            eb[ind_j]=strtod(instr,NULL);
-         }
-         else
-         { eb[ind_j] = exp(-E[ind_j]/(KB*T));} ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MRend 10.9.2010
-      }
-      free(zJmat); free(zt); matel.push_back(me); ex[0]/=Z; U/=Z;
-   }
+   
 
    char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
    if(save_matrices) {
@@ -520,9 +466,21 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          if(_density.find("6")!=std::string::npos) std::cout << "Lz\n";
       }
    }
+// Sets energy levels relative to lowest level, and determines the maximum energy level needed.
+   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T.Hi()))<DBL_EPSILON || VE.E(Esz+1)==0 || VE.E(Esz+1)==-DBL_MAX) break; }
 
-   // Rest of the runs only calculate the new matrix elements
-   for(iJ=1; iJ<(_num_op>6?_num_op:6); iJ++)
+   if (T.Lo()<0){Esz=(int)(-T.Lo());printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T.Lo(),(int)(-T.Lo()));
+                         printf ("Number   Excitation Energy\n");
+     for (ind_j=0;ind_j<Esz;++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
+     } // MR 10.9.2010
+
+    Matrix eb(0,Esz-1,T.Lo(),T.Hi()); 
+Vector U(T.Lo(),T.Hi());U=0;
+Vector Z(T.Lo(),T.Hi());Z=0;
+
+// For first run calculate also the partition function and internal energy
+// Rest of the runs only calculate the new matrix elements
+   for(iJ=0; iJ<nof_ops; iJ++)
    {
       me.assign(Esz,0.);
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
@@ -532,7 +490,7 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          if(iflag[iJ]==0) {
             double *fJmat; vt = (double*)malloc(Hsz*sizeof(double)); 
             if(iJ<6) 
-               fJmat=J[iJ].f_array(); 
+             {  fJmat=J[iJ].f_array(); redmat=1;}
             else 
             {
                NSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
@@ -540,7 +498,6 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
                MSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
                Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(n,k[iJ],-abs(q[iJ]),_l); rmzeros(Umq); mm_gout(Umq,filename); }
                redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[iJ],2*_l,0,0,0);// * wy2stev(iJ);
-//             if(q[iJ]<0) { if((q[iJ]%2)==0) Upq -= Umq; else Upq += Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } changed MR 15.12.09
                if(q[iJ]<0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
                #ifdef JIJCONV
                if(jijconv.size()>1) redmat*=jijconv[iJ+1];
@@ -556,20 +513,17 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
 #else
                me[ind_j] = F77NAME(ddot)(&Hsz, VE.V(ind_j), &incx, vt, &incx);
 #endif
-               me[ind_j]*=redmat;ex[iJ]+=me[ind_j]*eb[ind_j];
+              me[ind_j]*=redmat;
             }
-            free(fJmat); free(vt); matel.push_back(me); ex[iJ]/=Z; 
-         } 
+           free(fJmat); free(vt); matel.push_back(me); } 
          else { me.assign(Esz,0.); matel.push_back(me); }
-      }
+       }  
       else
-      {// here we should to load not zJmat but directly use sparse Matrix zSmat, either set already as Jsparse[0-5]
-        // or loaded from file filename into zSmat ... !! this should accellerate expectation value calculation:-)
-         // ????
-         complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
+      {complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
          if(iJ<6) 
          {
-            if(iflag[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]);redmat=1;
+            if(iflag[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]);
+            redmat=1;
          }
          else 
          { // if(!_density.empty()) { zJmat = balcar_Mq(_density,k[iJ],q[iJ],_n,_l); } else {
@@ -591,22 +545,43 @@ std::vector<double> icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<
          {  // Calculates the matrix elements <Vi|J.H|Vi>
                // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
               me[ind_j] = redmat*expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
-
-          /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+/*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
 #ifdef _G77 
             F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
 #else
             zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
 #endif
             me[ind_j] = redmat*zme.r;*/
-            ex[iJ]+=me[ind_j]*eb[ind_j];
-         }
+          }
          free(zJmat); //free(zt);
-         matel.push_back(me); ex[iJ]/=Z;
-      }
-      if(fabs(ex[iJ])<DBL_EPSILON) ex[iJ]=0.; 
-   }
-   ex[iJ] = log(Z)-VE.E(0)/(KB*T); ex[iJ+1] = U;
+         matel.push_back(me); 
+         }
+
+for(int Ti=T.Lo();Ti<=T.Hi();++Ti)
+ {int offset=(Ti-T.Lo())*(nof_ops+2);
+   for(ind_j=0; ind_j<Esz; ind_j++)
+  {
+  if(iJ==0){
+         if (T(Ti)<0)
+         {  char instr[MAXNOFCHARINLINE];
+            printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
+            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
+            eb(ind_j,Ti)=strtod(instr,NULL);
+         }
+         else
+         { eb(ind_j,Ti) = exp(-E[ind_j]/(KB*T(Ti)));} 
+          Z(Ti)+=eb(ind_j,Ti); 
+          U(Ti)+=(E[ind_j]+VE.E(0))*eb(ind_j,Ti);
+         }  
+            ex[iJ+offset]+=me[ind_j]*eb(ind_j,Ti);
+ }       ex[iJ+offset]/=Z(Ti); 
+         if(fabs(ex[iJ+offset])<DBL_EPSILON) ex[iJ+offset]=0.; 
+ if(iJ==0){// ex[iJ] = log(Z)-VE.E(0)/(KB*T); ex[iJ+1] = U;
+           ex[nof_ops+offset]=U(Ti)/Z(Ti);  // set U
+           ex[nof_ops+1+offset] = log(Z(Ti))-VE.E(0)/(KB*T(Ti));    // set lnZ
+           }         
+ } // Ti
+} // iJ
    return ex;
 }
 // --------------------------------------------------------------------------------------------------------------- //

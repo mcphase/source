@@ -360,7 +360,7 @@ dlloader=dlloader::DLLoader <singleion_module>(path);
  dlloader.DLOpenLib();
 // fprintf(stderr,"-->Loaded singleion_module library %s\n",modulefilename);
 module_type=external_class;
-si_mod=dlloader.DLGetInstance(); // this should remain here
+//si_mod=dlloader.DLGetInstance(); // this should remain here .. moved downwards after closing cf_file
 
 //fprintf(stderr,"-->got handle si_mod\n");
 
@@ -463,6 +463,8 @@ si_mod=dlloader.DLGetInstance(); // this should remain here
  }
 
  fclose (cf_file);
+if(module_type==external_class)si_mod=dlloader.DLGetInstance(sipffilename); // this loads a class object 
+
 // load file into buffer ss ...
 if(module_type<=0){ss = std::stringstream{slurp(sipffilename)};}
  

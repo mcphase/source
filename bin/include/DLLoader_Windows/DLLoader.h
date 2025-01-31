@@ -27,18 +27,18 @@ if (!(_handle = LoadLibrary(_pathToLib.c_str()))) {
 std::cerr << "Can't open and load " << _pathToLib << std::endl;exit(EXIT_FAILURE); 
 }
 }
-std::shared_ptr<T> DLGetInstance() override
+std::shared_ptr<T> DLGetInstance(const char * sipffilename) override
 {
 using allocClass = T * (*)();
 using deleteClass = void(*)(T *);
-auto allocFunc = reinterpret_cast<nullptr_t(*)()>(
+auto allocFunc = reinterpret_cast<nullptr_t(*)(const char*)>(
 GetProcAddress(_handle, _allocClassSymbol.c_str()));
 auto deleteFunc = reinterpret_cast<nullptr_t(*)()>(
 GetProcAddress(_handle, _deleteClassSymbol.c_str()));
 if (!allocFunc || !deleteFunc) {
 std::cerr << "Can't find allocator or deleter symbol in " << _pathToLib << std::endl;DLCloseLib();exit(EXIT_FAILURE); 
 }
-return std::shared_ptr<T>(allocFunc(),[deleteFunc](T *p) { deleteFunc(); });
+return std::shared_ptr<T>(allocFunc(sipffilename),[deleteFunc](T *p) { deleteFunc(); });
 }
 void DLCloseLib() override
 {
