@@ -106,7 +106,7 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
                       Vector &lnZ,        // Output scalar logarithm of partition function
                       Vector &U,          // Output scalar internal energy 
                       ComplexMatrix &Pst) // Parameter Storage matrix (initialized in Paramterer_storage_init)                                          
-{   
+{        
    // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
@@ -179,7 +179,7 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
       #ifdef JIJCONV
       if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
       #endif
-      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices); // add J.H to matrix
+      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH); // add J.H to matrix
       complex<double> a(1.,0.); int incx = 1;
       Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&Pst[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
 
@@ -189,21 +189,63 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
       else if(pars.arnoldi) VE.acalc(pars,Jm); 
       #endif
       else {VE.calc(Hsz,Jm);} free(Jm);
-      for(int Ti=1;Ti<=T.Hi();++Ti){
       // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
-        std::vector< std::vector<double> > matel; 
-      std::vector<double> vJ = mfmat.expJ(VE,T(Ti),matel,pars.save_matrices);
-      for(i=J.Rlo(); i<=J.Rhi(); i++) J[i][Ti] = vJ[i-J.Rlo()]; 
-      lnZ(Ti) = vJ[J.Rhi()-J.Rlo()+1]; U(Ti) = vJ[J.Rhi()-J.Rlo()+2];}
-   }
+        std::vector< std::vector<double> > matel; // &zji[2*q+1],  (complexdouble*)&est[j][1]
+// get expJ to highest T and matrix elements of eigenstates matel 
+// (for number of low energy states necessary for calculation at Ti=T.Hi() )
+int Ti=T.Hi();
+      std::vector<double> vJ =  mfmat.expJ(VE,T(Ti),matel,Jret.Rhi());
+for(i=Jret.Rlo(); i<=Jret.Rhi(); i++) {Jret(i,T.Hi()) = vJ[i-Jret.Rlo()];//printf("%g ",Jret(i,Ti));
+                                         } 
+ //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+//                                        to Sa Sb Sc La Lb Lc
+ dum=Jret(2,Ti);Jret(2,Ti)=Jret(3,Ti);Jret(3,Ti)=Jret(5,Ti);Jret(5,Ti)=Jret(4,Ti);Jret(4,Ti)=dum;
+ U(T.Hi())=vJ[Jret.Rhi()-Jret.Rlo()+1];
+ lnZ(T.Hi())=vJ[Jret.Rhi()-Jret.Rlo()+2];
+
+ vector<double> E; if(T.Hi()>1)for(int ind_j=0; ind_j<matel[0].size(); ind_j++){E.push_back(VE.E(ind_j)-VE.E(0));}
+// use matel to calculate more quickly the other temperatures
+    for(Ti=1;Ti<T.Hi();++Ti)
+    {int Esz;std::vector<double> eb;
+     Esz=matel[0].size();
+     if (T(Ti)<0){Esz=(int)(-T(Ti));printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T(Ti),(int)(-T(Ti)));
+                         printf ("Number   Excitation Energy\n");
+     for (int ind_j=0;ind_j<Esz;++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
+     } 
+     U(Ti)=0;
+     double Z=0;eb.assign(Esz,0.);
+     for(int iJ=0; iJ<Jret.Rhi(); iJ++)
+     {Jret(iJ+1,Ti)=0;
+      for(int ind_j=0; ind_j<Esz; ind_j++)
+      {if(iJ==0) // for iJ==0 sum up also U and Z
+        { if (T(Ti)<0)
+         {  char instr[MAXNOFCHARINLINE];
+            printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
+            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
+            eb[ind_j]=strtod(instr,NULL);
+         }
+         else
+         { 
+         eb[ind_j] = exp(-E[ind_j]/(KB*T(Ti)));
+         } 
+         Z+=eb[ind_j]; 
+         U(Ti)+=(VE.E(ind_j))*eb[ind_j];
+        } 
+       
+        Jret(iJ+1,Ti)+=matel[iJ][ind_j]*eb[ind_j];
+     }       
+     Jret(iJ+1,Ti)/=Z; 
+     if(fabs(Jret(iJ+1,Ti))<DBL_EPSILON) Jret(iJ+1,Ti)=0.; 
+            
+    } // iJ
+  lnZ(Ti) = log(Z)-VE.E(0)/(KB*T(Ti)); // set lnZ
+  U(Ti)/=Z;
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
-   for(int Ti=1;Ti<=T.Hi();++Ti){
-   dum=J(2,Ti);J(2,Ti)=J(3,Ti);J(3,Ti)=J(5,Ti);J(5,Ti)=J(4,Ti);J(4,Ti)=dum;
-   for(i=Jret.Rlo(); i<=Jret.Rhi(); i++) {Jret(i,Ti) = J(i,Ti);//printf("%g ",Jret(i,Ti));
-                                         } 
-    }//printf("\n");
+   dum=Jret(2,Ti);Jret(2,Ti)=Jret(3,Ti);Jret(3,Ti)=Jret(5,Ti);Jret(5,Ti)=Jret(4,Ti);Jret(4,Ti)=dum;
    // --------------------------------------------------------------------
+    } //  Ti   
+ } // fi truncate
 return true;
 }
 
@@ -224,7 +266,8 @@ bool ic1ion_module::Icalc(Vector &Jret,          // Output single ion momentum v
  Vector UU(1,1);UU(1)=U;
  IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU,Pst);
  U=UU(1);lnZ=lnZZ(1);T=TT(1);
- for(int i=1;i<=Jret.Hi();++i)Jret(i)=JM(i,1);
+ for(int i=1;i<=Jret.Hi();++i){Jret(i)=JM(i,1);//printf("Jret(%i)=%g ",i,Jret(i));
+}
 return true;
 }
 
@@ -434,7 +477,7 @@ int ic1ion_module::du1calc(int &tn,            // Input transition number; if tn
       //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
   
       std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
-      mfmat.u1(u,iu,VE,T,i,j,pr,delta,pars.save_matrices);
+      mfmat.u1(u,iu,VE,T,i,j,pr,delta);
 
       for(i=1; i<=u1.Hi(); i++)
          u1(i) = complex<double> (u[i], iu[i]);
@@ -619,7 +662,7 @@ bool ic1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (ro
       pars.jijconvcalc(); mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
       for(i=gLo; i<=gHi; i++) vgjmbH[i-1] *= pars.jijconv[i]; }
    #endif
-   sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices); 
+   sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH); 
 
    // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
    Hic/=MEV2CM; Hic+=Jmat; if(!iHic.isempty()) iHic/=MEV2CM; if(!iJmat.isempty()) iHic+=iJmat; 
@@ -1007,7 +1050,7 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
       // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
       //icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices,pars.density);
       std::vector<double> vgjmbH(51,0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
-      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH,pars.save_matrices);
+      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH);
       complex<double> a(1.,0.); int incx = 1;
       Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&Pst[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
 
@@ -1020,7 +1063,7 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
 
       // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
       std::vector< std::vector<double> > matel;
-      std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,T,matel,pars.save_matrices);
+      std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,T,matel);
       for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()];//printf("ss=%g\n",J(1));
    }
 }
@@ -1204,7 +1247,7 @@ int      ic1ion_module::sdod_du1calc(int xyz,            // Indicating which of 
       //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
   
       std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
-      mfmat.dod_u1(xyz,u,iu,VE,T,i,j,pr,delta,pars.save_matrices);
+      mfmat.dod_u1(xyz,u,iu,VE,T,i,j,pr,delta);
 
       for(i=1; i<=u1.Hi(); i++)
          u1(i) = complex<double> (u[i], iu[i]);
@@ -1347,7 +1390,7 @@ bool ic1ion_module::opmat(int &ni,                      // ni     which operator
       #ifdef JIJCONV
       if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
       #endif
-      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,gjmbH,pars.save_matrices); 
+      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,gjmbH); 
 
       sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; Hic+=Jmat; if(!iHic.isempty()) iHic/=MEV2CM; if(!iJmat.isempty()) iHic+=iJmat; 
 

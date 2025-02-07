@@ -308,13 +308,13 @@ void ic_cmag(const char *filename, icpars &pars, double elim)
    for(i=0; i<nH; i++)
    {
       for(j=0; j<6; j++) gjmbHmeV[j] = gjmbH[j]*(-MUB*(Hmin+i*Hstep)); 
-      mfmat.Jmat(J,iJ,gjmbHmeV,pars.save_matrices); J+=H; iJ+=iH; 
+      mfmat.Jmat(J,iJ,gjmbHmeV); J+=H; iJ+=iH; 
       if(elim!=-DBL_MAX) VE = spectre_eig(J,iJ,zVrot,cb); else
       #ifndef NO_ARPACK
       if(pars.arnoldi) VE.acalc(pars,J,iJ); else
       #endif
       if(pars.partial) VE.lcalc(pars,J,iJ); else VE.calc(J,iJ); 
-      ex = mfmat.expJ(VE,Tmax,matel,pars.save_matrices); ex.assign(matel[0].size(),0.); for(j=0; j<6; j+=2) exj.push_back(ex);
+      ex = mfmat.expJ(VE,Tmax,matel,6); ex.assign(matel[0].size(),0.); for(j=0; j<6; j+=2) exj.push_back(ex);
       for(j=0; j<nT; j++) 
       {
          ma[j] = 0.; mb[j] = 0.; mc[j] = 0.;  Z = 0.;
@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
       if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH[1]=-MUBc*pars.Bx; gjmbH[0]=GS*gjmbH[1]; }
       if(fabs(pars.By)>DBL_EPSILON) { gjmbH[3]=-MUBc*pars.By; gjmbH[2]=GS*gjmbH[3]; }
       if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH[5]=-MUBc*pars.Bz; gjmbH[4]=GS*gjmbH[5]; }
-      sMat<double> J,iJ; icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices); mfmat.Jmat(J,iJ,gjmbH,pars.save_matrices); Hic+=J; iHic+=iJ;
+      sMat<double> J,iJ; icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices); mfmat.Jmat(J,iJ,gjmbH); Hic+=J; iHic+=iJ;
    }
 
 // std::cout << std::setprecision(16) << "Hic=" << Hic.display_full() << "; Hic=Hic./" << MEV2CM << ";\n";

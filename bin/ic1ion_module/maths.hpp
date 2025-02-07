@@ -88,6 +88,12 @@ template <class T> class sMat {
      void mcol(int c, T val);                                           // Multiplies a given column by a constant
      void mrow(int r, T val);                                           // Multiplies a given row by a constant
 
+
+     // For expectation values and transition Matrix elements
+     double MultvxMv(double *v);           // Calculates the expectation Value <v|M|v> assuming M real symmetric
+     double MultvxMv(complexdouble *v,bool imag);    // if imag=false: Calculates the expectation Value <v|M|v> assuming M real symmetric
+                                                     // if imag=true:  Calculates the expectation Value <v|iM|v> assumig M real antisymmetric
+                                                     // uses only the row < column  ... upper triangle of M
      // Overloaded operators
      sMat<T> operator =  (const sMat & m);                              // Copy assignment - overwrites previous matrix
      sMat<T> operator += (const sMat & m);                              // Add another matrix to current (element-wise)
@@ -566,6 +572,66 @@ template <class T> void sMat<T>::mrow(int r, T val)             // Multiplies a 
       for(it=lb; it->first<ub->first; it++)
          it->second *= val;
 }
+
+template <class T> double sMat<T>::MultvxMv(complexdouble *v,bool imag) 
+ // if imag=false: Calculates the expectation Value <v|M|v> assuming M real symmetric
+ // if imag=true:  Calculates the expectation Value <v|iM|v> assumig M real antisymmetric
+ // uses only the row < column  ... upper triangle of M
+{  // We have to assume that the size of the vector v is equal to _r
+  double e=0,ed=0;
+   typename std::map<_ind,T>::iterator i;
+  if(imag)
+ {for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r;int c=i->first.c;
+      if(r<c){
+               e+=i->second*(-v[r].r*v[c].i+v[r].i*v[c].r);
+             }
+   } 
+ }
+  else
+ {   for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r; // row r
+    int c=i->first.c; // column c
+      
+     if(r<=c){
+        if(r==c){ed+=i->second*(v[r].r*v[c].r+v[r].i*v[c].i);
+                      }
+              else{
+                   e+= i->second*(v[r].r*v[c].r+v[r].i*v[c].i);
+                    }
+                            }    
+    }
+  }
+                                  
+                 
+return 2*e+ed;
+}
+
+template <class T> double sMat<T>::MultvxMv(double *v) 
+ // if imag=false: Calculates the expectation Value <v|M|v> assuming M real symmetric
+ // if imag=true:  Calculates the expectation Value <v|iM|v> assumig M real antisymmetric
+ // uses only the row < column  ... upper triangle of M
+{  // We have to assume that the size of the vector v is equal to _r
+  double e=0,ed=0;
+   typename std::map<_ind,T>::iterator i;
+    for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r; // row r
+    int c=i->first.c; // column c
+      
+     if(r<=c){
+        if(r==c){ed+=i->second*(v[r]*v[c]);
+                      }
+              else{
+                   e+= i->second*(v[r]*v[c]);
+                    }
+                            }    
+    }
+  
+                                  
+                 
+return 2*e+ed;
+}
+
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Overloaded operators

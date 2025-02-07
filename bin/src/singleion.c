@@ -233,7 +233,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
    jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
 
  if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i); // write transition trs files
-     
+
       for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
       switch(observable)
       {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;

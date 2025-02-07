@@ -10,7 +10,7 @@
  */
 
 #ifndef ICMF_H
-#include "martin.h"
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Defines a class to hold the eigenvalues and eigenvectors
 // --------------------------------------------------------------------------------------------------------------- //
@@ -59,48 +59,41 @@ class iceig
 };
 
 // --------------------------------------------------------------------------------------------------------------- //
-// Defines a class to hold the matrices Lx/Sx etc. and to calculate their expectation values
+// Defines a class to hold the matrices of operators Jm= Lx/Sx etc. and to calculate their expectation values
 // --------------------------------------------------------------------------------------------------------------- //
 class icmfmat
 {
    private:
       int _n;
       orbital _l;
-      int _num_op;
+      bool _save_matrices;                         // true:  matrices of operators be saved in files instead of storing J[i]
+      int _num_op;                                 // number of operators to store internally (will be increased if required)
       std::string _density;                        // Flag to output expectation values of spin/orbital density operator.
-
+      void Jop_generate(int m);                         // generates the operator matrix I[m] 
    public:
-      std::vector<sMat<double> > J;                // A vector of the matrices [Sx Lx Sy Ly Sz Lz] 
+      std::vector<sMat<double> > J;                // A vector of the matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
       std::vector<int> iflag;                      // Vector to determine if matrix is imaginary
 
       icmfmat();                                   // Blank constructor
-      ~icmfmat();                                    // Destructor
       icmfmat(int n, orbital l, int num_op,        // Constructor for l^n configuration
         bool save_matrices, std::string density="");
       void Jmat(sMat<double>&J, sMat<double>&iJ,   // Calculates the mean field matrix sum_i (H_i*J_i)
-        std::vector<double>&gjmbH, bool save_matrices);
-      std::vector<double> expJ(iceig&VE, double T, // Calculates the expectation values <V|J|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Jm|n>
-        bool save_matrices);
-      std::vector<double> expJ(iceig&VE, Vector & T, // Calculates the expectation values <V|J|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Jm|n>
-        bool save_matrices);
-      std::vector<double> spindensity_expJ(iceig&VE,//Calculates the expectation values
+        std::vector<double>&gjmbH);
+      std::vector<double> expJ(iceig&VE, double T, // Calculates the expectation values <V|Jm|V>exp(-beta*T)
+        std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Im|n>
+        int num_op);                               // with 0<=m<num_op
+       std::vector<double> spindensity_expJ(iceig&VE,//Calculates the expectation values
         int xyz,double T,                          //   <V|spindensitycoeff_of_Zlm|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel,   
-        bool save_matrices);
+        std::vector<std::vector<double> >&matel);
       std::vector<double> orbmomdensity_expJ(      // Calculates the expectation values
         iceig&VE,int xyz, double T,                //   <V|orbmomdensitycoeff_of_Zlm|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel,
-        bool save_matrices);
+        std::vector<std::vector<double> >&matel);
       void u1(std::vector<double> &u1,             // Calculates the vector u1 = <i|Ja-<Ja>|j>
         std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
-        int i, int j, int p, float &d,
-        bool save_matrices);
+        int i, int j, int p, float &d);
       void dod_u1(int xyz, std::vector<double>&u1, // Calculates the vector u1 = <i|M(q)-<M(q)>|j>
         std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
-        int i, int j, int p, float &d, 
-        bool save_matrices);
+        int i, int j, int p, float &d);
       #ifdef JIJCONV
       std::vector<double> jijconv;                 // Conversion from Stevens/Wybourne norm of Jij pars
       #endif

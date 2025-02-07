@@ -217,15 +217,15 @@ else
 	$(LINKER) -o ../ic1ion ic1ion.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 endif
 
-ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp
+ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp icmf.hpp
 ifdef integral
 	$(CC) $(CFLAGS) -I../include -I. -D_INTEGRAL -c $<
 else
 	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 
-states.o: states.cpp states.hpp ../include/constants.h
-	$(CC) $(patsubst -O3,   ,${CFLAGS}) -I../include -c $<
+states.o: states.cpp states.hpp ../include/constants.h lapack.h
+	$(CC) $(patsubst -O3,   ,${CFLAGS}) -I../include -I. -c $<
 
 truncate.o: truncate.cpp
 	$(CC) $(CFLAGS) -I../include -I. -c $<
@@ -259,7 +259,7 @@ endif
 
 
 
-ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o ../src/martin.o # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
+ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o ../src/martin.o ../src/myev.o # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
 ../icf1ionit$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o
 	@echo Linking $@
 	@$(LINKER) -o ../icf1ion icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
@@ -272,8 +272,6 @@ else
 	@$(LINKER) -o icf1ion.so icf1ion_module.o $(ICFOBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
-icmf.o : icmf.cpp ic1ion.hpp ../include/constants.h 
-	$(CC) $(CFLAGS) -I../include -I. -c $<
 
 # Pattern rules
 # Syntax is

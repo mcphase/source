@@ -112,6 +112,8 @@ template <class T> class zsMat {
 
      // For expectation values and transition Matrix elements
      double MultvxMv(complexdouble *v);                               // Calculates the expectation value <v|M|v> assuming M Hermitian
+     complexdouble MultuxMv(complexdouble *u,complexdouble *v);        // calculates the transition matrix element <u|Mv> assuming M Hermitian
+     void addto(complex<double> *H,double c);                           // adds to a Fortran style 2D complex array H the matrix x c
      
      // Overloaded operators
      zsMat<T> operator =  (const zsMat & m);                            // Copy assignment - overwrites previous matrix
@@ -770,9 +772,21 @@ template <class T> T* zsMat<T>::cp_array() const                // Returns Hermi
 
    return retval;
 }
+template <class T> void zsMat<T>::addto(complex<double> *H,double a)                           // adds to a Fortran style 2D complex array H the matrix x c
+{if(_iscsc) // if is compressed
+   {  printf("Error  zsMat addto: iscs not implemented \n");
+         exit(EXIT_FAILURE);
+      }
+  for(int c=0; c<(int)_x.size(); c++) //printf("%i %i %g |",_i[c],_p[c],real(_x[c]));
+   {   int row=_i[c],col=_p[c];
+     H[row+_n*col]+=(a*_x[c]);
+   }    
+
+}
 
 
-template <class T> double zsMat<T>::MultvxMv(complexdouble *v)  // Calculates the expectation Value <v|M|v> assuming M hermitian
+template <class T> double zsMat<T>::MultvxMv(complexdouble *v) 
+ // Calculates the expectation Value <v|M|v> assuming M hermitian
 {  // We have to assume that the size of the vector v is equal to _r
   double e=0,ed=0;
    if(_iscsc) // if is compressed
@@ -792,7 +806,7 @@ template <class T> double zsMat<T>::MultvxMv(complexdouble *v)  // Calculates th
                       }
               else{
                    if(real(_x[c])!=0.0){e+= real(_x[c])*(v[i].r*v[p].r+v[i].i*v[p].i);}
-                   if(imag(_x[c])!=0.0){e+=imag(_x[c])*(v[i].r*v[p].i-v[i].i*v[p].r);}
+                   if(imag(_x[c])!=0.0){e+=imag(_x[c])*(-v[i].r*v[p].i+v[i].i*v[p].r);}
                   // if(real(_x[c]==0.0)&&imag(_x[c]!=0.0))printf("error !");
                                   
                   }
@@ -801,6 +815,47 @@ template <class T> double zsMat<T>::MultvxMv(complexdouble *v)  // Calculates th
    }
 return 2*e+ed;
 }
+
+template <class T> complexdouble zsMat<T>::MultuxMv(complexdouble *u,complexdouble *v) 
+ // Calculates the Matrix Element <u|M|v> assuming M hermitian
+{  // We have to assume that the size of the vector v is equal to _r
+  double e=0,ed=0,ei=0;
+   if(_iscsc) // if is compressed
+   {
+      for(int j=0; j<_n; j++) for(int c=_p[j]; c<_p[j+1]; c++)
+      { //ev += conjugate(v[j])*_x[c] * v[_i[c]];
+       printf("iscs not implemented : %i %i %g |",_i[c],j,real(_x[c]));
+         exit(EXIT_FAILURE);
+      }
+   }
+   else 
+   {
+      for(int c=0; c<(int)_x.size(); c++) {//printf("%i %i %g |",_i[c],_p[c],real(_x[c]));
+      int i=_i[c],p=_p[c];
+       if(i<=p){
+        if(i==p){ed+=real(_x[c])*(u[i].r*v[p].r+u[i].i*v[p].i);
+                      }
+              else{
+                   if(real(_x[c])!=0.0){e+= real(_x[c])*(u[i].r*v[p].r+u[i].i*v[p].i);
+                                        e+= real(_x[c])*(v[i].r*u[p].r+v[i].i*u[p].i);
+                                        ei+= real(_x[c])*(u[i].r*v[p].i-u[i].i*v[p].r);
+                                        ei+= real(_x[c])*(-v[i].r*u[p].i+v[i].i*u[p].r);
+                                       }
+                   if(imag(_x[c])!=0.0){ei+= imag(_x[c])*(u[i].r*v[p].r+u[i].i*v[p].i);
+                                        ei-= imag(_x[c])*(v[i].r*u[p].r+v[i].i*u[p].i);
+                                        e-= imag(_x[c])*(u[i].r*v[p].i-u[i].i*v[p].r);
+                                        e+= imag(_x[c])*(-v[i].r*u[p].i+v[i].i*u[p].r);
+                                        }
+                  // if(real(_x[c]==0.0)&&imag(_x[c]!=0.0))printf("error !");
+                                  
+                  }
+                            }    
+          }
+   }
+complexdouble ret; ret.r=e+ed;ret.i=ei;
+return ret;
+}
+
 
 
 

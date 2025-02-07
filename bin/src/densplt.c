@@ -192,13 +192,12 @@ if(gp.read())printf("#reading graphic parameters from results/graphic_parameters
   for(int i=1;i<=argc-6-os-1;++i){h(i)=strtod(argv[6+os+i],NULL);printf("%4g ",h(i));}printf("\n");
   jjjps.Icalc_parameter_storage_init(h,Hext,T);
 
-  printf("calculating expectation values of density coefficients ....\n");
-
 switch(arrow)
-{case 1: jjjps.Scalc(mom,T,h,Hext,jjjps.Icalc_parstorage);break;
- case 2: jjjps.Lcalc(mom,T,h,Hext,jjjps.Icalc_parstorage);break;
- case 3: jjjps.mcalc(mom,T,h,Hext,jjjps.Icalc_parstorage);break;
+{case 1: jjjps.Scalc(mom,T,h,Hext,jjjps.Icalc_parstorage);printf("#arrow S=(%g,%g,%g)\n",mom(1),mom(2),mom(3));break;
+ case 2: jjjps.Lcalc(mom,T,h,Hext,jjjps.Icalc_parstorage);printf("#arrow L=(%g,%g,%g)\n",mom(1),mom(2),mom(3));break;
+ case 3: jjjps.mcalc(mom,T,h,Hext,jjjps.Icalc_parstorage);printf("#arrow M=(%g,%g,%g)muB\n",mom(1),mom(2),mom(3));break;
 }
+  printf("#calculating expectation values of density coefficients ....\n");
 
 switch(argv[1][0]) // dimension definition from jjjpar.hpp
 {case 'c':  jjjps.chargedensity_coeff (moments, T, h, Hext, jjjps.Icalc_parstorage); break;
