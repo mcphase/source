@@ -5,8 +5,8 @@
  * save computation time.
  *
  * Functions:
- *   void truncate_hmltn(&pars, &est, &Hic, &iHic, JHi, JLo)       // Calc. a rotated/truncated Hamiltonian
- *   void truncate_expJ(&pars, &est, &gjmbH, &J, T, lnZ, U, *Jm) // Calc. its expectation values
+ *   void truncate_hmltn(&pars, &Pst, &Hic, &iHic, JHi, JLo)       // Calc. a rotated/truncated Hamiltonian
+ *   void truncate_expJ(&pars, &Pst, &gjmbH, &J, T, lnZ, U, *Jm) // Calc. its expectation values
  *
  * This file is part of the ic1ionmodule of the McPhase package, calculating the single-ion properties of a rare
  * earth or actinide ion in intermediate coupling.
@@ -31,23 +31,22 @@
 truncRot g_truncRot;
 
 // --------------------------------------------------------------------------------------------------------------- //
-// Truncates the matrix, and stores the single ion part in the estates array
 // --------------------------------------------------------------------------------------------------------------- //
-void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<double> &iHic, int JHi, int JLo)
+void truncate_hmltn(icpars &pars, ComplexMatrix &Pst, sMat<double> &Hic, sMat<double> &iHic, int JHi, int JLo)
 {
    std::cout << "Icalc(): Calculating rotated matrix for truncation." << std::flush;
    clock_t start,end; start = clock();
    int info,Hsz=getdim(pars.n,pars.l);
    complexdouble *Vf; Vf = new complexdouble[Hsz*Hsz]; double *Ef; Ef = new double[Hsz]; 
 
-   // Calculates the eigenvectors and puts it into *est matrix for use by truncate_expJ()
+   // Calculates the eigenvectors and puts it into *Pst matrix for use by truncate_expJ()
    std::cout << " Starting single ion matrix diagonalisation... " << std::flush;
    info = ic_diag(Hic,iHic,Vf,Ef); if(info!=0) { std::cerr << "truncate_hmltn: Error diagonalising, info==" << info << "\n"; }
    delete[]Ef; 
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) { 
       if(fabs(Vf[ii*Hsz+jj].r)<DBL_EPSILON) {Vf[ii*Hsz+jj].r=0.;} if(fabs(Vf[ii*Hsz+jj].i)<DBL_EPSILON) {Vf[ii*Hsz+jj].i=0.;} } 
    std::cout << "Finished.";
-   int offset=EST_OFFSET; memcpy(&est[offset][0],Vf,Hsz*Hsz*sizeof(complexdouble)); offset+=Hsz*Hsz;
+   int offset=EST_OFFSET; memcpy(&Pst[offset][0],Vf,Hsz*Hsz*sizeof(complexdouble)); offset+=Hsz*Hsz;
 
    // Set up directory to store matrices if the user asks for it.
    char nstr[6]; char filename[255]; char basename[255];
@@ -82,7 +81,7 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
    F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&cb); free(zJmat);
    for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
       if(fabs(Hrot[ii*cb+jj].r)<DBL_EPSILON) {Hrot[ii*cb+jj].r=0.;} if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON){ Hrot[ii*cb+jj].i=0.;} } 
-   memcpy(&est[memloc+offset][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
+   memcpy(&Pst[memloc+offset][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
    // Calculates the rotated multipolar operators for the mean field terms
    std::cout << " Using " << cb << " levels of " << Hsz << ".\nIcalc(): Starting calculation of rotated mean field operators... " << std::flush;
    icmfmat mfmat(pars.n,pars.l,JHi-JLo+1,pars.save_matrices); double redmat;
@@ -109,7 +108,7 @@ void truncate_hmltn(icpars &pars, ComplexMatrix &est, sMat<double> &Hic, sMat<do
       F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,Vf,&Hsz,zmt,&Hsz,&zbeta,Hrot,&cb); free(zJmat);
       for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
          if(fabs(Hrot[ii*cb+jj].r)<DBL_EPSILON) {Hrot[ii*cb+jj].r=0.;} if(fabs(Hrot[ii*cb+jj].i)<DBL_EPSILON) {Hrot[ii*cb+jj].i=0.;} } 
-      memcpy(&est[memloc+offset][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
+      memcpy(&Pst[memloc+offset][0],Hrot,cb*cb*sizeof(complexdouble)); memloc+=cb*cb;
    }
    delete[]Vf; delete[]Hrot; delete[]zmt;
    end = clock(); std::cout << "Done. Time to set up rotated matrices = " << (double)(end-start)/CLOCKS_PER_SEC << "s." << std::endl;
@@ -162,7 +161,7 @@ void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, 
 // --------------------------------------------------------------------------------------------------------------- //
 // Uses the stored eigenvectors of the single ion Hamiltonian to truncate the matrix. Calc. expectation values.
 // --------------------------------------------------------------------------------------------------------------- //
-void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, Vector &T, Vector &lnZ, Vector &U)
+void truncate_expJ(icpars &pars, ComplexMatrix &Pst, Vector &gjmbH, Matrix &J, Vector &T, Vector &lnZ, Vector &U)
 {
    int Hsz=getdim(pars.n,pars.l);
    char uplo='U'; complexdouble zme;
@@ -171,7 +170,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
 
    int cb = (int)(pars.truncate_level*Hsz), offset = EST_OFFSET+Hsz*Hsz; 
    complexdouble *Hrot; Hrot = new complexdouble[cb*cb]; 
-   memcpy(Hrot,&est[offset][0],cb*cb*sizeof(complexdouble)); int szapy=cb*cb; complexdouble a; a.r=1.; a.i=0.;
+   memcpy(Hrot,&Pst[offset][0],cb*cb*sizeof(complexdouble)); int szapy=cb*cb; complexdouble a; a.r=1.; a.i=0.;
    // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
    int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
@@ -181,7 +180,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
    for(int iJ=1; iJ<=(gjmbH.Hi()-gjmbH.Lo()+1); iJ++)
    {
       if (q[iJ]<0) a.r = -gjmbH[iJ+gjmbH.Lo()-1]; else a.r = -gjmbH[iJ+gjmbH.Lo()-1];
-      if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,(complexdouble*)&est[iJ*cb*cb+offset][0],&incx,Hrot,&incx);
+      if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,(complexdouble*)&Pst[iJ*cb*cb+offset][0],&incx,Hrot,&incx);
    }
 
    // Diagonalises the rotated mean field Hamiltonian
@@ -217,10 +216,10 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
 
    // Checks that this time we require expectation values of higher order multipoles even though these were not used in mcphasit
    clock_t start,end; start = clock();
-   if((J.Rhi()*cb*cb+Hsz*Hsz)>est.Rows()) 
+   if((J.Rhi()*cb*cb+Hsz*Hsz)>Pst.Rows()) 
    {
       std::cerr << "ic1ion truncate: Multipolar operators not precalculated. Calculating now..." << std::flush;
-      oldJhi = (est.Rows()-offset)/cb/cb-1;
+      oldJhi = (Pst.Rows()-offset)/cb/cb-1;
       zmt = new complexdouble[Hsz*cb];
       opmat = new complexdouble[cb*cb];
    }
@@ -251,8 +250,8 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
             if(q[iJ]<0) { if((q[iJ]%2)==0) Umq -= Upq; else Umq += Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
             Umq *= redmat; if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq);
          }
-         F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&est[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
-         F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&est[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
+         F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
+         F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
          for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
             if(fabs(opmat[ii*cb+jj].r)<DBL_EPSILON) {opmat[ii*cb+jj].r=0.;} if(fabs(opmat[ii*cb+jj].i)<DBL_EPSILON) {opmat[ii*cb+jj].i=0.;} } 
       }
@@ -260,10 +259,10 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
       {  // Calculates the matrix elements <Vi|J.H|Vi>
           // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
             if(iJ>=oldJhi)me[ind_j] = expectation_value(cb,opmat                                 ,VE.zV(ind_j)); // defined in martin.c
-            else          me[ind_j] = expectation_value(cb,(complexdouble*)&est[memloc+offset][0],VE.zV(ind_j));
+            else          me[ind_j] = expectation_value(cb,(complexdouble*)&Pst[memloc+offset][0],VE.zV(ind_j));
 
         /* if(iJ>=oldJhi) F77NAME(zhemv)(&uplo, &cb, &zalpha, opmat,                                  &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-         else             F77NAME(zhemv)(&uplo, &cb, &zalpha, (complexdouble*)&est[memloc+offset][0], &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
+         else             F77NAME(zhemv)(&uplo, &cb, &zalpha, (complexdouble*)&Pst[memloc+offset][0], &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
          #ifdef _G77 
          F77NAME(zdotc)(&zme, &cb, VE.zV(ind_j), &incx, zt, &incx);
          #else
@@ -276,7 +275,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
       free(zt); for(int Ti=1;Ti<=T.Hi();++Ti){J[iJ+1][Ti]/=Z(Ti); if(iJ==(J.Rlo()-1)) U(Ti)/=Z; }
       memloc+=cb*cb;
    }
-   if((J.Rhi()*cb*cb+Hsz*Hsz)>est.Rows()) 
+   if((J.Rhi()*cb*cb+Hsz*Hsz)>Pst.Rows()) 
    {
       end = clock(); std::cout << " Done. Elapsed time = " << (double)(end-start)/CLOCKS_PER_SEC << "s." << std::endl;
 //    if(!opmat) { delete[]opmat; *opmat=0; } if(!zmt) { delete[]zmt; *zmt=0; }
@@ -288,7 +287,7 @@ void truncate_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Matrix &J, V
 // --------------------------------------------------------------------------------------------------------------- //
 // Uses the stored eigenvectors of the single ion Hamiltonian to truncate the matrix. Calc. magnetisation density
 // --------------------------------------------------------------------------------------------------------------- //
-void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, Vector &J, double T, int xyz)
+void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &Pst, Vector &gjmbH, Vector &J, double T, int xyz)
 {
    int Hsz=getdim(pars.n,pars.l);
    char uplo='U'; complexdouble zme;
@@ -297,7 +296,7 @@ void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, 
 
    int cb = (int)(pars.truncate_level*Hsz), offset = EST_OFFSET+Hsz*Hsz; 
    complexdouble *Hrot; Hrot = new complexdouble[cb*cb]; 
-   memcpy(Hrot,&est[offset][0],cb*cb*sizeof(complexdouble)); int szapy=cb*cb; complexdouble a; a.r=1.; a.i=0.;
+   memcpy(Hrot,&Pst[offset][0],cb*cb*sizeof(complexdouble)); int szapy=cb*cb; complexdouble a; a.r=1.; a.i=0.;
 
    int k[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
@@ -306,7 +305,7 @@ void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, 
    for(int iJ=1; iJ<=(gjmbH.Hi()-gjmbH.Lo()+1); iJ++)
    {
       if (q[iJ]<0) a.r = -gjmbH[iJ+gjmbH.Lo()-1]; else a.r = -gjmbH[iJ+gjmbH.Lo()-1];
-      if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,(complexdouble*)&est[iJ*cb*cb+offset][0],&incx,Hrot,&incx);
+      if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,(complexdouble*)&Pst[iJ*cb*cb+offset][0],&incx,Hrot,&incx);
    }
 
    // Diagonalises the rotated mean field Hamiltonian
@@ -340,8 +339,8 @@ void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &est, Vector &gjmbH, 
 
       zJmat = balcar_Mq(xyz,k[iJ],q[iJ],pars.n,pars.l);
 
-      F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&est[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
-      F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&est[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
+      F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
+      F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
       for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
          if(fabs(opmat[ii*cb+jj].r)<DBL_EPSILON) {opmat[ii*cb+jj].r=0.;} if(fabs(opmat[ii*cb+jj].i)<DBL_EPSILON) {opmat[ii*cb+jj].i=0.;} } 
 

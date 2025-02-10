@@ -90,7 +90,7 @@ gotoblas=1
 endif
 endif
 
-CFLAGS+= -fpermissive 
+CFLAGS+= -fpermissive -std=c++11
 ##################################################################################
 #                              Declarations                                      #
 ##################################################################################
@@ -98,7 +98,8 @@ CFLAGS+= -fpermissive
 ifdef WINDOWS
 CFLAGS+= -g -Wall $(PEDANT) -D_WINDOWS
 else
-CFLAGS+= -g -ansi -Wall $(PEDANT) -fPIC
+CFLAGS+= -g  -Wall $(PEDANT) -fPIC
+# removed -ansi flag because it gives so many warning with c++11 standard 10.2.2025
 endif
 #------------------------------    FAST    --------------------------------------#
 ifdef fast

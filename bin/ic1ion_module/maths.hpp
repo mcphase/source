@@ -94,6 +94,15 @@ template <class T> class sMat {
      double MultvxMv(complexdouble *v,bool imag);    // if imag=false: Calculates the expectation Value <v|M|v> assuming M real symmetric
                                                      // if imag=true:  Calculates the expectation Value <v|iM|v> assumig M real antisymmetric
                                                      // uses only the row < column  ... upper triangle of M
+     complexdouble MultuxMv(complexdouble *u,complexdouble *v,bool imag); // if imag=false: Calculates the transition matrix element <u|M|v> assuming M real symmetric
+                                                     // if imag=true:  Calculates the expectation Value <u|iM|v> assumig M real antisymmetric
+                                                     // uses only the row < column  ... upper triangle of M
+      double MultuxMv(double *u,double *v);          //  Calculates the transition matrix element <u|M|v> assuming M real symmetric
+                                                     // uses only the row < column  ... upper triangle of M
+
+
+     void  addto(complexdouble *H,bool imag);       // if imag=false add matrix to real part of fortran 2d arry H
+                                                    // if imag=true  add matrix to imaginary part of fortran 2d arry H
      // Overloaded operators
      sMat<T> operator =  (const sMat & m);                              // Copy assignment - overwrites previous matrix
      sMat<T> operator += (const sMat & m);                              // Add another matrix to current (element-wise)
@@ -625,11 +634,107 @@ template <class T> double sMat<T>::MultvxMv(double *v)
                    e+= i->second*(v[r]*v[c]);
                     }
                             }    
-    }
-  
-                                  
-                 
+    }         
 return 2*e+ed;
+}
+
+
+template <class T> double sMat<T>::MultuxMv(double *u,double *v) //  Calculates the transition matrix element <u|M|v> assuming M real symmetric
+                                                     // uses only the row < column  ... upper triangle of M
+
+{  // We have to assume that the size of the vector v is equal to _r
+  double e=0,ed=0;
+   typename std::map<_ind,T>::iterator i;
+   for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r; // row r
+    int c=i->first.c; // column c
+      
+     if(r<=c){
+        if(r==c){ed+=i->second*(u[r]*v[c]);
+                      }
+              else{
+                   e+= i->second*(u[r]*v[c]+v[r]*u[c]);
+                    }
+                            }    
+    }
+   
+double ret; ret=e+ed;
+return ret;
+}
+template <class T> complexdouble sMat<T>::MultuxMv(complexdouble *u,complexdouble *v,bool imag) // if imag=false: Calculates the transition matrix element <u|M|v> assuming M real symmetric
+                                                     // if imag=true:  Calculates the expectation Value <u|iM|v> assumig M real antisymmetric
+                                                     // uses only the row < column  ... upper triangle of M
+
+{  // We have to assume that the size of the vector v is equal to _r
+  double e=0,ei=0,ed=0;
+   typename std::map<_ind,T>::iterator i;
+  if(imag==true)
+ {for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r;int c=i->first.c;
+      if(r<c){double s;
+
+ 
+                   s= (u[r].r*v[c].r+u[r].i*v[c].i);
+                   s-= (v[r].r*u[c].r+v[r].i*u[c].i);
+                   ei+=s*i->second;
+                   s=(-v[r].r*u[c].i+v[r].i*u[c].r);
+                   s-=(u[r].r*v[c].i-u[r].i*v[c].r);
+                   e+=s*i->second;
+
+// ei+= i->second*(u[r].r*v[c].r+u[r].i*v[c].i);
+//                   ei-= i->second*(v[r].r*u[c].r+v[r].i*u[c].i);
+//                   e-=i->second*(u[r].r*v[c].i-u[r].i*v[c].r);
+//                   e+=i->second*(-v[r].r*u[c].i+v[r].i*u[c].r);
+             }
+   } 
+ }
+  else
+ {   for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r; // row r
+    int c=i->first.c; // column c
+      
+     if(r<=c){
+        if(r==c){ed+=i->second*(u[r].r*v[c].r+u[r].i*v[c].i);
+                      }
+              else{double s;
+                   s=(u[r].r*v[c].r+u[r].i*v[c].i);
+                   s+=(v[r].r*u[c].r+v[r].i*u[c].i);
+                   e+=s*i->second;
+                   s=(u[r].r*v[c].i-u[r].i*v[c].r);
+                   s+=(-v[r].r*u[c].i+v[r].i*u[c].r);
+                   ei+=s*i->second;
+//                   e+= i->second*(u[r].r*v[c].r+u[r].i*v[c].i);
+//                   e+= i->second*(v[r].r*u[c].r+v[r].i*u[c].i);
+//                   ei+=i->second*(u[r].r*v[c].i-u[r].i*v[c].r);
+//                   ei+=i->second*(-v[r].r*u[c].i+v[r].i*u[c].r);
+                    }
+                            }    
+    }
+  }  
+complexdouble ret; ret.r=e+ed;ret.i=ei;
+return ret;
+}
+
+
+
+
+
+template <class T> void sMat<T>::addto(complexdouble *H,bool imag)      // if imag=false add matrix to real part of fortran 2d arry H
+                                             // if imag=true  add matrix to imaginary part of fortran 2d arry H
+{typename std::map<_ind,T>::iterator i;
+  if(imag==false){
+    for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r; // row r
+    int c=i->first.c; // column c
+    H[_r*c+r].r +=i->second ;
+   }
+               }else{
+    for (i=_ls.begin(); i!=_ls.end(); i++)
+   {int r=i->first.r; // row r
+    int c=i->first.c; // column c
+    H[_r*c+r].i +=i->second ;
+   }
+               }
 }
 
 

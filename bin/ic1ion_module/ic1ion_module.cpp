@@ -28,7 +28,7 @@ ic1ion_module::ic1ion_module(const char * filename)
 {pars=icpars();
  ic_parseinput(filename,pars);
  mfmat=icmfmat(pars.n,pars.l,6,pars.save_matrices,pars.density);
-
+ Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM;
 }
 
 ic1ion_module::ic1ion_module(const ic1ion_module & pp)
@@ -113,7 +113,7 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   Matrix J(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi(),1,T.Hi()); 
+    Matrix J(1,gjmbH.Hi(),1,T.Hi()); // matrix for output to be written to Jret
    for(int Ti=1;Ti<=T.Hi();++Ti)for(int i=1;i<=J.Rhi();++i)J(i,Ti)=0;
    // --------------------------------------------------------------------
 
@@ -136,26 +136,29 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
       for(int i=J.Rlo(); i<=J.Rhi(); i++) vgjmbH[i-J.Rlo()] = -gjmbH[i];  // Vector of exchange + external fields to be added to matrix below
 
    // Calculates the IC Hamiltonian matrix
-   int i,k,q,Hsz=getdim(pars.n,pars.l);
-   complexdouble *H=0,*Jm=0;
-   bool Hicnotcalc = false;
-   std::vector<double> parval; parval.reserve(35);
+   //int k,q,
+   int i,Hsz=getdim(pars.n,pars.l);
+  // complexdouble *H=0,
+   complexdouble *Jm=0;
+   //bool Hicnotcalc = false;
+  /* std::vector<double> parval; parval.reserve(35); // parval is a vector of single ion parameters FK Bkq ...
    if(pars.n==1) { parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    else {
       for(i=0; i<4; i++) {parval.push_back(pars.F[i]);} parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
       for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    if(parval.size()%2==1) parval.push_back(0.);
-
-   if((Pst.Cols()!=(Hsz+1) || Pst.Rows()!=(Hsz+1)) && pars.truncate_level==1) Hicnotcalc = true;
-   else if(real(Pst[0][0])==-0.1 && imag(Pst[0][0])==-0.1)  // Hic previously calculated
+   */
+   //if((Pst.Cols()!=(Hsz+1) || Pst.Rows()!=(Hsz+1)) && pars.truncate_level==1) Hicnotcalc = true;
+   //else
+   /*if(real(Pst[0][0])==-0.1 && imag(Pst[0][0])==-0.1)  // Hic previously calculated
    {
       for(i=0; i<(int)(parval.size()/2); i++) if(real(Pst[0][i+1])!=parval[2*i] || imag(Pst[0][i+1])!=parval[2*i+1]) { Hicnotcalc = true; break; }
    }
    else Hicnotcalc = true;
-   if(Hicnotcalc)
+   */ 
+ // calculate Hamiltonian
+  /* if(Hicnotcalc)
    {
-      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM; H = zmat2f(Hic,iHic);
-//    Pst = ComplexMatrix(0,Hsz,0,Hsz); I comment this out - you should not reinitialize Pst !!!
       if( (Pst.Rhi()!=Hsz||Pst.Chi()!=Hsz) && pars.truncate_level==1)
       {
          std::cerr << "ERROR module ic1ion - Icalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
@@ -164,24 +167,26 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
       {
          Pst[0][0] = complex<double> (-0.1,-0.1);
          for(i=0; i<(int)(parval.size()/2); i++) Pst[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
-      }
-      if(pars.truncate_level!=1)  // Truncates the matrix, and stores the single ion part in Pst
-         truncate_hmltn(pars, Pst, Hic, iHic, J.Rhi(), J.Rlo());
-      else
-         for(i=1; i<=Hsz; i++) memcpy(&Pst[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
-      free(H);
-   }
+      } */
+ /*     // else
+      //{   H = zmat2f(Hic,iHic);for(i=1; i<=Hsz; i++) memcpy(&Pst[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
+      //free(H);} 
+   } */
    if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-      truncate_expJ(pars,Pst,gjmbH,J,T,lnZ,U);
+     {// check if truncate is to be used and if Hamiltonian was already calculated (Pst(0,0)=(-0.1,-0.1)
+     if(real(Pst[0][0])!=-0.1 || imag(Pst[0][0])!=-0.1)   // Truncates the matrix, and stores the single ion part in Pst
+     {    truncate_hmltn(pars, Pst, Hic, iHic, J.Rhi(), J.Rlo());Pst[0][0] = complex<double> (-0.1,-0.1);}
+    truncate_expJ(pars,Pst,gjmbH,J,T,lnZ,U);
+     }
    else
    {  // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-      //icmfmat mfmat(pars.n,pars.l,J.Rhi()-J.Rlo()+1,pars.save_matrices,pars.density);
       #ifdef JIJCONV
       if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
       #endif
       sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH); // add J.H to matrix
-      complex<double> a(1.,0.); int incx = 1;
-      Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&Pst[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
+    //  complex<double> a(1.,0.); int incx = 1; 
+    //  Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&Pst[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
+      Jm = zmat2f(Jmat,iJmat);  Hic.addto(Jm,false);if(!iHic.isempty())iHic.addto(Jm,true);
 
       // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
       iceig VE; if(pars.partial) VE.lcalc(pars,Jm);
@@ -607,9 +612,9 @@ bool ic1ion_module::Icalc_parameter_storage_matrix_init(
    int Hsz = getdim(pars.n,pars.l); 
    if(pars.truncate_level==1)
    {
-      Pst = ComplexMatrix(0,Hsz,0,Hsz);
+     Pst = ComplexMatrix(0,Hsz,0,Hsz);
   // Stores the number of electrons and the orbital number in element (0,0)
-      Pst(0,0) = complex<double> (pars.n, pars.l);
+     Pst(0,0) = complex<double> (pars.n, pars.l);
     }
    else
    {
@@ -650,7 +655,7 @@ bool ic1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (ro
 
    
    // Calculates the IC Hamiltonian matrix
-   sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); int Hsz = Hic.nr();
+    int Hsz = Hic.nr();
  
    // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
    //int num_op = gjmbH.Hi()-gjmbH.Lo()+1; icmfmat mfmat(pars.n,pars.l,(num_op>6?num_op:6),pars.save_matrices);
@@ -665,8 +670,8 @@ bool ic1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (ro
    sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH); 
 
    // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
-   Hic/=MEV2CM; Hic+=Jmat; if(!iHic.isempty()) iHic/=MEV2CM; if(!iJmat.isempty()) iHic+=iJmat; 
-   iceig VE; if(iHic.isempty()) VE.calc(Hic); else VE.calc(Hic,iHic);
+    Jmat+=Hic; if(!iHic.isempty()) iJmat+=iHic; 
+   iceig VE; if(iJmat.isempty()) VE.calc(Jmat); else VE.calc(Jmat,iJmat);
 
    // Initialises the output matrix
    est = ComplexMatrix(0,Hsz,0,Hsz);
@@ -940,7 +945,7 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
    for(iJ=1;iJ<=6;++iJ)
       if(fabs(zij[iJ].i+zji[iJ].i)>SMALL) { std::cerr << "ERROR module ic1ion - dmq1: <i|Qalpha|j>not hermitian\n"; exit(EXIT_FAILURE); }
                 
-   complex<double> im(0,1);
+   //complex<double> im(0,1);
    ComplexVector iQalphaj(1,6);
    
    for(a=1; a<=6; a++){iQalphaj(a) = complex<double> (zij[a].r,zij[a].i);if(a%2==1){iQalphaj(a)*=0.5;}} 
@@ -1008,27 +1013,25 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
 {  
    
    // Calculates the IC Hamiltonian matrix
-   int i,k,q,Hsz=getdim(pars.n,pars.l);
-   complexdouble *H=0,*Jm=0; 
-   bool Hicnotcalc = false;
-   std::vector<double> parval; parval.reserve(35);
+   int i,Hsz=getdim(pars.n,pars.l);
+   complexdouble *Jm=0; 
+   //bool Hicnotcalc = false;
+   /*std::vector<double> parval; parval.reserve(35);
    if(pars.n==1) { parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    else {
       for(i=0; i<4; i++) {parval.push_back(pars.F[i]);} parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
       for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
    if(parval.size()%2==1) parval.push_back(0.);
+  */
 
-   if((Pst.Cols()!=(Hsz+1) || Pst.Rows()!=(Hsz+1)) && pars.truncate_level==1) Hicnotcalc = true;
+  /* if((Pst.Cols()!=(Hsz+1) || Pst.Rows()!=(Hsz+1)) && pars.truncate_level==1) Hicnotcalc = true;
    else if(real(Pst[0][0])==-0.1 && imag(Pst[0][0])==-0.1)  // Hic previously calculated
    {
       for(i=0; i<(int)(parval.size()/2); i++) if(real(Pst[0][i+1])!=parval[2*i] && imag(Pst[0][i+1])!=parval[2*i+1]) { Hicnotcalc = true; break; }
    }
    else Hicnotcalc = true;
    if(Hicnotcalc)
-   {
-      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM; H = zmat2f(Hic,iHic);
-//    Pst = ComplexMatrix(0,Hsz,0,Hsz); I comment this out - you should not reinitialize Pst !!!
-      if( (Pst.Rhi()!=Hsz||Pst.Chi()!=Hsz) && pars.truncate_level==1)
+   { if( (Pst.Rhi()!=Hsz||Pst.Chi()!=Hsz) && pars.truncate_level==1)
       {
          std::cerr << "ERROR module ic1ion - Icalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
       }
@@ -1037,23 +1040,20 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
          Pst[0][0] = complex<double> (-0.1,-0.1);
          for(i=0; i<(int)(parval.size()/2); i++) Pst[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
       }
-      if(pars.truncate_level!=1)  // Truncates the matrix, and stores the single ion part in a memorymapped array (Linux only)
-         truncate_hmltn(pars, Pst, Hic, iHic, J.Hi(), J.Lo());
-      else
-         for(i=1; i<=Hsz; i++) memcpy(&Pst[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));
-      free(H);
-   }
-   if(pars.truncate_level!=1)  // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
+*/
+    if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
+     {// check if truncate is to be used and if Hamiltonian was already calculated (Pst(0,0)=(-0.1,-0.1)
+     if(real(Pst[0][0])!=-0.1 || imag(Pst[0][0])!=-0.1)   // Truncates the matrix, and stores the single ion part in Pst
+     {    truncate_hmltn(pars, Pst, Hic, iHic, J.Hi(), J.Lo());Pst[0][0] = complex<double> (-0.1,-0.1);}
       truncate_spindensity_expJ(pars,Pst,gjmbH,J,T,xyz);
+     }	
    else
    {
       // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-      //icmfmat mfmat(pars.n,pars.l,51,pars.save_matrices,pars.density);
       std::vector<double> vgjmbH(51,0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
       sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH);
-      complex<double> a(1.,0.); int incx = 1;
-      Jm = zmat2f(Jmat,iJmat); for(i=1; i<=Hsz; i++) F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,(complexdouble*)&Pst[i][1],&incx,&Jm[(i-1)*Hsz],&incx);
-
+      //complex<double> a(1.,0.); int incx = 1;
+      Jm = zmat2f(Jmat,iJmat); Hic.addto(Jm,false);if(!iHic.isempty())iHic.addto(Jm,true);
       // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
       iceig VE; if(pars.partial) VE.lcalc(pars,Jm); 
       #ifndef NO_ARPACK
@@ -1392,12 +1392,12 @@ bool ic1ion_module::opmat(int &ni,                      // ni     which operator
       #endif
       sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,gjmbH); 
 
-      sMat<double> Hic,iHic; Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; Hic+=Jmat; if(!iHic.isempty()) iHic/=MEV2CM; if(!iJmat.isempty()) iHic+=iJmat; 
+       Jmat+=Hic; if(!iHic.isempty()) iJmat+=iHic; 
 
       if(pars.truncate_level!=1)  {       // Truncates the matrix, and packs it into real upper / imag lower triangle format
-         truncate_hmltn_packed(pars, Hic, iHic, outmat, sipffile); return true; }
+         truncate_hmltn_packed(pars, Jmat, iJmat, outmat, sipffile); return true; }
       else {
-         zmat2pack(Hic,iHic,outmat); return true; }
+         zmat2pack(Jmat,iJmat,outmat); return true; }
    }
    else
    {  

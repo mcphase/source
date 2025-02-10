@@ -1,4 +1,4 @@
-#define MCPHASVERSION "mcphas version 5.7"
-#define MCDISPVERSION "mcdisp version 5.7"
-#define MCDIFFVERSION "mcdiff version 5.7"
-#define IC1IONMODULE_VERSION  5.7 
+#define MCPHASVERSION "mcphas 5.7 experimental code - do not use!"
+#define MCDISPVERSION "mcdisp 5.7 experimental code - do not use!"
+#define MCDIFFVERSION "mcdiff 5.7 experimental code - do not use!"
+#define IC1IONMODULE_VERSION  "5.7 experimental code - do not use!"

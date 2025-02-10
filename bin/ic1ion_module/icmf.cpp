@@ -555,7 +555,7 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
 // u.zero(sz); iu.zero(sz);
    int iJ, Hsz=VE.Hsz(), incx=1; 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::u1() - Hamiltonian matrix size not same as mean field operator!\n"; return; }
-   sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
+   /*sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
    double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    complexdouble *zJmat=0;
    char uplo = 'U';
@@ -575,13 +575,18 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
    // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
    int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-   int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
-                 
-   sMat<double> Upq,Umq; double redmat; int n = _n; if(n>(2*_l+1)) n = 4*_l+2-n; 
+*/   
+
+  //int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+      
+   //sMat<double> Upq,Umq; double redmat; int n = _n; if(n>(2*_l+1)) n = 4*_l+2-n; 
 
    // Calculates the matrix elements: <i|Ja|j> and <j|Ja|i> for each of the six Ja's
    for(iJ=0; iJ<sz; iJ++)
    {
+
+
+/*
 //    if(k[iJ]%2==1) { if(VE.iscomplex()) { zij[iJ].r=0.; zij[iJ].i=0.; } else mij[iJ]=0.; continue; }
       if(iJ>=6)
       {
@@ -597,10 +602,15 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
          if(q[iJ]<0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
          Umq *= redmat;
       }
+*/    
 
-      if(!VE.iscomplex() && im[iJ]==0)
-      {
-         vt = (double*)malloc(Hsz*sizeof(double)); 
+
+
+      if(J[iJ].isempty())Jop_generate(iJ); 
+     
+      if(!VE.iscomplex() && iflag[iJ]==0)
+      { zij[iJ].r=J[iJ].MultuxMv(VE.V(i),VE.V(j));
+       /*  vt = (double*)malloc(Hsz*sizeof(double)); 
          double *fJmat; if(iJ>=6) fJmat=Upq.f_array(); else fJmat=J[iJ].f_array();
          F77NAME(dsymv)(&uplo, &Hsz, &alpha, fJmat, &Hsz, VE.V(j), &incx, &beta, vt, &incx);
          #ifdef _G77 
@@ -609,14 +619,16 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
          mij[iJ] = F77NAME(ddot)(&Hsz, VE.V(i), &incx, vt, &incx); zij[iJ].r = mij[iJ];
          #endif
          free(fJmat); free(vt);
+       */
       } 
       else
-      {
-         zeroes.zero(J[0].nr(),J[0].nc());
+      {zij[iJ]=J[iJ].MultuxMv(VE.zV(i),VE.zV(j),iflag[iJ]);
+       /*  zeroes.zero(J[0].nr(),J[0].nc());
          if(iJ>=6) { if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes);   else zJmat = zmat2f(zeroes,Umq); }
          else      { if(im[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]); }
          
          zij[iJ]=transition_matrixelement(Hsz,zJmat,VE.zV(i),VE.zV(j));
+         */
         /*
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(j), &incx, &zbeta, zt, &incx);
@@ -628,7 +640,7 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
 //       int k;for(k=0;k<Hsz;++k)printf("%6.3f %+6.3f i  ",VE.zV(j)[k].r,VE.zV(j)[k].i);
          free(zt);
          */
-         free(zJmat); 
+         //free(zJmat); 
       }
    }
 

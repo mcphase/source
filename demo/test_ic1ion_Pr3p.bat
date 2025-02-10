@@ -44,7 +44,7 @@ getvalue.pl -c 40.78  2 27 2 0 m.clc
 getvalue.pl -c 56.154 2 28 2 0 m.clc
 
 getvalue.pl -c 35.337       0 6 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c 3.37204      0 7 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 3.372      0 7 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c   0.0910267  0 8 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c  0           0 9 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 2            0 10 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
@@ -54,9 +54,24 @@ getvalue.pl -c  0.00792222  0 13 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c   1.14772    0 14 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c   1.49202    0 15 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c  0.573855    0 16 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c 0.0275589    0 17 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c 0.0524248    0 18 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c  0.02728    0 17 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0525    0 18 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0.0341042    0 19 4 0 results/Ce3p_xyz_ic1ion.sipf.trs
+
+getvalue.pl -c 0.0       0 6 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 7 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 8 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 9 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 10 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 11 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 12 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 13 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 14 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 15 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 16 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 17 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 18 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0       0 19 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
 
 
 
@@ -187,7 +202,7 @@ getvalue.pl -c  95.7337   2 28 2 0  m.clc
 
   
 getvalue.pl -c 80.0232        0 6 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c   6.6393       0 7 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c   6.63754       0 7 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c     0.137944   0 8 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c    0           0 9 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c    2           0 10 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
@@ -197,8 +212,8 @@ getvalue.pl -c   0.0323135    0 13 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c    2.30302     0 14 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c    2.99391     0 15 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c    1.15151     0 16 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c   0.00270587   0 17 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c    0.00475756  0 18 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c   0.001951   0 17 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c   0.003758  0 18 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c   0.0024391    0 19 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 
 
@@ -235,21 +250,6 @@ getvariable.pl -c 0.00205 "a(6,6)" m.clc
 
 
    
-getvalue.pl -c   86.9645    0 6 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   6.64096    0 7 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c    0.140107  0 8 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0          0 9 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   2          0 10 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0.0628451  0 11 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0.081698   0 12 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0.0314225  0 13 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c    2.30548   0 14 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   2.99711    0 15 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   1.15274    0 16 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0.00231595 0 17 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0.00446039 0 18 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c  0.00289497  0 19 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-
 
 singleion -r Nd3p_xyz_icf1ion.sipf 2 20 10 30   0 0 0 0 0 0   0 0 0 > m.clc
 
@@ -267,6 +267,23 @@ getvalue.pl -c   13.576  2 25 2 0  m.clc
 getvalue.pl -c   86.965  2 26 2 0  m.clc
 getvalue.pl -c   97.606  2 27 2 0  m.clc
 getvalue.pl -c   111.2  2 28 2 0  m.clc
+
+getvalue.pl -c   86.9645    0 6 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   6.64096    0 7 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c    0.140107  0 8 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0          0 9 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   2          0 10 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.0628451  0 11 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.081698   0 12 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.0314225  0 13 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c    2.30548   0 14 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   2.99711    0 15 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   1.15274    0 16 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.00231595 0 17 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.00446039 0 18 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c  0.00289497  0 19 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+
+
 
 densplt c Nd3p_xyz_ic1ion.sipf 2 20 10 30 > m.clc
 
