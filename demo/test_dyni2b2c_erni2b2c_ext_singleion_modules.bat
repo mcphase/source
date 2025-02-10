@@ -3,7 +3,7 @@ cd ../examples/dyni2b2c
 copy mcphas.ini test_mcphas.ini
 setvariable xmax 4  test_mcphas.ini
 mcphasit -prefix test_
-getvalue.pl -c -0.504516 2 8 0 0 results/test_mcphas.fum
+getvalue.pl -c -0.8435 2 8 2 0 results/test_mcphas.fum
 
 cd ../erni2b2c
 

@@ -29,6 +29,7 @@ ic1ion_module::ic1ion_module(const char * filename)
  ic_parseinput(filename,pars);
  mfmat=icmfmat(pars.n,pars.l,6,pars.save_matrices,pars.density);
  Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM;
+
 }
 
 ic1ion_module::ic1ion_module(const ic1ion_module & pp)
@@ -199,12 +200,16 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
 // get expJ to highest T and matrix elements of eigenstates matel 
 // (for number of low energy states necessary for calculation at Ti=T.Hi() )
 int Ti=T.Hi();
+
       std::vector<double> vJ =  mfmat.expJ(VE,T(Ti),matel,Jret.Rhi());
+printf("hello Jret.Rhi=%i\n",Jret.Rhi());
+
 for(i=Jret.Rlo(); i<=Jret.Rhi(); i++) {Jret(i,T.Hi()) = vJ[i-Jret.Rlo()];//printf("%g ",Jret(i,Ti));
                                          } 
  //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
 //                                        to Sa Sb Sc La Lb Lc
  dum=Jret(2,Ti);Jret(2,Ti)=Jret(3,Ti);Jret(3,Ti)=Jret(5,Ti);Jret(5,Ti)=Jret(4,Ti);Jret(4,Ti)=dum;
+printf("hello2\n");
  U(T.Hi())=vJ[Jret.Rhi()-Jret.Rlo()+1];
  lnZ(T.Hi())=vJ[Jret.Rhi()-Jret.Rlo()+2];
 

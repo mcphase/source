@@ -101,7 +101,7 @@ template <class T> class sMat {
                                                      // uses only the row < column  ... upper triangle of M
 
 
-     void  addto(complexdouble *H,bool imag);       // if imag=false add matrix to real part of fortran 2d arry H
+     void  addto(complexdouble *H,bool imag,double factor=1.0);       // if imag=false add matrix to real part of fortran 2d arry H
                                                     // if imag=true  add matrix to imaginary part of fortran 2d arry H
      // Overloaded operators
      sMat<T> operator =  (const sMat & m);                              // Copy assignment - overwrites previous matrix
@@ -719,20 +719,20 @@ return ret;
 
 
 
-template <class T> void sMat<T>::addto(complexdouble *H,bool imag)      // if imag=false add matrix to real part of fortran 2d arry H
+template <class T> void sMat<T>::addto(complexdouble *H,bool imag,double factor)      // if imag=false add matrix to real part of fortran 2d arry H
                                              // if imag=true  add matrix to imaginary part of fortran 2d arry H
 {typename std::map<_ind,T>::iterator i;
   if(imag==false){
     for (i=_ls.begin(); i!=_ls.end(); i++)
    {int r=i->first.r; // row r
     int c=i->first.c; // column c
-    H[_r*c+r].r +=i->second ;
+    H[_r*c+r].r +=factor*i->second ;
    }
                }else{
     for (i=_ls.begin(); i!=_ls.end(); i++)
    {int r=i->first.r; // row r
     int c=i->first.c; // column c
-    H[_r*c+r].i +=i->second ;
+    H[_r*c+r].i +=factor*i->second ;
    }
                }
 }

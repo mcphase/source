@@ -32,31 +32,22 @@ delete ptr;
   int k[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
   int q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
   bool im[]= {0,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
- 
+
+
 icf1ion_module::icf1ion_module(const char * filename)
-{
-  
- for(int i=0;i<=IOP_DIM;++i)zst[i]=NULL;
- for(int i=0;i<=IOP_DIM;++i)st[i]=NULL;
+{for(int i=0;i<=IOP_DIM;++i)st[i]=NULL;
  pars=icpars();
  ic_parseinput(filename,pars);
  Hcf = icf_hmltn(Hcfi, pars); Hcf/=MEV2CM; Hcfi/=MEV2CM; 
- 
 }
 
 icf1ion_module::icf1ion_module(const icf1ion_module & pp)
-{for(int i=0;i<=IOP_DIM;++i)zst[i]=pp.zst[i];
- for(int i=0;i<=IOP_DIM;++i)st[i]=pp.st[i];
+{for(int i=0;i<=IOP_DIM;++i)st[i]=pp.st[i];
  pars=pp.pars;
 }
 icf1ion_module::~icf1ion_module()
-{
-
- for(int i=0;i<=IOP_DIM;++i)if(zst[i]!=NULL)delete zst[i];
-for(int i=0;i<=IOP_DIM;++i)if(st[i]!=NULL)delete st[i];
-
+{ for(int i=0;i<=IOP_DIM;++i)if(st[i]!=NULL)delete st[i];
 }
-
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Looks up the Hund's Rule ground state to determine L and S for a particular configuration p^n, d^n, f^n
@@ -393,7 +384,7 @@ void icf1ion_module::op_generate(int iJ)
 {   st[iJ]=new sMat<double>;
             if(iJ<=6) (*st[iJ]) = icf_mumat(pars.n, iJ-1, pars.l);     // Calculates Sx,Lx etc
             else      (*st[iJ]) = icf_ukq(pars.n,k[iJ],q[iJ],pars.l);  // Calculates multipolar operator matrices 
-    if(im[iJ]==true)    (*st[iJ])*=-1.0;   // in comparison with ic1ion module: imaginary operators sign
+   // if(im[iJ]==true)    (*st[iJ])*=-1.0;   // in comparison with ic1ion module: imaginary operators sign
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -423,11 +414,9 @@ void icf1ion_module::icf_expJ(  complexdouble *zV, double *vE, Vector & T, Matri
    }
 
    // For first run calculate also the partition function and internal energy
-
    me.assign(Esz,0.);  // complexdouble *zt=0;
    sMat<double> Jm;
 
-      //clock_t start,end,dexpectation_value=0,dMultvxMv=0;
    Vector Z(T.Lo(),T.Hi()); Z=0.;U=0;Matrix eb(0,Esz-1,T.Lo(),T.Hi());
      
    for(int iJ=J.Rlo(); iJ<=J.Rhi(); iJ++)
@@ -436,46 +425,14 @@ void icf1ion_module::icf_expJ(  complexdouble *zV, double *vE, Vector & T, Matri
       if(iJ>6 && (k[iJ]%2==1 || k[iJ]>2*pars.l)) {  continue; }
         if(st[iJ]==NULL)op_generate(iJ);
  
-        if(zst[iJ]==NULL) //&&1<0)  
-         { zst[iJ]=new zsMat<double>;
-            if(iJ<=6) Jm = icf_mumat(pars.n, iJ-1, pars.l);     // Calculates Sx,Lx etc
-            else      Jm = icf_ukq(pars.n,k[iJ],q[iJ],pars.l);  // Calculates multipolar operator matrices 
-            std::vector< std::vector<int> > u = Jm.find();
-            //memset(zJmat,0.,Hsz*Hsz*sizeof(complexdouble));
-            //complexdouble x;
-            if(im[iJ]==1) for (int j=0; j<(int)u.size(); j++) { // x.r=0.; x.i=Jm(u[j][0],u[j][1]); zJmat[Jm.nr()*u[j][1]+u[j][0]] = x;
-                                                               std::complex<double> xx(0,Jm(u[j][0],u[j][1])); (*zst[iJ])(u[j][1]+1,u[j][0]+1)=xx;}
-            else          for (int j=0; j<(int)u.size(); j++) { //x.r=Jm(u[j][0],u[j][1]); x.i=0.; zJmat[Jm.nr()*u[j][1]+u[j][0]] = x;
-                                                               std::complex<double> xx(Jm(u[j][0],u[j][1]),0);(*zst[iJ])(u[j][1]+1,u[j][0]+1)=xx;}
-
-         }
-       
          for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
             // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
 //start = clock(); 
-            double meold= (*zst[iJ]).MultvxMv(&zV[ind_j*Hsz]);
             me[ind_j]= (*st[iJ]).MultvxMv(&zV[ind_j*Hsz],im[iJ]);
-           
-if(fabs(meold-me[ind_j])>DBL_EPSILON*1000){fprintf(stderr,"Error <%i|I%i|%i>=%g meold=%g\n",ind_j,iJ+1,ind_j,me[ind_j],meold);exit(EXIT_FAILURE);}
-         
 //end = clock(); dMultvxMv+=end-start;
 // start = clock(); 
-//            double men = expectation_value(Hsz,zJmat,&zV[ind_j*Hsz]); // defined in martin.c
-// end = clock(); dexpectation_value+=end-start;
-//            if(fabs(men-me[ind_j])>SMALL){            printf("%g = %g %i %i \n",me[ind_j],men,ind_j,iJ);            }
-            /*  char uplo = 'U';int incx=1;   
-              complexdouble zme;          zme.r=0;zme.i=0;            
-            F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
-            #ifdef _G77 
-            F77NAME(zdotc)(&zme, &Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-            #else
-            zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-            #endif 
-            me[ind_j] = zme.r;
-            */ // zhemv and zme seems to be problematic in multithreading
-     //       printf("=%g ",me[ind_j]);//DEBUG 
-          } 
+         } 
 
        for(int Ti=T.Lo();Ti<=T.Hi();++Ti)
       {  J(iJ,Ti)=0.;   
@@ -536,14 +493,12 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
                       Vector &lnZ,        // Output scalar logarithm of partition function
                       Vector &U,          // Output scalar internal energy 
                       ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
-{
-   // sum exchange field and external field
+{  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   //Vector J(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); J=0;
    // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
@@ -564,68 +519,15 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
       for(int i=gjmbH.Lo(); i<=gjmbH.Hi(); i++) vgjmbH[i] = -gjmbH[i];  // Vector of Exchange + External field to be added to matrix in lines 628, 637
 
    // Calculates the IC Hamiltonian matrix
-   int i,Hsz=icf_getdim(pars);
-   int incx=1;
-   complexdouble *H=0, *zM=0;
-   /*std::vector<double> parval; parval.reserve(35);
-   parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q));
-   if(parval.size()%2==1) parval.push_back(0.);
-   */
-
-   if(zst[0]==NULL)
-   {
-      H = zmat2f(Hcf,Hcfi);
-      // Copies Hcf to Pst and zst
-     // for(i=1; i<=Hsz; i++) {memcpy(&Pst[i][1],&H[(i-1)*Hsz],Hsz*sizeof(complexdouble));} 
-      zst[0]=new zsMat<double>;
-      (*zst[0]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
-       {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[0])(i+1,j+1)=xx;}
-      free(H);
-      sMat<double> Jm,Jmi;
-      Jmi.zero(Hsz,Hsz);
-      for(int ind=gjmbH.Lo(); ind<=gjmbH.Hi(); ind++)
-      { if(zst[ind]==NULL){ if(ind<=6)         // Calculates Sx,Lx etc and copies them to Pst and zst too. 
-         {
-            Jm = icf_mumat(pars.n, ind-1, pars.l);
-            if(ind==3 || ind==4) H = zmat2f(Jmi,Jm); else H = zmat2f(Jm,Jmi); 
-            if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
-           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
-           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
-          free(H);
-         }
-         else               // Calculates multipolar operator matrices and copies them to Pst and zst. 
-         {
-            Jm = icf_ukq(pars.n,k[ind],q[ind],pars.l);
-            if(im[ind]==1) H = zmat2f(Jmi,Jm); else H = zmat2f(Jm,Jmi);
-           if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
-           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
-           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
-          free(H);
-         }
-      } }
-   }
-   // Calculates the mean field matrix from stored matrices
-    H=(complexdouble*)(*zst[0]).f_array(); // fill H with Hcf
-
-   // now subtract the Zeeman term from Hcf
-   for(int ind=gjmbH.Lo(); ind<=gjmbH.Hi(); ind++)
-   {
-      complex<double> a(vgjmbH[ind],0.);
-      if(zst[ind]==NULL) // not yet calculated zst
-      {zst[ind]=new zsMat<double>;
-         sMat<double> Jm, Jmi(Hsz,Hsz);
-         if(ind<=6) {       // Calculates Sx,Lx 
-            Jm = icf_mumat(pars.n, ind-1, pars.l); if(ind==3 || ind==4) zM = zmat2f(Jmi,Jm); else zM = zmat2f(Jm,Jmi); }
-         else       {       // Calculates multipolar operator matrices 
-            Jm = icf_ukq(pars.n,k[ind],q[ind],pars.l); if(im[ind]==1)   zM = zmat2f(Jmi,Jm); else zM = zmat2f(Jm,Jmi); }
-       (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(zM[i*Hsz+j].r!=0.0||zM[i*Hsz+j].i!=0.0)
-         {std::complex<double> xx(zM[i*Hsz+j].r,zM[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
-         for(i=1; i<=Hsz; i++) {F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,&zM[(i-1)*Hsz],&incx,&H[(i-1)*Hsz],&incx);} free(zM);
-      }
-    (*zst[ind]).addto((complex<double>*)H,vgjmbH[ind]);
+   int Hsz=icf_getdim(pars);
+   complexdouble *H=0;
   
+   // Calculates the mean field matrix from stored matrices
+ H=zmat2f(Hcf,Hcfi);
+   for(int ind=gjmbH.Lo(); ind<=gjmbH.Hi(); ind++)
+   {if(st[ind]==NULL)op_generate(ind);
+    (*st[ind]).addto(H,im[ind],vgjmbH[ind]);
    }
-
    // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
    double *vE = new double[Hsz]; complexdouble *zV = new complexdouble[Hsz*Hsz];
    int info = ic_diag(Hsz,H,zV,vE); 
@@ -936,7 +838,7 @@ int icf1ion_module::du1calc(int &tn,            // Input transition number; if t
 
    int sz = gjmbH.Hi();
    sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op;
-   complexdouble *zJmat=0, zme; zme.r=0; zme.i=0.; 
+   complexdouble  zme; zme.r=0; zme.i=0.; 
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
    std::vector<double> u(sz+1),iu(sz+1);
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
@@ -963,29 +865,7 @@ int icf1ion_module::du1calc(int &tn,            // Input transition number; if t
       //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
       for(iJ=1; iJ<=sz; iJ++)
       { if(st[iJ]==NULL)op_generate(iJ);
-        if(zst[iJ]==NULL)
-         {if(iJ<=6) op = icf_mumat(pars.n, iJ-1, pars.l); else op = icf_ukq(pars.n,k[iJ],q[iJ],pars.l); 
-         if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes);
-        
-          zst[iJ]=new zsMat<double>;
-         (*zst[iJ]).clear();for(int ii=0;ii<Hsz;ii++)for(int jj=0;jj<Hsz;jj++)if(zJmat[ii*Hsz+jj].r!=0.0||zJmat[ii*Hsz+jj].i!=0.0)
-         {std::complex<double> xx(zJmat[ii*Hsz+jj].r,zJmat[ii*Hsz+jj].i);(*zst[iJ])(ii+1,jj+1)=xx;}
-      
-//        calculates transition matrix element <S1|OP|S2> of hermitian 
-// operator OP given
-// two complex vector S1 and S2  OP and S1,S2 are given as pointers 
-//  zij[iJ]=transition_matrixelement(Hsz,zJmat,(complexdouble*)&est[i+1][1],(complexdouble*)&est[j+1][1]);
-       
-        free(zJmat); 
-        }
-     
-       complexdouble zijold=(*zst[iJ]).MultuxMv((complexdouble*)&est[i+1][1],(complexdouble*)&est[j+1][1]);
-    
        zij[iJ-1]=(*st[iJ]).MultuxMv((complexdouble*)&est[i+1][1],(complexdouble*)&est[j+1][1],im[iJ]);
-        
-if(fabs(zijold.r-zij[iJ-1].r)>DBL_EPSILON*1000){fprintf(stderr,"Error <%i|I%i|%i>=%g+i%g old=%g+i%g\n",i,iJ,j,zij[iJ-1].r,zij[iJ-1].i,zijold.r,zijold.i);exit(EXIT_FAILURE);}
-if(fabs(zijold.i-zij[iJ-1].i)>DBL_EPSILON*1000){fprintf(stderr,"Error <%i|I%i|%i>=%g+i%g old=%g+i%g\n",i,iJ,j,zij[iJ-1].r,zij[iJ-1].i,zijold.r,zijold.i);exit(EXIT_FAILURE);}
-
       }
 
       if(i==j && T>0) // subtract thermal expectation value from zij=zii
@@ -1927,16 +1807,6 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
            // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
             me[ind_j] = expectation_value(Hsz,zJmat,&zV[ind_j*Hsz]); // defined in martin.c
             
-            //  zme.r=0;zme.i=0;   
-            /* F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, &zV[ind_j*Hsz], &incx, &zbeta, zt, &incx);
-            #ifdef _G77 
-            F77NAME(zdotc)(&zme, &Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-            #else
-            zme = F77NAME(zdotc)(&Hsz, &zV[ind_j*Hsz], &incx, zt, &incx);
-            #endif */ 
-            //me[ind_j] = zme.r; // zhemv and zme seems to be problematic in multithreading
-            //printf("=%g ",zme.r);//DEBUG
- 
             // For first run calculate also the partition function and internal energy
          if(iJ==J.Lo())
          {
@@ -1990,62 +1860,15 @@ void icf1ion_module::sdod_Icalc(Vector &J,           // Output single ion moment
 
    // Calculates the IC Hamiltonian matrix
    int Hsz=icf_getdim(pars);
-   complexdouble *H=0, *zM=0;
-   /*std::vector<double> parval; parval.reserve(35);
-   parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q));
-   if(parval.size()%2==1) parval.push_back(0.);
-   */
-   if(zst[0]==NULL)
-   {
-       H = zmat2f(Hcf,Hcfi);
-      zst[0]=new zsMat<double>;
-      (*zst[0]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
-       {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[0])(i+1,j+1)=xx;}
-      free(H);
-      sMat<double> Jm,Jmi;
-      Jmi.zero(Hsz,Hsz);
-      for(int ind=gjmbH.Lo(); ind<=gjmbH.Hi(); ind++)
-      { if(zst[ind]==NULL){ if(ind<=6)         // Calculates Sx,Lx etc and copies them to zst too. 
-         {
-            Jm = icf_mumat(pars.n, ind-1, pars.l);
-            if(ind==3 || ind==4) H = zmat2f(Jmi,Jm); else H = zmat2f(Jm,Jmi); 
-            if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
-           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
-           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
-          free(H);
-         }
-         else               // Calculates multipolar operator matrices and copies them to  zst. 
-         {
-            Jm = icf_ukq(pars.n,k[ind],q[ind],pars.l);
-            if(im[ind]==1) H = zmat2f(Jmi,Jm); else H = zmat2f(Jm,Jmi);
-           if(zst[ind]==NULL){zst[ind]=new zsMat<double>;}
-           (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(H[i*Hsz+j].r!=0.0||H[i*Hsz+j].i!=0.0)
-           {std::complex<double> xx(H[i*Hsz+j].r,H[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
-          free(H);
-         }
-      } }
-   }
+   complexdouble *H=0;
 
    // Calculates the mean field matrix from stored matrices
-    H=(complexdouble*)(*zst[0]).f_array();
 
+   H=zmat2f(Hcf,Hcfi);
    for(int ind=gjmbH.Lo(); ind<=gjmbH.Hi(); ind++)
-   {
-      complex<double> a(vgjmbH[ind],0.);
-      if(zst[ind]==NULL) // not yet calculated zst
-       {zst[ind]=new zsMat<double>;
-         sMat<double> Jm, Jmi(Hsz,Hsz);
-         if(ind<=6) {       // Calculates Sx,Lx 
-            Jm = icf_mumat(pars.n, ind-1, pars.l); if(ind==3 || ind==4) zM = zmat2f(Jmi,Jm); else zM = zmat2f(Jm,Jmi); }
-         else       {       // Calculates multipolar operator matrices 
-            Jm = icf_ukq(pars.n,k[ind],q[ind],pars.l); if(im[ind]==1)   zM = zmat2f(Jmi,Jm); else zM = zmat2f(Jm,Jmi); }
-       (*zst[ind]).clear();for(i=0;i<Hsz;i++)for(int j=0;j<Hsz;j++)if(zM[i*Hsz+j].r!=0.0||zM[i*Hsz+j].i!=0.0)
-         {std::complex<double> xx(zM[i*Hsz+j].r,zM[i*Hsz+j].i);(*zst[ind])(i+1,j+1)=xx;}
-//         for(i=1; i<=Hsz; i++) {F77NAME(zaxpy)(&Hsz,(complexdouble*)&a,&zM[(i-1)*Hsz],&incx,&H[(i-1)*Hsz],&incx);} free(zM);
-      }
-   
+   {if(st[ind]==NULL)op_generate(ind);
+    (*st[ind]).addto(H,im[ind],vgjmbH[ind]);
    }
-
 
    // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
    double *vE = new double[Hsz]; complexdouble *zV = new complexdouble[Hsz*Hsz];
@@ -2263,13 +2086,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
             {  // Calculates the matrix elements <Vi|J.H|Vi>
                // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
                zme.r = expectation_value(Hsz,zJmat,(complexdouble*)&est[ind_j+1][1]); // defined in martin.c
-               /*F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, &zbeta, zt, &incx);
-               #ifdef _G77 
-               F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
-               #else
-               zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[ind_j+1][1], &incx, zt, &incx);
-               #endif */
-               // For first run calculate also the partition function and internal energy
+                // For first run calculate also the partition function and internal energy
                if(iJ==0)
                {
 //MR 10.9.2010
