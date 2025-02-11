@@ -493,12 +493,13 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
                       Vector &lnZ,        // Output scalar logarithm of partition function
                       Vector &U,          // Output scalar internal energy 
                       ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
-{  // sum exchange field and external field
+{ // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+   Matrix J(1,gjmbH.Hi(),T.Lo(),T.Hi());
    // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
@@ -521,7 +522,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
    // Calculates the IC Hamiltonian matrix
    int Hsz=icf_getdim(pars);
    complexdouble *H=0;
-  
+ 
    // Calculates the mean field matrix from stored matrices
  H=zmat2f(Hcf,Hcfi);
    for(int ind=gjmbH.Lo(); ind<=gjmbH.Hi(); ind++)
@@ -533,18 +534,17 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
    int info = ic_diag(Hsz,H,zV,vE); 
 // printf("E1=%g Hsz=%i\n",vE[1],Hsz); myPrintVector(stdout,Hxc);
    if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
-
-
-         icf_expJ(zV,vE,T,Jret,lnZ,U);
-
+         icf_expJ(zV,vE,T,J,lnZ,U);
     //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
 for(int Ti=1;Ti<=T.Hi();++Ti) {
-   dum=Jret(2,Ti);Jret(2,Ti)=Jret(3,Ti);Jret(3,Ti)=Jret(5,Ti);Jret(5,Ti)=Jret(4,Ti);Jret(4,Ti)=dum;
+   dum=J(2,Ti);J(2,Ti)=J(3,Ti);J(3,Ti)=J(5,Ti);J(5,Ti)=J(4,Ti);J(4,Ti)=dum;
+for(int i=Jret.Rlo();i<=Jret.Rhi();++i)Jret(i,Ti)=J(i,Ti);
                           }
-free(H);
+
+ 
          delete[]vE; delete[]zV;
-     
+    
      // --------------------------------------------------------------------
 return true;
 }

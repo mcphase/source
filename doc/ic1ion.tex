@@ -82,10 +82,13 @@ Bz=0.1
 
 # eigenvectors=X
 
-# --- some faster algorithms for matrix diagonalisation ...
+# --- some faster algorithms for matrix diagonalisation to b e used by singleion and mcphasit
+# mean field loops (there are to be done many diagonalisations and calculation of expectation values,
+# this is done in the module functions Icalc and IMcalc). Note, the following fast matrix diagonalisation
+# options have no effect on running mcdisp (module function estates).
 
 # uncomment the next line to save matrices which are often used the first time they are
-# calcultated in the directory results/mms, and then reread for subsequent instances.
+# calculated in the directory results/mms, and then reread for subsequent instances.
 
 # save_matrices
 

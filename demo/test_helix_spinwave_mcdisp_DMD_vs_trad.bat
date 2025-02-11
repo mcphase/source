@@ -21,8 +21,9 @@ range -d 7 1.22 1.23 results/mcdisp.dsigma
 getvalue.pl -c 0.7402 9 10 1.751 0 results/mcdisp.dsigma
 getvalue.pl -c 6.07  9 11 1.751 0 results/mcdisp.dsigma
 getvalue.pl -c 12.1  9 12 1.751 0 results/mcdisp.dsigma
-getvalue.pl -c -7.95 9 13 1.751 0 results/mcdisp.dsigma
-getvalue.pl -c -3.24 9 14 1.751 0 results/mcdisp.dsigma
+# chixy sign is determined by turning sense of helix, therefore we omit this check of column 13 and 14
+# getvalue.pl -c -7.95 9 13 1.751 0 results/mcdisp.dsigma
+# getvalue.pl -c -3.24 9 14 1.751 0 results/mcdisp.dsigma
 
 
 cd ../../demo

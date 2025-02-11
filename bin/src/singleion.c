@@ -40,6 +40,8 @@ void helpexit()
           "                       parameter file ion.sipf\n"
           "         -M  ......... calculate expectation values and transition matrix\n"
           "                       elements for magnetic moment M (muB)instead of I\n"
+          "         -U  ......... calculate energy U, ln of partition sum Z, free energy F\n"
+          "                       instead of I\n"
           "         -MQ 0 0 1 ...  instead of <I> calculate expectation values, transition matrix elements\n"
           "                       for M(Q=(0 0 1)/A), the Fourier Transform  of magnetic moment density M(r) \n"
           "         -L  ......... calculate expectation values and transition matrix\n"
@@ -110,6 +112,7 @@ void colheader(char observable,int observable_nofcomponents,int nofcomponents,Ve
                                    {case 'Q': printf("Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
                                               for(j=1;j<=observable_nofcomponents;++j){printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}printf("(muB)");break;
                                     case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
+                                    case 'U': printf(" lnZ  F(meV) U(meV) ");break;
                                     case 's': printf("Xpoly(emu/mol) X11 X22 X33 X23 X32 X13 X31 X12 X21(emu/mol) ");break;
                                     case 'i': printf("1/Xpoly(mol/emu) Y11 Y22 Y33 Y23 Y32 Y13 Y31 Y12 Y21(mol/emu) ");break;
                                     case 'd': printf("E(meV) Sdip(Q=0,Omega)(barn/meV) Xpolyr Xpolyi(mb^2/meV) X11r X11i X22r X22i X33r X33i X23r X23i X32r X32i X13r X13i X31r X31i X12r X12i X21r X21i(mb^2/meV) ");break;
@@ -266,7 +269,8 @@ printf("%3i %8g ",i,T(Ti)); // printout ion number and temperature
    complex<double> bose;double S;
    Matrix iX(1,3,1,3);Matrix X(1,3,1,3);
       switch(observable)
-       {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(MMq(j,Ti)),real(MMq(j,Ti)),imag(MMq(j,Ti)),I(j,Ti)*jjj.F(Norm(Q)));break;
+       {case 'U': printf("%4g %4g %4g ",lnz(Ti),-KB*T(Ti)*lnz(Ti),u(Ti));break;
+        case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(MMq(j,Ti)),real(MMq(j,Ti)),imag(MMq(j,Ti)),I(j,Ti)*jjj.F(Norm(Q)));break;
         case 'd': 
 		 bose=1.0/(1.0-exp(-z*(1.0/KB/T(Ti))));
 		   S=abs(bose/(im)*Trace((*Xcf[Ei])-(*Xcf[Ei]).Transpose().Conjugate()))*2/3/PI/8.0*3.65/4.0/PI;
@@ -442,6 +446,7 @@ printf("#***singleion.c - calculate single ion properties - M. Rotter %s*****\n"
 for (i=1;i<argc;++i)
  {if(strncmp(argv[i],"-h",2)==0) {helpexit();}
   else {if(strcmp(argv[i],"-M")==0) observable='M';       
+  else {if(strcmp(argv[i],"-U")==0) observable='U';       
   else {if(strcmp(argv[i],"-MQ")==0){observable='Q';
                                       if(i==argc-1){fprintf(stderr,"Error in command: singleion -MQ needs argument(s)\n");exit(EXIT_FAILURE);}
 	                                  Q(1)=strtod(argv[i+1],NULL);++i;
@@ -532,6 +537,7 @@ for (i=1;i<argc;++i)
     } // -d 
     } // -S 
    } // -MQ  
+   } // -U  
    } // -M  
  } // help
   if(argc<2){helpexit();}
@@ -542,7 +548,8 @@ for (i=1;i<argc;++i)
 
   int observable_nofcomponents;
   switch(observable)
-   {case 'M':
+   {case 'U':
+    case 'M':
     case 'Q':
     case 'S':
     case 'L': observable_nofcomponents=3;break;
@@ -602,141 +609,6 @@ if(verbose)fprintf(stderr,"# ... you can now use 'cpsingleion' to calculate spec
        "# **********************************************************************\n");
   }
 }
-/*
-    if(opmat<1e10){fout_opmat=fopen_errchk("./results/op.mat","w");}
-    jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
-
-                 switch(observable)
-                  {case 'd':
-                   case 's':
-                   case 'i':
-                   Xcf=new ComplexMatrix ** [2];if(Xcf==NULL)exit(EXIT_FAILURE);
-                   Xcf[1]=new ComplexMatrix*[Esteps+1];  
-                   for(int Ei=0;Ei<Esteps;++Ei){Xcf[1][Ei]=new ComplexMatrix(1,3,1,3);
-                                               if(Xcf[1][Ei]==NULL)exit(EXIT_FAILURE);}
-                   break;
-                  default: break;
-                  }
-
-
-if(nmax>0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,1);
-
-   for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
-        switch(observable)
-      {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
-       case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
-       case 'M': jjj.mcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
-       case 'Q': for(int Ti=1;Ti<=Tsteps;++Ti)
-                 {Vector II(I.Column(Ti));jjj.mcalc(II,T(Ti),Hxc,Hext,jjj.Icalc_parstorage);I.Column(Ti)=II;
-                 jjj.eigenstates(Hxc,Hext,T(Ti));
-                 jjj.MQ(Mq, Q);
-                 for(int ii=1;ii<=observable_nofcomponents;++ii){MMq(ii,Ti)=Mq(ii);}
-                 }
-                 break;       
-      default: jjj.Icalc(I,T,Hxc,Hext,lnz,u,jjj.Icalc_parstorage);
-      }          
-
-for(int Ti=1;Ti<=Tsteps;++Ti){
-int jmin=0;
-
-      if(nmax>0)read_trs_file(jjj,X,Estart,dE,Esteps,elevels,jmin,trsstring,epsilon,T(Ti),Hxc,Hext,1,verbose,observable,Ti,maxE);
- 
-
- for(int Ei=0;Ei<Esteps;++Ei){
-     printf("%3i %8g ",1,T(Ti)); // printout ion number and temperature
-      for(j=1;j<=3;++j)printf(" %10g ",Hext(j)); // printout external field as requested
-      for(j=1;j<=nofcomponents;++j)printf("%8g ",Hxc(j)); // printoutexchangefield as requested
-   complex<double> im(0,1.0);
-   complex<double> z(E(Ei+1),epsilon);
-   complex<double> bose;double S;
-      switch(observable)
-       {case 'Q': for(j=1;j<=observable_nofcomponents;++j)printf("%4g %4g %4g %4g   ",abs(MMq(j,Ti)),real(MMq(j,Ti)),imag(MMq(j,Ti)),I(j,Ti)*jjj.F(Norm(Q)));break;
-        case 'd': 
-   bose=1.0/(1.0-exp(-z*(1.0/KB/T(Ti))));
-   S=abs(bose/(im)*Sum((*Xcf[1][Ei])-(*Xcf[1][Ei]).Transpose().Conjugate()))*2/3/PI/8.0*3.65/4.0/PI;
-   
-printf("%4g %4g %4g %4g  %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g %4g ",E(Ei+1),S,
-real(Trace((*Xcf[1][Ei])))/3,imag(Trace((*Xcf[1][Ei])))/3,
-real((*Xcf[1][Ei])(1,1)),imag((*Xcf[1][Ei])(1,1)),
-real((*Xcf[1][Ei])(2,2)),imag((*Xcf[1][Ei])(2,2)),
-real((*Xcf[1][Ei])(3,3)),imag((*Xcf[1][Ei])(3,3)),
-real((*Xcf[1][Ei])(2,3)),imag((*Xcf[1][Ei])(2,3)),
-real((*Xcf[1][Ei])(3,2)),imag((*Xcf[1][Ei])(3,2)),
-real((*Xcf[1][Ei])(1,3)),imag((*Xcf[1][Ei])(1,3)),
-real((*Xcf[1][Ei])(3,1)),imag((*Xcf[1][Ei])(3,1)),
-real((*Xcf[1][Ei])(1,2)),imag((*Xcf[1][Ei])(1,2)),
-real((*Xcf[1][Ei])(2,1)),imag((*Xcf[1][Ei])(2,1))
-      );
-                  break;
-      default: for(j=1;j<=observable_nofcomponents;++j)printf("%4g ",I(j,Ti));  // printout corresponding moments      
-       }
-
-    if(nmax>0)
-         {
-          if(Ti==1&&Ei==0)
-          {if(!elevels){printf("%s",trsstring);if(nmax<jmin){printf(" ...");}}
-           else
-           {for(j=jjj.est.Clo();j<=jjj.est.Chi();++j){printf("%4g ",real(jjj.est(0,j)));}
-           }
-          }
-         } // nmax>0
-    printf("\n"); // fi Ti==1
-  TT=T(Ti);
-   }}} // Ei Ti Hi
-
- // create levels.cef file   ******************************************
-    snprintf(filename,MAXNOFCHARINLINE,"./results/%s.levels.cef",jjj.sipffilename);
-// if sipffilename contains path (e.g. "./" or "./../")
-// do some substitutions to avoid opening error
- pchr=strstr(filename+10,"/");
- while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"/");}
-pchr=strstr(filename+10,"\\");
- while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
-
-      fout=fopen_errchk(filename,"w");  
-    fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,TT);
-                                   for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
-                                   for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
-                                   switch(observable)
-                                   {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j){fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));}fprintf(fout,"(muB)");break;
-                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB)");break;
-                                    case 'd': fprintf(fout,"E(meV) Sdip(Q=0,Omega)(barn/meV) Xpolyr Xpolyi(mb^2/meV) X11r X11i X22r X22i X33r X33i X23r X23i X32r X32i X13r X13i X31r X31i X12r X12i X21r X21i(mb^2/meV) ");break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));
-                                   }
-                                   fprintf(fout,"\n");jjj.print_eigenstates(fout);fclose(fout);
-
-// continue writing op.mat file   ******************************************
-if(opmat<1e10){fout_opmat=fopen_errchk("results/op.mat","w");
-                       fprintf(fout_opmat,"#! d=%i  ",jjj.est.Chi());
-if(opmat>nofcomponents){ for(int opmati=0;opmati<=nofcomponents;++opmati)
-                                             {Matrix op(jjj.opmat(opmati,Hxc,Hext));
-                      myPrintComplexMatrix(fout_opmat,op);}
-
-                        }
-                    else
-                    { if(opmat<-nofcomponents){Matrix opp(jjj.opmat(0,Hxc,Hext)); opp=0;
-                                               for (int opmati=1;opmati<=jjj.est.Chi();++opmati)
-                                               {opp(opmati,opmati)=real(jjj.est(0,opmati));}
-                                                myPrintComplexMatrix(fout_opmat,opp);
-                                             for(int opmati=-1;opmati>=-nofcomponents;--opmati)
-                                             {Matrix op(jjj.opmat(opmati,Hxc,Hext));
-                                              myPrintComplexMatrix(fout_opmat,op);}
-                                              }
-                     else
-                     {Matrix op(jjj.opmat((int)opmat,Hxc,Hext));
-                      myPrintComplexMatrix(fout_opmat,op);
-                     }
-                    }
-fclose(fout_opmat);}
- if(observable=='d'){ for(int Ei=0;Ei<Esteps;++Ei)delete Xcf[1][Ei];
-                      if(Xcf[1]!=NULL)delete []Xcf[1];
-                         delete []X;
-                     }
-      
-   
-
- */
 
 
 
