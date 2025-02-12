@@ -1,4 +1,6 @@
 #include "ic1ion_module.hpp"
+#include "truncate.cpp"
+
 #if defined(__linux__) || defined(__APPLE__)
 extern "C"
 {
@@ -38,14 +40,6 @@ mfmat=pp.mfmat;
 Hic=pp.Hic;iHic=pp.iHic;
 }
 
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Declarations for functions in truncate.cpp
-// --------------------------------------------------------------------------------------------------------------- //
-void truncate_hmltn(icpars &pars, ComplexMatrix &Pst, sMat<double> &Hic, sMat<double> &iHic, int JHi, int JLo);
-void truncate_expJ(icpars &pars, ComplexMatrix &Pst, Vector &gjmbH, Matrix &J, Vector & T, Vector & lnZ, Vector & U);
-void truncate_spindensity_expJ(icpars &pars, ComplexMatrix &Pst, Vector &gjmbH, Vector &J, double T, int xyz);
-void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, Matrix &retmat, const char* filename);
 
 void myPrintMatrix(FILE * file,sMat<double> & M,int d)
 { int i1,j1;
@@ -135,11 +129,11 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
    int i,Hsz=getdim(pars.n,pars.l);
    complexdouble *Jm=0;
    if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-     {// check if truncate is to be used and if Hamiltonian was already calculated (Pst(0,0)=(-0.1,-0.1)
+   {// check if truncate is to be used and if Hamiltonian was already calculated (Pst(0,0)=(-0.1,-0.1)
      if(real(Pst[0][0])!=-0.1 || imag(Pst[0][0])!=-0.1)   // Truncates the matrix, and stores the single ion part in Pst
-     {    truncate_hmltn(pars, Pst, Hic, iHic, J.Rhi(), J.Rlo());Pst[0][0] = complex<double> (-0.1,-0.1);}
-    truncate_expJ(pars,Pst,gjmbH,J,T,lnZ,U);
-     }
+     {    truncate_hmltn(pars,  Hic, iHic, J.Rhi(), J.Rlo());Pst[0][0] = complex<double> (-0.1,-0.1);}
+    truncate_expJ(pars,gjmbH,J,T,lnZ,U);
+   }
    else
    {  // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
       #ifdef JIJCONV
@@ -163,9 +157,9 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
 
       for(i=J.Rlo(); i<=J.Rhi(); i++) {J(i,T.Hi()) = vJ[i-J.Rlo()];//printf("%g ",J(i,Ti));
                                          } 
-      U(T.Hi())=vJ[J.Rhi()-J.Rlo()+2];
       lnZ(T.Hi())=vJ[J.Rhi()-J.Rlo()+1];
-
+      U(T.Hi())=vJ[J.Rhi()-J.Rlo()+2];
+      
       vector<double> E; // energy vector
       if(T.Hi()>1)for(int ind_j=0; ind_j<matel[0].size(); ind_j++){E.push_back(VE.E(ind_j)-VE.E(0));}
     // use matel to calculate more quickly the other temperatures
@@ -949,36 +943,13 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
    int i,Hsz=getdim(pars.n,pars.l);
    complexdouble *Jm=0; 
    //bool Hicnotcalc = false;
-   /*std::vector<double> parval; parval.reserve(35);
-   if(pars.n==1) { parval.push_back(pars.xi); for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
-   else {
-      for(i=0; i<4; i++) {parval.push_back(pars.F[i]);} parval.push_back(pars.xi); for(i=0; i<3; i++) parval.push_back(pars.alpha[i]);
-      for(k=2; k<=(2*pars.l); k+=2) for(q=-k; q<=k; q++) parval.push_back(pars.B(k,q)); }
-   if(parval.size()%2==1) parval.push_back(0.);
-  */
+   
 
-  /* if((Pst.Cols()!=(Hsz+1) || Pst.Rows()!=(Hsz+1)) && pars.truncate_level==1) Hicnotcalc = true;
-   else if(real(Pst[0][0])==-0.1 && imag(Pst[0][0])==-0.1)  // Hic previously calculated
-   {
-      for(i=0; i<(int)(parval.size()/2); i++) if(real(Pst[0][i+1])!=parval[2*i] && imag(Pst[0][i+1])!=parval[2*i+1]) { Hicnotcalc = true; break; }
-   }
-   else Hicnotcalc = true;
-   if(Hicnotcalc)
-   { if( (Pst.Rhi()!=Hsz||Pst.Chi()!=Hsz) && pars.truncate_level==1)
-      {
-         std::cerr << "ERROR module ic1ion - Icalc: Hsz recalculation does not agree with eigenstates matrix dimension\n"; exit(EXIT_FAILURE);
-      }
-      if (!((int)(parval.size()/2)>Hsz && pars.truncate_level==1))
-      {
-         Pst[0][0] = complex<double> (-0.1,-0.1);
-         for(i=0; i<(int)(parval.size()/2); i++) Pst[0][i+1] = complex<double> (parval[2*i],parval[2*i+1]);
-      }
-*/
-    if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
+  if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
      {// check if truncate is to be used and if Hamiltonian was already calculated (Pst(0,0)=(-0.1,-0.1)
      if(real(Pst[0][0])!=-0.1 || imag(Pst[0][0])!=-0.1)   // Truncates the matrix, and stores the single ion part in Pst
-     {    truncate_hmltn(pars, Pst, Hic, iHic, J.Hi(), J.Lo());Pst[0][0] = complex<double> (-0.1,-0.1);}
-      truncate_spindensity_expJ(pars,Pst,gjmbH,J,T,xyz);
+     {    truncate_hmltn(pars,  Hic, iHic, J.Hi(), J.Lo());Pst[0][0] = complex<double> (-0.1,-0.1);}
+      truncate_spindensity_expJ(pars,gjmbH,J,T,xyz);
      }	
    else
    {
@@ -995,8 +966,7 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
       else {VE.calc(Hsz,Jm);} free(Jm);
 
       // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
-      std::vector< std::vector<double> > matel;
-      std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,T,matel);
+      std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,T);
       for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()];//printf("ss=%g\n",J(1));
    }
 }
@@ -1331,7 +1301,7 @@ bool ic1ion_module::opmat(int &ni,                      // ni     which operator
          truncate_hmltn_packed(pars, Jmat, iJmat, outmat, sipffile); return true; }
       else {
          zmat2pack(Jmat,iJmat,outmat); return true; }
-   }
+   } 
    else
    {  
       if(nn>50) {
@@ -1340,8 +1310,8 @@ bool ic1ion_module::opmat(int &ni,                      // ni     which operator
       // Indices n 7-11 are k=2 quadrupoles; 12-18:k=3; 19-27:k=4; 28-38:k=5; 39-51:k=6
       //         nn=abs(n)-1
       int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-      int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-      int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+    //int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+    //int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
       int Hsz=getdim(pars.n,pars.l); sMat<double> zeroes; zeroes.zero(Hsz,Hsz);
 
       // Checks if the reduced matrix element is zero, if so, return zero without calculating matrix elements.
@@ -1351,54 +1321,17 @@ bool ic1ion_module::opmat(int &ni,                      // ni     which operator
          if(pars.truncate_level!=1) { int cb = (int)(pars.truncate_level*(double)Hsz); zeroes.zero(cb,cb); }
          zmat2pack(zeroes,zeroes,outmat); return true;
       }
-
-      // Set up directory to store matrices if the user asks for it.
-      char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
-      if(pars.save_matrices) {
-      #ifndef _WINDOWS
-      struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
-         if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::Jmat(): Can't create mms dir, " << strerror(errno) << "\n";
-      #else
-      DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY))
-         if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::Jmat(): Cannot create mms directory\n";
-      #endif
-      nstr[0] = (pars.l==F?102:100); if(pars.n<10) { nstr[1] = pars.n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = pars.n+38; nstr[3] = 0; }
-      strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;   // 85 is ASCII for "U", 100=="d" and 102=="f"
-      } else { strcpy(basename,"nodir/"); }
-      #define NSTR(K,Q) nstr[1] = K+48; nstr[2] = Q+48; nstr[3] = 0
-      #define MSTR(K,Q) nstr[1] = K+48; nstr[2] = 109;  nstr[3] = Q+48; nstr[4] = 0
-
+       
       // Calculates the operator matrices <Sx>, <Lx>, etc.
-      if(abs(n)>6) 
-      {
-         sMat<double> Umq,Upq,Jmat,iJmat;
-         NSTR(k[nn],abs(q[nn])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-         Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(pars.n,k[nn],abs(q[nn]),pars.l); rmzeros(Upq); mm_gout(Upq,filename); }
-          if(q[nn]==0) { 
-            Jmat = Upq * redmat; iJmat.zero(Hsz,Hsz); }
-         else {
-            MSTR(k[nn],abs(q[nn])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-            Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[nn],-abs(q[nn]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
-            if(q[nn]<0) {Jmat.zero(Hsz,Hsz);
-               if((q[nn]%2)==0) iJmat = (Umq - Upq) * redmat; else iJmat = (Umq + Upq) * redmat; }
-            else {iJmat.zero(Hsz,Hsz);
-               if((q[nn]%2)==0)  Jmat = (Umq + Upq) * redmat; else  Jmat = (Umq - Upq) * redmat; }
-         }
-
-         if(pars.truncate_level!=1 || n<6) {
-            truncate_hmltn_packed(pars,Jmat,iJmat,outmat,sipffile); return true; }
-         else {
-            zmat2pack(Jmat,iJmat,outmat);return true; }
-      }
-      else
-      {
-         //icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices,pars.density);
+      sMat<double> * Jmat=mfmat.op_generate(nn);
+      
          if(pars.truncate_level!=1 || n<0) {
-            if(im[nn]==0) truncate_hmltn_packed(pars,mfmat.J[nn],zeroes,outmat,sipffile); else truncate_hmltn_packed(pars,zeroes,mfmat.J[nn],outmat,sipffile); }
+            if(mfmat.iflag[nn]==0) truncate_hmltn_packed(pars,(*Jmat),zeroes,outmat,sipffile); else truncate_hmltn_packed(pars,zeroes,(*Jmat),outmat,sipffile); }
          else {
-            if(im[nn]==0) zmat2pack(mfmat.J[nn],zeroes,outmat);                  else zmat2pack(zeroes,mfmat.J[nn],outmat); }
+            if(mfmat.iflag[nn]==0) zmat2pack((*Jmat),zeroes,outmat);                  else zmat2pack(zeroes,(*Jmat),outmat); }
          return true;
-      }
+     
+      mfmat.op_free(nn);
    }
 
    std::cerr << "ic1ion::opmat - failed to calculate operator matrices\n"; return false;

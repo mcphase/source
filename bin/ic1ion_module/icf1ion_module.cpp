@@ -33,6 +33,12 @@ delete ptr;
   int q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
   bool im[]= {0,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
 
+// KQ for the spindensity operator sequence in icf_balcarMQ
+//             0  1 2 3  4  5 6 7 8  9 10 1112131415 16 17 18 192021222324 25 26 27 28 29303132333435 36 37 38 39 40 4142434445464748
+   int KK[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+   int QQ[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+// int im[]=  {0, 1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+
 
 icf1ion_module::icf1ion_module(const char * filename)
 {for(int i=0;i<=IOP_DIM;++i)st[i]=NULL;
@@ -44,6 +50,7 @@ icf1ion_module::icf1ion_module(const char * filename)
 icf1ion_module::icf1ion_module(const icf1ion_module & pp)
 {for(int i=0;i<=IOP_DIM;++i)st[i]=pp.st[i];
  pars=pp.pars;
+ Hcf=pp.Hcf; Hcfi=pp.Hcfi;
 }
 icf1ion_module::~icf1ion_module()
 { for(int i=0;i<=IOP_DIM;++i)if(st[i]!=NULL)delete st[i];
@@ -394,7 +401,7 @@ void icf1ion_module::icf_expJ(  complexdouble *zV, double *vE, Vector & T, Matri
 {  int Hsz=icf_getdim(pars);
    int Esz, ind_j;
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   std::vector<double> E, me; /*matel.clear();*/ E.reserve(Hsz);
+   std::vector<double> E, me;  E.reserve(Hsz);
    for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON || vE[Esz+1]==0) break; }
 
    if (T(T.Lo())<0)
@@ -1756,19 +1763,16 @@ complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
 //--------------------------------------------------------------------------------------------------------------
 void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, double &T, Vector &J)
 {
-   int k[] = {0,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   int q[] = {0,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+   //int k[] = {0,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+   //int q[] = {0,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
    int Hsz=icf_getdim(pars); //, incx=1;
 
    char xyzstr[] = "xyz";
-   if(xyz>0) { std::cout << "Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
-   else      { std::cout << "Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
-
-   std::vector<double> E, ex((J.Hi()>6?J.Hi():6)+2,0.), me, eb;
+   if(xyz>0) { std::cout << "#Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
+   else      { std::cout << "#Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
+   if(J.Hi()>49){fprintf(stderr,"Error icf_spindensityexpJ: Operator %i > 50 requested\n",J.Hi());exit(EXIT_FAILURE);}
+   std::vector<double> E,  me, eb;
    int iJ, ind_j, Esz;
-
-   //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   //char uplo = 'U';
 
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<Hsz; Esz++) { E.push_back(vE[Esz]-vE[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || vE[Esz+1]==0) break; }
@@ -1790,18 +1794,16 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
    }
 
    // For first run calculate also the partition function
-   me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; complexdouble *zt=0;
-   complexdouble *zJmat;// = (complexdouble*)malloc(Hsz*Hsz*sizeof(complexdouble));
-   zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+   me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; 
+   complexdouble *zJmat=0;
    sMat<double> zeros(Hsz,Hsz),mat;
 
    for(iJ=J.Lo(); iJ<=J.Hi(); iJ++)
    {
-      me.assign(Esz,0.); J[iJ]=0.; ex[iJ]=0;
+      me.assign(Esz,0.); J[iJ]=0.; 
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      zJmat = icf_balcarMq(xyz,k[iJ],q[iJ],pars.n,pars.l); // minus sign stands for orbital density coeff
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-
+      zJmat = icf_balcarMq(xyz,KK[iJ-1],QQ[iJ-1],pars.n,pars.l); // minus sign stands for orbital density coeff
+      
       for(ind_j=0; ind_j<Esz; ind_j++)
       {   // Calculates the matrix elements <Vi|J.H|Vi>
            // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
@@ -1831,7 +1833,7 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
       }
       J[iJ]/=Z;
       if(fabs(J[iJ])<DBL_EPSILON) J[iJ]=0.;
-      free(zJmat); free(zt);
+      free(zJmat);
    }
   
 }
@@ -1863,7 +1865,6 @@ void icf1ion_module::sdod_Icalc(Vector &J,           // Output single ion moment
    complexdouble *H=0;
 
    // Calculates the mean field matrix from stored matrices
-
    H=zmat2f(Hcf,Hcfi);
    for(int ind=gjmbH.Lo(); ind<=gjmbH.Hi(); ind++)
    {if(st[ind]==NULL)op_generate(ind);
@@ -1872,10 +1873,13 @@ void icf1ion_module::sdod_Icalc(Vector &J,           // Output single ion moment
 
    // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
    double *vE = new double[Hsz]; complexdouble *zV = new complexdouble[Hsz*Hsz];
-   int info = ic_diag(Hsz,H,zV,vE); free(H);
-   if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
+   int info = ic_diag(Hsz,H,zV,vE); 
 
-   icf_spindensityexpJ(pars,zV,vE,xyz,T,J); delete[]vE; delete[]zV;
+   free(H);
+   if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
+   icf_spindensityexpJ(pars,zV,vE,xyz,T,J); 
+   delete[]vE; delete[]zV;
+
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -1965,8 +1969,8 @@ bool icf1ion_module::spindensity_coeff(Vector &J,          // Output single ion 
                       char *sipffilename, // Single ion properties filename
                       ComplexMatrix &Pst)  // Parameter Storage matrix (initialized in parstorage)
 {  // sum exchange field and external field
-   Vector gjmbH(1,Hxc.Hi());
-   gjmbH=Hxc;
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
@@ -1998,9 +2002,9 @@ bool icf1ion_module::orbmomdensity_coeff(Vector &J,        // Output single ion 
                       char *sipffilename, // Single ion properties filename
                       ComplexMatrix &Pst)  // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)
 {  // sum exchange field and external field
-   Vector gjmbH(1,Hxc.Hi());
-   gjmbH=Hxc;
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
+    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
    // --------------------------------------------------------------------
@@ -2030,11 +2034,9 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
 {
    int i,j,k;
 
-   int K[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   int Q[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-// int im[]= {0, 1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
 
-   int sz = gjmbH.Hi();
+   int sz = gjmbH.Hi();if(sz>49){fprintf(stderr,"Error icf_du1calc: Operator %i > 49 requested\n",sz);exit(EXIT_FAILURE);}
+   
    sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op;
    complexdouble *zJmat=0, *zt=0, zme; zme.r=0; zme.i=0.; 
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
@@ -2067,7 +2069,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
       {
 //       if(iJ<6) op = icf_mumat(pars.n, iJ, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
 //       if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes);
-         zJmat = icf_balcarMq(xyz,K[iJ],Q[iJ],pars.n,pars.l); // minus sign stands for orbital density coeff
+         zJmat = icf_balcarMq(xyz,KK[iJ],QQ[iJ],pars.n,pars.l); // minus sign stands for orbital density coeff
          zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
          F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[j+1][1], &incx, &zbeta, zt, &incx);
          #ifdef _G77 
@@ -2563,7 +2565,7 @@ int main(int argc, char *argv[])
 #ifdef _INTEGRAL
    clock_t start,end; end = clock();
    Vector J(1,6,0.), gmbH(1,6,.0578838263), ABC; gmbH[1]*=2; gmbH[3]*=2; gmbH[5]*=2; 
-   double /*T=2.0,*/lnZ=0.,U=0.,gJ=0.; T=2.0;
+   double lnZ=0.,U=0.,gJ=0.; T=2.0;
    char *filearray[1]; 
    filearray[0] = infile;
    end = clock();

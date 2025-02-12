@@ -209,9 +209,9 @@ libs/liblapack.a:
 	cd libs && make
 
 ifdef integral
-../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o  ../src/martin.o
+../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o ic1ion_module.o  ../src/martin.o
 	@echo Linking $@
-	$(LINKER) -o ../ic1ion ic1ion.o truncate.o states.o ic1ion_module.o  ../src/martin.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
+	$(LINKER) -o ../ic1ion ic1ion.o  states.o ic1ion_module.o  ../src/martin.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 else
 ../ic1ionit$(EXE): checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o  ../src/martin.o
 	@echo Linking $@
@@ -228,10 +228,8 @@ endif
 states.o: states.cpp states.hpp ../include/constants.h lapack.h
 	$(CC) $(patsubst -O3,   ,${CFLAGS}) -I../include -I. -c $<
 
-truncate.o: truncate.cpp
-	$(CC) $(CFLAGS) -I../include -I. -c $<
 
-ic1ion_module.o: ic1ion_module.cpp ic1ion_module.hpp ../include/singleion_module.hpp
+ic1ion_module.o: ic1ion_module.cpp truncate.cpp ic1ion_module.hpp ../include/singleion_module.hpp
 ifdef integral
 	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
@@ -250,12 +248,12 @@ else
 	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 
-ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o truncate.o ic1ion_module.o  ../src/martin.o
+ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o ic1ion_module.o  ../src/martin.o
 	@echo Linking $@
 ifdef WINDOWS
-	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
 else
-	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o truncate.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
+	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o  states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS)
 endif
 
 

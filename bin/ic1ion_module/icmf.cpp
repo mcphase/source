@@ -258,7 +258,7 @@ std::string iceig::strout()
 // --------------------------------------------------------------------------------------------------------------- //
 icmfmat::icmfmat()
 { 
-   sMat<double> t; J.assign(6,t); 
+   sMat<double> t; J.assign(6,t); T.assign(6,NULL);
    iflag.assign(6,0); iflag[2]=1; iflag[3]=1;
    _n = 1; _l = S; _num_op = 1; _save_matrices=false;
    #ifdef JIJCONV
@@ -268,13 +268,27 @@ icmfmat::icmfmat()
 icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string density)
 {
    _n = n; _l = l; _num_op = num_op; _density = density;_save_matrices=save_matrices;
-   sMat<double> t; J.assign(num_op>6?num_op:6,t); 
+   sMat<double> t; J.assign(num_op>6?num_op:6,t); T.assign(num_op>6?(num_op+2):(6+2),NULL);
    iflag.assign(num_op>6?num_op:6,0); 
-   for(int m=0;m<(num_op>6?num_op:6);++m)Jop_generate(m);
+   for(int m=0;m<(num_op>6&&!save_matrices?num_op:6);++m)op_generate(m);
 }
 
-void icmfmat::Jop_generate(int i)
-{char nstr[6];  char basename[255]; strcpy(basename,"results/mms/");
+icmfmat::icmfmat(const icmfmat & pp)
+{_n=pp._n;_l=pp._l;_num_op=pp._num_op;_density=pp._density;_save_matrices=pp._save_matrices;
+ J=pp.J;T=pp.T;iflag=pp.iflag;
+}
+
+icmfmat::~icmfmat()
+{
+for(int i=0;i<T.size();++i)if(T[i]!=NULL)delete []T[i];
+}
+
+sMat<double> * icmfmat::op_generate(int i)
+{if(_num_op<=i) {_num_op = i+1; iflag.resize(_num_op,0); // extend operator storage if more operators are required
+                 sMat<double> t; J.resize(_num_op,t);T.resize(_num_op+2,NULL);
+                                 }
+ if(J[i].isempty()) // only do something if Operator matrix is empty
+ {char nstr[6];  char basename[255]; strcpy(basename,"results/mms/");
       if(_save_matrices) {
       #ifndef _WINDOWS
       struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
@@ -346,8 +360,9 @@ void icmfmat::Jop_generate(int i)
    chanlam_mumat(n,3,mu,l); sumcheck = 0.; for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
       sumcheck += fabs(-mu(ii,jj)-J[5](ii,jj)-g_s*J[4](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_z(ChanLam) - (Lz+gSz)) = " << sumcheck << "\n"; 
 */
-        } // i>6
-    else{char filename[255];
+        } // i>=6
+    else{
+    char filename[255];
             // for i>=6 calculates operator J[i] either loading Umq Upq from file or calculating the matrices
       nstr[0] = 85;   // 85 is ASCII for "U", 100=="d" and 102=="f"
 #define NSTR(K,Q) nstr[1] = K+48; nstr[2] = Q+48; nstr[3] = 0
@@ -357,12 +372,12 @@ void icmfmat::Jop_generate(int i)
       int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
     //int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
       sMat<double> Upq,Umq; double redmat; int n = _n; //if(n>(2*_l+1)) n = 4*_l+2-n; 
-
             if(q[i]<0) iflag[i]=1;
          
             if(k[i]%2==1){} // continue;   // Using the  reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
             else if(k[i]>4 && _l==D){} //continue;
-            else {redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[i],2*_l,0,0,0);// * wy2stev(i);
+            else {
+            redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[i],2*_l,0,0,0);// * wy2stev(i);
             NSTR(k[i],abs(q[i])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
             Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(n,k[i],abs(q[i]),_l); rmzeros(Upq); mm_gout(Upq,filename); }
             if(q[i]==0) { J[i]= Upq * (redmat); }
@@ -377,14 +392,26 @@ void icmfmat::Jop_generate(int i)
                }
       }
  
+ }
+
+Imat=&J[i];
+ 
+return Imat;
 }
+
+void icmfmat::op_free(int i)
+{
+if(_save_matrices&&i>5) {J[i].clear();}
+}
+
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the mean field matrix sum_i (H_i*J_i)
 // --------------------------------------------------------------------------------------------------------------- //
 void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gjmbH)
 {  int i; Jmat.zero(J[0].nr(),J[0].nc()); iJmat.zero(J[0].nr(),J[0].nc()); 
    if(_num_op<(int)gjmbH.size()) {_num_op = (int)gjmbH.size(); iflag.resize(_num_op,0); 
-                                   sMat<double> t; J.resize(_num_op,t);
+                                   sMat<double> t; J.resize(_num_op,t);T.resize(_num_op+2,NULL);
                                  }
    for(i=0; i<((int)gjmbH.size()>6?6:_num_op); i++)
       if(fabs(gjmbH[i])>DBL_EPSILON*100) { if(iflag[i]==1) iJmat += J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i]; }
@@ -393,8 +420,9 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
    {
      for(i=6; i<(int)gjmbH.size(); i++)if(fabs(gjmbH[i])>DBL_EPSILON)
       { 
-         if(J[i].isempty())Jop_generate(i);            
+         op_generate(i);            
          if(iflag[i]==1) iJmat += J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i];
+         op_free(i);
       }
    }
 }
@@ -403,16 +431,11 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
 // --------------------------------------------------------------------------------------------------------------- //
 
 std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<double> > &matel, int num_op)
-{  double *vt=0; complexdouble *zt=0; //, zme;
-      if(_num_op<num_op) {_num_op = num_op; iflag.resize(_num_op,0); // extend operator storage if more operators are required
-                                   sMat<double> t; J.resize(_num_op,t);
-                                 }
-  std::vector<double> E,eb, ex((num_op+2),0.), me; matel.clear();
-   int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1; 
+{ std::vector<double> E,eb, ex((num_op+2),0.), me; matel.clear();
+   int iJ, ind_j, Esz, Hsz=VE.Hsz();//, incx=1; 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   char uplo = 'U';
+   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    // Checks that the eigenvactors are orthonormal
 /* char transa='C', transb='N'; double summm=0.;
    if(VE.iscomplex())
@@ -441,11 +464,9 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
          VE.zV(ii,jj) = 0;
       }  
    
-
-   
    if(!_density.empty()) 
    { 
-      std::cout << "Calculating the expectation of the moment density operator ";
+      std::cout << "#Calculating the expectation of the moment density operator ";
       if(_density.find("l")!=std::string::npos || _density.find("s")!=std::string::npos) std::cout << _density << "\n"; 
       else
       {
@@ -460,16 +481,14 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
 // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0 || VE.E(Esz+1)==-DBL_MAX) break; }
 
-
    if (T<0){printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
                          printf ("Number   Excitation Energy\n");
      for (ind_j=0;ind_j<(int)(-T);++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
      } // MR 10.9.2010
 
-
    // calculate Matrix Elements 
    for(iJ=0; iJ<num_op; iJ++)
-   { if(J[iJ].isempty())Jop_generate(iJ);            
+   { op_generate(iJ);            
             // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
       int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    
@@ -477,40 +496,26 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
       if(iJ>6 && (k[iJ]%2==1 || k[iJ]>_l*2)) { matel.push_back(me); continue; }
       if(!VE.iscomplex() && _density.empty()&&iflag[iJ]==0)
-      {   double *fJmat; 
-            if(!J[iJ].isempty()) // might be empty because redmat is zero ...
-             { vt = (double*)malloc(Hsz*sizeof(double));  fJmat=J[iJ].f_array(); 
+      {     if(!J[iJ].isempty()) // might be empty because redmat is zero ...
+             { //vt = (double*)malloc(Hsz*sizeof(double));  fJmat=J[iJ].f_array(); 
             for(ind_j=0; ind_j<Esz; ind_j++)
-            { double meold; // Calculates the matrix elements <Vi|J.H|Vi>
-               F77NAME(dsymv)(&uplo, &Hsz, &alpha, fJmat, &Hsz, VE.V(ind_j), &incx, &beta, vt, &incx);
-#ifdef _G77 
-               F77NAME(ddot)(meold],&Hsz, VE.V(ind_j), &incx, vt, &incx);
-#else
-               meold = F77NAME(ddot)(&Hsz, VE.V(ind_j), &incx, vt, &incx);
-#endif
+            { 
           me[ind_j]=J[iJ].MultvxMv(VE.V(ind_j));
-         if(fabs(meold-me[ind_j])>DBL_EPSILON*1000){fprintf(stderr,"Error real <%i|I%i|%i>=%g meold=%g\n",ind_j,iJ+1,ind_j,me[ind_j],meold);exit(EXIT_FAILURE);}
             }
-           free(fJmat); free(vt);  } 
-         
+           } 
          matel.push_back(me); 
        }  
       else
-      {complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
-         if(!J[iJ].isempty()) // might be empty because redmat is zero ...
-          {
-            if(iflag[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]);
-           for(ind_j=0; ind_j<Esz; ind_j++)
+      {  if(!J[iJ].isempty()) // might be empty because redmat is zero ...
+          { for(ind_j=0; ind_j<Esz; ind_j++)
          {  // Calculates the matrix elements <Vi|J.H|Vi>
-           double   meold = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
-        me[ind_j]=J[iJ].MultvxMv(VE.zV(ind_j),iflag[iJ]);
-         if(fabs(meold-me[ind_j])>DBL_EPSILON*1000){fprintf(stderr,"Error <%i|I%i|%i>=%g meold=%g\n",ind_j,iJ+1,ind_j,me[ind_j],meold);exit(EXIT_FAILURE);}
-                  }
-         free(zJmat); 
+           me[ind_j]=J[iJ].MultvxMv(VE.zV(ind_j),iflag[iJ]);
+                   }
          }
          matel.push_back(me); 
       }
-}
+   op_free(iJ);
+   }
 
 // For first run calculate also the partition function and internal energy
 // Rest of the runs only calculate the new matrix elements
@@ -548,100 +553,23 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
 // Calculates the matrix M_ab=<i|Ja|j><j|Jb|i>{exp(-beta_i*T)-exp(-beta_j*T)} for some state i,j
 // --------------------------------------------------------------------------------------------------------------- //
 void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta)
-{  double *vt=0, Z=0., therm; complexdouble zme; zme.r=0; zme.i=0.;//complexdouble *zt=0; 
+{  double  Z=0., therm; complexdouble zme; zme.r=0; zme.i=0.;
    int sz = (_num_op>6?_num_op:6);
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
-// u.zero(sz); iu.zero(sz);
-   int iJ, Hsz=VE.Hsz(), incx=1; 
+   int iJ, Hsz=VE.Hsz(); 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::u1() - Hamiltonian matrix size not same as mean field operator!\n"; return; }
-   /*sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   double alpha = 1, beta = 0; complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   complexdouble *zJmat=0;
-   char uplo = 'U';
-
-   char nstr[6]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
-   if(_save_matrices) {
-   #ifndef _WINDOWS
-   struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
-      if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::u1(): Can't create mms dir, " << strerror(errno) << "\n";
-   #else
-   DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY)) 
-      if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::u1(): Cannot create mms directory\n";
-   #endif
-   nstr[0] = (_l==F?102:100); if(_n<10) { nstr[1] = _n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = _n+38; nstr[3] = 0; }
-   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;   // 85 is ASCII for "U", 100=="d" and 102=="f"
-   } else { strcpy(basename,"nodir/"); }
-   // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
-   int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-*/   
-
-  //int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
-      
-   //sMat<double> Upq,Umq; double redmat; int n = _n; if(n>(2*_l+1)) n = 4*_l+2-n; 
-
    // Calculates the matrix elements: <i|Ja|j> and <j|Ja|i> for each of the six Ja's
    for(iJ=0; iJ<sz; iJ++)
    {
-
-
-/*
-//    if(k[iJ]%2==1) { if(VE.iscomplex()) { zij[iJ].r=0.; zij[iJ].i=0.; } else mij[iJ]=0.; continue; }
-      if(iJ>=6)
-      {
-         NSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-         Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(n,k[iJ],abs(q[iJ]),_l); rmzeros(Upq); mm_gout(Upq,filename); }
-         MSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-         Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(n,k[iJ],-abs(q[iJ]),_l); rmzeros(Umq); mm_gout(Umq,filename); }
-         #ifdef JIJCONV
-         if(jijconv.size()>1) redmat*=jijconv[iJ];
-         #endif
-         redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[iJ],2*_l,0,0,0);
-//       if(q[iJ]<0) { if((q[iJ]%2)==0) Upq -= Umq; else Upq += Umq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Upq += Umq; else Upq -= Umq; } changed MR 15.12.09
-         if(q[iJ]<0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
-         Umq *= redmat;
-      }
-*/    
-
-
-
-      if(J[iJ].isempty())Jop_generate(iJ); 
-     
+      op_generate(iJ); 
       if(!VE.iscomplex() && iflag[iJ]==0)
       { zij[iJ].r=J[iJ].MultuxMv(VE.V(i),VE.V(j));
-       /*  vt = (double*)malloc(Hsz*sizeof(double)); 
-         double *fJmat; if(iJ>=6) fJmat=Upq.f_array(); else fJmat=J[iJ].f_array();
-         F77NAME(dsymv)(&uplo, &Hsz, &alpha, fJmat, &Hsz, VE.V(j), &incx, &beta, vt, &incx);
-         #ifdef _G77 
-         F77NAME(ddot)(mij[iJ], &Hsz, VE.V(i), &incx, vt, &incx); zij[iJ].r = mij[iJ];
-         #else
-         mij[iJ] = F77NAME(ddot)(&Hsz, VE.V(i), &incx, vt, &incx); zij[iJ].r = mij[iJ];
-         #endif
-         free(fJmat); free(vt);
-       */
       } 
       else
       {zij[iJ]=J[iJ].MultuxMv(VE.zV(i),VE.zV(j),iflag[iJ]);
-       /*  zeroes.zero(J[0].nr(),J[0].nc());
-         if(iJ>=6) { if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes);   else zJmat = zmat2f(zeroes,Umq); }
-         else      { if(im[iJ]==0) zJmat=zmat2f(J[iJ],zeroes); else zJmat = zmat2f(zeroes,J[iJ]); }
-         
-         zij[iJ]=transition_matrixelement(Hsz,zJmat,VE.zV(i),VE.zV(j));
-         */
-        /*
-         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(j), &incx, &zbeta, zt, &incx);
-         #ifdef _G77 
-         F77NAME(zdotc)(&zij[iJ], &Hsz, VE.zV(i), &incx, zt, &incx);
-         #else
-         zij[iJ] = F77NAME(zdotc)(&Hsz, VE.zV(i), &incx, zt, &incx);
-         #endif
-//       int k;for(k=0;k<Hsz;++k)printf("%6.3f %+6.3f i  ",VE.zV(j)[k].r,VE.zV(j)[k].i);
-         free(zt);
-         */
-         //free(zJmat); 
-      }
+       }
+     op_free(iJ);
    }
 
    if(i==j&&T>0) {//subtract thermal expectation value from zij=zii
@@ -701,22 +629,20 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
 }
 
 //--------------------------------------------------------------------------------------------------------------
-std::vector<double> icmfmat::orbmomdensity_expJ(iceig &VE,int xyz, double T, std::vector< std::vector<double> > &matel)
+std::vector<double> icmfmat::orbmomdensity_expJ(iceig &VE,int xyz, double T)
 {
-   return spindensity_expJ(VE,-xyz, T, matel);
+   return spindensity_expJ(VE,-xyz, T);
 }
 
 //--------------------------------------------------------------------------------------------------------------
-std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::vector< std::vector<double> > &matel)
+std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T)
 {
-   double *vt=0, Z=0., U=0.;
-   complexdouble *zt=0; //, zme;
-   std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; matel.clear();
-   int iJ, ind_j, Esz, Hsz=VE.Hsz(), incx=1;
+   double Z=0.;
+   complexdouble *zt=0; 
+   std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; 
+   int iJ, ind_j, Esz, Hsz=VE.Hsz();
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   double alpha = 1, beta = 0;// complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   char uplo = 'U';
    // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
    if (T<0){Esz=(int)(-T);printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
@@ -729,89 +655,21 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
          VE.zV(ii,jj) = 0.;
       }
 
-   // For first run calculate also the partition function and internal energy
-   me.assign(Esz,0.); eb.assign(Esz,0.); Z=0.;
-   if(!VE.iscomplex())
-   {
-      double *fJmat=J[0].f_array(); vt = (double*)malloc(Hsz*sizeof(double));
-      for(ind_j=0; ind_j<Esz; ind_j++)
-      {  // Calculates the matrix elements <Vi|J.H|Vi>
-         F77NAME(dsymv)(&uplo, &Hsz, &alpha, fJmat, &Hsz, VE.V(ind_j), &incx, &beta, vt, &incx);
-         #ifdef _G77
-         F77NAME(ddot)(me[ind_j],&Hsz, VE.V(ind_j), &incx, vt, &incx);
-         #else
-         me[ind_j] = F77NAME(ddot)(&Hsz, VE.V(ind_j), &incx, vt, &incx);
-         #endif
- //MR 17.9.2010
-      if (T<0)
-      {  char instr[MAXNOFCHARINLINE];
-         printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-         if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
-         eb[ind_j]=strtod(instr,NULL);
-      }
-       else
-      {  eb[ind_j] = exp(-E[ind_j]/(KB*T));} ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MRend 17.9.2010
-      }
-      free(fJmat); free(vt); matel.push_back(me); ex[0]/=Z; U/=Z;
-   }
-   else
-   {
-      complexdouble *zJmat;
-      zeroes.zero(J[0].nr(),J[0].nc()); if(iflag[0]==0) zJmat=zmat2f(J[0],zeroes); else zJmat = zmat2f(zeroes,J[0]);
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      for(ind_j=0; ind_j<Esz; ind_j++)
-      {  // Calculates the matrix elements <Vi|J.H|Vi>
-         // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-          me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
-            //printf(" %g=",zme.r);//DEBUG 
-         //   zme.r=0;zme.i=0;              
-                  /*  F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-#ifdef _G77 
-         F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
-#else
-         zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
-#endif  me[ind_j] = zme.r;*/
-//       eb[ind_j] = exp(-E[ind_j]/(KB*T)); ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MR 17.9.2010
-         if (T<0)
-         {  char instr[MAXNOFCHARINLINE];
-            printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-            if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
-            eb[ind_j]=strtod(instr,NULL);
-         }
-         else
-         {  eb[ind_j] = exp(-E[ind_j]/(KB*T)); } ex[0]+=me[ind_j]*eb[ind_j]; Z+=eb[ind_j]; U+=(E[ind_j]+VE.E(0))*eb[ind_j];
-//MRend 17.9.2010                                                                   !!!!    -----------------!!!!
-      }
-      free(zJmat); free(zt); matel.push_back(me); ex[0]/=Z; U/=Z;
-   }
-
-   char nstr[6]; char basename[255]; strcpy(basename,"results/mms/");
-   if(_save_matrices) {
-   #ifndef _WINDOWS
-   struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
-      if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::expJ(): Can't create mms dir, " << strerror(errno) << "\n";
-   #else
-   DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY))
-      if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::expJ(): Cannot create mms directory\n";
-   #endif
-   nstr[0] = (_l==F?102:100); if(_n<10) { nstr[1] = _n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = _n+38; nstr[3] = 0; }
-   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;   // 85 is ASCII for "U", 100=="d" and 102=="f"
-   } else { strcpy(basename,"nodir/"); }
    int k[] = {0,1, 1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-   sMat<double> Upq,Umq;  //if(n>(2*_l+1)) n = 4*_l+2-n;
+   //sMat<double> Upq,Umq;  //if(n>(2*_l+1)) n = 4*_l+2-n;
    char xyzstr[] = "xyz";
-   if(xyz>0) { std::cout << "Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
-   else      { std::cout << "Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
+   if(xyz>0) { std::cout << "#Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
+   else      { std::cout << "#Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
 
+   // For first run calculate also the partition function and internal energy
    // Rest of the runs only calculate the new matrix elements
+   me.assign(Esz,0.); eb.assign(Esz,0.); Z=0.;
    for(iJ=0; iJ<(_num_op>6?_num_op:6); iJ++)
    {  ex[iJ]=0;
       me.assign(Esz,0.);
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      if((k[iJ]%2==1) || (k[iJ]>4 && _l==D)) { matel.push_back(me); continue; }
+      if((k[iJ]%2==1) || (k[iJ]>4 && _l==D)) {  continue; }
          complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
          
          zJmat = balcar_Mq(xyz,k[iJ],q[iJ],_n,_l); // minus sign stands for orbital density coeff
@@ -820,46 +678,46 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T, std::
          {  // Calculates the matrix elements <Vi|J.H|Vi>
              // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
               me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
-
-           /* F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-            #ifdef _G77
-            F77NAME(zdotc)(&zme, &Hsz, VE.zV(ind_j), &incx, zt, &incx);
-            #else
-            zme = F77NAME(zdotc)(&Hsz, VE.zV(ind_j), &incx, zt, &incx);
-            #endif
-            me[ind_j] = zme.r;*/
-            ex[iJ]+=me[ind_j]*eb[ind_j];
+  if(iJ==0){
+//MR 17.9.2010
+      if (T<0)
+      {  char instr[MAXNOFCHARINLINE];
+         printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
+         if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
+         eb[ind_j]=strtod(instr,NULL);
+      }
+       else
+      {  eb[ind_j] = exp(-E[ind_j]/(KB*T));}  Z+=eb[ind_j];
+//MRend 17.9.2010
+             }
+             ex[iJ]+=me[ind_j]*eb[ind_j];
          }
-         free(zJmat); free(zt); matel.push_back(me); ex[iJ]/=Z;
+         free(zJmat); free(zt);  ex[iJ]/=Z;
       
       if(fabs(ex[iJ])<DBL_EPSILON) ex[iJ]=0.;
    }
-   //ex[iJ] = log(Z)-VE.E(0)/(KB*T); ex[iJ+1] = U;
-   return ex;
+    return ex;
 }
+
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the matrix M_ab=<i|M(q)|j><j|:(q)|i>{exp(-beta_i*T)-exp(-beta_j*T)} for some state i,j
 // --------------------------------------------------------------------------------------------------------------- //
 void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta)
 {  
-   double /* *vt=0, */ Z=0., therm; complexdouble *zt=0, zme; zme.r=0; zme.i=0.;
+   double Z=0., therm; complexdouble *zt=0, zme; zme.r=0; zme.i=0.;
    int sz = (_num_op>6?_num_op:6);
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
-// u.zero(sz); iu.zero(sz);
    int iJ, Hsz=VE.Hsz(), incx=1; 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::u1() - Hamiltonian matrix size not same as mean field operator!\n"; return; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
- /*double alpha = 1, beta = 0;*/ complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    complexdouble *zJmat=0;
    char uplo = 'U';
  // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
    int k[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,-1,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-// int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
-                 
-// sMat<double> Upq,Umq; double redmat; int n = _n; if(n>(2*_l+1)) n = 4*_l+2-n; 
 
    // Calculates the matrix elements: <i|Ja|j> and <j|Ja|i> for each of the six Ja's
    for(iJ=0; iJ<sz; iJ++)
@@ -874,12 +732,10 @@ void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, ice
          #endif
 //       int k;for(k=0;k<Hsz;++k)printf("%6.3f %+6.3f i  ",VE.zV(j)[k].r,VE.zV(j)[k].i);
          free(zJmat); free(zt);
-//    }
    }
 
    if(i==j&&T>0) {//subtract thermal expectation value from zij=zii
-            std::vector< std::vector<double> > matel;
-            std::vector<double> vJ = spindensity_expJ(VE,xyz,T,matel);
+            std::vector<double> vJ = spindensity_expJ(VE,xyz,T);
             for(iJ=0; iJ<sz; iJ++)zij[iJ].r-=vJ[iJ];
             }
    if (T<0){T=-T;}

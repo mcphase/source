@@ -69,12 +69,19 @@ class icmfmat
       bool _save_matrices;                         // true:  matrices of operators be saved in files instead of storing J[i]
       int _num_op;                                 // number of operators to store internally (will be increased if required)
       std::string _density;                        // Flag to output expectation values of spin/orbital density operator.
-      void Jop_generate(int m);                         // generates the operator matrix I[m] 
-   public:
+      sMat<double> *Imat;
       std::vector<sMat<double> > J;                // A vector of the matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
+     
+   public:
+     std::vector<complexdouble*> T;                // A vector of truncated matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
+    sMat<double> * op_generate(int m);          // generates the operator matrix I[m] and returns a pointer to it
+      void op_free(int m);                            // frees the memory for generated operator m
+                                                  // (only in case of save_matrices option i.e. when matrices are stored in files)
       std::vector<int> iflag;                      // Vector to determine if matrix is imaginary
 
       icmfmat();                                   // Blank constructor
+      icmfmat(const icmfmat & pp);                                   // Copy constructor
+      ~icmfmat(); // Destructor
       icmfmat(int n, orbital l, int num_op,        // Constructor for l^n configuration
         bool save_matrices, std::string density="");
       void Jmat(sMat<double>&J, sMat<double>&iJ,   // Calculates the mean field matrix sum_i (H_i*J_i)
@@ -83,11 +90,9 @@ class icmfmat
         std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Im|n>
         int num_op);                               // with 0<=m<num_op
        std::vector<double> spindensity_expJ(iceig&VE,//Calculates the expectation values
-        int xyz,double T,                          //   <V|spindensitycoeff_of_Zlm|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel);
+        int xyz,double T);                          //   <V|spindensitycoeff_of_Zlm|V>exp(-beta*T)
       std::vector<double> orbmomdensity_expJ(      // Calculates the expectation values
-        iceig&VE,int xyz, double T,                //   <V|orbmomdensitycoeff_of_Zlm|V>exp(-beta*T)
-        std::vector<std::vector<double> >&matel);
+        iceig&VE,int xyz, double T);                //   <V|orbmomdensitycoeff_of_Zlm|V>exp(-beta*T)
       void u1(std::vector<double> &u1,             // Calculates the vector u1 = <i|Ja-<Ja>|j>
         std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
         int i, int j, int p, float &d);
