@@ -1323,12 +1323,12 @@ bool ic1ion_module::opmat(int &ni,                      // ni     which operator
       }
        
       // Calculates the operator matrices <Sx>, <Lx>, etc.
-      sMat<double> * Jmat=mfmat.op_generate(nn);
+      sMat<double> Jmat=mfmat.op_generate(nn);
       
          if(pars.truncate_level!=1 || n<0) {
-            if(mfmat.iflag[nn]==0) truncate_hmltn_packed(pars,(*Jmat),zeroes,outmat,sipffile); else truncate_hmltn_packed(pars,zeroes,(*Jmat),outmat,sipffile); }
+            if(mfmat.iflag[nn]==0) truncate_hmltn_packed(pars,Jmat,zeroes,outmat,sipffile); else truncate_hmltn_packed(pars,zeroes,Jmat,outmat,sipffile); }
          else {
-            if(mfmat.iflag[nn]==0) zmat2pack((*Jmat),zeroes,outmat);                  else zmat2pack(zeroes,(*Jmat),outmat); }
+            if(mfmat.iflag[nn]==0) zmat2pack(Jmat,zeroes,outmat);                  else zmat2pack(zeroes,Jmat,outmat); }
          return true;
      
       mfmat.op_free(nn);

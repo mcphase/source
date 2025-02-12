@@ -69,12 +69,11 @@ class icmfmat
       bool _save_matrices;                         // true:  matrices of operators be saved in files instead of storing J[i]
       int _num_op;                                 // number of operators to store internally (will be increased if required)
       std::string _density;                        // Flag to output expectation values of spin/orbital density operator.
-      sMat<double> *Imat;
       std::vector<sMat<double> > J;                // A vector of the matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
      
    public:
      std::vector<complexdouble*> T;                // A vector of truncated matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
-    sMat<double> * op_generate(int m);          // generates the operator matrix I[m] and returns a pointer to it
+    sMat<double>  op_generate(int m);          // generates the operator matrix I[m] and returns a pointer to it
       void op_free(int m);                            // frees the memory for generated operator m
                                                   // (only in case of save_matrices option i.e. when matrices are stored in files)
       std::vector<int> iflag;                      // Vector to determine if matrix is imaginary

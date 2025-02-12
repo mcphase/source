@@ -47,26 +47,7 @@ void ic1ion_module::truncate_hmltn(icpars &pars,  sMat<double> &Hic, sMat<double
    for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++) { 
       if(fabs(mfmat.T[0][ii*Hsz+jj].r)<DBL_EPSILON) {mfmat.T[0][ii*Hsz+jj].r=0.;} if(fabs(mfmat.T[0][ii*Hsz+jj].i)<DBL_EPSILON) {mfmat.T[0][ii*Hsz+jj].i=0.;} } 
    std::cout << "Finished.";
-   /*
-   // Set up directory to store matrices if the user asks for it.
-   char nstr[6]; char filename[255]; char basename[255];
-   if(pars.save_matrices) 
-   {
-      #ifndef _WINDOWS
-      struct stat status; int dirstat=0; stat("results/mms/",&status); if(!S_ISDIR(status.st_mode)) dirstat = mkdir("results/mms",0777);
-      if(dirstat!=0) { std::cerr << "Icalc(): " << errno << "\n"; exit(EXIT_FAILURE); }
-      #else
-      DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY)) 
-      if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::Jmat(): Cannot create mms directory\n";
-      #endif
-      nstr[0] = (pars.l==F?102:100); if(pars.n<10) { nstr[1] = pars.n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = pars.n+38; nstr[3] = 0; }
-      strcpy(basename,"results/mms/"); strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;  
-   } 
-   else 
-      strcpy(basename,"/dev/null");
-   #define NSTR(K,Q) nstr[1] = K+48; nstr[2] = Q+48; nstr[3] = 0
-   #define MSTR(K,Q) nstr[1] = K+48; nstr[2] = 109;  nstr[3] = Q+48; nstr[4] = 0
-*/
+   
    // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
    //int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    //int q[] = {0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
@@ -87,36 +68,19 @@ void ic1ion_module::truncate_hmltn(icpars &pars,  sMat<double> &Hic, sMat<double
   // icmfmat mfmat(pars.n,pars.l,JHi-JLo+1,pars.save_matrices);
    //double redmat;
    for(int iJ=(JLo-1); iJ<JHi; iJ++)
-   {sMat<double> * Jmat=mfmat.op_generate(iJ);
- std::cout << " 1operator "<< iJ << std::endl;
-
-      //if(iJ<6) 
-     // {
-         if(mfmat.iflag[iJ]==0) zJmat=zmat2f((*Jmat),zeroes); else zJmat = zmat2f(zeroes,(*Jmat));
-    std::cout << " 2operator "<< iJ << std::endl;
- /* }
-      else
-      {
-         NSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-         Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(pars.n,k[iJ],abs(q[iJ]),pars.l); rmzeros(Upq); mm_gout(Upq,filename); }
-         MSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-         Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[iJ],-abs(q[iJ]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
-         redmat = pow(-1.,(double)abs(pars.l)) * (2*pars.l+1) * threej(2*pars.l,2*k[iJ],2*pars.l,0,0,0);
-         #ifdef JIJCONV
-         if(pars.B.norm().find("Stevens")!=std::string::npos) redmat*=pars.jijconv[iJ+1];
-         #endif
-         if(q[iJ]<0) { if((q[iJ]%2)==0) Umq -= Upq; else Umq += Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
-         Umq *= redmat; if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq);
-      }*/
- if(mfmat.T[iJ+2]==NULL)mfmat.T[iJ+2]= new complexdouble[cb*cb]; 
- F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,mfmat.T[0],&Hsz,&zbeta,zmt,&Hsz);
- F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,mfmat.T[0],&Hsz,zmt,&Hsz,&zbeta,mfmat.T[iJ+2],&cb); 
-    free(zJmat);
+   {sMat<double>  Jmat=mfmat.op_generate(iJ);
+    if(mfmat.iflag[iJ]==0) zJmat=zmat2f(Jmat,zeroes); else zJmat = zmat2f(zeroes,Jmat);
+   
+     if(mfmat.T[iJ+2]==NULL)mfmat.T[iJ+2]= new complexdouble[cb*cb]; 
+     F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,mfmat.T[0],&Hsz,&zbeta,zmt,&Hsz);
+     F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,mfmat.T[0],&Hsz,zmt,&Hsz,&zbeta,mfmat.T[iJ+2],&cb); 
+     free(zJmat);
  for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
-         if(fabs(mfmat.T[iJ+2][ii*cb+jj].r)<DBL_EPSILON) {mfmat.T[iJ+2][ii*cb+jj].r=0.;} if(fabs(mfmat.T[iJ+2][ii*cb+jj].i)<DBL_EPSILON) {mfmat.T[iJ+2][ii*cb+jj].i=0.;} } 
+         if(fabs(mfmat.T[iJ+2][ii*cb+jj].r)<DBL_EPSILON) {mfmat.T[iJ+2][ii*cb+jj].r=0.;} 
+         if(fabs(mfmat.T[iJ+2][ii*cb+jj].i)<DBL_EPSILON) {mfmat.T[iJ+2][ii*cb+jj].i=0.;} 
+         } 
    mfmat.op_free(iJ);
    }
-  // delete[]Vf;  
   delete[]zmt;
    end = clock(); std::cout << "Done. Time to set up rotated matrices = " << (double)(end-start)/CLOCKS_PER_SEC << "s." << std::endl;
 }
@@ -175,11 +139,10 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
    int Esz, incx=1; std::vector<double> E, me, eb;
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
 
-   int cb = (int)(pars.truncate_level*Hsz), offset = EST_OFFSET+Hsz*Hsz; 
+   int cb = (int)(pars.truncate_level*Hsz);//, offset = EST_OFFSET+Hsz*Hsz; 
    if(cb<2){std::cerr <<  "Truncate too strong, " << cb << " states are too few - please increase truncate_level.\n";exit(EXIT_FAILURE);}
    complexdouble *Hrot; Hrot = new complexdouble[cb*cb]; 
-//   memcpy(Hrot,&Pst[offset][0],cb*cb*sizeof(complexdouble)); 
-     memcpy(Hrot,mfmat.T[1],cb*cb*sizeof(complexdouble)); 
+   memcpy(Hrot,mfmat.T[1],cb*cb*sizeof(complexdouble)); 
    int szapy=cb*cb; complexdouble a; a.r=1.; a.i=0.;
    // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
    //int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
@@ -190,7 +153,6 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
    for(int iJ=1; iJ<=(gjmbH.Hi()-gjmbH.Lo()+1); iJ++)
    {
       a.r = -gjmbH[iJ+gjmbH.Lo()-1]; 
-  //    if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,(complexdouble*)&Pst[iJ*cb*cb+offset][0],&incx,Hrot,&incx);
       if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,mfmat.T[iJ+1],&incx,Hrot,&incx);
    }
 
@@ -205,39 +167,14 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
    for(Esz=0; Esz<cb; Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T(T.Hi())))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
 
    // Does initialisations in case we need to recalculate the higher order multipolar matrices (e.g. for spins)
-   int memloc=cb*cb, oldJhi=J.Rhi();
    complexdouble  *zmt=0;//*opmat=0,
    sMat<double> zeroes; zeroes.zero(Hsz,Hsz);
-   // sMat<double> Upq,Umq; 
    complexdouble *zJmat;
    char notranspose='N',transpose='C',side='L'; 
-   /*char nstr[6]; char filename[255]; char basename[255];
-   if(pars.save_matrices) 
-   {
-      #ifndef _WINDOWS
-      struct stat status; int dirstat=0; stat("results/mms/",&status); if(!S_ISDIR(status.st_mode)) dirstat = mkdir("results/mms",0777);
-      if(dirstat!=0) { std::cerr << "ic1ion truncate: Cannot create mms directory\n"; exit(EXIT_FAILURE); }
-      #else
-      DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY)) 
-      if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::Jmat(): Cannot create mms directory\n";
-      #endif
-      nstr[0] = (pars.l==F?102:100); if(pars.n<10) { nstr[1] = pars.n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = pars.n+38; nstr[3] = 0; }
-      strcpy(basename,"results/mms/"); strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 85;  
-   } 
-   else 
-      strcpy(basename,"/dev/null");
-   */
+   
    // Checks that this time we require expectation values of higher order multipoles even though these were not used in mcphasit
    clock_t start,end; start = clock();
-  /* if((J.Rhi()*cb*cb+Hsz*Hsz)>Pst.Rows()) 
-   {
-      std::cerr << "ic1ion truncate: Multipolar operators not precalculated. Calculating now..." << std::flush;
-      oldJhi = (Pst.Rows()-offset)/cb/cb-1;
-      zmt = new complexdouble[Hsz*cb];
-      opmat = new complexdouble[cb*cb];
-   }
-  */
-    oldJhi=mfmat.T.size()-2;
+   int oldJhi=mfmat.T.size()-2;
     if(J.Rhi()>oldJhi)zmt = new complexdouble[Hsz*cb];
    // Calculates the rotated operators for the mean field terms
    complexdouble *zt; Vector Z(1,T.Hi());Z=0.; eb.assign(Esz,0.); U=0;
@@ -246,31 +183,10 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
       me.assign(Esz,0.);
       zt = (complexdouble*)malloc(cb*sizeof(complexdouble));for(int Ti=1;Ti<=J.Chi();++Ti)J[iJ+1][Ti]=0.; 
       if(iJ>=oldJhi) 
-      {sMat<double> * Jmat=mfmat.op_generate(iJ);
+      {sMat<double> Jmat=mfmat.op_generate(iJ);
          if(mfmat.T[iJ+2]==NULL)mfmat.T[iJ+2]= new complexdouble[cb*cb];
-         if(mfmat.iflag[iJ]==0) zJmat=zmat2f((*Jmat),zeroes); else zJmat = zmat2f(zeroes,(*Jmat));
+         if(mfmat.iflag[iJ]==0) zJmat=zmat2f(Jmat,zeroes); else zJmat = zmat2f(zeroes,Jmat);
        mfmat.op_free(iJ);
-    /*     if(iJ<6) 
-         {
-            icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices);
-            if(im[iJ]==0) zJmat=zmat2f(mfmat.J[iJ],zeroes); else zJmat = zmat2f(zeroes,mfmat.J[iJ]);
-         }
-         else
-         {
-            NSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-            Upq = mm_gin(filename); if(Upq.isempty()) { Upq = racah_ukq(pars.n,k[iJ],abs(q[iJ]),pars.l); rmzeros(Upq); mm_gout(Upq,filename); }
-            MSTR(k[iJ],abs(q[iJ])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
-            Umq = mm_gin(filename); if(Umq.isempty()) { Umq = racah_ukq(pars.n,k[iJ],-abs(q[iJ]),pars.l); rmzeros(Umq); mm_gout(Umq,filename); }
-            double redmat = pow(-1.,(double)abs(pars.l)) * (2*pars.l+1) * threej(2*pars.l,2*k[iJ],2*pars.l,0,0,0);
-            #ifdef JIJCONV
-            if(pars.B.norm().find("Stevens")!=std::string::npos) redmat*=pars.jijconv[iJ+1];
-            #endif
-            if(q[iJ]<0) { if((q[iJ]%2)==0) Umq -= Upq; else Umq += Upq; } else if(q[iJ]>0) { if((q[iJ]%2)==0) Umq += Upq; else Umq -= Upq; }
-            Umq *= redmat; if(im[iJ]==0) zJmat=zmat2f(Umq,zeroes); else zJmat = zmat2f(zeroes,Umq);
-         }
-     */
-//         F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
-//         F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
          F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,mfmat.T[0],&Hsz,&zbeta,zmt,&Hsz);
          F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,mfmat.T[0],&Hsz,zmt,&Hsz,&zbeta,mfmat.T[iJ+2],&cb); free(zJmat);
          for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
@@ -279,28 +195,16 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
       for(int ind_j=0; ind_j<Esz; ind_j++)
       {  // Calculates the matrix elements <Vi|J.H|Vi>
           // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-        //    if(iJ>=oldJhi)me[ind_j] = expectation_value(cb,opmat                                 ,VE.zV(ind_j)); // defined in martin.c
-        //    else          me[ind_j] = expectation_value(cb,(complexdouble*)&Pst[memloc+offset][0],VE.zV(ind_j));
          me[ind_j] = expectation_value(cb,mfmat.T[iJ+2],VE.zV(ind_j));
-        /* if(iJ>=oldJhi) F77NAME(zhemv)(&uplo, &cb, &zalpha, opmat,                                  &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-         else             F77NAME(zhemv)(&uplo, &cb, &zalpha, (complexdouble*)&Pst[memloc+offset][0], &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-         #ifdef _G77 
-         F77NAME(zdotc)(&zme, &cb, VE.zV(ind_j), &incx, zt, &incx);
-         #else
-         zme = F77NAME(zdotc)(&cb, VE.zV(ind_j), &incx, zt, &incx);
-         #endif
-         me[ind_j] = zme.r;*/for(int Ti=1;Ti<=T.Hi();++Ti){
+        for(int Ti=1;Ti<=T.Hi();++Ti){
          if(iJ==(J.Rlo()-1)) { eb[ind_j] = exp(-E[ind_j]/(KB*T(Ti))); Z(Ti)+=eb[ind_j]; U(Ti)+=(E[ind_j]+VE.E(0))*eb[ind_j]; }
          J[iJ+1][Ti]+=me[ind_j]*eb[ind_j];}
       }
       free(zt); for(int Ti=1;Ti<=T.Hi();++Ti){J[iJ+1][Ti]/=Z(Ti); if(iJ==(J.Rlo()-1)) U(Ti)/=Z; }
-      memloc+=cb*cb;
-   }
+     }
   // if((J.Rhi()*cb*cb+Hsz*Hsz)>Pst.Rows()) 
    if(J.Rhi()>oldJhi){
       end = clock(); std::cout << " Done. Elapsed time = " << (double)(end-start)/CLOCKS_PER_SEC << "s." << std::endl;
-//    if(!opmat) { delete[]opmat; *opmat=0; } if(!zmt) { delete[]zmt; *zmt=0; }
-     // delete[]opmat;
       delete[]zmt;
    }
    for(int Ti=1;Ti<=T.Hi();++Ti)lnZ(Ti) = log(Z(Ti))-VE.E(0)/(KB*T(Ti));
@@ -316,9 +220,8 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
    int Esz, incx=1; std::vector<double> E, me, eb;
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
 
-   int cb = (int)(pars.truncate_level*Hsz), offset = EST_OFFSET+Hsz*Hsz; 
+   int cb = (int)(pars.truncate_level*Hsz);
    complexdouble *Hrot; Hrot = new complexdouble[cb*cb]; 
-   //memcpy(Hrot,&Pst[offset][0],cb*cb*sizeof(complexdouble)); 
      memcpy(Hrot,mfmat.T[1],cb*cb*sizeof(complexdouble)); 
    int szapy=cb*cb; complexdouble a; a.r=1.; a.i=0.;
 
@@ -364,9 +267,7 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
 
       zJmat = balcar_Mq(xyz,k[iJ],q[iJ],pars.n,pars.l);
 
-     // F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,&zbeta,zmt,&Hsz);
-     // F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,(complexdouble*)&Pst[EST_OFFSET][0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
-         F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,mfmat.T[0],&Hsz,&zbeta,zmt,&Hsz);
+        F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,mfmat.T[0],&Hsz,&zbeta,zmt,&Hsz);
          F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,mfmat.T[0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
        for(int ii=0; ii<cb; ii++) for(int jj=0; jj<cb; jj++) { 
          if(fabs(opmat[ii*cb+jj].r)<DBL_EPSILON) {opmat[ii*cb+jj].r=0.;} if(fabs(opmat[ii*cb+jj].i)<DBL_EPSILON) {opmat[ii*cb+jj].i=0.;} } 
@@ -376,14 +277,7 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
          // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
          me[ind_j] = expectation_value(cb,opmat,VE.zV(ind_j)); // defined in martin.c
 
-         /*F77NAME(zhemv)(&uplo, &cb, &zalpha, opmat, &cb, VE.zV(ind_j), &incx, &zbeta, zt, &incx);
-         #ifdef _G77 
-         F77NAME(zdotc)(&zme, &cb, VE.zV(ind_j), &incx, zt, &incx);
-         #else
-         zme = F77NAME(zdotc)(&cb, VE.zV(ind_j), &incx, zt, &incx);
-         #endif
-         me[ind_j] = zme.r;*/
-         if(iJ==0) { eb[ind_j] = exp(-E[ind_j]/(KB*T)); Z+=eb[ind_j]; }
+          if(iJ==0) { eb[ind_j] = exp(-E[ind_j]/(KB*T)); Z+=eb[ind_j]; }
          J[iJ+1]+=me[ind_j]*eb[ind_j];
       }
       free(zt); J[iJ+1]/=Z;

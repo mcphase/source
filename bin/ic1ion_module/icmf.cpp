@@ -252,13 +252,12 @@ std::string iceig::strout()
    for(i=0; i<_Hsz; i++) { for(j=0; j<_Hsz; j++) ss << _V[j*_Hsz+i]; ss << "\n"; }
    return ss.str();
 }
-
 // --------------------------------------------------------------------------------------------------------------- //
 // Constructor for class icmfmat::
 // --------------------------------------------------------------------------------------------------------------- //
 icmfmat::icmfmat()
 { 
-   sMat<double> t; J.assign(6,t); T.assign(6,NULL);
+   sMat<double> t; J.assign(6,t); T.assign(8,NULL);
    iflag.assign(6,0); iflag[2]=1; iflag[3]=1;
    _n = 1; _l = S; _num_op = 1; _save_matrices=false;
    #ifdef JIJCONV
@@ -268,7 +267,7 @@ icmfmat::icmfmat()
 icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string density)
 {
    _n = n; _l = l; _num_op = num_op; _density = density;_save_matrices=save_matrices;
-   sMat<double> t; J.assign(num_op>6?num_op:6,t); T.assign(num_op>6?(num_op+2):(6+2),NULL);
+   sMat<double> t; J.assign(num_op>6?num_op:6,t); T.assign(num_op>6?num_op+2:8,NULL);
    iflag.assign(num_op>6?num_op:6,0); 
    for(int m=0;m<(num_op>6&&!save_matrices?num_op:6);++m)op_generate(m);
 }
@@ -283,7 +282,7 @@ icmfmat::~icmfmat()
 for(int i=0;i<T.size();++i)if(T[i]!=NULL)delete []T[i];
 }
 
-sMat<double> * icmfmat::op_generate(int i)
+sMat<double> icmfmat::op_generate(int i)
 {if(_num_op<=i) {_num_op = i+1; iflag.resize(_num_op,0); // extend operator storage if more operators are required
                  sMat<double> t; J.resize(_num_op,t);T.resize(_num_op+2,NULL);
                                  }
@@ -374,8 +373,8 @@ sMat<double> * icmfmat::op_generate(int i)
       sMat<double> Upq,Umq; double redmat; int n = _n; //if(n>(2*_l+1)) n = 4*_l+2-n; 
             if(q[i]<0) iflag[i]=1;
          
-            if(k[i]%2==1){} // continue;   // Using the  reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-            else if(k[i]>4 && _l==D){} //continue;
+            if(k[i]%2==1){J[i].zero(J[0].nr(),J[0].nc());} // continue;   // Using the  reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
+            else if(k[i]>4 && _l==D){J[i].zero(J[0].nr(),J[0].nc());} //continue;
             else {
             redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[i],2*_l,0,0,0);// * wy2stev(i);
             NSTR(k[i],abs(q[i])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
@@ -394,9 +393,9 @@ sMat<double> * icmfmat::op_generate(int i)
  
  }
 
-Imat=&J[i];
+
  
-return Imat;
+return J[i];
 }
 
 void icmfmat::op_free(int i)
@@ -411,7 +410,7 @@ if(_save_matrices&&i>5) {J[i].clear();}
 void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gjmbH)
 {  int i; Jmat.zero(J[0].nr(),J[0].nc()); iJmat.zero(J[0].nr(),J[0].nc()); 
    if(_num_op<(int)gjmbH.size()) {_num_op = (int)gjmbH.size(); iflag.resize(_num_op,0); 
-                                   sMat<double> t; J.resize(_num_op,t);T.resize(_num_op+2,NULL);
+                                   sMat<double> t; J.resize(_num_op,t);
                                  }
    for(i=0; i<((int)gjmbH.size()>6?6:_num_op); i++)
       if(fabs(gjmbH[i])>DBL_EPSILON*100) { if(iflag[i]==1) iJmat += J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i]; }
