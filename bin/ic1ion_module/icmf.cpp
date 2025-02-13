@@ -555,7 +555,7 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
 void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta)
 {  double  Z=0., therm; complexdouble zme; zme.r=0; zme.i=0.;
 //   int sz = (_num_op>6?_num_op:6);
-  int sz = u.size();
+  int sz =(u.size()>6?u.size():6);
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
    int iJ, Hsz=VE.Hsz(); 
@@ -707,7 +707,8 @@ std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T)
 void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta)
 {  
    double Z=0., therm; complexdouble *zt=0, zme; zme.r=0; zme.i=0.;
-   int sz = (_num_op>6?_num_op:6);
+   int sz = u.size();
+   if(sz>49){std::cerr << "Error: icmfmat::dod_u1 called with u of dimension " << sz << ">49 this is not possible\n";exit(EXIT_FAILURE);}
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
    int iJ, Hsz=VE.Hsz(), incx=1; 
@@ -716,7 +717,7 @@ void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, ice
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    complexdouble *zJmat=0;
    char uplo = 'U';
- // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
+ // Indices 4-8 are k=2 quadrupoles; 9-15:k=3; 16-24:k=4; 25-35:k=5; 36-48:k=6
    int k[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
    int q[] = {0,-1,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
 
@@ -744,8 +745,8 @@ void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, ice
    // Calculates the matrix M_ab and iM_ab
    for(iJ=0; iJ<sz; iJ++)
       {  
-         u[iJ+1] = zij[iJ].r;
-         iu[iJ+1]= zij[iJ].i;
+         u[iJ] = zij[iJ].r;
+         iu[iJ]= zij[iJ].i;
       }
 
    delta = VE.E(j)-VE.E(i);
@@ -766,8 +767,8 @@ void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, ice
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ia|%i>|^2=%6.3f\n |<%i|Ib|%i>|^2=%6.3f\n |<%i|Ic|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
-         printf(" |<%i|Id|%i>|^2=%6.3f\n |<%i|Ie|%i>|^2=%6.3f\n |<%i|If|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+         printf(" |<%i|Ia|%i>|^2=%6.3f\n |<%i|Ib|%i>|^2=%6.3f\n |<%i|Ic|%i>|^2=%6.3f\n",i+1,j+1,u[0]*u[0]+iu[0]*iu[0],i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2]);
+         printf(" |<%i|Id|%i>|^2=%6.3f\n |<%i|Ie|%i>|^2=%6.3f\n |<%i|If|%i>|^2=%6.3f\n",i+1,j+1,u[3]*u[3]+iu[3]*iu[3],i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5]);
          printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
       }
    }
@@ -777,14 +778,14 @@ void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, ice
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ia-<Ia>|%i>|^2=%6.3f\n |<%i|Ib-<Ib>|%i>|^2=%6.3f\n |<%i|Ic-<Ic>|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
-         printf(" |<%i|Id-<Id>|%i>|^2=%6.3f\n |<%i|Ie-<Ie>|%i>|^2=%6.3f\n |<%i|If-<If>|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+         printf(" |<%i|Ia-<Ia>|%i>|^2=%6.3f\n |<%i|Ib-<Ib>|%i>|^2=%6.3f\n |<%i|Ic-<Ic>|%i>|^2=%6.3f\n",i+1,j+1,u[0]*u[0]+iu[0]*iu[0],i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2]);
+         printf(" |<%i|Id-<Id>|%i>|^2=%6.3f\n |<%i|Ie-<Ie>|%i>|^2=%6.3f\n |<%i|If-<If>|%i>|^2=%6.3f\n",i+1,j+1,u[3]*u[3]+iu[3]*iu[3],i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5]);
          printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
       }
    }
 
    // multiply matrix Mab by occupation factor
    for(iJ=0; iJ<sz; iJ++)
-      { u[iJ+1] *= sqrt(therm/Z); iu[iJ+1] *= sqrt(therm/Z); }
+      { u[iJ] *= sqrt(therm/Z); iu[iJ] *= sqrt(therm/Z); }
 
 }

@@ -1098,7 +1098,7 @@ int      ic1ion_module::sdod_du1calc(int xyz,            // Indicating which of 
    double ninit=u1[1].real();
    double pinit=u1[1].imag();
    // Copies the already calculated energy levels / wavefunctions from *est
-   if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
+   if(est.Rows()!=est.Cols()) { std::cerr << "sdod_u1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
    int Hsz = est.Rows()-1;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    if(est[0][j+1].real()-est[0][i+1].real()<delta)
@@ -1107,8 +1107,6 @@ int      ic1ion_module::sdod_du1calc(int xyz,            // Indicating which of 
 
       
       // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-      int num_op = gjmbH.Hi()-gjmbH.Lo()+1;// icmfmat mfmat(pars.n,pars.l,(num_op>6?num_op:6),pars.save_matrices);
-
       iceig VE(Hsz,en,(complexdouble*)&est[1][0],1);
  
       // Calculates the transition matrix elements:
@@ -1116,11 +1114,11 @@ int      ic1ion_module::sdod_du1calc(int xyz,            // Indicating which of 
       //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
       //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
   
-      std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
+      std::vector<double> u(u1.Hi()), iu(u1.Hi());
       mfmat.dod_u1(xyz,u,iu,VE,T,i,j,pr,delta);
 
-      for(i=1; i<=u1.Hi(); i++)
-         u1(i) = complex<double> (u[i], iu[i]);
+      for(i=0; i<u1.Hi(); i++)
+         u1(i+1) = complex<double> (u[i], iu[i]);
    }
    // determine number of thermally reachable states
    if (ninit>Hsz)ninit=Hsz;
