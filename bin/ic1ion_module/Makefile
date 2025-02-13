@@ -218,18 +218,18 @@ else
 	$(LINKER) -o ../ic1ion ic1ion.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 endif
 
-ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp icmf.hpp
+ic1ion.o: ic1ion.cpp maths.hpp states.hpp ic1ion.hpp icmf.hpp ../../version
 ifdef integral
 	$(CC) $(CFLAGS) -I../include -I. -D_INTEGRAL -c $<
 else
 	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 
-states.o: states.cpp states.hpp ../include/constants.h lapack.h
+states.o: states.cpp states.hpp ../include/constants.h lapack.h ../../version
 	$(CC) $(patsubst -O3,   ,${CFLAGS}) -I../include -I. -c $<
 
 
-ic1ion_module.o: ic1ion_module.cpp truncate.cpp ic1ion_module.hpp ../include/singleion_module.hpp
+ic1ion_module.o: ic1ion_module.cpp truncate.cpp ic1ion_module.hpp ../include/singleion_module.hpp ../../version
 ifdef integral
 	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
@@ -241,14 +241,14 @@ endif
 endif
 
 
-icf1ion_module.o: icf1ion_module.cpp icf1ion_module.hpp ../include/sparsecomplex.hpp
+icf1ion_module.o: icf1ion_module.cpp icf1ion_module.hpp ../include/sparsecomplex.hpp ../../version
 ifdef integral
 	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
 	$(CC) $(CFLAGS) -I../include -I. -c $<
 endif
 
-ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o ic1ion_module.o  ../src/martin.o
+ic1ion.so: checkgcc libs/liblapack.a $(OBJ) states.o ic1ion.o ic1ion_module.o  ../src/martin.o ../../version
 	@echo Linking $@
 ifdef WINDOWS
 	@$(LINKER) -o ic1ion.so ic1ion_module.o ic1ion.o states.o  ../src/martin.o $(OBJ) $(VECOBJ) -shared $(LDFLAGS) -Wl,--out-implib,libic1ion_module.a
@@ -258,8 +258,8 @@ endif
 
 
 
-ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o ../src/martin.o ../src/myev.o # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o
-../icf1ionit$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o
+ICFOBJ := par_io.o icpars.o cfp.o ic_diag.o maths.o njsyms.o states.o mmio.o ../src/martin.o ../src/myev.o # lovesey.o icmf.o ic_hmltn.o coulomb.o so_cf.o 
+../icf1ionit$(EXE): checkgcc libs/liblapack.a $(ICFOBJ) icf1ion_module.o 
 	@echo Linking $@
 	@$(LINKER) -o ../icf1ion icf1ion_module.o $(ICFOBJ) $(VECOBJ) $(LDFLAGS) $(STATIC)
 

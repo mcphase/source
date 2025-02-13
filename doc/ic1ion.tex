@@ -122,12 +122,12 @@ Bz=0.1
 # carried out at the start - the diagonalisation of the single ion Hamiltonian, and
 # matrix-matrix multiplication to rotate the operator matrices. Once done the rotated 
 # matrices are stored in memory and then reused when the <J> expectation values have 
-# to be evaluated. the routine uses the Icalc_parstorage matrix for storing the 
-# rotated matrices.
+# to be evaluated. 
 # One should experiment with the value of X and compare it with using the full matrix 
 # diagonalisation before relying on the results. 
 # This approximation method is probably not necessary for d-electron matrices (as 
 # those are usually quite small), but for f-electrons it is quite useful!
+# Note: the truncate_matrix option in the sipf file will have no effect when using mcdisp
 # Uncomment the next line to use the truncate method with 1/5th of all levels
 
 # truncate_matrix=0.2

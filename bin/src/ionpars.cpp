@@ -897,7 +897,6 @@ int ionpars::noft(ComplexMatrix & est,double & T,double & pinit,double & ninit)
    int dj=est.Rhi();
    double n=ninit;
    if (n>dj)n=dj;
-   //if (pinit<SMALL_PROBABILITY)pinit=SMALL_PROBABILITY;
    double zsum=0,zii,x;
    int noft=0;
    if(T>0)for(int i=1;(i<=n)&((((x=(real(est(0,i))-real(est(0,1)))/KB/T)<200)? zii=exp(-x):zii=0)>=(pinit*zsum));++i)

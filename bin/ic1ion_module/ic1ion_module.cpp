@@ -129,9 +129,8 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
    int i,Hsz=getdim(pars.n,pars.l);
    complexdouble *Jm=0;
    if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-   {// check if truncate is to be used and if Hamiltonian was already calculated (Pst(0,0)=(-0.1,-0.1)
-     if(real(Pst[0][0])!=-0.1 || imag(Pst[0][0])!=-0.1)   // Truncates the matrix, and stores the single ion part in Pst
-     {    truncate_hmltn(pars,  Hic, iHic, J.Rhi(), J.Rlo());Pst[0][0] = complex<double> (-0.1,-0.1);}
+   {// check if truncate is to be used and if Hamiltonian was already calculated 
+      if(mfmat.T[0]==NULL){truncate_hmltn(pars,  Hic, iHic, J.Rhi(), J.Rlo());}
     truncate_expJ(pars,gjmbH,J,T,lnZ,U);
    }
    else
@@ -386,7 +385,7 @@ int ic1ion_module::du1calc(int &tn,            // Input transition number; if tn
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
                       char *sipffilename,// Single ion properties filename
                       ComplexVector & u1ret, // Output u1 vector
-                      float &delta,       // Output transition energy
+                      float &delta,       // Input maximal Energy / Output transition energy
                       int &n, int &nd,    // Output state numbers of initial and final state
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
@@ -396,7 +395,7 @@ int ic1ion_module::du1calc(int &tn,            // Input transition number; if tn
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   ComplexVector u1(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); u1=0; u1(1)=u1ret(1);
+   ComplexVector u1(1,gjmbH.Hi()); u1=0; u1(1)=u1ret(1);
    // --------------------------------------------------------------------------
 
    // Calculates the Zeeman term if magnetic field is not zero
@@ -417,23 +416,17 @@ int ic1ion_module::du1calc(int &tn,            // Input transition number; if tn
    double maxE=delta;n=i;nd=j;
    if((delta=(est[0][j+1].real()-est[0][i+1].real()))<=maxE)
    {  double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
- 
-      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-      int num_op = gjmbH.Hi()-gjmbH.Lo()+1; //icmfmat mfmat(pars.n,pars.l,(num_op>6?num_op:6),pars.save_matrices);
-                // MR: why num_op is defined by gjmbH dimension and not by u1 dimension ? (mfmat matrices should be initalised
-                //     to be able to calculate the components of vector u1. 
+      // catch eigenvectors VE from est
       iceig VE(Hsz,en,(complexdouble*)&est[1][0],1);
       // Calculates the transition matrix elements:
       //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
       //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
       //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
   
-      std::vector<double> u((num_op>6?num_op:6)+1), iu((num_op>6?num_op:6)+1);
+      std::vector<double> u(gjmbH.Hi()), iu(gjmbH.Hi());
       mfmat.u1(u,iu,VE,T,i,j,pr,delta);
-
-      for(i=1; i<=u1.Hi(); i++)
-         u1(i) = complex<double> (u[i], iu[i]);
-   
+      for(i=0; i<u1.Hi(); i++)
+         u1(i+1) = complex<double> (u[i], iu[i]);
     //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    complex<double>dum1;dum1=u1(2);u1(2)=u1(3);u1(3)=u1(5);u1(5)=u1(4);u1(4)=dum1;
@@ -441,14 +434,14 @@ int ic1ion_module::du1calc(int &tn,            // Input transition number; if tn
    }
    // determine number of thermally reachable states
    if (ninit>Hsz)ninit=Hsz;
-   //if (pinit<SMALL)pinit=SMALL;
    double zsum=0,zi,x;
    int noft=0; 
-   for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   if(T>0)for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
    {//fprintf(stderr,"i=%i zi=%g zsum=%g noft=%i Hsz=%i Ei-E1=%g\n",i,zi,zsum,noft,Hsz,est[0][i+1].real()-est[0][1].real());
       noft += Hsz-i; 
       zsum += zi;
    }
+   if(T<0)for(int i=0;i<ninit;++i){noft+=Hsz-i;}
    return noft;   
 }
 
@@ -536,31 +529,7 @@ int ic1ion_module::dS1(int &tn,            // Input transition number; if tn<0, 
    return nt;
 }
 
-// --------------------------------------------------------------------------------------------------------------- //
-// Routine to initialise the storage matrix "Pst" for Icalc
-// --------------------------------------------------------------------------------------------------------------- //
-bool ic1ion_module::Icalc_parameter_storage_matrix_init(
-                      ComplexMatrix &Pst,  // Parameter Storage Matrix for Module Operator Matrices
-                      Vector &Hxc,         // Input vector of exchange fields (meV) 
-                      Vector &Hext,        // Input vector of external field (T) 
- /* Not Used */       double &g_J,    // Input  Lande g-factor
-                      double &T,      // Input  temperature
- /* Not Used */       Vector & ABC,    // Input  Vector of parameters from single ion property file
-                      char *sipffilename) // Input  Single ion properties filename
-{  // If we just want a blank Pst matrix for later use (e.g. in Icalc)
-   int Hsz = getdim(pars.n,pars.l); 
-   if(pars.truncate_level==1)
-   { Pst = ComplexMatrix(0,Hsz,0,Hsz);
-  // Stores the number of electrons and the orbital number in element (0,0)
-     Pst(0,0) = complex<double> (pars.n, pars.l);
-    }
-   else
-   {  int Jlo=Hxc.Lo(), Jhi=Hxc.Hi()<6?6:Hxc.Hi(), cb = (int)(pars.truncate_level*(double)Hsz), matsize=cb*cb;
-      for (int ii=Jlo; ii<=Jhi; ii++) matsize += (cb*cb);
-      Pst = ComplexMatrix(0,matsize+100+Hsz*Hsz,0,0);
-   }
-return true;
-}
+
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the eigenstates of Hic+effective_mean_fields
@@ -935,8 +904,7 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
                 int xyz,             // direction 1,2,3 = x,y,z
                 double & T,           // Input scalar temperature
                 Vector &gjmbH,       // Input vector of mean fields (meV)
-                char *sipffilename, // Single ion properties filename
-                ComplexMatrix &Pst)  // Input/output Parameter Storage matrix (initialized in parstorage)
+                char *sipffilename) // Single ion properties filename
 {  
    
    // Calculates the IC Hamiltonian matrix
@@ -946,9 +914,8 @@ void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments
    
 
   if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-     {// check if truncate is to be used and if Hamiltonian was already calculated (Pst(0,0)=(-0.1,-0.1)
-     if(real(Pst[0][0])!=-0.1 || imag(Pst[0][0])!=-0.1)   // Truncates the matrix, and stores the single ion part in Pst
-     {    truncate_hmltn(pars,  Hic, iHic, J.Hi(), J.Lo());Pst[0][0] = complex<double> (-0.1,-0.1);}
+     {// check if truncate is to be used and if Hamiltonian was already calculated 
+     if(mfmat.T[0]==NULL){    truncate_hmltn(pars,  Hic, iHic, J.Hi(), J.Lo());}
       truncate_spindensity_expJ(pars,gjmbH,J,T,xyz);
      }	
    else
@@ -1071,7 +1038,7 @@ bool ic1ion_module::spindensity_coeff(Vector &J,          // Output single ion m
       if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
    }
   
-   sdod_Icalc(J,xyz,T,gjmbH,sipffilename,Pst);
+   sdod_Icalc(J,xyz,T,gjmbH,sipffilename);
 
    
 return true;
@@ -1107,7 +1074,7 @@ bool ic1ion_module::orbmomdensity_coeff(Vector &J,        // Output single ion m
       if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
    }
   
-   sdod_Icalc(J,-xyz,T,gjmbH,sipffilename,Pst);
+   sdod_Icalc(J,-xyz,T,gjmbH,sipffilename);
 return true;
 }
 

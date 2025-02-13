@@ -118,7 +118,7 @@ RCSCI    =      ci -u -f -s"Rel" -r$(VERSION) -m"$(LOCKMSG)"
 #
 
 INCL = mcphas.h  testspin.hpp qvectors.hpp spincf.hpp par.hpp  jjjpar.hpp inipar.hpp \
-       mfcf.hpp vector.h martin.h graphic_parameters.hpp 
+       mfcf.hpp vector.h martin.h graphic_parameters.hpp ../../version
 OBJS = jjjpar.o par.o physprop.o qvectors.o testspin.o spincf.o inipar.o \
         mfcf.o martin.o ionpars.o graphic_parameters.o perlparse.o
 
@@ -168,13 +168,13 @@ graphic_parameters.o: graphic_parameters.cpp graphic_parameters.hpp martin.h vec
 paramete.o: paramete.cpp paramete.hpp martin.h vector.h 
 	$(CCC) $(CFLAGS) $< 
 
-par.o: par.cpp par.hpp jjjpar.hpp martin.h vector.h ionpars.hpp cryststruct.hpp
+par.o: par.cpp par.hpp jjjpar.hpp martin.h vector.h ionpars.hpp cryststruct.hpp ../../version
 	$(CCC) $(CFLAGS) $< 
 
-jjjpar.o: jjjpar.cpp par.hpp ionpars.hpp perlparse.h $(DLLOADER_SRC) IDLLoader.h jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h
+jjjpar.o: jjjpar.cpp par.hpp ionpars.hpp perlparse.h $(DLLOADER_SRC) IDLLoader.h jjjpar_observables.cpp jjjpar_intmod_kramer.cpp jjjpar_intmod_brillouin.cpp jjjpar_intmod_cluster.cpp jjjpar_basmodfunc.cpp jjjpar.hpp martin.h vector.h myev.h ../../version
 	$(CCC) $(CFLAGS) $< 
 
-testspin.o: testspin.cpp testspin.hpp spincf.hpp martin.h
+testspin.o: testspin.cpp testspin.hpp spincf.hpp martin.h ../../version
 	$(CCC) $(CFLAGS) $< 
 
 spincf.o: spincf.cpp spincf_out.cpp spincf.hpp vector.h density.hpp jjjpar.hpp graphic_parameters.hpp cryststruct.hpp
@@ -193,19 +193,19 @@ mdcf.o: mdcf.cpp mdcf.hpp vector.h
 jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 	$(CCC) $(CFLAGS) $< 
 
-inipar.o: inipar.cpp inipar.hpp martin.h vector.h par.hpp
+inipar.o: inipar.cpp inipar.hpp martin.h vector.h par.hpp ../../version
 	$(CCC) $(CFLAGS) $< 
 
-ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h
+ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h ../../version
 	$(CCC) $(CFLAGS) $<
 
-inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp 
+inimcdis.o: inimcdis.cpp inimcdis.hpp martin.h vector.h mfcf.hpp ../../version
 	$(CCC) $(CFLAGS) $< 
 
-inimcdiff.o: inimcdiff.cpp inimcdiff.hpp martin.h vector.h mcdiff.h mfcf.hpp jjjpar.hpp
+inimcdiff.o: inimcdiff.cpp inimcdiff.hpp martin.h vector.h mcdiff.h mfcf.hpp jjjpar.hpp ../../version
 	$(CCC) $(CFLAGS) $< 
 
-physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp inipar.hpp
+physprop.o: physprop.cpp physprop.hpp spincf.hpp vector.h mfcf.hpp martin.h par.hpp inipar.hpp ../../version
 	$(CCC) $(CFLAGS) $< 
 
 qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp par.hpp myev.c
@@ -237,25 +237,25 @@ coq2jjj.o: coq2jjj.c paramete.hpp martin.h
 jjj2j.o: jjj2j.c par.hpp jjj2j.h jjjpar.hpp vector.h
 	$(CCC) $(CFLAGS) $<
 
-spins.o: spins.c densities_func.c spincf.hpp  martin.h vector.h graphic_parameters.hpp cryststruct.hpp par.hpp jjjpar.hpp
+spins.o: spins.c densities_func.c spincf.hpp  martin.h vector.h graphic_parameters.hpp cryststruct.hpp par.hpp jjjpar.hpp ../../version
 	$(CCC) $(CFLAGS) $<
 
-spinsfromq.o: spinsfromq.c spincf.hpp  par.hpp martin.h vector.h 
+spinsfromq.o: spinsfromq.c spincf.hpp  par.hpp martin.h vector.h ../../version
 	$(CCC) $(CFLAGS) $<
 
-singleion.o: singleion.c par.hpp jjjpar.hpp myev.h martin.h vector.h trs_io.c
+singleion.o: singleion.c par.hpp jjjpar.hpp myev.h martin.h vector.h trs_io.c ../../version
 	$(CCC) $(CFLAGS) $<
 
 densplt.o:  densplt.c plt_func.c density.hpp martin.h vector.h jjjpar.hpp graphic_parameters.hpp cryststruct.hpp spincf.hpp
 	$(CCC) $(CFLAGS) $<
 
-pointc.o:  pointc.c  martin.h vector.h ionpars.hpp jjjpar.hpp
+pointc.o:  pointc.c  martin.h vector.h ionpars.hpp jjjpar.hpp ../../version
 	$(CCC) $(CFLAGS) $<
 
 formfactor.o:  formfactor.c  martin.h vector.h ionpars.hpp jjjpar.hpp
 	$(CCC) $(CFLAGS) $<
 
-radwavfunc.o:  radwavfunc.c  martin.h vector.h ionpars.hpp jjjpar.hpp
+radwavfunc.o:  radwavfunc.c  martin.h vector.h ionpars.hpp jjjpar.hpp ../../version
 	$(CCC) $(CFLAGS) $<
 
 addj.o: addj.c par.hpp  martin.h vector.h
@@ -264,7 +264,7 @@ addj.o: addj.c par.hpp  martin.h vector.h
 reduce_unitcell.o: reduce_unitcell.c par.hpp  martin.h vector.h
 	$(CCC) $(CFLAGS) $<
 
-mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c inimcdiff.hpp spincf.hpp mfcf.hpp
+mcdiff.o: mcdiff.c jjjpar.hpp martin.h myev.h mcdiff.h mcdiff_intcalc.c mcdiff_output.c inimcdiff.hpp spincf.hpp mfcf.hpp ../../version
 	$(CCC) $(CFLAGS) $<
 
 myev.o: myev.c

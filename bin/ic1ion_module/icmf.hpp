@@ -72,8 +72,10 @@ class icmfmat
       std::vector<sMat<double> > J;                // A vector of the matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
      
    public:
-     std::vector<complexdouble*> T;                // A vector of truncated matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
-    sMat<double>  op_generate(int m);          // generates the operator matrix I[m] and returns a pointer to it
+     std::vector<complexdouble*> T;     // A vector of truncated matrices [T0 T1 T2 ... ] =
+                                        //[Eigenstates Ht Sxt Lxt Syt Lyt Szt Lzt ...] = [Eigenstates Ht It1 It2 It3 ...]
+                                        // (t atands for truncated), Eigenstates are not truncated and used for truncation
+    sMat<double>  op_generate(int m);          // generates the operator matrix I[m] and returns it
       void op_free(int m);                            // frees the memory for generated operator m
                                                   // (only in case of save_matrices option i.e. when matrices are stored in files)
       std::vector<int> iflag;                      // Vector to determine if matrix is imaginary

@@ -283,7 +283,8 @@ for(int i=0;i<T.size();++i)if(T[i]!=NULL)delete []T[i];
 }
 
 sMat<double> icmfmat::op_generate(int i)
-{if(_num_op<=i) {_num_op = i+1; iflag.resize(_num_op,0); // extend operator storage if more operators are required
+{if(_num_op<=i) {if(i>50){std::cerr << "Error icmfmat::op_generate - generating Operator " << i << " > 50 not possible\n";exit(EXIT_FAILURE);}
+                 _num_op = i+1; iflag.resize(_num_op,0); // extend operator storage if more operators are required
                  sMat<double> t; J.resize(_num_op,t);T.resize(_num_op+2,NULL);
                                  }
  if(J[i].isempty()) // only do something if Operator matrix is empty
@@ -359,7 +360,7 @@ sMat<double> icmfmat::op_generate(int i)
    chanlam_mumat(n,3,mu,l); sumcheck = 0.; for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
       sumcheck += fabs(-mu(ii,jj)-J[5](ii,jj)-g_s*J[4](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_z(ChanLam) - (Lz+gSz)) = " << sumcheck << "\n"; 
 */
-        } // i>=6
+        } // 50>=i>=6
     else{
     char filename[255];
             // for i>=6 calculates operator J[i] either loading Umq Upq from file or calculating the matrices
@@ -410,7 +411,7 @@ if(_save_matrices&&i>5) {J[i].clear();}
 void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gjmbH)
 {  int i; Jmat.zero(J[0].nr(),J[0].nc()); iJmat.zero(J[0].nr(),J[0].nc()); 
    if(_num_op<(int)gjmbH.size()) {_num_op = (int)gjmbH.size(); iflag.resize(_num_op,0); 
-                                   sMat<double> t; J.resize(_num_op,t);
+                                   sMat<double> t; J.resize(_num_op,t);T.resize(_num_op+2,NULL);
                                  }
    for(i=0; i<((int)gjmbH.size()>6?6:_num_op); i++)
       if(fabs(gjmbH[i])>DBL_EPSILON*100) { if(iflag[i]==1) iJmat += J[i]*gjmbH[i]; else Jmat += J[i]*gjmbH[i]; }
@@ -553,7 +554,8 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
 // --------------------------------------------------------------------------------------------------------------- //
 void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta)
 {  double  Z=0., therm; complexdouble zme; zme.r=0; zme.i=0.;
-   int sz = (_num_op>6?_num_op:6);
+//   int sz = (_num_op>6?_num_op:6);
+  int sz = u.size();
    std::vector<double> mij(sz,0.);//, mji(6,0.);
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
    int iJ, Hsz=VE.Hsz(); 
@@ -582,8 +584,8 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
    // Calculates the matrix M_ab and iM_ab
    for(iJ=0; iJ<sz; iJ++)
       {  
-         u[iJ+1] = zij[iJ].r;
-         iu[iJ+1]= zij[iJ].i;
+         u[iJ] = zij[iJ].r;
+         iu[iJ]= zij[iJ].i;
       }
 
    delta = VE.E(j)-VE.E(i);
@@ -604,8 +606,8 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ia|%i>|^2=%6.3f\n |<%i|Ib|%i>|^2=%6.3f\n |<%i|Ic|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
-         printf(" |<%i|Id|%i>|^2=%6.3f\n |<%i|Ie|%i>|^2=%6.3f\n |<%i|If|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+         printf(" |<%i|Ia|%i>|^2=%6.3f\n |<%i|Ib|%i>|^2=%6.3f\n |<%i|Ic|%i>|^2=%6.3f\n",i+1,j+1,u[0]*u[0]+iu[0]*iu[0],i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2]);
+         printf(" |<%i|Id|%i>|^2=%6.3f\n |<%i|Ie|%i>|^2=%6.3f\n |<%i|If|%i>|^2=%6.3f\n",i+1,j+1,u[3]*u[3]+iu[3]*iu[3],i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5]);
          printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
       }
    }
@@ -615,15 +617,15 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
       if(pr==1)
       {
          printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ia-<Ia>|%i>|^2=%6.3f\n |<%i|Ib-<Ib>|%i>|^2=%6.3f\n |<%i|Ic-<Ic>|%i>|^2=%6.3f\n",i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2],i+1,j+1,u[3]*u[3]+iu[3]*iu[3]);
-         printf(" |<%i|Id-<Id>|%i>|^2=%6.3f\n |<%i|Ie-<Ie>|%i>|^2=%6.3f\n |<%i|If-<If>|%i>|^2=%6.3f\n",i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5],i+1,j+1,u[6]*u[6]+iu[6]*iu[6]);
+         printf(" |<%i|Ia-<Ia>|%i>|^2=%6.3f\n |<%i|Ib-<Ib>|%i>|^2=%6.3f\n |<%i|Ic-<Ic>|%i>|^2=%6.3f\n",i+1,j+1,u[0]*u[0]+iu[0]*iu[0],i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2]);
+         printf(" |<%i|Id-<Id>|%i>|^2=%6.3f\n |<%i|Ie-<Ie>|%i>|^2=%6.3f\n |<%i|If-<If>|%i>|^2=%6.3f\n",i+1,j+1,u[3]*u[3]+iu[3]*iu[3],i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5]);
          printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
       }
    }
 
    // multiply matrix Mab by occupation factor
    for(iJ=0; iJ<sz; iJ++)
-      { u[iJ+1] *= sqrt(therm/Z); iu[iJ+1] *= sqrt(therm/Z); }
+      { u[iJ] *= sqrt(therm/Z); iu[iJ] *= sqrt(therm/Z); }
 
 }
 

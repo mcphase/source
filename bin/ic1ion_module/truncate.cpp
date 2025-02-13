@@ -175,7 +175,8 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
    // Checks that this time we require expectation values of higher order multipoles even though these were not used in mcphasit
    clock_t start,end; start = clock();
    int oldJhi=mfmat.T.size()-2;
-    if(J.Rhi()>oldJhi)zmt = new complexdouble[Hsz*cb];
+    if(J.Rhi()>oldJhi){zmt = new complexdouble[Hsz*cb];
+  std::cerr << "#ic1ion truncate: Multipolar operators not precalculated. Calculating now..." << std::flush;}
    // Calculates the rotated operators for the mean field terms
    complexdouble *zt; Vector Z(1,T.Hi());Z=0.; eb.assign(Esz,0.); U=0;
    for(int iJ=(J.Rlo()-1); iJ<J.Rhi(); iJ++)
@@ -251,11 +252,11 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
    opmat = new complexdouble[cb*cb];
 
    char xyzstr[] = "xyz";
-   if(xyz>0) { std::cout << "Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
-   else      { std::cout << "Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
+   if(xyz>0) { std::cout << "#Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
+   else      { std::cout << "#Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
 
    clock_t start,end; start = clock();
-   std::cerr << "ic1ion truncate: Calculating rotated M(Q) matrices, after Balcar and Lovesey..." << std::flush;
+   std::cerr << "#ic1ion truncate: Calculating rotated M(Q) matrices, after Balcar and Lovesey..." << std::flush;
 
    // Calculates the rotated operators for the mean field terms
    complexdouble *zt, *zJmat; double Z=0.; eb.assign(Esz,0.);

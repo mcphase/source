@@ -396,7 +396,7 @@ pchr=strstr(savfilename+strlen(path),"\\");
 
 void jjjpar::save_sipf(FILE * fout)
 { char  instr[MAXNOFCHARINLINE];
- int i;FILE * cfin;
+ int i;//FILE * cfin;
  switch (module_type)
   {case kramer: fprintf(fout,"#!MODULE=kramer\n#<!--mcphase.sipf-->\n");
            fprintf(fout,"#***************************************************************\n");
