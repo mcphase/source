@@ -229,7 +229,7 @@ states.o: states.cpp states.hpp ../include/constants.h lapack.h ../../version
 	$(CC) $(patsubst -O3,   ,${CFLAGS}) -I../include -I. -c $<
 
 
-ic1ion_module.o: ic1ion_module.cpp truncate.cpp ic1ion_module.hpp ../include/singleion_module.hpp ../../version
+ic1ion_module.o: ic1ion_module.cpp truncate.cpp ic1ion_module.hpp icmf.hpp ../include/singleion_module.hpp ../../version
 ifdef integral
 	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else
@@ -241,7 +241,7 @@ endif
 endif
 
 
-icf1ion_module.o: icf1ion_module.cpp icf1ion_module.hpp ../include/sparsecomplex.hpp ../../version
+icf1ion_module.o: icf1ion_module.cpp icf1ion_module.hpp icpars.hpp ../include/sparsecomplex.hpp ../../version
 ifdef integral
 	$(CC) $(CFLAGS) -D_INTEGRAL -I../include -I. -c $<
 else

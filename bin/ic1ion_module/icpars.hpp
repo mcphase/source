@@ -129,7 +129,7 @@ class icpars
     //bool bflag;                            // Flag to show if a field norm= or nostevfact is given
       double truncate_level;                 // Fraction of matrix to keep, for matrix truncation.
       int num_eigv;                          // Number of eigenvectors to print in output
-      std::string density;                   // Flag to output expectation values of spin/orbital density operator.
+    //  std::string density;                   // Flag to output expectation values of spin/orbital density operator.
     //std::string observable;                // Flag to tell mq() and dv1calc() which observable matrix to calculate
       std::string basis;                     // Name of basis to output eigenvectors, supported: "JmJ" and "mSmL"
       double Bx,By,Bz;                       // For magnetic field for Zeeman term

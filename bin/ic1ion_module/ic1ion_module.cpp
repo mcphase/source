@@ -29,7 +29,13 @@ delete ptr;
 ic1ion_module::ic1ion_module(const char * filename)
 {pars=icpars();
  ic_parseinput(filename,pars);
- mfmat=icmfmat(pars.n,pars.l,6,pars.save_matrices,pars.density);
+ mfmat=icmfmat(pars.n,pars.l,6,pars.save_matrices);
+ Sxmat=icmfmat(pars.n,pars.l,0,pars.save_matrices,1);
+ Symat=icmfmat(pars.n,pars.l,0,pars.save_matrices,2);
+ Szmat=icmfmat(pars.n,pars.l,0,pars.save_matrices,3);
+ Lxmat=icmfmat(pars.n,pars.l,0,pars.save_matrices,-1);
+ Lymat=icmfmat(pars.n,pars.l,0,pars.save_matrices,-2);
+ Lzmat=icmfmat(pars.n,pars.l,0,pars.save_matrices,-3);
  Hic = ic_hmltn(iHic,pars); Hic/=MEV2CM; iHic/=MEV2CM;
 }
 
@@ -37,6 +43,12 @@ ic1ion_module::ic1ion_module(const ic1ion_module & pp)
 {printf("copying ic1ion_module\n");
 pars=pp.pars;
 mfmat=pp.mfmat;
+Sxmat=pp.Sxmat;
+Symat=pp.Symat;
+Szmat=pp.Szmat;
+Lxmat=pp.Lxmat;
+Lymat=pp.Lymat;
+Lzmat=pp.Lzmat;
 Hic=pp.Hic;iHic=pp.iHic;
 }
 
@@ -86,10 +98,10 @@ bool checkmat(ComplexMatrix &cmat, complexdouble *fmat,int r, int c)
 */
 
 // --------------------------------------------------------------------------------------------------------------- //
-// Routine to calculate the magnetic moment at a particular temperature and field
+// Routine to calculate <Ia><Ib>... at a particular temperature and field
 // --------------------------------------------------------------------------------------------------------------- //
-bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
-                      Vector&T,          // Input scalar temperature
+bool ic1ion_module::IMcalc(Matrix &Jret,          // Output field of single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+                      Vector&T,          // Input Vector of temperatures
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double & g_J,   // Input Lande g-factor
@@ -98,23 +110,54 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
                       Vector &lnZ,        // Output scalar logarithm of partition function
                       Vector &U,          // Output scalar internal energy 
                       ComplexMatrix &Pst) // Parameter Storage matrix (initialized in Paramterer_storage_init)                                          
-{  // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-    Matrix J(1,gjmbH.Hi(),1,T.Hi()); // matrix for output to be written to Jret
-   for(int Ti=1;Ti<=T.Hi();++Ti)for(int i=1;i<=J.Rhi();++i)J(i,Ti)=0;
-   // --------------------------------------------------------------------
+{ expJ(mfmat,Jret,T,Hxc,Hext,lnZ,U);
+return true;
+}
 
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
-   {  if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
-   }
-   
+bool ic1ion_module::Icalc(Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+                      double &T,          // Input scalar temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+ /* Not Used */       double &g_J,   // Input Lande g-factor
+ /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
+                      char *sipffilename,// Single ion properties filename
+                      double &lnZ,        // Output scalar logarithm of partition function
+                      double &U,          // Output scalar internal energy 
+                      ComplexMatrix &Pst) // Parameter Storage Matrix                                         
+{ expJ(mfmat,Jret,T,Hxc,Hext,lnZ,U);
+  return true;
+}
+
+void ic1ion_module::expJ(icmfmat & mfm,     // Operators to be calculated
+                       Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+                      double &T,          // Input scalar temperature
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+                      double &lnZ,        // Output scalar logarithm of partition function
+                      double &U)          // Output scalar internal energy 
+{ Matrix JM(1,Jret.Hi(),1,1);
+ for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
+ Vector TT(1,1);TT(1)=T;
+ Vector lnZZ(1,1);lnZZ(1)=lnZ;
+ Vector UU(1,1);UU(1)=U;
+ expJ(mfm,JM,TT,Hxc,Hext,lnZZ,UU);
+ U=UU(1);lnZ=lnZZ(1);T=TT(1);
+ for(int i=1;i<=Jret.Hi();++i)
+ {Jret(i)=JM(i,1);//printf("Jret(%i)=%g ",i,Jret(i));
+ }
+}
+
+
+void ic1ion_module::expJ(icmfmat & mfm,     // Operators to be calculated
+                      Matrix &Jret,       // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
+                      Vector&T,           // Input Vector of temperatures
+                      Vector &Hxc,        // Input vector of exchange fields (meV) 
+                      Vector &Hext,       // Input vector of external field (T) 
+                      Vector &lnZ,        // Output scalar logarithm of partition function
+                      Vector &U)          // Output scalar internal energy 
+ { Vector gjmbH=sum_Hxc_Hext(Hxc,Hext);
+   Matrix J(1,Jret.Rhi(),1,T.Hi()); // matrix for output to be written to Jret
+   for(int Ti=1;Ti<=T.Hi();++Ti)for(int i=1;i<=J.Rhi();++i)J(i,Ti)=0;
    // Converts the Jij parameters if necessary
    std::vector<double> vgjmbH((J.Rhi()-J.Rlo()+1),0.); 
    #ifdef JIJCONV
@@ -152,8 +195,9 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
       // get expJ to highest T and matrix elements of eigenstates matel 
       // (for number of low energy states necessary for calculation at Ti=T.Hi() )
       int Ti=T.Hi();
-      std::vector<double> vJ =  mfmat.expJ(VE,T(Ti),matel,J.Rhi());
 
+      std::vector<double> vJ =  mfm.expJ(VE,T(Ti),matel,J.Rhi());
+   
       for(i=J.Rlo(); i<=J.Rhi(); i++) {J(i,T.Hi()) = vJ[i-J.Rlo()];//printf("%g ",J(i,Ti));
                                          } 
       lnZ(T.Hi())=vJ[J.Rhi()-J.Rlo()+1];
@@ -199,37 +243,12 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum 
 
   for(int Ti=1;Ti<=T.Hi();++Ti)
    {
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   dum=J(2,Ti);J(2,Ti)=J(3,Ti);J(3,Ti)=J(5,Ti);J(5,Ti)=J(4,Ti);J(4,Ti)=dum;
-   // --------------------------------------------------------------------
    for(i=Jret.Rlo();i<=Jret.Rhi();++i)Jret(i,Ti)=J(i,Ti);
    }
-return true;
+
 }
 
-bool ic1ion_module::Icalc(Vector &Jret,          // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
-                      double &T,          // Input scalar temperature
-                      Vector &Hxc,        // Input vector of exchange fields (meV) 
-                      Vector &Hext,       // Input vector of external field (T) 
- /* Not Used */       double &g_J,   // Input Lande g-factor
- /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      double &lnZ,        // Output scalar logarithm of partition function
-                      double &U,          // Output scalar internal energy 
-                      ComplexMatrix &Pst) // Parameter Storage Matrix                                         
-{Matrix JM(1,Jret.Hi(),1,1);double d=0;Vector dd;
- for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
- Vector TT(1,1);TT(1)=T;
- Vector lnZZ(1,1);lnZZ(1)=lnZ;
- Vector UU(1,1);UU(1)=U;
- IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU,Pst);
- U=UU(1);lnZ=lnZZ(1);T=TT(1);
- for(int i=1;i<=Jret.Hi();++i)
- {Jret(i)=JM(i,1);//printf("Jret(%i)=%g ",i,Jret(i));
- }
-return true;
-}
+
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the magnetic moment at a particular temperature and field
@@ -243,13 +262,8 @@ bool ic1ion_module::mcalc(Vector &mom,        // Output magnetic moment (mub)
                       char *sipffilename,// Single ion properties filename
                       ComplexMatrix &Pst) // Parameter Storage                                          
 {  Vector J(1,6); 
-   double gJ=0., lnZ, U;
-   Icalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //mom(1)=GS*J(1)+J(2);
-   //mom(2)=GS*J(3)+J(4);
-   //mom(3)=GS*J(5)+J(6);
+   double  lnZ, U;
+   expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
    mom(1)=GS*J(1)+J(4);
    mom(2)=GS*J(2)+J(5);
    mom(3)=GS*J(3)+J(6);
@@ -265,13 +279,8 @@ bool ic1ion_module::mMcalc(Matrix &mom,        // Output magnetic moment (mub)
                       char *sipffilename,// Single ion properties filename
                       ComplexMatrix &Pst) // Parameter Storage                                     
 {  Matrix J(1,6,1,T.Hi()); 
-   double gJ=0.;Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //mom(1)=GS*J(1)+J(2);
-   //mom(2)=GS*J(3)+J(4);
-   //mom(3)=GS*J(5)+J(6);
+   Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
    for(int Ti=1;Ti<=T.Hi();++Ti){
    mom(1,Ti)=GS*J(1,Ti)+J(4,Ti);
    mom(2,Ti)=GS*J(2,Ti)+J(5,Ti);
@@ -290,13 +299,8 @@ bool ic1ion_module::Lcalc(Vector &L,          // Output magnetic moment (mub)
                       char *sipffilename,// Single ion properties filename
                       ComplexMatrix &Pst) // Parameter Storage                                    
 {  Vector J(1,6); 
-   double gJ=0., lnZ, U;
-   Icalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //L(1)=J(2);
-   //L(2)=J(4);
-   //L(3)=J(6);
+   double  lnZ, U;
+   expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
    L(1)=J(4);
    L(2)=J(5);
    L(3)=J(6);
@@ -312,13 +316,8 @@ bool ic1ion_module::LMcalc(Matrix &L,          // Output magnetic moment (mub)
                       char *sipffilename,// Single ion properties filename
                       ComplexMatrix &Pst) // Parameter Storage                                                   
 {  Matrix J(1,6,1,T.Hi()); 
-   double gJ=0.; Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //L(1)=J(2);
-   //L(2)=J(4);
-   //L(3)=J(6);
+  Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
    for(int Ti=1;Ti<=T.Hi();++Ti){
    L(1,Ti)=J(4,Ti);
    L(2,Ti)=J(5,Ti);
@@ -338,13 +337,8 @@ bool ic1ion_module::Scalc(Vector &S,          // Output magnetic moment (mub)
                       char *sipffilename,// Single ion properties filename
                       ComplexMatrix &Pst) // Parameter Storage                                               
 {  Vector J(1,6); 
-   double gJ=0., lnZ, U;
-   Icalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //S(1)=J(1);
-   //S(2)=J(3);
-   //S(3)=J(5);
+   double  lnZ, U;
+   expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
    S(1)=J(1);
    S(2)=J(2);
    S(3)=J(3);
@@ -360,14 +354,9 @@ bool ic1ion_module::SMcalc(Matrix &S,          // Output magnetic moment (mub)
                       char *sipffilename,// Single ion properties filename
                       ComplexMatrix &Pst) // Parameter Storage                                                   
 {  Matrix J(1,6,1,T.Hi()); 
-   double gJ=0.;Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //S(1)=J(1);
-   //S(2)=J(3);
-   //S(3)=J(5);
- for(int Ti=1;Ti<=T.Hi();++Ti){
+   Vector lnZ(1,T.Hi()), U(1,T.Hi());
+   expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
+   for(int Ti=1;Ti<=T.Hi();++Ti){
    S(1,Ti)=J(1,Ti);
    S(2,Ti)=J(2,Ti);
    S(3,Ti)=J(3,Ti);}
@@ -389,59 +378,11 @@ int ic1ion_module::du1calc(int &tn,            // Input transition number; if tn
                       int &n, int &nd,    // Output state numbers of initial and final state
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
-{  // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
+{  Vector gjmbH=sum_Hxc_Hext(Hxc,Hext);
    ComplexVector u1(1,gjmbH.Hi()); u1=0; u1(1)=u1ret(1);
-   // --------------------------------------------------------------------------
-
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
-   {  if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
-   }
-   int i,j,k;
-   // check if printout should be done and make tn positive
-   int pr=0; if (tn<0) { pr=1; tn*=-1; }
-   double ninit=u1[1].real();
-   double pinit=u1[1].imag();
-   // Copies the already calculated energy levels / wavefunctions from *est
-   if(est.Rows()!=est.Cols()) { std::cerr << "du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
    int Hsz = est.Rows()-1;
-   j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
-   double maxE=delta;n=i;nd=j;
-   if((delta=(est[0][j+1].real()-est[0][i+1].real()))<=maxE)
-   {  double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
-      // catch eigenvectors VE from est
-      iceig VE(Hsz,en,(complexdouble*)&est[1][0],1);
-      // Calculates the transition matrix elements:
-      //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
-      //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
-      //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
-  
-      std::vector<double> u(gjmbH.Hi()), iu(gjmbH.Hi());
-      mfmat.u1(u,iu,VE,T,i,j,pr,delta);
-      for(i=0; i<u1.Hi(); i++)
-         u1(i+1) = complex<double> (u[i], iu[i]);
-    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   complex<double>dum1;dum1=u1(2);u1(2)=u1(3);u1(3)=u1(5);u1(5)=u1(4);u1(4)=dum1;
-   for(i=1; i<=u1ret.Hi(); i++) u1ret[i] = u1[i];
-   }
-   // determine number of thermally reachable states
-   if (ninit>Hsz)ninit=Hsz;
-   double zsum=0,zi,x;
-   int noft=0; 
-   if(T>0)for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
-   {//fprintf(stderr,"i=%i zi=%g zsum=%g noft=%i Hsz=%i Ei-E1=%g\n",i,zi,zsum,noft,Hsz,est[0][i+1].real()-est[0][1].real());
-      noft += Hsz-i; 
-      zsum += zi;
-   }
-   if(T<0)for(int i=0;i<ninit;++i){noft+=Hsz-i;}
+   int noft=mfmat.u1((complexdouble*)&u1[1],u1.Hi(),T,tn,delta,(complexdouble*)&est[1][0],(complexdouble*)&est[0][1],Hsz,n,nd);
+   for(int i=1; i<=u1ret.Hi(); i++) u1ret[i] = u1[i];
    return noft;   
 }
 
@@ -462,11 +403,6 @@ int ic1ion_module::dm1(int &tn,            // Input transition number; if tn<0, 
 {  ComplexVector u1(1,6);int n,nd;
    u1(1) = m1(1);
    int nt = du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-  // m1(1)=GS*u1(1)+u1(2);
-  // m1(2)=GS*u1(3)+u1(4);
-  // m1(3)=GS*u1(5)+u1(6);
    m1(1)=GS*u1(1)+u1(4);
    m1(2)=GS*u1(2)+u1(5);
    m1(3)=GS*u1(3)+u1(6);
@@ -490,11 +426,6 @@ int ic1ion_module::dL1(int &tn,            // Input transition number; if tn<0, 
 {  ComplexVector u1(1,6);int n,nd;
    u1(1) = L1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //L1(1)=u1(2);
-   //L1(2)=u1(4);
-   //L1(3)=u1(6);
    L1(1)=u1(4);
    L1(2)=u1(5);
    L1(3)=u1(6);
@@ -518,11 +449,6 @@ int ic1ion_module::dS1(int &tn,            // Input transition number; if tn<0, 
 {  ComplexVector u1(1,6);int n,nd;
    u1(1) = S1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //S1(1)=u1(1);
-   //S1(2)=u1(3);
-   //S1(3)=u1(5);
    S1(1)=u1(1);
    S1(2)=u1(2);
    S1(3)=u1(3);
@@ -541,25 +467,13 @@ bool ic1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (ro
                       double &T,          // Input  temperature
  /* Not Used */       Vector & ABC,   // Input  Vector of parameters from single ion property file
                       char *sipffilename)// Input  Single ion properties filename
-{ // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
-   {  if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
-   }
+{ Vector gjmbH=sum_Hxc_Hext(Hxc,Hext);
+
    clock_t start,end; start = clock();
    // Calculates the IC Hamiltonian matrix
     int Hsz = Hic.nr();
    // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-   //int num_op = gjmbH.Hi()-gjmbH.Lo()+1; icmfmat mfmat(pars.n,pars.l,(num_op>6?num_op:6),pars.save_matrices);
-   int i,j,gLo=gjmbH.Lo(),gHi=gjmbH.Hi(); std::vector<double> vgjmbH(gHi,0.);
+    int i,j,gLo=gjmbH.Lo(),gHi=gjmbH.Hi(); std::vector<double> vgjmbH(gHi,0.);
    for(i=gLo; i<=gHi; i++) vgjmbH[i-1] = -gjmbH[i];
    // Converts the Jij parameters if necessary
    #ifdef JIJCONV
@@ -890,53 +804,9 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
       noft += Hsz-i; 
       zsum += zi;
    }
-// removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit
-// int noft=0;for(i=0; (i<Hsz)&((exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)))>SMALL); ++i) noft += Hsz-i-1;
    return noft;
-// return Hsz*(Hsz-1)/2;
 }
 
-// --------------------------------------------------------------------------------------------------------------- //
-// Routine to calculate the coefficients of expansion of spindensity in terms
-// of Zlm R^2(r) at a given temperature T and  effective field H
-// --------------------------------------------------------------------------------------------------------------- //
-void ic1ion_module::sdod_Icalc(Vector &J,           // Output single ion moments==(expectation values) Zlm R^2(r) at given T, H_eff
-                int xyz,             // direction 1,2,3 = x,y,z
-                double & T,           // Input scalar temperature
-                Vector &gjmbH,       // Input vector of mean fields (meV)
-                char *sipffilename) // Single ion properties filename
-{  
-   
-   // Calculates the IC Hamiltonian matrix
-   int i,Hsz=getdim(pars.n,pars.l);
-   complexdouble *Jm=0; 
-   //bool Hicnotcalc = false;
-   
-
-  if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
-     {// check if truncate is to be used and if Hamiltonian was already calculated 
-     if(mfmat.T[0]==NULL){    truncate_hmltn(pars,  Hic, iHic, J.Hi(), J.Lo());}
-      truncate_spindensity_expJ(pars,gjmbH,J,T,xyz);
-     }	
-   else
-   {
-      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-      std::vector<double> vgjmbH(51,0.); for(i=gjmbH.Lo(); i<=gjmbH.Hi()&&i<=51; i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];
-      sMat<double> Jmat,iJmat; mfmat.Jmat(Jmat,iJmat,vgjmbH);
-      //complex<double> a(1.,0.); int incx = 1;
-      Jm = zmat2f(Jmat,iJmat); Hic.addto(Jm,false);if(!iHic.isempty())iHic.addto(Jm,true);
-      // Diagonalises the Hamiltonian H = Hic + sum_a(gjmbH_a*Ja)
-      iceig VE; if(pars.partial) VE.lcalc(pars,Jm); 
-      #ifndef NO_ARPACK
-      else if(pars.arnoldi) VE.acalc(pars,Jm); 
-      #endif
-      else {VE.calc(Hsz,Jm);} free(Jm);
-
-      // Calculates the expectation values sum_n{ <n|Ja|n> exp(-En/kT) }
-      std::vector<double> vJ = mfmat.spindensity_expJ(VE, xyz,T);
-      for(i=J.Lo(); i<=J.Hi(); i++) J[i] = vJ[i-J.Lo()];//printf("ss=%g\n",J(1));
-   }
-}
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the coefficients of expansion of chargedensity in terms
@@ -954,12 +824,11 @@ bool ic1ion_module::chargedensity_coeff(
                       ComplexMatrix &Pst)  // Input/output eigenstate matrix (initialized in parstorage)
 {
    Vector moments(1,51); 
-   double gJ=0., lnZ, U;
+   double lnZ, U;
    Vector Hxce(1,51); 
    Hxce=0;
    for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   Icalc(moments,T,Hxce,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-
+   expJ(mfmat,moments,T,Hxc,Hext,lnZ,U);
    
 // a(0, 0) = nof_electrons / sqrt(4.0 * 3.1415); // nofelectrons 
 // Indices for spindensity
@@ -972,9 +841,6 @@ bool ic1ion_module::chargedensity_coeff(
    for(int i=7; i<=15;++i) {mom(i) = moments(12+i)*sqrt((2.0*4+1)/8/PI);} mom(11) *= sqrt(2);
    for(int i=16;i<=28;++i) {mom(i) = moments(23+i)*sqrt((2.0*6+1)/8/PI);} mom(22) *= sqrt(2);
 
-// {for(l=2;l<=6;l+=2){for(m=-l;m<=l;++m){if(m!=0){a(l,m)*=sqrt((2.0*l+1)/8/PI);}else{a(l,m)*=sqrt((2.0*l+1)/4/PI);}}}
-// } // in case of module ic1ion we just take the prefactors of the Zlm ... ??? what should we take here ???
-// MR 23.8.2011: if Tkq are define as in our review then the above should be right
 return true;
 }
 
@@ -1022,29 +888,39 @@ bool ic1ion_module::spindensity_coeff(Vector &J,          // Output single ion m
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
                       char *sipffilename, // Single ion properties filename
                       ComplexMatrix &Pst)  // Input/output eigenstate matrix (initialized in parstorage)
-{  // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
+{  Vector gjmbH=sum_Hxc_Hext(Hxc,Hext);
+   if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
+     {// check if truncate is to be used and if Hamiltonian was already calculated 
+     if(mfmat.T[0]==NULL){    truncate_hmltn(pars,  Hic, iHic, J.Hi(), J.Lo());}
+      truncate_spindensity_expJ(pars,gjmbH,J,T,xyz);
+     }	
+   else
 
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
-   {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+   {double lnZ,U;
+   switch(xyz)
+   {case 1: expJ(Sxmat,J,T,Hxc,Hext,lnZ,U);break;
+    case 2: expJ(Symat,J,T,Hxc,Hext,lnZ,U);break;
+    case 3: expJ(Szmat,J,T,Hxc,Hext,lnZ,U);break;
    }
-  
-   sdod_Icalc(J,xyz,T,gjmbH,sipffilename);
-
-   
+   }
 return true;
 
 }
-
+ // sum exchange field and external field
+ Vector ic1ion_module::sum_Hxc_Hext(Vector & Hxc,Vector & Hext)
+  { Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
+   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; 
+   else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
+   
+   // Calculates the Zeeman term if magnetic field is not zero
+   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
+   {
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(5)+=MUB*Hext(2); gjmbH(2)+=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(3)+=GS*MUB*Hext(3); }
+   } 
+   return gjmbH;
+  }
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the coefficients of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
@@ -1059,81 +935,25 @@ bool ic1ion_module::orbmomdensity_coeff(Vector &J,        // Output single ion m
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
                       char *sipffilename, // Single ion properties filename
                       ComplexMatrix &Pst)  // Input/output eigenstate matrix (initialized in parstorage)
-{  // sum exchange field and external field
-   Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
-   if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
+{ Vector gjmbH=sum_Hxc_Hext(Hxc,Hext);
+
+  if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
+     {// check if truncate is to be used and if Hamiltonian was already calculated 
+     if(mfmat.T[0]==NULL){    truncate_hmltn(pars,  Hic, iHic, J.Hi(), J.Lo());}
+      truncate_spindensity_expJ(pars,gjmbH,J,T,-xyz);
+     }	
+   else
    {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+ double lnZ,U;
+   switch(xyz)
+   {case 1: expJ(Lxmat,J,T,Hxc,Hext,lnZ,U);break;
+    case 2: expJ(Lymat,J,T,Hxc,Hext,lnZ,U);break;
+    case 3: expJ(Lzmat,J,T,Hxc,Hext,lnZ,U);break;
    }
-  
-   sdod_Icalc(J,-xyz,T,gjmbH,sipffilename);
-return true;
+    }
+  return true;
 }
 
-// --------------------------------------------------------------------------------------------------------------- //
-// Routine to calculate the matrix elements of expansion of orbital moment density in terms
-// of Zlm F(r) at a given temperature T and  effective field H
-// --------------------------------------------------------------------------------------------------------------- //
-int      ic1ion_module::sdod_du1calc(int xyz,            // Indicating which of x,y,z direction to calculate
-                      int &tn,            // Input transition number; if tn<0, print debug info
-                      double &T,          // Input temperature
-                      Vector &gjmbH,      // Input vector of exchange fields + external fields (meV)
-                      char *sipffilename,// Single ion properties filename
-                      ComplexVector &u1,  // Output Llm1 vector (1,49)
-                      float &delta,       // Output transition energy
-                      ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
-{
-   int i,j,k;
- 
-   // check if printout should be done and make tn positive
-   int pr=0; if (tn<0) { pr=1; tn*=-1; }
-   double ninit=u1[1].real();
-   double pinit=u1[1].imag();
-   // Copies the already calculated energy levels / wavefunctions from *est
-   if(est.Rows()!=est.Cols()) { std::cerr << "sdod_u1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
-   int Hsz = est.Rows()-1;
-   j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
-   if(est[0][j+1].real()-est[0][i+1].real()<delta)
-   {
-      double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = est[0][k+1].real();
-
-      
-      // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-      iceig VE(Hsz,en,(complexdouble*)&est[1][0],1);
- 
-      // Calculates the transition matrix elements:
-      //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
-      //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
-      //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
-  
-      std::vector<double> u(u1.Hi()), iu(u1.Hi());
-      mfmat.dod_u1(xyz,u,iu,VE,T,i,j,pr,delta);
-
-      for(i=0; i<u1.Hi(); i++)
-         u1(i+1) = complex<double> (u[i], iu[i]);
-   }
-   // determine number of thermally reachable states
-   if (ninit>Hsz)ninit=Hsz;
-   //if (pinit<SMALL)pinit=SMALL;
-   double zsum=0,zi,x;
-   int noft=0; 
-   for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
-   {
-      noft += Hsz-i; 
-      zsum += zi;
-   }
-// removed MR  6.9.2011 to allow for mcdisp options -ninit -pinit   return noft;
-// int noft=0;for(i=0;(i<Hsz)&((exp(-(est[0][i+1].real()-est[0][1].real())/(KB*T)))>SMALL);++i)noft+=Hsz-i-1; 
-   return noft;
-}                 
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Routine to calculate the matrix elements of expansion of orbital moment density in terms
@@ -1151,24 +971,13 @@ int ic1ion_module::dspindensity_coeff1(int &tn,          // Input transition num
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
-{ 
-   Vector gjmbH(1,49); gjmbH = 0; for(int i=1; i<=Hxc.Hi(); ++i) { gjmbH(i)=Hxc(i); }
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
-   {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+{ int nt=0,n,nd, Hsz = est.Rows()-1;
+  switch(xyz)
+  {case 1: nt=Sxmat.u1((complexdouble*)&Slm1[1],Slm1.Hi(),T,tn,delta,(complexdouble*)&est[1][0],(complexdouble*)&est[0][1],Hsz,n,nd);break;
+   case 2: nt=Symat.u1((complexdouble*)&Slm1[1],Slm1.Hi(),T,tn,delta,(complexdouble*)&est[1][0],(complexdouble*)&est[0][1],Hsz,n,nd);break;
+   case 3: nt=Szmat.u1((complexdouble*)&Slm1[1],Slm1.Hi(),T,tn,delta,(complexdouble*)&est[1][0],(complexdouble*)&est[0][1],Hsz,n,nd);break;
    }
-   int nt = sdod_du1calc(xyz,tn,T,gjmbH,sipffilename,Slm1,delta,est);
-// Slm1(1)=0;
-// for(int i=2; i<=6; ++i) Slm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Slm1(4) *=sqrt(2);
-// for(int i=7; i<=15;++i) Slm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Slm1(11)*=sqrt(2);
-// for(int i=16;i<=28;++i) Slm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Slm1(22)*=sqrt(2);
+   
    return nt;
 }
 
@@ -1188,73 +997,42 @@ int ic1ion_module::dorbmomdensity_coeff1(int &tn,        // Input transition num
                       float &delta,       // Output transition energy
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
                                           // Returns total number of transitions
-{ 
-   Vector gjmbH(1,49); gjmbH = 0; for(int i=1; i<=Hxc.Hi(); ++i) { gjmbH(i)=Hxc(i); }
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
-   // Calculates the Zeeman term if magnetic field is not zero
-   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
-   {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+{   int nt=0,n,nd,Hsz = est.Rows()-1;
+  switch(xyz)
+  {case 1: nt=Lxmat.u1((complexdouble*)&Llm1[1],Llm1.Hi(),T,tn,delta,(complexdouble*)&est[1][0],(complexdouble*)&est[0][1],Hsz,n,nd);break;
+   case 2: nt=Lymat.u1((complexdouble*)&Llm1[1],Llm1.Hi(),T,tn,delta,(complexdouble*)&est[1][0],(complexdouble*)&est[0][1],Hsz,n,nd);break;
+   case 3: nt=Lzmat.u1((complexdouble*)&Llm1[1],Llm1.Hi(),T,tn,delta,(complexdouble*)&est[1][0],(complexdouble*)&est[0][1],Hsz,n,nd);break;
    }
-   
-   int nt = sdod_du1calc(-xyz,tn,T,gjmbH,sipffilename,Llm1,delta,est);
-// Llm1(1)=0;
-// for(int i=2; i<=6; ++i) Llm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Llm1(4) *=sqrt(2);
-// for(int i=7; i<=15;++i) Llm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Llm1(11)*=sqrt(2);
-// for(int i=16;i<=28;++i) Llm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Llm1(22)*=sqrt(2);
    return nt;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
 // --------------------------------------------------------------------------------------------------------------- //
-bool ic1ion_module::opmat(int &ni,                      // ni     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
+bool ic1ion_module::opmat(int &n,                      // ni     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
              char *sipffilename,         // Single ion properties filename
              Vector &Hxc,                 // Hext  vector of external field [meV]
              Vector &Hext,                // Hxc   vector of exchange field [meV]
                                           // on output   
              Matrix &outmat)              // operator matrix of Hamiltonian, I1, I2, I3 depending on n
-{ //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   int n=ni;
-   if(ni==2){n=3;}
-   if(ni==3){n=5;}
-   if(ni==4){n=2;}
-   if(ni==5){n=4;}
-   if(ni==-2){n=-3;}
-   if(ni==-3){n=-5;}
-   if(ni==-4){n=-2;}
-   if(ni==-5){n=-4;}
-
-   // --------------------------------------------------------------------
-   
-   
-  const char *sipffile = sipffilename;
+{  
+    const char *sipffile = sipffilename;
 
    int nn = abs(n)-1;
 
    if(n==0)                               // return Hamiltonian
    {
       std::vector<double> gjmbH(max(6,Hxc.Hi()),0.); for(int i=1; i<=Hxc.Hi(); i++) gjmbH[i-1]=-Hxc(i);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH[2];gjmbH[2]=gjmbH[4];gjmbH[4]=gjmbH[5];gjmbH[5]=gjmbH[3];gjmbH[3]=dum;
    // --------------------------------------------------------------------
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH[1]-=MUB*Hext(1); gjmbH[0]-=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH[3]-=MUB*Hext(2); gjmbH[2]-=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH[5]-=MUB*Hext(3); gjmbH[4]-=GS*MUB*Hext(3); }
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH[3]-=MUB*Hext(1); gjmbH[0]-=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH[4]-=MUB*Hext(2); gjmbH[1]-=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH[5]-=MUB*Hext(3); gjmbH[2]-=GS*MUB*Hext(3); }
   
       // check dimensions of vector
       if(Hxc.Hi()>51) {
          fprintf(stderr,"Error module ic1ion: dimension of exchange field=%i > 51 - check number of columns in file mcphas.j\n",Hxc.Hi()); exit(EXIT_FAILURE); }
 
       // Calculates the mean field matrices <Sx>, <Lx>, etc. and the matrix sum_a(gjmbH_a*Ja)
-      //icmfmat mfmat(pars.n,pars.l,gjmbH.size(),pars.save_matrices,pars.density);
       #ifdef JIJCONV
       if(pars.B.norm().find("Stevens")!=std::string::npos) mfmat.jijconv.assign(pars.jijconv.begin(),pars.jijconv.end());
       #endif

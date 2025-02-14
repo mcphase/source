@@ -66,40 +66,44 @@ class icmfmat
    private:
       int _n;
       orbital _l;
+      sMat<double>  balcar_Mq(int xyz, int K, int Q, bool & imag );
+
       bool _save_matrices;                         // true:  matrices of operators be saved in files instead of storing J[i]
       int _num_op;                                 // number of operators to store internally (will be increased if required)
-      std::string _density;                        // Flag to output expectation values of spin/orbital density operator.
-      std::vector<sMat<double> > J;                // A vector of the matrices [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz ...] = [I1 I2 I3 ...]
+      std::vector<sMat<double> > J;                // A vector of the matrices 
+      int _xyz;					   // defines which operator series to store
+ // xyz=0: [J0 J1 J2 ... ] =[Sx Lx Sy Ly Sz Lz T2-2 T2-1 ...] = [I1 I2 I3 ...]
+// --------------------------------------------------------------------------------------------------------------- //
+// xyz!=0: expansion Operators of spins orbital moment density in terms of Zlm F(r) 
+// --------------------------------------------------------------------------------------------------------------- //
+// xyz=1,2,3 [J0 J1 J2 ... ]= Spindensity operators for x,y,z directions
+ // xyz=-1,-2,-3 [J0 J1 J2 ... ]= OrbitalMomentdensity operators for x,y,z directions
      
    public:
-     std::vector<complexdouble*> T;     // A vector of truncated matrices [T0 T1 T2 ... ] =
-                                        //[Eigenstates Ht Sxt Lxt Syt Lyt Szt Lzt ...] = [Eigenstates Ht It1 It2 It3 ...]
-                                        // (t atands for truncated), Eigenstates are not truncated and used for truncation
-    sMat<double>  op_generate(int m);          // generates the operator matrix I[m] and returns it
-      void op_free(int m);                            // frees the memory for generated operator m
-                                                  // (only in case of save_matrices option i.e. when matrices are stored in files)
-      std::vector<int> iflag;                      // Vector to determine if matrix is imaginary
-
       icmfmat();                                   // Blank constructor
       icmfmat(const icmfmat & pp);                                   // Copy constructor
       ~icmfmat(); // Destructor
       icmfmat(int n, orbital l, int num_op,        // Constructor for l^n configuration
-        bool save_matrices, std::string density="");
-      void Jmat(sMat<double>&J, sMat<double>&iJ,   // Calculates the mean field matrix sum_i (H_i*J_i)
+        bool save_matrices, int xyz=0);
+     complexdouble*balcar_Mq(int xyz,int K,int Q,int n,orbital l);             // Driver for calculation of density coeff.
+     std::vector<complexdouble*> T;     // A vector of truncated matrices [T0 T1 T2 ... ] =
+                                        //[Eigenstates Ht Sxt Lxt Syt Lyt Szt Lzt ...] = [Eigenstates Ht It1 It2 It3 ...]
+                                        // (t atands for truncated), Eigenstates are not truncated and used for truncation
+     sMat<double>  op_generate(int m);          // generates the operator matrix I[m] and returns it
+     void op_free(int m);                            // frees the memory for generated operator m
+                                                  // (only in case of save_matrices option i.e. when matrices are stored in files)
+     std::vector<bool> iflag;                      // Vector to determine if matrix is imaginary
+
+     void Jmat(sMat<double>&J, sMat<double>&iJ,   // Calculates the mean field matrix sum_i (H_i*J_i)
         std::vector<double>&gjmbH);
       std::vector<double> expJ(iceig&VE, double T, // Calculates the expectation values <V|Jm|V>exp(-beta*T)
         std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Im|n>
         int num_op);                               // with 0<=m<num_op
-       std::vector<double> spindensity_expJ(iceig&VE,//Calculates the expectation values
-        int xyz,double T);                          //   <V|spindensitycoeff_of_Zlm|V>exp(-beta*T)
-      std::vector<double> orbmomdensity_expJ(      // Calculates the expectation values
-        iceig&VE,int xyz, double T);                //   <V|orbmomdensitycoeff_of_Zlm|V>exp(-beta*T)
-      void u1(std::vector<double> &u1,             // Calculates the vector u1 = <i|Ja-<Ja>|j>
+        void u1(std::vector<double> &u1,             // Calculates the vector u1 = <i|Ja-<Ja>|j>
         std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
         int i, int j, int p, float &d);
-      void dod_u1(int xyz, std::vector<double>&u1, // Calculates the vector u1 = <i|M(q)-<M(q)>|j>
-        std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
-        int i, int j, int p, float &d);
+      int u1(complexdouble* u,int sz, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
+        int tn, float &d,complexdouble *V,complexdouble * ev,int Hsz,int & n,int & nd);
       #ifdef JIJCONV
       std::vector<double> jijconv;                 // Conversion from Stevens/Wybourne norm of Jij pars
       #endif

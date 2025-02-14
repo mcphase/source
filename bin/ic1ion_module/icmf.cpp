@@ -258,22 +258,22 @@ std::string iceig::strout()
 icmfmat::icmfmat()
 { 
    sMat<double> t; J.assign(6,t); T.assign(8,NULL);
-   iflag.assign(6,0); iflag[2]=1; iflag[3]=1;
-   _n = 1; _l = S; _num_op = 1; _save_matrices=false;
+   iflag.assign(6,0); iflag[1]=1; iflag[4]=1;
+   _n = 1; _l = S; _num_op = 1; _save_matrices=false;_xyz=0;
    #ifdef JIJCONV
    jijconv.assign(1,0);
    #endif
 }
-icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, std::string density)
+icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, int xyz)
 {
-   _n = n; _l = l; _num_op = num_op; _density = density;_save_matrices=save_matrices;
+   _n = n; _l = l; _num_op = num_op; _xyz = xyz;_save_matrices=save_matrices;
    sMat<double> t; J.assign(num_op>6?num_op:6,t); T.assign(num_op>6?num_op+2:8,NULL);
    iflag.assign(num_op>6?num_op:6,0); 
    for(int m=0;m<(num_op>6&&!save_matrices?num_op:6);++m)op_generate(m);
 }
 
 icmfmat::icmfmat(const icmfmat & pp)
-{_n=pp._n;_l=pp._l;_num_op=pp._num_op;_density=pp._density;_save_matrices=pp._save_matrices;
+{_n=pp._n;_l=pp._l;_num_op=pp._num_op;_xyz=pp._xyz;_save_matrices=pp._save_matrices;
  J=pp.J;T=pp.T;iflag=pp.iflag;
 }
 
@@ -282,13 +282,143 @@ icmfmat::~icmfmat()
 for(int i=0;i<T.size();++i)if(T[i]!=NULL)delete []T[i];
 }
 
+complexdouble * icmfmat::balcar_Mq(int xyz, int K, int Q, int n, orbital l)
+{bool imag;
+ int Hsz = getdim(n,l);sMat<double> zeroes; zeroes.zero(Hsz,Hsz);
+ if(_n!=n||_l!=l){std::cerr << "icmfmat::balcar_Mq() - n or l do not match!\n"; exit(EXIT_FAILURE); }
+ sMat<double> retval=balcar_Mq(xyz,  K, Q, imag);
+ if(imag)return zmat2f(zeroes,retval);else return zmat2f(retval,zeroes);
+}
+
+sMat<double>  icmfmat::balcar_Mq(int xyz, int K, int Q, bool & imag )
+{ imag=false;
+#define NSTRB(K,Q) nstr[3] = K+48; nstr[4] = Q+48; nstr[5] = 0
+#define MSTRB(K,Q) nstr[3] = K+48; nstr[4] = 109;  nstr[5] = Q+48; nstr[6] = 0
+#define NPOS std::string::npos
+   int Hsz = getdim(_n,_l);
+   sMat<double> retval(Hsz,Hsz),qpp,qmp,qpm,qmm;
+   // Using the reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero... see balcar* in lovesey.cpp
+   if((K%2==1) || (K>2*_l)) {  retval.zero(Hsz,Hsz); return retval; }
+      
+   char nstr[7]; char filename[255]; char basename[255]; strcpy(basename,"results/mms/");
+   if(_save_matrices) {
+  nstr[0] = (_l==F?102:100); if(_n<10) { nstr[1] = _n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = _n+38; nstr[3] = 0; }
+   strcat(basename,nstr); strcat(basename,"_"); nstr[0] = 77;   // ASCII codes: 77="M", 83=="S", 100=="d", 102=="f", 109=="m", 112="p"
+   } else { strcpy(basename,"nodir/"); }
+
+   if(xyz==1||xyz==2)
+   {
+      nstr[1]=83;
+      if(Q!=0)
+      {
+         NSTRB(K,abs(Q)); nstr[2]=112; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpp = mm_gin(filename); if(qpp.isempty()) { qpp = balcar_MSq(1,K,abs(Q),_n,_l); rmzeros(qpp); mm_gout(qpp,filename); }
+         MSTRB(K,abs(Q)); nstr[2]=112; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qmp = mm_gin(filename); if(qmp.isempty()) { qmp = balcar_MSq(1,K,-abs(Q),_n,_l); rmzeros(qmp); mm_gout(qmp,filename); }
+         NSTRB(K,abs(Q)); nstr[2]=109; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpm = mm_gin(filename); if(qpm.isempty()) { qpm = balcar_MSq(-1,K,abs(Q),_n,_l); rmzeros(qpm); mm_gout(qpm,filename); }
+         MSTRB(K,abs(Q)); nstr[2]=109; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qmm = mm_gin(filename); if(qmm.isempty()) { qmm = balcar_MSq(-1,K,-abs(Q),_n,_l); rmzeros(qmm); mm_gout(qmm,filename); }
+	 // sum to coeff of Zlm (neglecting a 1/sqrt(2) factor) 
+         if(Q<0) { if(Q%2==0) { qmp -= qpp; qmm -= qpm; } else { qmp += qpp; qmm += qpm; } }
+         else    { if(Q%2==0) { qmp += qpp; qmm += qpm; } else { qmp -= qpp; qmm -= qpm; } }
+         // add spherical components and multiply by addition factor 1/sqrt(2)which was neglected in the line above
+         if(xyz==1) { if(Q<0) {imag=true;retval = (qmm-qmp)/(-2.);}    else retval = (qmm-qmp)/2.; }
+         if(xyz==2) { if(Q<0) retval = (qmm+qmp)/2.; else {imag=true;retval = (qmm+qmp)/2.;} }// changed MR 25.5.2010 // Q<0 signs changed MR 28.5.2010
+      }
+      else
+      {
+         NSTRB(K,0); nstr[2]=112; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpp = mm_gin(filename); if(qpp.isempty()) { qpp = balcar_MSq(1,K,0,_n,_l); rmzeros(qpp); mm_gout(qpp,filename); }
+         NSTRB(K,0); nstr[2]=109; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpm = mm_gin(filename); if(qpm.isempty()) { qpm = balcar_MSq(-1,K,0,_n,_l); rmzeros(qpm); mm_gout(qpm,filename); }      
+         if(xyz==1) {  retval = (qpp-qpm)/(-sqrt(2.)); }
+         if(xyz==2) {  imag=true;retval = (qpp+qpm)/sqrt(2.); }// changed MR 25.5.2010
+      }
+   }
+   else if(xyz==3)
+   {
+      nstr[1]=83;
+      if(Q!=0)
+      {
+         NSTRB(K,abs(Q)); nstr[2]=48; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpp = mm_gin(filename); if(qpp.isempty()) { qpp = balcar_MSq(0,K,abs(Q),_n,_l); rmzeros(qpp); mm_gout(qpp,filename); }
+         MSTRB(K,abs(Q)); nstr[2]=48; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qmp = mm_gin(filename); if(qmp.isempty()) { qmp = balcar_MSq(0,K,-abs(Q),_n,_l); rmzeros(qmp); mm_gout(qmp,filename); }
+         if(Q<0) {  if(Q%2==0) qmp -= qpp; else qmp += qpp;  imag=true;retval = qmp/(-sqrt(2.));}
+         else    {  if(Q%2==0) qmp += qpp; else qmp -= qpp;  retval = qmp/sqrt(2.);}// changed by MR 28.5.2010
+      }
+      else
+      {
+         NSTRB(K,0); nstr[2]=48; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         retval = mm_gin(filename); if(retval.isempty()) { retval = balcar_MSq(0,K,0,_n,_l); rmzeros(retval); mm_gout(retval,filename); }
+      }
+   }
+   else if(xyz==-1||xyz==-2)
+   {
+      nstr[1]=76;
+      if(Q!=0)
+      {
+         NSTRB(K,abs(Q)); nstr[2]=112; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpp = mm_gin(filename); if(qpp.isempty()) { qpp = balcar_MLq(1,K,abs(Q),_n,_l); rmzeros(qpp); mm_gout(qpp,filename); }
+         MSTRB(K,abs(Q)); nstr[2]=112; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qmp = mm_gin(filename); if(qmp.isempty()) { qmp = balcar_MLq(1,K,-abs(Q),_n,_l); rmzeros(qmp); mm_gout(qmp,filename); }
+         NSTRB(K,abs(Q)); nstr[2]=109; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpm = mm_gin(filename); if(qpm.isempty()) { qpm = balcar_MLq(-1,K,abs(Q),_n,_l); rmzeros(qpm); mm_gout(qpm,filename); }
+         MSTRB(K,abs(Q)); nstr[2]=109; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qmm = mm_gin(filename); if(qmm.isempty()) { qmm = balcar_MLq(-1,K,-abs(Q),_n,_l); rmzeros(qmm); mm_gout(qmm,filename); }
+	 // sum to coeff of Zlm (neglecting a 1/sqrt(2) factor) 
+         if(Q<0) { if(Q%2==0) { qmp -= qpp; qmm -= qpm; } else { qmp += qpp; qmm += qpm; } }
+         else    { if(Q%2==0) { qmp += qpp; qmm += qpm; } else { qmp -= qpp; qmm -= qpm; } }
+         // add spherical components and multiply by addition factor 1/sqrt(2)which was neglected in the line above
+         if(xyz==-1) { if(Q<0) {imag=true;retval = (qmm-qmp)/(-2.);}    else retval = (qmm-qmp)/2.; }
+         if(xyz==-2) { if(Q<0) retval = (qmm+qmp)/2.; else {imag=true;retval = (qmm+qmp)/2.;} }// changed MR 25.5.2010 // Q<0 signs changed MR 28.5.2010
+      }
+      else
+      {
+         NSTRB(K,0); nstr[2]=112; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpp = mm_gin(filename); if(qpp.isempty()) { qpp = balcar_MLq(1,K,0,_n,_l); rmzeros(qpp); mm_gout(qpp,filename); }
+         NSTRB(K,0); nstr[2]=109; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpm = mm_gin(filename); if(qpm.isempty()) { qpm = balcar_MLq(-1,K,0,_n,_l); rmzeros(qpm); mm_gout(qpm,filename); }
+         if(xyz==-1) {  retval = (qpp-qpm)/(-sqrt(2.)); }
+         if(xyz==-2) {  imag=true;retval = (qpp+qpm)/sqrt(2.); }// changed MR 25.5.2010
+      }
+   }
+   else if(xyz==-3)
+   {
+      nstr[1]=76;
+      if(Q!=0)
+      {
+         NSTRB(K,abs(Q)); nstr[2]=48; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qpp = mm_gin(filename); if(qpp.isempty()) { qpp = balcar_MLq(0,K,abs(Q),_n,_l); rmzeros(qpp); mm_gout(qpp,filename); }
+         MSTRB(K,abs(Q)); nstr[2]=48; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         qmp = mm_gin(filename); if(qmp.isempty()) { qmp = balcar_MLq(0,K,-abs(Q),_n,_l); rmzeros(qmp); mm_gout(qmp,filename); }
+         if(Q<0) {  if(Q%2==0) qmp -= qpp; else qmp += qpp; imag=true;retval = qmp/(-sqrt(2.));}
+         else    {  if(Q%2==0) qmp += qpp; else qmp -= qpp; retval = qmp/sqrt(2.);}// changed by MR 28.5.2010
+      }
+      else
+      {
+         NSTRB(K,0); nstr[2]=48; strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
+         retval = mm_gin(filename); if(retval.isempty()) { retval = balcar_MLq(0,K,0,_n,_l); rmzeros(retval); mm_gout(retval,filename); }
+      }
+   }
+   return retval;
+}
+
 sMat<double> icmfmat::op_generate(int i)
-{if(_num_op<=i) {if(i>50){std::cerr << "Error icmfmat::op_generate - generating Operator " << i << " > 50 not possible\n";exit(EXIT_FAILURE);}
-                 _num_op = i+1; iflag.resize(_num_op,0); // extend operator storage if more operators are required
+{if(_num_op<=i) {_num_op = i+1; iflag.resize(_num_op,0); // extend operator storage if more operators are required
                  sMat<double> t; J.resize(_num_op,t);T.resize(_num_op+2,NULL);
                                  }
  if(J[i].isempty()) // only do something if Operator matrix is empty
- {char nstr[6];  char basename[255]; strcpy(basename,"results/mms/");
+ {if(_xyz!=0)
+ {// Indices fpr balcar Mq 4-8 are k=2 quadrupoles; 9-15:k=3; 16-24:k=4; 25-35:k=5; 36-48:k=6
+   int k[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+   int q[] = {0,-1,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+   if(i>48){std::cerr << "Error icmfmat::op_generate - generating Operator balcar_Mq for " << i << " > 48 not possible\n";exit(EXIT_FAILURE);}
+   bool imag; J[i]=balcar_Mq(_xyz,k[i], q[i], imag );iflag[i]=imag;}
+ else
+ {if(i>50){std::cerr << "Error icmfmat::op_generate - generating Operator " << i << " > 50 not possible\n";exit(EXIT_FAILURE);}
+  char nstr[6];  char basename[255]; strcpy(basename,"results/mms/");
       if(_save_matrices) {
       #ifndef _WINDOWS
       struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
@@ -303,9 +433,9 @@ sMat<double> icmfmat::op_generate(int i)
  if(i<6){
     // Determines the filename strings for where the moment operator matrices are stored if previously calculated
     char Lfilestr[255], Sfilestr[255]; 
-   if(i<4)
+   if(i==0||i==1||i==3||i==4)
   {
-      iflag[2]=1; iflag[3]=1;
+      iflag[1]=1; iflag[4]=1;
    nstr[0] = 76;   // 76 is ASCII for "L", 85=="U", 100=="d" and 102=="f"
    nstr[1] = 49; // 49=="1"
   
@@ -313,52 +443,52 @@ sMat<double> icmfmat::op_generate(int i)
    sMat<double> Sp1, Sm1, Lp1, Lm1; 
    nstr[2]=120; nstr[3]=0; strcpy(Lfilestr,basename); strcat(Lfilestr,nstr); strcat(Lfilestr,".mm");   
    nstr[0]=83;             strcpy(Sfilestr,basename); strcat(Sfilestr,nstr); strcat(Sfilestr,".mm");
-   J[1] = mm_gin(Lfilestr); J[0] = mm_gin(Sfilestr); 
+   J[3] = mm_gin(Lfilestr); J[0] = mm_gin(Sfilestr); 
    nstr[2]=121; nstr[3]=0; strcpy(Sfilestr,basename); strcat(Sfilestr,nstr); strcat(Sfilestr,".mm");   
    nstr[0]=76;             strcpy(Lfilestr,basename); strcat(Lfilestr,nstr); strcat(Lfilestr,".mm");
-   J[3] = mm_gin(Lfilestr); J[2] = mm_gin(Sfilestr); 
-   if(J[0].isempty() || J[1].isempty() || J[2].isempty() || J[3].isempty())
+   J[4] = mm_gin(Lfilestr); J[1] = mm_gin(Sfilestr); 
+   if(J[0].isempty() || J[1].isempty() || J[3].isempty() || J[4].isempty())
     { 
       racah_mumat(_n,1,Lp1,Sp1,_l); rmzeros(Sp1); rmzeros(Lp1);
       racah_mumat(_n,-1,Lm1,Sm1,_l); rmzeros(Sm1); rmzeros(Lm1);
-      J[0] = (Sm1-Sp1)/sqrt(2); J[2] = (Sm1+Sp1)/sqrt(2); Sm1.clear(); Sp1.clear();   // Sx and Sy
-      J[1] = (Lm1-Lp1)/sqrt(2); J[3] = (Lm1+Lp1)/sqrt(2); Lm1.clear(); Lp1.clear();   // Lx ans Ly
-      mm_gout(J[2],Sfilestr); mm_gout(J[3],Lfilestr);
+      J[0] = (Sm1-Sp1)/sqrt(2); J[1] = (Sm1+Sp1)/sqrt(2); Sm1.clear(); Sp1.clear();   // Sx and Sy
+      J[3] = (Lm1-Lp1)/sqrt(2); J[4] = (Lm1+Lp1)/sqrt(2); Lm1.clear(); Lp1.clear();   // Lx ans Ly
+      mm_gout(J[1],Sfilestr); mm_gout(J[4],Lfilestr);
       nstr[2]=120; nstr[3]=0; strcpy(Lfilestr,basename); strcat(Lfilestr,nstr); strcat(Lfilestr,".mm");   
       nstr[0]=83;             strcpy(Sfilestr,basename); strcat(Sfilestr,nstr); strcat(Sfilestr,".mm");
-      mm_gout(J[0],Sfilestr); mm_gout(J[1],Lfilestr);
+      mm_gout(J[0],Sfilestr); mm_gout(J[3],Lfilestr);
     }
    
   }else
   {
    nstr[0]=76; nstr[2]=122; nstr[3]=0; strcpy(Lfilestr,basename); strcat(Lfilestr,nstr); strcat(Lfilestr,".mm");
    nstr[0]=83;                         strcpy(Sfilestr,basename); strcat(Sfilestr,nstr); strcat(Sfilestr,".mm");
-   J[4] = mm_gin(Sfilestr); J[5] = mm_gin(Lfilestr);                               // Sz and Lz
-   if(J[4].isempty() || J[5].isempty()) { 
-      racah_mumat(_n,0,J[5],J[4],_l); rmzeros(J[4]); rmzeros(J[5]); mm_gout(J[4],Sfilestr); mm_gout(J[5],Lfilestr); 
+   J[2] = mm_gin(Sfilestr); J[5] = mm_gin(Lfilestr);                               // Sz and Lz
+   if(J[2].isempty() || J[5].isempty()) { 
+      racah_mumat(_n,0,J[5],J[2],_l); rmzeros(J[2]); rmzeros(J[5]); mm_gout(J[2],Sfilestr); mm_gout(J[5],Lfilestr); 
                                         }
    
   }
 /* // Checks the moment operator matrices against those given by Chan and Lam.
 // int ii,jj=0; sMat<double> mu; double g_s = 2.0023193043622; // electronic g-factor
 // chanlam_mumat(n,1,mu,l); for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
-//    if(fabs(-mu(ii,jj)-J[1](ii,jj)-g_s*J[0](ii,jj))>10*DBL_EPSILON) { std::cerr << "icmfmat: Magnetic moment operator x does not agree.\n"; break; }
+//    if(fabs(-mu(ii,jj)-J[3](ii,jj)-g_s*J[0](ii,jj))>10*DBL_EPSILON) { std::cerr << "icmfmat: Magnetic moment operator x does not agree.\n"; break; }
 //    if(ii==mu.nr() && jj==mu.nc()) std::cerr << "icmfmat: Magnetic moment operator x agrees.\n";
 // chanlam_mumat(n,2,mu,l); for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
-//    if(fabs(-mu(ii,jj)-J[3](ii,jj)-g_s*J[2](ii,jj))>10*DBL_EPSILON) { std::cerr << "icmfmat: Magnetic moment operator y does not agree.\n"; break; }
+//    if(fabs(-mu(ii,jj)-J[4](ii,jj)-g_s*J[1](ii,jj))>10*DBL_EPSILON) { std::cerr << "icmfmat: Magnetic moment operator y does not agree.\n"; break; }
 //    if(ii==mu.nr() && jj==mu.nc()) std::cerr << "icmfmat: Magnetic moment operator y agrees.\n";
 // chanlam_mumat(n,3,mu,l); for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
-//    if(fabs(-mu(ii,jj)-J[5](ii,jj)-g_s*J[4](ii,jj))>10*DBL_EPSILON) { std::cerr << "icmfmat: Magnetic moment operator z does not agree.\n"; break; }
+//    if(fabs(-mu(ii,jj)-J[5](ii,jj)-g_s*J[2](ii,jj))>10*DBL_EPSILON) { std::cerr << "icmfmat: Magnetic moment operator z does not agree.\n"; break; }
 //    if(ii==mu.nr() && jj==mu.nc()) std::cerr << "icmfmat: Magnetic moment operator z agrees.\n";
    double sumcheck;
    chanlam_mumat(n,1,mu,l); sumcheck = 0.; for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
-//    std::cout << -mu(ii,jj) << "\t" << J[1](ii,jj)+g_s*J[0](ii,jj)  << "\t" << fabs(-mu(ii,jj)-J[1](ii,jj)-g_s*J[0](ii,jj)) << "\n";
-      sumcheck += fabs(-mu(ii,jj)-J[1](ii,jj)-g_s*J[0](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_x(ChanLam) - (Lx+gSx)) = " << sumcheck << "\n";
+//    std::cout << -mu(ii,jj) << "\t" << J[3](ii,jj)+g_s*J[0](ii,jj)  << "\t" << fabs(-mu(ii,jj)-J[3](ii,jj)-g_s*J[0](ii,jj)) << "\n";
+      sumcheck += fabs(-mu(ii,jj)-J[3](ii,jj)-g_s*J[0](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_x(ChanLam) - (Lx+gSx)) = " << sumcheck << "\n";
    chanlam_mumat(n,2,mu,l); sumcheck = 0.; for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
-//    std::cout << -mu(ii,jj) << "\t" << J[3](ii,jj)+g_s*J[2](ii,jj)  << "\t" << fabs(-mu(ii,jj)-J[3](ii,jj)-g_s*J[2](ii,jj)) << "\n";
-      sumcheck += fabs(-mu(ii,jj)-J[3](ii,jj)-g_s*J[2](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_y(ChanLam) - (Ly+gSy)) = " << sumcheck << "\n";
+//    std::cout << -mu(ii,jj) << "\t" << J[4](ii,jj)+g_s*J[1](ii,jj)  << "\t" << fabs(-mu(ii,jj)-J[3](ii,jj)-g_s*J[2](ii,jj)) << "\n";
+      sumcheck += fabs(-mu(ii,jj)-J[4](ii,jj)-g_s*J[1](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_y(ChanLam) - (Ly+gSy)) = " << sumcheck << "\n";
    chanlam_mumat(n,3,mu,l); sumcheck = 0.; for(ii=0; ii<mu.nr(); ii++) for(jj=0; jj<mu.nc(); jj++) 
-      sumcheck += fabs(-mu(ii,jj)-J[5](ii,jj)-g_s*J[4](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_z(ChanLam) - (Lz+gSz)) = " << sumcheck << "\n"; 
+      sumcheck += fabs(-mu(ii,jj)-J[5](ii,jj)-g_s*J[2](ii,jj)); std::cout << "Moment Matrix Check: sum(-mu_z(ChanLam) - (Lz+gSz)) = " << sumcheck << "\n"; 
 */
         } // 50>=i>=6
     else{
@@ -373,9 +503,8 @@ sMat<double> icmfmat::op_generate(int i)
     //int im[]= {0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
       sMat<double> Upq,Umq; double redmat; int n = _n; //if(n>(2*_l+1)) n = 4*_l+2-n; 
             if(q[i]<0) iflag[i]=1;
-         
             if(k[i]%2==1){J[i].zero(J[0].nr(),J[0].nc());} // continue;   // Using the  reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-            else if(k[i]>4 && _l==D){J[i].zero(J[0].nr(),J[0].nc());} //continue;
+            else if(k[i]>_l*2){J[i].zero(J[0].nr(),J[0].nc());} //continue;
             else {
             redmat = pow(-1.,(double)abs(_l)) * (2*_l+1) * threej(2*_l,2*k[i],2*_l,0,0,0);// * wy2stev(i);
             NSTR(k[i],abs(q[i])); strcpy(filename,basename); strcat(filename,nstr); strcat(filename,".mm");
@@ -392,10 +521,8 @@ sMat<double> icmfmat::op_generate(int i)
                }
       }
  
+  }
  }
-
-
- 
 return J[i];
 }
 
@@ -432,7 +559,7 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
 
 std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<double> > &matel, int num_op)
 { std::vector<double> E,eb, ex((num_op+2),0.), me; matel.clear();
-   int iJ, ind_j, Esz, Hsz=VE.Hsz();//, incx=1; 
+   int iJ, ind_j, Esz, Hsz=VE.Hsz();
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
@@ -464,19 +591,19 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
          VE.zV(ii,jj) = 0;
       }  
    
-   if(!_density.empty()) 
+   if(_xyz!=0) 
    { 
       std::cout << "#Calculating the expectation of the moment density operator ";
-      if(_density.find("l")!=std::string::npos || _density.find("s")!=std::string::npos) std::cout << _density << "\n"; 
-      else
-      {
-         if(_density.find("1")!=std::string::npos) std::cout << "Sx\n";
-         if(_density.find("2")!=std::string::npos) std::cout << "Lx\n";
-         if(_density.find("3")!=std::string::npos) std::cout << "Sy\n";
-         if(_density.find("4")!=std::string::npos) std::cout << "Ly\n";
-         if(_density.find("5")!=std::string::npos) std::cout << "Sz\n";
-         if(_density.find("6")!=std::string::npos) std::cout << "Lz\n";
+      switch(_xyz)
+      { case 1: std::cout << "Sx\n";break;
+        case 2: std::cout << "Sy\n";break;
+        case 3: std::cout << "Sz\n";break;
+        case -1: std::cout << "Lx\n";break;
+        case -2: std::cout << "Ly\n";break;
+        case -3: std::cout << "Lz\n";break;
+        default: break;
       }
+      
    }
 // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
    for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0 || VE.E(Esz+1)==-DBL_MAX) break; }
@@ -489,32 +616,27 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
    // calculate Matrix Elements 
    for(iJ=0; iJ<num_op; iJ++)
    { op_generate(iJ);            
-            // Indices 6-10 are k=2 quadrupoles; 11-17:k=3; 18-26:k=4; 27-37:k=5; 38-50:k=6
-      int k[] = {1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   
+      
       me.assign(Esz,0.);
-      // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      if(iJ>6 && (k[iJ]%2==1 || k[iJ]>_l*2)) { matel.push_back(me); continue; }
-      if(!VE.iscomplex() && _density.empty()&&iflag[iJ]==0)
-      {     if(!J[iJ].isempty()) // might be empty because redmat is zero ...
-             { //vt = (double*)malloc(Hsz*sizeof(double));  fJmat=J[iJ].f_array(); 
+     if(!J[iJ].isempty()) // might be empty because redmat is zero ...
+      {if(!VE.iscomplex() && _xyz==0&&iflag[iJ]==0)
+       {      
             for(ind_j=0; ind_j<Esz; ind_j++)
-            { 
+            { // Calculates the matrix elements <Vi|J|Vi>
           me[ind_j]=J[iJ].MultvxMv(VE.V(ind_j));
             }
-           } 
-         matel.push_back(me); 
        }  
       else
-      {  if(!J[iJ].isempty()) // might be empty because redmat is zero ...
-          { for(ind_j=0; ind_j<Esz; ind_j++)
-         {  // Calculates the matrix elements <Vi|J.H|Vi>
+      {   for(ind_j=0; ind_j<Esz; ind_j++)
+         {  // Calculates the matrix elements <Vi|J|Vi>
            me[ind_j]=J[iJ].MultvxMv(VE.zV(ind_j),iflag[iJ]);
                    }
-         }
-         matel.push_back(me); 
+         
+       }
       }
-   op_free(iJ);
+    matel.push_back(me); 
+
+    op_free(iJ);
    }
 
 // For first run calculate also the partition function and internal energy
@@ -549,11 +671,127 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
           
    return ex;
 }
+
+
+
 // --------------------------------------------------------------------------------------------------------------- //
 // Calculates the matrix M_ab=<i|Ja|j><j|Jb|i>{exp(-beta_i*T)-exp(-beta_j*T)} for some state i,j
 // --------------------------------------------------------------------------------------------------------------- //
-void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta)
+int icmfmat::u1(complexdouble*u,int sz, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
+        int tn, float &delta,complexdouble *V,complexdouble * ev,int Hsz,int & n,int &nd)
+{// check if printout should be done and make tn positive
+   int pr=0; if (tn<0) { pr=1; tn*=-1; }
+   double ninit=u[0].r;
+   double pinit=u[0].i;
+   int i,j=0,k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
+   double maxE=delta;n=i;nd=j;
+   if((delta=(ev[j].r-ev[i].r))<=maxE)
+   {  double *en = new double[Hsz]; for(k=0; k<Hsz; k++) en[k] = ev[k].r;
+      // catch eigenvectors VE from est
+      iceig VE(Hsz,en,V,1);
+      // Calculates the transition matrix elements:
+      //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
+      //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
+      //    See file icpars.cpp, function mfmat::Mab() to see the actual code to calculate this.
+      double  Z=0., therm; complexdouble zme; zme.r=0; zme.i=0.;
+      std::vector<double> mij(sz,0.);
+      int iJ;
+     // Calculates the matrix elements: <i|Ja|j> and <j|Ja|i> for each of the  Ja's
+     for(iJ=0; iJ<sz; iJ++)
+     {u[iJ]=zme;
+      op_generate(iJ); 
+      if(!VE.iscomplex() && iflag[iJ]==0)
+      { u[iJ].r=J[iJ].MultuxMv(VE.V(i),VE.V(j));
+      } 
+      else
+      { u[iJ]=J[iJ].MultuxMv(VE.zV(i),VE.zV(j),iflag[iJ]);
+       }
+      op_free(iJ);
+     }
+
+   if(i==j&&T>0) {//subtract thermal expectation value from zij=zii
+            std::vector< std::vector<double> > matel;
+            std::vector<double> vJ = expJ(VE,T,matel,sz);
+
+            for(iJ=0; iJ<sz; iJ++)u[iJ].r-=vJ[iJ];
+            }
+   if (T<0){T=-T;}
+
+   delta = VE.E(j)-VE.E(i);
+   if(delta<-0.000001)
+   {
+      std::cerr << "ERROR module ic1ion - du1calc: energy gain delta gets negative\n"; 
+      exit(EXIT_FAILURE);
+   }
+   if(j==i)delta=-SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
+
+   // Calculates the partition function
+   for(iJ=0; iJ<Hsz; iJ++) { therm = exp(-(VE.E(iJ)-VE.E(0))/(KB*T)); Z += therm; if(therm<DBL_EPSILON) break; }
+
+   // do some printout if wishes and set correct occupation factor
+   if (delta>SMALL)
+   {
+      therm = exp(-(VE.E(i)-VE.E(0))/(KB*T)) - exp(-(VE.E(j)-VE.E(0))/(KB*T));
+      if(pr==1)
+      {
+         printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
+         for(iJ=0;iJ<sz;++iJ)
+         {switch(_xyz)
+           {case  0: printf(" |<%i|I%i|%i>|^2=%6.3f\t ",i+1,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case  1: printf(" |<%i|Msx%i|%i>|^2=%6.3f\t ",i+1,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case  2: printf(" |<%i|Msy%i|%i>|^2=%6.3f\t ",i+1,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case  3: printf(" |<%i|Msz%i|%i>|^2=%6.3f\t ",i+1,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case -1: printf(" |<%i|Mlx%i|%i>|^2=%6.3f\t ",i+1,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case -2: printf(" |<%i|Mly%i|%i>|^2=%6.3f\t ",i+1,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case -3: printf(" |<%i|Mlz%i|%i>|^2=%6.3f\t ",i+1,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+         }}
+         printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
+      }
+   }
+   else
+   {
+      therm = exp(-(VE.E(i)-VE.E(0))/(KB*T))/(KB*T);    // quasielastic scattering has not wi-wj but wj*epsilon/kT
+      if(pr==1)
+      {
+         printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
+         for(iJ=0;iJ<sz;++iJ)
+         {switch(_xyz)
+          { case  0: printf(" |<%i|I%i-<I%i>|%i>|^2=%6.3f\t ",i+1,iJ,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case  1: printf(" |<%i|Msx%i-<Msx%i>|%i>|^2=%6.3f\t ",i+1,iJ,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case  2: printf(" |<%i|Msy%i-<Msy%i>|%i>|^2=%6.3f\t ",i+1,iJ,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case  3: printf(" |<%i|Msz%i-<Msz%i>|%i>|^2=%6.3f\t ",i+1,iJ,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case -1: printf(" |<%i|Mlx%i-<Mlx%i>|%i>|^2=%6.3f\t ",i+1,iJ,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case -2: printf(" |<%i|Mly%i-<Mly%i>|%i>|^2=%6.3f\t ",i+1,iJ,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+           case -3: printf(" |<%i|Mlz%i-<Mlz%i>|%i>|^2=%6.3f\t ",i+1,iJ,iJ,j+1,u[iJ].r*u[iJ].r+u[iJ].i*u[iJ].i);break;
+         }}printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
+      }
+   }
+
+   // multiply matrix Mab by occupation factor
+   for(iJ=0; iJ<sz; iJ++)
+      { u[iJ].r *= sqrt(therm/Z); u[iJ].i *= sqrt(therm/Z); }
+
+     }
+   // determine number of thermally reachable states
+   if (ninit>Hsz)ninit=Hsz;
+   double zsum=0,zi,x;
+   int noft=0; 
+   if(T>0)for(i=0; (i<ninit)&((((x=(ev[i].r-ev[0].r)/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
+   {//fprintf(stderr,"i=%i zi=%g zsum=%g noft=%i Hsz=%i Ei-E1=%g\n",i,zi,zsum,noft,Hsz,ev[0][i].r-ev[0].r);
+      noft += Hsz-i; 
+      zsum += zi;
+   }
+   if(T<0)for(int i=0;i<ninit;++i){noft+=Hsz-i;}
+   return noft;
+   
+}
+     
+// --------------------------------------------------------------------------------------------------------------- //
+// Calculates the matrix M_ab=<i|M(q)|j><j|:(q)|i>{exp(-beta_i*T)-exp(-beta_j*T)} for some state i,j
+// --------------------------------------------------------------------------------------------------------------- //
+void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i,int j,int pr,float & delta)
 {  double  Z=0., therm; complexdouble zme; zme.r=0; zme.i=0.;
+   
 //   int sz = (_num_op>6?_num_op:6);
   int sz =(u.size()>6?u.size():6);
    std::vector<double> mij(sz,0.);//, mji(6,0.);
@@ -629,163 +867,4 @@ void icmfmat::u1(std::vector<double>&u, std::vector<double>&iu, iceig&VE, double
 
 }
 
-//--------------------------------------------------------------------------------------------------------------
-std::vector<double> icmfmat::orbmomdensity_expJ(iceig &VE,int xyz, double T)
-{
-   return spindensity_expJ(VE,-xyz, T);
-}
 
-//--------------------------------------------------------------------------------------------------------------
-std::vector<double> icmfmat::spindensity_expJ(iceig &VE,int xyz, double T)
-{
-   double Z=0.;
-   complexdouble *zt=0; 
-   std::vector<double> E, ex((_num_op>6?_num_op:6)+2,0.), me, eb; 
-   int iJ, ind_j, Esz, Hsz=VE.Hsz();
-   if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
-   sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   // Sets energy levels relative to lowest level, and determines the maximum energy level needed.
-   for(Esz=0; Esz<J[0].nr(); Esz++) { E.push_back(VE.E(Esz)-VE.E(0)); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || VE.E(Esz+1)==0) break; }
-   if (T<0){Esz=(int)(-T);printf ("Temperature T=%g<0: please choose probability distribution for the -T=%i lowest energy states by hand\n",T,(int)(-T));
-                         printf ("Number   Excitation Energy\n");
-   for (ind_j=0;ind_j<Esz;++ind_j) printf ("%i    %4.4g meV\n",ind_j+1,E[ind_j]);
-   } // MR 17.9.2010
-   for(int ii=0; ii<Hsz; ii++) for(int jj=0; jj<Hsz; jj++)
-      if(fabs(VE.zV(ii,jj).r*VE.zV(ii,jj).r+VE.zV(ii,jj).i*VE.zV(ii,jj).i)<DBL_EPSILON*100000)
-      {
-         VE.zV(ii,jj) = 0.;
-      }
-
-   int k[] = {0,1, 1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   int q[] = {0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-   //sMat<double> Upq,Umq;  //if(n>(2*_l+1)) n = 4*_l+2-n;
-   char xyzstr[] = "xyz";
-   if(xyz>0) { std::cout << "#Calculating the expectation values of the spin density operator S" << xyzstr[xyz-1] << "\n"; }
-   else      { std::cout << "#Calculating the expectation values of the orbital moment density operator L" << xyzstr[-xyz-1] << "\n"; }
-
-   // For first run calculate also the partition function and internal energy
-   // Rest of the runs only calculate the new matrix elements
-   me.assign(Esz,0.); eb.assign(Esz,0.); Z=0.;
-   for(iJ=0; iJ<(_num_op>6?_num_op:6); iJ++)
-   {  ex[iJ]=0;
-      me.assign(Esz,0.);
-      // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      if((k[iJ]%2==1) || (k[iJ]>4 && _l==D)) {  continue; }
-         complexdouble *zJmat; zeroes.zero(J[0].nr(),J[0].nc());
-         
-         zJmat = balcar_Mq(xyz,k[iJ],q[iJ],_n,_l); // minus sign stands for orbital density coeff
-         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-         for(ind_j=0; ind_j<Esz; ind_j++)
-         {  // Calculates the matrix elements <Vi|J.H|Vi>
-             // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-              me[ind_j] = expectation_value(Hsz,zJmat,VE.zV(ind_j)); // defined in martin.c
-  if(iJ==0){
-//MR 17.9.2010
-      if (T<0)
-      {  char instr[MAXNOFCHARINLINE];
-         printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-         if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { printf("Error in input. Exiting\n"); exit(-1); }
-         eb[ind_j]=strtod(instr,NULL);
-      }
-       else
-      {  eb[ind_j] = exp(-E[ind_j]/(KB*T));}  Z+=eb[ind_j];
-//MRend 17.9.2010
-             }
-             ex[iJ]+=me[ind_j]*eb[ind_j];
-         }
-         free(zJmat); free(zt);  ex[iJ]/=Z;
-      
-      if(fabs(ex[iJ])<DBL_EPSILON) ex[iJ]=0.;
-   }
-    return ex;
-}
-
-
-// --------------------------------------------------------------------------------------------------------------- //
-// Calculates the matrix M_ab=<i|M(q)|j><j|:(q)|i>{exp(-beta_i*T)-exp(-beta_j*T)} for some state i,j
-// --------------------------------------------------------------------------------------------------------------- //
-void icmfmat::dod_u1(int xyz, std::vector<double>&u, std::vector<double>&iu, iceig&VE, double T, int i, int j,int pr,float & delta)
-{  
-   double Z=0., therm; complexdouble *zt=0, zme; zme.r=0; zme.i=0.;
-   int sz = u.size();
-   if(sz>49){std::cerr << "Error: icmfmat::dod_u1 called with u of dimension " << sz << ">49 this is not possible\n";exit(EXIT_FAILURE);}
-   std::vector<double> mij(sz,0.);//, mji(6,0.);
-   std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
-   int iJ, Hsz=VE.Hsz(), incx=1; 
-   if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::u1() - Hamiltonian matrix size not same as mean field operator!\n"; return; }
-   sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   complexdouble *zJmat=0;
-   char uplo = 'U';
- // Indices 4-8 are k=2 quadrupoles; 9-15:k=3; 16-24:k=4; 25-35:k=5; 36-48:k=6
-   int k[] = {0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
-   int q[] = {0,-1,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-
-   // Calculates the matrix elements: <i|Ja|j> and <j|Ja|i> for each of the six Ja's
-   for(iJ=0; iJ<sz; iJ++)
-   {
-      zJmat = balcar_Mq(xyz,k[iJ],q[iJ],_n,_l);
-         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, VE.zV(j), &incx, &zbeta, zt, &incx);
-         #ifdef _G77 
-         F77NAME(zdotc)(&zij[iJ], &Hsz, VE.zV(i), &incx, zt, &incx);
-         #else
-         zij[iJ] = F77NAME(zdotc)(&Hsz, VE.zV(i), &incx, zt, &incx);
-         #endif
-//       int k;for(k=0;k<Hsz;++k)printf("%6.3f %+6.3f i  ",VE.zV(j)[k].r,VE.zV(j)[k].i);
-         free(zJmat); free(zt);
-   }
-
-   if(i==j&&T>0) {//subtract thermal expectation value from zij=zii
-            std::vector<double> vJ = spindensity_expJ(VE,xyz,T);
-            for(iJ=0; iJ<sz; iJ++)zij[iJ].r-=vJ[iJ];
-            }
-   if (T<0){T=-T;}
-
-   // Calculates the matrix M_ab and iM_ab
-   for(iJ=0; iJ<sz; iJ++)
-      {  
-         u[iJ] = zij[iJ].r;
-         iu[iJ]= zij[iJ].i;
-      }
-
-   delta = VE.E(j)-VE.E(i);
-   if(delta<-0.000001)
-   {
-      std::cerr << "ERROR module ic1ion - du1calc: energy gain delta gets negative\n"; 
-      exit(EXIT_FAILURE);
-   }
-   if(j==i)delta=-SMALL; // if transition within the same level: take negative delta !!- this is needed in routine intcalc
-
-   // Calculates the partition function
-   for(iJ=0; iJ<Hsz; iJ++) { therm = exp(-(VE.E(iJ)-VE.E(0))/(KB*T)); Z += therm; if(therm<DBL_EPSILON) break; }
-
-   // do some printout if wishes and set correct occupation factor
-   if (delta>SMALL)
-   {
-      therm = exp(-(VE.E(i)-VE.E(0))/(KB*T)) - exp(-(VE.E(j)-VE.E(0))/(KB*T));
-      if(pr==1)
-      {
-         printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ia|%i>|^2=%6.3f\n |<%i|Ib|%i>|^2=%6.3f\n |<%i|Ic|%i>|^2=%6.3f\n",i+1,j+1,u[0]*u[0]+iu[0]*iu[0],i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2]);
-         printf(" |<%i|Id|%i>|^2=%6.3f\n |<%i|Ie|%i>|^2=%6.3f\n |<%i|If|%i>|^2=%6.3f\n",i+1,j+1,u[3]*u[3]+iu[3]*iu[3],i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5]);
-         printf(" n%i-n%i=%6.3f\n",i,j,therm / Z);
-      }
-   }
-   else
-   {
-      therm = exp(-(VE.E(i)-VE.E(0))/(KB*T))/(KB*T);    // quasielastic scattering has not wi-wj but wj*epsilon/kT
-      if(pr==1)
-      {
-         printf("delta(%i->%i)=%6.3fmeV\n",i+1,j+1,delta);
-         printf(" |<%i|Ia-<Ia>|%i>|^2=%6.3f\n |<%i|Ib-<Ib>|%i>|^2=%6.3f\n |<%i|Ic-<Ic>|%i>|^2=%6.3f\n",i+1,j+1,u[0]*u[0]+iu[0]*iu[0],i+1,j+1,u[1]*u[1]+iu[1]*iu[1],i+1,j+1,u[2]*u[2]+iu[2]*iu[2]);
-         printf(" |<%i|Id-<Id>|%i>|^2=%6.3f\n |<%i|Ie-<Ie>|%i>|^2=%6.3f\n |<%i|If-<If>|%i>|^2=%6.3f\n",i+1,j+1,u[3]*u[3]+iu[3]*iu[3],i+1,j+1,u[4]*u[4]+iu[4]*iu[4],i+1,j+1,u[5]*u[5]+iu[5]*iu[5]);
-         printf(" n%i=%6.3f\n",i,(KB*T)*therm/Z);
-      }
-   }
-
-   // multiply matrix Mab by occupation factor
-   for(iJ=0; iJ<sz; iJ++)
-      { u[iJ] *= sqrt(therm/Z); iu[iJ] *= sqrt(therm/Z); }
-
-}

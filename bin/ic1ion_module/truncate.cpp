@@ -233,8 +233,7 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
    for(int iJ=1; iJ<=(gjmbH.Hi()-gjmbH.Lo()+1); iJ++)
    {
       if (q[iJ]<0) a.r = -gjmbH[iJ+gjmbH.Lo()-1]; else a.r = -gjmbH[iJ+gjmbH.Lo()-1];
-      //if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,(complexdouble*)&Pst[iJ*cb*cb+offset][0],&incx,Hrot,&incx);
-       if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,mfmat.T[iJ+1],&incx,Hrot,&incx);
+      if (fabs(a.r)>DBL_EPSILON) F77NAME(zaxpy)(&szapy,&a,mfmat.T[iJ+1],&incx,Hrot,&incx);
   }
 
    // Diagonalises the rotated mean field Hamiltonian
@@ -266,7 +265,7 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
       me.assign(Esz,0.);
       zt = (complexdouble*)malloc(cb*sizeof(complexdouble)); J[iJ+1]=0.; 
 
-      zJmat = balcar_Mq(xyz,k[iJ],q[iJ],pars.n,pars.l);
+      zJmat = mfmat.balcar_Mq(xyz,k[iJ],q[iJ],pars.n,pars.l);
 
         F77NAME(zhemm)(&side,&uplo,&Hsz,&cb,&zalpha,zJmat,&Hsz,mfmat.T[0],&Hsz,&zbeta,zmt,&Hsz);
          F77NAME(zgemm)(&transpose,&notranspose,&cb,&cb,&Hsz,&zalpha,mfmat.T[0],&Hsz,zmt,&Hsz,&zbeta,opmat,&cb); free(zJmat);
@@ -284,7 +283,7 @@ void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vect
       free(zt); J[iJ+1]/=Z;
    }
 
-   end = clock(); std::cout << " Done. Elapsed time = " << (double)(end-start)/CLOCKS_PER_SEC << "s." << std::endl;
+   end = clock(); std::cerr << " Done. Elapsed time = " << (double)(end-start)/CLOCKS_PER_SEC << "s." << std::endl;
 // if(!opmat) { delete[]opmat; *opmat=0; } if(!zmt) { delete[]zmt; *zmt=0; }
    delete[]opmat; delete[]zmt;
 }
