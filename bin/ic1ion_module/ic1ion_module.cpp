@@ -511,7 +511,7 @@ bool ic1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (ro
             if(VE.V(i)[j]!=est[i+1][j+1]){fprintf(stderr,"compiler problem: bad memory mapping of vectors\n");exit(EXIT_FAILURE);}
          }
       }
-  end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
+  end = clock(); std::cerr << "#Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
 return true;
 }
 

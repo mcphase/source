@@ -48,6 +48,16 @@ void helpexit()
           "                       elements for orbital momentum L\n" 
           "         -S  ......... calculate expectation values and transition matrix\n"
           "                       elements for spin S\n"
+          "         -sx ....... ..calculate expectation values and transition matrix\n"
+          "                       elements for spindensity coefficients aSx(lm) in expansion \n"
+          "                       of spindensity-x-component in Ms(r) = sum_lm aS(l,m) R^2(r) Zlm(Omega)\n"
+          "                        E. Balcar J. Phys. C. 8 (1975) 1581\n"
+          "         -sy -sz ......for y and z components use option -sy and  -sz\n"
+          "         -lx ....... ..calculate expectation values and transition matrix\n"
+          "                       elements for orbital moment density coefficients aLx(lm) in expansion \n"
+          "                       of orbital moment density-x-component in Ml(r)=sum_lm  aLx(l,m) F(r) Zlm(Omega)\n"
+          "                       with F(r)==1/r int_r^inf R^2(x) dx,   E. Balcar J. Phys. C. 8 (1975) 1581\n"
+          "         -ly -lz ......for y and z components use option -ly and  -lz\n"
           "         -s 0.3 0.1 .. calculate static magnetic single ion susceptibility X in emu/mol with\n"
           "                       constant offset X0=0.3 emu/mol and molecular field constant lambda=0.1 mol/emu\n"
           "                       1/(X-X0)=(1/Xcf)-lambda. Xcf obtained the same way as option -d 0 0 and\n"
@@ -98,6 +108,12 @@ void colheader(char observable,int observable_nofcomponents,int nofcomponents,Ve
                                    switch(observable)
                                    {case 'Q': printf("                                 ");
                                               for(j=1;j<=observable_nofcomponents;++j){printf("   %2i          %2i          %2i       %2i    ",5+nofcomponents+(j-1)*4+1,5+nofcomponents+(j-1)*4+2,5+nofcomponents+(j-1)*4+3,5+nofcomponents+(j-1)*4+4);}printf("    ");break;
+                                    case 'x':
+                                    case 'y':
+                                    case 'z':
+                                    case 'u':
+                                    case 'v':
+                                    case 'w': for(j=1;j<=observable_nofcomponents;++j){printf("   %i       ",5+nofcomponents+j);}printf("    ");break;
                                     case 's': printf("   %i         ",5+nofcomponents+1);
                                               for(j=2;j<=observable_nofcomponents;++j){printf("%i  ",5+nofcomponents+j);}printf("    ");break;
                                     case 'i': printf("   %i            ",5+nofcomponents+1);
@@ -108,6 +124,9 @@ void colheader(char observable,int observable_nofcomponents,int nofcomponents,Ve
                                    }printf("\n");
  printf("#atom-nr   T[K]   ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
+int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
+int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
+
                                    switch(observable)
                                    {case 'Q': printf("Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
                                               for(j=1;j<=observable_nofcomponents;++j){printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}printf("(muB)");break;
@@ -116,6 +135,12 @@ void colheader(char observable,int observable_nofcomponents,int nofcomponents,Ve
                                     case 's': printf("Xpoly(emu/mol) X11 X22 X33 X23 X32 X13 X31 X12 X21(emu/mol) ");break;
                                     case 'i': printf("1/Xpoly(mol/emu) Y11 Y22 Y33 Y23 Y32 Y13 Y31 Y12 Y21(mol/emu) ");break;
                                     case 'd': printf("E(meV) Sdip(Q=0,Omega)(barn/meV) Xpolyr Xpolyi(mb^2/meV) X11r X11i X22r X22i X33r X33i X23r X23i X32r X32i X13r X13i X31r X31i X12r X12i X21r X21i(mb^2/meV) ");break;
+                                    case 'x': for(j=1;j<=observable_nofcomponents;++j)printf(" <aSx(%i,%i)> ",k[j],q[j]);break;
+                                    case 'y': for(j=1;j<=observable_nofcomponents;++j)printf(" <aSy(%i,%i)> ",k[j],q[j]);break;
+                                    case 'z': for(j=1;j<=observable_nofcomponents;++j)printf(" <aSz(%i,%i)> ",k[j],q[j]);break;
+                                    case 'u': for(j=1;j<=observable_nofcomponents;++j)printf(" <aLx(%i,%i)> ",k[j],q[j]);break;
+                                    case 'v': for(j=1;j<=observable_nofcomponents;++j)printf(" <aLy(%i,%i)> ",k[j],q[j]);break;
+                                    case 'w': for(j=1;j<=observable_nofcomponents;++j)printf(" <aLz(%i,%i)> ",k[j],q[j]);break;
                                     default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
                                    }
    if(!elevels){printf("transition-energies(meV)...\n");}else{printf("energy levels(meV)...\n");}
@@ -245,12 +270,18 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
        case 'Q': for(int Ti=1;Ti<=Tsteps;++Ti)
                  {Vector II(I.Column(Ti));
                  jjj.mcalc(II,T(Ti),Hxc,Hext,jjj.Icalc_parstorage);
-                 I.Column(Ti)=II;
+                 SetColumn(Ti,I,II);
                  jjj.eigenstates(Hxc,Hext,T(Ti));
                  jjj.MQ(Mq, Q);
                  for(int ii=1;ii<=observable_nofcomponents;++ii){MMq(ii,Ti)=Mq(ii);}
                  }
                  break;       
+       case 'x': jjj.spindensity_coeff (I,-1,T,Hxc,Hext, jjj.Icalc_parstorage);break;
+       case 'y': jjj.spindensity_coeff (I,-2,T,Hxc,Hext, jjj.Icalc_parstorage);break;
+       case 'z': jjj.spindensity_coeff (I,-3,T,Hxc,Hext, jjj.Icalc_parstorage);break;
+       case 'u': jjj.orbmomdensity_coeff (I,-1,T,Hxc,Hext, jjj.Icalc_parstorage);break;
+       case 'v': jjj.orbmomdensity_coeff (I,-2,T,Hxc,Hext, jjj.Icalc_parstorage);break;
+       case 'w': jjj.orbmomdensity_coeff (I,-3,T,Hxc,Hext, jjj.Icalc_parstorage);break;
        default: jjj.Icalc(I,T,Hxc,Hext,lnz,u,jjj.Icalc_parstorage);
       }  
      
@@ -456,6 +487,9 @@ for (i=1;i<argc;++i)
 	                                  Q(3)=strtod(argv[i+1],NULL);++i;
     			            }      
   else {if(strcmp(argv[i],"-S")==0) {observable='S'; }      
+  else {if(strcmp(argv[i],"-sx")==0) {observable='x'; }      
+  else {if(strcmp(argv[i],"-sy")==0) {observable='y'; }      
+  else {if(strcmp(argv[i],"-sz")==0) {observable='z'; }      
   else {if(strcmp(argv[i],"-d")==0) {observable='d'; 
                                       if(i==argc-1){fprintf(stderr,"Error in command: singleion -d needs arguments E and epsilon\n");exit(EXIT_FAILURE);}
 	                                  Estart=strtod(argv[i+1],NULL);++i;
@@ -475,6 +509,9 @@ for (i=1;i<argc;++i)
 	                                  lambda=strtod(argv[i+1],NULL);++i;
                                     }      
   else {if(strcmp(argv[i],"-L")==0) {observable='L'; }      
+  else {if(strcmp(argv[i],"-lx")==0) {observable='u'; }      
+  else {if(strcmp(argv[i],"-ly")==0) {observable='v'; }      
+  else {if(strcmp(argv[i],"-lz")==0) {observable='w'; }      
   else {if(strcmp(argv[i],"-t")==0) {no_trs_write=1; }      
   else {if(strcmp(argv[i],"-nt")==0) {if(i==argc-1){fprintf(stderr,"Error in command: singleion -nt needs argument\n");exit(EXIT_FAILURE);}
 	                                  nmax=(int)strtod(argv[i+1],NULL);++i;
@@ -531,10 +568,16 @@ for (i=1;i<argc;++i)
     } //-pinit         
     } //-nt  
     } // -t       
+    } // -lz  
+    } // -ly  
+    } // -lx  
     } // -L  
     } // -is 
     } // -s 
     } // -d 
+    } // -sz 
+    } // -sy
+    } // -sx 
     } // -S 
    } // -MQ  
    } // -U  
@@ -558,6 +601,12 @@ for (i=1;i<argc;++i)
     case 'd': observable_nofcomponents=22;
               break; // Energy transfer neutron cross section complex polycrystal susceptibility and 3x3x2
                     // components of complex susceptibility tensor
+    case 'x':
+    case 'y':
+    case 'z': observable_nofcomponents=ORBMOMDENS_EV_DIM;break; // orbmom and spindensity has 49 coefficients
+    case 'u':
+    case 'v':
+    case 'w': observable_nofcomponents=SPINDENS_EV_DIM;break; // orbmom and spindensity has 49 coefficients
     default: observable_nofcomponents=nofcomponents; // I
    }
 double EE=Estart;

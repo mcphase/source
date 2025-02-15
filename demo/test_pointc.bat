@@ -16,7 +16,42 @@ gauss 2 0.2 -4 4 > res.dat
 # convolute (must be .pl because of eval in convolute command batch)
 convolute.pl  5 7 results/Pr3p.sipf.trs 1 2 res.dat 
 # test of display_density
-densplt c -M Pr3p.sipf 5 1000 0 0 
-rm Pr3p.sipf Ma.clc res.dat
+densplt c -M Pr3p.sipf 5 1000 0 0 > dd
+getvariable.pl -c 0.564198   "a(0,0)" dd 
+getvariable.pl -c 0.000000   "a(2,-2)" dd 
+getvariable.pl -c 0.000000   "a(2,-1)" dd 
+getvariable.pl -c 0.109704   "a(2,0)" dd 
+getvariable.pl -c 0.000000   "a(2,1)" dd 
+getvariable.pl -c -0.139594   "a(2,2)" dd 
+getvariable.pl -c 0.000000   "a(4,-4)" dd 
+getvariable.pl -c 0.000000   "a(4,-3)" dd 
+getvariable.pl -c 0.000000   "a(4,-2)" dd 
+getvariable.pl -c 0.000000   "a(4,-1)" dd 
+getvariable.pl -c -0.043045   "a(4,0)" dd 
+getvariable.pl -c 0.000000   "a(4,1)" dd 
+getvariable.pl -c 0.047341   "a(4,2)" dd 
+getvariable.pl -c 0.000000   "a(4,3)" dd 
+getvariable.pl -c -0.024525   "a(4,4)" dd 
+getvariable.pl -c 0.000000   "a(6,-6)" dd 
+getvariable.pl -c 0.000000   "a(6,-5)" dd 
+getvariable.pl -c 0.000000   "a(6,-4)" dd 
+getvariable.pl -c 0.000000   "a(6,-3)" dd 
+getvariable.pl -c 0.000000   "a(6,-2)" dd 
+getvariable.pl -c 0.000000   "a(6,-1)" dd 
+getvariable.pl -c -0.020352   "a(6,0)" dd 
+getvariable.pl -c 0.000000   "a(6,1)" dd 
+getvariable.pl -c 0.022013   "a(6,2)" dd 
+getvariable.pl -c 0.000000   "a(6,3)" dd 
+getvariable.pl -c -0.009557   "a(6,4)" dd 
+getvariable.pl -c 0.000000   "a(6,5)" dd 
+getvariable.pl -c 0.002600   "a(6,6)" dd 
+
+singleion -r Pr3p.sipf -MQ 1 0 1 5 1000 0 0  0 0 0 > Ma.clc
+
+getvalue.pl -c 3.13267 3 12 1000 0 Ma.clc
+
+
+
+rem rm Pr3p.sipf Ma.clc res.dat dd
 
 

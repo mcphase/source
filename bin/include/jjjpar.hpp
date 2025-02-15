@@ -298,7 +298,7 @@ public:
    // evaluate radial wave function // r given in Angstroems, returns R(r) in units of 1/A^1.5
    double radial_wavefunction(double r);
    void save_radial_wavefunction(const char * filename);
-
+ 
    //functions to calculate radial matrix elements <r^n> from radial wave function
    int r2_from_radial_wavefunction();
    int r4_from_radial_wavefunction();
@@ -334,7 +334,9 @@ public:
 // 4. spindensities ----------------------------------------------------------
 // function to calculate coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
+int spindensity_coeff (Matrix &mom,int xyz, Vector & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
 int spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
+int dspindensity_coeff1 (int xyz,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dspindensity_coeff1,ComplexMatrix & ests);
 int dspindensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dspindensity_coeff1,ComplexMatrix & ests);
 // sub for calculation of spin density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)
@@ -353,7 +355,9 @@ private:
 public:
 // function to calculate coefficients of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
+int orbmomdensity_coeff (Matrix &mom,int xyz, Vector & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
 int orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage);
+int dorbmomdensity_coeff1 (int xyz,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dorbmomdensity_coeff1,ComplexMatrix & ests);
 int dorbmomdensity_coeff1 (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dorbmomdensity_coeff1,ComplexMatrix & ests);
 // sub for calculation of orbital moment density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)

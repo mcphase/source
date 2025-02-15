@@ -677,7 +677,17 @@ options: -nt ......... by default only 5 transition energies are output,
                        elements for orbital momentum L
          -S  ......... calculate expectation values and transition matrix
                        elements for spin S
-         -d 23.4 0.001 calculate dynamic magnetic single ion susceptibility X(omega) and neutron
+         -sx ....... ..calculate expectation values and transition matrix
+                       elements for spindensity coefficients aSx(lm) in expansion 
+                       of spindensity-x-component in Ms(r) = sum_lm aS(l,m) R^2(r) Zlm(Omega)
+                        E. Balcar J. Phys. C. 8 (1975) 1581
+         -sy -sz ......for y and z components use option -sy and  -sz
+         -lx ....... ..calculate expectation values and transition matrix
+                       elements for orbital moment density coefficients aLx(lm) in expansion 
+                       of orbital moment density-x-component in Ml(r)=sum_lm  aLx(l,m) F(r) Zlm(Omega)
+                       with F(r)==1/r int_r^inf R^2(x) dx,   E. Balcar J. Phys. C. 8 (1975) 1581
+         -ly -lz ......for y and z components use option -ly and  -lz
+        -d 23.4 0.001 calculate dynamic magnetic single ion susceptibility X(omega) and neutron
                        scattering function S(Q=0,omega) at hbar omega= E= 23.4 meV 
                        with imaginary part epsilon=0.001 meV (epsilon>0)
 \end{verbatim} 

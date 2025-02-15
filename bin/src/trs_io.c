@@ -1,7 +1,17 @@
 // used in mcdisp.c and singleion.c for in/out of .trs files
 
 void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,double & T,Vector & Hext,char observable)
-{time_t curtime;char cc=' ';if(observable=='Q')cc='M';
+{time_t curtime;char cc=' ';
+ switch(observable)
+{case 'x': 
+ case 'y':
+ case 'z': 
+ case 'u':
+ case 'v':
+ case 'w': cc='a';break;
+ case 'Q': cc='M';break;
+ default: break;
+}
  struct tm *loctime;
    fprintf(fout, "#output file of program %s",MCDISPVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
@@ -117,24 +127,43 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
                                   else{intensityp=intensityp*T*KB;intensitym=intensityp;}
      }
      else
-     {intensityp=-1;intensitym=-1;}   
+     {intensityp=-1;intensitym=-1;}  
+   ComplexVector m1(1,SPINDENS_EV_DIM); 
     switch(observable)
      {case 'M': break; // leave it, it was calulated above 
       case 'S': jjj.dS1calc(T,mf,Hext,dm1,est);break;
       case 'L': jjj.dL1calc(T,mf,Hext,dm1,est);break;
       case 'Q': jjj.dMQ1calc(Q,T,dm1,d,est);break;
+      case 'x': jjj.dspindensity_coeff1(1,T,mf,Hext,m1,est);break;
+      case 'y': jjj.dspindensity_coeff1(2,T,mf,Hext,m1,est);break;
+      case 'z': jjj.dspindensity_coeff1(3,T,mf,Hext,m1,est);break;
+      case 'u': jjj.dorbmomdensity_coeff1(1,T,mf,Hext,m1,est);break;
+      case 'v': jjj.dorbmomdensity_coeff1(2,T,mf,Hext,m1,est);break;
+      case 'w': jjj.dorbmomdensity_coeff1(3,T,mf,Hext,m1,est);break;
      }    
      if(minE<d&&d<maxE)
     { fprintf(fout,"%i %i %i  %i     %i     %9.6g  %9.6g  %10.6g  %i %i ",i,j,k,l,jjj.transitionnumber,myround(d),myround(gamma),myround(intensityp),n,nd);
        switch(observable)
      {case 'I':for(int i=1;i<=u1.Hi();++i)fprintf(fout," %9.6g",real(conj(u1(i))*u1(i)));break;
-      default: for(int i=1;i<=dm1.Hi();++i)fprintf(fout," %9.6g",real(conj(dm1(i))*dm1(i)));
+      case 'x':
+      case 'y':
+      case 'z':
+      case 'u':
+      case 'v':
+      case 'w': for(int i=1;i<=m1.Hi();++i)fprintf(fout," %9.6g",real(conj(m1(i))*m1(i)));
+     default: for(int i=1;i<=dm1.Hi();++i)fprintf(fout," %9.6g",real(conj(dm1(i))*dm1(i)));
       }fprintf(fout,"\n");
      ++tc;}
     if(d>=0&&minE<-d&&-d<maxE) // do not print negative energy transition if d<0 (d<0 means transiton to the same level)
     { fprintf(fout,"%i %i %i  %i     %i     %9.6g  %9.6g  %10.6g  %i %i ",i,j,k,l,jjj.transitionnumber,myround(-d),myround(gamma),myround(intensitym),nd,n);
        switch(observable)
      {case 'I':for(int i=1;i<=u1.Hi();++i)fprintf(fout," %9.6g",real(conj(u1(i))*u1(i)));break;
+      case 'x':
+      case 'y':
+      case 'z':
+      case 'u':
+      case 'v':
+      case 'w': for(int i=1;i<=m1.Hi();++i)fprintf(fout," %9.6g",real(conj(m1(i))*m1(i)));
       default: for(int i=1;i<=dm1.Hi();++i)fprintf(fout," %9.6g",real(conj(dm1(i))*dm1(i)));
       } fprintf(fout,"\n");
     ++tc;}

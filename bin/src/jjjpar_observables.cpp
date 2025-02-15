@@ -1036,8 +1036,15 @@ return ro;
 // function to calculate coefficients of expansion of spindensity in terms
 // of Zlm R^2(r) at a given temperature T and  effective field H
 /****************************************************************************/
+int jjjpar::spindensity_coeff (Matrix &I,int xyz, Vector & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
+{int ret; for(int Ti=1;Ti<=T.Hi();++Ti)
+                 {Vector II(I.Column(Ti));ret=spindensity_coeff(II,xyz,T(Ti),Hxc,Hext,parstorage);
+                   SetColumn(Ti,I,II);
+                 }
+ return ret;}
+ 
 int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
-{mom=0;
+{mom=0;bool pr=true;if(xyz<0){pr=false;xyz=-xyz;}
  switch (module_type)
   {case kramer: fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
            return false;break;
@@ -1070,18 +1077,33 @@ int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Ve
    default:fprintf(stderr,"Problem: spindensity is not possible in module, continuing ... \n");
            return false;break;
   }
+if(pr==true){
 // Indices for spindensity
 //          0 not used
 //          0 1  2 3 4  5  6 7 8  9 10 11 1213141516 17 18 192021222324 25 26 27 28 29303132333435 36 37 38 39 40 414243444546474849
 int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
 int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
 for(int i=1;i<=SPINDENS_EV_DIM;++i){printf("#! aS%i(%i,%i) =%12.6f\n",xyz,k[i],q[i],myround(mom(i)));}
-return true;
+}return true;
 }
-
 int jjjpar::dspindensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & spindensity_coeff1,ComplexMatrix & ests)
+{int xyz,ret;ComplexVector coeff(1,SPINDENS_EV_DIM);
+xyz=1;
+           if(-1==dspindensity_coeff1(xyz,T,Hxc,Hext,coeff,ests))
+           {if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;}            
+           for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(i)=coeff(i);
+                                xyz=2;
+            dspindensity_coeff1(xyz,T,Hxc,Hext,coeff,ests);
+            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(SPINDENS_EV_DIM+i)=coeff(i);
+                                xyz=3;
+            ret=dspindensity_coeff1(xyz,T,Hxc,Hext,coeff,ests);
+            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(2*SPINDENS_EV_DIM+i)=coeff(i);
+             return ret;  
+}
+int jjjpar::dspindensity_coeff1(int xyz,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & spindensity_coeff1,ComplexMatrix & ests)
 {float delta=maxE;spindensity_coeff1(1)=complex <double> (ninit,pinit);
-int xyz,ret;ComplexVector coeff(1,SPINDENS_EV_DIM);
+int ret;
  switch (module_type)
   {case kramer: if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  in module kramer is not possible, continuing ... \n");
            return 0;break;
@@ -1091,28 +1113,15 @@ int xyz,ret;ComplexVector coeff(1,SPINDENS_EV_DIM);
    case brillouin: if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
            return 0;break;
    case external: if(sd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else { xyz=1;(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
-            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(i)=coeff(i);
-                                xyz=2;
-            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
-            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(SPINDENS_EV_DIM+i)=coeff(i);
-                                xyz=3;
-            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
-            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(2*SPINDENS_EV_DIM+i)=coeff(i);
+           return 0;} else { 
+            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&spindensity_coeff1,&xyz,&delta,&ests);
              return ret;              }
            break;
-   case external_class:  xyz=1;
-            if(-1==si_mod->dspindensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,coeff,xyz,delta,ests))
+   case external_class:  ret=si_mod->dspindensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,spindensity_coeff1,xyz,delta,ests);
+            if(-1==ret)
            {if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;}            
-           for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(i)=coeff(i);
-                                xyz=2;
-            si_mod->dspindensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,coeff,xyz,delta,ests);
-            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(SPINDENS_EV_DIM+i)=coeff(i);
-                                xyz=3;
-            ret=si_mod->dspindensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,coeff,xyz,delta,ests);
-            for(int i=1;i<=SPINDENS_EV_DIM;++i)spindensity_coeff1(2*SPINDENS_EV_DIM+i)=coeff(i);
-             return ret;              
+            return ret;              
            break;
    case cluster:if(transitionnumber<0)fprintf(stderr,"Problem: spindensity is not possible in module cluster, continuing ... \n");
            return 0;break;
@@ -1223,8 +1232,17 @@ return mm;
 // function to calculate coefficients of expansion of orbital moment density in terms
 // of Zlm F(r) at a given temperature T and  effective field H
 /****************************************************************************/
+int jjjpar::orbmomdensity_coeff (Matrix &I,int xyz, Vector & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
+{int ret; for(int Ti=1;Ti<=T.Hi();++Ti)
+                 {Vector II(I.Column(Ti));ret=orbmomdensity_coeff(II,xyz,T(Ti),Hxc,Hext,parstorage);
+                  SetColumn(Ti,I,II);}
+ return ret;}
+
+
+
+
 int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
-{mom=0;
+{mom=0;bool pr=true;if(xyz<0){pr=false;xyz=-xyz;}
  switch (module_type)
   {case kramer: fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
            return false;break;
@@ -1233,7 +1251,7 @@ int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,
            return false;break;
 // comment on module so1ion/cfield:
 //fprintf(stderr,"Problem: calcmagdensity>0 in %s, orbmomdensity  in module so1ion and cfield do not work correctly yet, quitting... \n",sipffilename);
-//     exit(EXIT_FAILURE);}  // here I quit because it is yet unclear if the formulas programmed in are correct
+//     exit(EXIT_FAILURE);  // here I quit because it is yet unclear if the formulas programmed in are correct
                            // I assume that there is proportionality between
                            //         sum_i(2si+li) Zlm(Omega_i) to
                            // and
@@ -1251,22 +1269,67 @@ int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,
    case external_class: if(false==si_mod->orbmomdensity_coeff(mom,xyz,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage))
            {fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} 
-           return true;
            break;
    case cluster:fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
            return false;break;
    default:fprintf(stderr,"Problem: orbmomdensity is not possible in module, continuing ... \n");
            return false;break;
   }
+if(pr==true){
 // Indices for spindensity
 //          0 not used
 //          0 1  2 3 4  5  6 7 8  9 10 11 1213141516 17 18 192021222324 25 26 27 28 29303132333435 36 37 38 39 40 414243444546474849
 int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
 int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
 for(int i=1;i<=ORBMOMDENS_EV_DIM;++i){printf("#! aL%i(%i,%i) =%12.6f\n",xyz,k[i],q[i],myround(mom(i)));}
-return true;
+}return true;
 }
+
 int jjjpar::dorbmomdensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & orbmomdensity_coeff1,ComplexMatrix & ests)
+{int xyz,ret;ComplexVector coeff(1,SPINDENS_EV_DIM);
+xyz=1;
+           if(-1==dorbmomdensity_coeff1(xyz,T,Hxc,Hext,coeff,ests))
+           {if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;}            
+           for(int i=1;i<=SPINDENS_EV_DIM;++i)orbmomdensity_coeff1(i)=coeff(i);
+                                xyz=2;
+            dorbmomdensity_coeff1(xyz,T,Hxc,Hext,coeff,ests);
+            for(int i=1;i<=SPINDENS_EV_DIM;++i)orbmomdensity_coeff1(SPINDENS_EV_DIM+i)=coeff(i);
+                                xyz=3;
+            ret=dorbmomdensity_coeff1(xyz,T,Hxc,Hext,coeff,ests);
+            for(int i=1;i<=SPINDENS_EV_DIM;++i)orbmomdensity_coeff1(2*SPINDENS_EV_DIM+i)=coeff(i);
+             return ret;  
+}
+int jjjpar::dorbmomdensity_coeff1(int xyz,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & orbmomdensity_coeff1,ComplexMatrix & ests)
+{float delta=maxE;orbmomdensity_coeff1(1)=complex <double> (ninit,pinit);
+int ret;
+ switch (module_type)
+  {case kramer: if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  in module kramer is not possible, continuing ... \n");
+           return 0;break;
+   case cfield:
+   case so1ion: if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  in module  so1ion/cfeld is not possible, continuing ... \n");
+           return 0;break;
+   case brillouin: if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
+           return 0;break;
+   case external: if(sd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else { 
+            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&orbmomdensity_coeff1,&xyz,&delta,&ests);
+             return ret;              }
+           break;
+   case external_class:  ret=si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,orbmomdensity_coeff1,xyz,delta,ests);
+            if(-1==ret)
+           {if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
+           return 0;}            
+            return ret;              
+           break;
+   case cluster:if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity is not possible in module cluster, continuing ... \n");
+           return 0;break;
+   default:fprintf(stderr,"Problem: orbmomdensity is not possible in module, continuing ... \n");
+           return 0;break;
+  }
+}
+
+/*int jjjpar::dorbmomdensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, ComplexVector & orbmomdensity_coeff1,ComplexMatrix & ests)
 {float delta=maxE;orbmomdensity_coeff1(1)=complex <double> (ninit,pinit);
  int xyz,ret;ComplexVector coeff(1,ORBMOMDENS_EV_DIM);
 switch (module_type)
@@ -1307,7 +1370,7 @@ switch (module_type)
            return 0;break;
   }
 }
-
+*/
 //***********************************************************************
 // subs for calculation gradient of orbital moment density given a radiu R and polar angles teta,
 // fi and expansion coeff. of Zlm R^2(r)

@@ -234,9 +234,9 @@ mcdispit -prefix test_ -maxE 100
 getvalue.pl -c   0.0483285 9 10 6.38398 0 results/test_mcdisp.qei
 getvalue.pl -c    0.0501943 9 11 6.38398 0  results/test_mcdisp.qei
 
-spins  -c -M -prefix test_ 1 0 0 81 0 0 1 6.38398
+#display_densities  -c -M -prefix test_ 1 0 0 81 0 0 1 6.38398
 
-spins  -s -M -prefix test_ 1 0 0 81 0 0 1 6.38398
+#display_densities  -s -M -prefix test_ 1 0 0 81 0 0 1 6.38398
 
 rm dd
 cd ../../demo

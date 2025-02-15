@@ -31,7 +31,7 @@ delete ptr;
 //            0 1 2 3 4 5 6  7  8 91011 12 13 1415161718 19 20 21 222324252627 28 29 30 31 32333435363738 39 40 41 42 43 4445464748495051
   int k[] = {-1,1,1,1,1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
   int q[] = {-1,0,0,0,0,0,0,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
-  bool im[]= {0,0,0,1,1,0,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
+  bool im[]= {0,0,1,0,0,1,0, 1, 1,0,0,0, 1, 1, 1,0,0,0,0, 1, 1, 1, 1,0,0,0,0,0, 1, 1, 1, 1, 1,0,0,0,0,0,0, 1, 1, 1, 1, 1, 1,0,0,0,0,0,0,0};
 
 // KQ for the spindensity operator sequence in icf_balcarMQ
 //             0  1 2 3  4  5 6 7 8  9 10 1112131415 16 17 18 192021222324 25 26 27 28 29303132333435 36 37 38 39 40 4142434445464748
@@ -340,7 +340,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
    for (int J2=J2min; J2<=J2max; J2+=2) 
    {
       ns+=J2+1; 
-      if (ind%2==0)                                     // Sx, Sy or Sz
+      if (ind<3)                                     // Sx, Sy or Sz
          for (int J2p=J2min; J2p<=J2max; J2p+=2) 
             rm(J2-J2min,J2p-J2min) = pow(-1.,(S2+L2+J2p)/2.) * sqrt((S2+1.)*(J2+1.)*(J2p+1.)*(S2/2.)*(S2/2.+1.)) * sixj(J2p,2,J2,S2,L2,S2);
       else                                              // Lx, Ly or Lz
@@ -357,7 +357,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
      }
 
    double elm, sqrt2=sqrt(2.);
-   if (ind<2)                                           // Sx or Lx
+   if (ind==0||ind==3)                                           // Sx or Lx
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
@@ -365,7 +365,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
          if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm-elp)/sqrt2;
       }
-   else if (ind>1 && ind<4)                             // Sy or Ly
+   else if (ind==1 || ind==4)                             // Sy or Ly
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++)
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],-2,mJ2[j]);
@@ -373,7 +373,7 @@ sMat<double> icf_mumat(int n, int ind, orbital e_l=F)
          if(fabs(elm)>SMALL) mu(i,j)=elm/sqrt2;
        //mu(i,j) = (elm+elp)/sqrt2;
       }
-   else if (ind>3 && ind<6)                             // Sz or Lz
+   else if (ind==2 || ind==5)                             // Sz or Lz
       for (int i=0; i<ns; i++) for(int j=0; j<ns; j++) 
       {
          elm = rm(irm[i],irm[j]) * pow(-1.,(J2[i]-mJ2[i])/2.) * threej(J2[i],2,J2[j],-mJ2[i],0,mJ2[j]); 
@@ -391,7 +391,6 @@ void icf1ion_module::op_generate(int iJ)
 {   st[iJ]=new sMat<double>;
             if(iJ<=6) (*st[iJ]) = icf_mumat(pars.n, iJ-1, pars.l);     // Calculates Sx,Lx etc
             else      (*st[iJ]) = icf_ukq(pars.n,k[iJ],q[iJ],pars.l);  // Calculates multipolar operator matrices 
-   // if(im[iJ]==true)    (*st[iJ])*=-1.0;   // in comparison with ic1ion module: imaginary operators sign
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -503,17 +502,14 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
 { // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   Matrix J(1,gjmbH.Hi(),T.Lo(),T.Hi());
+    Matrix J(1,gjmbH.Hi(),T.Lo(),T.Hi());
    // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(5)+=MUB*Hext(2); gjmbH(2)+=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(3)+=GS*MUB*Hext(3); }
    }
    
    // Converts the Jij parameters if necessary
@@ -542,14 +538,9 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
 // printf("E1=%g Hsz=%i\n",vE[1],Hsz); myPrintVector(stdout,Hxc);
    if(info!=0) { std::cerr << "icf1ion - Error diagonalising, info==" << info << "\n"; delete[]vE; vE=0; delete[]zV; zV=0; exit(EXIT_FAILURE); }
          icf_expJ(zV,vE,T,J,lnZ,U);
-    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
 for(int Ti=1;Ti<=T.Hi();++Ti) {
-   dum=J(2,Ti);J(2,Ti)=J(3,Ti);J(3,Ti)=J(5,Ti);J(5,Ti)=J(4,Ti);J(4,Ti)=dum;
 for(int i=Jret.Rlo();i<=Jret.Rhi();++i)Jret(i,Ti)=J(i,Ti);
                           }
-
- 
          delete[]vE; delete[]zV;
     
      // --------------------------------------------------------------------
@@ -592,11 +583,6 @@ bool icf1ion_module::mcalc(Vector &mom,        // Output magnetic moment (mub)
    Vector J(1,6);
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //mom(1)=GS*J(1)+J(2);
-   //mom(2)=GS*J(3)+J(4);
-   //mom(3)=GS*J(5)+J(6);
    mom(1)=GS*J(1)+J(4);
    mom(2)=GS*J(2)+J(5);
    mom(3)=GS*J(3)+J(6);
@@ -614,11 +600,6 @@ bool icf1ion_module::mMcalc(Matrix &mom,        // Output magnetic moment (mub)
    Matrix J(1,6,1,T.Hi()); 
    Vector lnZ(1,T.Hi()), U(1,T.Hi());
    IMcalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //mom(1)=GS*J(1)+J(2);
-   //mom(2)=GS*J(3)+J(4);
-   //mom(3)=GS*J(5)+J(6);
    for(int Ti=1;Ti<=T.Hi();++Ti){
    mom(1,Ti)=GS*J(1,Ti)+J(4,Ti);
    mom(2,Ti)=GS*J(2,Ti)+J(5,Ti);
@@ -640,11 +621,6 @@ bool icf1ion_module::Lcalc(Vector &L,          // Output magnetic moment (mub)
    Vector J(1,6); 
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //L(1)=J(2);
-   //L(2)=J(4);
-   //L(3)=J(6);
    L(1)=J(4);
    L(2)=J(5);
    L(3)=J(6);
@@ -663,11 +639,6 @@ bool icf1ion_module::LMcalc(Matrix &L,          // Output magnetic moment (mub)
    Matrix J(1,6,1,T.Hi());
    Vector lnZ(1,T.Hi()), U(1,T.Hi());
    IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //L(1)=J(2);
-   //L(2)=J(4);
-   //L(3)=J(6);
    for(int Ti=1;Ti<=T.Hi();++Ti){
    L(1,Ti)=J(4,Ti);
    L(2,Ti)=J(5,Ti);
@@ -689,11 +660,6 @@ bool icf1ion_module::Scalc(Vector &S,          // Output magnetic moment (mub)
    Vector J(1,6); 
    double lnZ, U;
    Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //S(1)=J(1);
-   //S(2)=J(3);
-   //S(3)=J(5);
    S(1)=J(1);
    S(2)=J(2);
    S(3)=J(3);
@@ -710,13 +676,7 @@ bool icf1ion_module::SMcalc(Matrix &S,          // Output magnetic moment (mub)
 {
    Matrix J(1,6,1,T.Hi());Vector lnZ(1,T.Hi()), U(1,T.Hi());
    IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //S(1)=J(1);
-   //S(2)=J(3);
-   //S(3)=J(5);
-
-for(int Ti=1;Ti<=T.Hi();++Ti){
+  for(int Ti=1;Ti<=T.Hi();++Ti){
    S(1,Ti)=J(1,Ti);
    S(2,Ti)=J(2,Ti);
    S(3,Ti)=J(3,Ti);}
@@ -735,17 +695,12 @@ bool icf1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (r
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------------
-
    // Calculates the Zeeman term if magnetic field is not zero 
   if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(5)+=MUB*Hext(2); gjmbH(2)+=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(3)+=GS*MUB*Hext(3); }
    }
    clock_t start,end; start = clock();
 
@@ -804,7 +759,7 @@ bool icf1ion_module::estates(ComplexMatrix &est, // Output Eigenstates matrix (r
          }
       }
    if(Hci.isempty()) delete[]rV; else delete[]zV; delete[]vE;
-   end = clock(); std::cerr << "Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
+   end = clock(); std::cerr << "#Time to do estates() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
 return true;
 }
 
@@ -827,18 +782,15 @@ int icf1ion_module::du1calc(int &tn,            // Input transition number; if t
   // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
    ComplexVector u1(1,gjmbH.Hi()); u1=0; u1(1)=u1ret(1);
    // --------------------------------------------------------------------------
 
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(5)+=MUB*Hext(2); gjmbH(2)+=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(3)+=GS*MUB*Hext(3); }
    }
   
    int i,j,k1;
@@ -928,14 +880,9 @@ int icf1ion_module::du1calc(int &tn,            // Input transition number; if t
       }
    
       // multiply matrix Mab by occupation factor
-      for(iJ=1; iJ<=u1.Hi(); iJ++)
-	    u1(iJ) = complex<double> ( u[iJ]*sqrt(therm/Z), iu[iJ]*sqrt(therm/Z) );
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   complex<double>dum1;dum1=u1(2);u1(2)=u1(3);u1(3)=u1(5);u1(5)=u1(4);u1(4)=dum1;
-   for(iJ=1; iJ<=u1ret.Hi(); iJ++) u1ret[iJ] = u1[iJ];
-
-      delete[]en;
+      for(iJ=1; iJ<=u1ret.Hi(); iJ++)
+	    u1ret(iJ) = complex<double> ( u[iJ]*sqrt(therm/Z), iu[iJ]*sqrt(therm/Z) );
+     delete[]en;
    }
 
    if (ninit>Hsz)ninit=Hsz;
@@ -954,7 +901,6 @@ int icf1ion_module::du1calc(int &tn,            // Input transition number; if t
 //end = clock(); std::cerr << "Time to do du1calc() = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
 
    return noft;
-   //return Hsz*(Hsz-1)/2;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -975,11 +921,6 @@ int icf1ion_module::dm1(int &tn,            // Input transition number; if tn<0,
    ComplexVector u1(1,6);int n,nd;
    u1(1) = m1(1);
    int nt = du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-  // m1(1)=GS*u1(1)+u1(2);
-  // m1(2)=GS*u1(3)+u1(4);
-  // m1(3)=GS*u1(5)+u1(6);
    m1(1)=GS*u1(1)+u1(4);
    m1(2)=GS*u1(2)+u1(5);
    m1(3)=GS*u1(3)+u1(6);
@@ -1004,11 +945,6 @@ int icf1ion_module::dL1(int &tn,            // Input transition number; if tn<0,
    ComplexVector u1(1,6);int n,nd;
    u1(1) = L1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //L1(1)=u1(2);
-   //L1(2)=u1(4);
-   //L1(3)=u1(6);
    L1(1)=u1(4);
    L1(2)=u1(5);
    L1(3)=u1(6);
@@ -1033,11 +969,6 @@ int icf1ion_module::dS1(int &tn,            // Input transition number; if tn<0,
    ComplexVector u1(1,6);int n,nd;
    u1(1) = S1(1);
    int nt=du1calc(tn,T,Hxc,Hext,g_J,ABC,sipffilename,u1,delta,n,nd,est);
-    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   //S1(1)=u1(1);
-   //S1(2)=u1(3);
-   //S1(3)=u1(5);
    S1(1)=u1(1);
    S1(2)=u1(2);
    S1(3)=u1(3);
@@ -1308,9 +1239,10 @@ bool icf1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   complexdouble *zQmat, *zt, zme, zalpha, zbeta; zalpha.r=-1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   //complexdouble *zQmat, *zt, 
+   complexdouble zme;//, zalpha, zbeta; zalpha.r=-1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
    double zMqr,zMqi,Z=0.;
-   char trans = 'U'; int incx=1;
+   //char trans = 'U'; int incx=1;
 
    Mq = ComplexVector(1,3);
 
@@ -1324,22 +1256,28 @@ bool icf1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values
    icf_loveseyQq(Qmat[2],0,n,l,Jvec);
 
    for(q=0; q<3; q++)
-   {
-      zQmat = zmat2f(Qmat[q][0],Qmat[q][1]);
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
+   {  //zQmat = zmat2f(Qmat[q][0],Qmat[q][1]);
+      //zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       zMqr = 0.; zMqi = 0.;
       for(i=1; i<=Hsz; i++)
       {
-         F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
+        /* F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
          #ifdef _G77
          F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
          #else
          zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-         #endif
+         #endif */
+         //zme.r=expectation_value(Hsz,Qmat[q][0],(complexdouble*)&est[i][1]);
+         //zme.i=expectation_value(Hsz,Qmat[q][1],(complexdouble*)&est[i][1]);
+        if(q==1){ zme.i=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
+                  zme.r=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);
+        }else{ zme.r=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
+               zme.i=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);}
 //       printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
          zMqr += (-2.)*zme.r*est[0][i].imag(); zMqi += (-2.)*zme.i*est[0][i].imag(); if(q==0) Z += est[0][i].imag();
       }
-      free(zQmat); free(zt); Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
+      //free(zQmat); free(zt); 
+       Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
    }
 // printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
 return true;
@@ -1392,10 +1330,11 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   complexdouble *zQmat, *zt, zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   //complexdouble *zQmat, *zt,
+   complexdouble z1,z2,zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
    std::vector<complexdouble> zij(7,zbeta), zji(7,zbeta);
    double Z=0., therm;
-   char trans = 'U'; int incx=1;
+   //char trans = 'U'; int incx=1;
 
    // Calculates the scattering operator, Q.
    icf_loveseyQq(Qm,-1,n,l,Jvec); icf_loveseyQq(Qp,1,n,l,Jvec);
@@ -1415,7 +1354,7 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
  
    for(q=0; q<3; q++)
    {
-      zQmat = zmat2f(Qmat[q][2],Qmat[q][3]);    // Spin part
+      /*zQmat = zmat2f(Qmat[q][2],Qmat[q][3]);    // Spin part
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
       #ifdef _G77
@@ -1426,10 +1365,40 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
       zij[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-      #endif
-      free(zQmat); free(zt);
+      #endif */
+      
+       z1=Qmat[q][2].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
+       z2=Qmat[q][3].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
+       zij[2*q+1].r=z1.r+z2.r;
+       zij[2*q+1].i=z1.i+z2.i;
+       z1=Qmat[q][2].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],false);
+       z2=Qmat[q][3].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],true);
+       zji[2*q+1].r=z1.r+z2.r;
+       zji[2*q+1].i=z1.i+z2.i;
+       
+      if(i==j)                                  // subtract thermal expectation value from zij=zii
+      {                                         // MR120120 ... reintroduced
+         complexdouble expQ;double thexp=0;
+         for(iJ=1;iJ<=Hsz;++iJ)
+         {
+            therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
+            if(q==1)
+            expQ.r=Qmat[q][3].MultvxMv((complexdouble*)&est[iJ][1],true);
+            else
+            expQ.r=Qmat[q][2].MultvxMv((complexdouble*)&est[iJ][1],false);
+            /*F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
+            #ifdef _G77
+            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+            #else
+            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
+            #endif */
+            thexp += expQ.r * therm / Z;
+         }
+         zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
+      }
+      //free(zQmat); free(zt);
 
-      zQmat = zmat2f(Qmat[q][4],Qmat[q][5]);    // orbital part
+      /*zQmat = zmat2f(Qmat[q][4],Qmat[q][5]);    // orbital part
       zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
       #ifdef _G77
@@ -1440,24 +1409,38 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
       zij[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
       F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
       zji[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-      #endif
+      #endif*/
+      
+       z1=Qmat[q][4].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
+       z2=Qmat[q][5].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
+       zij[2*q+2].r=z1.r+z2.r;
+       zij[2*q+2].i=z1.i+z2.i;
+       z1=Qmat[q][4].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],false);
+       z2=Qmat[q][5].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],true);
+       zji[2*q+2].r=z1.r+z2.r;
+       zji[2*q+2].i=z1.i+z2.i;
+      
       if(i==j)                                  // subtract thermal expectation value from zij=zii
       {                                         // MR120120 ... reintroduced
          complexdouble expQ;double thexp=0;
          for(iJ=1;iJ<=Hsz;++iJ)
          {
             therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
-            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
+            if(q==1)
+            expQ.r=Qmat[q][5].MultvxMv((complexdouble*)&est[iJ][1],true);
+            else
+            expQ.r=Qmat[q][4].MultvxMv((complexdouble*)&est[iJ][1],false);
+            /*F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
             #ifdef _G77
             F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
             #else
             expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #endif
+            #endif */
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
       }
-      free(zQmat); free(zt);
+      //free(zQmat); free(zt);
    }
 
    // check if zij are complex conjugate
@@ -1971,17 +1954,12 @@ bool icf1ion_module::spindensity_coeff(Vector &J,          // Output single ion 
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
-
-   // Calculates the Zeeman term if magnetic field is not zero
+    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(5)+=MUB*Hext(2); gjmbH(2)+=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(3)+=GS*MUB*Hext(3); }
    }
    sdod_Icalc(J,xyz,T,gjmbH,sipffilename);
 return true;
@@ -2004,16 +1982,12 @@ bool icf1ion_module::orbmomdensity_coeff(Vector &J,        // Output single ion 
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
    {
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(2)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(2); gjmbH(3)+=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(5)+=GS*MUB*Hext(3); }
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH(4)+=MUB*Hext(1); gjmbH(1)+=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH(5)+=MUB*Hext(2); gjmbH(2)+=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH(6)+=MUB*Hext(3); gjmbH(3)+=GS*MUB*Hext(3); }
    }
    sdod_Icalc(J,-xyz,T,gjmbH,sipffilename);
 return true;
@@ -2033,8 +2007,6 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
                       ComplexMatrix &est) // Input eigenstate matrix (stored in estates)
 {
    int i,j,k;
-
-
    int sz = gjmbH.Hi();if(sz>49){fprintf(stderr,"Error icf_du1calc: Operator %i > 49 requested\n",sz);exit(EXIT_FAILURE);}
    
    sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op;
@@ -2189,10 +2161,6 @@ int icf1ion_module::dspindensity_coeff1(int &tn,          // Input transition nu
                                           // Returns total number of transitions
 { 
    Vector gjmbH(1,49); gjmbH = 0; for(int i=1; i<=Hxc.Hi(); ++i) { gjmbH(i)=Hxc(i); }
-  //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
    int nt = sdod_du1calc(xyz,tn,T,gjmbH,sipffilename,Slm1,delta,est);
 // Slm1(1)=0;
 // for(int i=2; i<=6; ++i) Slm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Slm1(4) *=sqrt(2);
@@ -2219,50 +2187,25 @@ int icf1ion_module::dorbmomdensity_coeff1(int &tn,        // Input transition nu
                                           // Returns total number of transitions
 { 
    Vector gjmbH(1,49); gjmbH = 0; for(int i=1; i<=Hxc.Hi(); ++i) { gjmbH(i)=Hxc(i); }
-   //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH(2);gjmbH(2)=gjmbH(4);gjmbH(4)=gjmbH(5);gjmbH(5)=gjmbH(3);gjmbH(3)=dum;
-   // --------------------------------------------------------------------
-   int nt = sdod_du1calc(-xyz,tn,T,gjmbH,sipffilename,Llm1,delta,est);
-// Llm1(1)=0;
-// for(int i=2; i<=6; ++i) Llm1(i) = u1(5+i) *sqrt((2.0*2+1)/8/PI); Llm1(4) *=sqrt(2);
-// for(int i=7; i<=15;++i) Llm1(i) = u1(12+i)*sqrt((2.0*4+1)/8/PI); Llm1(11)*=sqrt(2);
-// for(int i=16;i<=28;++i) Llm1(i) = u1(23+i)*sqrt((2.0*6+1)/8/PI); Llm1(22)*=sqrt(2);
+    int nt = sdod_du1calc(-xyz,tn,T,gjmbH,sipffilename,Llm1,delta,est);
    return nt;
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
 // returns operator matrices (n=0 Hamiltonian, n=1,...,nofcomponents: operators of moment components)
 // --------------------------------------------------------------------------------------------------------------- //
-bool icf1ion_module::opmat(int &ni,                      // ni     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
+bool icf1ion_module::opmat(int &n,                      // n     which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
              char *sipffilename,         // Single ion properties filename
              Vector &Hxc,                 // Hext  vector of external field [meV]
              Vector &Hext,                // Hxc   vector of exchange field [meV]
                                           // on output   
              Matrix &outmat)              // operator matrix of Hamiltonian, I1, I2, I3 depending on n
-{  //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   int n=ni;
-   if(ni==2){n=3;}
-   if(ni==3){n=5;}
-   if(ni==4){n=2;}
-   if(ni==5){n=4;}
-   if(ni==-2){n=-3;}
-   if(ni==-3){n=-5;}
-   if(ni==-4){n=-2;}
-   if(ni==-5){n=-4;}
-
-   
-   if(n==0)                               // return Hamiltonian
+{   if(n==0)                               // return Hamiltonian
    {
       std::vector<double> gjmbH(max(6,Hxc.Hi()),0.); for(int i=1; i<=Hxc.Hi(); i++) gjmbH[i-1]=-Hxc(i);
-      //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-   //                                        to Sa Sb Sc La Lb Lc
-   double dum; dum=gjmbH[2];gjmbH[2]=gjmbH[4];gjmbH[4]=gjmbH[5];gjmbH[5]=gjmbH[3];gjmbH[3]=dum;
-   // --------------------------------------------------------------------
-      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH[1]-=MUB*Hext(1); gjmbH[0]-=GS*MUB*Hext(1); }
-      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH[3]-=MUB*Hext(2); gjmbH[2]-=GS*MUB*Hext(2); }
-      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH[5]-=MUB*Hext(3); gjmbH[4]-=GS*MUB*Hext(3); }
+      if(fabs(Hext(1))>DBL_EPSILON) { gjmbH[3]-=MUB*Hext(1); gjmbH[0]-=GS*MUB*Hext(1); }
+      if(fabs(Hext(2))>DBL_EPSILON) { gjmbH[4]-=MUB*Hext(2); gjmbH[1]-=GS*MUB*Hext(2); }
+      if(fabs(Hext(3))>DBL_EPSILON) { gjmbH[5]-=MUB*Hext(3); gjmbH[2]-=GS*MUB*Hext(3); }
       #ifdef JIJCONV
       if(pars.B.norm().find("Stevens")!=std::string::npos) {
          pars.jijconvcalc();
@@ -2319,7 +2262,7 @@ bool icf1ion_module::opmat(int &ni,                      // ni     which operato
          fprintf(stderr,"Error module ic1ion: operatormatrix index=%i < -51 - check number of columns in file mcphas.j\n",n); exit(EXIT_FAILURE); }
 
       // Calculates the single-ion (without external field) Hamiltonian and operator matrix in LS-basis
-      sMat<double> Jmat; if(abs(n)>=6) Jmat = icf_mumat(pars.n, abs(n)-1, pars.l); else Jmat = icf_ukq(pars.n,k[abs(n)],q[abs(n)],pars.l);
+      sMat<double> Jmat; if(abs(n)<=6) Jmat = icf_mumat(pars.n, abs(n)-1, pars.l); else Jmat = icf_ukq(pars.n,k[abs(n)],q[abs(n)],pars.l);
       int Hsz=Hcf.nr(); sMat<double> zeros(Hsz,Hsz);
       Matrix retval(1,Hsz,1,Hsz); retval=0;
 
