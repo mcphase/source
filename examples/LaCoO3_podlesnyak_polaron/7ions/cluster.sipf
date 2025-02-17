@@ -1,0 +1,90 @@
+#!MODULE=cluster
+#<!--mcphase.sipf-->
+#!structurefile=cluster.j
+# ... the noperl option allows only simple matrix operations
+#     but saves a lot of memory ...
+#!noperl
+# in this example we do not need interactions out of the cluster
+# thus we do not set I1,I2,I3 
+
+# here should follow the description of cluster moments in terms
+# of moments of the individual ions
+#$GJ=2;
+# the individual moments
+#$M1_1=$I1_1->multiply_scalar($GJ);
+#$M1_2=$I1_2->multiply_scalar($GJ);
+#$M1_3=$I1_3->multiply_scalar($GJ);
+#$M2_1=$I2_1->multiply_scalar($GJ);
+#$M2_2=$I2_2->multiply_scalar($GJ);
+#$M2_3=$I2_3->multiply_scalar($GJ);
+#$M3_1=$I3_1->multiply_scalar($GJ);
+#$M3_2=$I3_2->multiply_scalar($GJ);
+#$M3_3=$I3_3->multiply_scalar($GJ);
+#$M4_1=$I4_1->multiply_scalar($GJ);
+#$M4_2=$I4_2->multiply_scalar($GJ);
+#$M4_3=$I4_3->multiply_scalar($GJ);
+#$M5_1=$I5_1->multiply_scalar($GJ);
+#$M5_2=$I5_2->multiply_scalar($GJ);
+#$M5_3=$I5_3->multiply_scalar($GJ);
+#$M6_1=$I6_1->multiply_scalar($GJ);
+#$M6_2=$I6_2->multiply_scalar($GJ);
+#$M6_3=$I6_3->multiply_scalar($GJ);
+#$M7_1=$I7_1->multiply_scalar($GJ);
+#$M7_2=$I7_2->multiply_scalar($GJ);
+#$M7_3=$I7_3->multiply_scalar($GJ);
+
+$M1_1=2*$I1_1;
+$M1_2=2*$I1_2;
+$M1_3=2*$I1_3;
+$M2_1=2*$I2_1;
+$M2_2=2*$I2_2;
+$M2_3=2*$I2_3;
+$M3_1=2*$I3_1;
+$M3_2=2*$I3_2;
+$M3_3=2*$I3_3;
+$M4_1=2*$I4_1;
+$M4_2=2*$I4_2;
+$M4_3=2*$I4_3;
+$M5_1=2*$I5_1;
+$M5_2=2*$I5_2;
+$M5_3=2*$I5_3;
+$M6_1=2*$I6_1;
+$M6_2=2*$I6_2;
+$M6_3=2*$I6_3;
+$M7_1=2*$I7_1;
+$M7_2=2*$I7_2;
+$M7_3=2*$I7_3;
+
+# the total moment
+# $M1=$M1_1+$M2_1+$M3_1+$M4_1+$M5_1+$M6_1+$M7_1;
+# $M2=$M1_2+$M2_2+$M3_2+$M4_2+$M5_2+$M6_2+$M7_2;
+# $M3=$M1_3+$M2_3+$M3_3+$M4_3+$M5_3+$M6_3+$M7_3;
+$M1=$M1_1;
+$M1+=$M2_1;
+$M1+=$M3_1;
+$M1+=$M4_1;
+$M1+=$M5_1;
+$M1+=$M6_1;
+$M1+=$M7_1;
+
+$M2=$M1_2;
+$M2+=$M2_2;
+$M2+=$M3_2;
+$M2+=$M4_2;
+$M2+=$M5_2;
+$M2+=$M6_2;
+$M2+=$M7_2;
+
+$M3=$M1_3;
+$M3+=$M2_3;
+$M3+=$M3_3;
+$M3+=$M4_3;
+$M3+=$M5_3;
+$M3+=$M6_3;
+$M3+=$M7_3;
+
+# for running mcdisp it is needed to define a interaction operator
+$I1=$M1;
+$I2=$M2;
+$I3=$M3;
+

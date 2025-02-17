@@ -133,9 +133,6 @@ void convH2H(complexdouble *Hin, complexdouble *Hout, int lnIn, int lnOut, std::
 bool ic_parseheader(const char *filename, icpars &pars);                  // Determines the paramters from saved file
 sMat<double> ic_Hcso(icpars &pars);                                       // Calculates the Hamiltonian H=H_c+H_so
 sMat<double> ic_hmltn(sMat<double> &H_cfi, icpars &pars);                 // Calculates the IC Hamiltonian matrix
-std::vector<double> ic_mag(sMat<double> &Hic, sMat<double> &iHic,         // Calculates the magnetisation
-       sMat<double> &Jmat, sMat<double> &iJmat, std::vector<double> &T, 
-       double H_mag=1., int nev=30);
 
 // --------------------------------------------------------------------------------------------------------------- //
 // Declarations for functions in icpars.cpp

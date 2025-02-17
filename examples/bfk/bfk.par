@@ -1,0 +1,10 @@
+# Parameter file  bfk.par
+#
+#!emin=-1.
+#!emax=50
+#!Npoints=10
+#!E=50
+#!k1= 1. 0. 0. 
+#!k2= 1. 0. 0.
+#!formfactorname=results/formfactor.out
+#!scatfilename=hklE.dat

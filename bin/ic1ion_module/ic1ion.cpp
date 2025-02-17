@@ -288,9 +288,9 @@ void ic_cmag(const char *filename, icpars &pars, double elim)
    double xnorm = sqrt(pars.xHa*pars.xHa+pars.xHb*pars.xHb+pars.xHc*pars.xHc); if(xnorm==0) xnorm=1.;
    double ynorm = sqrt(pars.yHa*pars.yHa+pars.yHb*pars.yHb+pars.yHc*pars.yHc); if(ynorm==0) ynorm=1.;
    std::vector<double> gjmbH(6,0.), gjmbHmeV(6,0.); 
-   if(pars.xT==0.) gjmbH[1]=pars.xHa/xnorm; else gjmbH[1]=pars.yHa/ynorm; gjmbH[0]=GS*gjmbH[1];
-   if(pars.xT==0.) gjmbH[3]=pars.xHb/xnorm; else gjmbH[3]=pars.yHb/ynorm; gjmbH[2]=GS*gjmbH[3];
-   if(pars.xT==0.) gjmbH[5]=pars.xHc/xnorm; else gjmbH[5]=pars.yHc/ynorm; gjmbH[4]=GS*gjmbH[5];
+   if(pars.xT==0.) gjmbH[3]=pars.xHa/xnorm; else gjmbH[3]=pars.yHa/ynorm; gjmbH[0]=GS*gjmbH[3];
+   if(pars.xT==0.) gjmbH[4]=pars.xHb/xnorm; else gjmbH[4]=pars.yHb/ynorm; gjmbH[1]=GS*gjmbH[4];
+   if(pars.xT==0.) gjmbH[5]=pars.xHc/xnorm; else gjmbH[5]=pars.yHc/ynorm; gjmbH[2]=GS*gjmbH[5];
 
    iceig VE;
    std::vector<double> ex; std::vector< std::vector<double> > matel, exj;
@@ -320,7 +320,7 @@ void ic_cmag(const char *filename, icpars &pars, double elim)
          ma[j] = 0.; mb[j] = 0.; mc[j] = 0.;  Z = 0.;
          for(k=0; k<(int)matel[0].size(); k++) 
          { 
-            if(j==0) for(int ii=0; ii<6; ii+=2) exj[ii/2][k] = GS*matel[ii][k]+matel[ii+1][k]; 
+            if(j==0) for(int ii=0; ii<3; ii+=1) exj[ii][k] = GS*matel[ii][k]+matel[ii+3][k]; 
             dt = exp(-(VE.E(k)-VE.E(0))/(KB*T[j])); Z+=dt;
             ma[j] += exj[0][k] * dt; mb[j] += exj[1][k] * dt; mc[j] += exj[2][k] * dt;
          }
@@ -392,8 +392,8 @@ int main(int argc, char *argv[])
    if(fabs(pars.Bx)>DBL_EPSILON || fabs(pars.By)>DBL_EPSILON || fabs(pars.Bz)>DBL_EPSILON)
    {
       std::vector<double> gjmbH(6,0.);
-      if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH[1]=-MUBc*pars.Bx; gjmbH[0]=GS*gjmbH[1]; }
-      if(fabs(pars.By)>DBL_EPSILON) { gjmbH[3]=-MUBc*pars.By; gjmbH[2]=GS*gjmbH[3]; }
+      if(fabs(pars.Bx)>DBL_EPSILON) { gjmbH[3]=-MUBc*pars.Bx; gjmbH[0]=GS*gjmbH[3]; }
+      if(fabs(pars.By)>DBL_EPSILON) { gjmbH[4]=-MUBc*pars.By; gjmbH[2]=GS*gjmbH[4]; }
       if(fabs(pars.Bz)>DBL_EPSILON) { gjmbH[5]=-MUBc*pars.Bz; gjmbH[4]=GS*gjmbH[5]; }
       sMat<double> J,iJ; icmfmat mfmat(pars.n,pars.l,6,pars.save_matrices); mfmat.Jmat(J,iJ,gjmbH); Hic+=J; iHic+=iJ;
    }

@@ -1,0 +1,100 @@
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module So1ion for
+# mcphas version 3.2
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.2
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.2
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+#
+#
+# crystal field paramerized in Stevens formalism
+#
+#-----------
+IONTYPE=S=1
+nof_electrons=6
+#-----------
+SIGMA0=2.3
+SIGMA1=2.3
+SIGMA2=2.3
+
+#--------------------------------------------------------------------------
+# Crystal Field parameters in Stevens Notation (coordinate system xyz||abc)
+#--------------------------------------------------------------------------
+units=meV
+Dz2=9
+
+#----------------
+# Lande factor gJ
+#----------------
+GJ=2
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.249
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q
+#   s = 1/2/d = Q/4/pi
+#   sin(theta) = lambda * s
+#    s2= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D
+#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D
+#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D
+#   <j6(Q)>=s2*(FFj6A*EXP(-FFj6a*s2) + FFj6B*EXP(-FFj6b*s2) + FFj6C*EXP(-FFj6c*s2) + FFj6D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)
+
+#--------------------------------------------------------------------------------------
+FFj0A=0.3902 FFj0a=12.5078 FFj0B=0.6324 FFj0b=4.4574 FFj0C=-0.1500 FFj0c=0.0343 FFj0D=0.1272
+FFj2A=1.7058 FFj2a=8.8595 FFj2B=1.1409 FFj2b=3.3086 FFj2C=0.1474 FFj2c=1.0899 FFj2D=-0.0025
+FFj4A=-0.4466 FFj4a=13.3912 FFj4B=0.1419 FFj4b=3.0110 FFj4C=0.2773 FFj4c=1.3351 FFj4D=0.0093
+
+
+CHARGE=3
+conf=d6
+R2=1.049
+R4=2.342
+F2=10913.7078186185
+F4=7998.46769434496
+zeta=63.7774643782714
+N1=3
+C1=0.34086
+XI1=4.79634
+N2=3
+C2=0.02683
+XI2=12.3274
+N3=3
+C3=0.19581
+XI3=6.92523
+N4=3
+C4=0.51593
+XI4=2.85514
+N5=3
+C5=0.04686
+XI5=1.66429
+A=1
+B=1
+C=1

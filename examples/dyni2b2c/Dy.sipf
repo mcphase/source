@@ -1,0 +1,38 @@
+#!MODULE=./1ion_mod/quartett.so
+#<!--mcphase.sipf-->
+gJ= 1.3333
+a= 4.3843
+b= -3.71
+c= -3.69
+d= 0.165
+e= 3.63
+delta= 0.123 meV
+
+# LandeFactor
+GJ=1.3333
+#in the hard direction (c) this doublet gives too low magnetization (50%) ... 
+#for the full CF admixtures of higerh CF levels are important
+
+#Neutron magnetic form factor coefficients
+FFj0A= 0.1157 FFj0a=15.0732 FFj0B= 0.3270 FFj0b= 6.7991 FFj0C= 0.5821 FFj0c= 3.0202 FFj0D=-0.0249
+FFj2A= 0.2523 FFj2a=18.5172 FFj2B= 1.0914 FFj2b= 6.7362 FFj2C= 0.9345 FFj2c= 2.2082 FFj2D= 0.0250
+FFj4A=-0.2829 FFj4a= 9.5247 FFj4B= 0.0565 FFj4b= 4.4292 FFj4C= 0.2437 FFj4c= 1.0665 FFj4D= 0.0092
+FFj6A=-0.0423 FFj6a= 6.0376 FFj6B=-0.1248 FFj6b= 2.2437 FFj6C= 0.1359 FFj6c= 1.2002 FFj6D= 0.0188
+
+Coefficients of Z(K')
+#
+Z1c0=5.0 Z1c2=2.666666667
+Z3c2=-0.22360680 Z3c4=-0.08131156
+Z5c4=0.02525253 Z5c6=-0.12432012
+Z7c6=0.05656908
+
+#---------------------------------------------------------------------------------------------
+# radial wave function parameters, for transition metal ions the the values are tabulated in
+# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave
+# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# Freeman and Watson PR 127 (1962) 2058
+#---------------------------------------------------------------------------------------------
+N1=4 C1=0.182603427665384 XI1=13.463 
+N2=4 C2=0.451747840662488 XI2=7.529 
+N3=4 C3=0.349365442261962 XI3=5.019 
+N4=4 C4=0.215845770182933 XI4=2.762 

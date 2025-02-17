@@ -1,0 +1,241 @@
+# 
+#<!--mcdiff.mcdiff.in>
+#***************************************************************
+#      mcdiff is a program for the calculation of elastic
+#   neutron diffraction and resonant magnetic Xray scattering 
+#  reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#*************************************************************** 
+# this input file contains 4 sections corresponding to different
+# groups of parameters
+#
+# - all lines have to start with a # sign with the  exception of 
+#   the lines containing atomic positional parameters
+# - the other parameters have to be defined in the corresponding 
+#   section by statements such as parameter=value
+# - the sequence of the parameters within a section is arbitrary
+# 
+#
+# %SECTION 1%  OVERALL PARAMETERS
+#
+#! lambda   = 2.3587  wavelength (A)
+#
+#! thetamax = 20   maximum bragg angle (deg)
+#
+#! ovalltemp= 0  overall temperature factor (A^2) 
+#           ...I ~ EXP(-2 * ovalltemp * sintheta^2 / lambda^2) 
+#                  relation to other notations:
+#                  ovalltemp = Biso = 8 pi^2 Uiso^2
+#
+#! lorentz=0  type of lorentzfactor to be used
+#            0.....no lorentzfactor 
+#            1.....neutron powder flat sample
+#            2.....neutron powder cylindrical sample
+#            3.....neutron single crystal
+#            4.....neutron TOF powder cyl. sample - d-pattern log scaled
+#            5.....neutron TOF powder cyl. sample - d-pattern normal scaled
+#
+# out*  controls the type of output in  mcdiff.out 
+#!out0=2  0..short header, 1...standard header, 2... long header in mcdiff.out
+# (a negative value triggers calculation of magnetic xray scattering)
+#
+#!  nofoutputcolumns=12  number of columns in output file mcdiff.out
+# choose out* to set type of desired output in column 1 to 12
+# (default is h k l d Q 2theta Inuc Imag Itot)
+#
+#!out1=31 out2=32 out3=33 out4=34 out5=35 out6=36 out7=27 out8=28 out9=29 out10=1 out11=0 out12=30 
+#
+#     ... in out*=n the numbers n have the following meaning:
+#            0....LF #
+#            1....|NSF|[b] #
+#            2....Re(NSF)[b] #
+#            3....Im(NSF)[b] #
+#            4....|MSF| #
+#            5....|MSF.P| #
+#            6....Re(MSF.P) #
+#            7....Im(MSF.P) #
+#            8....|MSFdip| #
+#            9....|MSFdip.P| #
+#            10....Re(MSFdip.P) #
+#            11....Im(MSFdip.P) #
+#            12....angl(Q,P)[°] #
+#            13....i(MSFxMSF*).P #
+#            14....I+ #
+#            15....I- #
+#            16....I+/I- #
+#            17....i(MSFxMSF*)dip.P #
+#            18....Idip+ #
+#            19....Idip- #
+#            20....Idip+/Idip- #
+#            21....2*|MSF.P|/sin^2(angl(Q,P) #
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P) #
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-) #
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-) #
+#            27....Inuc(2t)   #
+#            28....Imag(2t)   #
+#            29....Itot(2t)   #
+#            30....Imag_dip(2t) #
+#            31....h      #
+#            32....k      #
+#            33....l      #
+#            34....d[A]       #
+#            35....|Q|[1/A]   #
+#            36....2theta     #
+#            37....Qi[1/A]    #
+#            38....Qj[1/A]     Qi Qj Qk are euclidean components of scattering vector#
+#            39....Qk[1/A]     with j||b, k||(a x b) and i normal to k and j#
+#            40....T[K]       #
+#            41....Ha[T]      #
+#            42....Hb[T]      #
+#            43....Hc[T]      #
+#            44....hprim      #
+#            45....kprim      #
+#            46....lprim      #
+#            47....Itotdip(2t) #
+#
+#           In the above the intensities I+ and I- are the intensities in a polarised neutron
+#           experiment with incident polarisation up (+) or down (-):
+#            I+-=LF exp(-OTF Q^2/8pi^2) 
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF|^2-+i(MSF x MSF*).P)/NB^2 
+#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
+#           LF  ..... Lorentzfactor
+#           MSF ..... magnetic structure factor
+#           NSF ..... nuclear structure factor
+#
+#
+#             For some of the above options we need the
+#! Pa=  0.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
+#! Pb=  0.0000   Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)
+#! Pc=  0.1348
+#
+# %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
+#
+#
+#! natcryst=0      number of nonmagnetic atoms in primitive crystalographic unit cell
+#
+# it follows a list of natcryst lines with nonmagnetic atoms
+# ... notes: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+#            - Debye Waller Factor notation: sqr(Intensity) ~ structure factor ~ 
+#              ~sum_n ()n exp(-2 DWFn sin^2(theta) / lambda^2)=EXP (-Wn),  
+#              relation to other notations: 2*DWF = B = 8 pi^2 <u^2>, units DWF (A^2)
+#
+#! use_dadbdc=0
+#            - 0 means: da db and dc are not used by the program (unless you enter a line #! use_dadbdc=1),
+#               dr1,dr2 and dr3 refer to the primitive lattice given below
+# Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
+#
+#
+# %SECTION 3% DESCRIPTION OF THE LATTICE
+#
+# -----------------------------------------------------------------------------
+#{output file of program mcphas 5.7 experimental code - do not use! Fri Feb 14 17:42:45 2025
+#!<--mcphas.mcphas.mf-->
+#*********************************************************
+# mcphas - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+#**********************************************************
+#
+# Lattice Constants (A)
+#! a=4.3843 b=7.0326 c=7.4194 alpha=  90 beta=  90 gamma=  90
+#! r1a= 0.5 r2a=   0 r3a=   0
+#! r1b= 0.5 r2b=   1 r3b=   0   primitive lattice vectors [a][b][c]
+#! r1c= 0.5 r2c=   0 r3c=   1
+#
+# Nonzero Elastic constants   in meV per primitive unit cell in Voigt notation only first index<=second index has to be given
+# because the constants are symmetric Celij=Celji
+# Elastic constants refer to the Euclidean coordinate system ijk defined
+# with respect to abc as j||b, k||(a x b) and i normal to k and j
+#! 
+#
+#! nofatoms=2  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
+#*********************************************************************
+#! da=   0 [a] db=   0 [b] dc=   0 [c] nofneighbours=1412 diagonalexchange=1 sipffilename=Nd3p.sipf
+#! da=   0 [a] db= 0.5 [b] dc=0.0766 [c] nofneighbours=1412 diagonalexchange=1 sipffilename=Nd3p.sipf
+#!show_abc_unitcell=1.0
+#!show_primitive_crystal_unitcell=1.0
+#!show_magnetic_unitcell=1.0
+#!show_atoms=1.0
+#!show_chargedensity=1.0
+#!spins_scale_moment=1.0
+#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0
+#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsaa eps2=epsbb eps3=epscc eps4=2epsbc eps5=2epsac eps6=2epsab
+    #mf1(atom 1) mf1(atom 2) .... selfconsistent Mean field configuration 
+    #mf2(atom 1) mf2(atom 2) .... UNITS: mf(atom i)=gJ*mu_B*hxc(atom i)[meV] 
+    #mf3(atom 1) mf3(atom 2) ....         (i.e. divide by gJ and mu_B=0.05788meV/Tesla to get exchange field hxc[Tesla]}
+#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j
+#! strain tensor: eps1=   0=epsii eps2=   0=epsjj eps3=   0=epskk eps4=   0=2epsjk eps5=   0=2epsik eps6=   0=2epsij
+#
+# %SECTION 4% DESCRIPTION OF MAGNETIC UNIT CELL AND LIST OF MAGNETIC ATOMS
+#
+#
+# here follows the description of the magnetic unit cell with respect
+# to the primitive crystallographic unit cell:
+# 'nr1', 'nr2', 'nr3' ...the crystallographic unit cell has to be taken
+#                        nr1 nr2 and nr3 times along r1 r2 and r3,
+#                        respectively to get magnetic unit cell
+# 'nat' denotes the number of magnetic atoms in magnetic unit cell
+#
+# It follows a list of nat lines with to describe the magnetic moment configuration
+# Notes:
+# 'atom-filename' means the single ion property filename of this magnetic atom:
+#                 -it must contain the Formfactor Coefficients (e.g. see international tables)
+#                                      Lande factor
+#                                      Neutron Scattering Length (10^-12 cm) 
+#                 -it may contain a    Debey Waller Factor
+# 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1)
+# 'dr1','dr2' and 'dr3' refer to the primitive lattice given below
+# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons
+#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mx My Mz
+#                have to be given, which refer to an right handed orthogonal coordinate system 
+#                defined by y||b, z||(a x b) and x normal to y and z
+#  <Sa> <Sb> <Sc>  <La> <Lb > <Lc>  (optional) denote the spin and orbital angular momentum components 
+# 'mf1' 'mf2' 'mf3' (optional line, used to go beyond dipole approx for formfactor)
+#                                     denote the corresponding exchange fields in meV
+#
+#! x=1.5 y=0 T=1.5 Ha=0 Hb=0 Hc=0 n=20 spins nofatoms=2 in primitive basis nofcomponents=3 
+#!T=1.5 K Ha=0 T Hb= 0 T Hc= 0 T: nr1=10 nr2=1 nr3=1 nat=20 atoms in primitive magnetic unit cell:
+#1           2     3     4     5       6       7       8    9    10                  11   12   13   14   15   16
+#{sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] <Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)
+#          corresponding exchange fields [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)
+{Nd3p.sipf} 0.000000000 0.000000000 0.000000000 0.000000000 0.000000000 0.000000000  0.0000 2.0999 0.0000 0.0000 -0.7875 0.0000 0.0000 3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.2710 0.0000
+{Nd3p.sipf} -0.000000000 0.500000000 0.076600000 -0.000000000 0.500000000 0.076600000  0.0000 2.0999 0.0000 0.0000 -0.7875 0.0000 0.0000 3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.2710 0.0000
+{Nd3p.sipf} 0.500000000 0.500000000 0.500000000 1.000000000 -0.000000000 -0.000000000  0.0000 2.1438 0.0000 0.0000 -0.8039 0.0000 0.0000 3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.3354 0.0000
+{Nd3p.sipf} 0.500000000 1.000000000 0.576600000 1.000000000 0.500000000 0.076600000  0.0000 2.1438 0.0000 0.0000 -0.8039 0.0000 0.0000 3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.3354 0.0000
+{Nd3p.sipf} 1.000000000 1.000000000 1.000000000 2.000000000 -0.000000000 -0.000000000  0.0000 -2.1438 0.0000 0.0000 0.8039 0.0000 0.0000 -3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.3354 0.0000
+{Nd3p.sipf} 1.000000000 1.500000000 1.076600000 2.000000000 0.500000000 0.076600000  0.0000 -2.1438 0.0000 0.0000 0.8039 0.0000 0.0000 -3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.3354 0.0000
+{Nd3p.sipf} 1.500000000 1.500000000 1.500000000 3.000000000 -0.000000000 -0.000000000  0.0000 -2.0999 0.0000 0.0000 0.7875 0.0000 0.0000 -3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.2710 0.0000
+{Nd3p.sipf} 1.500000000 2.000000000 1.576600000 3.000000000 0.500000000 0.076600000  0.0000 -2.0999 0.0000 0.0000 0.7875 0.0000 0.0000 -3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.2710 0.0000
+{Nd3p.sipf} 2.000000000 2.000000000 2.000000000 4.000000000 -0.000000000 -0.000000000  0.0000 2.1170 0.0000 0.0000 -0.7939 0.0000 0.0000 3.7047 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.2948 0.0000
+{Nd3p.sipf} 2.000000000 2.500000000 2.076600000 4.000000000 0.500000000 0.076600000  0.0000 2.1170 0.0000 0.0000 -0.7939 0.0000 0.0000 3.7047 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.2948 0.0000
+{Nd3p.sipf} 2.500000000 2.500000000 2.500000000 5.000000000 -0.000000000 -0.000000000  0.0000 -2.0999 0.0000 0.0000 0.7875 0.0000 0.0000 -3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.2710 0.0000
+{Nd3p.sipf} 2.500000000 3.000000000 2.576600000 5.000000000 0.500000000 0.076600000  0.0000 -2.0999 0.0000 0.0000 0.7875 0.0000 0.0000 -3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.2710 0.0000
+{Nd3p.sipf} 3.000000000 3.000000000 3.000000000 6.000000000 -0.000000000 -0.000000000  0.0000 -2.1438 0.0000 0.0000 0.8039 0.0000 0.0000 -3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.3354 0.0000
+{Nd3p.sipf} 3.000000000 3.500000000 3.076600000 6.000000000 0.500000000 0.076600000  0.0000 -2.1438 0.0000 0.0000 0.8039 0.0000 0.0000 -3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.3354 0.0000
+{Nd3p.sipf} 3.500000000 3.500000000 3.500000000 7.000000000 -0.000000000 -0.000000000  0.0000 2.1438 0.0000 0.0000 -0.8039 0.0000 0.0000 3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.3354 0.0000
+{Nd3p.sipf} 3.500000000 4.000000000 3.576600000 7.000000000 0.500000000 0.076600000  0.0000 2.1438 0.0000 0.0000 -0.8039 0.0000 0.0000 3.7516 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.3354 0.0000
+{Nd3p.sipf} 4.000000000 4.000000000 4.000000000 8.000000000 -0.000000000 -0.000000000  0.0000 2.0999 0.0000 0.0000 -0.7875 0.0000 0.0000 3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.2710 0.0000
+{Nd3p.sipf} 4.000000000 4.500000000 4.076600000 8.000000000 0.500000000 0.076600000  0.0000 2.0999 0.0000 0.0000 -0.7875 0.0000 0.0000 3.6749 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 0.2710 0.0000
+{Nd3p.sipf} 4.500000000 4.500000000 4.500000000 9.000000000 -0.000000000 -0.000000000  0.0000 -2.1170 0.0000 0.0000 0.7939 0.0000 0.0000 -3.7047 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.2948 0.0000
+{Nd3p.sipf} 4.500000000 5.000000000 4.576600000 9.000000000 0.500000000 0.076600000  0.0000 -2.1170 0.0000 0.0000 0.7939 0.0000 0.0000 -3.7047 0.0000
+                 corresponding exchange fields [meV]-->           0.0000 -0.2948 0.0000

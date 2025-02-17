@@ -1,0 +1,193 @@
+#!MODULE=ic1ion
+#!MODULE=ic1ion
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module So1ion for  
+# mcphas version 5.7
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 5.7
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 5.7
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+#
+#
+# crystal field paramerized in Stevens formalism
+#
+#-----------
+IONTYPE=Nd3+
+#-----------
+
+#----------------
+# Stevens Factors
+#----------------
+ALPHA=-0.00642792
+BETA=-0.000291108
+GAMMA=-3.7988e-05
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.114
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=2.91
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=15.03
+
+CHARGE=0
+MAGNETIC=0
+#----------------
+# number of electrons in unfilled shell gJ
+#----------------
+nof_electrons=3
+
+#----------------
+# Lande factor gJ
+#----------------
+GJ=0
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.769
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#    s2= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D*EXP(-FFj0d*s2) + FFj0E
+#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D*EXP(-FFj2d*s2) + FFj2E)
+#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D*EXP(-FFj4d*s2) + FFj4E)
+#   <j6(Q)>=s2*(FFj6A*EXP(-FFj6a*s2) + FFj6B*EXP(-FFj6b*s2) + FFj6C*EXP(-FFj6c*s2) + FFj6D*EXP(-FFj6d*s2) + FFj6E)
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)
+#
+#--------------------------------------------------------------------------------------
+ FFj0A=+0.0540 FFj0a=+25.0293 FFj0B=+0.3101 FFj0b=+12.1020 FFj0C=+0.6575 FFj0c=+4.7223 FFj0D=-0.0216 FFj0d=+0.0000 FFj0E=+0.0000
+ FFj2A=+0.6751 FFj2a=+18.3421 FFj2B=+1.6272 FFj2b=+7.2600 FFj2C=+0.9644 FFj2c=+2.6016 FFj2D=+0.0150 FFj2d=+0.0000 FFj2E=+0.0000
+ FFj4A=-0.4053 FFj4a=+14.0141 FFj4B=+0.0329 FFj4b=+7.0046 FFj4C=+0.3759 FFj4c=+1.7074 FFj4D=+0.0209 FFj4d=+0.0000 FFj4E=+0.0000
+ FFj6A=-0.0416 FFj6a=+8.0136 FFj6B=-0.1261 FFj6b=+4.0399 FFj6C=+0.1400 FFj6c=+1.0873 FFj6D=+0.0102 FFj6d=+0.0000 FFj6E=+0.0000
+
+
+#---------------------------------------------------------------------------------------------------
+# radial wave function parameters, for transition metal ions the the values are tabulated in
+# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave
+# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt((2Np)!)
+# for rare earth ions see Freeman & Watson PR 127(1962)2058, Sovers J. Phys. Chem. Sol. 28(1966)1073
+#---------------------------------------------------------------------------------------------------
+N1=4 XI1=10.727 C1=0.218729
+N2=4 XI2=6.071 C2=0.423732
+N3=4 XI3=4.047 C3=0.387712
+N4=4 XI4=2.216 C4=0.159646
+
+
+#pointcharges charge[|e|]  x[A] y[A] z[A]
+pointcharge=   -1            1  0.5  1.5
+# 1 meV = 8.066 cm-1
+# 1 cm-1 = 0.124 meV
+# 1 meV = 11.6 K
+# 1 K = 0.0862 meV
+#-------------------------------------------------------
+# Crystal Field parameters Blm in Stevens Notation (meV)
+#-------------------------------------------------------
+units=meV
+#!B00 =23091.1
+B22S=-0.945052
+B21S=-2.83507
+B20 =-1.02381
+B21 =-5.67014
+B22 =-0.708789
+B44S=-0.00279556
+B43S=-0.0307502
+B42S=-0.0130459
+B41S=-0.00838643
+B40 =0.00118811
+B41 =-0.0167729
+B42 =-0.00978445
+B43 =-0.00559095
+B44 =0.000815371
+B66S=-1.62879e-05
+B65S=-0.00054637
+B64S=-0.000411909
+B63S=-0.00126598
+B62S=-0.000404506
+B61S=0.00010257
+B60 =5.54821e-05
+B61 =0.000205141
+B62 =-0.000303379
+B63 =-0.000230178
+B64 =0.00012014
+B65 =0.000506391
+B66 =4.33111e-05
+#--------------------------------------------------------
+# Crystal Field parameters Llm in Wybourne Notation (meV)
+#--------------------------------------------------------
+units=meV
+#!L00 =7696.93
+L22S=120.041
+L21S=180.058
+L20 =318.542
+L21 =360.117
+L22 =90.0305
+L44S=9.18215
+L43S=35.7097
+L42S=56.6853
+L41S=25.767
+L40 =-32.6499
+L41 =51.5339
+L42 =42.514
+L43 =6.49266
+L44 =-2.67813
+L66S=0.45136
+L65S=4.37078
+L64S=15.4554
+L63S=26.0178
+L62S=16.6262
+L61S=-3.33301
+L60 =-23.3677
+L61 =-6.66602
+L62 =12.4697
+L63 =4.73051
+L64 =-4.50782
+L65 =-4.05097
+L66 =-1.20021
+
+
+#----------------------------------------------------------
+# some parameters for ic1ion - calculation of magnetisation
+#----------------------------------------------------------
+calcmag
+ xT   = 1
+ xHa  = 0
+ xHb  = 0
+ xHc  = 0
+ xmin = 1
+ xstep= 1
+ xmax = 1
+ yT   = 0
+ yHa  = -0.5
+ yHb  = 0
+ yHc  = 0.86603
+ ymin = 1
+ ystep= 1
+ ymax = 10

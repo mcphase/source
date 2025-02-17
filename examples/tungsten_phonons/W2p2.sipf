@@ -1,0 +1,36 @@
+#!MODULE=phonon
+
+IONTYPE=W
+CHARGE=+2
+
+MODPAR1=183.84 #mass in(m0)
+MODPAR2=-4722.96436860649   # Kxx
+MODPAR3=-4722.96436860649   # Kyy
+MODPAR4=-4722.96436860648   # Kzz
+MODPAR5=8.81072992342524e-13   # Kxy  in (meV)
+MODPAR6=-1.13686837721616e-13   # Kxz
+MODPAR7=-1.13686837721616e-13   # Kyz
+MODPAR8=1   # umax (cutoff) for displacement [a0=0.5219 A]
+MODPAR9=0   # 0       umax restriction in all directions
+            #                1,2,3   umax restriction in x y z direction only
+            #                4       umax restriction in x and y direction
+            #                5       umax restriction in x and z direction
+            #                6       umax restriction in y and z direction
+
+#---------------------------------------------------------
+# Radial Matrix Elements (morrison 1987 "Angular Momentum
+#           Theory Applied to Interactions in Solids" US )
+#---------------------------------------------------------
+#ion   <r^2> <24> in units of a0^2 a0=0.5292 Angstroem
+#W2p
+R2=3.7885735
+R4=24.7164711
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.486
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+

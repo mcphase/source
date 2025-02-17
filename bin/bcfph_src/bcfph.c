@@ -19,8 +19,6 @@
 #endif
 
 
-#define K_B  0.0862
-#define PI   3.141592654
 #define TRMAX 10000 /* maximum number of crystal field transitions */
 /**********************************************************************/
 void helpexit()
@@ -388,7 +386,7 @@ fprintf(stdout,"# Read Ng+1=%i CF-Phonon coupling constants g_alpha(s) from ./re
 
 double OOcef,rr,quot,En,Em,beta,Z,omega;
 complex <double> sum,Mqs,E0,Dqs,omegeta;
-beta=fabs(1/(K_B*T));
+beta=fabs(1/(KB*T));
 Z=0;E0=(*opmatM[0])(1,1);
 for(n=1;n<=d;++n)
 {(*opmatM[0])(n,n)-=E0;

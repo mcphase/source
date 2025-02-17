@@ -76,34 +76,34 @@ getvalue.pl -c 0.0       0 19 1 0 results/Ce3p_xyz_ic1ion.sipf.trs
 
 
 densplt c Ce3p_xyz_ic1ion.sipf 2 20 10 30 > m.clc
-getvariable.pl -c 0.282099 "a(0,0)" m.clc 
-getvariable.pl -c -0.045797 "a(2,-2)" m.clc 
-getvariable.pl -c -0.068695 "a(2,-1)" m.clc 
-getvariable.pl -c -0.085934 "a(2,0)" m.clc 
-getvariable.pl -c -0.137391 "a(2,1)" m.clc 
-getvariable.pl -c -0.034348 "a(2,2)" m.clc 
-getvariable.pl -c 0.004186 "a(4,-4)" m.clc 
-getvariable.pl -c 0.016281 "a(4,-3)" m.clc 
-getvariable.pl -c 0.025843 "a(4,-2)" m.clc 
-getvariable.pl -c 0.011748 "a(4,-1)" m.clc 
-getvariable.pl -c -0.010525 "a(4,0)" m.clc 
-getvariable.pl -c 0.023495 "a(4,1)" m.clc 
-getvariable.pl -c 0.019383 "a(4,2)" m.clc 
-getvariable.pl -c 0.002960 "a(4,3)" m.clc 
-getvariable.pl -c -0.001221 "a(4,4)" m.clc 
-getvariable.pl -c -0.000021 "a(6,-6)" m.clc 
-getvariable.pl -c -0.000200 "a(6,-5)" m.clc 
-getvariable.pl -c -0.000708 "a(6,-4)" m.clc 
-getvariable.pl -c -0.001191 "a(6,-3)" m.clc 
-getvariable.pl -c -0.000761 "a(6,-2)" m.clc 
-getvariable.pl -c 0.000153 "a(6,-1)" m.clc 
-getvariable.pl -c 0.000757 "a(6,0)" m.clc 
-getvariable.pl -c 0.000305 "a(6,1)" m.clc 
-getvariable.pl -c -0.000571 "a(6,2)" m.clc 
-getvariable.pl -c -0.000217 "a(6,3)" m.clc 
-getvariable.pl -c 0.000206 "a(6,4)" m.clc 
-getvariable.pl -c 0.000186 "a(6,5)" m.clc 
-getvariable.pl -c 0.000055 "a(6,6)" m.clc
+getvariable.pl -c 0.282 "a(0,0)" m.clc 
+getvariable.pl -c -0.046 "a(2,-2)" m.clc 
+getvariable.pl -c -0.0687 "a(2,-1)" m.clc 
+getvariable.pl -c -0.0859 "a(2,0)" m.clc 
+getvariable.pl -c -0.1374 "a(2,1)" m.clc 
+getvariable.pl -c -0.0343 "a(2,2)" m.clc 
+getvariable.pl -c 0.0042 "a(4,-4)" m.clc 
+getvariable.pl -c 0.0163 "a(4,-3)" m.clc 
+getvariable.pl -c 0.0258 "a(4,-2)" m.clc 
+getvariable.pl -c 0.0117 "a(4,-1)" m.clc 
+getvariable.pl -c -0.0105 "a(4,0)" m.clc 
+getvariable.pl -c 0.0235 "a(4,1)" m.clc 
+getvariable.pl -c 0.0194 "a(4,2)" m.clc 
+getvariable.pl -c 0.00296 "a(4,3)" m.clc 
+getvariable.pl -c -0.0012 "a(4,4)" m.clc 
+getvariable.pl -c -0.00002 "a(6,-6)" m.clc 
+getvariable.pl -c -0.00020 "a(6,-5)" m.clc 
+getvariable.pl -c -0.0007 "a(6,-4)" m.clc 
+getvariable.pl -c -0.00119 "a(6,-3)" m.clc 
+getvariable.pl -c -0.00076 "a(6,-2)" m.clc 
+getvariable.pl -c 0.00015 "a(6,-1)" m.clc 
+getvariable.pl -c 0.00076 "a(6,0)" m.clc 
+getvariable.pl -c 0.00031 "a(6,1)" m.clc 
+getvariable.pl -c -0.00057 "a(6,2)" m.clc 
+getvariable.pl -c -0.00022 "a(6,3)" m.clc 
+getvariable.pl -c 0.00021 "a(6,4)" m.clc 
+getvariable.pl -c 0.00019 "a(6,5)" m.clc 
+getvariable.pl -c 0.00006 "a(6,6)" m.clc
 
 
 singleion -r Ce3p_xyz_icf1ion.sipf 2 20 10 30   0 0 0 0 0 0   0 0 0 > m.clc
@@ -183,6 +183,9 @@ getvariable.pl -c 0.000206 "a(6,4)" m.clc
 getvariable.pl -c 0.000186 "a(6,5)" m.clc 
 getvariable.pl -c 0.000055 "a(6,6)" m.clc
 
+ic1ion Nd3p_xyz_ic1ion.sipf
+getvalue.pl -c 0.7923  4 7 1.73205 0 results/icf1ion.mag 
+
 singleion -r Nd3p_xyz_ic1ion.sipf 2 20 10 30   0 0 0 0 0 0   0 0 0 > m.clc
 
 getvalue.pl -c -0.707389  2 15 2 0  m.clc
@@ -216,6 +219,8 @@ getvalue.pl -c   0.001951   0 17 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c   0.003758  0 18 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c   0.0024391    0 19 4 0 results/Nd3p_xyz_ic1ion.sipf.trs
 
+icf1ion Nd3p_xyz_icf1ion.sipf
+getvalue.pl -c 0.792305 4 7 1.73205 0 results/icf1ion.mag 
 
 densplt c Nd3p_xyz_icf1ion.sipf 2 20 10 30 > m.clc
 
@@ -279,115 +284,115 @@ getvalue.pl -c   0.0314225  0 13 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c    2.30548   0 14 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c   2.99711    0 15 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c   1.15274    0 16 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0.00231595 0 17 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c   0.00446039 0 18 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c  0.00289497  0 19 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.0023 0 17 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.0045 0 18 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c  0.0029  0 19 4 0 results/Nd3p_xyz_icf1ion.sipf.trs
 
 
 
 densplt c Nd3p_xyz_ic1ion.sipf 2 20 10 30 > m.clc
 
-getvariable.pl -c 0.8463 "a(0,0)" m.clc 
-getvariable.pl -c -0.01858 "a(2,-2)" m.clc 
-getvariable.pl -c -0.02787 "a(2,-1)" m.clc 
-getvariable.pl -c -0.03486 "a(2,0)" m.clc 
-getvariable.pl -c -0.05573 "a(2,1)" m.clc 
-getvariable.pl -c -0.01393 "a(2,2)" m.clc 
-getvariable.pl -c -0.00522 "a(4,-4)" m.clc 
-getvariable.pl -c -0.02029 "a(4,-3)" m.clc 
-getvariable.pl -c -0.03220 "a(4,-2)" m.clc 
-getvariable.pl -c -0.01464 "a(4,-1)" m.clc 
-getvariable.pl -c 0.01312 "a(4,0)" m.clc 
-getvariable.pl -c -0.02928 "a(4,1)" m.clc 
-getvariable.pl -c -0.02415 "a(4,2)" m.clc 
-getvariable.pl -c -0.0037 "a(4,3)" m.clc 
-getvariable.pl -c 0.00152 "a(4,4)" m.clc 
-getvariable.pl -c -0.00071 "a(6,-6)" m.clc 
-getvariable.pl -c -0.00692 "a(6,-5)" m.clc 
-getvariable.pl -c -0.02445 "a(6,-4)" m.clc 
-getvariable.pl -c -0.04116 "a(6,-3)" m.clc 
-getvariable.pl -c -0.02630 "a(6,-2)" m.clc 
-getvariable.pl -c 0.00527 "a(6,-1)" m.clc 
-getvariable.pl -c 0.02614 "a(6,0)" m.clc 
-getvariable.pl -c 0.01055 "a(6,1)" m.clc 
-getvariable.pl -c -0.01973 "a(6,2)" m.clc 
-getvariable.pl -c -0.00748 "a(6,3)" m.clc 
-getvariable.pl -c 0.00713 "a(6,4)" m.clc 
-getvariable.pl -c 0.00641 "a(6,5)" m.clc 
+getvariable.pl -c 0.85 "a(0,0)" m.clc 
+getvariable.pl -c -0.019 "a(2,-2)" m.clc 
+getvariable.pl -c -0.028 "a(2,-1)" m.clc 
+getvariable.pl -c -0.035 "a(2,0)" m.clc 
+getvariable.pl -c -0.056 "a(2,1)" m.clc 
+getvariable.pl -c -0.014 "a(2,2)" m.clc 
+getvariable.pl -c -0.0052 "a(4,-4)" m.clc 
+getvariable.pl -c -0.020 "a(4,-3)" m.clc 
+getvariable.pl -c -0.032 "a(4,-2)" m.clc 
+getvariable.pl -c -0.015 "a(4,-1)" m.clc 
+getvariable.pl -c 0.013 "a(4,0)" m.clc 
+getvariable.pl -c -0.03 "a(4,1)" m.clc 
+getvariable.pl -c -0.024 "a(4,2)" m.clc 
+getvariable.pl -c -0.004 "a(4,3)" m.clc 
+getvariable.pl -c 0.0015 "a(4,4)" m.clc 
+getvariable.pl -c -0.0007 "a(6,-6)" m.clc 
+getvariable.pl -c -0.007 "a(6,-5)" m.clc 
+getvariable.pl -c -0.024 "a(6,-4)" m.clc 
+getvariable.pl -c -0.041 "a(6,-3)" m.clc 
+getvariable.pl -c -0.026 "a(6,-2)" m.clc 
+getvariable.pl -c 0.0053 "a(6,-1)" m.clc 
+getvariable.pl -c 0.026 "a(6,0)" m.clc 
+getvariable.pl -c 0.011 "a(6,1)" m.clc 
+getvariable.pl -c -0.020 "a(6,2)" m.clc 
+getvariable.pl -c -0.0075 "a(6,3)" m.clc 
+getvariable.pl -c 0.0071 "a(6,4)" m.clc 
+getvariable.pl -c 0.0064 "a(6,5)" m.clc 
 getvariable.pl -c 0.0019 "a(6,6)" m.clc
 
 singleion -r Pr3p_xyz.sipf -MQ 1 0 0 2 20 10 30 0 0 0  > m.clc 
 
-getvalue.pl -c  1.68461  2 9 2 0 m.clc
-getvalue.pl -c  1.68461  2 10 2 0 m.clc
-getvalue.pl -c  1.67622  2 12 2 0 m.clc
-getvalue.pl -c  0.840005  2 13 2 0 m.clc
-getvalue.pl -c  0.840005  2 14 2 0 m.clc
-getvalue.pl -c  0.838112  2 16 2 0 m.clc
-getvalue.pl -c  2.52002   2 17 2 0 m.clc
+getvalue.pl -c  1.68  2 9 2 0 m.clc
+getvalue.pl -c  1.68  2 10 2 0 m.clc
+getvalue.pl -c  1.68  2 12 2 0 m.clc
+getvalue.pl -c  0.84  2 13 2 0 m.clc
+getvalue.pl -c  0.84  2 14 2 0 m.clc
+getvalue.pl -c  0.84  2 16 2 0 m.clc
+getvalue.pl -c  2.52   2 17 2 0 m.clc
 
 getvalue.pl -c 0 0 8 1 0    results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 0   0 11 1 0 results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 0  0 12 1 0  results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 0  0 13 1 0  results/Pr3p_xyz.sipf.trs
 
-getvalue.pl -c 0.123992  0 8 4 0 results/Pr3p_xyz.sipf.trs
-getvalue.pl -c 0.879961  0 11 4 0 results/Pr3p_xyz.sipf.trs
-getvalue.pl -c 1.14729  0 12 4 0 results/Pr3p_xyz.sipf.trs
-getvalue.pl -c 0.447265  0 13 4 0 results/Pr3p_xyz.sipf.trs
+getvalue.pl -c 0.12  0 8 4 0 results/Pr3p_xyz.sipf.trs
+getvalue.pl -c 0.88  0 11 4 0 results/Pr3p_xyz.sipf.trs
+getvalue.pl -c 1.15  0 12 4 0 results/Pr3p_xyz.sipf.trs
+getvalue.pl -c 0.45  0 13 4 0 results/Pr3p_xyz.sipf.trs
 
 singleion -r Pr3p_xyz_icf1ion.sipf -MQ 1 0 0 2 20 10 30 0 0 0  > m.clc 
 
-getvalue.pl -c  1.67228  2 9 2 0 m.clc
-getvalue.pl -c  1.67228  2 10 2 0 m.clc
-getvalue.pl -c  1.61291  2 12 2 0 m.clc
-getvalue.pl -c  0.833611  2 13 2 0 m.clc
-getvalue.pl -c  0.833611  2 14 2 0 m.clc
-getvalue.pl -c   0.806454  2 16 2 0 m.clc
-getvalue.pl -c  2.50084   2 17 2 0 m.clc
+getvalue.pl -c  1.67  2 9 2 0 m.clc
+getvalue.pl -c  1.67  2 10 2 0 m.clc
+getvalue.pl -c  1.61  2 12 2 0 m.clc
+getvalue.pl -c  0.83  2 13 2 0 m.clc
+getvalue.pl -c  0.83  2 14 2 0 m.clc
+getvalue.pl -c   0.81  2 16 2 0 m.clc
+getvalue.pl -c  2.50   2 17 2 0 m.clc
 
 getvalue.pl -c 0 0 8 1 0    results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 0   0 11 1 0 results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 0  0 12 1 0  results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 0  0 13 1 0  results/Pr3p_xyz_icf1ion.sipf.trs
 
-getvalue.pl -c 0.127501  0 8 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c 0.904513   0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c 1.17916  0 12 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
-getvalue.pl -c 0.460056  0 13 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.13  0 8 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.90   0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 1.18  0 12 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.46  0 13 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
 
 singleion -r Pr3p_xyz_ic1ion.sipf -MQ 1 0 0 2 20 10 30 0 0 0  > m.clc 
 
-getvalue.pl -c  1.68634  2 9 2 0 m.clc
-getvalue.pl -c  1.68634  2 10 2 0 m.clc
-getvalue.pl -c  1.62638   2 12 2 0 m.clc
-getvalue.pl -c  0.841297  2 13 2 0 m.clc
-getvalue.pl -c  0.841297  2 14 2 0 m.clc
-getvalue.pl -c  0.813191  2 16 2 0 m.clc
-getvalue.pl -c  2.52388  2 17 2 0 m.clc
+getvalue.pl -c  1.69  2 9 2 0 m.clc
+getvalue.pl -c  1.69  2 10 2 0 m.clc
+getvalue.pl -c  1.63   2 12 2 0 m.clc
+getvalue.pl -c  0.84  2 13 2 0 m.clc
+getvalue.pl -c  0.84  2 14 2 0 m.clc
+getvalue.pl -c  0.81  2 16 2 0 m.clc
+getvalue.pl -c  2.52  2 17 2 0 m.clc
 
 getvalue.pl -c 0 0 8 1 0    results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0   0 11 1 0 results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0  0 12 1 0  results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0  0 13 1 0  results/Pr3p_xyz_ic1ion.sipf.trs
 
-getvalue.pl -c 0.129008  0 8 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c 0.917624  0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c 1.19542  0 12 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
-getvalue.pl -c 0.464672  0 13 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.13  0 8 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.92  0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 1.20  0 12 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.46  0 13 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
 
 
 densplt s Pr3p_xyz_ic1ion.sipf 2 20 10 30 > m.clc
 
-getvariable.pl -c -0.240938 "aS1(0,0)" m.clc 
+getvariable.pl -c -0.24 "aS1(0,0)" m.clc 
 getvariable.pl -c 0.000000 "aS1(1,-1)" m.clc 
 getvariable.pl -c 0.000000 "aS1(1,0)" m.clc 
 getvariable.pl -c 0.000000 "aS1(1,1)" m.clc 
-getvariable.pl -c 0.040311 "aS1(2,-2)" m.clc 
-getvariable.pl -c 0.013504 "aS1(2,-1)" m.clc 
-getvariable.pl -c -0.019260 "aS1(2,0)" m.clc 
-getvariable.pl -c 0.120935 "aS1(2,1)" m.clc 
-getvariable.pl -c 0.069370 "aS1(2,2)" m.clc 
+getvariable.pl -c 0.040 "aS1(2,-2)" m.clc 
+getvariable.pl -c 0.014 "aS1(2,-1)" m.clc 
+getvariable.pl -c -0.019 "aS1(2,0)" m.clc 
+getvariable.pl -c 0.12 "aS1(2,1)" m.clc 
+getvariable.pl -c 0.069 "aS1(2,2)" m.clc 
 getvariable.pl -c 0.000000 "aS1(3,-3)" m.clc 
 getvariable.pl -c 0.000000 "aS1(3,-2)" m.clc 
 getvariable.pl -c 0.000000 "aS1(3,-1)" m.clc 
@@ -395,15 +400,15 @@ getvariable.pl -c 0.000000 "aS1(3,0)" m.clc
 getvariable.pl -c 0.000000 "aS1(3,1)" m.clc 
 getvariable.pl -c 0.000000 "aS1(3,2)" m.clc 
 getvariable.pl -c 0.000000 "aS1(3,3)" m.clc 
-getvariable.pl -c 0.009669 "aS1(4,-4)" m.clc 
-getvariable.pl -c 0.024219 "aS1(4,-3)" m.clc 
-getvariable.pl -c 0.019196 "aS1(4,-2)" m.clc 
-getvariable.pl -c -0.004151 "aS1(4,-1)" m.clc 
-getvariable.pl -c -0.027234 "aS1(4,0)" m.clc 
-getvariable.pl -c 0.004707 "aS1(4,1)" m.clc 
-getvariable.pl -c 0.032285 "aS1(4,2)" m.clc 
-getvariable.pl -c 0.015579 "aS1(4,3)" m.clc 
-getvariable.pl -c 0.001204 "aS1(4,4)" m.clc 
+getvariable.pl -c 0.0097 "aS1(4,-4)" m.clc 
+getvariable.pl -c 0.024 "aS1(4,-3)" m.clc 
+getvariable.pl -c 0.019 "aS1(4,-2)" m.clc 
+getvariable.pl -c -0.0042 "aS1(4,-1)" m.clc 
+getvariable.pl -c -0.027 "aS1(4,0)" m.clc 
+getvariable.pl -c 0.0047 "aS1(4,1)" m.clc 
+getvariable.pl -c 0.032 "aS1(4,2)" m.clc 
+getvariable.pl -c 0.016 "aS1(4,3)" m.clc 
+getvariable.pl -c 0.0012 "aS1(4,4)" m.clc 
 getvariable.pl -c 0.000000 "aS1(5,-5)" m.clc 
 getvariable.pl -c 0.000000 "aS1(5,-4)" m.clc 
 getvariable.pl -c 0.000000 "aS1(5,-3)" m.clc 
@@ -415,28 +420,28 @@ getvariable.pl -c 0.000000 "aS1(5,2)" m.clc
 getvariable.pl -c 0.000000 "aS1(5,3)" m.clc 
 getvariable.pl -c 0.000000 "aS1(5,4)" m.clc 
 getvariable.pl -c 0.000000 "aS1(5,5)" m.clc 
-getvariable.pl -c -0.002290 "aS1(6,-6)" m.clc 
-getvariable.pl -c -0.011678 "aS1(6,-5)" m.clc 
-getvariable.pl -c -0.025401 "aS1(6,-4)" m.clc 
-getvariable.pl -c -0.021510 "aS1(6,-3)" m.clc 
-getvariable.pl -c 0.005325 "aS1(6,-2)" m.clc 
-getvariable.pl -c 0.012414 "aS1(6,-1)" m.clc 
-getvariable.pl -c 0.007413 "aS1(6,0)" m.clc 
-getvariable.pl -c 0.027833 "aS1(6,1)" m.clc 
-getvariable.pl -c -0.005375 "aS1(6,2)" m.clc 
-getvariable.pl -c -0.018451 "aS1(6,3)" m.clc 
-getvariable.pl -c -0.004687 "aS1(6,4)" m.clc 
-getvariable.pl -c 0.003498 "aS1(6,5)" m.clc 
-getvariable.pl -c 0.002148 "aS1(6,6)" m.clc 
-getvariable.pl -c -0.120469 "aS2(0,0)" m.clc 
+getvariable.pl -c -0.0023 "aS1(6,-6)" m.clc 
+getvariable.pl -c -0.012 "aS1(6,-5)" m.clc 
+getvariable.pl -c -0.025 "aS1(6,-4)" m.clc 
+getvariable.pl -c -0.022 "aS1(6,-3)" m.clc 
+getvariable.pl -c 0.0053 "aS1(6,-2)" m.clc 
+getvariable.pl -c 0.012 "aS1(6,-1)" m.clc 
+getvariable.pl -c 0.007 "aS1(6,0)" m.clc 
+getvariable.pl -c 0.028 "aS1(6,1)" m.clc 
+getvariable.pl -c -0.0054 "aS1(6,2)" m.clc 
+getvariable.pl -c -0.018 "aS1(6,3)" m.clc 
+getvariable.pl -c -0.0047 "aS1(6,4)" m.clc 
+getvariable.pl -c 0.0035 "aS1(6,5)" m.clc 
+getvariable.pl -c 0.0022 "aS1(6,6)" m.clc 
+getvariable.pl -c -0.12 "aS2(0,0)" m.clc 
 getvariable.pl -c 0.000000 "aS2(1,-1)" m.clc 
 getvariable.pl -c 0.000000 "aS2(1,0)" m.clc 
 getvariable.pl -c 0.000000 "aS2(1,1)" m.clc 
-getvariable.pl -c 0.067119 "aS2(2,-2)" m.clc 
-getvariable.pl -c 0.100679 "aS2(2,-1)" m.clc 
-getvariable.pl -c -0.009630 "aS2(2,0)" m.clc 
-getvariable.pl -c 0.013504 "aS2(2,1)" m.clc 
-getvariable.pl -c -0.027933 "aS2(2,2)" m.clc 
+getvariable.pl -c 0.067 "aS2(2,-2)" m.clc 
+getvariable.pl -c 0.10 "aS2(2,-1)" m.clc 
+getvariable.pl -c -0.0096 "aS2(2,0)" m.clc 
+getvariable.pl -c 0.014 "aS2(2,1)" m.clc 
+getvariable.pl -c -0.028 "aS2(2,2)" m.clc 
 getvariable.pl -c 0.000000 "aS2(3,-3)" m.clc 
 getvariable.pl -c 0.000000 "aS2(3,-2)" m.clc 
 getvariable.pl -c 0.000000 "aS2(3,-1)" m.clc 
@@ -444,15 +449,15 @@ getvariable.pl -c 0.000000 "aS2(3,0)" m.clc
 getvariable.pl -c 0.000000 "aS2(3,1)" m.clc 
 getvariable.pl -c 0.000000 "aS2(3,2)" m.clc 
 getvariable.pl -c 0.000000 "aS2(3,3)" m.clc 
-getvariable.pl -c 0.002130 "aS2(4,-4)" m.clc 
-getvariable.pl -c 0.017027 "aS2(4,-3)" m.clc 
-getvariable.pl -c 0.031063 "aS2(4,-2)" m.clc 
-getvariable.pl -c 0.010935 "aS2(4,-1)" m.clc 
-getvariable.pl -c -0.013617 "aS2(4,0)" m.clc 
-getvariable.pl -c -0.004151 "aS2(4,1)" m.clc 
-getvariable.pl -c -0.012478 "aS2(4,2)" m.clc 
-getvariable.pl -c -0.019256 "aS2(4,3)" m.clc 
-getvariable.pl -c -0.008670 "aS2(4,4)" m.clc 
+getvariable.pl -c 0.0021 "aS2(4,-4)" m.clc 
+getvariable.pl -c 0.017 "aS2(4,-3)" m.clc 
+getvariable.pl -c 0.031 "aS2(4,-2)" m.clc 
+getvariable.pl -c 0.011 "aS2(4,-1)" m.clc 
+getvariable.pl -c -0.014 "aS2(4,0)" m.clc 
+getvariable.pl -c -0.004 "aS2(4,1)" m.clc 
+getvariable.pl -c -0.012 "aS2(4,2)" m.clc 
+getvariable.pl -c -0.019 "aS2(4,3)" m.clc 
+getvariable.pl -c -0.0087 "aS2(4,4)" m.clc 
 getvariable.pl -c 0.000000 "aS2(5,-5)" m.clc 
 getvariable.pl -c 0.000000 "aS2(5,-4)" m.clc 
 getvariable.pl -c 0.000000 "aS2(5,-3)" m.clc 
@@ -464,28 +469,28 @@ getvariable.pl -c 0.000000 "aS2(5,2)" m.clc
 getvariable.pl -c 0.000000 "aS2(5,3)" m.clc 
 getvariable.pl -c 0.000000 "aS2(5,4)" m.clc 
 getvariable.pl -c 0.000000 "aS2(5,5)" m.clc 
-getvariable.pl -c 0.002101 "aS2(6,-6)" m.clc 
-getvariable.pl -c 0.003292 "aS2(6,-5)" m.clc 
-getvariable.pl -c -0.004572 "aS2(6,-4)" m.clc 
-getvariable.pl -c -0.017153 "aS2(6,-3)" m.clc 
-getvariable.pl -c -0.008580 "aS2(6,-2)" m.clc 
-getvariable.pl -c 0.009212 "aS2(6,-1)" m.clc 
-getvariable.pl -c 0.003706 "aS2(6,0)" m.clc 
-getvariable.pl -c 0.012414 "aS2(6,1)" m.clc 
-getvariable.pl -c 0.012303 "aS2(6,2)" m.clc 
-getvariable.pl -c 0.025962 "aS2(6,3)" m.clc 
-getvariable.pl -c 0.025525 "aS2(6,4)" m.clc 
-getvariable.pl -c 0.011601 "aS2(6,5)" m.clc 
-getvariable.pl -c 0.002295 "aS2(6,6)" m.clc 
-getvariable.pl -c -0.361409 "aS3(0,0)" m.clc 
+getvariable.pl -c 0.0021 "aS2(6,-6)" m.clc 
+getvariable.pl -c 0.0033 "aS2(6,-5)" m.clc 
+getvariable.pl -c -0.0046 "aS2(6,-4)" m.clc 
+getvariable.pl -c -0.017 "aS2(6,-3)" m.clc 
+getvariable.pl -c -0.0086 "aS2(6,-2)" m.clc 
+getvariable.pl -c 0.0092 "aS2(6,-1)" m.clc 
+getvariable.pl -c 0.0037 "aS2(6,0)" m.clc 
+getvariable.pl -c 0.012 "aS2(6,1)" m.clc 
+getvariable.pl -c 0.012 "aS2(6,2)" m.clc 
+getvariable.pl -c 0.026 "aS2(6,3)" m.clc 
+getvariable.pl -c 0.026 "aS2(6,4)" m.clc 
+getvariable.pl -c 0.012 "aS2(6,5)" m.clc 
+getvariable.pl -c 0.0023 "aS2(6,6)" m.clc 
+getvariable.pl -c -0.36 "aS3(0,0)" m.clc 
 getvariable.pl -c 0.000000 "aS3(1,-1)" m.clc 
 getvariable.pl -c 0.000000 "aS3(1,0)" m.clc 
 getvariable.pl -c 0.000000 "aS3(1,1)" m.clc 
-getvariable.pl -c 0.013504 "aS3(2,-2)" m.clc 
-getvariable.pl -c 0.051565 "aS3(2,-1)" m.clc 
-getvariable.pl -c 0.133796 "aS3(2,0)" m.clc 
-getvariable.pl -c 0.103129 "aS3(2,1)" m.clc 
-getvariable.pl -c 0.010128 "aS3(2,2)" m.clc 
+getvariable.pl -c 0.014 "aS3(2,-2)" m.clc 
+getvariable.pl -c 0.052 "aS3(2,-1)" m.clc 
+getvariable.pl -c 0.13 "aS3(2,0)" m.clc 
+getvariable.pl -c 0.103 "aS3(2,1)" m.clc 
+getvariable.pl -c 0.01 "aS3(2,2)" m.clc 
 getvariable.pl -c 0.000000 "aS3(3,-3)" m.clc 
 getvariable.pl -c 0.000000 "aS3(3,-2)" m.clc 
 getvariable.pl -c 0.000000 "aS3(3,-1)" m.clc 
@@ -493,15 +498,15 @@ getvariable.pl -c 0.000000 "aS3(3,0)" m.clc
 getvariable.pl -c 0.000000 "aS3(3,1)" m.clc 
 getvariable.pl -c 0.000000 "aS3(3,2)" m.clc 
 getvariable.pl -c 0.000000 "aS3(3,3)" m.clc 
-getvariable.pl -c 0.001755 "aS3(4,-4)" m.clc 
-getvariable.pl -c 0.012835 "aS3(4,-3)" m.clc 
-getvariable.pl -c 0.031860 "aS3(4,-2)" m.clc 
-getvariable.pl -c 0.024130 "aS3(4,-1)" m.clc 
-getvariable.pl -c 0.000290 "aS3(4,0)" m.clc 
-getvariable.pl -c 0.048259 "aS3(4,1)" m.clc 
-getvariable.pl -c 0.023895 "aS3(4,2)" m.clc 
-getvariable.pl -c 0.002334 "aS3(4,3)" m.clc 
-getvariable.pl -c -0.000512 "aS3(4,4)" m.clc 
+getvariable.pl -c 0.0018 "aS3(4,-4)" m.clc 
+getvariable.pl -c 0.013 "aS3(4,-3)" m.clc 
+getvariable.pl -c 0.032 "aS3(4,-2)" m.clc 
+getvariable.pl -c 0.024 "aS3(4,-1)" m.clc 
+getvariable.pl -c 0.0003 "aS3(4,0)" m.clc 
+getvariable.pl -c 0.05 "aS3(4,1)" m.clc 
+getvariable.pl -c 0.02 "aS3(4,2)" m.clc 
+getvariable.pl -c 0.002 "aS3(4,3)" m.clc 
+getvariable.pl -c -0.0005 "aS3(4,4)" m.clc 
 getvariable.pl -c 0.000000 "aS3(5,-5)" m.clc 
 getvariable.pl -c 0.000000 "aS3(5,-4)" m.clc 
 getvariable.pl -c 0.000000 "aS3(5,-3)" m.clc 
@@ -513,31 +518,31 @@ getvariable.pl -c 0.000000 "aS3(5,2)" m.clc
 getvariable.pl -c 0.000000 "aS3(5,3)" m.clc 
 getvariable.pl -c 0.000000 "aS3(5,4)" m.clc 
 getvariable.pl -c 0.000000 "aS3(5,5)" m.clc 
-getvariable.pl -c -0.000022 "aS3(6,-6)" m.clc 
-getvariable.pl -c -0.001530 "aS3(6,-5)" m.clc 
-getvariable.pl -c -0.010601 "aS3(6,-4)" m.clc 
-getvariable.pl -c -0.028861 "aS3(6,-3)" m.clc 
-getvariable.pl -c -0.031951 "aS3(6,-2)" m.clc 
-getvariable.pl -c -0.005080 "aS3(6,-1)" m.clc 
-getvariable.pl -c 0.024890 "aS3(6,0)" m.clc 
-getvariable.pl -c -0.010161 "aS3(6,1)" m.clc 
-getvariable.pl -c -0.023963 "aS3(6,2)" m.clc 
-getvariable.pl -c -0.005247 "aS3(6,3)" m.clc 
-getvariable.pl -c 0.003092 "aS3(6,4)" m.clc 
-getvariable.pl -c 0.001418 "aS3(6,5)" m.clc 
-getvariable.pl -c 0.000059 "aS3(6,6)" m.clc
+getvariable.pl -c -0.00002 "aS3(6,-6)" m.clc 
+getvariable.pl -c -0.0015 "aS3(6,-5)" m.clc 
+getvariable.pl -c -0.011 "aS3(6,-4)" m.clc 
+getvariable.pl -c -0.029 "aS3(6,-3)" m.clc 
+getvariable.pl -c -0.032 "aS3(6,-2)" m.clc 
+getvariable.pl -c -0.0051 "aS3(6,-1)" m.clc 
+getvariable.pl -c 0.025 "aS3(6,0)" m.clc 
+getvariable.pl -c -0.010 "aS3(6,1)" m.clc 
+getvariable.pl -c -0.024 "aS3(6,2)" m.clc 
+getvariable.pl -c -0.0053 "aS3(6,3)" m.clc 
+getvariable.pl -c 0.0031 "aS3(6,4)" m.clc 
+getvariable.pl -c 0.0014 "aS3(6,5)" m.clc 
+getvariable.pl -c 0.00006 "aS3(6,6)" m.clc
 
 densplt s Pr3p_xyz_icf1ion.sipf 2 20 10 30 > m.clc
 
-getvariable.pl -c -0.248914   "aS1(0,0)" m.clc 
+getvariable.pl -c -0.25   "aS1(0,0)" m.clc 
 getvariable.pl -c 0.000000   "aS1(1,-1)" m.clc 
 getvariable.pl -c 0.000000   "aS1(1,0)" m.clc 
 getvariable.pl -c 0.000000   "aS1(1,1)" m.clc 
-getvariable.pl -c 0.013442   "aS1(2,-2)" m.clc 
-getvariable.pl -c 0.012707   "aS1(2,-1)" m.clc 
-getvariable.pl -c 0.005308   "aS1(2,0)" m.clc 
-getvariable.pl -c 0.092399   "aS1(2,1)" m.clc 
-getvariable.pl -c 0.044744   "aS1(2,2)" m.clc 
+getvariable.pl -c 0.0308   "aS1(2,-2)" m.clc 
+getvariable.pl -c 0.020   "aS1(2,-1)" m.clc 
+getvariable.pl -c 0.0053   "aS1(2,0)" m.clc 
+getvariable.pl -c 0.092   "aS1(2,1)" m.clc 
+getvariable.pl -c 0.045   "aS1(2,2)" m.clc 
 getvariable.pl -c 0.000000   "aS1(3,-3)" m.clc 
 getvariable.pl -c 0.000000   "aS1(3,-2)" m.clc 
 getvariable.pl -c 0.000000   "aS1(3,-1)" m.clc 
@@ -545,15 +550,15 @@ getvariable.pl -c 0.000000   "aS1(3,0)" m.clc
 getvariable.pl -c 0.000000   "aS1(3,1)" m.clc 
 getvariable.pl -c 0.000000   "aS1(3,2)" m.clc 
 getvariable.pl -c 0.000000   "aS1(3,3)" m.clc 
-getvariable.pl -c 0.006196   "aS1(4,-4)" m.clc 
-getvariable.pl -c 0.017013   "aS1(4,-3)" m.clc 
-getvariable.pl -c 0.017017   "aS1(4,-2)" m.clc 
-getvariable.pl -c -0.001620   "aS1(4,-1)" m.clc 
-getvariable.pl -c -0.031355   "aS1(4,0)" m.clc 
-getvariable.pl -c 0.004169   "aS1(4,1)" m.clc 
-getvariable.pl -c 0.036772   "aS1(4,2)" m.clc 
-getvariable.pl -c 0.018113   "aS1(4,3)" m.clc 
-getvariable.pl -c 0.001484   "aS1(4,4)" m.clc 
+getvariable.pl -c 0.011   "aS1(4,-4)" m.clc 
+getvariable.pl -c 0.027   "aS1(4,-3)" m.clc 
+getvariable.pl -c 0.021   "aS1(4,-2)" m.clc 
+getvariable.pl -c -0.0056   "aS1(4,-1)" m.clc 
+getvariable.pl -c -0.031   "aS1(4,0)" m.clc 
+getvariable.pl -c 0.0042   "aS1(4,1)" m.clc 
+getvariable.pl -c 0.037   "aS1(4,2)" m.clc 
+getvariable.pl -c 0.018   "aS1(4,3)" m.clc 
+getvariable.pl -c 0.0015   "aS1(4,4)" m.clc 
 getvariable.pl -c 0.000000   "aS1(5,-5)" m.clc 
 getvariable.pl -c 0.000000   "aS1(5,-4)" m.clc 
 getvariable.pl -c 0.000000   "aS1(5,-3)" m.clc 
@@ -565,28 +570,29 @@ getvariable.pl -c 0.000000   "aS1(5,2)" m.clc
 getvariable.pl -c 0.000000   "aS1(5,3)" m.clc 
 getvariable.pl -c 0.000000   "aS1(5,4)" m.clc 
 getvariable.pl -c 0.000000   "aS1(5,5)" m.clc 
-getvariable.pl -c -0.001178   "aS1(6,-6)" m.clc 
-getvariable.pl -c -0.006783   "aS1(6,-5)" m.clc 
-getvariable.pl -c -0.017771   "aS1(6,-4)" m.clc 
-getvariable.pl -c -0.023026   "aS1(6,-3)" m.clc 
-getvariable.pl -c -0.008357   "aS1(6,-2)" m.clc 
-getvariable.pl -c 0.012344   "aS1(6,-1)" m.clc 
-getvariable.pl -c 0.005883   "aS1(6,0)" m.clc 
-getvariable.pl -c 0.020309   "aS1(6,1)" m.clc 
-getvariable.pl -c -0.004281   "aS1(6,2)" m.clc 
-getvariable.pl -c -0.013473   "aS1(6,3)" m.clc 
-getvariable.pl -c -0.003239   "aS1(6,4)" m.clc 
-getvariable.pl -c 0.002655   "aS1(6,5)" m.clc 
-getvariable.pl -c 0.001589   "aS1(6,6)" m.clc 
-getvariable.pl -c -0.063928   "aS2(0,0)" m.clc 
+getvariable.pl -c -0.0017   "aS1(6,-6)" m.clc 
+getvariable.pl -c -0.0086   "aS1(6,-5)" m.clc 
+getvariable.pl -c -0.0188   "aS1(6,-4)" m.clc 
+getvariable.pl -c -0.016   "aS1(6,-3)" m.clc 
+getvariable.pl -c 0.0033   "aS1(6,-2)" m.clc 
+getvariable.pl -c 0.0090   "aS1(6,-1)" m.clc 
+getvariable.pl -c 0.0059   "aS1(6,0)" m.clc 
+getvariable.pl -c 0.020   "aS1(6,1)" m.clc 
+getvariable.pl -c -0.0043   "aS1(6,2)" m.clc 
+getvariable.pl -c -0.013   "aS1(6,3)" m.clc 
+getvariable.pl -c -0.0032   "aS1(6,4)" m.clc 
+getvariable.pl -c 0.0027   "aS1(6,5)" m.clc 
+getvariable.pl -c 0.0016   "aS1(6,6)" m.clc 
+
+getvariable.pl -c -0.124   "aS2(0,0)" m.clc 
 getvariable.pl -c 0.000000   "aS2(1,-1)" m.clc 
 getvariable.pl -c 0.000000   "aS2(1,0)" m.clc 
 getvariable.pl -c 0.000000   "aS2(1,1)" m.clc 
-getvariable.pl -c 0.041372   "aS2(2,-2)" m.clc 
-getvariable.pl -c 0.062059   "aS2(2,-1)" m.clc 
-getvariable.pl -c 0.008407   "aS2(2,0)" m.clc 
-getvariable.pl -c 0.012723   "aS2(2,1)" m.clc 
-getvariable.pl -c -0.002853   "aS2(2,2)" m.clc 
+getvariable.pl -c 0.041   "aS2(2,-2)" m.clc 
+getvariable.pl -c 0.062   "aS2(2,-1)" m.clc 
+getvariable.pl -c 0.0027   "aS2(2,0)" m.clc 
+getvariable.pl -c 0.020   "aS2(2,1)" m.clc 
+getvariable.pl -c -0.012   "aS2(2,2)" m.clc 
 getvariable.pl -c 0.000000   "aS2(3,-3)" m.clc 
 getvariable.pl -c 0.000000   "aS2(3,-2)" m.clc 
 getvariable.pl -c 0.000000   "aS2(3,-1)" m.clc 
@@ -594,15 +600,15 @@ getvariable.pl -c 0.000000   "aS2(3,0)" m.clc
 getvariable.pl -c 0.000000   "aS2(3,1)" m.clc 
 getvariable.pl -c 0.000000   "aS2(3,2)" m.clc 
 getvariable.pl -c 0.000000   "aS2(3,3)" m.clc 
-getvariable.pl -c 0.002379   "aS2(4,-4)" m.clc 
-getvariable.pl -c 0.019513   "aS2(4,-3)" m.clc 
-getvariable.pl -c 0.035711   "aS2(4,-2)" m.clc 
-getvariable.pl -c 0.012494   "aS2(4,-1)" m.clc 
-getvariable.pl -c -0.010354   "aS2(4,0)" m.clc 
-getvariable.pl -c -0.001594   "aS2(4,1)" m.clc 
-getvariable.pl -c -0.011045   "aS2(4,2)" m.clc 
-getvariable.pl -c -0.013626   "aS2(4,3)" m.clc 
-getvariable.pl -c -0.005583   "aS2(4,4)" m.clc 
+getvariable.pl -c 0.0024   "aS2(4,-4)" m.clc 
+getvariable.pl -c 0.020   "aS2(4,-3)" m.clc 
+getvariable.pl -c 0.036   "aS2(4,-2)" m.clc 
+getvariable.pl -c 0.012   "aS2(4,-1)" m.clc 
+getvariable.pl -c -0.016   "aS2(4,0)" m.clc 
+getvariable.pl -c -0.0056   "aS2(4,1)" m.clc 
+getvariable.pl -c -0.015   "aS2(4,2)" m.clc 
+getvariable.pl -c -0.023   "aS2(4,3)" m.clc 
+getvariable.pl -c -0.010   "aS2(4,4)" m.clc 
 getvariable.pl -c 0.000000   "aS2(5,-5)" m.clc 
 getvariable.pl -c 0.000000   "aS2(5,-4)" m.clc 
 getvariable.pl -c 0.000000   "aS2(5,-3)" m.clc 
@@ -614,28 +620,29 @@ getvariable.pl -c 0.000000   "aS2(5,2)" m.clc
 getvariable.pl -c 0.000000   "aS2(5,3)" m.clc 
 getvariable.pl -c 0.000000   "aS2(5,4)" m.clc 
 getvariable.pl -c 0.000000   "aS2(5,5)" m.clc 
-getvariable.pl -c 0.001510   "aS2(6,-6)" m.clc 
-getvariable.pl -c 0.002306   "aS2(6,-5)" m.clc 
-getvariable.pl -c -0.003549   "aS2(6,-4)" m.clc 
-getvariable.pl -c -0.012802   "aS2(6,-3)" m.clc 
-getvariable.pl -c -0.006462   "aS2(6,-2)" m.clc 
-getvariable.pl -c 0.006704   "aS2(6,-1)" m.clc 
-getvariable.pl -c 0.013824   "aS2(6,0)" m.clc 
-getvariable.pl -c 0.012402   "aS2(6,1)" m.clc 
-getvariable.pl -c 0.019685   "aS2(6,2)" m.clc 
-getvariable.pl -c 0.024861   "aS2(6,3)" m.clc 
-getvariable.pl -c 0.017515   "aS2(6,4)" m.clc 
-getvariable.pl -c 0.006570   "aS2(6,5)" m.clc 
-getvariable.pl -c 0.001177   "aS2(6,6)" m.clc 
-getvariable.pl -c -0.373372   "aS3(0,0)" m.clc 
+getvariable.pl -c 0.0015   "aS2(6,-6)" m.clc 
+getvariable.pl -c 0.0023   "aS2(6,-5)" m.clc 
+getvariable.pl -c -0.0035   "aS2(6,-4)" m.clc 
+getvariable.pl -c -0.013   "aS2(6,-3)" m.clc 
+getvariable.pl -c -0.0065   "aS2(6,-2)" m.clc 
+getvariable.pl -c 0.0067   "aS2(6,-1)" m.clc 
+getvariable.pl -c 0.0029   "aS2(6,0)" m.clc 
+getvariable.pl -c 0.0091   "aS2(6,1)" m.clc 
+getvariable.pl -c 0.0087   "aS2(6,2)" m.clc 
+getvariable.pl -c 0.019   "aS2(6,3)" m.clc 
+getvariable.pl -c 0.019   "aS2(6,4)" m.clc 
+getvariable.pl -c 0.0084   "aS2(6,5)" m.clc 
+getvariable.pl -c 0.0017   "aS2(6,6)" m.clc 
+
+getvariable.pl -c -0.37   "aS3(0,0)" m.clc 
 getvariable.pl -c 0.000000   "aS3(1,-1)" m.clc 
 getvariable.pl -c 0.000000   "aS3(1,0)" m.clc 
 getvariable.pl -c 0.000000   "aS3(1,1)" m.clc 
-getvariable.pl -c 0.013259   "aS3(2,-2)" m.clc 
-getvariable.pl -c 0.030756   "aS3(2,-1)" m.clc 
-getvariable.pl -c 0.097935   "aS3(2,0)" m.clc 
-getvariable.pl -c 0.095310   "aS3(2,1)" m.clc 
-getvariable.pl -c 0.015170   "aS3(2,2)" m.clc 
+getvariable.pl -c 0.020   "aS3(2,-2)" m.clc 
+getvariable.pl -c 0.048   "aS3(2,-1)" m.clc 
+getvariable.pl -c 0.098   "aS3(2,0)" m.clc 
+getvariable.pl -c 0.095   "aS3(2,1)" m.clc 
+getvariable.pl -c 0.015   "aS3(2,2)" m.clc 
 getvariable.pl -c 0.000000   "aS3(3,-3)" m.clc 
 getvariable.pl -c 0.000000   "aS3(3,-2)" m.clc 
 getvariable.pl -c 0.000000   "aS3(3,-1)" m.clc 
@@ -643,15 +650,15 @@ getvariable.pl -c 0.000000   "aS3(3,0)" m.clc
 getvariable.pl -c 0.000000   "aS3(3,1)" m.clc 
 getvariable.pl -c 0.000000   "aS3(3,2)" m.clc 
 getvariable.pl -c 0.000000   "aS3(3,3)" m.clc 
-getvariable.pl -c 0.001343   "aS3(4,-4)" m.clc 
-getvariable.pl -c 0.009990   "aS3(4,-3)" m.clc 
-getvariable.pl -c 0.027826   "aS3(4,-2)" m.clc 
-getvariable.pl -c 0.028285   "aS3(4,-1)" m.clc 
-getvariable.pl -c 0.001251   "aS3(4,0)" m.clc 
-getvariable.pl -c 0.054604   "aS3(4,1)" m.clc 
-getvariable.pl -c 0.026366   "aS3(4,2)" m.clc 
-getvariable.pl -c 0.002483   "aS3(4,3)" m.clc 
-getvariable.pl -c -0.000495   "aS3(4,4)" m.clc 
+getvariable.pl -c 0.0017   "aS3(4,-4)" m.clc 
+getvariable.pl -c 0.014   "aS3(4,-3)" m.clc 
+getvariable.pl -c 0.035   "aS3(4,-2)" m.clc 
+getvariable.pl -c 0.027   "aS3(4,-1)" m.clc 
+getvariable.pl -c 0.001   "aS3(4,0)" m.clc 
+getvariable.pl -c 0.055   "aS3(4,1)" m.clc 
+getvariable.pl -c 0.026   "aS3(4,2)" m.clc 
+getvariable.pl -c 0.002   "aS3(4,3)" m.clc 
+getvariable.pl -c -0.0005   "aS3(4,4)" m.clc 
 getvariable.pl -c 0.000000   "aS3(5,-5)" m.clc 
 getvariable.pl -c 0.000000   "aS3(5,-4)" m.clc 
 getvariable.pl -c 0.000000   "aS3(5,-3)" m.clc 
@@ -663,33 +670,33 @@ getvariable.pl -c 0.000000   "aS3(5,2)" m.clc
 getvariable.pl -c 0.000000   "aS3(5,3)" m.clc 
 getvariable.pl -c 0.000000   "aS3(5,4)" m.clc 
 getvariable.pl -c 0.000000   "aS3(5,5)" m.clc 
-getvariable.pl -c -0.000649   "aS3(6,-6)" m.clc 
-getvariable.pl -c -0.001088   "aS3(6,-5)" m.clc 
-getvariable.pl -c -0.007466   "aS3(6,-4)" m.clc 
-getvariable.pl -c -0.023056   "aS3(6,-3)" m.clc 
-getvariable.pl -c -0.035859   "aS3(6,-2)" m.clc 
-getvariable.pl -c -0.022820   "aS3(6,-1)" m.clc 
-getvariable.pl -c 0.018766   "aS3(6,0)" m.clc 
-getvariable.pl -c -0.007015   "aS3(6,1)" m.clc 
-getvariable.pl -c -0.017902   "aS3(6,2)" m.clc 
-getvariable.pl -c -0.004017   "aS3(6,3)" m.clc 
-getvariable.pl -c 0.002450   "aS3(6,4)" m.clc 
-getvariable.pl -c 0.001219   "aS3(6,5)" m.clc 
-getvariable.pl -c 0.000100   "aS3(6,6)" m.clc 
+getvariable.pl -c -0.000038   "aS3(6,-6)" m.clc 
+getvariable.pl -c -0.0013   "aS3(6,-5)" m.clc 
+getvariable.pl -c -0.0084   "aS3(6,-4)" m.clc 
+getvariable.pl -c -0.0221   "aS3(6,-3)" m.clc 
+getvariable.pl -c -0.024   "aS3(6,-2)" m.clc 
+getvariable.pl -c -0.0035   "aS3(6,-1)" m.clc 
+getvariable.pl -c 0.0188   "aS3(6,0)" m.clc 
+getvariable.pl -c -0.0070   "aS3(6,1)" m.clc 
+getvariable.pl -c -0.018   "aS3(6,2)" m.clc 
+getvariable.pl -c -0.0040   "aS3(6,3)" m.clc 
+getvariable.pl -c 0.0025   "aS3(6,4)" m.clc 
+getvariable.pl -c 0.0012   "aS3(6,5)" m.clc 
+getvariable.pl -c 0.0001   "aS3(6,6)" m.clc 
 
 densplt c Pr3p_ic1ion_trunc.sipf 2 10 20 30 > m.clc
 
-getvariable.pl -c 0.564198   "a(0,0)" m.clc 
-getvariable.pl -c -0.047484   "a(2,-2)" m.clc 
-getvariable.pl -c -0.074063   "a(2,-1)" m.clc 
-getvariable.pl -c -0.087065   "a(2,0)" m.clc 
-getvariable.pl -c -0.132566   "a(2,1)" m.clc 
-getvariable.pl -c -0.029252   "a(2,2)" m.clc 
-getvariable.pl -c -0.005805   "a(4,-4)" m.clc 
-getvariable.pl -c -0.025006   "a(4,-3)" m.clc 
-getvariable.pl -c -0.042338   "a(4,-2)" m.clc 
-getvariable.pl -c -0.020346   "a(4,-1)" m.clc 
-getvariable.pl -c 0.015434   "a(4,0)" m.clc 
+getvariable.pl -c 0.564  "a(0,0)" m.clc 
+getvariable.pl -c -0.047   "a(2,-2)" m.clc 
+getvariable.pl -c -0.074   "a(2,-1)" m.clc 
+getvariable.pl -c -0.087   "a(2,0)" m.clc 
+getvariable.pl -c -0.133   "a(2,1)" m.clc 
+getvariable.pl -c -0.029   "a(2,2)" m.clc 
+getvariable.pl -c -0.006   "a(4,-4)" m.clc 
+getvariable.pl -c -0.025   "a(4,-3)" m.clc 
+getvariable.pl -c -0.042   "a(4,-2)" m.clc 
+getvariable.pl -c -0.020   "a(4,-1)" m.clc 
+getvariable.pl -c 0.015   "a(4,0)" m.clc 
 getvariable.pl -c -0.036412   "a(4,1)" m.clc 
 getvariable.pl -c -0.026082   "a(4,2)" m.clc 
 getvariable.pl -c -0.001080   "a(4,3)" m.clc 
@@ -863,159 +870,320 @@ getvariable.pl -c 0.000060  "aS3(6,6)" m.clc
 
 densplt o Pr3p_xyz_ic1ion.sipf 2 20 10 30 > m.clc
 
-getvariable.pl -c 1.447223   "aL1(0,0)" dd 
-getvariable.pl -c 0.000000   "aL1(1,-1)" dd 
-getvariable.pl -c 0.000000   "aL1(1,0)" dd 
-getvariable.pl -c 0.000000   "aL1(1,1)" dd 
-getvariable.pl -c -0.279067   "aL1(2,-2)" dd 
-getvariable.pl -c 0.005931   "aL1(2,-1)" dd 
-getvariable.pl -c 0.334225   "aL1(2,0)" dd 
-getvariable.pl -c -0.837205   "aL1(2,1)" dd 
-getvariable.pl -c -0.563077   "aL1(2,2)" dd 
-getvariable.pl -c 0.000000   "aL1(3,-3)" dd 
-getvariable.pl -c 0.000000   "aL1(3,-2)" dd 
-getvariable.pl -c 0.000000   "aL1(3,-1)" dd 
-getvariable.pl -c 0.000000   "aL1(3,0)" dd 
-getvariable.pl -c 0.000000   "aL1(3,1)" dd 
-getvariable.pl -c 0.000000   "aL1(3,2)" dd 
-getvariable.pl -c 0.000000   "aL1(3,3)" dd 
-getvariable.pl -c 0.002923   "aL1(4,-4)" dd 
-getvariable.pl -c -0.011721   "aL1(4,-3)" dd 
-getvariable.pl -c -0.051806   "aL1(4,-2)" dd 
-getvariable.pl -c -0.045761   "aL1(4,-1)" dd 
-getvariable.pl -c -0.012391   "aL1(4,0)" dd 
-getvariable.pl -c -0.069081   "aL1(4,1)" dd 
-getvariable.pl -c -0.008001   "aL1(4,2)" dd 
-getvariable.pl -c 0.017145   "aL1(4,3)" dd 
-getvariable.pl -c 0.006089   "aL1(4,4)" dd 
-getvariable.pl -c 0.000000   "aL1(5,-5)" dd 
-getvariable.pl -c 0.000000   "aL1(5,-4)" dd 
-getvariable.pl -c 0.000000   "aL1(5,-3)" dd 
-getvariable.pl -c 0.000000   "aL1(5,-2)" dd 
-getvariable.pl -c 0.000000   "aL1(5,-1)" dd 
-getvariable.pl -c 0.000000   "aL1(5,0)" dd 
-getvariable.pl -c 0.000000   "aL1(5,1)" dd 
-getvariable.pl -c 0.000000   "aL1(5,2)" dd 
-getvariable.pl -c 0.000000   "aL1(5,3)" dd 
-getvariable.pl -c 0.000000   "aL1(5,4)" dd 
-getvariable.pl -c 0.000000   "aL1(5,5)" dd 
-getvariable.pl -c 0.004209   "aL1(6,-6)" dd 
-getvariable.pl -c 0.021339   "aL1(6,-5)" dd 
-getvariable.pl -c 0.046051   "aL1(6,-4)" dd 
-getvariable.pl -c 0.038209   "aL1(6,-3)" dd 
-getvariable.pl -c -0.010867   "aL1(6,-2)" dd 
-getvariable.pl -c -0.022764   "aL1(6,-1)" dd 
-getvariable.pl -c -0.012706   "aL1(6,0)" dd 
-getvariable.pl -c -0.051088   "aL1(6,1)" dd 
-getvariable.pl -c 0.009183   "aL1(6,2)" dd 
-getvariable.pl -c 0.033848   "aL1(6,3)" dd 
-getvariable.pl -c 0.008947   "aL1(6,4)" dd 
-getvariable.pl -c -0.006224   "aL1(6,5)" dd 
-getvariable.pl -c -0.003901   "aL1(6,6)" dd 
+getvariable.pl -c 1.4472   "aL1(0,0)" m.clc 
+getvariable.pl -c 0.000000   "aL1(1,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL1(1,0)" m.clc 
+getvariable.pl -c 0.000000   "aL1(1,1)" m.clc 
+getvariable.pl -c -0.2791   "aL1(2,-2)" m.clc 
+getvariable.pl -c 0.0059   "aL1(2,-1)" m.clc 
+getvariable.pl -c 0.3342   "aL1(2,0)" m.clc 
+getvariable.pl -c -0.8372   "aL1(2,1)" m.clc 
+getvariable.pl -c -0.5631   "aL1(2,2)" m.clc 
+getvariable.pl -c 0.000000   "aL1(3,-3)" m.clc 
+getvariable.pl -c 0.000000   "aL1(3,-2)" m.clc 
+getvariable.pl -c 0.000000   "aL1(3,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL1(3,0)" m.clc 
+getvariable.pl -c 0.000000   "aL1(3,1)" m.clc 
+getvariable.pl -c 0.000000   "aL1(3,2)" m.clc 
+getvariable.pl -c 0.000000   "aL1(3,3)" m.clc 
+getvariable.pl -c 0.002923   "aL1(4,-4)" m.clc 
+getvariable.pl -c -0.01172   "aL1(4,-3)" m.clc 
+getvariable.pl -c -0.05181   "aL1(4,-2)" m.clc 
+getvariable.pl -c -0.04576   "aL1(4,-1)" m.clc 
+getvariable.pl -c -0.01239   "aL1(4,0)" m.clc 
+getvariable.pl -c -0.06908   "aL1(4,1)" m.clc 
+getvariable.pl -c -0.00800   "aL1(4,2)" m.clc 
+getvariable.pl -c 0.0171   "aL1(4,3)" m.clc 
+getvariable.pl -c 0.0061   "aL1(4,4)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,-5)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,-4)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,-3)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,-2)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,0)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,1)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,2)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,3)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,4)" m.clc 
+getvariable.pl -c 0.000000   "aL1(5,5)" m.clc 
+getvariable.pl -c 0.004209   "aL1(6,-6)" m.clc 
+getvariable.pl -c 0.021339   "aL1(6,-5)" m.clc 
+getvariable.pl -c 0.046051   "aL1(6,-4)" m.clc 
+getvariable.pl -c 0.038209   "aL1(6,-3)" m.clc 
+getvariable.pl -c -0.01087   "aL1(6,-2)" m.clc 
+getvariable.pl -c -0.02276   "aL1(6,-1)" m.clc 
+getvariable.pl -c -0.01271   "aL1(6,0)" m.clc 
+getvariable.pl -c -0.0511   "aL1(6,1)" m.clc 
+getvariable.pl -c 0.00918   "aL1(6,2)" m.clc 
+getvariable.pl -c 0.03385   "aL1(6,3)" m.clc 
+getvariable.pl -c 0.00895   "aL1(6,4)" m.clc 
+getvariable.pl -c -0.0062   "aL1(6,5)" m.clc 
+getvariable.pl -c -0.0039   "aL1(6,6)" m.clc 
 
-getvariable.pl -c 0.723611   "aL2(0,0)" dd 
-getvariable.pl -c 0.000000   "aL2(1,-1)" dd 
-getvariable.pl -c 0.000000   "aL2(1,0)" dd 
-getvariable.pl -c 0.000000   "aL2(1,1)" dd 
-getvariable.pl -c -0.564066   "aL2(2,-2)" dd 
-getvariable.pl -c -0.846102   "aL2(2,-1)" dd 
-getvariable.pl -c 0.167112   "aL2(2,0)" dd 
-getvariable.pl -c 0.005931   "aL2(2,1)" dd 
-getvariable.pl -c 0.284504   "aL2(2,2)" dd 
-getvariable.pl -c 0.000000   "aL2(3,-3)" dd 
-getvariable.pl -c 0.000000   "aL2(3,-2)" dd 
-getvariable.pl -c 0.000000   "aL2(3,-1)" dd 
-getvariable.pl -c 0.000000   "aL2(3,0)" dd 
-getvariable.pl -c 0.000000   "aL2(3,1)" dd 
-getvariable.pl -c 0.000000   "aL2(3,2)" dd 
-getvariable.pl -c 0.000000   "aL2(3,3)" dd 
-getvariable.pl -c -0.003203   "aL2(4,-4)" dd 
-getvariable.pl -c 0.002621   "aL2(4,-3)" dd 
-getvariable.pl -c 0.011122   "aL2(4,-2)" dd 
-getvariable.pl -c -0.000440   "aL2(4,-1)" dd 
-getvariable.pl -c -0.006195   "aL2(4,0)" dd 
-getvariable.pl -c -0.045761   "aL2(4,1)" dd 
-getvariable.pl -c -0.053367   "aL2(4,2)" dd 
-getvariable.pl -c -0.038076   "aL2(4,3)" dd 
-getvariable.pl -c -0.012949   "aL2(4,4)" dd 
-getvariable.pl -c 0.000000   "aL2(5,-5)" dd 
-getvariable.pl -c 0.000000   "aL2(5,-4)" dd 
-getvariable.pl -c 0.000000   "aL2(5,-3)" dd 
-getvariable.pl -c 0.000000   "aL2(5,-2)" dd 
-getvariable.pl -c 0.000000   "aL2(5,-1)" dd 
-getvariable.pl -c 0.000000   "aL2(5,0)" dd 
-getvariable.pl -c 0.000000   "aL2(5,1)" dd 
-getvariable.pl -c 0.000000   "aL2(5,2)" dd 
-getvariable.pl -c 0.000000   "aL2(5,3)" dd 
-getvariable.pl -c 0.000000   "aL2(5,4)" dd 
-getvariable.pl -c 0.000000   "aL2(5,5)" dd 
-getvariable.pl -c -0.003901   "aL2(6,-6)" dd 
-getvariable.pl -c -0.006224   "aL2(6,-5)" dd 
-getvariable.pl -c 0.007987   "aL2(6,-4)" dd 
-getvariable.pl -c 0.030941   "aL2(6,-3)" dd 
-getvariable.pl -c 0.015367   "aL2(6,-2)" dd 
-getvariable.pl -c -0.016942   "aL2(6,-1)" dd 
-getvariable.pl -c -0.006353   "aL2(6,0)" dd 
-getvariable.pl -c -0.022764   "aL2(6,1)" dd 
-getvariable.pl -c -0.023142   "aL2(6,2)" dd 
-getvariable.pl -c -0.048176   "aL2(6,3)" dd 
-getvariable.pl -c -0.047087   "aL2(6,4)" dd 
-getvariable.pl -c -0.021339   "aL2(6,5)" dd 
-getvariable.pl -c -0.004209   "aL2(6,6)" dd 
+getvariable.pl -c 0.7236   "aL2(0,0)" m.clc 
+getvariable.pl -c 0.000000   "aL2(1,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL2(1,0)" m.clc 
+getvariable.pl -c 0.000000   "aL2(1,1)" m.clc 
+getvariable.pl -c -0.5640   "aL2(2,-2)" m.clc 
+getvariable.pl -c -0.8461   "aL2(2,-1)" m.clc 
+getvariable.pl -c 0.1671   "aL2(2,0)" m.clc 
+getvariable.pl -c 0.0059   "aL2(2,1)" m.clc 
+getvariable.pl -c 0.2845   "aL2(2,2)" m.clc 
+getvariable.pl -c 0.000000   "aL2(3,-3)" m.clc 
+getvariable.pl -c 0.000000   "aL2(3,-2)" m.clc 
+getvariable.pl -c 0.000000   "aL2(3,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL2(3,0)" m.clc 
+getvariable.pl -c 0.000000   "aL2(3,1)" m.clc 
+getvariable.pl -c 0.000000   "aL2(3,2)" m.clc 
+getvariable.pl -c 0.000000   "aL2(3,3)" m.clc 
+getvariable.pl -c -0.0032   "aL2(4,-4)" m.clc 
+getvariable.pl -c 0.00262   "aL2(4,-3)" m.clc 
+getvariable.pl -c 0.01112   "aL2(4,-2)" m.clc 
+getvariable.pl -c -0.00044   "aL2(4,-1)" m.clc 
+getvariable.pl -c -0.0062   "aL2(4,0)" m.clc 
+getvariable.pl -c -0.0458   "aL2(4,1)" m.clc 
+getvariable.pl -c -0.0534   "aL2(4,2)" m.clc 
+getvariable.pl -c -0.0381   "aL2(4,3)" m.clc 
+getvariable.pl -c -0.0129   "aL2(4,4)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,-5)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,-4)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,-3)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,-2)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,0)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,1)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,2)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,3)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,4)" m.clc 
+getvariable.pl -c 0.000000   "aL2(5,5)" m.clc 
+getvariable.pl -c -0.0039   "aL2(6,-6)" m.clc 
+getvariable.pl -c -0.0062   "aL2(6,-5)" m.clc 
+getvariable.pl -c 0.00799   "aL2(6,-4)" m.clc 
+getvariable.pl -c 0.03094   "aL2(6,-3)" m.clc 
+getvariable.pl -c 0.01537   "aL2(6,-2)" m.clc 
+getvariable.pl -c -0.0169   "aL2(6,-1)" m.clc 
+getvariable.pl -c -0.0064   "aL2(6,0)" m.clc 
+getvariable.pl -c -0.02276   "aL2(6,1)" m.clc 
+getvariable.pl -c -0.02314   "aL2(6,2)" m.clc 
+getvariable.pl -c -0.04818   "aL2(6,3)" m.clc 
+getvariable.pl -c -0.04709   "aL2(6,4)" m.clc 
+getvariable.pl -c -0.0213   "aL2(6,5)" m.clc 
+getvariable.pl -c -0.0042   "aL2(6,6)" m.clc 
 
-getvariable.pl -c 2.170844   "aL3(0,0)" dd 
-getvariable.pl -c 0.000000   "aL3(1,-1)" dd 
-getvariable.pl -c 0.000000   "aL3(1,0)" dd 
-getvariable.pl -c 0.000000   "aL3(1,1)" dd 
-getvariable.pl -c 0.005931   "aL3(2,-2)" dd 
-getvariable.pl -c -0.274125   "aL3(2,-1)" dd 
-getvariable.pl -c -0.969290   "aL3(2,0)" dd 
-getvariable.pl -c -0.548249   "aL3(2,1)" dd 
-getvariable.pl -c 0.004448   "aL3(2,2)" dd 
-getvariable.pl -c 0.000000   "aL3(3,-3)" dd 
-getvariable.pl -c 0.000000   "aL3(3,-2)" dd 
-getvariable.pl -c 0.000000   "aL3(3,-1)" dd 
-getvariable.pl -c 0.000000   "aL3(3,0)" dd 
-getvariable.pl -c 0.000000   "aL3(3,1)" dd 
-getvariable.pl -c 0.000000   "aL3(3,2)" dd 
-getvariable.pl -c 0.000000   "aL3(3,3)" dd 
-getvariable.pl -c -0.017606   "aL3(4,-4)" dd 
-getvariable.pl -c -0.058105   "aL3(4,-3)" dd 
-getvariable.pl -c -0.072421   "aL3(4,-2)" dd 
-getvariable.pl -c -0.016281   "aL3(4,-1)" dd 
-getvariable.pl -c 0.052377   "aL3(4,0)" dd 
-getvariable.pl -c -0.032562   "aL3(4,1)" dd 
-getvariable.pl -c -0.054315   "aL3(4,2)" dd 
-getvariable.pl -c -0.010565   "aL3(4,3)" dd 
-getvariable.pl -c 0.005135   "aL3(4,4)" dd 
-getvariable.pl -c 0.000000   "aL3(5,-5)" dd 
-getvariable.pl -c 0.000000   "aL3(5,-4)" dd 
-getvariable.pl -c 0.000000   "aL3(5,-3)" dd 
-getvariable.pl -c 0.000000   "aL3(5,-2)" dd 
-getvariable.pl -c 0.000000   "aL3(5,-1)" dd 
-getvariable.pl -c 0.000000   "aL3(5,0)" dd 
-getvariable.pl -c 0.000000   "aL3(5,1)" dd 
-getvariable.pl -c 0.000000   "aL3(5,2)" dd 
-getvariable.pl -c 0.000000   "aL3(5,3)" dd 
-getvariable.pl -c 0.000000   "aL3(5,4)" dd 
-getvariable.pl -c 0.000000   "aL3(5,5)" dd 
-getvariable.pl -c 0.000000   "aL3(6,-6)" dd 
-getvariable.pl -c 0.002430   "aL3(6,-5)" dd 
-getvariable.pl -c 0.018198   "aL3(6,-4)" dd 
-getvariable.pl -c 0.051014   "aL3(6,-3)" dd 
-getvariable.pl -c 0.057590   "aL3(6,-2)" dd 
-getvariable.pl -c 0.009704   "aL3(6,-1)" dd 
-getvariable.pl -c -0.044536   "aL3(6,0)" dd 
-getvariable.pl -c 0.019409   "aL3(6,1)" dd 
-getvariable.pl -c 0.043192   "aL3(6,2)" dd 
-getvariable.pl -c 0.009275   "aL3(6,3)" dd 
-getvariable.pl -c -0.005308   "aL3(6,4)" dd 
-getvariable.pl -c -0.002252   "aL3(6,5)" dd 
-getvariable.pl -c 0.000000   "aL3(6,6)" dd 
+getvariable.pl -c 2.17   "aL3(0,0)" m.clc 
+getvariable.pl -c 0.000000   "aL3(1,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL3(1,0)" m.clc 
+getvariable.pl -c 0.000000   "aL3(1,1)" m.clc 
+getvariable.pl -c 0.006   "aL3(2,-2)" m.clc 
+getvariable.pl -c -0.27   "aL3(2,-1)" m.clc 
+getvariable.pl -c -0.97   "aL3(2,0)" m.clc 
+getvariable.pl -c -0.55   "aL3(2,1)" m.clc 
+getvariable.pl -c 0.004   "aL3(2,2)" m.clc 
+getvariable.pl -c 0.000000   "aL3(3,-3)" m.clc 
+getvariable.pl -c 0.000000   "aL3(3,-2)" m.clc 
+getvariable.pl -c 0.000000   "aL3(3,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL3(3,0)" m.clc 
+getvariable.pl -c 0.000000   "aL3(3,1)" m.clc 
+getvariable.pl -c 0.000000   "aL3(3,2)" m.clc 
+getvariable.pl -c 0.000000   "aL3(3,3)" m.clc 
+getvariable.pl -c -0.018   "aL3(4,-4)" m.clc 
+getvariable.pl -c -0.058   "aL3(4,-3)" m.clc 
+getvariable.pl -c -0.072   "aL3(4,-2)" m.clc 
+getvariable.pl -c -0.016   "aL3(4,-1)" m.clc 
+getvariable.pl -c 0.052   "aL3(4,0)" m.clc 
+getvariable.pl -c -0.033   "aL3(4,1)" m.clc 
+getvariable.pl -c -0.054   "aL3(4,2)" m.clc 
+getvariable.pl -c -0.011   "aL3(4,3)" m.clc 
+getvariable.pl -c 0.0051   "aL3(4,4)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,-5)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,-4)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,-3)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,-2)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,-1)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,0)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,1)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,2)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,3)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,4)" m.clc 
+getvariable.pl -c 0.000000   "aL3(5,5)" m.clc 
+getvariable.pl -c 0.000000   "aL3(6,-6)" m.clc 
+getvariable.pl -c 0.0024   "aL3(6,-5)" m.clc 
+getvariable.pl -c 0.018   "aL3(6,-4)" m.clc 
+getvariable.pl -c 0.051   "aL3(6,-3)" m.clc 
+getvariable.pl -c 0.058   "aL3(6,-2)" m.clc 
+getvariable.pl -c 0.01   "aL3(6,-1)" m.clc 
+getvariable.pl -c -0.05   "aL3(6,0)" m.clc 
+getvariable.pl -c 0.019   "aL3(6,1)" m.clc 
+getvariable.pl -c 0.043   "aL3(6,2)" m.clc 
+getvariable.pl -c 0.009   "aL3(6,3)" m.clc 
+getvariable.pl -c -0.005   "aL3(6,4)" m.clc 
+getvariable.pl -c -0.002   "aL3(6,5)" m.clc 
+getvariable.pl -c 0.000000   "aL3(6,6)" m.clc 
+
+
+singleion -sx -r Pr3p_xyz_ic1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c -0.241 2 9 2 0 m.clc
+getvalue.pl -c 0.040    2 13 2 0 m.clc
+getvalue.pl -c 0.0135   2 14 2 0 m.clc
+getvalue.pl -c -0.01926 2 15 2 0 m.clc
+getvalue.pl -c 0.12094  2 16 2 0 m.clc
+getvalue.pl -c 0.0694 2 17 2 0 m.clc
+getvalue.pl -c 0.0154   0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.00267  0 15 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0002   0 16 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+
+singleion -sx -r Pr3p_ic1ion_trunc.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c -0.24097 2 9 2 0 m.clc
+getvalue.pl -c 0.0403  2 13 2 0 m.clc
+getvalue.pl -c 0.01351   2 14 2 0 m.clc
+getvalue.pl -c -0.01921 2 15 2 0 m.clc
+getvalue.pl -c 0.1209  2 16 2 0 m.clc
+getvalue.pl -c 0.0693 2 17 2 0 m.clc
+getvalue.pl -c 0.0154   0 11 4 0 results/Pr3p_ic1ion_trunc.sipf.trs
+getvalue.pl -c 0.00267  0 15 4 0 results/Pr3p_ic1ion_trunc.sipf.trs
+getvalue.pl -c 0.0002   0 16 4 0 results/Pr3p_ic1ion_trunc.sipf.trs
+
+
+singleion -sx -r Pr3p_xyz_icf1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c -0.24891 2 9 2 0 m.clc
+getvalue.pl -c 0.031 2 13 2 0 m.clc
+getvalue.pl -c 0.02023  2 14 2 0 m.clc
+getvalue.pl -c 0.005308  2 15 2 0 m.clc 
+getvalue.pl -c 0.0924  2 16 2 0 m.clc
+getvalue.pl -c 0.0447  2 17 2 0 m.clc
+getvalue.pl -c 0.0162     0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.00155    0 15 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.00049   0 16 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+  
+ 
+singleion -lx -r Pr3p_xyz_ic1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c 1.44     2 9 2 0 m.clc
+getvalue.pl -c -0.28    2 13 2 0 m.clc
+getvalue.pl -c 0.006  2 14 2 0 m.clc
+getvalue.pl -c 0.34 2 15 2 0 m.clc
+getvalue.pl -c -0.84  2 16 2 0 m.clc
+getvalue.pl -c -0.56 2 17 2 0 m.clc
+getvalue.pl -c 0.64    0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.12  0 15 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 6e-05  0 16 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+
+singleion -lx -r Pr3p_xyz_icf1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c 1.4552  2 9 2 0 m.clc
+getvalue.pl -c -0.282 2 13 2 0 m.clc
+getvalue.pl -c 0  2 14 2 0 m.clc
+getvalue.pl -c 0.3254  2 15 2 0 m.clc 
+getvalue.pl -c -0.8454   2 16 2 0 m.clc
+getvalue.pl -c -0.5636  2 17 2 0 m.clc
+getvalue.pl -c 0.6430      0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c  0.1254     0 15 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0             0 16 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+
+singleion -sy -r Pr3p_xyz_ic1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c -0.12    2 9 2 0 m.clc
+getvalue.pl -c 0.067    2 13 2 0 m.clc
+getvalue.pl -c 0.10     2 14 2 0 m.clc
+getvalue.pl -c -0.01  2 15 2 0 m.clc 
+getvalue.pl -c 0.01    2 16 2 0 m.clc
+getvalue.pl -c -0.028   2 17 2 0 m.clc
+    
+getvalue.pl -c 0.01998      0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.001468    0 15 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.000677   0 16 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+
+singleion -sy -r Pr3p_xyz_icf1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c -0.124457   2 9 2 0 m.clc
+getvalue.pl -c 0.04137 2 13 2 0 m.clc
+getvalue.pl -c 0.06206   2 14 2 0 m.clc
+getvalue.pl -c 0.002654  2 15 2 0 m.clc 
+getvalue.pl -c 0.02023   2 16 2 0 m.clc
+getvalue.pl -c -0.01226  2 17 2 0 m.clc
+getvalue.pl -c 0.02106      0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.000671     0 15 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.0005508    0 16 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+    
+
+singleion -ly -r Pr3p_xyz_ic1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c  0.72    2 9 2 0 m.clc
+getvalue.pl -c -0.56    2 13 2 0 m.clc
+getvalue.pl -c -0.84     2 14 2 0 m.clc
+getvalue.pl -c 0.17  2 15 2 0 m.clc 
+getvalue.pl -c 0.006    2 16 2 0 m.clc
+getvalue.pl -c 0.28   2 17 2 0 m.clc
+        
+getvalue.pl -c 0.828884      0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.097736      0 15 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.0500397     0 16 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+
+singleion -ly -r Pr3p_xyz_icf1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c 0.727599    2 9 2 0 m.clc
+getvalue.pl -c -0.563596 2 13 2 0 m.clc
+getvalue.pl -c -0.845397   2 14 2 0 m.clc
+getvalue.pl -c 0.162696  2 15 2 0 m.clc 
+getvalue.pl -c 0   2 16 2 0 m.clc
+getvalue.pl -c 0.281798  2 17 2 0 m.clc
+getvalue.pl -c 0.835901       0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.0964507     0 15 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c  0.0482251     0 16 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+ 
+singleion -sz -r Pr3p_xyz_ic1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c -0.36   2 9 2 0 m.clc
+getvalue.pl -c 0.014        2 13 2 0 m.clc
+getvalue.pl -c 0.052    2 14 2 0 m.clc
+getvalue.pl -c 0.133 2 15 2 0 m.clc 
+getvalue.pl -c 0.103    2 16 2 0 m.clc
+getvalue.pl -c 0.010   2 17 2 0 m.clc
+    
+getvalue.pl -c 0.00768446       0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.000218828  0 15 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c  0.00400595   0 16 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+
+singleion -sz -r Pr3p_xyz_icf1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c -0.373372     2 9 2 0 m.clc
+getvalue.pl -c 0.0202265   2 13 2 0 m.clc
+getvalue.pl -c 0.0476551   2 14 2 0 m.clc
+getvalue.pl -c 0.0979351  2 15 2 0 m.clc 
+getvalue.pl -c 0.0953101 2 16 2 0 m.clc
+getvalue.pl -c  0.0151699   2 17 2 0 m.clc
+getvalue.pl -c 0.00809825       0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c  0.000506804   0 15 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c   0.00319181     0 16 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+
+singleion -lz -r Pr3p_xyz_ic1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c 2.17     2 9 2 0 m.clc
+getvalue.pl -c 0.0059      2 13 2 0 m.clc
+getvalue.pl -c -0.274    2 14 2 0 m.clc
+getvalue.pl -c -0.969  2 15 2 0 m.clc 
+getvalue.pl -c -0.55    2 16 2 0 m.clc
+getvalue.pl -c 0.0045   2 17 2 0 m.clc
+    
+getvalue.pl -c 0.318801     0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 5.88991e-05     0 15 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c  0.119468   0 16 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+
+singleion -lz -r Pr3p_xyz_icf1ion.sipf  2 20 10 30 0 0 0 > m.clc
+getvalue.pl -c 2.18281      2 9 2 0 m.clc
+getvalue.pl -c 0   2 13 2 0 m.clc
+getvalue.pl -c -0.281798     2 14 2 0 m.clc
+getvalue.pl -c  -0.976181  2 15 2 0 m.clc 
+getvalue.pl -c -0.563596 2 16 2 0 m.clc
+getvalue.pl -c  0   2 17 2 0 m.clc
+getvalue.pl -c 0.3215       0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c  0   0 15 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c  0.125385    0 16 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+
+singleion -opmat 2 -r Pr3p_xyz_icf1ion.sipf 2 20 10 30 0 0 0
+
+getvalue.pl -c +0.282843 0 2 34 0 results/Pr3p_xyz_icf1ion.sipf.opmat 
+
+singleion -opmat 2 -r Pr3p_xyz_ic1ion.sipf 2 20 10 30 0 0 0
+
+getvalue.pl -c +0.577350 0 2 92 0 results/Pr3p_xyz_ic1ion.sipf.opmat 
+
+
 
 rm m.clc
 cd ../../demo
 
 # commands to write above checks for densplt using output (m.clc)
 # cp m.clc dd ;  substitute "#\!" "getvariable.pl -c" dd ; swapcol 3 5 dd; substitute "=" " " dd ; 
-# substitute 'a(' '"a(' dd ; substitute ')' ')" dd' dd
+# substitute 'aS' '"aS' dd ; substitute ')' ')" m.clc' dd

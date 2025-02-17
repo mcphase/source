@@ -1,0 +1,177 @@
+#!MODULE=ic1ion
+#MODULE=../../bin/ic1ion_module/icf1ion.so
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module ic1ion for  
+# mcphas version 3.0
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.0
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.0
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+
+
+#-----------
+IONTYPE=Co2+
+#-----------
+CHARGE=+2
+nof_electrons=7
+GJ=0
+#------------------------------------------------------------------------------------
+# The following is a guide on what to do if ic1ion does not recognize the IONTYPE
+#
+# from Griffith 1971 p379 CoIV=Co3+ is 3d6 configuration
+# conf=d6
+# from Abragam Bleaney 1970 p 391 B=1065/cm C=5120/cm XI= ??  p399 lambda=-145/cm 
+# for LS groundstate (balcar lecture) lambda=xi/2S (n<2l+1) lambda=-xi/2S (n>2l+1)  
+#                                     .... for d6 n=6,S=2 -> XI=-lambda*4=680/cm
+# in LaCoO3 paper PRB 67 (2003) 172401 lambda=-185 K = -128.628 /cm  --> XI=-lambda*4= 514.5
+#
+# from equations p 83 A=F_0-49*F_4  B=F_2-5*F_4 C=35*F_4
+# we get F_4=C/35  F2=B+5*F_4   ... however this is not what we need
+# we need other coefficients, namely F^2,F^4,F^6 which are related
+# in equation 77 of Racah, PhysRev62,438(1942)
+#
+# A=F_0 - 49 * F_4= F^0 - F^4 / 9
+# B=F_2-5 * F_4   =(9*F^2-5*F^4)/441
+# C=35* F_4       =5*F^4/63
+# i.e. it follows
+# 
+# F^0= A + 7 * C / 5
+# F^2= 49 * B + 7 * C
+# F^4= 63 * C / 5
+#
+# Which gives F^2=88025/cm and F^4=64512/cm
+# however F0 is not determined from this table because A is not known ...
+# note 8066/cm=1eV
+# ... so in case that ic1ion does not recognize the ion we put:
+# F0=0
+# F2=88025
+# F4=64512
+# xi=514.5
+# ---------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+ SCATTERINGLENGTHREAL= 0.249
+ SCATTERINGLENGTHIMAG= 0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0.0
+ 
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#   s2= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D
+#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D
+#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#--------------------------------------------------------------------------------------
+FFj0A= 0.4332 FFj0a=14.3553 FFj0B= 0.5857 FFj0b= 4.6077 FFj0C=-0.0382 FFj0c= 0.1338 FFj0D= 0.0179
+FFj2A= 1.9049 FFj2a= 11.6444 FFj2B= 1.3159 FFj2b= 4.3574 FFj2C= 0.3146 FFj2c= 1.6453 FFj2D=0.0017
+FFj4A=-0.4759 FFj4a=14.0462 FFj4B= 0.2747 FFj4b= 3.7306 FFj4C= 0.2458 FFj4c= 1.2504 FFj4D= 0.0057
+
+#------------------------------------------------------------------------------------------------------
+# radial wave function parameters R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# values tabulated in clementi & roetti Atomic data and nuclear data tables 14 (1974) 177-478
+# Cu2+ is isoelectronic to Ni+ looking at page 426 of Clementi & Roetti
+# the 3D9 radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
+#------------------------------------------------------------------------------------------------------
+
+
+#---------------------------------------------------------
+# Radial Matrix Elements 
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.2586919
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=3.7600657
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+
+
+#--------------------------------------------------------------------------
+# here we switch for the following units to meV
+#--------------------------------------------------------------------------
+units=meV
+
+# Parameters in Stevens notation
+#B20 = 14.6
+#B40 = -1.35
+#B44 = -8.0
+
+# we want it in Wybourne now:
+# B20= alpha_L r2 A20  alpha=-2/105
+# B4m= beta_L r4 A4m   beta=-2/315
+# Kassmann
+# L20= 2 r2 A20 = -105 B20
+# L40=8 r4 A40 = -315 *4 B40
+# L44= (4/35) sqrt(70) r4 A44 =-315* (2/35) sqrt(70) B44
+
+L20=-1533
+L40=1701
+L44=1204.8
+
+# modify the spin orbit coupling a bit (lambda=-18.7meV)
+# xi/2S=-lambda for more than half filled shell
+xi=56.1
+F2=10000000
+F4=10000000
+
+#----------------------------------------------------------
+# some parameters for ic1ion - calculation of magnetisation
+#----------------------------------------------------------
+calcmag
+ xT   = 1
+ xHa  = 0
+ xHb  = 0
+ xHc  = 0
+ xmin = 20
+ xstep= 1
+ xmax = 20
+ yT   = 0
+ yHa  = 0
+ yHb  = 0
+ yHc  = 1
+ ymin = 9
+ ystep= 1
+ ymax = 9
+
+
+
+
+
+N1=3
+XI1=4.95296
+C1=0.36301
+N2=3
+XI2=12.2963
+C2=0.02707
+N3=3
+XI3=7.03565
+C3=0.14777
+N4=3
+XI4=2.74850
+C4=0.49771
+N5=3
+XI5=1.69027
+C5=0.11388

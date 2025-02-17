@@ -1,0 +1,50 @@
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module So1ion for
+# mcphas version 3.2
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.2
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.2
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+#
+#
+#Pr nuclear magnetic moment I=5/2 described by module so1ion
+#
+#-----------
+IONTYPE=S=2.5
+
+#----------------
+# Lande factor gJ - nuclear: gJ=gN*muN/muB ... gN=1.72 muB  muB=-9.724e-24 J/T  muN=5.050e-27 J/T
+#                                          muN/muB=-0.5446e-3
+#----------------
+GJ=-0.9367e-3
+
+#----------------
+# Stevens Factors
+#----------------
+ALPHA=-0.0
+BETA=-0.00
+GAMMA=0
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+

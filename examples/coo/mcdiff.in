@@ -1,0 +1,150 @@
+# this file is the input file read by program mcdiff version 4.4 Fri Jul 29 21:08:12 2011
+#<!--mcdiff.mcdiff.in>
+#***************************************************************
+#      mcdiff is a program for the calculation of elastic
+#   neutron diffraction and resonant magnetic Xray scattering 
+#  reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#*************************************************************** 
+# this input file contains 4 sections corresponding to different
+# groups of parameters
+#
+# - all lines have to start with a # sign with the  exception of 
+#   the lines containing atomic positional parameters
+# - the other parameters have to be defined in the corresponding 
+#   section by statements such as parameter=value
+# - the sequence of the parameters within a section is arbitrary
+# 
+#
+# %SECTION 1%  OVERALL PARAMETERS
+#
+#! lambda   = 0.5  wavelength (A)
+#
+#! thetamax = 80   maximum bragg angle (deg)
+#
+#! ovalltemp= 0  overall temperature factor (A^2) 
+#           ...I ~ EXP(-2 * ovalltemp * sintheta^2 / lambda^2) 
+#                  relation to other notations:
+#                  ovalltemp = Biso = 8 pi^2 Uiso^2
+#
+#! lorentz=0  type of lorentzfactor to be used
+#            0.....no lorentzfactor 
+#            1.....neutron powder flat sample
+#            2.....neutron powder cylindrical sample
+#            3.....neutron single crystal
+#            4.....neutron TOF powder cyl. sample - d-pattern log scaled
+#            5.....neutron TOF powder cyl. sample - d-pattern normal scaled
+#! out10=21    type of desired output in column 10 and 11 of mcdiff.out
+#! out11=22   (optional) default is NSF in column 10 and LF in column 11
+#            0....LF
+#            1....|NSF|[b]
+#            2....Re(NSF)[b]
+#            3....Im(NSF)[b]
+#            4....|MSF|
+#            5....|MSF.P|
+#            6....Re(MSF.P)
+#            7....Im(MSF.P)
+#            8....|MSFdip|
+#            9....|MSFdip.P|
+#            10....Re(MSFdip.P)
+#            11....Im(MSFdip.P)
+#            12....angl(Q,P)[�]
+#            13....i(MSFxMSF*).P
+#            14....I+
+#            15....I-
+#            16....I+/I-
+#            17....i(MSFxMSF*)dip.P
+#            18....Idip+
+#            19....Idip-
+#            20....Idip+/Idip-
+#            21....2*|MSF.P|/sin^2(angl(Q,P)
+#            22....2*|MSFdip.P|/sin^2(angl(Q,P)
+#            23....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            24....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+I+/I-)/(1-I+/I-)
+#            25....2|NSF|sqrt(4PI/3.65)(|g|-sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#            26....2|NSF|sqrt(4PI/3.65)(|g|+sqrt(g^2-1/sin(angl(Q,P))))_with_g=(1+Idip+/Idip-)/(1-Idip+/Idip-)
+#
+#           In the above the intensities I+ and I- are the spinflip and nonspinflip intensities
+#           in a polarised neutron experiment:
+#            I+-=LF exp(-OTF Q^2/8pi^2) 
+#                    [ |NSF/NB|^2 + 3.65/4pi (|MSF/NB|^2-i(MSF x MSF*).P) 
+#                        +-  sqrt(3.65/4pi)/NB^2 (NSF (MSF*.P) + NSF* (MSF.P)]
+#
+#
+#             For some of the above options we need the
+#! Pa=  0.0000   Components of Polarisation Vector in terms of lattice vectors P=(Pa * a + Pb * b + Pc *c)
+#! Pb=0          Note: the length of P, i.e. |P| indicates the degree of beam polarisation (|P|<=1)
+#! Pc=1
+#
+#
+# %SECTION 2% LIST OF NONMAGNETIC ATOMS IN CRYSTALLOGRAPHIC UNIT CELL
+#
+#
+#! nat=1      number of nonmagnetic atoms in primitive crystalographic unit cell
+#
+# it follows a list of nat lines with nonmagnetic atoms
+# ... notes: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+#            - Debye Waller Factor notation: sqr(Intensity) ~ structure factor ~ 
+#              ~sum_n ()n exp(-2 DWFn sin^2(theta) / lambda^2)=EXP (-Wn),  
+#              relation to other notations: 2*DWF = B = 8 pi^2 <u^2>, units DWF (A^2)
+#
+#! use_dadbdc=0
+#            - 0 means: da db and dc are not used by the program (unless you enter a line #! use_dadbdc=1),
+#               dr1,dr2 and dr3 refer to the primitive lattice given below
+# Real Imag[scattering length(10^-12cm)]   da(a)    db(b)    dc(c)    dr1(r1)  dr2(r2)  dr3(r3)  DWF(A^2)
+   0.58030   0.00000                        0.50000  0.50000  0.50000  0.50000  0.50000  0.50000  0.00000
+#
+#
+# %SECTION 3% DESCRIPTION OF THE LATTICE
+#
+#
+# Note: what follows here may directly be taken from the output of program spins 
+#       (file spins.out) or charges (file charges.out)
+# -----------------------------------------------------------------------------
+#
+# lattice constants (A) and angles 
+#! a=4.261 b=4.261 c=4.261 alpha=  90 beta=  90 gamma=  90
+#
+# primitive lattice vectors 
+#! r1a= 0.500000 r2a= 0.500000 r3a= 0.000000
+#! r1b= 0.500000 r2b= 0.000000 r3b= 0.500000   primitive lattice vectors (a)(b)(c)
+#! r1c= 0.000000 r2c= 0.500000 r3c= 0.500000
+#
+#
+#
+# %SECTION 4% DESCRIPTION OF MAGNETIC UNIT CELL AND LIST OF MAGNETIC ATOMS
+#
+#
+# here follows the description of the magnetic unit cell with respect
+# to the primitive crystallographic unit cell:
+# 'nr1', 'nr2', 'nr3' ...the crystallographic unit cell has to be taken 
+#                        nr1 nr2 and nr3 times along r1 r2 and r3,
+#                        respectively to get magnetic unit cell
+# 'nat' denotes the number of magnetic atoms in magnetic unit cell
+#
+# Temperature,    Magnetic Field: Magnetic Unit Cell
+#! T=300 K Ha=0 T Hb= 0 T Hc= 9.6 T: nr1=1 nr2=1 nr3=1 nat=1 
+#
+#
+# It follows a list of nat lines with to describe the magnetic moment configuration
+# Notes:
+# 'atom-filename' means the single ion property filename of this magnetic atom:
+#                 -it must contain the Formfactor Coefficients (e.g. see international tables)
+#                                      Lande factor
+#                                      Neutron Scattering Length (10^-12 cm) 
+#                 -it may contain a    Debey Waller Factor
+# 'da' 'db' and 'dc' are not used by the program (unless you enter a line #! use_dadbdc=1)
+# 'dr1','dr2' and 'dr3' refer to the primitive lattice given below
+# 'Ma','Mb','Mc' denote the magnetic moment components in Bohr magnetons
+#                in case of non orthogonal lattices instead of Ma Mb Mc the components Mi Mj Mk
+#                have to be given, which refer to an right handed orthogonal coordinate system 
+#                defined by j||b, k||(a x b) and i normal to k and j
+#  <Sa>  <La> <Sb> <Lb >  <Sc> <Lc>  (optional) denote the spin and orbital angular momentum components 
+# 'Hxc1' 'Hxc2' 'Hxc3' (optional line, used to go beyond dipole approx for formfactor)
+#                                     denote the exchange fields in meV 
+#
+#{atom-file} da[a]  db[b]    dc[c]     dr1[r1]  dr2[r2]  dr3[r3]   <Ma>     <Mb>     <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb > <Lc>] 
+#{corresponding exchange fields Hxc [meV]- if passed to mcdiff only these are used for calculation (not the magnetic moments)}
+{Co2p.sipf}  0.00000  0.00000  0.00000   0.00000  0.00000  0.00000   +0.00000 +0.00000 +0.00000  0 0 0 0 0 0
+                  corresponding exchange fields Hxc [meV]--> +0.00000 +0.00000 -0.611296 +0.00000 +0.00000 -0.305648
+# in the above line the exchange field is entered - this field is assumed to act on the Co2+ 3d shell ...^ -0.611296    ^ -0.305648meV=mB*Hxc

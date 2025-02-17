@@ -1,0 +1,49 @@
+#!so1ion
+# !./ic1ion.so
+#<!--mcphase.sipf-->
+ IONTYPE=U4+
+ gJ   = 0.8
+ B20  = 0.21
+ B40  = -0.0117
+ B60  = 0.00033
+ B66  = 0.0014
+
+# Debey-Waller Factor
+DWF=0
+# debeywallerfactor = EXP(-2 * DWF *s*s)
+
+ALPHA=-0.0210101
+BETA=-0.000734619
+GAMMA=6.0994e-05
+GJ=0.8
+R2=2.042
+R4=7.632
+R6=47.774
+
+N1=4 C1=0.224472239325598 XI1=10.271 
+N2=4 C2=0.413190083732576 XI2=5.828 
+N3=4 C3=0.395392470373499 XI3=3.885 
+N4=4 C4=0.15761094054561 XI4=2.125 
+
+#Neutron magnetic form factor coefficients
+FFj0A= 0.3291 FFj0a=23.5475 FFj0B= 1.0836 FFj0b= 8.4540 FFj0C=-0.4340 FFj0c= 4.1196 FFj0D= 0.0214
+FFj2A= 3.7449 FFj2a=13.8944 FFj2B= 2.6453 FFj2b= 4.8634 FFj2C=-0.5218 FFj2c= 3.1919 FFj2D= 0.0009
+FFj4A=-1.0540 FFj4a=16.6055 FFj4B= 0.4339 FFj4b= 6.5119 FFj4C= 0.6746 FFj4c= 2.5993 FFj4D=-0.0011
+FFj6A=-0.1793 FFj6a=11.8961 FFj6B=-0.2269 FFj6b= 5.4280 FFj6C= 0.3291 FFj6c= 1.7008 FFj6D= 0.0030
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.8417
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+# coefficients of Z(K') from Balcar+Lovesey p214 (for Pr3+)
+Z1c0=1.6
+Z1c2=2.6311
+Z3c2=-0.0987
+Z3c4=-0.1345
+Z5c4=-0.0183
+Z5c6=-0.1168
+Z7c6=0.0023

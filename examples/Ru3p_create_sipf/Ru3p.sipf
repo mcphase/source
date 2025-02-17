@@ -1,0 +1,69 @@
+#!MODULE=ic1ion
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module Kramer for
+# mcphas version 3.0
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.0
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.0
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+IONTYPE=Ru3+
+CHARGE=3
+MAGNETIC=1
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.703
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=2.408E+00
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=1.007E+01
+
+# number of electrons 
+nof_electrons=5
+units=meV
+# configuration
+conf=d5
+# Slater integrals for e-e Exchange
+# F0 F2 F4 given in out36 output file in 1/cm (1mev=8.066 cm-1) 
+# converted to meV  F2=70406.894 CM-1 = 8728 meV
+#                   F4=46290.468 CM-1 = 5739 meV
+F2=8728
+F4=5739
+# spin orbit interaction parameter
+# Blume Watson zeta = 1180.311 CM-1 = 146 meV
+zeta=146
+
+#------------------------------------------------------------------------------------------------------
+# radial wave function parameters R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# the radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
+# fitted values to COWAN program 4d5  calculation
+#------------------------------------------------------------------------------------------------------
+#
+N1=4 XI1=3.32140823825811  C1=-1.00444334196302 
+N2=4 XI2=0.837278159515117  C2=0.105467233676215 
+N3=4 XI3=31.8661532123379  C3=0.035147414307434 
+N4=4 XI4=13.3491457970557  C4=0.247547862042695 
+

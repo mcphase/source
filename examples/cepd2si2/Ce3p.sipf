@@ -1,0 +1,133 @@
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module Cfield for  
+# mcphas version 3.0
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.0
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.0
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+#
+#
+# crystal field paramerized in Stevens formalism
+#
+#-----------
+IONTYPE=Ce3+
+#-----------
+
+
+#--------------------------------------------------------------------------
+# Crystal Field parameters in Stevens Notation (coordinate system xyz||abc)
+#--------------------------------------------------------------------------
+# crystal field for CePd2Si2 from dijk 00  
+B20=0.044
+B40=0.041
+B44=0.401
+
+
+#----------------
+# Stevens Factors
+#----------------
+ALPHA=-0.0571429
+BETA=0.00634921
+GAMMA=0
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.309
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=3.964
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=23.31
+
+#----------------
+# Lande factor gJ
+#----------------
+GJ=0.857143
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.484
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0.00211
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#   r= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Qr)>=   FFj0A*EXP(-FFj0a*r) + FFj0B*EXP(-FFj0b*r) + FFj0C*EXP(-FFj0c*r) + FFj0D
+#   <j2(Qr)>=r*(FFj2A*EXP(-FFj2a*r) + FFj2B*EXP(-FFj2b*r) + FFj2C*EXP(-FFj2c*r) + FFj2D
+#   <j4(Qr)>=r*(FFj4A*EXP(-FFj4a*r) + FFj4B*EXP(-FFj4b*r) + FFj4C*EXP(-FFj4c*r) + FFj4D
+#   <j6(Qr)>=r*(FFj6A*EXP(-FFj6a*r) + FFj6B*EXP(-FFj6b*r) + FFj6C*EXP(-FFj6c*r) + FFj6D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)
+
+#--------------------------------------------------------------------------------------
+FFj0A=+0.2291 FFj0a=+18.18 FFj0B=+0.7897 FFj0b=+5.807 FFj0C=-0.0191 FFj0c=0.0000 FFj0D=0.0000
+FFj2A=+2.1284 FFj2a=+8.9174 FFj2B=+1.1229 FFj2b=+2.8371 FFj2C=+0.01108 FFj2c=0.000 FFj2D=+0.0000
+FFj4A=+0.4221 FFj4a=+1.7572 FFj4B=-0.4087 FFj4b=+14.604 FFj4C=+0.01465 FFj4c=+0.000 FFj4D=+0.0000
+FFj6A=+0.13076 FFj6a=+0.8650 FFj6B=-0.15173 FFj6b=+5.6704 FFj6C=+0.00281 FFj6c=+0.000 FFj6D=+0.0000
+
+
+#----------------------------------------------------------------------
+# coefficients of Z(K') according to Lovesey (Neutron Scattering) vol.2
+# chapter 11.6.1 page 233
+#  ... these coefficients are needed to go beyond dipolar approx.
+#      for the neutron magnetic formfactor in rare earth ions
+#----------------------------------------------------------------------
+Z1c0=+1.07142857  Z1c2=+1.71428571
+		  Z3c2=+0.09583148  Z3c4=+0.31943828
+				    Z5c4=+0.00360750  Z5c6=+0.04329004
+						      Z7c6=+0.00000000
+
+#---------------------------------------------------------------------------------------------
+# radial wave function parameters, for transition metal ions the the values are tabulated in
+# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave
+# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# Freeman and Watson PR 127 (1962) 2058
+#---------------------------------------------------------------------------------------------
+#N1=4 C1=0.229632784346262 XI1=9.815
+#N2=4 C2=0.397960651595295 XI2=5.585
+#N3=4 C3=0.404759436239593 XI3=3.723
+#N4=4 C4=0.161154726823262 XI4=2.034
+
+CHARGE=+3
+nof_electrons=1
+units=meV
+conf=f1
+zeta=80.25496
+
+N1=4
+C1=0.229632784346262
+XI1=9.815
+N2=4
+C2=0.397960651595295
+XI2=5.585
+N3=4
+C3=0.404759436239593
+XI3=3.723
+N4=4
+C4=0.161154726823262
+XI4=2.034

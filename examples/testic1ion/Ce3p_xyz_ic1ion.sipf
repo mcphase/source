@@ -1,0 +1,160 @@
+#!MODULE=ic1ion
+#!MODULE=ic1ion
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module So1ion for  
+# mcphas version 5.7
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 5.7
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 5.7
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+#
+#
+# crystal field paramerized in Stevens formalism
+#
+#-----------
+IONTYPE=Ce3+
+#-----------
+
+#----------------
+# Stevens Factors
+#----------------
+ALPHA=-0.0571429
+BETA=0.00634921
+GAMMA=0
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.309
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=3.964
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=23.31
+
+CHARGE=0
+MAGNETIC=0
+#----------------
+# number of electrons in unfilled shell gJ
+#----------------
+nof_electrons=1
+
+#----------------
+# Lande factor gJ
+#----------------
+GJ=0
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+SCATTERINGLENGTHREAL=0.484
+SCATTERINGLENGTHIMAG=0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#    s2= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D*EXP(-FFj0d*s2) + FFj0E
+#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D*EXP(-FFj2d*s2) + FFj2E)
+#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D*EXP(-FFj4d*s2) + FFj4E)
+#   <j6(Q)>=s2*(FFj6A*EXP(-FFj6a*s2) + FFj6B*EXP(-FFj6b*s2) + FFj6C*EXP(-FFj6c*s2) + FFj6D*EXP(-FFj6d*s2) + FFj6E)
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#        -Rare Earth Form Factor F(Q) =<j0(Q)>+<j2(Q)>*(2/gJ-1)
+#
+#--------------------------------------------------------------------------------------
+ FFj0A=+0.2953 FFj0a=+17.6846 FFj0B=+0.2923 FFj0b=+6.7329 FFj0C=+0.4313 FFj0c=+5.3827 FFj0D=-0.0194 FFj0d=+0.0000 FFj0E=+0.0000
+ FFj2A=+0.9809 FFj2a=+18.0630 FFj2B=+1.8413 FFj2b=+7.7688 FFj2C=+0.9905 FFj2c=+2.8452 FFj2D=+0.0120 FFj2d=+0.0000 FFj2E=+0.0000
+ FFj4A=-0.6468 FFj4a=+10.5331 FFj4B=+0.4052 FFj4b=+5.6243 FFj4C=+0.3412 FFj4c=+1.5346 FFj4D=+0.0080 FFj4d=+0.0000 FFj4E=+0.0000
+ FFj6A=-0.1212 FFj6a=+7.9940 FFj6B=-0.0639 FFj6b=+4.0244 FFj6C=+0.1519 FFj6c=+1.0957 FFj6D=+0.0078 FFj6d=+0.0000 FFj6E=+0.0000
+
+
+#---------------------------------------------------------------------------------------------------
+# radial wave function parameters, for transition metal ions the the values are tabulated in
+# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave
+# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt((2Np)!)
+# for rare earth ions see Freeman & Watson PR 127(1962)2058, Sovers J. Phys. Chem. Sol. 28(1966)1073
+#---------------------------------------------------------------------------------------------------
+N1=4 XI1=9.815 C1=0.229633
+N2=4 XI2=5.585 C2=0.397961
+N3=4 XI3=3.723 C3=0.404759
+N4=4 XI4=2.034 C4=0.161155
+
+
+#pointcharges charge[|e|]  x[A] y[A] z[A]
+pointcharge=   -1            2    1    3
+# 1 meV = 8.066 cm-1
+# 1 cm-1 = 0.124 meV
+# 1 meV = 11.6 K
+# 1 K = 0.0862 meV
+#-------------------------------------------------------
+# Crystal Field parameters Blm in Stevens Notation (meV)
+#-------------------------------------------------------
+units=meV
+#!B00 =3848.51
+B22S=-1.23399
+B21S=-3.70186
+B20 =-1.33682
+B21 =-7.40372
+B22 =-0.925493
+B44S=0.00259552
+B43S=0.0285499
+B42S=0.0121124
+B41S=0.00778634
+B40 =-0.0011031
+B41 =0.0155727
+B42 =0.00908433
+B43 =0.00519089
+B44 =-0.000757028
+#--------------------------------------------------------
+# Crystal Field parameters Llm in Wybourne Notation (meV)
+#--------------------------------------------------------
+units=meV
+#!L00 =3848.47
+L22S=17.6317
+L21S=26.4471
+L20 =46.7876
+L21 =52.8942
+L22 =13.2237
+L44S=0.390873
+L43S=1.52011
+L42S=2.41302
+L41S=1.09687
+L40 =-1.38987
+L41 =2.19373
+L42 =1.80977
+L43 =0.276384
+L44 =-0.114005
+L66S=0.00546885
+L65S=0.0529581
+L64S=0.187263
+L63S=0.315242
+L62S=0.20145
+L61S=-0.0403841
+L60 =-0.283132
+L61 =-0.0807682
+L62 =0.151087
+L63 =0.0573167
+L64 =-0.0546185
+L65 =-0.0490831
+L66 =-0.0145422

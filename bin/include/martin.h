@@ -184,6 +184,7 @@ void dadbdc2ijk(Matrix & rijk,Matrix & r, Vector & abc);
 // transforms primitive lattice vector matrix r given in terms of abc
  // to ijk coordinate system
 
+
 void dadbdc2ijk(Vector & rijk,Vector & dadbdc, Vector & abc);
 // transforms vector r given in terms of abc
  // to ijk coordinate system

@@ -1,0 +1,95 @@
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Ni2p in NiO with rotation of
+# coordinates x||111,y||1-10,z||11-2
+#***************************************************************
+
+
+
+# Jz^2= J^2 - Jx^2-Jy^2 
+#O20=2J^2 - 3(Jx^2+Jy^2) 
+# B20= -(D1+D2)/6
+B20=-0.0171161666666667
+
+# O22=Jx^2-Jy^2
+# B22= (D1-D2)/2
+B22=0.046117
+
+#-----------
+IONTYPE=S=1
+#-----------
+CHARGE=2
+nof_electrons=8
+GJ=2
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+ SCATTERINGLENGTHREAL= 1.03
+ SCATTERINGLENGTHIMAG= 0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+ basis=no_value_in_database_err
+
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#   s2= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D
+#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D
+#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#--------------------------------------------------------------------------------------
+FFj0A= 0.0163 FFj0a=35.8826 FFj0B= 0.3916 FFj0b= 13.2233 FFj0C=0.6052 FFj0c= 4.3388 FFj0D= -0.0133
+FFj2A= 1.7080 FFj2a= 11.0160 FFj2B= 1.2147 FFj2b= 4.1031 FFj2C= 0.3150 FFj2c= 1.5334 FFj2D=0.0018
+FFj4A=-0.3803 FFj4a=10.4033 FFj4B= 0.2838 FFj4b= 3.3780 FFj4C= 0.2108 FFj4c= 1.1036 FFj4D= 0.0050
+
+#------------------------------------------------------------------------------------------------------
+# radial wave function parameters R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# values tabulated in clementi & roetti Atomic data and nuclear data tables 14 (1974) 177-478
+# the  radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
+#------------------------------------------------------------------------------------------------------
+N1=3
+XI1=4.86729
+C1=0.35355
+N2=3
+XI2=12.83450
+C2=0.02753
+N3=3
+XI3=7.12212
+C3=0.20286
+N4=3
+XI4=2.75130
+C4=0.48187
+N5=3
+XI5=1.61913
+C5=0.08941
+
+
+
+
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.1437136
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=3.1595262
+
+SIGMA0r=0
+SIGMA1r=1
+SIGMA2r=0
+SIGMA0i=0
+SIGMA1i=0
+SIGMA2i=0

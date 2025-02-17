@@ -8,12 +8,13 @@
 #define MAXNOFREFLECTIONS 6000
 #endif
 
-#define SMALLPOSITIONDEVIATION 1e-4  
+
 #define SMALLINTENSITY 1e-16
 #define NOFOUTPUTCOLUMNS 12
 #define MAX_NOF_MF_COMPONENTS 51
 #include "../../version"
 #include <mpspecfunp.h>
+#include <common.h>
 #include <martin.h>
 #include <myev.h>
 #include <jjjpar.hpp>

@@ -1,0 +1,7 @@
+#! T=300 Ha=0 Hb=0 Hc=0 n=1 spins nofatoms=2 in primitive basis nofcomponents=3 - momentum configuration <J(i)>
+0
+0
+0
+0
+0
+0

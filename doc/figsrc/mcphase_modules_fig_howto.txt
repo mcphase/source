@@ -1,0 +1,7 @@
+xfig installed on mac
+
+edit figure and export eps
+
+eps output buggy, but usable: edit output by editor
+and put "ellipse" command before the text output commands ... (it is placed wrongly
+after the text and thus the text is overtyped by the ellipse)

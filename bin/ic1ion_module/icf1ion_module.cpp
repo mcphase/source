@@ -391,6 +391,7 @@ void icf1ion_module::op_generate(int iJ)
 {   st[iJ]=new sMat<double>;
             if(iJ<=6) (*st[iJ]) = icf_mumat(pars.n, iJ-1, pars.l);     // Calculates Sx,Lx etc
             else      (*st[iJ]) = icf_ukq(pars.n,k[iJ],q[iJ],pars.l);  // Calculates multipolar operator matrices 
+
 }
 
 // --------------------------------------------------------------------------------------------------------------- //
@@ -1239,11 +1240,9 @@ bool icf1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   //complexdouble *zQmat, *zt, 
    complexdouble zme;//, zalpha, zbeta; zalpha.r=-1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
    double zMqr,zMqi,Z=0.;
-   //char trans = 'U'; int incx=1;
-
+  
    Mq = ComplexVector(1,3);
 
    icf_loveseyQq(Qm,-1,n,l,Jvec); icf_loveseyQq(Qp,1,n,l,Jvec);
@@ -1261,23 +1260,13 @@ bool icf1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values
       zMqr = 0.; zMqi = 0.;
       for(i=1; i<=Hsz; i++)
       {
-        /* F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-         #ifdef _G77
-         F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-         #else
-         zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-         #endif */
-         //zme.r=expectation_value(Hsz,Qmat[q][0],(complexdouble*)&est[i][1]);
-         //zme.i=expectation_value(Hsz,Qmat[q][1],(complexdouble*)&est[i][1]);
         if(q==1){ zme.i=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
                   zme.r=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);
         }else{ zme.r=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
                zme.i=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);}
-//       printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
          zMqr += (-2.)*zme.r*est[0][i].imag(); zMqi += (-2.)*zme.i*est[0][i].imag(); if(q==0) Z += est[0][i].imag();
       }
-      //free(zQmat); free(zt); 
-       Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
+      Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
    }
 // printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
 return true;
@@ -1330,12 +1319,10 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   //complexdouble *zQmat, *zt,
    complexdouble z1,z2,zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
    std::vector<complexdouble> zij(7,zbeta), zji(7,zbeta);
    double Z=0., therm;
-   //char trans = 'U'; int incx=1;
-
+   
    // Calculates the scattering operator, Q.
    icf_loveseyQq(Qm,-1,n,l,Jvec); icf_loveseyQq(Qp,1,n,l,Jvec);
    for(i=0; i<6; i++)  
@@ -1354,19 +1341,6 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
  
    for(q=0; q<3; q++)
    {
-      /*zQmat = zmat2f(Qmat[q][2],Qmat[q][3]);    // Spin part
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-      #ifdef _G77
-      F77NAME(zdotc)(&zij[2*q+1], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      F77NAME(zdotc)(&zji[2*q+1], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-      #else
-      zij[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      zji[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-      #endif */
-      
        z1=Qmat[q][2].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
        z2=Qmat[q][3].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
        zij[2*q+1].r=z1.r+z2.r;
@@ -1386,31 +1360,11 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
             expQ.r=Qmat[q][3].MultvxMv((complexdouble*)&est[iJ][1],true);
             else
             expQ.r=Qmat[q][2].MultvxMv((complexdouble*)&est[iJ][1],false);
-            /*F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
-            #ifdef _G77
-            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #else
-            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #endif */
+            
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
       }
-      //free(zQmat); free(zt);
-
-      /*zQmat = zmat2f(Qmat[q][4],Qmat[q][5]);    // orbital part
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-      #ifdef _G77
-      F77NAME(zdotc)(&zij[2*q+2], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      F77NAME(zdotc)(&zji[2*q+2], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-      #else
-      zij[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      zji[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-      #endif*/
-      
        z1=Qmat[q][4].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
        z2=Qmat[q][5].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
        zij[2*q+2].r=z1.r+z2.r;
@@ -1430,17 +1384,10 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
             expQ.r=Qmat[q][5].MultvxMv((complexdouble*)&est[iJ][1],true);
             else
             expQ.r=Qmat[q][4].MultvxMv((complexdouble*)&est[iJ][1],false);
-            /*F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
-            #ifdef _G77
-            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #else
-            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #endif */
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
       }
-      //free(zQmat); free(zt);
    }
 
    // check if zij are complex conjugate
@@ -1661,10 +1608,10 @@ bool icf_balcarMLq(sMat<double> &MLq, int q, int K, int Q, int n, orbital l)
    return 1;
 }
 
-complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
-{
+sMat<double>  icf_balcarMq(int xyz, int K, int Q, int n, orbital l, bool & imag )
+{imag=false;
    int Hsz = getdim(n,l);
-   sMat<double> retval_r(Hsz,Hsz),retval_i(Hsz,Hsz),qpp,qmp,qpm,qmm;
+   sMat<double> retval(Hsz,Hsz),qpp,qmp,qpm,qmm;
 
    if(xyz==1||xyz==2)
    {
@@ -1678,15 +1625,15 @@ complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
          if(Q<0) { if(Q%2==0) { qmp -= qpp; qmm -= qpm; } else { qmp += qpp; qmm += qpm; } }
          else    { if(Q%2==0) { qmp += qpp; qmm += qpm; } else { qmp -= qpp; qmm -= qpm; } }
          // add spherical components and multiply by addition factor 1/sqrt(2) which was neglected in the line above
-         if(xyz==1) { if(Q<0) retval_i = (qmm-qmp)/(-2.);    else retval_r = (qmm-qmp)/2.; }
-         if(xyz==2) { if(Q<0) retval_r = (qmm+qmp)/2.;       else retval_i = (qmm+qmp)/2.; } // changed MR 25.5.2010 // Q<0 signs changed MR 28.5.2010
+         if(xyz==1) { if(Q<0) {imag=true;retval = (qmm-qmp)/(-2.);}    else retval = (qmm-qmp)/2.; }
+         if(xyz==2) { if(Q<0) retval = (qmm+qmp)/2.;       else {imag=true;retval = (qmm+qmp)/2.;} } // changed MR 25.5.2010 // Q<0 signs changed MR 28.5.2010
       }
       else
       {
          icf_balcarMSq(qpp, 1,K,0,n,l); rmzeros(qpp);
          icf_balcarMSq(qpm,-1,K,0,n,l); rmzeros(qpm);
-         if(xyz==1) {  retval_r = (qpp-qpm)/(-sqrt(2.)); }
-         if(xyz==2) {  retval_i = (qpp+qpm)/sqrt(2.);    } // changed MR 25.5.2010
+         if(xyz==1) {  retval = (qpp-qpm)/(-sqrt(2.)); }
+         if(xyz==2) {  imag=true;retval = (qpp+qpm)/sqrt(2.);      } // changed MR 25.5.2010
       }
    }
    else if(xyz==3)
@@ -1695,12 +1642,12 @@ complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
       {
          icf_balcarMSq(qpp,0,K, abs(Q),n,l); rmzeros(qpp);
          icf_balcarMSq(qmp,0,K,-abs(Q),n,l); rmzeros(qmp);
-         if(Q<0) {  if(Q%2==0) qmp -= qpp; else qmp += qpp;  retval_i = qmp/(-sqrt(2.)); }
-         else    {  if(Q%2==0) qmp += qpp; else qmp -= qpp;  retval_r = qmp/sqrt(2.);    } // changed by MR 28.5.2010
+         if(Q<0) {  if(Q%2==0) qmp -= qpp; else qmp += qpp;  {imag=true;retval = qmp/(-sqrt(2.)); }}
+         else    {  if(Q%2==0) qmp += qpp; else qmp -= qpp;  retval = qmp/sqrt(2.);    } // changed by MR 28.5.2010
       }
       else
       {
-         icf_balcarMSq(retval_r,0,K,0,n,l); rmzeros(retval_r);
+         icf_balcarMSq(retval,0,K,0,n,l); rmzeros(retval);
       }
    }
    else if(xyz==-1||xyz==-2)
@@ -1715,15 +1662,15 @@ complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
          if(Q<0) { if(Q%2==0) { qmp -= qpp; qmm -= qpm; } else { qmp += qpp; qmm += qpm; } }
          else    { if(Q%2==0) { qmp += qpp; qmm += qpm; } else { qmp -= qpp; qmm -= qpm; } }
          // add spherical components and multiply by addition factor 1/sqrt(2)which was neglected in the line above
-         if(xyz==-1) { if(Q<0) retval_i = (qmm-qmp)/(-2.);    else retval_r = (qmm-qmp)/2.; }
-         if(xyz==-2) { if(Q<0) retval_r = (qmm+qmp)/2.;       else retval_i = (qmm+qmp)/2.; } // changed MR 25.5.2010 // Q<0 signs changed MR 28.5.2010
+         if(xyz==-1) { if(Q<0) {imag=true;retval = (qmm-qmp)/(-2.); }   else retval = (qmm-qmp)/2.; }
+         if(xyz==-2) { if(Q<0) retval = (qmm+qmp)/2.;       else {imag=true;retval = (qmm+qmp)/2.;} } // changed MR 25.5.2010 // Q<0 signs changed MR 28.5.2010
       }
       else
       {
          icf_balcarMLq(qpp, 1,K,0,n,l); rmzeros(qpp);
          icf_balcarMLq(qpm,-1,K,0,n,l); rmzeros(qpm);
-         if(xyz==-1) { retval_r = (qpp-qpm)/(-sqrt(2.)); }
-         if(xyz==-2) { retval_i = (qpp+qpm)/sqrt(2.);    } // changed MR 25.5.2010
+         if(xyz==-1) { retval = (qpp-qpm)/(-sqrt(2.)); }
+         if(xyz==-2) { {imag=true;retval = (qpp+qpm)/sqrt(2.);   } } // changed MR 25.5.2010
       }
    }
    else if(xyz==-3)
@@ -1732,15 +1679,23 @@ complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
       {
          icf_balcarMLq(qpp,0,K, abs(Q),n,l); rmzeros(qpp);
          icf_balcarMLq(qmp,0,K,-abs(Q),n,l); rmzeros(qmp);
-         if(Q<0) { if(Q%2==0) qmp -= qpp; else qmp += qpp; retval_i = qmp/(-sqrt(2.)); }
-         else    { if(Q%2==0) qmp += qpp; else qmp -= qpp; retval_r = qmp/sqrt(2.);    } // changed by MR 28.5.2010
+         if(Q<0) { if(Q%2==0) qmp -= qpp; else qmp += qpp; {imag=true;retval = qmp/(-sqrt(2.)); }}
+         else    { if(Q%2==0) qmp += qpp; else qmp -= qpp; retval = qmp/sqrt(2.);    } // changed by MR 28.5.2010
       }
       else
       {
-         icf_balcarMLq(retval_r,0,K,0,n,l); rmzeros(retval_r);
+         icf_balcarMLq(retval,0,K,0,n,l); rmzeros(retval);
       }
    }
-   return zmat2f(retval_r,retval_i);
+     return retval;
+}
+
+complexdouble * icf_balcarMq(int xyz, int K, int Q, int n, orbital l)
+{ bool imag;
+ int Hsz = getdim(n,l);sMat<double> zeroes; zeroes.zero(Hsz,Hsz);
+ sMat<double> retval=icf_balcarMq(xyz,  K, Q,n,l, imag);
+ if(imag)return zmat2f(zeroes,retval);else return zmat2f(retval,zeroes);
+
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -1778,20 +1733,17 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
 
    // For first run calculate also the partition function
    me.assign(Esz,0.); eb.assign(Esz,0.); double Z=0.; 
-   complexdouble *zJmat=0;
-   sMat<double> zeros(Hsz,Hsz),mat;
+   sMat<double> mat;
 
    for(iJ=J.Lo(); iJ<=J.Hi(); iJ++)
    {
       me.assign(Esz,0.); J[iJ]=0.; 
       // Using the above reduced matrix element with at (l k l; 0 0 0) 3-j symbol, odd k gives zero...
-      zJmat = icf_balcarMq(xyz,KK[iJ-1],QQ[iJ-1],pars.n,pars.l); // minus sign stands for orbital density coeff
-      
+      bool imag;mat = icf_balcarMq(xyz,KK[iJ-1],QQ[iJ-1],pars.n,pars.l,imag);
       for(ind_j=0; ind_j<Esz; ind_j++)
       {   // Calculates the matrix elements <Vi|J.H|Vi>
            // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-            me[ind_j] = expectation_value(Hsz,zJmat,&zV[ind_j*Hsz]); // defined in martin.c
-            
+            me[ind_j] = mat.MultvxMv(&zV[ind_j*Hsz],imag);
             // For first run calculate also the partition function and internal energy
          if(iJ==J.Lo())
          {
@@ -1816,7 +1768,6 @@ void icf_spindensityexpJ(icpars &pars, complexdouble *zV, double *vE, int xyz, d
       }
       J[iJ]/=Z;
       if(fabs(J[iJ])<DBL_EPSILON) J[iJ]=0.;
-      free(zJmat);
    }
   
 }
@@ -2010,11 +1961,10 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
    int sz = gjmbH.Hi();if(sz>49){fprintf(stderr,"Error icf_du1calc: Operator %i > 49 requested\n",sz);exit(EXIT_FAILURE);}
    
    sMat<double> zeroes(est.Rows()-1,est.Cols()-1), op;
-   complexdouble *zJmat=0, *zt=0, zme; zme.r=0; zme.i=0.; 
-   std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
+   complexdouble zme; zme.r=0; zme.i=0.; 
+   std::vector<complexdouble> zij(sz,zme);
    std::vector<double> u(sz+1),iu(sz+1);
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
-   char uplo = 'U';
    double Z=0., therm;
 
    // check if printout should be done and make tn positive
@@ -2024,7 +1974,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
 
    // Copies the already calculated energy levels / wavefunctions from *est
    if(est.Rows()!=est.Cols()) { std::cerr << "sdod_du1calc(): Input rows and columns of eigenstates matrix don't match.\n"; return 0; }
-   int Hsz = est.Rows()-1, iJ, incx = 1;
+   int Hsz = est.Rows()-1, iJ;
    j=0; k=0; for(i=0; i<Hsz; ++i) { for(j=i; j<Hsz; ++j) { ++k; if(k==tn) break; } if(k==tn) break; }
    if(est[0][j+1].real()-est[0][i+1].real()<delta)
    {
@@ -2037,50 +1987,29 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
       // Calculates the transition matrix elements:
       //    u1 = <i|Ja|j> * sqrt[(exp(-Ei/kT)-exp(-Ej/kT)) / Z ]   if delta > small
       //    u1 = <i|Ja-<Ja>|j> * sqrt[(exp(-Ei/kT)) / kTZ ]             if delta < small (quasielastic scattering)
+       std::vector<double> eb, E; int Esz;
+       if(i==j){ E.reserve(Hsz);
+             for(Esz=0; Esz<Hsz; Esz++) { E.push_back(en[Esz]-en[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || en[Esz+1]==0) break; }
+            eb.assign(Esz,0.);}
       for(iJ=0; iJ<sz; iJ++)
       {
-//       if(iJ<6) op = icf_mumat(pars.n, iJ, pars.l); else op = icf_ukq(pars.n,K[iJ],Q[iJ],pars.l); 
-//       if(im[iJ]==1) zJmat=zmat2f(zeroes,op); else zJmat=zmat2f(op,zeroes);
-         zJmat = icf_balcarMq(xyz,KK[iJ],QQ[iJ],pars.n,pars.l); // minus sign stands for orbital density coeff
-         zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-         F77NAME(zhemv)(&uplo, &Hsz, &zalpha, zJmat, &Hsz, (complexdouble*)&est[j+1][1], &incx, &zbeta, zt, &incx);
-         #ifdef _G77 
-         F77NAME(zdotc)(&zij[iJ], &Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
-         #else
-         zij[iJ] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i+1][1], &incx, zt, &incx);
-         #endif
-
-         if(i==j && T>0) // subtract thermal expectation value from zij=zii
-         {
-            std::vector<double> eb, E; E.reserve(Hsz);
-            int Esz; for(Esz=0; Esz<Hsz; Esz++) { E.push_back(en[Esz]-en[0]); if(exp(-E[Esz]/(KB*T))<DBL_EPSILON || en[Esz+1]==0) break; }
-            eb.assign(Esz,0.); double Jj=0.;
-
+        bool imag; op=icf_balcarMq(xyz,KK[iJ],QQ[iJ],pars.n,pars.l,imag);
+        zij[iJ]=op.MultuxMv((complexdouble*)&est[i+1][1],(complexdouble*)&est[j+1][1],imag);         
+        if(i==j && T>0) // subtract thermal expectation value from zij=zii
+         {  double Jj=0.;
             for(int ind_j=0; ind_j<Esz; ind_j++)
             {  // Calculates the matrix elements <Vi|J.H|Vi>
                // my substitute >>>> I believe this is faster because it does not compute imag part zme.i !
-               zme.r = expectation_value(Hsz,zJmat,(complexdouble*)&est[ind_j+1][1]); // defined in martin.c
+                zme.r=op.MultvxMv((complexdouble*)&est[ind_j+1][1],imag);
                 // For first run calculate also the partition function and internal energy
                if(iJ==0)
-               {
-//MR 10.9.2010
-                  if (T<0) 
-                  {
-                     char instr[MAXNOFCHARINLINE];
-                     printf("eigenstate %i: %4.4g meV  - please enter probability w(%i):",ind_j+1,E[ind_j],ind_j+1);
-                     if(fgets(instr, MAXNOFCHARINLINE, stdin)==NULL) { fprintf(stderr,"Error reading input\n"); exit(1); }
-                     eb[ind_j]=strtod(instr,NULL); 
-                  }
-//MRend 10.9.2010
-                  else
-                     eb[ind_j] = exp(-E[ind_j]/(KB*T));  
-		  Z+=eb[ind_j];
+               { eb[ind_j] = exp(-E[ind_j]/(KB*T));  
+		 Z+=eb[ind_j];
 	       }
                Jj+=zme.r*eb[ind_j];
             }
             zij[iJ].r -= Jj/Z; 
          }
-         free(zJmat); free(zt);
       }
 
       if (T<0) T=-T;
@@ -2133,7 +2062,6 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
 
     // determine number of thermally reachable states
    if (ninit>Hsz)ninit=Hsz;
-   //if (pinit<SMALL)pinit=SMALL;
    double zsum=0,zi,x;
    int noft=0; 
    for(i=0; (i<ninit)&((((x=(est[0][i+1].real()-est[0][1].real())/(KB*fabs(T)))<200)? zi=exp(-x):zi=0)>=(pinit*zsum)); ++i)
@@ -2463,27 +2391,26 @@ int main(int argc, char *argv[])
       if(pars.mag_units==0) FILEOUT << "Magnetisation(uB/atom)\tMa\tMb\tMc\tM_parallel\n";
       else if(pars.mag_units==1) FILEOUT << "Magnetisation(emu/mol)\tMa\tMb\tMc\tM_parallel\n";
       else if(pars.mag_units==2) FILEOUT << "Magnetisation(Am^2/mol)\tMa\tMb\tMc\tM_parallel\n";
-      int nT = (int)ceil((Tmax-Tmin)/Tstep), nH = (int)ceil((Hmax-Hmin)/Hstep) + 1;
+      int nT = (int)ceil((Tmax-Tmin)/Tstep)+1, nH = (int)ceil((Hmax-Hmin)/Hstep) + 1;
       std::vector<double> vT(nT,0.); for(int iT=0; iT<nT; iT++) vT[iT] = Tmin+iT*Tstep;
       std::vector<double> mag(nT,0.),ma(nT,0.),mb(nT,0.),mc(nT,0.);
 
       // Determines the require magnetic fields
       double xnorm = sqrt(pars.xHa*pars.xHa+pars.xHb*pars.xHb+pars.xHc*pars.xHc); if(xnorm==0) xnorm=1.;
       double ynorm = sqrt(pars.yHa*pars.yHa+pars.yHb*pars.yHb+pars.yHc*pars.yHc); if(ynorm==0) ynorm=1.;
-      Vector gjmbH0(1,3,0.),J(1,6,0.);
+      Vector gjmbH0(1,3,0.),J(1,3,0.);
       if(pars.xT==0.) gjmbH0(1)=pars.xHa/xnorm; else gjmbH0(1)=pars.yHa/ynorm; 
       if(pars.xT==0.) gjmbH0(2)=pars.xHb/xnorm; else gjmbH0(2)=pars.yHb/ynorm; 
       if(pars.xT==0.) gjmbH0(3)=pars.xHc/xnorm; else gjmbH0(3)=pars.yHc/ynorm; 
       double convfact=1; if(pars.mag_units==1) convfact = NAMUB*1e3; else if(pars.mag_units==2) convfact = NAMUB;  // 1==cgs, 2==SI
       
       
-      for(int iH=0; iH<nH; iH++)
+      for(int iH=0; iH<=nH; iH++)
       {
          for(int al=1; al<=3; al++) Hext(al) = gjmbH0(al)*(Hmin+iH*Hstep);
          for(int iT=0; iT<nT; iT++)
-         {
-            si_mod.Icalc(J,vT[iT],gjmbHxc,Hext,vT[iT],gjmbHxc,infile,lnZ,U,Pst); for(int iJ=1; iJ<=6; iJ++) if(fabs(J(iJ))<SMALL) J(iJ)=0.;
-            ma[iT]=GS*J(1)+J(4); mb[iT]=GS*J(2)+J(5); mc[iT]=GS*J(3)+J(6); mag[iT] = sqrt(ma[iT]*ma[iT]+mb[iT]*mb[iT]+mc[iT]*mc[iT]);
+         {  si_mod.mcalc(J,vT[iT],gjmbHxc,Hext,vT[iT],gjmbHxc,infile,Pst); for(int iJ=1; iJ<=3; iJ++) if(fabs(J(iJ))<SMALL) J(iJ)=0.;
+            ma[iT]=J(1); mb[iT]=J(2); mc[iT]=J(3); mag[iT] = Norm(J);//sqrt(ma[iT]*ma[iT]+mb[iT]*mb[iT]+mc[iT]*mc[iT]);
          }
          if(pars.xT!=0.)
          {

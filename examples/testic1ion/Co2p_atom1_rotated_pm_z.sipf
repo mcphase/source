@@ -1,0 +1,194 @@
+#!MODULE=../../bin/ic1ion_module/ic1ion.so
+#<!--mcphase.sipf-->
+#***************************************************************
+# Single Ion Parameter File for Module ic1ion for  
+# mcphas version 3.0
+# - program to calculate static magnetic properties
+# reference: M. Rotter JMMM 272-276 (2004) 481
+# mcdisp version 3.0
+# - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+# mcdiff version 3.0
+# - program to calculate neutron and magnetic xray diffraction
+# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R
+#***************************************************************
+
+
+#-----------
+IONTYPE=Co2+
+nof_electrons=7
+#-----------
+
+#------------------------------------------------------------------------------------
+# The following is a guide on what to do if ic1ion does not recognize the IONTYPE
+#
+# from Griffith 1971 p379 CoIV=Co3+ is 3d6 configuration
+# conf=d6
+# from Abragam Bleaney 1970 p 391 B=1065/cm C=5120/cm XI= ??  p399 lambda=-145/cm 
+# for LS groundstate (balcar lecture) lambda=xi/2S (n<2l+1) lambda=-xi/2S (n>2l+1)  
+#                                     .... for d6 n=6,S=2 -> XI=-lambda*4=680/cm
+# in LaCoO3 paper PRB 67 (2003) 172401 lambda=-185 K = -128.628 /cm  --> XI=-lambda*4= 514.5
+#
+# from equations p 83 A=F_0-49*F_4  B=F_2-5*F_4 C=35*F_4
+# we get F_4=C/35  F2=B+5*F_4   ... however this is not what we need
+# we need other coefficients, namely F^2,F^4,F^6 which are related
+# in equation 77 of Racah, PhysRev62,438(1942)
+#
+# A=F_0 - 49 * F_4= F^0 - F^4 / 9
+# B=F_2-5 * F_4   =(9*F^2-5*F^4)/441
+# C=35* F_4       =5*F^4/63
+# i.e. it follows
+# 
+# F^0= A + 7 * C / 5
+# F^2= 49 * B + 7 * C
+# F^4= 63 * C / 5
+#
+# Which gives F^2=88025/cm and F^4=64512/cm
+# however F0 is not determined from this table because A is not known ...
+# note 8066/cm=1eV
+# ... so in case that ic1ion does not recognize the ion we put:
+# F0=0
+# F2=88025
+# F4=64512
+# xi=514.5
+# ---------------------------------------------------------------------------------
+
+Bx=0
+By=0
+Bz=10
+
+#-------------------------------------------------------
+# Neutron Scattering Length (10^-12 cm) (can be complex)
+#-------------------------------------------------------
+ SCATTERINGLENGTHREAL= 0.249
+ SCATTERINGLENGTHIMAG= 0
+#  ... note: - if an occupancy other than 1.0 is needed, just reduce 
+#              the scattering length linear accordingly
+
+#-------------------------------------------------------
+# Debye-Waller Factor: sqr(Intensity)~|sf|~EXP(-2 * DWF *s*s)=EXP (-W)
+#                      with s=sin(theta)/lambda=Q/4pi
+# relation to other notations: 2*DWF=Biso=8 pi^2 <u^2>
+# unit of DWF is [A^2]
+#-------------------------------------------------------
+DWF=0
+ 
+#--------------------------------------------------------------------------------------
+# Neutron Magnetic Form Factor coefficients - thanks to J Brown
+#   d = 2*pi/Q      
+#   s = 1/2/d = Q/4/pi   
+#   sin(theta) = lambda * s
+#   s2= s*s = Q*Q/16/pi/pi
+#
+#   <j0(Q)>=   FFj0A*EXP(-FFj0a*s2) + FFj0B*EXP(-FFj0b*s2) + FFj0C*EXP(-FFj0c*s2) + FFj0D
+#   <j2(Q)>=s2*(FFj2A*EXP(-FFj2a*s2) + FFj2B*EXP(-FFj2b*s2) + FFj2C*EXP(-FFj2c*s2) + FFj2D
+#   <j4(Q)>=s2*(FFj4A*EXP(-FFj4a*s2) + FFj4B*EXP(-FFj4b*s2) + FFj4C*EXP(-FFj4c*s2) + FFj4D
+#
+#   Dipole Approximation for Neutron Magnetic Formfactor:
+#        -Spin Form Factor       FS(Q)=<j0(Q)>
+#        -Angular Form Factor    FL(Q)=<j0(Q)>+<j2(Q)>
+#--------------------------------------------------------------------------------------
+FFj0A= 0.4332 FFj0a=14.3553 FFj0B= 0.5857 FFj0b= 4.6077 FFj0C=-0.0382 FFj0c= 0.1338 FFj0D= 0.0179
+FFj2A= 1.9049 FFj2a= 11.6444 FFj2B= 1.3159 FFj2b= 4.3574 FFj2C= 0.3146 FFj2c= 1.6453 FFj2D=0.0017
+FFj4A=-0.4759 FFj4a=14.0462 FFj4B= 0.2747 FFj4b= 3.7306 FFj4C= 0.2458 FFj4c= 1.2504 FFj4D= 0.0057
+
+#------------------------------------------------------------------------------------------------------
+# radial wave function parameters R_Np,XIp(r)= r^(Np-1) . exp(-xi r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# values tabulated in clementi & roetti Atomic data and nuclear data tables 14 (1974) 177-478
+# Co3+ is isoelectronic to Fe2+,Mn+ looking at page 420 of Clemente & Roetti
+# the 3D6 radial wave function is expanded as R(r)=sum_p C_p R_Np,XIp(r)
+#------------------------------------------------------------------------------------------------------
+N1=3 XI1=4.95296 C1=0.36301
+N2=3 XI2=12.2963 C2=0.02707
+N3=3 XI3=7.03565 C3=0.14777
+N4=3 XI4=2.74850 C4=0.49771
+N5=3 XI5=1.69027 C5=0.11388
+
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+# from abragam bleaney 1971 p 399 
+
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+# from abragam bleaney 1971 p 399 
+
+
+#--------------------------------------------------------------------------
+# here we switch for the following units to meV
+#--------------------------------------------------------------------------
+units=meV
+
+#--------------------------------------------------------------------------
+# Crystal field parameters (Wybourne)
+#--------------------------------------------------------------------------
+
+
+#----------------------------------------------------------
+# some parameters for ic1ion - calculation of magnetisation
+#----------------------------------------------------------
+calcmag
+ xT   = 1
+ xHa  = 0
+ xHb  = 0
+ xHc  = 0
+ xmin = 1
+ xstep= 1
+ xmax = 2
+ yT   = 0
+ yHa  = 1
+ yHb  = 0
+ yHc  = 0
+ ymin = 1
+ ystep= 1
+ ymax = 10
+
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.24653
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=3.67281
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=21.0652
+#pointcharges charge[|e|]  x[A] y[A] z[A]
+pointcharge=   -2         0.010527 -0.3798 -2.1124
+pointcharge=   -2         -0.010527 -0.3798 2.1124
+# 1 meV = 8.066 cm-1
+# 1 cm-1 = 0.124 meV
+# 1 meV = 11.6 K
+# 1 K = 0.0862 meV
+#-------------------------------------------------------
+# Crystal Field parameters Blm in Stevens Notation (meV)
+#-------------------------------------------------------
+units=meV
+#--------------------------------------------------------
+# Crystal Field parameters Llm in Wybourne Notation (meV)
+#--------------------------------------------------------
+units=meV
+L22S=-3.49113e-017
+L21S=-1.23651e-014
+L20=1938.13
+L21=-12.0235
+L22=-38.9676
+L44S=5.89535e-019
+L43S=4.18502e-017
+L42S=4.2826e-017
+L41S=-5.00988e-015
+L40=308.775
+L41=-3.71647
+L42=-26.0452
+L43=0.244261
+L44=0.185921
+L66S=2.62051e-021
+L65S=-9.99499e-019
+L64S=1.65849e-018
+L63S=2.73219e-017
+L62S=-2.39067e-017
+L61S=5.37764e-017
+L60=88.1156
+L61=-1.7147
+L62=-18.4895
+L63=0.282321
+L64=0.419882
+L65=-0.00493829
+L66=-0.001831

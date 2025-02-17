@@ -1,0 +1,97 @@
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+# single ion property file for
+ IONTYPE=Nd3+
+# Lande factor gJ
+ GJ=0.72727272
+# neutron scattering length (10^-12 cm) (can be complex)
+ SCATTERINGLENGTHREAL= 0.769 
+ SCATTERINGLENGTHIMAG= 0 
+calcmagdensity=0
+#----------------
+# Stevens Factors
+#----------------
+ALPHA=-0.00642792
+BETA=-0.000291108
+GAMMA=-3.7988e-005
+
+#---------------------------------------------------------
+# Radial Matrix Elements (e.g. Abragam Bleaney 1971 p 399)
+#---------------------------------------------------------
+#<r^2> in units of a0^2 a0=0.5292 Angstroem
+R2=1.114
+#<r^4> in units of a0^4 a0=0.5292 Angstroem
+R4=2.91
+#<r^6> in units of a0^6 a0=0.5292 Angstroem
+R6=15.03
+
+
+# magnetic form factor coefficients - thanks to J Brown
+#   D = 2 * pi / Q
+#   s = 1 / 2 / D: sintheta = lambda * s
+#   <j0(kr)> = FFj0A * EXP(-FFj0a * s * s) + FFj0B * EXP(-FFj0b * s * s) + FFj0C * EXP(-FFj0c * s * s) + FFj0D
+#   <j2(kr)> = FFj2A * s * s * EXP(-FFj2a * s * s) + FFj2B * s * s * EXP(-FFj2b * s * s) + FFj2C * s * s * EXP(-FFj2c * s * s) + s * s * FFj2D
+#   <j4(kr)> = FFj4A * s * s * EXP(-FFj4a * s * s) + FFj4B * s * s * EXP(-FFj4b * s * s) + FFj4C * s * s * EXP(-FFj4c * s * s) + s * s * FFj4D
+#   <j6(kr)> = FFj6A * s * s * EXP(-FFj6a * s * s) + FFj6B * s * s * EXP(-FFj6b * s * s) + FFj6C * s * s * EXP(-FFj6c * s * s) + s * s * FFj6D
+#   dipole approximation: FQ = (j0 + j2 * (2 / gJ - 1)) 
+FFj0A= 0.0540 FFj0a=25.0293 FFj0B= 0.3101 FFj0b=12.1020 FFj0C= 0.6575 FFj0c= 4.7223 FFj0D=-0.0216 
+FFj2A= 0.6751 FFj2a=18.3421 FFj2B= 1.6272 FFj2b= 7.2600 FFj2C= 0.9644 FFj2c= 2.6016 FFj2D= 0.0150 
+FFj4A=-0.4053 FFj4a=14.0141 FFj4B= 0.0329 FFj4b= 7.0046 FFj4C= 0.3759 FFj4c= 1.7074 FFj4D= 0.0209 
+FFj6A=-0.0416 FFj6a= 8.0136 FFj6B=-0.1261 FFj6b= 4.0399 FFj6C= 0.1400 FFj6c= 1.0873 FFj6D= 0.0102 
+
+# coefficients of Z(K') according to Lovesey chapter 11.6.1 page 233
+Z1c0=1.63636364  Z1c2=2.95041322
+Z3c2=-0.20896503 Z3c4=-0.25329095
+Z5c4=0.03820789  Z5c6=0.14258681
+Z7c6=-0.00614959
+
+# crystal field after Boothroyd in wyborne notation (xyz||abc
+ B20=  -23.69e-2
+ B22  =  0                                           
+ B40  =  167.6e-4                                          
+ B42  =  0                                          
+ B44  =  -326.06e-4                                          
+ B60  =  -237.18e-6                                         
+ B62  =  0                                          
+ B64  =  -6324.26e-6                                          
+ B66  =  0                                          
+
+# rotated CF suited for mcphas yzx||abc
+# B20  = 0.11845
+# B22  = -0.35535
+# B40  = 0.00220925
+# B42  = -0.058203
+# B44  = 0.06924925
+# B60  = 0.000469385
+# B62  = -0.0017664125
+# B64  = -0.004204565
+# B66  = -0.0038861075
+
+#---------------------------------------------------------------------------
+# Crystal Field parameters in Wybourne Notation (coordinate system yzx||abc)
+#---------------------------------------------------------------------------
+units=meV
+#L20=-36.8543
+#L22=45.1371
+#L40=-60.712
+#L42=252.898
+#L44=-227.455
+#L60=-197.696
+#L62=72.6048
+#L64=157.762
+#L66=107.69
+
+# Debye-Waller Factor = EXP(-2 * DWF *s*s)=EXP (-W) ( 2*DWF=B=8 pi^2 <u^2>, depends on compound) ... DWF [A^2]
+DWF=0
+
+
+#---------------------------------------------------------------------------------------------
+# radial wave function parameters, for transition metal ions the the values are tabulated in
+# Clementi & Roetti Atomic data and nuclear data tables 14 (1974) 177-478, the radial wave
+# function is expanded as R(r)=sum_p Cp r^(Np-1) . exp(-XIp r) . (2 XIp)^(Np+0.5) / sqrt(2Np!)
+# Freeman and Watson PR 127 (1962) 2058
+#---------------------------------------------------------------------------------------------
+N1=4 C1=0.218728872232817 XI1=10.727
+N2=4 C2=0.42373164892569 XI2=6.071
+N3=4 C3=0.387711822924875 XI3=4.047
+N4=4 C4=0.159645804512521 XI4=2.216

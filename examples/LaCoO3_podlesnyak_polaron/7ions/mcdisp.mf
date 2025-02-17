@@ -1,0 +1,16 @@
+# Parameter file  mcdisp.mf - read by mcdisp version 4.7
+#<!--mcdisp.mcdisp.mf>
+#*********************************************************************
+# mcdisp - program to calculate the dispersion of magnetic excitations
+# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751
+#*********************************************************************
+#'T'             temperature T
+#'Ha' 'Hb' 'Hc'  magnetic field
+#'n'             number of atoms in magnetic unit cell
+#'nofatoms'      number of atoms in primitive crystal unit cell
+#'nofcomponents' dimension of moment vector of a magnetic atoms
+#! T=1 Ha=0 Hb=0 Hc=0 n=1 nofatoms=1 nofcomponents=3
+ 0.0000
+ 0.0000
+ 0.0000
+

@@ -148,7 +148,7 @@ void ic1ion_module::expJ(icmfmat & mfm,     // Operators to be calculated
 }
 
 
-void ic1ion_module::expJ(icmfmat & mfm,     // Operators to be calculated
+void ic1ion_module::expJ(icmfmat & mfmOP,     // Operators to be calculated
                       Matrix &Jret,       // Output single ion momentum vector <Ja>,<Jb>,<Jc>, etc.
                       Vector&T,           // Input Vector of temperatures
                       Vector &Hxc,        // Input vector of exchange fields (meV) 
@@ -196,7 +196,7 @@ void ic1ion_module::expJ(icmfmat & mfm,     // Operators to be calculated
       // (for number of low energy states necessary for calculation at Ti=T.Hi() )
       int Ti=T.Hi();
 
-      std::vector<double> vJ =  mfm.expJ(VE,T(Ti),matel,J.Rhi());
+      std::vector<double> vJ =  mfmOP.expJ(VE,T(Ti),matel,J.Rhi());
    
       for(i=J.Rlo(); i<=J.Rhi(); i++) {J(i,T.Hi()) = vJ[i-J.Rlo()];//printf("%g ",J(i,Ti));
                                          } 

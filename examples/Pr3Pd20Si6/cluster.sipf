@@ -1,0 +1,20 @@
+#!MODULE=cluster
+#<!--mcphase.sipf-->
+#!structurefile=cluster.j
+
+# in this example we set I1,I2,I3 the I1 I2 I3 of the first ion in the cluster, which 
+# is modelled by Pr3p.sipf (electronic magnetic moment) ... these degrees of freedom
+# interact by Heisenberg/RKKY interactions
+$I1=$I1_1;
+$I2=$I1_2;
+$I3=$I1_3;
+
+# here should follow the description of cluster moments in terms
+# of moments of the individual ions
+$GJ=0.8;
+$Gnuc=-0.9367e-3;
+$M1=$I1_1->multiply_scalar($GJ)+ $I2_1->multiply_scalar($Gnuc);
+$M2=$I1_2->multiply_scalar($GJ)+ $I2_2->multiply_scalar($Gnuc);
+$M3=$I1_3->multiply_scalar($GJ)+ $I2_3->multiply_scalar($Gnuc);
+
+

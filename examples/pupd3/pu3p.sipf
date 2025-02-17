@@ -1,0 +1,101 @@
+#!ic1ion.so
+#<!--mcphase.sipf-->
+# 1 meV=8.066/cm
+ unit =  meV
+ IONTYPE=Pu3+
+
+
+# Crystal field paramters in Wybourne normalisation
+ L40  =  319.94
+ L44  =  191.2007206137
+ L60  =  1250
+ L64  = -2338.5358666250
+
+# Save matrices of CF and angular momentum operators?
+save_matrices
+
+# Approximation methods for MF loop
+#partial
+#perturb
+#arnoldi
+#arnoldi_standalone
+truncate_matrix=0.007
+
+# For ic1ion singleion calculations
+ calcmag
+ xT   = 1
+ xHa  = 0
+ xHb  = 0
+ xHc  = 0
+ xmin = 1
+ xstep= 1
+ xmax = 305
+ yT   = 0
+ yHa  = 0
+ yHb  = 0
+ yHc  = 1
+ ymin = 1
+ ystep= 1
+ ymax = 1
+
+#   D = 2 * pi / Q
+#   s = 1 / 2 / D: sintheta = lambda * s
+
+#Nd3+ magnetische formfaktoren nach international tables
+#     ff(i,1...7)= <j0(kr)>-terms A,a,B,b,C,c,D
+ FFj0A=0.3840 FFj0a= 16.6793 FFj0B=3.1049 FFj0b=5.4210 FFj0C=-2.5148 FFj0c=4.5512 FFj0D=0.0263
+#     ff(i,8..14)= <j2(kr)>-terms A,a,B,b,C,c,D
+FFj2A=2.0885 FFj2a=12.8712 FFj2B = 2.5961 FFj2b= 5.1896 FFj2C=-0.1465  FFj2c=0.0393 FFj2D=0.1343
+
+#  ....
+#   j0 = ff(1) * EXP(-ff(2) * s * s) + ff(3) * EXP(-ff(4) * s * s)
+#   j0 = j0 + ff(5) * EXP(-ff(6) * s * s) + ff(7)
+#   j2 = ff(8) * s * s * EXP(-ff(9) * s * s) + ff(10) * s * s * EXP(-ff(11) * s * s)
+#   j2 = j2 + ff(12) * s * s * EXP(-ff(13) * s * s) + s * s * ff(14)
+#   FQ = (j0 + j2 * (2 / gJ - 1)) 
+
+
+# Debey-Waller Factor
+DWF=0
+# debeywallerfactor = EXP(-2 * DWF *s*s)
+
+
+FFj4A=-0.7014
+FFj4a=16.3687
+FFj4B=-0.1162
+FFj4b=6.6971
+FFj4C=0.7778
+FFj4c=2.4502
+FFj4D=0.0000
+FFj6A=-0.0364
+FFj6a=9.5721
+FFj6B=-0.3181
+FFj6b=4.3424
+FFj6C=0.3210
+FFj6c=1.5233
+FFj6D=0.0041
+SCATTERINGLENGTHREAL=0
+SCATTERINGLENGTHIMAG=0
+CHARGE=3
+nof_electrons=5
+units=meV
+conf=f5
+F2=9696.1
+F4=6314.0
+F6=4626.5
+zeta=307.92
+R2=1.952E+00
+R4=7.514
+R6=5.210E+01
+N1=4
+C1=-0.994691986694916
+XI1=3.80340582389465
+N2=4
+C2=-0.0529449675794641
+XI2=0.963771501547706
+N3=4
+C3=0.015902912438884
+XI3=31.8695898754917
+N4=4
+C4=0.245401984614236
+XI4=15.6319777713744

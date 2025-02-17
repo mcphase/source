@@ -1,0 +1,13 @@
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+
+#-----------
+IONTYPE=S=3.5
+#-----------
+GJ=2
+
+# anisotropy ... Hamiltonian: Ha = Dz2 * Sz^2
+Dz2=5
+
+
+
