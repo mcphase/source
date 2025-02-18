@@ -594,8 +594,12 @@ bool ic1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values 
    {
        zMqr = 0.; zMqi = 0.;
       for(i=1; i<=Hsz; i++)
-      {zme.r=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
-       zme.i=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);
+      {if(q==1){  zme.i=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
+                  zme.r=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);
+        }else{ zme.r=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
+               zme.i=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);}
+      // zme.r=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
+      // zme.i=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);
 //       printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
          zMqr += (-2.)*zme.r*est[0][i].imag(); zMqi += (-2.)*zme.i*est[0][i].imag(); if(q==0) Z += est[0][i].imag();
       }
@@ -694,16 +698,12 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
          for(iJ=1;iJ<=Hsz;++iJ)
          {
             therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
-            /*F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
-            #ifdef _G77
-            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #else
-            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #endif*/
+            if(q==1)
+            expQ.r=Qq[q][3].MultvxMv((complexdouble*)&est[iJ][1],true);
+            else
             expQ.r=Qq[q][2].MultvxMv((complexdouble*)&est[iJ][1],false);
-            expQ.i=Qq[q][3].MultvxMv((complexdouble*)&est[iJ][1],true);
-
-            thexp += expQ.r * therm / Z;
+         
+           thexp += expQ.r * therm / Z;
          }
          zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
       }
@@ -720,9 +720,10 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
          for(iJ=1;iJ<=Hsz;++iJ)
          {
             therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
-            
+            if(q==1)
+            expQ.r=Qq[q][5].MultvxMv((complexdouble*)&est[iJ][1],true);
+            else
             expQ.r=Qq[q][4].MultvxMv((complexdouble*)&est[iJ][1],false);
-            expQ.i=Qq[q][5].MultvxMv((complexdouble*)&est[iJ][1],true);
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;

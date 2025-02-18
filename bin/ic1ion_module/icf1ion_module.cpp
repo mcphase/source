@@ -1255,9 +1255,7 @@ bool icf1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values
    icf_loveseyQq(Qmat[2],0,n,l,Jvec);
 
    for(q=0; q<3; q++)
-   {  //zQmat = zmat2f(Qmat[q][0],Qmat[q][1]);
-      //zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      zMqr = 0.; zMqi = 0.;
+   {  zMqr = 0.; zMqi = 0.;
       for(i=1; i<=Hsz; i++)
       {
         if(q==1){ zme.i=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
