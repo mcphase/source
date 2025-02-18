@@ -566,9 +566,9 @@ bool ic1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values 
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   complexdouble *zQmat, *zt, zme, zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   complexdouble  zme;
    double zMqr,zMqi,Z=0.;
-   char trans = 'U'; int incx=1;
+   //char trans = 'U'; int incx=1;
 
    Mq = ComplexVector(1,3);
 
@@ -592,21 +592,14 @@ bool ic1ion_module::mqcalc(ComplexVector &Mq,      // Output expectation values 
    }
    for(q=0; q<3; q++)
    {
-      zQmat = zmat2f(Qmat[q][0],Qmat[q][1]);
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      zMqr = 0.; zMqi = 0.;
+       zMqr = 0.; zMqi = 0.;
       for(i=1; i<=Hsz; i++)
-      {
-         F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-#ifdef _G77
-         F77NAME(zdotc)(&zme, &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-#else
-         zme = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-#endif
+      {zme.r=Qmat[q][0].MultvxMv((complexdouble*)&est[i][1],false);
+       zme.i=Qmat[q][1].MultvxMv((complexdouble*)&est[i][1],true);
 //       printf ("%i zme=%g %+g i  Ei=%6.3f ni=%6.3f \n",i,zme.r,zme.i,est[0][i].real(),est[0][i].imag());
          zMqr += (-2.)*zme.r*est[0][i].imag(); zMqi += (-2.)*zme.i*est[0][i].imag(); if(q==0) Z += est[0][i].imag();
       }
-      free(zQmat); free(zt); Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
+      Mq[q+1] = complex<double> (zMqr, zMqi)/Z;
    }
 // printf("MQ=(%g %+g i, %g %+g i,%g %+g i)\n",real(Mq(1)),imag(Mq(1)),real(Mq(2)),imag(Mq(2)),real(Mq(3)),imag(Mq(3)));
 return true;
@@ -659,11 +652,10 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp1, Qm1; 
    std::vector< std::vector< sMat<double> > > Qq; for(i=0; i<3; i++) Qq.push_back(Qp1);
-   complexdouble *zQmat, *zt, zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   complexdouble z1,z2,zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
    std::vector<complexdouble> zij(7,zbeta), zji(7,zbeta);
    double Z=0., therm;
-   char trans = 'U'; int incx=1;
-
+   
    // Calculates the scattering operator, Q.
    if(!get_Qq(Qq[0],0,n,l,Jvec) || !get_Qq(Qq[1],1,n,l,Jvec))                  // Qq[0]==Qx, Qq[1]==Qy, Qq[2]==Qz
    {
@@ -690,65 +682,51 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
    ++i;++j; // because in est i and j start from 1...Hsz
  
    for(q=0; q<3; q++)
-   {  zQmat = zmat2f(Qq[q][2],Qq[q][3]);     // Spin part
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-      #ifdef _G77
-      F77NAME(zdotc)(&zij[2*q+1], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      F77NAME(zdotc)(&zji[2*q+1], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-      #else
-      zij[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx) ;
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      zji[2*q+1] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx) ;
-      #endif
+   {  z1=Qq[q][2].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
+      z2=Qq[q][3].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
+      zij[2*q+1].r=z1.r+z2.r;zij[2*q+1].i=z1.i+z2.i;
+      z1=Qq[q][2].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],false);
+      z2=Qq[q][3].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],true);
+      zji[2*q+1].r=z1.r+z2.r;zji[2*q+1].i=z1.i+z2.i;
       if(i==j)                               //subtract thermal expectation value from zij=zii
       {                                      //MR120120 ... reintroduced
          complexdouble expQ;double thexp=0;
          for(iJ=1;iJ<=Hsz;++iJ)
          {
             therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
-            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
+            /*F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
             #ifdef _G77
             F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
             #else
             expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #endif
+            #endif*/
+            expQ.r=Qq[q][2].MultvxMv((complexdouble*)&est[iJ][1],false);
+            expQ.i=Qq[q][3].MultvxMv((complexdouble*)&est[iJ][1],true);
+
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+1].r-=thexp;zji[2*q+1].r-=thexp;
       }
-      free(zQmat); free(zt);
-
-      zQmat = zmat2f(Qq[q][4],Qq[q][5]);     // orbital part
-      zt = (complexdouble*)malloc(Hsz*sizeof(complexdouble));
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[j][1], &incx, &zbeta, zt, &incx);
-      #ifdef _G77
-      F77NAME(zdotc)(&zij[2*q+2], &Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      F77NAME(zdotc)(&zji[2*q+2], &Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-      #else
-      zij[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[i][1], &incx, zt, &incx);
-      F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[i][1], &incx, &zbeta, zt, &incx);
-      zji[2*q+2] = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[j][1], &incx, zt, &incx);
-      #endif
+      
+      z1=Qq[q][4].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
+      z2=Qq[q][5].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
+      zij[2*q+2].r=z1.r+z2.r;zij[2*q+2].i=z1.i+z2.i;
+      z1=Qq[q][4].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],false);
+      z2=Qq[q][5].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],true);
+      zji[2*q+2].r=z1.r+z2.r;zji[2*q+2].i=z1.i+z2.i;
       if(i==j)                               //subtract thermal expectation value from zij=zii
       {                                      //MR120120 ... reintroduced
          complexdouble expQ;double thexp=0;
          for(iJ=1;iJ<=Hsz;++iJ)
          {
             therm = exp(-(est[0][iJ].real()-est[0][1].real())/(KB*T)); if(therm<DBL_EPSILON) break;
-            F77NAME(zhemv)(&trans, &Hsz, &zalpha, zQmat, &Hsz, (complexdouble*)&est[iJ][1], &incx, &zbeta, zt, &incx);
-            #ifdef _G77
-            F77NAME(zdotc)(&expQ, &Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #else
-            expQ = F77NAME(zdotc)(&Hsz, (complexdouble*)&est[iJ][1], &incx, zt, &incx);
-            #endif
+            
+            expQ.r=Qq[q][4].MultvxMv((complexdouble*)&est[iJ][1],false);
+            expQ.i=Qq[q][5].MultvxMv((complexdouble*)&est[iJ][1],true);
             thexp += expQ.r * therm / Z;
          }
          zij[2*q+2].r-=thexp;zji[2*q+2].r-=thexp;
       }
-      free(zQmat); free(zt);
    }
 
    // check if zij are complex conjugate

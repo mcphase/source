@@ -474,7 +474,7 @@ complexdouble* zmat2f(sMat<double> &r, sMat<double> &i)
    sMat<double> tmp = r+i;
    std::vector< std::vector<int> > u = tmp.find/*upper*/();
    int j, rows=tmp.nr();
-   // Allocates an _r*_c array and initiallises all elements to zero.
+   // calloc Allocates an _r*_c array and initiallises all elements to zero.
    complexdouble x, *retval = (complexdouble*)calloc(rows*tmp.nc(),sizeof(complexdouble));
    for (j=0; j<(int)u.size(); j++)
    {

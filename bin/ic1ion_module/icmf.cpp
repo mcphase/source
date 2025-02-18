@@ -422,10 +422,10 @@ sMat<double> icmfmat::op_generate(int i)
       if(_save_matrices) {
       #ifndef _WINDOWS
       struct stat status; stat("results/mms",&status); if(!S_ISDIR(status.st_mode))
-         if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::Jmat(): Can't create mms dir, " << strerror(errno) << "\n";
+         if(mkdir("results/mms",0777)!=0) std::cerr << "icmfmat::op_generate(): Can't create mms dir, " << strerror(errno) << "\n";
       #else
       DWORD drAttr = GetFileAttributes("results\\mms"); if(drAttr==0xffffffff || !(drAttr&FILE_ATTRIBUTE_DIRECTORY)) 
-         if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::Jmat(): Cannot create mms directory\n";
+         if (!CreateDirectory("results\\mms", NULL)) std::cerr << "icmfmat::op_generate(): Cannot create mms directory\n";
       #endif
       nstr[0] = (_l==F?102:100); if(_n<10) { nstr[1] = _n+48; nstr[2] = 0; } else { nstr[1] = 49; nstr[2] = _n+38; nstr[3] = 0; }
       strcat(basename,nstr); strcat(basename,"_"); 
