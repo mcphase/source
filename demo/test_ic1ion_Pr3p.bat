@@ -894,7 +894,7 @@ getvariable.pl -c -0.01   "aL1(4,0)" m.clc
 getvariable.pl -c -0.07   "aL1(4,1)" m.clc 
 getvariable.pl -c -0.01   "aL1(4,2)" m.clc 
 getvariable.pl -c 0.02   "aL1(4,3)" m.clc 
-getvariable.pl -c 0.006   "aL1(4,4)" m.clc 
+getvariable.pl -c 0.01   "aL1(4,4)" m.clc 
 getvariable.pl -c 0.000000   "aL1(5,-5)" m.clc 
 getvariable.pl -c 0.000000   "aL1(5,-4)" m.clc 
 getvariable.pl -c 0.000000   "aL1(5,-3)" m.clc 
@@ -914,9 +914,9 @@ getvariable.pl -c -0.01   "aL1(6,-2)" m.clc
 getvariable.pl -c -0.02   "aL1(6,-1)" m.clc 
 getvariable.pl -c -0.01   "aL1(6,0)" m.clc 
 getvariable.pl -c -0.05   "aL1(6,1)" m.clc 
-getvariable.pl -c 0.009   "aL1(6,2)" m.clc 
+getvariable.pl -c 0.01   "aL1(6,2)" m.clc 
 getvariable.pl -c 0.03   "aL1(6,3)" m.clc 
-getvariable.pl -c 0.009   "aL1(6,4)" m.clc 
+getvariable.pl -c 0.01   "aL1(6,4)" m.clc 
 getvariable.pl -c -0.01   "aL1(6,5)" m.clc 
 getvariable.pl -c -0.00   "aL1(6,6)" m.clc 
 
@@ -994,7 +994,7 @@ getvariable.pl -c 0.05   "aL3(4,0)" m.clc
 getvariable.pl -c -0.03   "aL3(4,1)" m.clc 
 getvariable.pl -c -0.05   "aL3(4,2)" m.clc 
 getvariable.pl -c -0.01   "aL3(4,3)" m.clc 
-getvariable.pl -c 0.005   "aL3(4,4)" m.clc 
+getvariable.pl -c 0.01   "aL3(4,4)" m.clc 
 getvariable.pl -c 0.000000   "aL3(5,-5)" m.clc 
 getvariable.pl -c 0.000000   "aL3(5,-4)" m.clc 
 getvariable.pl -c 0.000000   "aL3(5,-3)" m.clc 
