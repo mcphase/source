@@ -2379,7 +2379,7 @@ int main(int argc, char *argv[])
    // If required calculates some single-ion physical properties and saves to <physfile>
    if(pars.calcphys & PHYSPROP_MAGBIT)
    {
-      double lnZ=0., U=0., Tmin, Tstep, Tmax, Hmin, Hstep, Hmax, Hm;
+      double Tmin, Tstep, Tmax, Hmin, Hstep, Hmax, Hm;
       if(pars.xT==0. && pars.yT==0.) { std::cerr << "icf1ion: Either x- or y-axis must be temperature\n"; exit(-1); }
       if(pars.xT!=0.) { Tmin = pars.xMin; Tstep = pars.xStep; Tmax = pars.xMax; Hmin = pars.yMin; Hstep = pars.yStep; Hmax = pars.yMax; }
                  else { Tmin = pars.yMin; Tstep = pars.yStep; Tmax = pars.yMax; Hmin = pars.xMin; Hstep = pars.xStep; Hmax = pars.xMax; }

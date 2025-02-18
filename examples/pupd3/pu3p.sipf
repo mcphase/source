@@ -22,7 +22,7 @@ save_matrices
 truncate_matrix=0.007
 
 # For ic1ion singleion calculations
- calcmag
+# calcmag
  xT   = 1
  xHa  = 0
  xHb  = 0

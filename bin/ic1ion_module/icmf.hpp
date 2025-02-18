@@ -99,9 +99,6 @@ class icmfmat
       std::vector<double> expJ(iceig&VE, double T, // Calculates the expectation values <V|Jm|V>exp(-beta*T)
         std::vector<std::vector<double> >&matel,   //   matel is an m*n matrix of the elements <n|Im|n>
         int num_op);                               // with 0<=m<num_op
-        void u1(std::vector<double> &u1,             // Calculates the vector u1 = <i|Ja-<Ja>|j>
-        std::vector<double>&iu1, iceig&V, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
-        int i, int j, int p, float &d);
       int u1(complexdouble* u,int sz, double T,// * sqrt{exp(-beta_i*T)-exp(-beta_j*T)}
         int tn, float &d,complexdouble *V,complexdouble * ev,int Hsz,int & n,int & nd);
       #ifdef JIJCONV

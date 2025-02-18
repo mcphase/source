@@ -30,12 +30,20 @@ grep makenn test*.bat
  ... and run them by:
 grep -l makenn test*.bat | xargs mctest
 
+- generate a list of test by 
+ls -1 test* 
+  and paste and copy some files into dd using
+cat > dd
+ terminate by Ctrl^C, then execute these tests by
+cat dd | xargs mctest
+
 EOF
 exit(1);
 }else{print STDERR "#* $0 *\n";}
 
+$ct=0;$start_time=time();
 foreach(@ARGV)
-{$file=$_;
+{$file=$_;$tim[$ct]=time();
 
 unless (open (Fin, $file)){die "\n error:unable to open $file\n";}   
 $linenr=0;   
@@ -87,16 +95,16 @@ $i=0;foreach $name (@var)
                                    }
                                 } # no comment line
    } # next line
-close Fin;
-print "#************************\n";
-print "# mctest <".$file. "> OK\n";
-print "#************************\n";
-
+close Fin; $tim[$ct]=int(time()-$tim[$ct]);
+print "#************************************************\n";
+print "# mctest <".$file. "> in ".$tim[$ct]."s OK\n";
+print "#************************************************\n";
+++$ct;
 } # next batch file
-foreach(@ARGV)
+$ct=0;foreach(@ARGV)
 {$file=$_;
-print "# mctest <".$file. "> OK\n";
+print "# mctest <".$file. "> in ".$tim[$ct]." s OK\n";++$ct;
 }
-print "#**** END program mctest ******\n";
+print "#**** END program mctest Total Time: ".(time()-$start_time)." s ******\n";
 
 

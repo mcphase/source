@@ -18,8 +18,8 @@
 # for each point in Q-omega space) the minimum and maximum energy has to be given (energy stepwidth is 
 # equal to the parameter epsilon given in the command line after "-r")
 #
-#!emin=-100
-#!emax=100
+#!emin=-30
+#!emax=30
 #
 # optional switches which can be 0 or 1 are
 #!calculate_magmoment_oscillation=1  creates mcdisp.qem

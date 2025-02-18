@@ -6,6 +6,7 @@ REM (ic1ion and icf1ion were not consistent)
 REM 16.1.2025 tested with respect to XTLS on pu3p.sipf 
 REM with alpha=beta=gamma=0  see 
 
+# 200 sec
 ic1ion pu3p.sipf
 getvariable.pl -c -10206 E0 results/ic1ion.out
 getvalue.pl -c 0  0 1 1 0  results/ic1ion.out
@@ -42,12 +43,13 @@ getvalue.pl -c 409  0 1 12 0  results/icf1ion.out
 getvalue.pl -c 491  0 1 13 0  results/icf1ion.out
 getvalue.pl -c 491  0 1 14 0  results/icf1ion.out
 
-
+# 100sec
 mcphasit -prefix test_
 
 getvalue.pl -c -10206.9 2 8 1 0 results/test_mcphas.fum
 getvalue.pl -c 0.695 2 10 21 0 results/test_mcphas.fum
 
+#300sec
 spins -c -prefix test_ 1 0 0 81 > dd
 getvariable.pl -c 1.410495   "a(0,0)" dd 
 getvariable.pl -c 0.000000   "a(2,-2)" dd 
@@ -78,6 +80,7 @@ getvariable.pl -c 0.202595   "a(6,4)" dd
 getvariable.pl -c 0.000000   "a(6,5)" dd 
 getvariable.pl -c 0.000000   "a(6,6)" dd 
 
+# 800sec
 spins -s -M -prefix test_ 1 0 0 81 > dd
 
 getvariable.pl -c 0.000000  "aS1(0,0)" dd 
@@ -228,6 +231,7 @@ getvariable.pl -c 0.076607  "aS3(6,4)" dd
 getvariable.pl -c 0.000000  "aS3(6,5)" dd 
 getvariable.pl -c 0.000000  "aS3(6,6)" dd 
 
+# 100 sec
 setup_mcdisp_mf -prefix test_ 1 0 0 81
 mcdispit -prefix test_ -maxE 100
 

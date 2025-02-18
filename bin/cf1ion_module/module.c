@@ -9,9 +9,6 @@
 #include "vector.h"
 #include <stdlib.h>
 
-#define MU_B 0.05788
-#define K_B  0.0862
-#define SMALL 1e-10
 
 #define UNUSED_PARAMETER(a) (void)a
 
@@ -334,13 +331,13 @@ if(J.Hi()>12||gjmbH.Hi()>12)
      double x,y;int i;
      x=Min(En);
      for (i=1;i<=dj;++i)
-     {if ((y=(En(i)-x)/K_B/T)<700) wn[i]=exp(-y); 
+     {if ((y=(En(i)-x)/KB/T)<700) wn[i]=exp(-y); 
       else wn[i]=0.0;
     //  printf("%g\n",En(i));
       }
      double Zs;
      Zs=Sum(wn);wn/=Zs;  
-     lnZ=log(Zs)-x/K_B/T;
+     lnZ=log(Zs)-x/KB/T;
    // calculate U
      U=En*wn;
    // calculate Ja,Jb,Jc
@@ -477,12 +474,12 @@ if(tn<0) {tn=-tn;pr=0;}
      double x,y;int i,j=0,k,l;
      x=Min(En);
      for (i=1;i<=dj;++i)
-     {if ((y=(En(i)-x)/K_B/T)<700) wn[i]=exp(-y); 
+     {if ((y=(En(i)-x)/KB/T)<700) wn[i]=exp(-y); 
       else wn[i]=0.0;
 //      printf("%g\n",En(i));
       }
      Z=Sum(wn);wn/=Z;  
-     Z*=exp(-x/K_B/T);
+     Z*=exp(-x/KB/T);
    // calculate Ja,Jb,Jc
      ComplexMatrix z(1,dj,1,dj);
      ComplexMatrix * zp[gjmbH.Hi()+1];
@@ -525,7 +522,7 @@ for(l=1;l<=gjmbH.Hi();++l)
            // ... in complex vector scalar product a*b is defined as: a.conj(b) !!! (see cvector.cc)
 
 
-if (delta/K_B/T>0.000001)
+if (delta/KB/T>0.000001)
    {u1*=sqrt(wn(i)-wn(j)); // occupation factor
     if(pr==1)
       {printf("delta(%i->%i)=%4.4gmeV",i,j,delta);
@@ -539,7 +536,7 @@ if (delta/K_B/T>0.000001)
        printf(" |<%i|Ja-<Ja>|%i>|^2=%4.4g |<%i|Jb-<Jb>|%i>|^2=%4.4g |<%i|Jc-<Jc>|%i>|^2=%4.4g",i,j,abs(u1(1))*abs(u1(1)),i,j,abs(u1(2))*abs(u1(2)),i,j,abs(u1(3))*abs(u1(3)));
        printf(" n%i=%4.4g\n",i,wn(i));
       }
-    u1*=sqrt(wn(i)/K_B/T);
+    u1*=sqrt(wn(i)/KB/T);
    }
 
 //clean up memory

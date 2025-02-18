@@ -135,7 +135,7 @@ void ic1ion_module::truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<
 void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vector &T, Vector &lnZ, Vector &U)
 {
    int Hsz=getdim(pars.n,pars.l);
-   char uplo='U'; complexdouble zme;
+   char uplo='U';// complexdouble zme;
    int Esz, incx=1; std::vector<double> E, me, eb;
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
 
@@ -217,7 +217,7 @@ void ic1ion_module::truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vecto
 void ic1ion_module::truncate_spindensity_expJ(icpars &pars,  Vector &gjmbH, Vector &J, double T, int xyz)
 {
    int Hsz=getdim(pars.n,pars.l);
-   char uplo='U'; complexdouble zme;
+   char uplo='U'; //complexdouble zme;
    int Esz, incx=1; std::vector<double> E, me, eb;
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
 

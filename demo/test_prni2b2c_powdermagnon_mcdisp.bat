@@ -20,7 +20,7 @@ call setup_mcdisp_mf 2 0 0 0
 call mcdispit -minE 0.1 -max 2
 
 getvalue.pl -c 0.5907 0 9 9 0 results/mcdisp.qei
-getvalue.pl -c 0.00287 0 10 9 0 results/mcdisp.qei
-getvalue.pl -c 0.00287 0 11 9 0 results/mcdisp.qei
+getvalue.pl -c 0.0029 0 10 9 0 results/mcdisp.qei
+getvalue.pl -c 0.0029 0 11 9 0 results/mcdisp.qei
 
 cd ../../demo

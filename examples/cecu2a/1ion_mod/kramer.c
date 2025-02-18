@@ -8,10 +8,6 @@
 #include <complex>
 #include <vector.h>
 
-#define MU_B 0.05788
-#define K_B  0.0862
-#define SMALL 1e-10
-#define PI   3.14159265
 
 // this is called directly after loading it into memory from dlopen
 #ifdef __linux__
@@ -77,7 +73,7 @@ Matrix brot(1,3,1,3);
 gjmbH=rot*gjmbHin;
 //printf("%g %g %g\n",gjmbH(1),gjmbH(2),gjmbH(3));
    
-  double alpha, betar, betai, lambdap,lambdap_K_BT, lambdap2, expp, expm, np, nm;
+  double alpha, betar, betai, lambdap,lambdap_KBT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, jap, jam, jbp, jbm, jcp, jcm,Z;
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
   alpha = MODPAR[2] * gjmbH[2];
@@ -86,11 +82,11 @@ gjmbH=rot*gjmbHin;
 
   lambdap2 = alpha * alpha + betar * betar + betai * betai;
   lambdap = sqrt (lambdap2);
-  lambdap_K_BT=lambdap/K_B/(*T);
-  if (lambdap_K_BT>700){lambdap_K_BT=700;}
-  if (lambdap_K_BT<-700){lambdap_K_BT=-700;}
-  expm = exp (lambdap_K_BT);
-  expp = 1/expm; //=exp (-lambdap_K_BT);
+  lambdap_KBT=lambdap/KB/(*T);
+  if (lambdap_KBT>700){lambdap_KBT=700;}
+  if (lambdap_KBT<-700){lambdap_KBT=-700;}
+  expm = exp (lambdap_KBT);
+  expp = 1/expm; //=exp (-lambdap_KBT);
   Z = expp + expm;
   (*lnZ)=log(Z);
   np = expp / Z;
@@ -189,7 +185,7 @@ extern "C" int du1calc(int & tn,double & T, Vector & Hxc,Vector & Hext,double * 
     delta	splitting of kramers doublet [meV]
     u1r(i)	<-|Ji-<Ji>|+> sqrt(tanh(delta/2kT))
 */
-  double alpha, betar, betai, lambdap,lambdap_K_BT, lambdap2, expp, expm, np, nm;
+  double alpha, betar, betai, lambdap,lambdap_KBT, lambdap2, expp, expm, np, nm;
   double nennerp, nennerm, nenner;
   complex<double> ja,jb,jc,i(0,1),jap,jbp,jcp,jam,jbm,jcm;
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
@@ -230,11 +226,11 @@ J=rot*Jin;
   lambdap2 = alpha * alpha + betar * betar + betai * betai;
   lambdap = sqrt (lambdap2);
   
-  lambdap_K_BT=lambdap/K_B/T;
-  if (lambdap_K_BT>700){lambdap_K_BT=700;}
-  if (lambdap_K_BT<-700){lambdap_K_BT=-700;}
-  expm = exp (lambdap_K_BT);
-  expp = 1/expm; //=exp (-lambdap_K_BT);
+  lambdap_KBT=lambdap/KB/T;
+  if (lambdap_KBT>700){lambdap_KBT=700;}
+  if (lambdap_KBT<-700){lambdap_KBT=-700;}
+  expm = exp (lambdap_KBT);
+  expp = 1/expm; //=exp (-lambdap_KBT);
   Z = expp + expm;
   np = expp / Z;
   nm = expm / Z;
@@ -276,9 +272,9 @@ if (tn==2)
   u1(3)=jc*sqrt(nm-np);
   } else
   {// quasielastic scattering needs epsilon * nm / KT ....
-  u1(1)=ja*sqrt(nm/K_B/T);
-  u1(2)=jb*sqrt(nm/K_B/T);
-  u1(3)=jc*sqrt(nm/K_B/T);
+  u1(1)=ja*sqrt(nm/KB/T);
+  u1(2)=jb*sqrt(nm/KB/T);
+  u1(3)=jc*sqrt(nm/KB/T);
   }
  }
  else
@@ -324,14 +320,14 @@ if (tn==2)
     }
  if (tn==1)
  {// now lets calculate mat
- u1(1)=(jam-J(1))*sqrt(nm/K_B/T);
- u1(2)=(jbm-J(2))*sqrt(nm/K_B/T);
- u1(3)=(jcm-J(3))*sqrt(nm/K_B/T);
+ u1(1)=(jam-J(1))*sqrt(nm/KB/T);
+ u1(2)=(jbm-J(2))*sqrt(nm/KB/T);
+ u1(3)=(jcm-J(3))*sqrt(nm/KB/T);
  }else{ // tn = 3 in this case
  // now lets calculate mat
- u1(1)=(jap-J(1))*sqrt(np/K_B/T);
- u1(2)=(jbp-J(2))*sqrt(np/K_B/T);
- u1(3)=(jcp-J(3))*sqrt(np/K_B/T);
+ u1(1)=(jap-J(1))*sqrt(np/KB/T);
+ u1(2)=(jbp-J(2))*sqrt(np/KB/T);
+ u1(3)=(jcp-J(3))*sqrt(np/KB/T);
  }
 }
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
