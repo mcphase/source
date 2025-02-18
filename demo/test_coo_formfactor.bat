@@ -10,11 +10,11 @@ cd ../coo
 
 mcdispit -c -max 200  -minE -0.1 -maxE 3000 -prefix 002
 call range 6 -0.1 3000 results/002mcdisp.trs
-getvalue.pl -c 112.748 5 6 10 0  results/002mcdisp.trs
+getvalue.pl -c 113.691 5 6 10 0  results/002mcdisp.trs
  mcdispit -t -prefix 002
 range 5 13 14 results/002mcdisp.qei
-getvalue.pl -c 9e-07  9 10 1598.5 0 results/002mcdisp.qei
-getvalue.pl -c 8e-08 9 11 1598.5 0 results/002mcdisp.qei
+getvalue.pl -c 4e-06  9 10 1.33376 0 results/002mcdisp.qei
+getvalue.pl -c 0.0001 9 11 1.33376 0 results/002mcdisp.qei
    
  
 

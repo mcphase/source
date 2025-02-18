@@ -688,10 +688,12 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
    for(q=0; q<3; q++)
    {  z1=Qq[q][2].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
       z2=Qq[q][3].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
-      zij[2*q+1].r=z1.r+z2.r;zij[2*q+1].i=z1.i+z2.i;
+      zij[2*q+1].r=z1.r+z2.r;
+      zij[2*q+1].i=z1.i+z2.i;
       z1=Qq[q][2].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],false);
       z2=Qq[q][3].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],true);
-      zji[2*q+1].r=z1.r+z2.r;zji[2*q+1].i=z1.i+z2.i;
+      zji[2*q+1].r=z1.r+z2.r;
+      zji[2*q+1].i=z1.i+z2.i;
       if(i==j)                               //subtract thermal expectation value from zij=zii
       {                                      //MR120120 ... reintroduced
          complexdouble expQ;double thexp=0;
@@ -710,10 +712,12 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
       
       z1=Qq[q][4].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],false);
       z2=Qq[q][5].MultuxMv((complexdouble*)&est[i][1],(complexdouble*)&est[j][1],true);
-      zij[2*q+2].r=z1.r+z2.r;zij[2*q+2].i=z1.i+z2.i;
+      zij[2*q+2].r=z1.r+z2.r;
+      zij[2*q+2].i=z1.i+z2.i;
       z1=Qq[q][4].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],false);
       z2=Qq[q][5].MultuxMv((complexdouble*)&est[j][1],(complexdouble*)&est[i][1],true);
-      zji[2*q+2].r=z1.r+z2.r;zji[2*q+2].i=z1.i+z2.i;
+      zji[2*q+2].r=z1.r+z2.r;
+      zji[2*q+2].i=z1.i+z2.i;
       if(i==j)                               //subtract thermal expectation value from zij=zii
       {                                      //MR120120 ... reintroduced
          complexdouble expQ;double thexp=0;

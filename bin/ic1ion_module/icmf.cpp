@@ -668,8 +668,7 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
  } // iJ
  ex[iJ] = log(Z)-VE.E(0)/(KB*T); // set lnZ
  ex[iJ+1] = U/Z;// set U
-          
-   return ex;
+    return ex;
 }
 
 
@@ -712,8 +711,7 @@ int icmfmat::u1(complexdouble*u,int sz, double T,// * sqrt{exp(-beta_i*T)-exp(-b
    if(i==j&&T>0) {//subtract thermal expectation value from zij=zii
             std::vector< std::vector<double> > matel;
             std::vector<double> vJ = expJ(VE,T,matel,sz);
-
-            for(iJ=0; iJ<sz; iJ++)u[iJ].r-=vJ[iJ];
+           for(iJ=0; iJ<sz; iJ++)u[iJ].r-=vJ[iJ];
             }
    if (T<0){T=-T;}
 

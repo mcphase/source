@@ -3,10 +3,10 @@
 # Author: Martin Rotter mcphas version 3.2
 #****************************************************
 T=2.3 Ha=0 Hb=0 Hc=0 n=1 spins nofatoms=1 in primitive basis nofcomponents=6 - momentum configuration <J(i)>
- 0.01
- 0.02
- 0.03000
- 0.06000
- 0.015000
- 0.03000
+ 0.0
+ 0.0
+ -0.611296 
+ 0.0
+ 0.0
+ -0.305648
 
