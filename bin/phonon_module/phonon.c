@@ -11,9 +11,6 @@
 #include <complex>
 #include <vector.h>
 
-#define MU_B 0.05788
-#define K_B  0.0862
-#define SMALL 1e-10
 
 
 // this is called directly after loading it into memory from dlopen
@@ -120,7 +117,7 @@ Omega/=factor;
 // 1meV=1.6022e-22 J
 // Omegai=m a0^2 (Deltai/hbar)^2
 // 
-double Delta1,Delta2,Delta3,K_BT,X,Y,Z;
+double Delta1,Delta2,Delta3,KBT,X,Y,Z;
 
 Delta1=sqrt(-Omega(1)*1.6022e-22/m/a0/a0)*6582e-16; // phonon einstein frequencies (meV) 
 Delta2=sqrt(-Omega(2)*1.6022e-22/m/a0/a0)*6582e-16;
@@ -132,12 +129,12 @@ if(isnan((Delta2))){fprintf (stderr, "phonon: Delta2=nan Omega(2)=%g m=%g\n",Ome
 if(isnan((Delta3))){fprintf (stderr, "phonon: Delta3=nan Omega(3)=%g m=%g\n",Omega(3),m);exit (EXIT_FAILURE);}
 
 
-K_BT=(*T)*K_B;
-X=exp(-Delta1/K_BT);
-Y=exp(-Delta2/K_BT);
-Z=exp(-Delta3/K_BT);
+KBT=(*T)*KB;
+X=exp(-Delta1/KBT);
+Y=exp(-Delta2/KBT);
+Z=exp(-Delta3/KBT);
 // calculate phonon function and partition sum Z
-(*lnZ)=-Delta1/2/K_BT-Delta2/2/K_BT-Delta3/2/K_BT-log(1-X)-log(1-Y)-log(1-Z);
+(*lnZ)=-Delta1/2/KBT-Delta2/2/KBT-Delta3/2/KBT-log(1-X)-log(1-Y)-log(1-Z);
 
 // the energy U is sum_i Ei exp(-Ei/(kT))/Z
 // with Ei=w0(0.5+i)-1/2 FT.u0 (the last term is added to (*U) at the end of Icalc
@@ -212,9 +209,9 @@ default: break;
 }
 
 (*U)-=0.5*uu*F; // last term  to correct energy
-(*lnZ)+=0.5*uu*F/K_BT; // last term  to correct energy
+(*lnZ)+=0.5*uu*F/KBT; // last term  to correct energy
  // to easy convergence of mcphasit the linearity of the einstein Oscillator is damped 
-//if(isnan((*lnZ))){fprintf (stderr, "lnzi=nan %g %g %g %g %g %g  %g %g\n",uu(1),uu(2),uu(3),F(1),F(2),F(3),uu*F,K_BT);exit (EXIT_FAILURE);}
+//if(isnan((*lnZ))){fprintf (stderr, "lnzi=nan %g %g %g %g %g %g  %g %g\n",uu(1),uu(2),uu(3),F(1),F(2),F(3),uu*F,KBT);exit (EXIT_FAILURE);}
 
   u0=0;
   u0[1] = uu(1);

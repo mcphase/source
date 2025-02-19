@@ -801,7 +801,7 @@ int icf1ion_module::du1calc(int &tn,            // Input transition number; if t
    complexdouble  zme; zme.r=0; zme.i=0.; 
    std::vector<complexdouble> zij(sz,zme);//, zji(6,zme);
    std::vector<double> u(sz+1),iu(sz+1);
-   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    //char uplo = 'U';
    double Z=0., therm;
 
@@ -1317,7 +1317,7 @@ int icf1ion_module::dmq1(int &tn,                // Input transition number |tn|
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp, Qm; 
    std::vector< std::vector< sMat<double> > > Qmat; for(i=0; i<3; i++) Qmat.push_back(Qp);
-   complexdouble z1,z2,zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   complexdouble z1,z2, zbeta;  zbeta.r=0; zbeta.i=0;
    std::vector<complexdouble> zij(7,zbeta), zji(7,zbeta);
    double Z=0., therm;
    
@@ -1962,7 +1962,7 @@ int      sdod_du1calc(int xyz,            // Indicating which of x,y,z direction
    complexdouble zme; zme.r=0; zme.i=0.; 
    std::vector<complexdouble> zij(sz,zme);
    std::vector<double> u(sz+1),iu(sz+1);
-   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   //complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    double Z=0., therm;
 
    // check if printout should be done and make tn positive

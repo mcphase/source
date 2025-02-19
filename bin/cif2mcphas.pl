@@ -343,8 +343,12 @@ while (<>) {
 				    # if there are nonnumeric symbols refering to other atomic positions
 				    # try to substitute those with numbers
 				    if($ic>1&&$ic<8){for $j (0..$nofatom-1) {
-                                      if($sub=~/.*$dat[$j][0]/){ #print "found $dat[$j][0] in $sub ... ";
-                                                                 $sub=~s/$dat[$j][0]/\($dat[$j][$ic]\)/g; # substitute symbol with atomic coordinate
+                                      while($sub=~/.*$dat[$j][0]/){ #print "found $dat[$j][0] in $sub ... ";
+                                                                 if($sub=~/.*$dat[$j][0]x/){$sub=~s/$dat[$j][0]x/\($dat[$j][2]\)/;
+                                                                 }elsif($sub=~/.*$dat[$j][0]y/){$sub=~s/$dat[$j][0]y/\($dat[$j][3]\)/;
+                                                                 }elsif($sub=~/.*$dat[$j][0]z/){$sub=~s/$dat[$j][0]z/\($dat[$j][4]\)/;
+                                                                 }else{
+                                                                 $sub=~s/$dat[$j][0]/\($dat[$j][$ic]\)/;} # substitute symbol with atomic coordinate
                                                                  #print "substituting to $sub\n";
                                                                               }
                                       } 
@@ -568,7 +572,10 @@ for $j(0..$nofatom-1) {
 }
 # If the oxidation state is undefined, look it up in the table
 for $j(0..$nofatom-1) {
-  $at = $dat[$j][0]; $at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
+  if(defined $dat[$j][9]){$at = $dat[$j][9];}
+  elsif(defined $dat[$j][8]){$at = $dat[$j][8];}
+  else {$at = $dat[$j][0];} 
+  $at =~ s/_//g; $at =~ s/[0-9]+[A-Z]+//g; $at =~ s/[0-9]+//g; $at =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g;
   $at = lc $at; $at = ucfirst $at; 
   $attab = $element{$at}; 
   $atmas = $mass{$at}; 
@@ -740,7 +747,10 @@ for $j(0..$nofatom-1) {
   foreach (@same) { $uepos[$_]=undef; }
   @uepos = grep defined, @uepos;
 
-  $atom = $dat[$j][0]; $atom =~ s/_//g; $atom =~ s/[0-9]+[A-Z]+//g; 
+  if(defined $dat[$j][9]){$atom = $dat[$j][9];}
+  elsif(defined $dat[$j][8]){$atom = $dat[$j][8];}
+  else {  $atom = $dat[$j][0];}
+  $atom =~ s/_//g; $atom =~ s/[0-9]+[A-Z]+//g; 
   $atom =~ s/[0-9]+//g; $atom =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g; $atom = sprintf "%-4s",$atom;
   $atom = lc $atom; $atom = ucfirst $atom;
   push @atoms, $atom;
@@ -1198,7 +1208,7 @@ for (keys %ions) {
   else {
     print FOUT "#!MODULE=phonon\n";
     print FOUT $sipfheader;
-    print FOUT "IONTYPE=$_".abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-")."\n";
+    print FOUT "IONTYPE=".$ionnames{$_}.abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-")."\n";
     print FOUT "CHARGE=$oxy[$ions{$_}]\n";
     print FOUT "MAGNETIC=$ismag[$ions{$_}]\n";
     print FOUT "\n";
