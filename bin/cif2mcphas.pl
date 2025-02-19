@@ -747,14 +747,16 @@ for $j(0..$nofatom-1) {
   foreach (@same) { $uepos[$_]=undef; }
   @uepos = grep defined, @uepos;
 
-  if(defined $dat[$j][9]){$atom = $dat[$j][9];}
-  elsif(defined $dat[$j][8]){$atom = $dat[$j][8];}
-  else {  $atom = $dat[$j][0];}
+  if(defined $dat[$j][9]){$atom = $dat[$j][9];} # if given _atom_type_symbol - use it !
+  elsif(defined $dat[$j][8]){$atom = $dat[$j][8];} # elsif given _atom_site_type_symbol - use it !
+  else {  $atom = $dat[$j][0];}  # else use _atom_site_label (has to be there)
   $atom =~ s/_//g; $atom =~ s/[0-9]+[A-Z]+//g; 
   $atom =~ s/[0-9]+//g; $atom =~ s/['"\*()\?\+\-\~\^\,\.\%\\\>\=\/\|\[\]\{\}\$]//g; $atom = sprintf "%-4s",$atom;
   $atom = lc $atom; $atom = ucfirst $atom;
-  push @atoms, $atom;
-  if($ismag[$j]) { $ion = $atom.$oxy[$j]."p"; $ion=~s/\s+//g; } else { $ion = $atom; }
+  if($ismag[$j]) { $ion = $atom.$oxy[$j]; $ion=~s/\s+//g;push @atoms, $ion."+"; $ion=$ion."p"; } 
+            else { $ion = $atom;push @atoms, $atom; }
+  
+
 
   # Populates the arrays of atom types and positions
   $ioncount = 1;
@@ -765,6 +767,13 @@ for $j(0..$nofatom-1) {
       $label .= "_".$ioncount; $ioncount++;
     }
 # increased position accuracy to 12 digits MR 5.2.2023
+# in @pos information about all ions is saved:
+  # [0] - atom stores the Chemical Element Symbol, e.g. Tb - determine the atom:
+  # [1,2,3] - seps positions
+  # [4] - $ion stores the ionname with p instead of +, e.g. Tb3p
+  # [5] - stores the Valence , e.g. 3+ (not the charge, charge is stored in oxy[] set in line 790 ff to input charges) 
+  # [6] - label stores the name of the sipf file (without .sipf) 
+  # [7] - lab stores the atom_site_label from cif file $dat[$j][0]
     push @pos, sprintf "%-4s:% 17.12f:% 17.12f:% 17.12f:%-5s:%d:% 10.5f:%s:%s",$atom,@seps,$ion,$j,$oxy[$j],$label,$lab;
     $seen=0; foreach(@atp) { if($_=~/$atom/) { $seen=1; } } 
     if(!$seen || !defined($atp[-1])) { push @atp, $atom; } $htp{$atom}++;
@@ -778,6 +787,7 @@ for $j(0..$nofatom-1) {
     if($checkpos) { printf "%-4s% 10.5f% 10.5f% 10.5f\n",$atom,@seps; }
    $mults[$j]++;
   }
+# for option -ch replace @oxy = valence with input charges
   if ($inputcharges) {    # Replace formal valence by user inputted charges
     $atom =~ s/^\s+|\s+$//g;
     if ($chhash{$atom} ne "") {
@@ -951,7 +961,7 @@ if($spagrp eq "") {
   foreach $so (@sympos) { print "$so\n"; }
 } else { print "spacegroup is $spagrp".(defined $maybematch?" (possibly)":"")."\n"; }
 print "--------------------------------------------------------------------------------\n";
-print "Label\tElement\tMass\tValence\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
+print "Label\tElement\tMass\tCharge\tMult.\tMagnetic?\tFract_x\tFract_y\tFract_z\n";
 print "--------------------------------------------------------------------------------\n";
 @magornot = ( "NonMagnetic", "Magnetic" );
 $totalcharge=0;
@@ -1020,7 +1030,15 @@ for $si (0..$sa-1) {
   for $sj (0..$sb-1) { 
     for $sk (0..$sc-1) {
       for (0..$#pos) {
-        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; 
+        @ps = split(":",$pos[$_]); 
+        # ps[0] - atom stores the Chemical Element Symbol, e.g. Tb - 
+        # ps[1,2,3] - seps positions
+        # ps[4] - $ion stores the ionname, e.g. Tb3+
+        # ps[5] - stores the Valence , e.g. 3+ (not the charge, charge is stored in oxy[] set in line 790 ff to input charges) 
+        # ps[6] - label stores the name of the sipf file (without .sipf) 
+        # ps[7] - lab stores the atom_site_label from cif file $dat[$j][0]
+ 
+        $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; 
         $ions{$ps[7]} = $ps[5]; $ionnames{$ps[7]} = $ps[4];
         if($pointcharge) { $ntype = 1; } else { $ntype = $mults[$ps[5]]; }
         $pa = ($ps[1]+$si)/$sa; $pb = ($ps[2]+$sj)/$sb; $pc = ($ps[3]+$sk)/$sc;
@@ -1065,7 +1083,15 @@ for $si (0..$sa-1) {
   for $sj (0..$sb-1) { 
     for $sk (0..$sc-1) {
       for (0..$#pos) {
-        @ps = split(":",$pos[$_]); $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; 
+        @ps = split(":",$pos[$_]);
+  # ps[0] - atom stores the Chemical Element Symbol, e.g. Tb - 
+  # ps[1,2,3] - seps positions
+  # ps[4] - $ion stores the ionname, e.g. Tb3+
+  # ps[5] - stores the Valence , e.g. 3+ (not the charge, charge is stored in oxy[] set in line 790 ff to input charges) 
+  # ps[6] - label stores the name of the sipf file (without .sipf) 
+  # ps[7] - lab stores the atom_site_label from cif file $dat[$j][0]
+ 
+        $ntype = $htp{$ps[0]}; $ps[0]=~s/\s*//g; $ps[4]=~s/\s*//g; 
         $ions{$ps[7]} = $ps[5]; $ionnames{$ps[7]} = $ps[4];
         if($pointcharge) { $ntype = 1; } else { $ntype = $mults[$ps[5]]; }
         if($ismag[$ions{$ps[7]}]) {
@@ -1208,7 +1234,7 @@ for (keys %ions) {
   else {
     print FOUT "#!MODULE=phonon\n";
     print FOUT $sipfheader;
-    print FOUT "IONTYPE=".$ionnames{$_}.abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-")."\n";
+    print FOUT "IONTYPE=".$ionnames{$_}."\n";
     print FOUT "CHARGE=$oxy[$ions{$_}]\n";
     print FOUT "MAGNETIC=$ismag[$ions{$_}]\n";
     print FOUT "\n";
@@ -1449,8 +1475,8 @@ print "\n";
 print " mcphas_all.j                         ... contains all atoms (magnetic and not)\n";
 print " mcphas_magnetic_atoms.j == mcphas.j  ... contains only magnetic atoms\n";
 for (keys %ions) {
-  $atm = $atoms[$ions{$_}]; $atm =~ s/\s+//g;
-  printf " %-37s... contains parameters for %s ion\n", "$_.sipf", $atm.abs($oxy[$ions{$_}]).($oxy[$ions{$_}]>0?"+":"-");
+  $atm = $atoms[$ions{$_}]; 
+  printf " %-37s... contains parameters for %s \n", "$_.sipf", $atm;
 }
 print "\n";
 print "   running \"makenn R\" command  will create from mcphas.j a number of files\n";
