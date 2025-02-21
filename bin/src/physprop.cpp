@@ -36,7 +36,7 @@ physproperties::physproperties (int nofspincorrs,int maxnofhkli,int na,int nm)
  nofcomponents=nm;
  
  m=Vector(1,3);
- H=Vector(1,3);
+ H=Vector(1,HEXT_DIMENSION);
  P=Vector(1,3);
  jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
@@ -112,15 +112,14 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   float nnerr[200];nnerr[0]=199;
   int ortho=1;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
-      Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1; // Trick: put a=b=c=1 to have unit vectors in a b and c directions
+   Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
                        abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
-        // ... then use dadadc2ijk and ijk2dadbdc with this unit length "lattice"
-   Vector mabc(1,3),Hijk(1,3);
-   dadbdc2ijk(Hijk,H,abc);
+
+   Vector mabc(1,3); 
    ijk2dadbdc(mabc,m,abc);
 
-  printf("saving properties for  T=%g H=%g Ha=%g Hb=%g Hc=%g ",T,Norm(Hijk),H(1),H(2),H(3));
-  if(ortho==0){printf(" Hi=%g Hj=%g Hk=%g ",Hijk(1),Hijk(2),Hijk(3));}
+  printf("saving properties for ");ini.THstring(stdout,x,y,T,H,inputpars.cs,true,false);
+  if(ortho==0){printf(" Hi=%g Hj=%g Hk=%g ",H(1),H(2),H(3));}
   ini.time_estimate_until_end(x,y);
   printf("\n");
 
@@ -170,20 +169,20 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fclose(fout);
       }
    if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eel=0;P=0;}
-   fout = fopen_errchk (outfilename,"a");
-   fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
-            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
-   if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
+   fout = fopen_errchk (outfilename,"a");ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   fprintf (fout, "       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
+            myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*H(1,3)/Norm(H(1,3))));
+   if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),H(1),H(2),H(3));}
     if(ini.doeps){fprintf (fout, "  %4.4g  %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(Eel),myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));}
     if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf (fout, "  %4.4g  %4.4g %4.4g ",myround(P(1)),myround(P(2)),myround(P(3)));
    fprintf(fout,"\n");
    fclose(fout);
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,prefix);
   strcpy(outfilename+11+strlen(prefix),"mcphas.fum");
-   fout = fopen_errchk (outfilename,"a");
-   fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g %4.4g\n",
-            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),
-            myround(mabc[2]),myround(mabc[3]),myround(m*Hijk/Norm(Hijk)));
+   fout = fopen_errchk (outfilename,"a");ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   fprintf (fout, " %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g %4.4g\n",
+            myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),
+            myround(mabc[2]),myround(mabc[3]),myround(m*H(1,3)/Norm(H(1,3))));
    fclose(fout);
    if((fout=fopen("./fit/mcphas.fum","rb"))!=NULL)
     {// some measured data should be fitted
@@ -200,7 +199,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
                                      case 11: clc=mabc(1);break;
                                      case 12: clc=mabc(2);break;
                                      case 13: clc=mabc(3);break;
-                                     case 14: clc=m*Hijk/Norm(Hijk);break;
+                                     case 14: clc=m*H(1,3)/Norm(H(1,3));break;
                                      default: ;
                               }
                    } 
@@ -274,8 +273,9 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   totalJ=0; 
   if (htfailed!=0){j=0;}else{totalJ=sps.totalJ();}
    if(j<0){sps.wasstable=j;}// if qvector generated structure is stable, then take period key = number of qvector
-   fprintf (fout, "%4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g       %ip           %ip                %i x %i x %i ",
-            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),j,sps.wasstable,sps.na(),sps.nb(),sps.nc());
+   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   fprintf (fout, "       %ip           %ip                %i x %i x %i ",
+           j,sps.wasstable,sps.na(),sps.nb(),sps.nc());
            for(i1=1;i1<=nofcomponents;++i1)
 	      {fprintf(fout,"%4.4g ",myround(totalJ(i1)));}
 	      fprintf(fout,"\n");
@@ -340,7 +340,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       }
   fout = fopen_errchk (filename,"a");
   if (htfailed!=0){jj[i](1)=0;jj[i](2)=0;jj[i](3)=0;}
-   fprintf (fout, "%4.4g %4.4g   %4.4g %4.4g   %4.4g %4.4g %4.4g     ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+    ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
         for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
             {fprintf (fout, "%4.4g ",myround(jj[i](j2+nofcomponents*nofcomponents*(l-1))));
 	    }
@@ -453,10 +453,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); 
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
    for (i=nofhkls;i>=1;--i)
     {if (htfailed!=0){hkli[inew[i]](1)=0;hkli[inew[i]](2)=0;hkli[inew[i]](3)=0;hkli[inew[i]](4)=0;}
-    fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g     ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](4)));
+    fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](4)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray a component
@@ -464,9 +464,9 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
+    {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray b component
@@ -474,9 +474,9 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
+    {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
     } fprintf(fout,"\n");
    fclose(fout);
   //xray c component
@@ -484,9 +484,9 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   fprintf (fout, " %-4.4g %-4.4g %-4.4g %-4.4g  %-4.4g %-4.4g %-4.4g      ",myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]));
+   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
    for (i=nofhkls;i>=1;--i)
-    {fprintf (fout, "%4.4g %4.4g %4.4g  %4.4g %4.4g    ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
+    {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
     } fprintf(fout,"\n");
    fclose(fout);
 
@@ -520,17 +520,18 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "#!spins_scale_moment=1.0\n");
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-   fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");}
+   fprintf (fout, "#!out1=x out2=y out3=T [K] out4=|H| [T] out5=Ha [T] out6=Hb[ T] out7=Hc [T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");}
 else
-  {fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsaa eps2=epsbb eps3=epscc eps4=2epsbc eps5=2epsac eps6=2epsab\n");}
+  {fprintf (fout, "#!out1=x out2=y out3=T [K] out4=|H| [T] out5=Ha [T] out6=Hb [T] out7=Hc [T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsaa eps2=epsbb eps3=epscc eps4=2epsbc eps5=2epsac eps6=2epsab\n");}
    fprintf (fout, "    #<I1(atom 1)> <I1(atom 2)> .... selfconsistent Spinconfiguration  \n");
    fprintf (fout, "    #<I2(atom 1)> <I2(atom 2)> .... UNITS:  multiply <I>=<J> by Lande factor g to get moment [muB]\n");
    fprintf (fout, "    #<I3(atom 1)> <I3(atom 2)> ....}\n");
     fclose(fout);
    }  
   fout = fopen_errchk (outfilename,"a");
-   fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
-            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),myround(H[2]),myround(H[3]),sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
+   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   fprintf (fout, " %i %i %i ",
+            sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
    if (htfailed!=0){fprintf(fout,"1 ");sps.spinfromq(1,1,1,null1,null,null,null);} // failed
     else {fprintf(fout,"0 ");}
    fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
@@ -566,18 +567,17 @@ else
    fprintf (fout, "#!spins_scale_moment=1.0\n");
    fprintf (fout, "#!scale_view_1=1.0 scale_view_2=1.0 scale_view_3=1.0\n");
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-   fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");}
+   fprintf (fout, "#!out1=x out2=y out3=T [K] out4=|H| [T] out5=Ha [T] out6=Hb [T] out7=Hc [T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsii eps2=epsjj eps3=epskk eps4=2epsjk eps5=2epsik eps6=2epsij\n");}
 else
-  {fprintf (fout, "#x y T[K] |H| H[T] Ha[T] Hb[T] Hc[T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsaa eps2=epsbb eps3=epscc eps4=2epsbc eps5=2epsac eps6=2epsab\n");}
+  {fprintf (fout, "#!out1=x out2=y out3=T [K] out4=|H| [T] out5=Ha [T] out6=Hb [T] out7=Hc [T] nofspins nofatoms(in primitive basis) nofmeanfield-components errorcode(0=ok,1=failed) eps1=epsaa eps2=epsbb eps3=epscc eps4=2epsbc eps5=2epsac eps6=2epsab\n");}
    fprintf (fout, "    #mf1(atom 1) mf1(atom 2) .... selfconsistent Mean field configuration \n"); 
    fprintf (fout, "    #mf2(atom 1) mf2(atom 2) .... UNITS: mf(atom i)=gJ*mu_B*hxc(atom i)[meV] \n"); 
    fprintf (fout, "    #mf3(atom 1) mf3(atom 2) ....         (i.e. divide by gJ and mu_B=0.05788meV/Tesla to get exchange field hxc[Tesla]}\n");
     fclose(fout);
    }  
-     fout = fopen_errchk (outfilename,"a");
-fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g %i %i %i ",
-            myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),
-           myround(H[2]),myround(H[3]),mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
+     fout = fopen_errchk (outfilename,"a");ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+fprintf (fout, " %i %i %i ",
+            mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
    if (htfailed!=0){fprintf(fout,"1 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
                     sps.print(fout);fprintf(fout,"\n");}
    else
@@ -598,21 +598,20 @@ return sta;
 // scroll output files and read physical properties from these if possible,
 // on success return 0, otherwise
 // return 1
-int physproperties::read(int verbose, par & inputpars,char * readprefix)
+int physproperties::read(int verbose, par & inputpars,char * readprefix,inipar & ini)
 { FILE *fin;
   char filename[50];
   int i,j2,l,nmax;
   float nn[200];nn[0]=199;
   int ortho=1,found=0;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
-      Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
+     Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
                        abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
 
-   Vector mabc(1,3),Hijk(1,3);
-   dadbdc2ijk(Hijk,H,abc);
-   ijk2dadbdc(mabc,m,abc);
+   Vector mabc(1,3);
+    ijk2dadbdc(mabc,m,abc);
 
-  printf("reading properties for T=%g K  Ha= %g Hb= %g Hc= %g T\n", T,H(1),H(2),H(3));
+  printf("reading properties for ");ini.THstring(stdout,x,y,T,H,inputpars.cs,true,false);
 
 //-----------------------------------------mcphas.fum------------------------------------------------  
 // here read free energy etc if possible ... otherwise return 1

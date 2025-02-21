@@ -80,7 +80,7 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
   // add correction term
   fe+=0.5*(meanfield*d1);
   U+=0.5*(meanfield*d1);
- // printf ("Ha=%g Hb=%g Hc=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
+ // printf ("Hi=%g Hj=%g Hk=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
  }
 }}}
 fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
@@ -102,7 +102,7 @@ double fecalc(double & U, double & Eel, int & r,double & spinchange,Vector Hex,d
              spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs)
 {/*on input:
     T		Temperature[K]
-    Hex		Vector of external magnetic field [T]
+    Hex		Vector of external magnetic field [T] in ijk coordinates
     inputpars	exchange and other parameters
     sps		initial spinconfiguration
     testspins	all other testspinconfigurations
@@ -113,6 +113,7 @@ double fecalc(double & U, double & Eel, int & r,double & spinchange,Vector Hex,d
     u		mangetic energy[meV]
 
  */
+
  double fe,dE; // free energy
  Matrix GG(1,6,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector diff(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector

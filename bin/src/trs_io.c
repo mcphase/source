@@ -1,6 +1,6 @@
 // used in mcdisp.c and singleion.c for in/out of .trs files
 
-void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,double & T,Vector & Hext,char observable)
+void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,char * out,char observable)
 {time_t curtime;char cc=' ';
  switch(observable)
 {case 'x': 
@@ -92,7 +92,8 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,doubl
    fprintf(fout,"#! ninit= %g (max number of initial states) -do not modify: needed to count transitions\n",ninit);
    fprintf(fout,"#! pinit= %g (minimum population number of initial states)-do not modify: needed to count transitions\n",pinit);
    fprintf(fout,"#! maxE= %g meV(maximum value of transition energy)-do not modify: needed to count transitions\n",maxE);
-   fprintf(fout,"#! T= %g K Ha=%g Hb=%g Hc=%g T\n",T,Hext(1),Hext(2),Hext(3));
+   fprintf(fout,"#! %s\n",out);
+   
    fprintf(fout,"#1 2 3  4 *** 5 ****** 6 *********** 7 ******* 8 ********************"
                    " 9  10  ********* 11 ******************** 12 *********************\n");
    fprintf(fout,"#i j k ionnr transnr energy(meV) |gamma_s| sigma_mag_dip[barn/sr](*) "

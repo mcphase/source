@@ -44,7 +44,7 @@ double save(int verbose,const char * filemode, int j,inipar & ini,par & inputpar
 // scroll output files and read physical properties from these if possible,
 // on success return 0, otherwise
 // returns 1
-int read(int verbose, par & inputpars,char * readprefix);
+int read(int verbose, par & inputpars,char * readprefix,inipar & ini);
 };
 
 

@@ -3,13 +3,18 @@
 
 
 #include<martin.h>
-#include<myev.h>
+//#include<myev.h>
 
 #ifndef __linux__
 #include<cfloat>
 #endif
 
-
+//The strnstr() function locates the first occurrence of the null-terminated string find in the string s, 
+ //where not more than len characters are searched.  Characters that
+//     appear after a ‘\0’ character are not searched.  Since the strnstr() function is a FreeBSD specific API, it should only be used when portability is not a concern.
+//RETURN VALUES
+//     if find occurs nowhere in s, NULL is returned; otherwise a pointer to the first character of the first occurrence of find
+//     is returned.
 char * mystrnstr(const char *s, const char *find, size_t slen)
 {
 	char c, sc;
@@ -843,6 +848,34 @@ ratio=radius/(a.Column(3)*rvec);nmax(3)=ceil(1+ratio); nmin(3)=floor(-1-ratio);
 
 }
 
+// checks if Habc and Hext(1,2,3)=Hijk are in accordance if nonzero both, similar for E
+void crosscheck_H_E(Vector & Hext,Vector & Habc,Vector & Eabc,Vector & abc)
+{
+ // transform Habc and Eabc to ijk and add to Hext
+ Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3),w(1,3);
+ if(Norm(Habc)>SMALL_FIELD) // Habc is given -- thus use it !
+ { dadbdc2ijk(v,Habc,abcu);
+  w=Hext(1,3);
+  if(Norm(w)>SMALL_FIELD&&Norm(v-w)>SMALL_FIELD)
+  {fprintf(stderr,"# Error reading mcdisp.mf - Habc and Hijk both given and  Ha=%g Hb=%g Hc=%g and Hi=%g Hj=%g Hk=%g values do not agree ! \n",
+   Habc(1),Habc(2),Habc(3),w(1),w(2),w(3));exit(EXIT_FAILURE);}
+  for(int col=1;col<=3;++col){Hext(col)=v(col);}
+ } else
+ { v=Hext(1,3);
+ ijk2dadbdc(Habc,v,abcu);// if not, set Habc according to Hext in case  Hijk has been given
+ } 
+ if(Norm(Eabc)>SMALL_FIELD) // Eabc is given -- thus use it !
+ { dadbdc2ijk(v,Eabc,abcu);
+  w=Hext(4,6,-3);
+  if(Norm(w)>SMALL_FIELD&&Norm(v-w)>SMALL_FIELD)
+  {fprintf(stderr,"# Error reading mcdisp.mf - Eabc and Eijk both given and  Ea=%g Eb=%g Ec=%g and Ei=%g Ej=%g Ek=%g values do not agree ! \n",
+   Eabc(1),Eabc(2),Eabc(3),w(1),w(2),w(3));exit(EXIT_FAILURE);}
+  for(int col=1;col<=3;++col){Hext(col+3)=v(col);}
+ } else
+ { v=Hext(4,6,-3);
+ ijk2dadbdc(Eabc,v,abcu);// set Eabc according to Hext in case Eijk has been given
+ } 
+}
 
 // some matrix functions for hermitian matrices in
 // real notation: The real parts of the elements must be

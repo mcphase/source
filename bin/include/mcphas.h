@@ -9,8 +9,6 @@
 #include <complex>
 #include "martin.h"
 
- // normalize Vector dadbdc to length n
-int normalizedadbdc(Vector & dadbdc,double n,par & inputpars);
 
 // routines for mcphas for calculation of magnetic phases
 //htcalc.h

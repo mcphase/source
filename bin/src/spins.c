@@ -28,10 +28,14 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
    is read and extracted from this file and printed on screen (stdout),\n \
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>),\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
+   Note: T Ha Hb Hc stand for the 3rd 5th 6th 7th column in mcphas.* output files\n\
+         (may have different meaning if out3 out5 out6 out7 is set in mcphas.ini)\n\
   \n\
 2) if used with -f file x y, then this file has to be a mcphas.mf or mcphas.sps file,\n\
    the spin configuration at a given x,y point is read and extracted from this file ,\n\
    and printed on screen (stdout) etc. as 1)\n\
+   Note: x y stands for the 1st and 2nd column in mcphas.* output files\n\
+         (may have different meaning if out1 or out2 is set in mcphas.ini)\n\
 3) if used with -f filen n,  this file has to be a mcphas.tst file,\n \
    the spin configuration number n\n \
    is read and extracted from this file and printed on screen (stdout),\n \
@@ -279,6 +283,9 @@ if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
  printf("# reading from file %s\n",infilename);
   
  }
+char *out[NOF_USERDEF_MCPHAS_COLS+1];
+for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){out[col]=new char[20];}
+
  if (strncmp(argv[1],"-t",2)!=0&&strcmp(argv[1],"-fc")!=0){
   fout = fopen_errchk ("./results/spins.out", "w"); // unless it is table option
    cs.print_mcdiff_in_header(fout,"spins",0);
@@ -291,13 +298,12 @@ fprintf(fout,"\
 #\n\
 # -----------------------------------------------------------------------------\n");
 
-
 // input file header and conf------------------------------------------------------------------
-   n=headerinput(fin,fout,gp,cs);}
+   n=headerinput(fin,fout,gp,cs,out);}
 else
   {
 // input file header and conf------------------------------------------------------------------
-   n=headerinput(fin,stderr,gp,cs);
+   n=headerinput(fin,stderr,gp,cs,out);
   }
    if(cs.nofatoms<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofatoms=%i - must be >0 !!!\n",cs.nofatoms);exit(1);}
    if(cs.nofcomponents<1){fclose (fin);fprintf(stderr,"#!!! Error program spins reading nofcomponents=%i - must be >0 !!!\n",cs.nofcomponents);exit(1);}
@@ -313,10 +319,11 @@ else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
      else
      {HHx=strtod(argv[2+os],NULL);HHy=strtod(argv[3+os],NULL);HHz=strtod(argv[4+os],NULL);}
      }
-if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr))
+if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr,out))
   {fclose (fin);fprintf(stderr,"#!!! Error program spins - no stable structure found !!!\n");exit(1);}
 fclose (fin);
 // ----------------------------output configuration ----------------------------------------------------------------
+for (int col=1;col<=NOF_USERDEF_MCPHAS_COLS;++col){delete []out[col];}
 
   printf("#! %s - configuration\n",outstr);
 if(nofcomp>savmf.nofcomponents){nofcomp=savmf.nofcomponents;}

@@ -883,7 +883,7 @@ SLR=pp.SLR;SLI=pp.SLI;
                           // est=ComplexMatrix(pp.est.Rlo(),pp.est.Rhi(),pp.est.Clo(),pp.est.Chi());est=pp.est;
                           // Ia
                           // cluster_ini_Imat(); 
-                          dim=1; Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1,3);
+                          dim=1; Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1,HEXT_DIMENSION);
                           dnn= new int [(*clusterpars).cs.nofatoms+1];
                           // determine dimension of H matrix
                           for (int n=1;n<=(*clusterpars).cs.nofatoms;++n)
@@ -900,7 +900,7 @@ SLR=pp.SLR;SLI=pp.SLI;
                             (*cluster_M[index_M])=(*pp.cluster_M[index_M]);
                            }                        
                           clusterH = new zsMat<double>(dim,dim); *clusterH = *pp.clusterH; 
-                          oldHext = new Vector(1,3); *oldHext = *pp.oldHext;
+                          oldHext = new Vector(1,HEXT_DIMENSION); *oldHext = *pp.oldHext;
                           workspace = new iterwork(pp.workspace->zsize,pp.workspace->dsize,pp.workspace->isize);
                           truncate = pp.truncate; fdim=dim; arpack = pp.arpack; feast = pp.feast;
                           if (truncate>1e-6 && truncate!=1) { 

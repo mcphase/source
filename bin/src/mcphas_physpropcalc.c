@@ -234,14 +234,13 @@ if(verbose==1){printf(".. calculating (hkl) finished\n");}
                    (*inputpars.jjj[l1]).mcalc(mom,T,d1,H,(*inputpars.jjj[l1]).Icalc_parstorage);
                     for(m1=1;m1<=3;++m1){(*magmom).m(i1,j1,k1)(3*(l1-1)+m1)=mom(m1);}
                     }}}}
-  
 // display spinstructure
   float * x;x=new float[inputpars.cs.nofatoms+1];float *y;y=new float[inputpars.cs.nofatoms+1];float*z;z=new float[inputpars.cs.nofatoms+1];
 		 for (is=1;is<=inputpars.cs.nofatoms;++is)
 		   {x[is]=(*inputpars.jjj[is]).xyz[1];
  		    y[is]=(*inputpars.jjj[is]).xyz[2];
 		    z[is]=(*inputpars.jjj[is]).xyz[3];}
-    snprintf(text,MAXNOFCHARINLINE,"physpropclc:T=%gK, |H|=%gT, Ha=%gT, Hb=%gT, Hc=%gT  %i spins",myround(T),myround(Norm(H)),myround(physprops.H(1)),myround(physprops.H(2)),myround(physprops.H(3)),sps.n());
+    snprintf(text,MAXNOFCHARINLINE,"physpropclc:T=%gK, |H|=%gT, Hi=%gT, Hj=%gT, Hk=%gT  %i spins",myround(T),myround(Norm(H)),myround(physprops.H(1)),myround(physprops.H(2)),myround(physprops.H(3)),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
                     fin_coq = fopen_errchk (outfilename, "w");

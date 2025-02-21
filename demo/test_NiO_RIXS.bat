@@ -83,13 +83,13 @@ call setvariable SIGMA2i 0 Ni2p.sipf
 call mcdispit -max 3 -prefix 002 -xa 3
 call range -d 9 0.1 1000 results/002mcdisp.qex
 delline 100 1000000  results/002mcdisp.qex
-getvalue.pl -c 9.4926E-01 11 10 30 0 results/002mcdisp.qex
-getvalue.pl -c 5.4766E-02 13 12 30 0 results/002mcdisp.qex
-getvalue.pl -c 1.8716E-01 15 14 30 0 results/002mcdisp.qex
-getvalue.pl -c 2.2818E-02 17 16 30 0 results/002mcdisp.qex
-getvalue.pl -c 2.9025E-01 19 18 30 0 results/002mcdisp.qex
-getvalue.pl -c 7.5980E-01 21 20 30 0 results/002mcdisp.qex
-getvalue.pl -c 6.6911E-02 23 22 30 0 results/002mcdisp.qex
-getvalue.pl -c 9.7045E-02 25 24 30 0 results/002mcdisp.qex
+getvalue.pl -c 9.493E-01 11 10 30 0 results/002mcdisp.qex
+getvalue.pl -c 5.477E-02 13 12 30 0 results/002mcdisp.qex
+getvalue.pl -c 1.872E-01 15 14 30 0 results/002mcdisp.qex
+getvalue.pl -c 2.282E-02 17 16 30 0 results/002mcdisp.qex
+getvalue.pl -c 2.903E-01 19 18 30 0 results/002mcdisp.qex
+getvalue.pl -c 7.598E-01 21 20 30 0 results/002mcdisp.qex
+getvalue.pl -c 6.691E-02 23 22 30 0 results/002mcdisp.qex
+getvalue.pl -c 9.705E-02 25 24 30 0 results/002mcdisp.qex
 
 cd ../../demo

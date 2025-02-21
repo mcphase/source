@@ -153,7 +153,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 {
  fflush(stderr); fflush(stdout);
  #ifdef _THREADS
- htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector H(1,3); H = thrdat.H;
+ htcalc_input *myinput; myinput = (htcalc_input *) input; int j = myinput->j, thread_id = myinput->thread_id; Vector H(1,HEXT_DIMENSION); H = thrdat.H;
  THRLC_SET(threadSpecificKey, myinput); int tlsfemin=0;  // Thread local variable to judge whether to print output
  #else
  int thread_id=1;
@@ -164,7 +164,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
  Vector mmom(1,inputpars.cs.nofcomponents);
- Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,3),hkl(1,3);
+ Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,H.Hi()),hkl(1,3);
  h1ext=0;
  char text[MAXNOFCHARINLINE];
  char outfilename[MAXNOFCHARINLINE];
@@ -434,12 +434,12 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
       #endif // def _THREADS
 }
 
-int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs,
+int  htcalc (Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
              testspincf & testspins, physproperties & physprops)
 {/* calculates magnetic structure at a given HT- point  
   on input: 
     T	Temperature[K]
-    Habc	Vector of External Magnetic Field [T] (components along crystal axes abc)
+    H		Vector of External Magnetic Field [T] in ijk coordinates
     inputpars	Input parameters (exchange constants etc...)
     testqs	Set of propagation vectors to be tested 
     testspins	Set of Spinconfigurations to be tested
@@ -449,15 +449,12 @@ int  htcalc (Vector Habc,double T,inipar & ini,par & inputpars,qvectors & testqs
  // returns 0 if successfull
   // returns 2 if no spinconfiguration has been found at ht point
  */
+
  int i,j,k,is;
  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
  Vector h1(1,inputpars.cs.nofcomponents),hkl(1,3);
- Vector H(1,3); // magnetic field in ijk coordinate system
- Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1; // trick to get Habc as components along a,b,c
-                  abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
- dadbdc2ijk(H,Habc,abc); // transform Habc to ijk coordinates ... this is H
-                
+               
  double femin=FEMIN_INI;char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];
  spincf  sps(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents),sps1(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
  spincf  spsmin(1,1,1,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
@@ -473,7 +470,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
-               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Ha=%g Hb=%g Hc=%g\n",T,Habc(1),Habc(2),Habc(3));
+               fprintf(felog,"#Logging of h k l multiplicity fe[meV] spinconf_nr n1xn2xn3 nof_mf_loops spinchange threadid at T=%g Hi=%g Hj=%g Hk=%g\n",T,H(1),H(2),H(3));
                fclose(felog);
 	      }
  if (verbose==1)
@@ -494,7 +491,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    fprintf(fin_coq,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
    #endif
    fclose(fin_coq);	      
-   printf("\n starting T=%g H=%g Ha=%g Hb=%g Hc=%g ",T,Norm(H),Habc(1),Habc(2),Habc(3));
+   printf("\n starting T=%g H=%g Hi=%g Hj=%g Hk=%g ",T,Norm(H),H(1),H(2),H(3));
    if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){printf("Hi=%g Hj=%g Hk=%g",H(1),H(2),H(3));}
    printf("\n");
    printf("with %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",testspins.n,testqs.nofqs());
@@ -519,7 +516,6 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
     j=0;  //uncomment this for debugging purposes
     // 3. with the hkl - supercells generated from hmin hmax kmin kmax lmin lmax in mcphas.ini
     //j = -testqs.nofqs()-1;
-
 #ifdef _THREADS
 // ----------------------------------------------------------------------------------- //
 // Populates the thread data structure
@@ -540,7 +536,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
                   }
-   
+
  MUTEX_INIT(mutex_loop);
  MUTEX_INIT(mutex_tests);
  MUTEX_INIT(mutex_min);
@@ -559,6 +555,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 #endif
  for (k= -testqs.nofqs();k<=testspins.n;++k)
  {++j; if (j>testspins.n) j=-testqs.nofqs();
+
 #ifndef _THREADS
        htcalc_iteration(j, femin, spsmin, H, T,ini, inputpars, testqs, testspins, physprops);
 #else

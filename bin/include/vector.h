@@ -209,7 +209,7 @@ class Vector {
     Vector& Value(void) { temporary = 1; --(D->count); return *this; } 
 
     // subvector extraction
-    Vector  operator () (int,int) const;
+    Vector  operator () (int,int,int shift=0) const;
     
     // member functions
     int     Lo (void) const { return cl; }  
@@ -552,7 +552,7 @@ class ComplexVector {
     ComplexVector& Value(void) { temporary = 1; --(D->count); return *this; } 
 
     // subvector extraction
-    ComplexVector  operator() (int,int) const;
+    ComplexVector  operator() (int,int,int shift=0) const;
     
     // member functions
     int           Lo (void) const { return cl; }  
@@ -953,7 +953,7 @@ class IntVector {
     IntVector& Value(void) { temporary = 1; --(D->count); return *this; } 
 
     // subvector extraction
-    IntVector  operator() (int,int) const;
+    IntVector  operator() (int,int,int shift=0) const;
     
     // member functions
     int     Lo (void) const { return cl; }  

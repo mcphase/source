@@ -14,13 +14,13 @@ void jjjpar::brillouin_Icalc (Vector & Jret, double & T, Vector &  Hxc,Vector & 
 */
 
 // check dimensions of vector
-if(Jret.Hi()!=3||Hxc.Hi()!=3||Hext.Hi()!=3||ABC.Hi()!=1)
+if(Jret.Hi()!=3||Hxc.Hi()!=3||ABC.Hi()!=1)
    {fprintf(stderr,"Error loadable module brillouin.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
 
 double JJ,KBT,XJ,gmhkt,Jav,gmh,Z,X;
 Vector gjmbH(1,3);
-gjmbH=Hxc+gJ*MU_B*Hext;
+gjmbH=Hxc+gJ*MU_B*Hext(1,3);
 // program brillouin function for S=J=ABC(1)
 JJ=ABC[1];
 KBT=T*KB;
@@ -93,7 +93,7 @@ int jjjpar::brillouindm(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexV
 static Vector Jret(1,3);
 int pr;
 Vector gjmbH(1,3);
-gjmbH=Hxc+gJ*MU_B*Hext;
+gjmbH=Hxc+gJ*MU_B*Hext(1,3);
   pr=0;
   if (tn<0) {pr=1;tn*=-1;}
   if (T<0) {T=-T;}

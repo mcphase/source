@@ -284,7 +284,7 @@ Matrix jjjpar::krameropmat (int & n ,Vector &  Hxc,Vector & Hext)
   
 Matrix opmat(1,2,1,2);
 switch(n)
-{case 0: gjmbH=gJ*MU_B*Hext;for(int i=1;(i<=Hxc.Hi())&&(i<=3);++i)gjmbH(i)+=Hxc(i);
+{case 0: gjmbH=gJ*MU_B*Hext(1,3);for(int i=1;(i<=Hxc.Hi())&&(i<=3);++i)gjmbH(i)+=Hxc(i);
          opmat(1,1)= ABC[3]*gjmbH[3];      opmat(1,2)=ABC[2]*gjmbH[2];
          opmat(2,1)= -ABC[1]*gjmbH[1];     opmat(2,2)=-ABC[3]*gjmbH[3];break;
  case 1: opmat(1,1)= 0      ;opmat(1,2)=0;

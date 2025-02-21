@@ -21,7 +21,7 @@ int cc[]= {2,31,32,33,34,35,36,27,28,29,1,0,30}; // field to store code for assi
                                            // set default values here (see list below for different types)
                                            // using the out0 ... out12 variable in mcdiff.in these codes can be modified
 
-#define COLHEADDIM 47
+#define COLHEADDIM 62
 
 // different output data for columns 1 to and 12
 const char * ch []= {  "LF ",          //  0
@@ -72,7 +72,22 @@ const char * ch []= {  "LF ",          //  0
                             "kprim      ",    //  45
                             "lprim      ",    //  46
 			    "Itotdip(2t) ",    //  47
-                                           };
+                            "Hi[T]      ",    //  48
+                            "Hj[T]      ",    //  49
+                            "Hk[T]      ",    //  50
+                            "Ea[T]      ",    //  51
+                            "Eb[T]      ",    //  52
+                            "Ec[T]      ",    //  53
+                            "Ei[T]      ",    //  54
+                            "Ej[T]      ",    //  55
+                            "Ek[T]      ",    //  56
+                            "s1[T]      ",    //  57
+                            "s2[T]      ",    //  58
+                            "s3[T]      ",    //  59
+                            "s4[T]      ",    //  60
+                            "s5[T]      ",    //  61
+                            "s6[T]      "    //  62
+                                          };
 
 
  // *************************************************************************
@@ -212,9 +227,9 @@ fprintf(fout,"# Note: what follows here may directly be taken from the output of
 fprintf(fout,"#       (file spins.out) or charges (file charges.out)\n");
 fprintf(fout,"# -----------------------------------------------------------------------------\n");
 fprintf(fout,"#\n");
-fprintf(fout,"# lattice constants (A) and angles \n");
-fprintf(fout,"#! a=%g b=%g c=%g alpha=  %g beta=  %g gamma=  %g\n",a,b,c,alpha,beta,gamma);
-fprintf(fout,"#\n");
+fprintf(fout,"# lattice constants (A) and angles \n#!");
+  cs.print(fout);
+  fprintf(fout,"\n#\n");
 fprintf(fout,"# primitive lattice vectors \n");
 fprintf(fout,"#! r1a= %7f r2a= %7f r3a= %7f\n",r1(1),r2(1),r3(1));
 fprintf(fout,"#! r1b= %7f r2b= %7f r3b= %7f   primitive lattice vectors (a)(b)(c)\n",r1(2),r2(2),r3(2));
@@ -235,8 +250,14 @@ fprintf(fout,"#                        nr1 nr2 and nr3 times along r1 r2 and r3,
 fprintf(fout,"#                        respectively to get magnetic unit cell\n");
 fprintf(fout,"# 'nat' denotes the number of magnetic atoms in magnetic unit cell\n");
 fprintf(fout,"#\n");
-fprintf(fout,"# Temperature,  External Magnetic Field: Magnetic Unit Cell\n");
-fprintf(fout,"#! T=%g K Ha=%g T Hb= %g T Hc= %g T: nr1=%i nr2=%i nr3=%i nat=%i \n",T,H(1),H(2),H(3),nr1,nr2,nr3,natmagnetic);
+fprintf(fout,"# Temperature,  External Field: Magnetic Unit Cell\n");
+fprintf(fout,"#! T=%4.4g Hi=%4.4g Hj=%4.4g Hk=%4.4g",
+              T,H(1),H(2),H(3));
+  if(Norm(Eabc)>SMALL_FIELD)fprintf(fout," Ei=%4.4g Ej=%4.4g Ek=%4.4g",
+              H(4),H(5),H(6));
+  if(Norm(H(7,12))>SMALL_FIELD)fprintf(fout," s1=%4.4g s2=%4.4g s3=%4.4g s4=%4.4g s5=%4.4g s6=%4.4g",
+              H(7),H(8),H(9),H(10),H(11),H(12));
+fprintf(fout,": nr1=%i nr2=%i nr3=%i nat=%i \n",nr1,nr2,nr3,natmagnetic);
 fprintf(fout,"#\n");
 fprintf(fout,"#\n");
 fprintf(fout,"# It follows a list of nat lines with to describe the magnetic moment configuration\n");
@@ -295,7 +316,7 @@ inimcdiff::inimcdiff (const char * file,char * pref,int verb)
   verbose=verb;
   char instr[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE],sipffilename[MAXNOFCHARINLINE],infile[MAXNOFCHARINLINE]; 
   //,hklline[MAXNOFCHARINLINE];
- // Hext=Vector(1,3);
+  Habc=Vector(1,3);Eabc=Vector(1,3);
   P=Vector(1,3);
   FILE *fin; //,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
   prefix= new char [strlen(pref)+1]; strcpy(prefix,pref); // set prefix
@@ -394,18 +415,13 @@ printf("\n");
 // input section 2  *******************************************************
 
  instr[0]='#';
- while (instr[strspn(instr," \t")]=='#'&&a==0&&b==0&&c==0) // pointer to 'ltrimstring' 
+ while (instr[strspn(instr," \t")]=='#'&&cs.a()==0&&cs.b()==0&&cs.c()==0) // pointer to 'ltrimstring' 
   { pos=ftell(fin); 
     if (pos==-1)  {fprintf(stderr,"Error mcdiff: wrong mcdiff.in file format\n");exit (EXIT_FAILURE);}
    fgets(instr,MAXNOFCHARINLINE,fin); 
    extract(instr, "nat", nat);
    extract(instr, "natcryst", nat);
-   extract(instr, "a", a);
-   extract(instr, "b", b);
-   extract(instr, "c", c);
-   extract(instr, "alpha", alpha);
-   extract(instr, "beta", beta);
-   extract(instr, "gamma", gamma);
+   cs.cextract(instr);
    extract(instr, "use_dadbdc",use_dadbdc);
   }
   fseek(fin,pos,SEEK_SET); 
@@ -436,18 +452,13 @@ printf("\n");
 
 // input section 3 *********************************************************
   instr[0]='#';
- eps=Matrix(1,3,1,3);r1=Vector(1,3);r2=Vector(1,3);r3=Vector(1,3);H=Vector(1,3);
-
+ eps=Matrix(1,3,1,3);r1=Vector(1,3);r2=Vector(1,3);r3=Vector(1,3);H=Vector(1,HEXT_DIMENSION);
+ 
  nr1=0;nr2=0; nr3=0;
  while (instr[strspn(instr," \t")]=='#'&&nr1*nr2*nr3==0) 
   { pos=ftell(fin); 
    fgets(instr,MAXNOFCHARINLINE,fin); 
-   if(a==0)extract(instr, "a", a);
-   if(b==0)extract(instr, "b", b);
-   if(c==0)extract(instr, "c", c);
-   if(alpha==0)extract(instr, "alpha", alpha);
-   if(beta==0)extract(instr, "beta", beta);
-   if(gamma==0)extract(instr, "gamma", gamma);
+   cs.cextract(instr);
     extract(instr,"eps1",eps(1,1));
     extract(instr,"eps2",eps(2,2));
     extract(instr,"eps3",eps(3,3));
@@ -455,49 +466,46 @@ printf("\n");
     extract(instr,"eps5",eps(1,3));
     extract(instr,"eps6",eps(1,2));
 
-    extract(instr, "r1x", r1(1));
-    extract(instr, "r1y", r1(2));
-    extract(instr, "r1z", r1(3));
-    extract(instr, "r2x", r2(1));
-    extract(instr, "r2y", r2(2));
-    extract(instr, "r2z", r2(3));
-    extract(instr, "r3x", r3(1));
-    extract(instr, "r3y", r3(2));
-    extract(instr, "r3z", r3(3));
-    extract(instr, "r1a", r1(1));
-    extract(instr, "r1b", r1(2));
-    extract(instr, "r1c", r1(3));
-    extract(instr, "r2a", r2(1));
-    extract(instr, "r2b", r2(2));
-    extract(instr, "r2c", r2(3));
-    extract(instr, "r3a", r3(1));
-    extract(instr, "r3b", r3(2));
-    extract(instr, "r3c", r3(3));
+   
     extract(instr, "nr1", nr1);
     extract(instr, "nr2", nr2);
     extract(instr, "nr3", nr3);
     extract(instr, "nat", natmagnetic);
     extract(instr, "T", T);
-    extract(instr, "Ha", H(1));
-    extract(instr, "Hb", H(2));
-    extract(instr, "Hc", H(3));
+    extract(instr, "Ha", Habc(1));
+    extract(instr, "Hb", Habc(2));
+    extract(instr, "Hc", Habc(3));
+    extract(instr, "Hi", H(1));
+    extract(instr, "Hj", H(2));
+    extract(instr, "Hk", H(3));
+    extract(instr, "Ea", Eabc(1));
+    extract(instr, "Eb", Eabc(2));
+    extract(instr, "Ec", Eabc(3));
+    extract(instr, "Ei", H(4));
+    extract(instr, "Ej", H(5));
+    extract(instr, "Ek", H(6));
+    extract(instr, "s1", H(7));
+    extract(instr, "s2", H(8));
+    extract(instr, "s3", H(9));
+    extract(instr, "s4", H(10));
+    extract(instr, "s5", H(11));
+    extract(instr, "s6", H(12));
   }
 
+crosscheck_H_E(H,Habc,Eabc,cs.abc);
+
   fseek(fin,pos,SEEK_SET); 
-if (a == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant a given in section 3 or line does not start with # or nat too small: \n%s\n",instr);exit (EXIT_FAILURE);}
-if (b == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant b given in section 3 or line does not start with #: \n%s\n",instr);exit (EXIT_FAILURE);}
-if (c == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant c given in section 3 or line does not start with #: \n%s\n",instr);exit (EXIT_FAILURE);}
-printf("     section 3 - a=%g A  b=%g A c=%g A alpha=%g  beta=%g gamma=%g\n",a,b,c,alpha,beta,gamma);
+if (cs.a() == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant a given in section 3 or line does not start with # or nat too small: \n%s\n",instr);exit (EXIT_FAILURE);}
+if (cs.b() == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant b given in section 3 or line does not start with #: \n%s\n",instr);exit (EXIT_FAILURE);}
+if (cs.c() == 0) {fprintf(stderr,"ERROR mcdiff: no lattice constant c given in section 3 or line does not start with #: \n%s\n",instr);exit (EXIT_FAILURE);}
+printf("     section 3 - ");
+cs.print(stdout);printf("\n");
  unitcellstr=new char[MAXNOFCHARINLINE+1];
-snprintf(unitcellstr,MAXNOFCHARINLINE," a= %g A  b= %g A c= %g A  alpha=%g  beta=%g gamma=%g\n",a,b,c,alpha,beta,gamma);
-printf("                 r1= %5.3ga + %5.3gb + %5.3gc\n", r1(1), r1(2), r1(3));
-printf("                 r2= %5.3ga + %5.3gb + %5.3gc\n", r2(1), r2(2), r2(3));
-printf("                 r3= %5.3ga + %5.3gb + %5.3gc\n", r3(1), r3(2), r3(3));
-
-//printf("                    / %5.3ga \\     / %5.3ga \\     / %5.3ga \\    x||c \n", r1(1), r2(1), r3(1));
-//printf("                 r1=| %5.3gb |  r2=| %5.3gb |  r3=| %5.3gb |    y||a\n", r1(2), r2(2), r3(2));
-//printf("                    \\ %5.3gc /     \\ %5.3gc /     \\ %5.3gc /    z||b\n", r1(3), r2(3), r3(3));
-
+cs.tostring(unitcellstr,MAXNOFCHARINLINE);
+cs.print_r(stdout);
+   r1=Vector(1,3); r1=cs.r.Row(1);
+   r2=Vector(1,3); r2=cs.r.Row(2);
+   r3=Vector(1,3); r3=cs.r.Row(3);
   double da1,db1,dc1;
   rez1=Vector(1,3);rez2=Vector(1,3);rez3=Vector(1,3);
   rezcalc (r1, r2, r3, rez1, rez2, rez3);
@@ -581,19 +589,19 @@ rtoijk=Matrix(1,3,1,3); // define transformation matrix to calculate components 
 //  (c.i)=|c|*eps
 //  delta and (c.k) we get from the condition that length of c is |c|.
 
-if (gamma>180||gamma<=0){fprintf(stderr,"ERROR mcdiff: gamma must be between 0 and 180 degrees\n");exit(EXIT_FAILURE);}
-rtoijk(1,1)=a*sin(gamma*PI/180);
-rtoijk(2,1)=a*cos(gamma*PI/180);
+if (cs.gamma()>180||cs.gamma()<=0){fprintf(stderr,"ERROR mcdiff: gamma must be between 0 and 180 degrees\n");exit(EXIT_FAILURE);}
+rtoijk(1,1)=cs.a()*sin(cs.gamma()*PI/180);
+rtoijk(2,1)=cs.a()*cos(cs.gamma()*PI/180);
 rtoijk(3,1)=0;
 
 rtoijk(1,2)=0;
-rtoijk(2,2)=b;
+rtoijk(2,2)=cs.b();
 rtoijk(3,2)=0;
 
-rtoijk(1,3)=c*(cos(beta*PI/180)-cos(gamma*PI/180)*cos(alpha*PI/180))/sin(gamma*PI/180);
-if (fabs(rtoijk(1,3))>c){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
-rtoijk(2,3)=c*cos(alpha*PI/180);
-rtoijk(3,3)=c*c-rtoijk(1,3)*rtoijk(1,3)-rtoijk(2,3)*rtoijk(2,3);
+rtoijk(1,3)=cs.c()*(cos(cs.beta()*PI/180)-cos(cs.gamma()*PI/180)*cos(cs.alpha()*PI/180))/sin(cs.gamma()*PI/180);
+if (fabs(rtoijk(1,3))>cs.c()){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
+rtoijk(2,3)=cs.c()*cos(cs.alpha()*PI/180);
+rtoijk(3,3)=cs.c()*cs.c()-rtoijk(1,3)*rtoijk(1,3)-rtoijk(2,3)*rtoijk(2,3);
 if (rtoijk(3,3)<=0){fprintf(stderr,"ERROR mcdiff: alpha beta and gamma geometrically inconsistent\n");exit(EXIT_FAILURE);}
 rtoijk(3,3)=sqrt(rtoijk(3,3));
 // rtoijk columns are a b c lattice vectors in terms of ijk euclidean system
@@ -820,6 +828,7 @@ inimcdiff::inimcdiff (const inimcdiff & p)
 { colcod=new int[NOF_OUT_VARIABLES+1];for(int i=0;i<NOF_OUT_VARIABLES;++i){colcod[i]=cc[i];}
   colhead=new char *[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i){colhead[i]=new char [strlen(ch[i])+1];strcpy(colhead[i],ch[i]);}
   verbose=p.verbose;
+  cs=p.cs;
   savfilename= new char [strlen(p.savfilename)+1];
   strcpy(savfilename,p.savfilename);
   outfilename= new char [strlen(p.outfilename)+1];
@@ -846,7 +855,6 @@ inimcdiff::inimcdiff (const inimcdiff & p)
   nofatoms=p.nofatoms;
   natmagnetic=p.natmagnetic;
   P=p.P;Pxyz=p.Pxyz;eps=p.eps;r1=p.r1;r2=p.r2;r3=p.r3;rez1=p.rez1;rez2=p.rez2;rez3=p.rez3;
-  a=p.a;b=p.b;c=p.c;alpha=p.alpha;beta=p.beta;gamma=p.gamma;
   use_dadbdc=p.use_dadbdc;
   nr1=p.nr1;nr2=p.nr2;nr3=p.nr3;H=p.H;
   jjjpars = new jjjpar * [n+1];

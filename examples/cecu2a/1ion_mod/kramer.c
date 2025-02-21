@@ -51,7 +51,7 @@ if(Jr.Hi()!=3||Hxc.Hi()!=3||MODPAR.Hi()!=5)
    {fprintf(stderr,"Error loadable module kramer.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
 Vector gjmbHin(1,Hxc.Hi());
-gjmbHin=Hxc+(*g_J)*MU_B*Hext;
+gjmbHin=Hxc+(*g_J)*MU_B*Hext(1,3);
 
 // rotate effective field
 double sf=sin(MODPAR(4)*PI/180);
@@ -192,7 +192,7 @@ extern "C" int du1calc(int & tn,double & T, Vector & Hxc,Vector & Hext,double * 
   double Z,lnz,u;
   static int pr;
   static Vector gjmbHin(1,3);
-gjmbHin=Hxc+(*g_J)*MU_B*Hext;
+gjmbHin=Hxc+(*g_J)*MU_B*Hext(1,3);
   static Vector Jin(1,3);
   static Vector J(1,3);
   static ComplexVector u1(1,3);

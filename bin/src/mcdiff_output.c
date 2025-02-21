@@ -14,9 +14,9 @@ time_t curtime;
    fprintf(fout,"# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n");
    fprintf(fout,"#**********************************************************\n");
    // printout the lattice and atomic positions
-  fprintf(fout,"#\n# Lattice Constants (A)\n");
-  fprintf(fout,"#! a=%8.5f b=%8.5f c=%8.5f alpha=%8.5f beta=%8.5f gamma=%8.5f\n",ini.a,ini.b,ini.c,ini.alpha,ini.beta,ini.gamma);
-  fprintf(fout,"#! r1a=%8.5f r2a=%8.5f r3a=%8.5f\n",ini.nr1*ini.r1s[1],ini.nr2*ini.r2s[1],ini.nr3*ini.r3s[1]);
+  fprintf(fout,"#\n# Lattice Constants (A)\n#!");
+  ini.cs.print(fout);
+  fprintf(fout,"\n#! r1a=%8.5f r2a=%8.5f r3a=%8.5f\n",ini.nr1*ini.r1s[1],ini.nr2*ini.r2s[1],ini.nr3*ini.r3s[1]);
   fprintf(fout,"#! r1b=%8.5f r2b=%8.5f r3b=%8.5f   primitive lattice vectors [a][b][c]\n",ini.nr1*ini.r1s[2],ini.nr2*ini.r2s[2],ini.nr3*ini.r3s[2]);
   fprintf(fout,"#! r1c=%8.5f r2c=%8.5f r3c=%8.5f   (strained using strain tensor)\n",ini.nr1*ini.r1s[3],ini.nr2*ini.r2s[3],ini.nr3*ini.r3s[3]);
   fprintf(fout,"#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",ini.natmagnetic,spins.nofcomponents);
@@ -61,9 +61,9 @@ time_t curtime;
    fprintf(fout,"# reference: M. Rotter and A. Boothroyd PRB 79 (2009) 140405R\n");
    fprintf(fout,"#**********************************************************\n");
    // printout the lattice and atomic positions
-  fprintf(fout,"#\n# Lattice Constants (A)\n");
-  fprintf(fout,"#! a=%8.5f b=%8.5f c=%8.5f alpha=%8.5f beta=%8.5f gamma=%8.5f\n",ini.a,ini.b,ini.c,ini.alpha,ini.beta,ini.gamma);
-  fprintf(fout,"#! r1a=%8.5f r2a=%8.5f r3a=%8.5f\n",ini.nr1*ini.r1s[1],ini.nr2*ini.r2s[1],ini.nr3*ini.r3s[1]);
+  fprintf(fout,"#\n# Lattice Constants (A)\n#!");
+  ini.cs.print(fout);
+  fprintf(fout,"\n#! r1a=%8.5f r2a=%8.5f r3a=%8.5f\n",ini.nr1*ini.r1s[1],ini.nr2*ini.r2s[1],ini.nr3*ini.r3s[1]);
   fprintf(fout,"#! r1b=%8.5f r2b=%8.5f r3b=%8.5f   primitive lattice vectors [a][b][c]\n",ini.nr1*ini.r1s[2],ini.nr2*ini.r2s[2],ini.nr3*ini.r3s[2]);
   fprintf(fout,"#! r1c=%8.5f r2c=%8.5f r3c=%8.5f\n",ini.nr1*ini.r1s[3],ini.nr2*ini.r2s[3],ini.nr3*ini.r3s[3]);
   fprintf(fout,"#! nofatoms=%i  nofcomponents=%i  number of atoms in primitive unit cell/number of components of each spin\n",ini.natmagnetic,mfields.nofcomponents);
@@ -120,7 +120,7 @@ if(abs(ini.colcod[0])>0){
  fprintf(fout,"#***********************************************************************\n");
 
  fprintf(fout,"# lattice parameters:%s",ini.unitcellstr);
- fprintf(fout,"# prim. unit cell   / %10.7f A \\     / %10.7f A \\     / %10.7f A \\ \n", ini.r1(1), ini.r2(1), ini.r3(1));
+ fprintf(fout,"\n# prim. unit cell   / %10.7f A \\     / %10.7f A \\     / %10.7f A \\ \n", ini.r1(1), ini.r2(1), ini.r3(1));
  fprintf(fout,"#                b1=| %10.7f A |  b2=| %10.7f A |  b3=| %10.7f A |\n", ini.r1(2), ini.r2(2), ini.r3(2));
  fprintf(fout,"#                   \\ %10.7f A /     \\ %10.7f A /     \\ %10.7f A /\n", ini.r1(3), ini.r2(3), ini.r3(3));
  fprintf(fout, "#! Wavelength=%g A   number of atoms: %i\n",ini.lambda, ini.n);

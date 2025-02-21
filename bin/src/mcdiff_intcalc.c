@@ -105,9 +105,9 @@ case 37: return Qvec(1);//"Qi[1/A] ",    //  37    euclidean components of scatt
 case 38: return Qvec(2);//"Qj[1/A] ",    //  38    with j||b, k||(a x b) and i normal to k and j
 case 39: return Qvec(3); //"Qk[1/A] ",    //  39
 case 40: return ini.T;  //"T[K] ",    //  40
-case 41: return ini.H(1);  //"Ha[T] ",    //  41
-case 42: return ini.H(2);  //"Hb[T] ",    //  42
-case 43: return ini.H(3);  //"Hc[T] ",    //  43
+case 41: return ini.Habc(1);  //"Ha[T] ",    //  41
+case 42: return ini.Habc(2);  //"Hb[T] ",    //  42
+case 43: return ini.Habc(3);  //"Hc[T] ",    //  43
 case 44:  // transform hkl to primitive lattice
           //q=ini.r1sr2sr3s.Transpose()*hkl1;
           hklprim=0;for(int j=1;j<=3;++j){hklprim+=ini.r1s(j)*hkl(j);}
@@ -121,7 +121,23 @@ case 46:  // transform hkl to primitive lattice
           hklprim=0;for(int j=1;j<=3;++j){hklprim+=ini.r3s(j)*hkl(j);}
           return hklprim;//"lprim ",    //  46
 case 47: return inuc+Imagdip; //"Itotdip ",    //  47
-   default: fprintf(stderr,"Error mcdiff: unknown column code\n");exit(EXIT_FAILURE);   
+case 48: return ini.H(1);  //"Hi[T] ",    //  48
+case 49: return ini.H(2);  //"Hj[T] ",    //  49
+case 50: return ini.H(3);  //"Hk[T] ",    //  50
+case 51: return ini.Eabc(1);  //"Ea[V/m] ",    //  51
+case 52: return ini.Eabc(2);  //"Eb[V/m] ",    //  52
+case 53: return ini.Eabc(3);  //"Ec[V/m] ",    //  53
+case 54: return ini.H(4);  //"Ea[V/m] ",    //  54
+case 55: return ini.H(5);  //"Eb[V/m] ",    //  55
+case 56: return ini.H(6);  //"Ec[V/m] ",    //  56
+case 57: return ini.H(7);  //"s1[Pa] ",    //  57
+case 58: return ini.H(8);  //"s2[Pa] ",    //  58
+case 59: return ini.H(9);  //"s3[Pa] ",    //  59
+case 60: return ini.H(10);  //"s4[Pa] ",    //  60
+case 61: return ini.H(11);  //"s5[Pa] ",    //  61
+case 62: return ini.H(12);  //"s6[Pa] ",    //  62
+  default: fprintf(stderr,"Error mcdiff: unknown column code\n");exit(EXIT_FAILURE);   
+
          }
                         
 return 0;

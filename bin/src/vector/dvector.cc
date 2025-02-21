@@ -461,7 +461,7 @@ Vector& Vector::operator %= (const Vector& A)
 // Subvector extraction 
 //----------------------------------------------------------------------------//
 
-Vector Vector::operator () (int lo, int hi) const
+Vector Vector::operator () (int lo, int hi,int shiftindex) const
 //
 // The elements of this vector within the index range [lo..hi] 
 // are returned in a vector with the corresponding dimension [lo..hi].
@@ -470,8 +470,8 @@ Vector Vector::operator () (int lo, int hi) const
     // check for valid subvector range
     if (lo < cl || hi > ch)
       Matpack.Error("Vector::operator(): subvector index out of range (%d,%d)", lo,hi);
-    Vector W(lo,hi);    
-    copyvec(W.V+lo,V+lo,W.ncol);
+    Vector W(lo+shiftindex,hi+shiftindex);    
+    copyvec(W.V+lo+shiftindex,V+lo,W.ncol);
     return W.Value();
 }
 
@@ -750,7 +750,7 @@ double Norm (const Vector &A)
 {
   int n = A.Elements();
   if (n <= 0) Matpack.Error("double Norm (const Vector &A) -- empty vector");
-  double sum = sqrt(norm2(A.Store(),n)+1e-300);
+  double sum = sqrt(norm2(A.Store(),n)+1e-200);
   return sum;
 }
 

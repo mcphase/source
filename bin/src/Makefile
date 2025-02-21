@@ -118,7 +118,7 @@ RCSCI    =      ci -u -f -s"Rel" -r$(VERSION) -m"$(LOCKMSG)"
 #
 
 INCL = mcphas.h  testspin.hpp qvectors.hpp spincf.hpp par.hpp  jjjpar.hpp inipar.hpp \
-       mfcf.hpp vector.h martin.h graphic_parameters.hpp ../../version
+       mfcf.hpp vector.h martin.h graphic_parameters.hpp cryststruct.hpp ../../version
 OBJS = jjjpar.o par.o physprop.o qvectors.o testspin.o spincf.o inipar.o \
         mfcf.o martin.o ionpars.o graphic_parameters.o perlparse.o
 
@@ -193,7 +193,7 @@ mdcf.o: mdcf.cpp mdcf.hpp vector.h
 jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 	$(CCC) $(CFLAGS) $< 
 
-inipar.o: inipar.cpp inipar.hpp martin.h vector.h par.hpp ../../version
+inipar.o: inipar.cpp inipar.hpp cryststruct.hpp martin.h vector.h par.hpp ../../version
 	$(CCC) $(CFLAGS) $< 
 
 ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h ../../version
@@ -212,18 +212,13 @@ qvectors.o: qvectors.cpp qvectors.hpp spincf.hpp martin.h vector.h inipar.hpp pa
 	$(CCC) $(CFLAGS) $<
 
 mcphas.o: mcphas.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
-#	$(CCC) $(CFLAGS)  $<
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
 
 anisotropy.o: anisotropy.c $(INCL) mcphas_htcalc.c mcphas_fecalc.c mcphas_physpropcalc.c
-#	$(CCC) $(CFLAGS)   $<
 	$(CCC) $(CFLAGS)  $(THREADFLAG) $<
 
-
 mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_io.c $(INCL)
-#	$(CCC) $(CFLAGS)  $<
 	$(CCC) $(CFLAGS) $(THREADFLAG) $<
-
 
 cond.o: cond.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<
@@ -276,13 +271,6 @@ mf2fe.o: mf2fe.c
 fediff.o: fediff.c
 	$(CCC) $(CFLAGS) $<
 
-ifdef LINUX
-
-inimenu.o: inimenu.c
-	$(CCC) $(CFLAGS) $<
-
-endif
-
 ip.o: ionpars.cpp
 	$(CCC) $(CFLAGS) -o  $<
 
@@ -331,7 +319,7 @@ ip.o: ionpars.cpp
 	@echo Linking ../mcdispit
 	@$(LINKER)  -Wall  -o ../mcdispit   $^  $(LFLAGS) $(THREADLINK)
 
-../mcphasit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o mcphas.o
+../mcphasit$(EXE): $(OBJS) martin.o $(VOBS)  $(CFIELDOBJS) $(FUNCTIONOBJS) ionpars.o density.o mcphas.o 
 	@echo Linking ../mcphasit
 	@$(LINKER)  -Wall  -o ../mcphasit  $^ $(LFLAGS) $(THREADLINK)
 
@@ -380,13 +368,7 @@ ip.o: ionpars.cpp
 	@echo Linking ../fediff
 	@$(LINKER)  -Wall  -o ../fediff $^  $(LFLAGS)
 
-ifdef LINUX
 
-inimenu: inimenu.o inipar.o martin.o $(VOBS)
-	@echo Linking ../inimenu
-	@$(LINKER)  -Wall  -o ../inimenu $^  $(LFLAGS)
-
-endif
 
 clean: 
 	rm -vf ./*.o

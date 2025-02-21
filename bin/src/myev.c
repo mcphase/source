@@ -22,6 +22,7 @@ bool checkHerm(ComplexMatrix & M, bool warn=true)
 
 // subs to be able to check and directly diagonalize hermitean
 // matrizes, inverse a nearly singular matrix
+void myPrintComplexMatrix(ComplexMatrix  & M){myPrintComplexMatrix(stdout,M);} 
 void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
 {int i1,j1;
  fprintf (file,"#Real Part\n");
@@ -40,6 +41,7 @@ void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
 //  stored in the lower triangle of z,the imaginary parts (of the elements
 //  corresponding to the lower triangle) in the positions
 //  of the upper triangle of z[lo..hi,lo..hi].
+void myPrintComplexMatrix(Matrix & M){myPrintComplexMatrix(stdout,M);}
 void myPrintComplexMatrix(FILE * file,Matrix & M)
 {int i1,j1;
  fprintf (file,"#Real Part\n");
@@ -120,6 +122,7 @@ delete []numbers;
 return true;
 }
 
+void myPrintMatrix(Matrix & M){myPrintMatrix(stdout,M);}
 void myPrintMatrix(FILE * file,Matrix & M)
 {int i1,j1;
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
@@ -128,6 +131,7 @@ void myPrintMatrix(FILE * file,Matrix & M)
     }
 }    
 
+void myPrintVector(Vector & M){myPrintVector(stdout,M);}
 void myPrintVector(FILE * file,Vector & M)
 {int j1;
 // fprintf (file,"#Components:\n");
@@ -136,6 +140,7 @@ void myPrintVector(FILE * file,Vector & M)
     fprintf (file,"\n");    
 }    
 
+void myPrintComplexVector(ComplexVector & M){myPrintComplexVector(stdout,M);}
 void myPrintComplexVector(FILE * file,ComplexVector & M)
 {int j1;
  fprintf (file,"#Components:\n");
@@ -144,6 +149,7 @@ void myPrintComplexVector(FILE * file,ComplexVector & M)
     fprintf (file,"\n");    
 }    
 
+void myPrintComplexNumber(complex<double> & M){ myPrintComplexNumber(stdout,M);}
 void myPrintComplexNumber(FILE * file,complex<double> & M)
 {fprintf (file,"%6.3g %+6.3g i ",real(M),imag(M));
 

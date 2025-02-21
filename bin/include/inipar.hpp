@@ -1,4 +1,4 @@
-//  class inipar ... initial parameters for program mcphas
+//  class inipar ... initial parameters for program mcphasit
 //
 #ifndef INIPAR
 #define INIPAR
@@ -10,15 +10,18 @@
 #include<cerrno>
 #include<martin.h>
 #include<vector.h>
-#include<par.hpp>
+#include"cryststruct.hpp"
+#include"par.hpp"
+
+#define EXTERNAL_PARAMETER_DIMENSION  HEXT_DIMENSION+7  // dimension of xv, yv zero (see below)
 
 class inipar
 { private:
   
   public:
   char * savfilename;
-  int doeps,linepscf,linepsjj;\
-  par * ipx;par * ipy;par * ipz;
+  int doeps,linepscf,linepsjj;
+  par * ipx;par * ipy;par * ipz; // storage for two ion interaction parameter derivatives (djdx djdy djdz files)
 
   std::clock_t startcputime;
   int nofstapoints; // number of successful calls to htcalc
@@ -32,6 +35,9 @@ class inipar
   
   // XY PHASEDIAGRAM PARAMETERS
   Vector xv,yv,zero; // xT xHa xHb xHc ,  yT yHa yHb yHc, T0 Ha0 Hb0 Hc0
+                     // ... extended (optional) xHi xHj xHk xEa xEb XEc xEi xEj xEk xs1 xs2 xs3 xs4 xs5 xs6
+                     // with E1 E2 E3 external field
+                     // s1 s2 s3 s4 s5 s6 Voigt components of stress tensor
   float  xmin,  xmax,  xstep;
   float  ymin,  ymax,  ystep;
   
@@ -75,7 +81,10 @@ class inipar
   int maxnofhkls;
   // maximum q[1/A] for hkl's
   double maxQ;
- 
+ // set external field and Temperature
+ void getTH(double & T,Vector & h,double x, double y,cryststruct & cs);
+ // ouput string with fields , withnames controls wether output is with or without names e.g. "T="
+ void THstring(FILE * fout,double x, double y, double & T,Vector & h,cryststruct & cs,bool withnames=false,bool withxy=false);
   // printout initial parameters to file   
    void print();
    void print (const char * file);

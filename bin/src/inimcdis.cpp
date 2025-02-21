@@ -15,10 +15,10 @@
 
 int usrdefcols[]={8, 1,2,3,4,5,6,7,8}; // user defined output columns (first number is number of usr def output columns)
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
-int colcod[]=    {-1,5,6,7,4,12,13,14,15}; // field to store code for assigning type of data to columns of output,
+int colcod[]=    {-1,5,6,7,4,12,13,14,8}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
                                            // using the out5 out6  ... commands in mcdisp.par these codes can be modified
-#define COLHEADDIM 15
+#define COLHEADDIM 29	
 // different output data for columns 10 and 11
 const char * colhead []= {  "Qinc[1/A] ", //  0
                             "Qx[1/A]   ",  //   1
@@ -35,21 +35,34 @@ const char * colhead []= {  "Qinc[1/A] ", //  0
                             "h ",  //    12                                                                 
                             "k ",  //    13                                                                 
                             "l ",  //    14                                                                 
-                            "Q[A^-1] "  //    15                                                                 
-                           };
+                            "Hi[T]   ", //    15                                                  
+                            "Hj[T]   ", //    16                                                  
+                            "Hk[T]   ", //    17 
+                            "Ea[V/m] ",  //    18      
+                            "Eb[V/m] ",  //    19      
+                            "Ec[V/m] ",  //    20      
+                            "Ei[V/m] ",  //    21      
+                            "Ej[V/m] ",  //    22      
+                            "Ek[V/m] ",  //    23      
+                            "s1[Pa] ",  //    24     
+                            "s2[Pa] ",  //    25      
+                            "s3[Pa] ",  //    26      
+                            "s4[Pa] ",  //    27      
+                            "s5[Pa] ",  //    28      
+                            "s6[Pa] "  //    29     
+                               };
 
 // different output data for user defined columns ...
 double inimcdis::setcolvalue(int i,Vector & Qvec, double & Qincr,Vector & qprim,Vector & hkl)
-{
-         switch (i) {
+{      switch (i) {
 case 0:  return Qincr;break;
 case 1:  return Qvec(1);break;
 case 2:  return Qvec(2);break;
 case 3:  return Qvec(3);break;
 case 4:  return T;break;
-case 5:  return Hext(1);break;
-case 6:  return Hext(2);break;
-case 7:  return Hext(3);break;
+case 5:  return Habc(1);break;
+case 6:  return Habc(2);break;
+case 7:  return Habc(3);break;
 case 8:  return Norm(Qvec);break;
 case 9:  return qprim(1);break;
 case 10:  return qprim(2);break;
@@ -57,7 +70,21 @@ case 11:  return qprim(3);break;
 case 12:  return hkl(1);break;
 case 13:  return hkl(2);break;
 case 14:  return hkl(3);break;
-case 15:  return Norm(Qvec);break;
+case 15:  return Hext(1);break;
+case 16:  return Hext(2);break;
+case 17:  return Hext(3);break;
+case 18:  return Eabc(1);break;
+case 19:  return Eabc(2);break;
+case 20:  return Eabc(3);break;
+case 21:  return Hext(4);break;
+case 22:  return Hext(5);break;
+case 23:  return Hext(6);break;
+case 24:  return Hext(7);break;
+case 25:  return Hext(8);break;
+case 26:  return Hext(9);break;
+case 27:  return Hext(10);break;
+case 28:  return Hext(11);break;
+case 29:  return Hext(12);break;
 default: fprintf(stderr,"Error mcdisp: unknown column code\n");exit(EXIT_FAILURE);
                     }
 
@@ -81,10 +108,22 @@ fprintf(fout,"\n#");
  for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s",colhead[colcod[usrdefcols[i]]]);
 }
 
-// print user defined column headers
-void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim,Vector & hkl)
+// print characteristic external parameter string
+void inimcdis::mfstring(char *str,size_t t)
+{ snprintf(str,t,"T=%4.4g Hi=%4.4g Hj=%4.4g Hk=%4.4g",
+              T,Hext(1),Hext(2),Hext(3));
+  if(Norm(Eabc)>SMALL_FIELD)snprintf(str+strlen(str),t-strlen(str)," Ei=%4.4g Ej=%4.4g Ek=%4.4g",
+              Hext(4),Hext(5),Hext(6));
+  if(Norm(Hext(7,12))>SMALL_FIELD)snprintf(str+strlen(str),t-strlen(str)," s1=%4.4g s2=%4.4g s3=%4.4g s4=%4.4g s5=%4.4g s6=%4.4g",
+              Hext(7),Hext(8),Hext(9),Hext(10),Hext(11),Hext(12));
+}
+
+// print user defined columns
+void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim,Vector & hkl,bool withtext)
 {
- for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim,hkl)));
+ for(int i=1;i<=usrdefcols[0];++i)
+ if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[usrdefcols[i]]],myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim,hkl)));
+ else fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim,hkl)));
 }
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save()
@@ -273,7 +312,7 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
 inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,Vector & abc)
 { errno=1;do_jqf=do_jqfile;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
-  int nofhkllists=1;Hext=Vector(1,3);
+  int nofhkllists=1;Hext=Vector(1,HEXT_DIMENSION);Hext=0; Habc=Vector(1,3);Eabc=Vector(1,3);
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
   prefix= new char [strlen(pref)+1]; strcpy(prefix,pref); // set prefix
  // ****************************** read mf configuration from spinfile *****************************************  
@@ -285,9 +324,26 @@ inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,
   instr[0]='#';  
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
   extract(instr,"T",T); 
-  extract(instr,"Ha",Hext[1]);
-  extract(instr,"Hb",Hext[2]);
-  extract(instr,"Hc",Hext[3]);
+  extract(instr,"Ha",Habc[1]); 
+  extract(instr,"Hb",Habc[2]);
+  extract(instr,"Hc",Habc[3]); 
+  extract(instr,"Ea",Eabc[1]); 
+  extract(instr,"Eb",Eabc[2]);
+  extract(instr,"Ec",Eabc[3]); 
+  extract(instr,"Hi",Hext[1]); 
+  extract(instr,"Hj",Hext[2]);
+  extract(instr,"Hk",Hext[3]); 
+  extract(instr,"Ei",Hext[4]); 
+  extract(instr,"Ej",Hext[5]);
+  extract(instr,"Ek",Hext[6]); 
+  extract(instr,"s1",Hext[7]); 
+  extract(instr,"s2",Hext[8]);
+  extract(instr,"s3",Hext[9]); 
+  extract(instr,"s4",Hext[10]); 
+  extract(instr,"s5",Hext[11]);
+  extract(instr,"s6",Hext[12]); 
+  
+
   info= new char [strlen(instr)+1];strcpy(info,instr);
   printf("#%s \n# reading mean field configuration mf=gj muB heff [meV]\n",instr);
   nofatoms=1;nofcomponents=3;nofthreads=0;
@@ -297,6 +353,9 @@ inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,
   if(mf.load(fin)==0)
    {fprintf(stderr,"ERROR loading mean field configuration\n");exit(EXIT_FAILURE);}
   fclose(fin);
+
+ crosscheck_H_E(Hext,Habc,Eabc,abc); 
+
  //********************************  
   savfilename= new char [strlen(file)+strlen(prefix)+11];
   snprintf(savfilename,MAXNOFCHARINLINE,"results/_%s%s",prefix,file);
@@ -590,6 +649,8 @@ inimcdis::inimcdis (const inimcdis & p)
  info= new char [strlen(p.info)+1];strcpy(info,p.info);
  prefix= new char [strlen(p.prefix)+1]; strcpy(prefix,p.prefix);  
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
+  Eabc=Vector(1,3);Habc=Vector(1,3);
+  Eabc=p.Eabc;Habc=p.Habc;
   qmin=p.qmin;
   qmax=p.qmax;
   emin=p.emin;

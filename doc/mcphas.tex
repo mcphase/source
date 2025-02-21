@@ -529,7 +529,10 @@ In order that {\prg McPhase} can calculate the standard deviation between
 What measurement data can be used to calculate a standard deviation ?
 
 \begin{description}
-\item[{\prg mcphas.fum}] if given in column 8,9,10,.. in {\prg ./fit/mcphas.fum} the
+\item[{\prg mcphas.fum}] In column 1-7 the file has to contain 
+            x y T(K) H(T) Hi(T) Hj(T) Hk(T)  with ijk coordinates 
+            defined by  j||b, k||(a x b) and i normal to k and j.
+            If given in column 8,9,10,.. in {\prg ./fit/mcphas.fum} the
             free energy $f$, the energy $u$, the magnetisation, the strain and electrical polarisation
              is used for calculation
 	    of the standard deviation sta. The standard deviation is calculated
@@ -559,7 +562,8 @@ input files {\prg mcphas.ini, mcphas.j, etc. } and type
               in a loop given by {\prg mcphas.ini\index{mcphas.ini}} (you can also press the
               symbol in the {\prg McPhase - Explorer} window).
 \item[\prg mcphas\index{mcphas} [file]]  to run the program with an input file --   
-             {\prg file} contains T ha hb hc values to be calculated 
+             {\prg file} contains T(K) Hi(T) Hj(T) Hk(T) values to be calculated  in columns 
+             3, 5, 6, 7, respectively (ijk coordinates defined by  j||b, k||(a x b) and i normal to k and j )
              if [file] is not given, xmin xmax xstep (xT xHa xHb xHc)
              ymin ymax ystep (yT yHa yHb yHc) is read from file {\prg mcphas.ini\index{mcphas.ini}}
 	     and phase diagram is calculated

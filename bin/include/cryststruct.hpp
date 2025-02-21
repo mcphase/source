@@ -17,7 +17,7 @@ int nofatoms,nofcomponents,maxnofatoms;
 cryststruct()
 {nofatoms=0;nofcomponents=3,maxnofatoms=MAXNOFATOMS;
  r=Matrix(1,3,1,3);
- abc=Vector(1,6);
+ abc=Vector(1,6);abc=0;
  abc(4)=90;
  abc(5)=90;
  abc(6)=90;
@@ -31,7 +31,46 @@ double alpha(){return abc(4);}
 double beta(){return abc(5);}
 double gamma(){return abc(6);}
 
+void cextract(char * instr)
+{  if(abc(1)==0)extract(instr, "a", abc(1));
+   if(abc(2)==0)extract(instr, "b", abc(2));
+   if(abc(3)==0)extract(instr, "c", abc(3));
+   if(abc(4)==90)extract(instr, "alpha", abc(4));
+   if(abc(5)==90)extract(instr, "beta", abc(5));
+   if(abc(6)==90)extract(instr, "gamma", abc(6));
+    extract(instr, "r1x", r(1,1));
+    extract(instr, "r1y", r(1,2));
+    extract(instr, "r1z", r(1,3));
+    extract(instr, "r2x", r(2,1));
+    extract(instr, "r2y", r(2,2));
+    extract(instr, "r2z", r(2,3));
+    extract(instr, "r3x", r(3,1));
+    extract(instr, "r3y", r(3,2));
+    extract(instr, "r3z", r(3,3));
+    extract(instr, "r1a", r(1,1));
+    extract(instr, "r1b", r(1,2));
+    extract(instr, "r1c", r(1,3));
+    extract(instr, "r2a", r(2,1));
+    extract(instr, "r2b", r(2,2));
+    extract(instr, "r2c", r(2,3));
+    extract(instr, "r3a", r(3,1));
+    extract(instr, "r3b", r(3,2));
+    extract(instr, "r3c", r(3,3));
+ 
+}
 
+void tostring(char * str,size_t t)
+{snprintf(str,t," a= %g A  b= %g A c= %g A  alpha=%g  beta=%g gamma=%g",abc(1),abc(2),abc(3),abc(4),abc(5),abc(6));
+}
+void print(FILE * f)
+{fprintf(f," a= %g A  b= %g A c= %g A  alpha=%g  beta=%g gamma=%g",abc(1),abc(2),abc(3),abc(4),abc(5),abc(6));
+}
+
+void print_r(FILE *fout)
+{fprintf(fout,"                 r1= %5.3ga + %5.3gb + %5.3gc\n", r(1,1), r(1,2), r(1,3));
+fprintf(fout,"                 r2= %5.3ga + %5.3gb + %5.3gc\n", r(2,1), r(2,2), r(2,3));
+fprintf(fout,"                 r3= %5.3ga + %5.3gb + %5.3gc\n", r(3,1), r(3,2), r(3,3));
+}
 void print_mcdiff_in_header(FILE * fout,const char * program,int natcryst)
 {
 fprintf(fout,"\
@@ -131,6 +170,21 @@ fprintf(fout,"\
 #            45....kprim      #\n\
 #            46....lprim      #\n\
 #            47....Itotdip(2t) #\n\
+#            48....Hi[T]      #\n\
+#            49....Hj[T]      #\n\
+#            50....Hk[T]      #\n\
+#            51....Ea[V/m]      #\n\
+#            52....Eb[V/m]      #\n\
+#            53....Ec[V/m]      #\n\
+#            54....Ea[V/m]      #\n\
+#            55....Eb[V/m]      #\n\
+#            56....Ec[V/m]      #\n\
+#            57....s1[Pa]       #\n\
+#            58....s2[Pa]       #\n\
+#            59....s3[Pa]       #\n\
+#            60....s4[Pa]       #\n\
+#            61....s5[Pa]       #\n\
+#            62....s6[Pa]       #\n\
 #\n\
 #           In the above the intensities I+ and I- are the intensities in a polarised neutron\n\
 #           experiment with incident polarisation up (+) or down (-):\n\

@@ -17,6 +17,7 @@ class inimcdiff
 { private:
   public:
   int nofoutputcolumns;
+   Vector Habc,Eabc;
    int * colcod;
    char ** colhead;
    int verbose;
@@ -24,7 +25,8 @@ class inimcdiff
    char * savfilename;
    char * outfilename;
    char * prefix,*unitcellstr;
-   double a=0,b=0,c=0,alpha=0,beta=0,gamma=0;
+   cryststruct cs;
+
    double T,lambda,thetamax,ovalltemp;
     int lorenz,n,nat, nofatoms,natmagnetic,use_dadbdc=0;
    Vector P,Pxyz,r1,r2,r3,r1s,r2s,r3s,rez1,rez2,rez3;Matrix eps; 

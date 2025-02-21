@@ -19,7 +19,9 @@
 #include<vector.h>
 #include "sparsecomplex.hpp"
 
-
+#define HEXT_DIMENSION  12  // dimension of external field Hext (Hi Hj Hk Ei Ej Ek s1 s2 s3 s4 s5 s6)
+#define NOF_USERDEF_MCPHAS_COLS 7  // number of user defined columns in mcphas.ini -> mcphas.* outpus files
+#define SMALL_FIELD 1e-100  // nonzero value of external field E or H
 // function to print to stderr estimate of time until program end
 void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
 
@@ -51,6 +53,12 @@ extern  FILE * fopen_errchk (const char * filename, const char * mode);
 // get string instr: like fgets but with error check
 extern  char * fgets_errchk (char * instr,int size, FILE * file);
 
+//where not more than len characters are searched.  Characters that
+//     appear after a ‘\0’ character are not searched.  Since the strnstr() function is a FreeBSD specific API, it should only be used when portability is not a concern.
+//RETURN VALUES
+//     if find occurs nowhere in s, NULL is returned; otherwise a pointer to the first character of the first occurrence of find
+//     is returned.
+extern char * mystrnstr(const char *s, const char *find, size_t slen);
 
 // input line and split into numbers nn[1 ... ]
 // on input: nn[0]... size of array nn[] (not changed in routine)
@@ -206,6 +214,9 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
  // sphere of radius r from the origin (ai = column vectors of matrix a)
  // this routine returns the maximum and minimum values of ni i=1,2,3
  // by probing the corners of a cube
+
+// checks if Habc and Hext(1,2,3)=Hijk are in accordance if nonzero both, similar for E
+void crosscheck_H_E(Vector & Hext,Vector & Habc,Vector & Eabc,Vector & abc);
 
 
 

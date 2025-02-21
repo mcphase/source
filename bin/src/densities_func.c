@@ -3,7 +3,7 @@
 //                        currdensities
 /*****************************************************************/
 
-int check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hcin, spincf & savmf, double & T,Vector & Hext,char*outstr)
+int check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hcin, spincf & savmf, double & T,Vector & Hext,char*outstr,char **out)
 {// load mfconfigurations and check which one is nearest -------------------------------
 // returns 0 if ok, 1 if no stable configuration was found
 int n;
@@ -33,7 +33,11 @@ int n;
       if(n>=17){for(int ii=1;ii<=6;++ii)spins.epsilon(ii)=numbers[11+ii];}
       if (dd<delta)
        {delta=dd;
-        snprintf(outstr,MAXNOFCHARINLINE,"x=%g y=%g T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[1]),myround(numbers[2]),myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
+                snprintf(outstr,MAXNOFCHARINLINE,"%s=%g %s=%g %s=%g %s=%g %s=%g %s=%g %s=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",
+                        out[1],myround(numbers[1]),out[2],myround(numbers[2]),out[3],myround(numbers[3]),out[4],myround(numbers[4]),
+                        out[5],myround(numbers[5]),out[6],myround(numbers[6]),out[7],myround(numbers[7]),
+                        myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
+//                snprintf(outstr,MAXNOFCHARINLINE,"x=%g y=%g T=%g Ha=%g Hb=%g Hc=%g n=%g spins nofatoms=%i in primitive basis nofcomponents=%i",myround(numbers[1]),myround(numbers[2]),myround(numbers[3]),myround(numbers[5]),myround(numbers[6]),myround(numbers[7]),myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
         savmf=spins;T=numbers[3];Hext(1)=numbers[5];Hext(2)=numbers[6];Hext(3)=numbers[7];
        }
       pos=ftell(fin_coq); 
@@ -52,8 +56,17 @@ int n;
  return 0; // ok structure found
 }
    
-int headerinput(FILE * fin_coq,FILE* fout,graphic_parameters & gp,cryststruct & cs)
+int headerinput(FILE * fin_coq,FILE* fout,graphic_parameters & gp,cryststruct & cs,char **out)
 { char instr[MAXNOFCHARINLINE];
+ // default out values
+strcpy(out[1],"x");
+strcpy(out[2],"y");
+strcpy(out[3],"T");
+strcpy(out[4],"H");
+strcpy(out[5],"Ha");
+strcpy(out[6],"Hb");
+strcpy(out[7],"Hc");
+
  long int pos=0,j;int n=0;
 cs.nofatoms=0;cs.nofcomponents=3;
 char *token;cs.abc=0;
@@ -79,7 +92,14 @@ char *token;cs.abc=0;
    extract(instr,"show_atoms",gp.show_atoms);
    extract(instr,"spins_scale_moment",gp.spins_scale_moment);
    extract(instr,"show_chargedensity",gp.show_density);
-
+   extract(instr,"out1",out[1], 20 ,1);
+   extract(instr,"out2",out[2], 20 ,1);
+   extract(instr,"out3",out[3], 20 ,1);
+   extract(instr,"out4",out[4], 20 ,1);
+   extract(instr,"out5",out[5], 20 ,1);
+   extract(instr,"out6",out[6], 20 ,1);
+   extract(instr,"out7",out[7], 20 ,1);
+   
    extract(instr,"scale_view_1",gp.scale_view_1);
    extract(instr,"scale_view_2",gp.scale_view_2);
    extract(instr,"scale_view_3",gp.scale_view_3);

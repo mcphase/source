@@ -480,7 +480,7 @@ ComplexVector& ComplexVector::operator %= (const ComplexVector& A)
 // Subvector extraction 
 //----------------------------------------------------------------------------//
 
-ComplexVector ComplexVector::operator () (int lo, int hi) const
+ComplexVector ComplexVector::operator () (int lo, int hi, int shiftindex) const
 //
 // The elements of this vector within the index range [lo..hi] 
 // are returned in a vector with the corresponding dimension [lo..hi].
@@ -489,8 +489,8 @@ ComplexVector ComplexVector::operator () (int lo, int hi) const
     // check for valid subvector range
     if (lo < cl || hi > ch)
       Matpack.Error("ComplexVector::operator(): subvector index out of range (%d,%d)", lo,hi);
-    ComplexVector W(lo,hi);    
-    copyvec(W.V+lo,V+lo,W.ncol);
+    ComplexVector W(lo+shiftindex,hi+shiftindex);    
+    copyvec(W.V+lo+shiftindex,V+lo,W.ncol);
     return W.Value();
 }
 

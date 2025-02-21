@@ -35,7 +35,7 @@ int main (int argc, char **argv)
   double stamax=1e33;
   Vector xv(1,3);
   Vector yv(1,3);
-  Vector h(1,3);
+  Vector h(1,HEXT_DIMENSION);
   
 fprintf(stderr,"**************************************************************************\n");
 fprintf(stderr,"*\n");
@@ -142,7 +142,7 @@ fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
   Vector Imom(1,inputpars.cs.nofcomponents);
   Vector mmax(1,3*inputpars.cs.nofatoms);
   Vector mmom(1,3);
-  Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,3);h1ext=0;
+  Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,HEXT_DIMENSION);h1ext=0;
  if(doeps){printf("#Inverting Elastic Constants Matrix\n");
   inputpars.Cel.Inverse();
            }
@@ -168,7 +168,6 @@ T=0.0;h=0;
     if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.tst");
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
     testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-      
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
     strcpy(prefix+11+strlen(ini.prefix),"mcphas.tst");
     testspins.save(prefix,"w");
@@ -202,48 +201,28 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
    if(argc>options+1)  //should T-H values be read from file ?
    {while (feof(fin)==0&&0==inputline(fin,nn)){;}  // if yes -> input them
     if (feof(fin)!=0) goto endproper;
-    x=nn[1];y=nn[2];T=nn[3];h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
-    // column 5 6 7 are the direction of h given by its components of lattice vectors a b c 
-    // column 4 contains the magnitude of h in Tesla - normalize h so that it's magnitude is correct
-    normalizedadbdc(h,nn[4],inputpars);
+    x=nn[1];y=nn[2];T=nn[3];h=0;h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+    // column 5 6 7 are the direction of h given by its components in i j k coordinates
    }
    else
-   {//if parameters outside specified region then put them into it ...
-    xv=ini.xv(1,3);normalizedadbdc(xv,1.0,inputpars);// take care that vector xHa xHb Xhc has unit length 1 Tesla
-    yv=ini.yv(1,3);normalizedadbdc(yv,1.0,inputpars);
+   {
+   //if parameters outside specified region then put them into it ...
     if (x<ini.xmin) x=ini.xmin;
     if (y<ini.ymin) y=ini.ymin;    
-
-     T=ini.zero(0)+x*ini.xv(0)+y*ini.yv(0);
-     h(1)=ini.zero(1)+x*xv(1)+y*yv(1);
-     h(2)=ini.zero(2)+x*xv(2)+y*yv(2);
-     h(3)=ini.zero(3)+x*xv(3)+y*yv(3);
-   } 
-     
+    ini.getTH(T,h,x,y,inputpars.cs);
+  } 
+          
       physprop.x=x;physprop.y=y;
       physprop.T=T;
       physprop.H=h;
 
-// this means from input we take the vector xHa xHb xHc, interpret it as fractional 
-// coordinates in terms of unit !! vectors along the Bravais lattice vectors
-// and normalize this vector to 1 and then multiply it by x
-// and then add Ha0 Hb0 Hc0  and store this in physprop.H, further
-// in htcalc we will use dadbdc2ijk (again with Bravais lattice of unit length)
-// to transform physprop.H to Euclidean ijk coordinates 
-// and this will be used in the calculation as external field in Tesla
-// -->  input (xHa xHb xHc) and (Ha0 Hb0 Hc0) are vectors 
-// given in terms of components with respect to unit vectors along the Bravais lattice a, b, c.
-// For the external magnetic field unit is Tesla.
-// Therefore a tooltip text will be:
-// xHa: Magnetic Field component with respect to Bravais lattice unit vector ^a=a/|a| (normalised to 1 Tesla)
-// Ha0: Offset - Magnetic Field component with respect to Bravais lattice unit vector ^a=a/|a| (normalised to 1 Tesla)
 if(verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to the Bravais lattice unit vectors ^a=a/|a|  ^b=b/|b| ^c=c/|c|\n");
  if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
               {printf("Hi Hj Hk refer to components of magnetic field with respect to Euclidean Coordinates ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
 }
 
 // check if calculation results should and can be read (returns j=0)
-j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix);}
+j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix,ini);}
 
 // if not (j=1) then calculate physical properties at HT- point
 if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
@@ -313,16 +292,3 @@ if(ini.ipz!=NULL)delete ini.ipz;
 return(0);
 }
 
-int normalizedadbdc(Vector & dadbdc,double n,par & inputpars)
-   {if(Norm(dadbdc)>0.00001){ // normalize Vector dadbdc (da da dc are components with respect to
-                              // Bravais lattice a b c) to length n Angstroem
-    Vector Hijk(1,3);
-    Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;// !!!! a b c are unit vectors along Bravais Lattice vectors !!!
-                     abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
-    dadbdc2ijk(Hijk,dadbdc,abc);
-    Hijk*=n/Norm(Hijk);
-    ijk2dadbdc(dadbdc,Hijk,abc);
-    return true;      }
-    else
-   {return false;}
-   }

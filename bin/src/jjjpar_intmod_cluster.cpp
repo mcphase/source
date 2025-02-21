@@ -4,7 +4,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
 {// vector of matrix pointers which index the I1,I2,...In matrices of the cluster
  zsMat<double> * Iaa[(*clusterpars).cs.nofatoms*(*clusterpars).cs.nofcomponents+nofcomponents+3+3*(*clusterpars).cs.nofatoms+1];
  // initialize these matrices
- dim=1; Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1,3);
+ dim=1; Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1, HEXT_DIMENSION );
  dnn= new int [(*clusterpars).cs.nofatoms+1];
  // determine dimension of H matrix
  for (int n=1;n<=(*clusterpars).cs.nofatoms;++n)
@@ -48,7 +48,7 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
  }
 
  // initialize matrix and vector to cache Hamiltonian matrix from runs where Hext is constant
- clusterH = new zsMat<double>(dim,dim); oldHext = new Vector(1,3); justinit=true;
+ clusterH = new zsMat<double>(dim,dim); oldHext = new Vector(1,HEXT_DIMENSION); justinit=true;
  // Allocates workspace for iterative eigensolvers
  workspace = new iterwork(dim,dim,dim);
 
@@ -270,7 +270,7 @@ printf("#module cluster initialized\n");
 //------------------------------------------------------------------------------------------------
 void jjjpar::cluster_Iaa(zsMat<double> *Iai, int a, int i)
 {
- Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1,3);
+ Vector Hxc(1,(*clusterpars).cs.nofcomponents);Vector Hext(1,HEXT_DIMENSION);
  // initialize matrices
 //Iaa[0]=new ComplexMatrix(1,dim,1,dim);(*Iaa[0])=1;
 //for(int i=1;i<=(*clusterpars).cs.nofcomponents;++i)
@@ -378,6 +378,7 @@ void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Matrix & Jret,Vector & TT, Vec
 Vector En(1,dim);
 //Matrix zr(1,dim,1,dim);
 ComplexMatrix zc(1,dim,1,dim);
+
 cluster_calcH_and_diagonalize(En,zc,Hxc,Hext);
 
 for(int ti=TT.Lo();ti<=TT.Hi();++ti){ double T=TT(ti);
@@ -630,7 +631,7 @@ void jjjpar::cluster_est(ComplexMatrix * eigenstates,Vector &Hxc,Vector &Hext,do
 */
  fprintf(stderr,"# calculating eigenstates of cluster ...");
 (*eigenstates) = ComplexMatrix(0,dim,1,dim);
- 
+ //myPrintVector(stdout,Hext);
  Vector En(1,dim);
  //Matrix zr(1,dim,1,dim);
  //ComplexMatrix zc(1,dim,1,dim);
@@ -668,6 +669,7 @@ for (int i=1;i<=(*clusterpars).cs.nofatoms;++i)
 {Matrix Hi((*(*clusterpars).jjj[i]).opmat(0,ZeroHxc,Hext)); // here we need ZeroHxc because
                                                             // exchange operators are set by user (Ia)
                                                             // and not in the single ion module
+
   //1. determine dimensions
   int di=dnn[i];
   int dx=1,dz=1;

@@ -16,7 +16,7 @@
 void helpexit()
 { printf (" program single ion  - calculate single ion expectations values <Ia> <Ib> ... \n" 
           "and transition energies at given T and H\n"
-          "   use as: singleion [option] T[K] Hexta[T] Hextb[T] Hextc[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents [meV] \n\n"
+          "   use as: singleion [option] T[K] Hexti[T] Hextj[T] Hextk[T] Hxc1 Hxc2 Hxc3 ... Hxcnofcomponents [meV] \n\n"
           "           T    ..... Temperature in Kelvin \n"
           "           Hext ..... external field in Tesla \n"
           "           Hxc... exchange (molecular) field in meV   \n\n"
@@ -122,7 +122,7 @@ void colheader(char observable,int observable_nofcomponents,int nofcomponents,Ve
                                               for(j=5;j<=observable_nofcomponents;++j){printf("%i   ",5+nofcomponents+j);}printf("    ");break;
                                     default: for(j=1;j<=observable_nofcomponents;++j){printf("  %i  ",5+nofcomponents+j);}printf("    ");break;
                                    }printf("\n");
- printf("#atom-nr   T[K]   ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'a'-1+j);
+ printf("#atom-nr   T[K]   ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'i'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
 int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
 int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
@@ -161,7 +161,9 @@ pchr=strstr(filename+10,"\\");
  while(pchr!=0){memcpy(pchr,"I",1);pchr=strstr(filename+10,"\\");}
 
         fout_trs = fopen_errchk (filename,"w");
-        trs_header_out(fout_trs,pinit,ninit,maxE,TT,Hext,observable);
+        char outstring[MAXNOFCHARINLINE];
+        sprintf(outstring," T= %g K Hi=%g Hj=%g Hk=%g T",TT,Hext(1),Hext(2),Hext(3));
+        trs_header_out(fout_trs,pinit,ninit,maxE,outstring,observable);
 
         jjj.maxE=maxE;jjj.pinit=pinit;jjj.ninit=ninit;
         jjj.transitionnumber=0;int tc=0;nt=0;
@@ -463,9 +465,9 @@ int main (int argc, char **argv)
    double ninit=100000000,pinit=0,maxE=1e10,opmat=1e10,Estart=0,epsilon=0,dE=0,X0=0,lambda=0;
    int Tsteps=0,Hsteps=0,Esteps=0,elevels=0,no_trs_write=0;
    double Eend=0,Tend=0,Tstart=0;
-   Vector Hend(1,3),Hstart(1,3);
+   Vector Hend(1,HEXT_DIMENSION),Hstart(1,HEXT_DIMENSION);
   int nofcomponents=0;
-  Vector Hext(1,3),Q(1,3),Hxc_in(1,HXCMAXDIM);
+  Vector Hext(1,HEXT_DIMENSION),Q(1,3),Hxc_in(1,HXCMAXDIM);
   char sipffile[MAXNOFCHARINLINE];
 
   int nmax=5;// default number of transitions to  be output
@@ -621,7 +623,7 @@ double TT=Tend;
     
 ++Tsteps;Vector T(1,Tsteps); // Tsteps= number of temperatures to calculate
 T(1)=Tstart;for(int Ti=1;Ti<Tsteps;++Ti){T(Ti+1)=T(Ti)+(Tend-Tstart)/(Tsteps-1);} //set T's
-Vector dH(1,3);dH=0;
+Vector dH(1,HEXT_DIMENSION);dH=0;
 Hstart=Hext;if(Hsteps){dH=Hend-Hstart;dH*=(1.0/Hsteps);}
 //myPrintVector(stdout,dH);printf("%i\n",Hsteps);exit(0);
  

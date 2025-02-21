@@ -452,15 +452,17 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
 
   //calculate single ion properties of every atom in magnetic unit cell
   int nofEstps=0;if(do_Erefine)nofEstps=(int)((ini.emax-ini.emin)/(fabs(epsilon)/2)+1);
-  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.cs.nofatoms,ini.nofcomponents,nofEstps,do_Erefine);
-
+ mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.cs.nofatoms,ini.nofcomponents,nofEstps,do_Erefine);
+  char str[MAXNOFCHARINLINE];
+   ini.mfstring(str,MAXNOFCHARINLINE);
   
+   
  if (do_readtrs==0)
  {
  // ********************************************** write mcdisp.trs *******************************************************
  snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.trs",ini.prefix);printf("# saving  %s\n",filename);
   fout = fopen_errchk (filename,"w");
-   trs_header_out(fout,pinit,ninit,maxE,ini.T,ini.Hext,'I');
+   trs_header_out(fout,pinit,ninit,maxE,str,'I');
   for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
   for(l=1;l<=inputpars.cs.nofatoms;++l){
    if(do_verbose==1)fprintf(stdout,"trying du1calc for ion %i in crystallographic unit cell %i %i %i:\n",l,i,j,k);
@@ -495,24 +497,26 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   if (do_createtrs==1){fprintf(stdout,"single ion transition file ./results/mcdisp.trs created - please comment transitions which should not enter the calculation and restart with option -t\n");exit(0);}
   snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.trs",ini.prefix);
   printf("\n#reading %s\n\n",filename);
+
 // read transitions to be considered from file
  for(i=1;i<=ini.mf.na();++i){for(j=1;j<=ini.mf.nb();++j){for(k=1;k<=ini.mf.nc();++k){
     if((fin = fopen(filename,"rb"))==NULL){snprintf(filename,MAXNOFCHARINLINE,"./results/mcdisp.trs");
                   fin = fopen_errchk(filename,"rb");printf("\n#... not possible, therefore reading %s\n\n",filename);}
 noftransitions=0;
- int nparread=0;double Tr,Har,Hbr,Hcr;
+ int nparread=0;//double Tr,Har,Hbr,Hcr;
  char instr[MAXNOFCHARINLINE];
- while(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL&&nparread<6)
+ while(fgets(instr,MAXNOFCHARINLINE,fin)!=NULL&&nparread<6&&NULL==mystrnstr(instr,str,strlen(instr)))
  {nparread+=1-extract(instr,"ninit",ninit);
   nparread+=1-extract(instr,"pinit",pinit);
   nparread+=1-extract(instr,"maxE",maxE);
-  nparread+=1-extract(instr,"T",Tr);
+
+/*  nparread+=1-extract(instr,"T",Tr);
   nparread+=1-extract(instr,"Ha",Har);
   nparread+=1-extract(instr,"Hb",Hbr);
-  nparread+=1-extract(instr,"Hc",Hcr);
+  nparread+=1-extract(instr,"Hc",Hcr);*/
  }
 
- if (Tr!=ini.T||Har!=ini.Hext(1)||Hbr!=ini.Hext(2)||Hcr!=ini.Hext(3)||nparread!=7){fprintf(stderr,"ERROR: reading mcdisp.trs one of the parameters not set or not in line with mcdisp.mf mcdisp.par: ninit pinit maxE T Ha Hb Hc ! \n");exit(EXIT_FAILURE);}
+ if (nparread<3){fprintf(stderr,"ERROR: reading mcdisp.trs one of the parameters not set or not in line with mcdisp.mf mcdisp.par: ninit pinit maxE T Ha Hb Hc ... ! \n");exit(EXIT_FAILURE);}
   while (feof(fin)==0)
   {if ((i1=inputline(fin,nn))>=5)
    {if(i==(int)nn[1]&&j==(int)nn[2]&&k==(int)nn[3])
@@ -1008,7 +1012,7 @@ if (do_jqfile){
             fprintf(stderr,"# Skipping this q-point.\n");
             if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
                qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
-               ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+               ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
                fprintf (foutqei, "%4.4g           ",0.); // print energy zero
                fprintf(foutqei, "-1    -1   -1\n");
             }
@@ -1038,7 +1042,7 @@ if (do_jqfile){
          fprintf(stderr,"# The non-symmetric eigensolver failed. This Q point will be skipped.\n");
          if(qincr!=-1) { // In order to keep the q-increments the same - since we're missing a point here.
             qold=qijk; hkl2ijk(qijk,hkl, inputpars.cs.abc); qincr+=Norm(qijk-qold);
-            ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+            ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
             fprintf (foutqei, "%4.4g           ",0.);
             fprintf(foutqei, "-1    -1   -1\n");
          }
@@ -1098,7 +1102,6 @@ if (do_jqfile){
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
   intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl,counter);
   qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);QQ=Norm(qijk);
-
   if(qincr==-1){qincr=0;qold=qijk;
               // for the first q vector in the loop we have to initialize files ...
               snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
@@ -1149,7 +1152,7 @@ if (do_jqfile){
          qincr+=Norm(qijk-qold); 
          writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
                              ini,calc_rixs,do_Erefine,counter);
-                  ini.print_usrdefcols(foutqom,qijk,qincr,q,hkl);
+                  ini.print_usrdefcols(foutqom,qijk,qincr,q,hkl,false);
                   for (i=1;i<=dimA;++i)fprintf (foutqom, " %4.4g ",myround(En(i)));
                   fprintf (foutqom, " > ");
 
@@ -1345,7 +1348,7 @@ if (do_jqfile){
                                 Irlt=calc_irix(eir,eol,chi);if(Irlt>Irl){Irl=Irlt;azrl=azimuth*180/PI;}
                                 Ilrt=calc_irix(eil,eor,chi);if(Ilrt>Ilr){Ilr=Ilrt;azlr=azimuth*180/PI;}
                                 Illt=calc_irix(eil,eol,chi);if(Illt>Ill){Ill=Illt;azll=azimuth*180/PI;}
-                               if(calc_rixs==2){ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                               if(calc_rixs==2){ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
                                                 fprintf (foutqei, "%4.4g           ",myround(En(i)));
                                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Isst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ispt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ipst),myround(1e-8,azimuth*180/PI),myround(1e-8,Ippt),myround(1e-8,azimuth*180/PI));
                                                 fprintf (foutqei, " %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f    %5.4E %3.0f",myround(1e-8,Irrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Irlt),myround(1e-8,azimuth*180/PI),myround(1e-8,Ilrt),myround(1e-8,azimuth*180/PI),myround(1e-8,Illt),myround(1e-8,azimuth*180/PI));
@@ -1354,10 +1357,10 @@ if (do_jqfile){
                               }}
                               if (En(i)==-DBL_MAX) {
                               fprintf (foutqei, "#| "); 
-                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
                               fprintf (foutqei, "%4.4g%si%-4.4g    ",myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
                               } else {
-                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
                               fprintf (foutqei, "%4.4g           ",myround(En(i)));
                               }
                                 if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){
@@ -1406,11 +1409,11 @@ if (do_jqfile){
 
                      //if(intsbey(i)<0)intsbey(i)=-1.2;
                       fprintf (foutqom, " %6.6g",myround(intsbey(i)));
-                      ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                      ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
                       fprintf (foutqei, "%6.6g  %6.6g  %6.6g %6.6g  ",myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)));
 	             } else {
                       fprintf (foutqei, "#| "); 
-                      ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl);
+                      ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
                       fprintf (foutqei, "%6.6g%si%-6.6g  -1     -1    -1     ",myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
                      } 
                   if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){   
@@ -1493,7 +1496,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.qes_real; delete[] thrdat.qes_imag; 
                   delete[] thrdat.qel_real; delete[] thrdat.qel_imag; 
 #endif
-if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl);
+if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false);
                fprintf (foutdstot, "%4.4g %4.4g",DMDtotint,DMDtotintbey);
                switch(ini.outS)
                          {case 0: break;
@@ -1673,7 +1676,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl);
                      ch=(*chpointer[iE-1]);
                      intensity = vIntensity(iE++); totint+=intensity*fabs(epsilon)/2;
 #endif
-                     ini.print_usrdefcols(foutds,qijk,qincr,q,hkl);
+                     ini.print_usrdefcols(foutds,qijk,qincr,q,hkl,false);
                      fprintf (foutds, " %4.4g %4.4g ",myround(E),myround(intensity));
                      for (int ii=1;ii<=ch.Rhi();++ii)for (int jj=1;jj<=ch.Chi();++jj)fprintf(foutds,"%4.4g %4.4g  ",myround(real(ch(ii,jj))),myround(imag(ch(ii,jj))));
                      fprintf(foutds,"\n");

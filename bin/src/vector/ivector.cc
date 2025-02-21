@@ -330,7 +330,7 @@ IntVector& IntVector::operator = (int value)
 // Subvector extraction
 //----------------------------------------------------------------------------//
 
-IntVector IntVector::operator () (int lo, int hi) const
+IntVector IntVector::operator () (int lo, int hi, int shiftindex) const
 //
 // The elements of this vector within the index range [lo..hi] 
 // are returned in a vector with the corresponding dimension [lo..hi].
@@ -339,8 +339,8 @@ IntVector IntVector::operator () (int lo, int hi) const
     // check for valid subvector range
     if (lo < cl || hi > ch)
       Matpack.Error("IntVector::operator(): subvector index out of range (%d,%d)", lo,hi);
-    IntVector W(lo,hi);    
-    copyvec(W.V+lo,V+lo,W.ncol);
+    IntVector W(lo+shiftindex,hi+shiftindex);    
+    copyvec(W.V+lo+shiftindex,V+lo,W.ncol);
     return W.Value();
 }
 
