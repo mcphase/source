@@ -99,7 +99,7 @@ printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
 } 
 
 
-int usrdefcols[]={7, 1,2,3,4,5,6,7,}; // user defined output columns (first number is number of usr def output columns)
+int usrdefcols[]={7, 1,2,3,4,5,6,7}; // user defined output columns (first number is number of usr def output columns)
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
 int colcod[]=    {-1,19,20,0,21,1,2,3}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
@@ -127,12 +127,12 @@ const char * colhead []= {  "T[K]    ", //      0
                             "s6[Pa]  ",  //    18 
                             "x       ",  //    19 
                             "y       ", //     20 
-                            "|H|[T]  "   //    21
+                            "|H|[T]  ",   //    21
                             "|E|[T]  "   //    22
                                };
 
 // different output data for user defined columns ...
-double inipar::setcolvalue(int i,double& T,Vector & Hext,Vector & abc)
+double inipar::setcolvalue(int i,double & x, double & y,double& T,Vector & Hext,Vector & abc)
 {      switch (i) {
 case 0:  return T;break;
 case 1:  
@@ -181,22 +181,12 @@ fprintf(fout,"\n#");
  for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s",colhead[colcod[usrdefcols[i]]]);
 }
 
-// print characteristic external parameter string
-void inipar::mfstring(char *str,size_t t)
-{ snprintf(str,t,"T=%4.4g Hi=%4.4g Hj=%4.4g Hk=%4.4g",
-              T,Hext(1),Hext(2),Hext(3));
-  if(Norm(Eabc)>SMALL_FIELD)snprintf(str+strlen(str),t-strlen(str)," Ei=%4.4g Ej=%4.4g Ek=%4.4g",
-              Hext(4),Hext(5),Hext(6));
-  if(Norm(Hext(7,12))>SMALL_FIELD)snprintf(str+strlen(str),t-strlen(str)," s1=%4.4g s2=%4.4g s3=%4.4g s4=%4.4g s5=%4.4g s6=%4.4g",
-              Hext(7),Hext(8),Hext(9),Hext(10),Hext(11),Hext(12));
-}
-
 // print user defined columns
-void inipar::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim,Vector & hkl,bool withtext)
+void inipar::print_usrdefcols(FILE *fout,double & x, double & y,double& T,Vector & Hext,Vector & abc,bool withtext)
 {
  for(int i=1;i<=usrdefcols[0];++i)
- if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[usrdefcols[i]]],myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim,hkl)));
- else fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],Qvec,Qincr,qprim,hkl)));
+ if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[usrdefcols[i]]],myround(setcolvalue(colcod[usrdefcols[i]],x,y,T,Hext,abc)));
+ else fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],x,y,T,Hext,abc)));
 }
 
 // set external field and Temperature
@@ -300,6 +290,7 @@ void inipar::time_estimate_until_end(double x, double y)
 int inipar::load ()
 { FILE *fin_coq;
   char instr[MAXNOFCHARINLINE];
+  char somestring[MAXNOFCHARINLINE];
   errno = 0;startcputime= std::clock();
   fin_coq = fopen(savfilename, "rb");
   if (fin_coq==NULL) return 1;
@@ -378,7 +369,11 @@ int inipar::load ()
     extract_with_prefix(instr,prefix,"s40",zero[16]);
     extract_with_prefix(instr,prefix,"s50",zero[17]);    
     extract_with_prefix(instr,prefix,"s60",zero[18]);
-   
+      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
+     {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
+      extract(instr, somestring,colcod[usrdefcols[j]]);
+     }
+
     extract_with_prefix(instr,prefix,"hmin",qmin[1]); 
     extract_with_prefix(instr,prefix,"kmin",qmin[2]); 
     extract_with_prefix(instr,prefix,"lmin",qmin[3]); 
@@ -536,12 +531,18 @@ void inipar::print (const char * filename)
     if(zero(17)!=0)fprintf(fout,"s50=%g\n",zero(17));
     if(zero(18)!=0)fprintf(fout,"s60=%g\n",zero(18));
 
-    fprintf(fout,"input (xHa xHb xHc) (yHa yHb yHc) and (Ha0 Hb0 Hc0) are vectors\n");
-    fprintf(fout,"given in terms of components with respect to unit vectors along the\n");
-    fprintf(fout,"Bravais lattice ^a=a/|a|, ^b=b/|b|, ^c=c/|c|.\n");
-    fprintf(fout,"For the external magnetic field unit is Tesla.\n");
-
-    fprintf(fout,"[GENERATION OF SPIN CONFIGURATIONS]\n");
+    fprintf(fout,"#input (xHa xHb xHc) (yHa yHb yHc) and (Ha0 Hb0 Hc0) are vectors\n");
+    fprintf(fout,"#given in terms of components with respect to unit vectors along the\n");
+    fprintf(fout,"#Bravais lattice ^a=a/|a|, ^b=b/|b|, ^c=c/|c|.\n");
+    fprintf(fout,"#For the external magnetic field unit is Tesla.\n");
+    fprintf(fout,"# out variables to control first columns of output files results/mcphas.*:\n");
+    for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"out%i=%i \n",usrdefcols[i],colcod[usrdefcols[i]]);
+    fprintf(fout,"#     ... in out*=n the numbers n have the following meaning:\n");
+    for(int i=0;i<=COLHEADDIM;++i){
+    fprintf(fout,"#            %i....%s\n",i,colhead[i]);
+                   }
+ 
+    fprintf(fout,"\n[GENERATION OF SPIN CONFIGURATIONS]\n");
     fprintf(fout,"# test q vector (qmin qmax deltaq)\n");
     fprintf(fout,"hmin=%g\nhmax=%g\ndeltah=%g\n",qmin(1),qmax(1),deltaq(1));
     fprintf(fout,"kmin=%g\nkmax=%g\ndeltak=%g\n",qmin(2),qmax(2),deltaq(2));

@@ -89,8 +89,10 @@ class inipar
    void print();
    void print (const char * file);
    void time_estimate_until_end(double x, double y);
-
-  // exit with error message
+ double   setcolvalue(int i,double & x, double & y,double& T,Vector & Hext,Vector & abc);
+ void print_usrdefcols(FILE *fout,double & x, double & y,double& T,Vector & Hext,Vector & abc,bool withtext);
+ void print_usrdefcolhead(FILE *fout);
+ // exit with error message
    void errexit();
   //load parameters from file
    int load();
