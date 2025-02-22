@@ -83,14 +83,12 @@ class inipar
   double maxQ;
  // set external field and Temperature
  void getTH(double & T,Vector & h,double x, double y,cryststruct & cs);
- // ouput string with fields , withnames controls wether output is with or without names e.g. "T="
- void THstring(FILE * fout,double x, double y, double & T,Vector & h,cryststruct & cs,bool withnames=false,bool withxy=false);
   // printout initial parameters to file   
    void print();
    void print (const char * file);
    void time_estimate_until_end(double x, double y);
- double   setcolvalue(int i,double & x, double & y,double& T,Vector & Hext,Vector & abc);
- void print_usrdefcols(FILE *fout,double & x, double & y,double& T,Vector & Hext,Vector & abc,bool withtext);
+ double   setcolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc);
+ void print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext);
  void print_usrdefcolhead(FILE *fout);
  // exit with error message
    void errexit();

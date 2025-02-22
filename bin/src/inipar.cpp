@@ -104,6 +104,7 @@ int usrdefcols[]={7, 1,2,3,4,5,6,7}; // user defined output columns (first numbe
 int colcod[]=    {-1,19,20,0,21,1,2,3}; // field to store code for assigning type of data to columns of output,
                                            // set default values here (see list below for different types)
                                            // using the out5 out6  ... commands in mcdisp.par these codes can be modified
+
 #define COLHEADDIM 22	
 // different output data for columns 1-7
 const char * colhead []= {  "T[K]    ", //      0                                                 
@@ -132,7 +133,7 @@ const char * colhead []= {  "T[K]    ", //      0
                                };
 
 // different output data for user defined columns ...
-double inipar::setcolvalue(int i,double & x, double & y,double& T,Vector & Hext,Vector & abc)
+double inipar::setcolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc)
 {      switch (i) {
 case 0:  return T;break;
 case 1:  
@@ -181,13 +182,7 @@ fprintf(fout,"\n#");
  for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s",colhead[colcod[usrdefcols[i]]]);
 }
 
-// print user defined columns
-void inipar::print_usrdefcols(FILE *fout,double & x, double & y,double& T,Vector & Hext,Vector & abc,bool withtext)
-{
- for(int i=1;i<=usrdefcols[0];++i)
- if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[usrdefcols[i]]],myround(setcolvalue(colcod[usrdefcols[i]],x,y,T,Hext,abc)));
- else fprintf(fout,"%4.4g ",myround(setcolvalue(colcod[usrdefcols[i]],x,y,T,Hext,abc)));
-}
+
 
 // set external field and Temperature
 void inipar::getTH(double & T,Vector & h,double x, double y,cryststruct & cs)
@@ -255,24 +250,36 @@ void inipar::getTH(double & T,Vector & h,double x, double y,cryststruct & cs)
    ys=yv(13,18,-12);normalize(ys,1.0);
    for(int i=1;i<=6;++i){
      h(i+6)=zero(i+6)+x*xs(i)+y*ys(i);}
+
+
 }
 
- // ouput string with fields , withnames controls wether output is with or without names e.g. "T="
- void inipar::THstring(FILE * fout,double x, double y, double & T,Vector & h,cryststruct & cs,bool withnames,bool withxy)
-{if(withxy)
- {if(withnames)fprintf(fout,"x=%4.4g y=%4.4g",myround(x),myround(y)); else fprintf(fout," %4.4g %4.4g ",myround(x),myround(y));
+// print user defined columns
+void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext)
+{bool c[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i)c[i]=false;
+ for(int i=1;i<=usrdefcols[0];++i)
+ { double val=setcolvalue(colcod[usrdefcols[i]],x,y,T,Hext,abc);
+   if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[usrdefcols[i]]],myround(val));
+   else fprintf(fout,"%4.4g ",myround(val));
+   c[usrdefcols[i]]=true;
+ }
+if (!c[0]){fprintf(stderr,"#Error: Temperature T not stored  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
+for(int i=1;i<=HEXT_DIMENSION;++i)
+{if(fabs(Hext(i))>SMALL_FIELD)
+ {switch(i)
+  {case 1: case 2: case 3:{ bool cc=c[1]|c[2]|c[3]|c[4]|c[5]|c[6]|c[21];
+   if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
+                           } break;
+   case 4: case 5: case 6: { bool cc=c[7]|c[8]|c[9]|c[10]|c[11]|c[12]|c[22];
+   if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
+                           }break;
+   default: if(!c[i]){fprintf(stderr,"#Warning: stress s%i nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n",i-6);exit(EXIT_FAILURE); }
   }
-  if(withnames)fprintf(fout," T=%4.4g",myround(T)); else fprintf(fout," %4.4g ",myround(T));
-
- // get Ha Hb Hc from Hijk=h(1,2,3)
-  Vector abc(1,6),v(1,3),Habc(1,3); abc(1)=1; abc(2)=1; abc(3)=1; // trick to get Habc as components along a,b,c
-                  abc(4)=cs.alpha(); abc(5)=cs.beta(); abc(6)=cs.gamma();
-  v=h(1,3);ijk2dadbdc(Habc,v,abc);
-  
-  if(withnames)fprintf(fout," H=%g Ha=%g Hb=%g Hc=%g",myround(Norm(v)),myround(Habc(1)),myround(Habc(2)),myround(Habc(3))); 
-              else fprintf(fout,"%4.4g %4.4g %4.4g %4.4g ",myround(Norm(v)),myround(Habc(1)),myround(Habc(2)),myround(Habc(3)));
+ }
+}
 
 }
+ 
 
 
 void inipar::time_estimate_until_end(double x, double y)
@@ -401,6 +408,9 @@ int inipar::load ()
     }
    }
   fclose (fin_coq);
+ for(int i=1;i<=usrdefcols[0];++i){if(colcod[i]>COLHEADDIM)
+ {fprintf(stderr,"Error reading mcphas.ini - out%i = %i > %i not possible !\n",i,colcod[i],COLHEADDIM);exit(EXIT_FAILURE);}
+ }
 
   if (Norm(xv)==0){fprintf(stderr,"ERROR reading xT xHa xHb xHc\n");return 1;}
   if (Norm(yv)==0){fprintf(stderr,"ERROR reading yT yHa yHb yHc\n");return 1;}

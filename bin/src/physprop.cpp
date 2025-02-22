@@ -118,7 +118,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    Vector mabc(1,3); 
    ijk2dadbdc(mabc,m,abc);
 
-  printf("saving properties for ");ini.THstring(stdout,x,y,T,H,inputpars.cs,true,false);
+  printf("saving properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);
   if(ortho==0){printf(" Hi=%g Hj=%g Hk=%g ",H(1),H(2),H(3));}
   ini.time_estimate_until_end(x,y);
   printf("\n");
@@ -169,7 +169,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fclose(fout);
       }
    if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eel=0;P=0;}
-   fout = fopen_errchk (outfilename,"a");ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    fprintf (fout, "       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
             myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*H(1,3)/Norm(H(1,3))));
    if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),H(1),H(2),H(3));}
@@ -179,7 +179,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fclose(fout);
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,prefix);
   strcpy(outfilename+11+strlen(prefix),"mcphas.fum");
-   fout = fopen_errchk (outfilename,"a");ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    fprintf (fout, " %8.8g %8.8g  %4.4g %4.4g %4.4g %4.4g %4.4g\n",
             myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),
             myround(mabc[2]),myround(mabc[3]),myround(m*H(1,3)/Norm(H(1,3))));
@@ -273,7 +273,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   totalJ=0; 
   if (htfailed!=0){j=0;}else{totalJ=sps.totalJ();}
    if(j<0){sps.wasstable=j;}// if qvector generated structure is stable, then take period key = number of qvector
-   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    fprintf (fout, "       %ip           %ip                %i x %i x %i ",
            j,sps.wasstable,sps.na(),sps.nb(),sps.nc());
            for(i1=1;i1<=nofcomponents;++i1)
@@ -340,7 +340,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
       }
   fout = fopen_errchk (filename,"a");
   if (htfailed!=0){jj[i](1)=0;jj[i](2)=0;jj[i](3)=0;}
-    ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+    ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
         for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
             {fprintf (fout, "%4.4g ",myround(jj[i](j2+nofcomponents*nofcomponents*(l-1))));
 	    }
@@ -453,7 +453,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    strcpy(outfilename+10+strlen(prefix),"mcphas.hkl"); 
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    for (i=nofhkls;i>=1;--i)
     {if (htfailed!=0){hkli[inew[i]](1)=0;hkli[inew[i]](2)=0;hkli[inew[i]](3)=0;hkli[inew[i]](4)=0;}
     fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](4)));
@@ -464,7 +464,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasa.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](5)),myround(hkli[inew[i]](6)));
     } fprintf(fout,"\n");
@@ -474,7 +474,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasb.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g  ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](7)),myround(hkli[inew[i]](8)));
     } fprintf(fout,"\n");
@@ -484,7 +484,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl");  }
    fout = fopen_errchk (outfilename,"a");
    if (verbose==1)printf(" .... saving %s\n",outfilename);
-   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    for (i=nofhkls;i>=1;--i)
     {fprintf (fout, "   %4.4g %4.4g %4.4g  %4.4g %4.4g ",myround(hkli[inew[i]](1)),myround(hkli[inew[i]](2)),myround(hkli[inew[i]](3)),myround(hkli[inew[i]](9)),myround(hkli[inew[i]](10)));
     } fprintf(fout,"\n");
@@ -529,7 +529,7 @@ else
     fclose(fout);
    }  
   fout = fopen_errchk (outfilename,"a");
-   ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+   ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
    fprintf (fout, " %i %i %i ",
             sps.n()*sps.nofatoms,sps.nofatoms,sps.nofcomponents);
    if (htfailed!=0){fprintf(fout,"1 ");sps.spinfromq(1,1,1,null1,null,null,null);} // failed
@@ -575,7 +575,7 @@ else
    fprintf (fout, "    #mf3(atom 1) mf3(atom 2) ....         (i.e. divide by gJ and mu_B=0.05788meV/Tesla to get exchange field hxc[Tesla]}\n");
     fclose(fout);
    }  
-     fout = fopen_errchk (outfilename,"a");ini.THstring(fout,x,y,T,H,inputpars.cs,false,true);
+     fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
 fprintf (fout, " %i %i %i ",
             mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
    if (htfailed!=0){fprintf(fout,"1 %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g\n",myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));
@@ -611,7 +611,7 @@ int physproperties::read(int verbose, par & inputpars,char * readprefix,inipar &
    Vector mabc(1,3);
     ijk2dadbdc(mabc,m,abc);
 
-  printf("reading properties for ");ini.THstring(stdout,x,y,T,H,inputpars.cs,true,false);
+  printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);
 
 //-----------------------------------------mcphas.fum------------------------------------------------  
 // here read free energy etc if possible ... otherwise return 1
