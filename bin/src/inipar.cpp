@@ -107,29 +107,29 @@ int colcod[]=    {-1,19,20,0,21,1,2,3}; // field to store code for assigning typ
 
 #define COLHEADDIM 22	
 // different output data for columns 1-7
-const char * colhead []= {  "T[K]    ", //      0                                                 
-                            "Ha[T]   ", //      1                                                  
-                            "Hb[T]   ", //      2                                                  
-                            "Hc[T]   ", //      3 
-                            "Hi[T]   ", //      4                                                 
-                            "Hj[T]   ", //      5                                                 
-                            "Hk[T]   ", //      6
-                            "Ea[V/m] ",  //     7      
-                            "Eb[V/m] ",  //     8      
-                            "Ec[V/m] ",  //     9      
-                            "Ei[V/m] ",  //    10      
-                            "Ej[V/m] ",  //    11      
-                            "Ek[V/m] ",  //    12     
-                            "s1[Pa]  ",  //    13    
-                            "s2[Pa]  ",  //    14      
-                            "s3[Pa]  ",  //    15      
-                            "s4[Pa]  ",  //    16      
-                            "s5[Pa]  ",  //    17      
-                            "s6[Pa]  ",  //    18 
-                            "x       ",  //    19 
-                            "y       ", //     20 
-                            "|H|[T]  ",   //    21
-                            "|E|[T]  "   //    22
+const char * colhead []= {  "T [K]", //      0                                                 
+                            "Ha [T]", //      1                                                  
+                            "Hb [T]", //      2                                                  
+                            "Hc [T]", //      3 
+                            "Hi [T]", //      4                                                 
+                            "Hj [T]", //      5                                                 
+                            "Hk [T]", //      6
+                            "Ea [V/m]",  //     7      
+                            "Eb [V/m]",  //     8      
+                            "Ec [V/m]",  //     9      
+                            "Ei [V/m]",  //    10      
+                            "Ej [V/m]",  //    11      
+                            "Ek [V/m]",  //    12     
+                            "s1 [Pa]",  //    13    
+                            "s2 [Pa]",  //    14      
+                            "s3 [Pa]",  //    15      
+                            "s4 [Pa]",  //    16      
+                            "s5 [Pa]",  //    17      
+                            "s6 [Pa]",  //    18 
+                            "x",  //    19 
+                            "y", //     20 
+                            "|H| [T]",   //    21
+                            "|E| [T]"   //    22
                                };
 
 // different output data for user defined columns ...
@@ -173,13 +173,24 @@ return 0;
 
 
 // print user defined column headers
-void inipar::print_usrdefcolhead(FILE *fout)
+void inipar::print_usrdefcolhead(FILE *fout,char * str)
 {fprintf(fout,"#");
- for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%i%*s",i,(int)strlen(colhead[colcod[usrdefcols[i]]])-1,"");
- for(int i=usrdefcols[0]+1;i<=usrdefcols[0]+2;++i)fprintf(fout,"    %i    ",i);
- for(int i=usrdefcols[0]+3;i<=usrdefcols[0]+5;++i)fprintf(fout,"               %i   ",i);
-fprintf(fout,"\n#");
- for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s",colhead[colcod[usrdefcols[i]]]);
+ int i;
+ for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%i%*s",i,(int)strlen(colhead[colcod[usrdefcols[i]]]),"");
+ char *t;size_t n;
+ for(t=str;t[0]!='\0';t+=n)
+ {
+ //find first nonspace character
+ n= strspn(t," \t"); //printf("%i %i\n",n,t);
+ fprintf(fout,"%*s",(int)n,"");
+ // next - find until a space occurs
+ t+=n;n=strcspn(t," \t");
+ if(t[n]!='\0')fprintf(fout,"%2.i%*s",i,(int)(n-2),""); // fill the corresponding space with number and spaces
+ ++i;
+}
+ fprintf(fout,"\n#");
+ for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s ",colhead[colcod[usrdefcols[i]]]); 
+ fprintf(fout,"%s\n",str);
 }
 
 
@@ -255,13 +266,19 @@ void inipar::getTH(double & T,Vector & h,double x, double y,cryststruct & cs)
 }
 
 // print user defined columns
+void inipar::print_usrdefcolcodes(FILE *fout)
+{fprintf(fout,"#!");
+ for(int i=1;i<=usrdefcols[0];++i)
+ fprintf(fout,"out%i=%s ",usrdefcols[i],colhead[colcod[usrdefcols[i]]]);
+}
+// print user defined columns
 void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext)
 {bool c[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i)c[i]=false;
  for(int i=1;i<=usrdefcols[0];++i)
  { double val=setcolvalue(colcod[usrdefcols[i]],x,y,T,Hext,abc);
    if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[usrdefcols[i]]],myround(val));
    else fprintf(fout,"%4.4g ",myround(val));
-   c[usrdefcols[i]]=true;
+   c[colcod[usrdefcols[i]]]=true;
  }
 if (!c[0]){fprintf(stderr,"#Error: Temperature T not stored  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
 for(int i=1;i<=HEXT_DIMENSION;++i)

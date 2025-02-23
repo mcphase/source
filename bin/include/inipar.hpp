@@ -89,7 +89,8 @@ class inipar
    void time_estimate_until_end(double x, double y);
  double   setcolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc);
  void print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext);
- void print_usrdefcolhead(FILE *fout);
+ void print_usrdefcolcodes(FILE *fout);
+ void print_usrdefcolhead(FILE *fout,char * str);
  // exit with error message
    void errexit();
   //load parameters from file
