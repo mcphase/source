@@ -279,8 +279,9 @@ bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc)
  { // different output data for user defined columns ...
   switch(colcod[i])
   {case 19: case 20:  d=0; break; // do not use x,y
-   default: d=setcolvalue(colcod[i],x,y, T,Hext, abc)-nn[usrdefcols[i]];
+   default: d=setcolvalue(colcod[i],x,y, T,Hext, abc)-nn[i];
   }
+//  printf("d=%g i=%i nn=%g |",d,i,nn[i]);
   if(fabs(d)>SMALL_FIELD)return false;
  }
  return true;

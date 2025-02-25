@@ -71,6 +71,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
 
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;ini.print();} // if exit was 1 - save parameters and set exit=0
+  if(strcmp(ini.prefix,readprefix)==0&&prefix[0]!='\0')filemode="a";
    strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini"); 
    ini.print(prefix);  // copy mcphas.ini to results directory
 
@@ -222,7 +223,8 @@ if(verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to
 }
 
 // check if calculation results should and can be read (returns j=0)
-j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix,ini);}
+int parsread=1;
+j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix,ini);parsread=j;}
 
 // if not (j=1) then calculate physical properties at HT- point
 if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
@@ -231,7 +233,10 @@ if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
             //save physical properties of HT-point
 	    //sta=(sta*ini.nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(ini.nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
-          sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
+          if(strcmp(ini.prefix,readprefix)!=0||prefix[0]=='\0'||parsread!=0)
+           {sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);}
+          else
+           {ini.print_usrdefcols(stdout,x,y,T,physprop.H,inputpars.cs.abc,true);printf("\n");}
    	    ++ini.nofstapoints;
           if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 

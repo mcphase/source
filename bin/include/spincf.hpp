@@ -53,11 +53,10 @@ private:
    void calc_minmax_scale(Vector & min,Vector & max,Vector & ijkmin,Vector & ijkmax,Matrix & p,Vector & abc,double scale_view_1,double scale_view_2,double scale_view_3);
     void calc_prim_mag_unitcell_old(Matrix & p,Vector & abc, Matrix & r);
 // ----------------------------------------------------------
+ private:
 
-public:
    // number of spins  
    int nofa,nofb,nofc;
- private:
 // this subtracts n2 if n1>n2
    int mod(int n1,int n2);
    int mxa,mxb,mxc;

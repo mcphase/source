@@ -3,32 +3,25 @@
 //                        currdensities
 /*****************************************************************/
 
-int check_for_best(FILE *fin_coq,double Tin, double hain,double hbin, double hcin, spincf & savmf, double & T,Vector & Hext,char*outstr,char **out)
+int check_for_best(FILE *fin_coq,double * aa, spincf & savmf, double & T,Vector & Hext,char*outstr,char **out)
 {// load mfconfigurations and check which one is nearest -------------------------------
 // returns 0 if ok, 1 if no stable configuration was found
 int n;
-   double ddT,ddHa,ddHb,ddHc,dd,delta;
+   double dd,delta;
  float numbers[20];numbers[9]=1;numbers[10]=3;
  numbers[0]=20;char instr[MAXNOFCHARINLINE];
  long int pos=0;
- if(Tin>=0)
+ if(aa[0]==0)
 {
  for (delta=1000.0;feof(fin_coq)==0                      //end of file
-                    &&(n=inputline(fin_coq,numbers))>=8   //error in line reading (8 old format, 9 new format)
+                    &&(n=inputline(fin_coq,numbers))>=NOF_USERDEF_MCPHAS_COLS+1   //error in line reading (8 old format, 9 new format)
 		    ;)
     { spincf spins(1,1,1,(int)numbers[9],(int)numbers[10]);
       if(spins.load(fin_coq)==1){
-     if(Tin==0){ddT=0; // here hain and hbin correspond to x and y in phasediagram
-                ddHa=hain-numbers[1];ddHa*=ddHa;
-                ddHb=hbin-numbers[2];ddHb*=ddHb;
-                ddHc=0;
-      } else {
-      ddT=Tin-numbers[3];ddT*=ddT;
-      ddHa=hain-numbers[5];ddHa*=ddHa;
-      ddHb=hbin-numbers[6];ddHb*=ddHb;
-      ddHc=hcin-numbers[7];ddHc*=ddHc;
-      }
-      dd=sqrt(ddT+ddHa+ddHb+ddHc+0.000001);
+       dd=0.000001;for(int i=1;i<=NOF_USERDEF_MCPHAS_COLS;++i)
+       {if(aa[i]!=1e100)dd+=(aa[i]-numbers[i])*(aa[i]-numbers[i]);
+       }
+      dd=sqrt(dd);
       if(n>=11){if((int)numbers[11]!=0)dd=delta+10;} // if mcphase failed do not use this structure
       if(n>=17){for(int ii=1;ii<=6;++ii)spins.epsilon(ii)=numbers[11+ii];}
       if (dd<delta)
@@ -49,7 +42,7 @@ int n;
  } 
    else
  {// look for config number -Tin
-  for(n=1;n<=-Tin;++n)
+  for(n=1;n<=(int)aa[0];++n)
   {if(savmf.load(fin_coq)==0){fprintf(stderr,"Error program spins: loading configuration number %i\n",n);exit(1); }
   }snprintf(outstr,MAXNOFCHARINLINE,"n=%i spins nofatoms=%i in primitive basis nofcomponents=%i",savmf.n()*savmf.nofatoms,savmf.nofatoms,savmf.nofcomponents);
  }

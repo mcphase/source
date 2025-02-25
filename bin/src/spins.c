@@ -16,20 +16,23 @@ program spins - popout spin/exchange field configuration\n"
 "              - and/or display 3d animation of spin/moment/densities and animations\n\n\
 use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
     or: spins -f[c 1 13 3 0.2] [-n 2] mcphas.sps x y\n\
+    or: spins -f[c 1 13 3 0.2] [-n 2] mcphas.sps out1 out2 out3 out4 out5 out6 out7\n\
     or: spins -f[c 1 13 3 0.1] [-n 2] mcphas.tst n\n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [h k l E]\n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] x y\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [h k l E]\n\
                     \n\
 1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
    is read and extracted from this file and printed on screen (stdout),\n \
    results/spins.out is created (with mag moment chosen to be = <Ia> <Ib> <Ic>),\n\
    a simple graphics to represent the configuration is created in results/spins_prim.jvx \n\
-   Note: T Ha Hb Hc stand for the 3rd 5th 6th 7th column in mcphas.* output files\n\
+   Note: - T Ha Hb Hc stand for the 3rd 5th 6th 7th column in mcphas.* output files\n\
          (may have different meaning if out3 out5 out6 out7 is set in mcphas.ini)\n\
+         - out1,...,out7 refers to column 1-7 in mcphas.* output files\n\
   \n\
 2) if used with -f file x y, then this file has to be a mcphas.mf or mcphas.sps file,\n\
    the spin configuration at a given x,y point is read and extracted from this file ,\n\
@@ -311,15 +314,27 @@ else
    spincf savmf(1,1,1,cs.nofatoms,cs.nofcomponents);
 
 // ------------------------load spinsconfigurations and check which one is nearest -------------------------------   
-double TT=0; TT=strtod(argv[1+os],NULL);
-double HHx=0,HHy=0,HHz=0,lnZ,U;
-if (strncmp(argv[1],"-f",2)==0&&argc-os<3){TT=-TT;printf("# the configuration number %g\n",-TT);} // here TT becomes a number of a spinconfig in a file
-else{if(argc<4+os){TT=0;HHx=strtod(argv[1+os],NULL);HHy=strtod(argv[2+os],NULL);
-               }// here Hx and Hy become x and y in the phasediagram and TT=0 indicates this fact
+double aa[NOF_USERDEF_MCPHAS_COLS+1];for(int i=1;i<=NOF_USERDEF_MCPHAS_COLS;++i)aa[i]=1e100;
+
+double lnZ,U;
+if (strncmp(argv[1],"-f",2)==0&&argc<3+os){aa[0]=strtod(argv[1+os],NULL);printf("# the configuration number %g\n",aa[1]);}
+                                            // here aa[1] becomes a number of a spinconfig in a file
+else{if(argc-1==2+os||argc-1==6+os){aa[0]=0;aa[1]=strtod(argv[1+os],NULL);aa[2]=strtod(argv[2+os],NULL);
+               }// here aa[1] and aa[2] become x and y in the phasediagram 
      else
-     {HHx=strtod(argv[2+os],NULL);HHy=strtod(argv[3+os],NULL);HHz=strtod(argv[4+os],NULL);}
+     if(argc-1==4+os||argc-1==8+os)
+     {aa[0]=0;aa[3]=strtod(argv[1+os],NULL); // T   out3
+              aa[5]=strtod(argv[2+os],NULL); // Ha out5
+              aa[6]=strtod(argv[3+os],NULL); // Hb  out6 
+              aa[7]=strtod(argv[4+os],NULL);  // Hc  out7
      }
-if(check_for_best(fin,TT,HHx,HHy,HHz,savmf,T,Hext,outstr,out))
+     else
+     if(argc-1==NOF_USERDEF_MCPHAS_COLS+os||argc-1==NOF_USERDEF_MCPHAS_COLS+4+os)
+     {aa[0]=0;for(int i=1;i<=NOF_USERDEF_MCPHAS_COLS;++i)aa[i]=strtod(argv[i+os],NULL);
+     } else
+     {fprintf(stderr,"#Error program spins - wrong number of arguments %i (optional %i)!\n",argc-1,os);exit(1);}
+     } 
+if(check_for_best(fin,aa,savmf,T,Hext,outstr,out))
   {fclose (fin);fprintf(stderr,"#!!! Error program spins - no stable structure found !!!\n");exit(1);}
 fclose (fin);
 // ----------------------------output configuration ----------------------------------------------------------------
@@ -772,7 +787,10 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 // try a spinwave picture !!!  ... include phonons and spindensity changes ...
 //***************************************************************************************************************
 //***************************************************************************************************************
-if (argc-os>=6){
+if(argc-1==NOF_USERDEF_MCPHAS_COLS+4+os)os+=NOF_USERDEF_MCPHAS_COLS-4;
+if(argc-1==6+os)os-=2;
+//argc-1==8+os  ... ok 
+if (argc-1==8+os){
               // double E;
              long int pos=0;
              int extended_eigenvector_dimension;

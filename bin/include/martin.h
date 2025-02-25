@@ -21,7 +21,7 @@
 
 #define HEXT_DIMENSION  12  // dimension of external field Hext (Hi Hj Hk Ei Ej Ek s1 s2 s3 s4 s5 s6)
 #define NOF_USERDEF_MCPHAS_COLS 7  // number of user defined columns in mcphas.ini -> mcphas.* outpus files
-#define SMALL_FIELD 1e-100  // nonzero value of external field E or H
+#define SMALL_FIELD 1e-6     // nonzero value of external field E or H
 // function to print to stderr estimate of time until program end
 void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
 

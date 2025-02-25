@@ -114,9 +114,9 @@ void physproperties::update_maxnofhkls(int maxnofhkli)
 double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini, int ortho,par & inputpars,int verbose)
  {double sta=0;double * ptr;char hs[40];char num[40];
    header[0]='\0';outstr[0]='\0';
-    int nofcolsin=nofcols;
+    int nofcolsin=0;if(!setnn){nofcolsin=nofcols; Pel=0;Pelabc=0;m=0;mabc=0;fe=0;u=0;sps.epsilon=0;}
      double Nm=Norm(m),mp=m*H(1,3)/Norm(H(1,3));
-    nofcols=1000;for(int i=8;i<=nofcolsin||i<=nofcols;++i)
+    nofcols=15;for(int i=8;i<=nofcolsin||i<=nofcols;++i)
     {ptr=NULL;
           if(i<15){switch(i) {       case 8: ptr=&fe;snprintf(hs,40,"free_energy_f[meV/ion]");break;
                                      case 9: ptr=&u;snprintf(hs,40,"energy_u[meV/ion]");break;
@@ -185,12 +185,21 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
           if(i<9)snprintf(num,40,"%8.8g ",nn[i]);else snprintf(num,40,"%4.4g ",nn[i]);
           snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE,"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
         }else
-        {
-           (*ptr)=nn[i];
+        {  (*ptr)=nn[i];
         }
      snprintf(header+strlen(header),MAXNOFCHARINLINE,"%s ",hs);
     }
     } // next i
+if(!setnn)
+{// here set mabc m Pelabc P if necessary
+ Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
+                      abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
+    
+   if(Norm(m)<SMALL_FIELD)dadbdc2ijk(m,mabc,abc);
+   if(Norm(mabc)<SMALL_FIELD)ijk2dadbdc(mabc,m,abc);
+   if(Norm(Pel)<SMALL_FIELD)dadbdc2ijk(Pel,Pelabc,abc);
+   if(Norm(Pelabc)<SMALL_FIELD)ijk2dadbdc(Pelabc,Pel,abc);
+}
 
 return sta;
 }
@@ -198,15 +207,15 @@ return sta;
    // for xyt file
 double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose, Vector & totalJ)
  {double sta=0;double * ptr;int * iptr;char hs[40];char num[40];
-   header[0]='\0';outstr[0]='\0';
-    int nofcolsin=0;if(!setnn)nofcolsin=nofcols;
+   header[0]='\0';outstr[0]='\0';int nofa=sps.na(),nofb=sps.nb(),nofc=sps.nc();
+    int nofcolsin=0;if(!setnn){nofcolsin=nofcols;j=0;nofa=0;nofb=0;nofc=0;totalJ=0;}
     nofcols=12+nofcomponents;for(int i=8;i<=nofcolsin||i<=nofcols;++i)
     {ptr=NULL;iptr=NULL;
        switch(i) {       case 8: iptr=&j;snprintf(hs,40,"phasnumber-j");break;
                          case 9: iptr=&sps.wasstable;snprintf(hs,40,"period-key");break;
-                         case 10: iptr=&sps.nofa;snprintf(hs,40,"supercell-nr1");break;
-                         case 11: iptr=&sps.nofb;snprintf(hs,40,"nr2");break;
-                         case 12: iptr=&sps.nofc;snprintf(hs,40,"nr3");break;
+                         case 10: iptr=&nofa;snprintf(hs,40,"supercell-nr1");break;
+                         case 11: iptr=&nofb;snprintf(hs,40,"nr2");break;
+                         case 12: iptr=&nofc;snprintf(hs,40,"nr3");break;
                          default: ptr=&totalJ[i-12];snprintf(hs,40,"<I%i>",i-12);break;
                  }
 
@@ -248,7 +257,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   Vector null1(1,3);null1=0;
   double sta=0;
   float nn[200];nn[0]=199;
-  float nnerr[200];nnerr[0]=199;
+  float nnerr[200];nnerr[0]=199;for(int i=1;i<=199;++i)nnerr[i]=0;
   int ortho=1;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
    {ortho=0;ini.defaultcolcode(5,4);ini.defaultcolcode(6,5);ini.defaultcolcode(7,6);} // reset default colcode in ini
@@ -697,17 +706,13 @@ return sta;
 // on success return 0, otherwise
 // return 1
 int physproperties::read(int verbose, par & inputpars,char * readprefix,inipar & ini)
-{ FILE *fin;int n;float nnerr[200];nnerr[0]=199;
+{ FILE *fin;int n;float nnerr[200];nnerr[0]=199;for(int i=1;i<=199;++i)nnerr[i]=0;
   char filename[50],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
   int i,j2,l,nmax;
   float nn[200];nn[0]=199;
   int ortho=1; bool found=0;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){ortho=0;}
-     Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
-                      abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
-    ijk2dadbdc(mabc,m,abc); // transform m and Pel to abc coordinates
-    ijk2dadbdc(Pelabc,Pel,abc);
-
+    
  if(verbose==1){ printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);}
 
 //-----------------------------------------mcphas.fum------------------------------------------------  
@@ -732,10 +737,6 @@ found=0;
    fumcols(nn,nnerr,n,false,str,outstr,ini,ortho,inputpars,verbose); // load parameters 
    // check if stable, i.e. if free energy nn[8] is nonzero
    if(nn[8]==0) return 1; // 
-   if(Norm(m)<SMALL_FIELD)dadbdc2ijk(m,mabc,abc);
-   if(Norm(mabc)<SMALL_FIELD)ijk2dadbdc(mabc,m,abc);
-   if(Norm(Pel)<SMALL_FIELD)dadbdc2ijk(Pel,Pelabc,abc);
-   if(Norm(Pelabc)<SMALL_FIELD)ijk2dadbdc(Pelabc,Pel,abc);
 
 //fprintf (fout, "%4.4g %4.4g  %4.4g %4.4g %4.4g %4.4g %4.4g       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
  //           myround(x),myround(y),myround(T),myround(Norm(Hijk)),myround(H[1]),
@@ -929,6 +930,6 @@ found=0;while(found==0){
                } 
    fclose(fin);
    //-----------------------------------------------------------------------------------------  
-if(verbose==1)printf("..ok\n");
+if(verbose==1)printf("..ok\n"); else printf("reading ");
 return 0; 
  }
