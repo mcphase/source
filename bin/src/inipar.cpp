@@ -72,8 +72,8 @@ printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n
 printf ("          -a     append output files (do not overwrite) \n");
 printf ("          -doeps refine strain epsilon selfconsistently using elastic,magnetoelastic constants \n");
 printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz \n");
-printf ("          -linepscf with -doeps use zero strain single ion Hamiltoanian for every mean field iteration\n");
-printf ("          -linepsjj with -doeps use zero strain two ion interaction Hamiltoanian for every mean field iteration\n");
+printf ("          -linepscf with -doeps use zero strain single ion Hamiltonian for every mean field iteration\n");
+printf ("          -linepsjj with -doeps use zero strain two ion interaction Hamiltonian for every mean field iteration\n");
 printf ("          -prefix 001    try to read files starting with 001, e.g.\n");
 printf (" 		    001mcphas.ini, if these exist, otherwise take\n"); 
 printf (" 		    standard input files, check if in mcphas.ini there are\n");
@@ -131,7 +131,11 @@ const char * colhead []= {  "T [K]", //      0
                             "|H| [T]",   //    21
                             "|E| [T]"   //    22
                                };
-
+ bool inipar::defaultcolcode(int col,int colcode) // resets default columns if not set by user (outcolset==true)
+{                                             // returns true if reset has been successful
+ if(!outcolset)for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]==col)
+ {colcod[i]=colcode;}
+}
 // different output data for user defined columns ...
 double inipar::setcolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc)
 {      switch (i) {
@@ -176,7 +180,7 @@ return 0;
 void inipar::print_usrdefcolhead(FILE *fout,char * str)
 {fprintf(fout,"#");
  int i;
- for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%i%*s",i,(int)strlen(colhead[colcod[usrdefcols[i]]]),"");
+ for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%i%*s",i,(int)strlen(colhead[colcod[i]]),"");
  char *t;size_t n;
  for(t=str;t[0]!='\0';t+=n)
  {
@@ -189,10 +193,9 @@ void inipar::print_usrdefcolhead(FILE *fout,char * str)
  ++i;
 }
  fprintf(fout,"\n#");
- for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s ",colhead[colcod[usrdefcols[i]]]); 
+ for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s ",colhead[colcod[i]]); 
  fprintf(fout,"%s\n",str);
 }
-
 
 
 // set external field and Temperature
@@ -265,20 +268,38 @@ void inipar::getTH(double & T,Vector & h,double x, double y,cryststruct & cs)
 
 }
 
-// print user defined columns
+
+ // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
+ // if yes, returns true ... 
+bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc)
+{int maxcol=0;for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]>maxcol)maxcol=usrdefcols[i];
+ if(nn[0]<maxcol)return false; // array too small
+ double d;float x=0,y=0; // do not use x and y
+ for(int i=1;i<=usrdefcols[0];++i)
+ { // different output data for user defined columns ...
+  switch(colcod[i])
+  {case 19: case 20:  d=0; break; // do not use x,y
+   default: d=setcolvalue(colcod[i],x,y, T,Hext, abc)-nn[usrdefcols[i]];
+  }
+  if(fabs(d)>SMALL_FIELD)return false;
+ }
+ return true;
+}
+
+// print user defined column codes variables out1 -- out7 to fout
 void inipar::print_usrdefcolcodes(FILE *fout)
 {fprintf(fout,"#!");
  for(int i=1;i<=usrdefcols[0];++i)
- fprintf(fout,"out%i=%s ",usrdefcols[i],colhead[colcod[usrdefcols[i]]]);
+ fprintf(fout,"out%i=%s ",usrdefcols[i],colhead[colcod[i]]);
 }
 // print user defined columns
 void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext)
 {bool c[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i)c[i]=false;
  for(int i=1;i<=usrdefcols[0];++i)
- { double val=setcolvalue(colcod[usrdefcols[i]],x,y,T,Hext,abc);
-   if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[usrdefcols[i]]],myround(val));
-   else fprintf(fout,"%4.4g ",myround(val));
-   c[colcod[usrdefcols[i]]]=true;
+ { double val=setcolvalue(colcod[i],x,y,T,Hext,abc);
+   if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[i]],myround(val));
+   else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[colcod[i]])-8 < 0 ? :0),"",myround(val));
+   c[colcod[i]]=true;
  }
 if (!c[0]){fprintf(stderr,"#Error: Temperature T not stored  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
 for(int i=1;i<=HEXT_DIMENSION;++i)
@@ -312,7 +333,7 @@ void inipar::time_estimate_until_end(double x, double y)
 
 //load parameters from file
 int inipar::load ()
-{ FILE *fin_coq;
+{ FILE *fin_coq;outcolset=false;
   char instr[MAXNOFCHARINLINE];
   char somestring[MAXNOFCHARINLINE];
   errno = 0;startcputime= std::clock();
@@ -393,10 +414,6 @@ int inipar::load ()
     extract_with_prefix(instr,prefix,"s40",zero[16]);
     extract_with_prefix(instr,prefix,"s50",zero[17]);    
     extract_with_prefix(instr,prefix,"s60",zero[18]);
-      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
-     {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
-      extract(instr, somestring,colcod[usrdefcols[j]]);
-     }
 
     extract_with_prefix(instr,prefix,"hmin",qmin[1]); 
     extract_with_prefix(instr,prefix,"kmin",qmin[2]); 
@@ -422,6 +439,12 @@ int inipar::load ()
     extract_with_prefix(instr,prefix,"nofspincorrs",nofspincorrs); 
     extract_with_prefix(instr,prefix,"maxnofhkls",maxnofhkls); 
     extract_with_prefix(instr,prefix,"maxQ",maxQ); 
+
+       for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
+     {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
+      if(0==extract(instr, somestring,colcod[usrdefcols[j]]))outcolset=true;
+     }
+
     }
    }
   fclose (fin_coq);
@@ -563,7 +586,7 @@ void inipar::print (const char * filename)
     fprintf(fout,"#Bravais lattice ^a=a/|a|, ^b=b/|b|, ^c=c/|c|.\n");
     fprintf(fout,"#For the external magnetic field unit is Tesla.\n");
     fprintf(fout,"# out variables to control first columns of output files results/mcphas.*:\n");
-    for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"out%i=%i \n",usrdefcols[i],colcod[usrdefcols[i]]);
+    for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"out%i=%i \n",usrdefcols[i],colcod[i]);
     fprintf(fout,"#     ... in out*=n the numbers n have the following meaning:\n");
     for(int i=0;i<=COLHEADDIM;++i){
     fprintf(fout,"#            %i....%s\n",i,colhead[i]);
@@ -650,7 +673,7 @@ inipar::inipar (const inipar & p)
   strcpy(savfilename,p.savfilename);
   prefix = new char[strlen(p.prefix)+1];
   strcpy(prefix,p.prefix);
-  doeps=p.doeps;
+  doeps=p.doeps;outcolset=p.outcolset;
   linepscf=p.linepscf;
   linepsjj=p.linepsjj;
   ipx=p.ipx;

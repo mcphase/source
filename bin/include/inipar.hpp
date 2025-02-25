@@ -17,9 +17,12 @@
 
 class inipar
 { private:
+  bool outcolset; // indicates wether in mcphas.ini user has set some output columns
   
   public:
-  char * savfilename;
+  bool defaultcolcode(int col,int colcode); // resets default columns if not set by user (outcolset==true)
+                                             // returns true if reset has been successful
+   char * savfilename;
   int doeps,linepscf,linepsjj;
   par * ipx;par * ipy;par * ipz; // storage for two ion interaction parameter derivatives (djdx djdy djdz files)
 
@@ -81,8 +84,11 @@ class inipar
   int maxnofhkls;
   // maximum q[1/A] for hkl's
   double maxQ;
- // set external field and Temperature
- void getTH(double & T,Vector & h,double x, double y,cryststruct & cs);
+ // set external field and Temperature given x and y
+ void getTH(double & T,Vector & Hext,double x, double y,cryststruct & cs);
+ // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
+ // if yes, returns true ... 
+bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc);
   // printout initial parameters to file   
    void print();
    void print (const char * file);

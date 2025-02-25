@@ -15,12 +15,12 @@ class physproperties
 {
   private:
  int washere,nofspincorr;
-    
+ 
   public:
 float x,y; // phasediagramm labels  
 int j;  // index of spinstructure
 double T; // temperature
-Vector m,H,P; // moment and H field and electrical polarisation
+Vector m,mabc,H,Pel,Pelabc; // moment and H field and electrical polarisation
 double fe;
 double u; // free energy and mag energy per ion
 double Eel; // elastic energy per ion
@@ -38,6 +38,18 @@ physproperties (const physproperties & props);	// kopier-konstruktor
 
 ~physproperties ();		//destruktor
 
+   // 1.  puts header for fum file columns >8 into string header
+   // 2. sets or reads output column field nn -
+   //  if setnn true: for all i>8 up to input nofcols ... if nnerr[i]!=0 -> increase sta according to difference 
+   //                 (and finally return sta) ... then ...
+   //                 set  nn[i] from saved parameters fe,u,etc. and puts into nofcols the number of output columns
+   //                 puts into outstr the numbers  nn[i>8] formatted for output into mcphas.fum
+   //  if setnn false: reads nn  into parameters fe, u, etc  
+ // for fum file
+double fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int ortho,par & inputpars,int verbose);
+ // for xyt file
+double xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose, Vector & totalJ);
+ 
 void update_maxnofhkls(int mxnofhkli);
 // save physical properties to output files
 double save(int verbose,const char * filemode, int j,inipar & ini,par & inputpars,char * prefix);

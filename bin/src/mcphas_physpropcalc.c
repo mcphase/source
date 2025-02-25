@@ -18,7 +18,7 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
 // electrical polarisation P (makes only sense if total charge is zero)
 // in units |e|/A^2 ... sum dipole moment |e|A of magnetic unit cell and divide by unit cell volume in A^3
 if(fabs(inputpars.totalcharge)<SMALLCHARGE)
-{Vector rijk(1,3); physprops.P=0;
+{Vector rijk(1,3); physprops.Pel=0;
 for (l=1;l<=inputpars.cs.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
@@ -40,23 +40,23 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
                       // transforms vector xyz given in terms of abc
                       // to ijk coordinate system (in summing dipole moments it is not necessary to consider
                      //  the subcell vector of the magnetic unit cell - this will cancel in summation anyway)
-     physprops.P+=(mom+rijk)*(*inputpars.jjj[l]).charge; // sum dipolar moments
+     physprops.Pel+=(mom+rijk)*(*inputpars.jjj[l]).charge; // sum dipolar moments
 //printf("%s charge=%g pos= ",(*inputpars.jjj[l]).sipffilename,(*inputpars.jjj[l]).charge);myPrintVector(stdout,rijk);
 //P=sumi xi ci = sum (X+xi) ci if sumi ci=0
 // =sumgs (Xg+xs) cs= sumg  sums (xs cs) 
 
 
     }}}}
-    physprops.P/=(double)sps.n(); // divide by number of primitive cells in supercell
+    physprops.Pel/=(double)sps.n(); // divide by number of primitive cells in supercell
     Matrix prim_ijk(1,3,1,3);
    dadbdc2ijk(prim_ijk,inputpars.cs.r, inputpars.cs.abc);
    // transforms primitive lattice vector matrix r given in terms of abc
    // to ijk coordinate system
     double Vol=prim_ijk.Column(1)*crossp(prim_ijk.Column(2),prim_ijk.Column(3)); // divide by Volume of primitive unit cell in Angstroem
-    physprops.P/=Vol;
+    physprops.Pel/=Vol;
   if(verbose==1){printf(".. calculating electrical Polarisation\n");}
 }else
-{physprops.P=0;if(verbose==1){printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);}}
+{physprops.Pel=0;if(verbose==1){printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);}}
 
 
 

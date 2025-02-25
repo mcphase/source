@@ -54,11 +54,11 @@ private:
     void calc_prim_mag_unitcell_old(Matrix & p,Vector & abc, Matrix & r);
 // ----------------------------------------------------------
 
-
-  private:
- // number of spins  
+public:
+   // number of spins  
    int nofa,nofb,nofc;
- // this subtracts n2 if n1>n2
+ private:
+// this subtracts n2 if n1>n2
    int mod(int n1,int n2);
    int mxa,mxb,mxc;
    Vector * mom; // momentums <J>
