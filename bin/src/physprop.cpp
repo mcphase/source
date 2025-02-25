@@ -708,7 +708,7 @@ int physproperties::read(int verbose, par & inputpars,char * readprefix,inipar &
     ijk2dadbdc(mabc,m,abc); // transform m and Pel to abc coordinates
     ijk2dadbdc(Pelabc,Pel,abc);
 
-  printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);
+ if(verbose==1){ printf("reading properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);}
 
 //-----------------------------------------mcphas.fum------------------------------------------------  
 // here read free energy etc if possible ... otherwise return 1
@@ -929,5 +929,6 @@ found=0;while(found==0){
                } 
    fclose(fin);
    //-----------------------------------------------------------------------------------------  
+if(verbose==1)printf("..ok\n");
 return 0; 
  }
