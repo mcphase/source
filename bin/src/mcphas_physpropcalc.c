@@ -23,7 +23,7 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
       for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
-     (*inputpars.jjj[l]).pcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
+     (*inputpars.jjj[l]).pelcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
 
 // Problem : surface effect !! how to calculate polarisation !????
 // try - use wigner seitz cell 
@@ -40,7 +40,8 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
                       // transforms vector xyz given in terms of abc
                       // to ijk coordinate system (in summing dipole moments it is not necessary to consider
                      //  the subcell vector of the magnetic unit cell - this will cancel in summation anyway)
-     physprops.Pel+=(mom+rijk)*(*inputpars.jjj[l]).charge; // sum dipolar moments
+     physprops.Pel+=mom*0.01+rijk*(*inputpars.jjj[l]).charge; // sum dipolar moments
+                    // factor 0.01 to transform from |e|pm to |e|A 
 //printf("%s charge=%g pos= ",(*inputpars.jjj[l]).sipffilename,(*inputpars.jjj[l]).charge);myPrintVector(stdout,rijk);
 //P=sumi xi ci = sum (X+xi) ci if sumi ci=0
 // =sumgs (Xg+xs) cs= sumg  sums (xs cs) 

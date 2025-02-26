@@ -498,8 +498,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
                       char *sipffilename,// Single ion properties filename
                       Vector &lnZ,        // Output scalar logarithm of partition function
-                      Vector &U,          // Output scalar internal energy 
-                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      Vector &U)          // Output scalar internal energy 
 { // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
@@ -556,14 +555,13 @@ bool icf1ion_module::Icalc(Vector &Jret,          // Output single ion momentum 
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
                       char *sipffilename,// Single ion properties filename
                       double &lnZ,        // Output scalar logarithm of partition function
-                      double &U,          // Output scalar internal energy 
-                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      double &U)          // Output scalar internal energy 
 {Matrix JM(1,Jret.Hi(),1,1);double  d;Vector dd;
  for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
  Vector TT(1,1);TT(1)=T;
  Vector lnZZ(1,1);lnZZ(1)=lnZ;
  Vector UU(1,1);UU(1)=U;
- IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU,Pst);
+ IMcalc(JM,TT,Hxc,Hext,d,dd,sipffilename,lnZZ,UU);
  U=UU(1);lnZ=lnZZ(1);T=TT(1);
  for(int i=1;i<=Jret.Hi();++i){Jret(i)=JM(i,1);}
 return true;
@@ -578,12 +576,11 @@ bool icf1ion_module::mcalc(Vector &mom,        // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename)// Single ion properties filename
 {
    Vector J(1,6);
    double lnZ, U;
-   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
+   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U);
    mom(1)=GS*J(1)+J(4);
    mom(2)=GS*J(2)+J(5);
    mom(3)=GS*J(3)+J(6);
@@ -595,12 +592,11 @@ bool icf1ion_module::mMcalc(Matrix &mom,        // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double & gJ,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename)// Single ion properties filename
 {
    Matrix J(1,6,1,T.Hi()); 
    Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,Pst);
+   IMcalc(J,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U);
    for(int Ti=1;Ti<=T.Hi();++Ti){
    mom(1,Ti)=GS*J(1,Ti)+J(4,Ti);
    mom(2,Ti)=GS*J(2,Ti)+J(5,Ti);
@@ -616,12 +612,11 @@ bool icf1ion_module::Lcalc(Vector &L,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename)// Single ion properties filename
 {
    Vector J(1,6); 
    double lnZ, U;
-   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
+   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U);
    L(1)=J(4);
    L(2)=J(5);
    L(3)=J(6);
@@ -634,12 +629,11 @@ bool icf1ion_module::LMcalc(Matrix &L,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename)// Single ion properties filename
 {
    Matrix J(1,6,1,T.Hi());
    Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
+   IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U);
    for(int Ti=1;Ti<=T.Hi();++Ti){
    L(1,Ti)=J(4,Ti);
    L(2,Ti)=J(5,Ti);
@@ -655,12 +649,11 @@ bool icf1ion_module::Scalc(Vector &S,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,        // Input Lande g-factor
  /* Not Used */       Vector &ABC,        // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Storage eigenstate matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename)// Single ion properties filename
 {
    Vector J(1,6); 
    double lnZ, U;
-   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
+   Icalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U);
    S(1)=J(1);
    S(2)=J(2);
    S(3)=J(3);
@@ -672,11 +665,10 @@ bool icf1ion_module::SMcalc(Matrix &S,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double&g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)                                          
+                      char *sipffilename)// Single ion properties filename
 {
    Matrix J(1,6,1,T.Hi());Vector lnZ(1,T.Hi()), U(1,T.Hi());
-   IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
+   IMcalc(J,T,Hxc,Hext,g_J,ABC,sipffilename,lnZ,U);
   for(int Ti=1;Ti<=T.Hi();++Ti){
    S(1,Ti)=J(1,Ti);
    S(2,Ti)=J(2,Ti);
@@ -1826,14 +1818,13 @@ bool icf1ion_module::chargedensity_coeff(
                       Vector &Hext,        // Input vector of external field (T) 
  /* Not Used */       double &g_J,         // Input Lande g-factor
  /* Not Used */       Vector &ABC,         // Input vector of parameters from single ion property file
-                      char *sipffilename, // Single ion properties filename
-                      ComplexMatrix &Pst)  // Storage  matrix (initialized in Icalc_parameter_storage_matrix_init)
+                      char *sipffilename) // Single ion properties filename
 {  Vector moments(1,51); 
    double lnZ, U;
    Vector Hxce(1,51); 
    Hxce=0;
    for(int i=1; i<=Hxc.Hi(); ++i) { Hxce(i)=Hxc(i); }
-   Icalc(moments,T,Hxce,Hext,g_J,ABC,sipffilename,lnZ,U,Pst);
+   Icalc(moments,T,Hxce,Hext,g_J,ABC,sipffilename,lnZ,U);
 
  
 // Definitions in Icalc()
@@ -1898,8 +1889,7 @@ bool icf1ion_module::spindensity_coeff(Vector &J,          // Output single ion 
                       Vector &Hext,        // Input vector of external field (T) 
  /* Not Used */       double &g_J,    // Input Lande g-factor
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
-                      char *sipffilename, // Single ion properties filename
-                      ComplexMatrix &Pst)  // Parameter Storage matrix (initialized in parstorage)
+                      char *sipffilename) // Single ion properties filename
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
@@ -1926,8 +1916,7 @@ bool icf1ion_module::orbmomdensity_coeff(Vector &J,        // Output single ion 
                       Vector &Hext,        // Input vector of external field (T) 
  /* Not Used */       double &g_J,    // Input Lande g-factor
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
-                      char *sipffilename, // Single ion properties filename
-                      ComplexMatrix &Pst)  // Storage matrix (initialized in Icalc_parameter_storage_matrix_init)
+                      char *sipffilename) // Single ion properties filename
 {  // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
@@ -2365,7 +2354,7 @@ int main(int argc, char *argv[])
    ic_parseinput(filename,pars);
 
    // Calculates and diagonalises the Hamiltonian
-   Vector gjmbHxc(1,6,0.); ComplexMatrix est; ComplexMatrix Pst;
+   Vector gjmbHxc(1,6,0.); ComplexMatrix est; 
    double T=1.;
    Vector Hext(1,3);Hext(1)=pars.Bx;Hext(2)=pars.By;Hext(3)=pars.Bz;
    // create object of icf1ion_module class
@@ -2407,7 +2396,7 @@ int main(int argc, char *argv[])
       {
          for(int al=1; al<=3; al++) Hext(al) = gjmbH0(al)*(Hmin+iH*Hstep);
          for(int iT=0; iT<nT; iT++)
-         {  si_mod.mcalc(J,vT[iT],gjmbHxc,Hext,vT[iT],gjmbHxc,infile,Pst); for(int iJ=1; iJ<=3; iJ++) if(fabs(J(iJ))<SMALL) J(iJ)=0.;
+         {  si_mod.mcalc(J,vT[iT],gjmbHxc,Hext,vT[iT],gjmbHxc,infile); for(int iJ=1; iJ<=3; iJ++) if(fabs(J(iJ))<SMALL) J(iJ)=0.;
             ma[iT]=J(1); mb[iT]=J(2); mc[iT]=J(3); mag[iT] = Norm(J);//sqrt(ma[iT]*ma[iT]+mb[iT]*mb[iT]+mc[iT]*mc[iT]);
          }
          if(pars.xT!=0.)
@@ -2438,14 +2427,14 @@ int main(int argc, char *argv[])
    filearray[0] = infile;
    end = clock();
 
-   Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,Pst);
+   Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U);
    start = clock(); std::cerr << "Time to do Icalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
    std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
    std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";
 
 //for (int it=0; it<1000; it++) {
 // end = clock();
-// Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U,Pst);
+// Icalc(J,&T,gmbH,&gJ,ABC,filearray,&lnZ,&U);
 // start = clock(); std::cerr << "Time to do Icalc() = " << (double)(start-end)/CLOCKS_PER_SEC << "s.\n";
 // std::cerr << "lnZ = " << lnZ << ", U = " << U << "\n";
 // std::cerr << "J[1] = " << J[1] << ", J[2] = " << J[2] << ", J[3] = " << J[3] << ", J[4] = " << J[4] << ", J[5] = " << J[5] << ", J[6] = " << J[6] << "\n";

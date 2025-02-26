@@ -276,10 +276,11 @@ else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins
 if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
 if(strcmp(argv[1+os],"-eps")==0){os+=1;eps=1;}
 if(strcmp(argv[1+os],"-fst")==0){os+=1;fst=1;}
+}
 if(strcmp(argv[1+os],"-prefix")==0){strcpy(prefix,argv[2+os]); // read prefix
                                    fprintf(stdout,"# prefix for input filenames: %s\n",prefix);
  				   os+=2;}
-}
+
  strcpy(infilename,"./results/");strcpy(infilename+10,prefix);
  strcpy(infilename+10+strlen(prefix),"mcphas.mf");fin = fopen(infilename, "rb");
  if(fin==NULL){strcpy(infilename+10,"mcphas.mf");fin = fopen_errchk(infilename, "rb");}

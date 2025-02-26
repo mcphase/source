@@ -1355,8 +1355,11 @@ extern "C" void pcalc(Vector & P,double * T, Vector & Fxc, Vector & Hext,
 \end{verbatim}
 
 It returns the position vector {\prg P} of an Einstein oscillator in units of
-\AA \ under the action of a Force {\prg Fxc} in units of meV.
+\AA \ under the action of a Force {\prg Fxc} in units of meV, and external field
+(electric field as components 4,5,6 of Hext in units of kV/mm).
 For the rest it works exactly as {\prg mcalc}, therefore we do not give more details here.
+
+
 
 %*************************************************************************************
 
@@ -1443,7 +1446,41 @@ In this case the single ion module should calculate $(p_+/kT)$ instead of $(p_--
  are zero except for the state number $n=(-T)$, for which the probability $p_n=1$.
 \end{enumerate}
  
+%*************************************************************************************
 
+\subsubsection{External module function {\prg pelcalc} - used by {\prg mcdiff\index{mcdiff}}
+and {\prg mcphas}\index{mcphas}  }
+
+In order to calculate the electric dipole moment  $\langle \hat \mbf p_{el} \rangle$
+ the following function has to be present in the module file {\prg *.so}:
+
+\begin{verbatim}
+extern "C" void pelcalc(Vector & P,double * T, Vector & Fxc, Vector & Hext,
+                      double * gJ, Vector & MODPAR,
+                      char ** sipffilename, ComplexMatrix & Icalc_parstorage);
+\end{verbatim}
+
+It returns the electric dipole moment vector {\prg pel}  in units of
+$|e|$pm  under the action of a Force {\prg Fxc} in units of meV, and external field
+(electric field as components 4,5,6 of Hext in units of kV/mm).
+For the rest it works exactly as {\prg mcalc}, therefore we do not give more details here.
+
+%*************************************************************************************
+
+\subsubsection{External module function {\prg dpel1} - used by {\prg mcdisp\index{mcdisp}}}
+
+In order to calculate neutron intensities for RAMAN scattering
+the external single ion module has to provide the transition matrix elements of
+ the electric dipole moment  $p_{{\rm el} \alpha}$ in units of $|e|$pm. The 
+
+The format to be used is:
+{\footnotesize
+\begin{verbatim}
+extern "C" int dpel1(int & tn,double & T,Vector & Hxc,Vector & Hext,double * g_J,Vector & MODPAR,
+char ** sipffilename,ComplexVector & p1,float & maxE, ComplexMatrix & est)
+\end{verbatim}
+}
+The requirements are equivalent to the {\prg dP1} function, therefore all details are not repeated here.
 
 %*************************************************************************************
 \subsubsection{External module function {\prg chargedensity\_coeff} -

@@ -114,12 +114,12 @@ const char * colhead []= {  "T [K]", //      0
                             "Hi [T]", //      4                                                 
                             "Hj [T]", //      5                                                 
                             "Hk [T]", //      6
-                            "Ea [V/m]",  //     7      
-                            "Eb [V/m]",  //     8      
-                            "Ec [V/m]",  //     9      
-                            "Ei [V/m]",  //    10      
-                            "Ej [V/m]",  //    11      
-                            "Ek [V/m]",  //    12     
+                            "Ea [kV/mm]",  //     7      
+                            "Eb [kV/mm]",  //     8      
+                            "Ec [kV/mm]",  //     9      
+                            "Ei [kV/mm]",  //    10      
+                            "Ej [kV/mm]",  //    11      
+                            "Ek [kV/mm]",  //    12     
                             "s1 [Pa]",  //    13    
                             "s2 [Pa]",  //    14      
                             "s3 [Pa]",  //    15      
@@ -520,7 +520,7 @@ void inipar::print (const char * filename)
                   \n# vector in (H-T) space corresponding to x axis (xT [K] xHa [T] xHb [T] xHc [T]) \
                   \n# optional are also xHi[T] xHj[T] xHk[T] (magnetic field in ijk coordinates, \
 		  \n# defined by  j||b, k||(a x b) and i normal to k and j ), \
-		  \n# electric field xEa[V/m] xEb[V/m] xEc[V/m]  xEi[V/m] xEj[V/m] xEk[V/m] \
+		  \n# electric field xEa[kV/mm] xEb[kV/mm] xEc[kV/mm]  xEi[kV/mm] xEj[kV/mm] xEk[kV/mm] \
 		  \n# stress tensor in Voigt notation (1,2,3,4,5,6 = ii jj kk jk ik ij) \
                   \n# xs1[Pa] xs2[Pa] xs3[Pa] xs4[Pa] xs5[Pa] xs6[Pa] \
                   \n");

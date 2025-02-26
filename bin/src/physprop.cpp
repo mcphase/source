@@ -182,12 +182,12 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
              sta+=(nn[i]-(*ptr))*(nn[i]-(*ptr))/nnerr[i]/nnerr[i];
              }
           nn[i]=(*ptr);
-          if(i<9)snprintf(num,40,"%8.8g ",nn[i]);else snprintf(num,40,"%4.4g ",nn[i]);
-          snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE,"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
+          if(i<=9)snprintf(num,40,"%8.8g ",nn[i]);else snprintf(num,40,"%4.4g ",nn[i]);
+          snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE-strlen(outstr),"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
         }else
         {  (*ptr)=nn[i];
         }
-     snprintf(header+strlen(header),MAXNOFCHARINLINE,"%s ",hs);
+     snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",hs);
     }
     } // next i
 if(!setnn)
@@ -235,11 +235,11 @@ if(setnn){if(nnerr[i]>0&&i<=nofcolsin)
                     case 12:          snprintf(num,40,"%i ",(*iptr));break;
                     default: snprintf(num,40,"%4.4g ",myround(nn[i]));
                    }
-          snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE,"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
+          snprintf(outstr+strlen(outstr),MAXNOFCHARINLINE-strlen(outstr),"%*s%s",(int)(strlen(hs)+1-strlen(num)),"",num); 
          }else
          {if(iptr==NULL)(*ptr)=nn[i]; else (*iptr)=nn[i];
          }
-     snprintf(header+strlen(header),MAXNOFCHARINLINE,"%s ",hs);
+     snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",hs);
     } // next i
 return sta;
 }
@@ -291,15 +291,6 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fprintf (fout, "#note: - for specific heat calculation use unit conversion 1mev/f.u.=96.48J/mol\n");
    fprintf (fout, "#      - below moments and energies are given per ion - not per formula unit !\n");
 
-/*
-   strlcat(header, "free_energy_f[meV/ion] energy_u[meV/ion] total_moment|m|[mb/ion]  ma[mb/ion] mb[mb/ion] mc[mb/ion] m||(projection_along_H)[mb/ion] ",MAXNOFCHARINLINE);
-   if(ortho==0){strlcat(header, "mi[muB/ion] mj[muB/ion] mk[muB/ion] ",MAXNOFCHARINLINE);}
-   if(fabs(inputpars.totalcharge)<SMALLCHARGE){strlcat(header, " Pela   Pelb   Pelc[|e|/A^2] ",MAXNOFCHARINLINE);}
-   if(fabs(inputpars.totalcharge)<SMALLCHARGE&&ortho==0){strlcat(header, " Peli   Pelj   Pelk[|e|/A^2] ",MAXNOFCHARINLINE);}
-   if(ini.doeps&&ortho==0){strlcat(header, " Eel[meV/ion] eps1=epsii eps2=epsjj eps3=epskk epse4=2epsjk eps5=2epsik eps6=2epsij",MAXNOFCHARINLINE);}
-   if(ini.doeps&&ortho!=0){strlcat(header, " Eel[meV/ion] eps1=epsaa eps2=epsbb eps3=epscc epse4=2epsbc eps5=2epsac eps6=2epsab",MAXNOFCHARINLINE);}
-*/
-
    if(ini.doeps)
    {fprintf (fout, "#      - strain tensor eps is calculated selfconsistently.\n");
     if(ini.linepscf)
@@ -314,15 +305,6 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    ini.print_usrdefcolhead(fout,str);
   fclose(fout);
   }
-
- /*  fprintf (fout, "       %8.8g            %8.8g       %4.4g    %4.4g %4.4g %4.4g    %4.4g",
-            myround(fe),myround(u),myround(Norm(m)),myround(mabc[1]),myround(mabc[2]),myround(mabc[3]),myround(m*H(1,3)/Norm(H(1,3))));
-   if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g ",myround(m(1)),myround(m(2)),myround(m(3)));}
-    if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf (fout, "  %4.4g  %4.4g %4.4g ",myround(Pelabc(1)),myround(Pelabc(2)),myround(Pelabc(3)));
-    if(fabs(inputpars.totalcharge)<SMALLCHARGE&&ortho==0)fprintf (fout, "  %4.4g  %4.4g %4.4g ",myround(Pel(1)),myround(Pel(2)),myround(Pel(3)));
-   if(ini.doeps){fprintf (fout, "  %4.4g  %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(Eel),myround(sps.epsilon(1)),myround(sps.epsilon(2)),myround(sps.epsilon(3)),myround(sps.epsilon(4)),myround(sps.epsilon(5)),myround(sps.epsilon(6)));}
- */
-
 
    fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
          fprintf(fout,"%s\n",outstr); fclose(fout);
@@ -361,24 +343,13 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
    fprintf(fout,"# reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(fout,"#**********************************************************\n");
-  /* str[0]='\0';
-   strlcat(str, "phasnumber-j   period-key supercell-nr1   nr2   nr3 ",MAXNOFCHARINLINE);
-           for(i1=1;i1<=nofcomponents;++i1)
-	      {//fprintf(fout,"<I%c> ",'a'-1+i1);}
-	      snprintf(str+strlen(str),MAXNOFCHARINLINE,"<I%i> ",i1);}
-   */
+  
    ini.print_usrdefcolhead(fout,str); 
    fclose(fout);    
      }
   fout = fopen_errchk (outfilename,"a");
    if(j<0){sps.wasstable=j;}// if qvector generated structure is stable, then take period key = number of qvector
    ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
-/*   fprintf (fout, "       %ip           %ip                %i x %i x %i ",
-           j,sps.wasstable,sps.na(),sps.nb(),sps.nc());
-           for(i1=1;i1<=nofcomponents;++i1)
-	      {fprintf(fout,"%4.4g ",myround(totalJ(i1)));}
-	      fprintf(fout,"\n");
-*/   
     fprintf(fout,"%s\n",outstr);fclose(fout);
     if((fout=fopen("./fit/mcphas.xyt","rb"))!=NULL)
     {// some measured data should be fitted
@@ -431,10 +402,10 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout, "# correlation function <JJ(%g %g %g)>\n",myround((*inputpars.jjj[l]).dn[i](1)),myround((*inputpars.jjj[l]).dn[i](2)),myround((*inputpars.jjj[l]).dn[i](3)));
    str[0]='\0';
            for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents;++i1)
-	      {snprintf(str+strlen(str),MAXNOFCHARINLINE,"<J%cJ%c> ",'a'-1+i1,'a'-1+i1);}
+	      {snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"<J%cJ%c> ",'a'-1+i1,'a'-1+i1);}
            for(i1=1;i1<=(*inputpars.jjj[l]).nofcomponents-1;++i1)
               {for(j1=i1+1;j1<=(*inputpars.jjj[l]).nofcomponents;++j1)
-                        {snprintf(str+strlen(str),MAXNOFCHARINLINE,"<J%cJ%c> <J%cJ%c> ",'a'-1+i1,'a'-1+j1,'a'-1+j1,'a'-1+i1);
+                        {snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"<J%cJ%c> <J%cJ%c> ",'a'-1+i1,'a'-1+j1,'a'-1+j1,'a'-1+i1);
 			}
 	      }
                 ini.print_usrdefcolhead(fout,str);          
@@ -473,7 +444,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "#Neutron Intensity - Mind: only structure+polarizationfactor+formfactor+debeywallerfactor - no lorentzfactor is  taken into account\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE, "       h   k   l  int       h   k   l   int       h   k   l   int \n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  int       h   k   l   int       h   k   l   int \n");
    ini.print_usrdefcolhead(fout,str);
    fclose(fout);
    //xray a component
@@ -491,11 +462,11 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - i component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE, "       h   k   l  real(mi(Q)) im(mi(Q))    h   k   l   real(mi(Q)) im(mi(Q))     h   k   l   real(mi(Q)) im(mi(Q))[mu_B/atom] ...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mi(Q)) im(mi(Q))    h   k   l   real(mi(Q)) im(mi(Q))     h   k   l   real(mi(Q)) im(mi(Q))[mu_B/atom] ...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - a component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE, "       h   k   l  real(ma(Q)) im(ma(Q))      h   k   l    real(ma(Q)) im(ma(Q))      h   k   l  real(ma(Q)) im(ma(Q)) [mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(ma(Q)) im(ma(Q))      h   k   l    real(ma(Q)) im(ma(Q))      h   k   l  real(ma(Q)) im(ma(Q)) [mu_B/atom]...}\n");
    }
    ini.print_usrdefcolhead(fout,str); 
    fclose(fout);
@@ -514,11 +485,11 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - j component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE, "       h   k   l  real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))[mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))[mu_B/atom]...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - b component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE, "      h   k   l  real(mb(Q)) im(mb(Q))        h   k   l  real(mb(Q)) im(mb(Q))     h   k   l  real(mb(Q)) im(mb(Q))[mu_B/atom] ...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "      h   k   l  real(mb(Q)) im(mb(Q))        h   k   l  real(mb(Q)) im(mb(Q))     h   k   l  real(mb(Q)) im(mb(Q))[mu_B/atom] ...}\n");
    }
    ini.print_usrdefcolhead(fout,str); fclose(fout);
    //xray c component
@@ -536,11 +507,11 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - k component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE, "       h   k   l  real(mk(Q)) im(mk(Q))       h   k   l  real(mk(Q)) im(mk(Q))      h   k   l   real(mk(Q)) im(mk(Q)) [mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mk(Q)) im(mk(Q))       h   k   l  real(mk(Q)) im(mk(Q))      h   k   l   real(mk(Q)) im(mk(Q)) [mu_B/atom]...}\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - c component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE, "       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))  [mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))  [mu_B/atom]...}\n");
    }
    ini.print_usrdefcolhead(fout,str);fclose(fout);
 

@@ -38,12 +38,12 @@ const char * colhead []= {  "Qinc[1/A] ", //  0
                             "Hi[T]   ", //    15                                                  
                             "Hj[T]   ", //    16                                                  
                             "Hk[T]   ", //    17 
-                            "Ea[V/m] ",  //    18      
-                            "Eb[V/m] ",  //    19      
-                            "Ec[V/m] ",  //    20      
-                            "Ei[V/m] ",  //    21      
-                            "Ej[V/m] ",  //    22      
-                            "Ek[V/m] ",  //    23      
+                            "Ea[kV/mm] ",  //    18      
+                            "Eb[kV/mm] ",  //    19      
+                            "Ec[kV/mm] ",  //    20      
+                            "Ei[kV/mm] ",  //    21      
+                            "Ej[kV/mm] ",  //    22      
+                            "Ek[kV/mm] ",  //    23      
                             "s1[Pa] ",  //    24     
                             "s2[Pa] ",  //    25      
                             "s3[Pa] ",  //    26      
@@ -167,6 +167,7 @@ void inimcdis::save(const char * filename)
   fprintf(fout,"#!calculate_spindensity_oscillation=%i  creates mcdisp.qsd\n",calculate_spindensity_oscillation);
   fprintf(fout,"#!calculate_orbmomdensity_oscillation=%i  creates mcdisp.qod\n",calculate_orbmomdensity_oscillation);
   fprintf(fout,"#!calculate_phonon_oscillation=%i  creates mcdisp.qep\n",calculate_phonon_oscillation);
+  fprintf(fout,"#!calculate_pel_oscillation=%i  creates mcdisp.qpe\n",calculate_pel_oscillation);
   fprintf(fout,"#\n" 
                "#     out* controls the type of output in user defined columns in files mcdisp.qei,qex,qom,dsigma,dsigma.tot\n");
   for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"#!out%i=%i \n",usrdefcols[i],colcod[usrdefcols[i]]);
@@ -371,6 +372,7 @@ inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,
   calculate_spindensity_oscillation=0;
   calculate_orbmomdensity_oscillation=0;
   calculate_phonon_oscillation=0;
+  calculate_pel_oscillation=0;
   outS=0;
   qmin=0;qmax=0;deltaq=0;
  // ******************************** reading parameters  from mcdisp.par ****************************************************
@@ -395,6 +397,7 @@ nofhkls=0;save(file);
      extract_with_prefix(instr,prefix,"calculate_spindensity_oscillation",calculate_spindensity_oscillation);
      extract_with_prefix(instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
      extract_with_prefix(instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation);
+     extract_with_prefix(instr,prefix,"calculate_pel_oscillation",calculate_pel_oscillation);
      extract_with_prefix(instr,prefix,"outS",outS);
      extract_with_prefix(instr,prefix,"nofthreads",nofthreads);
      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
@@ -664,6 +667,7 @@ inimcdis::inimcdis (const inimcdis & p)
   calculate_spindensity_oscillation=p.calculate_spindensity_oscillation;
   calculate_orbmomdensity_oscillation=p.calculate_orbmomdensity_oscillation;
   calculate_phonon_oscillation=p.calculate_phonon_oscillation;
+  calculate_pel_oscillation=p.calculate_pel_oscillation;
   outS=p.outS;
     deltaq=p.deltaq;  
   nofatoms=p.nofatoms;

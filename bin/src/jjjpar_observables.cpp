@@ -24,7 +24,7 @@ int jjjpar::pcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
    case brillouin: 
    case cluster: // fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
           return false;break;
-   case external_class: return si_mod->pcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage);
+   case external_class: return si_mod->pcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename);
          break;
    default: if (p==NULL) {mom=0;return false;} 
             else{(*p)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
@@ -54,6 +54,59 @@ int  jjjpar::dP1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & P1
           return 0;break;
    }
 }
+
+/****************************************************************************/
+/****************************************************************************/
+//  electrical dipole moment in |e|pm
+/****************************************************************************/
+/****************************************************************************/
+int jjjpar::pelcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{int j;
+  for(int i=1;i<=T.Hi();++i){
+           Vector m(mom.Column(i));
+           j=pelcalc(m,T(i),Hxc,Hext,parstorage);
+           SetColumn(i,mom,m);}
+           return j;
+}
+
+int jjjpar::pelcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{ switch (module_type)
+  {case kramer: 
+   case cfield:
+   case so1ion: 
+   case brillouin: 
+   case cluster: // fprintf(stderr,"Warning: pel in internal modules not implemented, continuing ... \n");
+          return false;break;
+   case external_class: return si_mod->pelcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename);
+         break;
+   default: if (pel==NULL) {mom=0;return false;} 
+            else{(*pel)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+  }
+}
+
+
+int  jjjpar::dpel1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & P1,ComplexMatrix & ests)
+{float delta=maxE;P1(1)=complex <double> (ninit,pinit); int n;
+ switch (module_type)
+  {case external: if(dpel1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: electrical dipole moment  not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return (*dpel1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&P1,&delta,&ests);}
+           break;
+   case external_class: 
+        n=si_mod->dpel1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,P1,delta,ests);
+            if(n==-1){
+                    if(transitionnumber<0)fprintf(stderr,"Problem: electrical dipole moment  not possible in module %s, continuing ... \n",modulefilename);
+           return 0;} else {return n;}
+           break;
+
+   case kramer:
+   case cfield:
+   case brillouin:
+   case so1ion:
+   case cluster: 
+   default:if(transitionnumber<0)fprintf(stderr,"Warning: electrical dipole moment in internal modules not implemented, continuing ... \n");
+          return 0;break;
+   }
+}
 /****************************************************************************/
 /****************************************************************************/
 // 1. MAGNETIC MOMENT in units  muB
@@ -68,7 +121,7 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
    case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break;
    case cluster: cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZ,U);return true;break;
    case external_class:
-             return si_mod->mcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage);
+             return si_mod->mcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename);
              break;                                       
    default: if (m==NULL) {mom=0;return false;} 
             else{(*m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
@@ -94,9 +147,9 @@ int jjjpar::mcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Complex
            cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZZ,UU);}
            return true;break;
    case external_class:
-           if(false==si_mod->mMcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+           if(false==si_mod->mMcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
-                         if(false==si_mod->mcalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+                         if(false==si_mod->mcalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
                          {mom=0;return false;}    
                          SetColumn(i,mom,m);
                         }}
@@ -132,7 +185,7 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
    case external_class:
            i=si_mod->dm1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,m1,delta,ests);
            if(i==-1){if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc  is not possible in module %s, continuing ... \n",modulefilename);
-                   }
+                   return 0;}
            return i;break;
    case kramer: nnt=kramerdm(transitionnumber,T,Hxc,Hext,m1,delta,n,nd);m1*=gJ;return nnt;break;
    case cfield:
@@ -166,7 +219,7 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case brillouin: brillouin_Icalc(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
    case cluster: return false;break; 
    case external_class:
-             return si_mod->Lcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage);
+             return si_mod->Lcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename);
              break;   
    default: if (L==NULL) {Lmom=0;return false;} 
             else{(*L)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
@@ -189,9 +242,9 @@ int jjjpar::Lcalc (Matrix &Lmom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            return true;break;
    case cluster: return false;break; 
    case external_class:
-           if(false==si_mod->LMcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+           if(false==si_mod->LMcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(Lmom.Column(i));
-                         if(false==si_mod->Lcalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+                         if(false==si_mod->Lcalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
                          {Lmom=0;return false;}    
                          SetColumn(i,Lmom,m);
                         }}
@@ -220,7 +273,7 @@ switch (module_type)
    case external_class:
            i=si_mod->dL1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,L1,delta,ests);
            if(i==-1){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
-                   }
+                   return 0;}
            return i;break;
    case kramer: nnt=kramerdm(transitionnumber,T,Hxc,Hext,L1,delta,n,nd);L1*=(2.0-gJ);return nnt;break;
    case cfield:
@@ -244,7 +297,7 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case brillouin: brillouin_Icalc(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
    case cluster: return false;break; 
    case external_class:
-             return si_mod->Scalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage);
+             return si_mod->Scalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename);
              break;   
   default: if (S==NULL) {Smom=0;return false;} 
             else{(*S)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
@@ -268,9 +321,9 @@ int jjjpar::Scalc (Matrix &Smom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            return true;break;
    case cluster: return false;break; 
    case external_class:
-           if(false==si_mod->SMcalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+           if(false==si_mod->SMcalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(Smom.Column(i));
-                         if(false==si_mod->Scalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+                         if(false==si_mod->Scalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
                          {Smom=0;return false;}    
                          SetColumn(i,Smom,m);
                         }}
@@ -299,7 +352,7 @@ int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1
    case external_class:
            i=si_mod->dS1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,S1,delta,ests);
            if(i==-1){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
-                   }
+                   return 0;}
            return i;break;
    case kramer: nnt=kramerdm(transitionnumber,T,Hxc,Hext,S1,delta,n,nd);S1*=(gJ-1.0);return nnt;break;
    case cfield:
@@ -422,7 +475,9 @@ int jjjpar::dMQ1calc(Vector & Qvec,double & T, ComplexVector & dMQ,float & delta
                           return (*ddnn)(&transitionnumber,&th,&ph,&J0,&J2,&J4,&J6,&ests,&T,&dMQ,&ddelta);break;}
           else {return 0;}
    case external_class:getpolar(Qvec(1),Qvec(2),Qvec(3),Q,th,ph);
-               return si_mod->dmq1(transitionnumber,th,ph,J0,J2,J4,J6,ests,T,dMQ,ddelta);
+               i= si_mod->dmq1(transitionnumber,th,ph,J0,J2,J4,J6,ests,T,dMQ,ddelta);
+               if(i==-1)return 0;
+               return i;
                break;
    case cfield:  getpolar(Qvec(3),Qvec(1),Qvec(2),Q,th,ph); // for internal module cfield xyz||cba and we have to give dMQ1 polar angles with respect to xyz
             i=(*iops).dMQ1(transitionnumber,th,ph,J0,J2,J4,J6,Zc,ests,T,dMQ);
@@ -942,7 +997,7 @@ int jjjpar::chargedensity_coeff (Vector &mom, double & T, Vector &  Hxc,Vector &
    case external: if(cd_m==NULL){fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} else {(*cd_m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
            break;
-   case external_class: if(false==si_mod->chargedensity_coeff(mom,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+   case external_class: if(false==si_mod->chargedensity_coeff(mom,T,Hxc,Hext,gJ,ABC,sipffilename))
            {fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} 
            break;
@@ -1068,7 +1123,7 @@ int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Ve
    case external: if(sd_m==NULL){fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} else {(*sd_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
            break;
-   case external_class: if(false==si_mod->spindensity_coeff(mom,xyz,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+   case external_class: if(false==si_mod->spindensity_coeff(mom,xyz,T,Hxc,Hext,gJ,ABC,sipffilename))
            {fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} 
            break;
@@ -1266,7 +1321,7 @@ int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,
    case external: if(od_m==NULL){fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} else {(*od_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
            break;
-   case external_class: if(false==si_mod->orbmomdensity_coeff(mom,xyz,T,Hxc,Hext,gJ,ABC,sipffilename,parstorage))
+   case external_class: if(false==si_mod->orbmomdensity_coeff(mom,xyz,T,Hxc,Hext,gJ,ABC,sipffilename))
            {fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} 
            break;

@@ -1,15 +1,15 @@
 // used in mcdisp.c and singleion.c for in/out of .trs files
 
 void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,char * out,char observable)
-{time_t curtime;char cc=' ';
+{time_t curtime;char cc[30];cc[0]=observable;cc[1]='\0';
  switch(observable)
 {case 'x': 
  case 'y':
- case 'z': 
- case 'u':
- case 'v':
- case 'w': cc='a';break;
- case 'Q': cc='M';break;
+ case 'z': cc[0]='a';cc[1]='S';cc[2]=observable;cc[3]='\0';break;
+ case 'u': cc[0]='a';cc[1]='L';cc[2]='x';cc[3]='\0';break;
+ case 'v': cc[0]='a';cc[1]='L';cc[2]='y';cc[3]='\0';break;
+ case 'w': cc[0]='a';cc[1]='L';cc[2]='z';cc[3]='\0';break;
+ case 'Q': cc[0]='M';cc[1]='Q';cc[2]='\0';break;
  default: break;
 }
  struct tm *loctime;
@@ -21,6 +21,40 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,char 
    fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
    fprintf(fout,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
    fprintf(fout,"#*********************************************************************\n");
+   if(observable=='p')
+   {fprintf(fout,"#(*)The unpolarized powder average RAMAN cross section sigma for each transition \n");
+   fprintf(fout,"#   is calculated neglecting  the Debye Wallerfactor as follows:\n");
+   fprintf(fout,"#-------------------------------------------------------------- \n");
+   fprintf(fout,"#            Transition intensities in |e|pm/(kV/mm)           |\n");
+   fprintf(fout,"#                                                              |\n");
+   fprintf(fout,"# =                                                            |\n");
+   fprintf(fout,"# |                           2                                |\n");
+   fprintf(fout,"# |     =      wi  |<i|p  |k>|                                 |\n");
+   fprintf(fout,"# |                     el                                     |\n");
+   fprintf(fout,"# =                                                            |\n");
+   fprintf(fout,"#  E -> E                                                      |\n");
+   fprintf(fout,"#   i    k                                                     |\n");
+   fprintf(fout,"#                                                              |\n");
+   fprintf(fout,"#                            with                              |\n");
+   fprintf(fout,"#                                                              |\n");
+   fprintf(fout,"#                      - E /T                                  |\n");
+   fprintf(fout,"#                     e   i                                    |\n");
+   fprintf(fout,"# wi    =       --------------                                 |\n");
+   fprintf(fout,"#               ----    - E /T                                 |\n");
+   fprintf(fout,"#               >    n e   i                                   |\n");
+   fprintf(fout,"#               ----  i                                        |\n");
+   fprintf(fout,"#                i                                             |\n");
+   fprintf(fout,"#                                                              |\n");
+   fprintf(fout,"#                                                              |\n");
+   fprintf(fout,"#                              -----                           |\n");
+   fprintf(fout,"#                      2       \\                            2 |\n");
+   fprintf(fout,"#        |<i,r|p |k,s>|   =     >   |<i,r|p    -<p    >|k,s>|  |\n");
+   fprintf(fout,"#               el             /           el,u   el,u         |\n");
+   fprintf(fout,"#                              -----                           |\n");
+   fprintf(fout,"#                           u = x,y,z                          |\n");
+   fprintf(fout,"#                                                              |\n");
+   }
+   else {
    fprintf(fout,"#(*)The unpolarized powder average neutron cross section sigma for each transition \n");
    fprintf(fout,"#   is calculated neglecting the formfactor, the Debye Wallerfactor, factor k'/k as follows:\n");
    fprintf(fout,"#-------------------------------------------------------------- \n");
@@ -89,6 +123,7 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,char 
    fprintf(fout,"#             k,i   E -> E                                     |\n");
    fprintf(fout,"#                    i    k                                    |\n");
    fprintf(fout,"#-------------------------------------------------------------- \n");
+   }
    fprintf(fout,"#! ninit= %g (max number of initial states) -do not modify: needed to count transitions\n",ninit);
    fprintf(fout,"#! pinit= %g (minimum population number of initial states)-do not modify: needed to count transitions\n",pinit);
    fprintf(fout,"#! maxE= %g meV(maximum value of transition energy)-do not modify: needed to count transitions\n",maxE);
@@ -96,9 +131,11 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,char 
    
    fprintf(fout,"#1 2 3  4 *** 5 ****** 6 *********** 7 ******* 8 ********************"
                    " 9  10  ********* 11 ******************** 12 *********************\n");
-   fprintf(fout,"#i j k ionnr transnr energy(meV) |gamma_s| sigma_mag_dip[barn/sr](*) "
-                   " n  n'  wnn'|<n|%c%c1-<%c%c1>|n'>|^2 wnn'|<n|%c%c2-<%c%c2>|n'>|^2 ... "
-                   "with wnn'=wn-wn' for n!=n'  and wnn=wn/k_B T \n",cc,observable,cc,observable,cc,observable,cc,observable);
+   fprintf(fout,"#i j k ionnr transnr energy(meV) |gamma_s| ");
+   if(observable=='p')fprintf(fout,"Trace(chi_el)[|e|pm/(kV/mm)](*) ");
+   else fprintf(fout,"sigma_mag_dip[barn/sr](*) ");
+                 fprintf(fout, " n  n'  wnn'|<n|%s1-<%s1>|n'>|^2 wnn'|<n|%s2-<%s2>|n'>|^2 ... "
+                   "with wnn'=wn-wn' for n!=n'  and wnn=wn/k_B T \n",cc,cc,cc,cc);
 }
 
 //****************************************************************************************
@@ -118,9 +155,22 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
      jjj.du1calc(T,mf,Hext,u1,d,n,nd,est);
      }
    //fprintf(stdout,"nt=%i transition number %i: ",nt,jjj.transitionnumber);
-    gamma=Norm2(u1);
+    gamma=Norm2(u1);ComplexVector dm1(1,3);double intensityp=0, intensitym=0; 
+   if(observable=='p') 
+   { // calculate powder RAMAN intensities 
+    if(jjj.dpel1calc(T,mf,Hext,dm1,est)) // if dpel1calc is implemented for this ion
+     {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
+     //intensityp*=1.0;// no prefactor just Trace
+     intensitym=intensityp;
+     if (d>SMALL_QUASIELASTIC_ENERGY){if(d/T/KB<20){intensitym=-intensityp/(1-exp(d/T/KB));intensityp/=(1-exp(-d/T/KB));}else{intensitym=0;}}
+                                  else{intensityp=intensityp*T*KB;intensitym=intensityp;}
+     }
+     else
+     {intensityp=-1;intensitym=-1;} 
+   }
+   else
+   {
      // calculate powder neutron intensities 
-     double intensityp=0, intensitym=0; ComplexVector dm1(1,3);
      if(jjj.dm1calc(T,mf,Hext,dm1,est)) // if dm1calc is implemented for this ion
      {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
      intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
@@ -129,12 +179,14 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
      }
      else
      {intensityp=-1;intensitym=-1;}  
+   }
    ComplexVector m1(1,SPINDENS_EV_DIM); 
     switch(observable)
      {case 'M': break; // leave it, it was calulated above 
       case 'S': jjj.dS1calc(T,mf,Hext,dm1,est);break;
       case 'L': jjj.dL1calc(T,mf,Hext,dm1,est);break;
       case 'Q': jjj.dMQ1calc(Q,T,dm1,d,est);break;
+      case 'p': jjj.dpel1calc(T,mf,Hext,dm1,est);break;
       case 'x': jjj.dspindensity_coeff1(1,T,mf,Hext,m1,est);break;
       case 'y': jjj.dspindensity_coeff1(2,T,mf,Hext,m1,est);break;
       case 'z': jjj.dspindensity_coeff1(3,T,mf,Hext,m1,est);break;

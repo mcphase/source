@@ -195,11 +195,19 @@ public:
 //                                       OBSERVABLES 
 // ********************************************************************************
 //0. PHONON displacement
-int pcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & ests);
+int pcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
 int  dP1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dP1,ComplexMatrix & ests);
 private:
 void (*p)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
 int  (*dP1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
+//    electrical dipole moment 
+public:
+int pelcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+int pelcalc(Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+int  dpel1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dP1,ComplexMatrix & ests);
+private:
+void (*pel)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+int  (*dpel1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
 public:
 //1. MAGNETIC MOMENT

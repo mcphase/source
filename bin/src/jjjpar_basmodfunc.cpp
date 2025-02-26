@@ -196,6 +196,16 @@ module_type=external;orientation=abc_xyz;int err_load_lib=0;
      if (dP1==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  dP1 -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"dP1 ");}
 
+    pel=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"pelcalc");
+    //*(int **)(&p)=GetProcAddress(handle,"pelcalc");
+     if (pel==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  pelcalc -continuing ",(int)GetLastError(),modulefilename);}
+                    }else {if(verbose)fprintf (stderr,"pelcalc ");}
+
+    dpel1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dpel1");
+    //*(void **)(&du)=GetProcAddress(handle,"dpel1");
+     if (dpel1==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  dpel1 -continuing ",(int)GetLastError(),modulefilename);}
+                    }else {if(verbose)fprintf (stderr,"dpel1 ");}
+
     m=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"mcalc");
     //*(int **)(&m)=GetProcAddress(handle,"mcalc");
      if (m==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  mcalc -continuing ",(int)GetLastError(),modulefilename);}
@@ -320,6 +330,8 @@ else
   loadfunction(*(void **)(&du),handle,"du1calc",verbose);
   loadfunction(*(void **)(&p),handle,"pcalc",verbose);
   loadfunction(*(void **)(&dP1),handle,"dP1",verbose);
+  loadfunction(*(void **)(&pel),handle,"pelcalc",verbose);
+  loadfunction(*(void **)(&dpel1),handle,"dpel1",verbose);
   loadfunction(*(void **)(&m),handle,"mcalc",verbose);
   loadfunction(*(void **)(&mM),handle,"mMcalc",verbose);
   loadfunction(*(void **)(&dm1),handle,"dm1",verbose);
@@ -542,7 +554,7 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
    case so1ion: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
    case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
    case cluster: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
-   case external_class: if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,parstorage))
+   case external_class: if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U))
                         {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);};
                   break;
    default: (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
@@ -564,9 +576,9 @@ void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector
            break;
    case cluster:  cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);
           break;
-   case external_class: if(false==si_mod->IMcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U,parstorage))
+   case external_class: if(false==si_mod->IMcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U))
                         {for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
-                         if(false==si_mod->Icalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename,lnZ(i),U(i),parstorage))
+                         if(false==si_mod->Icalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename,lnZ(i),U(i)))
                   {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);}
                          SetColumn(i,mom,m);
                         }}
@@ -784,8 +796,7 @@ ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hex
             return Icalc_parstorage;break;
    case cfield:
    case so1ion: (*iops).cfeigenstates(&Icalc_parstorage,Hxc,Hext,T);return Icalc_parstorage;break;
-   case external_class: if(false==si_mod->Icalc_parameter_storage_matrix_init(Icalc_parstorage,Hxc,Hext,gJ,T,ABC,sipffilename))
-                        {Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;}
+   case external_class: Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;
                         return Icalc_parstorage;  
                           break;
    default: Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;return Icalc_parstorage;

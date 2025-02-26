@@ -42,6 +42,8 @@ void helpexit()
           "                       elements for magnetic moment M (muB)instead of I\n"
           "         -U  ......... calculate energy U, ln of partition sum Z, free energy F\n"
           "                       instead of I\n"
+          "         -pel  ........ calculate electrical dipole moment pel in |e|A\n"
+          "                       instead of I\n"
           "         -MQ 0 0 1 ...  instead of <I> calculate expectation values, transition matrix elements\n"
           "                       for M(Q=(0 0 1)/A), the Fourier Transform  of magnetic moment density M(r) \n"
           "         -L  ......... calculate expectation values and transition matrix\n"
@@ -77,6 +79,10 @@ void helpexit()
           "                       until 27K has been reached\n"
           "         -Hsteps 20 0 0 10 in addition to initial field calculate 20 further external fields\n"
           "                       until (0 0 10) Tesla has been reached\n"
+          "         -HE ......... in addition to magnetic field also apply electrical field in kV/mm, i.e. there will be \n"
+          "                       instead of 3 components  Hexti Hextj Hextk in the command line 6 components \n"
+          "                       Hexti Hextj Hextk Eexti Eextj Eextk, similar for Hsteps option there will be 6 components\n"
+          "                       (therefore: mind that -HE is given before -Hsteps in the command line)\n"
           "         -opmat 2 .... output operator matrix number n=2 to results/*.opmat\n"
           "                Operators in results/output op.mat for different values of n:\n"
           "                n=0                    Hamiltonian\n"
@@ -97,32 +103,47 @@ void helpexit()
 }
 
 
-void colheader(char observable,int observable_nofcomponents,int nofcomponents,Vector & Q,int elevels,double X0,double lambda)
+void colheader(char observable,int observable_nofcomponents,int nofcomponents,Vector & Q,int elevels,double X0,double lambda,int HEnofcomp)
 {int j;
    switch(observable){case 's':printf("# Single ion susceptibility X with 1/(X-X0)=(1/Xcf)-lambda, X0=%g emu/mol, lambda=%g mol/emu.\n# For polycrystal Xpoly=Trace(X)/3\n",X0,lambda);break;
                       case 'i':printf("# Inverse Y of single ion susceptibility X with 1/(X-X0)=(1/Xcf)-lambda: Y=X^(-1), X0=%g emu/mol, lambda=%g mol/emu.\n#For polycrystal Xpoly=Trace(X)/3 \n",X0,lambda);break;
                       default: break;
                      }
-   printf("# 1         2     ");for(j=1;j<=3;++j)printf("   %i     ",2+j);
-                                   for(j=1;j<=nofcomponents;++j)printf("  %2i      ",j+5);
+   printf("# 1         2     ");for(j=1;j<=HEnofcomp;++j)printf("   %i     ",2+j);
+                                   for(j=1;j<=nofcomponents;++j)printf("  %2i      ",j+2+HEnofcomp);
                                    switch(observable)
                                    {case 'Q': printf("                                 ");
-                                              for(j=1;j<=observable_nofcomponents;++j){printf("   %2i          %2i          %2i       %2i    ",5+nofcomponents+(j-1)*4+1,5+nofcomponents+(j-1)*4+2,5+nofcomponents+(j-1)*4+3,5+nofcomponents+(j-1)*4+4);}printf("    ");break;
+                                              for(j=1;j<=observable_nofcomponents;++j){printf("   %2i          %2i          %2i       %2i    ",
+                                              HEnofcomp+2+nofcomponents+(j-1)*4+1,
+                                              HEnofcomp+2+nofcomponents+(j-1)*4+2,
+                                              HEnofcomp+2+nofcomponents+(j-1)*4+3,
+                                              HEnofcomp+2+nofcomponents+(j-1)*4+4);}printf("    ");break;
                                     case 'x':
                                     case 'y':
                                     case 'z':
                                     case 'u':
                                     case 'v':
-                                    case 'w': for(j=1;j<=observable_nofcomponents;++j){printf("   %i       ",5+nofcomponents+j);}printf("    ");break;
-                                    case 's': printf("   %i         ",5+nofcomponents+1);
-                                              for(j=2;j<=observable_nofcomponents;++j){printf("%i  ",5+nofcomponents+j);}printf("    ");break;
-                                    case 'i': printf("   %i            ",5+nofcomponents+1);
-                                              for(j=2;j<=observable_nofcomponents;++j){printf("%i  ",5+nofcomponents+j);}printf("    ");break;
-                                    case 'd': printf(" %i    %i                        %i      %i ",5+nofcomponents+1,5+nofcomponents+2,5+nofcomponents+3,5+nofcomponents+4);
-                                              for(j=5;j<=observable_nofcomponents;++j){printf("%i   ",5+nofcomponents+j);}printf("    ");break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j){printf("  %i  ",5+nofcomponents+j);}printf("    ");break;
+                                    case 'w': for(j=1;j<=observable_nofcomponents;++j)
+                                              {printf("   %i       ",HEnofcomp+2+nofcomponents+j);}
+                                              printf("    ");break;
+                                    case 's': printf("   %i         ",HEnofcomp+2+nofcomponents+1);
+                                              for(j=2;j<=observable_nofcomponents;++j)
+                                              {printf("%i  ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
+                                    case 'i': printf("   %i            ",HEnofcomp+2+nofcomponents+1);
+                                              for(j=2;j<=observable_nofcomponents;++j)
+                                              {printf("%i  ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
+                                    case 'd': printf(" %i    %i                        %i      %i ",
+                                              HEnofcomp+2+nofcomponents+1,
+                                              HEnofcomp+2+nofcomponents+2,
+                                              HEnofcomp+2+nofcomponents+3,
+                                              HEnofcomp+2+nofcomponents+4);
+                                              for(j=5;j<=observable_nofcomponents;++j)
+                                              {printf("%i   ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)
+                                             {printf("  %i  ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
                                    }printf("\n");
  printf("#atom-nr   T[K]   ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'i'-1+j);
+                              if(HEnofcomp>5)for(j=1;j<=3;++j)printf("Eext%c(kV/mm) ",'i'-1+j);
                                    for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
 int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
 int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
@@ -131,6 +152,7 @@ int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,
                                    {case 'Q': printf("Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
                                               for(j=1;j<=observable_nofcomponents;++j){printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}printf("(muB)");break;
                                     case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
+                                    case 'p': for(j=1;j<=observable_nofcomponents;++j)printf(" <pel%c> ",'a'-1+j);printf("(|e|A)");break;
                                     case 'U': printf(" lnZ  F(meV) U(meV) ");break;
                                     case 's': printf("Xpoly(emu/mol) X11 X22 X33 X23 X32 X13 X31 X12 X21(emu/mol) ");break;
                                     case 'i': printf("1/Xpoly(mol/emu) Y11 Y22 Y33 Y23 Y32 Y13 Y31 Y12 Y21(mol/emu) ");break;
@@ -149,7 +171,7 @@ if(observable=='d'){printf("#(*)The unpolarized powder average neutron cross sec
 }
 }
 
-void write_trs_file(jjjpar &jjj,int nmax,double pinit,double ninit,double maxE,double TT,Vector & Hext,Vector & Hxc,Vector & Q,char observable,int i)
+void write_trs_file(jjjpar &jjj,int nmax,double pinit,double ninit,double maxE,double TT,Vector & Hext,Vector & Hxc,Vector & Q,char observable,int i,int HEnofcomp )
         {char filename[MAXNOFCHARINLINE];char * pchr;FILE * fout_trs;
          int nt=0;float d=1e10;
   snprintf(filename,MAXNOFCHARINLINE,"./results/%s.trs",jjj.sipffilename);
@@ -162,7 +184,8 @@ pchr=strstr(filename+10,"\\");
 
         fout_trs = fopen_errchk (filename,"w");
         char outstring[MAXNOFCHARINLINE];
-        sprintf(outstring," T= %g K Hi=%g Hj=%g Hk=%g T",TT,Hext(1),Hext(2),Hext(3));
+        snprintf(outstring,MAXNOFCHARINLINE," T= %g K Hi=%g Hj=%g Hk=%g T",TT,Hext(1),Hext(2),Hext(3));
+       if(HEnofcomp>5)snprintf(outstring+strlen(outstring),MAXNOFCHARINLINE,"  Ei=%g Ej=%g Ek=%g kV/mm",Hext(4),Hext(5),Hext(6));
         trs_header_out(fout_trs,pinit,ninit,maxE,outstring,observable);
 
         jjj.maxE=maxE;jjj.pinit=pinit;jjj.ninit=ninit;
@@ -237,7 +260,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
               double Tstart,int Tsteps,Vector & T,double TT,
               double Estart,int Esteps,Vector & E,double dE,
               Vector & Hstart,int Hsteps,Vector & dH,
-              double epsilon,double lambda, double X0,int verbose,double opmat,int no_trs_write)
+              double epsilon,double lambda, double X0,int verbose,double opmat,int no_trs_write,int HEnofcomp)
   { char filename[MAXNOFCHARINLINE],trsstring[MAXNOFCHARINLINE];
     float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
     char  * pchr;int j;
@@ -262,13 +285,14 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
                   }
    jjj.Icalc_parameter_storage_init(Hxc,Hext,Tstart);
 
- if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i); // write transition trs files
+ if(nmax>0&&no_trs_write==0)write_trs_file(jjj,nmax,pinit,ninit,maxE,TT,Hext,Hxc,Q,observable,i,HEnofcomp); // write transition trs files
 
       for(int Hi=0;Hi<=Hsteps;++Hi){Hext=Hstart+(double)Hi*dH;
       switch(observable)
       {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case 'M': jjj.mcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
+       case 'p': jjj.pelcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case 'Q': for(int Ti=1;Ti<=Tsteps;++Ti)
                  {Vector II(I.Column(Ti));
                  jjj.mcalc(II,T(Ti),Hxc,Hext,jjj.Icalc_parstorage);
@@ -296,6 +320,7 @@ for(int Ei=0;Ei<Esteps;++Ei){
        
 printf("%3i %8g ",i,T(Ti)); // printout ion number and temperature
       for(j=1;j<=3;++j)printf(" %8g ",Hext(j)); // printout external field as requested
+      if(HEnofcomp>5)for(j=4;j<=6;++j)printf(" %8g ",Hext(j)); 
       for(j=1;j<=nofcomponents;++j)printf("%8g ",Hxc(j)); // printoutexchangefield as requested
       complex<double> im(0,1.0);
    complex<double> z(E(Ei+1),epsilon);
@@ -396,11 +421,13 @@ pchr=strstr(filename+10,"\\");
       fout=fopen_errchk(filename,"w"); 
      fprintf(fout,"#\n#\n#!d=%i sipffile=%s T= %g K ",jjj.est.Chi(),jjj.sipffilename,TT);
                                    for(j=1;j<=3;++j)fprintf(fout,"Hext%c=%g T ",'a'-1+j,Hext(j));
+                                   if(HEnofcomp>5)for(j=1;j<=3;++j)fprintf(fout,"Eext%c=%g kV/mm ",'a'-1+j,Hext(j+3)); 
                                    for(j=1;j<=nofcomponents;++j)fprintf(fout,"Hxc%i=%g meV  ",j,Hxc(j));
                                    switch(observable)
                                    {case 'Q': fprintf(fout,"Q=(%g %g %g)/A ",Q(1),Q(2),Q(3));
                                               for(j=1;j<=observable_nofcomponents;++j){fprintf(fout," M%c%c=%g%+gi ",observable,'a'-1+j,real(MMq(j,1)),imag(MMq(j,1)));}fprintf(fout,"(muB) ");break;
                                     case 'M': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," %c%c=%g ",observable,'a'-1+j,I(j,1));fprintf(fout,"(muB) ");break;
+                                    case 'p': for(j=1;j<=observable_nofcomponents;++j)fprintf(fout," pel%c=%g ",'a'-1+j,I(j,1));fprintf(fout,"(|e|pm) ");break;
                                     case 'd': 
                                     case 's': 
                                     case 'i': break; 
@@ -469,7 +496,7 @@ int main (int argc, char **argv)
   int nofcomponents=0;
   Vector Hext(1,HEXT_DIMENSION),Q(1,3),Hxc_in(1,HXCMAXDIM);
   char sipffile[MAXNOFCHARINLINE];
-
+  int HEnofcomp=3;
   int nmax=5;// default number of transitions to  be output
   char observable='I'; // default is operators I
 printf("#***singleion.c - calculate single ion properties - M. Rotter %s*****\n",MCPHASVERSION);
@@ -479,6 +506,7 @@ printf("#***singleion.c - calculate single ion properties - M. Rotter %s*****\n"
 for (i=1;i<argc;++i)
  {if(strncmp(argv[i],"-h",2)==0) {helpexit();}
   else {if(strcmp(argv[i],"-M")==0) observable='M';       
+  else {if(strcmp(argv[i],"-pel")==0) observable='p';       
   else {if(strcmp(argv[i],"-U")==0) observable='U';       
   else {if(strcmp(argv[i],"-MQ")==0){observable='Q';
                                       if(i==argc-1){fprintf(stderr,"Error in command: singleion -MQ needs argument(s)\n");exit(EXIT_FAILURE);}
@@ -552,13 +580,23 @@ for (i=1;i<argc;++i)
 	                              Hend(2)=strtod(argv[i+1],NULL);++i;
     			             if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hsteps needs 4 arguments\n");exit(EXIT_FAILURE);}
 	                              Hend(3)=strtod(argv[i+1],NULL);++i;
-    			             }       
+                                   if(HEnofcomp>5){
+                                      if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hsteps needs 7 arguments\n");exit(EXIT_FAILURE);}
+	                              Hend(4)=strtod(argv[i+1],NULL);++i;
+    			             if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hsteps needs 7 arguments\n");exit(EXIT_FAILURE);}
+	                              Hend(5)=strtod(argv[i+1],NULL);++i;
+    			             if(i==argc-1){fprintf(stderr,"Error in command: singleion -Hsteps needs 7 arguments\n");exit(EXIT_FAILURE);}
+	                              Hend(6)=strtod(argv[i+1],NULL);++i;
+                                                  }
+  			             }       
+  else {if(strcmp(argv[i],"-HE")==0)HEnofcomp=6;      
   else {if(strcmp(argv[i],"-v")==0)verbose=1;      
   else{Tstart=strtod(argv[i],NULL);++i; if(!Tsteps){Tend=Tstart;} // now read T
        Hext=0;for(j=1;j<=3;++j){if(i<argc){Hext(j)=strtod(argv[i],NULL);}++i;} // read Hexta Hextb Hextc
        Hxc_in=0;for(j=1;i<argc&&j<HXCMAXDIM;++j){++nofcomponents;Hxc_in(j)=strtod(argv[i],NULL);++i;} //read Hxc1 Hxc2 ... Hxcn
       } // T Hext Hxc
     } // verbose
+    } // HE
     } // -Hsteps
     } // -Tsteps
     } // -Esteps
@@ -583,6 +621,7 @@ for (i=1;i<argc;++i)
     } // -S 
    } // -MQ  
    } // -U  
+   } // -pel  
    } // -M  
  } // help
   if(argc<2){helpexit();}
@@ -595,6 +634,7 @@ for (i=1;i<argc;++i)
   switch(observable)
    {case 'U':
     case 'M':
+    case 'p':
     case 'Q':
     case 'S':
     case 'L': observable_nofcomponents=3;break;
@@ -631,7 +671,7 @@ if (!do_sipf)
   {par inputpars("./mcphas.j",verbose);
    inputpars.save_sipfs("./results/_");
    if(nofcomponents!=inputpars.cs.nofcomponents)fprintf(stderr,"#Warning: number of exchange field components read from command line not equal to that in mcphas.j - continuing...\n");
-    colheader(observable,observable_nofcomponents,nofcomponents,Q,elevels,X0,lambda);
+    colheader(observable,observable_nofcomponents,nofcomponents,Q,elevels,X0,lambda,HEnofcomp);
     
                  
 
@@ -640,19 +680,19 @@ if (!do_sipf)
               observable,observable_nofcomponents,nofcomponents,i,elevels,
               Tstart,Tsteps,T,TT,
               Estart,Esteps,E,dE,
-              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write);
+              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write,HEnofcomp);
    }
 
   
   } else { // option -r sipffile
    jjjpar jjj(0,0,0,sipffile,nofcomponents,verbose);jjj.save_sipf("./results/_");
-   colheader(observable,observable_nofcomponents,nofcomponents,Q,elevels,X0,lambda);
+   colheader(observable,observable_nofcomponents,nofcomponents,Q,elevels,X0,lambda,HEnofcomp);
 
    do_a_sipf(jjj,nmax,pinit,ninit,maxE,Hext,Hxc,Q,
               observable,observable_nofcomponents,nofcomponents,1,elevels,
               Tstart,Tsteps,T,TT,
               Estart,Esteps,E,dE,
-              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write);
+              Hstart,Hsteps,dH,epsilon,lambda,X0,verbose,opmat,no_trs_write,HEnofcomp);
             
 fprintf(stderr,"# **********************end of program singleion************************\n");
 if(verbose)fprintf(stderr,"# ... you can now use 'cpsingleion' to calculate specific heat,\n"

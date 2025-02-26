@@ -167,13 +167,16 @@ excitations.
 \begin{description} 
 \item[ display\_densities -f{[c 12 0.1]} mcphas.sps T Ha Hb Hc]
 \item[ display\_densities -f mcphas.sps x y]
+\item[ display\_densities -f{[c 12 0.1]} mcphas.sps out1 out2 out3 ou4 out5 out6 out7]
 \item[ display\_densities -f mcphas.sps n]
  if used with -f filename this file has to be a mcphas.mf or mcphas.sps or mcphas.tst file,
 the spin configuration
-   at given temperature T[K] and magnetic effective field H[T]
+   at given temperature T[K] (column 3 in mcphas.* output files)
+and magnetic effective field H[T] (columns 5,6,7 in mcphas.* output files)  
     is read and extracted from this file and printed on screen (stdout), nothing
- else is done. Insterad of temperature and magnetic field also the x y point coordinates
-in the phasediagram or the index n (from the sequence of spin configuartions) can be given.
+ else is done. Instead of temperature and magnetic field also the x y point coordinates
+in the phasediagram or the index n (from the sequence of spin configuartions) or
+ out1,...,out7 (refers to the external parameters in column 1-7 in mcphas.* output files) can be given.
 the option -fc 12 0.1 displays a commented user readable information about the 12 largerst
 spin components in the primitive unit cell with absolute values larger than 0.1 (useful for
 inspection of numbers).
@@ -188,6 +191,7 @@ for -tMSL
        -tI    with expectation values of interaction operators $\langle I \rangle$.
 
 \item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack T Ha Hb Hc [h k l E]]
+\item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack out1 out2 ... out7 [h k l E]]
 \item[display\_densities \lbrack-c$|$-s$|$-o$|$-m$|$-j\rbrack \lbrack -p i j k$|$-div\rbrack \lbrack -S$|$-L$|$-M\rbrack \lbrack -P\rbrack \lbrack -prefix 001\rbrack  x y]
  if used without a filename, the information is read from results/mcphas.* res
 ults/mcdisp.*

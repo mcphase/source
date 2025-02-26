@@ -108,8 +108,7 @@ bool ic1ion_module::IMcalc(Matrix &Jret,          // Output field of single ion 
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
                       char *sipffilename,// Single ion properties filename
                       Vector &lnZ,        // Output scalar logarithm of partition function
-                      Vector &U,          // Output scalar internal energy 
-                      ComplexMatrix &Pst) // Parameter Storage matrix (initialized in Paramterer_storage_init)                                          
+                      Vector &U)          // Output scalar internal energy 
 { expJ(mfmat,Jret,T,Hxc,Hext,lnZ,U);
 return true;
 }
@@ -122,8 +121,7 @@ bool ic1ion_module::Icalc(Vector &Jret,          // Output single ion momentum v
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
                       char *sipffilename,// Single ion properties filename
                       double &lnZ,        // Output scalar logarithm of partition function
-                      double &U,          // Output scalar internal energy 
-                      ComplexMatrix &Pst) // Parameter Storage Matrix                                         
+                      double &U)         // Output scalar internal energy 
 { expJ(mfmat,Jret,T,Hxc,Hext,lnZ,U);
   return true;
 }
@@ -259,9 +257,8 @@ bool ic1ion_module::mcalc(Vector &mom,        // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Parameter Storage                                          
-{  Vector J(1,6); 
+                      char *sipffilename)// Single ion properties filename
+ {  Vector J(1,6); 
    double  lnZ, U;
    expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
    mom(1)=GS*J(1)+J(4);
@@ -276,8 +273,7 @@ bool ic1ion_module::mMcalc(Matrix &mom,        // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Parameter Storage                                     
+                      char *sipffilename)// Single ion properties filename
 {  Matrix J(1,6,1,T.Hi()); 
    Vector lnZ(1,T.Hi()), U(1,T.Hi());
    expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
@@ -296,8 +292,7 @@ bool ic1ion_module::Lcalc(Vector &L,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Parameter Storage                                    
+                      char *sipffilename)// Single ion properties filename
 {  Vector J(1,6); 
    double  lnZ, U;
    expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
@@ -313,8 +308,7 @@ bool ic1ion_module::LMcalc(Matrix &L,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Parameter Storage                                                   
+                      char *sipffilename)// Single ion properties filename
 {  Matrix J(1,6,1,T.Hi()); 
   Vector lnZ(1,T.Hi()), U(1,T.Hi());
    expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
@@ -334,8 +328,7 @@ bool ic1ion_module::Scalc(Vector &S,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Parameter Storage                                               
+                      char *sipffilename)// Single ion properties filename
 {  Vector J(1,6); 
    double  lnZ, U;
    expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
@@ -351,8 +344,7 @@ bool ic1ion_module::SMcalc(Matrix &S,          // Output magnetic moment (mub)
                       Vector &Hext,       // Input vector of external field (T) 
  /* Not Used */       double &g_J,   // Input Lande g-factor
  /* Not Used */       Vector & ABC,   // Input vector of parameters from single ion property file
-                      char *sipffilename,// Single ion properties filename
-                      ComplexMatrix &Pst) // Parameter Storage                                                   
+                      char *sipffilename)// Single ion properties filename
 {  Matrix J(1,6,1,T.Hi()); 
    Vector lnZ(1,T.Hi()), U(1,T.Hi());
    expJ(mfmat,J,T,Hxc,Hext,lnZ,U);
@@ -803,8 +795,7 @@ bool ic1ion_module::chargedensity_coeff(
                       Vector &Hext,        // Input vector of external field (T) 
  /* Not Used */       double &g_J,    // Input Lande g-factor
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
-                      char *sipffilename, // Single ion properties filename
-                      ComplexMatrix &Pst)  // Input/output eigenstate matrix (initialized in parstorage)
+                      char *sipffilename) // Single ion properties filename
 {
    Vector moments(1,51); 
    double lnZ, U;
@@ -869,8 +860,7 @@ bool ic1ion_module::spindensity_coeff(Vector &J,          // Output single ion m
                       Vector &Hext,        // Input vector of external field (T) 
  /* Not Used */       double &g_J,    // Input Lande g-factor
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
-                      char *sipffilename, // Single ion properties filename
-                      ComplexMatrix &Pst)  // Input/output eigenstate matrix (initialized in parstorage)
+                      char *sipffilename) // Single ion properties filename
 {  Vector gjmbH=sum_Hxc_Hext(Hxc,Hext);
    if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
      {// check if truncate is to be used and if Hamiltonian was already calculated 
@@ -916,8 +906,7 @@ bool ic1ion_module::orbmomdensity_coeff(Vector &J,        // Output single ion m
                       Vector &Hext,        // Input vector of external field (T) 
  /* Not Used */       double &g_J,    // Input Lande g-factor
  /* Not Used */       Vector & ABC,    // Input vector of parameters from single ion property file
-                      char *sipffilename, // Single ion properties filename
-                      ComplexMatrix &Pst)  // Input/output eigenstate matrix (initialized in parstorage)
+                      char *sipffilename) // Single ion properties filename
 { Vector gjmbH=sum_Hxc_Hext(Hxc,Hext);
 
   if(pars.truncate_level!=1)     // Uses the eigenvectors of the single ion Hamiltonian to truncate the matrix
