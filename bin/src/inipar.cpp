@@ -179,22 +179,15 @@ return 0;
 // print user defined column headers
 void inipar::print_usrdefcolhead(FILE *fout,char * str)
 {fprintf(fout,"#");
- int i;
- for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%i%*s",i,(int)strlen(colhead[colcod[i]]),"");
- char *t;size_t n;
- for(t=str;t[0]!='\0';t+=n)
- {
- //find first nonspace character
- n= strspn(t," \t"); //printf("%i %i\n",n,t);
- fprintf(fout,"%*s",(int)n,"");
- // next - find until a space occurs
- t+=n;n=strcspn(t," \t");
- if(t[n]!='\0')fprintf(fout,"%2.i%*s",i,(int)(n-2),""); // fill the corresponding space with number and spaces
- ++i;
-}
- fprintf(fout,"\n#");
- for(i=1;i<=usrdefcols[0];++i)fprintf(fout,"%s ",colhead[colcod[i]]); 
- fprintf(fout,"%s\n",str);
+ int i;char header [MAXNOFCHARINLINE];header[0]='\0';
+ for(i=1;i<=usrdefcols[0];++i)
+  {for(int j=0;j<strlen(colhead[colcod[i]]);++j)if(colhead[colcod[i]][j]!=' ')
+    snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%c",colhead[colcod[i]][j]); 
+  snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header)," ");
+  }
+ snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",str);
+ print_col_numbers(fout,header);
+ fprintf(fout,"\n#%s\n",header);
 }
 
 

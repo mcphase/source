@@ -186,7 +186,7 @@ cowan:
 cowanwin:   
 	cd bin/cowan && $(MAKE) cross64=1
 
-mcphase: vector cfield phonon 
+mcphase: vector cfield 
 	cd bin/src && $(MAKE)
 
 mcphasewin: vectorwin cfieldwin phononwin 

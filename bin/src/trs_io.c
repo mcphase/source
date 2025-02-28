@@ -186,6 +186,7 @@ int trs_write_next_line(FILE * fout,jjjpar & jjj,int & nt,int  i,int  j,int  k,i
       case 'S': jjj.dS1calc(T,mf,Hext,dm1,est);break;
       case 'L': jjj.dL1calc(T,mf,Hext,dm1,est);break;
       case 'Q': jjj.dMQ1calc(Q,T,dm1,d,est);break;
+      case 'P': jjj.dP1calc(T,mf,Hext,dm1,est);break;
       case 'p': jjj.dpel1calc(T,mf,Hext,dm1,est);break;
       case 'x': jjj.dspindensity_coeff1(1,T,mf,Hext,m1,est);break;
       case 'y': jjj.dspindensity_coeff1(2,T,mf,Hext,m1,est);break;

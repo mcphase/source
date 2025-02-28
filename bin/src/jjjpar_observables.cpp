@@ -16,6 +16,15 @@
 // 0. phonon displacement p in A
 /****************************************************************************/
 /****************************************************************************/
+int jjjpar::pcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{int j;
+  for(int i=1;i<=T.Hi();++i){
+           Vector m(mom.Column(i));
+           j=pcalc(m,T(i),Hxc,Hext,parstorage);
+           SetColumn(i,mom,m);}
+           return j;
+}
+
 int jjjpar::pcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
 { switch (module_type)
   {case kramer: 

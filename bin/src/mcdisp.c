@@ -22,48 +22,6 @@
 #include "../../version"
 #include "myev.c"
 
-void errexit() // type info and error exit 
-{     printf (" \n %s \n",MCDISPVERSION);
-    printf ("use as: mcdisp\n"); 
-    printf (" or as: mcdisp [options] [file]\n");
-    printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
-    printf ("Options:\n");
-    printf (" -jq           ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq largest evalue and eigenvector\n");
-    printf ("                   if energies are given for hkls in mcdisp.par, output file mcdisp_scaled.jq contains scaled parameters\n");
-    printf ("                   such that energy of first hkl set corresponds to highest eigenvalue of J(Q)\n");
-    printf (" -jqe          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
-    printf (" -max n        ... restrict single ion susceptibility to n lowest\n");
-    printf ("                   lying transitions starting from the ground state\n");
-    printf (" -minE E       ... an energy range may be given by minE and maxE: only\n");
-    printf (" -maxE E           single ion transitions within this energy range will \n");
-    printf ("                   be considered\n");
-    printf (" -r            ... refine energies\n");
-    printf (" -x            ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
-    printf (" -xa   stp     ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection (stp in deg)\n");
-    printf (" -xaf  az      ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n");
-    printf (" -d            ... calculate intensities in dipole approximation only\n");
-    printf (" -v            ... verbose\n");
-    printf (" -a            ... do not overwrite output files in results - append results\n");
-    printf (" -A            ... do not overwrite output files - compare hkl's to be calculated with existing list in mcdisp.qom and\n");
-    printf ("                   continue calculation at last matching q vector\n");
-    printf (" -c            ... only create single ion transition file ./results/mcdisp.trs and exit\n");
-    printf (" -t            ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
-    printf (" -ninit n      ... maximum number n of (low energy) initial states (single ion transitions)\n");
-    printf ("                   (not functional with all single ion modules)\n");
-    printf (" -pinit p      ... minimum populationnumber p of initial state (single ion transitions)\n");
-    printf ("                   in order to be considered (not functional with all single ion modules)\n");
-    printf (" -prefix 001   ... prefix for parameters to be read from mcdisp.par and used for creation of output files\n"
-            "                   (useful for running in parallel calculations for different zones: e.g. put in\n"
-            "                   mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
-            "                   and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
-            "                   output files, e.g. *mcdisp.qei  with appendfile)\n");
-    printf (" -ignore_non_hermitian_matrix_error   ... ignores error when energies get complex due to unphysical mf groundstate\n");
-    printf ("\n");
-    printf ("Note: files which must be in current directory -\n");
-    printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
-      exit (EXIT_FAILURE);
-} 
-
 int index_s(int i,int j,int k,int l, int t, const mdcf & md, const inimcdis & ini)
 {int s=0,i1,j1,k1;
 // calculates the index of the Matrix A given 
@@ -85,8 +43,6 @@ int index_s(int i,int j,int k,int l, int t, const mdcf & md, const inimcdis & in
  s+=md.baseindex(i,j,k,l,t);
  return s;
 }
-
-
 
 #ifdef _THREADS
 #define _THREADS_JSSS 1
@@ -125,6 +81,7 @@ typedef struct{
    ComplexMatrix **Eorbmomdensity;mfcf  **qod_real, **qod_imag;
    ComplexMatrix **Ephonon;mfcf  **qep_real, **qep_imag;
    ComplexMatrix **Emagmom;mfcf  **qem_real, **qem_imag;
+   ComplexMatrix **Epel;mfcf  **qpe_real, **qpe_imag;
    ComplexMatrix **Espin;mfcf  **qes_real, **qes_imag;
    ComplexMatrix **Eorbmom;mfcf  **qel_real, **qel_imag;
    ComplexMatrix **ch;
@@ -138,12 +95,13 @@ typedef struct{
 } intcalcapr_thread_data;
 class intcalcapr_input { public:
    int thread_id;
-   int dimA, level, do_verbose,calc_rixs,do_phonon;
+   int dimA, level, do_verbose,calc_rixs,calc_Xel,do_phonon;
    double  En,intensity, intensitybey, intensityP, QQ;
    double epsilon; int iE,Estp;
-   intcalcapr_input(int _dimA, int _tid, int _level, int _doverb, int _calcrixs,int _do_phonon, double _En)
+   intcalcapr_input(int _dimA, int _tid, int _level, int _doverb, int _calcrixs,int _calcXel,int _do_phonon, double _En)
    { 
-      thread_id = _tid; dimA = _dimA; level = _level; do_verbose = _doverb;calc_rixs= _calcrixs, do_phonon=_do_phonon; En = _En;
+      thread_id = _tid; dimA = _dimA; level = _level; do_verbose = _doverb;calc_rixs= _calcrixs;
+      calc_Xel=_calcXel;do_phonon=_do_phonon; En = _En;
    }
 };
 // ----------------------------------------------------------------------------------- //
@@ -393,7 +351,7 @@ void rottouvw(ComplexMatrix & chi,inimcdis & ini,Vector & abc,int & counter)
 
 // *******************************************************************************************
 // procedure to calculate the dispersion
-void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do_gobeyond,
+void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int calc_Xel,int do_phonon, int do_gobeyond,
               int do_Erefine,int do_jqfile,int do_createtrs,int do_readtrs, int do_verbose,int do_ignore_non_hermitian_matrix_error,
               int maxlevels,double minE,double maxE,double ninit,double pinit,double epsilon, const char * filemode)
 { int i,j,k,l,ll,s,ss,i1,i2,j1,j2,k1,k2,l1,l2,t1,t2,b,bb,m,tn;
@@ -409,6 +367,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   FILE * foutqel=NULL;
   FILE * foutqsd=NULL;
   FILE * foutqod=NULL;
+  FILE * foutqpe=NULL;
   FILE * fout1=NULL;
   FILE * foutds=NULL;
   FILE * foutdstot=NULL;
@@ -446,6 +405,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int do_phonon, int do
   ComplexVector spindensity_coeff1(1,3*SPINDENS_EV_DIM);
   ComplexVector orbmomdensity_coeff1(1,3*ORBMOMDENS_EV_DIM);
   ComplexVector magmom_coeff1(1,MAGMOM_EV_DIM);
+  ComplexVector pel_coeff1(1,PEL_EV_DIM);
   ComplexVector spin_coeff1(1,SPIN_EV_DIM);
   ComplexVector orbmom_coeff1(1,ORBMOM_EV_DIM);
   ComplexVector phonon_coeff1(1,PHONON_EV_DIM);
@@ -554,6 +514,7 @@ ComplexMatrix Echargedensity(1,dimA,1,CHARGEDENS_EV_DIM);Echargedensity=0;
 ComplexMatrix Espindensity(1,dimA,1,3*SPINDENS_EV_DIM);Espindensity=0;
 ComplexMatrix Eorbmomdensity(1,dimA,1,3*ORBMOMDENS_EV_DIM);Eorbmomdensity=0;
 ComplexMatrix Ephonon(1,dimA,1,PHONON_EV_DIM);Ephonon=0;
+ComplexMatrix Epel(1,dimA,1,PEL_EV_DIM);Epel=0;
 ComplexMatrix Emagmom(1,dimA,1,MAGMOM_EV_DIM);Emagmom=0;
 ComplexMatrix Espin(1,dimA,1,SPIN_EV_DIM);Espin=0;
 ComplexMatrix Eorbmom(1,dimA,1,ORBMOM_EV_DIM);Eorbmom=0;
@@ -614,6 +575,9 @@ if(ini.calculate_phonon_oscillation){
 if(ini.calculate_magmoment_oscillation){
    if((*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,magmom_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,MAGMOM_EV_DIM,magmom_coeff1,md,nn,ini,Emagmom);}
+if(ini.calculate_pel_oscillation){
+   if((*inputpars.jjj[l]).dpel1calc(ini.T,mf,ini.Hext,pel_coeff1,md.est(i,j,k,l))!=0)
+       fillE(jmin,i,j,k,l,PEL_EV_DIM,pel_coeff1,md,nn,ini,Epel);}
 if(ini.calculate_spinmoment_oscillation){
    if((*inputpars.jjj[l]).dS1calc(ini.T,mf,ini.Hext,spin_coeff1,md.est(i,j,k,l))!=0)
        fillE(jmin,i,j,k,l,SPIN_EV_DIM,spin_coeff1,md,nn,ini,Espin);}
@@ -754,7 +718,7 @@ fprintf(stdout,"\n");
        thrdat.q = q; thrdat.thread_id = -1;       
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
    {
-      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
+      tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,calc_Xel,do_phonon,0.); 
       thrdat.J[ithread] = &J;
      // thrdat.J[ithread] = new jq(J);
       tin[ithread]->dimA=0; 
@@ -1092,6 +1056,8 @@ if (do_jqfile){
              mfcf qep_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PHONON_EV_DIM);
              mfcf qem_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
              mfcf qem_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
+             mfcf qpe_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PEL_EV_DIM);
+             mfcf qpe_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PEL_EV_DIM);
              mfcf qes_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
              mfcf qes_imag(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
              mfcf qel_real(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,ORBMOM_EV_DIM);
@@ -1100,25 +1066,26 @@ if (do_jqfile){
   double DMDtotint=0,DMDtotintbey=0;
   ComplexMatrix chitot(1,3,1,3),chitotbey(1,3,1,3); chitot=0;chitotbey=0;
   if(do_verbose==1){fprintf(stdout,"\n#calculating  intensities approximately ...\n");}
-  intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,do_phonon,hkl,counter);
+  intcalc_ini(ini,inputpars,md,do_Erefine,epsilon,do_verbose,do_gobeyond,calc_rixs,calc_Xel,do_phonon,hkl,counter);
   qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);QQ=Norm(qijk);
   if(qincr==-1){qincr=0;qold=qijk;
               // for the first q vector in the loop we have to initialize files ...
               snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
-              if(calc_rixs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
+              if(calc_rixs||calc_Xel){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);}
                      else {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
                            snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);
                            if(do_Erefine==1){
                            snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma",ini.prefix);foutds = fopen_errchk (filename,filemode);printf("#saving %s\n",filename);                    
                                             }
                            }
-               writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,do_Erefine);                  
-               //------------observables-----------------------------------
+               writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,calc_Xel,do_Erefine);  
+              //------------observables-----------------------------------
                if(ini.calculate_chargedensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);}
                if(ini.calculate_spindensity_oscillation)  {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);}
                if(ini.calculate_orbmomdensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);}
                if(ini.calculate_phonon_oscillation)       {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);}
                if(ini.calculate_magmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);}
+               if(ini.calculate_pel_oscillation)          {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qpe",ini.prefix);foutqpe=evfileinit(filemode,filename,inputpars,"qpe",PEL_EV_DIM);}
                if(ini.calculate_spinmoment_oscillation)   {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
                if(ini.calculate_orbmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
                //-----------------------------------------------------------
@@ -1129,7 +1096,7 @@ if (do_jqfile){
               {lastcputime=std::clock();
               fclose(foutqom);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qom",ini.prefix);foutqom = fopen_errchk (filename,"a");
               fclose(foutqei);
-              if(calc_rixs){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,"a");}
+              if(calc_rixs||calc_Xel){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qex",ini.prefix);foutqei = fopen_errchk (filename,"a");}
                      else {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qei",ini.prefix);foutqei = fopen_errchk (filename,"a");
                            fclose(foutdstot);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.dsigma.tot",ini.prefix);foutdstot = fopen_errchk (filename,"a");
                           if(do_Erefine==1){
@@ -1143,6 +1110,7 @@ if (do_jqfile){
                if(ini.calculate_orbmomdensity_oscillation){fclose(foutqod);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=fopen_errchk (filename,"a");}
                if(ini.calculate_phonon_oscillation)       {fclose(foutqep);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=fopen_errchk (filename,"a");}
                if(ini.calculate_magmoment_oscillation)    {fclose(foutqem);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=fopen_errchk (filename,"a");}
+               if(ini.calculate_pel_oscillation)          {fclose(foutqpe);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qpe",ini.prefix);foutqpe=fopen_errchk (filename,"a");}
                if(ini.calculate_spinmoment_oscillation)   {fclose(foutqes);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=fopen_errchk (filename,"a");}
                if(ini.calculate_orbmoment_oscillation)    {fclose(foutqel);snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=fopen_errchk (filename,"a");}
                //-----------------------------------------------------------
@@ -1150,8 +1118,10 @@ if (do_jqfile){
 
              }
          qincr+=Norm(qijk-qold); 
-         writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqes,foutqel,
-                             ini,calc_rixs,do_Erefine,counter);
+         writehklblocknumber(foutqom,foutqei,foutdstot,foutds,foutqee,foutqsd,foutqod,foutqep,foutqem,foutqpe,foutqes,foutqel,
+                             ini,calc_rixs,calc_Xel,do_Erefine,counter);
+ 
+
                   ini.print_usrdefcols(foutqom,qijk,qincr,q,hkl,false);
                   for (i=1;i<=dimA;++i)fprintf (foutqom, " %4.4g ",myround(En(i)));
                   fprintf (foutqom, " > ");
@@ -1180,6 +1150,7 @@ if (do_jqfile){
                   thrdat.qod_real = new mfcf*[NUM_THREADS];          thrdat.qod_imag = new mfcf*[NUM_THREADS];
                   thrdat.qep_real = new mfcf*[NUM_THREADS];          thrdat.qep_imag = new mfcf*[NUM_THREADS];
                   thrdat.qem_real = new mfcf*[NUM_THREADS];          thrdat.qem_imag = new mfcf*[NUM_THREADS];
+                  thrdat.qpe_real = new mfcf*[NUM_THREADS];          thrdat.qpe_imag = new mfcf*[NUM_THREADS];
                   thrdat.qes_real = new mfcf*[NUM_THREADS];          thrdat.qes_imag = new mfcf*[NUM_THREADS];
                   thrdat.qel_real = new mfcf*[NUM_THREADS];          thrdat.qel_imag = new mfcf*[NUM_THREADS];
                   thrdat.chi      = new ComplexMatrix*[NUM_THREADS]; thrdat.chibey   = new ComplexMatrix*[NUM_THREADS];
@@ -1190,13 +1161,14 @@ if (do_jqfile){
                   thrdat.Eorbmomdensity       = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Ephonon       = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Emagmom       = new ComplexMatrix*[NUM_THREADS]; 
+                  thrdat.Epel         = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Espin       = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Eorbmom       = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.Tau      = new ComplexMatrix*[NUM_THREADS]; 
                   thrdat.hkl = hkl; thrdat.thread_id = -1;
                   for (ithread=0; ithread<NUM_THREADS; ithread++) 
                   {
-                     tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,En);
+                     tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,calc_Xel,do_phonon,En);
                      int dimchi=3,dimchibey=3;if(calc_rixs){dimchi=9;dimchibey=1;}
                      thrdat.chiPhon[ithread] = new ComplexMatrix(1,1,1,1);
                      thrdat.chi[ithread] = new ComplexMatrix(1,dimchi,1,dimchi);
@@ -1219,6 +1191,9 @@ if (do_jqfile){
                      if(ini.calculate_magmoment_oscillation){thrdat.qem_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
                      thrdat.qem_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,MAGMOM_EV_DIM);
                      thrdat.Emagmom[ithread] = new ComplexMatrix(1,dimA,1,MAGMOM_EV_DIM); *thrdat.Emagmom[ithread]=Emagmom;}
+                     if(ini.calculate_pel_oscillation){thrdat.qpe_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PEL_EV_DIM);
+                     thrdat.qpe_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,PEL_EV_DIM);
+                     thrdat.Epel[ithread] = new ComplexMatrix(1,dimA,1,PEL_EV_DIM); *thrdat.Epel[ithread]=Epel;}
                      if(ini.calculate_spinmoment_oscillation){thrdat.qes_real[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
                      thrdat.qes_imag[ithread] = new mfcf(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),ini.mf.nofatoms,SPIN_EV_DIM);
                      thrdat.Espin[ithread] = new ComplexMatrix(1,dimA,1,SPIN_EV_DIM); *thrdat.Espin[ithread]=Espin;}
@@ -1283,6 +1258,8 @@ if (do_jqfile){
                      #define qep_imag (*thrdat.qep_imag[ithread])
                      #define qem_real (*thrdat.qem_real[ithread])
                      #define qem_imag (*thrdat.qem_imag[ithread])
+                     #define qpe_real (*thrdat.qpe_real[ithread])
+                     #define qpe_imag (*thrdat.qpe_imag[ithread])
                      #define qes_real (*thrdat.qes_real[ithread])
                      #define qes_imag (*thrdat.qes_imag[ithread])
                      #define qel_real (*thrdat.qel_real[ithread])
@@ -1310,15 +1287,31 @@ if (do_jqfile){
                                             qod_real,qod_imag,Eorbmomdensity,
                                             qep_real,qep_imag,Ephonon,
                                             qem_real,qem_imag,Emagmom,
+                                            qpe_real,qpe_imag,Epel,
                                             qes_real,qes_imag,Espin,
                                             qel_real,qel_imag,Eorbmom,
-                                            dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,calc_rixs,do_phonon,QQ);
+                                            dimA,Tau,i,En(i),ini,inputpars,hkl,md,do_verbose,calc_rixs,calc_Xel,do_phonon,QQ);
                      }
                      else
                      {ints(i)=-1;intsbey(i)=-1;intsP(i)=-1;
                      }
 #endif
                       //printout rectangular function to .mcdisp.
+                     if(calc_Xel){
+                      if (En(i)==-DBL_MAX) {
+                              fprintf (foutqei, "#| "); 
+                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
+                              fprintf (foutqei, "%4.4g%si%-4.4g    ",myround(real(Enc(i))),(imag(Enc(i))<0)?"-":"+",myround(fabs(imag(Enc(i)))));
+                              } else {
+                              ini.print_usrdefcols(foutqei,qijk,qincr,q,hkl,false);
+                              fprintf (foutqei, "%4.4g           ",myround(En(i)));
+                              }
+                       if (En(i)!=-DBL_MAX&&En(i)<=ini.emax&&En(i)>=ini.emin){
+                       fprintf(foutqei, " %4.4g ",ints(i));
+                      for(i1=1;i1<=3;++i1)for(j1=1;j1<=3;++j1) fprintf(foutqei," %4.4g %4.4g ",real(chi(i1,j1)),imag(chi(i1,j1)));
+                       }else {fprintf(foutqei, "-1     -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1\n");}                                   
+                     }
+                     else
 	             if(calc_rixs){
                           // determine Isp Ipp Ips Isp  from chi(9x9 matrix)
                          // here calculate azimuth dependence of I and maximize ....
@@ -1439,6 +1432,7 @@ if(ini.calculate_spindensity_oscillation)print_ev(foutqsd,i,ini,hkl,QQ,En,ints,i
 if(ini.calculate_orbmomdensity_oscillation)print_ev(foutqod,i,ini,hkl,QQ,En,ints,intsbey,intsP,qod_real,qod_imag,q);
 if(ini.calculate_phonon_oscillation)print_ev(foutqep,i,ini,hkl,QQ,En,ints,intsbey,intsP,qep_real,qep_imag,q);
 if(ini.calculate_magmoment_oscillation)print_ev(foutqem,i,ini,hkl,QQ,En,ints,intsbey,intsP,qem_real,qem_imag,q);
+if(ini.calculate_pel_oscillation)print_ev(foutqpe,i,ini,hkl,QQ,En,ints,intsbey,intsP,qpe_real,qpe_imag,q);
 if(ini.calculate_spinmoment_oscillation)print_ev(foutqes,i,ini,hkl,QQ,En,ints,intsbey,intsP,qes_real,qes_imag,q);
 if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,intsbey,intsP,qel_real,qel_imag,q);
                           }
@@ -1458,6 +1452,8 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   #undef qep_imag
                   #undef qem_real
                   #undef qem_imag
+                  #undef qpe_real
+                  #undef qpe_imag
                   #undef qes_real
                   #undef qes_imag
                   #undef qel_real
@@ -1473,6 +1469,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                      if(ini.calculate_orbmomdensity_oscillation){delete thrdat.qod_real[ithread]; delete thrdat.qod_imag[ithread];delete thrdat.Eorbmomdensity[ithread];} 
                      if(ini.calculate_phonon_oscillation){delete thrdat.qep_real[ithread]; delete thrdat.qep_imag[ithread];delete thrdat.Ephonon[ithread]; }
                      if(ini.calculate_magmoment_oscillation){delete thrdat.qem_real[ithread]; delete thrdat.qem_imag[ithread];delete thrdat.Emagmom[ithread];} 
+                     if(ini.calculate_pel_oscillation){delete thrdat.qpe_real[ithread]; delete thrdat.qpe_imag[ithread];delete thrdat.Epel[ithread];} 
                      if(ini.calculate_spinmoment_oscillation){delete thrdat.qes_real[ithread]; delete thrdat.qes_imag[ithread];delete thrdat.Espin[ithread]; }
                      if(ini.calculate_orbmoment_oscillation){delete thrdat.qel_real[ithread]; delete thrdat.qel_imag[ithread];delete thrdat.Eorbmom[ithread]; }
                     // delete thrdat.Tau[ithread];
@@ -1483,6 +1480,7 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.Eorbmomdensity;  
                   delete[] thrdat.Ephonon;  
                   delete[] thrdat.Emagmom;  
+                  delete[] thrdat.Epel;  
                   delete[] thrdat.Espin;  
                   delete[] thrdat.Eorbmom;  
                   delete[] thrdat.Tau;
@@ -1493,10 +1491,11 @@ if(ini.calculate_orbmoment_oscillation)print_ev(foutqel,i,ini,hkl,QQ,En,ints,int
                   delete[] thrdat.qod_real; delete[] thrdat.qod_imag; 
                   delete[] thrdat.qep_real; delete[] thrdat.qep_imag; 
                   delete[] thrdat.qem_real; delete[] thrdat.qem_imag; 
+                  delete[] thrdat.qpe_real; delete[] thrdat.qpe_imag; 
                   delete[] thrdat.qes_real; delete[] thrdat.qes_imag; 
                   delete[] thrdat.qel_real; delete[] thrdat.qel_imag; 
 #endif
-if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false);
+if(!calc_rixs&&!calc_Xel){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false);
                fprintf (foutdstot, "%4.4g %4.4g",DMDtotint,DMDtotintbey);
                switch(ini.outS)
                          {case 0: break;
@@ -1558,7 +1557,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false);
 
 //*********************************************************************		    
    // do refinement of energies by output of scattering cross section vs enrgy transfer if required
-  if (do_Erefine==1&&!calc_rixs){double totint=0;
+  if (do_Erefine==1&&!calc_rixs&&!calc_Xel){double totint=0;
                 if(do_verbose==1){fprintf(stdout, "#refining calculation with exact calculation of energy dependence of scattering cross section\n");}
           snprintf(filename,MAXNOFCHARINLINE,"./results/.%smcdisp.dsigma",ini.prefix);foutds1 = fopen_errchk (filename,"w");
           fprintf (foutds1, "#{%s ",MCDISPVERSION);
@@ -1571,7 +1570,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false);
           thrdat.ch = new ComplexMatrix*[NUM_THREADS];                  
           thrdat.hkl = hkl; thrdat.q = q; thrdat.thread_id = -1;
           for (ithread=0; ithread<NUM_THREADS; ithread++) 
-          {  tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,do_phonon,0.); 
+          {  tin[ithread] = new intcalcapr_input(dimA,ithread,1,do_verbose,calc_rixs,calc_Xel,do_phonon,0.); 
              tin[ithread]->epsilon=fabs(epsilon); thrdat.J[ithread] = new jq(J);thrdat.md[ithread] = new mdcf(md,1);
              thrdat.ch[ithread] = new ComplexMatrix(1,md.nofcomponents,1,md.nofcomponents);
           }
@@ -1694,7 +1693,7 @@ if(!calc_rixs){ini.print_usrdefcols(foutdstot,qijk,qincr,q,hkl,false);
                      }  // do_Erefine
 //*********************************************************************		    
 
-   if(!calc_rixs)fprintf (foutdstot, "\n");              
+   if(!calc_rixs&&!calc_Xel)fprintf (foutdstot, "\n");              
    fprintf (foutqom, "\n");
    } // do jqfile
 } // next hkl
@@ -1755,7 +1754,7 @@ double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(k
      }
     else
      {
-      if(!calc_rixs){staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
+      if(!calc_rixs||!calc_Xel){staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(foutqei,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(stdout,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       if (do_Erefine==1){fclose(foutds);}
@@ -1769,6 +1768,7 @@ double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(k
                         if(ini.calculate_orbmomdensity_oscillation)fclose(foutqod);
                         if(ini.calculate_phonon_oscillation)fclose(foutqep);
                         if(ini.calculate_magmoment_oscillation)fclose(foutqem);
+                        if(ini.calculate_pel_oscillation)fclose(foutqpe);
                         if(ini.calculate_spinmoment_oscillation)fclose(foutqes);
                         if(ini.calculate_orbmoment_oscillation)fclose(foutqel);
                         
@@ -1781,7 +1781,7 @@ int main (int argc, char **argv)
 {std::clock_t startcputime = std::clock();
  int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
  int do_ignore_non_hermitian_matrix_error=0;
- int do_readtrs=0,calc_beyond=1,calc_rixs=0;
+ int do_readtrs=0,calc_beyond=1,calc_rixs=0,calc_Xel=0;
  char spinfile [MAXNOFCHARINLINE]; //default spin-configuration-input file
   snprintf(spinfile,MAXNOFCHARINLINE,"mcdisp.mf");
  const char * filemode="w";
@@ -1795,7 +1795,7 @@ int main (int argc, char **argv)
  fprintf(stderr,"#* reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
  fprintf(stderr,"#*            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
  fprintf(stderr,"#***********************************************************************\n\n");
-
+ inimcdis ini;
 
 //***************************************************************************************
 // check command line parameters 
@@ -1805,17 +1805,18 @@ for (i=1;i<=argc-1;++i){
 		                                                epsilon=strtod(argv[i+1],NULL);++i;
 							        fprintf(stdout,"#epsilon= %g\n",epsilon);
 				     }		
-     else {if(strcmp(argv[i],"-xaf")==0) {calc_rixs=3;calc_beyond=0; // rixs with azimuth fixed
+    else {if(strcmp(argv[i],"-xaf")==0) {calc_rixs=3;calc_beyond=0; // rixs with azimuth fixed
                                                   if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -xaf needs argument(s)\n");exit(EXIT_FAILURE);}
 		                                  epsilon=strtod(argv[i+1],NULL);++i; // use epsilon to convey azimuth
 						  fprintf(stdout,"#maximum number of single ion excitations taken into account (starting with lowest energy): %i\n",maxlevels);
 					         }
-      else {if(strcmp(argv[i],"-xa")==0) {calc_rixs=2;calc_beyond=0; // rixs with azimuth dependence in steps
+     else {if(strcmp(argv[i],"-xa")==0) {calc_rixs=2;calc_beyond=0; // rixs with azimuth dependence in steps
                                                   if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -xa needs argument(s)\n");exit(EXIT_FAILURE);}
 		                                  epsilon=strtod(argv[i+1],NULL);++i; // use epsilon to convey azimuth step
 						  fprintf(stdout,"#maximum number of single ion excitations taken into account (starting with lowest energy): %i\n",maxlevels);
 					         }
-       else {if(strcmp(argv[i],"-x")==0) {calc_rixs=1;calc_beyond=0;}  // rixs without azimuth dep .. Irixs max only
+      else {if(strcmp(argv[i],"-x")==0) {calc_rixs=1;calc_beyond=0;}  // rixs without azimuth dep .. Irixs max only
+       else {if(strcmp(argv[i],"-Xel")==0) {calc_Xel=1;calc_beyond=0;}  // rixs without azimuth dep .. Irixs max only
         else {if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
          else {if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
           else {if(strcmp(argv[i],"-jqe")==0) {do_jqfile=2;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
@@ -1851,7 +1852,7 @@ for (i=1;i<=argc-1;++i){
                       else {if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
-                       else {if(strncmp(argv[i],"-h",2)==0) {errexit();}
+                       else {if(strncmp(argv[i],"-h",2)==0) {ini.helpexit();}
               	       else{strcpy(spinfile,argv[i]);}
                           } // help
                          } // do_ignore_non_hermitian_matrix_error
@@ -1867,18 +1868,21 @@ for (i=1;i<=argc-1;++i){
 	       } // -t
               } // -jqe
  	     } // -jq 
-           }	
-          }
-         }
-        }
-      } // xaf
-    }
+           }// -d	
+          } // -Xel
+         } // -x
+        } // -xa
+      } // -xaf
+    } // -r
+   } // for i in args
   // as class load  parameters from file
   par inputpars("./mcphas.j",do_verbose);
+  ini.load("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc);
 
-  inimcdis ini("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc);
+
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
-  if(do_Erefine&&calc_rixs){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf\n");exit(EXIT_FAILURE);}
+  if(calc_rixs&&calc_Xel){fprintf(stderr,"Error mcdisp: Options -Xel and -x -xa -xaf cannnot be used simultaneously, please use only one of these options\n");exit(EXIT_FAILURE);}
+  if(do_Erefine&&(calc_rixs||calc_Xel)){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf -Xel\n");exit(EXIT_FAILURE);}
   if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}
   if(ini.nofatoms!=inputpars.cs.nofatoms){fprintf(stderr,"Error mcdisp: number of atoms in crystal unit cell read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofatoms,inputpars.cs.nofatoms);exit(EXIT_FAILURE);}
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);  inputpars.save_sipfs(prefix); 
@@ -1886,7 +1890,7 @@ for (i=1;i<=argc-1;++i){
 
 int do_phonon=1;
 //calculate dispersion and save to files
-dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,do_ignore_non_hermitian_matrix_error,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
+dispcalc(ini,inputpars,calc_rixs,calc_Xel,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_createtrs,do_readtrs,do_verbose,do_ignore_non_hermitian_matrix_error,maxlevels,minE,maxE,ninit,pinit,epsilon,filemode);
   
  printf("#RESULTS saved in directory ./results/  - files:\n");
   if(do_jqfile){
@@ -1898,7 +1902,7 @@ dispcalc(ini,inputpars,calc_rixs,do_phonon,calc_beyond,do_Erefine,do_jqfile,do_c
    printf("#  %smcdisp.dsigma      - (option -r) T,H,qvector,E vs intensity obtained from dyn susz\n",ini.prefix);
       }
    printf("#  %smcdisp.qom  - T,H,qvector vs all mode energies in one line\n",ini.prefix);
-   printf("#  %smcdisp.qee,qsd,qod,qep,qem,qes,qel  - T,H,qvector,E vs extended eigenvectors (more components to plot observables.)\n",ini.prefix);
+   printf("#  %smcdisp.qee,qsd,qod,qep,qem,qes,qel,qpe  - T,H,qvector,E vs extended eigenvectors (more components to plot observables.)\n",ini.prefix);
    printf("#  %smcdisp.trs  - single ion transitions used\n",ini.prefix);
    }
    printf("#  _%smcdisp.par - input parameters read from mcdisp.par\n",ini.prefix);

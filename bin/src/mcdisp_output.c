@@ -64,10 +64,19 @@ void writeheader(par & inputpars,FILE * fout)
  }
 }
 
-void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,par & inputpars,inimcdis & ini,int & calc_rixs,int & do_Erefine)                   
+void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
+    par & inputpars,inimcdis & ini,int & calc_rixs,int & calc_Xel,int & do_Erefine)                   
 {//open output files and write headers for output files mcdisp.qei qex qom dsigma.tot dsigma
   fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
-
+ if(calc_Xel){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
+               writeheader(inputpars,foutqei);
+               fprintf(foutqei,"#electrical susceptibility Xel(Q,omega)\n");
+               fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
+             ini.print_usrdefcolhead(foutqei);
+             fprintf (foutqei,"energy[meV] " 
+                              "Trace(Xel'') Xelxxreal(Q,omega) Xelxximag Xelxyreal Xelxyimag Xelxzreal Xelxzimag ...Xelzzimag(|e|A^-2/kVmm^-2)\n");
+  }
+ else
  if(calc_rixs){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
                writeheader(inputpars,foutqei);
                fprintf(foutqei,"#RIXS intensity components:azimuth is defined as in Longfield et al. PRB 66 054417 (2002)\n"
@@ -145,11 +154,11 @@ void writehklblocknumber(FILE * jqfile,inimcdis & ini,int & counter)
  }                    
 //****************************************************************************************************************************
 void writehklblocknumber(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
-                    FILE * foutqee,FILE * foutqsd,FILE * foutqod,FILE * foutqep,FILE * foutqem,FILE * foutqes,FILE * foutqel,
-                    inimcdis & ini,int & calc_rixs,int & do_Erefine,int & counter)
+                    FILE * foutqee,FILE * foutqsd,FILE * foutqod,FILE * foutqep,FILE * foutqem,FILE * foutqpe,FILE * foutqes,FILE * foutqel,
+                    inimcdis & ini,int & calc_rixs,int & calc_Xel,int & do_Erefine,int & counter)
  {  if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
                        {fprintf(foutqei,"#!hklblock_number=%i\n",is);fprintf(foutqom,"#!hklblock_number=%i\n",is);                                       
-                        if(!calc_rixs){fprintf(foutdstot,"#!hklblock_number=%i\n",is);
+                        if(!calc_rixs&&!calc_Xel){fprintf(foutdstot,"#!hklblock_number=%i\n",is);
                                        if (do_Erefine==1){fprintf(foutds,"#!hklblock_number=%i\n",is);}
                                       }
                         if(ini.calculate_chargedensity_oscillation)fprintf(foutqee,"#!hklblock_number=%i\n",is);
@@ -157,6 +166,7 @@ void writehklblocknumber(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * f
                         if(ini.calculate_orbmomdensity_oscillation)fprintf(foutqod,"#!hklblock_number=%i\n",is);
                         if(ini.calculate_phonon_oscillation)fprintf(foutqep,"#!hklblock_number=%i\n",is);
                         if(ini.calculate_magmoment_oscillation)fprintf(foutqem,"#!hklblock_number=%i\n",is);
+                        if(ini.calculate_pel_oscillation)fprintf(foutqpe,"#!hklblock_number=%i\n",is);
                         if(ini.calculate_spinmoment_oscillation)fprintf(foutqes,"#!hklblock_number=%i\n",is);
                         if(ini.calculate_orbmoment_oscillation)fprintf(foutqel,"#!hklblock_number=%i\n",is);
                         }

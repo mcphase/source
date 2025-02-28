@@ -63,7 +63,7 @@ jj/=sps.n();
 
 
 
-double evalfe(double & U,double & Eel,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
+double evalfe(double & U,double & Eelastic,spincf & sps,mfcf & mf,inipar & ini, par & inputpars,double & T, Vector * lnzi, Vector * ui)
 // calculate free energy fe and energy u
 { Vector d1(1,inputpars.cs.nofcomponents),meanfield(1,inputpars.cs.nofcomponents);
 int i,j,k,l,m1,s;double fe;
@@ -86,19 +86,19 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
 fe/=(double)sps.n(); //normalise to primitiv crystal unit cell
 U/=(double)sps.n();//fprintf(stdout,"fe=%g\n",fe);
 
-if(ini.doeps){Eel=sps.epsilon*inputpars.Cel*sps.epsilon;
-              fe+=Eel;U+=Eel;              
+if(ini.doeps){Eelastic=sps.epsilon*inputpars.Cel*sps.epsilon;
+              fe+=Eelastic;U+=Eelastic;              
               fe-=sps.epsilon*mf.epsmf;
               U-=sps.epsilon*mf.epsmf;
 } // add elastic energy and magnetoelastic energy
 
 fe/=sps.nofatoms; //normalise to meV/ion (ion=subsystem)
 U/=sps.nofatoms;
-Eel/=sps.nofatoms;
+Eelastic/=sps.nofatoms;
 return fe;
  }
 
-double fecalc(double & U, double & Eel, int & r,double & spinchange,Vector Hex,double T,inipar & ini,par & inputpars,
+double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector Hex,double T,inipar & ini,par & inputpars,
              spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs)
 {/*on input:
     T		Temperature[K]
@@ -116,6 +116,7 @@ double fecalc(double & U, double & Eel, int & r,double & spinchange,Vector Hex,d
 
  double fe,dE; // free energy
  Matrix GG(1,6,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
+ Vector sigma(1,6); // external stress tensor in Voigt notation and units meV/pVol
  Vector diff(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
  Vector moment(1,inputpars.cs.nofcomponents), d1(1,inputpars.cs.nofcomponents),meanfield(1,inputpars.cs.nofcomponents);
                  Matrix II(1,inputpars.cs.nofcomponents,1,inputpars.cs.nofcomponents);
@@ -171,6 +172,15 @@ for(i=1;i<=6;++i)
             
 // initialize epsilon mean field to zero
   mf.epsmf=0;
+
+// set stress tensor in units of meV/primitive unit Cell, i.e. convert input strain s1-s6 from GPa to meV/pVol
+// 1GPa=1e+9Pa=1e+9J/m^3
+// 1meV= 1.60218e-22 J
+// 1 A= 1e-10 m
+// 1meV/pVol=1.60218e-22 J/A^3 x  A^3/pVol = 1.60218e+8  J/m^3 x  A^3/pVol = 1.60218e-1 GPa x  A^3/pVol
+for(i=1;i<=6;++i)sigma(i)=Hex(6+i);
+sigma*=inputpars.cs.pVol()/1.60218e-1;
+
 }
 
 // coupling coefficients jj[](a-c) berechnen
@@ -447,7 +457,7 @@ mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssumy;
 mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumx;                    
                }}
 
-                sps.epsilon=inputpars.CelInv*mf.epsmf;
+                sps.epsilon=inputpars.CelInv*(mf.epsmf+sigma);
                }
 
   //treat program interrupts
@@ -482,7 +492,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
    strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
      fin_coq = fopen_errchk (outfilename, "a");
-     fe=evalfe(U,Eel,sps,mf,ini,inputpars, T,lnzi,ui);
+     fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
 
   #ifndef _THREADS
    fprintf(fin_coq,"%i %g %g %g %g %g %g\n",(int)time(0),log((double)r)/log(10.0),log(sta)/log(10.0),log(spinchange+1e-10)/log(10),stepratio,100*(double)ini.successrate/ini.nofcalls,fe);
@@ -510,7 +520,7 @@ if (r>ini.maxnofmfloops)
 }
 
 //printf ("hello end of selfconsistency loop after %i iterations\n",r);
-fe=evalfe(U,Eel,sps,mf,ini,inputpars, T,lnzi,ui);
+fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
 
 //for(int ec=1;ec<=6;++ec)printf("mf.eps(%i)=%g ",ec,mf.epsmf(ec));printf("\nsl=%i\n",sl);
 //myPrintMatrix(stdout,III);

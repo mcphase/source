@@ -9,6 +9,24 @@
 #include<cfloat>
 #endif
 
+
+// given a string str with headers of columns, print column numbers to fout
+void print_col_numbers(FILE * fout,char * str)
+{char *t;size_t n;int i=1;
+ for(t=str;t[0]!='\0';t+=n)
+ {
+ //find first nonspace character
+ n= strspn(t," \t"); //printf("%i %i\n",n,t);
+ fprintf(fout, "%*s",(int)n,"");
+ // next - find until a space occurs
+ t+=n;n=strcspn(t," \t");
+ if(t[n]!='\0'){fprintf(fout, "%i",i);
+                if(i<10&&n>1)fprintf(fout,"%*s",(int)(n-1),""); // fill the corresponding space with number and spaces
+                if(i>9&&n>2)fprintf(fout,"%*s",(int)(n-2),""); // fill the corresponding space with number and spaces
+               } ++i;
+ }
+}
+
 //The strnstr() function locates the first occurrence of the null-terminated string find in the string s, 
  //where not more than len characters are searched.  Characters that
 //     appear after a ‘\0’ character are not searched.  Since the strnstr() function is a FreeBSD specific API, it should only be used when portability is not a concern.
@@ -734,7 +752,6 @@ Matrix rtoijk(1,3,1,3); // define transformation matrix to calculate components 
                            // r1 r2 and r3 with respect to the ijk coordinate system
                            //defined by  j||b, k||(a x b) and i normal to k and j
 get_abc_in_ijk(rtoijk,abc);
-
 rijk=rtoijk*rdadbdc;
 }
 

@@ -35,7 +35,7 @@ perl -l -n -e "unlink" reduce_unitcell_sipf.del
 
 # 0) distribute C-C bonding electron equally on both C, put Ni-C bond electron on Ni, Tm-C on Tm, Tm-Ni on Tm
 # 
- reduce_unitcell -delatoms 5:3+-0.5:4+-0.5,6:2+-1,7:2+-1,8:2+-1,9:2+-1,10:1+-1,11:1+-1,12:1+-1,13:1+-1,14:1+-1,15:1+-1,16:1+-1,17:1+-1 results/makenn.j > mnn.j
+ reduce_unitcell -delatoms 5:3+--0.5:4+--0.5,6:2+--1,7:2+--1,8:2+--1,9:2+--1,10:1+--1,11:1+--1,12:1+--1,13:1+--1,14:1+--1,15:1+--1,16:1+--1,17:1+--1 results/makenn.j > mnn.j
 
 getvalue.pl -c -2.376716e-01 0 7 1 0 mnn.j
 

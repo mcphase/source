@@ -39,24 +39,35 @@ void cextract(char * instr)
    if(abc(5)==90)extract(instr, "beta", abc(5));
    if(abc(6)==90)extract(instr, "gamma", abc(6));
     extract(instr, "r1x", r(1,1));
-    extract(instr, "r1y", r(1,2));
-    extract(instr, "r1z", r(1,3));
-    extract(instr, "r2x", r(2,1));
+    extract(instr, "r1y", r(2,1));
+    extract(instr, "r1z", r(3,1));
+    extract(instr, "r2x", r(1,2));
     extract(instr, "r2y", r(2,2));
-    extract(instr, "r2z", r(2,3));
-    extract(instr, "r3x", r(3,1));
-    extract(instr, "r3y", r(3,2));
+    extract(instr, "r2z", r(3,2));
+    extract(instr, "r3x", r(1,3));
+    extract(instr, "r3y", r(2,3));
     extract(instr, "r3z", r(3,3));
     extract(instr, "r1a", r(1,1));
-    extract(instr, "r1b", r(1,2));
-    extract(instr, "r1c", r(1,3));
-    extract(instr, "r2a", r(2,1));
+    extract(instr, "r1b", r(2,1));
+    extract(instr, "r1c", r(3,1));
+    extract(instr, "r2a", r(1,2));
     extract(instr, "r2b", r(2,2));
-    extract(instr, "r2c", r(2,3));
-    extract(instr, "r3a", r(3,1));
-    extract(instr, "r3b", r(3,2));
+    extract(instr, "r2c", r(3,2));
+    extract(instr, "r3a", r(1,3));
+    extract(instr, "r3b", r(2,3));
     extract(instr, "r3c", r(3,3));
  
+}
+
+ // Volume of primitive unit cell in Angstroem^3
+double pVol()
+{
+    Matrix prim_ijk(1,3,1,3);
+   dadbdc2ijk(prim_ijk,r,abc);
+   // transforms primitive lattice vector matrix r given in terms of abc
+   // to ijk coordinate system
+    double pVol=prim_ijk.Column(1)*crossp(prim_ijk.Column(2),prim_ijk.Column(3));
+return pVol;
 }
 
 void tostring(char * str,size_t t)
@@ -67,9 +78,9 @@ void print(FILE * f)
 }
 
 void print_r(FILE *fout)
-{fprintf(fout,"                 r1= %5.3ga + %5.3gb + %5.3gc\n", r(1,1), r(1,2), r(1,3));
-fprintf(fout,"                 r2= %5.3ga + %5.3gb + %5.3gc\n", r(2,1), r(2,2), r(2,3));
-fprintf(fout,"                 r3= %5.3ga + %5.3gb + %5.3gc\n", r(3,1), r(3,2), r(3,3));
+{fprintf(fout,"                 r1= %5.3ga + %5.3gb + %5.3gc\n",r(1,1), r(2,1), r(3,1));
+fprintf(fout,"                 r2= %5.3ga + %5.3gb + %5.3gc\n", r(1,2), r(2,2), r(3,2));
+fprintf(fout,"                 r3= %5.3ga + %5.3gb + %5.3gc\n", r(1,3), r(2,3), r(3,3));
 }
 void print_mcdiff_in_header(FILE * fout,const char * program,int natcryst)
 {

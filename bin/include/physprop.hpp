@@ -23,7 +23,7 @@ double T; // temperature
 Vector m,mabc,H,Pel,Pelabc; // moment and H field and electrical polarisation
 double fe;
 double u; // free energy and mag energy per ion
-double Eel; // elastic energy per ion
+double Eelastic; // elastic energy per ion
 int nofatoms;
 int nofcomponents;
 

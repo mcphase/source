@@ -98,6 +98,52 @@ return 0;
  // class of initial parameters for program mcdisp
  // *************************************************************************
 
+
+void inimcdis::helpexit() // type info and error exit 
+{     printf (" \n %s \n",MCDISPVERSION);
+    printf ("use as: mcdisp\n"); 
+    printf (" or as: mcdisp [options] [file]\n");
+    printf ("  [file] ... input file with mean field set (default mcdisp.mf)\n");
+    printf ("Options:\n");
+    printf (" -jq           ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq largest evalue and eigenvector\n");
+    printf ("                   if energies are given for hkls in mcdisp.par, output file mcdisp_scaled.jq contains scaled parameters\n");
+    printf ("                   such that energy of first hkl set corresponds to highest eigenvalue of J(Q)\n");
+    printf (" -jqe          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
+    printf (" -max n        ... restrict single ion susceptibility to n lowest\n");
+    printf ("                   lying transitions starting from the ground state\n");
+    printf (" -minE E       ... an energy range may be given by minE and maxE: only\n");
+    printf (" -maxE E           single ion transitions within this energy range will \n");
+    printf ("                   be considered\n");
+    printf (" -r            ... refine energies\n");
+    printf (" -x            ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
+    printf (" -xa   stp     ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection (stp in deg)\n");
+    printf (" -xaf  az      ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n"
+            " -Xel          ... to calculate omega and Q dependent electrical susceptibility tensor\n"
+            "                   (for RAMAN and inelastic X-ray scattering intensity on phonons). \n"
+            );
+    printf (" -d            ... calculate intensities in dipole approximation only\n");
+    printf (" -v            ... verbose\n");
+    printf (" -a            ... do not overwrite output files in results - append results\n");
+    printf (" -A            ... do not overwrite output files - compare hkl's to be calculated with existing list in mcdisp.qom and\n");
+    printf ("                   continue calculation at last matching q vector\n");
+    printf (" -c            ... only create single ion transition file ./results/mcdisp.trs and exit\n");
+    printf (" -t            ... read single ion transition file ./results/mcdisp.trs (do not create it)\n");
+    printf (" -ninit n      ... maximum number n of (low energy) initial states (single ion transitions)\n");
+    printf ("                   (not functional with all single ion modules)\n");
+    printf (" -pinit p      ... minimum populationnumber p of initial state (single ion transitions)\n");
+    printf ("                   in order to be considered (not functional with all single ion modules)\n");
+    printf (" -prefix 001   ... prefix for parameters to be read from mcdisp.par and used for creation of output files\n"
+            "                   (useful for running in parallel calculations for different zones: e.g. put in\n"
+            "                   mcdisp.par instead of #!hklline= several statements #!001hklline= ... #!002hklline=\n"
+            "                   and start several jobs of mcdisp with -prefix 001, -prefix 002 simultaneously, afterwards merge\n"
+            "                   output files, e.g. *mcdisp.qei  with appendfile)\n");
+    printf (" -ignore_non_hermitian_matrix_error   ... ignores error when energies get complex due to unphysical mf groundstate\n");
+    printf ("\n");
+    printf ("Note: files which must be in current directory -\n");
+    printf ("      ./mcdisp.par, ./mcphas.j, directory ./results\n");
+      exit (EXIT_FAILURE);
+} 
+
 // print user defined column headers
 void inimcdis::print_usrdefcolhead(FILE *fout)
 {fprintf(fout,"#");
@@ -308,9 +354,10 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
 	              }
                      }
 }
+
+
 // *************************************************************************
-//constructor ... load initial parameters from file
-inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,Vector & abc)
+void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile,Vector & abc)
 { errno=1;do_jqf=do_jqfile;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
   int nofhkllists=1;Hext=Vector(1,HEXT_DIMENSION);Hext=0; Habc=Vector(1,3);Eabc=Vector(1,3);
@@ -344,6 +391,8 @@ inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,
   extract(instr,"s5",Hext[11]);
   extract(instr,"s6",Hext[12]); 
   
+  crosscheck_H_E(Hext,Habc,Eabc,abc); 
+
 
   info= new char [strlen(instr)+1];strcpy(info,instr);
   printf("#%s \n# reading mean field configuration mf=gj muB heff [meV]\n",instr);
@@ -355,7 +404,6 @@ inimcdis::inimcdis (const char * file,char * spinfile,char * pref,int do_jqfile,
    {fprintf(stderr,"ERROR loading mean field configuration\n");exit(EXIT_FAILURE);}
   fclose(fin);
 
- crosscheck_H_E(Hext,Habc,Eabc,abc); 
 
  //********************************  
   savfilename= new char [strlen(file)+strlen(prefix)+11];
@@ -644,6 +692,12 @@ nofhkls=0;save(file);
       if(nofhkls==0){fprintf(stderr,"ERROR mcdisp: no hkl's found in mcdisp.par - please edit and insert\n");exit(EXIT_FAILURE);}      
 }
 
+
+// *************************************************************************
+//constructor ... load initial parameters from file
+inimcdis::inimcdis()
+{savfilename=NULL;info=NULL;prefix=NULL;hkls=NULL;hklfile_start_index=NULL;
+}
 //kopier-konstruktor 
 inimcdis::inimcdis (const inimcdis & p)
 { do_jqf=p.do_jqf;
@@ -690,10 +744,12 @@ inimcdis::inimcdis (const inimcdis & p)
 
 //destruktor
 inimcdis::~inimcdis ()
-{delete []savfilename;delete []info;
- delete []prefix;
+{if (savfilename!=NULL)delete []savfilename;
+ if (info!=NULL)delete []info;
+ if(prefix!=NULL) delete []prefix;
  int i;
 //if (nofhkls==1)
+if(hkls!=NULL)
  { for (i=1;i<=nofhkls;++i) 
    { delete []hkls[i];}
    delete []hkls;

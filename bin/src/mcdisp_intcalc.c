@@ -5,7 +5,8 @@
 //***********************************************************************
 // returns 1 on success and zero on failure
 //***********************************************************************
-void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double & epsilon,int do_verbose,int do_gobeyond,int calc_rixs,int do_phonon,Vector & hkl,int qcounter)
+void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double & epsilon,int do_verbose,
+                 int do_gobeyond,int calc_rixs, int calc_Xel,int do_phonon,Vector & hkl,int qcounter)
 {int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);double QQ;
   hkl2ijk(qijk,hkl, inputpars.cs.abc);
     QQ=Norm(qijk);
@@ -69,7 +70,16 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
   if(do_Erefine) // fill chi0 matrices 
   {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2), md.nofEstps,epsilon,
                   qijk,qcounter,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
-
+   if(calc_Xel)// Xel
+      {if((*inputpars.jjj[l]).dpel1calc(ini.T,mf,ini.Hext,mq1_dip,md.est(i,j,k,l))!=0)
+       // calculate <-|pel|+> for Xel
+       {if(do_verbose)printf("#calculating Xel for ion %s\n",(*inputpars.jjj[l]).sipffilename);
+       (*inputpars.jjj[l]).FF_type=5; // put FFTYPE to Xel to indicate that this is implemented
+       }
+       else{ if(do_verbose)printf("#warning mcdisp - function dpel1 not implemented for single ion module of ion %s, no intensity from this ion\n",(*inputpars.jjj[l]).sipffilename);
+           mq1_dip=0;mq1_dip(1)= complex <double> (1e-10,0.0);(*inputpars.jjj[l]).FF_type=1;
+           }
+      }else
   if(calc_rixs)// RIXS
       {if((*inputpars.jjj[l]).drixs1calc(qijk,ini.T,mq1_dip,md.est(i,j,k,l))!=0)
        // calculate <-|Rijomega|+> see haverkort paper: transition operator for RIXS
@@ -186,6 +196,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
         mfcf & qod_real,mfcf & qod_imag,ComplexMatrix & Eorbmomdensity,
         mfcf & qep_real,mfcf & qep_imag,ComplexMatrix & Ephonon,
         mfcf & qem_real,mfcf & qem_imag,ComplexMatrix & Emagmom,
+        mfcf & qpe_real,mfcf & qpe_imag,ComplexMatrix & Epel,
         mfcf & qes_real,mfcf & qes_imag,ComplexMatrix & Espin,
         mfcf & qel_real,mfcf & qel_imag,ComplexMatrix & Eorbmom,
         int dimA, const ComplexMatrix &Tau, int level,double en, const inimcdis & ini,
@@ -212,6 +223,8 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
    #define qep_imag (*thrdat.qep_imag[thread_id])
    #define qem_real (*thrdat.qem_real[thread_id])
    #define qem_imag (*thrdat.qem_imag[thread_id])
+   #define qpe_real (*thrdat.qpe_real[thread_id])
+   #define qpe_imag (*thrdat.qpe_imag[thread_id])
    #define qes_real (*thrdat.qes_real[thread_id])
    #define qes_imag (*thrdat.qes_imag[thread_id])
    #define qel_real (*thrdat.qel_real[thread_id])
@@ -221,12 +234,14 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
    #define Eorbmomdensity (*thrdat.Eorbmomdensity[thread_id])
    #define Ephonon (*thrdat.Ephonon[thread_id])
    #define Emagmom (*thrdat.Emagmom[thread_id])
-   #define Espin (*thrdat.Espin[thread_id])
+   #define Epel    (*thrdat.Epel[thread_id])
+   #define Espin   (*thrdat.Espin[thread_id])
    #define Eorbmom (*thrdat.Eorbmom[thread_id])
    int level =  myinput->level;//, dimA = myinput->dimA, do_verbose = myinput->do_verbose;
    #define Tau (*thrdat.Tau[thread_id])
    double en = myinput->En; 
    int calc_rixs = myinput->calc_rixs;
+   int calc_Xel = myinput->calc_Xel;
    int do_phonon = myinput->do_phonon;
    #define ini (*thrdat.ini[thread_id])
    #define inputpars (*thrdat.inputpars[thread_id])
@@ -255,6 +270,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
   if(ini.calculate_orbmomdensity_oscillation){qod_real.clear();qod_imag.clear();}
   if(ini.calculate_phonon_oscillation){qep_real.clear();qep_imag.clear();}
   if(ini.calculate_magmoment_oscillation){qem_real.clear();qem_imag.clear();} 
+  if(ini.calculate_pel_oscillation){qpe_real.clear();qpe_imag.clear();} 
   if(ini.calculate_spinmoment_oscillation){qes_real.clear();qes_imag.clear();}
   if(ini.calculate_orbmoment_oscillation){qel_real.clear();qel_imag.clear();}
 
@@ -349,6 +365,10 @@ int ssm1,in1,in2;
                                         // printf("Emagmom(s=%i,alpha=%i)= %g %+g i \n",s,i,
                                         //          real(Emagmom(s,i)),imag(Emagmom(s,i)));
                                          }//printf("at E=%g\n",en);  
+                                     if(ini.calculate_pel_oscillation)for(i=1;i<=PEL_EV_DIM;++i)
+                                        {qpe_real.mf(i1,j1,k1)(PEL_EV_DIM*(l1-1)+i)+=real(Epel(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
+                                         qpe_imag.mf(i1,j1,k1)(PEL_EV_DIM*(l1-1)+i)+=imag(Epel(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
+                                         }
                                      if(ini.calculate_spinmoment_oscillation)for(i=1;i<=SPIN_EV_DIM;++i)
                                         {qes_real.mf(i1,j1,k1)(SPIN_EV_DIM*(l1-1)+i)+=real(Espin(s,i)*Tau(s,level))*sqrt(fabs(en));// add this transition
                                          qes_imag.mf(i1,j1,k1)(SPIN_EV_DIM*(l1-1)+i)+=imag(Espin(s,i)*Tau(s,level))*sqrt(fabs(en));// *sqrt(fabs(en)) inserted 13.3.2011 MR
@@ -392,7 +412,11 @@ int ssm1,in1,in2;
                     //                      so that Tau is in units of sqrt of meV^-1
 
 
-if (calc_rixs){// use 1-9 components of chi to store result !!! (other components do not count          
+if (calc_Xel){// use 1-3 components of chi to store result !!! (other components do not count          
+               chi*=bose/(double)ini.mf.n();
+               sumS=Trace(chi);intensity=fabs(real(sumS));
+              } 
+else if (calc_rixs){// use 1-9 components of chi to store result !!! (other components do not count          
                chi*=bose/(double)ini.mf.n();
               } 
        else{double factor=0.5*bose*3.65/4.0/PI/(double)ini.mf.n()/PI/2.0;
@@ -468,6 +492,8 @@ myinput->QQ=QQ;
 #undef qep_imag
 #undef qem_real
 #undef qem_imag
+#undef qpe_real
+#undef qpe_imag
 #undef qes_real
 #undef qes_imag
 #undef qel_real
@@ -477,6 +503,7 @@ myinput->QQ=QQ;
 #undef Eorbmomdensity
 #undef Ephonon
 #undef Emagmom
+#undef Epel
 #undef Espin
 #undef Eorbmom
 MUTEX_LOCK(&mutex_loop);
@@ -847,268 +874,6 @@ for(int i=1;i<=9;++i){dummy(i)=0;for(int j=1;j<=9;++j){dummy(i)+=chi(i,j)*ee(j);
                               // so we do not need to conjugate the vector here
  return Intensity;
 }
-
-
-
-
-
-
-
-
-
-
-//*************** OLD OLD OLD .... removed june 2013 !!! . intcalc() is not used any more !!!
-
-//**************************************************************************/
-#ifdef _THREADSREFINE
-#if defined  (__linux__) || defined (__APPLE__)
-void *intcalc(void *input)
-#else
-DWORD WINAPI intcalc(void *input)
-#endif
-#else
-double intcalc(ComplexMatrix & ch,int dimA, double en,inimcdis & ini,par & inputpars,jq & J,Vector & q,Vector & hkl,mdcf & md,int do_verbose,double epsilon)
-#endif
-{int i,j,i1,j1,k1,l1,t1,i2,j2,k2,l2,t2,s,ss,bmax,bbmax,b;
- double intensity=1.2;
- double QQ,ki,kf;
-
-#ifdef _THREADSREFINE
-   intcalcapr_input *myinput; myinput = (intcalcapr_input *)input;
-   int thread_id = myinput->thread_id;
-   int dimA = myinput->dimA;
-   double en = myinput->En; 
-   #define ini (*thrdat.ini[thread_id])
-   #define inputpars (*thrdat.inputpars[thread_id])
-   #define J (*thrdat.J[thread_id])
-   #define q thrdat.q
-   #define hkl thrdat.hkl
-   #define md (*thrdat.md[thread_id])
-   #define ch (*thrdat.ch[thread_id])
-   // int do_verbose = myinput->do_verbose;
-   double epsilon = myinput->epsilon; 
-#endif
- 
- complex<double> z(en,epsilon);
- complex<double> eps(epsilon*3,0);
- // determine chi
-   ComplexMatrix chi(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-   ComplexMatrix Ac(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-   ComplexMatrix Acinv(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-   ComplexMatrix Bc(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-   Ac=0;Bc=0;
- for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
-   bmax=md.baseindex_max(i1,j1,k1);
-   ComplexMatrix chi0c(1,md.nofcomponents*bmax,1,md.nofcomponents*bmax);
-   ComplexMatrix dd(1,md.nofcomponents*bmax,1,md.nofcomponents*bmax);
-   ComplexMatrix cc(1,md.nofcomponents*bmax,1,md.nofcomponents*bmax);
-   cc=0; dd=0;
-   s=(index_s(i1,j1,k1,1,1,md,ini)-1)*md.nofcomponents;
-
- // to be removed - put to jjjpar !!! 
-   for(l1=1;l1<=md.nofatoms;++l1){
-   for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
-      b=md.baseindex(i1,j1,k1,l1,t1);   
-   for(i=1;i<=md.nofcomponents;++i)
-   {
-     if (md.delta(i1,j1,k1)(b)>SMALL_QUASIELASTIC_ENERGY)
-     { //normal inelastic intensity
-      cc(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=1.0/(md.delta(i1,j1,k1)(b)-z);
-      dd(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=0.0;
-     }
-    else if (md.delta(i1,j1,k1)(b)<-SMALL_QUASIELASTIC_ENERGY)
-     {cc(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=0.0;
-      dd(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=1.0/(-md.delta(i1,j1,k1)(b)+z);
-     }
-    else
-     { 
-     //quasielastic intensity ...  artificially we introduce a splitting epsilon !!! compare Jensen 91 p 158
-     // factor 0.5 because every transition is counted as half positive and half negative energy...
-     cc(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=0.5*eps/(eps-z);
-     dd(md.nofcomponents*(b-1)+i,md.nofcomponents*(b-1)+i)=-0.5*eps/(eps+z);
-     }
-    }}}
-    chi0c=md.M(i1,j1,k1)*cc+md.M(i1,j1,k1).Transpose()*dd; 
-   // myPrintComplexMatrix(stdout,chi0c); 
-  // end of code to be romved !!!
-
-   // for i1 j1 k1 site in magnetic unit cell:
-   // assemble chi0c from the chi0's of the different atoms in the crystallographic basis
-   //chi0c=0;
-   //for(l1=1;l1<=md.nofatoms;++l1){
-   //chi0c= from series of pointers to matrices with single ion chi for specified energy ...
-   // mind we should change all this code here to work with lower dimension: t1 is not needed and can be omitted 
-   // and matrices should get smaller !!!
-   // }
-   // myPrintComplexMatrix(stdout,chi0c); 
-     
-
-//myPrintComplexMatrix(stdout,cc); 
-    for(i=1;i<=md.nofcomponents*bmax;++i){
-     Ac(s+i,s+i)=1; // set diagonal elements 1 (make Ac a unit matrix)
-    for(j=1;j<=md.nofcomponents*bmax;++j){
-     Bc(s+i,s+j)=chi0c(i,j);
-     }}
-
-  for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
-     ss=(index_s(i2,j2,k2,1,1,md,ini)-1)*md.nofcomponents;
-     bbmax=md.baseindex_max(i2,j2,k2);
-     ComplexMatrix cc1(1,md.nofcomponents*bmax,1,md.nofcomponents*bbmax);
-  
-     cc1=chi0c*J.mati(J.in(i1,j1,k1),J.in(i2,j2,k2));
-    for(i=1;i<=md.nofcomponents*bmax;++i){for(j=1;j<=md.nofcomponents*bbmax;++j){
-      Ac(s+i,ss+j)-=cc1(i,j);
-    }}
-   }}}   
- }}}
-
-
-//myPrintComplexMatrix(stdout,Ac); 
- chi=Ac.Inverse()*Bc;
-
- // determine chi'' and S (bose factor)
-   complex<double> im(0,1.0);
-   ComplexMatrix S(1,md.nofcomponents*dimA,1,md.nofcomponents*dimA);
-   complex<double> bose;
-   bose=1.0/(1.0-exp(-z*(1.0/KB/ini.T)));
-   S=bose/(im)*(chi-chi.Transpose().Conjugate());
-   ch=0;
- // polarization factor
-// neutrons only sense first 3x3 part of S !! - this is taken into account by setting 0 all
-// higher components in the polarization factor !!!
- Matrix pol(1,md.nofcomponents,1,md.nofcomponents);
- Vector qijk(1,3);
-  hkl2ijk(qijk,hkl, inputpars.cs.abc);
- // transforms Miller indices (in terms of reciprocal lattice abc*)
- // to Q vector in ijk coordinate system
- pol=0; double qsqr=qijk*qijk;
-//    qijk(1)=hkl(1)/inputpars.a; // only correct for ortholattices !!!!
-//    qijk(2)=hkl(2)/inputpars.b;
-//    qijk(3)=hkl(3)/inputpars.c;
-    for(i=1;i<=3;++i){pol(i,i)=1.0;
-    for(j=1;j<=3;++j){pol(i,j)-=qijk(i)*qijk(j)/qsqr;//(qijk*qijk);
-    }}
-    QQ=Norm(qijk);
-// yes and for intermediate coupling we need another polarization factor
-// because neutrons sense the first 6x6 part of S
-    Matrix polICIC(1,md.nofcomponents,1,md.nofcomponents);
-    Matrix polICn(1,md.nofcomponents,1,md.nofcomponents);
-    Matrix polnIC(1,md.nofcomponents,1,md.nofcomponents);
-    polICIC=0;polICn=0;polnIC=0;
-    for(i=1;i<=6&&i<=md.nofcomponents;++i){
-    for(j=1;j<=6&&j<=md.nofcomponents;++j){polICIC(i,j)=pol((i+1)/2,(j+1)/2);
-                      if(i==1||i==3||i==5){polICIC(i,j)*=2.0;} // this accounts for the 
-                      if(j==1||j==3||j==5){polICIC(i,j)*=2.0;} // fact that gs=2 and gl=1
-    }}
-    for(i=1;i<=3&&i<=md.nofcomponents;++i){
-    for(j=1;j<=6&&j<=md.nofcomponents;++j){polnIC(i,j)=pol(i,(j+1)/2);
-                      if(j==1||j==3||j==5){polnIC(i,j)*=2.0;} // fact that gs=2 and gl=1
-    }}
-    for(i=1;i<=6&&i<=md.nofcomponents;++i){
-    for(j=1;j<=3&&j<=md.nofcomponents;++j){polICn(i,j)=pol((i+1)/2,j);
-                      if(i==1||i==3||i==5){polICn(i,j)*=2.0;} // this accounts for the 
-    }}
-
- //multiply polarization factor, formfactor and debeywallerfactor
- for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
- for(l1=1;l1<=md.nofatoms;++l1){
-   for(t1=1;t1<=md.noft(i1,j1,k1,l1);++t1){
-      s=(index_s(i1,j1,k1,l1,t1,md,ini)-1)*md.nofcomponents;
-  for(i2=1;i2<=ini.mf.na();++i2){for(j2=1;j2<=ini.mf.nb();++j2){for(k2=1;k2<=ini.mf.nc();++k2){
-  for(l2=1;l2<=md.nofatoms;++l2){
-   for(t2=1;t2<=md.noft(i2,j2,k2,l2);++t2){
-      ss=(index_s(i2,j2,k2,l2,t2,md,ini)-1)*md.nofcomponents;
-    for(i=1;i<=md.nofcomponents;++i){for(j=1;j<=md.nofcomponents;++j){
-      ch(i,j)+=chi(s+i,ss+j);
-      if((*inputpars.jjj[l1]).gJ==0&&(*inputpars.jjj[l2]).gJ==0)
-      {S(s+i,ss+j)*=polICIC(i,j); 
-       S(s+i,ss+j)*=0.5*(*inputpars.jjj[l1]).debyewallerfactor(QQ); //  debey waller factor
-       if(i==2||i==4||i==6){S(s+i,ss+j)*=(*inputpars.jjj[l1]).F(-QQ);}else{S(s+i,ss+j)*=(*inputpars.jjj[l1]).F(QQ);}
-                               // mind here we should use different formfactors for spin and orbital components !!!
-                               // formfactor +QQ..spin formfactor (j0), -QQ .. orbital formfactor (j0+j2)
-       S(s+i,ss+j)*=0.5*(*inputpars.jjj[l2]).debyewallerfactor(QQ); // debey waller factor
-       if(j==2||j==4||j==6){S(s+i,ss+j)*=(*inputpars.jjj[l2]).F(-QQ);}else{S(s+i,ss+j)*=(*inputpars.jjj[l2]).F(QQ);}
-                               // mind here we should use different formfactors for spin and orbital components !!!
-                               // formfactor +QQ..spin formfactor (j0), -QQ .. orbital formfactor (j0+j2)
-      }
-      if((*inputpars.jjj[l1]).gJ==0&&(*inputpars.jjj[l2]).gJ!=0)
-      {S(s+i,ss+j)*=polICn(i,j); 
-       S(s+i,ss+j)*=0.5*(*inputpars.jjj[l1]).debyewallerfactor(QQ); //  debey waller factor
-       if(i==2||i==4||i==6){S(s+i,ss+j)*=(*inputpars.jjj[l1]).F(-QQ);}else{S(s+i,ss+j)*=(*inputpars.jjj[l1]).F(QQ);}
-                               // mind here we should use different formfactors for spin and orbital components !!!
-                               // formfactor +QQ..spin formfactor (j0), -QQ .. orbital formfactor (j0+j2)
-       S(s+i,ss+j)*=(*inputpars.jjj[l2]).gJ/2.0*(*inputpars.jjj[l2]).debyewallerfactor(QQ)*(*inputpars.jjj[l2]).F(QQ); // and formfactor + debey waller factor
-      }
-      if((*inputpars.jjj[l1]).gJ!=0&&(*inputpars.jjj[l2]).gJ==0)
-      {S(s+i,ss+j)*=polnIC(i,j); 
-       S(s+i,ss+j)*=(*inputpars.jjj[l1]).gJ/2.0*(*inputpars.jjj[l1]).debyewallerfactor(QQ)*(*inputpars.jjj[l1]).F(QQ); // and formfactor + debey waller factor
-       S(s+i,ss+j)*=0.5*(*inputpars.jjj[l2]).debyewallerfactor(QQ)*(*inputpars.jjj[l2]).F(QQ); // debey waller factor
-       if(j==2||j==4||j==6){S(s+i,ss+j)*=(*inputpars.jjj[l2]).F(-QQ);}else{S(s+i,ss+j)*=(*inputpars.jjj[l2]).F(QQ);}
-                               // mind here we should use different formfactors for spin and orbital components !!!
-                               // formfactor +QQ..spin formfactor (j0), -QQ .. orbital formfactor (j0+j2)
-      }
-      if((*inputpars.jjj[l1]).gJ!=0&&(*inputpars.jjj[l2]).gJ!=0)
-      {S(s+i,ss+j)*=pol(i,j);
-       S(s+i,ss+j)*=(*inputpars.jjj[l1]).gJ/2.0*(*inputpars.jjj[l1]).debyewallerfactor(QQ)*(*inputpars.jjj[l1]).F(QQ); // and formfactor + debey waller factor
-       S(s+i,ss+j)*=(*inputpars.jjj[l2]).gJ/2.0*(*inputpars.jjj[l2]).debyewallerfactor(QQ)*(*inputpars.jjj[l2]).F(QQ); // and formfactor + debey waller factor
-      }
-    }}   
-  }}
-  }}}
- }}
- }}}
-
- // determine dsigma in barns / cryst unit
- //divide by number of crytallographic unit cells  (ini.mf.n()) in magnetic unit cell
-intensity=abs(Sum(S))/ini.mf.n()/PI/2.0*3.65/4.0/PI; 
-
-// here should be entered factor  k/k' + absolute scale factor
-if (ini.ki==0)
-{if (ini.kf*ini.kf+0.4811*en<0)
-   {fprintf(stderr,"warning mcdisp - calculation of intensity: energy transfer %g meV cannot be reached with kf=const=%g/A at (%g,%g,%g)\n",en,ini.kf,hkl(1),hkl(2),hkl(3));
-    intensity=0;}
- else
- { ki=sqrt(ini.kf*ini.kf+0.4811*en);
-   intensity*=ini.kf/ki;
- }
-}
-else
-{if (ini.ki*ini.ki-0.4811*en<0)
-   {fprintf(stderr,"warning mcdisp - calculation of intensity: energy transfer %g meV cannot be reached with ki=const=%g/A at (%g,%g,%g)\n",en,ini.ki,hkl(1),hkl(2),hkl(3));
-    intensity=0;}
- else
- { 
-  kf=sqrt(ini.ki*ini.ki-0.4811*en);
-  intensity*=kf/ini.ki;
- }
-}
-
-
-#ifdef _THREADSREFINE
-#undef ini
-#undef inputpars
-#undef J
-#undef q
-#undef hkl
-#undef md
-#undef ch
-myinput->intensity=intensity;
-MUTEX_LOCK(&mutex_loop);
-thrdat.thread_id = thread_id;
-EVENT_SIG(checkfinish);
-MUTEX_UNLOCK(&mutex_loop);
-#if defined  (__linux__) || defined (__APPLE__)
-pthread_exit(NULL);
-#else
-return 0;
-#endif
-#else
-return intensity;	
-#endif
-}
-
-
-
 
 
 

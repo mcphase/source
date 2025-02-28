@@ -36,6 +36,9 @@ extern   int extract(char * instr,const char * parameter,float & var);
 extern   int setvar(char * instr,const char * parameter,double & var);
 extern   int setvar(char * instr,const char * parameter,int var);
 
+// given a string str with headers of columns, print column numbers to fout
+void print_col_numbers(FILE * fout,char * str);
+
 // for a string variable maxium size n has to be given
 // and m >0 is the maximum number of space separations in the extracted string 
 // (e.g. m=1 will read from instr "G= one two three four" the parameter "G"

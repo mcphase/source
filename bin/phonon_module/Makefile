@@ -23,9 +23,10 @@ VECOBJS= matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
 		chgeigen.o matlapl.o moment.o matexph.o matsqth.o magicsquare.o
 
 phonon.so: phonon.o  $(VECOBJS) ../src/martin.o
-	${CCC}  -Wall -o phonon.so $^ -shared $(LFLAGS)    
+	${CCC} -Wall -o phonon.so $^ -shared $(LFLAGS)    
+
 phonon.o: phonon_module.cpp phonon_module.hpp martin.h
-	${CCC}  ${CCOPTS}-Wall -fPIC -c  -o phonon.o phonon_module.cpp  $(INCLDIRS)
+	${CCC}  ${CCOPTS} -Wall -fPIC -c  -o phonon.o phonon_module.cpp  $(INCLDIRS)
 
 cleanall:
 clean:

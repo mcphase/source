@@ -677,10 +677,19 @@ In table (\ref{units}) the unit conventions are listed.
 \label{units}   
 \begin{tabular} 
 {l|l|l|l}
-Physical Quantity  & symbol                                         & unit      & typical file(s)     \\
+Physical Quantity  & symbol                                         & unit      & typical file(s)/programs     \\
 \hline
-Charge             &  CHARGE                                        & $|e|$       & *.sipf \\
+Born van Karman spring & $c_L(ij)$                                  &  N/m      &   bvk\_parameter.table  \\
+Charge             &  CHARGE                                        & $|e|$     & *.sipf \\
+Coupling constants & $K_{\alpha\beta}(ij)$                          & meV       & mcphas.j     \\
+Crystal field parameters & $B_l^m, L_l^m$			    & meV	& *.sipf \\
 Debye Waller Factor & DWF, $B_{iso}/2$                              & \AA$^2$   & *.sipf, mcdiff.in \\ 
+Phonon-Displacement	   & $\mbf P$                               & \AA       & singleion, spins   \\
+Phonon-Displacement	   & $\mbf u$                               & 1         & singleion   \\
+Electric Field	   & $\mbf E_{\rm el}$				    & kV/mm     & mcphas.ini, mcphas.fum \\
+Electric Polarisation & $\mbf P_{\rm el}$			    & |e|/\AA$^2$ & mcphas.fum \\
+Elastic constants  &  $c^{\alpha\beta} $			    & meV/primitve unit cell & mcphas.j \\
+Elastic Energy     &  $E_{elastic}$				    & meV/ion	& mcphas.fum \\
 Energy             & cf-parameters Blm Llm, free energy u           & meV       & *.sipf, mcphas.fum ...  \\
 Lattice Constant   & a,b,c                                          & \AA        & mcdiff.in, mcphas.j \\
 Magnetic Field     & H, Ha, Hb, Hc                                  & Tesla     & mcphas.ini, mcdisp.mf ...    \\
@@ -689,9 +698,11 @@ Neutron Cross Section &  sigma ,$\sigma$                            & barn      
 Neutron Scattering Length & SCATTERINGLENGTHREAL & $10^{-12}$~cm & *.sipf, mcdiff.in \\
   & SCATTERINGLENGTHIMAG & & \\
 Radial Integrals   & R2,R4,R6 , $\langle r^l \rangle$               & $a_0^2$, $a0=0.5292$~\AA \\ 
+Stress tensor	   & $\sigma^{\alpha}$				    & GPa	& mcphas.fum, mcphas.ini \\
 Temperature        & T                                              & Kelvin    & mcphas.ini, mcdisp.mf ... \\
 Wave length        & lambda, $\lambda$                              & \AA       & mcdiff.in \\
 Wave vector        & k, ki, kf, Q, Qx, Qy, Qz                       & 1/\AA    & mcdisp.par \\
+
 \end{tabular}
 \end{center}
 \end{table}

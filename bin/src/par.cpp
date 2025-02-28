@@ -38,27 +38,16 @@ par::par (const char *filejjj,int verbose)
 
  // input file header ------------------------------------------------------------------
   fgets (instr, MAXNOFCHARINLINE, fin_coq);
-  extract(instr,"a",cs.abc(1));extract(instr,"b",cs.abc(2)); extract(instr,"c",cs.abc(3)); 
-                 extract(instr,"alpha",cs.abc(4));  extract(instr,"beta",cs.abc(5));extract(instr,"gamma",cs.abc(6)); 
   instr[0]='#';
    // inserted 12.11.07 in order to format output correctly (characterstring 13 spoiled output string)
    for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
    rems[1]=new char[strlen(instr)+2];strcpy(rems[1],instr);
    rems[2]=new char[40];strcpy(rems[2],"#!<--mcphas.mcphas.j-->");
   cs.nofatoms=0;
-  instr[0]='#';cs.abc=0;
+  instr[0]='#';
  while (cs.nofatoms==0||(strstr(instr,"*******")==NULL&&instr[strspn(instr," \t")]=='#')) 
   {fgets(instr,MAXNOFCHARINLINE,fin_coq);
-   if(Norm(cs.abc)<1e-10){extract(instr,"a",cs.abc(1));extract(instr,"b",cs.abc(2)); extract(instr,"c",cs.abc(3)); 
-                 extract(instr,"alpha",cs.abc(4));  extract(instr,"beta",cs.abc(5));extract(instr,"gamma",cs.abc(6)); 
-   }
-   extract(instr,"r1x",cs.r[1][1]);extract(instr,"r2x",cs.r[1][2]); extract(instr,"r3x",cs.r[1][3]); 
-   extract(instr,"r1y",cs.r[2][1]); extract(instr,"r2y",cs.r[2][2]); extract(instr,"r3y",cs.r[2][3]);
-   extract(instr,"r1z",cs.r[3][1]); extract(instr,"r2z",cs.r[3][2]); extract(instr,"r3z",cs.r[3][3]);
-   extract(instr,"r1a",cs.r[1][1]);extract(instr,"r2a",cs.r[1][2]); extract(instr,"r3a",cs.r[1][3]); 
-   extract(instr,"r1b",cs.r[2][1]); extract(instr,"r2b",cs.r[2][2]); extract(instr,"r3b",cs.r[2][3]);
-   extract(instr,"r1c",cs.r[3][1]); extract(instr,"r2c",cs.r[3][2]); extract(instr,"r3c",cs.r[3][3]);
-
+   cs.cextract(instr);
     // read optional elastic constants        
   char Celstr[6];
    for(i=1;i<=6;++i)for(j=1;j<=6;++j){
@@ -69,6 +58,7 @@ par::par (const char *filejjj,int verbose)
 		  if(feof(fin_coq)!=0)
                     {fprintf(stderr,"ERROR reading header of file %s: line '#! nofatoms=...' not found\n",filejjj);exit(EXIT_FAILURE);}
   }
+  for(i=1;i<=6;++i)if(cs.abc(i)==0){fprintf(stderr,"Error reading crystal structure parameters abc alpha beta gamma = 0 in file %s\n",filejjj);exit(EXIT_FAILURE);}
   if(cs.nofatoms>MAX_NOF_ATOMS_IN_PRIMITIVE_CRYST_UNITCELL)
   {fprintf(stderr,"ERROR reading mcphas.j: maximum number of atoms in unit cell exceeded - enlarge it in par.hpp and recompile\n");exit(EXIT_FAILURE);}
   // check if primitive lattice is right handed

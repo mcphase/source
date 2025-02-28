@@ -19,9 +19,10 @@ class inimcdis
 { private:
   int do_jqf;
   char * savfilename;
-  Vector qmin,qmax,deltaq,Eabc,Habc;
+  Vector qmin,qmax,deltaq;
   void read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_jqfile,Vector & abc);   
   double setcolvalue(int i,Vector & Qvec, double & Qincr, Vector & qprim,Vector & hkl);
+  Vector Eabc,Habc;
   
   public:
   int * hklfile_start_index;
@@ -48,12 +49,14 @@ class inimcdis
   double ki;
   double kf; // constant ki/kf
   mfcf mf;
-   void save(); // save parameters to results/_mcdisp.ini results/_mcdisp.mf
-   void save(const char * filename); // save parameters to results/_mcdisp.ini results/_mcdisp.mf
+  void load (const char * file,char * spinfile, char * prefix,int do_jqfile, Vector & abc); //constructor
+   void save(); // save parameters to results/_mcdisp.par results/_mcdisp.mf
+   void save(const char * filename); // save parameters to file filename
    void print_usrdefcolhead(FILE *fout);
    void print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector & qprim,Vector & hkl, bool withtxt=false);
    void mfstring(char *str,size_t t);
-  inimcdis (const char * file,char * spinfile, char * prefix,int do_jqfile,Vector & abc); //constructor
+   void helpexit();
+  inimcdis();
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor
 };

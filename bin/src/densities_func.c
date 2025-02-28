@@ -76,9 +76,7 @@ char *token;cs.abc=0;
     while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
 
    if (instr[strspn(instr," \t")]=='#'){fprintf(fout,"%s",instr);}
-   if(cs.abc[1]==0){extract(instr,"a",cs.abc[1]);extract(instr,"b",cs.abc[2]); extract(instr,"c",cs.abc[3]);
-                 extract(instr,"alpha",cs.abc[4]);  extract(instr,"beta",cs.abc[5]);extract(instr,"gamma",cs.abc[6]);
-   }
+   
    extract(instr,"show_abc_unitcell",gp.show_abc_unitcell);
    extract(instr,"show_primitive_crystal_unitcell",gp.show_primitive_crystal_unitcell);
    extract(instr,"show_magnetic_unitcell",gp.show_magnetic_unitcell);
@@ -96,13 +94,7 @@ char *token;cs.abc=0;
    extract(instr,"scale_view_1",gp.scale_view_1);
    extract(instr,"scale_view_2",gp.scale_view_2);
    extract(instr,"scale_view_3",gp.scale_view_3);
-
-   extract(instr,"r1x",cs.r[1][1]);extract(instr,"r2x",cs.r[1][2]); extract(instr,"r3x",cs.r[1][3]);
-   extract(instr,"r1y",cs.r[2][1]); extract(instr,"r2y",cs.r[2][2]); extract(instr,"r3y",cs.r[2][3]);
-   extract(instr,"r1z",cs.r[3][1]); extract(instr,"r2z",cs.r[3][2]); extract(instr,"r3z",cs.r[3][3]);
-   extract(instr,"r1a",cs.r[1][1]);extract(instr,"r2a",cs.r[1][2]); extract(instr,"r3a",cs.r[1][3]);
-   extract(instr,"r1b",cs.r[2][1]); extract(instr,"r2b",cs.r[2][2]); extract(instr,"r3b",cs.r[2][3]);
-   extract(instr,"r1c",cs.r[3][1]); extract(instr,"r2c",cs.r[3][2]); extract(instr,"r3c",cs.r[3][3]);
+   cs.cextract(instr);
    extract(instr,"nofatoms",cs.nofatoms);    extract(instr,"nofcomponents",cs.nofcomponents);
    if ((cs.nofatoms>0)&&((extract(instr,"x",cs.x[n+1])+
                     extract(instr,"y",cs.y[n+1])+

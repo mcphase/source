@@ -38,6 +38,7 @@ inline std::string slurp (const std::string& path) {
                      //  so as to not repeat calculations.
 
 #define MAGMOM_EV_DIM 3  // eigenvector dimension for moment oscillation
+#define PEL_EV_DIM 3  // eigenvector dimension for electric dipole moment oscillation
 #define SPIN_EV_DIM 3  // eigenvector dimension for spin oscillation
 #define ORBMOM_EV_DIM 3  // eigenvector dimension for orbmom oscillation
 #define CHARGEDENS_EV_DIM 28  // eigenvector dimension for chargedensity oscillation
@@ -196,6 +197,7 @@ public:
 // ********************************************************************************
 //0. PHONON displacement
 int pcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
+int pcalc(Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
 int  dP1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dP1,ComplexMatrix & ests);
 private:
 void (*p)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
@@ -253,6 +255,15 @@ public:
   double SLR,SLI; // scattering length
   double DWF; // DebeyWallerFactor [A^2]
   int FF_type; // use by program mcdisp, mcdiff to store which formfactor this ion is
+               // 1  -2    +2   +3   -3 4 5
+               // 1: nonmagnetic,
+               // -2: GO BEYOND: using MQ function, for dipole intensities use mom(1-3)
+               //      rare earth expression (if gJ>0), spin formfactor only (if gJ=0)
+               // 2:  DIPOLE ONLY: rare earth (if gJ>0), spin formfactor only (if gJ=0)
+               // 3: DIPOLE ONLY: gJ=0,general L and S moments given, use dipole approximation
+               // -3: GO BEYOND: using MQ function, go beyond dipole approximation.
+               // 4: RIXS
+               // 5: Xel
 void FFinfo(FILE * fout); // formfactor information print to fout, for mcdiff and mcdisp
                          // info about formactor is printed according to settings of FFtype
                          // FF_type has to be set by mcdiff / mcdisp correctly before calling

@@ -48,13 +48,7 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
 
 
     }}}}
-    physprops.Pel/=(double)sps.n(); // divide by number of primitive cells in supercell
-    Matrix prim_ijk(1,3,1,3);
-   dadbdc2ijk(prim_ijk,inputpars.cs.r, inputpars.cs.abc);
-   // transforms primitive lattice vector matrix r given in terms of abc
-   // to ijk coordinate system
-    double Vol=prim_ijk.Column(1)*crossp(prim_ijk.Column(2),prim_ijk.Column(3)); // divide by Volume of primitive unit cell in Angstroem
-    physprops.Pel/=Vol;
+    physprops.Pel/=(double)sps.n()*inputpars.cs.pVol(); // divide by number of primitive cells in supercelland Vol of prim unitcell
   if(verbose==1){printf(".. calculating electrical Polarisation\n");}
 }else
 {physprops.Pel=0;if(verbose==1){printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);}}

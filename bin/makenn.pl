@@ -1448,8 +1448,10 @@ if(abs($Cel->at($i,$j))>1e-6){++$i1;print $l sprintf(" Cel%i%i=%+10.9g",$i,$j,$C
                      }if($i1>0){print $l "\n";}}
 if($i1==0){print $l "\n";}
 
+# 1GPa=1e+9Pa=1e+9J/m^3
 # 1meV= 1.60218e-22 J
 # 1 A= 1e-10 m
+# 1meV/pVol=1.60218e-22 J/A^3 x  A^3/pVol = 1.60218e+8  J/m^3 x  A^3/pVol = 1.60218e-1 GPa x  A^3/pVol
 $confact=0.1*1.60218/$pVolume;
 print $l "#! unit conversion:  1 meV/Primitive Unit Cell Volume =".$confact." GPa\n";
 }

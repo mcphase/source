@@ -159,7 +159,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  int thread_id=1;
  #endif 
  int i,ii,iii,tryrandom,nr,rr,ri,is,r;
- double fe,fered,Eel,U,sc;
+ double fe,fered,Eelastic,U,sc;
  double u,lnz; // free- and magnetic energy per ion [meV]
  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
@@ -219,7 +219,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  
       //!!!calculate free energy - this is the heart of this loop !!!!
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-      fe=fecalc(U,Eel,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs);
+      fe=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs);
           if (fe>=2*FEMIN_INI && verbose==1) {
 	       if(j>0) printf ( ">for_str_%i(%ix%ix%i) "  ,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">for(%g %g %g)(%ix%ix%i) ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
@@ -230,7 +230,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
             {               // first - reduce the spinconfiguration if possible
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-               if ((fered=fecalc(U,Eel,r,sc,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
+               if ((fered=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
                                  if (verbose==1){fprintf(stdout,">[%i](%ix%ix%i)r%i->(%ix%ix%i)fe=%f->%fmeV ",thread_id,sps.na(),sps.nb(),sps.nc(),tryrandom,sps1.na(),sps1.nb(),sps1.nc(),fe,fered); fflush(stdout);}
                                                                                      sps=sps1;fe=fered;}
                                                                                                   else {
@@ -657,7 +657,7 @@ else // if yes ... then
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
-      physprops.fe=fecalc(physprops.u,physprops.Eel,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs); 
+      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs); 
 
       magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
@@ -723,7 +723,7 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
      }
                fclose(felog);
 	      }
-                             physprops.sps.epsilon=0;physprops.Eel=0;
+                             physprops.sps.epsilon=0;physprops.Eelastic=0;
                              physprops.m=0;delete mf;return 2;
                              }
  //if(verbose==1){printf(".\n");}

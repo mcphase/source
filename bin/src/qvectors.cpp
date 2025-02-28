@@ -110,8 +110,6 @@ qvectors::qvectors (inipar & ini,par & inputpars,
  // calculate rezprim (primitive reciprocal basis in euclidean ijk coordinates)
   dadbdc2ijk(rijk,r,inputpars.cs.abc); // rijk is the primitive unit cell in ijk coordinates
   rezijk=2*PI*rijk.Inverse().Transpose();
-  
-  
   nofatoms=inputpars.cs.nofatoms;
   nofcomponents=inputpars.cs.nofcomponents;
 

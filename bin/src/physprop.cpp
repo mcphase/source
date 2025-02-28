@@ -61,7 +61,7 @@ physproperties::physproperties (const physproperties & p)
   Pel=p.Pel;
   m=p.m;Pelabc=p.Pelabc;mabc=p.mabc;
   nofhkls=p.nofhkls;
-  u=p.u;fe=p.fe;Eel=p.Eel;
+  u=p.u;fe=p.fe;Eelastic=p.Eelastic;
   sps=p.sps;
   mf=p.mf;
   washere=p.washere;
@@ -129,7 +129,7 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                               }
                    } 
            else   { // i>=15
-                   int nofcols=14;             
+                   nofcols=14;             
                    if(ortho==0){nofcols=17;
                          switch(i) { 
                                      case 15: ptr=&m[1];snprintf(hs,40,"mi[mb/ion]");break;
@@ -156,7 +156,7 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                              nofcols+=3;
                             }
                   if(ini.doeps){switch(i-nofcols) {
-                                     case 1: ptr=&Eel;snprintf(hs,40,"Eel[meV/ion]");break;
+                                     case 1: ptr=&Eelastic;snprintf(hs,40,"Eelastic[meV/ion]");break;
                                      case 2: ptr=&sps.epsilon[1];snprintf(hs,40,"eps1=epsii");break;
                                      case 3: ptr=&sps.epsilon[2];snprintf(hs,40,"eps2=epsjj");break;
                                      case 4: ptr=&sps.epsilon[3];snprintf(hs,40,"eps3=epskk");break;
@@ -164,7 +164,8 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                                      case 6: ptr=&sps.epsilon[5];snprintf(hs,40,"eps5=2epsik");break;
                                      case 7: ptr=&sps.epsilon[6];snprintf(hs,40,"eps6=2epsij");break;
                                      default: ;
-                                           } nofcols+=7;
+                                           }
+                               nofcols+=7;
                                }
            
                  }
@@ -188,7 +189,7 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
         {  (*ptr)=nn[i];
         }
      snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%s ",hs);
-    }
+    } 
     } // next i
 if(!setnn)
 {// here set mabc m Pelabc P if necessary
@@ -277,7 +278,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.fum");
   if (verbose==1) printf("saving %s \n",outfilename);
-  if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eel=0;mabc=0;sps.epsilon=0;Pel=0;Pelabc=0;}
+  if (htfailed!=0){fe=0;u=0;m=0;m[1]=0;m[2]=0;m[3]=0;Eelastic=0;mabc=0;sps.epsilon=0;Pel=0;Pelabc=0;}
   fumcols(nn,nnerr,nofcols,true,str,outstr,ini,ortho,inputpars,verbose);
   if (washere==0)
   {fout = fopen_errchk (outfilename,filemode);

@@ -42,7 +42,8 @@ void helpexit()
           "                       elements for magnetic moment M (muB)instead of I\n"
           "         -U  ......... calculate energy U, ln of partition sum Z, free energy F\n"
           "                       instead of I\n"
-          "         -pel  ........ calculate electrical dipole moment pel in |e|A\n"
+          "         -P   ........ calculate phonon displacement in A instead of I\n"
+          "         -pel  ........ calculate electrical dipole moment pel in |e|pm\n"
           "                       instead of I\n"
           "         -MQ 0 0 1 ...  instead of <I> calculate expectation values, transition matrix elements\n"
           "                       for M(Q=(0 0 1)/A), the Fourier Transform  of magnetic moment density M(r) \n"
@@ -104,71 +105,46 @@ void helpexit()
 
 
 void colheader(char observable,int observable_nofcomponents,int nofcomponents,Vector & Q,int elevels,double X0,double lambda,int HEnofcomp)
-{int j;
+{int j;char str[MAXNOFCHARINLINE];
    switch(observable){case 's':printf("# Single ion susceptibility X with 1/(X-X0)=(1/Xcf)-lambda, X0=%g emu/mol, lambda=%g mol/emu.\n# For polycrystal Xpoly=Trace(X)/3\n",X0,lambda);break;
                       case 'i':printf("# Inverse Y of single ion susceptibility X with 1/(X-X0)=(1/Xcf)-lambda: Y=X^(-1), X0=%g emu/mol, lambda=%g mol/emu.\n#For polycrystal Xpoly=Trace(X)/3 \n",X0,lambda);break;
                       default: break;
                      }
-   printf("# 1         2     ");for(j=1;j<=HEnofcomp;++j)printf("   %i     ",2+j);
-                                   for(j=1;j<=nofcomponents;++j)printf("  %2i      ",j+2+HEnofcomp);
-                                   switch(observable)
-                                   {case 'Q': printf("                                 ");
-                                              for(j=1;j<=observable_nofcomponents;++j){printf("   %2i          %2i          %2i       %2i    ",
-                                              HEnofcomp+2+nofcomponents+(j-1)*4+1,
-                                              HEnofcomp+2+nofcomponents+(j-1)*4+2,
-                                              HEnofcomp+2+nofcomponents+(j-1)*4+3,
-                                              HEnofcomp+2+nofcomponents+(j-1)*4+4);}printf("    ");break;
-                                    case 'x':
-                                    case 'y':
-                                    case 'z':
-                                    case 'u':
-                                    case 'v':
-                                    case 'w': for(j=1;j<=observable_nofcomponents;++j)
-                                              {printf("   %i       ",HEnofcomp+2+nofcomponents+j);}
-                                              printf("    ");break;
-                                    case 's': printf("   %i         ",HEnofcomp+2+nofcomponents+1);
-                                              for(j=2;j<=observable_nofcomponents;++j)
-                                              {printf("%i  ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
-                                    case 'i': printf("   %i            ",HEnofcomp+2+nofcomponents+1);
-                                              for(j=2;j<=observable_nofcomponents;++j)
-                                              {printf("%i  ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
-                                    case 'd': printf(" %i    %i                        %i      %i ",
-                                              HEnofcomp+2+nofcomponents+1,
-                                              HEnofcomp+2+nofcomponents+2,
-                                              HEnofcomp+2+nofcomponents+3,
-                                              HEnofcomp+2+nofcomponents+4);
-                                              for(j=5;j<=observable_nofcomponents;++j)
-                                              {printf("%i   ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)
-                                             {printf("  %i  ",HEnofcomp+2+nofcomponents+j);}printf("    ");break;
-                                   }printf("\n");
- printf("#atom-nr   T[K]   ");for(j=1;j<=3;++j)printf("Hext%c(T) ",'i'-1+j);
-                              if(HEnofcomp>5)for(j=1;j<=3;++j)printf("Eext%c(kV/mm) ",'i'-1+j);
-                                   for(j=1;j<=nofcomponents;++j)printf("Hxc%i(meV) ",j);
+
+
+ str[0]='\0';
+ snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"#atom-nr   T[K]   ");for(j=1;j<=3;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"Hext%c(T) ",'i'-1+j);
+                              if(HEnofcomp>5)for(j=1;j<=3;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"Eext%c(kV/mm) ",'i'-1+j);
+                                   for(j=1;j<=nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"Hxc%i(meV) ",j);
 int k[] = {-1,0, 1,1,1, 2, 2,2,2,2, 3, 3, 3,3,3,3,3, 4, 4, 4, 4,4,4,4,4,4, 5, 5, 5, 5, 5,5,5,5,5,5,5, 6, 6, 6, 6, 6, 6,6,6,6,6,6,6,6};
 int q[] = {-1,0,-1,0,1,-2,-1,0,1,2,-3,-2,-1,0,1,2,3,-4,-3,-2,-1,0,1,2,3,4,-5,-4,-3,-2,-1,0,1,2,3,4,5,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6};
 
                                    switch(observable)
-                                   {case 'Q': printf("Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
-                                              for(j=1;j<=observable_nofcomponents;++j){printf(" |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}printf("(muB)");break;
-                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);printf("(muB)");break;
-                                    case 'p': for(j=1;j<=observable_nofcomponents;++j)printf(" <pel%c> ",'a'-1+j);printf("(|e|A)");break;
-                                    case 'U': printf(" lnZ  F(meV) U(meV) ");break;
-                                    case 's': printf("Xpoly(emu/mol) X11 X22 X33 X23 X32 X13 X31 X12 X21(emu/mol) ");break;
-                                    case 'i': printf("1/Xpoly(mol/emu) Y11 Y22 Y33 Y23 Y32 Y13 Y31 Y12 Y21(mol/emu) ");break;
-                                    case 'd': printf("E(meV) Sdip(Q=0,Omega)(barn/meV) Xpolyr Xpolyi(mb^2/meV) X11r X11i X22r X22i X33r X33i X23r X23i X32r X32i X13r X13i X31r X31i X12r X12i X21r X21i(mb^2/meV) ");break;
-                                    case 'x': for(j=1;j<=observable_nofcomponents;++j)printf(" <aSx(%i,%i)> ",k[j],q[j]);break;
-                                    case 'y': for(j=1;j<=observable_nofcomponents;++j)printf(" <aSy(%i,%i)> ",k[j],q[j]);break;
-                                    case 'z': for(j=1;j<=observable_nofcomponents;++j)printf(" <aSz(%i,%i)> ",k[j],q[j]);break;
-                                    case 'u': for(j=1;j<=observable_nofcomponents;++j)printf(" <aLx(%i,%i)> ",k[j],q[j]);break;
-                                    case 'v': for(j=1;j<=observable_nofcomponents;++j)printf(" <aLy(%i,%i)> ",k[j],q[j]);break;
-                                    case 'w': for(j=1;j<=observable_nofcomponents;++j)printf(" <aLz(%i,%i)> ",k[j],q[j]);break;
-                                    default: for(j=1;j<=observable_nofcomponents;++j)printf(" <%c%c> ",observable,'a'-1+j);
+                                   {case 'Q': snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"Q=(%8.5f %8.5f %8.5f)/A ",Q(1),Q(2),Q(3));
+                                              for(j=1;j<=observable_nofcomponents;++j){snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," |<M%c%c>| real(<M%c%c>) imag(<M%c%c>) <M%c>f(Q) ",observable,'a'-1+j,observable,'a'-1+j,observable,'a'-1+j,'a'-1+j);}snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"(muB)");break;
+                                    case 'M': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"  <%c%c>",observable,'a'-1+j);snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"(muB)");break;
+                                    case 'P': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"  <%c%c>",observable,'a'-1+j);snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"(A)");break;
+                                    case 'p': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"  <pel%c>",'a'-1+j);snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"(|e|pm)");break;
+                                    case 'U': snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," lnZ  F(meV) U(meV) ");break;
+                                    case 's': snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"Xpoly(emu/mol) X11 X22 X33 X23 X32 X13 X31 X12 X21(emu/mol) ");break;
+                                    case 'i': snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"1/Xpoly(mol/emu) Y11 Y22 Y33 Y23 Y32 Y13 Y31 Y12 Y21(mol/emu) ");break;
+                                    case 'd': snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"E(meV) Sdip(Q=0,Omega)(barn/meV) Xpolyr Xpolyi(mb^2/meV) X11r X11i X22r X22i X33r X33i X23r X23i X32r X32i X13r X13i X31r X31i X12r X12i X21r X21i(mb^2/meV) ");break;
+                                    case 'x': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," <aSx(%i,%i)> ",k[j],q[j]);break;
+                                    case 'y': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," <aSy(%i,%i)> ",k[j],q[j]);break;
+                                    case 'z': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," <aSz(%i,%i)> ",k[j],q[j]);break;
+                                    case 'u': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," <aLx(%i,%i)> ",k[j],q[j]);break;
+                                    case 'v': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," <aLy(%i,%i)> ",k[j],q[j]);break;
+                                    case 'w': for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," <aLz(%i,%i)> ",k[j],q[j]);break;
+                                    default: for(j=1;j<=observable_nofcomponents;++j)snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," <%c%c> ",observable,'a'-1+j);
                                    }
-   if(!elevels){printf("transition-energies(meV)...\n");}else{printf("energy levels(meV)...\n");}
+                       if(!elevels){snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," transition-energies(meV)...");}else{snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str)," energy levels(meV)...");}
+
+printf("#");print_col_numbers(stdout,str);
+
+ printf("\n%s\n",str);
 if(observable=='d'){printf("#(*)The unpolarized powder average neutron cross section sigma for each transition\n\
 #   is calculated neglecting the formfactor, the Debye Wallerfactor, factor k'/k\n");
-}
+                   }
 }
 
 void write_trs_file(jjjpar &jjj,int nmax,double pinit,double ninit,double maxE,double TT,Vector & Hext,Vector & Hxc,Vector & Q,char observable,int i,int HEnofcomp )
@@ -292,6 +268,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
       {case 'L': jjj.Lcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case 'S': jjj.Scalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case 'M': jjj.mcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
+       case 'P': jjj.pcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case 'p': jjj.pelcalc(I,T,Hxc,Hext,jjj.Icalc_parstorage);break;
        case 'Q': for(int Ti=1;Ti<=Tsteps;++Ti)
                  {Vector II(I.Column(Ti));
@@ -507,6 +484,7 @@ for (i=1;i<argc;++i)
  {if(strncmp(argv[i],"-h",2)==0) {helpexit();}
   else {if(strcmp(argv[i],"-M")==0) observable='M';       
   else {if(strcmp(argv[i],"-pel")==0) observable='p';       
+  else {if(strcmp(argv[i],"-P")==0) observable='P';       
   else {if(strcmp(argv[i],"-U")==0) observable='U';       
   else {if(strcmp(argv[i],"-MQ")==0){observable='Q';
                                       if(i==argc-1){fprintf(stderr,"Error in command: singleion -MQ needs argument(s)\n");exit(EXIT_FAILURE);}
@@ -592,7 +570,7 @@ for (i=1;i<argc;++i)
   else {if(strcmp(argv[i],"-HE")==0)HEnofcomp=6;      
   else {if(strcmp(argv[i],"-v")==0)verbose=1;      
   else{Tstart=strtod(argv[i],NULL);++i; if(!Tsteps){Tend=Tstart;} // now read T
-       Hext=0;for(j=1;j<=3;++j){if(i<argc){Hext(j)=strtod(argv[i],NULL);}++i;} // read Hexta Hextb Hextc
+       Hext=0;for(j=1;j<=HEnofcomp;++j){if(i<argc){Hext(j)=strtod(argv[i],NULL);}++i;} // read Hexta Hextb Hextc and Ei Ej Ek if requested
        Hxc_in=0;for(j=1;i<argc&&j<HXCMAXDIM;++j){++nofcomponents;Hxc_in(j)=strtod(argv[i],NULL);++i;} //read Hxc1 Hxc2 ... Hxcn
       } // T Hext Hxc
     } // verbose
@@ -621,6 +599,7 @@ for (i=1;i<argc;++i)
     } // -S 
    } // -MQ  
    } // -U  
+   } // -P  
    } // -pel  
    } // -M  
  } // help

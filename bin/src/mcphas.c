@@ -172,10 +172,8 @@ T=0.0;h=0;
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
     strcpy(prefix+11+strlen(ini.prefix),"mcphas.tst");
     testspins.save(prefix,"w");
-
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.qvc");
     qvectors testqs (ini,inputpars,Imax,outfilename,verbose);
-
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                       
