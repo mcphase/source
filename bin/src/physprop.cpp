@@ -37,9 +37,10 @@ physproperties::physproperties (int nofspincorrs,int maxnofhkli,int na,int nm)
  
  m=Vector(1,3); 
  mabc=Vector(1,3); 
- Pelabc=Vector(1,3); 
+ Pelabc=Vector(1,3); Pel=Vector(1,3);
+ Pelabc0=Vector(1,3); Pel0=Vector(1,3);
  H=Vector(1,HEXT_DIMENSION);
- Pel=Vector(1,3);
+ 
  jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  hkli= new Vector [maxnofhkli+1];for(i=0;i<=maxnofhkli;++i){hkli[i]=Vector(1,10);}
@@ -58,8 +59,9 @@ physproperties::physproperties (const physproperties & p)
   j=p.j;
   T=p.T;
   H=p.H;
-  Pel=p.Pel;
-  m=p.m;Pelabc=p.Pelabc;mabc=p.mabc;
+  Pel=p.Pel;Pelabc=p.Pelabc;
+  Pel0=p.Pel0;Pelabc0=p.Pelabc0;
+  m=p.m;mabc=p.mabc;
   nofhkls=p.nofhkls;
   u=p.u;fe=p.fe;Eelastic=p.Eelastic;
   sps=p.sps;
@@ -266,6 +268,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
                        abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
    ijk2dadbdc(mabc,m,abc);  // transform m and P to abc coordinate system
    ijk2dadbdc(Pelabc,Pel,abc);
+   ijk2dadbdc(Pelabc0,Pel0,abc);
 
   printf("saving properties for ");ini.print_usrdefcols(stdout,x,y,T,H,inputpars.cs.abc,true);
   if(ortho==0){printf(" Hi=%g Hj=%g Hk=%g ",H(1),H(2),H(3));}
@@ -301,8 +304,11 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
     { fprintf (fout, "#      ... however, two ion interaction is always evaluated for eps=0 (option -linepsjj).\n");
     }
    }
+   if(fabs(inputpars.totalcharge)<SMALLCHARGE){fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0a=%4.4g  Pel0b=%4.4g  Pel0c=%4.4g\n",Pelabc0(1),Pelabc0(2),Pelabc0(3)); }
+   if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
+               if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0i=%4.4g  Pel0j=%4.4g  Pel0k=%4.4g\n",Pel0(1),Pel0(2),Pel0(3));
+                }
 
-   if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");}
    ini.print_usrdefcolhead(fout,str);
   fclose(fout);
   }

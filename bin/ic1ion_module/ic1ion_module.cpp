@@ -157,14 +157,14 @@ void ic1ion_module::expJ(icmfmat & mfmOP,     // Operators to be calculated
    Matrix J(1,Jret.Rhi(),1,T.Hi()); // matrix for output to be written to Jret
    for(int Ti=1;Ti<=T.Hi();++Ti)for(int i=1;i<=J.Rhi();++i)J(i,Ti)=0;
    // Converts the Jij parameters if necessary
-   std::vector<double> vgjmbH((J.Rhi()-J.Rlo()+1),0.); 
+   std::vector<double> vgjmbH((gjmbH.Hi()-gjmbH.Lo()+1),0.); 
    #ifdef JIJCONV
    if(pars.B.norm().find("Stevens")!=std::string::npos) {
       pars.jijconvcalc();
-      for(int i=J.Rlo(); i<=J.Rhi(); i++) vgjmbH[i-J.Rlo()] = -gjmbH[i]*pars.jijconv[i]; }
+      for(int i=gjmbH.Lo(); i<=gjmbH.Hi(); i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i]*pars.jijconv[i]; }
    else
    #endif
-      for(int i=J.Rlo(); i<=J.Rhi(); i++) vgjmbH[i-J.Rlo()] = -gjmbH[i];  // Vector of exchange + external fields to be added to matrix below
+      for(int i=gjmbH.Lo(); i<=gjmbH.Hi(); i++) vgjmbH[i-gjmbH.Lo()] = -gjmbH[i];  // Vector of exchange + external fields to be added to matrix below
 
    // Calculates the IC Hamiltonian matrix
    int i,Hsz=getdim(pars.n,pars.l);

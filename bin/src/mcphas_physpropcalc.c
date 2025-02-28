@@ -15,32 +15,22 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
     }}}}
     physprops.m/=(double)sps.n()*(double)sps.nofatoms;
 
+
+
+
+
 // electrical polarisation P (makes only sense if total charge is zero)
 // in units |e|/A^2 ... sum dipole moment |e|A of magnetic unit cell and divide by unit cell volume in A^3
 if(fabs(inputpars.totalcharge)<SMALLCHARGE)
-{Vector rijk(1,3); physprops.Pel=0;
+{ physprops.Pel=0;
 for (l=1;l<=inputpars.cs.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
       for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){d1[m1]=mf.mf(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];}                  
      (*inputpars.jjj[l]).pelcalc(mom,T, d1,H,(*inputpars.jjj[l]).Icalc_parstorage);
 
-// Problem : surface effect !! how to calculate polarisation !????
-// try - use wigner seitz cell 
-    Vector dr1r2r3(1,3),xyz(1,3);
-    dr1r2r3=inputpars.rez*(*inputpars.jjj[l]).xyz; // transform dadbdc to primitive lattice
-    for(int n=1;n<=3;++n){
-    while(dr1r2r3(n)>0.5)dr1r2r3(n)-=1.0; // shift position into the wigner seitz cell
-    while(dr1r2r3(n)<-0.5)dr1r2r3(n)+=1.0;
-    if(fabs(dr1r2r3(n)-0.5)<SMALLPOSITIONDEVIATION)dr1r2r3(n)=0.0; // if it is exactly at the edge - split atom and put half at +0.5 and -0.5 and sum --> results
-    if(fabs(dr1r2r3(n)+0.5)<SMALLPOSITIONDEVIATION)dr1r2r3(n)=0.0; // --> in the same contribution as putting atom at 0. thus put it at origin for this purpose
-    } 
-    xyz=inputpars.cs.r*dr1r2r3; // transform back to dadbdc 
-     dadbdc2ijk(rijk,xyz, inputpars.cs.abc); 
-                      // transforms vector xyz given in terms of abc
-                      // to ijk coordinate system (in summing dipole moments it is not necessary to consider
-                     //  the subcell vector of the magnetic unit cell - this will cancel in summation anyway)
-     physprops.Pel+=mom*0.01+rijk*(*inputpars.jjj[l]).charge; // sum dipolar moments
+
+     physprops.Pel+=mom*0.01; // sum dipolar moments
                     // factor 0.01 to transform from |e|pm to |e|A 
 //printf("%s charge=%g pos= ",(*inputpars.jjj[l]).sipffilename,(*inputpars.jjj[l]).charge);myPrintVector(stdout,rijk);
 //P=sumi xi ci = sum (X+xi) ci if sumi ci=0

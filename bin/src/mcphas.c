@@ -177,6 +177,33 @@ T=0.0;h=0;
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                       
+  if(fabs(inputpars.totalcharge)<SMALLCHARGE)
+{Vector rijk(1,3);
+for (l=1;l<=inputpars.cs.nofatoms;++l){
+// Problem : surface effect !! how to calculate polarisation !????
+// try - use wigner seitz cell 
+    Vector dr1r2r3(1,3),xyz(1,3);
+    dr1r2r3=inputpars.rez*(*inputpars.jjj[l]).xyz; // transform dadbdc to primitive lattice
+    for(int n=1;n<=3;++n){
+    while(dr1r2r3(n)>0.5)dr1r2r3(n)-=1.0; // shift position into the wigner seitz cell
+    while(dr1r2r3(n)<-0.5)dr1r2r3(n)+=1.0;
+    if(fabs(dr1r2r3(n)-0.5)<SMALLPOSITIONDEVIATION)dr1r2r3(n)=0.0; // if it is exactly at the edge - split atom and put half at +0.5 and -0.5 and sum --> results
+    if(fabs(dr1r2r3(n)+0.5)<SMALLPOSITIONDEVIATION)dr1r2r3(n)=0.0; // --> in the same contribution as putting atom at 0. thus put it at origin for this purpose
+    } 
+    xyz=inputpars.cs.r*dr1r2r3; // transform back to dadbdc 
+     dadbdc2ijk(rijk,xyz, inputpars.cs.abc); 
+                      // transforms vector xyz given in terms of abc
+                      // to ijk coordinate system (in summing dipole moments it is not necessary to consider
+                     //  the subcell vector of the magnetic unit cell - this will cancel in summation anyway)
+     physprop.Pel0+=rijk*(*inputpars.jjj[l]).charge; // sum dipolar moments
+}physprop.Pel0/=inputpars.cs.pVol(); // divide by number of primitive cells in supercelland Vol of prim unitcell
+  if(verbose==1){printf(".. calculating electrical Polarisation\n");}
+}else
+{physprop.Pel0=0;
+ if(verbose==1)printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);                              
+}
+
+
 if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)

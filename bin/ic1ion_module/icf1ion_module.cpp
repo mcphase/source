@@ -502,7 +502,7 @@ bool icf1ion_module::IMcalc(Matrix &Jret,          // Output single ion momentum
 { // sum exchange field and external field
    Vector gjmbH(1,(Hxc.Hi()<6) ? 6 : Hxc.Hi()); gjmbH=0;
    if(gjmbH.Hi()==Hxc.Hi()) gjmbH=Hxc; else for(int i=1; i<=(gjmbH.Hi()<Hxc.Hi()?gjmbH.Hi():Hxc.Hi()); i++) gjmbH[i]=Hxc[i];
-    Matrix J(1,gjmbH.Hi(),T.Lo(),T.Hi());
+    Matrix J(1,Jret.Rhi(),T.Lo(),T.Hi());
    // --------------------------------------------------------------------
    // Calculates the Zeeman term if magnetic field is not zero
    if(fabs(Hext(1))>DBL_EPSILON || fabs(Hext(2))>DBL_EPSILON || fabs(Hext(3))>DBL_EPSILON)
