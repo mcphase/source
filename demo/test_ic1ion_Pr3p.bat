@@ -14,6 +14,13 @@ getvalue.pl -c 0.0698 4 13 10 0 m.clc
 singleion -M -r Co2p_atom1_rotated_pm_z.sipf 2 0 0 10  0 0 0 0 0 0 > m.clc
 getvalue.pl -c 5.998 5 14 10 0 m.clc
 
+
+singleion -XM 0 0 -muBT -nt 10000 -r Co2p_atom1_rotated_pm_z.sipf 2 0 0 0  0 0 0 0 0 0 > m.clc
+getvalue.pl -c 12.08 2 20 2 0 m.clc
+
+
+
+
 call substitute "MODULE=ic1ion" "MODULE=icf1ion" octahedronic1ion.sipf
 call densplt c octahedronic1ion.sipf 2 0 0 0 
 call icf1ion octahedronic1ion.sipf

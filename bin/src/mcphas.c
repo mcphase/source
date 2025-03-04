@@ -176,7 +176,9 @@ T=0.0;h=0;
     qvectors testqs (ini,inputpars,Imax,outfilename,verbose);
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-                      
+       
+
+// *** calculate electrical polarisation (static, from ionic charges and positions, electret matter)               
   if(fabs(inputpars.totalcharge)<SMALLCHARGE)
 {Vector rijk(1,3);
 for (l=1;l<=inputpars.cs.nofatoms;++l){
@@ -197,12 +199,17 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
                      //  the subcell vector of the magnetic unit cell - this will cancel in summation anyway)
      physprop.Pel0+=rijk*(*inputpars.jjj[l]).charge; // sum dipolar moments
 }physprop.Pel0/=inputpars.cs.pVol(); // divide by number of primitive cells in supercelland Vol of prim unitcell
+// thus we have not Pel in units of |e|A/A^3=|e|/A^2. For SI we need it in C/m^2
+// |e|=1.602189e-19 Coulomb
+// A=1e-10 m
+// i.e. |e|/A^2=1.602189e+1=16.02189 C/m^2
+ physprop.Pel0*=16.02189;
   if(verbose==1){printf(".. calculating electrical Polarisation\n");}
 }else
 {physprop.Pel0=0;
  if(verbose==1)printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);                              
 }
-
+// ***********************************************
 
 if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram

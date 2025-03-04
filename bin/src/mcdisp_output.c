@@ -65,16 +65,18 @@ void writeheader(par & inputpars,FILE * fout)
 }
 
 void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
-    par & inputpars,inimcdis & ini,int & calc_rixs,int & calc_Xel,int & do_Erefine)                   
+    par & inputpars,inimcdis & ini,int & calc_rixs,int & calcXobs,int & do_Erefine)                   
 {//open output files and write headers for output files mcdisp.qei qex qom dsigma.tot dsigma
   fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
- if(calc_Xel){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
+ if(calcXobs){fprintf(foutqei,"#!<--mcphas.mcdisp.qeX%s-->\n",obs[calcXobs]);
                writeheader(inputpars,foutqei);
-               fprintf(foutqei,"#electrical susceptibility Xel(Q,omega)\n");
+               fprintf(foutqei,"#susceptibility X%s(Q,omega)\n",obs[calcXobs]);
                fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
              ini.print_usrdefcolhead(foutqei);
              fprintf (foutqei,"energy[meV] " 
-                              "Trace(Xel'') Xelxxreal(Q,omega) Xelxximag Xelxyreal Xelxyimag Xelxzreal Xelxzimag ...Xelzzimag(|e|A^-2/kVmm^-2)\n");
+  "Trace(X%s'')/3 X%sxxreal(Q,omega) X%sxximag X%syyreal X%syyimag X%szz .. X%syz X%szy X%sxz X%szx X%syz X%szy (%s)^2/f.u. f.u.=crystallographic primitive unit cell (r1xr2xr3) \n",
+      obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],
+      obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obunit[calcXobs] );
   }
  else
  if(calc_rixs){fprintf(foutqei,"#!<--mcphas.mcdisp.qex-->\n");
@@ -94,13 +96,13 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
                               "Irix: Isigmasigma azimuthsigmasigma   Isigmapi azsigmapi  "
                               " Ipisigma azpisigma   Ipipi azpipi          Irightright azrightright"
                               " Irightleft azreightleft Ileftright azleftright Ileftleft azlefteft(deg) "
-                              "  [a.u./sr/f.u.] f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+                              "  [a.u./sr/f.u.] f.u.=crystallographic primitive unit cell (r1xr2xr3)\n");
 
             fprintf (foutqom, "#dispersion \n");ini.print_usrdefcolhead(foutqom);fprintf(foutqom,"energies[meV]\n");
 
        }else{
              writeheader(inputpars,foutqom);
-            fprintf (foutqom, "#dispersion \n");ini.print_usrdefcolhead(foutqom);fprintf(foutqom,"energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+            fprintf (foutqom, "#dispersion \n");ini.print_usrdefcolhead(foutqom);fprintf(foutqom,"energies[meV] > intensities Imag (full calc) [barn/sr/f.u.]   f.u.=crystallographic primitive unit cell (r1xr2xr3)\n");
 
             fprintf(foutqei,"#!<--mcphas.mcdisp.qei-->\n");
             writeheader(inputpars,foutqei);
@@ -120,7 +122,7 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
 
            fprintf(foutdstot,"#!<--mcphas.mcdisp.dsigma.tot-->\n");writeheader(inputpars,foutdstot);
            fprintf (foutdstot, "#!Total Scattering Cross Section Itot in energy range [emin=%g ; emax=%g]\n",ini.emin,ini.emax);
-           fprintf(foutdstot,"# ... Itot is given as dsigma_/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.]f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+           fprintf(foutdstot,"# ... Itot is given as dsigma_/dOmeg dsigma_mag/dOmeg[barn/sr/f.u.]f.u.=crystallographic unit cell (r1xr2xr3)\n");
            ini.print_usrdefcolhead(foutdstot);
            fprintf(foutdstot,"Itot-DMDdip Itot-DMDbey ");
             switch(ini.outS)
@@ -155,10 +157,10 @@ void writehklblocknumber(FILE * jqfile,inimcdis & ini,int & counter)
 //****************************************************************************************************************************
 void writehklblocknumber(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
                     FILE * foutqee,FILE * foutqsd,FILE * foutqod,FILE * foutqep,FILE * foutqem,FILE * foutqpe,FILE * foutqes,FILE * foutqel,
-                    inimcdis & ini,int & calc_rixs,int & calc_Xel,int & do_Erefine,int & counter)
+                    inimcdis & ini,int & calc_rixs,int & calcXobs,int & do_Erefine,int & counter)
  {  if(ini.hklfile_start_index[0]>0)for(int is=1;is<=ini.hklfile_start_index[0];++is)if(ini.hklfile_start_index[is]==counter)
                        {fprintf(foutqei,"#!hklblock_number=%i\n",is);fprintf(foutqom,"#!hklblock_number=%i\n",is);                                       
-                        if(!calc_rixs&&!calc_Xel){fprintf(foutdstot,"#!hklblock_number=%i\n",is);
+                        if(!calc_rixs&&!calcXobs){fprintf(foutdstot,"#!hklblock_number=%i\n",is);
                                        if (do_Erefine==1){fprintf(foutds,"#!hklblock_number=%i\n",is);}
                                       }
                         if(ini.calculate_chargedensity_oscillation)fprintf(foutqee,"#!hklblock_number=%i\n",is);

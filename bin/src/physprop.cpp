@@ -142,16 +142,16 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
                                }
                   if(fabs(inputpars.totalcharge)<SMALLCHARGE)
                             {switch(i-nofcols) { 
-                                     case 1: ptr=&Pelabc[1];snprintf(hs,40,"Pela[|e|/A^2]");break;
-                                     case 2: ptr=&Pelabc[2];snprintf(hs,40,"Pelb[|e|/A^2]");break;
-                                     case 3: ptr=&Pelabc[3];snprintf(hs,40,"Pelc[|e|/A^2]");break;                                    
+                                     case 1: ptr=&Pelabc[1];snprintf(hs,40,"Pela[C/m^2]");break;
+                                     case 2: ptr=&Pelabc[2];snprintf(hs,40,"Pelb[C/m^2]");break;
+                                     case 3: ptr=&Pelabc[3];snprintf(hs,40,"Pelc[C/m^2]");break;                                    
                                      default: ;
                                           }
                        if(ortho==0){nofcols+=3;
                          switch(i-nofcols) { 
-                                     case 1: ptr=&Pel[1];snprintf(hs,40,"Peli[|e|/A^2]");break;
-                                     case 2: ptr=&Pel[2];snprintf(hs,40,"Pelj[|e|/A^2]");break;
-                                     case 3: ptr=&Pel[3];snprintf(hs,40,"Pelk[|e|/A^2]");break;                                    
+                                     case 1: ptr=&Pel[1];snprintf(hs,40,"Peli[C/m^2]");break;
+                                     case 2: ptr=&Pel[2];snprintf(hs,40,"Pelj[C/m^2]");break;
+                                     case 3: ptr=&Pel[3];snprintf(hs,40,"Pelk[C/m^2]");break;                                    
                                      default: ;
                                    }
                                  } 
@@ -304,9 +304,9 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
     { fprintf (fout, "#      ... however, two ion interaction is always evaluated for eps=0 (option -linepsjj).\n");
     }
    }
-   if(fabs(inputpars.totalcharge)<SMALLCHARGE){fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0a=%4.4g  Pel0b=%4.4g  Pel0c=%4.4g\n",Pelabc0(1),Pelabc0(2),Pelabc0(3)); }
+   if(fabs(inputpars.totalcharge)<SMALLCHARGE){fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0a=%4.4g  Pel0b=%4.4g  Pel0c=%4.4g C/m^2\n",Pelabc0(1),Pelabc0(2),Pelabc0(3)); }
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-               if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0i=%4.4g  Pel0j=%4.4g  Pel0k=%4.4g\n",Pel0(1),Pel0(2),Pel0(3));
+               if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0i=%4.4g  Pel0j=%4.4g  Pel0k=%4.4g C/m^2\n",Pel0(1),Pel0(2),Pel0(3));
                 }
 
    ini.print_usrdefcolhead(fout,str);

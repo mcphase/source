@@ -10,6 +10,26 @@
 #endif
 
 
+
+ob obint(int i)
+{switch(i)
+{case 1: return M;
+ case 2: return pel;
+ case 3: return P;
+ case 4: return L;
+ case 5: return S;
+ case 6: return sx;
+ case 7: return sy;
+ case 8: return sz;
+ case 9: return lx;
+ case 10: return ly;
+ case 11: return lz;
+ case 12: return MQ;
+ case 13: return U;
+default: return I;
+}
+}
+
 // given a string str with headers of columns, print column numbers to fout
 void print_col_numbers(FILE * fout,char * str)
 {char *t;size_t n;int i=1;

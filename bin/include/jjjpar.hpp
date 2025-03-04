@@ -145,7 +145,7 @@ public:
    int  du1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & ests);
    int transitionnumber; // the transition associated with the ion (important if there are more in the single ion spectrum)
 
-   /****************************************************************************/
+/****************************************************************************/
 // this function calculates series of single ion susceptibility matrices for 
 // different energies
    // output:returns 0 on success
@@ -154,12 +154,13 @@ public:
    // input: emin est nofstps define energies, eps is the imaginary part of the energy
    //        Q       the Q vector in 1/A
    //        |qcounter| is a counter telling which q vector in the list is calculated
-   //                 this sub will only do something if |qcounter|=0,1
+   //                 this sub will only do something if |qcounter|=-1,0,1,2,3,4,5,6,7,8,9
    //        |epsilon| ... imaginary part of Energy for calculation of chi0(omega+i|epsilon|)
-   //        sign(qcounter) <0 & sign(epsilon) >0 ... chi0c matrices should be cleared
-   //        sign(qcounter) <0 & sign(epsilon) <=0  ... try to load chi0 externally (from bfk)
-   //        sign(qcounter) >0 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc
-   //        sign(qcounter) >0 & sign(epsilon) <=0  ... calculate magnetic chi0(1...3,1...3) using dm1calc
+   //        qcounter==-1   & sign(epsilon) >0 ... chi0c matrices should be cleared
+   //        qcounter==-1  & sign(epsilon) <=0  ... try to load chi0 externally (from bfk)
+   //        qcounter==0,1 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc
+   //        qcounter==1,2,...,5 & sign(epsilon) <=0  ... calculate chi0(1...3,1...3) using dm1calc,dpel1calc ... according
+   //              to obint(qcoounter) defined in martin.c:      M=1, pel=2, P=3, L=4, S=5,
    //        delta ... sign determines if energy gain or loss term is added
 /****************************************************************************/
  int chi0(ComplexMatrix ** chi0pointer,double & emin, double estp, int & nofstps,const double & eps,Vector & Q, 
@@ -208,7 +209,7 @@ int pelcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix &
 int pelcalc(Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
 int  dpel1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & dP1,ComplexMatrix & ests);
 private:
-void (*pel)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+void (*pelf)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
 int  (*dpel1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
 
 public:
@@ -229,9 +230,9 @@ public:
 private:  // handle for mcalc in loadable modules
   void (*m)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   void (*mM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
-  void (*L)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+  void (*Lf)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   void (*LM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
-  void (*S)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
+  void (*Sf)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   void (*SM)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*);
   int  (*dm1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);
   int  (*dL1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*);

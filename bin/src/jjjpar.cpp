@@ -960,10 +960,10 @@ if(!pp.Icalc_parstorage.Empty())
    I=pp.I;  du=pp.du;
    mq=pp.mq;    ddnn=pp.ddnn;
    p=pp.p;dP1=pp.dP1;
-   pel=pp.pel;dpel1=pp.dpel1;
+   pelf=pp.pelf;dpel1=pp.dpel1;
    m=pp.m;dm1=pp.dm1;
-   L=pp.L;dL1=pp.dL1;
-   S=pp.S;dS1=pp.dS1;
+   Lf=pp.Lf;dL1=pp.dL1;
+   Sf=pp.Sf;dS1=pp.dS1;
    cd_m=pp.cd_m;cd_dm=pp.cd_dm;
    sd_m=pp.sd_m;sd_dm=pp.sd_dm;	
    od_m=pp.od_m;od_dm=pp.od_dm;

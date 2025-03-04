@@ -88,8 +88,8 @@ int jjjpar::pelcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Compl
           return false;break;
    case external_class: return si_mod->pelcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename);
          break;
-   default: if (pel==NULL) {mom=0;return false;} 
-            else{(*pel)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+   default: if (pelf==NULL) {mom=0;return false;} 
+            else{(*pelf)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -230,8 +230,8 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case external_class:
              return si_mod->Lcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename);
              break;   
-   default: if (L==NULL) {Lmom=0;return false;} 
-            else{(*L)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+   default: if (Lf==NULL) {Lmom=0;return false;} 
+            else{(*Lf)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
 int jjjpar::Lcalc (Matrix &Lmom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
@@ -254,16 +254,16 @@ int jjjpar::Lcalc (Matrix &Lmom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            if(false==si_mod->LMcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(Lmom.Column(i));
                          if(false==si_mod->Lcalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
-                         {Lmom=0;return false;}    
+                         {Lmom*=0;return false;}    
                          SetColumn(i,Lmom,m);
                         }}
             return true;
                   break;
    default:if(LM==NULL){ 
-           if (L==NULL) {Lmom=0;return false;} 
+           if (Lf==NULL) {Lmom*=0;return false;} 
             else{for(int i=1;i<=T.Hi();++i){
            Vector m(Lmom.Column(i));
-           (*L)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           (*Lf)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
            SetColumn(i,Lmom,m);}
            return true;}
            } else {(*LM)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
@@ -308,8 +308,8 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case external_class:
              return si_mod->Scalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename);
              break;   
-  default: if (S==NULL) {Smom=0;return false;} 
-            else{(*S)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+  default: if (Sf==NULL) {Smom*=0;return false;} 
+            else{(*Sf)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -333,16 +333,16 @@ int jjjpar::Scalc (Matrix &Smom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            if(false==si_mod->SMcalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(Smom.Column(i));
                          if(false==si_mod->Scalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
-                         {Smom=0;return false;}    
+                         {Smom*=0;return false;}    
                          SetColumn(i,Smom,m);
                         }}
             return true;
                   break;
  default: if(SM==NULL){ 
-           if (S==NULL) {Smom=0;return false;} 
+           if (Sf==NULL) {Smom*=0;return false;} 
             else{for(int i=1;i<=T.Hi();++i){
            Vector m(Smom.Column(i));
-           (*S)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           (*Sf)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
            SetColumn(i,Smom,m);}
            return true;}} else {
            (*SM)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
@@ -774,6 +774,7 @@ void jjjpar::FFinfo(FILE * fout) // has to be consistent with mcdisp_intcalc set
             else {fprintf(fout,"beyond dip.appr. for magnetic n-intensity Imag, Imag_dip calc. with: <M(Q)>=<M>*F(Q) with F(Q)=j0  FF coefficients:");}
             break;
     case 4:fprintf(fout,"ion included in rixs intensity calculation");break;
+    case 5:fprintf(fout,"ion included in susceptibiliy  calculation");break;
     default: fprintf(stderr,"Error: inconsistency in formfactor calculation\n"); exit(1);
    }
 

@@ -4,6 +4,10 @@
 #endif
 #define KB 0.08617343183   // Boltzmanns constant in mev/K
 #define MU_B  0.0578838263 // Bohrmagneton in meV/tesla
+#define ECHARGE 1.602189e-19   // elementary charge |e| in Coulomb
+#define MU0    4*PI*1e-7    // mu0 in Vs/Am  
+#define EPS0   
+
 #define MAXNOFCHARINLINE 7024
 #define SMALL 1e-6  // (meV) regulates if energy is treated as degenerate or not after a diagonalisation
                     // used in many modules: singleion_module.hpp mcdisp mcphas ... change with caution !!!
@@ -14,9 +18,6 @@
                     // also for adding jjpar sets to see what is difference in position or what is equal
                     // also for checking jjj parameters if values are equal 
 
-#define KB 0.08617343183   // Boltzmanns constant in mev/K
-
-#define MU_B  0.0578838263 // Bohrmagneton in meV/tesla
 
 #define MAXNOFCHARINLINE 7024
 

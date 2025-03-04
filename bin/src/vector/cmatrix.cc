@@ -970,7 +970,8 @@ complex<double> Trace (const ComplexMatrix& d)
     int j;
     complex<double> **m = d.M+d.rl;
     complex<double> trace = 0;
-    for (j = d.cl; j <= d.ch; j++) trace += (*m++)[j];  // TODO
+    for (j = d.cl; j <= d.ch; j++)trace += (*m++)[j]; 
+     // TODO
     return trace;
 } 
 

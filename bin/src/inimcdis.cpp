@@ -118,8 +118,10 @@ void inimcdis::helpexit() // type info and error exit
     printf (" -x            ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
     printf (" -xa   stp     ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection (stp in deg)\n");
     printf (" -xaf  az      ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n"
-            " -Xel          ... to calculate omega and Q dependent electrical susceptibility tensor\n"
-            "                   (for RAMAN and inelastic X-ray scattering intensity on phonons). \n"
+            " -X[observable]... to calculate omega and Q dependent  susceptibility tensor for an observable \n"
+            "                   observable can be: M (magnetic moment) pel (electricalpolarisation)\n"
+            "                   (e.g. use -Xpel for RAMAN and inelastic X-ray scattering intensity on phonons). \n"
+            "                      -XM for magnetic susceptibility e.g. to calculate EPR spectra \n"
             );
     printf (" -d            ... calculate intensities in dipole approximation only\n");
     printf (" -v            ... verbose\n");

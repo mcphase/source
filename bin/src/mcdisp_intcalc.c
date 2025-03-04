@@ -6,7 +6,7 @@
 // returns 1 on success and zero on failure
 //***********************************************************************
 void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double & epsilon,int do_verbose,
-                 int do_gobeyond,int calc_rixs, int calc_Xel,int do_phonon,Vector & hkl,int qcounter)
+                 int do_gobeyond,int calc_rixs, int calcXobs,int do_phonon,Vector & hkl,int qcounter)
 {int i,j,k,l,m,jmin,i1,j1,tn; Vector qijk(1,3);double QQ;
   hkl2ijk(qijk,hkl, inputpars.cs.abc);
     QQ=Norm(qijk);
@@ -70,16 +70,23 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
   if(do_Erefine) // fill chi0 matrices 
   {(*inputpars.jjj[l]).chi0(md.chi0pointer(i,j,k,l),ini.emin, fabs(epsilon/2), md.nofEstps,epsilon,
                   qijk,qcounter,nn[6],ini.T,mf,ini.Hext, md.est(i,j,k,l),i,j,k,l);}
-   if(calc_Xel)// Xel
-      {if((*inputpars.jjj[l]).dpel1calc(ini.T,mf,ini.Hext,mq1_dip,md.est(i,j,k,l))!=0)
-       // calculate <-|pel|+> for Xel
-       {if(do_verbose)printf("#calculating Xel for ion %s\n",(*inputpars.jjj[l]).sipffilename);
+   if(calcXobs)// Xobservable
+      {int check=0;
+       switch(obint(calcXobs))
+       { case M:   check=(*inputpars.jjj[l]).dm1calc(ini.T,mf,ini.Hext,mq1_dip,md.est(i,j,k,l)); break;
+         case pel: check=(*inputpars.jjj[l]).dpel1calc(ini.T,mf,ini.Hext,mq1_dip,md.est(i,j,k,l));break;
+         default: fprintf(stderr,"Error mcdisp: option -X not implemented for observable %s\n",obs[calcXobs]);
+       }
+       if(check!=0)
+       // calculate <-|observable|+> for X[]: mq1_dip =[]1 unit is unit of observable
+       {if(do_verbose)printf("#calculating X%s for ion %s\n",obs[calcXobs],(*inputpars.jjj[l]).sipffilename);
        (*inputpars.jjj[l]).FF_type=5; // put FFTYPE to Xel to indicate that this is implemented
        }
-       else{ if(do_verbose)printf("#warning mcdisp - function dpel1 not implemented for single ion module of ion %s, no intensity from this ion\n",(*inputpars.jjj[l]).sipffilename);
+       else{ if(do_verbose)printf("#warning mcdisp - function d%s1 not implemented for single ion module of ion %s, no intensity from this ion\n",obs[calcXobs],(*inputpars.jjj[l]).sipffilename);
            mq1_dip=0;mq1_dip(1)= complex <double> (1e-10,0.0);(*inputpars.jjj[l]).FF_type=1;
            }
-      }else
+      }
+  else
   if(calc_rixs)// RIXS
       {if((*inputpars.jjj[l]).drixs1calc(qijk,ini.T,mq1_dip,md.est(i,j,k,l))!=0)
        // calculate <-|Rijomega|+> see haverkort paper: transition operator for RIXS
@@ -130,10 +137,10 @@ void intcalc_ini(inimcdis & ini,par & inputpars,mdcf & md,int do_Erefine,double 
                   }
                    }
      } // if calc_rixs
-
+    
       if(do_gobeyond){mq1*=DBWF[l]; // multiply Debye Waller factor
                       Gamman=Norm2(mq1);if(Gamman>SMALL_NORM)mq1/=sqrt(Gamman);
-                      }
+                     }    // Note: Norm2 is the sum of the modulus of elements squared 
       mq1_dip*=DBWF[l]; // multiply Debye Waller factor
       gamma=Norm2(mq1_dip);if(gamma>SMALL_NORM)mq1_dip/=sqrt(gamma);
 
@@ -241,7 +248,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
    #define Tau (*thrdat.Tau[thread_id])
    double en = myinput->En; 
    int calc_rixs = myinput->calc_rixs;
-   int calc_Xel = myinput->calc_Xel;
+   int calcXobs = myinput->calcXobs;
    int do_phonon = myinput->do_phonon;
    #define ini (*thrdat.ini[thread_id])
    #define inputpars (*thrdat.inputpars[thread_id])
@@ -298,7 +305,7 @@ double intcalc_approx(ComplexMatrix & chi,ComplexMatrix & chibey,ComplexMatrix &
 chi=0;chibey=0;chiPhon=0;
 int ssm1,in1,in2;
 
-// determine chi
+// determine chi''
  for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
    in1=md.in(i1,j1,k1);      
  for(l1=1;l1<=md.nofatoms;++l1){
@@ -412,9 +419,10 @@ int ssm1,in1,in2;
                     //                      so that Tau is in units of sqrt of meV^-1
 
 
-if (calc_Xel){// use 1-3 components of chi to store result !!! (other components do not count          
-               chi*=bose/(double)ini.mf.n();
-               sumS=Trace(chi);intensity=fabs(real(sumS));
+// chi is actually coefficent of delta function in chi'' (compare manual: chi'' = sum_i chi(i) * delta(omega-E(i))
+if (calcXobs){// calculate polycrystal average from Trace     
+               chi*=bose/(double)ini.mf.n(); // divide by supercell number -> thus chi is per primitive unit cell
+               sumS=Trace(chi)/3.0;intensity=fabs(real(sumS)); 
               } 
 else if (calc_rixs){// use 1-9 components of chi to store result !!! (other components do not count          
                chi*=bose/(double)ini.mf.n();

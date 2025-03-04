@@ -196,9 +196,9 @@ module_type=external;orientation=abc_xyz;int err_load_lib=0;
      if (dP1==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  dP1 -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"dP1 ");}
 
-    pel=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"pelcalc");
+    pelf=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"pelcalc");
     //*(int **)(&p)=GetProcAddress(handle,"pelcalc");
-     if (pel==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  pelcalc -continuing ",(int)GetLastError(),modulefilename);}
+     if (pelf==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  pelcalc -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"pelcalc ");}
 
     dpel1=(int(*)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*,float*,ComplexMatrix*))GetProcAddress(handle,"dpel1");
@@ -220,9 +220,9 @@ module_type=external;orientation=abc_xyz;int err_load_lib=0;
      if (dm1==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  dm1 -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"dm1 ");}
 
-    L=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Lcalc");
-    //*(int **)(&L)=GetProcAddress(handle,"Lcalc");
-     if (L==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  Lcalc -continuing ",(int)GetLastError(),modulefilename);}
+    Lf=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Lcalc");
+    //*(int **)(&Lf)=GetProcAddress(handle,"Lcalc");
+     if (Lf==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  Lcalc -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)if(verbose)fprintf (stderr,"Lcalc ");}
     LM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"LMcalc");
     //*(int **)(&L)=GetProcAddress(handle,"Lcalc");
@@ -234,9 +234,9 @@ module_type=external;orientation=abc_xyz;int err_load_lib=0;
      if (dL1==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  dL1 -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"dL1 ");}
   
-  S=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Scalc");
-    //*(int **)(&S)=GetProcAddress(handle,"Scalc");
-     if (S==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  Scalc -continuing ",(int)GetLastError(),modulefilename);}
+  Sf=(void(*)(Vector*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"Scalc");
+    //*(int **)(&Sf)=GetProcAddress(handle,"Scalc");
+     if (Sf==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  Scalc -continuing ",(int)GetLastError(),modulefilename);}
                     }else {if(verbose)fprintf (stderr,"Scalc ");}
   SM=(void(*)(Matrix*,Vector*,Vector*,Vector*,double*,Vector*,char**,ComplexMatrix*))GetProcAddress(handle,"SMcalc");
     //*(int **)(&S)=GetProcAddress(handle,"SMcalc");
@@ -330,15 +330,15 @@ else
   loadfunction(*(void **)(&du),handle,"du1calc",verbose);
   loadfunction(*(void **)(&p),handle,"pcalc",verbose);
   loadfunction(*(void **)(&dP1),handle,"dP1",verbose);
-  loadfunction(*(void **)(&pel),handle,"pelcalc",verbose);
+  loadfunction(*(void **)(&pelf),handle,"pelcalc",verbose);
   loadfunction(*(void **)(&dpel1),handle,"dpel1",verbose);
   loadfunction(*(void **)(&m),handle,"mcalc",verbose);
   loadfunction(*(void **)(&mM),handle,"mMcalc",verbose);
   loadfunction(*(void **)(&dm1),handle,"dm1",verbose);
-  loadfunction(*(void **)(&L),handle,"Lcalc",verbose);
+  loadfunction(*(void **)(&Lf),handle,"Lcalc",verbose);
   loadfunction(*(void **)(&LM),handle,"LMcalc",verbose);
   loadfunction(*(void **)(&dL1),handle,"dL1",verbose);
-  loadfunction(*(void **)(&S),handle,"Scalc",verbose);
+  loadfunction(*(void **)(&Sf),handle,"Scalc",verbose);
   loadfunction(*(void **)(&dS1),handle,"dS1",verbose);
   loadfunction(*(void **)(&mq),handle,"mqcalc",verbose);
   loadfunction(*(void **)(&ddnn),handle,"dmq1",verbose);
@@ -359,9 +359,10 @@ else
   loadfunction(*(void **)(&dyn_opmat),handle,"opmat",verbose);
 }
 #endif
-
+if(verbose)fprintf (stderr,"\n");
+  
 if(err_load_lib==1){ 
-// here comes some experimental code for loading a shared library
+// here comes the code for loading a shared library
 // in case loading was not successful ...
  std::string path=std::string(modulefilename);
 if(verbose)std::cout << "#Loading singleion_module class from " << path << std::endl;
@@ -379,7 +380,6 @@ module_type=external_class;
 
 // exit(EXIT_FAILURE);
 }
-  if(verbose)fprintf (stderr,"\n");
      }
     }
    }
@@ -623,24 +623,24 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
    // input: emin est nofstps define energies, eps is the imaginary part of the energy
    //        Q       the Q vector in 1/A
    //        |qcounter| is a counter telling which q vector in the list is calculated
-   //                 this sub will only do something if |qcounter|=0,1
+   //                 this sub will only do something if |qcounter|=-1,0,1,2,3,4,5,6,7,8,9
    //        |epsilon| ... imaginary part of Energy for calculation of chi0(omega+i|epsilon|)
-   //        sign(qcounter) <0 & sign(epsilon) >0 ... chi0c matrices should be cleared
-   //        sign(qcounter) <0 & sign(epsilon) <=0  ... try to load chi0 externally (from bfk)
-   //        sign(qcounter) >0 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc
-   //        sign(qcounter) >0 & sign(epsilon) <=0  ... calculate magnetic chi0(1...3,1...3) using dm1calc
+   //        qcounter==-1   & sign(epsilon) >0 ... chi0c matrices should be cleared
+   //        qcounter==-1  & sign(epsilon) <=0  ... try to load chi0 externally (from bfk)
+   //        qcounter==0,1 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc
+   //        qcounter==1,2,...,5 & sign(epsilon) <=0  ... calculate chi0(1...3,1...3) using dm1calc,dpel1calc ... according
+   //              to obint(qcoounter) defined in martin.c:      M=1, pel=2, P=3, L=4, S=5,
    //        delta ... sign determines if energy gain or loss term is added
 /****************************************************************************/
-int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int & nofstps, const double & epsilon, Vector & Q, 
+int jjjpar::chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int & nofstps, const double & epsilon, Vector & Q, 
                   int qcounter,float & delta,double & T,Vector &  Hxc,Vector & Hext, ComplexMatrix & ests,
                    int i1,int j1,int k1,int l1)
 { // for the moment do nothing module specific but use existing module function to calculate internal
   // well defined chi0
   // ... in future we may then do something more clever by putting here values from a file which is created by external
   // programs such as bfk ... this is triggered by epsilon <0
- 
- if(fabs(qcounter)<2)// only do something for first q vector (all others will have the same chi0 [currently not q dependence in chi0]
- {if(qcounter<0){
+
+ if(qcounter==-1){
   if(epsilon>0){for(int i=0;i<nofstps;++i)(*chi0pointer[i])=0; // clear matrices
   }else{// load externally chi0 from bfk0.res type of file
    if(module_type!=so1ion||Hxc.Hi()!=3){fprintf(stderr,"Error mcdisp -r <0 cannot load external chi0: not module so1ion or mf dimension !=3\n");exit(EXIT_FAILURE);}
@@ -688,8 +688,12 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
       }
    fclose(file);
    }
-  } else {// use internal chi0
-  if(epsilon>0){ // use du1calc with nofcomponents
+  } 
+ 
+
+ if((qcounter==0||qcounter==1)&&epsilon>0)
+ {// use internal chi0
+  // use du1calc with nofcomponents
   ComplexVector u1(1,nofcomponents);float dd; int n,nd;
   ComplexMatrix M(1,nofcomponents,1,nofcomponents);
   du1calc(T,Hxc,Hext,u1,dd,n,nd,ests);  
@@ -716,38 +720,48 @@ int jjjpar:: chi0(ComplexMatrix ** chi0pointer,double & emin, double  estp, int 
      cc=0.5*eps/(eps+z);(*chi0pointer[i])+=cc*M.Transpose();
                             } //i
   } 
-  } else  // do purely magnetic susceptibility using dm1calc in muB^2/meV
+  } 
+
+if(qcounter>0&&epsilon<=0)  // 1 do purely magnetic susceptibility using dm1calc in muB^2/meV
+                            // 2 do purely dielectric susceptibility using dpel1calc in (|e|pm)^2/meV
+			    // 3,4,5... similar for P,L,S
   {
   ComplexVector m1(1,3); 
-  ComplexMatrix M(1,3,1,3);
-  dm1calc(T,Hxc,Hext,m1,ests);  
- 
+  ComplexMatrix MM(1,3,1,3);int ch=0;
+  switch(obint(qcounter)){
+    case M:    ch=dm1calc(T,Hxc,Hext,m1,ests); break; 
+    case pel:  ch=dpel1calc(T,Hxc,Hext,m1,ests); break; 
+    case P:    ch=dP1calc(T,Hxc,Hext,m1,ests); break; 
+    case L:    ch=dL1calc(T,Hxc,Hext,m1,ests); break; 
+    case S:    ch=dS1calc(T,Hxc,Hext,m1,ests); break; 
+    default:   fprintf(stderr,"Error jjjpar_basmodfunc chi0: qcounter=%i not implemented\n",qcounter);exit(EXIT_FAILURE);
+                          } 
+  if(ch==0)m1=0;
  complex<double> eps(SMALL_QUASIELASTIC_ENERGY-epsilon,0),cc,d(delta,0);
   if(fabs(delta)>SMALL_QUASIELASTIC_ENERGY)
   {  if(delta<0){ //treat correctly energy gain of neutron
                 m1=m1.Conjugate();
-                M=-m1^m1;
+                MM=-m1^m1;
                } else {
-                M=m1^m1;
+                MM=m1^m1;
                }
   for(int i=0;i<nofstps;++i){
      complex<double> z(emin+i*estp,-epsilon); 
-     cc=1.0/(d-z);(*chi0pointer[i])+=cc*M;       
+     cc=1.0/(d-z);(*chi0pointer[i])+=cc*MM;       
                             } //i
   }else{
      //quasielastic intensity ...  artificially we introduce a splitting epsilon !!! compare Jensen 91 p 158
      // factor 0.5 because every transition is counted as half positive and half negative energy...
-   M=m1^m1;
+   MM=m1^m1;
    for(int i=0;i<nofstps;++i){
      complex<double> z(emin+i*estp,epsilon);    
-     //  cc=eps/(eps-z);(*chi0pointer[i])+=cc*M;
-     cc=0.5*eps/(eps-z);(*chi0pointer[i])+=cc*M;
-     cc=0.5*eps/(eps+z);(*chi0pointer[i])+=cc*M.Transpose();
+     //  cc=eps/(eps-z);(*chi0pointer[i])+=cc*MM;
+     cc=0.5*eps/(eps-z);(*chi0pointer[i])+=cc*MM;
+     cc=0.5*eps/(eps+z);(*chi0pointer[i])+=cc*MM.Transpose();
                             } //i
  
   } 
- }
- }} //qcounter
+ } //qcounter
  return 0; // success
 }
 

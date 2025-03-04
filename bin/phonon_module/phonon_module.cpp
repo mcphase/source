@@ -294,7 +294,7 @@ int phonon_module::du1calc(int &tn,double &T,Vector&Fxc,Vector&Hext,double&gJ,Ve
                             6       umax restriction in y and z direction
   on output    
     delta	splittings [meV] 
-    u1(i)	transition vector elements ...
+    u1(i)	transition vector elements [1]
 */
 int pr;
 
@@ -334,7 +334,7 @@ for(int i=1;i<=3;++i)
 {//u1(i)=complex <double> (Sr(i,tn),Si(i,tn));
 u1(i)=complex <double> (K(i,tn),0.0);
 }
-u1*=sqrt(mev2J*hbar*hbar/2/m/a0/a0/delta); // multiply by factor and convert into 1/meV units
+u1*=sqrt(mev2J*hbar*hbar/2/m/a0/a0/delta); // multiply by factor and convert into [1] units (u: unit is 1)
 if (pr==1) printf ("delta=%4.6g meV\n",delta);
 
 // phonon function has 3 effective transitions
