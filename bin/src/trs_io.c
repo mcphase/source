@@ -27,7 +27,7 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,char 
    fprintf(fout,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
    fprintf(fout,"#            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
    fprintf(fout,"#*********************************************************************\n");
-   if(observable!=I&&observable!=MQ)
+   if(observable!=I)
    {fprintf(fout,"#(*)The unpolarized powder average RAMAN cross section sigma for each transition \n");
    fprintf(fout,"#   is calculated neglecting  the Debye Wallerfactor as follows:\n");
    fprintf(fout,"#-------------------------------------------------------------- \n");
@@ -155,7 +155,7 @@ void trs_header_out(FILE* fout,double & pinit,double & ninit,double & maxE,char 
    fprintf(fout,"#1 2 3  4 *** 5 ****** 6 *********** 7 ******* 8 ********************"
                    " 9  10  ********* 11 ******************** 12 *********************\n");
    fprintf(fout,"#i j k ionnr transnr energy(meV) |gamma_s| ");
-   if(observable!=I&&observable!=MQ)fprintf(fout,"Tr(X%s)/3[(%s)^2](*)  ",obs[obint(observable)],obunit[obint(observable)]);   
+   if(observable!=I)fprintf(fout,"Tr(X%s)/3[(%s)^2](*)  ",obs[obint(observable)],obunit[obint(observable)]);   
    else               fprintf(fout,"sigma_mag_dip[barn/sr](*) ");
                  fprintf(fout, " n  n'  wnn'|<n|%s1-<%s1>|n'>|^2 wnn'|<n|%s2-<%s2>|n'>|^2 ... "
                    "with wnn'=wn-wn' for n!=n'  and wnn=wn/k_B T \n",cc,cc,cc,cc);
@@ -204,28 +204,27 @@ switch(observable)
       case lz:
       case I:
       case M: 
-      case MQ: 
-             // calculate powder neutron intensities 
-     if(jjj.dm1calc(T,mf,Hext,dm1,est)) // if dm1calc is implemented for this ion
-     {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
-     intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
-     if (d>SMALL_QUASIELASTIC_ENERGY){if(d/T/KB<20){intensitym=-intensityp/(1-exp(d/T/KB));intensityp/=(1-exp(-d/T/KB));}else{intensitym=0;}}
-                                  else{intensityp=intensityp*T*KB;intensitym=intensityp;}
-     }
-     else
-     {intensityp=-1;intensitym=-1;dm1=0;} 
-             break; 
-       default: 
-     // calculate Trace X
-    if(ch) // if dObs1calc is implemented for this ion
-     {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
-     intensityp*=1.0/3;// no prefactor just Trace/3
-     intensitym=intensityp;
-     if (d>SMALL_QUASIELASTIC_ENERGY){if(d/T/KB<20){intensitym=-intensityp/(1-exp(d/T/KB));intensityp/=(1-exp(-d/T/KB));}else{intensitym=0;}}
-                                  else{intensityp=intensityp*T*KB;intensitym=intensityp;}
-     }
-     else
-     {intensityp=-1;intensitym=-1;dm1=0;} 
+              // calculate powder neutron intensities 
+        if(jjj.dm1calc(T,mf,Hext,dm1,est)) // if dm1calc is implemented for this ion
+        {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
+        intensityp*=0.048434541067;intensitym=intensityp;// prefactor for intensity in barn/sr is 2/3*0.53908*0.53908/4= 0.048434541067
+        if (d>SMALL_QUASIELASTIC_ENERGY){if(d/T/KB<20){intensitym=-intensityp/(1-exp(d/T/KB));intensityp/=(1-exp(-d/T/KB));}else{intensitym=0;}}
+                                     else{intensityp=intensityp*T*KB;intensitym=intensityp;}
+        }
+        else
+        {intensityp=-1;intensitym=-1;dm1=0;} 
+              break; 
+     default: 
+        // calculate Trace X
+       if(ch) // if dObs1calc is implemented for this ion
+        {intensityp+=Norm2(dm1); // Norm2 ... sum of modulus squared
+        intensityp*=1.0/3;// no prefactor just Trace/3
+        intensitym=intensityp;
+        if (d>SMALL_QUASIELASTIC_ENERGY){if(d/T/KB<20){intensitym=-intensityp/(1-exp(d/T/KB));intensityp/=(1-exp(-d/T/KB));}else{intensitym=0;}}
+                                     else{intensityp=intensityp*T*KB;intensitym=intensityp;}
+         }
+        else
+        {intensityp=-1;intensitym=-1;dm1=0;} 
    break;
      }
       

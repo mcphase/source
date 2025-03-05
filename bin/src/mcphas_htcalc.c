@@ -491,9 +491,7 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    fprintf(fin_coq,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
    #endif
    fclose(fin_coq);	      
-   printf("\n starting T=%g H=%g Hi=%g Hj=%g Hk=%g ",T,Norm(H),H(1),H(2),H(3));
-   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90){printf("Hi=%g Hj=%g Hk=%g",H(1),H(2),H(3));}
-   printf("\n");
+   printf("\n starting  "); ini.print_usrdefcols(stdout,physprops.x,physprops.y,T,H,inputpars.cs.abc,true);printf("\n");
    printf("with %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",testspins.n,testqs.nofqs());
    printf("Notation: < >            ...begin / end of mean field loop\n");
    printf("          ->             ...reduction of stabilised structure possible into ...\n");

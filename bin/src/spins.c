@@ -21,9 +21,9 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [h k l E]\n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
-    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [h k l E]\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [h k l E]\n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
+    or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [h k l E]\n\
                     \n\
 1) if used with -f file T Ha Hb Hc, this file has to be a mcphas.mf or mcphas.sps file,\n \
    the spin configuration at given temperature T[K] and magnetic effective field H[T]\n \
@@ -73,6 +73,7 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
          -M  ... show arrow indicating magnetic moment (for cluster show total moment)\n\
          -Mi ... show arrow indicating magnetic moment (for cluster show individual moments)\n\
          -P  ... calculate phononic displacement\n\
+         -pel  ... show arrow indicating electric dipole moment\n\
          -eps ... create eps (postscript) files in addition to jvx (javaview) output\n\
          -fst ... create fst (fullprof viewer) files in addition to jvx (javaview) output\n\
 \n\
@@ -272,6 +273,9 @@ else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins
                                    snprintf(gp.title,sizeof(gp.title),"%s arrows correspond to the magnetic moments",gp.title);
                                    if(strcmp(argv[os],"-Mi")==0){arrow=4;}
                                    }
+else if(strncmp(argv[1+os],"-pel",4)==0){os+=1;arrow=5;gp.spins_colour=4; gp.spins_scale_moment=1;//arrowdim=MAGMOM_EV_DIM;
+                                   snprintf(gp.title,sizeof(gp.title),"%s arrows correspond to the electric dipole moments",gp.title);
+                                   }
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
 if(strcmp(argv[1+os],"-eps")==0){os+=1;eps=1;}
@@ -437,7 +441,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
 
      savmf.jvx_cd(fin,outstr,cs,
                   gp,0.0,savmf*0.0,savmf*0.0,
-                  hkl1,T,gjmbHxc1,Hextijk,cs,magmom,magmom * 0.0,magmom* 0.0);
+                  hkl1,T,gjmbHxc1,Hextijk,cs,magmom,magmom * 0.0,magmom* 0.0,magmom * 0.0);
     fclose (fin);
 
   exit(0);
@@ -477,6 +481,7 @@ gp.read();
               } cs4.nofatoms=ii;
 
   spincf spinconf(savmf.na(),savmf.nb(),savmf.nc(),ii,3);
+  spincf sc_phonon(savmf.na(),savmf.nb(),savmf.nc(),ii,3);
 
 fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    fprintf(fout,"#! strain tensor: eps1=%4.4g=epsii eps2=%4.4g=epsjj eps3=%4.4g=epskk eps4=%4.4g=2epsjk eps5=%4.4g=2epsik eps6=%4.4g=2epsij\n",
@@ -540,12 +545,15 @@ switch(arrow)
 {case 1: (*inputpars.jjj[ii]).Scalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
  case 2: (*inputpars.jjj[ii]).Lcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
  case 3: (*inputpars.jjj[ii]).mcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
+ case 5: (*inputpars.jjj[ii]).pelcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage);break;
+ default: break;
 }
 
 switch(arrow)
 {case 1:
  case 2:
  case 3:
+ case 5:
          for(nt=1;nt<=3;++nt)
 		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt); // here we set moment to be output as arrow
                     };break;
@@ -693,14 +701,14 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
 if(phonon==1)  // if module allows to calculate position  - use this for graphics ...
 {if(true==(*inputpars.jjj[ii]).pcalc(mom,T,h,Hextijk,(*inputpars.jjj[ii]).Icalc_parstorage))
 {for(nt=1;nt<=3;++nt)
-		        {spinconf.m(i,j,k)(nt+3*(ii-1))=mom(nt); // here we set moment to be output as arrow
+		        {sc_phonon.m(i,j,k)(nt+3*(ii-1))=mom(nt); // here we set moment to be output as arrow
                     };
 }
 }
 
   }}
 }}
-
+             
 if (strncmp(argv[1],"-t",2)==0){exit(0);}
   fclose (fout);
    
@@ -773,13 +781,13 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins.jvx", "w");
     gp.showprim=0;gp.spins_wave_amplitude=0;
-     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon);
     fclose (fin);
 
 // create jvx file of spinconfiguration - checkout polytope/goldfarb3.jvx  primitive/cubewithedges.jvx
    fin = fopen_errchk ("./results/spins_prim.jvx", "w");
      gp.showprim=1;
-     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag);
+     densitycf.jvx_cd(fin,outstr,cs,gp,0.0,densityev_real,densityev_imag,hkl,T,gjmbHxc,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon);
     fclose (fin);
 
 //***************************************************************************************************************
@@ -816,7 +824,10 @@ if (argc-1==8+os){
               case 4: fprintf(stderr,"mcdisp: output of individual moment oscillation in eigenvector file mcdisp.qemi not yet implemented - thus exiting program spins\n");
                       strcpy(infilename+10+strlen(prefix),"mcdisp.qemi");fin = fopen(infilename, "rb");
                       if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qemi", "rb");
-                      break;                      
+                      break;   
+              case 5: strcpy(infilename+10+strlen(prefix),"mcdisp.qpe");fin = fopen(infilename, "rb");
+                      if(fin==NULL)fin = fopen_errchk ("./results/mcdisp.qpe", "rb");
+                      break;                   
              }
              // input file header ------------------------------------------------------------------
              instr[0]='#';
@@ -1057,12 +1068,12 @@ if (argc-1==8+os){
                snprintf(filename,sizeof(filename),"./results/spins.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=0;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,spinconfpev_real,spinconfpev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);
                fclose (fin);
                snprintf(filename,sizeof(filename),"./results/spins_prim.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=1;
                      densitycf.jvx_cd(fin,outstr,cs,gp,
-                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,spinconfpev_real,spinconfpev_imag);
+                                  phase,densityev_real,densityev_imag,hkl,T,hh,Hextijk,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);
                fclose (fin);
               }
           printf("# %s\n",outstr);

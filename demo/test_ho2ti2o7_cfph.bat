@@ -27,12 +27,26 @@ REM  also the crystal field will
 REM be calculated using this model         
 call makenn 6 -cfph -r
 
-reduce_unitcell -delatoms 23:9+-0.5:1+-0.5,24:9+-0.5:2+-0.5,25:9+-0.5:3+-0.5,26:9+-0.5:4+-0.5,27:10+-0.5:1+-0.5,28:10+-0.5:2+-0.5,29:10+-0.5:3+-0.5,30:10+-0.5:4+-0.5,31:11+-0.5:1+-0.5,32:11+-0.5:2+-0.5,33:12+-0.5:3+-0.5,34:12+-0.5:4+-0.5,35:13+-0.5:3+-0.5,36:13+-0.5:1+-0.5,37:14+-0.5:2+-0.5,38:14+-0.5:4+-0.5,39:15+-0.5:2+-0.5,40:15+-0.5:3+-0.5,41:16+-0.5:1+-0.5,42:16+-0.5:4+-0.5,43:17+-0.5:1+-0.5,44:17+-0.5:2+-0.5,45:18+-0.5:3+-0.5,46:18+-0.5:4+-0.5,47:19+-0.5:3+-0.5,48:19+-0.5:1+-0.5,49:20+-0.5:2+-0.5,50:20+-0.5:4+-0.5,51:21+-0.5:2+-0.5,52:21+-0.5:3+-0.5,53:22+-0.5:1+-0.5,54:22+-0.5:4+-0.5  results/makenn.j > cfph.j
+REM - now the tedious work is to remove all the electron charges from .j files
+REM 1) first do mcphas_all_atoms.j
+reduce_unitcell -delatoms 23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54 mcphas.j > mcphas_all_atoms.j 
+REM 2) do the create cfph interaction file
+reduce_unitcell -delatoms 23:9+--0.5:1+--0.5,24:9+--0.5:2+--0.5,25:9+--0.5:3+--0.5,26:9+--0.5:4+--0.5,27:10+--0.5:1+--0.5,28:10+--0.5:2+--0.5,29:10+--0.5:3+--0.5,30:10+--0.5:4+--0.5,31:11+--0.5:1+--0.5,32:11+--0.5:2+--0.5,33:12+--0.5:3+--0.5,34:12+--0.5:4+--0.5,35:13+--0.5:3+--0.5,36:13+--0.5:1+--0.5,37:14+--0.5:2+--0.5,38:14+--0.5:4+--0.5,39:15+--0.5:2+--0.5,40:15+--0.5:3+--0.5,41:16+--0.5:1+--0.5,42:16+--0.5:4+--0.5,43:17+--0.5:1+--0.5,44:17+--0.5:2+--0.5,45:18+--0.5:3+--0.5,46:18+--0.5:4+--0.5,47:19+--0.5:3+--0.5,48:19+--0.5:1+--0.5,49:20+--0.5:2+--0.5,50:20+--0.5:4+--0.5,51:21+--0.5:2+--0.5,52:21+--0.5:3+--0.5,53:22+--0.5:1+--0.5,54:22+--0.5:4+--0.5  results/makenn.j > cfph.j
 REM now in cfph.j there is the CF-phonon interaction
 perl -l -n -e "unlink" reduce_unitcell_sipf.del
 
 getvariable.pl -c 26 nofatoms cfph.j
 getvariable.pl -c 48  nofcomponents cfph.j
+
+copy mcphas_all_atoms.j mcphas.j
+call makenn 5.1 -bvk > bvk_springs.dat
+REM set scale=1000
+REM set alpha=5.00000e-01
+REM call fillcol 4 %scale%'xexp(-'%alpha%'xc3xc3)' bvk_springs.dat
+REM compute makenn.j file
+call makenn 5.1 -bvk bvk_springs.dat
+
+copy results/makenn.j mcphasph.j
 
 
 REM add all interactions ...

@@ -325,7 +325,7 @@ void do_a_sipf(jjjpar & jjj,int nmax,double pinit,double ninit,double maxE,Vecto
               Vector & Hstart,int Hsteps,Vector & dH,
               double epsilon,double lambda, double X00,int verbose,double opmat,int no_trs_write,int HEnofcomp,
               int calcX,Xunit unit)
-  { char filename[MAXNOFCHARINLINE],trsstring[MAXNOFCHARINLINE];
+  { char filename[MAXNOFCHARINLINE],trsstring[MAXNOFCHARINLINE];trsstring[0]='\0';
     float nn[MAXNOFCHARINLINE];nn[0]=MAXNOFCHARINLINE;
     char  * pchr;int j;
     Matrix I(1,observable_nofcomponents,1,Tsteps);complex <double> X0 (X00,0);

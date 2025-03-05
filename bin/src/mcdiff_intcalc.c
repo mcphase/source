@@ -130,12 +130,12 @@ case 53: return ini.Eabc(3);  //"Ec[kV/mm] ",    //  53
 case 54: return ini.H(4);  //"Ea[kV/mm] ",    //  54
 case 55: return ini.H(5);  //"Eb[kV/mm] ",    //  55
 case 56: return ini.H(6);  //"Ec[kV/mm] ",    //  56
-case 57: return ini.H(7);  //"s1[Pa] ",    //  57
-case 58: return ini.H(8);  //"s2[Pa] ",    //  58
-case 59: return ini.H(9);  //"s3[Pa] ",    //  59
-case 60: return ini.H(10);  //"s4[Pa] ",    //  60
-case 61: return ini.H(11);  //"s5[Pa] ",    //  61
-case 62: return ini.H(12);  //"s6[Pa] ",    //  62
+case 57: return ini.H(7);  //"s1[GPa] ",    //  57
+case 58: return ini.H(8);  //"s2[GPa] ",    //  58
+case 59: return ini.H(9);  //"s3[GPa] ",    //  59
+case 60: return ini.H(10);  //"s4[GPa] ",    //  60
+case 61: return ini.H(11);  //"s5[GPa] ",    //  61
+case 62: return ini.H(12);  //"s6[GPa] ",    //  62
   default: fprintf(stderr,"Error mcdiff: unknown column code\n");exit(EXIT_FAILURE);   
 
          }

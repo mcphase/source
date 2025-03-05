@@ -70,11 +70,19 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
   fprintf(foutqom,"#!<--mcphas.mcdisp.qom-->\n");
  if(calcXobs){fprintf(foutqei,"#!<--mcphas.mcdisp.qeX%s-->\n",obs[calcXobs]);
                writeheader(inputpars,foutqei);
-               fprintf(foutqei,"#susceptibility X%s(Q,omega)\n",obs[calcXobs]);
+               fprintf(foutqei,"#susceptibility X%s''(Q,omega)\n",obs[calcXobs]);
+            fprintf(foutqei,
+"#       1    ----   ss'           ss'       *  \n"
+"# X''= ----  >     X (Q,omega)-  X (Q,omega)   \n"
+"#       2iN  ----    \n"
+"#            s,s'  \n"
+"# \n"
+"#      s,s' ... ions in the supercell of the primitive unit cell.\n"
+"#      N    ... number of primitive unit cells in supercell.\n");
                fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
              ini.print_usrdefcolhead(foutqei);
              fprintf (foutqei,"energy[meV] " 
-  "Trace(X%s'')/3 X%sxxreal(Q,omega) X%sxximag X%syyreal X%syyimag X%szz .. X%syz X%szy X%sxz X%szx X%syz X%szy (%s)^2/f.u. f.u.=crystallographic primitive unit cell (r1xr2xr3) \n",
+  "Trace(X%s'')/3 X%s''xxreal(Q,omega) X%s''xximag X%s''yyreal X%s''yyimag X%s''zz .. X%s''yz X%s''zy X%s''xz X%s''zx X%s''yz X%s''zy(%s)^2/f.u. f.u.=crystallographic primitive unit cell (r1xr2xr3) \n",
       obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],
       obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obunit[calcXobs] );
   }

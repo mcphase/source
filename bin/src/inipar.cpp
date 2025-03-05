@@ -120,12 +120,12 @@ const char * colhead []= {  "T [K]", //      0
                             "Ei [kV/mm]",  //    10      
                             "Ej [kV/mm]",  //    11      
                             "Ek [kV/mm]",  //    12     
-                            "s1 [Pa]",  //    13    
-                            "s2 [Pa]",  //    14      
-                            "s3 [Pa]",  //    15      
-                            "s4 [Pa]",  //    16      
-                            "s5 [Pa]",  //    17      
-                            "s6 [Pa]",  //    18 
+                            "s1 [GPa]",  //    13    
+                            "s2 [GPa]",  //    14      
+                            "s3 [GPa]",  //    15      
+                            "s4 [GPa]",  //    16      
+                            "s5 [GPa]",  //    17      
+                            "s6 [GPa]",  //    18 
                             "x",  //    19 
                             "y", //     20 
                             "|H| [T]",   //    21
@@ -305,7 +305,7 @@ for(int i=1;i<=HEXT_DIMENSION;++i)
    case 4: case 5: case 6: { bool cc=c[7]|c[8]|c[9]|c[10]|c[11]|c[12]|c[22];
    if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
                            }break;
-   default: if(!c[i]){fprintf(stderr,"#Warning: stress s%i nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n",i-6);exit(EXIT_FAILURE); }
+   default: if(!c[i+6]){fprintf(stderr,"#Warning: stress s%i nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n",i-6);exit(EXIT_FAILURE); }
   }
  }
 }
@@ -515,7 +515,7 @@ void inipar::print (const char * filename)
 		  \n# defined by  j||b, k||(a x b) and i normal to k and j ), \
 		  \n# electric field xEa[kV/mm] xEb[kV/mm] xEc[kV/mm]  xEi[kV/mm] xEj[kV/mm] xEk[kV/mm] \
 		  \n# stress tensor in Voigt notation (1,2,3,4,5,6 = ii jj kk jk ik ij) \
-                  \n# xs1[Pa] xs2[Pa] xs3[Pa] xs4[Pa] xs5[Pa] xs6[Pa] \
+                  \n# xs1[GPa] xs2[GPa] xs3[GPa] xs4[GPa] xs5[GPa] xs6[GPa] \
                   \n");
 
     fprintf(fout,"xT=%g\nxHa=%g\nxHb=%g\nxHc=%g\n# range of x\nxmin=%g\nxmax=%g\nxstep=%g\n",

@@ -343,7 +343,7 @@ getvalue.pl -c 0   0 11 1 0 results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 0  0 12 1 0  results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 0  0 13 1 0  results/Pr3p_xyz.sipf.trs
 
-getvalue.pl -c 0.12  0 8 4 0 results/Pr3p_xyz.sipf.trs
+getvalue.pl -c 0.8248  0 8 4 0 results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 0.88  0 11 4 0 results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 1.15  0 12 4 0 results/Pr3p_xyz.sipf.trs
 getvalue.pl -c 0.45  0 13 4 0 results/Pr3p_xyz.sipf.trs
@@ -363,7 +363,7 @@ getvalue.pl -c 0   0 11 1 0 results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 0  0 12 1 0  results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 0  0 13 1 0  results/Pr3p_xyz_icf1ion.sipf.trs
 
-getvalue.pl -c 0.13  0 8 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
+getvalue.pl -c 0.85  0 8 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 0.90   0 11 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 1.18  0 12 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
 getvalue.pl -c 0.46  0 13 4 0 results/Pr3p_xyz_icf1ion.sipf.trs
@@ -383,7 +383,7 @@ getvalue.pl -c 0   0 11 1 0 results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0  0 12 1 0  results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0  0 13 1 0  results/Pr3p_xyz_ic1ion.sipf.trs
 
-getvalue.pl -c 0.13  0 8 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
+getvalue.pl -c 0.86  0 8 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0.92  0 11 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 1.20  0 12 4 0 results/Pr3p_xyz_ic1ion.sipf.trs
 getvalue.pl -c 0.46  0 13 4 0 results/Pr3p_xyz_ic1ion.sipf.trs

@@ -44,12 +44,12 @@ const char * colhead []= {  "Qinc[1/A] ", //  0
                             "Ei[kV/mm] ",  //    21      
                             "Ej[kV/mm] ",  //    22      
                             "Ek[kV/mm] ",  //    23      
-                            "s1[Pa] ",  //    24     
-                            "s2[Pa] ",  //    25      
-                            "s3[Pa] ",  //    26      
-                            "s4[Pa] ",  //    27      
-                            "s5[Pa] ",  //    28      
-                            "s6[Pa] "  //    29     
+                            "s1[GPa] ",  //    24     
+                            "s2[GPa] ",  //    25      
+                            "s3[GPa] ",  //    26      
+                            "s4[GPa] ",  //    27      
+                            "s5[GPa] ",  //    28      
+                            "s6[GPa] "  //    29     
                                };
 
 // different output data for user defined columns ...
@@ -118,7 +118,7 @@ void inimcdis::helpexit() // type info and error exit
     printf (" -x            ... calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities\n");
     printf (" -xa   stp     ... calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection (stp in deg)\n");
     printf (" -xaf  az      ... calculate resonant inelastic x-ray intensities at specified azimuth (deg) for each reflection\n"
-            " -X[observable]... to calculate omega and Q dependent  susceptibility tensor for an observable \n"
+            " -X[observable]... to calculate omega and Q dependent  susceptibility tensor X''(Q,omega) for an observable \n"
             "                   observable can be: M (magnetic moment) pel (electricalpolarisation)\n"
             "                   (e.g. use -Xpel for RAMAN and inelastic X-ray scattering intensity on phonons). \n"
             "                      -XM for magnetic susceptibility e.g. to calculate EPR spectra \n"
