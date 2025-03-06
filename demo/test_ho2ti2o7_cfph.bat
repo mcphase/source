@@ -53,8 +53,24 @@ REM add all interactions ...
 call addj  mcphasph.j cfph.j > mcphas_cfph.j
 call addj mcphas_cfph.j mcphasex_cd.j > mcphas.j
 
-
+REM try stress along 111 direction ...
 call mcphasit -v -doeps -prefix test_ 
-getvalue.pl -c -7.1003 1 8 1 0 results/test_mcphas.fum
+getvalue.pl -c 30.977 2 8 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.8688 2 11 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.0036 2 22 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.0036 2 23 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.0036 2 24 0.5 0 results/test_mcphas.fum
+
+setup_mcdisp_mf -prefix test_   1    1    1    0 0.5774 0.5774 0.5774 
+mcdispit -prefix test_ -pinit 0.1 -maxE 50
+
+range 7 1 1.2 results/test_mcdisp.qei
+getvalue.pl -c  0.0015 9 10 32.7692 0 results/test_mcdisp.qei
+getvalue.pl -c  0.0015 9 11 32.7692 0 results/test_mcdisp.qei
+getvalue.pl -c  0.00011 9 12 32.7692 0 results/test_mcdisp.qei
+
+mcdispit -prefix test_ -pinit 0.1 -maxE 50 -Xpel
+
+
 
 cd ../../demo

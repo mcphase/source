@@ -4,8 +4,6 @@
 #include <ctime>
 #include "singleion_module.hpp"
 #include "ic1ion.hpp"
-#include "martin.h"
-#include "myev.h"
 
 class icf1ion_module : public singleion_module
 {private:  

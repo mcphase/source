@@ -456,7 +456,7 @@ int myparse_execute(zsMat<double> **operators, char **operatornames, int *seq2, 
     zsMat<double> dummy, dummy2;
 
        // Prints out what we think the input should be for debugging purposes
-       printf("%s\t==>\t",statement);
+       printf("# %s\t==>\t",statement);
 
        // Now do the matrix manipulations, do the first operation outside the loop
        int is5=0;

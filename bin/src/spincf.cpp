@@ -10,8 +10,10 @@
 
 #define MAXNOFSPINS  200
 #define SMALLSPINDIFF 0.03
+#define NOMORE  100        // maximum number of atoms to plot in jvx file
 // output functions
 #include "spincf_out.cpp"
+#include "spincf_jvx.cpp"
 
 int spincf::spequal(Vector a,Vector b)
 {// in this function we look if two spins are equal or not (used in order to compare or reduce

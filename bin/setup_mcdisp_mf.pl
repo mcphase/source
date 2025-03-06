@@ -5,27 +5,32 @@ GetOptions("help"=>\$helpflag,
            "prefix|p=s"=>\$prefix);
 usage() if $helpflag||$#ARGV<1;
 print STDERR "#* $0 *\n";
-$ARGV[0]=~s/x/*/g;$ARGV[0]=eval $ARGV[0];
-$ARGV[1]=~s/x/*/g;$ARGV[1]=eval $ARGV[1];
-if ($#ARGV>2) { 
-$ARGV[2]=~s/x/*/g;$ARGV[2]=eval $ARGV[2];
-$ARGV[3]=~s/x/*/g;$ARGV[3]=eval $ARGV[3];
-            }
+foreach(@ARGV)
+{
+$_=~s/exp/essp/g;
+$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;
+}
+
 print STDOUT << "EOF";
 #******************************************************************
 #* setup_mcdisp_mf 221011 setting up mcdisp.mf to be used by mcdisp
 EOF
 print STDOUT "# reading results/".$prefix."mcphas.mf\n";
 print STDOUT "# writing ".$prefix."mcdisp.mf\n";
+if ($#ARGV>4) { 
+print STDOUT "out1=$ARGV[0]  out2=$ARGV[1]  out3=$ARGV[2] out4=$ARGV[3] out5=$ARGV[4] out6=$ARGV[5] out7=$ARGV[6]   ... starting spins\n";
+$args="$ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3] $ARGV[4] $ARGV[5] $ARGV[6]";
+             }
 if ($#ARGV>2) { 
-print STDOUT "#T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T\n";
-$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]  > ".$prefix."mcdisp.mf");
+print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T  ... starting spins\n";
+$args="$ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]";
              }
 else
             {
-print STDOUT "# x=$ARGV[0]  y=$ARGV[1] \n";
-$err=system ("spins -f results/".$prefix."mcphas.mf $ARGV[0] $ARGV[1]  > ".$prefix."mcdisp.mf");
+print STDOUT "x=$ARGV[0]  y=$ARGV[1] ... starting spins\n";
+$args="$ARGV[0] $ARGV[1]";
              }
+$err=system ("spins -f results/".$prefix."mcphas.mf ".$args."  > ".$prefix."mcdisp.mf");
 if($err){unlink "mcdisp.mf";exit(1);}
 
 
@@ -38,7 +43,7 @@ print STDOUT << "EOF";
 # reading results/$prefix mcphas.sps
 # ....writing results/spins.*
 EOF
-system ("spins -prefix $prefix $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
+system ("spins -prefix $prefix $args");
 }else{
 print STDOUT << "EOF";
 # file mcdisp.mf created
@@ -49,7 +54,7 @@ print STDOUT << "EOF";
 # ....writing mcdisp.mf
 # ....writing results/spins.*
 EOF
-system ("spins $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
+system ("spins $args");
 }
 
 
@@ -81,12 +86,15 @@ sub usage() {
     usage: setup_mcdisp_mf [options] T Ha Hb Hc
              or
            setup_mcdisp_mf [options] x y
+             or
+           setup_mcdisp_mf [options] out1 out2 out3 ou4 out5 out6 out7
 
      -h          : this (help) message
-      T          : Temperature (K)
-      Ha,Hb,Hc   : Magnetic Field (T)
-      x,y        : x,y values of point in the phase diagram
-
+      T          : Temperature (K) (column 3 in output file mcphas.*)
+      Ha,Hb,Hc   : Magnetic Field (T) (columns 5,6,7 in output file mcphas.*)
+      x,y        : x,y values of point in the phase diagram (columns 1 2 in mcphas.*)
+      out1-out7  : values of external parameters in columns 1-7 of output files mcphas.*
+  
     required input files:
 
     results/mcphas.mf

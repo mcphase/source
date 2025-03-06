@@ -138,15 +138,6 @@ extern int sleep(int a);
 void xproduct(Vector & result,Vector a, Vector b);
 Vector crossp(Vector a,Vector b);
 
-// calculates expectation value   <ES|OP|ES> of hermitian operator OP given a complex eigenstate vector  ES
-// OP and ES are given as pointers 
-double expectation_value(int & dim,complexdouble * OP,complexdouble * ES );
-
-
-// similar to above, calculates transition matrix element <S1|OP|S2> of hermitian 
-// operator OP given
-// two complex vector S1 and S2  OP and S1,S2 are given as pointers 
-complexdouble transition_matrixelement(int & d,complexdouble * OP,complexdouble * S1,complexdouble * S2);
 
 
 //**********************************************************************************

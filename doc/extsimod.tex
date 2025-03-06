@@ -460,28 +460,31 @@ void estates            &&	{\prg mcdiff}         & parameter storage for du1calc
 Observables & &&\\
 \hline
 \hline
-void mcalc      	& & {\prg mcdiff,singleion} & magnetic moment $\langle\hat \mbf M\rangle$\\
+void mcalc      	& & {\prg mcdiff,singleion} & magnetic moment $\langle\hat \mbf M\rangle$ [$\mu_B$]\\
 	                & & {\prg mcphase} &\\
 void mMcalc      	& & {\prg singleion} & the same with vectorized T\\
-int dm1		& & {\prg mcdisp} & $\langle-| \hat\mbf M|+\rangle\sqrt{(p_--p_+)}$\\
+int dm1		& & {\prg mcdisp} & $\langle-| \hat\mbf M|+\rangle\sqrt{(p_--p_+)}$[$\mu_B$]\\
 \hline
-void Lcalc      	& & {\prg mcdiff,singleion} & orbital ang. momentum $\langle \hat \mbf L\rangle$\\
+void Lcalc      	& & {\prg mcdiff,singleion} & orbital ang. momentum $\langle \hat \mbf L\rangle$[$\hbar$]\\
 	                & & {\prg mcphase} &\\
 void LMcalc      	& & {\prg singleion} & the same with vectorized T\\
-int dL1		& & {\prg mcdisp} & $\langle-| \hat\mbf L|+\rangle\sqrt{(p_--p_+)}$\\
+int dL1		& & {\prg mcdisp} & $\langle-| \hat\mbf L|+\rangle\sqrt{(p_--p_+)}$[$\hbar$]\\
 \hline
-void Scalc      	& & {\prg mcdiff,singleion} & spin $\langle \hat\mbf S\rangle$\\
+void Scalc      	& & {\prg mcdiff,singleion} & spin $\langle \hat\mbf S\rangle$[$\hbar$]\\
 	                & & {\prg mcphase} &\\
 void SMcalc      	& & {\prg singleion} & the same with vectorized T\\
-int dS1		& & {\prg mcdisp} &  $\langle-|\hat \mbf S|+\rangle\sqrt{(p_--p_+)}$\\
+int dS1		& & {\prg mcdisp} &  $\langle-|\hat \mbf S|+\rangle\sqrt{(p_--p_+)}$[$\hbar$]\\
 \hline
-void mqcalc      	& & {\prg mcdiff} & FT of magnetic moment $\langle\hat \mbf M(\mbf Q)\rangle$\\
-int dmq1		& & {\prg mcdisp} &  $\langle-|\hat \mbf M(\mbf Q)|+\rangle\sqrt{(p_--p_+)}$\\
+void mqcalc      	& & {\prg mcdiff} & FT of magnetic moment $\langle\hat \mbf M(\mbf Q)\rangle$[$\mu_B$]\\
+int dmq1		& & {\prg mcdisp} &  $\langle-|\hat \mbf M(\mbf Q)|+\rangle\sqrt{(p_--p_+)}$[$\mu_B$]\\
 \hline
 int drixs1 & & {\prg mcdisp} & RIXS transition operator $\hat \mbf R$,eq. (\ref{rixsop})\\
 \hline
-void pcalc      	& & {\prg mcphas} & phononic displacement $\langle \hat \mbf P\rangle$\\
-nt dP1 & & {\prg mcdisp} & phonon displacement (\AA) $\langle-|\hat \mbf P|+\rangle\sqrt{(p_--p_+)}$\\
+void pcalc      	& & {\prg mcphas} & phononic displacement $\langle \hat \mbf P\rangle$[$\AA$]\\
+nt dP1 & & {\prg mcdisp} & phonon displacement $\langle-|\hat \mbf P|+\rangle\sqrt{(p_--p_+)}$[$\AA$]\\
+\hline
+void pelcalc      	& & {\prg mcphas} & electric dipole moment $\langle \hat \mbf p_{\rm el}\rangle$[$|e|$pm]\\
+nt dpel1 & & {\prg mcdisp} & el. dipole moment $\langle-|\hat \mbf p_{\rm el}|+\rangle\sqrt{(p_--p_+)}$[$|e|$pm]\\
 \hline
 void chargedensity\_coeff  & {\prg densplt -c}&&coeff of $-|e|Z_l^m(\Omega)R^2(r)$ in equ.(\ref{chargedensity2})\\
 &{\prg spins -c} & & i.e. $\langle\sum_i Z_l^m(\Omega_i)\rangle$\\

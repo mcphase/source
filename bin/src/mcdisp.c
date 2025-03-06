@@ -1081,14 +1081,14 @@ if (do_jqfile){
                            }
                writeheaders(foutqom,foutqei,foutdstot,foutds,inputpars,ini,calc_rixs,calcXobs,do_Erefine);  
               //------------observables-----------------------------------
-               if(ini.calculate_chargedensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);}
-               if(ini.calculate_spindensity_oscillation)  {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);}
-               if(ini.calculate_orbmomdensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);}
-               if(ini.calculate_phonon_oscillation)       {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);}
-               if(ini.calculate_magmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);}
-               if(ini.calculate_pel_oscillation)          {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qpe",ini.prefix);foutqpe=evfileinit(filemode,filename,inputpars,"qpe",PEL_EV_DIM);}
-               if(ini.calculate_spinmoment_oscillation)   {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);}
-               if(ini.calculate_orbmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);}
+               if(ini.calculate_chargedensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qee",ini.prefix);foutqee=evfileinit(filemode,filename,inputpars,"qee",CHARGEDENS_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_spindensity_oscillation)  {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qsd",ini.prefix);foutqsd=evfileinit(filemode,filename,inputpars,"qsd",3*SPINDENS_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_orbmomdensity_oscillation){snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qod",ini.prefix);foutqod=evfileinit(filemode,filename,inputpars,"qod",3*ORBMOMDENS_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_phonon_oscillation)       {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qep",ini.prefix);foutqep=evfileinit(filemode,filename,inputpars,"qep",PHONON_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_magmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qem",ini.prefix);foutqem=evfileinit(filemode,filename,inputpars,"qem",MAGMOM_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_pel_oscillation)          {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qpe",ini.prefix);foutqpe=evfileinit(filemode,filename,inputpars,"qpe",PEL_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_spinmoment_oscillation)   {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qes",ini.prefix);foutqes=evfileinit(filemode,filename,inputpars,"qes",SPIN_EV_DIM);printf("#saving %s\n",filename);}
+               if(ini.calculate_orbmoment_oscillation)    {snprintf(filename,MAXNOFCHARINLINE,"./results/%smcdisp.qel",ini.prefix);foutqel=evfileinit(filemode,filename,inputpars,"qel",ORBMOM_EV_DIM);printf("#saving %s\n",filename);}
                //-----------------------------------------------------------
                lastcputime=std::clock();
               } else
@@ -1873,7 +1873,7 @@ for (i=1;i<=argc-1;++i){
   ini.load("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc);
 
 
-  if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.par (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
+  if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
   if(calc_rixs&&calcXobs){fprintf(stderr,"Error mcdisp: Options -X[observable] and -x -xa -xaf cannnot be used simultaneously, please use only one of these options\n");exit(EXIT_FAILURE);}
   if(do_Erefine&&(calc_rixs||calcXobs)){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf -X[observable]\n");exit(EXIT_FAILURE);}
   if(do_jqfile&&do_readtrs){fprintf(stderr,"Error mcdisp: Option -t and -jq are cannot be used at the same time\n");exit(EXIT_FAILURE);}

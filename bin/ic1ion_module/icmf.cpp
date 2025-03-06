@@ -19,7 +19,6 @@
  * This program is licensed under the GNU General Purpose License, version 2. Please see the COPYING file
  */
 #include "ic1ion.hpp"
-#include "martin.h"
 #include <cctype>                  // For std::tolower
 #include <fstream>
 
@@ -269,7 +268,7 @@ icmfmat::icmfmat(int n, orbital l, int num_op, bool save_matrices, int xyz)
    _n = n; _l = l; _num_op = num_op; _xyz = xyz;_save_matrices=save_matrices;
    sMat<double> t; J.assign(num_op>6?num_op:6,t); T.assign(num_op>6?num_op+2:8,NULL);
    iflag.assign(num_op>6?num_op:6,0); 
-   for(int m=0;m<(num_op>6&&!save_matrices?num_op:6);++m)op_generate(m);
+   if(xyz==0)for(int m=0;m<(num_op>6&&!save_matrices?num_op:6);++m)op_generate(m);
 }
 
 icmfmat::icmfmat(const icmfmat & pp)

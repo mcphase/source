@@ -112,7 +112,7 @@ IntVector::IntVector (int ncl, int nch, int value)
 //  all elements with the given value
 //
 {
-    register int* v;
+     int* v;
 
     // set the dimension information
     cl = ncl; ch = nch; ncol = nch-ncl+1;
@@ -448,8 +448,8 @@ int Min (const IntVector& d)
 // Returns the smallest element
 //
 {
-    register int n = d.ch-d.cl;
-    register int* src = d.V+d.cl;
+     int n = d.ch-d.cl;
+     int* src = d.V+d.cl;
     int m = *src++;
     while (n--) {
 	if (*src < m) m = *src; 
@@ -467,8 +467,8 @@ int Min (const IntVector& d, int& i)
 {
 //  Matpack.Error("int Min (const IntVector& d, int& i) NOT YET IMPLEMENTED");
 //  return 0;
-    register int n = d.ch-d.cl;
-    register int* src = d.V+d.cl;
+     int n = d.ch-d.cl;
+     int* src = d.V+d.cl;
     int m = *src++;
     while (n--) {
 	if (*src < m) { m = *src; i = n; }
@@ -484,8 +484,8 @@ int Max (const IntVector& d)
 // Returns the largest element
 //
 {
-    register int n = d.ch-d.cl;
-    register int* src = d.V+d.cl;
+     int n = d.ch-d.cl;
+     int* src = d.V+d.cl;
     int m = *src++;
     while (n--) {
 	if (*src > m) m = *src; 
@@ -503,8 +503,8 @@ int Max (const IntVector& d, int& i)
 {
 //  Matpack.Error("int Max (const IntVector& d, int& i) NOT YET IMPLEMENTED");
 //  return 0;
-    register int n = d.ch-d.cl;
-    register int* src = d.V+d.cl;
+     int n = d.ch-d.cl;
+     int* src = d.V+d.cl;
     int m = *src++;
     while (n--) {
 	if (*src > m) { m = *src; i = n; }
@@ -541,9 +541,9 @@ void Reverse (IntVector& d)
 //
 {
     unsigned size = d.ncol / 2;
-    register int *d1 = d.V+d.cl;
-    register int *d2 = d.V+d.ch;
-    register int t;
+     int *d1 = d.V+d.cl;
+     int *d2 = d.V+d.ch;
+     int t;
     while (size--) {
 	t = *d1;
 	*d1++ = *d2;

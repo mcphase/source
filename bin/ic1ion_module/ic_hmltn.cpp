@@ -19,7 +19,6 @@
  */
 
 #include "ic1ion.hpp"
-#include "martin.h"
 #include <fstream>
 #include <sstream>
 #include <string>

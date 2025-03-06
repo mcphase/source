@@ -190,7 +190,10 @@ The Hamiltonian of the standard model of rare earth magnetism
 is described in section~\ref{hamiltonian}.
 Alternatively, a more complex Hamiltonian can be used which includes
 all terms in intermediate coupling - this is important for transition metal
-and actinide ions.
+and actinide ions. By means of magnetoelastic interactions 
+the interplay of lattice and magnetism can be studied. Properties 
+to be calculated are magnetic moments, electric polarisation, strain  and
+excitations under magnetic and electic fields and stress/pressure.
 
  
 
@@ -216,7 +219,8 @@ modules used for the calculation of single ion properties (see Section~\ref{cfie
 This program has been written to calculate the thermodynamic properties.
 In order to  deal with the pair interactions a
  combined mean-field/monte-carlo algorithm is used in module {\prg mcphas}.
-For a given temperature $T$ and magnetic field $\mbf H$ (vector)
+For a given temperature $T$ and magnetic field $\mbf H$ (vector), electric
+field and stress tensor / pressure 
  several possible magnetic structures are stabilised
 by a mean field algorithm and the free energy is 
 calculated. The initial values for this mean-field procedure are
@@ -224,8 +228,8 @@ modified by a Monte Carlo process.
 See Section~\ref{runmcphas} on how to perform such a simulation.
 
 
-The temperature and magnetic field is varied during the calculation
-and thereby it is possible to map out the magnetic phase diagram.
+The temperature and magnetic/electric field / stress (pressure) are varied during the calculation
+and thereby it is possible to map out a phase diagram.
 The program produces a plot of the stabilised magnetic
 structures and the magnetisation on screen, the
 output files contain additional information 
@@ -342,8 +346,8 @@ Gd$_3$GaO$_6$  & pointcharge model for crystal field parameters & {\prg pointc} 
 GdNi$_2$B$_2$C & double-q magnetic structure, spin only (L=0) & {\prg brillouin}\index{brillouin}& \cite{doerr02-5609,jensen08-134408}\\
 GdRu$_2$Si$_2$ & biquadratic interactions - magnetisation, mag. structure & {\prg cfield} & \\
 helix\_spinwave & spinwave calculation for a helical magnetic structure & {\prg so1ion} & \\
-Ho$_2$Ti$_2$O$_7$ & diffuse magnetic scattering & {\prg so1ion} & \cite{bramwell01-1495}\\
-                  & cf-phonon interaction, INS, magnetostriciton & {\prg phonon} & \\
+Ho$_2$Ti$_2$O$_7$ & diffuse magnetic scattering, external stress & {\prg so1ion} & \cite{bramwell01-1495}\\
+                  & cf-phonon interaction, INS, magnetostriction & {\prg phonon} & \\
 LaCoO$_3$ & spin polarons quasielastic scattering & {\prg cluster}\index{cluster} & \cite{podlesnyak11-134430,podlesnyak08-247603} \\
 La$_2$CoO$_4$ & dispersive magnetic excitations / spinwaves &{\prg  ic1ion} & \cite{lewtas10-184420}\\
 LuMnO$_3$ &  magnetic structure and dispersion of excitations & {\prg so1ion} & \cite{lewtas10-184420} \\
@@ -522,7 +526,7 @@ conventions see appendix~\ref{cfparconventions}.
 
 \clearpage
 
-\input{cfield.tex}
+\input{singleion.tex}
 
 \clearpage
 

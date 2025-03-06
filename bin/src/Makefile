@@ -177,7 +177,7 @@ jjjpar.o: jjjpar.cpp par.hpp ionpars.hpp perlparse.h $(DLLOADER_SRC) IDLLoader.h
 testspin.o: testspin.cpp testspin.hpp spincf.hpp martin.h ../../version
 	$(CCC) $(CFLAGS) $< 
 
-spincf.o: spincf.cpp spincf_out.cpp spincf.hpp vector.h density.hpp jjjpar.hpp graphic_parameters.hpp cryststruct.hpp
+spincf.o: spincf.cpp spincf_out.cpp spincf_jvx.cpp  spincf.hpp vector.h density.hpp jjjpar.hpp graphic_parameters.hpp cryststruct.hpp
 	$(CCC) $(CFLAGS) $< 
 
 density.o: density.cpp density.hpp vector.h

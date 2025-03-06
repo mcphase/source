@@ -4,7 +4,6 @@
 #include <ctime>
 #include "singleion_module.hpp"
 #include "ic1ion.hpp"
-#include "martin.h"
 
 class ic1ion_module : public singleion_module
 {private:
@@ -43,6 +42,13 @@ void truncate_hmltn(icpars &pars,  sMat<double> &Hic, sMat<double> &iHic, int JH
 void truncate_expJ(icpars &pars,  Vector &gjmbH, Matrix &J, Vector & T, Vector & lnZ, Vector & U);
 void truncate_spindensity_expJ(icpars &pars, Vector &gjmbH, Vector &J, double T, int xyz);
 void truncate_hmltn_packed(icpars &pars, sMat<double> &Mat, sMat<double> &iMat, Matrix &retmat, const char* filename);
+// calculates expectation value   <ES|OP|ES> of hermitian operator OP given a complex eigenstate vector  ES
+// OP and ES are given as pointers 
+//double expectation_value(int & dim,complexdouble * OP,complexdouble * ES );
+// similar to above, calculates transition matrix element <S1|OP|S2> of hermitian 
+// operator OP given
+// two complex vector S1 and S2  OP and S1,S2 are given as pointers 
+//complexdouble transition_matrixelement(int & d,complexdouble * OP,complexdouble * S1,complexdouble * S2);
 
 public:
 ic1ion_module(const char * filename);

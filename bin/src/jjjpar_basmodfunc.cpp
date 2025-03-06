@@ -615,8 +615,8 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
 }
 
 /****************************************************************************/
-// this function calculates series of single ion susceptibility matrices for 
-// different energies
+// this function calculates series of single ion susceptibility matrices chi0 for 
+// different energies(meV)
    // output:returns 0 on success
    //        the Matrices chi0pointer[1....nofstps] must exist and will be filled with values
    //        ...... the contribution of transition transitionnumber is added to these matrices
@@ -627,8 +627,8 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
    //        |epsilon| ... imaginary part of Energy for calculation of chi0(omega+i|epsilon|)
    //        qcounter==-1   & sign(epsilon) >0 ... chi0c matrices should be cleared
    //        qcounter==-1  & sign(epsilon) <=0  ... try to load chi0 externally (from bfk)
-   //        qcounter==0,1 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc
-   //        qcounter==1,2,...,5 & sign(epsilon) <=0  ... calculate chi0(1...3,1...3) using dm1calc,dpel1calc ... according
+   //        qcounter==0,1 & sign(epsilon) >0  ... calculate chi0(1...nofcomponents,1...nofcomponents) using du1calc -->unit of chi0:(gJ muB)^2/meV
+   //        qcounter==1,2,...,5 & sign(epsilon) <=0  ... calculate chi0(1...3,1...3) using dm1calc(->muB^2/meV),dpel1calc (->|e|^2pm^2/meV)... according
    //              to obint(qcoounter) defined in martin.c:      M=1, pel=2, P=3, L=4, S=5,
    //        delta ... sign determines if energy gain or loss term is added
 /****************************************************************************/

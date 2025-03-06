@@ -13,13 +13,13 @@ have to be set to zero in {\prg mcphas.j\index{mcphas.j}}.
 considered and may lead to magnetic order. {\prg mcphas} can perform 
 calculations in the ordered state in the following way: for 
 a given temperature $T$ and magnetic field $\mbf H$ (vector)
-several possible magnetic structures are stabilised
+(and electric field and stress tensor) several possible magnetic structures are stabilised
 by a mean field algorithm and the free energy is 
 calculated. The initial values for this mean-field procedure are
 modified by a Monte Carlo process.
 
 
-The temperature and magnetic field is varied during the calculation
+The temperature and magnetic field (and electric field and stress) is varied during the calculation
 and thereby it is possible to map out the magnetic phase diagram.
 \end{itemize}
 
@@ -80,22 +80,25 @@ files are given in the directory {\prg tutorial/03magnetic\_phases\_mcphas/simpl
 \begin{description}
 \item [MCPHASE RUNTIME CONTROL:] this section contains the parameters
 controlling the status of the calculation.
-\item [XY PHASEDIAGRAM PARAMETERS:] here the temperature and field range and
+\item [XY PHASEDIAGRAM PARAMETERS:] here the temperature and field (stress) range and
 step widths of the calculation are specified.
 The definition of the x and y
-axis in terms of temperature and magnetic field is followed by the
+axis in terms of temperature and magnetic/electric field / stress is followed by the
 corresponding range and step width. An offset may be given for all
 field and temperature values.
 Note that for most cases of interest
-this offset is zero (T0=0, Ha0=0, Hb0=0, Hc0=0).
+this offset is zero (T0=0, Ha0=0, Hb0=0, Hc0=0, Ea0=0, Eb0=0, Ec0=0, s10=0, s20, ..., s60=0).
  For the simple case of calculating a Temperature-Field phase diagram
  It is just necessary to set xT=1 and give the temperature range by
 xmin/xmax/xstep. For field in b direction then just set yHb=1 and 
 define the range in ymin/ymax/ystep.
 In case of non-orthogonal axes the applied magnetic field
-components $Ha, Hb, Hc$ refer to the orthogonal coordinate system
+components $Ha, Hb, Hc$ refer to components with respect to
+unit vectors along $\mbf a,\mbf b,\mbf c$, respectively. 
+Alternatively $Hi, Hj, Hk$ may be used, where $ijk$ refer to
+the orthogonal coordinate system
 defined with respect to the nonorthogonal lattice $\mbf a,\mbf b,\mbf c$ as
-$Hb||\mbf b$, $Hc||(\mbf a \times \mbf b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+$Hj||\mbf b$, $Hk||(\mbf a \times \mbf b)$ and $Hi$ perpendicular to $Hj$ and $Hk$.
 
 \item [GENERATION OF SPINCONFIGURATIONS:] at the beginning of the program
 some initial values of spin configurations are generated from a set of 
@@ -165,7 +168,8 @@ and the single ion Hamiltonian is given by
 \end{equation}
 
 Note, here ${\mbf H}^s$ denotes the exchange field at the site $s$ and ${\mbf H}$ denotes the applied
-magnetic field.
+magnetic field\footnote{for electric fields $\hat H(s)$ will contain also the electric field, compare
+section~\ref{phonons} }.
 
 The correction term is defined by
 
@@ -312,7 +316,7 @@ are repeated.
 
 \vspace{0.5cm}
 
-{\small {\bf Information for experienced users:}
+{\tiny {\bf Information for experienced users (outdated):}
 \begin{description}
 \item[\prg mcphas.jjj:]
 format of exchange parameter file, which only needs a reduced set of exchange
@@ -459,6 +463,51 @@ only half of it may be given:
 #\end{verbatim}
 }
 
+For magnetoelastic problems elastic constants and  magnetoelastic interactions  can be entered in the following form,
+for the definition of the magnetoelastic constants $G_{\rm cfph}^{(\alpha\beta)\gamma}$
+see equation (\ref{Gcfph}):
+
+{\small
+\begin{verbatim} 
+# antiferromagnet with magnetoelastic interactions
+#<!--mcphase.mcphas.j-->
+#***************************************************************
+# Lattice Constants (A)
+# Lattice Constants (A)
+#! a=8.062 b=8.062 c=8.062 alpha=90 beta=90 gamma=90
+#! r1a=0 r2a=0.5 r3a=0.5
+#! r1b=0.5 r2b=0 r3b=0.5 primitive lattice vectors [a][b][c]
+#! r1c=0.5 r2c=0.5 r3c=0
+#! nofatoms=1  nofcomponents=3  number of atoms in primitive unit cell/number of components of each spin
+#
+#! Primitive Unit Cell Volume [A^3]: pVol=130.999123582
+# Nonzero Elastic constants   in meV per primitive unit cell in Voigt notation only first index<=second index has to be given
+# because the constants are symmetric Celij=Celji
+# Elastic constants refer to the Euclidean coordinate system ijk defined
+# with respect to abc as j||b, k||(a x b) and i normal to k and j
+#!  Cel11=+121111.877 Cel12=+35479.1703 Cel13=+35479.1703
+#!  Cel22=+121111.877 Cel23=+35479.1703
+#!  Cel33=+121111.877
+#!  Cel44=+35479.1703
+#!  Cel55=+35479.1703
+#!  Cel66=+35479.1703 
+#! unit conversion:  1 meV/Primitive Unit Cell Volume =0.00122304635038043 GPa
+#
+# ****************************************************************************
+#! da=  0 [a] db=  0 [b] dc=  0 nofneighbours=2 diagonalexchange=2 sipffilename=Ce3p.sipf
+#   G indices:  
+#  epsilon_alphabeta(strain tensor indices-Voigt Notation),gamma(I-operator index, see so1ion Module definition)
+#   .... this is explicitely ....
+#          eps6,O22S eps4,O21S eps1,O20  eps2,O20 eps3,O20 ... 
+#! Gindices=  6,4      4,5       1,6        2,6      3,6    5,7 1,8 2,8 4,17 6,18  6,19 1,20 2,20  4,21 6,21 1,22 4,23  6,23 1,24 2,24 
+#   corresponding magnetoelastic constants (meV)
+#! G=  21.28 42.56 10.64 10.64 -21.28 42.56  -31.9231.92 -0.462 -0.132 0.066  0.0642 0.064 0.096 0.066 -0.126 0.126 0.46 0.448 0.448 0.228
+# da[a] db[b] dc[c] Jaa[meV] Jbb[meV] Jcc[meV] Jab[meV] Jba[meV] Jac[meV] Jca[meV] Jbc[meV] Jcb[meV]
+#! symmetricexchange=1 indexexchange = JaJa JaJc JbJb JcJc
++0	+0	+1	-0.1 0  -0.1	-0.1  
++0	+0	-1	-0.1 0  -0.1	-0.1  
+#\end{verbatim}
+}
 
 \subsubsection{Single Ion Property Input Files}\label{sifile}
 
@@ -571,7 +620,7 @@ input files {\prg mcphas.ini, mcphas.j, etc. } and type
 \item[\prg mcphas\index{mcphas} -stamax 14]  end mcphas\index{mcphas} if standard deviation exceeds 14.
 \item[\prg mcphas\index{mcphas} -a] avoid overwriting output files in results, append new results to existing files
 \item[\prg mcphas\index{mcphas} -doeps] refine strain epsilon using elastic and magnetoelastic constants 
-see section \ref{phonons} for how to enter these constants into {\prg mcphas.j}
+see also section \ref{phonons} for how to enter these constants into {\prg mcphas.j}
 \item[\prg mcphas\index{mcphas} -v]  to  enable verbose mode with lots of messages of {\prg McPhas}. Specifically
 the verbose mode enables the following features:
   \begin{itemize}
@@ -688,10 +737,7 @@ u=f+Ts=f-T\partial f/\partial T=\frac{1}{N_b}\sum_{s,i} \epsilon^s_i \frac{e^{-\
                             As an example for the information
 			   contained in this file the calculated magnetisation  of NdCu$_2$ is shown in
 			   fig~\ref{magnetization}.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            also for the magnetisation components $ma,mb,mc$ in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-                           Moreover, in {\prg mcphas.fum} are stored
+                              Moreover, in {\prg mcphas.fum} are stored
                            the calculated strain tensor (for option -doeps) and the 
                            electrical polarisation (if charges are given in the sipf files and the sum of charges
                            taken for the crystal is zero).
@@ -713,18 +759,13 @@ u=f+Ts=f-T\partial f/\partial T=\frac{1}{N_b}\sum_{s,i} \epsilon^s_i \frac{e^{-\
 	       spin-spin correlation functions from {\prg mcphas1.j1 .j1 .j2 ...}. As an example the magnetostriction analysis of
 	       NdCu$_2$ is shown in figure~\ref{magnetostrictiongraphic}. For details 
              please refer to~\cite{rotter02-8885}.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            also for the moment components in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
+                       
 \item [\prg mcphas.xyt]    phase diagram as x,y,T, H, phase-number j according to spin-configuration table
                given in mcphas.phs, a periodicity key, thermal expectationvalues $\langle \hat  I_{\alpha} \rangle$ 
                (averaged over the unit cell).
  Figure~\ref{phasediagramgraphic}
 	       shows the phase diagram of NdCu$_2$ for magnetic fields parallel to the orthorhombic $b$-direction.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ 
-                             in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-              Note that  the phase-number is not necessarily a unique number for each phase in the phase diagram, because
+                            Note that  the phase-number is not necessarily a unique number for each phase in the phase diagram, because
 the program numbers phases according to their similarity in the moments. For example, any tetragonal easy plane magnet 
 will have domains with moments parallel to $a$ and $b$. The program will generate both domains and find equal energy for both. It will give each domain a separate phase number, because spin directions are completely different. Because both domains have the same free energy at every temperature, the phase-index will vary in a random manner. In order to generate a beautiful phase diagram figure, such equivalent domains have to be identified and phase numbers have to be substituted.
 \item [\prg mcphas.hkl]    calculated (unpolarised) neutron diffraction data (the calculated magnetic intensities
@@ -734,29 +775,16 @@ will have domains with moments parallel to $a$ and $b$. The program will generat
     As an example figure~\ref{neutintgraphic}
     shows the calculated temperature dependence of magnetic amplitudes for NdCu$_2$.
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ 
-                             in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-    
 \item [\prg mcphasa.hkl]    Fourier Transform of the $a$-component of the magnetic Moments.
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$. The single ion module function
     {\prg mcalc} is used to evaluate the magnetic moment on each site.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            the magnetic moment component in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-\item [\prg mcphasb.hkl]    Fourier Transform of the $b$-component of the magnetic Moments. The single ion module function
+                            \item [\prg mcphasb.hkl]    Fourier Transform of the $b$-component of the magnetic Moments. The single ion module function
     {\prg mcalc} is used to evaluate the magnetic moment on each site. 
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            the magnetic moment component in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-\item [\prg mcphasc.hkl]    Fourier Transform of the $c$-component of the magnetic Moments. The single ion module function
+ \item [\prg mcphasc.hkl]    Fourier Transform of the $c$-component of the magnetic Moments. The single ion module function
     {\prg mcalc} is used to evaluate the magnetic moment on each site.
                            $h,k,l$ refer to the reciprocal lattice $\vec a^*,\vec b^*,\vec c^*$.
-                            Note, in case of non-orthogonal axes the convention for applied field $Ha, Hb,Hc$ and
-                            the magnetic moment component in these tables 
-                            is $Hb||\vec b$, $Hc||(\vec a \times \vec b)$ and $Ha$ perpendicular to $Hb$ and $Hc$.
-\end{description} 
+                            \end{description} 
 
 
 

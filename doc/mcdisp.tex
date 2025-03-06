@@ -18,8 +18,8 @@ the {\prg mcphas.j\index{mcphas.j}} and single ion input files. In addition, the
 				scattering intensity. 
 				
 				Options are:
-				 \begin{itemize}
-				\item Option {\prg -max} restricts the single ion susceptibility
+				 \begin{description}
+				\item [{\prg -max}] restricts the single ion susceptibility
 				used to maximum of  the n lowest lying transitions, starting
 				from the ground state (useful to save calculation time).
 --
@@ -28,7 +28,7 @@ the {\prg mcphas.j\index{mcphas.j}} and single ion input files. In addition, the
 				Single ion transitions with energies outside this
 				energy interval are not considered.
                                                \item option {\prg -d} forces mcdisp to do calculation of intensities in dipole approximation only				
-				\item Option {\prg -r} is used to calculate the energy dependence
+				\item [{\prg -r}] is used to calculate the energy dependence
 				of the cross section via the direct evaluation of the
  dynamical susceptibility for a set of energy values (see appendix~\ref{formalism}). 
 If option {\prg -r 0.032} is used, the energy dependence of 
@@ -48,34 +48,34 @@ if $g_J=0$ then $\hat I_1=\hat S_x, \hat I_2=\hat L_x, \hat I_3=\hat S_y, \hat I
 \hat I_5=\hat S_z,\hat  I_6=\hat L_z$ (here $\hat \mbf S, \hat \mbf L,\hat \mbf J$ refer to the
 spin-, orbital- and total angular momentum, respectively in a coordinate system where
 $y||b$,$z||(a \times b)$ and $x$ perpendicular to $y$ and $z$).
-				\item To create an output
+				\item [{\prg -jq}]To create an output
 				of the Fourier transform ${\mathcal J}({\mbf Q})$ use option
 				{\prg -jq} (outputs largest eigenvalue of ${\mathcal J}({\mbf Q})$ and 
 corresponding eigenvector) or option {\prg -jqe} (outputs all eigenvalues). 
 If energies are given for hkls in mcdisp.par, output file mcdisp\_scaled.jq contains scaled parameters
 such that energy of first hkl set corresponds to highest eigenvalue of ${\mathcal J}({\mbf Q})$.
-				\item {\prg -v} option is to display\index{display} more information.
+				\item [{\prg -v}] option is to display\index{display} more information.
                                 
-				\item Option {\prg -a} can be used to avoid overwriting output files in results, new results
+				\item [{\prg -a}] can be used to avoid overwriting output files in results, new results
 				are appended.
 								
-				\item Option {\prg -c}  can be used to create  a single ion
+				\item [{\prg -c}]  can be used to create  a single ion
 				transition file {\prg ./results/mcdisp.trs}, which contains
 				all single ion transitions used in the calculation. It also contains the 
                                     neutron intensities of the non interacting subsystems. This file can
 				be edited (uncommenting single ion transitions which should not
 				by used by a \# sign at the beginning of the line)
 				and then the program can be restarted using the 
-				\item  option {\prg -t} to
+				\item  [ {\prg -t}] to
 				read the single ion transition file {\prg ./results/mcdisp.trs} and
 				calculate energies and neutron intensities of dispersive modes.
-				\item Option {\prg -ninit n} to set the maximum number of low lying
+				\item [ {\prg -ninit n}] to set the maximum number of low lying
                                  initial states, which will be considered in calculating a single ion susceptibility (not functional
                                  in all single ion modules).
- \item Option {\prg -pinit p} to set the minimum thermal population of a 
+ \item [{\prg -pinit p}] to set the minimum thermal population of a 
                                  initial state in order to be considered in the singleion ion susceptibility (not functional in
                                  all singleion ion modules).
- \item Option {\prg -prefix 001} to allow for easy parallel processing: all output files {\prg results/mcdisp.*}
+ \item [{\prg -prefix 001}] to allow for easy parallel processing: all output files {\prg results/mcdisp.*}
                   will then be created with prefix {\prg 001}, i.e. {\prg results/001mcdisp.*}.
                   Moreover,  in {\prg mcdisp.par} it is then possible to enter
                   variables like {\prg hklline=}  with prefix, in our case {\prg 001}, i.e. {\prg 001hklline}: this will trigger
@@ -84,13 +84,13 @@ such that energy of first hkl set corresponds to highest eigenvalue of ${\mathca
                   Variables without prefixes will always be read and used.
                   After finishing the different processes, the results of the calculations stored e.g. in {\prg 001mcdisp.qei} and
                   {\prg 002mcdisp.qei} may be merged by commands like {\prg appendfile mcdisp.qei 001mcdisp.qei 002mcdisp.qei}.
-    \item Option {\prg -ignore\_not\_posdef\_matrix\_error} ignores error when energies get complex due to unphysical mf groundstate.
-    \item Option {\prg -x} to calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities.
-    \item Option {\prg -xa  azstp} to calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection in steps azstep (deg).
-    \item Option {\prg -xaf  azimuth} to calculate resonant inelastic x-ray intensities for the given azimuth (deg).				
-    \item Option {\prg -X[observable]} to calculate omega and Q dependent susceptibility tensor for an
+    \item [{\prg -ignore\_not\_posdef\_matrix\_error}] ignores error when energies get complex due to unphysical mf groundstate.
+    \item [{\prg -x}] to calculate resonant inelastic x-ray intensities (maximized with respect to azimuth) instead of neutron intensities.
+    \item [ {\prg -xa  azstp}] to calculate resonant inelastic x-ray intensities with complete azimuth dependence for each reflection in steps azstep (deg).
+    \item [ {\prg -xaf  azimuth}] to calculate resonant inelastic x-ray intensities for the given azimuth (deg).				
+    \item [ {\prg -X[observable]}] to calculate omega and Q dependent susceptibility tensor for an
  observable (e.g use -Xpel for RAMAN and inelastic X-ray scattering intensity on phonons). 
-      \end{itemize}
+      \end{description}
 \item [\prg mcdispit [options]][file.mf]]  same as {\prg mcdisp}, but no graphic window
 \end{description} 
 
@@ -110,7 +110,7 @@ the exchange fields on the different sites:
 #'n'             number of atoms in magnetic unit cell
 #'nofatoms'      number of atoms in primitive crystal unit cell
 #'nofcomponents' dimension of moment vector of a magnetic atoms
-T=2 Ha=0 Hb=0 Hc=0 n=10 nofatoms=2 nofcomponents=3
+#! x=1.5 y=0 T=1.5 |H|=0 Ha=0 Hb=0 Hc=0 n=20 spins nofatoms=2 in primitive basis nofcomponents=3 - configuration
  0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000
  0.2708 0.3354 -0.3354 -0.2708 0.2947 -0.2708 -0.3354 0.3354 0.2708 -0.2947
  0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000
@@ -158,16 +158,21 @@ described in section~\ref{displaydensities}.
 #!calculate_spindensity_oscillation=0  creates mcdisp.qsd
 #!calculate_orbmomdensity_oscillation=0  creates mcdisp.qod
 #!calculate_phonon_oscillation=0  creates mcdisp.qep
+#!calculate_pel_oscillation=0  creates mcdisp.qpe
 #
 # (optional) number of parallel threads on your machine
 #  (if not set program will attempt to determine this automatically)
 # nofthreads=2
 #
 #     out* controls the type of output in user defined columns in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
-#!out1=1 
+#!out1=5 
 #!out2=6 
 #!out3=7 
 #!out4=4 
+#!out5=12 
+#!out6=13 
+#!out7=14 
+#!out8=8 
 #     ... in out*=n the numbers n have the following meaning:
 #            0....Qinc[1/A] 
 #            1....Qx[1/A]   
@@ -178,6 +183,27 @@ described in section~\ref{displaydensities}.
 #            6....Hb[T]     
 #            7....Hc[T]     
 #            8....|Q|[1/A]  
+#            9....hprim  
+#            10....kprim  
+#            11....lprim  
+#            12....h 
+#            13....k 
+#            14....l 
+#            15....Hi[T]   
+#            16....Hj[T]   
+#            17....Hk[T]   
+#            18....Ea[kV/mm] 
+#            19....Eb[kV/mm] 
+#            20....Ec[kV/mm] 
+#            21....Ei[kV/mm] 
+#            22....Ej[kV/mm] 
+#            23....Ek[kV/mm] 
+#            24....s1[GPa] 
+#            25....s2[GPa] 
+#            26....s3[GPa] 
+#            27....s4[GPa] 
+#            28....s5[GPa] 
+#            29....s6[GPa] 
 #
 # optional switch outS for control of the output of the magnetic scattering function in results/mcdisp.qei
 #! outS=3
@@ -311,7 +337,9 @@ and neutron intensities.
 calculated using the DMD algorithm described in section~\ref{DMDform}
 \item[{\prg mcdisp.qei}] energies and neutron scattering intensities calculated by the DMD algorithm, if 
         the energy of a mode is outside interval  [emin,emax] the value -1 is output for the intensity.
-\item[{\prg mcdisp.qem .qes .qel .qsd .qod .qee}] eigenvectors for different observables (relative phase and amplitudes)
+\item[{\prg mcdisp.qeX'observable'}] energies and absorptive part of the dynamical
+        susceptibilities calculated using the DMD algorithm.
+\item[{\prg mcdisp.qem .qes .qel .qsd .qod .qee .qpe}] eigenvectors for different observables (relative phase and amplitudes)
 \item [{\prg mcdisp.dsigma}(only created with option {\prg -r}):] Contains the energy dependence of the scattering cross %%@
 section
 calculated according to section~\ref{formalism} within the energy range specified by [emin,emax] given in {\prg %%@

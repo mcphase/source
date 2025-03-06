@@ -579,6 +579,9 @@ void inipar::print (const char * filename)
     fprintf(fout,"#given in terms of components with respect to unit vectors along the\n");
     fprintf(fout,"#Bravais lattice ^a=a/|a|, ^b=b/|b|, ^c=c/|c|.\n");
     fprintf(fout,"#For the external magnetic field unit is Tesla.\n");
+    fprintf(fout,"#For the external electric field unit is kV/mm.\n");
+    fprintf(fout,"#For the external stress tensor the unit is GPa.\n\n");
+
     fprintf(fout,"# out variables to control first columns of output files results/mcphas.*:\n");
     for(int i=1;i<=usrdefcols[0];++i)fprintf(fout,"out%i=%i \n",usrdefcols[i],colcod[i]);
     fprintf(fout,"#     ... in out*=n the numbers n have the following meaning:\n");

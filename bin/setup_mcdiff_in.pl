@@ -9,27 +9,32 @@ usage() if $ARGV[0]=~/-h/||$#ARGV<1;
 print STDERR "#* $0 *\n";
 if($ARGV[0]=~/-prefix/)
 {$prefix=$ARGV[1];shift @ARGV;shift @ARGV;}
-$ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$ARGV[0]=eval $ARGV[0];
-$ARGV[1]=~s/exp/essp/g;$ARGV[1]=~s/x/*/g;$ARGV[1]=~s/essp/exp/g;$ARGV[1]=eval $ARGV[1];
-if ($#ARGV>2) { 
-$ARGV[2]=~s/exp/essp/g;$ARGV[2]=~s/x/*/g;$ARGV[2]=~s/essp/exp/g;$ARGV[2]=eval $ARGV[2];
-$ARGV[3]=~s/exp/essp/g;$ARGV[3]=~s/x/*/g;$ARGV[3]=~s/essp/exp/g;$ARGV[3]=eval $ARGV[3];
-             }
+foreach(@ARGV)
+{
+$_=~s/exp/essp/g;
+$_=~s/x/*/g;$_=~s/essp/exp/g;$_=eval $_;
+}
+
 print STDOUT << "EOF";
 *******************************************************
 setting up mcdiff.in to be used by mcdiff
 using program spins reading results/mcphas.mf
 EOF
 if ($prefix){$pp="-prefix ".$prefix; print STDOUT "with prefix $prefix\n";}
+if ($#ARGV>4) { 
+print STDOUT "out1=$ARGV[0]  out2=$ARGV[1]  out3=$ARGV[2] out4=$ARGV[3] out5=$ARGV[4] out6=$ARGV[5] out7=$ARGV[6]   ... starting spins\n";
+$args="$ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3] $ARGV[4] $ARGV[5] $ARGV[6]";
+             }
 if ($#ARGV>2) { 
 print STDOUT "T=$ARGV[0] K Ha=$ARGV[1] T Hb=$ARGV[2] T Hc=$ARGV[3] T  ... starting spins\n";
-$err=system ("spins $pp $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]");
+$args="$ARGV[0] $ARGV[1] $ARGV[2] $ARGV[3]";
              }
 else
             {
-print STDOUT "x=$ARGV[0]  y=$ARGV[1] ... startin spins\n";
-$err=system ("spins $pp $ARGV[0] $ARGV[1]");
+print STDOUT "x=$ARGV[0]  y=$ARGV[1] ... starting spins\n";
+$args="$ARGV[0] $ARGV[1]";
              }
+$err=system ("spins $pp ".$args);
 if($err){exit(EXIT_FAILURE);}
 
 if(open (Fin, "mcdiff.in"))
@@ -84,12 +89,15 @@ sub usage() {
     usage: setup_mcdiff_in [option] T Ha Hb Hc
               or
            setup_mcdiff_in [option] x y
+              or
+           setup_mcdiff_in [option] out1 out2 out3 ou4 out5 out6 out7
 
      -h          : this (help) message
-      T          : Temperature (K)
-      Ha,Hb,Hc   : Magnetic Field (T)
-      x,y        : x,y values of point in the phase diagram
-
+      T          : Temperature (K) (column 3 in output file mcphas.*)
+      Ha,Hb,Hc   : Magnetic Field (T) (columns 5,6,7 in output file mcphas.*)
+      x,y        : x,y values of point in the phase diagram (columns 1 2 in mcphas.*)
+      out1-out7  : values of external parameters in columns 1-7 of output files mcphas.*
+  
     required input files:
 
     results/mcphas.mf

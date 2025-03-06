@@ -700,6 +700,8 @@ nofhkls=0;save(file);
 inimcdis::inimcdis()
 {savfilename=NULL;info=NULL;prefix=NULL;hkls=NULL;hklfile_start_index=NULL;
 }
+
+
 //kopier-konstruktor 
 inimcdis::inimcdis (const inimcdis & p)
 { do_jqf=p.do_jqf;

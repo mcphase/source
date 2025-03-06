@@ -72,16 +72,25 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
                writeheader(inputpars,foutqei);
                fprintf(foutqei,"#susceptibility X%s''(Q,omega)\n",obs[calcXobs]);
             fprintf(foutqei,
-"#       1    ----   ss'           ss'       *  \n"
+"#\n"
+"# =     1    ----  =ss'          =ss'       *  \n"
 "# X''= ----  >     X (Q,omega)-  X (Q,omega)   \n"
 "#       2iN  ----    \n"
 "#            s,s'  \n"
 "# \n"
 "#      s,s' ... ions in the supercell of the primitive unit cell.\n"
-"#      N    ... number of primitive unit cells in supercell.\n");
+"#      N    ... number of primitive unit cells in supercell.\n"
+"#\n"
+"# Dynamical Matrix diagonalisation yields the expansion: \n"
+"#\n"
+"#      =                ----  =\n"
+"#      X''(Q,omega)=  >       X%s'' delta(hbar omega - Ei(Q))\n"
+"#                       ----\n"
+"#\n",
+obs[calcXobs]);
                fprintf (foutqei, "#dispersion displayytext=E(meV)\n#displaylines=false \n");
              ini.print_usrdefcolhead(foutqei);
-             fprintf (foutqei,"energy[meV] " 
+             fprintf (foutqei,"Ei(Q)[meV] " 
   "Trace(X%s'')/3 X%s''xxreal(Q,omega) X%s''xximag X%s''yyreal X%s''yyimag X%s''zz .. X%s''yz X%s''zy X%s''xz X%s''zx X%s''yz X%s''zy(%s)^2/f.u. f.u.=crystallographic primitive unit cell (r1xr2xr3) \n",
       obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],
       obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obs[calcXobs],obunit[calcXobs] );
@@ -150,7 +159,8 @@ void writeheaders(FILE * foutqom,FILE * foutqei,FILE * foutdstot,FILE * foutds,
                          writeheader(inputpars,foutds);
                          fprintf (foutds, "#Scattering Cross Section \n");
                          ini.print_usrdefcolhead(foutds);
-                         fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixzi chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (1/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+if(inputpars.cs.nofcomponents==3)fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixzi chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (gJ^2muB^2/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+if(inputpars.cs.nofcomponents==6)fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chi11r chi11i  chi12r chi12i chi13r chi13i chi14r chi14i ...chi16i chi21r ch21i ... chi26i ... chi31r ....chi66i  (muB^2/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
                            }  
           }
 }
@@ -225,9 +235,11 @@ FILE * evfileinit(const char * filemode,const char*filename,par & inputpars,cons
 //****************************************************************************************************
 void print_ev(FILE * fout,int i,inimcdis & ini,Vector & hkl,double QQ,Vector & En,Vector & ints,Vector & intsbey,Vector & intsP,mfcf & qee_real,mfcf & qee_imag, Vector & qprim)
                                {
-                     fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g %4.4g  %4.4g %4.4g\n",
-                              myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),
-                              myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
+              char mfstr[MAXNOFCHARINLINE];ini.mfstring(mfstr,MAXNOFCHARINLINE);
+                    // fprintf (fout, " %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g %4.4g  %4.4g %4.4g  %4.4g  %4.4g %4.4g %4.4g  %4.4g %4.4g\n",
+                    //          myround(ini.Hext(1)),myround(ini.Hext(2)),myround(ini.Hext(3)),myround(ini.T),
+                     fprintf (fout, " %s h=%4.4g k=%4.4g l=%4.4g  Q=%4.4g E=%4.4g  Imagdip=%4.4g  Imag=%4.4g Inuc=%4.4g hprim=%4.4g  kprim=%4.4g lprim=%4.4g\n",
+                              mfstr, myround(hkl(1)),myround(hkl(2)),myround(hkl(3)),
                               myround(QQ),myround(En(i)),myround(1e-8,ints(i)),myround(1e-8,intsbey(i)),myround(1e-8,intsP(i)),
                               myround(qprim(1)),myround(qprim(2)),myround(qprim(3))
                               );

@@ -38,11 +38,11 @@ void jjjpar::cluster_ini_Imat() // to be called on initializing the cluster modu
        if(ts!=0) { if(ts=='f') truncate=feast;  else truncate=arpack; }
        if(fs!=0) { if(fs=='t') feast=truncate;  else feast=arpack; }
        if(as!=0) { if(as=='t') arpack=truncate; else arpack=feast; }
-       if(feast!=0 && arpack!=0) { fprintf(stderr,"WARNING: cluster_module cannot use both FEAST and ARPACK together. FEAST will be used.\n"); arpack=0; }
+       if(feast!=0 && arpack!=0) { fprintf(stderr,"#WARNING: cluster_module cannot use both FEAST and ARPACK together. FEAST will be used.\n"); arpack=0; }
        else if(arpack!=0) { 
-          fprintf(stderr,"\n -----------\n WARNING: ARPACK eigensolver selected. Note that this option is buggy. Proceed at you own risk!\n ----------- \n"); fflush(stderr); }
+          fprintf(stderr,"#\n# -----------\n# WARNING: ARPACK eigensolver selected. Note that this option is buggy. Proceed at you own risk!\n ----------- \n"); fflush(stderr); }
        if(arpack==DBL_MAX) {arpack = 0.1;} if(truncate==DBL_MAX) {truncate = 0.1;}
-       printf("truncate=%g\tfeast=%g\tarpack=%g\n",truncate,feast,arpack); /*truncate=0;*/ feast=0; /*arpack=0;*/
+       printf("#!truncate=%g\tfeast=%g\tarpack=%g\n",truncate,feast,arpack); /*truncate=0;*/ feast=0; /*arpack=0;*/
     }
   //else if(strncmp(instr,"#!truncate",10)==0) { char *valsto = strchr(instr,'=')+1; truncate = atof(valsto); }
  }

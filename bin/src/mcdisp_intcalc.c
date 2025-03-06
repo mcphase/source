@@ -421,8 +421,8 @@ int ssm1,in1,in2;
 
 // chi is actually coefficent of delta function in chi'' (compare manual: chi'' = sum_i chi(i) * delta(omega-E(i))
 if (calcXobs){// calculate polycrystal average from Trace     
-               chi*=bose/(double)ini.mf.n(); // divide by supercell number -> thus chi is per primitive unit cell
-               sumS=Trace(chi)/3.0;intensity=fabs(real(sumS)); 
+               chi*=1/(double)ini.mf.n(); // divide by supercell number -> thus chi is per primitive unit cell
+               sumS=Trace(chi)/3.0;intensity=fabs(real(bose*sumS)); 
               } 
 else if (calc_rixs){// use 1-9 components of chi to store result !!! (other components do not count          
                chi*=bose/(double)ini.mf.n();
