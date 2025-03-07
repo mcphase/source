@@ -558,7 +558,7 @@ void icmfmat::Jmat(sMat<double>&Jmat, sMat<double>&iJmat, std::vector<double>&gj
 
 std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector<double> > &matel, int num_op)
 { std::vector<double> E,eb, ex((num_op+2),0.), me; matel.clear();
-   int iJ, ind_j, Esz, Hsz=VE.Hsz();
+   int iJ, ind_j, Esz, Hsz=VE.Hsz();op_generate(0); 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
    complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
