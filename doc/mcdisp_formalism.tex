@@ -798,7 +798,11 @@ take the limit for $ \varepsilon \rightarrow 0^+$. Using Dirac's formula
 \end{equation}
 }
 
-\noindent and the correlation function \hili{$\M{\m{\Sigma}}$} can be evaluated by applying the 
+When using the program {\prg mcdisp} with option {\prg -X'observable'}, e.g. {\prg -Xpel}, 
+the coefficients of the $\delta$-function in (\ref{Xabscalc}) are evaluated (note these
+have the unit of the observable squared) and output into output file {\prg results/mcdisp.qeX'obserable'}.
+
+\noindent  The correlation function \hili{$\M{\m{\Sigma}}$} can be evaluated by applying the 
 fluctuation dissipation theorem (\ref{fluctdissbeyond}):
 
 \begin{equation}\label{corrfunct}

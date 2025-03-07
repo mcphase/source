@@ -126,13 +126,15 @@ loop_
  E1 E 0.0000 0.500(2) C1
 ; atomic radii  Tm 227 pm C 170pm  Ni 163pm
 ; C-Ni bonds at Ni+(C1-Ni)*163/(163+170)
- E2 E Ni+(C1-Ni)*163/(163+170) Ni+(C1-Ni)*163/(163+170)  Ni+(C1-Ni)*163/(163+170) 
+ E2 E Nix+(C1x-Ni)*163/(163+170) Ni+(C1-Niy)*163/(163+170)  Ni+(C1-Ni)*163/(163+170) 
 \end{verbatim}
 
 Note that atomic coordinates may also be expressed as formulas, with positions
 from previous lines as variables. In the above example the bond charge of bonding 
 electrons is denoted by the symbol E. The position coordinate is defined relative
-to the position of C1 and Ni. 
+to the position of C1 and Ni. The indices x,y and z refer to the corresponding
+fractional coordinate and can be omitted if the coordinate to be computed
+is the same.
 
 {\em Options:}
 \begin{description}
@@ -667,29 +669,67 @@ options: -nt ......... by default only 5 transition energies are output,
          -E        ... output to stdout energy of cf levels instead of transition energy
          -r ion.sipf . do not read mcphas-j but only the single ion
                        parameter file ion.sipf
-         -M  ......... calculate expectation values and transition matrix
+         -U  ......... calculate energy U, ln of partition sum Z, free energy F
+                       instead of <I>
+         -t  ......... reads .trs files from previous run (possibly modified by user, 
+                       i.e. removing
+                       some lines to speed up an approximate calculation of spectra.)
+         -Esteps 10 27 for option -d in addition to initial Energy calculate 10 further
+                       Energies until 27 meV has been reached
+         -Tsteps 10 27 in addition to initial temperature calculate 10 further temperatures
+                       until 27K has been reached
+         -Hsteps 20 0 0 10 in addition to initial field calculate 20 further external fields
+                       until (0 0 10) Tesla has been reached
+         -HE ......... in addition to magnetic field also apply electrical field in kV/mm, 
+                       i.e. there will be 
+                       instead of 3 components  Hexti Hextj Hextk in the command 
+                       line 6 components 
+                       Hexti Hextj Hextk Eexti Eextj Eextk, similar for Hsteps option 
+                       there will be 6 components
+                       (therefore: mind that -HE is given before -Hsteps in the command line)
+         -opmat 2 .... output operator matrix number n=2 to results/*.opmat
+                Operators in results/output op.mat for different values of n:
+                n=0                    Hamiltonian
+                n=1,...,nofcomponents  operator Matrix In in standard basis
+                n=-1,..,-nofomponents  operator Matrix In for Hamiltonian eigenstates 
+                                       basis
+                n>nofomponents: all operator Matrices (n=0 to n=nofcomponents) in 
+                                standard basis
+                n<-nofomponents: all operator Matrices (n=0 to n=-nofcomponents) 
+                                 in Hamiltonian  eigenstates basis
+         -v       .... verbose, output more information on ongoing calculation
+
+  Other Observables:
+         -M  ...magnetic moment: calculate expectation values and transition matrix
                        elements for magnetic moment M (muB)instead of I
-         -U  ......... calculate energy U, free energy F and logarithm of partition 
-                       function Z instead of I
-         -MQ 0 0 1 ...  instead of <I> calculate expectation values, transition matrix elements
-                       for M(Q=(0 0 1)/A), the Fourier Transform  of magnetic moment density M(r) 
-         -L  ......... calculate expectation values and transition matrix
+         -P  ...phonon displacement: calculate phonon displacement in A instead of I
+         -pel ..electric dipole moment: calculate electrical dipole moment pel in |e|pm
+                       instead of I
+         -L  ....orbital momentum: calculate expectation values and transition matrix
                        elements for orbital momentum L
-         -S  ......... calculate expectation values and transition matrix
+         -S  ....spin: calculate expectation values and transition matrix
                        elements for spin S
-         -sx ....... ..calculate expectation values and transition matrix
+         -MQ 0 0 1 ...M(Q),Fourier transform of magnetic moment density:  instead of <I>
+                       calculate expectation values, transition matrix elements
+                       for M(Q=(0 0 1)/A), the Fourier Transform  of magnetic moment 
+                       density M(r) 
+         -sx ....spin density: calculate expectation values and transition matrix
                        elements for spindensity coefficients aSx(lm) in expansion 
                        of spindensity-x-component in Ms(r) = sum_lm aS(l,m) R^2(r) Zlm(Omega)
                         E. Balcar J. Phys. C. 8 (1975) 1581
          -sy -sz ......for y and z components use option -sy and  -sz
-         -lx ....... ..calculate expectation values and transition matrix
+         -lx ....orbital moment density: calculate expectation values and transition matrix
                        elements for orbital moment density coefficients aLx(lm) in expansion 
-                       of orbital moment density-x-component in Ml(r)=sum_lm  aLx(l,m) F(r) Zlm(Omega)
+                       of orbital moment density-x-component 
+                       in Ml(r)=sum_lm  aLx(l,m) F(r) Zlm(Omega)
                        with F(r)==1/r int_r^inf R^2(x) dx,   E. Balcar J. Phys. C. 8 (1975) 1581
          -ly -lz ......for y and z components use option -ly and  -lz
-        -d 23.4 0.001 calculate dynamic magnetic single ion susceptibility X(omega) and neutron
-                       scattering function S(Q=0,omega) at hbar omega= E= 23.4 meV 
-                       with imaginary part epsilon=0.001 meV (epsilon>0)
+
+   Susceptibilities:
+         -X[observable] 24 0.1  ... calculate susceptibility chi(z) for z=E + i epsilon with
+                       E=24 meV and epsilon=0.1 meV. The susceptibility  chi is defined as the
+                       derivative of I (or any observable) with respect to the field, e.g. for
+                       the observable magnetic moment -XM the susceptibility is chi=dM/dH
 \end{verbatim} 
 The program evaluates equation (\ref{singleionsusceptibility}) setting $\hat \mathcal I_{\alpha}$
 equal to the magnetic moment operator $\hat M_{\alpha}$ with $\alpha=1,2,3$ for the
@@ -700,39 +740,34 @@ in dipole approximation for a polycrystal neglecting
 form factor, Debye Waller factor by the following relation
 
 \begin{equation}
-S_{\rm mag,poly}^{inel}(Q=0,\omega)=  \frac{2}{3}\frac{(\gamma r_0)^2}{4\pi} \frac{1}{1-exp(-\hbar\omega/k_bT)}     \sum_{\alpha=1,2,3}\chi''_{\alpha\alpha}(\omega)
+S_{\rm mag,poly}^{inel}(Q=0,z)=  \frac{2}{3}\frac{(\gamma r_0)^2}{4\pi} \frac{1}{1-exp(- z/k_bT)}     \sum_{\alpha=1,2,3}\chi''_{\alpha\alpha}(z)
 \end{equation}
 
 Compare (\ref{fluctdissbeyond}), (\ref{Sinelperp}) and (\ref{sinelmag}). Note, the prefactor $2/3$ comes
-from the average of the polarisation factor.
+from the average of the polarisation factor. 
 
 \begin{verbatim}
-
-         -s 0.3 0.1 .. calculate static magnetic single ion susceptibility X in emu/mol with
-                       constant offset X0=0.3 emu/mol and molecular field constant lambda=0.1 mol/emu
-                       1/(X-X0)=(1/Xcf)-lambda. Xcf obtained the same way as option -d 0 0 and
-                       converting the results to emu/mol by multiplying with factor MU_B MU_B NA/10000=
-                       = 0.0578838263*0.55848973464 = 0.0323275227902. lambda is only applied if  
-                       Xcf is diagonal.
-         -is  0.3 0.1  same as -s but output of the inverse susceptibility Y=X^-1 in mol/emu
+                       units: standard unit is (unit of observable)^2/meV, e.g. for -XM
+                              (muB)^2/meV. you can use the options ... 
+         -emu 0.3 0.1 . to obtain the magnetic susceptibility chi in units of emu/mol with
+                       constant offset X0=0.3 emu/mol and molecular field constant 
+                       lambda=0.1 mol/emu
+                       1/(X-X0)=(1/Xcf)-lambda. Xcf obtained the same way as option 
+                       -d 0 0 and
+                       converting the results to emu/mol by multiplying with factor
+                       MU_B MU_B NA/10000=
+                       = 0.0578838263*0.55848973464 = 0.0323275227902. 
+                       lambda is only applied if Xcf is diagonal.
+                       e.g. -XM 0 0 -emu 0 0 will calculate the static magnetic 
+                       susceptibility in emu/mol
+         -SI ......... to obtain the magnetic susceptibility (-XM) in SI units (Am^2/mol)
+         -muBT ......... to obtain the magnetic susceptibility (-XM) in  (muB/Tesla)
+         -iX[observable] 24 0.1  ....same as -X, but output inverse susceptibility
                        (works only if off diagonal elements of X are zero)
-         -t  ......... reads .trs files from previous run (possibly modified by user, i.e. removing
-                       some lines to speed up an approximate calculation of spectra.
-         -Esteps 10 27 for option -d in addition to initial Energy calculate 10 further
-                       Energies until 27 meV has been reached
-         -Tsteps 10 27 in addition to initial temperature calculate 10 further temperatures
-                       until 27K has been reached
-         -Hsteps 20 0 0 10 in addition to initial field calculate 20 further external fields
-                       until (0 0 10) Tesla has been reached
-         -opmat 2 .... output operator matrix number n=2 to results/*.opmat
-                Operators in results/output op.mat for different values of n:
-                n=0                    Hamiltonian
-                n=1,...,nofcomponents  operator Matrix In in standard basis
-                n=-1,..,-nofomponents  operator Matrix In for Hamiltonian eigenstates basis
-                n>nofomponents: all operator Matrices (n=0 to n=nofcomponents) in standard basis
-                n<-nofomponents: all operator Matrices (n=0 to n=-nofcomponents) in Hamiltonian eigenstates basis
-         -v       .... verbose, output more information on ongoing calculation
-Note: for calculating T,H dependencies you can instead of using options -Tsteps or -Hsteps put singleion in a LOOP
+
+
+ Note: for calculating T,H dependencies you can instead of using options -Tsteps 
+      or -Hsteps put singleion in a LOOP
       and pipe the result into a file
  ... LOOP linux:   for B in $(seq 0 0.1 14); do singleion 2 $B 0 0 0 0 0; done > results/fielddep.dat
  ... LOOP linux using perl:
