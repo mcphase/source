@@ -72,14 +72,23 @@ for (i=1;i<=sps.na();++i){for (j=1;j<=sps.nb();++j){for (k=1;k<=sps.nc();++k)
 {s=sps.in(i,j,k);
  for(l=1;l<=inputpars.cs.nofatoms;++l)
  {fe-=KB*T*lnzi[s][l];// sum up contributions from each ion
+  if(T==0)fe+=lnzi[s][l]; // for MC just sum lnzi
   U+=ui[s][l];//fprintf(stdout,"lnzi(%i,%i)=%g ",s,l,lnzi[s][l]);
 // correction term
   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
    {d1[m1]=sps.m(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];
   meanfield[m1]=mf.mf(i,j,k)[inputpars.cs.nofcomponents*(l-1)+m1];}
-  // add correction term
+ 
+if(T==0)
+{// for real Monte Carlo add to U (calculated from ui without exchange field) 
+ // the exchange energy (factor 05 because each pair is counted twice)
+  U-=0.5*(meanfield*d1);
+}else
+{ // add correction term
   fe+=0.5*(meanfield*d1);
   U+=0.5*(meanfield*d1);
+}
+
  // printf ("Hi=%g Hj=%g Hk=%g ma=%g mb=%g mc=%g \n", meanfield[1], meanfield[2], meanfield[3], d1[1], d1[2], d1[3]);
  }
 }}}
@@ -98,8 +107,66 @@ Eelastic/=sps.nofatoms;
 return fe;
  }
 
+
+
+void calc_mfijk(Vector & m,spincf & sps,int & i,int & j,int& k,int & exstr,inipar & ini,int sdim,Matrix & GG, Matrix * jj,
+         par & inputpars,int & diagonalexchange)
+{int di,dj,dk,l;m=0;
+   for (int i1=1;i1<=sps.na();++i1){if (i1>=i){di=i1-i;}else{di=sps.na()-i+i1;}
+                               for (int j1=1;j1<=sps.nb();++j1){if (j1>=j){dj=j1-j;}else{dj=sps.nb()-j+j1;}
+			                                    for (int k1=1;k1<=sps.nc();++k1){if (k1>=k){dk=k1-k;}else{dk=sps.nc()-k+k1;}
+
+    l=sps.in(di,dj,dk);//di dj dk range from 0 to to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
+                       // and index a difference between crystal unit cell positions in the
+                       // magnetic supercell
+
+////      if(r==1){fprintf(stdout,"l=%i di=%i dj=%i dk=%i\n",l,di,dj,dk);    myPrintMatrix(stdout,jj[l]);getchar();}
+
+     // here the contribution of the crystal unit cell i1 j1 k1 (i1,j1,k1 indicate the
+     // position of the crystal unit cell in the magnetic supercell) to the mean field
+     // of the crystal unit cell i j k is calculated by one matrix multiplication
+     if (diagonalexchange==0||inputpars.cs.nofatoms>1)
+     {m+=jj[l]*(const Vector&)sps.m(i1,j1,k1);
+if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
+            m+=jj[l+(sdim+2)*bb]*sps.epsilon(bb)*(const Vector&)sps.m(i1,j1,k1);
+            }
+     }else
+     {//do the diagonal elements separately to accellerate the sum
+      for(int m1=1;m1<=inputpars.cs.nofatoms*inputpars.cs.nofcomponents;++m1)
+         {m(m1)+=sps.m(i1,j1,k1)(m1)*jj[l](m1,m1);
+if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
+            m(m1)+=jj[l+(sdim+2)*bb](m1,m1)*sps.epsilon(bb)*sps.m(i1,j1,k1)(m1);
+            }
+         }
+     }
+    }}}
+  if(ini.doeps&&ini.linepscf==0){m+=sps.epsilon*GG;}
+}
+
+void calc_spsijk(Vector & m,mfcf & mf,int & i,int & j,int & k,par & inputpars,double & T,Vector & Hex,
+ Vector * lnzi,Vector * ui,int  s,int  ss,ComplexMatrix **Icalcpars,ComplexVector **stat=NULL)
+{  Vector d1(1,inputpars.cs.nofcomponents);
+    Vector moment(1,inputpars.cs.nofcomponents);
+  for(int l=1;l<=inputpars.cs.nofatoms;++l)
+  {int lm1m3;
+   lm1m3=inputpars.cs.nofcomponents*(l-1);
+   for(int m1=1;m1<=inputpars.cs.nofcomponents;++m1)
+   {d1[m1]=mf.mf(i,j,k)[lm1m3+m1];}
+if(stat==0)
+ (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]));
+else
+ (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]),stat[l]);
+
+   if(isnan(lnzi[s][l])){fprintf (stderr, "Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   if(isnan(ui[s][l])){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   for(int m1=1;m1<=inputpars.cs.nofcomponents;++m1)
+   {m(lm1m3+m1)=moment[m1];}
+  }
+}
+
+
 double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector Hex,double T,inipar & ini,par & inputpars,
-             spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs)
+             spincf & sps,mfcf & mf,testspincf & testspins, qvectors & testqs,physproperties * physprops)
 {/*on input:
     T		Temperature[K]
     Hex		Vector of external magnetic field [T] in ijk coordinates
@@ -118,12 +185,12 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
  Matrix GG(1,6,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector sigma(1,6); // external stress tensor in Voigt notation and units meV/pVol
  Vector diff(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),d(1,3),d_rint(1,3),xyz(1,3),xyz_rint(1,3);// some vector
- Vector moment(1,inputpars.cs.nofcomponents), d1(1,inputpars.cs.nofcomponents),meanfield(1,inputpars.cs.nofcomponents);
+ Vector meanfield(1,inputpars.cs.nofcomponents);
                  Matrix II(1,inputpars.cs.nofcomponents,1,inputpars.cs.nofcomponents);
 //Matrix III(1,3,1,3);Vector dn(1,3);int sl;
 
  char text[MAXNOFCHARINLINE];char outfilename [MAXNOFCHARINLINE]; // some text variable
- int i,j,k,i1,j1,k1,di,dj,dk,l,s,sdim,m,n,m1;
+ int i,j,k,l,s,sdim,m,n,m1;
  r=0;
  div_t result; // some modulo variable
  float    sta=1000000; // initial value of standard deviation
@@ -159,6 +226,9 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
          
  spincf  spsold(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents); // spinconf variable to store old sps
  mfcf  mfold(mf.na(),mf.nb(),mf.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents); // spinconf variable to store old mf
+// initialize mfold with large number
+   for(s=0;s<=mfold.in(mfold.na(),mfold.nb(),mfold.nc());++s){ mfold.mi(s)=1000;}
+   
  spsold=sps;
 
 if(ini.doeps){ // set coupling matrix 
@@ -167,7 +237,7 @@ for(i=1;i<=6;++i)
   for(m=1;m<=inputpars.cs.nofcomponents;++m)
    GG(i,(l-1)*inputpars.cs.nofcomponents+m)=(*(*inputpars.jjj[l]).G)(i,m);
 // invert elastic constants 
- // printf("#Inverting Elastic Constants Matrix\n");
+ //printf("#Inverting Elastic Constants Matrix\n");
   inputpars.CelInv=inputpars.Cel.Inverse();
             
 // initialize epsilon mean field to zero
@@ -190,8 +260,6 @@ int exstr=0;if(ini.ipx!=NULL){exstr=6;}
  for(i=0;i<=(sdim+2)*(1+exstr)-1;++i){jj[i]=Matrix(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);} // coupling coeff.variable
    if (jj == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
-   // initialize mfold with zeros
-   for(s=0;s<=mfold.in(mfold.na(),mfold.nb(),mfold.nc());++s){mfold.mi(s)=1000;}
    for(s=0;s<=(sdim+2)*(1+exstr)-1;++s){jj[s]=0;} //clear jj(j,...)
 
    for(m=1;m<=inputpars.cs.nofatoms;++m)
@@ -314,12 +382,6 @@ jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(
 
     }  
 
-
-
-
-
-
-
   }          
 
    }
@@ -341,7 +403,10 @@ if (ini.displayall==1)   // display spincf if button is pressed
      sleep(200);
  }
 
-// loop for selfconsistency
+// mf loop for selfconsistency **********************************************************
+// mf loop for selfconsistency **********************************************************
+// mf loop for selfconsistency **********************************************************
+
 for (r=1;sta>ini.maxstamf;++r)
 {if (spinchange>ini.maxspinchange)
     {delete []jj;delete []lnzi;delete []ui;
@@ -352,48 +417,24 @@ for (r=1;sta>ini.maxstamf;++r)
      if (verbose==1) {fprintf(stderr,"feDIV!MAXspinchangE");}++ini.nofmaxspinchangeDIV;
      return 2*FEMIN_INI+1;}
 
- //1. calculate mf from sps (and calculate sta)
+ //1. calculate mf from sps (and calculate sta) |||||||||||||||||||||||||||||||||||||||||||
  sta=0;dE=0; if(ini.doeps)mf.epsmf=0;
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
- {mf.mf(i,j,k)=0;  if(ini.doeps)mf.epsmf+=GG*sps.m(i,j,k);
-  for (i1=1;i1<=sps.na();++i1){if (i1>=i){di=i1-i;}else{di=sps.na()-i+i1;}
-                               for (j1=1;j1<=sps.nb();++j1){if (j1>=j){dj=j1-j;}else{dj=sps.nb()-j+j1;}
-			                                    for (k1=1;k1<=sps.nc();++k1){if (k1>=k){dk=k1-k;}else{dk=sps.nc()-k+k1;}
+ {  if(ini.doeps)mf.epsmf+=GG*sps.m(i,j,k);
+  
+  calc_mfijk(mf.mf(i,j,k),sps,i,j,k,exstr,ini,sdim,GG,jj,inputpars,diagonalexchange);
 
-    l=sps.in(di,dj,dk);//di dj dk range from 0 to to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
-                       // and index a difference between crystal unit cell positions in the
-                       // magnetic supercell
 
-////      if(r==1){fprintf(stdout,"l=%i di=%i dj=%i dk=%i\n",l,di,dj,dk);    myPrintMatrix(stdout,jj[l]);getchar();}
-
-     // here the contribution of the crystal unit cell i1 j1 k1 (i1,j1,k1 indicate the
-     // position of the crystal unit cell in the magnetic supercell) to the mean field
-     // of the crystal unit cell i j k is calculated by one matrix multiplication
-     if (diagonalexchange==0||inputpars.cs.nofatoms>1)
-     {mf.mf(i,j,k)+=jj[l]*(const Vector&)sps.m(i1,j1,k1);
-if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
-            mf.mf(i,j,k)+=jj[l+(sdim+2)*bb]*sps.epsilon(bb)*(const Vector&)sps.m(i1,j1,k1);
-            }
-     }else
-     {//do the diagonal elements separately to accellerate the sum
-      for(m1=1;m1<=inputpars.cs.nofatoms*inputpars.cs.nofcomponents;++m1)
-         {mf.mf(i,j,k)(m1)+=sps.m(i1,j1,k1)(m1)*jj[l](m1,m1);
-if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
-            mf.mf(i,j,k)(m1)+=jj[l+(sdim+2)*bb](m1,m1)*sps.epsilon(bb)*sps.m(i1,j1,k1)(m1);
-            }
-         }
-     }
-    }}}
-  if(ini.doeps&&ini.linepscf==0){mf.mf(i,j,k)+=sps.epsilon*GG;}
   diff=mf.mf(i,j,k)-mfold.mf(i,j,k);sta+=diff*diff;
  // dE-=0.5*diff*(const Vector&)sps.m(i,j,k); // here we tried to calculate dE - energy difference for the step
   diff*=stepratio;mf.mf(i,j,k)=mfold.mf(i,j,k)+diff;//step gently ... i.e. scale change of MF with stepratio
+  
   }}}
   // normalize mf.epsmf to crystallographic primitive unit cell (in accordance with elastic constants!)
   mf.epsmf/=sps.n();
 // if(r==1){mf.print_human_readable(stdout);}
 
-  mfold=mf;
+  
   sta=sqrt(sta/sps.n()/inputpars.cs.nofatoms);
   bigstep=fmodf(ini.bigstep-0.0001,1.0);
   if (ini.bigstep>1.0){smallstep=bigstep/(ini.bigstep-bigstep);}else{smallstep=bigstep/5;}
@@ -406,29 +447,19 @@ if(exstr>0&&ini.linepsjj==0){for(int bb=1;bb<=6;++bb)
 // ---> printing this dE  yields the result, that dE is > KB*T always when the strucuture
 // is oscillating and finally diverges because of MAXSPINCHANGE reached.
 
- if ((ini.maxnofmfloops==1&&r==1)||(r==2&&ini.maxnofmfloops==2)){sta=0;} // end loop on first calculation of MF from sps if no MF looping required
+ if ((ini.maxnofmfloops<=1&&r==1)||(r==2&&ini.maxnofmfloops==2)){sta=0;} // end loop on first calculation of MF from sps if no MF looping required
 else
-{
-
-
-//2. calculate sps from mf
+{mfold=mf;
+//2. calculate sps from mf --------------------------------------------------------------
  for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
- {diff=sps.m(i,j,k);s=sps.in(i,j,k);
-  for(l=1;l<=inputpars.cs.nofatoms;++l)
-  {int lm1m3;
-   lm1m3=inputpars.cs.nofcomponents*(l-1);
-   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
-   {d1[m1]=mf.mf(i,j,k)[lm1m3+m1];}
- (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]));
+ {diff=sps.m(i,j,k);
 
-   if(isnan(lnzi[s][l])){fprintf (stderr, "Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
-   if(isnan(ui[s][l])){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
-   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
-   {sps.m(i,j,k)(lm1m3+m1)=moment[m1];}
-  }
+   calc_spsijk(sps.m(i,j,k),mf,i,j,k,inputpars,T,Hex,lnzi,ui,sps.in(i,j,k),sps.in(i-1,j-1,k-1),Icalcpars);
+
   diff-=sps.m(i,j,k);
   spinchange+=sqrt(diff*diff)/sps.n();
   }}}
+
   if(ini.doeps){// here should come the exchange striction: calculate correlation function
                 // and multiply with  corresponding derivative of two ion interaction
                 // --> and add to mf.epsmf
@@ -504,7 +535,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
    fclose(fin_coq);
   }
  }
-if (r>ini.maxnofmfloops) 
+if (r>ini.maxnofmfloops)if(ini.nofrndtries>=0) 
     {delete []jj;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){
@@ -516,15 +547,185 @@ if (r>ini.maxnofmfloops)
                      }
      ++ini.nofmaxloopDIV;
      return 2*FEMIN_INI;}
+                         else{sta=0;} // continue with Monte Carlo
 }
 }
-
+// end mf loop for selfconsistency **********************************************************
+// end mf loop for selfconsistency **********************************************************
+// end mf loop for selfconsistency **********************************************************
 //printf ("hello end of selfconsistency loop after %i iterations\n",r);
-fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
-
 //for(int ec=1;ec<=6;++ec)printf("mf.eps(%i)=%g ",ec,mf.epsmf(ec));printf("\nsl=%i\n",sl);
 //myPrintMatrix(stdout,III);
 // myPrintVector(stdout,dn);
+
+
+
+// initialize ui[s][l] for maxnofmfloops=1  (without changing sps)
+if(ini.maxnofmfloops==1)for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
+  calc_spsijk(diff,mf,i,j,k,inputpars,T,Hex,lnzi,ui,sps.in(i,j,k),sps.in(i-1,j-1,k-1),Icalcpars);
+
+
+// ***************************************************************************
+// do real Monte Carlo simulation - only for negative ini.nofrndtries !!!
+// ***************************************************************************
+if(ini.nofrndtries<0)
+{
+ComplexVector *** states;states= new ComplexVector ** [sdim+2];
+for(i=0;i<=sdim+1;++i){states[i]=new ComplexVector * [inputpars.cs.nofatoms+1];
+                       for(l=1;l<=inputpars.cs.nofatoms;++l)states[i][l]=NULL;
+                      }
+
+// initialize ui[s][l] for real Monte Carlo calculation without changing sps
+// for real Monte Carlo do not make use of mean fields for calculation of ui
+ // use Hsingleion  without mean field, i.e. with mfold=0
+// initialize mfold with large number
+   for(s=0;s<=mfold.in(mfold.na(),mfold.nb(),mfold.nc());++s){ mfold.mi(s)=0;}
+// ui=tr(H*ro)  ro=exp(-H/kT)
+// <I>=tr(I*ro)
+//  .... actually here we should initialize the <I> with the mean field "state",
+// i.e. |MF>=sum_i sqr(exp(-Ei/kT)/Z)|i>   and use as initial sps <MF|I|MF> and corresponding
+// exchange fields !!!!
+double TT=0;
+for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
+     {// first call Icalc with TT=0 to initialize state vector ("new Complex Vector")  
+       calc_spsijk(diff,mfold,i,j,k,inputpars,TT,Hex,lnzi,ui,sps.in(i,j,k),sps.in(i-1,j-1,k-1),Icalcpars,states[sps.in(i,j,k)]);
+     // second call Icalc with T,mf to fill states with mf-state and calculate corresponding sps.m's
+       calc_spsijk(diff,mf,i,j,k,inputpars,T,Hex,lnzi,ui,sps.in(i,j,k),sps.in(i-1,j-1,k-1),Icalcpars,states[sps.in(i,j,k)]);
+      // third call with TT=0, mf=0 (i.e. Monte Carlo stepwidht mfold(1)=0 - > states not changed)
+     //  - to fill lnzi and ui with expectation values of Hsingleion without exchange field -> needed in evalfe
+     //  to calculate U (= -0.5 * mf*sps.m) for initial state
+     //  - fill sps.m with initial values corresponding to MF "state"
+     calc_spsijk(sps.m(i,j,k),mfold,i,j,k,inputpars,TT,Hex,lnzi,ui,sps.in(i,j,k),sps.in(i-1,j-1,k-1),Icalcpars,states[sps.in(i,j,k)]);
+     }
+// because sps has changed, recalculated mean fields so evalfe will yield correct initial state energy U
+for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
+  calc_mfijk(mf.mf(i,j,k),sps,i,j,k,exstr,ini,sdim,GG,jj,inputpars,diagonalexchange);
+
+// calculate free energy / for Monte Carlo calculate Energy U for current state
+// initialize fe to -kTlnZ with Z=high temperature limit calculated from lnzi
+fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, TT,lnzi,ui);
+
+
+//printf("starting MC run with E=U=%g",U);
+double E0=U*sps.n()*sps.nofatoms,E=0,Z;int kept=1,notkept=1;  
+Vector d1(1,inputpars.cs.nofcomponents);d1=0;d1(1)=1; // d1(1) is stepsize (alpha in Metropolis paper 1953 !)
+U=0;if(physprops!=NULL)(*physprops).totalJ=0;
+
+Vector totalJ(1,inputpars.cs.nofcomponents);totalJ=sps.totalJ();
+Vector dtotalJ(1,inputpars.cs.nofcomponents);
+Vector Imom(1,inputpars.cs.nofcomponents);
+Vector mn(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
+Vector mo(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
+Vector En(1,inputpars.cs.nofatoms);
+
+// Note: in constrast to the mean field loop the self energy coefficient jj[0] has to be halfed in order
+//       to obtain correct energy changes
+jj[0]*=0.5;
+
+// initialize E to U calculated in evalfe() from ui according to Hsingleion without exchange field.
+// remember to introduce into ICalc T=0 beahviour (random state energy and moment!)
+int nofMC=-ini.nofrndtries*sps.n();
+// Monte Carlo random loop ---------------------------------------------------------
+for(r=1;r<=nofMC;++r) 
+{
+// choose a random spin (i.e. primitive unit cell with nofatoms spins:)
+	                 i=(int)rint(rnd(1.0)*(sps.na()-1))+1;
+		         j=(int)rint(rnd(1.0)*(sps.nb()-1))+1;
+		         k=(int)rint(rnd(1.0)*(sps.nc()-1))+1;
+                         
+// randomize  atoms in unit cell ijk with ICalc T=0 and calculate single ion energy change
+ double expEKT;s=sps.in(i,j,k);dE=0;bool keep;dtotalJ=0;
+ for(l=1;l<=inputpars.cs.nofatoms;++l)
+ {(*inputpars.jjj[l]).Icalc(Imom,TT,d1,Hex,lnzi[s][l],En(l),(*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]),states[s][l]);
+ // returns the moment and the energy
+   if(isnan(lnzi[s][l])){fprintf (stderr, "Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   if(isnan(En)){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   int lm1m3=inputpars.cs.nofcomponents*(l-1);
+   for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){
+      mn(lm1m3+m1)=Imom[m1];
+      dtotalJ(m1)+=Imom[m1]-sps.m(i,j,k)(lm1m3+m1);
+      }
+ // update energy of the ensemble
+ printf("ui=%g ",ui[s][l]);
+ dE+=En(l)-ui[s][l];  // single ion term
+ }
+ // now treat the two ion interaction term
+ calc_mfijk(mf.mf(i,j,k),sps,i,j,k,exstr,ini,sdim,GG,jj,inputpars,diagonalexchange);
+ dE+=sps.m(i,j,k)*mf.mf(i,j,k);  // remove old exchange contribution with this ion ijk from energy
+
+mo=sps.m(i,j,k);sps.m(i,j,k)=mn; // calculate mf using new moments and add new interaction energy of this ion ijk
+ calc_mfijk(mf.mf(i,j,k),sps,i,j,k,exstr,ini,sdim,GG,jj,inputpars,diagonalexchange);
+ dE-=sps.m(i,j,k)*mf.mf(i,j,k);
+
+//printf("dE=%g \n",dE);
+ // monte carlo stepping according to metropolis 1953 
+ keep=false;
+ if(dE<=0)keep=true;
+ else{if(dE/(KB*T)<HUGE_EXP)expEKT=exp(-dE/(KB*T)); else  expEKT=0;
+         double xi=rnd(1);
+         if(xi<expEKT)keep=true;
+         else{sps.m(i,j,k)=mo;notkept++;}
+        }   
+if(keep)
+{E+=dE;kept++;
+ for(l=1;l<=inputpars.cs.nofatoms;++l)
+ {ui[s][l]=En(l);
+ }
+ totalJ+=dtotalJ*(double)(1.0/(sps.n()*sps.nofatoms));
+}
+ // here make averages of observables
+ // energy
+ U+=E;
+ // <I>
+
+if(physprops!=NULL)(*physprops).totalJ+=totalJ;
+
+// <M> magnetic moment
+
+
+// refine stepsize alpha according to kept/notkept ratio
+if(r%10==0)
+{if(kept/notkept<0.01&&d1(1)>0.1){d1(1)*=0.5; // decrease stepsize if few steps are kept
+if(verbose&&d1(1)<0.0001)printf("MC stepsize =%g ",d1(1));}
+ if(notkept/kept<0.01&&d1(1)<10) {d1(1)*=2; // increase stepsize if many steps are  kept
+ if(verbose&&d1(1)>10000)printf("MC stepsize =%g ",d1(1));}
+}
+
+// check E 
+/*if(r%10==1)
+{double Er=0; for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k)
+     calc_mfijk(mf.mf(i,j,k),sps,i,j,k,exstr,ini,sdim,GG,jj,inputpars,diagonalexchange);
+     fe=evalfe(Er,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
+printf("n1 n2 n3 = %i %i %i r=%i Er=%g  E=%g\n",sps.na(),sps.nb(),sps.nc(),r,Er*sps.n()*sps.nofatoms,E+E0);
+} */
+
+ } // next Monte Carlo r ---------------------------------------------------------
+ 
+// Energy
+ U/=nofMC; U+=E0;  U/=sps.n()*sps.nofatoms;
+
+// Operators <I>
+ if(physprops!=NULL)(*physprops).totalJ/=nofMC;
+ 
+ // Z and fe ... DIFFICULT - I do not know how to calculate !!!???????
+ Z=1.0*kept/nofMC; // needs to be multiplied by Z(T-->inf) ... see fe calc 
+ fe*=-KB*T;
+ fe-=(KB*T*(log(Z))-E0)/(sps.n()*sps.nofatoms); // for the moment leave this !!!!????
+ // if(verbose)printf(" log Z=%g ",log(Z));
+ //printf("stopping MC run with U=%g meV /ion fe = %g meV /ion",U,fe);
+for(i=0;i<=sdim+1;++i){for(l=1;l<=inputpars.cs.nofatoms;++l)if(states[i][l]!=NULL)delete states[i][l];
+                      delete [] states[i];
+                      }
+delete [] states;
+}
+// ***************************************************************************
+// END Monte Carlo simulation 
+// ***************************************************************************
+else
+{// calculate free energy 
+fe=evalfe(U,Eelastic,sps,mf,ini,inputpars, T,lnzi,ui);
+}
+
 
 if (ini.displayall==1)
  {
@@ -541,7 +742,6 @@ if (ini.displayall==1)
       mf.print(stdout);
       sleep(200);
   }
-
  delete []jj;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){

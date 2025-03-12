@@ -138,7 +138,7 @@ public:
    Vector MF; // to store exchange fields for mcdiff
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents
    // from exchange field Hxc [meV] and external field Hext
-   void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage);
+   void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage,ComplexVector * state = NULL);
    void  Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext, Vector & lnZ,Vector & U,ComplexMatrix & parstorage);
 
    // returns transition element matrix M  and transition energy delta (to calculate chi0 in mcdisp,see manual)
@@ -430,7 +430,7 @@ void *handle;
 // ********************************************************************************
 
   // kramers internal module functions, module_type=1
-  void kramer_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  void kramer_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U,ComplexVector * state=NULL);
   int  kramerdm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd);
   Matrix krameropmat (int & n ,Vector &  Hxc,Vector & Hext);
 

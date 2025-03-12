@@ -175,7 +175,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  FILE * felog; // logfile for q dependence of fe
  FILE * fin_coq;
 
-  for (tryrandom=0;tryrandom<=ini.nofrndtries&&j!=0;++tryrandom)
+  for (tryrandom=0;(tryrandom<=ini.nofrndtries||tryrandom==0)&&j!=0;++tryrandom)
    {if (j>0){sps=(*testspins.configurations[j]);// take test-spinconfiguration
              #ifndef _THREADS
 	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)< "  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
@@ -227,7 +227,19 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
           
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
-            {               // first - reduce the spinconfiguration if possible
+            {if(ini.nofrndtries<0)
+              {
+             #ifndef _THREADS
+	       femin=fe; spsmin=sps;	   
+               //printout fe
+	        if (verbose==1) printf("fe=%gmeV, str %i(%i)",fe,physprops.j,j);
+             #else
+             MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
+             #endif 
+               }
+             else
+             {  
+               // first - reduce the spinconfiguration if possible
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                if ((fered=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
@@ -300,7 +312,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                  isfull=1;}else{fprintf(stderr,"%i!FT!",thread_id);}}
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
              #endif 
-	     }
+	     }}
             delete mf;
             //printout fe
             #ifdef _THREADS
@@ -655,7 +667,7 @@ else // if yes ... then
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
-      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs); 
+      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs,&physprops); 
 
       magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
@@ -696,7 +708,7 @@ else // if yes ... then
 		}
   delete magmom;if(verbose==1){printf(">");}
  //check if fecalculation gives again correct result
-   if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2){int eq=0;
+   if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2&&ini.nofrndtries>=0){int eq=0;
    #ifndef _THREADS
    if(spsmin==sps){eq=1;};//take spinconfiguration which gave minimum free energy as starting value
      #else
@@ -725,7 +737,9 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
                              physprops.m=0;delete mf;return 2;
                              }
  //if(verbose==1){printf(".\n");}
- physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
+if(ini.nofrndtries>=0) physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
+else physprops.sps=sps;
+
       delete mf;
  }
 

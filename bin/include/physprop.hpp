@@ -20,7 +20,7 @@ class physproperties
 float x,y; // phasediagramm labels  
 int j;  // index of spinstructure
 double T; // temperature
-Vector m,mabc,H,Pel,Pelabc,Pel0,Pelabc0; 
+Vector m,mabc,H,Pel,Pelabc,Pel0,Pelabc0,totalJ; 
  // moment and H field and electrical polarisation (Pel0 refers to 
  // structural (probably not measurable) polarisation in case of lack of inversion symmetry,
  // Pel is the induced polarisation)
@@ -51,7 +51,7 @@ physproperties (const physproperties & props);	// kopier-konstruktor
  // for fum file
 double fumcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int ortho,par & inputpars,int verbose);
  // for xyt file
-double xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose, Vector & totalJ);
+double xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose);
  
 void update_maxnofhkls(int mxnofhkli);
 // save physical properties to output files

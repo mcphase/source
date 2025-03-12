@@ -335,7 +335,7 @@ int inipar::load ()
   if (fin_coq==NULL) return 1;
   xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;zero=0;
   qmin(1)=1;qmin(2)=1;qmin(3)=1;qmax=0;deltaq=0;maxqperiod=0;maxnofspins=0;nofrndtries=0;
-  maxnofmfloops=0;maxstamf=0;bigstep=0;maxspinchange=0;nofthreads=0;
+  maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;nofthreads=0;
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
   
   while (fgets(instr,MAXNOFCHARINLINE,fin_coq)!=NULL)
@@ -467,7 +467,8 @@ int inipar::load ()
   if (maxnoftestspincf<1){fprintf(stderr,"ERROR maxnoftestspincf<1 not possible\n");return 1;}
   getnofthread(nofthreads);
   
-  if(maxnofmfloops==0){fprintf(stderr,"Error reading maxnofmfloops\n");return 1;}
+  if(maxnofmfloops<0){fprintf(stderr,"Error reading maxnofmfloops\n");return 1;}
+  if(maxnofmfloops==0){fprintf(stderr,"#! Reading maxnofmfloops=0 - running mcphasit in Monte Carlo mode\n");}
   if(maxnofmfloops==1){fprintf(stderr,"#! Reading maxnofmfloops=1 - mean fields will be calculated from initial spins and free energy will be evaluated using initial spins\n");}
   if(maxnofmfloops==2){fprintf(stderr,"#! Reading maxnofmfloops=2 - mean fields will be calculated from initial spins, new spins will be calculated  and using these the free energy will be evaluated\n");}
   if(maxstamf==0){fprintf(stderr,"Error reading maxstamf\n");return 1;}

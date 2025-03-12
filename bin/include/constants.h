@@ -6,7 +6,7 @@
 #define MU_B  0.0578838263 // Bohrmagneton in meV/tesla
 #define ECHARGE 1.602189e-19   // elementary charge |e| in Coulomb
 #define MU0    4*PI*1e-7    // mu0 in Vs/Am  
-#define EPS0   
+   
 
 #define MAXNOFCHARINLINE 7024
 #define SMALL 1e-6  // (meV) regulates if energy is treated as degenerate or not after a diagonalisation
@@ -18,8 +18,5 @@
                     // also for adding jjpar sets to see what is difference in position or what is equal
                     // also for checking jjj parameters if values are equal 
 
-
-#define MAXNOFCHARINLINE 7024
-
-
 #define SMALLPOSITIONDEVIATION 1e-4  // used in mcdiff mcphas to see if a lattice atom position matches or not
+#define HUGE_EXP   200   // huge value of E/kT in exp(E/kT)

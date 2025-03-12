@@ -235,7 +235,7 @@ jjj2j.o: jjj2j.c par.hpp jjj2j.h jjjpar.hpp vector.h
 spins.o: spins.c densities_func.c spincf.hpp  martin.h vector.h graphic_parameters.hpp cryststruct.hpp par.hpp jjjpar.hpp ../../version
 	$(CCC) $(CFLAGS) $<
 
-spinsfromq.o: spinsfromq.c spincf.hpp  par.hpp martin.h vector.h ../../version
+spinsfromq.o: spinsfromq.c spincf.hpp  par.hpp jjjpar.hpp martin.h vector.h ../../version
 	$(CCC) $(CFLAGS) $<
 
 singleion.o: singleion.c par.hpp jjjpar.hpp myev.h martin.h vector.h trs_io.c ../../version

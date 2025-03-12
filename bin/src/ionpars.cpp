@@ -690,7 +690,8 @@ void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  Hxc,Vector & He
 }
 
 /**************************************************************************/
-void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & /*ests*/)
+void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double & lnZs, double & U,
+ ComplexMatrix & /*Parstorage*/,ComplexVector * state)
 {   /*on input
     T		temperature[K]
     Hxc	        vector of exchange field [meV]
@@ -702,7 +703,39 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
     Z		single ion partition function
     U		single ion magnetic energy
     */
-   int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
+   int dj=Hcf.Rhi();
+// for Monte Carlo treat T=0 case
+if(T==0){
+Vector gjmbH(1,max(3,Hxc.Hi()));gjmbH=0;
+gjmbH(1)=gJ*MU_B*Hext(1);
+gjmbH(2)=gJ*MU_B*Hext(2);
+gjmbH(3)=gJ*MU_B*Hext(3);
+
+// check dimensions of vector
+if(gjmbH.Hi()>NOF_OLM_MATRICES+3)
+   {fprintf(stderr,"Error module so1ion/cfield: dimension of exchange field=%i > %i - check number of columns in file mcphas.j\n",gjmbH.Hi(),NOF_OLM_MATRICES+3);
+    exit(EXIT_FAILURE);}
+
+   int j;
+   Matrix Ham(1,dj,1,dj);    
+   Ham=Hcf;for(j=1;j<=gjmbH.Hi();++j){Ham-=gjmbH(j)*(*In[j]);}
+    if(state==NULL)state=new ComplexVector(1,dj);
+    for(j=1;j<=dj;++j){double r=Hxc(1); // step according to stepsize given in Hxc(1)
+                     complex <double> c=crnd(r); // randomize state vector
+                     (*state)(j)+=c;
+                      }
+    double norm2=Norm2((*state)); // calculate Norm^2 of state vector
+    // U = <state|Ham|state>
+// The real parts of the elements must be
+//  stored in the lower triangle of z,the imaginary parts (of the elements
+//  corresponding to the lower triangle) in the positions
+//  of the upper triangle of z[lo..hi,lo..hi].
+   U=matelr((*state),(*state),Ham)/norm2;
+   lnZs=log(dj); // for lnZ put the high temperature limit
+   for(j=1;j<=I.Hi();++j)I[j]=matelr((*state),(*state),(*In[j]))/norm2;
+
+}else{
+  int sort=0;if (T<0) sort=1;
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
    setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
    // calculate Z and wn (occupation probability)
@@ -718,6 +751,17 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
      for(int j=1;j<=I.Hi();++j)I[j]+=wn(i)*matelr(i,i,zr,zi,(*In[j]));
                                    }
     } //printf("%g %g\n",I[1],I[2]);
+
+   if(state!=NULL) // put "MF state" into state vector, i.e. |MF>=sum_i sqrt(exp(-Ei/kT)/Z)|i>   
+   // exchange fields !!!!
+  {for(int j=1;j<=dj;++j){(*state)=complex<double>(0,0);
+      for (int i=1;i<=dj;++i)
+    { if(wn(i)>SMALL_PROBABILITY){(*state)(j)+=complex<double>(sqrt(wn(i))*zr[j][i],sqrt(wn(i))*zi[j][i]);
+                                 }
+                     }
+    }
+  }
+ }
 }
 
 void ionpars::Icalc(Matrix & I,Vector & T, Vector &  Hxc,Vector & Hext, Vector & lnZs, Vector & U, ComplexMatrix & /*ests*/)
