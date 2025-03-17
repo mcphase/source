@@ -40,6 +40,7 @@ physproperties::physproperties (int nofspincorrs,int maxnofhkli,int na,int nm)
  Pelabc=Vector(1,3); Pel=Vector(1,3);
  Pelabc0=Vector(1,3); Pel0=Vector(1,3);
  H=Vector(1,HEXT_DIMENSION);
+ totalJ=Vector(1,nofcomponents);
  
  jj= new Vector [nofspincorrs+1];for(i=0;i<=nofspincorrs;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
@@ -58,20 +59,29 @@ physproperties::physproperties (const physproperties & p)
   x=p.x;y=p.y;
   j=p.j;
   T=p.T;
-  H=p.H;
+  m=Vector(1,3); 
+  mabc=Vector(1,3); 
+  Pelabc=Vector(1,3); Pel=Vector(1,3);
+  Pelabc0=Vector(1,3); Pel0=Vector(1,3);
+  H=Vector(1,HEXT_DIMENSION);
+  H=p.H; 
   Pel=p.Pel;Pelabc=p.Pelabc;
   Pel0=p.Pel0;Pelabc0=p.Pelabc0;
   m=p.m;mabc=p.mabc;
   nofhkls=p.nofhkls;
   u=p.u;fe=p.fe;Eelastic=p.Eelastic;
-  sps=p.sps;
-  mf=p.mf;
   washere=p.washere;
  maxnofhkls=p.maxnofhkls;
  nofspincorr=p.nofspincorr;
  nofatoms=p.nofatoms;
  nofcomponents=p.nofcomponents;
-  
+  sps=spincf(1,1,1,nofatoms,nofcomponents);
+  mf=mfcf(1,1,1,nofatoms,nofcomponents);
+  sps=p.sps;
+  mf=p.mf;
+ totalJ=Vector(1,nofcomponents);
+ totalJ=p.totalJ;
+
  jj= new Vector [nofspincorr+1];for(i=0;i<=nofspincorr;++i){jj[i]=Vector(1,nofcomponents*nofcomponents*nofatoms);} //  ... number of interaction constants (aa bb cc ab ba ac ca bc cb)
    if (jj == NULL){fprintf (stderr, "physproperties::physproperties Out of memory\n");exit (EXIT_FAILURE);} 
  hkli= new Vector [maxnofhkls+1];for(i=0;i<=maxnofhkls;++i){hkli[i]=Vector(1,10);}
@@ -80,7 +90,6 @@ physproperties::physproperties (const physproperties & p)
     {jj[i]=p.jj[i];}
  for(i=1;i<=nofhkls;++i)
     {hkli[i]=p.hkli[i];} 
- 
  }
 
 
@@ -208,7 +217,7 @@ return sta;
 }
 
    // for xyt file
-double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose, Vector & totalJ)
+double physproperties::xytcols(float * nn,float * nnerr, int & nofcols,bool setnn,char * header,char * outstr,inipar & ini,int verbose)
  {double sta=0;double * ptr;int * iptr;char hs[40];char num[40];
    header[0]='\0';outstr[0]='\0';int nofa=sps.na(),nofb=sps.nb(),nofc=sps.nc();
     int nofcolsin=0;if(!setnn){nofcolsin=nofcols;j=0;nofa=0;nofb=0;nofc=0;totalJ=0;}
@@ -334,13 +343,12 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
      fclose(fout);
     }else{errno=0;}
 //--------------------------------------mcphas.xyt---------------------------------------------------  
-  errno = 0; Vector totalJ(1,nofcomponents);
+  errno = 0;  
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas.xyt");
     if (verbose==1)printf("saving %s\n",outfilename);
-  totalJ=0; 
-  if (htfailed!=0){j=0;}else{totalJ=sps.totalJ();}
-  xytcols(nn,nnerr,nofcols,true,str,outstr,ini,verbose,totalJ);
+  if (htfailed!=0){j=0;totalJ=0;}
+  xytcols(nn,nnerr,nofcols,true,str,outstr,ini,verbose);
   if (washere==0)
   {fout = fopen_errchk (outfilename,filemode);
    fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
@@ -366,7 +374,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
      while(feof(fout)==0)
      {if ((l=inputline(fout,nn,nnerr))!=0)
       {if(ini.checkTH(nn,T,H,inputpars.cs.abc)) // checks if T and H is in accordance with nn  
-         {double s=xytcols(nn,nnerr,l,true,str,outstr,ini,verbose,totalJ);
+         {double s=xytcols(nn,nnerr,l,true,str,outstr,ini,verbose);
           if(verbose==1){fprintf(stdout,"sta_mcphas.xyt=%g\n",s);}
           sta+=s;
 	 }
@@ -723,7 +731,7 @@ found=0;
  //  if(ortho==0){fprintf (fout, "    %4.4g %4.4g %4.4g   %4.4g %4.4g %4.4g",myround(m(1)),myround(m(2)),myround(m(3)),Hijk(1),Hijk(2),Hijk(3));}
   
 //-----------------------------------------mcphas.xyt------------------------------------------------  
-  errno = 0; Vector totalJ(1,nofcomponents);
+  errno = 0; 
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas.xyt");
     if (verbose==1)printf("reading %s\n",infilename);

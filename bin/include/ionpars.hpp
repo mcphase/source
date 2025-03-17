@@ -63,7 +63,7 @@ class ionpars
 
    // functions needed to calculate thermal expectation value of observables 
    void cfeigenstates (ComplexMatrix *est, Vector &  gjmbHxc,Vector & Hext, double & T);
-   void Icalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & parstorage);
+   void Icalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & parstorage,ComplexVector *& state);
    void Icalc(Matrix & JJ,Vector & T, Vector &  gjmbHxc,Vector & Hext, Vector & lnZs, Vector & U, ComplexMatrix & parstorage);
 
    Matrix opmat (int & n ,Vector &  Hxc,Vector & Hext);
@@ -73,6 +73,7 @@ class ionpars
    // on output    
    // operator matrix of Hamiltonian, I1, I2, I3 depending on n
 
+   void Jcalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & ests,ComplexVector *& state);
    void Jcalc(Vector & JJ,double & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & ests);
    void Jcalc(Matrix & JJ,Vector & T, Vector &  gjmbHxc,Vector & Hext, ComplexMatrix & ests);
    // charge density coefficients

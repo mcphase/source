@@ -548,10 +548,14 @@ int jjjpar::get_exchange_indices(char *instrptr, Matrix *exchangeindices,const c
 // keep this routine as efficient as possible
 /****************************************************************************/
 void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double & lnZ,double & U,ComplexMatrix & parstorage)
+{ComplexVector * state=NULL;
+ Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage,state);}
+
+void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double & lnZ,double & U,ComplexMatrix & parstorage,ComplexVector *& state)
 {switch (module_type)
-  {case kramer: kramer_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
+  {case kramer: kramer_Icalc(mom,T,Hxc,Hext,lnZ,U,state,false);break;
    case cfield:
-   case so1ion: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage);break;
+   case so1ion: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage,state);  break;
    case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
    case cluster: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
    case external_class: if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U))

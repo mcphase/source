@@ -138,6 +138,7 @@ public:
    Vector MF; // to store exchange fields for mcdiff
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents
    // from exchange field Hxc [meV] and external field Hext
+   void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage,ComplexVector *& state);
    void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage);
    void  Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext, Vector & lnZ,Vector & U,ComplexMatrix & parstorage);
 
@@ -215,6 +216,7 @@ int  (*dpel1)(int*,double*,Vector*,Vector*,double*,Vector*,char**,ComplexVector*
 public:
 //1. MAGNETIC MOMENT
    // returns magnetic moment
+   int mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage,ComplexVector *& state);
    int mcalc(Vector &mom, double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
    int mcalc(Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
    int micalc(Vector &momi,  double & T, Vector &  Hxc,Vector & Hext,ComplexMatrix & parstorage);
@@ -431,6 +433,7 @@ void *handle;
 
   // kramers internal module functions, module_type=1
   void kramer_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U);
+  void kramer_Icalc (Vector &mom,double & T,Vector &  Hxc,Vector & Hext, double & Z,double & U,ComplexVector *& state,bool use_state);
   int  kramerdm (int & tn,double & T,Vector &  Hxc,Vector & Hext, ComplexVector & u1,float & delta,int & n, int & nd);
   Matrix krameropmat (int & n ,Vector &  Hxc,Vector & Hext);
 

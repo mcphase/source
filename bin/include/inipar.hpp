@@ -52,6 +52,10 @@ class inipar
   int maxqperiod;
   // maximal number of spins in qvector generated structure
   int maxnofspins; 
+  // minimum number of periodicity (for Monte Carlo simulations)
+  int minnr1; 
+  int minnr2; 
+  int minnr3; 
   // number of random spininversions  to try
   // at each configuration
   int nofrndtries;

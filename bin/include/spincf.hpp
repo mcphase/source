@@ -124,7 +124,8 @@ private:
                       //returns position of atom l at lattice site (i j k) (Angstrom)
                       // as vector components in Euclidean ijk coordinate system
                       // defined by  j||b, k||(a x b) and i normal to k and j
-  
+  int in(int i, int j, int k,int oa,int ob,int oc,int oxb,int oxc);
+    
  public:
     Vector moment(int i,int j,int k,int l); // returns moment of atom l (1,nofcomponents)
 
@@ -160,6 +161,9 @@ private:
  
     Vector totalJ (); // returns nettomoment <J>
     void invert();// inverts all spins (AND higher order moments)
+     // extend spinconfiguration  to ia ib ic times the original one periodically enlarging supercell
+     void extend(int ia,int ib,int ic);
+
     int reduce();// reduces spinconfiguration, if reduction is possible returns 1, otherwise 0
     void spinfromq (int n1,int n2, int n3,Vector & qvector, Vector & nettom,Vector & momentq0, Vector & phi);
 

@@ -690,7 +690,8 @@ void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  Hxc,Vector & He
 }
 
 /**************************************************************************/
-void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double & lnZs, double & U, ComplexMatrix & /*ests*/)
+void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double & lnZs, double & U,
+ ComplexMatrix & /*Parstorage*/,ComplexVector *& state)
 {   /*on input
     T		temperature[K]
     Hxc	        vector of exchange field [meV]
@@ -702,7 +703,38 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
     Z		single ion partition function
     U		single ion magnetic energy
     */
-   int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
+   int dj=Hcf.Rhi();
+// for Monte Carlo treat T=0 case
+if(T==0){
+
+
+   Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);int sort=0,i;
+   setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
+if(state==NULL){state=new ComplexVector(1,dj);
+ double dd,d,ddmin=1e100;
+ for(int ii=1;ii<=dj;++ii) // check which |i> is nearest in <i|I|i> to the input <I>
+  {dd=0; for(int j=1;j<=I.Hi();++j){d=I[j]-matelr(ii,ii,zr,zi,(*In[j]));dd+=d*d;}
+    if(dd<ddmin){i=ii;ddmin=dd;}
+  }
+ }
+ else
+ {
+ // select a random eigenstate i
+ i=rndint(dj);
+ 
+ }
+ U=En(i);
+   lnZs=log(dj); // for lnZ put the high temperature limit
+
+   for(int j=1;j<=I.Hi();++j)I[j]=matelr(i,i,zr,zi,(*In[j]));
+
+for(int j=1;j<=dj;++j){
+         (*state)(j)=complex<double>(zr[j][i],zi[j][i]);
+                      }
+
+
+}else{
+  int sort=0;if (T<0) sort=1;
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
    setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
    // calculate Z and wn (occupation probability)
@@ -718,6 +750,8 @@ void ionpars::Icalc(Vector & I,double & T, Vector &  Hxc,Vector & Hext, double &
      for(int j=1;j<=I.Hi();++j)I[j]+=wn(i)*matelr(i,i,zr,zi,(*In[j]));
                                    }
     } //printf("%g %g\n",I[1],I[2]);
+
+ }
 }
 
 void ionpars::Icalc(Matrix & I,Vector & T, Vector &  Hxc,Vector & Hext, Vector & lnZs, Vector & U, ComplexMatrix & /*ests*/)
@@ -964,7 +998,10 @@ void ionpars::getijdelta_from_transitionnumber(int & i,int & j,float & delta,int
 /**************************************************************************/
 //                          OBSERVABLES
 /**************************************************************************/
-void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & /*ests*/)
+void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & parstorage)
+{ComplexVector * state=NULL;
+ Jcalc(JJ,T,Hxc,Hext,parstorage,state);}
+void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, ComplexMatrix & /*parstorage*/,ComplexVector *& state)
 {   /*on input
     T		temperature[K]
     Hxc	vector of exchange field [meV]
@@ -974,7 +1011,13 @@ void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, Complex
                                                 if T<0 the program asks for w_n and calculates
 						       exp value <J>=sum_n w_n <n|J|n>
     */
-   int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
+
+if(state!=NULL)
+{JJ(1)=matelr((*state),(*state),Ja);
+JJ(2)=matelr((*state),(*state),Jb);
+JJ(3)=matelr((*state),(*state),Jc);
+}else
+{   int dj=Hcf.Rhi(),sort=0;if (T<0) sort=1;
    Vector En(1,dj);Matrix zr(1,dj,1,dj);Matrix zi(1,dj,1,dj);
    setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
 // calculate Z and wn (occupation probability)
@@ -990,7 +1033,7 @@ void ionpars::Jcalc(Vector & JJ,double & T, Vector &  Hxc,Vector & Hext, Complex
                                    }
     }
 }   
-
+}
 
 
 

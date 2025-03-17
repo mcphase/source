@@ -173,15 +173,18 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  mfcf * mf1;
  spincf * magmom;
  FILE * felog; // logfile for q dependence of fe
- FILE * fin_coq;
+ FILE * fout;
 
-  for (tryrandom=0;tryrandom<=ini.nofrndtries&&j!=0;++tryrandom)
+  for (tryrandom=0;(tryrandom<=ini.nofrndtries||tryrandom==0)&&j!=0;++tryrandom)
    {if (j>0){sps=(*testspins.configurations[j]);// take test-spinconfiguration
              #ifndef _THREADS
 	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)< "  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
              #else
 	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)<[%i] "  ,j,sps.na(),sps.nb(),sps.nc(),thread_id); fflush(stdout); }
              #endif 
+            while(sps.na()<ini.minnr1)sps.extend(2,1,1); 
+            while(sps.nb()<ini.minnr2)sps.extend(1,2,1); 
+            while(sps.nc()<ini.minnr3)sps.extend(1,1,2); 
             }
     else     // take q vector and choose phase and mom dir randomly
             {q=testqs.q(-j);  
@@ -201,6 +204,10 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
 	     }
 	     sps.spinfromq(testqs.na(-j),testqs.nb(-j),testqs.nc(-j),
 	                   q,nettom,momentq0,phi);
+             while(sps.na()<ini.minnr1)sps.extend(2,1,1); 
+             while(sps.nb()<ini.minnr2)sps.extend(1,2,1); 
+             while(sps.nc()<ini.minnr3)sps.extend(1,1,2); 
+                // for Monte Carlo we have minimum number of spins
              hkl=inputpars.rez.Transpose()*q;  
              #ifndef _THREADS
    	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)< ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
@@ -208,10 +215,10 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
    	     if (tryrandom==0&&verbose==1) { printf ( "(%g %g %g)(%ix%ix%i)<[%i] ",hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc(),thread_id); fflush(stdout); }
              #endif 
 	    }	 
-    if (tryrandom>0){nr=(int)(rint(rnd(1.0)*(sps.n()*inputpars.cs.nofatoms-1)))+1;
+    if (tryrandom>0){nr=rndint(sps.n()*inputpars.cs.nofatoms);
 	             for (i=1;i<=nr;++i) //MonteCarlo randomize nr spins
-                      {rr=(int)rint(rnd(1.0)*(sps.n()-1))+1;
-		       ri=inputpars.cs.nofcomponents*(int)rint(rnd(1.0)*(inputpars.cs.nofatoms-1));
+                      {rr=rndint(sps.n());
+		       ri=inputpars.cs.nofcomponents*arc4random_uniform(inputpars.cs.nofatoms);
 	               for(ii=1;ii<=inputpars.cs.nofcomponents;++ii)
 		       {sps.mi(rr)(ri+ii)*=(2*rnd(1.0)-1) ;}
 		       } // randomize spin rr
@@ -227,7 +234,19 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
           
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
-            {               // first - reduce the spinconfiguration if possible
+            {if(ini.nofrndtries<0)
+              {
+             #ifndef _THREADS
+	       femin=fe; spsmin=sps;	   
+               //printout fe
+	        if (verbose==1) printf("fe=%gmeV, str %i(%i)",fe,physprops.j,j);
+             #else
+             MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
+             #endif 
+               }
+             else
+             {  
+               // first - reduce the spinconfiguration if possible
                sps1=sps;if(1==sps1.reduce()){ // if reduction is successful, try if the energy is less or equal for reduced spoinconfigurations
                    mf1=new mfcf(sps1.na(),sps1.nb(),sps1.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
                if ((fered=fecalc(U,Eelastic,r,sc,H ,T,ini,inputpars,sps1,(*mf1),testspins,testqs))<=fe*(1.0000000000001)){(*mf)=(*mf1);
@@ -262,22 +281,22 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                      snprintf(text,MAXNOFCHARINLINE,"fe=%g<femin=%g:T=%gK, |H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT,  %i spins",fe,femin,T,Norm(H),H(1),H(2),H(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
-                    fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
-                    fclose (fin_coq);
+                    fout = fopen_errchk (outfilename, "w");
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
+                    fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
-                    fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
-                    fclose (fin_coq);
+                    fout = fopen_errchk (outfilename, "w");
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
+                    fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
-                    fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
-                    fclose (fin_coq);
+                    fout = fopen_errchk (outfilename, "w");
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
+                    fclose (fout);
 		   
                     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
-                    fin_coq = fopen_errchk (outfilename, "w");
-                     (*magmom).eps(fin_coq,text);
-                    fclose (fin_coq);
+                    fout = fopen_errchk (outfilename, "w");
+                     (*magmom).eps(fout,text);
+                    fclose (fout);
 		delete[]x;delete []y; delete []z;
 	        }
                 delete magmom;   
@@ -300,17 +319,17 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
                  isfull=1;}else{fprintf(stderr,"%i!FT!",thread_id);}}
              MUTEX_LOCK (&mutex_min); if(fe<femin) { femin=fe; thrdat.spsmin=sps; } MUTEX_UNLOCK (&mutex_min); tlsfemin=1;
              #endif 
-	     }
+	     }}
             delete mf;
             //printout fe
             #ifdef _THREADS
-	    if (tryrandom==ini.nofrndtries && verbose==1) {
+	    if (tryrandom==ini.nofrndtries||ini.nofrndtries<0)if(verbose==1) {
                if(tlsfemin) printf("[%i]femin=%gmeV str %i(%i)-",thread_id,fe,physprops.j,j); 
 	       if(j>0) printf ( ">[%i]str %i(%ix%ix%i)done "  ,thread_id,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">[%i](%g %g %g)(%ix%ix%i)done ",thread_id,hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                                                           }
             #endif
-            if (tryrandom==ini.nofrndtries&&verbose==1){printf("\n");}
+            if (tryrandom==ini.nofrndtries||ini.nofrndtries<0)if(verbose==1){printf("\n");}
  
 	    
   // log fe if required
@@ -461,7 +480,7 @@ int  htcalc (Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
  mfcf * mf;
  spincf * magmom;
  FILE * felog; // logfile for q dependence of fe
- FILE * fin_coq;
+ FILE * fout;
 
 if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check mcphas.ini !");exit(EXIT_FAILURE);}
 
@@ -476,21 +495,21 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
  if (verbose==1)
  { strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
    strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
-   fin_coq= fopen_errchk (outfilename,"w");
+   fout= fopen_errchk (outfilename,"w");
    #ifndef _THREADS
-   fprintf(fin_coq,"#displayxtext=time(s)\n");
-   fprintf(fin_coq,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy(%%)\n");
-   fprintf(fin_coq,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)\n");
-   fprintf(fin_coq,"%i 0 0 0 0 0 0\n",(int)time(0));
-   fprintf(fin_coq,"%i 1 1 1 1 1 1\n",(int)time(0)+1);
+   fprintf(fout,"#displayxtext=time(s)\n");
+   fprintf(fout,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy(%%)\n");
+   fprintf(fout,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)\n");
+   fprintf(fout,"%i 0 0 0 0 0 0\n",(int)time(0));
+   fprintf(fout,"%i 1 1 1 1 1 1\n",(int)time(0)+1);
    #else
-   fprintf(fin_coq,"#displayxtext=time(s)\n");
-   fprintf(fin_coq,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy 8:threadID(%%)\n");
-   fprintf(fin_coq,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)  thread_id \n");
-   fprintf(fin_coq,"%i 0 0 0 0 0 0 0\n",(int)time(0));
-   fprintf(fin_coq,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
+   fprintf(fout,"#displayxtext=time(s)\n");
+   fprintf(fout,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy 8:threadID(%%)\n");
+   fprintf(fout,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)  thread_id \n");
+   fprintf(fout,"%i 0 0 0 0 0 0 0\n",(int)time(0));
+   fprintf(fout,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
    #endif
-   fclose(fin_coq);	      
+   fclose(fout);	      
    printf("\n starting  "); ini.print_usrdefcols(stdout,physprops.x,physprops.y,T,H,inputpars.cs.abc,true);printf("\n");
    printf("with %i spinconfigurations read from mcphas.tst and table \nand\n %i spinconfigurations created from hkl's\n\n",testspins.n,testqs.nofqs());
    printf("Notation: < >            ...begin / end of mean field loop\n");
@@ -655,7 +674,7 @@ else // if yes ... then
    //MR 120221 removed spinconf invert in case nettoI is negative
   // now really calculate the physical properties
       mf=new mfcf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,inputpars.cs.nofcomponents);int r;double sc;
-      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs); 
+      physprops.fe=fecalc(physprops.u,physprops.Eelastic,r,sc,H ,T,ini,inputpars,sps,(*mf),testspins,testqs,&physprops); 
 
       magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    int i1,j1,k1,l1,m1;Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);
@@ -677,26 +696,26 @@ else // if yes ... then
                      snprintf(text,MAXNOFCHARINLINE,"recalculated: fe=%g,femin=%g:T=%gK,|H|=%gT,Ha=%gT, Hb=%gT, Hc=%gT, %i spins",physprops.fe,femin,T,Norm(H),physprops.H(1),physprops.H(2),physprops.H(3),sps.n());
                     strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dab.eps");
-                     fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
-                    fclose (fin_coq);
+                     fout = fopen_errchk (outfilename, "w");
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,4,(*magmom));
+                    fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dac.eps");
-                    fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
-                    fclose (fin_coq);
+                    fout = fopen_errchk (outfilename, "w");
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,5,(*magmom));
+                    fclose (fout);
                     strcpy(outfilename+11+strlen(ini.prefix),"spins3dbc.eps");
-                    fin_coq = fopen_errchk (outfilename, "w");
-                     sps.eps3d(fin_coq,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
-                    fclose (fin_coq);
+                    fout = fopen_errchk (outfilename, "w");
+                     sps.eps3d(fout,text,inputpars.cs.abc,inputpars.cs.r,x,y,z,6,(*magmom));
+                    fclose (fout);
 		    strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
-                    fin_coq = fopen_errchk (outfilename, "w");
-                     (*magmom).eps(fin_coq,text);
-                    fclose (fin_coq);
+                    fout = fopen_errchk (outfilename, "w");
+                     (*magmom).eps(fout,text);
+                    fclose (fout);
                 delete[]x;delete []y; delete []z;
 		}
   delete magmom;if(verbose==1){printf(">");}
  //check if fecalculation gives again correct result
-   if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2){int eq=0;
+   if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2&&ini.nofrndtries>=0){int eq=0;
    #ifndef _THREADS
    if(spsmin==sps){eq=1;};//take spinconfiguration which gave minimum free energy as starting value
      #else
@@ -725,7 +744,9 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
                              physprops.m=0;delete mf;return 2;
                              }
  //if(verbose==1){printf(".\n");}
- physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
+if(ini.nofrndtries>=0) physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
+else physprops.sps=sps;
+
       delete mf;
  }
 

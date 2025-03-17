@@ -122,11 +122,15 @@ int  jjjpar::dpel1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & 
 /****************************************************************************/
 /****************************************************************************/
 int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
+{ComplexVector * state=NULL;
+ return mcalc(mom,T,Hxc,Hext,parstorage,state);}
+
+int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage,ComplexVector *& state)
 {double lnZ,U;
  switch (module_type)
-  {case kramer: kramer_Icalc(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break;
+  {case kramer: kramer_Icalc(mom,T,Hxc,Hext,lnZ,U,state,true);mom*=gJ;return true;break;
    case cfield:
-   case so1ion: (*iops).Jcalc(mom,T,Hxc,Hext,parstorage);mom*=gJ;return true;break;
+   case so1ion: (*iops).Jcalc(mom,T,Hxc,Hext,parstorage,state);mom*=gJ;return true;break;
    case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break;
    case cluster: cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZ,U);return true;break;
    case external_class:

@@ -2,10 +2,13 @@
 //routine Icalc for kramers doublet
 //------------------------------------------------------------------------------------------------
 void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
+{ComplexVector * state =NULL;
+kramer_Icalc(Jret,T,Hxc,Hext,lnZ,U,state,false);}
+void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U,ComplexVector *& state,bool use_state )
 { /*on input
     ABC(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     gJ		lande factor
-    T		temperature[K]
+    T		temperature[K], T=0 means do random Monte Carlo step
     gjmbH	vector of effective field [meV]
   on output    
     J		single ion momentum vector <J>
@@ -17,27 +20,28 @@ void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext
   double alpha_lambdap,alphaplambdap,alphaxlambdap;
   Vector gjmbH(1,3);
   if(Jret.Hi()>3)Jret=0;
-  gjmbH[1]=Hxc[1]+gJ*MU_B*Hext[1];
+
+if(T==0&&use_state==true)
+{ // calculate expectation value from state (*state)(1)|+> + (*state)(2) |->
+Jret(1)=ABC[1]*real(conj((*state)(1))*(*state)(2)+conj((*state)(2))*(*state)(1));
+Jret(2)=ABC[2]*real(conj(-(*state)(1))*(*state)(1)+conj((*state)(2))*(*state)(2));
+Jret(3)=ABC[3]*real(conj((*state)(1))*(*state)(2)-conj((*state)(1))*(*state)(2));
+
+
+}else
+{
+
+gjmbH[1]=Hxc[1]+gJ*MU_B*Hext[1];
   gjmbH[2]=Hxc[2]+gJ*MU_B*Hext[2];
   gjmbH[3]=Hxc[3]+gJ*MU_B*Hext[3];
-
+  
   alpha = ABC[2] * gjmbH[2];
   betar = -ABC[1] * gjmbH[1];
   betai = -ABC[3] * gjmbH[3];
-  lambdap2 = alpha * alpha + betar * betar + betai * betai;
-  lambdap = sqrt (lambdap2);
-  lambdap_KBT=lambdap/KB/T;
-  if (lambdap_KBT>700){lambdap_KBT=700;}
-  if (lambdap_KBT<-700){lambdap_KBT=-700;}
-  expm = exp (lambdap_KBT);
-  expp = 1/expm; //=exp (-lambdap_KBT);
-  Z = expp + expm;
-  lnZ=log(Z);
-  np = expp / Z;
-  nm = expm / Z;
-  U=lambdap*(np-nm); // energy
 
-//  nennerp = (alpha - lambdap) * (alpha - lambdap) + betar * betar + betai * betai;
+lambdap2 = alpha * alpha + betar * betar + betai * betai;
+  lambdap = sqrt (lambdap2);
+  //  nennerp = (alpha - lambdap) * (alpha - lambdap) + betar * betar + betai * betai;
 //  nennerm = (alpha + lambdap) * (alpha + lambdap) + betar * betar + betai * betai;
     alphaxlambdap=alpha*lambdap;
     alpha_lambdap=alpha-lambdap;
@@ -45,7 +49,7 @@ void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext
     nennerp=  2.0*(-alphaxlambdap+lambdap2);    
     nennerm=  2.0*(alphaxlambdap+lambdap2);    
 
-  if (nennerp > SMALL)
+if (nennerp > SMALL)
     {
       jap = -ABC[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
 //      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
@@ -66,7 +70,7 @@ void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext
       jcp = 0;
     }
 
-  if (nennerm > SMALL)
+if (nennerm > SMALL)
     {
       jam = -ABC[1] * 2.0 * betar * (alphaplambdap) / nennerm;
 //      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
@@ -87,11 +91,89 @@ void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext
       jcm = 0;
     }
 
+// for Monte Carlo treat T=0 case
+if(T==0){
+
+int i;
+ if(state==NULL)
+{state=new ComplexVector(1,2);
+double dd,ddm=0,ddp=0;
+dd=Jret[1]-jap;ddp+=dd*dd;
+dd=Jret[2]-jbp;ddp+=dd*dd;
+dd=Jret[3]-jcp;ddp+=dd*dd;
+
+dd=Jret[1]-jam;ddm+=dd*dd;
+dd=Jret[2]-jbm;ddm+=dd*dd;
+dd=Jret[3]-jcm;ddm+=dd*dd;
+
+if(ddp<ddm)i=0; else i=1;
+
+}else
+{// choose random lamba+ or lambda- state
+ i=arc4random_uniform(2);
+}
+
+if(i==0)
+{U=lambdap;
+if (nennerp > SMALL)
+ {double snp=sqrt(nennerp);
+  (*state)(1)=complex <double>(-betar/snp,-betai/snp);
+  (*state)(2)=complex <double>(alpha_lambdap/snp,0);
+ }else
+ {(*state)(1)=complex <double>(1,0);
+  (*state)(2)=complex <double>(0,0);
+ }
+ 
+  Jret[1] =jap ;
+  Jret[2] = jbp ;
+  Jret[3] = jcp ;
+
+}
+ else
+{U=-lambdap;
+
+  if (nennerm > SMALL)
+ {double snm=sqrt(nennerm);
+  (*state)(1)=complex <double>(-betar/snm,-betai/snm);
+  (*state)(2)=complex <double>(alphaplambdap/snm,0);
+ }else
+ {(*state)(1)=complex <double>(0,0);
+  (*state)(2)=complex <double>(1,0);
+ }
+
+ 
+Jret[1] = jam;
+  Jret[2] = jbm;
+  Jret[3] =  jcm;
+
+}
+
+}
+else
+{ 
+
+  lambdap_KBT=lambdap/KB/T;
+  if (lambdap_KBT>HUGE_EXP){lambdap_KBT=HUGE_EXP;}
+  if (lambdap_KBT<-HUGE_EXP){lambdap_KBT=-HUGE_EXP;}
+  expm = exp (lambdap_KBT);
+  expp = 1/expm; //=exp (-lambdap_KBT);
+  Z = expp + expm;
+  lnZ=log(Z);
+  np = expp / Z;
+  nm = expm / Z;
+  U=lambdap*(np-nm); // energy
+
+
+  
+
+  
   Jret[1] = np * jap + nm * jam;
   Jret[2] = np * jbp + nm * jbm;
   Jret[3] = np * jcp + nm * jcm;
 //  printf ("Ha=%g Hb=%g Hc=%g Ja=%g Jb=%g Jc=%g \n", 
 //     gjmbH[1]/MU_B/gjJ, gjmbH[2]/MU_B/gjJ, gjmbH[3]/MU_B/gjJ, J[1], J[2], J[3]);
+}
+}
 }
 
 int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd)

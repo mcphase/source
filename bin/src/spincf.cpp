@@ -140,6 +140,45 @@ void spincf::invert()
  }  
 }
 
+int spincf::in(int i, int j, int k,int oa,int ob,int oc,int oxb,int oxc)
+{while (i>oa)i-=oa;
+ while (j>ob)j-=ob;
+ while (k>oc)k-=oc;
+ return ((i*oxb+j)*oxc+k);
+}
+
+// extend spinconfiguration  to ia ib ic times the original one periodically enlarging supercell
+void spincf::extend(int ia,int ib,int ic)
+{ 
+  epsilon=0;
+  int oa=nofa,ob=nofb,oc=nofc;
+  int oxa=mxa,oxb=mxb,oxc=mxc;
+  nofa*=ia; nofb*=ib; nofc*=ic;
+  mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
+  int l;int i,j,k;
+  Vector * mn;
+//dimension arrays
+  mn = new Vector[mxa*mxb*mxc+1];for(l=0;l<=mxa*mxb*mxc;++l){mn[l]=Vector(1,nofcomponents*nofatoms);}
+  if (mn == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);} 
+  for(int ii=1;ii<=ia;++ii)
+  for(int jj=1;jj<=ib;++jj)
+  for(int kk=1;kk<=ic;++kk) 
+ for (i=1;i<=nofa;++i)
+ { for (j=1;j<=nofb;++j)
+   {for (k=1;k<=nofc;++k)
+    {
+     mn[in(i+oa*(ii-1),j+ob*(jj-1),k+oc*(kk-1))]= mom[in(i,j,k,oa,ob,oc,oxb,oxc)];
+    }
+   }
+ } 
+ 
+delete []mom;
+mom=mn;
+
+
+}
+
+
 // reduce spinconfiguration if it is periodic
 // returns 1 if successful, 0 if no reduction is possible
 int spincf::reduce()

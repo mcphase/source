@@ -51,14 +51,14 @@ getvalue.pl -c 1.699 1 10 52 0 results/mcphas.fum
 call setup_mcdisp_mf 2 0 0 0
 rem create mcdisp.trs for quasielastic excitations
 call mcdispit -c  -maxE 40   -pinit 0.1
-getvalue.pl -c 9.35207 0 6 2 0 results/mcdisp.trs
-getvalue.pl -c 0.204099  0 8 2 0 results/mcdisp.trs
+getvalue.pl -c 9.3521 0 6 2 0 results/mcdisp.trs
+getvalue.pl -c 0.2041  0 8 2 0 results/mcdisp.trs
 
 call mcdispit -t -prefix 011
 getvalue.pl -c -39.16   5 9 0.6 0 results/011mcdisp.qom
 getvalue.pl -c -35.77   5 13 0.6 0 results/011mcdisp.qom
 range 5 0.4 0.55 results/011mcdisp.qei
  average -dmin=0.1 -av  9  results/011mcdisp.qei
-getvalue.pl -c 0.2972018 9 10 9.07597 0  results/011mcdisp.qei
-getvalue.pl -c 0.23144 9 11 9.07597 0  results/011mcdisp.qei
+getvalue.pl -c 0.30 9 10 9.07597 0  results/011mcdisp.qei
+getvalue.pl -c 0.23 9 11 9.07597 0  results/011mcdisp.qei
 cd ../../../demo

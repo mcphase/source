@@ -1,8 +1,8 @@
 cd ../examples/tbcu2a
 
-mcphasit  -prefix test_
+mcphasit  -prefix test_ -v
 
-getvalue.pl -c -345.99 2 8 3 0 results/test_mcphas.fum
+getvalue.pl -c -346.0 2 8 3 0 results/test_mcphas.fum
 getvalue.pl -c 2.94 2 10 3 0 results/test_mcphas.fum
 
 setup_mcdiff_in -prefix test_ 5 0 0 0

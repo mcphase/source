@@ -30,6 +30,23 @@ default: return I;
 }
 }
 
+// choose random complex number
+complex<double> crnd(double & r)
+{
+r=rnd(r)+1e-10;
+double fi=rnd(1)*2*PI;
+complex<double> c(r*cos(fi),r*sin(fi));
+return c;
+}
+
+// return random number between 0 and z
+#define ARC4RANDOM_MAX 4294967295    // 2^32-1
+double rnd(float z){return  z*arc4random()/ARC4RANDOM_MAX;}
+
+// return random integer number from  1,2,3,..,i
+int rndint(int i){return arc4random_uniform(i)+1;}
+
+
 // given a string str with headers of columns, print column numbers to fout
 void print_col_numbers(FILE * fout,char * str)
 {char *t;size_t n;int i=1;
@@ -440,8 +457,6 @@ if(i>=(int)nn[0])
 
  // *************************************************************************
 
-// return random number between 0 and z
-float rnd(float z){return  z*rand()/RAND_MAX;}
 
 // return integer of floating number (like basic integer function)
 float integer (float s){  double result;modf(s,&result);  return result;}
@@ -602,6 +617,42 @@ double matelr (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
         }
  return sumr;
 }
+
+
+double matelr (ComplexVector & sk, ComplexVector &sl , Matrix & op)
+{double sumr=0;
+  int dl,dh;
+ if((dl=op.Rlo())!=op.Clo()||op.Rlo()!=sk.Lo()||op.Rlo()!=sl.Lo()||
+    (dh=op.Rhi())!=op.Chi()||op.Rhi()!=sk.Hi()||op.Rhi()!=sl.Hi()){fprintf(stderr,"Error matel: operator not sqaure and/or eigenvector dimension do not match\n");exit(EXIT_FAILURE);}
+ for(int i=dl;i<=dh;++i){sumr+=(real(sk(i))*real(sl(i))+imag(sk(i))*imag(sl(i)))*op[i][i];
+  for(int j=i+1;j<=dh;++j){if(op[i][j]!=0){
+                                sumr+=(real(sk(i))*imag(sl(j))- imag(sk(i))*real(sl(j))-real(sk(j))*imag(sl(i))+ imag(sk(j))*real(sl(i)))*op[i][j];
+                                          }
+                          if(op[j][i]!=0){
+                              sumr+=(real(sk(i))*real(sl(j))+ imag(sk(i))*imag(sl(j))+real(sk(j))*real(sl(i))+ imag(sk(j))*imag(sl(i)))*op[j][i];
+                                          }
+                         }
+        }
+ return sumr;
+}
+
+double mateli (ComplexVector & sk, ComplexVector &sl , Matrix & op)
+{double sumi=0;
+  int dl,dh;
+ if((dl=op.Rlo())!=op.Clo()||op.Rlo()!=sk.Lo()||op.Rlo()!=sl.Lo()||
+    (dh=op.Rhi())!=op.Chi()||op.Rhi()!=sk.Hi()||op.Rhi()!=sl.Hi()){fprintf(stderr,"Error matel: operator not sqaure and/or eigenvector dimension do not match\n");exit(EXIT_FAILURE);}
+ for(int i=dl;i<=dh;++i){   sumi+=(real(sk(i))*imag(sl(i))- imag(sk(i))*real(sl(i)))*op[i][i];
+  for(int j=i+1;j<=dh;++j){if(op[i][j]!=0){
+                                sumi+=(real(sk(j))*real(sl(i))+ imag(sk(j))*imag(sl(i))-real(sk(i))*real(sl(j))- imag(sk(i))*imag(sl(j)))*op[i][j];
+                                          }
+                          if(op[j][i]!=0){
+                              sumi+=(real(sk(i))*imag(sl(j))- imag(sk(i))*real(sl(j))+real(sk(j))*imag(sl(i))- imag(sk(j))*real(sl(i)))*op[j][i];                           
+                                          }
+                            }
+        }
+ return sumi;
+}
+
 double mateli (int k,int l,Matrix & zr, Matrix & zi, Matrix & op)
 {double sumi=0;//,p1r,p1i,p2r,p2i;
   //xisyj,xjsyi,im(0,1);

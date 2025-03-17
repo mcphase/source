@@ -56,7 +56,7 @@ call addj mcphas_cfph.j mcphasex_cd.j > mcphas.j
 REM try stress along 111 direction ...
 call mcphasit -v -doeps -prefix test_ 
 getvalue.pl -c 30.977 2 8 0.5 0 results/test_mcphas.fum
-getvalue.pl -c 0.8688 2 11 0.5 0 results/test_mcphas.fum
+getvalue.pl -c 0.8688 2 10 0.5 0 results/test_mcphas.fum
 getvalue.pl -c 0.0036 2 22 0.5 0 results/test_mcphas.fum
 getvalue.pl -c 0.0036 2 23 0.5 0 results/test_mcphas.fum
 getvalue.pl -c 0.0036 2 24 0.5 0 results/test_mcphas.fum

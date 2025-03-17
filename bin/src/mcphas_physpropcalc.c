@@ -2,8 +2,18 @@
 
 /************************************************************************/
 void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physprops,inipar & ini,par & inputpars)
-{ int i,j,k,l,n,m1; char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];FILE * fin_coq;
+{ int i,j,k,l,n,m1; char text[MAXNOFCHARINLINE];char outfilename[MAXNOFCHARINLINE];FILE * fin_coq; 
  //save fe and u
+//save spinarrangement
+      physprops.sps=sps;
+
+//save mfarrangement
+      physprops.mf=mf;
+
+// moments <I>
+       physprops.totalJ=sps.totalJ();
+
+ if(ini.maxnofmfloops>0){ // only do something if in MF-mode
  // calculate nettomoment from spinstructure
     Vector mom(1,3),d1(1,inputpars.cs.nofcomponents);physprops.m=0;
     for (l=1;l<=inputpars.cs.nofatoms;++l){
@@ -14,9 +24,6 @@ void physpropclc(Vector H,double T,spincf & sps,mfcf & mf,physproperties & physp
      physprops.m+=mom;
     }}}}
     physprops.m/=(double)sps.n()*(double)sps.nofatoms;
-
-
-
 
 
 // electrical polarisation P (makes only sense if total charge is zero)
@@ -211,11 +218,6 @@ physprops.jj[n](k1+inputpars.cs.nofcomponents*inputpars.cs.nofcomponents*(l-1))=
    }}}physprops.nofhkls=j;
 if(verbose==1){printf(".. calculating (hkl) finished\n");}
 
-//save spinarrangement
-      physprops.sps=sps;
-
-//save mfarrangement
-      physprops.mf=mf;
    spincf * magmom;
     magmom=new spincf(sps.na(),sps.nb(),sps.nc(),inputpars.cs.nofatoms,3);
                    for (l1=1;l1<=inputpars.cs.nofatoms;++l1){
@@ -253,4 +255,5 @@ delete[]x;delete []y; delete []z;
   //sps.display(text);
 delete []mq;
 delete magmom;
+}
 }

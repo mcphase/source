@@ -28,6 +28,8 @@ enum ob    { I=0, M=1, pel=2, P=3, L=4, S=5, sx=6,  sy=7,  sz=8,  lx=9,  ly=10, 
 
 ob obint(int i);
 
+// choose random complex number c with 0<|c|<r, returns complex number and in r the randomly chosen |c|
+complex<double> crnd(double & r);
 
 // function to print to stderr estimate of time until program end
 void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
@@ -89,7 +91,9 @@ extern int inputparline (const char * parname, FILE * fin_coq, float *nn)
 ;
 
 // return random number between 0 and z
-extern  float rnd(float z);
+extern  double rnd(float z);
+// return random integer from 1,2,...,i
+extern  int rndint(int i);
 
 // return integer of floating number (like basic integer function)
 extern  float integer (float s);
@@ -150,6 +154,9 @@ Vector crossp(Vector a,Vector b);
 //  of the upper triangle of z[lo..hi,lo..hi].
 double matelr (int i,int j,Matrix & zr, Matrix & zi, Matrix & op);
 double mateli (int i,int j,Matrix & zr, Matrix & zi, Matrix & op);
+// the same for two Complex Vectors si and sj
+double matelr (ComplexVector & si, ComplexVector &sj , Matrix & op);
+double mateli (ComplexVector & si, ComplexVector &sj , Matrix & op);
 
 // calculate some column i of ComplexMatrix opZ which is defined as the 
 // product of two complex matrices op * Z, however Z is given as
