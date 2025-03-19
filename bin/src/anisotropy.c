@@ -154,6 +154,8 @@ print_time_estimate_until_end(16/(ct*dtheta*dtheta)-1);
  if(verbose==1){printf("reading parameters from file mcphas.j\n");}
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
  inipar ini("mcphas.ini",prefix);ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;
+if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
+
  par inputpars("./mcphas.j",verbose ); inputpars.save("./results/_mcphas.j",0); 
  nofthreads = ini.nofthreads;
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);

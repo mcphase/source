@@ -349,7 +349,8 @@ myPrintMatrix(stdout,outmat);printf("\n");*/
 //routine Icalc for cluster
 //------------------------------------------------------------------------------------------------
 void jjjpar::cluster_Icalc_mcalc_Micalc (int code,Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
-{
+{if(T==0){fprintf(stderr,"Error - T=0 in module Cluster - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
+
 Matrix JM(1,Jret.Hi(),1,1);
  for(int i=1;i<=Jret.Hi();++i)JM(i,1)=Jret(i);
  Vector TT(1,1);TT(1)=T;
@@ -386,6 +387,8 @@ for(int ti=TT.Lo();ti<=TT.Hi();++ti){ double T=TT(ti);
      Vector wn(1,dim);double Zs;
      double x,y;
      x=Min(En);
+if(T==0){fprintf(stderr,"Error - T=0 in module Cluster - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
+
     if(T>0)
      {
      for (int i=1;i<=dim;++i)

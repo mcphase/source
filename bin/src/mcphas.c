@@ -38,9 +38,9 @@ int main (int argc, char **argv)
   Vector h(1,HEXT_DIMENSION);
   
 fprintf(stderr,"**************************************************************************\n");
-fprintf(stderr,"*\n");
-fprintf(stderr,"* mcphas - program to calculate static magnetic properties (phase diagram)\n");
-fprintf(stderr,"*\n");
+//fprintf(stderr,"*\n");
+fprintf(stderr,"*  %s \n",MCPHASVERSION);
+fprintf(stderr,"* program to calculate static magnetic properties (phase diagram)\n");
 fprintf(stderr,"* reference: M. Rotter JMMM 272-276 (2004) 481\n");
 fprintf(stderr,"**************************************************************************\n\n");
   
@@ -86,6 +86,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
 
 if(doeps) {
+if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
 if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
 // as class par load  parameters derivatives from file
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdx");

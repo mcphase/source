@@ -839,7 +839,7 @@ if(physprops!=NULL){
 if(physprops!=NULL){
 strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"mcphas_mc.hst");
-fout = fopen_errchk (outfilename, "w");fprintf(fout,"# Monte Carlo Energy Histogram\n# E  p(E)\n");
+fout = fopen_errchk (outfilename, "w");fprintf(fout,"#displaytitle=Monte Carlo Energy Histogram\n" "#Energy  p(E)\n");
     for(iE=0;iE<EHIST_NOFPOINTS;++iE)
 {if(iE<EHIST_NOFPOINTS/2)E=E0+iE*EHIST_WIDTH;
  else     E=E0+(iE-EHIST_NOFPOINTS)*EHIST_WIDTH;

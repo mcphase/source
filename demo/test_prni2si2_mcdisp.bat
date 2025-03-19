@@ -12,12 +12,12 @@ call range -d 7 0.1 100 results/mcdisp.trs
 call mcdispit -t
 
 range 7 1.059 1.061 results/mcdisp.qei
-getvalue.pl -c 0.000948 9 10 4.01448 0 results/mcdisp.qei
-getvalue.pl -c 0.000973 9 11 4.01448 0 results/mcdisp.qei
-getvalue.pl -c 0.000443 9 13 4.01448 0 results/mcdisp.qei
-getvalue.pl -c -0.000435 9 15 4.01448 0 results/mcdisp.qei
-getvalue.pl -c 0.000178 9 18 4.01448 0 results/mcdisp.qei
 
+getvalue.pl -c 0.4 9 10 1.175 0 results/mcdisp.qei
+getvalue.pl -c 0.4 9 11 1.175 0 results/mcdisp.qei
+getvalue.pl -c 0.02 9 13 1.175 0 results/mcdisp.qei
+getvalue.pl -c 0.02 9 15 1.175 0 results/mcdisp.qei
+getvalue.pl -c -0.1 9 17 1.175 0 results/mcdisp.qei
 
 
 cd ../../demo

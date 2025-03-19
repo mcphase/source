@@ -17,7 +17,7 @@ void jjjpar::brillouin_Icalc (Vector & Jret, double & T, Vector &  Hxc,Vector & 
 if(Jret.Hi()!=3||Hxc.Hi()!=3||ABC.Hi()!=1)
    {fprintf(stderr,"Error loadable module brillouin.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
-
+if(T==0){fprintf(stderr,"Error - T=0 in module Brillouin - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
 double JJ,KBT,XJ,gmhkt,Jav,gmh,Z,X;
 Vector gjmbH(1,3);
 gjmbH=Hxc+gJ*MU_B*Hext(1,3);

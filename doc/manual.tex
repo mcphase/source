@@ -224,7 +224,8 @@ field and stress tensor / pressure
  several possible magnetic structures are stabilised
 by a mean field algorithm and the free energy is 
 calculated. The initial values for this mean-field procedure are
-modified by a Monte Carlo process.
+modified randomly. In addition or alternatively  a Monte Carlo process according to Metropolis
+stepping~\cite{metropolis53-1087} can be performed.
 See Section~\ref{runmcphas} on how to perform such a simulation.
 
 
@@ -355,7 +356,7 @@ NdBa$_2$Cu$_3$O$_7$ & fit of magnetic neutron diffraction  & {\prg cfield}\index
                     & data going beyond dipapprox && \\
 NdCu$_2$  & crystal field, magnetic structure,  & {\prg cfield}& %%@
 \cite{loewenhaupt95-491,loewenhaupt96-499,rotter00-29} \\
-                    & phase diagrams, excitations &&\cite{rotter02-751,rotter02-8885} \\
+                    & phase diagrams with Monte Carlo, excitations &&\cite{rotter02-751,rotter02-8885} \\
 NiO            & INS and RIXS on NiO & {\prg so1ion}\index{so1ion} & \\
 PrNi$_2$B$_2$C & crystal field - fit to neutrons,cp, susc & {\prg cfield}&\cite{mazumdar08-144422}\\
 PrNi$_2$Si$_2$ & excitons in an amplitude modulated mag structure & {\prg so1ion}\index{so1ion} & \cite{blanco13-104411} \\

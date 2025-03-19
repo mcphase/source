@@ -519,6 +519,7 @@ plot.setDomainGridlinePaint(Color.BLACK);
 
         reload_data(i);
                                }
+     if(xmax<xmin||ymax<ymin){System.out.println("No data to plot");System.exit(1);}
      rangeAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
      domainAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
 
@@ -592,20 +593,20 @@ protected static void reload_data(int i){    try{
       for(int i1=0;i1<=strLine.length();++i1)
        {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
-        if(detxText==true&&i1<=strLine.length()-13){
-            if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){
+        if(detxText==true){
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){
               chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(j==0&&SF.NofCols(strLine)>1){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,clx));}
+               {if(j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,clx));}
                }
                                                    }
-        if(detyText==true&&i1<=strLine.length()-13){
-            if(strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
+        if(detyText==true){
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
               chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(j==0&&SF.NofCols(strLine)>1){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,cly));}
+               {if(j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,cly));}
                }
                                                    }
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}

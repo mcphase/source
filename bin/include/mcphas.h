@@ -8,7 +8,7 @@
 #include "inipar.hpp"
 #include <complex>
 #include "martin.h"
-
+#include "../../version"
 
 // routines for mcphas for calculation of magnetic phases
 //htcalc.h

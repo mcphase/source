@@ -129,7 +129,10 @@ double physproperties::fumcols(float * nn,float * nnerr, int & nofcols,bool setn
      double Nm=Norm(m),mp=m*H(1,3)/Norm(H(1,3));
     nofcols=15;for(int i=8;i<=nofcolsin||i<=nofcols;++i)
     {ptr=NULL;
-          if(i<15){switch(i) {       case 8: ptr=&fe;snprintf(hs,40,"free_energy_f[meV/ion]");break;
+          if(i<15){switch(i) {       case 8: ptr=&fe;
+                                              if(ini.nofrndtries>=0)snprintf(hs,40,"free_energy_f[meV/ion]");
+                                              else                  snprintf(hs,40,"energy_u[meV/ion]"); // for Monte Carlo
+                                              break;
                                      case 9: ptr=&u;snprintf(hs,40,"energy_u[meV/ion]");break;
                                      case 10: ptr=&Nm;snprintf(hs,40,"total_moment|m|[mb/ion]");break;
                                      case 11: ptr=&mabc[1];snprintf(hs,40,"ma[mb/ion]");break;
@@ -294,7 +297,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   fumcols(nn,nnerr,nofcols,true,str,outstr,ini,ortho,inputpars,verbose);
   if (washere==0)
   {fout = fopen_errchk (outfilename,filemode);
-   fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
+   fprintf(fout, "#output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphas.fum-->\n");
    fprintf(fout,"#*********************************************************\n");
@@ -303,7 +306,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "#note: - for specific heat calculation use unit conversion 1mev/f.u.=96.48J/mol\n");
    fprintf (fout, "#      - below moments and energies are given per ion - not per formula unit !\n");
-
+   if(ini.nofrndtries<0)fprintf (fout, "# free energy calculation not (yet) implemented in Monte Carlo run - calculating energy u only\n");
    if(ini.doeps)
    {fprintf (fout, "#      - strain tensor eps is calculated selfconsistently.\n");
     if(ini.linepscf)
@@ -351,7 +354,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   xytcols(nn,nnerr,nofcols,true,str,outstr,ini,verbose);
   if (washere==0)
   {fout = fopen_errchk (outfilename,filemode);
-   fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
+   fprintf(fout, "#output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphas.xyt-->\n");
    fprintf(fout,"#*********************************************************\n");
@@ -423,9 +426,14 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
                         {snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str),"<J%cJ%c> <J%cJ%c> ",'a'-1+i1,'a'-1+j1,'a'-1+j1,'a'-1+i1);
 			}
 	      }
-                ini.print_usrdefcolhead(fout,str);          
+                ini.print_usrdefcolhead(fout,str);   
+
+if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation functions not (yet) implemented\n"); }
+       
    fclose(fout);
       }
+ if(ini.nofrndtries>=0)
+ {
   fout = fopen_errchk (filename,"a");
     ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
         for(j2=1;j2<=nofcomponents*nofcomponents;++j2)               
@@ -439,6 +447,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
      if (washere==0){fprintf(stderr,"Warning: Calculation of standard deviation using %s  not implemented\n",filename);}
      fclose(fout);
     }else{errno=0;}
+  }
   }}
 
 //-----------------------------------------mcphas*.hkl------------------------------------------------  
@@ -477,13 +486,15 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - i component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mi(Q)) im(mi(Q))    h   k   l   real(mi(Q)) im(mi(Q))     h   k   l   real(mi(Q)) im(mi(Q))[mu_B/atom] ...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mi(Q)) im(mi(Q))    h   k   l   real(mi(Q)) im(mi(Q))     h   k   l   real(mi(Q)) im(mi(Q))[mu_B/atom] ...\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - a component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(ma(Q)) im(ma(Q))      h   k   l    real(ma(Q)) im(ma(Q))      h   k   l  real(ma(Q)) im(ma(Q)) [mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(ma(Q)) im(ma(Q))      h   k   l    real(ma(Q)) im(ma(Q))      h   k   l  real(ma(Q)) im(ma(Q)) [mu_B/atom]...\n");
    }
    ini.print_usrdefcolhead(fout,str); 
+   if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of hkl not (yet) implemented\n"); }
+
    fclose(fout);
    //xray b component
    if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphasj.hkl");
@@ -506,12 +517,14 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    str[0]='\0';
    snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "      h   k   l  real(mb(Q)) im(mb(Q))        h   k   l  real(mb(Q)) im(mb(Q))     h   k   l  real(mb(Q)) im(mb(Q))[mu_B/atom] ...}\n");
    }
-   ini.print_usrdefcolhead(fout,str); fclose(fout);
+   ini.print_usrdefcolhead(fout,str);
+  if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of hkl not (yet) implemented\n"); }
+   fclose(fout);
    //xray c component
    if(ortho==0){strcpy(outfilename+10+strlen(prefix),"mcphask.hkl");
                 } else {strcpy(outfilename+10+strlen(prefix),"mcphasc.hkl");  }
    fout = fopen_errchk (outfilename,filemode);
-   fprintf(fout, "#{output file of program %s ",MCPHASVERSION);
+   fprintf(fout, "#output file of program %s ",MCPHASVERSION);
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),fout);
    fprintf(fout,"#!<--mcphas.mcphasc.hkl-->\n");
    fprintf(fout,"#*********************************************************\n");
@@ -522,15 +535,18 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - k component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mk(Q)) im(mk(Q))       h   k   l  real(mk(Q)) im(mk(Q))      h   k   l   real(mk(Q)) im(mk(Q)) [mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mk(Q)) im(mk(Q))       h   k   l  real(mk(Q)) im(mk(Q))      h   k   l   real(mk(Q)) im(mk(Q)) [mu_B/atom]...\n");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - c component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))  [mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))  [mu_B/atom]...\n");
    }
-   ini.print_usrdefcolhead(fout,str);fclose(fout);
+   ini.print_usrdefcolhead(fout,str);
+   if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of hkl not (yet) implemented\n"); }
+   fclose(fout);
 
       }
+   if(ini.nofrndtries<=0){
    int * inew;inew=new int[nofhkls+1];float *intensity;intensity=new float[nofhkls+1];
    if(inew==NULL){fprintf (stderr, "Out of memory for inew\n");exit (EXIT_FAILURE);}
    if(intensity==NULL){fprintf (stderr, "Out of memory for intensity\n");exit (EXIT_FAILURE);}
@@ -586,6 +602,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
      fclose(fout);
     }else{errno=0;}
    delete []inew;delete []intensity;
+  }
 //---------------------------------------mcphas.sps--------------------------------------------------  
  errno = 0;
  strcpy(outfilename+10+strlen(prefix),"mcphas.sps");
@@ -666,8 +683,11 @@ else
    fprintf (fout, "    #mf1(atom 1) mf1(atom 2) .... selfconsistent Mean field configuration \n"); 
    fprintf (fout, "    #mf2(atom 1) mf2(atom 2) .... UNITS: mf(atom i)=gJ*mu_B*hxc(atom i)[meV] \n"); 
    fprintf (fout, "    #mf3(atom 1) mf3(atom 2) ....         (i.e. divide by gJ and mu_B=0.05788meV/Tesla to get exchange field hxc[Tesla]}\n");
+   if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of mean fields do not make sense - nothing saved\n"); }
+
     fclose(fout);
    }  
+if(ini.nofrndtries>=0){
      fout = fopen_errchk (outfilename,"a");ini.print_usrdefcols(fout,x,y,T,H,inputpars.cs.abc,false);
 fprintf (fout, " %i %i %i ",
             mf.n()*mf.nofatoms,mf.nofatoms,mf.nofcomponents);
@@ -682,6 +702,7 @@ fprintf (fout, " %i %i %i ",
      if (washere==0){fprintf(stderr,"Warning: Calculation of standard deviation using  ./fit/mcphas.mf not implemented\n");}
      fclose(fout);
     }else{errno=0;}
+                     }
 //-----------------------------------------------------------------------------------------  
  
  washere=1;

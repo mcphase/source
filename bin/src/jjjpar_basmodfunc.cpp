@@ -558,10 +558,12 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
    case so1ion: (*iops).Icalc(mom,T,Hxc,Hext,lnZ,U,parstorage,state);  break;
    case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
    case cluster: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
-   case external_class: if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U))
+   case external_class: if(T==0){fprintf(stderr,"Error - T=0 in external module - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
+                         if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U))
                         {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);};
                   break;
-   default: (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
+   default: if(T==0){fprintf(stderr,"Error - T=0 in external module - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
+             (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
   }
 }
 void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector & lnZ,Vector & U,ComplexMatrix & parstorage)

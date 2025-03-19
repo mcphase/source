@@ -44,57 +44,58 @@ public class IniConfigurator extends JPanel
   JCheckBox chkDisplayAll = new JCheckBox();
   JCheckBox chkLogFevsQ = new JCheckBox();
   
+/*
   // Textfield for Status-display
   JTextField txStatus = new JTextField();
-  
+*/  
   // Tab-Panel
   JTabbedPane panMain = new JTabbedPane();
   // 1. Tab
   JPanel panXYPhaseParams = new JPanel();	// [XY PHASEDIAGRAM PARAMETERS]
 	// Labels
-	JLabel labXT = new JLabel();
+/*	JLabel labXT = new JLabel();
 	JLabel labXHa = new JLabel();
 	JLabel labXHb = new JLabel();
 	JLabel labXHc = new JLabel();
-	JLabel labXMin = new JLabel();
+*/	JLabel labXMin = new JLabel();
 	JLabel labXMax = new JLabel();
 	JLabel labXStep = new JLabel();
 	JLabel labXMax1 = new JLabel();
 	JLabel labXMin1 = new JLabel();
-	JLabel labXT1 = new JLabel();
+/*	JLabel labXT1 = new JLabel();
 	JLabel labXHa1 = new JLabel();
 	JLabel labXHb1 = new JLabel();
 	JLabel labXHc1 = new JLabel();
-	JLabel labXStep1 = new JLabel();
-        JLabel labT0 = new JLabel();
+*/	JLabel labXStep1 = new JLabel();
+ /*       JLabel labT0 = new JLabel();
         JLabel labHa0 = new JLabel();
         JLabel labHb0 = new JLabel();
         JLabel labHc0 = new JLabel();
-	
-	// Textfields
+*/	
+/*	// Textfields
 	JTextField txXT = new JTextField();
 	JTextField txXHa = new JTextField();
 	JTextField txXHb = new JTextField();
 	JTextField txXHc = new JTextField();
-	JTextField txXMin = new JTextField();
+*/	JTextField txXMin = new JTextField();
 	JTextField txXMax = new JTextField();
 	JTextField txXStep = new JTextField();
 	JTextField txYMin = new JTextField();
-	JTextField txYT = new JTextField();
+/*	JTextField txYT = new JTextField();
 	JTextField txYHa = new JTextField();
 	JTextField txYHb = new JTextField();
 	JTextField txYHc = new JTextField();
-	JTextField txYStep = new JTextField();
+*/	JTextField txYStep = new JTextField();
 	JTextField txYMax = new JTextField();
-	JTextField txT0 = new JTextField();
+/*	JTextField txT0 = new JTextField();
 	JTextField txHa0 = new JTextField();
 	JTextField txHb0 = new JTextField();
 	JTextField txHc0 = new JTextField();
-  
+  */
   // 2. Tab
   JPanel panQVector = new JPanel();			// [GENERATION OF SPIN-CONFIGURATIONS]
     // Labels
-	JLabel labDeltaH = new JLabel();
+	/*JLabel labDeltaH = new JLabel();
 	JLabel labHMax = new JLabel();
 	JLabel labHMin = new JLabel();
 	JLabel labDeltaL = new JLabel();
@@ -104,8 +105,8 @@ public class IniConfigurator extends JPanel
 	JLabel labKMax = new JLabel();
 	JLabel labKMin = new JLabel();
 	JLabel labMaxNofSpins = new JLabel();
-	JLabel labNofRndTries = new JLabel();
-	JLabel labMaxQPeriod = new JLabel();
+*/	JLabel labNofRndTries = new JLabel();
+/*	JLabel labMaxQPeriod = new JLabel();
   	JLabel labmaxnoftestspincf = new JLabel();
   	// Textfields
 	JTextField txDeltaH = new JTextField();
@@ -118,9 +119,10 @@ public class IniConfigurator extends JPanel
 	JTextField txLMax = new JTextField();
 	JTextField txLMin = new JTextField();
 	JTextField txMaxNofSpins = new JTextField();
-	JTextField txNofRndTries = new JTextField();
-	JTextField txMaxQPeriod = new JTextField();
+*/	JTextField txNofRndTries = new JTextField();
+/*	JTextField txMaxQPeriod = new JTextField();
 	JTextField txmaxnoftestspincf = new JTextField();
+*/
   // 3. Tab		
   JPanel panAdditionalParams = new JPanel();	// [PARAMETERS FOR SUB FECALC - SELFCONSISTENCY PROCESS]
 	// Labels
@@ -137,7 +139,7 @@ public class IniConfigurator extends JPanel
 	JTextField txMaxNofMfLoops = new JTextField();
 
   // 4. Tab		
-  JPanel panOutputOfProperties = new JPanel();	// [PARAMETERS FOR SUB FECALC - SELFCONSISTENCY PROCESS]
+  /*JPanel panOutputOfProperties = new JPanel();	// [PARAMETERS FOR SUB FECALC - SELFCONSISTENCY PROCESS]
 	// Labels
 	JLabel labMaxNofHkls = new JLabel();
 	JLabel labNofSpinCorrs = new JLabel();
@@ -146,7 +148,7 @@ public class IniConfigurator extends JPanel
 	JTextField txMaxNofHkls = new JTextField();
 	JTextField txNofSpinCorrs = new JTextField();
 	JTextField txMaxQ = new JTextField();
-
+*/
   // Helper Panels for display on the Tab-panles
   JPanel jPanel1 = new JPanel();
   JPanel jPanel2 = new JPanel();
@@ -201,7 +203,7 @@ public class IniConfigurator extends JPanel
    * Initializing function
    * All elements of the form are initialized
    ***************************************************************/
-  private void jbInit() throws Exception 
+  private void jbInit(String s) throws Exception 
   {
     //this.setSize(2000,2000);		// overall size of the form
 	//this.setPreferredSize(new Dimension(2000,2000));	// preferred size
@@ -212,8 +214,8 @@ public class IniConfigurator extends JPanel
 	 **************************************/
 	
 	// Read-Button
-    btnRead.setText("Read file mcphas.ini");		// display-text of the button
-	btnRead.setToolTipText("Reads Data from file mcphas.ini");	// tooltiptext of button
+    btnRead.setText("Read file "+s);		// display-text of the button
+	btnRead.setToolTipText("Reads Data from file "+s);	// tooltiptext of button
     // action-listener for button
 	btnRead.addActionListener(new java.awt.event.ActionListener() 
 		{
@@ -223,8 +225,8 @@ public class IniConfigurator extends JPanel
 			}
 		});
 	// Write-Button
-    btnWrite.setText("Write file mcphas.ini");
-	btnWrite.setToolTipText("Writes Data to file mcphas.ini; Resets the runtime-parameters!");
+    btnWrite.setText("Write file "+s);
+	btnWrite.setToolTipText("Writes Data to file "+s+"; Resets the runtime-parameters!");
     btnWrite.addActionListener(new java.awt.event.ActionListener() 
 		{
 		public void actionPerformed(ActionEvent e) 
@@ -284,61 +286,61 @@ public class IniConfigurator extends JPanel
 	 * Statustextfield
 	 **********************************/
 	// Statustext - Textfield
-	InitTextfield(txStatus, "Statustext", 700, 19);
+/*	InitTextfield(txStatus, "Statustext", 700, 19);
 	txStatus.setHorizontalAlignment(JTextField.CENTER);
 	txStatus.setBackground(Color.lightGray);
-	
+*/	
 	/***********************************
 	 * First tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labXT, "xT:", 70, 19);
+/*	InitLabel(labXT, "xT:", 70, 19);
 	InitLabel(labXHa, "xHa:", 70, 19);
 	InitLabel(labXHb, "xHb:", 70, 19);    
 	InitLabel(labXHc, "xHc:", 70, 19);
-	InitLabel(labXMin, "xmin:", 70, 19);
+*/	InitLabel(labXMin, "xmin:", 70, 19);
 	InitLabel(labXMax, "xmax:", 70, 19);
 	InitLabel(labXStep, "xstep:", 70, 19);
 	InitLabel(labXMax1, "ymax:", 70, 19);
 	InitLabel(labXMin1, "ymin:", 70, 19);
-	InitLabel(labXT1, "yT:", 70, 19);
+/*	InitLabel(labXT1, "yT:", 70, 19);
 	InitLabel(labXHa1, "yHa:", 70, 19);
 	InitLabel(labXHb1, "yHb:", 70, 19);
 	InitLabel(labXHc1, "yHc:", 70, 19);
-	InitLabel(labXStep1, "ystep:", 70, 19);
+*/	InitLabel(labXStep1, "ystep:", 70, 19);
 
-	InitLabel(labT0, "T0:", 70, 19);
+/*	InitLabel(labT0, "T0:", 70, 19);
 	InitLabel(labHa0, "Ha0:", 70, 19);
 	InitLabel(labHb0, "Hb0:", 70, 19);
 	InitLabel(labHc0, "Hc0:", 70, 19);
-	
+*/	
 	// Textfields	
-	InitTextfield(txXT, "Vector in (H-T) space corresponding to phasediagram x axis (xT [K] xHa [T] xHb [T] xHc [T])", 50, 19);
+/*	InitTextfield(txXT, "Vector in (H-T) space corresponding to phasediagram x axis (xT [K] xHa [T] xHb [T] xHc [T])", 50, 19);
 	InitTextfield(txXHa, "Vector in (H-T) space corresponding to phasediagram x axis (xT [K] xHa [T] xHb [T] xHc [T])", 50, 19);
 	InitTextfield(txXHb, "Vector in (H-T) space corresponding to phasediagram x axis (xT [K] xHa [T] xHb [T] xHc [T])", 50, 19);
 	InitTextfield(txXHc, "Vector in (H-T) space corresponding to phasediagram x axis (xT [K] xHa [T] xHb [T] xHc [T])", 50, 19);
-	InitTextfield(txXMin, "Minimum of x axis", 50, 19);
+*/	InitTextfield(txXMin, "Minimum of x axis", 50, 19);
 	InitTextfield(txXMax, "Maximum of x axis", 50, 19);
 	InitTextfield(txXStep, "Stepwidth of x axis ", 50, 19);
 	InitTextfield(txYMin, "Minimum of y axis", 50, 19);
-	InitTextfield(txYT, "Vector in (H-T) space corresponding to phasediagram y axis (yT [K] yHa [T] yHb [T] yHc [T])", 50, 19);
+/*	InitTextfield(txYT, "Vector in (H-T) space corresponding to phasediagram y axis (yT [K] yHa [T] yHb [T] yHc [T])", 50, 19);
 	InitTextfield(txYHa, "Vector in (H-T) space corresponding to phasediagram y axis (yT [K] yHa [T] yHb [T] yHc [T])", 50, 19);
 	InitTextfield(txYHb, "Vector in (H-T) space corresponding to phasediagram y axis (yT [K] yHa [T] yHb [T] yHc [T])", 50, 19);
 	InitTextfield(txYHc, "Vector in (H-T) space corresponding to phasediagram y axis (yT [K] yHa [T] yHb [T] yHc [T])", 50, 19);
-	InitTextfield(txYStep, "Stepwidth of y axis", 50, 19);
+*/	InitTextfield(txYStep, "Stepwidth of y axis", 50, 19);
 	InitTextfield(txYMax, "Maximum of y axis", 50, 19);
 
-	InitTextfield(txT0, "Temperature offset", 50, 19);
+/*	InitTextfield(txT0, "Temperature offset", 50, 19);
 	InitTextfield(txHa0, "Field  offset along a", 50, 19);
 	InitTextfield(txHb0, "Field  offset along b", 50, 19);
 	InitTextfield(txHc0, "Field  offset along c", 50, 19);
     
-	
+*/	
 	/***********************************
 	 * Second tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labDeltaH, "deltah:", 70, 19);
+/*	InitLabel(labDeltaH, "deltah:", 70, 19);
 	InitLabel(labHMax, "hmax:", 70, 19);
 	InitLabel(labHMin, "hmin:", 70, 19);
 	InitLabel(labDeltaL, "deltal:", 70, 19);
@@ -347,8 +349,8 @@ public class IniConfigurator extends JPanel
 	InitLabel(labDeltaK, "deltak:", 70, 19);
 	InitLabel(labKMax, "kmax:", 70, 19);
 	InitLabel(labKMin, "kmin:", 70, 19);
-	InitLabel(labNofRndTries, "nofrndtries:", 150, 19);
-	InitLabel(labMaxQPeriod, "maxqperiod:", 150, 19);
+*/	InitLabel(labNofRndTries, "nofrndtries:", 150, 19);
+/*	InitLabel(labMaxQPeriod, "maxqperiod:", 150, 19);
 	InitLabel(labmaxnoftestspincf, "maxnoftestspincf:", 150, 19);
 	InitLabel(labMaxNofSpins, "MaxNofSpins:", 150, 19);
 	// Textfields
@@ -361,16 +363,17 @@ public class IniConfigurator extends JPanel
 	InitTextfield(txDeltaL, "test q vector (qmin qmax deltaq)", 50, 19);
 	InitTextfield(txLMax, "test q vector (qmin qmax deltaq)", 50, 19);
 	InitTextfield(txLMin, "test q vector (qmin qmax deltaq)", 50, 19);
- 	InitTextfield(txNofRndTries, "number of random (Monte Carlo) spin inversions  to try for each initial spinconfiguration", 50, 19);
- 	InitTextfield(txMaxQPeriod, "maximal periodicity of spinconfigurations generated by q vectors", 50, 19);
+ */	InitTextfield(txNofRndTries, "number of random (Monte Carlo) spin inversions  to try for each initial spinconfiguration", 50, 19);
+ /*	InitTextfield(txMaxQPeriod, "maximal periodicity of spinconfigurations generated by q vectors", 50, 19);
  	InitTextfield(txmaxnoftestspincf, "maximal number of test spinconfigurations to be stored", 50, 19);
  	InitTextfield(txMaxNofSpins, "maximal number of spins in spinconfigurations generated by q vectors", 50, 19);
-
+*/
 	/***********************************
 	 * Third tab-panel
 	 ***********************************/
 	// Labels
 	InitLabel(labMaxSpinChange, "maxspinchange:", 190, 19);
+labMaxSpinChange.setBackground(Color.blue);
 	//InitLabel(labSmallStep, "smallstep:", 150, 19);
 	InitLabel(labBigStep, "bigstep:", 190, 19);
 	InitLabel(labMaxStaMf, "maxstamf:", 190, 19);
@@ -386,59 +389,66 @@ public class IniConfigurator extends JPanel
 	 * Fourth tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labNofSpinCorrs, "nofspincorrs:", 150, 19);
+/*	InitLabel(labNofSpinCorrs, "nofspincorrs:", 150, 19);
 	InitLabel(labMaxNofHkls, "maxnofhkls:", 150, 19);
 	InitLabel(labMaxQ, "maxQ:", 150, 19);
 	// Textfields
 	InitTextfield(txNofSpinCorrs, "For thermal expansion and magnetostriction - how many spinspin correlation functions should be calculated", 50, 19);
 	InitTextfield(txMaxNofHkls, "For Neutron Diffraction - calculation of mxnofhkl strongest reflections", 50, 19);
 	InitTextfield(txMaxQ, "For Neutron Diffraction - maximum scattering vector |Q|[1/A] for calculated hkl's", 50, 19);
-	 	
+*/	 	
 	this.add(panMain, BorderLayout.NORTH);
-		panMain.setPreferredSize(new Dimension(700,300));
+		panMain.setPreferredSize(new Dimension(700,150));
+                panMain.setBackground(Color.green);
+
 		panMain.addTab("XY Phasediagram Parameters", panXYPhaseParams);
 		    panXYPhaseParams.setLayout(flowLayout1);
+                    panXYPhaseParams.setBackground(Color.green);
 			panXYPhaseParams.add(jPanel1, null);
+                       jPanel1.setBackground(Color.green);
 				//jPanel1.setPreferredSize(new Dimension(50, 173));
 				//jPanel1.setMinimumSize(new Dimension(50, 173));
 			    jPanel1.setLayout(verticalFlowLayout1);
-					jPanel1.add(labXT, null);
+		/*			jPanel1.add(labXT, null);
 					jPanel1.add(labXHa, null);
 					jPanel1.add(labXHb, null);
 					jPanel1.add(labXHc, null);
-					jPanel1.add(labXMin, null);
+		*/			jPanel1.add(labXMin, null);
 					jPanel1.add(labXMax, null);
 					jPanel1.add(labXStep, null);
 			panXYPhaseParams.add(jPanel2, null);
+jPanel2.setBackground(Color.green);
 			    jPanel2.setLayout(verticalFlowLayout2);
-					jPanel2.add(txXT, null);
+		/*			jPanel2.add(txXT, null);
 					jPanel2.add(txXHa, null);
 					jPanel2.add(txXHb, null);
 					jPanel2.add(txXHc, null);
-					jPanel2.add(txXMin, null);
+		*/			jPanel2.add(txXMin, null);
 					jPanel2.add(txXMax, null);
 					jPanel2.add(txXStep, null);
 			panXYPhaseParams.add(jPanel3, null);
+jPanel3.setBackground(Color.green);
 				//jPanel3.setPreferredSize(new Dimension(50, 173));
 				//jPanel3.setMinimumSize(new Dimension(50, 173));
 				jPanel3.setLayout(verticalFlowLayout3);
-					jPanel3.add(labXT1, null);
+		/*			jPanel3.add(labXT1, null);
 					jPanel3.add(labXHa1, null);
 					jPanel3.add(labXHb1, null);
 					jPanel3.add(labXHc1, null);
-					jPanel3.add(labXMin1, null);
+		*/			jPanel3.add(labXMin1, null);
 					jPanel3.add(labXMax1, null);
 					jPanel3.add(labXStep1, null);
 			panXYPhaseParams.add(jPanel4, null);
+jPanel4.setBackground(Color.green);
 			    jPanel4.setLayout(verticalFlowLayout4);
-					jPanel4.add(txYT, null);
+		/*			jPanel4.add(txYT, null);
 					jPanel4.add(txYHa, null);
 					jPanel4.add(txYHb, null);
 					jPanel4.add(txYHc, null);
-					jPanel4.add(txYMin, null);
+		*/			jPanel4.add(txYMin, null);
 					jPanel4.add(txYMax, null);
 					jPanel4.add(txYStep, null);
-			panXYPhaseParams.add(jPanel4a, null);
+		/*	panXYPhaseParams.add(jPanel4a, null);
 			    jPanel4a.setLayout(verticalFlowLayout4a);
 					jPanel4a.add(labT0, null);
 					jPanel4a.add(labHa0, null);
@@ -450,10 +460,11 @@ public class IniConfigurator extends JPanel
 					jPanel4b.add(txHa0, null);
 					jPanel4b.add(txHb0, null);
 					jPanel4b.add(txHc0, null);
-
+*/
 		panMain.addTab("Generation of Spin-Configurations", jPanel13);
 			jPanel13.setLayout(verticalFlowLayout13);
-			jPanel13.add(panQVector,null);
+                        jPanel13.setBackground(Color.green);
+		/*	jPanel13.add(panQVector,null);
 				panQVector.setLayout(flowLayout2);
 				panQVector.add(jPanel5, null);
 					jPanel5.setLayout(verticalFlowLayout5);
@@ -497,27 +508,30 @@ public class IniConfigurator extends JPanel
 						jPanel10.add(txLMin, null);
 						jPanel10.add(txLMax, null);
 						jPanel10.add(txDeltaL, null);
-			jPanel13.add(jPanel14, null);
+		*/	jPanel13.add(jPanel14, null);
 				jPanel14.setLayout(flowLayout4);
+                               jPanel14.setBackground(Color.green);
+                               jPanel15.setBackground(Color.green);
 				jPanel14.add(jPanel15, null);
 					jPanel15.setLayout(verticalFlowLayout14);
 					//jPanel15.setPreferredSize(new Dimension(120, 77));
 					//jPanel15.setMinimumSize(new Dimension(120, 77));			
 						jPanel15.add(labNofRndTries, null);
-						jPanel15.add(labMaxQPeriod, null);
+			/*			jPanel15.add(labMaxQPeriod, null);
 						jPanel15.add(labmaxnoftestspincf, null);
 						jPanel15.add(labMaxNofSpins, null);
-				jPanel14.add(jPanel16, null);
+			*/	jPanel14.add(jPanel16, null);
 					jPanel16.setLayout(verticalFlowLayout15);
 					//jPanel16.setPreferredSize(new Dimension(70, 77));
 					//jPanel16.setMinimumSize(new Dimension(70, 77));			
 						jPanel16.add(txNofRndTries, null);
-						jPanel16.add(txMaxQPeriod, null);	
+			/*			jPanel16.add(txMaxQPeriod, null);	
 						jPanel16.add(txmaxnoftestspincf, null);	
 						jPanel16.add(txMaxNofSpins, null);
-					
+			*/		
 			panMain.addTab("Parameters for sub fecalc - Selfconsistency process", panAdditionalParams);
-		    panAdditionalParams.setLayout(flowLayout3);
+	      panAdditionalParams.setBackground(Color.green);
+	       panAdditionalParams.setLayout(flowLayout3);
 			panAdditionalParams.add(jPanel12, null);
 				//jPanel12.setPreferredSize(new Dimension(140, 240));
 				//jPanel12.setMinimumSize(new Dimension(140, 240));
@@ -536,7 +550,9 @@ public class IniConfigurator extends JPanel
 					jPanel11.add(txBigStep, null);
 					//jPanel11.add(txSmallStep, null);
 					jPanel11.add(txMaxSpinChange, null);
-
+jPanel12.setBackground(Color.green);
+jPanel11.setBackground(Color.green);
+/*
 			panMain.addTab("Output of physical properties", panOutputOfProperties);
 		    panOutputOfProperties.setLayout(flowLayout5);
 			panOutputOfProperties.add(jPanel17, null);
@@ -555,7 +571,8 @@ public class IniConfigurator extends JPanel
 					jPanel18.add(txMaxQ, null);
 			
 	this.add(txStatus, BorderLayout.CENTER);
-	
+*/	
+panOkCancel.setBackground(Color.green);
     this.add(panOkCancel, BorderLayout.SOUTH);
 		panOkCancel.add(chkExit, null);
 		panOkCancel.add(chkPause, null);
@@ -572,7 +589,7 @@ public class IniConfigurator extends JPanel
 		strWorkingDir = strWorkingDir + strFileSeparator;
 	}
 	// Add Filename to working-directory
-	strWorkingDir = strWorkingDir + "mcphas.ini";
+	strWorkingDir = strWorkingDir + s;
 
   }
 //Start the applet
@@ -608,6 +625,7 @@ public class IniConfigurator extends JPanel
     jLab.setPreferredSize(new Dimension(iLength, iHeight));
     jLab.setMinimumSize(new Dimension(iLength, iHeight));
 	//jLab.setHorizontalAlignment(JLabel.RIGHT);
+jLab.setBackground(Color.blue);
   }
 
   private void InitTextfield(JTextField jText, String strToolTipText, int iLength, int iHeight)
@@ -617,6 +635,7 @@ public class IniConfigurator extends JPanel
     jText.setMinimumSize(new Dimension(iLength, iHeight));
 	jText.setMaximumSize(new Dimension(iLength, iHeight));
     jText.setHorizontalAlignment(JTextField.RIGHT);
+
   }
   
   /************************************************
@@ -624,12 +643,15 @@ public class IniConfigurator extends JPanel
    ************************************************/
   
   public static void main(String[] args) {
-
+          String s;s="mcphas.ini"; 
+          if (args.length>0)s=args[0];
 	  try
 	  {		
 		IniConfigurator panel = new IniConfigurator();
 				
-		JFrame frame = new JFrame("IniConfigurator");
+		JFrame frame = new JFrame("McPhase Runtime Control (.ini)");
+                 frame.setBackground(Color.blue);
+
 		frame.addWindowListener(new WindowAdapter() 
 			{
 				public void windowClosing(WindowEvent e) 
@@ -640,9 +662,11 @@ public class IniConfigurator extends JPanel
 		
 		frame.getContentPane().add("Center", panel);
 		frame.pack();
-		frame.setSize(800,400);
+		frame.setSize(800,250);
+               panel.setBackground(Color.green);
+
 		// Initialize Form
-		panel.jbInit();
+		panel.jbInit(s);
 		// Start Reading of INI
 		panel.ReadFromIni(panel.strWorkingDir);
 		// Set the form visible
@@ -678,23 +702,23 @@ public class IniConfigurator extends JPanel
 	chkPause.setSelected(strPause.equalsIgnoreCase("1"));	
 	chkDisplayAll.setSelected(strDisplayAll.equalsIgnoreCase("1"));
 	chkLogFevsQ.setSelected(strLogFevQS.equalsIgnoreCase("1"));
-	
+/*	
     txXT.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xT"));
     txXHa.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xHa"));
     txXHb.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xHb"));
     txXHc.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xHc"));
-    txXMin.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xmin"));
+ */   txXMin.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xmin"));
     txXMax.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xmax"));
     txXStep.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xstep"));
-    txYT.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yT"));
+  /*  txYT.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yT"));
     txYHa.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yHa"));
     txYHb.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yHb"));
     txYHc.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yHc"));
-    txYMin.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ymin"));
+  */  txYMin.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ymin"));
     txYMax.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ymax"));
     txYStep.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ystep"));
 
-    txT0.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "T0"));
+/*    txT0.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "T0"));
     txHa0.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "Ha0"));
     txHb0.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "Hb0"));
     txHc0.setText(m_IniFile.GetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "Hc0"));
@@ -709,21 +733,21 @@ public class IniConfigurator extends JPanel
     txLMin.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "lmin"));
     txLMax.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "lmax"));
     txDeltaL.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "deltal"));
-    txNofRndTries.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "nofrndtries"));
-    txMaxQPeriod.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "maxqperiod"));	  
+   */ txNofRndTries.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "nofrndtries"));
+   /* txMaxQPeriod.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "maxqperiod"));	  
     txmaxnoftestspincf.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "maxnoftestspincf"));	  
 	txMaxNofSpins.setText(m_IniFile.GetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "maxnofspins"));
-
+*/
 	txMaxNofMfLoops.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxnofmfloops"));
     txMaxStaMf.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxstamf"));
     txBigStep.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "bigstep"));
     //txSmallStep.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "smallstep"));
     txMaxSpinChange.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxspinchange"));
-
+/*
 	txNofSpinCorrs.setText(m_IniFile.GetValue(CONST_OUTPUT_OF_PHYSICAL_PROPERTIES, "nofspincorrs"));
     txMaxNofHkls.setText(m_IniFile.GetValue(CONST_OUTPUT_OF_PHYSICAL_PROPERTIES, "maxnofhkls"));
     txMaxQ.setText(m_IniFile.GetValue(CONST_OUTPUT_OF_PHYSICAL_PROPERTIES, "maxQ"));
-  }
+ */ }
 
   void WriteCommand()
   {	
@@ -807,21 +831,21 @@ public class IniConfigurator extends JPanel
 	m_IniFile.SetFileName(strFileName);
 	DisplayStatus("Updating INI-File");
 	
-	m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xT", txXT.getText(), "xy phasediagram axes - parameters\n# structures are calculated in the xy - phasediagram\n# the direction of x and y can be chosen:\n# vector in (H-T) space corresponding to x axis (xT [K] xHa [T] xHb [T] xHc [T])");
+/*	m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xT", txXT.getText(), "xy phasediagram axes - parameters\n# structures are calculated in the xy - phasediagram\n# the direction of x and y can be chosen:\n# vector in (H-T) space corresponding to x axis (xT [K] xHa [T] xHb [T] xHc [T])");
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xHa", txXHa.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xHb", txXHb.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xHc", txXHc.getText());
-    m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xmin", txXMin.getText(), "range of x");
+  */  m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xmin", txXMin.getText(), "range of x");
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xmax", txXMax.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "xstep", txXStep.getText());
-    m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yT", txYT.getText(), "vector in (H-T) space corresponding to y axis (yT [K] yHa [T] yHb [T] yHc [T])");
+   /* m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yT", txYT.getText(), "vector in (H-T) space corresponding to y axis (yT [K] yHa [T] yHb [T] yHc [T])");
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yHa", txYHa.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yHb", txYHb.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "yHc", txYHc.getText());
-    m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ymin", txYMin.getText(), "range of y");
+ */   m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ymin", txYMin.getText(), "range of y");
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ymax", txYMax.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "ystep", txYStep.getText());
-    m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "T0", txT0.getText(), "offset");
+  /*  m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "T0", txT0.getText(), "offset");
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "Ha0", txHa0.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "Hb0", txHb0.getText());
     m_IniFile.SetValue(CONST_XY_PHASEDIAGRAM_PARAMETERS, "Hc0", txHc0.getText());
@@ -838,7 +862,7 @@ public class IniConfigurator extends JPanel
     m_IniFile.SetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "maxqperiod", txMaxQPeriod.getText(), "maximal periodicity of spinconfigurations generated by q vectors");
     m_IniFile.SetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "maxnoftestspincf", txmaxnoftestspincf.getText(), "maximal number of test spinconfigurations");
     m_IniFile.SetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "maxnofspins", txMaxNofSpins.getText(), "maximal number of spins in spinconfigurations generated by q vectors");
-    m_IniFile.SetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "nofrndtries", txNofRndTries.getText(), "number of random (Monte Carlo) spin inversions  to try for each initial spinconfiguration");
+   */ m_IniFile.SetValue(CONST_GENERATION_OF_SPIN_CONFIGURATIONS, "nofrndtries", txNofRndTries.getText(), "number of random (Monte Carlo) spin inversions  to try for each initial spinconfiguration");
 	
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxnofmfloops", txMaxNofMfLoops.getText(), "maximum number of selfconsistency loops");
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxstamf", txMaxStaMf.getText(), "standard deviation - limit to end selfconsistency process\n# standard deviation is defined by ...sta=sqrt(sum_{i=1}^{n} (newmf-old mf)i^2/n)\n# the meanfield is given by mf=gj mb H [meV] (gj...lande factor, mb... bohr magneton)");
@@ -846,16 +870,16 @@ public class IniConfigurator extends JPanel
     //m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "smallstep", txSmallStep.getText(), "a small step (=step/calculated step) to perform actually when sta rises");
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxspinchange", txMaxSpinChange.getText(), "sum_{i=1}^{n} abs(actual change of angular momentum <Ji> with respect to\n# initial  configuration) > maxspinchange will  end selfconsistency process");
 
-	m_IniFile.SetValue(CONST_OUTPUT_OF_PHYSICAL_PROPERTIES, "nofspincorrs", txNofSpinCorrs.getText(), "output of physical properties to compare with experiment\n# 1. For thermal expansion and magnetostriction\n#  how many spinspin correlation functions\n#  should be calculated");
+/*	m_IniFile.SetValue(CONST_OUTPUT_OF_PHYSICAL_PROPERTIES, "nofspincorrs", txNofSpinCorrs.getText(), "output of physical properties to compare with experiment\n# 1. For thermal expansion and magnetostriction\n#  how many spinspin correlation functions\n#  should be calculated");
     m_IniFile.SetValue(CONST_OUTPUT_OF_PHYSICAL_PROPERTIES, "maxnofhkls", txMaxNofHkls.getText(), " 2. For Neutron Diffraction\n#  calculation of mxnofhkl strongest reflections");
     m_IniFile.SetValue(CONST_OUTPUT_OF_PHYSICAL_PROPERTIES, "maxQ", txMaxQ.getText(), "maximum scattering vector |Q|[1/A] for calculated hkl's");
-
+*/
 	m_IniFile.Write();
   }
   
   void DisplayStatus(String strStatus)
   {
-	  txStatus.setText(strStatus);
+//	  txStatus.setText(strStatus);
   }
 }
 

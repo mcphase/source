@@ -19,6 +19,15 @@ mcdispit -max 2
 getvalue.pl -c  -1.787 5 11 0.02 0 results/mcdisp.qom
 range -d 5 0.039 0.041 results/mcdisp.qei
 getvalue.pl -c  0.0408399 9 10 1.24943 0 results/mcdisp.qei
+
+REM now test the Monte Carlo option
+
+cd ../ndcu2a
+cp mcphas_2atoms.j mcphas.j
+mcphasit -prefix MC_
+getvalue.pl -c -0.3 1  8 3   0 results/MC_mcphas.fum
+getvalue.pl -c 0.2 1  10 3   0 results/MC_mcphas.fum
+
 cd ../../demo
 
 

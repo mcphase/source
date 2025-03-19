@@ -59,6 +59,6 @@ getvalue.pl -c -39.16   5 9 0.6 0 results/011mcdisp.qom
 getvalue.pl -c -35.77   5 13 0.6 0 results/011mcdisp.qom
 range 5 0.4 0.55 results/011mcdisp.qei
  average -dmin=0.1 -av  9  results/011mcdisp.qei
-getvalue.pl -c 0.30 9 10 9.07597 0  results/011mcdisp.qei
+getvalue.pl -c 0.29 9 10 9.07597 0  results/011mcdisp.qei
 getvalue.pl -c 0.23 9 11 9.07597 0  results/011mcdisp.qei
 cd ../../../demo
