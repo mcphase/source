@@ -148,10 +148,10 @@ procedure in the module {\prg mcphas} is the sub {\prg fecalc}\index{fecalc}. In
 program the self consistent calculation of the magnetic moment configuration
 is performed as shown schematically in fig.~\ref{fecalc}. 
 In addition or alternatively a Monte Carlo calculation can be performed~\footnote{
-To trigger the Monte Carlo calculation set NOFRNDTRIES to a negative value. Then
+To trigger the Monte Carlo calculation set NOFMCSTEPS to a nonzero value. Then
 after MAXNOFMFLOOPS has been reached the program switches into Monte Carlo walk mode with randomly
 choosing energy eigenstates and computing total energy of a supercell
-(-NOFRNDTRIES times per spin in the supercell).  
+(NOFMCSTEPS times per spin in the supercell).  
 The initial quantum state is chosen such as to match most closely the meanfield state/ initial
 configuration. The single ion program is called with $T=0$ and delivers a random energy eigenstate
 and the energy of the Hamiltonian is updated according to the Metropolis algorithm~\cite{metropolis53-1087}.

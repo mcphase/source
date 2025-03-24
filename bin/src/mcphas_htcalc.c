@@ -94,7 +94,7 @@ void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
     {again:
      last_modify_time=filestatus.st_mtime;
      fprintf(stdout,"mcphas.ini has been modified - reading new mcphas.ini\n");
-      sleep(1);
+      sleep(1000);
       loaderr=ini.load();
       if(ini.exit_mcphas==1)
         {testspins.save(filemode);  //exit normally
@@ -175,7 +175,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
  FILE * felog; // logfile for q dependence of fe
  FILE * fout;
 
-  for (tryrandom=0;(tryrandom<=ini.nofrndtries||tryrandom==0)&&j!=0;++tryrandom)
+  for (tryrandom=0;(tryrandom<=ini.nofrndtries)&&j!=0;++tryrandom)
    {if (j>0){sps=(*testspins.configurations[j]);// take test-spinconfiguration
              #ifndef _THREADS
 	     if (tryrandom==0&&verbose==1) { printf ( "str%i(%ix%ix%i)< "  ,j,sps.na(),sps.nb(),sps.nc()); fflush(stdout); }
@@ -234,7 +234,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
           
       // test spinconfiguration  and remember it                                    
       if (fe<femin)
-            {if(ini.nofrndtries<0)
+            {if(ini.nofMCsteps>0)
               {
              #ifndef _THREADS
 	       femin=fe; spsmin=sps;	   
@@ -323,13 +323,13 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
             delete mf;
             //printout fe
             #ifdef _THREADS
-	    if (tryrandom==ini.nofrndtries||ini.nofrndtries<0)if(verbose==1) {
+	    if (tryrandom==ini.nofrndtries)if(verbose==1) {
                if(tlsfemin) printf("[%i]femin=%gmeV str %i(%i)-",thread_id,fe,physprops.j,j); 
 	       if(j>0) printf ( ">[%i]str %i(%ix%ix%i)done "  ,thread_id,j,sps.na(),sps.nb(),sps.nc());
                else    printf ( ">[%i](%g %g %g)(%ix%ix%i)done ",thread_id,hkl(1),hkl(2),hkl(3),sps.na(),sps.nb(),sps.nc()); 
                                                           }
             #endif
-            if (tryrandom==ini.nofrndtries||ini.nofrndtries<0)if(verbose==1){printf("\n");}
+            if (tryrandom==ini.nofrndtries)if(verbose==1){printf("\n");}
  
 	    
   // log fe if required
@@ -498,14 +498,18 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    fout= fopen_errchk (outfilename,"w");
    #ifndef _THREADS
    fprintf(fout,"#displayxtext=time(s)\n");
-   fprintf(fout,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy(%%)\n");
+   fprintf(fout,"#displaytitle=2:log(iterations) 3:log(sta)|E(meV) 4:log(spinchange)|U(meV) 5:stepratio 6:successrate 7:freeenergy(%%)\n");
    fprintf(fout,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)\n");
+   fprintf(fout,"#or for Monte Carlo option \n");
+   fprintf(fout,"#time(s) log(iteration) E(meV)  U(meV)\n");
    fprintf(fout,"%i 0 0 0 0 0 0\n",(int)time(0));
    fprintf(fout,"%i 1 1 1 1 1 1\n",(int)time(0)+1);
    #else
    fprintf(fout,"#displayxtext=time(s)\n");
-   fprintf(fout,"#displaytitle=2:log(iterations) 3:log(sta) 4:log(spinchange) 5:stepratio 6:successrate 7:freeenergy 8:threadID(%%)\n");
+   fprintf(fout,"#displaytitle=2:log(iterations) 3:log(sta)|E(meV) 4:log(spinchange)|U(meV) 5:stepratio|threadid 6:successrate 7:freeenergy 8:threadID(%%)\n");
    fprintf(fout,"#time(s) log(iteration) log(sta) log(spinchange+1e-10) stepratio  successrate=(nof stabilised structures)/(nof initial spinconfigs) freenergy(meV)  thread_id \n");
+   fprintf(fout,"#or for Monte Carlo option \n");
+   fprintf(fout,"#time(s) log(iteration) E(meV)  U(meV) thread_id \n");
    fprintf(fout,"%i 0 0 0 0 0 0 0\n",(int)time(0));
    fprintf(fout,"%i 1 1 1 1 1 1 1\n",(int)time(0)+1);
    #endif
@@ -715,7 +719,7 @@ else // if yes ... then
 		}
   delete magmom;if(verbose==1){printf(">");}
  //check if fecalculation gives again correct result
-   if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2&&ini.nofrndtries>=0){int eq=0;
+   if (physprops.fe>femin+(0.00001*fabs(femin))&&ini.maxnofmfloops>2&&ini.nofMCsteps==0){int eq=0;
    #ifndef _THREADS
    if(spsmin==sps){eq=1;};//take spinconfiguration which gave minimum free energy as starting value
      #else
@@ -744,7 +748,7 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
                              physprops.m=0;delete mf;return 2;
                              }
  //if(verbose==1){printf(".\n");}
-if(ini.nofrndtries>=0) physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
+if(ini.nofMCsteps==0) physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
 else physprops.sps=sps;
 
       delete mf;

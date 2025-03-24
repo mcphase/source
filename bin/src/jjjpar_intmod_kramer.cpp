@@ -24,24 +24,21 @@ void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext
 if(T==0&&use_state==true)
 { // calculate expectation value from state (*state)(1)|+> + (*state)(2) |->
 Jret(1)=ABC[1]*real(conj((*state)(1))*(*state)(2)+conj((*state)(2))*(*state)(1));
-Jret(2)=ABC[2]*real(conj(-(*state)(1))*(*state)(1)+conj((*state)(2))*(*state)(2));
+Jret(2)=ABC[2]*real(conj((*state)(1))*(*state)(1)-conj((*state)(2))*(*state)(2));
 Jret(3)=ABC[3]*real(conj((*state)(1))*(*state)(2)-conj((*state)(1))*(*state)(2));
 
-
 }else
-{
-
-gjmbH[1]=Hxc[1]+gJ*MU_B*Hext[1];
+{ gjmbH[1]=Hxc[1]+gJ*MU_B*Hext[1];
   gjmbH[2]=Hxc[2]+gJ*MU_B*Hext[2];
   gjmbH[3]=Hxc[3]+gJ*MU_B*Hext[3];
   
-  alpha = ABC[2] * gjmbH[2];
   betar = -ABC[1] * gjmbH[1];
+  alpha = -ABC[2] * gjmbH[2];
   betai = -ABC[3] * gjmbH[3];
 
-lambdap2 = alpha * alpha + betar * betar + betai * betai;
+  lambdap2 = alpha * alpha + betar * betar + betai * betai;
   lambdap = sqrt (lambdap2);
-  //  nennerp = (alpha - lambdap) * (alpha - lambdap) + betar * betar + betai * betai;
+//  nennerp = (alpha - lambdap) * (alpha - lambdap) + betar * betar + betai * betai;
 //  nennerm = (alpha + lambdap) * (alpha + lambdap) + betar * betar + betai * betai;
     alphaxlambdap=alpha*lambdap;
     alpha_lambdap=alpha-lambdap;
@@ -53,7 +50,7 @@ if (nennerp > SMALL)
     {
       jap = -ABC[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
 //      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
-      jbp = ABC[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
+      jbp = ABC[2] * alpha / lambdap;
       jcp = -2.0 * ABC[3] * betai * (alpha_lambdap) / nennerp;
     }
   else
@@ -61,7 +58,7 @@ if (nennerp > SMALL)
       jap = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbp = -copysign (ABC[2], alpha);
+	  jbp = copysign (ABC[2], alpha);
 	}
       else
 	{
@@ -74,7 +71,7 @@ if (nennerm > SMALL)
     {
       jam = -ABC[1] * 2.0 * betar * (alphaplambdap) / nennerm;
 //      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
-      jbm = ABC[2] * (2.0 * alpha*alphaplambdap) / nennerm;
+      jbm = -ABC[2] * alpha /lambdap;
       jcm = -2.0 * ABC[3] * betai * (alphaplambdap) / nennerm;
     }
   else
@@ -82,7 +79,7 @@ if (nennerm > SMALL)
       jam = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbm = copysign (ABC[2], alpha);
+	  jbm = -copysign (ABC[2], alpha);
 	}
       else
 	{
@@ -117,14 +114,21 @@ if(i==0)
 {U=lambdap;
 if (nennerp > SMALL)
  {double snp=sqrt(nennerp);
-  (*state)(1)=complex <double>(-betar/snp,-betai/snp);
-  (*state)(2)=complex <double>(alpha_lambdap/snp,0);
+  (*state)(1)=complex <double>(betar/snp,betai/snp);
+  (*state)(2)=complex <double>(-alpha_lambdap/snp,0);
  }else
- {(*state)(1)=complex <double>(1,0);
-  (*state)(2)=complex <double>(0,0);
+ {if (alpha * alpha > SMALL)
+    {if(alpha>0){(*state)(1)=complex <double>(1,0);
+               (*state)(2)=complex <double>(0,0);}
+    else       {(*state)(1)=complex <double>(0,0);
+               (*state)(2)=complex <double>(1,0);}
+    }
+  else
+  {(*state)(1)=complex <double>(1,0);
+   (*state)(2)=complex <double>(0,0);}
  }
  
-  Jret[1] =jap ;
+  Jret[1] = jap ;
   Jret[2] = jbp ;
   Jret[3] = jcp ;
 
@@ -134,17 +138,24 @@ if (nennerp > SMALL)
 
   if (nennerm > SMALL)
  {double snm=sqrt(nennerm);
-  (*state)(1)=complex <double>(-betar/snm,-betai/snm);
-  (*state)(2)=complex <double>(alphaplambdap/snm,0);
+  (*state)(1)=complex <double>(betar/snm,betai/snm);
+  (*state)(2)=complex <double>(-alphaplambdap/snm,0);
  }else
- {(*state)(1)=complex <double>(0,0);
-  (*state)(2)=complex <double>(1,0);
+ {if (alpha * alpha > SMALL)
+    {if(alpha>0){(*state)(1)=complex <double>(0,0);
+                 (*state)(2)=complex <double>(1,0);}
+    else       {(*state)(1)=complex <double>(1,0);
+               (*state)(2)=complex <double>(0,0);}
+    }
+  else
+  {(*state)(1)=complex <double>(0,0);
+   (*state)(2)=complex <double>(1,0);}
  }
 
  
-Jret[1] = jam;
+  Jret[1] = jam;
   Jret[2] = jbm;
-  Jret[3] =  jcm;
+  Jret[3] = jcm;
 
 }
 
@@ -154,8 +165,7 @@ else
 
   lambdap_KBT=lambdap/KB/T;
   if (lambdap_KBT>HUGE_EXP){lambdap_KBT=HUGE_EXP;}
-  if (lambdap_KBT<-HUGE_EXP){lambdap_KBT=-HUGE_EXP;}
-  expm = exp (lambdap_KBT);
+   expm = exp (lambdap_KBT);
   expp = 1/expm; //=exp (-lambdap_KBT);
   Z = expp + expm;
   lnZ=log(Z);

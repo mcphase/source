@@ -557,7 +557,7 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
    fclose(fout);
   }
  }
-if (r>ini.maxnofmfloops){if(ini.nofrndtries>=0) 
+if (r>ini.maxnofmfloops){if(ini.nofMCsteps==0) 
     {delete []jj;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)
      {for (l=1;l<=inputpars.cs.nofatoms;++l){
@@ -587,9 +587,9 @@ if(ini.maxnofmfloops==1)for (i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1
   calc_spsijk(diff,mf,i,j,k,inputpars,T,Hex,lnzi,ui,sps.in(i,j,k),sps.in(i-1,j-1,k-1),Icalcpars);
 
 // ***************************************************************************
-// do real Monte Carlo simulation - only for negative ini.nofrndtries !!!
+// do real Monte Carlo simulation - only for positive ini.nofMCsteps !!!
 // ***************************************************************************
-if(ini.nofrndtries<0)
+if(ini.nofMCsteps>0)
 { 
 // Real Monte Carlo Remarks
 // - one has to take energy eigenstates and not arbitrary states of the subsystems(ions),
@@ -642,6 +642,7 @@ evalfe(E0,Eelastic,sps,mf,ini,inputpars, TT,lnzi,ui);
 #define EHIST_NOFPOINTS 200
 // width in energy 
 #define EHIST_WIDTH      0.02*KB*T
+#define TSTART   3000+T
 int hi[EHIST_NOFPOINTS];int iE;for(iE=0;iE<EHIST_NOFPOINTS;++iE)hi[iE]=0;
 
 // this is a ring storage for histogram: hi[0] stores number of runs for E0( initial
@@ -662,11 +663,11 @@ Vector dtotalJ(1,inputpars.cs.nofcomponents);
 Vector magmom(1,3); 
  Vector dmagmom(1,3),mom(1,3);
 Vector tJ(1,inputpars.cs.nofcomponents);
-
+double Tm;
 if(physprops!=NULL){(*physprops).totalJ=0; // total operator moment <I>
-    totalJ=sps.totalJ();
-                    (*physprops).m=0; // magnetic moment
-    magmom=0;
+		    totalJ=sps.totalJ();
+		    (*physprops).m=0; // magnetic moment
+		    magmom=0;
     for (l=1;l<=inputpars.cs.nofatoms;++l){
     // go through magnetic unit cell and sum up the contribution of every atom
     for(i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k){
@@ -674,9 +675,16 @@ if(physprops!=NULL){(*physprops).totalJ=0; // total operator moment <I>
      magmom+=dmagmom;
     }}}}
     magmom/=(double)sps.n()*(double)sps.nofatoms;
+    Tm=T;
                    }
+else {Tm=TSTART;}
 // remember to introduce into ICalc T=0 beahviour (random state energy and moment!)
-int nofMC=(-ini.nofrndtries-1)*sps.n();bool keep=false;
+int nofMC=(ini.nofMCsteps+2)*sps.n()/2;nofMC*=2;bool keep=false;
+// TSTART*ff^(nofMC/2)=T
+// ln(TSTART)+ln(ff)*nofMC/2=ln(T)
+// ff=exp(2*(ln(T)-ln(TSTART))/nofMC)
+//double ff=exp(2*(log(T)-log(TSTART))/nofMC);
+
 // Monte Carlo random loop ---------------------------------------------------------
 for(r=1;r<nofMC;++r) 
 {// choose a random spin (i.e. primitive unit cell with nofatoms spins:)
@@ -716,7 +724,6 @@ for(r=1;r<nofMC;++r)
 if(physprops!=NULL){ dmagmom=-mom;
                         (*inputpars.jjj[l]).mcalc(mom,TT, d1,Hex,(*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]),states[s][l]);
                          dmagmom+=mom;dmagmom*=1.0/(sps.n()*sps.nofatoms);
-
                         }
    
 
@@ -755,10 +762,14 @@ for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
 
  // monte carlo stepping according to metropolis 1953 - check if we should do the step (i.e. keep=true)
  keep=true;double xi;
- if(dE>0){if(dE/(KB*T)<HUGE_EXP)expEKT=exp(-dE/(KB*T)); else  expEKT=0;
+ if(dE>0){if(dE/(KB*Tm)<HUGE_EXP)expEKT=exp(-dE/(KB*Tm)); else  expEKT=0;
          xi=rnd(1);if(xi>expEKT){keep=false;(*states[s][l])=savs;}
          }  
  
+ if(r>nofMC/2){Tm=T;U=0;}
+ else if(Tm>T){//Tm*=ff;
+               Tm-=2*(TSTART-T)/nofMC;
+              }
 if(keep==true)
 {
 /*
@@ -805,7 +816,7 @@ if(physprops!=NULL){totalJ+=dtotalJ;
 
 // update energy histogram
 // determine point iE
-if(physprops!=NULL)
+if(physprops!=NULL)if(r>nofMC/2)
 {iE=(int)rint(E/(EHIST_WIDTH*sps.n()*sps.nofatoms));
 while(iE<0)iE+=EHIST_NOFPOINTS;
 while(iE>EHIST_NOFPOINTS-1)iE-=EHIST_NOFPOINTS;
@@ -814,24 +825,64 @@ while(iE>EHIST_NOFPOINTS-1)iE-=EHIST_NOFPOINTS;
  // here make averages of observables
  // energy
  U+=E;//printf("%i %g %g %g\n",r,E,xi,En(1));
-if(physprops!=NULL){
+if(physprops!=NULL)if(r>nofMC/2){
  // <I>
                    (*physprops).totalJ+=totalJ;
 // <M> magnetic moment
                     (*physprops).m+=magmom;
      }
+
+//treat program interrupts
+  #ifdef _THREADS
+  MUTEX_LOCK (&mutex_tests);
+  #endif
+  checkini(testspins,testqs,ini);
+  #ifdef _THREADS
+  MUTEX_UNLOCK (&mutex_tests);
+  #endif
+
+if (verbose)
+ {if (time(0)-time_of_last_output>2)
+  {time_of_last_output=time(0);
+   strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+     strcpy(outfilename+11+strlen(ini.prefix),"fe_status.dat");
+     fout = fopen_errchk (outfilename, "a");
+     
+  #ifndef _THREADS
+   fprintf(fout,"%i %g %g %g\n",(int)time(0),log((double)r)/log(10.0),E/(sps.n()*sps.nofatoms)+E0,U/(r*sps.n()*sps.nofatoms)+E0);
+   #else
+   htcalc_input *tin; int thrid;
+   if ((tin=(htcalc_input*)THRLC_GET(threadSpecificKey))==THRLC_GET_FAIL) thrid = 0; else thrid = tin->thread_id+1;
+   fprintf(fout,"%i %g %g %g %i\n",(int)time(0),log((double)r)/log(10.0),E/(sps.n()*sps.nofatoms)+E0,U/(r*sps.n()*sps.nofatoms)+E0,thrid);
+   #endif
+   fclose(fout);
+  }
+ if (ini.displayall==1){strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
+     strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
+      fout = fopen_errchk (outfilename, "w");
+        snprintf(text,MAXNOFCHARINLINE,"fecalc:%i spins, MC iteration %i T=%g E(per ion)=%g dE=%g keep=%i changed spin at %i %i %i atomnr %i",sps.n(),r,Tm,E/(sps.n()*sps.nofatoms)+E0,dE,keep,i,j,k,l);
+      sps.eps(fout,text);
+      fclose (fout);
+      fprintf(stdout,"%s\n new spin is:",text);
+      myPrintVector(stdout,mn);
+      sps.print(stdout);
+       snprintf(text,MAXNOFCHARINLINE,"fecalc: meanfields");
+      fprintf(stdout,"%s\n",text);
+      mf.print(stdout);sleep(2000);}
+ }
+
  } // next Monte Carlo r ---------------------------------------------------------
  // now determine absolute Energy
 
 
  
 // Energy
- if(nofMC>0)U/=nofMC;   U/=sps.n()*sps.nofatoms; U+=E0;
+ if(nofMC>0)U/=nofMC/2;   U/=sps.n()*sps.nofatoms; U+=E0;
 
 // Operators <I>
  if(physprops!=NULL)if(nofMC>0){
- (*physprops).totalJ=(*physprops).totalJ*(1.0/nofMC);
- (*physprops).m=(*physprops).m*(1.0/nofMC);
+ (*physprops).totalJ=(*physprops).totalJ*(2.0/nofMC);
+ (*physprops).m=(*physprops).m*(2.0/nofMC);
                     }
 
  // Z and fe ... DIFFICULT - I do not know how to calculate !!!??????? 
@@ -843,8 +894,8 @@ fout = fopen_errchk (outfilename, "w");fprintf(fout,"#displaytitle=Monte Carlo E
     for(iE=0;iE<EHIST_NOFPOINTS;++iE)
 {if(iE<EHIST_NOFPOINTS/2)E=E0+iE*EHIST_WIDTH;
  else     E=E0+(iE-EHIST_NOFPOINTS)*EHIST_WIDTH;
-fprintf(fout ,"%g %g\n",E,(double)hi[iE]/nofMC);
-//Z=gE*exp(-E/(KB*T))*nofMC/hi[iE];  // does not work because I do not know degeneracy gE
+fprintf(fout ,"%g %g\n",E,(double)2.0*hi[iE]/nofMC);
+//Z=gE*exp(-E/(KB*T))*0.5*nofMC/hi[iE];  // does not work because I do not know degeneracy gE
 }
 fclose (fout);
 }
@@ -881,7 +932,7 @@ if (ini.displayall==1)
        snprintf(text,MAXNOFCHARINLINE,"fecalc:%i meanfields, iteration %i sta=%g spinchange=%g fe=%g",sps.n(),r,sta,spinchange,fe);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
-      sleep(200);
+      sleep(2000);
   }
  delete []jj;delete []lnzi;delete []ui;
      for (i=1;i<=sps.na();++i){for(j=1;j<=sps.nb();++j){for(k=1;k<=sps.nc();++k)

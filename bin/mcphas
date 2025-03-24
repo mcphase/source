@@ -16,6 +16,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -v|-verbose)
       verbose=1
+      ARGS+=("$1")
       shift # past value
       ;;
     -h|-help)

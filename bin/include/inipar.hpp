@@ -56,9 +56,11 @@ class inipar
   int minnr1; 
   int minnr2; 
   int minnr3; 
-  // number of random spininversions  to try
+  // number of random seed spins  to try
   // at each configuration
   int nofrndtries;
+ // number of random (Monte Carlo) spin inversions  to try for each spins
+  int nofMCsteps;
   // maximum number of test spinconfigurations 
   int maxnoftestspincf;
 

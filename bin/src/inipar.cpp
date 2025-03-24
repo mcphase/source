@@ -327,24 +327,26 @@ void inipar::time_estimate_until_end(double x, double y)
 
 //load parameters from file
 int inipar::load ()
-{ FILE *fin_coq;outcolset=false;
+{ FILE *fin;outcolset=false;
   char instr[MAXNOFCHARINLINE];
   char somestring[MAXNOFCHARINLINE];
   errno = 0;startcputime= std::clock();
-  fin_coq = fopen(savfilename, "rb");
-  if (fin_coq==NULL) return 1;
+  fin = fopen(savfilename, "rb");
+  if (fin==NULL) return 1;
   xv=0;yv=0;xmin=1;xmax=0;ymin=1;ymax=0;xstep=0;ystep=0;zero=0;
-  qmin(1)=1;qmin(2)=1;qmin(3)=1;qmax=0;deltaq=0;maxqperiod=0;maxnofspins=0;nofrndtries=0;
+  qmin(1)=1;qmin(2)=1;qmin(3)=1;qmax=0;deltaq=0;maxqperiod=0;maxnofspins=0;nofrndtries=0;nofMCsteps=0;
   minnr1=0;
   minnr2=0;
   minnr3=0;
   maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;nofthreads=0;
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
   
-  while (fgets(instr,MAXNOFCHARINLINE,fin_coq)!=NULL)
+  while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
   {if(instr[strspn(instr," \t")]!='#'&&instr[strspn(instr," \t")]!='[') // comment lines headed by # or [ are ignored in mcphas.ini
-   {extract_with_prefix(instr,prefix,"exit",exit_mcphas);extract_with_prefix(instr,prefix,"pause",pause_mcphas);
-    extract_with_prefix(instr,prefix,"displayall",displayall);extract_with_prefix(instr,prefix,"logfevsQ",logfevsQ); 
+   {extract_with_prefix(instr,prefix,"exit",exit_mcphas);
+    extract_with_prefix(instr,prefix,"pause",pause_mcphas);
+    extract_with_prefix(instr,prefix,"displayall",displayall);
+    extract_with_prefix(instr,prefix,"logfevsQ",logfevsQ); 
      
     extract_with_prefix(instr,prefix,"xT",xv[0]);      
     extract_with_prefix(instr,prefix,"xHa",xv[1]);
@@ -366,7 +368,8 @@ int inipar::load ()
     extract_with_prefix(instr,prefix,"xs5",xv[17]);    
     extract_with_prefix(instr,prefix,"xs6",xv[18]);
 
-    extract_with_prefix(instr,prefix,"xmin",xmin);  extract_with_prefix(instr,prefix,"xmax",xmax);
+    extract_with_prefix(instr,prefix,"xmin",xmin);  
+    extract_with_prefix(instr,prefix,"xmax",xmax);
     extract_with_prefix(instr,prefix,"xstep",xstep);
    
     extract_with_prefix(instr,prefix,"yT",yv[0]);      
@@ -389,7 +392,8 @@ int inipar::load ()
     extract_with_prefix(instr,prefix,"ys5",yv[17]);    
     extract_with_prefix(instr,prefix,"ys6",yv[18]);
     
-    extract_with_prefix(instr,prefix,"ymin",ymin); extract_with_prefix(instr,prefix,"ymax",ymax);
+    extract_with_prefix(instr,prefix,"ymin",ymin); 
+    extract_with_prefix(instr,prefix,"ymax",ymax);
     extract_with_prefix(instr,prefix,"ystep",ystep);   
  
     extract_with_prefix(instr,prefix,"T0",zero[0]);      
@@ -427,7 +431,8 @@ int inipar::load ()
     extract_with_prefix(instr,prefix,"minnr3",minnr3);
     extract_with_prefix(instr,prefix,"maxnofspins",maxnofspins);
     extract_with_prefix(instr,prefix,"nofrndtries",nofrndtries);
-
+    extract_with_prefix(instr,prefix,"nofMCsteps",nofMCsteps);
+    
     extract_with_prefix(instr,prefix,"maxnofmfloops",maxnofmfloops);
     extract_with_prefix(instr,prefix,"maxstamf",maxstamf); 
     extract_with_prefix(instr,prefix,"bigstep",bigstep); 
@@ -447,21 +452,21 @@ int inipar::load ()
 
     }
    }
-  fclose (fin_coq);
+  fclose (fin);
  for(int i=1;i<=usrdefcols[0];++i){if(colcod[i]>COLHEADDIM)
  {fprintf(stderr,"Error reading mcphas.ini - out%i = %i > %i not possible !\n",i,colcod[i],COLHEADDIM);exit(EXIT_FAILURE);}
  }
 
-  if (Norm(xv)==0){fprintf(stderr,"ERROR reading xT xHa xHb xHc\n");return 1;}
-  if (Norm(yv)==0){fprintf(stderr,"ERROR reading yT yHa yHb yHc\n");return 1;}
-  if (xmin>xmax){fprintf(stderr,"ERROR reading xmin xmax\n");return 1;}
-  if (ymin>ymax){fprintf(stderr,"ERROR reading ymin ymax\n");return 1;}
+  if (Norm(xv)==0){fprintf(stderr,"ERROR reading xT xHa xHb xHc=0\n");return 1;}
+  if (Norm(yv)==0){fprintf(stderr,"ERROR reading yT yHa yHb yHc=0\n");return 1;}
+  if (xmin>xmax){fprintf(stderr,"ERROR reading xmin=%g > xmax=%g \n",xmin,xmax);return 1;}
+  if (ymin>ymax){fprintf(stderr,"ERROR reading ymin=%g > ymax=%g \n",ymin,ymax);return 1;}
   if (xstep==0){fprintf(stderr,"Warning reading xstep: xstep=0\n");}
   if (ystep==0){fprintf(stderr,"Warning reading ystep: ystep=0\n");}
 
-  if(qmin(1)>qmax(1)){fprintf(stderr,"ERROR reading hmin hmax\n");return 1;}
-  if(qmin(2)>qmax(2)){fprintf(stderr,"ERROR reading kmin kmax\n");return 1;}
-  if(qmin(3)>qmax(3)){fprintf(stderr,"ERROR reading lmin lmax\n");return 1;}
+  if(qmin(1)>qmax(1)){fprintf(stderr,"ERROR reading hmin=%g >  hmax=%g\n",qmin(1),qmax(1));return 1;}
+  if(qmin(2)>qmax(2)){fprintf(stderr,"ERROR reading kmin=%g >  kmax=%g\n",qmin(2),qmax(2));return 1;}
+  if(qmin(3)>qmax(3)){fprintf(stderr,"ERROR reading lmin=%g >  lmax=%g\n",qmin(3),qmax(3));return 1;}
   if(Norm(deltaq)==0){fprintf(stderr,"Warning reading deltah k l: deltah=deltak=deltal=0\n");}
   if(deltaq[1]==0){fprintf(stderr,"ERROR reading deltah=0: deltah must be >0\n");return 1;}
   if(deltaq[2]==0){fprintf(stderr,"ERROR reading deltak=0: deltak must be >0\n");return 1;}
@@ -473,8 +478,9 @@ int inipar::load ()
   if (maxnoftestspincf<1){fprintf(stderr,"ERROR maxnoftestspincf<1 not possible\n");return 1;}
   getnofthread(nofthreads);
   
-  if(maxnofmfloops<0){fprintf(stderr,"Error reading maxnofmfloops\n");return 1;}
-  if(nofrndtries<0){fprintf(stderr,"#! Reading nofrndtries=%i<0 - running mcphasit in Monte Carlo mode\n",nofrndtries);}
+  if(maxnofmfloops<0){fprintf(stderr,"Error reading maxnofmfloops<0\n");return 1;}
+  if(nofrndtries<0){fprintf(stderr,"Error nofrndtries<0 \n");return 1;}
+  if(nofMCsteps<0){fprintf(stderr,"Error nofMCsteps<0 \n");return 1;}
   if(maxnofmfloops==1){fprintf(stderr,"#! Reading maxnofmfloops=1 - mean fields will be calculated from initial spins and free energy will be evaluated using initial spins\n");}
   if(maxnofmfloops==2){fprintf(stderr,"#! Reading maxnofmfloops=2 - mean fields will be calculated from initial spins, new spins will be calculated  and using these the free energy will be evaluated\n");}
   if(maxstamf==0){fprintf(stderr,"Error reading maxstamf\n");return 1;}
@@ -609,10 +615,13 @@ void inipar::print (const char * filename)
     fprintf(fout,"minnr1=%i\n",minnr1);
     fprintf(fout,"minnr2=%i\n",minnr2);
     fprintf(fout,"minnr3=%i\n",minnr3);
-   fprintf(fout,"# number of random  spin inversions  to try for each initial spinconfiguration\n"
-                "# a negative value triggers a Metropolis Monte Carlo calculation (when maxnofmfloops\n"
+   fprintf(fout,"# number of random  seed spins to try for each initial spinconfiguration\n");
+               
+    fprintf(fout,"nofrndtries=%i\n",nofrndtries);
+    fprintf(fout,"# number of  Metropolis Monte Carlo steps (when maxnofmfloops\n"
                 "# has been reached)\n");
-    fprintf(fout,"nofrndtries=%i\n\n",nofrndtries);
+    fprintf(fout,"nofMCsteps=%i\n",nofMCsteps);
+
     fprintf(fout,"# maximum number of test spin configurations in table\n");
     fprintf(fout,"maxnoftestspincf=%i\n\n",maxnoftestspincf);
 
@@ -717,6 +726,7 @@ inipar::inipar (const inipar & p)
   minnr3=p.minnr3;
   maxnofspins=p.maxnofspins;
   nofrndtries=p.nofrndtries;
+  nofMCsteps=p.nofMCsteps;
   maxnoftestspincf=p.maxnoftestspincf;
 
   maxnofmfloops=p.maxnofmfloops;
