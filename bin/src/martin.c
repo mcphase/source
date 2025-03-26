@@ -7,6 +7,7 @@
 
 #ifndef __linux__
 #include<cfloat>
+#include <cstdint>
 #endif
 
 
@@ -38,6 +39,16 @@ double fi=rnd(1)*2*PI;
 complex<double> c(r*cos(fi),r*sin(fi));
 return c;
 }
+#ifndef __linux_
+
+ double rnd(float z){return  z*rand()/RAND_MAX;}
+
+// return random integer number from  1,2,3,..,i
+int rndint(int i){return rand()%i+1;}
+
+int arc4random_uniform(int i){return rand()%i;}
+
+#else
 
 // return random number between 0 and z
 #define ARC4RANDOM_MAX 4294967295    // 2^32-1
@@ -46,6 +57,7 @@ double rnd(float z){return  z*arc4random()/ARC4RANDOM_MAX;}
 // return random integer number from  1,2,3,..,i
 int rndint(int i){return arc4random_uniform(i)+1;}
 
+#endif
 
 // given a string str with headers of columns, print column numbers to fout
 void print_col_numbers(FILE * fout,char * str)

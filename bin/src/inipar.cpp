@@ -64,7 +64,7 @@ if(Norm(x)>0.00001){ // normalize Vector x to unit length
 
 void inipar::errexit() // type info and error exit 
 {     printf (" \n%s \n",MCPHASVERSION);
-printf (" use as: mcphas \n or as: mcphas [file]\n");
+printf (" use as: mcphas [options] [file]\n");
 printf (" [file] ... input file  with sets of x y T H Hi Hj Hk points \n");
 printf (" (format as output file mcphas.xyt)\n\n");
 printf (" Options: -h     print this help screen\n");

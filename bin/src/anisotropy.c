@@ -23,8 +23,9 @@ int main (int argc, char **argv)
   int im,l,nofsteps;
   int do_sipffile=0;
   int nofthreads=1;
+  int Tsteps=0;
   double z,u;
-  double T,H;
+  double H,Tend,Tstart;
   Vector xv(1,3);
   Vector yv(1,3);
   Vector h(1,3);
@@ -34,28 +35,27 @@ fprintf(stderr,"#*\n");
 fprintf(stderr,"#* anisotropy - program to calculate magnetic anisotropy \n");
 fprintf(stderr,"#*\n");
 fprintf(stderr,"#**************************************************************************\n\n");
-int poly=0,P=6,doeps=0;//single crystal
+int poly=0,P,doeps=0;//single crystal
 // check command line
 // options ?
 int linepscf=0,linepsjj=0;int options=0;
-for (int im=0;im<=argc-1;++im) 
+for (int im=1;im<argc;++im) 
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) exit(EXIT_FAILURE); // display help message
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-linepscf")==0) {linepscf=1;if (options<im)options=im;} // do cf strain epsilon calculation linear 
    if (strcmp(argv[im],"-linepsjj")==0) {linepsjj=1;if (options<im)options=im;} // do exchange strain epsilon calculation linear
   }
-
   
 //T H xn yn zn nofsteps 
-  if(argc+options<4){fprintf(stderr,"ERROR anisotropy: too few parameters\n");exit(EXIT_FAILURE);}
-  T=strtod (argv[1+options], NULL); 
+  if(argc<4+options){fprintf(stderr,"ERROR anisotropy: too few parameters\n");exit(EXIT_FAILURE);}
+  Tstart=strtod (argv[1+options], NULL); 
   H=strtod (argv[2+options], NULL); 
 Vector direction(1,3);
 if (strcmp(argv[3+options],"-p")==0){P=4+options;poly=1;//polycrystal
                     
                             }
-else{
+else{P=6+options;
   direction(1)=strtod (argv[3+options], NULL); 
   direction(2)=strtod (argv[4+options], NULL); 
   direction(3)=strtod (argv[5+options], NULL); 
@@ -64,8 +64,16 @@ else{
 nofsteps=(int)strtod (argv[P], NULL); 
   double dtheta=PI/abs(nofsteps)+0.000001;
 
-if (argc>=8){if (strcmp(argv[P+1],"-doeps")==0){doeps=1;}
-             if (strcmp(argv[P+1],"-r")==0)
+if (argc>P+1){if (strcmp(argv[P+1],"-Tsteps")==0)
+              {Tsteps=(int)fabs(strtod(argv[P+2],NULL));
+               Tend=strtod(argv[P+3],NULL);P+=3;}
+             }
+if(poly==0){Tsteps=0;}
+if(!Tsteps){Tend=Tstart;} 
+++Tsteps;Vector T(1,Tsteps); // Tsteps= number of temperatures to calculate
+T(1)=Tstart;for(int Ti=1;Ti<Tsteps;++Ti){T(Ti+1)=T(Ti)+(Tend-Tstart)/(Tsteps-1);} //set T's
+
+if (argc>P+1){if (strcmp(argv[P+1],"-r")==0)
                  {do_sipffile=1;strcpy(sipffilename,argv[P+2]);
                  }
             }
@@ -86,28 +94,28 @@ fprintf(fout,
 "# output file of program: anisotropy @command\n"
 "#! displayxtext=azimuth(deg) in plane perpendicular to [%g %g %g] direction\n"
 "#! displayytext=M||H(mub)\n"
-"#! displaytitle= Anisotropy plot az=0 corresponds to [%g %g %g]\n"
+"#! displaytitle= Anisotropy plot T=%g az=0 corresponds to [%g %g %g]\n"
 "#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
-"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",direction(1),direction(2),direction(3),r1(1),r1(2),r1(3));
+"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",T(1),direction(1),direction(2),direction(3),r1(1),r1(2),r1(3));
 }else{
 
 fprintf(fout,
 "# output file of program: anisotropy @command\n"
 "#! displayxtext=theta(deg)\n"
 "#! displayytext=M||H(mub)\n"
-"#! displaytitle= Polycrystal Calculation Results - dependence on polar angle theta\n"
+"#! displaytitle= Polycrystal Calculation Results - T=%g dependence on polar angle theta\n"
 "#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
-"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n");
+"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",T(1));
 }
 
 if(do_sipffile){
  jjjpar jjj(0,0,0,sipffilename,argc-9);jjj.save_sipf("./results/_");
- int nofcomponents=argc-9;
+ int nofcomponents=argc-(P+3);
  Vector Hxc(1,nofcomponents);Hxc=0;fprintf(stdout,"# exchange fields:");
  for(int j=1;j<=nofcomponents;++j){Hxc(j)=strtod (argv[j+2+P], NULL); 
  fprintf(stdout," %6.4g",Hxc(j));}fprintf(stdout,"\n");
- h=0;Vector m(1,3);
- jjj.Icalc_parameter_storage_init(Hxc,h,T);
+ h=0;Matrix m(1,3,1,Tsteps);
+ jjj.Icalc_parameter_storage_init(Hxc,h,T(1));
 if(poly==0){
  // loop different H 
  for(double az=0;az<2*PI-0.00001;az+=2*PI/nofsteps)
@@ -121,14 +129,14 @@ if(poly==0){
 
   jjj.mcalc(m,T,Hxc,h,jjj.Icalc_parstorage);
             //save physical properties of HT-point
-    fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
-           phi*180/PI,theta*180/PI,T,H,h(1),h(2),h(3),az*180/PI,Norm(m),m(1),m(2),m(3),m*h/Norm(h));  
+    for(int Ti=1;Ti<=1;++Ti)fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
+           phi*180/PI,theta*180/PI,T(Ti),H,h(1),h(2),h(3),az*180/PI,Norm(m.Column(Ti)),m(1,Ti),m(2,Ti),m(3,Ti),m.Column(Ti)*h/Norm(h));  
  }      
        } // poly==0
 else
  {// loop sphere
 
- int ct=0; double mpoly=0;
+ int ct=0; Vector mpoly(1,Tsteps);mpoly=0;
  for (double theta=dtheta;theta<PI;theta+=dtheta){ 
  double  dphi=dtheta*PI/4/sin(theta);
   for (double phi=0;phi<2*PI;phi+=dphi){
@@ -136,18 +144,19 @@ else
  h(2)=H*sin(theta)*sin(phi);
  h(3)=H*cos(theta);
  jjj.mcalc(m,T,Hxc,h,jjj.Icalc_parstorage);
-            //save physical properties of HT-point
+            //save physical properties of HT-point 1
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
-           phi*180/PI,theta*180/PI,T,H,h(1),h(2),h(3),theta*180/PI,Norm(m),m(1),m(2),m(3),m*h/Norm(h)); 
-  ++ct;mpoly+=m*h/Norm(h);
+           phi*180/PI,theta*180/PI,T(1),H,h(1),h(2),h(3),theta*180/PI,Norm(m.Column(1)),m(1,1),m(2,1),m(3,1),m.Column(1)*h/Norm(h)); 
+  ++ct;mpoly+=h*m/Norm(h);
 print_time_estimate_until_end(16/(ct*dtheta*dtheta)-1);
 
 
  }} 
- mpoly/=ct;
- fprintf(stdout,"#\n#1    2        3\n#T(K) H(Tesla) Mpolycrystal(muB) \n %6.3f %6.3f %6.3f \n",T,H,mpoly);
- fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T,H,mpoly);
-
+fprintf(stdout,"#\n#1    2        3\n#T(K) H(Tesla) Mpolycrystal(muB) \n");
+ mpoly/=ct;for(int Ti=1;Ti<=Tsteps;++Ti){
+  fprintf(stdout,"%6.3f %6.3f %6.3f \n",T(Ti),H,mpoly(Ti));
+ fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T(Ti),H,mpoly(Ti));
+                                        }
  }      // poly==0
 }else{  // !do sipf
 // as class par load  parameters from file
@@ -160,13 +169,13 @@ if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Car
  nofthreads = ini.nofthreads;
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
   Vector Imom(1,inputpars.cs.nofcomponents);
-  Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,3);h1ext=0; 
+  Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,HEXT_DIMENSION);h1ext=0; 
   // here save single ion property files to results
   inputpars.save_sipfs("./results/_");
   //determine saturation momentum (used for scaling the plots, generation of qvectors)
-  for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix
+  for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T(1)); // initialize eigenstate matrix
   for (im=1;im<=inputpars.cs.nofcomponents;++im){h1ext=0;h1=0;h1(im)=20*MU_B; //just put some high field
-                            (*inputpars.jjj[l]).Icalc(Imom,T,h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
+                            (*inputpars.jjj[l]).Icalc(Imom,T(1),h1,h1ext,z,u,(*inputpars.jjj[l]).Icalc_parstorage);
                             Imax(inputpars.cs.nofcomponents*(l-1)+im)=Imom(im);
                                               }
                                   }
@@ -188,48 +197,51 @@ if(poly==0){
   if(h(1)<-0.001){phi=atan(h(2)/h(1))+PI;}
   double theta=acos(h(3)/H);
    // set field        
-      physprop.T=T;
-      physprop.H=h;
+      physprop.T=T(1);
+      physprop.H(1)=h(1);
+      physprop.H(2)=h(2);
+      physprop.H(3)=h(3);
    print_time_estimate_until_end((2*PI-az)/(az+2*PI/nofsteps));//ratio = nofpointstodo / nofpointsdone
-
  //calculate physical properties at HT- point
-   s=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);
+   s=htcalc(physprop.H,T(1),ini,inputpars,testqs,testspins,physprop);
    if(s==1)break;
    //save physical properties of HT-point
    if(s==0)++ini.nofstapoints;
    if(s==2)++ini.noffailedpoints;
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
-           phi*180/PI,theta*180/PI,T,H,h(1),h(2),h(3),az*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
+           phi*180/PI,theta*180/PI,T(1),H,h(1),h(2),h(3),az*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
   } // H/T loop 
  }
 else
-{int ct=0; double mpoly=0;
+{int ct=0; Vector mpoly(1,Tsteps);mpoly=0;
  for (double theta=dtheta;theta<PI;theta+=dtheta){ 
  double  dphi=dtheta*PI/4/sin(theta);
   for (double phi=0;phi<2*PI;phi+=dphi){
  h(1)=H*sin(theta)*cos(phi);
  h(2)=H*sin(theta)*sin(phi);
  h(3)=H*cos(theta);
- // set field        
-      physprop.T=T;
-      physprop.H=h;
- //calculate physical properties at HT- point
-   s=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);
+for(int Ti=1;Ti<=Tsteps;++Ti){ // set field        
+      physprop.T=T(Ti);
+      physprop.H(1)=h(1);
+      physprop.H(2)=h(2);
+      physprop.H(3)=h(3);
+   //calculate physical properties at HT- point
+   s=htcalc(physprop.H,T(Ti),ini,inputpars,testqs,testspins,physprop);
    if(s==1)break;
    //save physical properties of HT-point
    if(s==0)++ini.nofstapoints;
    if(s==2)++ini.noffailedpoints;
-    fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
-           phi*180/PI,theta*180/PI,T,H,h(1),h(2),h(3),theta*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
-   ++ct;mpoly+=physprop.m*h/Norm(h);
+if(Ti==1)fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
+           phi*180/PI,theta*180/PI,T(Ti),H,h(1),h(2),h(3),theta*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
+   ++ct;mpoly(Ti)+=physprop.m*h/Norm(h);
 print_time_estimate_until_end(16/(ct*dtheta*dtheta)-1);
-
+}
  }} 
- mpoly/=ct;
-fprintf(stdout,"#\n#1      2            3 \n#T(K) H(Tesla) Mpolycrystal(muB) \n %6.3f %6.3f %6.3f \n",T,H,mpoly);
-fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T,H,mpoly);
-
-
+ mpoly/=ct;fprintf(stdout,"#\n#1      2            3 \n#T(K) H(Tesla) Mpolycrystal(muB) \n");
+for(int Ti=1;Ti<=Tsteps;++Ti){
+fprintf(stdout," %6.3f %6.3f %6.3f \n",T(Ti),H,mpoly(Ti));
+fprintf(fout,"# T= %6.3f  K Hexternal= %6.3f Tesla Mpolycrystal=%6.3f \n",T(Ti),H,mpoly(Ti));
+}
 }
 
    std::cout << "#\n#!nofHTpoints=" << ini.nofstapoints << "H-T points  successfully calculated" << std::endl;

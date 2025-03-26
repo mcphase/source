@@ -578,7 +578,7 @@ protected static void reload_data(int i){    try{
              int clxerr = colxerr[i];
              int clyerr = colyerr[i];
 
-             j=0;
+             j=0;int dxtf=0; int dytf=0;
              //Auslesen der Datei
             while (inStream.available() > 0&&j<maxnofpoints)
             {
@@ -595,18 +595,18 @@ protected static void reload_data(int i){    try{
         //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
         if(detxText==true){
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){
-              chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));
+              chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,clx));}
+               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,clx));}
                }
                                                    }
         if(detyText==true){
             if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
-              chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));
+              chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
                                                                              }
                else  // if no data has yet been read  -go through string and try to find automatically column headers
-               {if(j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,cly));}
+               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,cly));}
                }
                                                    }
         //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}

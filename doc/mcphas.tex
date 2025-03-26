@@ -16,7 +16,7 @@ a given temperature $T$ and magnetic field $\mbf H$ (vector)
 (and electric field and stress tensor) several possible magnetic structures are stabilised
 by a mean field algorithm and the free energy is 
 calculated. The initial values for this mean-field procedure are
-modified by a Monte Carlo process.
+modified randomly, the result of the mean field calculation can be used by a Monte Carlo process.
 
 
 The temperature and magnetic field (and electric field and stress) is varied during the calculation
@@ -146,7 +146,7 @@ points.
 \item [PARAMETERS FOR SUB FECALC SELFCONSISTENCY PROCESS:] the most important
 procedure in the module {\prg mcphas} is the sub {\prg fecalc}\index{fecalc}. In this part of the 
 program the self consistent calculation of the magnetic moment configuration
-is performed as shown schematically in fig.~\ref{fecalc}. 
+is performed as shown schematically in fig.~\ref{fecalc}, for the code see bin/src/mcphas\_fecalc.c. 
 In addition or alternatively a Monte Carlo calculation can be performed~\footnote{
 To trigger the Monte Carlo calculation set NOFMCSTEPS to a nonzero value. Then
 after MAXNOFMFLOOPS has been reached the program switches into Monte Carlo walk mode with randomly

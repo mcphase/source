@@ -40,7 +40,7 @@ sub usage() {
 
     usage: anisotropy -h
            anisotropy [options] T H xn yn zn nofsteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
-           anisotropy [options] T H -p nofthetasteps [-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
+           anisotropy [options] T H -p nofthetasteps [-Tsteps 10 27][-r sipffilename Hxc1 Hxc2 ... Hxcnofcomponents]
 
      -h           : this (help) message
       T           : temperature in Kelvin
@@ -48,9 +48,12 @@ sub usage() {
       xn,yn,zn    : direction normal to plane, in which the anisotropy
                     should be calculated ... e.g. if you want to
                     calculate the anisotropy in the xy plane, then
-                    enter xn yn zn = 0 0 1
+                    enter xn yn zn = 0 0 1, xn yn zn refer to euclidean coordinates
+                    defined with respect to the crystal axes a,b,c as:  y||b, z||(a x b) 
+                    and x normal to z and y
       nofsteps    : number of steps to be calculated 
      -p           : calculate numerical polycrystal average of the magnetic moment (is isotropic)
+                    and output to stdout
       nofthetasteps    : number of theta steps to be calculated for polycrystal average
 
     options:
@@ -58,6 +61,8 @@ sub usage() {
     -linepscf with -doeps use zero strain single ion Hamiltoanian for every mean field iteration
     -linepsjj with -doeps use zero strain two ion interaction Hamiltoanian for every mean field iteration
     -v             : verbose mode with more detailed output
+    -Tsteps      : in addition to initial temperature calculate 10 further temperatures
+                       until 27K has been reached
     -r sipffilename: filename of single ion parameter file
                       Hxc1,Hxc2,... are the exchange field components (meV)
                      (exchange field is kept constant, external magnetic

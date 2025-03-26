@@ -16,6 +16,7 @@
 %\usepackage{empheq}
 %\usepackage{bbm}
 %\usepackage{dsfont}
+\usepackage{hyperref} 
 \makeindex
 \newcommand\mybar[1][black]{\begingroup\color{#1}\kern1pt\rule[-\dp\strutbox]{1pt}{\baselineskip}\kern1pt\endgroup}
 \newcommand{\highlight}[1]{\colorbox{red!10}{$\displaystyle#1$}}
@@ -43,11 +44,21 @@
  \vspace{1cm} 
 {\bf   USERS MANUAL}\\
   \vspace{2cm} 
-\vspace{3cm}}
+ Checkout our workshops at the McPhase homepage  
+\href{https://mcphase.github.io/webpage/}{mcphase.github.io/webpage/} 
+ - we offer workshops with  few participants online or in
+ a relaxed atmosphere in Venice, Italy, a city without the stress of cars.
+\vspace{1cm}
+\includegraphics[bb=100 100 700 180,angle=0, width=0.9\textwidth]{figsrc/McPhaseVenice.jpg}
+\vspace{1cm}}
 
-\date {\vspace{2cm} \input{version.tex}
- \vspace{2cm}
- \\ \today}
+\date {
+\vspace{1cm} 
+       \input{version.tex}
+       \vspace{1cm}
+       \today}
+%\begin{center}
+%\end{center}
 
 \author{M. Rotter\thanks{Independent international Scientific Consultant, email: mcphase@icloud.com}, 
 \and Duc Manh Le \thanks{Dept. Physics and Astronomy, Seoul National University, Seoul 151-742, Korea}
@@ -79,6 +90,23 @@ Without the enthusiastic support of the neutron scattering
 community this program would not have come into existence. 
 
 \section*{What is New ?}
+
+\subsection*{ ... in version 6.0 ...}
+\begin{itemize}
+\item    External Stress / Pressure
+\item    Electric Field and orientational Polarisation
+\item    Monte Carlo Metropolis algorithm
+\item    {\prg McPhaseExplorer} Button for opening the Manual  
+\item    {\prg mcphas.ini}: flexible user defined output columns can be defined,
+          Magnetic and Electric Field can be input in euclidean coordinates or as components along crystal axis
+\item    {\prg cif2mcphas} atomic coordinates may contain references to previous atoms x y z, e.g. O1x
+\item    {\prg ic1ion} operators -  bug removed for imaginary Tkq (i.e. q<2) in expectation value calc in ic1ion 5.6 
+\item    {\prg reduce\_unitcell} extended: for negative coefficient (+--) the sipf files will be overwritten
+         with CHARGE replaced by distributed charge - useful for problems with electric polarisation calculations
+\item    {\prg mcdisp} output files:  qom dsigma disgma.tot file have different format now (number of columns increased by one)
+\item   {\prg singleion} options  introduced for dynamical static susceptibility and INS scattering function
+\item    {\prg mctest} - to test correct function of McPhase, cd  demo  and type {\prg mctest test*.bat }
+\end{itemize}
 
 \subsection*{ ... in version 5.6 ...}
 \begin{itemize}
@@ -143,27 +171,7 @@ u= umax * tanh (u/umax) ... this avoids uniform shifts of the crystal
 \item bug in {\prg makenn} options ignore\_neihgbours\_behind=1 and bvk found and removed
 \end{itemize}
 
-\subsection*{ \dots in version 5.3 \dots}
-\begin{itemize}
-\item  Ce3p.sipf database: formfactor for Ce3+ ion coefficients FF improved 
-\item {\prg singleion} extended to ouput optional M(Q)
-\item {\prg setup\_mcdiff\_in}  options were blocking negative x y, therefore modified code
-           thus it can accept negative x y in phasediagram
-\item {\prg mcdisp.jq } contains now hklblocknumber= lines 
- moreover mcdisp calculates scaled interation parameters to enable better fitting keeping TN constant
-if in mcdisp.par after the hkl of the first q vector a number is given, then
-scaled interaction parameters are computed such that their highest eigenvalue
-agrees with this number. Scaled parameters are saved in results/mcdisp\_scaled.j
-and here follow standard deviations computed with the scaled parameters
- sta\_scaled sta4\_scaled
-\item {\prg makenn} comments in output file removed to smooth iterative usage
-\item {\prg splitfile} option -c introduced to split at columns value changes
-\item {\prg  ic1ion bug for quasielastic beyond dipolar scattering fixed (spin exp value was not
-          subtracted from matrix elements)}
-\item {\prg rotateBLm} bug reading Blm with sign  fixed
-\item {\prg mcphas2jvx} bug for nonortho primitive lattices fixed
-\item {\prg getvalue} linux bug fixed
-\end{itemize}
+
 
 \newpage
 

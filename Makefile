@@ -27,7 +27,7 @@
 #                              latex2html -local_icons manual.tex  
 #                                         [maybe necessary to adapt manual.tex style, usepackage
 #                                          so that latex can run without problems on it]
-#					on MAC latex2html needs edit vi /opt/homebrew/Cellar/latex2html/2024/l2hconf.pm
+#					on MAC latex2html needs edit vi /opt/homebrew/Cellar/latex2html/2025/l2hconf.pm
 #                                               and insert 
 #$LATEX = '/Library/TeX/texbin/pdflatex';        # LaTeX $PDFLATEX = '/Library/TeX/texbin/pdflatex';     # pdfLaTeX
 #$LUALATEX = '/Library/TeX/texbin/luatex';       # LuaLaTeX $DVILUALATEX = '/Library/TeX/texbin/dviluatex'; # dviLuaLaTeX
@@ -189,7 +189,7 @@ cowanwin:
 mcphase: vector cfield 
 	cd bin/src && $(MAKE)
 
-mcphasewin: vectorwin cfieldwin phononwin 
+mcphasewin: vectorwin cfieldwin  
 	cd bin/src && $(MAKE) cross64=1
 
 examples  : vector 

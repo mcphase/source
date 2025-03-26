@@ -526,13 +526,13 @@ if (ini.displayall==1)  // if all should be displayed - write sps picture to fil
      strcpy(outfilename,"./results/.");strcpy(outfilename+11,ini.prefix);
      strcpy(outfilename+11+strlen(ini.prefix),"spins.eps");
      fout = fopen_errchk (outfilename, "w");
-     snprintf(text,MAXNOFCHARINLINE,"fecalc:%i spins, iteration %i sta=%g ini.maxstamf=%g spinchange=%g",sps.n(),r,sta,ini.maxstamf,spinchange);
+     snprintf(text,MAXNOFCHARINLINE,"fecalc:%i spins, MF iteration %i sta=%g ini.maxstamf=%g spinchange=%g",sps.n(),r,sta,ini.maxstamf,spinchange);
      sps.eps(fout,text);
      fclose (fout);
 
       fprintf(stdout,"%s\n",text);
       sps.print(stdout);
-   snprintf(text,MAXNOFCHARINLINE,"... as calculated from %i meanfields, iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
+   snprintf(text,MAXNOFCHARINLINE,"... as calculated from %i meanfields, MF iteration %i sta=%g spinchange=%g",sps.n(),r,sta,spinchange);
       fprintf(stdout,"%s\n",text);
       mf.print(stdout);
   
@@ -575,7 +575,7 @@ if (r>ini.maxnofmfloops){if(ini.nofMCsteps==0)
 // end mf loop for selfconsistency **********************************************************
 // end mf loop for selfconsistency **********************************************************
 // end mf loop for selfconsistency **********************************************************
-//printf ("hello end of selfconsistency loop after %i iterations\n",r);
+//printf ("hello end of selfconsistency loop after %i MF iterations\n",r);
 //for(int ec=1;ec<=6;++ec)printf("mf.eps(%i)=%g ",ec,mf.epsmf(ec));printf("\nsl=%i\n",sl);
 //myPrintMatrix(stdout,III);
 // myPrintVector(stdout,dn);
@@ -639,10 +639,13 @@ evalfe(E0,Eelastic,sps,mf,ini,inputpars, TT,lnzi,ui);
 
 // energy histogramm
 // number of points in histogram
-#define EHIST_NOFPOINTS 200
+#define EHIST_NOFPOINTS 400
 // width in energy 
-#define EHIST_WIDTH      0.02*KB*T
-#define TSTART   3000+T
+#define EHIST_WIDTH      0.1*KB*T
+// try to do initial half of the Monte Carlo Loop starting with high Tm and approaching T from above
+// #define TSTART   3000+T
+// .. no do it with the same T all the time:
+#define TSTART   T
 int hi[EHIST_NOFPOINTS];int iE;for(iE=0;iE<EHIST_NOFPOINTS;++iE)hi[iE]=0;
 
 // this is a ring storage for histogram: hi[0] stores number of runs for E0( initial
@@ -766,10 +769,10 @@ for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
          xi=rnd(1);if(xi>expEKT){keep=false;(*states[s][l])=savs;}
          }  
  
- if(r>nofMC/2){Tm=T;U=0;}
- else if(Tm>T){//Tm*=ff;
+ if(r>nofMC/2){Tm=T;}
+ else {U=0;if(Tm>T){//Tm*=ff;
                Tm-=2*(TSTART-T)/nofMC;
-              }
+              }}
 if(keep==true)
 {
 /*
@@ -824,7 +827,7 @@ while(iE>EHIST_NOFPOINTS-1)iE-=EHIST_NOFPOINTS;
 }
  // here make averages of observables
  // energy
- U+=E;//printf("%i %g %g %g\n",r,E,xi,En(1));
+ if(r>nofMC/2)U+=E;//printf("%i %g %g %g\n",r,E,xi,En(1));
 if(physprops!=NULL)if(r>nofMC/2){
  // <I>
                    (*physprops).totalJ+=totalJ;

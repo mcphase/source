@@ -46,6 +46,8 @@ EOF
  java displaymag 2 11 ./results/."$prefix"mcphas.fum 2 12 ./results/."$prefix"mcphas.fum 2 13 ./results/."$prefix"mcphas.fum  &
  magid=$!
 
+
+if [ X"$verbose" = X"1" ]; then
 cat << EOF > results/."$prefix"spins.eps
 0 0 0 0 0 0 0 0 0 0 0 0 0
 1 1 1 1 1 1 1 1 1 1 1 1 1
@@ -55,7 +57,6 @@ java PostscriptViewer results/."$prefix"spins.eps results/."$prefix"spins3dab.ep
  #displayspins  &
  spinid=$!
   
-if [ X"$verbose" = X"1" ]; then
 cat << EOF > results/."$prefix"fe_status.dat
 0 0 0 0 0 0 0 0 0 0 0 0 0
 1 1 1 1 1 1 1 1 1 1 1 1 1
@@ -78,15 +79,15 @@ fi
  sleep 1
  #kill all processes
  # killall gv gnuplot gnuplot_x11 displaymag displayspins inimenu java
- kill $javaid $magid $spinid
+ kill $javaid $magid
 if [ X"$verbose" = X"1" ]; then
- kill $status1id $status2id $status3id
-fi
- rm -f ./results/."$prefix"mcphas.fum
+ kill $status1id $status2id $status3id $spinid
  rm -f ./results/."$prefix"spins.eps
  rm -f ./results/."$prefix"spins3dab.eps
  rm -f ./results/."$prefix"spins3dac.eps
  rm -f ./results/."$prefix"spins3dbc.eps
+fi
+ rm -f ./results/."$prefix"mcphas.fum
  rm -f ./results/.mag.gnu
  rm -f ./results/."$prefix"fe_status.dat
  rm -f ./results/."$prefix"mcphas_mc.hst

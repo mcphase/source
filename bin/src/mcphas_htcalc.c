@@ -216,7 +216,7 @@ int htcalc_iteration(int j, double &femin, spincf &spsmin, Vector H, double T,in
              #endif 
 	    }	 
     if (tryrandom>0){nr=rndint(sps.n()*inputpars.cs.nofatoms);
-	             for (i=1;i<=nr;++i) //MonteCarlo randomize nr spins
+	             for (i=1;i<=nr;++i) // randomize nr spins
                       {rr=rndint(sps.n());
 		       ri=inputpars.cs.nofcomponents*arc4random_uniform(inputpars.cs.nofatoms);
 	               for(ii=1;ii<=inputpars.cs.nofcomponents;++ii)

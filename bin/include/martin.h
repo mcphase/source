@@ -95,6 +95,9 @@ extern  double rnd(float z);
 // return random integer from 1,2,...,i
 extern  int rndint(int i);
 
+#ifndef __linux_
+extern int arc4random_uniform(int i);
+#endif
 // return integer of floating number (like basic integer function)
 extern  float integer (float s);
 
