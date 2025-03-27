@@ -481,7 +481,7 @@ int inipar::load ()
 
        for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
-      if(0==extract(instr, somestring,colcod[usrdefcols[j]]))outcolset=true;
+      if(0==extract_with_prefix(instr,prefix, somestring,colcod[usrdefcols[j]]))outcolset=true;
      }
 
     }

@@ -81,7 +81,9 @@ such that energy of first hkl set corresponds to highest eigenvalue of ${\mathca
                   variables like {\prg hklline=}  with prefix, in our case {\prg 001}, i.e. {\prg 001hklline}: this will trigger
                   the program to read these variables only if started with the option {\prg -prefix 001}. Another process
                   maybe started with {\prg -prefix 002} and will read variables such as {\prg 002hklline} and ignore {\prg 001hklline}.
-                  Variables without prefixes will always be read and used.
+                  Variables without prefixes will always be read and used, in conflicting cases the last appearance in file
+                  mcdisp.par will be taken (i.e. 001kf=1 \dots kf=2 will set kf to 2, whereas kf=2 001kf=1 will set kf to 1 if mcdisp is
+                  started with prefix 001).
                   After finishing the different processes, the results of the calculations stored e.g. in {\prg 001mcdisp.qei} and
                   {\prg 002mcdisp.qei} may be merged by commands like {\prg appendfile mcdisp.qei 001mcdisp.qei 002mcdisp.qei}.
     \item [{\prg -ignore\_not\_posdef\_matrix\_error}] ignores error when energies get complex due to unphysical mf groundstate.
