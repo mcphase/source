@@ -1870,7 +1870,7 @@ for (i=1;i<=argc-1;++i){
    } // for i in args
   // as class load  parameters from file
   par inputpars("./mcphas.j",do_verbose);
-  ini.load("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc);
+  ini.load("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
 
 
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}

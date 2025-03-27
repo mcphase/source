@@ -132,43 +132,53 @@ const char * colhead []= {  "T [K]", //      0
                             "|E| [T]"   //    22
                                };
  bool inipar::defaultcolcode(int col,int colcode) // resets default columns if not set by user (outcolset==true)
-{                                             // returns true if reset has been successful
+{ bool ret=false;                                            // returns true if reset has been successful
  if(!outcolset)for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]==col)
- {colcod[i]=colcode;}
+ {colcod[i]=colcode;ret=true;}
+return ret;
 }
-// different output data for user defined columns ...
-double inipar::setcolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc)
+// calculate the value of different output data for user defined columns ...
+double inipar::calccolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc)
+{double xx=x,yy=y;
+ Vector Habc(1,3);Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3);v=Hext(1,3);
+          ijk2dadbdc(Habc,v,abcu);
+ Vector Eabc(1,3);v=Hext(4,6,-3);
+          ijk2dadbdc(Eabc,v,abcu);
+Vector Hijk(1,3);Hijk=Hext(1,3);double NormH=Norm(Hijk);
+Vector Eijk(1,3);Eijk=Hext(4,6,-3);double NormE=Norm(Eijk);
+double ret=(*colvaluepointer(i,xx,yy,T,Hext,Habc,Eabc,NormH,NormE));
+return ret;
+}
+
+double * inipar::colvaluepointer(int i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
+                 Vector & Eabc,double & NormH, double & NormE)
 {      switch (i) {
-case 0:  return T;break;
+case 0:  return &T;break;
 case 1:  
 case 2:  
-case 3:  {Vector Habc(1,3);Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3);v=Hext(1,3);
-          ijk2dadbdc(Habc,v,abcu);
-         return Habc(i);
-         }break;
-case 4:  return Hext(1);break;
-case 5:  return Hext(2);break;
-case 6:  return Hext(3);break;
+case 3:  return &Habc(i);
+         break;
+case 4:  return &Hext(1);break;
+case 5:  return &Hext(2);break;
+case 6:  return &Hext(3);break;
 case 7:  
 case 8:  
-case 9:{Vector Eabc(1,3);Vector abcu(1,6);abcu=abc;abcu(1)=1;abcu(2)=1;abcu(3)=1;Vector v(1,3);v=Hext(4,6,-3);
-          ijk2dadbdc(Eabc,v,abcu);
-         return Eabc(i-6);
-         }break;
-case 10:  return Hext(4);break;
-case 11:  return Hext(5);break;
-case 12:  return Hext(6);break;
-case 13:  return Hext(7);break;
-case 14:  return Hext(8);break;
-case 15:  return Hext(9);break;
-case 16:  return Hext(10);break;
-case 17:  return Hext(11);break;
-case 18:  return Hext(12);break;
-case 19:  return x;break;
-case 20:  return y;break;
-case 21:  {Vector Hijk(1,3);Hijk=Hext(1,3);return Norm(Hijk);}break;
-case 22:  {Vector Eijk(1,3);Eijk=Hext(4,6);return Norm(Eijk);}break;
-default: fprintf(stderr,"Error mcphas: unknown column code\n");exit(EXIT_FAILURE);
+case 9:  return &Eabc(i-6);
+         break;
+case 10:  return &Hext(4);break;
+case 11:  return &Hext(5);break;
+case 12:  return &Hext(6);break;
+case 13:  return &Hext(7);break;
+case 14:  return &Hext(8);break;
+case 15:  return &Hext(9);break;
+case 16:  return &Hext(10);break;
+case 17:  return &Hext(11);break;
+case 18:  return &Hext(12);break;
+case 19:  return &x;break;
+case 20:  return &y;break;
+case 21:  return &NormH ;break;
+case 22:  return &NormE;break;
+default: fprintf(stderr,"Error mcphas: unknown column code %i\n",i);exit(EXIT_FAILURE);
                     }
 
 return 0;
@@ -192,7 +202,7 @@ void inipar::print_usrdefcolhead(FILE *fout,char * str)
 
 
 // set external field and Temperature
-void inipar::getTH(double & T,Vector & h,double x, double y,cryststruct & cs)
+void inipar::calcTHfromxy(double & T,Vector & h,double x, double y,cryststruct & cs)
 {    T=zero(0)+x*xv(0)+y*yv(0);
     // this means from input we take the vector xHa xHb xHc, interpret it as fractional 
 // coordinates in terms of unit !! vectors along the Bravais lattice vectors
@@ -261,6 +271,30 @@ void inipar::getTH(double & T,Vector & h,double x, double y,cryststruct & cs)
 
 }
 
+// set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
+ // returns true if successful (NormH NormE x y are not used)
+bool inipar::calcTHfromnn(double & T,Vector & Hext,float * nn,cryststruct &cs)
+{int maxcol=0;for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]>maxcol)maxcol=usrdefcols[i];
+ if(nn[0]<maxcol)return false; // array too small, not enough parameters in line
+ double xx=0,yy=0,NormH,NormE;T=0;Hext=0;
+ Vector Habc(1,3),Eabc(1,3);
+for(int i=1;i<=usrdefcols[0];++i)
+{ (*colvaluepointer(colcod[usrdefcols[i]],xx,yy,T,Hext,Habc,Eabc,NormH,NormE))=nn[usrdefcols[i]];
+}
+// if Habc or Eabc are given - add these to Hext
+Vector abc(1,6),v(1,3); abc(1)=1; abc(2)=1; abc(3)=1; 
+                  abc(4)=cs.alpha(); abc(5)=cs.beta(); abc(6)=cs.gamma();
+dadbdc2ijk(v,Habc,abc); 
+Hext(1)+=v(1);
+Hext(2)+=v(2);
+Hext(3)+=v(3);
+dadbdc2ijk(v,Eabc,abc); 
+Hext(4)+=v(1);
+Hext(5)+=v(2);
+Hext(6)+=v(3);
+
+ return true;
+}
 
  // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
  // if yes, returns true ... 
@@ -272,7 +306,7 @@ bool inipar::checkTH(float * nn,double & T,Vector & Hext,Vector & abc)
  { // different output data for user defined columns ...
   switch(colcod[i])
   {case 19: case 20:  d=0; break; // do not use x,y
-   default: d=setcolvalue(colcod[i],x,y, T,Hext, abc)-nn[i];
+   default: d=calccolvalue(colcod[i],x,y, T,Hext, abc)-nn[i];
   }
 //  printf("d=%g i=%i nn=%g |",d,i,nn[i]);
   if(fabs(d)>SMALL_FIELD)return false;
@@ -290,7 +324,7 @@ void inipar::print_usrdefcolcodes(FILE *fout)
 void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext)
 {bool c[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i)c[i]=false;
  for(int i=1;i<=usrdefcols[0];++i)
- { double val=setcolvalue(colcod[i],x,y,T,Hext,abc);
+ { double val=calccolvalue(colcod[i],x,y,T,Hext,abc);
    if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[i]],myround(val));
    else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[colcod[i]])-8 < 0 ? :0),"",myround(val));
    c[colcod[i]]=true;

@@ -359,8 +359,8 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
 
 
 // *************************************************************************
-void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile,Vector & abc)
-{ errno=1;do_jqf=do_jqfile;
+void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat)
+{ errno=1;do_jqf=do_jqfile;nofthreads=0;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
   int nofhkllists=1;Hext=Vector(1,HEXT_DIMENSION);Hext=0; Habc=Vector(1,3);Eabc=Vector(1,3);
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
@@ -369,9 +369,12 @@ void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile
   fin=fopen(spinfile,"rb");
    if (fin==NULL) {fprintf(stderr,"#Warning - file %s not found - trying to read mcdisp.mf\n",spinfile);
    snprintf(spinfile,MAXNOFCHARINLINE,"mcdisp.mf");fin=fopen(spinfile,"rb");
-    if (fin==NULL) {fprintf(stderr,"ERROR - file %s not found \n",spinfile);exit(EXIT_FAILURE);}
+    if (fin==NULL) {fprintf(stderr,"Warning - file %s not found - doing calculation at T=300K assuming zero mean and external fields / stress\n",spinfile);
+    }
    }
-  instr[0]='#';  
+ if(fin==NULL){snprintf(instr,sizeof(instr),"#!T=300 Ha=0 Hb=0 Hc=0 n=1 spins nofatoms=1 in primitive basis nofcomponents=%i - configuration",nofcomponents);
+ T=300; Hext=0;nofatoms=nofat;nofcomponents=nofcomp;
+}else {instr[0]='#';  
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
   extract(instr,"T",T); 
   extract(instr,"Ha",Habc[1]); 
@@ -395,17 +398,20 @@ void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile
   
   crosscheck_H_E(Hext,Habc,Eabc,abc); 
 
-
-  info= new char [strlen(instr)+1];strcpy(info,instr);
   printf("#%s \n# reading mean field configuration mf=gj muB heff [meV]\n",instr);
-  nofatoms=1;nofcomponents=3;nofthreads=0;
+  
+  
+  
   extract(instr,"nofatoms",nofatoms); 
   extract(instr,"nofcomponents",nofcomponents); 
+  if(nofcomponents!=nofcomp){fprintf(stderr,"ERROR loading mean field configuration nofcomponents from mcphas.j (%i) different from file %s (%i)\n",nofcomp,spinfile,nofcomponents);exit(EXIT_FAILURE);}
+  if(nofatoms!=nofat){fprintf(stderr,"ERROR loading mean field configuration nofatoms from mcphas.j (%i) different from file %s (%i)\n",nofat,spinfile,nofatoms);exit(EXIT_FAILURE);}
   mf=mfcf(1,1,1,nofatoms,nofcomponents); 
   if(mf.load(fin)==0)
    {fprintf(stderr,"ERROR loading mean field configuration\n");exit(EXIT_FAILURE);}
   fclose(fin);
-
+ }
+ info= new char [strlen(instr)+1];strcpy(info,instr);
 
  //********************************  
   savfilename= new char [strlen(file)+strlen(prefix)+11];
@@ -690,8 +696,13 @@ nofhkls=0;save(file);
        // now read also the hkls in mcdisp.par
       ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
       fin = fopen(file, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
-  save();
-      if(nofhkls==0){fprintf(stderr,"ERROR mcdisp: no hkl's found in mcdisp.par - please edit and insert\n");exit(EXIT_FAILURE);}      
+      if(nofhkls==0){fprintf(stderr,"Warning mcdisp: no hkl's found in mcdisp.par - please edit and insert- doing now  a calculation only for Q=(100)\n");
+                nofhkls=1;hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                                     hkls[nofhkls][0]=3;
+                                     hkls[nofhkls][1]=1;
+                                     hkls[nofhkls][2]=0;
+                                     hkls[nofhkls][3]=0;}      
+      save();
 }
 
 

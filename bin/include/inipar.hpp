@@ -90,25 +90,53 @@ class inipar
   int maxnofhkls;
   // maximum q[1/A] for hkl's
   double maxQ;
+
+// ***************** intelligent functions **********************
  // set external field and Temperature given x and y
- void getTH(double & T,Vector & Hext,double x, double y,cryststruct & cs);
+ void calcTHfromxy(double & T,Vector & Hext,double x, double y,cryststruct & cs);
+
+// calculate the value of different output data for user defined column with colcod i...
+ double   calccolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc);
+
+// return pointer to value of user defined column with colcod i
+double * colvaluepointer(int i,double & x, double & y,double& T,Vector & Hext,Vector & Habc,
+                 Vector & Eabc,double & NormH, double & NormE);
+
+ // set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
+ // returns true if successful  (NormH NormE x y are not used)
+bool calcTHfromnn(double & T,Vector & Hext,float * nn,cryststruct &cs);
+
  // given T and Hext check if in array nn[0-7] the values are in accordance with T and Hext
  // if yes, returns true ... 
 bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc);
+
   // printout initial parameters to file   
    void print();
    void print (const char * file);
+
+// estimeate time until finishing of mcphas
    void time_estimate_until_end(double x, double y);
- double   setcolvalue(int i,float & x, float & y,double& T,Vector & Hext,Vector & abc);
+
+
+// output the values into columns with external parameters to file fout
  void print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector & Hext,Vector & abc,bool withtext);
+
+// print user defined column codes variables out1 -- out7 to fout
  void print_usrdefcolcodes(FILE *fout);
+
+// print column headers for columns with external parameters
  void print_usrdefcolhead(FILE *fout,char * str);
+
  // exit with error message
    void errexit();
+
   //load parameters from file
    int load();
+
   inipar (const char * file,char * prefix); //constructor
+
   inipar (const inipar & p);//kopier-konstruktor
+
  ~inipar ();//destruktor
 };
 

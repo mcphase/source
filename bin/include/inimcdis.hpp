@@ -49,7 +49,7 @@ class inimcdis
   double ki;
   double kf; // constant ki/kf
   mfcf mf;
-  void load (const char * file,char * spinfile, char * prefix,int do_jqfile, Vector & abc); //constructor
+  void load (const char * file,char * spinfile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat); //constructor
    void save(); // save parameters to results/_mcdisp.par results/_mcdisp.mf
    void save(const char * filename); // save parameters to file filename
    void print_usrdefcolhead(FILE *fout);

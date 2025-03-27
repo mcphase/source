@@ -25,8 +25,8 @@ int main (int argc, char **argv)
   FILE * fin=NULL; 
   char outfilename[MAXNOFCHARINLINE];
   int im,j,l,doeps=0,linepscf=0,linepsjj=0;
-  int options=1; // this integer indicates how many command strings belong to 
-                 //options (=1+number of option-strings)
+  int options=0; // this integer indicates how many command strings belong to 
+                 //options 
   float x,y,dumm;
   double z,u;
   double T;
@@ -47,7 +47,7 @@ fprintf(stderr,"****************************************************************
 // check command line
 int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
               char readprefix [MAXNOFCHARINLINE];readprefix[0]='\0';
-  for (im=0;im<=argc-1;++im)
+  for (im=1;im<argc;++im)  // im=0  argv[0] is command "mcphasit"
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
@@ -233,17 +233,21 @@ for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
    if (ini.ymin>ini.ymax){dumm=ini.ymin;ini.ymin=ini.ymax;ini.ymax=dumm;}
    
    if(argc>options+1)  //should T-H values be read from file ?
-   {while (feof(fin)==0&&0==inputline(fin,nn)){;}  // if yes -> input them
+   {while (feof(fin)==0&&(0==inputline(fin,nn)||ini.calcTHfromnn(T,h,nn,inputpars.cs)==false)){;}  // if yes -> input them
     if (feof(fin)!=0) goto endproper;
-    x=nn[1];y=nn[2];T=nn[3];h=0;h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
+    //x=nn[1];y=nn[2];T=nn[3];h=0;h(1)=nn[5];h(2)=nn[6];h(3)=nn[7];
     // column 5 6 7 are the direction of h given by its components in i j k coordinates
+    // --> replaced  above by      -------------^
+   // ini.calcTHfromnn(T,h,nn,inputpars.cs): set external field and Temperature given nn as input from file with meaning defined by out1-7 in mcphas.ini
+   // returns true if successful  (NormH NormE x y are not used)
+
    }
    else
    {
    //if parameters outside specified region then put them into it ...
     if (x<ini.xmin) x=ini.xmin;
     if (y<ini.ymin) y=ini.ymin;    
-    ini.getTH(T,h,x,y,inputpars.cs);
+    ini.calcTHfromxy(T,h,x,y,inputpars.cs);
   } 
           
       physprop.x=x;physprop.y=y;

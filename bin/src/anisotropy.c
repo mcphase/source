@@ -51,6 +51,7 @@ for (int im=1;im<argc;++im)
   if(argc<4+options){fprintf(stderr,"ERROR anisotropy: too few parameters\n");exit(EXIT_FAILURE);}
   Tstart=strtod (argv[1+options], NULL); 
   H=strtod (argv[2+options], NULL); 
+//printf("#Tstart=%g H=%g\n",Tstart,H);
 Vector direction(1,3);
 if (strcmp(argv[3+options],"-p")==0){P=4+options;poly=1;//polycrystal
                     
@@ -72,7 +73,7 @@ if(poly==0){Tsteps=0;}
 if(!Tsteps){Tend=Tstart;} 
 ++Tsteps;Vector T(1,Tsteps); // Tsteps= number of temperatures to calculate
 T(1)=Tstart;for(int Ti=1;Ti<Tsteps;++Ti){T(Ti+1)=T(Ti)+(Tend-Tstart)/(Tsteps-1);} //set T's
-
+//printf("T(1)=%g\n",T(1));
 if (argc>P+1){if (strcmp(argv[P+1],"-r")==0)
                  {do_sipffile=1;strcpy(sipffilename,argv[P+2]);
                  }
@@ -96,7 +97,7 @@ fprintf(fout,
 "#! displayytext=M||H(mub)\n"
 "#! displaytitle= Anisotropy plot T=%g az=0 corresponds to [%g %g %g]\n"
 "#1         2          3    4      5     6     7      8           9	   10      11      12      13\n"
-"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",T(1),direction(1),direction(2),direction(3),r1(1),r1(2),r1(3));
+"#phi(deg) theta(deg) T[K] |H|[T] Hx[T] Hy[T] Hz[T] azimuth(deg) |M|[muB] Mx[muB] My[muB] Mz[muB] MparallelH[muB]\n",direction(1),direction(2),direction(3),T(1),r1(1),r1(2),r1(3));
 }else{
 
 fprintf(fout,

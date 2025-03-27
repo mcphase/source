@@ -12,7 +12,7 @@ however less graphic tools.
 
 Preriquisites:
 - for  running McPhase, McDisp
-    Windows 2000, XP, VISTA, 7
+    Windows 2000, XP, VISTA, 7, or newer
 -----------------------------------------------------------------------
 Installation Procedure:
 
@@ -38,17 +38,26 @@ Installation Procedure:
 
 -> the program should start running
 
+ To test the correct function of different programs use the test
+ utility mctest. type:
+  
+   cd demo
+   mctest test*.bat
 
-[ for compiling the sources:
+  ... if an Error appears, kindly give feedback. IF not, the installation
+  is correct.
+
+
+[ Instructions for compiling the sources:
   (necessary if mcphas does not run on your system after installation
-    * gcc for windows (e.g. MinGW-4.3.5.exe (or newer) and MSYS-1.0.10.exe
+    * gcc for windows (e.g. MinGW-14.2.0.exe (or newer) and MSYS-1.0.10.exe
     available at http://www.mingw.org)
-    * java (> 1.6.0)  available at java.sun.com,
+    * java (> 17.0)  available at java.sun.com,
      if you do not know wether java (and which version) is installed
      on your computer, open a dos shell and type:
      java -version
 
-    install compiler MinGW-4.3.5.exe (or later) and MSYS-1.0.10.exe
+    install compiler MinGW--14.2.0.exe (or later) and MSYS-1.0.10.exe
     install MSYS
 
     cd  mcphas\
@@ -97,8 +106,8 @@ Prerequisits:
     PDL 2.0      PerlDL
             http://pdl.perl.org
     
-- option (needed only for some old plotting programs):
-    flex
+- option (needed only for some old plotting programs, which are not maintained any more):
+   [ flex
     yacc
     PGPLOT 5.2.0 graphics library
             http://www.astro.caltech.edu/~tjp/pgplot/
@@ -110,7 +119,8 @@ Prerequisits:
             Makefile.PL'
 	    you have to manually edit 'Makefile' and substitute 'f2c' with 'g2c' 
             before
-	    continuing with 'make' and 'make test' ...   
+	    continuing with 'make' and 'make test' ...  
+     ] 
 -----------------------------------------------------------------------
 Installation Procedure:
 
@@ -146,8 +156,11 @@ c) Now the installation should be complete. To test the Program:
    . ./lin.bat
    
    
-   goto directory ./demo
-   and run the demos to test many of the programs of the package
+   goto directory by: cd  ./demo
+   and run the tests by:  mctest test*.bat
+   
+   kindly report errors, which come up. If not errors come up,
+   claculations on your system reproduce standard results.
 
 [e) if it is necessary to recompile the sources -
 

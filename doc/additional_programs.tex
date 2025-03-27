@@ -1161,6 +1161,12 @@ $\theta$ is the rotation angle in degree.
 \item [\prg lorentz\index{lorentz} fwhm stp min max:]\addcontentsline{toc}{subsubsection}{\prg lorentz} calculate a lorentzian, output goes to %%@
 console (stdout)the formula for a Lorentz curve is: 
 ${\rm lorentz}(x)=\frac{1.0}{\pi{\rm fwhm}(1.0+x^2/fwhm^2)}$
+\item [\prg mctest\index{mctest} batchfile:]\addcontentsline{toc}{subsubsection}{\prg mctest} is a program to test a script. It
+ will execute the script test.bat line by line and stop with an error message
+if an error occurs. For testing  goto directory demo and look out for testing batch files
+named test*.bat, use such a file to test mcphase, e.g.:
+{\prg mctest test\_ndcu2\_mcphasit.bat}. The batch may contain linux and windows-shell specific
+commands (e.g. copy or cp) and accepts both. 
 \item [\prg plotbook *.ps:]\addcontentsline{toc}{subsubsection}{\prg plotbook} program plotbook to arrange many (single side) ps-images to one %%@
 booklet (needs: latex, pstops,ghostscript, perl)
 \item [\prg script2html\index{script2html} calc1.bat calc2.bat ...]\addcontentsline{toc}{subsubsection}{\prg script2html} This program creates a html file from scripts containing just the text
