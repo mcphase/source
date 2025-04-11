@@ -361,7 +361,71 @@ void inipar::time_estimate_until_end(double x, double y)
 
 //load parameters from file
 int inipar::load ()
+{int n=-1;char ** lp; lp=NULL;
+return load(n,lp);
+}
+
+// findnewmatch = true: check if new match (which is not listed in the n prefixes of lofpref) can be found in instr using
+//                      char prefix (which may contain a wildcard '*'), if it can be found increase n
+//                      and put new match prefix in lofpref and put findnewmatch to false and return
+//                      extract_with_prefix for the new match
+// findnewmatch = false: return extract_with_prefix for the prefix=lofpref[n]
+int inipar::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var)
+{int ret; double val;
+ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val);
+if(ret==0)var=(int)val;
+return ret;
+}
+int inipar::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,float & var)
+{int ret; double val;
+ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val);
+if(ret==0)var=(float)val;
+return ret;
+}
+
+int inipar::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,double & var)
+{
+ if(findnewmatch==true)
+ {if(pref[0]!='\0')
+  {char prefvar[MAXNOFCHARINLINE];char * s,*p;
+  snprintf(prefvar,sizeof(prefvar),"%s%s",pref,parameter);
+  s=wstrstr(instr,prefvar);
+  if(s!=NULL)
+  { // ok there seems to be a new match - see if it is already in the list
+   snprintf(prefvar,sizeof(prefvar),"%s",parameter);
+   p=wstrstr(instr,prefvar);
+   int i=0;for(char * t=s;t<p;++t){prefvar[i]=*t;++i;}prefvar[i]='\0'; // put the prefix to prefvar
+    i=0;bool mm=false;while(i<n&&mm==false){mm=match(prefvar,lofpref[i]);
+    ++i;}
+    if(i==n&&mm==false){lofpref[i]=new char [strlen(prefvar)+2];snprintf(lofpref[i],strlen(prefvar)+1,"%s",prefvar);
+                          snprintf(prefix,sizeof(prefix),"%s",prefvar);
+                     ++n; findnewmatch=false;printf("increase lofpref %s\n",lofpref[i]);
+            }
+   }// no new match -> extract without prefix
+   else
+   {
+    return extract(instr,parameter,var);
+   }
+  }
+ else
+ {if(n==0){int i=0;lofpref[i]=new char [1];lofpref[i][0]='\0';
+                          prefix[0]='\0';
+                     ++n; findnewmatch=false;}
+ }
+ }
+ if(n>0)
+ {return extract_with_prefix(instr,lofpref[n-1],parameter,var);
+ }
+ else
+ {return extract_with_prefix(instr,pref,parameter,var);
+ }
+}
+
+//load parameters from file
+int inipar::load (int & nofinis,char**lofpref)
 { FILE *fin;outcolset=false;
+  bool findnewmatch=true;if(nofinis==-1){findnewmatch=false;}
+
   char instr[MAXNOFCHARINLINE];
   char somestring[MAXNOFCHARINLINE];
   errno = 0;startcputime= std::clock();
@@ -376,112 +440,112 @@ int inipar::load ()
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
-  {if(instr[strspn(instr," \t")]!='#'&&instr[strspn(instr," \t")]!='[') // comment lines headed by # or [ are ignored in mcphas.ini
-   {extract_with_prefix(instr,prefix,"exit",exit_mcphas);
-    extract_with_prefix(instr,prefix,"pause",pause_mcphas);
-    extract_with_prefix(instr,prefix,"displayall",displayall);
-    extract_with_prefix(instr,prefix,"logfevsQ",logfevsQ); 
+  {if(!(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!')&&instr[strspn(instr," \t")]!='[') // comment lines headed by # or [ are ignored in mcphas.ini
+   {extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"exit",exit_mcphas);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"pause",pause_mcphas);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"displayall",displayall);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"logfevsQ",logfevsQ); 
      
-    extract_with_prefix(instr,prefix,"xT",xv[0]);      
-    extract_with_prefix(instr,prefix,"xHa",xv[1]);
-    extract_with_prefix(instr,prefix,"xHb",xv[2]);    
-    extract_with_prefix(instr,prefix,"xHc",xv[3]);
-    extract_with_prefix(instr,prefix,"xHi",xv[4]);
-    extract_with_prefix(instr,prefix,"xHj",xv[5]);    
-    extract_with_prefix(instr,prefix,"xHk",xv[6]);
-    extract_with_prefix(instr,prefix,"xEa",xv[7]);
-    extract_with_prefix(instr,prefix,"xEb",xv[8]);    
-    extract_with_prefix(instr,prefix,"xEc",xv[9]);
-    extract_with_prefix(instr,prefix,"xEi",xv[10]);
-    extract_with_prefix(instr,prefix,"xEj",xv[11]);    
-    extract_with_prefix(instr,prefix,"xEk",xv[12]);
-    extract_with_prefix(instr,prefix,"xs1",xv[13]);
-    extract_with_prefix(instr,prefix,"xs2",xv[14]);    
-    extract_with_prefix(instr,prefix,"xs3",xv[15]);
-    extract_with_prefix(instr,prefix,"xs4",xv[16]);
-    extract_with_prefix(instr,prefix,"xs5",xv[17]);    
-    extract_with_prefix(instr,prefix,"xs6",xv[18]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xT",xv[0]);      
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xHa",xv[1]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xHb",xv[2]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xHc",xv[3]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xHi",xv[4]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xHj",xv[5]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xHk",xv[6]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xEa",xv[7]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xEb",xv[8]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xEc",xv[9]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xEi",xv[10]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xEj",xv[11]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xEk",xv[12]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xs1",xv[13]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xs2",xv[14]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xs3",xv[15]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xs4",xv[16]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xs5",xv[17]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xs6",xv[18]);
 
-    extract_with_prefix(instr,prefix,"xmin",xmin);  
-    extract_with_prefix(instr,prefix,"xmax",xmax);
-    extract_with_prefix(instr,prefix,"xstep",xstep);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xmin",xmin);  
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xmax",xmax);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"xstep",xstep);
    
-    extract_with_prefix(instr,prefix,"yT",yv[0]);      
-    extract_with_prefix(instr,prefix,"yHa",yv[1]);
-    extract_with_prefix(instr,prefix,"yHb",yv[2]);    
-    extract_with_prefix(instr,prefix,"yHc",yv[3]);
-    extract_with_prefix(instr,prefix,"yHi",yv[4]);
-    extract_with_prefix(instr,prefix,"yHj",yv[5]);    
-    extract_with_prefix(instr,prefix,"yHk",yv[6]);
-    extract_with_prefix(instr,prefix,"yEa",yv[7]);
-    extract_with_prefix(instr,prefix,"yEb",yv[8]);    
-    extract_with_prefix(instr,prefix,"yEc",yv[9]);
-    extract_with_prefix(instr,prefix,"yEi",yv[10]);
-    extract_with_prefix(instr,prefix,"yEj",yv[11]);    
-    extract_with_prefix(instr,prefix,"yEk",yv[12]);
-    extract_with_prefix(instr,prefix,"ys1",yv[13]);
-    extract_with_prefix(instr,prefix,"ys2",yv[14]);    
-    extract_with_prefix(instr,prefix,"ys3",yv[15]);
-    extract_with_prefix(instr,prefix,"ys4",yv[16]);
-    extract_with_prefix(instr,prefix,"ys5",yv[17]);    
-    extract_with_prefix(instr,prefix,"ys6",yv[18]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yT",yv[0]);      
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yHa",yv[1]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yHb",yv[2]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yHc",yv[3]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yHi",yv[4]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yHj",yv[5]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yHk",yv[6]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yEa",yv[7]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yEb",yv[8]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yEc",yv[9]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yEi",yv[10]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yEj",yv[11]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"yEk",yv[12]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ys1",yv[13]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ys2",yv[14]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ys3",yv[15]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ys4",yv[16]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ys5",yv[17]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ys6",yv[18]);
     
-    extract_with_prefix(instr,prefix,"ymin",ymin); 
-    extract_with_prefix(instr,prefix,"ymax",ymax);
-    extract_with_prefix(instr,prefix,"ystep",ystep);   
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ymin",ymin); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ymax",ymax);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ystep",ystep);   
  
-    extract_with_prefix(instr,prefix,"T0",zero[0]);      
-    extract_with_prefix(instr,prefix,"Ha0",zero[1]);
-    extract_with_prefix(instr,prefix,"Hb0",zero[2]);    
-    extract_with_prefix(instr,prefix,"Hc0",zero[3]);
-    extract_with_prefix(instr,prefix,"Hi0",zero[4]);
-    extract_with_prefix(instr,prefix,"Hj0",zero[5]);    
-    extract_with_prefix(instr,prefix,"Hk0",zero[6]);
-    extract_with_prefix(instr,prefix,"Ea0",zero[7]);
-    extract_with_prefix(instr,prefix,"Eb0",zero[8]);    
-    extract_with_prefix(instr,prefix,"Ec0",zero[9]);
-    extract_with_prefix(instr,prefix,"Ei0",zero[10]);
-    extract_with_prefix(instr,prefix,"Ej0",zero[11]);    
-    extract_with_prefix(instr,prefix,"Ek0",zero[12]);
-    extract_with_prefix(instr,prefix,"s10",zero[13]);
-    extract_with_prefix(instr,prefix,"s20",zero[14]);    
-    extract_with_prefix(instr,prefix,"s30",zero[15]);
-    extract_with_prefix(instr,prefix,"s40",zero[16]);
-    extract_with_prefix(instr,prefix,"s50",zero[17]);    
-    extract_with_prefix(instr,prefix,"s60",zero[18]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"T0",zero[0]);      
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Ha0",zero[1]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Hb0",zero[2]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Hc0",zero[3]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Hi0",zero[4]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Hj0",zero[5]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Hk0",zero[6]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Ea0",zero[7]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Eb0",zero[8]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Ec0",zero[9]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Ei0",zero[10]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Ej0",zero[11]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Ek0",zero[12]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s10",zero[13]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s20",zero[14]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s30",zero[15]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s40",zero[16]);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s50",zero[17]);    
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"s60",zero[18]);
 
-    extract_with_prefix(instr,prefix,"hmin",qmin[1]); 
-    extract_with_prefix(instr,prefix,"kmin",qmin[2]); 
-    extract_with_prefix(instr,prefix,"lmin",qmin[3]); 
-    extract_with_prefix(instr,prefix,"hmax",qmax[1]); 
-    extract_with_prefix(instr,prefix,"kmax",qmax[2]); 
-    extract_with_prefix(instr,prefix,"lmax",qmax[3]); 
-    extract_with_prefix(instr,prefix,"deltah",deltaq[1]); 
-    extract_with_prefix(instr,prefix,"deltak",deltaq[2]); 
-    extract_with_prefix(instr,prefix,"deltal",deltaq[3]); 
-    extract_with_prefix(instr,prefix,"maxqperiod",maxqperiod);
-    extract_with_prefix(instr,prefix,"minnr1",minnr1);
-    extract_with_prefix(instr,prefix,"minnr2",minnr2);
-    extract_with_prefix(instr,prefix,"minnr3",minnr3);
-    extract_with_prefix(instr,prefix,"maxnofspins",maxnofspins);
-    extract_with_prefix(instr,prefix,"nofrndtries",nofrndtries);
-    extract_with_prefix(instr,prefix,"nofMCsteps",nofMCsteps);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmax",qmax[1]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmax",qmax[2]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmax",qmax[3]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltah",deltaq[1]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltak",deltaq[2]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltal",deltaq[3]); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxqperiod",maxqperiod);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"minnr1",minnr1);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"minnr2",minnr2);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"minnr3",minnr3);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnofspins",maxnofspins);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofrndtries",nofrndtries);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofMCsteps",nofMCsteps);
     
-    extract_with_prefix(instr,prefix,"maxnofmfloops",maxnofmfloops);
-    extract_with_prefix(instr,prefix,"maxstamf",maxstamf); 
-    extract_with_prefix(instr,prefix,"bigstep",bigstep); 
-    extract_with_prefix(instr,prefix,"maxspinchange",maxspinchange); 
-    extract_with_prefix(instr,prefix,"maxnoftestspincf",maxnoftestspincf);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnofmfloops",maxnofmfloops);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxstamf",maxstamf); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"bigstep",bigstep); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxspinchange",maxspinchange); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnoftestspincf",maxnoftestspincf);
 
-    extract_with_prefix(instr,prefix,"nofthreads",nofthreads);
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofthreads",nofthreads);
 
-    extract_with_prefix(instr,prefix,"nofspincorrs",nofspincorrs); 
-    extract_with_prefix(instr,prefix,"maxnofhkls",maxnofhkls); 
-    extract_with_prefix(instr,prefix,"maxQ",maxQ); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofspincorrs",nofspincorrs); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnofhkls",maxnofhkls); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxQ",maxQ); 
 
        for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
-      if(0==extract_with_prefix(instr,prefix, somestring,colcod[usrdefcols[j]]))outcolset=true;
+      if(0==extract_match( findnewmatch,nofinis,lofpref,instr,prefix, somestring,colcod[usrdefcols[j]]))outcolset=true;
      }
 
     }
@@ -537,7 +601,128 @@ void inipar::print (const char * filename)
 {
  FILE * fout;
 // we should print to a file all used configurations
- fout = fopen_errchk (filename,"w");
+  fout = fopen_errchk (filename,"w");
+  print(fout);
+  fclose(fout);
+}
+
+bool inipar::checkpr(FILE* fout,const  char * var,int val,int masterval)
+{
+if(masterval!=val){fprintf(fout,"%s%s=%i\n",prefix,var,val);return true;}
+else {return false;}
+}
+bool inipar::checkpr(FILE* fout, const char * var,double val,double masterval)
+{
+if(masterval!=val){fprintf(fout,"%s%s=%g\n",prefix,var,val);return true;}
+else {return false;}
+}
+
+
+// prints parameters including prefix - printout only if prefixed parameters is not equal to p.parameter
+void inipar::print_with_prefix(FILE * fout, inipar p)
+{checkpr(fout, "exit",exit_mcphas,p.exit_mcphas);
+ checkpr(fout, "pause",pause_mcphas,p.pause_mcphas);
+checkpr(fout, "displayall",displayall,p.displayall);
+checkpr(fout, "logfevsQ",logfevsQ,p.logfevsQ);
+checkpr(fout, "xT",xv(0),p.xv(0));
+checkpr(fout, "xHa",xv(1),p.xv(1));
+checkpr(fout, "xHb",xv(2),p.xv(2));
+checkpr(fout, "xHc",xv(3),p.xv(3));
+checkpr(fout, "xmin",xmin,p.xmin);
+checkpr(fout, "xmax",xmax,p.xmax);
+checkpr(fout, "xstep",xstep,p.xstep);
+if(xv(4)!=0)checkpr(fout, "xHi",xv(4),p.xv(4));
+if(xv(5)!=0)checkpr(fout, "xHj",xv(5),p.xv(5));
+if(xv(6)!=0)checkpr(fout, "xHk",xv(6),p.xv(6));
+if(xv(7)!=0)checkpr(fout, "xEa",xv(7),p.xv(7));
+if(xv(8)!=0)checkpr(fout, "xEb",xv(8),p.xv(8));
+if(xv(9)!=0)checkpr(fout, "xEc",xv(9),p.xv(9));
+if(xv(10)!=0)checkpr(fout, "xEi",xv(10),p.xv(10));
+if(xv(11)!=0)checkpr(fout, "xEj",xv(11),p.xv(11));
+if(xv(12)!=0)checkpr(fout, "xEk",xv(12),p.xv(12));
+if(xv(13)!=0)checkpr(fout, "xs1",xv(13),p.xv(13));
+if(xv(14)!=0)checkpr(fout, "xs2",xv(14),p.xv(14));
+if(xv(15)!=0)checkpr(fout, "xs3",xv(15),p.xv(15));
+if(xv(16)!=0)checkpr(fout, "xs4",xv(16),p.xv(16));
+if(xv(17)!=0)checkpr(fout, "xs5",xv(17),p.xv(17));
+if(xv(18)!=0)checkpr(fout, "xs6",xv(18),p.xv(18));
+
+checkpr(fout, "yT",yv(0),p.yv(0));
+checkpr(fout, "yHa",yv(1),p.yv(1));
+checkpr(fout, "yHb",yv(2),p.yv(2));
+checkpr(fout, "yHc",yv(3),p.yv(3));
+checkpr(fout, "ymin",ymin,p.ymin);
+checkpr(fout, "ymax",ymax,p.ymax);
+checkpr(fout, "ystep",ystep,p.ystep);
+if(yv(4)!=0)checkpr(fout, "yHi",yv(4),p.yv(4));
+if(yv(5)!=0)checkpr(fout, "yHj",yv(5),p.yv(5));
+if(yv(6)!=0)checkpr(fout, "yHk",yv(6),p.yv(6));
+if(yv(7)!=0)checkpr(fout, "yEa",yv(7),p.yv(7));
+if(yv(8)!=0)checkpr(fout, "yEb",yv(8),p.yv(8));
+if(yv(9)!=0)checkpr(fout, "yEc",yv(9),p.yv(9));
+if(yv(10)!=0)checkpr(fout, "yEi",yv(10),p.yv(10));
+if(yv(11)!=0)checkpr(fout, "yEj",yv(11),p.yv(11));
+if(yv(12)!=0)checkpr(fout, "yEk",yv(12),p.yv(12));
+if(yv(13)!=0)checkpr(fout, "ys1",yv(13),p.yv(13));
+if(yv(14)!=0)checkpr(fout, "ys2",yv(14),p.yv(14));
+if(yv(15)!=0)checkpr(fout, "ys3",yv(15),p.yv(15));
+if(yv(16)!=0)checkpr(fout, "ys4",yv(16),p.yv(16));
+if(yv(17)!=0)checkpr(fout, "ys5",yv(17),p.yv(17));
+if(yv(18)!=0)checkpr(fout, "ys6",yv(18),p.yv(18));
+
+
+checkpr(fout, "T0",zero(0),p.zero(0));
+checkpr(fout, "Ha0",zero(1),p.zero(1));
+checkpr(fout, "Hb0",zero(2),p.zero(2));
+checkpr(fout, "Hc0",zero(3),p.zero(3));
+if(zero(4)!=0)checkpr(fout, "Hi0",zero(4),p.zero(4));
+if(zero(5)!=0)checkpr(fout, "Hj0",zero(5),p.zero(5));
+if(zero(6)!=0)checkpr(fout, "Hk0",zero(6),p.zero(6));
+if(zero(7)!=0)checkpr(fout, "Ea0",zero(7),p.zero(7));
+if(zero(8)!=0)checkpr(fout, "Eb0",zero(8),p.zero(8));
+if(zero(9)!=0)checkpr(fout, "Ec0",zero(9),p.zero(9));
+if(zero(10)!=0)checkpr(fout, "Ei0",zero(10),p.zero(10));
+if(zero(11)!=0)checkpr(fout, "Ej0",zero(11),p.zero(11));
+if(zero(12)!=0)checkpr(fout, "Ek0",zero(12),p.zero(12));
+if(zero(13)!=0)checkpr(fout, "s10",zero(13),p.zero(13));
+if(zero(14)!=0)checkpr(fout, "s20",zero(14),p.zero(14));
+if(zero(15)!=0)checkpr(fout, "s30",zero(15),p.zero(15));
+if(zero(16)!=0)checkpr(fout, "s40",zero(16),p.zero(16));
+if(zero(17)!=0)checkpr(fout, "s50",zero(17),p.zero(17));
+if(zero(18)!=0)checkpr(fout, "s60",zero(18),p.zero(18));
+
+checkpr(fout, "hmin",qmin(1),p.qmin(1));
+checkpr(fout, "hmax",qmax(1),p.qmax(1));
+checkpr(fout, "deltah",deltaq(1),p.deltaq(1));
+checkpr(fout, "kmin",qmin(2),p.qmin(2));
+checkpr(fout, "kmax",qmax(2),p.qmax(2));
+checkpr(fout, "deltak",deltaq(2),p.deltaq(2));
+checkpr(fout, "lmin",qmin(3),p.qmin(3));
+checkpr(fout, "lmax",qmax(3),p.qmax(3));
+checkpr(fout, "deltal",deltaq(3),p.deltaq(3));
+checkpr(fout, "maxqperiod",maxqperiod,p.maxqperiod);
+checkpr(fout, "maxnofspins",maxnofspins,p.maxnofspins);
+checkpr(fout, "minnr1",minnr1,p.minnr1);
+checkpr(fout, "minnr2",minnr2,p.minnr2);
+checkpr(fout, "minnr3",minnr3,p.minnr3);
+checkpr(fout, "nofrndtries",nofrndtries,p.nofrndtries);
+checkpr(fout, "nofMCsteps",nofMCsteps,p.nofMCsteps);
+checkpr(fout, "maxnoftestspincf",maxnoftestspincf,p.maxnoftestspincf);
+
+checkpr(fout, "maxnofmfloops",maxnofmfloops,p.maxnofmfloops);
+checkpr(fout, "maxstamf",maxstamf,p.maxstamf);
+checkpr(fout, "bigstep",bigstep,p.bigstep);
+checkpr(fout, "maxspinchange",maxspinchange,p.maxspinchange);
+checkpr(fout, "nofspincorrs",nofspincorrs,p.nofspincorrs);
+checkpr(fout, "maxnofhkls",maxnofhkls,p.maxnofhkls);
+checkpr(fout, "maxQ",maxQ,p.maxQ);
+
+}
+
+
+
+void inipar::print (FILE * fout)
+{
     fprintf(fout,"# Parameters for meanfield calculation - module %s\n#<!--mcphase.mcphas.ini-->\n",MCPHASVERSION);
     fprintf(fout,"#*********************************************************\n");
     fprintf(fout,"# mcphas - program to calculate static magnetic properties\n");
@@ -666,7 +851,7 @@ void inipar::print (const char * filename)
                   \n# standard deviation is defined by ...sta=sqrt(sum_{i=1}^{n} (newmf-old mf)i^2/n) \
 		  \n# the meanfield is given by mf=gj mb H [meV] (gj...lande factor, mb... bohr magneton)\n");
     fprintf(fout,"maxstamf=%g\n",maxstamf);
-    fprintf(fout,"# mean field step ratio (bigstep=actual step/calculated step<1) to perform actually\n");
+    fprintf(fout,"# mean field step ratio bigstep( = step to perform /calculated step<1) \n");
     fprintf(fout,"# note: if sta increases - then for 10 iterations set step ratio to smallstep=bigstep/n\n");
     fprintf(fout,"# by default n=5. However, if bigstep>1 then n=integervalue(bigstep) and step ratio=bigstep-n \n");
     fprintf(fout,"bigstep=%g\n",bigstep);
@@ -686,8 +871,6 @@ void inipar::print (const char * filename)
     fprintf(fout," maxnofhkls=%i\n",maxnofhkls);
     fprintf(fout,"#  maximum scattering vector |Q|[1/A] for calculated hkl's\n");
     fprintf(fout," maxQ=%g\n",maxQ);
-
-  fclose(fout);
 }
 
 //constructor ... load initial parameters from file
@@ -695,7 +878,7 @@ inipar::inipar (const char * file,char * pref)
 { savfilename= new char [strlen(file)+strlen(pref)+1];
   if(pref[0]!='\0')strcpy(savfilename,pref);
   strcpy(savfilename+strlen(pref),file);
-  prefix = new char[strlen(pref)+1];
+  prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,pref);
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);zero=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
@@ -719,15 +902,64 @@ nofthreads=0;getnofthread(nofthreads);
   nofcalls=0;
   noffailedpoints=0;
   print();
+ // append also the default values for different prefixes 
+ // scan Ha Hb Hc Hi Hj Hk chia chib chic 
+ FILE * fout = fopen_errchk (savfilename,"a");
+  fprintf(fout,
+   "# prefix for field scan parallel a\n"
+   "Ha_yHa=1\n"
+   "Ha_yHb=0\n"
+   "Ha_yHc=0\n"
+   "Ha_ymin=0\n"
+   "Ha_ymax=20\n"
+   "Ha_ystep=0.5\n"
+   "# prefix for field scan parallel b\n"
+   "Hb_yHa=0\n"
+   "Hb_yHb=1\n"
+   "Hb_yHc=0\n"
+   "Hb_ymin=0\n"
+   "Hb_ymax=20\n"
+   "Hb_ystep=0.5\n"
+   "# prefix for field scan parallel c\n"
+   "Hc_yHa=0\n"
+   "Hc_yHb=0\n"
+   "Hc_yHc=1\n"
+   "Hc_ymin=0\n"
+   "Hc_ymax=20\n"
+   "Hc_ystep=0.5\n"
+   "# prefix for T scan with field parallel a\n"
+   "chia_yHa=1\n"
+   "chia_yHb=0\n"
+   "chia_yHc=0\n"
+   "chia_ymin=1\n"
+   "chia_ymax=1\n"
+   "chia_ystep=0.5\n"
+"# prefix for T scan with field parallel a\n"
+   "chib_yHa=0\n"
+   "chib_yHb=1\n"
+   "chib_yHc=0\n"
+   "chib_ymin=1\n"
+   "chib_ymax=1\n"
+   "chib_ystep=0.5\n"
+"# prefix for T scan with field parallel a\n"
+   "chic_yHa=0\n"
+   "chic_yHb=0\n"
+   "chic_yHc=1\n"
+   "chic_ymin=1\n"
+   "chic_ymax=1\n"
+   "chic_ystep=0.5\n"
+);
+  fclose(fout);
+
                               }
                 }
 }
 
 //kopier-konstruktor 
 inipar::inipar (const inipar & p)
-{ savfilename= new char [strlen(p.savfilename)+1];
+{savfilename= new char [strlen(p.savfilename)+1];
   strcpy(savfilename,p.savfilename);
-  prefix = new char[strlen(p.prefix)+1];
+  prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,p.prefix);
   doeps=p.doeps;outcolset=p.outcolset;
   linepscf=p.linepscf;
@@ -746,11 +978,13 @@ inipar::inipar (const inipar & p)
   displayall=p.displayall;logfevsQ=p.logfevsQ;
   
   
-  xv=Vector(0,3);yv=Vector(0,3);
+  xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   xv=p.xv;xmin=p.xmin;xmax=p.xmax;xstep=p.xstep;
   yv=p.yv;ymin=p.ymin;ymax=p.ymax;ystep=p.ystep;
-  
+  zero=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
+  zero=p.zero;
+
   qmin=p.qmin;
   qmax=p.qmax;
   deltaq=p.deltaq;  
@@ -771,6 +1005,7 @@ inipar::inipar (const inipar & p)
   nofspincorrs=p.nofspincorrs;
   maxnofhkls=p.maxnofhkls;
   maxQ=p.maxQ;
+  nofthreads=p.nofthreads;
 }
 
 //destruktor
@@ -779,5 +1014,64 @@ inipar::~inipar ()
  
 delete []savfilename;
 delete []prefix;
+//printf("hello destruktor inipar\n");  
+ }
+
+
+//***************************************************************
+//constructor ... load initial parameters from file
+inipars::inipars (const char * file,char * pref)
+{ inis=new inipar*[MAXNOFINIS];
+  char * lofprefixes[MAXNOFINIS];
+  int nofinisold=-1;nofinis=0;
+// here we have to load inis[1...nofinis] with different prefixes matching pref - until no new matching
+// prefix is found ...
+  while(nofinisold<nofinis&&nofinis<MAXNOFINIS)
+  {inis[nofinis]=new inipar(file,pref);
+   nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes);
+  }
+ 
+
+// remove last inis, because it does not contain a new prefix
+if(nofinis>0&&nofinis<MAXNOFINIS){delete inis[nofinis];} 
+if(nofinis==0)nofinis=1;
+}
+
+void inipars::saveexitzero()
+{// read file and put exit=0 and save it again
+ char *lines[MAXNOFLINES];
+ char instr[MAXNOFCHARINLINE];
+ FILE * fout = fopen_errchk ((*inis[0]).savfilename,"r");int i=0;
+ while (fgets(instr,MAXNOFCHARINLINE,fout)!=NULL)
+ {char * p; p=strstr(instr,"exit=1");
+  if(p!=NULL)
+    {p[5]='0';
+    }
+  lines[i]=new char [strlen(instr)+1];strncpy(lines[i],instr,strlen(instr));++i;
+ }
+ fclose(fout);
+ fout=fopen_errchk ((*inis[0]).savfilename,"w");
+ for(int ii=0;ii<i;++ii)
+ {fprintf(fout,"%s",lines[ii]);
+  delete [] lines [ii];
+ }
+ fclose(fout);
+
+}
+
+
+
+//kopier-konstruktor  inipars
+inipars::inipars (const inipars & p)
+{ nofinis=p.nofinis;
+  inis=new inipar*[MAXNOFINIS];
+  for(int i=0;i<nofinis;++i)inis[i]=new inipar((*p.inis[i]));
+}
+
+//destruktor inipars
+inipars::~inipars ()
+{//printf("hello destruktor inipars %i\n",nofinis);  
+ for(int i=0;i<nofinis;++i)delete  inis[i];
+delete []inis;
 //printf("hello destruktor inipar\n");  
  }

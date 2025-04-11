@@ -14,6 +14,8 @@
 #include"par.hpp"
 
 #define EXTERNAL_PARAMETER_DIMENSION  HEXT_DIMENSION+7  // dimension of xv, yv zero (see below)
+#define MAXNOFINIS 100
+
 
 class inipar
 { private:
@@ -113,6 +115,10 @@ bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc);
   // printout initial parameters to file   
    void print();
    void print (const char * file);
+   void print (FILE * fout);
+void print_with_prefix(FILE * fout, inipar p);
+bool checkpr(FILE* fout,const char * var,int val,int masterval);
+bool checkpr(FILE* fout,const char * var,double val,double masterval);
 
 // estimeate time until finishing of mcphas
    void time_estimate_until_end(double x, double y);
@@ -130,14 +136,32 @@ bool checkTH(float * nn,double & T,Vector & Hext,Vector & abc);
  // exit with error message
    void errexit();
 
-  //load parameters from file
+  //load parameters from file, returns 1 on error, 0 on success
    int load();
+   int load (int & nofinis,char**lofpref);
+int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,float & var);
+int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,double & var);
+int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var);
 
   inipar (const char * file,char * prefix); //constructor
 
   inipar (const inipar & p);//kopier-konstruktor
 
  ~inipar ();//destruktor
+};
+
+// define a superclass to store all different prefixes and corresponding parameters
+class inipars
+{public:
+  int    nofinis;
+  inipar ** inis;
+   void saveexitzero(); // puts exit to zero in input file
+
+  inipars (const char * file,char * prefix); //constructor
+
+  inipars (const inipars & p);//kopier-konstruktor
+
+ ~inipars ();//destruktor
 };
 
 #endif

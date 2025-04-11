@@ -21,22 +21,14 @@ const char * filemode="w";
 
 // main program
 int main (int argc, char **argv)
-{ 
-  FILE * fin=NULL; 
-  char outfilename[MAXNOFCHARINLINE];
-  int im,j,l,doeps=0,linepscf=0,linepsjj=0;
+{ int j,l,doeps=0,linepscf=0,linepsjj=0;
   int options=0; // this integer indicates how many command strings belong to 
                  //options 
-  float x,y,dumm;
-  double z,u;
-  double T;
-  float nn[100];nn[0]=99;
-  double sta=0;
+
+  int im;
   double stamax=1e33;
-  Vector xv(1,3);
-  Vector yv(1,3);
-  Vector h(1,HEXT_DIMENSION);
-  
+  double sta=0;
+
 fprintf(stderr,"**************************************************************************\n");
 //fprintf(stderr,"*\n");
 fprintf(stderr,"*  %s \n",MCPHASVERSION);
@@ -66,19 +58,38 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
                                   fprintf(stdout,"#reading stable points from mcphas ouput files: results/%s*\n",readprefix);
  				 if (options<im+1)options=im+1;}
   }
-    inipar ini("mcphas.ini",prefix);    ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;
-    if(errexit==1)ini.errexit();
+    inipars inip("mcphas.ini",prefix);   
+   
+    if(errexit==1)(*inip.inis[0]).errexit();
+// loop for different prefixes ...
+   for(int ninis=0;ninis<inip.nofinis;++ninis)
+{
+  FILE * fin=NULL; 
+  char outfilename[MAXNOFCHARINLINE];
+    float x,y,dumm;
+  double z,u;
+  double T;
+  float nn[100];nn[0]=99;
+  Vector xv(1,3);
+  Vector yv(1,3);
+  Vector h(1,HEXT_DIMENSION);
+  
+
+   inipar ini((*inip.inis[ninis]));
+  if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
+   ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;
 
   if (ini.exit_mcphas!=0)
-  {ini.exit_mcphas=0;ini.print();} // if exit was 1 - save parameters and set exit=0
+  {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
   if(strcmp(ini.prefix,readprefix)==0&&prefix[0]!='\0')filemode="a";
    strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);strcpy(prefix+11+strlen(ini.prefix),"mcphas.ini"); 
-   ini.print(prefix);  // copy mcphas.ini to results directory
+   ini.print(prefix);  // copy mcphas.ini to results directory with filename prefixmcphas.ini
 
 
 // as class par load  parameters from file
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.j");
-  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.j");
+fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.j");
+fclose(fin);
  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  par inputpars(prefix,verbose); 
 // here save single ion property files to results
@@ -90,8 +101,9 @@ if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calc
 if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
 // as class par load  parameters derivatives from file
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdx");
-  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.djdx");
- if(fopen(prefix,"rb")!=NULL){
+ fin=fopen(prefix,"rb"); if(fin==NULL)strcpy(prefix,"mcphas.djdx");
+ fclose(fin);fin=fopen(prefix,"rb");
+ if(fin!=NULL){
  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  ini.ipx= new par(prefix,verbose);  
 
@@ -100,8 +112,9 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdx");inputpars.save(prefix,0);
                              
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdy");
-  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.djdy");
-if(fopen(prefix,"rb")!=NULL){
+FILE*fin1;fin1=fopen(prefix,"rb");  if(fin1==NULL)strcpy(prefix,"mcphas.djdy");
+fclose(fin1);fin1=fopen(prefix,"rb");
+if(fin1!=NULL){
   if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  ini.ipy= new par(prefix,verbose); 
 // here save single ion property files to results
@@ -109,17 +122,18 @@ if(fopen(prefix,"rb")!=NULL){
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdy");inputpars.save(prefix,0);
                              
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdz");
-  if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.djdz");
-if(fopen(prefix,"rb")!=NULL){
+  FILE * fin2; fin2=fopen(prefix,"rb"); if(fin2==NULL)strcpy(prefix,"mcphas.djdz");
+fclose(fin2);fin2=fopen(prefix,"rb");
+if(fin2!=NULL){
   if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  ini.ipz= new par(prefix,verbose);  
 // here save single ion property files to results
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdz");inputpars.save(prefix,0);
                              }else {fprintf(stderr,"# Error - could not open mcphas.djdz \n");exit(1); }
- 
+ fclose(fin2);
  } else {fprintf(stderr,"# Error - could not open mcphas.djdy \n");exit(1); }
- 
+ fclose(fin1);
 if(verbose)fprintf(stdout,"# strain due to derivatives of 2ion interactions in mcphas.djdx .djdy .djdz will be calculated\n");
 fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
   // check if inputpars abc nofatoms  atomic positions sipffilenames nofcomponents  agree with
@@ -136,7 +150,7 @@ fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
   if(((*ini.ipx)!=(*ini.ipz))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdz in nofneighbours or neighbour positions\n");exit(1);}
  fprintf(stderr,"# ... these are no problems, continuing\n");
  if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
-  }
+  }fclose(fin);
           }
 
 
@@ -167,7 +181,8 @@ if(verbose==1)printf("... done\n");
 T=0.0;h=0;
 // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
     strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.tst");
-    if(fopen(prefix,"rb")==NULL)strcpy(prefix,"mcphas.tst");
+    fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.tst");
+    fclose(fin);
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
     testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);
@@ -211,7 +226,10 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
  if(verbose==1)printf("...unit cell total charge=%g calculating electrical Polarisation does not make sense\n",inputpars.totalcharge);                              
 }
 // ***********************************************
-
+if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
+                  for (int ithread=0; ithread<NUM_THREADS; ithread++) 
+                    tin[ithread] = new htcalc_input(0,ithread,&inputpars);
+                
 if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
@@ -325,7 +343,7 @@ std::cout << "# mcphas was compiled without parallel processing option " << std:
 if(ini.ipx!=NULL)delete ini.ipx;
 if(ini.ipy!=NULL)delete ini.ipy;
 if(ini.ipz!=NULL)delete ini.ipz;
-
+}
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program mcphas\n");
    fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");

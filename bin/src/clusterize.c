@@ -94,9 +94,9 @@ PRB 2008 \n\
 # the individual moments\n");
   for(int n=1;n<=clust.cs.nofatoms;++n)
   {fprintf(fout,"\
-$M%i_1=2.0*$I%i_1;\n\
-$M%i_2=2.0*$I%i_2;\n\
-$M%i_3=2.0*$I%i_3;\n",n,n,n,n,n,n);
+$M%i_1=%g*$I%i_1;\n\
+$M%i_2=%g*$I%i_2;\n\
+$M%i_3=%g*$I%i_3;\n",n,(*clust.jjj[n]).gJ,n,n,(*clust.jjj[n]).gJ,n,n,(*clust.jjj[n]).gJ,n);
   }
   fprintf(fout,"\
 # the total moment\n\

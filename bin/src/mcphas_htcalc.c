@@ -551,13 +551,12 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
    thrdat.spsmin = spsmin; 
    thrdat.thread_id = -1;
 //   htcalc_input *tin[NUM_THREADS];
-   static int washere=0;
-
-   if(washere==0){washere=1;
+ /*  static int washere=0;
+   if(washere==0){washere=1;if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
                   }
-
+*/ // moved to mcphas.c
  MUTEX_INIT(mutex_loop);
  MUTEX_INIT(mutex_tests);
  MUTEX_INIT(mutex_min);
@@ -576,7 +575,6 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 #endif
  for (k= -testqs.nofqs();k<=testspins.n;++k)
  {++j; if (j>testspins.n) j=-testqs.nofqs();
-
 #ifndef _THREADS
        htcalc_iteration(j, femin, spsmin, H, T,ini, inputpars, testqs, testspins, physprops);
 #else

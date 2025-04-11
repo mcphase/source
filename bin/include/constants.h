@@ -9,6 +9,7 @@
    
 
 #define MAXNOFCHARINLINE 7024
+#define MAXNOFLINES 7024  // max nof lines in mcphas.ini
 #define SMALL 1e-6  // (meV) regulates if energy is treated as degenerate or not after a diagonalisation
                     // used in many modules: singleion_module.hpp mcdisp mcphas ... change with caution !!!
                     // ! this is a central switch !

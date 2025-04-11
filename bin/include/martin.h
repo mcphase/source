@@ -8,7 +8,7 @@
 #if __GNUC__ > 2
 #include <unistd.h>
 #endif
-
+#include <stdbool.h>   
 #include<cstdio>
 #include<cerrno>
 #include<cstdlib>
@@ -54,7 +54,7 @@ void print_col_numbers(FILE * fout,char * str);
 // to var as "one",  putting m=2 will set var to "one two", m=3 will yield "one two three"
 extern   int extract(char * instr,const char * parameter,char * var, size_t n,int m);
 
-// extract a variable which is there also if it is preceded by a prefix
+// extract a variable which is there also if it is preceded by a prefix returns 0 on success, 1 if not successful
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var);
@@ -236,6 +236,15 @@ void set_zlm_constants(Matrix & cnst);
 FILE * open_sipf(char * sipf_filename,char * modulename,int verbose);
 // opens sipf file and returns filehandle and modulename 
 
+// A C program to match wild card characters 
+// The main function that checks if two given strings 
+// match. The first string may contain wildcard characters 
+bool match(char* first, char* second);
+
+// locates the first match with wildcards of the string needle in haystack
+// If needle is an empty string, haystack is returned; if needle occurs nowhere in haystack, NULL is returned; otherwise a pointer to the
+//     first character of the first occurrence of needle is returned.
+char * wstrstr (char * haystack, char *needle);
 
 #endif
 

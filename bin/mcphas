@@ -1,7 +1,7 @@
 #!/bin/sh
 # main program batch of mcphase
 
-export prefix=
+unset prefix
 
 ARGS=()
 
@@ -34,7 +34,11 @@ set -- "${ARGS[@]}" # restore positional parameters
 
 # yes do a calculation
  #start displaying results
+ if [ -f  "$prefix"mcphas.ini ]; then
  java IniConfigurator "$prefix"mcphas.ini &
+ else
+ java IniConfigurator mcphas.ini &
+ fi
  javaid=$!
  #inimenu  & 
 
@@ -93,3 +97,4 @@ fi
  rm -f ./results/."$prefix"mcphas_mc.hst
  rm -f ./results/.gv;
  
+unset prefix
