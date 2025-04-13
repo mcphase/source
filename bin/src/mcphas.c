@@ -96,6 +96,9 @@ fclose(fin);
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
 
+if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
+   {ini.defaultcolcode(5,4);ini.defaultcolcode(6,5);ini.defaultcolcode(7,6);} // reset default colcode in ini
+  
 if(doeps) {
 if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
 if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
@@ -192,7 +195,6 @@ T=0.0;h=0;
     qvectors testqs (ini,inputpars,Imax,outfilename,verbose);
 // declare variable physprop (typa class physproperties)
    physproperties physprop(ini.nofspincorrs,ini.maxnofhkls,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
-       
 
 // *** calculate electrical polarisation (static, from ionic charges and positions, electret matter)               
   if(fabs(inputpars.totalcharge)<SMALLCHARGE)
@@ -229,8 +231,8 @@ for (l=1;l<=inputpars.cs.nofatoms;++l){
 if(NUM_THREADS>256){fprintf(stderr,"Error mcphas: too many threads required - change hardcode limit 256 in mcphas_htcalc.c line 69 and recompile\n");exit(EXIT_FAILURE);}
                   for (int ithread=0; ithread<NUM_THREADS; ithread++) 
                     tin[ithread] = new htcalc_input(0,ithread,&inputpars);
-                
-if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
+ 
+fin=NULL; if (argc>options+1){ini.xv=0;ini.yv=0;fin=fopen_errchk (argv[argc-1],"rb");}   //input from file
 // loop different H /T points in phase diagram
 for (x=ini.xmin;x<=ini.xmax;x+=ini.xstep)
  { //begin initialize display file
@@ -304,7 +306,8 @@ if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
 	      break;	 
 	 default:  ;
 	}
- if(fin!=NULL){y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read from file
+ if(fin!=NULL){   
+y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read from file
 
     }
  }  

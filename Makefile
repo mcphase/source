@@ -189,7 +189,7 @@ cowanwin:
 mcphase: vector cfield 
 	cd bin/src && $(MAKE)
 
-mcphasewin: vectorwin cfieldwin  
+mcphasewin: vectorwin cfieldwin 
 	cd bin/src && $(MAKE) cross64=1
 
 examples  : vector 
@@ -219,7 +219,7 @@ windows:
 	make unreleased_remove clean cleanexe allwin 
 	make clean 
 #	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
-#	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/jre1.8.0_121 --output=$(HOME)/mcph.exe
+#	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/jdk-17.0.3 --output=$(HOME)/mcph.exe
 #	rm $(HOME)/windows.jar
 	dot_clean -mv ./
 	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
@@ -266,7 +266,7 @@ tgz :
 	dos2unix ./examples/upd3/calc.bat
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
 	dot_clean -mv ./
-	cd ../;tar --exclude=mcphas/bin/jre1.8.0_121/* --exclude=mcphas/bin/Perl* \
+	cd ../;tar --exclude=mcphas/bin/jdk-17.0.3/* --exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
 		-cvf $(HOME)/mcph.tar mcphas/* \
 		;cd ./mcphas  

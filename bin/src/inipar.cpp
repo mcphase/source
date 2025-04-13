@@ -225,11 +225,11 @@ void inipar::calcTHfromxy(double & T,Vector & h,double x, double y,cryststruct &
     normalize(v,1.0); // take care of Hijk to be of unit length 1 Tesla
     v1=v1+v;
 
-    v=yv(1,3);normalizedadbdc(v,1.0,cs);// take care that vector xHa xHb Xhc has unit length 1 Tesla
+    v=yv(1,3);normalizedadbdc(v,1.0,cs);// take care that vector yHa yHb yHc has unit length 1 Tesla
     dadbdc2ijk(v2,v,abc); // transform Habc to ijk coordinates ... this is H
     v=yv(4,6,-3);normalize(v,1.0); // take care of Hijk to be of unit length 1 Tesla
     v2=v2+v;
-    
+
     v=zero(1,3);
     dadbdc2ijk(zv,v,abc); // transform Habc to ijk coordinates 
     v=zero(4,6,-3); 
@@ -242,21 +242,20 @@ void inipar::calcTHfromxy(double & T,Vector & h,double x, double y,cryststruct &
    
     // similar for the E-field
 
-    v=xv(7,9,-6);normalizedadbdc(v,1.0,cs); // take care that vector xHa xHb Xhc has unit length 1 Tesla
-    dadbdc2ijk(v1,v,abc); // transform Habc to ijk coordinates ... this is H
-    v=xv(10,12,-9);normalize(v,1.0); // take care of Hijk to be of unit length 1 Tesla
+    v=xv(7,9,-6);normalizedadbdc(v,1.0,cs); // take care that vector xEa xEb XEc has unit length 1 Tesla
+    dadbdc2ijk(v1,v,abc); // transform Eabc to ijk coordinates ... this is E
+    v=xv(10,12,-9);normalize(v,1.0); // take care of Eijk to be of unit length 1 Tesla
     v1=v1+v;
      
-    v=yv(7,9,-6);normalizedadbdc(v,1.0,cs);// take care that vector xHa xHb Xhc has unit length 1 Tesla
-    dadbdc2ijk(v2,v,abc); // transform Habc to ijk coordinates ... this is H
-    v=yv(10,12,-9);normalize(v,1.0); // take care of Hijk to be of unit length 1 Tesla
+    v=yv(7,9,-6);normalizedadbdc(v,1.0,cs);// take care that vector yEa yEb yEc has unit length 1 Tesla
+    dadbdc2ijk(v2,v,abc); // transform Eabc to ijk coordinates ... this is E
+    v=yv(10,12,-9);normalize(v,1.0); // take care of Eijk to be of unit length 1 Tesla
     v2=v2+v;
     
     v=zero(7,9,-6);
     dadbdc2ijk(zv,v,abc); // transform Habc to ijk coordinates 
     v=zero(10,12,-9); 
     zv=zv+v;
-
      h(4)=zv(1)+x*v1(1)+y*v2(1);
      h(5)=zv(2)+x*v1(2)+y*v2(2);
      h(6)=zv(3)+x*v1(3)+y*v2(3);

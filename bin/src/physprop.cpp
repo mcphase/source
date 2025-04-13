@@ -275,7 +275,7 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
   float nnerr[200];nnerr[0]=199;for(int i=1;i<=199;++i)nnerr[i]=0;
   int ortho=1;
   if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
-   {ortho=0;ini.defaultcolcode(5,4);ini.defaultcolcode(6,5);ini.defaultcolcode(7,6);} // reset default colcode in ini
+   {ortho=0;} 
    Vector abc(1,6); abc(1)=1; abc(2)=1; abc(3)=1;
                        abc(4)=inputpars.cs.alpha(); abc(5)=inputpars.cs.beta(); abc(6)=inputpars.cs.gamma();
    ijk2dadbdc(mabc,m,abc);  // transform m and P to abc coordinate system
