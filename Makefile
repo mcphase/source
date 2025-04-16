@@ -45,9 +45,9 @@
 #               .  update innosetup (version information) // izpack.xl
 #		.      start docker and type:  make  package
 #                               or make windows (for windows) and make tgz (for linux)
-#	           (does automatically make unreleased_remove clean, mcph.exe and mcph.tgz 
+#	           (does automatically make  clean, mcph.exe and mcph.tgz 
 #                   and converts all *.pl files dos2unix 
-#                   in bin, perhaps in examples and unreleased_restore,
+#                   in bin, perhaps in examples,
 #                    -k keep going even if errors occur)
 #               .  rename linux distribution file  $HOME/mcph.tgz to e.g. mcph5_2.tgz
 #               .  rename windows distribution file  $HOME/mcph.exe to e.g. mcph5_2.exe
@@ -83,7 +83,7 @@
 #           gfortran lSystem not found - then do:
 #                               export LIBRARY_PATH="$LIBRARY_PATH:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
 #
-#	        Note on compiling with dos:   make unreleased_remove and copy mcphas (except Output)
+#	        Note on compiling with dos:    copy mcphas (except Output)
 #                                   to c:\msys64/home/rotter/  
 #                                    mingw win64 shell  (from startup menu) 
 #                                    cd mcphas
@@ -98,7 +98,6 @@
 #                                     (rename file setup found in mcphas/output/setup.exe into mcphX_Y.exe)
 #                                  - install windows&linux and test demo + examples, attention: remove
 #                                       HOME/appdat/roaming/.mcphaseexplorer directory before installation
-#                                 make unreleased_restore
 #
 #    Screen Saver
 #
@@ -112,7 +111,7 @@
 #Then select "Create" and the screen saver should be magically created for you.
 # Author(s):     M. Rotter
 #
-#  Last Update:	  22.09.2024
+#  Last Update:	  16.4.2025
 #
 #**********************************************************************
 
@@ -204,30 +203,21 @@ tutorial : vector
 java    : 
 	cd ./bin/jar ; make
 
-unreleased_remove : 
-	mv -n ./bin/src/clusterize.c ./Output/clusterize_notreleased.c
-	cp -n ./Output/clusterize_pleasefund.c ./bin/src/clusterize.c
-	rm -f ./bin/clusterize*
-
-unreleased_restore : 
-	mv ./Output/clusterize_notreleased.c ./bin/src/clusterize.c 
-
 package :  
 	make windows  tgz  
 
 windows: 
-	make unreleased_remove clean cleanexe allwin 
+	make clean cleanexe allwin 
 	make clean 
 #	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
-#	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/jdk-17.0.3 --output=$(HOME)/mcph.exe
+#	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/zulu17.56.15-ca-jre17.0.14-win_x64 --output=$(HOME)/mcph.exe
 #	rm $(HOME)/windows.jar
 	dot_clean -mv ./
 	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
 	mv Output/mysetup.exe $(HOME)/mcph.exe
-	make unreleased_restore
 
 tgz : 
-	make unreleased_remove cleanexe clean all 
+	make cleanexe clean all 
 	make clean 
 	dos2unix ./bin/*.pl
 	dos2unix ./demo/*.bat ./demo/demo
@@ -256,7 +246,6 @@ tgz :
 	dos2unix ./examples/NiO/calc.bat
 	dos2unix ./examples/Pr3Pd20Si6/calc.bat
 	dos2unix ./examples/prni2b2c/fit/watch*.bat ./examples/prni2b2c/fit/calcsta 
-	dos2unix ./examples/prni2b2c/powder_magnon.bat
 	dos2unix ./examples/prni2si2/calc.bat
 	dos2unix ./examples/pupd3/calc.bat
 	dos2unix ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
@@ -266,7 +255,7 @@ tgz :
 	dos2unix ./examples/upd3/calc.bat
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
 	dot_clean -mv ./
-	cd ../;tar --exclude=mcphas/bin/jdk-17.0.3/* --exclude=mcphas/bin/Perl* \
+	cd ../;tar --exclude=mcphas/bin/zulu17.56.15-ca-jre17.0.14-win_x64/* --exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
 		-cvf $(HOME)/mcph.tar mcphas/* \
 		;cd ./mcphas  
@@ -297,7 +286,6 @@ tgz :
 	unix2dos ./examples/NiO/calc.bat
 	unix2dos ./examples/Pr3Pd20Si6/calc.bat
 	unix2dos ./examples/prni2b2c/fit/watch*.bat ./examples/prni2b2c/fit/calcsta 
-	unix2dos ./examples/prni2b2c/powder_magnon.bat
 	unix2dos ./examples/prni2si2/calc.bat
 	unix2dos ./examples/pupd3/calc.bat
 	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
@@ -306,7 +294,6 @@ tgz :
 	unix2dos ./examples/tungsten_phonons/calc.bat
 	unix2dos ./examples/upd3/calc.bat
 	unix2dos ./tutorial/07documentation_logbooks/calc.bat
-	make unreleased_restore
 
 clean:
 	rm -f ./Makefile.sav

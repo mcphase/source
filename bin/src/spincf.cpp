@@ -152,7 +152,7 @@ void spincf::extend(int ia,int ib,int ic)
 { 
   epsilon=0;
   int oa=nofa,ob=nofb,oc=nofc;
-  int oxa=mxa,oxb=mxb,oxc=mxc;
+  int oxb=mxb,oxc=mxc;
   nofa*=ia; nofb*=ib; nofc*=ic;
   mxa=nofa+1; mxb=nofb+1; mxc=nofc+1;
   int l;int i,j,k;

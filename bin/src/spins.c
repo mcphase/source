@@ -154,8 +154,7 @@ fprintf(stderr,"# ***********************************************************\n"
  FILE * fin, * fout;
  int i,minl=1,maxl=1,eps=0,fst=0;
  cryststruct cs,cs4;
- //float numbers[13];numbers[9]=1;numbers[10]=3;
- //numbers[0]=13;
+
  char outstr[MAXNOFCHARINLINE];
  char infilename[MAXNOFCHARINLINE];
  char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
@@ -804,12 +803,11 @@ if (argc-1==8+os){
              long int pos=0;
              int extended_eigenvector_dimension;
               char instr[MAXNOFCHARINLINE],dumstr[MAXNOFCHARINLINE],outhklstr[MAXNOFCHARINLINE];
-              float numbers[20];numbers[9]=1;numbers[10]=3;
-              numbers[0]=20;
+          
              gp.spins_wave_amplitude=1.0;gp.spins_show_ellipses=1.0;gp.spins_show_oscillation=1.0;
              gp.phonon_wave_amplitude=1.0;gp.phonon_scale_static_displacements=1.0;
 //----------------------------------------------------------------------------------------------------------
-           double delta,dd,tcdd,tE;Vector thkl(1,3);
+           double delta,dd,tcdd;Vector thkl(1,3);
                 
            if(arrow>0){double checkdd=1e7;
              strcpy(infilename,"./results/");strcpy(infilename+10,prefix);

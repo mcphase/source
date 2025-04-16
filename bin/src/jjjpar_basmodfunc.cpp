@@ -17,7 +17,7 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 /*void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int verbose)
 {
 *(void **)(&symbol)=GetProcAddress(handle,func);
-    //*(int **)(&p)=GetProcAddress(handle,"pcalc");
+    // *(int **)(&p)=GetProcAddress(handle,"pcalc");
      if (symbol==NULL) {if((int)GetLastError()!=127){fprintf (stderr,"  warning  %d  module %s loading function  %s -continuing\n",(int)GetLastError(),modulefilename,func);}
                     }else {if(verbose)fprintf (stderr,"%s ",func);}
 }

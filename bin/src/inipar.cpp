@@ -191,7 +191,7 @@ void inipar::print_usrdefcolhead(FILE *fout,char * str)
 {fprintf(fout,"#");
  int i;char header [MAXNOFCHARINLINE];header[0]='\0';
  for(i=1;i<=usrdefcols[0];++i)
-  {for(int j=0;j<strlen(colhead[colcod[i]]);++j)if(colhead[colcod[i]][j]!=' ')
+  {for(int j=0;j<(int)strlen(colhead[colcod[i]]);++j)if(colhead[colcod[i]][j]!=' ')
     snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header),"%c",colhead[colcod[i]][j]); 
   snprintf(header+strlen(header),MAXNOFCHARINLINE-strlen(header)," ");
   }
@@ -276,7 +276,7 @@ bool inipar::calcTHfromnn(double & T,Vector & Hext,float * nn,cryststruct &cs)
 {int maxcol=0;for(int i=1;i<=usrdefcols[0];++i)if(usrdefcols[i]>maxcol)maxcol=usrdefcols[i];
  if(nn[0]<maxcol)return false; // array too small, not enough parameters in line
  double xx=0,yy=0,NormH,NormE;T=0;Hext=0;
- Vector Habc(1,3),Eabc(1,3);
+ Vector Habc(1,3),Eabc(1,3);Habc=0;Eabc=0;
 for(int i=1;i<=usrdefcols[0];++i)
 { (*colvaluepointer(colcod[usrdefcols[i]],xx,yy,T,Hext,Habc,Eabc,NormH,NormE))=nn[usrdefcols[i]];
 }
@@ -336,7 +336,7 @@ for(int i=1;i<=HEXT_DIMENSION;++i)
    if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
                            } break;
    case 4: case 5: case 6: { bool cc=c[7]|c[8]|c[9]|c[10]|c[11]|c[12]|c[22];
-   if(!cc){fprintf(stderr,"#Warning: External Magnetic Field H nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
+   if(!cc){fprintf(stderr,"#Warning: External Electric Field E nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
                            }break;
    default: if(!c[i+6]){fprintf(stderr,"#Warning: stress s%i nonzero but not stored in output files  - please change settings out out* in mcphas.ini\n",i-6);exit(EXIT_FAILURE); }
   }

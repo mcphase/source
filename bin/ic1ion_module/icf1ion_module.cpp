@@ -10,7 +10,7 @@ void deleter(icf1ion_module *ptr)
  }
 }
 #endif
-#ifdef WIN32
+#ifdef __MINGW32__
 extern "C"
 {
 __declspec (dllexport) icf1ion_module *allocator(const char * filename)

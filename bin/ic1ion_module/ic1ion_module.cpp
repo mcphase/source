@@ -12,7 +12,7 @@ void deleter(ic1ion_module *ptr)
  }
 }
 #endif
-#ifdef WIN32
+#ifdef __MINGW32__
 extern "C"
 {
 __declspec (dllexport) ic1ion_module *allocator(const char * filename)
@@ -202,7 +202,7 @@ void ic1ion_module::expJ(icmfmat & mfmOP,     // Operators to be calculated
       U(T.Hi())=vJ[J.Rhi()-J.Rlo()+2];
       
       vector<double> E; // energy vector
-      if(T.Hi()>1)for(int ind_j=0; ind_j<matel[0].size(); ind_j++){E.push_back(VE.E(ind_j)-VE.E(0));}
+      if(T.Hi()>1)for(int ind_j=0; ind_j<(int)matel[0].size(); ind_j++){E.push_back(VE.E(ind_j)-VE.E(0));}
     // use matel to calculate more quickly the other temperatures
     for(Ti=1;Ti<T.Hi();++Ti)
     {int Esz;std::vector<double> eb;
@@ -648,7 +648,7 @@ int ic1ion_module::dmq1(int &tn,                // Input transition number |tn|.
    std::vector<double> E,Jvec(6,0.); Jvec[0]=th; Jvec[1]=ph; Jvec[2]=J0; Jvec[3]=J2; Jvec[4]=J4; Jvec[5]=J6;
    std::vector< sMat<double> > Qp1, Qm1; 
    std::vector< std::vector< sMat<double> > > Qq; for(i=0; i<3; i++) Qq.push_back(Qp1);
-   complexdouble z1,z2,zalpha, zbeta; zalpha.r=1; zalpha.i=0; zbeta.r=0; zbeta.i=0;
+   complexdouble z1,z2, zbeta;  zbeta.r=0; zbeta.i=0;
    std::vector<complexdouble> zij(7,zbeta), zji(7,zbeta);
    double Z=0., therm;
    

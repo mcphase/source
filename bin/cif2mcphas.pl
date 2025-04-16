@@ -1443,8 +1443,8 @@ if($interact){
  print " l ? (0)\n";$ans = <>; $ans =~ s/[\R\n\r]*//g;if(!($ans eq "")) { $l=$ans;}
  }
  copy("mcphas_magnetic_atoms.j","mcphas.j");
- system ("spinsfromq $na $nb $nc $h $k $l > results/mcphas.tst");
- system ("spins -f results/mcphas.tst 1");
+ system ("spinsfromq $na $nb $nc $h $k $l > .cif2mcphas.sps");
+ system ("spins -f .cif2mcphas.sps 1");
 
 unless(open(FIN, "results/spins.out")){die "Error cif2mcphas reading results/spins.out\n";}
 while (<FIN>) { last if ($_ =~/%SECTION 3/)   

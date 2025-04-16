@@ -54,8 +54,8 @@ while($line=<Fin>)
 if ($^O=~/MSWin/){$line=~s/^\s*rem/#/i; # i ... case insensitive pattern matching
                   $line=~s/^\s*rm\s/del /;
                   $line=~s/^\s*cp\s/copy /;
-
-
+                  $line=~s|/|\\|ig;
+                  
                  } else
                  {$line=~s/^\s*call\s//i;
                   $line=~s/^\s*del\s/rm /i;
@@ -77,7 +77,9 @@ $i=0;foreach $name (@var)
 ++$i;
 }
 
-
+if ($^O=~/MSWin/){$line=~s/^\s*([\w]+).pl/perl \%MCPHASE_DIR\%\\bin\\$1.pl/;
+# print $line."\n";
+             }
      unless ($line=~/^\s*[#\n]/){
                if($line=~/^\s*cd/i){$line=~s/^\s*cd//;$line=~s/\n//;$line=~s/\s*//;
                                     unless(chdir($line)){die "\nError  executing command \ncd  $line in $file line number $linenr\n";}
@@ -97,7 +99,7 @@ $i=0;foreach $name (@var)
    } # next line
 close Fin; $tim[$ct]=int(time()-$tim[$ct]);
 print "#************************************************\n";
-print "# mctest <".$file. "> in ".$tim[$ct]."s OK\n";
+print "# mctest <".$file. "> in ".$tim[$ct]."s OK\n";
 print "#************************************************\n";
 ++$ct;
 } # next batch file

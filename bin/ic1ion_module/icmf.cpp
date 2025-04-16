@@ -278,7 +278,7 @@ icmfmat::icmfmat(const icmfmat & pp)
 
 icmfmat::~icmfmat()
 {
-for(int i=0;i<T.size();++i)if(T[i]!=NULL)delete []T[i];
+for(int i=0;i<(int)T.size();++i)if(T[i]!=NULL)delete []T[i];
 }
 
 complexdouble * icmfmat::balcar_Mq(int xyz, int K, int Q, int n, orbital l)
@@ -561,7 +561,8 @@ std::vector<double>  icmfmat::expJ(iceig &VE, double T, std::vector< std::vector
    int iJ, ind_j, Esz, Hsz=VE.Hsz();op_generate(0); 
    if(Hsz!=J[0].nr()) { std::cerr << "icmfmat::expJ() - Hamiltonian matrix size not same as mean field operator!\n"; return E; }
    sMat<double> zeroes; zeroes.zero(J[0].nr(),J[0].nc());
-   complexdouble zalpha; zalpha.r=1; zalpha.i=0; complexdouble zbeta; zbeta.r=0; zbeta.i=0;
+   //complexdouble zalpha; zalpha.r=1; zalpha.i=0; 
+   //complexdouble zbeta; zbeta.r=0; zbeta.i=0;
    // Checks that the eigenvactors are orthonormal
 /* char transa='C', transb='N'; double summm=0.;
    if(VE.iscomplex())

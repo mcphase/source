@@ -296,8 +296,9 @@ switch (module_type)
    case brillouin: 
    case cluster: 
    default: if(transitionnumber<0&& washere==0){washere=1;fprintf(stderr,"Problem: dL1calc in  modules cluster and brillouin not implemented, continuing ... \n");}
-          return 0;break;
+          
    }
+return 0;
 }
 
 
@@ -375,8 +376,9 @@ int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1
    case brillouin: nnt=brillouindm(transitionnumber,T,Hxc,Hext,S1,delta,n,nd);S1*=(gJ-1.0);return nnt;break;
    case cluster: 
    default:if(transitionnumber<0)fprintf(stderr,"Problem: dS1calc in module cluster not implemented, continuing ... \n");
-          return 0;break;
+          
    }
+return 0;
 }
 
 /****************************************************************************/

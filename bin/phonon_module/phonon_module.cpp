@@ -10,7 +10,7 @@ void deleter(phonon_module *ptr)
  }
 }
 #endif
-#ifdef WIN32
+#ifdef __MINGW32__
 extern "C"
 {
 __declspec (dllexport) phonon_module *allocator(const char * filename)
