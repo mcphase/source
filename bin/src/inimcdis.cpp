@@ -158,9 +158,10 @@ fprintf(fout,"\n#");
 
 // print characteristic external parameter string
 void inimcdis::mfstring(char *str,size_t t)
-{ snprintf(str,t,"T=%4.4g Hi=%4.4g Hj=%4.4g Hk=%4.4g",
+{
+ snprintf(str,t,"T=%4.4g Hi=%4.4g Hj=%4.4g Hk=%4.4g",
               T,Hext(1),Hext(2),Hext(3));
-  if(Norm(Eabc)>SMALL_FIELD)snprintf(str+strlen(str),t-strlen(str)," Ei=%4.4g Ej=%4.4g Ek=%4.4g",
+ if(Norm(Eabc)>SMALL_FIELD)snprintf(str+strlen(str),t-strlen(str)," Ei=%4.4g Ej=%4.4g Ek=%4.4g",
               Hext(4),Hext(5),Hext(6));
   if(Norm(Hext(7,12))>SMALL_FIELD)snprintf(str+strlen(str),t-strlen(str)," s1=%4.4g s2=%4.4g s3=%4.4g s4=%4.4g s5=%4.4g s6=%4.4g",
               Hext(7),Hext(8),Hext(9),Hext(10),Hext(11),Hext(12));
@@ -175,7 +176,9 @@ void inimcdis::print_usrdefcols(FILE *fout,Vector &Qvec, double & Qincr, Vector 
 }
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save()
-{save(savfilename);
+{char savfilename[MAXNOFCHARINLINE];
+  snprintf(savfilename,MAXNOFCHARINLINE,"results/_%s%s",prefix,parfile);
+  save(savfilename);
 }
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save(const char * filename)
@@ -357,16 +360,81 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
                      }
 }
 
+// findnewmatch = true: check if new match (which is not listed in the n prefixes of lofpref) can be found in instr using
+//                      char prefix (which may contain a wildcard '*'), if it can be found increase n
+//                      and put new match prefix in lofpref and put findnewmatch to false and return
+//                      extract_with_prefix for the new match
+// findnewmatch = false: return extract_with_prefix for the prefix=lofpref[n]
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var)
+{int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
+ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
+if(ret==0)var=atoi(val);
+return ret;
+}
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,float & var)
+{int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
+ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
+if(ret==0)var=strtof(val,NULL);
+return ret;
+}
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,double & var)
+{int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
+ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
+if(ret==0)var=strtod(val,NULL);
+return ret;
+}
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int m)
+{
+ if(findnewmatch==true)
+ {if(pref[0]!='\0')
+  {char prefvar[MAXNOFCHARINLINE];char * s,*p;
+  snprintf(prefvar,sizeof(prefvar),"%s%s",pref,parameter);
+  s=wstrstr(instr,prefvar);
+  if(s!=NULL)
+  { // ok there seems to be a new match - see if it is already in the list
+   snprintf(prefvar,sizeof(prefvar),"%s",parameter);
+   p=wstrstr(instr,prefvar);
+   int i=0;for(char * t=s;t<p;++t){prefvar[i]=*t;++i;}prefvar[i]='\0'; // put the prefix to prefvar
+    i=0;bool mm=false;while(i<n&&mm==false){mm=match(prefvar,lofpref[i]);
+    ++i;}
+    if(i==n&&mm==false){lofpref[i]=new char [strlen(prefvar)+2];snprintf(lofpref[i],strlen(prefvar)+1,"%s",prefvar);
+                          snprintf(prefix,sizeof(prefix),"%s",prefvar);
+                     ++n; findnewmatch=false;printf("increase lofpref %s\n",lofpref[i]);
+            }
+   }// no new match -> extract without prefix
+   else
+   {
+    return extract(instr,parameter,var,ns, m);
+   }
+  }
+ else
+ {if(n==0){int i=0;lofpref[i]=new char [1];lofpref[i][0]='\0';
+                          prefix[0]='\0';
+                     ++n; findnewmatch=false;}
+ }
+ }
+ if(n>0)
+ {
+ if(findnewmatch==true) return extract(instr,parameter,var,ns,m);  // if we still have to find new match: return without prefix 
+  else return extract_with_prefix(instr,lofpref[n-1],parameter,var,ns,m); // if a new match has been found: return parameters with this new prefix
+ }
+ else
+ {return extract_with_prefix(instr,pref,parameter,var,ns, m);
+ }
+}
 
 // *************************************************************************
-void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat)
-{ errno=1;do_jqf=do_jqfile;nofthreads=0;
+int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat)
+{ bool findnewmatch=true;if(nofinis==-1){findnewmatch=false;}
+   errno=1;do_jqf=do_jqfile;nofthreads=0;outcolset=false;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
-  int nofhkllists=1;Hext=Vector(1,HEXT_DIMENSION);Hext=0; Habc=Vector(1,3);Eabc=Vector(1,3);
+  int nofhkllists=1;
+  Hext=0; Habc=0;Eabc=0;
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
-  prefix= new char [strlen(pref)+1]; strcpy(prefix,pref); // set prefix
+   strcpy(prefix,pref); // set prefix
  // ****************************** read mf configuration from spinfile *****************************************  
-  fin=fopen(spinfile,"rb");
+for(int iii=1;iii<3;++iii)
+{  fin=fopen(spinfile,"rb");
    if (fin==NULL) {fprintf(stderr,"#Warning - file %s not found - trying to read mcdisp.mf\n",spinfile);
    snprintf(spinfile,MAXNOFCHARINLINE,"mcdisp.mf");fin=fopen(spinfile,"rb");
     if (fin==NULL) {fprintf(stderr,"Warning - file %s not found - doing calculation at T=300K assuming zero mean and external fields / stress\n",spinfile);
@@ -374,7 +442,7 @@ void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile
    }
  if(fin==NULL){snprintf(instr,sizeof(instr),"#!T=300 Ha=0 Hb=0 Hc=0 n=1 spins nofatoms=1 in primitive basis nofcomponents=%i - configuration",nofcomponents);
  T=300; Hext=0;nofatoms=nofat;nofcomponents=nofcomp;
-}else {instr[0]='#';  
+}else {instr[0]='#';  instr[1]='\0';
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
   extract(instr,"T",T); 
   extract(instr,"Ha",Habc[1]); 
@@ -398,7 +466,7 @@ void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile
   
   crosscheck_H_E(Hext,Habc,Eabc,abc); 
 
-  printf("#%s \n# reading mean field configuration mf=gj muB heff [meV]\n",instr);
+  printf("# reading mean field configuration from file %s mf=gj muB heff [meV]\n#%s \n",spinfile,instr);
   
   
   
@@ -406,18 +474,16 @@ void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile
   extract(instr,"nofcomponents",nofcomponents); 
   if(nofcomponents!=nofcomp){fprintf(stderr,"ERROR loading mean field configuration nofcomponents from mcphas.j (%i) different from file %s (%i)\n",nofcomp,spinfile,nofcomponents);exit(EXIT_FAILURE);}
   if(nofatoms!=nofat){fprintf(stderr,"ERROR loading mean field configuration nofatoms from mcphas.j (%i) different from file %s (%i)\n",nofat,spinfile,nofatoms);exit(EXIT_FAILURE);}
-  mf=mfcf(1,1,1,nofatoms,nofcomponents); 
   if(mf.load(fin)==0)
    {fprintf(stderr,"ERROR loading mean field configuration\n");exit(EXIT_FAILURE);}
   fclose(fin);
  }
- info= new char [strlen(instr)+1];strcpy(info,instr);
+}
+ strcpy(info,instr);
 
  //********************************  
-  savfilename= new char [strlen(file)+strlen(prefix)+11];
-  snprintf(savfilename,MAXNOFCHARINLINE,"results/_%s%s",prefix,file);
-  errno = 0;
-  qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
+    errno = 0; 
+  
   // **************** initialize parameters to default values ********************************************
   emin=-DBL_MAX;emax=DBL_MAX;
   ki=0;kf=0;
@@ -433,74 +499,72 @@ void inimcdis::load (const char * file,char * spinfile,char * pref,int do_jqfile
   qmin=0;qmax=0;deltaq=0;
  // ******************************** reading parameters  from mcdisp.par ****************************************************
   int i=0,hklblock=0,QxQyQzblock=0,j;
-  printf("reading file %s\n",file);
-  fin = fopen(file, "rb"); 
-if (fin==NULL) {fprintf(stderr,"# Warning - file %s not found - using default values ! \n",file);
- emin=-100;emax=100;ki=0;kf=100;colcod[1]=5;colcod[2]=6;colcod[3]=7;colcod[4]=4;
-nofhkls=0;save(file); 
+  printf("reading file %s\n",parfile);
+  fin = fopen(parfile, "rb"); 
+if (fin==NULL) { return 1;
 }else
 {   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
   {++i; // i is used to estimate an upper boundary for the number of hkls in the hkl list 
-     extract_with_prefix(instr,prefix,"emin",emin); 
-     extract_with_prefix(instr,prefix,"emax",emax); 
-     extract_with_prefix(instr,prefix,"ki",ki); 
-     extract_with_prefix(instr,prefix,"kf",kf); 
-     extract_with_prefix(instr,prefix,"calculate_magmoment_oscillation",calculate_magmoment_oscillation);
-     extract_with_prefix(instr,prefix,"calculate_spinmoment_oscillation",calculate_spinmoment_oscillation);
-     extract_with_prefix(instr,prefix,"calculate_orbmoment_oscillation",calculate_orbmoment_oscillation);
-     extract_with_prefix(instr,prefix,"calculate_chargedensity_oscillation",calculate_chargedensity_oscillation);
-     extract_with_prefix(instr,prefix,"calculate_spindensity_oscillation",calculate_spindensity_oscillation);
-     extract_with_prefix(instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
-     extract_with_prefix(instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation);
-     extract_with_prefix(instr,prefix,"calculate_pel_oscillation",calculate_pel_oscillation);
-     extract_with_prefix(instr,prefix,"outS",outS);
-     extract_with_prefix(instr,prefix,"nofthreads",nofthreads);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"emin",emin); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"emax",emax); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ki",ki); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kf",kf); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_magmoment_oscillation",calculate_magmoment_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_spinmoment_oscillation",calculate_spinmoment_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_orbmoment_oscillation",calculate_orbmoment_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_chargedensity_oscillation",calculate_chargedensity_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_spindensity_oscillation",calculate_spindensity_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_pel_oscillation",calculate_pel_oscillation);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"outS",outS);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofthreads",nofthreads);
      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
-      extract(instr, somestring,colcod[usrdefcols[j]]);
-     }
+      if(0==extract_match( findnewmatch,nofinis,lofpref,instr,prefix, somestring,colcod[usrdefcols[j]]))outcolset=true;
+    }
 
-     hklblock+=1-extract_with_prefix(instr,prefix,"hmin",qmin[1]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"kmin",qmin[2]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"lmin",qmin[3]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"hmax",qmax[1]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"kmax",qmax[2]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"lmax",qmax[3]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"deltah",deltaq[1]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"deltak",deltaq[2]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"deltal",deltaq[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmax",qmax[1]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmax",qmax[2]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmax",qmax[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltah",deltaq[1]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltak",deltaq[2]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltal",deltaq[3]); 
      if(hklblock==9){++nofhkllists;hklblock=0;i+=(int)ceil(fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1));}
 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qxmin",qmin[1]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qymin",qmin[2]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qzmin",qmin[3]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qxmax",qmax[1]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qymax",qmax[2]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qzmax",qmax[3]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQx",deltaq[1]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQy",deltaq[2]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQz",deltaq[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmin",qmin[1]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymin",qmin[2]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmin",qmin[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmax",qmax[1]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymax",qmax[2]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmax",qmax[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQx",deltaq[1]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQy",deltaq[2]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQz",deltaq[3]); 
      if(QxQyQzblock==9){++nofhkllists;QxQyQzblock=0;i+=(int)ceil(fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1));}
 
-     if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1,1))
+     if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;
                   fclose(finhkl);++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1,1))
+     if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");while (fgets(hklfile,MAXNOFCHARINLINE,finhkl)!=NULL)++i;
                   fclose(finhkl);++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
+     if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
                  {if(!extract(instr,"Nstp",N))i+=N;++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
+     if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) Nsteps=21
                  {if(!extract(instr,"Nstp",N))i+=N;++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1,1))  
+     if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1,1))  
                  {if(!extract(instr,"Nstp",N)&&!extract(instr,"Mstp",M))i+=N*M;++nofhkllists;
                  }
-     if(!extract_with_prefix(instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1,1))  
+     if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1,1))  
                  {if(!extract(instr,"Nstp",N)&&!extract(instr,"Mstp",M))i+=N*M;++nofhkllists;
                  }
   }
@@ -520,7 +584,7 @@ nofhkls=0;save(file);
     char* c_nofthreads=getenv("MCPHASE_NOFTHREADS");  // Check if system environment variable set from dos.bat/lin.bat
     if (c_nofthreads)
        nofthreads = atoi(c_nofthreads);
-    else {
+    else {  
 #if defined(__linux__)                               // System-dependent calls to find number of processors (from GotoBLAS)
        nofthreads = get_nprocs();
 #elif defined(__FreeBSD__) || defined(__APPLE__)
@@ -536,22 +600,25 @@ nofhkls=0;save(file);
   }
   printf("# nofthreads=%i\n",nofthreads);
   // reread mcdisp.par creating the hkl list ******************************************************************
+  if(hkls!=NULL){ for (i=1;i<=nofhkls;++i) { delete []hkls[i];}delete []hkls;}
   hkls=new double *[i+10]; // dimension the list
   nofhkls=0;hklblock=0;QxQyQzblock=0;
-  hklfile_start_index= new int [nofhkllists+1];hklfile_start_index[0]=nofhkllists;
+  if(hklfile_start_index!=NULL) delete []hklfile_start_index;
+  hklfile_start_index= new int [nofhkllists+1];
+  hklfile_start_index[0]=nofhkllists;
   nofhkllists=0;Vector hkl(1,3),qijk(1,3);
-  fin = fopen(file, "rb"); // if in mcdisp.par we find a hklfile= ... insert hkl from this file into list
+  fin = fopen(parfile, "rb"); // if in mcdisp.par we find a hklfile= ... insert hkl from this file into list
             while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
                {// treat hklblocks
-     hklblock+=1-extract_with_prefix(instr,prefix,"hmin",qmin[1]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"kmin",qmin[2]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"lmin",qmin[3]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"hmax",qmax[1]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"kmax",qmax[2]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"lmax",qmax[3]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"deltah",deltaq[1]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"deltak",deltaq[2]); 
-     hklblock+=1-extract_with_prefix(instr,prefix,"deltal",deltaq[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmax",qmax[1]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmax",qmax[2]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmax",qmax[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltah",deltaq[1]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltak",deltaq[2]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltal",deltaq[3]); 
      if(hklblock==9){++nofhkllists;hklblock=0;hklfile_start_index[nofhkllists]=nofhkls+1;
                     printf("# ... hklblock hklmin(%g %g %g) to hklmax(%g %g %g) with hklstepsize (%g %g %g)\n",qmin(1),qmin(2),qmin(3),qmax(1),qmax(2),qmax(3),deltaq(1),deltaq(2),deltaq(3));
                    for(h1=qmin(1);h1<=qmax(1);h1+=deltaq(1))
@@ -565,15 +632,15 @@ nofhkls=0;save(file);
                                     }
                     }
 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qxmin",qmin[1]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qymin",qmin[2]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qzmin",qmin[3]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qxmax",qmax[1]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qymax",qmax[2]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"Qzmax",qmax[3]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQx",deltaq[1]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQy",deltaq[2]); 
-     QxQyQzblock+=1-extract_with_prefix(instr,prefix,"deltaQz",deltaq[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmin",qmin[1]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymin",qmin[2]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmin",qmin[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmax",qmax[1]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymax",qmax[2]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmax",qmax[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQx",deltaq[1]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQy",deltaq[2]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQz",deltaq[3]); 
      if(QxQyQzblock==9){++nofhkllists;hklblock=0;hklfile_start_index[nofhkllists]=nofhkls+1;
                     printf("# ... hklblock hklmin(%g %g %g) to hklmax(%g %g %g) with hklstepsize (%g %g %g)\n",qmin(1),qmin(2),qmin(3),qmax(1),qmax(2),qmax(3),deltaq(1),deltaq(2),deltaq(3));
                    for(qijk(1)=qmin(1);qijk(1)<=qmax(1);qijk(1)+=deltaq(1))
@@ -588,18 +655,18 @@ nofhkls=0;save(file);
                                     }
                     }
                 // treat hklplane statements
-                if(!extract_with_prefix(instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1,1)) //#hklplane=h0=0 k0=1 l0=0 to hN=1 kN=1 lN=0 Nstp=21 to hM=1 kM=0 lM=3 Mstp=21  
-                 { if(extract(instr,"h0",h0)){printf("error mcdisp reading mcdisp.par: in hklplane - h0 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"k0",k0)){printf("error mcdisp reading mcdisp.par: in hklplane - k0 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"l0",l0)){printf("error mcdisp reading mcdisp.par: in hklplane - l0 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"hN",hN)){printf("error mcdisp reading mcdisp.par: in hklplane - hN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"kN",kN)){printf("error mcdisp reading mcdisp.par: in hklplane - kN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"lN",lN)){printf("error mcdisp reading mcdisp.par: in hklplane - lN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"hM",hM)){printf("error mcdisp reading mcdisp.par: in hklplane - hM not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"kM",kM)){printf("error mcdisp reading mcdisp.par: in hklplane - kM not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"lM",lM)){printf("error mcdisp reading mcdisp.par: in hklplane - lM not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading mcdisp.par: in hklplane - Nstp  not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Mstp",M)){printf("error mcdisp reading mcdisp.par: in hklplane - Mstp  not found");exit (EXIT_FAILURE);}
+                if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklplane",hklline,MAXNOFCHARINLINE-1,1)) //#hklplane=h0=0 k0=1 l0=0 to hN=1 kN=1 lN=0 Nstp=21 to hM=1 kM=0 lM=3 Mstp=21  
+                 { if(extract(instr,"h0",h0)){printf("error mcdisp reading %s: in hklplane - h0 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"k0",k0)){printf("error mcdisp reading %s: in hklplane - k0 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"l0",l0)){printf("error mcdisp reading %s: in hklplane - l0 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"hN",hN)){printf("error mcdisp reading %s: in hklplane - hN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"kN",kN)){printf("error mcdisp reading %s: in hklplane - kN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"lN",lN)){printf("error mcdisp reading %s: in hklplane - lN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"hM",hM)){printf("error mcdisp reading %s: in hklplane - hM not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"kM",kM)){printf("error mcdisp reading %s: in hklplane - kM not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"lM",lM)){printf("error mcdisp reading %s: in hklplane - lM not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklplane - Nstp  not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Mstp",M)){printf("error mcdisp reading %s: in hklplane - Mstp  not found",parfile);exit (EXIT_FAILURE);}
                    printf("# ... hklplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,N,hM,kM,lM,M);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                    for(i=1;i<=N;++i)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
@@ -611,18 +678,18 @@ nofhkls=0;save(file);
                  }
 
                 // treat QxQyQzplane statements
-                if(!extract_with_prefix(instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1,1)) //#QxyQzplane=Qx0=0 Qy0=1 Qz0=0 to QxN=1 QyN=1 QzN=0 Nstp=21 to QxM=1 QyM=0 QzM=3 Mstp=21
-                 { if(extract(instr,"Qx0",h0)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Qx0 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Qy0",k0)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Qy0 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Qz0",l0)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Qz0 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QxN",hN)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - QxN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QyN",kN)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - QyN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QzN",lN)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - QzN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QxM",hM)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - QxM not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QyM",kM)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - QyM not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QzM",lM)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - QzM not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Nstp  not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Mstp",M)){printf("error mcdisp reading mcdisp.par: in QxyQzplane - Mstp  not found");exit (EXIT_FAILURE);}
+                if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzplane",hklline,MAXNOFCHARINLINE-1,1)) //#QxyQzplane=Qx0=0 Qy0=1 Qz0=0 to QxN=1 QyN=1 QzN=0 Nstp=21 to QxM=1 QyM=0 QzM=3 Mstp=21
+                 { if(extract(instr,"Qx0",h0)){printf("error mcdisp reading %s: in QxyQzplane - Qx0 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Qy0",k0)){printf("error mcdisp reading %s: in QxyQzplane - Qy0 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Qz0",l0)){printf("error mcdisp reading %s: in QxyQzplane - Qz0 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QxN",hN)){printf("error mcdisp reading %s: in QxyQzplane - QxN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QyN",kN)){printf("error mcdisp reading %s: in QxyQzplane - QyN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QzN",lN)){printf("error mcdisp reading %s: in QxyQzplane - QzN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QxM",hM)){printf("error mcdisp reading %s: in QxyQzplane - QxM not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QyM",kM)){printf("error mcdisp reading %s: in QxyQzplane - QyM not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QzM",lM)){printf("error mcdisp reading %s: in QxyQzplane - QzM not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in QxyQzplane - Nstp  not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Mstp",M)){printf("error mcdisp reading %s: in QxyQzplane - Mstp  not found",parfile);exit (EXIT_FAILURE);}
                    printf("# ... QxyQzplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,N,hM,kM,lM,M);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                    for(i=1;i<=N;++i)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
@@ -639,14 +706,14 @@ nofhkls=0;save(file);
 
 
                 // treat hklline statements
-                if(!extract_with_prefix(instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
-                 { if(extract(instr,"h1",h1)){printf("error mcdisp reading mcdisp.par: in hklline - h1 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"k1",k1)){printf("error mcdisp reading mcdisp.par: in hklline - k1 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"l1",l1)){printf("error mcdisp reading mcdisp.par: in hklline - l1 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"hN",hN)){printf("error mcdisp reading mcdisp.par: in hklline - hN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"kN",kN)){printf("error mcdisp reading mcdisp.par: in hklline - kN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"lN",lN)){printf("error mcdisp reading mcdisp.par: in hklline - lN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading mcdisp.par: in hklline - Nstp  not found");exit (EXIT_FAILURE);}
+                if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
+                 { if(extract(instr,"h1",h1)){printf("error mcdisp reading %s: in hklline - h1 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"k1",k1)){printf("error mcdisp reading %s: in hklline - k1 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"l1",l1)){printf("error mcdisp reading %s: in hklline - l1 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"hN",hN)){printf("error mcdisp reading %s: in hklline - hN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"kN",kN)){printf("error mcdisp reading %s: in hklline - kN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"lN",lN)){printf("error mcdisp reading %s: in hklline - lN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklline - Nstp  not found",parfile);exit (EXIT_FAILURE);}
                     printf("# ... hklline (%g %g %g) to (%g %g %g) with %g points\n",h1,k1,l1,hN,kN,lN,N);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                    for(i=1;i<=N;++i){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
@@ -657,14 +724,14 @@ nofhkls=0;save(file);
                                     }
                  }
                 // treat QxQyQzline statements
-                if(!extract_with_prefix(instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
-                 { if(extract(instr,"Qx1",h1)){printf("error mcdisp reading mcdisp.par: in hklline - h1 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Qy1",k1)){printf("error mcdisp reading mcdisp.par: in hklline - k1 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Qz1",l1)){printf("error mcdisp reading mcdisp.par: in hklline - l1 not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QxN",hN)){printf("error mcdisp reading mcdisp.par: in hklline - hN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QyN",kN)){printf("error mcdisp reading mcdisp.par: in hklline - kN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"QzN",lN)){printf("error mcdisp reading mcdisp.par: in hklline - lN not found");exit (EXIT_FAILURE);}
-                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading mcdisp.par: in hklline - N  not found");exit (EXIT_FAILURE);}
+                if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzline",hklline,MAXNOFCHARINLINE-1,1))  // #!hklline=(h1=0 k1=0 l1=1) to (hN=0 kN=0 lN=2) N=21
+                 { if(extract(instr,"Qx1",h1)){printf("error mcdisp reading %s: in hklline - h1 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Qy1",k1)){printf("error mcdisp reading %s: in hklline - k1 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Qz1",l1)){printf("error mcdisp reading %s: in hklline - l1 not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QxN",hN)){printf("error mcdisp reading %s: in hklline - hN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QyN",kN)){printf("error mcdisp reading %s: in hklline - kN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"QzN",lN)){printf("error mcdisp reading %s: in hklline - lN not found",parfile);exit (EXIT_FAILURE);}
+                   if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklline - N  not found",parfile);exit (EXIT_FAILURE);}
                     printf("# ... QxQyQzline (%g %g %g)/A to (%g %g %g)/A with %g points\n",h1,k1,l1,hN,kN,lN,N);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                    for(i=1;i<=N;++i){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
@@ -679,13 +746,13 @@ nofhkls=0;save(file);
                                     }
                  }
                  // treat hklfile statements
-                if(!extract_with_prefix(instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1,1))
+                if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                   read_hkl_list(finhkl,hkls,0,do_jqfile,abc);
                   fclose(finhkl);
                  }
                  // treat QxQyQzfile statements
-                if(!extract_with_prefix(instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1,1))
+                if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"QxQyQzfile",hklfile,MAXNOFCHARINLINE-1,1))
                  {finhkl=fopen_errchk(hklfile,"rb");++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                   read_hkl_list(finhkl,hkls,1,do_jqfile,abc);
                   fclose(finhkl);
@@ -695,33 +762,59 @@ nofhkls=0;save(file);
        fclose (fin);
        // now read also the hkls in mcdisp.par
       ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-      fin = fopen(file, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
-      if(nofhkls==0){fprintf(stderr,"Warning mcdisp: no hkl's found in mcdisp.par - please edit and insert- doing now  a calculation only for Q=(100)\n");
+      fin = fopen(parfile, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
+      if(nofhkls==0){fprintf(stderr,"Warning mcdisp: no hkl's found in %s - please edit and insert- doing now  a calculation only for Q=(100)\n",parfile);
                 nofhkls=1;hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
                                      hkls[nofhkls][1]=1;
                                      hkls[nofhkls][2]=0;
                                      hkls[nofhkls][3]=0;}      
       save();
+return 0;
 }
 
 
 // *************************************************************************
-//constructor ... load initial parameters from file
-inimcdis::inimcdis()
-{savfilename=NULL;info=NULL;prefix=NULL;hkls=NULL;hklfile_start_index=NULL;
+//load parameters from file
+int inimcdis::load (char * spinfile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat)
+{int n=-1;char ** lp; lp=NULL;
+return load(n,lp,spinfile,pref,do_jqfile, abc,nofcomp,nofat);
 }
-
+//constructor ... load initial parameters from file
+inimcdis::inimcdis(const char * file,char * pref,char * spinfile,
+                   int & do_jqfile,Vector & abc,
+                   int & nofcomp,int & nofat)
+{hkls=NULL;hklfile_start_index=NULL;Hext=Vector(1,HEXT_DIMENSION);Habc=Vector(1,3);Eabc=Vector(1,3);
+ qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);mf=mfcf(1,1,1,nofat,nofcomp);
+  parfile= new char [MAXNOFCHARINLINE];
+  snprintf(parfile,MAXNOFCHARINLINE,"%s%s",pref,file);
+ info= new char [MAXNOFCHARINLINE];
+  prefix = new char[MAXNOFCHARINLINE];
+  strcpy(prefix,pref);
+  printf("reading file %s\n",file);
+  if(load(spinfile,pref,do_jqfile, abc,nofcomp,nofat)!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",parfile,file);
+                strcpy(parfile,file);}
+                if(load(spinfile,pref,do_jqfile, abc,nofcomp,nofat)!=0){
+    fprintf(stderr,"# Warning: Cannot load file %s - using default values ! \n",parfile); 
+// insert  here default values and save into mcdisp.par
+emin=-100;emax=100;ki=0;kf=100;colcod[1]=5;colcod[2]=6;colcod[3]=7;colcod[4]=4;
+nofhkls=0;
+info[0]='\0';prefix[0]='\0';
+save(parfile); 
+  }
+ }
+}
 
 //kopier-konstruktor 
 inimcdis::inimcdis (const inimcdis & p)
 { do_jqf=p.do_jqf;
-  savfilename= new char [strlen(p.savfilename)+1];
-  strcpy(savfilename,p.savfilename);
- info= new char [strlen(p.info)+1];strcpy(info,p.info);
- prefix= new char [strlen(p.prefix)+1]; strcpy(prefix,p.prefix);  
+  parfile= new char [MAXNOFCHARINLINE];
+  strcpy(parfile,p.parfile);
+ info= new char [MAXNOFCHARINLINE];strcpy(info,p.info);
+ prefix= new char [MAXNOFCHARINLINE]; strcpy(prefix,p.prefix);  
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   Eabc=Vector(1,3);Habc=Vector(1,3);
+  Hext=Vector(1,HEXT_DIMENSION); Hext=p.Hext;
   Eabc=p.Eabc;Habc=p.Habc;
   qmin=p.qmin;
   qmax=p.qmax;
@@ -739,27 +832,30 @@ inimcdis::inimcdis (const inimcdis & p)
   calculate_pel_oscillation=p.calculate_pel_oscillation;
   outS=p.outS;
     deltaq=p.deltaq;  
+  nofthreads=p.nofthreads;
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
   mf=mfcf(1,1,1,nofatoms,nofcomponents);mf=p.mf;T=p.T;
   nofhkls=p.nofhkls;
-  int i,j;
-      hkls=new double *[nofhkls+10];
+  int i,j;if(p.hkls!=NULL)
+    {  hkls=new double *[nofhkls+10];
       for (j=1;j<=nofhkls;++j) 
   	      {if ((int)p.hkls[j][0]==3){hkls[j]=new double [NOFHKLCOLUMNS+1];}
                else {hkls[j]=new double [(int)p.hkls[j][0]+1];}
                for(i=0;i<=p.hkls[j][0];++i)
          	    {hkls[j][i]=p.hkls[j][i];}
 	      }
-       int nofhkllists=p.hklfile_start_index[0];
+     }else hkls=NULL;
+    if(p.hklfile_start_index!=NULL)
+    {  int nofhkllists=p.hklfile_start_index[0];
        hklfile_start_index= new int [nofhkllists+1];hklfile_start_index[0]=nofhkllists;
       for (j=1;j<=nofhkllists;++j) hklfile_start_index[j]=p.hklfile_start_index[j]; 
-   
+    } else hklfile_start_index=NULL;
 }
 
 //destruktor
 inimcdis::~inimcdis ()
-{if (savfilename!=NULL)delete []savfilename;
+{if (parfile!=NULL)delete []parfile;
  if (info!=NULL)delete []info;
  if(prefix!=NULL) delete []prefix;
  int i;
@@ -771,3 +867,42 @@ if(hkls!=NULL)
    delete  []hklfile_start_index;
  }
 }
+
+
+//***************************************************************
+//constructor ... load initial parameters from file
+inimdpars::inimdpars (const char * file,char * pref,char * spinfile,
+             int & do_jqfile,Vector & abc,
+             int & nofcomponents,int & nofatoms)
+{ inis=new inimcdis*[MAXNOFINIS];
+  char * lofprefixes[MAXNOFINIS];
+  int nofinisold=-1;nofinis=0;
+// here we have to load inis[1...nofinis] with different prefixes matching pref - until no new matching
+// prefix is found ...
+  while(nofinisold<nofinis&&nofinis<MAXNOFINIS)
+  {inis[nofinis]=new inimcdis(file,pref,spinfile,do_jqfile,abc,nofcomponents,nofatoms);
+   nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes,spinfile,pref,do_jqfile,abc,nofcomponents,nofatoms);
+  }
+ 
+
+// remove last inis, because it does not contain a new prefix
+if(nofinis>0&&nofinis<MAXNOFINIS){delete inis[nofinis];} 
+if(nofinis==0)nofinis=1;
+
+}
+
+
+//kopier-konstruktor  inimcdiss
+inimdpars::inimdpars (const inimdpars & p)
+{ nofinis=p.nofinis;
+  inis=new inimcdis*[MAXNOFINIS];
+  for(int i=0;i<nofinis;++i)inis[i]=new inimcdis((*p.inis[i]));
+}
+
+//destruktor inimcdiss
+inimdpars::~inimdpars ()
+{//printf("hello destruktor inimcdiss %i\n",nofinis);  
+ for(int i=0;i<nofinis;++i)delete  inis[i];
+delete []inis;
+//printf("hello destruktor inimcdis\n");  
+ }

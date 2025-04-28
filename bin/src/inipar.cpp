@@ -325,7 +325,7 @@ void inipar::print_usrdefcols(FILE *fout,float & x, float & y,double& T,Vector &
  for(int i=1;i<=usrdefcols[0];++i)
  { double val=calccolvalue(colcod[i],x,y,T,Hext,abc);
    if(withtext)fprintf(fout,"%s=%4.4g ",colhead[colcod[i]],myround(val));
-   else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[colcod[i]])-8 < 0 ? :0),"",myround(val));
+   else fprintf(fout,"%*s%4.4g ",(int)(strlen(colhead[colcod[i]])-8 < 0 ? 0 :strlen(colhead[colcod[i]])-8 ),"",myround(val));
    c[colcod[i]]=true;
  }
 if (!c[0]){fprintf(stderr,"#Error: Temperature T not stored  - please change settings out out* in mcphas.ini\n");exit(EXIT_FAILURE); }
@@ -413,7 +413,9 @@ int inipar::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * ins
  }
  }
  if(n>0)
- {return extract_with_prefix(instr,lofpref[n-1],parameter,var);
+ {
+ if(findnewmatch==true) return extract(instr,parameter,var);  // if we still have to find new match: return without prefix 
+  else return extract_with_prefix(instr,lofpref[n-1],parameter,var); // if a new match has been found: return parameters with this new prefix
  }
  else
  {return extract_with_prefix(instr,pref,parameter,var);
@@ -553,6 +555,8 @@ int inipar::load (int & nofinis,char**lofpref)
  for(int i=1;i<=usrdefcols[0];++i){if(colcod[i]>COLHEADDIM)
  {fprintf(stderr,"Error reading mcphas.ini - out%i = %i > %i not possible !\n",i,colcod[i],COLHEADDIM);exit(EXIT_FAILURE);}
  }
+
+//if(nofinis>0)printf("prefix=%s Ha0=%g Hb0=%g Hc0=%g\n",lofpref[nofinis-1],zero(1),zero(2),zero(3));
 
   if (Norm(xv)==0){fprintf(stderr,"ERROR reading xT xHa xHb xHc=0\n");return 1;}
   if (Norm(yv)==0){fprintf(stderr,"ERROR reading yT yHa yHb yHc=0\n");return 1;}

@@ -78,13 +78,13 @@ int mfcf::load(FILE * fin_coq)
   nb[0]=MAXNOFSPINS;
   nc[0]=MAXNOFSPINS;
   long int pos;
-  
   pos=ftell(fin_coq);if (pos==-1) return 0;
-
 nn1=0;j=0;
+
 while ((i=inputline (fin_coq, na))!=0)  
    {for (l=1;l<=nofcomponents*nofatoms-2;++l){inputline (fin_coq, nb);}
-    nn1=i;i=inputline (fin_coq, nc);++j;}
+    nn1=i;i=inputline (fin_coq, nc);++j;
+   }
 // j (nofspins in b direction)determined
 if (nn1==0) return 0; // no block to read any more
 nn2=j;

@@ -55,7 +55,27 @@ if ($^O=~/MSWin/){$line=~s/^\s*rem/#/i; # i ... case insensitive pattern matchin
                   $line=~s/^\s*rm\s/del /;
                   $line=~s/^\s*cp\s/copy /;
                   $line=~s|/|\\|ig;
-                  
+                  $line=~s|'|"|ig;
+# mcphas commands with second parameter having an eval
+@com1=(
+'fact',
+'fermicol',
+'fillcol',
+'potcol',
+'setvariable',
+'shiftc',
+      );
+ foreach(@com1){
+                  $line=~s|($_[^\s]*\s+[^\s]*\s+[^\s]+)\\([^\s]+\s)|$1/$2|ig;}
+# mcphas commands with other parameters having a eval
+#'fitcol',4,5
+# fitfermi 1 2 3 4 5
+# ga 1 3 4 5
+# gauss 1 2 3 4
+# gauss2d  1-9
+# gausscol 2 3 4
+# ...
+                 $line=~s/chmod/# chmod/g;
                  } else
                  {$line=~s/^\s*call\s//i;
                   $line=~s/^\s*del\s/rm /i;
@@ -77,7 +97,7 @@ $i=0;foreach $name (@var)
 ++$i;
 }
 
-if ($^O=~/MSWin/){$line=~s/^\s*([\w]+).pl/perl \%MCPHASE_DIR\%\\bin\\$1.pl/;
+if ($^O=~/MSWin/){$line=~s/^\s*([\w]+)\.pl/perl \%MCPHASE_DIR\%\\bin\\$1.pl/;
 # print $line."\n";
              }
      unless ($line=~/^\s*[#\n]/){

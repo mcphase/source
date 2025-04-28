@@ -415,7 +415,7 @@ void dispcalc(inimcdis & ini,par & inputpars,int calc_rixs,int calcXobs,int do_p
  mdcf md(ini.mf.na(),ini.mf.nb(),ini.mf.nc(),inputpars.cs.nofatoms,ini.nofcomponents,nofEstps,do_Erefine);
   char str[MAXNOFCHARINLINE];
    ini.mfstring(str,MAXNOFCHARINLINE);
-  
+
    
  if (do_readtrs==0)
  {
@@ -713,7 +713,6 @@ fprintf(stdout,"\n");
            Jl.mati(s,ss)= 0;// set Js,ss(q)=0 
    }}}
  }}}
-
 #ifdef _THREADS_JSSS
        thrdat.q = q; thrdat.thread_id = -1;       
    for (ithread=0; ithread<NUM_THREADS; ithread++) 
@@ -726,6 +725,7 @@ fprintf(stdout,"\n");
    } 
    int thrcount=0, ithread=0;
 #endif
+
 #ifdef _THREADS
 int num_threads_started=-1;
 #endif
@@ -734,11 +734,13 @@ int num_threads_started=-1;
    for(ll=1;ll<=inputpars.cs.nofatoms;++ll)
    { //sum up l.th neighbour interaction of crystallographic atom ll
      // 1. transform dn(l) to primitive lattice and round it to integer value
+
   #ifndef _THREADS_JSSS
       jsss_mult(ll,nofneighbours,q,inputpars,ini,J,md);
   #else
       thrcount++;
       tin[ithread]->level=ll;
+
       #if defined  (__linux__) || defined (__APPLE__)
       rc = pthread_create(&threads[ithread], &attr, jsss_mult, (void *) tin[ithread]);
       if(rc) { printf("Error return code %i from jsss thread %i\n",rc,ithread+1); exit(EXIT_FAILURE); }
@@ -1765,7 +1767,7 @@ double staq=(hmax-ini.hkls[firstcounter][1])*(hmax-ini.hkls[firstcounter][1])+(k
      }
     else
      {
-      if(!calc_rixs||!calcXobs){staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
+      if(!calc_rixs&&!calcXobs){staout(foutqom,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(foutqei,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       staout(stdout,sta,sta_int,sta_without_antipeaks,sta_int_without_antipeaks,sta_without_weights,sta_int_without_weights,sta_without_antipeaks_weights,sta_int_without_antipeaks_weights);
       if (do_Erefine==1){fclose(foutds);}
@@ -1806,8 +1808,7 @@ int main (int argc, char **argv)
  fprintf(stderr,"#* reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");
  fprintf(stderr,"#*            M. Rotter J. Comp. Mat. Sci. 38 (2006) 400\n");
  fprintf(stderr,"#***********************************************************************\n\n");
- inimcdis ini;
-
+int errexit=0;
 //***************************************************************************************
 // check command line parameters 
 //***************************************************************************************
@@ -1864,15 +1865,23 @@ for (i=1;i<=argc-1;++i){
                       else if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
-                       else if(strncmp(argv[i],"-h",2)==0) {ini.helpexit();}
+                       else if(strncmp(argv[i],"-h",2)==0) {errexit=1;}
               	       else{strcpy(spinfile,argv[i]);}
                           
    } // for i in args
   // as class load  parameters from file
   par inputpars("./mcphas.j",do_verbose);
-  ini.load("mcdisp.par",spinfile,prefix,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
+ 
 
+  inimdpars inip("mcdisp.par",prefix,spinfile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms); 
+  //ini.load("mcdisp.par",spinfile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
 
+  if(errexit==1)(*inip.inis[0]).helpexit();
+// loop for different prefixes ...
+   for(int ninis=0;ninis<inip.nofinis;++ninis)
+{inimcdis ini((*inip.inis[ninis]));
+
+  if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
   if(calc_rixs&&calcXobs){fprintf(stderr,"Error mcdisp: Options -X[observable] and -x -xa -xaf cannnot be used simultaneously, please use only one of these options\n");exit(EXIT_FAILURE);}
   if(do_Erefine&&(calc_rixs||calcXobs)){fprintf(stderr,"Error mcdisp: Option -r not possible in combination with option -x -xa -xaf -X[observable]\n");exit(EXIT_FAILURE);}
@@ -1914,7 +1923,7 @@ std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel
 #else
 std::cout << "# mcdisp was compiled without parallel processing option " << std::endl;
 #endif
-
+}
    fprintf(stderr,"#************************************************************\n");
    fprintf(stderr,"#                    End of Program mcdisp\n");
    fprintf(stderr,"# reference: M. Rotter et al. J. Appl. Phys. A74 (2002) 5751\n");

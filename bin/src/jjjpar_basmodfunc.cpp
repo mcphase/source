@@ -26,7 +26,7 @@ void jjjpar::getpolar(double x,double y, double z, double & r, double & th, doub
 void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int verbose)
   {char * error;
    *(void **)(&symbol)=dlsym(handle,func);
-   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL){fprintf (stderr," %s - continuing\n",error);}symbol=NULL;}
+   if ((error=dlerror())!=NULL) {if(strstr(error,"symbol not found")==NULL&&strstr(error,"undefined symbol")==NULL){fprintf (stderr," %s - continuing\n",error);}symbol=NULL;}
                           else {if(verbose)fprintf (stderr,"%s ",func);}
   }  
 #endif

@@ -39,7 +39,7 @@ unless ($#ARGV >4)
                          order to allow for x dependent resolution \n";
  exit 0;}else{print STDERR "#* $0 *\n";}
 
-
+print "\@echo off\n";
 print "echo $ds# $0 @ARGV$ds\n";
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$c1=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$c2=eval $ARGV[0];shift @ARGV;
@@ -299,4 +299,5 @@ echo $ds#$ds
 echo $ds# M. Rotter and A. Boothroyd Phys. Rev. B 79 (2009) 140405R$ds
 echo $ds#$ds
 echo $ds# ***************************************************************$ds
+echo on
 EOF

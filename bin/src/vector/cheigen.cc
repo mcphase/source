@@ -16,6 +16,7 @@
 
 #include "vector.h"
 #include <cstdio>
+#include <cfloat>
 
 //----------------------------------------------------------------------------//
 void EigenSystemHermitean (Matrix& z, Vector& d, Matrix& zr, Matrix& zi, 
@@ -251,7 +252,7 @@ void Chtred (Matrix& z, Vector& d, Vector& e, Vector& t1, Vector& t2)
 		f = hypot(zi[l],zl[i]);
 
 		// form next diagonal element of matrix T
-		if (f == 0.0) {
+		if (f < DBL_MIN) {
 		    t1[l] = -t1[i];
 		    si = t2[i];
 		    zi[l] = g;
@@ -263,9 +264,9 @@ void Chtred (Matrix& z, Vector& d, Vector& e, Vector& t1, Vector& t2)
 		    g = 1 + g / f;
 		    zi[l] *= g;
 		    zl[i] *= g;
-		    f = 0.0;
+		    
 		}
-
+                   f = 0.0;
 		if (l != lo) {
 
 		    for (j = lo; j <= l; j++) {

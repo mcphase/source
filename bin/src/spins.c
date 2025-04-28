@@ -265,15 +265,15 @@ break;
                                      }
 
 if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;gp.spins_colour=3; gp.spins_scale_moment=1;//arrowdim=SPIN_EV_DIM;
-                              snprintf(gp.title,sizeof(gp.title),"%s arrows correspond to the spins",gp.title);}
+                              snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the spins");}
 else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;gp.spins_colour=2; gp.spins_scale_moment=1;//arrowdim=ORBMOM_EV_DIM;
-                                   snprintf(gp.title,sizeof(gp.title),"%s arrows correspond to the orbital angular momenta",gp.title);}
+                                   snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the orbital angular momenta");}
 else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins_scale_moment=1;//arrowdim=MAGMOM_EV_DIM;
-                                   snprintf(gp.title,sizeof(gp.title),"%s arrows correspond to the magnetic moments",gp.title);
+                                   snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the magnetic moments");
                                    if(strcmp(argv[os],"-Mi")==0){arrow=4;}
                                    }
 else if(strncmp(argv[1+os],"-pel",4)==0){os+=1;arrow=5;gp.spins_colour=4; gp.spins_scale_moment=1;//arrowdim=MAGMOM_EV_DIM;
-                                   snprintf(gp.title,sizeof(gp.title),"%s arrows correspond to the electric dipole moments",gp.title);
+                                   snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the electric dipole moments");
                                    }
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}

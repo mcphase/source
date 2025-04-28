@@ -164,7 +164,7 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
    // now token is  at = 
   (*token)='\0';
   te=token+1+strspn(token," \t");te+=strcspn(te," \t\n\0");
-  snprintf(instr,MAXNOFCHARINLINE,"%s=%g%s",instr,var,te);
+  snprintf(token,MAXNOFCHARINLINE-(token-instr),"=%g%s",var,te);
   return 0;
 }
 // same for int

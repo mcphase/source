@@ -94,8 +94,8 @@
 # - some lines in reciprocal space 
 #
 #!test_hklline=h1=1 k1=1 l1=0.3 to hN=1 kN=1 lN=1.1 Nstp=2
-#!001hklline=h1=1 k1=1 l1=0.3 to hN=1 kN=1 lN=1.1 Nstp=6
-#!002hklline=h1=1 k1=1 l1=0.3 to hN=1 kN=1 lN=2.1 Nstp=21
+#!cf0_100hklline=h1=1 k1=1 l1=0.3 to hN=1 kN=1 lN=1.1 Nstp=6
+#!cf_100hklline=h1=1 k1=1 l1=0.3 to hN=1 kN=1 lN=2.1 Nstp=21
 #!003hklline=h1=1 k1=1 l1=0.3 to hN=1 kN=1 lN=1.1 Nstp=6
 #!004hklline=h1=1 k1=1 l1=0.3 to hN=1 kN=1 lN=2.1 Nstp=21
 #hklline=h1=0 k1=2 l1=0 to hN=1 kN=1 lN=0 Nstp=21

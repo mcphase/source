@@ -17,9 +17,9 @@ getvariable.pl -c -253.893 Eigenvalues results/Pr3p.sipf.levels.cef
 # lorentz for comparison to -XM dynamic susceptibility option of singleion
 lorentz 2 0.2 -40 40 > res.dat
 # convolute (must be .pl because of eval in convolute command batch)
-convolute.pl  6 8 results/Pr3p.sipf.trs 1 2 res.dat > dd
-chmod +x dd 
-./dd > Ma.clc
+convolute.pl  6 8 results/Pr3p.sipf.trs 1 2 res.dat > dd.bat
+chmod +x dd.bat
+./dd.bat > Ma.clc
 singleion -XM 0 1 -nt 100 -Esteps 300 200 -r Pr3p.sipf 5 1000 0 0  0 0 0 > dd
 
 getvalue.pl -c 0.037 9 10 79.333 0 dd
@@ -63,6 +63,6 @@ getvalue.pl -c 3.13267 3 12 1000 0 Ma.clc
 
 
 
-rem rm Pr3p.sipf Ma.clc res.dat dd
+rem rm Pr3p.sipf Ma.clc res.dat dd dd.bat
 
 

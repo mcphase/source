@@ -21,3 +21,4 @@
 
 #define SMALLPOSITIONDEVIATION 1e-4  // used in mcdiff mcphas to see if a lattice atom position matches or not
 #define HUGE_EXP   200   // huge value of E/kT in exp(E/kT)
+#define MAXNOFINIS 100  // maximum number of different prefixes in mcphas.ini mcdisp.ini

@@ -57,7 +57,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
                                  {strcpy(readprefix,argv[im+1]); // read prefix
                                   fprintf(stdout,"#reading stable points from mcphas ouput files: results/%s*\n",readprefix);
  				 if (options<im+1)options=im+1;}
-  }
+  }	
     inipars inip("mcphas.ini",prefix);   
    
     if(errexit==1)(*inip.inis[0]).errexit();
@@ -88,8 +88,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
 
 // as class par load  parameters from file
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.j");
-fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.j");
-fclose(fin);
+fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.j"); else fclose(fin);
  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  par inputpars(prefix,verbose); 
 // here save single ion property files to results
@@ -104,8 +103,8 @@ if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calc
 if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
 // as class par load  parameters derivatives from file
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdx");
- fin=fopen(prefix,"rb"); if(fin==NULL)strcpy(prefix,"mcphas.djdx");
- fclose(fin);fin=fopen(prefix,"rb");
+ fin=fopen(prefix,"rb"); if(fin==NULL)strcpy(prefix,"mcphas.djdx"); else  fclose(fin);
+  fin=fopen(prefix,"rb");
  if(fin!=NULL){
  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  ini.ipx= new par(prefix,verbose);  
@@ -115,8 +114,8 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdx");inputpars.save(prefix,0);
                              
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdy");
-FILE*fin1;fin1=fopen(prefix,"rb");  if(fin1==NULL)strcpy(prefix,"mcphas.djdy");
-fclose(fin1);fin1=fopen(prefix,"rb");
+FILE*fin1;fin1=fopen(prefix,"rb");  if(fin1==NULL)strcpy(prefix,"mcphas.djdy"); else fclose(fin1);
+fin1=fopen(prefix,"rb");
 if(fin1!=NULL){
   if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  ini.ipy= new par(prefix,verbose); 
@@ -125,8 +124,8 @@ if(fin1!=NULL){
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdy");inputpars.save(prefix,0);
                              
  strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdz");
-  FILE * fin2; fin2=fopen(prefix,"rb"); if(fin2==NULL)strcpy(prefix,"mcphas.djdz");
-fclose(fin2);fin2=fopen(prefix,"rb");
+  FILE * fin2; fin2=fopen(prefix,"rb"); if(fin2==NULL)strcpy(prefix,"mcphas.djdz"); else fclose(fin2);
+fin2=fopen(prefix,"rb");
 if(fin2!=NULL){
   if(verbose==1){printf("reading parameters from file %s\n",prefix);}
  ini.ipz= new par(prefix,verbose);  
@@ -153,8 +152,8 @@ fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
   if(((*ini.ipx)!=(*ini.ipz))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdz in nofneighbours or neighbour positions\n");exit(1);}
  fprintf(stderr,"# ... these are no problems, continuing\n");
  if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
-  }fclose(fin);
-          }
+  fclose(fin);
+  }        }
 
 
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
@@ -184,8 +183,7 @@ if(verbose==1)printf("... done\n");
 T=0.0;h=0;
 // load testspinconfigurations (nooftstspinconfigurations,init-file,sav-file)
     strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.tst");
-    fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.tst");
-    fclose(fin);
+    fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.tst");else    fclose(fin);
     strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);strcpy(outfilename+10+strlen(ini.prefix),"mcphas.phs");
     testspincf testspins (ini.maxnoftestspincf,prefix,outfilename,inputpars.cs.nofatoms,inputpars.cs.nofcomponents);
     strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);

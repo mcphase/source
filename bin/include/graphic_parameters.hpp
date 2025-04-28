@@ -34,7 +34,7 @@ double density_dtheta,density_dfi;
 double threshhold;
 int gridi,gridj,gridk;
 
-char title[100];
+char title[MAXNOFCHARINLINE];
 
 ~graphic_parameters();
 

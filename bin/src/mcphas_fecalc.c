@@ -179,8 +179,8 @@ if(stat==0)
 else
  (*inputpars.jjj[l]).Icalc(moment,T,d1,Hex,lnzi[s][l],ui[s][l],(*Icalcpars[inputpars.cs.nofatoms*ss+l-1]),stat[l]);
 
-   if(isnan(lnzi[s][l])){fprintf (stderr, "Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    if(isnan(ui[s][l])){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   if(isnan(lnzi[s][l])){fprintf (stderr, "calc_spsijk: Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
    for(int m1=1;m1<=inputpars.cs.nofcomponents;++m1)
    {m(lm1m3+m1)=moment[m1];}
   }
@@ -224,7 +224,7 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
  ++ini.nofcalls;
  spinchange=0; // initial value of spinchange
  sdim=sps.in(sps.na(),sps.nb(),sps.nc()); // dimension of spinconfigurations
- Vector  * lnzi; lnzi=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){lnzi[i]=Vector(1,inputpars.cs.nofatoms);} // partition sum for every atom
+ Vector  * lnzi; lnzi=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){lnzi[i]=Vector(1,inputpars.cs.nofatoms);lnzi[i]=0;} // partition sum for every atom
  Vector  * ui; ui=new Vector [sdim+2];for(i=0;i<=sdim+1;++i){ui[i]=Vector(1,inputpars.cs.nofatoms);ui[i]=0;} // magnetic energy for every atom
  ComplexMatrix ** Icalcpars;Icalcpars=new ComplexMatrix*[inputpars.cs.nofatoms*sdim+2];
 
@@ -718,8 +718,8 @@ for(r=1;r<nofMC;++r)
  (*inputpars.jjj[l]).Icalc(Imom,TT,d1,Hex,lnzi[s][l],En(l),(*Icalcpars[inputpars.cs.nofatoms*sps.in(i-1,j-1,k-1)+l-1]),states[s][l]);
   // returns the moment Imom and the energy En(l) of a random chosen Energy eigenstate, 
   // which is returned in states[s][l] (to be used for physical property calculations)
-   if(isnan(lnzi[s][l])){fprintf (stderr, "Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
-   if(isnan(En(l))){fprintf (stderr, "Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   if(isnan(En(l))){fprintf (stderr, "MC_loop: Icalc returns ui=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
+   if(isnan(lnzi[s][l])){fprintf (stderr, "MC_loop:Icalc returns lnzi=nan for s=%i l=%i\n",s,l);exit (EXIT_FAILURE);}
     for(m1=1;m1<=inputpars.cs.nofcomponents;++m1){
       mn(lm1m3+m1)=Imom[m1];
      if(physprops!=NULL){dtotalJ(m1)=(Imom[m1]-sps.m(i,j,k)(lm1m3+m1))/(sps.n()*sps.nofatoms);}
@@ -880,7 +880,8 @@ if (verbose)
 
  
 // Energy
- if(nofMC>0)U/=nofMC/2;   U/=sps.n()*sps.nofatoms; U+=E0;
+ if(nofMC>0)U/=nofMC/2;   
+  U/=sps.n()*sps.nofatoms; U+=E0;
 
 // Operators <I>
  if(physprops!=NULL)if(nofMC>0){

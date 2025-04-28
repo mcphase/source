@@ -132,7 +132,7 @@ pchr=strstr(filename+10,"\\");
         fout_trs = fopen_errchk (filename,"w");
         char outstring[MAXNOFCHARINLINE];
         snprintf(outstring,MAXNOFCHARINLINE," T= %g K Hi=%g Hj=%g Hk=%g T",TT,Hext(1),Hext(2),Hext(3));
-       if(HEnofcomp>5)snprintf(outstring+strlen(outstring),MAXNOFCHARINLINE,"  Ei=%g Ej=%g Ek=%g kV/mm",Hext(4),Hext(5),Hext(6));
+       if(HEnofcomp>5)snprintf(outstring+strlen(outstring),MAXNOFCHARINLINE-strlen(outstring),"  Ei=%g Ej=%g Ek=%g kV/mm",Hext(4),Hext(5),Hext(6));
         trs_header_out(fout_trs,pinit,ninit,maxE,outstring,observable);
 
         jjj.maxE=maxE;jjj.pinit=pinit;jjj.ninit=ninit;
@@ -172,7 +172,7 @@ pchr=strstr(filename+10,"\\");
        while (feof(fin)==0)
        {if ((i1=inputline(fin,nn))>=6)
        {int tn=(int)nn[5];if(nn[6]>=-SMALL_QUASIELASTIC_ENERGY){++jmin;
-                        if(Ti==1&&!elevels){ snprintf(trsstring,MAXNOFCHARINLINE,"%s%4g ",trsstring,nn[6]);}
+                        if(Ti==1&&!elevels){ snprintf(trsstring+strlen(trsstring),MAXNOFCHARINLINE-strlen(trsstring),"%4g ",nn[6]);}
                                                                }
         // calculate delta(single ion excitation energy), 
         // Malphabeta(transition matrix elements)

@@ -1,4 +1,62 @@
 
+
+//output for javaview *******************************************************************
+void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
+                    double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
+                    Vector & Hext,cryststruct & cs4,
+                    spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag,
+                    spincf & phonon,spincf & pev_real, spincf & pev_imag)
+{ int l;
+ // some checks
+ if(nofatoms!=densityev_real.nofatoms||nofa!=densityev_real.na()||nofb!=densityev_real.nb()||nofc!=densityev_real.nc()||
+    nofatoms!=densityev_imag.nofatoms||nofa!=densityev_imag.na()||nofb!=densityev_imag.nb()||nofc!=densityev_imag.nc()||
+    nofcomponents<densityev_real.nofcomponents||densityev_real.nofcomponents!=densityev_imag.nofcomponents)
+    {fprintf(stderr,"Error creating jvx movie files: eigenvector read from .qev file dim %i does not match  dimension %i of spins structure read from sps file\n",nofcomponents,densityev_real.nofcomponents);exit(1);}
+
+  Vector maxv(1,3),minv(1,3),ijkmax(1,3),ijkmin(1,3),max_min(1,3),dd(1,3),dd0(1,3),c(1,3),xyz(1,3);
+  Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
+  Matrix abc_in_ijk_Inverse(1,3,1,3); abc_in_ijk_Inverse=abc_in_ijk.Inverse();
+  
+  calc_minmax_scale_relabc(minv,maxv,ijkmin,ijkmax,cs.r,cs.abc,gp.scale_view_1,gp.scale_view_2,gp.scale_view_3);
+   if(gp.showprim==1){ijkmin(1)=1;ijkmin(2)=1;ijkmin(3)=1;ijkmax(1)=-1;ijkmax(2)=-1;ijkmax(3)=-1;} // show only primitive magnetic unit cell
+  max_min=maxv-minv;
+  int * pl;  pl=new int[magmom.nofatoms+1];
+  for(l=1;l<=magmom.nofatoms;++l)pl[l]=l;
+
+fprintf(fout,"<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?>\n");
+fprintf(fout,"<jvx-model>\n");
+fprintf(fout,"  <title>%s</title>\n",text);
+fprintf(fout,"  <geometries>\n");
+
+if(gp.show_abc_unitcell>0)jvx_show_abc_unitcell(fout,gp,abc_in_ijk);
+
+if(gp.show_primitive_crystal_unitcell>0)jvx_show_primitive_crystal_unitcell(fout,gp,cs);
+
+if(gp.show_magnetic_unitcell>0)jvx_show_magnetic_unitcell(fout,gp,cs);
+
+if(gp.show_atoms>0)jvx_show_atoms(fout,gp,cs,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,phase,phonon,pev_real,pev_imag,pl);
+
+if(gp.spins_scale_moment>0)jvx_show_magnetic_moments(fout,gp,cs,cs4,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
+                            phase,magmom,magmomev_real,magmomev_imag,phonon,pev_real,pev_imag,pl);
+
+if(gp.spins_show_static_moment_direction>0)jvx_show_static_magnetic_moments(fout,gp,cs,cs4,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
+                             phase,magmom,phonon,pev_real,pev_imag,pl);
+
+if(gp.spins_show_ellipses>0)jvx_spins_show_ellipses(fout,gp,cs,cs4,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
+                             phase,magmom,magmomev_real,magmomev_imag,phonon,pev_real,pev_imag,pl);
+
+if(gp.scale_density_vectors>0)jvx_density_vectors(fout,gp,cs,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
+                             phase,magmom,densityev_real,densityev_imag,phonon,pev_real,pev_imag,pl,T,gjmbHxc,Hext);
+
+if(gp.show_density>0)jvx_density(fout,gp,cs,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
+                             phase,magmom,densityev_real,densityev_imag,phonon,pev_real,pev_imag,pl,T,gjmbHxc,Hext);
+
+fprintf(fout,"  </geometries>\n");
+fprintf(fout,"</jvx-model>\n");
+delete []pl;
+}
+
+
 //output for javaview (old) *******************************************************************
 void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
                     double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
@@ -62,63 +120,6 @@ void spincf::calc_minmax_scale_relabc(Vector & minv,Vector & maxv,Vector & ijkmi
    ijkmin(i)=Min(ddd);ijkmax(i)=Max(ddd);
   }
   for(i=1;i<=3;++i){minv(i)/=abc(i);maxv(i)/=abc(i);}
-}
-
-//output for javaview *******************************************************************
-void spincf::jvx_cd(FILE * fout,char * text,cryststruct & cs,graphic_parameters & gp,
-                    double phase,spincf & densityev_real,spincf & densityev_imag,Vector & hkl,double & T, Vector &  gjmbHxc,
-                    Vector & Hext,cryststruct & cs4,
-                    spincf & magmom,spincf & magmomev_real, spincf & magmomev_imag,
-                    spincf & phonon,spincf & pev_real, spincf & pev_imag)
-{ int l;
- // some checks
- if(nofatoms!=densityev_real.nofatoms||nofa!=densityev_real.na()||nofb!=densityev_real.nb()||nofc!=densityev_real.nc()||
-    nofatoms!=densityev_imag.nofatoms||nofa!=densityev_imag.na()||nofb!=densityev_imag.nb()||nofc!=densityev_imag.nc()||
-    nofcomponents<densityev_real.nofcomponents||densityev_real.nofcomponents!=densityev_imag.nofcomponents)
-    {fprintf(stderr,"Error creating jvx movie files: eigenvector read from .qev file dim %i does not match  dimension %i of spins structure read from sps file\n",nofcomponents,densityev_real.nofcomponents);exit(1);}
-
-  Vector maxv(1,3),minv(1,3),ijkmax(1,3),ijkmin(1,3),max_min(1,3),dd(1,3),dd0(1,3),c(1,3),xyz(1,3);
-  Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
-  Matrix abc_in_ijk_Inverse(1,3,1,3); abc_in_ijk_Inverse=abc_in_ijk.Inverse();
-  
-  calc_minmax_scale_relabc(minv,maxv,ijkmin,ijkmax,cs.r,cs.abc,gp.scale_view_1,gp.scale_view_2,gp.scale_view_3);
-   if(gp.showprim==1){ijkmin(1)=1;ijkmin(2)=1;ijkmin(3)=1;ijkmax(1)=-1;ijkmax(2)=-1;ijkmax(3)=-1;} // show only primitive magnetic unit cell
-  max_min=maxv-minv;
-  int * pl;  pl=new int[magmom.nofatoms+1];
-  for(l=1;l<=magmom.nofatoms;++l)pl[l]=l;
-
-fprintf(fout,"<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?>\n");
-fprintf(fout,"<jvx-model>\n");
-fprintf(fout,"  <title>%s</title>\n",text);
-fprintf(fout,"  <geometries>\n");
-
-if(gp.show_abc_unitcell>0)jvx_show_abc_unitcell(fout,gp,abc_in_ijk);
-
-if(gp.show_primitive_crystal_unitcell>0)jvx_show_primitive_crystal_unitcell(fout,gp,cs);
-
-if(gp.show_magnetic_unitcell>0)jvx_show_magnetic_unitcell(fout,gp,cs);
-
-if(gp.show_atoms>0)jvx_show_atoms(fout,gp,cs,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,phase,phonon,pev_real,pev_imag,pl);
-
-if(gp.spins_scale_moment>0)jvx_show_magnetic_moments(fout,gp,cs,cs4,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
-                            phase,magmom,magmomev_real,magmomev_imag,phonon,pev_real,pev_imag,pl);
-
-if(gp.spins_show_static_moment_direction>0)jvx_show_static_magnetic_moments(fout,gp,cs,cs4,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
-                             phase,magmom,phonon,pev_real,pev_imag,pl);
-
-if(gp.spins_show_ellipses>0)jvx_spins_show_ellipses(fout,gp,cs,cs4,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
-                             phase,magmom,magmomev_real,magmomev_imag,phonon,pev_real,pev_imag,pl);
-
-if(gp.scale_density_vectors>0)jvx_density_vectors(fout,gp,cs,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
-                             phase,magmom,densityev_real,densityev_imag,phonon,pev_real,pev_imag,pl,T,gjmbHxc,Hext);
-
-if(gp.show_density>0)jvx_density(fout,gp,cs,ijkmin,ijkmax,hkl,maxv,minv,abc_in_ijk_Inverse,
-                             phase,magmom,densityev_real,densityev_imag,phonon,pev_real,pev_imag,pl,T,gjmbHxc,Hext);
-
-
-fprintf(fout,"  </geometries>\n");
-fprintf(fout,"</jvx-model>\n");
-delete []pl;
 }
 
 // creates a box corresponding to the abc unit cell  ********************************************************

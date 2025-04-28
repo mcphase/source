@@ -19,7 +19,7 @@ printf("#* Author: Martin Rotter %s\n",MCPHASVERSION);
 printf("#*****************************************************\n");
 
 // check command line
-  if (argc < 6)
+  if (argc < 7)
     { printf ("# program spinsfromq - create spinconfiguration from q vector\n \
 #                use as: spinsfromq [-m f1 f2 f3 ...] n1 n2 n3 h k l [fi][h2 k2 l2 [fi2] [h3 k3 l3 [fi3]]]\n \
 #		n1 n2 n3 .... periodicity of supercell\n \
@@ -42,7 +42,7 @@ printf("#*****************************************************\n");
   double lnz,u,fi1=0,fi2=0,fi3=0;
   int a;
   double T;
-  Vector h(1,inputpars.cs.nofcomponents),hext(1,3);
+  Vector h(1,inputpars.cs.nofcomponents),hext(1,HEXT_DIMENSION);
   Vector moment(1,inputpars.cs.nofcomponents);
   Vector factors(1,inputpars.cs.nofcomponents);
   Vector qvector (1,3);
@@ -82,7 +82,7 @@ printf("#*****************************************************\n");
   h*=2; // multiply field h by two until moment netoom gets large enough to have some sizable numbers
   }
   // treat case of zero moment loop ended at high h ...
-  if(Norm(h)>=1e10)for(i=1;i<=inputpars.cs.nofcomponents;++i)
+  if(Norm(h)>=1e10)for(i=1;i<=inputpars.cs.nofatoms;++i)
            for(j=1;j<=inputpars.cs.nofcomponents;++j)nettom(j+(i-1)*inputpars.cs.nofcomponents)=1;
                                          
     
