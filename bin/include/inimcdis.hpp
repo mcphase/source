@@ -81,7 +81,7 @@ class inimdpars
   
   inimdpars (const char * file,char * prefix,char * spinfile,
              int & do_jqfile,Vector & abc,
-             int & nofcomponents,int & nofatoms); //constructor
+             int & nofcomponents,int & nofatoms,int verbose); //constructor
 
   inimdpars (const inimdpars & p);//kopier-konstruktor
 

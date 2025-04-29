@@ -1873,16 +1873,16 @@ for (i=1;i<=argc-1;++i){
   par inputpars("./mcphas.j",do_verbose);
  
 
-  inimdpars inip("mcdisp.par",prefix,spinfile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms); 
+  inimdpars inip("mcdisp.par",prefix,spinfile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms,do_verbose); 
   //ini.load("mcdisp.par",spinfile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
   if(errexit==1)(*inip.inis[0]).helpexit();
 // loop for different prefixes ...
    for(int ninis=0;ninis<inip.nofinis;++ninis)
 {inimcdis ini((*inip.inis[ninis]));
- printf("hell\n");
   if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
+  if (ini.nofhkls==1)  fprintf(stderr,"Warning mcdisp: no hkl's found - please edit and insert- doing now  a calculation only for Q=(100)\n");
+
   ini.save();
- printf("heldddl\n");
 
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
   if(calc_rixs&&calcXobs){fprintf(stderr,"Error mcdisp: Options -X[observable] and -x -xa -xaf cannnot be used simultaneously, please use only one of these options\n");exit(EXIT_FAILURE);}

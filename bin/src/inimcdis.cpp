@@ -365,8 +365,8 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
 //                      char prefix (which may contain a wildcard '*'), if it can be found increase n
 //                      and put new match prefix in lofpref and put findnewmatch to false and return
 //                      extract_with_prefix for the new match
-//                      if it cannot be found return extract(instr,paramter)
-// findnewmatch = false: return extract_with_prefix for the prefix=lofpref[n]
+//                      if it cannot be found return extract(instr,parameter)
+// findnewmatch = false: return extract_with_prefix for the prefix=lofpref[n], i.e. prefix+var has to be found to return 0
 int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var)
 {int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
 ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
@@ -498,7 +498,7 @@ int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int 
   calculate_pel_oscillation=0;
   outS=0;
   qmin=0;qmax=0;deltaq=0;
- // ******************************** reading parameters  from mcdisp.par ****************************************************
+ // ******************************** reading parameters  from mcdisp.par run 1 to determine i=nofhkls-estimate****************************************************
   int i=0,hklblock=0,QxQyQzblock=0,j;
   if(verbose)printf("reading file %s\n",parfile);
   fin = fopen(parfile, "rb"); 
@@ -571,7 +571,7 @@ if (fin==NULL) { return 1;
   }
   fclose (fin);
  }
- // ************************************ end reading parameters *****************************************
+ // ************************************ end reading parameters first run to determine i (estimate for nofhkls) *****************************************
  // check parameters
   if (ki==0) {if (kf==0) kf=100;
               if(verbose)fprintf(stdout,"#Calculating intensities for  kf=const=%4.4g/A\n",kf);
@@ -599,11 +599,11 @@ if (fin==NULL) { return 1;
     }
     if(nofthreads<1||nofthreads>255) nofthreads=1;             // All else fails: use only 1 thread
   }
-  printf("# nofthreads=%i\n",nofthreads);
-  // reread mcdisp.par creating the hkl list ******************************************************************
-  if(hkls!=NULL){ for (i=1;i<=nofhkls;++i) { delete []hkls[i];}delete []hkls;}
+  if(verbose)printf("# nofthreads=%i\n",nofthreads);
+  // ***************************************** reread mcdisp.par creating the hkl list ******************************************************************
+  if(hkls!=NULL){ for (int ii=1;ii<=nofhkls;++ii) { delete []hkls[ii];}delete []hkls;}
   hkls=new double *[i+10]; // dimension the list
-  printf("nofhkl estimate i=%i\n",i);
+  //printf("nofhkl estimate i=%i\n",i);
   nofhkls=0;hklblock=0;QxQyQzblock=0;
   if(hklfile_start_index!=NULL) delete []hklfile_start_index;
   hklfile_start_index= new int [nofhkllists+1];
@@ -671,11 +671,11 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"Mstp",M)){printf("error mcdisp reading %s: in hklplane - Mstp  not found",parfile);exit (EXIT_FAILURE);}
                    printf("# ... hklplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,N,hM,kM,lM,M);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(i=1;i<=N;++i)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=N;++ii)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     hkls[nofhkls][1]=h0+(hN-h0)*(i-1)/(N-1)+(hM-h0)*(j-1)/(M-1);
-                                     hkls[nofhkls][2]=k0+(kN-k0)*(i-1)/(N-1)+(kM-k0)*(j-1)/(M-1);
-                                     hkls[nofhkls][3]=l0+(lN-l0)*(i-1)/(N-1)+(lM-l0)*(j-1)/(M-1);
+                                     hkls[nofhkls][1]=h0+(hN-h0)*(ii-1)/(N-1)+(hM-h0)*(j-1)/(M-1);
+                                     hkls[nofhkls][2]=k0+(kN-k0)*(ii-1)/(N-1)+(kM-k0)*(j-1)/(M-1);
+                                     hkls[nofhkls][3]=l0+(lN-l0)*(ii-1)/(N-1)+(lM-l0)*(j-1)/(M-1);
                                     }
                  }
 
@@ -694,11 +694,11 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"Mstp",M)){printf("error mcdisp reading %s: in QxyQzplane - Mstp  not found",parfile);exit (EXIT_FAILURE);}
                    printf("# ... QxyQzplane (%g %g %g) to (%g %g %g) with %g points to (%g %g %g) with %g points\n",h0,k0,l0,hN,kN,lN,N,hM,kM,lM,M);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(i=1;i<=N;++i)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=N;++ii)for(j=1;j<=M;++j){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     qijk(1)=h0+(hN-h0)*(i-1)/(N-1)+(hM-h0)*(j-1)/(M-1);
-                                     qijk(2)=k0+(kN-k0)*(i-1)/(N-1)+(kM-k0)*(j-1)/(M-1);
-                                     qijk(3)=l0+(lN-l0)*(i-1)/(N-1)+(lM-l0)*(j-1)/(M-1);
+                                     qijk(1)=h0+(hN-h0)*(ii-1)/(N-1)+(hM-h0)*(j-1)/(M-1);
+                                     qijk(2)=k0+(kN-k0)*(ii-1)/(N-1)+(kM-k0)*(j-1)/(M-1);
+                                     qijk(3)=l0+(lN-l0)*(ii-1)/(N-1)+(lM-l0)*(j-1)/(M-1);
                                      ijk2hkl(hkl, qijk,abc);
                                      hkls[nofhkls][1]=hkl(1);
                                      hkls[nofhkls][2]=hkl(2);
@@ -718,11 +718,11 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklline - Nstp  not found",parfile);exit (EXIT_FAILURE);}
                     printf("# ... hklline (%g %g %g) to (%g %g %g) with %g points\n",h1,k1,l1,hN,kN,lN,N);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(i=1;i<=N;++i){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=N;++ii){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     hkls[nofhkls][1]=h1+(hN-h1)*(i-1)/(N-1);
-                                     hkls[nofhkls][2]=k1+(kN-k1)*(i-1)/(N-1);
-                                     hkls[nofhkls][3]=l1+(lN-l1)*(i-1)/(N-1);
+                                     hkls[nofhkls][1]=h1+(hN-h1)*(ii-1)/(N-1);
+                                     hkls[nofhkls][2]=k1+(kN-k1)*(ii-1)/(N-1);
+                                     hkls[nofhkls][3]=l1+(lN-l1)*(ii-1)/(N-1);
                                     }
                  }
                 // treat QxQyQzline statements
@@ -736,11 +736,11 @@ if (fin==NULL) { return 1;
                    if(extract(instr,"Nstp",N)){printf("error mcdisp reading %s: in hklline - N  not found",parfile);exit (EXIT_FAILURE);}
                     printf("# ... QxQyQzline (%g %g %g)/A to (%g %g %g)/A with %g points\n",h1,k1,l1,hN,kN,lN,N);
                    ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-                   for(i=1;i<=N;++i){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
+                   for(int ii=1;ii<=N;++ii){++nofhkls; hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
-                                     qijk(1)=h1+(hN-h1)*(i-1)/(N-1);
-                                     qijk(2)=k1+(kN-k1)*(i-1)/(N-1);
-                                     qijk(3)=l1+(lN-l1)*(i-1)/(N-1);
+                                     qijk(1)=h1+(hN-h1)*(ii-1)/(N-1);
+                                     qijk(2)=k1+(kN-k1)*(ii-1)/(N-1);
+                                     qijk(3)=l1+(lN-l1)*(ii-1)/(N-1);
                                      ijk2hkl(hkl, qijk,abc);
                                      hkls[nofhkls][1]=hkl(1);
                                      hkls[nofhkls][2]=hkl(2);
@@ -765,13 +765,13 @@ if (fin==NULL) { return 1;
        // now read also the hkls in mcdisp.par
       ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
       fin = fopen(parfile, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
-      if(nofhkls==0){fprintf(stderr,"Warning mcdisp: no hkl's found in %s - please edit and insert- doing now  a calculation only for Q=(100)\n",parfile);
+      if(nofhkls==0){
                 nofhkls=1;hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
                                      hkls[nofhkls][1]=1;
                                      hkls[nofhkls][2]=0;
                                      hkls[nofhkls][3]=0;} 
-  printf("nofhkl =%i\n",nofhkls);
+  if(i+9<nofhkls){fprintf(stderr,"Error mcdisp: nofhkl =%i > estimate %i\n",nofhkls,i);exit(EXIT_FAILURE);}
      
 return 0;
 }
@@ -877,7 +877,7 @@ if(hkls!=NULL)
 //constructor ... load initial parameters from file
 inimdpars::inimdpars (const char * file,char * pref,char * spinfile,
              int & do_jqfile,Vector & abc,
-             int & nofcomponents,int & nofatoms)
+             int & nofcomponents,int & nofatoms, int verbose)
 { inis=new inimcdis*[MAXNOFINIS];
   char * lofprefixes[MAXNOFINIS];
   int nofinisold=-1;nofinis=0;
@@ -885,7 +885,7 @@ inimdpars::inimdpars (const char * file,char * pref,char * spinfile,
 // prefix is found ...
   while(nofinisold<nofinis&&nofinis<MAXNOFINIS)
   {inis[nofinis]=new inimcdis(file,pref,spinfile,do_jqfile,abc,nofcomponents,nofatoms);
-   nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes,spinfile,pref,do_jqfile,abc,nofcomponents,nofatoms,1);
+   nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes,spinfile,pref,do_jqfile,abc,nofcomponents,nofatoms,verbose);
   }
  
 // remove last inis, because it does not contain a new prefix
