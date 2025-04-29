@@ -182,7 +182,8 @@ void inimcdis::save()
 }
 // save parameters (which were read from mcdisp.par)
 void inimcdis::save(const char * filename)
-{  FILE * fout;int i,j;
+{ printf("Saving %s\n",filename);
+  FILE * fout;int i,j;
   fout=fopen(filename,"w");if (fout==NULL) {fprintf(stderr,"ERROR - file %s cannot be opened \n",filename);exit(EXIT_FAILURE);} 
   fprintf(fout,"# Parameter file  mcdisp.par - read by %s\n",MCDISPVERSION);
   fprintf(fout,"#<!--mcdisp.mcdisp.par>\n");
@@ -364,6 +365,7 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
 //                      char prefix (which may contain a wildcard '*'), if it can be found increase n
 //                      and put new match prefix in lofpref and put findnewmatch to false and return
 //                      extract_with_prefix for the new match
+//                      if it cannot be found return extract(instr,paramter)
 // findnewmatch = false: return extract_with_prefix for the prefix=lofpref[n]
 int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var)
 {int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
@@ -399,7 +401,7 @@ int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * i
     ++i;}
     if(i==n&&mm==false){lofpref[i]=new char [strlen(prefvar)+2];snprintf(lofpref[i],strlen(prefvar)+1,"%s",prefvar);
                           snprintf(prefix,sizeof(prefix),"%s",prefvar);
-                     ++n; findnewmatch=false;printf("increase lofpref %s\n",lofpref[i]);
+                     ++n; findnewmatch=false;printf("new matching prefix found: %s\n",lofpref[i]);
             }
    }// no new match -> extract without prefix
    else
@@ -424,7 +426,7 @@ int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * i
 }
 
 // *************************************************************************
-int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat)
+int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat,int verbose)
 { bool findnewmatch=true;if(nofinis==-1){findnewmatch=false;}
    errno=1;do_jqf=do_jqfile;nofthreads=0;outcolset=false;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
@@ -433,8 +435,7 @@ int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int 
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
    strcpy(prefix,pref); // set prefix
  // ****************************** read mf configuration from spinfile *****************************************  
-for(int iii=1;iii<3;++iii)
-{  fin=fopen(spinfile,"rb");
+ fin=fopen(spinfile,"rb");
    if (fin==NULL) {fprintf(stderr,"#Warning - file %s not found - trying to read mcdisp.mf\n",spinfile);
    snprintf(spinfile,MAXNOFCHARINLINE,"mcdisp.mf");fin=fopen(spinfile,"rb");
     if (fin==NULL) {fprintf(stderr,"Warning - file %s not found - doing calculation at T=300K assuming zero mean and external fields / stress\n",spinfile);
@@ -466,7 +467,7 @@ for(int iii=1;iii<3;++iii)
   
   crosscheck_H_E(Hext,Habc,Eabc,abc); 
 
-  printf("# reading mean field configuration from file %s mf=gj muB heff [meV]\n#%s \n",spinfile,instr);
+  if(verbose!=0)printf("# reading mean field configuration from file %s mf=gj muB heff [meV]\n#%s \n",spinfile,instr);
   
   
   
@@ -478,7 +479,7 @@ for(int iii=1;iii<3;++iii)
    {fprintf(stderr,"ERROR loading mean field configuration\n");exit(EXIT_FAILURE);}
   fclose(fin);
  }
-}
+
  strcpy(info,instr);
 
  //********************************  
@@ -499,7 +500,7 @@ for(int iii=1;iii<3;++iii)
   qmin=0;qmax=0;deltaq=0;
  // ******************************** reading parameters  from mcdisp.par ****************************************************
   int i=0,hklblock=0,QxQyQzblock=0,j;
-  printf("reading file %s\n",parfile);
+  if(verbose)printf("reading file %s\n",parfile);
   fin = fopen(parfile, "rb"); 
 if (fin==NULL) { return 1;
 }else
@@ -573,11 +574,11 @@ if (fin==NULL) { return 1;
  // ************************************ end reading parameters *****************************************
  // check parameters
   if (ki==0) {if (kf==0) kf=100;
-              fprintf(stdout,"#Calculating intensities for  kf=const=%4.4g/A\n",kf);
+              if(verbose)fprintf(stdout,"#Calculating intensities for  kf=const=%4.4g/A\n",kf);
 	     }
 	     else
 	     {kf=0;
-	      fprintf(stdout,"#Calculating intensities for ki=const=%4.4g/A\n",ki);
+	      if(verbose)fprintf(stdout,"#Calculating intensities for ki=const=%4.4g/A\n",ki);
 	     }
   // Checks if nofthreads set in mcdisp.par, if not check environment or use system calls
   if(nofthreads<1) {
@@ -602,6 +603,7 @@ if (fin==NULL) { return 1;
   // reread mcdisp.par creating the hkl list ******************************************************************
   if(hkls!=NULL){ for (i=1;i<=nofhkls;++i) { delete []hkls[i];}delete []hkls;}
   hkls=new double *[i+10]; // dimension the list
+  printf("nofhkl estimate i=%i\n",i);
   nofhkls=0;hklblock=0;QxQyQzblock=0;
   if(hklfile_start_index!=NULL) delete []hklfile_start_index;
   hklfile_start_index= new int [nofhkllists+1];
@@ -768,8 +770,9 @@ if (fin==NULL) { return 1;
                                      hkls[nofhkls][0]=3;
                                      hkls[nofhkls][1]=1;
                                      hkls[nofhkls][2]=0;
-                                     hkls[nofhkls][3]=0;}      
-      save();
+                                     hkls[nofhkls][3]=0;} 
+  printf("nofhkl =%i\n",nofhkls);
+     
 return 0;
 }
 
@@ -778,7 +781,7 @@ return 0;
 //load parameters from file
 int inimcdis::load (char * spinfile,char * pref,int do_jqfile,Vector & abc,int nofcomp,int nofat)
 {int n=-1;char ** lp; lp=NULL;
-return load(n,lp,spinfile,pref,do_jqfile, abc,nofcomp,nofat);
+return load(n,lp,spinfile,pref,do_jqfile, abc,nofcomp,nofat,0);
 }
 //constructor ... load initial parameters from file
 inimcdis::inimcdis(const char * file,char * pref,char * spinfile,
@@ -791,7 +794,6 @@ inimcdis::inimcdis(const char * file,char * pref,char * spinfile,
  info= new char [MAXNOFCHARINLINE];
   prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,pref);
-  printf("reading file %s\n",file);
   if(load(spinfile,pref,do_jqfile, abc,nofcomp,nofat)!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",parfile,file);
                 strcpy(parfile,file);}
                 if(load(spinfile,pref,do_jqfile, abc,nofcomp,nofat)!=0){
@@ -807,8 +809,8 @@ save(parfile);
 
 //kopier-konstruktor 
 inimcdis::inimcdis (const inimcdis & p)
-{ do_jqf=p.do_jqf;
-  parfile= new char [MAXNOFCHARINLINE];
+{do_jqf=p.do_jqf;
+ parfile= new char [MAXNOFCHARINLINE];
   strcpy(parfile,p.parfile);
  info= new char [MAXNOFCHARINLINE];strcpy(info,p.info);
  prefix= new char [MAXNOFCHARINLINE]; strcpy(prefix,p.prefix);  
@@ -835,12 +837,13 @@ inimcdis::inimcdis (const inimcdis & p)
   nofthreads=p.nofthreads;
   nofatoms=p.nofatoms;
   nofcomponents=p.nofcomponents;
-  mf=mfcf(1,1,1,nofatoms,nofcomponents);mf=p.mf;T=p.T;
   nofhkls=p.nofhkls;
-  int i,j;if(p.hkls!=NULL)
+  int i,j;
+   if(p.hkls!=NULL)
     {  hkls=new double *[nofhkls+10];
       for (j=1;j<=nofhkls;++j) 
-  	      {if ((int)p.hkls[j][0]==3){hkls[j]=new double [NOFHKLCOLUMNS+1];}
+  	      {
+   if ((int)p.hkls[j][0]==3){hkls[j]=new double [NOFHKLCOLUMNS+1];}
                else {hkls[j]=new double [(int)p.hkls[j][0]+1];}
                for(i=0;i<=p.hkls[j][0];++i)
          	    {hkls[j][i]=p.hkls[j][i];}
@@ -851,6 +854,7 @@ inimcdis::inimcdis (const inimcdis & p)
        hklfile_start_index= new int [nofhkllists+1];hklfile_start_index[0]=nofhkllists;
       for (j=1;j<=nofhkllists;++j) hklfile_start_index[j]=p.hklfile_start_index[j]; 
     } else hklfile_start_index=NULL;
+  mf=mfcf(1,1,1,nofatoms,nofcomponents);mf=p.mf;T=p.T;
 }
 
 //destruktor
@@ -881,10 +885,9 @@ inimdpars::inimdpars (const char * file,char * pref,char * spinfile,
 // prefix is found ...
   while(nofinisold<nofinis&&nofinis<MAXNOFINIS)
   {inis[nofinis]=new inimcdis(file,pref,spinfile,do_jqfile,abc,nofcomponents,nofatoms);
-   nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes,spinfile,pref,do_jqfile,abc,nofcomponents,nofatoms);
+   nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes,spinfile,pref,do_jqfile,abc,nofcomponents,nofatoms,1);
   }
  
-
 // remove last inis, because it does not contain a new prefix
 if(nofinis>0&&nofinis<MAXNOFINIS){delete inis[nofinis];} 
 if(nofinis==0)nofinis=1;

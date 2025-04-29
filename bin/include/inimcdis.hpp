@@ -67,7 +67,7 @@ int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char 
              int & do_jqfile,Vector & abc,
              int & nofcomponents,int & nofatoms);
   int load (char * spinfile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat); //constructor
-  int load (int & nofinis,char**lofpref,char * spinfile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat); //constructor
+  int load (int & nofinis,char**lofpref,char * spinfile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat,int verbose); //constructor
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor
 };
