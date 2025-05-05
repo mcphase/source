@@ -99,24 +99,13 @@ void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
       if(ini.exit_mcphas==1)
         {testspins.save(filemode);  //exit normally
          testqs.save(filemode);
-      printf("RESULTS saved in directory ./results/  - files:\n");
-   printf("  mcphas.fum  - total magnetic moment, energy at different T,H\n");
-   printf("  mcphas.sps  - stable configurations at different T,H\n");
-   printf("  mcphas.mf   - mean fields at different T,H\n");
-   printf("  mcphas.hkl  - strong magnetic satellites, neutron diffraction intensity\n");
-   printf("  mcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n");
-   printf("  mcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n");
-   printf("  mcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n");
-   printf("  mcphas.qvc  - ...corresponding table of all qvector generated test configs\n");
-   printf("  mcphas.phs  - ...corresponding table of all test configurations (except qvecs)\n");
-   printf("  _mcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n");
-   printf("  ...         - and a copy of the single ion parameter files used.\n\n");
+         ini.finish_mcphas(testqs.nofqs (),testspins.n);
    fprintf(stderr,"**********************************************\n");
-   fprintf(stderr,"          End of Program mcphas\n");
+   fprintf(stderr,"          End of Program %s\n",ini.program);
    fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(stderr,"**********************************************\n");
-          exit(0);
-	}
+         exit(0);
+      }
 
       while(ini.pause_mcphas==1||loaderr==1) // wait until pause button is released and no loaderror occurs
        {fprintf(stdout,"Pausing ...\n");
@@ -466,10 +455,15 @@ int  htcalc (Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
     physprops	physical properties at (HT) point (i.e. magnetic structure
 		neutron intensities, thermal expansion ...)	
  // returns 0 if successfull
-  // returns 2 if no spinconfiguration has been found at ht point
+ //  --> if no spinconfiguration has been found at ht point
+ // returns 1 if recalculation of fe yields too different value
+ // returns 2 if prevailing problem is maxnofmfloops reached
+ // returns 3 if prevailing problem is maxspinchange is reached  
  */
 
  int i,j,k,is;
+ int start_nofmaxspinchangeDIV=ini.nofmaxspinchangeDIV;
+ int start_nofmaxloopDIV=ini.nofmaxloopDIV;
  Vector momentq0(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),phi(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);
  Vector nettom(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms),q(1,3);
  Vector h1(1,inputpars.cs.nofcomponents),hkl(1,3);
@@ -634,8 +628,9 @@ if (T<=0.01){fprintf(stderr," ERROR htcalc - temperature too low - please check 
 #endif
 
 if (femin>=FEMIN_INI) // did we find a stable structure ??
- {fprintf(stderr,"Warning propcalc: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
-                 physprops.T,physprops.H(1),physprops.H(2),physprops.H(3));return 2;}
+ {if(ini.nofmaxspinchangeDIV-start_nofmaxspinchangeDIV<ini.nofmaxloopDIV-start_nofmaxloopDIV)
+          return 2; else return 3;
+ }
 else // if yes ... then
  {if(verbose==1){printf("... calculating physical properties ");}
  if (physprops.j>0){ // take spinconfiguration ----
@@ -724,10 +719,10 @@ else // if yes ... then
    if(thrdat.spsmin==sps){eq=1;};//take spinconfiguration which gave minimum free energy as starting value
      #endif
    
-   fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
+   if(verbose){fprintf(stderr,"Warning htcalc.c: at T=%g K /  H= %g Tfemin=%4.9g was calc.(conf no %i),\n but recalculation  gives fe= %4.9gmeV -> no structure saved\n",
                             T,Norm(H),femin,physprops.j,physprops.fe);
    fprintf(stderr,"recalculation converged after %i loops and initial and final spin structures are ",r);
-   if(eq==1){fprintf(stderr,"equal\n");}else{fprintf(stderr,"not equal\n");}
+   if(eq==1){fprintf(stderr,"equal\n");}else{fprintf(stderr,"not equal\n");}}
 if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini.prefix);
                        strcpy(outfilename+10+strlen(ini.prefix),"mcphas.log");
                        felog=fopen_errchk(outfilename,"a");
@@ -743,7 +738,7 @@ if (ini.logfevsQ==1) {strcpy(outfilename,"./results/");strcpy(outfilename+10,ini
                fclose(felog);
 	      }
                              physprops.sps.epsilon=0;physprops.Eelastic=0;
-                             physprops.m=0;delete mf;return 2;
+                             physprops.m=0;delete mf;return 1;
                              }
  //if(verbose==1){printf(".\n");}
 if(ini.nofMCsteps==0) physpropclc(H,T,sps,(*mf),physprops,ini,inputpars);
@@ -753,9 +748,9 @@ else physprops.sps=sps;
  }
 
 return 0; // ok we are done with this (HT) point- return ok
- #if defined __linux__ && defined _THREADS
- pthread_exit(NULL);
- #endif
+// #if defined __linux__ && defined _THREADS
+// pthread_exit(NULL);
+// #endif
 }
 
 

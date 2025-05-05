@@ -98,6 +98,43 @@ printf ("       ./mcphas.ini, ./mcphas.j, directory ./results\n\n");
       exit (EXIT_FAILURE);
 } 
 
+void inipar::finish_mcphas(int nofqs,int nofspincf)
+{
+printf("RESULTS saved in directory ./results/  - files:\n");
+   printf("#RESULTS saved in directory ./results/  - files:\n");
+   printf("#  %smcphas.fum  - total magnetic moment, energy at different T,H\n",prefix);
+   printf("#  %smcphas.sps  - stable configurations at different T,H\n",prefix);
+   printf("#  %smcphas.mf   - mean fields at different T,H\n",prefix);
+   printf("#  %smcphas.hkl  - strong magnetic satellites, neutron diffraction intensity\n",prefix);
+   printf("#  %smcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n",prefix);
+   printf("#  %smcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n",prefix);
+   printf("#  %smcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n",prefix);
+   printf("#!  %smcphas.qvc  - ...corresponding table of all nqvc=%i qvector generated test configs\n",prefix,nofqs);
+   printf("#!  %smcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",prefix,nofspincf);
+   printf("#  _%smcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n",prefix);
+   printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
+   double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+   std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
+   std::cout << "#!nofHTpoints=" << nofstapoints << " H-T points in phasediagram successfully calculated" << std::endl;
+   std::cout << "#!nofreppoints="<< nofreppoints << " points repeated ( nofconvrep=" << nofconvrep << " of which converged after repetition)" << std::endl;
+   std::cout << "#!noffailedpoints=" << noffailedpoints << " H-T points in phasediagram failed to converge " << std::endl;
+   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << nofcalls << " times"  << std::endl;
+   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << successrate << " times"  << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
+   std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
+
+if(nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",(nofstapoints+noffailedpoints)*sta/nofstapoints);}
+else { fprintf(stdout,"#! sta=1e10\n");}
+#ifdef _THREADS
+std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;
+for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
+#else
+std::cout << "# mcphas was compiled without parallel processing option " << std::endl;
+#endif
+if(ipx!=NULL)delete ipx;    
+if(ipy!=NULL)delete ipy;
+if(ipz!=NULL)delete ipz;
+}
 
 int usrdefcols[]={7, 1,2,3,4,5,6,7}; // user defined output columns (first number is number of usr def output columns)
                                              // in files mcdisp.qei,qex,qom,dsigma,dsigma.tot
@@ -437,7 +474,7 @@ int inipar::load (int & nofinis,char**lofpref)
   minnr1=0;
   minnr2=0;
   minnr3=0;
-  maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;nofthreads=0;
+  maxnofmfloops=-1;maxstamf=0;bigstep=0;maxspinchange=0;nofthreads=0;repeat=0;
   nofspincorrs=0;maxnofhkls=0;maxQ=0;maxnoftestspincf=1000;
   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
@@ -535,6 +572,7 @@ int inipar::load (int & nofinis,char**lofpref)
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnofmfloops",maxnofmfloops);
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxstamf",maxstamf); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"bigstep",bigstep); 
+    extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"repeat",repeat); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxspinchange",maxspinchange); 
     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"maxnoftestspincf",maxnoftestspincf);
 
@@ -715,6 +753,7 @@ checkpr(fout, "maxnoftestspincf",maxnoftestspincf,p.maxnoftestspincf);
 checkpr(fout, "maxnofmfloops",maxnofmfloops,p.maxnofmfloops);
 checkpr(fout, "maxstamf",maxstamf,p.maxstamf);
 checkpr(fout, "bigstep",bigstep,p.bigstep);
+checkpr(fout, "repeat",repeat,p.repeat);
 checkpr(fout, "maxspinchange",maxspinchange,p.maxspinchange);
 checkpr(fout, "nofspincorrs",nofspincorrs,p.nofspincorrs);
 checkpr(fout, "maxnofhkls",maxnofhkls,p.maxnofhkls);
@@ -859,6 +898,13 @@ void inipar::print (FILE * fout)
     fprintf(fout,"# by default n=5. However, if bigstep>1 then n=integervalue(bigstep) and step ratio=bigstep-n \n");
     fprintf(fout,"bigstep=%g\n",bigstep);
 
+    fprintf(fout,"# number of repetitions if all mean field loop fail to stabilise\n");
+    fprintf(fout,"# at each repetition either maxstamf or manxofloops or maxspinchange is relaxed\n");
+    fprintf(fout,"# (depending on which problems occur most) to allow for more computation time,e.g. \n");
+    fprintf(fout,"# repeat 3.4 will allow for 3 repetitions and if maxnofmfloops is too small to converge\n");
+    fprintf(fout,"# it will be increased by a factor 1/0.4 for each repetition\n");
+    fprintf(fout,"repeat=%g\n",repeat);
+
     fprintf(fout,"# sum_{i=1}^{n} abs(actual change of angular momentum <Ji> with respect to \
                   \n# initial  configuration) > maxspinchange will  end selfconsistency process\n");
     fprintf(fout,"maxspinchange=%g\n\n",maxspinchange);
@@ -877,8 +923,10 @@ void inipar::print (FILE * fout)
 }
 
 //constructor ... load initial parameters from file
-inipar::inipar (const char * file,char * pref)
-{ savfilename= new char [strlen(file)+strlen(pref)+1];
+inipar::inipar (const char * file,char * pref,const char * prog)
+{  program= new char [strlen(prog)+1];
+   strcpy(program,prog);
+   savfilename= new char [strlen(file)+strlen(pref)+1];
   if(pref[0]!='\0')strcpy(savfilename,pref);
   strcpy(savfilename+strlen(pref),file);
   prefix = new char[MAXNOFCHARINLINE];
@@ -896,14 +944,17 @@ inipar::inipar (const char * file,char * pref)
   minnr1=0;
   minnr2=0;
   minnr3=0;
-  maxnofmfloops=100;maxstamf=1e-3;bigstep=1;maxspinchange=100;zero=0;
+  maxnofmfloops=100;maxstamf=1e-3;bigstep=1;maxspinchange=100;zero=0;repeat=0;
 nofthreads=0;getnofthread(nofthreads);
   nofspincorrs=0;maxnofhkls=5;maxQ=3;maxnoftestspincf=1000;
   nofstapoints=0;
+  nofreppoints=0;
+  nofconvrep=0;
   nofmaxloopDIV=0;nofmaxspinchangeDIV=0;
   successrate=0;
   nofcalls=0;
   noffailedpoints=0;
+  sta=0;
   print();
  // append also the default values for different prefixes 
  // scan Ha Hb Hc Hi Hj Hk chia chib chic 
@@ -960,7 +1011,9 @@ nofthreads=0;getnofthread(nofthreads);
 
 //kopier-konstruktor 
 inipar::inipar (const inipar & p)
-{savfilename= new char [strlen(p.savfilename)+1];
+{ program= new char [strlen(p.program)+1];
+  strcpy(program,p.program);
+  savfilename= new char [strlen(p.savfilename)+1];
   strcpy(savfilename,p.savfilename);
   prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,p.prefix);
@@ -970,8 +1023,11 @@ inipar::inipar (const inipar & p)
   ipx=p.ipx;
   ipy=p.ipy;
   ipz=p.ipz;
+  sta=p.sta;
   startcputime=p.startcputime;
   nofstapoints=p.nofstapoints;
+  nofreppoints=p.nofreppoints;
+  nofconvrep=p.nofconvrep;
   nofmaxloopDIV=p.nofmaxloopDIV;
   nofmaxspinchangeDIV=p.nofmaxspinchangeDIV;
   successrate=p.successrate; 
@@ -1003,6 +1059,7 @@ inipar::inipar (const inipar & p)
   maxnofmfloops=p.maxnofmfloops;
   maxstamf=p.maxstamf;
   bigstep=p.bigstep;
+  repeat=p.repeat;
   maxspinchange=p.maxspinchange;
   
   nofspincorrs=p.nofspincorrs;
@@ -1023,14 +1080,14 @@ delete []prefix;
 
 //***************************************************************
 //constructor ... load initial parameters from file
-inipars::inipars (const char * file,char * pref)
+inipars::inipars (const char * file,char * pref,const char * prog)
 { inis=new inipar*[MAXNOFINIS];
   char * lofprefixes[MAXNOFINIS];
   int nofinisold=-1;nofinis=0;
 // here we have to load inis[1...nofinis] with different prefixes matching pref - until no new matching
 // prefix is found ...
   while(nofinisold<nofinis&&nofinis<MAXNOFINIS)
-  {inis[nofinis]=new inipar(file,pref);
+  {inis[nofinis]=new inipar(file,pref,prog);
    nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes);
   }
  

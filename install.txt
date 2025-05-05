@@ -92,6 +92,14 @@ There is a hardcoded maximum of 255 threads.
 
 
 ]
+**************
+Windows Mpe: Ich glaube es hat damit zu tun, dass mpe Spuren im System hinterlässt, 
+die bei der Deinstallation nicht gelöscht werden. Auf meinem alten Windows
+ Rechner habe ich bemerkt, dass es  Folder "mcphaseexplorer" in 
+hidden Ordner unter “home/AppData/Roaming” und “home/AppData/Local” gibt, die gelöscht werden sollten, 
+dann lässt sich mpe starten und initialisiert das ganze neu. --> make note in install on the location
+of this file !!!
+*******************************
 
 -------------------------------------------------------------------
 II  LINUX 

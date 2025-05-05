@@ -28,6 +28,7 @@ int main (int argc, char **argv)
   int im;
   double stamax=1e33;
   double sta=0;
+  int nofreppoints=0,nofconvrep=0;
 
 fprintf(stderr,"**************************************************************************\n");
 //fprintf(stderr,"*\n");
@@ -58,7 +59,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
                                   fprintf(stdout,"#reading stable points from mcphas ouput files: results/%s*\n",readprefix);
  				 if (options<im+1)options=im+1;}
   }	
-    inipars inip("mcphas.ini",prefix);   
+    inipars inip("mcphas.ini",prefix,"mcphasit");   
    
     if(errexit==1)(*inip.inis[0]).errexit();
 // loop for different prefixes ...
@@ -280,30 +281,64 @@ if(verbose==1){printf("Ha Hb Hc are components of magnetic field with respect to
 // check if calculation results should and can be read (returns j=0)
 int parsread=1;
 j=1;if(readprefix[0]!='\0'){j=physprop.read(verbose,inputpars,readprefix,ini);parsread=j;}
-
+                              // on successful read return j=0, otherwise
+                              // return j=1
 // if not (j=1) then calculate physical properties at HT- point
-if (j==1){j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);}
+if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
+          double maxstamf=ini.maxstamf;int rep;
+          int maxnofmfloops=ini.maxnofmfloops;
+          double maxspinchange=ini.maxspinchange;
+          for(rep=0;rep<=floor(ini.repeat)&&j>0;++rep)
+          {j=htcalc(physprop.H,T,ini,inputpars,testqs,testspins,physprop);
+          // returns j=0 if successfull
+ //  --> if no spinconfiguration has been found at ht point
+ // returns j=1 if recalculation of fe yields too different value
+ // returns j=2 if prevailing problem is maxnofmfloops reached
+ // returns j=3 if prevailing problem is maxspinchange is reached  
+           switch (j)
+           {case 1: ini.maxstamf*=rr;printf("repeating with maxstamf=%g\n",ini.maxstamf);
+                    break;
+            case 2: ini.maxnofmfloops/=rr;printf("repeating with maxnofmfloops=%i\n",ini.maxnofmfloops);
+                    break;
+            case 3: ini.maxspinchange/=rr;printf("repeating with maxspinchange=%g\n",ini.maxspinchange);
+                    break;
+            default:  ;
+           }
+           
+          } if(rep>0){++nofreppoints;ini.nofreppoints=nofreppoints;
+                      if(j==0){++nofconvrep;ini.nofconvrep=nofconvrep;}
+                     }
+
+         ini.maxspinchange=maxspinchange;
+         ini.maxnofmfloops=maxnofmfloops;
+         ini.maxstamf=maxstamf;
+         }
        switch (j)
        {case 0:
             //save physical properties of HT-point
 	    //sta=(sta*ini.nofstapoints+physprop.save (verbose,filemode,j,inputpars))/(ini.nofstapoints+1);
           // 12.3.07 fancy calculation above substituted by normal summing of sta
           if(strcmp(ini.prefix,readprefix)!=0||prefix[0]=='\0'||parsread!=0)
-           {sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);}
+           {sta+=physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);ini.sta=sta;}
           else
            {ini.print_usrdefcols(stdout,x,y,T,physprop.H,inputpars.cs.abc,true);printf("\n");}
    	    ++ini.nofstapoints;
           if (sta>stamax){fprintf(stdout,"#! stamax=%g exceeded - exiting\n",stamax);goto endproper;}
 	      break; 
-	 case 1: goto endproper;
-	      break;
-         case 2: //ht calculation leads to no results- save dummy line
-	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
+         case 1:
+         case 2:
+         case 3: //ht calculation leads to no results- save dummy line
+                fprintf(stderr,"Warning mcphas: no stable structure found at ");
+                ini.print_usrdefcols(stderr,x,y,T,physprop.H,inputpars.cs.abc,true);fprintf(stderr,"\n");
+// T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
+//                 physprop.T,physprop.H(1),physprop.H(2),physprop.H(3));
+ 	         physprop.save (verbose,filemode,j,ini,inputpars,ini.prefix);
 		 //sta+=1.0; // increment sta because within manifold of spincf no good solution could be found
      	      ++ini.noffailedpoints;
 	      break;	 
 	 default:  ;
 	}
+
  if(fin!=NULL){   
 y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read from file
 
@@ -312,44 +347,12 @@ y=ini.ymin-ini.ystep;} // this is to switch off xy loop if xy points are read fr
 endproper:
   testspins.save(filemode);testqs.save(filemode);
    if(argc>options+1) fclose(fin);
-   printf("#RESULTS saved in directory ./results/  - files:\n");
-   printf("#  %smcphas.fum  - total magnetic moment, energy at different T,H\n",ini.prefix);
-   printf("#  %smcphas.sps  - stable configurations at different T,H\n",ini.prefix);
-   printf("#  %smcphas.mf   - mean fields at different T,H\n",ini.prefix);
-   printf("#  %smcphas.hkl  - strong magnetic satellites, neutron diffraction intensity\n",ini.prefix);
-   printf("#  %smcphas*.hkl - strong magnetic satellites, Fourier Comp.of moment in * dir\n",ini.prefix);
-   printf("#  %smcphas*.j*  - JJ correlation functions (for exchange magnetostriction)\n",ini.prefix);
-   printf("#  %smcphas.xyt  - phasediagram (stable conf.nr, angular and multipolar moments)\n",ini.prefix);
-   printf("#!  %smcphas.qvc  - ...corresponding table of all nqvc=%i qvector generated test configs\n",ini.prefix,testqs.nofqs ());
-   printf("#!  %smcphas.phs  - ...corresponding table of all ntst=%i configurations (except qvecs)\n",ini.prefix,testspins.n);
-   printf("#  _%smcphas.*   - parameters read from input parameter files (.tst,.ini,.j)\n",ini.prefix);
-   printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
-   double cpu_duration = (std::clock() - ini.startcputime) / (double)CLOCKS_PER_SEC;
-   std::cout << "#! Finished in cputime=" << cpu_duration << " seconds [CPU Clock] " << std::endl;
-   std::cout << "#!nofHTpoints=" << ini.nofstapoints << " H-T points in phasediagram successfully calculated" << std::endl;
-   std::cout << "#!noffailedpoints=" << ini.noffailedpoints << " H-T points in phasediagram failed to converge " << std::endl;
-   std::cout << "#!fecalc - free energy calculation was attempted noffecalccalls=" << ini.nofcalls << " times"  << std::endl;
-   std::cout << "#!fecalc - free energy calculation was successful at noffecalcsuccess=" << ini.successrate << " times"  << std::endl;
-   std::cout << "#!fecalc - free energy diverged maxnofloopsDIV=" << ini.nofmaxloopDIV << " times because maxnofloops was reached" << std::endl;
-   std::cout << "#!fecalc - free energy diverged maxspinchangeDIV=" << ini.nofmaxspinchangeDIV << " times because maxspinchange was reached" << std::endl;
-
-if(ini.nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",(ini.nofstapoints+ini.noffailedpoints)*sta/ini.nofstapoints);}
-else { fprintf(stdout,"#! sta=1e10\n");}
-#ifdef _THREADS
-std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;
-for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
-#else
-std::cout << "# mcphas was compiled without parallel processing option " << std::endl;
-#endif
-if(ini.ipx!=NULL)delete ini.ipx;
-if(ini.ipy!=NULL)delete ini.ipy;
-if(ini.ipz!=NULL)delete ini.ipz;
-}
+   ini.finish_mcphas(testqs.nofqs (),testspins.n);
+ }
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program mcphas\n");
    fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");
    fprintf(stderr,"**********************************************\n");
-
 return(0);
 }
 

@@ -25,13 +25,15 @@ class inipar
   bool defaultcolcode(int col,int colcode); // resets default columns if not set by user (outcolset==true)
                                              // returns true if reset has been successful
    char * savfilename;
+   char * program;
+  double sta;
   int doeps,linepscf,linepsjj;
   par * ipx;par * ipy;par * ipz; // storage for two ion interaction parameter derivatives (djdx djdy djdz files)
 
   std::clock_t startcputime;
   int nofstapoints; // number of successful calls to htcalc
   int noffailedpoints; // number of failure calls to htcalc
-  int nofmaxloopDIV,nofmaxspinchangeDIV;
+  int nofmaxloopDIV,nofmaxspinchangeDIV,nofconvrep,nofreppoints;
   int successrate; // number of successful calls to fecalc
   int nofcalls; // number of calls to fecalc
 
@@ -77,6 +79,8 @@ class inipar
   float maxstamf;
   // a big step ratio (=step/calculated step) to perform actually
   float bigstep;
+  // if a point failes, how often should it be repeated with larger computation time
+  float repeat;
   // a small step (=step/calculated step) to perform actually when sta rises
   //float smallstep=0.2;
   //  (<sum abs(actual change of m[mb] with respect to
@@ -135,7 +139,7 @@ bool checkpr(FILE* fout,const char * var,double val,double masterval);
 
  // exit with error message
    void errexit();
-
+   void finish_mcphas(int nofqs,int nofspincf);
   //load parameters from file, returns 1 on error, 0 on success
    int load();
    int load (int & nofinis,char**lofpref);
@@ -143,7 +147,7 @@ int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char 
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,double & var);
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var);
 
-  inipar (const char * file,char * prefix); //constructor
+  inipar (const char * file,char * prefix,const char * prog); //constructor
 
   inipar (const inipar & p);//kopier-konstruktor
 
@@ -157,7 +161,7 @@ class inipars
   inipar ** inis;
    void saveexitzero(); // puts exit to zero in input file
 
-  inipars (const char * file,char * prefix); //constructor
+  inipars (const char * file,char * prefix, const char * prog); //constructor
 
   inipars (const inipars & p);//kopier-konstruktor
 

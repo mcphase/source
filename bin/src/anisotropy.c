@@ -15,6 +15,39 @@ int verbose=0;
 #include "mcphas_fecalc.c"
 #include "mcphas_physpropcalc.c"
 
+int rephtcalc(Vector H,double T,inipar & ini,par & inputpars,qvectors & testqs,
+             testspincf & testspins, physproperties & physprops)
+{int j=1;
+
+float rr=fmodf(ini.repeat-0.00001,1.0);
+          double maxstamf=ini.maxstamf;int rep;
+          int maxnofmfloops=ini.maxnofmfloops,maxspinchange=ini.maxspinchange;
+          for(rep=0;rep<=floor(ini.repeat)&&j>0;++rep)
+          {j=htcalc(H,T,ini,inputpars,testqs,testspins,physprops);
+          // returns j=0 if successfull
+ //  --> if no spinconfiguration has been found at ht point
+ // returns j=1 if recalculation of fe yields too different value
+ // returns j=2 if prevailing problem is maxnofloops reached
+ // returns j=3 if prevailing problem is maxspinchange is reached  
+           switch (j)
+           {case 1: ini.maxstamf*=rr;printf("#repeating with maxstamf=%g\n",ini.maxstamf);
+                    break;
+            case 2: ini.maxnofmfloops/=rr;printf("#repeating with maxnofmfloops=%i\n",ini.maxnofmfloops);
+                    break;
+            case 3: ini.maxspinchange/=rr;printf("#repeating with maxspinchange=%g\n",ini.maxspinchange);
+                    break;
+            default:  ;
+           }
+          }if(rep>0){++ini.nofreppoints;
+                      if(j==0){++ini.nofconvrep;}
+                     }
+         ini.maxspinchange=maxspinchange;
+         ini.maxnofmfloops=maxnofmfloops;
+         ini.maxstamf=maxstamf;
+
+return j;
+}
+
 
 // main program
 int main (int argc, char **argv)
@@ -163,7 +196,7 @@ fprintf(stdout,"#\n#1    2        3\n#T(K) H(Tesla) Mpolycrystal(muB) \n");
 // as class par load  parameters from file
  if(verbose==1){printf("reading parameters from file mcphas.j\n");}
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
- inipar ini("mcphas.ini",prefix);ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;
+ inipar ini("mcphas.ini",prefix,"anisotropyit");ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;
 if(doeps&&ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
 
  par inputpars("./mcphas.j",verbose ); inputpars.save("./results/_mcphas.j",0); 
@@ -204,11 +237,11 @@ if(poly==0){
       physprop.H(3)=h(3);
    print_time_estimate_until_end((2*PI-az)/(az+2*PI/nofsteps));//ratio = nofpointstodo / nofpointsdone
  //calculate physical properties at HT- point
-   s=htcalc(physprop.H,T(1),ini,inputpars,testqs,testspins,physprop);
-   if(s==1)break;
+   s=rephtcalc(physprop.H,T(1),ini,inputpars,testqs,testspins,physprop);
    //save physical properties of HT-point
    if(s==0)++ini.nofstapoints;
-   if(s==2)++ini.noffailedpoints;
+   else {++ini.noffailedpoints;fprintf(stderr,"# Warning anisotropyit: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
+                 physprop.T,physprop.H(1),physprop.H(2),physprop.H(3));}
     fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T(1),H,h(1),h(2),h(3),az*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
   } // H/T loop 
@@ -227,11 +260,11 @@ for(int Ti=1;Ti<=Tsteps;++Ti){ // set field
       physprop.H(2)=h(2);
       physprop.H(3)=h(3);
    //calculate physical properties at HT- point
-   s=htcalc(physprop.H,T(Ti),ini,inputpars,testqs,testspins,physprop);
-   if(s==1)break;
+   s=rephtcalc(physprop.H,T(Ti),ini,inputpars,testqs,testspins,physprop);
    //save physical properties of HT-point
    if(s==0)++ini.nofstapoints;
-   if(s==2)++ini.noffailedpoints;
+   else {++ini.noffailedpoints;fprintf(stderr,"# Warning anisotropyit: femin positive ... no stable structure found at  T= %g K / Ha= %g Hb= %g Hc= %g  T\n",
+                 physprop.T,physprop.H(1),physprop.H(2),physprop.H(3));}
 if(Ti==1)fprintf(fout,"%6.3f  %6.3f  %6.3f  %6.3f   %6.3f %6.3f %6.3f   %6.3f   %6.3f   %6.3f %6.3f %6.3f %6.3f\n",
            phi*180/PI,theta*180/PI,T(Ti),H,h(1),h(2),h(3),theta*180/PI,Norm(physprop.m),physprop.m(1),physprop.m(2),physprop.m(3),physprop.m*h/Norm(h));  
    ++ct;mpoly(Ti)+=physprop.m*h/Norm(h);

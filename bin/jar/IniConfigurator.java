@@ -131,12 +131,14 @@ public class IniConfigurator extends JPanel
 	JLabel labMaxSpinChange = new JLabel();
 	//JLabel labSmallStep = new JLabel();
 	JLabel labBigStep = new JLabel();
+	JLabel labRepeat = new JLabel();
 	JLabel labMaxStaMf = new JLabel();
 	JLabel labMaxNofMfLoops = new JLabel();
 	// Textfields
 	JTextField txMaxSpinChange = new JTextField();
 	//JTextField txSmallStep = new JTextField();
 	JTextField txBigStep = new JTextField();
+	JTextField txRepeat = new JTextField();
 	JTextField txMaxStaMf = new JTextField();
 	JTextField txMaxNofMfLoops = new JTextField();
 
@@ -165,7 +167,9 @@ public class IniConfigurator extends JPanel
   JPanel jPanel9 = new JPanel();
   JPanel jPanel10 = new JPanel();
   JPanel jPanel11 = new JPanel();
+  JPanel jPanel11a = new JPanel();
   JPanel jPanel12 = new JPanel();
+  JPanel jPanel12a = new JPanel();
   JPanel jPanel13 = new JPanel();
   JPanel jPanel14 = new JPanel();
   JPanel jPanel15 = new JPanel();
@@ -191,7 +195,9 @@ public class IniConfigurator extends JPanel
   VerticalFlowLayout verticalFlowLayout10 = new VerticalFlowLayout();
   FlowLayout flowLayout3 = new FlowLayout();
   VerticalFlowLayout verticalFlowLayout11 = new VerticalFlowLayout();
+  VerticalFlowLayout verticalFlowLayout11a = new VerticalFlowLayout();
   VerticalFlowLayout verticalFlowLayout12 = new VerticalFlowLayout();
+  VerticalFlowLayout verticalFlowLayout12a = new VerticalFlowLayout();
   VerticalFlowLayout verticalFlowLayout13 = new VerticalFlowLayout();
   VerticalFlowLayout verticalFlowLayout14 = new VerticalFlowLayout();
   VerticalFlowLayout verticalFlowLayout15 = new VerticalFlowLayout();
@@ -351,8 +357,8 @@ public class IniConfigurator extends JPanel
 	InitLabel(labDeltaK, "deltak:", 70, 19);
 	InitLabel(labKMax, "kmax:", 70, 19);
 	InitLabel(labKMin, "kmin:", 70, 19);
-*/	InitLabel(labNofRndTries, "nofrndtries:", 150, 19);
-        InitLabel(labNofMCsteps, "nofMCsteps:", 150, 19);
+*/	InitLabel(labNofRndTries, "nofrndtries:", 90, 19);
+        InitLabel(labNofMCsteps, "nofMCsteps:", 90, 19);
 /*	InitLabel(labMaxQPeriod, "maxqperiod:", 150, 19);
 	InitLabel(labmaxnoftestspincf, "maxnoftestspincf:", 150, 19);
 	InitLabel(labMaxNofSpins, "MaxNofSpins:", 150, 19);
@@ -376,16 +382,18 @@ public class IniConfigurator extends JPanel
 	 * Third tab-panel
 	 ***********************************/
 	// Labels
-	InitLabel(labMaxSpinChange, "maxspinchange:", 190, 19);
+	InitLabel(labMaxSpinChange, "maxspinchange:", 110, 19);
          labMaxSpinChange.setBackground(Color.blue);
 	//InitLabel(labSmallStep, "smallstep:", 150, 19);
-	InitLabel(labBigStep, "bigstep:", 190, 19);
-	InitLabel(labMaxStaMf, "maxstamf:", 190, 19);
-	InitLabel(labMaxNofMfLoops, "maxnofmfloops:", 190, 19);    
+	InitLabel(labBigStep, "bigstep:", 70, 19);
+	InitLabel(labRepeat, "repeat:", 70, 19);
+	InitLabel(labMaxStaMf, "maxstamf:", 70, 19);
+	InitLabel(labMaxNofMfLoops, "maxnofmfloops:", 110, 19);    
 	// Textfields
 	InitTextfield(txMaxSpinChange, "Sum_{i=1}^{n} abs(change of <Ji> with respect to initial  configuration) - limit to abandon selfconsistency process", 50, 19);
 	//InitTextfield(txSmallStep, "Tooltip", 50, 19);
 	InitTextfield(txBigStep, "Mean field - step ratio (=actual step/calculated step)", 50, 19);
+	InitTextfield(txRepeat, "sets, how often the mean field procedure should be repeated with larger computation time in case there is no convergence", 50, 19);
 	InitTextfield(txMaxStaMf, "Standard deviation - limit to end selfconsistency process", 50, 19);
 	InitTextfield(txMaxNofMfLoops, "Maximum number of loops to abandon selfconsistency process", 50, 19);
 
@@ -402,7 +410,7 @@ public class IniConfigurator extends JPanel
 	InitTextfield(txMaxQ, "For Neutron Diffraction - maximum scattering vector |Q|[1/A] for calculated hkl's", 50, 19);
 */	 	
 	this.add(panMain, BorderLayout.NORTH);
-		panMain.setPreferredSize(new Dimension(700,150));
+		panMain.setPreferredSize(new Dimension(600,140));
                 panMain.setBackground(Color.green);
 
 		panMain.addTab("XY Phasediagram Parameters", panXYPhaseParams);
@@ -474,24 +482,37 @@ jPanel4.setBackground(Color.white);
 jPanel17.add(jPanel12, null);
 				//jPanel12.setMinimumSize(new Dimension(140, 240));
 				jPanel12.setLayout(verticalFlowLayout11);
-					jPanel12.add(labMaxNofMfLoops, null);
 					jPanel12.add(labMaxStaMf, null);
 					jPanel12.add(labBigStep, null);
+					jPanel12.add(labRepeat, null);
 					//jPanel12.add(labSmallStep, null);
-					jPanel12.add(labMaxSpinChange, null);
+
 //			panAdditionalParams.add(jPanel11, null);
 			                jPanel17.add(jPanel11, null);
 				jPanel11.setLayout(verticalFlowLayout12);
 				//jPanel11.setPreferredSize(new Dimension(200, 240));
 				//jPanel11.setMinimumSize(new Dimension(200, 240));
-					jPanel11.add(txMaxNofMfLoops, null);
 					jPanel11.add(txMaxStaMf, null);
 					jPanel11.add(txBigStep, null);
+					jPanel11.add(txRepeat, null);
 					//jPanel11.add(txSmallStep, null);
-					jPanel11.add(txMaxSpinChange, null);
+
+
+jPanel17.add(jPanel12a, null);jPanel12a.setLayout(verticalFlowLayout11a);
+				
+					jPanel12a.add(labMaxNofMfLoops, null);
+					jPanel12a.add(labMaxSpinChange, null);
+jPanel17.add(jPanel11a, null);jPanel11a.setLayout(verticalFlowLayout12a);
+				
+					jPanel11a.add(txMaxNofMfLoops, null);
+					jPanel11a.add(txMaxSpinChange, null);
+
+
 jPanel17.setBackground(new Color(180, 210, 255));
 jPanel12.setBackground(new Color(180, 210, 255));
 jPanel11.setBackground(new Color(180, 210, 255));
+jPanel12a.setBackground(new Color(180, 210, 255));
+jPanel11a.setBackground(new Color(180, 210, 255));
 		/*	jPanel13.add(panQVector,null);
 				panQVector.setLayout(flowLayout2);
 				panQVector.add(jPanel5, null);
@@ -676,7 +697,7 @@ jLab.setBackground(Color.blue);
 		
 		frame.getContentPane().add("Center", panel);
 		frame.pack();
-		frame.setSize(800,250);
+		frame.setSize(700,220);
                panel.setBackground(Color.green);
 
 		// Initialize Form
@@ -756,6 +777,7 @@ jLab.setBackground(Color.blue);
 	txMaxNofMfLoops.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxnofmfloops"));
     txMaxStaMf.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxstamf"));
     txBigStep.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "bigstep"));
+    txRepeat.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "repeat"));
     //txSmallStep.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "smallstep"));
     txMaxSpinChange.setText(m_IniFile.GetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxspinchange"));
 /*
@@ -883,6 +905,7 @@ jLab.setBackground(Color.blue);
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxnofmfloops", txMaxNofMfLoops.getText(), "maximum number of selfconsistency loops");
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxstamf", txMaxStaMf.getText(), "standard deviation - limit to end selfconsistency process\n# standard deviation is defined by ...sta=sqrt(sum_{i=1}^{n} (newmf-old mf)i^2/n)\n# the meanfield is given by mf=gj mb H [meV] (gj...lande factor, mb... bohr magneton)");
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "bigstep", txBigStep.getText(), "mean field step ratio bigstep( = step to perform /calculated step<1) \n# note: if sta increases - then for 10 iterations set step ratio to smallstep=bigstep/n\n# by default n=5. However, if bigstep>1 then n=integervalue(bigstep) and step ratio=bigstep-n");
+    m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "repeat", txRepeat.getText(), "number of repetitions: if all mean field loops fail to stabilise\n at each repetition either maxstamf or manxofloops or maxspinchange is relaxed \n  (depending on which problems occur most) to allow for more computation time,e.g. \n 2.3 will allow for 3 repetitions and if maxnofmfloops is too small to converge\n  it will be increased by a factor 1/0.4 for each repetition");
     //m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "smallstep", txSmallStep.getText(), "a small step (=step/calculated step) to perform actually when sta rises");
     m_IniFile.SetValue(CONST_PARAMETERS_FOR_SUB_FECALC_SELFCONSISTENCY_PROCESS, "maxspinchange", txMaxSpinChange.getText(), "sum_{i=1}^{n} abs(actual change of angular momentum <Ji> with respect to\n# initial  configuration) > maxspinchange will  end selfconsistency process");
 

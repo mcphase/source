@@ -651,7 +651,9 @@ the verbose mode enables the following features:
                    parameters such as 001xmin and use those, if these are given AFTER the 
                    the standard parameters (i.e. xmin=0 \dots 001xmin=1 will set xmin to 1 whereas
               001xmin=1 \dots xmin=0 will set xmin to 0). Output goes to files
- 		    results/001mcphas*.* (option for parallel processes)
+ 		    results/001mcphas*.* (option ideal for parallel processes).
+                   Wildcard * may be used in the prefix option, e.g.  -prefix 00* will run
+                   {\prg mcphas} with all prefixes in the mcphas.ini file starting with 00.
  \item[\prg mcphas\index{mcphas}         -read  001 ]   try to read output files of previous calculation starting
  		     with 001, e.g. results/001mcphas.fum, if these exist, and if 
  		    the x-y-T-Ha-Hb-Hc point is found and the calculation was stable 

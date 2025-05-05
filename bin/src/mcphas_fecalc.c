@@ -199,7 +199,7 @@ double fecalc(double & U, double & Eelastic, int & r,double & spinchange,Vector 
     returns free energy[meV]
     sps		selfconsistently stabilized spinconfiguration (may be different
 		from initial spinconfiguration)
-    u		mangetic energy[meV]
+    u		magnetic energy[meV]
 
  */
 
