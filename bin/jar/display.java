@@ -51,6 +51,8 @@ import org.jfree.ui.RefineryUtilities;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.annotations.XYLineAnnotation;
+import org.jfree.chart.annotations.XYTextAnnotation;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -223,6 +225,9 @@ static public void windowclose(){
        System.out.println("        when using option -xmin 23.3 the application sets the minimum of the display xaxis to 23.3\n");
        System.out.println("        similar are options -xmax -ymin -ymax -xtext -ytext -title....\n");
        System.out.println("        when using option -c file.jpg the application only creates a jpg file and exits immediatly\n");
+       System.out.println("        option -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values\n");
+       System.out.println("                          a text to be written as line label can be added by inserting | and adding the text\n");
+       System.out.println("        option -hlines 2,3.4,12.3 shows horizontal lines at specified x values\n");
        System.out.println("        option -g shows gridlines\n");
        System.out.println("        if optional errorcolumns are added then instead of lines symbols and errorbars are shown\n");
        System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to\n");
@@ -301,6 +306,16 @@ static public void windowclose(){
              detTitle=false;ss=SF.FirstWord(s);Title=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
+            else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-hlines")) // option "-hlines 3,2,4"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detTitle=false;ss=SF.FirstWord(s);Hlines=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-vlines")) // option "-vlines 3,2,4"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detTitle=false;ss=SF.FirstWord(s);Vlines=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
             else {System.out.println("ERROR: option,"+SF.TrimString(s)+" not implemented !\n\n");System.exit(0);}
           }
        for(int i=k;s.length()>0;	i+=0)
@@ -355,6 +370,8 @@ static public void windowclose(){
  static String xText = "";
  static String yText = "";
  static String Title = "";
+ static String Vlines = "";
+ static String Hlines = "";
  static LegendTitle Legendt;
  static DefaultXYZDataset bdataset;
  static DefaultIntervalXYDataset dataset;
@@ -478,8 +495,8 @@ plot.setDomainGridlinePaint(Color.BLACK);
         brenderer.setSeriesPaint(2, Color.black);
         brenderer.setSeriesPaint(5, Color.orange);
         brenderer.setSeriesPaint(4, Color.pink);
-       renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
-       brenderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
+       renderer.setDefaultToolTipGenerator(new StandardXYToolTipGenerator());
+       brenderer.setDefaultToolTipGenerator(new StandardXYToolTipGenerator());
     
 
    for(int i=6;i<=MAX_NOF_FILES;++i){ renderer.setSeriesPaint(i, new Color(70*i%256,140*i % 256,210*i % 256));}
@@ -522,6 +539,38 @@ plot.setDomainGridlinePaint(Color.BLACK);
      if(xmax<xmin||ymax<ymin){System.out.println("No data to plot");System.exit(1);}
      rangeAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
      domainAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
+ 
+// this is for plotting a line 
+//     XYLineAnnotation axy = new  XYLineAnnotation(0.0, 0.0, 1.0, 0.0);
+//     plot.addAnnotation(axy);
+// we plot vertical lines at the positions specified in the numbers of string Vlines
+
+    String hl [] = Hlines.split(",");Double p = new Double(0.0);
+for (String s : hl) {
+if(!s.isEmpty()){
+    String sn [] = s.split("\\|"); 
+   double y =p.parseDouble(sn[0]); 
+ XYLineAnnotation axy = new  XYLineAnnotation(y, xmin, y, xmax);
+plot.addAnnotation(axy);
+   if(sn.length>1){
+XYTextAnnotation t = new XYTextAnnotation(sn[1],y,xmax+0.02*(xmax-xmin));
+plot.addAnnotation(t);
+    }
+ }
+}
+    String vl [] = Vlines.split(",");
+for (String s : vl) {
+if(!s.isEmpty()){ String sn [] = s.split("\\|"); 
+   double x =p.parseDouble(sn[0]); 
+ XYLineAnnotation axy = new  XYLineAnnotation(ymin, x, ymax, x);
+plot.addAnnotation(axy);
+ if(sn.length>1){
+XYTextAnnotation t = new XYTextAnnotation(sn[1],ymax+0.02*(ymax-ymin),x);
+plot.addAnnotation(t);
+    }
+ }
+}
+
 
      update_legend();
      return chart;
