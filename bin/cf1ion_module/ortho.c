@@ -1125,7 +1125,8 @@ DOUBLE   Chi2(SETUP *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR *v)/
 /* DOUBLE         chi2_az,chi2_bz,chi2_cz,chi2_pz;
    DOUBLE         chi2_an,chi2_bn,chi2_cn,chi2_pn; */
    DOUBLE         dumx,dumy,dumz,dump,b1,b2,b3,b_norm,sqrt(DOUBLE f);
-   DOUBLE         mag(KOMPLEX   *(*mat_Ji)(),SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *v,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE t),e_dummy,i_dummy;
+   DOUBLE         mag(KOMPLEX   *(*mat_Ji)(VEKTOR  *ev_ir,VEKTOR  *ev_ic),SETUP     *setup,EWPROBLEM *ewproblem,ITERATION *iteration,VEKTOR    *v,DOUBLE Bx,DOUBLE By,DOUBLE Bz,DOUBLE t);
+   DOUBLE         e_dummy,i_dummy;
    EWPROBLEM      *diagonalisiere(EWPROBLEM *ewproblem,MATRIX *matrix,INT overwrite,SETUP *setup);
    ITERATION      *hamilton(ITERATION *i,VEKTOR    *v);
    DOUBLE         ttheta;

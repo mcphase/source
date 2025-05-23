@@ -111,8 +111,8 @@ Prerequisits:
     gcc, gfortran or g77
     perl
     java
-    PDL 2.0      PerlDL
-            http://pdl.perl.org
+    PDL 2.0      PerlDL  http://pdl.perl.org  comman to install: cpan -I pdl
+   (MacOS  install sourceforge SciPDL App and put to lin.bat: source /Applications/PDL/setup_bash )
     
 - option (needed only for some old plotting programs, which are not maintained any more):
    [ flex

@@ -295,17 +295,18 @@ if (j==1){float rr=fmodf(ini.repeat-0.00001,1.0);
  // returns j=1 if recalculation of fe yields too different value
  // returns j=2 if prevailing problem is maxnofmfloops reached
  // returns j=3 if prevailing problem is maxspinchange is reached  
+          if(rep+1<=floor(ini.repeat)){
            switch (j)
            {case 1: ini.maxstamf*=rr;printf("repeating with maxstamf=%g\n",ini.maxstamf);
                     break;
             case 2: ini.maxnofmfloops/=rr;printf("repeating with maxnofmfloops=%i\n",ini.maxnofmfloops);
                     break;
-            case 3: ini.maxspinchange/=rr;printf("repeating with maxspinchange=%g\n",ini.maxspinchange);
+            case 3: ini.maxspinchange/=rr;printf("repeating with maxspinchange=%g \n",ini.maxspinchange);
                     break;
             default:  ;
            }
-           
-          } if(rep>0){++nofreppoints;ini.nofreppoints=nofreppoints;
+                                       }
+          } if(rep>1){++nofreppoints;ini.nofreppoints=nofreppoints;
                       if(j==0){++nofconvrep;ini.nofconvrep=nofconvrep;}
                      }
 

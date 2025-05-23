@@ -212,6 +212,9 @@ windows:
 #	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
 #	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/zulu17.56.15-ca-jre17.0.14-win_x64 --output=$(HOME)/mcph.exe
 #	rm $(HOME)/windows.jar
+	make winno
+
+winno:
 	dot_clean -mv ./
 	docker run --rm -i -v "$$PWD:/work" amake/innosetup innosetup_mac.iss
 	mv Output/mysetup.exe $(HOME)/mcph.exe

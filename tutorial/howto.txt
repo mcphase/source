@@ -115,5 +115,10 @@ HOW TO TREAT/INCLUDE ...
                                        - manual   chapter Including Quadrupolar and 
                                                   Higher Order Interactions
                                        - programs mcphas, mcdisp
+-------------------------------------------------------------------------------------
+.... CRYSTAL FIELD - PHONON INTERACTIONS / MAGNETOSTRICTION ?
+                                       - tutorial M-Handout_CF-phon
+                                       - examples tmnic2, tmcu2_cf_phonon, ho2ti2o7
+                                       - manual  chapter crystal field phonon interaction
 *************************************************************************************
 \end{verbatim}
