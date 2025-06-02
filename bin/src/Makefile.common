@@ -111,7 +111,7 @@ endif
 CC+= -pipe $(ARCHFLAG)
 #COPTS= -ansi -O3 -fomit-frame-pointer -fforce-addr -mcpu=i486
 #COPTS= -DDEBUG
-COPTS=-ansi $(LINOPTS)
+COPTS= $(LINOPTS)
 ifdef profile
 COPTS=-pg $(LINOPTS)
 LFLAGS=-pg 

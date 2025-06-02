@@ -349,6 +349,10 @@ endproper:
   testspins.save(filemode);testqs.save(filemode);
    if(argc>options+1) fclose(fin);
    ini.finish_mcphas(testqs.nofqs (),testspins.n);
+#ifdef _THREADS
+for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
+#endif
+
  }
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program mcphas\n");

@@ -100,6 +100,9 @@ void checkini(testspincf & testspins,qvectors & testqs,inipar & ini)
         {testspins.save(filemode);  //exit normally
          testqs.save(filemode);
          ini.finish_mcphas(testqs.nofqs (),testspins.n);
+#ifdef _THREADS
+for (int ithread=0; ithread<ini.nofthreads; ithread++) delete tin[ithread];
+#endif
    fprintf(stderr,"**********************************************\n");
    fprintf(stderr,"          End of Program %s\n",ini.program);
    fprintf(stderr," reference: M. Rotter JMMM 272-276 (2004) 481\n");

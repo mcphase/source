@@ -126,8 +126,7 @@ printf("RESULTS saved in directory ./results/  - files:\n");
 if(nofstapoints>0)  { fprintf(stdout,"#! sta=%g\n",(nofstapoints+noffailedpoints)*sta/nofstapoints);}
 else { fprintf(stdout,"#! sta=1e10\n");}
 #ifdef _THREADS
-std::cout << "#! nofthreads= " << NUM_THREADS << " threads were used in parallel processing " << std::endl;
-for (int ithread=0; ithread<NUM_THREADS; ithread++) delete tin[ithread];
+std::cout << "#! nofthreads= " << nofthreads << " threads were used in parallel processing " << std::endl;
 #else
 std::cout << "# mcphas was compiled without parallel processing option " << std::endl;
 #endif
@@ -424,17 +423,17 @@ int inipar::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * ins
  if(findnewmatch==true)
  {if(pref[0]!='\0')
   {char prefvar[MAXNOFCHARINLINE];char * s,*p;
-  snprintf(prefvar,sizeof(prefvar),"%s%s",pref,parameter);
+  snprintf(prefvar,MAXNOFCHARINLINE,"%s%s",pref,parameter);
   s=wstrstr(instr,prefvar);
   if(s!=NULL)
   { // ok there seems to be a new match - see if it is already in the list
-   snprintf(prefvar,sizeof(prefvar),"%s",parameter);
+   snprintf(prefvar,MAXNOFCHARINLINE,"%s",parameter);
    p=wstrstr(instr,prefvar);
    int i=0;for(char * t=s;t<p;++t){prefvar[i]=*t;++i;}prefvar[i]='\0'; // put the prefix to prefvar
     i=0;bool mm=false;while(i<n&&mm==false){mm=match(prefvar,lofpref[i]);
     ++i;}
     if(i==n&&mm==false){lofpref[i]=new char [strlen(prefvar)+2];snprintf(lofpref[i],strlen(prefvar)+1,"%s",prefvar);
-                          snprintf(prefix,sizeof(prefix),"%s",prefvar);
+                          snprintf(prefix,MAXNOFCHARINLINE,"%s",prefvar);
                      ++n; findnewmatch=false;printf("increase lofpref %s\n",lofpref[i]);
             }
    }// no new match -> extract without prefix

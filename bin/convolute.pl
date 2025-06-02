@@ -299,5 +299,4 @@ echo $ds#$ds
 echo $ds# M. Rotter and A. Boothroyd Phys. Rev. B 79 (2009) 140405R$ds
 echo $ds#$ds
 echo $ds# ***************************************************************$ds
-echo on
 EOF

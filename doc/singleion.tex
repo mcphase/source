@@ -159,7 +159,11 @@ In order to get a more realistic scattering intensity, the
 form factor (giving a $Q$ dependence), the
 factor $k'/k$ and the Debye Waller factor $exp(-W(Q))$ should be considered.
 
-Here comes the output file {\prg results/Nd3p.sipf.levels.cef}:
+% defined in define_j.c:    m =2J+1,...,1  => mj =J,...,-J
+Here comes the output file {\prg results/Nd3p.sipf.levels.cef}, note that for the so1ion module
+the row indices 1,....,d=10=2J+1 correspond to the quantum numbers -J,....,+J, respectively. This
+means the first row corresponds in the example to the eigenvector components of $|J-9/2 MJ=-9/2\rangle$,
+ the second row to $|J-9/2 MJ=-7/2\rangle$ and so on:
 {\footnotesize
 \begin{verbatim} 
 #

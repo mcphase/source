@@ -78,6 +78,7 @@ addj results/makenn.j mcphas_rkky.j > mcphas.j
 
 call insertfile 21 mcphas.j results/makenn.Cel
 REM ... now the calculated elastic constants are finally in mcphas.j
+getvariable.pl -c 60138 Cel12 mcphas.j
 
 REM check that maximum in J(Q) is really at Q=(0.55 0 0)
 call mcdispit -jq -minE -1000

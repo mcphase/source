@@ -681,7 +681,6 @@ void ionpars::cfeigenstates(ComplexMatrix *eigenstates,Vector &  Hxc,Vector & He
    setup_and_solve_Hamiltonian(Hxc,Hext,En,zr,zi,sort);
    
    for(i=1;i<=dj;++i)for(j=1;j<=dj;++j)(*eigenstates)(i,j)=complex <double> (zr(i,j),zi(i,j));
- 
     //calculate partition sum
     double zz;
     calculate_Z_wn(En,T,zz,wn);
@@ -816,7 +815,7 @@ int ionpars::du1calc(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexVect
   getijdelta_from_transitionnumber(i,j,delta,dj,tn,pr,ests);
   n=i;nd=j;
   char optype[5];
-  for(int l=1;l<=Hxc.Hi();++l){snprintf(optype,sizeof(optype),"I%i",l);
+  for(int l=1;l<=Hxc.Hi();++l){snprintf(optype,5,"I%i",l);
   u1(l)=observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*In[l]));}
 
 // return number of all transitions     
@@ -1261,11 +1260,11 @@ int q[] = {-1,0,-2,-1,0,1,2,-4,-3,-2,-1,0,1,2,3,4,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,
 
 char optype[12];
 cd1(1)=0;if(i==j){cd1(1)=-nof_electrons / sqrt(4.0 * 3.1415);}
-for(l=2;l<=6;++l){snprintf(optype,sizeof(optype),"cd_coeff%i",l);
+for(l=2;l<=6;++l){snprintf(optype,12,"cd_coeff%i",l);
                   cd1(l)=alpha*cnst(k[l],q[l])*observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*Olm[l-1]));}
-for(l=7;l<=15;++l){snprintf(optype,sizeof(optype),"cd_coeff%i",l);
+for(l=7;l<=15;++l){snprintf(optype,12,"cd_coeff%i",l);
                    cd1(l)=beta*cnst(k[l],q[l])*observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*Olm[l-1+7]));}
-for(l=16;l<=28;++l){snprintf(optype,sizeof(optype),"cd_coeff%i",l);
+for(l=16;l<=28;++l){snprintf(optype,12,"cd_coeff%i",l);
                     cd1(l)=gamma*cnst(k[l],q[l])*observable1(i,j,delta,zr,zi,T,ests,pr,optype,(*Olm[l-1+7+11]));}
      // theta_J*cnst(l,m)  are prefactors to get coefficients of Zlm*R(r)^2 
     //in case of module cfield and so1ion(stevens parameters tetan and zlm prefactors)

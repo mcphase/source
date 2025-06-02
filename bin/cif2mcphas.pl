@@ -298,7 +298,11 @@ while (<>) {
     $spagrp = $_;
     $spagrp =~ s/_symmetry_space_group_name_H-M//g;
     $spagrp =~ s/HR/H/; $spagrp =~ s/://g; $spagrp =~ s/['"]//g; $spagrp =~ s/^\s+//g;
-  } elsif($_ =~ /_symmetry_Int_Tables_number/) {
+  }elsif($_ =~ /_space_group_name_H-M/) { 
+    $spagrp = $_;
+    $spagrp =~ s/_space_group_name_H-M//g;
+    $spagrp =~ s/HR/H/; $spagrp =~ s/://g; $spagrp =~ s/['"]//g; $spagrp =~ s/^\s+//g;
+  } elsif($_ =~ /_symmetry_Int_Tables_number/||$_ =~ /_space_group_IT_number/) {
     @line = split; $spanum = @line[1];
   } else {                  # First we parse the loop column headers in this else{} block
     if($isloop == 1) {

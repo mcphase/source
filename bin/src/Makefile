@@ -194,7 +194,7 @@ jq.o: jq.cpp jq.hpp vector.h mdcf.hpp
 	$(CCC) $(CFLAGS) $< 
 
 inipar.o: inipar.cpp inipar.hpp cryststruct.hpp martin.h vector.h par.hpp ../../version
-	$(CCC) $(CFLAGS) $< 
+	$(CCC) $(CFLAGS) $(THREADFLAG)  $< 
 
 ionpars.o: ionpars.cpp ionpars.hpp perlparse.h martin.h ../../version
 	$(CCC) $(CFLAGS) $<

@@ -172,7 +172,7 @@ gp.scale_view_2=1.0;
 gp.scale_view_3=1.0;
 gp.spins_scale_moment=0;
 gp.show_density=0;
-snprintf(gp.title,sizeof(gp.title),"output of program spins");
+snprintf(gp.title,MAXNOFCHARINLINE,"output of program spins");
 
 // --------------------- load crystal structure information from mcphas.j for further processing  -----------------
 //   (needed by check_for_best () to convert Habc into Hijk , then for spins.out crystallographic info ...)
@@ -203,16 +203,16 @@ switch(argv[1][1]) // dimension definition from jjjpar.hpp
 printf("#chargedensity is expanded in tesseral harmonics Zlm\n\
 #   ro(r) sum_lm (a(l,m) R^2(r) Zlm(Omega)\n\
 #   M. Rotter et al. J Phys: Conf Ser. 325 (2011) 012005\n#\n ");
- snprintf(gp.title,sizeof(gp.title),"chargedensity ro(r)");
+ snprintf(gp.title,MAXNOFCHARINLINE,"chargedensity ro(r)");
  gp.threshhold=-0.05;
            break;
  case 's': dim=SPINDENS_EV_DIM;
 printf("#spindensity is expanded in tesseral harmonics Zlm\n\
 #   M(r).(%g,%g,%g)= sum_lm aS(l,m) R^2(r) Zlm(Omega)\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
-  if(doijk==3) snprintf(gp.title,sizeof(gp.title),"projection of spindensity Ms(r).(%g,%g,%g)",xx,yy,zz);
-  if(doijk==1){snprintf(gp.title,sizeof(gp.title),"divergence of spindensity div Ms(r)");gp.scale_density_vectors=0;}
-  if(doijk==0) snprintf(gp.title,sizeof(gp.title),"abs value  of spindensity |Ms(r)|");
+  if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of spindensity Ms(r).(%g,%g,%g)",xx,yy,zz);
+  if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of spindensity div Ms(r)");gp.scale_density_vectors=0;}
+  if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of spindensity |Ms(r)|");
 if(doijk<3){dim*=3;}
 gp.threshhold=0.05;
 break;
@@ -221,9 +221,9 @@ printf("#orbital momdensity is expanded in tesseral harmonics Zlm\n\
 #   M(r).(%g,%g,%g)= sum_lm  aL(l,m) F(r) Zlm(Omega)\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
-  if(doijk==3) snprintf(gp.title,sizeof(gp.title),"projection of orbmomdensity Ms(r).(%g,%g,%g)",xx,yy,zz);
-  if(doijk==1){snprintf(gp.title,sizeof(gp.title),"divergence of orbmomdensity div ML(r)");gp.scale_density_vectors=0;}
-  if(doijk==0) snprintf(gp.title,sizeof(gp.title),"abs value  of orbmomdensity |ML(r)|");
+  if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of orbmomdensity Ms(r).(%g,%g,%g)",xx,yy,zz);
+  if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of orbmomdensity div ML(r)");gp.scale_density_vectors=0;}
+  if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of orbmomdensity |ML(r)|");
 if(doijk<3){dim*=3;}
 gp.threshhold=0.05;
 break;
@@ -232,9 +232,9 @@ printf("#magnetic momdensity is expanded in tesseral harmonics Zlm\n\
 #   M(r).(%g,%g,%g)= sum_lm (aS(l,m) R^2(r)+ aL(l,m) F(r)) Zlm(Omega)\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
-  if(doijk==3) snprintf(gp.title,sizeof(gp.title),"projection of momdensity M(r).(%g,%g,%g)",xx,yy,zz);
-  if(doijk==1){snprintf(gp.title,sizeof(gp.title),"divergence of momdensity div ML(r)");gp.scale_density_vectors=0;}
-  if(doijk==0) snprintf(gp.title,sizeof(gp.title),"abs value  of momdensity |ML(r)|");
+  if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of momdensity M(r).(%g,%g,%g)",xx,yy,zz);
+  if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of momdensity div ML(r)");gp.scale_density_vectors=0;}
+  if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of momdensity |ML(r)|");
 if(doijk<3){dim*=3;}
 gp.threshhold=0.05;
 break;
@@ -243,9 +243,9 @@ printf("#currdensity is expanded in tesseral harmonics Zlm\n\
 #   j(r).(%g,%g,%g)= sum_lm (b(l,m) R^2(r)+ d(l,m) F(r) Zlm(Omega)\n\
 #   with F(r)=1/r int_r^inf R^2(x) dx\n\
 #   E. Balcar J. Phys. C. 8 (1975) 1581\n#\n ",xx,yy,zz);
-  if(doijk==3) snprintf(gp.title,sizeof(gp.title),"projection of currdensity j(r).(i=%g,j=%g,k=%g)(milliAmp/A^2)",xx,yy,zz);
-  if(doijk==1){snprintf(gp.title,sizeof(gp.title),"divergence of currdensity div j(r)");gp.scale_density_vectors=0;}
-  if(doijk==0) snprintf(gp.title,sizeof(gp.title),"abs value  of currdensity |j(r)|(milliAmp/A^2)");
+  if(doijk==3) snprintf(gp.title,MAXNOFCHARINLINE,"projection of currdensity j(r).(i=%g,j=%g,k=%g)(milliAmp/A^2)",xx,yy,zz);
+  if(doijk==1){snprintf(gp.title,MAXNOFCHARINLINE,"divergence of currdensity div j(r)");gp.scale_density_vectors=0;}
+  if(doijk==0) snprintf(gp.title,MAXNOFCHARINLINE,"abs value  of currdensity |j(r)|(milliAmp/A^2)");
   dim*=6;
 gp.threshhold=0.05;
 break;
@@ -265,15 +265,15 @@ break;
                                      }
 
 if(strcmp(argv[1+os],"-S")==0){os+=1;arrow=1;gp.spins_colour=3; gp.spins_scale_moment=1;//arrowdim=SPIN_EV_DIM;
-                              snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the spins");}
+                              snprintf(gp.title+strlen(gp.title),MAXNOFCHARINLINE-strlen(gp.title)," arrows correspond to the spins");}
 else if(strcmp(argv[1+os],"-L")==0){os+=1;arrow=2;gp.spins_colour=2; gp.spins_scale_moment=1;//arrowdim=ORBMOM_EV_DIM;
-                                   snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the orbital angular momenta");}
+                                   snprintf(gp.title+strlen(gp.title),MAXNOFCHARINLINE-strlen(gp.title)," arrows correspond to the orbital angular momenta");}
 else if(strncmp(argv[1+os],"-M",2)==0){os+=1;arrow=3;gp.spins_colour=1; gp.spins_scale_moment=1;//arrowdim=MAGMOM_EV_DIM;
-                                   snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the magnetic moments");
+                                   snprintf(gp.title+strlen(gp.title),MAXNOFCHARINLINE-strlen(gp.title)," arrows correspond to the magnetic moments");
                                    if(strcmp(argv[os],"-Mi")==0){arrow=4;}
                                    }
 else if(strncmp(argv[1+os],"-pel",4)==0){os+=1;arrow=5;gp.spins_colour=4; gp.spins_scale_moment=1;//arrowdim=MAGMOM_EV_DIM;
-                                   snprintf(gp.title+strlen(gp.title),sizeof(gp.title)-strlen(gp.title)," arrows correspond to the electric dipole moments");
+                                   snprintf(gp.title+strlen(gp.title),MAXNOFCHARINLINE-strlen(gp.title)," arrows correspond to the electric dipole moments");
                                    }
 
 if(strcmp(argv[1+os],"-P")==0){os+=1;phonon=1;}
@@ -855,7 +855,7 @@ if (argc-1==8+os){
                         strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),inputpars.cs.abc);
                  if (dd<delta)
                  {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
-                  snprintf(outhklstr,sizeof(outhklstr),"%s ",instr);
+                  snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
                   spinconfev_real=ev_real;
                   spinconfev_imag=ev_imag;                  
                  }
@@ -904,7 +904,7 @@ if (argc-1==8+os){
                         strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),inputpars.cs.abc);
                  if (dd<delta)
                  {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
-                  snprintf(outhklstr,sizeof(outhklstr),"%s ",instr);
+                  snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
                   spinconfpev_real=ev_real;
                   spinconfpev_imag=ev_imag;                  
                  }
@@ -968,7 +968,7 @@ if (argc-1==8+os){
                         strtod(argv[7+os],NULL),strtod(argv[8+os],NULL),inputpars.cs.abc);
                  if (dd<delta)
                  {delta=dd;checkdd=tcdd;hkl=thkl;//E=tE;
-                  snprintf(outhklstr,sizeof(outhklstr),"%s ",instr);
+                  snprintf(outhklstr,MAXNOFCHARINLINE,"%s ",instr);
                  
             switch(argv[1][1]) // dimension definition from jjjpar.hpp
             {case 's': 
@@ -1015,12 +1015,12 @@ if (argc-1==8+os){
                printf(" calculating movie sequence %i(16)\n",i+1);
                printf("********************************************\n");
                char filename[MAXNOFCHARINLINE];
-               snprintf(filename,sizeof(filename),"./results/spins.%i.jvx",i+1);
+               snprintf(filename,MAXNOFCHARINLINE,"./results/spins.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=0;
                      densitycf.jvx_cd(fin,outhklstr,cs,gp,
                                   phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);
                fclose (fin);
-               snprintf(filename,sizeof(filename),"./results/spins_prim.%i.jvx",i+1);
+               snprintf(filename,MAXNOFCHARINLINE,"./results/spins_prim.%i.jvx",i+1);
                fin = fopen_errchk (filename, "w");gp.showprim=1;
                      densitycf.jvx_cd(fin,outhklstr,cs,gp,
                                   phase,densityev_real,densityev_imag,hkl,T,hh,Hext,cs4,spinconf,spinconfev_real,spinconfev_imag,sc_phonon,spinconfpev_real,spinconfpev_imag);

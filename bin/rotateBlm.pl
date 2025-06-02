@@ -253,6 +253,7 @@ DWF=0
 # debeywallerfactor = EXP(-2 * DWF *s*s)
 EOF
 }
+ print outfile "\n";
  for $i (0 .. 5) { if ($_ = $R2->[$i][0]) { if(abs($_)>1e-8) {if($i % 2){$_=-$_}; print outfile "$Bo2{$i} = $_\n"; } } }
   for $i (0 .. 9) { if ($_ = $R4->[$i][0]) { if(abs($_)>1e-8) {if($i % 2){$_=-$_}; print  outfile "$Bo4{$i} = $_\n"; } } }
   for $i (0 .. 13) { if ($_ = $R6->[$i][0]) { if(abs($_)>1e-8){if($i % 2){$_=-$_}; print  outfile "$Bo6{$i} = $_\n"; } } }

@@ -100,15 +100,15 @@ while($ARGV[0]=~/-[^\d]/){
 if ($ARGV[0] eq '-log') {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$log=eval $ARGV[0]; shift @ARGV;$logbatchfile=$ARGV[0]; shift @ARGV;}
   }
 
- while(!open(Fout,">results/searchspace.status")){print "Error opening file results/searchspace.status\n";<STDIN>;}
+ while(!open(Fout,">results/searchspace.status")){print STDERR "Error opening file results/searchspace.status\n";<STDIN>;}
   print Fout "parameter[value,      min,           max,           (not used)   ,minimum meshwidth]\n";
  foreach (@ARGV)
- {$file=$_; if(mycopy ($file,$file.".bak")){print "\n error copying $file \n";print " <Press enter to close>";$in=<STDIN>;exit 1;} 
-   unless (open (Fin, $file.".forfit")){print "\n error:unable to open $file\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}   
+ {$file=$_; if(mycopy ($file,$file.".bak")){print STDERR "\n error copying $file \n";print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;} 
+   unless (open (Fin, $file.".forfit")){print STDERR "\n error:unable to open $file\n";print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;}   
    while($line=<Fin>)
 {while ($line=~/^(#!|[^#])*?\bpar\w+\s*\Q[\E/) {++$#par;#load another parameter
 				 ($parname)=($line=~m/(?:#!|[^#])*?\b(par\w+)\s*\Q[\E/);
-                                 foreach(@parnam){if ($_ eq $parname){print "ERROR searchspace: parameter $parname occurs more than one time in input files\n"; print " <Press enter to close>";$in=<STDIN>;exit 1;}}
+                                 foreach(@parnam){if ($_ eq $parname){print STDERR "ERROR searchspace: parameter $parname occurs more than one time in input files\n"; print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;}}
                                  $parnam[$#par]=$parname;
 				 ($par[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*([^,]+)/);
 				 ($parmin[$#par])=($line=~m/(?:#!|[^#])*?\bpar\w+\s*\Q[\E\s*[^,]+\s*,\s*([^,]+)/);
@@ -120,15 +120,15 @@ if ($ARGV[0] eq '-log') {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$
                                  $i=$#par;write STDOUT;$ii=$i;write Fout;
 				  #check if parmin<=parmax
                           if ($parmin[$#par]>$parmax[$#par]) 
-                            {print "ERROR searchspace reading parameterrange: parmin > parmax\n";
-                              print " <Press enter to close>";$in=<STDIN>;exit 1;
+                            {print STDERR "ERROR searchspace reading parameterrange: parmin > parmax\n";
+                              print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;
                              }
 
                          $line=~s/(?:#!|[^#])*?\bpar\w+\s*\Q[\E//;                     
 				 }
      } close Fin;
  }  
-    if ($#par<0) {print "Error searchspace: no parameters found in input files @ARGV\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
+    if ($#par<0) {print STDERR "Error searchspace: no parameters found in input files @ARGV\n";print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;}
     print ($#par+1);print " parameters found\n"; close Fout;
 
   if($searchlevel<0){# in this case only read parameter set -$searchlevel from input file and update parameter files
@@ -166,8 +166,8 @@ if ($ARGV[0] eq '-log') {shift @ARGV; $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$
                                                 }
                          }
                     }
-                   print "Error program searchspace, loading parameter set ".(-$searchlevel)." failed !\n"; 
-                   print " <Press enter to close>";$in=<STDIN>;exit 1;
+                   print STDERR "Error program searchspace, loading parameter set ".(-$searchlevel)." failed !\n"; 
+                   print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;
                    }
 
 
@@ -341,11 +341,11 @@ sub sta {local $SIG{INT}='IGNORE';
  writefiles();
  # print "#call routine calcsta to calculate standard deviation\n";
  if ($^O=~/MSWin/){
-                   if(system ("calcsta.bat 1e10 ".$par[0]." > results\\searchspace.sta")){print "\n error executing calcsta.bat\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
+                   if(system ("calcsta.bat 1e10 ".$par[0]." > results\\searchspace.sta")){print STDERR "\n error executing calcsta.bat\n";print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;}
                   }
  else
                   {
-                   if(system ("./calcsta 1e10 ".$par[0]." > results/searchspace.sta")){print "\n error executing calcsta.bat\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
+                   if(system ("./calcsta 1e10 ".$par[0]." > results/searchspace.sta")){print STDERR "\n error executing calcsta.bat\n";print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;}
                   }
 
  open (Fin,"./results/searchspace.sta"); $i6=0;$errc=1;
@@ -410,10 +410,10 @@ sub writefiles {
 				    }
 				    # calculate the expression by a little perl program
 				    #open (Foutcc, ">./results/ccccccc.ccc");
-				    #printf Foutcc "#!/usr/bin/perl\nprint ".$expression.";\n";
+				    #printf Foutcc "#!/usr/bin/perl\nprint STDERR ".$expression.";\n";
 				    #close Foutcc;$systemcall="perl ./results/ccccccc.ccc > ./results/cccccc1.ccc";
                                     #if ($^O=~/MSWin/){$systemcall=~s|\/|\\|g;}
-				    #if(system $systemcall){print "error evaluating expression in results/ccccc*";print " <Press enter to close>";$in=<STDIN>;exit 1;}
+				    #if(system $systemcall){print STDERR "error evaluating expression in results/ccccc*";print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;}
 				    #open (Fincc,"results/cccccc1.ccc");
 				    #$data=<Fincc>; close Fincc;
 				    #mydel("./results/ccccccc.ccc");mydel("./results/cccccc1.ccc");
@@ -427,7 +427,7 @@ sub writefiles {
                             } print Fout1 $line;print Fout2 $modline;
      } close Fin;close Fout1;close Fout2;
      if (mycopy("results/searchspace.par",$file.".forfit"))
-     {print "\n error copying results/searchspace.par to  $file.forfit\n";print " <Press enter to close>";$in=<STDIN>;exit 1;}
+     {print STDERR "\n error copying results/searchspace.par to  $file.forfit\n";print STDERR " <Press enter to close>";$in=<STDIN>;exit 1;}
  }
 }
 

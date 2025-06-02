@@ -51,7 +51,7 @@ par::par (const char *filejjj,int verbose)
     // read optional elastic constants        
   char Celstr[6];
    for(i=1;i<=6;++i)for(j=1;j<=6;++j){
-  snprintf(Celstr,sizeof(Celstr),"Cel%i%i",i,j);// printf("%s\n",Celstr);
+  snprintf(Celstr,6,"Cel%i%i",i,j);// printf("%s\n",Celstr);
   extract(instr,Celstr,Cel(i,j));Cel(j,i)=Cel(i,j);}
 
    extract(instr,"nofatoms",cs.nofatoms);extract(instr,"nofcomponents",cs.nofcomponents); 

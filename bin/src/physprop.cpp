@@ -264,7 +264,7 @@ return sta;
 // methode save
 double physproperties::save (int verbose, const char * filemode, int htfailed,inipar & ini, par & inputpars,char * prefix)
 { FILE *fout;
-  char filename[50],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
+  char filename[MAXNOFCHARINLINE],str[MAXNOFCHARINLINE],outstr[MAXNOFCHARINLINE];
   time_t curtime;
   struct tm *loctime;  
   int i,j2,l,i1,j1,nmax;
@@ -405,7 +405,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
   if (verbose==1)printf("saving mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(outfilename,"./results/");strcpy(outfilename+10,prefix);
   strcpy(outfilename+10+strlen(prefix),"mcphas");
-  snprintf(filename,sizeof(filename),"%s%i.j%i",outfilename,l,i);
+  snprintf(filename,MAXNOFCHARINLINE,"%s%i.j%i",outfilename,l,i);
   if (htfailed!=0){jj[i](1)=0;jj[i](2)=0;jj[i](3)=0;}
   if (washere==0)  //printout file header
   {  fout = fopen_errchk (filename,filemode);
@@ -441,7 +441,7 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
 	    }
    fprintf (fout,"\n");
    fclose(fout);
-   snprintf(filename,sizeof(filename),"./fit/mcphas%i.j%i",l,i);
+   snprintf(filename,MAXNOFCHARINLINE,"./fit/mcphas%i.j%i",l,i);
    if((fout=fopen(filename,"rb"))!=NULL)
     {// some measured data should be fitted
      if (washere==0){fprintf(stderr,"Warning: Calculation of standard deviation using %s  not implemented\n",filename);}
@@ -788,7 +788,7 @@ fprintf(stderr,"         because in mcphas.j for atom %i  only %i neighbours are
   if (verbose==1)printf("reading mcphas%i.j%i - spinspin corr for sublattice %i neighbour %i\n",l,i,l,i);
   strcpy(infilename,"./results/");strcpy(infilename+10,readprefix);
   strcpy(infilename+10+strlen(readprefix),"mcphas");
-  snprintf(filename,sizeof(filename),"%s%i.j%i",infilename,l,i);
+  snprintf(filename,MAXNOFCHARINLINE,"%s%i.j%i",infilename,l,i);
   fin = fopen_errchk (filename,"r");
    // check x y T H[1] H[2] H[3] agrees and fe nonzero ?
 //then read jj[] 

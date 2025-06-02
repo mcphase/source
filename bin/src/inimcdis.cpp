@@ -390,17 +390,17 @@ int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * i
  if(findnewmatch==true)
  {if(pref[0]!='\0')
   {char prefvar[MAXNOFCHARINLINE];char * s,*p;
-  snprintf(prefvar,sizeof(prefvar),"%s%s",pref,parameter);
+  snprintf(prefvar,MAXNOFCHARINLINE,"%s%s",pref,parameter);
   s=wstrstr(instr,prefvar);
   if(s!=NULL)
   { // ok there seems to be a new match - see if it is already in the list
-   snprintf(prefvar,sizeof(prefvar),"%s",parameter);
+   snprintf(prefvar,MAXNOFCHARINLINE,"%s",parameter);
    p=wstrstr(instr,prefvar);
    int i=0;for(char * t=s;t<p;++t){prefvar[i]=*t;++i;}prefvar[i]='\0'; // put the prefix to prefvar
     i=0;bool mm=false;while(i<n&&mm==false){mm=match(prefvar,lofpref[i]);
     ++i;}
     if(i==n&&mm==false){lofpref[i]=new char [strlen(prefvar)+2];snprintf(lofpref[i],strlen(prefvar)+1,"%s",prefvar);
-                          snprintf(prefix,sizeof(prefix),"%s",prefvar);
+                          snprintf(prefix,MAXNOFCHARINLINE,"%s",prefvar);
                      ++n; findnewmatch=false;printf("new matching prefix found: %s\n",lofpref[i]);
             }
    }// no new match -> extract without prefix
@@ -441,7 +441,7 @@ int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int 
     if (fin==NULL) {fprintf(stderr,"Warning - file %s not found - doing calculation at T=300K assuming zero mean and external fields / stress\n",spinfile);
     }
    }
- if(fin==NULL){snprintf(instr,sizeof(instr),"#!T=300 Ha=0 Hb=0 Hc=0 n=1 spins nofatoms=1 in primitive basis nofcomponents=%i - configuration",nofcomponents);
+ if(fin==NULL){snprintf(instr,MAXNOFCHARINLINE,"#!T=300 Ha=0 Hb=0 Hc=0 n=1 spins nofatoms=1 in primitive basis nofcomponents=%i - configuration",nofcomponents);
  T=300; Hext=0;nofatoms=nofat;nofcomponents=nofcomp;
 }else {instr[0]='#';  instr[1]='\0';
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}

@@ -26,13 +26,19 @@ call singleion -nt 20 -r cluster.sipf 2 0 0 0 0 0 0
 getvalue.pl -c 0.8633 0 6 4 0 results/cluster.sipf.trs
 REM create mcdisp.trs for quasielastic excitations
 call mcdispit -c  -maxE 0.9 -minE 0.6  -pinit 0.1
-getvalue.pl -c 11.358 5 7 6 0 results/mcdisp.trs
+REM getvalue.pl -c 11.358 5 7 6 0 results/mcdisp.trs ... this getvalue does not work, because of degeneracy !!!
 REM possibly do with powdermagnon to get powder average !!
 call powdermagnon 0.1 0.2 0.1 3 0.7 0.9
 REM calculate the quasielastic scattering powder average
 call mcdispit -t
 
-call powdermagnon -r results/mcdisp.qei 0.7 0.9 0.3 
+call powdermagnon -r results/mcdisp.qei 0.7 0.9 0.3  > dd
+
+getvalue.pl -c 3.7 7 8  4.5069848125 0 dd
+
+rm dd
+sumcol 7 results/mcdisp.trs
+ getvalue -c 97.8 0 7 8 0 results/mcdisp.trs
 
 cd ../../../demo
 

@@ -209,6 +209,40 @@ package :
 windows: 
 	make clean cleanexe allwin 
 	make clean 
+	unix2dos ./bin/*.pl ./demo/*.bat
+	substitute sleep wait ./demo/*.bat 
+	unix2dos ./examples/cecu2a/fit/watch*.bat
+	unix2dos ./examples/tmnic2/calc.bat
+	unix2dos ./examples/coo/calc.bat
+	unix2dos ./examples/dycu2iwata/calc.bat
+	unix2dos ./examples/gd3gao6/calc.bat
+	unix2dos ./examples/helix_spinwave/calc.bat
+	unix2dos ./examples/ho2ti2o7/*.bat
+	unix2dos ./examples/la2coo4/calc.bat
+	unix2dos ./examples/Ce3p_chain_cfphonon/calc.bat
+	unix2dos ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
+	unix2dos ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
+	unix2dos ./examples/CeAl2_cfphonon_cfstrict/CF/calc.bat
+	unix2dos ./examples/Cu2OSeO3/4interacting_tetrahedrons_noDM/calc.bat
+	unix2dos ./examples/Cu2OSeO3/nocluster_spinwave_model_noDM/calc.bat
+	unix2dos ./examples/LaCoO3_podlesnyak_polaron/calc.bat
+	unix2dos ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
+	unix2dos ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
+	unix2dos ./examples/LaCoO3_podlesnyak_polaron/5ions/calc.bat
+	unix2dos ./examples/LaCoO3_podlesnyak_polaron/7ions/calc.bat
+	unix2dos ./examples/lumno3/calc.bat
+	unix2dos ./examples/ndba2cu3o7/calcsta.bat
+	unix2dos ./examples/NiO/calc.bat
+	unix2dos ./examples/Pr3Pd20Si6/calc.bat
+	unix2dos ./examples/prni2b2c/fit/watch*.bat ./examples/prni2b2c/fit/calcsta 
+	unix2dos ./examples/prni2si2/calc.bat
+	unix2dos ./examples/pupd3/calc.bat
+	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
+	unix2dos ./examples/testic1ion/test.bat
+	unix2dos ./examples/tmcu2_cf_phonon/calc.bat
+	unix2dos ./examples/tungsten_phonons/calc.bat
+	unix2dos ./examples/upd3/calc.bat
+	unix2dos ./tutorial/07documentation_logbooks/calc.bat
 #	/Applications/IzPack/bin/compile izpack.xl -o $(HOME)/windows.jar
 #	python /Applications/IzPack/utils/wrappers/izpack2exe/izpack2exe.py --file=$(HOME)/windows.jar --no-upx --with-jdk=bin/zulu17.56.15-ca-jre17.0.14-win_x64 --output=$(HOME)/mcph.exe
 #	rm $(HOME)/windows.jar
@@ -263,40 +297,6 @@ tgz :
 		-cvf $(HOME)/mcph.tar mcphas/* \
 		;cd ./mcphas  
 	cd $(HOME);gzip mcph.tar;mv mcph.tar.gz mcph.tgz
-	unix2dos ./bin/*.pl ./demo/*.bat
-	substitute sleep wait ./demo/*.bat 
-	unix2dos ./examples/cecu2a/fit/watch*.bat
-	unix2dos ./examples/tmnic2/calc.bat
-	unix2dos ./examples/coo/calc.bat
-	unix2dos ./examples/dycu2iwata/calc.bat
-	unix2dos ./examples/gd3gao6/calc.bat
-	unix2dos ./examples/helix_spinwave/calc.bat
-	unix2dos ./examples/ho2ti2o7/*.bat
-	unix2dos ./examples/la2coo4/calc.bat
-	unix2dos ./examples/Ce3p_chain_cfphonon/calc.bat
-	unix2dos ./examples/Ce3p_tetragonalprim_cfphonon/calc.bat
-	unix2dos ./examples/CeAl2_cfphonon_cfstrict/phonons/calc.bat
-	unix2dos ./examples/CeAl2_cfphonon_cfstrict/CF/calc.bat
-	unix2dos ./examples/Cu2OSeO3/4interacting_tetrahedrons_noDM/calc.bat
-	unix2dos ./examples/Cu2OSeO3/nocluster_spinwave_model_noDM/calc.bat
-	unix2dos ./examples/LaCoO3_podlesnyak_polaron/calc.bat
-	unix2dos ./examples/LaCoO3_podlesnyak_polaron/2ions/calc.bat
-	unix2dos ./examples/LaCoO3_podlesnyak_polaron/3ions/calc.bat
-	unix2dos ./examples/LaCoO3_podlesnyak_polaron/5ions/calc.bat
-	unix2dos ./examples/LaCoO3_podlesnyak_polaron/7ions/calc.bat
-	unix2dos ./examples/lumno3/calc.bat
-	unix2dos ./examples/ndba2cu3o7/calcsta.bat
-	unix2dos ./examples/NiO/calc.bat
-	unix2dos ./examples/Pr3Pd20Si6/calc.bat
-	unix2dos ./examples/prni2b2c/fit/watch*.bat ./examples/prni2b2c/fit/calcsta 
-	unix2dos ./examples/prni2si2/calc.bat
-	unix2dos ./examples/pupd3/calc.bat
-	unix2dos ./examples/Ru3p_create_sipf/calc.bat ./examples/Ru3p_create_sipf/calcsta.bat
-	unix2dos ./examples/testic1ion/test.bat
-	unix2dos ./examples/tmcu2_cf_phonon/calc.bat
-	unix2dos ./examples/tungsten_phonons/calc.bat
-	unix2dos ./examples/upd3/calc.bat
-	unix2dos ./tutorial/07documentation_logbooks/calc.bat
 
 clean:
 	rm -f ./Makefile.sav
