@@ -30,10 +30,10 @@ $rkky=0;$calcdist=0;$readtable=0;$classdip=0;
 shift @ARGV; 
 @storeargv=@ARGV;
 # Parses command line options
-GetOptions("rkky3d=s{4}"=>\@rkky3d,
+die "exiting" unless GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "kaneyoshi3d=s{5}"=>\@kaneyoshi3d,
            "rkkz3d=s{4}"=>\@rkkz3d,
-           "rkkynest:s{100}"=>\@rkkynest,
+           "rkkynest=s{4,}"=>\@rkkynest,
            "rkky=s{2}"=>\@rkkydummy,
            "kaneyoshi=s{3}"=>\@kaneyoshi,
            "rkkz=s{2}"=>\@rkkz,
@@ -50,10 +50,17 @@ GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "rfunc"=>\$rfunc,
            "djdx"=>\$djdx,
            "djdy"=>\$djdy,
-           "djdz"=>\$djdz);
+           "djdz"=>\$djdz) ;
+
+# .... insufficienarguments: check  getOpt module how to get @rkkynest with optional 1+3n arguments
+#tag=i{2,}	–tag 1	Error: Insufficient arguments for option tag
+#                –tag 1 2	c(1, 2)
+#                –tag 1 2 3	c(1, 2, 3)
+#tag=i{,2}	–tag 1	1
+#                –tag 1 2	c(1, 2)
+#                –tag 1 2 3	c(1, 2)
 
 # @ARGV=@storeargv;
-
 die "djdx djdy djdz are exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
 if ($bvk||$cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
 
