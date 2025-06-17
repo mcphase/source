@@ -1028,8 +1028,9 @@ if (argc-1==8+os){
               }
           printf("# %s\n",outhklstr);
           }
+fprintf(stderr,"# %s\n",outstr);
 fprintf(stderr,"# ************************************************************************\n");
-fprintf(stderr,"# *             end of program spins\n");
+fprintf(stderr,"# *             end of program spins running at \n");
 fprintf(stderr,"# * Reference: M. Rotter PRB 79 (2009) 140405R\n");
 fprintf(stderr,"# * \n");
 fprintf(stderr,"# * view jvx file by:\n");

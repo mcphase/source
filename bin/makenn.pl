@@ -29,6 +29,7 @@ my ($rmax) = eval $ARGV[0];
 $rkky=0;$calcdist=0;$readtable=0;$classdip=0;
 shift @ARGV; 
 @storeargv=@ARGV;
+foreach(@ARGV){$_=~s/\A-(\d)/m$1/g;} # getoption hangs up if there is a negative number as parameter: substitute -0.213 with m0.213
 # Parses command line options
 die "exiting" unless GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "kaneyoshi3d=s{5}"=>\@kaneyoshi3d,
@@ -51,6 +52,10 @@ die "exiting" unless GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "djdx"=>\$djdx,
            "djdy"=>\$djdy,
            "djdz"=>\$djdz) ;
+
+# substitute all m0.132 back to -0.132 ...:
+foreach(@rkkynest,@ARGV,@rkky3d,@kaneyoshi3d,@rkkz3d,@rkkydummy,@kaneyoshi,
+       @rkkz,$bvk,$cfph,$e,$f,$jp,$dm,$d,$npc,$nm,$cfphr,$rfunc.$djdx,$djdy,$djdz){$_=~s/\Am(\d)/-$1/g;}
 
 # .... insufficienarguments: check  getOpt module how to get @rkkynest with optional 1+3n arguments
 #tag=i{2,}	–tag 1	Error: Insufficient arguments for option tag
