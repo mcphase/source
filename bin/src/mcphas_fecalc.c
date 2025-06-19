@@ -278,6 +278,7 @@ sigma*=inputpars.cs.pVol()/1.60218e-1;
 // coupling coefficients jj[](a-c) berechnen
 // for (r=0;r<=sdim;++r)
 int exstr=0;if(ini.ipx!=NULL){exstr=6;}
+            
  Matrix * jj; jj= new Matrix [(sdim+2)*(1+exstr)];
  for(i=0;i<=(sdim+2)*(1+exstr)-1;++i){jj[i]=Matrix(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);} // coupling coeff.variable
    if (jj == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
@@ -289,6 +290,13 @@ int exstr=0;if(ini.ipx!=NULL){exstr=6;}
     if(exstr>0){if ((*(*ini.ipx).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
                 if ((*(*ini.ipy).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
                 if ((*(*ini.ipz).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+if(ini.ipeps1!=NULL){if ((*(*ini.ipeps1).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                     if ((*(*ini.ipeps2).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                     if ((*(*ini.ipeps3).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                     if ((*(*ini.ipeps4).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                     if ((*(*ini.ipeps5).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                     if ((*(*ini.ipeps6).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
+                    }
                }
     for(l=1;l<=(*inputpars.jjj[m]).paranz;++l)
     {//sum up l.th neighbour interaction of atom m
@@ -384,19 +392,41 @@ Vector Rij(1,3);dadbdc2ijk(Rij,xyz,inputpars.cs.abc);
 
 // beta = 1  (xx)
 jj[s+(sdim+2)*1](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(1);
+if(ini.ipeps1!=NULL){
+jj[s+(sdim+2)*1](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps1).jjj[m]).jij[l](i,j);
+                    }
 // beta =2 (yy)
 jj[s+(sdim+2)*2](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(2);
+if(ini.ipeps2!=NULL){
+jj[s+(sdim+2)*2](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps2).jjj[m]).jij[l](i,j);
+                    }
+
+
 // beta =3 (zz)
 jj[s+(sdim+2)*3](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(3);
+if(ini.ipeps3!=NULL){
+jj[s+(sdim+2)*3](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps3).jjj[m]).jij[l](i,j);
+                    }
 // beta =4 (2yz=2zy)
 jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(3);
 jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(2);
+if(ini.ipeps4!=NULL){
+jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps4).jjj[m]).jij[l](i,j);
+                    }
+
 // beta =5 (2xz=2zx)
 jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(3);
 jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(1);
+if(ini.ipeps5!=NULL){
+jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps5).jjj[m]).jij[l](i,j);
+                    }
+
 // beta =6 (2xy=2yx)
 jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(2);
 jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(1);
+if(ini.ipeps6!=NULL){
+jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps6).jjj[m]).jij[l](i,j);
+                    }
 
        
 //remark: function par:jij(l) returns exchange constants (*inputpars.jjj[1]).jij[l](1-9)

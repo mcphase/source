@@ -537,7 +537,8 @@ for(int i=1;i<=cs.nofatoms;++i)
  //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement
  //  2 neighbour position 1 interaction parmeter disagreement i.e. 0 is perfect match
 int par::operator!= (par & op2) // match
-{if(Norm(cs.abc-op2.cs.abc)>0.0001){fprintf(stderr,"# Lattice does not match\n");return 8;}
+{if(this==&op2)return 0;
+ if(Norm(cs.abc-op2.cs.abc)>0.0001){fprintf(stderr,"# Lattice does not match\n");return 8;}
  if(cs.nofatoms!=op2.cs.nofatoms){fprintf(stderr,"# Number of atoms nofatoms do not match\n");return 7;}
  for(int i=1;i<=cs.nofatoms;++i)
   {if(Norm((*op2.jjj[i]).xyz-(*jjj[i]).xyz)>0.0001){fprintf(stderr,"# Atomic position of atom %i do not match\n",i);return 6;}

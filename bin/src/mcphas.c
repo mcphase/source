@@ -19,6 +19,36 @@ const char * filemode="w";
 #include "mcphas_fecalc.c"
 #include "mcphas_physpropcalc.c"
 
+// for exchange striction - load exchange striction parameters into ip and store _file
+// returns true if successful
+bool parload(par * ip,char * iniprefix, const char * filename, int verbose,par & inputpars, par * ipx = NULL)
+{ char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
+  FILE * fin=NULL; 
+  strcpy(prefix,iniprefix);strcpy(prefix+strlen(iniprefix),filename);
+ fin=fopen(prefix,"rb"); if(fin==NULL)strcpy(prefix,filename); else  fclose(fin);
+ fin=fopen(prefix,"rb");
+ if(fin!=NULL){if(verbose==1){printf("reading parameters from file %s\n",prefix);}
+               ip= new par(prefix,verbose);  
+
+// here save single ion property files to results
+  strcpy(prefix,"./results/_");strcpy(prefix+11,iniprefix);
+  strcpy(prefix+11+strlen(iniprefix),filename);(*ip).save(prefix,0);
+  fclose(fin);
+   // check if inputpars abc nofatoms  atomic positions sipffilenames nofcomponents  agree with
+  // ipx y z
+ // check if ini ipx and ipy and ipz have the same paranz for each neighbour
+ // operator ~ returns 8 7 6 5 4 3 2 1 0depending on agreement of
+ //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement
+ //  2 neighbour position 1 interaction parmeter disagreement i.e. 0 is perfect match
+ if((inputpars!=(*ip))>3){fprintf(stderr,"# Error - %s does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n",filename);exit(1);}
+  if(ipx!=NULL){
+  if(((*ipx)!=(*ip))>1){fprintf(stderr,"# Error - mcphas.djdx / mcphas.djdeps1 does not match %s in nofneighbours or neighbour positions\n",filename);exit(1);}
+   } 
+  if(verbose)fprintf(stdout,"# strain due to derivatives of 2ion interactions in %s will be calculated\n",filename);
+  return true;
+ }   else   return false; 
+}  
+ 
 // main program
 int main (int argc, char **argv)
 { int j,l,doeps=0,linepscf=0,linepsjj=0;
@@ -94,6 +124,7 @@ fin=fopen(prefix,"rb");if(fin==NULL)strcpy(prefix,"mcphas.j"); else fclose(fin);
  par inputpars(prefix,verbose); 
 // here save single ion property files to results
   strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
+// here save input two ion interaction paraeters to results/_mcphas.j
   strcpy(prefix+11+strlen(ini.prefix),"mcphas.j");inputpars.save(prefix,0);
 
 if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
@@ -102,59 +133,29 @@ if (inputpars.cs.alpha()!=90||inputpars.cs.beta()!=90||inputpars.cs.gamma()!=90)
 if(doeps) {
 if(ini.nofrndtries<0){fprintf(stderr,"# Error - nofrndtries<0 - Monte Carlo calculations not (yet) possible with strain epsilon.\n");exit(1); }
 if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in diagonalisation of single ion Hamiltonian\n");}
+
 // as class par load  parameters derivatives from file
- strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdx");
- fin=fopen(prefix,"rb"); if(fin==NULL)strcpy(prefix,"mcphas.djdx"); else  fclose(fin);
-  fin=fopen(prefix,"rb");
- if(fin!=NULL){
- if(verbose==1){printf("reading parameters from file %s\n",prefix);}
- ini.ipx= new par(prefix,verbose);  
-
-// here save single ion property files to results
-  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
-  strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdx");inputpars.save(prefix,0);
-                             
- strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdy");
-FILE*fin1;fin1=fopen(prefix,"rb");  if(fin1==NULL)strcpy(prefix,"mcphas.djdy"); else fclose(fin1);
-fin1=fopen(prefix,"rb");
-if(fin1!=NULL){
-  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
- ini.ipy= new par(prefix,verbose); 
-// here save single ion property files to results
-  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
-  strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdy");inputpars.save(prefix,0);
-                             
- strcpy(prefix,ini.prefix);strcpy(prefix+strlen(ini.prefix),"mcphas.djdz");
-  FILE * fin2; fin2=fopen(prefix,"rb"); if(fin2==NULL)strcpy(prefix,"mcphas.djdz"); else fclose(fin2);
-fin2=fopen(prefix,"rb");
-if(fin2!=NULL){
-  if(verbose==1){printf("reading parameters from file %s\n",prefix);}
- ini.ipz= new par(prefix,verbose);  
-// here save single ion property files to results
-  strcpy(prefix,"./results/_");strcpy(prefix+11,ini.prefix);inputpars.save_sipfs(prefix); 
-  strcpy(prefix+11+strlen(ini.prefix),"mcphas.djdz");inputpars.save(prefix,0);
-                             }else {fprintf(stderr,"# Error - could not open mcphas.djdz \n");exit(1); }
- fclose(fin2);
- } else {fprintf(stderr,"# Error - could not open mcphas.djdy \n");exit(1); }
- fclose(fin1);
-if(verbose)fprintf(stdout,"# strain due to derivatives of 2ion interactions in mcphas.djdx .djdy .djdz will be calculated\n");
-fprintf(stderr,"#Comparing mcphas.djdx .djdy .djdz and mcphas.j ...\n");
-  // check if inputpars abc nofatoms  atomic positions sipffilenames nofcomponents  agree with
-  // ini.ipx y z
- // check if ini ipx and ipy and ipz have the same paranz for each neighbour
- // operator ~ returns 8 7 6 5 4 3 2 1 0depending on agreement of
- //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement
- //  2 neighbour position 1 interaction parmeter disagreement i.e. 0 is perfect match
- if((inputpars!=(*ini.ipx))>3){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n");exit(1);}
- if((inputpars!=(*ini.ipy))>3){fprintf(stderr,"# Error - mcphas.djdy does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n");exit(1);}
- if((inputpars!=(*ini.ipz))>3){fprintf(stderr,"# Error - mcphas.djdz does not match mcphas.j in nofcomponents, sipffilenames, atomic positions, nofatoms or lattice \n");exit(1);}
-
-  if(((*ini.ipx)!=(*ini.ipy))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdy in nofneighbours or neighbour positions\n");exit(1);}
-  if(((*ini.ipx)!=(*ini.ipz))>1){fprintf(stderr,"# Error - mcphas.djdx does not match mcphas.djdz in nofneighbours or neighbour positions\n");exit(1);}
+ if(parload(ini.ipx,ini.prefix,"mcphas.djdx",verbose,inputpars))
+ { if(!parload(ini.ipy,ini.prefix,"mcphas.djdy",verbose,inputpars,ini.ipx))
+       {fprintf(stderr,"# Error - could not open mcphas.djdy \n");exit(1); }
+   if(!parload(ini.ipz,ini.prefix,"mcphas.djdz",verbose,inputpars,ini.ipx))
+        {fprintf(stderr,"# Error - could not open mcphas.djdz \n");exit(1); }
  fprintf(stderr,"# ... these are no problems, continuing\n");
+ }
+                 
+ // if mcphas.djdeps1-6 exist - read also those
+ if(parload(ini.ipeps1,ini.prefix,"mcphas.djdeps1",verbose,inputpars))
+ {parload(ini.ipeps2,ini.prefix,"mcphas.djdeps2",verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps3,ini.prefix,"mcphas.djdeps3",verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps4,ini.prefix,"mcphas.djdeps4",verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps5,ini.prefix,"mcphas.djdeps5",verbose,inputpars,ini.ipeps1);
+  parload(ini.ipeps6,ini.prefix,"mcphas.djdeps6",verbose,inputpars,ini.ipeps1);
+ fprintf(stderr,"# ... these are no problems, continuing\n");
+ }
+ 
  if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
-  fclose(fin);
-  }        }
+          } // doeps
+ 
 
 
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);

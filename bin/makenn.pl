@@ -49,6 +49,12 @@ die "exiting" unless GetOptions("rkky3d=s{4}"=>\@rkky3d,
            "nm"=>\$nm,
            "r"=>\$cfphr,
            "rfunc"=>\$rfunc,
+           "djdeps1"=>\$djdeps1,
+           "djdeps2"=>\$djdeps2,
+           "djdeps3"=>\$djdeps3,
+           "djdeps4"=>\$djdeps4,
+           "djdeps5"=>\$djdeps5,
+           "djdeps6"=>\$djdeps6,
            "djdx"=>\$djdx,
            "djdy"=>\$djdy,
            "djdz"=>\$djdz) ;
@@ -66,13 +72,39 @@ foreach(@rkkynest,@ARGV,@rkky3d,@kaneyoshi3d,@rkkz3d,@rkkydummy,@kaneyoshi,
 #                –tag 1 2 3	c(1, 2)
 
 # @ARGV=@storeargv;
-die "djdx djdy djdz are exclusive options and cannot be used together\n" if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz);
-if ($bvk||$cfph){die "djdx djdy djdz cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz);}
+die "djdx djdy djdz deps1 deps2 deps3 deps4 deps5 deps6 are exclusive options and cannot be used together\n"
+    if defined ($djdx and $djdy) or  ($djdz and $djdy) or ($djdx and $djdz)
+    or ($djdeps1 and $djdx)
+    or ($djdeps2 and $djdx)
+    or ($djdeps3 and $djdx)
+    or ($djdeps4 and $djdx)
+    or ($djdeps5 and $djdx)
+    or ($djdeps6 and $djdx)
+    or ($djdeps1 and $djdy)
+    or ($djdeps2 and $djdy)
+    or ($djdeps3 and $djdy)
+    or ($djdeps4 and $djdy)
+    or ($djdeps5 and $djdy)
+    or ($djdeps6 and $djdy)
+    or ($djdeps1 and $djdz)
+    or ($djdeps2 and $djdz)
+    or ($djdeps3 and $djdz)
+    or ($djdeps4 and $djdz)
+    or ($djdeps5 and $djdz)
+    or ($djdeps6 and $djdz)
+;
+if ($bvk||$cfph){die "djdx djdy djdz djdeps1-6 cannot be used with bvk and cfph\n" if ($djdx||$djdy||$djdz||$djdeps1||$djdeps2||$djdeps3||$djdeps4||$djdeps5||$djdeps6);}
 
 $ext=".j"; 
 if ($djdx) {$ext=".djdx"; }
 if ($djdy) {$ext=".djdy"; }
 if ($djdz) {$ext=".djdz"; }
+if ($djdeps1) {$ext=".djdeps1"; }
+if ($djdeps2) {$ext=".djdeps2"; }
+if ($djdeps3) {$ext=".djdeps3"; }
+if ($djdeps4) {$ext=".djdeps4"; }
+if ($djdeps5) {$ext=".djdeps5"; }
+if ($djdeps6) {$ext=".djdeps6"; }
 
 #******************************************************** treat options 
 #$_=$ARGV[0];
@@ -1152,7 +1184,8 @@ sub getinteraction {
    if ($gJ==0){$gJ=1;}
 
   if(@rkkynest)
-   {# J(R)= A sum_i=1..n  cos(Qn.R)/(|Qn||R|)^3
+   {if ($djdeps1||$djdeps2||$djdeps3||$djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkkynest does not provide direct dependence on strain epsilon\n";}
+    # J(R)= A sum_i=1..n  cos(Qn.R)/(|Qn||R|)^3
     $jaa=0;
     for($n=1;$n<$#rkkynest;$n+=3)
      {my $Qx=$rkkynest[$n]; 
@@ -1169,45 +1202,80 @@ sub getinteraction {
    }
 
   elsif ($rkky==1)
-  {$jaa = $scale*cos(2*$kf*$r)/8/$kf/$kf/$kf/$r/$r/$r;
-  $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0; 
+  {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkky does not provide direct dependence on strain epsilon4-6\n";}
+    $jaa = $scale*cos(2*$kf*$r)/8/$kf/$kf/$kf/$r/$r/$r;  
+    if($djdeps1||$djdeps2||$djdeps3){$jaa = $jaa+ $scale*sin(2*$kf*$r)/12/$kf/$kf/$r/$r;} # derivative with respect to eps: dkf/deps1=-kf/3
+    $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0; 
   }
 
   elsif ($rkky==4)
-  {$kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
-  $jaa = $scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr;
+  {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkky3d does not provide direct dependence on strain epsilon4-6\n";}
+   $kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
+   if ($djdeps1){
+             # derivative with respect to eps: dka/deps1=-ka
+             # dkr/deps1=-ka*rx*rx/kfr * dka/deps1 = ka*ka*rx*rx/kfr
+             # dj/deps1=-3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-2*$scale*sin(2*$kfr)/8/$kfr/$kfr/$kfr;
+                 $jaa = -3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+               } 
+   elsif ($djdeps2){
+                 $jaa = -3*$kb*$kb*$ry*$ry*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+               } 
+   elsif ($djdeps3){
+                 $jaa = -3*$kc*$kc*$rz*$rz*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+               } 
+    else {$jaa = $scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr;}
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
   }
 
   elsif ($rkky==3)
 
-  {$jaa = $scale*(sin(2*$kf*$r)-2*$kf*$r*cos(2*$kf*$r))/16/$kf/$kf/$kf/$kf/$r/$r/$r/$r;
-  $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
+  {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkkz does not provide direct dependence on strain epsilon4-6\n";}
+   # derivative with respect to eps: dkf/deps1=-kf/3
+   $jaa = $scale*(sin(2*$kf*$r)-2*$kf*$r*cos(2*$kf*$r))/16/$kf/$kf/$kf/$kf/$r/$r/$r/$r;
+   if($djdeps1||$djdeps2||$djdeps3){
+   $jaa = -4*$jaa/3- $scale*sin(2*$kf*$r)/12/$kf/$kf/$r/$r;} # derivative with respect to eps: dkf/deps1=-kf/3
+   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
   }
 
   elsif ($rkky==6)
-  {$kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
-  $jaa = $scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/16/$kfr/$kfr/$kfr/$kfr;
+  {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkkz3d does not provide direct dependence on strain epsilon4-6\n";}
+   $kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
+  if ($djdeps1){
+             # derivative with respect to eps: dka/deps1=-ka
+             # dkr/deps1=-ka*rx*rx/kfr * dka/deps1 = ka*ka*rx*rx/kfr
+             # dj/deps1=-3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-2*$scale*sin(2*$kfr)/8/$kfr/$kfr/$kfr;
+        $jaa = -$ka*$ka*$rx*$rx*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+               } 
+  elsif ($djdeps2){
+        $jaa = -$kb*$kb*$ry*$ry*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+               } 
+  elsif ($djdeps2){
+        $jaa = -$kc*$kc*$rz*$rz*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+               } 
+   else {$jaa = $scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/16/$kfr/$kfr/$kfr/$kfr;}
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
   }
 
   elsif($rkky==2)
 
-  {my ($xx)=$r*$r/$D/$D;
+  {if ($djdeps1||$djdeps2||$djdeps3||$djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option kaneyoshi does not provide direct dependence on strain epsilon\n";}
+   my ($xx)=$r*$r/$D/$D;
   $jaa= $scale*(-$xx+$xx*$xx)*exp(-$aa*$xx);
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;  $jcb=0;$jca=0;
   }
 
   elsif($rkky==5)
 
-  {my ($xx)=$rx*$rx/$Da/$Da+$ry*$ry/$Db/$Db+$rz*$rz/$Dc/$Dc;
+  {if ($djdeps1||$djdeps2||$djdeps3||$djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option kaneyoshi3d does not provide direct dependence on strain epsilon\n";}
+   my ($xx)=$rx*$rx/$Da/$Da+$ry*$ry/$Db/$Db+$rz*$rz/$Dc/$Dc;
   $jaa= $scale*(-$xx+$xx*$xx)*exp(-$aa*$xx);
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;  $jcb=0;$jca=0;
   }
 
   else
 
-  {   # calculate classical dipole interaction
+  { if ($djdeps1||$djdeps2||$djdeps3||$djdeps4||$djdeps5||$djdeps6) {die "Error makenn: classical dipole interaction does not provide direct dependence on strain epsilon\n";}
+     # calculate classical dipole interaction
 
 # muB=0.927405e-23 Ampere m^2
 # mu0/4 pi=1e-7 kgm s^-2 Amp^-2
@@ -1432,6 +1500,12 @@ else
 if ($djdx) {push @atoms, ("# - derivative with respect to x\n");}
 if ($djdy) {push @atoms, ("# - derivative with respect to y\n");}
 if ($djdz) {push @atoms, ("# - derivative with respect to z\n");}
+if ($djdeps1) {push @atoms, ("# - derivative with respect to eps1\n");}
+if ($djdeps2) {push @atoms, ("# - derivative with respect to eps2\n");}
+if ($djdeps3) {push @atoms, ("# - derivative with respect to eps3\n");}
+if ($djdeps4) {push @atoms, ("# - derivative with respect to eps4\n");}
+if ($djdeps5) {push @atoms, ("# - derivative with respect to eps5\n");}
+if ($djdeps6) {push @atoms, ("# - derivative with respect to eps6\n");}
 
 
     if($alpha!=90||$beta!=90||$gamma!=90)
@@ -1679,17 +1753,17 @@ print STDOUT << "EOF";
               according to J(R)=A.cos(2.kf.R)/(2.kf.R)^3
               scaling A<0, kf should be the Fermi wavevector (usually
               between 0.3-2.5 A^-1 depending on the electrondensity^0.333)
- option -rkky3d A(meV) ka(1/A) kb(1/A) kc(1/A) calculates the rkky interaction
+ option -rkky3d A(meV) kx(1/A) ky(1/A) kz(1/A) calculates the rkky interaction
               according to J(R)=A.cos(2.kfR)/(2.kfR)^3
-              scaling A<0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
+              scaling A<0, kfR=sqrt(kx^2.Rx^2+ky^2.Ry^2+kz^2.Rz^2)
  option -rkkz A(meV) kf(1/A) calculates the rkky interaction
               according to J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4
               scaling A>0, kf should be the Fermi wavevector (see 5.7.35 in 
 	      "Rare Earth Magnetism" by J. Jensen and A. Mackintosh, 1991, 
               Clarendon. Oxford
- option -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)  calculates the rkky interaction
+ option -rkkz3d A(meV) kx(1/A) ky(1/A) kz(1/A)  calculates the rkky interaction
               according to J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4
-              scaling A>0, kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2)
+              scaling A>0, kfR=sqrt(kx^2.Rx^2+ky^2.Ry^2+kz^2.Rz^2)
  option -rkkynest A(mev) h1 k1 l1 [h2 k2 l2 ... hN kN lN]   calculates the rkky
               interaction according to the empirical contribution by Fermi surface
               nesting vectors  J(R)=A.sum_n cos(Qn.R)/(|Qn||R|)^3  with Qn=(hn kn ln) 
@@ -1699,10 +1773,10 @@ print STDOUT << "EOF";
               curve: J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2]
               with D corresponding to the orbital radius
               the exponential alpha is conveniently put to  about 1
- option -kaneyoshi3d A(meV) Da(A) Db(A) Dc(A) alpha  calculates the 3d-kaneyoshi
+ option -kaneyoshi3d A(meV) Dx(A) Dy(A) Dz(A) alpha  calculates the 3d-kaneyoshi
              parametrization for the Bethe-Slater
               curve: J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2]
-              with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2)
+              with RD=sqrt(Rx^2/Dx^2+Ry^2/Dy^2+Rz^2/Dz^2)
               the exponential alpha is conveniently put to  about 1
  option -bvk filename
               for phonons: take Born van Karman model with longitudinal and
@@ -1784,7 +1858,27 @@ print STDOUT << "EOF";
  displacement of the neighbor in x,y and z direction respectively. These derivatives
  are useful for the calculation of exchange striction effects. 
 
- xyz refers to a right handed Euclidean coordinate system with 
+        -djdeps1
+        -djdeps2
+        -djdeps3
+        -djdeps4
+        -djdeps5
+        -djdeps6   create files makenn.djdeps1 .djdeps2 ... .djdeps6 instead of makenn.j, respectively
+ these contain the derivatives of the interaction paramters with respect to
+ the strain tensor components epsilon1, epsilon2 ... epsilon6 (in Voigt Notation) as 
+ calculated from the kf dependence on strain in the rkky formulas (dkf/deps1=-kf/3 , dkx/deps1=-kx ...)
+ for option -rkky    dj/deps1,2,3 = A.cos(2.kf.r)/(2.kf.r)^3+ A.sin(2.kf.r)/12(kf.r)^2
+            -rkky3d  dj/deps1 = -3.A.(kx.Rx)^2.cos(2.kfR)/(.kfR^5)
+                                -A*(kx.Rx)^2.sin(2.kfR)/(4.kfR^4) and similar for eps2,3
+            -rkkz    dj/deps1,2,3 = -4.A.(sin(2.kf.r)-2.kf.r.cos(2.kf.r))/(3.(2.kf.R)^4)
+                                    -A.sin(2.kf.r)/(12(kf.r)^2)
+            -rkkz3d  dj/deps1 = -A.(kx.Rx)^2.(sin(2.kfR)-2.kfR.cos(2.kfR))/(4.kfR^6)
+                                +A.*(kx.Rx)^2.sin(2.kfR)/(4.kfR^4) 
+                     and similar for eps2,3
+ 
+ These derivatives are useful for the calculation of exchange striction effects. 
+
+ Note: xyz refers to a right handed Euclidean coordinate system with 
  y||b, z||(a x b) and x perpendicular to y and z.
 
 EOF

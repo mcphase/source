@@ -71,7 +71,7 @@ printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
 printf ("          -a     append output files (do not overwrite) \n");
 printf ("          -doeps refine strain epsilon selfconsistently using elastic,magnetoelastic constants \n");
-printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz \n");
+printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz and optional djdeps1-6\n");
 printf ("          -linepscf with -doeps use zero strain single ion Hamiltonian for every mean field iteration\n");
 printf ("          -linepsjj with -doeps use zero strain two ion interaction Hamiltonian for every mean field iteration\n");
 printf ("          -prefix 001    try to read files starting with 001, e.g.\n");
@@ -133,6 +133,12 @@ std::cout << "# mcphas was compiled without parallel processing option " << std:
 if(ipx!=NULL)delete ipx;    
 if(ipy!=NULL)delete ipy;
 if(ipz!=NULL)delete ipz;
+if(ipeps1!=NULL)delete ipeps1;    
+if(ipeps2!=NULL)delete ipeps2;    
+if(ipeps3!=NULL)delete ipeps3;    
+if(ipeps4!=NULL)delete ipeps4;    
+if(ipeps5!=NULL)delete ipeps5;    
+if(ipeps6!=NULL)delete ipeps6;    
 }
 
 int usrdefcols[]={7, 1,2,3,4,5,6,7}; // user defined output columns (first number is number of usr def output columns)
@@ -933,6 +939,7 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);zero=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
   doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;
+  ipeps1=NULL;ipeps2=NULL;ipeps3=NULL;ipeps4=NULL;ipeps5=NULL;ipeps6=NULL;
   printf("reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
                 strcpy(savfilename,file);}
@@ -1022,6 +1029,12 @@ inipar::inipar (const inipar & p)
   ipx=p.ipx;
   ipy=p.ipy;
   ipz=p.ipz;
+  ipeps1=p.ipeps1;
+  ipeps2=p.ipeps2;
+  ipeps3=p.ipeps3;
+  ipeps4=p.ipeps4;
+  ipeps5=p.ipeps5;
+  ipeps6=p.ipeps6;
   sta=p.sta;
   startcputime=p.startcputime;
   nofstapoints=p.nofstapoints;

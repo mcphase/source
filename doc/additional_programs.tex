@@ -288,23 +288,23 @@ curve or the RKKY model.
 \begin{description}
 \item[option {\prg -rkky A(meV) kf(1/A)}] calculates the rkky interaction according to $J(R)=A %%@
 cos(2 k_f R)/(2 k_f R)^3$
-\item[option {\prg -rkky3d A(meV) ka(1/A) kb(1/A) kc(1/A)}] calculates the rkky interaction %%@
-according to $J(R)=A cos(2 \kappa)/(2 \kappa)^3$ with $\kappa^2=k_a^2 R_a^2 + k_b^2 R_b^2 + %%@
-k_c^2 R_c^2$
+\item[option {\prg -rkky3d A(meV) kx(1/A) ky(1/A) kz(1/A)}] calculates the rkky interaction %%@
+according to $J(R)=A cos(2 \kappa)/(2 \kappa)^3$ with $\kappa^2=k_x^2 R_x^2 + k_y^2 R_y^2 + %%@
+k_z^2 R_z^2$
 \item[option {\prg -rkkz A(meV) kf(1/A)}] calculates the rkky interaction according to $J(R)=A %%@
 (sin(2 k_f R)- 2 k_f R cos(2 k_f R))/(2 k_f R)^4$
-\item[option {\prg -rkkz3d A(meV) ka(1/A) kb(1/A) kc(1/A)}] calculates the rkky interaction %%@
-according to $J(R)=A (sin(2 \kappa)- 2 \kappa cos(2 \kappa))/(2 \kappa)^4$ with $\kappa^2=k_a^2 %%@
-R_a^2 + k_b^2 R_b^2 + k_c^2 R_c^2$
+\item[option {\prg -rkkz3d A(meV) kx(1/A) ky(1/A) kz(1/A)}] calculates the rkky interaction %%@
+according to $J(R)=A (sin(2 \kappa)- 2 \kappa cos(2 \kappa))/(2 \kappa)^4$ with $\kappa^2=k_x^2 %%@
+R_x^2 + k_y^2 R_y^2 + k_z^2 R_z^2$
 \item[option {\prg -kaneyoshi A(meV) D(A) alpha}] calculates the Kaneyoshi parametrisation for %%@
 the Bethe-Slater
                                curve: $J(R)= A [-(R/D)^2+(R/D)^4]exp[-\alpha (R/D)^2]$  with $D$ %%@
 corresponding
                                to the orbital radius
-\item[option {\prg -kaneyoshi3d A(meV) Da(A) Db(A) Dc(A) alpha}] calculates the Kaneyoshi %%@
+\item[option {\prg -kaneyoshi3d A(meV) Dx(A) Dy(A) Dz(A) alpha}] calculates the Kaneyoshi %%@
 parametrisation for the Bethe-Slater
                                curve: $J(R)= A [-\rho^2+\rho^4]exp[-\alpha \rho^2]$  with %%@
-$\rho^2=R_a^2/D_a^2+R_b^2/D_b^2+R_c^2/D_c^2$
+$\rho^2=R_x^2/D_x^2+R_y^2/D_y^2+R_z^2/D_z^2$
 \item[option {\prg option -bvk filename}]
               for phonon take Born van Karman model with longitudinal and
               transversal spring constants from file - file format:
@@ -378,11 +378,38 @@ springs $c_T$.
 \end{eqnarray}
               To get an sample file use option -f or -dm without a filename.      
 \item[option {\prg -d}] puts to the last column the distance of the neighbours (A)
-\end{description}
 
 The neigbours of each atom are also stored in seperate files
 {\prg results\//makenn.a*.pc}, which can be used with the program {\prg pointc} to evaluate
 the pointcharge model and calculate crystal field paramaters.
+
+\item[option {\prg -npc }]  do not keep {\prg results\//makenn.a*.pc} files
+\item[option {\prg -rfunc }] create {\prg results\//makenn.func.r} file with distance dependence of
+                rkky and kaneyoshi functions (only for options rkky* and kaneyoshi*)
+\item[option {\prg -djdx}]
+\item[option {\prg -djdy}]
+\item[option {\prg -djdz }]  create files makenn.djdx .djdy .djdz instead of makenn.j, respectively
+ these contain the derivatives of the interaction paramters with respect to
+ displacement of the neighbor in x,y and z direction respectively. These derivatives
+ are useful for the calculation of exchange striction effects. 
+
+\item[option {\prg -djdeps1}]
+\item[option {\prg  -djdeps2}]
+\item[option {\prg -djdeps3}]
+\item[option {\prg -djdeps4}]
+\item[option {\prg  -djdeps5}]
+\item[option {\prg -djdeps6 }]  create files makenn.djdeps1 .djdeps2 ... .djdeps6 instead of makenn.j, respectively
+ these contain the derivatives of the interaction paramters with respect to
+ the strain tensor components epsilon1, epsilon2 ... epsilon6 (in Voigt Notation) as 
+ calculated from the kf dependence on strain in the rkky formulas ($\partial k_f/\partial \epsilon_1=-k_f/3 $,
+ $\partial k_x/\partial \epsilon_1=-k_x $,\dots)
+
+ These derivatives are useful for the calculation of exchange striction effects. 
+\end{description}
+
+ Note: $xyz$ refers to a right handed Euclidean coordinate system with 
+ $y||\vec b$, $z||(\vec a \times \vec b)$ and $x$ perpendicular to $y$ and $z$.
+
 \item [\prg mcphas2jvx mcphas.j] 
 Creates a JavaView input file (by default {\prg results/mcphas.jvx}) which shows the atomic positions 
 and exchange interactions in 3D graphics. It requires a {\prg mcphas.j} type file as input. JavaView can
