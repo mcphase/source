@@ -21,7 +21,7 @@ const char * filemode="w";
 
 // for exchange striction - load exchange striction parameters into ip and store _file
 // returns true if successful
-bool parload(par * ip,char * iniprefix, const char * filename, int verbose,par & inputpars, par * ipx = NULL)
+bool parload(par *& ip,char * iniprefix, const char * filename, int verbose,par & inputpars, par * ipx = NULL)
 { char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   FILE * fin=NULL; 
   strcpy(prefix,iniprefix);strcpy(prefix+strlen(iniprefix),filename);
@@ -29,7 +29,6 @@ bool parload(par * ip,char * iniprefix, const char * filename, int verbose,par &
  fin=fopen(prefix,"rb");
  if(fin!=NULL){if(verbose==1){printf("reading parameters from file %s\n",prefix);}
                ip= new par(prefix,verbose);  
-
 // here save single ion property files to results
   strcpy(prefix,"./results/_");strcpy(prefix+11,iniprefix);
   strcpy(prefix+11+strlen(iniprefix),filename);(*ip).save(prefix,0);
@@ -152,6 +151,11 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
   parload(ini.ipeps6,ini.prefix,"mcphas.djdeps6",verbose,inputpars,ini.ipeps1);
  fprintf(stderr,"# ... these are no problems, continuing\n");
  }
+
+ if(ini.ipx!=NULL&&ini.ipeps1!=NULL)
+ {
+ if(((ini.ipx)!=(ini.ipeps1))>1){fprintf(stderr,"# Error - mcphas.djdx and mcphas.djdeps1 do not match in nofneighbours or neighbour positions\n");exit(1);}
+  }
  
  if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
           } // doeps

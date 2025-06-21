@@ -1213,15 +1213,14 @@ sub getinteraction {
    $kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
    if ($djdeps1){
              # derivative with respect to eps: dka/deps1=-ka
-             # dkr/deps1=-ka*rx*rx/kfr * dka/deps1 = ka*ka*rx*rx/kfr
-             # dj/deps1=-3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-2*$scale*sin(2*$kfr)/8/$kfr/$kfr/$kfr;
-                 $jaa = -3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+             # dkr/deps1=ka*rx*rx/kfr * dka/deps1 = -ka*ka*rx*rx/kfr
+             $jaa = 3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
    elsif ($djdeps2){
-                 $jaa = -3*$kb*$kb*$ry*$ry*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+                 $jaa = 3*$kb*$kb*$ry*$ry*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
    elsif ($djdeps3){
-                 $jaa = -3*$kc*$kc*$rz*$rz*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+                 $jaa = 3*$kc*$kc*$rz*$rz*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
     else {$jaa = $scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr;}
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
@@ -1242,15 +1241,14 @@ sub getinteraction {
    $kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
   if ($djdeps1){
              # derivative with respect to eps: dka/deps1=-ka
-             # dkr/deps1=-ka*rx*rx/kfr * dka/deps1 = ka*ka*rx*rx/kfr
-             # dj/deps1=-3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr-2*$scale*sin(2*$kfr)/8/$kfr/$kfr/$kfr;
-        $jaa = -$ka*$ka*$rx*$rx*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+             # dkr/deps1=-ka*rx*rx/kfr * dka/deps1 = -ka*ka*rx*rx/kfr
+        $jaa = $ka*$ka*$rx*$rx*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
   elsif ($djdeps2){
-        $jaa = -$kb*$kb*$ry*$ry*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+        $jaa = $kb*$kb*$ry*$ry*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
   elsif ($djdeps2){
-        $jaa = -$kc*$kc*$rz*$rz*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
+        $jaa = $kc*$kc*$rz*$rz*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
    else {$jaa = $scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/16/$kfr/$kfr/$kfr/$kfr;}
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
@@ -1868,7 +1866,7 @@ print STDOUT << "EOF";
  the strain tensor components epsilon1, epsilon2 ... epsilon6 (in Voigt Notation) as 
  calculated from the kf dependence on strain in the rkky formulas (dkf/deps1=-kf/3 , dkx/deps1=-kx ...)
  for option -rkky    dj/deps1,2,3 = A.cos(2.kf.r)/(2.kf.r)^3+ A.sin(2.kf.r)/12(kf.r)^2
-            -rkky3d  dj/deps1 = -3.A.(kx.Rx)^2.cos(2.kfR)/(.kfR^5)
+            -rkky3d  dj/deps1 = -3.A.(kx.Rx)^2.cos(2.kfR)/(8.kfR^5)
                                 -A*(kx.Rx)^2.sin(2.kfR)/(4.kfR^4) and similar for eps2,3
             -rkkz    dj/deps1,2,3 = -4.A.(sin(2.kf.r)-2.kf.r.cos(2.kf.r))/(3.(2.kf.R)^4)
                                     -A.sin(2.kf.r)/(12(kf.r)^2)

@@ -277,7 +277,7 @@ sigma*=inputpars.cs.pVol()/1.60218e-1;
 
 // coupling coefficients jj[](a-c) berechnen
 // for (r=0;r<=sdim;++r)
-int exstr=0;if(ini.ipx!=NULL){exstr=6;}
+int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
             
  Matrix * jj; jj= new Matrix [(sdim+2)*(1+exstr)];
  for(i=0;i<=(sdim+2)*(1+exstr)-1;++i){jj[i]=Matrix(1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms,1,inputpars.cs.nofcomponents*inputpars.cs.nofatoms);} // coupling coeff.variable
@@ -287,17 +287,16 @@ int exstr=0;if(ini.ipx!=NULL){exstr=6;}
 
    for(m=1;m<=inputpars.cs.nofatoms;++m)
    {if ((*inputpars.jjj[m]).diagonalexchange==0){diagonalexchange=0;} // if any ion has anisotropic exchange - calculate anisotropic
-    if(exstr>0){if ((*(*ini.ipx).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                if ((*(*ini.ipy).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                if ((*(*ini.ipz).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-if(ini.ipeps1!=NULL){if ((*(*ini.ipeps1).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                     if ((*(*ini.ipeps2).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                     if ((*(*ini.ipeps3).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                     if ((*(*ini.ipeps4).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                     if ((*(*ini.ipeps5).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                     if ((*(*ini.ipeps6).jjj[m]).diagonalexchange==0){diagonalexchange=0;}
-                    }
-               }
+    if(exstr>0){if(ini.ipx!=NULL){if ((*(*ini.ipx).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipy!=NULL){if ((*(*ini.ipy).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipz!=NULL){if ((*(*ini.ipz).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipeps1!=NULL){if ((*(*ini.ipeps1).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipeps2!=NULL){if ((*(*ini.ipeps2).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipeps3!=NULL){if ((*(*ini.ipeps3).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipeps4!=NULL){if ((*(*ini.ipeps4).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipeps5!=NULL){if ((*(*ini.ipeps5).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                if(ini.ipeps6!=NULL){if ((*(*ini.ipeps6).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
+                }
     for(l=1;l<=(*inputpars.jjj[m]).paranz;++l)
     {//sum up l.th neighbour interaction of atom m
                                              // atom m = sublattice m
@@ -344,17 +343,27 @@ if(ini.ipeps1!=NULL){if ((*(*ini.ipeps1).jjj[m]).diagonalexchange==0){diagonalex
 
     }
 
-if(exstr>0){
+if(exstr>0){int iparanz; 
+ if(ini.ipx!=NULL){iparanz=(*(*ini.ipx).jjj[m]).paranz;}else{iparanz=(*(*ini.ipeps1).jjj[m]).paranz;}
 
-for(l=1;l<=(*(*ini.ipx).jjj[m]).paranz;++l)
+for(l=1;l<=iparanz;++l)
     {//sum up l.th neighbour interaction of atom m
                                              // atom m = sublattice m
+     if(ini.ipx!=NULL){
 	n=(*(*ini.ipx).jjj[m]).sublattice[l]; // n set to sublattice of neighbor l
 
     // determine s (index of difference between crystal unit cells in the magnetic supercell)
     // start with calculating the difference vector xyz of origins of crystal unit cells
                    // bugfix GdVO3: sign of 2nd term changed and last term added 12.12.07
      xyz=(*(*ini.ipx).jjj[m]).dn[l]+(*(*ini.ipx).jjj[m]).xyz-(*(*ini.ipx).jjj[n]).xyz;
+                    }else{
+	n=(*(*ini.ipeps1).jjj[m]).sublattice[l]; // n set to sublattice of neighbor l
+
+    // determine s (index of difference between crystal unit cells in the magnetic supercell)
+    // start with calculating the difference vector xyz of origins of crystal unit cells
+                   // bugfix GdVO3: sign of 2nd term changed and last term added 12.12.07
+     xyz=(*(*ini.ipeps1).jjj[m]).dn[l]+(*(*ini.ipeps1).jjj[m]).xyz-(*(*ini.ipeps1).jjj[n]).xyz;
+                    }
          // distance of neighbour l
                                     // xyz of sublattice m
                                                             // xyz of sublattice n
@@ -391,39 +400,48 @@ for(l=1;l<=(*(*ini.ipx).jjj[m]).paranz;++l)
 Vector Rij(1,3);dadbdc2ijk(Rij,xyz,inputpars.cs.abc);
 
 // beta = 1  (xx)
-jj[s+(sdim+2)*1](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(1);
+if(ini.ipx!=NULL){jj[s+(sdim+2)*1](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(1);
+                  }
 if(ini.ipeps1!=NULL){
 jj[s+(sdim+2)*1](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps1).jjj[m]).jij[l](i,j);
                     }
 // beta =2 (yy)
-jj[s+(sdim+2)*2](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(2);
+if(ini.ipy!=NULL){jj[s+(sdim+2)*2](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(2);
+                    }
 if(ini.ipeps2!=NULL){
 jj[s+(sdim+2)*2](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps2).jjj[m]).jij[l](i,j);
                     }
 
 
 // beta =3 (zz)
-jj[s+(sdim+2)*3](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(3);
+if(ini.ipz!=NULL){jj[s+(sdim+2)*3](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(3);
+                 }
 if(ini.ipeps3!=NULL){
 jj[s+(sdim+2)*3](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps3).jjj[m]).jij[l](i,j);
                     }
 // beta =4 (2yz=2zy)
-jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(3);
-jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(2);
+if(ini.ipy!=NULL){jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(3);
+                    }
+if(ini.ipz!=NULL){jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(2);
+                    }
 if(ini.ipeps4!=NULL){
 jj[s+(sdim+2)*4](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps4).jjj[m]).jij[l](i,j);
                     }
 
 // beta =5 (2xz=2zx)
-jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(3);
-jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(1);
+if(ini.ipx!=NULL){jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(3);
+                    }
+if(ini.ipz!=NULL){jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipz).jjj[m]).jij[l](i,j)*Rij(1);
+                    }
 if(ini.ipeps5!=NULL){
 jj[s+(sdim+2)*5](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps5).jjj[m]).jij[l](i,j);
                     }
 
 // beta =6 (2xy=2yx)
-jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(2);
-jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(1);
+if(ini.ipx!=NULL){jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipx).jjj[m]).jij[l](i,j)*Rij(2);
+                    }
+if(ini.ipy!=NULL){jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=0.5*(*(*ini.ipy).jjj[m]).jij[l](i,j)*Rij(1);
+                    }
 if(ini.ipeps6!=NULL){
 jj[s+(sdim+2)*6](inputpars.cs.nofcomponents*(m-1)+i,inputpars.cs.nofcomponents*(n-1)+j)+=(*(*ini.ipeps6).jjj[m]).jij[l](i,j);
                     }
@@ -511,7 +529,6 @@ else
   diff-=sps.m(i,j,k);
   spinchange+=sqrt(diff*diff)/sps.n();
   }}}
-
   if(ini.doeps){// here should come the exchange striction: calculate correlation function
                 // and multiply with  corresponding derivative of two ion interaction
                 // --> and add to mf.epsmf
@@ -519,15 +536,26 @@ else
                 // jj a nofcomponents x nofcomponents Matrix
                 // l ... sublattic (atom) index
                 // n ... neighbour number in neighbour list
-if(ini.ipx!=NULL){
-                for(l=1;l<=inputpars.cs.nofatoms;++l)for(n=1;n<=(*(*ini.ipx).jjj[l]).paranz;++n)
-                {//calculate spincorrelation function of neighbour n of sublattice l
-                   corrfunc(II,n,l,(*ini.ipx),sps);double dldlssumx=0,dldlssumy=0,dldlssumz=0;
+if(ini.ipx!=NULL||ini.ipeps1!=NULL){int iparanz; 
+ 
+                for(l=1;l<=inputpars.cs.nofatoms;++l)
+                {if(ini.ipx!=NULL){iparanz=(*(*ini.ipx).jjj[l]).paranz;}else{iparanz=(*(*ini.ipeps1).jjj[l]).paranz;}
+                 for(n=1;n<=iparanz;++n)
+                 {//calculate spincorrelation function of neighbour n of sublattice l
+                   
+                   if(ini.ipx!=NULL)corrfunc(II,n,l,(*ini.ipx),sps);
+                   else corrfunc(II,n,l,(*ini.ipeps1),sps);
+
+                   double dldlssumx=0,dldlssumy=0,dldlssumz=0;
+                   double dldlssumeps1=0,dldlssumeps2=0,dldlssumeps3=0;
+                   double dldlssumeps4=0,dldlssumeps5=0,dldlssumeps6=0;
+                        if(ini.ipx!=NULL){
                    for(int dl=1;dl<=inputpars.cs.nofcomponents;++dl)
-                    for(int dls=1;dls<=inputpars.cs.nofcomponents;++dls){
+                    for(int dls=1;dls<=inputpars.cs.nofcomponents;++dls){   
                         dldlssumx+=(*(*ini.ipx).jjj[l]).jij[n](dl,dls)*II(dl,dls);
                         dldlssumy+=(*(*ini.ipy).jjj[l]).jij[n](dl,dls)*II(dl,dls);
                         dldlssumz+=(*(*ini.ipz).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+
 mf.epsmf(1)+=0.5*(*(*ini.ipx).jjj[l]).dr[n](1)*dldlssumx;  // we can take dr from ipx because ipy ipz have all the same dr !
 mf.epsmf(2)+=0.5*(*(*ini.ipy).jjj[l]).dr[n](2)*dldlssumy;
 mf.epsmf(3)+=0.5*(*(*ini.ipz).jjj[l]).dr[n](3)*dldlssumz;
@@ -537,8 +565,35 @@ mf.epsmf(4)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](3)*dldlssumy;
 mf.epsmf(5)+=0.25*(*(*ini.ipz).jjj[l]).dr[n](1)*dldlssumz;
 mf.epsmf(5)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](3)*dldlssumx;
 mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssumy;
-mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumx;                    
-               }}
+mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumx;   
+
+                                                                        }
+
+                       if(ini.ipeps1!=NULL){
+                    for(int dl=1;dl<=inputpars.cs.nofcomponents;++dl)
+                    for(int dls=1;dls<=inputpars.cs.nofcomponents;++dls){   
+                         dldlssumeps1+=(*(*ini.ipeps1).jjj[l]).jij[n](dl,dls)*II(dl,dls);
+                        if(ini.ipeps2!=NULL){dldlssumeps2+=(*(*ini.ipeps2).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+                        if(ini.ipeps3!=NULL){dldlssumeps3+=(*(*ini.ipeps3).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+                        if(ini.ipeps4!=NULL){dldlssumeps4+=(*(*ini.ipeps4).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+                        if(ini.ipeps5!=NULL){dldlssumeps5+=(*(*ini.ipeps5).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+                        if(ini.ipeps6!=NULL){dldlssumeps6+=(*(*ini.ipeps6).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
+                                                                        }
+
+mf.epsmf(1)+=0.5*dldlssumeps1; 
+mf.epsmf(2)+=0.5*dldlssumeps2; 
+mf.epsmf(3)+=0.5*dldlssumeps3; 
+mf.epsmf(4)+=0.5*dldlssumeps4; 
+mf.epsmf(5)+=0.5*dldlssumeps5; 
+mf.epsmf(6)+=0.5*dldlssumeps6; 
+
+                                           }
+
+
+
+
+                 
+               }}}
 
                 sps.epsilon=inputpars.CelInv*(mf.epsmf+sigma);
                }
