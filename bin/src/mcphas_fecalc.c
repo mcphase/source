@@ -688,6 +688,19 @@ if(ini.nofMCsteps>0)
 //   best approach: take spins and mean fields and find the most nearby energy eigenstate
 //   for each ion to represent best the spin (coming from a stabilised mf or from a previous
 //   monte carlo run)
+//  warmup = 10% = 0.1 of the nofMCsteps (without doing observable averages)
+#define WARMUP 0.1
+// energy histogramm
+// number of points in histogram
+#define EHIST_NOFPOINTS 400
+// width in energy 
+#define EHIST_WIDTH      0.1*KB*T
+// try to do initial half of the Monte Carlo Loop starting with high Tm and approaching T from above
+// #define TSTART   3000+T
+// .. no do it with the same T all the time:
+#define TSTART   T
+int hi[EHIST_NOFPOINTS];int iE;for(iE=0;iE<EHIST_NOFPOINTS;++iE)hi[iE]=0;
+
 double TT=0;
 ComplexVector *** states;states= new ComplexVector ** [sdim+2];
 for(i=0;i<=sdim+1;++i){states[i]=new ComplexVector * [inputpars.cs.nofatoms+1];
@@ -722,16 +735,6 @@ evalfe(E0,Eelastic,sps,mf,ini,inputpars, TT,lnzi,ui);
 
 
 
-// energy histogramm
-// number of points in histogram
-#define EHIST_NOFPOINTS 400
-// width in energy 
-#define EHIST_WIDTH      0.1*KB*T
-// try to do initial half of the Monte Carlo Loop starting with high Tm and approaching T from above
-// #define TSTART   3000+T
-// .. no do it with the same T all the time:
-#define TSTART   T
-int hi[EHIST_NOFPOINTS];int iE;for(iE=0;iE<EHIST_NOFPOINTS;++iE)hi[iE]=0;
 
 // this is a ring storage for histogram: hi[0] stores number of runs for E0( initial
 // state energy), larger energies are in hi[1,2,...], smaller energies in hi[99,98,...]
@@ -854,9 +857,10 @@ for(m1=1;m1<=inputpars.cs.nofcomponents;++m1)
          xi=rnd(1);if(xi>expEKT){keep=false;(*states[s][l])=savs;}
          }  
  
- if(r>nofMC/2){Tm=T;}
+// sweep from high T to low T during warmup
+ if(r>nofMC*WARMUP){Tm=T;}
  else {U=0;if(Tm>T){//Tm*=ff;
-               Tm-=2*(TSTART-T)/nofMC;
+               Tm-=4*(TSTART-T)/(WARMUP*nofMC);
               }}
 if(keep==true)
 {
@@ -904,7 +908,7 @@ if(physprops!=NULL){totalJ+=dtotalJ;
 
 // update energy histogram
 // determine point iE
-if(physprops!=NULL)if(r>nofMC/2)
+if(physprops!=NULL)if(r>nofMC*WARMUP)
 {iE=(int)rint(E/(EHIST_WIDTH*sps.n()*sps.nofatoms));
 while(iE<0)iE+=EHIST_NOFPOINTS;
 while(iE>EHIST_NOFPOINTS-1)iE-=EHIST_NOFPOINTS;
@@ -912,8 +916,8 @@ while(iE>EHIST_NOFPOINTS-1)iE-=EHIST_NOFPOINTS;
 }
  // here make averages of observables
  // energy
- if(r>nofMC/2)U+=E;//printf("%i %g %g %g\n",r,E,xi,En(1));
-if(physprops!=NULL)if(r>nofMC/2){
+ if(r>nofMC*WARMUP)U+=E;//printf("%i %g %g %g\n",r,E,xi,En(1));
+if(physprops!=NULL)if(r>nofMC*WARMUP){
  // <I>
                    (*physprops).totalJ+=totalJ;
 // <M> magnetic moment
@@ -965,13 +969,13 @@ if (verbose)
 
  
 // Energy
- if(nofMC>0)U/=nofMC/2;   
+ if(nofMC>0)U/=nofMC*(1-WARMUP);   
   U/=sps.n()*sps.nofatoms; U+=E0;
 
 // Operators <I>
  if(physprops!=NULL)if(nofMC>0){
- (*physprops).totalJ=(*physprops).totalJ*(2.0/nofMC);
- (*physprops).m=(*physprops).m*(2.0/nofMC);
+ (*physprops).totalJ=(*physprops).totalJ*(1.0/((1-WARMUP)*nofMC));
+ (*physprops).m=(*physprops).m*(1.0/((1-WARMUP)*nofMC));
                     }
 
  // Z and fe ... DIFFICULT - I do not know how to calculate !!!??????? 
