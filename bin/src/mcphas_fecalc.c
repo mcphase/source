@@ -567,12 +567,13 @@ mf.epsmf(5)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](3)*dldlssumx;
 mf.epsmf(6)+=0.25*(*(*ini.ipy).jjj[l]).dr[n](1)*dldlssumy;
 mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumx;   
 
-                                                                        }
+                                           }
 
                        if(ini.ipeps1!=NULL){
                     for(int dl=1;dl<=inputpars.cs.nofcomponents;++dl)
                     for(int dls=1;dls<=inputpars.cs.nofcomponents;++dls){   
                          dldlssumeps1+=(*(*ini.ipeps1).jjj[l]).jij[n](dl,dls)*II(dl,dls);
+
                         if(ini.ipeps2!=NULL){dldlssumeps2+=(*(*ini.ipeps2).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
                         if(ini.ipeps3!=NULL){dldlssumeps3+=(*(*ini.ipeps3).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
                         if(ini.ipeps4!=NULL){dldlssumeps4+=(*(*ini.ipeps4).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
@@ -580,12 +581,14 @@ mf.epsmf(6)+=0.25*(*(*ini.ipx).jjj[l]).dr[n](2)*dldlssumx;
                         if(ini.ipeps6!=NULL){dldlssumeps6+=(*(*ini.ipeps6).jjj[l]).jij[n](dl,dls)*II(dl,dls);}
                                                                         }
 
+
 mf.epsmf(1)+=0.5*dldlssumeps1; 
 mf.epsmf(2)+=0.5*dldlssumeps2; 
 mf.epsmf(3)+=0.5*dldlssumeps3; 
 mf.epsmf(4)+=0.5*dldlssumeps4; 
 mf.epsmf(5)+=0.5*dldlssumeps5; 
-mf.epsmf(6)+=0.5*dldlssumeps6; 
+mf.epsmf(6)+=0.5*dldlssumeps6;
+ 
 
                                            }
 

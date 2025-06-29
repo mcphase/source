@@ -126,7 +126,7 @@ elsif(@rkky3d)
  #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
  #  $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;
    print "#calculating RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n";
-   print "#kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
+   print "#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";}
 elsif(@kaneyoshi3d)
   {$rkky=5;
    $s=$kaneyoshi3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -141,7 +141,7 @@ elsif(@kaneyoshi3d)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$aa=eval $ARGV[0];shift @ARGV;
    print "#calculating kaneyoshi parametrization for the Bethe-Slater curve\n";
    print "# J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV \n";
-   print "#with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A  and alpha=$aa\n";}
+   print "#with RD=sqrt(Ri^2/Di^2+Rj^2/Dj^2+Rk^2/Dk^2) with Di=$Da A Dj=$Db A Dk=$Dc A  and alpha=$aa\n";}
 elsif(@rkkz3d)
   {$rkky=6;
    $s=$rkkz3d[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -154,7 +154,7 @@ elsif(@rkkz3d)
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kb=eval $ARGV[0];shift @ARGV;  
 #   $ARGV[0]=~s/exp/essp/g;$ARGV[0]=~s/x/*/g;$ARGV[0]=~s/essp/exp/g;$kc=eval $ARGV[0];shift @ARGV;   
    print "#calculating RKKY interaction J(R)=A [sin(2.kf.R)-2.kf.R.cos(2.kf.R)]/(2.kf.R)^4 for scale A=$scale meV\n";
-   print "#kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n";}
+   print "#kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n";}
 elsif(@rkkydummy)
   {$rkky=1;
    $s=$rkkydummy[0];  $s=~s/exp/essp/g;$s=~s/x/*/g;$s=~s/essp/exp/g;    $scale=eval $s;
@@ -1067,7 +1067,6 @@ my $i,$j;$i=0;
 sub getinteraction {
    my ($Gmix,$gJthis,$gJ,$sipffilethis,$sipffile,$r,$rx,$ry,$rz)=@_;
    my $n;
-
  if($bvk==1)
  { # here do the Born von Karman calculation using spring constants
    # $long_spring and $trans_spring are the spring constants in N/m
@@ -1247,7 +1246,7 @@ sub getinteraction {
   elsif ($djdeps2){
         $jaa = $kb*$kb*$ry*$ry*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
-  elsif ($djdeps2){
+  elsif ($djdeps3){
         $jaa = $kc*$kc*$rz*$rz*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
                } 
    else {$jaa = $scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/16/$kfr/$kfr/$kfr/$kfr;}
@@ -1482,13 +1481,13 @@ elsif ($rkky==2)
 {push @atoms, ("# kaneyoshi parametrization for the Bethe-Slater curve J(R)= A [-(R/D)^2+(R/D)^4].exp[-alpha.(R/D)^2] for scale A=$scale meV D=$D A alpha=$aa\n");}
 elsif ($rkky==4)
 {push @atoms, ("# it follows output of RKKY interaction J(R)=A.cos(2.kfR)/(2.kfR)^3 for scale A=$scale meV and\n");
- push @atoms, ("# kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n");}
+ push @atoms, ("# kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rck^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n");}
 elsif($rkky==5)
 {push @atoms, ("# kaneyoshi parametrization for the Bethe-Slater curve J(R)= A [-(RD)^2+(RD)^4].exp[-alpha.(RD)^2] for scale A=$scale meV\n");
- push @atoms, ("# with RD=sqrt(Ra^2/Da^2+Rb^2/Db^2+Rc^2/Dc^2) with Da=$Da A Db=$Db A Dc=$Dc A and alpha=$aa\n");}
+ push @atoms, ("# with RD=sqrt(Ri^2/Di^2+Rj^2/Dj^2+Rk^2/Dk^2) with Di=$Da A Dj=$Db A Dk=$Dc A and alpha=$aa\n");}
 elsif($rkky==6)
  {push @atoms, ("# it follows output of RKKY interaction  J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4 for scale A=$scale meV\n");
-  push @atoms, ("# kfR=sqrt(ka^2.Ra^2+kb^2.Rb^2+kc^2.Rc^2) with ka=$ka A^-1 kb=$kb A^-1 kc=$kc A^-1\n");}
+  push @atoms, ("# kfR=sqrt(ki^2.Ri^2+kj^2.Rj^2+kk^2.Rk^2) with ki=$ka A^-1 kj=$kb A^-1 kk=$kc A^-1\n");}
 elsif($readtable>0)
   {push @atoms, ("# it follows output generated from interactions read from table $table_file\n");
   }
@@ -1523,7 +1522,7 @@ print $l1 sprintf("#! bx= %+10.6f  by=%+10.6f bz=%+10.6f\n",$rtoijk->index(0)->a
 print $l1 sprintf("#! cx= %+10.6f  cy=%+10.6f cz=%+10.6f\n",$rtoijk->index(0)->at(2),$rtoijk->index(1)->at(2),$rtoijk->index(2)->at(2)); 
 print $l1 "#------------------------------------------------------------------------------------\n";
     if($alpha!=90||$beta!=90||$gamma!=90)
-     {print $l1 "#orthonormal coordinate system xyz is defined with respect to abc as y||b, z||(a x b) and x normal to k and j\n#charge[|e|]  dx[A]   dy[A]   dz[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";}
+     {print $l1 "#orthonormal coordinate system xyz is defined with respect to abc as y||b, z||(a x b) and x perpendicular to z and y\n#charge[|e|]  dx[A]   dy[A]   dz[A]        da[a]    db[b]    dc[c]   distance[A] atomnr\n";}
      else
      {print $l1 "#1            2         3         4              5          6          7         8             9\n";
       print $l1 "#charge[|e|]  da[A]     db[A]     dc[A]          da[a]      db[b]      dc[c]     distance[A]   atomnr\n";}

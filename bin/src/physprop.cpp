@@ -468,7 +468,7 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
    fprintf(fout,"#**********************************************************\n");
    fprintf (fout, "#Neutron Intensity - Mind: only structure+polarizationfactor+formfactor+debeywallerfactor - no lorentzfactor is  taken into account\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  int       h   k   l   int       h   k   l   int \n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  int       h   k   l   int       h   k   l   int ");
    ini.print_usrdefcolhead(fout,str);
    fclose(fout);
    //xray a component
@@ -486,11 +486,11 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - i component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mi(Q)) im(mi(Q))    h   k   l   real(mi(Q)) im(mi(Q))     h   k   l   real(mi(Q)) im(mi(Q))[mu_B/atom] ...\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mi(Q)) im(mi(Q))    h   k   l   real(mi(Q)) im(mi(Q))     h   k   l   real(mi(Q)) im(mi(Q))[mu_B/atom] ...");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - a component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(ma(Q)) im(ma(Q))      h   k   l    real(ma(Q)) im(ma(Q))      h   k   l  real(ma(Q)) im(ma(Q)) [mu_B/atom]...\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(ma(Q)) im(ma(Q))      h   k   l    real(ma(Q)) im(ma(Q))      h   k   l  real(ma(Q)) im(ma(Q)) [mu_B/atom]...");
    }
    ini.print_usrdefcolhead(fout,str); 
    if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of hkl not (yet) implemented\n"); }
@@ -511,11 +511,11 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - j component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))[mu_B/atom]...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))       h   k   l   real(mj(Q)) im(mj(Q))[mu_B/atom]...}");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - b component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "      h   k   l  real(mb(Q)) im(mb(Q))        h   k   l  real(mb(Q)) im(mb(Q))     h   k   l  real(mb(Q)) im(mb(Q))[mu_B/atom] ...}\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "      h   k   l  real(mb(Q)) im(mb(Q))        h   k   l  real(mb(Q)) im(mb(Q))     h   k   l  real(mb(Q)) im(mb(Q))[mu_B/atom] ...}");
    }
    ini.print_usrdefcolhead(fout,str);
   if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of hkl not (yet) implemented\n"); }
@@ -535,18 +535,18 @@ if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of correlation fu
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - k component\n");
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mk(Q)) im(mk(Q))       h   k   l  real(mk(Q)) im(mk(Q))      h   k   l   real(mk(Q)) im(mk(Q)) [mu_B/atom]...\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mk(Q)) im(mk(Q))       h   k   l  real(mk(Q)) im(mk(Q))      h   k   l   real(mk(Q)) im(mk(Q)) [mu_B/atom]...");
    }else{
    fprintf (fout,"#Absolute Value of the Fourier Transform of the moment configuration - c component\n"); 
    str[0]='\0';
-   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))  [mu_B/atom]...\n");
+   snprintf(str+strlen(str),MAXNOFCHARINLINE-strlen(str), "       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))       h   k   l  real(mc(Q)) im(mc(Q))  [mu_B/atom]...");
    }
    ini.print_usrdefcolhead(fout,str);
    if(ini.nofrndtries<0){fprintf(fout,"# Monte Carlo calculations of hkl not (yet) implemented\n"); }
    fclose(fout);
 
       }
-   if(ini.nofrndtries<=0){
+   if(ini.nofrndtries>=0){
    int * inew;inew=new int[nofhkls+1];float *intensity;intensity=new float[nofhkls+1];
    if(inew==NULL){fprintf (stderr, "Out of memory for inew\n");exit (EXIT_FAILURE);}
    if(intensity==NULL){fprintf (stderr, "Out of memory for intensity\n");exit (EXIT_FAILURE);}
