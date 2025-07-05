@@ -20,7 +20,7 @@ int main (int argc, char **argv)
                         reducing (removing entries) or increasing (by filling with zeroes) \n \
                         the exchange parameter tables\n \
                         -ni  forces output without indexchange \n \
-                        -s  0.2 scales all interactions in file1 by 0.2 before adding \n \
+                        -s  0.2 scales all interactions (including magnetoelastic G) in file1 by 0.2 before adding \n \
                         -v  verbose \n \
                 If file2.j is not given, a copy of the input file is saved \n \
                \n");

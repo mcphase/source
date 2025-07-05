@@ -609,6 +609,12 @@ if (fin==NULL) { return 1;
   hklfile_start_index= new int [nofhkllists+1];
   hklfile_start_index[0]=nofhkllists;
   nofhkllists=0;Vector hkl(1,3),qijk(1,3);
+
+       // now read the hkls in mcdisp.par
+      ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
+      fin = fopen(parfile, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
+      if(nofhkls==0){--nofhkllists;}
+
   fin = fopen(parfile, "rb"); // if in mcdisp.par we find a hklfile= ... insert hkl from this file into list
             while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
                {// treat hklblocks
@@ -763,9 +769,9 @@ if (fin==NULL) { return 1;
               }
        fclose (fin);
        // now read also the hkls in mcdisp.par
-      ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
-      fin = fopen(parfile, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
-      if(nofhkls==0){
+   //   ++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
+   //   fin = fopen(parfile, "rb");read_hkl_list(fin,hkls,0,do_jqfile,abc); fclose(fin); 
+      if(nofhkls==0){++nofhkllists;hklfile_start_index[nofhkllists]=nofhkls+1;
                 nofhkls=1;hkls[nofhkls]=new double [NOFHKLCOLUMNS+1];
                                      hkls[nofhkls][0]=3;
                                      hkls[nofhkls][1]=1;

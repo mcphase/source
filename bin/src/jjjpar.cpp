@@ -246,7 +246,7 @@ void jjjpar::scalepars (double scalefactor)
 {int i;for (i=1;i<=paranz;++i)
   {jij[i]*=scalefactor;
   }
-
+ for(i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)*=scalefactor;
 }
 
 // remove neighbour from list
