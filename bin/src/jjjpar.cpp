@@ -8,6 +8,7 @@
 // moreover, it loads also the user defined single ion module functions (linux only)
 #include "jjjpar.hpp"
 #include "perlparse.h"
+#include "mathparser.hpp"
 #include "../../version"
 #include<par.hpp>
 
@@ -561,10 +562,22 @@ void jjjpar::save_sipf(FILE * fout)
 
 }
 
+void jjjpar::print_interaction(FILE * fout,int pi,int prl,int prh,int pcl,int pch)
+                 //prints interaction tensor (rows prl-prh,columns pcl-pch) pi  to fout
+{if(pi>paranz){fprintf(stderr,"Error printing interaction - neighbour index %i > number of neighbours %i\n",pi,paranz);exit(EXIT_FAILURE);} 
+ fprintf(fout,"Interaction number %i to neighbour at (%g a, %g b, %g c),sublattice %i\n",pi,dn[pi](1),dn[pi](2),dn[pi](3),sublattice[pi]);
+ if(prl>nofcomponents){fprintf(stderr,"Error printing interaction - lower row index %i > nofcomponents=%i\n",prl,nofcomponents);exit(EXIT_FAILURE);} 
+ if(prh>nofcomponents){fprintf(stderr,"Error printing interaction - higher row index %i > nofcomponents=%i\n",prh,nofcomponents);exit(EXIT_FAILURE);} 
+ if(pcl>nofcomponents){fprintf(stderr,"Error printing interaction - lower column index %i > nofcomponents=%i\n",pcl,nofcomponents);exit(EXIT_FAILURE);} 
+ if(pch>nofcomponents){fprintf(stderr,"Error printing interaction - higher column index %i > nofcomponents=%i\n",pch,nofcomponents);exit(EXIT_FAILURE);} 
+ fprintf(fout,"rows %i - %i, columns %i - %i \n",prl,prh,pcl,pch);
+ Matrix pp(jij[pi](prl,prh,pcl,pch));
+ myPrintMatrix(fout,pp);
 
+}
 /*****************************************************************************************/
 //constructor with file handle of mcphas.j
-jjjpar::jjjpar(FILE * file,int nofcomps,int verbose) 
+jjjpar::jjjpar(FILE * file,int nofcomps,parser & ob,int verbose) 
 { jl_lmax=6;
   char instr[MAXNOFCHARINLINE],Gstr[MAXNOFCHARINLINE],exchangeindicesstr[MAXNOFCHARINLINE],Gindicesstr[MAXNOFCHARINLINE];
   sipffilename= new char [MAXNOFCHARINLINE];
@@ -575,21 +588,22 @@ jjjpar::jjjpar(FILE * file,int nofcomps,int verbose)
   float nn[MAXNOFNUMBERSINLINE+1];
   nn[0]=MAXNOFNUMBERSINLINE;
   mom=Vector(1,9); mom=0;
-
+ 
   xyz=Vector(1,3);
   cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   i=6; FF_type=0;
   while(i>0){fgets_errchk (instr, MAXNOFCHARINLINE, file);
              if(instr[strspn(instr," \t")]!='#'){fprintf (stderr, "Error reading mcphas.j - exchangeparameters start before all variables (da,db,dc,nofneighbours,diagonalexchange and sipffilename) have been given\n");
                                                  exit (EXIT_FAILURE);}
-             i+=extract(instr,"x",xyz[1])-1;
-             i+=extract(instr,"y",xyz[2])-1;
-             i+=extract(instr,"z",xyz[3])-1;
-             i+=extract(instr,"da",xyz[1])-1;
-             i+=extract(instr,"db",xyz[2])-1;
-             i+=extract(instr,"dc",xyz[3])-1;
-             i+=extract(instr,"nofneighbours",paranz)-1;
-             i+=extract(instr,"diagonalexchange",diagonalexchange)-1;
+             parseline(instr,ob);
+             i+=extract(instr,"x",xyz[1],ob)-1;
+             i+=extract(instr,"y",xyz[2],ob)-1;
+             i+=extract(instr,"z",xyz[3],ob)-1;
+             i+=extract(instr,"da",xyz[1],ob)-1;
+             i+=extract(instr,"db",xyz[2],ob)-1;
+             i+=extract(instr,"dc",xyz[3],ob)-1;
+             i+=extract(instr,"nofneighbours",paranz,ob)-1;
+             i+=extract(instr,"diagonalexchange",diagonalexchange,ob)-1;
              i+=extract(instr,"cffilename",sipffilename,(size_t)MAXNOFCHARINLINE,1)-1;
              i+=extract(instr,"sipffilename",sipffilename,(size_t)MAXNOFCHARINLINE,1)-1;
             }
@@ -608,8 +622,8 @@ if(diagonalexchange==2) {
     i=1; while(i>0) { 
       if(instr[strspn(instr," \t")]!='#'||feof(file)!=0) { 
          fprintf (stderr, "Error reading mcphas.j - diagonalexchange==2, but not indexexchange parameter line 9a - see manual found\n"); exit (EXIT_FAILURE);}
-      fgets_errchk (instr, MAXNOFCHARINLINE, file); 
-      extract(instr,"symmetricexchange",symmetricexchange);
+      fgets_errchk (instr, MAXNOFCHARINLINE, file); parseline(instr,ob);
+      extract(instr,"symmetricexchange",symmetricexchange,ob);
       if(extract(instr,"indexexchange",exchangeindicesstr,MAXNOFCHARINLINE,2000000)==0) { break; }
     }
     indexexchangenum=get_exchange_indices(exchangeindicesstr,&exchangeindices,"indexexchange");
@@ -626,7 +640,7 @@ if(diagonalexchange==2) {
 
 
   //start reading again at the beginning of the file to get formfactors, debye waller factor
-  get_parameters_from_sipfile(sipffilename,verbose);
+  get_parameters_from_sipfile(sipffilename,verbose,ob);
 // go back to previous position just after da=... line
 // and look for comment lines with magnetoelastic interaction
  jpos=fseek(file,pos,SEEK_SET); 
@@ -637,14 +651,16 @@ if (jpos!=0){fprintf(stderr,"Error: wrong file format of file mcphas.j\n");exit 
  i=0;j=0;
 
  while((i==0||j==0)&&feof(file)==false) { fgets_errchk (instr, MAXNOFCHARINLINE, file);
-      if(instr[strspn(instr," \t")]!='#'||strncmp(instr,"#*********",10)==0) { break;}       
+      if(instr[strspn(instr," \t")]!='#'||strncmp(instr,"#*********",10)==0) { break;} 
+                   parseline(instr,ob);      
       if(extract(instr,"Gindices",Gindicesstr,MAXNOFCHARINLINE,2000000)==0) {j=1;}
       if(extract(instr,"G",Gstr,MAXNOFCHARINLINE,200000)==0) { i=1;}        
    }
 if(i==1&&j==1){Gindexexchangenum=get_exchange_indices(Gindicesstr,&Gindices,"Gindices");
 // here fill G with values !!!
 //printf("%s\n",Gstr);
-j=splitstring(Gstr,nn);
+j=splitstring(Gstr,nn,ob);
+//printf("%g\n",nn[1]);
 
 int ii,jj;
 if(j<Gindexexchangenum){
@@ -673,7 +689,7 @@ else
 // go back to previous position and look for exchange parameters
   jpos=fseek(file,pos,SEEK_SET); 
   for  (i=1;i<=paranz;++i)
-  {while((j=inputline(file, nn))==0&&feof(file)==0){}; // returns 0 if comment line or eof, exits with error, if input string too long
+  {while((j=inputline(file, nn,ob))==0&&feof(file)==0){}; // returns 0 if comment line or eof, exits with error, if input string too long
    // Additional check to see if we are on the last neighbour, as McPhaseExplorer generates bad files without EOL at the end unless you add an empty line
    if(feof(file)!=0 && (i<paranz||(j-3)<nofcomponents)) { 
                       fprintf (stderr, "Error in jjjpar.cpp: input jjj parameters - \n");
@@ -755,8 +771,8 @@ jjjpar::jjjpar(double x,double y,double z, char * sipffile, int n,int verbose)
   for(int i=1;i<=6;++i)for(int j=1;j<=nofcomponents;++j)(*G)(i,j)=0;
   sipffilename= new char [MAXNOFCHARINLINE];
   clusterfilename=new char [MAXNOFCHARINLINE];
-  strcpy(sipffilename,sipffile);
-  get_parameters_from_sipfile(sipffilename,verbose);
+  strcpy(sipffilename,sipffile);parser ob;
+  get_parameters_from_sipfile(sipffilename,verbose,ob);
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   for(unsigned int ui=MAXSAVEQ; ui--; ) { Qsaved[ui]=DBWQsaved[ui]=1e16; Fsaved[ui]=DBWsaved[ui]=0; } nsaved=DBWnsaved=MAXSAVEQ-1;
   for(int ii=0; ii<52; ii++) opmatM[ii] = 0;

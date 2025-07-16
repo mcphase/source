@@ -18,7 +18,9 @@
 #include <stdio.h>
 #include<vector.h>
 #include "sparsecomplex.hpp"
+#include "mathparser.hpp"
 
+#define MAXNOFCHARSINLINE 1024
 #define HEXT_DIMENSION  12  // dimension of external field Hext (Hi Hj Hk Ei Ej Ek s1 s2 s3 s4 s5 s6)
 #define NOF_USERDEF_MCPHAS_COLS 7  // number of user defined columns in mcphas.ini -> mcphas.* outpus files
 #define SMALL_FIELD 1e-6     // nonzero value of external field E or H
@@ -34,6 +36,9 @@ complex<double> crnd(double & r);
 // function to print to stderr estimate of time until program end
 void print_time_estimate_until_end(double ratio); //input :ratio = nofpointstodo / nofpointsdone
 
+// parse a #! line for variables (a-z)
+extern void parseline(char * instr, parser & ob);
+
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -
 // output: var ... value of parameter
 // returns 1 on error and 0 if successful
@@ -42,8 +47,15 @@ extern  int extract(char * instr,const char * parameter,double & var);
 // extract/set a variable named [parmeter] into var out of a string [instr]
 extern   int extract(char * instr,const char * parameter,int & var);
 extern   int extract(char * instr,const char * parameter,float & var);
+extern  int extract(char * instr,const char * parameter,int & var, parser & ob);
+extern  int extract(char * instr,const char * parameter,float & var,parser & ob);
+extern  int extract(char * instr,const char * parameter,double & var,parser & ob);
+
+
 extern   int setvar(char * instr,const char * parameter,double & var);
 extern   int setvar(char * instr,const char * parameter,int var);
+
+
 
 // given a string str with headers of columns, print column numbers to fout
 void print_col_numbers(FILE * fout,char * str);
@@ -58,6 +70,10 @@ extern   int extract(char * instr,const char * parameter,char * var, size_t n,in
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var);
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var);
+extern int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var,parser& ob);
+extern int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var,parser & ob);
+extern int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var,parser & ob);
+
 extern   int extract_with_prefix(char * instr,char * prefix, const char * parameter,char * var, size_t n,int m);
 
 // open file: like fopen but with error check 
@@ -78,9 +94,14 @@ extern char * mystrnstr(const char *s, const char *find, size_t slen);
 // returns nof numbers read and
 // 0 if end of file or no numbers have been read 
 extern  int splitstring (char * instr, float *nn);
+extern int splitstring (char * instr, float*nn, parser & ob);
 extern  int splitstring (char * instr, float *nn, float *nnerr );
+extern int splitstring (char * instr, float*nn, float *nnerr,parser & ob);
+
 extern  int inputline (FILE * fin_coq, float *nn);
 extern  int inputline (FILE * fin_coq, float *nn, float *nnerr);
+extern int inputline (FILE * fin_coq, float *nn,parser & ob);
+extern int inputline (FILE * fin_coq, float *nn, float *nnerr,parser & ob);
 
 // function to input a line of numbers separated by delimiters
 // example:

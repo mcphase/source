@@ -35,7 +35,7 @@ void jjjpar::loadfunction(void  *(&symbol),void *handle,const char * func,int ve
 /************************************************************************************/
 // get parameters from sipf file
 /************************************************************************************/
-void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
+void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser & ob)
 {int i,j;
  float nn[MAXNOFNUMBERSINLINE];
  nn[0]=MAXNOFNUMBERSINLINE;
@@ -49,10 +49,11 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
       nof_electrons=0; // not to be used in module kramer !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
+      parseline(instr,ob);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-                                           i+=extract(instr,"A",ABC(1))-1;
-                                           i+=extract(instr,"B",ABC(2))-1;
-                                           i+=extract(instr,"C",ABC(3))-1;
+                                           i+=extract(instr,"A",ABC(1),ob)-1;
+                                           i+=extract(instr,"B",ABC(2),ob)-1;
+                                           i+=extract(instr,"C",ABC(3),ob)-1;
                                           }
       }
       // input all  lines starting with comments
@@ -70,8 +71,9 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
       nof_electrons=0; // not to be used in module brillouin !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
+      parseline(instr,ob);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-                                           i+=extract(instr,"J",ABC(1))-1;
+                                           i+=extract(instr,"J",ABC(1),ob)-1;
                                           }
       }// input all  lines starting with comments
       if(i!=0){fprintf(stderr,"Error reading spin quantum number J=S from file %s\ncorrect file format is:\n",sipf_filename);
@@ -86,7 +88,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
      {module_type=cfield;orientation=abc_yzx;if(verbose)fprintf (stderr,"#[internal]\n");
       //fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
        fseek(cf_file,0,SEEK_SET);
-      iops=new ionpars(cf_file,sipf_filename,verbose);
+      iops=new ionpars(cf_file,sipf_filename,verbose,ob);
 
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -100,7 +102,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
      {module_type=so1ion;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
      // fclose(cf_file);cf_file = fopen_errchk (sipf_filename, "rb"); // reopen file
       fseek(cf_file,0,SEEK_SET);
-      iops=new ionpars(cf_file,sipf_filename,verbose);
+      iops=new ionpars(cf_file,sipf_filename,verbose,ob);
       nof_electrons=(*iops).nof_electrons;
       int dj;dj=(int)(2*J()+1);
       est=ComplexMatrix(0,dj,1,dj);
@@ -114,6 +116,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
       nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
+        parseline(instr,ob);
        i+=extract(instr,"structurefile",clusterfilename,MAXNOFCHARINLINE,1)-1;
       }// input all  lines starting with comments
       if(i!=0){fprintf(stderr,"Error reading structurefile from file %s\ncorrect file format is:\n",sipf_filename);
@@ -131,16 +134,16 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose)
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-                                           i-=extract(instr,"MODPAR1",nn[1])-1;
-                                           i-=extract(instr,"MODPAR2",nn[2])-1;
-                                           i-=extract(instr,"MODPAR3",nn[3])-1;
-                                           i-=extract(instr,"MODPAR4",nn[4])-1;
-                                           i-=extract(instr,"MODPAR5",nn[5])-1;
-                                           i-=extract(instr,"MODPAR6",nn[6])-1;
-                                           i-=extract(instr,"MODPAR7",nn[7])-1;
-                                           i-=extract(instr,"MODPAR8",nn[8])-1;
-                                           i-=extract(instr,"MODPAR9",nn[9])-1;
-                                              extract(instr,"nof_electrons",nof_electrons);
+                                           i-=extract(instr,"MODPAR1",nn[1],ob)-1;
+                                           i-=extract(instr,"MODPAR2",nn[2],ob)-1;
+                                           i-=extract(instr,"MODPAR3",nn[3],ob)-1;
+                                           i-=extract(instr,"MODPAR4",nn[4],ob)-1;
+                                           i-=extract(instr,"MODPAR5",nn[5],ob)-1;
+                                           i-=extract(instr,"MODPAR6",nn[6],ob)-1;
+                                           i-=extract(instr,"MODPAR7",nn[7],ob)-1;
+                                           i-=extract(instr,"MODPAR8",nn[8],ob)-1;
+                                           i-=extract(instr,"MODPAR9",nn[9],ob)-1;
+                                              extract(instr,"nof_electrons",nof_electrons,ob);
                                           }
       }
        // input all  lines starting with comments
@@ -402,75 +405,76 @@ module_type=external_class;
  // cf_file = fopen_errchk (sipf_filename, "rb");
   while(feof(cf_file)==false)
   {fgets(instr, MAXNOFCHARINLINE, cf_file);
+  parseline(instr,ob);
    if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-    extract(instr,"SCATTERINGLENGTHREAL",SLR);
-    extract(instr,"SCATTERINGLENGTHIMAG",SLI);
-    extract(instr,"CHARGE",charge);
-    extract(instr,"MAGNETIC",magnetic);
-    extract(instr,"GJ",gJ);
-    extract(instr,"gJ",gJ);
+    extract(instr,"SCATTERINGLENGTHREAL",SLR,ob);
+    extract(instr,"SCATTERINGLENGTHIMAG",SLI,ob);
+    extract(instr,"CHARGE",charge,ob);
+    extract(instr,"MAGNETIC",magnetic,ob);
+    extract(instr,"GJ",gJ,ob);
+    extract(instr,"gJ",gJ,ob);
 
-        extract(instr,"R2",  r2);
-        extract(instr,"R4",  r4);
-        extract(instr,"R6",  r6);
+        extract(instr,"R2",  r2,ob);
+        extract(instr,"R4",  r4,ob);
+        extract(instr,"R6",  r6,ob);
 
     // read formfactor if given
-    extract(instr,"FFj0A",magFFj0[1]);
-    extract(instr,"FFj0a",magFFj0[2]);
-    extract(instr,"FFj0B",magFFj0[3]);
-    extract(instr,"FFj0b",magFFj0[4]);
-    extract(instr,"FFj0C",magFFj0[5]);
-    extract(instr,"FFj0c",magFFj0[6]);
-    extract(instr,"FFj0D",magFFj0[7]);
-    extract(instr,"FFj0d",magFFj0[8]);
-    extract(instr,"FFj0E",magFFj0[9]);
-    extract(instr,"FFj2A",magFFj2[1]);
-    extract(instr,"FFj2a",magFFj2[2]);
-    extract(instr,"FFj2B",magFFj2[3]);
-    extract(instr,"FFj2b",magFFj2[4]);
-    extract(instr,"FFj2C",magFFj2[5]);
-    extract(instr,"FFj2c",magFFj2[6]);
-    extract(instr,"FFj2D",magFFj2[7]);
-    extract(instr,"FFj2d",magFFj2[8]);
-    extract(instr,"FFj2E",magFFj2[9]);
-    extract(instr,"FFj4A",magFFj4[1]);
-    extract(instr,"FFj4a",magFFj4[2]);
-    extract(instr,"FFj4B",magFFj4[3]);
-    extract(instr,"FFj4b",magFFj4[4]);
-    extract(instr,"FFj4C",magFFj4[5]);
-    extract(instr,"FFj4c",magFFj4[6]);
-    extract(instr,"FFj4D",magFFj4[7]);
-    extract(instr,"FFj4d",magFFj4[8]);
-    extract(instr,"FFj4E",magFFj4[9]);
-    extract(instr,"FFj6A",magFFj6[1]);
-    extract(instr,"FFj6a",magFFj6[2]);
-    extract(instr,"FFj6B",magFFj6[3]);
-    extract(instr,"FFj6b",magFFj6[4]);
-    extract(instr,"FFj6C",magFFj6[5]);
-    extract(instr,"FFj6c",magFFj6[6]);
-    extract(instr,"FFj6D",magFFj6[7]);
-    extract(instr,"FFj6d",magFFj6[8]);
-    extract(instr,"FFj6E",magFFj6[9]);
+    extract(instr,"FFj0A",magFFj0[1],ob);
+    extract(instr,"FFj0a",magFFj0[2],ob);
+    extract(instr,"FFj0B",magFFj0[3],ob);
+    extract(instr,"FFj0b",magFFj0[4],ob);
+    extract(instr,"FFj0C",magFFj0[5],ob);
+    extract(instr,"FFj0c",magFFj0[6],ob);
+    extract(instr,"FFj0D",magFFj0[7],ob);
+    extract(instr,"FFj0d",magFFj0[8],ob);
+    extract(instr,"FFj0E",magFFj0[9],ob);
+    extract(instr,"FFj2A",magFFj2[1],ob);
+    extract(instr,"FFj2a",magFFj2[2],ob);
+    extract(instr,"FFj2B",magFFj2[3],ob);
+    extract(instr,"FFj2b",magFFj2[4],ob);
+    extract(instr,"FFj2C",magFFj2[5],ob);
+    extract(instr,"FFj2c",magFFj2[6],ob);
+    extract(instr,"FFj2D",magFFj2[7],ob);
+    extract(instr,"FFj2d",magFFj2[8],ob);
+    extract(instr,"FFj2E",magFFj2[9],ob);
+    extract(instr,"FFj4A",magFFj4[1],ob);
+    extract(instr,"FFj4a",magFFj4[2],ob);
+    extract(instr,"FFj4B",magFFj4[3],ob);
+    extract(instr,"FFj4b",magFFj4[4],ob);
+    extract(instr,"FFj4C",magFFj4[5],ob);
+    extract(instr,"FFj4c",magFFj4[6],ob);
+    extract(instr,"FFj4D",magFFj4[7],ob);
+    extract(instr,"FFj4d",magFFj4[8],ob);
+    extract(instr,"FFj4E",magFFj4[9],ob);
+    extract(instr,"FFj6A",magFFj6[1],ob);
+    extract(instr,"FFj6a",magFFj6[2],ob);
+    extract(instr,"FFj6B",magFFj6[3],ob);
+    extract(instr,"FFj6b",magFFj6[4],ob);
+    extract(instr,"FFj6C",magFFj6[5],ob);
+    extract(instr,"FFj6c",magFFj6[6],ob);
+    extract(instr,"FFj6D",magFFj6[7],ob);
+    extract(instr,"FFj6d",magFFj6[8],ob);
+    extract(instr,"FFj6E",magFFj6[9],ob);
    // coefficients of Z(K') according to Lovesey chapter 11.6.1 page 233
-    extract(instr,"Z1c0",Zc(1));
-    extract(instr,"Z1c2",Zc(2));
-    extract(instr,"Z3c2",Zc(3));
-    extract(instr,"Z3c4",Zc(4));
-    extract(instr,"Z5c4",Zc(5));
-    extract(instr,"Z5c6",Zc(6));
-    extract(instr,"Z7c6",Zc(7));
+    extract(instr,"Z1c0",Zc(1),ob);
+    extract(instr,"Z1c2",Zc(2),ob);
+    extract(instr,"Z3c2",Zc(3),ob);
+    extract(instr,"Z3c4",Zc(4),ob);
+    extract(instr,"Z5c4",Zc(5),ob);
+    extract(instr,"Z5c6",Zc(6),ob);
+    extract(instr,"Z7c6",Zc(7),ob);
    // read debeywallerfactor if given
-    extract(instr,"DWF",DWF);
+    extract(instr,"DWF",DWF,ob);
    // read radial wavefunction parameters
-        extract(instr,"N1",Np(1));extract(instr,"XI1",Xip(1));extract(instr,"C1",Cp(1));
-        extract(instr,"N2",Np(2));extract(instr,"XI2",Xip(2));extract(instr,"C2",Cp(2));
-        extract(instr,"N3",Np(3));extract(instr,"XI3",Xip(3));extract(instr,"C3",Cp(3));
-        extract(instr,"N4",Np(4));extract(instr,"XI4",Xip(4));extract(instr,"C4",Cp(4));
-        extract(instr,"N5",Np(5));extract(instr,"XI5",Xip(5));extract(instr,"C5",Cp(5));
-        extract(instr,"N6",Np(6));extract(instr,"XI6",Xip(6));extract(instr,"C6",Cp(6));
-        extract(instr,"N7",Np(7));extract(instr,"XI7",Xip(7));extract(instr,"C7",Cp(7));
-        extract(instr,"N8",Np(8));extract(instr,"XI8",Xip(8));extract(instr,"C8",Cp(8));
-        extract(instr,"N9",Np(9));extract(instr,"XI9",Xip(9));extract(instr,"C9",Cp(9));
+        extract(instr,"N1",Np(1),ob);extract(instr,"XI1",Xip(1),ob);extract(instr,"C1",Cp(1),ob);
+        extract(instr,"N2",Np(2),ob);extract(instr,"XI2",Xip(2),ob);extract(instr,"C2",Cp(2),ob);
+        extract(instr,"N3",Np(3),ob);extract(instr,"XI3",Xip(3),ob);extract(instr,"C3",Cp(3),ob);
+        extract(instr,"N4",Np(4),ob);extract(instr,"XI4",Xip(4),ob);extract(instr,"C4",Cp(4),ob);
+        extract(instr,"N5",Np(5),ob);extract(instr,"XI5",Xip(5),ob);extract(instr,"C5",Cp(5),ob);
+        extract(instr,"N6",Np(6),ob);extract(instr,"XI6",Xip(6),ob);extract(instr,"C6",Cp(6),ob);
+        extract(instr,"N7",Np(7),ob);extract(instr,"XI7",Xip(7),ob);extract(instr,"C7",Cp(7),ob);
+        extract(instr,"N8",Np(8),ob);extract(instr,"XI8",Xip(8),ob);extract(instr,"C8",Cp(8),ob);
+        extract(instr,"N9",Np(9),ob);extract(instr,"XI9",Xip(9),ob);extract(instr,"C9",Cp(9),ob);
   }
  }
 

@@ -27,11 +27,13 @@ delete ptr;
 
 phonon_module::phonon_module(const char * filename)
 {charge=0; // default charge zero
+ parser ob;
  char instr[MAXNOFCHARINLINE];
  // get charge from filename
  FILE * fin; fin = fopen_errchk(filename,"rb");
 while(feof(fin)==false){fgets(instr, MAXNOFCHARINLINE, fin);
-extract(instr,"CHARGE",charge);
+parseline(instr,ob);
+extract(instr,"CHARGE",charge,ob);
                       }
 }
 

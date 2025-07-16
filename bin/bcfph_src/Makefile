@@ -145,7 +145,7 @@ bcfph.o: bcfph.c martin.h myev.h
 # make  binaries (link .o files)
 
 
-../bcfph$(EXE):  bcfph.o martin.o  myev.o  $(VOBS)
+../bcfph$(EXE):  bcfph.o martin.o  mathparser.o myev.o  $(VOBS)
 	@echo Linking ../../bin/bcfph
 	$(LINKER)  -Wall  -o ../../bin/bcfph $^  $(LFLAGS) $(THREADLINK)	
 

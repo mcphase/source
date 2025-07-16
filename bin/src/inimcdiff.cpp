@@ -317,7 +317,7 @@ inimcdiff::inimcdiff (const char * file,char * pref,int verb)
   char instr[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE],sipffilename[MAXNOFCHARINLINE],infile[MAXNOFCHARINLINE]; 
   //,hklline[MAXNOFCHARINLINE];
   Habc=Vector(1,3);Eabc=Vector(1,3);
-  P=Vector(1,3);
+  P=Vector(1,3);parser ob;
   FILE *fin; //,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
   prefix= new char [strlen(pref)+1]; strcpy(prefix,pref); // set prefix
   //********************************  
@@ -352,7 +352,8 @@ inimcdiff::inimcdiff (const char * file,char * pref,int verb)
  while (instr[strspn(instr," \t")]=='#'&&strstr (instr, "%SECTION 2%")==NULL) // pointer to 'ltrimstring' 
   { if (pos==-1) {fprintf(stderr,"Error mcdiff: wrong mcdiff.in file format\n");exit (EXIT_FAILURE);}
    fgets(instr,MAXNOFCHARINLINE,fin); 
-   extract(instr,"nofoutputcolumns",nofoutputcolumns);  
+   parseline(instr,ob);
+   extract(instr,"nofoutputcolumns",nofoutputcolumns,ob);  
   }
 colcod=new int[NOF_OUT_VARIABLES+1];for(int i=0;i<NOF_OUT_VARIABLES;++i){if(i<=12){colcod[i]=cc[i];}else{colcod[i]=0;}}
 colhead=new char *[COLHEADDIM+1];for(int i=0;i<=COLHEADDIM;++i){colhead[i]=new char [strlen(ch[i])+1];strcpy(colhead[i],ch[i]);}
@@ -363,21 +364,22 @@ while (instr[strspn(instr," \t")]=='#'&&strstr (instr, "%SECTION 2%")==NULL) // 
   { pos=ftell(fin); 
     if (pos==-1) {fprintf(stderr,"Error mcdiff: wrong mcdiff.in file format\n");exit (EXIT_FAILURE);}
    fgets(instr,MAXNOFCHARINLINE,fin); 
-   extract(instr,"nofatoms",nofatoms);  
-   extract(instr,"lambda", lambda);
-   extract(instr, "thetamax", thetamax);
-   extract(instr, "nat", nat);
-   extract(instr, "natcryst", nat);
-   extract(instr, "ovalltemp", ovalltemp);
-   extract(instr, "lorentz", lorenz);
+      parseline(instr,ob);
+   extract(instr,"nofatoms",nofatoms,ob);  
+   extract(instr,"lambda", lambda,ob);
+   extract(instr, "thetamax", thetamax,ob);
+   extract(instr, "nat", nat,ob);
+   extract(instr, "natcryst", nat,ob);
+   extract(instr, "ovalltemp", ovalltemp,ob);
+   extract(instr, "lorentz", lorenz,ob);
    for(int i=0;i<= nofoutputcolumns;++i) // extract user defined output columns
    {snprintf(somestring,MAXNOFCHARINLINE,"out%i",i);
-    extract(instr, somestring,colcod[i]);
+    extract(instr, somestring,colcod[i],ob);
    }
-   extract(instr, "Pa",P(1));
-   extract(instr, "Pb",P(2));
-   extract(instr, "Pc",P(3));
-   extract(instr, "nofthreads",P(3));
+   extract(instr, "Pa",P(1),ob);
+   extract(instr, "Pb",P(2),ob);
+   extract(instr, "Pc",P(3),ob);
+   extract(instr, "nofthreads",P(3),ob);
   }
 
   fseek(fin,pos,SEEK_SET); 
@@ -419,10 +421,11 @@ printf("\n");
   { pos=ftell(fin); 
     if (pos==-1)  {fprintf(stderr,"Error mcdiff: wrong mcdiff.in file format\n");exit (EXIT_FAILURE);}
    fgets(instr,MAXNOFCHARINLINE,fin); 
-   extract(instr, "nat", nat);
-   extract(instr, "natcryst", nat);
-   cs.cextract(instr);
-   extract(instr, "use_dadbdc",use_dadbdc);
+   parseline(instr,ob);
+   extract(instr, "nat", nat,ob);
+   extract(instr, "natcryst", nat,ob);
+   cs.cextract(instr,ob);
+   extract(instr, "use_dadbdc",use_dadbdc,ob);
   }
   fseek(fin,pos,SEEK_SET); 
 
@@ -435,10 +438,11 @@ printf("\n");
   float numbers[70];numbers[0]=70;
   float numbers1[70];numbers1[0]=70;
   if (nat!=0){ for(int i=1;i<=nat;++i) { pos=ftell(fin); 
-                                     int n=inputline(fin,numbers);
+                                     int n=inputline(fin,numbers,ob);
                                      if (n==0) {if(feof(fin)==true){fprintf(stderr,"Error mcdiff: end of input file in section 2\n");exit (EXIT_FAILURE);}
                                                 fseek(fin,pos,SEEK_SET); 
                                                 fgets(instr,MAXNOFCHARINLINE,fin); 
+                                                parseline(instr,ob);
                                                 if(strstr (instr, "%%SECTION 3%%")!=NULL){fprintf (stderr,"ERROR mcdiff: Section 3 started before all nat=%i atoms of crystallographic unit cell were listed !\n",nat);exit (EXIT_FAILURE);}
                                                --i;}
                                      else      {if (n<9) {fprintf (stderr,"ERROR mcdiff: Section 2 - Nonmagnetic Atoms: too few positional parameters for atom %i!\n",i);exit (EXIT_FAILURE);}
@@ -458,38 +462,39 @@ printf("\n");
  while (instr[strspn(instr," \t")]=='#'&&nr1*nr2*nr3==0) 
   { pos=ftell(fin); 
    fgets(instr,MAXNOFCHARINLINE,fin); 
-   cs.cextract(instr);
-    extract(instr,"eps1",eps(1,1));
-    extract(instr,"eps2",eps(2,2));
-    extract(instr,"eps3",eps(3,3));
-    extract(instr,"eps4",eps(2,3));
-    extract(instr,"eps5",eps(1,3));
-    extract(instr,"eps6",eps(1,2));
+   parseline(instr,ob);
+   cs.cextract(instr,ob);
+    extract(instr,"eps1",eps(1,1),ob);
+    extract(instr,"eps2",eps(2,2),ob);
+    extract(instr,"eps3",eps(3,3),ob);
+    extract(instr,"eps4",eps(2,3),ob);
+    extract(instr,"eps5",eps(1,3),ob);
+    extract(instr,"eps6",eps(1,2),ob);
 
    
-    extract(instr, "nr1", nr1);
-    extract(instr, "nr2", nr2);
-    extract(instr, "nr3", nr3);
-    extract(instr, "nat", natmagnetic);
-    extract(instr, "T", T);
-    extract(instr, "Ha", Habc(1));
-    extract(instr, "Hb", Habc(2));
-    extract(instr, "Hc", Habc(3));
-    extract(instr, "Hi", H(1));
-    extract(instr, "Hj", H(2));
-    extract(instr, "Hk", H(3));
-    extract(instr, "Ea", Eabc(1));
-    extract(instr, "Eb", Eabc(2));
-    extract(instr, "Ec", Eabc(3));
-    extract(instr, "Ei", H(4));
-    extract(instr, "Ej", H(5));
-    extract(instr, "Ek", H(6));
-    extract(instr, "s1", H(7));
-    extract(instr, "s2", H(8));
-    extract(instr, "s3", H(9));
-    extract(instr, "s4", H(10));
-    extract(instr, "s5", H(11));
-    extract(instr, "s6", H(12));
+    extract(instr, "nr1", nr1,ob);
+    extract(instr, "nr2", nr2,ob);
+    extract(instr, "nr3", nr3,ob);
+    extract(instr, "nat", natmagnetic,ob);
+    extract(instr, "T", T,ob);
+    extract(instr, "Ha", Habc(1),ob);
+    extract(instr, "Hb", Habc(2),ob);
+    extract(instr, "Hc", Habc(3),ob);
+    extract(instr, "Hi", H(1),ob);
+    extract(instr, "Hj", H(2),ob);
+    extract(instr, "Hk", H(3),ob);
+    extract(instr, "Ea", Eabc(1),ob);
+    extract(instr, "Eb", Eabc(2),ob);
+    extract(instr, "Ec", Eabc(3),ob);
+    extract(instr, "Ei", H(4),ob);
+    extract(instr, "Ej", H(5),ob);
+    extract(instr, "Ek", H(6),ob);
+    extract(instr, "s1", H(7),ob);
+    extract(instr, "s2", H(8),ob);
+    extract(instr, "s3", H(9),ob);
+    extract(instr, "s4", H(10),ob);
+    extract(instr, "s5", H(11),ob);
+    extract(instr, "s6", H(12),ob);
   }
 
 crosscheck_H_E(H,Habc,Eabc,cs.abc);
@@ -660,6 +665,7 @@ for(int i=1;i<=natmagnetic;++i){
                             while(instr[strspn(instr," \t")]=='#'){pos=ftell(fin);
                                                                    if(feof(fin)==1){fprintf(stderr,"mcdiff Error: end of file before all magnetic atoms could be read\n");exit(EXIT_FAILURE);}
                                                                   fgets(instr,MAXNOFCHARINLINE,fin);
+                                                                  parseline(instr,ob);
                                                                   }
 			     // get sipffilename out of "{filename}   ..."
 
@@ -675,7 +681,7 @@ for(int i=1;i<=natmagnetic;++i){
 
                              // read the rest of the line and split into numbers
                             fseek(fin,pos+strchr(instr,'}')-instr+1,SEEK_SET); 
-                            j=inputline(fin,numbers);
+                            j=inputline(fin,numbers,ob);
    //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
    //                                        to Sa Sb Sc La Lb Lc
    //                                           
@@ -699,12 +705,14 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
                             if (j<9) {fprintf(stderr,"ERROR mcdiff: too few parameters for magnetic atom %i: %s\n",i,instr);exit(EXIT_FAILURE);}
                              // determine jxc .... dimension of exchange field if present >>>>>>>>>>>>>>>>
                             long int currentpos=ftell(fin);instr[0]='#';int jxc;
-                            while(instr[strspn(instr," \t")]=='#'&&feof(fin)==0){pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
+                            while(instr[strspn(instr," \t")]=='#'&&feof(fin)==0){pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);
+                              parseline(instr,ob);
+                              }
                             if (strchr(instr,'>')==NULL||instr[strspn(instr," \t")]=='#')
                              {jxc=1;} // no ">" found --> do dipole approx
                              else          
                              {fseek(fin,pos+strchr(instr,'>')-instr+1,SEEK_SET); 
-                              jxc=inputline(fin,numbers1);if(verbose)printf("dimension of mf = %i\n",jxc);
+                              jxc=inputline(fin,numbers1,ob);if(verbose)printf("dimension of mf = %i\n",jxc);
                              }
                              fseek(fin,currentpos,SEEK_SET); //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                              jjjpars[i]=new jjjpar((double)numbers[4] / nr1,(double)numbers[5] / nr2,(double)numbers[6] / nr3, sipffilename,jxc);
@@ -727,13 +735,15 @@ if(use_dadbdc!=0)        {       numbers[4]= (numbers[1]*rez1(1)+numbers[2]*rez1
                                                            else {(*jjjpars[i]).FF_type=+2;}//J[i]=-1;} // just use spin formfactor
                                                       }
                             instr[0]='#';
-                            while(instr[strspn(instr," \t")]=='#'&&feof(fin)==0){pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);}
+                            while(instr[strspn(instr," \t")]=='#'&&feof(fin)==0){pos=ftell(fin);fgets(instr,MAXNOFCHARINLINE,fin);
+                             parseline(instr,ob);
+                               }
                             if (strchr(instr,'>')==NULL||instr[strspn(instr," \t")]=='#')
                              {fseek(fin,pos,SEEK_SET);} // no ">" found --> do dipole approx
                              else          
                              {Vector Qvec(1,3);Qvec=0;ComplexVector Mq(1,3);
                               fseek(fin,pos+strchr(instr,'>')-instr+1,SEEK_SET); 
-                              j=inputline(fin,numbers);if(verbose)printf("dimension of mf = %i\n",j);
+                              j=inputline(fin,numbers,ob);if(verbose)printf("dimension of mf = %i\n",j);
                               if(j>maxmfcomponents){maxmfcomponents=j;}
                               if(j>mfields.nofcomponents){fprintf(stderr,"ERROR mcdiff: number of exchange field components too large (%i>%i) recompile with larger MAX_NOF_MF_COMPONENTS\n",j,mfields.nofcomponents);exit(EXIT_FAILURE);}
                               Vector gjmbHxc(1,j);for(k=1;k<=j;++k){gjmbHxc(k)=numbers[k];mfields.mf(1,1,1)(mfields.nofcomponents*(i-1)+k)=gjmbHxc(k);}

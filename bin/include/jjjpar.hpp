@@ -104,9 +104,10 @@ public:
    void saveG(FILE * file); // save coupling constants G
    void save_sipf(const char * path); //save single ion parameter file filename to path*
    void save_sipf(FILE *file); //save single ion parameter file filename to path*
+  void print_interaction(FILE * fout,int pi,int prl,int prh,int pcl,int pch); 
+                 //prints interaction tensor (rows prl-prh,columns pcl-pch) pi  to fout
 
-
-   jjjpar (FILE * fin, int nofcomp,int verbose=0); //constructor with filehandle of mcphas.j file
+   jjjpar (FILE * fin, int nofcomp,parser & ob, int verbose=0); //constructor with filehandle of mcphas.j file
    jjjpar (double x, double y, double z,char * sipffile,int n,int verbose=0); // constructor with filename of single ion parameter file
                // constructor with positions scattering length dwf
    jjjpar(double x,double y,double z, double slr,double sli, double dwf);
@@ -131,7 +132,7 @@ private:
   std::stringstream ss;
   Vector ABC;   // storage for single ion module paramters
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
-  void get_parameters_from_sipfile(char * sipffilename,int verbose); // function to read single ion parameter files
+  void get_parameters_from_sipfile(char * sipffilename,int verbose,parser & ob); // function to read single ion parameter files
   int  get_exchange_indices(char *instr, Matrix *exchangeindices,const char * ie);
 
 public:

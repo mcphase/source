@@ -13,7 +13,7 @@ INCLDIRS =      -I. \
 		-I/local/lib  \
 		-I/usr/X11R6/include
 
-VECOBJS= martin.o matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
+VECOBJS= martin.o mathparser.o matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
 		imatrix.o dvector.o dmatrix.o dmatmul.o cvector.o \
 		cmatrix.o cmatmul.o dludcomp.o dsvdcomp.o dortho.o \
 		cludcomp.o tred.o imtql.o imtql2.o rseigen.o cheigen.o \

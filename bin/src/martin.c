@@ -172,14 +172,60 @@ int setvar(char * instr,const char * parameter,int  var)
 {double vv=(double)var;return setvar(instr,parameter,vv);
 }
 
+// parse a #! line for variables (a-z)
+void parseline(char * instr, parser & ob)
+{char *token;
+ token=instr;
+  
+// check if line is comment line -> if yes return 1
+if (instr[strspn(instr," \t")]=='#') 
+ {if(instr[strspn(instr," \t#")]!='!') return ; //removed 26.5.02 in order to be able to place parameters in comment lines
+                                 // inserted again 27.8.09 to be able to have real comment lines ignored
+                                 // by mcphase - however "#!" will be treated as comment with variable to be read
+ else if(strstr (token, "="))
+ {// treat '#!... case with some variable defined
+  while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token))
+  {++token; // advance while nonalphabet character
+   if(*token=='#'){++token;if(*token!='!')return;}
+  }
+  ob.eval_exp(token); 
+  token=strstr (token, "=");
+  ++token;while(isspace(*token))++token;
+ }
+}
+else if(strstr (token, "="))
+{   // no comment line - treat first variable setting if present
+ while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token))
+  {++token; 
+   if(*token=='#'){++token;if(*token!='!')return;}
+  } // advance while nonalphabet character
+  ob.eval_exp(token); 
+  token=strstr (token, "=");
+  ++token;while(isspace(*token))++token;
+}
+while(strstr (token, "=")>strstr(token," ")&&strstr(token," ")) // treat other variables if present
+{//printf("%s\n",token);
+ token=strstr(token," "); // advance to next space
+ while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token)){++token; 
+   if(*token=='#'){++token;if(*token!='!')return;}
+  } // advance while nonalphabet character
+  ob.eval_exp(token); 
+ token=strstr (token, "=");++token;while(isspace(*token))++token;
+}
+
+}
+
 // ********************************************************************************************************
 // extract parameter 'parameter'  from string instr (z.B. "blabla dmin=0.2 blabla") -
 // output: var ... value of parameter
 // returns 1 on error and 0 if successful
 int extract(char * instr,const char * parameter,double & var)
+{parser ob; return extract(instr,parameter,var,ob);}
+
+int extract(char * instr,const char * parameter,double & var,parser & ob)
 { //const char delimiters[] = " =:\n";
   char *token,*td,*te;
-  
+  char expression[MAXNOFCHARSINLINE];
 // check if line is comment line -> if yes return 1
 if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1; //removed 26.5.02 in order to be able to place parameters in comment lines
                                  // inserted again 27.8.09 to be able to have real comment lines ignored
@@ -193,22 +239,28 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
  td=instr;while ((te=strstr(td,"#!"))!=NULL){td=te+1;} // skip all "#!" signs and
  if ((td=strchr(td,'#'))!=NULL){if(td<token) return 1;} // check if comment sign "#" appears before parameter - if yes return 1
  
-  //extract parameter  
+  //extract parameter
+  
   token+=strlen(parameter);
   if (strstr (token, "=")==NULL) return 1;  // no '=' found after parameter string
   while(strstr(token," ")==token||strstr(token,"\t")==token)++token;
   if (strstr(token,"=")!=token) return 1; // there are other characters than tab or spaces between parameter and =
-  ++token;
-  var = strtod (token, NULL);
+  ++token;snprintf(expression,MAXNOFCHARSINLINE,"%s=%s",parameter,token);
+//  var = strtod (token, NULL);
+  var=ob.eval_exp(expression);
   return 0;
 }
 
 // same for int and double 
 // extract a variable named [parmeter] into var out of a string [instr]
   int extract(char * instr,const char * parameter,int & var)
-      {double dd;if(0==extract(instr,parameter,dd)){var=(int)dd;return 0;}else{return 1;}}
+  {parser ob; return extract(instr,parameter,var,ob);}
+  int extract(char * instr,const char * parameter,int & var, parser & ob)
+      {double dd;if(0==extract(instr,parameter,dd,ob)){var=(int)dd;return 0;}else{return 1;}}
   int extract(char * instr,const char * parameter,float & var)
-      {double dd;if(0==extract(instr,parameter,dd)){var=(float)dd;return 0;}else{return 1;}}
+  {parser ob; return extract(instr,parameter,var,ob);}
+  int extract(char * instr,const char * parameter,float & var,parser & ob)
+      {double dd;if(0==extract(instr,parameter,dd,ob)){var=(float)dd;return 0;}else{return 1;}}
 
 
 //the same for a string ... maximal n characters are copied
@@ -260,17 +312,23 @@ if(te==NULL){n0=n;}else{n0=te-var;}
 
 // same for variable with prefix
 int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var)
+{parser ob; return extract_with_prefix(instr,prefix,parameter,var,ob);}
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,double & var,parser& ob)
 {if(0==extract(instr,parameter,var)){return 0;}
  else{char par[MAXNOFCHARINLINE];snprintf(par,MAXNOFCHARINLINE,"%s%s",prefix,parameter);  if(0==extract(instr,par,var)){return 0;}}
  return 1;
 }
 int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var)
+{parser ob; return extract_with_prefix(instr,prefix,parameter,var,ob);}
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,float & var,parser & ob)
 {if(0==extract(instr,parameter,var)){return 0;}
  else{char par[MAXNOFCHARINLINE];snprintf(par,MAXNOFCHARINLINE,"%s%s",prefix,parameter);  if(0==extract(instr,par,var)){return 0;}}
  return 1;
 }
 // same for int variable with prefix
 int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var)
+{parser ob; return extract_with_prefix(instr,prefix,parameter,var,ob);}
+int extract_with_prefix(char * instr,char * prefix, const char * parameter,int & var,parser & ob)
 {if(0==extract(instr,parameter,var)){return 0;}
  else{char par[MAXNOFCHARINLINE];snprintf(par,MAXNOFCHARINLINE,"%s%s",prefix,parameter);  if(0==extract(instr,par,var)){return 0;}}
  return 1;
@@ -338,9 +396,14 @@ return pointer;
 // number with an experimental error and stores the error in nnerr
 
 int splitstring (char * instr, float*nn)
-{return splitstring(instr,nn,NULL);}
+{parser ob; return splitstring(instr,nn,NULL,ob);}
+int splitstring (char * instr, float*nn, parser & ob)
+{return splitstring(instr,nn,NULL,ob);}
 
 int splitstring (char * instr, float*nn, float *nnerr)
+{parser ob; return splitstring(instr,nn,nnerr,ob);}
+
+int splitstring (char * instr, float*nn, float *nnerr,parser & ob)
 {char delimiters[] = " \n\t";
   char *token,*ebar;
   int i;
@@ -351,7 +414,7 @@ int splitstring (char * instr, float*nn, float *nnerr)
   while ((token=strchr(instr,'\r'))!=NULL){*token=' ';}
 
 // check if line is comment line -> if yes return 0
-  if (instr[strspn(instr," \t")]=='#') return 0;
+  if (instr[strspn(instr," \t")]=='#') {parseline(instr,ob);return 0;}
  
 
   //initialize token to first nonspace character
@@ -365,20 +428,28 @@ if(i>=(int)nn[0])
            exit (EXIT_FAILURE);
         }
     
-      nn[i] = strtod (token, NULL);
+//      nn[i] = strtod (token, NULL);
 if(nnerr!=NULL)
-  {if(i>=(int)nnerr[0])
+  {ebar=mystrnstr(token,"+-",strcspn(token,delimiters));
+   if (ebar!=NULL)*ebar=' ';
+   nn[i] = (float)ob.eval_exp(token);
+   if(i>=(int)nnerr[0])
         { fprintf (stderr, "Error in function inputline/splitstring: maximum value of errornumbers in line exceeded,more numbers in line (>%i) to be read.\n",i);
            exit (EXIT_FAILURE);
         }
  // try to catch errorbar if it exists
   nnerr[i]=0;
 
-  ebar=mystrnstr(token,"+-",strcspn(token,delimiters));
-  if (ebar!=NULL){nnerr[i] = strtod (ebar+2, NULL);}
-  } 
+  if (ebar!=NULL){*ebar='+';
+//nnerr[i] = strtod (ebar+2, NULL);
+nnerr[i] = (float)ob.eval_exp(ebar+2);
+
+}
+  }else
+      nn[i] = (float)ob.eval_exp(token);
+ // printf("i=%i token=%g %s\n",i,nn[i],token);
+ 
       token = mystrtok (token, delimiters);
- // printf("i=%i token=%g\n",i,nn[i]);
     }
   }        
 //  printf("i=%i token=%g\n",i,nn[i]);
@@ -395,10 +466,17 @@ if(nnerr!=NULL)
 //         n .... number of numbers read
 // if called with nnerr the function looks for expressions such as 3.5+-0.2 indicating a
 // number with an experimental error and stores the error in nnerr
+int inputline (FILE * fin_coq, float *nn,parser & ob)
+{return inputline(fin_coq,nn,NULL,ob);
+}
 int inputline (FILE * fin_coq, float *nn)
-{return inputline(fin_coq,nn,NULL);
+{parser ob; return inputline(fin_coq,nn,NULL,ob);
 }
 int inputline (FILE * fin_coq, float *nn, float *nnerr)
+{parser ob; return inputline(fin_coq,nn,nnerr,ob);
+}
+
+int inputline (FILE * fin_coq, float *nn, float *nnerr,parser & ob)
 { char instr[maxnofcharinline];
   
   if (fgets (instr, sizeof (instr), fin_coq) == NULL)
@@ -409,7 +487,7 @@ int inputline (FILE * fin_coq, float *nn, float *nnerr)
       exit (EXIT_FAILURE);
      }
  
- return splitstring(instr,nn, nnerr);
+ return splitstring(instr,nn, nnerr,ob);
 }
 
 // function to input a line of numbers separated by delimiters

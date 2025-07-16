@@ -396,7 +396,7 @@ savmf.calc_prim_mag_unitcell(p,cs.abc,cs.r);
   if (strncmp(argv[1],"-f",2)==0) 
  { inputpars.savelattice(fout);
    fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-   fprintf(fout,"#! strain tensor: eps1=%4.4g=epsii eps2=%4.4g=epsjj eps3=%4.4g=epskk eps4=%4.4g=2epsjk eps5=%4.4g=2epsik eps6=%4.4g=2epsij\n",
+   fprintf(fout,"#! strain tensor: eps1=%4.4g (epsii) eps2=%4.4g (epsjj) eps3=%4.4g (epskk) eps4=%4.4g (2epsjk) eps5=%4.4g (2epsik) eps6=%4.4g (2epsij)\n",
     myround(savmf.epsilon(1)),myround(savmf.epsilon(2)),myround(savmf.epsilon(3)),myround(savmf.epsilon(4)),myround(savmf.epsilon(5)),myround(savmf.epsilon(6)));
 
   fprintf(fout,"#! %s \n",outstr);
@@ -482,8 +482,8 @@ gp.read();
   spincf sc_phonon(savmf.na(),savmf.nb(),savmf.nc(),ii,3);
 
 fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
-   fprintf(fout,"#! strain tensor: eps1=%4.4g=epsii eps2=%4.4g=epsjj eps3=%4.4g=epskk eps4=%4.4g=2epsjk eps5=%4.4g=2epsik eps6=%4.4g=2epsij\n",
-    myround(savmf.epsilon(1)),myround(savmf.epsilon(2)),myround(savmf.epsilon(3)),myround(savmf.epsilon(4)),myround(savmf.epsilon(5)),myround(savmf.epsilon(6)));
+   fprintf(fout,"#! strain tensor: eps1=%4.4g (epsii) eps2=%4.4g (epsjj) eps3=%4.4g (epskk) eps4=%4.4g (2epsjk) eps5=%4.4g (2epsik) eps6=%4.4g (2epsij)\n",
+       myround(savmf.epsilon(1)),myround(savmf.epsilon(2)),myround(savmf.epsilon(3)),myround(savmf.epsilon(4)),myround(savmf.epsilon(5)),myround(savmf.epsilon(6)));
 
 if (strncmp(argv[1],"-t",2)!=0){
 // the following is for the printout of spins.out ...........................

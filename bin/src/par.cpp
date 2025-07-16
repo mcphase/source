@@ -35,9 +35,9 @@ par::par (const char *filejjj,int verbose)
   rez=Matrix(1,3,1,3);
   Cel=Matrix(1,6,1,6);Cel=0;CelInv=Matrix(1,6,1,6);CelInv=0;
   fin_coq = fopen_errchk (filejjj, "rb");
-
+  parser ob;
  // input file header ------------------------------------------------------------------
-  fgets (instr, MAXNOFCHARINLINE, fin_coq);
+  fgets (instr, MAXNOFCHARINLINE, fin_coq);parseline(instr,ob);
   instr[0]='#';
    // inserted 12.11.07 in order to format output correctly (characterstring 13 spoiled output string)
    for(i=0;(unsigned int)i<=strlen(instr);++i){if(instr[i]==13)instr[i]=32;}
@@ -46,8 +46,8 @@ par::par (const char *filejjj,int verbose)
   cs.nofatoms=0;
   instr[0]='#';
  while (cs.nofatoms==0||(strstr(instr,"*******")==NULL&&instr[strspn(instr," \t")]=='#')) 
-  {fgets(instr,MAXNOFCHARINLINE,fin_coq);
-   cs.cextract(instr);
+  {fgets(instr,MAXNOFCHARINLINE,fin_coq);parseline(instr,ob);
+   cs.cextract(instr,ob);
     // read optional elastic constants        
   char Celstr[6];
    for(i=1;i<=6;++i)for(j=1;j<=6;++j){
@@ -72,7 +72,7 @@ par::par (const char *filejjj,int verbose)
   //gJ=Vector(1,cs.nofatoms);
   for(i=1;i<=cs.nofatoms;++i)  
   {//printf("creating atom %i (of %i)...\n",i,cs.nofatoms);
-   jjj[i]=new jjjpar(fin_coq,cs.nofcomponents,verbose);
+   jjj[i]=new jjjpar(fin_coq,cs.nofcomponents,ob,verbose);
    if(jjj[i]==NULL){ fprintf (stderr, "Out of memory creating atoms jjjpar by constructor\n");exit (EXIT_FAILURE);}
    //gJ(i)=(*jjj[i]).gJ;
    cs.sipffilenames[i]=(*jjj[i]).sipffilename;
@@ -416,6 +416,13 @@ void par::save (FILE * file,int noindexchange)
     fprintf(file,"#*********************************************************************\n");
   }
  
+}
+
+void par::print_interaction(FILE * fout,int pa,int pi,int prl,int prh,int pcl,int pch)
+{if (pa>cs.nofatoms){fprintf(stderr,"Error addj: option -pi atom index %i > nofatoms =%i\n",pa,cs.nofatoms);exit(EXIT_FAILURE);}
+ fprintf(fout,"# Interaction tensor of atom number %i at (%g a, %g b, %g c), sipf file %s\n",pa,(*jjj[pa]).xyz(1),(*jjj[pa]).xyz(2),(*jjj[pa]).xyz(3),cs.sipffilenames[pa]);
+(*jjj[pa]).print_interaction(fout,pi,prl,prh,pcl,pch);
+
 }
 void par::savelattice (FILE *file)
 { 

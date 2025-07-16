@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <mpspecfunp.h>
 #include <mcdisp.h>
+#include <mathparser.hpp>
 
 #define IONPARS_MAXNOFCOMPONENTS 54
 // standard operator sequence I1,....,I54
@@ -98,7 +99,7 @@ class ionpars
    void save(FILE * file); // save ion parameters to file 
 
    ionpars(int dimj);
-   ionpars(FILE * cf_file, char * cffilename,int verbose);
+   ionpars(FILE * cf_file, char * cffilename,int verbose,parser & ob);
    ionpars (char * iontype); // constructor from iontype (mind:no matrices filled with values !)
    ~ionpars();
    ionpars(const ionpars & p);

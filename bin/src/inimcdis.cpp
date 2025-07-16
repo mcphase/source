@@ -367,22 +367,22 @@ void inimcdis::read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_
 //                      extract_with_prefix for the new match
 //                      if it cannot be found return extract(instr,parameter)
 // findnewmatch = false: return extract_with_prefix for the prefix=lofpref[n], i.e. prefix+var has to be found to return 0
-int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var)
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var,parser & ob)
 {int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
 ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
-if(ret==0)var=atoi(val);
+if(ret==0){var=(int)ob.eval_exp(val);}
 return ret;
 }
-int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,float & var)
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,float & var,parser & ob)
 {int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
 ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
-if(ret==0)var=strtof(val,NULL);
+if(ret==0)var=(float)ob.eval_exp(val);
 return ret;
 }
-int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,double & var)
+int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,double & var,parser & ob)
 {int ret; size_t s=MAXNOFCHARINLINE;char val[MAXNOFCHARINLINE];
 ret=extract_match(findnewmatch,  n,lofpref ,instr,pref,  parameter, val,s,1);
-if(ret==0)var=strtod(val,NULL);
+if(ret==0)var=ob.eval_exp(val);
 return ret;
 }
 int inimcdis::extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int m)
@@ -430,7 +430,7 @@ int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int 
 { bool findnewmatch=true;if(nofinis==-1){findnewmatch=false;}
    errno=1;do_jqf=do_jqfile;nofthreads=0;outcolset=false;
   char instr[MAXNOFCHARINLINE],hklfile[MAXNOFCHARINLINE],hklline[MAXNOFCHARINLINE],somestring[MAXNOFCHARINLINE];
-  int nofhkllists=1;
+  int nofhkllists=1; parser ob;
   Hext=0; Habc=0;Eabc=0;
   FILE *fin,*finhkl;float N,M,h0,k0,l0,h1,k1,l1,hN,kN,lN,hM,kM,lM;
    strcpy(prefix,pref); // set prefix
@@ -445,25 +445,26 @@ int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int 
  T=300; Hext=0;nofatoms=nofat;nofcomponents=nofcomp;
 }else {instr[0]='#';  instr[1]='\0';
   while(instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!'){fgets(instr,MAXNOFCHARINLINE,fin);}
-  extract(instr,"T",T); 
-  extract(instr,"Ha",Habc[1]); 
-  extract(instr,"Hb",Habc[2]);
-  extract(instr,"Hc",Habc[3]); 
-  extract(instr,"Ea",Eabc[1]); 
-  extract(instr,"Eb",Eabc[2]);
-  extract(instr,"Ec",Eabc[3]); 
-  extract(instr,"Hi",Hext[1]); 
-  extract(instr,"Hj",Hext[2]);
-  extract(instr,"Hk",Hext[3]); 
-  extract(instr,"Ei",Hext[4]); 
-  extract(instr,"Ej",Hext[5]);
-  extract(instr,"Ek",Hext[6]); 
-  extract(instr,"s1",Hext[7]); 
-  extract(instr,"s2",Hext[8]);
-  extract(instr,"s3",Hext[9]); 
-  extract(instr,"s4",Hext[10]); 
-  extract(instr,"s5",Hext[11]);
-  extract(instr,"s6",Hext[12]); 
+  parseline(instr,ob);
+  extract(instr,"T",T,ob); 
+  extract(instr,"Ha",Habc[1],ob); 
+  extract(instr,"Hb",Habc[2],ob);
+  extract(instr,"Hc",Habc[3],ob); 
+  extract(instr,"Ea",Eabc[1],ob); 
+  extract(instr,"Eb",Eabc[2],ob);
+  extract(instr,"Ec",Eabc[3],ob); 
+  extract(instr,"Hi",Hext[1],ob); 
+  extract(instr,"Hj",Hext[2],ob);
+  extract(instr,"Hk",Hext[3],ob); 
+  extract(instr,"Ei",Hext[4],ob); 
+  extract(instr,"Ej",Hext[5],ob);
+  extract(instr,"Ek",Hext[6],ob); 
+  extract(instr,"s1",Hext[7],ob); 
+  extract(instr,"s2",Hext[8],ob);
+  extract(instr,"s3",Hext[9],ob); 
+  extract(instr,"s4",Hext[10],ob); 
+  extract(instr,"s5",Hext[11],ob);
+  extract(instr,"s6",Hext[12],ob); 
   
   crosscheck_H_E(Hext,Habc,Eabc,abc); 
 
@@ -471,8 +472,8 @@ int inimcdis::load (int & nofinis,char**lofpref,char * spinfile,char * pref,int 
   
   
   
-  extract(instr,"nofatoms",nofatoms); 
-  extract(instr,"nofcomponents",nofcomponents); 
+  extract(instr,"nofatoms",nofatoms,ob); 
+  extract(instr,"nofcomponents",nofcomponents,ob); 
   if(nofcomponents!=nofcomp){fprintf(stderr,"ERROR loading mean field configuration nofcomponents from mcphas.j (%i) different from file %s (%i)\n",nofcomp,spinfile,nofcomponents);exit(EXIT_FAILURE);}
   if(nofatoms!=nofat){fprintf(stderr,"ERROR loading mean field configuration nofatoms from mcphas.j (%i) different from file %s (%i)\n",nofat,spinfile,nofatoms);exit(EXIT_FAILURE);}
   if(mf.load(fin)==0)
@@ -507,45 +508,45 @@ if (fin==NULL) { return 1;
 {   
   while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
   {++i; // i is used to estimate an upper boundary for the number of hkls in the hkl list 
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"emin",emin); 
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"emax",emax); 
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ki",ki); 
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kf",kf); 
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_magmoment_oscillation",calculate_magmoment_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_spinmoment_oscillation",calculate_spinmoment_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_orbmoment_oscillation",calculate_orbmoment_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_chargedensity_oscillation",calculate_chargedensity_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_spindensity_oscillation",calculate_spindensity_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_pel_oscillation",calculate_pel_oscillation);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"outS",outS);
-     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofthreads",nofthreads);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"emin",emin,ob); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"emax",emax,ob); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"ki",ki,ob); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kf",kf,ob); 
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_magmoment_oscillation",calculate_magmoment_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_spinmoment_oscillation",calculate_spinmoment_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_orbmoment_oscillation",calculate_orbmoment_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_chargedensity_oscillation",calculate_chargedensity_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_spindensity_oscillation",calculate_spindensity_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_orbmomdensity_oscillation",calculate_orbmomdensity_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_phonon_oscillation",calculate_phonon_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"calculate_pel_oscillation",calculate_pel_oscillation,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"outS",outS,ob);
+     extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"nofthreads",nofthreads,ob);
      for(int j=1;j<=usrdefcols[0];++j) // extract user defined output columns
      {snprintf(somestring,MAXNOFCHARINLINE,"out%i",usrdefcols[j]);
-      if(0==extract_match( findnewmatch,nofinis,lofpref,instr,prefix, somestring,colcod[usrdefcols[j]]))outcolset=true;
+      if(0==extract_match( findnewmatch,nofinis,lofpref,instr,prefix, somestring,colcod[usrdefcols[j]],ob))outcolset=true;
     }
 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmax",qmax[1]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmax",qmax[2]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmax",qmax[3]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltah",deltaq[1]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltak",deltaq[2]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltal",deltaq[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmax",qmax[1],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmax",qmax[2],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmax",qmax[3],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltah",deltaq[1],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltak",deltaq[2],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltal",deltaq[3],ob); 
      if(hklblock==9){++nofhkllists;hklblock=0;i+=(int)ceil(fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1));}
 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmin",qmin[1]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymin",qmin[2]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmin",qmin[3]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmax",qmax[1]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymax",qmax[2]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmax",qmax[3]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQx",deltaq[1]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQy",deltaq[2]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQz",deltaq[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmin",qmin[1],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymin",qmin[2],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmin",qmin[3],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmax",qmax[1],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymax",qmax[2],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmax",qmax[3],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQx",deltaq[1],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQy",deltaq[2],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQz",deltaq[3],ob); 
      if(QxQyQzblock==9){++nofhkllists;QxQyQzblock=0;i+=(int)ceil(fabs((qmax(1)-qmin(1))/deltaq(1)+1)*fabs((qmax(2)-qmin(2))/deltaq(2)+1)*fabs((qmax(3)-qmin(3))/deltaq(3)+1));}
 
      if(!extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hklfile",hklfile,MAXNOFCHARINLINE-1,1))
@@ -618,15 +619,15 @@ if (fin==NULL) { return 1;
   fin = fopen(parfile, "rb"); // if in mcdisp.par we find a hklfile= ... insert hkl from this file into list
             while (fgets(instr,MAXNOFCHARINLINE,fin)!=NULL)
                {// treat hklblocks
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmax",qmax[1]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmax",qmax[2]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmax",qmax[3]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltah",deltaq[1]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltak",deltaq[2]); 
-     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltal",deltaq[3]); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmin",qmin[1],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmin",qmin[2],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmin",qmin[3],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"hmax",qmax[1],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"kmax",qmax[2],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"lmax",qmax[3],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltah",deltaq[1],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltak",deltaq[2],ob); 
+     hklblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltal",deltaq[3],ob); 
      if(hklblock==9){++nofhkllists;hklblock=0;hklfile_start_index[nofhkllists]=nofhkls+1;
                     printf("# ... hklblock hklmin(%g %g %g) to hklmax(%g %g %g) with hklstepsize (%g %g %g)\n",qmin(1),qmin(2),qmin(3),qmax(1),qmax(2),qmax(3),deltaq(1),deltaq(2),deltaq(3));
                    for(h1=qmin(1);h1<=qmax(1);h1+=deltaq(1))
@@ -640,15 +641,15 @@ if (fin==NULL) { return 1;
                                     }
                     }
 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmin",qmin[1]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymin",qmin[2]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmin",qmin[3]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmax",qmax[1]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymax",qmax[2]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmax",qmax[3]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQx",deltaq[1]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQy",deltaq[2]); 
-     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQz",deltaq[3]); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmin",qmin[1],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymin",qmin[2],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmin",qmin[3],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qxmax",qmax[1],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qymax",qmax[2],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"Qzmax",qmax[3],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQx",deltaq[1],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQy",deltaq[2],ob); 
+     QxQyQzblock+=1-extract_match( findnewmatch,nofinis,lofpref,instr,prefix,"deltaQz",deltaq[3],ob); 
      if(QxQyQzblock==9){++nofhkllists;hklblock=0;hklfile_start_index[nofhkllists]=nofhkls+1;
                     printf("# ... hklblock hklmin(%g %g %g) to hklmax(%g %g %g) with hklstepsize (%g %g %g)\n",qmin(1),qmin(2),qmin(3),qmax(1),qmax(2),qmax(3),deltaq(1),deltaq(2),deltaq(3));
                    for(qijk(1)=qmin(1);qijk(1)<=qmax(1);qijk(1)+=deltaq(1))
@@ -795,7 +796,7 @@ inimcdis::inimcdis(const char * file,char * pref,char * spinfile,
                    int & nofcomp,int & nofat)
 {hkls=NULL;hklfile_start_index=NULL;Hext=Vector(1,HEXT_DIMENSION);Habc=Vector(1,3);Eabc=Vector(1,3);
  qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);mf=mfcf(1,1,1,nofat,nofcomp);
-  parfile= new char [MAXNOFCHARINLINE];
+  parfile= new char [MAXNOFCHARINLINE]; 
   snprintf(parfile,MAXNOFCHARINLINE,"%s%s",pref,file);
  info= new char [MAXNOFCHARINLINE];
   prefix = new char[MAXNOFCHARINLINE];

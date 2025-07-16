@@ -96,15 +96,19 @@ community this program would not have come into existence.
 \item    External Stress / Pressure
 \item    Electric Field and orientational Polarisation
 \item    Monte Carlo Metropolis algorithm
+\item    input files can contain variables and expressions such as Dz2=sqrt(2)*Dx2
 \item    {\prg McPhaseExplorer} Button for opening the Manual  
 \item    {\prg mcphas.ini}: flexible user defined output columns can be defined,
-          Magnetic and Electric Field can be input in euclidean coordinates or as components along crystal axis
+          Magnetic and Electric Field can be input in euclidean coordinates or as components along crystal axis,
+          parameter repeat to control action if no convergence is achieved in mean field loop
 \item    {\prg cif2mcphas} atomic coordinates may contain references to previous atoms x y z, e.g. O1x
 \item    {\prg ic1ion} operators -  bug removed for imaginary Tkq (i.e. q<2) in expectation value calc in ic1ion 5.6 
 \item    {\prg reduce\_unitcell} extended: for negative coefficient (+--) the sipf files will be overwritten
          with CHARGE replaced by distributed charge - useful for problems with electric polarisation calculations
 \item    {\prg mcdisp} output files:  qom dsigma disgma.tot file have different format now (number of columns increased by one)
 \item   {\prg singleion} options  introduced for dynamical static susceptibility and INS scattering function
+\item   {\prg makenn}: new options -rkkynest -djdeps1-6
+\item    {\prg display}: option -vlines -hlines for vertical and horizontal guide to the eye lines
 \item    {\prg mctest} - to test correct function of McPhase, cd  demo  and type {\prg mctest test*.bat }
 \end{itemize}
 

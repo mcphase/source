@@ -65,11 +65,12 @@ have to calculate the transition matrix elements:
 The single ion susceptibility for such a transition, e.g. $\Delta_1$ - corresponds to
 
 \begin{eqnarray}
-\m{\chi}^0&=&\sum_{\nu\mu}\frac{\langle \nu|\hat \mbf u|\mu\rangle\langle \mu |\hat \mbf u^T|\nu \rangle}{\Delta_1 -\hbar \omega}
+\m{\chi}^0&=&\sum_{\nu\mu}\frac{\langle \nu|\hat \mbf u-\hat \mbf u_0|\mu\rangle\langle \mu |\hat \mbf u^T-\hat \mbf u_0^T|\nu \rangle}{\Delta_1 -\hbar \omega}
 (p_{\nu} -p_{\mu}) \\
 &=&\sum_{\nu\mu}\frac{\langle \nu|\m{S}^T \hat \mbf u'|\mu\rangle\langle \mu |\hat \mbf u'^T \m{S}|\nu \rangle}{\Delta_1 -\hbar \omega}
 (p_{\nu} -p_{\mu}) 
 \end{eqnarray}
+
 Because the different components of $\mbf u'$ commute and the Hamiltonian (\ref{phonsihamdiag})
 is separable, for the transition $\Delta_1$ only the terms with $u_1'$ in the nominator
 contribute:

@@ -31,34 +31,38 @@ double alpha(){return abc(4);}
 double beta(){return abc(5);}
 double gamma(){return abc(6);}
 
-void cextract(char * instr)
-{  if(abc(1)==0)extract(instr, "a", abc(1));
-   if(abc(2)==0)extract(instr, "b", abc(2));
-   if(abc(3)==0)extract(instr, "c", abc(3));
-   if(abc(4)==90)extract(instr, "alpha", abc(4));
-   if(abc(5)==90)extract(instr, "beta", abc(5));
-   if(abc(6)==90)extract(instr, "gamma", abc(6));
-    extract(instr, "r1x", r(1,1));
-    extract(instr, "r1y", r(2,1));
-    extract(instr, "r1z", r(3,1));
-    extract(instr, "r2x", r(1,2));
-    extract(instr, "r2y", r(2,2));
-    extract(instr, "r2z", r(3,2));
-    extract(instr, "r3x", r(1,3));
-    extract(instr, "r3y", r(2,3));
-    extract(instr, "r3z", r(3,3));
-    extract(instr, "r1a", r(1,1));
-    extract(instr, "r1b", r(2,1));
-    extract(instr, "r1c", r(3,1));
-    extract(instr, "r2a", r(1,2));
-    extract(instr, "r2b", r(2,2));
-    extract(instr, "r2c", r(3,2));
-    extract(instr, "r3a", r(1,3));
-    extract(instr, "r3b", r(2,3));
-    extract(instr, "r3c", r(3,3));
+
+void cextract(char * instr,parser & ob)
+{ 
+  if(abc(1)==0)extract(instr, "a", abc(1),ob);
+   if(abc(2)==0)extract(instr, "b", abc(2),ob);
+   if(abc(3)==0)extract(instr, "c", abc(3),ob);
+   if(abc(4)==90)extract(instr, "alpha", abc(4),ob);
+   if(abc(5)==90)extract(instr, "beta", abc(5),ob);
+   if(abc(6)==90)extract(instr, "gamma", abc(6),ob);
+    extract(instr, "r1x", r(1,1),ob);
+    extract(instr, "r1y", r(2,1),ob);
+    extract(instr, "r1z", r(3,1),ob);
+    extract(instr, "r2x", r(1,2),ob);
+    extract(instr, "r2y", r(2,2),ob);
+    extract(instr, "r2z", r(3,2),ob);
+    extract(instr, "r3x", r(1,3),ob);
+    extract(instr, "r3y", r(2,3),ob);
+    extract(instr, "r3z", r(3,3),ob);
+    extract(instr, "r1a", r(1,1),ob);
+    extract(instr, "r1b", r(2,1),ob);
+    extract(instr, "r1c", r(3,1),ob);
+    extract(instr, "r2a", r(1,2),ob);
+    extract(instr, "r2b", r(2,2),ob);
+    extract(instr, "r2c", r(3,2),ob);
+    extract(instr, "r3a", r(1,3),ob);
+    extract(instr, "r3b", r(2,3),ob);
+    extract(instr, "r3c", r(3,3),ob);
  
 }
 
+void cextract(char * instr)
+{parser ob; cextract(instr,ob);}
  // Volume of primitive unit cell in Angstroem^3
 double pVol()
 {

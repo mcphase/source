@@ -115,9 +115,15 @@ to experimental data (see section~\ref{simannfit}).
 # instead of the Stevens parameters Blm 
 # second order crystal field parameters Dx^2 Dy^2 and Dz^2 can be entered in meV
 # - this corresponds to the Hamiltonian H=+Dx2 Jx^2+Dy2 Jy^2+Dz2 Jz^2
+# - variables and simple expressions can be used  such as for Dz2 shown below
+#        supported math functions : sin, cos, tan, asin, acos, atan, sinh, 
+#        cosh, tanh, asinh, acosh, atanh, ln, log, exp, sqrt, sqr, round, int.
+#        (to check if input is correctly read look in output files starting 
+#         with results/_  , e.g. results/_Nd3p.sipf )
+
 Dx2=0.1
 Dy2=0
-Dz2=0.4
+Dz2=4*Dx2
 \end{verbatim}
 
 \begin{enumerate} 

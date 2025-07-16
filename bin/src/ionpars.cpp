@@ -93,7 +93,7 @@ ionpars::~ionpars(){
    delete[] In; 
  } //destructor
 
-ionpars::ionpars(FILE * cf_file, char * cffilename,int verbose) 
+ionpars::ionpars(FILE * cf_file, char * cffilename,int verbose,parser & ob) 
 //constructor with commands from file handle (filename of cf parameters etc)
 // MIND: this code has to be kept consistent with the code in cf1ion_module/eingabe.c (function read_new_format())
 // ( reason: the stand alone c-progams so1ion, cfield should be consistent with the c++ programs
@@ -134,32 +134,33 @@ int perlp=1;//by default try perlparse
 // read in lines and get IONTYPE=  and CF parameters Blm
    while(feof(cf_file)==false)
   {fgets(instr, MAXNOFCHARINLINE, cf_file);
+  parseline(instr,ob);
           // in IONTYPE line there is no #!perl ... do not perlparse
         if(!extract(instr,"IONTYPE",iontype,(size_t)MAXNOFCHARINLINE,1)&&strstr (instr,"#!perl")==NULL)perlp=0;
-        inof+=1-extract(instr,"nof_electrons",nof_electrons); //MR 120127
+        inof+=1-extract(instr,"nof_electrons",nof_electrons,ob); //MR 120127
         kq3[0]='B';for(int i=0;i<=45;++i){strncpy(kq3+1,kq+i*3,3);if(kq3[3]==' ')kq3[3]='\0';
-                                          extract(instr,kq3,Blm(i));}
-        extract(instr,"Dx2",Blm(46));
-        extract(instr,"Dy2",Blm(47));
-        extract(instr,"Dz2",Blm(48));
-        extract(instr,"Dx4",Blm(49));
-        extract(instr,"Dy4",Blm(50));
-        extract(instr,"Dz4",Blm(51));
+                                          extract(instr,kq3,Blm(i),ob);}
+        extract(instr,"Dx2",Blm(46),ob);
+        extract(instr,"Dy2",Blm(47),ob);
+        extract(instr,"Dz2",Blm(48),ob);
+        extract(instr,"Dx4",Blm(49),ob);
+        extract(instr,"Dy4",Blm(50),ob);
+        extract(instr,"Dz4",Blm(51),ob);
         kq3[0]='L';for(int i=0;i<=45;++i){strncpy(kq3+1,kq+i*3,3);if(kq3[3]==' ')kq3[3]='\0';        
-                                          extract(instr,kq3,Llm(i));}
-        ialpha+=1-extract(instr,"ALPHA",alpha);
-        ibeta+=1-extract(instr,"BETA",beta);
-        igamma+=1-extract(instr,"GAMMA",gamma);
-        igj+=1-extract(instr,"GJ",gJ);       
-        ir2+=1-extract(instr,"R2",r2);
-        ir4+=1-extract(instr,"R4",r4);
-        ir6+=1-extract(instr,"R6",r6);
-        extract(instr,"SIGMA0r",s0r);
-        extract(instr,"SIGMA1r",s1r);
-        extract(instr,"SIGMA2r",s2r);
-        extract(instr,"SIGMA0i",s0i);
-        extract(instr,"SIGMA1i",s1i);
-        extract(instr,"SIGMA2i",s2i);
+                                          extract(instr,kq3,Llm(i),ob);}
+        ialpha+=1-extract(instr,"ALPHA",alpha,ob);
+        ibeta+=1-extract(instr,"BETA",beta,ob);
+        igamma+=1-extract(instr,"GAMMA",gamma,ob);
+        igj+=1-extract(instr,"GJ",gJ,ob);       
+        ir2+=1-extract(instr,"R2",r2,ob);
+        ir4+=1-extract(instr,"R4",r4,ob);
+        ir6+=1-extract(instr,"R6",r6,ob);
+        extract(instr,"SIGMA0r",s0r,ob);
+        extract(instr,"SIGMA1r",s1r,ob);
+        extract(instr,"SIGMA2r",s2r,ob);
+        extract(instr,"SIGMA0i",s0i,ob);
+        extract(instr,"SIGMA1i",s1i,ob);
+        extract(instr,"SIGMA2i",s2i,ob);
  } //fclose(cf_file);
  fseek(cf_file,0,SEEK_SET);
 
