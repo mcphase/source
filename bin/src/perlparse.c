@@ -121,6 +121,8 @@ if(system(command)){fprintf(stderr,"Error parsing sipffile through perl\n");retu
                                             {if(myReadComplexMatrix (fin, (*operators[i]))==false)
                                               {fprintf(stderr,"Error parsing sipffile through perl - reading matrix from output\n");return false; }
                                              }
+
+
     }
                      }
  fclose(fin); 
@@ -207,7 +209,7 @@ int myparse(char*sipffilename
               ,int **sq2, double **csn, char **statements, int *iocs, int* oes)
 {FILE * fin; 
  char  instr[MAXNOFCHARINLINE];
- printf("# using noperl parsing\n");
+ fprintf(stderr,"# using noperl parsing\n");
  fin=fopen(sipffilename,"rb");
 
  char line[MAXNOFCHARINLINE], *t0, *t1, *t2, *tokvar, *tokeq, *tokop, statement[MAXNOFCHARINLINE], *varpos[99], *oppos[99];
@@ -537,7 +539,7 @@ int myparse(char*sipffilename
               ,int **sq2, double **csn, char **statements, int *iocs, int* oes)
 {FILE * fin; 
  char  instr[MAXNOFCHARINLINE];
- printf("# using noperl parsing\n");
+ fprintf(stderr,"# using noperl parsing\n");
  fin=fopen(sipffilename,"rb");
 
  char line[MAXNOFCHARINLINE], *t0, *t1, *t2, *tokvar, *tokeq, *tokop, statement[MAXNOFCHARINLINE], *varpos[99], *oppos[99];
@@ -706,7 +708,7 @@ int myparse_execute(ComplexMatrix **operators, char **operatornames, int *seq2, 
     ComplexMatrix dummy, dummy2;
 
        // Prints out what we think the input should be for debugging purposes
-       printf("%s\t==>\t",statement);
+       fprintf(stderr,"# %s\t==>\t",statement);
   //  printf("%s\t[[",statement); for(int ii=0; seq2[ii]!=0; ii++) printf("%i ",seq2[ii]); printf("]]\n");
 
        // Now do the matrix manipulations, do the first operation outside the loop
@@ -728,11 +730,11 @@ int myparse_execute(ComplexMatrix **operators, char **operatornames, int *seq2, 
           } i0 = 5; }
           switch(*t0) {
              case '+': if(seq2[1]!=3) { fprintf(stderr,sterr,statement); return false; }
-                (*operators[seq2[0]]) += dummy; printf(" op(%i)[%s] += %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
+                (*operators[seq2[0]]) += dummy; fprintf(stderr," op(%i)[%s] += %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
              case '-': if(seq2[1]!=4) { fprintf(stderr,sterr,statement); return false; }
-                (*operators[seq2[0]]) -= dummy; printf(" op(%i)[%s] -= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
+                (*operators[seq2[0]]) -= dummy; fprintf(stderr," op(%i)[%s] -= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
              case '*': if(seq2[1]!=7) { fprintf(stderr,sterr,statement); return false; }
-                                                printf(" op(%i)[%s] *= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
+                                                fprintf(stderr," op(%i)[%s] *= %s ",seq2[0],operatornames[seq2[0]],dummystr); break;
                 dummy2 = (*operators[seq2[0]]) * dummy; (*operators[seq2[0]]) = dummy2;
           }
        }
@@ -749,7 +751,7 @@ int myparse_execute(ComplexMatrix **operators, char **operatornames, int *seq2, 
                 break;
              default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
           } i0 = 4; }
-          printf(" op(%i)[%s] = %s ",seq2[0],operatornames[seq2[0]],dummystr);
+          fprintf(stderr," op(%i)[%s] = %s ",seq2[0],operatornames[seq2[0]],dummystr);
        }
       int pm;
        while(seq2[i0]!=0) {
@@ -770,10 +772,10 @@ int myparse_execute(ComplexMatrix **operators, char **operatornames, int *seq2, 
                 break;
              default: fprintf(stderr,"Error carrying out matrix operations in statement: %s\n",statement); return false; 
           }
-          printf(" %c %s ",(pm==3?'+':'-'),dummystr);
+          fprintf(stderr," %c %s ",(pm==3?'+':'-'),dummystr);
           if(pm==3) (*operators[seq2[0]]) += dummy; else (*operators[seq2[0]]) -= dummy;
        }
-       printf("\n");
+       fprintf(stderr,"\n");
   return true;
 }
 

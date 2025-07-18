@@ -12,7 +12,7 @@
 
 #define UNUSED_PARAMETER(a) (void)a
 
-// use cfield as a module loaded at runtime
+// use so1ion as a module loaded at runtime
 
 extern "C" void cfield0_mcphas(double ** hcfr,double ** hcfi, double ** Jxr,double ** Jxi,  double ** Jyr, double ** Jyi, double ** Jzr, double ** Jzi,
                               double ** mo20r, double ** mo20i,
@@ -243,15 +243,15 @@ module_ionpars::module_ionpars(const char * text) //constructor
    delete []mo66r;delete []mo66i;
 
 //ATTENTION FOR NDCU2 the AXES xyz are parallel to cab
-Matrix dummy(1,dimj,1,dimj);
+/* Matrix dummy(1,dimj,1,dimj);
 dummy=Jb;Jb=Jc;Jc=Ja;Ja=dummy;
 ComplexMatrix dummyc(1,dimj,1,dimj);
 dummyc=Jbb;Jbb=Jcc;Jcc=Jaa;Jaa=dummyc;
-
+*/ // removed 17.7.2025 --> to create so1ion.so instead of cfield.so
 
 }
 
-module_ionpars iops("#ATTENTION in module cfield.so the AXES xyz are parallel to cab\n#The higher order interactions are described by the  PKQ Operators defined in cfield:\n#O20(c) .... Jd\n#O22(c) .... Je\n#O40(c) .... Jf\n#O42(c) .... Jg\n#O44(c) .... Jh\n#O60(c) .... Ji\n#O62(c) .... Jj\n#O64(c) .... Jk\n#O66(c) .... Jl\n");  // get 1ion parameters - operator matrices
+module_ionpars iops("#ATTENTION in module so1ion.so the AXES xyz are parallel to abc\n#The higher order interactions are described by the  PKQ Operators defined in so1ion:\n#O20(c) .... Jd\n#O22(c) .... Je\n#O40(c) .... Jf\n#O42(c) .... Jg\n#O44(c) .... Jh\n#O60(c) .... Ji\n#O62(c) .... Jj\n#O64(c) .... Jk\n#O66(c) .... Jl\n");  // get 1ion parameters - operator matrices
 
 
 #ifdef __declspec
@@ -283,7 +283,7 @@ gjmbH(3)+=(*g_J)*MU_B*Hext(3);
 
 // check dimensions of vector
 if(J.Hi()>12||gjmbH.Hi()>12)
-   {fprintf(stderr,"Error loadable module cfield.so: wrong number of dimensions - check number of columns in file mcphas.j\n");
+   {fprintf(stderr,"Error loadable module so1ion.so: wrong number of dimensions - check number of columns in file mcphas.j\n");
     exit(EXIT_FAILURE);}
 
 //  Driver routine to compute the  eigenvalues and normalized eigenvectors 
@@ -419,7 +419,7 @@ gjmbH(2)+=(*gJ)*MU_B*Hext(2);
 gjmbH(3)+=(*gJ)*MU_B*Hext(3);
 // check dimensions of vector
 if(gjmbH.Hi()>12)
-   {fprintf(stderr,"Error loadable module cfield.so: wrong number of dimensions - check number of columns in file mcphas.j\n");
+   {fprintf(stderr,"Error loadable module so1ion.so: wrong number of dimensions - check number of columns in file mcphas.j\n");
     exit(EXIT_FAILURE);}
 
 //  Driver routine to compute the  eigenvalues and normalized eigenvectors 
@@ -551,8 +551,8 @@ return (int)((iops.J+1)*(2*iops.J+1)); // return number of all transitions
 
 // this is called directly after loading it into memory from dlopen
 void _init(void)
-{  fprintf(stdout,"cfield.so: is loaded\n");}
+{  fprintf(stdout,"so1ion.so: is loaded\n");}
 
 // called just before removing from memory
 void _fini(void)
-{  fprintf(stdout,"cfield.so: is removed\n");}
+{  fprintf(stdout,"so1ion.so: is removed\n");}

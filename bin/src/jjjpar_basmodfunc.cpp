@@ -405,15 +405,16 @@ module_type=external_class;
  // cf_file = fopen_errchk (sipf_filename, "rb");
   while(feof(cf_file)==false)
   {fgets(instr, MAXNOFCHARINLINE, cf_file);
+
   parseline(instr,ob);
-   if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
+   if(instr[strspn(instr," \t")]!='#'||instr[strspn(instr," \t#")]=='!'){//unless the line is commented ...
     extract(instr,"SCATTERINGLENGTHREAL",SLR,ob);
     extract(instr,"SCATTERINGLENGTHIMAG",SLI,ob);
     extract(instr,"CHARGE",charge,ob);
     extract(instr,"MAGNETIC",magnetic,ob);
     extract(instr,"GJ",gJ,ob);
     extract(instr,"gJ",gJ,ob);
-
+   
         extract(instr,"R2",  r2,ob);
         extract(instr,"R4",  r4,ob);
         extract(instr,"R6",  r6,ob);

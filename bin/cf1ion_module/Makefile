@@ -58,7 +58,7 @@ ifdef WINDOWS
 EXE=.exe
 endif
 
-all : cfieldrout.o cfield.so ../cfield$(EXE) ../so1ion$(EXE) module.o
+all : cfieldrout.o so1ion.so ../cfield$(EXE) ../so1ion$(EXE) module.o
 
 VECOBJS= matpack.o sortdbl.o sort2dbl.o sort3dbl.o ivector.o \
 		imatrix.o dvector.o dmatrix.o dmatmul.o cvector.o \
@@ -77,8 +77,8 @@ so1ion.o: types.c main.c
 # used for internal module in mcphas and mcdisp
 cfieldrout.o: cfieldrout.c $(CFOBJS) 
 
-cfield.so: module.o cfield.o  $(VECOBJS) $(CFOBJS) 
-	$(CCC) $(CCOPTS) -Wall -o cfield.so $^ -shared  $(LFLAGS)
+so1ion.so: module.o cfield.o  $(VECOBJS) $(CFOBJS) 
+	$(CCC) $(CCOPTS) -Wall -o so1ion.so $^ -shared  $(LFLAGS)
 # -L../ic1ion_module/libs -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
 
 ../cfield$(EXE): cfield.o $(CFOBJS)

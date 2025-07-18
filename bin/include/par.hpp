@@ -66,9 +66,11 @@ void savelattice(FILE *fout);// save lattice to file
 void saveatoms(FILE *fout);// save atom positions and properties  to file
 void save_sipfs(const char *path);   //save single ion parameter files filename to path*
 void save_mcdiff_in (const char * program); // save structure in mcdiff.in program is program name calling this
-void set_nofcomponents (int n); //sets the number of components in the interaction vector
+void set_nofcomponents (int n); //sets the number of components in the interaction vector to n
 void increase_nofcomponents (int n); //increases the number of components in the interaction vector
 void decrease_nofcomponents (int n); //decreases the number of components in the interaction vector
+void remove_components(int rml,int rmh,int verbose =0); // decreases the number of components by removing components rml, rml+1,...,rmh
+
 
 // operator!= returns 8 7 6 5 4 3 2 1 0depending on agreement of
  //  8 abc 7 nofatoms 6 atomic positions 5 sipffilenames 4 nofcomponents 3 nofneighbours disagreement

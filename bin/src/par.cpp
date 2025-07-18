@@ -384,6 +384,19 @@ void par::decrease_nofcomponents (int n)
  cs.nofcomponents-=n;
 }
 
+void par::remove_components(int rml,int rmh, int verbose)
+{// decreases the number of components by removing components rml, rml+1,...,rmh
+if(rmh>cs.nofcomponents){fprintf(stderr,"ERROR removing compoments in parameter set: rmh=%i > nofcomponents = %i \n",rmh,cs.nofcomponents);exit(EXIT_FAILURE);}
+if(rml>rmh){fprintf(stderr,"ERROR removing compoments in parameter set: rmh=%i < rml=%i\n",rmh,rml);exit(EXIT_FAILURE);}
+if(rml<1){fprintf(stderr,"ERROR removing compoments in parameter set: rml=%i <1  \n",rml);exit(EXIT_FAILURE);}
+
+ for(int i=1;i<=cs.nofatoms;++i)
+ {
+  (*jjj[i]).remove_components(rml,rmh,verbose);
+ }
+ cs.nofcomponents-=1+rmh-rml;
+}
+
 //save to file
 void par::save (const char * filename,int noindexchange)
 { FILE * fout;

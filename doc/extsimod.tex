@@ -46,7 +46,7 @@ EXTERNAL MODULES & \\
 {\prg ic1ion} & $\hat S_a,\hat S_b,\hat S_c,\hat L_a,\hat L_b,\hat L_c,\hat T_2^{-2},\hat T_2^{-1},\hat T_2^{0},\hat T_2^{1},\hat T_2^{2},\hat T_3^{-3}...\hat T_6^{6}$\\
 {\prg icf1ion} & $\hat S_a,\hat S_b,\hat S_c,\hat L_a,\hat L_b,\hat L_c,\hat T_2^{-2},\hat T_2^{-1},\hat T_2^{0},\hat T_2^{1},\hat T_2^{2},\hat T_3^{-3}...\hat T_6^{6}$\\
 \hline
-{\prg bin/cf1ion\_module/cfield.so} & $\hat J_a,\hat J_b,\hat J_c,\hat O_{2-2},\hat O_{2-1},\hat O_{20},\hat O_{21},\hat O_{22},\hat O_{4-4}...,\hat O_{44},\hat O_{6-6}...\hat O_{66}$\\
+{\prg bin/cf1ion\_module/so1ion.so} & $\hat J_a,\hat J_b,\hat J_c,\hat O_{20},\hat O_{22},\hat O_{40},\hat O_{42},\hat O_{44},\hat O_{60},\hat O_{62},\hat O_{64},\hat O_{66}$\\
  \end{tabular}
 \end{center}   
 \end{table}
@@ -145,6 +145,35 @@ SIGMA0r,SIGMA0i,SIGMA1r,SIGMA1i,SIGMA2r,SIGMA2i are zero).
 # for anisotropic Resonant Inelastic X-ray Scattering
 $sigma1_a2u=1.423;
 $R12=-2* $sigma1_a2u * $Jz;
+# Note: Operators which may be redefined here are denoted by the variables:
+# I1 I2 I3 ....
+# Jx Jy Jz
+# Jx2 Jy2 Jz2  (=Jx*Jx Jy*Jy Jz*Jz)
+# O22S O21S O20 O21 O22 O31S .... O66
+\end{verbatim}
+
+In an alternative approach, changing the operator sequence may also be done internally
+yet with less flexibility in parsing operators (addition, subtraction, multiplication).
+The syntax of the same code as above will be
+
+\begin{verbatim}
+#!MODULE=so1ion
+#<!--mcphase.sipf-->
+#!perl with IONTYPE=Ce3+
+#!noperl
+#! B20=  0.1e-1                                       
+#! B22  =  -0.3e-1
+#! B40  =  0.0
+#! B42  =  0.0
+#! B44  =  0.0
+#! B60  =  0.0
+#! B62  =  0.0
+#! B64  =  0.0
+#! B66  =  0.0
+ $I1 = 5.0 * $O44 + $O40; # for quadrupolar interactions
+
+# for anisotropic Resonant Inelastic X-ray Scattering
+$R12=-2* 1.423 * $Jz;
 # Note: Operators which may be redefined here are denoted by the variables:
 # I1 I2 I3 ....
 # Jx Jy Jz

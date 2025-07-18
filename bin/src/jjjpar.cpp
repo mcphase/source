@@ -116,19 +116,35 @@ void jjjpar::increase_nofcomponents(int n) // increase nofcomponents by n
 }
 
 void jjjpar::decrease_nofcomponents(int n) // decrease nofcomponents by n
+{remove_components(nofcomponents-n+1,nofcomponents);
+}  
+
+void jjjpar::remove_components(int rml,int rmh,int verbose)
+// decreases the number of components by removing components rml, rml+1,...,rmh
 {int i,j,k,nold;
   nold=nofcomponents;
-  nofcomponents-=n;
+  if(rmh>nofcomponents){fprintf(stderr,"ERROR removing compoments in jjjpar set: rmh=%i > nofcomponents = %i \n",rmh,nofcomponents);exit(EXIT_FAILURE);}
+  if(rml>rmh){fprintf(stderr,"ERROR removing compoments in jjjpar set: rmh=%i < rml=%i\n",rmh,rml);exit(EXIT_FAILURE);}
+   if(rml<1){fprintf(stderr,"ERROR removing compoments in jjjpar set: rml=%i <1  \n",rml);exit(EXIT_FAILURE);}
+
+  nofcomponents-=rmh-rml+1;
   if(nofcomponents<1){fprintf (stderr, "Error decreasing Nofcomponents=%i gets less than 1\n",nofcomponents);exit (EXIT_FAILURE);}
   //mom.Resize(1,nofcomponents); // not needed, because mom is always Vector (1,9) !!!
+   Vector MFsav(1,nold); MFsav=MF;
     MF.Resize(1,nofcomponents); 
+    for(i=0;i<nold-rmh;++i)MF(rml+i)=MFsav(rmh+i+1);   
 
    Matrix Gsav(1,6,1,nold);
   Gsav=(*G);
   delete G;
   G=new Matrix(1,6,1,nofcomponents);
-  for(i=1;i<=6;++i)for(j=1;j<=nofcomponents;++j)(*G)(i,j)=Gsav(i,j);
-
+  for(i=1;i<=6;++i){for(j=1;j<rml;++j)(*G)(i,j)=Gsav(i,j);
+ if(verbose){for(j=rml;j<=rmh;++j)
+              if(fabs(Gsav(i,j))>0)
+               fprintf(stderr,"Warning removing nonzero G(%i,%i)=%g\n",i,j,Gsav(i,j));
+            }
+                    for(j=0;j<nold-rmh;++j)(*G)(i,rml+j)=Gsav(i,rmh+j+1);
+                   }
 
   Matrix * jijstore;
   jijstore = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jijstore[i]=Matrix(1,nofcomponents,1,nofcomponents);}
@@ -136,10 +152,23 @@ void jjjpar::decrease_nofcomponents(int n) // decrease nofcomponents by n
 
   for (i=1;i<=paranz;++i)
    {jijstore[i]=0;
-    for (j=1;j<=nofcomponents;++j)
-    {for (k=1;k<=nofcomponents;++k)
-     {jijstore[i](j,k)=jij[i](j,k);
-   }}}
+    
+    for(j=1;j<rml;++j)
+    {for (k=1;k<rml;++k)jijstore[i](j,k)=jij[i](j,k);
+      if(verbose)for(k=rml;k<=rmh;++k)if(fabs(jij[i](j,k))>0)fprintf(stderr,"Warning removing nonzero J%i,%i=%g of neighbour at (%g,%g,%g)\n",j,k,jij[i](j,k),dn[i](1),dn[i](2),dn[i](3));
+      for(k=0;k<nold-rmh;++k)jijstore[i](j,rml+k)=jij[i](j,rmh+k+1);
+    }
+ if(verbose){for(j=rml;j<=rmh;++j)
+              {for (k=1;k<nold;++k)if(fabs(jij[i](j,k))>0) fprintf(stderr,"Warning removing nonzero J%i,%i=%g of neighbour at (%g,%g,%g)\n",j,k,jij[i](j,k),dn[i](1),dn[i](2),dn[i](3));            
+            }}
+
+    for(j=0;j<nold-rmh;++j)   
+    {for (k=1;k<rml;++k)jijstore[i](rml+j,k)=jij[i](rmh+j+1,k);
+     if(verbose)for(k=rml;k<=rmh;++k)if(fabs(jij[i](rmh+j+1,k))>0)fprintf(stderr,"Warning removing nonzero J%i,%i=%g of neighbour at (%g,%g,%g)\n",rmh+j+1,k,jij[i](rmh+j+1,k),dn[i](1),dn[i](2),dn[i](3));
+     for(k=0;k<nold-rmh;++k)jijstore[i](rml+j,rml+k)=jij[i](rmh+j+1,rmh+k+1);
+    }
+   
+  }
  
 
  delete []jij;

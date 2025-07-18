@@ -1417,7 +1417,7 @@ ITERATION *read_Vkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lese
     STEVENS   *calc_Pkq(INT dim);
     MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
-    printf("Reading file %s ....\n",name);
+    printf("#Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
  
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
@@ -1756,7 +1756,7 @@ ITERATION *read_Dkq(CHAR *name, INT vsymmetrienr_vor)  /* Dkq aus file name lese
     STEVENS   *calc_Pkq(INT dim);
     MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
-    printf("Reading file %s ....\n",name);
+    printf("#Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
  
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
@@ -2010,7 +2010,7 @@ ITERATION *read_new_format(CHAR type,ITERATION *iteration,CHAR *name,INT vsymmet
     STEVENS   *calc_Pkq(INT dim);
     MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
   /* read mcphas single ion input file */
-       printf("file format as single ion input module #!MODULE=so1ion or #!MODULE=cfield\n");
+       printf("#file format as single ion input module #!MODULE=so1ion or #!MODULE=cfield\n");
     string   = STRING_ALLOC(buffer_size);
 
 
@@ -2047,13 +2047,13 @@ ITERATION *read_new_format(CHAR type,ITERATION *iteration,CHAR *name,INT vsymmet
             /*strncpy(ion,token,1)*/;/*maximal 5 characters*/
             /*remove from string var all characters after delimiters*/
             strtok(ion," \n");
-            printf("IONTYPE=%s ",ion);
+            printf("#IONTYPE=%s ",ion);
            }
         } 
 
      }
     }
-    fclose(fp);printf("\n");
+    fclose(fp);printf("\n#");
     if(ion==0){fprintf(stderr,"ERROR so1ion/cfield:IONTYPE not found!\n");exit(EXIT_FAILURE);}
 
     if(strncmp(ion,"S=",2)==0)  /* J=... ion !! same as S= */
@@ -2348,7 +2348,7 @@ ITERATION *read_Lkq(CHAR *name, INT vsymmetrienr_vor)  /* Lkq aus file name lese
     STEVENS   *calc_Pkq(INT dim);
     MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
-    printf("Reading file %s ....\n",name);
+    printf("#Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
  
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
@@ -2619,7 +2619,7 @@ ITERATION *read_Wkq(CHAR *name, INT vsymmetrienr_vor)  /* Wkq aus file name lese
     STEVENS   *calc_Pkq(INT dim);
     MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
-    printf("Reading file %s ....\n",name);
+    printf("#Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
  
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
@@ -2862,7 +2862,7 @@ ITERATION *read_Akq(CHAR *name, INT vsymmetrienr_vor)  /* Akq aus file name lese
     STEVENS   *calc_Pkq(INT dim);
     MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
-    printf("Reading file %s ....\n",name);
+    printf("#Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
  
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
@@ -3245,7 +3245,7 @@ ITERATION *read_Bkq(CHAR *name, INT vsymmetrienr_vor)  /* Vkq aus file name lese
     STEVENS   *calc_Pkq(INT dim);
     MATRIX    *readBmag(FILE      *fp,CHAR      *name,CHAR modus,DOUBLE myB,ITERATION *iteration,INT buffer_size,CHAR      *string);
  
-    printf("Reading file %s ....\n",name);
+    printf("#Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
  
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);
@@ -4731,7 +4731,7 @@ READ *read_einheit(CHAR *name,CHAR art)
     CHAR      *ion;
     CHAR      c,*string,*line,*fgets(char * __restrict, int, FILE *),*a_tos(CHAR *string,INT anfang,INT ende);
  
-    printf("Reading file %s ....\n",name);
+    printf("#Reading file %s ....\n",name);
     string   = STRING_ALLOC(buffer_size);
  
     if( (fp=fopen(name,"rb"))==(FILE*)0 )  read_error(2,fp,name);

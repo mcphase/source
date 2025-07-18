@@ -222,6 +222,18 @@ while(strstr (token, "=")>strstr(token," ")&&strstr(token," ")) // treat other v
 int extract(char * instr,const char * parameter,double & var)
 {parser ob; return extract(instr,parameter,var,ob);}
 
+void rtrim(char str[]) {
+
+    int length = strlen(str);
+    int i = length - 1;
+
+    while (i >= 0 && isspace(str[i])) {
+        i--;
+    }
+
+    str[i + 1] = '\0';
+	
+}
 int extract(char * instr,const char * parameter,double & var,parser & ob)
 { //const char delimiters[] = " =:\n";
   char *token,*td,*te;
@@ -245,7 +257,12 @@ if (instr[strspn(instr," \t")]=='#'&&instr[strspn(instr," \t#")]!='!') return 1;
   if (strstr (token, "=")==NULL) return 1;  // no '=' found after parameter string
   while(strstr(token," ")==token||strstr(token,"\t")==token)++token;
   if (strstr(token,"=")!=token) return 1; // there are other characters than tab or spaces between parameter and =
-  ++token;snprintf(expression,MAXNOFCHARSINLINE,"%s=%s",parameter,token);
+  ++token;
+  snprintf(expression,MAXNOFCHARSINLINE,"%s",parameter);
+  rtrim(expression);
+  snprintf(expression,MAXNOFCHARSINLINE,"%s=%s",expression,token);
+
+
 //  var = strtod (token, NULL);
   var=ob.eval_exp(expression);
   return 0;

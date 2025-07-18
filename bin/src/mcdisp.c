@@ -939,8 +939,9 @@ if (do_jqfile){
  }
  else
  {// no jqfile but excitations to be calculated
- if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i matrix A, A=\n",dimA,dimA);
+ if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i DMD Eigenvalue prblem  A t = hbar omega Lambda t, Matrix  A=\n",dimA,dimA);
                            myPrintComplexMatrix(stdout,Ac); 
+                   fprintf(stdout,"#Matrix Lambda=\n",dimA,dimA);
                            myPrintComplexMatrix(stdout,Lambda); 
                    }
 

@@ -92,6 +92,7 @@ public:
   int diagonalexchange;  // switch 1=exchange is diagonal, 0=exchange is not diagonal
    void increase_nofcomponents(int n); // increase nofcomponents by n
    void decrease_nofcomponents(int n); // decrease nofcomponents by n
+   void remove_components(int rml,int rmh, int verbose =0); // decreases the number of components by removing components rml, rml+1,...,rmh
    void add(jjjpar & b, Vector & abc); // add parameters b to this
    void addpars (int number, jjjpar & addjjj); // enlarge the set of parameters by
                                                         // inserting a new exchange parameters addjjj

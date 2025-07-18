@@ -401,6 +401,7 @@ if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30
   In = new Matrix * [1+IONPARS_MAXNOFCOMPONENTS];
   for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i)In[i]= new Matrix(1,dimj,1,dimj);
 //---------------------------------------------------------------------------
+
  if (perlp){
    ComplexMatrix * OOlm  [1+NOF_OLM_MATRICES]; 
    // define memory for all matrices 
@@ -496,6 +497,7 @@ if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30
 
                 if(perlparse(cffilename,numbers,numbernames,strings,stringnames,IIn,operatornames)==false)
                      {printf("Error perl parsing sipf file %s\n",cffilename);exit(EXIT_FAILURE);}
+
   // now fill interaction operators In with values
   for(l=1;l<=IONPARS_MAXNOFCOMPONENTS;++l)for(i=1;i<=dimj;++i)for(j=1;j<=dimj;++j)
    if(i<j){(*In[l])(i,j)=imag((*IIn[l])(j,i));}else{(*In[l])(i,j)=real((*IIn[l])(i,j));}
@@ -515,12 +517,13 @@ if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30
   if(i<j){Jc(i,j)=imag((*IIn[3+IONPARS_MAXNOFCOMPONENTS+NOF_OLM_MATRICES+NOF_RIXS_MATRICES])(j,i));}
      else{Jc(i,j)=real((*IIn[3+IONPARS_MAXNOFCOMPONENTS+NOF_OLM_MATRICES+NOF_RIXS_MATRICES])(i,j));}
                                            }
+
   for (i=1;i<=NOF_OLM_MATRICES;++i)  {delete OOlm[i];}
   for(i=0;i<=IONPARS_MAXNOFCOMPONENTS;++i){delete IIn[i];}
-  for (i=0;i<=45;++i){delete numbernames[16+i];
-                      delete numbernames[62+i];
+  for (i=0;i<=45;++i){delete numbernames[19+i];
+                      delete numbernames[65+i];
                        }
-  for (i=1;i<=IONPARS_MAXNOFCOMPONENTS+NOF_OLM_MATRICES;++i)delete operatornames[i];
+  for (i=1;i<=IONPARS_MAXNOFCOMPONENTS+NOF_OLM_MATRICES;++i){delete operatornames[i];}
                } //if perlp
   else
   {
@@ -530,6 +533,7 @@ if(i<j){(*Olm[51])(i,j)=modzdzci[30*(j-1)+i-1];}else{(*Olm[51])(i,j)=modzdzcr[30
     (*In[3])=Jc;
     for(i=1;i<=NOF_OLM_MATRICES;++i){(*In[i+3])=(*Olm[i]);}
   }
+
 //myPrintMatrix(stdout,(*In[51]));
 if(ialpha){if(fabs(alphar-alpha)/fabs(alphar+1)>SMALL_DEVIATION) {if(verbose)fprintf(stderr,"#Warning module %s internal value for Stevens Parameter (alpha=%g) different from input file (alpha=%g), using value from input file\n",moduletype,alphar,alpha);}
 }else{alpha=alphar;}
