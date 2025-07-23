@@ -14,7 +14,7 @@ return dd;
 
 
 void extract_xyTHext(char * outstr,double & x,double & y,double & T,Vector & Hext,Vector & abc)
-{  Vector Habc(1,3),Eabc(1,3);x=0;y=0;Hext=0;Habc=0;Eabc=0;
+{  Vector Habc(1,3),Eabc(1,3);Hext=0;Habc=0;Eabc=0;
   extract(outstr,"x",x); 
   extract(outstr,"y",y); 
   extract(outstr,"T",T); 
@@ -49,14 +49,14 @@ bool check_dd(double tcdd,char * outhklstr,char * outstr)
 
 // determines how good are xyT Hext h k l E to loaded string parameters  
 // returns also tcdd: distance of xyT Hext only (without hklE). returns extracted hkl E
-double distance_of_str_to_xyTHext_hklE(char * outstr,double & tcdd,double & x,double & y,double & T,Vector & Hext,
+double distance_of_str_to_xyTHext_hklE(char * str,double & tcdd,double & x,double & y,double & T,Vector & Hext,
                      double  h,double  k,double l,double  E,Vector & abc)
 { double d,dd,tx=1e10,ty=1e10,tT,tE;Vector tHext(1,Hext.Hi()),thkl(1,3);
-  extract_xyTHext(outstr,tx,ty,tT,tHext,abc);
-  extract(outstr,"h",thkl(1)); 
-  extract(outstr,"k",thkl(2)); 
-  extract(outstr,"l",thkl(3));
-  extract(outstr,"E",tE);
+  extract_xyTHext(str,tx,ty,tT,tHext,abc);
+  extract(str,"h",thkl(1)); 
+  extract(str,"k",thkl(2)); 
+  extract(str,"l",thkl(3));
+  extract(str,"E",tE);
   tHext-=Hext; 
   d=tHext*tHext;
   if(tx!=1e10){dd=x-tx;d+=dd*dd;}
@@ -94,7 +94,7 @@ int n,j;
                         out[1],myround(numbers[1]),out[2],myround(numbers[2]),out[3],myround(numbers[3]),out[4],myround(numbers[4]),
                         out[5],myround(numbers[5]),out[6],myround(numbers[6]),out[7],myround(numbers[7]),
                         myround(numbers[8]),(int)numbers[9],(int)numbers[10]);
-        savmf=spins;
+        savmf=spins;x=0;y=0;
         extract_xyTHext(outstr,x,y,T,Hext,abc);
 
 

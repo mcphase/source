@@ -1802,8 +1802,8 @@ int main (int argc, char **argv)
  int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
  int do_ignore_non_hermitian_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0,calcXobs=0;
- char spinfile [MAXNOFCHARINLINE]; //default spin-configuration-input file
-  snprintf(spinfile,MAXNOFCHARINLINE,"mcdisp.mf");
+ char mffile [MAXNOFCHARINLINE]; //default spin-configuration-input file
+  snprintf(mffile,MAXNOFCHARINLINE,"mcdisp.mf");
  const char * filemode="w";
  char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
  double epsilon=0.05; //imaginary part of omega to avoid divergence
@@ -1866,29 +1866,28 @@ for (i=1;i<=argc-1;++i){
 						  fprintf(stdout,"#minimum population of initial state for single ion excitations to be taken into account: %g\n",pinit);
 					         }
                      else if(strcmp(argv[i],"-prefix")==0) {if(i==argc-1){fprintf(stderr,"Error in command: mcdisp -prefix needs argument(s)\n");exit(EXIT_FAILURE);}
-  		                                  strcpy(prefix,argv[i+1]);snprintf(spinfile,MAXNOFCHARINLINE,"%smcdisp.mf",prefix);++i;
+  		                                  strcpy(prefix,argv[i+1]);snprintf(mffile,MAXNOFCHARINLINE,"%smcdisp.mf",prefix);++i;
  						  fprintf(stdout,"#prefix for reading parameters from mcdisp.par and for ouput filenames: %s\n",prefix);
  					         }
                       else if(strcmp(argv[i],"-ignore_non_hermitian_matrix_error")==0) {do_ignore_non_hermitian_matrix_error=1;
  						  fprintf(stdout,"#ignoring not positive definite matrices\n");
  					         }
                        else if(strncmp(argv[i],"-h",2)==0) {errexit=1;}
-              	       else{strcpy(spinfile,argv[i]);}
+              	       else{strcpy(mffile,argv[i]);}
                           
    } // for i in args
   // as class load  parameters from file
   par inputpars("./mcphas.j",do_verbose);
  
 
-  inimdpars inip("mcdisp.par",prefix,spinfile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms,do_verbose); 
-  //ini.load("mcdisp.par",spinfile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
+  inimdpars inip("mcdisp.par",prefix,mffile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms,do_verbose); 
+  //ini.load("mcdisp.par",mffile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
   if(errexit==1)(*inip.inis[0]).helpexit();
 // loop for different prefixes ...
    for(int ninis=0;ninis<inip.nofinis;++ninis)
 {inimcdis ini((*inip.inis[ninis]));
   if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
   if (ini.nofhkls==1)  fprintf(stderr,"Warning mcdisp: no hkl's found - please edit and insert- doing now  a calculation only for Q=(100)\n");
-
   ini.save();
 
   if(ini.nofcomponents!=inputpars.cs.nofcomponents){fprintf(stderr,"Error mcdisp: number of components read from mcdisp.mf (%i) and mcphas.j (%i) not equal\n",ini.nofcomponents,inputpars.cs.nofcomponents);exit(EXIT_FAILURE);}
@@ -1920,7 +1919,7 @@ dispcalc(ini,inputpars,calc_rixs,calcXobs,do_phonon,calc_beyond,do_Erefine,do_jq
    printf("#  %smcdisp.trs  - single ion transitions used\n",ini.prefix);
    }
    printf("#  _%smcdisp.par - input parameters read from mcdisp.par\n",ini.prefix);
-   printf("#  _%smcdisp.mf  - input parameters read from %s\n",ini.prefix,spinfile);
+   printf("#  _%smcdisp.mf  - input parameters read from %s\n",ini.prefix,mffile);
    printf("#  _%smcdisp.j   - input parameters read from mcphas.j\n",ini.prefix);
    printf("#  ...         - and a copy of the single ion parameter files used.\n\n");
    double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;

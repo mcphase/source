@@ -21,6 +21,7 @@ class inimcdis
 { private:
   int do_jqf;
   char * parfile;
+  char * mf_file;
   Vector qmin,qmax,deltaq;
   void read_hkl_list(FILE * finhkl,double ** hkls,int readqxqyqz,int do_jqfile,Vector & abc);   
   double setcolvalue(int i,Vector & Qvec, double & Qincr, Vector & qprim,Vector & hkl);
@@ -63,11 +64,11 @@ int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char 
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,int & var,parser & ob);
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int m);
 
-  inimcdis(const char * file,char * prefix,char * spinfile,
+  inimcdis(const char * file,char * prefix,char * mffile,
              int & do_jqfile,Vector & abc,
              int & nofcomponents,int & nofatoms);
-  int load (char * spinfile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat); //constructor
-  int load (int & nofinis,char**lofpref,char * spinfile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat,int verbose); //constructor
+  int load (char * mffile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat); //constructor
+  int load (int & nofinis,char**lofpref,char * mffile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat,int verbose); //constructor
   inimcdis (const inimcdis & p);//kopier-konstruktor
  ~inimcdis ();//destruktor
 };
@@ -79,7 +80,7 @@ class inimdpars
   int    nofinis;
   inimcdis ** inis;
   
-  inimdpars (const char * file,char * prefix,char * spinfile,
+  inimdpars (const char * file,char * prefix,char * mffile,
              int & do_jqfile,Vector & abc,
              int & nofcomponents,int & nofatoms,int verbose); //constructor
 

@@ -848,7 +848,7 @@ if (argc-1==8+os){
                for (delta=1000.0;feof(fin)==0&&fgets(instr,MAXNOFCHARINLINE,fin)!=NULL;)
                { if(fgets(dumstr,MAXNOFCHARINLINE,fin)!=NULL) 
                  {spincf ev_real(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
-                 spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
+                  spincf ev_imag(spinconf.na(),spinconf.nb(),spinconf.nc(),spinconf.nofatoms,3);
                  ev_real.load(fin);ev_imag.load(fin);
                  dd=distance_of_str_to_xyTHext_hklE(instr,tcdd,x,y,T,Hext,
                         strtod(argv[5+os],NULL),strtod(argv[6+os],NULL),
