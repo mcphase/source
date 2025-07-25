@@ -792,7 +792,7 @@ for(ii=1;ii<=inputpars.cs.nofatoms;++ii)
 //***************************************************************************************************************
 //***************************************************************************************************************
 //***************************************************************************************************************
-// try a spinwave picture !!!  ... include phonons and spindensity changes ...
+// try movie - a spinwave picture  ... including phonons and spindensity changes ...
 //***************************************************************************************************************
 //***************************************************************************************************************
 if(argc-1==NOF_USERDEF_MCPHAS_COLS+4+os)os+=NOF_USERDEF_MCPHAS_COLS-4;
@@ -956,12 +956,12 @@ if (argc-1==8+os){
                extract(instr,"spins_show_oscillation",gp.spins_show_oscillation);
                extract(instr,"extended_eigenvector_dimension",extended_eigenvector_dimension);
               }
-               j=fseek(fin,pos,SEEK_SET); if (j!=0){fprintf(stderr,"Error: wrong qev file format\n");exit (EXIT_FAILURE);}
-              for (delta=1000.0;feof(fin)==0&&fgets(instr,MAXNOFCHARINLINE,fin)!=NULL;)
+               j=fseek(fin,pos,SEEK_SET); if (j!=0){fprintf(stderr,"Error: wrong qee/qsd/qod file format\n");exit (EXIT_FAILURE);}
+          
+               for (delta=1000.0;feof(fin)==0&&fgets(instr,MAXNOFCHARINLINE,fin)!=NULL;)
                { if(fgets(dumstr,MAXNOFCHARINLINE,fin)!=NULL) 
-                 {fgets(instr,MAXNOFCHARINLINE,fin); 
-                 spincf ev_real(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
-                 spincf ev_imag(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
+                 {spincf ev_real(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
+                  spincf ev_imag(densitycf.na(),densitycf.nb(),densitycf.nc(),densitycf.nofatoms,extended_eigenvector_dimension);
                  ev_real.load(fin);ev_imag.load(fin);
                  dd=distance_of_str_to_xyTHext_hklE(instr,tcdd,x,y,T,Hext,
                         strtod(argv[5+os],NULL),strtod(argv[6+os],NULL),
