@@ -47,17 +47,20 @@ $format=$ARGV[0];shift @ARGV;
 
        if ($line=~/^\s*#/) {print Fout $line;}
 
-       else{$line=~s/D/E/g;@numbers=split(" ",$line);
-
+       else{@numbers=split(/(?<=[\w\.])(?![\w\.])[\s\t](?![\s\t]*$)/,$line);
            	  $i=0;++$j;
              
 		  foreach (@numbers)
 
 		  {++$i;
-
+# print "!".$numbers[$i-1]."!"; 
+$numbers[$i-1]=~s/\n//g;
 		  if ($i>=$col1&&$i<=$col2) 
 
-                {unless($format=~/-t/){print Fout sprintf("%".$format." ",$numbers[$i-1]);}
+                {$numbers[$i-1]=~s/^\s+|\s+$//g;
+
+                 unless($format=~/-t/){unless($format=~/s/) {$numbers[$i-1]=~s/D/E/g;}
+                        print Fout sprintf("%".$format." ",$numbers[$i-1]);}
                        else
                       {if($i!=$col1+5){print Fout $numbers[$i-1]." ";}
                        else

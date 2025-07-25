@@ -38,8 +38,9 @@ foreach (@ARGV)
 
       if($line!~/^\s*#/)                      # Line is not a comment
       {
-         $line =~ s/D/E/g; @numbers = split(" ",$line);                  # Splits line into numbers
-       if($min<=$max){
+          @numbers = split(" ",$line);                  # Splits line into numbers
+        $numbers[$column-1] =~ s/D/E/g;
+       if($min<$max){
          if ($numbers[$column-1]<$min || $numbers[$column-1]>$max)       # If value in columns is not in limit...
          {
             if ($dd!~/\s*-d/) { $line = "#:".$line; } else { $line=""; } # ... either comment it or delete it.
