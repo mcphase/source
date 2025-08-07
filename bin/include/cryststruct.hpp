@@ -113,6 +113,8 @@ fprintf(fout,"\
 #\n\
 #! thetamax = 10   maximum bragg angle (deg)\n\
 #\n\
+#! thetamin = 0   maximum bragg angle (deg)\n\
+#\n\
 #! ovalltemp= 0  overall temperature factor (A^2)\n\
 #           ...I ~ EXP(-2 * ovalltemp * sintheta^2 / lambda^2)\n\
 #                  relation to other notations:\n\

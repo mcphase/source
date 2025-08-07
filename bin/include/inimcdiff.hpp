@@ -27,7 +27,7 @@ class inimcdiff
    char * prefix,*unitcellstr;
    cryststruct cs;
 
-   double T,lambda,thetamax,ovalltemp;
+   double T,lambda,thetamax,thetamin,ovalltemp;
     int lorenz,n,nat, nofatoms,natmagnetic,use_dadbdc=0;
    Vector P,Pxyz,r1,r2,r3,r1s,r2s,r3s,rez1,rez2,rez3;Matrix eps; 
    float *x1;float*y1;float*z1;

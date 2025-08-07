@@ -204,6 +204,7 @@ int getint(inimcdiff & ini,int hi,int ki,int li,Vector & hkl,
             s=0.5 / d;
 	    sintheta = ini.lambda * s;
             if (sintheta >= sin(ini.thetamax / 180 * PI)) return false;
+            if (sintheta <= sin(ini.thetamin / 180 * PI)) return false;
                Theta = 180 / PI * atan(sintheta / sqrt(1 - sintheta * sintheta));
                //nuclear(|nsfr+i nsfc|^2) and magnetic structure factor(msf) calculation
                complex <double> nsf=0;

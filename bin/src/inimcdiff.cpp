@@ -152,6 +152,8 @@ fprintf(fout,"#! lambda   = %g  wavelength (A)\n",lambda);
 fprintf(fout,"#\n");
 fprintf(fout,"#! thetamax = %g   maximum bragg angle (deg)\n",thetamax);
 fprintf(fout,"#\n");
+fprintf(fout,"#! thetamin = %g   minimum bragg angle (deg)\n",thetamin);
+fprintf(fout,"#\n");
 fprintf(fout,"#! ovalltemp= %g  overall temperature factor (A^2) \n",ovalltemp);
 fprintf(fout,"#           ...I ~ EXP(-2 * ovalltemp * sintheta^2 / lambda^2) \n");
 fprintf(fout,"#                  relation to other notations:\n");
@@ -329,7 +331,7 @@ inimcdiff::inimcdiff (const char * file,char * pref,int verb)
 
   errno = 0;
   // **************** initialize parameters to default values ********************************************
-  T=0;
+  T=0;thetamin=0;
  // ******************************** reading parameters  from mcdiff.in ****************************************************
   //int i=0; //,hklblock=0,QxQyQzblock=0,j;
   snprintf(infile,MAXNOFCHARINLINE,"%s%s",prefix,file);// use for the moment savfilename to store input filename
@@ -368,6 +370,7 @@ while (instr[strspn(instr," \t")]=='#'&&strstr (instr, "%SECTION 2%")==NULL) // 
    extract(instr,"nofatoms",nofatoms,ob);  
    extract(instr,"lambda", lambda,ob);
    extract(instr, "thetamax", thetamax,ob);
+   extract(instr, "thetamin", thetamin,ob);
    extract(instr, "nat", nat,ob);
    extract(instr, "natcryst", nat,ob);
    extract(instr, "ovalltemp", ovalltemp,ob);
@@ -407,7 +410,7 @@ if (thetamax == 0){fprintf(stderr,"ERROR mcdiff: no thetamax given or line does 
   }
  // printf("# nofthreads=%i\n",nofthreads);
  
-printf("     section 1 - lambda=%g A thetamax= %g deg\n",lambda, thetamax);
+printf("     section 1 - lambda=%g A thetamin=%g deg thetamax= %g deg\n",lambda, thetamin, thetamax);
 printf("                 ovalltemp=%g A^2 lorentz-type=%i\n",ovalltemp,lorenz);
 printf("                 output: column ");
 for(int i=2;i<= nofoutputcolumns;++i){printf(" %i=%s",i,colhead[colcod[i]]);
@@ -850,6 +853,7 @@ inimcdiff::inimcdiff (const inimcdiff & p)
   T=p.T;  
   lambda=p.lambda;
   thetamax=p.thetamax;
+  thetamin=p.thetamin;
   ovalltemp=p.ovalltemp;
   lorenz=p.lorenz;
   nat=p.nat;

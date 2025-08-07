@@ -3,6 +3,7 @@ BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 use PDL;
 use Cwd;
+use Fcntl qw(:flock);
 
 # use PDL::Slatec;
 
@@ -215,7 +216,8 @@ if($sta>0)
    $dmin=1e10; 
    if($probe>0)# check distance to other parameter sets
                {if(open(Fin1,$s1file))
-                {while(($line=<Fin1>)&&($dmin>$#par+1))
+                {flock(Fin1, LOCK_SH) || die "Cannot lock $s1file";
+                 while(($line=<Fin1>)&&($dmin>$#par+1))
                     {unless ($line=~/^\s*#/)
                         {$line=~s/D/E/g;@numbers=split(" ",$line);
                           $d=0;$i=0;foreach(@par){$dd=($par[$i]-$numbers[$i+1])/$parstp[$i];$d+=$dd*$dd; ++$i;}
@@ -225,7 +227,8 @@ if($sta>0)
                 close Fin1;
                 } 
                if(open(Fin1,$s0file))
-                {while(($line=<Fin1>)&&($dmin>$#par+1))
+                {flock(Fin1, LOCK_SH) || die "Cannot lock $s0file";
+                 while(($line=<Fin1>)&&($dmin>$#par+1))
                     {unless ($line=~/^\s*#/)
                         {$line=~s/D/E/g;@numbers=split(" ",$line);
                           $d=0;$i=0;foreach(@par){$dd=($par[$i]-$numbers[$i+1])/$parstp[$i];$d+=$dd*$dd; ++$i;}
