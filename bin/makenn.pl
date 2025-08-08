@@ -1200,56 +1200,38 @@ sub getinteraction {
 
    }
 
-  elsif ($rkky==1)
+  elsif ($rkky==1)  # -rkky
   {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkky does not provide direct dependence on strain epsilon4-6\n";}
     $jaa = $scale*cos(2*$kf*$r)/8/$kf/$kf/$kf/$r/$r/$r;  
     if($djdeps1||$djdeps2||$djdeps3){$jaa = $jaa+ $scale*sin(2*$kf*$r)/12/$kf/$kf/$r/$r;} # derivative with respect to eps: dkf/deps1=-kf/3
     $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0; 
   }
 
-  elsif ($rkky==4)
+  elsif ($rkky==4) # -rkky3d
   {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkky3d does not provide direct dependence on strain epsilon4-6\n";}
    $kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
-   if ($djdeps1){
-             # derivative with respect to eps: dka/deps1=-ka
-             # dkr/deps1=ka*rx*rx/kfr * dka/deps1 = -ka*ka*rx*rx/kfr
-             $jaa = 3*$ka*$ka*$rx*$rx*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
-               } 
-   elsif ($djdeps2){
-                 $jaa = 3*$kb*$kb*$ry*$ry*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
-               } 
-   elsif ($djdeps3){
-                 $jaa = 3*$kc*$kc*$rz*$rz*$scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr/$kfr/$kfr+$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
-               } 
-    else {$jaa = $scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr;}
+   $jaa = $scale*cos(2*$kfr)/8/$kfr/$kfr/$kfr;
+   if ($djdeps1||$djdeps2||$djdeps3){$jaa = $jaa+ $scale*sin(2*$kfr)/12/$kfr/$kfr;
+            }
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
   }
 
-  elsif ($rkky==3)
+  elsif ($rkky==3)  # -rkkz
 
   {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkkz does not provide direct dependence on strain epsilon4-6\n";}
    # derivative with respect to eps: dkf/deps1=-kf/3
    $jaa = $scale*(sin(2*$kf*$r)-2*$kf*$r*cos(2*$kf*$r))/16/$kf/$kf/$kf/$kf/$r/$r/$r/$r;
    if($djdeps1||$djdeps2||$djdeps3){
-   $jaa = -4*$jaa/3- $scale*sin(2*$kf*$r)/12/$kf/$kf/$r/$r;} # derivative with respect to eps: dkf/deps1=-kf/3
+   $jaa = 4*$jaa/3- $scale*sin(2*$kf*$r)/12/$kf/$kf/$r/$r;} # derivative with respect to eps: dkf/deps1=-kf/3
    $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
   }
 
-  elsif ($rkky==6)
+  elsif ($rkky==6)# -rkkz3d
   {if ($djdeps4||$djdeps5||$djdeps6) {die "Error makenn: option rkkz3d does not provide direct dependence on strain epsilon4-6\n";}
    $kfr=sqrt($ka*$ka*$rx*$rx+$kb*$kb*$ry*$ry+$kc*$kc*$rz*$rz);
-  if ($djdeps1){
-             # derivative with respect to eps: dka/deps1=-ka
-             # dkr/deps1=-ka*rx*rx/kfr * dka/deps1 = -ka*ka*rx*rx/kfr
-        $jaa = $ka*$ka*$rx*$rx*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$ka*$ka*$rx*$rx*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
-               } 
-  elsif ($djdeps2){
-        $jaa = $kb*$kb*$ry*$ry*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kb*$kb*$ry*$ry*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
-               } 
-  elsif ($djdeps3){
-        $jaa = $kc*$kc*$rz*$rz*$scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/4/$kfr/$kfr/$kfr/$kfr/$kfr/$kfr-$scale*$kc*$kc*$rz*$rz*sin(2*$kfr)/4/$kfr/$kfr/$kfr/$kfr;
-               } 
-   else {$jaa = $scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/16/$kfr/$kfr/$kfr/$kfr;}
+   $jaa = $scale*(sin(2*$kfr)-2*$kfr*cos(2*$kfr))/16/$kfr/$kfr/$kfr/$kfr;
+  if ($djdeps1||$djdeps2||$djdeps3){$jaa = 4*$jaa/3- $scale*sin(2*$kfr)/12/$kfr/$kfr;
+             }
   $jbb =$jaa;$jcc =$jaa;$jab = 0;$jbc =0;$jac =0;$jba=0;$jcb=0;$jca=0;
   }
 
@@ -1863,15 +1845,13 @@ print STDOUT << "EOF";
         -djdeps6   create files makenn.djdeps1 .djdeps2 ... .djdeps6 instead of makenn.j, respectively
  these contain the derivatives of the interaction paramters with respect to
  the strain tensor components epsilon1, epsilon2 ... epsilon6 (in Voigt Notation) as 
- calculated from the kf dependence on strain in the rkky formulas (dkf/deps1=-kf/3 , dkx/deps1=-kx ...)
- for option -rkky    dj/deps1,2,3 = A.cos(2.kf.r)/(2.kf.r)^3+ A.sin(2.kf.r)/12(kf.r)^2
-            -rkky3d  dj/deps1 = -3.A.(kx.Rx)^2.cos(2.kfR)/(8.kfR^5)
-                                -A*(kx.Rx)^2.sin(2.kfR)/(4.kfR^4) and similar for eps2,3
-            -rkkz    dj/deps1,2,3 = -4.A.(sin(2.kf.r)-2.kf.r.cos(2.kf.r))/(3.(2.kf.R)^4)
-                                    -A.sin(2.kf.r)/(12(kf.r)^2)
-            -rkkz3d  dj/deps1 = -A.(kx.Rx)^2.(sin(2.kfR)-2.kfR.cos(2.kfR))/(4.kfR^6)
-                                +A.*(kx.Rx)^2.sin(2.kfR)/(4.kfR^4) 
-                     and similar for eps2,3
+ calculated from the kf dependence on strain in the rkky formulas. For a spherical
+Fermi surface kf=(6π^2/V)^1/3 and thus dkf/deps1,2,3=-kf/3. For a orthorhombic Fermi sruface
+dkfR/deps1,2,3=-kfR/3 (see manual).
+ for option -rkky    dJ/deps1,2,3 = A[3.cos(2.kf.r)+2.kf.r.sin(2.kf.r)]/24(kf.r)^3
+            -rkkz    dJ/deps1,2,3 = A.[(1-(kf.r)^2)sin(2.kf.r)-2.kf.r.cos(2.kf.r)]/(12.(kf.R)^4)
+            -rkky3d  dJ/deps1,2,3 = A.[3.cos(2.kfR)+2.kfR.sin(2.kfR)]/(24.kfR^3) 
+            -rkkz3d  dJ/deps1,2,3 = A.[(1-(kfR)^2).sin(2.kfR)-2.kfR.cos(2.kfR)]/(12.kfR^4)
  
  These derivatives are useful for the calculation of exchange striction effects. 
 

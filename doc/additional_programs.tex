@@ -398,13 +398,49 @@ the pointcharge model and calculate crystal field paramaters.
 \item[option {\prg -djdeps3}]
 \item[option {\prg -djdeps4}]
 \item[option {\prg  -djdeps5}]
-\item[option {\prg -djdeps6 }]  create files makenn.djdeps1 .djdeps2 ... .djdeps6 instead of makenn.j, respectively
+\item[option {\prg -djdeps6 }]  create files {\prg makenn.djdeps1 .djdeps2 ... .djdeps6 }
+instead of {\prg makenn.j}, respectively
  these contain the derivatives of the interaction paramters with respect to
  the strain tensor components epsilon1, epsilon2 ... epsilon6 (in Voigt Notation) as 
- calculated from the kf dependence on strain in the rkky formulas ($\partial k_f/\partial \epsilon_1=-k_f/3 $,
- $\partial k_x/\partial \epsilon_1=-k_x $,\dots)
+ calculated from the kf dependence on strain in the rkky formulas.
+ For a spherical Fermi surface $k_F=(6\pi^2/V)^{1/3}$ and thus
+$\partial k_f/\partial \epsilon_1=-k_f/3 $. 
+ for option
+\begin{description}
+\item[-rkky]   $ \partial J/\partial d\epsilon_i = A[3cos(2k_fR)+2k_f R sin(2k_fR)]/24(k_fR)^3$ for $i=1,2,3$.
+\item[-rkkz]  $ \partial J/\partial d\epsilon_i =  A[(1-(k_fR)^2)sin(2k_fR)-2k_fR.cos(2k_fR)]/(12(k_fR)^4)$ for $i=1,2,3$.
+\end{description}
+                 
+For an orthorhombic distorted Fermi sphere the volume is $4\pi k_x k_y k_z/3=8\pi^3/V$ and
+it follows $dk_x/k_x+dk_y/k_y+dk_z/k_z=V d(1/V)=-dV/V$. Here we have assumed that the strain will not change
+the effective electron mass and band structure significantly and the change in $k_x,k_y,k_z$ will be
+only due to the change in electron density which is correlated to a change density of electron states in k-space.
+In this case  $dk_x/k_x=dk_y/k_y=dk_z/k_z=-(d\epsilon_1+d\epsilon_2+d\epsilon_3)/3$ and 
+$\partial k_x/\partial \epsilon_i=-k_x/3$ for $i=1,2,3$ and similar for $k_y$ and $k_z$.
+We calculate
+$\partial J/\partial \epsilon_1=\partial J/\partial \kappa \partial \kappa/\partial \epsilon_1$
+and 
+$\partial \kappa/\partial \epsilon_1=\partial \kappa/\partial k_x \partial k_x/\partial \epsilon_1
++\partial \kappa/\partial k_y \partial k_y/\partial \epsilon_1
++\partial \kappa/\partial k_z \partial k_z/\partial \epsilon_1=
+        = -\kappa/3 $
+and similar for $\epsilon_2, \epsilon_3$.
+% -rkky3d
+%J(R)=A.cos(2.kfR)/(2.kfR)^3
+%dJ/deps1=(-3Acos(2.kfR)/(8 kfR^4)-Asin(2kfR)/4kfR^3 )dkfR/deps1
+%-rkkz3d
+%J(R)=A [sin(2.kfR)-2.kfR.cos(2.kfR)]/(2.kfR)^4
+%dJ/deps1=(-A(sin(2.kfR)-2.kfR.cos(2.kfR))/(4.kfR^5) +A.sin(2.kfR)/(4.kfR^3) ) dkfR/deps1
+Thus for options
+\begin{description}
+               
+\item[-rkky3d]  $ \partial J/\partial d\epsilon_i  = A[3 cos(2\kappa) + 2\kappa sin(2\kappa)]/(24\kappa^3)$ for $i=1,2,3$.
+\item[-rkkz3d]  $ \partial J/\partial d\epsilon_i  = A[(1-\kappa^2 )sin(2\kappa)-2\kappa cos(2\kappa)]/(12\kappa^4) $ for $i=1,2,3$.
+\end{description}
 
  These derivatives are useful for the calculation of exchange striction effects. 
+
+
 \end{description}
 
  Note: $xyz$ refers to a right handed Euclidean coordinate system with 
