@@ -48,14 +48,15 @@ OSTYPE=$(shell uname)
 ifneq (,$(findstring $(OSTYPE),Linux))
  LINUX = linux
 else
+ ifneq (,$(findstring $(OSTYPE),Darwin))
+ LINUX = linux
+ else
  WINDOWS = windows
+ EXE=.exe
 ifneq (,$(findstring CYGWIN,$(shell uname)))
  CYGWIN=1
 endif
 endif
-
-ifdef WINDOWS
-EXE=.exe
 endif
 
 all : cfieldrout.o so1ion.so ../cfield$(EXE) ../so1ion$(EXE) module.o
@@ -82,7 +83,9 @@ so1ion.so: module.o cfield.o  $(VECOBJS) $(CFOBJS)
 # -L../ic1ion_module/libs -llapack -lblas -L/usr/local/gfortran/lib -lgfortran
 
 ../cfield$(EXE): cfield.o $(CFOBJS)
+	echo $(EXE) $(WINDOWS) $(LINUX)
 	$(CCC) $(CCOPTS) -Wall -o ../cfield $^ $(LFLAGS)
+
 
 ../so1ion$(EXE): so1ion.o $(CFOBJS)
 	$(CCC) $(CCOPTS) -Wall -o ../so1ion $^ $(LFLAGS)

@@ -121,7 +121,7 @@ gitdir = Output/mcphase~mcphase
 
 
 
-all: vector larpack functions cfield mcphase ic1ion phonon examples tutorial bfk bcfph cowan
+all: vector larpack functions cfield mcphase ic1ion phonon examples tutorial bfk bcfph cowan manual
 allwin: vectorwin larpackwin functionswin cfieldwin mcphasewin ic1ionwin phononwin exampleswin tutorial bfkwin bcfphwin cowanwin
 
 
@@ -130,6 +130,9 @@ git: $(gitdir)/*
 #	cp -ru $(gitdir)/* ./
 	rsync -avu --filter='exclude .git'  $(gitdir)/ ./
 	cp Makefile.sav Makefile
+
+manual:    
+	cd doc && $(MAKE)
 
 vector: 
 	cd bin/src/vector && $(MAKE)
@@ -292,7 +295,8 @@ tgz :
 	dos2unix ./examples/upd3/calc.bat
 	dos2unix ./tutorial/07documentation_logbooks/calc.bat
 	dot_clean -mv ./
-	cd ../;tar --exclude=mcphas/bin/zulu17.56.15-ca-jre17.0.14-win_x64/* --exclude=mcphas/bin/Perl* \
+	cd ../;tar --exclude=mcphas/bin/zulu17.56.15-ca-jre17.0.14-win_x64/* \
+		--exclude=mcphas/bin/Perl* \
 		--exclude=mcphas/Output* --exclude=mcphas/bin/*.exe \
 		-cvf $(HOME)/mcph.tar mcphas/* \
 		;cd ./mcphas  
@@ -332,7 +336,7 @@ cleanexe:
                 bin/densplt bin/pointc bin/formfactor\
                 bin/radwavfunc bin/addj bin/reduce_unitcell \
                 bin/mcdiff   bin/mf2fe bin/fediff bin/inimenu \
-                bin/cf1ion_module/cfield.so \
+                bin/cf1ion_module/so1ion.so \
                 bin/ic1ion  bin/icf1ion bin/so1ion \
                 bin/ic1ion_module/ic1ion.so \
                 bin/bfk \

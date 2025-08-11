@@ -12,7 +12,7 @@
 #
 #**********************************************************************
 
-all: manual.pdf  html
+all: manual
 
 manual.aux: manual.tex $(wildcard *.bib) $(wildcard *.tex) 
 	sed -e 's/#define.*VERSION *"//;s/"//' ../version > version.tex
@@ -43,7 +43,7 @@ manual.ps: manual.dvi $(wildcard ./*.eps)  $(wildcard ./figsrc/*.ps)
 manual.pdf: manual.tex manual.aux manual.bbl manual.toc
 	pdflatex  manual
 
-html: manual.tex manual.aux manual.bbl manual.toc
+manual: manual.pdf
 	rm -r ./manual/*
 	latex2html -local_icons manual.tex 
 
