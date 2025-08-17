@@ -993,6 +993,17 @@ void crosscheck_H_E(Vector & Hext,Vector & Habc,Vector & Eabc,Vector & abc)
  } 
 }
 
+// calculates the strain dr of a Vector r given the strain tensor epsilon in Voigt notation
+Vector dr(Vector & epsilon,Vector & r)
+{Vector dr(1,3);
+ // Voigt eps1=(epsii) eps2=(epsjj) eps3=(epskk) eps4=(2epsjk) eps5=(2epsik) eps6=(2epsij)
+ dr(1)=    epsilon(1)*r(1)+0.5*epsilon(6)*r(2)+0.5*epsilon(5)*r(3);
+ dr(2)=0.5*epsilon(6)*r(1)+    epsilon(2)*r(2)+0.5*epsilon(4)*r(3);
+ dr(3)=0.5*epsilon(5)*r(1)+0.5*epsilon(4)*r(2)+    epsilon(3)*r(3);
+ return dr;
+}
+
+
 // some matrix functions for hermitian matrices in
 // real notation: The real parts of the elements must be
  //  stored in the lower triangle of z,the imaginary parts (of the elements

@@ -90,11 +90,13 @@ public:
     void fst(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z,spincf & magmom);
 
   // output of chargedensity on grid as ascii file points are equally spaced as specified
-   // nofpoints*
+  // nofpoints*
   void cd(FILE * fout,cryststruct & cs,graphic_parameters & gp,
                 spincf & savev_real,spincf & savev_imag,double phase,Vector & hkl,double & T,Vector &  gjmbHxc,Vector & Hext);
 
     void fstprim(FILE * fout,char * text,Vector & abc,Matrix & r,float * x,float *y,float*z, spincf & magmom);
+   // calculate primitive magnetic unit cell basis vectors in euclidean ijk coordinate system
+   // as columns of  p
     void calc_prim_mag_unitcell(Matrix & p,Vector & abc, Matrix & r);
 
 private:

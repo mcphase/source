@@ -250,7 +250,8 @@ void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
 // checks if Habc and Hext(1,2,3)=Hijk are in accordance if nonzero both, similar for E
 void crosscheck_H_E(Vector & Hext,Vector & Habc,Vector & Eabc,Vector & abc);
 
-
+// calculates the strain dr of a Vector r given the strain tensor epsilon in Voigt notation
+Vector dr(Vector & epsilon,Vector & r);
 
 void set_zlm_constants(Matrix & cnst);
 

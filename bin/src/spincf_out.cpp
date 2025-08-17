@@ -77,6 +77,8 @@ void spincf::epsarrow(FILE * fout,Vector x,Vector y)
 
   }
 
+// calculate primitive magnetic unit cell basis vectors in euclidean ijk coordinate system
+// as columns of  p
 void spincf::calc_prim_mag_unitcell(Matrix & p,Vector & abc, Matrix & r)
 { int i,j;
   Vector nofabc(1,3);nofabc(1)=nofa;nofabc(2)=nofb;nofabc(3)=nofc;

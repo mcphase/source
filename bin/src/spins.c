@@ -21,6 +21,7 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
     or: spins -tMSL [-prefix 001] T Ha Hb Hc \n\
     or: spins -tHex [-prefix 001]  T Ha Hb Hc \n\
     or: spins -tI  [-prefix 001] T Ha Hb Hc \n\
+    or: spins -tL2 4.5 [-prefix 001] T Ha Hb Hc \n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] T Ha Hb Hc [h k l E]\n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] x y [h k l E] \n\
     or: spins [-c|-s|-o|-m|-j] [-p i j k|-div] [-S|-L|-M|-pel] [-P] [-eps|-fst] [-prefix 001] out1 out2 out3 out4 out5 out6 out7 [h k l E]\n\
@@ -59,6 +60,9 @@ use as: spins -f[c 1 13 3 0.1] [-n 2] mcphas.sps T Ha Hb Hc\n\
               of each atom in the magnetic unitc cell \n\
        -tHex ...  output to stdout table with T Ha Hb Hc atom positions and exchange fields Hex\n\
        -tI   ... a similar table with expectation values of interaction operators <I>\n\
+       -tL2 4.5  ... a table with average squared longitudinal bond elongations up to bond\n\
+                     length 4.5 Angstroem, only atoms with phonon degrees of freedom are considered\n\
+                     (useful for estimating elastic energy contributions of different bonds)\n\
    for graphical animations the options are: \n\
          -c ... calculate chargedensity\n\
          -s ... calculate spindensity\n\
@@ -139,7 +143,44 @@ fprintf(fout,"\
 #\n");
 }
 
-           
+
+
+void L2_calc(double & tL2,int i0, int j0, int k0, int ii0,FILE * fout, char * outstr, char * tstr, 
+              Vector & nmin, Vector & nmax, spincf & savmf,Matrix & pm_unitcell,
+             double & T,Vector & h0, Vector & Hext,par & inputpars)
+{Vector r0(1,3),r(1,3),p0(1,3),p(1,3),h(1,inputpars.cs.nofcomponents),hh(1,savmf.nofcomponents*savmf.nofatoms);
+ double d; 
+ // if module allows to calculate position shift of an atom - only then use this for output 
+    if(true==(*inputpars.jjj[ii0]).pcalc(p0,T,h0,Hext,(*inputpars.jjj[ii0]).Icalc_parstorage))
+     {
+
+ r0=savmf.pos(i0,j0,k0,ii0, inputpars.cs); // position of ion
+  p0+=dr(savmf.epsilon,r0); // add the strain dr using position Vector r and given the strain tensor epsilon in Voigt notation
+ for(int i1=nmin(1)-1;i1<=nmax(1)+1;++i1) // go through different prim magnetic unit cells
+ for(int j1=nmin(1)-1;j1<=nmax(1)+1;++j1)
+ for(int k1=nmin(1)-1;k1<=nmax(1)+1;++k1)
+    for (int i=1;i<=savmf.na();++i)
+    for(int j=1;j<=savmf.nb();++j)
+    for(int k=1;k<=savmf.nc();++k){hh=savmf.m(i,j,k);//look at each atom
+      for(int ii=1;ii<=inputpars.cs.nofatoms;++ii)
+   {r=savmf.pos(i,j,k,ii, inputpars.cs); 
+    r+=(double)i1*pm_unitcell.Column(1)+(double)j1*pm_unitcell.Column(2)+(double)k1*pm_unitcell.Column(3);
+    d=Norm(r-r0);if(d>0.1&&d<tL2){ h=0; 
+   for(int nt=1;nt<=inputpars.cs.nofcomponents;++nt){h(nt)=hh(nt+inputpars.cs.nofcomponents*(ii-1));}
+     if(true==(*inputpars.jjj[ii]).pcalc(p,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
+     {p+=dr(savmf.epsilon,r);// add displacement due to strain
+       // now p-p0 is the displacement and r-r0 the unstrained bond length
+       // ... calculate the projection of p-p0 on r-r0 and square it
+     double L2=(p-p0)*(r-r0); L2/=d;
+       L2*=L2; // square this projection - this is the longitudinal bond elongation
+                                  fprintf(fout,"%s %s %g %g\n",outstr,tstr,d,L2);
+     }
+                                 }
+   }}
+  }
+fprintf(fout,"#\n"); // comment line after each atom
+}
+          
 /**********************************************************************/
 // hauptprogramm
 int main (int argc, char **argv)
@@ -156,12 +197,14 @@ fprintf(stderr,"# ***********************************************************\n"
  cryststruct cs,cs4;
 
  char outstr[MAXNOFCHARINLINE];
+ char tstr[MAXNOFCHARINLINE];
  char infilename[MAXNOFCHARINLINE];
  char prefix[MAXNOFCHARINLINE];prefix[0]='\0';
- 
+ Vector nmin(1,3),nmax(1,3);
+
   int dim=28,nofcomp=1000000000;
  int os=0,maxn=0; int doijk=0,arrow=0,density=0,phonon=0;//,arrowdim=3;
- double xx=0,yy=0,zz=0,limit=0;
+ double xx=0,yy=0,zz=0,limit=0,tL2=0;
 graphic_parameters gp;
 gp.show_abc_unitcell=1.0;
 gp.show_primitive_crystal_unitcell=1.0;
@@ -188,7 +231,9 @@ snprintf(gp.title,MAXNOFCHARINLINE,"output of program spins");
    if (strncmp(argv[os],"-n",2)==0){nofcomp=(int)strtod(argv[os+1],NULL);os+=2;}
    fin = fopen_errchk (argv[os], "rb");printf("#* program spins ... reading from file %s\n",argv[os]);   
  }
- else { if (strncmp(argv[1],"-t",2)==0){os=1;fout=stdout;}
+ else { if (strncmp(argv[1],"-t",2)==0){os=1;fout=stdout;
+                          if (strncmp(argv[1],"-tL2",4)==0){os=2;tL2=strtod(argv[2],NULL);}
+                                       }
        else  // second ... other options with graphics !!
  {if(strcmp(argv[1],"-c")==0){os=1;}
   if(strcmp(argv[1],"-s")==0){os=1;}
@@ -499,11 +544,15 @@ fprintf(fout,"#          corresponding exchange fields [meV]- if passed to mcdif
 	}
 else  //now table options
  { fprintf(fout,"#! nr1=%i nr2=%i nr3=%i nat=%i atoms in primitive magnetic unit cell:\n",savmf.na(),savmf.nb(),savmf.nc(),cs4.nofatoms*savmf.na()*savmf.nb()*savmf.nc());
- fprintf(fout,"# 1 2  3  4  5           6     7     8     9       10      11      12   13   14                  15   16   17   18   19   20\n");
- fprintf(fout,"# T Ha Hb Hc {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
- if (strcmp(argv[1],"-tMSL")==0)                                    fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)\n");
+ //fprintf(fout,"# 1 2  3  4  5           6     7     8     9       10      11      12   13   14                  15   16   17   18   19   20\n");
+ fprintf(fout,"# external parameters {sipf-file} da[a] db[b] dc[c] dr1[r1] dr2[r2] dr3[r3] ");
+ if (strcmp(argv[1],"-tMSL")==0)                                    fprintf(fout,"<Ma> <Mb> <Mc> [mb] [optional <Sa> <Sb> <Sc> <La> <Lb> <Lc> (hbar)]\n");
  if (strcmp(argv[1],"-tI")==0) fprintf(fout,"<I1> <I2> <I3> ... <Inofcomponents>\n");
  if (strcmp(argv[1],"-tHex")==0) fprintf(fout,"<Hex1> <Hex2> <Hex3> ... <Inofcomponents> (meV)\n");
+ if (strcmp(argv[1],"-tL2")==0){ fprintf(fout,"bondlength_to_neighbour [A]  elongation^2 [A^2]\n");
+                                nlimits_calc(nmin,nmax, tL2,p);
+
+                               }
  }       
 //  1. from the meanfieldconfiguration (savmf) the <Olm> have to be calculated for all l=2,4,6
 // 1.a: the mcphas.j has to be used to determine the structure + single ione properties (copy something from singleion.c)
@@ -611,41 +660,50 @@ for(nt=1;nt<=inputpars.cs.nofcomponents;++nt){hhh(nt)=hh(nt+inputpars.cs.nofcomp
 
     dd0=p.Inverse()*dd3;dd0(1)*=savmf.na();dd0(2)*=savmf.nb();dd0(3)*=savmf.nc();
     Matrix abc_in_ijk(1,3,1,3); get_abc_in_ijk(abc_in_ijk,cs.abc);
-    dd=abc_in_ijk.Inverse()*dd3;       
+    dd=abc_in_ijk.Inverse()*dd3; 
+    snprintf(tstr,MAXNOFCHARINLINE,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
+            cs.sipffilenames[ii],dd(1),dd(2),dd(3),dd0(1),dd0(2),dd0(3));
+    if (strcmp(argv[1],"-tL2")!=0) {     
     if (strncmp(argv[1],"-t",2)==0){
        fprintf(fout,"%s ",outstr);
                                    }
-    fprintf(fout,"{%s} %9.9f %9.9f %9.9f %9.9f %9.9f %9.9f ",
-            cs.sipffilenames[ii],dd(1),dd(2),dd(3),dd0(1),dd0(2),dd0(3));
-    if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tMSL")==0){
-    //ouput the magnetic moment if possible
-    if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
-    {     for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
-     // and output the orbital and spin momentum if possible 
-     if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage)&&
+      fprintf(fout,"%s",tstr);
+    }
+    if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tMSL")==0)
+    {
+     //ouput the magnetic moment if possible
+     if((*inputpars.jjj[ii]).mcalc(magmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
+     {     for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,magmom(nt)));}
+      // and output the orbital and spin momentum if possible 
+      if((*inputpars.jjj[ii]).Lcalc(Lmom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage)&&
         (*inputpars.jjj[ii]).Scalc(Smom,T,h,Hext,(*inputpars.jjj[ii]).Icalc_parstorage))
-      //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
-      //                                        to Sa Sb Sc La Lb Lc
-      //{        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f %4.4f",myround(1e-5,Smom(nt)),myround(1e-5,Lmom(nt)));}
-      {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,Smom(nt)));}
+       //MR23.10.2022 change operator sequence from Sa La Sb Lb Sc Lc --------
+       //                                        to Sa Sb Sc La Lb Lc
+       //{        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f %4.4f",myround(1e-5,Smom(nt)),myround(1e-5,Lmom(nt)));}
+       {        for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,Smom(nt)));}
                for(nt=1;nt<=3;++nt){fprintf(fout," %4.4f",myround(1e-5,Lmom(nt)));}
-      }
-   }}}
-if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tHex")==0)
-  {
+       }
+      }}
+    }
+   if (strncmp(argv[1],"-t",2)!=0||strcmp(argv[1],"-tHex")==0)
+   {
     // finally output a line with the exchange fields 
     if (strncmp(argv[1],"-t",2)!=0)fprintf(fout,"\n                 corresponding exchange fields [meV]-->          ");
                       for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout exchangefields
                         {fprintf(fout," %4.4f",myround(1e-5,h(nt)));}
                         
-  }
-if (strcmp(argv[1],"-tI")==0)
-  {(*inputpars.jjj[ii]).Icalc(I,T,h,Hext,lnZ,U,(*inputpars.jjj[ii]).Icalc_parstorage);
+   }
+   if (strcmp(argv[1],"-tI")==0)
+   {(*inputpars.jjj[ii]).Icalc(I,T,h,Hext,lnZ,U,(*inputpars.jjj[ii]).Icalc_parstorage);
                          for(nt=1;nt<=savmf.nofcomponents;++nt)  // printout I operator expectation values
                         {fprintf(fout," %4.4f",myround(1e-5,I(nt)));}
                          
-  }
-fprintf(fout,"\n");
+   }
+   if (strcmp(argv[1],"-tL2")==0)
+   {// here calculate up to tl2 Angstroem bondlengths and elongation^2 and output to fout
+    L2_calc(tL2,i,j,k,ii,fout,outstr,tstr,nmin,nmax,savmf,p,T,h,Hext,inputpars);
+   }
+   else   fprintf(fout,"\n");
 
 // -----------------------------------------------------------------------------------------------
 
@@ -705,7 +763,8 @@ if(phonon==1)  // if module allows to calculate position  - use this for graphic
 }
 }
 
-  }}
+  }
+}
 }}
              
 if (strncmp(argv[1],"-t",2)==0){exit(0);}

@@ -84,7 +84,8 @@ else {print "taking $n lines\n";}
                                    
            }
       }
-      if($ii>-1){ print "hh $ii\n";emptyblock();}
+      if($ii>-1){# print "hh $ii\n";
+                 emptyblock();}
       close Fin;
       close Fout;
        unless (rename "range.out",$file)

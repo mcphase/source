@@ -394,7 +394,7 @@ void inipar::time_estimate_until_end(double x, double y)
     int nofpoints=nofstapoints+noffailedpoints+1; // add 1 to avoid zero
     int nofysteps=(int)((ymax-ymin)/ystep); if(nofysteps==0){nofysteps=1;}
     int pointstodo=nofysteps*int((xmax-x)/xstep)+int((ymax-y)/ystep);
-    print_time_estimate_until_end(pointstodo/nofpoints);
+    print_time_estimate_until_end((double)pointstodo/(double)nofpoints);
     //printf("%i  %i HTpoints to do.",nofysteps,pointstodo);
 
  
