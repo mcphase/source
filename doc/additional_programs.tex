@@ -14,7 +14,14 @@ file1.j - output is written to stdout, if file2.j is not given, a copy of the in
                          reducing (removing entries) or increasing (by filling with zeroes) 
                          the exchange parameter tables
 \item[Option:            -ni]  forces output without indexchange 
+\item[Option:            -s  0.2] scales all interactions (including  magnetoelastic G) in file1 by 0.2 before adding 
+\item[Option:            -rmcomp 9 15 ] removes components 8 to 15 from result before output
+\item[Option:            -pd]  output a column with distance  
+\item[Option:            -ps]   output a column with sublattice index
+\item[Option:            -pi 5 7  1 2 1 3] print to stdout only interaction tensor (rows 1-2, columns 1-3) of ion 5 with neighbour 7 as matrix 
+\item[Option:            -v ] verbose 
 \end{description}
+                 If file2.j is not given, a copy of the input file is saved 
 \item [\prg anisotropy:]\addcontentsline{toc}{subsubsection}{\prg anisotropy} program to calculate the magnetic anistropy
 by doing a mcphas or
                single ion calculation for different external magnetic field
@@ -549,6 +556,25 @@ given by th parametrisation in file.sipf.
 \item[Option:  -ni ] forces output without indexchange 
 \item[Option: -delatoms 1,2,5,7 ]  instead of removing atoms connected by a lattice vector 
  			remove atoms number 1,2,5 and 7 from the list and also all interactions with those 
+                        In case the atoms to be removed have the phonon module, 
+                         effective interactions are introduced between the remaining atoms, in this way the 
+                        crystal field phonon interactions with 4f shells can be treated in an effective way:
+                        Minimizing the energy by setting zero the derivative of the Hamiltonian (\ref{Htot}) with respect to the phonon coordinate
+                        $\hat u_i^{\alpha}$ and in the spirit of the Einstein model neglecting bilinear terms 
+                        ( $K_{\alpha\beta}(ij)$, $G_{mix}^{\alpha\gamma}(i)$) and off diagonal terms in
+$K_{\alpha\beta}(ii)$,  the phonon displacement $u_i^{\alpha}$
+    can be estimated in a mean field approach by 
+   \begin{equation}
+u_i^{\alpha}=\sum_{j,\gamma}\frac{-\Gamma^{\alpha\gamma}(ij) \langle O_{\gamma}(\hat \mbf J_j)\rangle }{K_{\alpha\alpha}(ii)} 
+ \end{equation}                  
+Substituting this into (\ref{Htot}) we get an effective multipole interaction contribution instead of
+the Einstein term ($K_{\alpha\beta}(ii)$,) and the crystal field phonon interaction ($\Gamma^{\alpha\gamma}(ij) $ ):
+\begin{equation}
+\hat H_{\rm tot}= \dots + \frac{1}{2}\sum_{jj',\gamma\gamma'}
+\frac{\Gamma^{\alpha\gamma}(ij)\Gamma^{\alpha\gamma'}(ij') \langle O_{\gamma}(\hat \mbf J_j)\rangle\langle O_{\gamma'}(\hat \mbf J_{j'})\rangle }
+{K_{\alpha\alpha}(ii)} + \dots
+ \end{equation}   
+This effective multipole interaction is added in the output in case an atom which is removed has the phonon module.
 \item[Option: -delatoms 1:3+-0.75:4+-0.25,2,5,7]  removes atoms number 1,2,5,7 for atom 1 the interactions
  			 are transferred to 75\% to atom 3 and 25\% to atom 4 and interactions to atoms 3 and 4 are
  			 removed, for 2 5 7 all the interactions with other atoms are removed
@@ -1099,10 +1125,17 @@ program to get the y-value of a function by averaging
          1/y-value is written to stdout MCPHASE_YVALUE_INVERSE
          standarddeviation to stdaout and MCPHASE_STA
 \end{verbatim}
-\item[\prg getvariable\index{getvariable} variablename filename]\addcontentsline{toc}{subsubsection}{\prg getvariable}
+\item[\prg getvariable\index{getvariable} {[options]} variablename filename]\addcontentsline{toc}{subsubsection}{\prg getvariable}
  program to get the value of a variable from a file 
   (e.g. somewhere in a file there is 
    a statement T=4.3 and you want to get out this 4.3)
+\begin{description}
+\item[Option  -c 24.13 ]  compare the value with $24.13\pm0.01$ (error corresponds to last 
+  digit, and exit with failure message if extracted y-value is
+                    not corresponding
+\item[Option   -v 2  ]   in case the variable is a vector (e.g. G= 32 4.2 4 ), get second component 
+                   (i.e. 4.2)
+\end{description}
 \begin{verbatim}
  output: the variable value is written to stdout and environment variable 
          MCPHASE_GETVARIABLE_VALUE, the name is stored in 

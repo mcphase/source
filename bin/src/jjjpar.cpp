@@ -39,7 +39,7 @@ double jjjpar::J()
   {
    case cfield:
    case so1ion: return (*iops).J;break;
-   case brillouin:  return ABC[1];break;
+   case brillouin:  return MODPARS[1];break;
    default: fprintf (stderr, "error class jjjpar: single ion module does not allow to calculate quantum number J \n");
             exit (EXIT_FAILURE);
   }
@@ -217,6 +217,55 @@ void jjjpar::add(jjjpar & b,Vector & abc) // add set b to this (abc: lattice con
  }
 }
 
+int jjjpar::addpar (Vector & dabc,Vector & drijk,int subl)
+// add a neighbour with distance dabc and zero exchange, return index (=paranz) of this parameter
+{ Matrix * jijn;
+  Vector * dnn;
+  Vector * drr;
+  int * sl;
+  int i;
+  jijn = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jijn[i]=Matrix(1,nofcomponents,1,nofcomponents);}
+  dnn = new Vector[paranz+1];for(i=0;i<=paranz;++i){dnn[i]=Vector(1,3);}
+  drr = new Vector[paranz+1];for(i=0;i<=paranz;++i){drr[i]=Vector(1,3);}
+  sl = new int [paranz+1];
+
+  for (i=1;i<=paranz;++i)
+  {jijn[i]=jij[i];
+   dnn[i]=dn[i];
+   drr[i]=dr[i];
+   sl[i]=sublattice[i];
+  }
+  
+  paranz++;  // increase parameters   
+  
+  delete []jij;
+  delete []dn;
+  delete []dr;
+  delete []sublattice;
+  dn = new Vector[paranz+1];for(i=0;i<=paranz;++i){dn[i]=Vector(1,3);}
+  if (dn == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
+  dr = new Vector[paranz+1];for(i=0;i<=paranz;++i){dr[i]=Vector(1,3);}
+  if (dr == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
+  sublattice = new int[paranz+1];
+  if (sublattice == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);}
+  jij = new Matrix[paranz+1];for(i=0;i<=paranz;++i){jij[i]=Matrix(1,nofcomponents,1,nofcomponents);}
+  if (jij == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
+
+// setup new field jij, dn
+  for (i=1;i<paranz;++i)
+  {jij[i]=jijn[i];dn[i]=dnn[i];dr[i]=drr[i];sublattice[i]=sl[i];}
+   jij[paranz]=0;
+   dn[paranz]=dabc;
+   dr[paranz]=drijk;
+   
+   sublattice[paranz]=subl;
+
+  delete []jijn;
+  delete []dnn;
+  delete []drr;
+  return paranz;
+}
+
 // enlarge the set of parameters 
 // inserting a set of exchange parameters
 // into field at position number
@@ -313,7 +362,7 @@ void jjjpar::delpar (int number)
 /************************************************************************************/
 
 //saving parameters to file
-void jjjpar::save(FILE * file,int noindexchange) 
+void jjjpar::save(FILE * file,int noindexchange,bool pd, bool ps) 
 { int i,i1,j1,npairs=0,symmetric=1;
   int *n1= new int[nofcomponents*nofcomponents+2];if (n1 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
            
@@ -337,8 +386,8 @@ void jjjpar::save(FILE * file,int noindexchange)
  if(npairs==0){++npairs;n1[npairs]=1;n2[npairs]=1;} // in case all exchange constants are zero ...
 
  // if there are less columns to be saved than  nofcomponentsxnofcomponents-2 -- > use indexchange format
-  if(npairs<nofcomponents*nofcomponents-2&&noindexchange==0){
-  int diagsav=diagonalexchange;diagonalexchange=2;
+  if(npairs<nofcomponents*nofcomponents-2&&noindexchange==0)
+{ int diagsav=diagonalexchange;diagonalexchange=2;
   saveatom(file);
   saveG(file);
   diagonalexchange=diagsav;
@@ -350,11 +399,16 @@ void jjjpar::save(FILE * file,int noindexchange)
   fprintf(file,"#! symmetricexchange=%i indexexchange=",symmetric);
   for(i1=1;i1<=npairs;++i1){
    if(n1[i1]<0){if(symmetric==0){fprintf(file," %i,%i",-n1[i1],-n2[i1]);}} // print lower triangle only if nonsymmetric exchange
-   else{  fprintf(file," %i,%i",n1[i1],n2[i1]);}
+   else        {fprintf(file," %i,%i",n1[i1],n2[i1]);}
   }  fprintf(file,"\n");
-  fprintf(file,"#da[a]   db[b]     dc[c]       J%i%i[meV]  ... \n",abs(n1[1]),abs(n2[1]));  
+  fprintf(file,"#");
+  if(ps)fprintf(file,"sublattice ");
+  if(pd)fprintf(file,"distance[A] ");
+  fprintf(file,"da[a]   db[b]     dc[c]       J%i%i[meV]  ... \n",abs(n1[1]),abs(n2[1]));  
   for  (i=1;i<=paranz;++i)
-  {fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",myround(dn[i](1)),myround(dn[i](2)),myround(dn[i](3)));
+  {if(ps)fprintf(file,"%i ",sublattice[i]);
+   if(pd)fprintf(file,"%-+8.6g ",Norm(dr[i]));
+   fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",myround(dn[i](1)),myround(dn[i](2)),myround(dn[i](3)));
    for(i1=1;i1<=npairs;++i1){
    if(n1[i1]<0){if(symmetric==0){fprintf(file," %-+8.6e",jij[i](-n1[i1],-n2[i1]));}} // print lower triangle only if nonsymmetric exchange
    else{  fprintf(file," %-+8.6e",jij[i](n1[i1],n2[i1]));}
@@ -364,10 +418,15 @@ void jjjpar::save(FILE * file,int noindexchange)
 else
 { saveatom(file);saveG(file);
 // save the exchange parameters to file in traditional method(exactly paranz parameters!)
-  fprintf(file,"#da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");  
+  fprintf(file,"#");
+  if(ps)fprintf(file,"sublattice ");
+  if(pd)fprintf(file,"distance[A] ");
+  fprintf(file,"da[a]   db[b]     dc[c]       Jaa[meV]  Jbb[meV]  Jcc[meV]  Jab[meV]  Jba[meV]  Jac[meV]  Jca[meV]  Jbc[meV]  Jcb[meV]\n");  
   for  (i=1;i<=paranz;++i)
-  {fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",myround(dn[i](1)),myround(dn[i](2)),myround(dn[i](3)));
-    // format of matrix 
+  {if(ps)fprintf(file,"%i ",sublattice[i]);
+   if(pd)fprintf(file,"%-+8.6g ",Norm(dr[i]));
+   fprintf(file,"%-+8.6g %-+8.6g %-+8.6g  ",myround(dn[i](1)),myround(dn[i](2)),myround(dn[i](3)));
+  // format of matrix 
   // 11 22 33 12 21 13 31 23 32 (3x3 matrix)
   // 11 22 33 44 12 21 13 31 14 41 23 32 24 42 34 43 (4x4 matrix)
   // 11 22 33 44 55 12 21 13 31 14 41 15 51 23 32 24 42 25 52 34 43 35 53 45 54 (5x5 matrix)
@@ -444,7 +503,7 @@ void jjjpar::save_sipf(FILE * fout)
            fprintf(fout,"#\n# this is a crystal field ground state doublet\n");
            fprintf(fout,"# module, parameters are the following 3 matrix\n# elements\n#\n");
            fprintf(fout,"# A=|<+-|Ja|-+>| B=|<+-|Jb|-+>| C=|<+-|Jc|+->|\n");
-           fprintf(fout,"A=%10f \n B=%10f \n C=%10f\n\n",ABC(1),ABC(2),ABC(3));
+           fprintf(fout,"A=%10f \n B=%10f \n C=%10f\n\n",MODPARS(1),MODPARS(2),MODPARS(3));
             
           break;
    case cfield: fprintf(fout,"#!MODULE=cfield\n#<!--mcphase.sipf-->\n");
@@ -478,7 +537,7 @@ void jjjpar::save_sipf(FILE * fout)
            fprintf(fout,"#****************************************************************\n#\n");
            fprintf(fout,"#\n# single ion parameterized by Brillouin function\n");
            fprintf(fout,"# BJ(x) with angular momentum number J=S,\n# no crystal field\n#\n");
-           fprintf(fout,"J = %g\n\n",ABC(1));
+           fprintf(fout,"J = %g\n\n",MODPARS(1));
           break;
    case so1ion: fprintf(fout,"#!MODULE=so1ion\n#<!--mcphase.sipf-->\n");
            fprintf(fout,"#***************************************************************\n");
@@ -517,7 +576,7 @@ void jjjpar::save_sipf(FILE * fout)
            (*clusterpars).save(clustsavfile,0);
            (*clusterpars).save_sipfs("results/_");}
    default: // in case of external single ion module just save a copy of the input file 
-            // however, substitute some variables such as CHARGE nof_electrons ABC magnetic
+            // however, substitute some variables such as CHARGE nof_electrons MODPARS magnetic
              char *token;//double dummy;
             for (std::string line; std::getline(ss, line, '\n');)
             {//const char * instr = line.c_str();//
@@ -847,7 +906,7 @@ jjjpar::jjjpar(int n,int diag,int nofmom)
   paranz=n;xyz=Vector(1,3);xyz=0; 
    cnst= Matrix(0,6,-6,6);set_zlm_constants(cnst);
   int i1;r2=0;r4=0;r6=0;
-  module_type=kramer;orientation=abc_xyz;ABC=Vector(1,3);ABC=0;
+  module_type=kramer;orientation=abc_xyz;MODPARS=Vector(1,3);MODPARS=0;
   transitionnumber=1;
   nofcomponents=nofmom;
   mom=Vector(1,9); mom=0;
@@ -913,7 +972,7 @@ SLR=pp.SLR;SLI=pp.SLI;
   strcpy(sipffilename,pp.sipffilename);
   if(module_type<=0)ss = std::stringstream{slurp(sipffilename)};
   
-  if (pp.module_type==brillouin||pp.module_type==kramer||pp.module_type<=0)  ABC=pp.ABC;
+  if (pp.module_type==brillouin||pp.module_type==kramer||pp.module_type<=0)  MODPARS=pp.MODPARS;
   if ((pp.module_type==cluster||pp.module_type==brillouin||pp.module_type==kramer||pp.module_type<=0) &&
       (pp.Icalc_parstorage.Cols()>0) && (pp.Icalc_parstorage.Rows()>0))
   {  Icalc_parstorage = ComplexMatrix(pp.Icalc_parstorage.Rlo(),pp.Icalc_parstorage.Rhi(),pp.Icalc_parstorage.Clo(),pp.Icalc_parstorage.Chi());

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------------------------
 void jjjpar::brillouin_Icalc (Vector & Jret, double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U)
 { /*on input
-    ABC(1)  J=S....Spin quantum number
+    MODPARS(1)  J=S....Spin quantum number
     gJ		lande factor
     T		temperature[K]
     gjmbH	vector of effective field [meV]
@@ -14,15 +14,15 @@ void jjjpar::brillouin_Icalc (Vector & Jret, double & T, Vector &  Hxc,Vector & 
 */
 
 // check dimensions of vector
-if(Jret.Hi()!=3||Hxc.Hi()!=3||ABC.Hi()!=1)
+if(Jret.Hi()!=3||Hxc.Hi()!=3||MODPARS.Hi()!=1)
    {fprintf(stderr,"Error loadable module brillouin.so: wrong number of dimensions - check number of columns in file mcphas.j or number of parameters in single ion property file\n");
     exit(EXIT_FAILURE);}
 if(T==0){fprintf(stderr,"Error - T=0 in module Brillouin - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
 double JJ,KBT,XJ,gmhkt,Jav,gmh,Z,X;
 Vector gjmbH(1,3);
 gjmbH=Hxc+gJ*MU_B*Hext(1,3);
-// program brillouin function for S=J=ABC(1)
-JJ=ABC[1];
+// program brillouin function for S=J=MODPARS(1)
+JJ=MODPARS[1];
 KBT=T*KB;
 gmh=Norm(gjmbH);
 gmhkt=gmh/KBT;
@@ -80,7 +80,7 @@ int jjjpar::brillouindm(int & tn,double & T,Vector &  Hxc,Vector & Hext,ComplexV
 { 
   /*on input
     tn          transition-number
-    ABC(1)      S=J spin quantum number
+    MODPARS(1)      S=J spin quantum number
     g_J		lande factor
     T		temperature[K]
     gjmbH	vector of effective field [meV]
@@ -100,8 +100,8 @@ gjmbH=Hxc+gJ*MU_B*Hext(1,3);
   double JJ,KBT,XJ,gmhkt,gmh,Z,R,X,sinth,hxxyy,jjkt,corr;
   complex <double> i(0,1),bx,by,bz;
 
-// program brillouin function for S=J=ABC(1)
-  JJ=ABC[1];
+// program brillouin function for S=J=MODPARS(1)
+  JJ=MODPARS[1];
   KBT=T*KB;
   gmh=Norm(gjmbH);
   gmhkt=gmh/KBT;

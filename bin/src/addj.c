@@ -23,6 +23,8 @@ int main (int argc, char **argv)
                         -s  0.2             ... scales all interactions (including \n \
                                                 magnetoelastic G) in file1 by 0.2 before adding \n \
                         -rmcomp 9 15        ... removes components 8 to 15 from result before output\n \
+                        -pd                 ... output a column with distance  \n \
+                        -ps                 ... output a column with sublattice index\n \
                         -pi 5 7  1 2 1 3 print to stdout only interaction tensor (rows 1-2, columns 1-3) of ion 5 with neighbour 7 as matrix \n \
                         -v  verbose \n \
                 If file2.j is not given, a copy of the input file is saved \n \
@@ -30,7 +32,7 @@ int main (int argc, char **argv)
       exit (1);
     } else {fprintf(stderr, "#* addj 250712 *\n");}
  int ow=1; int n=0,noindexchange=0,rml=0,rmh;double scale=1.0;int verbose=0;
- int pa=0,pi,prl,prh,pcl,pch;
+ int pa=0,pi,prl,prh,pcl,pch;bool pd=false,ps=false;
  while(argv[ow][0]=='-'){
  if(strcmp(argv[ow],"-nofcomponents")==0){ow+=1;
  // option setting nofcomponents
@@ -43,6 +45,8 @@ int main (int argc, char **argv)
                              }
  if(strcmp(argv[ow],"-ni")==0){noindexchange=1;}
  if(strcmp(argv[ow],"-v")==0){verbose=1;}
+ if(strcmp(argv[ow],"-pd")==0){pd=true;}
+ if(strcmp(argv[ow],"-ps")==0){ps=true;}
  if(strcmp(argv[ow],"-pi")==0){
                               ow+=1;pa=(int)strtol(argv[ow], (char **)NULL, 10);
                              ow+=1;pi=(int)strtol(argv[ow], (char **)NULL, 10);
@@ -65,7 +69,7 @@ int main (int argc, char **argv)
   if(rml>0){a.remove_components(rml,rmh,verbose);}
 if(pa) a.print_interaction(stdout,pa,pi,prl,prh,pcl,pch);
 else
- a.save(stdout,noindexchange);
+ a.save(stdout,noindexchange,pd,ps);
 }
 
 

@@ -45,41 +45,41 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
  cf_file=open_sipf(sipf_filename,modulefilename,verbose);
   if(strcmp(modulefilename,"kramer")==0)
     {module_type=kramer;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
-      ABC=Vector(1,3);i=3;
+      MODPARS=Vector(1,3);i=3;
       nof_electrons=0; // not to be used in module kramer !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
       parseline(instr,ob);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-                                           i+=extract(instr,"A",ABC(1),ob)-1;
-                                           i+=extract(instr,"B",ABC(2),ob)-1;
-                                           i+=extract(instr,"C",ABC(3),ob)-1;
+                                           i+=extract(instr,"A",MODPARS(1),ob)-1;
+                                           i+=extract(instr,"B",MODPARS(2),ob)-1;
+                                           i+=extract(instr,"C",MODPARS(3),ob)-1;
                                           }
       }
       // input all  lines starting with comments
       if(i!=0){fprintf(stderr,"Error reading |<+-|Ja|-+>|,|<+-|Jb|-+>|,|<+-|Jc|+->| from file %s\ncorrect file format is:\n",sipf_filename);
               fprintf(stderr,"\nMODULE=kramer\n#comment lines ..\n#matrix elements A=|<+-|Ja|-+>| B=|<+-|Jb|-+>| C=|<+-|Jc|+->|\nA=2 \nB=3 \nC=1\n\n");exit(EXIT_FAILURE);}
-      // now we have the numbers corresponding to the vector ABC() in nn[]
-      fprintf(stderr," ... kramers doublet with A=<+|Ja|->=%g B=<+-|Jb|+->=+-%g C=<+|Jc|->/i=%g\n",ABC(1),ABC(2),ABC(3));
+      // now we have the numbers corresponding to the vector MODPARS() in nn[]
+      fprintf(stderr," ... kramers doublet with A=<+|Ja|->=%g B=<+-|Jb|+->=+-%g C=<+|Jc|->/i=%g\n",MODPARS(1),MODPARS(2),MODPARS(3));
       est=ComplexMatrix(0,2,1,2); // not used, just initialize to prevent errors
       Icalc_parstorage=ComplexMatrix(0,2,1,2); // not used, just initialize to prevent errors
     }
   else
     {if(strcmp(modulefilename,"brillouin")==0)
      {module_type=brillouin;orientation=abc_xyz;if(verbose)fprintf (stderr,"#[internal]\n");
-      ABC=Vector(1,1);i=1;
+      MODPARS=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module brillouin !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
       parseline(instr,ob);
        if(instr[strspn(instr," \t")]!='#'){//unless the line is commented ...
-                                           i+=extract(instr,"J",ABC(1),ob)-1;
+                                           i+=extract(instr,"J",MODPARS(1),ob)-1;
                                           }
       }// input all  lines starting with comments
       if(i!=0){fprintf(stderr,"Error reading spin quantum number J=S from file %s\ncorrect file format is:\n",sipf_filename);
               fprintf(stderr,"\n#!brillouin\n#comment lines ..\n# Quantum number  J\nJ=3.5\n\n");exit(EXIT_FAILURE);}
-      // now we have the numbers corresponding to the vector ABC() in nn[]
-      fprintf(stderr," ... Brillouin function with J=S=%g\n",ABC(1));
+      // now we have the numbers corresponding to the vector MODPARS() in nn[]
+      fprintf(stderr," ... Brillouin function with J=S=%g\n",MODPARS(1));
       est=ComplexMatrix(0,2,1,2);est=0;// not used, just initialize to prevent errors
       Icalc_parstorage=ComplexMatrix(0,2,1,2);Icalc_parstorage=0;// not used, just initialize to prevent errors
      }
@@ -112,7 +112,7 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
      }
      else if (strcmp(modulefilename,"cluster")==0)
      {module_type=cluster;orientation=abc_xyz;module_clust=true;if(verbose)fprintf (stderr,"#[internal]\n");
-      ABC=Vector(1,1);i=1;
+      MODPARS=Vector(1,1);i=1;
       nof_electrons=0; // not to be used in module cluster !!
       while(feof(cf_file)==false)
       {fgets(instr, MAXNOFCHARINLINE, cf_file);
@@ -148,12 +148,12 @@ void jjjpar::get_parameters_from_sipfile(char * sipf_filename,int verbose,parser
       }
        // input all  lines starting with comments
     //while((i=inputparline ("params",cf_file, nn))==0&&feof(cf_file)==false);
-    // now we have the numbers corresponding to vector ABC() in nn[] - these are the module parameters !
+    // now we have the numbers corresponding to vector MODPARS() in nn[] - these are the module parameters !
     if(verbose)fprintf(stderr,"#MODPARs: ");
     if(i>0){
-             ABC=Vector(1,i);for(j=1;j<=i;++j){ABC(j)=nn[j];if(verbose)fprintf(stderr,"%g ",nn[j]);}
+             MODPARS=Vector(1,i);for(j=1;j<=i;++j){MODPARS(j)=nn[j];if(verbose)fprintf(stderr,"%g ",nn[j]);}
             }else{
-             ABC=Vector(1,1);
+             MODPARS=Vector(1,1);
 	    }
     if(verbose)fprintf(stderr," module functions ");
 module_type=external;orientation=abc_xyz;int err_load_lib=0;
@@ -564,11 +564,11 @@ void jjjpar::Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,double
    case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);break;
    case cluster: cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);break;
    case external_class: if(T==0){fprintf(stderr,"Error - T=0 in external module - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
-                         if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U))
+                         if(false==si_mod->Icalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename,lnZ,U))
                         {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);};
                   break;
    default: if(T==0){fprintf(stderr,"Error - T=0 in external module - Monte Carlo stepping not yet implemented\n");exit(EXIT_FAILURE);}
-             (*I)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);
+             (*I)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&lnZ,&U,&parstorage);
   }
 }
 void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector & lnZ,Vector & U,ComplexMatrix & parstorage)
@@ -587,19 +587,19 @@ void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector
            break;
    case cluster:  cluster_Icalc_mcalc_Micalc (1,mom,T,Hxc,Hext,lnZ,U);
           break;
-   case external_class: if(false==si_mod->IMcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename,lnZ,U))
+   case external_class: if(false==si_mod->IMcalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename,lnZ,U))
                         {for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
-                         if(false==si_mod->Icalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename,lnZ(i),U(i)))
+                         if(false==si_mod->Icalc(m,T(i),Hxc,Hext,gJ,MODPARS,sipffilename,lnZ(i),U(i)))
                   {fprintf (stderr," error external class module %s loading function Icalc not possible ...\n",modulefilename);exit(EXIT_FAILURE);}
                          SetColumn(i,mom,m);
                         }}
                   break;
    default:if(IM==NULL){ for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
-          (*I)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ(i),&U(i),&parstorage);
+          (*I)(&m,&T(i),&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&lnZ(i),&U(i),&parstorage);
           SetColumn(i,mom,m);}
                       } // if exists IM (Matrix function for Icalc) use this
            else
-          {(*IM)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&lnZ,&U,&parstorage);}
+          {(*IM)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&lnZ,&U,&parstorage);}
             
   }
 }
@@ -612,7 +612,7 @@ void jjjpar::Icalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Vector
 int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,float & delta,int & n, int & nd, ComplexMatrix & ests)
 {delta=maxE;u1(1)=complex <double> (ninit,pinit);
   switch (module_type)
-  {case external: if (du!=NULL){return (*du)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&u1,&delta,&n,&nd,&ests);}
+  {case external: if (du!=NULL){return (*du)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&u1,&delta,&n,&nd,&ests);}
            else return 0;
            break;
    case kramer: return kramerdm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
@@ -620,7 +620,7 @@ int jjjpar::du1calc(double & T,Vector &  Hxc,Vector & Hext,ComplexVector & u1,fl
    case so1ion: return (*iops).du1calc(transitionnumber,T,Hxc,Hext,u1,delta,n,nd,ests);break;
    case brillouin: return brillouindm(transitionnumber,T,Hxc,Hext,u1,delta,n,nd);break;
    case cluster: return cluster_dm(1,transitionnumber,T,u1,delta,n,nd,ests);break;
-   case external_class: return si_mod->du1calc(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,u1,delta,n,nd,ests);break;
+   case external_class: return si_mod->du1calc(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,u1,delta,n,nd,ests);break;
    default: return 0;
   }
 }
@@ -781,12 +781,12 @@ if(qcounter>0&&epsilon<=0)  // 1 do purely magnetic susceptibility using dm1calc
 /****************************************************************************/
 ComplexMatrix & jjjpar::eigenstates (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case external:  if(estates!=NULL){(*estates)(&est,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
+  {case external:  if(estates!=NULL){(*estates)(&est,&Hxc,&Hext,&gJ,&T,&MODPARS,&sipffilename);}
             return est;break;
    case cfield:
    case so1ion: (*iops).cfeigenstates(&est,Hxc,Hext,T);return est;break;
    case cluster: cluster_est(&est,Hxc,Hext,T);return est;break;
-   case external_class: if(false==si_mod->estates(est,Hxc,Hext,gJ,T,ABC,sipffilename))
+   case external_class: if(false==si_mod->estates(est,Hxc,Hext,gJ,T,MODPARS,sipffilename))
                         {est=ComplexMatrix(0,2,1,2);est=0;}
                         return est;  
                         break;
@@ -817,7 +817,7 @@ void jjjpar::print_eigenstates(FILE *fout)
 /****************************************************************************/
 ComplexMatrix & jjjpar::Icalc_parameter_storage_init (Vector &  Hxc,Vector & Hext,double & T)
 {switch (module_type)
-  {case external:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&Hxc,&Hext,&gJ,&T,&ABC,&sipffilename);}
+  {case external:  if(Icalc_parameter_storage!=NULL){(*Icalc_parameter_storage)(&Icalc_parstorage,&Hxc,&Hext,&gJ,&T,&MODPARS,&sipffilename);}
             return Icalc_parstorage;break;
    case cfield:
    case so1ion: (*iops).cfeigenstates(&Icalc_parstorage,Hxc,Hext,T);return Icalc_parstorage;break;

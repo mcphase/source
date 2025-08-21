@@ -173,9 +173,12 @@ return cs.nofatoms;
 }
 
 int par::delatom(int nn, Matrix & distribute,int verbose) // removes atom number n 
-// 1)if n<0 then atom number |n| is removed and also all interactions of other atoms
+// 1)if nn<0 then atom number |nn| is removed and also all interactions of other atoms
 // with this atom are removed from the interaction table 
-// 2) if n>0 interactions with the other atoms are kept and transferred to 
+// In case the atoms to be removed have the phonon module, 
+//  effective interactions are introduced between the remaining atoms, in this way the 
+// crystal field phonon interactions with 4f shells can be treated in an effective way
+// 2) if nn>0 interactions with the other atoms are kept and transferred to 
 // a group of atoms (numbers given in column 1 of distribute) with 
 // coefficients given in col 2 of distribute. Only interactions
 // with atoms given in column 1 of distribute are removed completely.
@@ -236,22 +239,58 @@ if(found!=1){fprintf(stderr,"Error reduce_unitcell on distributing interaction %
                                     (*jjj[j]).delpar(s);--s;}
           //fprintf(stderr,"%i neighbour of ion %i paranz=%i sublattice=%i \n",s,j,(*nnn[j]).paranz,(*nnn[j]).sublattice[s]);
           }
-   if(j>n){                
+// now all interactions for ion j are removed  / redistributed from other ions neighbour list
+
+   if(j>n){    // if ion j is after the ion to be deleted in the list, move its sipffilenam and xyz down in the list            
  cs.sipffilenames[j-1]=(*jjj[j]).sipffilename;
  cs.x[j-1]=(*jjj[j]).xyz[1];
  cs.y[j-1]=(*jjj[j]).xyz[2];
  cs.z[j-1]=(*jjj[j]).xyz[3];
           }
 if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
-              if(j+1==n)++j;}
+              if(j+1==n)++j;// if next ion is the ion to be deleted jump over it and treat in the next loops the remaining ions
+}
 
-if(nn<0){totalcharge-=(*jjj[n]).charge;}
+if(nn<0){totalcharge-=(*jjj[n]).charge;// recalculate charge in case the ion is removed without redistributing charge
+// here create the effective multipolar interactions in case the ion has the phonon module
+// check if external module and pcalc is defined --> then it is a phonon module
+Vector u0(1,3),Hxc(1,3),Hext(1,3);double T=1,g_J=0;
+if((*jjj[n]).module_type==external_class&&(*jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage))
+    { if(verbose)fprintf(stderr,"%s is phonon module - creating effective multipolar interactions\n",(*jjj[n]).sipffilename);}
+       for(s=1;s<=(*jjj[n]).paranz;++s){int j=(*jjj[n]).sublattice[s];
+        if(!(*jjj[j]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage)) // if neighbour is no phonon
+         {for(int sd=1;sd<=(*jjj[n]).paranz;++sd) // loop all neighbours in list
+          {// identify which magnetic ion adresses the neighbour s and sd
+            int jd=(*jjj[n]).sublattice[sd];
+           if(!(*jjj[jd]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage)) // if neighbour is no phonon
+           { 
+           // compute distance vector of effective multipolar interaction
+           Vector dabc(1,3),drijk(1,3); dabc=(*jjj[n]).dn[sd]-(*jjj[n]).dn[s];dadbdc2ijk(drijk,dabc, cs.abc);
+              // look if this neighbour is present in the list of atom j - if not, add this neighbour
+              int f=0;
+              for(int ss=1;ss<=(*jjj[j]).paranz;++ss)if(Norm((*jjj[j]).dn[ss]-dabc)<SMALL_MATCH_LATTICEVECTOR)f=ss;
+               if(f==0){f=(*jjj[j]).addpar(dabc,drijk,jd);}
+//fprintf(stderr,"hello %i\n",f);
+//myPrintVector(stderr,dabc);
+              // look if this neighbour is present in the list of atom jd- if not, add this neighbour
+              int ff=0;dabc*=-1.0;drijk*=-1.0;
+              for(int ss=1;ss<=(*jjj[jd]).paranz;++ss)if(Norm((*jjj[jd]).dn[ss]-dabc)<SMALL_MATCH_LATTICEVECTOR)ff=ss;
+               if(ff==0){ff=(*jjj[jd]).addpar(dabc,drijk,j);}
+      for(int a=1;a<=3;++a) // for to be deleted atom nn loop all three coordinates a=1,2,3 (xyz phonon displacements)
+         for(int g=4;g<=cs.nofcomponents;++g)for(int gd=4;gd<=cs.nofcomponents;++gd)  // loop all interactions with higher order multipoles of other atoms
+           { // add multipolar effective interaction to ion j
+             (*jjj[j]).jij[f](g,gd)-=(*jjj[n]).jij[s](a,g)*(*jjj[n]).jij[sd](a,gd)/(*jjj[n]).MODPARS(a+1);
+             if(Norm(dabc)>SMALL_MATCH_LATTICEVECTOR)(*jjj[jd]).jij[ff](g,gd)-=(*jjj[n]).jij[s](a,g)*(*jjj[n]).jij[sd](a,gd)/(*jjj[n]).MODPARS(a+1);
+           }
+         }}}}
+    }
 else{for(int i=1;i<=distribute.Rhi();++i){int sl=(int)distribute(i,1);
 if(distribute(i,2)<0) {(*jjj[sl]).charge+=fabs(distribute(i,2))*(*jjj[n]).charge;
 fprintf(stderr,"charge on atom %i set to %g and overwriting sipf file %s \n",sl,(*jjj[sl]).charge,(*jjj[sl]).sipffilename);
 (*jjj[sl]).save_sipf("./"); }
        }}
 
+// now completeley remove ion from the table of interactions jjj
 for (j=1;j<n;++j){nnn[j]=jjj[j];}
 for (j=n+1;j<=cs.nofatoms+1;++j){nnn[j-1]=jjj[j];}
 // correct the sublattice numbering 
@@ -407,7 +446,7 @@ void par::save (const char * filename,int noindexchange)
 
 
 
-void par::save (FILE * file,int noindexchange)
+void par::save (FILE * file,int noindexchange,bool pd, bool ps)
 { int i;
   errno = 0;
   fprintf(file,"%s",rems[1]);
@@ -424,7 +463,7 @@ void par::save (FILE * file,int noindexchange)
   savelattice(file);
   for (i=1;i<=cs.nofatoms;++i)
   {
-  (*jjj[i]).save(file,noindexchange);
+  (*jjj[i]).save(file,noindexchange,pd,ps);
 //  fprintf(file,"%s",rems[3+i]); // changed 3.03 - I believe here should be only line with stars
     fprintf(file,"#*********************************************************************\n");
   }

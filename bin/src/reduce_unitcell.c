@@ -24,7 +24,10 @@ int main (int argc, char **argv)
                         the exchange parameter tables\n \
                         -ni  forces output without indexchange \n \
 			-delatoms 1,2,5,7    instead of removing atoms connected by a lattice vector \n \
-			remove atoms number 1,2,5 and 7 from the list and also all interactions with those \n \
+			remove atoms number 1,2,5 and 7 from the list and also all interactions with those. \n \
+                        In case the atoms to be removed have the phonon module, \n \
+                         effective interactions are introduced between the remaining atoms, in this way the  \n \
+                        crystal field phonon interactions with 4f shells can be treated in an effective way \n \
 			-delatoms 1:3+-0.75:4+-0.25,2,5,7  removes atoms number 1,2,5,7 for atom 1 the interactions\n \
 			 are transferred to 75%% to atom 3 and 25%% to atom 4 and interactions to atoms 3 and 4 are\n \
 			 removed,   for 2 5 7 all the interactions with other atoms are removed\n \
@@ -71,7 +74,7 @@ for(n=1;n<=i;++n)
  while ((token=strchr(substr[n],':'))!=NULL){*token=' ';}
 //fprintf(stderr,"string is %s\n",substr[n]);
 // use splitstring to read atom numbers and as "error+-" the nscoeff
- int nn=splitstring(substr[n],ns,nscoeff);
+ int nn=splitstring(substr[n],ns,nscoeff); // nn-1= number of neighbours onto which to be distributed
  int dim=1;if(nn>1){dim=nn-1;}
    Matrix dis(1,dim,1,2);int an=ns[1];
  for(int ii=2;ii<=nn;++ii){
@@ -86,8 +89,8 @@ dis(ii-1,1)=nnew;
 dis(ii-1,2)=nscoeff[ii];
                           }
    if(n<i){int anp1=strtod (substr[n+1], NULL);if((int)an<=(int)anp1){fprintf(stderr,"Error program reduce_unitcell option -delatoms atom numbers have to be given in ascending order\n");exit(1);}}
-if(nn>1){   a.delatom((int)an,dis,verbose);
-}else{ a.delatom(-(int)an,dis,verbose);}
+if(nn>1){   a.delatom((int)an,dis,verbose); // distribute onto neighbours
+}else{ a.delatom(-(int)an,dis,verbose);} // do not distribute onto neighbours. In case of phonon module put effective multipolar interaction to 
   }
 }
  a.save(stdout,noindexchange);

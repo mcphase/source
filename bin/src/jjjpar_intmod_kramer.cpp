@@ -6,7 +6,7 @@ void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext
 kramer_Icalc(Jret,T,Hxc,Hext,lnZ,U,state,false);}
 void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext, double & lnZ, double & U,ComplexVector *& state,bool use_state )
 { /*on input
-    ABC(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
+    MODPARS(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     gJ		lande factor
     T		temperature[K], T=0 means do random Monte Carlo step
     gjmbH	vector of effective field [meV]
@@ -23,18 +23,18 @@ void jjjpar::kramer_Icalc (Vector & Jret,double & T, Vector &  Hxc,Vector & Hext
 
 if(T==0&&use_state==true)
 { // calculate expectation value from state (*state)(1)|+> + (*state)(2) |->
-Jret(1)=ABC[1]*real(conj((*state)(1))*(*state)(2)+conj((*state)(2))*(*state)(1));
-Jret(2)=ABC[2]*real(conj((*state)(1))*(*state)(1)-conj((*state)(2))*(*state)(2));
-Jret(3)=ABC[3]*real(conj((*state)(1))*(*state)(2)-conj((*state)(1))*(*state)(2));
+Jret(1)=MODPARS[1]*real(conj((*state)(1))*(*state)(2)+conj((*state)(2))*(*state)(1));
+Jret(2)=MODPARS[2]*real(conj((*state)(1))*(*state)(1)-conj((*state)(2))*(*state)(2));
+Jret(3)=MODPARS[3]*real(conj((*state)(1))*(*state)(2)-conj((*state)(1))*(*state)(2));
 
 }else
 { gjmbH[1]=Hxc[1]+gJ*MU_B*Hext[1];
   gjmbH[2]=Hxc[2]+gJ*MU_B*Hext[2];
   gjmbH[3]=Hxc[3]+gJ*MU_B*Hext[3];
   
-  betar = -ABC[1] * gjmbH[1];
-  alpha = -ABC[2] * gjmbH[2];
-  betai = -ABC[3] * gjmbH[3];
+  betar = -MODPARS[1] * gjmbH[1];
+  alpha = -MODPARS[2] * gjmbH[2];
+  betai = -MODPARS[3] * gjmbH[3];
 
   lambdap2 = alpha * alpha + betar * betar + betai * betai;
   lambdap = sqrt (lambdap2);
@@ -48,42 +48,42 @@ Jret(3)=ABC[3]*real(conj((*state)(1))*(*state)(2)-conj((*state)(1))*(*state)(2))
 
 if (nennerp > SMALL)
     {
-      jap = -ABC[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
+      jap = -MODPARS[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
 //      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
-      jbp = ABC[2] * alpha / lambdap;
-      jcp = -2.0 * ABC[3] * betai * (alpha_lambdap) / nennerp;
+      jbp = MODPARS[2] * alpha / lambdap;
+      jcp = -2.0 * MODPARS[3] * betai * (alpha_lambdap) / nennerp;
     }
   else
     {
       jap = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbp = copysign (ABC[2], alpha);
+	  jbp = copysign (MODPARS[2], alpha);
 	}
       else
 	{
-	  jbp = ABC[2];
+	  jbp = MODPARS[2];
 	}
       jcp = 0;
     }
 
 if (nennerm > SMALL)
     {
-      jam = -ABC[1] * 2.0 * betar * (alphaplambdap) / nennerm;
+      jam = -MODPARS[1] * 2.0 * betar * (alphaplambdap) / nennerm;
 //      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
-      jbm = -ABC[2] * alpha /lambdap;
-      jcm = -2.0 * ABC[3] * betai * (alphaplambdap) / nennerm;
+      jbm = -MODPARS[2] * alpha /lambdap;
+      jcm = -2.0 * MODPARS[3] * betai * (alphaplambdap) / nennerm;
     }
   else
     {
       jam = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbm = -copysign (ABC[2], alpha);
+	  jbm = -copysign (MODPARS[2], alpha);
 	}
       else
 	{
-	  jbm = -ABC[2];
+	  jbm = -MODPARS[2];
 	}
       jcm = 0;
     }
@@ -190,7 +190,7 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & He
 { 
   /*on input
     transitionnumber ... number of transition to be computed - meaningless for kramers doublet, because there is only 1 transition
-    ABC[i]	saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
+    MODPARS[i]	saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     gJ		lande factor
     T		temperature[K]
     gjmbH	vector of effective field [meV]
@@ -219,9 +219,9 @@ int jjjpar::kramerdm(int & transitionnumber,double & T,Vector &  Hxc,Vector & He
   pr=0;
   if (transitionnumber<0) {pr=1;transitionnumber*=-1;}
 
-  alpha = ABC[2]* gjmbH[2];
-  betar = -ABC[1] * gjmbH[1];
-  betai = -ABC[3] * gjmbH[3];
+  alpha = MODPARS[2]* gjmbH[2];
+  betar = -MODPARS[1] * gjmbH[1];
+  betai = -MODPARS[3] * gjmbH[3];
   lambdap2 = alpha * alpha + betar * betar + betai * betai;
   lambdap = sqrt (lambdap2);
 
@@ -251,21 +251,21 @@ if (transitionnumber==2)
 
   if (nenner > SMALL)
     {
-      ja = -ABC[1] * 2.0*(alpha * betar+i * betai * lambdap) / nenner;
-      jb = -ABC[2] * 2.0 * (betar*betar+betai*betai) / nenner;
-      jc = -ABC[3] * 2.0*(alpha*betai -i *betar*lambdap) / nenner;
+      ja = -MODPARS[1] * 2.0*(alpha * betar+i * betai * lambdap) / nenner;
+      jb = -MODPARS[2] * 2.0 * (betar*betar+betai*betai) / nenner;
+      jc = -MODPARS[3] * 2.0*(alpha*betai -i *betar*lambdap) / nenner;
     }
   else
     {
       if (alpha > SMALL)
-	{ja = ABC[1];  // <-| is the ground state
+	{ja = MODPARS[1];  // <-| is the ground state
   	 jb = 0;
-         jc = -i*ABC[3];
+         jc = -i*MODPARS[3];
 	}
       else
-	{ja = ABC[1];  // <+| is the ground state
+	{ja = MODPARS[1];  // <+| is the ground state
   	 jb = 0;
-         jc = i*ABC[3]; 	
+         jc = i*MODPARS[3]; 	
 	}
     }
  if (delta>SMALL_QUASIELASTIC_ENERGY)
@@ -284,42 +284,42 @@ else
 { delta=-SMALL_QUASIELASTIC_ENERGY; // transition within the same level
   if (nennerp > SMALL)
     {
-      jap = -ABC[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
+      jap = -MODPARS[1] * 2.0 * betar * (alpha_lambdap) / nennerp;
 //      jbp = M * ((alpha_lambdap) * (alpha_lambdap) - (betar * betar + betai * betai)) / nennerp;
-      jbp = ABC[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
-      jcp = -2.0 * ABC[3] * betai * (alpha_lambdap) / nennerp;
+      jbp = MODPARS[2] * (2.0 * alpha*alpha_lambdap) / nennerp;
+      jcp = -2.0 * MODPARS[3] * betai * (alpha_lambdap) / nennerp;
     }
   else
     {
       jap = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbp = -copysign (ABC[2], alpha);
+	  jbp = -copysign (MODPARS[2], alpha);
 	}
       else
 	{
-	  jbp = -ABC[2];
+	  jbp = -MODPARS[2];
 	}
       jcp = 0;
     }
 
   if (nennerm > SMALL)
     {
-      jam = -ABC[1] * 2.0 * betar * (alphaplambdap) / nennerm;
+      jam = -MODPARS[1] * 2.0 * betar * (alphaplambdap) / nennerm;
 //      jbm = M * ((alpha + lambdap) * (alpha + lambdap) - (betar * betar + betai * betai)) / nennerm;
-      jbm = ABC[2] * (2.0 * alpha*alphaplambdap) / nennerm;
-      jcm = -2.0 * ABC[3] * betai * (alphaplambdap) / nennerm;
+      jbm = MODPARS[2] * (2.0 * alpha*alphaplambdap) / nennerm;
+      jcm = -2.0 * MODPARS[3] * betai * (alphaplambdap) / nennerm;
     }
   else
     {
       jam = 0;
       if (alpha * alpha > SMALL)
 	{
-	  jbm = copysign (ABC[2], alpha);
+	  jbm = copysign (MODPARS[2], alpha);
 	}
       else
 	{
-	  jbm = ABC[2];
+	  jbm = MODPARS[2];
 	}
       jcm = 0;
     }
@@ -346,7 +346,7 @@ return 3; // kramers doublet has always exactly one transition + 2 levels (quasi
 Matrix jjjpar::krameropmat (int & n ,Vector &  Hxc,Vector & Hext)
 {
  /* on input
-    ABC(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
+    MODPARS(1...3)  A,M,Ci....saturation moment/gJ[MU_B] of groundstate doublet in a.b.c direction
     gJ		lande factor
     n		which operator 0=Hamiltonian, 1,2,3=J1,J2,J3
     gjmbH	vector of effective field [meV]
@@ -377,14 +377,14 @@ Matrix jjjpar::krameropmat (int & n ,Vector &  Hxc,Vector & Hext)
 Matrix opmat(1,2,1,2);
 switch(n)
 {case 0: gjmbH=gJ*MU_B*Hext(1,3);for(int i=1;(i<=Hxc.Hi())&&(i<=3);++i)gjmbH(i)+=Hxc(i);
-         opmat(1,1)= ABC[3]*gjmbH[3];      opmat(1,2)=ABC[2]*gjmbH[2];
-         opmat(2,1)= -ABC[1]*gjmbH[1];     opmat(2,2)=-ABC[3]*gjmbH[3];break;
+         opmat(1,1)= MODPARS[3]*gjmbH[3];      opmat(1,2)=MODPARS[2]*gjmbH[2];
+         opmat(2,1)= -MODPARS[1]*gjmbH[1];     opmat(2,2)=-MODPARS[3]*gjmbH[3];break;
  case 1: opmat(1,1)= 0      ;opmat(1,2)=0;
-         opmat(2,1)= ABC[1];opmat(2,2)=0;break;
- case 2: opmat(1,1)= 0      ;opmat(1,2)=-ABC[2];
+         opmat(2,1)= MODPARS[1];opmat(2,2)=0;break;
+ case 2: opmat(1,1)= 0      ;opmat(1,2)=-MODPARS[2];
          opmat(2,1)= 0      ;opmat(2,2)=0;break;
- case 3: opmat(1,1)= -ABC[3];opmat(1,2)=0;
-         opmat(2,1)= 0     ;opmat(2,2)=ABC[3];break;
+ case 3: opmat(1,1)= -MODPARS[3];opmat(1,2)=0;
+         opmat(2,1)= 0     ;opmat(2,2)=MODPARS[3];break;
  default: fprintf(stderr,"ERROR operator calculation in module kramer - functio krameropmat: n=%i\n",n);exit(EXIT_FAILURE);
 }
 return opmat;

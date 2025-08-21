@@ -33,10 +33,10 @@ int jjjpar::pcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
    case brillouin: 
    case cluster: // fprintf(stderr,"Warning: phonons in internal modules not implemented, continuing ... \n");
           return false;break;
-   case external_class: return si_mod->pcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename);
+   case external_class: return si_mod->pcalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
          break;
    default: if (p==NULL) {mom=0;return false;} 
-            else{(*p)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*p)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -45,10 +45,10 @@ int  jjjpar::dP1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & P1
 {float delta=maxE;P1(1)=complex <double> (ninit,pinit); int n;
  switch (module_type)
   {case external: if(dP1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*dP1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&P1,&delta,&ests);}
+           return 0;} else {return (*dP1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&P1,&delta,&ests);}
            break;
    case external_class: 
-        n=si_mod->dP1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,P1,delta,ests);
+        n=si_mod->dP1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,P1,delta,ests);
             if(n==-1){
                     if(transitionnumber<0)fprintf(stderr,"Problem: phonons  not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return n;}
@@ -86,10 +86,10 @@ int jjjpar::pelcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Compl
    case brillouin: 
    case cluster: // fprintf(stderr,"Warning: pel in internal modules not implemented, continuing ... \n");
           return false;break;
-   case external_class: return si_mod->pelcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename);
+   case external_class: return si_mod->pelcalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
          break;
    default: if (pelf==NULL) {mom=0;return false;} 
-            else{(*pelf)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*pelf)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -98,10 +98,10 @@ int  jjjpar::dpel1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & 
 {float delta=maxE;P1(1)=complex <double> (ninit,pinit); int n;
  switch (module_type)
   {case external: if(dpel1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: electrical dipole moment  not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*dpel1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&P1,&delta,&ests);}
+           return 0;} else {return (*dpel1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&P1,&delta,&ests);}
            break;
    case external_class: 
-        n=si_mod->dpel1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,P1,delta,ests);
+        n=si_mod->dpel1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,P1,delta,ests);
             if(n==-1){
                     if(transitionnumber<0)fprintf(stderr,"Problem: electrical dipole moment  not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return n;}
@@ -134,10 +134,10 @@ int jjjpar::mcalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext ,Complex
    case brillouin: brillouin_Icalc(mom,T,Hxc,Hext,lnZ,U);mom*=gJ;return true;break;
    case cluster: cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZ,U);return true;break;
    case external_class:
-             return si_mod->mcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename);
+             return si_mod->mcalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
              break;                                       
    default: if (m==NULL) {mom=0;return false;} 
-            else{(*m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*m)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);return true;}
   }
 }
 int jjjpar::mcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
@@ -160,9 +160,9 @@ int jjjpar::mcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Complex
            cluster_Icalc_mcalc_Micalc (2,mom,T,Hxc,Hext,lnZZ,UU);}
            return true;break;
    case external_class:
-           if(false==si_mod->mMcalc(mom,T,Hxc,Hext,gJ,ABC,sipffilename))
+           if(false==si_mod->mMcalc(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(mom.Column(i));
-                         if(false==si_mod->mcalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
+                         if(false==si_mod->mcalc(m,T(i),Hxc,Hext,gJ,MODPARS,sipffilename))
                          {mom=0;return false;}    
                          SetColumn(i,mom,m);
                         }}
@@ -172,10 +172,10 @@ int jjjpar::mcalc (Matrix &mom, Vector & T, Vector &  Hxc,Vector & Hext ,Complex
            if (m==NULL) {mom=0;return false;} 
             else{for(int i=1;i<=T.Hi();++i){
            Vector m1(mom.Column(i));
-           (*m)(&m1,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           (*m)(&m1,&T(i),&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);
            SetColumn(i,mom,m1);}
            return true;}}else{
-           (*mM)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           (*mM)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);
            return true;}
   }
 }
@@ -193,10 +193,10 @@ int  jjjpar::dm1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & m1
  ComplexVector uu1(1,m1.Hi());int nnt,i,n,nd;
  switch (module_type)
   {case external: if(dm1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc  is not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&m1,&delta,&ests);}
+           return 0;} else {return (*dm1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&m1,&delta,&ests);}
            break;
    case external_class:
-           i=si_mod->dm1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,m1,delta,ests);
+           i=si_mod->dm1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,m1,delta,ests);
            if(i==-1){if(transitionnumber<0)fprintf(stderr,"Problem: dm1 calc  is not possible in module %s, continuing ... \n",modulefilename);
                    return 0;}
            return i;break;
@@ -232,10 +232,10 @@ int jjjpar::Lcalc (Vector &Lmom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case brillouin: brillouin_Icalc(Lmom,T,Hxc,Hext,lnZ,U);Lmom*=(2.0-gJ);return true;break;
    case cluster: return false;break; 
    case external_class:
-             return si_mod->Lcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename);
+             return si_mod->Lcalc(Lmom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
              break;   
    default: if (Lf==NULL) {Lmom=0;return false;} 
-            else{(*Lf)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*Lf)(&Lmom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);return true;}
   }
 }
 int jjjpar::Lcalc (Matrix &Lmom, Vector & T, Vector &  Hxc,Vector & Hext ,ComplexMatrix & parstorage)
@@ -255,9 +255,9 @@ int jjjpar::Lcalc (Matrix &Lmom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            return true;break;
    case cluster: return false;break; 
    case external_class:
-           if(false==si_mod->LMcalc(Lmom,T,Hxc,Hext,gJ,ABC,sipffilename))
+           if(false==si_mod->LMcalc(Lmom,T,Hxc,Hext,gJ,MODPARS,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(Lmom.Column(i));
-                         if(false==si_mod->Lcalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
+                         if(false==si_mod->Lcalc(m,T(i),Hxc,Hext,gJ,MODPARS,sipffilename))
                          {Lmom*=0;return false;}    
                          SetColumn(i,Lmom,m);
                         }}
@@ -267,10 +267,10 @@ int jjjpar::Lcalc (Matrix &Lmom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            if (Lf==NULL) {Lmom*=0;return false;} 
             else{for(int i=1;i<=T.Hi();++i){
            Vector m(Lmom.Column(i));
-           (*Lf)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           (*Lf)(&m,&T(i),&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);
            SetColumn(i,Lmom,m);}
            return true;}
-           } else {(*LM)(&Lmom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           } else {(*LM)(&Lmom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);
            return true;}
   }
 }
@@ -281,10 +281,10 @@ int  jjjpar::dL1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & L1
 switch (module_type)
   {static int washere=0;
    case external: if(dL1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*dL1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&L1,&delta,&ests);}
+           return 0;} else {return (*dL1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&L1,&delta,&ests);}
            break;
    case external_class:
-           i=si_mod->dL1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,L1,delta,ests);
+           i=si_mod->dL1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,L1,delta,ests);
            if(i==-1){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
                    return 0;}
            return i;break;
@@ -311,10 +311,10 @@ int jjjpar::Scalc (Vector &Smom, double & T, Vector &  Hxc,Vector & Hext ,Comple
    case brillouin: brillouin_Icalc(Smom,T,Hxc,Hext,lnZ,U);Smom*=(gJ-1.0);return true;break;
    case cluster: return false;break; 
    case external_class:
-             return si_mod->Scalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename);
+             return si_mod->Scalc(Smom,T,Hxc,Hext,gJ,MODPARS,sipffilename);
              break;   
   default: if (Sf==NULL) {Smom*=0;return false;} 
-            else{(*Sf)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);return true;}
+            else{(*Sf)(&Smom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);return true;}
   }
 }
 
@@ -335,9 +335,9 @@ int jjjpar::Scalc (Matrix &Smom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            return true;break;
    case cluster: return false;break; 
    case external_class:
-           if(false==si_mod->SMcalc(Smom,T,Hxc,Hext,gJ,ABC,sipffilename))
+           if(false==si_mod->SMcalc(Smom,T,Hxc,Hext,gJ,MODPARS,sipffilename))
                         {for(int i=1;i<=T.Hi();++i){Vector m(Smom.Column(i));
-                         if(false==si_mod->Scalc(m,T(i),Hxc,Hext,gJ,ABC,sipffilename))
+                         if(false==si_mod->Scalc(m,T(i),Hxc,Hext,gJ,MODPARS,sipffilename))
                          {Smom*=0;return false;}    
                          SetColumn(i,Smom,m);
                         }}
@@ -347,10 +347,10 @@ int jjjpar::Scalc (Matrix &Smom, Vector & T, Vector &  Hxc,Vector & Hext ,Comple
            if (Sf==NULL) {Smom*=0;return false;} 
             else{for(int i=1;i<=T.Hi();++i){
            Vector m(Smom.Column(i));
-           (*Sf)(&m,&T(i),&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           (*Sf)(&m,&T(i),&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);
            SetColumn(i,Smom,m);}
            return true;}} else {
-           (*SM)(&Smom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);
+           (*SM)(&Smom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);
            return true;}
   }
 }
@@ -361,10 +361,10 @@ int  jjjpar::dS1calc (double & T,Vector &  Hxc,Vector & Hext, ComplexVector & S1
  ComplexVector uu1(1,S1.Hi());int nnt,i,n,nd;
  switch (module_type)
   {case external: if(dS1==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: dS1 calc  is not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*dS1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&S1,&delta,&ests);}
+           return 0;} else {return (*dS1)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&S1,&delta,&ests);}
            break;
    case external_class:
-           i=si_mod->dS1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,S1,delta,ests);
+           i=si_mod->dS1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,S1,delta,ests);
            if(i==-1){if(transitionnumber<0)fprintf(stderr,"Problem: dL1 calc  is not possible in module %s, continuing ... \n",modulefilename);
                    return 0;}
            return i;break;
@@ -1011,9 +1011,9 @@ int jjjpar::chargedensity_coeff (Vector &mom, double & T, Vector &  Hxc,Vector &
    case brillouin: fprintf(stderr,"Problem: chargedensity  in module brillouin is not possible, continuing ... \n");
            return false;break;
    case external: if(cd_m==NULL){fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return false;} else {(*cd_m)(&mom,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           return false;} else {(*cd_m)(&mom,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);}
            break;
-   case external_class: if(false==si_mod->chargedensity_coeff(mom,T,Hxc,Hext,gJ,ABC,sipffilename))
+   case external_class: if(false==si_mod->chargedensity_coeff(mom,T,Hxc,Hext,gJ,MODPARS,sipffilename))
            {fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} 
            break;
@@ -1047,9 +1047,9 @@ int jjjpar::dchargedensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, Comple
    case brillouin: if(transitionnumber<0)fprintf(stderr,"Problem: chargedensity  in module brillouin is not possible, continuing ... \n");
            return 0;break;
    case external: if(cd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return 0;} else {return (*cd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&chargedensity_coeff1,&delta,&ests);}
+           return 0;} else {return (*cd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&chargedensity_coeff1,&delta,&ests);}
            break;
-   case external_class: i=si_mod->dchargedensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,chargedensity_coeff1,delta,ests);
+   case external_class: i=si_mod->dchargedensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,chargedensity_coeff1,delta,ests);
            if(i==-1){if(transitionnumber<0)fprintf(stderr,"Problem: chargedensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {return i;}
            break;
@@ -1067,8 +1067,8 @@ int jjjpar::dchargedensity_coeff1(double & T,Vector &  Hxc,Vector & Hext, Comple
 double jjjpar::chargedensity_calc (double & teta,double & fi,double & R, Vector & moments)
 {double ro,rr;
 
-if((module_type==external)&&(ro_calc!=NULL)){(*ro_calc)(&ro,&teta,&fi,&R,&moments,&gJ,&ABC,&sipffilename);return ro;}
-if((module_type==external_class)&&true==si_mod->ro_calc(ro,teta,fi,R,moments,gJ,ABC,sipffilename)){return ro;}
+if((module_type==external)&&(ro_calc!=NULL)){(*ro_calc)(&ro,&teta,&fi,&R,&moments,&gJ,&MODPARS,&sipffilename);return ro;}
+if((module_type==external_class)&&true==si_mod->ro_calc(ro,teta,fi,R,moments,gJ,MODPARS,sipffilename)){return ro;}
 if (R>4.0||R<0){ro=0;}else{
  int l,m;
  Matrix a(0,6,-6,6); 
@@ -1137,9 +1137,9 @@ int jjjpar::spindensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,Ve
    case brillouin: fprintf(stderr,"Problem: spindensity  in module brillouin is not possible, continuing ... \n");
            return false;break;
    case external: if(sd_m==NULL){fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return false;} else {(*sd_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           return false;} else {(*sd_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);}
            break;
-   case external_class: if(false==si_mod->spindensity_coeff(mom,xyz,T,Hxc,Hext,gJ,ABC,sipffilename))
+   case external_class: if(false==si_mod->spindensity_coeff(mom,xyz,T,Hxc,Hext,gJ,MODPARS,sipffilename))
            {fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} 
            break;
@@ -1185,10 +1185,10 @@ int ret;
            return 0;break;
    case external: if(sd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else { 
-            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&spindensity_coeff1,&xyz,&delta,&ests);
+            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&spindensity_coeff1,&xyz,&delta,&ests);
              return ret;              }
            break;
-   case external_class:  ret=si_mod->dspindensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,spindensity_coeff1,xyz,delta,ests);
+   case external_class:  ret=si_mod->dspindensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,spindensity_coeff1,xyz,delta,ests);
             if(-1==ret)
            {if(transitionnumber<0)fprintf(stderr,"Problem: spindensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;}            
@@ -1335,9 +1335,9 @@ int jjjpar::orbmomdensity_coeff (Vector &mom,int xyz, double & T, Vector &  Hxc,
    case brillouin: fprintf(stderr,"Problem: orbmomdensity  in module brillouin is not possible, continuing ... \n");
            return false;break;
    case external: if(od_m==NULL){fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
-           return false;} else {(*od_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&parstorage);}
+           return false;} else {(*od_m)(&mom,&xyz,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&parstorage);}
            break;
-   case external_class: if(false==si_mod->orbmomdensity_coeff(mom,xyz,T,Hxc,Hext,gJ,ABC,sipffilename))
+   case external_class: if(false==si_mod->orbmomdensity_coeff(mom,xyz,T,Hxc,Hext,gJ,MODPARS,sipffilename))
            {fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return false;} 
            break;
@@ -1384,10 +1384,10 @@ int ret;
            return 0;break;
    case external: if(sd_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else { 
-            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&orbmomdensity_coeff1,&xyz,&delta,&ests);
+            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&orbmomdensity_coeff1,&xyz,&delta,&ests);
              return ret;              }
            break;
-   case external_class:  ret=si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,orbmomdensity_coeff1,xyz,delta,ests);
+   case external_class:  ret=si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,orbmomdensity_coeff1,xyz,delta,ests);
             if(-1==ret)
            {if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;}            
@@ -1413,25 +1413,25 @@ switch (module_type)
            return 0;break;
    case external: if(od_dm==NULL){if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;} else {xyz=1;
-            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&coeff,&xyz,&delta,&ests);
             for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(i)=coeff(i);
                                 xyz=2;
-            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            (*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&coeff,&xyz,&delta,&ests);
             for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(ORBMOMDENS_EV_DIM+i)=coeff(i);
                                 xyz=3;
-            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&ABC,&sipffilename,&coeff,&xyz,&delta,&ests);
+            ret=(*sd_dm)(&transitionnumber,&T,&Hxc,&Hext,&gJ,&MODPARS,&sipffilename,&coeff,&xyz,&delta,&ests);
             for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(2*ORBMOMDENS_EV_DIM+i)=coeff(i);
              return ret;              } break;
    case external_class:  xyz=1;
-            if(-1==si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,coeff,xyz,delta,ests))
+            if(-1==si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,coeff,xyz,delta,ests))
            {if(transitionnumber<0)fprintf(stderr,"Problem: orbmomdensity  is not possible in module %s, continuing ... \n",modulefilename);
            return 0;}            
            for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(i)=coeff(i);
                                 xyz=2;
-            si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,coeff,xyz,delta,ests);
+            si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,coeff,xyz,delta,ests);
             for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(ORBMOMDENS_EV_DIM+i)=coeff(i);
                                 xyz=3;
-            ret=si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,ABC,sipffilename,coeff,xyz,delta,ests);
+            ret=si_mod->dorbmomdensity_coeff1(transitionnumber,T,Hxc,Hext,gJ,MODPARS,sipffilename,coeff,xyz,delta,ests);
             for(int i=1;i<=ORBMOMDENS_EV_DIM;++i)orbmomdensity_coeff1(2*ORBMOMDENS_EV_DIM+i)=coeff(i);
              return ret;              
            break;

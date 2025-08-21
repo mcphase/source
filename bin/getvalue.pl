@@ -21,6 +21,8 @@ print STDERR << "EOF";
 options: -c 24.13   compare the value with 24.13+-0.01 (error corresponds to last 
                     digit, and exit with failure message if extracted y-value is
                     not corresponding
+          -s 24.13  same as -c but compute standard deviation (y-value-24.13)^2 and output #!sta=
+          -var 24.13  same as -c but compute variance (y-value-24.13)^2/0.01^ 2 and output #!sta=
 
  examples:
 
@@ -40,11 +42,16 @@ options: -c 24.13   compare the value with 24.13+-0.01 (error corresponds to las
 
 . getvalue 0 3 46 0 f.dat
 
+ 4) in datafile f.dat get value of 46th datapoint in column 3  and compare to 23.4 and compute variance
+
+. getvalue -var 23.4 0 3 46 0 f.dat
+
+
  
 
  output: y-value           to stdout and stored in env. variable MCPHASE_YVALUE
          1/y-value         to stdout and stored in MCPHASE_YVALUE_INVERSE
-         standarddeviation to stdout and stored in MCPHASE_STA
+         standarddeviation (by default scatter of data) to stdout and stored in MCPHASE_STA
 EOF
 # clean bat files
 #open (Fout,">$ENV{'MCPHASE_DIR'}/bin/bat.bat");close Fout;
@@ -52,7 +59,9 @@ EOF
 exit(1);
 }else{print STDERR "#* $0 *\n";}
 
-GetOptions("c=s"=>\$compare);
+GetOptions("c=s"=>\$compare,
+           "s=s"=>\$s,
+           "var=s"=>\$r);
 
 $ARGV[0]=~s/x/*/g;$colx=eval $ARGV[0];shift @ARGV;
 $ARGV[0]=~s/x/*/g;$coly=eval $ARGV[0];shift @ARGV;
@@ -109,6 +118,19 @@ if(defined $compare)
 {die "Error getvalue comparing  $compare to extracted yvalue $yvalue from file $filename \n";}
 }
 
+if(defined $s)
+{$sta=$value-$s;$sta=$sta*$sta;
+ print "echo '#!sta=".$sta."'\n";
+}
+if(defined $r)
+{@d=split("e|E|d|D",$r);
+ $d[0]=~s/\d(?=[\d\.]*?\d)/X/g;
+ $d[0]=~s/\d/1/g;
+ $d[0]=~s/X/0/g;
+ $err=join("e",@d);
+print STDERR "accuracy=".$err."\n";$sta=($value-$r)/$err;$sta=$sta*$sta;
+ print "echo '#!sta=".$sta."'\n";
+}
 exit(0);
 
 sub getvalue_by_averaging_over_intervaldE { 

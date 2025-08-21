@@ -99,8 +99,9 @@ public:
 							// into field at position number
    void scalepars (double scalefactor); // multiply all exchange parameters with scale factor
    void delpar (int number); // remove a neighbour from list
+   int addpar (Vector & dabc,Vector & drijk,int subl); // add a neighbour with distance dabc and zero exchange, returns index of this parameter
 
-   void save (FILE *file,int noindexchange); // to save the parameters to a filehandle
+   void save (FILE *file,int noindexchange,bool pd=false, bool ps=false); // to save the parameters to a filehandle
    void saveatom (FILE *file); // to save the atom coordinates and properties to a filehandle
    void saveG(FILE * file); // save coupling constants G
    void save_sipf(const char * path); //save single ion parameter file filename to path*
@@ -127,17 +128,17 @@ public:
    int nof_electrons; // no of electrons in d or f shell
   module_orientation orientation;  // defines orientation of abc: can be xyz or yzx (cfield module)
   bool module_clust=false; // tells if module contains more atoms (i.e. cluster module)
- module module_type;
+  module module_type;
 private:
 
   std::stringstream ss;
-  Vector ABC;   // storage for single ion module paramters
   void getpolar(double x,double y, double z, double & r, double & th, double & ph);// calculates polar coordinates from Vector X(1..3)
   void get_parameters_from_sipfile(char * sipffilename,int verbose,parser & ob); // function to read single ion parameter files
   int  get_exchange_indices(char *instr, Matrix *exchangeindices,const char * ie);
 
 public:
-   Vector MF; // to store exchange fields for mcdiff
+  Vector MODPARS;   // storage for single ion module paramters
+  Vector MF; // to store exchange fields for mcdiff
    // subroutine to calculate expectation values <Ialpha> alpha=1...nofcomponents
    // from exchange field Hxc [meV] and external field Hext
    void  Icalc (Vector &mom, double & T, Vector &  Hxc,Vector & Hext, double & lnZ,double & U,ComplexMatrix & parstorage,ComplexVector *& state);

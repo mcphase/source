@@ -307,7 +307,7 @@ void inipar::calcTHfromxy(double & T,Vector & h,double x, double y,cryststruct &
    xs=xv(13,18,-12);normalize(xs,1.0);
    ys=yv(13,18,-12);normalize(ys,1.0);
    for(int i=1;i<=6;++i){
-     h(i+6)=zero(i+6)+x*xs(i)+y*ys(i);}
+     h(i+6)=zero(i+12)+x*xs(i)+y*ys(i);}
 
 
 }
