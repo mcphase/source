@@ -21,8 +21,8 @@ print STDERR << "EOF";
 options: -c 24.13   compare the value with 24.13+-0.01 (error corresponds to last 
                     digit, and exit with failure message if extracted y-value is
                     not corresponding
-          -s 24.13  same as -c but compute standard deviation (y-value-24.13)^2 and output #!sta=
-          -var 24.13  same as -c but compute variance (y-value-24.13)^2/0.01^ 2 and output #!sta=
+          -s 24.13  same as -c but compute standard deviation (yvalue-24.13)^2 and output #!sta=
+          -var 24.13  same as -c but compute variance (yvalue-24.13)^2/0.01^ 2 and output #!sta=
 
  examples:
 
@@ -119,7 +119,7 @@ if(defined $compare)
 }
 
 if(defined $s)
-{$sta=$value-$s;$sta=$sta*$sta;
+{$sta=$yvalue-$s;$sta=$sta*$sta;
  print "echo '#!sta=".$sta."'\n";
 }
 if(defined $r)
@@ -128,7 +128,7 @@ if(defined $r)
  $d[0]=~s/\d/1/g;
  $d[0]=~s/X/0/g;
  $err=join("e",@d);
-print STDERR "accuracy=".$err."\n";$sta=($value-$r)/$err;$sta=$sta*$sta;
+print STDERR "accuracy=".$err."\n";$sta=($yvalue-$r)/$err;$sta=$sta*$sta;
  print "echo '#!sta=".$sta."'\n";
 }
 exit(0);

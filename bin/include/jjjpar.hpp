@@ -108,6 +108,8 @@ public:
    void save_sipf(FILE *file); //save single ion parameter file filename to path*
   void print_interaction(FILE * fout,int pi,int prl,int prh,int pcl,int pch); 
                  //prints interaction tensor (rows prl-prh,columns pcl-pch) pi  to fout
+  void print_G(FILE * fout); 
+                 //prints magnetoelastic interaction matrix  to fout
 
    jjjpar (FILE * fin, int nofcomp,parser & ob, int verbose=0); //constructor with filehandle of mcphas.j file
    jjjpar (double x, double y, double z,char * sipffile,int n,int verbose=0); // constructor with filename of single ion parameter file

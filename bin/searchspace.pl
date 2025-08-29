@@ -290,10 +290,10 @@ else
        if ($minimum==1&&$sta!=0)
         {#the input parameters are probably a (local) minimum - so save a file
           ($sta)=sta();if ($sta>$staorigin*1.00000001){$warning="#WARNING - calculation of sta gave another result at some point than stored in file searchspace.".($searchlevel-1)."\n";}
-       if ($sta<$stamin&&$sta!=0){# $stamin=$sta;# foreach (@ARGV)
+       if ($sta<$stamin&&$sta!=0){ $stamin=$sta;# foreach (@ARGV)
                                        #{$file=$_; mycopy ($file,$file.".min.".$searchlevel);
                                        # mycopy ($file.".forfit",$file.".forfit.min.$searchlevel");}
-                                       #   $pointcountermin=$pointcounter+1;
+                                         $pointcountermin=$pointcounter+1;
 			}
 #          foreach (@ARGV){$file=$_; mycopy ($file.".forfit",$file.".$searchlevel.$minnumber");}
           print Foutlocalmin $pointcounterorigin." ";
@@ -479,7 +479,7 @@ sub read_write_statusfile {
      print Fout "--------------------------------------------------------------------\n";
      print Fout "parameter[value,      min,           max,           (not used)   ,minimum meshwidth]\n";
      foreach(@par){write Fout;++$ii;}
-     print Fourt $warning;
+     print Fout $warning;
      close Fout;}
 
                           }

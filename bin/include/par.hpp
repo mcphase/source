@@ -61,6 +61,8 @@ void scale(double scalefactor); // scale all interaction parameters by scalefact
 void save(FILE * fout,int noindexchange,bool pd=false,bool ps=false); // save lattice, atoms and exchange parameters to file
 void print_interaction(FILE * fout,int pa,int pi,int prl,int prh,int pcl,int pch); 
                   // prints interaction tensor (rows prl-prh,columns pcl-pch) pi of atom pa to fout
+void print_G(FILE * fout); 
+                  // prints magnetoelastic interaction parameters to Fout
 void save(const char * filename,int noindexchange); // save lattice, atoms and exchange parameters to file
 void savelattice(FILE *fout);// save lattice to file
 void saveatoms(FILE *fout);// save atom positions and properties  to file

@@ -252,20 +252,58 @@ if(0==strcmp((*jjj[n]).sipffilename,(*jjj[j]).sipffilename)){again=1;}
 }
 
 if(nn<0){totalcharge-=(*jjj[n]).charge;// recalculate charge in case the ion is removed without redistributing charge
-// here create the effective multipolar interactions in case the ion has the phonon module
+// here create the effective multipolar and magnetoelastic interactions in case the ion has the phonon module
 // check if external module and pcalc is defined --> then it is a phonon module
 Vector u0(1,3),Hxc(1,3),Hext(1,3);double T=1,g_J=0;
 if((*jjj[n]).module_type==external_class&&(*jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage))
-    { if(verbose)fprintf(stderr,"%s is phonon module - creating effective multipolar interactions\n",(*jjj[n]).sipffilename);}
-       for(s=1;s<=(*jjj[n]).paranz;++s){int j=(*jjj[n]).sublattice[s];
+    { if(verbose)fprintf(stderr,"%s is phonon module - creating effective multipolar interactions\n",(*jjj[n]).sipffilename);
+Matrix K(1,3,1,3);K=0;
+ Vector Omega(1,3);
+ K(1,1)=(*jjj[n]).MODPARS[2];
+ K(2,2)=(*jjj[n]).MODPARS[3];
+ K(3,3)=(*jjj[n]).MODPARS[4];
+ K(2,1)=(*jjj[n]).MODPARS[5];
+ K(3,1)=(*jjj[n]).MODPARS[6];
+ K(3,2)=(*jjj[n]).MODPARS[7];
+int sort=1,maxiter=1000000;double factor=1e-4;
+K*=factor;
+//
+//  Driver routine to compute  the eigenvalues  and normalized
+//  eigenvectors of  the real symmetric matrix z, given by the
+//  lower triangle in z[lo..hi,lo..hi]. The eigenvalues are re-
+//  turned in d[lo..hi] in ascending sequence if sort = True,
+//  otherwise not ordered for  sort = False. The associated
+//  eigenvectors overwrite the given matrix z. The eigenvectors  
+//  are created in the columns of z.The storage re-
+//  quirement is n*n + 2*n double.
+//  The vector d must already be allocated by the user.
+//
+//  Reference:
+//  B.T.Smith et al: Matrix Eigensystem Routines
+//  EISPACK Guide,Springer,Heidelberg,New York 1976.
+// 
+ EigenSystemSymmetric (K,Omega,sort,maxiter); // K is destroyed by this and will contain eigenvectors
+Omega/=factor; 
+       for(s=1;s<=(*jjj[n]).paranz;++s){int j=(*jjj[n]).sublattice[s];// loop all neighbours in list
         if(!(*jjj[j]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage)) // if neighbour is no phonon
-         {for(int sd=1;sd<=(*jjj[n]).paranz;++sd) // loop all neighbours in list
+         {Vector dabc(1,3),drijk(1,3);
+          // here treat magnetoelastic term of neighbour s -------------------
+          for(int a=1;a<=3;++a) // for to be deleted atom nn loop all components a=1,2,3 (eigenvalues of K)
+           for(int b=1;b<=3;++b)
+            for(int bd=1;bd<=3;++bd)
+             for(int g=4;g<=cs.nofcomponents;++g)
+              for(int gd=1;gd<=6;++gd)
+              { (*(*jjj[j]).G)(gd,g)-=K(b,a)*K(bd,a)*(*jjj[n]).jij[s](b,g)*(*(*jjj[n]).G)(gd,bd)/Omega(a);
+              }
+          // ------------------------
+          // now treat multipolar interaction term
+          for(int sd=1;sd<=(*jjj[n]).paranz;++sd) // loop all neighbours in list
           {// identify which magnetic ion adresses the neighbour s and sd
             int jd=(*jjj[n]).sublattice[sd];
            if(!(*jjj[jd]).pcalc(u0,  T,  Hxc,Hext,(*jjj[n]).Icalc_parstorage)) // if neighbour is no phonon
            { 
            // compute distance vector of effective multipolar interaction
-           Vector dabc(1,3),drijk(1,3); dabc=(*jjj[n]).dn[sd]-(*jjj[n]).dn[s];dadbdc2ijk(drijk,dabc, cs.abc);
+            dabc=(*jjj[n]).dn[sd]-(*jjj[n]).dn[s];dadbdc2ijk(drijk,dabc, cs.abc);
               // look if this neighbour is present in the list of atom j - if not, add this neighbour
               int f=0;
               for(int ss=1;ss<=(*jjj[j]).paranz;++ss)if(Norm((*jjj[j]).dn[ss]-dabc)<SMALL_MATCH_LATTICEVECTOR)f=ss;
@@ -276,14 +314,19 @@ if((*jjj[n]).module_type==external_class&&(*jjj[n]).pcalc(u0,  T,  Hxc,Hext,(*jj
               int ff=0;dabc*=-1.0;drijk*=-1.0;
               for(int ss=1;ss<=(*jjj[jd]).paranz;++ss)if(Norm((*jjj[jd]).dn[ss]-dabc)<SMALL_MATCH_LATTICEVECTOR)ff=ss;
                if(ff==0){ff=(*jjj[jd]).addpar(dabc,drijk,j);}
-      for(int a=1;a<=3;++a) // for to be deleted atom nn loop all three coordinates a=1,2,3 (xyz phonon displacements)
-         for(int g=4;g<=cs.nofcomponents;++g)for(int gd=4;gd<=cs.nofcomponents;++gd)  // loop all interactions with higher order multipoles of other atoms
+
+
+      for(int a=1;a<=3;++a) // for to be deleted atom nn loop all components a=1,2,3 (eigenvalues of K)
+       for(int b=1;b<=3;++b)
+        for(int bd=1;bd<=3;++bd)
+         for(int g=4;g<=cs.nofcomponents;++g)for(int gd=4;gd<=cs.nofcomponents;++gd)  
+             // loop all interactions with higher order multipoles of other atoms
            { // add multipolar effective interaction to ion j
-             (*jjj[j]).jij[f](g,gd)-=(*jjj[n]).jij[s](a,g)*(*jjj[n]).jij[sd](a,gd)/(*jjj[n]).MODPARS(a+1);
-             if(Norm(dabc)>SMALL_MATCH_LATTICEVECTOR)(*jjj[jd]).jij[ff](g,gd)-=(*jjj[n]).jij[s](a,g)*(*jjj[n]).jij[sd](a,gd)/(*jjj[n]).MODPARS(a+1);
-           }
+             (*jjj[j]).jij[f](g,gd)-=K(b,a)*K(bd,a)*(*jjj[n]).jij[s](b,g)*(*jjj[n]).jij[sd](bd,gd)/Omega(a);
+             if(Norm(dabc)>SMALL_MATCH_LATTICEVECTOR)(*jjj[jd]).jij[ff](g,gd)-=K(b,a)*K(bd,a)*(*jjj[n]).jij[s](b,g)*(*jjj[n]).jij[sd](bd,gd)/Omega(a);
+           }// ------------------------
          }}}}
-    }
+    }}
 else{for(int i=1;i<=distribute.Rhi();++i){int sl=(int)distribute(i,1);
 if(distribute(i,2)<0) {(*jjj[sl]).charge+=fabs(distribute(i,2))*(*jjj[n]).charge;
 fprintf(stderr,"charge on atom %i set to %g and overwriting sipf file %s \n",sl,(*jjj[sl]).charge,(*jjj[sl]).sipffilename);
@@ -476,6 +519,16 @@ void par::print_interaction(FILE * fout,int pa,int pi,int prl,int prh,int pcl,in
 (*jjj[pa]).print_interaction(fout,pi,prl,prh,pcl,pch);
 
 }
+void par::print_G(FILE * fout)
+                  // prints magnetoelastic interaction parameters to Fout
+{savelattice(fout);
+ for (int i=1;i<=cs.nofatoms;++i)
+  {
+  (*jjj[i]).print_G(fout);
+    fprintf(fout,"#*********************************************************************\n");
+  }
+}
+
 void par::savelattice (FILE *file)
 { 
   errno = 0;

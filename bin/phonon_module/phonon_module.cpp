@@ -136,8 +136,23 @@ lnZ=0; // last term  to correct energy
 
  int sort=1,maxiter=1000000;double factor=1e-4;
 K*=factor;
-// EigenSystemHermitean (K,Omega,Sr,Si,sort,maxiter); // K is destroyed by this
+//
+//  Driver routine to compute  the eigenvalues  and normalized
+//  eigenvectors of  the real symmetric matrix z, given by the
+//  lower triangle in z[lo..hi,lo..hi]. The eigenvalues are re-
+//  turned in d[lo..hi] in ascending sequence if sort = True,
+//  otherwise not ordered for  sort = False. The associated
+//  eigenvectors overwrite the given matrix z. The eigenvectors  
+//  are created in the columns of z.The storage re-
+//  quirement is n*n + 2*n double.
+//  The vector d must already be allocated by the user.
+//
+//  Reference:
+//  B.T.Smith et al: Matrix Eigensystem Routines
+//  EISPACK Guide,Springer,Heidelberg,New York 1976.
+// 
  EigenSystemSymmetric (K,Omega,sort,maxiter); // K is destroyed by this and will contain eigenvectors
+
 Omega/=factor; 
 // hbar=1.054572e-34 Js=6582e-16meVs
 // 1meV=1.6022e-22 J

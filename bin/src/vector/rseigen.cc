@@ -25,7 +25,8 @@ void EigenSystemSymmetric (Matrix& z, Vector& d, int sort, int maxiter)
 //  lower triangle in z[lo..hi,lo..hi]. The eigenvalues are re-
 //  turned in d[lo..hi] in ascending sequence if sort = True,
 //  otherwise not ordered for  sort = False. The associated
-//  eigenvectors overwrite the given matrix z. The storage re-
+//  eigenvectors overwrite the given matrix z. The eigenvectors  
+//  are created in the columns of z.The storage re-
 //  quirement is n*n + 2*n double.
 //  The vector d must already be allocated by the user.
 //

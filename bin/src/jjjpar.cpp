@@ -16,15 +16,15 @@
 #include "mcdisp.h"
 
 #define MAXNOFNUMBERSINLINE 2700
-#define MAXNOFCHARINLINE 7024
-#define MAGFF_NOF_COEFF 9
+#define MAXNOFCHARINLINE    7024
+#define MAGFF_NOF_COEFF     9
 
 
-#include "jjjpar_basmodfunc.cpp" // basic sipf module functions
-#include "jjjpar_observables.cpp" // function for physical observables
-#include "jjjpar_intmod_kramer.cpp"   // some functions for module_type=1
-#include "jjjpar_intmod_brillouin.cpp"// some functions for module_type=3
-#include "jjjpar_intmod_cluster.cpp"// some functions for module_type=5
+#include "jjjpar_basmodfunc.cpp"       // basic sipf module functions
+#include "jjjpar_observables.cpp"      // function for physical observables
+#include "jjjpar_intmod_kramer.cpp"    // some functions for module_type=1
+#include "jjjpar_intmod_brillouin.cpp" // some functions for module_type=3
+#include "jjjpar_intmod_cluster.cpp"   // some functions for module_type=5
 
 
  
@@ -368,7 +368,7 @@ void jjjpar::save(FILE * file,int noindexchange,bool pd, bool ps)
            
   int *n2= new int[nofcomponents*nofcomponents+2];if (n2 == NULL){ fprintf (stderr, "Out of memory\n"); exit (EXIT_FAILURE);} // 4 lines moved here to make destructor work MR 30.3.10
            
- // MR 22.12.22 - Added to check if exchange parameters indexed should be saved (e.g. a lot of zeroes)
+// MR 22.12.22 - Added to check if exchange parameters indexed should be saved (e.g. a lot of zeroes)
 // check how many zeroes, if the exchange is symmetric and which pairs need to be saved
    for(i1=1;i1<=nofcomponents;++i1)
    for(j1=i1;j1<=nofcomponents;++j1)
@@ -661,6 +661,14 @@ void jjjpar::print_interaction(FILE * fout,int pi,int prl,int prh,int pcl,int pc
  fprintf(fout,"rows %i - %i, columns %i - %i \n",prl,prh,pcl,pch);
  Matrix pp(jij[pi](prl,prh,pcl,pch));
  myPrintMatrix(fout,pp);
+
+}
+
+void jjjpar::print_G(FILE * fout)
+                 //prints magnetoelastic interaction matrix  to fout
+{saveatom(fout);
+
+ myPrintMatrix(fout,(*G));
 
 }
 /*****************************************************************************************/
