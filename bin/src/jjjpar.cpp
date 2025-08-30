@@ -667,7 +667,7 @@ void jjjpar::print_interaction(FILE * fout,int pi,int prl,int prh,int pcl,int pc
 void jjjpar::print_G(FILE * fout)
                  //prints magnetoelastic interaction matrix  to fout
 {saveatom(fout);
-
+ fprintf(fout,"# Matrix of magnetoelastic Parameters G - rows correspond to strain index in Voigt notation, columns to interaction operators\n");
  myPrintMatrix(fout,(*G));
 
 }

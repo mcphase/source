@@ -14,8 +14,11 @@
 
 all: manual
 
-manual.aux: manual.tex $(wildcard *.bib) $(wildcard *.tex) 
+version.tex: manual.tex ../version 
 	sed -e 's/#define.*VERSION *"//;s/"//' ../version > version.tex
+
+
+manual.aux: manual.tex version.tex $(wildcard *.bib) $(wildcard *.tex) 
 	latex manual.tex
 	makeindex manual.idx
 
@@ -40,7 +43,7 @@ manual.ps: manual.dvi $(wildcard ./*.eps)  $(wildcard ./figsrc/*.ps)
 #	pstops  "2:0" $<  > dodd.ps
 
 
-manual.pdf: manual.tex $(wildcard ./*.bib) $(wildcard ./*.tex)
+manual.pdf: manual.tex version.tex $(wildcard ./*.bib) $(wildcard ./*.tex)
 	pdflatex  manual 
 
 manual: manual.pdf

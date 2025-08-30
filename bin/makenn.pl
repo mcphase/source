@@ -1525,7 +1525,8 @@ print $l1 "#--------------------------------------------------------------------
           push @atoms, sprintf("%+10.9e %+10.9e ",$Jac->index($n)->at($n1),$Jca->index($n)->at($n1));
           for($i=4;$i<=$nofcomponents;++$i){push @atoms, "0 0 ";} # add other components
           push @atoms, sprintf("%+10.9e %+10.9e ",$Jbc->index($n)->at($n1),$Jcb->index($n)->at($n1));
-          for($i=4;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){push @atoms, "0 0 ";}} # add other components         
+          for($i=4;$i<=$nofcomponents;++$i){push @atoms, "0 0 ";} # add other components
+          for($i=3;$i<=$nofcomponents;++$i){for($ii=$i+1;$ii<=$nofcomponents;++$ii){push @atoms, "0 0 ";}} # add other components         
    }
    else  #here the isotropic interaction is written
    {push @atoms, sprintf("%+10.9e %+10.9e %+10.9e ",$Jaa->index($n)->at($n1),$Jbb->index($n)->at($n1),$Jcc->index($n)->at($n1));

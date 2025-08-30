@@ -214,7 +214,8 @@ static public void windowclose(){
   public static void main(String[] args) {
       xmin=1e30;xmax=-1e30;detymin=true;detymax=true;doexit=false;
       ymin=1e30;ymax=-1e30;detxmin=true;detxmax=true;
-      detxText=true;detyText=true;detTitle=true;
+      detxText=true;detyText=true;detTitle=true;detdim=true;
+      prefxsize=500;prefysize=270;
            String ss; String s;
       if (args.length<1)
       {System.out.println("- too few arguments...\n");
@@ -229,6 +230,7 @@ static public void windowclose(){
        System.out.println("                          a text to be written as line label can be added by inserting | and adding the text\n");
        System.out.println("        option -hlines 2,3.4,12.3 shows horizontal lines at specified x values\n");
        System.out.println("        option -g shows gridlines\n");
+       System.out.println("        option -dim 400 200  set dimension of plot (in pixels width 400 height 200)\n");
        System.out.println("        if optional errorcolumns are added then instead of lines symbols and errorbars are shown\n");
        System.out.println("	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to\n");
        System.out.println("	  bubblecolumn are shown (toggle bubblesize with 's' and 'b')\n");
@@ -270,6 +272,13 @@ static public void windowclose(){
             else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-g")) // option "-g"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
              showgrid=true;
+            }
+            else if(SF.TrimString(s).substring(0, 4).equalsIgnoreCase("-dim")) // option "-dim 500 223"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detdim=false;ss=SF.FirstWord(s);prefxsize=p.valueOf(ss).intValue();
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+                          ss=SF.FirstWord(s);prefysize=p.valueOf(ss).intValue();
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-xmin")) // option "-xmin 23"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
@@ -333,7 +342,7 @@ static public void windowclose(){
        file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>=MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
        s=SF.DropWord(s); if (s.length()==0&&i<args.length-1){++i;s=args[i];s=SF.TrimString(s);}
        }noffiles=j;
-        display demo = new display(title);
+        display demo = new display(title,prefxsize,prefysize);
        
         
         demo.pack();
@@ -365,7 +374,8 @@ static public void windowclose(){
  static int[] colyerr;
  static double scale;
  static double xmin,xmax,ymin,ymax;
- static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,doexit,showgrid;
+ static Integer prefxsize,prefysize;
+ static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detdim,doexit,showgrid;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
@@ -386,7 +396,7 @@ static public void windowclose(){
      * @param title  the frame title.
      */
           
- public display(String title) {
+ public display(String title,Integer prefxsize,Integer prefysize) {
         super(title);
         addKeyListener(this); 
         
@@ -408,7 +418,7 @@ static public void windowclose(){
         chartPanel.setRangeZoomable(true);
         //bRot.setHorizontalAlignment(SwingConstants.LEFT);
         //chartPanel.add(bRot);
-        chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+        chartPanel.setPreferredSize(new java.awt.Dimension(prefxsize, prefysize));
         //chartPanel.setAlignmentX(Component.RIGHT_ALIGNMENT);
         setContentPane(chartPanel);
           // get the top-level container in the Frame (= Window)
@@ -485,14 +495,14 @@ plot.setDomainGridlinePaint(Color.BLACK);
         renderer.setSeriesPaint(0, Color.blue);
         renderer.setSeriesPaint(1, Color.red);
         renderer.setSeriesPaint(2, Color.green);
-        renderer.setSeriesPaint(3, Color.black);
+        renderer.setSeriesPaint(3, Color.black); // dark
         renderer.setSeriesPaint(4, Color.orange);
         renderer.setSeriesPaint(5, Color.pink);
 
         brenderer.setSeriesPaint(1, Color.blue);
         brenderer.setSeriesPaint(0, Color.red);
         brenderer.setSeriesPaint(3, Color.green);
-        brenderer.setSeriesPaint(2, Color.black);
+        brenderer.setSeriesPaint(2, Color.black); // dark
         brenderer.setSeriesPaint(5, Color.orange);
         brenderer.setSeriesPaint(4, Color.pink);
        renderer.setDefaultToolTipGenerator(new StandardXYToolTipGenerator());
