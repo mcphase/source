@@ -1,669 +1,173 @@
-/*
- * $Id: JGridDemo.java,v 1.8 2001/02/05 23:28:46 dwd Exp $
- *
- * This software is provided by NOAA for full, free and open release.  It is
- * understood by the recipient/user that NOAA assumes no liability for any
- * errors contained in the code.  Although this software is released without
- * conditions or restrictions in its use, it is expected that appropriate
- * credit be given to its author and to the National Oceanic and Atmospheric
- * Administration should the software be included by the recipient as an
- * element in other product development.
+
+/* ---------------------
+ * BubbleChartDemo1.java
+ * ---------------------
+ * (C) Copyright 2003-2008, by Object Refinery Limited.
  */
-//package gov.noaa.pmel.sgt.demo;
 
-//import gov.noaa.pmel.sgt.demo.TestData;
+//package demo;
 
-import gov.noaa.pmel.sgt.swing.JPlotLayout;
-import gov.noaa.pmel.sgt.swing.JClassTree;
-import gov.noaa.pmel.sgt.swing.prop.GridAttributeDialog;
-import gov.noaa.pmel.sgt.JPane;
-import gov.noaa.pmel.sgt.AbstractPane;
-import gov.noaa.pmel.sgt.GridAttribute;
-import gov.noaa.pmel.sgt.ContourLevels;
-import gov.noaa.pmel.sgt.CartesianRenderer;
-import gov.noaa.pmel.sgt.CartesianGraph;
-import gov.noaa.pmel.sgt.GridCartesianRenderer;
-import gov.noaa.pmel.sgt.IndexedColorMap;
-import gov.noaa.pmel.sgt.ColorMap;
-import gov.noaa.pmel.sgt.LinearTransform;
-import gov.noaa.pmel.sgt.Layer;
-import gov.noaa.pmel.sgt.LinearTransform;
-
-import gov.noaa.pmel.sgt.dm.SGTData;
-import gov.noaa.pmel.sgt.dm.SGTPoint;
-import gov.noaa.pmel.sgt.dm.SGTLine;
-import gov.noaa.pmel.sgt.dm.SGTGrid;
-import gov.noaa.pmel.sgt.dm.SGTMetaData;
-import gov.noaa.pmel.sgt.dm.SimplePoint;
-import gov.noaa.pmel.sgt.dm.SimpleLine;
-import gov.noaa.pmel.sgt.dm.SimpleGrid;
-import gov.noaa.pmel.sgt.dm.Collection;
-import gov.noaa.pmel.sgt.SGLabel;
-
-import gov.noaa.pmel.util.GeoDate;
-import gov.noaa.pmel.util.TimeRange;
-import gov.noaa.pmel.util.Range2D;
-import gov.noaa.pmel.util.Dimension2D;
-import gov.noaa.pmel.util.Rectangle2D;
-import gov.noaa.pmel.util.Point2D;
-import gov.noaa.pmel.util.IllegalTimeValue;
-import gov.noaa.pmel.util.Domain;
-
-import gov.noaa.pmel.util.GeoDateArray;
-
+import java.awt.Color;
 import java.awt.*;
-import java.awt.print.*;
+import java.awt.event.*;
 import java.awt.image.*;
-import javax.swing.*;
-
+import javax.swing.JPanel;
+import java.io.*;
 import javax.imageio.ImageIO;
 
-import java.awt.event.*;
-import java.io.*;
-import java.lang.*;
-import java.util.*;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.title.PaintScaleLegend;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYBlockRenderer;
+import org.jfree.chart.renderer.GrayPaintScale;
+import org.jfree.chart.renderer.LookupPaintScale;
+import org.jfree.chart.renderer.PaintScale;
+import org.jfree.data.xy.DefaultXYZDataset;
+import org.jfree.data.xy.XYZDataset;
+import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RefineryUtilities;
+
+import org.jfree.chart.annotations.XYLineAnnotation;
+import org.jfree.chart.annotations.XYTextAnnotation;
+
+//import com.sun.image.codec.jpeg.JPEGCodec;
+//import com.sun.image.codec.jpeg.JPEGImageEncoder;
+
 /**
- * Example demonstrating how to use <code>JPlotLayout</code>
- * to create a raster-contour plot.
- * 
- * @author Donald Denbo
- * @version $Revision: 1.8 $, $Date: 2001/02/05 23:28:46 $
- * @since 2.0
+ * A bubble chart demo.
  */
-public class displaycontour extends JApplet {
- static   double vals[]={0.,1.};
+public class displaycontour extends ApplicationFrame implements WindowListener {
+// Button bRot=new Button("save display.jpg");                       //erstellt einen Button
+static myStringfunc SF=new myStringfunc();
+static final int MAX_NOF_FILES = 20;
+
+static int noffiles;
  static String[] file;
- static String title;
- static String xaxistext;
- static String yaxistext;
- static String zaxistext;
- 
- static String comment;
- static String comment1;
+ static String jpgfilename;
+ static long[] lastmod;
  static int[] colx;
  static int[] coly;
- static int[] colz;
- 
- static boolean makeImg = false;
- static boolean closeImg = false;
- static String imgFile;
- static boolean png = false;
- 
- // %#* Edited by Nikolai
- static String xtex="x-col";
- static String ytex="y-col";
- static String ztex="z-col";
- 
- static String[] Params;
- static long lastmod = 0;
+ static int[] colint;
+ static double scale;
+ static double xmin,xmax,ymin,ymax,zmin,zmax;
+ static Integer prefxsize,prefysize;
+ static boolean detxmin,detymin,detzmin,detxmax,detymax,detzmax,detxText,detyText,detzText,detTitle,detdim,doexit,showgrid;
+ static String [] legend; 
+ static String xText = "";
+ static String yText = "";
+ static String zText = "";
+ static String Title = "";
+ static String Vlines = "";
+ static String Hlines = "";
+ static LegendTitle Legendt;
+ static DefaultXYZDataset dataset;
+ static NumberAxis zAxis;
+ static JFreeChart chart;
+ static ChartPanel chartPanel;
+// static ChartPanel panel;
 
-
-  static JPlotLayout rpl_;
-  static JFrame frame;
-  private GridAttribute gridAttr_;
-  JButton edit_;
-  JButton space_ = null;
-  JButton tree_;
-  JButton print_;
-  JButton layout_;
-  PageFormat pageFormat = PrinterJob.getPrinterJob().defaultPage();
-  
-  UpdateThread ut;
-
-  public void init() {
-    double[] axis1, axis2;
-    double[] values;
-    double[] zero;
-
-    axis1=new double[10];
-    axis2=new double[10];
-        
-    int count;
-        for(count=0; count < 10; count++) {
-      axis1[count] = count;
-      axis2[count] = count;
-    }
-    values= new double[10*10];
-        for(count=0; count < 100; count++) {
-      values[count] = 1.0;
-    }
-    
-    /*
-     * Create the demo in the JApplet environment.
-     */
-    getContentPane().setLayout(new BorderLayout(0,0));
-    setBackground(java.awt.Color.white);
-    setSize(600,600);
-    JPanel main = new JPanel();
-    try {
-	rpl_ = makeGraph(values,axis1,axis2,Double.NaN,Double.NaN,Double.NaN,Double.NaN);
-	} catch(java.beans.PropertyVetoException e) { }
-    JPanel button = makeButtonPanel(false);
-    rpl_.setBatch(true);
-    main.add(rpl_, BorderLayout.CENTER);
-    JPane gridKeyPane = rpl_.getKeyPane();
-    gridKeyPane.setSize(new Dimension(600,100));
-    main.add(gridKeyPane, BorderLayout.SOUTH);
-    getContentPane().add(main, "Center");
-    getContentPane().add(button, "South");
-    rpl_.setBatch(false);
-	ut = new UpdateThread(this);
-  }
-
-  JPanel makeButtonPanel(boolean mark) {
-    JPanel button = new JPanel();
-    button.setLayout(new FlowLayout());
-    tree_ = new JButton("Tree View");
-    MyAction myAction = new MyAction();
-    tree_.addActionListener(myAction);
-    button.add(tree_);
-    edit_ = new JButton("Edit GridAttribute");
-    edit_.addActionListener(myAction);
-    button.add(edit_);
-
-    print_ = new JButton("Print...");
-    print_.addActionListener(myAction);
-    button.add(print_);
-    layout_ = new JButton("Page Layout...");
-    layout_.addActionListener(myAction);
-    button.add(layout_);
-    /*
-     * Optionally leave the "mark" button out of the button panel
-     */
-    if(!mark) {
-      space_ = new JButton("Add Mark");
-      space_.addActionListener(myAction);
-      button.add(space_);
-    }
-    return button;
-  }
-  public static void main(String[] args) throws java.beans.PropertyVetoException {
-  if (args.length<2)
-  {System.out.println("- too few arguments...\n");
-    System.out.println("  program displaycontour - show data file by viewing a contour/color graphic on screen\n");
-    System.out.println("                           NOTE: data file will be automatically reloaded when it is changed\n\n");
-    System.out.println("use as:  displaycontour <options> xcol ycol zcol filename\n\n");
-    System.out.println("         xcol,ycol,zcol ... column to be taken as x- and y-axis and color-axis\n");
-    System.out.println("         filename ..... filename of datafile\n\n");
-    System.out.println("options: -xmin <value> ..... sets the minimum of display x-axis");
-    System.out.println("	                         (similar options: -xmax, -ymin, -ymax).\n");
-    System.out.println("         -xtitle <value> ..... sets the title of display x-axis");
-    System.out.println("	                           (similar options: -ytitle, -ztitle).\n");
-    System.out.println("         -c <filename> ..... creates image of display and closes immediately\n");
-    System.out.println("         -o <filename> ..... creates image of display on closing\n");
-    System.out.println("         -png ..... created image will be in png-format instead of jpg-format\n\n");
-  System.exit(0);
-  }
-  
-  Params = args;
-  
-
-
-
-    /*
-     * Create the demo as an application // 
-     */
-    displaycontour gd = new displaycontour();
-	gd.init();
-    /*
-     * Create a new JFrame to contain the demo.
-     */
-
-    frame = new JFrame("displaycontour"); // %#* Title
-    JPanel main = new JPanel();
-    main.setLayout(new BorderLayout());
-    frame.setSize(600,600);
-    frame.getContentPane().setLayout(new BorderLayout());
-    /*
-     * Listen for windowClosing events and dispose of JFrame
-     */
-    frame.addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent event) {
-	JFrame fr = (JFrame)event.getSource();
-	if (makeImg) makeImage(imgFile);
-	fr.setVisible(false);
-	fr.dispose();
-	System.exit(0);
-      }
-      public void windowOpened(java.awt.event.WindowEvent event) {
-	rpl_.getKeyPane().draw();
-      }
-    });
-	
-    /*
-     * Create button panel with "mark" button
-     */
-    JPanel button = gd.makeButtonPanel(true);
-    /*
-     * Create JPlotLayout and turn batching on.  With batching on the
-     * plot will not be updated as components are modified or added to
-     * the plot tree.
-     */
-    rpl_ = reloadAll(args, gd);
-    rpl_.setBatch(true);
-    /*
-     * Layout the plot, key, and buttons.
-     */
-    main.add(rpl_, BorderLayout.CENTER);
-    JPane gridKeyPane = rpl_.getKeyPane();
-    gridKeyPane.setSize(new Dimension(600,100));
-    rpl_.setKeyLayerSizeP(new Dimension2D(6.0, 1.0));
-    rpl_.setKeyBoundsP(new Rectangle2D.Double(0.0, 1.0, 6.0, 1.0));
-    main.add(gridKeyPane, BorderLayout.SOUTH);
-    frame.getContentPane().add(main, BorderLayout.CENTER);
-    frame.getContentPane().add(button, BorderLayout.SOUTH);
-    frame.pack();
-    frame.setVisible(true);
-	
-	gd.ut.run();
-	
-    /*
-     * Turn batching off. JPlotLayout will redraw if it has been
-     * modified since batching was turned on.
-     */
-    rpl_.setBatch(false);
-  }
-  
-  public static JPlotLayout reloadAll(String[] args, displaycontour gd) throws java.beans.PropertyVetoException {
-  /* Part edited by Nikolai */
-  double xmin, xmax, ymin, ymax;
-  xmin = Double.NaN;
-  ymin = Double.NaN;
-  xmax = Double.NaN;
-  ymax = Double.NaN;
-  /* ---------------------- */
-
-  String ss;
-  file = new String[args.length];
-  colx = new int[args.length];
-  coly = new int[args.length];
-  colz = new int[args.length];
-   Double p = new Double(0.0);
-//      System.out.println(sx+" "+sy);
-//      p.valueOf(strLine);
-//    double[] myDatax = {};
- int j=0;
-// title= new String;
- title="displaycontour";
- /* Part edited by Nikolai */
- //for(int i=0; i<args.length-1;	i+=4)
- //{
- int k = 0;
- while (args[k].substring(0, 1).equals("-")) {
-	if (args[k].equalsIgnoreCase("-xmin")) {
-		xmin = Double.parseDouble(args[k+1]);
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-xmax")) {
-		xmax = Double.parseDouble(args[k+1]);
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-ymin")) {
-		ymin = Double.parseDouble(args[k+1]);
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-ymax")) {
-		ymax = Double.parseDouble(args[k+1]);
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-xtitle")) {
-		xtex = args[k+1];
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-ytitle")) {
-		ytex = args[k+1];
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-ztitle")) {
-		ztex = args[k+1];
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-title")) {
-		title = args[k+1];
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-c")) {
-		makeImg = true;
-		closeImg = true;
-		imgFile = args[k + 1];
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-o")) {
-		makeImg = true;
-		closeImg = false;
-		imgFile = args[k + 1];
-		++k;
-	}
-	if (args[k].equalsIgnoreCase("-png")) {
-		png = true;
-	}
-	++k;
- }
- file[j]=args[k+3];
-  //Integer pp; // -> Nutzloser Integer?
-  ss=args[k];xaxistext=ss;
-  colx[j]=p.valueOf(ss).intValue();
-  ss=args[k+1];yaxistext=ss;
-  coly[j]=p.valueOf(ss).intValue();
-  ss=args[k+2];zaxistext=ss;
-  colz[j]=p.valueOf(ss).intValue();
-  ++j; 
-  title=title+" "+args[k]+" "+args[k+1]+" "+args[k+2]+" "+args[k+3];
- //}
- /* ---------------------- */
- File fileIni;
-
-    double[] axis1, axis2,a1,a2;
-    double[] values,vv;
-    double[] zero;
-    a1=new double[100000];
-    a2=new double[100000];
-    vv=new double[100000];
-    int ii=0;int jj=0;
-    
- try{int i=0;
- String s="";comment=" ";comment1=" ";
- fileIni = new File(file[i]);
- lastmod = fileIni.lastModified();
-
-    //ffnen der Datei
-	Scanner sc = new Scanner(fileIni);
-    String strLine;
-    String sx;
-    String sy;
-    String sz;
-    int clx = colx[i];
-    int cly = coly[i];   
-    int clz = colz[i];   
-    int washere=0;
-     //Auslesen der Datei
-    while (sc.hasNextLine())
-    {
-      strLine = sc.nextLine();
-      if ((strLine.length() == 0)
-        ||(TrimString(strLine).substring(0, 1).equalsIgnoreCase("#")))
-      {if((TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))&&washere==1){washere=2;comment1=strLine ;}
-       if((TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))&&washere==0){washere=1;comment=strLine ;}
-
-        continue;
-      }
-      
-      // select colx and coly
-      sx=TrimString(strLine);
-      sy=TrimString(strLine);
-      sz=TrimString(strLine);
-      int cx =clx-1;
-      int cy =cly-1;      
-      int cz =clz-1;
-
-      while (cx>0)
-      {--cx;
-       int iPos = sx.indexOf(" ");
-       if (iPos < 0)
-       {
-         continue;
-       }
-       sx=sx.substring(iPos);
-       sx=TrimString(sx); 
-      }
-
-      while (cy>0)
-      {--cy;
-       int iPos = sy.indexOf(" ");
-       if (iPos < 0)
-       {
-         continue;
-       }
-       sy=sy.substring(iPos);
-       sy=TrimString(sy); 
-      }
-      
-      while (cz>0)
-      {--cz;
-       int iPos = sz.indexOf(" ");
-       if (iPos < 0)
-       {
-         continue;
-       }
-       sz=sz.substring(iPos);
-       sz=TrimString(sz); 
-      }
-            
-       cx=sx.indexOf(" ");
-       cy=sy.indexOf(" ");
-       cz=sz.indexOf(" ");
-       if (cx>0) {sx=sx.substring(0,cx);}
-       if (cy>0) {sy=sy.substring(0,cy);}
-       if (cz>0) {sz=sz.substring(0,cz);}
-
-      Double pp = new Double(0.0);
-      a1[ii]= pp.parseDouble(sx);
-      a2[ii]= pp.parseDouble(sy);
-      vv[ii]= pp.parseDouble(sz);
-     //System.out.println(sx+" x "+sy+" x "+sz);
-    
-      if(ii>0){if(a2[ii]<a2[ii-1]&&jj==0){jj=ii;}}
-      
-     ++ii;
-    }
-	sc.close();
-	System.out.println(ii + " " + jj);
- }
-    catch (FileNotFoundException e)
-    {
-      System.out.println("File not found: " + e.getLocalizedMessage());
-      //EntSession.CWatch("Konfigurationsdatei cti_listener.ini nicht gefunden!");
-    }
-
-    //Sonstiger Dateifehler
-    catch (IOException e)
-    {
-      System.out.println("Dateifehler: " + e.getLocalizedMessage());
-      //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
-    }
-    
-    axis1=new double[ii/jj];
-    axis2=new double[jj];
-      System.out.println("mesh "+ii+"points in grid "+(ii/jj)+"x"+jj);
-        
-    int count;
-        for(count=0; count < ii/jj; count++) {
-      axis1[count] = a1[jj*count];}
-        for(count=0; count < jj; count++) {
-      axis2[count] = a2[count];
-    }
-    
-    values= new double[ii];
-        for(count=0; count < ii; count++) {
-      values[count] = vv[count];
-    }
-	
-	frame.setTitle(title);
-	
-    rpl_ = gd.makeGraph(values,axis1,axis2,xmin,ymin,xmax,ymax);
-	return rpl_;
-  }
-
-  void edit_actionPerformed(java.awt.event.ActionEvent e) {
-    /*
-     * Create a GridAttributeDialog and set the renderer.
-     */
-    GridAttributeDialog gad = new GridAttributeDialog();
-    gad.setJPane(rpl_);
-    CartesianRenderer rend = ((CartesianGraph)rpl_.getFirstLayer().getGraph()).getRenderer();
-    gad.setGridCartesianRenderer((GridCartesianRenderer)rend);
-    //        gad.setGridAttribute(gridAttr_);
-    gad.setVisible(true);
-  }
-
-    void tree_actionPerformed(java.awt.event.ActionEvent e) {
-      /*
-       * Create a JClassTree for the JPlotLayout objects
-       */
-        JClassTree ct = new JClassTree();
-        ct.setModal(false);
-        ct.setJPane(rpl_);
-        ct.show();
-    }
-
-  void print_actionPerformed(ActionEvent e) {
-    Color saveColor;
-
-    PrinterJob printJob = PrinterJob.getPrinterJob();
-    printJob.setPrintable(rpl_, pageFormat);
-    printJob.setJobName("Grid Demo");
-    if(printJob.printDialog()) {
-      try {
-        saveColor = rpl_.getBackground();
-        if(!saveColor.equals(Color.white)) {
-          rpl_.setBackground(Color.white);
+public void windowClosing(WindowEvent e) {
+         windowclose();
         }
-        rpl_.setPageAlign(AbstractPane.TOP,
-                          AbstractPane.CENTER);
-        RepaintManager currentManager = RepaintManager.currentManager(rpl_);
-        currentManager.setDoubleBufferingEnabled(false);
-        printJob.print();
-        currentManager.setDoubleBufferingEnabled(true);
-        rpl_.setBackground(saveColor);
-      } catch (PrinterException pe) {
-        System.out.println("Error printing: " + pe);
-      }
+static public void windowclose(){
+        if(jpgfilename.length()!=0)
+         {  BufferedImage image= chart.createBufferedImage(chartPanel.getWidth(),chartPanel.getHeight(),BufferedImage.TYPE_INT_RGB,null);
+           try {
+                // write the image as a jpg
+                ImageIO.write(image,"jpg",new File(jpgfilename));
+              } catch(Exception f) {
+                f.printStackTrace();
+              }
+          }
+                //dispose();
+                System.exit(0);
+}
+        public void windowOpened(WindowEvent e) {}
+        public void windowActivated(WindowEvent e) {}
+        public void windowIconified(WindowEvent e) {}
+        public void windowDeiconified(WindowEvent e) {}
+        public void windowDeactivated(WindowEvent e) {}
+        public void windowClosed(WindowEvent e) {}
+
+    /**
+     * A demonstration application showing a bubble chart.
+     *
+     * @param title  the frame title.
+     */
+    public displaycontour(String title,Integer prefxsize,Integer prefysize) {
+
+
+
+        super(title);
+        chartPanel = createDemoPanel();
+        chartPanel.setPreferredSize(new java.awt.Dimension(prefxsize, prefysize));
+        setContentPane(chartPanel);
+        chartPanel.setAlignmentY(Component.LEFT_ALIGNMENT);
+        JFreeChart chart=createChart();
+//        chartPanel.add(bRot);
+
+//   bRot.addActionListener(new ActionListener(){
+//    public void actionPerformed(ActionEvent ed){
+//    try{
+//         FileOutputStream fos=new FileOutputStream("display.jpg");
+//         BufferedImage image= chart.createBufferedImage(chartPanel.getWidth(),chartPanel.getHeight(),BufferedImage.TYPE_INT_RGB,null); 
+//         JPEGImageEncoder encoder= JPEGCodec.createJPEGEncoder(fos); 
+//         encoder.encode(image);
+//         fos.close();
+//    }    catch (FileNotFoundException e)
+//    {
+//         System.out.println("File not found: " + e.getLocalizedMessage());
+//         //EntSession.CWatch("Konfigurationsdatei cti_listener.ini nicht gefunden!");
+//    }
+//         //Sonstiger Dateifehler
+//         catch (IOException e)
+//    {
+//         System.out.println("Dateifehler: " + e.getLocalizedMessage());
+//         //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
+//    }
+
+//      } });
+                                               
     }
 
-  }
-
-  void layout_actionPerformed(ActionEvent e) {
-    PrinterJob pj = PrinterJob.getPrinterJob();
-    pageFormat = pj.pageDialog(pageFormat);
-  }
-
-
-    
-  JPlotLayout makeGraph(double[] values,double[]axis1,double[]axis2,
-		double xMin, double yMin, double xMax, double yMax)
-		throws java.beans.PropertyVetoException{
-    /*
-     * This example uses a pre-created "Layout" for raster time
-     * series to simplify the construction of a plot. The
-     * JPlotLayout can plot a single grid with
-     * a ColorKey, time series with a LineKey, point collection with a
-     * PointCollectionKey, and general X-Y plots with a
-     * LineKey. JPlotLayout supports zooming, object selection, and
-     * object editing.
-     */                
-    SimpleGrid newData;
-    SGTMetaData xMeta;
-    SGTMetaData yMeta;
-    SGTMetaData zMeta;
-    SGLabel keyLabel = new SGLabel("Key Label", "", new Point2D.Double(0.0, 0.0));
-    keyLabel.setHeightP(0.16);
-
-
-      keyLabel.setText(title); // %#* Title
-      xMeta = new SGTMetaData(xtex, ""); // %#* X-Achse
-      yMeta = new SGTMetaData(ytex, ""); // %#* Y-Achse
-      zMeta = new SGTMetaData(ztex, ""); // %#* Z-Achse
-  
-  newData = new SimpleGrid(values, axis1, axis2, "Test Series");
-
-    newData.setXMetaData(xMeta);
-    newData.setYMetaData(yMeta);
-    newData.setZMetaData(zMeta);
-    newData.setKeyTitle(keyLabel);
-
-    JPlotLayout rpl;
-    ContourLevels clevels;
-    /*
-     * Create a test grid with sinasoidal-ramp data.
+    /**
+     * Creates a chart.
+     *
+     * @param dataset  the dataset.
+     *
+     * @return The chart.
      */
-    Range2D xr = new Range2D(190.0f, 250.0f, 1.0f);
-    Range2D yr = new Range2D(0.0f, 45.0f, 1.0f);
-    /*
-     * Create the layout without a Logo image and with the
-     * ColorKey on a separate Pane object.
-     */   
-    rpl = new JPlotLayout(true, false, false, "test layout " + lastmod, null, true);
-    rpl.setEditClasses(false);
-    /*
-     * Create a GridAttribute for CONTOUR style.
-     */
-    Range2D datar = new Range2D(-20.0f, 45.0f, 5.0f);
-    clevels = ContourLevels.getDefault(datar);
-    gridAttr_ = new GridAttribute(clevels);
-	
-	
-    /*
-     * Create a ColorMap and change the style to RASTER_CONTOUR.
-     */
-    ColorMap cmap = createColorMap(datar);
-    gridAttr_.setColorMap(cmap);
-    gridAttr_.setStyle(GridAttribute.RASTER_CONTOUR);
-    /*
-     * Add the grid to the layout and give a label for
-     * the ColorKey.
-     */
-    rpl.addData(newData, gridAttr_, ztex);
-    /*
-     * Change the layout's three title lines.
-     */        
-    rpl.setTitles(title,
-                  comment,
-                  comment1);
-    /*
-     * Resize the graph  and place in the "Center" of the frame.
-     */
-    rpl.setSize(new Dimension(600,500));
-    
-    /*
-     * Resize the key Pane, both the device size and the physical
-     * size. Set the size of the key in physical units and place
-     * the key pane at the "South" of the frame.
-     */
-    rpl.setLayerSizeP(new Dimension2D(6.0, 6.0));
-    rpl.setKeyLayerSizeP(new Dimension2D(6.0, 1.02));
-    rpl.setKeyBoundsP(new Rectangle2D.Double(0.01, 1.01, 5.98, 1.0));
-  
-  /* %#* Part edited by Nikolai */
-  Range2D xd = rpl.getRange().getXRange();
-  Range2D yd = rpl.getRange().getYRange();
-  if (!Double.isNaN(xMin)) xd.start = xMin;
-  if (!Double.isNaN(yMin)) yd.start = yMin;
-  if (!Double.isNaN(xMax)) xd.end = xMax;
-  if (!Double.isNaN(yMax)) yd.end = yMax;
-  xd.delta = Double.NaN;
-  yd.delta = Double.NaN;
-  rpl.setRange(new Domain(xd, yd));
-  rpl.setClipping(true);
-  if (rpl.getFirstLayer().getGraph() instanceof CartesianGraph) {
-  CartesianGraph cg = ((CartesianGraph)rpl.getFirstLayer().getGraph());
-  if (!cg.isClipping())
-  {
-	cg.setClipping(true);
-  }
-  cg.setClip(xd.start, xd.end, yd.start, yd.end);
-  }
-  rpl.setBatch(true);
-  /*
-  Component[] c = rpl.getComponents();
-  Layer ly;
-  for (int i = 0; i < c.length; i++) {
-	if (c[i] instanceof Layer) {
-		ly = (Layer)c[i];
-		((CartesianGraph)ly.getGraph())
-			.setClip(xd.start, xd.end, yd.start, yd.end);
-	}
-  }
-  */
-  rpl.setBatch(false);
-  //rpl.setForeground(Color.WHITE);
-  //rpl.setBackground(Color.BLACK);
-
-    return rpl;
-  }
-  
-  
-  ColorMap createColorMap(Range2D datar) {
-    int[] red =
+    private static JFreeChart createChart() {
+        NumberAxis xAxis = new NumberAxis(xText);
+//         xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+         xAxis.setLowerMargin(0.0);
+         xAxis.setUpperMargin(0.0);
+         NumberAxis yAxis = new NumberAxis(yText);
+//         yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+         yAxis.setLowerMargin(0.0);
+         yAxis.setUpperMargin(0.0);
+         zAxis = new NumberAxis(zText);
+         XYBlockRenderer renderer = new XYBlockRenderer();
+         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
+//         plot.setBackgroundPaint(Color.lightGray);
+         plot.setDomainGridlinesVisible(false);
+         plot.setRangeGridlinePaint(Color.white);
+         chart = new JFreeChart(Title, plot);
+         chart.removeLegend();
+         //chart.setBackgroundPaint(Color.white);
+           dataset = new DefaultXYZDataset();
+for(int i=0;i<noffiles;++i){
+                           plot.setRenderer(i,renderer);
+                           plot.setDataset(i,dataset);
+         reload_data(i);
+                               }
+int[] red =
     {  0,  0,  0,  0,  0,  0,  0,  0,
        0,  0,  0,  0,  0,  0,  0,  0,
        0,  0,  0,  0,  0,  0,  0,  0,
@@ -691,192 +195,421 @@ public class displaycontour extends JApplet {
        0,  0,  0,  0,  0,  0,  0,  0,
        0,  0,  0,  0,  0,  0,  0,  0};
 
-    IndexedColorMap cmap = new IndexedColorMap(red, green, blue);
-    cmap.setTransform(new LinearTransform(0.0, (double)red.length,
-					  datar.start, datar.end));
-    return cmap;
-  }
-    
-  class MyAction implements java.awt.event.ActionListener {
-        public void actionPerformed(java.awt.event.ActionEvent event) {
-           Object obj = event.getSource();
-           
-	   if(obj == edit_) 
-             edit_actionPerformed(event);
-	   
-	   if(obj == space_) 
-	     System.out.println("  <<Mark>>");
-	   
-	   if(obj == tree_)
-	       tree_actionPerformed(event);
+     if(xmax<=xmin||ymax<=ymin||zmax<=zmin){System.out.println("No data to plot");System.exit(1);}
+     xAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
+     yAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
+         LookupPaintScale scale = new LookupPaintScale(zmin, zmax,Color.red);
+         for(int i=0;i<64;++i){
+         scale.add(i,new Color(red[i],green[i],blue[i]));
+                                  }
+         PaintScaleLegend zscale = new PaintScaleLegend(scale,zAxis);
+        zscale.setVisible(true);
+          chart.addSubtitle(zscale);
+         renderer.setPaintScale(scale);
+        plot.setBackgroundPaint(Color.white);
+        plot.setForegroundAlpha(1.0f);
+plot.setRangeGridlinesVisible(showgrid);
+plot.setRangeGridlinePaint(Color.WHITE);
 
-           if(obj == print_) 
-               print_actionPerformed(event);
-	       
-           if(obj == layout_) 
-               layout_actionPerformed(event);
+plot.setDomainGridlinesVisible(showgrid);
+plot.setDomainGridlinePaint(Color.WHITE);
+
+
+// this is for plotting a line 
+//     XYLineAnnotation axy = new  XYLineAnnotation(0.0, 0.0, 1.0, 0.0);
+//     plot.addAnnotation(axy);
+// we plot vertical lines at the positions specified in the numbers of string Vlines
+
+    String hl [] = Vlines.split(",");Double p = new Double(0.0);
+for (String s : hl) {
+if(!s.isEmpty()){
+    String sn [] = s.split("\\|"); 
+   double y =p.parseDouble(sn[0]); 
+ XYLineAnnotation axy = new  XYLineAnnotation(y, xmin, y, xmax);
+plot.addAnnotation(axy);
+   if(sn.length>1){
+XYTextAnnotation t = new XYTextAnnotation(sn[1],y,xmax+0.02*(xmax-xmin));
+plot.addAnnotation(t);
     }
-	}
-
- static private String FirstWord(String strSource)
- {String fw;
-  fw=TrimString(strSource);
-       int iPos = fw.indexOf(" ");
-       if (iPos >= 0)
-       {
-       fw=strSource.substring(0,iPos);
-       fw=TrimString(fw); 
-       }
- return(fw); 
  }
-
- static private String DropWord(String strSource)
- {String fw;
-  fw=TrimString(strSource);
-       int iPos = fw.indexOf(" ");
-       if (iPos >= 0)
-       {
-       fw=strSource.substring(iPos);
-       fw=TrimString(fw); 
-       }
- return(fw); 
- }
-
- static private String TrimString(String strSource)
- {
-    while ((strSource.startsWith(" "))
-      && (strSource.length() > 0))
-      {
-        strSource = strSource.substring(1, strSource.length());
-      }
-
-    while ((strSource.endsWith(" "))
-        && (strSource.length() > 0))
-      {
-        strSource = strSource.substring(0, strSource.length() - 1);
-      }
-
-    return(strSource);
- }
- 
- public static void makeImage(String fileName)
- {
-	try {
-		//BufferedImage buff = frameToImage(frame, null);
-		BufferedImage buff = componentToImage(frame.getContentPane().getComponent(0), null);
-		File f = new File(fileName);
-		if (buff == null) System.out.println("Image is null");
-		ImageIO.write(buff, ((png) ? "jpg" : "png"), f);
-	} catch(Exception e) {
-		System.out.println("Coudn't write Image. ERROR: " + e);
-	}
- }
- 
- public static BufferedImage componentToImage(Component component, Rectangle region) throws IOException
-{
-    BufferedImage img = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_RGB);
-    Graphics g = img.getGraphics();
-    g.setColor(component.getForeground());
-    g.setFont(component.getFont());
-    component.paintAll(g);
-	component.paint(g);
-    if (region == null)
-    {
-        region = new Rectangle(0, 0, img.getWidth(), img.getHeight());
-    }
-    return img.getSubimage(region.x, region.y, region.width, region.height);
 }
- 
- public class UpdateThread extends Thread {
- 
-		private displaycontour gd;
- 
-		public UpdateThread(displaycontour dc) {
-			gd = dc;
-		}
-		
-		public void run() {
+    String vl [] = Hlines.split(",");
+for (String s : vl) {
+if(!s.isEmpty()){ String sn [] = s.split("\\|"); 
+   double x =p.parseDouble(sn[0]); 
+ XYLineAnnotation axy = new  XYLineAnnotation(ymin, x, ymax, x);
+plot.addAnnotation(axy);
+ if(sn.length>1){
+XYTextAnnotation t = new XYTextAnnotation(sn[1],ymax+0.02*(ymax-ymin),x);
+plot.addAnnotation(t);
+    }
+ }
+}
+         return chart;
+    }
+
+    /**
+     * Creates a sample dataset.
+     *
+     * @return A sample dataset.
+     */
+  /*  public static XYZDataset createDataset() {
+        
+         dataset = new DefaultXYZDataset();
+        //double[] x = {2.1, 2.3, 2.3, 2.2, 2.2, 1.8, 1.8, 1.9, 2.3, 3.8};
+        //double[] y = {14.1, 11.1, 10.0, 8.8, 8.7, 8.4, 5.4, 4.1, 4.1, 25};
+        //double[] z = {2.4, 2.7, 2.7, 2.2, 2.2, 2.2, 2.1, 2.2, 1.6, 4};
+        //double[][] series = new double[][] { x, y, z };
+        //dataset.addSeries("Series 1", series);
+        return dataset;
+    }*/
+
+    /**
+     * Creates a panel for the demo (used by SuperDemo.java).
+     *
+     * @return A panel.
+     */
+    public static ChartPanel createDemoPanel() {
+        JFreeChart chart = createChart();
+        ChartPanel chartPanel = new ChartPanel(chart);
+       	
+        chartPanel.setDomainZoomable(true);
+        chartPanel.setRangeZoomable(true);
+        return chartPanel;
+    }
+
+    /**
+     * Starting point for the demonstration application.
+     *
+     * @param args  ignored.
+     */
+    public static void main(String[] args) {
+xmin=1e30;xmax=-1e30;detymin=true;detymax=true;doexit=false;
+ymin=1e30;ymax=-1e30;detxmin=true;detxmax=true;
+zmin=1e30;zmax=-1e30;detzmin=true;detzmax=true;
+      detxText=true;detyText=true;detzText=true;detTitle=true;detdim=true;
+      prefxsize=500;prefysize=270;
+     
+          String ss,s;
+      if (args.length<3)
+      {System.out.println("- too few arguments...\n");
+       System.out.println("  program displaycontour - show and watch data file by viewing a xy graphic on screen\n");
+       System.out.println("use as:  displaycontour [options] xcol ycol intcol filename \n");
+       System.out.println("         xcol,ycol ... column to be taken as x-, y- and intensity-axis");
+       System.out.println("	 filename ..... filename of datafile");
+       System.out.println("	 Data files may contain lines to tune the display output, such as");
+       System.out.println("	 # displaytitle=My new Graph");
+       System.out.println("	 # displayytext=intensity");
+       System.out.println("	 # displayxtext=meV \n");
+       System.out.println("        options:   -o file.jpg create a jpg file on exiting");
+       System.out.println("                   -c file.jpg create a jpg file and exit immediately");
+       System.out.println("                   -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
+       System.out.println("                   -xmax -ymin -ymax -xtext -ytext -title  similar");
+       System.out.println("                   -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values");
+       System.out.println("                          a text to be written as line label can be added by inserting | and adding the text");
+       System.out.println("                   -hlines 2,3.4,12.3 shows horizontal lines at specified y values");
+       System.out.println("                   -g shows gridlines");
+       System.out.println("                   -dim 400 200  set dimension of plot (in pixels width 400 height 200)\n");
+       System.out.println("                 Press Enter to Continue");
+       System.exit(0);
+      }
+       file = new String[args.length/3];
+       lastmod = new long[args.length/3];
+       colx = new int[args.length/3];
+       coly = new int[args.length/3];
+       colint = new int[args.length/3];
+       Double p = new Double(0.0);
+       //      System.out.println(sx+" "+sy);
+       //      p.valueOf(strLine);
+       //    double[] myDatax = {};
+  
+int j=0;int k=0; jpgfilename="";showgrid=false;
+       String title="display";
+       s=args[0];s=SF.TrimString(s); // command line arguments are treated here
+       //look if options are present
+       while(SF.TrimString(s).substring(0, 1).equalsIgnoreCase("-"))
+          {// yes there are options
+           if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-o")) // option "-o file.jpg"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             jpgfilename=SF.FirstWord(s);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+           else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-c")) // option "-c file.jpg"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             jpgfilename=SF.FirstWord(s);doexit=true;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 2).equalsIgnoreCase("-g")) // option "-g"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             showgrid=true;
+            }
+            else if(SF.TrimString(s).substring(0, 4).equalsIgnoreCase("-dim")) // option "-dim 500 223"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detdim=false;ss=SF.FirstWord(s);prefxsize=p.valueOf(ss).intValue();
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+                          ss=SF.FirstWord(s);prefysize=p.valueOf(ss).intValue();
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-zmax")) // option "-zmax 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detzmax=false;ss=SF.FirstWord(s);zmax=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-zmin")) // option "-zmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detzmin=false;ss=SF.FirstWord(s);zmin=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-xmin")) // option "-xmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detxmin=false;ss=SF.FirstWord(s);xmin=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-xmax")) // option "-xmax 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detxmax=false;ss=SF.FirstWord(s);xmax=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-ymin")) // option "-ymin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detymin=false;ss=SF.FirstWord(s);ymin=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-ymax")) // option "-ymax 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detymax=false;ss=SF.FirstWord(s);ymax=p.parseDouble(ss);
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ztext")) // option "-ytext meV"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detyText=false;ss=SF.FirstWord(s);zText=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ytext")) // option "-ytext meV"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detxText=false;ss=SF.FirstWord(s);xText=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-xtext")) // option "-xtext meV"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detyText=false;ss=SF.FirstWord(s);yText=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-title")) // option "-title meV"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detTitle=false;ss=SF.FirstWord(s);Title=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-hlines")) // option "-hlines 3,2,4"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detTitle=false;ss=SF.FirstWord(s);Hlines=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 7).equalsIgnoreCase("-vlines")) // option "-vlines 3,2,4"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             detTitle=false;ss=SF.FirstWord(s);Vlines=ss;
+             s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else {System.out.println("ERROR: option,"+SF.TrimString(s)+" not implemented !\n\n");System.exit(0);}
+          }
+       for(int i=k;s.length()>0;	i+=0)
+       {Integer pp;
+       ss=SF.FirstWord(s);
+       colx[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
+       s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
+       ss=SF.FirstWord(s);
+       coly[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
+       s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
+       ss=SF.FirstWord(s);
+       colint[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
+       s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
+       ss=SF.FirstWord(s);
+       file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>=MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
+       s=SF.DropWord(s); if (s.length()==0&&i<args.length-1){++i;s=args[i];s=SF.TrimString(s);}
+       }noffiles=j;
+       
+        displaycontour demo = new displaycontour(title,prefxsize,prefysize);
+        demo.pack();
+        RefineryUtilities.centerFrameOnScreen(demo);
+        demo.setVisible(true);
+        final Thread updater = demo.new UpdaterThread();
+        updater.setDaemon(true);
+        updater.start();
+    
+      if(doexit==true){windowclose();
+                       }
+
+    } // main
+
+
+
+
+     /**
+     * A thread for updating the dataset.
+     */
+    private class UpdaterThread extends Thread {
+        /**
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
             setPriority(MIN_PRIORITY); // be nice
-			
-			int j = 0;
-			String f = "";
-			f = file[j];
-			File fileIni;
-			
           while(true){
                 try {
                     sleep(500);
-					if (rpl_.isBatch()) rpl_.setBatch(false);
-					fileIni = new File(f);
-					if (fileIni.lastModified() != lastmod) {
-						int k= 0;
-						if (((JPanel)frame.getContentPane().getComponent(0)).getComponent(1) instanceof JPlotLayout) {
-							k = 1;
-						}
-						
-						if (((JPanel)gd.getContentPane().getComponent(0)).getComponentCount() > 0) {
-							((JPanel)gd.getContentPane().getComponent(0)).remove(k);
-						}
-						fileIni = null;
-						rpl_ = reloadAll(Params, gd);
-						rpl_.setBatch(true);
-						((JPanel)frame.getContentPane().getComponent(0)).add(rpl_, BorderLayout.CENTER);
-						//frame.repaint();
-						frame.setVisible(false);
-						frame.setVisible(true);
-						rpl_.setBatch(false);
-						rpl_.repaint();
-					}
-				}
-				catch (IndexOutOfBoundsException e) {
+                
+
+            File fileIni;
+           int filechanged=0;
+           for (int i=0;i<1;++i)
+                  {fileIni = new File(file[i]);
+                   if(fileIni.lastModified()!=lastmod[i]){lastmod[i]=fileIni.lastModified(); reload_data(i);}
+                  }
+           }
+ catch (IndexOutOfBoundsException e) {
                     // suppress
-					System.out.println("INDEX ERROR! " + e + e.getCause());
-				}
+                }
                 catch (InterruptedException e) {
                     // suppress
-					System.out.println("INTERRUPT ERROR! " + e);
                 }
-				catch (java.beans.PropertyVetoException e) {
-					System.out.println("PROPERTY ERROR! " + e);
-				}
-				catch(Exception e) {
-					System.out.println("ERROR! " + e);
-				}
-				if (closeImg) frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-			}
-		}
-	}
+}}}
+
+protected static void reload_data(int i)
+      {  File fileIni;
+            String s="";
+       try{
+            //XYDataset ds = chart.getXYPlot().getDataset(i);
+            //ds.getData().removeAllElements();
+            int maxnofpoints=1000;int j=maxnofpoints;
+           while(j==maxnofpoints)           
+           {double [][] data=new double [3][maxnofpoints];//={{0,1},{0,1},{0,1}};             
+
+            fileIni = new File(file[i]);
+            //?ffnen der Datei
+             DataInputStream inStream = new DataInputStream(new FileInputStream(fileIni));
+             String strLine;
+             String sx;
+             String sy;
+             String sint;
+             int clx = colx[i];
+             int cly = coly[i];   
+             int clint = colint[i];
+
+             j=0;int dxtf=0; int dytf=0;int dztf=0;
+             //Auslesen der Datei
+            while (inStream.available() > 0&&j<maxnofpoints)
+            {
+             strLine = inStream.readLine();
+             if (strLine==null) break;
+             if (strLine.length() == 0) continue;
+      // replace tabs by spaces
+      strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
+
+             if(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))
+             {
+      for(int i1=0;i1<=strLine.length();++i1)
+       {//if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylegend=true")){legend[i]="true";chart.addLegend(chart.getXYPlot().Legendt);}}
+        //if(i1<=strLine.length()-19){if(strLine.substring(i1,i1+19).equalsIgnoreCase("displaylegend=false")){legend[i]="false";Legendt=chart.getLegend();chart.removeLegend();}}
+        if(detxText==true){
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayxtext=")){
+              chart.getXYPlot().getDomainAxis().setLabel(strLine.substring(i1+13,strLine.length()));dxtf=1;
+                                                                             }
+               else  // if no data has yet been read  -go through string and try to find automatically column headers
+               {if(dxtf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getDomainAxis().setLabel(SF.NthWord(strLine,clx));}
+               }
+                                                   }
+        if(detyText==true){
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayytext=")){
+              chart.getXYPlot().getRangeAxis().setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
+                                                                             }
+               else  // if no data has yet been read  -go through string and try to find automatically column headers
+               {if(dytf==0&&j==0&&SF.NofCols(strLine)>0){chart.getXYPlot().getRangeAxis().setLabel(SF.NthWord(strLine,cly));}
+               }
+                                                   }
+        if(detzText==true){
+            if(i1<=strLine.length()-13&&strLine.substring(i1,i1+13).equalsIgnoreCase("displayztext=")){
+              zAxis.setLabel(strLine.substring(i1+13,strLine.length()));dytf=1;
+                                                                             }
+               else  // if no data has yet been read  -go through string and try to find automatically column headers
+               {if(dztf==0&&j==0&&SF.NofCols(strLine)>0){zAxis.setLabel(SF.NthWord(strLine,clint));
+                                                        }
+               }
+                                                   }
+        
+        //if(i1<=strLine.length()-17){if(strLine.substring(i1,i1+17).equalsIgnoreCase("displaylines=true")){chart.setLineVisible(true);}}
+        //if(i1<=strLine.length()-18){if(strLine.substring(i1,i1+18).equalsIgnoreCase("displaylines=false")){chart.setLineVisible(false);}}
+        if(i1<=strLine.length()-13){if(strLine.substring(i1,i1+13).equalsIgnoreCase("displaytitle=")){chart.setTitle(strLine.substring(i1+13,strLine.length()));}}
+        }
+        continue;
+             }
+             // select colx and coly
+                 sx=SF.NthWord(strLine,clx);
+                 sy=SF.NthWord(strLine,cly);
+                 sint=SF.NthWord(strLine,clint);
+//             System.out.println(sx+" "+sy+" "+clx+" "+cly);
+
+               Double p = new Double(0.0);
+   if(sx.length()!=0&&sy.length()!=0&&sint.length()!=0){
+               try{sx=sx.replace("+-"," ");sx=SF.NthWord(sx,1);
+                   sy=sy.replace("+-"," ");sy=SF.NthWord(sy,1);
+                   sint=sint.replace("+-"," ");sint=SF.NthWord(sint,1);
+                    sx=sx.replace('D','E');
+                    sy=sy.replace('D','E');
+                    sint=sint.replace('D','E');
+                     data[0][j]=p.parseDouble(sx);
+                      if (detxmax&data[0][j]<xmin){xmin=data[0][j];}
+                      if (detxmax&data[0][j]>xmax){xmax=data[0][j];}
+                     data[1][j]=p.parseDouble(sy);
+                      if (detymin&data[1][j]<ymin){ymin=data[1][j];}
+                      if (detymax&data[1][j]>ymax){ymax=data[1][j];}
+                     data[2][j]=p.parseDouble(sint);
+                      if (detxmax&data[2][j]<zmin){zmin=data[2][j];}
+                      if (detxmax&data[2][j]>zmax){zmax=data[2][j];}
+                    ++j;
+                   }
+                   catch(NumberFormatException e){if(j>0){--j;}//System.exit(1);
+                                                  }
+                                                          }
+               }                
+/*       System.out.println("x:"+xmin+" "+xmax);
+       System.out.println("y:"+ymin+" "+ymax);
+       System.out.println("z:"+zmin+" "+zmax);
+*/
+               if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
+                 else {
+               if (j>0)
+               {// here fill the rest of the array with the same values
+                for(int jj=j;jj<maxnofpoints;++jj)
+                  {data[0][jj]=data[0][j-1];data[1][jj]=data[1][j-1];data[2][jj]=data[2][j-1];
+                  }
+
+                    dataset.removeSeries(file[i]+s.valueOf(i));
+                    dataset.addSeries(file[i]+s.valueOf(i),data);
+                   
+               }
+              }
+             }
+    //double[] myDatay = {stringToDouble(strLine,0),stringToDouble(strLine,0)};
+   }
+ catch(EOFException e)
+    {
+      System.out.println("EOF: " + e.getLocalizedMessage());
+    }
+
+    catch (FileNotFoundException e)
+    {
+      System.out.println("File not found: " + e.getLocalizedMessage());
+    }
+
+    //Sonstiger Dateifehler
+    catch (IOException e)
+    {
+      System.out.println("Dateifehler: " + e.getLocalizedMessage());
+      //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
+    }
+ //   repaint();
+  }
+    
  
-}
-
-
-/*
- public static void main(String[] args){ 
-
- Frame myFrame = new Frame(title);
- display myPanel = new display();
-	myFrame.addWindowListener(new WindowAdapter() {
-	    public void windowClosing(WindowEvent e) {System.exit(0);}
-	});
- myPanel.initChart();
- myFrame.add(myPanel);
- myFrame.setSize(300,300);
- myFrame.setVisible(true);
- myPanel.start();	
-
-//	frame = new JFrame("FileChooserDemo");
-//	frame.addWindowListener(new WindowAdapter() {
-//	    public void windowClosing(WindowEvent e) {System.exit(0);}
-//	});
-//	frame.getContentPane().add("Center", panel);
-//	frame.pack();
-//	frame.setVisible(true);
-
-//	panel.updateState();
-
-
- }
-
  static private String FirstWord(String strSource)
  {String fw;
   fw=TrimString(strSource);
@@ -918,4 +651,6 @@ public class displaycontour extends JApplet {
     return(strSource);
  }
 
-}*/
+
+
+}
