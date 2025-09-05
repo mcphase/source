@@ -182,19 +182,10 @@ if (instr[strspn(instr," \t")]=='#')
  {if(instr[strspn(instr," \t#")]!='!') return ; //removed 26.5.02 in order to be able to place parameters in comment lines
                                  // inserted again 27.8.09 to be able to have real comment lines ignored
                                  // by mcphase - however "#!" will be treated as comment with variable to be read
- else if(strstr (token, "="))
- {// treat '#!... case with some variable defined
-  while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token))
-  {++token; // advance while nonalphabet character
-   if(*token=='#'){++token;if(*token!='!')return;}
-  }
-  ob.eval_exp(token); 
-  token=strstr (token, "=");
-  ++token;while(isspace(*token))++token;
  }
-}
-else if(strstr (token, "="))
-{   // no comment line - treat first variable setting if present
+if(strstr (token, "="))
+{while(strstr (token, "=")>strstr(token," ")&&strstr(token," "))++token;// advance to last space before = sign
+   // #! or no comment line - treat first variable setting if present
  while(strchr(" \t!?$%&*()[]{}\"��/><;@:+-~|#",*token))
   {++token; 
    if(*token=='#'){++token;if(*token!='!')return;}

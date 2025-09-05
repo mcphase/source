@@ -22,7 +22,8 @@ manual.aux: manual.tex version.tex $(wildcard *.bib) $(wildcard *.tex)
 	latex manual.tex
 	makeindex manual.idx
 
-manual.bbl: $(wildcard ./*.bib) manual.tex manual.aux
+manual.bbl: $(wildcard ./*.bib) manual.tex  $(wildcard ./*.tex)
+	latex manual
 	bibtex manual
 
 
@@ -43,7 +44,8 @@ manual.ps: manual.dvi $(wildcard ./*.eps)  $(wildcard ./figsrc/*.ps)
 #	pstops  "2:0" $<  > dodd.ps
 
 
-manual.pdf: manual.tex version.tex $(wildcard ./*.bib) $(wildcard ./*.tex)
+manual.pdf: manual.tex version.tex manual.bbl $(wildcard ./*.bib) $(wildcard ./*.tex)
+	pdflatex  manual 
 	pdflatex  manual 
 
 manual: manual.pdf

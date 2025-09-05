@@ -32,7 +32,8 @@ import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYZDataset;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
-
+//import org.jfree.chart.ui.RectangleAnchor;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 
@@ -55,6 +56,8 @@ static int noffiles;
  static int[] coly;
  static int[] colint;
  static double scale;
+ static double bw;
+ static double bh;
  static double xmin,xmax,ymin,ymax,zmin,zmax;
  static Integer prefxsize,prefysize;
  static boolean detxmin,detymin,detzmin,detxmax,detymax,detzmax,detxText,detyText,detzText,detTitle,detdim,doexit,showgrid;
@@ -154,14 +157,14 @@ static public void windowclose(){
          yAxis.setUpperMargin(0.0);
          zAxis = new NumberAxis(zText);
          XYBlockRenderer renderer = new XYBlockRenderer();
+           dataset = new DefaultXYZDataset();
          XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 //         plot.setBackgroundPaint(Color.lightGray);
          plot.setDomainGridlinesVisible(false);
          plot.setRangeGridlinePaint(Color.white);
          chart = new JFreeChart(Title, plot);
          chart.removeLegend();
-         //chart.setBackgroundPaint(Color.white);
-           dataset = new DefaultXYZDataset();
+         chart.setBackgroundPaint(Color.white);
 for(int i=0;i<noffiles;++i){
                            plot.setRenderer(i,renderer);
                            plot.setDataset(i,dataset);
@@ -199,13 +202,15 @@ int[] red =
      xAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
      yAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
          LookupPaintScale scale = new LookupPaintScale(zmin, zmax,Color.red);
-         for(int i=0;i<64;++i){
-         scale.add(i,new Color(red[i],green[i],blue[i]));
+         for(int i=0;i<64;++i){double value=zmin+i*(zmax-zmin)/64;//System.out.println(value);
+         scale.add(value,new Color(red[i],green[i],blue[i]));
                                   }
          PaintScaleLegend zscale = new PaintScaleLegend(scale,zAxis);
         zscale.setVisible(true);
           chart.addSubtitle(zscale);
          renderer.setPaintScale(scale);
+        renderer.setBlockWidth(bw);
+        renderer.setBlockHeight(bh);
         plot.setBackgroundPaint(Color.white);
         plot.setForegroundAlpha(1.0f);
 plot.setRangeGridlinesVisible(showgrid);
@@ -213,34 +218,35 @@ plot.setRangeGridlinePaint(Color.WHITE);
 
 plot.setDomainGridlinesVisible(showgrid);
 plot.setDomainGridlinePaint(Color.WHITE);
-
+//System.out.println(DatasetUtils.findDomainBounds(dataset, false).getLowerBound());
+//System.out.println(renderer.findRangeBounds(dataset));
 
 // this is for plotting a line 
 //     XYLineAnnotation axy = new  XYLineAnnotation(0.0, 0.0, 1.0, 0.0);
 //     plot.addAnnotation(axy);
 // we plot vertical lines at the positions specified in the numbers of string Vlines
 
-    String hl [] = Vlines.split(",");Double p = new Double(0.0);
-for (String s : hl) {
+    String vl [] = Vlines.split(",");Double p = new Double(0.0);
+for (String s : vl) {
 if(!s.isEmpty()){
     String sn [] = s.split("\\|"); 
-   double y =p.parseDouble(sn[0]); 
- XYLineAnnotation axy = new  XYLineAnnotation(y, xmin, y, xmax);
+   double x =p.parseDouble(sn[0]); 
+ XYLineAnnotation axy = new  XYLineAnnotation(x, ymin, x, ymax);
 plot.addAnnotation(axy);
    if(sn.length>1){
-XYTextAnnotation t = new XYTextAnnotation(sn[1],y,xmax+0.02*(xmax-xmin));
+XYTextAnnotation t = new XYTextAnnotation(sn[1],x,ymax+0.02*(ymax-ymin));
 plot.addAnnotation(t);
     }
  }
 }
-    String vl [] = Hlines.split(",");
-for (String s : vl) {
+    String hl [] = Hlines.split(",");
+for (String s : hl) {
 if(!s.isEmpty()){ String sn [] = s.split("\\|"); 
-   double x =p.parseDouble(sn[0]); 
- XYLineAnnotation axy = new  XYLineAnnotation(ymin, x, ymax, x);
+   double y =p.parseDouble(sn[0]); 
+ XYLineAnnotation axy = new  XYLineAnnotation(xmin, y, xmax, y);
 plot.addAnnotation(axy);
  if(sn.length>1){
-XYTextAnnotation t = new XYTextAnnotation(sn[1],ymax+0.02*(ymax-ymin),x);
+XYTextAnnotation t = new XYTextAnnotation(sn[1],xmax+0.02*(xmax-xmin),y);
 plot.addAnnotation(t);
     }
  }
@@ -295,7 +301,8 @@ zmin=1e30;zmax=-1e30;detzmin=true;detzmax=true;
       {System.out.println("- too few arguments...\n");
        System.out.println("  program displaycontour - show and watch data file by viewing a xy graphic on screen\n");
        System.out.println("use as:  displaycontour [options] xcol ycol intcol filename \n");
-       System.out.println("         xcol,ycol ... column to be taken as x-, y- and intensity-axis");
+       System.out.println("         xcol,ycol,intcol ... column to be taken as x-, y- and intensity-axis");
+       System.out.println("                              x-spacings have to be equal, also y-spacings may not vary ");
        System.out.println("	 filename ..... filename of datafile");
        System.out.println("	 Data files may contain lines to tune the display output, such as");
        System.out.println("	 # displaytitle=My new Graph");
@@ -387,12 +394,12 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-ytext")) // option "-ytext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detxText=false;ss=SF.FirstWord(s);xText=ss;
+             detxText=false;ss=SF.FirstWord(s);yText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-xtext")) // option "-xtext meV"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
-             detyText=false;ss=SF.FirstWord(s);yText=ss;
+             detyText=false;ss=SF.FirstWord(s);xText=ss;
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
             }
             else if(SF.TrimString(s).substring(0, 6).equalsIgnoreCase("-title")) // option "-title meV"
@@ -479,7 +486,7 @@ protected static void reload_data(int i)
        try{
             //XYDataset ds = chart.getXYPlot().getDataset(i);
             //ds.getData().removeAllElements();
-            int maxnofpoints=1000;int j=maxnofpoints;
+            int maxnofpoints=1000;int j=maxnofpoints;double xold=0,yold=0;bh=0;bw=0;
            while(j==maxnofpoints)           
            {double [][] data=new double [3][maxnofpoints];//={{0,1},{0,1},{0,1}};             
 
@@ -555,10 +562,12 @@ protected static void reload_data(int i)
                     sx=sx.replace('D','E');
                     sy=sy.replace('D','E');
                     sint=sint.replace('D','E');
-                     data[0][j]=p.parseDouble(sx);
+                     data[0][j]=p.parseDouble(sx);if(j>0){double bwg=Math.abs(data[0][j]-xold);if(bwg>0&&(bwg<bw||bw==0)){bw=bwg;}}
+                      xold=data[0][j];
                       if (detxmax&data[0][j]<xmin){xmin=data[0][j];}
                       if (detxmax&data[0][j]>xmax){xmax=data[0][j];}
-                     data[1][j]=p.parseDouble(sy);
+                     data[1][j]=p.parseDouble(sy);if(j>0){double bhg=Math.abs(data[1][j]-yold);if(bhg>0&&(bhg<bh||bh==0)){bh=bhg;}}
+                     yold=data[1][j];
                       if (detymin&data[1][j]<ymin){ymin=data[1][j];}
                       if (detymax&data[1][j]>ymax){ymax=data[1][j];}
                      data[2][j]=p.parseDouble(sint);
@@ -570,20 +579,20 @@ protected static void reload_data(int i)
                                                   }
                                                           }
                }                
-/*       System.out.println("x:"+xmin+" "+xmax);
-       System.out.println("y:"+ymin+" "+ymax);
-       System.out.println("z:"+zmin+" "+zmax);
-*/
+      // System.out.println("x:"+xmin+" "+xmax);
+      // System.out.println("y:"+ymin+" "+ymax);
+      // System.out.println("z:"+zmin+" "+zmax);
+
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                  else {
                if (j>0)
-               {// here fill the rest of the array with the same values
-                for(int jj=j;jj<maxnofpoints;++jj)
-                  {data[0][jj]=data[0][j-1];data[1][jj]=data[1][j-1];data[2][jj]=data[2][j-1];
+               {double [][] series=new double [3][j];
+                // here fill the rest of the array with the same values
+                for(int jj=0;jj<j;++jj)
+                  {series[0][jj]=data[0][jj];series[1][jj]=data[1][jj];series[2][jj]=data[2][jj];
                   }
 
-                    dataset.removeSeries(file[i]+s.valueOf(i));
-                    dataset.addSeries(file[i]+s.valueOf(i),data);
+                    dataset.addSeries(file[i]+s.valueOf(i),series);
                    
                }
               }

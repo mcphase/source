@@ -159,8 +159,8 @@ obs[calcXobs]);
                          writeheader(inputpars,foutds);
                          fprintf (foutds, "#Scattering Cross Section \n");
                          ini.print_usrdefcolhead(foutds);
-if(inputpars.cs.nofcomponents==3)fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixzi chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (gJ^2muB^2/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
-if(inputpars.cs.nofcomponents==6)fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chi11r chi11i  chi12r chi12i chi13r chi13i chi14r chi14i ...chi16i chi21r ch21i ... chi26i ... chi31r ....chi66i  (muB^2/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)}\n");
+if(inputpars.cs.nofcomponents==3)fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chixxr chixxi  chixyr chixyi chixzr chixzi chiyxr chiyxi chiyyr chiyyi chiyzr chiyzi chizxr chizxi chizyr chizyi chizzr chizzi (gJ^2muB^2/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3)\n");
+else fprintf (foutds, "energy[meV] dsigma/dOmegadE'[barn/mev/sr/f.u.] (dipolar approx for FF) chi11r chi11i  chi12r chi12i chi13r chi13i chi14r chi14i ...chi1ni chi21r ch21i ... chi26i ... chi31r ....chinni  (muB^2/meV/f.u.) f.u.=crystallogrpaphic unit cell (r1xr2xr3) n=%i\n",inputpars.cs.nofcomponents);
                            }  
           }
 }

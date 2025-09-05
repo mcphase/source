@@ -152,13 +152,18 @@ for($i=0;$i<$ii;++$i) # take data points
     $iyf=my_floor($iy);
     $iyc=my_ceil($iy);
   if($ixf>=-1&&$iyf>=-1&&$ixc<=$Nx&&$iyc<=$Ny)
-    {$wxc=$ix-$ixf;#if($wxc<0){print "error: $ix $ixf";exit(1);}
-      #if($wxc>1){print "error: $ix $ixf";exit(1);}
+    {$wxc=$ix-$ixf;
 
-     $wyc=$iy-$iyf;
+     $wyc=$iy-$iyf; 
      $wyf=1-$wyc;
-     
+     #if($wxc<0){print "error wxc<0: $ix $ixf";exit(1);}
+     #if($wxc>1){print "error wxc>1: $ix $ixf";exit(1);}
+     #if($wyc<0){print "error wyc<0: $iy $iyf";exit(1);}
+     #if($wyc>1){print "error wyc>1: $iy $iyf";exit(1);}
+
      $z=$czvalues[$i]*$c3values[$j];
+     if($z>100){print "z large: $z $i $j ".$czvalues[$i].$c3values[$j]."\n";exit(1);}
+    # distribute $z to 4 nearest grid points according to distance
     if($ixf>=0){$wxf=1-$wxc;
                 if($iyf>=0){
      $a[$ixf][$iyf]+=$wxf*$wyf*$z;}
