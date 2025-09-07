@@ -11,9 +11,9 @@ unless ($#ARGV >4)
 
             Usage: convolute c1 c2 file cx cy convfuncfile [d1 d2 datafile [d3]]
 	        
-	           convolutes data given as column c1 vs column c2 in file 
+	         convolutes data given as column c1 vs column c2 in file 
                  (data pairs xi,yi) with the convolution function given in 
-		     columnn cx vs cy  of convfuncfile (function c(x))
+		 columnn cx vs cy  of convfuncfile (function c(x))
 		     
                  Range and stepwidth of output is determined from range 
                  and step of convfuncfile unless a datafile is given. 

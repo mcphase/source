@@ -14,6 +14,8 @@ import java.awt.image.*;
 import javax.swing.JPanel;
 import java.io.*;
 import javax.imageio.ImageIO;
+//import java.io.*;
+//import java.util.EventListener;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.title.LegendTitle;
@@ -46,8 +48,7 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 public class displaycontour extends ApplicationFrame implements WindowListener {
 // Button bRot=new Button("save display.jpg");                       //erstellt einen Button
 static myStringfunc SF=new myStringfunc();
-static final int MAX_NOF_FILES = 20;
-
+static final int MAX_NOF_FILES = 1;
 static int noffiles;
  static String[] file;
  static String jpgfilename;
@@ -72,15 +73,15 @@ static int noffiles;
  static DefaultXYZDataset dataset;
  static NumberAxis zAxis;
  static JFreeChart chart;
- static ChartPanel chartPanel;
-// static ChartPanel panel;
+ static ChartPanel panel;
+ public ChartPanel chartPanel;
 
 public void windowClosing(WindowEvent e) {
          windowclose();
         }
 static public void windowclose(){
         if(jpgfilename.length()!=0)
-         {  BufferedImage image= chart.createBufferedImage(chartPanel.getWidth(),chartPanel.getHeight(),BufferedImage.TYPE_INT_RGB,null);
+         {  BufferedImage image= chart.createBufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB,null);
            try {
                 // write the image as a jpg
                 ImageIO.write(image,"jpg",new File(jpgfilename));
@@ -104,15 +105,19 @@ static public void windowclose(){
      * @param title  the frame title.
      */
     public displaycontour(String title,Integer prefxsize,Integer prefysize) {
-
-
-
         super(title);
-        chartPanel = createDemoPanel();
+
+
+        dataset = new DefaultXYZDataset();
+        JFreeChart chart=createChart(dataset);
+
+        //chartPanel = createDemoPanel();
+        ChartPanel chartPanel = new ChartPanel(chart,true,true,true,true,true);
+        
+        panel= chartPanel;
         chartPanel.setPreferredSize(new java.awt.Dimension(prefxsize, prefysize));
         setContentPane(chartPanel);
         chartPanel.setAlignmentY(Component.LEFT_ALIGNMENT);
-        JFreeChart chart=createChart();
 //        chartPanel.add(bRot);
 
 //   bRot.addActionListener(new ActionListener(){
@@ -146,7 +151,7 @@ static public void windowclose(){
      *
      * @return The chart.
      */
-    private static JFreeChart createChart() {
+    private  JFreeChart createChart(DefaultXYZDataset dataset) {
         NumberAxis xAxis = new NumberAxis(xText);
 //         xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
          xAxis.setLowerMargin(0.0);
@@ -156,9 +161,13 @@ static public void windowclose(){
          yAxis.setLowerMargin(0.0);
          yAxis.setUpperMargin(0.0);
          zAxis = new NumberAxis(zText);
+        chart = ChartFactory.createScatterPlot(
+                Title, xText, yText, dataset,
+                PlotOrientation.VERTICAL, false, false, false);
+
          XYBlockRenderer renderer = new XYBlockRenderer();
-           dataset = new DefaultXYZDataset();
-         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
+          XYPlot plot = (XYPlot) chart.getPlot();
+//         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 //         plot.setBackgroundPaint(Color.lightGray);
          plot.setDomainGridlinesVisible(false);
          plot.setRangeGridlinePaint(Color.white);
@@ -275,7 +284,7 @@ plot.addAnnotation(t);
      *
      * @return A panel.
      */
-    public static ChartPanel createDemoPanel() {
+/*    public  ChartPanel createDemoPanel() {
         JFreeChart chart = createChart();
         ChartPanel chartPanel = new ChartPanel(chart);
        	
@@ -283,7 +292,7 @@ plot.addAnnotation(t);
         chartPanel.setRangeZoomable(true);
         return chartPanel;
     }
-
+*/
     /**
      * Starting point for the demonstration application.
      *
@@ -331,7 +340,7 @@ zmin=1e30;zmax=-1e30;detzmin=true;detzmax=true;
        //    double[] myDatax = {};
   
 int j=0;int k=0; jpgfilename="";showgrid=false;
-       String title="display";
+       String title="displaycontour";
        s=args[0];s=SF.TrimString(s); // command line arguments are treated here
        //look if options are present
        while(SF.TrimString(s).substring(0, 1).equalsIgnoreCase("-"))
@@ -431,18 +440,24 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
        colint[j]=p.valueOf(SF.DataCol(ss)).intValue();       title=title+" "+ss;
        s=SF.DropWord(s); if (s.length()==0){++i;s=args[i];s=SF.TrimString(s);}
        ss=SF.FirstWord(s);
-       file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>=MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
+       file[j]=ss;lastmod[j]=0; title=title+" "+ss;++j;if(j>MAX_NOF_FILES){System.out.println("ERROR: maximum number of files"+j+" exceeded, recompile with larger MAX_NOF_FILES\n\n");System.exit(0);}
        s=SF.DropWord(s); if (s.length()==0&&i<args.length-1){++i;s=args[i];s=SF.TrimString(s);}
        }noffiles=j;
        
         displaycontour demo = new displaycontour(title,prefxsize,prefysize);
         demo.pack();
-        RefineryUtilities.centerFrameOnScreen(demo);
+        //RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);
         final Thread updater = demo.new UpdaterThread();
-        updater.setDaemon(true);
+        //updater.setDaemon(true);
         updater.start();
-    
+    Runtime.getRuntime().addShutdownHook(new Thread()
+                    {    @Override
+                         public void run() { 
+                       //  System.out.println("Exiting");
+                                           }
+                    });
+        
       if(doexit==true){windowclose();
                        }
 
@@ -466,7 +481,6 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
                 
 
             File fileIni;
-           int filechanged=0;
            for (int i=0;i<1;++i)
                   {fileIni = new File(file[i]);
                    if(fileIni.lastModified()!=lastmod[i]){lastmod[i]=fileIni.lastModified(); reload_data(i);}
@@ -480,7 +494,7 @@ int j=0;int k=0; jpgfilename="";showgrid=false;
                 }
 }}}
 
-protected static void reload_data(int i)
+protected void reload_data(int i)
       {  File fileIni;
             String s="";
        try{
@@ -615,51 +629,10 @@ protected static void reload_data(int i)
       System.out.println("Dateifehler: " + e.getLocalizedMessage());
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
- //   repaint();
+//    repaint();
+//System.out.println("Displaycontour: Data reloaded");
   }
     
  
- static private String FirstWord(String strSource)
- {String fw;
-  fw=TrimString(strSource);
-       int iPos = fw.indexOf(" ");
-       if (iPos >= 0)
-       {
-       fw=strSource.substring(0,iPos);
-       fw=TrimString(fw); 
-       }
- return(fw); 
- }
-
- static private String DropWord(String strSource)
- {String fw;
-  fw=TrimString(strSource);
-       int iPos = fw.indexOf(" ");
-       if (iPos >= 0)
-       {
-       fw=strSource.substring(iPos);
-       fw=TrimString(fw); 
-       }
- return(fw); 
- }
-
- static private String TrimString(String strSource)
- {
-    while ((strSource.startsWith(" "))
-      && (strSource.length() > 0))
-      {
-        strSource = strSource.substring(1, strSource.length());
-      }
-
-    while ((strSource.endsWith(" "))
-        && (strSource.length() > 0))
-      {
-        strSource = strSource.substring(0, strSource.length() - 1);
-      }
-
-    return(strSource);
- }
-
-
 
 }

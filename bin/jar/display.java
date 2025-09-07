@@ -70,8 +70,8 @@ public class display extends ApplicationFrame implements KeyListener,WindowListe
 static final int MAX_NOF_FILES = 20;
 static myStringfunc SF=new myStringfunc();
 static int xy[]={0,0,0,0};
-static Frame frame;
-static Frame popup;
+//static Frame frame;
+//static Frame popup;
 //static ToolTipManager ToolTipManager;
 
   static class MyChartMouseListener implements ChartMouseListener {
