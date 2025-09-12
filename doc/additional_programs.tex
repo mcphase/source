@@ -287,6 +287,7 @@ working {\prg mcphas.j\index{mcphas.j}} file with the crystal structure.
 The program {\prg makenn\index{makenn}} takes {\prg mcphas.j\index{mcphas.j}} and
 creates all neighbours within a sphere of distance 23.3\AA, for every neighbour the classical
 dipole interaction $J_{\alpha\beta}(\vec R)=\frac{\mu_0}{4\pi} (g_J \mu_B)^2 \frac{3R_{\alpha}R_{\beta}-\delta_{\alpha\beta}R^2}{R^5}$
+(the factor $\frac{\mu_0}{4\pi}$ is necessary in SI units)
  is calculated and is stored in file {\prg makenn.j}. If the exchange %%@
 parameters 
 (and neighbour positions) are not known for your system, you can use this module 
@@ -295,14 +296,15 @@ to generate a list of nearest neighbours and exchange parameters. Currently impl
 curve or the RKKY model. 
 \begin{description}
 \item[option {\prg -rkky A(meV) kf(1/A)}] calculates the rkky interaction according to $J(R)=A %%@
-cos(2 k_f R)/(2 k_f R)^3$
+\cos(2 k_f R)/(2 k_f R)^3$
 \item[option {\prg -rkky3d A(meV) kx(1/A) ky(1/A) kz(1/A)}] calculates the rkky interaction %%@
 according to $J(R)=A cos(2 \kappa)/(2 \kappa)^3$ with $\kappa^2=k_x^2 R_x^2 + k_y^2 R_y^2 + %%@
 k_z^2 R_z^2$
 \item[option {\prg -rkkz A(meV) kf(1/A)}] calculates the rkky interaction according to $J(R)=A %%@
-(sin(2 k_f R)- 2 k_f R cos(2 k_f R))/(2 k_f R)^4$
+(\sin(2 k_f R)- 2 k_f R \cos(2 k_f R))/(2 k_f R)^4$, scaling A>0, kf should be the Fermi wavevector (see 5.7.35 in 
+	      \cite{jensen91-1})
 \item[option {\prg -rkkz3d A(meV) kx(1/A) ky(1/A) kz(1/A)}] calculates the rkky interaction %%@
-according to $J(R)=A (sin(2 \kappa)- 2 \kappa cos(2 \kappa))/(2 \kappa)^4$ with $\kappa^2=k_x^2 %%@
+according to $J(R)=A (\sin(2 \kappa)- 2 \kappa \cos(2 \kappa))/(2 \kappa)^4$ with $\kappa^2=k_x^2 %%@
 R_x^2 + k_y^2 R_y^2 + k_z^2 R_z^2$
 \item[option {\prg -kaneyoshi A(meV) D(A) alpha}] calculates the Kaneyoshi parametrisation for %%@
 the Bethe-Slater
@@ -311,7 +313,7 @@ corresponding
                                to the orbital radius
 \item[option {\prg -kaneyoshi3d A(meV) Dx(A) Dy(A) Dz(A) alpha}] calculates the Kaneyoshi %%@
 parametrisation for the Bethe-Slater
-                               curve: $J(R)= A [-\rho^2+\rho^4]exp[-\alpha \rho^2]$  with %%@
+                               curve: $J(R)= A [-\rho^2+\rho^4]\exp[-\alpha \rho^2]$  with %%@
 $\rho^2=R_x^2/D_x^2+R_y^2/D_y^2+R_z^2/D_z^2$
 \item[option {\prg option -bvk filename}]
               for phonon take Born van Karman model with longitudinal and
@@ -415,8 +417,8 @@ instead of {\prg makenn.j}, respectively
 $\partial k_f/\partial \epsilon_1=-k_f/3 $. 
  for option
 \begin{description}
-\item[-rkky]   $ \partial J/\partial d\epsilon_i = A[3cos(2k_fR)+2k_f R sin(2k_fR)]/24(k_fR)^3$ for $i=1,2,3$.
-\item[-rkkz]  $ \partial J/\partial d\epsilon_i =  A[(1-(k_fR)^2)sin(2k_fR)-2k_fR.cos(2k_fR)]/(12(k_fR)^4)$ for $i=1,2,3$.
+\item[-rkky]   $ \partial {\mathcal J}/\partial \epsilon_{\alpha} = A[3\cos(2k_fR)+2k_f R \sin(2k_fR)]/24(k_fR)^3$ for $\alpha=1,2,3$.
+\item[-rkkz]  $ \partial {\mathcal J}/\partial \epsilon_{\alpha} =  A[(1-(k_fR)^2)\sin(2k_fR)-2k_fR.\cos(2k_fR)]/(12(k_fR)^4)$ for $\alpha=1,2,3$.
 \end{description}
                  
 For an orthorhombic distorted Fermi sphere the volume is $4\pi k_x k_y k_z/3=8\pi^3/V$ and
@@ -424,7 +426,7 @@ it follows $dk_x/k_x+dk_y/k_y+dk_z/k_z=V d(1/V)=-dV/V$. Here we have assumed tha
 the effective electron mass and band structure significantly and the change in $k_x,k_y,k_z$ will be
 only due to the change in electron density which is correlated to a change density of electron states in k-space.
 In this case  $dk_x/k_x=dk_y/k_y=dk_z/k_z=-(d\epsilon_1+d\epsilon_2+d\epsilon_3)/3$ and 
-$\partial k_x/\partial \epsilon_i=-k_x/3$ for $i=1,2,3$ and similar for $k_y$ and $k_z$.
+$\partial k_x/\partial \epsilon_{\alpha}=-k_x/3$ for ${\alpha}=1,2,3$ and similar for $k_y$ and $k_z$.
 We calculate
 $\partial J/\partial \epsilon_1=\partial J/\partial \kappa \partial \kappa/\partial \epsilon_1$
 and 
@@ -442,8 +444,8 @@ and similar for $\epsilon_2, \epsilon_3$.
 Thus for options
 \begin{description}
                
-\item[-rkky3d]  $ \partial J/\partial d\epsilon_i  = A[3 cos(2\kappa) + 2\kappa sin(2\kappa)]/(24\kappa^3)$ for $i=1,2,3$.
-\item[-rkkz3d]  $ \partial J/\partial d\epsilon_i  = A[(1-\kappa^2 )sin(2\kappa)-2\kappa cos(2\kappa)]/(12\kappa^4) $ for $i=1,2,3$.
+\item[-rkky3d]  $ \partial {\mathcal J}/\partial d\epsilon_{\alpha}  = A[3 \cos(2\kappa) + 2\kappa \sin(2\kappa)]/(24\kappa^3)$ for $i=1,2,3$.
+\item[-rkkz3d]  $ \partial {\mathcal J}/\partial d\epsilon_{\alpha}  = A[(1-\kappa^2 )\sin(2\kappa)-2\kappa \cos(2\kappa)]/(12\kappa^4) $ for $i=1,2,3$.
 \end{description}
 
  These derivatives are useful for the calculation of exchange striction effects. 
@@ -1004,8 +1006,10 @@ column cx vs cy
                  stdout and to environment variables MCPHASE\_STA etc.
 
                        
-\item [\prg convolute2d\index{convolute2d} c1 c2 c3 file cx cy cz convfuncfile minx maxx Nx miny maxy Ny:]\addcontentsline{toc}{subsubsection}{\prg convolute2d} 
-convolutes a 2 dimensional function data given as column c3(c1,c2) in file (data tripls $x_i,y_i, z_i$) with the convolution function given in column cx vs cy vs cz
+\item [\prg convolute2d\index{convolute2d} c1 c2 c3 inputfile cx cy cz convfuncfile minx maxx Nx miny maxy Ny:]\addcontentsline{toc}{subsubsection}{\prg convolute2d} 
+\item [or \prg convolute2d\index{convolute2d} c1 c2 c3 inputfile cx cy cz convfuncfile {-d[f]} dx dy dz datafile {[sx sy]}:]  
+convolutes a 2 dimensional function data given as column c3(c1,c2) in inputfile (data tripls $x_i,y_i, z_i$) with the 
+                        convolution function given in column cx vs cy vs cz
 		        of convfuncfile (function $c(x,y)$)
 		       Range and number of points of output file is determined from minx maxx Nx and 
                         miny, maxy Ny.
@@ -1014,7 +1018,40 @@ convolutes a 2 dimensional function data given as column c3(c1,c2) in file (data
                         resulting x,y will not correspond to a point on the grid defined by minx, max Nx, miny,maxy Ny -
                         therefore the contribution is distributed (according to distance) onto the neighbouring grid
                        points.
-		       output is written to stdout. 
+ 
+{\prg inputfile} and {\prg convfuncfile} may be unsorted, equal steps not necessary.
+ datafile has to be a Nx times Ny points grid with equal x and y spacing
+
+ Output goes to stdout in 3 columns with
+       column  1(2) correspond to x(y)  and range from minx(y) to maxx(y) with Nx(y) steps.
+ Column 3 contains the result of the convolution.
+       If the second syntax with a {\prg datafile}
+ is used,  an additional column 4 is added containing the scaled dz data and
+                 standard deviation, volume of curves etc are output to
+                 stdout and to environment variables MCPHASE\_STA etc.
+\begin{description}
+ \item [options:]
+  \item[-df ] instead of -d will not output convolution but only standard deviations
+  \item[sx sy ] columns sx,sy of the datafile may contain 
+                       stretching factors in x,y direction for the convolution function in 
+                         order to allow for x,y dependent resolution
+\end{description}
+
+Note on normalisation assuming that the input functions are normalised and equal spaced: i.e.
+                        $ \sum_i z_i(x_i,y_i) dx dy =1$,  
+                        $ \sum_j c_j(r_{xi},r_{yi}) dr_x dr_y =1 $, where     
+  stepwidth of function and resolution function are $dx$,$dy$ and $dr_x$,$dr_y$ respectively
+  stepwidth of output $df_x=({\rm maxx}-{\rm minx})/N_x$,$df_y=({\rm maxy}-{\rm miny})/N_y$:
+                        multiply $f(x,y)$ by $dx.dy.dr_x.dr_y/(df_x.df_y)$ 
+     to get a normalised function obeying $\sum_k f(x_k,y_k) df_x df_y = 1$
+
+ Example: To plot a contour of a dispersion with a gaussian resolution function of
+          fwhm=0.2 in h and fwhm=0.5meV in energy
+\begin{verbatim}
+gauss2d 0.2 0.5 0 0.05 -0.5 0.5 0.1 -1.0 +1.0 > resolution.dat
+convolute2d 5 9 10 results/mcdisp.qei 1 2 3 resolution.dat 1 2 11 0 20 40 > results/mcdisp.clc
+displaycontour 1 2 3 results/mcdisp.clc
+\end{verbatim}
 \item [\prg coscol\index{coscol} col const file:]\addcontentsline{toc}{subsubsection}{\prg coscol} calculates cosinus of a column cos(col) 
 \item [\prg delcol\index{delcol} col file:]\addcontentsline{toc}{subsubsection}{\prg delcol} deletes column col in file
 \item [\prg delcols\index{delcols} col n file:]\addcontentsline{toc}{subsubsection}{\prg delcols} deletes column col several (n) times in file

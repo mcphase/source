@@ -326,7 +326,7 @@ $zd=$data[$ix][$iy];
  $sta+=($z-$zd)*($z-$zd);
 $volcalc+=$dx*$dy*$z;
 $voldata+=$dx*$dy*$zd;
-if ($ARGV[8]=~/-df/){;}else {print "echo $ds".sprintf("%+10.9e %10.9e %10.9e$ds\n",$x,$y,$z);}
+if ($ARGV[8]=~/-d/){;}else {print "echo $ds".sprintf("%+10.9e %10.9e %10.9e$ds\n",$x,$y,$z);}
 }
 # print "echo $ds#\n";
 }
@@ -344,6 +344,7 @@ $y=$ly+$iy*$deltay;
 $z=$a[$ix][$iy];
 $zd=$data[$ix][$iy];
  $stanorm+=($z-$zd*$scale)*($z-$zd*$scale);
+if ($ARGV[8]=~/-df/){;}else {print "echo $ds".sprintf("%+10.9e %10.9e %10.9e %10.9e$ds\n",$x,$y,$z,$zd*$scale);}
 
 
 }}

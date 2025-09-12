@@ -39,23 +39,30 @@ such as
 \begin{verbatim}
 	most general usage: 
 
- display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] file [xcol1[] ycol1[] file1 ...]
+ display [-options] xcol[excolerr] ycol[eycolerr][bcolbubble] filename [xcol1[] ycol1[] filename1 ...]
+
+         xcol,ycol ... column to be taken as x-, y- axis in a lineplot
+	 filename ..... filename of datafile
+	 Data files may contain lines to tune the display output, such as
+	 # displaytitle=My new Graph
+	 # displayytext=intensity
+	 # displayxtext=meV 
+       if optional errorcolumns are added then instead of lines symbols and errorbars are shown
+	  if optional bubblecolumns are added then instead of lines bubbles with area corresponding to
+	  bubblecolumn are shown (toggle bubblesize with 's' and 'b')
+	  (toggle lines also with '-' key))
+       options:  -o file.jpg  create a jpg file on exiting
+                 -c file.jpg  only creates a jpg file and exit immediately
+                 -logx -logy  make x(y) a logarithmic axis
+                 -xmin 23.3 the application sets the minimum of the display xaxis to 23.3
+                 -xmax -ymin -ymax -xtext -ytext -title ...similar
+                 -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values
+                          a text to be written as line label can be added by inserting | and adding the text
+                 -hlines 2,3.4,12.3 shows horizontal lines at specified y values
+                 -g shows gridlines
+                 -dim 400 200  set dimension of plot (in pixels width 400 height 200)
 
 
-xcol,ycol ... column to be taken as x-, y- axis  in a lineplot
-when using option -o file.jpg the application creates a jpg file on exiting
-when using option -xmin 23.3 the application sets the minimum of the display xaxis to 23.3
-similar are options -xmax -ymin -ymax -title ....
-when using option -c file.jpg the application only creates a jpg file and exits immediatly
-if optional errorcolumns are added then instead of lines symbols and errorbars are shown
-if optional bubblecolumns are added then instead of lines bubbles with area corresponding to
-bubblecolumn are shown (toggle bubblesize with 's' and 'b')
-(toggle lines also with '-' key))
-filename ..... filename of datafile
-Data files may contain lines to tune the display output, such as
-#! displaytitle=My new Graph
-#! displayytext=intensity
-#! displayxtext=meV 
 \end{verbatim} 
 
 \item [displaybubbles\index{displaybubbles}  5 6 8 ./results/mcdisp.qei] works similar as display, however

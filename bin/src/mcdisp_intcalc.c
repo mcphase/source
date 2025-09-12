@@ -591,7 +591,7 @@ double intcalc_Erefine(ComplexMatrix & ch, int Estp,inimcdis & ini,par & inputpa
    }}}}   
  }}}}
 
-if(do_verbose){printf("diagonalising matrix A for Estep %i\n",Estp);//myPrintComplexMatrix(stdout,Ac); 
+if(do_verbose){printf("inverting matrix A for Estep %i\n",Estp);//myPrintComplexMatrix(stdout,Ac); 
               }
  chi=Ac.Inverse()*Bc;
 

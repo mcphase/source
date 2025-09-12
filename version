@@ -1,4 +1,4 @@
-#define MCPHASVERSION "mcphas 6.0 experimental code - do not use!"
-#define MCDISPVERSION "mcdisp 6.0 experimental code - do not use!"
-#define MCDIFFVERSION "mcdiff 6.0 experimental code - do not use!"
-#define IC1IONMODULE_VERSION  "6.0 experimental code - do not use!"
+#define MCPHASVERSION "mcphas 6.0"
+#define MCDISPVERSION "mcdisp 6.0"
+#define MCDIFFVERSION "mcdiff 6.0"
+#define IC1IONMODULE_VERSION  "6.0"

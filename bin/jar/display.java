@@ -38,6 +38,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.axis.Axis;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -214,7 +215,7 @@ static public void windowclose(){
   public static void main(String[] args) {
       xmin=1e30;xmax=-1e30;detymin=true;detymax=true;doexit=false;
       ymin=1e30;ymax=-1e30;detxmin=true;detxmax=true;
-      detxText=true;detyText=true;detTitle=true;detdim=true;
+      detxText=true;detyText=true;detTitle=true;detdim=true;logx=false;logy=false;
       prefxsize=500;prefysize=270;
            String ss; String s;
       if (args.length<1)
@@ -234,6 +235,7 @@ static public void windowclose(){
 //    System.out.println("	 # displaylegend=false (toggle also with 'L' key)\n");
        System.out.println("       options:  -o file.jpg  create a jpg file on exiting");
        System.out.println("                 -c file.jpg  only creates a jpg file and exit immediately");
+       System.out.println("                 -logx -logy  make x(y) a logarithmic axis");
        System.out.println("                 -xmin 23.3 the application sets the minimum of the display xaxis to 23.3");
        System.out.println("                 -xmax -ymin -ymax -xtext -ytext -title ...similar");
        System.out.println("                 -vlines 2|(201),3.4,12.3 shows vertical lines at specified x values");
@@ -280,6 +282,14 @@ static public void windowclose(){
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
                           ss=SF.FirstWord(s);prefysize=p.valueOf(ss).intValue();
              s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logx")) // option "-xmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             logx=true;
+            }
+            else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-logy")) // option "-xmin 23"
+            {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
+             logy=true;
             }
             else if(SF.TrimString(s).substring(0, 5).equalsIgnoreCase("-xmin")) // option "-xmin 23"
             {s=SF.DropWord(s); if (s.length()==0){++k;s=args[k];s=SF.TrimString(s);}
@@ -376,7 +386,7 @@ static public void windowclose(){
  static double scale;
  static double xmin,xmax,ymin,ymax;
  static Integer prefxsize,prefysize;
- static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detdim,doexit,showgrid;
+ static boolean detxmin,detymin,detxmax,detymax,detxText,detyText,detTitle,detdim,doexit,showgrid,logx,logy;
  static String [] legend; 
  static String xText = "";
  static String yText = "";
@@ -525,14 +535,14 @@ plot.setDomainGridlinePaint(Color.BLACK);
 
         // increase the margins to account for the fact that the auto-range
         // doesn't take into account the bubble size...
-        NumberAxis domainAxis = (NumberAxis) plot.getDomainAxis();
-        domainAxis.setLowerMargin(0.15);
-        domainAxis.setUpperMargin(0.15);
-        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-        rangeAxis.setLowerMargin(0.15);
-        rangeAxis.setUpperMargin(0.15);
-        rangeAxis.setAutoRangeIncludesZero(false);
-        domainAxis.setAutoRangeIncludesZero(false);
+        NumberAxis yAxis = (NumberAxis) plot.getDomainAxis();
+        yAxis.setLowerMargin(0.15);
+        yAxis.setUpperMargin(0.15);
+        NumberAxis xAxis = (NumberAxis) plot.getRangeAxis();
+        xAxis.setLowerMargin(0.15);
+        xAxis.setUpperMargin(0.15);
+        xAxis.setAutoRangeIncludesZero(false);
+        yAxis.setAutoRangeIncludesZero(false);
         
     for(int i=0;i<noffiles;++i){
          if(colyerr[i]>=0){plot.setRenderer(i,renderer);
@@ -548,9 +558,22 @@ plot.setDomainGridlinePaint(Color.BLACK);
         reload_data(i);
                                }
      if(xmax<xmin||ymax<ymin){System.out.println("No data to plot");System.exit(1);}
-     rangeAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
-     domainAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
- 
+     xAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
+     yAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
+  if(logy){
+     LogAxis ylogAxis = new LogAxis(yText);
+     plot.setDomainAxis(0,ylogAxis);
+     if(ymin-(ymax-ymin)*0.04>0)
+     {ylogAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);}
+         }
+  if(logx){
+     LogAxis xlogAxis = new LogAxis(xText);
+     xlogAxis.setLowerMargin(0.15);
+     xlogAxis.setUpperMargin(0.15);
+     plot.setRangeAxis(0,xlogAxis);
+     if(xmin-(xmax-xmin)*0.04>0)
+     {xlogAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);}
+           }
 // this is for plotting a line 
 //     XYLineAnnotation axy = new  XYLineAnnotation(0.0, 0.0, 1.0, 0.0);
 //     plot.addAnnotation(axy);
@@ -648,6 +671,7 @@ protected static void reload_data(int i){    try{
       // replace tabs by spaces
       strLine=strLine.replaceAll("[\t\n\u000B\u0009\f]"," ");
 
+// treat comment lines and read variables which might be there to tune plotting
              if(SF.TrimString(strLine).substring(0, 1).equalsIgnoreCase("#"))
              {
       for(int i1=0;i1<=strLine.length();++i1)
@@ -676,8 +700,8 @@ protected static void reload_data(int i){    try{
         continue;
              }
              // select colx and coly
-                 sx=SF.NthWord(strLine,clx);
-                 sy=SF.NthWord(strLine,cly);
+                 sx=SF.NthWord(strLine,clx);if(clx==0){sx=s.valueOf(j);}
+                 sy=SF.NthWord(strLine,cly);if(cly==0){sy=s.valueOf(j);}
                  sxe=SF.NthWord(strLine,clxerr);
                  sye=SF.NthWord(strLine,Math.abs(clyerr));
              // System.out.println(sx+" "+sy+" "+sxe+" "+sye);

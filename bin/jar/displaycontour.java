@@ -32,6 +32,7 @@ import org.jfree.chart.renderer.LookupPaintScale;
 import org.jfree.chart.renderer.PaintScale;
 import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYZDataset;
+import org.jfree.data.Range;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 //import org.jfree.chart.ui.RectangleAnchor;
@@ -154,12 +155,12 @@ static public void windowclose(){
     private  JFreeChart createChart(DefaultXYZDataset dataset) {
         NumberAxis xAxis = new NumberAxis(xText);
 //         xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-         xAxis.setLowerMargin(0.0);
-         xAxis.setUpperMargin(0.0);
+         xAxis.setLowerMargin(0.05);
+         xAxis.setUpperMargin(0.05);
          NumberAxis yAxis = new NumberAxis(yText);
 //         yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-         yAxis.setLowerMargin(0.0);
-         yAxis.setUpperMargin(0.0);
+         yAxis.setLowerMargin(0.05);
+         yAxis.setUpperMargin(0.05);
          zAxis = new NumberAxis(zText);
         chart = ChartFactory.createScatterPlot(
                 Title, xText, yText, dataset,
@@ -208,8 +209,8 @@ int[] red =
        0,  0,  0,  0,  0,  0,  0,  0};
 
      if(xmax<=xmin||ymax<=ymin||zmax<=zmin){System.out.println("No data to plot");System.exit(1);}
-     xAxis.setRange(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04);
-     yAxis.setRange(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04);
+      xAxis.setRangeWithMargins(new Range(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04),true,true);
+      yAxis.setRangeWithMargins(new Range(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04),true,true);
          LookupPaintScale scale = new LookupPaintScale(zmin, zmax,Color.red);
          for(int i=0;i<64;++i){double value=zmin+i*(zmax-zmin)/64;//System.out.println(value);
          scale.add(value,new Color(red[i],green[i],blue[i]));
@@ -240,7 +241,7 @@ for (String s : vl) {
 if(!s.isEmpty()){
     String sn [] = s.split("\\|"); 
    double x =p.parseDouble(sn[0]); 
- XYLineAnnotation axy = new  XYLineAnnotation(x, ymin, x, ymax);
+ XYLineAnnotation axy = new  XYLineAnnotation(x, ymin, x, ymax+0.01*(ymax-ymin));
 plot.addAnnotation(axy);
    if(sn.length>1){
 XYTextAnnotation t = new XYTextAnnotation(sn[1],x,ymax+0.02*(ymax-ymin));
@@ -252,7 +253,7 @@ plot.addAnnotation(t);
 for (String s : hl) {
 if(!s.isEmpty()){ String sn [] = s.split("\\|"); 
    double y =p.parseDouble(sn[0]); 
- XYLineAnnotation axy = new  XYLineAnnotation(xmin, y, xmax, y);
+ XYLineAnnotation axy = new  XYLineAnnotation(xmin, y, xmax+0.01*(xmax-xmin), y);
 plot.addAnnotation(axy);
  if(sn.length>1){
 XYTextAnnotation t = new XYTextAnnotation(sn[1],xmax+0.02*(xmax-xmin),y);
@@ -596,7 +597,9 @@ protected void reload_data(int i)
       // System.out.println("x:"+xmin+" "+xmax);
       // System.out.println("y:"+ymin+" "+ymax);
       // System.out.println("z:"+zmin+" "+zmax);
-
+      chart.getXYPlot().getDomainAxis().setRangeWithMargins(new Range(xmin-(xmax-xmin)*0.04,xmax+(xmax-xmin)*0.04),true,true);
+      chart.getXYPlot().getRangeAxis().setRangeWithMargins(new Range(ymin-(ymax-ymin)*0.04,ymax+(ymax-ymin)*0.04),true,true);
+      
                if(j==maxnofpoints){maxnofpoints*=2;j=maxnofpoints;}
                  else {
                if (j>0)
@@ -630,7 +633,7 @@ protected void reload_data(int i)
       //EntSession.CWatch("Fehler beim Zugriff auf Datei cti_listener.ini!");
     }
 //    repaint();
-//System.out.println("Displaycontour: Data reloaded");
+//System.out.println("Displaycontour: Data reloaded ymax:"+ymax);
   }
     
  

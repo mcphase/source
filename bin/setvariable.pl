@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-BEGIN{@ARGV=map{glob($_)}@ARGV}
+# BEGIN{@ARGV=map{glob($_)}@ARGV}
 
 use Scalar::Util qw(looks_like_number);
 
@@ -8,7 +8,7 @@ unless ($#ARGV >1) {usage();}else{print STDERR "#* $0 *";}
 sub usage() {
 
   print STDERR << "EOF";
-
+$#ARGV
     $0: program to set a variable in a data file, e.g. replace T=15 with T=20
         in some file
 
