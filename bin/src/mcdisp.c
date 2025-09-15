@@ -144,10 +144,21 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
     int nofneighbours=myinput->dimA, ll=myinput->level;
     int thread_id = myinput->thread_id;
 #endif
+    Matrix maglat(1,3,1,3); Vector maghkl(1,3);
+  if(ini.include_cd){maglat=inputpars.cs.prim_unitcell_ijk();
+                     for(int i=1;i<=3;++i){ 
+                     maglat(i,1)*=ini.mf.na();
+                     maglat(i,2)*=ini.mf.nb();
+                     maglat(i,3)*=ini.mf.nc();
+                     
+                     }
+                     maghkl(1)=q(1)*ini.mf.na();
+                     maghkl(2)=q(2)*ini.mf.nb();
+                     maghkl(3)=q(3)*ini.mf.nc();
+                     }
     complex<double> ipi(0,2*3.1415926535), expqd;
-    int i,j,k,i1,j1,k1,s,ss,sl,tl,tll,m,n;
-    int l;
-    double REexpqd, IMexpqd, jjval; int jsi,jsj;
+    int i,j,k,l,i1,j1,k1,s,ss,sl,tl,tll,m,n,jsi,jsj;
+    double REexpqd, IMexpqd, jjval; 
     for(l=1;l<=(*inputpars.jjj[ll]).paranz;++l) 
     {
          int sd=(*inputpars.jjj[ll]).sublattice[l];
@@ -156,12 +167,9 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
          xyz=(*inputpars.jjj[ll]).xyz+(*inputpars.jjj[ll]).dn[l]-(*inputpars.jjj[sd]).xyz; // line added 17.6.09 to remove rounding bug in PCSMO calculation
          d=inputpars.rez*(const Vector&)xyz;
          for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); // rint d for loop below to determine crystallographic unit ss ...
-
          xyz=(*inputpars.jjj[ll]).dn[l];
          d=inputpars.rez*(const Vector&)xyz;// set d to distance for later use to determine phase factor in J(Q) ...
-
          expqd = exp(ipi*(q*d)); REexpqd = real(expqd); IMexpqd = imag(expqd);
-
 //	  if (do_verbose==1) {printf("#adding neighbor %i (%6.3f %6.3f %6.3f) of atom %i (%6.3f %6.3f %6.3f)- it contributes to J(s,s'):\n",l,xyz(1),xyz(2),xyz(3),ll,(*inputpars.jjj[ll]).xyz[1],(*inputpars.jjj[ll]).xyz[2],(*inputpars.jjj[ll]).xyz[3]);
 //                              } 
    //2. in order to sum up we must take into account that the magnetic unit cell is
@@ -170,7 +178,6 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
    //   in the magnetic supercell
          for(i1=1;i1<=ini.mf.na();++i1){for(j1=1;j1<=ini.mf.nb();++j1){for(k1=1;k1<=ini.mf.nc();++k1){
          s=md.in(i1,j1,k1); 
-
          //calc ss (check in which crystallographic unit ss of the magnetic cell the neighbour l-ll lies)	 
          i=(int)(i1+d_rint(1)-1); // calculate 
 	 j=(int)(j1+d_rint(2)-1);
@@ -188,17 +195,13 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 	 ss=md.in(i,j,k);
 //          if (do_verbose==1) {printf("#s=%i %i %i  s'=%i %i %i\n",i,j,k,i1,j1,k1);}
           // sum up 
-
 //         mdl - Changed 110710 - To speed up computation by calculating exp(+2i.Pi.Q.d) real and imag parts separately, 
 //                                and put into J.mati(s,ss) directly without using intermediate jsss matrix.
            complex<double> **jsss = J.mati(s,ss).M;
-
 //         ComplexMatrix jsss(1,ini.nofcomponents*md.baseindex_max(i1,j1,k1),1,ini.nofcomponents*md.baseindex_max(i,j,k));
 //         jsss=0;
-        
 	  sl=(*inputpars.jjj[ll]).sublattice[l]; // the whole loop has also to be done 
                                                  // for all the other transitions of sublattice sl
-
 //#ifdef _THREADS_JSSS   ... not needed becaues each thread has different ll !! thus writes to a different 
 // region of memory (jsi)
 //	  MUTEX_LOCK(&mutex_Jlock_write1); 
@@ -206,16 +209,16 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 //           Jlock[si]=1;
 //          MUTEX_UNLOCK(&mutex_Jlock_write1);
 // #endif
-           
           // therefore calculate offset of the set of transitions
           for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
 	  for(tll=1;tll<=md.noft(i,j,k,sl);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,sl,tll)-1);
-
-	     for(m=1;m<=ini.nofcomponents;++m){for(n=1;n<=ini.nofcomponents;++n){ //this should also be ok for nofcomponents > 3 !!! (components 1-3 denote the magnetic moment)
+	     for(m=1;m<=ini.nofcomponents;++m)for(n=1;n<=ini.nofcomponents;++n){ //this should also be ok for nofcomponents > 3 !!! (components 1-3 denote the magnetic moment)
          jjval = (*inputpars.jjj[ll]).jij[l](m,n);  
          jsss[jsi+m][jsj+n] += complex<double>(jjval*REexpqd, jjval*IMexpqd);
 //         jsss(jsi+m,jsj+n) += complex<double>(jjval*REexpqd, jjval*IMexpqd);
-                                              }                                 } // but orbitons should be treated correctly by extending 3 to n !!
+                                              }       // but orbitons should be treated correctly by extending 3 to n !!
+// here we  optionally insert classical dipolar interaction by Ewald Method bowden 81 !!!
+// for m,n components 1-3 (so1ion) or 1-6 (ic1ion, icf1ion)
 
 	                                         }} 
 //#ifdef _THREADS_JSSS
@@ -229,6 +232,32 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
           ++nofneighbours; // count neighbours summed up
 	 }}}
    }
+  if(ini.include_cd)
+ {ComplexMatrix cd(1,3,1,3);
+ Vector dA(1,3),dB(1,3);bool deltaAB;
+    for(i1=1;i1<=ini.mf.na();++i1)for(j1=1;j1<=ini.mf.nb();++j1)for(k1=1;k1<=ini.mf.nc();++k1){
+  s=md.in(i1,j1,k1); 
+  dA(1)=((*inputpars.jjj[ll]).xyz(1)+i1-1)/ini.mf.na();
+  dA(2)=((*inputpars.jjj[ll]).xyz(2)+j1-1)/ini.mf.nb();
+  dA(3)=((*inputpars.jjj[ll]).xyz(3)+k1-1)/ini.mf.nc();
+   for(i=1;i<=ini.mf.na();++i)for(j=1;j<=ini.mf.nb();++j)for(k=1;k<=ini.mf.nc();++k){
+   ss=md.in(i,j,k);
+   for(l=1;l<=inputpars.cs.nofatoms;++l){ // loop all atoms in magnetic unit cell
+  
+  complex<double> **jsss = J.mati(s,ss).M;
+  dB(1)=((*inputpars.jjj[l]).xyz(1)+i-1)/ini.mf.na();
+  dB(2)=((*inputpars.jjj[l]).xyz(2)+j-1)/ini.mf.nb();
+  dB(3)=((*inputpars.jjj[l]).xyz(3)+k-1)/ini.mf.nc();
+  if(i==i1&&j==j1&&k==k1&&l==ll)deltaAB=true;
+                           else deltaAB=false;
+  cd=DAB(maghkl, maglat, dA,(*inputpars.jjj[ll]).gJ, dB, (*inputpars.jjj[l]).gJ, deltaAB);
+   for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
+	  for(tll=1;tll<=md.noft(i,j,k,l);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,l,tll)-1);
+	  for(m=1;m<=3;++m)for(n=1;n<=3;++n)jsss[jsi+m][jsj+n] +=cd(m,n);
+          }}
+   }}}
+ } // ini.include_cd
+
 #ifdef _THREADS_JSSS
    myinput->dimA=nofneighbours;
 #if defined  (__linux__) || defined (__APPLE__)
@@ -869,7 +898,7 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
                                              //nofcomponents^th dimension corresponds to 1st in manual 
 					     // and it is only necessary to take into 
 					     // acount this dimension!!
-       for(i=1;i<=ini.nofcomponents;++i){for(j=1;j<=ini.nofcomponents;++j){
+      if (do_jqfile){ for(i=1;i<=ini.nofcomponents;++i)for(j=1;j<=ini.nofcomponents;++j){
         J_Q(ini.nofcomponents*(s-1)+i,ini.nofcomponents*(ss-1)+j)+=J.mati(J.in(i1,j1,k1),J.in(i2,j2,k2))(ini.nofcomponents*(b-1)+i,ini.nofcomponents*(bb-1)+j);
        }}
 
@@ -1802,6 +1831,7 @@ int main (int argc, char **argv)
  int i,do_Erefine=0,do_jqfile=0,do_verbose=0,maxlevels=10000000,do_createtrs=0;
  int do_ignore_non_hermitian_matrix_error=0;
  int do_readtrs=0,calc_beyond=1,calc_rixs=0,calcXobs=0;
+ bool include_cd=false;
  char mffile [MAXNOFCHARINLINE]; //default spin-configuration-input file
   snprintf(mffile,MAXNOFCHARINLINE,"mcdisp.mf");
  const char * filemode="w";
@@ -1838,8 +1868,9 @@ for (i=1;i<=argc-1;++i){
        else if(strcmp(argv[i],"-XM")==0) {calcXobs=1;calc_beyond=0;}  
        else if(strcmp(argv[i],"-Xpel")==0) {calcXobs=2;calc_beyond=0;}  
         else if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
-         else if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
-          else if(strcmp(argv[i],"-jqe")==0) {do_jqfile=2;minE=SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
+         else if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=-SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
+          else if(strcmp(argv[i],"-jqe")==0) {do_jqfile=2;minE=-SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
+           else if(strcmp(argv[i],"-cd")==0) include_cd=true;       
            else if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
             else if(strcmp(argv[i],"-c")==0) do_createtrs=1;       
              else if(strcmp(argv[i],"-A")==0) filemode="A";       
@@ -1880,7 +1911,7 @@ for (i=1;i<=argc-1;++i){
   par inputpars("./mcphas.j",do_verbose);
  
 
-  inimdpars inip("mcdisp.par",prefix,mffile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms,do_verbose); 
+  inimdpars inip("mcdisp.par",prefix,mffile,do_jqfile,include_cd,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms,do_verbose); 
   //ini.load("mcdisp.par",mffile,do_jqfile,inputpars.cs.abc,inputpars.cs.nofcomponents,inputpars.cs.nofatoms);
   if(errexit==1)(*inip.inis[0]).helpexit();
 // loop for different prefixes ...
@@ -1904,7 +1935,7 @@ dispcalc(ini,inputpars,calc_rixs,calcXobs,do_phonon,calc_beyond,do_Erefine,do_jq
   
  printf("#RESULTS saved in directory ./results/  - files:\n");
   if(do_jqfile){
-   printf("#  %smcdisp.jq  - Fourier Transfor J(Q) of the Interaction Parmeters\n",ini.prefix);
+   printf("#  %smcdisp.jq  - Fourier Transform J(Q) of the Interaction Parmeters\n",ini.prefix);
   }else{
   if(calc_rixs){printf("#  %smcdisp.qex  - T,H,qvector vs energies and resonant inelastic X-ray (RIXS) intensities\n",ini.prefix);}
   else if(calcXobs){printf("#  %smcdisp.qeX%s  - T,H,qvector vs energies and susceptibilities for observable %s \n",ini.prefix,obs[calcXobs],obs[calcXobs]);}

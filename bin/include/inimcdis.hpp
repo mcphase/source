@@ -27,7 +27,10 @@ class inimcdis
   double setcolvalue(int i,Vector & Qvec, double & Qincr, Vector & qprim,Vector & hkl);
   Vector Eabc,Habc;
   bool outcolset;// indicates wether in mcphas.ini user has set some output columns
+
   public:
+  bool include_cd; // true if the calculation of J(q) the classical dipole interaction
+                   // should be included 
   int * hklfile_start_index;
   char * info;
   char * prefix;
@@ -65,7 +68,7 @@ int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char 
 int extract_match(bool & findnewmatch, int & n,char**lofpref ,char * instr,char * pref, const char * parameter,char * var,size_t ns,int m);
 
   inimcdis(const char * file,char * prefix,char * mffile,
-             int & do_jqfile,Vector & abc,
+             int & do_jqfile,bool inc_cd,Vector & abc,
              int & nofcomponents,int & nofatoms);
   int load (char * mffile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat); //constructor
   int load (int & nofinis,char**lofpref,char * mffile, char * prefix,int do_jqfile, Vector & abc,int nofcomp,int nofat,int verbose); //constructor
@@ -81,7 +84,7 @@ class inimdpars
   inimcdis ** inis;
   
   inimdpars (const char * file,char * prefix,char * mffile,
-             int & do_jqfile,Vector & abc,
+             int & do_jqfile,bool inc_cd,Vector & abc,
              int & nofcomponents,int & nofatoms,int verbose); //constructor
 
   inimdpars (const inimdpars & p);//kopier-konstruktor

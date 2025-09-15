@@ -240,6 +240,25 @@ void hkl2ijk(Vector & qijk,Vector & hkl, Vector & abc);
 void ijk2hkl(Vector & hkl, Vector & qijk,Vector & abc);
 // transforms Q vector in ijk coordinate system to Miller indices (in terms of reciprocal lattice abc*)
 
+// evaluates equation 23 in Bowden 81
+ComplexMatrix ER(double R, Vector & rl);
+
+// calculates classical dipole interaction Fourier transform with Ewald Method accorind 
+// to bowden 1981 p 827 - to be use in line 216 of mcdisp.c and for q=0 in mcphas 
+ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & rA,double gJA, Vector & rB,double gJB,bool deltaAB);
+// input: hkl ... q-vector in Miller indices with respect to reciprocal lattice
+//        lattice ... 3x3 Matrix with column vectors the edges of the unit cell vectors in units of A
+//        dA ... atomic position of atom a with respect to vectors of lattice
+//        gJA .. Lande factor of atom A
+//        dB ... atomic position of atom a with respect to vectors of lattice
+//        gJB .. Lande factor of atom B
+//        deltaAB ... 1 if dA=dB and zero otherwise
+// ouput DAB(q) according to equation (26) including a prefactor to obtain units of meV 
+//         DAB(q)=(gJA*gJB*muB)^2)(mu0/4pi) sum_j(neq i) Dij exp(-iqrij) 
+//         with rij=rj-ri, ri=rA and rj runs over rB+all lattice vectors
+//                   ( 3xij^2-rij^2     3xij.yij         3xij.zij    )
+//         Dij=1/r^5 ( 3xij.yij        3yij^2-rij^2      3yij.zij    )  
+//                   ( 3xij.zij          3yij.zij       3zij^2-rij^2 )
 
 void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
 // problem: we want to find all lattice vectors Rn=ni*ai which are within a

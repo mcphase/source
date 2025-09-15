@@ -63,17 +63,23 @@ void cextract(char * instr,parser & ob)
 
 void cextract(char * instr)
 {parser ob; cextract(instr,ob);}
+
  // Volume of primitive unit cell in Angstroem^3
 double pVol()
 {
     Matrix prim_ijk(1,3,1,3);
-   dadbdc2ijk(prim_ijk,r,abc);
+   prim_ijk=prim_unitcell_ijk();
    // transforms primitive lattice vector matrix r given in terms of abc
    // to ijk coordinate system
     double pVol=prim_ijk.Column(1)*crossp(prim_ijk.Column(2),prim_ijk.Column(3));
 return pVol;
 }
 
+Matrix prim_unitcell_ijk()
+{Matrix prim_ijk(1,3,1,3);
+ dadbdc2ijk(prim_ijk,r,abc);
+ return prim_ijk;
+}
 void tostring(char * str,size_t t)
 {snprintf(str,t," a= %g A  b= %g A c= %g A  alpha=%g  beta=%g gamma=%g",abc(1),abc(2),abc(3),abc(4),abc(5),abc(6));
 }

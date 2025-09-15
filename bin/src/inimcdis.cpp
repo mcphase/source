@@ -109,6 +109,8 @@ void inimcdis::helpexit() // type info and error exit
     printf ("                   if energies are given for hkls in mcdisp.par, output file mcdisp_scaled.jq contains scaled parameters\n");
     printf ("                   such that energy of first hkl set corresponds to highest eigenvalue of J(Q)\n");
     printf (" -jqe          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
+    printf (" -cd           ... for calculateing J(Q) (Fourier transform of 2ion coupling) add classical dipole \n");
+    printf ("                   interaction using Ewald summation, Bowden J.Phys.C:solid state phys. 14(1981) L827 \n");
     printf (" -max n        ... restrict single ion susceptibility to n lowest\n");
     printf ("                   lying transitions starting from the ground state\n");
     printf (" -minE E       ... an energy range may be given by minE and maxE: only\n");
@@ -796,10 +798,11 @@ return load(n,lp,mffile,pref,do_jqfile, abc,nofcomp,nofat,0);
 
 //constructor ... load initial parameters from file
 inimcdis::inimcdis(const char * file,char * pref,char * mffile,
-                   int & do_jqfile,Vector & abc,
+                   int & do_jqfile,bool inc_cd,Vector & abc,
                    int & nofcomp,int & nofat)
 {hkls=NULL;hklfile_start_index=NULL;Hext=Vector(1,HEXT_DIMENSION);Habc=Vector(1,3);Eabc=Vector(1,3);
  qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);mf=mfcf(1,1,1,nofat,nofcomp);
+  include_cd=inc_cd;
   parfile= new char [MAXNOFCHARINLINE]; 
   mf_file= new char [MAXNOFCHARINLINE]; 
   snprintf(parfile,MAXNOFCHARINLINE,"%s%s",pref,file);
@@ -822,6 +825,7 @@ save(parfile);
 //kopier-konstruktor 
 inimcdis::inimcdis (const inimcdis & p)
 {do_jqf=p.do_jqf;
+ include_cd=p.include_cd;
  parfile= new char [MAXNOFCHARINLINE];
   strcpy(parfile,p.parfile);
  mf_file= new char [MAXNOFCHARINLINE];
@@ -891,7 +895,7 @@ if(hkls!=NULL)
 //***************************************************************
 //constructor ... load initial parameters from file
 inimdpars::inimdpars (const char * file,char * pref,char * mffile,
-             int & do_jqfile,Vector & abc,
+             int & do_jqfile,bool inc_cd,Vector & abc,
              int & nofcomponents,int & nofatoms, int verbose)
 { inis=new inimcdis*[MAXNOFINIS];
   char * lofprefixes[MAXNOFINIS];
@@ -899,7 +903,7 @@ inimdpars::inimdpars (const char * file,char * pref,char * mffile,
 // here we have to load inis[1...nofinis] with different prefixes matching pref - until no new matching
 // prefix is found ...
   while(nofinisold<nofinis&&nofinis<MAXNOFINIS)
-  {inis[nofinis]=new inimcdis(file,pref,mffile,do_jqfile,abc,nofcomponents,nofatoms);
+  {inis[nofinis]=new inimcdis(file,pref,mffile,do_jqfile,inc_cd,abc,nofcomponents,nofatoms);
    nofinisold=nofinis;(*inis[nofinis]).load(nofinis,lofprefixes,mffile,pref,do_jqfile,abc,nofcomponents,nofatoms,verbose);
   }
  
