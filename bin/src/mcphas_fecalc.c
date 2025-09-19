@@ -284,6 +284,14 @@ int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
    if (jj == NULL){fprintf (stderr, "Out of memory\n");exit (EXIT_FAILURE);}
 
    for(s=0;s<=(sdim+2)*(1+exstr)-1;++s){jj[s]=0;} //clear jj(j,...)
+ Matrix maglat(1,3,1,3); 
+  if(ini.include_cd){maglat=inputpars.cs.prim_unitcell_ijk();
+                     for(int i=1;i<=3;++i){ 
+                     maglat(i,1)*=sps.na();
+                     maglat(i,2)*=sps.nb();
+                     maglat(i,3)*=sps.nc();
+                     }
+                    }
 
    for(m=1;m<=inputpars.cs.nofatoms;++m)
    {if ((*inputpars.jjj[m]).diagonalexchange==0){diagonalexchange=0;} // if any ion has anisotropic exchange - calculate anisotropic
@@ -297,6 +305,37 @@ int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
                 if(ini.ipeps5!=NULL){if ((*(*ini.ipeps5).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
                 if(ini.ipeps6!=NULL){if ((*(*ini.ipeps6).jjj[m]).diagonalexchange==0){diagonalexchange=0;}}
                 }
+
+if(ini.include_cd)
+ {Matrix cd(1,3,1,3);diagonalexchange=0;
+        int cddim=3; if(inputpars.cs.nofcomponents<3)cddim=inputpars.cs.nofcomponents;
+ Vector dA(1,3),dB(1,3);bool deltaAB;
+    for(int i1=1;i1<=sps.na();++i1)for(int j1=1;j1<=sps.nb();++j1)for(int k1=1;k1<=sps.nc();++k1){
+  dA(1)=((*inputpars.jjj[m]).xyz(1)+i1-1)/sps.na();
+  dA(2)=((*inputpars.jjj[m]).xyz(2)+j1-1)/sps.nb();
+  dA(3)=((*inputpars.jjj[m]).xyz(3)+k1-1)/sps.nc();
+   for(i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k){
+   for(l=1;l<=inputpars.cs.nofatoms;++l){ // loop all atoms in magnetic unit cell
+  dB(1)=((*inputpars.jjj[l]).xyz(1)+i-1)/sps.na();
+  dB(2)=((*inputpars.jjj[l]).xyz(2)+j-1)/sps.nb();
+  dB(3)=((*inputpars.jjj[l]).xyz(3)+k-1)/sps.nc();
+  if(i==i1&&j==j1&&k==k1&&l==m)deltaAB=true;
+                           else deltaAB=false;
+  cd=DAB0( maglat, dA,(*inputpars.jjj[m]).gJ, dB, (*inputpars.jjj[l]).gJ, deltaAB);
+      // s is determined from a vector rijk connecting the different crystal unit cells 
+         int ri=i-i1; if(ri>=sps.na())ri-=sps.na();if(ri<0)ri+=sps.na();
+         int rj=j-j1; if(rj>=sps.nb())rj-=sps.nb();if(rj<0)rj+=sps.nb();
+         int rk=k-k1; if(rk>=sps.nc())rk-=sps.nc();if(rk<0)rk+=sps.nc();
+
+	s=sps.in(ri,rj,rk); //rijk range here from 0 to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
+	// sum up the contribution of the interaction parameter to the interaction matrix jj[s] to be
+        // used in the meanfield calculation below
+	for(int al=1;al<=cddim;++al)for(int be=1;be<=cddim;++be)
+	  jj[s](inputpars.cs.nofcomponents*(m-1)+al,inputpars.cs.nofcomponents*(l-1)+be)+=cd(al,be);
+   }}}
+ } // ini.include_cd
+
+
     for(l=1;l<=(*inputpars.jjj[m]).paranz;++l)
     {//sum up l.th neighbour interaction of atom m
                                              // atom m = sublattice m
@@ -342,7 +381,9 @@ int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
         }}
 
     }
-
+//ComplexMatrix ff(1,3,1,3);ff=(*jj[0])(1,3,1,3);
+//myPrintMatrix(ff);
+//exit(1);
 if(exstr>0){int iparanz; 
  if(ini.ipx!=NULL){iparanz=(*(*ini.ipx).jjj[m]).paranz;}else{iparanz=(*(*ini.ipeps1).jjj[m]).paranz;}
 

@@ -316,6 +316,8 @@ double physproperties::save (int verbose, const char * filemode, int htfailed,in
     { fprintf (fout, "#      ... however, two ion interaction is always evaluated for eps=0 (option -linepsjj).\n");
     }
    }
+    if(ini.include_cd){ fprintf (fout, "#      ... two ion interaction in mcphas.j extended by classical dipolar interaction according to Bowdens expansion.\n");
+    }
    if(fabs(inputpars.totalcharge)<SMALLCHARGE){fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0a=%4.4g  Pel0b=%4.4g  Pel0c=%4.4g C/m^2\n",Pelabc0(1),Pelabc0(2),Pelabc0(3)); }
    if(ortho==0){fprintf (fout, "#      - coordinate system ijk defined by  j||b, k||(a x b) and i normal to k and j\n");
                if(fabs(inputpars.totalcharge)<SMALLCHARGE)fprintf(fout,"#! Structural Static Electrical Polarisation  Pel0i=%4.4g  Pel0j=%4.4g  Pel0k=%4.4g C/m^2\n",Pel0(1),Pel0(2),Pel0(3));

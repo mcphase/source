@@ -22,9 +22,10 @@ bool checkHerm(ComplexMatrix & M, bool warn=true)
 
 // subs to be able to check and directly diagonalize hermitean
 // matrizes, inverse a nearly singular matrix
-void myPrintComplexMatrix(ComplexMatrix  & M){myPrintComplexMatrix(stdout,M);} 
-void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
+void myPrintMatrix(ComplexMatrix  & M,const char * s){myPrintMatrix(stdout,M, s);} 
+void myPrintMatrix(FILE * file,ComplexMatrix & M,const char * s)
 {int i1,j1;
+if(s!=NULL)fprintf (file,"#%s \n",s);
  fprintf (file,"#Real Part\n");
    double va;
    for (i1=M.Rlo();i1<=M.Rhi();++i1){ 
@@ -41,9 +42,10 @@ void myPrintComplexMatrix(FILE * file,ComplexMatrix & M)
 //  stored in the lower triangle of z,the imaginary parts (of the elements
 //  corresponding to the lower triangle) in the positions
 //  of the upper triangle of z[lo..hi,lo..hi].
-void myPrintComplexMatrix(Matrix & M){myPrintComplexMatrix(stdout,M);}
-void myPrintComplexMatrix(FILE * file,Matrix & M)
+void myPrintComplexMatrix(Matrix & M,const char * s){myPrintComplexMatrix(stdout,M,s);}
+void myPrintComplexMatrix(FILE * file,Matrix & M,const char * s)
 {int i1,j1;
+if(s!=NULL)fprintf (file,"#%s \n",s);
  fprintf (file,"#Real Part\n");
    double va;
    for (i1=M.Rlo();i1<=M.Rhi();++i1){ 
@@ -96,7 +98,7 @@ delete []numbers;
 return true;
 }
 
-int myReadComplexMatrix (FILE * file, ComplexMatrix & M)
+int myReadMatrix (FILE * file, ComplexMatrix & M)
 {int i1,j1;char instr[MAXNOFCHARINLINE];
  float *numbers;
   numbers = new float[M.Rhi()-M.Rlo()+2];
@@ -122,36 +124,39 @@ delete []numbers;
 return true;
 }
 
-void myPrintMatrix(Matrix & M){myPrintMatrix(stdout,M);}
-void myPrintMatrix(FILE * file,Matrix & M)
+void myPrintMatrix(Matrix & M,const char * s){myPrintMatrix(stdout,M,s);}
+void myPrintMatrix(FILE * file,Matrix & M,const char * s)
 {int i1,j1;
+if(s!=NULL)fprintf (file,"#%s \n",s);
    for (i1=M.Rlo();i1<=M.Rhi();++i1){
     for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%8.6g ",myround(M(i1,j1)));
     fprintf (file,"\n");
     }
 }    
 
-void myPrintVector(Vector & M){myPrintVector(stdout,M);}
-void myPrintVector(FILE * file,Vector & M)
+void myPrintVector(Vector & M,const char * s){myPrintVector(stdout,M,s);}
+void myPrintVector(FILE * file,Vector & M,const char * s)
 {int j1;
+if(s!=NULL)fprintf (file,"#%s \n",s);
 // fprintf (file,"#Components:\n");
    
     for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%8.6g ",myround(M(j1)));
     fprintf (file,"\n");    
 }    
 
-void myPrintComplexVector(ComplexVector & M){myPrintComplexVector(stdout,M);}
-void myPrintComplexVector(FILE * file,ComplexVector & M)
+void myPrintVector(ComplexVector & M,const char * s){myPrintVector(stdout,M,s);}
+void myPrintVector(FILE * file,ComplexVector & M,const char * s)
 {int j1;
- fprintf (file,"#Components:\n");
-   
+ if(s!=NULL)fprintf (file,"#%s \n",s);  
     for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%6.3g %+6.3g i\n",myround(real(M(j1))),myround(imag(M(j1))));
     fprintf (file,"\n");    
 }    
 
-void myPrintComplexNumber(complex<double> & M){ myPrintComplexNumber(stdout,M);}
-void myPrintComplexNumber(FILE * file,complex<double> & M)
-{fprintf (file,"%6.3g %+6.3g i ",real(M),imag(M));
+void myPrintComplexNumber(complex<double> & M,const char * s){ myPrintComplexNumber(stdout,M,s);}
+void myPrintComplexNumber(FILE * file,complex<double> & M,const char * s)
+{
+if(s!=NULL)fprintf (file,"%s: %6.3g %+6.3g i ",s,real(M),imag(M));
+else fprintf (file,"%6.3g %+6.3g i ",real(M),imag(M));
 
 }
 

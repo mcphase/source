@@ -241,7 +241,7 @@ void ijk2hkl(Vector & hkl, Vector & qijk,Vector & abc);
 // transforms Q vector in ijk coordinate system to Miller indices (in terms of reciprocal lattice abc*)
 
 // evaluates equation 23 in Bowden 81
-ComplexMatrix ER(double R, Vector & rl);
+Matrix ER(double R, Vector & rl);
 
 // calculates classical dipole interaction Fourier transform with Ewald Method accorind 
 // to bowden 1981 p 827 - to be use in line 216 of mcdisp.c and for q=0 in mcphas 
@@ -259,6 +259,9 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & rA,double gJA, Vector
 //                   ( 3xij^2-rij^2     3xij.yij         3xij.zij    )
 //         Dij=1/r^5 ( 3xij.yij        3yij^2-rij^2      3yij.zij    )  
 //                   ( 3xij.zij          3yij.zij       3zij^2-rij^2 )
+
+// the same at q=0: DAB(q=0)
+Matrix DAB0(Matrix & lattice, Vector & rA,double gJA, Vector & rB,double gJB,bool deltaAB);
 
 void nlimits_calc(Vector & nmin, Vector & nmax, double radius, Matrix & a);
 // problem: we want to find all lattice vectors Rn=ni*ai which are within a

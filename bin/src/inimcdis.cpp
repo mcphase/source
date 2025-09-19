@@ -109,6 +109,7 @@ void inimcdis::helpexit() // type info and error exit
     printf ("                   if energies are given for hkls in mcdisp.par, output file mcdisp_scaled.jq contains scaled parameters\n");
     printf ("                   such that energy of first hkl set corresponds to highest eigenvalue of J(Q)\n");
     printf (" -jqe          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all eigenvalues \n");
+    printf (" -jqm          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all components \n");
     printf (" -cd           ... for calculateing J(Q) (Fourier transform of 2ion coupling) add classical dipole \n");
     printf ("                   interaction using Ewald summation, Bowden J.Phys.C:solid state phys. 14(1981) L827 \n");
     printf (" -max n        ... restrict single ion susceptibility to n lowest\n");

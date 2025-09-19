@@ -156,7 +156,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
                      maghkl(2)=q(2)*ini.mf.nb();
                      maghkl(3)=q(3)*ini.mf.nc();
                      }
-    complex<double> ipi(0,2*3.1415926535), expqd;
+    complex<double> i2pi(0,2*PI), expqd;
     int i,j,k,l,i1,j1,k1,s,ss,sl,tl,tll,m,n,jsi,jsj;
     double REexpqd, IMexpqd, jjval; 
     for(l=1;l<=(*inputpars.jjj[ll]).paranz;++l) 
@@ -169,7 +169,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
          for (i=1;i<=3;++i)d_rint(i)=rint(d(i)); // rint d for loop below to determine crystallographic unit ss ...
          xyz=(*inputpars.jjj[ll]).dn[l];
          d=inputpars.rez*(const Vector&)xyz;// set d to distance for later use to determine phase factor in J(Q) ...
-         expqd = exp(ipi*(q*d)); REexpqd = real(expqd); IMexpqd = imag(expqd);
+         expqd = exp(i2pi*(q*d)); REexpqd = real(expqd); IMexpqd = imag(expqd);
 //	  if (do_verbose==1) {printf("#adding neighbor %i (%6.3f %6.3f %6.3f) of atom %i (%6.3f %6.3f %6.3f)- it contributes to J(s,s'):\n",l,xyz(1),xyz(2),xyz(3),ll,(*inputpars.jjj[ll]).xyz[1],(*inputpars.jjj[ll]).xyz[2],(*inputpars.jjj[ll]).xyz[3]);
 //                              } 
    //2. in order to sum up we must take into account that the magnetic unit cell is
@@ -233,7 +233,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
 	 }}}
    }
   if(ini.include_cd)
- {ComplexMatrix cd(1,3,1,3);
+ {ComplexMatrix cd(1,3,1,3); int cddim=3; if(inputpars.cs.nofcomponents<3)cddim=inputpars.cs.nofcomponents;
  Vector dA(1,3),dB(1,3);bool deltaAB;
     for(i1=1;i1<=ini.mf.na();++i1)for(j1=1;j1<=ini.mf.nb();++j1)for(k1=1;k1<=ini.mf.nc();++k1){
   s=md.in(i1,j1,k1); 
@@ -253,7 +253,7 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
   cd=DAB(maghkl, maglat, dA,(*inputpars.jjj[ll]).gJ, dB, (*inputpars.jjj[l]).gJ, deltaAB);
    for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
 	  for(tll=1;tll<=md.noft(i,j,k,l);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,l,tll)-1);
-	  for(m=1;m<=3;++m)for(n=1;n<=3;++n)jsss[jsi+m][jsj+n] +=cd(m,n);
+	  for(m=1;m<=cddim;++m)for(n=1;n<=cddim;++n)jsss[jsi+m][jsj+n] +=cd(m,n);
           }}
    }}}
  } // ini.include_cd
@@ -642,7 +642,7 @@ if(ini.calculate_orbmoment_oscillation){
         }
 if (do_verbose==1){
                   fprintf(stdout,"#Ualpha1 (s=%i %i %i):\n",i,j,k);
-                  myPrintComplexVector(stdout,u1); 
+                  myPrintVector(stdout,u1); 
                  }
 
     }}}
@@ -662,10 +662,10 @@ if (do_jqfile)
    fprintf(jqfile,"#!<--mcphas.mcdisp.dsigma.jq-->\n");
    fprintf (jqfile, "#Fourier Transform of 2 Ion Interaction - sta is calculated by comparing the larges eigenvalue\n# to that of the first q vector of the calculation");
    curtime=time(NULL);loctime=localtime(&curtime);fputs (asctime(loctime),jqfile);
-  if (do_verbose==1){   fprintf (jqfile, "#q=(hkl)\n #spin s() - spin s'()\n #3x3 matrix jss'(q) real im .... [meV]\n");}
-  else {if(do_jqfile==1)fprintf(jqfile,"#h  vs  k  vs  l  vs Qincr[1/A] vs largest eigenvalue of J(hkl) matrix (meV) vs components of corresponding eigenvector re im re im re im re im\n");
-        if(do_jqfile==2)fprintf(jqfile,"#h  vs  k  vs  l  vs Qincr[1/A] vs eigenvalues of J(hkl) matrix (meV) \n");       
-       }
+   if(do_jqfile==1)fprintf(jqfile,"#h   k   l  Qincr[1/A] largest eigenvalue of J(hkl) matrix (meV) vs components of corresponding eigenvector re im re im re im re im\n");
+   if(do_jqfile==2)fprintf(jqfile,"#h   k   l  Qincr[1/A] eigenvalues of J(hkl) matrix (meV) \n");       
+   if(do_jqfile==3)fprintf(jqfile,"#h   k   l  Qincr[1/A]  J11(Q)r J11(Q)i J12(Q)r J12(Q)i J13(Q) .. J14(Q) ... J1,%i(Q) J21(Q). J22(Q) ... J%i,%i(Q)\n# Jij(Q)real=column 3+2*(i-1)*%i+2*j i,j=(ion-index - 1 )*%i+component-index\n",ini.nofcomponents*dimA,ini.nofcomponents*dimA,ini.nofcomponents*dimA,ini.nofcomponents*dimA,ini.nofcomponents);
+       
 }
 
 // ************************************************************************************************
@@ -821,11 +821,10 @@ int num_threads_started=-1;
 if (do_jqfile){qold=qijk;hkl2ijk(qijk,hkl, inputpars.cs.abc);  if(qincr==-1){qincr=0;qold=qijk;}qincr+=Norm(qijk-qold);
               writehklblocknumber(jqfile,ini,counter);
          
-                  if (do_verbose==1){fprintf (jqfile, "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
-                                     fprintf(jqfile,"nofneighbours= %li\n",nofneighbours);
+                  if (do_verbose==1){printf ( "#q=(%g, %g, %g) ",hkl(1),hkl(2),hkl(3));
+                                     printf("nofneighbours= %li\n",nofneighbours);
                                     }
-                  else
-                  {fprintf (jqfile, "%g  %g  %g %g  ",hkl(1),hkl(2),hkl(3),qincr);}
+                  fprintf (jqfile, "%g  %g  %g %g  ",hkl(1),hkl(2),hkl(3),qincr);
                   }
 
 
@@ -844,17 +843,17 @@ if(do_verbose==1){fprintf(stdout,"#Transform J(q) matrix  with U...\n");}
 
 //if (do_verbose==1){
 //                  fprintf(stdout,"#J(s=%i%i%i,s''=%i%i%i)=\n",i1,j1,k1,i2,j2,k2);
-//                  myPrintComplexMatrix(stdout,J.mati(s,ss)); 
+//                  myPrintMatrix(stdout,J.mati(s,ss)); 
 //                  fprintf(stdout,"#sqr(gamma_s=%i%i%i)=\n",i1,j1,k1);
-//                  myPrintComplexVector(stdout,md.sqrt_gamma(i1,j1,k1));
+//                  myPrintVector(stdout,md.sqrt_gamma(i1,j1,k1));
 //                  fprintf(stdout,"#U(s=%i%i%i)=\n",i1,j1,k1);
-//                  myPrintComplexMatrix(stdout,md.U(i1,j1,k1));
+//                  myPrintMatrix(stdout,md.U(i1,j1,k1));
 //                  fprintf(stdout,"#sqr(gamma_s=%i%i%i)=\n",i2,j2,k2);
-//                  myPrintComplexVector(stdout,md.sqrt_gamma(i2,j2,k2));
+//                  myPrintVector(stdout,md.sqrt_gamma(i2,j2,k2));
 //                  fprintf(stdout,"#U(s=%i%i%i)=\n",i2,j2,k2);
-//                  myPrintComplexMatrix(stdout,md.U(i2,j2,k2));
+//                  myPrintMatrix(stdout,md.U(i2,j2,k2));
 //                  fprintf(stdout,"#sqr(gamma_s) U(s)T* J(s=%i%i%i,s''=%i%i%i) U(s'') sqr(gamma_s'')*=\n",i1,j1,k1,i2,j2,k2);
-//                  myPrintComplexMatrix(stdout,Jl.mati(s,ss)); 
+//                  myPrintMatrix(stdout,Jl.mati(s,ss)); 
 //                 }
   }}}
  }}}
@@ -911,7 +910,7 @@ if(do_verbose==1){fprintf(stdout,"#calculating matrix A\n");}
 if (do_jqfile){
        if (do_verbose==1)
        {//fprintf (jqfile, "#spin (%i*r1 %i*r2 %i*r3) - spin (%i*r1 %i*r2 %i*r3)\n",i1,j1,k1,i2,j2,k2);
-         myPrintComplexMatrix(jqfile,J_Q); 
+         myPrintMatrix(stdout,J_Q); 
        }
 
 	// diagonalize JQ to get eigenvalues (biggest corresponds to Tn) !!!
@@ -920,13 +919,12 @@ if (do_jqfile){
          myEigenSystemHermitean (J_Q,Tn,eigenvectors,sort=1,maxiter);
          i2=ini.nofcomponents*ini.mf.n()*inputpars.cs.nofatoms;
        if(do_verbose==1)
-       {fprintf(jqfile,"#eigenvalues(highest corresponds to Tn, predicted magstructure)\n");
-         myPrintVector(jqfile,Tn); 
-        fprintf(jqfile,"#eigenvectors(moment direction):\n");
-         myPrintComplexMatrix(jqfile,eigenvectors); 
+       {printf("#eigenvalues(highest corresponds to Tn, predicted magstructure)\n");
+         myPrintVector(Tn); 
+        printf("#eigenvectors(moment direction):\n");
+         myPrintMatrix(eigenvectors); 
        }
-       else
-       {if(do_jqfile==1){// print largest eigenvalue and eigenvector
+       if(do_jqfile==1){// print largest eigenvalue and eigenvector
         fprintf(jqfile," %g ",Tn(i2));
         for (i1=1;i1<=i2;++i1)
         {fprintf(jqfile," %6.3g ",real(eigenvectors(i1,i2)));
@@ -937,8 +935,11 @@ if (do_jqfile){
         for (i1=i2;i1>0;--i1)
         {fprintf(jqfile," %g ",Tn(i1));}
                         }
+       if(do_jqfile==3){if(i2!=J_Q.Chi()){fprintf(stderr,"Error mcdisp - jq internal dimension J(Q) not equal to i2");exit(EXIT_FAILURE);}
+         for (i1=1;i1<=i2;++i1)for(int ii1=1;ii1<=i2;++ii1)
+        {fprintf(jqfile," %g %g ",real(J_Q(i1,ii1)),imag(J_Q(i1,ii1)));}
+                        }
         fprintf(jqfile,"\n");
-       }
        // if we are calculating initial q-vektor i.e. jqsta=-1e10 ....
        if (jqsta<-0.9e10){jq0=Tn(i2);jqsta=-0.1e10;jqsta_scaled=jqsta;scalefactor=1;jqmax=jq0;hmax=hkl(1);kmax=hkl(2);lmax=hkl(3);
                           // here the first hkl vectors eigenvalue has been determined
@@ -969,9 +970,9 @@ if (do_jqfile){
  else
  {// no jqfile but excitations to be calculated
  if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i DMD Eigenvalue prblem  A t = hbar omega Lambda t, Matrix  A=\n",dimA,dimA);
-                           myPrintComplexMatrix(stdout,Ac); 
+                           myPrintMatrix(stdout,Ac); 
                    fprintf(stdout,"#Matrix Lambda=\n",dimA,dimA);
-                           myPrintComplexMatrix(stdout,Lambda); 
+                           myPrintMatrix(stdout,Lambda); 
                    }
 
    // diagonalize Ac to get energies  and eigenvectors !!!
@@ -1064,12 +1065,12 @@ if (do_jqfile){
      if( NormFro(unit-test)>SMALL_QUASIELASTIC_ENERGY) notnorm = true;
    }
    if(notnorm) {
-    myPrintComplexMatrix(stdout,test); 
+    myPrintMatrix(stdout,test); 
  fprintf(stderr,"Error: eigenvectors t not correctly normalised\n"); 
  fprintf(stderr,"   Press q to quit, or any other key to ignore this error.\n"); if(getchar()=='q') exit(1); }}
 //-------------------------------------------------------
  if(do_verbose==1){ fprintf(stdout,"#eigenvectors (matrix Tau):\n");
-                    myPrintComplexMatrix(stdout,Tau); 
+                    myPrintMatrix(stdout,Tau); 
                fprintf(stdout,"#saving the following eigenvalues (meV) to mcdisp.qom:\n");
    for (i=1;i<=dimA;++i){fprintf(stdout, " %4.4g",En(i));}
                          }        
@@ -1870,6 +1871,7 @@ for (i=1;i<=argc-1;++i){
         else if(strcmp(argv[i],"-d")==0) {calc_beyond=0;}
          else if(strcmp(argv[i],"-jq")==0) {do_jqfile=1;minE=-SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
           else if(strcmp(argv[i],"-jqe")==0) {do_jqfile=2;minE=-SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
+          else if(strcmp(argv[i],"-jqm")==0) {do_jqfile=3;minE=-SMALL_QUASIELASTIC_ENERGY;maxlevels=1;}
            else if(strcmp(argv[i],"-cd")==0) include_cd=true;       
            else if(strcmp(argv[i],"-t")==0) do_readtrs=1;       
             else if(strcmp(argv[i],"-c")==0) do_createtrs=1;       

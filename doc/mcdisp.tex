@@ -48,12 +48,17 @@ if $g_J=0$ then $\hat I_1=\hat S_x, \hat I_2=\hat L_x, \hat I_3=\hat S_y, \hat I
 \hat I_5=\hat S_z,\hat  I_6=\hat L_z$ (here $\hat \mbf S, \hat \mbf L,\hat \mbf J$ refer to the
 spin-, orbital- and total angular momentum, respectively in a coordinate system where
 $y||b$,$z||(a \times b)$ and $x$ perpendicular to $y$ and $z$).
-				\item [{\prg -jq}]To create an output
-				of the Fourier transform ${\mathcal J}({\mbf Q})$ use option
-				{\prg -jq} (outputs largest eigenvalue of ${\mathcal J}({\mbf Q})$ and 
-corresponding eigenvector) or option {\prg -jqe} (outputs all eigenvalues). 
-If energies are given for hkls in mcdisp.par, output file mcdisp\_scaled.jq contains scaled parameters
-such that energy of first hkl set corresponds to highest eigenvalue of ${\mathcal J}({\mbf Q})$.
+ \item [{\prg -jqm}]To create an output of the Fourier transform ${\mathcal J}({\mbf Q})$
+				\item [{\prg -jq}] outputs largest eigenvalue of ${\mathcal J}({\mbf Q})$ and 
+corresponding eigenvector) or option
+\item [ {\prg -jqe} ](outputs all eigenvalues). 
+ If energies are given for hkls in mcdisp.par, output file mcdisp\_scaled.jq contains scaled parameters
+ such that energy of first hkl set corresponds to highest eigenvalue of ${\mathcal J}({\mbf Q})$.
+\item[\prg mcphas\index{mcphas} -cd] treat classical dipole interaction internally (for the the first three 
+   the interaction operators $I_1,I_2,I_3$, which must correspond to angular momentum $J$, such as in the so1ion module)
+    the classical dipole interaction is calculated using the series expansion for the classical dipolar expansion 
+   given by Bowden\cite{bowden81-827}. Using this option permits to avoid a large number of interaction constants in
+{\prg mcphas.j}
 				\item [{\prg -v}] option is to display\index{display} more information.
                                 
 				\item [{\prg -a}] can be used to avoid overwriting output files in results, new results

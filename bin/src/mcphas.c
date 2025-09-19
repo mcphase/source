@@ -50,7 +50,7 @@ bool parload(par *& ip,char * iniprefix, const char * filename, int verbose,par 
  
 // main program
 int main (int argc, char **argv)
-{ int j,l,doeps=0,linepscf=0,linepsjj=0;
+{ int j,l,doeps=0,linepscf=0,linepsjj=0;bool inc_cd=false;
   int options=0; // this integer indicates how many command strings belong to 
                  //options 
 
@@ -72,6 +72,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
   for (im=1;im<argc;++im)  // im=0  argv[0] is command "mcphasit"
   {if (strcmp(argv[im],"-v")==0) {verbose=1;if (options<im)options=im;}// set verbose mode on
    if (strcmp(argv[im],"-h")==0) errexit=1; // display help message
+   if (strcmp(argv[im],"-cd")==0) {inc_cd=true;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-doeps")==0) {doeps=1;if (options<im)options=im;} // do strain epsilon calculation
    if (strcmp(argv[im],"-linepscf")==0) {linepscf=1;if (options<im)options=im;} // do cf strain epsilon calculation linear 
    if (strcmp(argv[im],"-linepsjj")==0) {linepsjj=1;if (options<im)options=im;} // do exchange strain epsilon calculation linear
@@ -107,7 +108,7 @@ int errexit=0;char prefix [MAXNOFCHARINLINE];prefix[0]='\0';
 
    inipar ini((*inip.inis[ninis]));
   if(inip.nofinis>1)printf("# Running McPhase with prefix %s\n",ini.prefix);
-   ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;
+   ini.doeps=doeps;ini.linepscf=linepscf;ini.linepsjj=linepsjj;ini.include_cd=inc_cd;
 
   if (ini.exit_mcphas!=0)
   {ini.exit_mcphas=0;inip.saveexitzero();} // if exit was 1 - save parameters and set exit=0
@@ -160,8 +161,8 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
  if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}
           } // doeps
  
-
-
+ if(verbose==1&&inc_cd){printf("option -cd: including classical dipole interaction in approximation by Bowden when calculating mean fields in mean field loop\n");}
+          
   Vector Imax(1,inputpars.cs.nofatoms*inputpars.cs.nofcomponents);
   Vector Imom(1,inputpars.cs.nofcomponents);
   Vector mmax(1,3*inputpars.cs.nofatoms);
@@ -169,7 +170,7 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
   Vector h1(1,inputpars.cs.nofcomponents),h1ext(1,HEXT_DIMENSION);h1ext=0;
  if(doeps){printf("#Inverting Elastic Constants Matrix\n");
   inputpars.Cel.Inverse();
-           }
+          }
 //determine saturation momentum (used for scaling the plots, generation of qvectors)
 if(verbose==1){printf("determine saturation momentum running singleion calculations for different fields");}
 T=1.0;for(l=1;l<=inputpars.cs.nofatoms;++l){h1=0;(*inputpars.jjj[l]).Icalc_parameter_storage_init(h1,h1ext,T); // initialize eigenstate matrix

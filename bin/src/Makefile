@@ -226,7 +226,7 @@ mcdisp.o: mcdisp.c  myev.c mcdisp_intcalc.c mcdisp_output.c jq.hpp mdcf.hpp trs_
 cond.o: cond.c paramete.hpp martin.h
 	$(CCC) $(CFLAGS) $<
 
-clusterize.o: clusterize.c par.hpp martin.h jjjpar.hpp 
+clusterize.o: clusterize.c par.hpp martin.h jjjpar.hpp myev.h
 	$(CCC) $(CFLAGS) $<
 
 coq2jjj.o: coq2jjj.c paramete.hpp martin.h

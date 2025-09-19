@@ -801,7 +801,7 @@ void jjjpar::print_eigenstates(FILE *fout)
  ComplexMatrix es(est(1,est.Rhi(),1,est.Chi()));
  if(strstr(modulefilename,"ic1ion.so")!=NULL) {
     es=es.Transpose(); }
- myPrintComplexMatrix(fout,es);
+ myPrintMatrix(fout,es);
 //----------------------------------------------------------------------------//
 // Submatrix extraction 
 //----------------------------------------------------------------------------//

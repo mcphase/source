@@ -70,6 +70,8 @@ printf (" (format as output file mcphas.xyt)\n\n");
 printf (" Options: -h     print this help screen\n");
 printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n");
 printf ("          -a     append output files (do not overwrite) \n");
+printf ("          -cd     add classical dipole  interaction using Ewald summation, \n");
+printf ("                  Bowden J.Phys.C:solid state phys. 14(1981) L827  \n");
 printf ("          -doeps refine strain epsilon selfconsistently using elastic,magnetoelastic constants \n");
 printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz and optional djdeps1-6\n");
 printf ("          -linepscf with -doeps use zero strain single ion Hamiltonian for every mean field iteration\n");
@@ -938,7 +940,7 @@ inipar::inipar (const char * file,char * pref,const char * prog)
   strcpy(prefix,pref);
   xv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);yv=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);zero=Vector(0,EXTERNAL_PARAMETER_DIMENSION-1);
   qmin=Vector(1,3);qmax=Vector(1,3);deltaq=Vector(1,3);
-  doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;
+  doeps=0;linepscf=0;linepsjj=0;ipx=NULL;ipy=NULL;ipz=NULL;include_cd=false;
   ipeps1=NULL;ipeps2=NULL;ipeps3=NULL;ipeps4=NULL;ipeps5=NULL;ipeps6=NULL;
   printf("reading file %s\n",savfilename);
   if(load()!=0){if(pref[0]!='\0'){fprintf(stderr,"File %s not found - trying %s\n",savfilename,file);
@@ -1023,7 +1025,7 @@ inipar::inipar (const inipar & p)
   strcpy(savfilename,p.savfilename);
   prefix = new char[MAXNOFCHARINLINE];
   strcpy(prefix,p.prefix);
-  doeps=p.doeps;outcolset=p.outcolset;
+  doeps=p.doeps;outcolset=p.outcolset;include_cd=p.include_cd;
   linepscf=p.linepscf;
   linepsjj=p.linepsjj;
   ipx=p.ipx;

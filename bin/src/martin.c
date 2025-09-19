@@ -1478,6 +1478,41 @@ Matrix MatrixfromVectors(Vector & v1,Vector & v2,Vector & v3)
 return m;
 }
 
+void myPMatrix(FILE * file,Matrix & M,const char * s=NULL)
+{int i1,j1;if(s!=NULL)fprintf (file,"%s:\n",s);
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){
+    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%8.6g ",myround(M(i1,j1)));
+    fprintf (file,"\n");
+    }
+} 
+void myPMatrix(Matrix & M,const char * s=NULL){myPMatrix(stdout,M,s);}
+
+void myPMatrix(FILE * file,ComplexMatrix & M,const char * s=NULL)
+{int i1,j1;
+if(s!=NULL)fprintf (file,"%s ",s);
+fprintf (file,"real part\n",s);
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){
+    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%8.6g ",myround(real(M(i1,j1))));
+    fprintf (file,"\n");
+    }
+if(s!=NULL)fprintf (file,"%s ",s);
+fprintf (file,"imaginary part\n",s);
+   for (i1=M.Rlo();i1<=M.Rhi();++i1){
+    for (j1=M.Clo();j1<=M.Chi();++j1) fprintf (file,"%8.6g ",myround(imag(M(i1,j1))));
+    fprintf (file,"\n");
+    }
+} 
+void myPMatrix(ComplexMatrix & M,const char * s=NULL){myPMatrix(stdout,M,s);}
+
+
+void myPVector(FILE * file,Vector & M,const char * s=NULL)
+{int j1;
+if(s!=NULL)fprintf (file,"%s:",s);
+   
+    for (j1=M.Lo();j1<=M.Hi();++j1) fprintf (file,"%8.6g ",myround(M(j1)));
+    fprintf (file,"\n");    
+}    
+void myPVector(Vector & M,const char * s=NULL){myPVector(stdout,M,s);}
 
 
 // calculates classical dipole interaction Fourier transform with Ewald Method accorind 
@@ -1496,99 +1531,174 @@ ComplexMatrix DAB(Vector & hkl, Matrix & lattice, Vector & dA,double gJA, Vector
 //                   ( 3xij^2-rij^2     3xij.yij         3xij.zij    )
 //         Dij=1/r^5 ( 3xij.yij        3yij^2-rij^2      3yij.zij    )  
 //                   ( 3xij.zij          3yij.zij       3zij^2-rij^2 )
-{ComplexMatrix D(1,3,1,3);
-// units prefactor
-// muB=0.927405e-23 Ampere m^2
-//mu0/4 pi=1e-7 kgm s^-2 Amp^-2
-//m^3=10^30Angstroem^3
-//1meV= 16.0218e-23 J
-// factor=(mu0/4pi)(gJ muB)^2=0.92740^2  Angstroem^3 meV/16.0218
+{ComplexMatrix D(1,3,1,3);D=0;
+ // units prefactor
+ // muB=0.927405e-23 Ampere m^2
+ //mu0/4 pi=1e-7 kgm s^-2 Amp^-2
+ //m^3=10^30Angstroem^3
+ //1meV= 16.0218e-23 J
+ // factor=(mu0/4pi)(gJ muB)^2=0.92740^2  Angstroem^3 meV/16.0218
    double factor=gJA*gJB*.927405*.927405/16.02183;  //[meV A^3]
-// volume of unit cell
-double v=lattice.Column(1)*crossp(lattice.Column(2),lattice.Column(3));
-//
-Matrix rez(1,3,1,3);
-rez= rezcalc(lattice);// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
-Vector q(1,3);
-// reduce hkl to first Brillouin zone
-Vector hkl_red(1,3);
-for(int i=1;i<=3;++i)hkl_red(i)=hkl(i)-rint(hkl(i));
-q=rez*hkl_red;
-double qn=Norm(q);
-double qq=qn*qn;
-// put R (1/A) to reasonable value
-double R=2/cbrt(v);double RR=R*R;
-D=0;
+ // volume of unit cell
+ double v=lattice.Column(1)*crossp(lattice.Column(2),lattice.Column(3));
+ Matrix rez(1,3,1,3);
+ rez= rezcalc(lattice);// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
+ Vector q(1,3);
+ // reduce hkl to first Brillouin zone
+ Vector hkl_red(1,3);
+ // reduce q to first BZ
+ for(int i=1;i<=3;++i)hkl_red(i)=hkl(i)-rint(hkl(i)); 
+ // .. and remember phase factor to multiply to compensate 
+ double phase =2*PI*(hkl-hkl_red)*(dB-dA);
+ complex <double> eph(factor*cos(phase),factor*sin(phase));
+ q=rez*hkl_red;
+ double qn=Norm(q);
+ double qq=qn*qn;
+ //printf("qn=%g",qn);
+ // put R (1/A) to reasonable value
+ double R=2/cbrt(v);
+ double RR=R*R;
 
-int L=2;
-for(int al=1;al<=3;++al)for(int be=1;be<=3;++be){
-D(al,be)+=q(al)*q(be)*exp(-qq/4/RR)/qq;
-
-for(int i=-L;i<=L;++i)
-for(int j=-L;j<=L;++j)
-for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
-{Vector ijk(1,3);
- ijk(1)=(double) i;
- ijk(2)=(double) j;
- ijk(3)=(double) k;
- Vector Q(1,3); Q=rez*ijk+q;double Qn=Norm(Q);double QQ=Qn*Qn;
- double qLtAB=2*PI*(dB-dA)*ijk;
- complex <double>expitau(cos(qLtAB),-sin(qLtAB));
- D(al,be)+=expitau*Q(al)*Q(be)*exp(-QQ/4/RR)/QQ ;
- 
+ int L=2;
+ for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)
+ {
+  // TERM I
+  D(al,be) =q(al)*q(be)*exp(-qq/4/RR)/qq;
+  // TERM II
+  for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
+  {
+   Vector Q(1,3); Q=q;
+   Q+=(double)i*rez.Column(1);
+   Q+=(double)j*rez.Column(2);
+   Q+=(double)k*rez.Column(3);
+   double Qn=Norm(Q);
+   double QQ=Qn*Qn;
+   double qLtAB=2*PI*((dB(1)-dA(1))*i+(dB(2)-dA(2))*j+(dB(3)-dA(3))*k);
+   complex <double>expitau(cos(qLtAB),-sin(qLtAB));
+   D(al,be)+=expitau*Q(al)*Q(be)*exp(-QQ/4/RR)/QQ ;
+  }
+  D(al,be)*=-4*PI/v;
+  // TERM IV
+  if(deltaAB&&al==be){D(al,be)+=4*RR*R/3/sqrt(PI);}
+ }
+ // term III
+ for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0||!deltaAB)
+ {
+  double qrl=2*PI*(hkl_red(1)*i+hkl_red(2)*j+hkl_red(3)*k);
+  qrl+=2*PI*hkl_red*(dB-dA);
+  complex <double> eqrl(cos(qrl),sin(qrl));
+  Vector rl(1,3);rl=lattice*(dB-dA);
+  rl+=(double)i*lattice.Column(1);
+  rl+=(double)j*lattice.Column(2);
+  rl+=(double)k*lattice.Column(3);
+  
+  Matrix E(1,3,1,3); E=ER(R,rl);
+  for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)D(al,be)+=eqrl*E(al,be);
+ }
+ D*=eph;
+ /* printf("***********\n");
+ myPVector(hkl,"hkl");
+ myPVector(q,"q");printf("R=%g\n",R);
+ myPVector(dA,"dA");
+ myPVector(dB,"dB");
+ myPMatrix(lattice,"lattice");
+ myPMatrix(D,"DAB");
+ */
+ return D;
 }
 
-D(al,be)*=-4*PI/v;
-
-if(deltaAB&&al==be){D(al,be)+=4*RR*R/3/sqrt(PI);}
-}
-//printf("dA=%g %g %g\n",dA(1),dA(2),dA(3));
-//printf("dB=%g %g %g\n",dB(1),dB(2),dB(3));
-
-// E term
-for(int i=-L;i<=L;++i)
-for(int j=-L;j<=L;++j)
-for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
-{Vector ijk(1,3);
- ijk(1)=(double) i;
- ijk(2)=(double) j;
- ijk(3)=(double) k;
+Matrix DAB0( Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bool deltaAB)
+// input: 
+//        lattice ... 3x3 Matrix with column vectors the edges of the unit cell vectors in units of A
+//        dA ... atomic position of atom a with respect to vectors of lattice
+//        gJA .. Lande factor of atom A
+//        dB ... atomic position of atom a with respect to vectors of lattice
+//        gJB .. Lande factor of atom B
+//        deltaAB ... 1 if dA=dB and zero otherwise
+// ouput DAB(q=0) according to equation (26) including a prefactor to obtain units of meV 
+//         DAB(q=0)=(gJA*gJB*muB)^2)(mu0/4pi) sum_j(neq i) Dij 
+//         with rij=rj-ri, ri=rA and rj runs over rB+all lattice vectors
+//                   ( 3xij^2-rij^2     3xij.yij         3xij.zij    )
+//         Dij=1/r^5 ( 3xij.yij        3yij^2-rij^2      3yij.zij    )  
+//                   ( 3xij.zij          3yij.zij       3zij^2-rij^2 )
+{Matrix D(1,3,1,3);D=0;
+ // units prefactor
+ // muB=0.927405e-23 Ampere m^2
+ //mu0/4 pi=1e-7 kgm s^-2 Amp^-2
+ //m^3=10^30Angstroem^3
+ //1meV= 16.0218e-23 J
+ // factor=(mu0/4pi)(gJ muB)^2=0.92740^2  Angstroem^3 meV/16.0218
+   double factor=gJA*gJB*.927405*.927405/16.02183;  //[meV A^3]
+ // volume of unit cell
+ double v=lattice.Column(1)*crossp(lattice.Column(2),lattice.Column(3));
+ Matrix rez(1,3,1,3);
+ rez= rezcalc(lattice);// calculate reciprocal lattice as columns in rez from real lattice columns in MAtrix r
  
- double qrl=2*PI*hkl_red*ijk;
-complex <double> eqrl(cos(qrl),-sin(qrl));
- Vector rl(1,3);rl=lattice*ijk;
-//printf("rl=%g %g %g\n",rl(1),rl(2),rl(3));
+ // put R (1/A) to reasonable value
+ double R=2/cbrt(v);
+ double RR=R*R;
 
- D+=eqrl*ER(R,rl);
+ int L=2;
+ for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)
+ {
+  // TERM I =0
+  // TERM II
+  for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0)
+  {
+   Vector Q(1,3); 
+   Q=(double)i*rez.Column(1);
+   Q+=(double)j*rez.Column(2);
+   Q+=(double)k*rez.Column(3);
+   double Qn=Norm(Q);
+   double QQ=Qn*Qn;
+   double qLtAB=2*PI*((dB(1)-dA(1))*i+(dB(2)-dA(2))*j+(dB(3)-dA(3))*k);
+   D(al,be)+=cos(qLtAB)*Q(al)*Q(be)*exp(-QQ/4/RR)/QQ ;
+  }
+  D(al,be)*=-4*PI/v;
+  // TERM IV
+  if(deltaAB&&al==be){D(al,be)+=4*RR*R/3/sqrt(PI);}
+ }
+ // term III
+ for(int i=-L;i<=L;++i)for(int j=-L;j<=L;++j)for(int k=-L;k<=L;++k)if(i!=0||j!=0||k!=0||!deltaAB)
+ {
+  Vector rl(1,3);rl=lattice*(dB-dA);
+  rl+=(double)i*lattice.Column(1);
+  rl+=(double)j*lattice.Column(2);
+  rl+=(double)k*lattice.Column(3);
+  D+=ER(R,rl);
+ }
+ D*=factor;
+ /* printf("***********\n");
+ myPVector(hkl,"hkl");
+ myPVector(q,"q");printf("R=%g\n",R);
+ myPVector(dA,"dA");
+ myPVector(dB,"dB");
+ myPMatrix(lattice,"lattice");
+ myPMatrix(D,"DAB");
+*/   
  
-}
-printf("D12=%g+i %g\n",real(D(1,2)),imag(D(1,2)));
-
-D*=factor;
-
-return D;
+ return D;
 }
 
 // evaluates equation 23 in Bowden 81
-ComplexMatrix ER(double R, Vector & rl)
-{ComplexMatrix E(1,3,1,3);double RR=R*R;
-double rln=Norm(rl);double rrl=rln*rln;
- for(int al=1;al<=3;++al)for(int be=1;be<=3;++be){
+Matrix ER(double R, Vector & rl)
+{Matrix E(1,3,1,3);double RR=R*R;
+ double rln=Norm(rl);double rrl=rln*rln;
+ for(int al=1;al<=3;++al)for(int be=1;be<=3;++be)
+ {
   E(al,be)=(3+2*RR*rrl)*rl(al)*rl(be)/rrl;
   if(al==be)E(al,be)-=1;
   E(al,be)*=2*R*exp(-RR*rrl)/sqrt(PI)/rrl;
   double e=3*rl(al)*rl(be)/rrl;
   if(al==be)e-=1;
-  e*=erf(R*rln)/rln/rrl;
+  e*=erfc(R*rln)/rln/rrl;
   E(al,be)+=e;
-
  }
-return E;
+ return E;
 }
 
 void SetColumn(int j,Matrix M,Vector &v) // fills column i in Matrix M with vector v
 {for(int i=v.Lo();i<=v.Hi();++i){M(i,j)=v(i);}
-
 }
 
 void set_zlm_constants(Matrix & cnst)

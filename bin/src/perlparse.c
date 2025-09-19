@@ -118,7 +118,7 @@ if(system(command)){fprintf(stderr,"Error parsing sipffile through perl\n");retu
    {for(int i=0;numbernames[i]!=NULL;++i)extract(instr,numbernames[i],(*numbers[i]));
     for(int i=0;stringnames[i]!=NULL;++i)extract(instr,stringnames[i],strings[i],(size_t)MAXNOFCHARINLINE,1);
     for(int i=0;operatornames[i]!=NULL;++i)if(extract(instr,operatornames[i],dummy)==0)
-                                            {if(myReadComplexMatrix (fin, (*operators[i]))==false)
+                                            {if(myReadMatrix (fin, (*operators[i]))==false)
                                               {fprintf(stderr,"Error parsing sipffile through perl - reading matrix from output\n");return false; }
                                              }
 

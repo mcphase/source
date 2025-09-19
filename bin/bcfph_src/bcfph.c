@@ -307,8 +307,8 @@ if(d<1){  fprintf (stderr,"#reading ./results/op.mat - Error: dimension d=%i\n",
 
 for(imax=0;feof(fin_opmat)==false;++imax)
 {opmatM[imax] = new ComplexMatrix(1,d,1,d);
-// fprintf(stderr,"%i",myReadComplexMatrix(fin_opmat, (*opmatM[imax])));
-myReadComplexMatrix(fin_opmat, (*opmatM[imax]));
+// fprintf(stderr,"%i",myReadMatrix(fin_opmat, (*opmatM[imax])));
+myReadMatrix(fin_opmat, (*opmatM[imax]));
 }
 --imax;
 fprintf(stdout,"# Ok - Read Hamiltonian and i=%i Olm Operator Matrices with dimension d=%i from ./results/op.mat \n",imax,d);
