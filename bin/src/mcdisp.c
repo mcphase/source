@@ -234,22 +234,27 @@ void jsss_mult(int ll, long int &nofneighbours, Vector q,  par &inputpars, inimc
    }
   if(ini.include_cd)
  {ComplexMatrix cd(1,3,1,3); int cddim=3; if(inputpars.cs.nofcomponents<3)cddim=inputpars.cs.nofcomponents;
- Vector dA(1,3),dB(1,3);bool deltaAB;
+ Vector dA(1,3),dB(1,3),dll(1,3),dl(1,3),xyz(1,3);bool deltaAB;
+// transform distance vector xyz to primitive lattice
+ xyz=(*inputpars.jjj[ll]).xyz;dll=inputpars.rez*(const Vector&)xyz;
+   for(l=1;l<=inputpars.cs.nofatoms;++l){ // loop all atoms in magnetic unit cell
+// transform distance vector xyz to primitive lattice
+ xyz=(*inputpars.jjj[l]).xyz;dl=inputpars.rez*(const Vector&)xyz;
     for(i1=1;i1<=ini.mf.na();++i1)for(j1=1;j1<=ini.mf.nb();++j1)for(k1=1;k1<=ini.mf.nc();++k1){
   s=md.in(i1,j1,k1); 
-  dA(1)=((*inputpars.jjj[ll]).xyz(1)+i1-1)/ini.mf.na();
-  dA(2)=((*inputpars.jjj[ll]).xyz(2)+j1-1)/ini.mf.nb();
-  dA(3)=((*inputpars.jjj[ll]).xyz(3)+k1-1)/ini.mf.nc();
+  dA(1)=(dll(1)+i1-1)/ini.mf.na();
+  dA(2)=(dll(2)+j1-1)/ini.mf.nb();
+  dA(3)=(dll(3)+k1-1)/ini.mf.nc();
    for(i=1;i<=ini.mf.na();++i)for(j=1;j<=ini.mf.nb();++j)for(k=1;k<=ini.mf.nc();++k){
    ss=md.in(i,j,k);
-   for(l=1;l<=inputpars.cs.nofatoms;++l){ // loop all atoms in magnetic unit cell
-  
   complex<double> **jsss = J.mati(s,ss).M;
-  dB(1)=((*inputpars.jjj[l]).xyz(1)+i-1)/ini.mf.na();
-  dB(2)=((*inputpars.jjj[l]).xyz(2)+j-1)/ini.mf.nb();
-  dB(3)=((*inputpars.jjj[l]).xyz(3)+k-1)/ini.mf.nc();
+  dB(1)=(dl(1)+i-1)/ini.mf.na();
+  dB(2)=(dl(2)+j-1)/ini.mf.nb();
+  dB(3)=(dl(3)+k-1)/ini.mf.nc();
   if(i==i1&&j==j1&&k==k1&&l==ll)deltaAB=true;
                            else deltaAB=false;
+ // in contrast to mcphasit it is not necessary to divide here DAB by ini.mf.n() to get
+// consistent results for a supercell. Tested 20.9.2025 MR on HoVO4 with Gd3+ -cd 
   cd=DAB(maghkl, maglat, dA,(*inputpars.jjj[ll]).gJ, dB, (*inputpars.jjj[l]).gJ, deltaAB);
    for(tl=1;tl<=md.noft(i1,j1,k1,ll);++tl){ jsi = ini.nofcomponents*(md.baseindex(i1,j1,k1,ll,tl)-1);
 	  for(tll=1;tll<=md.noft(i,j,k,l);++tll){ jsj = ini.nofcomponents*(md.baseindex(i,j,k,l,tll)-1);
@@ -970,9 +975,8 @@ if (do_jqfile){
  else
  {// no jqfile but excitations to be calculated
  if(do_verbose==1){fprintf(stdout,"#diagonalizing %ix%i DMD Eigenvalue prblem  A t = hbar omega Lambda t, Matrix  A=\n",dimA,dimA);
-                           myPrintMatrix(stdout,Ac); 
-                   fprintf(stdout,"#Matrix Lambda=\n",dimA,dimA);
-                           myPrintMatrix(stdout,Lambda); 
+                           myPrintMatrix(Ac,"#Ac"); 
+                           myPrintMatrix(Lambda,"#Matrix Lambda"); 
                    }
 
    // diagonalize Ac to get energies  and eigenvectors !!!

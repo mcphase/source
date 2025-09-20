@@ -309,24 +309,32 @@ int exstr=0;if(ini.ipx!=NULL||ini.ipeps1!=NULL){exstr=6;}
 if(ini.include_cd)
  {Matrix cd(1,3,1,3);diagonalexchange=0;
         int cddim=3; if(inputpars.cs.nofcomponents<3)cddim=inputpars.cs.nofcomponents;
- Vector dA(1,3),dB(1,3);bool deltaAB;
-    for(int i1=1;i1<=sps.na();++i1)for(int j1=1;j1<=sps.nb();++j1)for(int k1=1;k1<=sps.nc();++k1){
-  dA(1)=((*inputpars.jjj[m]).xyz(1)+i1-1)/sps.na();
-  dA(2)=((*inputpars.jjj[m]).xyz(2)+j1-1)/sps.nb();
-  dA(3)=((*inputpars.jjj[m]).xyz(3)+k1-1)/sps.nc();
-   for(i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k){
+ Vector dA(1,3),dB(1,3),dm(1,3),dl(1,3);bool deltaAB;
+// transform distance vector xyz to primitive lattice
+ xyz=(*inputpars.jjj[m]).xyz;dm=inputpars.rez*(const Vector&)xyz;
    for(l=1;l<=inputpars.cs.nofatoms;++l){ // loop all atoms in magnetic unit cell
-  dB(1)=((*inputpars.jjj[l]).xyz(1)+i-1)/sps.na();
-  dB(2)=((*inputpars.jjj[l]).xyz(2)+j-1)/sps.nb();
-  dB(3)=((*inputpars.jjj[l]).xyz(3)+k-1)/sps.nc();
+ xyz=(*inputpars.jjj[l]).xyz;dl=inputpars.rez*(const Vector&)xyz;
+    for(int i1=1;i1<=sps.na();++i1)for(int j1=1;j1<=sps.nb();++j1)for(int k1=1;k1<=sps.nc();++k1){
+  dA(1)=(dm(1)+i1-1)/sps.na();
+  dA(2)=(dm(2)+j1-1)/sps.nb();
+  dA(3)=(dm(3)+k1-1)/sps.nc();
+   for(i=1;i<=sps.na();++i)for(j=1;j<=sps.nb();++j)for(k=1;k<=sps.nc();++k){
+  dB(1)=(dl(1)+i-1)/sps.na();
+  dB(2)=(dl(2)+j-1)/sps.nb();
+  dB(3)=(dl(3)+k-1)/sps.nc();
   if(i==i1&&j==j1&&k==k1&&l==m)deltaAB=true;
-                           else deltaAB=false;
-  cd=DAB0( maglat, dA,(*inputpars.jjj[m]).gJ, dB, (*inputpars.jjj[l]).gJ, deltaAB);
+                          else deltaAB=false;
+  // here we divide one gJ by sps.n(), the number of primitive unit cells in the magnetic
+  // supercell, because when calculating a supercell e.g. twice a primitive unit cell -
+  // then in Bowden's equation (3) (5) index j will run over a "Bravais lattice", this will
+  // in his sum then be twice as large as the original crystal - so to avoid an artificially
+  // factor 2 too large dipolar field (because our crystal is not enlarged by describing it
+  // using a supercell), we divide by the size of the supercell, i.e. sps.n()
+  cd=DAB0(maglat, dA,(*inputpars.jjj[m]).gJ/sps.n(), dB, (*inputpars.jjj[l]).gJ, deltaAB);
       // s is determined from a vector rijk connecting the different crystal unit cells 
          int ri=i-i1; if(ri>=sps.na())ri-=sps.na();if(ri<0)ri+=sps.na();
          int rj=j-j1; if(rj>=sps.nb())rj-=sps.nb();if(rj<0)rj+=sps.nb();
          int rk=k-k1; if(rk>=sps.nc())rk-=sps.nc();if(rk<0)rk+=sps.nc();
-
 	s=sps.in(ri,rj,rk); //rijk range here from 0 to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
 	// sum up the contribution of the interaction parameter to the interaction matrix jj[s] to be
         // used in the meanfield calculation below
@@ -369,7 +377,6 @@ if(ini.include_cd)
         while (k<=0) {k+=sps.nc();}result=div(k,sps.nc());k=result.rem;
       // s is determined from a vector ijk connecting the different crystal unit cells
 	s=sps.in(i,j,k); //ijk range here from 0 to sps.na()-1,sps.nb()-1,sps.nc()-1 !!!!
-
         //     myPrintMatrix(stdout,(*inputpars.jjj[m]).jij[l]);
 
 	// sum up the contribution of the interaction parameter to the interaction matrix jj[s] to be
@@ -381,9 +388,12 @@ if(ini.include_cd)
         }}
 
     }
-//ComplexMatrix ff(1,3,1,3);ff=(*jj[0])(1,3,1,3);
-//myPrintMatrix(ff);
-//exit(1);
+/*if(m==1){
+Matrix ff(jj[0]); Matrix gg(ff);
+printf("%i x% i x %i ",sps.na(),sps.nb(),sps.nc());
+myPrintMatrix(gg,"j11");
+         }
+*/
 if(exstr>0){int iparanz; 
  if(ini.ipx!=NULL){iparanz=(*(*ini.ipx).jjj[m]).paranz;}else{iparanz=(*(*ini.ipeps1).jjj[m]).paranz;}
 

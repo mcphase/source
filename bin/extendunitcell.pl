@@ -200,7 +200,7 @@ sub printneighbourlist {
   for($n=1;$n<=$nofatoms;++$n)
   { 
    # get a neighbour
-   $nn=0;
+   $nn=0;$nofnorig=0;
      while(<$h>)
      {last if /^#.*\Q**********\E/;
       ++$nn;
@@ -238,7 +238,7 @@ sub printneighbourlist {
      }
       # print out atom and neighbor list
       for($i=1;$i<=$nn;++$i)
-       {
+       {unless($nofn){$nofn=0;}
         $text[$i]=~s!\Qnofneighbours=\E\s*[\-\+\d.]+!nofneighbours=$nofn!;
         $text[$i]=~s!\Qda=\E\s*[\-\+\d.]+!da=$da!;
         $text[$i]=~s!\Qdb=\E\s*[\-\+\d.]+!db=$db!;

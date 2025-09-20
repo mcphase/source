@@ -1666,17 +1666,16 @@ Matrix DAB0( Matrix & lattice, Vector & dA,double gJA, Vector & dB,double gJB,bo
   rl+=(double)j*lattice.Column(2);
   rl+=(double)k*lattice.Column(3);
   D+=ER(R,rl);
- }
+ }                  
  D*=factor;
- /* printf("***********\n");
- myPVector(hkl,"hkl");
- myPVector(q,"q");printf("R=%g\n",R);
+ /*printf("***********\n");
  myPVector(dA,"dA");
  myPVector(dB,"dB");
  myPMatrix(lattice,"lattice");
+ myPMatrix(rez,"rez");
+  
  myPMatrix(D,"DAB");
-*/   
- 
+ */
  return D;
 }
 

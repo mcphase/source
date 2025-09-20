@@ -72,6 +72,8 @@ printf ("          -stamax 14  ... end mcphas if standard deviation exceeds 14\n
 printf ("          -a     append output files (do not overwrite) \n");
 printf ("          -cd     add classical dipole  interaction using Ewald summation, \n");
 printf ("                  Bowden J.Phys.C:solid state phys. 14(1981) L827  \n");
+printf ("                  only the first three interaction operators I1.I2.I3 are considered and it \n");
+printf ("                  is assumed that gJ*I1,gJ*I2,gJ*I3 are the components of the magnetic moment (gJ given in sipf file)\n");
 printf ("          -doeps refine strain epsilon selfconsistently using elastic,magnetoelastic constants \n");
 printf ("                 read from mcphas.j and mcphas.djdx mcphas.djdy and mcphas.djdz and optional djdeps1-6\n");
 printf ("          -linepscf with -doeps use zero strain single ion Hamiltonian for every mean field iteration\n");

@@ -155,7 +155,7 @@ if(verbose==1&&linepscf){printf("option -linepscf: strain epsilon not used in di
 
  if(ini.ipx!=NULL&&ini.ipeps1!=NULL)
  {
- if(((ini.ipx)!=(ini.ipeps1))>1){fprintf(stderr,"# Error - mcphas.djdx and mcphas.djdeps1 do not match in nofneighbours or neighbour positions\n");exit(1);}
+ if(((*ini.ipx)!=(*ini.ipeps1))>1){fprintf(stderr,"# Error - mcphas.djdx and mcphas.djdeps1 do not match in nofneighbours or neighbour positions\n");exit(1);}
   }
  
  if(verbose==1&&linepsjj){printf("option -linepsj: neglecting strain dependence of two ion interactions when calculating mean fields in mean field loop\n");}

@@ -112,6 +112,8 @@ void inimcdis::helpexit() // type info and error exit
     printf (" -jqm          ... calculate J(Q) (Fourier transform of 2ion coupling) store in mcdisp.jq all components \n");
     printf (" -cd           ... for calculateing J(Q) (Fourier transform of 2ion coupling) add classical dipole \n");
     printf ("                   interaction using Ewald summation, Bowden J.Phys.C:solid state phys. 14(1981) L827 \n");
+    printf ("                   only the first three interaction operators I1.I2.I3 are considered and it \n");
+    printf ("                   is assumed that gJ*I1,gJ*I2,gJ*I3 are the components of the magnetic moment (gJ given in sipf file)\n");
     printf (" -max n        ... restrict single ion susceptibility to n lowest\n");
     printf ("                   lying transitions starting from the ground state\n");
     printf (" -minE E       ... an energy range may be given by minE and maxE: only\n");

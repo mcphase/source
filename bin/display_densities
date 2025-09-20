@@ -47,6 +47,10 @@ kill $rem1
 kill $rem2
 kill $rem3
 kill $rem4
+ rm results/spins.jvx
+ rm results/spins.*.jvx
+ rm results/spins_prim.jvx
+ rm results/spins_prim.*.jvx
 else
   rm results/graphic_parameters.set
 fi
